@@ -1,0 +1,36 @@
+{
+  "name": "systemsketch",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 4322 --strictPort",
+    "build": "tsc -b && vite build",
+    "test": "vitest run",
+    "test:python": "python3 -m unittest discover -s tests -v",
+    "check": "tsc -b && vitest run && python3 -m unittest discover -s tests -v",
+    "release:candidate": "python3 scripts/release.py candidate",
+    "release:promote": "python3 scripts/release.py promote",
+    "release:rollback": "python3 scripts/release.py rollback",
+    "release:status": "python3 scripts/release.py status",
+    "desktop:install": "python3 scripts/install_desktop.py",
+    "desktop:start": "python3 scripts/launch_systemsketch.py --no-open",
+    "desktop:preview": "python3 scripts/launch_systemsketch.py --preview --no-open",
+    "desktop:status": "python3 scripts/launch_systemsketch.py --status",
+    "desktop:stop": "python3 scripts/launch_systemsketch.py --stop --all"
+  },
+  "dependencies": {
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "tldraw": "5.3.2"
+  },
+  "devDependencies": {
+    "@tldraw/assets": "5.3.2",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.1.1",
+    "typescript": "7.0.2",
+    "vite": "8.2.2",
+    "vitest": "4.1.11"
+  }
+}
