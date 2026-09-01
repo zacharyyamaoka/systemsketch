@@ -1,0 +1,4180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Babble &amp; Prune</title>
+  <style>
+    :root {
+      --paper: #f4f0e8;
+      --paper-deep: #ebe5da;
+      --panel: #fffdf9;
+      --ink: #20201f;
+      --muted: #6e6a63;
+      --line: #d8d0c4;
+      --line-strong: #bdb3a5;
+      --soft: #f8f5ef;
+      --green: #2f7f62;
+      --red: #b84939;
+      --blue: #3f6fa8;
+      --shadow: 0 18px 60px rgba(53, 46, 36, 0.10);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --serif: Iowan Old Style, Baskerville, Georgia, serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--paper);
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% -10%, rgba(224, 90, 63, 0.09), transparent 32rem),
+        radial-gradient(circle at 95% 5%, rgba(47, 127, 116, 0.08), transparent 30rem),
+        var(--paper);
+      font-family: var(--sans);
+      line-height: 1.5;
+    }
+
+    button,
+    textarea,
+    input {
+      font: inherit;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page {
+      width: min(1500px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .hero {
+      padding: 58px 0 30px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.75fr);
+      gap: 44px;
+      align-items: end;
+    }
+
+    .kicker,
+    .eyebrow {
+      color: var(--muted);
+      font: 700 11px/1.2 var(--mono);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 980px;
+      margin: 13px 0 16px;
+      font: 500 clamp(44px, 6vw, 84px)/0.96 var(--serif);
+      letter-spacing: -0.045em;
+    }
+
+    .brief {
+      max-width: 960px;
+      margin: 0;
+      color: #494641;
+      font-size: clamp(16px, 1.7vw, 21px);
+      line-height: 1.55;
+    }
+
+    .hero-aside {
+      border-left: 1px solid var(--line-strong);
+      padding-left: 24px;
+    }
+
+    .hero-aside strong {
+      display: block;
+      margin: 7px 0 9px;
+      font: 500 21px/1.25 var(--serif);
+    }
+
+    .hero-aside p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 24px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 29px;
+      padding: 5px 10px;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      background: rgba(255, 253, 249, 0.62);
+      color: #4d4943;
+      font: 650 11px/1 var(--mono);
+    }
+
+    .badge.primary {
+      border-color: #222;
+      background: #222;
+      color: white;
+    }
+
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      margin: 30px 0 0;
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 249, 0.52);
+    }
+
+    .workflow-step {
+      min-height: 92px;
+      padding: 15px 17px;
+      border-right: 1px solid var(--line);
+    }
+
+    .workflow-step:last-child {
+      border-right: 0;
+    }
+
+    .workflow-step span {
+      color: var(--muted);
+      font: 700 10px/1 var(--mono);
+      letter-spacing: 0.1em;
+    }
+
+    .workflow-step b {
+      display: block;
+      margin: 9px 0 3px;
+      font: 600 15px/1.2 var(--sans);
+    }
+
+    .workflow-step small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .context {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+      gap: 22px;
+      padding: 28px 0 32px;
+    }
+
+    .context-panel {
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 249, 0.72);
+      padding: 18px;
+    }
+
+    .context-panel h2 {
+      margin: 7px 0 13px;
+      font: 500 24px/1.2 var(--serif);
+    }
+
+    .axis-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .axis {
+      min-width: min(100%, 260px);
+      flex: 1 1 260px;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .axis b {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 12px;
+    }
+
+    .axis span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .invariant-list {
+      display: grid;
+      gap: 9px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .invariant-list li {
+      position: relative;
+      padding-left: 21px;
+      color: #4b4842;
+      font-size: 13px;
+    }
+
+    .invariant-list li::before {
+      position: absolute;
+      left: 0;
+      top: 0.2em;
+      color: var(--green);
+      content: "◆";
+      font-size: 9px;
+    }
+
+    .boundary {
+      margin-top: 15px;
+      padding-top: 13px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .boundary b {
+      color: var(--ink);
+    }
+
+    .ai-prune {
+      margin: 0 0 38px;
+      overflow: hidden;
+      border: 1px solid #a9a093;
+      border-radius: 8px;
+      background: rgba(255, 253, 249, 0.88);
+      box-shadow: 0 12px 38px rgba(53, 46, 36, 0.07);
+    }
+
+    .ai-prune-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 22px 24px 18px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(115deg, rgba(63, 111, 168, 0.08), transparent 45%),
+        var(--panel);
+    }
+
+    .ai-prune-head h2 {
+      margin: 7px 0 6px;
+      font: 500 clamp(28px, 3vw, 40px)/1.05 var(--serif);
+      letter-spacing: -0.025em;
+    }
+
+    .ai-prune-head p {
+      max-width: 790px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .formula {
+      flex: none;
+      padding: 10px 12px;
+      border: 1px solid #bdc9d7;
+      border-radius: 5px;
+      background: #f4f8fc;
+      color: #315b88;
+      font: 700 11px/1.35 var(--mono);
+      white-space: nowrap;
+    }
+
+    .judgment-chip,
+    .evidence-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 4px 7px;
+      border-radius: 99px;
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .judgment-chip {
+      border: 1px solid #b9c9db;
+      background: #eef4fa;
+      color: #315f91;
+    }
+
+    .evidence-chip {
+      border: 1px solid #bad1c5;
+      background: #eff8f3;
+      color: #28694f;
+    }
+
+    .ai-summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+      gap: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .ai-recommendation,
+    .hinge-card {
+      padding: 20px 24px;
+    }
+
+    .ai-recommendation {
+      border-right: 1px solid var(--line);
+    }
+
+    .recommendation-line {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 10px 0 8px;
+    }
+
+    .recommendation-line strong {
+      font: 500 clamp(25px, 3vw, 36px)/1 var(--serif);
+    }
+
+    .ai-total {
+      display: inline-grid;
+      min-width: 70px;
+      min-height: 48px;
+      place-items: center;
+      border: 1px solid #aebed0;
+      border-radius: 5px;
+      background: #eef4fa;
+      color: #315f91;
+      font: 800 14px/1 var(--mono);
+    }
+
+    .ai-recommendation p,
+    .hinge-card p {
+      margin: 0;
+      color: #55514b;
+      font-size: 13px;
+    }
+
+    .alternative-line {
+      margin-top: 11px !important;
+      padding-top: 10px;
+      border-top: 1px dashed var(--line);
+      color: var(--muted) !important;
+      font-size: 12px !important;
+    }
+
+    .hinge-card {
+      background: #faf7f1;
+    }
+
+    .hinge-card b {
+      display: block;
+      margin: 8px 0 7px;
+      font: 600 17px/1.2 var(--serif);
+    }
+
+    .criteria-section,
+    .matrix-section,
+    .gate-section {
+      padding: 21px 24px 24px;
+    }
+
+    .criteria-section,
+    .matrix-section {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-intro {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 13px;
+    }
+
+    .section-intro h3 {
+      margin: 5px 0 4px;
+      font: 500 22px/1.1 var(--serif);
+    }
+
+    .section-intro p {
+      max-width: 760px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      background: white;
+    }
+
+    .requirement-table,
+    .score-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .requirement-table {
+      min-width: 880px;
+    }
+
+    .score-table {
+      min-width: 980px;
+    }
+
+    .requirement-table th,
+    .score-table th {
+      padding: 9px 10px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line-strong);
+      background: #f4f1eb;
+      color: var(--muted);
+      font: 750 9px/1.2 var(--mono);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      vertical-align: bottom;
+    }
+
+    .requirement-table td,
+    .score-table td {
+      padding: 10px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      color: #4b4842;
+      font-size: 11px;
+      vertical-align: top;
+    }
+
+    .requirement-table tr:last-child td,
+    .score-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .requirement-table th:last-child,
+    .requirement-table td:last-child,
+    .score-table th:last-child,
+    .score-table td:last-child {
+      border-right: 0;
+    }
+
+    .requirement-name {
+      min-width: 150px;
+    }
+
+    .requirement-name b,
+    .score-variant b {
+      display: block;
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .requirement-name small,
+    .score-variant small {
+      color: var(--muted);
+      font: 700 9px/1 var(--mono);
+    }
+
+    .weight-number {
+      display: inline-grid;
+      min-width: 44px;
+      min-height: 29px;
+      place-items: center;
+      border-radius: 4px;
+      background: #eef4fa;
+      color: #315f91;
+      font: 800 11px/1 var(--mono);
+    }
+
+    .anchor-list {
+      display: grid;
+      min-width: 230px;
+      gap: 5px;
+    }
+
+    .anchor-list span {
+      display: grid;
+      grid-template-columns: 17px 1fr;
+      gap: 6px;
+    }
+
+    .anchor-list b {
+      color: #315f91;
+      font: 800 10px/1.4 var(--mono);
+    }
+
+    .score-table tbody tr.ai-leader {
+      background: #f5f9fd;
+    }
+
+    .score-table tbody tr.gate-fail {
+      background: #fbf1ef;
+    }
+
+    .score-variant {
+      min-width: 150px;
+    }
+
+    .score-detail {
+      min-width: 112px;
+      margin: 0;
+      border: 0;
+    }
+
+    .score-detail summary {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0;
+    }
+
+    .score-detail summary::after {
+      margin-left: auto;
+      font-size: 12px;
+    }
+
+    .score-value {
+      display: inline-grid;
+      width: 31px;
+      height: 31px;
+      place-items: center;
+      border: 1px solid #bcc7d3;
+      border-radius: 50%;
+      color: #315f91;
+      font: 850 12px/1 var(--mono);
+    }
+
+    .confidence {
+      padding: 4px 5px;
+      border-radius: 3px;
+      background: #f0eee9;
+      color: var(--muted);
+      font: 750 8px/1 var(--mono);
+      text-transform: uppercase;
+    }
+
+    .confidence.high { background: #edf7f1; color: #28694f; }
+    .confidence.low { background: #faf0e7; color: #97601d; }
+
+    .score-evidence {
+      width: 220px;
+      margin: 8px 0 0;
+      padding: 8px;
+      border-left: 2px solid #b9c9db;
+      background: #f7f9fb;
+      color: #56514b;
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
+    .total-cell {
+      min-width: 86px;
+      color: var(--ink) !important;
+      font: 850 15px/1.2 var(--mono) !important;
+    }
+
+    .rank-label {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font: 700 8px/1 var(--mono);
+      text-transform: uppercase;
+    }
+
+    .gate-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 10px;
+    }
+
+    .gate-card {
+      padding: 12px;
+      border: 1px solid var(--line);
+      background: white;
+    }
+
+    .gate-card > b {
+      display: block;
+      margin: 4px 0;
+      font-size: 13px;
+    }
+
+    .gate-card > p {
+      margin: 0 0 9px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .gate-results {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .gate-result {
+      padding: 4px 6px;
+      border: 1px solid #bad1c5;
+      border-radius: 3px;
+      background: #eff8f3;
+      color: #28694f;
+      font: 750 9px/1 var(--mono);
+      cursor: help;
+    }
+
+    .gate-result.fail {
+      border-color: #dfb7af;
+      background: #fbefed;
+      color: var(--red);
+    }
+
+    .gallery-head {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 13px 0;
+      border-top: 1px solid var(--line-strong);
+      border-bottom: 1px solid var(--line);
+      background: rgba(244, 240, 232, 0.94);
+      backdrop-filter: blur(16px);
+    }
+
+    .gallery-head h2 {
+      margin: 0;
+      font: 500 25px/1 var(--serif);
+    }
+
+    .gallery-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .tool-button,
+    .action-button,
+    .export-button,
+    .demo-button {
+      border: 1px solid var(--line-strong);
+      border-radius: 5px;
+      background: var(--panel);
+      cursor: pointer;
+      transition: 150ms ease;
+    }
+
+    .tool-button {
+      min-height: 34px;
+      padding: 7px 11px;
+      color: var(--muted);
+      font: 650 11px/1 var(--mono);
+    }
+
+    .tool-button:hover,
+    .tool-button.active,
+    .action-button:hover,
+    .export-button:hover {
+      border-color: var(--ink);
+      color: var(--ink);
+      transform: translateY(-1px);
+    }
+
+    .tool-button.active {
+      background: var(--ink);
+      color: white;
+    }
+
+    .variant-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+      padding: 24px 0 32px;
+    }
+
+    .variant-grid.focus-layout {
+      grid-template-columns: minmax(0, 1080px);
+      justify-content: center;
+    }
+
+    .variant-grid.focus-layout .variant-card:not(.is-focused) {
+      display: none;
+    }
+
+    .variant-card {
+      --accent: #222;
+      position: relative;
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+      border-top: 5px solid var(--accent);
+      border-radius: 7px;
+      background: var(--panel);
+      box-shadow: 0 3px 12px rgba(52, 45, 36, 0.04);
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .variant-card:hover,
+    .variant-card.is-focused {
+      border-color: color-mix(in srgb, var(--accent) 58%, var(--line-strong));
+      box-shadow: var(--shadow);
+    }
+
+    .variant-card.is-picked {
+      outline: 3px solid color-mix(in srgb, var(--accent) 55%, white);
+      outline-offset: 3px;
+    }
+
+    .variant-card.is-rejected {
+      opacity: 0.55;
+      filter: grayscale(0.45);
+    }
+
+    .variant-card.is-shortlisted::after {
+      position: absolute;
+      top: 11px;
+      right: 12px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--blue);
+      content: "";
+      box-shadow: 0 0 0 4px white;
+    }
+
+    .variant-header {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 13px;
+      align-items: start;
+      padding: 17px 18px 14px;
+    }
+
+    .variant-index {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--line));
+      border-radius: 50%;
+      color: var(--accent);
+      font: 800 12px/1 var(--mono);
+    }
+
+    .variant-title h3 {
+      margin: 0;
+      font: 500 27px/1.05 var(--serif);
+      letter-spacing: -0.02em;
+    }
+
+    .variant-title p {
+      margin: 7px 0 0;
+      color: #55514b;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .default-badge {
+      display: none;
+      padding: 5px 7px;
+      border-radius: 3px;
+      background: color-mix(in srgb, var(--accent) 12%, white);
+      color: var(--accent);
+      font: 800 9px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .variant-ai-meta {
+      display: grid;
+      justify-items: end;
+      gap: 6px;
+    }
+
+    .variant-score {
+      color: var(--muted);
+      font: 800 10px/1 var(--mono);
+      white-space: nowrap;
+    }
+
+    .variant-card.is-default .default-badge {
+      display: inline-flex;
+    }
+
+    .prototype-frame {
+      position: relative;
+      min-height: 288px;
+      margin: 0 18px;
+      overflow: hidden;
+      border: 1px solid #bbb3a7;
+      border-radius: 5px;
+      background: #e9e6df;
+    }
+
+    .prototype-label {
+      position: absolute;
+      z-index: 3;
+      top: 8px;
+      left: 8px;
+      padding: 4px 6px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.86);
+      color: #56514b;
+      font: 700 8px/1 var(--mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      backdrop-filter: blur(8px);
+    }
+
+    .prototype {
+      min-height: 288px;
+    }
+
+    .prototype img,
+    .prototype video,
+    .prototype canvas,
+    .prototype iframe,
+    .media-surface img,
+    .media-surface video,
+    .media-surface canvas,
+    .media-surface iframe {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .media-story {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 10px 18px 0;
+    }
+
+    .media-story:has(.media-exhibit:only-child) {
+      grid-template-columns: 1fr;
+    }
+
+    .media-exhibit {
+      min-width: 0;
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: var(--soft);
+    }
+
+    .media-surface {
+      min-height: 142px;
+      overflow: hidden;
+      background: #e9e6df;
+    }
+
+    .media-caption {
+      padding: 9px 10px 10px;
+    }
+
+    .media-caption b {
+      display: block;
+      margin-bottom: 4px;
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .media-caption span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .variant-body {
+      padding: 16px 18px 18px;
+    }
+
+    .fit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .fit {
+      min-height: 82px;
+      padding: 11px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+    }
+
+    .fit b {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .fit span {
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    details {
+      margin-top: 12px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    summary {
+      padding: 11px 0;
+      cursor: pointer;
+      color: #4d4943;
+      font: 700 11px/1 var(--mono);
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      float: right;
+      color: var(--muted);
+      content: "+";
+      font-size: 16px;
+    }
+
+    details[open] summary::after {
+      content: "−";
+    }
+
+    .decision-list {
+      display: grid;
+      gap: 8px;
+      padding: 0 0 13px;
+    }
+
+    .decision {
+      display: grid;
+      grid-template-columns: minmax(90px, 0.35fr) 1fr;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .decision b {
+      color: var(--muted);
+    }
+
+    .proof-list {
+      display: grid;
+      gap: 6px;
+      margin: 0 0 13px;
+      padding: 11px 0 0;
+      border-top: 1px dashed var(--line);
+      list-style: none;
+    }
+
+    .proof-list li {
+      position: relative;
+      padding-left: 17px;
+      color: #5a5650;
+      font-size: 11px;
+    }
+
+    .proof-list li::before {
+      position: absolute;
+      left: 0;
+      color: var(--green);
+      content: "✓";
+      font-weight: 800;
+    }
+
+    .keep-title {
+      margin: 14px 0 8px;
+      color: var(--muted);
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .keep-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .keep-chip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 29px;
+      padding: 5px 9px;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      background: white;
+      color: #55514b;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .keep-chip:has(input:checked) {
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 8%, white);
+      color: var(--accent);
+    }
+
+    .keep-chip input {
+      width: 13px;
+      height: 13px;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+
+    .variant-feedback {
+      width: 100%;
+      min-height: 60px;
+      margin: 0 0 12px;
+      padding: 9px 10px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .variant-feedback:focus,
+    .global-synthesis:focus {
+      border-color: var(--accent, var(--ink));
+      outline: 2px solid color-mix(in srgb, var(--accent, var(--ink)) 18%, white);
+    }
+
+    .variant-note {
+      margin-top: 12px;
+      border: 0;
+    }
+
+    .variant-note summary {
+      padding: 8px 0;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .variant-actions {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr 1fr;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .action-button {
+      min-height: 36px;
+      padding: 7px 9px;
+      font: 750 10px/1 var(--mono);
+    }
+
+    .action-button.pick {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+    }
+
+    .action-button.shortlist.active {
+      border-color: var(--blue);
+      background: #edf3fa;
+      color: var(--blue);
+    }
+
+    .action-button.reject.active {
+      border-color: var(--red);
+      background: #faefed;
+      color: var(--red);
+    }
+
+    .decision-dock {
+      position: sticky;
+      z-index: 30;
+      bottom: 12px;
+      display: grid;
+      grid-template-columns: minmax(210px, 0.62fr) minmax(260px, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      margin: 0 auto 28px;
+      padding: 14px;
+      border: 1px solid #aaa093;
+      border-radius: 8px;
+      background: rgba(255, 253, 249, 0.96);
+      box-shadow: 0 20px 65px rgba(46, 40, 32, 0.18);
+      backdrop-filter: blur(20px);
+    }
+
+    .decision-summary small {
+      display: block;
+      color: var(--muted);
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .decision-summary b {
+      display: block;
+      margin-top: 5px;
+      font: 500 17px/1.2 var(--serif);
+    }
+
+    .decision-summary span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .global-synthesis {
+      width: 100%;
+      min-height: 72px;
+      padding: 10px 11px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: white;
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .dock-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 7px;
+    }
+
+    .export-button {
+      min-height: 36px;
+      padding: 7px 10px;
+      font: 750 10px/1 var(--mono);
+    }
+
+    .export-button.primary {
+      border-color: var(--ink);
+      background: var(--ink);
+      color: white;
+    }
+
+    .export-button.subtle {
+      border-color: transparent;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .checks {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.65fr);
+      gap: 24px;
+      padding: 26px 0 54px;
+      border-top: 1px solid var(--line-strong);
+    }
+
+    .checks h2 {
+      margin: 8px 0 9px;
+      font: 500 27px/1.15 var(--serif);
+    }
+
+    .checks p {
+      max-width: 720px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .check-list {
+      display: grid;
+      gap: 7px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .check-list li {
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 249, 0.7);
+      font-size: 12px;
+    }
+
+    .check-list li::before {
+      margin-right: 7px;
+      color: var(--green);
+      content: "✓";
+      font-weight: 800;
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 100;
+      right: 20px;
+      bottom: 20px;
+      padding: 10px 13px;
+      border-radius: 5px;
+      background: var(--ink);
+      color: white;
+      font: 650 11px/1 var(--mono);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: 180ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .empty-state {
+      display: none;
+      padding: 70px 20px;
+      border: 1px dashed var(--line-strong);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .placeholder-preview {
+      display: grid;
+      min-height: 288px;
+      place-content: center;
+      gap: 8px;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .placeholder-preview strong {
+      font: 500 23px/1.2 var(--serif);
+    }
+
+    .placeholder-preview span {
+      max-width: 360px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* Worked-example miniature prototypes */
+    .mini-shell {
+      min-height: 288px;
+      color: #29302f;
+      background: #f4f5f1;
+      font-family: var(--sans);
+    }
+
+    .mini-shell button {
+      font-family: var(--sans);
+    }
+
+    .demo-alt-only {
+      display: none;
+    }
+
+    .prototype.is-alt .demo-alt-only {
+      display: revert;
+    }
+
+    .prototype.is-alt .demo-base-only {
+      display: none !important;
+    }
+
+    .prototype.is-alt .queue-item.demo-alt-only {
+      display: grid;
+    }
+
+    .prototype.is-alt .annotation.demo-alt-only,
+    .prototype.is-alt .coach-card.demo-alt-only {
+      display: block;
+    }
+
+    .demo-button {
+      min-height: 28px;
+      padding: 5px 8px;
+      border-color: #a9aaa5;
+      background: rgba(255, 255, 255, 0.9);
+      color: #3f4644;
+      font-size: 9px;
+      font-weight: 750;
+    }
+
+    .demo-button:hover {
+      border-color: #343938;
+    }
+
+    .mini-top,
+    .notebook-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 36px;
+      padding: 0 12px;
+      border-bottom: 1px solid #cfd2cd;
+      background: #eceee9;
+      color: #5a615f;
+      font-size: 9px;
+    }
+
+    .mini-top b,
+    .notebook-head b {
+      color: #2a302e;
+      font-size: 10px;
+    }
+
+    .mini-top i,
+    .notebook-head i {
+      font-style: normal;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: 67px minmax(0, 1fr) 120px;
+      min-height: 252px;
+    }
+
+    .run-rail {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      padding: 13px 9px;
+      border-right: 1px solid #d2d5d0;
+      background: #e8eae5;
+      font-size: 9px;
+    }
+
+    .run-rail b {
+      margin-bottom: 3px;
+      color: #777d7b;
+      font-size: 8px;
+      letter-spacing: 0.08em;
+    }
+
+    .run-rail span {
+      padding: 5px;
+      border: 1px solid transparent;
+      border-radius: 3px;
+    }
+
+    .run-rail span.active {
+      border-color: #d96c56;
+      background: white;
+      color: #bd4d39;
+      font-weight: 800;
+    }
+
+    .run-rail small {
+      color: #777d7b;
+    }
+
+    .trace-pane {
+      min-width: 0;
+      padding: 13px 10px 9px;
+      background: #fbfcf9;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+
+    .metric-row span {
+      padding: 5px;
+      border: 1px solid #d9dbd6;
+      background: white;
+      color: #737876;
+      font-size: 7px;
+    }
+
+    .metric-row b {
+      display: block;
+      color: #303634;
+      font-size: 11px;
+    }
+
+    .trace-pane svg,
+    .evidence-card svg,
+    .note-main svg {
+      display: block;
+      width: 100%;
+      overflow: visible;
+    }
+
+    .gridline {
+      fill: none;
+      stroke: #dedfdc;
+      stroke-width: 1;
+    }
+
+    .command,
+    .measure,
+    .compare {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.2;
+    }
+
+    .command {
+      stroke: #2f3735;
+    }
+
+    .measure {
+      stroke: #e05a3f;
+    }
+
+    .compare {
+      stroke: #6d86b3;
+      stroke-dasharray: 4 3;
+    }
+
+    .event-line {
+      stroke: #ccaa75;
+      stroke-dasharray: 3 3;
+    }
+
+    .event-dot {
+      fill: #b7791f;
+    }
+
+    .legend {
+      display: flex;
+      gap: 12px;
+      color: #777d7b;
+      font-size: 7px;
+    }
+
+    .legend span::before {
+      display: inline-block;
+      width: 8px;
+      height: 2px;
+      margin-right: 4px;
+      vertical-align: middle;
+      background: #6d86b3;
+      content: "";
+    }
+
+    .legend .cmd::before { background: #2f3735; }
+    .legend .meas::before { background: #e05a3f; }
+
+    .event-pane {
+      padding: 15px 11px;
+      border-left: 1px solid #d2d5d0;
+      background: #f0f1ed;
+    }
+
+    .event-pane > b {
+      color: #7a7f7d;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .event-pane strong {
+      display: block;
+      margin-top: 8px;
+      color: #a65c2a;
+      font: 500 15px/1.1 var(--serif);
+    }
+
+    .event-pane p {
+      margin: 7px 0 12px;
+      color: #626866;
+      font-size: 8px;
+      line-height: 1.45;
+    }
+
+    .spatial-replay {
+      background: #e8eeeb;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 288px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 65% 42%, rgba(47, 127, 116, 0.12), transparent 42%),
+        linear-gradient(#f5f8f6, #dce5e1);
+    }
+
+    .stage > svg {
+      position: absolute;
+      inset: 22px 5px 0;
+      width: calc(100% - 10px);
+      height: 228px;
+    }
+
+    .floor {
+      fill: none;
+      stroke: #c7d1cd;
+      stroke-width: 1;
+    }
+
+    .motion-path {
+      fill: none;
+      stroke: url("#pathFade");
+      stroke-dasharray: 3 3;
+      stroke-width: 3;
+    }
+
+    .ghost-arm {
+      fill: none;
+      stroke: #78938d;
+      stroke-dasharray: 5 4;
+      stroke-width: 8;
+      opacity: 0.42;
+    }
+
+    .measure-arm {
+      fill: none;
+      stroke: #364c47;
+      stroke-linecap: round;
+      stroke-width: 7;
+    }
+
+    .joint {
+      fill: #eef3f1;
+      stroke: #56766e;
+      stroke-width: 3;
+    }
+
+    .playhead {
+      fill: rgba(255, 255, 255, 0.8);
+      stroke: #e05a3f;
+      stroke-width: 4;
+    }
+
+    .spatial-inspector {
+      position: absolute;
+      top: 34px;
+      right: 15px;
+      display: grid;
+      width: 132px;
+      gap: 5px;
+      padding: 10px;
+      border: 1px solid #a8bbb5;
+      border-radius: 4px;
+      background: rgba(250, 253, 251, 0.94);
+      box-shadow: 0 8px 25px rgba(51, 75, 69, 0.13);
+    }
+
+    .spatial-inspector small {
+      color: #72827e;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .spatial-inspector b {
+      font: 500 16px/1 var(--serif);
+    }
+
+    .spatial-inspector span {
+      color: #b7503b;
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    .spatial-inspector em {
+      color: #72827e;
+      font-size: 7px;
+      font-style: normal;
+    }
+
+    .spatial-button {
+      position: absolute;
+      right: 15px;
+      bottom: 15px;
+    }
+
+    .notebook {
+      background:
+        linear-gradient(90deg, transparent 45px, rgba(186, 90, 83, 0.18) 45px, rgba(186, 90, 83, 0.18) 46px, transparent 46px),
+        repeating-linear-gradient(#faf9f4, #faf9f4 23px, #dce0eb 24px);
+    }
+
+    .notebook-head {
+      background: rgba(245, 243, 236, 0.94);
+    }
+
+    .note-body {
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      min-height: 252px;
+    }
+
+    .note-margin {
+      display: flex;
+      flex-direction: column;
+      gap: 35px;
+      padding: 27px 8px;
+      color: #9a978f;
+      font: 7px/1 var(--mono);
+    }
+
+    .note-main {
+      padding: 17px 18px 12px 13px;
+    }
+
+    .hypothesis {
+      margin: 0 0 8px;
+      font: 500 13px/1.3 var(--serif);
+    }
+
+    .hypothesis small {
+      display: block;
+      margin-bottom: 3px;
+      color: #7667c6;
+      font: 750 7px/1 var(--mono);
+      letter-spacing: 0.08em;
+    }
+
+    .delta-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 3px;
+      color: #62635f;
+      font: 8px/1 var(--mono);
+    }
+
+    .delta-row ins {
+      color: #4d6f51;
+      text-decoration: none;
+    }
+
+    .result-line {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin: 2px 0 7px;
+      font-size: 8px;
+    }
+
+    .result-line b {
+      color: #7667c6;
+    }
+
+    .annotation {
+      margin: 5px 0 7px;
+      padding: 6px 7px;
+      border-left: 2px solid #7667c6;
+      background: rgba(118, 103, 198, 0.08);
+      color: #555463;
+      font-size: 8px;
+    }
+
+    .annotation u {
+      display: block;
+      margin-top: 2px;
+      color: #7667c6;
+      text-decoration: none;
+    }
+
+    .exception-queue {
+      background: #f3f1ec;
+    }
+
+    .queue-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 48px;
+      padding: 8px 12px;
+      border-bottom: 1px solid #d3cfc7;
+    }
+
+    .queue-head div {
+      display: grid;
+    }
+
+    .queue-head small {
+      color: #8b8275;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .queue-head b {
+      font: 500 15px/1.15 var(--serif);
+    }
+
+    .queue-head > span {
+      color: #858077;
+      font-size: 8px;
+    }
+
+    .queue-body {
+      display: grid;
+      grid-template-columns: minmax(150px, 0.8fr) 1fr;
+      min-height: 240px;
+    }
+
+    .queue-list {
+      border-right: 1px solid #d3cfc7;
+    }
+
+    .queue-item {
+      display: grid;
+      grid-template-columns: 9px 1fr auto;
+      gap: 7px;
+      align-items: center;
+      min-height: 50px;
+      padding: 7px 9px;
+      border-bottom: 1px solid #ddd9d1;
+      color: #55534f;
+    }
+
+    .queue-item.active {
+      background: white;
+      color: #282a28;
+    }
+
+    .queue-item span {
+      display: grid;
+    }
+
+    .queue-item b {
+      font-size: 9px;
+    }
+
+    .queue-item small,
+    .queue-item em {
+      color: #8a857d;
+      font-size: 7px;
+      font-style: normal;
+    }
+
+    .queue-item.resolved {
+      background: #e9f3ec;
+      color: #376848;
+    }
+
+    .sev {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #a9aaa5;
+    }
+
+    .sev.high { background: #c64b36; }
+    .sev.med { background: #cc8d33; }
+    .sev.low { background: #7c9a72; }
+
+    .evidence-card {
+      padding: 17px 15px;
+      background: #fbfaf7;
+    }
+
+    .evidence-card > small {
+      color: #a56e2a;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .evidence-card > b {
+      display: block;
+      margin: 5px 0 4px;
+      font: 500 18px/1 var(--serif);
+    }
+
+    .evidence-card p {
+      margin: 3px 0 9px;
+      color: #6f6a63;
+      font-size: 8px;
+    }
+
+    .coach {
+      position: relative;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 100% 0, rgba(63, 111, 168, 0.12), transparent 46%),
+        #f4f6f8;
+    }
+
+    .coach-progress {
+      display: grid;
+      grid-template-columns: 23px 36px 23px 36px 23px 1fr;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .coach-progress span {
+      display: grid;
+      width: 22px;
+      height: 22px;
+      place-items: center;
+      border: 1px solid #aeb8c2;
+      border-radius: 50%;
+      background: white;
+      color: #6b7782;
+      font-size: 8px;
+    }
+
+    .coach-progress span.done {
+      border-color: #5b876c;
+      background: #5b876c;
+      color: white;
+    }
+
+    .coach-progress span.active {
+      border: 2px solid #3f6fa8;
+      color: #3f6fa8;
+      font-weight: 800;
+    }
+
+    .coach-progress i {
+      height: 1px;
+      background: #bbc3ca;
+    }
+
+    .coach-progress b {
+      margin-left: 10px;
+      font-size: 9px;
+    }
+
+    .coach-card {
+      min-height: 190px;
+      padding: 16px;
+      border: 1px solid #c6ced6;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 9px 28px rgba(60, 78, 96, 0.08);
+    }
+
+    .coach-card > small {
+      color: #3f6fa8;
+      font-size: 7px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .coach-card h4 {
+      max-width: 430px;
+      margin: 7px 0 12px;
+      font: 500 17px/1.22 var(--serif);
+    }
+
+    .evidence-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .evidence-options span,
+    .test-recipe span {
+      padding: 7px;
+      border: 1px solid #d4dae0;
+      border-radius: 3px;
+      color: #77818a;
+      font-size: 8px;
+    }
+
+    .evidence-options span.yes {
+      border-color: #5b876c;
+      background: #eef6f0;
+      color: #3b6b4a;
+    }
+
+    .coach-evidence {
+      margin-top: 11px;
+      padding-top: 9px;
+      border-top: 1px solid #e0e4e7;
+      font-size: 8px;
+    }
+
+    .coach-evidence p {
+      margin: 2px 0 0;
+      color: #6b747c;
+    }
+
+    .test-recipe {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .test-recipe span {
+      display: grid;
+    }
+
+    .test-recipe b {
+      margin-top: 2px;
+      color: #3f6fa8;
+      font-size: 10px;
+    }
+
+    .coach-button {
+      position: absolute;
+      right: 34px;
+      bottom: 29px;
+      border-color: #3f6fa8;
+      background: #3f6fa8;
+      color: white;
+    }
+
+    @media (max-width: 1050px) {
+      .hero-grid,
+      .context,
+      .checks,
+      .ai-summary {
+        grid-template-columns: 1fr;
+      }
+
+      .ai-recommendation {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .hero-aside {
+        border-top: 1px solid var(--line);
+        border-left: 0;
+        padding-top: 17px;
+        padding-left: 0;
+      }
+
+      .variant-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .media-story {
+        grid-template-columns: 1fr;
+      }
+
+      .decision-dock {
+        grid-template-columns: 1fr;
+      }
+
+      .dock-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        width: min(100% - 20px, 1500px);
+      }
+
+      .hero {
+        padding-top: 34px;
+      }
+
+      .workflow {
+        grid-template-columns: 1fr;
+      }
+
+      .workflow-step {
+        min-height: 76px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .workflow-step:last-child {
+        border-bottom: 0;
+      }
+
+      .ai-prune-head,
+      .section-intro,
+      .recommendation-line {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .ai-prune-head,
+      .ai-recommendation,
+      .hinge-card,
+      .criteria-section,
+      .matrix-section,
+      .gate-section {
+        padding-right: 15px;
+        padding-left: 15px;
+      }
+
+      .gallery-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .fit-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .control-grid {
+        grid-template-columns: 54px minmax(0, 1fr);
+      }
+
+      .event-pane {
+        display: none;
+      }
+
+      .queue-body {
+        grid-template-columns: 1fr;
+      }
+
+      .queue-list {
+        display: none;
+      }
+
+      .evidence-options,
+      .test-recipe {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+    }
+
+    @media print {
+      .gallery-head,
+      .decision-dock,
+      .variant-actions,
+      .variant-feedback,
+      .variant-note,
+      .keep-list,
+      .demo-button {
+        display: none !important;
+      }
+
+      .variant-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .variant-card {
+        break-inside: avoid;
+        box-shadow: none;
+      }
+    }
+  
+/* SystemSketch implementation-plan prototypes */
+.plan-prototype {
+  --plan-accent: #3f66e8;
+  position: relative;
+  box-sizing: border-box;
+  min-height: 410px;
+  padding: 16px;
+  overflow: hidden;
+  border: 1px solid #d9dee8;
+  border-radius: 18px;
+  color: #1e2735;
+  background:
+    radial-gradient(circle at 1px 1px, rgba(62, 75, 96, .13) 1px, transparent 1.2px) 0 0 / 18px 18px,
+    linear-gradient(145deg, #fbfcfe, #f4f6fa);
+  outline: none;
+}
+
+.plan-controller { --plan-accent: #146f68; }
+.plan-presets { --plan-accent: #a35445; }
+
+.plan-prototype:focus-visible {
+  box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--plan-accent) 55%, white);
+}
+
+.prototype-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 26px;
+}
+
+.plan-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 9px;
+  border: 1px solid color-mix(in srgb, var(--plan-accent) 28%, white);
+  border-radius: 999px;
+  color: color-mix(in srgb, var(--plan-accent) 82%, #172033);
+  background: color-mix(in srgb, var(--plan-accent) 9%, white);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+.prototype-help {
+  color: #727b89;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.mini-v1-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  max-width: calc(100% - 20px);
+  min-height: 45px;
+  margin: 12px auto 14px;
+  padding: 3px;
+  border: 1px solid rgba(30, 39, 53, .12);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 2px 5px rgba(25, 34, 48, .08), 0 12px 30px rgba(25, 34, 48, .1);
+  backdrop-filter: blur(12px);
+}
+
+.mini-tool {
+  position: relative;
+  display: grid;
+  width: 43px;
+  height: 39px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  color: #323947;
+  background: transparent;
+  cursor: pointer;
+}
+
+.mini-tool:hover { background: #f0f2f6; }
+.mini-tool.is-active { color: white; background: var(--plan-accent); }
+.mini-tool[data-family="library"] { margin-left: 3px; border-left: 1px solid #e7e9ee; border-radius: 0 7px 7px 0; }
+
+.mini-tool svg {
+  width: 19px;
+  height: 19px;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.65;
+}
+
+.mini-tool .caret {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 0;
+  height: 0;
+  border-top: 3px solid transparent;
+  border-right: 3px solid currentColor;
+  opacity: .65;
+}
+
+.architecture-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 15px minmax(0, 1fr) 15px minmax(0, 1fr) 15px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 9px 5px;
+  align-items: stretch;
+  max-width: 870px;
+  margin: 0 auto;
+}
+
+.architecture-flow > i {
+  align-self: center;
+  color: #9aa2af;
+  font-style: normal;
+  font-weight: 800;
+  text-align: center;
+}
+
+.arch-node,
+.arch-branch {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 84px;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #cbd6e9;
+  border-radius: 11px;
+  background: rgba(238, 244, 255, .92);
+  box-shadow: 0 1px 2px rgba(29, 41, 61, .05);
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.arch-node.host,
+.arch-branch.host {
+  border-color: color-mix(in srgb, var(--plan-accent) 30%, #d9dee8);
+  background: color-mix(in srgb, var(--plan-accent) 7%, white);
+}
+
+.arch-node.deep {
+  border-style: dashed;
+  background: color-mix(in srgb, var(--plan-accent) 12%, white);
+}
+
+.arch-node small,
+.arch-branch small {
+  display: block;
+  margin-bottom: 5px;
+  color: #788395;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .09em;
+}
+
+.arch-node b,
+.arch-branch b {
+  font-size: 12px;
+  line-height: 1.22;
+  overflow-wrap: anywhere;
+}
+
+.arch-node span,
+.arch-branch span {
+  margin-top: 4px;
+  color: #657083;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.arch-branch {
+  grid-row: 2;
+  min-height: 58px;
+}
+
+.arch-branch::before {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 1px;
+  height: 10px;
+  background: #aeb6c4;
+  content: "";
+}
+
+.arch-branch[data-node="adapter"] { grid-column: 3 / 5; }
+.arch-branch[data-node="library"] { grid-column: 5 / 8; }
+
+.arch-node.is-flow-active,
+.arch-branch.is-flow-active {
+  z-index: 2;
+  border-color: var(--plan-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--plan-accent) 14%, transparent), 0 8px 20px rgba(32, 42, 61, .12);
+  transform: translateY(-2px);
+}
+
+.trace-console {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 870px;
+  min-height: 38px;
+  margin: 12px auto 0;
+  padding: 6px;
+  border: 1px solid #d9dee8;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .88);
+}
+
+.trace-console button {
+  min-height: 29px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  color: white;
+  background: var(--plan-accent);
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.trace-console button.secondary { color: #5d6674; background: #edf0f4; }
+
+.trace-console span {
+  min-width: 0;
+  overflow: hidden;
+  color: #596578;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mini-library {
+  position: absolute;
+  z-index: 5;
+  top: 48px;
+  left: 12px;
+  display: none;
+  width: 190px;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #d5dbe5;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .98);
+  box-shadow: 0 18px 42px rgba(27, 38, 56, .19);
+}
+
+.mini-library.is-open { display: block; }
+.mini-library strong { display: block; margin-bottom: 7px; font-size: 11px; }
+
+.mini-library input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 29px;
+  padding: 0 8px;
+  border: 1px solid #d7dce5;
+  border-radius: 7px;
+  outline: 0;
+  font-size: 10px;
+}
+
+.mini-library input:focus { border-color: var(--plan-accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--plan-accent) 13%, transparent); }
+
+.mini-library-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.mini-library-grid span {
+  display: grid;
+  min-height: 35px;
+  place-items: center;
+  border: 1px solid #e1e5ec;
+  border-radius: 7px;
+  color: #485466;
+  background: #f7f8fa;
+  font-size: 15px;
+}
+
+.implementation-recommendation,
+.api-seam-table,
+.implementation-slices,
+.acceptance-matrix,
+.avoid-list {
+  margin-top: 48px;
+}
+
+.implementation-recommendation {
+  padding: 24px;
+  border: 1px solid #cfd8ed;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #f8faff, #f1f5ff);
+}
+
+.implementation-recommendation h2,
+.api-seam-table h2,
+.implementation-slices h2,
+.acceptance-matrix h2,
+.avoid-list h2 {
+  margin: 0 0 9px;
+}
+
+.recommendation-grid {
+  display: grid;
+  grid-template-columns: 1.25fr .75fr;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.recommendation-card,
+.hinge-card {
+  padding: 17px;
+  border: 1px solid #d8deea;
+  border-radius: 14px;
+  background: white;
+}
+
+.recommendation-card b,
+.hinge-card b { display: block; margin-bottom: 7px; font-size: 13px; }
+.recommendation-card p,
+.hinge-card p { margin: 0; color: #5e6879; font-size: 12px; line-height: 1.55; }
+
+.seam-table-wrap { overflow-x: auto; border: 1px solid #dde2ea; border-radius: 14px; }
+.seam-table { width: 100%; border-collapse: collapse; background: white; font-size: 11px; }
+.seam-table th,
+.seam-table td { padding: 11px 12px; border-bottom: 1px solid #e8ebf0; text-align: left; vertical-align: top; }
+.seam-table th { color: #5d6676; background: #f6f7f9; font-size: 9px; letter-spacing: .055em; text-transform: uppercase; }
+.seam-table tr:last-child td { border-bottom: 0; }
+.seam-table td:first-child { min-width: 125px; font-weight: 780; }
+.seam-table .winner { color: #234fc4; background: #f5f8ff; }
+
+.slice-list { display: grid; gap: 9px; margin-top: 16px; }
+.slice-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) minmax(190px, .55fr);
+  gap: 12px;
+  align-items: start;
+  padding: 14px;
+  border: 1px solid #dde2ea;
+  border-radius: 13px;
+  background: white;
+}
+
+.slice-row > b {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 9px;
+  color: white;
+  background: #3f66e8;
+  font-size: 12px;
+}
+
+.slice-row strong { display: block; margin-bottom: 4px; font-size: 12px; }
+.slice-row p { margin: 0; color: #626d7d; font-size: 11px; line-height: 1.48; }
+.slice-row code { color: #39465c; font-size: 10px; }
+.slice-proof { padding-left: 12px; border-left: 2px solid #cbd6f7; }
+.slice-proof small { display: block; margin-bottom: 4px; color: #7080a3; font-size: 8px; font-weight: 850; letter-spacing: .07em; }
+
+.acceptance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.acceptance-card {
+  padding: 15px;
+  border: 1px solid #dde2ea;
+  border-radius: 13px;
+  background: white;
+}
+
+.acceptance-card b { display: block; margin-bottom: 7px; font-size: 12px; }
+.acceptance-card ul { margin: 0; padding-left: 17px; color: #606a7a; font-size: 10px; line-height: 1.55; }
+
+.avoid-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 9px;
+  margin-top: 15px;
+}
+
+.avoid-grid div {
+  padding: 13px;
+  border: 1px solid #ead8d5;
+  border-radius: 12px;
+  color: #6c514d;
+  background: #fff8f6;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.verified-seams {
+  margin-top: 16px;
+  color: #697385;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.verified-seams a { color: #3558be; }
+
+@media (max-width: 850px) {
+  .architecture-flow { grid-template-columns: 1fr 12px 1fr; }
+  .architecture-flow > .arch-node:nth-of-type(3),
+  .architecture-flow > .arch-node:nth-of-type(4),
+  .architecture-flow > i:nth-of-type(n + 3) { display: none; }
+  .arch-branch[data-node="adapter"] { grid-column: 1 / 2; }
+  .arch-branch[data-node="library"] { grid-column: 3 / 4; }
+  .recommendation-grid,
+  .acceptance-grid { grid-template-columns: 1fr; }
+  .avoid-grid { grid-template-columns: 1fr 1fr; }
+  .slice-row { grid-template-columns: 34px 1fr; }
+  .slice-proof { grid-column: 2; padding: 10px 0 0; border-top: 1px solid #e2e6ed; border-left: 0; }
+}
+
+@media (max-width: 560px) {
+  .plan-prototype { min-height: 430px; padding: 12px; }
+  .prototype-help { display: none; }
+  .mini-tool { width: 37px; }
+  .architecture-flow { margin-top: 4px; }
+  .arch-node,
+  .arch-branch { min-height: 75px; padding: 8px; }
+  .trace-console span { display: none; }
+  .avoid-grid { grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+<body>
+  <header class="hero">
+    <div class="page">
+      <div class="hero-grid">
+        <div>
+          <div class="kicker" id="kicker">Babble &amp; Prune</div>
+          <h1 id="page-title">Prototype comparison</h1>
+          <p class="brief" id="page-brief"></p>
+          <div class="badge-row">
+            <span class="badge primary" id="count-badge">0 variants</span>
+            <span class="badge">prototype, not production</span>
+            <span class="badge">one shared comparison frame</span>
+            <span class="badge">weighted AI prune</span>
+            <span class="badge">choices stay in this browser</span>
+          </div>
+        </div>
+        <aside class="hero-aside">
+          <div class="eyebrow">AI recommendation · ought</div>
+          <strong id="default-name">—</strong>
+          <p id="default-why"></p>
+        </aside>
+      </div>
+      <div class="workflow" aria-label="Babble and prune workflow">
+        <div class="workflow-step">
+          <span>01 · FRAME</span>
+          <b>One shared problem</b>
+          <small>Same constraints, fixture, and stop line.</small>
+        </div>
+        <div class="workflow-step">
+          <span>02 · CRITERIA</span>
+          <b>Precommit what good means</b>
+          <small>Weighted FRs and hard gates before options.</small>
+        </div>
+        <div class="workflow-step">
+          <span>03 · BABBLE</span>
+          <b>Orthogonal directions</b>
+          <small>Structural alternatives, not cosmetic reskins.</small>
+        </div>
+        <div class="workflow-step">
+          <span>04 · PROTOTYPE</span>
+          <b>Make each idea felt</b>
+          <small>One real slice and one meaningful state change.</small>
+        </div>
+        <div class="workflow-step">
+          <span>05 · PRUNE</span>
+          <b>AI advises; you decide</b>
+          <small>Audit scores, then pick, reject, or splice.</small>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="context">
+      <div class="context-panel">
+        <div class="eyebrow">Search map</div>
+        <h2>The load-bearing axes</h2>
+        <div class="axis-list" id="axis-list"></div>
+      </div>
+      <div class="context-panel">
+        <div class="eyebrow">Common contract</div>
+        <h2>Held constant</h2>
+        <ul class="invariant-list" id="invariant-list"></ul>
+        <div class="boundary"><b>Prototype boundary:</b> <span id="boundary"></span></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="variants-heading">
+      <div class="gallery-head">
+        <div>
+          <div class="eyebrow">Visual atlas · try before you read</div>
+          <h2 id="variants-heading">Compare the outcomes</h2>
+          <p>Interact directly where possible. Keys 1–9 focus · J/K move · Enter picks · S shortlists · R rejects · C copies</p>
+        </div>
+        <div class="toolbar" aria-label="Gallery layout">
+          <button class="tool-button active" type="button" data-layout="grid">Grid</button>
+          <button class="tool-button" type="button" data-layout="focus">Focus</button>
+          <button class="tool-button" type="button" id="previous-variant" aria-label="Previous variant">←</button>
+          <button class="tool-button" type="button" id="next-variant" aria-label="Next variant">→</button>
+        </div>
+      </div>
+      <div class="variant-grid" id="variant-grid"></div>
+      <div class="empty-state" id="empty-state">No variants match this view.</div>
+    </section>
+
+    <section class="ai-prune" id="ai-prune" aria-labelledby="ai-prune-heading">
+      <div class="ai-prune-head">
+        <div>
+          <div class="eyebrow">AI prune · auditable judgment</div>
+          <h2 id="ai-prune-heading">What the AI thinks is best—and why</h2>
+          <p>Criteria and weights are an inferred interpretation of the brief, fixed before scoring. Prototype behavior is evidence; weights, scores, and recommendation are judgment.</p>
+        </div>
+        <div class="formula">total = Σ(weight × score / 5)</div>
+      </div>
+
+      <div class="ai-summary">
+        <div class="ai-recommendation" id="ai-recommendation"></div>
+        <div class="hinge-card">
+          <span class="judgment-chip">sensitivity · ought</span>
+          <b>Decision hinge</b>
+          <p id="decision-hinge"></p>
+        </div>
+      </div>
+
+      <div class="criteria-section">
+        <div class="section-intro">
+          <div>
+            <div class="eyebrow">01 · Before alternatives</div>
+            <h3>Weighted functional requirements</h3>
+            <p>Outcome-oriented FRs sum to 100%. The 1 / 3 / 5 anchors make later scoring inspectable instead of decorative precision.</p>
+          </div>
+          <span class="judgment-chip">AI interpretation · ought</span>
+        </div>
+        <div class="table-scroll" id="requirement-table"></div>
+      </div>
+
+      <div class="matrix-section">
+        <div class="section-intro">
+          <div>
+            <div class="eyebrow">02 · After prototypes</div>
+            <h3>Evidence-backed score matrix</h3>
+            <p>Open any score to see its evidence and confidence. Totals rank eligible options; they do not turn taste into objective truth.</p>
+          </div>
+          <span class="evidence-chip">prototype evidence · is</span>
+        </div>
+        <div class="table-scroll" id="score-matrix"></div>
+      </div>
+
+      <div class="gate-section" id="gate-panel">
+        <div class="section-intro">
+          <div>
+            <div class="eyebrow">Pass / fail · separate from preference</div>
+            <h3>Hard gates</h3>
+            <p>A failed gate prevents an option from winning regardless of weighted total; the failed option stays visible.</p>
+          </div>
+        </div>
+        <div class="gate-grid" id="gate-grid"></div>
+      </div>
+    </section>
+
+
+    <section class="implementation-recommendation" aria-labelledby="recommendation-heading">
+      <div class="section-intro">
+        <div>
+          <div class="eyebrow">Recommendation · P1</div>
+          <h2 id="recommendation-heading">Compose upstream first; own only the missing concepts</h2>
+          <p>Start with <code>DefaultToolbar</code> as the chassis and treat the seven Figma families as a projection over tldraw's stock tool registry. This preserves tldraw's keyboard suppression, focus semantics, accessibility announcements, responsive overflow, tool analytics, shared styles, and editor behavior. SystemSketch owns four narrow things: family recall, the exact seven-slot projection, Curve's non-zero-bend preset, and library content.</p>
+        </div>
+        <span class="judgment-chip">91 / 100 · provisional pick</span>
+      </div>
+      <div class="recommendation-grid">
+        <article class="recommendation-card">
+          <b>Why this is more off-the-shelf than the original V1 blueprint</b>
+          <p>The original proposal assumed an owned toolbar controller. Source inspection found a smaller seam: public <code>DefaultToolbar</code> accepts custom children, <code>OverflowingToolbar</code> already preserves the last active overflow item, and <code>TLUiOverrides.tools</code> lets R/O/L/A keep using the stock keyboard registry. That removes owned focus, raw keyboard, a11y announcement, and overflow systems.</p>
+        </article>
+        <article class="hinge-card">
+          <b>When to switch to P2</b>
+          <p>If hiding DefaultToolbar extras or matching Figma's exact responsive chrome becomes brittle in the first spike, stop and move only the shell to P2. The tool overrides, preference model, Curve adapter, library catalog, and tests all survive that switch.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="api-seam-table" aria-labelledby="seam-heading">
+      <div class="section-intro">
+        <div>
+          <div class="eyebrow">Responsibility map</div>
+          <h2 id="seam-heading">What each plan reuses versus owns</h2>
+          <p>The percentages in the prototypes are conceptual responsibility, not predicted lines of code. The meaningful distinction is which side must maintain behavior after a tldraw upgrade.</p>
+        </div>
+      </div>
+      <div class="seam-table-wrap">
+        <table class="seam-table">
+          <thead><tr><th>Surface</th><th>P1 · Compose Upstream</th><th>P2 · Own Controller</th><th>P3 · Preset Tools</th></tr></thead>
+          <tbody>
+            <tr><td>Toolbar layout</td><td class="winner">tldraw <code>DefaultToolbar</code> + overflow</td><td>Host-owned seven-slot DOM/CSS</td><td>Host-owned catalog DOM/CSS</td></tr>
+            <tr><td>Buttons, menus, focus</td><td class="winner">tldraw primitives and contexts</td><td>tldraw primitives; host composition</td><td>tldraw primitives; host composition</td></tr>
+            <tr><td>R / O / L</td><td class="winner">Stock tool items and keyboard registry</td><td>Stock registry → host commands</td><td>Catalog descriptors → tools</td></tr>
+            <tr><td>Repeated A</td><td class="winner">Wrapped stock Arrow <code>onSelect</code></td><td>Owned reducer called by stock registry</td><td>Cycle first-class preset tool IDs</td></tr>
+            <tr><td>Straight / Elbow</td><td class="winner">Stock arrow + <code>ArrowShapeKindStyle</code></td><td>Same stock style boundary</td><td>Custom StateNodes create stock shapes</td></tr>
+            <tr><td>Curve</td><td class="winner">One guarded before-create bend</td><td>Controller-driven before-create bend</td><td>Owned pointing/create tool behavior</td></tr>
+            <tr><td>Family recall</td><td>Small shared UI preference store</td><td>Owned reducer + preference store</td><td>Tool ID + last-family catalog state</td></tr>
+            <tr><td>Library</td><td class="winner">Stock popover/focus; host catalog</td><td>Host sidebar/focus; stock primitives</td><td>Shared host descriptor catalog</td></tr>
+            <tr><td>Board document</td><td class="winner">100% stock tldraw records</td><td>100% stock tldraw records</td><td>100% stock shapes; custom tool states only</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="implementation-slices" aria-labelledby="slices-heading">
+      <div class="section-intro">
+        <div>
+          <div class="eyebrow">P1 delivery plan</div>
+          <h2 id="slices-heading">Five closed vertical slices</h2>
+          <p>Each slice ends with observable behavior in the deployed Preview. Do not build the full library or commenting setup before the selected-tool loop works end to end.</p>
+        </div>
+      </div>
+      <div class="slice-list">
+        <article class="slice-row">
+          <b>0</b>
+          <div><strong>Prove the two uncertain seams</strong><p>Spike a Figma-slot child inside <code>DefaultToolbar</code>, confirm the seven direct children survive overflow duplication, and register a guarded arrow before-create handler that produces a visible curve while leaving pasted/imported arrows unchanged. Inspect whether <code>tools.comment</code> is actually registered under the current license/package set.</p></div>
+          <div class="slice-proof"><small>EXIT PROOF</small><p>One stock Rectangle click, one repeated-A Curve creation, one narrow-width overflow check, and an explicit Comment capability result.</p></div>
+        </article>
+        <article class="slice-row">
+          <b>1</b>
+          <div><strong>Ship the stock-backed seven-slot shell</strong><p>Add <code>src/toolbar/SystemSketchToolbar.tsx</code> and scoped <code>systemsketch-toolbar.css</code>. Extend the existing <code>SYSTEMSKETCH_COMPONENTS</code> in <code>src/App.tsx</code> with <code>Toolbar</code>. Wire Cursor, Frame, Draw, Text, and the current Shape subtype to real <code>useTools()</code> callbacks; render + but keep its panel small.</p></div>
+          <div class="slice-proof"><small>EXIT PROOF</small><p>The exact bottom-center silhouette selects five real stock tools, retains tldraw tooltips/focus, and does not collide with the bottom-right utility strip.</p></div>
+        </article>
+        <article class="slice-row">
+          <b>2</b>
+          <div><strong>Unify clicks, hotkeys, and recall</strong><p>Add <code>toolbarOverrides.ts</code>, <code>toolbarPreferences.ts</code>, and a pure <code>arrowPresetModel.ts</code>. Wrap existing rectangle/ellipse/line/arrow items rather than attaching raw keyboard listeners. Store only last-family choices under a versioned SystemSketch preference key; use editor styles and current tool as the live truth.</p></div>
+          <div class="slice-proof"><small>EXIT PROOF</small><p><code>R O L A A A</code> updates the same slot immediately; switching to Cursor and pressing A recalls the last arrow preset; reload preserves preference without adding document records.</p></div>
+        </article>
+        <article class="slice-row">
+          <b>3</b>
+          <div><strong>Close one real library journey</strong><p>Add <code>ShapeLibraryPanel.tsx</code> and <code>shapeLibraryCatalog.ts</code>. Use tldraw popover/input primitives, filter a deliberately small catalog, and make one library item create a real stock geo shape at the viewport center. Preserve the selected tool and return focus to + on close.</p></div>
+          <div class="slice-proof"><small>EXIT PROOF</small><p>Open +, type “decision”, insert a diamond, close with Escape, and press R; no search keystroke activates a canvas tool.</p></div>
+        </article>
+        <article class="slice-row">
+          <b>4</b>
+          <div><strong>Finish the production edges</strong><p>Connect the licensed stock Comment tool or its explicit disabled state. Add coarse-pointer sizing, narrow-width behavior, readonly behavior, reduced motion, tooltip labels, screen-reader announcements, preference migration/fallback, and the single DefaultToolbar class-contract upgrade smoke. Keep the existing Excalidraw paste and utility-strip mounts unchanged.</p></div>
+          <div class="slice-proof"><small>EXIT PROOF</small><p>Keyboard, touch, readonly, comment availability, library focus, reload, and existing paste/release flows pass in Preview before promotion.</p></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="acceptance-matrix" aria-labelledby="acceptance-heading">
+      <div class="section-intro">
+        <div>
+          <div class="eyebrow">Evidence plan</div>
+          <h2 id="acceptance-heading">Test the pure contract, editor effect, and rendered journey separately</h2>
+        </div>
+      </div>
+      <div class="acceptance-grid">
+        <article class="acceptance-card"><b>Pure Vitest model</b><ul><li>First A recalls last arrow</li><li>Repeated A cycles 0 → 1 → 2 → 0</li><li>R/O/L replace the Shape slot</li><li>Preference parse, migration, corruption fallback</li><li>Library open never changes active tool</li></ul></article>
+        <article class="acceptance-card"><b>Editor integration</b><ul><li>Overrides delegate to original tool callbacks</li><li>Curve guard touches only newly drawn arrows</li><li>Elbow uses <code>ArrowShapeKindStyle</code></li><li>No UI preference in the tldraw store</li><li>Comment resolves only when capability exists</li></ul></article>
+        <article class="acceptance-card"><b>Real browser journey</b><ul><li>Wide + narrow visual captures</li><li>Keyboard suppression while editing/searching</li><li>Overflow clone shares one remembered icon</li><li>Focus return, Escape, touch targets</li><li>No collision with utilities or style panel</li></ul></article>
+      </div>
+    </section>
+
+    <section class="avoid-list" aria-labelledby="avoid-heading">
+      <div class="section-intro">
+        <div>
+          <div class="eyebrow">Guardrails</div>
+          <h2 id="avoid-heading">Four tempting shortcuts to reject</h2>
+        </div>
+      </div>
+      <div class="avoid-grid">
+        <div><b>No raw global keydown router.</b><br>Wrapping <code>TLUiToolItem.onSelect</code> keeps tldraw's existing editing, open-menu, readonly, and focus suppression.</div>
+        <div><b>No toolbar state in the board.</b><br>Last-used subtype is a local user preference, not shared diagram content or shape metadata.</div>
+        <div><b>No custom arrow shape types.</b><br>Straight, Curve, and Elbow remain ordinary stock arrows so export, paste, bindings, and collaboration stay compatible.</div>
+        <div><b>No copied DefaultToolbar.</b><br>Compose it in P1; if its shell is too constrained, switch cleanly to P2 instead of forking upstream JSX.</div>
+      </div>
+      <p class="verified-seams"><b>Verified against pinned tldraw 5.3.2:</b> <a href="file:///home/bam/systemsketch/node_modules/tldraw/src/lib/ui/components/Toolbar/DefaultToolbar.tsx">DefaultToolbar custom children</a> · <a href="file:///home/bam/systemsketch/node_modules/tldraw/src/lib/ui/components/Toolbar/OverflowingToolbar.tsx">overflow and last-active behavior</a> · <a href="file:///home/bam/systemsketch/node_modules/tldraw/src/lib/ui/hooks/useTools.tsx">stock tools and R/O/L/A mappings</a> · <a href="file:///home/bam/systemsketch/node_modules/tldraw/src/lib/ui/hooks/useKeyboardShortcuts.ts">editing-safe keyboard registry</a> · <a href="file:///home/bam/systemsketch/node_modules/tldraw/src/lib/shapes/arrow/toolStates/Pointing.tsx">arrow creation path</a>.</p>
+    </section>
+
+    <section class="checks">
+      <div>
+        <div class="eyebrow">Evidence contract</div>
+        <h2>What this gallery proves—and what it does not</h2>
+        <p>The live previews make the directions judgeable and the controls make preference capture cheap. They do not claim that production integration, real hardware behavior, or unbuilt edge cases have been verified.</p>
+      </div>
+      <ul class="check-list" id="check-list"></ul>
+    </section>
+
+    <aside class="decision-dock" id="decision-dock" aria-label="Prune decision">
+      <div class="decision-summary">
+        <small>Your direction · controls optional</small>
+        <b id="decision-title">No pick yet</b>
+        <span id="decision-detail">Type the splice you want in ordinary language.</span>
+      </div>
+      <textarea class="global-synthesis" id="global-synthesis" placeholder="Type naturally: “Start with P1; borrow P2’s true sidebar and keep P1’s keyboard boundary.”"></textarea>
+      <div class="dock-actions">
+        <button class="export-button primary" type="button" id="copy-prune">Copy direction</button>
+        <button class="export-button" type="button" id="download-prune">Download .md</button>
+        <button class="export-button subtle" type="button" id="reset-prune">Reset choices</button>
+      </div>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="application/json" id="babble-data">
+{
+  "schemaVersion": 2,
+  "title": "Three ways to build the chosen Figma toolbar",
+  "kicker": "SystemSketch · implementation boundary review · 31 Aug 2026",
+  "brief": "Implement the already-selected V1 Figma-style toolbar in SystemSketch: seven stable family slots (Cursor, Frame, Shape, Draw, Text, Comment, +), a family icon that becomes the last selected subtype, R/O/L direct selection, repeated A cycling Straight → Curve → Elbow while remembering the last arrow preset, and a searchable library sidebar. Keep the visible behavior fixed and compare only the technical boundary.",
+  "count": 3,
+  "defaultId": "p1",
+  "defaultWhy": "P1 Compose Upstream is the provisional recommendation at 91/100. It uses tldraw 5.3.2's public DefaultToolbar, responsive OverflowingToolbar behavior, toolbar/menu primitives, useTools registry, built-in keyboard routing, style state, accessibility announcements, and editor side effects. SystemSketch owns only the seven family-slot projection, a tiny preference store, one guarded curved-arrow preset adapter, and the searchable library contents.",
+  "decisionHinge": "The choice is close between P1 and P2. Moving only 5 weight points from tldraw reuse to pixel/interaction exactness changes the weights to 30/30/20/10/10 and ties them at 90. Choose P2 if eliminating DefaultToolbar's extra chrome and internal CSS dependencies matters more than maximizing upstream composition; otherwise choose P1.",
+  "invariants": [
+    "The rendered toolbar is the chosen V1 Figma surface in every plan; this comparison does not reopen position, icon count, or grouping.",
+    "Cursor, Frame, Shape, Draw, Text, Comment, and + occupy seven stable bottom-center positions.",
+    "The Shape family slot displays the actual last-used subtype after R, O, L, or an arrow choice.",
+    "A recalls the last arrow preset when entering Arrow and cycles Straight → Curve → Elbow only when Arrow is already active.",
+    "The + control opens a searchable library surface without changing the selected drawing tool.",
+    "Current tool/style state stays in tldraw; family recall is user-interface preference state, never board document data.",
+    "The existing Excalidraw paste adapter, bottom-right utility strip, persistence key, release flow, and stock canvas engine remain intact.",
+    "All integrations target public tldraw 5.3.2 exports and editor APIs; no package fork or node_modules patch is permitted."
+  ],
+  "boundary": "These are implementation plans and interactive architecture traces, not a toolbar implementation. They identify concrete files, API seams, slices, acceptance evidence, and failure modes. No production React, CSS, editor, or package dependency was changed while preparing this comparison.",
+  "axes": [
+    {
+      "name": "Toolbar shell",
+      "values": [
+        "tldraw DefaultToolbar",
+        "SystemSketch toolbar shell",
+        "SystemSketch catalog over custom tool states"
+      ]
+    },
+    {
+      "name": "Keyboard owner",
+      "values": [
+        "tldraw tool registry",
+        "tldraw registry calling owned commands",
+        "preset tool registry"
+      ]
+    },
+    {
+      "name": "Arrow preset seam",
+      "values": [
+        "one before-create adapter",
+        "controller + before-create adapter",
+        "dedicated StateNode tools"
+      ]
+    },
+    {
+      "name": "Responsive behavior",
+      "values": [
+        "stock overflow",
+        "owned seven-slot CSS",
+        "catalog-driven owned CSS"
+      ]
+    },
+    {
+      "name": "Primary risk",
+      "values": [
+        "stock DOM/CSS constraints",
+        "more host chrome",
+        "engine-state coupling"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "c1",
+      "name": "Off-the-shelf tldraw reuse",
+      "weight": 35,
+      "why": "The requested preference is to lean as hard as practical on tldraw's existing UI, tool, shortcut, style, focus, and responsive infrastructure.",
+      "passCondition": "The plan delegates common toolbar behavior to public tldraw components and registries, with custom code limited to behavior that does not exist upstream.",
+      "anchors": {
+        "1": "Reimplements toolbar, shortcuts, selection, menus, and tool execution independently of tldraw.",
+        "3": "Uses tldraw's editor and tools but owns substantial toolbar or tool-state behavior.",
+        "5": "Composes DefaultToolbar, tool items, keyboard routing, styles, focus, and editor behavior directly."
+      }
+    },
+    {
+      "id": "c2",
+      "name": "Exact V1 behavior",
+      "weight": 25,
+      "why": "The interaction model is already chosen; implementation economy is not useful if the result drifts from Figma-style stable family slots and repeated-key behavior.",
+      "passCondition": "The seven-slot silhouette, selected subtype feedback, family recall, repeat-A contract, and library sidebar behave exactly as specified.",
+      "anchors": {
+        "1": "Requires visible compromises or substitutes a stock individual-tool row.",
+        "3": "Matches the core behavior with one or two constrained visual differences.",
+        "5": "The implementation boundary imposes no visible or interaction compromise."
+      }
+    },
+    {
+      "id": "c3",
+      "name": "Public-API upgrade safety",
+      "weight": 20,
+      "why": "SystemSketch pins tldraw but should still be able to upgrade without carrying a fork or depending on copied internal state-machine code.",
+      "passCondition": "All imports are public, internal CSS/DOM coupling is minimized and documented, and a tldraw version bump has a focused regression surface.",
+      "anchors": {
+        "1": "Copies or patches internal tldraw implementation details with broad upgrade exposure.",
+        "3": "Uses public registration seams but mirrors some upstream interaction behavior.",
+        "5": "Uses only narrow public APIs behind one adapter boundary."
+      }
+    },
+    {
+      "id": "c4",
+      "name": "Testability and state clarity",
+      "weight": 10,
+      "why": "Repeat-key state, family memory, editor state, and document content must not blur together or become regression-prone.",
+      "passCondition": "The arrow transition table and preference model are pure-testable, editor effects are guarded, and the full keyboard journey is observable in a real browser.",
+      "anchors": {
+        "1": "Behavior emerges from distributed component state and global listeners.",
+        "3": "Core transitions are testable but browser/editor coupling remains broad.",
+        "5": "State ownership is explicit and each effect has a focused unit or journey proof."
+      }
+    },
+    {
+      "id": "c5",
+      "name": "Delivery speed and code volume",
+      "weight": 10,
+      "why": "The first implementation should close one vertical toolbar behavior without turning into a second UI framework.",
+      "passCondition": "A thin first slice can ship Cursor/Frame/Shape/Draw/Text through real tldraw tools, followed by arrow presets, library insertion, and Comment gating.",
+      "anchors": {
+        "1": "Requires a new tool framework or large up-front platform layer.",
+        "3": "Requires a moderate owned shell/controller before the first complete journey.",
+        "5": "Mostly composes existing pieces and adds narrow adapters incrementally."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "g1",
+      "name": "Fixed seven-slot V1 surface",
+      "why": "The selected visual and interaction direction must not be reinterpreted during implementation."
+    },
+    {
+      "id": "g2",
+      "name": "R / O / L / repeated-A plus recall",
+      "why": "The Excalidraw-like keyboard loop and persistent subtype feedback are the primary behavior, not decoration."
+    },
+    {
+      "id": "g3",
+      "name": "Searchable + library",
+      "why": "The compact toolbar depends on a scalable home for less-frequent objects and templates."
+    },
+    {
+      "id": "g4",
+      "name": "No tldraw fork or document-schema pollution",
+      "why": "Toolbar preference is UI state and must not create a second editor or leak into shared board content."
+    },
+    {
+      "id": "g5",
+      "name": "Typing and accessibility safety",
+      "why": "Tool hotkeys must stop while editing text or searching the library, and buttons must retain focus, labels, tooltips, and announcements."
+    },
+    {
+      "id": "g6",
+      "name": "Honest Comment capability gating",
+      "why": "The slot must call the registered licensed comment tool when available and remain explicitly disabled—not fake—when it is unavailable."
+    }
+  ],
+  "variants": [
+    {
+      "id": "p1",
+      "name": "Compose Upstream",
+      "thesis": "Render the Figma family slots inside tldraw's own DefaultToolbar and route every selection through its stock tool registry; add only the memory, curve, and library gaps.",
+      "accent": "#3f66e8",
+      "bestWhen": "Reusing the maximum amount of tested tldraw UI and interaction infrastructure is the governing preference.",
+      "losesWhen": "The toolbar must have zero dependency on DefaultToolbar's extra-chrome DOM/CSS or its responsive overflow behavior.",
+      "decisions": [
+        {
+          "label": "Mount",
+          "value": "Set components.Toolbar to SystemSketchToolbar; that component returns DefaultToolbar with exactly seven custom child slots and minItems/maxItems tuned to the fixed dock."
+        },
+        {
+          "label": "Stock reuse",
+          "value": "Keep DefaultToolbar/OverflowingToolbar, TldrawUiToolbarButton, dropdown/popover/input primitives, useTools, useIsToolSelected, tool analytics/a11y announcements, and the built-in keyboard registry."
+        },
+        {
+          "label": "Hotkeys",
+          "value": "Use TLUiOverrides.tools to wrap rectangle, ellipse, line, and arrow onSelect callbacks. R/O/L remain stock registrations; the overridden A callback recalls or cycles before delegating to the stock arrow action."
+        },
+        {
+          "label": "Memory",
+          "value": "Read current tool and shared styles from the editor. Keep only lastByFamily and straight-vs-curve recall in one namespaced UI preference store shared by both toolbar and overflow render trees."
+        },
+        {
+          "label": "Curve gap",
+          "value": "Register one guarded before-create shape side effect: only when the active tool is Arrow and the UI preset is Curve, change the new stock arrow from bend 0 to the agreed non-zero bend. Elbow uses ArrowShapeKindStyle."
+        },
+        {
+          "label": "Library",
+          "value": "Use tldraw's popover, input, menu lifecycle, and focus behavior; SystemSketch owns the searchable catalog, categories, sidebar-like sizing, and insert commands."
+        },
+        {
+          "label": "Comment",
+          "value": "Call tools.comment when @tldraw/commenting is registered and licensed; otherwise keep the seventh slot present but disabled with explicit entitlement copy."
+        },
+        {
+          "label": "Main constraint",
+          "value": "Scope one CSS rule to hide DefaultToolbar's stock extras/mobile style strip. This is the only deliberate dependency on its current class structure and receives an upgrade smoke test."
+        }
+      ],
+      "keepParts": [
+        "DefaultToolbar + OverflowingToolbar",
+        "stock keyboard routing through TLUiOverrides",
+        "stock tool callbacks and style state",
+        "single guarded curve side effect",
+        "shared family preference store",
+        "tldraw popover/input primitives"
+      ],
+      "proof": [
+        "A focused real-canvas journey presses A, A, R, O, L, switches to Cursor, then presses A and sees the remembered arrow preset in the same family slot.",
+        "The same toolbar remains keyboard- and screen-reader-operable when DefaultToolbar moves children into overflow; duplicate render trees share one preference source.",
+        "Creating a curve changes only newly created arrows while imported, pasted, duplicated, and programmatically created arrows retain their original bend.",
+        "Typing A/R/O/L inside canvas text editing and library search never changes tools.",
+        "A tldraw version-bump smoke catches changes to the one scoped extra-chrome selector and seven direct toolbar children."
+      ],
+      "scores": {
+        "c1": {
+          "score": 5,
+          "evidence": "Verified public exports cover DefaultToolbar with custom children, OverflowingToolbar, menu/toolbar primitives, useTools, TLUiOverrides, style APIs, and editor side effects.",
+          "confidence": "high"
+        },
+        "c2": {
+          "score": 4,
+          "evidence": "The seven family slots and behaviors fit, but hiding DefaultToolbar extras and styling its stock container are constrained adaptations rather than a fully owned pixel shell.",
+          "confidence": "high"
+        },
+        "c3": {
+          "score": 4,
+          "evidence": "Behavior uses public APIs; upgrade exposure is limited to one documented stock class/DOM contract for hiding extras and fitting the Figma chrome.",
+          "confidence": "high"
+        },
+        "c4": {
+          "score": 5,
+          "evidence": "Tool wrappers and the arrow transition table are pure-testable; the only editor mutation is a type- and preset-guarded before-create handler.",
+          "confidence": "high"
+        },
+        "c5": {
+          "score": 5,
+          "evidence": "The first vertical slice composes existing tool callbacks and responsive toolbar behavior instead of building new focus, keyboard, menu, or overflow systems.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "DefaultToolbar accepts seven replacement children; each is a family slot rather than an individual stock-tool row."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Stock keyboard registrations invoke wrapped R/O/L/A tool items, and the shared preference store owns repeat-A recall."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The + slot opens a searchable host catalog inside tldraw focus/menu primitives."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "Only component overrides, tool overrides, style APIs, and a side effect are used; preference never enters the board store."
+        },
+        "g5": {
+          "pass": true,
+          "evidence": "The built-in tldraw keyboard registry already suppresses shortcuts during editing/open menus and provides toolbar semantics, focus, tooltips, and announcements."
+        },
+        "g6": {
+          "pass": true,
+          "evidence": "The slot resolves the real registered comment tool and has a deliberate disabled state when the licensed package is absent."
+        }
+      },
+      "preview": "<div class=\"plan-prototype plan-upstream\" tabindex=\"0\" data-plan=\"p1\"><div class=\"prototype-head\"><span class=\"plan-badge\">72% upstream responsibility<\/span><span class=\"prototype-help\">Focus, then try A · A · R · O · L · +<\/span><\/div><div class=\"mini-v1-toolbar\" data-mini-toolbar><\/div><div class=\"architecture-flow\"><div class=\"arch-node upstream\" data-node=\"shell\"><small>STOCK UI<\/small><b>DefaultToolbar<\/b><span>overflow · focus · buttons<\/span><\/div><i>→<\/i><div class=\"arch-node host thin\" data-node=\"family\"><small>HOST PROJECTION<\/small><b>FamilyToolSlot × 7<\/b><span>icon + remembered subtype<\/span><\/div><i>→<\/i><div class=\"arch-node upstream\" data-node=\"registry\"><small>STOCK REGISTRY<\/small><b>useTools + overrides<\/b><span>kbd · a11y · analytics<\/span><\/div><i>→<\/i><div class=\"arch-node upstream\" data-node=\"editor\"><small>STOCK ENGINE<\/small><b>Editor<\/b><span>tools · styles · document<\/span><\/div><div class=\"arch-branch host\" data-node=\"adapter\"><small>ONLY GAP<\/small><b>Curve adapter<\/b><span>before-create bend<\/span><\/div><div class=\"arch-branch host library\" data-node=\"library\"><small>HOST CONTENT<\/small><b>Shape catalog<\/b><span>inside stock popover<\/span><\/div><\/div><div class=\"trace-console\"><button type=\"button\" data-run-trace>Run A → A → R → +<\/button><button type=\"button\" class=\"secondary\" data-reset-trace>Reset<\/button><span data-trace-status>Ready: tldraw owns the common path.<\/span><\/div><\/div>"
+    },
+    {
+      "id": "p2",
+      "name": "Own the Controller",
+      "thesis": "Build an exact SystemSketch toolbar shell and explicit command controller from public tldraw primitives, while keeping every canvas action and keyboard registration on the stock editor boundary.",
+      "accent": "#146f68",
+      "bestWhen": "Exact Figma layout, responsive rules, sidebar behavior, and a stable host-owned DOM matter slightly more than maximum DefaultToolbar reuse.",
+      "losesWhen": "The product is not ready to own toolbar layout, roving focus, overflow decisions, and more browser-level regression coverage.",
+      "decisions": [
+        {
+          "label": "Mount",
+          "value": "Set components.Toolbar to a fully host-owned SystemSketchToolbar built from public TldrawUiToolbar, TldrawUiToolbarButton, dropdown, popover, input, icon, and tooltip primitives."
+        },
+        {
+          "label": "Controller",
+          "value": "Create one createToolbarCommands(editor, preferences) boundary. Both family buttons and TLUiOverrides tool callbacks call these commands, so click and keyboard behavior cannot drift."
+        },
+        {
+          "label": "Hotkeys",
+          "value": "Still retain tldraw's keyboard registry by wrapping the stock tool items; the controller owns repeat-A semantics but does not add a competing document-level keydown listener."
+        },
+        {
+          "label": "Memory",
+          "value": "A pure reducer owns active family, lastByFamily, arrowPreset, and libraryOpen. Editor state remains authoritative for the real active tool; the reducer stores only recall and transient UI state."
+        },
+        {
+          "label": "Curve gap",
+          "value": "Use the same guarded before-create adapter as P1, but drive it from the controller's arrowPreset rather than a thin tool wrapper."
+        },
+        {
+          "label": "Library",
+          "value": "Render a real left aside under the toolbar provider. Own search, categories, focus return, escape/outside dismissal, and insert commands while reusing tldraw button/input/icon primitives."
+        },
+        {
+          "label": "Responsive",
+          "value": "Keep all seven stable slots down to the agreed minimum width, then switch to an explicitly designed compact mode; do not inherit stock overflow or extra controls."
+        },
+        {
+          "label": "Main constraint",
+          "value": "More SystemSketch code becomes responsible for keyboard focus order, collision behavior, coarse-pointer targets, mobile sizing, and visual regressions."
+        }
+      ],
+      "keepParts": [
+        "pixel-exact owned toolbar DOM",
+        "one command boundary for click + keyboard",
+        "tldraw public UI primitives",
+        "stock tool callbacks and keyboard registry",
+        "explicit reducer + preference store",
+        "true owned sidebar"
+      ],
+      "proof": [
+        "Golden browser screenshots at wide, compact, and coarse-pointer breakpoints show the exact seven-slot silhouette and no collision with the existing utility strip.",
+        "A reducer test covers all transitions, including first A from another tool, repeated A, family recall, and library opening without tool change.",
+        "An editor integration journey proves clicks and hotkeys call the same command path and preserve tldraw selection/tool state.",
+        "Focus returns to + when the library closes, Escape dismisses it, and search input suppresses canvas shortcuts.",
+        "A tldraw upgrade test depends only on public primitive and editor APIs, not DefaultToolbar markup."
+      ],
+      "scores": {
+        "c1": {
+          "score": 4,
+          "evidence": "The plan retains tldraw primitives, tools, keyboard registry, styles, editor, and focus helpers, but replaces DefaultToolbar and responsive overflow.",
+          "confidence": "high"
+        },
+        "c2": {
+          "score": 5,
+          "evidence": "Owning the DOM, responsive rules, and sidebar removes the extra-chrome and stock-container compromises in P1.",
+          "confidence": "high"
+        },
+        "c3": {
+          "score": 5,
+          "evidence": "The integration uses public UI primitives and editor APIs behind one command adapter with no dependency on DefaultToolbar's class structure.",
+          "confidence": "high"
+        },
+        "c4": {
+          "score": 5,
+          "evidence": "A pure reducer and single command boundary make tool, recall, and sidebar transitions explicit and independently testable.",
+          "confidence": "high"
+        },
+        "c5": {
+          "score": 3,
+          "evidence": "The custom responsive shell, focus behavior, sidebar, and browser coverage must exist before the result is production-complete.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The host owns the exact seven-slot DOM and responsive design."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The command reducer defines R/O/L/A and recall as explicit transitions shared by clicks and stock keyboard callbacks."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The + slot controls a true searchable sidebar with owned focus return."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The custom layer ends at public editor/tool APIs; toolbar preference remains outside document state."
+        },
+        "g5": {
+          "pass": true,
+          "evidence": "The plan includes explicit focus, input suppression, coarse pointer, and accessibility acceptance journeys."
+        },
+        "g6": {
+          "pass": true,
+          "evidence": "The real tools.comment entry is used when available, with a labeled disabled state otherwise."
+        }
+      },
+      "preview": "<div class=\"plan-prototype plan-controller\" tabindex=\"0\" data-plan=\"p2\"><div class=\"prototype-head\"><span class=\"plan-badge\">47% host responsibility<\/span><span class=\"prototype-help\">Focus, then try A · A · R · O · L · +<\/span><\/div><div class=\"mini-v1-toolbar\" data-mini-toolbar><\/div><div class=\"architecture-flow\"><div class=\"arch-node host\" data-node=\"shell\"><small>HOST UI<\/small><b>SystemSketchToolbar<\/b><span>layout · focus · responsive<\/span><\/div><i>→<\/i><div class=\"arch-node host\" data-node=\"family\"><small>HOST COMMANDS<\/small><b>ToolbarController<\/b><span>reducer · recall · sidebar<\/span><\/div><i>→<\/i><div class=\"arch-node upstream\" data-node=\"registry\"><small>PUBLIC TLDRAW<\/small><b>tools + UI primitives<\/b><span>kbd · actions · widgets<\/span><\/div><i>→<\/i><div class=\"arch-node upstream\" data-node=\"editor\"><small>STOCK ENGINE<\/small><b>Editor<\/b><span>tools · styles · document<\/span><\/div><div class=\"arch-branch host\" data-node=\"adapter\"><small>NARROW EFFECT<\/small><b>Arrow preset effect<\/b><span>controller → bend<\/span><\/div><div class=\"arch-branch host library\" data-node=\"library\"><small>HOST PANEL<\/small><b>LibrarySidebar<\/b><span>real aside + focus return<\/span><\/div><\/div><div class=\"trace-console\"><button type=\"button\" data-run-trace>Run A → A → R → +<\/button><button type=\"button\" class=\"secondary\" data-reset-trace>Reset<\/button><span data-trace-status>Ready: one owned controller defines the contract.<\/span><\/div><\/div>"
+    },
+    {
+      "id": "p3",
+      "name": "Register Preset Tools",
+      "thesis": "Make Straight Arrow, Curve Arrow, and Elbow Arrow first-class editor tool states, then drive the Figma family slots from a typed tool catalog instead of adapting stock Arrow at creation time.",
+      "accent": "#a35445",
+      "bestWhen": "Arrow presets are the beginning of a larger domain-tool platform whose behaviors must be addressable, scriptable, and testable as first-class tool IDs.",
+      "losesWhen": "This is only a toolbar interaction and avoiding copied or coupled tool-state logic is more important than a future preset-tool platform.",
+      "decisions": [
+        {
+          "label": "Mount",
+          "value": "Use a catalog-driven host toolbar shell. Every slot resolves a ToolDescriptor with icon, label, shortcut, active predicate, and editor activation command."
+        },
+        {
+          "label": "Tool layer",
+          "value": "Register arrow-straight, arrow-curve, and arrow-elbow StateNode tools plus matching TLUiToolItem entries. Repeated A rotates the registered preset IDs rather than mutating one Arrow preference."
+        },
+        {
+          "label": "Creation",
+          "value": "Each preset tool creates the same stock arrow shape with explicit kind/bend defaults and returns to its own tool ID after an interaction, preserving active feedback without a broad shape side effect."
+        },
+        {
+          "label": "Memory",
+          "value": "The current preset is editor tool state; the catalog stores lastByFamily only for recall after switching families. The board still stores ordinary tldraw arrow shapes, not custom shape types."
+        },
+        {
+          "label": "Library",
+          "value": "Library catalog entries and toolbar entries share the typed descriptor model, allowing future domain objects to expose insert, drag, shortcut, and availability capabilities consistently."
+        },
+        {
+          "label": "Testing",
+          "value": "StateNode tests cover idle → pointing → dragging → complete/cancel/interrupt for every arrow preset, plus binding, snapping, sticky-tool, touch, and selection return behavior."
+        },
+        {
+          "label": "Main constraint",
+          "value": "tldraw's exported ArrowShapeTool is public, but its Pointing flow currently hard-codes onInteractionEnd: arrow. Exact preset identity therefore requires owning or closely mirroring that interaction path."
+        },
+        {
+          "label": "Use threshold",
+          "value": "Do not choose this plan for three arrow icons alone; choose it only if at least two more semantic preset families will need first-class tool states soon."
+        }
+      ],
+      "keepParts": [
+        "typed ToolDescriptor catalog",
+        "first-class preset tool IDs",
+        "ordinary stock arrow document shapes",
+        "no broad after-create mutation",
+        "tool-state regression suite",
+        "future domain-tool runway"
+      ],
+      "proof": [
+        "Each arrow preset remains the active tool across create, complete, cancel, interrupt, sticky-tool, and selection transitions.",
+        "Bindings, snapping, arrow labels, touch long-press, precise targeting, undo, and imported stock arrows match the upstream Arrow tool.",
+        "R/O/L/A and toolbar clicks resolve through one typed catalog with correct icons and accessibility labels.",
+        "The document contains only type: arrow with ordinary kind/bend props, so collaborators without the custom toolbar can still render and edit it.",
+        "A pinned tldraw upgrade diff explicitly compares upstream ArrowShapeTool/Pointing behavior before promotion."
+      ],
+      "scores": {
+        "c1": {
+          "score": 3,
+          "evidence": "Canvas geometry and shape utilities remain stock, but preset tool states and the catalog duplicate behavior that P1 delegates to the single upstream Arrow tool.",
+          "confidence": "high"
+        },
+        "c2": {
+          "score": 5,
+          "evidence": "First-class preset IDs can express exact active state, cycling, recall, and preset creation with no toolbar ambiguity.",
+          "confidence": "high"
+        },
+        "c3": {
+          "score": 2,
+          "evidence": "Tool registration is public, but exact interaction parity requires mirroring an upstream Pointing path whose return target is currently hard-coded to arrow.",
+          "confidence": "high"
+        },
+        "c4": {
+          "score": 5,
+          "evidence": "Explicit tool IDs and state-node transition tests make every preset behavior observable, although the test matrix is much larger.",
+          "confidence": "high"
+        },
+        "c5": {
+          "score": 2,
+          "evidence": "Multiple tool states, a catalog, and parity tests are substantial platform work before the same V1 toolbar journey is complete.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The catalog renders the same fixed seven family slots."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "R/O/L/A select explicit tool descriptors and Arrow rotation is a first-class tool transition."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The shared catalog supports a searchable + library and insert commands."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "Tools are registered through public seams and still create ordinary stock arrow shapes; no fork or custom document type is proposed."
+        },
+        "g5": {
+          "pass": true,
+          "evidence": "The plan retains tldraw keyboard registration and requires full focus, touch, cancel, and editing-state tests."
+        },
+        "g6": {
+          "pass": true,
+          "evidence": "Comment remains a capability-gated descriptor backed by tools.comment."
+        }
+      },
+      "preview": "<div class=\"plan-prototype plan-presets\" tabindex=\"0\" data-plan=\"p3\"><div class=\"prototype-head\"><span class=\"plan-badge\">58% host responsibility<\/span><span class=\"prototype-help\">Focus, then try A · A · R · O · L · +<\/span><\/div><div class=\"mini-v1-toolbar\" data-mini-toolbar><\/div><div class=\"architecture-flow\"><div class=\"arch-node host\" data-node=\"shell\"><small>HOST UI<\/small><b>CatalogToolbar<\/b><span>seven family descriptors<\/span><\/div><i>→<\/i><div class=\"arch-node host\" data-node=\"family\"><small>HOST PLATFORM<\/small><b>ToolDescriptor catalog<\/b><span>active · icon · kbd · insert<\/span><\/div><i>→<\/i><div class=\"arch-node host deep\" data-node=\"registry\"><small>CUSTOM TOOL STATES<\/small><b>3 Arrow StateNodes<\/b><span>straight · curve · elbow<\/span><\/div><i>→<\/i><div class=\"arch-node upstream\" data-node=\"editor\"><small>STOCK SHAPES<\/small><b>tldraw Editor<\/b><span>ordinary arrow records<\/span><\/div><div class=\"arch-branch host\" data-node=\"adapter\"><small>PARITY SURFACE<\/small><b>Pointing behavior<\/b><span>bindings · cancel · return<\/span><\/div><div class=\"arch-branch host library\" data-node=\"library\"><small>SHARED CATALOG<\/small><b>Library entries<\/b><span>future domain tools<\/span><\/div><\/div><div class=\"trace-console\"><button type=\"button\" data-run-trace>Run A → A → R → +<\/button><button type=\"button\" class=\"secondary\" data-reset-trace>Reset<\/button><span data-trace-status>Ready: presets are first-class editor tools.<\/span><\/div><\/div>"
+    }
+  ],
+  "checks": [
+    "Exactly three implementation boundaries for the same chosen V1 toolbar",
+    "Weights were fixed before plans and total 100%",
+    "Every plan evaluates every hard gate separately",
+    "All tldraw reuse claims were checked against the pinned 5.3.2 source and public exports",
+    "Curve's straight/arc/elbow data-model caveat is explicit",
+    "Each plan names its code ownership, phases, acceptance proof, and upgrade risk",
+    "Interactive architecture traces accept A/R/O/L/+ and expose the different ownership path",
+    "Pick, shortlist, reject, feedback, splice, copy, download, and synthesis controls are present",
+    "The artifact is plan-only; production toolbar code remains unchanged"
+  ]
+}
+  </script>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const project = JSON.parse(document.getElementById("babble-data").textContent);
+      const variants = project.variants;
+      const requirements = project.requirements || [];
+      const hardGates = project.hardGates || [];
+      const rankedResults = variants
+        .map((variant) => resultFor(variant))
+        .sort((left, right) => {
+          if (left.eligible !== right.eligible) return left.eligible ? -1 : 1;
+          if (right.total !== left.total) return right.total - left.total;
+          return variants.indexOf(left.variant) - variants.indexOf(right.variant);
+        });
+      const eligibleResults = rankedResults.filter((result) => result.eligible);
+      const topResult = eligibleResults[0] || rankedResults[0];
+      const coLeaders = topResult
+        ? eligibleResults.filter((result) => topResult.total - result.total <= 3)
+        : [];
+      const resultById = new Map(rankedResults.map((result) => [result.variant.id, result]));
+      const rankById = new Map(rankedResults.map((result, index) => [result.variant.id, index + 1]));
+      const defaultVariant = variants.find((variant) => variant.id === project.defaultId) || variants[0];
+      const storageKey = `babble-prune:${location.pathname}:${project.title}`;
+
+      const blankState = () => ({
+        pick: null,
+        statuses: {},
+        keeps: {},
+        notes: {},
+        synthesis: "",
+        focusIndex: 0,
+        layout: "grid"
+      });
+
+      let state = blankState();
+      try {
+        state = { ...state, ...JSON.parse(localStorage.getItem(storageKey) || "{}") };
+      } catch {
+        state = blankState();
+      }
+      state.synthesis = state.synthesis || state.why || "";
+
+      const byId = (id) => document.getElementById(id);
+      const variantGrid = byId("variant-grid");
+      const toast = byId("toast");
+
+      document.title = `${project.title} · Babble & Prune`;
+      byId("kicker").textContent = project.kicker || "Babble & Prune";
+      byId("page-title").textContent = project.title;
+      byId("page-brief").textContent = project.brief;
+      byId("count-badge").textContent = `${variants.length} orthogonal variant${variants.length === 1 ? "" : "s"}`;
+      byId("default-name").textContent = `${labelFor(defaultVariant.id)} · ${defaultVariant.name}`;
+      byId("default-why").textContent = project.defaultWhy;
+      byId("boundary").textContent = project.boundary;
+
+      byId("axis-list").innerHTML = (project.axes || []).map((axis) => `
+        <div class="axis">
+          <b>${escapeHtml(axis.name)}</b>
+          <span>${escapeHtml(axis.values.join(" · "))}</span>
+        </div>
+      `).join("");
+
+      byId("invariant-list").innerHTML = (project.invariants || []).map(
+        (invariant) => `<li>${escapeHtml(invariant)}</li>`
+      ).join("");
+
+      byId("check-list").innerHTML = (project.checks || []).map(
+        (check) => `<li>${escapeHtml(check)}</li>`
+      ).join("");
+
+      renderAiPrune();
+      variantGrid.innerHTML = variants.map((variant, index) => variantMarkup(variant, index)).join("");
+      byId("global-synthesis").value = state.synthesis;
+      setLayout(state.layout || "grid");
+      updateUi();
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function labelFor(id) {
+        const index = variants.findIndex((variant) => variant.id === id);
+        return index >= 0 ? `V${index + 1}` : id;
+      }
+
+      function resultFor(variant) {
+        const total = requirements.reduce((sum, requirement) => {
+          const score = Number(variant.scores?.[requirement.id]?.score || 0);
+          return sum + Number(requirement.weight || 0) * score / 5;
+        }, 0);
+        const failedGates = hardGates.filter(
+          (gate) => variant.gateResults?.[gate.id]?.pass !== true
+        );
+        return {
+          variant,
+          total: Math.round((total + Number.EPSILON) * 100) / 100,
+          eligible: failedGates.length === 0,
+          failedGates
+        };
+      }
+
+      function formatTotal(value) {
+        return Number(value).toFixed(1);
+      }
+
+      function renderAiPrune() {
+        byId("decision-hinge").textContent = project.decisionHinge || "No decision hinge supplied.";
+
+        const requirementRows = requirements.map((requirement) => `
+          <tr>
+            <td class="requirement-name">
+              <small>${escapeHtml(requirement.id)}</small>
+              <b>${escapeHtml(requirement.name)}</b>
+            </td>
+            <td><span class="weight-number">${escapeHtml(requirement.weight)}%</span></td>
+            <td>${escapeHtml(requirement.why)}</td>
+            <td>${escapeHtml(requirement.passCondition)}</td>
+            <td>
+              <div class="anchor-list">
+                <span><b>1</b>${escapeHtml(requirement.anchors?.["1"] || "—")}</span>
+                <span><b>3</b>${escapeHtml(requirement.anchors?.["3"] || "—")}</span>
+                <span><b>5</b>${escapeHtml(requirement.anchors?.["5"] || "—")}</span>
+              </div>
+            </td>
+          </tr>
+        `).join("");
+
+        byId("requirement-table").innerHTML = `
+          <table class="requirement-table">
+            <thead><tr><th>FR</th><th>Weight</th><th>Why here</th><th>Pass condition</th><th>Anchors</th></tr></thead>
+            <tbody>${requirementRows}</tbody>
+          </table>
+        `;
+
+        const scoreHeaders = requirements.map((requirement) => `
+          <th title="${escapeHtml(requirement.name)}">${escapeHtml(requirement.id)} · ${escapeHtml(requirement.weight)}%</th>
+        `).join("");
+
+        const scoreRows = rankedResults.map((result) => {
+          const cells = requirements.map((requirement) => {
+            const entry = result.variant.scores?.[requirement.id] || {};
+            const confidence = entry.confidence || "low";
+            return `
+              <td>
+                <details class="score-detail">
+                  <summary aria-label="${escapeHtml(requirement.name)} score ${escapeHtml(entry.score ?? "—")} out of 5, ${escapeHtml(confidence)} confidence">
+                    <span class="score-value">${escapeHtml(entry.score ?? "—")}</span>
+                    <span class="confidence ${escapeHtml(confidence)}">${escapeHtml(confidence)}</span>
+                  </summary>
+                  <p class="score-evidence"><span class="evidence-chip">is</span><br>${escapeHtml(entry.evidence || "No evidence supplied.")}</p>
+                </details>
+              </td>
+            `;
+          }).join("");
+          const status = result.eligible ? `#${rankById.get(result.variant.id)} eligible` : "gate fail";
+          const rowClass = coLeaders.includes(result) ? "ai-leader" : (result.eligible ? "" : "gate-fail");
+          return `
+            <tr class="${rowClass}">
+              <td class="score-variant">
+                <small>${labelFor(result.variant.id)}</small>
+                <b>${escapeHtml(result.variant.name)}</b>
+              </td>
+              ${cells}
+              <td class="total-cell">${formatTotal(result.total)}<span class="rank-label">${escapeHtml(status)}</span></td>
+            </tr>
+          `;
+        }).join("");
+
+        byId("score-matrix").innerHTML = `
+          <table class="score-table">
+            <thead><tr><th>Ranked option</th>${scoreHeaders}<th>Weighted / 100</th></tr></thead>
+            <tbody>${scoreRows}</tbody>
+          </table>
+        `;
+
+        if (!topResult) {
+          byId("ai-recommendation").innerHTML = `
+            <span class="judgment-chip">AI judgment · ought</span>
+            <div class="recommendation-line"><strong>No eligible recommendation</strong></div>
+            <p>Complete the FR scores and hard-gate evidence before pruning.</p>
+          `;
+        } else {
+          const leaderNames = coLeaders.map(
+            (result) => `${labelFor(result.variant.id)} · ${result.variant.name}`
+          ).join(" + ");
+          const recommendationLabel = coLeaders.length > 1 ? "Co-leaders" : "Best overall";
+          const alternative = eligibleResults.find((result) => !coLeaders.includes(result));
+          const alternativeMarkup = alternative ? `
+            <p class="alternative-line"><b>Strong alternative:</b> ${labelFor(alternative.variant.id)} · ${escapeHtml(alternative.variant.name)} at ${formatTotal(alternative.total)} — ${escapeHtml(alternative.variant.bestWhen)}</p>
+          ` : "";
+          byId("ai-recommendation").innerHTML = `
+            <span class="judgment-chip">AI judgment · ought</span>
+            <div class="recommendation-line">
+              <strong>${recommendationLabel}: ${escapeHtml(leaderNames)}</strong>
+              <span class="ai-total">${formatTotal(topResult.total)} / 100</span>
+            </div>
+            <p>${escapeHtml(project.defaultWhy)}</p>
+            ${alternativeMarkup}
+          `;
+        }
+
+        if (!hardGates.length) {
+          byId("gate-grid").innerHTML = `<div class="gate-card"><b>No separate hard gates</b><p>All constraints are represented as weighted FRs for this round.</p></div>`;
+          return;
+        }
+
+        byId("gate-grid").innerHTML = hardGates.map((gate) => {
+          const results = variants.map((variant) => {
+            const entry = variant.gateResults?.[gate.id] || {};
+            const passed = entry.pass === true;
+            return `<span class="gate-result ${passed ? "" : "fail"}" title="${escapeHtml(entry.evidence || "No evidence supplied.")}">${labelFor(variant.id)} ${passed ? "✓ pass" : "✕ fail"}</span>`;
+          }).join("");
+          return `
+            <div class="gate-card">
+              <span class="evidence-chip">hard gate</span>
+              <b>${escapeHtml(gate.name)}</b>
+              <p>${escapeHtml(gate.why)}</p>
+              <div class="gate-results">${results}</div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function variantMarkup(variant, index) {
+        const result = resultById.get(variant.id);
+        const decisions = variant.decisions.map((decision) => `
+          <div class="decision">
+            <b>${escapeHtml(decision.label)}</b>
+            <span>${escapeHtml(decision.value)}</span>
+          </div>
+        `).join("");
+
+        const proof = variant.proof.map((item) => `
+          <li>${escapeHtml(item)}</li>
+        `).join("");
+
+        const keepParts = variant.keepParts.map((part, partIndex) => `
+          <label class="keep-chip">
+            <input type="checkbox" data-keep="${escapeHtml(variant.id)}" data-part="${partIndex}">
+            <span>${escapeHtml(part)}</span>
+          </label>
+        `).join("");
+
+        const media = (variant.media || []).map((item) => `
+          <figure class="media-exhibit">
+            <div class="media-surface">${item.html}</div>
+            <figcaption class="media-caption">
+              <b>${escapeHtml(item.label)}</b>
+              <span>${escapeHtml(item.caption)}</span>
+            </figcaption>
+          </figure>
+        `).join("");
+
+        const mediaStory = media ? `<div class="media-story" aria-label="Supporting media for ${escapeHtml(variant.name)}">${media}</div>` : "";
+
+        return `
+          <article class="variant-card" id="card-${escapeHtml(variant.id)}"
+            data-variant="${escapeHtml(variant.id)}"
+            style="--accent:${escapeHtml(variant.accent || "#222")}">
+            <div class="variant-header">
+              <div class="variant-index">V${index + 1}</div>
+              <div class="variant-title">
+                <h3>${escapeHtml(variant.name)}</h3>
+                <p>${escapeHtml(variant.thesis)}</p>
+              </div>
+              <div class="variant-ai-meta">
+                <span class="default-badge">AI pick</span>
+                <span class="variant-score">${result ? `${formatTotal(result.total)} / 100${result.eligible ? "" : " · gate fail"}` : "unscored"}</span>
+              </div>
+            </div>
+            <div class="prototype-frame">
+              <span class="prototype-label">${escapeHtml(variant.previewLabel || "hero specimen")}</span>
+              <div class="prototype">${variant.preview}</div>
+            </div>
+            ${mediaStory}
+            <div class="variant-body">
+              <div class="fit-grid">
+                <div class="fit">
+                  <b>Best when</b>
+                  <span>${escapeHtml(variant.bestWhen)}</span>
+                </div>
+                <div class="fit">
+                  <b>Loses when</b>
+                  <span>${escapeHtml(variant.losesWhen)}</span>
+                </div>
+              </div>
+              <details>
+                <summary>Decisions &amp; prototype evidence</summary>
+                <div class="decision-list">${decisions}</div>
+                <ul class="proof-list">${proof}</ul>
+              </details>
+              <div class="keep-title">Parts worth splicing</div>
+              <div class="keep-list">${keepParts}</div>
+              <details class="variant-note">
+                <summary>Add a note on ${labelFor(variant.id)} (optional)</summary>
+                <textarea class="variant-feedback" data-note="${escapeHtml(variant.id)}"
+                  placeholder="A detail specific to ${escapeHtml(variant.name)}…">${escapeHtml(state.notes[variant.id] || "")}</textarea>
+              </details>
+              <div class="variant-actions">
+                <button type="button" class="action-button pick" data-action="pick" data-id="${escapeHtml(variant.id)}">Pick ${labelFor(variant.id)}</button>
+                <button type="button" class="action-button shortlist" data-action="shortlist" data-id="${escapeHtml(variant.id)}">Shortlist</button>
+                <button type="button" class="action-button reject" data-action="reject" data-id="${escapeHtml(variant.id)}">Reject</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      function saveState() {
+        localStorage.setItem(storageKey, JSON.stringify(state));
+      }
+
+      function updateUi() {
+        variants.forEach((variant, index) => {
+          const card = byId(`card-${variant.id}`);
+          const status = state.statuses[variant.id];
+          card.classList.toggle("is-default", variant.id === project.defaultId);
+          card.classList.toggle("is-picked", state.pick === variant.id);
+          card.classList.toggle("is-shortlisted", status === "shortlist");
+          card.classList.toggle("is-rejected", status === "reject");
+          card.classList.toggle("is-focused", index === state.focusIndex);
+
+          const shortlistButton = card.querySelector('[data-action="shortlist"]');
+          const rejectButton = card.querySelector('[data-action="reject"]');
+          shortlistButton.classList.toggle("active", status === "shortlist");
+          rejectButton.classList.toggle("active", status === "reject");
+          shortlistButton.textContent = status === "shortlist" ? "Shortlisted" : "Shortlist";
+          rejectButton.textContent = status === "reject" ? "Rejected" : "Reject";
+
+          card.querySelectorAll("[data-keep]").forEach((input) => {
+            const selected = state.keeps[variant.id] || [];
+            input.checked = selected.includes(Number(input.dataset.part));
+          });
+        });
+
+        const picked = variants.find((variant) => variant.id === state.pick);
+        const shortlist = variants.filter((variant) => state.statuses[variant.id] === "shortlist");
+        const keptCount = Object.values(state.keeps).reduce((total, parts) => total + parts.length, 0);
+
+        if (picked) {
+          byId("decision-title").textContent = `Pick: ${labelFor(picked.id)} · ${picked.name}`;
+        } else if (shortlist.length) {
+          byId("decision-title").textContent = `Shortlist: ${shortlist.map((variant) => labelFor(variant.id)).join(", ")}`;
+        } else if (state.synthesis.trim()) {
+          byId("decision-title").textContent = "Free-form direction ready";
+        } else {
+          byId("decision-title").textContent = "No pick yet";
+        }
+
+        const details = [];
+        if (!picked && !state.synthesis.trim()) details.push(`AI recommends ${labelFor(defaultVariant.id)}; your direction is still empty`);
+        if (state.synthesis.trim()) details.push("natural-language splice captured");
+        if (keptCount) details.push(`${keptCount} splice part${keptCount === 1 ? "" : "s"} selected`);
+        byId("decision-detail").textContent = details.join(" · ") || "Decision captured locally.";
+      }
+
+      function setStatus(id, status) {
+        if (state.statuses[id] === status) {
+          delete state.statuses[id];
+        } else {
+          state.statuses[id] = status;
+        }
+        if (status === "reject" && state.pick === id) state.pick = null;
+        saveState();
+        updateUi();
+      }
+
+      function setPick(id) {
+        state.pick = state.pick === id ? null : id;
+        if (state.pick) delete state.statuses[id];
+        saveState();
+        updateUi();
+        showToast(state.pick ? `${labelFor(id)} picked` : "Pick cleared");
+      }
+
+      function moveFocus(delta) {
+        state.focusIndex = (state.focusIndex + delta + variants.length) % variants.length;
+        saveState();
+        updateUi();
+        const card = byId(`card-${variants[state.focusIndex].id}`);
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      function focusVariant(index) {
+        if (index < 0 || index >= variants.length) return;
+        state.focusIndex = index;
+        saveState();
+        updateUi();
+        byId(`card-${variants[index].id}`).scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      function setLayout(layout) {
+        state.layout = layout;
+        variantGrid.classList.toggle("focus-layout", layout === "focus");
+        document.querySelectorAll("[data-layout]").forEach((button) => {
+          button.classList.toggle("active", button.dataset.layout === layout);
+        });
+        saveState();
+        updateUi();
+      }
+
+      function markdownBrief() {
+        const picked = variants.find((variant) => variant.id === state.pick);
+        const shortlisted = variants.filter((variant) => state.statuses[variant.id] === "shortlist");
+        const rejected = variants.filter((variant) => state.statuses[variant.id] === "reject");
+        const mdCell = (value) => String(value).replaceAll("|", "\\|").replaceAll("\n", " ");
+        const recommendationText = coLeaders.length > 1
+          ? `Co-leaders: ${coLeaders.map((result) => `${labelFor(result.variant.id)} · ${result.variant.name} (${formatTotal(result.total)})`).join(", ")}`
+          : topResult
+            ? `${labelFor(topResult.variant.id)} · ${topResult.variant.name} (${formatTotal(topResult.total)}/100)`
+            : "No eligible recommendation";
+        const lines = [
+          `# Babble prune — ${project.title}`,
+          "",
+          `**Shared brief:** ${project.brief}`,
+          "",
+          "## AI prune — judgment / ought",
+          "",
+          `**Recommendation:** ${recommendationText}`,
+          `**Why:** ${project.defaultWhy}`,
+          `**Decision hinge:** ${project.decisionHinge}`,
+          "",
+          "> FR weights, scores, and recommendation are AI judgments. Exercised prototype behavior is evidence; production integration remains outside the prototype boundary.",
+          "",
+          "### Weighted functional requirements",
+          ""
+        ];
+
+        requirements.forEach((requirement) => {
+          lines.push(
+            `- **${requirement.id} · ${requirement.name} — ${requirement.weight}%:** ${requirement.why}`,
+            `  - Pass: ${requirement.passCondition}`,
+            `  - Anchors: 1 = ${requirement.anchors?.["1"] || "—"}; 3 = ${requirement.anchors?.["3"] || "—"}; 5 = ${requirement.anchors?.["5"] || "—"}`
+          );
+        });
+
+        lines.push("", "### Ranked score matrix", "");
+        lines.push(
+          `| Rank | Option | ${requirements.map((requirement) => mdCell(requirement.id)).join(" | ")} | Weighted | Gates |`,
+          `| ---: | --- | ${requirements.map(() => "---:").join(" | ")} | ---: | --- |`
+        );
+        rankedResults.forEach((result, index) => {
+          const scores = requirements.map(
+            (requirement) => result.variant.scores?.[requirement.id]?.score ?? "—"
+          );
+          lines.push(
+            `| ${index + 1} | ${mdCell(`${labelFor(result.variant.id)} · ${result.variant.name}`)} | ${scores.join(" | ")} | ${formatTotal(result.total)} | ${result.eligible ? "pass" : `fail: ${result.failedGates.map((gate) => gate.name).join(", ")}`} |`
+          );
+        });
+
+        lines.push("", "### Score evidence — observed is, interpreted as ought", "");
+        rankedResults.forEach((result) => {
+          lines.push(`#### ${labelFor(result.variant.id)} · ${result.variant.name} — ${formatTotal(result.total)}/100`, "");
+          requirements.forEach((requirement) => {
+            const entry = result.variant.scores?.[requirement.id] || {};
+            lines.push(`- **${requirement.id}: ${entry.score ?? "—"}/5 · ${entry.confidence || "unknown"} confidence.** ${entry.evidence || "No evidence supplied."}`);
+          });
+          lines.push("");
+        });
+
+        lines.push("### Hard gates", "");
+        if (!hardGates.length) {
+          lines.push("- No separate hard gates in this round.", "");
+        } else {
+          hardGates.forEach((gate) => {
+            lines.push(`- **${gate.name}:** ${gate.why}`);
+            variants.forEach((variant) => {
+              const entry = variant.gateResults?.[gate.id] || {};
+              lines.push(`  - ${labelFor(variant.id)} ${entry.pass === true ? "PASS" : "FAIL"} — ${entry.evidence || "No evidence supplied."}`);
+            });
+          });
+          lines.push("");
+        }
+
+        lines.push(
+          "## Human prune — your decision",
+          "",
+          `**Decision:** ${picked ? `${labelFor(picked.id)} · ${picked.name}` : "No final pick"}`,
+          `**AI recommendation (advisory):** ${recommendationText}`,
+          `**Shortlist:** ${shortlisted.length ? shortlisted.map((variant) => `${labelFor(variant.id)} · ${variant.name}`).join(", ") : "none"}`,
+          `**Rejected:** ${rejected.length ? rejected.map((variant) => `${labelFor(variant.id)} · ${variant.name}`).join(", ") : "none"}`,
+          ""
+        );
+
+        const keepLines = variants.flatMap((variant) => {
+          const selected = state.keeps[variant.id] || [];
+          return selected.map((partIndex) => `- ${labelFor(variant.id)} · ${variant.keepParts[partIndex]}`);
+        });
+        lines.push("## Keep / splice", ...(keepLines.length ? keepLines : ["- none selected"]), "");
+
+        const feedbackLines = variants
+          .filter((variant) => (state.notes[variant.id] || "").trim())
+          .map((variant) => `- **${labelFor(variant.id)} · ${variant.name}:** ${state.notes[variant.id].trim()}`);
+        lines.push("## Variant feedback", ...(feedbackLines.length ? feedbackLines : ["- none"]), "");
+
+        lines.push("## Free-form direction", state.synthesis.trim() || "Not supplied.", "");
+        lines.push("## Prototype boundary", project.boundary, "");
+
+        if (picked || keepLines.length) {
+          lines.push("## Next", "Synthesize a new child prototype from this decision before production implementation.");
+        } else {
+          lines.push("## Next", `Review ${labelFor(defaultVariant.id)} as the AI recommendation, then pick, shortlist, reject, or splice before production implementation.`);
+        }
+        return lines.join("\n");
+      }
+
+      function compactDirection() {
+        const picked = variants.find((variant) => variant.id === state.pick);
+        const shortlisted = variants.filter((variant) => state.statuses[variant.id] === "shortlist");
+        const kept = variants.flatMap((variant) => {
+          const selected = state.keeps[variant.id] || [];
+          return selected.map((partIndex) => `${labelFor(variant.id)}: ${variant.keepParts[partIndex]}`);
+        });
+        const notes = variants
+          .filter((variant) => (state.notes[variant.id] || "").trim())
+          .map((variant) => `${labelFor(variant.id)}: ${state.notes[variant.id].trim()}`);
+        const fileName = decodeURIComponent(location.pathname.split("/").pop() || "babble-gallery.html");
+        return [
+          `# Babble direction — ${project.title}`,
+          `Gallery: ${fileName}`,
+          "",
+          `Pick: ${picked ? `${labelFor(picked.id)} · ${picked.name}` : "none"}`,
+          `Shortlist: ${shortlisted.length ? shortlisted.map((variant) => labelFor(variant.id)).join(", ") : "none"}`,
+          `Keep / borrow: ${kept.length ? kept.join("; ") : "none selected"}`,
+          ...(notes.length ? ["", "Variant notes:", ...notes.map((note) => `- ${note}`)] : []),
+          "",
+          "Direction:",
+          state.synthesis.trim() || "No free-form direction supplied."
+        ].join("\n");
+      }
+
+      async function copyMarkdown() {
+        const markdown = compactDirection();
+        try {
+          await navigator.clipboard.writeText(markdown);
+        } catch {
+          const fallback = document.createElement("textarea");
+          fallback.value = markdown;
+          fallback.style.position = "fixed";
+          fallback.style.opacity = "0";
+          document.body.appendChild(fallback);
+          fallback.select();
+          document.execCommand("copy");
+          fallback.remove();
+        }
+        showToast("Direction copied as Markdown");
+      }
+
+      function downloadMarkdown() {
+        const blob = new Blob([markdownBrief()], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        const slug = project.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        anchor.href = url;
+        anchor.download = `${slug || "babble"}-prune.md`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+        showToast("Markdown decision downloaded");
+      }
+
+      let toastTimer;
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+      }
+
+      document.addEventListener("click", (event) => {
+        const actionButton = event.target.closest("[data-action]");
+        if (actionButton) {
+          const { action, id } = actionButton.dataset;
+          if (action === "pick") setPick(id);
+          if (action === "shortlist") setStatus(id, "shortlist");
+          if (action === "reject") setStatus(id, "reject");
+          return;
+        }
+
+        const layoutButton = event.target.closest("[data-layout]");
+        if (layoutButton) {
+          setLayout(layoutButton.dataset.layout);
+          return;
+        }
+
+        const demoButton = event.target.closest("[data-demo-toggle]");
+        if (demoButton) {
+          const prototype = demoButton.closest(".prototype");
+          const isAlt = prototype.classList.toggle("is-alt");
+          demoButton.textContent = isAlt ? demoButton.dataset.altLabel : demoButton.dataset.baseLabel;
+        }
+      });
+
+      document.addEventListener("change", (event) => {
+        const keepInput = event.target.closest("[data-keep]");
+        if (!keepInput) return;
+        const id = keepInput.dataset.keep;
+        const partIndex = Number(keepInput.dataset.part);
+        const selected = new Set(state.keeps[id] || []);
+        if (keepInput.checked) selected.add(partIndex);
+        else selected.delete(partIndex);
+        state.keeps[id] = [...selected].sort((left, right) => left - right);
+        saveState();
+        updateUi();
+      });
+
+      document.addEventListener("input", (event) => {
+        const note = event.target.closest("[data-note]");
+        if (note) {
+          state.notes[note.dataset.note] = note.value;
+          saveState();
+        }
+        if (event.target.id === "global-synthesis") {
+          state.synthesis = event.target.value;
+          saveState();
+          updateUi();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        const typing = event.target.matches("input, textarea, [contenteditable='true']");
+        if (typing) return;
+
+        const numericIndex = event.key === "0" ? 9 : Number(event.key) - 1;
+        if (Number.isInteger(numericIndex) && numericIndex >= 0) {
+          focusVariant(numericIndex);
+          return;
+        }
+
+        if (event.key === "j" || event.key === "J" || event.key === "ArrowDown" || event.key === "ArrowRight") {
+          event.preventDefault();
+          moveFocus(1);
+        } else if (event.key === "k" || event.key === "K" || event.key === "ArrowUp" || event.key === "ArrowLeft") {
+          event.preventDefault();
+          moveFocus(-1);
+        } else if (event.key === "Enter") {
+          setPick(variants[state.focusIndex].id);
+        } else if (event.key === "s" || event.key === "S") {
+          setStatus(variants[state.focusIndex].id, "shortlist");
+        } else if (event.key === "r" || event.key === "R") {
+          setStatus(variants[state.focusIndex].id, "reject");
+        } else if (event.key === "c" || event.key === "C") {
+          copyMarkdown();
+        }
+      });
+
+      byId("previous-variant").addEventListener("click", () => moveFocus(-1));
+      byId("next-variant").addEventListener("click", () => moveFocus(1));
+      byId("copy-prune").addEventListener("click", copyMarkdown);
+      byId("download-prune").addEventListener("click", downloadMarkdown);
+      byId("reset-prune").addEventListener("click", () => {
+        state = blankState();
+        byId("global-synthesis").value = "";
+        document.querySelectorAll("[data-note]").forEach((note) => { note.value = ""; });
+        setLayout("grid");
+        saveState();
+        updateUi();
+        showToast("Local choices reset");
+      });
+    })();
+  </script>
+
+<script>
+(() => {
+  const icons = {
+    cursor: '<svg viewBox="0 0 24 24"><path d="M5 3.5 18.4 12l-6.1 1.4-2.9 5.7L5 3.5Z"/></svg>',
+    frame: '<svg viewBox="0 0 24 24"><path d="M5 3v18M19 3v18M3 6h5M16 6h5M3 18h5M16 18h5"/></svg>',
+    rectangle: '<svg viewBox="0 0 24 24"><rect x="4.5" y="5" width="15" height="14" rx="1.5"/></svg>',
+    ellipse: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="8" ry="7"/></svg>',
+    line: '<svg viewBox="0 0 24 24"><path d="m5 18 14-12"/></svg>',
+    straight: '<svg viewBox="0 0 24 24"><path d="M5 18 18 6M12.5 6H18v5.5"/></svg>',
+    curve: '<svg viewBox="0 0 24 24"><path d="M5 18c2.4-8 7.1-11.8 13-11M12.7 4.2 18 7l-3.1 5"/></svg>',
+    elbow: '<svg viewBox="0 0 24 24"><path d="M5 18v-8h13M14 6l4 4-4 4"/></svg>',
+    draw: '<svg viewBox="0 0 24 24"><path d="M4 18c2-8 4-11 6-11 3 0 0 10 3 10 2 0 3-4 7-5"/></svg>',
+    text: '<svg viewBox="0 0 24 24"><path d="M5 6h14M12 6v13M8 19h8"/></svg>',
+    comment: '<svg viewBox="0 0 24 24"><path d="M5 5.5h14v10H9l-4 3v-13Z"/></svg>',
+    library: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'
+  }
+
+  const labels = {
+    cursor: 'Cursor',
+    frame: 'Frame',
+    rectangle: 'Rectangle',
+    ellipse: 'Ellipse',
+    line: 'Line',
+    straight: 'Straight arrow',
+    curve: 'Curved arrow',
+    elbow: 'Elbow arrow',
+    draw: 'Draw',
+    text: 'Text',
+    comment: 'Comment',
+    library: 'Open library'
+  }
+
+  const planMessages = {
+    p1: {
+      aEnter: 'A → stock keyboard registry recalls the arrow tool.',
+      aCycle: 'A again → wrapped stock tool selects Curve; before-create supplies bend.',
+      r: 'R → stock Rectangle tool sets GeoShapeGeoStyle.',
+      o: 'O → stock Ellipse tool sets GeoShapeGeoStyle.',
+      l: 'L → stock Line tool runs unchanged.',
+      library: '+ → tldraw popover/focus opens the host shape catalog.'
+    },
+    p2: {
+      aEnter: 'A → tldraw keyboard calls the owned ToolbarController.',
+      aCycle: 'A again → reducer advances Curve; guarded effect supplies bend.',
+      r: 'R → one command path selects the stock Rectangle tool.',
+      o: 'O → one command path selects the stock Ellipse tool.',
+      l: 'L → one command path selects the stock Line tool.',
+      library: '+ → controller opens the owned sidebar and returns focus on close.'
+    },
+    p3: {
+      aEnter: 'A → catalog activates the remembered arrow preset StateNode.',
+      aCycle: 'A again → catalog switches to the Curve Arrow tool ID.',
+      r: 'R → catalog resolves the stock Rectangle descriptor.',
+      o: 'O → catalog resolves the stock Ellipse descriptor.',
+      l: 'L → catalog resolves the stock Line descriptor.',
+      library: '+ → shared descriptor catalog opens in the library surface.'
+    }
+  }
+
+  const traceNode = {
+    p1: { aEnter: 'registry', aCycle: 'adapter', r: 'registry', o: 'registry', l: 'registry', library: 'library' },
+    p2: { aEnter: 'family', aCycle: 'adapter', r: 'family', o: 'family', l: 'family', library: 'library' },
+    p3: { aEnter: 'registry', aCycle: 'registry', r: 'family', o: 'family', l: 'family', library: 'library' }
+  }
+
+  const families = ['cursor', 'frame', 'shape', 'draw', 'text', 'comment', 'library']
+  const arrowCycle = ['straight', 'curve', 'elbow']
+
+  function setupPrototype(root) {
+    const plan = root.dataset.plan
+    const toolbar = root.querySelector('[data-mini-toolbar]')
+    const status = root.querySelector('[data-trace-status]')
+    const runButton = root.querySelector('[data-run-trace]')
+    const resetButton = root.querySelector('[data-reset-trace]')
+    let timers = []
+    let state
+
+    const library = document.createElement('aside')
+    library.className = 'mini-library'
+    library.setAttribute('aria-label', 'Shape library preview')
+    library.innerHTML = '<strong>Library</strong><input type="search" placeholder="Search shapes" aria-label="Search shapes"><div class="mini-library-grid"><span>□</span><span>◇</span><span>○</span><span>↗</span><span>▤</span><span>⌁</span></div>'
+    root.appendChild(library)
+
+    function currentShapeIcon() {
+      return state.shapeTool
+    }
+
+    function renderToolbar() {
+      toolbar.innerHTML = ''
+      families.forEach((family) => {
+        const button = document.createElement('button')
+        button.type = 'button'
+        button.className = 'mini-tool'
+        button.dataset.family = family
+        const resolved = family === 'shape' ? currentShapeIcon() : family
+        button.innerHTML = icons[resolved] + (family === 'shape' || family === 'draw' ? '<span class="caret"></span>' : '')
+        button.title = labels[resolved] || labels[family]
+        button.setAttribute('aria-label', button.title)
+        if (family === state.activeFamily && family !== 'library') button.classList.add('is-active')
+        if (family === 'library' && state.libraryOpen) button.classList.add('is-active')
+        button.addEventListener('click', () => activateFamily(family))
+        toolbar.appendChild(button)
+      })
+      library.classList.toggle('is-open', state.libraryOpen)
+    }
+
+    function highlight(nodeName) {
+      root.querySelectorAll('[data-node]').forEach((node) => {
+        node.classList.toggle('is-flow-active', node.dataset.node === nodeName)
+      })
+    }
+
+    function setStatus(kind) {
+      status.textContent = planMessages[plan][kind]
+      highlight(traceNode[plan][kind])
+    }
+
+    function activateFamily(family) {
+      if (family === 'library') {
+        state.libraryOpen = !state.libraryOpen
+        setStatus('library')
+        renderToolbar()
+        if (state.libraryOpen) library.querySelector('input').focus()
+        else root.focus()
+        return
+      }
+      state.libraryOpen = false
+      state.activeFamily = family
+      if (family === 'shape') highlight('family')
+      else highlight(family === 'cursor' || family === 'frame' || family === 'draw' || family === 'text' || family === 'comment' ? 'registry' : 'family')
+      status.textContent = `${labels[family]} → family slot delegates to the plan's tool boundary.`
+      renderToolbar()
+    }
+
+    function press(key) {
+      state.libraryOpen = false
+      if (key === 'a') {
+        const entering = state.activeFamily !== 'shape' || !arrowCycle.includes(state.shapeTool)
+        if (entering) {
+          state.activeFamily = 'shape'
+          state.shapeTool = arrowCycle[state.arrowIndex]
+          setStatus('aEnter')
+        } else {
+          state.arrowIndex = (state.arrowIndex + 1) % arrowCycle.length
+          state.shapeTool = arrowCycle[state.arrowIndex]
+          setStatus('aCycle')
+        }
+      } else if (key === 'r') {
+        state.activeFamily = 'shape'
+        state.shapeTool = 'rectangle'
+        setStatus('r')
+      } else if (key === 'o') {
+        state.activeFamily = 'shape'
+        state.shapeTool = 'ellipse'
+        setStatus('o')
+      } else if (key === 'l') {
+        state.activeFamily = 'shape'
+        state.shapeTool = 'line'
+        setStatus('l')
+      } else if (key === '+') {
+        state.libraryOpen = true
+        setStatus('library')
+      }
+      renderToolbar()
+    }
+
+    function clearTimers() {
+      timers.forEach(window.clearTimeout)
+      timers = []
+    }
+
+    function reset() {
+      clearTimers()
+      state = { activeFamily: 'cursor', shapeTool: 'rectangle', arrowIndex: 0, libraryOpen: false }
+      root.querySelectorAll('[data-node]').forEach((node) => node.classList.remove('is-flow-active'))
+      status.textContent = plan === 'p1'
+        ? 'Ready: tldraw owns the common path.'
+        : plan === 'p2'
+          ? 'Ready: one owned controller defines the contract.'
+          : 'Ready: presets are first-class editor tools.'
+      renderToolbar()
+    }
+
+    root.addEventListener('keydown', (event) => {
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return
+      const key = event.key.toLowerCase()
+      if (!['a', 'r', 'o', 'l', '+'].includes(key)) return
+      event.preventDefault()
+      press(key)
+    })
+
+    runButton.addEventListener('click', () => {
+      reset()
+      const sequence = ['a', 'a', 'r', '+']
+      sequence.forEach((key, index) => {
+        timers.push(window.setTimeout(() => press(key), 280 + index * 620))
+      })
+    })
+
+    resetButton.addEventListener('click', reset)
+    reset()
+  }
+
+  document.querySelectorAll('.plan-prototype').forEach(setupPrototype)
+})()
+
+</script>
+</body>
+</html>

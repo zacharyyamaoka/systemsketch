@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SystemSketch context-menu reliability · implementation report</title>
+  <style>
+    :root { color-scheme: light; --ink:#17181b; --muted:#656a73; --line:#dfe2e8; --paper:#fff; --wash:#f4f6fa; --blue:#315efb; --green:#0a8f5b; --amber:#a45a00; }
+    * { box-sizing: border-box; }
+    body { margin:0; color:var(--ink); background:linear-gradient(150deg,#eef2ff 0,#f8f9fc 34%,#f3f5f8 100%); font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { width:min(1180px,calc(100% - 40px)); margin:38px auto 70px; }
+    header,.card,.evidence { background:rgba(255,255,255,.94); border:1px solid rgba(31,39,55,.12); box-shadow:0 18px 50px rgba(30,43,72,.08); }
+    header { border-radius:28px; padding:42px 46px; overflow:hidden; position:relative; }
+    header::after { content:""; position:absolute; width:300px; height:300px; right:-90px; top:-150px; border-radius:50%; background:radial-gradient(circle,#7992ff 0,#315efb 48%,transparent 70%); opacity:.22; }
+    .eyebrow { color:var(--blue); font-size:12px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+    h1 { max-width:800px; margin:10px 0 13px; font-size:clamp(38px,6vw,68px); line-height:1.02; letter-spacing:-.048em; }
+    .lede { max-width:820px; margin:0; color:var(--muted); font-size:19px; }
+    .chips { display:flex; flex-wrap:wrap; gap:9px; margin-top:25px; }
+    .chip { border:1px solid var(--line); border-radius:999px; padding:7px 11px; background:#fff; font-size:13px; font-weight:700; }
+    .chip.pass { color:var(--green); background:#edfbf5; border-color:#b9ead4; }
+    h2 { margin:0 0 12px; font-size:25px; letter-spacing:-.025em; }
+    h3 { margin:0 0 7px; font-size:16px; }
+    p { margin:0; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin-top:18px; }
+    .card { border-radius:20px; padding:24px; }
+    .card p { color:var(--muted); }
+    .flow { display:grid; grid-template-columns:1fr; gap:9px; margin-top:16px; }
+    .node { border:1px solid var(--line); border-radius:14px; padding:13px 15px; background:var(--wash); }
+    .node strong { display:block; margin-bottom:5px; }
+    .node span { color:var(--muted); font-size:13px; }
+    .arrow { justify-self:center; color:var(--blue); font-size:20px; font-weight:900; line-height:1; transform:rotate(90deg); }
+    .timeline { display:grid; gap:10px; margin-top:16px; counter-reset:step; }
+    .step { display:grid; grid-template-columns:32px 1fr; gap:12px; align-items:start; }
+    .step::before { counter-increment:step; content:counter(step); display:grid; place-items:center; width:30px; height:30px; border-radius:50%; background:#eef1ff; color:var(--blue); font-weight:800; }
+    .step.bad::before { background:#fff2e5; color:var(--amber); }
+    .step strong { display:block; }
+    .step span { color:var(--muted); font-size:13px; }
+    figure { margin:18px 0 0; border-radius:22px; overflow:hidden; border:1px solid var(--line); background:#fff; box-shadow:0 18px 50px rgba(30,43,72,.08); }
+    figure img { display:block; width:100%; height:auto; }
+    figcaption { padding:14px 18px; color:var(--muted); border-top:1px solid var(--line); }
+    table { width:100%; border-collapse:collapse; margin-top:8px; }
+    th,td { padding:12px 10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+    th { color:var(--muted); font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
+    td:last-child { color:var(--green); font-weight:800; white-space:nowrap; }
+    .evidence { margin-top:18px; border-radius:20px; padding:24px; }
+    code { padding:2px 6px; border-radius:6px; background:#edf0f6; font:13px ui-monospace,SFMono-Regular,Menlo,monospace; }
+    @media (max-width:760px) { main{width:min(100% - 22px,1180px);margin-top:12px} header{padding:30px 24px}.grid{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">SystemSketch · context-menu reliability</div>
+    <h1>One stock menu.<br>No ghost state.</h1>
+    <p class="lede">SystemSketch continues to use tldraw’s public context-menu root and stock content. The repair removes a Chrome app-window blur edge case and makes Block controls selection-aware without replacing tldraw’s interaction lifecycle.</p>
+    <div class="chips">
+      <span class="chip pass">12 / 12 browser checks</span>
+      <span class="chip pass">135 TypeScript checks</span>
+      <span class="chip pass">24 Python checks</span>
+      <span class="chip">Stock right-click + right-drag behavior retained</span>
+    </div>
+  </header>
+
+  <section class="grid">
+    <article class="card">
+      <h2>The actual composition</h2>
+      <div class="flow">
+        <div class="node"><strong>DefaultContextMenu</strong><span>tldraw owns trigger, portal, positioning, dismissal, keyboard, touch, and pointer routing.</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><strong>Block groups</strong><span>SystemSketch prepends only selection-specific Block view, Add, Ports, Advanced, and Routing items.</span></div>
+        <div class="arrow">→</div>
+        <div class="node"><strong>DefaultContextMenuContent</strong><span>tldraw still renders Edit, Arrange/Reorder, clipboard, conversion, export, and Select all.</span></div>
+      </div>
+    </article>
+
+    <article class="card">
+      <h2>What was actually broken</h2>
+      <div class="timeline">
+        <div class="step"><div><strong>Menu opens normally</strong><span>The selected Block receives additive commands above stock tldraw items.</span></div></div>
+        <div class="step bad"><div><strong>Desktop window loses focus</strong><span>Chrome hides the Radix portal while its uncontrolled root and tldraw’s menu capture can remain half-open.</span></div></div>
+        <div class="step bad"><div><strong>The next gestures split</strong><span>The first right-click may hit the stale capture and look like a canvas menu; the second may produce no visible portal.</span></div></div>
+        <div class="step"><div><strong>Blur now resets the stock root</strong><span>A keyed remount lets Radix and tldraw run their own cleanup together before the window returns.</span></div></div>
+      </div>
+    </article>
+  </section>
+
+  <figure>
+    <img src="systemsketch-context-menu-live-2026-09-01.png" alt="SystemSketch product canvas with a selected Block and its additive Block commands above the stock tldraw context-menu items">
+    <figcaption>The final browser capture is taken after a simulated window blur and two consecutive right-click opens. The selected Block commands and the stock tldraw commands are both present.</figcaption>
+  </figure>
+
+  <section class="evidence">
+    <h2>Behavior contract</h2>
+    <table>
+      <thead><tr><th>Context</th><th>Expected surface</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>Empty canvas</td><td>Stock tldraw menu only; works even when the Block creation tool was active.</td><td>PASS</td></tr>
+        <tr><td>One selected Block</td><td>Block view, Add, Ports, optional Advanced, then unchanged stock commands.</td><td>PASS</td></tr>
+        <tr><td>Several selected Blocks</td><td>Batchable Block view and Ports remain visible with a count; structural Add stays hidden.</td><td>PASS</td></tr>
+        <tr><td>Dismiss and reopen</td><td>The same additive menu returns on every right-click.</td><td>PASS</td></tr>
+        <tr><td>Window blur and return</td><td>The first and second right-clicks both resolve to the selected Block.</td><td>PASS</td></tr>
+        <tr><td>Implementation boundary</td><td><code>DefaultContextMenu</code> and <code>DefaultContextMenuContent</code> remain the only menu shell and stock content.</td><td>PASS</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+</body>
+</html>

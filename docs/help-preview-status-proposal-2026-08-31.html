@@ -1,0 +1,3467 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Babble &amp; Prune</title>
+  <style>
+    :root {
+      --paper: #f4f0e8;
+      --paper-deep: #ebe5da;
+      --panel: #fffdf9;
+      --ink: #20201f;
+      --muted: #6e6a63;
+      --line: #d8d0c4;
+      --line-strong: #bdb3a5;
+      --soft: #f8f5ef;
+      --green: #2f7f62;
+      --red: #b84939;
+      --blue: #3f6fa8;
+      --shadow: 0 18px 60px rgba(53, 46, 36, 0.10);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --serif: Iowan Old Style, Baskerville, Georgia, serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--paper);
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% -10%, rgba(224, 90, 63, 0.09), transparent 32rem),
+        radial-gradient(circle at 95% 5%, rgba(47, 127, 116, 0.08), transparent 30rem),
+        var(--paper);
+      font-family: var(--sans);
+      line-height: 1.5;
+    }
+
+    button,
+    textarea,
+    input {
+      font: inherit;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page {
+      width: min(1500px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .hero {
+      padding: 58px 0 30px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.75fr);
+      gap: 44px;
+      align-items: end;
+    }
+
+    .kicker,
+    .eyebrow {
+      color: var(--muted);
+      font: 700 11px/1.2 var(--mono);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 980px;
+      margin: 13px 0 16px;
+      font: 500 clamp(44px, 6vw, 84px)/0.96 var(--serif);
+      letter-spacing: -0.045em;
+    }
+
+    .brief {
+      max-width: 960px;
+      margin: 0;
+      color: #494641;
+      font-size: clamp(16px, 1.7vw, 21px);
+      line-height: 1.55;
+    }
+
+    .hero-aside {
+      border-left: 1px solid var(--line-strong);
+      padding-left: 24px;
+    }
+
+    .hero-aside strong {
+      display: block;
+      margin: 7px 0 9px;
+      font: 500 21px/1.25 var(--serif);
+    }
+
+    .hero-aside p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 24px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 29px;
+      padding: 5px 10px;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      background: rgba(255, 253, 249, 0.62);
+      color: #4d4943;
+      font: 650 11px/1 var(--mono);
+    }
+
+    .badge.primary {
+      border-color: #222;
+      background: #222;
+      color: white;
+    }
+
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      margin: 30px 0 0;
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 249, 0.52);
+    }
+
+    .workflow-step {
+      min-height: 92px;
+      padding: 15px 17px;
+      border-right: 1px solid var(--line);
+    }
+
+    .workflow-step:last-child {
+      border-right: 0;
+    }
+
+    .workflow-step span {
+      color: var(--muted);
+      font: 700 10px/1 var(--mono);
+      letter-spacing: 0.1em;
+    }
+
+    .workflow-step b {
+      display: block;
+      margin: 9px 0 3px;
+      font: 600 15px/1.2 var(--sans);
+    }
+
+    .workflow-step small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .context {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+      gap: 22px;
+      padding: 28px 0 32px;
+    }
+
+    .context-panel {
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 249, 0.72);
+      padding: 18px;
+    }
+
+    .context-panel h2 {
+      margin: 7px 0 13px;
+      font: 500 24px/1.2 var(--serif);
+    }
+
+    .axis-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .axis {
+      min-width: min(100%, 260px);
+      flex: 1 1 260px;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .axis b {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 12px;
+    }
+
+    .axis span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .invariant-list {
+      display: grid;
+      gap: 9px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .invariant-list li {
+      position: relative;
+      padding-left: 21px;
+      color: #4b4842;
+      font-size: 13px;
+    }
+
+    .invariant-list li::before {
+      position: absolute;
+      left: 0;
+      top: 0.2em;
+      color: var(--green);
+      content: "◆";
+      font-size: 9px;
+    }
+
+    .boundary {
+      margin-top: 15px;
+      padding-top: 13px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .boundary b {
+      color: var(--ink);
+    }
+
+    .ai-prune {
+      margin: 0 0 38px;
+      overflow: hidden;
+      border: 1px solid #a9a093;
+      border-radius: 8px;
+      background: rgba(255, 253, 249, 0.88);
+      box-shadow: 0 12px 38px rgba(53, 46, 36, 0.07);
+    }
+
+    .ai-prune-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 22px 24px 18px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(115deg, rgba(63, 111, 168, 0.08), transparent 45%),
+        var(--panel);
+    }
+
+    .ai-prune-head h2 {
+      margin: 7px 0 6px;
+      font: 500 clamp(28px, 3vw, 40px)/1.05 var(--serif);
+      letter-spacing: -0.025em;
+    }
+
+    .ai-prune-head p {
+      max-width: 790px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .formula {
+      flex: none;
+      padding: 10px 12px;
+      border: 1px solid #bdc9d7;
+      border-radius: 5px;
+      background: #f4f8fc;
+      color: #315b88;
+      font: 700 11px/1.35 var(--mono);
+      white-space: nowrap;
+    }
+
+    .judgment-chip,
+    .evidence-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 4px 7px;
+      border-radius: 99px;
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .judgment-chip {
+      border: 1px solid #b9c9db;
+      background: #eef4fa;
+      color: #315f91;
+    }
+
+    .evidence-chip {
+      border: 1px solid #bad1c5;
+      background: #eff8f3;
+      color: #28694f;
+    }
+
+    .ai-summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+      gap: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .ai-recommendation,
+    .hinge-card {
+      padding: 20px 24px;
+    }
+
+    .ai-recommendation {
+      border-right: 1px solid var(--line);
+    }
+
+    .recommendation-line {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 10px 0 8px;
+    }
+
+    .recommendation-line strong {
+      font: 500 clamp(25px, 3vw, 36px)/1 var(--serif);
+    }
+
+    .ai-total {
+      display: inline-grid;
+      min-width: 70px;
+      min-height: 48px;
+      place-items: center;
+      border: 1px solid #aebed0;
+      border-radius: 5px;
+      background: #eef4fa;
+      color: #315f91;
+      font: 800 14px/1 var(--mono);
+    }
+
+    .ai-recommendation p,
+    .hinge-card p {
+      margin: 0;
+      color: #55514b;
+      font-size: 13px;
+    }
+
+    .alternative-line {
+      margin-top: 11px !important;
+      padding-top: 10px;
+      border-top: 1px dashed var(--line);
+      color: var(--muted) !important;
+      font-size: 12px !important;
+    }
+
+    .hinge-card {
+      background: #faf7f1;
+    }
+
+    .hinge-card b {
+      display: block;
+      margin: 8px 0 7px;
+      font: 600 17px/1.2 var(--serif);
+    }
+
+    .criteria-section,
+    .matrix-section,
+    .gate-section {
+      padding: 21px 24px 24px;
+    }
+
+    .criteria-section,
+    .matrix-section {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-intro {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 13px;
+    }
+
+    .section-intro h3 {
+      margin: 5px 0 4px;
+      font: 500 22px/1.1 var(--serif);
+    }
+
+    .section-intro p {
+      max-width: 760px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      background: white;
+    }
+
+    .requirement-table,
+    .score-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .requirement-table {
+      min-width: 880px;
+    }
+
+    .score-table {
+      min-width: 980px;
+    }
+
+    .requirement-table th,
+    .score-table th {
+      padding: 9px 10px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line-strong);
+      background: #f4f1eb;
+      color: var(--muted);
+      font: 750 9px/1.2 var(--mono);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      vertical-align: bottom;
+    }
+
+    .requirement-table td,
+    .score-table td {
+      padding: 10px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      color: #4b4842;
+      font-size: 11px;
+      vertical-align: top;
+    }
+
+    .requirement-table tr:last-child td,
+    .score-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .requirement-table th:last-child,
+    .requirement-table td:last-child,
+    .score-table th:last-child,
+    .score-table td:last-child {
+      border-right: 0;
+    }
+
+    .requirement-name {
+      min-width: 150px;
+    }
+
+    .requirement-name b,
+    .score-variant b {
+      display: block;
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .requirement-name small,
+    .score-variant small {
+      color: var(--muted);
+      font: 700 9px/1 var(--mono);
+    }
+
+    .weight-number {
+      display: inline-grid;
+      min-width: 44px;
+      min-height: 29px;
+      place-items: center;
+      border-radius: 4px;
+      background: #eef4fa;
+      color: #315f91;
+      font: 800 11px/1 var(--mono);
+    }
+
+    .anchor-list {
+      display: grid;
+      min-width: 230px;
+      gap: 5px;
+    }
+
+    .anchor-list span {
+      display: grid;
+      grid-template-columns: 17px 1fr;
+      gap: 6px;
+    }
+
+    .anchor-list b {
+      color: #315f91;
+      font: 800 10px/1.4 var(--mono);
+    }
+
+    .score-table tbody tr.ai-leader {
+      background: #f5f9fd;
+    }
+
+    .score-table tbody tr.gate-fail {
+      background: #fbf1ef;
+    }
+
+    .score-variant {
+      min-width: 150px;
+    }
+
+    .score-detail {
+      min-width: 112px;
+      margin: 0;
+      border: 0;
+    }
+
+    .score-detail summary {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0;
+    }
+
+    .score-detail summary::after {
+      margin-left: auto;
+      font-size: 12px;
+    }
+
+    .score-value {
+      display: inline-grid;
+      width: 31px;
+      height: 31px;
+      place-items: center;
+      border: 1px solid #bcc7d3;
+      border-radius: 50%;
+      color: #315f91;
+      font: 850 12px/1 var(--mono);
+    }
+
+    .confidence {
+      padding: 4px 5px;
+      border-radius: 3px;
+      background: #f0eee9;
+      color: var(--muted);
+      font: 750 8px/1 var(--mono);
+      text-transform: uppercase;
+    }
+
+    .confidence.high { background: #edf7f1; color: #28694f; }
+    .confidence.low { background: #faf0e7; color: #97601d; }
+
+    .score-evidence {
+      width: 220px;
+      margin: 8px 0 0;
+      padding: 8px;
+      border-left: 2px solid #b9c9db;
+      background: #f7f9fb;
+      color: #56514b;
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
+    .total-cell {
+      min-width: 86px;
+      color: var(--ink) !important;
+      font: 850 15px/1.2 var(--mono) !important;
+    }
+
+    .rank-label {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font: 700 8px/1 var(--mono);
+      text-transform: uppercase;
+    }
+
+    .gate-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 10px;
+    }
+
+    .gate-card {
+      padding: 12px;
+      border: 1px solid var(--line);
+      background: white;
+    }
+
+    .gate-card > b {
+      display: block;
+      margin: 4px 0;
+      font-size: 13px;
+    }
+
+    .gate-card > p {
+      margin: 0 0 9px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .gate-results {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .gate-result {
+      padding: 4px 6px;
+      border: 1px solid #bad1c5;
+      border-radius: 3px;
+      background: #eff8f3;
+      color: #28694f;
+      font: 750 9px/1 var(--mono);
+      cursor: help;
+    }
+
+    .gate-result.fail {
+      border-color: #dfb7af;
+      background: #fbefed;
+      color: var(--red);
+    }
+
+    .gallery-head {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 13px 0;
+      border-top: 1px solid var(--line-strong);
+      border-bottom: 1px solid var(--line);
+      background: rgba(244, 240, 232, 0.94);
+      backdrop-filter: blur(16px);
+    }
+
+    .gallery-head h2 {
+      margin: 0;
+      font: 500 25px/1 var(--serif);
+    }
+
+    .gallery-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .tool-button,
+    .action-button,
+    .export-button,
+    .demo-button {
+      border: 1px solid var(--line-strong);
+      border-radius: 5px;
+      background: var(--panel);
+      cursor: pointer;
+      transition: 150ms ease;
+    }
+
+    .tool-button {
+      min-height: 34px;
+      padding: 7px 11px;
+      color: var(--muted);
+      font: 650 11px/1 var(--mono);
+    }
+
+    .tool-button:hover,
+    .tool-button.active,
+    .action-button:hover,
+    .export-button:hover {
+      border-color: var(--ink);
+      color: var(--ink);
+      transform: translateY(-1px);
+    }
+
+    .tool-button.active {
+      background: var(--ink);
+      color: white;
+    }
+
+    .variant-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+      padding: 24px 0 32px;
+    }
+
+    .variant-grid.focus-layout {
+      grid-template-columns: minmax(0, 1080px);
+      justify-content: center;
+    }
+
+    .variant-grid.focus-layout .variant-card:not(.is-focused) {
+      display: none;
+    }
+
+    .variant-card {
+      --accent: #222;
+      position: relative;
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+      border-top: 5px solid var(--accent);
+      border-radius: 7px;
+      background: var(--panel);
+      box-shadow: 0 3px 12px rgba(52, 45, 36, 0.04);
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .variant-card:hover,
+    .variant-card.is-focused {
+      border-color: color-mix(in srgb, var(--accent) 58%, var(--line-strong));
+      box-shadow: var(--shadow);
+    }
+
+    .variant-card.is-picked {
+      outline: 3px solid color-mix(in srgb, var(--accent) 55%, white);
+      outline-offset: 3px;
+    }
+
+    .variant-card.is-rejected {
+      opacity: 0.55;
+      filter: grayscale(0.45);
+    }
+
+    .variant-card.is-shortlisted::after {
+      position: absolute;
+      top: 11px;
+      right: 12px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--blue);
+      content: "";
+      box-shadow: 0 0 0 4px white;
+    }
+
+    .variant-header {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 13px;
+      align-items: start;
+      padding: 17px 18px 14px;
+    }
+
+    .variant-index {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--line));
+      border-radius: 50%;
+      color: var(--accent);
+      font: 800 12px/1 var(--mono);
+    }
+
+    .variant-title h3 {
+      margin: 0;
+      font: 500 27px/1.05 var(--serif);
+      letter-spacing: -0.02em;
+    }
+
+    .variant-title p {
+      margin: 7px 0 0;
+      color: #55514b;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .default-badge {
+      display: none;
+      padding: 5px 7px;
+      border-radius: 3px;
+      background: color-mix(in srgb, var(--accent) 12%, white);
+      color: var(--accent);
+      font: 800 9px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .variant-ai-meta {
+      display: grid;
+      justify-items: end;
+      gap: 6px;
+    }
+
+    .variant-score {
+      color: var(--muted);
+      font: 800 10px/1 var(--mono);
+      white-space: nowrap;
+    }
+
+    .variant-card.is-default .default-badge {
+      display: inline-flex;
+    }
+
+    .prototype-frame {
+      position: relative;
+      min-height: 288px;
+      margin: 0 18px;
+      overflow: hidden;
+      border: 1px solid #bbb3a7;
+      border-radius: 5px;
+      background: #e9e6df;
+    }
+
+    .prototype-label {
+      position: absolute;
+      z-index: 3;
+      top: 8px;
+      left: 8px;
+      padding: 4px 6px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.86);
+      color: #56514b;
+      font: 700 8px/1 var(--mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      backdrop-filter: blur(8px);
+    }
+
+    .prototype {
+      min-height: 288px;
+    }
+
+    .prototype img,
+    .prototype video,
+    .prototype canvas,
+    .prototype iframe,
+    .media-surface img,
+    .media-surface video,
+    .media-surface canvas,
+    .media-surface iframe {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .media-story {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 10px 18px 0;
+    }
+
+    .media-story:has(.media-exhibit:only-child) {
+      grid-template-columns: 1fr;
+    }
+
+    .media-exhibit {
+      min-width: 0;
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: var(--soft);
+    }
+
+    .media-surface {
+      min-height: 142px;
+      overflow: hidden;
+      background: #e9e6df;
+    }
+
+    .media-caption {
+      padding: 9px 10px 10px;
+    }
+
+    .media-caption b {
+      display: block;
+      margin-bottom: 4px;
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .media-caption span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .variant-body {
+      padding: 16px 18px 18px;
+    }
+
+    .fit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .fit {
+      min-height: 82px;
+      padding: 11px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+    }
+
+    .fit b {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .fit span {
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    details {
+      margin-top: 12px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    summary {
+      padding: 11px 0;
+      cursor: pointer;
+      color: #4d4943;
+      font: 700 11px/1 var(--mono);
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      float: right;
+      color: var(--muted);
+      content: "+";
+      font-size: 16px;
+    }
+
+    details[open] summary::after {
+      content: "−";
+    }
+
+    .decision-list {
+      display: grid;
+      gap: 8px;
+      padding: 0 0 13px;
+    }
+
+    .decision {
+      display: grid;
+      grid-template-columns: minmax(90px, 0.35fr) 1fr;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .decision b {
+      color: var(--muted);
+    }
+
+    .proof-list {
+      display: grid;
+      gap: 6px;
+      margin: 0 0 13px;
+      padding: 11px 0 0;
+      border-top: 1px dashed var(--line);
+      list-style: none;
+    }
+
+    .proof-list li {
+      position: relative;
+      padding-left: 17px;
+      color: #5a5650;
+      font-size: 11px;
+    }
+
+    .proof-list li::before {
+      position: absolute;
+      left: 0;
+      color: var(--green);
+      content: "✓";
+      font-weight: 800;
+    }
+
+    .keep-title {
+      margin: 14px 0 8px;
+      color: var(--muted);
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .keep-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .keep-chip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 29px;
+      padding: 5px 9px;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      background: white;
+      color: #55514b;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .keep-chip:has(input:checked) {
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 8%, white);
+      color: var(--accent);
+    }
+
+    .keep-chip input {
+      width: 13px;
+      height: 13px;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+
+    .variant-feedback {
+      width: 100%;
+      min-height: 60px;
+      margin: 0 0 12px;
+      padding: 9px 10px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .variant-feedback:focus,
+    .global-synthesis:focus {
+      border-color: var(--accent, var(--ink));
+      outline: 2px solid color-mix(in srgb, var(--accent, var(--ink)) 18%, white);
+    }
+
+    .variant-note {
+      margin-top: 12px;
+      border: 0;
+    }
+
+    .variant-note summary {
+      padding: 8px 0;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .variant-actions {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr 1fr;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .action-button {
+      min-height: 36px;
+      padding: 7px 9px;
+      font: 750 10px/1 var(--mono);
+    }
+
+    .action-button.pick {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+    }
+
+    .action-button.shortlist.active {
+      border-color: var(--blue);
+      background: #edf3fa;
+      color: var(--blue);
+    }
+
+    .action-button.reject.active {
+      border-color: var(--red);
+      background: #faefed;
+      color: var(--red);
+    }
+
+    .decision-dock {
+      position: sticky;
+      z-index: 30;
+      bottom: 12px;
+      display: grid;
+      grid-template-columns: minmax(210px, 0.62fr) minmax(260px, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      margin: 0 auto 28px;
+      padding: 14px;
+      border: 1px solid #aaa093;
+      border-radius: 8px;
+      background: rgba(255, 253, 249, 0.96);
+      box-shadow: 0 20px 65px rgba(46, 40, 32, 0.18);
+      backdrop-filter: blur(20px);
+    }
+
+    .decision-summary small {
+      display: block;
+      color: var(--muted);
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .decision-summary b {
+      display: block;
+      margin-top: 5px;
+      font: 500 17px/1.2 var(--serif);
+    }
+
+    .decision-summary span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .global-synthesis {
+      width: 100%;
+      min-height: 72px;
+      padding: 10px 11px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: white;
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .dock-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 7px;
+    }
+
+    .export-button {
+      min-height: 36px;
+      padding: 7px 10px;
+      font: 750 10px/1 var(--mono);
+    }
+
+    .export-button.primary {
+      border-color: var(--ink);
+      background: var(--ink);
+      color: white;
+    }
+
+    .export-button.subtle {
+      border-color: transparent;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .checks {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.65fr);
+      gap: 24px;
+      padding: 26px 0 54px;
+      border-top: 1px solid var(--line-strong);
+    }
+
+    .checks h2 {
+      margin: 8px 0 9px;
+      font: 500 27px/1.15 var(--serif);
+    }
+
+    .checks p {
+      max-width: 720px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .check-list {
+      display: grid;
+      gap: 7px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .check-list li {
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 249, 0.7);
+      font-size: 12px;
+    }
+
+    .check-list li::before {
+      margin-right: 7px;
+      color: var(--green);
+      content: "✓";
+      font-weight: 800;
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 100;
+      right: 20px;
+      bottom: 20px;
+      padding: 10px 13px;
+      border-radius: 5px;
+      background: var(--ink);
+      color: white;
+      font: 650 11px/1 var(--mono);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: 180ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .empty-state {
+      display: none;
+      padding: 70px 20px;
+      border: 1px dashed var(--line-strong);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .placeholder-preview {
+      display: grid;
+      min-height: 288px;
+      place-content: center;
+      gap: 8px;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .placeholder-preview strong {
+      font: 500 23px/1.2 var(--serif);
+    }
+
+    .placeholder-preview span {
+      max-width: 360px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* Worked-example miniature prototypes */
+    .mini-shell {
+      min-height: 288px;
+      color: #29302f;
+      background: #f4f5f1;
+      font-family: var(--sans);
+    }
+
+    .mini-shell button {
+      font-family: var(--sans);
+    }
+
+    .demo-alt-only {
+      display: none;
+    }
+
+    .prototype.is-alt .demo-alt-only {
+      display: revert;
+    }
+
+    .prototype.is-alt .demo-base-only {
+      display: none !important;
+    }
+
+    .prototype.is-alt .queue-item.demo-alt-only {
+      display: grid;
+    }
+
+    .prototype.is-alt .annotation.demo-alt-only,
+    .prototype.is-alt .coach-card.demo-alt-only {
+      display: block;
+    }
+
+    .demo-button {
+      min-height: 28px;
+      padding: 5px 8px;
+      border-color: #a9aaa5;
+      background: rgba(255, 255, 255, 0.9);
+      color: #3f4644;
+      font-size: 9px;
+      font-weight: 750;
+    }
+
+    .demo-button:hover {
+      border-color: #343938;
+    }
+
+    .mini-top,
+    .notebook-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 36px;
+      padding: 0 12px;
+      border-bottom: 1px solid #cfd2cd;
+      background: #eceee9;
+      color: #5a615f;
+      font-size: 9px;
+    }
+
+    .mini-top b,
+    .notebook-head b {
+      color: #2a302e;
+      font-size: 10px;
+    }
+
+    .mini-top i,
+    .notebook-head i {
+      font-style: normal;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: 67px minmax(0, 1fr) 120px;
+      min-height: 252px;
+    }
+
+    .run-rail {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      padding: 13px 9px;
+      border-right: 1px solid #d2d5d0;
+      background: #e8eae5;
+      font-size: 9px;
+    }
+
+    .run-rail b {
+      margin-bottom: 3px;
+      color: #777d7b;
+      font-size: 8px;
+      letter-spacing: 0.08em;
+    }
+
+    .run-rail span {
+      padding: 5px;
+      border: 1px solid transparent;
+      border-radius: 3px;
+    }
+
+    .run-rail span.active {
+      border-color: #d96c56;
+      background: white;
+      color: #bd4d39;
+      font-weight: 800;
+    }
+
+    .run-rail small {
+      color: #777d7b;
+    }
+
+    .trace-pane {
+      min-width: 0;
+      padding: 13px 10px 9px;
+      background: #fbfcf9;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+
+    .metric-row span {
+      padding: 5px;
+      border: 1px solid #d9dbd6;
+      background: white;
+      color: #737876;
+      font-size: 7px;
+    }
+
+    .metric-row b {
+      display: block;
+      color: #303634;
+      font-size: 11px;
+    }
+
+    .trace-pane svg,
+    .evidence-card svg,
+    .note-main svg {
+      display: block;
+      width: 100%;
+      overflow: visible;
+    }
+
+    .gridline {
+      fill: none;
+      stroke: #dedfdc;
+      stroke-width: 1;
+    }
+
+    .command,
+    .measure,
+    .compare {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.2;
+    }
+
+    .command {
+      stroke: #2f3735;
+    }
+
+    .measure {
+      stroke: #e05a3f;
+    }
+
+    .compare {
+      stroke: #6d86b3;
+      stroke-dasharray: 4 3;
+    }
+
+    .event-line {
+      stroke: #ccaa75;
+      stroke-dasharray: 3 3;
+    }
+
+    .event-dot {
+      fill: #b7791f;
+    }
+
+    .legend {
+      display: flex;
+      gap: 12px;
+      color: #777d7b;
+      font-size: 7px;
+    }
+
+    .legend span::before {
+      display: inline-block;
+      width: 8px;
+      height: 2px;
+      margin-right: 4px;
+      vertical-align: middle;
+      background: #6d86b3;
+      content: "";
+    }
+
+    .legend .cmd::before { background: #2f3735; }
+    .legend .meas::before { background: #e05a3f; }
+
+    .event-pane {
+      padding: 15px 11px;
+      border-left: 1px solid #d2d5d0;
+      background: #f0f1ed;
+    }
+
+    .event-pane > b {
+      color: #7a7f7d;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .event-pane strong {
+      display: block;
+      margin-top: 8px;
+      color: #a65c2a;
+      font: 500 15px/1.1 var(--serif);
+    }
+
+    .event-pane p {
+      margin: 7px 0 12px;
+      color: #626866;
+      font-size: 8px;
+      line-height: 1.45;
+    }
+
+    .spatial-replay {
+      background: #e8eeeb;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 288px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 65% 42%, rgba(47, 127, 116, 0.12), transparent 42%),
+        linear-gradient(#f5f8f6, #dce5e1);
+    }
+
+    .stage > svg {
+      position: absolute;
+      inset: 22px 5px 0;
+      width: calc(100% - 10px);
+      height: 228px;
+    }
+
+    .floor {
+      fill: none;
+      stroke: #c7d1cd;
+      stroke-width: 1;
+    }
+
+    .motion-path {
+      fill: none;
+      stroke: url("#pathFade");
+      stroke-dasharray: 3 3;
+      stroke-width: 3;
+    }
+
+    .ghost-arm {
+      fill: none;
+      stroke: #78938d;
+      stroke-dasharray: 5 4;
+      stroke-width: 8;
+      opacity: 0.42;
+    }
+
+    .measure-arm {
+      fill: none;
+      stroke: #364c47;
+      stroke-linecap: round;
+      stroke-width: 7;
+    }
+
+    .joint {
+      fill: #eef3f1;
+      stroke: #56766e;
+      stroke-width: 3;
+    }
+
+    .playhead {
+      fill: rgba(255, 255, 255, 0.8);
+      stroke: #e05a3f;
+      stroke-width: 4;
+    }
+
+    .spatial-inspector {
+      position: absolute;
+      top: 34px;
+      right: 15px;
+      display: grid;
+      width: 132px;
+      gap: 5px;
+      padding: 10px;
+      border: 1px solid #a8bbb5;
+      border-radius: 4px;
+      background: rgba(250, 253, 251, 0.94);
+      box-shadow: 0 8px 25px rgba(51, 75, 69, 0.13);
+    }
+
+    .spatial-inspector small {
+      color: #72827e;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .spatial-inspector b {
+      font: 500 16px/1 var(--serif);
+    }
+
+    .spatial-inspector span {
+      color: #b7503b;
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    .spatial-inspector em {
+      color: #72827e;
+      font-size: 7px;
+      font-style: normal;
+    }
+
+    .spatial-button {
+      position: absolute;
+      right: 15px;
+      bottom: 15px;
+    }
+
+    .notebook {
+      background:
+        linear-gradient(90deg, transparent 45px, rgba(186, 90, 83, 0.18) 45px, rgba(186, 90, 83, 0.18) 46px, transparent 46px),
+        repeating-linear-gradient(#faf9f4, #faf9f4 23px, #dce0eb 24px);
+    }
+
+    .notebook-head {
+      background: rgba(245, 243, 236, 0.94);
+    }
+
+    .note-body {
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      min-height: 252px;
+    }
+
+    .note-margin {
+      display: flex;
+      flex-direction: column;
+      gap: 35px;
+      padding: 27px 8px;
+      color: #9a978f;
+      font: 7px/1 var(--mono);
+    }
+
+    .note-main {
+      padding: 17px 18px 12px 13px;
+    }
+
+    .hypothesis {
+      margin: 0 0 8px;
+      font: 500 13px/1.3 var(--serif);
+    }
+
+    .hypothesis small {
+      display: block;
+      margin-bottom: 3px;
+      color: #7667c6;
+      font: 750 7px/1 var(--mono);
+      letter-spacing: 0.08em;
+    }
+
+    .delta-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 3px;
+      color: #62635f;
+      font: 8px/1 var(--mono);
+    }
+
+    .delta-row ins {
+      color: #4d6f51;
+      text-decoration: none;
+    }
+
+    .result-line {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin: 2px 0 7px;
+      font-size: 8px;
+    }
+
+    .result-line b {
+      color: #7667c6;
+    }
+
+    .annotation {
+      margin: 5px 0 7px;
+      padding: 6px 7px;
+      border-left: 2px solid #7667c6;
+      background: rgba(118, 103, 198, 0.08);
+      color: #555463;
+      font-size: 8px;
+    }
+
+    .annotation u {
+      display: block;
+      margin-top: 2px;
+      color: #7667c6;
+      text-decoration: none;
+    }
+
+    .exception-queue {
+      background: #f3f1ec;
+    }
+
+    .queue-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 48px;
+      padding: 8px 12px;
+      border-bottom: 1px solid #d3cfc7;
+    }
+
+    .queue-head div {
+      display: grid;
+    }
+
+    .queue-head small {
+      color: #8b8275;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .queue-head b {
+      font: 500 15px/1.15 var(--serif);
+    }
+
+    .queue-head > span {
+      color: #858077;
+      font-size: 8px;
+    }
+
+    .queue-body {
+      display: grid;
+      grid-template-columns: minmax(150px, 0.8fr) 1fr;
+      min-height: 240px;
+    }
+
+    .queue-list {
+      border-right: 1px solid #d3cfc7;
+    }
+
+    .queue-item {
+      display: grid;
+      grid-template-columns: 9px 1fr auto;
+      gap: 7px;
+      align-items: center;
+      min-height: 50px;
+      padding: 7px 9px;
+      border-bottom: 1px solid #ddd9d1;
+      color: #55534f;
+    }
+
+    .queue-item.active {
+      background: white;
+      color: #282a28;
+    }
+
+    .queue-item span {
+      display: grid;
+    }
+
+    .queue-item b {
+      font-size: 9px;
+    }
+
+    .queue-item small,
+    .queue-item em {
+      color: #8a857d;
+      font-size: 7px;
+      font-style: normal;
+    }
+
+    .queue-item.resolved {
+      background: #e9f3ec;
+      color: #376848;
+    }
+
+    .sev {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #a9aaa5;
+    }
+
+    .sev.high { background: #c64b36; }
+    .sev.med { background: #cc8d33; }
+    .sev.low { background: #7c9a72; }
+
+    .evidence-card {
+      padding: 17px 15px;
+      background: #fbfaf7;
+    }
+
+    .evidence-card > small {
+      color: #a56e2a;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .evidence-card > b {
+      display: block;
+      margin: 5px 0 4px;
+      font: 500 18px/1 var(--serif);
+    }
+
+    .evidence-card p {
+      margin: 3px 0 9px;
+      color: #6f6a63;
+      font-size: 8px;
+    }
+
+    .coach {
+      position: relative;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 100% 0, rgba(63, 111, 168, 0.12), transparent 46%),
+        #f4f6f8;
+    }
+
+    .coach-progress {
+      display: grid;
+      grid-template-columns: 23px 36px 23px 36px 23px 1fr;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .coach-progress span {
+      display: grid;
+      width: 22px;
+      height: 22px;
+      place-items: center;
+      border: 1px solid #aeb8c2;
+      border-radius: 50%;
+      background: white;
+      color: #6b7782;
+      font-size: 8px;
+    }
+
+    .coach-progress span.done {
+      border-color: #5b876c;
+      background: #5b876c;
+      color: white;
+    }
+
+    .coach-progress span.active {
+      border: 2px solid #3f6fa8;
+      color: #3f6fa8;
+      font-weight: 800;
+    }
+
+    .coach-progress i {
+      height: 1px;
+      background: #bbc3ca;
+    }
+
+    .coach-progress b {
+      margin-left: 10px;
+      font-size: 9px;
+    }
+
+    .coach-card {
+      min-height: 190px;
+      padding: 16px;
+      border: 1px solid #c6ced6;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 9px 28px rgba(60, 78, 96, 0.08);
+    }
+
+    .coach-card > small {
+      color: #3f6fa8;
+      font-size: 7px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .coach-card h4 {
+      max-width: 430px;
+      margin: 7px 0 12px;
+      font: 500 17px/1.22 var(--serif);
+    }
+
+    .evidence-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .evidence-options span,
+    .test-recipe span {
+      padding: 7px;
+      border: 1px solid #d4dae0;
+      border-radius: 3px;
+      color: #77818a;
+      font-size: 8px;
+    }
+
+    .evidence-options span.yes {
+      border-color: #5b876c;
+      background: #eef6f0;
+      color: #3b6b4a;
+    }
+
+    .coach-evidence {
+      margin-top: 11px;
+      padding-top: 9px;
+      border-top: 1px solid #e0e4e7;
+      font-size: 8px;
+    }
+
+    .coach-evidence p {
+      margin: 2px 0 0;
+      color: #6b747c;
+    }
+
+    .test-recipe {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .test-recipe span {
+      display: grid;
+    }
+
+    .test-recipe b {
+      margin-top: 2px;
+      color: #3f6fa8;
+      font-size: 10px;
+    }
+
+    .coach-button {
+      position: absolute;
+      right: 34px;
+      bottom: 29px;
+      border-color: #3f6fa8;
+      background: #3f6fa8;
+      color: white;
+    }
+
+    @media (max-width: 1050px) {
+      .hero-grid,
+      .context,
+      .checks,
+      .ai-summary {
+        grid-template-columns: 1fr;
+      }
+
+      .ai-recommendation {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .hero-aside {
+        border-top: 1px solid var(--line);
+        border-left: 0;
+        padding-top: 17px;
+        padding-left: 0;
+      }
+
+      .variant-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .media-story {
+        grid-template-columns: 1fr;
+      }
+
+      .decision-dock {
+        grid-template-columns: 1fr;
+      }
+
+      .dock-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        width: min(100% - 20px, 1500px);
+      }
+
+      .hero {
+        padding-top: 34px;
+      }
+
+      .workflow {
+        grid-template-columns: 1fr;
+      }
+
+      .workflow-step {
+        min-height: 76px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .workflow-step:last-child {
+        border-bottom: 0;
+      }
+
+      .ai-prune-head,
+      .section-intro,
+      .recommendation-line {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .ai-prune-head,
+      .ai-recommendation,
+      .hinge-card,
+      .criteria-section,
+      .matrix-section,
+      .gate-section {
+        padding-right: 15px;
+        padding-left: 15px;
+      }
+
+      .gallery-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .fit-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .control-grid {
+        grid-template-columns: 54px minmax(0, 1fr);
+      }
+
+      .event-pane {
+        display: none;
+      }
+
+      .queue-body {
+        grid-template-columns: 1fr;
+      }
+
+      .queue-list {
+        display: none;
+      }
+
+      .evidence-options,
+      .test-recipe {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+    }
+
+    @media print {
+      .gallery-head,
+      .decision-dock,
+      .variant-actions,
+      .variant-feedback,
+      .variant-note,
+      .keep-list,
+      .demo-button {
+        display: none !important;
+      }
+
+      .variant-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .variant-card {
+        break-inside: avoid;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="page">
+      <div class="hero-grid">
+        <div>
+          <div class="kicker" id="kicker">Babble &amp; Prune</div>
+          <h1 id="page-title">Prototype comparison</h1>
+          <p class="brief" id="page-brief"></p>
+          <div class="badge-row">
+            <span class="badge primary" id="count-badge">0 variants</span>
+            <span class="badge">prototype, not production</span>
+            <span class="badge">one shared comparison frame</span>
+            <span class="badge">weighted AI prune</span>
+            <span class="badge">choices stay in this browser</span>
+          </div>
+        </div>
+        <aside class="hero-aside">
+          <div class="eyebrow">AI recommendation · ought</div>
+          <strong id="default-name">—</strong>
+          <p id="default-why"></p>
+        </aside>
+      </div>
+      <div class="workflow" aria-label="Babble and prune workflow">
+        <div class="workflow-step">
+          <span>01 · FRAME</span>
+          <b>One shared problem</b>
+          <small>Same constraints, fixture, and stop line.</small>
+        </div>
+        <div class="workflow-step">
+          <span>02 · CRITERIA</span>
+          <b>Precommit what good means</b>
+          <small>Weighted FRs and hard gates before options.</small>
+        </div>
+        <div class="workflow-step">
+          <span>03 · BABBLE</span>
+          <b>Orthogonal directions</b>
+          <small>Structural alternatives, not cosmetic reskins.</small>
+        </div>
+        <div class="workflow-step">
+          <span>04 · PROTOTYPE</span>
+          <b>Make each idea felt</b>
+          <small>One real slice and one meaningful state change.</small>
+        </div>
+        <div class="workflow-step">
+          <span>05 · PRUNE</span>
+          <b>AI advises; you decide</b>
+          <small>Audit scores, then pick, reject, or splice.</small>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="context">
+      <div class="context-panel">
+        <div class="eyebrow">Search map</div>
+        <h2>The load-bearing axes</h2>
+        <div class="axis-list" id="axis-list"></div>
+      </div>
+      <div class="context-panel">
+        <div class="eyebrow">Common contract</div>
+        <h2>Held constant</h2>
+        <ul class="invariant-list" id="invariant-list"></ul>
+        <div class="boundary"><b>Prototype boundary:</b> <span id="boundary"></span></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="variants-heading">
+      <div class="gallery-head">
+        <div>
+          <div class="eyebrow">Visual atlas · try before you read</div>
+          <h2 id="variants-heading">Compare the outcomes</h2>
+          <p>Interact directly where possible. Keys 1–9 focus · J/K move · Enter picks · S shortlists · R rejects · C copies</p>
+        </div>
+        <div class="toolbar" aria-label="Gallery layout">
+          <button class="tool-button active" type="button" data-layout="grid">Grid</button>
+          <button class="tool-button" type="button" data-layout="focus">Focus</button>
+          <button class="tool-button" type="button" id="previous-variant" aria-label="Previous variant">←</button>
+          <button class="tool-button" type="button" id="next-variant" aria-label="Next variant">→</button>
+        </div>
+      </div>
+      <div class="variant-grid" id="variant-grid"></div>
+      <div class="empty-state" id="empty-state">No variants match this view.</div>
+    </section>
+
+    <section class="ai-prune" id="ai-prune" aria-labelledby="ai-prune-heading">
+      <div class="ai-prune-head">
+        <div>
+          <div class="eyebrow">AI prune · auditable judgment</div>
+          <h2 id="ai-prune-heading">What the AI thinks is best—and why</h2>
+          <p>Criteria and weights are an inferred interpretation of the brief, fixed before scoring. Prototype behavior is evidence; weights, scores, and recommendation are judgment.</p>
+        </div>
+        <div class="formula">total = Σ(weight × score / 5)</div>
+      </div>
+
+      <div class="ai-summary">
+        <div class="ai-recommendation" id="ai-recommendation"></div>
+        <div class="hinge-card">
+          <span class="judgment-chip">sensitivity · ought</span>
+          <b>Decision hinge</b>
+          <p id="decision-hinge"></p>
+        </div>
+      </div>
+
+      <div class="criteria-section">
+        <div class="section-intro">
+          <div>
+            <div class="eyebrow">01 · Before alternatives</div>
+            <h3>Weighted functional requirements</h3>
+            <p>Outcome-oriented FRs sum to 100%. The 1 / 3 / 5 anchors make later scoring inspectable instead of decorative precision.</p>
+          </div>
+          <span class="judgment-chip">AI interpretation · ought</span>
+        </div>
+        <div class="table-scroll" id="requirement-table"></div>
+      </div>
+
+      <div class="matrix-section">
+        <div class="section-intro">
+          <div>
+            <div class="eyebrow">02 · After prototypes</div>
+            <h3>Evidence-backed score matrix</h3>
+            <p>Open any score to see its evidence and confidence. Totals rank eligible options; they do not turn taste into objective truth.</p>
+          </div>
+          <span class="evidence-chip">prototype evidence · is</span>
+        </div>
+        <div class="table-scroll" id="score-matrix"></div>
+      </div>
+
+      <div class="gate-section" id="gate-panel">
+        <div class="section-intro">
+          <div>
+            <div class="eyebrow">Pass / fail · separate from preference</div>
+            <h3>Hard gates</h3>
+            <p>A failed gate prevents an option from winning regardless of weighted total; the failed option stays visible.</p>
+          </div>
+        </div>
+        <div class="gate-grid" id="gate-grid"></div>
+      </div>
+    </section>
+
+    <section class="checks">
+      <div>
+        <div class="eyebrow">Evidence contract</div>
+        <h2>What this gallery proves—and what it does not</h2>
+        <p>The live previews make the directions judgeable and the controls make preference capture cheap. They do not claim that production integration, real hardware behavior, or unbuilt edge cases have been verified.</p>
+      </div>
+      <ul class="check-list" id="check-list"></ul>
+    </section>
+
+    <aside class="decision-dock" id="decision-dock" aria-label="Prune decision">
+      <div class="decision-summary">
+        <small>Your direction · controls optional</small>
+        <b id="decision-title">No pick yet</b>
+        <span id="decision-detail">Type the splice you want in ordinary language.</span>
+      </div>
+      <textarea class="global-synthesis" id="global-synthesis" placeholder="Type naturally: “Use V5’s structure, V2’s scrubber, and V1’s density. Avoid modals.”"></textarea>
+      <div class="dock-actions">
+        <button class="export-button primary" type="button" id="copy-prune">Copy direction</button>
+        <button class="export-button" type="button" id="download-prune">Download .md</button>
+        <button class="export-button subtle" type="button" id="reset-prune">Reset choices</button>
+      </div>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="application/json" id="babble-data">
+{
+  "schemaVersion": 3,
+  "title": "Five quieter ways to show Preview availability",
+  "kicker": "SystemSketch Help · Babble & Prune · 31 Aug 2026",
+  "brief": "Redesign the release section inside SystemSketch Help so it is almost silent when Stable is current, becomes unmistakably actionable when newer Preview work exists, and never confuses the current build with the option to open a duplicate in Preview.",
+  "count": 5,
+  "defaultId": "v4",
+  "defaultWhy": "Spotlight Only is the AI recommendation at 97.2/100 because it removes release chrome entirely from the ordinary Help experience, then adds one explicit, high-contrast Preview action only when newer work actually exists.",
+  "decisionHinge": "The recommendation depends on quiet-at-rest being more important than permanent release detail. Moving 12 weight points from Quiet when current (FR2) to Detail without clutter (FR4) flips the lead narrowly to V1 Adaptive Status Card, 95.2 versus 94.8.",
+  "invariants": [
+    "Use the same Stable 0.1.0 state, four release notes, duplicate action, rollback action, and keyboard-shortcuts row.",
+    "Every direction demonstrates both states: nothing newer exists, and newer Preview work is available.",
+    "Open Live Preview continues to open an independent duplicate in a new window.",
+    "Keep the selected bottom-right utility strip and remove no existing zoom or board-overview behavior.",
+    "Prototype only: do not change the production SystemSketch UI during this comparison."
+  ],
+  "boundary": "These are interactive HTML prototypes in the actual SystemSketch visual language. The state switch and disclosure interactions are real; release polling, tldraw integration, window launching, persistence, and accessibility QA remain simulated until a direction is selected.",
+  "axes": [
+    {
+      "name": "Resting presence",
+      "values": [
+        "compact card",
+        "single row",
+        "two lanes",
+        "footer only",
+        "trigger only"
+      ]
+    },
+    {
+      "name": "New-work signal",
+      "values": [
+        "card transforms",
+        "row gains badge",
+        "available lane appears",
+        "spotlight appears",
+        "Help trigger becomes label"
+      ]
+    },
+    {
+      "name": "Mental model",
+      "values": [
+        "status",
+        "settings row",
+        "comparison",
+        "notification",
+        "inbox trigger"
+      ]
+    },
+    {
+      "name": "Detail strategy",
+      "values": [
+        "inside card",
+        "nested disclosure",
+        "parallel cards",
+        "secondary details",
+        "advanced menu"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "fr1",
+      "name": "Preview-state certainty",
+      "weight": 32,
+      "why": "The current UI mixes current-build facts with an always-present Preview action, so the first job is to answer whether anything newer actually exists.",
+      "passCondition": "A user can tell at a glance whether Stable is current or newer Preview work is available, without interpreting build hashes or release prose.",
+      "anchors": {
+        "1": "The user must infer the state from technical details or an ambiguous action.",
+        "3": "The state is stated but competes with similar-looking current-build information.",
+        "5": "The state is named in plain language and cannot be mistaken for the other state."
+      }
+    },
+    {
+      "id": "fr2",
+      "name": "Quiet when current",
+      "weight": 24,
+      "why": "Help is opened for shortcuts and support too; a healthy release system should not dominate that ordinary task.",
+      "passCondition": "When nothing newer exists, release status occupies little visual area and no Preview CTA looks urgent or necessary.",
+      "anchors": {
+        "1": "The existing full release card remains dominant at rest.",
+        "3": "The card is reduced, but release status still owns a major section.",
+        "5": "Only a calm one-line confirmation or footer remains."
+      }
+    },
+    {
+      "id": "fr3",
+      "name": "Action hierarchy when new",
+      "weight": 20,
+      "why": "When newer work exists, trying it should become the obvious next action and should explain that it opens a duplicate.",
+      "passCondition": "The new state visibly names Preview, summarizes why it matters, and presents one dominant duplicate action.",
+      "anchors": {
+        "1": "The action looks unchanged from the no-news state or competes with maintenance actions.",
+        "3": "The action is visible but the reason or duplicate behavior is secondary.",
+        "5": "One prominent, contextual CTA explains both what is new and what opening it will do."
+      }
+    },
+    {
+      "id": "fr4",
+      "name": "Detail without clutter",
+      "weight": 14,
+      "why": "Build, release time, changes, rollback, and refresh remain useful for trust and recovery, but they are not the first thing most users need.",
+      "passCondition": "Technical facts and maintenance actions remain reachable without occupying the default scan path.",
+      "anchors": {
+        "1": "Important recovery or provenance detail disappears.",
+        "3": "Detail exists but requires an unclear route or still adds noticeable clutter.",
+        "5": "All detail is available behind an obvious, lightweight disclosure."
+      }
+    },
+    {
+      "id": "fr5",
+      "name": "Accessible product fit",
+      "weight": 10,
+      "why": "The state change must remain understandable without color and should fit the existing bottom-right Help surface without another navigation concept.",
+      "passCondition": "Text, iconography, focusable controls, and the existing Help/utility structure communicate both states without relying on a green dot alone.",
+      "anchors": {
+        "1": "Color or an unlabeled dot carries the meaning, or a new navigation model is required.",
+        "3": "Text exists but focus/order or structural fit is awkward.",
+        "5": "Plain-language state, keyboard-reachable controls, and the current Help structure work together."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "g1",
+      "name": "Truthful two-state behavior",
+      "why": "Preview urgency may appear only when the release API reports newer actionable work."
+    },
+    {
+      "id": "g2",
+      "name": "No top-of-canvas status",
+      "why": "The earlier distracting release pill must not return."
+    },
+    {
+      "id": "g3",
+      "name": "Safe duplicate workflow preserved",
+      "why": "The selected behavior opens an independent duplicate and retains rollback/check access."
+    }
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "Adaptive Status Card",
+      "thesis": "Keep one release card, but let its size, tone, and contents transform completely with the actual state.",
+      "accent": "#2f7f74",
+      "bestWhen": "You want explicit reassurance in both states and never want release provenance more than one disclosure away.",
+      "losesWhen": "Any persistent release module still feels like too much information for ordinary Help use.",
+      "decisions": [
+        {
+          "label": "At rest",
+          "value": "A small neutral card says “Stable is current” with version and a Details disclosure; there is no Preview CTA."
+        },
+        {
+          "label": "When new",
+          "value": "The same region grows into a colored New Preview card with change count and one dominant duplicate action."
+        },
+        {
+          "label": "Maintenance",
+          "value": "Build, release time, rollback, and refresh live under Details in both states."
+        }
+      ],
+      "keepParts": [
+        "plain-language current state",
+        "card transforms by state",
+        "maintenance details disclosure"
+      ],
+      "proof": [
+        "The prototype switches the same card between a 58 px current state and a 166 px new-work state.",
+        "The Preview action is absent—not merely disabled—when nothing newer exists."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "Both card states begin with mutually exclusive plain-language labels: Stable is current versus New Preview available.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 3,
+          "evidence": "The current state is much smaller than today, but release status still owns a full-width card above Help content.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "The new state expands, changes tone, summarizes four changes, and presents one full-width duplicate CTA.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "A named Details disclosure keeps every technical and recovery fact one click away.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "State text, icon, and structure carry meaning without color and stay inside the existing Help panel.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "Only the simulated newer-work state renders the Preview CTA."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "All status content remains inside Help."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The CTA explicitly says it opens an independent duplicate; maintenance actions remain in Details."
+        }
+      },
+      "previewLabel": "toggle current / new",
+      "media": [
+        {
+          "label": "State footprint",
+          "caption": "The same component contracts to reassurance and expands only for action.",
+          "html": "<div class='state-map'><span>Current<br><b>58 px<\/b><\/span><i>state-driven transform<\/i><span class='hot'>New Preview<br><b>166 px<\/b><\/span><\/div>"
+        }
+      ],
+      "preview": "<style>.status-lab{position:relative;min-height:430px;overflow:hidden;border-radius:14px;background:#f5f6f8;color:#22262c;font:12px/1.35 Inter,ui-sans-serif,sans-serif}.status-lab *{box-sizing:border-box}.status-lab .canvas-line{position:absolute;background:#202124}.status-lab .canvas-line.v{left:18%;top:0;width:4px;height:100%}.status-lab .canvas-line.h{left:0;right:0;top:48%;height:4px}.help-shell{position:absolute;z-index:2;top:18px;right:18px;width:344px;padding:14px;border:1px solid #dfe2e7;border-radius:14px;background:#fff;box-shadow:0 18px 44px #20242b22}.help-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.help-head small{display:block;color:#7b828d;font:700 8px/1.2 ui-monospace;letter-spacing:.13em}.help-head b{display:block;margin-top:3px;font-size:18px}.close-x{display:grid;width:30px;height:30px;place-items:center;border:0;border-radius:8px;background:#f1f2f4;color:#69707a}.calm-card,.new-card,.lane-card,.spotlight,.update-row,.action-banner{border-radius:10px}.calm-card{display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #e0e3e7;background:#f6f7f8}.status-icon{display:grid;flex:0 0 28px;height:28px;place-items:center;border-radius:50%;background:#e7f4ec;color:#23724a;font-weight:900}.status-copy{min-width:0;flex:1}.status-copy b,.status-copy span{display:block}.status-copy span{margin-top:2px;color:#6e7580;font-size:10px}.text-button{border:0;background:transparent;color:#555d68;font-size:10px;font-weight:750}.new-card{padding:13px;border:1px solid #b7c7ff;background:linear-gradient(145deg,#edf1ff,#f5f7ff)}.new-kicker{display:flex;align-items:center;gap:6px;color:#4056d6;font-size:9px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}.new-card h3,.spotlight h3{margin:7px 0 3px;font-size:18px}.new-card p,.spotlight p{margin:0;color:#586174;font-size:10px}.primary-action{width:100%;min-height:35px;margin-top:11px;border:0;border-radius:8px;background:#22262c;color:#fff;font-weight:800}.sub-action{display:flex;justify-content:space-between;margin-top:9px;color:#69717d;font-size:9px}.help-list{margin-top:12px;border-top:1px solid #eceef1}.help-item{display:flex;min-height:38px;align-items:center;justify-content:space-between;padding:0 7px;color:#393e45}.help-item+ .help-item{border-top:1px solid #f0f1f3}.help-item small{color:#8a919b}.utility-strip{position:absolute;right:18px;bottom:18px;display:flex;height:42px;align-items:center;border:1px solid #dfe2e7;border-radius:11px;background:#fff;box-shadow:0 8px 22px #20242b1c}.utility-strip span{display:grid;min-width:42px;height:100%;place-items:center;border-left:1px solid #eceef1;font-weight:750}.utility-strip span:first-child{border-left:0}.utility-strip .help-trigger{position:relative;color:#4358d9}.preview-dot{position:absolute;right:7px;top:7px;width:7px;height:7px;border:2px solid #fff;border-radius:50%;background:#5068ef}.state-toggle{position:absolute;z-index:4;left:18px;bottom:18px;min-height:34px;padding:0 12px;border:1px solid #cfd4dc;border-radius:8px;background:#fff;color:#414751;font-size:10px;font-weight:800;box-shadow:0 5px 14px #20242b12}.details-box{margin-top:8px;padding-top:8px;border-top:1px solid #dfe3f0;color:#69717d;font-size:9px}.status-lab .demo-alt-only{display:none}.prototype.is-alt .status-lab .demo-base-only{display:none}.prototype.is-alt .status-lab .demo-alt-only{display:block}.prototype.is-alt .status-lab .preview-dot.demo-alt-only{display:block}.prototype.is-alt .status-lab .help-trigger.demo-alt-label{min-width:88px}.state-map{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;padding:18px;border:1px solid #e2e5ea;border-radius:10px;background:#fafbfc;text-align:center}.state-map span{padding:10px;border-radius:8px;background:#eef1f3}.state-map span.hot{background:#edf1ff;color:#4056d6}.state-map i{color:#818894;font-size:10px}<\/style><div class='status-lab'><i class='canvas-line v'><\/i><i class='canvas-line h'><\/i><section class='help-shell'><div class='help-head'><div><small>SYSTEMSKETCH<\/small><b>Help<\/b><\/div><button class='close-x'>×<\/button><\/div><div class='calm-card demo-base-only'><span class='status-icon'>✓<\/span><span class='status-copy'><b>Stable is current<\/b><span>0.1.0 · Nothing newer to try<\/span><\/span><button class='text-button'>Details ›<\/button><\/div><div class='new-card demo-alt-only'><div class='new-kicker'>● New Preview available<\/div><h3>4 changes ready to try<\/h3><p>Open a duplicate of this board. Stable stays unchanged.<\/p><button class='primary-action'>Open duplicate in Preview ↗<\/button><div class='sub-action'><span>What changed<\/span><span>Release details ›<\/span><\/div><\/div><div class='help-list'><div class='help-item'><span>Keyboard shortcuts<\/span><small>Ctrl Shift ?<\/small><\/div><div class='help-item'><span>Help center<\/span><small>↗<\/small><\/div><\/div><\/section><div class='utility-strip'><span>▣<\/span><span>−<\/span><span>173%<\/span><span>＋<\/span><span class='help-trigger'>?<i class='preview-dot demo-alt-only'><\/i><\/span><\/div><button class='state-toggle' data-demo-toggle data-base-label='Show new Preview' data-alt-label='Show current Stable'>Show new Preview<\/button><\/div>"
+    },
+    {
+      "id": "v2",
+      "name": "Version & Updates Row",
+      "thesis": "Treat release status like one ordinary Help setting, then disclose a compact update sheet only when the row is opened.",
+      "accent": "#536dfe",
+      "bestWhen": "You want the quietest conventional Help menu and expect users to inspect release detail only occasionally.",
+      "losesWhen": "A new Preview must interrupt scanning more strongly than a badged menu row can manage.",
+      "decisions": [
+        {
+          "label": "At rest",
+          "value": "One row reads Version & updates · 0.1.0 · Up to date alongside shortcuts and support."
+        },
+        {
+          "label": "When new",
+          "value": "The row moves to the top, gains a NEW badge and plain-language New Preview label."
+        },
+        {
+          "label": "Disclosure",
+          "value": "Opening the native details row reveals changes, duplicate CTA, rollback, and refresh."
+        }
+      ],
+      "keepParts": [
+        "single version row",
+        "NEW badge plus text",
+        "native details disclosure"
+      ],
+      "proof": [
+        "The ordinary state is one 40 px row with no card.",
+        "The details element is genuinely openable, while the shared toggle proves the row's new-work hierarchy."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 4,
+          "evidence": "Up to date and New Preview are explicit, though the state remains one row among other Help items.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "Current release status uses only one conventional menu row.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "The row gains a badge and opens directly to the CTA, but it is less visually dominant than a spotlight.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "A familiar details disclosure contains changes, build facts, rollback, and refresh without default clutter.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "Text labels, a semantic disclosure, and standard Help-row structure fit the current surface cleanly.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The NEW badge and CTA render only in the new-work state."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The release row remains inside Help."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The disclosed CTA names the duplicate behavior; maintenance actions remain below it."
+        }
+      },
+      "previewLabel": "toggle row state",
+      "media": [
+        {
+          "label": "Information architecture",
+          "caption": "Release status becomes a peer of Help content instead of the parent of it.",
+          "html": "<div class='state-map'><span>Shortcuts<\/span><span>Help center<\/span><span class='hot'>Version &amp; updates<\/span><\/div>"
+        }
+      ],
+      "preview": "<div class='status-lab'><i class='canvas-line v'><\/i><i class='canvas-line h'><\/i><section class='help-shell'><div class='help-head'><div><small>SYSTEMSKETCH<\/small><b>Help<\/b><\/div><button class='close-x'>×<\/button><\/div><div class='help-list' style='margin-top:0;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden'><div class='help-item demo-alt-only' style='background:#f0f3ff'><span><b>Version &amp; updates<\/b><small style='display:block;margin-top:2px;color:#4056d6'>New Preview available<\/small><\/span><strong style='padding:3px 6px;border-radius:999px;background:#5068ef;color:white;font-size:8px'>NEW<\/strong><\/div><div class='help-item'><span>Keyboard shortcuts<\/span><small>Ctrl Shift ?<\/small><\/div><div class='help-item'><span>Help center<\/span><small>↗<\/small><\/div><div class='help-item demo-base-only'><span>Version &amp; updates<\/span><small>0.1.0 · Up to date<\/small><\/div><\/div><details class='demo-alt-only' open style='margin-top:9px;padding:10px;border:1px solid #cbd4ff;border-radius:9px;background:#f7f8ff'><summary style='cursor:pointer;color:#4056d6;font-weight:800'>4 Preview changes<\/summary><p style='margin:8px 0;color:#657087;font-size:10px'>Bottom-right utilities, duplicate workflow, and launcher fixes.<\/p><button class='primary-action'>Open duplicate in Preview ↗<\/button><div class='sub-action'><span>Stable stays unchanged<\/span><span>More details ›<\/span><\/div><\/details><\/section><div class='utility-strip'><span>▣<\/span><span>−<\/span><span>173%<\/span><span>＋<\/span><span class='help-trigger'>?<i class='preview-dot demo-alt-only'><\/i><\/span><\/div><button class='state-toggle' data-demo-toggle data-base-label='Show new Preview' data-alt-label='Show current Stable'>Show new Preview<\/button><\/div>"
+    },
+    {
+      "id": "v3",
+      "name": "Current / Available Lanes",
+      "thesis": "Separate what you are running from what you could try, so Stable and Preview can never read like the same object.",
+      "accent": "#b7791f",
+      "bestWhen": "The Stable-versus-Preview model is unfamiliar and teaching that distinction matters more than compactness.",
+      "losesWhen": "The user already understands release lanes or wants Help to remain lightweight.",
+      "decisions": [
+        {
+          "label": "Mental model",
+          "value": "Two named lanes: Current Stable on the left and Available Preview on the right."
+        },
+        {
+          "label": "At rest",
+          "value": "The Available lane says No newer Preview and contains no action."
+        },
+        {
+          "label": "When new",
+          "value": "The Available lane becomes highlighted with a change summary and duplicate CTA."
+        }
+      ],
+      "keepParts": [
+        "Current versus Available labels",
+        "no-action empty lane",
+        "Stable stays unchanged reassurance"
+      ],
+      "proof": [
+        "Both release concepts remain visible in the same frame, eliminating pronoun ambiguity.",
+        "The Available lane changes from an explicit empty state to a complete action card."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "Current Stable and Available Preview are separately named, positioned, and described in both states.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 2,
+          "evidence": "Even with nothing new, two full-width lane cards keep the release system visually dominant.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "The highlighted Available lane contains one contextual action and explicit Stable-stays-unchanged copy.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "Each lane has a clear details route, keeping provenance attached to the correct object.",
+          "confidence": "medium"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "The text model is highly accessible, but it adds a denser release-specific layout to Help.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The Available lane has no CTA until newer work exists."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Both lanes are contained in Help."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The new lane explains duplication and retains Stable details and maintenance routes."
+        }
+      },
+      "previewLabel": "toggle available lane",
+      "media": [
+        {
+          "label": "Object model",
+          "caption": "This is the only direction that keeps current and available as two parallel objects.",
+          "html": "<div class='state-map'><span>CURRENT<br><b>Stable 0.1.0<\/b><\/span><i>versus<\/i><span class='hot'>AVAILABLE<br><b>Preview<\/b><\/span><\/div>"
+        }
+      ],
+      "preview": "<div class='status-lab'><i class='canvas-line v'><\/i><i class='canvas-line h'><\/i><section class='help-shell'><div class='help-head'><div><small>SYSTEMSKETCH<\/small><b>Help<\/b><\/div><button class='close-x'>×<\/button><\/div><div style='display:grid;grid-template-columns:1fr 1fr;gap:8px'><article class='lane-card' style='min-height:155px;padding:12px;border:1px solid #e0e3e7;background:#f7f8f9'><small style='color:#7a818b;font-weight:800'>CURRENT<\/small><h3 style='margin:7px 0 2px'>Stable 0.1.0<\/h3><p style='margin:0;color:#68707a;font-size:10px'>The board you are using now.<\/p><div style='margin-top:38px;color:#77808b;font-size:9px'>Build 27c283af<br>Details ›<\/div><\/article><article class='lane-card demo-base-only' style='min-height:155px;padding:12px;border:1px dashed #cfd4da;background:#fff'><small style='color:#7a818b;font-weight:800'>AVAILABLE<\/small><h3 style='margin:7px 0 2px'>No newer Preview<\/h3><p style='margin:0;color:#68707a;font-size:10px'>Stable is current.<\/p><\/article><article class='lane-card demo-alt-only' style='min-height:155px;padding:12px;border:1px solid #e1bd78;background:#fff8e9'><small style='color:#95610d;font-weight:850'>AVAILABLE · NEW<\/small><h3 style='margin:7px 0 2px'>Preview<\/h3><p style='margin:0;color:#755f38;font-size:10px'>4 changes · Stable stays unchanged.<\/p><button class='primary-action' style='margin-top:17px;background:#8d5d13'>Open duplicate ↗<\/button><\/article><\/div><div class='help-list'><div class='help-item'><span>Keyboard shortcuts<\/span><small>Ctrl Shift ?<\/small><\/div><\/div><\/section><div class='utility-strip'><span>▣<\/span><span>−<\/span><span>173%<\/span><span>＋<\/span><span class='help-trigger'>?<i class='preview-dot demo-alt-only' style='background:#b7791f'><\/i><\/span><\/div><button class='state-toggle' data-demo-toggle data-base-label='Show new Preview' data-alt-label='Show current Stable'>Show new Preview<\/button><\/div>"
+    },
+    {
+      "id": "v4",
+      "name": "Spotlight Only",
+      "thesis": "Remove release UI from ordinary Help; insert a strong Preview spotlight only when there is genuinely something new.",
+      "accent": "#5068ef",
+      "bestWhen": "The release system should behave like a notification: invisible when healthy, unmistakable when action is possible.",
+      "losesWhen": "Users routinely need build, release-time, or rollback information even when no update exists.",
+      "decisions": [
+        {
+          "label": "At rest",
+          "value": "Help starts with shortcuts and support. A tiny footer reads Stable 0.1.0 · Current."
+        },
+        {
+          "label": "When new",
+          "value": "A high-contrast New Preview spotlight appears above Help rows with change count and one duplicate CTA."
+        },
+        {
+          "label": "Maintenance",
+          "value": "Version, rollback, refresh, and build history move to a quiet Version details row."
+        }
+      ],
+      "keepParts": [
+        "footer-only current state",
+        "conditional Preview spotlight",
+        "Version details maintenance row"
+      ],
+      "proof": [
+        "The current state has no release card or Preview action anywhere in the main Help scan.",
+        "The new state adds a single 150 px spotlight and a matching labeled dot without rearranging ordinary Help rows."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "Current is stated in the footer; the alternate state is titled New Preview available and cannot be read as current-build metadata.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "Nothing-new state uses one low-contrast footer line and no release module or CTA.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "The only high-contrast region appears for new work and contains one prominent Open duplicate in Preview action.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "Version details keeps provenance and recovery reachable, though it is one level farther away than V1 or V2.",
+          "confidence": "medium"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "Plain-language state, conditional structure, visible text beside the dot, and existing Help rows fit the current product cleanly.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The spotlight and duplicate CTA do not exist in the current state."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The notification appears inside Help and only the small bottom-right dot exists outside it."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The CTA says Open duplicate in Preview; Version details retains maintenance actions."
+        }
+      },
+      "previewLabel": "toggle spotlight",
+      "media": [
+        {
+          "label": "Attention budget",
+          "caption": "Ordinary Help spends zero primary attention on releases; new work receives the only colored surface.",
+          "html": "<div class='state-map'><span>Current<br><b>footer only<\/b><\/span><i>attention appears only with news<\/i><span class='hot'>New Preview<br><b>spotlight + CTA<\/b><\/span><\/div>"
+        }
+      ],
+      "preview": "<div class='status-lab'><i class='canvas-line v'><\/i><i class='canvas-line h'><\/i><section class='help-shell'><div class='help-head'><div><small>SYSTEMSKETCH<\/small><b>Help<\/b><\/div><button class='close-x'>×<\/button><\/div><article class='spotlight demo-alt-only' style='padding:14px;border:1px solid #aebdff;background:linear-gradient(145deg,#e8edff,#f6f8ff)'><div class='new-kicker'>● NEW PREVIEW AVAILABLE<\/div><h3>There’s new work to try<\/h3><p>4 changes since Stable 0.1.0. Open an independent duplicate; this board stays unchanged.<\/p><button class='primary-action' style='background:#4056d6'>Open duplicate in Preview ↗<\/button><div class='sub-action'><span>See what changed<\/span><span>Preview details ›<\/span><\/div><\/article><div class='help-list' style='margin-top:0'><div class='help-item'><span>Keyboard shortcuts<\/span><small>Ctrl Shift ?<\/small><\/div><div class='help-item'><span>Help center<\/span><small>↗<\/small><\/div><div class='help-item'><span>Send feedback<\/span><small>↗<\/small><\/div><div class='help-item' style='color:#737b85'><span>Version details<\/span><small class='demo-base-only'>Stable 0.1.0 · Current<\/small><small class='demo-alt-only'>Stable 0.1.0<\/small><\/div><\/div><\/section><div class='utility-strip'><span>▣<\/span><span>−<\/span><span>173%<\/span><span>＋<\/span><span class='help-trigger'>?<i class='preview-dot demo-alt-only'><\/i><\/span><\/div><button class='state-toggle' data-demo-toggle data-base-label='Show new Preview' data-alt-label='Show current Stable'>Show new Preview<\/button><\/div>"
+    },
+    {
+      "id": "v5",
+      "name": "Preview Alert Trigger",
+      "thesis": "Keep Help entirely about help, and let the question-mark trigger itself become a labeled Preview alert when new work exists.",
+      "accent": "#9a4fd2",
+      "bestWhen": "The new-work state must be visible without opening Help, while the open panel should remain extremely sparse.",
+      "losesWhen": "Changing the width and meaning of the bottom-right trigger feels jumpy or too promotional.",
+      "decisions": [
+        {
+          "label": "At rest",
+          "value": "The utility strip ends in the ordinary question-mark icon; Help contains no release section."
+        },
+        {
+          "label": "When new",
+          "value": "The icon expands into a labeled Preview ready trigger with a count badge."
+        },
+        {
+          "label": "Inside Help",
+          "value": "A compact action banner appears above normal Help rows; build and maintenance live under Advanced."
+        }
+      ],
+      "keepParts": [
+        "labeled external alert",
+        "release-free ordinary Help",
+        "compact action banner"
+      ],
+      "proof": [
+        "The bottom-right trigger visibly changes from a 42 px question mark to a 104 px Preview-ready control.",
+        "The open panel remains sparse and contains no current-build card."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 4,
+          "evidence": "Preview ready is explicit before opening Help, though the expanding trigger introduces a second meaning for the Help position.",
+          "confidence": "medium"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "The ordinary state contains no release UI inside Help and only the existing question-mark trigger outside it.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "The labeled trigger and compact action banner make the duplicate CTA hard to miss when new work exists.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 3,
+          "evidence": "Advanced preserves maintenance detail, but the route is less directly associated with version status.",
+          "confidence": "medium"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "Text makes the alert accessible, but a variable-width control changes the established utility-strip rhythm.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The expanded alert and banner render only in the new-work state."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "No status returns to the upper canvas."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The banner preserves the duplicate action and Advanced retains maintenance controls."
+        }
+      },
+      "previewLabel": "toggle trigger state",
+      "media": [
+        {
+          "label": "Trigger behavior",
+          "caption": "This direction spends attention outside Help only when a Preview is actually actionable.",
+          "html": "<div class='state-map'><span>Current<br><b>?<\/b><\/span><i>conditional trigger width<\/i><span class='hot'>New<br><b>● Preview ready<\/b><\/span><\/div>"
+        }
+      ],
+      "preview": "<div class='status-lab'><i class='canvas-line v'><\/i><i class='canvas-line h'><\/i><section class='help-shell'><div class='help-head'><div><small>SYSTEMSKETCH<\/small><b>Help<\/b><\/div><button class='close-x'>×<\/button><\/div><div class='action-banner demo-alt-only' style='display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #d9b8ed;background:#fbf3ff'><span style='display:grid;width:30px;height:30px;place-items:center;border-radius:8px;background:#9a4fd2;color:#fff;font-weight:900'>4<\/span><span class='status-copy'><b>Preview ready<\/b><span>Open an independent duplicate<\/span><\/span><button style='min-height:30px;padding:0 9px;border:0;border-radius:7px;background:#752eac;color:#fff;font-size:9px;font-weight:800'>Open ↗<\/button><\/div><div class='help-list' style='margin-top:0'><div class='help-item'><span>Keyboard shortcuts<\/span><small>Ctrl Shift ?<\/small><\/div><div class='help-item'><span>Help center<\/span><small>↗<\/small><\/div><div class='help-item'><span>Send feedback<\/span><small>↗<\/small><\/div><div class='help-item'><span>Advanced<\/span><small>Version · rollback · refresh ›<\/small><\/div><\/div><\/section><div class='utility-strip'><span>▣<\/span><span>−<\/span><span>173%<\/span><span>＋<\/span><span class='help-trigger demo-base-only'>?<\/span><span class='help-trigger demo-alt-only' style='min-width:104px;padding:0 10px;color:#752eac;font-size:10px'>● Preview ready<\/span><\/div><button class='state-toggle' data-demo-toggle data-base-label='Show new Preview' data-alt-label='Show current Stable'>Show new Preview<\/button><\/div>"
+    }
+  ],
+  "checks": [
+    "Exactly five structurally distinct release-status directions",
+    "Same SystemSketch Help panel, release fixture, viewport, and duplicate behavior",
+    "Every preview toggles between current Stable and new Preview states",
+    "Five criteria frozen before scoring; weights sum to 100%",
+    "Every score includes observable evidence and confidence",
+    "All hard gates are evaluated separately",
+    "Pick, shortlist, reject, splice, copy, download, keyboard navigation, and local persistence are present",
+    "No production SystemSketch component was changed by this proposal"
+  ]
+}
+  </script>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const project = JSON.parse(document.getElementById("babble-data").textContent);
+      const variants = project.variants;
+      const requirements = project.requirements || [];
+      const hardGates = project.hardGates || [];
+      const rankedResults = variants
+        .map((variant) => resultFor(variant))
+        .sort((left, right) => {
+          if (left.eligible !== right.eligible) return left.eligible ? -1 : 1;
+          if (right.total !== left.total) return right.total - left.total;
+          return variants.indexOf(left.variant) - variants.indexOf(right.variant);
+        });
+      const eligibleResults = rankedResults.filter((result) => result.eligible);
+      const topResult = eligibleResults[0] || rankedResults[0];
+      const coLeaders = topResult
+        ? eligibleResults.filter((result) => topResult.total - result.total <= 3)
+        : [];
+      const resultById = new Map(rankedResults.map((result) => [result.variant.id, result]));
+      const rankById = new Map(rankedResults.map((result, index) => [result.variant.id, index + 1]));
+      const defaultVariant = variants.find((variant) => variant.id === project.defaultId) || variants[0];
+      const storageKey = `babble-prune:${location.pathname}:${project.title}`;
+
+      const blankState = () => ({
+        pick: null,
+        statuses: {},
+        keeps: {},
+        notes: {},
+        synthesis: "",
+        focusIndex: 0,
+        layout: "grid"
+      });
+
+      let state = blankState();
+      try {
+        state = { ...state, ...JSON.parse(localStorage.getItem(storageKey) || "{}") };
+      } catch {
+        state = blankState();
+      }
+      state.synthesis = state.synthesis || state.why || "";
+
+      const byId = (id) => document.getElementById(id);
+      const variantGrid = byId("variant-grid");
+      const toast = byId("toast");
+
+      document.title = `${project.title} · Babble & Prune`;
+      byId("kicker").textContent = project.kicker || "Babble & Prune";
+      byId("page-title").textContent = project.title;
+      byId("page-brief").textContent = project.brief;
+      byId("count-badge").textContent = `${variants.length} orthogonal variant${variants.length === 1 ? "" : "s"}`;
+      byId("default-name").textContent = `${labelFor(defaultVariant.id)} · ${defaultVariant.name}`;
+      byId("default-why").textContent = project.defaultWhy;
+      byId("boundary").textContent = project.boundary;
+
+      byId("axis-list").innerHTML = (project.axes || []).map((axis) => `
+        <div class="axis">
+          <b>${escapeHtml(axis.name)}</b>
+          <span>${escapeHtml(axis.values.join(" · "))}</span>
+        </div>
+      `).join("");
+
+      byId("invariant-list").innerHTML = (project.invariants || []).map(
+        (invariant) => `<li>${escapeHtml(invariant)}</li>`
+      ).join("");
+
+      byId("check-list").innerHTML = (project.checks || []).map(
+        (check) => `<li>${escapeHtml(check)}</li>`
+      ).join("");
+
+      renderAiPrune();
+      variantGrid.innerHTML = variants.map((variant, index) => variantMarkup(variant, index)).join("");
+      byId("global-synthesis").value = state.synthesis;
+      setLayout(state.layout || "grid");
+      updateUi();
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function labelFor(id) {
+        const index = variants.findIndex((variant) => variant.id === id);
+        return index >= 0 ? `V${index + 1}` : id;
+      }
+
+      function resultFor(variant) {
+        const total = requirements.reduce((sum, requirement) => {
+          const score = Number(variant.scores?.[requirement.id]?.score || 0);
+          return sum + Number(requirement.weight || 0) * score / 5;
+        }, 0);
+        const failedGates = hardGates.filter(
+          (gate) => variant.gateResults?.[gate.id]?.pass !== true
+        );
+        return {
+          variant,
+          total: Math.round((total + Number.EPSILON) * 100) / 100,
+          eligible: failedGates.length === 0,
+          failedGates
+        };
+      }
+
+      function formatTotal(value) {
+        return Number(value).toFixed(1);
+      }
+
+      function renderAiPrune() {
+        byId("decision-hinge").textContent = project.decisionHinge || "No decision hinge supplied.";
+
+        const requirementRows = requirements.map((requirement) => `
+          <tr>
+            <td class="requirement-name">
+              <small>${escapeHtml(requirement.id)}</small>
+              <b>${escapeHtml(requirement.name)}</b>
+            </td>
+            <td><span class="weight-number">${escapeHtml(requirement.weight)}%</span></td>
+            <td>${escapeHtml(requirement.why)}</td>
+            <td>${escapeHtml(requirement.passCondition)}</td>
+            <td>
+              <div class="anchor-list">
+                <span><b>1</b>${escapeHtml(requirement.anchors?.["1"] || "—")}</span>
+                <span><b>3</b>${escapeHtml(requirement.anchors?.["3"] || "—")}</span>
+                <span><b>5</b>${escapeHtml(requirement.anchors?.["5"] || "—")}</span>
+              </div>
+            </td>
+          </tr>
+        `).join("");
+
+        byId("requirement-table").innerHTML = `
+          <table class="requirement-table">
+            <thead><tr><th>FR</th><th>Weight</th><th>Why here</th><th>Pass condition</th><th>Anchors</th></tr></thead>
+            <tbody>${requirementRows}</tbody>
+          </table>
+        `;
+
+        const scoreHeaders = requirements.map((requirement) => `
+          <th title="${escapeHtml(requirement.name)}">${escapeHtml(requirement.id)} · ${escapeHtml(requirement.weight)}%</th>
+        `).join("");
+
+        const scoreRows = rankedResults.map((result) => {
+          const cells = requirements.map((requirement) => {
+            const entry = result.variant.scores?.[requirement.id] || {};
+            const confidence = entry.confidence || "low";
+            return `
+              <td>
+                <details class="score-detail">
+                  <summary aria-label="${escapeHtml(requirement.name)} score ${escapeHtml(entry.score ?? "—")} out of 5, ${escapeHtml(confidence)} confidence">
+                    <span class="score-value">${escapeHtml(entry.score ?? "—")}</span>
+                    <span class="confidence ${escapeHtml(confidence)}">${escapeHtml(confidence)}</span>
+                  </summary>
+                  <p class="score-evidence"><span class="evidence-chip">is</span><br>${escapeHtml(entry.evidence || "No evidence supplied.")}</p>
+                </details>
+              </td>
+            `;
+          }).join("");
+          const status = result.eligible ? `#${rankById.get(result.variant.id)} eligible` : "gate fail";
+          const rowClass = coLeaders.includes(result) ? "ai-leader" : (result.eligible ? "" : "gate-fail");
+          return `
+            <tr class="${rowClass}">
+              <td class="score-variant">
+                <small>${labelFor(result.variant.id)}</small>
+                <b>${escapeHtml(result.variant.name)}</b>
+              </td>
+              ${cells}
+              <td class="total-cell">${formatTotal(result.total)}<span class="rank-label">${escapeHtml(status)}</span></td>
+            </tr>
+          `;
+        }).join("");
+
+        byId("score-matrix").innerHTML = `
+          <table class="score-table">
+            <thead><tr><th>Ranked option</th>${scoreHeaders}<th>Weighted / 100</th></tr></thead>
+            <tbody>${scoreRows}</tbody>
+          </table>
+        `;
+
+        if (!topResult) {
+          byId("ai-recommendation").innerHTML = `
+            <span class="judgment-chip">AI judgment · ought</span>
+            <div class="recommendation-line"><strong>No eligible recommendation</strong></div>
+            <p>Complete the FR scores and hard-gate evidence before pruning.</p>
+          `;
+        } else {
+          const leaderNames = coLeaders.map(
+            (result) => `${labelFor(result.variant.id)} · ${result.variant.name}`
+          ).join(" + ");
+          const recommendationLabel = coLeaders.length > 1 ? "Co-leaders" : "Best overall";
+          const alternative = eligibleResults.find((result) => !coLeaders.includes(result));
+          const alternativeMarkup = alternative ? `
+            <p class="alternative-line"><b>Strong alternative:</b> ${labelFor(alternative.variant.id)} · ${escapeHtml(alternative.variant.name)} at ${formatTotal(alternative.total)} — ${escapeHtml(alternative.variant.bestWhen)}</p>
+          ` : "";
+          byId("ai-recommendation").innerHTML = `
+            <span class="judgment-chip">AI judgment · ought</span>
+            <div class="recommendation-line">
+              <strong>${recommendationLabel}: ${escapeHtml(leaderNames)}</strong>
+              <span class="ai-total">${formatTotal(topResult.total)} / 100</span>
+            </div>
+            <p>${escapeHtml(project.defaultWhy)}</p>
+            ${alternativeMarkup}
+          `;
+        }
+
+        if (!hardGates.length) {
+          byId("gate-grid").innerHTML = `<div class="gate-card"><b>No separate hard gates</b><p>All constraints are represented as weighted FRs for this round.</p></div>`;
+          return;
+        }
+
+        byId("gate-grid").innerHTML = hardGates.map((gate) => {
+          const results = variants.map((variant) => {
+            const entry = variant.gateResults?.[gate.id] || {};
+            const passed = entry.pass === true;
+            return `<span class="gate-result ${passed ? "" : "fail"}" title="${escapeHtml(entry.evidence || "No evidence supplied.")}">${labelFor(variant.id)} ${passed ? "✓ pass" : "✕ fail"}</span>`;
+          }).join("");
+          return `
+            <div class="gate-card">
+              <span class="evidence-chip">hard gate</span>
+              <b>${escapeHtml(gate.name)}</b>
+              <p>${escapeHtml(gate.why)}</p>
+              <div class="gate-results">${results}</div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function variantMarkup(variant, index) {
+        const result = resultById.get(variant.id);
+        const decisions = variant.decisions.map((decision) => `
+          <div class="decision">
+            <b>${escapeHtml(decision.label)}</b>
+            <span>${escapeHtml(decision.value)}</span>
+          </div>
+        `).join("");
+
+        const proof = variant.proof.map((item) => `
+          <li>${escapeHtml(item)}</li>
+        `).join("");
+
+        const keepParts = variant.keepParts.map((part, partIndex) => `
+          <label class="keep-chip">
+            <input type="checkbox" data-keep="${escapeHtml(variant.id)}" data-part="${partIndex}">
+            <span>${escapeHtml(part)}</span>
+          </label>
+        `).join("");
+
+        const media = (variant.media || []).map((item) => `
+          <figure class="media-exhibit">
+            <div class="media-surface">${item.html}</div>
+            <figcaption class="media-caption">
+              <b>${escapeHtml(item.label)}</b>
+              <span>${escapeHtml(item.caption)}</span>
+            </figcaption>
+          </figure>
+        `).join("");
+
+        const mediaStory = media ? `<div class="media-story" aria-label="Supporting media for ${escapeHtml(variant.name)}">${media}</div>` : "";
+
+        return `
+          <article class="variant-card" id="card-${escapeHtml(variant.id)}"
+            data-variant="${escapeHtml(variant.id)}"
+            style="--accent:${escapeHtml(variant.accent || "#222")}">
+            <div class="variant-header">
+              <div class="variant-index">V${index + 1}</div>
+              <div class="variant-title">
+                <h3>${escapeHtml(variant.name)}</h3>
+                <p>${escapeHtml(variant.thesis)}</p>
+              </div>
+              <div class="variant-ai-meta">
+                <span class="default-badge">AI pick</span>
+                <span class="variant-score">${result ? `${formatTotal(result.total)} / 100${result.eligible ? "" : " · gate fail"}` : "unscored"}</span>
+              </div>
+            </div>
+            <div class="prototype-frame">
+              <span class="prototype-label">${escapeHtml(variant.previewLabel || "hero specimen")}</span>
+              <div class="prototype">${variant.preview}</div>
+            </div>
+            ${mediaStory}
+            <div class="variant-body">
+              <div class="fit-grid">
+                <div class="fit">
+                  <b>Best when</b>
+                  <span>${escapeHtml(variant.bestWhen)}</span>
+                </div>
+                <div class="fit">
+                  <b>Loses when</b>
+                  <span>${escapeHtml(variant.losesWhen)}</span>
+                </div>
+              </div>
+              <details>
+                <summary>Decisions &amp; prototype evidence</summary>
+                <div class="decision-list">${decisions}</div>
+                <ul class="proof-list">${proof}</ul>
+              </details>
+              <div class="keep-title">Parts worth splicing</div>
+              <div class="keep-list">${keepParts}</div>
+              <details class="variant-note">
+                <summary>Add a note on ${labelFor(variant.id)} (optional)</summary>
+                <textarea class="variant-feedback" data-note="${escapeHtml(variant.id)}"
+                  placeholder="A detail specific to ${escapeHtml(variant.name)}…">${escapeHtml(state.notes[variant.id] || "")}</textarea>
+              </details>
+              <div class="variant-actions">
+                <button type="button" class="action-button pick" data-action="pick" data-id="${escapeHtml(variant.id)}">Pick ${labelFor(variant.id)}</button>
+                <button type="button" class="action-button shortlist" data-action="shortlist" data-id="${escapeHtml(variant.id)}">Shortlist</button>
+                <button type="button" class="action-button reject" data-action="reject" data-id="${escapeHtml(variant.id)}">Reject</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      function saveState() {
+        localStorage.setItem(storageKey, JSON.stringify(state));
+      }
+
+      function updateUi() {
+        variants.forEach((variant, index) => {
+          const card = byId(`card-${variant.id}`);
+          const status = state.statuses[variant.id];
+          card.classList.toggle("is-default", variant.id === project.defaultId);
+          card.classList.toggle("is-picked", state.pick === variant.id);
+          card.classList.toggle("is-shortlisted", status === "shortlist");
+          card.classList.toggle("is-rejected", status === "reject");
+          card.classList.toggle("is-focused", index === state.focusIndex);
+
+          const shortlistButton = card.querySelector('[data-action="shortlist"]');
+          const rejectButton = card.querySelector('[data-action="reject"]');
+          shortlistButton.classList.toggle("active", status === "shortlist");
+          rejectButton.classList.toggle("active", status === "reject");
+          shortlistButton.textContent = status === "shortlist" ? "Shortlisted" : "Shortlist";
+          rejectButton.textContent = status === "reject" ? "Rejected" : "Reject";
+
+          card.querySelectorAll("[data-keep]").forEach((input) => {
+            const selected = state.keeps[variant.id] || [];
+            input.checked = selected.includes(Number(input.dataset.part));
+          });
+        });
+
+        const picked = variants.find((variant) => variant.id === state.pick);
+        const shortlist = variants.filter((variant) => state.statuses[variant.id] === "shortlist");
+        const keptCount = Object.values(state.keeps).reduce((total, parts) => total + parts.length, 0);
+
+        if (picked) {
+          byId("decision-title").textContent = `Pick: ${labelFor(picked.id)} · ${picked.name}`;
+        } else if (shortlist.length) {
+          byId("decision-title").textContent = `Shortlist: ${shortlist.map((variant) => labelFor(variant.id)).join(", ")}`;
+        } else if (state.synthesis.trim()) {
+          byId("decision-title").textContent = "Free-form direction ready";
+        } else {
+          byId("decision-title").textContent = "No pick yet";
+        }
+
+        const details = [];
+        if (!picked && !state.synthesis.trim()) details.push(`AI recommends ${labelFor(defaultVariant.id)}; your direction is still empty`);
+        if (state.synthesis.trim()) details.push("natural-language splice captured");
+        if (keptCount) details.push(`${keptCount} splice part${keptCount === 1 ? "" : "s"} selected`);
+        byId("decision-detail").textContent = details.join(" · ") || "Decision captured locally.";
+      }
+
+      function setStatus(id, status) {
+        if (state.statuses[id] === status) {
+          delete state.statuses[id];
+        } else {
+          state.statuses[id] = status;
+        }
+        if (status === "reject" && state.pick === id) state.pick = null;
+        saveState();
+        updateUi();
+      }
+
+      function setPick(id) {
+        state.pick = state.pick === id ? null : id;
+        if (state.pick) delete state.statuses[id];
+        saveState();
+        updateUi();
+        showToast(state.pick ? `${labelFor(id)} picked` : "Pick cleared");
+      }
+
+      function moveFocus(delta) {
+        state.focusIndex = (state.focusIndex + delta + variants.length) % variants.length;
+        saveState();
+        updateUi();
+        const card = byId(`card-${variants[state.focusIndex].id}`);
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      function focusVariant(index) {
+        if (index < 0 || index >= variants.length) return;
+        state.focusIndex = index;
+        saveState();
+        updateUi();
+        byId(`card-${variants[index].id}`).scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      function setLayout(layout) {
+        state.layout = layout;
+        variantGrid.classList.toggle("focus-layout", layout === "focus");
+        document.querySelectorAll("[data-layout]").forEach((button) => {
+          button.classList.toggle("active", button.dataset.layout === layout);
+        });
+        saveState();
+        updateUi();
+      }
+
+      function markdownBrief() {
+        const picked = variants.find((variant) => variant.id === state.pick);
+        const shortlisted = variants.filter((variant) => state.statuses[variant.id] === "shortlist");
+        const rejected = variants.filter((variant) => state.statuses[variant.id] === "reject");
+        const mdCell = (value) => String(value).replaceAll("|", "\\|").replaceAll("\n", " ");
+        const recommendationText = coLeaders.length > 1
+          ? `Co-leaders: ${coLeaders.map((result) => `${labelFor(result.variant.id)} · ${result.variant.name} (${formatTotal(result.total)})`).join(", ")}`
+          : topResult
+            ? `${labelFor(topResult.variant.id)} · ${topResult.variant.name} (${formatTotal(topResult.total)}/100)`
+            : "No eligible recommendation";
+        const lines = [
+          `# Babble prune — ${project.title}`,
+          "",
+          `**Shared brief:** ${project.brief}`,
+          "",
+          "## AI prune — judgment / ought",
+          "",
+          `**Recommendation:** ${recommendationText}`,
+          `**Why:** ${project.defaultWhy}`,
+          `**Decision hinge:** ${project.decisionHinge}`,
+          "",
+          "> FR weights, scores, and recommendation are AI judgments. Exercised prototype behavior is evidence; production integration remains outside the prototype boundary.",
+          "",
+          "### Weighted functional requirements",
+          ""
+        ];
+
+        requirements.forEach((requirement) => {
+          lines.push(
+            `- **${requirement.id} · ${requirement.name} — ${requirement.weight}%:** ${requirement.why}`,
+            `  - Pass: ${requirement.passCondition}`,
+            `  - Anchors: 1 = ${requirement.anchors?.["1"] || "—"}; 3 = ${requirement.anchors?.["3"] || "—"}; 5 = ${requirement.anchors?.["5"] || "—"}`
+          );
+        });
+
+        lines.push("", "### Ranked score matrix", "");
+        lines.push(
+          `| Rank | Option | ${requirements.map((requirement) => mdCell(requirement.id)).join(" | ")} | Weighted | Gates |`,
+          `| ---: | --- | ${requirements.map(() => "---:").join(" | ")} | ---: | --- |`
+        );
+        rankedResults.forEach((result, index) => {
+          const scores = requirements.map(
+            (requirement) => result.variant.scores?.[requirement.id]?.score ?? "—"
+          );
+          lines.push(
+            `| ${index + 1} | ${mdCell(`${labelFor(result.variant.id)} · ${result.variant.name}`)} | ${scores.join(" | ")} | ${formatTotal(result.total)} | ${result.eligible ? "pass" : `fail: ${result.failedGates.map((gate) => gate.name).join(", ")}`} |`
+          );
+        });
+
+        lines.push("", "### Score evidence — observed is, interpreted as ought", "");
+        rankedResults.forEach((result) => {
+          lines.push(`#### ${labelFor(result.variant.id)} · ${result.variant.name} — ${formatTotal(result.total)}/100`, "");
+          requirements.forEach((requirement) => {
+            const entry = result.variant.scores?.[requirement.id] || {};
+            lines.push(`- **${requirement.id}: ${entry.score ?? "—"}/5 · ${entry.confidence || "unknown"} confidence.** ${entry.evidence || "No evidence supplied."}`);
+          });
+          lines.push("");
+        });
+
+        lines.push("### Hard gates", "");
+        if (!hardGates.length) {
+          lines.push("- No separate hard gates in this round.", "");
+        } else {
+          hardGates.forEach((gate) => {
+            lines.push(`- **${gate.name}:** ${gate.why}`);
+            variants.forEach((variant) => {
+              const entry = variant.gateResults?.[gate.id] || {};
+              lines.push(`  - ${labelFor(variant.id)} ${entry.pass === true ? "PASS" : "FAIL"} — ${entry.evidence || "No evidence supplied."}`);
+            });
+          });
+          lines.push("");
+        }
+
+        lines.push(
+          "## Human prune — your decision",
+          "",
+          `**Decision:** ${picked ? `${labelFor(picked.id)} · ${picked.name}` : "No final pick"}`,
+          `**AI recommendation (advisory):** ${recommendationText}`,
+          `**Shortlist:** ${shortlisted.length ? shortlisted.map((variant) => `${labelFor(variant.id)} · ${variant.name}`).join(", ") : "none"}`,
+          `**Rejected:** ${rejected.length ? rejected.map((variant) => `${labelFor(variant.id)} · ${variant.name}`).join(", ") : "none"}`,
+          ""
+        );
+
+        const keepLines = variants.flatMap((variant) => {
+          const selected = state.keeps[variant.id] || [];
+          return selected.map((partIndex) => `- ${labelFor(variant.id)} · ${variant.keepParts[partIndex]}`);
+        });
+        lines.push("## Keep / splice", ...(keepLines.length ? keepLines : ["- none selected"]), "");
+
+        const feedbackLines = variants
+          .filter((variant) => (state.notes[variant.id] || "").trim())
+          .map((variant) => `- **${labelFor(variant.id)} · ${variant.name}:** ${state.notes[variant.id].trim()}`);
+        lines.push("## Variant feedback", ...(feedbackLines.length ? feedbackLines : ["- none"]), "");
+
+        lines.push("## Free-form direction", state.synthesis.trim() || "Not supplied.", "");
+        lines.push("## Prototype boundary", project.boundary, "");
+
+        if (picked || keepLines.length) {
+          lines.push("## Next", "Synthesize a new child prototype from this decision before production implementation.");
+        } else {
+          lines.push("## Next", `Review ${labelFor(defaultVariant.id)} as the AI recommendation, then pick, shortlist, reject, or splice before production implementation.`);
+        }
+        return lines.join("\n");
+      }
+
+      function compactDirection() {
+        const picked = variants.find((variant) => variant.id === state.pick);
+        const shortlisted = variants.filter((variant) => state.statuses[variant.id] === "shortlist");
+        const kept = variants.flatMap((variant) => {
+          const selected = state.keeps[variant.id] || [];
+          return selected.map((partIndex) => `${labelFor(variant.id)}: ${variant.keepParts[partIndex]}`);
+        });
+        const notes = variants
+          .filter((variant) => (state.notes[variant.id] || "").trim())
+          .map((variant) => `${labelFor(variant.id)}: ${state.notes[variant.id].trim()}`);
+        const fileName = decodeURIComponent(location.pathname.split("/").pop() || "babble-gallery.html");
+        return [
+          `# Babble direction — ${project.title}`,
+          `Gallery: ${fileName}`,
+          "",
+          `Pick: ${picked ? `${labelFor(picked.id)} · ${picked.name}` : "none"}`,
+          `Shortlist: ${shortlisted.length ? shortlisted.map((variant) => labelFor(variant.id)).join(", ") : "none"}`,
+          `Keep / borrow: ${kept.length ? kept.join("; ") : "none selected"}`,
+          ...(notes.length ? ["", "Variant notes:", ...notes.map((note) => `- ${note}`)] : []),
+          "",
+          "Direction:",
+          state.synthesis.trim() || "No free-form direction supplied."
+        ].join("\n");
+      }
+
+      async function copyMarkdown() {
+        const markdown = compactDirection();
+        try {
+          await navigator.clipboard.writeText(markdown);
+        } catch {
+          const fallback = document.createElement("textarea");
+          fallback.value = markdown;
+          fallback.style.position = "fixed";
+          fallback.style.opacity = "0";
+          document.body.appendChild(fallback);
+          fallback.select();
+          document.execCommand("copy");
+          fallback.remove();
+        }
+        showToast("Direction copied as Markdown");
+      }
+
+      function downloadMarkdown() {
+        const blob = new Blob([markdownBrief()], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        const slug = project.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        anchor.href = url;
+        anchor.download = `${slug || "babble"}-prune.md`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+        showToast("Markdown decision downloaded");
+      }
+
+      let toastTimer;
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+      }
+
+      document.addEventListener("click", (event) => {
+        const actionButton = event.target.closest("[data-action]");
+        if (actionButton) {
+          const { action, id } = actionButton.dataset;
+          if (action === "pick") setPick(id);
+          if (action === "shortlist") setStatus(id, "shortlist");
+          if (action === "reject") setStatus(id, "reject");
+          return;
+        }
+
+        const layoutButton = event.target.closest("[data-layout]");
+        if (layoutButton) {
+          setLayout(layoutButton.dataset.layout);
+          return;
+        }
+
+        const demoButton = event.target.closest("[data-demo-toggle]");
+        if (demoButton) {
+          const prototype = demoButton.closest(".prototype");
+          const isAlt = prototype.classList.toggle("is-alt");
+          demoButton.textContent = isAlt ? demoButton.dataset.altLabel : demoButton.dataset.baseLabel;
+        }
+      });
+
+      document.addEventListener("change", (event) => {
+        const keepInput = event.target.closest("[data-keep]");
+        if (!keepInput) return;
+        const id = keepInput.dataset.keep;
+        const partIndex = Number(keepInput.dataset.part);
+        const selected = new Set(state.keeps[id] || []);
+        if (keepInput.checked) selected.add(partIndex);
+        else selected.delete(partIndex);
+        state.keeps[id] = [...selected].sort((left, right) => left - right);
+        saveState();
+        updateUi();
+      });
+
+      document.addEventListener("input", (event) => {
+        const note = event.target.closest("[data-note]");
+        if (note) {
+          state.notes[note.dataset.note] = note.value;
+          saveState();
+        }
+        if (event.target.id === "global-synthesis") {
+          state.synthesis = event.target.value;
+          saveState();
+          updateUi();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        const typing = event.target.matches("input, textarea, [contenteditable='true']");
+        if (typing) return;
+
+        const numericIndex = event.key === "0" ? 9 : Number(event.key) - 1;
+        if (Number.isInteger(numericIndex) && numericIndex >= 0) {
+          focusVariant(numericIndex);
+          return;
+        }
+
+        if (event.key === "j" || event.key === "J" || event.key === "ArrowDown" || event.key === "ArrowRight") {
+          event.preventDefault();
+          moveFocus(1);
+        } else if (event.key === "k" || event.key === "K" || event.key === "ArrowUp" || event.key === "ArrowLeft") {
+          event.preventDefault();
+          moveFocus(-1);
+        } else if (event.key === "Enter") {
+          setPick(variants[state.focusIndex].id);
+        } else if (event.key === "s" || event.key === "S") {
+          setStatus(variants[state.focusIndex].id, "shortlist");
+        } else if (event.key === "r" || event.key === "R") {
+          setStatus(variants[state.focusIndex].id, "reject");
+        } else if (event.key === "c" || event.key === "C") {
+          copyMarkdown();
+        }
+      });
+
+      byId("previous-variant").addEventListener("click", () => moveFocus(-1));
+      byId("next-variant").addEventListener("click", () => moveFocus(1));
+      byId("copy-prune").addEventListener("click", copyMarkdown);
+      byId("download-prune").addEventListener("click", downloadMarkdown);
+      byId("reset-prune").addEventListener("click", () => {
+        state = blankState();
+        byId("global-synthesis").value = "";
+        document.querySelectorAll("[data-note]").forEach((note) => { note.value = ""; });
+        setLayout("grid");
+        saveState();
+        updateUi();
+        showToast("Local choices reset");
+      });
+    })();
+  </script>
+</body>
+</html>

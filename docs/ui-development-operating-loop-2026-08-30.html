@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SystemSketch UI development operating loop</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17191d;
+      --muted: #656b75;
+      --paper: #f5f2ea;
+      --panel: #fffdf8;
+      --line: #d8d2c6;
+      --accent: #215e4f;
+      --accent-soft: #dcebe4;
+      --warn: #a0442f;
+      --warn-soft: #f5dfd7;
+      --gold: #bc842e;
+      --shadow: 0 18px 50px rgba(34, 31, 26, .10);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(188, 132, 46, .14), transparent 25rem),
+        radial-gradient(circle at 88% 15%, rgba(33, 94, 79, .12), transparent 28rem),
+        var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    a { color: inherit; }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 56px 0 80px;
+    }
+
+    .eyebrow {
+      margin: 0 0 14px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      max-width: 900px;
+      margin-bottom: 20px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(42px, 7vw, 82px);
+      font-weight: 500;
+      letter-spacing: -.045em;
+      line-height: .98;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 500;
+      letter-spacing: -.025em;
+      line-height: 1.08;
+    }
+
+    h3 { margin-bottom: 8px; font-size: 17px; }
+
+    .lede {
+      max-width: 810px;
+      margin-bottom: 32px;
+      color: #34383f;
+      font-size: clamp(18px, 2.2vw, 24px);
+      line-height: 1.42;
+    }
+
+    .verdict {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 50px;
+      padding: 10px 14px;
+      border: 1px solid rgba(33, 94, 79, .24);
+      border-radius: 999px;
+      background: rgba(220, 235, 228, .7);
+      color: var(--accent);
+      font-weight: 750;
+    }
+
+    .verdict::before {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      content: "";
+    }
+
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 0 0 70px;
+    }
+
+    .metric {
+      min-height: 160px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 253, 248, .78);
+      box-shadow: 0 8px 24px rgba(34, 31, 26, .05);
+    }
+
+    .metric strong {
+      display: block;
+      margin-bottom: 8px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 38px;
+      font-weight: 500;
+      letter-spacing: -.03em;
+    }
+
+    .metric span { color: var(--muted); font-size: 14px; }
+
+    .metric.warn strong { color: var(--warn); }
+
+    section { margin-top: 76px; }
+
+    .section-intro {
+      max-width: 760px;
+      margin-bottom: 26px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .loop-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .loop {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .loop header { padding: 22px 24px 4px; }
+
+    .loop header p { margin-bottom: 8px; color: var(--muted); font-size: 14px; }
+
+    .loop ol {
+      display: grid;
+      gap: 0;
+      margin: 0;
+      padding: 12px 24px 26px;
+      list-style: none;
+      counter-reset: loop;
+    }
+
+    .loop li {
+      position: relative;
+      min-height: 54px;
+      padding: 11px 12px 11px 54px;
+      border-bottom: 1px solid #ebe6dc;
+      counter-increment: loop;
+    }
+
+    .loop li:last-child { border-bottom: 0; }
+
+    .loop li::before {
+      position: absolute;
+      left: 8px;
+      top: 11px;
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--warn-soft);
+      color: var(--warn);
+      content: counter(loop);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .loop.good li::before { background: var(--accent-soft); color: var(--accent); }
+
+    .loop b { display: block; font-size: 15px; }
+
+    .loop small { color: var(--muted); }
+
+    .micro-v {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 100px 1fr;
+      gap: 16px;
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .v-side { display: grid; gap: 14px; }
+
+    .v-step {
+      padding: 16px 18px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: #fff;
+    }
+
+    .v-step span {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .v-step strong { font-size: 16px; }
+
+    .v-center {
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+    }
+
+    .v-center svg { width: 84px; height: 250px; overflow: visible; }
+
+    .v-center path { fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: 4; }
+
+    .slice-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr);
+      gap: 26px;
+      padding: 30px;
+      border-radius: 24px;
+      background: #17211e;
+      color: #f8f6ef;
+      box-shadow: 0 22px 60px rgba(23, 33, 30, .22);
+    }
+
+    .slice-card .eyebrow { color: #8dd1bd; }
+
+    .slice-card h2 { max-width: 700px; }
+
+    .slice-card p { color: #c9d1ce; }
+
+    .acceptance {
+      display: grid;
+      gap: 8px;
+      margin-top: 22px;
+    }
+
+    .acceptance label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,.11);
+      border-radius: 12px;
+      background: rgba(255,255,255,.045);
+      cursor: pointer;
+    }
+
+    .acceptance input { margin-top: 4px; accent-color: #8dd1bd; }
+
+    .acceptance label:has(input:checked) { opacity: .58; }
+
+    .acceptance label:has(input:checked) span { text-decoration: line-through; }
+
+    .scope-box {
+      align-self: start;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 16px;
+      background: rgba(255,255,255,.06);
+    }
+
+    .scope-box h3 { color: #f3bd68; }
+
+    .scope-box ul { margin: 12px 0 0; padding-left: 20px; color: #c9d1ce; }
+
+    .scope-box li + li { margin-top: 8px; }
+
+    .progress {
+      overflow: hidden;
+      height: 8px;
+      margin-top: 18px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+    }
+
+    .progress span {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: #8dd1bd;
+      transition: width .25s ease;
+    }
+
+    .guardrails {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .guardrail {
+      padding: 22px;
+      border-top: 4px solid var(--accent);
+      border-radius: 4px 4px 16px 16px;
+      background: rgba(255,253,248,.82);
+    }
+
+    .guardrail p { margin-bottom: 0; color: var(--muted); font-size: 14px; }
+
+    .stop {
+      margin-top: 30px;
+      padding: 22px 24px;
+      border: 1px solid rgba(160, 68, 47, .25);
+      border-radius: 16px;
+      background: var(--warn-soft);
+      color: #6f2e1e;
+      font-size: 17px;
+    }
+
+    .sources {
+      padding-top: 26px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .sources a { color: var(--accent); }
+
+    @media (max-width: 840px) {
+      .evidence-grid, .guardrails { grid-template-columns: 1fr 1fr; }
+      .loop-compare, .slice-card { grid-template-columns: 1fr; }
+      .micro-v { grid-template-columns: 1fr; }
+      .v-center { display: none; }
+    }
+
+    @media (max-width: 540px) {
+      main { width: min(100% - 20px, 1180px); padding-top: 34px; }
+      .evidence-grid, .guardrails { grid-template-columns: 1fr; }
+      .metric { min-height: auto; }
+      .micro-v, .slice-card { padding: 20px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .progress span { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">SystemSketch · development operating loop · Aug 30 2026</p>
+    <h1>Speed is how quickly you close a learning loop.</h1>
+    <p class="lede">The bottleneck is not code generation or test count. It is the rate at which one coherent user behavior moves from hypothesis → real app → human acceptance. AI slop appears when implementation batches grow faster than that judgment loop can close.</p>
+    <div class="verdict">One closed-loop feature at a time—not one “robust subsystem” at a time.</div>
+
+    <div class="evidence-grid" aria-label="Repository evidence">
+      <article class="metric warn"><strong>131k</strong><span>tracked TS/TSX/CSS/Python lines accumulated in the prior pyblocks repository snapshot.</span></article>
+      <article class="metric warn"><strong>1,006</strong><span>tracked files in that repository after the Aug 24–26 build burst.</span></article>
+      <article class="metric warn"><strong>400</strong><span>current pyblocks WIP items: 109 modified/deleted tracked files + 291 untracked files.</span></article>
+      <article class="metric"><strong>513</strong><span>green Python + Vitest checks in the archived hardening pass—yet the product still needed a restart.</span></article>
+    </div>
+
+    <section>
+      <p class="eyebrow">The diagnosis</p>
+      <h2>Local rigor, global drift</h2>
+      <p class="section-intro">The individual bricks were often tested. The wall kept changing shape. That is why “add more tests” did not solve the felt problem.</p>
+      <div class="loop-compare">
+        <article class="loop">
+          <header><h3>The loop that produced the restart</h3><p>Large batch; validation arrives late.</p></header>
+          <ol>
+            <li><b>Expand the product concept</b><small>Whiteboard + blocks + pipeline + hosts + file formats.</small></li>
+            <li><b>Generate many locally complete features</b><small>Each request looks reasonable in isolation.</small></li>
+            <li><b>Harden the whole system</b><small>Hundreds of tests pin a moving design.</small></li>
+            <li><b>Use it and find interaction seams</b><small>The human feedback queue opens after the batch exists.</small></li>
+            <li><b>Accumulate exceptions and regressions</b><small>Tests protect yesterday's assumptions.</small></li>
+            <li><b>Restart from a clean substrate</b><small>Coherence is recovered by discarding integration debt.</small></li>
+          </ol>
+        </article>
+
+        <article class="loop good">
+          <header><h3>The loop to run now</h3><p>Small batch; validation is inside the slice.</p></header>
+          <ol>
+            <li><b>Name one real user task</b><small>Not a component, layer, or visual language.</small></li>
+            <li><b>Write its proof before code</b><small>Automation + the human use that would make it valuable.</small></li>
+            <li><b>Build the thinnest vertical path</b><small>Use stock behavior everywhere else.</small></li>
+            <li><b>Run one real-browser journey</b><small>Exercise input, persistence, and the integration seam.</small></li>
+            <li><b>Use it for a real sketch</b><small>Zach accepts, rejects, or names one friction point.</small></li>
+            <li><b>Harden only what failed</b><small>Publish, then start the next behavior.</small></li>
+          </ol>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <p class="eyebrow">How to use the NASA V</p>
+      <h2>Run a micro‑V per behavior</h2>
+      <p class="section-intro">The V is not “specify high-level, let AI fill the bottom.” Its leverage is the direct pairing between every definition on the left and its evidence on the right. UI discovery still needs the final human-use gate.</p>
+      <div class="micro-v">
+        <div class="v-side">
+          <div class="v-step"><span>Need</span><strong>What real task becomes easier?</strong></div>
+          <div class="v-step"><span>Observable behavior</span><strong>What can the user do, from start to finish?</strong></div>
+          <div class="v-step"><span>Smallest design</span><strong>What is the least code that can expose the risky seam?</strong></div>
+        </div>
+        <div class="v-center" aria-hidden="true">
+          <svg viewBox="0 0 90 250"><path d="M8 10 L45 226 L82 10"/><circle cx="45" cy="226" r="7" fill="currentColor"/></svg>
+        </div>
+        <div class="v-side">
+          <div class="v-step"><span>Implementation proof</span><strong>Unit/component checks for the changed model.</strong></div>
+          <div class="v-step"><span>Integration proof</span><strong>One physical browser journey in the deployed app.</strong></div>
+          <div class="v-step"><span>Validation</span><strong>Zach completes the real task and chooses to keep using it.</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="slice-card">
+        <div>
+          <p class="eyebrow">Recommended first slice</p>
+          <h2>Sketch three BAM components, connect them, reload, and keep editing.</h2>
+          <p>This tests the product's actual spine—blocks + linking + persistence—while stock tldraw carries every generic whiteboard behavior.</p>
+          <div class="acceptance" id="acceptance">
+            <label><input type="checkbox" /><span>Create three minimal named blocks without leaving the canvas.</span></label>
+            <label><input type="checkbox" /><span>Connect A → B → C with stable endpoint identity.</span></label>
+            <label><input type="checkbox" /><span>Reload the actual deployed app; names, placement, and links survive.</span></label>
+            <label><input type="checkbox" /><span>Rename or move B; both links remain attached and undo works.</span></label>
+            <label><input type="checkbox" /><span>Use it to describe one real BAM subsystem—not a demo fixture.</span></label>
+            <label><input type="checkbox" /><span>Accept the interaction before starting another product behavior.</span></label>
+          </div>
+          <div class="progress" aria-label="Acceptance progress"><span id="progress"></span></div>
+        </div>
+        <aside class="scope-box">
+          <h3>Explicitly not in this slice</h3>
+          <ul>
+            <li>Excalidraw chrome parity</li>
+            <li>Ports or expanded block internals</li>
+            <li>Markdown, code, or image cards</li>
+            <li>Obsidian / VS Code hosts</li>
+            <li>Branch or release-management UX</li>
+            <li>A generalized semantic schema</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section>
+      <p class="eyebrow">Operating guardrails</p>
+      <h2>The rules that keep AI speed additive</h2>
+      <div class="guardrails">
+        <article class="guardrail"><h3>WIP = 1 behavior</h3><p>Agents may parallelize research, variants, and tests for the same slice. They do not begin adjacent product behaviors before acceptance.</p></article>
+        <article class="guardrail"><h3>Fixed appetite</h3><p>Give the slice one day or another explicit budget. Scope is variable; the time and proof are fixed.</p></article>
+        <article class="guardrail"><h3>Independent oracle</h3><p>Reference app for familiar gestures, browser behavior script for mechanics, real human task for usefulness. The evolving app never grades itself alone.</p></article>
+        <article class="guardrail"><h3>Diff must be reviewable</h3><p>If the behavioral change cannot be explained and inspected in roughly 15 minutes, the batch is already too large.</p></article>
+        <article class="guardrail"><h3>Delete and defer</h3><p>Every slice carries a visible non-goals list. A good adjacent idea is parked, not quietly absorbed.</p></article>
+        <article class="guardrail"><h3>Done includes use</h3><p>Green tests mean verified. A real task completed without unacceptable friction means validated. Both are required.</p></article>
+      </div>
+      <p class="stop"><strong>Immediate sequencing call:</strong> keep stock tldraw chrome. Do not port the Excalidraw interface next. Close the block → link → reload → edit loop first; copy an Excalidraw behavior only when that real workflow exposes a specific friction.</p>
+    </section>
+
+    <section class="sources">
+      <p><strong>Method sources:</strong> NASA pairs left-side definition with right-side verification and distinguishes verification from system-level validation in the <a href="https://www.nasa.gov/wp-content/uploads/2018/09/nasa_systems_engineering_handbook_0.pdf">NASA Systems Engineering Handbook</a>. DORA reports that small batches and WIP limits improve feedback and are especially important when AI increases output velocity: <a href="https://dora.dev/capabilities/working-in-small-batches/">small batches</a> · <a href="https://dora.dev/capabilities/wip-limits/">WIP limits</a>. Basecamp's <a href="https://basecamp.com/shapeup/0.3-chapter-01">Shape Up</a> describes integrated teams building vertical slices one at a time.</p>
+      <p><strong>Local evidence snapshot:</strong> direct inspection of <code>/home/bam/pyblocks</code>, <code>/home/bam/systemsketch</code>, and Zach's Aug 24–30 project notes on Aug 30 2026. Counts are descriptive evidence, not a code-quality score.</p>
+    </section>
+  </main>
+
+  <script>
+    const checks = Array.from(document.querySelectorAll('#acceptance input'))
+    const progress = document.querySelector('#progress')
+    function updateProgress() {
+      const complete = checks.filter((check) => check.checked).length
+      progress.style.width = `${(complete / checks.length) * 100}%`
+      progress.parentElement.setAttribute('aria-label', `${complete} of ${checks.length} acceptance checks complete`)
+    }
+    checks.forEach((check) => check.addEventListener('change', updateProgress))
+    updateProgress()
+  </script>
+</body>
+</html>

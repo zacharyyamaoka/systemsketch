@@ -1,0 +1,303 @@
+{
+  "schemaVersion": 3,
+  "title": "Five ways to switch and sunset SystemSketch previews",
+  "kicker": "SystemSketch · /babble 5 · Aug 31, 2026",
+  "brief": "Generalize the current Stable → Preview action into named development presets that can open stock tldraw plus one feature, small feature variants on the product UI, or larger compositions—then retire previews without weakening the immutable Stable escape hatch.",
+  "count": 5,
+  "defaultId": "v1",
+  "defaultWhy": "Preset Shelf is the provisional default at 95.6/100. It gives Zach the low-cognitive-load preset model he is reaching for, makes lifecycle state visible, and maps onto the current one-Stable-server + one-live-Preview-server design without inventing another runtime per preset.",
+  "decisionHinge": "The recommendation depends on whether this is primarily a human switching surface or an agent/reproducibility protocol. If shareable URLs and source-controlled definitions become more important than browsing and lifecycle visibility, V5 Manifest Router should supply the substrate—or replace the visible shelf entirely.",
+  "invariants": [
+    "The ordinary app entry remains the immutable verified Stable safety anchor.",
+    "All development presets reuse one live Preview/Vite server; presets do not create codebases or ports.",
+    "Every Preview opens an independent board snapshot or read-only view; Stable and Preview never autosave the same real .tldr file.",
+    "Composition is selected before the tldraw editor mounts, because registered shapes, tools, and schema are construction-time capabilities.",
+    "Preset selection and lifecycle metadata live outside .tldr document content."
+  ],
+  "boundary": "Standalone interactive UI/architecture prototypes using the same Robot sorter.tldr scenario. Switching, story controls, picks, and lifecycle state are real inside the gallery; no launcher endpoint, preset registry, profile composition, clone creation, or production SystemSketch UI has been implemented.",
+  "axes": [
+    {"name": "Mental model", "values": ["named catalog", "build × composition matrix", "temporary sessions", "capability stack", "URL/manifest router"]},
+    {"name": "Primary object", "values": ["preset", "coordinate", "running preview", "layer recipe", "route"]},
+    {"name": "Sunset model", "values": ["archive then remove", "disable a row/column", "TTL unless pinned", "delete recipe, retain layers", "tombstone and successor"]},
+    {"name": "Control surface", "values": ["in-app shelf", "configuration grid", "session dock", "composition workbench", "command palette"]}
+  ],
+  "requirements": [
+    {
+      "id": "fr1",
+      "name": "Focused one-step switching",
+      "weight": 28,
+      "why": "The point is to isolate one subassembly without dragging volatile UI or unrelated work back into attention.",
+      "passCondition": "From Stable, Zach can identify and open Block Dev as stock tldraw + Block in one obvious action without reconstructing its configuration.",
+      "anchors": {
+        "1": "Requires remembering flags, rebuilding a configuration, or navigating several unrelated controls.",
+        "3": "The target is reachable but the choice or its consequences require interpretation.",
+        "5": "The named target and what it includes are immediately legible and open in one action."
+      }
+    },
+    {
+      "id": "fr2",
+      "name": "Composition range without conceptual lies",
+      "weight": 22,
+      "why": "The system should support isolated features and small variants on the full UI, while keeping build, composition, and document policy distinct.",
+      "passCondition": "The model can represent stock + Block, product shell + Block variant, and larger recipes without pretending each is a release or separate server.",
+      "anchors": {
+        "1": "Supports one special-case Preview only or conflates release and composition.",
+        "3": "Supports common named recipes but makes novel combinations awkward.",
+        "5": "Represents arbitrary valid compositions while keeping build and document policy explicit."
+      }
+    },
+    {
+      "id": "fr3",
+      "name": "Safety boundary stays unmistakable",
+      "weight": 20,
+      "why": "A feature-preview mechanism is useful only if broken work cannot strand or silently overwrite the real working document.",
+      "passCondition": "Stable remains visibly immutable and every experimental target visibly opens an independent duplicate on the live working tree.",
+      "anchors": {
+        "1": "The user can plausibly mistake a composition for Stable or create competing writers.",
+        "3": "The safety policy exists but is revealed late or inconsistently.",
+        "5": "Channel, composition, and document ownership are visible before launch and remain visible afterward."
+      }
+    },
+    {
+      "id": "fr4",
+      "name": "Clean sunset and historical clarity",
+      "weight": 18,
+      "why": "Temporary previews should disappear from the active surface without breaking links silently or turning the selector into an attic.",
+      "passCondition": "Block Dev can be retired in one understandable action; active lists stay clean and an old reference explains what replaced it or that it is gone.",
+      "anchors": {
+        "1": "Retirement means an unexplained 404, stale menu item, or manual cleanup in several places.",
+        "3": "The preview can be hidden or deleted, but old references and replacement paths are weak.",
+        "5": "Active, archived, successor, and eventual removal states are explicit and low-maintenance."
+      }
+    },
+    {
+      "id": "fr5",
+      "name": "Fit with the current implementation",
+      "weight": 12,
+      "why": "SystemSketch already has one Stable server, one live Vite Preview, snapshot handoff, launch URLs, and a quiet Help/update surface.",
+      "passCondition": "The proposal extends those seams with a small preset registry and URL parameter rather than replacing the release architecture.",
+      "anchors": {
+        "1": "Requires new processes, duplicated builds, or a broad launcher rewrite.",
+        "3": "Reuses the core but adds significant new state or coordination machinery.",
+        "5": "Adds a small declarative registry and routes through the existing clone/launch transaction."
+      }
+    }
+  ],
+  "hardGates": [
+    {"id": "g1", "name": "Stable remains the ordinary immutable entry", "why": "A preset system must never weaken the recovery anchor."},
+    {"id": "g2", "name": "No two writers on one .tldr", "why": "Every experimental launch must preserve the existing independent-copy safety rule."},
+    {"id": "g3", "name": "Composition is document-neutral", "why": "Choosing or sunsetting a preset must not mutate board content; registered capabilities are chosen before mount."}
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "Preset Shelf",
+      "thesis": "Treat each useful build + composition + document policy as one named launch recipe in a small human-readable catalog.",
+      "accent": "#287451",
+      "bestWhen": "Zach usually wants a known working context—Block Dev, Rows Lab, Full Preview—without rebuilding its ingredients.",
+      "losesWhen": "Novel ad-hoc combinations are more common than recurring presets, or automation is the only consumer.",
+      "decisions": [
+        {"label": "Primary object", "value": "A named preset whose details expand to build, shell, capabilities, and document policy."},
+        {"label": "Launch", "value": "One click snapshots the Stable board and opens the preset on the existing Preview server."},
+        {"label": "Sunset", "value": "Archive hides it from Active, preserves old URLs with a successor for one release, then removal is safe."}
+      ],
+      "keepParts": ["named launch recipes", "Active / Archived lifecycle", "visible build + document policy"],
+      "proof": [
+        "The hero opens on the same Stable Robot sorter.tldr context and makes Block Dev legible as stock + Block + independent copy.",
+        "The direct Sunset action moves Block Dev out of the active shelf and leaves an archived successor notice."
+      ],
+      "scores": {
+        "fr1": {"score": 5, "evidence": "Block Dev is a named card with its exact composition and a single Open action; no axes must be reconstructed.", "confidence": "high"},
+        "fr2": {"score": 4, "evidence": "Any valid recipe can be named, but novel combinations require creating another preset or dropping to an advanced surface.", "confidence": "high"},
+        "fr3": {"score": 5, "evidence": "The current Stable anchor and Block Dev's Live working tree + independent copy policy are visible together before launch.", "confidence": "high"},
+        "fr4": {"score": 5, "evidence": "The exercised state change removes the card from Active while retaining an archived row and successor explanation.", "confidence": "high"},
+        "fr5": {"score": 5, "evidence": "The card can compile to the existing previewClone + launch URL transaction and needs only a small recipe registry.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "Stable remains the fixed first card and is not editable from the shelf."},
+        "g2": {"pass": true, "evidence": "Every development card explicitly launches an independent copy."},
+        "g3": {"pass": true, "evidence": "Recipe selection is launcher state and all capability labels are resolved before the preview editor mounts."}
+      },
+      "previewLabel": "interactive preset catalog",
+      "story": {
+        "title": "Open, then retire Block Dev",
+        "steps": [
+          {"label": "Read the recipe", "caption": "Block Dev names stock chrome, the Block capability, the live build, and the independent-copy rule before launch.", "state": "base", "target": "[data-demo-toggle]"},
+          {"label": "Sunset it", "caption": "The active shelf stays clean while an archived row explains that Rows Lab replaces Block Dev.", "state": "alt", "target": "[data-demo-toggle]"}
+        ]
+      },
+      "media": [
+        {"label": "Lifecycle", "caption": "Sunsetting is a lifecycle transition, not deletion of a build or server.", "html": "<div class=\"ss-lifecycle\"><span class=\"on\">Active</span><b>→</b><span>Archived · successor</span><b>→</b><span>Removed after 1 release</span></div>"}
+      ],
+      "preview": "<div class=\"ss-mock\"><div class=\"ss-canvas\"><div class=\"ss-file\"><i></i><b>Robot sorter.tldr</b><span>Saved · Stable 0.1.0</span></div><div class=\"ss-block\"><small>camera</small><b>Sort item</b><span>image → class</span></div><div class=\"ss-wire\"></div></div><section class=\"ss-panel ss-shelf\"><header><div><small>DEVELOPMENT</small><h3>Preview presets</h3></div><span class=\"ss-chip safe\">Stable stays open</span></header><div class=\"ss-stable-row\"><b>Stable</b><span>Verified build · original file</span><em>Current</em></div><div class=\"demo-base-only\"><article class=\"ss-preset active\"><div><i class=\"ss-icon\">B</i><span><b>Block Dev</b><small>Live tree · Stock tldraw + Block</small></span></div><span class=\"ss-copy\">Independent copy ↗</span></article><article class=\"ss-preset\"><div><i class=\"ss-icon\">▦</i><span><b>Rows Lab</b><small>Live tree · Stock + Block + Grid</small></span></div><span class=\"ss-copy\">Independent copy ↗</span></article></div><div class=\"demo-alt-only\"><article class=\"ss-preset\"><div><i class=\"ss-icon\">▦</i><span><b>Rows Lab</b><small>Live tree · Stock + Block + Grid</small></span></div><span class=\"ss-copy\">Independent copy ↗</span></article><div class=\"ss-archive-row\"><b>Block Dev archived</b><span>Old links explain: replaced by Rows Lab</span></div></div><button class=\"demo-button\" data-demo-toggle data-base-label=\"Sunset Block Dev\" data-alt-label=\"Restore Block Dev\">Sunset Block Dev</button></section></div>"
+    },
+    {
+      "id": "v2",
+      "name": "Build × Composition Matrix",
+      "thesis": "Expose the real dimensions directly: choose a build row, a composition column, and let the selected cell define the launch target.",
+      "accent": "#356da8",
+      "bestWhen": "Zach regularly compares the same composition across Stable and live work, and wants invalid combinations made explicit.",
+      "losesWhen": "The goal is focused feature work; a Cartesian grid makes simple named jobs feel like configuration.",
+      "decisions": [
+        {"label": "Primary object", "value": "A coordinate in build × composition space rather than a named bundle."},
+        {"label": "Launch", "value": "Selecting a valid cell previews its exact build and feature registration before opening."},
+        {"label": "Sunset", "value": "Retire a composition column; historical builds retain disabled cells rather than active menu entries."}
+      ],
+      "keepParts": ["explicit orthogonal dimensions", "invalid-cell explanation", "same composition across builds"],
+      "proof": [
+        "The matrix distinguishes verified Stable from the live working tree and product, stock, Block, and Rows compositions.",
+        "The Sunset interaction disables the Block column and identifies Rows as its successor."
+      ],
+      "scores": {
+        "fr1": {"score": 3, "evidence": "Block Dev is visible, but the user must interpret a row/column coordinate and disabled cells before launching.", "confidence": "high"},
+        "fr2": {"score": 5, "evidence": "Build and composition remain genuinely orthogonal and every valid combination has an explicit cell.", "confidence": "high"},
+        "fr3": {"score": 4, "evidence": "Rows make build identity clear and Preview cells say copy, though the dense grid can still blur the primary safe path.", "confidence": "medium"},
+        "fr4": {"score": 3, "evidence": "A column can be disabled, but retirement leaves historical/invalid cells and needs explanation in several places.", "confidence": "high"},
+        "fr5": {"score": 3, "evidence": "The underlying launch can reuse current seams, but the matrix and validity logic add state beyond a small preset registry.", "confidence": "medium"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "Stable is a fixed build row; unavailable feature compositions are disabled, not synthesized."},
+        "g2": {"pass": true, "evidence": "All live-row launches display Copy before opening."},
+        "g3": {"pass": true, "evidence": "The cell resolves a composition before mount and never writes the board."}
+      },
+      "previewLabel": "interactive configuration matrix",
+      "story": {
+        "title": "See the coordinate, then retire a column",
+        "steps": [
+          {"label": "Read build and composition separately", "caption": "The selected live × Block cell exposes the two axes without calling the composition a release.", "state": "base", "target": "[data-demo-toggle]"},
+          {"label": "Retire Block", "caption": "The whole Block column becomes historical while Rows remains a valid live target.", "state": "alt", "target": "[data-demo-toggle]"}
+        ]
+      },
+      "media": [
+        {"label": "Validity rule", "caption": "A Stable build can launch only profiles actually compiled into that immutable artifact.", "html": "<div class=\"ss-rule\"><b>valid(build, profile)</b><span>= profile ∈ build.manifest.profiles</span><small>No runtime mix-and-match across immutable artifacts.</small></div>"}
+      ],
+      "preview": "<div class=\"ss-mock\"><div class=\"ss-matrix-head\"><small>PREVIEW MATRIX</small><h3>Build × composition</h3><span>Robot sorter.tldr · launches a copy</span></div><div class=\"ss-matrix demo-base-only\"><b></b><b>Product</b><b>Stock</b><b>Block</b><b>Rows</b><strong>Stable 0.1</strong><span class=\"selected-safe\">Current</span><span>Available</span><span class=\"disabled\">Not in build</span><span class=\"disabled\">Not in build</span><strong>Live tree</strong><span>Open copy</span><span>Open copy</span><span class=\"selected-live\">Block Dev ↗</span><span>Rows Lab ↗</span></div><div class=\"ss-matrix demo-alt-only\"><b></b><b>Product</b><b>Stock</b><b class=\"retired\">Block · retired</b><b>Rows</b><strong>Stable 0.1</strong><span class=\"selected-safe\">Current</span><span>Available</span><span class=\"disabled\">Archived</span><span class=\"disabled\">Not in build</span><strong>Live tree</strong><span>Open copy</span><span>Open copy</span><span class=\"disabled\">Use Rows</span><span class=\"selected-live\">Rows Lab ↗</span></div><button class=\"demo-button\" data-demo-toggle data-base-label=\"Sunset Block column\" data-alt-label=\"Restore Block column\">Sunset Block column</button></div>"
+    },
+    {
+      "id": "v3",
+      "name": "Ephemeral Preview Sessions",
+      "thesis": "Treat previews as temporary running experiments that expire automatically unless Zach pins them.",
+      "accent": "#ad6d18",
+      "bestWhen": "Many short-lived agent experiments are opened and the main problem is accumulated preview clutter.",
+      "losesWhen": "The same named contexts should remain durable muscle-memory targets across weeks or releases.",
+      "decisions": [
+        {"label": "Primary object", "value": "A launched session with preset, source fingerprint, board copy, last-used time, and TTL."},
+        {"label": "Launch", "value": "Start from a small template list; the session then becomes the thing managed."},
+        {"label": "Sunset", "value": "Unpinned sessions expire after a quiet period; pinning promotes one to a durable preset."}
+      ],
+      "keepParts": ["automatic TTL", "pin-to-keep", "session ownership and last-used state"],
+      "proof": [
+        "The hero shows Stable separately from three live sessions with explicit board copies and expiry clocks.",
+        "The direct interaction expires Block Dev and leaves a recoverable Recently ended row."
+      ],
+      "scores": {
+        "fr1": {"score": 4, "evidence": "Starting a known session is simple, but the surface is organized around running instances rather than reusable feature intent.", "confidence": "medium"},
+        "fr2": {"score": 3, "evidence": "Any session may carry a recipe, but comparing or creating compositions is secondary to lifecycle management.", "confidence": "high"},
+        "fr3": {"score": 5, "evidence": "Every session card names its source fingerprint and independent board copy while Stable stays separate.", "confidence": "high"},
+        "fr4": {"score": 5, "evidence": "TTL makes sunset automatic, pinning is explicit, and the exercised ended state is recoverable without cluttering Active.", "confidence": "high"},
+        "fr5": {"score": 3, "evidence": "It can reuse the launcher but adds session persistence, TTL evaluation, pinning, and cleanup machinery.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "Stable is a separate always-present anchor outside session expiry."},
+        "g2": {"pass": true, "evidence": "Each session names its unique Untitled preview copy."},
+        "g3": {"pass": true, "evidence": "Expiry and pin state belong to session metadata, not tldraw records."}
+      },
+      "previewLabel": "interactive preview-session dock",
+      "story": {
+        "title": "Let an experiment expire",
+        "steps": [
+          {"label": "Inspect running previews", "caption": "Block Dev is a live session on its own copy with a visible two-day expiry.", "state": "base", "target": "[data-demo-toggle]"},
+          {"label": "Expire it", "caption": "The session leaves Running automatically and remains briefly recoverable under Recently ended.", "state": "alt", "target": "[data-demo-toggle]"}
+        ]
+      },
+      "media": [
+        {"label": "Retention policy", "caption": "Pinning is an explicit promotion from perishable experiment to durable preset.", "html": "<div class=\"ss-retention\"><span><b>Unpinned</b><small>archive after 7 quiet days</small></span><i>→</i><span><b>Pinned</b><small>keep until manually retired</small></span></div>"}
+      ],
+      "preview": "<div class=\"ss-mock\"><div class=\"ss-session-head\"><div><small>PREVIEW SESSIONS</small><h3>Running experiments</h3></div><span class=\"ss-chip safe\">Stable · Robot sorter.tldr</span></div><div class=\"demo-base-only\"><article class=\"ss-session hot\"><i>B</i><div><b>Block Dev</b><small>stock + Block · copy 03</small></div><span>live</span><em>expires 2d</em></article><article class=\"ss-session\"><i>▦</i><div><b>Rows Lab</b><small>stock + Block + Grid · copy 02</small></div><span>live</span><em>pinned</em></article><article class=\"ss-session\"><i>◫</i><div><b>Full Preview</b><small>product profile · copy 01</small></div><span>idle</span><em>expires 6d</em></article></div><div class=\"demo-alt-only\"><article class=\"ss-session\"><i>▦</i><div><b>Rows Lab</b><small>stock + Block + Grid · copy 02</small></div><span>live</span><em>pinned</em></article><article class=\"ss-ended\"><b>Block Dev ended</b><span>Recover for 24 hours · source 3557cd1</span></article></div><button class=\"demo-button\" data-demo-toggle data-base-label=\"Let Block Dev expire\" data-alt-label=\"Recover Block Dev\">Let Block Dev expire</button></div>"
+    },
+    {
+      "id": "v4",
+      "name": "Capability Stack Composer",
+      "thesis": "Build a preview by stacking independently registered capabilities, then optionally save that exact stack as a named preset.",
+      "accent": "#7659b5",
+      "bestWhen": "The design space itself is under investigation and Zach frequently needs combinations nobody anticipated enough to name.",
+      "losesWhen": "The main need is focused work on a few recurring contexts; the composer invites tinkering and choice overhead.",
+      "decisions": [
+        {"label": "Primary object", "value": "An ordered stack: base shell + capability layers + optional UI layer."},
+        {"label": "Launch", "value": "Validate the stack, name it if useful, then open the resolved recipe on a cloned Preview board."},
+        {"label": "Sunset", "value": "Delete or archive only the saved recipe; reusable capability modules remain available to other stacks."}
+      ],
+      "keepParts": ["layer vocabulary", "stack validation", "save-current-composition as preset"],
+      "proof": [
+        "The hero starts at Stock + Block and directly adds Product shell to produce a small-feature-on-existing-UI composition.",
+        "The supporting exhibit separates recipe retirement from capability-module removal."
+      ],
+      "scores": {
+        "fr1": {"score": 2, "evidence": "Block Dev can be reproduced, but the primary surface asks Zach to manipulate ingredients rather than select a known job.", "confidence": "high"},
+        "fr2": {"score": 5, "evidence": "The ordered layer model directly represents isolated tests, full UI variants, and novel combinations with validation.", "confidence": "high"},
+        "fr3": {"score": 4, "evidence": "The resolved recipe can show live build and clone policy, but the flexible composer makes the safe default less dominant.", "confidence": "medium"},
+        "fr4": {"score": 4, "evidence": "Recipes can disappear cleanly while modules survive, though old recipe URLs still need tombstone handling elsewhere.", "confidence": "medium"},
+        "fr5": {"score": 2, "evidence": "A capability dependency graph, compatibility validator, ordering rules, and composer UI exceed the current small launch seam.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "Stable is not a composable layer; the workbench always targets Live Preview."},
+        "g2": {"pass": true, "evidence": "Launch summary fixes document policy to Independent copy."},
+        "g3": {"pass": true, "evidence": "The stack is resolved and validated before constructing the editor and is stored outside .tldr."}
+      },
+      "previewLabel": "interactive layer workbench",
+      "story": {
+        "title": "Compose a small feature on the real UI",
+        "steps": [
+          {"label": "Begin isolated", "caption": "The stack is stock tldraw plus Block—the exact focused Block Dev context.", "state": "base", "target": "[data-demo-toggle]"},
+          {"label": "Add the existing shell", "caption": "One layer turns the same Block variant into a test on the current product UI without redefining the feature.", "state": "alt", "target": "[data-demo-toggle]"}
+        ]
+      },
+      "media": [
+        {"label": "Sunset semantics", "caption": "Deleting a recipe does not remove the stable capability modules used by other compositions.", "html": "<div class=\"ss-lifecycle\"><span class=\"on\">Recipe: Block Dev</span><b>× retire</b><span>Block capability remains</span><b>+</b><span>Rows Lab still resolves</span></div>"}
+      ],
+      "preview": "<div class=\"ss-mock ss-composer\"><div class=\"ss-layer-pool\"><small>CAPABILITIES</small><span>Stock base</span><span>Product shell</span><span>Block</span><span>Rows + columns</span><span>File workspace</span></div><div class=\"ss-stack\"><header><small>COMPOSITION</small><h3 class=\"demo-base-only\">Block Dev</h3><h3 class=\"demo-alt-only\">Block on Product</h3></header><div class=\"ss-layer base\">tldraw 5.3.2</div><div class=\"ss-layer demo-base-only\">stock chrome</div><div class=\"ss-layer accent demo-alt-only\">SystemSketch shell</div><div class=\"ss-layer feature\">Block capability</div><div class=\"ss-launch-summary\"><b>Live working tree</b><span>Independent copy · valid before mount</span></div><button class=\"demo-button\" data-demo-toggle data-base-label=\"Add product shell\" data-alt-label=\"Return to stock shell\">Add product shell</button></div></div>"
+    },
+    {
+      "id": "v5",
+      "name": "Manifest Router",
+      "thesis": "Make presets source-controlled route descriptors first; humans and agents reach them through URLs or a command palette rather than permanent chrome.",
+      "accent": "#316a78",
+      "bestWhen": "Agents create most previews, reproducible links matter, and Zach prefers the main canvas to stay visually quiet.",
+      "losesWhen": "Zach wants to browse what exists, compare several options visually, or manage lifecycle without remembering commands.",
+      "decisions": [
+        {"label": "Primary object", "value": "A versioned manifest record with stable ID, resolved profile, status, and optional successor."},
+        {"label": "Launch", "value": "Command palette or `?preset=block-dev` resolves the descriptor and routes through the current clone launcher."},
+        {"label": "Sunset", "value": "Change status to archived and add `replacedBy`; old URLs render a tombstone instead of silently drifting."}
+      ],
+      "keepParts": ["source-controlled preset manifests", "copyable preset URLs", "tombstone + replacedBy resolution"],
+      "proof": [
+        "The hero uses a realistic command palette over the current canvas and shows the complete Block Dev route summary.",
+        "The direct Sunset state keeps the old command/URL resolvable but redirects intent to Rows Lab."
+      ],
+      "scores": {
+        "fr1": {"score": 4, "evidence": "A searched Block Dev command opens in one action, but the available set is less glanceable than a persistent shelf.", "confidence": "high"},
+        "fr2": {"score": 4, "evidence": "Manifests can encode arbitrary validated recipes, but authoring new combinations happens in data/code rather than direct UI.", "confidence": "high"},
+        "fr3": {"score": 5, "evidence": "The route summary explicitly states Live working tree and independent copy, while Stable remains outside preset resolution.", "confidence": "high"},
+        "fr4": {"score": 4, "evidence": "Archived status and replacedBy keep old links honest, though the lifecycle is less visible without invoking the palette or opening the URL.", "confidence": "high"},
+        "fr5": {"score": 5, "evidence": "A typed descriptor and query parameter fit the existing launchUrl and previewClone seams with minimal permanent UI.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "Preset manifests resolve only on the Preview channel; the ordinary icon still opens Stable."},
+        "g2": {"pass": true, "evidence": "The command summary fixes board policy to Independent copy before launch."},
+        "g3": {"pass": true, "evidence": "The manifest is resolved before React selects the profile and never becomes board data."}
+      },
+      "previewLabel": "interactive command router",
+      "story": {
+        "title": "Resolve an old preset honestly",
+        "steps": [
+          {"label": "Open the route", "caption": "Block Dev resolves to one typed manifest and a copyable URL without adding permanent canvas chrome.", "state": "base", "target": "[data-demo-toggle]"},
+          {"label": "Sunset the route", "caption": "The same ID becomes an honest tombstone that points to Rows Lab instead of breaking or silently changing meaning.", "state": "alt", "target": "[data-demo-toggle]"}
+        ]
+      },
+      "media": [
+        {"label": "Resolution trace", "caption": "One URL selects the recipe; the current launcher still owns build, clone, and window creation.", "html": "<div class=\"ss-route\"><code>?preset=block-dev</code><b>→</b><span>manifest</span><b>→</b><span>previewClone</span><b>→</b><span>one Vite server</span></div>"}
+      ],
+      "preview": "<div class=\"ss-mock\"><div class=\"ss-canvas muted\"><div class=\"ss-file\"><i></i><b>Robot sorter.tldr</b><span>Saved · Stable 0.1.0</span></div><div class=\"ss-block\"><small>camera</small><b>Sort item</b><span>image → class</span></div></div><section class=\"ss-command\"><header><span>⌕</span><input aria-label=\"Command search mock\" value=\"preview block\" readonly></header><div class=\"demo-base-only\"><small>OPEN PREVIEW PRESET</small><article class=\"active\"><b>Block Dev</b><span>stock + Block · Live tree · copy</span><kbd>Enter</kbd></article><article><b>Rows Lab</b><span>stock + Block + Grid</span></article><div class=\"ss-url\">systemsketch://preview?preset=block-dev</div></div><div class=\"demo-alt-only\"><small>ARCHIVED PRESET</small><article class=\"warning\"><b>Block Dev was retired</b><span>Replaced by Rows Lab · old URL preserved</span></article><article class=\"active\"><b>Open Rows Lab instead</b><span>stock + Block + Grid · Live tree · copy</span><kbd>Enter</kbd></article></div><button class=\"demo-button\" data-demo-toggle data-base-label=\"Sunset route\" data-alt-label=\"Restore route\">Sunset route</button></section></div>"
+    }
+  ]
+}

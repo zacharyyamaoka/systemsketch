@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 2,
+  "title": "Five bottom-right utility patterns for SystemSketch",
+  "kicker": "SystemSketch UI · Babble & Prune · 31 Aug 2026",
+  "brief": "Move the persistent SystemSketch release card off the top of the canvas and place its information behind Help, while adding familiar bottom-right zoom controls and a launcher for a placeholder right-side board panel. Copy proven Miro and FigJam interaction patterns and keep the tldraw integration narrow.",
+  "count": 5,
+  "defaultId": "v1",
+  "defaultWhy": "FigJam Utility Strip is the provisional default at 92/100. It most directly follows the note's Figma-first decision, keeps every control visible in one familiar cluster, and gives the future panel a stable launcher. Its cost is one deliberately owned navigation component.",
+  "decisionHinge": "The recommendation hinges on discoverability versus smallest implementation delta. Moving 10 weight points from Discoverable controls to Minimal custom code makes V1 and V2 tie at 88/100; if preserving more of tldraw's existing navigation structure dominates, choose Miro Satellites.",
+  "invariants": [
+    "The canvas has no persistent SystemSketch version pill or release card at the top.",
+    "Help exposes the existing Stable/Preview status, version, build, release time, safety, changes, and release actions.",
+    "Zoom out, current zoom, zoom in, Help, and a placeholder right-side board panel remain reachable.",
+    "Use the same light dotted whiteboard, 27% zoom, status content, and 720 × 400 comparison viewport.",
+    "Keep the tldraw editor, tools, document model, and keyboard behavior intact."
+  ],
+  "boundary": "These are self-contained interactive UI sketches, not production integration. Menu and drawer opening are real in the gallery; zoom values, release actions, panel contents, mobile behavior, focus management, and wiring to the tldraw editor are simulated. No live SystemSketch source was changed.",
+  "axes": [
+    {
+      "name": "Control composition",
+      "values": ["one segmented strip", "separate satellites", "progressively disclosed hub", "edge rail plus cluster", "shared utility drawer"]
+    },
+    {
+      "name": "Panel launcher",
+      "values": ["first-class strip button", "separate button", "help-menu row", "persistent edge tab", "drawer tab"]
+    },
+    {
+      "name": "Help depth",
+      "values": ["popover with inline status", "Miro-style dark menu", "status-first hub", "small menu beside rail", "full right drawer"]
+    },
+    {
+      "name": "Risk posture",
+      "values": ["Figma-first", "conservative hybrid", "minimal chrome", "panel-forward", "shared-shell scalable"]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "fr1",
+      "name": "Calm default canvas",
+      "weight": 25,
+      "why": "The current top-center release pill is distracting on a surface whose main job is spatial thinking.",
+      "passCondition": "With all transient surfaces closed, utilities stay compact at the bottom-right and no release information floats over the upper canvas.",
+      "anchors": {
+        "1": "Release or utility chrome remains prominent in the main visual field.",
+        "3": "The top is clear, but the bottom-right footprint or persistent panel is visually heavy.",
+        "5": "The top is completely clear and the resting controls read as quiet whiteboard chrome."
+      }
+    },
+    {
+      "id": "fr2",
+      "name": "Miro/FigJam familiarity",
+      "weight": 25,
+      "why": "The design note explicitly prefers copying mature whiteboard conventions to avoid coherence work and relearning.",
+      "passCondition": "A Miro or FigJam user can predict what the zoom, question-mark, and board-panel controls do from placement and form.",
+      "anchors": {
+        "1": "The controls use a novel layout or mental model unrelated to the references.",
+        "3": "Individual icons are familiar, but composition or behavior diverges from the references.",
+        "5": "Placement, grouping, and disclosure closely match a shown Miro or FigJam pattern."
+      }
+    },
+    {
+      "id": "fr3",
+      "name": "Discoverable controls",
+      "weight": 20,
+      "why": "Help, zoom, and the new right-side panel should be found without searching menus or remembering shortcuts.",
+      "passCondition": "A first-time user can locate all three utilities from the resting canvas and tell which control opens the side panel.",
+      "anchors": {
+        "1": "Two or more utilities are hidden behind an unrelated control.",
+        "3": "Every utility is reachable, but one requires menu exploration or an ambiguous icon.",
+        "5": "All three utilities have visible, unambiguous affordances in the bottom-right."
+      }
+    },
+    {
+      "id": "fr4",
+      "name": "Minimal custom code",
+      "weight": 20,
+      "why": "SystemSketch currently keeps stock tldraw intact, and the project note names minimizing custom code as a goal.",
+      "passCondition": "The direction can be built through supported tldraw UI component overrides plus a small host-owned status content component, without forking editor internals.",
+      "anchors": {
+        "1": "Requires a broad chrome rewrite or duplicated editor behavior.",
+        "3": "Requires one meaningful owned navigation surface and some custom state/layout.",
+        "5": "Mostly reuses the existing navigation surface and adds only narrow, isolated components."
+      }
+    },
+    {
+      "id": "fr5",
+      "name": "Panel growth path",
+      "weight": 10,
+      "why": "The placeholder should later become a useful Frames or board-overview surface without another navigation redesign.",
+      "passCondition": "The panel has a stable launcher and an interaction container that can accept real board navigation content later.",
+      "anchors": {
+        "1": "The placeholder is a dead end or would need a new launcher later.",
+        "3": "The panel can grow, but its current entry point is secondary or ambiguous.",
+        "5": "The launcher and right-side container already express a durable board-navigation model."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "g1",
+      "name": "No top release overlay",
+      "why": "Removing the distracting upper-canvas status surface is the explicit user outcome."
+    },
+    {
+      "id": "g2",
+      "name": "All three utilities reachable",
+      "why": "Help/status, zoom, and the placeholder panel are all part of the requested slice."
+    },
+    {
+      "id": "g3",
+      "name": "No tldraw engine fork",
+      "why": "The editor and document model must remain upgradeable and stock beneath the owned chrome."
+    }
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "FigJam Utility Strip",
+      "thesis": "Make the complete utility set one predictable segmented control: panel, zoom out, zoom value, zoom in, Help.",
+      "accent": "#536DFE",
+      "bestWhen": "You want the strongest zero-relearning match to the note's Figma-first decision and expect the right-side panel to become important.",
+      "losesWhen": "Preserving tldraw's existing navigation DOM and making the smallest first code change matters more than exact composition.",
+      "decisions": [
+        {"label": "Composition", "value": "One FigJam-like five-part strip keeps every utility in a single visual grammar."},
+        {"label": "Help", "value": "A light popover opens above the question mark; SystemSketch status is the first section, followed by help links."},
+        {"label": "Panel", "value": "The leftmost board-overview icon opens a fixed right drawer with a placeholder body."},
+        {"label": "Implementation seam", "value": "Own tldraw's supported NavigationPanel component, reuse editor zoom actions, and extract UpdatePill content into a reusable status section."}
+      ],
+      "keepParts": ["single segmented strip", "first-class panel launcher", "inline status inside Help", "right drawer shell"],
+      "proof": [
+        "The preview renders the same dotted board at 27% with no top release pill.",
+        "Help is open by default; click the question mark to close it, and click the leftmost icon to open the placeholder panel."
+      ],
+      "scores": {
+        "fr1": {"score": 5, "evidence": "The resting state is one 212 px bottom-right strip and the entire upper canvas is clear.", "confidence": "high"},
+        "fr2": {"score": 5, "evidence": "The order, grouping, zoom percentage, and help placement directly reproduce the supplied FigJam bottom-right reference.", "confidence": "high"},
+        "fr3": {"score": 5, "evidence": "Panel, minus, zoom percentage, plus, and Help each have a persistent, separate target.", "confidence": "high"},
+        "fr4": {"score": 3, "evidence": "It fits the supported NavigationPanel seam but replaces that surface with an owned five-control composition and panel state.", "confidence": "high"},
+        "fr5": {"score": 5, "evidence": "The dedicated first control and fixed right drawer give board navigation a durable home.", "confidence": "medium"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "No SystemSketch element appears at the top of the mock."},
+        "g2": {"pass": true, "evidence": "All three utilities have visible controls in the strip."},
+        "g3": {"pass": true, "evidence": "The proposal uses public UI components and editor actions; no editor or store internals change."}
+      },
+      "preview": "<style>.utility-mock{position:relative;min-height:330px;overflow:hidden;color:#24262b;background-color:#f7f7f5;background-image:radial-gradient(#d5d7d3 1px,transparent 1px);background-size:20px 20px;font:12px/1.35 Inter,ui-sans-serif,system-ui,sans-serif}.utility-mock *{box-sizing:border-box}.utility-mock button,.utility-mock summary,.utility-mock label{font:inherit}.utility-mock button{color:inherit}.utility-mock details{margin:0;border:0}.utility-mock summary{padding:0;list-style:none}.utility-mock summary::-webkit-details-marker{display:none}.utility-mock summary:after{display:none}.utility-mock .board-chip{position:absolute;top:15px;left:16px;padding:7px 10px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#6b6e74;font-size:10px;box-shadow:0 2px 7px #20242b12}.utility-mock .nodes{position:absolute;inset:76px 115px 68px 35px}.utility-mock .node{position:absolute;display:grid;min-width:92px;min-height:36px;place-items:center;padding:7px;border:1px solid #8d9198;border-radius:7px;background:#fff;font-size:10px;box-shadow:0 2px 8px #1f293712}.utility-mock .node.a{left:5%;top:24%}.utility-mock .node.b{left:47%;top:2%}.utility-mock .node.c{left:51%;top:58%}.utility-mock .wire{position:absolute;height:1px;background:#8d9198;transform-origin:left}.utility-mock .wire.one{left:30%;top:38%;width:92px;transform:rotate(-18deg)}.utility-mock .wire.two{left:30%;top:44%;width:102px;transform:rotate(20deg)}.utility-controls{position:absolute;right:13px;bottom:13px;z-index:12;display:flex;align-items:center;gap:7px}.utility-group{display:flex;align-items:center;min-height:42px;overflow:visible;border:1px solid #d9dce2;border-radius:10px;background:#fff;box-shadow:0 4px 14px #20242b1f}.utility-button,.utility-summary,.panel-label{display:grid;min-width:42px;height:40px;place-items:center;border:0;background:transparent;cursor:pointer;font-weight:650}.utility-button+.utility-button,.utility-summary,.panel-label+.utility-button{border-left:1px solid #eceef1}.zoom-readout{min-width:55px;font-weight:750}.utility-button:hover,.utility-summary:hover,.panel-label:hover{background:#f1f3ff}.utility-help{position:relative}.help-popover{position:absolute;right:0;bottom:50px;width:250px;padding:10px;border:1px solid #d8dbe1;border-radius:12px;background:#fff;box-shadow:0 16px 42px #20242b28;text-align:left}.help-title{display:flex;align-items:center;justify-content:space-between;padding:4px 5px 8px;font-weight:750}.status-card{margin-bottom:8px;padding:10px;border-radius:9px;background:#f3f5f6}.status-head{display:flex;justify-content:space-between;gap:8px}.status-head b{font-size:11px}.status-head code{color:#747b84;font-size:9px}.status-meta{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px;color:#656b73;font-size:9px}.status-meta span{padding:5px;border-radius:5px;background:#fff}.status-changes{margin:7px 0 0;padding-left:15px;color:#656b73;font-size:9px}.status-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px}.status-actions button{min-height:28px;border:1px solid #d7dae0;border-radius:6px;background:#fff;font-size:9px;font-weight:700}.status-actions .primary{grid-column:1/-1;background:#272a30;color:#fff}.help-row{display:flex;align-items:center;justify-content:space-between;min-height:31px;padding:0 7px;border-radius:6px;color:#343840}.help-row:hover{background:#f4f5f7}.help-row small{color:#8a9098}.panel-check{position:absolute;opacity:0;pointer-events:none}.side-panel{position:absolute;z-index:10;top:10px;right:10px;bottom:64px;width:235px;padding:14px;border:1px solid #d9dce2;border-radius:12px;background:#fff;box-shadow:0 16px 38px #20242b24;transition:transform 160ms ease,opacity 160ms ease}.panel-check:not(:checked)+.side-panel{opacity:0;pointer-events:none;transform:translateX(105%)}.panel-head{display:flex;align-items:center;justify-content:space-between;font-weight:750}.panel-close{display:grid;width:27px;height:27px;place-items:center;border:0;border-radius:6px;background:#f3f4f5;cursor:pointer}.panel-empty{display:grid;height:205px;place-content:center;gap:7px;color:#8b9097;text-align:center}.panel-empty b{color:#484d54}.satellite-group{display:flex;gap:7px}.dark-help .help-popover{color:#f5f5f5;background:#202020;border-color:#2d2d2d}.dark-help .status-card{background:#2c2c2c}.dark-help .status-meta span,.dark-help .status-actions button{color:#f5f5f5;background:#242424;border-color:#444}.dark-help .status-actions .primary{background:#f5f5f5;color:#202020}.dark-help .help-row{color:#f5f5f5}.dark-help .help-row:hover{background:#303030}.minimal-group .utility-button{min-width:45px}.zoom-menu{position:relative}.zoom-popover{position:absolute;right:0;bottom:50px;width:210px;padding:8px;border:1px solid #d9dce2;border-radius:10px;background:#fff;box-shadow:0 14px 38px #20242b22}.zoom-row{display:flex;min-height:32px;align-items:center;justify-content:space-between;padding:0 8px;border-radius:6px}.zoom-row:hover{background:#f3f4f6}.edge-tab{position:absolute;z-index:11;right:0;top:116px;display:flex;align-items:center;gap:6px;padding:9px 8px;border:1px solid #d9dce2;border-right:0;border-radius:9px 0 0 9px;background:#fff;box-shadow:0 5px 16px #20242b18;cursor:pointer;writing-mode:vertical-rl}.edge-v .side-panel{top:10px;bottom:10px}.drawer-v .side-panel{top:10px;bottom:10px;width:270px}.drawer-tabs{display:flex;gap:4px;margin:12px 0}.drawer-tabs span{padding:6px 9px;border-radius:6px;background:#f0f2f5;font-size:10px}.drawer-tabs .active{background:#e9edff;color:#3f51d7;font-weight:750}.shared-help-button{position:relative}.status-dot{position:absolute;top:7px;right:7px;width:6px;height:6px;border:1px solid #fff;border-radius:50%;background:#22a55b}.variant-note{position:absolute;left:15px;bottom:14px;color:#858a91;font-size:9px}</style><div class='utility-mock figjam-v'><input class='panel-check' id='v1-panel' type='checkbox'><aside class='side-panel'><div class='panel-head'><span>Board overview</span><label class='panel-close' for='v1-panel'>×</label></div><div class='panel-empty'><b>Panel placeholder</b><span>Frames and regions will live here.</span></div></aside><div class='board-chip'>SystemSketch · Architecture board</div><div class='nodes'><span class='node a'>Sensor inputs</span><span class='node b'>World model</span><span class='node c'>Robot action</span><i class='wire one'></i><i class='wire two'></i></div><div class='variant-note'>Default canvas has no release overlay.</div><div class='utility-controls'><div class='utility-group'><label class='panel-label' for='v1-panel' title='Board overview'>▣</label><button class='utility-button'>−</button><button class='utility-button zoom-readout'>27%</button><button class='utility-button'>＋</button><details class='utility-help' open><summary class='utility-summary'>?</summary><div class='help-popover'><div class='help-title'><span>Help</span><small>SystemSketch</small></div><section class='status-card'><div class='status-head'><b><i style='color:#22a55b'>●</i> Stable · 0.1.0</b><code>c7660b8</code></div><div class='status-meta'><span>Released<br><b>Aug 30 · 7:42 PM</b></span><span>Safety<br><b>Immutable while open</b></span></div><ul class='status-changes'><li>Stock tldraw 5.3.2 whiteboard</li><li>Stable / Preview publishing</li></ul><div class='status-actions'><button class='primary'>Open Live Preview</button><button>Use Previous</button><button>Check again</button></div></section><div class='help-row'><span>Keyboard shortcuts</span><small>Ctrl ⇧ ?</small></div><div class='help-row'><span>Help center</span><small>↗</small></div><div class='help-row'><span>Send feedback</span><small>↗</small></div></div></details></div></div></div>"
+    },
+    {
+      "id": "v2",
+      "name": "Miro Satellites",
+      "thesis": "Keep zoom, Help, and board overview as three small neighboring capsules rather than one owned mega-control.",
+      "accent": "#202020",
+      "bestWhen": "You want the smallest visual footprint and a conservative path that composes narrow components around tldraw's navigation behavior.",
+      "losesWhen": "A single coherent FigJam strip or an unmistakable panel launcher matters more than implementation modularity.",
+      "decisions": [
+        {"label": "Composition", "value": "A Miro-like −/+ capsule and separate Help circle sit beside a small board-overview button."},
+        {"label": "Help", "value": "A dark Miro-style menu exposes status first and keeps support/navigation rows below."},
+        {"label": "Panel", "value": "The board icon is independent, so the future Frames surface can evolve without changing zoom or Help."},
+        {"label": "Implementation seam", "value": "Use small supported overrides for NavigationPanel and HelpMenu; keep panel state in a sibling overlay."}
+      ],
+      "keepParts": ["separate zoom rocker", "Miro dark help menu", "independent panel button", "modular component boundaries"],
+      "proof": [
+        "The preview keeps all three capsules in the bottom-right and no status at the top.",
+        "Help is open by default; the board icon independently opens the same placeholder panel."
+      ],
+      "scores": {
+        "fr1": {"score": 5, "evidence": "Three small satellites leave the canvas quiet and avoid a long permanent strip.", "confidence": "high"},
+        "fr2": {"score": 5, "evidence": "The split −/+ and Help capsules plus dark menu closely match the supplied Miro references.", "confidence": "high"},
+        "fr3": {"score": 4, "evidence": "All utilities are visible, but the unlabeled board icon is less self-explanatory than a named rail or integrated pattern.", "confidence": "medium"},
+        "fr4": {"score": 4, "evidence": "The composition can be split across narrow public UI overrides and a sibling drawer instead of one larger navigation rewrite.", "confidence": "medium"},
+        "fr5": {"score": 3, "evidence": "The independent launcher can grow, but its visual relationship to the future panel is weak until opened.", "confidence": "medium"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The mock has no top release element."},
+        "g2": {"pass": true, "evidence": "Board icon, zoom capsule, and Help circle remain visible."},
+        "g3": {"pass": true, "evidence": "The proposal stays within public UI override and editor-action seams."}
+      },
+      "preview": "<div class='utility-mock miro-v'><input class='panel-check' id='v2-panel' type='checkbox'><aside class='side-panel'><div class='panel-head'><span>Frames</span><label class='panel-close' for='v2-panel'>×</label></div><div class='panel-empty'><b>Panel placeholder</b><span>Frame thumbnails can arrive later.</span></div></aside><div class='board-chip'>SystemSketch · Architecture board</div><div class='nodes'><span class='node a'>Sensor inputs</span><span class='node b'>World model</span><span class='node c'>Robot action</span><i class='wire one'></i><i class='wire two'></i></div><div class='variant-note'>Three independent utilities; each can change alone.</div><div class='utility-controls satellite-group'><label class='utility-group panel-label' for='v2-panel' title='Frames'>▣</label><div class='utility-group'><button class='utility-button'>−</button><button class='utility-button'>＋</button></div><details class='utility-help dark-help' open><summary class='utility-group utility-summary'>?</summary><div class='help-popover'><div class='help-title'><span>SystemSketch help</span><small>Stable</small></div><section class='status-card'><div class='status-head'><b><i style='color:#52d273'>●</i> Stable · 0.1.0</b><code>c7660b8</code></div><div class='status-meta'><span>Released<br><b>Aug 30 · 7:42 PM</b></span><span>Safety<br><b>Immutable while open</b></span></div><div class='status-actions'><button class='primary'>Open Live Preview</button><button>Use Previous</button><button>Check again</button></div></section><div class='help-row'><span>Help center</span><small>↗</small></div><div class='help-row'><span>Keyboard shortcuts</span><small>Ctrl ⇧ ?</small></div><div class='help-row'><span>Send feedback</span><small>↗</small></div></div></details></div></div>"
+    },
+    {
+      "id": "v3",
+      "name": "Progressive Help Hub",
+      "thesis": "Show only zoom and Help at rest; place the board-panel launcher and all SystemSketch status inside Help.",
+      "accent": "#2F7F74",
+      "bestWhen": "Maximum canvas calm and the smallest code surface matter, while the board panel remains occasional rather than primary navigation.",
+      "losesWhen": "Users need to open the board panel often or must discover it without first exploring Help.",
+      "decisions": [
+        {"label": "Composition", "value": "The resting chrome copies Miro's minimal −/+ and ? pair exactly."},
+        {"label": "Help", "value": "Help becomes a utility hub: status, panel entry, shortcuts, feedback, and support."},
+        {"label": "Panel", "value": "A labeled Open board overview row inside Help launches the placeholder drawer."},
+        {"label": "Implementation seam", "value": "Keep navigation compact, enable an owned HelpMenu, and manage the drawer in the host overlay."}
+      ],
+      "keepParts": ["two-capsule resting state", "status-first Help hub", "labeled panel menu row", "progressive disclosure"],
+      "proof": [
+        "The preview shows the smallest default chrome of the five directions.",
+        "Help is open by default; its labeled board-overview row launches the placeholder panel."
+      ],
+      "scores": {
+        "fr1": {"score": 5, "evidence": "Only a 92 px zoom rocker and 42 px Help circle persist at rest.", "confidence": "high"},
+        "fr2": {"score": 4, "evidence": "The resting pair is directly Miro-like, but using Help as the panel launcher is not present in either reference.", "confidence": "high"},
+        "fr3": {"score": 3, "evidence": "Zoom and Help are obvious; the board panel is discoverable only after opening Help.", "confidence": "high"},
+        "fr4": {"score": 5, "evidence": "It can preserve a compact navigation component and concentrate new behavior in one HelpMenu plus one drawer.", "confidence": "medium"},
+        "fr5": {"score": 3, "evidence": "The drawer can grow, but its launcher remains semantically nested under Help rather than board navigation.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "No status appears at the top of the board."},
+        "g2": {"pass": true, "evidence": "Zoom and Help are visible; the labeled board-panel action is inside Help."},
+        "g3": {"pass": true, "evidence": "All work stays in public HelpMenu/navigation overrides and a host drawer."}
+      },
+      "preview": "<div class='utility-mock progressive-v'><input class='panel-check' id='v3-panel' type='checkbox'><aside class='side-panel'><div class='panel-head'><span>Board overview</span><label class='panel-close' for='v3-panel'>×</label></div><div class='panel-empty'><b>Panel placeholder</b><span>Navigation content can be added later.</span></div></aside><div class='board-chip'>SystemSketch · Architecture board</div><div class='nodes'><span class='node a'>Sensor inputs</span><span class='node b'>World model</span><span class='node c'>Robot action</span><i class='wire one'></i><i class='wire two'></i></div><div class='variant-note'>Panel discovery is traded for the calmest resting state.</div><div class='utility-controls'><div class='utility-group minimal-group'><button class='utility-button'>−</button><button class='utility-button'>＋</button></div><details class='utility-help' open><summary class='utility-group utility-summary'>?</summary><div class='help-popover'><div class='help-title'><span>Help &amp; board utilities</span><small>?</small></div><section class='status-card'><div class='status-head'><b><i style='color:#22a55b'>●</i> Stable · 0.1.0</b><code>c7660b8</code></div><div class='status-meta'><span>Released<br><b>Aug 30 · 7:42 PM</b></span><span>Safety<br><b>Immutable while open</b></span></div><div class='status-actions'><button class='primary'>Open Live Preview</button><button>Use Previous</button><button>Check again</button></div></section><label class='help-row' for='v3-panel'><span>▣ &nbsp; Open board overview</span><small>→</small></label><div class='help-row'><span>⌨ &nbsp; Keyboard shortcuts</span><small>Ctrl ⇧ ?</small></div><div class='help-row'><span>◎ &nbsp; Send feedback</span><small>↗</small></div></div></details></div></div>"
+    },
+    {
+      "id": "v4",
+      "name": "Edge Navigator",
+      "thesis": "Give the future board panel a persistent vertical edge tab while zoom and Help remain a conventional bottom-right cluster.",
+      "accent": "#B7791F",
+      "bestWhen": "The Frames or board-overview panel is expected to become a frequent primary navigation surface.",
+      "losesWhen": "The panel stays occasional, or the always-visible edge tab feels too much like application chrome on a whiteboard.",
+      "decisions": [
+        {"label": "Composition", "value": "Zoom and Help stay bottom-right; Board overview moves to a persistent right-edge tab."},
+        {"label": "Help", "value": "A compact popover contains release status and help actions without competing with panel navigation."},
+        {"label": "Panel", "value": "The edge tab and drawer form one spatial object; opening the panel replaces the tab with a close control."},
+        {"label": "Implementation seam", "value": "Add one host-level edge overlay plus supported HelpMenu/navigation controls."}
+      ],
+      "keepParts": ["persistent edge tab", "spatially attached drawer", "compact help popover", "separation of help and navigation"],
+      "proof": [
+        "The preview starts with the right panel open so its spatial relationship to the edge launcher is visible.",
+        "Close the panel to reveal the vertical Board tab; Help and zoom remain independent."
+      ],
+      "scores": {
+        "fr1": {"score": 4, "evidence": "The top remains clear, but the persistent vertical edge tab adds a second chrome zone.", "confidence": "high"},
+        "fr2": {"score": 3, "evidence": "The bottom cluster is familiar, while a vertical board tab is closer to an IDE sidebar than the supplied whiteboard references.", "confidence": "high"},
+        "fr3": {"score": 5, "evidence": "The named Board tab makes the panel unmistakable, and zoom and Help remain visible." , "confidence": "high"},
+        "fr4": {"score": 3, "evidence": "It needs an additional responsive edge overlay and coordination with the existing right-side style panel." , "confidence": "medium"},
+        "fr5": {"score": 5, "evidence": "A named, spatially attached edge launcher is a strong durable home for Frames and overview navigation." , "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The top canvas is clear."},
+        "g2": {"pass": true, "evidence": "The edge launcher, zoom controls, and Help remain reachable."},
+        "g3": {"pass": true, "evidence": "The edge overlay is host-owned and does not change editor internals."}
+      },
+      "preview": "<div class='utility-mock edge-v'><input class='panel-check' id='v4-panel' type='checkbox' checked><aside class='side-panel'><div class='panel-head'><span>Board overview</span><label class='panel-close' for='v4-panel'>×</label></div><div class='panel-empty'><b>Panel placeholder</b><span>Frames, regions, and search can grow here.</span></div></aside><label class='edge-tab' for='v4-panel'>▣ <span>Board</span></label><div class='board-chip'>SystemSketch · Architecture board</div><div class='nodes'><span class='node a'>Sensor inputs</span><span class='node b'>World model</span><span class='node c'>Robot action</span><i class='wire one'></i><i class='wire two'></i></div><div class='variant-note'>The panel launcher is promoted to persistent navigation.</div><div class='utility-controls'><div class='utility-group'><button class='utility-button'>−</button><button class='utility-button zoom-readout'>27%</button><button class='utility-button'>＋</button><details class='utility-help'><summary class='utility-summary'>?</summary><div class='help-popover'><div class='help-title'><span>Help</span><small>Stable 0.1.0</small></div><section class='status-card'><div class='status-head'><b><i style='color:#22a55b'>●</i> Stable</b><code>c7660b8</code></div><div class='status-meta'><span>Released<br><b>Aug 30 · 7:42 PM</b></span><span>Safety<br><b>Immutable while open</b></span></div><div class='status-actions'><button class='primary'>Open Live Preview</button><button>Use Previous</button><button>Check again</button></div></section><div class='help-row'><span>Keyboard shortcuts</span><small>Ctrl ⇧ ?</small></div></div></details></div></div></div>"
+    },
+    {
+      "id": "v5",
+      "name": "Shared Right Drawer",
+      "thesis": "Use one scalable right drawer for Help, SystemSketch status, and board overview, with tabs switching its purpose.",
+      "accent": "#7667C6",
+      "bestWhen": "You expect several utility surfaces and want one consistent responsive container instead of multiple popovers and panels.",
+      "losesWhen": "A quick Help click should stay lightweight, or strict fidelity to Miro/FigJam matters more than future consolidation.",
+      "decisions": [
+        {"label": "Composition", "value": "Zoom stays a small strip; the status-dotted Help icon opens the shared right drawer."},
+        {"label": "Help", "value": "Help becomes a full drawer tab with the complete current release card and support actions."},
+        {"label": "Panel", "value": "Board overview is a neighboring drawer tab rather than a separate overlay or launcher."},
+        {"label": "Implementation seam", "value": "Build one host-owned UtilityDrawer and let tldraw navigation/help triggers select its active tab."}
+      ],
+      "keepParts": ["single responsive drawer shell", "status dot on Help", "Help/Overview tabs", "one overlay collision model"],
+      "proof": [
+        "The preview opens the shared drawer on Help with the full status section visible.",
+        "Close it with × to inspect the calm bottom-right trigger; the Board overview tab remains visible in the drawer."
+      ],
+      "scores": {
+        "fr1": {"score": 4, "evidence": "The resting state is quiet, but opening ordinary Help consumes a full-height right drawer." , "confidence": "high"},
+        "fr2": {"score": 3, "evidence": "The control placement is familiar, but Help-as-drawer and tabbed board navigation are not shown in the supplied references." , "confidence": "high"},
+        "fr3": {"score": 4, "evidence": "Zoom and Help are visible, while board overview becomes obvious only after the drawer opens." , "confidence": "high"},
+        "fr4": {"score": 3, "evidence": "One drawer simplifies overlay collisions later but requires new shared state, tabs, and responsive behavior now." , "confidence": "medium"},
+        "fr5": {"score": 5, "evidence": "The shared full-height drawer is already a scalable container for overview, frames, and future utilities." , "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "No release status appears at the top."},
+        "g2": {"pass": true, "evidence": "Zoom and Help are visible; board overview is a labeled drawer tab."},
+        "g3": {"pass": true, "evidence": "The drawer is host UI and uses editor actions without changing the engine."}
+      },
+      "preview": "<div class='utility-mock drawer-v'><input class='panel-check' id='v5-panel' type='checkbox' checked><aside class='side-panel'><div class='panel-head'><span>Utilities</span><label class='panel-close' for='v5-panel'>×</label></div><div class='drawer-tabs'><span class='active'>Help</span><span>Board overview</span></div><section class='status-card'><div class='status-head'><b><i style='color:#22a55b'>●</i> Stable · 0.1.0</b><code>c7660b8</code></div><div class='status-meta'><span>Released<br><b>Aug 30 · 7:42 PM</b></span><span>Safety<br><b>Immutable while open</b></span></div><ul class='status-changes'><li>Stock tldraw 5.3.2 whiteboard</li><li>Stable / Preview publishing</li><li>Local canvas persistence</li></ul><div class='status-actions'><button class='primary'>Open Live Preview</button><button>Use Previous</button><button>Check again</button></div></section><div class='help-row'><span>Keyboard shortcuts</span><small>Ctrl ⇧ ?</small></div><div class='help-row'><span>Help center</span><small>↗</small></div><div class='help-row'><span>Send feedback</span><small>↗</small></div></aside><div class='board-chip'>SystemSketch · Architecture board</div><div class='nodes'><span class='node a'>Sensor inputs</span><span class='node b'>World model</span><span class='node c'>Robot action</span><i class='wire one'></i><i class='wire two'></i></div><div class='variant-note'>One drawer arbitrates every right-side utility surface.</div><div class='utility-controls'><div class='utility-group'><button class='utility-button'>−</button><button class='utility-button zoom-readout'>27%</button><button class='utility-button'>＋</button></div><label class='utility-group utility-summary shared-help-button' for='v5-panel'>?<i class='status-dot'></i></label></div></div>"
+    }
+  ],
+  "checks": [
+    "Exactly five structural directions, not cosmetic variations",
+    "Same board, 27% zoom, release content, viewport, and fidelity class",
+    "Every preview supports at least one real open/close interaction",
+    "Five weighted criteria frozen before scoring; weights sum to 100%",
+    "Every score includes observable evidence and confidence",
+    "Three hard gates evaluated independently from weighted judgment",
+    "Pick, shortlist, reject, feedback, splice, copy, and download controls preserved",
+    "Production tldraw wiring, accessibility QA, responsiveness, and release actions are explicitly outside this prototype"
+  ]
+}

@@ -1,0 +1,591 @@
+{
+  "schemaVersion": 2,
+  "title": "Five implementation architectures for the SystemSketch UI shell",
+  "kicker": "SystemSketch major UI sections \u00b7 Babble & Prune \u00b7 31 Aug 2026",
+  "brief": "Plan a reusable placeholder-first UI shell matching the supplied FigJam composition: a persistent top-left board capsule, an always-visible top-right collaboration capsule, inset left and right popouts, a selection mini-menu above board objects, a menu above the bottom toolbar, the bottom toolbar itself, and the existing bottom-right utilities. Keep the tldraw editor and its public interaction seams authoritative.",
+  "count": 5,
+  "defaultId": "v1",
+  "defaultWhy": "Slot-Mapped Shell is the provisional default at 94/100. It maps every region with a first-class tldraw seam onto that seam, uses the public contextual-toolbar primitive for object-local controls, and limits custom overlay ownership to the two inset popouts. It is concrete enough to ship incrementally without inventing a general window manager first.",
+  "decisionHinge": "The recommendation hinges on immediate happy-path delivery versus building a generalized menu platform now. Moving 20 weight points from tldraw happy-path fit to reusable-surface infrastructure makes Registry + Slot Adapters lead 92 to 90; otherwise Slot-Mapped Shell leads because it owns less abstraction before the menu bodies are known.",
+  "invariants": [
+    "The top-left board/pages capsule and top-right collaboration/share capsule are persistent global chrome; the top-right capsule never depends on selection or an open inspector.",
+    "Left and right panels are inset rounded popouts beneath the persistent top bars and above the bottom chrome.",
+    "A selection mini-menu follows the selected object's screen bounds; a separate surface opens above the bottom toolbar.",
+    "The same 720 \u00d7 420 dotted board, selected Block, open left/right popouts, open above-toolbar menu, toolbar, and utilities appear in every proposal.",
+    "Canvas records, tools, camera, selection, history, and clipboard remain owned by tldraw; menu open state is ephemeral React UI state."
+  ],
+  "boundary": "These are interactive implementation-architecture sketches, not production integration. The three major popout toggles work in the gallery; tldraw selection tracking, keyboard/focus behavior, responsive breakpoints, collaboration data, file management, shape catalog content, and real commands remain simulated. No product UI code is changed by this proposal round.",
+  "axes": [
+    {
+      "name": "Chrome ownership",
+      "values": [
+        "named tldraw slots",
+        "single overlay host",
+        "declarative registry with adapters",
+        "outer React app frame",
+        "stock popover composition"
+      ]
+    },
+    {
+      "name": "Anchor authority",
+      "values": [
+        "tldraw layout zones",
+        "one inset coordinate system",
+        "surface descriptors",
+        "host layout",
+        "trigger-local popovers"
+      ]
+    },
+    {
+      "name": "State coordination",
+      "values": [
+        "small shared reducer",
+        "central SurfaceHost reducer",
+        "registry state machine",
+        "app-shell context",
+        "local component state"
+      ]
+    },
+    {
+      "name": "Growth posture",
+      "values": [
+        "concrete first",
+        "one chrome owner",
+        "platform first",
+        "application frame first",
+        "placeholder speed first"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "fr1",
+      "name": "tldraw happy-path fit",
+      "weight": 30,
+      "why": "The user explicitly wants to reuse mature tldraw UI and interaction seams before owning new canvas behavior.",
+      "passCondition": "The architecture composes public component slots, UI primitives, editor state, and event helpers without forking the editor or targeting private DOM.",
+      "anchors": {
+        "1": "Depends on private DOM, a fork, or parallel canvas behavior.",
+        "3": "Uses public editor APIs but owns most chrome placement and lifecycle.",
+        "5": "Maps regions directly to supported TLComponents/editor components and public UI primitives."
+      }
+    },
+    {
+      "id": "fr2",
+      "name": "Reference fidelity",
+      "weight": 20,
+      "why": "The complete FigJam-like shell is now specified and should not be reinterpreted as generic edge-to-edge panels.",
+      "passCondition": "Persistent capsules, inset side popouts, object-local mini-menu, above-toolbar surface, toolbar, and utilities can coexist in the supplied spatial relationship.",
+      "anchors": {
+        "1": "Several regions are missing or structurally different.",
+        "3": "All regions exist but one or more are docked, modal, or poorly anchored.",
+        "5": "The complete composition and its persistent/transient distinction are preserved."
+      }
+    },
+    {
+      "id": "fr3",
+      "name": "Reusable surface contracts",
+      "weight": 20,
+      "why": "The near-term goal is to establish reliable placeholder shells that later Block, library, comments, files, and style features can reuse.",
+      "passCondition": "Left, right, selection-local, and toolbar-local surfaces share explicit frame, trigger, dismissal, and body contracts without sharing domain content.",
+      "anchors": {
+        "1": "Every menu is bespoke and cannot be reused.",
+        "3": "Some shell styling is shared, but behavior remains duplicated.",
+        "5": "A clear reusable contract covers anchors, focus, exclusivity, sizing, and bodies."
+      }
+    },
+    {
+      "id": "fr4",
+      "name": "Interaction correctness",
+      "weight": 20,
+      "why": "Floating chrome must not accidentally draw, pan, lose keyboard focus, or become detached from the current selection.",
+      "passCondition": "Pointer/wheel handling, Escape/click-away, focus return, selection following, camera movement, collision, and breakpoint behavior have one testable policy.",
+      "anchors": {
+        "1": "UI leaks events or has contradictory dismissal/focus rules.",
+        "3": "Core toggles work but complex coexistence or selection movement is custom and lightly specified.",
+        "5": "The design reuses tldraw event/positioning helpers and defines deterministic lifecycle rules."
+      }
+    },
+    {
+      "id": "fr5",
+      "name": "Incremental delivery",
+      "weight": 10,
+      "why": "Placeholders should establish the shell quickly without delaying the Block and file-management vertical slices.",
+      "passCondition": "The regions can land one at a time behind ordinary tests while stock tools and existing utilities stay operational.",
+      "anchors": {
+        "1": "Requires a broad rewrite before any region can ship.",
+        "3": "A meaningful foundation must land before the first visible region.",
+        "5": "Each region is an independent slot override or small component with isolated proof."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "g1",
+      "name": "Persistent top-right capsule",
+      "why": "The user explicitly corrected the earlier contextual interpretation; this bar is global chrome."
+    },
+    {
+      "id": "g2",
+      "name": "Complete region set",
+      "why": "Top bars, both side popouts, object mini-menu, above-toolbar menu, toolbar, and utilities must all have a home."
+    },
+    {
+      "id": "g3",
+      "name": "Stock canvas semantics",
+      "why": "UI architecture may not replace tldraw's document, selection, tool, camera, history, or clipboard model."
+    },
+    {
+      "id": "g4",
+      "name": "Ephemeral chrome state",
+      "why": "Open panels and active menu sections are session UI state, not document records."
+    },
+    {
+      "id": "g5",
+      "name": "No event leakage",
+      "why": "Clicking, typing, or scrolling in a popout must not draw, select, or pan the board underneath."
+    }
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "Slot-Mapped Shell",
+      "thesis": "Use a named tldraw component slot wherever one exists and one small in-front-of-canvas host only for the inset panels and object-local menu.",
+      "accent": "#526FE4",
+      "bestWhen": "You want the closest happy path, visible progress by region, and enough reuse for the known shell without building a framework first.",
+      "losesWhen": "Dozens of future surfaces with dynamic placement rules are already certain and justify a registry before their content exists.",
+      "decisions": [
+        {
+          "label": "Persistent bars",
+          "value": "MenuPanel owns the top-left board/page capsule; an always-supplied SharePanel owns the top-right collaboration capsule."
+        },
+        {
+          "label": "Transient canvas chrome",
+          "value": "InFrontOfTheCanvas hosts reusable left/right PopoutFrame components; TldrawUiContextualToolbar owns selection-following placement."
+        },
+        {
+          "label": "Toolbar family menus",
+          "value": "A Toolbar override wraps public toolbar items and TldrawUiPopover content above the trigger."
+        },
+        {
+          "label": "State",
+          "value": "One small ChromeProvider stores open surface IDs and LIFO dismissal; shape/tool/selection data stay in Editor."
+        }
+      ],
+      "keepParts": [
+        "public TLComponents slot map",
+        "TldrawUiContextualToolbar",
+        "shared PopoutFrame",
+        "small ephemeral ChromeProvider"
+      ],
+      "proof": [
+        "The hero shows the entire supplied shell and labels the public tldraw seams that own it.",
+        "Click the top-left, top-right, and purple toolbar triggers to independently close and reopen the two popouts and above-toolbar menu."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "Every first-class region maps to MenuPanel, SharePanel, Toolbar, NavigationPanel, InFrontOfTheCanvas, or a public tldraw UI primitive.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "All persistent and transient regions coexist with the supplied inset spacing and anchoring.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "PopoutFrame and ChromeProvider are reusable, while each named slot remains deliberately concrete.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "It reuses contextual-toolbar positioning, tldraw event handling, popover focus behavior, and one deterministic dismissal reducer.",
+          "confidence": "medium"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "Each slot can ship independently, though the shared ChromeProvider and inset tokens should land first.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "SharePanel is supplied unconditionally and never derived from selection."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Every region is assigned to a visible supported seam."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The full Tldraw editor remains mounted and authoritative."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "ChromeProvider stores UI state outside records and snapshots."
+        },
+        "g5": {
+          "pass": true,
+          "evidence": "Public UI primitives plus editor.markEventAsHandled/pass-through-wheel helpers define the event boundary."
+        }
+      },
+      "preview": "\n<style>\n.shell-mock{position:relative;min-height:420px;overflow:hidden;color:#202124;background-color:#fafaf8;background-image:radial-gradient(#d7d9d5 1px,transparent 1px);background-size:18px 18px;font:11px/1.35 Inter,ui-sans-serif,system-ui,sans-serif}\n.shell-mock *{box-sizing:border-box}.shell-mock button,.shell-mock input,.shell-mock label{font:inherit}.shell-mock button,.shell-mock label{cursor:pointer;color:inherit}.shell-check{position:absolute;opacity:0;pointer-events:none}\n.chrome-card{border:1px solid #dedfe3;background:#fff;box-shadow:0 5px 16px #20242b1b}.top-left-shell{position:absolute;z-index:8;top:12px;left:12px;display:flex;height:39px;align-items:center;overflow:hidden;border-radius:13px}.top-left-shell>*{display:grid;height:100%;place-items:center;padding:0 10px;border-right:1px solid #ececef}.top-left-shell>*:last-child{border-right:0}.top-left-shell b{display:flex;gap:6px;align-items:center}.free-chip{padding:2px 5px;border-radius:4px;background:#f2ecff;color:#7c3aed;font-size:8px}.top-right-shell{position:absolute;z-index:8;top:12px;right:12px;display:flex;height:39px;align-items:center;gap:3px;padding:4px;border-radius:13px}.top-right-shell>*{display:grid;min-width:31px;height:30px;place-items:center;border:0;border-radius:8px;background:transparent}.avatar{width:27px;min-width:27px!important;height:27px!important;border-radius:50%!important;background:#cf5c34!important;color:#fff!important;font-weight:800}.timer{padding:0 8px!important;border:1px solid #e7e8eb!important;background:#f8f8f7!important;font-family:ui-monospace,monospace}.share{padding:0 11px!important;background:#8654f6!important;color:#fff!important;font-weight:800}\n.left-popout,.right-popout{position:absolute;z-index:6;top:61px;bottom:55px;overflow:hidden;border:1px solid #dedfe3;border-radius:14px;background:#fff;box-shadow:0 12px 30px #20242b1c;transition:opacity 150ms ease,transform 150ms ease}.left-popout{left:16px;width:184px}.right-popout{right:16px;width:190px}.left-check:not(:checked)~.left-popout{opacity:0;pointer-events:none;transform:translateX(-110%)}.right-check:not(:checked)~.right-popout{opacity:0;pointer-events:none;transform:translateX(110%)}\n.popout-head{display:flex;height:42px;align-items:center;justify-content:space-between;padding:0 11px;border-bottom:1px solid #ececef;font-weight:800}.popout-head label{font-size:18px;font-weight:400}.search{margin:8px;padding:7px 8px;border-radius:7px;background:#f2f3f4;color:#9a9da3}.library{padding:2px 11px 12px}.library h5{display:flex;align-items:center;justify-content:space-between;margin:10px 0 7px}.shape-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 9px}.shape-icon{display:grid;width:24px;height:24px;place-items:center;margin:auto;border:1px solid #74777d;border-radius:4px;background:#fff}.shape-icon.round{border-radius:50%}.shape-icon.diamond{transform:rotate(45deg);border-radius:2px}.connection-row{display:flex;gap:17px;padding:4px 2px 7px;font-size:19px}.right-copy{display:flex;gap:9px;padding:13px 11px;color:#44484f}.right-copy i{font-size:18px}.right-copy p{margin:0;font-size:9px}.panel-actions{display:flex;gap:5px;padding:7px 8px;border-bottom:1px solid #ececef}.panel-actions span{display:grid;width:25px;height:25px;place-items:center;border-radius:6px;background:#f2f3f4}.right-empty{display:grid;height:200px;place-content:center;color:#a0a4aa;text-align:center}\n.selected-shape{position:absolute;left:40%;top:45%;width:122px;height:78px;border:2px solid #4f8ff7;background:#fff}.selected-shape:before,.selected-shape:after{content:'';position:absolute;width:8px;height:8px;border:2px solid #4f8ff7;border-radius:2px;background:#fff}.selected-shape:before{top:-6px;left:-6px}.selected-shape:after{right:-6px;bottom:-6px}.selected-shape span{display:grid;height:100%;place-items:center;color:#8b9097;font-size:9px}\n.selection-menu{position:absolute;z-index:7;left:50%;top:34%;display:flex;height:37px;align-items:center;overflow:hidden;border-radius:10px;background:#202020;color:#fff;box-shadow:0 8px 22px #20242b2d;transform:translateX(-50%)}.selection-menu span{display:grid;min-width:39px;height:100%;place-items:center;padding:0 8px;border-right:1px solid #3d3d3d}.selection-menu span:last-child{border-right:0}.selection-menu .wide{min-width:66px}.selection-menu .label{min-width:74px;color:#dfe1e5;font-size:9px}\n.bottom-toolbar{position:absolute;z-index:8;left:46%;bottom:11px;display:flex;height:39px;align-items:center;gap:2px;padding:4px;border:1px solid #dedfe3;border-radius:13px;background:#fff;box-shadow:0 5px 16px #20242b20;transform:translateX(-50%)}.bottom-toolbar>*{display:grid;min-width:27px;height:30px;place-items:center;border:0;border-radius:7px;background:transparent}.bottom-toolbar .active{background:#5f84ed;color:#fff}.bottom-toolbar .palette-trigger{position:relative;margin:0;background:#ebe6ff;color:#6d3fdc}.bottom-toolbar .palette-trigger input{position:absolute;opacity:0;pointer-events:none}.utility-strip{position:absolute;z-index:8;right:12px;bottom:11px;display:flex;height:39px;align-items:center;padding:4px;border:1px solid #dedfe3;border-radius:13px;background:#fff;box-shadow:0 5px 16px #20242b1b}.utility-strip span{display:grid;min-width:31px;height:30px;place-items:center}.utility-strip b{min-width:38px;text-align:center}\n.above-menu{position:absolute;z-index:7;left:50%;bottom:57px;width:298px;min-height:106px;padding:9px;border:1px solid #dedfe3;border-radius:13px;background:#fff;box-shadow:0 12px 30px #20242b24;transform:translateX(-50%);transition:opacity 150ms ease,transform 150ms ease}.shell-mock:has(.palette-check:not(:checked)) .above-menu{opacity:0;pointer-events:none;transform:translate(-50%,12px)}.above-menu .search{margin:0 0 7px}.command-row{display:flex;align-items:center;justify-content:space-between;padding:5px 7px;border-radius:6px}.command-row.active{background:#f0f0f1}.command-row small{color:#a0a3a8}.color-row{display:flex;gap:8px;align-items:center;padding:5px}.swatch{width:18px;height:18px;border:1px solid #dedfe3;border-radius:50%;background:#fff}.swatch.purple{background:#7c4dff}.swatch.orange{background:#ed6b3f}.swatch.yellow{background:#f5c84b}.swatch.green{background:#75c776}\n.architecture-note{position:absolute;z-index:9;left:211px;top:62px;max-width:220px;padding:7px 9px;border:1px solid #d9dce2;border-radius:9px;background:#ffffffed;color:#5f6570;font-size:8px;box-shadow:0 4px 12px #20242b12}.architecture-note b{display:block;margin-bottom:3px;color:#343840}.seam-pill{display:inline-block;margin:2px 2px 0 0;padding:2px 5px;border-radius:99px;background:#e9edff;color:#3e55c7;font-size:7px;font-weight:800}.surface-boundary{position:absolute;z-index:2;inset:7px;border:2px dashed #148578;border-radius:18px;pointer-events:none}.registry-map{position:absolute;z-index:5;left:211px;top:105px;width:132px;padding:7px;border:1px solid #b9a7ef;border-radius:9px;background:#f5f1ffed;color:#6040a7;font:7px/1.45 ui-monospace,monospace;box-shadow:0 4px 12px #20242b12}.registry-map b{display:block;margin-bottom:3px;font-family:Inter,sans-serif}.shell-app-frame{box-shadow:inset 0 0 0 7px #25272b}.shell-app-frame .top-left-shell,.shell-app-frame .top-right-shell{top:18px}.shell-app-frame .left-popout,.shell-app-frame .right-popout{top:67px;bottom:61px}.shell-app-frame .architecture-note{top:68px}.shell-stock .left-popout{bottom:174px;width:166px}.shell-stock .right-popout{bottom:126px;width:174px}.shell-stock .selection-menu{height:33px}.shell-stock .above-menu{width:256px;min-height:88px}.stock-arrow{position:absolute;z-index:7;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:7px solid #fff}.left-arrow{top:54px;left:54px}.right-arrow{top:54px;right:56px}.fixture-caption{position:absolute;left:211px;bottom:60px;color:#858a92;font-size:8px}\n@media(max-width:760px){.left-popout{width:165px}.right-popout{width:170px}.architecture-note{left:185px}.registry-map{display:none}}\n</style>\n\n<div class='shell-mock shell-slots'>\n  <input class='shell-check left-check' id='v1-left' type='checkbox' checked>\n  <input class='shell-check right-check' id='v1-right' type='checkbox' checked>\n  \n  <nav class='chrome-card top-left-shell' aria-label='Board and pages'>\n    <label for='v1-left' title='Toggle shape library'>\u2630\u2304</label>\n    <b>Untitled <i class='free-chip'>Free</i></b>\n    <span>\u25a3 pages</span>\n  </nav>\n  <nav class='chrome-card top-right-shell' aria-label='Collaboration and sharing'>\n    <span class='avatar'>Z</span><span>\u2304</span>\n    <label for='v1-right' title='Toggle right popout'>\u25a6</label>\n    <span class='timer'>\u25c9 03:00</span><button class='share'>Share</button>\n  </nav>\n  <aside class='left-popout' aria-label='Shape library'>\n    <header class='popout-head'><span>Shapes</span><label for='v1-left'>\u00d7</label></header>\n    <div class='search'>\u2315 &nbsp; Search shapes</div>\n    <div class='library'>\n      <h5><span>Recents</span><span>\u2303</span></h5>\n      <div class='shape-grid'><i class='shape-icon'></i></div>\n      <h5><span>Connections</span><span>\u2303</span></h5>\n      <div class='connection-row'><span>\u21b1</span><span>\u2934</span><span>\u2197</span><span>\u2318</span></div>\n      <h5><span>Basic</span><span>\u2303</span></h5>\n      <div class='shape-grid'><i class='shape-icon'></i><i class='shape-icon round'></i><i class='shape-icon diamond'></i><i class='shape-icon'></i><i class='shape-icon diamond'></i><i class='shape-icon round'></i><i class='shape-icon'></i><i class='shape-icon round'></i><i class='shape-icon'>\uff0b</i><i class='shape-icon'>\u2190</i><i class='shape-icon'>\u2192</i><i class='shape-icon'>\u2606</i></div>\n      <h5><span>Flowchart</span><span>\u2303</span></h5>\n      <div class='shape-grid'><i class='shape-icon'>\u25b1</i><i class='shape-icon'>\u25b0</i><i class='shape-icon'>\u25b1</i><i class='shape-icon'>\u25a4</i></div>\n    </div>\n  </aside>\n  <aside class='right-popout' aria-label='Comments and inspector'>\n    <div class='panel-actions'><span>\u2315</span><span>\u2637</span><span>\u2022\u2022\u2022</span><label for='v1-right'>\u00d7</label></div>\n    <div class='right-copy'><i>\u25ef</i><p>Give feedback, ask a question, or leave a note. Click anywhere in the file to leave a comment.</p></div>\n    <div class='right-empty'>Right-side reusable surface</div>\n  </aside>\n  <div class='selected-shape'><span>Selected Block</span></div>\n  <div class='selection-menu' aria-label='Selection mini menu'><span>\u25e9\u2304</span><span>\u25cf\u2304</span><span>\u2630\u2304</span><span class='label'>Aa &nbsp; Small</span><span>B</span><span>\u2197</span></div>\n  <section class='above-menu' aria-label='Above-toolbar menu'>\n    <div class='search'>\u2315 &nbsp; Search</div>\n    <div class='command-row active'><span>\u25ce &nbsp; Find and replace\u2026</span><small>Ctrl+F</small></div>\n    <div class='command-row'><span>\u25c9 &nbsp; Select all</span><small>Ctrl+A</small></div>\n    <div class='color-row'><i class='swatch purple'></i><i class='swatch orange'></i><i class='swatch yellow'></i><i class='swatch green'></i><i class='swatch'></i></div>\n  </section>\n  <nav class='bottom-toolbar' aria-label='Drawing toolbar'><button class='active'>\u2196</button><button>\u261d</button><button>\u270e</button><button>\u25c7</button><button>\u2197</button><button>T</button><button>\u25a1</button><label class='palette-trigger'><input class='palette-check' id='v1-palette' type='checkbox' checked aria-label='Toggle above-toolbar menu'><span>\u2318\uff0b</span></label></nav>\n  <nav class='utility-strip' aria-label='Zoom and help'><span>\u25a3</span><span>\u2212</span><b>32%</b><span>\uff0b</span><span>?</span></nav>\n  <div class='architecture-note'><b>Public slot map</b><i class='seam-pill'>MenuPanel</i><i class='seam-pill'>SharePanel</i><i class='seam-pill'>Toolbar</i><i class='seam-pill'>ContextualToolbar</i><i class='seam-pill'>InFrontOfTheCanvas</i></div>\n  <div class='fixture-caption'>Click \u2630, \u25a6, or \u2318\uff0b to toggle the three reusable surfaces.</div>\n</div>\n"
+    },
+    {
+      "id": "v2",
+      "name": "Unified SurfaceHost",
+      "thesis": "Render the entire persistent and transient chrome system from one InFrontOfTheCanvas surface host with one coordinate and collision model.",
+      "accent": "#118675",
+      "bestWhen": "Exact cross-surface alignment and a single owner for collision, layering, dismissal, and responsive changes matter more than slot-native composition.",
+      "losesWhen": "You want tldraw upgrades and built-in responsive behavior to carry as much of the shell as possible.",
+      "decisions": [
+        {
+          "label": "Ownership",
+          "value": "One SurfaceHost renders top bars, side popouts, mini-menu, toolbar menu, toolbar, and utilities over the stock canvas."
+        },
+        {
+          "label": "Positioning",
+          "value": "One inset/collision solver lays out every region in editor-container coordinates."
+        },
+        {
+          "label": "Commands",
+          "value": "Controls still call public editor actions/tools; only layout and menu lifecycle are centralized."
+        },
+        {
+          "label": "State",
+          "value": "A reducer owns every surface, trigger, focus return target, and z-order."
+        }
+      ],
+      "keepParts": [
+        "single collision model",
+        "central LIFO dismissal",
+        "one responsive coordinate system",
+        "shared chrome tokens"
+      ],
+      "proof": [
+        "The dashed boundary shows one host owning every visible region.",
+        "The same three toggles demonstrate coordinated state without changing the canvas fixture."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 3,
+          "evidence": "It uses the public InFrontOfTheCanvas seam and editor actions but bypasses most specialized TLComponents layout behavior.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "A single coordinate owner can reproduce the supplied composition precisely.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "Every surface shares one descriptor, frame, layering, focus, and collision contract.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "Central policy is coherent, but selection placement, breakpoints, and menu focus are reimplemented rather than inherited.",
+          "confidence": "medium"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "One host foundation is required, after which placeholder regions are cheap to add.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The host always renders the top-right bar."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The host descriptor list includes every region."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Only chrome is overlaid; editor semantics remain stock."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The SurfaceHost reducer is ordinary React state."
+        },
+        "g5": {
+          "pass": true,
+          "evidence": "The host defines one event boundary for all child surfaces."
+        }
+      },
+      "preview": "\n<div class='shell-mock shell-host'>\n  <input class='shell-check left-check' id='v2-left' type='checkbox' checked>\n  <input class='shell-check right-check' id='v2-right' type='checkbox' checked>\n  <div class='surface-boundary'></div>\n  <nav class='chrome-card top-left-shell' aria-label='Board and pages'>\n    <label for='v2-left' title='Toggle shape library'>\u2630\u2304</label>\n    <b>Untitled <i class='free-chip'>Free</i></b>\n    <span>\u25a3 pages</span>\n  </nav>\n  <nav class='chrome-card top-right-shell' aria-label='Collaboration and sharing'>\n    <span class='avatar'>Z</span><span>\u2304</span>\n    <label for='v2-right' title='Toggle right popout'>\u25a6</label>\n    <span class='timer'>\u25c9 03:00</span><button class='share'>Share</button>\n  </nav>\n  <aside class='left-popout' aria-label='Shape library'>\n    <header class='popout-head'><span>Shapes</span><label for='v2-left'>\u00d7</label></header>\n    <div class='search'>\u2315 &nbsp; Search shapes</div>\n    <div class='library'>\n      <h5><span>Recents</span><span>\u2303</span></h5>\n      <div class='shape-grid'><i class='shape-icon'></i></div>\n      <h5><span>Connections</span><span>\u2303</span></h5>\n      <div class='connection-row'><span>\u21b1</span><span>\u2934</span><span>\u2197</span><span>\u2318</span></div>\n      <h5><span>Basic</span><span>\u2303</span></h5>\n      <div class='shape-grid'><i class='shape-icon'></i><i class='shape-icon round'></i><i class='shape-icon diamond'></i><i class='shape-icon'></i><i class='shape-icon diamond'></i><i class='shape-icon round'></i><i class='shape-icon'></i><i class='shape-icon round'></i><i class='shape-icon'>\uff0b</i><i class='shape-icon'>\u2190</i><i class='shape-icon'>\u2192</i><i class='shape-icon'>\u2606</i></div>\n      <h5><span>Flowchart</span><span>\u2303</span></h5>\n      <div class='shape-grid'><i class='shape-icon'>\u25b1</i><i class='shape-icon'>\u25b0</i><i class='shape-icon'>\u25b1</i><i class='shape-icon'>\u25a4</i></div>\n    </div>\n  </aside>\n  <aside class='right-popout' aria-label='Comments and inspector'>\n    <div class='panel-actions'><span>\u2315</span><span>\u2637</span><span>\u2022\u2022\u2022</span><label for='v2-right'>\u00d7</label></div>\n    <div class='right-copy'><i>\u25ef</i><p>Give feedback, ask a question, or leave a note. Click anywhere in the file to leave a comment.</p></div>\n    <div class='right-empty'>Right-side reusable surface</div>\n  </aside>\n  <div class='selected-shape'><span>Selected Block</span></div>\n  <div class='selection-menu' aria-label='Selection mini menu'><span>\u25e9\u2304</span><span>\u25cf\u2304</span><span>\u2630\u2304</span><span class='label'>Aa &nbsp; Small</span><span>B</span><span>\u2197</span></div>\n  <section class='above-menu' aria-label='Above-toolbar menu'>\n    <div class='search'>\u2315 &nbsp; Search</div>\n    <div class='command-row active'><span>\u25ce &nbsp; Find and replace\u2026</span><small>Ctrl+F</small></div>\n    <div class='command-row'><span>\u25c9 &nbsp; Select all</span><small>Ctrl+A</small></div>\n    <div class='color-row'><i class='swatch purple'></i><i class='swatch orange'></i><i class='swatch yellow'></i><i class='swatch green'></i><i class='swatch'></i></div>\n  </section>\n  <nav class='bottom-toolbar' aria-label='Drawing toolbar'><button class='active'>\u2196</button><button>\u261d</button><button>\u270e</button><button>\u25c7</button><button>\u2197</button><button>T</button><button>\u25a1</button><label class='palette-trigger'><input class='palette-check' id='v2-palette' type='checkbox' checked aria-label='Toggle above-toolbar menu'><span>\u2318\uff0b</span></label></nav>\n  <nav class='utility-strip' aria-label='Zoom and help'><span>\u25a3</span><span>\u2212</span><b>32%</b><span>\uff0b</span><span>?</span></nav>\n  <div class='architecture-note'><b>One SurfaceHost</b>Every region is positioned and coordinated by one overlay component; tldraw supplies editor state and commands.</div>\n  <div class='fixture-caption'>Click \u2630, \u25a6, or \u2318\uff0b to toggle the three reusable surfaces.</div>\n</div>\n"
+    },
+    {
+      "id": "v3",
+      "name": "Registry + Slot Adapters",
+      "thesis": "Declare reusable surfaces as data, then let adapters place each descriptor into a tldraw slot, contextual toolbar, or inset overlay anchor.",
+      "accent": "#7B4BC4",
+      "bestWhen": "Left/right panels, inspectors, libraries, files, comments, and future domain menus will proliferate and need policy-driven reuse.",
+      "losesWhen": "The shell is still exploratory and a descriptor platform would be more code than the first four placeholder bodies.",
+      "decisions": [
+        {
+          "label": "Surface schema",
+          "value": "Each descriptor declares anchor, trigger, body, size, exclusivity group, focus policy, and availability predicate."
+        },
+        {
+          "label": "Adapters",
+          "value": "MenuPanel, SharePanel, Toolbar, ContextualToolbar, and overlay adapters render descriptors through public seams."
+        },
+        {
+          "label": "Commands",
+          "value": "Bodies receive typed UI commands and editor selectors rather than raw store mutation."
+        },
+        {
+          "label": "Testing",
+          "value": "Contract tests run every descriptor through open, Escape, click-away, focus-return, and narrow-screen journeys."
+        }
+      ],
+      "keepParts": [
+        "surface descriptor schema",
+        "slot adapters",
+        "availability predicates",
+        "contract-test matrix"
+      ],
+      "proof": [
+        "The hero numbers the same regions and exposes a small registry map beside them.",
+        "All three triggers still exercise the rendered descriptors in the shared fixture."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 4,
+          "evidence": "Adapters use public tldraw slots and primitives, but a custom indirection layer sits between product components and those seams.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "Descriptors and per-anchor adapters preserve the full supplied composition.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "This is the strongest explicit reuse model for future menu bodies and policies.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "Central contract tests are strong, though adapter edge cases add another lifecycle layer.",
+          "confidence": "medium"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "The registry and adapters are an upfront rung, but each later placeholder becomes a small descriptor/body pair.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The top-right descriptor is persistent and has no availability predicate."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Every region has an anchor descriptor and adapter."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Adapters consume public Editor selectors/commands only."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "Registry activation is ephemeral UI state."
+        },
+        "g5": {
+          "pass": true,
+          "evidence": "The surface contract requires an event boundary and focus policy."
+        }
+      },
+      "preview": "\n<div class='shell-mock shell-registry'>\n  <input class='shell-check left-check' id='v3-left' type='checkbox' checked>\n  <input class='shell-check right-check' id='v3-right' type='checkbox' checked>\n  <div class='registry-map'><b>surface registry</b>library \u2192 left<br>comments \u2192 right<br>selection \u2192 object<br>tool-family \u2192 toolbar</div>\n  <nav class='chrome-card top-left-shell' aria-label='Board and pages'>\n    <label for='v3-left' title='Toggle shape library'>\u2630\u2304</label>\n    <b>Untitled <i class='free-chip'>Free</i></b>\n    <span>\u25a3 pages</span>\n  </nav>\n  <nav class='chrome-card top-right-shell' aria-label='Collaboration and sharing'>\n    <span class='avatar'>Z</span><span>\u2304</span>\n    <label for='v3-right' title='Toggle right popout'>\u25a6</label>\n    <span class='timer'>\u25c9 03:00</span><button class='share'>Share</button>\n  </nav>\n  <aside class='left-popout' aria-label='Shape library'>\n    <header class='popout-head'><span>Shapes</span><label for='v3-left'>\u00d7</label></header>\n    <div class='search'>\u2315 &nbsp; Search shapes</div>\n    <div class='library'>\n      <h5><span>Recents</span><span>\u2303</span></h5>\n      <div class='shape-grid'><i class='shape-icon'></i></div>\n      <h5><span>Connections</span><span>\u2303</span></h5>\n      <div class='connection-row'><span>\u21b1</span><span>\u2934</span><span>\u2197</span><span>\u2318</span></div>\n      <h5><span>Basic</span><span>\u2303</span></h5>\n      <div class='shape-grid'><i class='shape-icon'></i><i class='shape-icon round'></i><i class='shape-icon diamond'></i><i class='shape-icon'></i><i class='shape-icon diamond'></i><i class='shape-icon round'></i><i class='shape-icon'></i><i class='shape-icon round'></i><i class='shape-icon'>\uff0b</i><i class='shape-icon'>\u2190</i><i class='shape-icon'>\u2192</i><i class='shape-icon'>\u2606</i></div>\n      <h5><span>Flowchart</span><span>\u2303</span></h5>\n      <div class='shape-grid'><i class='shape-icon'>\u25b1</i><i class='shape-icon'>\u25b0</i><i class='shape-icon'>\u25b1</i><i class='shape-icon'>\u25a4</i></div>\n    </div>\n  </aside>\n  <aside class='right-popout' aria-label='Comments and inspector'>\n    <div class='panel-actions'><span>\u2315</span><span>\u2637</span><span>\u2022\u2022\u2022</span><label for='v3-right'>\u00d7</label></div>\n    <div class='right-copy'><i>\u25ef</i><p>Give feedback, ask a question, or leave a note. Click anywhere in the file to leave a comment.</p></div>\n    <div class='right-empty'>Right-side reusable surface</div>\n  </aside>\n  <div class='selected-shape'><span>Selected Block</span></div>\n  <div class='selection-menu' aria-label='Selection mini menu'><span>\u25e9\u2304</span><span>\u25cf\u2304</span><span>\u2630\u2304</span><span class='label'>Aa &nbsp; Small</span><span>B</span><span>\u2197</span></div>\n  <section class='above-menu' aria-label='Above-toolbar menu'>\n    <div class='search'>\u2315 &nbsp; Search</div>\n    <div class='command-row active'><span>\u25ce &nbsp; Find and replace\u2026</span><small>Ctrl+F</small></div>\n    <div class='command-row'><span>\u25c9 &nbsp; Select all</span><small>Ctrl+A</small></div>\n    <div class='color-row'><i class='swatch purple'></i><i class='swatch orange'></i><i class='swatch yellow'></i><i class='swatch green'></i><i class='swatch'></i></div>\n  </section>\n  <nav class='bottom-toolbar' aria-label='Drawing toolbar'><button class='active'>\u2196</button><button>\u261d</button><button>\u270e</button><button>\u25c7</button><button>\u2197</button><button>T</button><button>\u25a1</button><label class='palette-trigger'><input class='palette-check' id='v3-palette' type='checkbox' checked aria-label='Toggle above-toolbar menu'><span>\u2318\uff0b</span></label></nav>\n  <nav class='utility-strip' aria-label='Zoom and help'><span>\u25a3</span><span>\u2212</span><b>32%</b><span>\uff0b</span><span>?</span></nav>\n  <div class='architecture-note'><b>Registry + slot adapters</b>Descriptors declare anchor, exclusivity, focus policy, and body; adapters place them into public slots.</div>\n  <div class='fixture-caption'>Click \u2630, \u25a6, or \u2318\uff0b to toggle the three reusable surfaces.</div>\n</div>\n"
+    },
+    {
+      "id": "v4",
+      "name": "Outer App Frame",
+      "thesis": "Place persistent bars and side popouts in a React application frame around Tldraw, using tldraw UI seams only for the toolbar and object-local menu.",
+      "accent": "#B85D18",
+      "bestWhen": "SystemSketch is becoming a multi-pane application whose file browser, collaboration, and project chrome should outlive or swap the canvas.",
+      "losesWhen": "The whiteboard remains the product center and app-frame layout should not compete with tldraw's responsive panel system.",
+      "decisions": [
+        {
+          "label": "Ownership",
+          "value": "The host app owns top bars and left/right popouts as siblings of Tldraw."
+        },
+        {
+          "label": "Canvas",
+          "value": "Tldraw fills one app-frame cell; viewport and resize observers respond when the frame changes."
+        },
+        {
+          "label": "Local UI",
+          "value": "Selection mini-menu and above-toolbar surfaces remain inside tldraw through public primitives."
+        },
+        {
+          "label": "State",
+          "value": "App navigation state and editor state meet through typed commands/selectors at the canvas boundary."
+        }
+      ],
+      "keepParts": [
+        "clear app/editor boundary",
+        "persistent project chrome",
+        "typed canvas bridge",
+        "future multi-pane readiness"
+      ],
+      "proof": [
+        "The dark inset frame makes the host-owned application boundary visible.",
+        "Panel toggles change host siblings while the selected object and local menu remain inside the canvas fixture."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 3,
+          "evidence": "The editor remains stock, but host layout replaces several first-class tldraw UI zones and must coordinate resize/focus itself.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "A host frame can reproduce the visual shell exactly.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "Host panels share app-shell contracts, while canvas-local surfaces use a second contract.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 3,
+          "evidence": "Cross-boundary focus, resize, keyboard routing, and overlay collisions need custom integration.",
+          "confidence": "medium"
+        },
+        "fr5": {
+          "score": 3,
+          "evidence": "The app frame and editor bridge should land before its regions, making the first placeholder less incremental.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The host app always mounts the top-right bar."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Host and canvas-local regions cover the complete set."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The embedded Tldraw component remains the only canvas."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "App-frame UI state is kept outside the document."
+        },
+        "g5": {
+          "pass": true,
+          "evidence": "Host siblings naturally intercept their own events; the bridge still requires tests."
+        }
+      },
+      "preview": "\n<div class='shell-mock shell-app-frame'>\n  <input class='shell-check left-check' id='v4-left' type='checkbox' checked>\n  <input class='shell-check right-check' id='v4-right' type='checkbox' checked>\n  \n  <nav class='chrome-card top-left-shell' aria-label='Board and pages'>\n    <label for='v4-left' title='Toggle shape library'>\u2630\u2304</label>\n    <b>Untitled <i class='free-chip'>Free</i></b>\n    <span>\u25a3 pages</span>\n  </nav>\n  <nav class='chrome-card top-right-shell' aria-label='Collaboration and sharing'>\n    <span class='avatar'>Z</span><span>\u2304</span>\n    <label for='v4-right' title='Toggle right popout'>\u25a6</label>\n    <span class='timer'>\u25c9 03:00</span><button class='share'>Share</button>\n  </nav>\n  <aside class='left-popout' aria-label='Shape library'>\n    <header class='popout-head'><span>Shapes</span><label for='v4-left'>\u00d7</label></header>\n    <div class='search'>\u2315 &nbsp; Search shapes</div>\n    <div class='library'>\n      <h5><span>Recents</span><span>\u2303</span></h5>\n      <div class='shape-grid'><i class='shape-icon'></i></div>\n      <h5><span>Connections</span><span>\u2303</span></h5>\n      <div class='connection-row'><span>\u21b1</span><span>\u2934</span><span>\u2197</span><span>\u2318</span></div>\n      <h5><span>Basic</span><span>\u2303</span></h5>\n      <div class='shape-grid'><i class='shape-icon'></i><i class='shape-icon round'></i><i class='shape-icon diamond'></i><i class='shape-icon'></i><i class='shape-icon diamond'></i><i class='shape-icon round'></i><i class='shape-icon'></i><i class='shape-icon round'></i><i class='shape-icon'>\uff0b</i><i class='shape-icon'>\u2190</i><i class='shape-icon'>\u2192</i><i class='shape-icon'>\u2606</i></div>\n      <h5><span>Flowchart</span><span>\u2303</span></h5>\n      <div class='shape-grid'><i class='shape-icon'>\u25b1</i><i class='shape-icon'>\u25b0</i><i class='shape-icon'>\u25b1</i><i class='shape-icon'>\u25a4</i></div>\n    </div>\n  </aside>\n  <aside class='right-popout' aria-label='Comments and inspector'>\n    <div class='panel-actions'><span>\u2315</span><span>\u2637</span><span>\u2022\u2022\u2022</span><label for='v4-right'>\u00d7</label></div>\n    <div class='right-copy'><i>\u25ef</i><p>Give feedback, ask a question, or leave a note. Click anywhere in the file to leave a comment.</p></div>\n    <div class='right-empty'>Right-side reusable surface</div>\n  </aside>\n  <div class='selected-shape'><span>Selected Block</span></div>\n  <div class='selection-menu' aria-label='Selection mini menu'><span>\u25e9\u2304</span><span>\u25cf\u2304</span><span>\u2630\u2304</span><span class='label'>Aa &nbsp; Small</span><span>B</span><span>\u2197</span></div>\n  <section class='above-menu' aria-label='Above-toolbar menu'>\n    <div class='search'>\u2315 &nbsp; Search</div>\n    <div class='command-row active'><span>\u25ce &nbsp; Find and replace\u2026</span><small>Ctrl+F</small></div>\n    <div class='command-row'><span>\u25c9 &nbsp; Select all</span><small>Ctrl+A</small></div>\n    <div class='color-row'><i class='swatch purple'></i><i class='swatch orange'></i><i class='swatch yellow'></i><i class='swatch green'></i><i class='swatch'></i></div>\n  </section>\n  <nav class='bottom-toolbar' aria-label='Drawing toolbar'><button class='active'>\u2196</button><button>\u261d</button><button>\u270e</button><button>\u25c7</button><button>\u2197</button><button>T</button><button>\u25a1</button><label class='palette-trigger'><input class='palette-check' id='v4-palette' type='checkbox' checked aria-label='Toggle above-toolbar menu'><span>\u2318\uff0b</span></label></nav>\n  <nav class='utility-strip' aria-label='Zoom and help'><span>\u25a3</span><span>\u2212</span><b>32%</b><span>\uff0b</span><span>?</span></nav>\n  <div class='architecture-note'><b>Outer app frame</b>Persistent bars and side popouts live beside the editor; only selection-local UI enters tldraw.</div>\n  <div class='fixture-caption'>Click \u2630, \u25a6, or \u2318\uff0b to toggle the three reusable surfaces.</div>\n</div>\n"
+    },
+    {
+      "id": "v5",
+      "name": "Stock Popover Composition",
+      "thesis": "Keep tldraw's stock zones and disclosure mechanics, adding placeholder content through its existing popovers, style panel, actions, and contextual-toolbar primitives.",
+      "accent": "#3C6D8C",
+      "bestWhen": "The fastest low-risk placeholder shell matters more than matching the tall inset panels exactly on the first pass.",
+      "losesWhen": "The supplied FigJam composition is already a firm visual contract rather than a rough direction.",
+      "decisions": [
+        {
+          "label": "Persistent bars",
+          "value": "Small MenuPanel and SharePanel wrappers add board and collaboration controls while preserving stock content."
+        },
+        {
+          "label": "Side content",
+          "value": "Library and inspector bodies use stock popovers/StylePanel disclosure rather than a new large panel host."
+        },
+        {
+          "label": "Local controls",
+          "value": "TldrawUiContextualToolbar and toolbar ActionsMenu carry the object and above-toolbar surfaces."
+        },
+        {
+          "label": "State",
+          "value": "Each public popover owns its local open/focus lifecycle; very little shared state exists."
+        }
+      ],
+      "keepParts": [
+        "stock popover focus behavior",
+        "minimal shared state",
+        "contextual toolbar reuse",
+        "fast placeholder delivery"
+      ],
+      "proof": [
+        "The shorter side surfaces and popover arrows show the deliberate stock-disclosure compromise.",
+        "The same triggers exercise local popover state with the least custom coordination."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "It relies almost entirely on stock TLComponents and public popover/contextual-toolbar primitives.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 3,
+          "evidence": "All regions exist, but tall inset left/right panels are approximated by shorter stock disclosure surfaces.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 3,
+          "evidence": "Shared tldraw primitives are reused, while product-level sizing, exclusivity, and cross-surface policy remain implicit.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "Stock focus and dismissal are reliable, but independent popovers do not coordinate every coexistence case.",
+          "confidence": "medium"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "Each placeholder can be added as a narrow wrapper or child of an existing surface.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "A custom SharePanel wrapper remains mounted."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Every region is represented, even where its dimensions differ."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Only public stock UI composition changes."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "Popover state stays local and ephemeral."
+        },
+        "g5": {
+          "pass": true,
+          "evidence": "Stock popovers and contextual toolbar already isolate pointer/focus behavior."
+        }
+      },
+      "preview": "\n<div class='shell-mock shell-stock'>\n  <input class='shell-check left-check' id='v5-left' type='checkbox' checked>\n  <input class='shell-check right-check' id='v5-right' type='checkbox' checked>\n  <i class='stock-arrow left-arrow'></i><i class='stock-arrow right-arrow'></i>\n  <nav class='chrome-card top-left-shell' aria-label='Board and pages'>\n    <label for='v5-left' title='Toggle shape library'>\u2630\u2304</label>\n    <b>Untitled <i class='free-chip'>Free</i></b>\n    <span>\u25a3 pages</span>\n  </nav>\n  <nav class='chrome-card top-right-shell' aria-label='Collaboration and sharing'>\n    <span class='avatar'>Z</span><span>\u2304</span>\n    <label for='v5-right' title='Toggle right popout'>\u25a6</label>\n    <span class='timer'>\u25c9 03:00</span><button class='share'>Share</button>\n  </nav>\n  <aside class='left-popout' aria-label='Shape library'>\n    <header class='popout-head'><span>Shapes</span><label for='v5-left'>\u00d7</label></header>\n    <div class='search'>\u2315 &nbsp; Search shapes</div>\n    <div class='library'>\n      <h5><span>Recents</span><span>\u2303</span></h5>\n      <div class='shape-grid'><i class='shape-icon'></i></div>\n      <h5><span>Connections</span><span>\u2303</span></h5>\n      <div class='connection-row'><span>\u21b1</span><span>\u2934</span><span>\u2197</span><span>\u2318</span></div>\n      <h5><span>Basic</span><span>\u2303</span></h5>\n      <div class='shape-grid'><i class='shape-icon'></i><i class='shape-icon round'></i><i class='shape-icon diamond'></i><i class='shape-icon'></i><i class='shape-icon diamond'></i><i class='shape-icon round'></i><i class='shape-icon'></i><i class='shape-icon round'></i><i class='shape-icon'>\uff0b</i><i class='shape-icon'>\u2190</i><i class='shape-icon'>\u2192</i><i class='shape-icon'>\u2606</i></div>\n      <h5><span>Flowchart</span><span>\u2303</span></h5>\n      <div class='shape-grid'><i class='shape-icon'>\u25b1</i><i class='shape-icon'>\u25b0</i><i class='shape-icon'>\u25b1</i><i class='shape-icon'>\u25a4</i></div>\n    </div>\n  </aside>\n  <aside class='right-popout' aria-label='Comments and inspector'>\n    <div class='panel-actions'><span>\u2315</span><span>\u2637</span><span>\u2022\u2022\u2022</span><label for='v5-right'>\u00d7</label></div>\n    <div class='right-copy'><i>\u25ef</i><p>Give feedback, ask a question, or leave a note. Click anywhere in the file to leave a comment.</p></div>\n    <div class='right-empty'>Right-side reusable surface</div>\n  </aside>\n  <div class='selected-shape'><span>Selected Block</span></div>\n  <div class='selection-menu' aria-label='Selection mini menu'><span>\u25e9\u2304</span><span>\u25cf\u2304</span><span>\u2630\u2304</span><span class='label'>Aa &nbsp; Small</span><span>B</span><span>\u2197</span></div>\n  <section class='above-menu' aria-label='Above-toolbar menu'>\n    <div class='search'>\u2315 &nbsp; Search</div>\n    <div class='command-row active'><span>\u25ce &nbsp; Find and replace\u2026</span><small>Ctrl+F</small></div>\n    <div class='command-row'><span>\u25c9 &nbsp; Select all</span><small>Ctrl+A</small></div>\n    <div class='color-row'><i class='swatch purple'></i><i class='swatch orange'></i><i class='swatch yellow'></i><i class='swatch green'></i><i class='swatch'></i></div>\n  </section>\n  <nav class='bottom-toolbar' aria-label='Drawing toolbar'><button class='active'>\u2196</button><button>\u261d</button><button>\u270e</button><button>\u25c7</button><button>\u2197</button><button>T</button><button>\u25a1</button><label class='palette-trigger'><input class='palette-check' id='v5-palette' type='checkbox' checked aria-label='Toggle above-toolbar menu'><span>\u2318\uff0b</span></label></nav>\n  <nav class='utility-strip' aria-label='Zoom and help'><span>\u25a3</span><span>\u2212</span><b>32%</b><span>\uff0b</span><span>?</span></nav>\n  <div class='architecture-note'><b>Stock popover composition</b>Keep stock panels and contextual toolbar; attach lightweight placeholder content to existing triggers.</div>\n  <div class='fixture-caption'>Click \u2630, \u25a6, or \u2318\uff0b to toggle the three reusable surfaces.</div>\n</div>\n"
+    }
+  ],
+  "checks": [
+    "Exactly five implementation architectures with different ownership and state boundaries",
+    "The same complete shell, selected Block, viewport, content, and fidelity class appear in every proposal",
+    "Every proposal exposes working left, right, and above-toolbar toggles",
+    "Five weighted criteria were frozen before scoring and sum to 100%",
+    "Every score includes observable evidence and confidence",
+    "Five hard gates are evaluated separately from weighted judgment",
+    "Pick, shortlist, reject, note, splice, copy, and download controls remain available",
+    "Production integration, real collaboration/file data, responsive QA, and final menu bodies are explicitly outside the prototypes"
+  ]
+}

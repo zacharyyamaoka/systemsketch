@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Worktrees per track — review of the workflow</title>
+<style>
+  :root{--ink:#14171a;--muted:#626a73;--line:#dfe3e7;--paper:#f6f7f8;--card:#fff;
+        --green:#0e6b36;--amber:#8a6206;--blue:#315be8;--red:#c4392c}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+        font:15px/1.58 Inter,ui-sans-serif,system-ui,-apple-system,sans-serif}
+  main{width:min(1180px,calc(100% - 32px));margin:auto;padding:42px 0 80px}
+  .hero{padding:34px;border:1px solid var(--line);border-radius:24px;background:var(--card);
+         box-shadow:0 18px 50px #1218200b}
+  .kicker{font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#4b5560}
+  h1{margin:6px 0 12px;font-size:clamp(30px,4.6vw,50px);line-height:1.04;letter-spacing:-.045em}
+  .lede{max-width:880px;margin:0;color:var(--muted);font-size:18px}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+  .badge{padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:#fafbfc;
+          font:700 12px/1.2 ui-monospace,monospace}
+  .badge.bad{border-color:#f0c4bd;background:#fdf1ef;color:var(--red)}
+  .badge.ok{border-color:#bfe3cd;background:#eefaf2;color:var(--green)}
+  .badge.warn{border-color:#f2d9a8;background:#fdf7ea;color:var(--amber)}
+  section{margin-top:52px}
+  h2{margin:0 0 6px;font-size:27px;letter-spacing:-.03em}
+  h3{margin:0 0 8px;font-size:17px}
+  .sub{margin:0 0 22px;color:var(--muted);max-width:900px}
+  figure{margin:0;padding:14px;border:1px solid var(--line);border-radius:18px;background:var(--card)}
+  figure svg{display:block;width:100%;height:auto}
+  figcaption{padding:12px 4px 2px;color:var(--muted);font-size:13.5px}
+  figcaption strong{display:block;color:var(--ink);font-size:14.5px;margin-bottom:2px}
+  .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+  @media(max-width:820px){.two{grid-template-columns:1fr}}
+  pre{margin:0;padding:16px;border:1px solid var(--line);border-radius:14px;background:#0f1216;
+       color:#e6edf3;overflow-x:auto;font:12.5px/1.62 ui-monospace,SFMono-Regular,Menlo,monospace}
+  pre.light{background:#fbfcfd;color:#1b2027;border-color:var(--line)}
+  .card{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--card)}
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);
+         border-radius:16px;overflow:hidden}
+  th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;font-size:14px}
+  th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#4b5560;background:#fafbfc}
+  tr:last-child td{border-bottom:0}
+  .pill{display:inline-block;padding:3px 9px;border-radius:999px;
+         font:700 11.5px/1.5 ui-monospace,monospace;white-space:nowrap}
+  .pill.ok{background:#eefaf2;color:var(--green)}
+  .pill.bad{background:#fdf1ef;color:var(--red)}
+  .pill.warn{background:#fdf7ea;color:var(--amber)}
+  code{padding:.12em .35em;border-radius:5px;background:#eceff2;font:12.5px/1.4 ui-monospace,monospace}
+  .note{padding:16px 18px;border:1px solid #f2d9a8;border-radius:14px;background:#fdf7ea}
+  .note.bad{border-color:#f0c4bd;background:#fdf1ef}
+  .note.good{border-color:#bfe3cd;background:#eefaf2}
+  blockquote{margin:0;padding:14px 18px;border-left:3px solid var(--line);
+              background:#fafbfc;color:var(--muted);font-size:14.5px;border-radius:0 10px 10px 0}
+  blockquote b{color:var(--ink)}
+  ol.steps{margin:0;padding:0;list-style:none;counter-reset:s}
+  ol.steps li{position:relative;padding:14px 12px 14px 52px;border-bottom:1px solid var(--line)}
+  ol.steps li:last-child{border-bottom:0}
+  ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:12px;top:14px;
+        width:26px;height:26px;border-radius:50%;background:#eaf0fe;color:var(--blue);
+        font:800 13px/26px ui-monospace,monospace;text-align:center}
+  ol.steps li.done::before{content:"✓";background:#eefaf2;color:var(--green)}
+  ol.steps li.gap::before{background:#fdf1ef;color:var(--red)}
+  ol.steps b{display:block;font-weight:650;margin-bottom:3px}
+  ol.steps span{color:var(--muted);font-size:13.5px}
+  footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);
+          color:var(--muted);font-size:13px}
+  a{color:var(--blue)}
+</style>
+</head>
+<body><main>
+
+<div class="hero">
+  <div class="kicker">SystemSketch · workflow review · 1 September 2026</div>
+  <h1>Worktrees per track</h1>
+  <p class="lede">The diagnosis in your note is right and the emphasis is inverted. Steps&nbsp;4–6
+  already exist in this repository as release channels — you built them. Steps&nbsp;1–3 are the
+  missing ones, and of those, only step&nbsp;1 actually buys speed. Two measured facts stop the
+  plan from starting at all today.</p>
+  <div class="badges">
+    <span class="badge bad">HEAD = 9 src files · working tree = 111</span>
+    <span class="badge bad">:4322 bound · <code>--strictPort</code></span>
+    <span class="badge ok">Preview / Stable already shipped</span>
+    <span class="badge warn">CLAUDE.md currently forbids worktrees</span>
+  </div>
+</div>
+
+<section>
+  <h2>The short version</h2>
+  <div class="two">
+    <div class="card">
+      <h3><span class="pill ok">right</span> &nbsp;What holds up</h3>
+      <p class="sub" style="margin:10px 0 0">Your step 1.2 is the whole insight:
+      <em>worktrees cannot fix this; the only way to move faster is independently parallel
+      tracks</em>. That is correct, and it is the sentence the rest of the plan then stops
+      following. Isolation is also worth having for a reason you did not claim: it gives each
+      agent its own git index, which is the one shared mutable thing that actually bites you
+      in a multi-session setup.</p>
+    </div>
+    <div class="card">
+      <h3><span class="pill bad">inverted</span> &nbsp;What does not</h3>
+      <p class="sub" style="margin:10px 0 0">Steps 2–6 are all git topology, and git topology is
+      precisely the part that <em>doesn't</em> fix it. A worktree removes the conflicts git
+      would have warned you about and leaves the ones that fail silently. And the plan's stated
+      goal — shrink review time — is made worse, not better, by its own mechanism.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>1 · It cannot start: there is no baseline to branch from</h2>
+  <p class="sub">Worktrees branch from <strong>commits</strong>. This repository has
+  <strong>1 commit</strong>, made on 30 August, called <em>“Start SystemSketch from stock
+  tldraw.”</em> Everything built since — the Block, ports, edges, the inspector, the UI shell —
+  is uncommitted working-tree state that git cannot hand to anyone. I ran the probe rather than
+  reasoning about it.</p>
+
+  <div class="two">
+    <pre>$ git worktree add --detach /tmp/wt-probe HEAD
+Preparing worktree (detached HEAD 3557cd1)
+HEAD is now at 3557cd1 Start SystemSketch from stock tldraw
+
+$ find /tmp/wt-probe/src -type f | wc -l
+9                                  # what a track agent would inherit
+
+$ find src -type f | wc -l
+111                                # what you actually have, uncommitted
+
+$ ls /tmp/wt-probe/src/features
+ls: cannot access &#x27;.../src/features&#x27;: No such file or directory
+
+$ ls -d /tmp/wt-probe/node_modules
+ls: cannot access &#x27;.../node_modules&#x27;: No such file or directory</pre>
+    <div class="card">
+      <h3>What this means in practice</h3>
+      <p style="color:var(--muted);font-size:14px">You dispatch three agents. Each opens a
+      worktree containing stock tldraw and the release plumbing. Each is asked to build a
+      feature <em>on top of the Block</em>. None of them can see a Block. Each writes one.</p>
+      <p style="color:var(--muted);font-size:14px">Three days later you merge. Git reports no
+      conflicts, because none of them touched the same lines as your uncommitted work — git
+      cannot see uncommitted work at all. You now have four Block implementations and a
+      clean history.</p>
+      <div class="note bad" style="margin-top:14px">
+        <b>This is not hygiene advice.</b> It is step&nbsp;0, and it is unskippable.
+        <code>git status</code> reports <b>180</b> entries (162 untracked);
+        <code>git diff</code> reports 18 files changed, 1152 insertions(+), 498 deletions(-).
+      </div>
+    </div>
+  </div>
+
+  <figure style="margin-top:18px">
+    
+<svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="A worktree inherits 9 source files; the working tree has 111">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7"
+            markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#c4392c"/>
+    </marker>
+    <pattern id="hatch" width="7" height="7" patternTransform="rotate(45)"
+             patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="0" y2="7" stroke="#c4392c" stroke-width="3" opacity=".18"/>
+    </pattern>
+  </defs>
+
+  <text x="20" y="34" fill="#14171a" font-size="15"
+        font-weight="600" font-family="Inter,sans-serif">Your checkout — what SystemSketch actually is today</text>
+  <rect x="20" y="46" width="620" height="42" rx="8" fill="#eefaf2" stroke="#bfe3cd"/>
+  <rect x="20" y="46" width="50.27027027027027" height="42" rx="8" fill="#fff" stroke="#0e6b36"/>
+  <text x="84.27027027027026" y="72" font-size="13.5" font-family="ui-monospace,monospace"
+        fill="#0e6b36">111 files in src/ · Block, ports, edges, inspector, UI shell</text>
+
+  <text x="20" y="140" font-size="15" font-weight="600"
+        font-family="Inter,sans-serif" fill="#14171a">HEAD — the only commit git can branch from</text>
+  <rect x="70.27027027027026" y="152" width="569.7297297297297" height="42" rx="8"
+        fill="url(#hatch)" stroke="#f0c4bd" stroke-dasharray="4 4"/>
+  <rect x="20" y="152" width="50.27027027027027" height="42" rx="8" fill="#fff" stroke="#c4392c"/>
+  <text x="84.27027027027026" y="178" font-size="13.5" font-family="ui-monospace,monospace"
+        fill="#c4392c">9 files · stock tldraw + release plumbing</text>
+
+  <text x="84.27027027027026" y="248" font-size="15" font-weight="600"
+        font-family="Inter,sans-serif" fill="#14171a">What each track agent inherits</text>
+  <rect x="20" y="256" width="50.27027027027027" height="42" rx="8" fill="#fdf1ef" stroke="#c4392c"/>
+  <path d="M45.13513513513513 198 L45.13513513513513 252" stroke="#c4392c"
+        stroke-width="2" marker-end="url(#ar)"/>
+  <text x="84.27027027027026" y="270" font-size="13.5" font-family="Inter,sans-serif"
+        fill="#c4392c">…so it rebuilds the Block from scratch —</text>
+  <text x="84.27027027027026" y="288" font-size="13.5" font-family="Inter,sans-serif"
+        fill="#626a73">and merges a second Block cleanly on top of yours.</text>
+</svg>
+    <figcaption><strong>Drawn to scale from the live repository.</strong>
+    The green bar is your checkout. The white sliver inside it is everything git has actually
+    recorded — and the sliver is all a new worktree receives.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>2 · Step 3 fails on the first agent, today</h2>
+  <p class="sub">“Get those agents to launch servers using code so I can inspect the end result”
+  is the right instinct — a running instance you can poke is worth more than any report. But
+  <code>npm run dev</code> is pinned to a single port with <code>--strictPort</code>, and that
+  port is occupied right now by your own running Preview.</p>
+
+  <div class="two">
+    <pre>$ ss -ltnp | grep -E &#x27;:(4321|4322|4323)&#x27;
+LISTEN 127.0.0.1:4322 users:((&quot;node&quot;,pid=57341,fd=21))
+LISTEN 127.0.0.1:4323 users:((&quot;python3&quot;,pid=57340,fd=3))
+LISTEN 127.0.0.1:4321 users:((&quot;python3&quot;,pid=102027,fd=3))
+
+$ grep &#x27;&quot;dev&quot;&#x27; package.json
+&quot;dev&quot;: &quot;vite --host 127.0.0.1 --port 4322 --strictPort&quot;,
+                                          ^^^^^^^^^^^^
+                    vite exits non-zero when 4322 is taken. It is taken.</pre>
+    <div>
+      <pre class="light">// package.json — one line, and every worktree can serve itself
+&quot;dev&quot;: &quot;vite --host 127.0.0.1
+        --port ${SYSTEMSKETCH_DEV_PORT:-4322} --strictPort&quot;
+
+# then a port triple per track, derived from the track index
+# track 1
+SYSTEMSKETCH_DEV_PORT=4332 SYSTEMSKETCH_API_PORT=4333 npm run dev
+# track 2
+SYSTEMSKETCH_DEV_PORT=4342 SYSTEMSKETCH_API_PORT=4343 npm run dev</pre>
+      <div class="note" style="margin-top:14px">
+        <b>Also budget the disk.</b> <code>git worktree add</code> does not copy
+        <code>node_modules</code> — currently <b>200M</b>. Four live tracks is four
+        installs. Use pnpm's content-addressed store, or symlink a shared
+        <code>node_modules</code> into each worktree at creation time and make that part of
+        the dispatch script rather than something each agent rediscovers.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>3 · You already built steps 4, 5 and 6</h2>
+  <p class="sub">“Merge into preview” reads as a git operation, but in this repository
+  <strong>Preview is not a branch</strong> — it is a release channel: an immutable, content-addressed
+  build that <code>release:candidate</code> publishes and <code>release:promote</code> blesses.
+  The button you describe in step 6 exists.</p>
+
+  <pre class="light" style="margin-bottom:18px"># release_lib.py — Preview is a CHANNEL, not a branch
+@dataclass(frozen=True)
+class ReleaseChannels:
+    stable: str | None = None       # 4321 · what you trust
+    candidate: str | None = None    # 4322 · &quot;Preview&quot; · what you are judging
+    previous: str | None = None     # the rollback target
+
+# launch_systemsketch.py
+STABLE_PORT  = int(os.environ.get(&quot;SYSTEMSKETCH_STABLE_PORT&quot;,  &quot;4321&quot;))
+PREVIEW_PORT = int(os.environ.get(&quot;SYSTEMSKETCH_PREVIEW_PORT&quot;, &quot;4322&quot;))</pre>
+
+  <figure>
+    
+<svg viewBox="0 0 940 330" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Git branches are the write axis, release channels are the read axis">
+  <defs>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7"
+            markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#315be8"/>
+    </marker>
+    <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7"
+            markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#0e6b36"/>
+    </marker>
+  </defs>
+
+  <rect x="14" y="14" width="452" height="302" rx="16" fill="#f8faff" stroke="#d5e0fb"/>
+  <text x="34" y="44" font-size="12" font-weight="800" letter-spacing="1.6"
+        font-family="ui-monospace,monospace" fill="#315be8">WRITE AXIS · GIT</text>
+  <text x="34" y="66" font-size="13.5" font-family="Inter,sans-serif" fill="#626a73">
+    Who may change the source. New — you must build this.</text>
+
+  <rect x="34" y="88" width="180" height="40" rx="9" fill="#fff" stroke="#315be8"/>
+  <text x="48" y="113" font-size="13" font-family="ui-monospace,monospace" fill="#315be8">track/block</text>
+  <rect x="34" y="140" width="180" height="40" rx="9" fill="#fff" stroke="#315be8"/>
+  <text x="48" y="165" font-size="13" font-family="ui-monospace,monospace" fill="#315be8">track/rows-cols</text>
+  <rect x="34" y="192" width="180" height="40" rx="9" fill="#fff" stroke="#315be8"/>
+  <text x="48" y="217" font-size="13" font-family="ui-monospace,monospace" fill="#315be8">track/file-mgmt</text>
+
+  <path d="M222 108 C268 108 268 160 292 160" stroke="#315be8" fill="none" marker-end="url(#a2)"/>
+  <path d="M222 160 L292 160" stroke="#315be8" fill="none" marker-end="url(#a2)"/>
+  <path d="M222 212 C268 212 268 160 292 160" stroke="#315be8" fill="none" marker-end="url(#a2)"/>
+
+  <rect x="300" y="138" width="146" height="44" rx="10" fill="#eaf0fe" stroke="#315be8"/>
+  <text x="322" y="166" font-size="14" font-weight="700"
+        font-family="ui-monospace,monospace" fill="#315be8">main</text>
+  <text x="300" y="206" font-size="12.5" font-family="Inter,sans-serif" fill="#626a73">
+    the integration branch</text>
+  <text x="300" y="224" font-size="12.5" font-family="Inter,sans-serif" fill="#626a73">
+    — not a release</text>
+
+  <rect x="482" y="14" width="444" height="302" rx="16" fill="#f7fcf9" stroke="#c9e8d6"/>
+  <text x="502" y="44" font-size="12" font-weight="800" letter-spacing="1.6"
+        font-family="ui-monospace,monospace" fill="#0e6b36">READ AXIS · CHANNELS</text>
+  <text x="502" y="66" font-size="13.5" font-family="Inter,sans-serif" fill="#626a73">
+    What you can open right now. Already built.</text>
+
+  <path d="M452 160 L498 160" stroke="#0e6b36" fill="none" marker-end="url(#a3)"/>
+
+  <rect x="506" y="122" width="184" height="76" rx="11" fill="#fff" stroke="#0e6b36"/>
+  <text x="524" y="150" font-size="14" font-weight="700"
+        font-family="ui-monospace,monospace" fill="#0e6b36">Preview</text>
+  <text x="524" y="170" font-size="12.5" font-family="ui-monospace,monospace"
+        fill="#626a73">candidate · :4322</text>
+  <text x="524" y="188" font-size="12.5" font-family="ui-monospace,monospace"
+        fill="#626a73">release:candidate</text>
+
+  <path d="M698 160 L742 160" stroke="#0e6b36" fill="none" marker-end="url(#a3)"/>
+  <text x="720" y="112" font-size="11.5" font-family="ui-monospace,monospace"
+        fill="#0e6b36" text-anchor="middle">the button</text>
+
+  <rect x="750" y="122" width="160" height="76" rx="11" fill="#eefaf2" stroke="#0e6b36"/>
+  <text x="768" y="150" font-size="14" font-weight="700"
+        font-family="ui-monospace,monospace" fill="#0e6b36">Stable</text>
+  <text x="768" y="170" font-size="12.5" font-family="ui-monospace,monospace"
+        fill="#626a73">stable · :4321</text>
+  <text x="768" y="188" font-size="12.5" font-family="ui-monospace,monospace"
+        fill="#626a73">release:promote</text>
+
+  <text x="506" y="248" font-size="13" font-family="Inter,sans-serif" fill="#14171a"
+        font-weight="600">Do not add a `preview` git branch.</text>
+  <text x="506" y="270" font-size="13" font-family="Inter,sans-serif" fill="#626a73">
+    You would then own two things called Preview,</text>
+  <text x="506" y="288" font-size="13" font-family="Inter,sans-serif" fill="#626a73">
+    and nothing forces them to agree.</text>
+</svg>
+    <figcaption><strong>Two axes, not one pipeline.</strong> Git answers “who may change the
+    source”; channels answer “what can I open right now”. Keeping them separate means a track
+    merges once, and every channel promotion afterwards is a pointer move you can roll back
+    — <code>release:rollback</code> already exists.</figcaption>
+  </figure>
+
+  <div class="note good" style="margin-top:18px">
+    <b>Consequence: your six steps collapse to three new ones.</b> Fork a track · merge it to
+    <code>main</code> · cut a candidate. Steps 5 and 6 are unchanged from what you do today.
+    The plan is substantially smaller than it looks.
+  </div>
+</section>
+
+<section>
+  <h2>4 · The reframe — isolation is not independence</h2>
+  <p class="sub">This is the load-bearing objection, and you have already written it down once.</p>
+
+  <blockquote style="margin-bottom:18px">
+    “If the Block contract is still changing under the grid, finish Block first; otherwise this
+    is <b>Tempus disguised as parallelism</b>.” — your project note, 31 August
+  </blockquote>
+
+  <p class="sub">A worktree isolates <em>files</em>. Parallel tracks require isolating
+  <em>contracts</em>. Two agents in perfect filesystem isolation, both working against a Block
+  contract that is still moving, will produce two clean diffs, a clean merge, and a broken
+  product. Git detects edit collisions; it does not detect intent collisions, and the only
+  detector for those is a test suite running against the merged state.</p>
+
+  <table>
+    <tr><th>Conflict class</th><th>Does a worktree help?</th><th>How you find out</th></tr>
+    <tr>
+      <td><b>Textual</b> — two branches edit the same lines</td>
+      <td><span class="pill ok">eliminated</span></td>
+      <td>Git stops and asks. Visible, cheap, and the class you were <em>already</em> being
+      warned about.</td>
+    </tr>
+    <tr>
+      <td><b>Semantic</b> — different lines, incompatible intent</td>
+      <td><span class="pill bad">no change</span></td>
+      <td>Nothing stops. It compiles. Tests on both sides pass. You find it in the UI, later,
+      as a bug with no obvious author.</td>
+    </tr>
+    <tr>
+      <td><b>Duplicate</b> — both tracks build the same missing thing</td>
+      <td><span class="pill bad">made likelier</span></td>
+      <td>Isolation is what prevents each agent from noticing the other already did it.</td>
+    </tr>
+  </table>
+
+  <div class="note" style="margin-top:18px">
+    <b>The gate is a frozen contract, not a directory.</b> Before a track forks, it must name
+    the interface it depends on, name who owns it, and state that it is not being edited this
+    week. If you cannot fill that in, the tracks are not independent and the right move is to
+    sequence them — no amount of isolation converts sequential work into parallel work.
+  </div>
+
+  <div class="note bad" style="margin-top:14px">
+    <b>And SystemSketch's current lane count is 1.</b> Every artefact in <code>docs/</code>
+    dated today — batch editing, click-to-edit, edge rebuild, port-in-window — is
+    <em>one feature</em> being iterated by taste. Adopting worktrees here optimises a resource
+    you are not short of. The repositories with genuinely separable lanes are the ones where an
+    interface already exists between them.
+  </div>
+</section>
+
+<section>
+  <h2>5 · The trap: this plan makes its own stated bottleneck worse</h2>
+  <p class="sub">You wrote “a bottleneck is basically the review time and the goal is to shrink
+  that”, and then designed a system that multiplies producers against a single consumer. Those
+  are the same variable pulled in opposite directions.</p>
+
+  <figure>
+    
+<svg viewBox="0 0 900 330" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="More parallel tracks multiply review latency at constant throughput">
+  <text x="20" y="30" font-size="15" font-weight="600" font-family="Inter,sans-serif"
+        fill="#14171a">L = λW — one reviewer is one server</text>
+  <text x="20" y="52" font-size="13.5" font-family="Inter,sans-serif" fill="#626a73">
+    Agents raise arrivals. They do not raise your service rate. Throughput stays flat; latency scales.</text>
+  <text x="108" y="66" font-size="11.5" font-weight="700" letter-spacing=".08em"
+        font-family="ui-monospace,monospace" fill="#315be8">PRODUCERS</text>
+  <text x="396" y="66" font-size="11.5" font-weight="700" letter-spacing=".08em"
+        font-family="ui-monospace,monospace" fill="#8a6206">YOU</text>
+  <text x="474" y="66" font-size="11.5" font-weight="700" letter-spacing=".08em"
+        font-family="ui-monospace,monospace" fill="#c4392c">TIME TO A VERDICT</text>
+  <text x="20" y="100" font-size="13.5" font-weight="600" font-family="Inter,sans-serif" fill="#14171a">1 track</text>
+  <rect x="108" y="74" width="38" height="38" rx="7" fill="#eaf0fe" stroke="#315be8"/><text x="127" y="99" font-size="13" text-anchor="middle" font-family="ui-monospace,monospace" fill="#315be8">🤖</text>
+  <path d="M160 93 L392 93" stroke="#626a73" fill="none" stroke-dasharray="3 4"/>
+  <rect x="400" y="74" width="52" height="38" rx="7" fill="#fdf7ea" stroke="#8a6206"/><text x="412" y="99" font-size="15" font-family="Inter,sans-serif">👤</text>
+  <rect x="474" y="84" width="62" height="18" rx="5" fill="#fdf1ef" stroke="#f0c4bd"/><text x="546" y="98" font-size="12.5" font-family="ui-monospace,monospace" fill="#c4392c">W = 1×</text>
+  <text x="20" y="178" font-size="13.5" font-weight="600" font-family="Inter,sans-serif" fill="#14171a">3 tracks</text>
+  <rect x="108" y="152" width="38" height="38" rx="7" fill="#eaf0fe" stroke="#315be8"/><text x="127" y="177" font-size="13" text-anchor="middle" font-family="ui-monospace,monospace" fill="#315be8">🤖</text>
+  <rect x="154" y="152" width="38" height="38" rx="7" fill="#eaf0fe" stroke="#315be8"/><text x="173" y="177" font-size="13" text-anchor="middle" font-family="ui-monospace,monospace" fill="#315be8">🤖</text>
+  <rect x="200" y="152" width="38" height="38" rx="7" fill="#eaf0fe" stroke="#315be8"/><text x="219" y="177" font-size="13" text-anchor="middle" font-family="ui-monospace,monospace" fill="#315be8">🤖</text>
+  <path d="M252 171 L392 171" stroke="#626a73" fill="none" stroke-dasharray="3 4"/>
+  <rect x="400" y="152" width="52" height="38" rx="7" fill="#fdf7ea" stroke="#8a6206"/><text x="412" y="177" font-size="15" font-family="Inter,sans-serif">👤</text>
+  <rect x="474" y="162" width="186" height="18" rx="5" fill="#fdf1ef" stroke="#f0c4bd"/><text x="670" y="176" font-size="12.5" font-family="ui-monospace,monospace" fill="#c4392c">W = 3×</text>
+  <text x="20" y="256" font-size="13.5" font-weight="600" font-family="Inter,sans-serif" fill="#14171a">5 tracks</text>
+  <rect x="108" y="230" width="38" height="38" rx="7" fill="#eaf0fe" stroke="#315be8"/><text x="127" y="255" font-size="13" text-anchor="middle" font-family="ui-monospace,monospace" fill="#315be8">🤖</text>
+  <rect x="154" y="230" width="38" height="38" rx="7" fill="#eaf0fe" stroke="#315be8"/><text x="173" y="255" font-size="13" text-anchor="middle" font-family="ui-monospace,monospace" fill="#315be8">🤖</text>
+  <rect x="200" y="230" width="38" height="38" rx="7" fill="#eaf0fe" stroke="#315be8"/><text x="219" y="255" font-size="13" text-anchor="middle" font-family="ui-monospace,monospace" fill="#315be8">🤖</text>
+  <rect x="246" y="230" width="38" height="38" rx="7" fill="#eaf0fe" stroke="#315be8"/><text x="265" y="255" font-size="13" text-anchor="middle" font-family="ui-monospace,monospace" fill="#315be8">🤖</text>
+  <rect x="292" y="230" width="38" height="38" rx="7" fill="#eaf0fe" stroke="#315be8"/><text x="311" y="255" font-size="13" text-anchor="middle" font-family="ui-monospace,monospace" fill="#315be8">🤖</text>
+  <path d="M344 249 L392 249" stroke="#626a73" fill="none" stroke-dasharray="3 4"/>
+  <rect x="400" y="230" width="52" height="38" rx="7" fill="#fdf7ea" stroke="#8a6206"/><text x="412" y="255" font-size="15" font-family="Inter,sans-serif">👤</text>
+  <rect x="474" y="240" width="310" height="18" rx="5" fill="#fdf1ef" stroke="#f0c4bd"/><text x="794" y="254" font-size="12.5" font-family="ui-monospace,monospace" fill="#c4392c">W = 5×</text>
+  <text x="20" y="316" font-size="13" font-family="Inter,sans-serif" fill="#14171a">
+    The two moves that actually raise λ: a machine gate before the human gate, and every ask
+    carrying a reversible default so silence keeps work moving.</text>
+</svg>
+    <figcaption><strong>Agents change the arrival rate, not the service rate.</strong>
+    Five tracks do not give five times the throughput — they give the same throughput and five
+    times the queue, and every individual track now waits behind four peers.</figcaption>
+  </figure>
+
+  <div class="two" style="margin-top:18px">
+    <div class="card">
+      <h3>Why “very rich content” alone will not do it</h3>
+      <p style="color:var(--muted);font-size:14px">Richness is not free — it is <em>more</em> for
+      you to read. It only shrinks review when it replaces work you would otherwise have done
+      yourself: reproducing the bug, finding the file, checking the test actually ran. A gallery
+      that makes you admire the work is review <em>load</em>. Evidence that lets you skip
+      verifying is review <em>relief</em>. Same page count, opposite sign.</p>
+    </div>
+    <div class="card">
+      <h3>What actually raises your service rate</h3>
+      <ol class="steps" style="margin-top:6px">
+        <li><b>A machine gate before the human gate</b><span><code>npm run check</code> plus the
+        feature's own smoke test plus screenshots must pass before anything reaches you. You
+        review taste. You never review correctness.</span></li>
+        <li><b>Every ask carries its reversible default</b><span>“If you say nothing I will do X,
+        and undoing it costs one commit.” Silence becomes progress instead of a stall. This is
+        the only move that decouples agent throughput from your attention — and vibetracks
+        already implements it.</span></li>
+        <li><b>Batch per track, not per job</b><span>One packet with every open question, at a
+        cadence you choose, rather than a trickle that fragments your day.</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:18px">
+    <b>One more serialisation point.</b> Steps 4→5→6 funnel every track through a single Preview
+    channel you inspect one at a time. Four tracks finishing on the same afternoon means four
+    sequential promotions. Your own pruned design from yesterday — <b>V1 Preset Shelf, 95.6/100</b> —
+    is exactly the fix: several compositions live in one Preview runtime. A track's review
+    surface should be <code>?preset=block-dev</code> on the running Preview, not its own
+    promotion. The two designs are the same problem solved twice; connect them.
+  </div>
+</section>
+
+<section>
+  <h2>6 · The corrected pipeline</h2>
+  <p class="sub">Same intent, ordered so that each step is possible when you reach it.</p>
+  <div class="card" style="padding:8px 12px">
+    <ol class="steps">
+      <li class="gap"><b>Step 0 — commit the baseline</b><span>Nothing below is possible until
+      <code>git status</code> is empty. Today this is the single highest-leverage command in the
+      repository.</span></li>
+      <li><b>Freeze the contract, then fork</b><span>Name the interface, name its owner, state the
+      freeze window. A track that cannot name its contract is sequenced, not parallelised.</span></li>
+      <li><b>One worktree per track, on <code>track/&lt;name&gt;</code></b><span>The real win is
+      a private git index and HEAD — no more shared staging area between concurrent sessions.
+      Merge daily; branch age is what turns isolation into semantic drift.</span></li>
+      <li><b>Each track serves itself on its own port triple</b><span>Derived from the track index,
+      written into the dispatch prompt, never rediscovered by the agent.</span></li>
+      <li><b>Machine gate, then a packet with defaults</b><span>Green check + smoke + screenshots
+      before you are involved at all; then one batched, answerable packet where silence still
+      moves the work forward.</span></li>
+      <li class="done"><b>Merge to <code>main</code>, cut a candidate</b><span>Already built:
+      <code>release:candidate</code>.</span></li>
+      <li class="done"><b>Inspect Preview, promote</b><span>Already built:
+      <code>release:promote</code>, with <code>release:rollback</code> behind it.</span></li>
+    </ol>
+  </div>
+
+  <h3 style="margin-top:26px">The precondition gate, as a checklist an agent can run</h3>
+  <pre class="light" style="margin-top:10px"># The gate that must pass BEFORE `git worktree add`, not after.
+
+1. Baseline is committed          git status --short  →  empty
+2. The contract this track needs is named and frozen
+   e.g. &quot;Block props + stable port IDs + layoutBlock() output —
+         owner: block track — frozen until 2026-09-05&quot;
+3. Nobody else is editing that contract this week
+4. The track has its own port triple, and it is written down
+5. `npm run check` is green on the baseline the fork starts from</pre>
+</section>
+
+<section>
+  <h2>7 · Step 7 — the context each new agent gets</h2>
+  <p class="sub">“I need to add this as context to each new agent.” Two files, and they must not
+  contradict each other — which they currently would.</p>
+  <table>
+    <tr><th>File</th><th>Says today</th><th>Change</th></tr>
+    <tr>
+      <td><code>~/.claude/CLAUDE.md</code><br><span style="color:var(--muted);font-size:13px">loads in every repo</span></td>
+      <td>“Do not create or use a feature branch, detached checkout, or Git worktree unless Zach
+      explicitly asks for one.”</td>
+      <td><span class="pill warn">replaced</span> with a conditional rule: <b>main by default;
+      worktree when the work is a named track that passes the gate.</b> Appending would have left
+      two contradictory instructions in the same always-loaded file.</td>
+    </tr>
+    <tr>
+      <td><code>vibetracks/TRACK_AGENT.md</code><br><span style="color:var(--muted);font-size:13px">the per-lane standing prompt</span></td>
+      <td>“Preserve existing dirty work. Work on the existing <code>main</code> checkout. No
+      branch, no worktree, unless I ask.”</td>
+      <td><span class="pill bad">left alone</span> — deliberately. That prompt is correct for a
+      repository whose baseline is uncommitted, which is every repository you have right now.
+      Change it when step 0 is done, not before.</td>
+    </tr>
+  </table>
+  <div class="note" style="margin-top:18px">
+    <b>The port triple and the freeze window are repo-specific</b>, so they do not belong in the
+    global file. They belong next to the code, in the dispatch script that creates the worktree.
+  </div>
+</section>
+
+<footer>
+  Built by <code>docs/build_worktree_track_workflow.py</code>. Every count, port and diagram
+  dimension in this page is measured from the live checkout at build time — the scale diagram in
+  §1 is drawn from the real file counts, not illustrative. The worktree probe was run against a
+  detached throwaway worktree and removed; no branch, commit, stash or source file in
+  <code>/home/bam/systemsketch</code> was modified by this review.
+</footer>
+
+</main></body>
+</html>

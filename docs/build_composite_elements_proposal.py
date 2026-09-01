@@ -1,0 +1,331 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+OUTPUT_PATH = PROJECT_ROOT / "docs" / "composite-elements-proposal-2026-08-31.html"
+
+
+HTML = r'''<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SystemSketch composite elements — implementation proposal</title>
+<style>
+  :root {
+    color-scheme: light;
+    --paper: #f5f1e8;
+    --panel: #fffdf8;
+    --ink: #18211e;
+    --muted: #69736e;
+    --line: #d8d3c8;
+    --green: #1b6b52;
+    --green-soft: #dceee6;
+    --amber: #a86116;
+    --amber-soft: #f8e8cf;
+    --blue: #315d8b;
+    --blue-soft: #e1ebf6;
+    --red: #9e4639;
+    --shadow: 0 16px 48px rgba(33, 41, 37, .10);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 14% 0%, rgba(49,93,139,.12), transparent 29rem),
+      radial-gradient(circle at 92% 15%, rgba(27,107,82,.10), transparent 28rem),
+      var(--paper);
+    line-height: 1.55;
+  }
+  a { color: var(--blue); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  code, .mono { font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace; }
+  .page { width: min(1180px, calc(100% - 36px)); margin: 0 auto; padding: 42px 0 72px; }
+  .eyebrow { color: var(--green); font: 700 12px/1.2 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+  h1 { max-width: 900px; margin: 12px 0 18px; font: 650 clamp(38px, 6vw, 72px)/.98 Georgia, serif; letter-spacing: -.045em; }
+  .lede { max-width: 860px; color: #3d4944; font-size: clamp(17px, 2vw, 22px); }
+  .verdict {
+    display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: center;
+    margin: 34px 0 18px; padding: 24px 26px; background: var(--panel); border: 1px solid var(--line);
+    border-left: 5px solid var(--green); border-radius: 18px; box-shadow: var(--shadow);
+  }
+  .verdict strong { display: block; font: 650 24px/1.2 Georgia, serif; margin-bottom: 8px; }
+  .stamp { width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center; text-align: center;
+    border: 2px solid var(--green); color: var(--green); font-weight: 800; transform: rotate(-4deg); }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 18px 0 34px; }
+  .kpi { padding: 18px; border-radius: 14px; background: rgba(255,253,248,.86); border: 1px solid var(--line); }
+  .kpi b { display:block; color: var(--green); font: 650 27px/1 Georgia, serif; margin-bottom: 7px; }
+  .kpi span { color: var(--muted); font-size: 13px; }
+  nav { position: sticky; top: 12px; z-index: 5; display: flex; gap: 8px; flex-wrap: wrap; width: fit-content;
+    margin: 0 auto 34px; padding: 8px; border: 1px solid var(--line); border-radius: 999px;
+    background: rgba(255,253,248,.94); backdrop-filter: blur(12px); box-shadow: 0 8px 24px rgba(33,41,37,.08); }
+  nav a { padding: 7px 11px; border-radius: 999px; text-decoration: none; color: #48534e; font-size: 13px; }
+  nav a:hover { background: var(--green-soft); color: var(--green); }
+  section { margin-top: 52px; scroll-margin-top: 88px; }
+  h2 { margin: 0 0 9px; font: 650 clamp(28px, 4vw, 43px)/1.05 Georgia, serif; letter-spacing: -.025em; }
+  h3 { margin: 0 0 7px; font-size: 18px; }
+  .section-intro { max-width: 820px; color: var(--muted); margin-bottom: 23px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .card { min-width: 0; padding: 20px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; }
+  .card .tag { display: inline-block; padding: 3px 8px; margin-bottom: 12px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font-size: 12px; font-weight: 700; }
+  .card p:last-child { margin-bottom: 0; }
+  .yes { background: var(--green-soft) !important; color: var(--green) !important; }
+  .no { background: #efece6 !important; color: #6c6b68 !important; }
+  .warn { background: var(--amber-soft) !important; color: var(--amber) !important; }
+  .split { display: grid; grid-template-columns: .9fr 1.1fr; gap: 18px; align-items: stretch; }
+  .callout { padding: 18px 20px; border: 1px solid #d6c195; border-radius: 14px; background: #fff8e9; color: #54462e; }
+  .diagram { overflow: hidden; padding: 18px; border-radius: 18px; background: #16201d; color: #f3f5ef; box-shadow: var(--shadow); }
+  .diagram svg { width: 100%; height: auto; display: block; }
+  table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 15px; overflow: hidden; }
+  th, td { padding: 13px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  th { color: #53605a; background: #f1eee7; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+  tr:last-child td { border-bottom: 0; }
+  tr.recommended td { background: #f0f8f4; }
+  .score { font: 700 18px/1 Georgia, serif; color: var(--green); white-space: nowrap; }
+  .bar { width: 110px; height: 7px; margin-top: 8px; border-radius: 99px; background: #e4e0d7; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: var(--green); }
+  .architecture { display: grid; grid-template-columns: 1fr 48px 1fr 48px 1fr; gap: 9px; align-items: stretch; }
+  .layer { padding: 18px; border-radius: 15px; border: 1px solid var(--line); background: var(--panel); }
+  .layer.sdk { border-top: 4px solid var(--blue); }
+  .layer.kernel { border-top: 4px solid var(--green); }
+  .layer.block { border-top: 4px solid var(--amber); }
+  .arrow { display: grid; place-items: center; color: var(--muted); font-size: 27px; }
+  .layer ul { margin: 11px 0 0; padding-left: 18px; color: #4c5852; }
+  .journey-picker { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .journey-picker button { appearance:none; border: 1px solid var(--line); border-radius: 999px; padding: 8px 13px; background: var(--panel); cursor:pointer; color: var(--ink); }
+  .journey-picker button[aria-selected="true"] { background: var(--ink); color: white; border-color: var(--ink); }
+  .journey { display:none; grid-template-columns: repeat(4,1fr); gap: 10px; }
+  .journey.active { display:grid; }
+  .step { position:relative; min-height: 155px; padding: 17px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+  .step:not(:last-child)::after { content:"→"; position:absolute; z-index:2; right:-18px; top:50%; color:var(--green); font-size:22px; font-weight:800; }
+  .step b { display:block; margin-bottom: 6px; }
+  .step span { color:var(--muted); font-size: 13px; }
+  .module-tree { padding: 20px; border-radius: 16px; background: #18211e; color: #dfe8e3; overflow:auto; }
+  .module-tree .accent { color:#9ee2c5; }
+  .module-tree .comment { color:#8f9e97; }
+  .ladder { counter-reset: rung; display:grid; gap: 11px; }
+  .rung { display:grid; grid-template-columns: 46px 1fr auto; gap: 14px; align-items:start; padding: 17px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
+  .rung::before { counter-increment:rung; content:counter(rung); width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:var(--green-soft); color:var(--green); font-weight:800; }
+  .rung small { color:var(--muted); }
+  .gate { padding:4px 9px; border-radius:999px; background:#efece6; color:#5e6662; font-size:12px; white-space:nowrap; }
+  .evidence { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  .evidence a { display:block; height:100%; padding:16px; background:var(--panel); border:1px solid var(--line); border-radius:14px; text-decoration:none; }
+  .evidence b { display:block; color:var(--ink); margin-bottom:5px; }
+  .evidence span { color:var(--muted); font-size:13px; }
+  footer { margin-top: 58px; padding-top: 22px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+  @media (max-width: 820px) {
+    .kpis, .grid-3, .split, .evidence { grid-template-columns: 1fr 1fr; }
+    .architecture { grid-template-columns:1fr; }
+    .arrow { transform:rotate(90deg); min-height:32px; }
+    .journey { grid-template-columns:1fr 1fr; }
+    .step:nth-child(2)::after { display:none; }
+    .verdict { grid-template-columns:1fr; }
+    .stamp { display:none; }
+  }
+  @media (max-width: 540px) {
+    .page { width:min(100% - 24px,1180px); padding-top:26px; }
+    .kpis, .grid-3, .split, .evidence, .journey { grid-template-columns:1fr; }
+    .step::after { display:none; }
+    nav { border-radius:18px; justify-content:center; position:relative; top:auto; }
+    th:nth-child(2), td:nth-child(2) { display:none; }
+    .rung { grid-template-columns:38px 1fr; }
+    .gate { grid-column:2; width:fit-content; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="eyebrow">SystemSketch · architecture proposal · 31 Aug 2026</div>
+  <h1>Composite elements need a contract, not a kingdom of base classes.</h1>
+  <p class="lede">Build the Block as one custom tldraw shape, let tldraw own its canvas lifecycle, and add a thin SystemSketch capability registry for the three product behaviors: inline fields, inspector sections, and detach plans.</p>
+
+  <div class="verdict">
+    <div><strong>Direct answer</strong>tldraw has the lower-level bases—<code>ShapeUtil</code>, <code>BaseBoxShapeUtil</code>, and <code>BaseFrameLikeShapeUtil</code>—but no built-in “CompositeElement” that supplies inline editing, an inspector, and detach. The image-pipeline kit adds a useful <code>NodeDefinition</code> registry, but that is starter-kit application code, not an SDK base.</div>
+    <div class="stamp">THIN<br>CONTRACT<br>FIRST</div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><b>3</b><span>shared product capabilities</span></div>
+    <div class="kpi"><b>1</b><span>semantic shape in normal use</span></div>
+    <div class="kpi"><b>1</b><span>layout authority for render + edit + detach</span></div>
+    <div class="kpi"><b>0 px</b><span>target detach footprint drift</span></div>
+  </div>
+
+  <nav aria-label="Report sections">
+    <a href="#reframe">Reframe</a><a href="#existing">What exists</a><a href="#decision">Decision</a>
+    <a href="#architecture">Architecture</a><a href="#flows">Flows</a><a href="#ladder">Build ladder</a><a href="#proof">Proof</a>
+  </nav>
+
+  <section id="reframe">
+    <h2>First split the overloaded word “composite”</h2>
+    <p class="section-intro">The earlier pyblocks research already reached the important principle: the Block is renderable from primitives but not semantically reducible to them. Four different relationships were hiding under one word.</p>
+    <div class="grid-3">
+      <article class="card"><span class="tag yes">Visual composite</span><h3>One atomic custom shape</h3><p>Several labels, rules, dots, and panels render inside one selected canvas object. These are not permanent child records while the Block is intact.</p></article>
+      <article class="card"><span class="tag">Semantic composite</span><h3>Typed content + stable identities</h3><p>Title, description, ports, role, links, and view state belong to the Block model. A port ID does not change when its visible name does.</p></article>
+      <article class="card"><span class="tag warn">Container composite</span><h3>Expanded behaves like a frame</h3><p>Only Expanded needs real child shapes. Use <code>BaseFrameLikeShapeUtil</code> for containment, clipping, reparenting, and frame-style selection.</p></article>
+      <article class="card"><span class="tag">Shared definition</span><h3>Several occurrences, one meaning</h3><p>Linked copies share selected semantic content while keeping placement, view mode, and per-view sizes per occurrence. This is separate from visual composition.</p></article>
+      <article class="card"><span class="tag no">Not “ungroup”</span><h3>Detach transfers authority</h3><p>Detaching materializes ordinary shapes, preserves the picture, and gives up Block behavior, semantic port identity, linked identity, and Inspector support.</p></article>
+      <article class="card"><span class="tag no">Not a runtime mode</span><h3>Edit state stays transient</h3><p>Double-click editing uses tldraw’s one-editing-shape lifecycle. Position/content locks and definition/instance ownership stay separate decisions.</p></article>
+    </div>
+  </section>
+
+  <section id="existing">
+    <h2>What tldraw already provides—and what it does not</h2>
+    <p class="section-intro">This is mostly an assembly task. The stable substrate is upstream; SystemSketch owns the small semantic seam.</p>
+    <table>
+      <thead><tr><th>Concern</th><th>Existing substrate</th><th>SystemSketch work</th></tr></thead>
+      <tbody>
+        <tr><td>Atomic custom object</td><td><code>ShapeUtil</code> + validated props/migrations</td><td><code>BlockShapeUtil</code> and Block schema</td></tr>
+        <tr><td>Rectangular manipulation</td><td><code>BaseBoxShapeUtil</code></td><td>Only if a shape never contains children</td></tr>
+        <tr><td>Expanded containment</td><td><code>BaseFrameLikeShapeUtil</code></td><td>Opt the Block into the frame contract only while Expanded; explicitly prevent child scaling</td></tr>
+        <tr><td>Text edit lifecycle</td><td><code>canEdit</code>, editing-shape state, double-click/Enter/Escape, <code>useEditablePlainText</code></td><td>Map the one editing shape to the exact nested Block field</td></tr>
+        <tr><td>Inspector</td><td>Reactive selection APIs, UI slots, and an official inspector example</td><td>Optional Details panel with Block-specific field descriptions</td></tr>
+        <tr><td>Ports and cables</td><td>Bindings + image-pipeline Node/Port/Connection pattern</td><td>Stable semantic port binding beside geometric connection binding</td></tr>
+        <tr><td>Detach</td><td>Shape CRUD, grouping, transforms, history transactions</td><td>Shape-specific primitive plan + generic one-undo orchestration</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="margin-top:14px"><strong>The image-pipeline kit’s real reusable pattern:</strong> one <code>NodeShapeUtil</code> owns tldraw behavior; a registry of <code>NodeDefinition</code> classes owns node variants. The pyblocks donor has already reconciled Block onto that pattern and then paid down its editing, inspector, frame, and detach bugs.</div>
+  </section>
+
+  <section id="decision">
+    <h2>Criteria before architecture</h2>
+    <p class="section-intro">Weights reflect this project: native whiteboard behavior matters more than abstract reuse, and the escape hatch must be trustworthy.</p>
+    <table>
+      <thead><tr><th>Option</th><th>Trade-off</th><th>Weighted result</th></tr></thead>
+      <tbody>
+        <tr><td><b>A · Universal <code>CompositeShapeUtil</code></b><br><small>Inheritance owns editing, inspector, detach, rendering, and containment.</small></td><td>Looks tidy initially, but mixes canvas mechanics, React UI, field semantics, and one-way conversion. Future non-box composites inherit the wrong behavior.</td><td class="score">63 / 100<div class="bar"><i style="width:63%"></i></div></td></tr>
+        <tr><td><b>B · Block-only implementation</b><br><small>Copy the proven Block and extract nothing.</small></td><td>Fastest first delivery and easiest to validate. Leaves likely duplicate command/inspector/detach wiring when the second semantic shape arrives.</td><td class="score">79 / 100<div class="bar"><i style="width:79%"></i></div></td></tr>
+        <tr class="recommended"><td><b>C · Concrete Block util + capability registry</b><br><small>tldraw inheritance for mechanics; descriptors/services for shared product behavior.</small></td><td>Reuses upstream contracts, gives every surface one typed command path, and keeps detach shape-specific while sharing orchestration. Extract a base class later only from proven duplication.</td><td class="score">94 / 100<div class="bar"><i style="width:94%"></i></div></td></tr>
+      </tbody>
+    </table>
+    <p style="color:var(--muted);font-size:13px">Weights: whiteboard-native interaction 30% · trustworthy detach 25% · one source of geometric truth 20% · Block/port/Expanded fit 15% · future extension cost 10%.</p>
+  </section>
+
+  <section id="architecture">
+    <h2>The proposed narrow waist</h2>
+    <p class="section-intro">Inheritance stays where tldraw expects it. Product capabilities are composed through typed functions so the inspector never has to live inside a ShapeUtil.</p>
+    <div class="architecture">
+      <article class="layer sdk"><h3>tldraw SDK</h3><ul><li><code>BaseFrameLikeShapeUtil</code></li><li>editing-shape lifecycle</li><li>selection + UI context</li><li>store, history, bindings</li></ul></article>
+      <div class="arrow">→</div>
+      <article class="layer kernel"><h3>SystemSketch composite kernel</h3><ul><li>field descriptors</li><li>typed composite commands</li><li>inspector section registry</li><li>detach transaction runner</li></ul></article>
+      <div class="arrow">→</div>
+      <article class="layer block"><h3>Block implementation</h3><ul><li>schema + migrations</li><li>one <code>layoutBlock()</code></li><li>Block renderer + primitive recipe</li><li>port identity + frame policy</li></ul></article>
+    </div>
+
+    <div class="split" style="margin-top:18px">
+      <pre class="module-tree"><span class="accent">src/composites/</span>
+  compositeRegistry.ts      <span class="comment"># capabilities by shape type</span>
+  compositeCommands.ts      <span class="comment"># the one mutation path</span>
+  compositeEditing.ts       <span class="comment"># active nested field</span>
+  CompositeInspector.tsx    <span class="comment"># optional selection UI</span>
+  detachComposite.ts        <span class="comment"># history + replace + select</span>
+
+<span class="accent">src/blocks/</span>
+  blockShape.ts             <span class="comment"># props + migrations</span>
+  BlockShapeUtil.tsx        <span class="comment"># tldraw lifecycle bridge</span>
+  blockLayout.ts            <span class="comment"># geometry authority</span>
+  blockDefinition.ts        <span class="comment"># fields/inspector/detach adapter</span>
+  blockPrimitives.ts        <span class="comment"># lowering recipe</span>
+
+<span class="accent">src/connections/</span>
+  PortBindingUtil.ts        <span class="comment"># identity follows stable port id</span></pre>
+      <div class="card"><span class="tag yes">Load-bearing rule</span><h3><code>layoutBlock()</code> is the one geometric truth</h3><p>The renderer, hit geometry, field editor placement, port anchors, selection indicator, SVG export, and detached primitive plan all read the same immutable layout value.</p><p>This is the practical answer to “built from primitives”: not dozens of live child records, but one deterministic visual recipe that can be materialized on demand.</p></div>
+    </div>
+  </section>
+
+  <section id="flows">
+    <h2>Three surfaces, one command path</h2>
+    <p class="section-intro">Pick a behavior to see where ownership changes. The inline editor and inspector differ only in gesture and presentation.</p>
+    <div class="journey-picker" role="tablist">
+      <button role="tab" aria-selected="true" data-target="inline">Inline edit</button>
+      <button role="tab" aria-selected="false" data-target="inspector">Inspector edit</button>
+      <button role="tab" aria-selected="false" data-target="detach">Detach</button>
+    </div>
+    <div class="journey active" id="inline">
+      <div class="step"><b>1 · Double-click field</b><span>DOM marker or layout hit-test resolves <code>title</code>, <code>description</code>, or a stable <code>portId</code>.</span></div>
+      <div class="step"><b>2 · Enter tldraw edit state</b><span>The editor still owns focus, Escape, click-away, drag suppression, and the one-editing-shape invariant.</span></div>
+      <div class="step"><b>3 · Dispatch typed command</b><span><code>setCompositeField(shapeId, field, value)</code> updates live. No second draft model.</span></div>
+      <div class="step"><b>4 · Finish semantic side effects</b><span>Rename-link reconciliation or validation waits for edit end; one gesture remains one undo.</span></div>
+    </div>
+    <div class="journey" id="inspector">
+      <div class="step"><b>1 · Select Block</b><span>An explicit Details action opens the optional right panel; selection alone need not force it open.</span></div>
+      <div class="step"><b>2 · Read descriptors</b><span>The registry supplies sections, field types, labels, visibility, and capability—not the ShapeUtil.</span></div>
+      <div class="step"><b>3 · Dispatch same command</b><span>The panel calls the same <code>setCompositeField</code> used by inline editing.</span></div>
+      <div class="step"><b>4 · Store drives both views</b><span>The canvas and inspector react to the same immutable shape record. No synchronization bridge.</span></div>
+    </div>
+    <div class="journey" id="detach">
+      <div class="step"><b>1 · Preview losses</b><span>Block behavior, linked identity, Inspector, and semantic port identity are explicitly named.</span></div>
+      <div class="step"><b>2 · Build plan</b><span><code>blockPrimitives(layoutBlock(shape))</code> returns stock shape partials and endpoint remaps.</span></div>
+      <div class="step"><b>3 · One transaction</b><span>Create parts, preserve children, convert/rebind cables, delete custom bindings, then remove Block.</span></div>
+      <div class="step"><b>4 · Hand authority over</b><span>Select the new primitives. They are ordinary tldraw shapes; one Undo restores the semantic Block.</span></div>
+    </div>
+  </section>
+
+  <section id="ladder">
+    <h2>Implementation ladder</h2>
+    <p class="section-intro">Do not transplant the entire pyblocks pipeline. Mine the proven seams and close one vertical behavior at a time in SystemSketch Preview.</p>
+    <div class="ladder">
+      <article class="rung"><div><b>Block tracer</b><br><small>Register one empty Block, one title, one input, one output, and a single pure layout. Keep the stock canvas otherwise unchanged.</small></div><span class="gate">shape + migration tests</span></article>
+      <article class="rung"><div><b>Two editing surfaces</b><br><small>Double-click title/port labels and open Details explicitly. Both must produce the same store delta and undo behavior.</small></div><span class="gate">real pointer + keyboard journey</span></article>
+      <article class="rung"><div><b>Detach the hard case</b><br><small>Lower the connected Port view, preserve cable pixels as stock arrows, drop semantic bindings, and undo in one step.</small></div><span class="gate">0 px footprint drift</span></article>
+      <article class="rung"><div><b>Three Block views</b><br><small>Simple, Port, Expanded each remember their own size. Hidden/collapsed ports keep anchors and stable IDs.</small></div><span class="gate">view round-trip tests</span></article>
+      <article class="rung"><div><b>Expanded frame parity</b><br><small>Accept children, move them with the Block, resize the boundary without scaling them, preserve nested detach and internal cables.</small></div><span class="gate">real nested canvas journey</span></article>
+      <article class="rung"><div><b>Generalize only on second use</b><br><small>Add the next non-Block composite through the registry. Extract a reusable util base only where duplicated tldraw hook code is now visible.</small></div><span class="gate">no speculative inheritance</span></article>
+    </div>
+  </section>
+
+  <section id="proof">
+    <h2>Acceptance evidence</h2>
+    <p class="section-intro">The proposal is complete only when the behaviors remain whiteboard-native under real interaction, not just when TypeScript compiles.</p>
+    <div class="grid-3">
+      <article class="card"><span class="tag">Editing</span><h3>Exact field, exact lifecycle</h3><p>Double-click the visible title, type, description, icon, port name, or port type; Enter/Escape/click-away work; the Block cannot drag or resize while editing; one gesture is one undo.</p></article>
+      <article class="card"><span class="tag">Inspector</span><h3>Parity, not duplication</h3><p>The same change from the inspector and canvas yields the same shape record. Nothing selected means no SystemSketch inspector. Vanilla shapes keep vanilla controls.</p></article>
+      <article class="card"><span class="tag">Detach</span><h3>Faithful picture, explicit loss</h3><p>Only stock records remain; bounds and anchors match; nested children survive; cables become arrows; semantic bindings vanish; one undo restores the Block.</p></article>
+      <article class="card"><span class="tag">Persistence</span><h3>Migrations and reload</h3><p>Old Block props migrate; current Block reloads with the same view sizes, port IDs, selection-independent content, and no session edit state serialized.</p></article>
+      <article class="card"><span class="tag">Containment</span><h3>Frame contract</h3><p>Drop inside/outside, move, resize, clip, erase, select-all, copy/paste, and nested detach behave like the tldraw frame contract where Expanded opts in.</p></article>
+      <article class="card"><span class="tag">Boundary</span><h3>Stock remains the datum beneath</h3><p>The product adds only the whitelisted Block/connection/composite seams. The Stable/Preview release boundary and ordinary whiteboard interactions remain intact.</p></article>
+    </div>
+
+    <h3 style="margin-top:26px">Primary references and proven donor seams</h3>
+    <div class="evidence">
+      <a href="https://tldraw.dev/starter-kits/image-pipeline"><b>Official image-pipeline starter kit</b><span>Node/definition/port/connection architecture and typed pipeline behavior.</span></a>
+      <a href="https://tldraw.dev/sdk-features/shapes"><b>Official tldraw Shapes guide</b><span>ShapeUtil lifecycle, geometry, migrations, frames, and BaseFrameLikeShapeUtil.</span></a>
+      <a href="https://tldraw.dev/examples/editable-shape"><b>Official editable-shape example</b><span>The one-editing-shape lifecycle that inline editing should inherit.</span></a>
+      <a href="https://tldraw.dev/examples/inspector-panel"><b>Official inspector example</b><span>Reactive selection and an app-owned property surface.</span></a>
+      <a href="file:///home/bam/pyblocks/src/pipeline/nodes/NodeShapeUtil.tsx"><b>pyblocks NodeShapeUtil donor</b><span>BaseFrameLike adapter, tldraw editing hooks, field selection, geometry, and container behavior.</span></a>
+      <a href="file:///home/bam/pyblocks/src/pipeline/nodes/types/blockModel.ts"><b>pyblocks blockModel donor</b><span>The single layout authority used by render, ports, editing, and detach.</span></a>
+      <a href="file:///home/bam/pyblocks/src/pipeline/components/BlockInspector.tsx"><b>pyblocks BlockInspector donor</b><span>Selection-aware rich property editing and per-view controls.</span></a>
+      <a href="file:///home/bam/pyblocks/src/pipeline/nodes/detachNode.ts"><b>pyblocks detachNode donor</b><span>Primitive lowering, stock-arrow conversion, nested child preservation, and one-undo authority transfer.</span></a>
+    </div>
+  </section>
+
+  <footer>
+    <b>Scope:</b> architecture and implementation proposal only. No SystemSketch product behavior changed. The live repository is still the pinned stock <code>tldraw@5.3.2</code> foundation plus the existing update pill. This report consolidates the latest pyblocks decisions rather than creating a new requirements mirror.
+  </footer>
+</main>
+<script>
+  const tabButtons = [...document.querySelectorAll('.journey-picker button')]
+  const journeys = [...document.querySelectorAll('.journey')]
+  for (const button of tabButtons) {
+    button.addEventListener('click', () => {
+      for (const candidate of tabButtons) candidate.setAttribute('aria-selected', String(candidate === button))
+      for (const journey of journeys) journey.classList.toggle('active', journey.id === button.dataset.target)
+    })
+  }
+</script>
+</body>
+</html>
+'''
+
+
+def main() -> None:
+    OUTPUT_PATH.write_text(HTML, encoding="utf-8")
+    print(OUTPUT_PATH)
+
+
+if __name__ == "__main__":
+    main()

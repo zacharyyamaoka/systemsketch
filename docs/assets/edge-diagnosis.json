@@ -1,0 +1,58 @@
+[
+  {
+    "id": "BUG-1a",
+    "label": "run.in → decode.in: boundary INPUT feeds the inner block — the reported gesture",
+    "observed": 0,
+    "expected": 1,
+    "reproduced": true
+  },
+  {
+    "id": "BUG-1b",
+    "label": "decode.out → run.out: inner block returns through the boundary OUTPUT",
+    "observed": 0,
+    "expected": 1,
+    "reproduced": true
+  },
+  {
+    "id": "BUG-1c",
+    "label": "decode.out → run.in: inner OUTPUT into the boundary INPUT — data leaving through an inlet",
+    "observed": 1,
+    "expected": 0,
+    "reproduced": true
+  },
+  {
+    "id": "BUG-1d",
+    "label": "run.out → decode.in: boundary OUTPUT feeding the inside — an outlet acting as a source",
+    "observed": 1,
+    "expected": 0,
+    "reproduced": true
+  },
+  {
+    "id": "BUG-2a",
+    "label": "pressing A (arrow tool) discards the un-landed cable",
+    "observed": 1,
+    "expected": 0,
+    "reproduced": true
+  },
+  {
+    "id": "BUG-2a-PERSIST",
+    "label": "the orphan cable outlives a reload",
+    "observed": 0,
+    "expected": 0,
+    "reproduced": false
+  },
+  {
+    "id": "BUG-2b",
+    "label": "clicking another toolbar tool discards the un-landed cable",
+    "observed": 1,
+    "expected": 0,
+    "reproduced": true
+  },
+  {
+    "id": "BUG-2c-CONTROL",
+    "label": "Escape discards the un-landed cable (control)",
+    "observed": 0,
+    "expected": 0,
+    "reproduced": false
+  }
+]

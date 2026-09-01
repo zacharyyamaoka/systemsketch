@@ -1,0 +1,297 @@
+{
+  "schemaVersion": 2,
+  "title": "Three ways to build the chosen Figma toolbar",
+  "kicker": "SystemSketch · implementation boundary review · 31 Aug 2026",
+  "brief": "Implement the already-selected V1 Figma-style toolbar in SystemSketch: seven stable family slots (Cursor, Frame, Shape, Draw, Text, Comment, +), a family icon that becomes the last selected subtype, R/O/L direct selection, repeated A cycling Straight → Curve → Elbow while remembering the last arrow preset, and a searchable library sidebar. Keep the visible behavior fixed and compare only the technical boundary.",
+  "count": 3,
+  "defaultId": "p1",
+  "defaultWhy": "P1 Compose Upstream is the provisional recommendation at 91/100. It uses tldraw 5.3.2's public DefaultToolbar, responsive OverflowingToolbar behavior, toolbar/menu primitives, useTools registry, built-in keyboard routing, style state, accessibility announcements, and editor side effects. SystemSketch owns only the seven family-slot projection, a tiny preference store, one guarded curved-arrow preset adapter, and the searchable library contents.",
+  "decisionHinge": "The choice is close between P1 and P2. Moving only 5 weight points from tldraw reuse to pixel/interaction exactness changes the weights to 30/30/20/10/10 and ties them at 90. Choose P2 if eliminating DefaultToolbar's extra chrome and internal CSS dependencies matters more than maximizing upstream composition; otherwise choose P1.",
+  "invariants": [
+    "The rendered toolbar is the chosen V1 Figma surface in every plan; this comparison does not reopen position, icon count, or grouping.",
+    "Cursor, Frame, Shape, Draw, Text, Comment, and + occupy seven stable bottom-center positions.",
+    "The Shape family slot displays the actual last-used subtype after R, O, L, or an arrow choice.",
+    "A recalls the last arrow preset when entering Arrow and cycles Straight → Curve → Elbow only when Arrow is already active.",
+    "The + control opens a searchable library surface without changing the selected drawing tool.",
+    "Current tool/style state stays in tldraw; family recall is user-interface preference state, never board document data.",
+    "The existing Excalidraw paste adapter, bottom-right utility strip, persistence key, release flow, and stock canvas engine remain intact.",
+    "All integrations target public tldraw 5.3.2 exports and editor APIs; no package fork or node_modules patch is permitted."
+  ],
+  "boundary": "These are implementation plans and interactive architecture traces, not a toolbar implementation. They identify concrete files, API seams, slices, acceptance evidence, and failure modes. No production React, CSS, editor, or package dependency was changed while preparing this comparison.",
+  "axes": [
+    {
+      "name": "Toolbar shell",
+      "values": ["tldraw DefaultToolbar", "SystemSketch toolbar shell", "SystemSketch catalog over custom tool states"]
+    },
+    {
+      "name": "Keyboard owner",
+      "values": ["tldraw tool registry", "tldraw registry calling owned commands", "preset tool registry"]
+    },
+    {
+      "name": "Arrow preset seam",
+      "values": ["one before-create adapter", "controller + before-create adapter", "dedicated StateNode tools"]
+    },
+    {
+      "name": "Responsive behavior",
+      "values": ["stock overflow", "owned seven-slot CSS", "catalog-driven owned CSS"]
+    },
+    {
+      "name": "Primary risk",
+      "values": ["stock DOM/CSS constraints", "more host chrome", "engine-state coupling"]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "c1",
+      "name": "Off-the-shelf tldraw reuse",
+      "weight": 35,
+      "why": "The requested preference is to lean as hard as practical on tldraw's existing UI, tool, shortcut, style, focus, and responsive infrastructure.",
+      "passCondition": "The plan delegates common toolbar behavior to public tldraw components and registries, with custom code limited to behavior that does not exist upstream.",
+      "anchors": {
+        "1": "Reimplements toolbar, shortcuts, selection, menus, and tool execution independently of tldraw.",
+        "3": "Uses tldraw's editor and tools but owns substantial toolbar or tool-state behavior.",
+        "5": "Composes DefaultToolbar, tool items, keyboard routing, styles, focus, and editor behavior directly."
+      }
+    },
+    {
+      "id": "c2",
+      "name": "Exact V1 behavior",
+      "weight": 25,
+      "why": "The interaction model is already chosen; implementation economy is not useful if the result drifts from Figma-style stable family slots and repeated-key behavior.",
+      "passCondition": "The seven-slot silhouette, selected subtype feedback, family recall, repeat-A contract, and library sidebar behave exactly as specified.",
+      "anchors": {
+        "1": "Requires visible compromises or substitutes a stock individual-tool row.",
+        "3": "Matches the core behavior with one or two constrained visual differences.",
+        "5": "The implementation boundary imposes no visible or interaction compromise."
+      }
+    },
+    {
+      "id": "c3",
+      "name": "Public-API upgrade safety",
+      "weight": 20,
+      "why": "SystemSketch pins tldraw but should still be able to upgrade without carrying a fork or depending on copied internal state-machine code.",
+      "passCondition": "All imports are public, internal CSS/DOM coupling is minimized and documented, and a tldraw version bump has a focused regression surface.",
+      "anchors": {
+        "1": "Copies or patches internal tldraw implementation details with broad upgrade exposure.",
+        "3": "Uses public registration seams but mirrors some upstream interaction behavior.",
+        "5": "Uses only narrow public APIs behind one adapter boundary."
+      }
+    },
+    {
+      "id": "c4",
+      "name": "Testability and state clarity",
+      "weight": 10,
+      "why": "Repeat-key state, family memory, editor state, and document content must not blur together or become regression-prone.",
+      "passCondition": "The arrow transition table and preference model are pure-testable, editor effects are guarded, and the full keyboard journey is observable in a real browser.",
+      "anchors": {
+        "1": "Behavior emerges from distributed component state and global listeners.",
+        "3": "Core transitions are testable but browser/editor coupling remains broad.",
+        "5": "State ownership is explicit and each effect has a focused unit or journey proof."
+      }
+    },
+    {
+      "id": "c5",
+      "name": "Delivery speed and code volume",
+      "weight": 10,
+      "why": "The first implementation should close one vertical toolbar behavior without turning into a second UI framework.",
+      "passCondition": "A thin first slice can ship Cursor/Frame/Shape/Draw/Text through real tldraw tools, followed by arrow presets, library insertion, and Comment gating.",
+      "anchors": {
+        "1": "Requires a new tool framework or large up-front platform layer.",
+        "3": "Requires a moderate owned shell/controller before the first complete journey.",
+        "5": "Mostly composes existing pieces and adds narrow adapters incrementally."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "g1",
+      "name": "Fixed seven-slot V1 surface",
+      "why": "The selected visual and interaction direction must not be reinterpreted during implementation."
+    },
+    {
+      "id": "g2",
+      "name": "R / O / L / repeated-A plus recall",
+      "why": "The Excalidraw-like keyboard loop and persistent subtype feedback are the primary behavior, not decoration."
+    },
+    {
+      "id": "g3",
+      "name": "Searchable + library",
+      "why": "The compact toolbar depends on a scalable home for less-frequent objects and templates."
+    },
+    {
+      "id": "g4",
+      "name": "No tldraw fork or document-schema pollution",
+      "why": "Toolbar preference is UI state and must not create a second editor or leak into shared board content."
+    },
+    {
+      "id": "g5",
+      "name": "Typing and accessibility safety",
+      "why": "Tool hotkeys must stop while editing text or searching the library, and buttons must retain focus, labels, tooltips, and announcements."
+    },
+    {
+      "id": "g6",
+      "name": "Honest Comment capability gating",
+      "why": "The slot must call the registered licensed comment tool when available and remain explicitly disabled—not fake—when it is unavailable."
+    }
+  ],
+  "variants": [
+    {
+      "id": "p1",
+      "name": "Compose Upstream",
+      "thesis": "Render the Figma family slots inside tldraw's own DefaultToolbar and route every selection through its stock tool registry; add only the memory, curve, and library gaps.",
+      "accent": "#3f66e8",
+      "bestWhen": "Reusing the maximum amount of tested tldraw UI and interaction infrastructure is the governing preference.",
+      "losesWhen": "The toolbar must have zero dependency on DefaultToolbar's extra-chrome DOM/CSS or its responsive overflow behavior.",
+      "decisions": [
+        {"label": "Mount", "value": "Set components.Toolbar to SystemSketchToolbar; that component returns DefaultToolbar with exactly seven custom child slots and minItems/maxItems tuned to the fixed dock."},
+        {"label": "Stock reuse", "value": "Keep DefaultToolbar/OverflowingToolbar, TldrawUiToolbarButton, dropdown/popover/input primitives, useTools, useIsToolSelected, tool analytics/a11y announcements, and the built-in keyboard registry."},
+        {"label": "Hotkeys", "value": "Use TLUiOverrides.tools to wrap rectangle, ellipse, line, and arrow onSelect callbacks. R/O/L remain stock registrations; the overridden A callback recalls or cycles before delegating to the stock arrow action."},
+        {"label": "Memory", "value": "Read current tool and shared styles from the editor. Keep only lastByFamily and straight-vs-curve recall in one namespaced UI preference store shared by both toolbar and overflow render trees."},
+        {"label": "Curve gap", "value": "Register one guarded before-create shape side effect: only when the active tool is Arrow and the UI preset is Curve, change the new stock arrow from bend 0 to the agreed non-zero bend. Elbow uses ArrowShapeKindStyle."},
+        {"label": "Library", "value": "Use tldraw's popover, input, menu lifecycle, and focus behavior; SystemSketch owns the searchable catalog, categories, sidebar-like sizing, and insert commands."},
+        {"label": "Comment", "value": "Call tools.comment when @tldraw/commenting is registered and licensed; otherwise keep the seventh slot present but disabled with explicit entitlement copy."},
+        {"label": "Main constraint", "value": "Scope one CSS rule to hide DefaultToolbar's stock extras/mobile style strip. This is the only deliberate dependency on its current class structure and receives an upgrade smoke test."}
+      ],
+      "keepParts": [
+        "DefaultToolbar + OverflowingToolbar",
+        "stock keyboard routing through TLUiOverrides",
+        "stock tool callbacks and style state",
+        "single guarded curve side effect",
+        "shared family preference store",
+        "tldraw popover/input primitives"
+      ],
+      "proof": [
+        "A focused real-canvas journey presses A, A, R, O, L, switches to Cursor, then presses A and sees the remembered arrow preset in the same family slot.",
+        "The same toolbar remains keyboard- and screen-reader-operable when DefaultToolbar moves children into overflow; duplicate render trees share one preference source.",
+        "Creating a curve changes only newly created arrows while imported, pasted, duplicated, and programmatically created arrows retain their original bend.",
+        "Typing A/R/O/L inside canvas text editing and library search never changes tools.",
+        "A tldraw version-bump smoke catches changes to the one scoped extra-chrome selector and seven direct toolbar children."
+      ],
+      "scores": {
+        "c1": {"score": 5, "evidence": "Verified public exports cover DefaultToolbar with custom children, OverflowingToolbar, menu/toolbar primitives, useTools, TLUiOverrides, style APIs, and editor side effects.", "confidence": "high"},
+        "c2": {"score": 4, "evidence": "The seven family slots and behaviors fit, but hiding DefaultToolbar extras and styling its stock container are constrained adaptations rather than a fully owned pixel shell.", "confidence": "high"},
+        "c3": {"score": 4, "evidence": "Behavior uses public APIs; upgrade exposure is limited to one documented stock class/DOM contract for hiding extras and fitting the Figma chrome.", "confidence": "high"},
+        "c4": {"score": 5, "evidence": "Tool wrappers and the arrow transition table are pure-testable; the only editor mutation is a type- and preset-guarded before-create handler.", "confidence": "high"},
+        "c5": {"score": 5, "evidence": "The first vertical slice composes existing tool callbacks and responsive toolbar behavior instead of building new focus, keyboard, menu, or overflow systems.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "DefaultToolbar accepts seven replacement children; each is a family slot rather than an individual stock-tool row."},
+        "g2": {"pass": true, "evidence": "Stock keyboard registrations invoke wrapped R/O/L/A tool items, and the shared preference store owns repeat-A recall."},
+        "g3": {"pass": true, "evidence": "The + slot opens a searchable host catalog inside tldraw focus/menu primitives."},
+        "g4": {"pass": true, "evidence": "Only component overrides, tool overrides, style APIs, and a side effect are used; preference never enters the board store."},
+        "g5": {"pass": true, "evidence": "The built-in tldraw keyboard registry already suppresses shortcuts during editing/open menus and provides toolbar semantics, focus, tooltips, and announcements."},
+        "g6": {"pass": true, "evidence": "The slot resolves the real registered comment tool and has a deliberate disabled state when the licensed package is absent."}
+      },
+      "preview": "<div class=\"plan-prototype plan-upstream\" tabindex=\"0\" data-plan=\"p1\"><div class=\"prototype-head\"><span class=\"plan-badge\">72% upstream responsibility</span><span class=\"prototype-help\">Focus, then try A · A · R · O · L · +</span></div><div class=\"mini-v1-toolbar\" data-mini-toolbar></div><div class=\"architecture-flow\"><div class=\"arch-node upstream\" data-node=\"shell\"><small>STOCK UI</small><b>DefaultToolbar</b><span>overflow · focus · buttons</span></div><i>→</i><div class=\"arch-node host thin\" data-node=\"family\"><small>HOST PROJECTION</small><b>FamilyToolSlot × 7</b><span>icon + remembered subtype</span></div><i>→</i><div class=\"arch-node upstream\" data-node=\"registry\"><small>STOCK REGISTRY</small><b>useTools + overrides</b><span>kbd · a11y · analytics</span></div><i>→</i><div class=\"arch-node upstream\" data-node=\"editor\"><small>STOCK ENGINE</small><b>Editor</b><span>tools · styles · document</span></div><div class=\"arch-branch host\" data-node=\"adapter\"><small>ONLY GAP</small><b>Curve adapter</b><span>before-create bend</span></div><div class=\"arch-branch host library\" data-node=\"library\"><small>HOST CONTENT</small><b>Shape catalog</b><span>inside stock popover</span></div></div><div class=\"trace-console\"><button type=\"button\" data-run-trace>Run A → A → R → +</button><button type=\"button\" class=\"secondary\" data-reset-trace>Reset</button><span data-trace-status>Ready: tldraw owns the common path.</span></div></div>"
+    },
+    {
+      "id": "p2",
+      "name": "Own the Controller",
+      "thesis": "Build an exact SystemSketch toolbar shell and explicit command controller from public tldraw primitives, while keeping every canvas action and keyboard registration on the stock editor boundary.",
+      "accent": "#146f68",
+      "bestWhen": "Exact Figma layout, responsive rules, sidebar behavior, and a stable host-owned DOM matter slightly more than maximum DefaultToolbar reuse.",
+      "losesWhen": "The product is not ready to own toolbar layout, roving focus, overflow decisions, and more browser-level regression coverage.",
+      "decisions": [
+        {"label": "Mount", "value": "Set components.Toolbar to a fully host-owned SystemSketchToolbar built from public TldrawUiToolbar, TldrawUiToolbarButton, dropdown, popover, input, icon, and tooltip primitives."},
+        {"label": "Controller", "value": "Create one createToolbarCommands(editor, preferences) boundary. Both family buttons and TLUiOverrides tool callbacks call these commands, so click and keyboard behavior cannot drift."},
+        {"label": "Hotkeys", "value": "Still retain tldraw's keyboard registry by wrapping the stock tool items; the controller owns repeat-A semantics but does not add a competing document-level keydown listener."},
+        {"label": "Memory", "value": "A pure reducer owns active family, lastByFamily, arrowPreset, and libraryOpen. Editor state remains authoritative for the real active tool; the reducer stores only recall and transient UI state."},
+        {"label": "Curve gap", "value": "Use the same guarded before-create adapter as P1, but drive it from the controller's arrowPreset rather than a thin tool wrapper."},
+        {"label": "Library", "value": "Render a real left aside under the toolbar provider. Own search, categories, focus return, escape/outside dismissal, and insert commands while reusing tldraw button/input/icon primitives."},
+        {"label": "Responsive", "value": "Keep all seven stable slots down to the agreed minimum width, then switch to an explicitly designed compact mode; do not inherit stock overflow or extra controls."},
+        {"label": "Main constraint", "value": "More SystemSketch code becomes responsible for keyboard focus order, collision behavior, coarse-pointer targets, mobile sizing, and visual regressions."}
+      ],
+      "keepParts": [
+        "pixel-exact owned toolbar DOM",
+        "one command boundary for click + keyboard",
+        "tldraw public UI primitives",
+        "stock tool callbacks and keyboard registry",
+        "explicit reducer + preference store",
+        "true owned sidebar"
+      ],
+      "proof": [
+        "Golden browser screenshots at wide, compact, and coarse-pointer breakpoints show the exact seven-slot silhouette and no collision with the existing utility strip.",
+        "A reducer test covers all transitions, including first A from another tool, repeated A, family recall, and library opening without tool change.",
+        "An editor integration journey proves clicks and hotkeys call the same command path and preserve tldraw selection/tool state.",
+        "Focus returns to + when the library closes, Escape dismisses it, and search input suppresses canvas shortcuts.",
+        "A tldraw upgrade test depends only on public primitive and editor APIs, not DefaultToolbar markup."
+      ],
+      "scores": {
+        "c1": {"score": 4, "evidence": "The plan retains tldraw primitives, tools, keyboard registry, styles, editor, and focus helpers, but replaces DefaultToolbar and responsive overflow.", "confidence": "high"},
+        "c2": {"score": 5, "evidence": "Owning the DOM, responsive rules, and sidebar removes the extra-chrome and stock-container compromises in P1.", "confidence": "high"},
+        "c3": {"score": 5, "evidence": "The integration uses public UI primitives and editor APIs behind one command adapter with no dependency on DefaultToolbar's class structure.", "confidence": "high"},
+        "c4": {"score": 5, "evidence": "A pure reducer and single command boundary make tool, recall, and sidebar transitions explicit and independently testable.", "confidence": "high"},
+        "c5": {"score": 3, "evidence": "The custom responsive shell, focus behavior, sidebar, and browser coverage must exist before the result is production-complete.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The host owns the exact seven-slot DOM and responsive design."},
+        "g2": {"pass": true, "evidence": "The command reducer defines R/O/L/A and recall as explicit transitions shared by clicks and stock keyboard callbacks."},
+        "g3": {"pass": true, "evidence": "The + slot controls a true searchable sidebar with owned focus return."},
+        "g4": {"pass": true, "evidence": "The custom layer ends at public editor/tool APIs; toolbar preference remains outside document state."},
+        "g5": {"pass": true, "evidence": "The plan includes explicit focus, input suppression, coarse pointer, and accessibility acceptance journeys."},
+        "g6": {"pass": true, "evidence": "The real tools.comment entry is used when available, with a labeled disabled state otherwise."}
+      },
+      "preview": "<div class=\"plan-prototype plan-controller\" tabindex=\"0\" data-plan=\"p2\"><div class=\"prototype-head\"><span class=\"plan-badge\">47% host responsibility</span><span class=\"prototype-help\">Focus, then try A · A · R · O · L · +</span></div><div class=\"mini-v1-toolbar\" data-mini-toolbar></div><div class=\"architecture-flow\"><div class=\"arch-node host\" data-node=\"shell\"><small>HOST UI</small><b>SystemSketchToolbar</b><span>layout · focus · responsive</span></div><i>→</i><div class=\"arch-node host\" data-node=\"family\"><small>HOST COMMANDS</small><b>ToolbarController</b><span>reducer · recall · sidebar</span></div><i>→</i><div class=\"arch-node upstream\" data-node=\"registry\"><small>PUBLIC TLDRAW</small><b>tools + UI primitives</b><span>kbd · actions · widgets</span></div><i>→</i><div class=\"arch-node upstream\" data-node=\"editor\"><small>STOCK ENGINE</small><b>Editor</b><span>tools · styles · document</span></div><div class=\"arch-branch host\" data-node=\"adapter\"><small>NARROW EFFECT</small><b>Arrow preset effect</b><span>controller → bend</span></div><div class=\"arch-branch host library\" data-node=\"library\"><small>HOST PANEL</small><b>LibrarySidebar</b><span>real aside + focus return</span></div></div><div class=\"trace-console\"><button type=\"button\" data-run-trace>Run A → A → R → +</button><button type=\"button\" class=\"secondary\" data-reset-trace>Reset</button><span data-trace-status>Ready: one owned controller defines the contract.</span></div></div>"
+    },
+    {
+      "id": "p3",
+      "name": "Register Preset Tools",
+      "thesis": "Make Straight Arrow, Curve Arrow, and Elbow Arrow first-class editor tool states, then drive the Figma family slots from a typed tool catalog instead of adapting stock Arrow at creation time.",
+      "accent": "#a35445",
+      "bestWhen": "Arrow presets are the beginning of a larger domain-tool platform whose behaviors must be addressable, scriptable, and testable as first-class tool IDs.",
+      "losesWhen": "This is only a toolbar interaction and avoiding copied or coupled tool-state logic is more important than a future preset-tool platform.",
+      "decisions": [
+        {"label": "Mount", "value": "Use a catalog-driven host toolbar shell. Every slot resolves a ToolDescriptor with icon, label, shortcut, active predicate, and editor activation command."},
+        {"label": "Tool layer", "value": "Register arrow-straight, arrow-curve, and arrow-elbow StateNode tools plus matching TLUiToolItem entries. Repeated A rotates the registered preset IDs rather than mutating one Arrow preference."},
+        {"label": "Creation", "value": "Each preset tool creates the same stock arrow shape with explicit kind/bend defaults and returns to its own tool ID after an interaction, preserving active feedback without a broad shape side effect."},
+        {"label": "Memory", "value": "The current preset is editor tool state; the catalog stores lastByFamily only for recall after switching families. The board still stores ordinary tldraw arrow shapes, not custom shape types."},
+        {"label": "Library", "value": "Library catalog entries and toolbar entries share the typed descriptor model, allowing future domain objects to expose insert, drag, shortcut, and availability capabilities consistently."},
+        {"label": "Testing", "value": "StateNode tests cover idle → pointing → dragging → complete/cancel/interrupt for every arrow preset, plus binding, snapping, sticky-tool, touch, and selection return behavior."},
+        {"label": "Main constraint", "value": "tldraw's exported ArrowShapeTool is public, but its Pointing flow currently hard-codes onInteractionEnd: arrow. Exact preset identity therefore requires owning or closely mirroring that interaction path."},
+        {"label": "Use threshold", "value": "Do not choose this plan for three arrow icons alone; choose it only if at least two more semantic preset families will need first-class tool states soon."}
+      ],
+      "keepParts": [
+        "typed ToolDescriptor catalog",
+        "first-class preset tool IDs",
+        "ordinary stock arrow document shapes",
+        "no broad after-create mutation",
+        "tool-state regression suite",
+        "future domain-tool runway"
+      ],
+      "proof": [
+        "Each arrow preset remains the active tool across create, complete, cancel, interrupt, sticky-tool, and selection transitions.",
+        "Bindings, snapping, arrow labels, touch long-press, precise targeting, undo, and imported stock arrows match the upstream Arrow tool.",
+        "R/O/L/A and toolbar clicks resolve through one typed catalog with correct icons and accessibility labels.",
+        "The document contains only type: arrow with ordinary kind/bend props, so collaborators without the custom toolbar can still render and edit it.",
+        "A pinned tldraw upgrade diff explicitly compares upstream ArrowShapeTool/Pointing behavior before promotion."
+      ],
+      "scores": {
+        "c1": {"score": 3, "evidence": "Canvas geometry and shape utilities remain stock, but preset tool states and the catalog duplicate behavior that P1 delegates to the single upstream Arrow tool.", "confidence": "high"},
+        "c2": {"score": 5, "evidence": "First-class preset IDs can express exact active state, cycling, recall, and preset creation with no toolbar ambiguity.", "confidence": "high"},
+        "c3": {"score": 2, "evidence": "Tool registration is public, but exact interaction parity requires mirroring an upstream Pointing path whose return target is currently hard-coded to arrow.", "confidence": "high"},
+        "c4": {"score": 5, "evidence": "Explicit tool IDs and state-node transition tests make every preset behavior observable, although the test matrix is much larger.", "confidence": "high"},
+        "c5": {"score": 2, "evidence": "Multiple tool states, a catalog, and parity tests are substantial platform work before the same V1 toolbar journey is complete.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The catalog renders the same fixed seven family slots."},
+        "g2": {"pass": true, "evidence": "R/O/L/A select explicit tool descriptors and Arrow rotation is a first-class tool transition."},
+        "g3": {"pass": true, "evidence": "The shared catalog supports a searchable + library and insert commands."},
+        "g4": {"pass": true, "evidence": "Tools are registered through public seams and still create ordinary stock arrow shapes; no fork or custom document type is proposed."},
+        "g5": {"pass": true, "evidence": "The plan retains tldraw keyboard registration and requires full focus, touch, cancel, and editing-state tests."},
+        "g6": {"pass": true, "evidence": "Comment remains a capability-gated descriptor backed by tools.comment."}
+      },
+      "preview": "<div class=\"plan-prototype plan-presets\" tabindex=\"0\" data-plan=\"p3\"><div class=\"prototype-head\"><span class=\"plan-badge\">58% host responsibility</span><span class=\"prototype-help\">Focus, then try A · A · R · O · L · +</span></div><div class=\"mini-v1-toolbar\" data-mini-toolbar></div><div class=\"architecture-flow\"><div class=\"arch-node host\" data-node=\"shell\"><small>HOST UI</small><b>CatalogToolbar</b><span>seven family descriptors</span></div><i>→</i><div class=\"arch-node host\" data-node=\"family\"><small>HOST PLATFORM</small><b>ToolDescriptor catalog</b><span>active · icon · kbd · insert</span></div><i>→</i><div class=\"arch-node host deep\" data-node=\"registry\"><small>CUSTOM TOOL STATES</small><b>3 Arrow StateNodes</b><span>straight · curve · elbow</span></div><i>→</i><div class=\"arch-node upstream\" data-node=\"editor\"><small>STOCK SHAPES</small><b>tldraw Editor</b><span>ordinary arrow records</span></div><div class=\"arch-branch host\" data-node=\"adapter\"><small>PARITY SURFACE</small><b>Pointing behavior</b><span>bindings · cancel · return</span></div><div class=\"arch-branch host library\" data-node=\"library\"><small>SHARED CATALOG</small><b>Library entries</b><span>future domain tools</span></div></div><div class=\"trace-console\"><button type=\"button\" data-run-trace>Run A → A → R → +</button><button type=\"button\" class=\"secondary\" data-reset-trace>Reset</button><span data-trace-status>Ready: presets are first-class editor tools.</span></div></div>"
+    }
+  ],
+  "checks": [
+    "Exactly three implementation boundaries for the same chosen V1 toolbar",
+    "Weights were fixed before plans and total 100%",
+    "Every plan evaluates every hard gate separately",
+    "All tldraw reuse claims were checked against the pinned 5.3.2 source and public exports",
+    "Curve's straight/arc/elbow data-model caveat is explicit",
+    "Each plan names its code ownership, phases, acceptance proof, and upgrade risk",
+    "Interactive architecture traces accept A/R/O/L/+ and expose the different ownership path",
+    "Pick, shortlist, reject, feedback, splice, copy, download, and synthesis controls are present",
+    "The artifact is plan-only; production toolbar code remains unchanged"
+  ]
+}

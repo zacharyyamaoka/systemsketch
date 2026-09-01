@@ -1,0 +1,283 @@
+{
+  "schemaVersion": 3,
+  "title": "Five ways to integrate a SystemSketch Dev Hub",
+  "kicker": "SystemSketch · UI Babble 5 · Aug 31, 2026",
+  "brief": "Add one Dev icon beside Help in the existing bottom-right utility strip, then make Stable, Latest Preview, and named isolated presets easy to launch and manage without making the ordinary canvas feel like a development tool.",
+  "count": 5,
+  "defaultId": "v1",
+  "defaultWhy": "Anchored Dev Shelf is the provisional default at 96.8/100. It matches the user's chosen placement, reuses the current Help-popover geometry, keeps the ordinary canvas quiet, and gives Latest Preview plus isolated presets enough room without turning development state into permanent chrome.",
+  "decisionHinge": "The recommendation assumes launching or browsing a preset is the common task and lifecycle administration is occasional. If Zach begins switching presets many times per hour, V3 Quick Switch becomes more attractive; if he needs build and session state visible while drawing, V2 Dev Drawer should replace the popover.",
+  "invariants": [
+    "A dedicated Dev icon sits immediately before the existing Help icon in the bottom-right utility strip.",
+    "Help returns to user help and shortcuts; release status, Latest Preview, publishing, preset launch, and preset lifecycle move into Dev.",
+    "Stable is the ordinary immutable entry; Latest Preview and isolated presets reuse the one live Preview runtime.",
+    "Every experimental launch opens an independent board copy and labels the active composition after launch.",
+    "Dev UI state and preset lifecycle metadata never enter .tldr document content."
+  ],
+  "boundary": "Standalone interactive UI prototypes in one common SystemSketch canvas frame. Opening, switching, archive views, stories, and selection controls work inside the gallery; no Dev icon, preset registry, launcher endpoint, clone transaction, or production SystemSketch behavior has been implemented.",
+  "axes": [
+    {"name": "Surface", "values": ["anchored popover", "persistent inset drawer", "quick switch menu", "search-first command palette", "expanding utility ribbon"]},
+    {"name": "Primary object", "values": ["preset catalog", "development workspace", "next launch", "command", "active context"]},
+    {"name": "Visibility", "values": ["transient", "persistent while working", "minimal transient", "modal transient", "inline on demand"]},
+    {"name": "Lifecycle access", "values": ["inline archive + manager", "first-class management", "secondary Manage link", "searchable actions", "overflow manager"]}
+  ],
+  "requirements": [
+    {
+      "id": "fr1",
+      "name": "Fast focused switching",
+      "weight": 30,
+      "why": "The Dev destination should help Zach enter one isolated working context without reconstructing configuration or scanning unrelated controls.",
+      "passCondition": "From the normal canvas, Block Dev or Latest Preview can be identified and launched in at most two obvious actions.",
+      "anchors": {"1": "Requires several screens or configuration choices.", "3": "Reachable in two or three actions but demands interpretation.", "5": "The intended target is immediately legible and launches in one or two obvious actions."}
+    },
+    {
+      "id": "fr2",
+      "name": "Ordinary canvas stays calm",
+      "weight": 22,
+      "why": "Development affordances are valuable only when they do not make Stable or normal drawing feel like an engineering console.",
+      "passCondition": "At rest, the only added chrome is one quiet Dev icon beside Help; detail appears only on request.",
+      "anchors": {"1": "Persistent labels, badges, or panels dominate normal drawing.", "3": "Mostly quiet, with some ongoing development state visible.", "5": "One quiet icon at rest; all detail is progressive disclosure."}
+    },
+    {
+      "id": "fr3",
+      "name": "State and safety are unmistakable",
+      "weight": 20,
+      "why": "Stable, Latest Preview, and isolated compositions must not blur together or threaten the working document.",
+      "passCondition": "Before launch, the surface names channel, composition, and independent-copy policy; after launch, the active composition is visibly identified.",
+      "anchors": {"1": "Targets look interchangeable or document ownership is hidden.", "3": "Safety exists but appears only in secondary detail.", "5": "Channel, composition, and copy policy are clear at decision time and after launch."}
+    },
+    {
+      "id": "fr4",
+      "name": "Lifecycle remains manageable",
+      "weight": 16,
+      "why": "The selector should not become an attic as experiments accumulate and are replaced.",
+      "passCondition": "Active presets stay clean while archived presets, successor links, and management actions remain discoverable.",
+      "anchors": {"1": "No visible retirement path or archived history.", "3": "Management exists but is distant from the launch surface.", "5": "Active and archived states are easy to understand and manage without clutter."}
+    },
+    {
+      "id": "fr5",
+      "name": "Fits the current utility seam",
+      "weight": 12,
+      "why": "SystemSketch already has a tldraw toolbar, anchored Help panel, right popout, focus handling, and mutually exclusive bottom-right surfaces.",
+      "passCondition": "The concept can reuse those components and interaction conventions without replacing the toolbar or introducing a second global navigation system.",
+      "anchors": {"1": "Requires a new shell or conflicts with existing canvas chrome.", "3": "Reuses some primitives but adds significant navigation machinery.", "5": "Extends the existing toolbar/popover model with a sibling trigger and shared state."}
+    }
+  ],
+  "hardGates": [
+    {"id": "g1", "name": "Dev is distinct from Help", "why": "Developer operations should no longer hide inside end-user help once a dedicated destination exists."},
+    {"id": "g2", "name": "Stable and document safety remain explicit", "why": "No launcher treatment may weaken the immutable Stable anchor or independent-copy rule."},
+    {"id": "g3", "name": "No document mutation from UI selection", "why": "Choosing, pinning, or archiving a development context is application metadata, never board content."}
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "Anchored Dev Shelf",
+      "thesis": "Mirror the current Help popover with a sibling Dev panel: Latest Preview first, isolated presets second, management last.",
+      "accent": "#4f5bd5",
+      "bestWhen": "Most visits are deliberate launches into a known context and development details should disappear completely afterward.",
+      "losesWhen": "You need persistent build diagnostics or switch contexts dozens of times without closing the surface.",
+      "decisions": [
+        {"label": "Placement", "value": "A </> icon immediately before Help; clicking it closes Help and any right popout."},
+        {"label": "Hierarchy", "value": "Latest Preview is the primary row, named isolated presets form a compact shelf, and Archived/Manage stays in the footer."},
+        {"label": "After launch", "value": "The existing top-center Preview badge gains the active preset name, for example Preview · Block Dev."}
+      ],
+      "keepParts": ["sibling Dev/Help popovers", "Latest Preview as the primary row", "active shelf with quiet archive footer"],
+      "proof": [
+        "The common canvas shows only one additional </> icon at rest and a product-matched 370px panel when opened.",
+        "The direct Archive action removes Block Dev from Active and exposes an archived successor row without changing the canvas."
+      ],
+      "scores": {
+        "fr1": {"score": 5, "evidence": "Latest Preview and Block Dev are visible immediately after one icon click; each row is a single launch target.", "confidence": "high"},
+        "fr2": {"score": 5, "evidence": "At rest the existing strip gains only one icon; the anchored panel is transient and mutually exclusive with Help.", "confidence": "high"},
+        "fr3": {"score": 5, "evidence": "Every row names Live tree, its composition, and independent copy; Stable is fixed at the top of the panel.", "confidence": "high"},
+        "fr4": {"score": 4, "evidence": "Archive is understandable and the footer exposes history, though bulk administration belongs in a secondary manager.", "confidence": "high"},
+        "fr5": {"score": 5, "evidence": "It is structurally the existing Help panel plus a sibling trigger and shared open-surface state.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "Help and Dev remain separate adjacent triggers with mutually exclusive panels."},
+        "g2": {"pass": true, "evidence": "Stable is labeled immutable and every development row says independent copy."},
+        "g3": {"pass": true, "evidence": "Archive and launch state live entirely in the panel prototype."}
+      },
+      "previewLabel": "interactive anchored Dev shelf",
+      "story": {
+        "title": "Open Dev, then retire one preset",
+        "steps": [
+          {"label": "Read the launch hierarchy", "caption": "Latest Preview is the broad newest build; Block Dev and Rows Lab are narrower isolated compositions below it.", "state": "base", "target": "[data-demo-toggle]"},
+          {"label": "Archive Block Dev", "caption": "The active shelf stays clean while an archived row records that Rows Lab replaces the older preset.", "state": "alt", "target": "[data-demo-toggle]"}
+        ]
+      },
+      "media": [
+        {"label": "Navigation rule", "caption": "Dev owns builds and compositions; Help returns to human-facing assistance.", "html": "<div class=\"dh-rule\"><span><b>?</b> Help<small>shortcuts · guidance</small></span><i>≠</i><span><b>&lt;/&gt;</b> Dev<small>preview · presets · publish</small></span></div>"}
+      ],
+      "preview": "<div class=\"dh-mock\"><div class=\"dh-top-left\"><b>☰</b><strong>Robot sorter</strong><span>Page 1⌄</span></div><div class=\"dh-top-right\"><i>Z</i><span>◫</span><small>◉ 03:00</small><b>Share</b></div><div class=\"dh-canvas\"><div class=\"dh-block\"><small>camera</small><b>Sort item</b><span>image → class</span></div><div class=\"dh-wire\"></div></div><section class=\"dh-panel dh-shelf\"><header><div><small>SYSTEMSKETCH</small><h3>Dev</h3></div><button aria-label=\"Close mock Dev panel\">×</button></header><div class=\"dh-stable\"><span><b>Stable</b><small>Verified 0.1.0 · original file</small></span><em>Current</em></div><article class=\"dh-latest\"><span class=\"dh-glyph\">↯</span><div><small>LATEST</small><b>Open Latest Preview</b><span>Live working tree · full product · copy</span></div><strong>↗</strong></article><div class=\"dh-section-label\"><span>ISOLATED PRESETS</span><button>＋ New</button></div><div class=\"demo-base-only\"><article class=\"dh-row\"><i>B</i><span><b>Block Dev</b><small>Stock tldraw + Block · copy</small></span><em>↗</em></article><article class=\"dh-row\"><i>▦</i><span><b>Rows Lab</b><small>Stock + Block + Grid · copy</small></span><em>↗</em></article></div><div class=\"demo-alt-only\"><article class=\"dh-row\"><i>▦</i><span><b>Rows Lab</b><small>Stock + Block + Grid · copy</small></span><em>↗</em></article><div class=\"dh-archived\"><b>Block Dev archived</b><span>Replaced by Rows Lab</span></div></div><footer><button>Archived · 1</button><button>Manage presets ›</button></footer><button class=\"demo-button\" data-demo-toggle data-base-label=\"Archive Block Dev\" data-alt-label=\"Restore Block Dev\">Archive Block Dev</button></section><div class=\"dh-toolstrip\"><span>⌖</span><span>−</span><b>100%</b><span>＋</span><span class=\"active\">&lt;/&gt;</span><span>?</span></div></div>"
+    },
+    {
+      "id": "v2",
+      "name": "Persistent Dev Drawer",
+      "thesis": "Treat Dev as a real right-side workspace that can stay open while you inspect builds, presets, sessions, and archives on the canvas.",
+      "accent": "#287451",
+      "bestWhen": "Development status and preset management are part of the work itself, not just a launch transition.",
+      "losesWhen": "You want the drawing surface to feel completely ordinary between occasional preview launches.",
+      "decisions": [
+        {"label": "Placement", "value": "The </> icon toggles a full-height inset right popout through the existing right-surface provider."},
+        {"label": "Hierarchy", "value": "A compact navigation rail switches between Launch, Running, and Archived without closing the canvas."},
+        {"label": "After launch", "value": "The drawer remains available as an environment inspector until explicitly closed."}
+      ],
+      "keepParts": ["Launch / Running / Archived IA", "persistent build facts", "reuse of right-surface exclusivity"],
+      "proof": [
+        "The prototype keeps Robot sorter visible while a product-matched inset drawer exposes complete development context.",
+        "The direct tab action switches from launch targets to archived presets and successor metadata in place."
+      ],
+      "scores": {
+        "fr1": {"score": 4, "evidence": "Launch targets are direct, though entering the drawer and its navigation adds more visual scanning than V1.", "confidence": "high"},
+        "fr2": {"score": 3, "evidence": "The drawer is absent at rest but designed to remain open, taking a meaningful slice of canvas during development.", "confidence": "high"},
+        "fr3": {"score": 5, "evidence": "Persistent channel, build, document, and active-composition facts are the drawer's strongest feature.", "confidence": "high"},
+        "fr4": {"score": 5, "evidence": "Running and Archived are first-class destinations with room for successor and retention metadata.", "confidence": "high"},
+        "fr5": {"score": 4, "evidence": "It can reuse the existing rightSurface provider, but competes with board overview and inspector popouts.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The Dev icon opens a dedicated drawer; Help stays an adjacent separate trigger."},
+        "g2": {"pass": true, "evidence": "A persistent safety card labels Stable and independent-copy launch policy."},
+        "g3": {"pass": true, "evidence": "Tabs and lifecycle controls are application UI state only."}
+      },
+      "previewLabel": "interactive persistent Dev drawer",
+      "story": {
+        "title": "Launch with context, then inspect history",
+        "steps": [
+          {"label": "Work beside the canvas", "caption": "Launch targets and build facts remain visible while the canvas stays usable.", "state": "base", "target": "[data-demo-toggle]"},
+          {"label": "Open Archived", "caption": "The same persistent workspace becomes a lifecycle manager with replacement and retention details.", "state": "alt", "target": "[data-demo-toggle]"}
+        ]
+      },
+      "media": [
+        {"label": "Surface ownership", "caption": "Dev becomes another mutually exclusive right-side surface beside Board overview and Inspector.", "html": "<div class=\"dh-flow\"><span>Board overview</span><b>↔</b><span class=\"chosen\">Dev drawer</span><b>↔</b><span>Inspector</span></div>"}
+      ],
+      "preview": "<div class=\"dh-mock\"><div class=\"dh-top-left\"><b>☰</b><strong>Robot sorter</strong><span>Page 1⌄</span></div><div class=\"dh-canvas drawer-space\"><div class=\"dh-block\"><small>camera</small><b>Sort item</b><span>image → class</span></div></div><aside class=\"dh-drawer\"><header><div><small>SYSTEMSKETCH</small><h3>Dev workspace</h3></div><button>×</button></header><nav><span class=\"demo-base-only active\">Launch</span><span>Running</span><span class=\"demo-alt-only active\">Archived</span></nav><div class=\"demo-base-only\"><div class=\"dh-safety\"><b>Stable 0.1.0</b><span>Immutable · Robot sorter.tldr</span></div><article class=\"dh-big-row\"><small>LATEST PREVIEW</small><b>Live working tree</b><span>Full product · independent copy</span><button>Open ↗</button></article><article class=\"dh-row\"><i>B</i><span><b>Block Dev</b><small>Stock + Block · copy</small></span><em>↗</em></article><article class=\"dh-row\"><i>▦</i><span><b>Rows Lab</b><small>Stock + Block + Grid · copy</small></span><em>↗</em></article></div><div class=\"demo-alt-only\"><article class=\"dh-history\"><b>Block Dev</b><span>Archived today</span><small>Replaced by Rows Lab · remove after 0.2</small><button>Restore</button></article><article class=\"dh-history\"><b>Old toolbar lab</b><span>Archived 5d ago</span><small>No successor · safe to remove</small><button>Remove</button></article></div><button class=\"demo-button\" data-demo-toggle data-base-label=\"Show Archived\" data-alt-label=\"Back to Launch\">Show Archived</button></aside><div class=\"dh-toolstrip\"><span>⌖</span><span>−</span><b>100%</b><span>＋</span><span class=\"active\">&lt;/&gt;</span><span>?</span></div></div>"
+    },
+    {
+      "id": "v3",
+      "name": "Quick Switch Menu",
+      "thesis": "Optimize the Dev icon for the next launch: Latest Preview and recent presets first, with configuration pushed behind Manage.",
+      "accent": "#ad6d18",
+      "bestWhen": "You repeatedly bounce among two or three known contexts and almost never edit preset definitions from the launcher.",
+      "losesWhen": "You need to understand composition ingredients, build details, or retirement history before choosing.",
+      "decisions": [
+        {"label": "Placement", "value": "A very small menu opens directly above the </> icon and remembers the most recently used targets."},
+        {"label": "Hierarchy", "value": "Latest Preview is the default action; recent isolated presets follow; Manage is deliberately secondary."},
+        {"label": "After launch", "value": "A short confirmation state names the opened preset and independent copy, then the menu dismisses."}
+      ],
+      "keepParts": ["recent-target ordering", "single compact launch menu", "brief safety confirmation"],
+      "proof": [
+        "The menu fits within the current strip's visual scale and exposes the three likely launches with minimal text.",
+        "The direct Open action changes to a clear Block Dev launch confirmation using the same state as the guided story."
+      ],
+      "scores": {
+        "fr1": {"score": 5, "evidence": "One icon click and one row click launch the latest or recent isolated context with almost no scanning.", "confidence": "high"},
+        "fr2": {"score": 5, "evidence": "The transient menu is the smallest proposed surface and adds only one icon at rest.", "confidence": "high"},
+        "fr3": {"score": 4, "evidence": "Rows say copy and the confirmation is explicit, but composition/build detail is intentionally compressed.", "confidence": "high"},
+        "fr4": {"score": 2, "evidence": "Lifecycle work is delegated to Manage; archived history is not visible in the primary menu.", "confidence": "high"},
+        "fr5": {"score": 4, "evidence": "It easily fits the toolbar, though it introduces a second lighter menu style alongside the fuller Help panel.", "confidence": "medium"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The quick menu belongs only to the Dev icon; Help is unaffected."},
+        "g2": {"pass": true, "evidence": "Every development target includes the copy glyph and the confirmation states Stable stayed open."},
+        "g3": {"pass": true, "evidence": "Recent ordering and confirmation are launcher state."}
+      },
+      "previewLabel": "interactive quick-switch menu",
+      "story": {
+        "title": "Launch the recent isolated context",
+        "steps": [
+          {"label": "Choose from recent targets", "caption": "The surface assumes you already know Block Dev and Rows Lab, so it optimizes for recognition and speed.", "state": "base", "target": "[data-demo-toggle]"},
+          {"label": "Confirm the safe launch", "caption": "A brief confirmation names Block Dev, its composition, and the independent board copy before dismissing.", "state": "alt", "target": "[data-demo-toggle]"}
+        ]
+      },
+      "media": [
+        {"label": "Focus loop", "caption": "This direction aggressively optimizes the common transition and delegates administration.", "html": "<div class=\"dh-flow\"><span>Canvas</span><b>→</b><span class=\"chosen\">Dev icon</span><b>→</b><span>Known preset</span><b>→</b><span>Isolated copy</span></div>"}
+      ],
+      "preview": "<div class=\"dh-mock\"><div class=\"dh-top-left\"><b>☰</b><strong>Robot sorter</strong><span>Page 1⌄</span></div><div class=\"dh-canvas\"><div class=\"dh-block\"><small>camera</small><b>Sort item</b><span>image → class</span></div></div><section class=\"dh-quick\"><div class=\"demo-base-only\"><small>OPEN DEVELOPMENT VIEW</small><article class=\"primary\"><i>↯</i><span><b>Latest Preview</b><small>Full product · copy</small></span><kbd>↗</kbd></article><article><i>B</i><span><b>Block Dev</b><small>Recent · stock + Block · copy</small></span><kbd>↗</kbd></article><article><i>▦</i><span><b>Rows Lab</b><small>Stock + Block + Grid · copy</small></span><kbd>↗</kbd></article><footer><button>Manage presets…</button><span>⌘ ⇧ D</span></footer></div><div class=\"demo-alt-only dh-confirm\"><i>✓</i><b>Opening Block Dev</b><span>Independent copy of Robot sorter.tldr</span><small>Stable stays open and unchanged</small></div><button class=\"demo-button\" data-demo-toggle data-base-label=\"Open Block Dev\" data-alt-label=\"Back to menu\">Open Block Dev</button></section><div class=\"dh-toolstrip\"><span>⌖</span><span>−</span><b>100%</b><span>＋</span><span class=\"active\">&lt;/&gt;</span><span>?</span></div></div>"
+    },
+    {
+      "id": "v4",
+      "name": "Dev Command Palette",
+      "thesis": "Make the Dev icon open a centered, keyboard-first command surface that searches presets, build actions, and lifecycle operations together.",
+      "accent": "#8c4fb0",
+      "bestWhen": "The preset catalog grows large or agents and keyboard users need one reproducible command vocabulary.",
+      "losesWhen": "The catalog stays small and you want the available development contexts to teach themselves visually.",
+      "decisions": [
+        {"label": "Placement", "value": "The </> icon invokes a centered command palette; Cmd+Shift+D opens the same surface."},
+        {"label": "Hierarchy", "value": "Search spans Open, Manage, Archive, Publish, and Return actions rather than presenting a fixed shelf."},
+        {"label": "After launch", "value": "The selected result expands to show channel, composition, and copy policy before confirmation."}
+      ],
+      "keepParts": ["shared command vocabulary", "keyboard shortcut", "searchable launch and lifecycle actions"],
+      "proof": [
+        "The hero renders a credible command surface over the same SystemSketch canvas with grouped realistic results.",
+        "The direct Select action expands Block Dev into a safety-confirmation state driven by the guided story."
+      ],
+      "scores": {
+        "fr1": {"score": 4, "evidence": "Known targets are very fast by keyboard, but browsing requires search/result interpretation instead of recognition from a shelf.", "confidence": "high"},
+        "fr2": {"score": 5, "evidence": "Only the Dev icon persists; the modal command surface is completely transient.", "confidence": "high"},
+        "fr3": {"score": 4, "evidence": "The confirmation state is explicit, though the initial result list compresses important safety context.", "confidence": "high"},
+        "fr4": {"score": 3, "evidence": "Archive and restore commands are searchable, but lifecycle history is not spatially legible without a query.", "confidence": "high"},
+        "fr5": {"score": 4, "evidence": "It can reuse dialogs and typed actions but adds a global command-index layer beyond the current Help popover.", "confidence": "medium"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The palette is explicitly titled Dev commands and invoked from its own icon."},
+        "g2": {"pass": true, "evidence": "Opening a result reveals the independent-copy contract before confirmation."},
+        "g3": {"pass": true, "evidence": "Commands mutate launcher or manifest state only."}
+      },
+      "previewLabel": "interactive Dev command palette",
+      "story": {
+        "title": "Search, inspect, then launch",
+        "steps": [
+          {"label": "Search the command vocabulary", "caption": "A single query finds presets and related lifecycle actions without a separate settings hierarchy.", "state": "base", "target": "[data-demo-toggle]"},
+          {"label": "Inspect before opening", "caption": "The selected Block Dev command expands to show Live tree, stock + Block, and independent copy before launch.", "state": "alt", "target": "[data-demo-toggle]"}
+        ]
+      },
+      "media": [
+        {"label": "Shared protocol", "caption": "The same named commands can later back the UI, keyboard shortcuts, URLs, and agent tooling.", "html": "<div class=\"dh-flow\"><span>Icon</span><span>Keyboard</span><span>URL</span><span>Agent</span><b>→</b><span class=\"chosen\">dev.openPreset</span></div>"}
+      ],
+      "preview": "<div class=\"dh-mock\"><div class=\"dh-top-left\"><b>☰</b><strong>Robot sorter</strong><span>Page 1⌄</span></div><div class=\"dh-canvas blurred\"><div class=\"dh-block\"><small>camera</small><b>Sort item</b><span>image → class</span></div></div><section class=\"dh-command\"><header><span>⌕</span><input value=\"block dev\" readonly aria-label=\"Mock Dev command search\"><kbd>esc</kbd></header><div class=\"demo-base-only\"><small>OPEN PRESET</small><article class=\"selected\"><i>B</i><span><b>Open Block Dev</b><small>stock + Block · Live tree</small></span><kbd>↵</kbd></article><article><i>▦</i><span><b>Open Rows Lab</b><small>stock + Block + Grid</small></span></article><small>ACTIONS</small><article><i>⌁</i><span><b>Archive Block Dev…</b><small>Lifecycle · manifest</small></span></article></div><div class=\"demo-alt-only dh-command-detail\"><button>‹ Results</button><i>B</i><h3>Open Block Dev</h3><dl><div><dt>Build</dt><dd>Live working tree</dd></div><div><dt>Composition</dt><dd>Stock + Block</dd></div><div><dt>Document</dt><dd>Independent copy</dd></div></dl><strong>Open preset ↗</strong></div><button class=\"demo-button\" data-demo-toggle data-base-label=\"Select Block Dev\" data-alt-label=\"Back to results\">Select Block Dev</button></section><div class=\"dh-toolstrip\"><span>⌖</span><span>−</span><b>100%</b><span>＋</span><span class=\"active\">&lt;/&gt;</span><span>?</span></div></div>"
+    },
+    {
+      "id": "v5",
+      "name": "Expanding Dev Ribbon",
+      "thesis": "Let the Dev icon temporarily expand the utility strip itself into a horizontal context switcher for Stable, Latest, and pinned isolated presets.",
+      "accent": "#b14d63",
+      "bestWhen": "Context switching is extremely frequent and the current development context should remain one glance away from the canvas.",
+      "losesWhen": "The bottom-right corner must remain compact or preset lifecycle work matters more than rapid switching.",
+      "decisions": [
+        {"label": "Placement", "value": "The same </> icon expands leftward into pinned context chips without opening a separate panel."},
+        {"label": "Hierarchy", "value": "Stable, Latest, Block Dev, and Rows Lab behave like environment tabs; overflow opens full management."},
+        {"label": "After launch", "value": "The active context remains selected in the ribbon until it collapses or the user returns to Stable."}
+      ],
+      "keepParts": ["pinned frequent contexts", "active-context visibility", "fast Stable return"],
+      "proof": [
+        "The prototype demonstrates the exact strip expansion against the same bottom toolbar and canvas geometry.",
+        "The direct control uses one state machine to expand and collapse pinned development contexts."
+      ],
+      "scores": {
+        "fr1": {"score": 5, "evidence": "Pinned contexts become direct one-click targets immediately beside the current canvas controls.", "confidence": "high"},
+        "fr2": {"score": 2, "evidence": "The collapsed state is quiet, but the expanded ribbon is wide, visually dense, and can compete with the bottom toolbar.", "confidence": "high"},
+        "fr3": {"score": 4, "evidence": "Active context is continuously visible, though compact chips have little room for document-copy explanations.", "confidence": "high"},
+        "fr4": {"score": 4, "evidence": "Pinning keeps the ribbon curated and overflow reaches management, but archived history is off-surface.", "confidence": "medium"},
+        "fr5": {"score": 3, "evidence": "It modifies the geometry and responsive behavior of the existing utility strip rather than adding a sibling popover.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The expansion originates only from the dedicated Dev icon beside Help."},
+        "g2": {"pass": true, "evidence": "Stable is a fixed chip and every development chip carries a copy marker in its tooltip/label."},
+        "g3": {"pass": true, "evidence": "Pin and selected-context state remain application metadata."}
+      },
+      "previewLabel": "interactive expanding Dev ribbon",
+      "story": {
+        "title": "Expand the strip into contexts",
+        "steps": [
+          {"label": "Keep the canvas ordinary", "caption": "At rest, the only addition is the Dev icon immediately before Help.", "state": "base", "target": "[data-demo-toggle]"},
+          {"label": "Reveal pinned contexts", "caption": "The strip expands leftward into Stable, Latest, Block Dev, and Rows Lab for rapid environment switching.", "state": "alt", "target": "[data-demo-toggle]"}
+        ]
+      },
+      "media": [
+        {"label": "Responsive cost", "caption": "The ribbon is compelling at wide viewports but must collapse back to a popover on narrow screens.", "html": "<div class=\"dh-width\"><span>Bottom toolbar</span><i></i><span class=\"warn\">expanded Dev ribbon</span><small>collision budget</small></div>"}
+      ],
+      "preview": "<div class=\"dh-mock\"><div class=\"dh-top-left\"><b>☰</b><strong>Robot sorter</strong><span>Page 1⌄</span></div><div class=\"dh-canvas\"><div class=\"dh-block\"><small>camera</small><b>Sort item</b><span>image → class</span></div></div><div class=\"dh-bottom-tools\"><b>↖</b><span>□</span><span>↝</span><span>✎</span><span>T</span><span>＋</span></div><div class=\"dh-ribbon demo-alt-only\"><button class=\"safe\">● Stable</button><button>↯ Latest ↗</button><button class=\"active\">B Block Dev ↗</button><button>▦ Rows ↗</button><button>•••</button></div><div class=\"dh-toolstrip ribbon-base\"><span>⌖</span><span>−</span><b>100%</b><span>＋</span><span class=\"active\">&lt;/&gt;</span><span>?</span></div><button class=\"demo-button dh-ribbon-toggle\" data-demo-toggle data-base-label=\"Expand Dev ribbon\" data-alt-label=\"Collapse Dev ribbon\">Expand Dev ribbon</button></div>"
+    }
+  ]
+}

@@ -1,0 +1,468 @@
+#!/usr/bin/env python3
+"""Build the SystemSketch interface-scale babble/prune gallery."""
+
+from __future__ import annotations
+
+import json
+import subprocess
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+SPEC_PATH = ROOT / "docs/ui-scale-proposals-2026-08-31.json"
+OUTPUT_PATH = ROOT / "docs/ui-scale-proposals-2026-08-31.html"
+TEMP_OUTPUT_PATH = ROOT / "docs/.ui-scale-proposals-2026-08-31.tmp.html"
+GALLERY = Path("/home/bam/.agents/skills/babble/scripts/gallery.py")
+
+
+SHARED_STYLE = r"""
+<style>
+  .ss-stage, .ss-stage * { box-sizing: border-box; }
+  .ss-stage {
+    --ink:#282b31; --muted:#7c828c; --line:#e5e7ea; --panel:#fff; --accent:#7657ef;
+    position:relative; width:100%; min-height:460px; overflow:hidden; border-radius:17px;
+    color:var(--ink); background:#f8f9fb; font:600 12px/1.25 Inter,ui-sans-serif,system-ui,sans-serif;
+    box-shadow:inset 0 0 0 1px rgba(20,25,35,.09);
+  }
+  .ss-canvas { position:absolute; inset:0; background-color:#f9fafb; background-image:radial-gradient(#d9dce2 1px,transparent 1px); background-size:20px 20px; }
+  .ss-wire { position:absolute; height:3px; border-radius:99px; background:#8c929c; transform-origin:left center; }
+  .ss-wire.one { left:31%; top:44%; width:21%; transform:rotate(9deg); }
+  .ss-wire.two { left:51%; top:51%; width:16%; transform:rotate(-24deg); }
+  .ss-block { position:absolute; display:grid; place-items:center; width:128px; height:82px; border:2px solid #6b7787; border-radius:13px; color:#39414c; background:#fff; box-shadow:0 7px 20px rgba(30,40,55,.08); font-weight:800; }
+  .ss-block::before { content:""; position:absolute; left:-6px; top:35px; width:10px; height:10px; border:2px solid #7657ef; border-radius:50%; background:#fff; }
+  .ss-block.a { left:22%; top:34%; } .ss-block.b { right:22%; top:51%; }
+  .ss-caption { position:absolute; left:50%; top:16px; padding:6px 10px; border:1px solid #dfe2e7; border-radius:8px; color:#767d87; background:rgba(255,255,255,.88); transform:translateX(-50%); font-size:10px; }
+  .ss-ui { position:absolute; z-index:3; transition:transform 160ms ease,font-size 160ms ease; }
+  .ss-top-left,.ss-top-right,.ss-toolbar,.ss-utility { display:flex; align-items:center; border:1px solid rgba(20,25,35,.11); background:rgba(255,255,255,.97); box-shadow:0 8px 25px rgba(30,40,55,.12); }
+  .ss-top-left { left:14px; top:14px; height:43px; border-radius:14px; transform-origin:top left; }
+  .ss-top-right { right:14px; top:14px; height:43px; border-radius:14px; transform-origin:top right; }
+  .ss-toolbar { left:50%; bottom:13px; height:45px; border-radius:13px; transform:translateX(-50%); transform-origin:bottom center; }
+  .ss-utility { right:13px; bottom:13px; height:43px; border-radius:11px; transform-origin:bottom right; }
+  .ss-chrome-btn { display:grid; min-width:42px; height:40px; place-items:center; padding:0 11px; border:0; border-right:1px solid #eceef1; color:#353940; background:transparent; cursor:pointer; font:inherit; font-weight:750; }
+  .ss-chrome-btn:first-child { border-radius:12px 0 0 12px; } .ss-chrome-btn:last-child { border-right:0; border-radius:0 12px 12px 0; }
+  .ss-chrome-btn:hover,.ss-chrome-btn:focus-visible { background:#eef0f3; outline:none; }
+  .ss-title { min-width:88px; } .ss-dot { width:7px; height:7px; margin-left:6px; border-radius:50%; background:#2fbd7f; }
+  .ss-avatar { min-width:32px; width:32px; height:32px; margin:0 5px; border:0; border-radius:50%; color:#fff; background:#c75d3b; cursor:pointer; font-size:10px; font-weight:900; }
+  .ss-share { height:34px; margin-right:4px; padding:0 12px; border:0; border-radius:9px; color:#fff; background:#7955e8; cursor:pointer; font-size:10px; font-weight:850; }
+  .ss-tool { display:grid; width:42px; height:40px; place-items:center; border:0; border-right:1px solid #eceef1; background:transparent; cursor:pointer; }
+  .ss-tool.active { margin:3px; height:35px; border:0; border-radius:8px; color:#fff; background:#438de7; }
+  .ss-canvas-zoom { min-width:58px; font-weight:850; }
+  .ss-layer { position:absolute; z-index:7; display:none; }
+  .ss-pop { padding:7px; border:1px solid rgba(20,25,35,.12); border-radius:12px; background:#fff; box-shadow:0 18px 45px rgba(25,31,42,.2); }
+  .ss-menu { left:14px; top:64px; width:214px; }
+  .ss-menu-row { display:flex; min-height:36px; align-items:center; justify-content:space-between; gap:10px; padding:0 10px; border:0; border-radius:8px; color:#34383f; background:transparent; font:inherit; text-align:left; }
+  button.ss-menu-row { width:100%; cursor:pointer; } button.ss-menu-row:hover,.ss-menu-row.hot { background:#f0f1f3; }
+  .ss-menu-row i { width:22px; color:#757c86; font-style:normal; text-align:center; }
+  .ss-menu-row span { flex:1; } .ss-menu-row kbd { color:#989da5; font:700 9px ui-monospace,monospace; }
+  .ss-sep { height:1px; margin:6px -7px; background:#eceef1; }
+  .ss-scrim { position:absolute; z-index:6; inset:0; display:none; background:rgba(24,28,35,.56); backdrop-filter:blur(1px); }
+  .ss-dialog { left:50%; top:50%; width:min(610px,calc(100% - 40px)); height:330px; padding:0; overflow:hidden; border-radius:17px; transform:translate(-50%,-50%); }
+  .ss-dialog-head { display:flex; height:52px; align-items:center; justify-content:space-between; padding:0 16px; border-bottom:1px solid var(--line); font-size:15px; font-weight:850; }
+  .ss-close { display:grid; width:30px; height:30px; place-items:center; border:0; border-radius:8px; background:#f1f2f4; cursor:pointer; }
+  .ss-settings-grid { display:grid; grid-template-columns:170px 1fr; height:278px; }
+  .ss-settings-nav { padding:12px; border-right:1px solid var(--line); background:#fafafa; }
+  .ss-nav-row { display:flex; height:39px; align-items:center; gap:10px; padding:0 10px; border-radius:9px; color:#616872; }
+  .ss-nav-row.active { color:#3f2e83; background:#eee9ff; font-weight:850; }
+  .ss-nav-icon { display:grid; width:24px; place-items:center; font-size:16px; }
+  .ss-settings-body { padding:22px 24px; overflow:auto; }
+  .ss-settings-body h3 { margin:0; font-size:17px; } .ss-settings-body>p { margin:5px 0 18px; color:#7b828c; font-size:10px; }
+  .ss-setting-card { padding:16px; border:1px solid #e5e7eb; border-radius:13px; background:#fbfbfc; }
+  .ss-setting-title { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+  .ss-setting-title strong { display:block; font-size:12px; } .ss-setting-title small { display:block; margin-top:4px; color:#7f858e; font-weight:600; }
+  .ss-current { color:#5e42d2; font-size:15px; font-weight:900; }
+  .ss-scale-line { display:flex; align-items:center; gap:8px; margin-top:15px; }
+  .ss-reset { border:0; color:#676e78; background:transparent; cursor:pointer; font-size:16px; }
+  .ss-track { position:relative; height:5px; flex:1; border-radius:99px; background:#dedfe4; }
+  .ss-fill { position:absolute; inset:0 auto 0 0; width:50%; border-radius:inherit; background:#7657ef; }
+  .ss-thumb { position:absolute; left:50%; top:50%; width:17px; height:17px; border:2px solid #fff; border-radius:50%; background:#7657ef; box-shadow:0 1px 5px rgba(0,0,0,.25); transform:translate(-50%,-50%); }
+  .ss-presets { display:flex; gap:6px; margin-top:14px; }
+  .ss-preset { flex:1; min-height:30px; border:1px solid #dfe1e5; border-radius:8px; color:#4a5059; background:#fff; cursor:pointer; font-size:9px; font-weight:800; }
+  .ss-preset:hover,.ss-preset.selected { border-color:#7657ef; color:#5e42d2; background:#f1edff; }
+  .ss-note { display:flex; align-items:center; gap:6px; margin-top:13px; color:#6f7680; font-size:9px; }
+  .ss-note b { color:#28a36e; }
+  .ss-toast { left:50%; top:70px; min-width:270px; padding:13px 14px; border-radius:12px; transform:translateX(-50%); }
+  .ss-toast strong { display:block; } .ss-toast span { display:block; margin-top:4px; color:#777e88; font-size:10px; }
+  .ss-toast-actions { display:flex; gap:7px; margin-top:11px; }
+  .ss-action { min-height:31px; padding:0 11px; border:1px solid #dcdee3; border-radius:8px; background:#fff; cursor:pointer; font-size:9px; font-weight:850; }
+  .ss-action.primary { border-color:#7657ef; color:#fff; background:#7657ef; }
+  .ss-command { left:50%; top:78px; width:min(430px,calc(100% - 36px)); transform:translateX(-50%); }
+  .ss-command-search { display:flex; height:43px; align-items:center; gap:9px; padding:0 12px; border:2px solid #7657ef; border-radius:9px; color:#7a818a; font-size:12px; }
+  .ss-command-query { color:#292d33; }
+  .ss-command-results { margin-top:7px; }
+  .ss-command-result { display:flex; min-height:41px; align-items:center; gap:10px; padding:0 10px; border-radius:8px; }
+  .ss-command-result.hot { color:#38266f; background:#eee9ff; }
+  .ss-command-result b { display:block; } .ss-command-result small { display:block; color:#858b94; font-size:8px; }
+  .ss-inline-scale { left:236px; top:202px; width:248px; }
+  .ss-inline-scale h4,.ss-utility-pop h4,.ss-profile-panel h4 { margin:3px 4px 8px; font-size:11px; }
+  .ss-stepper { display:grid; grid-template-columns:38px 1fr 38px; align-items:center; overflow:hidden; border:1px solid #dfe1e5; border-radius:9px; }
+  .ss-stepper button { height:36px; border:0; background:#f4f5f7; cursor:pointer; font-size:16px; }
+  .ss-stepper strong { text-align:center; }
+  .ss-utility-pop { right:13px; bottom:64px; width:260px; }
+  .ss-compare-zoom { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .ss-zoom-card { padding:11px; border:1px solid #e4e6ea; border-radius:10px; background:#fafafa; }
+  .ss-zoom-card span { display:block; color:#7f858e; font-size:9px; } .ss-zoom-card strong { display:block; margin-top:4px; font-size:16px; }
+  .ss-profile-panel { right:14px; top:64px; width:292px; }
+  .ss-profile { display:grid; grid-template-columns:38px 1fr auto; align-items:center; gap:8px; min-height:49px; padding:6px 8px; border:1px solid transparent; border-radius:9px; cursor:pointer; }
+  .ss-profile:hover,.ss-profile.selected { border-color:#cfc5ff; background:#f1edff; }
+  .ss-profile-icon { display:grid; width:34px; height:34px; place-items:center; border-radius:9px; background:#eceef2; font-size:16px; }
+  .ss-profile small { display:block; color:#7f858e; font-size:8px; }
+  .ss-auto-banner { left:50%; top:70px; width:360px; transform:translateX(-50%); }
+  .ss-auto-banner .ss-toast-actions { justify-content:flex-end; }
+  .ss-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 7px; border-radius:99px; color:#236a4b; background:#e5f7ee; font-size:8px; font-weight:900; }
+  .ss-proof { display:flex; min-height:126px; align-items:center; justify-content:center; gap:9px; padding:18px; border-radius:14px; color:#373b43; background:linear-gradient(135deg,#fafafa,#f0f1f4); }
+  .ss-proof-step { min-width:84px; padding:12px 10px; border:1px solid #dfe2e7; border-radius:10px; background:#fff; text-align:center; }
+  .ss-proof-step b { display:block; font-size:16px; } .ss-proof-step span { display:block; margin-top:5px; color:#7c838d; font-size:8px; }
+  .ss-proof-arrow { color:#a1a6ae; font-size:17px; }
+  .ss-state-label { position:absolute; left:14px; bottom:14px; z-index:2; padding:5px 8px; border-radius:7px; color:#6e747d; background:rgba(255,255,255,.88); font-size:8px; }
+  .prototype[data-story-state="scaled"] .ss-top-left,.prototype[data-story-state="persisted"] .ss-top-left { transform:scale(1.18); }
+  .prototype[data-story-state="scaled"] .ss-top-right,.prototype[data-story-state="persisted"] .ss-top-right { transform:scale(1.18); }
+  .prototype[data-story-state="scaled"] .ss-toolbar,.prototype[data-story-state="persisted"] .ss-toolbar { transform:translateX(-50%) scale(1.18); }
+  .prototype[data-story-state="scaled"] .ss-utility,.prototype[data-story-state="persisted"] .ss-utility { transform:scale(1.18); }
+  .prototype[data-story-state="menu"] [data-show="menu"],
+  .prototype[data-story-state="submenu"] [data-show="menu"],
+  .prototype[data-story-state="submenu"] [data-show="submenu"],
+  .prototype[data-story-state="settings"] [data-show="settings"],
+  .prototype[data-story-state="settings"] [data-show="scrim"],
+  .prototype[data-story-state="scaled"] [data-show="settings"],
+  .prototype[data-story-state="scaled"] [data-show="scrim"],
+  .prototype[data-story-state="palette"] [data-show="palette"],
+  .prototype[data-story-state="results"] [data-show="palette"],
+  .prototype[data-story-state="results"] [data-show="results"],
+  .prototype[data-story-state="utility"] [data-show="utility"],
+  .prototype[data-story-state="profile"] [data-show="profile"],
+  .prototype[data-story-state="override"] [data-show="profile"],
+  .prototype[data-story-state="base"] [data-show="auto"],
+  .prototype[data-story-state="base"] [data-show="base"],
+  .prototype[data-story-state="scaled"] [data-show="auto-note"],
+  .prototype[data-story-state="override"] [data-show="auto-note"] { display:block; }
+  .prototype[data-story-state="scaled"] [data-when="scaled"], .prototype[data-story-state="persisted"] [data-when="scaled"] { display:inline; }
+  .prototype[data-story-state="scaled"] [data-when="base"], .prototype[data-story-state="persisted"] [data-when="base"] { display:none; }
+  [data-when="scaled"] { display:none; }
+  [data-show="results"] { display:none; }
+  @media (max-width:760px) { .ss-stage{min-height:410px}.ss-dialog{height:310px}.ss-settings-grid{grid-template-columns:125px 1fr;height:258px}.ss-settings-body{padding:16px}.ss-top-right{display:none}.ss-inline-scale{left:auto;right:12px}.ss-proof{flex-wrap:wrap}.ss-proof-arrow{display:none} }
+</style>
+"""
+
+
+def scene(
+    extra: str = "",
+    state_label: str = "Canvas content remains 100%",
+    *,
+    menu_action: bool = False,
+    profile_action: bool = False,
+) -> str:
+    menu_control = (
+        '<button class="ss-chrome-btn story-target" data-story-to="menu" aria-label="Open main menu">☰</button>'
+        if menu_action else '<div class="ss-chrome-btn" aria-hidden="true">☰</div>'
+    )
+    profile_control = (
+        '<button class="ss-avatar story-target" data-story-to="profile" aria-label="Open display profile">Z</button>'
+        if profile_action else '<div class="ss-avatar" aria-hidden="true">Z</div>'
+    )
+    return f"""
+    <div class="ss-stage">
+      <div class="ss-canvas"><div class="ss-caption">SystemSketch · high-DPI display</div><div class="ss-wire one"></div><div class="ss-wire two"></div><div class="ss-block a">Capture</div><div class="ss-block b">Classify</div></div>
+      <div class="ss-ui ss-top-left">{menu_control}<div class="ss-chrome-btn ss-title">Untitled <i class="ss-dot"></i></div><div class="ss-chrome-btn">Page 1⌄</div><div class="ss-chrome-btn">▦</div></div>
+      <div class="ss-ui ss-top-right">{profile_control}<div class="ss-chrome-btn">▣</div><div class="ss-chrome-btn">◉ 03:00</div><div class="ss-share">Share</div></div>
+      <div class="ss-ui ss-toolbar"><div class="ss-tool active">↖</div><div class="ss-tool">✋</div><div class="ss-tool">╱</div><div class="ss-tool">◇</div><div class="ss-tool">↗</div><div class="ss-tool">⌃</div></div>
+      <div class="ss-ui ss-utility"><div class="ss-chrome-btn">▧</div><div class="ss-chrome-btn">−</div><div class="ss-chrome-btn ss-canvas-zoom">100%</div><div class="ss-chrome-btn">＋</div><div class="ss-chrome-btn">?</div></div>
+      <span class="ss-state-label">{state_label}</span>
+      {extra}
+    </div>"""
+
+
+def proof(*steps: tuple[str, str]) -> str:
+    parts: list[str] = []
+    for index, (icon, label) in enumerate(steps):
+        if index:
+            parts.append('<span class="ss-proof-arrow">→</span>')
+        parts.append(f'<div class="ss-proof-step"><b>{icon}</b><span>{label}</span></div>')
+    return '<div class="ss-proof">' + ''.join(parts) + '</div>'
+
+
+main_menu = r"""
+<div class="ss-layer ss-pop ss-menu" data-show="menu">
+  <div class="ss-menu-row"><i>▱</i><span>File</span><b>›</b></div><div class="ss-menu-row"><i>✎</i><span>Edit</span><b>›</b></div><div class="ss-menu-row"><i>⌗</i><span>View</span><b>›</b></div><div class="ss-sep"></div>
+  <button class="ss-menu-row hot story-target" data-story-to="settings"><i>⚙</i><span>Settings</span><b>↗</b></button>
+  <div class="ss-menu-row"><i>⌨</i><span>Keyboard shortcuts</span></div><div class="ss-menu-row"><i>?</i><span>Help</span><b>›</b></div>
+</div>
+"""
+
+
+settings_dialog = r"""
+<div class="ss-scrim" data-show="scrim"></div>
+<section class="ss-layer ss-pop ss-dialog" data-show="settings" aria-label="Interface settings">
+  <header class="ss-dialog-head"><span>Settings</span><button class="ss-close" data-story-to="persisted" aria-label="Close settings">×</button></header>
+  <div class="ss-settings-grid">
+    <nav class="ss-settings-nav"><div class="ss-nav-row"><i class="ss-nav-icon">⚙</i>General</div><div class="ss-nav-row"><i class="ss-nav-icon">◐</i>Appearance</div><div class="ss-nav-row active"><i class="ss-nav-icon">▣</i>Interface</div><div class="ss-nav-row"><i class="ss-nav-icon">⌨</i>Shortcuts</div><div class="ss-nav-row"><i class="ss-nav-icon">?</i>About</div></nav>
+    <div class="ss-settings-body"><h3>Interface</h3><p>Adjust SystemSketch controls without changing the board.</p><div class="ss-setting-card"><div class="ss-setting-title"><div><strong>Interface scale</strong><small>Canvas zoom remains independent at 100%.</small></div><span class="ss-current"><span data-when="base">100%</span><span data-when="scaled">125%</span></span></div><div class="ss-scale-line"><button class="ss-reset" data-story-to="settings" aria-label="Reset interface scale">↶</button><div class="ss-track"><i class="ss-fill"></i><i class="ss-thumb"></i></div></div><div class="ss-presets"><button class="ss-preset" data-story-to="settings">90%</button><button class="ss-preset" data-story-to="settings">100%</button><button class="ss-preset" data-story-to="settings">110%</button><button class="ss-preset selected story-target" data-story-to="scaled">125%</button><button class="ss-preset" data-story-to="scaled">150%</button></div><div class="ss-note"><b>●</b> Saved on this computer and applied immediately.</div></div></div>
+  </div>
+</section>
+"""
+
+
+v1_preview = SHARED_STYLE + scene(main_menu + settings_dialog, menu_action=True)
+
+
+v2_extra = r"""
+<div class="ss-layer ss-pop ss-menu" data-show="menu">
+  <div class="ss-menu-row"><i>▱</i><span>File</span><b>›</b></div><div class="ss-menu-row"><i>✎</i><span>Edit</span><b>›</b></div><div class="ss-menu-row"><i>⌗</i><span>View</span><b>›</b></div><div class="ss-sep"></div>
+  <button class="ss-menu-row hot story-target" data-story-to="submenu"><i>⚙</i><span>Preferences</span><b>›</b></button><div class="ss-menu-row"><i>?</i><span>Help</span><b>›</b></div>
+</div>
+<section class="ss-layer ss-pop ss-inline-scale" data-show="submenu" aria-label="Interface scale submenu">
+  <h4>Interface size</h4><div class="ss-menu-row"><i>▣</i><span>Canvas zoom</span><b>100%</b></div><div class="ss-sep"></div>
+  <div class="ss-setting-title"><div><strong>UI scale</strong><small>Remember on this computer</small></div></div>
+  <div class="ss-stepper"><button data-story-to="submenu" aria-label="Make interface smaller">−</button><strong><span data-when="base">100%</span><span data-when="scaled">125%</span></strong><button class="story-target" data-story-to="scaled" aria-label="Make interface larger">＋</button></div>
+  <button class="ss-menu-row" data-story-to="submenu"><i>↶</i><span>Reset to 100%</span></button>
+</section>
+"""
+
+
+v3_extra = r"""
+<section class="ss-layer ss-pop ss-utility-pop" data-show="utility" aria-label="Canvas and interface zoom">
+  <h4>Zoom</h4><div class="ss-compare-zoom"><div class="ss-zoom-card"><span>Canvas</span><strong>100%</strong></div><div class="ss-zoom-card"><span>Interface</span><strong><span data-when="base">100%</span><span data-when="scaled">125%</span></strong></div></div>
+  <div class="ss-presets"><button class="ss-preset" data-story-to="utility">100%</button><button class="ss-preset selected story-target" data-story-to="scaled">125%</button><button class="ss-preset" data-story-to="scaled">150%</button></div><div class="ss-note"><b>●</b> Interface choice is remembered; canvas zoom stays per board.</div>
+</section>
+<button class="ss-layer ss-action primary" style="right:13px;bottom:64px" data-show="base" data-story-to="utility">UI size</button>
+"""
+
+
+v4_extra = r"""
+<section class="ss-layer ss-pop ss-command" data-show="palette" aria-label="Command palette">
+  <div class="ss-command-search"><span>⌕</span><span class="ss-command-query">interface scale</span><kbd style="margin-left:auto">Esc</kbd></div>
+  <div class="ss-command-results"><button class="ss-menu-row ss-command-result hot story-target" data-story-to="results"><i>▣</i><span><b>Set interface scale…</b><small>Display &amp; accessibility</small></span><kbd>Enter</kbd></button><div data-show="results"><div class="ss-sep"></div><div class="ss-presets"><button class="ss-preset" data-story-to="results">100%</button><button class="ss-preset selected story-target" data-story-to="scaled">125%</button><button class="ss-preset" data-story-to="scaled">150%</button></div></div></div>
+</section>
+<button class="ss-layer ss-action primary" style="left:50%;top:70px;transform:translateX(-50%)" data-show="base" data-story-to="palette">Open command palette · Ctrl K</button>
+<div class="ss-layer ss-pop ss-toast" data-show="auto-note"><strong>Interface scale set to 125%</strong><span>Saved on this computer · Canvas remains 100%</span></div>
+"""
+
+
+v5_extra = r"""
+<section class="ss-layer ss-pop ss-auto-banner" data-show="auto" aria-label="High density display recommendation"><span class="ss-badge">▣ HIGH-DPI DISPLAY</span><strong style="display:block;margin-top:9px">Make SystemSketch easier to read?</strong><span>125% enlarges controls and panels, not the board.</span><div class="ss-toast-actions"><button class="ss-action" data-story-to="override">Choose…</button><button class="ss-action primary story-target" data-story-to="scaled">Use 125%</button></div></section>
+<section class="ss-layer ss-pop ss-profile-panel" data-show="profile" aria-label="Display profiles"><h4>Display &amp; accessibility</h4><button class="ss-profile" data-story-to="override"><i class="ss-profile-icon">▦</i><span><b>Compact</b><small>90% · more canvas room</small></span></button><button class="ss-profile selected story-target" data-story-to="scaled"><i class="ss-profile-icon">▣</i><span><b>Comfortable</b><small>125% · recommended here</small></span><b>✓</b></button><button class="ss-profile" data-story-to="scaled"><i class="ss-profile-icon">▰</i><span><b>Large</b><small>150% · maximum readability</small></span></button><div class="ss-sep"></div><button class="ss-menu-row" data-story-to="profile"><i>↶</i><span>Reset automatic choice</span></button></section>
+<div class="ss-layer ss-pop ss-toast" data-show="auto-note"><strong>Comfortable profile applied</strong><span>125% · remembered for this display</span></div>
+"""
+
+
+requirements = [
+    {
+        "id": "fr1", "name": "Readable on high-DPI displays", "weight": 30,
+        "why": "The actual failure is physical: the current toolbar and other chrome are too small to scan and hit comfortably on Zach's high-resolution computer.",
+        "passCondition": "A user can move from 100% to a comfortably larger chrome size and immediately see controls, labels, and hit targets enlarge while sketch content stays stable.",
+        "anchors": {"1": "Does not materially improve chrome readability or only changes isolated controls.", "3": "Offers a useful larger size, but feedback or coverage across chrome is incomplete.", "5": "Clearly enlarges all application chrome with immediate, legible feedback across the representative screen."},
+    },
+    {
+        "id": "fr2", "name": "Separate UI scale from canvas zoom", "weight": 22,
+        "why": "SystemSketch already has board zoom at bottom right. Interface scaling must not change document geometry, camera state, exports, or the meaning of the existing 100% control.",
+        "passCondition": "The prototype visibly identifies which value affects the interface and proves the canvas remains at 100% with unchanged Block geometry.",
+        "anchors": {"1": "Conflates canvas zoom and chrome scaling or makes the boundary easy to misread.", "3": "The concepts are technically separate but the UI requires interpretation.", "5": "The surface makes the two scopes unmistakable before and after adjustment."},
+    },
+    {
+        "id": "fr3", "name": "Easy to find and adjust", "weight": 18,
+        "why": "A persistent setting is only useful if Zach can rediscover it months later without remembering a shortcut or product-specific term.",
+        "passCondition": "Starting from the ordinary canvas, the setting is reachable through a recognizable entry point and can be changed in a few obvious actions.",
+        "anchors": {"1": "Requires remembered syntax, an obscure gesture, or unrelated navigation.", "3": "Reachable with a plausible path but the entry label or extra step is not self-evident.", "5": "A first-time user is strongly cued to the control and can adjust it with minimal navigation."},
+    },
+    {
+        "id": "fr4", "name": "Persistent and safely reversible", "weight": 18,
+        "why": "The requested benefit disappears if the scale must be restored every launch; an oversized or mistaken value must also be easy to undo.",
+        "passCondition": "The concept says where the choice persists, previews changes immediately, constrains the range, and offers a visible reset to 100%.",
+        "anchors": {"1": "Session-only, ambiguous persistence, or no credible recovery path.", "3": "Persists and can be changed back, but reset/range feedback is indirect.", "5": "Immediate preview, local persistence, a safe range, and one-step reset are all explicit."},
+    },
+    {
+        "id": "fr5", "name": "Fit the existing SystemSketch shell", "weight": 12,
+        "why": "The product already owns a tldraw MainMenu override, centered dialogs, persistent top capsules, bottom-right zoom, and a small local preference boundary. The next change should reuse those seams.",
+        "passCondition": "The direction can be implemented through existing public tldraw/SystemSketch seams without a second chrome system or invasive canvas changes.",
+        "anchors": {"1": "Requires a parallel settings architecture or invasive renderer/browser behavior.", "3": "Feasible but introduces a notable new surface or state model.", "5": "Maps directly onto existing menu, dialog, CSS-token, and local-preference seams."},
+    },
+]
+
+
+gates = [
+    {"id": "g1", "name": "Canvas invariant", "why": "Interface scale must not alter tldraw camera zoom, document coordinates, export size, or stored `.tldr` content."},
+    {"id": "g2", "name": "App-local persistence", "why": "The choice must survive relaunch on this computer without travelling inside the board file."},
+    {"id": "g3", "name": "Safe recovery", "why": "Every direction must expose a bounded 80–160% choice and a way back to 100%."},
+]
+
+
+variants = [
+    {
+        "id": "v1", "name": "Settings Hub", "accent": "#7657ef",
+        "thesis": "Put a durable, gear-led Settings destination in the existing main menu and let its centered, dimmed Interface panel preview scale live.",
+        "bestWhen": "SystemSketch expects more durable preferences soon and recognizability matters more than shaving one click.",
+        "losesWhen": "Interface scale is likely to remain the only setting and a full hub would be permanent scaffolding for one row.",
+        "decisions": [
+            {"label": "Entry point", "value": "Main menu → ⚙ Settings opens a real settings destination rather than hiding under File operations."},
+            {"label": "Control", "value": "A bounded continuous scale with 90/100/125/150% presets, immediate preview, and reset."},
+            {"label": "Information architecture", "value": "Icon-led left rail makes future Appearance, Shortcuts, and About sections predictable."},
+        ],
+        "keepParts": ["gear-led Settings menu item", "icon-led settings rail", "live preset slider", "explicit canvas-zoom boundary"],
+        "proof": ["The direct menu, Interface row, 125% preset, reset, and close controls drive one shared story state.", "The chrome enlarges while the two Blocks and the bottom-right canvas value remain at 100%."],
+        "scores": {
+            "fr1": {"score": 5, "evidence": "The 125% state enlarges the top capsules, toolbar, bottom utility strip, and dialog controls together while the board objects remain fixed.", "confidence": "high"},
+            "fr2": {"score": 5, "evidence": "The setting says 'Canvas zoom remains independent at 100%' beside the control, and the board specimen does not move.", "confidence": "high"},
+            "fr3": {"score": 4, "evidence": "A plainly labeled Settings item with a gear icon sits in the ordinary main menu, but reaching the scale still takes the menu plus centered window.", "confidence": "high"},
+            "fr4": {"score": 5, "evidence": "The prototype exposes presets, live feedback, a reset icon, the 100% baseline, and a 'Saved on this computer' status.", "confidence": "high"},
+            "fr5": {"score": 5, "evidence": "The current code already owns SystemSketchMainMenu and dialog/chrome hosts; this adds a local preference and CSS scale token without touching tldraw records.", "confidence": "high"},
+        },
+        "gateResults": {"g1": {"pass": True, "evidence": "Only rendered chrome changes size; the Blocks, wires, and canvas 100% label stay fixed."}, "g2": {"pass": True, "evidence": "The UI explicitly stores the choice on this computer, outside the board."}, "g3": {"pass": True, "evidence": "Bounded presets and the reset control provide a visible 100% recovery path."}},
+        "previewLabel": "main menu → centered settings",
+        "story": {"title": "Open Settings and make the chrome comfortable", "steps": [
+            {"label": "Start on the canvas", "caption": "The ordinary SystemSketch shell begins with canvas zoom at 100%.", "state": "base", "target": "[data-story-to='menu']"},
+            {"label": "Open the main menu", "caption": "Settings is a first-class, gear-cued destination beside the existing File and View groups.", "state": "menu", "target": "[data-story-to='settings']"},
+            {"label": "Inspect the boundary", "caption": "A centered settings window dims the board and explains that interface scale does not change canvas zoom.", "state": "settings", "target": "[data-story-to='scaled']"},
+            {"label": "Preview 125%", "caption": "All application chrome grows immediately; the Blocks and 100% canvas value do not move.", "state": "scaled", "target": "[data-story-to='persisted']"},
+            {"label": "Close and keep it", "caption": "The comfortable chrome remains after closing because the preference is local to this computer.", "state": "persisted", "target": "[data-story-to='menu']"},
+        ]},
+        "preview": v1_preview,
+        "media": [{"label": "Durable path", "caption": "A familiar destination, live proof, and an explicit local-save boundary make the setting recoverable later.", "html": proof(("☰", "Main menu"), ("▣", "Interface"), ("125%", "Live preview"), ("●", "Remember locally"))}],
+    },
+    {
+        "id": "v2", "name": "Inline Preferences", "accent": "#3b7f73",
+        "thesis": "Keep the entire job inside a cascading Preferences submenu so interface scale is one fast, lightweight adjustment rather than a destination.",
+        "bestWhen": "The product will have only a handful of stable preferences and speed from menu to adjustment matters most.",
+        "losesWhen": "Settings grow, need explanatory copy, or should be browsable by category and icon.",
+        "decisions": [{"label": "Entry point", "value": "Main menu → Preferences keeps the setting near tldraw's existing preferences."}, {"label": "Control", "value": "A compact minus/value/plus stepper trades precision for speed."}, {"label": "Container", "value": "A nested popover preserves canvas context and never creates a modal task."}],
+        "keepParts": ["Preferences submenu", "compact stepper", "local-save microcopy"],
+        "proof": ["The menu and submenu are directly clickable and the plus control changes the same prototype to the enlarged state.", "Canvas zoom and interface size appear as separate rows before the adjustment."],
+        "scores": {
+            "fr1": {"score": 4, "evidence": "The stepper reaches a larger all-chrome state, but the small menu affords less room to explain or compare comfortable presets.", "confidence": "high"},
+            "fr2": {"score": 4, "evidence": "Canvas zoom and UI scale are adjacent separate rows, though their shared popover can still imply a single zoom model.", "confidence": "medium"},
+            "fr3": {"score": 5, "evidence": "The adjustment is two obvious menu levels away and changes with one plus press, with no dialog transition.", "confidence": "high"},
+            "fr4": {"score": 4, "evidence": "The popover says the value is remembered and offers Reset to 100%, but bounded range and continuous preview are less visible.", "confidence": "high"},
+            "fr5": {"score": 5, "evidence": "It composes directly from the existing MainMenu submenu primitives and one local preference without adding a new host.", "confidence": "high"},
+        },
+        "gateResults": {"g1": {"pass": True, "evidence": "The canvas objects and canvas 100% row remain unchanged."}, "g2": {"pass": True, "evidence": "The submenu explicitly remembers the interface value on this computer."}, "g3": {"pass": True, "evidence": "The full implementation would clamp the stepper to 80–160%; Reset to 100% is visible in the prototype."}},
+        "previewLabel": "cascading preference control",
+        "story": {"title": "Adjust without leaving the menu", "steps": [
+            {"label": "Open the menu", "caption": "Use the same top-left entry that already owns File and View.", "state": "base", "target": "[data-story-to='menu']"},
+            {"label": "Choose Preferences", "caption": "The ordinary menu grows a lightweight Preferences branch.", "state": "menu", "target": "[data-story-to='submenu']"},
+            {"label": "Increase UI scale", "caption": "Canvas zoom stays at 100% while one plus press steps the interface to 125%.", "state": "submenu", "target": "[data-story-to='scaled']"},
+            {"label": "See the result", "caption": "Chrome grows in place without opening a modal or disturbing the board.", "state": "scaled", "target": "[data-story-to='menu']"},
+        ]},
+        "preview": scene(v2_extra, menu_action=True),
+        "media": [{"label": "Shortest menu path", "caption": "This direction minimizes ceremony, but it has little room for future settings or explanation.", "html": proof(("☰", "Menu"), ("⚙", "Preferences"), ("＋", "Step to 125%"))}],
+    },
+    {
+        "id": "v3", "name": "Dual Zoom Utility", "accent": "#d2723f",
+        "thesis": "Put interface scale beside the existing bottom-right canvas zoom so both magnification scopes can be compared and changed in one place.",
+        "bestWhen": "Users think 'make it bigger' first and should not have to know whether that means canvas or interface before opening a control.",
+        "losesWhen": "A second zoom concept in the high-frequency canvas utility strip would create ongoing ambiguity or visual weight.",
+        "decisions": [{"label": "Entry point", "value": "A UI size button lives beside the existing − / canvas 100% / + utility."}, {"label": "Control", "value": "Two side-by-side cards name Canvas and Interface before offering presets."}, {"label": "Mental model", "value": "Magnification is one family with two explicit scopes."}],
+        "keepParts": ["side-by-side Canvas/UI values", "comfortable-size presets", "scope-specific persistence note"],
+        "proof": ["The popover shows Canvas 100% and Interface 100% in separate cards, then enlarges only chrome at 125%.", "The entry sits on the real SystemSketch bottom-right utility surface."],
+        "scores": {
+            "fr1": {"score": 4, "evidence": "The direct utility makes comfortable presets fast and the enlarged state is obvious across chrome.", "confidence": "high"},
+            "fr2": {"score": 5, "evidence": "Parallel Canvas and Interface cards expose both numbers, scopes, and persistence rules at the decision point.", "confidence": "high"},
+            "fr3": {"score": 5, "evidence": "The setting sits beside the visible control users already reach for when something looks too small.", "confidence": "high"},
+            "fr4": {"score": 4, "evidence": "The local-vs-board persistence note is explicit and 100% is a preset, though a dedicated reset affordance is absent.", "confidence": "high"},
+            "fr5": {"score": 4, "evidence": "SystemSketch owns the NavigationPanel and can extend it, but UI preferences become coupled to a high-frequency canvas utility.", "confidence": "high"},
+        },
+        "gateResults": {"g1": {"pass": True, "evidence": "The two cards explicitly keep canvas at 100% while only chrome grows."}, "g2": {"pass": True, "evidence": "The note distinguishes remembered interface choice from per-board canvas zoom."}, "g3": {"pass": True, "evidence": "Presets include 100% and the implementation would clamp the same 80–160% range."}},
+        "previewLabel": "bottom-right dual zoom",
+        "story": {"title": "Resolve 'make it bigger' at the zoom control", "steps": [
+            {"label": "Start where zoom already lives", "caption": "Canvas zoom is already visible at 100% in the bottom-right utility strip.", "state": "base", "target": "[data-story-to='utility']"},
+            {"label": "Compare both scopes", "caption": "The popover names Canvas and Interface side by side before the user changes anything.", "state": "utility", "target": "[data-story-to='scaled']"},
+            {"label": "Choose Comfortable", "caption": "Interface becomes 125%; canvas geometry and its 100% value stay fixed.", "state": "scaled", "target": "[data-story-to='utility']"},
+        ]},
+        "preview": scene(v3_extra),
+        "media": [{"label": "One family, two scopes", "caption": "The key value is not fewer controls; it is making the existing canvas zoom and new interface scale impossible to conflate.", "html": proof(("100%", "Canvas / board"), ("≠", "Independent"), ("125%", "Interface / computer"))}],
+    },
+    {
+        "id": "v4", "name": "Command-First Scale", "accent": "#4f65d9",
+        "thesis": "Treat interface scaling as an action: search it from the command palette, enter a percentage, and keep the canvas unobstructed.",
+        "bestWhen": "Keyboard-first experts repeatedly tune environments across machines and value speed and exact values over browseable settings.",
+        "losesWhen": "The control must be discoverable months later without remembering command-palette vocabulary.",
+        "decisions": [{"label": "Entry point", "value": "Ctrl K or the existing command button, then search 'interface scale'."}, {"label": "Control", "value": "Preset percentages appear as the selected command's second step."}, {"label": "Feedback", "value": "A transient confirmation reports local persistence and canvas invariance."}],
+        "keepParts": ["searchable Set interface scale command", "exact percentage presets", "confirmation toast"],
+        "proof": ["The command result, 125% choice, and confirmation all run in the gallery.", "The final chrome grows while canvas objects remain in place."],
+        "scores": {
+            "fr1": {"score": 4, "evidence": "The command applies 125% to all representative chrome, but it offers less visual comparison than the settings hub.", "confidence": "high"},
+            "fr2": {"score": 5, "evidence": "The command and confirmation both name interface scale and explicitly report that canvas remains 100%.", "confidence": "high"},
+            "fr3": {"score": 2, "evidence": "Search is fast once known, but a user must remember Ctrl K or infer the phrase 'interface scale'.", "confidence": "high"},
+            "fr4": {"score": 4, "evidence": "The confirmation says the value is saved; 100% is available, but recovery is hidden behind repeating the command.", "confidence": "high"},
+            "fr5": {"score": 3, "evidence": "SystemSketch has a command popover, but promoting it into a general settings command surface adds routing and focus behavior for a durable preference.", "confidence": "medium"},
+        },
+        "gateResults": {"g1": {"pass": True, "evidence": "The confirmation and fixed board specimen prove the command targets interface only."}, "g2": {"pass": True, "evidence": "The applied toast says the value is saved on this computer."}, "g3": {"pass": True, "evidence": "The command exposes bounded presets including 100%; its same path provides recovery."}},
+        "previewLabel": "keyboard-first command",
+        "story": {"title": "Search and apply an exact scale", "steps": [
+            {"label": "Open commands", "caption": "Use Ctrl K or the existing bottom toolbar command entry.", "state": "base", "target": "[data-story-to='palette']"},
+            {"label": "Find interface scale", "caption": "Search narrows directly to a Display & accessibility action.", "state": "palette", "target": "[data-story-to='results']"},
+            {"label": "Choose 125%", "caption": "The command expands into bounded exact percentages.", "state": "results", "target": "[data-story-to='scaled']"},
+            {"label": "Confirm the scope", "caption": "Chrome grows and the system confirms local persistence while canvas remains 100%.", "state": "scaled", "target": "[data-story-to='palette']"},
+        ]},
+        "preview": scene(v4_extra),
+        "media": [{"label": "Expert path", "caption": "The command is extremely compact once learned; the cost is that the control has almost no ambient discoverability.", "html": proof(("⌘K", "Open commands"), ("⌕", "interface scale"), ("↵", "Apply 125%"))}],
+    },
+    {
+        "id": "v5", "name": "Adaptive Display Profile", "accent": "#b05475",
+        "thesis": "Detect a high-density display, offer one reversible Comfortable profile, and keep manual Compact/Comfortable/Large overrides under the profile menu.",
+        "bestWhen": "The app should fix obvious high-DPI discomfort automatically for most people and numeric percentages are implementation detail.",
+        "losesWhen": "Display detection is unreliable, users move windows between mixed-DPI monitors, or precise scale is a strong expectation.",
+        "decisions": [{"label": "Entry point", "value": "A one-time high-DPI recommendation appears where the problem is first detected."}, {"label": "Control", "value": "Named profiles replace a slider: Compact 90, Comfortable 125, Large 150."}, {"label": "Recovery", "value": "The top-right profile menu retains Display & accessibility overrides and reset."}],
+        "keepParts": ["high-DPI recommendation", "named size profiles", "per-display memory"],
+        "proof": ["Use 125% immediately enlarges the complete representative shell.", "The profile menu exposes the same choice later and states that the value is remembered for this display."],
+        "scores": {
+            "fr1": {"score": 5, "evidence": "The high-DPI prompt directly offers a 125% comfortable state and the complete chrome responds visibly.", "confidence": "high"},
+            "fr2": {"score": 4, "evidence": "The prompt says it enlarges controls, not the board, but named profiles conceal the exact scope more than explicit dual values.", "confidence": "medium"},
+            "fr3": {"score": 3, "evidence": "The first-run recommendation is effortless, but rediscovery later depends on associating display settings with the top-right profile.", "confidence": "high"},
+            "fr4": {"score": 5, "evidence": "The recommendation is reversible, the profile list includes a reset, and the prototype remembers Comfortable for this display.", "confidence": "medium"},
+            "fr5": {"score": 2, "evidence": "Reliable per-display detection and monitor-change handling add a platform-sensitive state model beyond the current local preference boundary.", "confidence": "medium"},
+        },
+        "gateResults": {"g1": {"pass": True, "evidence": "The prompt explicitly says 'controls and panels, not the board,' and the specimen preserves geometry."}, "g2": {"pass": True, "evidence": "The confirmation says the profile is remembered for this display, outside `.tldr` content."}, "g3": {"pass": True, "evidence": "Compact, Comfortable, Large, and Reset keep the final implementation inside the same safe range."}},
+        "previewLabel": "automatic recommendation + profiles",
+        "story": {"title": "Let the app notice the high-DPI problem", "steps": [
+            {"label": "Receive a recommendation", "caption": "SystemSketch notices a high-density display and offers one plain-language fix.", "state": "base", "target": "[data-story-to='scaled']"},
+            {"label": "Apply Comfortable", "caption": "The complete chrome grows to 125% while the board stays unchanged.", "state": "scaled", "target": "[data-story-to='profile']"},
+            {"label": "Find the override later", "caption": "Compact, Comfortable, Large, and Reset remain available under Display & accessibility.", "state": "profile", "target": "[data-story-to='scaled']"},
+        ]},
+        "preview": scene(v5_extra, profile_action=True),
+        "media": [{"label": "Problem-led setup", "caption": "This is the only direction that removes discovery from the initial task, but it pays for that ease with DPI-detection complexity.", "html": proof(("4K", "Detect density"), ("▣", "Recommend Comfortable"), ("125%", "Remember per display"))}],
+    },
+]
+
+
+project = {
+    "schemaVersion": 3,
+    "title": "Make SystemSketch comfortable on a high-DPI display",
+    "kicker": "SystemSketch · /babble 5 · 31 Aug 2026",
+    "brief": "Five product-fidelity ways to change the size of SystemSketch's application chrome, remember the choice across relaunches, and keep it unmistakably separate from the canvas zoom already shown at bottom right.",
+    "count": 5,
+    "defaultId": "v1",
+    "defaultWhy": "Settings Hub leads at 96/100. It most completely matches Zach's stated Obsidian/Figma mental model, gives a gear-led home for future preferences, previews the whole chrome live, and maps onto SystemSketch's existing MainMenu, dialog, CSS-token, and local-preference seams.",
+    "decisionHinge": "The hinge is whether this is the beginning of a real settings surface or permanently a one-setting job. If future preferences are unlikely and 8 weight points move from shell fit/reversibility to adjustment speed, V3's Dual Zoom Utility becomes the stronger choice; otherwise V1's extra click buys a durable, clearer home.",
+    "invariants": [
+        "The same current SystemSketch canvas, two Blocks, top capsules, toolbar, and bottom-right canvas zoom appear in every prototype.",
+        "Only application chrome scales; tldraw camera zoom, document coordinates, selection geometry, exports, and `.tldr` content remain unchanged.",
+        "The preference is local to the installed app/computer and survives relaunch without being saved inside a board.",
+        "Every direction supports a bounded 80–160% implementation range and recovery to 100%.",
+    ],
+    "boundary": "This remains the five-direction decision artifact. Menus, guided stories, direct controls, and visible scale changes are real inside this gallery; persistence and relaunch are simulated here. V1 was subsequently selected, renamed Settings, and implemented in SystemSketch production code.",
+    "axes": [
+        {"name": "Entry point", "values": ["first-class Interface menu", "Preferences submenu", "bottom-right zoom utility", "command palette", "automatic high-DPI prompt"]},
+        {"name": "Control model", "values": ["slider + presets", "stepper", "dual-scope presets", "search + exact value", "named adaptive profiles"]},
+        {"name": "Container", "values": ["centered modal hub", "cascading popover", "anchored utility popover", "command overlay", "recommendation + profile menu"]},
+        {"name": "Product posture", "values": ["durable settings home", "smallest addition", "magnification family", "expert action", "automatic accommodation"]},
+    ],
+    "requirements": requirements,
+    "hardGates": gates,
+    "variants": variants,
+    "checks": [
+        "Exactly five structurally distinct directions",
+        "Same SystemSketch fixture and viewport",
+        "Guided and direct controls drive the same state per variant",
+        "All visible prototype buttons have a state transition",
+        "Every score contains evidence and confidence",
+        "No production implementation during the babble round",
+    ],
+}
+
+
+SPEC_PATH.write_text(json.dumps(project, indent=2, ensure_ascii=False), encoding="utf-8")
+TEMP_OUTPUT_PATH.unlink(missing_ok=True)
+subprocess.run(
+    ["python3", str(GALLERY), "build", "--strict", "--spec", str(SPEC_PATH), "--output", str(TEMP_OUTPUT_PATH)],
+    check=True,
+)
+TEMP_OUTPUT_PATH.replace(OUTPUT_PATH)
+print(f"Built {OUTPUT_PATH}")

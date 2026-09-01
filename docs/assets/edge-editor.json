@@ -1,0 +1,142 @@
+[
+  {
+    "id": "WIRED",
+    "label": "a cable joins the two Blocks",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "ZORDER",
+    "label": "the cable paints under the Blocks",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "ROUTE-CURVED",
+    "label": "the default route is a cubic",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "FIGMA-1",
+    "label": "a selected cable with the pointer far away offers only its two terminals",
+    "observed": 2,
+    "desired": 2,
+    "ok": true
+  },
+  {
+    "id": "FIGMA-2",
+    "label": "and offers its control point as the pointer approaches",
+    "observed": 3,
+    "desired": 3,
+    "ok": true
+  },
+  {
+    "id": "BEND-1",
+    "label": "dragging the control point changes the route",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "BEND-2",
+    "label": "and the bent curve is a quadratic through the pointer",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "ROUTE-STRAIGHT",
+    "label": "straight routing draws one line segment",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "ROUTE-RESET",
+    "label": "switching routing forgets the previous bend",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "ROUTE-ELBOW",
+    "label": "elbow routing draws an orthogonal polyline",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "ROUTE-ELBOW-PERPENDICULAR",
+    "label": "and its first segment leaves the port horizontally",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "INSERT-1",
+    "label": "the midpoint handle offers a Block",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "INSERT-2",
+    "label": "picking splices a third Block in",
+    "observed": 3,
+    "desired": 3,
+    "ok": true
+  },
+  {
+    "id": "INSERT-3",
+    "label": "and the one cable becomes two",
+    "observed": 2,
+    "desired": 2,
+    "ok": true
+  },
+  {
+    "id": "INSPECT-1",
+    "label": "selecting a cable opens the connection inspector",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "INSPECT-2",
+    "label": "and it names both endpoints",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "INSPECT-3",
+    "label": "with the live routing pressed",
+    "observed": "true",
+    "desired": "true",
+    "ok": true
+  },
+  {
+    "id": "INSPECT-4",
+    "label": "the inspector switches routing like the menu does",
+    "observed": "true",
+    "desired": "true",
+    "ok": true
+  },
+  {
+    "id": "INSPECT-5",
+    "label": "and the cable repaints as an orthogonal polyline",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "CLEAN",
+    "label": "the whole journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

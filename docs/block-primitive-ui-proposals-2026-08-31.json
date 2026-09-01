@@ -1,0 +1,566 @@
+{
+  "schemaVersion": 2,
+  "title": "Five Block inspector directions for SystemSketch",
+  "kicker": "SystemSketch Block primitive · Babble & Prune · 31 Aug 2026",
+  "brief": "Add one Block tool to the main toolbar. Choosing it immediately reveals Block settings on the right; after placement, the same surface edits the selected Block. Compare five genuinely different disclosure and layout models without changing the shared Block data model or tldraw interaction model.",
+  "count": 5,
+  "defaultId": "v1",
+  "defaultWhy": "Inset Popout Inspector is the provisional default at 92/100. It makes the requested right-side inspector explicit without permanently narrowing the canvas, leaves visible whiteboard gutters around the surface, and gives Details and Connections room to grow. Its main cost is custom collision handling with the top and bottom utility chrome.",
+  "decisionHinge": "The recommendation hinges on uninterrupted canvas versus maximum stock-tldraw layout fit. If 20 weight points move from Whiteboard flow to tldraw-native fit, Fixed Dock leads 93 to 84; otherwise Inset Popout Inspector wins because it keeps the board full-width and visually separates the inspector from application edges.",
+  "invariants": [
+    "Exactly one Block tool appears in the existing bottom toolbar and uses B as its proposed shortcut.",
+    "Choosing Block or exactly selecting a Block reveals its inspector on the right.",
+    "The shared fixture is a 720 × 400 dotted board with the same decode Block, fields, ports, and toolbar state.",
+    "Details and Connections are views over one typed Block record; the UI does not create a second editing model.",
+    "Expanded remains a real frame-like shape with stock tldraw child containment semantics."
+  ],
+  "boundary": "These are self-contained interaction sketches for human review, not production integration. The open/close and disclosure controls work in the gallery; document persistence, real editor selection, keyboard/focus behavior, responsive layout, port wiring, and accessibility QA are simulated. No Block product code has been changed.",
+  "axes": [
+    {
+      "name": "Canvas relationship",
+      "values": [
+        "overlay",
+        "reserved column",
+        "floating card",
+        "canvas editor plus drawer",
+        "edge rail"
+      ]
+    },
+    {
+      "name": "Disclosure",
+      "values": [
+        "full immediately",
+        "persistent full form",
+        "essentials first",
+        "quick versus deep",
+        "section by section"
+      ]
+    },
+    {
+      "name": "Primary edit locus",
+      "values": [
+        "inset right popout",
+        "right dock",
+        "right peeker",
+        "near Block",
+        "right rail drawer"
+      ]
+    },
+    {
+      "name": "Growth posture",
+      "values": [
+        "balanced",
+        "form-heavy",
+        "lightweight",
+        "power-user",
+        "many inspector domains"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "fr1",
+      "name": "Toolbar discoverability",
+      "weight": 20,
+      "why": "The first success criterion is that a Block appears in the main toolbar and is easy to invoke.",
+      "passCondition": "The selected Block tool is visible, named or unambiguous, and paired with a learnable shortcut.",
+      "anchors": {
+        "1": "Block is hidden or confused with another tool.",
+        "3": "Block is visible but weakly labeled or spatially detached.",
+        "5": "Block has a clear selected state, label, and B shortcut in the expected toolbar."
+      }
+    },
+    {
+      "id": "fr2",
+      "name": "Inspector clarity",
+      "weight": 25,
+      "why": "The second success criterion is immediate access to understandable Block settings on the right.",
+      "passCondition": "A user can identify the current Block, its view, core fields, and the path to connections without hunting.",
+      "anchors": {
+        "1": "The editor surface is ambiguous or omits core context.",
+        "3": "Core fields are present but hierarchy or mode is unclear.",
+        "5": "Identity, view, fields, and Details/Connections structure are obvious at a glance."
+      }
+    },
+    {
+      "id": "fr3",
+      "name": "Whiteboard flow",
+      "weight": 20,
+      "why": "Blocks should enrich spatial thinking without turning the canvas into a form application.",
+      "passCondition": "The canvas remains spacious and frequent Block creation/editing does not cause disruptive layout motion.",
+      "anchors": {
+        "1": "Inspector behavior repeatedly obscures or shifts the working area.",
+        "3": "The workflow is usable but consumes notable space or adds a disclosure step.",
+        "5": "Editing stays close to the sketch and the full canvas returns immediately when Block context ends."
+      }
+    },
+    {
+      "id": "fr4",
+      "name": "tldraw-native fit",
+      "weight": 20,
+      "why": "The port should follow supported tldraw tool, selection, component, and frame seams.",
+      "passCondition": "The pattern can be driven by current tool/selection state and a supported right-side component without forking editor behavior.",
+      "anchors": {
+        "1": "Requires a parallel selection or canvas model.",
+        "3": "Uses public seams but owns substantial coordination behavior.",
+        "5": "Closely follows existing tldraw panel, tool, and selection conventions."
+      }
+    },
+    {
+      "id": "fr5",
+      "name": "Inspector scalability",
+      "weight": 15,
+      "why": "The surface must later hold views, ports, defaults, layout, and advanced settings without a redesign.",
+      "passCondition": "Details, Connections, and later advanced sections have an evident information architecture.",
+      "anchors": {
+        "1": "Adding ports or advanced fields breaks the pattern.",
+        "3": "The pattern can grow only through another disclosure layer.",
+        "5": "Tabs or stable sections already provide a clear path for substantially more settings."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "g1",
+      "name": "One Block tool",
+      "why": "The toolbar must expose one coherent primitive rather than separate tools for each view."
+    },
+    {
+      "id": "g2",
+      "name": "Selection-driven right inspector",
+      "why": "Block invocation and exact Block selection must reveal the requested right-side settings surface."
+    },
+    {
+      "id": "g3",
+      "name": "One edit model",
+      "why": "Inline editing, inspector editing, and later menus must update the same typed shape props."
+    },
+    {
+      "id": "g4",
+      "name": "Frame-native Expanded mode",
+      "why": "Expanded containment must use tldraw's real shape tree and frame semantics."
+    }
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "Inset Popout Inspector",
+      "thesis": "Float a large rounded inspector card inside the canvas chrome, leaving visible gutters on every side while Block is active or selected.",
+      "accent": "#4F46E5",
+      "bestWhen": "You want the clearest requested behavior and enough room for ports without permanently shrinking the whiteboard.",
+      "losesWhen": "The inspector must consume every available vertical pixel or custom collision handling with surrounding chrome is undesirable.",
+      "decisions": [
+        {
+          "label": "Disclosure",
+          "value": "Details opens immediately; Connections is a peer tab inside the floating card rather than a buried accordion."
+        },
+        {
+          "label": "Canvas",
+          "value": "The board stays full-width; the rounded card sits 16 px from the right and leaves separate top and bottom gutters for contextual and utility chrome."
+        },
+        {
+          "label": "Tool handoff",
+          "value": "Choosing Block shows blank defaults; placement turns the same sheet into the selected Block inspector."
+        },
+        {
+          "label": "Implementation seam",
+          "value": "Render a selection-driven component in front of the canvas and coordinate its inset bounds with the existing SystemSketch chrome."
+        }
+      ],
+      "keepParts": [
+        "inset rounded popout",
+        "visible canvas gutters",
+        "Details/Connections tabs",
+        "blank-to-selected handoff"
+      ],
+      "proof": [
+        "The same selected decode Block and toolbar appear in every preview.",
+        "Use the Hide/Show inspector control and switch Details/Connections to exercise the floating surface without changing the shared Block fixture."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "The selected Block tool is labeled and includes the B shortcut in the shared bottom toolbar.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "A large rounded card presents identity, view, core fields, and peer Details/Connections tabs while remaining visibly separate from the app edges.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "The canvas does not reflow, visible gutters preserve spatial context, and the full board returns when Block context ends.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 3,
+          "evidence": "Selection-driven overlay state fits public component seams, but inset positioning and collision handling are owned SystemSketch chrome.",
+          "confidence": "medium"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "Two top-level tabs, scrolling, and stable sections can absorb ports, layout, and advanced fields.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "One selected Block item represents every view."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "A floating right-side card is visibly tied to the Block tool and selected Block."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The preview exposes one field set; the proposal routes it through shared shape commands."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "Expanded is a view choice on the same Block, backed by frame-like shape behavior."
+        }
+      },
+      "preview": "<style>.block-mock{position:relative;min-height:390px;overflow:hidden;color:#20242b;background-color:#f8f8f6;background-image:radial-gradient(#d7d9d5 1px,transparent 1px);background-size:20px 20px;font:12px/1.35 Inter,ui-sans-serif,system-ui,sans-serif}.block-mock *{box-sizing:border-box}.block-mock button,.block-mock input,.block-mock textarea,.block-mock label,.block-mock summary{font:inherit}.block-mock button,.block-mock label,.block-mock summary{cursor:pointer}.mock-board-label{position:absolute;top:14px;left:16px;padding:6px 9px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#6a6f77;font-size:10px;box-shadow:0 2px 7px #20242b12}.mock-block{position:absolute;left:15%;top:35%;width:164px;border:2px solid #4f46e5;border-radius:10px;background:#fff;box-shadow:0 7px 20px #34305d1f}.mock-block-head{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-bottom:1px solid #e6e7eb;font-weight:760}.mock-block-body{padding:10px 11px;color:#666c75;font-size:10px}.mock-block-foot{display:flex;justify-content:space-between;padding:7px 11px;border-top:1px solid #ececef;color:#777d86;font-size:9px}.port-dot{display:inline-block;width:8px;height:8px;margin-right:4px;border:2px solid #4f46e5;border-radius:50%;background:#fff}.selection-handle{position:absolute;width:7px;height:7px;border:1px solid #4338ca;background:#fff}.selection-handle.a{left:-5px;top:-5px}.selection-handle.b{right:-5px;bottom:-5px}.mock-toolbar{position:absolute;z-index:7;left:50%;bottom:12px;display:flex;gap:3px;align-items:center;padding:5px;border:1px solid #d9dce2;border-radius:12px;background:#fff;box-shadow:0 5px 18px #20242b22;transform:translateX(-50%)}.tool{display:grid;min-width:38px;height:36px;place-items:center;border:0;border-radius:7px;background:transparent;color:#5e636b}.tool.active{background:#ebeaff;color:#4338ca;box-shadow:inset 0 0 0 1px #d7d3ff}.tool-block{display:flex;min-width:60px;gap:4px}.key{font-size:8px;opacity:.7}.inspector-toggle{position:absolute;z-index:9;right:14px;bottom:15px;padding:7px 10px;border:1px solid #d8dbe1;border-radius:8px;background:#fff;color:#4f46e5;font-weight:740}.inspector-check{position:absolute;opacity:0;pointer-events:none}.inspector{position:absolute;z-index:6;top:0;right:0;bottom:0;width:282px;border-left:1px solid #dadde2;background:#fff;box-shadow:-10px 0 28px #20242b18;transition:transform 160ms ease}.inspector-check:not(:checked)~.inspector{transform:translateX(103%)}.inspector-head{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border-bottom:1px solid #eaebee}.inspector-head b{font-size:13px}.badge{padding:3px 6px;border-radius:99px;background:#efefff;color:#4338ca;font-size:9px;font-weight:760}.inspector-tabs{display:flex;gap:3px;padding:8px 12px 0}.inspector-tabs label,.inspector-tabs summary{flex:1;padding:7px;border-radius:7px;color:#6e737c;text-align:center}.inspector-tabs .active{background:#efefff;color:#4338ca;font-weight:760}.inspector-body{display:grid;gap:10px;padding:12px 15px}.field{display:grid;gap:4px;color:#6c727b;font-size:9px;font-weight:700;letter-spacing:.02em}.field input,.field textarea{width:100%;padding:7px 8px;border:1px solid #d9dce2;border-radius:7px;background:#fff;color:#24272c;font-size:11px;font-weight:500;resize:none}.segmented{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;border-radius:8px;background:#f0f1f3}.segmented span{padding:6px 4px;border-radius:6px;text-align:center;font-size:9px}.segmented .selected{background:#fff;color:#4338ca;font-weight:760;box-shadow:0 1px 4px #20242b16}.tab-check{position:absolute;opacity:0}.details-pane,.connections-pane{display:none}.tab-check.details:checked~.details-pane,.tab-check.connections:checked~.connections-pane{display:grid}.tab-check.details:checked~.inspector-tabs .details-label,.tab-check.connections:checked~.inspector-tabs .connections-label{background:#efefff;color:#4338ca;font-weight:760}.connection-row{display:grid;grid-template-columns:1fr auto;gap:7px;align-items:center;padding:8px;border:1px solid #e2e3e7;border-radius:8px}.connection-row small{display:block;color:#858a92}.connection-row code{color:#4f46e5;font-size:9px}.section-title{display:flex;justify-content:space-between;color:#42464d;font-weight:760}.peeker{top:12px;right:12px;bottom:auto;width:230px;border:1px solid #d9dce2;border-radius:12px;box-shadow:0 12px 32px #20242b20}.dock-board{right:300px}.fixed-dock{width:300px;box-shadow:none}.quick-pop{position:absolute;z-index:5;left:33%;top:25%;width:180px;padding:10px;border:1px solid #d8dbe1;border-radius:10px;background:#fff;box-shadow:0 10px 30px #20242b24}.quick-pop b{display:block;margin-bottom:7px}.quick-actions{display:flex;gap:5px;margin-top:8px}.quick-actions button{flex:1;padding:6px;border:0;border-radius:6px;background:#efefff;color:#4338ca}.rail{position:absolute;z-index:8;top:50%;right:0;display:grid;gap:4px;padding:5px;border:1px solid #d8dbe1;border-right:0;border-radius:10px 0 0 10px;background:#fff;box-shadow:0 7px 22px #20242b1c;transform:translateY(-50%)}.rail label{display:grid;width:36px;height:36px;place-items:center;border-radius:7px}.rail label.active{background:#efefff;color:#4338ca}.rail-inspector{right:46px;top:10px;bottom:10px;width:250px;border:1px solid #d9dce2;border-radius:12px;box-shadow:0 12px 32px #20242b20}.variant-caption{position:absolute;left:15px;bottom:62px;color:#848a92;font-size:9px}.popout-cap{position:absolute;z-index:6;top:10px;right:16px;display:grid;width:258px;height:38px;place-items:center;border:1px solid #d9dce2;border-radius:13px;background:#fff;color:#7a8088;font-size:9px;font-weight:700;box-shadow:0 5px 18px #20242b18;transition:transform 160ms ease,opacity 160ms ease}.popout-inspector{top:56px;right:16px;bottom:58px;width:258px;overflow:auto;border:1px solid #d9dce2;border-radius:18px;box-shadow:0 16px 38px #20242b24}.popout-inspector .inspector-body{gap:7px;padding:9px 12px}.inspector-check:not(:checked)~.popout-cap{opacity:0;pointer-events:none;transform:translateX(110%)}.inspector-check:not(:checked)~.popout-inspector{transform:translateX(110%)}</style><div class='block-mock'><input class='inspector-check' id='v1-open' type='checkbox' checked><div class='mock-board-label'>SystemSketch · Block selected</div><div class='mock-block'><i class='selection-handle a'></i><i class='selection-handle b'></i><div class='mock-block-head'><span>decode</span><small>call</small></div><div class='mock-block-body'>Decode one packet</div><div class='mock-block-foot'><span><i class='port-dot'></i>packet : bytes</span><span>message : str <i class='port-dot'></i></span></div></div><div class='variant-caption'>Inset popout disappears when Block context ends.</div><div class='mock-toolbar'><button class='tool'>↖</button><button class='tool'>□</button><button class='tool active tool-block'>▣ Block <span class='key'>B</span></button><button class='tool'>→</button><button class='tool'>T</button></div><div class='popout-cap'>TBD contextual controls</div><aside class='inspector popout-inspector'><div class='inspector-head'><b>Block</b><span class='badge'>Selected</span></div><input class='tab-check details' id='v1-details' name='v1-tab' type='radio' checked><input class='tab-check connections' id='v1-connections' name='v1-tab' type='radio'><div class='inspector-tabs'><label class='details-label' for='v1-details'>Details</label><label class='connections-label' for='v1-connections'>Connections</label></div><div class='inspector-body details-pane'><div class='segmented'><span class='selected'>Simple</span><span>Port</span><span>Expanded</span></div><label class='field'>TITLE<input value='decode'></label><label class='field'>TYPE<input value='call'></label><label class='field'>DESCRIPTION<textarea rows='3'>Decode one packet</textarea></label><label class='field'>SHOW DESCRIPTION<input type='checkbox' checked></label></div><div class='inspector-body connections-pane'><div class='section-title'><span>Inputs</span><span>＋</span></div><div class='connection-row'><span>packet<small>Input port</small></span><code>bytes</code></div><div class='section-title'><span>Outputs</span><span>＋</span></div><div class='connection-row'><span>message<small>Output port</small></span><code>str</code></div></div></aside><label class='inspector-toggle' for='v1-open'>Hide / show inspector</label></div>"
+    },
+    {
+      "id": "v2",
+      "name": "Fixed Dock",
+      "thesis": "Reserve a stable right column whenever Block is active or selected, so the board and inspector never overlap.",
+      "accent": "#2563EB",
+      "bestWhen": "You expect long editing sessions, value stable geometry, and want the closest match to conventional tldraw side panels.",
+      "losesWhen": "Canvas width is scarce or frequently entering and leaving Block context makes the board resize feel distracting.",
+      "decisions": [
+        {
+          "label": "Disclosure",
+          "value": "The complete form is visible without a popover or overlay layer."
+        },
+        {
+          "label": "Canvas",
+          "value": "The working viewport contracts to reserve a 300 px inspector column."
+        },
+        {
+          "label": "Continuity",
+          "value": "The selected Block remains entirely visible because the canvas lays out around the dock."
+        },
+        {
+          "label": "Implementation seam",
+          "value": "Use the supported right-panel layout seam and derive visibility from tool/selection state."
+        }
+      ],
+      "keepParts": [
+        "non-overlapping dock",
+        "stable full form",
+        "prominent view switcher",
+        "stock panel posture"
+      ],
+      "proof": [
+        "The board's right boundary visibly stops at the dock.",
+        "Switch Details/Connections inside the dock; the selected Block never sits underneath it."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 4,
+          "evidence": "The shared toolbar exposes Block clearly, though visual attention is split with a permanently prominent dock while active.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "The widest, non-overlapping inspector provides the strongest hierarchy and field legibility.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 3,
+          "evidence": "Nothing is covered, but entering and leaving Block context changes available canvas width.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "A reserved right panel most closely matches established editor layout conventions and supported component seams.",
+          "confidence": "medium"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "The dock has ample space and tabs, but permanent width pressure grows as inspector content expands.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "One Block tool owns all three views."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The active/selected Block drives a visible right dock."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Dock fields edit the same typed shape props as all other surfaces."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "Expanded remains a view on the single frame-like Block shape."
+        }
+      },
+      "preview": "<div class='block-mock'><div class='mock-board-label'>SystemSketch · viewport reserves the dock</div><div class='mock-block' style='left:12%;top:35%'><i class='selection-handle a'></i><i class='selection-handle b'></i><div class='mock-block-head'><span>decode</span><small>call</small></div><div class='mock-block-body'>Decode one packet</div><div class='mock-block-foot'><span><i class='port-dot'></i>packet : bytes</span><span>message : str <i class='port-dot'></i></span></div></div><div class='variant-caption'>No overlap; canvas reflows around the dock.</div><div class='mock-toolbar' style='left:35%'><button class='tool'>↖</button><button class='tool'>□</button><button class='tool active tool-block'>▣ Block <span class='key'>B</span></button><button class='tool'>→</button><button class='tool'>T</button></div><aside class='inspector fixed-dock'><div class='inspector-head'><b>Block</b><span class='badge'>decode</span></div><input class='tab-check details' id='v2-details' name='v2-tab' type='radio' checked><input class='tab-check connections' id='v2-connections' name='v2-tab' type='radio'><div class='inspector-tabs'><label class='details-label' for='v2-details'>Details</label><label class='connections-label' for='v2-connections'>Connections</label></div><div class='inspector-body details-pane'><div class='segmented'><span class='selected'>Simple</span><span>Port</span><span>Expanded</span></div><label class='field'>TITLE<input value='decode'></label><label class='field'>TYPE<input value='call'></label><label class='field'>DESCRIPTION<textarea rows='3'>Decode one packet</textarea></label><div class='section-title'><span>Appearance</span><span>⌄</span></div></div><div class='inspector-body connections-pane'><div class='section-title'><span>Inputs</span><span>＋</span></div><div class='connection-row'><span>packet<small>Input port</small></span><code>bytes</code></div><div class='section-title'><span>Outputs</span><span>＋</span></div><div class='connection-row'><span>message<small>Output port</small></span><code>str</code></div></div></aside></div>"
+    },
+    {
+      "id": "v3",
+      "name": "Compact Peeker",
+      "thesis": "Show a small top-right card for the most common fields, with Connections and advanced settings disclosed only when requested.",
+      "accent": "#0F766E",
+      "bestWhen": "Most Blocks need only a title, type, description, and view while port editing is occasional.",
+      "losesWhen": "Connections and layout controls become everyday work or users need several sections visible at once.",
+      "decisions": [
+        {
+          "label": "Disclosure",
+          "value": "Identity and core fields appear first; an expandable Connections section holds ports."
+        },
+        {
+          "label": "Canvas",
+          "value": "A 230 px floating card leaves most of the right edge visible and never reflows the board."
+        },
+        {
+          "label": "Editing rhythm",
+          "value": "The inspector behaves like a quick peeker, not a permanent application pane."
+        },
+        {
+          "label": "Implementation seam",
+          "value": "Render a compact selection overlay whose expansion remains ephemeral UI state."
+        }
+      ],
+      "keepParts": [
+        "essentials-first card",
+        "small canvas footprint",
+        "progressive Connections section",
+        "quick dismissal"
+      ],
+      "proof": [
+        "The shared Block and toolbar remain visible around the smaller card.",
+        "Open the Connections disclosure to see the same packet and message ports."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "The selected Block tool remains the strongest chrome element because the peeker is visually light.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 4,
+          "evidence": "Core fields are clear, but port context is one disclosure deeper than in the full inspectors.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "The card does not reflow the board and occupies the least right-side area of the five directions.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "A selection popover is a narrow supported overlay, though it is less conventional than a standard panel.",
+          "confidence": "medium"
+        },
+        "fr5": {
+          "score": 3,
+          "evidence": "Growth is possible through accordions, but many port and layout controls would make the compact card deep and scroll-heavy.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "One Block tool is clearly selected."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The compact inspector is anchored on the right and driven by Block context."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Collapsed and expanded sections expose one prop model."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The view switch keeps Expanded on the same frame-like Block."
+        }
+      },
+      "preview": "<div class='block-mock'><div class='mock-board-label'>SystemSketch · Block selected</div><div class='mock-block'><i class='selection-handle a'></i><i class='selection-handle b'></i><div class='mock-block-head'><span>decode</span><small>call</small></div><div class='mock-block-body'>Decode one packet</div><div class='mock-block-foot'><span><i class='port-dot'></i>packet : bytes</span><span>message : str <i class='port-dot'></i></span></div></div><div class='variant-caption'>Essentials first; expand only when needed.</div><div class='mock-toolbar'><button class='tool'>↖</button><button class='tool'>□</button><button class='tool active tool-block'>▣ Block <span class='key'>B</span></button><button class='tool'>→</button><button class='tool'>T</button></div><aside class='inspector peeker'><div class='inspector-head'><b>Block · decode</b><span class='badge'>Simple</span></div><div class='inspector-body'><label class='field'>TITLE<input value='decode'></label><label class='field'>TYPE<input value='call'></label><label class='field'>DESCRIPTION<textarea rows='2'>Decode one packet</textarea></label><details><summary class='section-title'><span>Connections · 2</span><span>⌄</span></summary><div style='display:grid;gap:6px;margin-top:8px'><div class='connection-row'><span>packet<small>Input</small></span><code>bytes</code></div><div class='connection-row'><span>message<small>Output</small></span><code>str</code></div></div></details></div></aside></div>"
+    },
+    {
+      "id": "v4",
+      "name": "Canvas Quick Edit + Drawer",
+      "thesis": "Put frequent title/type/view edits beside the selected Block and reserve the right drawer for ports, layout, and advanced settings.",
+      "accent": "#B45309",
+      "bestWhen": "Fast repeated edits matter and users are comfortable with a two-level power-user workflow.",
+      "losesWhen": "A single obvious inspector is more important than minimizing pointer travel or the split edit locus feels inconsistent.",
+      "decisions": [
+        {
+          "label": "Disclosure",
+          "value": "A canvas popover owns quick fields; a named More button opens the deep right drawer."
+        },
+        {
+          "label": "Canvas",
+          "value": "Common edits happen near the Block, while uncommon edits temporarily occupy the right side."
+        },
+        {
+          "label": "Editing rhythm",
+          "value": "Pointer travel is minimized for rapid labeling and view changes."
+        },
+        {
+          "label": "Implementation seam",
+          "value": "Both surfaces call the same Block command layer; UI state decides only which surface is open."
+        }
+      ],
+      "keepParts": [
+        "near-object quick fields",
+        "deep right drawer",
+        "shared command layer",
+        "fast repeated edits"
+      ],
+      "proof": [
+        "The small editor sits beside the same selected Block while the deep inspector remains visibly available on the right.",
+        "Use the drawer's Details/Connections tabs to inspect the advanced path."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "Block is clearly selected in the toolbar and the near-object editor reinforces the tool-to-object relationship.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 3,
+          "evidence": "Each surface is clear, but users must learn which fields live near the Block and which live in the drawer.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "Frequent edits stay close to the object and the large drawer is needed only for deep work.",
+          "confidence": "medium"
+        },
+        "fr4": {
+          "score": 3,
+          "evidence": "Both surfaces can use public seams, but coordinating their focus, dismissal, and shared state adds meaningful host behavior.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "The full drawer can absorb all future sections while the quick editor remains intentionally small.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "A single Block tool still owns creation."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The selected Block exposes both a quick surface and a right-side inspector path."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The architecture explicitly routes both editors through identical Block commands."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "Expanded remains frame-native regardless of which surface changes the view."
+        }
+      },
+      "preview": "<div class='block-mock'><div class='mock-board-label'>SystemSketch · Block selected</div><div class='mock-block' style='left:7%;top:40%'><i class='selection-handle a'></i><i class='selection-handle b'></i><div class='mock-block-head'><span>decode</span><small>call</small></div><div class='mock-block-body'>Decode one packet</div><div class='mock-block-foot'><span><i class='port-dot'></i>packet : bytes</span><span>message : str <i class='port-dot'></i></span></div></div><div class='quick-pop'><b>Quick edit</b><label class='field'>TITLE<input value='decode'></label><div class='segmented' style='margin-top:7px'><span class='selected'>Simple</span><span>Port</span><span>Expanded</span></div><div class='quick-actions'><button>Done</button><button>More →</button></div></div><div class='variant-caption'>Quick edits near the object; deep edits on the right.</div><div class='mock-toolbar' style='left:37%'><button class='tool'>↖</button><button class='tool'>□</button><button class='tool active tool-block'>▣ Block <span class='key'>B</span></button><button class='tool'>→</button><button class='tool'>T</button></div><aside class='inspector' style='width:245px'><div class='inspector-head'><b>Block settings</b><span class='badge'>Advanced</span></div><input class='tab-check details' id='v4-details' name='v4-tab' type='radio' checked><input class='tab-check connections' id='v4-connections' name='v4-tab' type='radio'><div class='inspector-tabs'><label class='details-label' for='v4-details'>Layout</label><label class='connections-label' for='v4-connections'>Connections</label></div><div class='inspector-body details-pane'><div class='section-title'><span>Port layout</span><span>⌄</span></div><label class='field'>POSITION<input value='Aligned'></label><label class='field'>SPACING<input value='Auto'></label><div class='section-title'><span>Advanced</span><span>⌄</span></div></div><div class='inspector-body connections-pane'><div class='connection-row'><span>packet<small>Input</small></span><code>bytes</code></div><div class='connection-row'><span>message<small>Output</small></span><code>str</code></div></div></aside></div>"
+    },
+    {
+      "id": "v5",
+      "name": "Inspector Rail",
+      "thesis": "Keep a thin right-edge rail for Block domains and open only the active section in a neighboring drawer.",
+      "accent": "#7C3AED",
+      "bestWhen": "SystemSketch will soon add several inspector domains and users benefit from stable, compact section navigation.",
+      "losesWhen": "Only Details and Connections exist, making a permanent rail feel like architecture ahead of need.",
+      "decisions": [
+        {
+          "label": "Disclosure",
+          "value": "Rail icons select Details, Connections, Layout, or Notes; one adjacent drawer shows that section."
+        },
+        {
+          "label": "Canvas",
+          "value": "The 46 px rail persists in Block context; the section drawer floats beside it."
+        },
+        {
+          "label": "Navigation",
+          "value": "Inspector domains remain spatially stable even as their internal forms grow."
+        },
+        {
+          "label": "Implementation seam",
+          "value": "One host overlay manages the rail and section state while shape data remains in the tldraw store."
+        }
+      ],
+      "keepParts": [
+        "stable domain rail",
+        "single-section drawer",
+        "compact collapsed width",
+        "future Notes/Layout homes"
+      ],
+      "proof": [
+        "The right rail and Details drawer are visible beside the shared selected Block.",
+        "Select the Connections rail icon to reveal the same two ports without changing the Block fixture."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 4,
+          "evidence": "The Block tool is clear, though the icon-heavy rail competes with it for interpretation.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 3,
+          "evidence": "The active section is clear, but unlabeled domain icons require learning or tooltips.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "The collapsed rail is narrow and the board does not reflow, while the open drawer still covers a right-side strip.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "The rail can live in a supported overlay, but its section-navigation model is custom application chrome.",
+          "confidence": "medium"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "Stable domain slots provide the clearest growth path for Layout, Notes, and future Block-specific panels.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "One toolbar item still creates every Block view."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Block context reveals a right-side rail and active inspector section."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Rail navigation changes UI state only; all fields target one typed shape record."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "Expanded remains a view of the frame-like Block shape."
+        }
+      },
+      "preview": "<style>.block-mock:has(#v5-details:checked) .rail-inspector .details-pane,.block-mock:has(#v5-connections:checked) .rail-inspector .connections-pane{display:grid}.block-mock:has(#v5-connections:checked) .rail .details-label{background:transparent;color:inherit}.block-mock:has(#v5-connections:checked) .rail .connections-label{background:#efefff;color:#4338ca}</style><div class='block-mock'><div class='mock-board-label'>SystemSketch · Block selected</div><div class='mock-block'><i class='selection-handle a'></i><i class='selection-handle b'></i><div class='mock-block-head'><span>decode</span><small>call</small></div><div class='mock-block-body'>Decode one packet</div><div class='mock-block-foot'><span><i class='port-dot'></i>packet : bytes</span><span>message : str <i class='port-dot'></i></span></div></div><div class='variant-caption'>Persistent domain navigation; one section at a time.</div><div class='mock-toolbar' style='left:42%'><button class='tool'>↖</button><button class='tool'>□</button><button class='tool active tool-block'>▣ Block <span class='key'>B</span></button><button class='tool'>→</button><button class='tool'>T</button></div><input class='tab-check details' id='v5-details' name='v5-tab' type='radio' checked><input class='tab-check connections' id='v5-connections' name='v5-tab' type='radio'><nav class='rail'><label class='details-label active' for='v5-details' title='Details'>▤</label><label class='connections-label' for='v5-connections' title='Connections'>⇄</label><label title='Layout'>⌗</label><label title='Notes'>T</label></nav><aside class='inspector rail-inspector'><div class='inspector-head'><b>Block</b><span class='badge'>decode</span></div><div class='inspector-body details-pane'><div class='section-title'><span>Details</span><span>▤</span></div><div class='segmented'><span class='selected'>Simple</span><span>Port</span><span>Expanded</span></div><label class='field'>TITLE<input value='decode'></label><label class='field'>TYPE<input value='call'></label><label class='field'>DESCRIPTION<textarea rows='2'>Decode one packet</textarea></label></div><div class='inspector-body connections-pane'><div class='section-title'><span>Connections</span><span>⇄</span></div><div class='connection-row'><span>packet<small>Input</small></span><code>bytes</code></div><div class='connection-row'><span>message<small>Output</small></span><code>str</code></div></div></aside></div>"
+    }
+  ],
+  "checks": [
+    "Exactly five structural directions, not cosmetic variations",
+    "Same board, selected decode Block, fields, ports, toolbar state, viewport, and fidelity class",
+    "Every preview supports a real disclosure or section-switch interaction",
+    "Five weighted criteria frozen before scoring; weights sum to 100%",
+    "Every score includes observable evidence and confidence",
+    "Four hard gates evaluated independently from weighted judgment",
+    "Pick, shortlist, reject, feedback, splice, copy, and download controls preserved",
+    "Production tldraw wiring, accessibility QA, responsiveness, persistence, and keyboard behavior are explicitly outside these prototypes"
+  ]
+}

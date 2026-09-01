@@ -1,0 +1,1356 @@
+{
+  "schemaVersion": 3,
+  "title": "Ten fast ways to edit Ports inside a Block",
+  "kicker": "SystemSketch \u00b7 Babble + Prune 10 \u00b7 Sep 1, 2026",
+  "brief": "Make adding, reordering, and deleting semantic ports extremely fast from within the Block window itself, while preserving the existing port-as-cable-terminal interaction. The comparison deliberately includes Zach's table-inspired hover/hold/context-menu hybrid and the proposed elbow-control-point model.",
+  "count": 10,
+  "defaultId": "v3",
+  "defaultWhy": "Port Tool is the provisional default at 93.4/100. It is the only direction that combines top-tier repeated-edit throughput, dense-list/accessibility strength, and a completely explicit gesture boundary: one P/Ports entry amortizes across the edit burst, while ordinary port dragging remains exclusively cable creation outside the mode.",
+  "decisionHinge": "The recommendation depends on burst throughput versus zero-learning visibility. Move 13 weight points from Repeated-edit throughput to First-use discoverability and V10 Footer Strip narrowly leads V3 (91.0 vs 90.8). If a typical session makes one port edit, choose V10; if it makes several, keep V3. V1 Boundary Rows is the best gesture layer to splice on top of either command baseline.",
+  "invariants": [
+    "Use the same selected decode Block in Port view with in_1 and out_1, then demonstrate adding in_2, moving it above in_1, and deleting out_1.",
+    "Inputs remain on the left edge and outputs on the right; port order is semantic and survives Port \u2194 Expanded view changes.",
+    "A normal drag from a port terminal continues to start a semantic cable unless an unmistakable port-edit state owns the gesture.",
+    "Deleting a connected port must make the affected cable count explicit and remain one-step undoable.",
+    "All port mutations address stable ids and commit through the same command layer used by the inspector and context menu."
+  ],
+  "boundary": "Standalone interactive front-end slices at a shared SystemSketch-like Block fidelity. Guided stories, direct add/move/delete controls, prune state, and export work in the gallery; real tldraw pointer capture, cable bindings, touch thresholds, command dispatch, undo, persistence, and Port/Expanded integration are simulated and require production validation after selection.",
+  "axes": [
+    {
+      "name": "Mental model",
+      "values": [
+        "table rows",
+        "geometry beads",
+        "persistent tool",
+        "transient lens",
+        "commands",
+        "local sheet",
+        "text list",
+        "selected-object halo",
+        "typed tokens",
+        "footer toolbar"
+      ]
+    },
+    {
+      "name": "Disclosure",
+      "values": [
+        "hover",
+        "selection-near",
+        "explicit mode",
+        "press-hold",
+        "secondary click",
+        "anchored overlay",
+        "focus mode",
+        "port selection",
+        "palette",
+        "always visible"
+      ]
+    },
+    {
+      "name": "Reorder",
+      "values": [
+        "held row grip",
+        "drag bead",
+        "mode drag",
+        "large-row drag",
+        "move command",
+        "sheet grip",
+        "Alt+Arrow",
+        "halo arrows",
+        "spatial drop",
+        "reorder state"
+      ]
+    },
+    {
+      "name": "Safety boundary",
+      "values": [
+        "separate gutter",
+        "modifier/threshold",
+        "tool state",
+        "dwell state",
+        "named command",
+        "off-canvas table",
+        "keyboard focus",
+        "selected target",
+        "palette state",
+        "footer command"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "fr1",
+      "name": "Repeated-edit throughput",
+      "weight": 30,
+      "why": "Zach's stated outcome is a very fast on-canvas loop for creating, arranging, and removing several ports\u2014not merely one successful edit.",
+      "passCondition": "After the mechanism is known, add, reorder, and delete each take one short action and several edits can be chained without leaving the Block.",
+      "anchors": {
+        "1": "Each edit requires leaving the canvas or reopening a deep surface.",
+        "3": "Each operation is available, but repeated edits accumulate menu, targeting, or mode overhead.",
+        "5": "All three operations chain as direct one-action edits at the Block."
+      }
+    },
+    {
+      "id": "fr2",
+      "name": "Zero gesture ambiguity",
+      "weight": 24,
+      "why": "A port already owns the cable-drag gesture, while the Block owns selection and text editing. Inline editing must not make those common actions feel unreliable.",
+      "passCondition": "The user can predict whether a pointer action selects, wires, edits text, reorders, or deletes before committing it.",
+      "anchors": {
+        "1": "Common wiring or selection gestures can accidentally mutate the port list.",
+        "3": "Conflicts are reduced with timing, modifiers, or target precision but remain learnable hazards.",
+        "5": "Port-list mutation has an unmistakable target or bounded mode and ordinary canvas gestures stay intact."
+      }
+    },
+    {
+      "id": "fr3",
+      "name": "First-use discoverability",
+      "weight": 18,
+      "why": "The Block should teach the interaction through familiar visible affordances rather than rely on remembered shortcuts or documentation.",
+      "passCondition": "A new user hovering or selecting the Block can identify how to add a port and infer where reorder/delete live.",
+      "anchors": {
+        "1": "The interaction is invisible unless the user already knows a shortcut or gesture.",
+        "3": "One entry point is visible, but the full operation set is hidden behind convention or exploration.",
+        "5": "Visible labels, handles, or familiar row controls make all three operations self-explanatory."
+      }
+    },
+    {
+      "id": "fr4",
+      "name": "Canvas continuity",
+      "weight": 15,
+      "why": "The point of this feature is to stay in the window and preserve spatial focus on the Block rather than detour into the inspector.",
+      "passCondition": "The Block, target side, and neighboring ports remain visible while editing, with little temporary occlusion or chrome.",
+      "anchors": {
+        "1": "Editing replaces the canvas context or moves the task to a distant surface.",
+        "3": "The interaction stays anchored but meaningfully covers the Block or surrounding sketch.",
+        "5": "Edits happen directly at the port boundary with the full local sketch context intact."
+      }
+    },
+    {
+      "id": "fr5",
+      "name": "Precision, access, and scale",
+      "weight": 13,
+      "why": "Expanded Blocks may hold dense port lists, and the same capability should remain usable with keyboard, touch/pen, zoom, and reduced dexterity.",
+      "passCondition": "Targets remain precise at dense scales and every operation has an explicit keyboard- or command-invocable path.",
+      "anchors": {
+        "1": "Tiny targets, timing, or unsupported input devices make the operation unreliable.",
+        "3": "The common mouse case works, but density or alternate input needs a fallback surface.",
+        "5": "Large targets, keyboard parity, and list behavior remain robust across dense Port and Expanded views."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "g1",
+      "name": "Cable drag remains unambiguous",
+      "why": "Dragging a port is already how semantic cables start; a winning edit model cannot silently steal that gesture."
+    },
+    {
+      "id": "g2",
+      "name": "Connected delete is explicit and undoable",
+      "why": "Removing a connected port changes topology; the affected cable count must be visible and the mutation must be recoverable in one undo."
+    },
+    {
+      "id": "g3",
+      "name": "Port and Expanded parity",
+      "why": "The same mental model must work on the compact Port face and the spatially stretched Expanded frame."
+    },
+    {
+      "id": "g4",
+      "name": "Stable identity and one history step",
+      "why": "Reorder must preserve durable port IDs and each add/move/delete commit must map cleanly onto tldraw undo/redo."
+    }
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "Boundary Rows",
+      "thesis": "Use Zach's table-inspired hybrid: hover gaps to insert, press-hold a row grip to reorder, and right-click for explicit row commands.",
+      "accent": "#6757d6",
+      "bestWhen": "The priority is maximum pointer speed with familiar table grammar and the existing right-click command layer as a safety net.",
+      "losesWhen": "Hold timing and small boundary targets make pen, touch, or dense Expanded layouts feel unreliable.",
+      "decisions": [
+        {
+          "label": "Primary object",
+          "value": "A port behaves like a table row whose boundary exposes insertion and whose gutter exposes ordering."
+        },
+        {
+          "label": "Reorder",
+          "value": "Press-hold on the row gutter crosses a drag threshold; a normal click still selects."
+        },
+        {
+          "label": "Delete",
+          "value": "The row menu names affected cables and exposes Delete plus Undo."
+        }
+      ],
+      "keepParts": [
+        "hover gap plus",
+        "press-hold row grip",
+        "add above/below commands",
+        "connected-delete disclosure"
+      ],
+      "proof": [
+        "The live hero adds in_2 at a gap, moves it above in_1, and removes out_1 through its row affordance.",
+        "The reference strip shows the exact Block, Obsidian table insertion, and row-menu sources Zach supplied."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "Gap add, held row grip, and row menu all remain at the Block and can chain without opening the inspector.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 3,
+          "evidence": "A distinct gutter helps, but reorder still depends on a hold threshold that can be confused with selection or a slow cable drag.",
+          "confidence": "medium"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "The visible plus, six-dot grip, and familiar row menu expose the complete operation set.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "Every action stays on the boundary and the Block remains visible.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 3,
+          "evidence": "The menu provides keyboard fallback, but hover gaps and hold timing remain precision-sensitive.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The reorder grip is outside the port dot, so the cable terminal keeps its direct drag gesture."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The row menu can show \u2018Delete out_1 \u00b7 1 cable\u2019 and produce a single Undo toast."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The row/gap grammar projects onto both compact and stretched edges."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "Moving rows changes list order while the stable port id remains unchanged."
+        }
+      },
+      "previewLabel": "interactive table-inspired hybrid",
+      "story": {
+        "title": "Try gap add, held reorder, and row delete",
+        "steps": [
+          {
+            "label": "See the quiet Block",
+            "caption": "The existing Port face stays unchanged until the pointer reaches a row boundary.",
+            "state": "base",
+            "target": ".insert-edge"
+          },
+          {
+            "label": "Insert at the boundary",
+            "caption": "A table-like plus adds in_2 exactly between neighboring rows.",
+            "state": "add",
+            "target": ".insert-edge"
+          },
+          {
+            "label": "Hold and move",
+            "caption": "The separate gutter grip moves in_2 above in_1 without touching the cable terminal.",
+            "state": "move",
+            "target": ".row-grip"
+          },
+          {
+            "label": "Delete from the row",
+            "caption": "The row command removes out_1 and would disclose its connected cable before commit.",
+            "state": "delete",
+            "target": ".row-menu button"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Row grammar",
+          "caption": "The interaction separates three verbs across gap, gutter, and menu so no one target must infer everything.",
+          "html": "<div class=\"port-media\"><div class=\"port-media-flow\"><span><b>hover gap</b><small>starting state</small></span><i>\u2192</i><span><b>hold row grip</b><small>decisive model</small></span><i>\u2192</i><span><b>menu delete</b><small>commit + undo</small></span></div></div>"
+        }
+      ],
+      "preview": "\n      <div class=\"port-prototype v1-preview\">\n        <div class=\"canvas-caption\">Port view \u00b7 decode</div>\n        \n      <div class=\"decode-block\">\n        <div class=\"block-title\">decode</div>\n        \n      <div class=\"block-body\">\n        <div class=\"port-row input-only port-moved\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_1</span></div>\n        <div class=\"port-row input-only port-new\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_2</span></div>\n        <div class=\"port-row output-only port-delete\"><span class=\"port-label\">out_1<i class=\"type-dot\"></i></span></div>\n      </div>\n    \n        <button class=\"row-grip\" data-story-to=\"move\" aria-label=\"Hold and move in_1\" style=\"top:64px\">\u283f</button><button class=\"insert-edge\" data-story-to=\"add\" aria-label=\"Add input below in_1\">+</button><div class=\"native-actions row-menu\"><button data-story-to=\"delete\" class=\"danger\" aria-label=\"Open row commands and delete out_1\">\u22ee</button></div>\n        <div class=\"block-footer\"><button class=\"footer-dots\" aria-label=\"More\">\u22ee</button></div>\n      </div>\n    \n        \n        <div class=\"native-status status-add\">in_2 inserted</div><div class=\"native-status status-move\">in_2 moved above in_1</div><div class=\"native-status status-delete\">out_1 deleted \u00b7 Undo</div>\n      </div>\n    "
+    },
+    {
+      "id": "v2",
+      "name": "Perimeter Beads",
+      "thesis": "Treat ports like elbow control points: selected Blocks reveal occupied beads and hollow gap beads directly on the perimeter.",
+      "accent": "#4f76ad",
+      "bestWhen": "The geometric edge itself should be the entire mental model and pointer users value minimal chrome.",
+      "losesWhen": "The same bead must mean both wire terminal and reorder handle, or the edge becomes too dense to target reliably.",
+      "decisions": [
+        {
+          "label": "Primary object",
+          "value": "The Block perimeter is a control-point rail, not a list of rows."
+        },
+        {
+          "label": "Add and move",
+          "value": "Click a hollow bead to add; drag an occupied bead to a new slot."
+        },
+        {
+          "label": "Delete",
+          "value": "Alt-click or drag a bead to a perimeter trash notch."
+        }
+      ],
+      "keepParts": [
+        "ghost gap beads",
+        "perimeter preview rail",
+        "slot snapping",
+        "edge-near reveal rule"
+      ],
+      "proof": [
+        "The live hero exposes a hollow insertion bead and occupied reorder beads on the same spatial edge.",
+        "The delete notch makes removal visible, but the prototype also exposes the unresolved conflict with cable dragging."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "All mutations are one direct pointer gesture on the edge.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 2,
+          "evidence": "Dragging an occupied port bead is also the established cable-start gesture, so the prototype cannot predict intent without a modifier or mode.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "Hollow and occupied points are legible once the Block is selected, though delete still needs a legend.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "The control rail adds almost no occlusion and preserves the whole Block.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 2,
+          "evidence": "Small perimeter points and modifier deletion degrade at dense scales and on touch.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": false,
+          "evidence": "FAIL: the occupied bead still carries both cable-start and reorder semantics; the prototype has not proven a non-ambiguous threshold."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The trash notch can show the connected-cable count and one-step Undo."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "A stretched edge can render the same bead rail in Expanded view."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "Slot snapping reorders ids without recreating the port records."
+        }
+      },
+      "previewLabel": "interactive control-point perimeter",
+      "story": {
+        "title": "Manipulate the Block edge as geometry",
+        "steps": [
+          {
+            "label": "Reveal the edge rail",
+            "caption": "Occupied beads align with ports; hollow beads mark valid insertion slots.",
+            "state": "base",
+            "target": ".bead.ghost"
+          },
+          {
+            "label": "Click a hollow bead",
+            "caption": "A new input appears at the chosen edge position.",
+            "state": "add",
+            "target": ".bead.ghost"
+          },
+          {
+            "label": "Drag along the rail",
+            "caption": "The bead snaps to the slot above in_1, making order spatial.",
+            "state": "move",
+            "target": ".bead.b1"
+          },
+          {
+            "label": "Use the trash notch",
+            "caption": "Removal is on the same edge, but this model still conflicts with cable dragging.",
+            "state": "delete",
+            "target": ".bead.trash"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Perimeter grammar",
+          "caption": "The strongest geometric direction is also the only hard-gate failure because the existing terminal drag already owns the decisive gesture.",
+          "html": "<div class=\"port-media\"><div class=\"port-media-flow\"><span><b>hollow bead</b><small>starting state</small></span><i>\u2192</i><span><b>occupied bead</b><small>decisive model</small></span><i>\u2192</i><span><b>trash notch</b><small>commit + undo</small></span></div></div>"
+        }
+      ],
+      "preview": "\n      <div class=\"port-prototype v2-preview\">\n        <div class=\"canvas-caption\">Port view \u00b7 decode</div>\n        \n      <div class=\"decode-block\">\n        <div class=\"block-title\">decode</div>\n        \n      <div class=\"block-body\">\n        <div class=\"port-row input-only port-moved\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_1</span></div>\n        <div class=\"port-row input-only port-new\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_2</span></div>\n        <div class=\"port-row output-only port-delete\"><span class=\"port-label\">out_1<i class=\"type-dot\"></i></span></div>\n      </div>\n    \n        <div class=\"bead-rail\"><button class=\"bead b1\" data-story-to=\"move\" aria-label=\"Drag first bead to reorder\">\u25cf</button><button class=\"bead ghost b2\" data-story-to=\"add\" aria-label=\"Add port at ghost bead\">+</button><button class=\"bead b3\" data-story-to=\"move\" aria-label=\"Drag output bead\">\u25cf</button><button class=\"bead trash\" data-story-to=\"delete\" aria-label=\"Alt click bead to delete\">\u00d7</button></div>\n        <div class=\"block-footer\"><button class=\"footer-dots\" aria-label=\"More\">\u22ee</button></div>\n      </div>\n    \n        \n        <div class=\"native-status status-add\">in_2 snapped into gap</div><div class=\"native-status status-move\">bead moved to slot 1</div><div class=\"native-status status-delete\">out_1 removed \u00b7 Undo</div>\n      </div>\n    "
+    },
+    {
+      "id": "v3",
+      "name": "Port Tool",
+      "thesis": "Give port editing one explicit, persistent canvas mode: press P or choose Ports, then click gaps, drag rows, and delete without colliding with wiring.",
+      "accent": "#5a7d51",
+      "bestWhen": "Several port edits happen in a burst and preserving predictable canvas gestures matters more than avoiding a mode.",
+      "losesWhen": "Most sessions make only one tiny edit and entering or exiting a dedicated tool feels like ceremony.",
+      "decisions": [
+        {
+          "label": "Primary object",
+          "value": "Port editing is a first-class tldraw tool state, parallel to drawing or text tools."
+        },
+        {
+          "label": "Mode boundary",
+          "value": "P or a labeled Ports pill enters; Escape or selecting another tool exits."
+        },
+        {
+          "label": "Within mode",
+          "value": "Gap pluses, row grips, and trash are all explicit; cable creation is disabled until exit."
+        }
+      ],
+      "keepParts": [
+        "P shortcut",
+        "green mode outline",
+        "tool-owned gap/grip/trash",
+        "Escape exit"
+      ],
+      "proof": [
+        "The hero visibly changes the selected Block boundary when Port mode becomes active and exposes a dedicated edit rail.",
+        "Add, move, and delete map onto separate mode-owned controls while the cable tool remains outside the mode."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "One mode entry amortizes across an arbitrary burst of single-action adds, moves, and deletes.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "Port-list mutation is impossible outside the labeled tool and cable dragging is unavailable inside it.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "The labeled Ports pill and mode outline are clear, though the P shortcut is learned rather than self-evident.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "The Block and canvas remain visible; only a narrow rail and mode outline are added.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "The tool can own large hit targets, keyboard traversal, pen behavior, and dense-list scrolling consistently.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "Port mode disables cable-start behavior; exiting restores the normal semantic terminal drag."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Deleting a connected port opens an in-mode impact chip and commits through one Undo point."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The same tool projects controls onto Port rows or Expanded edge positions."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The tool dispatches moveBlockPort against durable ids and brackets each gesture as one history unit."
+        }
+      },
+      "previewLabel": "interactive explicit Port mode",
+      "story": {
+        "title": "Enter one bounded mode for a burst of edits",
+        "steps": [
+          {
+            "label": "Normal canvas",
+            "caption": "Ports keep their ordinary selection and cable behavior outside editing mode.",
+            "state": "base",
+            "target": ".port-tool button"
+          },
+          {
+            "label": "Enter and add",
+            "caption": "The green Block outline and edit rail make the tool boundary unmistakable while in_2 is inserted.",
+            "state": "add",
+            "target": ".mode-rail button:nth-child(1)"
+          },
+          {
+            "label": "Reorder in mode",
+            "caption": "The rail moves in_2 above in_1 while stable ids and cables remain attached.",
+            "state": "move",
+            "target": ".mode-rail button:nth-child(2)"
+          },
+          {
+            "label": "Delete with impact",
+            "caption": "The trash action removes out_1 in one undoable edit, then Escape returns to wiring.",
+            "state": "delete",
+            "target": ".mode-rail button:nth-child(3)"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Mode boundary",
+          "caption": "A short burst has a clear lifecycle: enter once, perform several edits, then return to normal cable semantics.",
+          "html": "<div class=\"port-media\"><div class=\"port-media-flow\"><span><b>P / Ports</b><small>starting state</small></span><i>\u2192</i><span><b>burst edit</b><small>decisive model</small></span><i>\u2192</i><span><b>Escape</b><small>commit + undo</small></span></div></div>"
+        }
+      ],
+      "preview": "\n      <div class=\"port-prototype v3-preview\">\n        <div class=\"canvas-caption\">Port view \u00b7 decode</div>\n        \n      <div class=\"decode-block is-selected\">\n        <div class=\"block-title\">decode</div>\n        \n      <div class=\"block-body\">\n        <div class=\"port-row input-only port-moved\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_1</span></div>\n        <div class=\"port-row input-only port-new\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_2</span></div>\n        <div class=\"port-row output-only port-delete\"><span class=\"port-label\">out_1<i class=\"type-dot\"></i></span></div>\n      </div>\n    \n        <div class=\"native-actions mode-rail\"><button data-story-to=\"add\" aria-label=\"Add port in Port mode\">\uff0b</button><button data-story-to=\"move\" aria-label=\"Move port in Port mode\">\u2195</button><button data-story-to=\"delete\" class=\"danger\" aria-label=\"Delete port in Port mode\">\u232b</button></div>\n        <div class=\"block-footer\"><button class=\"footer-dots\" aria-label=\"More\">\u22ee</button></div>\n      </div>\n    \n        <div class=\"native-actions port-tool\"><button data-story-to=\"add\" aria-label=\"Enter Port tool and add\">P \u00b7 Ports</button></div>\n        <div class=\"native-status status-add\">Port mode \u00b7 click gaps to add</div><div class=\"native-status status-move\">in_2 moved \u00b7 ids preserved</div><div class=\"native-status status-delete\">out_1 + 1 cable removed \u00b7 Undo</div>\n      </div>\n    "
+    },
+    {
+      "id": "v4",
+      "name": "Hold Lens",
+      "thesis": "Press-hold any port row to temporarily transform the Block into a large-target port-only lens; release to return to the sketch.",
+      "accent": "#8563b2",
+      "bestWhen": "A transient focus state should make dense ports easy to manipulate without leaving a lasting canvas mode.",
+      "losesWhen": "Hold duration is hard to discover or repeated edits outlast the comfortable pointer hold.",
+      "decisions": [
+        {
+          "label": "Primary object",
+          "value": "The Block temporarily becomes a focused list while its title and footprint remain anchored."
+        },
+        {
+          "label": "Entry/exit",
+          "value": "Hold crosses a visible dwell ring; pointer release or Escape restores the normal face."
+        },
+        {
+          "label": "Targets",
+          "value": "Rows expand to large grips, labels, types, insertion boundaries, and delete buttons."
+        }
+      ],
+      "keepParts": [
+        "temporary port-only lens",
+        "large row targets",
+        "release-to-exit",
+        "internals fade during reorder"
+      ],
+      "proof": [
+        "The live hero swaps the body to a focused list without moving the Block or opening external chrome.",
+        "The lens exposes direct add/move/delete targets and then collapses back to the same face."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 4,
+          "evidence": "Actions are fast inside the lens, but entry must be repeated if the hold is released between edits.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 4,
+          "evidence": "A dwell ring and transformed face establish intent, though hold timing remains a threshold interaction.",
+          "confidence": "medium"
+        },
+        "fr3": {
+          "score": 3,
+          "evidence": "The row reacts once held, but a new user may not know that a hold exists.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "The lens occupies only the Block's own footprint and intentionally hides irrelevant internals during editing.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "Large targets help touch and density, while keyboard users need an explicit command to lock the transient lens.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The dwell completes on the row label/gutter, never the cable dot, and the transformed lens suspends wiring."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The lens has an explicit trash cell with cable impact and one-step Undo."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Expanded view can transform only its boundary layer while fading interior content."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "List operations keep ids and the hold lifecycle brackets each commit cleanly."
+        }
+      },
+      "previewLabel": "interactive transient focus lens",
+      "story": {
+        "title": "Hold to reveal a temporary port-only face",
+        "steps": [
+          {
+            "label": "Normal Block face",
+            "caption": "The canvas stays calm before a deliberate row hold.",
+            "state": "base",
+            "target": ".hold-target button"
+          },
+          {
+            "label": "Hold and add",
+            "caption": "The body transforms into large port rows; the insertion boundary creates in_2.",
+            "state": "add",
+            "target": ".lens-row:nth-child(3) button"
+          },
+          {
+            "label": "Move with a large grip",
+            "caption": "The temporary list uses comfortable targets and fades irrelevant Block content.",
+            "state": "move",
+            "target": ".lens-row:nth-child(1) button"
+          },
+          {
+            "label": "Delete, then release",
+            "caption": "A visible trash cell removes out_1; releasing restores the ordinary Block face.",
+            "state": "delete",
+            "target": ".lens-row:nth-child(2) button:last-child"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Transient lifecycle",
+          "caption": "The interaction borrows a camera-like press-and-hold lens: local focus appears only for the duration of the edit.",
+          "html": "<div class=\"port-media\"><div class=\"port-media-flow\"><span><b>press + dwell</b><small>starting state</small></span><i>\u2192</i><span><b>port-only face</b><small>decisive model</small></span><i>\u2192</i><span><b>release</b><small>commit + undo</small></span></div></div>"
+        }
+      ],
+      "preview": "\n      <div class=\"port-prototype v4-preview\">\n        <div class=\"canvas-caption\">Port view \u00b7 decode</div>\n        \n      <div class=\"decode-block\">\n        <div class=\"block-title\">decode</div>\n        \n      <div class=\"block-body\">\n        <div class=\"port-row input-only port-moved\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_1</span></div>\n        <div class=\"port-row input-only port-new\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_2</span></div>\n        <div class=\"port-row output-only port-delete\"><span class=\"port-label\">out_1<i class=\"type-dot\"></i></span></div>\n      </div>\n    \n        \n  <div class=\"port-lens\">\n    <div class=\"lens-row\"><button data-story-to=\"move\">\u283f</button><b>in_1</b><span>input</span><button data-story-to=\"delete\">\u00d7</button></div>\n    <div class=\"lens-row\"><button data-story-to=\"move\">\u283f</button><b>out_1</b><span>output</span><button data-story-to=\"delete\">\u00d7</button></div>\n    <div class=\"lens-row\"><button data-story-to=\"add\">\uff0b</button><span>Add at this boundary</span><span></span><span></span></div>\n  </div>\n\n        <div class=\"block-footer\"><button class=\"footer-dots\" aria-label=\"More\">\u22ee</button></div>\n      </div>\n    \n        <div class=\"native-actions hold-target\"><button data-story-to=\"add\" aria-label=\"Hold row to open Port lens\">Hold row \u00b7 350 ms</button></div>\n        <div class=\"native-status status-add\">Port lens held</div><div class=\"native-status status-move\">in_2 moved</div><div class=\"native-status status-delete\">out_1 deleted \u00b7 release to exit</div>\n      </div>\n    "
+    },
+    {
+      "id": "v5",
+      "name": "Row Commands",
+      "thesis": "Keep the canvas visually unchanged and put the complete add-above/below, move, duplicate, and delete vocabulary in the port context menu.",
+      "accent": "#b26943",
+      "bestWhen": "A reliable accessible command path matters more than peak repeated-edit speed or persistent visual affordances.",
+      "losesWhen": "Many ports are being rearranged and reopening a menu per action becomes tedious.",
+      "decisions": [
+        {
+          "label": "Primary object",
+          "value": "Each port is a command target; the menu is the canonical invocation surface."
+        },
+        {
+          "label": "Ordering",
+          "value": "Move up/down commands avoid drag precision and gain keyboard shortcuts."
+        },
+        {
+          "label": "Delete",
+          "value": "The menu can state the exact cable impact before the destructive item is chosen."
+        }
+      ],
+      "keepParts": [
+        "add above/below",
+        "move up/down shortcuts",
+        "duplicate port",
+        "explicit cable impact"
+      ],
+      "proof": [
+        "The hero opens a row-anchored command menu beside out_1 and drives add, move, and delete states from real menu items.",
+        "No controls occupy the Block until the row command is invoked."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 3,
+          "evidence": "Every operation exists, but repeated changes reopen and traverse the menu.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "Commands are explicit, target-bound, and separate from cable or selection gestures.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 3,
+          "evidence": "Right-click is familiar, but the operation set remains invisible until invoked.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "The normal canvas has zero added chrome; the temporary menu is row-anchored.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "Keyboard shortcuts and menu targets scale well, though touch needs a long-press or visible overflow trigger.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The context trigger is a secondary click or overflow button; direct port drag always starts a cable."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The delete item can read \u2018Delete port and 1 cable\u2019 and map to one undoable command."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Commands operate on a selected semantic port independent of its rendered y position."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "All entries call the existing id-based command layer with explicit history labels."
+        }
+      },
+      "previewLabel": "interactive port context menu",
+      "story": {
+        "title": "Operate one port through explicit commands",
+        "steps": [
+          {
+            "label": "Target out_1",
+            "caption": "The face remains stock until the port's secondary command is invoked.",
+            "state": "base",
+            "target": ".context-menu-trigger"
+          },
+          {
+            "label": "Open row commands",
+            "caption": "The menu exposes add above/below, move, and destructive actions together.",
+            "state": "menu",
+            "target": ".context-menu button:nth-child(2)"
+          },
+          {
+            "label": "Add below",
+            "caption": "A menu command inserts in_2 with no drag targeting.",
+            "state": "add",
+            "target": ".context-menu button:nth-child(2)"
+          },
+          {
+            "label": "Move with a shortcut",
+            "caption": "Move up/down gives keyboard and low-precision parity.",
+            "state": "move",
+            "target": ".context-menu button:nth-child(3)"
+          },
+          {
+            "label": "Delete explicitly",
+            "caption": "The destructive item can name affected cables before commit.",
+            "state": "delete",
+            "target": ".context-menu button.danger"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Command vocabulary",
+          "caption": "This is the clean baseline: slower but semantically explicit, fully keyboard invocable, and safe to retain beside any faster gesture.",
+          "html": "<div class=\"port-media\"><div class=\"port-media-flow\"><span><b>right-click</b><small>starting state</small></span><i>\u2192</i><span><b>named command</b><small>decisive model</small></span><i>\u2192</i><span><b>undo</b><small>commit + undo</small></span></div></div>"
+        }
+      ],
+      "preview": "\n      <div class=\"port-prototype v5-preview\">\n        <div class=\"canvas-caption\">Port view \u00b7 decode</div>\n        \n      <div class=\"decode-block\">\n        <div class=\"block-title\">decode</div>\n        \n      <div class=\"block-body\">\n        <div class=\"port-row input-only port-moved\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_1</span></div>\n        <div class=\"port-row input-only port-new\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_2</span></div>\n        <div class=\"port-row output-only port-delete\"><span class=\"port-label\">out_1<i class=\"type-dot\"></i></span></div>\n      </div>\n    \n        \n  <div class=\"context-menu\">\n    <button data-story-to=\"add\"><span>Add port above</span><kbd>A</kbd></button>\n    <button data-story-to=\"add\"><span>Add port below</span><kbd>B</kbd></button>\n    <button data-story-to=\"move\"><span>Move up</span><kbd>\u2325\u2191</kbd></button>\n    <button data-story-to=\"move\"><span>Move down</span><kbd>\u2325\u2193</kbd></button>\n    <button data-story-to=\"delete\" class=\"danger\"><span>Delete port</span><kbd>\u232b</kbd></button>\n  </div>\n<button class=\"native-control context-menu-trigger\" data-story-to=\"menu\" aria-label=\"Open port context menu\">\u22ee</button>\n        <div class=\"block-footer\"><button class=\"footer-dots\" aria-label=\"More\">\u22ee</button></div>\n      </div>\n    \n        \n        <div class=\"native-status status-menu\">Port commands open</div><div class=\"native-status status-add\">in_2 added below</div><div class=\"native-status status-move\">in_2 moved up</div><div class=\"native-status status-delete\">out_1 + 1 cable deleted \u00b7 Undo</div>\n      </div>\n    "
+    },
+    {
+      "id": "v6",
+      "name": "Port Sheet",
+      "thesis": "Open a compact spreadsheet-like editor anchored over the Block, with large rows, drag grips, types, and add/delete controls in one stable surface.",
+      "accent": "#437c8b",
+      "bestWhen": "The list is dense or typed, several properties must be edited together, and one local overlay is acceptable.",
+      "losesWhen": "Preserving a completely unobscured view of the Block and nearby cables is more important than list control.",
+      "decisions": [
+        {
+          "label": "Primary object",
+          "value": "A compact two-kind table treats Inputs and Outputs as editable records."
+        },
+        {
+          "label": "Surface",
+          "value": "The footer's Ports button opens an anchored sheet rather than the distant inspector."
+        },
+        {
+          "label": "Scale",
+          "value": "The sheet can scroll, expose types/defaults, and support keyboard row navigation."
+        }
+      ],
+      "keepParts": [
+        "anchored local sheet",
+        "large typed rows",
+        "scrollable dense list",
+        "two-column input/output add"
+      ],
+      "proof": [
+        "The hero opens a real anchored sheet inside the canvas and keeps the decode title visibly behind it.",
+        "Add, move, and delete all remain available without reopening the surface."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 4,
+          "evidence": "One sheet opening amortizes across rapid row operations, though it adds an entry click.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "Every mutation has a labeled table control and the canvas cable gesture is untouched.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "The labeled Ports footer and conventional table controls expose the full interaction.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 3,
+          "evidence": "The sheet is local but covers most of the Block body and some nearby canvas.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "Large scrollable rows, keyboard focus, and type fields are the most robust dense-list surface.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "All sheet interactions occur off the port terminal, leaving direct cable drag unchanged."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The trash cell can disclose connection impact and retain an Undo action in the sheet footer."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The sheet edits semantic records and therefore behaves identically for Port and Expanded rendering."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "Rows bind to stable ids, and each manipulation is one named command/history unit."
+        }
+      },
+      "previewLabel": "interactive anchored spreadsheet",
+      "story": {
+        "title": "Open one local sheet for a dense edit burst",
+        "steps": [
+          {
+            "label": "Block remains primary",
+            "caption": "A labeled Ports control sits in the existing footer.",
+            "state": "base",
+            "target": ".footer-dots"
+          },
+          {
+            "label": "Open the local sheet",
+            "caption": "The anchored table exposes the whole list without sending focus to the inspector.",
+            "state": "sheet",
+            "target": ".sheet-add button:first-child"
+          },
+          {
+            "label": "Add a typed row",
+            "caption": "Input and Output additions are labeled and ready for immediate naming/type editing.",
+            "state": "add",
+            "target": ".sheet-add button:first-child"
+          },
+          {
+            "label": "Reorder precisely",
+            "caption": "A large row grip supports pointer and keyboard movement in a dense list.",
+            "state": "move",
+            "target": ".sheet-row:nth-child(2) button:first-child"
+          },
+          {
+            "label": "Delete with context",
+            "caption": "The row stays visible while its connected-cable impact is confirmed and undone.",
+            "state": "delete",
+            "target": ".sheet-row:nth-child(3) button:last-child"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Local table lifecycle",
+          "caption": "The sheet pays one disclosure click to gain durable large targets and a scalable editing surface.",
+          "html": "<div class=\"port-media\"><div class=\"port-media-flow\"><span><b>Ports footer</b><small>starting state</small></span><i>\u2192</i><span><b>anchored sheet</b><small>decisive model</small></span><i>\u2192</i><span><b>close</b><small>commit + undo</small></span></div></div>"
+        }
+      ],
+      "preview": "\n      <div class=\"port-prototype v6-preview\">\n        <div class=\"canvas-caption\">Port view \u00b7 decode</div>\n        \n      <div class=\"decode-block\">\n        <div class=\"block-title\">decode</div>\n        \n      <div class=\"block-body\">\n        <div class=\"port-row input-only port-moved\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_1</span></div>\n        <div class=\"port-row input-only port-new\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_2</span></div>\n        <div class=\"port-row output-only port-delete\"><span class=\"port-label\">out_1<i class=\"type-dot\"></i></span></div>\n      </div>\n    \n        \n  <div class=\"port-sheet\">\n    <div class=\"sheet-head\"><span>decode \u00b7 Ports</span><button data-story-to=\"base\">\u00d7</button></div>\n    <div class=\"sheet-row\"><button data-story-to=\"move\">\u283f</button><b>in_1</b><span>Input</span><button data-story-to=\"delete\">\u232b</button></div>\n    <div class=\"sheet-row\"><button data-story-to=\"move\">\u283f</button><b>out_1</b><span>Output</span><button data-story-to=\"delete\">\u232b</button></div>\n    <div class=\"sheet-add\"><button data-story-to=\"add\">\uff0b Input</button><button data-story-to=\"add\">\uff0b Output</button></div>\n  </div>\n\n        <div class=\"block-footer\"><button class=\"footer-dots\" data-story-to=\"sheet\" aria-label=\"Open Ports sheet\">Ports \u25a4</button></div>\n      </div>\n    \n        \n        <div class=\"native-status status-sheet\">Ports sheet open</div><div class=\"native-status status-add\">in_2 added as Input</div><div class=\"native-status status-move\">in_2 moved to row 1</div><div class=\"native-status status-delete\">out_1 deleted \u00b7 Undo</div>\n      </div>\n    "
+    },
+    {
+      "id": "v7",
+      "name": "Keyboard List",
+      "thesis": "Let the Block's port region enter a text-like list editor: Enter adds, Alt+Arrow reorders, and Backspace deletes the focused port.",
+      "accent": "#657184",
+      "bestWhen": "Expert keyboard throughput, port naming, and accessible deterministic focus matter more than first-use pointer discoverability.",
+      "losesWhen": "The user expects purely spatial manipulation or rarely uses shortcuts.",
+      "decisions": [
+        {
+          "label": "Primary object",
+          "value": "Ports are editable lines with a caret, selection, and familiar text-list commands."
+        },
+        {
+          "label": "Entry",
+          "value": "Double-click a label or press Enter on a selected port; Escape returns to canvas selection."
+        },
+        {
+          "label": "Mutation",
+          "value": "Enter, Alt+Arrow, and Backspace map to add, move, and delete while inline naming remains available."
+        }
+      ],
+      "keepParts": [
+        "deterministic keyboard focus",
+        "Enter-to-add",
+        "Alt+Arrow reorder",
+        "inline rename and type"
+      ],
+      "proof": [
+        "The hero swaps the body into a compact line editor and exposes active focus plus actual shortcut controls.",
+        "The same ordered list state drives the add, move, and delete examples."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "After entry, an expert can add/name/reorder/delete without leaving the keyboard.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "A focused editor state owns keyboard mutation while pointer terminal dragging remains unchanged.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 2,
+          "evidence": "The entry and shortcut vocabulary are poorly discoverable without a hint or command menu.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "The editor replaces only the Block body and preserves its title, footprint, and canvas context.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "Deterministic focus, large line rows, screen-reader labels, and no pointer precision make this exceptionally robust.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The editor begins only from label focus/Enter; pointer dragging the terminal remains a cable action."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Backspace on a connected row opens an inline impact confirmation and one Undo unit."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Both visual views project the same ordered list into this editor state."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "Caret rows are keyed by id and Alt+Arrow mutates order without recreation."
+        }
+      },
+      "previewLabel": "interactive text-like port editor",
+      "story": {
+        "title": "Edit the port list without leaving the keyboard",
+        "steps": [
+          {
+            "label": "Focus a port label",
+            "caption": "The normal Block remains unchanged until Enter or a label double-click.",
+            "state": "base",
+            "target": ".key-trigger"
+          },
+          {
+            "label": "Enter list editing",
+            "caption": "A caret and stable row focus expose the keyboard-owned state.",
+            "state": "edit",
+            "target": ".key-hints button:first-child"
+          },
+          {
+            "label": "Press Enter",
+            "caption": "A new line creates in_2 and is ready for immediate naming.",
+            "state": "add",
+            "target": ".key-hints button:first-child"
+          },
+          {
+            "label": "Press Alt+Up",
+            "caption": "The focused line moves without pointer targeting or identity loss.",
+            "state": "move",
+            "target": ".key-hints button:nth-child(2)"
+          },
+          {
+            "label": "Press Backspace",
+            "caption": "Connected deletion remains explicit and recoverable before Escape returns to canvas.",
+            "state": "delete",
+            "target": ".key-hints button:nth-child(3)"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Keyboard grammar",
+          "caption": "The model borrows the mature affordances of list and text editors instead of inventing a new canvas gesture.",
+          "html": "<div class=\"port-media\"><div class=\"port-media-flow\"><span><b>Enter edit</b><small>starting state</small></span><i>\u2192</i><span><b>line commands</b><small>decisive model</small></span><i>\u2192</i><span><b>Escape</b><small>commit + undo</small></span></div></div>"
+        }
+      ],
+      "preview": "\n      <div class=\"port-prototype v7-preview\">\n        <div class=\"canvas-caption\">Port view \u00b7 decode</div>\n        \n      <div class=\"decode-block\">\n        <div class=\"block-title\">decode</div>\n        \n      <div class=\"block-body\">\n        <div class=\"port-row input-only port-moved\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_1</span></div>\n        <div class=\"port-row input-only port-new\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_2</span></div>\n        <div class=\"port-row output-only port-delete\"><span class=\"port-label\">out_1<i class=\"type-dot\"></i></span></div>\n      </div>\n    \n        \n  <div class=\"key-editor\">\n    <div class=\"key-line on\"><em>1</em><b>in_1</b><span>: input</span></div>\n    <div class=\"key-line\"><em>2</em><b>out_1</b><span>: output</span></div>\n    <div class=\"key-line port-new\"><em>3</em><b>in_2</b><span>: input</span></div>\n    <div class=\"key-hints\">\n      <button data-story-to=\"add\">Enter add</button>\n      <button data-story-to=\"move\">Alt+\u2191 move</button>\n      <button data-story-to=\"delete\">\u232b delete</button>\n    </div>\n  </div>\n<button class=\"native-control key-trigger\" data-story-to=\"edit\" aria-label=\"Edit ports as a keyboard list\">\u21b5</button>\n        <div class=\"block-footer\"><button class=\"footer-dots\" aria-label=\"More\">\u22ee</button></div>\n      </div>\n    \n        \n        <div class=\"native-status status-edit\">Port list editor focused</div><div class=\"native-status status-add\">line 2 \u00b7 in_2 created</div><div class=\"native-status status-move\">line moved up</div><div class=\"native-status status-delete\">out_1 deleted \u00b7 Ctrl+Z</div>\n      </div>\n    "
+    },
+    {
+      "id": "v8",
+      "name": "Port Halo",
+      "thesis": "Select one port, then expose a tiny adjacent halo with add-above/below, move, and delete actions bound to that exact target.",
+      "accent": "#5a7dbc",
+      "bestWhen": "Single precise edits dominate and the UI should explicitly show which port each action will affect.",
+      "losesWhen": "Many ports must be reordered because each operation begins with a new target selection.",
+      "decisions": [
+        {
+          "label": "Primary object",
+          "value": "One selected port owns a small contextual action cluster."
+        },
+        {
+          "label": "Target clarity",
+          "value": "The selected row highlights before any add, move, or delete command is offered."
+        },
+        {
+          "label": "Dismissal",
+          "value": "Clicking canvas, Escape, or starting a cable hides the halo immediately."
+        }
+      ],
+      "keepParts": [
+        "selected-row highlight",
+        "add above/below",
+        "adjacent action halo",
+        "automatic dismissal on cable drag"
+      ],
+      "proof": [
+        "The hero highlights out_1 and opens a compact vertical halo physically adjacent to that port.",
+        "Each button drives the shared add/move/delete list states and keeps the target visible."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 3,
+          "evidence": "Single edits are fast, but repeated work incurs select-then-command cycles.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "The explicit selection state and separate halo buttons make target and verb unambiguous.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "Selecting a port reveals labeled-symbol controls exactly where the user is looking.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "The halo stays beside the Block but temporarily occupies a narrow canvas gutter.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "Large halo buttons and keyboard roving focus work well, though dense edges can make initial port selection difficult.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "Starting a cable dismisses the halo; halo actions live outside the terminal dot."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The selected target lets delete show an exact impact count and one-step Undo."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The halo anchors to whichever semantic port position the current view projects."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "Commands address the selected stable id and bracket history per action."
+        }
+      },
+      "previewLabel": "interactive selected-port halo",
+      "story": {
+        "title": "Select one port, then act beside it",
+        "steps": [
+          {
+            "label": "Select out_1",
+            "caption": "A direct port click targets the row before mutation controls appear.",
+            "state": "base",
+            "target": ".port-pick"
+          },
+          {
+            "label": "Reveal the halo",
+            "caption": "The action cluster sits beside the highlighted target rather than in global chrome.",
+            "state": "selected",
+            "target": ".port-halo button:first-child"
+          },
+          {
+            "label": "Add beside selection",
+            "caption": "Above/below controls make the insertion location explicit.",
+            "state": "add",
+            "target": ".port-halo button:first-child"
+          },
+          {
+            "label": "Move the selection",
+            "caption": "The same target remains highlighted as it changes order.",
+            "state": "move",
+            "target": ".port-halo button:nth-child(3)"
+          },
+          {
+            "label": "Delete the target",
+            "caption": "A dedicated trash button removes the visibly selected port and offers Undo.",
+            "state": "delete",
+            "target": ".port-halo button:nth-child(4)"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Selection lifecycle",
+          "caption": "The halo optimizes one exact edit: target first, then reveal only the verbs valid for that port.",
+          "html": "<div class=\"port-media\"><div class=\"port-media-flow\"><span><b>select row</b><small>starting state</small></span><i>\u2192</i><span><b>adjacent verbs</b><small>decisive model</small></span><i>\u2192</i><span><b>dismiss</b><small>commit + undo</small></span></div></div>"
+        }
+      ],
+      "preview": "\n      <div class=\"port-prototype v8-preview\">\n        <div class=\"canvas-caption\">Port view \u00b7 decode</div>\n        \n      <div class=\"decode-block\">\n        <div class=\"block-title\">decode</div>\n        \n      <div class=\"block-body\">\n        <div class=\"port-row input-only port-moved\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_1</span></div>\n        <div class=\"port-row input-only port-new\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_2</span></div>\n        <div class=\"port-row output-only port-delete\"><span class=\"port-label\">out_1<i class=\"type-dot\"></i></span></div>\n      </div>\n    \n        <button class=\"native-control port-pick\" data-story-to=\"selected\" aria-label=\"Select out_1 port\">\u25cf</button><div class=\"native-actions port-halo\"><button data-story-to=\"add\" aria-label=\"Add above selected port\">\uff0b\u2191</button><button data-story-to=\"add\" aria-label=\"Add below selected port\">\uff0b\u2193</button><button data-story-to=\"move\" aria-label=\"Move selected port\">\u2195</button><button data-story-to=\"delete\" class=\"danger\" aria-label=\"Delete selected port\">\u232b</button></div>\n        <div class=\"block-footer\"><button class=\"footer-dots\" aria-label=\"More\">\u22ee</button></div>\n      </div>\n    \n        \n        <div class=\"native-status status-selected\">out_1 selected</div><div class=\"native-status status-add\">in_2 added above target</div><div class=\"native-status status-move\">selection moved</div><div class=\"native-status status-delete\">out_1 deleted \u00b7 Undo</div>\n      </div>\n    "
+    },
+    {
+      "id": "v9",
+      "name": "Typed Tokens",
+      "thesis": "Open a tiny palette of typed port tokens and drag one onto a highlighted Block edge; rearrange tokens spatially and drop them into Trash.",
+      "accent": "#4f8b7e",
+      "bestWhen": "Choosing a port type while adding is common and direct spatial placement is more valuable than compact menus.",
+      "losesWhen": "Pointer travel, touch precision, or many reorder operations make drag-and-drop tiring.",
+      "decisions": [
+        {
+          "label": "Primary object",
+          "value": "A port is a typed token inserted onto a spatial drop edge."
+        },
+        {
+          "label": "Creation",
+          "value": "Drag Input, Image, or Text from a local palette to the exact side and slot."
+        },
+        {
+          "label": "Move/delete",
+          "value": "Drag a row to another slot or into a visible Trash token while edit state is active."
+        }
+      ],
+      "keepParts": [
+        "typed add tokens",
+        "highlighted drop edge",
+        "slot preview",
+        "visible trash dropzone"
+      ],
+      "proof": [
+        "The hero opens a typed palette and exposes a dashed insertion edge directly on the Block.",
+        "The shared states demonstrate a typed in_2 addition, spatial reorder, and explicit Trash drop."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 4,
+          "evidence": "Typed add combines creation and type choice, but drag travel slows repeated reorder and delete.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 4,
+          "evidence": "The palette/drop-edge state establishes intent, though dragging existing ports still needs an edit-state rule.",
+          "confidence": "medium"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "The palette labels types and the dashed edge advertises a drop target, but its launcher must first be found.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "The palette stays local and the Block remains visible, with modest gutter occlusion.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 3,
+          "evidence": "Spatial drag is clear at moderate density but needs command fallbacks for keyboard, touch, and long Expanded edges.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The highlighted drop edge appears only after opening the palette; ordinary terminal drag outside that state remains wiring."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Trash is a labeled drop target with cable impact and a one-step Undo toast."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Tokens target semantic side/order and can drop onto compact or stretched edge projections."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "Drops resolve to id-based create/move/remove commands with one history boundary."
+        }
+      },
+      "previewLabel": "interactive typed drag palette",
+      "story": {
+        "title": "Drag a typed port onto the Block edge",
+        "steps": [
+          {
+            "label": "Open typed ports",
+            "caption": "A local launcher reveals port kinds rather than creating an untyped row first.",
+            "state": "base",
+            "target": ".palette-trigger button"
+          },
+          {
+            "label": "Reveal drop targets",
+            "caption": "The dashed Block edge shows where a token can land and how side/order will resolve.",
+            "state": "palette",
+            "target": ".token-palette button:first-child"
+          },
+          {
+            "label": "Drop an Input",
+            "caption": "One drag both creates in_2 and assigns its initial input type.",
+            "state": "add",
+            "target": ".token-palette button:first-child"
+          },
+          {
+            "label": "Drag to another slot",
+            "caption": "The edge preview makes the new order spatial before commit.",
+            "state": "move",
+            "target": ".drop-edge"
+          },
+          {
+            "label": "Drop into Trash",
+            "caption": "A visible destructive target names topology impact and offers Undo.",
+            "state": "delete",
+            "target": ".token-palette button:last-child"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Typed drag lifecycle",
+          "caption": "This direction makes the port type part of creation rather than a follow-up inspector edit.",
+          "html": "<div class=\"port-media\"><div class=\"port-media-flow\"><span><b>pick token</b><small>starting state</small></span><i>\u2192</i><span><b>drop side + slot</b><small>decisive model</small></span><i>\u2192</i><span><b>Trash</b><small>commit + undo</small></span></div></div>"
+        }
+      ],
+      "preview": "\n      <div class=\"port-prototype v9-preview\">\n        <div class=\"canvas-caption\">Port view \u00b7 decode</div>\n        \n      <div class=\"decode-block\">\n        <div class=\"block-title\">decode</div>\n        \n      <div class=\"block-body\">\n        <div class=\"port-row input-only port-moved\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_1</span></div>\n        <div class=\"port-row input-only port-new\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_2</span></div>\n        <div class=\"port-row output-only port-delete\"><span class=\"port-label\">out_1<i class=\"type-dot\"></i></span></div>\n      </div>\n    \n        \n  <div class=\"token-palette\">\n    <button data-story-to=\"add\"><i class=\"type-dot\"></i>Input</button>\n    <button data-story-to=\"add\"><i class=\"type-dot\" style=\"background:#c060e0\"></i>Image</button>\n    <button data-story-to=\"add\"><i class=\"type-dot\" style=\"background:#4caf50\"></i>Text</button>\n    <button data-story-to=\"delete\">\ud83d\uddd1 Trash</button>\n  </div>\n  <div class=\"drop-edge\"></div>\n\n        <div class=\"block-footer\"><button class=\"footer-dots\" aria-label=\"More\">\u22ee</button></div>\n      </div>\n    \n        <div class=\"native-actions palette-trigger\"><button data-story-to=\"palette\" aria-label=\"Open typed port palette\">\uff0b Typed port</button></div>\n        <div class=\"native-status status-palette\">Choose a token and drop edge</div><div class=\"native-status status-add\">Input in_2 dropped</div><div class=\"native-status status-move\">in_2 moved to slot 1</div><div class=\"native-status status-delete\">out_1 dropped in Trash \u00b7 Undo</div>\n      </div>\n    "
+    },
+    {
+      "id": "v10",
+      "name": "Footer Strip",
+      "thesis": "Put a quiet but permanent +Input, +Output, Reorder, and Delete strip in the Block footer so the core operations are always one click away.",
+      "accent": "#a35b68",
+      "bestWhen": "The fastest learnable default matters and a small amount of persistent Block chrome is acceptable.",
+      "losesWhen": "Hundreds of Blocks make the repeated footer controls visually noisy or the footer width becomes constrained.",
+      "decisions": [
+        {
+          "label": "Primary object",
+          "value": "The existing Block footer becomes the stable command home for port-list edits."
+        },
+        {
+          "label": "Creation",
+          "value": "Separate +Input and +Output buttons remove side/type ambiguity."
+        },
+        {
+          "label": "Ordering/delete",
+          "value": "Reorder enters an obvious numbered state; Delete applies to the selected port and is disabled without one."
+        }
+      ],
+      "keepParts": [
+        "persistent +Input/+Output",
+        "footer command home",
+        "explicit reorder state",
+        "disabled-until-selected delete"
+      ],
+      "proof": [
+        "The live hero uses the Block's already-existing 46px footer and adds no popover or external surface.",
+        "All three operations are visible in the starting state and drive the same port-list mutations."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 4,
+          "evidence": "Add is always one click and reorder/delete are shallow, though target selection adds a step.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "Labeled footer buttons are separate from every port, selection, text, and cable gesture.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "The complete operation vocabulary is visible without hover, hold, shortcut, or secondary click.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "The strip stays inside an existing footer but adds persistent visual weight to every editable Block.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "Large labeled buttons and keyboard focus are robust, while narrow Blocks need overflow or responsive compaction.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "All mutations start in the footer, so terminal dragging is exclusively cable creation."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Delete activates only after a port selection and can state the affected cable count before one-step commit."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The footer persists in both Port and Expanded views and targets semantic records."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "Commands call stable-id mutations and one named history step each."
+        }
+      },
+      "previewLabel": "interactive permanent footer controls",
+      "story": {
+        "title": "Keep every port command one click away",
+        "steps": [
+          {
+            "label": "See all commands",
+            "caption": "The existing footer permanently exposes the complete edit vocabulary.",
+            "state": "base",
+            "target": ".footer-command-strip button:first-child"
+          },
+          {
+            "label": "Add an Input",
+            "caption": "A labeled one-click command inserts in_2 with no menu or gesture discovery.",
+            "state": "add",
+            "target": ".footer-command-strip button:first-child"
+          },
+          {
+            "label": "Enter reorder",
+            "caption": "The footer's reorder command makes the temporary ordering state explicit.",
+            "state": "move",
+            "target": ".footer-command-strip button:nth-child(3)"
+          },
+          {
+            "label": "Delete selected",
+            "caption": "Trash is available only after a port target is selected and remains undoable.",
+            "state": "delete",
+            "target": ".footer-command-strip button:nth-child(4)"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Persistent command home",
+          "caption": "The strip trades a small permanent footprint for immediate first-use comprehension and predictable keyboard access.",
+          "html": "<div class=\"port-media\"><div class=\"port-media-flow\"><span><b>visible verbs</b><small>starting state</small></span><i>\u2192</i><span><b>select target</b><small>decisive model</small></span><i>\u2192</i><span><b>commit</b><small>commit + undo</small></span></div></div>"
+        }
+      ],
+      "preview": "\n      <div class=\"port-prototype v10-preview\">\n        <div class=\"canvas-caption\">Port view \u00b7 decode</div>\n        \n      <div class=\"decode-block\">\n        <div class=\"block-title\">decode</div>\n        \n      <div class=\"block-body\">\n        <div class=\"port-row input-only port-moved\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_1</span></div>\n        <div class=\"port-row input-only port-new\"><span class=\"port-label\"><i class=\"type-dot\"></i>in_2</span></div>\n        <div class=\"port-row output-only port-delete\"><span class=\"port-label\">out_1<i class=\"type-dot\"></i></span></div>\n      </div>\n    \n        \n        <div class=\"block-footer\">\n  <div class=\"footer-command-strip\">\n    <button data-story-to=\"add\">\uff0b Input</button>\n    <button data-story-to=\"add\">\uff0b Output</button>\n    <button data-story-to=\"move\">\u2195 Reorder</button>\n    <button data-story-to=\"delete\">\u232b</button>\n  </div>\n  <button class=\"footer-dots\" aria-label=\"More\">\u22ee</button>\n</div>\n      </div>\n    \n        \n        <div class=\"native-status status-add\">in_2 added</div><div class=\"native-status status-move\">reorder state \u00b7 in_2 moved</div><div class=\"native-status status-delete\">out_1 deleted \u00b7 Undo</div>\n      </div>\n    "
+    }
+  ],
+  "checks": [
+    "Exactly ten structurally distinct edit models",
+    "Same decode Block, initial ports, viewport, and add/move/delete scenario",
+    "Five weighted criteria frozen before generation and summing to 100%",
+    "Four hard gates scored separately from the weighted objective",
+    "Every hero supports a synchronized guided story and direct controls",
+    "Every variant retains add, reorder, and delete behavior at comparable fidelity",
+    "Only V2 fails a hard gate and it is excluded from recommendation",
+    "No production Block, port, cable, or inspector code changed"
+  ]
+}

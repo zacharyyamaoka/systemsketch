@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SystemSketch semantic context menu · implementation proof</title>
+  <style>
+    :root{color-scheme:light;--ink:#17191d;--muted:#626a76;--line:#dfe3e8;--paper:#f5f6f8;--card:#fff;--blue:#315ee8;--green:#087a50;--shadow:0 18px 55px #20293816;font:16px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink)}main{width:min(1180px,calc(100% - 32px));margin:auto;padding:56px 0 84px}.eyebrow{font-size:12px;font-weight:850;letter-spacing:.13em;text-transform:uppercase;color:var(--blue)}h1{font-size:clamp(36px,6vw,72px);line-height:.98;letter-spacing:-.055em;max-width:900px;margin:14px 0 20px}.lede{max-width:780px;font-size:19px;color:var(--muted)}.badges{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 36px}.badge{padding:7px 11px;border:1px solid var(--line);background:#fff;border-radius:999px;font-size:13px;font-weight:750}.badge.ok{color:var(--green);border-color:#b9decf;background:#f1fbf6}.hero{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}.hero img{display:block;width:100%;height:auto}.hero figcaption{padding:13px 18px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}section{margin-top:54px}h2{font-size:30px;letter-spacing:-.035em;margin:0 0 18px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:21px;box-shadow:0 8px 26px #2029380a}.card b{display:block;font-size:18px;margin-bottom:6px}.card p{margin:0;color:var(--muted)}.num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;background:#eaf0ff;color:var(--blue);font-weight:850;margin-bottom:14px}.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;padding:24px;border-radius:20px;background:#11161d;color:#fff}.flow div{border:1px solid #354150;border-radius:13px;padding:14px;background:#1a212a}.flow b{display:block}.flow small{display:block;color:#9eabba;margin-top:5px}.table{overflow:auto;border:1px solid var(--line);border-radius:18px;background:#fff}table{width:100%;min-width:760px;border-collapse:collapse}th,td{text-align:left;vertical-align:top;padding:14px 16px;border-bottom:1px solid var(--line)}th{background:#f9fafb;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}tr:last-child td{border:0}.pass{color:var(--green);font-weight:850}code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:#eef1f5;border-radius:5px;padding:2px 5px}.note{border-left:4px solid var(--blue);padding:15px 18px;background:#eef3ff;border-radius:0 12px 12px 0;color:#344054}.foot{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}a{color:#174fbf;text-decoration:none}a:hover{text-decoration:underline}@media(max-width:760px){main{width:min(100% - 20px,1180px);padding-top:30px}.grid,.flow{grid-template-columns:1fr}h1{font-size:42px}.hero{border-radius:14px}}
+  </style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">SystemSketch · Stable candidate · 1 Sep 2026</div>
+  <h1>Pyblocks’ right-click authoring is now native SystemSketch UI.</h1>
+  <p class="lede">Right-click chooses structure, then the existing on-block editor owns the value. The stock tldraw menu stays intact below the semantic commands, so the feature adds capability without creating a second inspector or a second document model.</p>
+  <div class="badges">
+    <span class="badge ok">9 / 9 physical browser checks</span>
+    <span class="badge ok">100 / 100 Vitest checks</span>
+    <span class="badge ok">24 / 24 Python checks</span>
+    <span class="badge">Production build verified</span>
+  </div>
+
+  <figure class="hero">
+    <img src="systemsketch-context-menu-live-2026-09-01.png" alt="The real SystemSketch product composition showing a selected Block and the new native context menu above the stock tldraw commands">
+    <figcaption>Real headless-Chrome capture of the full product composition—not a mock. Block view, Add, and Ports sit above the unchanged stock Edit, Reorder, clipboard, conversion, and selection groups.</figcaption>
+  </figure>
+
+  <section>
+    <h2>One gesture, one command path</h2>
+    <div class="flow">
+      <div><b>Right-click</b><small>tldraw selects the concrete Block or cable.</small></div>
+      <div><b>Choose structure</b><small>View, Add, Ports, Advanced, or Routing.</small></div>
+      <div><b>Write once</b><small>Existing commands mutate the canonical shape props.</small></div>
+      <div><b>Edit in place</b><small>New fields and ports focus the existing inline editor.</small></div>
+      <div><b>Persist normally</b><small>The ordinary <code>.tldr</code> workspace owns the result.</small></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What landed</h2>
+    <div class="grid">
+      <article class="card"><span class="num">1</span><b>Block view</b><p>Checked Simple, Port, and Expanded choices use the Block’s remembered per-view boxes. No size is recomputed in the menu.</p></article>
+      <article class="card"><span class="num">2</span><b>Add</b><p>Input and Output allocate stable IDs. Icon, Description, and Type appear only while missing, then immediately enter the existing on-canvas editor.</p></article>
+      <article class="card"><span class="num">3</span><b>Ports</b><p>Checked Offset and Aligned choices write the same occurrence-local <code>portLayout</code> read by the inspector, renderer, and cable anchors.</p></article>
+      <article class="card"><span class="num">4</span><b>Advanced + Routing</b><p>Expanded Blocks can Step into the existing structural depth scope. Selected connections expose checked Curved and Straight routing choices.</p></article>
+    </div>
+  </section>
+
+  <section>
+    <h2>Executed evidence</h2>
+    <div class="table">
+      <table>
+        <thead><tr><th>Journey</th><th>Observed result</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Native menu composition</td><td>Semantic group rendered first; stock tldraw commands remained present and interactive.</td><td class="pass">PASS</td></tr>
+          <tr><td>View transition</td><td>Port was checked; selecting Simple changed the real Block, and later Expanded restored its saved box.</td><td class="pass">PASS</td></tr>
+          <tr><td>Add input from Simple</td><td>Created <code>in_1</code>, revealed Port view, focused the generated name, and committed <code>request</code>.</td><td class="pass">PASS</td></tr>
+          <tr><td>Add fields</td><td>Description and Type opened their existing inline editors; completed fields disappeared from Add.</td><td class="pass">PASS</td></tr>
+          <tr><td>Port layout</td><td>Offset became checked and the inspector reflected the same canonical state.</td><td class="pass">PASS</td></tr>
+          <tr><td>Advanced depth</td><td>Expanded → Advanced → Step into opened the real Depth Stack scope.</td><td class="pass">PASS</td></tr>
+          <tr><td>Product boundary</td><td>The essential right-click journey was repeated in the full product component registry.</td><td class="pass">PASS</td></tr>
+          <tr><td>Runtime health</td><td>Zero local console errors across the physical pointer and keyboard journey.</td><td class="pass">PASS</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Porting boundary</h2>
+    <p class="note">This ports the pyblocks menu behavior that has a real SystemSketch semantic target. Pyblocks-only linked-definition commands such as Duplicate unlinked were intentionally not copied: Stable has no linked occurrence model, and stock Duplicate already creates an independent Block. Tidy, cable nudging, insertion, and authored-route reset remain outside this menu until their underlying algorithms exist in SystemSketch.</p>
+  </section>
+
+  <p class="foot">Implementation: <a href="../src/blocks/ui/BlockContextMenu.tsx">BlockContextMenu.tsx</a> · commands: <a href="../src/blocks/commands/blockCommands.ts">blockCommands.ts</a> and <a href="../src/blocks/connections/connectionCommands.ts">connectionCommands.ts</a> · physical proof: <a href="../tests/block_context_menu_smoke.mjs">block_context_menu_smoke.mjs</a>.</p>
+</main>
+</body>
+</html>

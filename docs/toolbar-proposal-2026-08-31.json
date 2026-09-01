@@ -1,0 +1,318 @@
+{
+  "schemaVersion": 2,
+  "title": "Five toolbar directions for SystemSketch",
+  "kicker": "SystemSketch UI · Babble & Prune · 31 Aug 2026",
+  "brief": "Replace the stock tldraw tool row with a small Figma-derived SystemSketch toolbar that exposes Cursor, Frame, Shape, Draw, Text, Comment, and Library. The selected subtype must occupy its family slot, the slot must remember it, R/O/L must select geometry, repeated A must cycle straight/curve/elbow arrows, and + must open a searchable shape library sidebar.",
+  "count": 5,
+  "defaultId": "v1",
+  "defaultWhy": "Figma Mirror is the provisional default at 91/100. It is the only direction that turns the final note decision—copy Figma—into the literal interaction model: seven stable family positions, a mutating last-used icon in each family, split-button menus, and a separate + library launcher. It accepts more owned chrome than the stock-compatible alternative but keeps the tldraw engine and tool registry underneath.",
+  "decisionHinge": "The recommendation hinges on exact reference fidelity versus smallest integration delta. Moving 15 weight points from Figma / whiteboard familiarity to Implementation fit changes the weights to 15/25/15/15/30 and makes V2 Stock Tool Well edge V1 by 86 to 85. Choose V2 if minimizing owned toolbar behavior is more important than copying Figma's family-slot model exactly.",
+  "invariants": [
+    "Cursor, Frame, Shape, Draw, Text, Comment, and Library are reachable in every direction.",
+    "Selecting a subtype produces immediate, persistent feedback about the current tool and remembers the last subtype in that family.",
+    "With a prototype focused, R selects Rectangle, O selects Ellipse, L selects Line, and A selects or cycles Straight → Curve → Elbow arrow presets.",
+    "The + control opens a searchable library sidebar with recent, basic, flowchart, and external-library sections.",
+    "The right-side Figma mode selector is deliberately omitted until SystemSketch has a real mode to put there.",
+    "Use the same dotted board, sample system diagram, seven tool families, and 720 × 400 prototype frame.",
+    "Keep tldraw 5.3.2 as the canvas, document, geometry, and base-tool engine; change only supported UI/tool seams."
+  ],
+  "boundary": "These are self-contained interactive toolbar prototypes, not production integration. Tool selection, subtype memory, R/O/L/A cycling, menus, library opening, and library filtering are real inside the gallery. Drawing on the canvas, document persistence, comment licensing, accessibility completion, responsive behavior, and tldraw wiring are simulated. No live SystemSketch product code was changed.",
+  "axes": [
+    {
+      "name": "Primary composition",
+      "values": ["Figma family dock", "stock tool well", "intent-split dock", "active-tool capsule", "library workbench"]
+    },
+    {
+      "name": "Resting position",
+      "values": ["bottom center", "left center", "bottom split", "top center", "right center"]
+    },
+    {
+      "name": "Tool visibility",
+      "values": ["seven stable families", "individual stock tools", "five creation + two collaboration", "one active + palette", "seven beside library"]
+    },
+    {
+      "name": "Risk posture",
+      "values": ["reference exactness", "minimal toolbar delta", "task grouping", "maximum canvas calm", "library-first growth"]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "fr1",
+      "name": "Figma / whiteboard familiarity",
+      "weight": 30,
+      "why": "The design note explicitly chooses Figma as the primary reference so SystemSketch inherits a coherent interaction model without another round of custom UI invention.",
+      "passCondition": "A Figma, FigJam, or Miro user can predict where tools, subtype menus, active state, and the library live before experimenting.",
+      "anchors": {
+        "1": "Uses a novel toolbar mental model unrelated to the shown references.",
+        "3": "Uses familiar icons and placement but changes the family or disclosure model.",
+        "5": "Closely matches the reference placement, grouping, split controls, and last-used behavior."
+      }
+    },
+    {
+      "id": "fr2",
+      "name": "Tool feedback and hotkey flow",
+      "weight": 25,
+      "why": "The important behavior is not the row of icons; it is seeing the selected subtype, recalling it later, and cycling arrow variants without breaking sketching flow.",
+      "passCondition": "The current subtype is unambiguous at a glance, remains in its family slot, and the R/O/L/A sequence can be used without menu recovery.",
+      "anchors": {
+        "1": "Active state is generic or disappears when a submenu closes.",
+        "3": "The tool is visible but subtype memory or repeated-key behavior requires interpretation.",
+        "5": "The exact subtype is continuously visible, remembered, and changes immediately with every key press."
+      }
+    },
+    {
+      "id": "fr3",
+      "name": "Glanceability and canvas calm",
+      "weight": 15,
+      "why": "Zach prefers only a few visually scannable controls; anything beyond the glance limit should move behind search, hotkeys, or the library.",
+      "passCondition": "The resting toolbar has a stable visual rhythm, does not dominate the board, and makes the active tool legible without reading labels.",
+      "anchors": {
+        "1": "The resting surface is crowded, unstable, or visually competes with the diagram.",
+        "3": "The row is usable but occupies meaningful canvas or needs labels to disambiguate.",
+        "5": "A compact, stable silhouette communicates current state immediately and leaves the board calm."
+      }
+    },
+    {
+      "id": "fr4",
+      "name": "Library reach and scale",
+      "weight": 15,
+      "why": "The + control is the escape hatch from the small toolbar into an extensive, searchable set of shapes and future domain libraries.",
+      "passCondition": "The library opens from an obvious control, supports search and categories, and can grow without expanding the primary toolbar.",
+      "anchors": {
+        "1": "The library is hidden behind an unrelated action or has no credible growth path.",
+        "3": "A visible launcher opens a basic panel, but search or future library organization feels secondary.",
+        "5": "The launcher, search, categories, recents, and external collections form a durable library workflow."
+      }
+    },
+    {
+      "id": "fr5",
+      "name": "Implementation fit",
+      "weight": 15,
+      "why": "SystemSketch currently treats stock tldraw as the datum; toolbar work should use supported component, tool, style, and editor APIs without forking the engine.",
+      "passCondition": "The direction can be implemented as isolated host-owned React UI plus narrow tldraw tool/style adapters, with no editor or document fork.",
+      "anchors": {
+        "1": "Requires replacing or duplicating a broad slice of tldraw editor behavior.",
+        "3": "Requires one owned toolbar controller and a focused preset adapter, but leaves engine internals stock.",
+        "5": "Mostly composes existing tldraw toolbar items/actions and adds only narrow state and library UI."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "g1",
+      "name": "Seven requested families remain reachable",
+      "why": "Cursor, Frame, Shape, Draw, Text, Comment, and Library define the requested top-level capability set."
+    },
+    {
+      "id": "g2",
+      "name": "Last-used subtype feedback",
+      "why": "The toolbar must show and remember the real selected subtype rather than only highlight a generic family icon."
+    },
+    {
+      "id": "g3",
+      "name": "R / O / L / repeated-A behavior",
+      "why": "Direct hotkey selection and repeated arrow cycling are explicit parts of the desired Excalidraw-like flow."
+    },
+    {
+      "id": "g4",
+      "name": "Searchable + library",
+      "why": "A small primary toolbar only works if the extensive option set has a clear, scalable home."
+    },
+    {
+      "id": "g5",
+      "name": "No tldraw engine fork",
+      "why": "The current architecture deliberately keeps tldraw's editor, document model, and upgrade path stock."
+    }
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "Figma Mirror",
+      "thesis": "Copy the Figma family-slot model literally: seven stable positions, split-button submenus, and the active subtype replacing its family icon.",
+      "accent": "#4b79e6",
+      "bestWhen": "The stated Figma-first decision is real and zero relearning matters more than preserving the stock tldraw toolbar DOM.",
+      "losesWhen": "The first implementation must reuse the greatest possible amount of tldraw's current toolbar markup and overflow behavior.",
+      "decisions": [
+        {"label": "Composition", "value": "One bottom-center floating dock: Cursor, Frame, Shape, Draw, Text, Comment, and +."},
+        {"label": "State", "value": "Each family owns a last-used subtype; the Shape slot visibly becomes Rectangle, Ellipse, Line, Straight Arrow, Curve Arrow, or Elbow Arrow."},
+        {"label": "Keyboard", "value": "R/O/L select geometry; the first A recalls the last arrow preset and repeated A cycles only while Arrow is already active."},
+        {"label": "Library", "value": "+ opens a left sidebar so the primary dock remains within the glance limit."},
+        {"label": "Implementation seam", "value": "Replace only components.Toolbar, read stock tools through useTools/useEditor, use tldraw style APIs, and mount one host-owned library panel."}
+      ],
+      "keepParts": ["seven stable family slots", "last-used subtype icon", "split-button menu hit targets", "A-cycle state machine", "left searchable library"],
+      "proof": [
+        "The rendered dock keeps seven stable positions and mutates the Shape icon after Rectangle, Ellipse, Line, and Arrow choices.",
+        "The focused prototype handles R, O, L, and repeated A; the status chip and slot icon update together.",
+        "The + button opens a searchable multi-section library and closes without changing the selected tool."
+      ],
+      "scores": {
+        "fr1": {"score": 5, "evidence": "Placement, grouping, blue active tile, split affordances, and slot mutation directly reproduce the inspected Figma references.", "confidence": "high"},
+        "fr2": {"score": 5, "evidence": "The active subtype appears in both the blue family slot and live status; R/O/L/A were exercised in the prototype.", "confidence": "high"},
+        "fr3": {"score": 5, "evidence": "Seven fixed slots produce a short, stable silhouette and subtypes stay behind chevrons until needed.", "confidence": "high"},
+        "fr4": {"score": 4, "evidence": "The visible + opens search, recents, categories, and external libraries, though real insertion and persistence remain simulated.", "confidence": "high"},
+        "fr5": {"score": 3, "evidence": "Supported tldraw UI/tool/style APIs cover the design, but the exact family dock, memory controller, curved preset adapter, and library are owned code.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "All seven families are persistent top-level controls."},
+        "g2": {"pass": true, "evidence": "The family icon and active status both update to the selected subtype and retain it after leaving the family."},
+        "g3": {"pass": true, "evidence": "R/O/L and repeated A are implemented in the focused prototype."},
+        "g4": {"pass": true, "evidence": "+ opens a real filterable sidebar in the prototype."},
+        "g5": {"pass": true, "evidence": "The implementation plan uses supported UI overrides and editor style/tool APIs; no engine changes are proposed."}
+      },
+      "preview": "<div class=\"toolbar-prototype variant-figma\" tabindex=\"0\" data-variant=\"v1\" data-library-side=\"left\"><div class=\"prototype-board\"><div class=\"board-title\">Checkout flow · system sketch</div><div class=\"sample-diagram\"><div class=\"sample-node node-a\">Sensor</div><div class=\"sample-link\"></div><div class=\"sample-node node-b\">Decision</div></div><div class=\"active-readout\"><span data-active-icon></span><b data-active-label>Move</b><kbd data-active-key>V</kbd></div><div class=\"hotkey-strip\">Focus board · <kbd>R</kbd> <kbd>O</kbd> <kbd>L</kbd> · repeat <kbd>A</kbd></div><div class=\"toolbar-shell figma-dock\"><div class=\"family-slot\" data-family=\"cursor\"></div><div class=\"family-slot\" data-family=\"frame\"></div><div class=\"family-slot\" data-family=\"shape\"></div><div class=\"family-slot\" data-family=\"draw\"></div><div class=\"family-slot\" data-family=\"text\"></div><div class=\"family-slot\" data-family=\"comment\"></div><div class=\"family-slot\" data-family=\"library\"></div></div><div data-menu-mount></div><div data-library-mount></div></div></div>"
+    },
+    {
+      "id": "v2",
+      "name": "Stock Tool Well",
+      "thesis": "Keep tldraw's individual-tool mental model in a Miro-like left rail, then add an active subtype well and + library without inventing family split buttons.",
+      "accent": "#6f5bd3",
+      "bestWhen": "The safest first mutation is more valuable than exact Figma behavior and a vertical rail fits the eventual panel layout.",
+      "losesWhen": "You want the toolbar itself—not a separate status well—to teach that Shape is a remembered family slot.",
+      "decisions": [
+        {"label": "Composition", "value": "A left-center vertical rail shows the seven families as individual tldraw-like tool buttons."},
+        {"label": "State", "value": "A small active-tool well above the rail carries the exact subtype; the family button remains visually stable."},
+        {"label": "Keyboard", "value": "The same controller handles R/O/L/A, but feedback resolves in the active well instead of morphing every slot."},
+        {"label": "Library", "value": "+ opens beside the rail, matching Miro's side-flyout direction."},
+        {"label": "Implementation seam", "value": "Compose existing tool items and active selection signals; custom code is mainly layout, one active well, shortcuts, and the library."}
+      ],
+      "keepParts": ["vertical left placement", "active subtype well", "stock individual-tool buttons", "side-flyout library", "visible shortcut labels"],
+      "proof": [
+        "The rendered rail exposes all families, labels the active subtype separately, and keeps the canvas center unobstructed.",
+        "R/O/L/A change the active well and selected family without requiring a submenu.",
+        "+ opens and filters the same library beside the rail."
+      ],
+      "scores": {
+        "fr1": {"score": 4, "evidence": "The rail matches the inspected Miro composition but deliberately departs from the final Figma family-slot decision.", "confidence": "high"},
+        "fr2": {"score": 4, "evidence": "The exact subtype is continuously visible in the active well and hotkeys work, but the family icon itself does not carry all feedback.", "confidence": "high"},
+        "fr3": {"score": 4, "evidence": "The narrow vertical rhythm is stable and labeled, though it consumes a continuous canvas edge and is taller than V1.", "confidence": "high"},
+        "fr4": {"score": 4, "evidence": "The rail's + has an obvious adjacent expansion direction and the prototype includes search and categories.", "confidence": "high"},
+        "fr5": {"score": 5, "evidence": "This direction can compose more of tldraw's existing individual-tool items and active signals, limiting the custom family-slot layer.", "confidence": "medium"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "All seven families are persistent rail buttons."},
+        "g2": {"pass": true, "evidence": "The active well displays and retains the exact subtype even though the family glyph stays stable."},
+        "g3": {"pass": true, "evidence": "R/O/L and repeated A are implemented in the focused prototype."},
+        "g4": {"pass": true, "evidence": "+ opens a real filterable sidebar in the prototype."},
+        "g5": {"pass": true, "evidence": "The direction is explicitly structured around supported stock tool items and selection state."}
+      },
+      "preview": "<div class=\"toolbar-prototype variant-stock\" tabindex=\"0\" data-variant=\"v2\" data-static-icons=\"true\" data-show-labels=\"true\" data-library-side=\"left\"><div class=\"prototype-board\"><div class=\"board-title\">Checkout flow · system sketch</div><div class=\"sample-diagram\"><div class=\"sample-node node-a\">Sensor</div><div class=\"sample-link\"></div><div class=\"sample-node node-b\">Decision</div></div><div class=\"active-readout rail-readout\"><span data-active-icon></span><b data-active-label>Move</b><kbd data-active-key>V</kbd></div><div class=\"hotkey-strip\">Focus board · <kbd>R</kbd> <kbd>O</kbd> <kbd>L</kbd> · repeat <kbd>A</kbd></div><div class=\"toolbar-shell stock-rail\"><div class=\"family-slot\" data-family=\"cursor\"></div><div class=\"family-slot\" data-family=\"frame\"></div><div class=\"family-slot\" data-family=\"shape\"></div><div class=\"family-slot\" data-family=\"draw\"></div><div class=\"family-slot\" data-family=\"text\"></div><div class=\"family-slot\" data-family=\"comment\"></div><div class=\"family-slot\" data-family=\"library\"></div></div><div data-menu-mount></div><div data-library-mount></div></div></div>"
+    },
+    {
+      "id": "v3",
+      "name": "Intent Split Dock",
+      "thesis": "Separate creation from collaboration: five remembered creation families in the center, with Comment and Library in a small right-hand satellite.",
+      "accent": "#13866f",
+      "bestWhen": "Most sessions are creation-heavy and keeping Comment/+ visually secondary makes the core drawing loop easier to scan.",
+      "losesWhen": "One contiguous Figma-like muscle-memory row matters more than clarifying the difference between creation and collaboration actions.",
+      "decisions": [
+        {"label": "Composition", "value": "Cursor, Frame, Shape, Draw, and Text form the main dock; Comment and + occupy a separate satellite."},
+        {"label": "State", "value": "Creation-family icons mutate exactly like V1; the active readout sits between the two groups."},
+        {"label": "Keyboard", "value": "R/O/L/A preserve the same family memory and arrow-cycle contract."},
+        {"label": "Library", "value": "The secondary satellite makes + easy to find without extending the creation dock."},
+        {"label": "Implementation seam", "value": "Same owned controller as V1 plus responsive positioning for two independent surfaces."}
+      ],
+      "keepParts": ["creation/collaboration split", "five-icon primary glance set", "mutating family icons", "secondary + satellite", "shared active readout"],
+      "proof": [
+        "The two rendered groups preserve all seven families while making the five creation families a distinct scan target.",
+        "R/O/L/A mutate the Shape slot in the primary dock and the shared active readout.",
+        "The satellite + opens the same filterable library without extending the primary silhouette."
+      ],
+      "scores": {
+        "fr1": {"score": 4, "evidence": "The controls and bottom placement are reference-familiar, but splitting one Figma row into two groups changes muscle memory.", "confidence": "high"},
+        "fr2": {"score": 5, "evidence": "Creation slots mutate and the centered readout mirrors every hotkey transition, making subtype state unusually explicit.", "confidence": "high"},
+        "fr3": {"score": 4, "evidence": "The main creation set lands at the preferred five-icon glance limit, but two separate islands require a wider scan.", "confidence": "high"},
+        "fr4": {"score": 4, "evidence": "The + satellite is visible and scalable, though its separation can imply a weaker relationship to Shapes.", "confidence": "medium"},
+        "fr5": {"score": 3, "evidence": "It needs the same family controller as V1 plus extra two-surface layout and responsive collision rules.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "Five creation families plus Comment and Library remain persistent across the two groups."},
+        "g2": {"pass": true, "evidence": "Creation family icons and the active readout retain the selected subtype."},
+        "g3": {"pass": true, "evidence": "R/O/L and repeated A are implemented in the focused prototype."},
+        "g4": {"pass": true, "evidence": "The satellite + opens a real filterable sidebar."},
+        "g5": {"pass": true, "evidence": "The design stays in host-owned React surfaces over supported tldraw APIs."}
+      },
+      "preview": "<div class=\"toolbar-prototype variant-split\" tabindex=\"0\" data-variant=\"v3\" data-library-side=\"right\"><div class=\"prototype-board\"><div class=\"board-title\">Checkout flow · system sketch</div><div class=\"sample-diagram\"><div class=\"sample-node node-a\">Sensor</div><div class=\"sample-link\"></div><div class=\"sample-node node-b\">Decision</div></div><div class=\"active-readout split-readout\"><span data-active-icon></span><b data-active-label>Move</b><kbd data-active-key>V</kbd></div><div class=\"hotkey-strip\">Focus board · <kbd>R</kbd> <kbd>O</kbd> <kbd>L</kbd> · repeat <kbd>A</kbd></div><div class=\"toolbar-shell split-primary\"><div class=\"family-slot\" data-family=\"cursor\"></div><div class=\"family-slot\" data-family=\"frame\"></div><div class=\"family-slot\" data-family=\"shape\"></div><div class=\"family-slot\" data-family=\"draw\"></div><div class=\"family-slot\" data-family=\"text\"></div></div><div class=\"toolbar-shell split-secondary\"><div class=\"family-slot\" data-family=\"comment\"></div><div class=\"family-slot\" data-family=\"library\"></div></div><div data-menu-mount></div><div data-library-mount></div></div></div>"
+    },
+    {
+      "id": "v4",
+      "name": "Active Tool Capsule",
+      "thesis": "Show only the current tool, its family menu, and + at rest; open the seven-family palette on demand for the calmest possible canvas.",
+      "accent": "#d17632",
+      "bestWhen": "Hotkeys and command search are the normal way to change tools and resting canvas calm is more important than persistent family positions.",
+      "losesWhen": "The toolbar itself must serve as the visual inventory of available capabilities for occasional users.",
+      "decisions": [
+        {"label": "Composition", "value": "A top-center capsule contains an all-tools launcher, the exact active subtype, its menu affordance, and +."},
+        {"label": "State", "value": "The active subtype becomes the primary object rather than one of seven simultaneous slots."},
+        {"label": "Keyboard", "value": "R/O/L/A are first-class and keep the capsule useful even when the palette is closed."},
+        {"label": "Library", "value": "+ remains visible while the seven-family palette is progressively disclosed."},
+        {"label": "Implementation seam", "value": "A new palette/focus model and compact active-tool controller replace more stock toolbar assumptions."}
+      ],
+      "keepParts": ["active-tool-first capsule", "all-tools palette", "maximum resting calm", "top-center placement", "always-visible +"],
+      "proof": [
+        "The rendered capsule reduces the resting toolbar to three decisions while preserving the exact active subtype.",
+        "The grid button reveals all seven families and selecting one returns to the compact capsule.",
+        "R/O/L/A update the capsule directly; + opens and filters the same library."
+      ],
+      "scores": {
+        "fr1": {"score": 3, "evidence": "The capsule uses familiar controls but the active-tool-first model is closer to command software than the shown whiteboard toolbars.", "confidence": "high"},
+        "fr2": {"score": 5, "evidence": "The exact current subtype is the dominant capsule content and every hotkey transition is immediately visible.", "confidence": "high"},
+        "fr3": {"score": 5, "evidence": "Only one tool, one palette launcher, and + remain visible at rest, leaving the maximum canvas area calm.", "confidence": "high"},
+        "fr4": {"score": 3, "evidence": "+ is always visible and opens search, but the top capsule and side library form a less conventional spatial relationship.", "confidence": "medium"},
+        "fr5": {"score": 3, "evidence": "The concept remains outside the engine but needs a custom palette, focus behavior, and active-tool presentation rather than stock toolbar composition.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "All seven families are reachable from the persistent grid launcher."},
+        "g2": {"pass": true, "evidence": "The exact last-used subtype is the capsule's main label and icon."},
+        "g3": {"pass": true, "evidence": "R/O/L and repeated A are implemented in the focused prototype."},
+        "g4": {"pass": true, "evidence": "The persistent + opens a real filterable sidebar."},
+        "g5": {"pass": true, "evidence": "The custom work is isolated to UI and tool-style adapters, not editor internals."}
+      },
+      "preview": "<div class=\"toolbar-prototype variant-capsule\" tabindex=\"0\" data-variant=\"v4\" data-capsule=\"true\" data-library-side=\"left\"><div class=\"prototype-board\"><div class=\"board-title\">Checkout flow · system sketch</div><div class=\"sample-diagram\"><div class=\"sample-node node-a\">Sensor</div><div class=\"sample-link\"></div><div class=\"sample-node node-b\">Decision</div></div><div class=\"hotkey-strip\">Focus board · <kbd>R</kbd> <kbd>O</kbd> <kbd>L</kbd> · repeat <kbd>A</kbd></div><div class=\"toolbar-shell capsule-dock\"><button class=\"palette-toggle\" type=\"button\" aria-label=\"Open all tools\"><span data-icon=\"grid\"></span></button><button class=\"capsule-active\" type=\"button\"><span data-active-icon></span><b data-active-label>Move</b><kbd data-active-key>V</kbd><i>⌄</i></button><div class=\"family-slot capsule-library\" data-family=\"library\"></div></div><div class=\"capsule-palette\" hidden><div class=\"family-slot\" data-family=\"cursor\"></div><div class=\"family-slot\" data-family=\"frame\"></div><div class=\"family-slot\" data-family=\"shape\"></div><div class=\"family-slot\" data-family=\"draw\"></div><div class=\"family-slot\" data-family=\"text\"></div><div class=\"family-slot\" data-family=\"comment\"></div></div><div data-menu-mount></div><div data-library-mount></div></div></div>"
+    },
+    {
+      "id": "v5",
+      "name": "Library Workbench",
+      "thesis": "Attach the seven-family toolbar to a right-side workbench so + expands into a durable asset browser instead of a transient sidebar.",
+      "accent": "#b44f76",
+      "bestWhen": "Domain libraries, recents, and browse-to-insert workflows are expected to dominate SystemSketch more than raw drawing tools.",
+      "losesWhen": "The board should feel empty and tool-first most of the time, or Figma's bottom-centered muscle memory is the primary constraint.",
+      "decisions": [
+        {"label": "Composition", "value": "A right-center vertical family dock is physically attached to the expandable library workbench."},
+        {"label": "State", "value": "Family icons mutate, while the open workbench also echoes the active subtype in its header."},
+        {"label": "Keyboard", "value": "R/O/L/A keep drawing fast even when the asset workbench remains open."},
+        {"label": "Library", "value": "Search, recents, categories, and external collections are the dominant scalable surface rather than an auxiliary popover."},
+        {"label": "Implementation seam", "value": "Requires shared toolbar/drawer layout state, collision management, and future drag-to-canvas integration."}
+      ],
+      "keepParts": ["attached tool/library relationship", "persistent library workbench", "right-edge expansion", "active subtype echoed in drawer", "external collection cards"],
+      "proof": [
+        "The rendered right dock mutates the Shape icon and + opens an attached, filterable workbench.",
+        "The workbench visibly supports recents, diagram basics, flowchart shapes, and external collections.",
+        "R/O/L/A remain usable with the workbench open and update its current-tool context."
+      ],
+      "scores": {
+        "fr1": {"score": 3, "evidence": "The vertical rail and side panel are whiteboard-familiar, but the attached workbench is not the final Figma bottom-dock decision.", "confidence": "high"},
+        "fr2": {"score": 4, "evidence": "The mutating family icon and readout preserve exact state, but an open workbench competes for attention with that feedback.", "confidence": "high"},
+        "fr3": {"score": 3, "evidence": "The closed rail is compact, yet it occupies a full edge and the workbench is intentionally visually dominant when open.", "confidence": "high"},
+        "fr4": {"score": 5, "evidence": "The library is a first-class searchable workbench with an obvious growth path for domain and external collections.", "confidence": "high"},
+        "fr5": {"score": 3, "evidence": "It stays within supported UI overrides but adds durable drawer state, layout negotiation, and eventual drag/drop insertion work.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "All seven families are persistent right-rail controls."},
+        "g2": {"pass": true, "evidence": "Family icons and active context retain the selected subtype."},
+        "g3": {"pass": true, "evidence": "R/O/L and repeated A are implemented in the focused prototype."},
+        "g4": {"pass": true, "evidence": "+ opens the most extensive real filterable library surface in the set."},
+        "g5": {"pass": true, "evidence": "The engine remains stock; the extra work is host-owned layout and library integration."}
+      },
+      "preview": "<div class=\"toolbar-prototype variant-workbench\" tabindex=\"0\" data-variant=\"v5\" data-library-side=\"right\" data-workbench=\"true\"><div class=\"prototype-board\"><div class=\"board-title\">Checkout flow · system sketch</div><div class=\"sample-diagram\"><div class=\"sample-node node-a\">Sensor</div><div class=\"sample-link\"></div><div class=\"sample-node node-b\">Decision</div></div><div class=\"active-readout workbench-readout\"><span data-active-icon></span><b data-active-label>Move</b><kbd data-active-key>V</kbd></div><div class=\"hotkey-strip\">Focus board · <kbd>R</kbd> <kbd>O</kbd> <kbd>L</kbd> · repeat <kbd>A</kbd></div><div class=\"toolbar-shell workbench-rail\"><div class=\"family-slot\" data-family=\"cursor\"></div><div class=\"family-slot\" data-family=\"frame\"></div><div class=\"family-slot\" data-family=\"shape\"></div><div class=\"family-slot\" data-family=\"draw\"></div><div class=\"family-slot\" data-family=\"text\"></div><div class=\"family-slot\" data-family=\"comment\"></div><div class=\"family-slot\" data-family=\"library\"></div></div><div data-menu-mount></div><div data-library-mount></div></div></div>"
+    }
+  ],
+  "checks": [
+    "Exactly five structurally distinct toolbar directions",
+    "Same board, tool families, hotkeys, and library content in every preview",
+    "Weighted criteria fixed before drawing and total 100%",
+    "Every score includes evidence and confidence",
+    "All hard gates evaluated separately",
+    "Pick, shortlist, reject, feedback, splice, copy, and download controls",
+    "Prototype-only boundary remains explicit"
+  ]
+}

@@ -1,0 +1,233 @@
+{
+  "schemaVersion": 3,
+  "title": "Five quieter ways to show Preview availability",
+  "kicker": "SystemSketch Help · Babble & Prune · 31 Aug 2026",
+  "brief": "Redesign the release section inside SystemSketch Help so it is almost silent when Stable is current, becomes unmistakably actionable when newer Preview work exists, and never confuses the current build with the option to open a duplicate in Preview.",
+  "count": 5,
+  "defaultId": "v4",
+  "defaultWhy": "Spotlight Only is the AI recommendation at 97.2/100 because it removes release chrome entirely from the ordinary Help experience, then adds one explicit, high-contrast Preview action only when newer work actually exists.",
+  "decisionHinge": "The recommendation depends on quiet-at-rest being more important than permanent release detail. Moving 12 weight points from Quiet when current (FR2) to Detail without clutter (FR4) flips the lead narrowly to V1 Adaptive Status Card, 95.2 versus 94.8.",
+  "invariants": [
+    "Use the same Stable 0.1.0 state, four release notes, duplicate action, rollback action, and keyboard-shortcuts row.",
+    "Every direction demonstrates both states: nothing newer exists, and newer Preview work is available.",
+    "Open Live Preview continues to open an independent duplicate in a new window.",
+    "Keep the selected bottom-right utility strip and remove no existing zoom or board-overview behavior.",
+    "Prototype only: do not change the production SystemSketch UI during this comparison."
+  ],
+  "boundary": "These are interactive HTML prototypes in the actual SystemSketch visual language. The state switch and disclosure interactions are real; release polling, tldraw integration, window launching, persistence, and accessibility QA remain simulated until a direction is selected.",
+  "axes": [
+    {"name": "Resting presence", "values": ["compact card", "single row", "two lanes", "footer only", "trigger only"]},
+    {"name": "New-work signal", "values": ["card transforms", "row gains badge", "available lane appears", "spotlight appears", "Help trigger becomes label"]},
+    {"name": "Mental model", "values": ["status", "settings row", "comparison", "notification", "inbox trigger"]},
+    {"name": "Detail strategy", "values": ["inside card", "nested disclosure", "parallel cards", "secondary details", "advanced menu"]}
+  ],
+  "requirements": [
+    {
+      "id": "fr1",
+      "name": "Preview-state certainty",
+      "weight": 32,
+      "why": "The current UI mixes current-build facts with an always-present Preview action, so the first job is to answer whether anything newer actually exists.",
+      "passCondition": "A user can tell at a glance whether Stable is current or newer Preview work is available, without interpreting build hashes or release prose.",
+      "anchors": {"1": "The user must infer the state from technical details or an ambiguous action.", "3": "The state is stated but competes with similar-looking current-build information.", "5": "The state is named in plain language and cannot be mistaken for the other state."}
+    },
+    {
+      "id": "fr2",
+      "name": "Quiet when current",
+      "weight": 24,
+      "why": "Help is opened for shortcuts and support too; a healthy release system should not dominate that ordinary task.",
+      "passCondition": "When nothing newer exists, release status occupies little visual area and no Preview CTA looks urgent or necessary.",
+      "anchors": {"1": "The existing full release card remains dominant at rest.", "3": "The card is reduced, but release status still owns a major section.", "5": "Only a calm one-line confirmation or footer remains."}
+    },
+    {
+      "id": "fr3",
+      "name": "Action hierarchy when new",
+      "weight": 20,
+      "why": "When newer work exists, trying it should become the obvious next action and should explain that it opens a duplicate.",
+      "passCondition": "The new state visibly names Preview, summarizes why it matters, and presents one dominant duplicate action.",
+      "anchors": {"1": "The action looks unchanged from the no-news state or competes with maintenance actions.", "3": "The action is visible but the reason or duplicate behavior is secondary.", "5": "One prominent, contextual CTA explains both what is new and what opening it will do."}
+    },
+    {
+      "id": "fr4",
+      "name": "Detail without clutter",
+      "weight": 14,
+      "why": "Build, release time, changes, rollback, and refresh remain useful for trust and recovery, but they are not the first thing most users need.",
+      "passCondition": "Technical facts and maintenance actions remain reachable without occupying the default scan path.",
+      "anchors": {"1": "Important recovery or provenance detail disappears.", "3": "Detail exists but requires an unclear route or still adds noticeable clutter.", "5": "All detail is available behind an obvious, lightweight disclosure."}
+    },
+    {
+      "id": "fr5",
+      "name": "Accessible product fit",
+      "weight": 10,
+      "why": "The state change must remain understandable without color and should fit the existing bottom-right Help surface without another navigation concept.",
+      "passCondition": "Text, iconography, focusable controls, and the existing Help/utility structure communicate both states without relying on a green dot alone.",
+      "anchors": {"1": "Color or an unlabeled dot carries the meaning, or a new navigation model is required.", "3": "Text exists but focus/order or structural fit is awkward.", "5": "Plain-language state, keyboard-reachable controls, and the current Help structure work together."}
+    }
+  ],
+  "hardGates": [
+    {"id": "g1", "name": "Truthful two-state behavior", "why": "Preview urgency may appear only when the release API reports newer actionable work."},
+    {"id": "g2", "name": "No top-of-canvas status", "why": "The earlier distracting release pill must not return."},
+    {"id": "g3", "name": "Safe duplicate workflow preserved", "why": "The selected behavior opens an independent duplicate and retains rollback/check access."}
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "Adaptive Status Card",
+      "thesis": "Keep one release card, but let its size, tone, and contents transform completely with the actual state.",
+      "accent": "#2f7f74",
+      "bestWhen": "You want explicit reassurance in both states and never want release provenance more than one disclosure away.",
+      "losesWhen": "Any persistent release module still feels like too much information for ordinary Help use.",
+      "decisions": [
+        {"label": "At rest", "value": "A small neutral card says “Stable is current” with version and a Details disclosure; there is no Preview CTA."},
+        {"label": "When new", "value": "The same region grows into a colored New Preview card with change count and one dominant duplicate action."},
+        {"label": "Maintenance", "value": "Build, release time, rollback, and refresh live under Details in both states."}
+      ],
+      "keepParts": ["plain-language current state", "card transforms by state", "maintenance details disclosure"],
+      "proof": ["The prototype switches the same card between a 58 px current state and a 166 px new-work state.", "The Preview action is absent—not merely disabled—when nothing newer exists."],
+      "scores": {
+        "fr1": {"score": 5, "evidence": "Both card states begin with mutually exclusive plain-language labels: Stable is current versus New Preview available.", "confidence": "high"},
+        "fr2": {"score": 3, "evidence": "The current state is much smaller than today, but release status still owns a full-width card above Help content.", "confidence": "high"},
+        "fr3": {"score": 5, "evidence": "The new state expands, changes tone, summarizes four changes, and presents one full-width duplicate CTA.", "confidence": "high"},
+        "fr4": {"score": 5, "evidence": "A named Details disclosure keeps every technical and recovery fact one click away.", "confidence": "high"},
+        "fr5": {"score": 5, "evidence": "State text, icon, and structure carry meaning without color and stay inside the existing Help panel.", "confidence": "medium"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "Only the simulated newer-work state renders the Preview CTA."},
+        "g2": {"pass": true, "evidence": "All status content remains inside Help."},
+        "g3": {"pass": true, "evidence": "The CTA explicitly says it opens an independent duplicate; maintenance actions remain in Details."}
+      },
+      "previewLabel": "toggle current / new",
+      "media": [{"label": "State footprint", "caption": "The same component contracts to reassurance and expands only for action.", "html": "<div class='state-map'><span>Current<br><b>58 px</b></span><i>state-driven transform</i><span class='hot'>New Preview<br><b>166 px</b></span></div>"}],
+      "preview": "<style>.status-lab{position:relative;min-height:430px;overflow:hidden;border-radius:14px;background:#f5f6f8;color:#22262c;font:12px/1.35 Inter,ui-sans-serif,sans-serif}.status-lab *{box-sizing:border-box}.status-lab .canvas-line{position:absolute;background:#202124}.status-lab .canvas-line.v{left:18%;top:0;width:4px;height:100%}.status-lab .canvas-line.h{left:0;right:0;top:48%;height:4px}.help-shell{position:absolute;z-index:2;top:18px;right:18px;width:344px;padding:14px;border:1px solid #dfe2e7;border-radius:14px;background:#fff;box-shadow:0 18px 44px #20242b22}.help-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.help-head small{display:block;color:#7b828d;font:700 8px/1.2 ui-monospace;letter-spacing:.13em}.help-head b{display:block;margin-top:3px;font-size:18px}.close-x{display:grid;width:30px;height:30px;place-items:center;border:0;border-radius:8px;background:#f1f2f4;color:#69707a}.calm-card,.new-card,.lane-card,.spotlight,.update-row,.action-banner{border-radius:10px}.calm-card{display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #e0e3e7;background:#f6f7f8}.status-icon{display:grid;flex:0 0 28px;height:28px;place-items:center;border-radius:50%;background:#e7f4ec;color:#23724a;font-weight:900}.status-copy{min-width:0;flex:1}.status-copy b,.status-copy span{display:block}.status-copy span{margin-top:2px;color:#6e7580;font-size:10px}.text-button{border:0;background:transparent;color:#555d68;font-size:10px;font-weight:750}.new-card{padding:13px;border:1px solid #b7c7ff;background:linear-gradient(145deg,#edf1ff,#f5f7ff)}.new-kicker{display:flex;align-items:center;gap:6px;color:#4056d6;font-size:9px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}.new-card h3,.spotlight h3{margin:7px 0 3px;font-size:18px}.new-card p,.spotlight p{margin:0;color:#586174;font-size:10px}.primary-action{width:100%;min-height:35px;margin-top:11px;border:0;border-radius:8px;background:#22262c;color:#fff;font-weight:800}.sub-action{display:flex;justify-content:space-between;margin-top:9px;color:#69717d;font-size:9px}.help-list{margin-top:12px;border-top:1px solid #eceef1}.help-item{display:flex;min-height:38px;align-items:center;justify-content:space-between;padding:0 7px;color:#393e45}.help-item+ .help-item{border-top:1px solid #f0f1f3}.help-item small{color:#8a919b}.utility-strip{position:absolute;right:18px;bottom:18px;display:flex;height:42px;align-items:center;border:1px solid #dfe2e7;border-radius:11px;background:#fff;box-shadow:0 8px 22px #20242b1c}.utility-strip span{display:grid;min-width:42px;height:100%;place-items:center;border-left:1px solid #eceef1;font-weight:750}.utility-strip span:first-child{border-left:0}.utility-strip .help-trigger{position:relative;color:#4358d9}.preview-dot{position:absolute;right:7px;top:7px;width:7px;height:7px;border:2px solid #fff;border-radius:50%;background:#5068ef}.state-toggle{position:absolute;z-index:4;left:18px;bottom:18px;min-height:34px;padding:0 12px;border:1px solid #cfd4dc;border-radius:8px;background:#fff;color:#414751;font-size:10px;font-weight:800;box-shadow:0 5px 14px #20242b12}.details-box{margin-top:8px;padding-top:8px;border-top:1px solid #dfe3f0;color:#69717d;font-size:9px}.status-lab .demo-alt-only{display:none}.prototype.is-alt .status-lab .demo-base-only{display:none}.prototype.is-alt .status-lab .demo-alt-only{display:block}.prototype.is-alt .status-lab .preview-dot.demo-alt-only{display:block}.prototype.is-alt .status-lab .help-trigger.demo-alt-label{min-width:88px}.state-map{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;padding:18px;border:1px solid #e2e5ea;border-radius:10px;background:#fafbfc;text-align:center}.state-map span{padding:10px;border-radius:8px;background:#eef1f3}.state-map span.hot{background:#edf1ff;color:#4056d6}.state-map i{color:#818894;font-size:10px}</style><div class='status-lab'><i class='canvas-line v'></i><i class='canvas-line h'></i><section class='help-shell'><div class='help-head'><div><small>SYSTEMSKETCH</small><b>Help</b></div><button class='close-x'>×</button></div><div class='calm-card demo-base-only'><span class='status-icon'>✓</span><span class='status-copy'><b>Stable is current</b><span>0.1.0 · Nothing newer to try</span></span><button class='text-button'>Details ›</button></div><div class='new-card demo-alt-only'><div class='new-kicker'>● New Preview available</div><h3>4 changes ready to try</h3><p>Open a duplicate of this board. Stable stays unchanged.</p><button class='primary-action'>Open duplicate in Preview ↗</button><div class='sub-action'><span>What changed</span><span>Release details ›</span></div></div><div class='help-list'><div class='help-item'><span>Keyboard shortcuts</span><small>Ctrl Shift ?</small></div><div class='help-item'><span>Help center</span><small>↗</small></div></div></section><div class='utility-strip'><span>▣</span><span>−</span><span>173%</span><span>＋</span><span class='help-trigger'>?<i class='preview-dot demo-alt-only'></i></span></div><button class='state-toggle' data-demo-toggle data-base-label='Show new Preview' data-alt-label='Show current Stable'>Show new Preview</button></div>"
+    },
+    {
+      "id": "v2",
+      "name": "Version & Updates Row",
+      "thesis": "Treat release status like one ordinary Help setting, then disclose a compact update sheet only when the row is opened.",
+      "accent": "#536dfe",
+      "bestWhen": "You want the quietest conventional Help menu and expect users to inspect release detail only occasionally.",
+      "losesWhen": "A new Preview must interrupt scanning more strongly than a badged menu row can manage.",
+      "decisions": [
+        {"label": "At rest", "value": "One row reads Version & updates · 0.1.0 · Up to date alongside shortcuts and support."},
+        {"label": "When new", "value": "The row moves to the top, gains a NEW badge and plain-language New Preview label."},
+        {"label": "Disclosure", "value": "Opening the native details row reveals changes, duplicate CTA, rollback, and refresh."}
+      ],
+      "keepParts": ["single version row", "NEW badge plus text", "native details disclosure"],
+      "proof": ["The ordinary state is one 40 px row with no card.", "The details element is genuinely openable, while the shared toggle proves the row's new-work hierarchy."],
+      "scores": {
+        "fr1": {"score": 4, "evidence": "Up to date and New Preview are explicit, though the state remains one row among other Help items.", "confidence": "high"},
+        "fr2": {"score": 5, "evidence": "Current release status uses only one conventional menu row.", "confidence": "high"},
+        "fr3": {"score": 4, "evidence": "The row gains a badge and opens directly to the CTA, but it is less visually dominant than a spotlight.", "confidence": "high"},
+        "fr4": {"score": 5, "evidence": "A familiar details disclosure contains changes, build facts, rollback, and refresh without default clutter.", "confidence": "high"},
+        "fr5": {"score": 5, "evidence": "Text labels, a semantic disclosure, and standard Help-row structure fit the current surface cleanly.", "confidence": "medium"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The NEW badge and CTA render only in the new-work state."},
+        "g2": {"pass": true, "evidence": "The release row remains inside Help."},
+        "g3": {"pass": true, "evidence": "The disclosed CTA names the duplicate behavior; maintenance actions remain below it."}
+      },
+      "previewLabel": "toggle row state",
+      "media": [{"label": "Information architecture", "caption": "Release status becomes a peer of Help content instead of the parent of it.", "html": "<div class='state-map'><span>Shortcuts</span><span>Help center</span><span class='hot'>Version &amp; updates</span></div>"}],
+      "preview": "<div class='status-lab'><i class='canvas-line v'></i><i class='canvas-line h'></i><section class='help-shell'><div class='help-head'><div><small>SYSTEMSKETCH</small><b>Help</b></div><button class='close-x'>×</button></div><div class='help-list' style='margin-top:0;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden'><div class='help-item demo-alt-only' style='background:#f0f3ff'><span><b>Version &amp; updates</b><small style='display:block;margin-top:2px;color:#4056d6'>New Preview available</small></span><strong style='padding:3px 6px;border-radius:999px;background:#5068ef;color:white;font-size:8px'>NEW</strong></div><div class='help-item'><span>Keyboard shortcuts</span><small>Ctrl Shift ?</small></div><div class='help-item'><span>Help center</span><small>↗</small></div><div class='help-item demo-base-only'><span>Version &amp; updates</span><small>0.1.0 · Up to date</small></div></div><details class='demo-alt-only' open style='margin-top:9px;padding:10px;border:1px solid #cbd4ff;border-radius:9px;background:#f7f8ff'><summary style='cursor:pointer;color:#4056d6;font-weight:800'>4 Preview changes</summary><p style='margin:8px 0;color:#657087;font-size:10px'>Bottom-right utilities, duplicate workflow, and launcher fixes.</p><button class='primary-action'>Open duplicate in Preview ↗</button><div class='sub-action'><span>Stable stays unchanged</span><span>More details ›</span></div></details></section><div class='utility-strip'><span>▣</span><span>−</span><span>173%</span><span>＋</span><span class='help-trigger'>?<i class='preview-dot demo-alt-only'></i></span></div><button class='state-toggle' data-demo-toggle data-base-label='Show new Preview' data-alt-label='Show current Stable'>Show new Preview</button></div>"
+    },
+    {
+      "id": "v3",
+      "name": "Current / Available Lanes",
+      "thesis": "Separate what you are running from what you could try, so Stable and Preview can never read like the same object.",
+      "accent": "#b7791f",
+      "bestWhen": "The Stable-versus-Preview model is unfamiliar and teaching that distinction matters more than compactness.",
+      "losesWhen": "The user already understands release lanes or wants Help to remain lightweight.",
+      "decisions": [
+        {"label": "Mental model", "value": "Two named lanes: Current Stable on the left and Available Preview on the right."},
+        {"label": "At rest", "value": "The Available lane says No newer Preview and contains no action."},
+        {"label": "When new", "value": "The Available lane becomes highlighted with a change summary and duplicate CTA."}
+      ],
+      "keepParts": ["Current versus Available labels", "no-action empty lane", "Stable stays unchanged reassurance"],
+      "proof": ["Both release concepts remain visible in the same frame, eliminating pronoun ambiguity.", "The Available lane changes from an explicit empty state to a complete action card."],
+      "scores": {
+        "fr1": {"score": 5, "evidence": "Current Stable and Available Preview are separately named, positioned, and described in both states.", "confidence": "high"},
+        "fr2": {"score": 2, "evidence": "Even with nothing new, two full-width lane cards keep the release system visually dominant.", "confidence": "high"},
+        "fr3": {"score": 5, "evidence": "The highlighted Available lane contains one contextual action and explicit Stable-stays-unchanged copy.", "confidence": "high"},
+        "fr4": {"score": 5, "evidence": "Each lane has a clear details route, keeping provenance attached to the correct object.", "confidence": "medium"},
+        "fr5": {"score": 4, "evidence": "The text model is highly accessible, but it adds a denser release-specific layout to Help.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The Available lane has no CTA until newer work exists."},
+        "g2": {"pass": true, "evidence": "Both lanes are contained in Help."},
+        "g3": {"pass": true, "evidence": "The new lane explains duplication and retains Stable details and maintenance routes."}
+      },
+      "previewLabel": "toggle available lane",
+      "media": [{"label": "Object model", "caption": "This is the only direction that keeps current and available as two parallel objects.", "html": "<div class='state-map'><span>CURRENT<br><b>Stable 0.1.0</b></span><i>versus</i><span class='hot'>AVAILABLE<br><b>Preview</b></span></div>"}],
+      "preview": "<div class='status-lab'><i class='canvas-line v'></i><i class='canvas-line h'></i><section class='help-shell'><div class='help-head'><div><small>SYSTEMSKETCH</small><b>Help</b></div><button class='close-x'>×</button></div><div style='display:grid;grid-template-columns:1fr 1fr;gap:8px'><article class='lane-card' style='min-height:155px;padding:12px;border:1px solid #e0e3e7;background:#f7f8f9'><small style='color:#7a818b;font-weight:800'>CURRENT</small><h3 style='margin:7px 0 2px'>Stable 0.1.0</h3><p style='margin:0;color:#68707a;font-size:10px'>The board you are using now.</p><div style='margin-top:38px;color:#77808b;font-size:9px'>Build 27c283af<br>Details ›</div></article><article class='lane-card demo-base-only' style='min-height:155px;padding:12px;border:1px dashed #cfd4da;background:#fff'><small style='color:#7a818b;font-weight:800'>AVAILABLE</small><h3 style='margin:7px 0 2px'>No newer Preview</h3><p style='margin:0;color:#68707a;font-size:10px'>Stable is current.</p></article><article class='lane-card demo-alt-only' style='min-height:155px;padding:12px;border:1px solid #e1bd78;background:#fff8e9'><small style='color:#95610d;font-weight:850'>AVAILABLE · NEW</small><h3 style='margin:7px 0 2px'>Preview</h3><p style='margin:0;color:#755f38;font-size:10px'>4 changes · Stable stays unchanged.</p><button class='primary-action' style='margin-top:17px;background:#8d5d13'>Open duplicate ↗</button></article></div><div class='help-list'><div class='help-item'><span>Keyboard shortcuts</span><small>Ctrl Shift ?</small></div></div></section><div class='utility-strip'><span>▣</span><span>−</span><span>173%</span><span>＋</span><span class='help-trigger'>?<i class='preview-dot demo-alt-only' style='background:#b7791f'></i></span></div><button class='state-toggle' data-demo-toggle data-base-label='Show new Preview' data-alt-label='Show current Stable'>Show new Preview</button></div>"
+    },
+    {
+      "id": "v4",
+      "name": "Spotlight Only",
+      "thesis": "Remove release UI from ordinary Help; insert a strong Preview spotlight only when there is genuinely something new.",
+      "accent": "#5068ef",
+      "bestWhen": "The release system should behave like a notification: invisible when healthy, unmistakable when action is possible.",
+      "losesWhen": "Users routinely need build, release-time, or rollback information even when no update exists.",
+      "decisions": [
+        {"label": "At rest", "value": "Help starts with shortcuts and support. A tiny footer reads Stable 0.1.0 · Current."},
+        {"label": "When new", "value": "A high-contrast New Preview spotlight appears above Help rows with change count and one duplicate CTA."},
+        {"label": "Maintenance", "value": "Version, rollback, refresh, and build history move to a quiet Version details row."}
+      ],
+      "keepParts": ["footer-only current state", "conditional Preview spotlight", "Version details maintenance row"],
+      "proof": ["The current state has no release card or Preview action anywhere in the main Help scan.", "The new state adds a single 150 px spotlight and a matching labeled dot without rearranging ordinary Help rows."],
+      "scores": {
+        "fr1": {"score": 5, "evidence": "Current is stated in the footer; the alternate state is titled New Preview available and cannot be read as current-build metadata.", "confidence": "high"},
+        "fr2": {"score": 5, "evidence": "Nothing-new state uses one low-contrast footer line and no release module or CTA.", "confidence": "high"},
+        "fr3": {"score": 5, "evidence": "The only high-contrast region appears for new work and contains one prominent Open duplicate in Preview action.", "confidence": "high"},
+        "fr4": {"score": 4, "evidence": "Version details keeps provenance and recovery reachable, though it is one level farther away than V1 or V2.", "confidence": "medium"},
+        "fr5": {"score": 5, "evidence": "Plain-language state, conditional structure, visible text beside the dot, and existing Help rows fit the current product cleanly.", "confidence": "medium"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The spotlight and duplicate CTA do not exist in the current state."},
+        "g2": {"pass": true, "evidence": "The notification appears inside Help and only the small bottom-right dot exists outside it."},
+        "g3": {"pass": true, "evidence": "The CTA says Open duplicate in Preview; Version details retains maintenance actions."}
+      },
+      "previewLabel": "toggle spotlight",
+      "media": [{"label": "Attention budget", "caption": "Ordinary Help spends zero primary attention on releases; new work receives the only colored surface.", "html": "<div class='state-map'><span>Current<br><b>footer only</b></span><i>attention appears only with news</i><span class='hot'>New Preview<br><b>spotlight + CTA</b></span></div>"}],
+      "preview": "<div class='status-lab'><i class='canvas-line v'></i><i class='canvas-line h'></i><section class='help-shell'><div class='help-head'><div><small>SYSTEMSKETCH</small><b>Help</b></div><button class='close-x'>×</button></div><article class='spotlight demo-alt-only' style='padding:14px;border:1px solid #aebdff;background:linear-gradient(145deg,#e8edff,#f6f8ff)'><div class='new-kicker'>● NEW PREVIEW AVAILABLE</div><h3>There’s new work to try</h3><p>4 changes since Stable 0.1.0. Open an independent duplicate; this board stays unchanged.</p><button class='primary-action' style='background:#4056d6'>Open duplicate in Preview ↗</button><div class='sub-action'><span>See what changed</span><span>Preview details ›</span></div></article><div class='help-list' style='margin-top:0'><div class='help-item'><span>Keyboard shortcuts</span><small>Ctrl Shift ?</small></div><div class='help-item'><span>Help center</span><small>↗</small></div><div class='help-item'><span>Send feedback</span><small>↗</small></div><div class='help-item' style='color:#737b85'><span>Version details</span><small class='demo-base-only'>Stable 0.1.0 · Current</small><small class='demo-alt-only'>Stable 0.1.0</small></div></div></section><div class='utility-strip'><span>▣</span><span>−</span><span>173%</span><span>＋</span><span class='help-trigger'>?<i class='preview-dot demo-alt-only'></i></span></div><button class='state-toggle' data-demo-toggle data-base-label='Show new Preview' data-alt-label='Show current Stable'>Show new Preview</button></div>"
+    },
+    {
+      "id": "v5",
+      "name": "Preview Alert Trigger",
+      "thesis": "Keep Help entirely about help, and let the question-mark trigger itself become a labeled Preview alert when new work exists.",
+      "accent": "#9a4fd2",
+      "bestWhen": "The new-work state must be visible without opening Help, while the open panel should remain extremely sparse.",
+      "losesWhen": "Changing the width and meaning of the bottom-right trigger feels jumpy or too promotional.",
+      "decisions": [
+        {"label": "At rest", "value": "The utility strip ends in the ordinary question-mark icon; Help contains no release section."},
+        {"label": "When new", "value": "The icon expands into a labeled Preview ready trigger with a count badge."},
+        {"label": "Inside Help", "value": "A compact action banner appears above normal Help rows; build and maintenance live under Advanced."}
+      ],
+      "keepParts": ["labeled external alert", "release-free ordinary Help", "compact action banner"],
+      "proof": ["The bottom-right trigger visibly changes from a 42 px question mark to a 104 px Preview-ready control.", "The open panel remains sparse and contains no current-build card."],
+      "scores": {
+        "fr1": {"score": 4, "evidence": "Preview ready is explicit before opening Help, though the expanding trigger introduces a second meaning for the Help position.", "confidence": "medium"},
+        "fr2": {"score": 5, "evidence": "The ordinary state contains no release UI inside Help and only the existing question-mark trigger outside it.", "confidence": "high"},
+        "fr3": {"score": 5, "evidence": "The labeled trigger and compact action banner make the duplicate CTA hard to miss when new work exists.", "confidence": "high"},
+        "fr4": {"score": 3, "evidence": "Advanced preserves maintenance detail, but the route is less directly associated with version status.", "confidence": "medium"},
+        "fr5": {"score": 4, "evidence": "Text makes the alert accessible, but a variable-width control changes the established utility-strip rhythm.", "confidence": "medium"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The expanded alert and banner render only in the new-work state."},
+        "g2": {"pass": true, "evidence": "No status returns to the upper canvas."},
+        "g3": {"pass": true, "evidence": "The banner preserves the duplicate action and Advanced retains maintenance controls."}
+      },
+      "previewLabel": "toggle trigger state",
+      "media": [{"label": "Trigger behavior", "caption": "This direction spends attention outside Help only when a Preview is actually actionable.", "html": "<div class='state-map'><span>Current<br><b>?</b></span><i>conditional trigger width</i><span class='hot'>New<br><b>● Preview ready</b></span></div>"}],
+      "preview": "<div class='status-lab'><i class='canvas-line v'></i><i class='canvas-line h'></i><section class='help-shell'><div class='help-head'><div><small>SYSTEMSKETCH</small><b>Help</b></div><button class='close-x'>×</button></div><div class='action-banner demo-alt-only' style='display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #d9b8ed;background:#fbf3ff'><span style='display:grid;width:30px;height:30px;place-items:center;border-radius:8px;background:#9a4fd2;color:#fff;font-weight:900'>4</span><span class='status-copy'><b>Preview ready</b><span>Open an independent duplicate</span></span><button style='min-height:30px;padding:0 9px;border:0;border-radius:7px;background:#752eac;color:#fff;font-size:9px;font-weight:800'>Open ↗</button></div><div class='help-list' style='margin-top:0'><div class='help-item'><span>Keyboard shortcuts</span><small>Ctrl Shift ?</small></div><div class='help-item'><span>Help center</span><small>↗</small></div><div class='help-item'><span>Send feedback</span><small>↗</small></div><div class='help-item'><span>Advanced</span><small>Version · rollback · refresh ›</small></div></div></section><div class='utility-strip'><span>▣</span><span>−</span><span>173%</span><span>＋</span><span class='help-trigger demo-base-only'>?</span><span class='help-trigger demo-alt-only' style='min-width:104px;padding:0 10px;color:#752eac;font-size:10px'>● Preview ready</span></div><button class='state-toggle' data-demo-toggle data-base-label='Show new Preview' data-alt-label='Show current Stable'>Show new Preview</button></div>"
+    }
+  ],
+  "checks": [
+    "Exactly five structurally distinct release-status directions",
+    "Same SystemSketch Help panel, release fixture, viewport, and duplicate behavior",
+    "Every preview toggles between current Stable and new Preview states",
+    "Five criteria frozen before scoring; weights sum to 100%",
+    "Every score includes observable evidence and confidence",
+    "All hard gates are evaluated separately",
+    "Pick, shortlist, reject, splice, copy, download, keyboard navigation, and local persistence are present",
+    "No production SystemSketch component was changed by this proposal"
+  ]
+}

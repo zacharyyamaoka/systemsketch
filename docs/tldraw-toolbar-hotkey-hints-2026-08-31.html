@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SystemSketch — tldraw toolbar hotkey hints</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17191f;
+      --muted: #6f7480;
+      --line: #dfe2e8;
+      --paper: #fbfbfc;
+      --panel: #ffffff;
+      --accent: #5b5bd6;
+      --accent-low: #ecebff;
+      --good: #16794b;
+      --good-low: #e5f5ec;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--paper); }
+    main { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 54px 0 72px; }
+    header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 28px; align-items: end; border-bottom: 1px solid var(--line); padding-bottom: 28px; }
+    .eyebrow { color: var(--accent); font-size: 12px; font-weight: 760; letter-spacing: .13em; text-transform: uppercase; }
+    h1 { max-width: 780px; margin: 10px 0 12px; font-size: clamp(36px, 5vw, 66px); line-height: .98; letter-spacing: -.055em; }
+    .lede { max-width: 730px; margin: 0; color: var(--muted); font-size: 18px; line-height: 1.55; }
+    .verdict { min-width: 138px; padding: 16px 18px; border: 1px solid #a8dfc2; border-radius: 16px; color: var(--good); background: var(--good-low); }
+    .verdict strong { display: block; font-size: 28px; line-height: 1; }
+    .verdict span { display: block; margin-top: 6px; font-size: 12px; font-weight: 700; }
+    section { margin-top: 42px; }
+    h2 { margin: 0 0 9px; font-size: 24px; letter-spacing: -.025em; }
+    .intro { max-width: 780px; margin: 0 0 20px; color: var(--muted); line-height: 1.6; }
+    .evidence { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .card { min-width: 0; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); box-shadow: 0 8px 26px rgba(30, 33, 40, .045); }
+    .card .tag { display: inline-flex; margin-bottom: 12px; padding: 5px 8px; border-radius: 999px; color: var(--accent); background: var(--accent-low); font-size: 11px; font-weight: 760; letter-spacing: .05em; text-transform: uppercase; }
+    .card strong { display: block; margin-bottom: 6px; font-size: 18px; }
+    .card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .probe { margin-top: 20px; padding: 24px; overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: linear-gradient(140deg, #f6f7f9, #fff); }
+    .probe-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 30px; }
+    .probe-head p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+    .switcher { display: flex; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: #f2f3f5; }
+    .switcher button { border: 0; border-radius: 7px; padding: 8px 12px; color: var(--muted); background: transparent; font: inherit; font-size: 12px; font-weight: 720; cursor: pointer; }
+    .switcher button[aria-pressed="true"] { color: var(--ink); background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.09); }
+    .stage { min-height: 170px; display: grid; place-items: center; padding: 28px 14px; border-radius: 15px; background-color: #f8f8f8; background-image: radial-gradient(#dfe1e6 1px, transparent 1px); background-size: 18px 18px; }
+    .toolbar { display: flex; align-items: center; gap: 0; max-width: 100%; padding: 6px; border: 1px solid #dedfe4; border-radius: 12px; background: rgba(255,255,255,.96); box-shadow: 0 4px 12px rgba(26, 27, 31, .12); }
+    .tool { position: relative; display: grid; place-items: center; width: 48px; height: 48px; border: 0; border-radius: 9px; color: #292b31; background: transparent; }
+    .tool.active { color: #fff; background: #5c83e6; }
+    .glyph { font-size: 22px; font-weight: 480; line-height: 1; }
+    .hint { position: absolute; right: 5px; bottom: 3px; color: currentColor; font-size: 8px; font-weight: 760; line-height: 1; opacity: .58; }
+    .caption { margin: 16px 0 0; color: var(--muted); text-align: center; font-size: 13px; }
+    .caption strong { color: var(--ink); }
+    .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .choice { position: relative; padding: 23px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); }
+    .choice.recommended { border-color: #bcbbed; box-shadow: 0 0 0 3px var(--accent-low); }
+    .choice h3 { margin: 0 0 8px; font-size: 19px; }
+    .choice p, .choice li { color: var(--muted); font-size: 14px; line-height: 1.55; }
+    .choice ul { margin: 13px 0 0; padding-left: 19px; }
+    .choice .pill { display: inline-flex; margin-bottom: 14px; padding: 5px 8px; border-radius: 999px; color: var(--accent); background: var(--accent-low); font-size: 10px; font-weight: 780; letter-spacing: .06em; text-transform: uppercase; }
+    .choice code, p code { padding: 2px 5px; border-radius: 5px; background: #eff0f3; color: #31343b; font-size: .92em; }
+    pre { margin: 16px 0 0; overflow-x: auto; padding: 18px; border-radius: 13px; color: #eceef4; background: #202127; font: 12px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+    th, td { padding: 13px 15px; border-bottom: 1px solid var(--line); text-align: left; font-size: 13px; }
+    th { color: var(--muted); background: #f5f6f8; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+    tr:last-child td { border-bottom: 0; }
+    .pass { color: var(--good); font-weight: 760; }
+    footer { margin-top: 44px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; line-height: 1.55; }
+    @media (max-width: 760px) {
+      header { grid-template-columns: 1fr; }
+      .verdict { width: fit-content; }
+      .evidence, .choices { grid-template-columns: 1fr; }
+      .probe-head { align-items: flex-start; flex-direction: column; }
+      .stage { place-items: start; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <div class="eyebrow">SystemSketch · tldraw 5.3.2</div>
+      <h1>Hotkey hints are a small change.</h1>
+      <p class="lede">tldraw already assigns number keys to the visible toolbar slots. The low-code version only reveals that existing behavior; no tldraw fork or editor rewrite is needed.</p>
+    </div>
+    <div class="verdict"><strong>Yes</strong><span>CSS-only for the current order</span></div>
+  </header>
+
+  <section>
+    <h2>What is already there</h2>
+    <p class="intro">The labels are absent, but the behavior is live. tldraw collects the visible toolbar buttons and clicks slot 1–10 when the user presses <code>1…9, 0</code>.</p>
+    <div class="evidence">
+      <article class="card"><span class="tag">Source</span><strong>Built-in 1…0 map</strong><p><code>OverflowingToolbar</code> maps <code>1</code> to index 0 through <code>0</code> to index 9.</p></article>
+      <article class="card"><span class="tag">Live app</span><strong>2 → Hand</strong><p>The running SystemSketch preview switched from Select to Hand when the unmodified toolbar received <code>2</code>.</p></article>
+      <article class="card"><span class="tag">Live app</span><strong>9 → Rectangle</strong><p>The ninth visible slot activated Rectangle. <code>0</code> currently does nothing because the stock desktop toolbar exposes nine slots.</p></article>
+    </div>
+  </section>
+
+  <section class="probe">
+    <div class="probe-head">
+      <div><h2>Compare the three meanings of “desired”</h2><p>The middle state is the minimal recommended experiment.</p></div>
+      <div class="switcher" role="group" aria-label="Toolbar comparison">
+        <button type="button" data-mode="current" aria-pressed="false">Current</button>
+        <button type="button" data-mode="hints" aria-pressed="true">Reveal hints</button>
+        <button type="button" data-mode="figjam" aria-pressed="false">Exact FigJam</button>
+      </div>
+    </div>
+    <div class="stage"><div class="toolbar" id="toolbar" aria-label="Illustrative toolbar"></div></div>
+    <p class="caption" id="caption"></p>
+  </section>
+
+  <section>
+    <h2>Two implementation levels</h2>
+    <p class="intro">The right choice depends on whether the screenshot means “show me the real shortcuts” or “copy FigJam’s exact ordering and skip rules.”</p>
+    <div class="choices">
+      <article class="choice recommended">
+        <span class="pill">Recommended first</span>
+        <h3>Reveal tldraw’s existing slot numbers</h3>
+        <p>Add a CSS counter to the stock toolbar buttons. This preserves <code>&lt;Tldraw&gt;</code>, its overflow behavior, tooltips, accessibility labels, and keyboard handler.</p>
+        <ul><li>No <code>components</code> override</li><li>One small CSS rule set</li><li>Risk: selectors follow tldraw’s internal class names, so retain the exact 5.3.2 pin and add one DOM regression test before upgrading</li></ul>
+        <pre>.tlui-main-toolbar__tools &gt; .tlui-row {
+  counter-reset: tool-slot;
+}
+
+.tlui-main-toolbar__tools &gt; .tlui-row &gt;
+.tlui-button__tool[data-toolbar-visible='true'] {
+  counter-increment: tool-slot;
+}
+
+.tlui-main-toolbar__tools &gt; .tlui-row &gt;
+.tlui-button__tool[data-toolbar-visible='true']::before {
+  content: counter(tool-slot);
+  position: absolute;
+  right: 5px;
+  bottom: 3px;
+  font-size: 8px;
+  font-weight: 700;
+  opacity: .58;
+}</pre>
+      </article>
+      <article class="choice">
+        <span class="pill">Only for exact fidelity</span>
+        <h3>Own the toolbar and its key map</h3>
+        <p>Use tldraw’s supported <code>TLComponents.Toolbar</code> seam and render a small SystemSketch toolbar. This is needed if Hand must sit before Select yet remain unnumbered, or if ten fixed tools must always show <code>1…0</code>.</p>
+        <ul><li>One owned TSX component + CSS</li><li>Still uses tldraw’s tools and editor</li><li>More maintenance: responsive overflow, tool lock, drag-from-toolbar, tooltips, focus states, and keyboard behavior become SystemSketch responsibilities</li></ul>
+        <p>The previous pyblocks prototype already contains a working owned-toolbar donor with visible badges; reuse that pattern rather than inventing a third one.</p>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <h2>Decision boundary</h2>
+    <table>
+      <thead><tr><th>Requirement</th><th>Smallest implementation</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Show hints for real current number shortcuts</td><td>CSS counter over stock toolbar</td><td class="pass">Simple</td></tr>
+        <tr><td>Keep responsive overflow and tldraw behavior</td><td>Do not override <code>Toolbar</code></td><td class="pass">Preserved</td></tr>
+        <tr><td>Exact FigJam order, Hand unnumbered, 1…0 fixed</td><td>Owned toolbar + owned shortcut map</td><td>Deliberate customization</td></tr>
+        <tr><td>Change the app today</td><td>Not done in this investigation</td><td>Await design choice</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>Evidence: installed tldraw 5.3.2 source (<code>OverflowingToolbar.tsx</code> and <code>DefaultToolbar.tsx</code>) plus the running SystemSketch preview at 127.0.0.1:4322. Scope: feasibility investigation only; product UI remains stock.</footer>
+</main>
+<script>
+  const modes = {
+    current: {
+      items: [['↖','Select'], ['✋','Hand'], ['✎','Draw'], ['◇','Eraser'], ['↗','Arrow'], ['T','Text'], ['▢','Note'], ['▧','Media'], ['□','Rectangle'], ['⌃','More']],
+      caption: '<strong>Current:</strong> the number shortcuts work, but only letter shortcuts appear in tooltips.'
+    },
+    hints: {
+      items: [['↖','Select','1'], ['✋','Hand','2'], ['✎','Draw','3'], ['◇','Eraser','4'], ['↗','Arrow','5'], ['T','Text','6'], ['▢','Note','7'], ['▧','Media','8'], ['□','Rectangle','9'], ['⌃','More']],
+      caption: '<strong>Minimal change:</strong> reveal the actual slot numbers on the unchanged stock toolbar.'
+    },
+    figjam: {
+      items: [['⌁','Lock'], ['✋','Hand'], ['↖','Select','1'], ['□','Rectangle','2'], ['◇','Diamond','3'], ['○','Ellipse','4'], ['→','Arrow','5'], ['—','Line','6'], ['✎','Draw','7'], ['T','Text','8'], ['▧','Media','9'], ['⌫','Eraser','0'], ['⋮','More']],
+      caption: '<strong>Exact FigJam semantics:</strong> attractive, but now ordering and keyboard behavior differ from stock tldraw.'
+    }
+  }
+  const toolbar = document.querySelector('#toolbar')
+  const caption = document.querySelector('#caption')
+  const buttons = [...document.querySelectorAll('[data-mode]')]
+  function render(mode) {
+    toolbar.replaceChildren(...modes[mode].items.map(([glyph, label, hint], index) => {
+      const button = document.createElement('button')
+      button.className = 'tool'
+      button.type = 'button'
+      button.title = label
+      button.innerHTML = `<span class="glyph">${glyph}</span>${hint ? `<span class="hint">${hint}</span>` : ''}`
+      if ((mode === 'figjam' && index === 2) || (mode !== 'figjam' && index === 0)) button.classList.add('active')
+      return button
+    }))
+    caption.innerHTML = modes[mode].caption
+    buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)))
+  }
+  buttons.forEach(button => button.addEventListener('click', () => render(button.dataset.mode)))
+  render('hints')
+</script>
+</body>
+</html>

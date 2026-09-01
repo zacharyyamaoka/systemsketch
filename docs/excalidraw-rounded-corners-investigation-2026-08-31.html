@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SystemSketch · Excalidraw rounded-corner paste investigation</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f7f4ed;
+      --paper-2: #efe9dc;
+      --ink: #1f252b;
+      --muted: #657078;
+      --line: #d5cdbd;
+      --panel: rgba(255, 253, 248, 0.9);
+      --purple: #7c3aed;
+      --purple-soft: #ede9fe;
+      --green: #147d64;
+      --green-soft: #ddf4ec;
+      --amber: #9a6700;
+      --amber-soft: #fff0c2;
+      --red: #b42318;
+      --red-soft: #fee4e2;
+      --shadow: 0 20px 60px rgba(63, 51, 34, 0.11);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(124, 58, 237, 0.11), transparent 28rem),
+        linear-gradient(180deg, var(--paper), #f3efe7 55%, #ebe5da);
+      font: 16px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: #5b31b5; text-underline-offset: 3px; }
+    code, pre { font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace; }
+
+    .page {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 54px 0 90px;
+    }
+
+    .eyebrow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 760;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow span {
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.52);
+    }
+
+    h1 {
+      max-width: 970px;
+      margin: 0;
+      font-size: clamp(2.5rem, 7vw, 5.6rem);
+      line-height: 0.94;
+      letter-spacing: -0.065em;
+    }
+
+    .lede {
+      max-width: 800px;
+      margin: 28px 0 0;
+      color: #414a50;
+      font-size: clamp(1.1rem, 2vw, 1.35rem);
+    }
+
+    .verdict {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 22px;
+      align-items: start;
+      margin: 36px 0 0;
+      padding: 26px;
+      border: 1px solid #b9dfd2;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(221,244,236,0.92), rgba(255,255,255,0.78));
+      box-shadow: var(--shadow);
+    }
+
+    .yes {
+      display: grid;
+      place-items: center;
+      width: 76px;
+      height: 76px;
+      border-radius: 22px;
+      color: white;
+      background: var(--green);
+      font-size: 1.15rem;
+      font-weight: 850;
+      letter-spacing: 0.05em;
+    }
+
+    .verdict h2 { margin: 0 0 6px; font-size: 1.55rem; }
+    .verdict p { margin: 0; color: #35564c; }
+
+    .section { margin-top: 68px; }
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, 0.45fr);
+      gap: 34px;
+      align-items: end;
+      margin-bottom: 22px;
+    }
+    .section h2 {
+      margin: 0;
+      font-size: clamp(1.85rem, 4vw, 3.2rem);
+      line-height: 1.02;
+      letter-spacing: -0.045em;
+    }
+    .section-head p { margin: 0; color: var(--muted); }
+
+    .visual-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .shape-card, .card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: var(--panel);
+      box-shadow: 0 10px 30px rgba(63, 51, 34, 0.065);
+    }
+    .shape-card { padding: 22px; min-height: 330px; }
+    .shape-card .tag, .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 790;
+      letter-spacing: 0.045em;
+      text-transform: uppercase;
+    }
+    .tag.input { color: #5b31b5; background: var(--purple-soft); }
+    .tag.loss { color: var(--red); background: var(--red-soft); }
+    .tag.keep { color: var(--green); background: var(--green-soft); }
+    .shape-card h3 { margin: 16px 0 2px; font-size: 1.1rem; }
+    .shape-card p { margin: 0; color: var(--muted); font-size: 0.91rem; }
+    .shape-stage {
+      display: grid;
+      place-items: center;
+      height: 180px;
+      margin-top: 10px;
+      border-radius: 16px;
+      background-image: radial-gradient(#cfc7b8 0.85px, transparent 0.85px);
+      background-size: 18px 18px;
+    }
+    .shape-stage svg { width: 88%; height: 150px; overflow: visible; }
+
+    .loss-line {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border: 3px solid transparent;
+      border-radius: 22px;
+      animation: pulse 2.8s ease-out 1;
+    }
+    .shape-card:nth-child(2) .loss-line { border-color: rgba(180,35,24,0.64); }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(180,35,24,0); }
+      25% { box-shadow: 0 0 0 9px rgba(180,35,24,0.12); }
+    }
+
+    .dataflow {
+      display: grid;
+      grid-template-columns: 1fr 56px 1fr 56px 1fr;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .flow-node {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--panel);
+    }
+    .flow-node strong { display: block; margin-bottom: 8px; font-size: 1.04rem; }
+    .flow-node p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+    .arrow {
+      display: grid;
+      place-items: center;
+      color: var(--purple);
+      font-size: 2rem;
+      font-weight: 800;
+    }
+    .drop {
+      border-color: #f0b9b4;
+      background: linear-gradient(145deg, var(--red-soft), rgba(255,255,255,0.82));
+    }
+    .drop code { color: var(--red); font-weight: 760; }
+
+    .formula {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .card { padding: 24px; }
+    .card h3 { margin: 0 0 12px; font-size: 1.12rem; }
+    .card p { color: var(--muted); }
+    .equation {
+      display: grid;
+      place-items: center;
+      min-height: 155px;
+      color: #39236f;
+      background: linear-gradient(145deg, var(--purple-soft), rgba(255,255,255,0.8));
+      font: 760 clamp(1.15rem, 2.3vw, 1.85rem)/1.45 "IBM Plex Mono", monospace;
+      text-align: center;
+    }
+
+    .criteria {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0,1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .criterion {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: rgba(255,255,255,0.63);
+    }
+    .criterion b { display: block; color: var(--purple); font-size: 1.35rem; }
+    .criterion span { display: block; color: var(--muted); font-size: 0.84rem; }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--panel);
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 860px; }
+    th, td { padding: 15px 16px; border-bottom: 1px solid var(--line); text-align: left; }
+    th { color: var(--muted); font-size: 0.77rem; text-transform: uppercase; letter-spacing: 0.055em; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr.recommended { background: var(--green-soft); }
+    .score { font-weight: 840; font-size: 1.08rem; }
+    .rank { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 12px; background: #e8e0d1; font-weight: 840; }
+    .recommended .rank { color: white; background: var(--green); }
+
+    .path {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 12px;
+    }
+    .step {
+      min-height: 220px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--panel);
+    }
+    .step .n {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      margin-bottom: 18px;
+      border-radius: 13px;
+      color: white;
+      background: var(--purple);
+      font-weight: 850;
+    }
+    .step h3 { margin: 0 0 8px; font-size: 1.03rem; }
+    .step p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+
+    pre {
+      margin: 14px 0 0;
+      padding: 20px;
+      overflow: auto;
+      border-radius: 18px;
+      color: #e9e5f7;
+      background: #201b2d;
+      font-size: 0.83rem;
+      line-height: 1.55;
+      tab-size: 2;
+    }
+    .comment { color: #a9a3bb; }
+    .kw { color: #d7b5ff; }
+    .str { color: #9ee6cc; }
+    .num { color: #ffd88d; }
+
+    .tests {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 12px;
+    }
+    .test {
+      display: grid;
+      grid-template-columns: 26px 1fr;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.63);
+    }
+    .check { color: var(--green); font-weight: 900; }
+    .test b { display: block; }
+    .test span { color: var(--muted); font-size: 0.88rem; }
+
+    .boundary {
+      margin-top: 14px;
+      padding: 18px 20px;
+      border: 1px solid #eccb78;
+      border-radius: 18px;
+      color: #704d00;
+      background: var(--amber-soft);
+    }
+
+    .sources ol { padding-left: 1.35rem; }
+    .sources li { margin: 10px 0; }
+    .sources small { color: var(--muted); }
+
+    .feedback {
+      margin-top: 68px;
+      padding: 28px;
+      border-radius: 24px;
+      color: #f8f4ff;
+      background: #251c38;
+      box-shadow: var(--shadow);
+    }
+    .feedback h2 { margin: 0; font-size: 1.65rem; }
+    .feedback p { color: #c8bed8; }
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 14px;
+      border: 1px solid #655878;
+      border-radius: 14px;
+      color: white;
+      background: #181220;
+      font: inherit;
+      resize: vertical;
+    }
+    button {
+      margin-top: 12px;
+      padding: 11px 15px;
+      border: 0;
+      border-radius: 12px;
+      color: #241836;
+      background: #dac5ff;
+      font: 760 0.9rem/1 inherit;
+      cursor: pointer;
+    }
+    #copy-status { margin-left: 10px; color: #9ee6cc; font-size: 0.88rem; }
+
+    @media (max-width: 900px) {
+      .visual-grid, .path { grid-template-columns: 1fr 1fr; }
+      .dataflow { grid-template-columns: 1fr; }
+      .arrow { transform: rotate(90deg); min-height: 34px; }
+      .criteria { grid-template-columns: 1fr 1fr; }
+      .formula, .section-head { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 620px) {
+      .page { width: min(100% - 24px, 1180px); padding-top: 28px; }
+      .verdict { grid-template-columns: 1fr; }
+      .visual-grid, .path, .tests, .criteria { grid-template-columns: 1fr; }
+      h1 { font-size: 3.15rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="eyebrow">
+      <span>SystemSketch</span>
+      <span>tldraw 5.3.2</span>
+      <span>Investigation · 2026-08-31</span>
+    </div>
+    <h1>Rounded corners can survive the paste.</h1>
+    <p class="lede">The failure is a narrow adapter gap: Excalidraw puts roundness in the clipboard JSON, but tldraw’s rectangle/diamond conversion branch discards it and the stock rectangle path is sharp. Both extension seams needed for a local fix are already public.</p>
+
+    <section class="verdict" aria-label="Verdict">
+      <div class="yes">YES</div>
+      <div>
+        <h2>Extend the interop layer, not the canvas engine.</h2>
+        <p>Register an Excalidraw-shaped custom geo path, then override only the <code>excalidraw</code> external-content handler. Delegate everything else to tldraw’s existing converter. This preserves native labels, resizing, bindings, styling, export, grouping, and selection.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>The visible failure</h2>
+        <p>One clipboard field separates the input from the current result. The proposed result uses the same Excalidraw radius formula.</p>
+      </div>
+      <div class="visual-grid">
+        <article class="shape-card">
+          <span class="tag input">Excalidraw input</span>
+          <h3><code>roundness: { type: 3 }</code></h3>
+          <p>Adaptive radius: 25% of the short side, capped at 32 px.</p>
+          <div class="shape-stage">
+            <svg viewBox="0 0 300 150" role="img" aria-label="Rounded rectangle copied from Excalidraw">
+              <path d="M56 28 L244 28 Q272 28 272 56 L272 94 Q272 122 244 122 L56 122 Q28 122 28 94 L28 56 Q28 28 56 28" fill="#ede9fe" stroke="#4c2f83" stroke-width="3" />
+              <text x="150" y="80" text-anchor="middle" font-family="system-ui" font-size="17" fill="#39236f">rounded</text>
+            </svg>
+          </div>
+        </article>
+
+        <article class="shape-card">
+          <span class="tag loss">Current tldraw paste</span>
+          <h3><code>geo: "rectangle"</code></h3>
+          <p>The roundness property is never read; the built-in path has four square corners.</p>
+          <div class="shape-stage">
+            <svg viewBox="0 0 300 150" role="img" aria-label="Sharp tldraw rectangle after current paste conversion">
+              <path d="M28 28 H272 V122 H28 Z" fill="#fee4e2" stroke="#8e241c" stroke-width="3" />
+              <text x="150" y="80" text-anchor="middle" font-family="system-ui" font-size="17" fill="#7a271f">roundness lost</text>
+            </svg>
+          </div>
+          <div class="loss-line" aria-hidden="true"></div>
+        </article>
+
+        <article class="shape-card">
+          <span class="tag keep">Proposed adapter</span>
+          <h3><code>geo: "excalidraw-rounded-rect"</code></h3>
+          <p>A custom geo path keeps tldraw behavior while restoring the missing geometry.</p>
+          <div class="shape-stage">
+            <svg viewBox="0 0 300 150" role="img" aria-label="Rounded tldraw custom geo after proposed conversion">
+              <path d="M56 28 L244 28 Q272 28 272 56 L272 94 Q272 122 244 122 L56 122 Q28 122 28 94 L28 56 Q28 28 56 28" fill="#ddf4ec" stroke="#147d64" stroke-width="3" />
+              <text x="150" y="80" text-anchor="middle" font-family="system-ui" font-size="17" fill="#0f624f">roundness retained</text>
+            </svg>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Where the information disappears</h2>
+        <p>The same current-main behavior exists in SystemSketch’s pinned tldraw 5.3.2 source.</p>
+      </div>
+      <div class="dataflow">
+        <div class="flow-node">
+          <strong>1 · Clipboard JSON</strong>
+          <p>Excalidraw copies <code>type</code>, dimensions, and <code>roundness: {type, value?}</code>.</p>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="flow-node drop">
+          <strong>2 · tldraw converter</strong>
+          <p>The rectangle / ellipse / diamond case copies dimensions and style, but <code>roundness</code> is absent from the emitted shape.</p>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="flow-node">
+          <strong>3 · Stock geo path</strong>
+          <p>The built-in rectangle path is four <code>lineTo</code> calls; <code>TLGeoShapeProps</code> has no corner-radius property.</p>
+        </div>
+      </div>
+
+      <div class="formula">
+        <article class="card equation">
+          r = min(0.25 × min(width, height), value ?? 32)
+        </article>
+        <article class="card">
+          <h3>Roundness types</h3>
+          <p><b>1 · Legacy</b> and <b>2 · proportional</b> use 25% of the relevant side. <b>3 · adaptive</b>, the rectangle default, uses that proportion up to a fixed 32 px cap. <code>null</code> means sharp.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Decision surface</h2>
+        <p>The recommendation optimizes for exact interop without taking ownership of tldraw’s mature shape behavior.</p>
+      </div>
+      <div class="criteria" aria-label="Weighted criteria">
+        <div class="criterion"><b>30%</b><span>Visual + data fidelity</span></div>
+        <div class="criterion"><b>25%</b><span>Native tldraw behavior</span></div>
+        <div class="criterion"><b>25%</b><span>Upgrade cost</span></div>
+        <div class="criterion"><b>15%</b><span>Time to ship</span></div>
+        <div class="criterion"><b>5%</b><span>Upstream path</span></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Rank</th><th>Option</th><th>Fidelity</th><th>Native behavior</th><th>Maintenance</th><th>Speed</th><th>Upstream</th><th>Weighted</th></tr>
+          </thead>
+          <tbody>
+            <tr class="recommended"><td><div class="rank">1</div></td><td><b>Custom geo + thin paste adapter</b><br><small>Public tldraw seams; delegate the rest</small></td><td>5/5</td><td>5/5</td><td>4/5</td><td>4/5</td><td>4/5</td><td class="score">91/100</td></tr>
+            <tr><td><div class="rank">2</div></td><td><b>Upstream converter hook / built-in support</b><br><small>Ideal destination, slower dependency</small></td><td>5/5</td><td>5/5</td><td>5/5</td><td>1/5</td><td>5/5</td><td class="score">88/100</td></tr>
+            <tr><td><div class="rank">3</div></td><td><b>Vendor the full converter</b><br><small>Deterministic but owns ~500 upstream lines</small></td><td>5/5</td><td>5/5</td><td>2/5</td><td>3/5</td><td>2/5</td><td class="score">76/100</td></tr>
+            <tr><td><div class="rank">4</div></td><td><b>Map to note / oval / bitmap</b><br><small>Fast approximation, wrong semantics</small></td><td>2/5</td><td>2/5</td><td>4/5</td><td>5/5</td><td>1/5</td><td class="score">58/100</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>The happy path</h2>
+        <p>One custom geometry definition, one handler override, one narrow transformation, and a fixture-based regression gate.</p>
+      </div>
+      <div class="path">
+        <article class="step"><div class="n">1</div><h3>Register the shape</h3><p>Configure <code>GeoShapeUtil</code> with <code>excalidraw-rounded-rect</code>. It inherits labels, resize, fill, dash, links, snapping, hit-testing, and SVG export.</p></article>
+        <article class="step"><div class="n">2</div><h3>Override only Excalidraw paste</h3><p>In <code>&lt;Tldraw onMount&gt;</code>, replace the public <code>excalidraw</code> external-content handler. tldraw deliberately registers user handlers last.</p></article>
+        <article class="step"><div class="n">3</div><h3>Transform geo creation</h3><p>Build a queue of Excalidraw geo elements. During the delegated converter call, change rounded rectangles to the custom geo and retain <code>{type, value}</code> in shape meta.</p></article>
+        <article class="step"><div class="n">4</div><h3>Lock the seam with fixtures</h3><p>Paste sharp, adaptive, proportional, labelled, grouped, rotated, linked, and arrow-bound rectangles. Assert type/meta/geometry and exercise one real browser paste.</p></article>
+      </div>
+
+      <pre aria-label="Implementation sketch"><span class="comment">// Shape geometry: preserve Excalidraw's actual algorithm.</span>
+<span class="kw">const</span> RoundedGeo = GeoShapeUtil.configure({
+  customGeoTypes: {
+    <span class="str">'excalidraw-rounded-rect'</span>: {
+      getPath(width, height, shape) {
+        <span class="kw">const</span> roundness = shape.meta.excalidrawRoundness
+        <span class="kw">const</span> side = Math.min(width, height)
+        <span class="kw">const</span> radius = roundness.type === <span class="num">3</span>
+          ? Math.min(side * <span class="num">0.25</span>, roundness.value ?? <span class="num">32</span>)
+          : side * <span class="num">0.25</span>
+        <span class="kw">return</span> buildExcalidrawRoundedRectPath(width, height, radius, shape.props.fill)
+      },
+      snapType: <span class="str">'polygon'</span>,
+      icon: <span class="str">'geo-rectangle'</span>,
+    },
+  },
+})
+
+<span class="comment">// Paste seam: keep upstream conversion for everything except roundness.</span>
+onMount={(editor) => {
+  editor.registerExternalContentHandler(<span class="str">'excalidraw'</span>, ({ content, point }) =>
+    putExcalidrawContentWithRoundness(editor, content, point)
+  )
+}}</pre>
+
+      <div class="boundary"><b>Why not “just add <code>roundness</code> to <code>putExcalidrawContent</code>”?</b> The converter is only half the gap. The stock tldraw rectangle schema and path have nowhere to store or render a radius. The custom geo type supplies that missing target representation; the handler supplies the mapping.</div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Acceptance gate</h2>
+        <p>Ship rectangle support first. Treat rounded diamonds as the next small adapter case, not as a reason to build a general shape system.</p>
+      </div>
+      <div class="tests">
+        <div class="test"><div class="check">✓</div><div><b>Sharp remains sharp</b><span><code>roundness: null</code> continues to emit the built-in rectangle.</span></div></div>
+        <div class="test"><div class="check">✓</div><div><b>Adaptive formula is exact</b><span>64×40 → 10 px; 220×120 → 30 px; 300×180 → 32 px.</span></div></div>
+        <div class="test"><div class="check">✓</div><div><b>Authored value is retained</b><span><code>{type: 3, value: 12}</code> renders at 12 px above its cutoff.</span></div></div>
+        <div class="test"><div class="check">✓</div><div><b>Native behavior survives</b><span>Text editing, resizing, rotation, links, fill/dash, export, and arrow binding remain tldraw-owned.</span></div></div>
+        <div class="test"><div class="check">✓</div><div><b>Compound pastes survive</b><span>Mixed shapes, groups, bound labels, and arrows keep their ordering and bindings.</span></div></div>
+        <div class="test"><div class="check">✓</div><div><b>Real clipboard proof</b><span>Copy from Excalidraw, paste into deployed SystemSketch, reload, edit, and export.</span></div></div>
+      </div>
+    </section>
+
+    <section class="section sources">
+      <div class="section-head">
+        <h2>Primary sources</h2>
+        <p>Checked against SystemSketch’s installed 5.3.2 source and the current upstream files on 2026-08-31.</p>
+      </div>
+      <article class="card">
+        <ol>
+          <li><a href="https://github.com/tldraw/tldraw/blob/main/packages/tldraw/src/lib/utils/excalidraw/putExcalidrawContent.ts#L106-L142">tldraw · Excalidraw converter, geo branch</a> — rectangle / ellipse / diamond conversion omits roundness.</li>
+          <li><a href="https://github.com/tldraw/tldraw/blob/main/packages/tldraw/src/lib/shapes/geo/getGeoShapePath.ts#L61-L74">tldraw · stock rectangle path</a> — the built-in rectangle is four straight edges.</li>
+          <li><a href="https://tldraw.dev/examples/custom-geo-types">tldraw · custom geo types example</a> — public configured geo extension, including an official rounded-rectangle example.</li>
+          <li><a href="https://tldraw.dev/examples/custom-paste">tldraw · custom paste behavior</a> — public external-content handler override from <code>onMount</code>.</li>
+          <li><a href="https://github.com/excalidraw/excalidraw/blob/master/packages/element/src/utils.ts#L465-L484">Excalidraw · <code>getCornerRadius</code></a> — authoritative roundness calculation.</li>
+          <li><a href="https://github.com/excalidraw/excalidraw/blob/master/packages/common/src/constants.ts#L352-L375">Excalidraw · roundness constants</a> — legacy, proportional, adaptive, 25%, and 32 px.</li>
+          <li><a href="https://github.com/excalidraw/excalidraw/blob/master/packages/element/src/shape.ts#L725-L769">Excalidraw · rectangle renderer</a> — applies the radius to the short side and emits rounded path geometry.</li>
+          <li><a href="https://tldraw.dev/reference/tldraw/putExcalidrawContent">tldraw · <code>putExcalidrawContent</code> reference</a> — the current public function inserts directly and exposes no transform callback.</li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="feedback">
+      <h2>Feedback surface</h2>
+      <p>The default recommendation is “custom geo + thin paste adapter.” If you want a different trade-off, write it here and copy it back into the task.</p>
+      <textarea id="feedback" placeholder="What should change? Example: support rounded diamonds in the first slice, or prefer an upstream PR before local code."></textarea>
+      <button id="copy" type="button">Copy my feedback</button><span id="copy-status" aria-live="polite"></span>
+    </section>
+  </main>
+
+  <script>
+    const button = document.getElementById('copy')
+    const feedback = document.getElementById('feedback')
+    const status = document.getElementById('copy-status')
+    button.addEventListener('click', async () => {
+      const body = feedback.value.trim() || '(No written feedback — default recommendation accepted.)'
+      const text = [
+        'Feedback on `excalidraw-rounded-corners-investigation-2026-08-31.html`',
+        '',
+        'Source note: [[PROJECT - exacli_tldraw]]',
+        '',
+        body,
+      ].join('\n')
+      try {
+        await navigator.clipboard.writeText(text)
+        status.textContent = 'Copied.'
+      } catch {
+        feedback.value = text
+        feedback.select()
+        status.textContent = 'Clipboard blocked; selected the text instead.'
+      }
+    })
+  </script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SystemSketch — Figma toolbar P1 implementation</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #20242b;
+      --muted: #6d7480;
+      --faint: #9299a4;
+      --line: #dfe2e7;
+      --paper: #f1f2f4;
+      --card: #fff;
+      --blue: #536dfe;
+      --blue-soft: #edf0ff;
+      --green: #247854;
+      --green-soft: #e8f5ed;
+      --amber: #9a5d18;
+      --amber-soft: #fff4df;
+      --shadow: 0 24px 80px rgb(29 35 45 / 10%), 0 2px 8px rgb(29 35 45 / 6%);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--paper); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; }
+    .page { width: min(1360px, calc(100% - 32px)); margin: 0 auto; padding: 16px 0 76px; }
+    .topbar { position: sticky; top: 12px; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; padding: 10px 12px 10px 16px; border: 1px solid rgb(32 36 43 / 10%); border-radius: 16px; background: rgb(255 255 255 / 88%); box-shadow: 0 10px 36px rgb(29 35 45 / 8%); backdrop-filter: blur(16px); }
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 800; }
+    .brand i { width: 11px; height: 11px; border-radius: 4px; background: var(--blue); box-shadow: 0 0 0 5px var(--blue-soft); }
+    nav { display: flex; gap: 4px; }
+    nav a { padding: 8px 11px; border-radius: 9px; color: var(--muted); text-decoration: none; font-size: 11px; font-weight: 720; }
+    nav a:hover { color: var(--ink); background: #eff0f2; }
+    .hero { overflow: hidden; padding: clamp(30px, 5vw, 70px); border: 1px solid #d9dbe0; border-radius: 28px; background: linear-gradient(145deg, #fff 58%, #f0f2ff); box-shadow: var(--shadow); }
+    .eyebrow { color: var(--blue); font-size: 10px; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { max-width: 970px; margin: 18px 0 18px; font-size: clamp(46px, 7vw, 98px); line-height: .9; letter-spacing: -.065em; }
+    .lede { max-width: 760px; margin: 0; color: var(--muted); font-size: clamp(16px, 2vw, 22px); line-height: 1.5; letter-spacing: -.02em; }
+    .status { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+    .pill { display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border: 1px solid #dedfe4; border-radius: 99px; color: #515863; background: #fff; font-size: 11px; font-weight: 760; }
+    .pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px var(--green-soft); }
+    .section { margin-top: 28px; padding: clamp(24px, 4vw, 52px); border: 1px solid #d9dbe0; border-radius: 24px; background: #fff; box-shadow: 0 16px 58px rgb(29 35 45 / 6%); }
+    .section-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, .7fr); gap: 28px; align-items: end; margin-bottom: 28px; }
+    h2 { margin: 8px 0 0; font-size: clamp(32px, 4vw, 56px); line-height: .98; letter-spacing: -.05em; }
+    .section-head p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .demo-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 14px; }
+    .canvas { position: relative; min-height: 560px; overflow: hidden; border: 1px solid #dce0e5; border-radius: 20px; outline: none; background-color: #f8f9fa; background-image: radial-gradient(#d7dbe1 .8px, transparent .8px); background-size: 18px 18px; box-shadow: inset 0 1px 0 #fff, 0 20px 60px rgb(29 35 45 / 8%); }
+    .canvas:focus-visible { box-shadow: inset 0 0 0 3px var(--blue-soft), 0 20px 60px rgb(29 35 45 / 8%); }
+    .mock-doc { position: absolute; top: 14px; left: 14px; display: flex; gap: 10px; align-items: center; padding: 11px 14px; border: 1px solid #e3e5e8; border-radius: 13px; background: #fff; box-shadow: 0 7px 22px rgb(29 35 45 / 9%); font-size: 11px; font-weight: 760; }
+    .mock-doc::before { content: "☰"; color: #68707b; font-size: 13px; }
+    .sketch-line { position: absolute; left: 22%; top: 35%; width: 38%; height: 25%; border: 3px solid #252a31; border-top: 0; border-left: 0; border-radius: 0 0 90% 0; transform: rotate(8deg); opacity: .88; }
+    .sketch-card { position: absolute; right: 14%; top: 22%; width: 180px; height: 118px; border: 3px solid #252a31; border-radius: 16px; transform: rotate(-2deg); background: rgb(255 255 255 / 62%); }
+    .toolbar { position: absolute; z-index: 8; left: 50%; bottom: 14px; display: flex; transform: translateX(-50%); align-items: center; gap: 0; padding: 3px; border: 1px solid rgb(15 23 42 / 11%); border-radius: 11px; background: rgb(255 255 255 / 97%); box-shadow: 0 2px 6px rgb(15 23 42 / 8%), 0 12px 34px rgb(15 23 42 / 13%); }
+    .tool { position: relative; display: grid; width: 43px; height: 40px; place-items: center; padding: 0; border: 0; border-radius: 7px; background: transparent; cursor: pointer; }
+    .tool:hover { background: #eff1f5; }
+    .tool[aria-pressed="true"] { color: #fff; background: var(--blue); }
+    .tool:disabled { opacity: .36; cursor: not-allowed; }
+    .tool svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    .tool .caret { position: absolute; right: 2px; bottom: 1px; font-size: 8px; opacity: .66; }
+    .tool.plus { margin-left: 3px; border-left: 1px solid #e5e7eb; border-radius: 0 7px 7px 0; }
+    .popover { position: absolute; z-index: 7; left: 50%; bottom: 68px; display: none; width: 236px; transform: translateX(-50%); padding: 7px; border: 1px solid #dfe2e7; border-radius: 12px; background: #fff; box-shadow: 0 18px 46px rgb(15 23 42 / 18%); }
+    .popover.open { display: block; }
+    .popover.library { left: auto; right: 18px; width: min(340px, calc(100% - 36px)); transform: none; padding: 14px; }
+    .popover h3 { margin: 4px 5px 8px; color: var(--faint); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
+    .menu-item { display: grid; grid-template-columns: 24px 1fr auto; width: 100%; align-items: center; gap: 6px; padding: 8px; border: 0; border-radius: 8px; text-align: left; background: transparent; cursor: pointer; font-size: 11px; }
+    .menu-item:hover, .menu-item.active { color: #4057d6; background: #f0f2ff; }
+    .menu-item kbd { color: #9299a4; font-size: 9px; }
+    .lib-head { display: flex; align-items: center; justify-content: space-between; }
+    .lib-head strong { font-size: 17px; }
+    .lib-head button { border: 0; border-radius: 7px; background: #f0f2f5; cursor: pointer; }
+    .library input { width: 100%; margin: 13px 0; padding: 9px 10px; border: 1px solid #dfe2e7; border-radius: 8px; outline: none; }
+    .library input:focus { border-color: #9baaf7; box-shadow: 0 0 0 3px var(--blue-soft); }
+    .lib-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+    .lib-item { min-height: 62px; padding: 6px; border: 1px solid #e1e5eb; border-radius: 9px; background: #f8f9fb; cursor: pointer; font-size: 9px; }
+    .lib-item:hover { border-color: #9baaf7; color: #4057d6; background: #f0f2ff; }
+    .side-note { display: flex; flex-direction: column; gap: 10px; }
+    .readout { padding: 16px; border: 1px solid #dfe2e7; border-radius: 15px; background: #fafafa; }
+    .readout span { display: block; color: var(--faint); font-size: 9px; font-weight: 820; letter-spacing: .1em; text-transform: uppercase; }
+    .readout strong { display: block; margin-top: 7px; font-size: 14px; }
+    .readout p { margin: 7px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .hint { border-color: #d9dffd; background: #f7f8ff; }
+    .architecture { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    .layer { position: relative; min-height: 160px; padding: 17px; border: 1px solid #dfe2e7; border-radius: 15px; background: #fafafa; }
+    .layer:not(:last-child)::after { content: "→"; position: absolute; z-index: 2; top: 50%; right: -17px; display: grid; width: 24px; height: 24px; transform: translateY(-50%); place-items: center; border: 1px solid #dfe2e7; border-radius: 50%; color: var(--blue); background: #fff; font-weight: 900; }
+    .layer span { color: var(--blue); font-size: 9px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+    .layer h3 { margin: 9px 0 7px; font-size: 14px; }
+    .layer p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .proof-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .proof { padding: 17px; border: 1px solid #dfe2e7; border-radius: 14px; }
+    .proof b { display: flex; align-items: center; gap: 9px; font-size: 12px; }
+    .proof b::before { content: "✓"; display: grid; width: 22px; height: 22px; place-items: center; border-radius: 7px; color: var(--green); background: var(--green-soft); }
+    .proof p { margin: 9px 0 0 31px; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .upgrade { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .upgrade article { padding: 22px; border: 1px solid #dfe2e7; border-radius: 16px; }
+    .upgrade article:first-child { border-color: #cbe6d5; background: #f3faf6; }
+    .upgrade article:last-child { border-color: #f0d9b9; background: #fffaf1; }
+    .upgrade h3 { margin: 0 0 9px; font-size: 16px; }
+    .upgrade p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .files { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 14px; }
+    .files a { padding: 11px 12px; border: 1px solid #dfe2e7; border-radius: 10px; color: #4c596a; background: #fff; text-decoration: none; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; }
+    .files a:hover { border-color: #9baaf7; color: #4057d6; }
+    footer { display: flex; justify-content: space-between; gap: 20px; padding: 30px 6px 0; color: var(--faint); font-size: 10px; }
+    @media (max-width: 900px) { .section-head, .demo-wrap { grid-template-columns: 1fr; } .architecture { grid-template-columns: 1fr 1fr; } .layer:not(:last-child)::after { display: none; } .side-note { display: grid; grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 620px) { nav { display: none; } .page { width: min(100% - 18px, 1360px); } .canvas { min-height: 500px; } .toolbar .tool { width: 38px; } .architecture, .proof-grid, .upgrade, .files, .side-note { grid-template-columns: 1fr; } .lib-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="brand"><i></i>SystemSketch · P1 implementation</div>
+      <nav><a href="#live">Try it</a><a href="#boundary">Boundary</a><a href="#proof">Proof</a><a href="#upgrade">P2 escape hatch</a></nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <span class="eyebrow">Implemented · browser verified · Aug 31, 2026</span>
+        <h1>Figma’s toolbar rhythm. tldraw’s machinery.</h1>
+        <p class="lede">Seven glanceable slots now sit at the bottom of SystemSketch. The family icon remembers the last shape, repeated <b>A</b> cycles straight → curve → elbow, and the plus opens a searchable shape library—all on public tldraw UI and editor seams.</p>
+        <div class="status"><span class="pill">P1 shipped</span><span class="pill">45 frontend tests</span><span class="pill">18 Python tests</span><span class="pill">Real-browser pass</span></div>
+      </section>
+
+      <section class="section" id="live">
+        <div class="section-head">
+          <div><span class="eyebrow">Interactive reconstruction</span><h2>One slot, useful memory.</h2></div>
+          <p>Click the shape caret or press <b>R</b>, <b>O</b>, <b>L</b>, and <b>A</b> while the canvas has focus. Repeated A cycles arrow geometry. The demo mirrors the implemented state machine; the production toolbar invokes the real tldraw tools.</p>
+        </div>
+        <div class="demo-wrap">
+          <div class="canvas" id="demo-canvas" tabindex="0" aria-label="Interactive toolbar demo">
+            <div class="mock-doc">Untitled <span style="color:#e09d37">●</span> · Page 1</div>
+            <div class="sketch-line"></div><div class="sketch-card"></div>
+            <div class="popover" id="shape-menu" aria-label="Shape menu">
+              <h3>Shapes</h3>
+              <button class="menu-item" data-shape="rectangle"><span>□</span><span>Rectangle</span><kbd>R</kbd></button>
+              <button class="menu-item" data-shape="ellipse"><span>○</span><span>Ellipse</span><kbd>O</kbd></button>
+              <button class="menu-item" data-shape="line"><span>╱</span><span>Line</span><kbd>L</kbd></button>
+              <h3>Arrows · repeat A to cycle</h3>
+              <button class="menu-item" data-shape="arrow-straight"><span>→</span><span>Straight arrow</span><kbd>A</kbd></button>
+              <button class="menu-item" data-shape="arrow-curve"><span>↝</span><span>Curved arrow</span><kbd>A × 2</kbd></button>
+              <button class="menu-item" data-shape="arrow-elbow"><span>↳</span><span>Elbow arrow</span><kbd>A × 3</kbd></button>
+            </div>
+            <div class="popover library" id="library" aria-label="Library demo">
+              <div class="lib-head"><div><span class="eyebrow">Library</span><br><strong>Shapes</strong></div><button id="close-library" aria-label="Close">×</button></div>
+              <input id="library-search" placeholder="Search shapes" aria-label="Search shapes">
+              <div class="lib-grid" id="library-grid">
+                <button class="lib-item">Rectangle</button><button class="lib-item">Ellipse</button><button class="lib-item">Triangle</button><button class="lib-item">Diamond</button>
+                <button class="lib-item">Hexagon</button><button class="lib-item">Cloud</button><button class="lib-item">Process</button><button class="lib-item">Decision</button>
+              </div>
+            </div>
+            <div class="toolbar" aria-label="Figma-style toolbar demo">
+              <button class="tool" data-tool="cursor" aria-label="Cursor" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="m5 3 13 9-6 1 3 6-2 1-3-6-4 4z"/></svg></button>
+              <button class="tool" data-tool="frame" aria-label="Frame" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/></svg></button>
+              <button class="tool" id="shape-tool" data-tool="shape" aria-label="Rectangle" aria-pressed="false"><span id="shape-glyph" style="font-size:22px">□</span><span class="caret">⌄</span></button>
+              <button class="tool" data-tool="draw" aria-label="Pen" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="m4 20 4-1 11-11-3-3L5 16zM14 7l3 3"/></svg><span class="caret">⌄</span></button>
+              <button class="tool" data-tool="text" aria-label="Text" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M5 6h14M12 6v13M9 19h6"/></svg></button>
+              <button class="tool" disabled aria-label="Comment unavailable"><svg viewBox="0 0 24 24"><path d="M5 5h14v10H9l-4 4z"/></svg></button>
+              <button class="tool plus" id="library-tool" aria-label="Library" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+          <aside class="side-note">
+            <div class="readout hint"><span>Current family slot</span><strong id="current-label">Rectangle</strong><p>The bottom icon is both status and a one-click recall target.</p></div>
+            <div class="readout"><span>Keyboard</span><strong id="key-label">Waiting</strong><p>Search fields keep their keystrokes; the canvas owns drawing shortcuts.</p></div>
+            <div class="readout"><span>Capability</span><strong>Comment is honest</strong><p>The slot stays disabled until licensed tldraw commenting is registered.</p></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="boundary">
+        <div class="section-head">
+          <div><span class="eyebrow">P1 technical boundary</span><h2>Compose first. Customize narrowly.</h2></div>
+          <p>The implementation leans on tldraw for layout, registered tools, focus, keyboard routing, selection, history, shape creation, popovers, menus, and responsive behavior. SystemSketch owns only the family model and the product-specific library catalog.</p>
+        </div>
+        <div class="architecture">
+          <article class="layer"><span>Shell</span><h3>DefaultToolbar</h3><p>Public tldraw toolbar composition, sizing, focus, and overflow.</p></article>
+          <article class="layer"><span>Projection</span><h3>Seven families</h3><p>Cursor, Frame, Shape, Draw, Text, Comment, Library.</p></article>
+          <article class="layer"><span>Registry</span><h3>Stock tools</h3><p>Wrapped tool callbacks remember the latest family choice.</p></article>
+          <article class="layer"><span>One seam</span><h3>Curve preset</h3><p>A guarded before-create hook gives curve arrows a visible bend.</p></article>
+          <article class="layer"><span>Canvas</span><h3>Ordinary shapes</h3><p>Library tiles create normal tldraw geo shapes, selected in history.</p></article>
+        </div>
+        <div class="files">
+          <a href="../src/toolbar/SystemSketchToolbar.tsx">src/toolbar/SystemSketchToolbar.tsx</a>
+          <a href="../src/toolbar/toolbarIntegration.ts">src/toolbar/toolbarIntegration.ts</a>
+          <a href="../src/toolbar/toolbarModel.ts">src/toolbar/toolbarModel.ts</a>
+          <a href="../src/toolbar/systemsketch-toolbar.css">src/toolbar/systemsketch-toolbar.css</a>
+        </div>
+      </section>
+
+      <section class="section" id="proof">
+        <div class="section-head">
+          <div><span class="eyebrow">Observable evidence</span><h2>Tested as behavior, not decoration.</h2></div>
+          <p>The final pass used the real Preview app and a real canvas. Temporary arrows and library shapes were deleted after verification so the user’s board was left clean.</p>
+        </div>
+        <div class="proof-grid">
+          <article class="proof"><b>Repeated A cycles presets</b><p>Straight → curved → elbow; leaving and returning with A recalls the latest arrow preset.</p></article>
+          <article class="proof"><b>R, O, and L share the slot</b><p>The family icon changes immediately and re-click invokes the remembered stock tool.</p></article>
+          <article class="proof"><b>Curve geometry is real</b><p>A browser-drawn arrow had visible bend while pasted and programmatic arrows stay untouched.</p></article>
+          <article class="proof"><b>Library closes after insertion</b><p>Search, insert, select, history, and tldraw global menu dismissal work as one interaction.</p></article>
+          <article class="proof"><b>Typing is isolated</b><p>Entering “decisiona” in library search did not fire the A shortcut or change the selected tool.</p></article>
+          <article class="proof"><b>Preference survives reload</b><p>The curved-arrow icon remained the family icon after reloading Preview.</p></article>
+          <article class="proof"><b>Compact width verified</b><p>All seven slots stayed usable at a 560 × 700 viewport without colliding with utilities.</p></article>
+          <article class="proof"><b>Full repository check is green</b><p>TypeScript, 45 Vitest cases, and 18 Python integration tests all passed.</p></article>
+        </div>
+      </section>
+
+      <section class="section" id="upgrade">
+        <div class="section-head">
+          <div><span class="eyebrow">Documented escape hatch</span><h2>P1 now. P2 only if the shell fights us.</h2></div>
+          <p>The upgrade is deliberately bounded. Product behavior is not coupled to the toolbar container, so future pressure does not require rewriting family memory, tools, shortcuts, the library, or tests.</p>
+        </div>
+        <div class="upgrade">
+          <article><h3>Keep P1 while it stays boring</h3><p><b>DefaultToolbar</b> gives SystemSketch the maximum off-the-shelf tldraw behavior and the smallest maintenance surface. This is the shipped choice.</p></article>
+          <article><h3>Upgrade to P2 when there is evidence</h3><p>If stock overflow DOM, breakpoints, or extra toolbar chrome materially constrain the product, replace only the outer shell with an owned <b>TldrawUiToolbar</b>. Keep the model, overrides, curve side effect, library catalog, and regression tests unchanged.</p></article>
+        </div>
+      </section>
+    </main>
+    <footer><span>SystemSketch · Figma toolbar P1</span><span>Implementation evidence · 2026-08-31</span></footer>
+  </div>
+  <script>
+    const canvas = document.querySelector('#demo-canvas');
+    const shapeTool = document.querySelector('#shape-tool');
+    const shapeMenu = document.querySelector('#shape-menu');
+    const library = document.querySelector('#library');
+    const libraryTool = document.querySelector('#library-tool');
+    const currentLabel = document.querySelector('#current-label');
+    const keyLabel = document.querySelector('#key-label');
+    const shapeGlyph = document.querySelector('#shape-glyph');
+    const glyphs = { rectangle: '□', ellipse: '○', line: '╱', 'arrow-straight': '→', 'arrow-curve': '↝', 'arrow-elbow': '↳' };
+    const labels = { rectangle: 'Rectangle', ellipse: 'Ellipse', line: 'Line', 'arrow-straight': 'Straight arrow', 'arrow-curve': 'Curved arrow', 'arrow-elbow': 'Elbow arrow' };
+    let currentShape = 'rectangle';
+    let lastArrow = 'arrow-straight';
+
+    function activateTool(id) {
+      document.querySelectorAll('.tool[data-tool]').forEach((tool) => tool.setAttribute('aria-pressed', String(tool.dataset.tool === id)));
+    }
+    function setShape(id) {
+      currentShape = id;
+      if (id.startsWith('arrow-')) lastArrow = id;
+      shapeGlyph.textContent = glyphs[id];
+      shapeTool.setAttribute('aria-label', labels[id]);
+      currentLabel.textContent = labels[id];
+      document.querySelectorAll('[data-shape]').forEach((item) => item.classList.toggle('active', item.dataset.shape === id));
+      activateTool('shape');
+    }
+    document.querySelectorAll('.tool[data-tool]').forEach((tool) => tool.addEventListener('click', (event) => {
+      if (event.target.closest('.caret') && tool === shapeTool) return;
+      activateTool(tool.dataset.tool);
+    }));
+    shapeTool.addEventListener('click', (event) => {
+      const bounds = shapeTool.getBoundingClientRect();
+      if (event.clientX > bounds.right - 17 || event.clientY > bounds.bottom - 16) {
+        shapeMenu.classList.toggle('open'); library.classList.remove('open');
+      } else { setShape(currentShape); }
+    });
+    document.querySelectorAll('[data-shape]').forEach((item) => item.addEventListener('click', () => { setShape(item.dataset.shape); shapeMenu.classList.remove('open'); canvas.focus(); }));
+    libraryTool.addEventListener('click', () => { library.classList.toggle('open'); shapeMenu.classList.remove('open'); libraryTool.setAttribute('aria-pressed', String(library.classList.contains('open'))); if (library.classList.contains('open')) document.querySelector('#library-search').focus(); });
+    document.querySelector('#close-library').addEventListener('click', () => { library.classList.remove('open'); libraryTool.setAttribute('aria-pressed', 'false'); canvas.focus(); });
+    document.querySelector('#library-search').addEventListener('input', (event) => { const query = event.target.value.toLowerCase(); document.querySelectorAll('.lib-item').forEach((item) => item.hidden = !item.textContent.toLowerCase().includes(query)); keyLabel.textContent = `Search kept “${event.target.value || '…'}”`; });
+    document.querySelectorAll('.lib-item').forEach((item) => item.addEventListener('click', () => { currentLabel.textContent = `${item.textContent} inserted`; library.classList.remove('open'); libraryTool.setAttribute('aria-pressed', 'false'); activateTool('cursor'); canvas.focus(); }));
+    canvas.addEventListener('keydown', (event) => {
+      if (event.target.matches('input')) return;
+      const key = event.key.toLowerCase();
+      const direct = { r: 'rectangle', o: 'ellipse', l: 'line' };
+      if (direct[key]) setShape(direct[key]);
+      if (key === 'a') {
+        const cycle = ['arrow-straight', 'arrow-curve', 'arrow-elbow'];
+        const next = currentShape.startsWith('arrow-') ? cycle[(cycle.indexOf(currentShape) + 1) % cycle.length] : lastArrow;
+        setShape(next);
+      }
+      if ('rola'.includes(key)) { keyLabel.textContent = key.toUpperCase(); event.preventDefault(); }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+[
+  {
+    "id": "BOUNDARY-1a",
+    "label": "run.in → decode.in: boundary INPUT feeds the inner Block — the reported gesture",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "BOUNDARY-1a-QUIET",
+    "label": "run.in → decode.in never offers a Block on top of a Block",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "BOUNDARY-1b",
+    "label": "decode.out → run.out: inner Block returns through the boundary OUTPUT",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "BOUNDARY-1b-QUIET",
+    "label": "decode.out → run.out never offers a Block on top of a Block",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "BOUNDARY-1c",
+    "label": "decode.out → run.in: inner OUTPUT into the boundary INPUT — data leaving through an inlet",
+    "observed": 0,
+    "desired": 0,
+    "ok": true
+  },
+  {
+    "id": "BOUNDARY-1c-QUIET",
+    "label": "decode.out → run.in never offers a Block on top of a Block",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "BOUNDARY-1d",
+    "label": "run.out → decode.in: boundary OUTPUT feeding the inside — an outlet acting as a source",
+    "observed": 0,
+    "desired": 0,
+    "ok": true
+  },
+  {
+    "id": "BOUNDARY-1d-QUIET",
+    "label": "run.out → decode.in never offers a Block on top of a Block",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "AFFORD-1",
+    "label": "a drag out of the boundary lights only the legal targets",
+    "observed": [
+      "decode.in_1",
+      "run.out_1"
+    ],
+    "desired": [
+      "decode.in_1",
+      "run.out_1"
+    ],
+    "ok": true
+  },
+  {
+    "id": "AFFORD-2",
+    "label": "the port under the pointer is the hinted one",
+    "observed": [
+      "in_1"
+    ],
+    "desired": [
+      "in_1"
+    ],
+    "ok": true
+  },
+  {
+    "id": "AFFORD-3",
+    "label": "the highlight is cleared once the gesture ends",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "PICKER-1",
+    "label": "a cable into empty space offers a Block",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "PICKER-2",
+    "label": "picking creates exactly one Block",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "PICKER-3",
+    "label": "and the cable it answered is bound",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "PICKER-4",
+    "label": "the offer closes on a pick",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "PICKER-5",
+    "label": "the new Block is wired through its first matching port",
+    "observed": [
+      "in_1",
+      "out_1"
+    ],
+    "desired": [
+      "in_1",
+      "out_1"
+    ],
+    "ok": true
+  },
+  {
+    "id": "PICKER-6",
+    "label": "declining is offered",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "PICKER-7",
+    "label": "Escape removes the cable the offer was for",
+    "observed": 0,
+    "desired": 0,
+    "ok": true
+  },
+  {
+    "id": "PICKER-8",
+    "label": "and closes the offer",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "PICKER-9",
+    "label": "tapping a port makes the same offer",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "PICKER-10",
+    "label": "declining a tap leaves no cable",
+    "observed": 0,
+    "desired": 0,
+    "ok": true
+  },
+  {
+    "id": "EXIT-A",
+    "label": "pressing A (arrow tool) mid-offer leaves no cable behind",
+    "observed": {
+      "cables": 0,
+      "picker": false
+    },
+    "desired": {
+      "cables": 0,
+      "picker": false
+    },
+    "ok": true
+  },
+  {
+    "id": "EXIT-TOOLBAR",
+    "label": "clicking another toolbar tool mid-offer leaves no cable behind",
+    "observed": {
+      "cables": 0,
+      "picker": false
+    },
+    "desired": {
+      "cables": 0,
+      "picker": false
+    },
+    "ok": true
+  },
+  {
+    "id": "EXIT-ESCAPE",
+    "label": "pressing Escape mid-offer leaves no cable behind",
+    "observed": {
+      "cables": 0,
+      "picker": false
+    },
+    "desired": {
+      "cables": 0,
+      "picker": false
+    },
+    "ok": true
+  },
+  {
+    "id": "EXIT-CANVAS",
+    "label": "clicking empty canvas mid-offer leaves no cable behind",
+    "observed": {
+      "cables": 0,
+      "picker": false
+    },
+    "desired": {
+      "cables": 0,
+      "picker": false
+    },
+    "ok": true
+  },
+  {
+    "id": "REPLACE-1",
+    "label": "the boundary cable landed",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "REPLACE-2",
+    "label": "a refused second cable does not stack on the occupied input",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "DURABLE-1",
+    "label": "a boundary cable exists",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "DURABLE-2",
+    "label": "it survives the boundary leaving Expanded",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "DURABLE-3",
+    "label": "and coming back",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "DURABLE-4",
+    "label": "and a reload",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "CLEAN",
+    "label": "the whole journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

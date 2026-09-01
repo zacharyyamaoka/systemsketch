@@ -1,0 +1,4342 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Babble &amp; Prune</title>
+  <style>
+    :root {
+      --paper: #f4f0e8;
+      --paper-deep: #ebe5da;
+      --panel: #fffdf9;
+      --ink: #20201f;
+      --muted: #6e6a63;
+      --line: #d8d0c4;
+      --line-strong: #bdb3a5;
+      --soft: #f8f5ef;
+      --green: #2f7f62;
+      --red: #b84939;
+      --blue: #3f6fa8;
+      --shadow: 0 18px 60px rgba(53, 46, 36, 0.10);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --serif: Iowan Old Style, Baskerville, Georgia, serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--paper);
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% -10%, rgba(224, 90, 63, 0.09), transparent 32rem),
+        radial-gradient(circle at 95% 5%, rgba(47, 127, 116, 0.08), transparent 30rem),
+        var(--paper);
+      font-family: var(--sans);
+      line-height: 1.5;
+    }
+
+    button,
+    textarea,
+    input {
+      font: inherit;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page {
+      width: min(1500px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .hero {
+      padding: 34px 0 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-grid {
+      display: block;
+    }
+
+    .kicker,
+    .eyebrow {
+      color: var(--muted);
+      font: 700 11px/1.2 var(--mono);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 1100px;
+      margin: 10px 0 12px;
+      font: 500 clamp(38px, 5vw, 68px)/0.98 var(--serif);
+      letter-spacing: -0.045em;
+    }
+
+    .brief {
+      max-width: 980px;
+      margin: 0;
+      color: #494641;
+      font-size: clamp(15px, 1.45vw, 19px);
+      line-height: 1.48;
+    }
+
+    .hero-aside {
+      border-left: 1px solid var(--line-strong);
+      padding-left: 24px;
+    }
+
+    .hero-aside strong {
+      display: block;
+      margin: 7px 0 9px;
+      font: 500 21px/1.25 var(--serif);
+    }
+
+    .hero-aside p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 29px;
+      padding: 5px 10px;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      background: rgba(255, 253, 249, 0.62);
+      color: #4d4943;
+      font: 650 11px/1 var(--mono);
+    }
+
+    .badge.primary {
+      border-color: #222;
+      background: #222;
+      color: white;
+    }
+
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      margin: 30px 0 0;
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 249, 0.52);
+    }
+
+    .workflow-step {
+      min-height: 92px;
+      padding: 15px 17px;
+      border-right: 1px solid var(--line);
+    }
+
+    .workflow-step:last-child {
+      border-right: 0;
+    }
+
+    .workflow-step span {
+      color: var(--muted);
+      font: 700 10px/1 var(--mono);
+      letter-spacing: 0.1em;
+    }
+
+    .workflow-step b {
+      display: block;
+      margin: 9px 0 3px;
+      font: 600 15px/1.2 var(--sans);
+    }
+
+    .workflow-step small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .context {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+      gap: 22px;
+      padding: 28px 0 32px;
+    }
+
+    .context-panel {
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 249, 0.72);
+      padding: 18px;
+    }
+
+    .context-panel h2 {
+      margin: 7px 0 13px;
+      font: 500 24px/1.2 var(--serif);
+    }
+
+    .axis-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .axis {
+      min-width: min(100%, 260px);
+      flex: 1 1 260px;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .axis b {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 12px;
+    }
+
+    .axis span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .invariant-list {
+      display: grid;
+      gap: 9px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .invariant-list li {
+      position: relative;
+      padding-left: 21px;
+      color: #4b4842;
+      font-size: 13px;
+    }
+
+    .invariant-list li::before {
+      position: absolute;
+      left: 0;
+      top: 0.2em;
+      color: var(--green);
+      content: "◆";
+      font-size: 9px;
+    }
+
+    .boundary {
+      margin-top: 15px;
+      padding-top: 13px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .boundary b {
+      color: var(--ink);
+    }
+
+    .objective-contract {
+      display: grid;
+      gap: 13px;
+      padding: 20px 0 24px;
+    }
+
+    .objective-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .objective-head h2 {
+      margin: 5px 0 0;
+      font: 500 clamp(24px, 2.7vw, 34px)/1.05 var(--serif);
+    }
+
+    .objective-head p {
+      max-width: 520px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .objective-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
+      gap: 12px;
+    }
+
+    .objective-panel {
+      padding: 13px;
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 249, 0.76);
+    }
+
+    .objective-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .objective-panel-head b {
+      font-size: 13px;
+    }
+
+    .objective-panel-head span {
+      color: var(--muted);
+      font: 700 9px/1 var(--mono);
+      text-transform: uppercase;
+    }
+
+    .criteria-strip,
+    .constraint-strip,
+    .ranking-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .criterion-chip,
+    .constraint-chip,
+    .ranking-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 34px;
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: white;
+      font-size: 11px;
+    }
+
+    .criterion-chip b,
+    .ranking-chip b {
+      color: #315f91;
+      font: 850 11px/1 var(--mono);
+    }
+
+    .constraint-chip::before {
+      color: var(--green);
+      content: "◆";
+      font-size: 8px;
+    }
+
+    .prototype-boundary {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .prototype-boundary b {
+      color: var(--ink);
+    }
+
+    .ai-prune {
+      margin: 10px 0 38px;
+      overflow: hidden;
+      border: 1px solid #a9a093;
+      border-radius: 8px;
+      background: rgba(255, 253, 249, 0.88);
+      box-shadow: 0 12px 38px rgba(53, 46, 36, 0.07);
+    }
+
+    .ai-prune-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 22px 24px 18px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(115deg, rgba(63, 111, 168, 0.08), transparent 45%),
+        var(--panel);
+    }
+
+    .ai-prune-head h2 {
+      margin: 7px 0 6px;
+      font: 500 clamp(28px, 3vw, 40px)/1.05 var(--serif);
+      letter-spacing: -0.025em;
+    }
+
+    .ai-prune-head p {
+      max-width: 790px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .formula {
+      flex: none;
+      padding: 10px 12px;
+      border: 1px solid #bdc9d7;
+      border-radius: 5px;
+      background: #f4f8fc;
+      color: #315b88;
+      font: 700 11px/1.35 var(--mono);
+      white-space: nowrap;
+    }
+
+    .judgment-chip,
+    .evidence-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 4px 7px;
+      border-radius: 99px;
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .judgment-chip {
+      border: 1px solid #b9c9db;
+      background: #eef4fa;
+      color: #315f91;
+    }
+
+    .evidence-chip {
+      border: 1px solid #bad1c5;
+      background: #eff8f3;
+      color: #28694f;
+    }
+
+    .ai-summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+      gap: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .ai-recommendation,
+    .hinge-card {
+      padding: 20px 24px;
+    }
+
+    .ai-recommendation {
+      border-right: 1px solid var(--line);
+    }
+
+    .recommendation-line {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 10px 0 8px;
+    }
+
+    .recommendation-line strong {
+      font: 500 clamp(25px, 3vw, 36px)/1 var(--serif);
+    }
+
+    .ai-total {
+      display: inline-grid;
+      min-width: 70px;
+      min-height: 48px;
+      place-items: center;
+      border: 1px solid #aebed0;
+      border-radius: 5px;
+      background: #eef4fa;
+      color: #315f91;
+      font: 800 14px/1 var(--mono);
+    }
+
+    .ai-recommendation p,
+    .hinge-card p {
+      margin: 0;
+      color: #55514b;
+      font-size: 13px;
+    }
+
+    .alternative-line {
+      margin-top: 11px !important;
+      padding-top: 10px;
+      border-top: 1px dashed var(--line);
+      color: var(--muted) !important;
+      font-size: 12px !important;
+    }
+
+    .hinge-card {
+      background: #faf7f1;
+    }
+
+    .hinge-card b {
+      display: block;
+      margin: 8px 0 7px;
+      font: 600 17px/1.2 var(--serif);
+    }
+
+    .criteria-section,
+    .matrix-section,
+    .gate-section {
+      padding: 21px 24px 24px;
+    }
+
+    .criteria-section,
+    .matrix-section {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .ranking-section {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .ranking-chip {
+      flex: 1 1 180px;
+      justify-content: space-between;
+    }
+
+    .ranking-chip.is-leader {
+      border-color: #aebed0;
+      background: #eef4fa;
+    }
+
+    .ranking-chip.is-ineligible {
+      border-color: #dfb7af;
+      background: #fbefed;
+      color: var(--red);
+    }
+
+    .calibration-details {
+      margin: 0;
+      padding: 0 24px 20px;
+      border: 0;
+    }
+
+    .calibration-details > summary {
+      padding: 14px 0;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .section-intro {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 13px;
+    }
+
+    .section-intro h3 {
+      margin: 5px 0 4px;
+      font: 500 22px/1.1 var(--serif);
+    }
+
+    .section-intro p {
+      max-width: 760px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      background: white;
+    }
+
+    .requirement-table,
+    .score-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .requirement-table {
+      min-width: 880px;
+    }
+
+    .score-table {
+      min-width: 980px;
+    }
+
+    .requirement-table th,
+    .score-table th {
+      padding: 9px 10px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line-strong);
+      background: #f4f1eb;
+      color: var(--muted);
+      font: 750 9px/1.2 var(--mono);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      vertical-align: bottom;
+    }
+
+    .score-table th small {
+      display: block;
+      margin-top: 4px;
+      color: #315f91;
+      font-size: 8px;
+    }
+
+    .requirement-table td,
+    .score-table td {
+      padding: 10px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      color: #4b4842;
+      font-size: 11px;
+      vertical-align: top;
+    }
+
+    .requirement-table tr:last-child td,
+    .score-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .requirement-table th:last-child,
+    .requirement-table td:last-child,
+    .score-table th:last-child,
+    .score-table td:last-child {
+      border-right: 0;
+    }
+
+    .requirement-name {
+      min-width: 150px;
+    }
+
+    .requirement-name b,
+    .score-variant b {
+      display: block;
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .requirement-name small,
+    .score-variant small {
+      color: var(--muted);
+      font: 700 9px/1 var(--mono);
+    }
+
+    .weight-number {
+      display: inline-grid;
+      min-width: 44px;
+      min-height: 29px;
+      place-items: center;
+      border-radius: 4px;
+      background: #eef4fa;
+      color: #315f91;
+      font: 800 11px/1 var(--mono);
+    }
+
+    .anchor-list {
+      display: grid;
+      min-width: 230px;
+      gap: 5px;
+    }
+
+    .anchor-list span {
+      display: grid;
+      grid-template-columns: 17px 1fr;
+      gap: 6px;
+    }
+
+    .anchor-list b {
+      color: #315f91;
+      font: 800 10px/1.4 var(--mono);
+    }
+
+    .score-table tbody tr.ai-leader {
+      background: #f5f9fd;
+    }
+
+    .score-table tbody tr.gate-fail {
+      background: #fbf1ef;
+    }
+
+    .score-variant {
+      min-width: 150px;
+    }
+
+    .score-detail {
+      min-width: 112px;
+      margin: 0;
+      border: 0;
+    }
+
+    .score-detail summary {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0;
+    }
+
+    .score-detail summary::after {
+      margin-left: auto;
+      font-size: 12px;
+    }
+
+    .score-value {
+      display: inline-grid;
+      width: 31px;
+      height: 31px;
+      place-items: center;
+      border: 1px solid #bcc7d3;
+      border-radius: 50%;
+      color: #315f91;
+      font: 850 12px/1 var(--mono);
+    }
+
+    .confidence {
+      padding: 4px 5px;
+      border-radius: 3px;
+      background: #f0eee9;
+      color: var(--muted);
+      font: 750 8px/1 var(--mono);
+      text-transform: uppercase;
+    }
+
+    .confidence.high { background: #edf7f1; color: #28694f; }
+    .confidence.low { background: #faf0e7; color: #97601d; }
+
+    .score-evidence {
+      width: 220px;
+      margin: 8px 0 0;
+      padding: 8px;
+      border-left: 2px solid #b9c9db;
+      background: #f7f9fb;
+      color: #56514b;
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
+    .total-cell {
+      min-width: 86px;
+      color: var(--ink) !important;
+      font: 850 15px/1.2 var(--mono) !important;
+    }
+
+    .rank-label {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font: 700 8px/1 var(--mono);
+      text-transform: uppercase;
+    }
+
+    .gate-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 10px;
+    }
+
+    .gate-card {
+      padding: 12px;
+      border: 1px solid var(--line);
+      background: white;
+    }
+
+    .gate-card > b {
+      display: block;
+      margin: 4px 0;
+      font-size: 13px;
+    }
+
+    .gate-card > p {
+      margin: 0 0 9px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .gate-results {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .gate-result {
+      padding: 4px 6px;
+      border: 1px solid #bad1c5;
+      border-radius: 3px;
+      background: #eff8f3;
+      color: #28694f;
+      font: 750 9px/1 var(--mono);
+      cursor: help;
+    }
+
+    .gate-result.fail {
+      border-color: #dfb7af;
+      background: #fbefed;
+      color: var(--red);
+    }
+
+    .gallery-head {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 13px 0;
+      border-top: 1px solid var(--line-strong);
+      border-bottom: 1px solid var(--line);
+      background: rgba(244, 240, 232, 0.94);
+      backdrop-filter: blur(16px);
+    }
+
+    .gallery-head h2 {
+      margin: 0;
+      font: 500 25px/1 var(--serif);
+    }
+
+    .gallery-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .tool-button,
+    .action-button,
+    .export-button,
+    .demo-button {
+      border: 1px solid var(--line-strong);
+      border-radius: 5px;
+      background: var(--panel);
+      cursor: pointer;
+      transition: 150ms ease;
+    }
+
+    .tool-button {
+      min-height: 34px;
+      padding: 7px 11px;
+      color: var(--muted);
+      font: 650 11px/1 var(--mono);
+    }
+
+    .tool-button:hover,
+    .tool-button.active,
+    .action-button:hover,
+    .export-button:hover {
+      border-color: var(--ink);
+      color: var(--ink);
+      transform: translateY(-1px);
+    }
+
+    .tool-button.active {
+      background: var(--ink);
+      color: white;
+    }
+
+    .variant-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+      padding: 24px 0 32px;
+    }
+
+    .variant-grid.focus-layout {
+      grid-template-columns: minmax(0, 1080px);
+      justify-content: center;
+    }
+
+    .variant-grid.focus-layout .variant-card:not(.is-focused) {
+      display: none;
+    }
+
+    .variant-card {
+      --accent: #222;
+      position: relative;
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+      border-top: 5px solid var(--accent);
+      border-radius: 7px;
+      background: var(--panel);
+      box-shadow: 0 3px 12px rgba(52, 45, 36, 0.04);
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .variant-card:hover,
+    .variant-card.is-focused {
+      border-color: color-mix(in srgb, var(--accent) 58%, var(--line-strong));
+      box-shadow: var(--shadow);
+    }
+
+    .variant-card.is-picked {
+      outline: 3px solid color-mix(in srgb, var(--accent) 55%, white);
+      outline-offset: 3px;
+    }
+
+    .variant-card.is-rejected {
+      opacity: 0.55;
+      filter: grayscale(0.45);
+    }
+
+    .variant-card.is-shortlisted::after {
+      position: absolute;
+      top: 11px;
+      right: 12px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--blue);
+      content: "";
+      box-shadow: 0 0 0 4px white;
+    }
+
+    .variant-header {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 13px;
+      align-items: start;
+      padding: 17px 18px 14px;
+    }
+
+    .variant-index {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--line));
+      border-radius: 50%;
+      color: var(--accent);
+      font: 800 12px/1 var(--mono);
+    }
+
+    .variant-title h3 {
+      margin: 0;
+      font: 500 27px/1.05 var(--serif);
+      letter-spacing: -0.02em;
+    }
+
+    .variant-title p {
+      margin: 7px 0 0;
+      color: #55514b;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .default-badge {
+      display: none;
+      padding: 5px 7px;
+      border-radius: 3px;
+      background: color-mix(in srgb, var(--accent) 12%, white);
+      color: var(--accent);
+      font: 800 9px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .variant-ai-meta {
+      display: grid;
+      justify-items: end;
+      gap: 6px;
+    }
+
+    .variant-score {
+      color: var(--muted);
+      font: 800 10px/1 var(--mono);
+      white-space: nowrap;
+    }
+
+    .variant-card.is-default .default-badge {
+      display: inline-flex;
+    }
+
+    .prototype-frame {
+      position: relative;
+      min-height: 288px;
+      margin: 0 18px;
+      overflow: hidden;
+      border: 1px solid #bbb3a7;
+      border-radius: 5px;
+      background: #e9e6df;
+    }
+
+    .prototype-label {
+      position: absolute;
+      z-index: 3;
+      top: 8px;
+      left: 8px;
+      padding: 4px 6px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.86);
+      color: #56514b;
+      font: 700 8px/1 var(--mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      backdrop-filter: blur(8px);
+    }
+
+    .prototype {
+      min-height: 288px;
+    }
+
+    .story-driver {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 10px 13px;
+      align-items: center;
+      margin: 0 18px 10px;
+      padding: 10px;
+      border: 1px solid color-mix(in srgb, #7667c6 34%, var(--line));
+      border-radius: 5px;
+      background: color-mix(in srgb, #7667c6 5%, var(--panel));
+    }
+
+    .story-play,
+    .story-nav {
+      min-height: 32px;
+      border: 1px solid #a9a2ce;
+      border-radius: 4px;
+      background: white;
+      color: #514592;
+      cursor: pointer;
+      font: 750 10px/1 var(--mono);
+    }
+
+    .story-play {
+      min-width: 92px;
+      padding: 7px 10px;
+      border-color: #7667c6;
+      background: #7667c6;
+      color: white;
+    }
+
+    .story-play:hover,
+    .story-nav:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(82, 69, 146, 0.14);
+    }
+
+    .story-copy {
+      min-width: 0;
+    }
+
+    .story-copy small {
+      display: block;
+      color: #6e639e;
+      font: 750 8px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .story-copy b {
+      display: block;
+      margin-top: 4px;
+      overflow: hidden;
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .story-copy p {
+      margin: 3px 0 0;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.35;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .story-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .story-nav {
+      min-width: 54px;
+      padding: 7px 8px;
+    }
+
+    .story-nav:disabled {
+      cursor: default;
+      opacity: 0.36;
+    }
+
+    .story-progress {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .story-progress button {
+      width: 100%;
+      height: 3px;
+      padding: 0;
+      overflow: hidden;
+      border: 0;
+      border-radius: 999px;
+      background: #d8d3ea;
+      cursor: pointer;
+      text-indent: -999px;
+    }
+
+    .story-progress button.active {
+      background: #7667c6;
+    }
+
+    .prototype button,
+    .prototype [role="button"] {
+      cursor: pointer;
+    }
+
+    .prototype .story-target {
+      position: relative;
+      z-index: 2;
+      outline: 2px solid #7667c6;
+      outline-offset: 3px;
+      box-shadow: 0 0 0 5px rgba(118, 103, 198, 0.13);
+      animation: story-target-pulse 780ms ease-out 2;
+    }
+
+    @keyframes story-target-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(118, 103, 198, 0.42); }
+      100% { box-shadow: 0 0 0 11px rgba(118, 103, 198, 0); }
+    }
+
+    .prototype img,
+    .prototype video,
+    .prototype canvas,
+    .prototype iframe,
+    .media-surface img,
+    .media-surface video,
+    .media-surface canvas,
+    .media-surface iframe {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .media-story {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 10px 18px 0;
+    }
+
+    .media-story:has(.media-exhibit:only-child) {
+      grid-template-columns: 1fr;
+    }
+
+    .media-exhibit {
+      min-width: 0;
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: var(--soft);
+    }
+
+    .media-surface {
+      min-height: 142px;
+      overflow: hidden;
+      background: #e9e6df;
+    }
+
+    .media-caption {
+      padding: 9px 10px 10px;
+    }
+
+    .media-caption b {
+      display: block;
+      margin-bottom: 4px;
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .media-caption span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .variant-body {
+      padding: 16px 18px 18px;
+    }
+
+    .fit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .fit {
+      min-height: 82px;
+      padding: 11px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+    }
+
+    .fit b {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .fit span {
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    details {
+      margin-top: 12px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    summary {
+      padding: 11px 0;
+      cursor: pointer;
+      color: #4d4943;
+      font: 700 11px/1 var(--mono);
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      float: right;
+      color: var(--muted);
+      content: "+";
+      font-size: 16px;
+    }
+
+    details[open] summary::after {
+      content: "−";
+    }
+
+    .decision-list {
+      display: grid;
+      gap: 8px;
+      padding: 0 0 13px;
+    }
+
+    .decision {
+      display: grid;
+      grid-template-columns: minmax(90px, 0.35fr) 1fr;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .decision b {
+      color: var(--muted);
+    }
+
+    .proof-list {
+      display: grid;
+      gap: 6px;
+      margin: 0 0 13px;
+      padding: 11px 0 0;
+      border-top: 1px dashed var(--line);
+      list-style: none;
+    }
+
+    .proof-list li {
+      position: relative;
+      padding-left: 17px;
+      color: #5a5650;
+      font-size: 11px;
+    }
+
+    .proof-list li::before {
+      position: absolute;
+      left: 0;
+      color: var(--green);
+      content: "✓";
+      font-weight: 800;
+    }
+
+    .keep-title {
+      margin: 14px 0 8px;
+      color: var(--muted);
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .keep-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .keep-chip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 29px;
+      padding: 5px 9px;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      background: white;
+      color: #55514b;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .keep-chip:has(input:checked) {
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 8%, white);
+      color: var(--accent);
+    }
+
+    .keep-chip input {
+      width: 13px;
+      height: 13px;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+
+    .variant-feedback {
+      width: 100%;
+      min-height: 60px;
+      margin: 0 0 12px;
+      padding: 9px 10px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .variant-feedback:focus,
+    .global-synthesis:focus {
+      border-color: var(--accent, var(--ink));
+      outline: 2px solid color-mix(in srgb, var(--accent, var(--ink)) 18%, white);
+    }
+
+    .variant-note {
+      margin-top: 12px;
+      border: 0;
+    }
+
+    .variant-note summary {
+      padding: 8px 0;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .variant-actions {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr 1fr;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .action-button {
+      min-height: 36px;
+      padding: 7px 9px;
+      font: 750 10px/1 var(--mono);
+    }
+
+    .action-button.pick {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+    }
+
+    .action-button.shortlist.active {
+      border-color: var(--blue);
+      background: #edf3fa;
+      color: var(--blue);
+    }
+
+    .action-button.reject.active {
+      border-color: var(--red);
+      background: #faefed;
+      color: var(--red);
+    }
+
+    .decision-dock {
+      position: sticky;
+      z-index: 30;
+      bottom: 12px;
+      display: grid;
+      grid-template-columns: minmax(210px, 0.62fr) minmax(260px, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      margin: 0 auto 28px;
+      padding: 14px;
+      border: 1px solid #aaa093;
+      border-radius: 8px;
+      background: rgba(255, 253, 249, 0.96);
+      box-shadow: 0 20px 65px rgba(46, 40, 32, 0.18);
+      backdrop-filter: blur(20px);
+    }
+
+    .decision-summary small {
+      display: block;
+      color: var(--muted);
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .decision-summary b {
+      display: block;
+      margin-top: 5px;
+      font: 500 17px/1.2 var(--serif);
+    }
+
+    .decision-summary span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .global-synthesis {
+      width: 100%;
+      min-height: 72px;
+      padding: 10px 11px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: white;
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .dock-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 7px;
+    }
+
+    .export-button {
+      min-height: 36px;
+      padding: 7px 10px;
+      font: 750 10px/1 var(--mono);
+    }
+
+    .export-button.primary {
+      border-color: var(--ink);
+      background: var(--ink);
+      color: white;
+    }
+
+    .export-button.subtle {
+      border-color: transparent;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .checks {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.65fr);
+      gap: 24px;
+      padding: 26px 0 54px;
+      border-top: 1px solid var(--line-strong);
+    }
+
+    .checks h2 {
+      margin: 8px 0 9px;
+      font: 500 27px/1.15 var(--serif);
+    }
+
+    .checks p {
+      max-width: 720px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .check-list {
+      display: grid;
+      gap: 7px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .check-list li {
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 249, 0.7);
+      font-size: 12px;
+    }
+
+    .check-list li::before {
+      margin-right: 7px;
+      color: var(--green);
+      content: "✓";
+      font-weight: 800;
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 100;
+      right: 20px;
+      bottom: 20px;
+      padding: 10px 13px;
+      border-radius: 5px;
+      background: var(--ink);
+      color: white;
+      font: 650 11px/1 var(--mono);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: 180ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .empty-state {
+      display: none;
+      padding: 70px 20px;
+      border: 1px dashed var(--line-strong);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .placeholder-preview {
+      display: grid;
+      min-height: 288px;
+      place-content: center;
+      gap: 8px;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .placeholder-preview strong {
+      font: 500 23px/1.2 var(--serif);
+    }
+
+    .placeholder-preview span {
+      max-width: 360px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* Worked-example miniature prototypes */
+    .mini-shell {
+      min-height: 288px;
+      color: #29302f;
+      background: #f4f5f1;
+      font-family: var(--sans);
+    }
+
+    .mini-shell button {
+      font-family: var(--sans);
+    }
+
+    .demo-alt-only {
+      display: none;
+    }
+
+    .prototype.is-alt .demo-alt-only {
+      display: revert;
+    }
+
+    .prototype.is-alt .demo-base-only {
+      display: none !important;
+    }
+
+    .prototype.is-alt .queue-item.demo-alt-only {
+      display: grid;
+    }
+
+    .prototype.is-alt .annotation.demo-alt-only,
+    .prototype.is-alt .coach-card.demo-alt-only {
+      display: block;
+    }
+
+    .demo-button {
+      min-height: 28px;
+      padding: 5px 8px;
+      border-color: #a9aaa5;
+      background: rgba(255, 255, 255, 0.9);
+      color: #3f4644;
+      font-size: 9px;
+      font-weight: 750;
+    }
+
+    .demo-button:hover {
+      border-color: #343938;
+    }
+
+    .mini-top,
+    .notebook-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 36px;
+      padding: 0 12px;
+      border-bottom: 1px solid #cfd2cd;
+      background: #eceee9;
+      color: #5a615f;
+      font-size: 9px;
+    }
+
+    .mini-top b,
+    .notebook-head b {
+      color: #2a302e;
+      font-size: 10px;
+    }
+
+    .mini-top i,
+    .notebook-head i {
+      font-style: normal;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: 67px minmax(0, 1fr) 120px;
+      min-height: 252px;
+    }
+
+    .run-rail {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      padding: 13px 9px;
+      border-right: 1px solid #d2d5d0;
+      background: #e8eae5;
+      font-size: 9px;
+    }
+
+    .run-rail b {
+      margin-bottom: 3px;
+      color: #777d7b;
+      font-size: 8px;
+      letter-spacing: 0.08em;
+    }
+
+    .run-rail span {
+      padding: 5px;
+      border: 1px solid transparent;
+      border-radius: 3px;
+    }
+
+    .run-rail span.active {
+      border-color: #d96c56;
+      background: white;
+      color: #bd4d39;
+      font-weight: 800;
+    }
+
+    .run-rail small {
+      color: #777d7b;
+    }
+
+    .trace-pane {
+      min-width: 0;
+      padding: 13px 10px 9px;
+      background: #fbfcf9;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+
+    .metric-row span {
+      padding: 5px;
+      border: 1px solid #d9dbd6;
+      background: white;
+      color: #737876;
+      font-size: 7px;
+    }
+
+    .metric-row b {
+      display: block;
+      color: #303634;
+      font-size: 11px;
+    }
+
+    .trace-pane svg,
+    .evidence-card svg,
+    .note-main svg {
+      display: block;
+      width: 100%;
+      overflow: visible;
+    }
+
+    .gridline {
+      fill: none;
+      stroke: #dedfdc;
+      stroke-width: 1;
+    }
+
+    .command,
+    .measure,
+    .compare {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.2;
+    }
+
+    .command {
+      stroke: #2f3735;
+    }
+
+    .measure {
+      stroke: #e05a3f;
+    }
+
+    .compare {
+      stroke: #6d86b3;
+      stroke-dasharray: 4 3;
+    }
+
+    .event-line {
+      stroke: #ccaa75;
+      stroke-dasharray: 3 3;
+    }
+
+    .event-dot {
+      fill: #b7791f;
+    }
+
+    .legend {
+      display: flex;
+      gap: 12px;
+      color: #777d7b;
+      font-size: 7px;
+    }
+
+    .legend span::before {
+      display: inline-block;
+      width: 8px;
+      height: 2px;
+      margin-right: 4px;
+      vertical-align: middle;
+      background: #6d86b3;
+      content: "";
+    }
+
+    .legend .cmd::before { background: #2f3735; }
+    .legend .meas::before { background: #e05a3f; }
+
+    .event-pane {
+      padding: 15px 11px;
+      border-left: 1px solid #d2d5d0;
+      background: #f0f1ed;
+    }
+
+    .event-pane > b {
+      color: #7a7f7d;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .event-pane strong {
+      display: block;
+      margin-top: 8px;
+      color: #a65c2a;
+      font: 500 15px/1.1 var(--serif);
+    }
+
+    .event-pane p {
+      margin: 7px 0 12px;
+      color: #626866;
+      font-size: 8px;
+      line-height: 1.45;
+    }
+
+    .spatial-replay {
+      background: #e8eeeb;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 288px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 65% 42%, rgba(47, 127, 116, 0.12), transparent 42%),
+        linear-gradient(#f5f8f6, #dce5e1);
+    }
+
+    .stage > svg {
+      position: absolute;
+      inset: 22px 5px 0;
+      width: calc(100% - 10px);
+      height: 228px;
+    }
+
+    .floor {
+      fill: none;
+      stroke: #c7d1cd;
+      stroke-width: 1;
+    }
+
+    .motion-path {
+      fill: none;
+      stroke: url("#pathFade");
+      stroke-dasharray: 3 3;
+      stroke-width: 3;
+    }
+
+    .ghost-arm {
+      fill: none;
+      stroke: #78938d;
+      stroke-dasharray: 5 4;
+      stroke-width: 8;
+      opacity: 0.42;
+    }
+
+    .measure-arm {
+      fill: none;
+      stroke: #364c47;
+      stroke-linecap: round;
+      stroke-width: 7;
+    }
+
+    .joint {
+      fill: #eef3f1;
+      stroke: #56766e;
+      stroke-width: 3;
+    }
+
+    .playhead {
+      fill: rgba(255, 255, 255, 0.8);
+      stroke: #e05a3f;
+      stroke-width: 4;
+    }
+
+    .spatial-inspector {
+      position: absolute;
+      top: 34px;
+      right: 15px;
+      display: grid;
+      width: 132px;
+      gap: 5px;
+      padding: 10px;
+      border: 1px solid #a8bbb5;
+      border-radius: 4px;
+      background: rgba(250, 253, 251, 0.94);
+      box-shadow: 0 8px 25px rgba(51, 75, 69, 0.13);
+    }
+
+    .spatial-inspector small {
+      color: #72827e;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .spatial-inspector b {
+      font: 500 16px/1 var(--serif);
+    }
+
+    .spatial-inspector span {
+      color: #b7503b;
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    .spatial-inspector em {
+      color: #72827e;
+      font-size: 7px;
+      font-style: normal;
+    }
+
+    .spatial-button {
+      position: absolute;
+      right: 15px;
+      bottom: 15px;
+    }
+
+    .notebook {
+      background:
+        linear-gradient(90deg, transparent 45px, rgba(186, 90, 83, 0.18) 45px, rgba(186, 90, 83, 0.18) 46px, transparent 46px),
+        repeating-linear-gradient(#faf9f4, #faf9f4 23px, #dce0eb 24px);
+    }
+
+    .notebook-head {
+      background: rgba(245, 243, 236, 0.94);
+    }
+
+    .note-body {
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      min-height: 252px;
+    }
+
+    .note-margin {
+      display: flex;
+      flex-direction: column;
+      gap: 35px;
+      padding: 27px 8px;
+      color: #9a978f;
+      font: 7px/1 var(--mono);
+    }
+
+    .note-main {
+      padding: 17px 18px 12px 13px;
+    }
+
+    .hypothesis {
+      margin: 0 0 8px;
+      font: 500 13px/1.3 var(--serif);
+    }
+
+    .hypothesis small {
+      display: block;
+      margin-bottom: 3px;
+      color: #7667c6;
+      font: 750 7px/1 var(--mono);
+      letter-spacing: 0.08em;
+    }
+
+    .delta-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 3px;
+      color: #62635f;
+      font: 8px/1 var(--mono);
+    }
+
+    .delta-row ins {
+      color: #4d6f51;
+      text-decoration: none;
+    }
+
+    .result-line {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin: 2px 0 7px;
+      font-size: 8px;
+    }
+
+    .result-line b {
+      color: #7667c6;
+    }
+
+    .annotation {
+      margin: 5px 0 7px;
+      padding: 6px 7px;
+      border-left: 2px solid #7667c6;
+      background: rgba(118, 103, 198, 0.08);
+      color: #555463;
+      font-size: 8px;
+    }
+
+    .annotation u {
+      display: block;
+      margin-top: 2px;
+      color: #7667c6;
+      text-decoration: none;
+    }
+
+    .exception-queue {
+      background: #f3f1ec;
+    }
+
+    .queue-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 48px;
+      padding: 8px 12px;
+      border-bottom: 1px solid #d3cfc7;
+    }
+
+    .queue-head div {
+      display: grid;
+    }
+
+    .queue-head small {
+      color: #8b8275;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .queue-head b {
+      font: 500 15px/1.15 var(--serif);
+    }
+
+    .queue-head > span {
+      color: #858077;
+      font-size: 8px;
+    }
+
+    .queue-body {
+      display: grid;
+      grid-template-columns: minmax(150px, 0.8fr) 1fr;
+      min-height: 240px;
+    }
+
+    .queue-list {
+      border-right: 1px solid #d3cfc7;
+    }
+
+    .queue-item {
+      display: grid;
+      grid-template-columns: 9px 1fr auto;
+      gap: 7px;
+      align-items: center;
+      min-height: 50px;
+      padding: 7px 9px;
+      border-bottom: 1px solid #ddd9d1;
+      color: #55534f;
+    }
+
+    .queue-item.active {
+      background: white;
+      color: #282a28;
+    }
+
+    .queue-item span {
+      display: grid;
+    }
+
+    .queue-item b {
+      font-size: 9px;
+    }
+
+    .queue-item small,
+    .queue-item em {
+      color: #8a857d;
+      font-size: 7px;
+      font-style: normal;
+    }
+
+    .queue-item.resolved {
+      background: #e9f3ec;
+      color: #376848;
+    }
+
+    .sev {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #a9aaa5;
+    }
+
+    .sev.high { background: #c64b36; }
+    .sev.med { background: #cc8d33; }
+    .sev.low { background: #7c9a72; }
+
+    .evidence-card {
+      padding: 17px 15px;
+      background: #fbfaf7;
+    }
+
+    .evidence-card > small {
+      color: #a56e2a;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .evidence-card > b {
+      display: block;
+      margin: 5px 0 4px;
+      font: 500 18px/1 var(--serif);
+    }
+
+    .evidence-card p {
+      margin: 3px 0 9px;
+      color: #6f6a63;
+      font-size: 8px;
+    }
+
+    .coach {
+      position: relative;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 100% 0, rgba(63, 111, 168, 0.12), transparent 46%),
+        #f4f6f8;
+    }
+
+    .coach-progress {
+      display: grid;
+      grid-template-columns: 23px 36px 23px 36px 23px 1fr;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .coach-progress span {
+      display: grid;
+      width: 22px;
+      height: 22px;
+      place-items: center;
+      border: 1px solid #aeb8c2;
+      border-radius: 50%;
+      background: white;
+      color: #6b7782;
+      font-size: 8px;
+    }
+
+    .coach-progress span.done {
+      border-color: #5b876c;
+      background: #5b876c;
+      color: white;
+    }
+
+    .coach-progress span.active {
+      border: 2px solid #3f6fa8;
+      color: #3f6fa8;
+      font-weight: 800;
+    }
+
+    .coach-progress i {
+      height: 1px;
+      background: #bbc3ca;
+    }
+
+    .coach-progress b {
+      margin-left: 10px;
+      font-size: 9px;
+    }
+
+    .coach-card {
+      min-height: 190px;
+      padding: 16px;
+      border: 1px solid #c6ced6;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 9px 28px rgba(60, 78, 96, 0.08);
+    }
+
+    .coach-card > small {
+      color: #3f6fa8;
+      font-size: 7px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .coach-card h4 {
+      max-width: 430px;
+      margin: 7px 0 12px;
+      font: 500 17px/1.22 var(--serif);
+    }
+
+    .evidence-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .evidence-options span,
+    .test-recipe span {
+      padding: 7px;
+      border: 1px solid #d4dae0;
+      border-radius: 3px;
+      color: #77818a;
+      font-size: 8px;
+    }
+
+    .evidence-options span.yes {
+      border-color: #5b876c;
+      background: #eef6f0;
+      color: #3b6b4a;
+    }
+
+    .coach-evidence {
+      margin-top: 11px;
+      padding-top: 9px;
+      border-top: 1px solid #e0e4e7;
+      font-size: 8px;
+    }
+
+    .coach-evidence p {
+      margin: 2px 0 0;
+      color: #6b747c;
+    }
+
+    .test-recipe {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .test-recipe span {
+      display: grid;
+    }
+
+    .test-recipe b {
+      margin-top: 2px;
+      color: #3f6fa8;
+      font-size: 10px;
+    }
+
+    .coach-button {
+      position: absolute;
+      right: 34px;
+      bottom: 29px;
+      border-color: #3f6fa8;
+      background: #3f6fa8;
+      color: white;
+    }
+
+    @media (max-width: 1050px) {
+      .hero-grid,
+      .context,
+      .checks,
+      .ai-summary,
+      .objective-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .ai-recommendation {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .hero-aside {
+        border-top: 1px solid var(--line);
+        border-left: 0;
+        padding-top: 17px;
+        padding-left: 0;
+      }
+
+      .variant-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .media-story {
+        grid-template-columns: 1fr;
+      }
+
+      .decision-dock {
+        grid-template-columns: 1fr;
+      }
+
+      .dock-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        width: min(100% - 20px, 1500px);
+      }
+
+      .hero {
+        padding-top: 34px;
+      }
+
+      .workflow {
+        grid-template-columns: 1fr;
+      }
+
+      .workflow-step {
+        min-height: 76px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .workflow-step:last-child {
+        border-bottom: 0;
+      }
+
+      .ai-prune-head,
+      .section-intro,
+      .recommendation-line,
+      .objective-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .objective-head p {
+        text-align: left;
+      }
+
+      .ai-prune-head,
+      .ai-recommendation,
+      .hinge-card,
+      .criteria-section,
+      .matrix-section,
+      .gate-section {
+        padding-right: 15px;
+        padding-left: 15px;
+      }
+
+      .gallery-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .fit-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .story-driver {
+        grid-template-columns: 1fr auto;
+      }
+
+      .story-play {
+        grid-column: 1 / -1;
+        width: 100%;
+      }
+
+      .control-grid {
+        grid-template-columns: 54px minmax(0, 1fr);
+      }
+
+      .event-pane {
+        display: none;
+      }
+
+      .queue-body {
+        grid-template-columns: 1fr;
+      }
+
+      .queue-list {
+        display: none;
+      }
+
+      .evidence-options,
+      .test-recipe {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+
+      .prototype .story-target {
+        animation: none !important;
+      }
+    }
+
+    @media print {
+      .gallery-head,
+      .decision-dock,
+      .variant-actions,
+      .variant-feedback,
+      .variant-note,
+      .keep-list,
+      .demo-button,
+      .story-driver {
+        display: none !important;
+      }
+
+      .variant-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .variant-card {
+        break-inside: avoid;
+        box-shadow: none;
+      }
+    }
+
+    /* Product-fidelity SystemSketch Dev Hub specimens. */
+    .dh-mock {
+      position: relative;
+      height: 430px;
+      overflow: hidden;
+      border: 1px solid #dfe3e8;
+      border-radius: 14px;
+      color: #252930;
+      background:
+        radial-gradient(circle at 31% 38%, rgb(89 101 135 / 4%), transparent 24%),
+        #f8f9fb;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .dh-mock button { font: inherit; }
+
+    .dh-top-left,
+    .dh-top-right {
+      position: absolute;
+      z-index: 2;
+      top: 14px;
+      display: flex;
+      height: 42px;
+      align-items: center;
+      gap: 12px;
+      padding: 0 12px;
+      border: 1px solid rgb(15 23 42 / 9%);
+      border-radius: 12px;
+      background: rgb(255 255 255 / 96%);
+      box-shadow: 0 4px 16px rgb(15 23 42 / 9%);
+      font-size: 11px;
+    }
+
+    .dh-top-left { left: 14px; }
+    .dh-top-right { right: 14px; }
+    .dh-top-left b { font-size: 15px; font-weight: 500; }
+    .dh-top-left strong { font-size: 12px; }
+    .dh-top-left span { padding-left: 10px; border-left: 1px solid #e9ebef; color: #68707a; }
+    .dh-top-right i {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border-radius: 50%;
+      color: #fff;
+      background: #c3562e;
+      font-style: normal;
+      font-weight: 800;
+    }
+    .dh-top-right small { padding: 7px 9px; border: 1px solid #e7e9ed; border-radius: 8px; }
+    .dh-top-right b { padding: 9px 11px; border-radius: 8px; color: #fff; background: #7351dd; }
+
+    .dh-canvas {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(#d8dde4 0.65px, transparent 0.65px);
+      background-size: 16px 16px;
+      transition: right 160ms ease, filter 160ms ease;
+    }
+    .dh-canvas.drawer-space { right: 346px; }
+    .dh-canvas.blurred { filter: blur(1px) brightness(.94); }
+
+    .dh-block {
+      position: absolute;
+      top: 154px;
+      left: 15%;
+      display: grid;
+      width: 150px;
+      min-height: 88px;
+      align-content: center;
+      padding: 16px;
+      border: 2px solid #20242a;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 5px 18px rgb(15 23 42 / 10%);
+    }
+    .dh-block small { color: #8a919b; font-size: 8px; text-transform: uppercase; }
+    .dh-block b { margin-top: 3px; font-size: 14px; }
+    .dh-block span { margin-top: 6px; color: #616975; font: 9px/1.3 ui-monospace, monospace; }
+    .dh-wire { position: absolute; top: 198px; left: calc(15% + 184px); width: 130px; border-top: 2px solid #20242a; }
+
+    .dh-toolstrip {
+      position: absolute;
+      z-index: 8;
+      right: 14px;
+      bottom: 12px;
+      display: flex;
+      height: 42px;
+      align-items: stretch;
+      overflow: hidden;
+      border: 1px solid #dfe3e8;
+      border-radius: 11px;
+      background: rgb(255 255 255 / 97%);
+      box-shadow: 0 5px 18px rgb(15 23 42 / 10%);
+    }
+    .dh-toolstrip > * {
+      display: grid;
+      min-width: 42px;
+      place-items: center;
+      border-left: 1px solid #eceef2;
+      color: #343a42;
+      font-size: 12px;
+      font-style: normal;
+    }
+    .dh-toolstrip > *:first-child { border-left: 0; }
+    .dh-toolstrip b { min-width: 58px; font-size: 11px; }
+    .dh-toolstrip .active { color: #4057dc; background: #eef1ff; font: 800 10px/1 ui-monospace, monospace; }
+
+    .dh-panel,
+    .dh-drawer,
+    .dh-quick,
+    .dh-command {
+      position: absolute;
+      z-index: 6;
+      box-sizing: border-box;
+      border: 1px solid rgb(15 23 42 / 12%);
+      color: #242931;
+      background: rgb(255 255 255 / 98%);
+      box-shadow: 0 18px 45px rgb(15 23 42 / 17%), 0 2px 8px rgb(15 23 42 / 8%);
+    }
+
+    .dh-panel header,
+    .dh-drawer header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .dh-panel header small,
+    .dh-drawer header small,
+    .dh-quick > div > small,
+    .dh-command > div > small {
+      display: block;
+      color: #838b95;
+      font-size: 8px;
+      font-weight: 850;
+      letter-spacing: .11em;
+    }
+    .dh-panel h3,
+    .dh-drawer h3 { margin: 2px 0 0; font-size: 17px; }
+    .dh-panel header button,
+    .dh-drawer header button {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border: 0;
+      border-radius: 7px;
+      color: #69717c;
+      background: #f1f3f5;
+    }
+
+    .dh-shelf {
+      right: 14px;
+      bottom: 61px;
+      width: min(370px, calc(100% - 28px));
+      padding: 13px;
+      border-radius: 14px;
+    }
+    .dh-stable {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding: 8px 9px;
+      border-radius: 8px;
+      background: #f3f5f7;
+    }
+    .dh-stable span,
+    .dh-stable small { display: block; }
+    .dh-stable b { font-size: 10px; }
+    .dh-stable small { margin-top: 2px; color: #7a828c; font-size: 8px; }
+    .dh-stable em { color: #287451; font-size: 8px; font-style: normal; font-weight: 800; }
+    .dh-latest {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+      padding: 10px;
+      border: 1px solid #b9c1ff;
+      border-radius: 10px;
+      background: linear-gradient(145deg, #f6f7ff, #eef0ff);
+    }
+    .dh-glyph,
+    .dh-row i,
+    .dh-session i {
+      display: grid;
+      width: 29px;
+      height: 29px;
+      place-items: center;
+      border-radius: 8px;
+      color: #4057dc;
+      background: #e7eaff;
+      font-style: normal;
+      font-weight: 850;
+    }
+    .dh-latest div > * { display: block; }
+    .dh-latest div > small { color: #5367e6; font-size: 7px; font-weight: 900; letter-spacing: .09em; }
+    .dh-latest div > b { margin-top: 2px; font-size: 11px; }
+    .dh-latest div > span { margin-top: 2px; color: #656f91; font-size: 8px; }
+    .dh-latest > strong { color: #5367e6; font-size: 13px; }
+    .dh-section-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 10px 2px 5px;
+      color: #8a919b;
+      font-size: 7px;
+      font-weight: 850;
+      letter-spacing: .08em;
+    }
+    .dh-section-label button { border: 0; color: #5367e6; background: none; font-size: 8px; font-weight: 750; }
+    .dh-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 8px;
+      border-radius: 8px;
+    }
+    .dh-row:hover { background: #f4f5f7; }
+    .dh-row i { width: 26px; height: 26px; color: #59616c; background: #edf0f3; font-size: 9px; }
+    .dh-row span > * { display: block; }
+    .dh-row b { font-size: 10px; }
+    .dh-row small { margin-top: 2px; color: #7a828c; font-size: 8px; }
+    .dh-row em { color: #69717c; font-size: 10px; font-style: normal; }
+    .dh-archived { padding: 8px 9px; border-radius: 8px; color: #6e5733; background: #fff7e7; }
+    .dh-archived > * { display: block; }
+    .dh-archived b { font-size: 9px; }
+    .dh-archived span { margin-top: 2px; font-size: 8px; }
+    .dh-shelf footer { display: flex; justify-content: space-between; margin-top: 7px; padding-top: 7px; border-top: 1px solid #eceef2; }
+    .dh-shelf footer button { border: 0; color: #707985; background: none; font-size: 8px; }
+
+    .dh-mock .demo-button {
+      min-height: 28px;
+      margin-top: 7px;
+      padding: 0 10px;
+      border: 1px solid #d9dde4;
+      border-radius: 7px;
+      color: #39404a;
+      background: #fff;
+      font-size: 8px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .dh-shelf > .demo-button,
+    .dh-drawer > .demo-button,
+    .dh-quick > .demo-button,
+    .dh-command > .demo-button { width: 100%; }
+
+    .dh-drawer {
+      top: 12px;
+      right: 12px;
+      bottom: 61px;
+      width: 330px;
+      padding: 14px;
+      border-radius: 14px;
+    }
+    .dh-drawer nav { display: grid; grid-template-columns: repeat(3, 1fr); margin: 12px 0 10px; border-bottom: 1px solid #e8eaee; }
+    .dh-drawer nav span { padding: 7px 4px; color: #8a919b; font-size: 8px; font-weight: 750; text-align: center; }
+    .dh-drawer nav .active { margin-bottom: -1px; border-bottom: 2px solid #287451; color: #287451; }
+    .dh-safety { display: flex; align-items: center; justify-content: space-between; padding: 8px 9px; border-radius: 8px; background: #eef7f1; }
+    .dh-safety > * { display: block; }
+    .dh-safety b { color: #245d43; font-size: 9px; }
+    .dh-safety span { color: #5e7568; font-size: 8px; }
+    .dh-big-row { position: relative; margin: 9px 0 5px; padding: 11px; border: 1px solid #bec8ff; border-radius: 10px; background: #f4f5ff; }
+    .dh-big-row > * { display: block; }
+    .dh-big-row small { color: #5367e6; font-size: 7px; font-weight: 850; }
+    .dh-big-row b { margin-top: 3px; font-size: 12px; }
+    .dh-big-row span { margin-top: 3px; color: #69728f; font-size: 8px; }
+    .dh-big-row button { position: absolute; right: 9px; bottom: 9px; border: 0; color: #fff; background: #4f5bd5; border-radius: 6px; padding: 6px 8px; font-size: 8px; font-weight: 750; }
+    .dh-history { position: relative; margin-bottom: 8px; padding: 11px; border: 1px solid #e4e6ea; border-radius: 9px; }
+    .dh-history > * { display: block; }
+    .dh-history b { font-size: 11px; }
+    .dh-history span { margin-top: 2px; color: #9a6e2e; font-size: 8px; }
+    .dh-history small { margin-top: 6px; color: #727a85; font-size: 8px; }
+    .dh-history button { position: absolute; top: 10px; right: 9px; border: 0; color: #5367e6; background: none; font-size: 8px; font-weight: 750; }
+
+    .dh-quick {
+      right: 14px;
+      bottom: 61px;
+      width: 300px;
+      padding: 9px;
+      border-radius: 12px;
+    }
+    .dh-quick > div > small { padding: 5px 7px 6px; }
+    .dh-quick article {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 9px;
+      padding: 8px;
+      border-radius: 8px;
+    }
+    .dh-quick article.primary { color: #3248c3; background: #eff1ff; }
+    .dh-quick article i { display: grid; width: 25px; height: 25px; place-items: center; border-radius: 7px; background: rgb(79 91 213 / 10%); font-style: normal; font-size: 9px; font-weight: 850; }
+    .dh-quick article span > * { display: block; }
+    .dh-quick article b { font-size: 10px; }
+    .dh-quick article small { margin-top: 2px; color: #79818b; font-size: 8px; }
+    .dh-quick article kbd { color: #777f89; font-size: 9px; }
+    .dh-quick footer { display: flex; justify-content: space-between; margin-top: 4px; padding: 8px 7px 2px; border-top: 1px solid #eceef2; }
+    .dh-quick footer button { border: 0; color: #606a77; background: none; font-size: 8px; }
+    .dh-quick footer span { color: #9aa0a8; font: 8px/1 ui-monospace, monospace; }
+    .demo-alt-only.dh-confirm { display: none; justify-items: center; padding: 18px 10px 12px; text-align: center; }
+    .prototype.is-alt .demo-alt-only.dh-confirm { display: grid; }
+    .dh-confirm i { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; color: #fff; background: #287451; font-style: normal; }
+    .dh-confirm b { margin-top: 8px; font-size: 12px; }
+    .dh-confirm span { margin-top: 4px; color: #68717c; font-size: 9px; }
+    .dh-confirm small { margin-top: 8px; color: #287451; font-size: 8px; font-weight: 750; }
+
+    .dh-command {
+      top: 74px;
+      left: 50%;
+      width: min(470px, calc(100% - 40px));
+      padding: 8px;
+      border-radius: 13px;
+      transform: translateX(-50%);
+    }
+    .dh-command header { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; padding: 8px 9px 10px; border-bottom: 1px solid #eceef2; }
+    .dh-command header input { min-width: 0; border: 0; outline: 0; color: #252930; background: transparent; font-size: 12px; font-weight: 650; }
+    .dh-command header kbd { padding: 3px 5px; border: 1px solid #dde1e6; border-radius: 4px; color: #858c95; font-size: 8px; }
+    .dh-command > div > small { padding: 9px 8px 4px; }
+    .dh-command article { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; padding: 8px; border-radius: 8px; }
+    .dh-command article.selected { color: #fff; background: #4f5bd5; }
+    .dh-command article i { display: grid; width: 26px; height: 26px; place-items: center; border-radius: 7px; background: rgb(255 255 255 / 17%); font-style: normal; font-size: 9px; font-weight: 850; }
+    .dh-command article span > * { display: block; }
+    .dh-command article b { font-size: 10px; }
+    .dh-command article small { margin-top: 2px; color: #858d98; font-size: 8px; }
+    .dh-command article.selected small { color: #e2e5ff; }
+    .dh-command article kbd { font-size: 9px; }
+    .demo-alt-only.dh-command-detail { display: none; justify-items: center; padding: 10px 18px 5px; }
+    .prototype.is-alt .demo-alt-only.dh-command-detail { display: grid; }
+    .dh-command-detail > button { justify-self: start; border: 0; color: #66707c; background: none; font-size: 8px; }
+    .dh-command-detail > i { display: grid; width: 35px; height: 35px; place-items: center; margin-top: 4px; border-radius: 9px; color: #4f5bd5; background: #edf0ff; font-style: normal; font-weight: 850; }
+    .dh-command-detail h3 { margin: 6px 0 8px; font-size: 13px; }
+    .dh-command-detail dl { width: 100%; margin: 0; border: 1px solid #e7e9ed; border-radius: 8px; }
+    .dh-command-detail dl div { display: flex; justify-content: space-between; padding: 6px 8px; border-top: 1px solid #eceef2; font-size: 8px; }
+    .dh-command-detail dl div:first-child { border-top: 0; }
+    .dh-command-detail dt { color: #7a828c; }
+    .dh-command-detail dd { margin: 0; font-weight: 700; }
+    .dh-command-detail > strong { width: 100%; margin-top: 8px; padding: 8px; border-radius: 7px; color: #fff; background: #4f5bd5; font-size: 9px; text-align: center; }
+
+    .dh-bottom-tools {
+      position: absolute;
+      z-index: 3;
+      left: 50%;
+      bottom: 12px;
+      display: flex;
+      height: 42px;
+      align-items: center;
+      overflow: hidden;
+      border: 1px solid #dfe3e8;
+      border-radius: 11px;
+      background: #fff;
+      box-shadow: 0 5px 18px rgb(15 23 42 / 10%);
+      transform: translateX(-50%);
+    }
+    .dh-bottom-tools > * { display: grid; width: 39px; place-items: center; color: #565e68; font-size: 11px; }
+    .dh-bottom-tools b { align-self: stretch; color: #fff; background: #536dfe; }
+    .demo-alt-only.dh-ribbon {
+      position: absolute;
+      z-index: 7;
+      right: 258px;
+      bottom: 12px;
+      display: none;
+      height: 42px;
+      align-items: center;
+      gap: 4px;
+      padding: 0 5px;
+      border: 1px solid #dfe3e8;
+      border-radius: 11px;
+      background: #fff;
+      box-shadow: 0 5px 18px rgb(15 23 42 / 10%);
+    }
+    .prototype.is-alt .demo-alt-only.dh-ribbon { display: flex; }
+    .dh-ribbon button { height: 30px; padding: 0 9px; border: 0; border-radius: 7px; color: #59616c; background: #f4f5f7; font-size: 8px; font-weight: 750; white-space: nowrap; }
+    .dh-ribbon button.safe { color: #287451; background: #ecf7f0; }
+    .dh-ribbon button.active { color: #fff; background: #4f5bd5; }
+    .dh-mock .demo-button.dh-ribbon-toggle { position: absolute; z-index: 9; top: 72px; right: 14px; left: auto; margin: 0; }
+    .dh-width { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; }
+    .dh-width span { padding: 8px 10px; border: 1px solid #e1e4e8; border-radius: 7px; font-size: 9px; }
+    .dh-width span.warn { color: #95435a; border-color: #edc2cc; background: #fff3f6; }
+    .dh-width i { height: 1px; background: #ccd1d7; }
+    .dh-width small { grid-column: 1 / -1; color: #8a919b; font-size: 8px; text-align: center; }
+
+    .dh-rule,
+    .dh-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      flex-wrap: wrap;
+    }
+    .dh-rule span { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 0 7px; min-width: 160px; padding: 9px 11px; border: 1px solid #e0e4e9; border-radius: 8px; background: #fff; }
+    .dh-rule span b { grid-row: span 2; font: 800 11px/1 ui-monospace, monospace; }
+    .dh-rule span small { color: #7b838e; font-size: 8px; }
+    .dh-rule i { color: #9aa1aa; font-style: normal; }
+    .dh-flow span { padding: 7px 9px; border: 1px solid #dde1e6; border-radius: 7px; background: #fff; font-size: 8px; }
+    .dh-flow span.chosen { color: #fff; border-color: #4f5bd5; background: #4f5bd5; }
+    .dh-flow b { color: #8a919b; font-size: 9px; }
+
+    @media (max-width: 760px) {
+      .dh-mock { height: 440px; }
+      .dh-top-right { display: none; }
+      .dh-canvas.drawer-space { right: 0; }
+      .dh-drawer { left: 10px; width: auto; }
+      .dh-ribbon { right: 10px; left: 10px; bottom: 62px; overflow-x: auto; }
+      .dh-mock .demo-button.dh-ribbon-toggle { top: 72px; right: 10px; }
+      .dh-bottom-tools { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="page">
+      <div class="hero-grid">
+        <div class="kicker" id="kicker">Babble &amp; Prune</div>
+        <h1 id="page-title">Prototype comparison</h1>
+        <p class="brief" id="page-brief"></p>
+        <div class="badge-row">
+          <span class="badge primary" id="count-badge">0 variants</span>
+          <span class="badge">prototype comparison</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="objective-contract" aria-labelledby="objective-heading">
+      <div class="objective-head">
+        <div>
+          <div class="eyebrow">Fixed before the variants</div>
+          <h2 id="objective-heading">Objective + constraints</h2>
+        </div>
+        <p>Maximize the weighted score. A winner must also pass every hard gate.</p>
+      </div>
+      <div class="objective-grid">
+        <div class="objective-panel">
+          <div class="objective-panel-head">
+            <b>Weighted objective</b>
+            <span>Σ(weight × score / 5) · 100 max</span>
+          </div>
+          <div class="criteria-strip" id="criteria-strip"></div>
+        </div>
+        <div class="objective-panel">
+          <div class="objective-panel-head">
+            <b>Hard gates</b>
+            <span>pass / fail</span>
+          </div>
+          <div class="constraint-strip" id="constraint-strip"></div>
+        </div>
+      </div>
+      <div class="prototype-boundary"><b>Prototype boundary:</b> <span id="boundary"></span></div>
+    </section>
+
+    <section aria-labelledby="variants-heading">
+      <div class="gallery-head">
+        <div>
+          <div class="eyebrow">Look first</div>
+          <h2 id="variants-heading">Compare the outcomes</h2>
+          <p>Interact with the variants. Scores and AI judgment come afterward.</p>
+        </div>
+        <div class="toolbar" aria-label="Gallery layout">
+          <button class="tool-button active" type="button" data-layout="grid">Grid</button>
+          <button class="tool-button" type="button" data-layout="focus">Focus</button>
+          <button class="tool-button" type="button" id="previous-variant" aria-label="Previous variant">←</button>
+          <button class="tool-button" type="button" id="next-variant" aria-label="Next variant">→</button>
+        </div>
+      </div>
+      <div class="variant-grid" id="variant-grid"></div>
+      <div class="empty-state" id="empty-state">No variants match this view.</div>
+    </section>
+
+    <section class="ai-prune" id="ai-prune" aria-labelledby="ai-prune-heading">
+      <div class="ai-prune-head">
+        <div>
+          <div class="eyebrow">Revealed after the variants</div>
+          <h2 id="ai-prune-heading">AI ranking + judgment</h2>
+        </div>
+      </div>
+
+      <div class="ai-summary">
+        <div class="ai-recommendation" id="ai-recommendation"></div>
+        <div class="hinge-card">
+          <span class="judgment-chip">sensitivity · ought</span>
+          <b>Decision hinge</b>
+          <p id="decision-hinge"></p>
+        </div>
+      </div>
+
+      <div class="ranking-section">
+        <div class="ranking-strip" id="ranking-strip"></div>
+      </div>
+
+      <div class="matrix-section">
+        <div class="section-intro">
+          <div>
+            <div class="eyebrow">Weighted objective</div>
+            <h3>Scores by criterion</h3>
+            <p>Open a score only when you want its evidence.</p>
+          </div>
+        </div>
+        <div class="table-scroll" id="score-matrix"></div>
+      </div>
+
+      <div class="gate-section" id="gate-panel">
+        <div class="section-intro">
+          <div>
+            <div class="eyebrow">Feasibility constraints</div>
+            <h3>Hard-gate results</h3>
+            <p>A failed gate cannot win, regardless of score.</p>
+          </div>
+        </div>
+        <div class="gate-grid" id="gate-grid"></div>
+      </div>
+
+      <details class="calibration-details">
+        <summary>Scoring calibration (optional)</summary>
+        <div class="table-scroll" id="requirement-table"></div>
+      </details>
+    </section>
+
+    <aside class="decision-dock" id="decision-dock" aria-label="Prune decision">
+      <div class="decision-summary">
+        <small>Your direction · controls optional</small>
+        <b id="decision-title">No pick yet</b>
+        <span id="decision-detail">Type the splice you want in ordinary language.</span>
+      </div>
+      <textarea class="global-synthesis" id="global-synthesis" placeholder="Type naturally: “Use V5’s structure, V2’s scrubber, and V1’s density. Avoid modals.”"></textarea>
+      <div class="dock-actions">
+        <button class="export-button primary" type="button" id="copy-prune">Copy direction</button>
+        <button class="export-button" type="button" id="download-prune">Download .md</button>
+        <button class="export-button subtle" type="button" id="reset-prune">Reset choices</button>
+      </div>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="application/json" id="babble-data">
+{
+  "schemaVersion": 3,
+  "title": "Five ways to integrate a SystemSketch Dev Hub",
+  "kicker": "SystemSketch · UI Babble 5 · Aug 31, 2026",
+  "brief": "Add one Dev icon beside Help in the existing bottom-right utility strip, then make Stable, Latest Preview, and named isolated presets easy to launch and manage without making the ordinary canvas feel like a development tool.",
+  "count": 5,
+  "defaultId": "v1",
+  "defaultWhy": "Anchored Dev Shelf is the provisional default at 96.8/100. It matches the user's chosen placement, reuses the current Help-popover geometry, keeps the ordinary canvas quiet, and gives Latest Preview plus isolated presets enough room without turning development state into permanent chrome.",
+  "decisionHinge": "The recommendation assumes launching or browsing a preset is the common task and lifecycle administration is occasional. If Zach begins switching presets many times per hour, V3 Quick Switch becomes more attractive; if he needs build and session state visible while drawing, V2 Dev Drawer should replace the popover.",
+  "invariants": [
+    "A dedicated Dev icon sits immediately before the existing Help icon in the bottom-right utility strip.",
+    "Help returns to user help and shortcuts; release status, Latest Preview, publishing, preset launch, and preset lifecycle move into Dev.",
+    "Stable is the ordinary immutable entry; Latest Preview and isolated presets reuse the one live Preview runtime.",
+    "Every experimental launch opens an independent board copy and labels the active composition after launch.",
+    "Dev UI state and preset lifecycle metadata never enter .tldr document content."
+  ],
+  "boundary": "Standalone interactive UI prototypes in one common SystemSketch canvas frame. Opening, switching, archive views, stories, and selection controls work inside the gallery; no Dev icon, preset registry, launcher endpoint, clone transaction, or production SystemSketch behavior has been implemented.",
+  "axes": [
+    {
+      "name": "Surface",
+      "values": [
+        "anchored popover",
+        "persistent inset drawer",
+        "quick switch menu",
+        "search-first command palette",
+        "expanding utility ribbon"
+      ]
+    },
+    {
+      "name": "Primary object",
+      "values": [
+        "preset catalog",
+        "development workspace",
+        "next launch",
+        "command",
+        "active context"
+      ]
+    },
+    {
+      "name": "Visibility",
+      "values": [
+        "transient",
+        "persistent while working",
+        "minimal transient",
+        "modal transient",
+        "inline on demand"
+      ]
+    },
+    {
+      "name": "Lifecycle access",
+      "values": [
+        "inline archive + manager",
+        "first-class management",
+        "secondary Manage link",
+        "searchable actions",
+        "overflow manager"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "fr1",
+      "name": "Fast focused switching",
+      "weight": 30,
+      "why": "The Dev destination should help Zach enter one isolated working context without reconstructing configuration or scanning unrelated controls.",
+      "passCondition": "From the normal canvas, Block Dev or Latest Preview can be identified and launched in at most two obvious actions.",
+      "anchors": {
+        "1": "Requires several screens or configuration choices.",
+        "3": "Reachable in two or three actions but demands interpretation.",
+        "5": "The intended target is immediately legible and launches in one or two obvious actions."
+      }
+    },
+    {
+      "id": "fr2",
+      "name": "Ordinary canvas stays calm",
+      "weight": 22,
+      "why": "Development affordances are valuable only when they do not make Stable or normal drawing feel like an engineering console.",
+      "passCondition": "At rest, the only added chrome is one quiet Dev icon beside Help; detail appears only on request.",
+      "anchors": {
+        "1": "Persistent labels, badges, or panels dominate normal drawing.",
+        "3": "Mostly quiet, with some ongoing development state visible.",
+        "5": "One quiet icon at rest; all detail is progressive disclosure."
+      }
+    },
+    {
+      "id": "fr3",
+      "name": "State and safety are unmistakable",
+      "weight": 20,
+      "why": "Stable, Latest Preview, and isolated compositions must not blur together or threaten the working document.",
+      "passCondition": "Before launch, the surface names channel, composition, and independent-copy policy; after launch, the active composition is visibly identified.",
+      "anchors": {
+        "1": "Targets look interchangeable or document ownership is hidden.",
+        "3": "Safety exists but appears only in secondary detail.",
+        "5": "Channel, composition, and copy policy are clear at decision time and after launch."
+      }
+    },
+    {
+      "id": "fr4",
+      "name": "Lifecycle remains manageable",
+      "weight": 16,
+      "why": "The selector should not become an attic as experiments accumulate and are replaced.",
+      "passCondition": "Active presets stay clean while archived presets, successor links, and management actions remain discoverable.",
+      "anchors": {
+        "1": "No visible retirement path or archived history.",
+        "3": "Management exists but is distant from the launch surface.",
+        "5": "Active and archived states are easy to understand and manage without clutter."
+      }
+    },
+    {
+      "id": "fr5",
+      "name": "Fits the current utility seam",
+      "weight": 12,
+      "why": "SystemSketch already has a tldraw toolbar, anchored Help panel, right popout, focus handling, and mutually exclusive bottom-right surfaces.",
+      "passCondition": "The concept can reuse those components and interaction conventions without replacing the toolbar or introducing a second global navigation system.",
+      "anchors": {
+        "1": "Requires a new shell or conflicts with existing canvas chrome.",
+        "3": "Reuses some primitives but adds significant navigation machinery.",
+        "5": "Extends the existing toolbar/popover model with a sibling trigger and shared state."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "g1",
+      "name": "Dev is distinct from Help",
+      "why": "Developer operations should no longer hide inside end-user help once a dedicated destination exists."
+    },
+    {
+      "id": "g2",
+      "name": "Stable and document safety remain explicit",
+      "why": "No launcher treatment may weaken the immutable Stable anchor or independent-copy rule."
+    },
+    {
+      "id": "g3",
+      "name": "No document mutation from UI selection",
+      "why": "Choosing, pinning, or archiving a development context is application metadata, never board content."
+    }
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "Anchored Dev Shelf",
+      "thesis": "Mirror the current Help popover with a sibling Dev panel: Latest Preview first, isolated presets second, management last.",
+      "accent": "#4f5bd5",
+      "bestWhen": "Most visits are deliberate launches into a known context and development details should disappear completely afterward.",
+      "losesWhen": "You need persistent build diagnostics or switch contexts dozens of times without closing the surface.",
+      "decisions": [
+        {
+          "label": "Placement",
+          "value": "A <\/> icon immediately before Help; clicking it closes Help and any right popout."
+        },
+        {
+          "label": "Hierarchy",
+          "value": "Latest Preview is the primary row, named isolated presets form a compact shelf, and Archived/Manage stays in the footer."
+        },
+        {
+          "label": "After launch",
+          "value": "The existing top-center Preview badge gains the active preset name, for example Preview · Block Dev."
+        }
+      ],
+      "keepParts": [
+        "sibling Dev/Help popovers",
+        "Latest Preview as the primary row",
+        "active shelf with quiet archive footer"
+      ],
+      "proof": [
+        "The common canvas shows only one additional <\/> icon at rest and a product-matched 370px panel when opened.",
+        "The direct Archive action removes Block Dev from Active and exposes an archived successor row without changing the canvas."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "Latest Preview and Block Dev are visible immediately after one icon click; each row is a single launch target.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "At rest the existing strip gains only one icon; the anchored panel is transient and mutually exclusive with Help.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "Every row names Live tree, its composition, and independent copy; Stable is fixed at the top of the panel.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "Archive is understandable and the footer exposes history, though bulk administration belongs in a secondary manager.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "It is structurally the existing Help panel plus a sibling trigger and shared open-surface state.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "Help and Dev remain separate adjacent triggers with mutually exclusive panels."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Stable is labeled immutable and every development row says independent copy."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Archive and launch state live entirely in the panel prototype."
+        }
+      },
+      "previewLabel": "interactive anchored Dev shelf",
+      "story": {
+        "title": "Open Dev, then retire one preset",
+        "steps": [
+          {
+            "label": "Read the launch hierarchy",
+            "caption": "Latest Preview is the broad newest build; Block Dev and Rows Lab are narrower isolated compositions below it.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Archive Block Dev",
+            "caption": "The active shelf stays clean while an archived row records that Rows Lab replaces the older preset.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Navigation rule",
+          "caption": "Dev owns builds and compositions; Help returns to human-facing assistance.",
+          "html": "<div class=\"dh-rule\"><span><b>?<\/b> Help<small>shortcuts · guidance<\/small><\/span><i>≠<\/i><span><b>&lt;/&gt;<\/b> Dev<small>preview · presets · publish<\/small><\/span><\/div>"
+        }
+      ],
+      "preview": "<div class=\"dh-mock\"><div class=\"dh-top-left\"><b>☰<\/b><strong>Robot sorter<\/strong><span>Page 1⌄<\/span><\/div><div class=\"dh-top-right\"><i>Z<\/i><span>◫<\/span><small>◉ 03:00<\/small><b>Share<\/b><\/div><div class=\"dh-canvas\"><div class=\"dh-block\"><small>camera<\/small><b>Sort item<\/b><span>image → class<\/span><\/div><div class=\"dh-wire\"><\/div><\/div><section class=\"dh-panel dh-shelf\"><header><div><small>SYSTEMSKETCH<\/small><h3>Dev<\/h3><\/div><button aria-label=\"Close mock Dev panel\">×<\/button><\/header><div class=\"dh-stable\"><span><b>Stable<\/b><small>Verified 0.1.0 · original file<\/small><\/span><em>Current<\/em><\/div><article class=\"dh-latest\"><span class=\"dh-glyph\">↯<\/span><div><small>LATEST<\/small><b>Open Latest Preview<\/b><span>Live working tree · full product · copy<\/span><\/div><strong>↗<\/strong><\/article><div class=\"dh-section-label\"><span>ISOLATED PRESETS<\/span><button>＋ New<\/button><\/div><div class=\"demo-base-only\"><article class=\"dh-row\"><i>B<\/i><span><b>Block Dev<\/b><small>Stock tldraw + Block · copy<\/small><\/span><em>↗<\/em><\/article><article class=\"dh-row\"><i>▦<\/i><span><b>Rows Lab<\/b><small>Stock + Block + Grid · copy<\/small><\/span><em>↗<\/em><\/article><\/div><div class=\"demo-alt-only\"><article class=\"dh-row\"><i>▦<\/i><span><b>Rows Lab<\/b><small>Stock + Block + Grid · copy<\/small><\/span><em>↗<\/em><\/article><div class=\"dh-archived\"><b>Block Dev archived<\/b><span>Replaced by Rows Lab<\/span><\/div><\/div><footer><button>Archived · 1<\/button><button>Manage presets ›<\/button><\/footer><button class=\"demo-button\" data-demo-toggle data-base-label=\"Archive Block Dev\" data-alt-label=\"Restore Block Dev\">Archive Block Dev<\/button><\/section><div class=\"dh-toolstrip\"><span>⌖<\/span><span>−<\/span><b>100%<\/b><span>＋<\/span><span class=\"active\">&lt;/&gt;<\/span><span>?<\/span><\/div><\/div>"
+    },
+    {
+      "id": "v2",
+      "name": "Persistent Dev Drawer",
+      "thesis": "Treat Dev as a real right-side workspace that can stay open while you inspect builds, presets, sessions, and archives on the canvas.",
+      "accent": "#287451",
+      "bestWhen": "Development status and preset management are part of the work itself, not just a launch transition.",
+      "losesWhen": "You want the drawing surface to feel completely ordinary between occasional preview launches.",
+      "decisions": [
+        {
+          "label": "Placement",
+          "value": "The <\/> icon toggles a full-height inset right popout through the existing right-surface provider."
+        },
+        {
+          "label": "Hierarchy",
+          "value": "A compact navigation rail switches between Launch, Running, and Archived without closing the canvas."
+        },
+        {
+          "label": "After launch",
+          "value": "The drawer remains available as an environment inspector until explicitly closed."
+        }
+      ],
+      "keepParts": [
+        "Launch / Running / Archived IA",
+        "persistent build facts",
+        "reuse of right-surface exclusivity"
+      ],
+      "proof": [
+        "The prototype keeps Robot sorter visible while a product-matched inset drawer exposes complete development context.",
+        "The direct tab action switches from launch targets to archived presets and successor metadata in place."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 4,
+          "evidence": "Launch targets are direct, though entering the drawer and its navigation adds more visual scanning than V1.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 3,
+          "evidence": "The drawer is absent at rest but designed to remain open, taking a meaningful slice of canvas during development.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "Persistent channel, build, document, and active-composition facts are the drawer's strongest feature.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "Running and Archived are first-class destinations with room for successor and retention metadata.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "It can reuse the existing rightSurface provider, but competes with board overview and inspector popouts.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The Dev icon opens a dedicated drawer; Help stays an adjacent separate trigger."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "A persistent safety card labels Stable and independent-copy launch policy."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Tabs and lifecycle controls are application UI state only."
+        }
+      },
+      "previewLabel": "interactive persistent Dev drawer",
+      "story": {
+        "title": "Launch with context, then inspect history",
+        "steps": [
+          {
+            "label": "Work beside the canvas",
+            "caption": "Launch targets and build facts remain visible while the canvas stays usable.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Open Archived",
+            "caption": "The same persistent workspace becomes a lifecycle manager with replacement and retention details.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Surface ownership",
+          "caption": "Dev becomes another mutually exclusive right-side surface beside Board overview and Inspector.",
+          "html": "<div class=\"dh-flow\"><span>Board overview<\/span><b>↔<\/b><span class=\"chosen\">Dev drawer<\/span><b>↔<\/b><span>Inspector<\/span><\/div>"
+        }
+      ],
+      "preview": "<div class=\"dh-mock\"><div class=\"dh-top-left\"><b>☰<\/b><strong>Robot sorter<\/strong><span>Page 1⌄<\/span><\/div><div class=\"dh-canvas drawer-space\"><div class=\"dh-block\"><small>camera<\/small><b>Sort item<\/b><span>image → class<\/span><\/div><\/div><aside class=\"dh-drawer\"><header><div><small>SYSTEMSKETCH<\/small><h3>Dev workspace<\/h3><\/div><button>×<\/button><\/header><nav><span class=\"demo-base-only active\">Launch<\/span><span>Running<\/span><span class=\"demo-alt-only active\">Archived<\/span><\/nav><div class=\"demo-base-only\"><div class=\"dh-safety\"><b>Stable 0.1.0<\/b><span>Immutable · Robot sorter.tldr<\/span><\/div><article class=\"dh-big-row\"><small>LATEST PREVIEW<\/small><b>Live working tree<\/b><span>Full product · independent copy<\/span><button>Open ↗<\/button><\/article><article class=\"dh-row\"><i>B<\/i><span><b>Block Dev<\/b><small>Stock + Block · copy<\/small><\/span><em>↗<\/em><\/article><article class=\"dh-row\"><i>▦<\/i><span><b>Rows Lab<\/b><small>Stock + Block + Grid · copy<\/small><\/span><em>↗<\/em><\/article><\/div><div class=\"demo-alt-only\"><article class=\"dh-history\"><b>Block Dev<\/b><span>Archived today<\/span><small>Replaced by Rows Lab · remove after 0.2<\/small><button>Restore<\/button><\/article><article class=\"dh-history\"><b>Old toolbar lab<\/b><span>Archived 5d ago<\/span><small>No successor · safe to remove<\/small><button>Remove<\/button><\/article><\/div><button class=\"demo-button\" data-demo-toggle data-base-label=\"Show Archived\" data-alt-label=\"Back to Launch\">Show Archived<\/button><\/aside><div class=\"dh-toolstrip\"><span>⌖<\/span><span>−<\/span><b>100%<\/b><span>＋<\/span><span class=\"active\">&lt;/&gt;<\/span><span>?<\/span><\/div><\/div>"
+    },
+    {
+      "id": "v3",
+      "name": "Quick Switch Menu",
+      "thesis": "Optimize the Dev icon for the next launch: Latest Preview and recent presets first, with configuration pushed behind Manage.",
+      "accent": "#ad6d18",
+      "bestWhen": "You repeatedly bounce among two or three known contexts and almost never edit preset definitions from the launcher.",
+      "losesWhen": "You need to understand composition ingredients, build details, or retirement history before choosing.",
+      "decisions": [
+        {
+          "label": "Placement",
+          "value": "A very small menu opens directly above the <\/> icon and remembers the most recently used targets."
+        },
+        {
+          "label": "Hierarchy",
+          "value": "Latest Preview is the default action; recent isolated presets follow; Manage is deliberately secondary."
+        },
+        {
+          "label": "After launch",
+          "value": "A short confirmation state names the opened preset and independent copy, then the menu dismisses."
+        }
+      ],
+      "keepParts": [
+        "recent-target ordering",
+        "single compact launch menu",
+        "brief safety confirmation"
+      ],
+      "proof": [
+        "The menu fits within the current strip's visual scale and exposes the three likely launches with minimal text.",
+        "The direct Open action changes to a clear Block Dev launch confirmation using the same state as the guided story."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "One icon click and one row click launch the latest or recent isolated context with almost no scanning.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "The transient menu is the smallest proposed surface and adds only one icon at rest.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "Rows say copy and the confirmation is explicit, but composition/build detail is intentionally compressed.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 2,
+          "evidence": "Lifecycle work is delegated to Manage; archived history is not visible in the primary menu.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "It easily fits the toolbar, though it introduces a second lighter menu style alongside the fuller Help panel.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The quick menu belongs only to the Dev icon; Help is unaffected."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Every development target includes the copy glyph and the confirmation states Stable stayed open."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Recent ordering and confirmation are launcher state."
+        }
+      },
+      "previewLabel": "interactive quick-switch menu",
+      "story": {
+        "title": "Launch the recent isolated context",
+        "steps": [
+          {
+            "label": "Choose from recent targets",
+            "caption": "The surface assumes you already know Block Dev and Rows Lab, so it optimizes for recognition and speed.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Confirm the safe launch",
+            "caption": "A brief confirmation names Block Dev, its composition, and the independent board copy before dismissing.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Focus loop",
+          "caption": "This direction aggressively optimizes the common transition and delegates administration.",
+          "html": "<div class=\"dh-flow\"><span>Canvas<\/span><b>→<\/b><span class=\"chosen\">Dev icon<\/span><b>→<\/b><span>Known preset<\/span><b>→<\/b><span>Isolated copy<\/span><\/div>"
+        }
+      ],
+      "preview": "<div class=\"dh-mock\"><div class=\"dh-top-left\"><b>☰<\/b><strong>Robot sorter<\/strong><span>Page 1⌄<\/span><\/div><div class=\"dh-canvas\"><div class=\"dh-block\"><small>camera<\/small><b>Sort item<\/b><span>image → class<\/span><\/div><\/div><section class=\"dh-quick\"><div class=\"demo-base-only\"><small>OPEN DEVELOPMENT VIEW<\/small><article class=\"primary\"><i>↯<\/i><span><b>Latest Preview<\/b><small>Full product · copy<\/small><\/span><kbd>↗<\/kbd><\/article><article><i>B<\/i><span><b>Block Dev<\/b><small>Recent · stock + Block · copy<\/small><\/span><kbd>↗<\/kbd><\/article><article><i>▦<\/i><span><b>Rows Lab<\/b><small>Stock + Block + Grid · copy<\/small><\/span><kbd>↗<\/kbd><\/article><footer><button>Manage presets…<\/button><span>⌘ ⇧ D<\/span><\/footer><\/div><div class=\"demo-alt-only dh-confirm\"><i>✓<\/i><b>Opening Block Dev<\/b><span>Independent copy of Robot sorter.tldr<\/span><small>Stable stays open and unchanged<\/small><\/div><button class=\"demo-button\" data-demo-toggle data-base-label=\"Open Block Dev\" data-alt-label=\"Back to menu\">Open Block Dev<\/button><\/section><div class=\"dh-toolstrip\"><span>⌖<\/span><span>−<\/span><b>100%<\/b><span>＋<\/span><span class=\"active\">&lt;/&gt;<\/span><span>?<\/span><\/div><\/div>"
+    },
+    {
+      "id": "v4",
+      "name": "Dev Command Palette",
+      "thesis": "Make the Dev icon open a centered, keyboard-first command surface that searches presets, build actions, and lifecycle operations together.",
+      "accent": "#8c4fb0",
+      "bestWhen": "The preset catalog grows large or agents and keyboard users need one reproducible command vocabulary.",
+      "losesWhen": "The catalog stays small and you want the available development contexts to teach themselves visually.",
+      "decisions": [
+        {
+          "label": "Placement",
+          "value": "The <\/> icon invokes a centered command palette; Cmd+Shift+D opens the same surface."
+        },
+        {
+          "label": "Hierarchy",
+          "value": "Search spans Open, Manage, Archive, Publish, and Return actions rather than presenting a fixed shelf."
+        },
+        {
+          "label": "After launch",
+          "value": "The selected result expands to show channel, composition, and copy policy before confirmation."
+        }
+      ],
+      "keepParts": [
+        "shared command vocabulary",
+        "keyboard shortcut",
+        "searchable launch and lifecycle actions"
+      ],
+      "proof": [
+        "The hero renders a credible command surface over the same SystemSketch canvas with grouped realistic results.",
+        "The direct Select action expands Block Dev into a safety-confirmation state driven by the guided story."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 4,
+          "evidence": "Known targets are very fast by keyboard, but browsing requires search/result interpretation instead of recognition from a shelf.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "Only the Dev icon persists; the modal command surface is completely transient.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "The confirmation state is explicit, though the initial result list compresses important safety context.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 3,
+          "evidence": "Archive and restore commands are searchable, but lifecycle history is not spatially legible without a query.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "It can reuse dialogs and typed actions but adds a global command-index layer beyond the current Help popover.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The palette is explicitly titled Dev commands and invoked from its own icon."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Opening a result reveals the independent-copy contract before confirmation."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Commands mutate launcher or manifest state only."
+        }
+      },
+      "previewLabel": "interactive Dev command palette",
+      "story": {
+        "title": "Search, inspect, then launch",
+        "steps": [
+          {
+            "label": "Search the command vocabulary",
+            "caption": "A single query finds presets and related lifecycle actions without a separate settings hierarchy.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Inspect before opening",
+            "caption": "The selected Block Dev command expands to show Live tree, stock + Block, and independent copy before launch.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Shared protocol",
+          "caption": "The same named commands can later back the UI, keyboard shortcuts, URLs, and agent tooling.",
+          "html": "<div class=\"dh-flow\"><span>Icon<\/span><span>Keyboard<\/span><span>URL<\/span><span>Agent<\/span><b>→<\/b><span class=\"chosen\">dev.openPreset<\/span><\/div>"
+        }
+      ],
+      "preview": "<div class=\"dh-mock\"><div class=\"dh-top-left\"><b>☰<\/b><strong>Robot sorter<\/strong><span>Page 1⌄<\/span><\/div><div class=\"dh-canvas blurred\"><div class=\"dh-block\"><small>camera<\/small><b>Sort item<\/b><span>image → class<\/span><\/div><\/div><section class=\"dh-command\"><header><span>⌕<\/span><input value=\"block dev\" readonly aria-label=\"Mock Dev command search\"><kbd>esc<\/kbd><\/header><div class=\"demo-base-only\"><small>OPEN PRESET<\/small><article class=\"selected\"><i>B<\/i><span><b>Open Block Dev<\/b><small>stock + Block · Live tree<\/small><\/span><kbd>↵<\/kbd><\/article><article><i>▦<\/i><span><b>Open Rows Lab<\/b><small>stock + Block + Grid<\/small><\/span><\/article><small>ACTIONS<\/small><article><i>⌁<\/i><span><b>Archive Block Dev…<\/b><small>Lifecycle · manifest<\/small><\/span><\/article><\/div><div class=\"demo-alt-only dh-command-detail\"><button>‹ Results<\/button><i>B<\/i><h3>Open Block Dev<\/h3><dl><div><dt>Build<\/dt><dd>Live working tree<\/dd><\/div><div><dt>Composition<\/dt><dd>Stock + Block<\/dd><\/div><div><dt>Document<\/dt><dd>Independent copy<\/dd><\/div><\/dl><strong>Open preset ↗<\/strong><\/div><button class=\"demo-button\" data-demo-toggle data-base-label=\"Select Block Dev\" data-alt-label=\"Back to results\">Select Block Dev<\/button><\/section><div class=\"dh-toolstrip\"><span>⌖<\/span><span>−<\/span><b>100%<\/b><span>＋<\/span><span class=\"active\">&lt;/&gt;<\/span><span>?<\/span><\/div><\/div>"
+    },
+    {
+      "id": "v5",
+      "name": "Expanding Dev Ribbon",
+      "thesis": "Let the Dev icon temporarily expand the utility strip itself into a horizontal context switcher for Stable, Latest, and pinned isolated presets.",
+      "accent": "#b14d63",
+      "bestWhen": "Context switching is extremely frequent and the current development context should remain one glance away from the canvas.",
+      "losesWhen": "The bottom-right corner must remain compact or preset lifecycle work matters more than rapid switching.",
+      "decisions": [
+        {
+          "label": "Placement",
+          "value": "The same <\/> icon expands leftward into pinned context chips without opening a separate panel."
+        },
+        {
+          "label": "Hierarchy",
+          "value": "Stable, Latest, Block Dev, and Rows Lab behave like environment tabs; overflow opens full management."
+        },
+        {
+          "label": "After launch",
+          "value": "The active context remains selected in the ribbon until it collapses or the user returns to Stable."
+        }
+      ],
+      "keepParts": [
+        "pinned frequent contexts",
+        "active-context visibility",
+        "fast Stable return"
+      ],
+      "proof": [
+        "The prototype demonstrates the exact strip expansion against the same bottom toolbar and canvas geometry.",
+        "The direct control uses one state machine to expand and collapse pinned development contexts."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "Pinned contexts become direct one-click targets immediately beside the current canvas controls.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 2,
+          "evidence": "The collapsed state is quiet, but the expanded ribbon is wide, visually dense, and can compete with the bottom toolbar.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "Active context is continuously visible, though compact chips have little room for document-copy explanations.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "Pinning keeps the ribbon curated and overflow reaches management, but archived history is off-surface.",
+          "confidence": "medium"
+        },
+        "fr5": {
+          "score": 3,
+          "evidence": "It modifies the geometry and responsive behavior of the existing utility strip rather than adding a sibling popover.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The expansion originates only from the dedicated Dev icon beside Help."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Stable is a fixed chip and every development chip carries a copy marker in its tooltip/label."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Pin and selected-context state remain application metadata."
+        }
+      },
+      "previewLabel": "interactive expanding Dev ribbon",
+      "story": {
+        "title": "Expand the strip into contexts",
+        "steps": [
+          {
+            "label": "Keep the canvas ordinary",
+            "caption": "At rest, the only addition is the Dev icon immediately before Help.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Reveal pinned contexts",
+            "caption": "The strip expands leftward into Stable, Latest, Block Dev, and Rows Lab for rapid environment switching.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Responsive cost",
+          "caption": "The ribbon is compelling at wide viewports but must collapse back to a popover on narrow screens.",
+          "html": "<div class=\"dh-width\"><span>Bottom toolbar<\/span><i><\/i><span class=\"warn\">expanded Dev ribbon<\/span><small>collision budget<\/small><\/div>"
+        }
+      ],
+      "preview": "<div class=\"dh-mock\"><div class=\"dh-top-left\"><b>☰<\/b><strong>Robot sorter<\/strong><span>Page 1⌄<\/span><\/div><div class=\"dh-canvas\"><div class=\"dh-block\"><small>camera<\/small><b>Sort item<\/b><span>image → class<\/span><\/div><\/div><div class=\"dh-bottom-tools\"><b>↖<\/b><span>□<\/span><span>↝<\/span><span>✎<\/span><span>T<\/span><span>＋<\/span><\/div><div class=\"dh-ribbon demo-alt-only\"><button class=\"safe\">● Stable<\/button><button>↯ Latest ↗<\/button><button class=\"active\">B Block Dev ↗<\/button><button>▦ Rows ↗<\/button><button>•••<\/button><\/div><div class=\"dh-toolstrip ribbon-base\"><span>⌖<\/span><span>−<\/span><b>100%<\/b><span>＋<\/span><span class=\"active\">&lt;/&gt;<\/span><span>?<\/span><\/div><button class=\"demo-button dh-ribbon-toggle\" data-demo-toggle data-base-label=\"Expand Dev ribbon\" data-alt-label=\"Collapse Dev ribbon\">Expand Dev ribbon<\/button><\/div>"
+    }
+  ]
+}
+  </script>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const project = JSON.parse(document.getElementById("babble-data").textContent);
+      const variants = project.variants;
+      const requirements = project.requirements || [];
+      const hardGates = project.hardGates || [];
+      const rankedResults = variants
+        .map((variant) => resultFor(variant))
+        .sort((left, right) => {
+          if (left.eligible !== right.eligible) return left.eligible ? -1 : 1;
+          if (right.total !== left.total) return right.total - left.total;
+          return variants.indexOf(left.variant) - variants.indexOf(right.variant);
+        });
+      const eligibleResults = rankedResults.filter((result) => result.eligible);
+      const topResult = eligibleResults[0] || rankedResults[0];
+      const coLeaders = topResult
+        ? eligibleResults.filter((result) => topResult.total - result.total <= 3)
+        : [];
+      const resultById = new Map(rankedResults.map((result) => [result.variant.id, result]));
+      const rankById = new Map(rankedResults.map((result, index) => [result.variant.id, index + 1]));
+      const defaultVariant = variants.find((variant) => variant.id === project.defaultId) || variants[0];
+      const storageKey = `babble-prune:${location.pathname}:${project.title}`;
+
+      const blankState = () => ({
+        pick: null,
+        statuses: {},
+        keeps: {},
+        notes: {},
+        synthesis: "",
+        focusIndex: 0,
+        layout: "grid"
+      });
+
+      let state = blankState();
+      try {
+        state = { ...state, ...JSON.parse(localStorage.getItem(storageKey) || "{}") };
+      } catch {
+        state = blankState();
+      }
+      state.synthesis = state.synthesis || state.why || "";
+
+      const byId = (id) => document.getElementById(id);
+      const variantGrid = byId("variant-grid");
+      const toast = byId("toast");
+      const storyTimers = new Map();
+
+      document.title = `${project.title} · Babble & Prune`;
+      byId("kicker").textContent = project.kicker || "Babble & Prune";
+      byId("page-title").textContent = project.title;
+      byId("page-brief").textContent = project.brief;
+      byId("count-badge").textContent = `${variants.length} orthogonal variant${variants.length === 1 ? "" : "s"}`;
+      byId("boundary").textContent = project.boundary;
+
+      byId("criteria-strip").innerHTML = requirements.map((requirement) => `
+        <span class="criterion-chip" title="${escapeHtml(requirement.passCondition)}">
+          <b>${escapeHtml(requirement.weight)}%</b>
+          <span>${escapeHtml(requirement.name)}</span>
+        </span>
+      `).join("");
+
+      byId("constraint-strip").innerHTML = hardGates.length
+        ? hardGates.map((gate) => `<span class="constraint-chip" title="${escapeHtml(gate.why)}">${escapeHtml(gate.name)}</span>`).join("")
+        : `<span class="constraint-chip">No separate hard gates</span>`;
+
+      renderAiPrune();
+      variantGrid.innerHTML = variants.map((variant, index) => variantMarkup(variant, index)).join("");
+      variantGrid.querySelectorAll(".variant-card").forEach((card) => {
+        setStoryStep(card, 0, { stopPlayback: false });
+      });
+      byId("global-synthesis").value = state.synthesis;
+      setLayout(state.layout || "grid");
+      updateUi();
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function labelFor(id) {
+        const index = variants.findIndex((variant) => variant.id === id);
+        return index >= 0 ? `V${index + 1}` : id;
+      }
+
+      function resultFor(variant) {
+        const total = requirements.reduce((sum, requirement) => {
+          const score = Number(variant.scores?.[requirement.id]?.score || 0);
+          return sum + Number(requirement.weight || 0) * score / 5;
+        }, 0);
+        const failedGates = hardGates.filter(
+          (gate) => variant.gateResults?.[gate.id]?.pass !== true
+        );
+        return {
+          variant,
+          total: Math.round((total + Number.EPSILON) * 100) / 100,
+          eligible: failedGates.length === 0,
+          failedGates
+        };
+      }
+
+      function formatTotal(value) {
+        return Number(value).toFixed(1);
+      }
+
+      function renderAiPrune() {
+        byId("decision-hinge").textContent = project.decisionHinge || "No decision hinge supplied.";
+
+        const requirementRows = requirements.map((requirement) => `
+          <tr>
+            <td class="requirement-name">
+              <small>${escapeHtml(requirement.id)}</small>
+              <b>${escapeHtml(requirement.name)}</b>
+            </td>
+            <td><span class="weight-number">${escapeHtml(requirement.weight)}%</span></td>
+            <td>${escapeHtml(requirement.why)}</td>
+            <td>${escapeHtml(requirement.passCondition)}</td>
+            <td>
+              <div class="anchor-list">
+                <span><b>1</b>${escapeHtml(requirement.anchors?.["1"] || "—")}</span>
+                <span><b>3</b>${escapeHtml(requirement.anchors?.["3"] || "—")}</span>
+                <span><b>5</b>${escapeHtml(requirement.anchors?.["5"] || "—")}</span>
+              </div>
+            </td>
+          </tr>
+        `).join("");
+
+        byId("requirement-table").innerHTML = `
+          <table class="requirement-table">
+            <thead><tr><th>Criterion</th><th>Weight</th><th>Why</th><th>Pass condition</th><th>1 / 3 / 5 anchors</th></tr></thead>
+            <tbody>${requirementRows}</tbody>
+          </table>
+        `;
+
+        const scoreHeaders = requirements.map((requirement) => `
+          <th title="${escapeHtml(requirement.passCondition)}">${escapeHtml(requirement.name)}<small>${escapeHtml(requirement.weight)}%</small></th>
+        `).join("");
+
+        const scoreRows = rankedResults.map((result) => {
+          const cells = requirements.map((requirement) => {
+            const entry = result.variant.scores?.[requirement.id] || {};
+            const confidence = entry.confidence || "low";
+            return `
+              <td>
+                <details class="score-detail">
+                  <summary aria-label="${escapeHtml(requirement.name)} score ${escapeHtml(entry.score ?? "—")} out of 5, ${escapeHtml(confidence)} confidence">
+                    <span class="score-value">${escapeHtml(entry.score ?? "—")}</span>
+                    <span class="confidence ${escapeHtml(confidence)}">${escapeHtml(confidence)}</span>
+                  </summary>
+                  <p class="score-evidence"><span class="evidence-chip">is</span><br>${escapeHtml(entry.evidence || "No evidence supplied.")}</p>
+                </details>
+              </td>
+            `;
+          }).join("");
+          const status = result.eligible ? `#${rankById.get(result.variant.id)} eligible` : "gate fail";
+          const rowClass = coLeaders.includes(result) ? "ai-leader" : (result.eligible ? "" : "gate-fail");
+          return `
+            <tr class="${rowClass}">
+              <td class="score-variant">
+                <small>${labelFor(result.variant.id)}</small>
+                <b>${escapeHtml(result.variant.name)}</b>
+              </td>
+              ${cells}
+              <td class="total-cell">${formatTotal(result.total)}<span class="rank-label">${escapeHtml(status)}</span></td>
+            </tr>
+          `;
+        }).join("");
+
+        byId("score-matrix").innerHTML = `
+          <table class="score-table">
+            <thead><tr><th>Ranked option</th>${scoreHeaders}<th>Weighted / 100</th></tr></thead>
+            <tbody>${scoreRows}</tbody>
+          </table>
+        `;
+
+        byId("ranking-strip").innerHTML = rankedResults.map((result) => {
+          const rank = rankById.get(result.variant.id);
+          const stateClass = !result.eligible ? "is-ineligible" : (coLeaders.includes(result) ? "is-leader" : "");
+          return `
+            <span class="ranking-chip ${stateClass}">
+              <b>#${rank}</b>
+              <span>${labelFor(result.variant.id)} · ${escapeHtml(result.variant.name)}</span>
+              <strong>${formatTotal(result.total)}${result.eligible ? "" : " · gate fail"}</strong>
+            </span>
+          `;
+        }).join("");
+
+        if (!topResult) {
+          byId("ai-recommendation").innerHTML = `
+            <span class="judgment-chip">AI judgment · ought</span>
+            <div class="recommendation-line"><strong>No eligible recommendation</strong></div>
+            <p>Complete the FR scores and hard-gate evidence before pruning.</p>
+          `;
+        } else {
+          const leaderNames = coLeaders.map(
+            (result) => `${labelFor(result.variant.id)} · ${result.variant.name}`
+          ).join(" + ");
+          const recommendationLabel = coLeaders.length > 1 ? "Co-leaders" : "Best overall";
+          const alternative = eligibleResults.find((result) => !coLeaders.includes(result));
+          const alternativeMarkup = alternative ? `
+            <p class="alternative-line"><b>Strong alternative:</b> ${labelFor(alternative.variant.id)} · ${escapeHtml(alternative.variant.name)} at ${formatTotal(alternative.total)} — ${escapeHtml(alternative.variant.bestWhen)}</p>
+          ` : "";
+          byId("ai-recommendation").innerHTML = `
+            <span class="judgment-chip">AI judgment · ought</span>
+            <div class="recommendation-line">
+              <strong>${recommendationLabel}: ${escapeHtml(leaderNames)}</strong>
+              <span class="ai-total">${formatTotal(topResult.total)} / 100</span>
+            </div>
+            <p>${escapeHtml(project.defaultWhy)}</p>
+            ${alternativeMarkup}
+          `;
+        }
+
+        if (!hardGates.length) {
+          byId("gate-grid").innerHTML = `<div class="gate-card"><b>No separate hard gates</b><p>All constraints are represented as weighted FRs for this round.</p></div>`;
+          return;
+        }
+
+        byId("gate-grid").innerHTML = hardGates.map((gate) => {
+          const results = variants.map((variant) => {
+            const entry = variant.gateResults?.[gate.id] || {};
+            const passed = entry.pass === true;
+            return `<span class="gate-result ${passed ? "" : "fail"}" title="${escapeHtml(entry.evidence || "No evidence supplied.")}">${labelFor(variant.id)} ${passed ? "✓ pass" : "✕ fail"}</span>`;
+          }).join("");
+          return `
+            <div class="gate-card">
+              <span class="evidence-chip">hard gate</span>
+              <b>${escapeHtml(gate.name)}</b>
+              <p>${escapeHtml(gate.why)}</p>
+              <div class="gate-results">${results}</div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function variantMarkup(variant, index) {
+        const decisions = variant.decisions.map((decision) => `
+          <div class="decision">
+            <b>${escapeHtml(decision.label)}</b>
+            <span>${escapeHtml(decision.value)}</span>
+          </div>
+        `).join("");
+
+        const proof = variant.proof.map((item) => `
+          <li>${escapeHtml(item)}</li>
+        `).join("");
+
+        const keepParts = variant.keepParts.map((part, partIndex) => `
+          <label class="keep-chip">
+            <input type="checkbox" data-keep="${escapeHtml(variant.id)}" data-part="${partIndex}">
+            <span>${escapeHtml(part)}</span>
+          </label>
+        `).join("");
+
+        const media = (variant.media || []).map((item) => `
+          <figure class="media-exhibit">
+            <div class="media-surface">${item.html}</div>
+            <figcaption class="media-caption">
+              <b>${escapeHtml(item.label)}</b>
+              <span>${escapeHtml(item.caption)}</span>
+            </figcaption>
+          </figure>
+        `).join("");
+
+        const mediaStory = media ? `<div class="media-story" aria-label="Supporting media for ${escapeHtml(variant.name)}">${media}</div>` : "";
+
+        const storySteps = variant.story?.steps || [];
+        const storyProgress = storySteps.map((step, stepIndex) => `
+          <button type="button" data-story-action="jump" data-story-index="${stepIndex}"
+            aria-label="Show story step ${stepIndex + 1}: ${escapeHtml(step.label)}">Step ${stepIndex + 1}</button>
+        `).join("");
+        const storyDriver = storySteps.length ? `
+          <div class="story-driver" data-story-driver aria-label="Guided click-through for ${escapeHtml(variant.name)}">
+            <button type="button" class="story-play" data-story-action="play">▶ Play story</button>
+            <div class="story-copy" aria-live="polite">
+              <small><span data-story-position>Step 1 of ${storySteps.length}</span> · ${escapeHtml(variant.story.title || "Guided story")}</small>
+              <b data-story-label>${escapeHtml(storySteps[0]?.label || "Start")}</b>
+              <p data-story-caption>${escapeHtml(storySteps[0]?.caption || "")}</p>
+            </div>
+            <div class="story-actions">
+              <button type="button" class="story-nav" data-story-action="back">← Back</button>
+              <button type="button" class="story-nav" data-story-action="next">Next →</button>
+            </div>
+            <div class="story-progress" aria-label="Story progress">${storyProgress}</div>
+          </div>
+        ` : "";
+
+        return `
+          <article class="variant-card" id="card-${escapeHtml(variant.id)}"
+            data-variant="${escapeHtml(variant.id)}"
+            style="--accent:${escapeHtml(variant.accent || "#222")}">
+            <div class="variant-header">
+              <div class="variant-index">V${index + 1}</div>
+              <div class="variant-title">
+                <h3>${escapeHtml(variant.name)}</h3>
+                <p>${escapeHtml(variant.thesis)}</p>
+              </div>
+            </div>
+            ${storyDriver}
+            <div class="prototype-frame">
+              <span class="prototype-label">${escapeHtml(variant.previewLabel || "hero specimen")}</span>
+              <div class="prototype">${variant.preview}</div>
+            </div>
+            ${mediaStory}
+            <div class="variant-body">
+              <details>
+                <summary>Fit, tradeoffs &amp; evidence</summary>
+                <div class="fit-grid">
+                  <div class="fit">
+                    <b>Best when</b>
+                    <span>${escapeHtml(variant.bestWhen)}</span>
+                  </div>
+                  <div class="fit">
+                    <b>Loses when</b>
+                    <span>${escapeHtml(variant.losesWhen)}</span>
+                  </div>
+                </div>
+                <div class="decision-list">${decisions}</div>
+                <ul class="proof-list">${proof}</ul>
+              </details>
+              <div class="keep-title">Parts worth splicing</div>
+              <div class="keep-list">${keepParts}</div>
+              <details class="variant-note">
+                <summary>Add a note on ${labelFor(variant.id)} (optional)</summary>
+                <textarea class="variant-feedback" data-note="${escapeHtml(variant.id)}"
+                  placeholder="A detail specific to ${escapeHtml(variant.name)}…">${escapeHtml(state.notes[variant.id] || "")}</textarea>
+              </details>
+              <div class="variant-actions">
+                <button type="button" class="action-button pick" data-action="pick" data-id="${escapeHtml(variant.id)}">Pick ${labelFor(variant.id)}</button>
+                <button type="button" class="action-button shortlist" data-action="shortlist" data-id="${escapeHtml(variant.id)}">Shortlist</button>
+                <button type="button" class="action-button reject" data-action="reject" data-id="${escapeHtml(variant.id)}">Reject</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      function variantForCard(card) {
+        return variants.find((variant) => variant.id === card?.dataset.variant);
+      }
+
+      function stopStory(card) {
+        if (!card) return;
+        const timer = storyTimers.get(card.dataset.variant);
+        if (timer) clearTimeout(timer);
+        storyTimers.delete(card.dataset.variant);
+        card.classList.remove("is-story-playing");
+        const playButton = card.querySelector('[data-story-action="play"]');
+        const story = variantForCard(card)?.story;
+        if (!playButton || !story?.steps?.length) return;
+        const index = Number(card.dataset.storyIndex || 0);
+        playButton.textContent = index >= story.steps.length - 1 ? "↻ Replay story" : "▶ Play story";
+      }
+
+      function setStoryStep(card, requestedIndex, options = {}) {
+        const { stopPlayback = true } = options;
+        const story = variantForCard(card)?.story;
+        if (!card || !story?.steps?.length) return;
+        if (stopPlayback) stopStory(card);
+
+        const index = Math.max(0, Math.min(Number(requestedIndex) || 0, story.steps.length - 1));
+        const step = story.steps[index];
+        const prototype = card.querySelector(".prototype");
+        card.dataset.storyIndex = String(index);
+        if (!storyTimers.has(card.dataset.variant)) {
+          card.querySelector('[data-story-action="play"]').textContent =
+            index >= story.steps.length - 1 ? "↻ Replay story" : "▶ Play story";
+        }
+        prototype.dataset.storyState = step.state;
+        prototype.classList.toggle("is-alt", step.state === "alt");
+
+        prototype.querySelectorAll("[data-demo-toggle]").forEach((button) => {
+          button.textContent = step.state === "alt" ? button.dataset.altLabel : button.dataset.baseLabel;
+        });
+        card.querySelector("[data-story-position]").textContent = `Step ${index + 1} of ${story.steps.length}`;
+        card.querySelector("[data-story-label]").textContent = step.label;
+        card.querySelector("[data-story-caption]").textContent = step.caption;
+        card.querySelector('[data-story-action="back"]').disabled = index === 0;
+        card.querySelector('[data-story-action="next"]').disabled = index === story.steps.length - 1;
+        card.querySelectorAll("[data-story-index]").forEach((button) => {
+          button.classList.toggle("active", Number(button.dataset.storyIndex) <= index);
+          button.setAttribute("aria-current", Number(button.dataset.storyIndex) === index ? "step" : "false");
+        });
+
+        prototype.querySelectorAll(".story-target").forEach((target) => target.classList.remove("story-target"));
+        if (step.target) {
+          const target = prototype.querySelector(step.target);
+          if (target) {
+            void target.offsetWidth;
+            target.classList.add("story-target");
+          }
+        }
+      }
+
+      function playStory(card) {
+        const story = variantForCard(card)?.story;
+        if (!card || !story?.steps?.length) return;
+        if (storyTimers.has(card.dataset.variant)) {
+          stopStory(card);
+          return;
+        }
+
+        let index = Number(card.dataset.storyIndex || 0);
+        if (index >= story.steps.length - 1) {
+          index = 0;
+          setStoryStep(card, index, { stopPlayback: false });
+        }
+        card.classList.add("is-story-playing");
+        card.querySelector('[data-story-action="play"]').textContent = "Ⅱ Pause";
+
+        const advance = () => {
+          const current = Number(card.dataset.storyIndex || 0);
+          if (current >= story.steps.length - 1) {
+            stopStory(card);
+            return;
+          }
+          setStoryStep(card, current + 1, { stopPlayback: false });
+          storyTimers.set(card.dataset.variant, setTimeout(advance, 1400));
+        };
+        storyTimers.set(card.dataset.variant, setTimeout(advance, 950));
+      }
+
+      function saveState() {
+        localStorage.setItem(storageKey, JSON.stringify(state));
+      }
+
+      function updateUi() {
+        variants.forEach((variant, index) => {
+          const card = byId(`card-${variant.id}`);
+          const status = state.statuses[variant.id];
+          card.classList.toggle("is-picked", state.pick === variant.id);
+          card.classList.toggle("is-shortlisted", status === "shortlist");
+          card.classList.toggle("is-rejected", status === "reject");
+          card.classList.toggle("is-focused", index === state.focusIndex);
+
+          const shortlistButton = card.querySelector('[data-action="shortlist"]');
+          const rejectButton = card.querySelector('[data-action="reject"]');
+          shortlistButton.classList.toggle("active", status === "shortlist");
+          rejectButton.classList.toggle("active", status === "reject");
+          shortlistButton.textContent = status === "shortlist" ? "Shortlisted" : "Shortlist";
+          rejectButton.textContent = status === "reject" ? "Rejected" : "Reject";
+
+          card.querySelectorAll("[data-keep]").forEach((input) => {
+            const selected = state.keeps[variant.id] || [];
+            input.checked = selected.includes(Number(input.dataset.part));
+          });
+        });
+
+        const picked = variants.find((variant) => variant.id === state.pick);
+        const shortlist = variants.filter((variant) => state.statuses[variant.id] === "shortlist");
+        const keptCount = Object.values(state.keeps).reduce((total, parts) => total + parts.length, 0);
+
+        if (picked) {
+          byId("decision-title").textContent = `Pick: ${labelFor(picked.id)} · ${picked.name}`;
+        } else if (shortlist.length) {
+          byId("decision-title").textContent = `Shortlist: ${shortlist.map((variant) => labelFor(variant.id)).join(", ")}`;
+        } else if (state.synthesis.trim()) {
+          byId("decision-title").textContent = "Free-form direction ready";
+        } else {
+          byId("decision-title").textContent = "No pick yet";
+        }
+
+        const details = [];
+        if (!picked && !state.synthesis.trim()) details.push("No direction captured yet");
+        if (state.synthesis.trim()) details.push("natural-language splice captured");
+        if (keptCount) details.push(`${keptCount} splice part${keptCount === 1 ? "" : "s"} selected`);
+        byId("decision-detail").textContent = details.join(" · ") || "Decision captured locally.";
+      }
+
+      function setStatus(id, status) {
+        if (state.statuses[id] === status) {
+          delete state.statuses[id];
+        } else {
+          state.statuses[id] = status;
+        }
+        if (status === "reject" && state.pick === id) state.pick = null;
+        saveState();
+        updateUi();
+      }
+
+      function setPick(id) {
+        state.pick = state.pick === id ? null : id;
+        if (state.pick) delete state.statuses[id];
+        saveState();
+        updateUi();
+        showToast(state.pick ? `${labelFor(id)} picked` : "Pick cleared");
+      }
+
+      function moveFocus(delta) {
+        state.focusIndex = (state.focusIndex + delta + variants.length) % variants.length;
+        saveState();
+        updateUi();
+        const card = byId(`card-${variants[state.focusIndex].id}`);
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      function focusVariant(index) {
+        if (index < 0 || index >= variants.length) return;
+        state.focusIndex = index;
+        saveState();
+        updateUi();
+        byId(`card-${variants[index].id}`).scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      function setLayout(layout) {
+        state.layout = layout;
+        variantGrid.classList.toggle("focus-layout", layout === "focus");
+        document.querySelectorAll("[data-layout]").forEach((button) => {
+          button.classList.toggle("active", button.dataset.layout === layout);
+        });
+        saveState();
+        updateUi();
+      }
+
+      function markdownBrief() {
+        const picked = variants.find((variant) => variant.id === state.pick);
+        const shortlisted = variants.filter((variant) => state.statuses[variant.id] === "shortlist");
+        const rejected = variants.filter((variant) => state.statuses[variant.id] === "reject");
+        const mdCell = (value) => String(value).replaceAll("|", "\\|").replaceAll("\n", " ");
+        const recommendationText = coLeaders.length > 1
+          ? `Co-leaders: ${coLeaders.map((result) => `${labelFor(result.variant.id)} · ${result.variant.name} (${formatTotal(result.total)})`).join(", ")}`
+          : topResult
+            ? `${labelFor(topResult.variant.id)} · ${topResult.variant.name} (${formatTotal(topResult.total)}/100)`
+            : "No eligible recommendation";
+        const lines = [
+          `# Babble prune — ${project.title}`,
+          "",
+          `**Shared brief:** ${project.brief}`,
+          "",
+          "## AI prune — judgment / ought",
+          "",
+          `**Recommendation:** ${recommendationText}`,
+          `**Why:** ${project.defaultWhy}`,
+          `**Decision hinge:** ${project.decisionHinge}`,
+          "",
+          "> FR weights, scores, and recommendation are AI judgments. Exercised prototype behavior is evidence; production integration remains outside the prototype boundary.",
+          "",
+          "### Weighted functional requirements",
+          ""
+        ];
+
+        requirements.forEach((requirement) => {
+          lines.push(
+            `- **${requirement.id} · ${requirement.name} — ${requirement.weight}%:** ${requirement.why}`,
+            `  - Pass: ${requirement.passCondition}`,
+            `  - Anchors: 1 = ${requirement.anchors?.["1"] || "—"}; 3 = ${requirement.anchors?.["3"] || "—"}; 5 = ${requirement.anchors?.["5"] || "—"}`
+          );
+        });
+
+        lines.push("", "### Ranked score matrix", "");
+        lines.push(
+          `| Rank | Option | ${requirements.map((requirement) => mdCell(requirement.id)).join(" | ")} | Weighted | Gates |`,
+          `| ---: | --- | ${requirements.map(() => "---:").join(" | ")} | ---: | --- |`
+        );
+        rankedResults.forEach((result, index) => {
+          const scores = requirements.map(
+            (requirement) => result.variant.scores?.[requirement.id]?.score ?? "—"
+          );
+          lines.push(
+            `| ${index + 1} | ${mdCell(`${labelFor(result.variant.id)} · ${result.variant.name}`)} | ${scores.join(" | ")} | ${formatTotal(result.total)} | ${result.eligible ? "pass" : `fail: ${result.failedGates.map((gate) => gate.name).join(", ")}`} |`
+          );
+        });
+
+        lines.push("", "### Score evidence — observed is, interpreted as ought", "");
+        rankedResults.forEach((result) => {
+          lines.push(`#### ${labelFor(result.variant.id)} · ${result.variant.name} — ${formatTotal(result.total)}/100`, "");
+          requirements.forEach((requirement) => {
+            const entry = result.variant.scores?.[requirement.id] || {};
+            lines.push(`- **${requirement.id}: ${entry.score ?? "—"}/5 · ${entry.confidence || "unknown"} confidence.** ${entry.evidence || "No evidence supplied."}`);
+          });
+          lines.push("");
+        });
+
+        lines.push("### Hard gates", "");
+        if (!hardGates.length) {
+          lines.push("- No separate hard gates in this round.", "");
+        } else {
+          hardGates.forEach((gate) => {
+            lines.push(`- **${gate.name}:** ${gate.why}`);
+            variants.forEach((variant) => {
+              const entry = variant.gateResults?.[gate.id] || {};
+              lines.push(`  - ${labelFor(variant.id)} ${entry.pass === true ? "PASS" : "FAIL"} — ${entry.evidence || "No evidence supplied."}`);
+            });
+          });
+          lines.push("");
+        }
+
+        lines.push(
+          "## Human prune — your decision",
+          "",
+          `**Decision:** ${picked ? `${labelFor(picked.id)} · ${picked.name}` : "No final pick"}`,
+          `**AI recommendation (advisory):** ${recommendationText}`,
+          `**Shortlist:** ${shortlisted.length ? shortlisted.map((variant) => `${labelFor(variant.id)} · ${variant.name}`).join(", ") : "none"}`,
+          `**Rejected:** ${rejected.length ? rejected.map((variant) => `${labelFor(variant.id)} · ${variant.name}`).join(", ") : "none"}`,
+          ""
+        );
+
+        const keepLines = variants.flatMap((variant) => {
+          const selected = state.keeps[variant.id] || [];
+          return selected.map((partIndex) => `- ${labelFor(variant.id)} · ${variant.keepParts[partIndex]}`);
+        });
+        lines.push("## Keep / splice", ...(keepLines.length ? keepLines : ["- none selected"]), "");
+
+        const feedbackLines = variants
+          .filter((variant) => (state.notes[variant.id] || "").trim())
+          .map((variant) => `- **${labelFor(variant.id)} · ${variant.name}:** ${state.notes[variant.id].trim()}`);
+        lines.push("## Variant feedback", ...(feedbackLines.length ? feedbackLines : ["- none"]), "");
+
+        lines.push("## Free-form direction", state.synthesis.trim() || "Not supplied.", "");
+        lines.push("## Prototype boundary", project.boundary, "");
+
+        if (picked || keepLines.length) {
+          lines.push("## Next", "Synthesize a new child prototype from this decision before production implementation.");
+        } else {
+          lines.push("## Next", `Review ${labelFor(defaultVariant.id)} as the AI recommendation, then pick, shortlist, reject, or splice before production implementation.`);
+        }
+        return lines.join("\n");
+      }
+
+      function compactDirection() {
+        const picked = variants.find((variant) => variant.id === state.pick);
+        const shortlisted = variants.filter((variant) => state.statuses[variant.id] === "shortlist");
+        const kept = variants.flatMap((variant) => {
+          const selected = state.keeps[variant.id] || [];
+          return selected.map((partIndex) => `${labelFor(variant.id)}: ${variant.keepParts[partIndex]}`);
+        });
+        const notes = variants
+          .filter((variant) => (state.notes[variant.id] || "").trim())
+          .map((variant) => `${labelFor(variant.id)}: ${state.notes[variant.id].trim()}`);
+        const fileName = decodeURIComponent(location.pathname.split("/").pop() || "babble-gallery.html");
+        return [
+          `# Babble direction — ${project.title}`,
+          `Gallery: ${fileName}`,
+          "",
+          `Pick: ${picked ? `${labelFor(picked.id)} · ${picked.name}` : "none"}`,
+          `Shortlist: ${shortlisted.length ? shortlisted.map((variant) => labelFor(variant.id)).join(", ") : "none"}`,
+          `Keep / borrow: ${kept.length ? kept.join("; ") : "none selected"}`,
+          ...(notes.length ? ["", "Variant notes:", ...notes.map((note) => `- ${note}`)] : []),
+          "",
+          "Direction:",
+          state.synthesis.trim() || "No free-form direction supplied."
+        ].join("\n");
+      }
+
+      async function copyMarkdown() {
+        const markdown = compactDirection();
+        try {
+          await navigator.clipboard.writeText(markdown);
+        } catch {
+          const fallback = document.createElement("textarea");
+          fallback.value = markdown;
+          fallback.style.position = "fixed";
+          fallback.style.opacity = "0";
+          document.body.appendChild(fallback);
+          fallback.select();
+          document.execCommand("copy");
+          fallback.remove();
+        }
+        showToast("Direction copied as Markdown");
+      }
+
+      function downloadMarkdown() {
+        const blob = new Blob([markdownBrief()], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        const slug = project.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        anchor.href = url;
+        anchor.download = `${slug || "babble"}-prune.md`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+        showToast("Markdown decision downloaded");
+      }
+
+      let toastTimer;
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+      }
+
+      document.addEventListener("click", (event) => {
+        const storyControl = event.target.closest("[data-story-action]");
+        if (storyControl) {
+          const card = storyControl.closest(".variant-card");
+          const action = storyControl.dataset.storyAction;
+          const index = Number(card.dataset.storyIndex || 0);
+          if (action === "play") playStory(card);
+          if (action === "back") setStoryStep(card, index - 1);
+          if (action === "next") setStoryStep(card, index + 1);
+          if (action === "jump") setStoryStep(card, Number(storyControl.dataset.storyIndex));
+          return;
+        }
+
+        const actionButton = event.target.closest("[data-action]");
+        if (actionButton) {
+          const { action, id } = actionButton.dataset;
+          if (action === "pick") setPick(id);
+          if (action === "shortlist") setStatus(id, "shortlist");
+          if (action === "reject") setStatus(id, "reject");
+          return;
+        }
+
+        const layoutButton = event.target.closest("[data-layout]");
+        if (layoutButton) {
+          setLayout(layoutButton.dataset.layout);
+          return;
+        }
+
+        const demoButton = event.target.closest("[data-demo-toggle]");
+        if (demoButton) {
+          const prototype = demoButton.closest(".prototype");
+          const card = demoButton.closest(".variant-card");
+          const nextState = prototype.classList.contains("is-alt") ? "base" : "alt";
+          const story = variantForCard(card)?.story;
+          const matchingIndex = story?.steps?.findIndex((step) => step.state === nextState) ?? -1;
+          if (matchingIndex >= 0) {
+            setStoryStep(card, matchingIndex);
+          } else {
+            stopStory(card);
+            prototype.classList.toggle("is-alt", nextState === "alt");
+            prototype.dataset.storyState = nextState;
+            demoButton.textContent = nextState === "alt" ? demoButton.dataset.altLabel : demoButton.dataset.baseLabel;
+          }
+          return;
+        }
+
+        const storyStateControl = event.target.closest("[data-story-to]");
+        if (storyStateControl) {
+          const card = storyStateControl.closest(".variant-card");
+          const story = variantForCard(card)?.story;
+          const matchingIndex = story?.steps?.findIndex((step) => step.state === storyStateControl.dataset.storyTo) ?? -1;
+          if (matchingIndex >= 0) setStoryStep(card, matchingIndex);
+        }
+      });
+
+      document.addEventListener("change", (event) => {
+        const keepInput = event.target.closest("[data-keep]");
+        if (!keepInput) return;
+        const id = keepInput.dataset.keep;
+        const partIndex = Number(keepInput.dataset.part);
+        const selected = new Set(state.keeps[id] || []);
+        if (keepInput.checked) selected.add(partIndex);
+        else selected.delete(partIndex);
+        state.keeps[id] = [...selected].sort((left, right) => left - right);
+        saveState();
+        updateUi();
+      });
+
+      document.addEventListener("input", (event) => {
+        const note = event.target.closest("[data-note]");
+        if (note) {
+          state.notes[note.dataset.note] = note.value;
+          saveState();
+        }
+        if (event.target.id === "global-synthesis") {
+          state.synthesis = event.target.value;
+          saveState();
+          updateUi();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        const typing = event.target.matches("input, textarea, [contenteditable='true']");
+        if (typing) return;
+
+        const numericIndex = event.key === "0" ? 9 : Number(event.key) - 1;
+        if (Number.isInteger(numericIndex) && numericIndex >= 0) {
+          focusVariant(numericIndex);
+          return;
+        }
+
+        if (event.key === "j" || event.key === "J" || event.key === "ArrowDown" || event.key === "ArrowRight") {
+          event.preventDefault();
+          moveFocus(1);
+        } else if (event.key === "k" || event.key === "K" || event.key === "ArrowUp" || event.key === "ArrowLeft") {
+          event.preventDefault();
+          moveFocus(-1);
+        } else if (event.key === "Enter") {
+          setPick(variants[state.focusIndex].id);
+        } else if (event.key === "s" || event.key === "S") {
+          setStatus(variants[state.focusIndex].id, "shortlist");
+        } else if (event.key === "r" || event.key === "R") {
+          setStatus(variants[state.focusIndex].id, "reject");
+        } else if (event.key === "c" || event.key === "C") {
+          copyMarkdown();
+        }
+      });
+
+      byId("previous-variant").addEventListener("click", () => moveFocus(-1));
+      byId("next-variant").addEventListener("click", () => moveFocus(1));
+      byId("copy-prune").addEventListener("click", copyMarkdown);
+      byId("download-prune").addEventListener("click", downloadMarkdown);
+      byId("reset-prune").addEventListener("click", () => {
+        variantGrid.querySelectorAll(".variant-card").forEach((card) => {
+          stopStory(card);
+          setStoryStep(card, 0, { stopPlayback: false });
+        });
+        state = blankState();
+        byId("global-synthesis").value = "";
+        document.querySelectorAll("[data-note]").forEach((note) => { note.value = ""; });
+        setLayout("grid");
+        saveState();
+        updateUi();
+        showToast("Local choices reset");
+      });
+    })();
+  </script>
+</body>
+</html>
