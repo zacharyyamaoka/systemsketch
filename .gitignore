@@ -5,3 +5,7 @@ __pycache__/
 *.py[cod]
 *.log
 docs/screenshots/
+
+# Report builders crop their source captures at build time and write the result
+# back beside them; the originals are the evidence, the crops are output.
+docs/assets/crop-*.png
