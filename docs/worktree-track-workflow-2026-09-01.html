@@ -75,11 +75,12 @@
   <h1>Worktrees per track</h1>
   <p class="lede">The diagnosis in your note is right and the emphasis is inverted. Steps&nbsp;4–6
   already exist in this repository as release channels — you built them. Steps&nbsp;1–3 are the
-  missing ones, and of those, only step&nbsp;1 actually buys speed. Two measured facts stop the
-  plan from starting at all today.</p>
+  missing ones, and of those, only step&nbsp;1 actually buys speed. Two measured facts stopped the
+  plan from starting at all — <b>the baseline is now committed and proved (§8)</b>; the port
+  collision is still open.</p>
   <div class="badges">
-    <span class="badge bad">HEAD = 9 src files · working tree = 111</span>
-    <span class="badge bad">:4322 bound · <code>--strictPort</code></span>
+    <span class="badge ok">step 0 done · HEAD = 132 src files</span>
+    <span class="badge bad">:4322 bound · <code>--strictPort</code> — still open</span>
     <span class="badge ok">Preview / Stable already shipped</span>
     <span class="badge warn">CLAUDE.md currently forbids worktrees</span>
   </div>
@@ -514,30 +515,152 @@ PREVIEW_PORT = int(os.environ.get(&quot;SYSTEMSKETCH_PREVIEW_PORT&quot;, &quot;4
 
 <section>
   <h2>7 · Step 7 — the context each new agent gets</h2>
-  <p class="sub">“I need to add this as context to each new agent.” Two files, and they must not
-  contradict each other — which they currently would.</p>
+  <p class="sub">“I need to add this as context to each new agent.” Five files, and the binding
+  constraint is that they must not contradict each other. Two of them did.</p>
   <table>
-    <tr><th>File</th><th>Says today</th><th>Change</th></tr>
+    <tr><th>File</th><th>Said before</th><th>Says now</th></tr>
     <tr>
       <td><code>~/.claude/CLAUDE.md</code><br><span style="color:var(--muted);font-size:13px">loads in every repo</span></td>
       <td>“Do not create or use a feature branch, detached checkout, or Git worktree unless Zach
       explicitly asks for one.”</td>
-      <td><span class="pill warn">replaced</span> with a conditional rule: <b>main by default;
-      worktree when the work is a named track that passes the gate.</b> Appending would have left
-      two contradictory instructions in the same always-loaded file.</td>
+      <td><span class="pill warn">rewritten</span> <b>Main by default; you open a worktree by
+      saying so in the chat.</b> The agent never infers one and never proposes one to be tidy.
+      An earlier draft made the agent evaluate a five-item gate; that put the decision in the
+      wrong place. The gate survives as three things it must check and say out loud once you
+      have started one.</td>
     </tr>
     <tr>
-      <td><code>vibetracks/TRACK_AGENT.md</code><br><span style="color:var(--muted);font-size:13px">the per-lane standing prompt</span></td>
-      <td>“Preserve existing dirty work. Work on the existing <code>main</code> checkout. No
-      branch, no worktree, unless I ask.”</td>
-      <td><span class="pill bad">left alone</span> — deliberately. That prompt is correct for a
-      repository whose baseline is uncommitted, which is every repository you have right now.
-      Change it when step 0 is done, not before.</td>
+      <td><code>~/.claude/CLAUDE.md</code><br><span style="color:var(--muted);font-size:13px">new section</span></td>
+      <td>— (covered only indirectly, in vault memory)</td>
+      <td><span class="pill ok">added</span> <b>Every handoff ends with a report you can act
+      on:</b> show the running thing on a stated URL, then a rich-media report unless the work
+      is purely textual, ending in a decision surface — done and proved · what is left · what
+      needs you, each with a reversible default so silence keeps work moving · what was
+      deliberately not done.</td>
+    </tr>
+    <tr>
+      <td><code>systemsketch/CLAUDE.md</code></td>
+      <td>— (did not exist)</td>
+      <td><span class="pill ok">created</span> The stock-tldraw rule and the boundary test that
+      enforces it, the 4321/4322/4323 port map and the <code>--strictPort</code> hazard, that
+      <code>npm run check</code> is necessary but not sufficient for UI work, the
+      <code>docs/build_*.py</code> report convention, and the concurrent-session rules.</td>
+    </tr>
+    <tr>
+      <td><code>pyblocks/CLAUDE.md</code></td>
+      <td>“…never reset/clean/checkout, no worktrees.”</td>
+      <td><span class="pill ok">updated</span> Same worktree rule as the global file, plus a
+      line noting the brain is already loaded globally. Its reference-registry and
+      real-browser-proof rules were already right and are untouched.</td>
+    </tr>
+    <tr>
+      <td><code>bam_ws/CLAUDE.md</code></td>
+      <td>“Before doing anything else, read <code>~/zach_brain/Settings/entry.md</code>.”</td>
+      <td><span class="pill bad">contradiction fixed</span> The global file explicitly says
+      <em>not</em> to run the vault ritual outside the vault, so this fired against it in every
+      bam_ws session. Now points at the already-loaded global context instead, and explains that
+      <code>AGENTS.md</code> keeps the <code>entry.md</code> pointer because <b>Codex does not
+      receive the global file and genuinely needs it</b>.</td>
+    </tr>
+    <tr>
+      <td><code>vibetracks/TRACK_AGENT.md</code></td>
+      <td>“Use a worktree only for genuinely overlapping file edits, or when I ask.”</td>
+      <td><span class="pill warn">tightened</span> The “overlapping file edits” clause let an
+      agent decide for itself. Now: never on your own judgement. Its main body already said
+      “no worktree unless I ask”, which was correct and is unchanged.</td>
     </tr>
   </table>
+  <div class="note good" style="margin-top:18px">
+    <b>You do not need a per-repo file to reach the brain.</b> <code>~/.claude/CLAUDE.md</code>
+    already loads in every repository and already imports <code>about-me.md</code> and the memory
+    index. What a per-repo file is <em>for</em> is the operational knowledge only that repository
+    has — ports, what counts as production, the test command, the local hazards. That is how the
+    three above are written.
+  </div>
+  <div class="note" style="margin-top:14px">
+    <b>Budget note:</b> the always-loaded vault stack is now ~16.4k tokens against a 15k budget.
+    It was already over before this change; these edits added roughly 450. The real slack is in
+    <code>MEMORY.md</code>, where 8 entries exceed the 400 B pointer budget by 1,641 B.
+  </div>
+</section>
+
+<section>
+  <h2>8 · Step 0 — done</h2>
+  <p class="sub">The baseline is committed and proved. <code>HEAD</code> went from
+  <strong>29 tracked files</strong> to <strong>359</strong>, and from
+  <strong>9</strong> files in <code>src/</code> to <strong>132</strong> — which now
+  matches the working checkout exactly.</p>
+
+  <pre class="light" style="margin-bottom:18px">a9e43e6 Add CLAUDE.md: stock-tldraw rule, port map, and the proof bar
+8f812bd Land the design record: report builders, galleries and their evidence
+c5502b6 Land everything built on top of stock tldraw since Aug 30
+0764862 Ignore the crops report builders write back into docs/assets
+3557cd1 Start SystemSketch from stock tldraw</pre>
+
+  <div class="two">
+    <pre>$ git worktree add --detach /tmp/wt-verify HEAD
+HEAD is now at 8f812bd Land the design record: report builders, galleries…
+
+$ find /tmp/wt-verify/src -type f | wc -l
+132                                # was 9 before step 0
+
+$ find src -type f | wc -l
+132                                # identical to the checkout
+
+$ ln -s ~/systemsketch/node_modules /tmp/wt-verify/node_modules
+$ cd /tmp/wt-verify &amp;&amp; npm run check
+  Test Files  37 passed (37)
+       Tests  289 passed (289)
+  Ran 24 tests in 0.286s
+  OK
+EXIT: 0                            # a fresh worktree builds and passes</pre>
+    <div class="card">
+      <h3>Why the proof is a worktree, not a green checkout</h3>
+      <p style="color:var(--muted);font-size:14px">Running <code>npm run check</code> in
+      <code>~/systemsketch</code> would only prove the <em>working tree</em> is green — which
+      was already true before any of this, and is exactly the state that hid the problem. The
+      claim that needed testing is that <em>what git can hand to a new worktree</em> is
+      complete and green. So: fork a real detached worktree off the new <code>HEAD</code>,
+      symlink <code>node_modules</code>, run the full suite there.</p>
+      <div class="note good" style="margin-top:14px">
+        <b>289 vitest + 24 Python, exit 0, in a tree git built from scratch.</b> A track agent
+        forking today inherits the Block, the ports, the edges, the inspector and the shell —
+        and can prove its own work before handing it back.
+      </div>
+    </div>
+  </div>
+
+  <table style="margin-top:18px">
+    <tr><th>Commit</th><th>What it lands</th><th>Why separately</th></tr>
+    <tr><td><code>0764862</code></td><td>gitignore <code>docs/assets/crop-*.png</code></td>
+        <td>The report builders crop their source captures and write the result back beside
+        them. Originals are evidence; crops are output.</td></tr>
+    <tr><td><code>c5502b6</code></td><td>153 files of product source + tests</td>
+        <td>The thing agents actually fork. Kept apart from the design record so
+        <code>git log -- src</code> reads as product history.</td></tr>
+    <tr><td><code>8f812bd</code></td><td>196 files of builders, galleries, captures (16 MB)</td>
+        <td>Committed rather than treated as regenerable: the captures record past UI states
+        that cannot be reproduced from the current tree, and the README links them by relative
+        path — gitignoring would leave every worktree with dangling links.</td></tr>
+    <tr><td><code>a9e43e6</code></td><td><code>CLAUDE.md</code> for this repo</td>
+        <td>Stock-tldraw rule, the 4321/4322/4323 port map, the proof bar, the
+        concurrent-session rules.</td></tr>
+  </table>
+
   <div class="note" style="margin-top:18px">
-    <b>The port triple and the freeze window are repo-specific</b>, so they do not belong in the
-    global file. They belong next to the code, in the dispatch script that creates the worktree.
+    <b>Payload measured before staging, per the source-only git boundary:</b> 16.65 MB total,
+    no datasets, no checkpoints, no <code>.tldr</code> user documents, largest single file
+    1.54 MB. Nothing was pushed — <code>origin/main</code> still points at the original commit,
+    and that is Zach's call to make.
+  </div>
+
+  <div class="note bad" style="margin-top:14px">
+    <b>A peer session was writing to this tree throughout.</b> It rewrote six
+    <code>selection-menu-*.png</code> captures mid-commit, then touched the changelog,
+    <code>README.md</code>, <code>src/chrome/systemsketch-chrome.css</code> and added a new
+    <code>figjam-appearance</code> report. That work is deliberately left uncommitted — it
+    belongs to whoever is running it, and racing them would have produced exactly the
+    clean-merge-wrong-result failure §4 is about.
   </div>
 </section>
 
