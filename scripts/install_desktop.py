@@ -31,7 +31,7 @@ def atomic_write(path: Path, content: bytes, mode: int = 0o644) -> None:
 
 
 def desktop_entry(python: Path, launcher: Path, release_home: Path) -> str:
-    stable = f"{python} {launcher} --open --release-home {release_home}"
+    stable = f"{python} {launcher} --open --release-home {release_home} %f"
     preview = f"{python} {launcher} --open --preview --release-home {release_home}"
     return f"""[Desktop Entry]
 Version=1.0
@@ -45,6 +45,7 @@ Icon={APP_ID}
 Terminal=false
 Categories=Development;Graphics;
 Keywords=Whiteboard;System;Design;Sketch;tldraw;
+MimeType=application/vnd.tldraw+json;
 StartupNotify=true
 StartupWMClass={APP_ID}
 Actions=TryPreview;
@@ -52,6 +53,17 @@ Actions=TryPreview;
 [Desktop Action TryPreview]
 Name=Open Live Preview
 Exec={preview}
+"""
+
+
+def mime_package() -> bytes:
+    return b"""<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/vnd.tldraw+json">
+    <comment>tldraw document</comment>
+    <glob pattern="*.tldr"/>
+  </mime-type>
+</mime-info>
 """
 
 
@@ -68,6 +80,14 @@ def refresh_command(command: str, *arguments: str) -> None:
         )
 
 
+def remove_conflicting_icon_variants(icon_root: Path, canonical_icon: Path) -> None:
+    """Remove exact-name legacy icons that can outrank the requested PNG."""
+    for extension in (".png", ".svg", ".xpm"):
+        for candidate in icon_root.glob(f"*/apps/{APP_ID}{extension}"):
+            if candidate != canonical_icon:
+                candidate.unlink(missing_ok=True)
+
+
 def main() -> int:
     release_home = default_release_home()
     data_home = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share"))
@@ -81,14 +101,18 @@ def main() -> int:
             raise ReleaseError(f"requested icon is missing: {icon_source}")
         icon_path = data_home / "icons" / "hicolor" / "512x512" / "apps" / f"{APP_ID}.png"
         desktop_path = data_home / "applications" / f"{APP_ID}.desktop"
+        mime_path = data_home / "mime" / "packages" / f"{APP_ID}.xml"
         atomic_write(icon_path, icon_source.read_bytes())
+        remove_conflicting_icon_variants(data_home / "icons" / "hicolor", icon_path)
         atomic_write(
             desktop_path,
             desktop_entry(Path(sys.executable).resolve(), launcher, release_home).encode(),
             0o755,
         )
+        atomic_write(mime_path, mime_package())
 
         refresh_command("update-desktop-database", str(data_home / "applications"))
+        refresh_command("update-mime-database", str(data_home / "mime"))
         refresh_command("gtk-update-icon-cache", "-f", "-t", str(data_home / "icons" / "hicolor"))
         validator = shutil.which("desktop-file-validate")
         if validator:

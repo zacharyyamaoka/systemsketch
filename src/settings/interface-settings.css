@@ -1,0 +1,264 @@
+.systemsketch-app {
+  --systemsketch-interface-scale: 1;
+  --systemsketch-interface-scale-inverse: 1;
+}
+
+/* tldraw keeps its interface in a sibling layer to the canvas. Scaling that
+   coordinate system preserves board geometry and canvas zoom. */
+.systemsketch-app .tlui-layout,
+.systemsketch-app .systemsketch-surface-host {
+  zoom: var(--systemsketch-interface-scale);
+}
+
+/* Menus, dialogs, tooltips, and toasts are portaled beside the UI layout. */
+.systemsketch-app .tl-container > * > .tlui-menu,
+.systemsketch-app .tlui-popover__content,
+.systemsketch-app .tlui-dialog__positioner,
+.systemsketch-app .tlui-tooltip,
+.systemsketch-app .tlui-toast__container {
+  zoom: var(--systemsketch-interface-scale);
+}
+
+.systemsketch-settings {
+  width: min(760px, calc((100vw - 48px) * var(--systemsketch-interface-scale-inverse)));
+  color: #272b32;
+  background: #fff;
+}
+
+.systemsketch-settings__header {
+  height: 54px;
+  padding-inline-start: 18px;
+  border-bottom: 1px solid #e9eaed;
+}
+
+.systemsketch-settings__title-icon {
+  width: 19px;
+  height: 19px;
+  margin-right: 9px;
+  fill: none;
+  stroke: #626974;
+  stroke-width: 1.45;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.systemsketch-settings__header .tlui-dialog__header__title {
+  font-size: 15px;
+  font-weight: 760;
+}
+
+.systemsketch-settings__body {
+  display: grid;
+  grid-template-columns: 184px minmax(0, 1fr);
+  width: 100%;
+  height: min(430px, calc(80vh * var(--systemsketch-interface-scale-inverse) - 54px));
+  min-height: 0;
+  padding: 0;
+  overflow: auto;
+}
+
+.systemsketch-settings__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 16px 10px;
+  border-right: 1px solid #e9eaed;
+  background: #f7f7f8;
+}
+
+.systemsketch-settings__nav button {
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 8px;
+  color: #6c727c;
+  background: transparent;
+  cursor: default;
+  font-size: 12px;
+  font-weight: 680;
+  text-align: left;
+}
+
+.systemsketch-settings__nav button:disabled {
+  opacity: 1;
+}
+
+.systemsketch-settings__nav button.is-active {
+  color: #4e37bd;
+  background: #ece8ff;
+}
+
+.systemsketch-settings__nav svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.systemsketch-settings__panel {
+  position: relative;
+  padding: 34px 38px 30px;
+}
+
+.systemsketch-settings__eyebrow {
+  margin-bottom: 7px;
+  color: #7253df;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.systemsketch-settings__intro {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.systemsketch-settings__intro h2 {
+  margin: 0;
+  color: #252930;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.systemsketch-settings__intro p,
+.systemsketch-settings__note p {
+  margin: 7px 0 0;
+  color: #747b86;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.systemsketch-settings__intro output {
+  min-width: 62px;
+  padding: 8px 10px;
+  border: 1px solid #dedfe4;
+  border-radius: 8px;
+  color: #3f4650;
+  background: #f8f8f9;
+  font: 760 13px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-align: center;
+}
+
+.systemsketch-settings__slider-row {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 22px;
+  align-items: center;
+  gap: 11px;
+  margin-top: 34px;
+  color: #7b818a;
+  font-size: 11px;
+  font-weight: 760;
+}
+
+.systemsketch-settings__slider-row .large {
+  color: #505761;
+  font-size: 18px;
+}
+
+.systemsketch-settings__slider-row input {
+  width: 100%;
+  accent-color: #7253df;
+}
+
+.systemsketch-settings__presets {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 7px;
+  margin: 17px 0 0 27px;
+}
+
+.systemsketch-settings__presets button,
+.systemsketch-settings__reset {
+  min-height: 34px;
+  border: 1px solid #dedfe4;
+  border-radius: 8px;
+  color: #626974;
+  background: #fff;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 730;
+}
+
+.systemsketch-settings__presets button:hover,
+.systemsketch-settings__reset:hover:not(:disabled) {
+  border-color: #bdb1ee;
+  color: #5137bd;
+  background: #f4f1ff;
+}
+
+.systemsketch-settings__presets button.is-active {
+  border-color: #7253df;
+  color: #fff;
+  background: #7253df;
+}
+
+.systemsketch-settings__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 30px;
+  padding: 14px 15px;
+  border: 1px solid #e8e5f5;
+  border-radius: 10px;
+  background: #faf9ff;
+}
+
+.systemsketch-settings__note strong {
+  color: #3f4650;
+  font-size: 11px;
+}
+
+.systemsketch-settings__saved-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 4px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #3da878;
+  box-shadow: 0 0 0 3px rgb(61 168 120 / 13%);
+}
+
+.systemsketch-settings__reset {
+  margin-top: 19px;
+  padding: 0 13px;
+}
+
+.systemsketch-settings__reset:disabled {
+  cursor: default;
+  opacity: .42;
+}
+
+@media (max-width: 640px) {
+  .systemsketch-settings__body {
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .systemsketch-settings__nav {
+    align-items: center;
+    padding-inline: 7px;
+  }
+
+  .systemsketch-settings__nav button {
+    width: 38px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .systemsketch-settings__nav button span {
+    display: none;
+  }
+
+  .systemsketch-settings__panel {
+    padding: 26px 22px;
+  }
+}

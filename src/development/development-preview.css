@@ -1,0 +1,144 @@
+.systemsketch-development-preview {
+  position: absolute;
+  z-index: var(--tl-layer-panels);
+  top: var(--tl-space-2);
+  left: 50%;
+  display: flex;
+  min-height: 40px;
+  max-width: min(760px, calc(100vw - 16px));
+  box-sizing: border-box;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 5px 5px 12px;
+  border: 1px solid #c9ceff;
+  border-radius: 11px;
+  color: #333c65;
+  background: rgb(249 249 255 / 97%);
+  box-shadow: 0 3px 10px rgb(29 38 91 / 10%), 0 12px 32px rgb(29 38 91 / 10%);
+  backdrop-filter: blur(18px);
+  pointer-events: auto;
+  transform: translateX(-50%);
+}
+
+.systemsketch-development-preview__identity {
+  display: grid;
+  gap: 2px;
+}
+
+.systemsketch-development-preview__identity span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #4256df;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.systemsketch-development-preview__identity i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.systemsketch-development-preview__identity small,
+.systemsketch-development-preview > p {
+  color: #656d85;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.systemsketch-development-preview > p {
+  max-width: 240px;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.systemsketch-development-preview > p.error {
+  color: #a1333d;
+}
+
+.systemsketch-development-preview > button {
+  min-height: 29px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  color: #fff;
+  background: #4458df;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.systemsketch-development-preview > button:disabled {
+  cursor: default;
+  opacity: .55;
+}
+
+.systemsketch-block-development-inspector {
+  position: absolute;
+  z-index: calc(var(--tl-layer-panels) + 2);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(280px, 100vw);
+  overflow: hidden;
+  border: 0;
+  border-left: 1px solid var(--tl-color-divider, rgb(0 0 0 / 8%));
+  border-radius: 0;
+  background: var(--color-panel, #fff);
+  box-shadow: none;
+  pointer-events: auto;
+}
+
+.systemsketch-block-development-inspector .block-inspector {
+  height: 100%;
+  min-height: 0;
+}
+
+.systemsketch-block-development-inspector .block-inspector__body {
+  min-height: 0;
+  flex: 1;
+}
+
+/* The donor app reserves a real 280px grid column for the inspector. This
+   profile mounts through tldraw's in-front seam, so move stock top-right
+   controls to the dock's left edge instead of letting them cover Notes. */
+.systemsketch-development-app:has(.systemsketch-block-development-inspector) .tlui-layout__top__right {
+  margin-right: 280px;
+}
+
+@media (max-width: 620px) {
+  .systemsketch-development-preview__identity small,
+  .systemsketch-development-preview > p {
+    display: none;
+  }
+
+  .systemsketch-block-development-inspector {
+    width: min(280px, 100vw);
+  }
+
+  .systemsketch-development-app:has(.systemsketch-block-development-inspector) .tlui-layout__top__right {
+    display: none;
+  }
+}
+
+.tl-theme__dark .systemsketch-development-preview {
+  border-color: #555f9c;
+  color: #e6e8ff;
+  background: rgb(39 42 57 / 97%);
+}
+
+.tl-theme__dark .systemsketch-development-preview__identity span {
+  color: #9eabff;
+}
+
+.tl-theme__dark .systemsketch-development-preview__identity small,
+.tl-theme__dark .systemsketch-development-preview > p {
+  color: #b8bed8;
+}

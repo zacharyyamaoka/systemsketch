@@ -1,29 +1,206 @@
 import { getAssetUrlsByImport } from '@tldraw/assets/imports.vite'
-import { Tldraw } from 'tldraw'
+import { Tldraw, type Editor } from 'tldraw'
+import { useCallback } from 'react'
 import 'tldraw/tldraw.css'
-import { UpdatePill } from './UpdatePill'
+import { EXCALIDRAW_SHAPE_UTILS, registerExcalidrawPasteHandler } from './excalidrawInterop'
+import {
+  BlockShapeUtil,
+  BlockTool,
+  installBlockClickToEdit,
+  installBlockPortMenuTarget,
+} from './blocks'
+import { BlockContextMenu } from './blocks/ui'
+import {
+  blockConnectionBindingUtils,
+  blockConnectionOverlayUtils,
+  blockConnectionShapeUtils,
+  installBlockConnections,
+} from './blocks/connections'
+import {
+  BLOCK_DEVELOPMENT_OVERRIDES,
+  BlockDevelopmentPreviewChrome,
+  BlockDevelopmentToolbar,
+  DevelopmentPreviewChrome,
+} from './development/DevelopmentPreviewChrome'
+import {
+  developmentPersistenceKey,
+  resolveDevelopmentProfile,
+  type DevelopmentProfileId,
+} from './developmentProfiles'
+import { ChromeProvider } from './chrome/ChromeProvider'
+import {
+  SystemSketchMenuPanel,
+  SystemSketchSharePanel,
+  SystemSketchSurfaceHost,
+} from './chrome/SystemSketchChrome'
+import { SystemSketchNavigationPanel } from './SystemSketchUtilities'
+import { SystemSketchFigmaToolbar } from './toolbar/SystemSketchToolbar'
+import {
+  registerToolbarSideEffects,
+  SYSTEMSKETCH_TOOLBAR_OVERRIDES,
+} from './toolbar/toolbarIntegration'
+import {
+  SystemSketchMainMenu,
+  SystemSketchWorkspaceProvider,
+  useLocalWorkspace,
+} from './workspace/LocalWorkspace'
+import { interfaceScaleCssValues, useInterfaceScale } from './settings/interfaceScale'
+import { installInstantTextEditing } from './instantTextEditing'
+import { installDevelopmentSeam } from './developmentSeam'
+import { enablePasteAtCursor } from './pasteAtCursor'
+import type { CSSProperties } from 'react'
 import './app.css'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
+const SYSTEMSKETCH_COMPONENTS = {
+  ContextMenu: BlockContextMenu,
+  InFrontOfTheCanvas: SystemSketchSurfaceHost,
+  MainMenu: SystemSketchMainMenu,
+  MenuPanel: SystemSketchMenuPanel,
+  NavigationPanel: SystemSketchNavigationPanel,
+  SharePanel: SystemSketchSharePanel,
+  StylePanel: null,
+  Toolbar: SystemSketchFigmaToolbar,
+}
+const SYSTEMSKETCH_SHAPE_UTILS = [
+  ...EXCALIDRAW_SHAPE_UTILS,
+  BlockShapeUtil,
+  ...blockConnectionShapeUtils,
+]
+const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
+const SYSTEMSKETCH_OVERLAY_UTILS = [...blockConnectionOverlayUtils]
+const SYSTEMSKETCH_TOOLS = [BlockTool]
+const STOCK_DEVELOPMENT_COMPONENTS = {
+  InFrontOfTheCanvas: DevelopmentPreviewChrome,
+}
+const BLOCK_DEVELOPMENT_COMPONENTS = {
+  ContextMenu: BlockContextMenu,
+  InFrontOfTheCanvas: BlockDevelopmentPreviewChrome,
+  Toolbar: BlockDevelopmentToolbar,
+}
+const BLOCK_DEVELOPMENT_SHAPE_UTILS = [BlockShapeUtil, ...blockConnectionShapeUtils]
+const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
+const BLOCK_DEVELOPMENT_OVERLAY_UTILS = [...blockConnectionOverlayUtils]
 
 /**
- * The product datum: stock tldraw, plus one host-owned update pill.
+ * The product datum: stock tldraw with deliberately narrow product seams.
  *
- * Keep all future product UI outside this component until it is deliberately
- * introduced. `assetUrls`, `licenseKey`, and `persistenceKey` are operational
- * infrastructure; no stock tool, shape, menu, shortcut, or component is
- * replaced here.
+ * SystemSketch keeps tldraw's canvas engine and interaction lifecycle, then
+ * composes its chrome, local workspace, paste adapter, and semantic Block
+ * through the SDK's public component, tool, shape, override, and mount APIs.
  */
-export function App() {
+function SystemSketchCanvas() {
+  const { attach } = useLocalWorkspace()
+  const interfaceScale = useInterfaceScale()
+  const scaleCss = interfaceScaleCssValues(interfaceScale)
+  const onMount = useCallback((editor: Editor) => {
+    enablePasteAtCursor(editor)
+    const stopWorkspace = attach(editor)
+    const stopBlockConnections = installBlockConnections(editor)
+    const stopDevelopmentSeam = installDevelopmentSeam(editor)
+    const stopInstantTextEditing = installInstantTextEditing(editor)
+    const stopBlockClickToEdit = installBlockClickToEdit(editor)
+    const stopBlockPortMenuTarget = installBlockPortMenuTarget(editor)
+    const stopExcalidrawPaste = registerExcalidrawPasteHandler(editor)
+    const stopToolbarSideEffects = registerToolbarSideEffects(editor)
+    return () => {
+      stopToolbarSideEffects()
+      stopExcalidrawPaste()
+      stopBlockPortMenuTarget()
+      stopBlockClickToEdit()
+      stopInstantTextEditing()
+      stopDevelopmentSeam()
+      stopBlockConnections()
+      stopWorkspace()
+    }
+  }, [attach])
+
   return (
-    <main className="systemsketch-app" data-testid="systemsketch-app">
+    <main
+      className="systemsketch-app"
+      data-testid="systemsketch-app"
+      data-interface-scale={interfaceScale}
+      style={{
+        '--systemsketch-interface-scale': scaleCss.scale,
+        '--systemsketch-interface-scale-inverse': scaleCss.inverse,
+      } as CSSProperties}
+    >
       <Tldraw
         assetUrls={ASSET_URLS}
+        bindingUtils={SYSTEMSKETCH_BINDING_UTILS}
+        components={SYSTEMSKETCH_COMPONENTS}
         licenseKey={TLDRAW_LICENSE_KEY}
-        persistenceKey="systemsketch-stock-whiteboard"
+        onMount={onMount}
+        overlayUtils={SYSTEMSKETCH_OVERLAY_UTILS}
+        overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
+        shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}
+        tools={SYSTEMSKETCH_TOOLS}
       />
-      <UpdatePill />
     </main>
+  )
+}
+
+function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId, 'product'> }) {
+  const isBlockDevelopment = profile === 'block-dev'
+  const onMount = useCallback((editor: Editor) => {
+    enablePasteAtCursor(editor)
+    const stopBlockConnections = isBlockDevelopment
+      ? installBlockConnections(editor)
+      : () => undefined
+    const stopInstantTextEditing = isBlockDevelopment
+      ? installInstantTextEditing(editor)
+      : () => undefined
+    const stopBlockClickToEdit = isBlockDevelopment
+      ? installBlockClickToEdit(editor)
+      : () => undefined
+    const stopBlockPortMenuTarget = isBlockDevelopment
+      ? installBlockPortMenuTarget(editor)
+      : () => undefined
+    const stopDevelopmentSeam = installDevelopmentSeam(editor)
+    return () => {
+      stopDevelopmentSeam()
+      stopBlockPortMenuTarget()
+      stopBlockClickToEdit()
+      stopInstantTextEditing()
+      stopBlockConnections()
+    }
+  }, [isBlockDevelopment])
+
+  return (
+    <main
+      className="systemsketch-app systemsketch-development-app"
+      data-testid="systemsketch-development-app"
+      data-development-profile={profile}
+    >
+      <Tldraw
+        assetUrls={ASSET_URLS}
+        bindingUtils={isBlockDevelopment ? BLOCK_DEVELOPMENT_BINDING_UTILS : undefined}
+        components={isBlockDevelopment ? BLOCK_DEVELOPMENT_COMPONENTS : STOCK_DEVELOPMENT_COMPONENTS}
+        licenseKey={TLDRAW_LICENSE_KEY}
+        onMount={onMount}
+        overlayUtils={isBlockDevelopment ? BLOCK_DEVELOPMENT_OVERLAY_UTILS : undefined}
+        overrides={isBlockDevelopment ? BLOCK_DEVELOPMENT_OVERRIDES : undefined}
+        persistenceKey={developmentPersistenceKey(profile)}
+        shapeUtils={isBlockDevelopment ? BLOCK_DEVELOPMENT_SHAPE_UTILS : undefined}
+        tools={isBlockDevelopment ? [BlockTool] : undefined}
+      />
+    </main>
+  )
+}
+
+export function App() {
+  const profile = resolveDevelopmentProfile(window.location.search)
+
+  if (profile !== 'product') {
+    return <DevelopmentCanvas profile={profile} />
+  }
+
+  return (
+    <SystemSketchWorkspaceProvider>
+      <ChromeProvider>
+        <SystemSketchCanvas />
+      </ChromeProvider>
+    </SystemSketchWorkspaceProvider>
   )
 }

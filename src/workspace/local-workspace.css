@@ -1,0 +1,450 @@
+.systemsketch-file-identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 2px;
+}
+
+.systemsketch-file-title {
+  display: flex;
+  max-width: min(32vw, 280px);
+  height: 32px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 7px;
+  color: var(--color-text-1);
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.systemsketch-file-title:hover {
+  background: var(--color-muted-2);
+}
+
+.systemsketch-file-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-file-title i {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #22a06b;
+}
+
+.systemsketch-file-title i[data-state='dirty'],
+.systemsketch-file-title i[data-state='saving'] {
+  background: #e9a23b;
+}
+
+.systemsketch-file-title i[data-state='conflict'],
+.systemsketch-file-title i[data-state='missing'],
+.systemsketch-file-title i[data-state='error'] {
+  background: #e34935;
+}
+
+.systemsketch-workspace-loading {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  justify-items: center;
+  color: #242424;
+  background: #f7f7f5;
+}
+
+.systemsketch-workspace-loading__mark {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 12px;
+  color: white;
+  background: #111;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.systemsketch-workspace-loading p {
+  max-width: 480px;
+  margin: 0;
+  color: #a43c31;
+  text-align: center;
+}
+
+.systemsketch-workspace-dialog-backdrop {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(17 17 17 / 28%);
+  backdrop-filter: blur(3px);
+}
+
+.systemsketch-workspace-dialog {
+  display: flex;
+  width: min(760px, calc(100vw - 48px));
+  max-height: min(680px, calc(100vh - 48px));
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgb(0 0 0 / 10%);
+  border-radius: 14px;
+  color: #1e1e1e;
+  background: #fff;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 24%);
+}
+
+.systemsketch-workspace-dialog > header,
+.systemsketch-workspace-dialog > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+}
+
+.systemsketch-workspace-dialog > header {
+  border-bottom: 1px solid #e8e8e6;
+}
+
+.systemsketch-workspace-dialog > header span {
+  color: #777;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.systemsketch-workspace-dialog h2 {
+  margin: 2px 0 0;
+  font-size: 18px;
+}
+
+.systemsketch-workspace-dialog > header > button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  color: #666;
+  background: transparent;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.systemsketch-workspace-dialog > header > button:hover {
+  background: #f0f0ee;
+}
+
+.systemsketch-workspace-browser {
+  display: grid;
+  min-height: 0;
+  flex: 1 1 480px;
+  grid-template-columns: 190px minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.systemsketch-workspace-browser > aside {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 10px;
+  overflow: auto;
+  border-right: 1px solid #e8e8e6;
+  background: #f7f7f5;
+}
+
+.systemsketch-workspace-browser > aside > strong {
+  padding: 4px 8px;
+  color: #777;
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.systemsketch-workspace-browser > aside button {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.systemsketch-workspace-browser > aside button:hover {
+  background: #eaeae7;
+}
+
+.systemsketch-workspace-browser > aside span,
+.systemsketch-workspace-browser > aside small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-workspace-browser > aside small,
+.systemsketch-workspace-browser > aside p {
+  color: #888;
+  font-size: 10px;
+}
+
+.systemsketch-workspace-browser__files {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.systemsketch-workspace-pathbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #ededeb;
+}
+
+.systemsketch-workspace-pathbar button {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 7px;
+  background: #f2f2f0;
+  cursor: pointer;
+}
+
+.systemsketch-workspace-pathbar code {
+  overflow: hidden;
+  color: #666;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-workspace-file-list {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.systemsketch-workspace-file-list > button {
+  display: grid;
+  min-height: 38px;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 7px;
+  color: #292929;
+  background: transparent;
+  cursor: default;
+  text-align: left;
+}
+
+.systemsketch-workspace-file-list > button:hover,
+.systemsketch-workspace-file-list > button.selected {
+  background: #f0f0ed;
+}
+
+.systemsketch-workspace-file-list > button.selected {
+  box-shadow: inset 0 0 0 1px #5d72e9;
+  background: #eef0ff;
+}
+
+.systemsketch-workspace-file-list > button > span {
+  color: #6c75d8;
+  font-size: 16px;
+}
+
+.systemsketch-workspace-file-list > button.folder > span {
+  color: #c49936;
+}
+
+.systemsketch-workspace-file-list > button small {
+  color: #8a8a8a;
+  font-size: 10px;
+}
+
+.systemsketch-workspace-file-list__empty {
+  margin: auto;
+  color: #8b8b8b;
+  font-size: 12px;
+}
+
+.systemsketch-workspace-name-field {
+  display: flex;
+  align-items: center;
+  border: 1px solid #cfcfcb;
+  border-radius: 8px;
+  background: white;
+}
+
+.systemsketch-workspace-name-field:focus-within {
+  border-color: #5368dc;
+  box-shadow: 0 0 0 3px rgb(83 104 220 / 14%);
+}
+
+.systemsketch-workspace-name-field input {
+  min-width: 0;
+  flex: 1;
+  padding: 9px 10px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+}
+
+.systemsketch-workspace-name-field span {
+  padding-right: 10px;
+  color: #858585;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+}
+
+.systemsketch-workspace-name-field.is-save-as {
+  margin: 8px 12px 12px;
+}
+
+.systemsketch-workspace-dialog__rename {
+  padding: 28px 24px 40px;
+}
+
+.systemsketch-workspace-dialog__rename label {
+  display: block;
+  margin-bottom: 7px;
+  color: #555;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.systemsketch-workspace-dialog__rename p {
+  margin: 10px 2px 0;
+  color: #888;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+}
+
+.systemsketch-workspace-dialog__error {
+  margin: 0;
+  padding: 9px 18px;
+  border-top: 1px solid #f0d4cf;
+  color: #a43c31;
+  background: #fff2ef;
+  font-size: 12px;
+}
+
+.systemsketch-workspace-dialog > footer {
+  justify-content: flex-end;
+  gap: 8px;
+  border-top: 1px solid #e8e8e6;
+  background: #fafaf9;
+}
+
+.systemsketch-workspace-dialog > footer button,
+.systemsketch-workspace-alert button {
+  padding: 8px 13px;
+  border: 1px solid #d2d2cf;
+  border-radius: 8px;
+  color: #333;
+  background: white;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.systemsketch-workspace-dialog > footer button.primary,
+.systemsketch-workspace-alert button.primary {
+  border-color: #232323;
+  color: white;
+  background: #232323;
+}
+
+.systemsketch-workspace-dialog button:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+.systemsketch-workspace-alert {
+  position: fixed;
+  z-index: 9000;
+  top: 12px;
+  left: 50%;
+  display: flex;
+  width: min(620px, calc(100vw - 32px));
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 11px 12px 11px 15px;
+  border: 1px solid #e7b9b1;
+  border-radius: 11px;
+  background: #fff8f6;
+  box-shadow: 0 12px 36px rgb(0 0 0 / 16%);
+  transform: translateX(-50%);
+}
+
+.systemsketch-workspace-alert > div:first-child {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.systemsketch-workspace-alert span {
+  overflow: hidden;
+  color: #7b5b55;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-workspace-alert__actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 7px;
+}
+
+@media (max-width: 640px) {
+  .systemsketch-file-title {
+    max-width: 32vw;
+  }
+
+  .systemsketch-workspace-dialog-backdrop {
+    padding: 10px;
+  }
+
+  .systemsketch-workspace-dialog {
+    width: calc(100vw - 20px);
+    max-height: calc(100vh - 20px);
+  }
+
+  .systemsketch-workspace-browser {
+    grid-template-columns: 1fr;
+  }
+
+  .systemsketch-workspace-browser > aside {
+    display: none;
+  }
+
+  .systemsketch-workspace-alert {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

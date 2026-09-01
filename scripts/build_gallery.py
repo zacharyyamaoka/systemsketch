@@ -84,8 +84,16 @@ def main() -> None:
     <article class="proof"><div class="n">0</div><h3>Browser errors</h3><p>Stable and Preview were exercised in the rendered app; warning/error logs were empty.</p></article>
     <article class="proof"><div class="n">1→1</div><h3>Persistence</h3><p>A physical rectangle drag produced one shape; reload and release restart retained that same shape.</p></article>
     <article class="proof"><div class="n">HMR</div><h3>Live mutation proven</h3><p>The open Preview received a temporary source-string mutation without reload, then received its revert.</p></article>
-    <article class="proof"><div class="n">SHA</div><h3>Icon exactness</h3><p>The repo and installed icon byte-match the requested black source image.</p></article>
+    <article class="proof"><div class="n">SHA</div><h3>Icon exactness</h3><p>The repo and installed icon byte-match the requested black source image; exact-name legacy variants are now removed before the icon-theme cache is rebuilt.</p></article>
     <article class="proof"><div class="n">A/B</div><h3>Stable stayed still</h3><p>Publishing advanced the pointer while the running Stable process continued serving its old build until a clean restart.</p></article>
+  </section>
+
+  <section id="dock-icon-repair"><h2>Dock icon lookup repaired · September 1</h2><p class="sub">The asset was correct; the desktop theme was resolving a higher-priority stale variant.</p>
+    <div class="flow">
+      <div class="node"><b><span class="dot amber"></span>Legacy scalable SVG</b><small>The old purple pencil icon shared the <code>systemsketch</code> name and outranked the installed PNG.</small></div><div class="arrow">→</div>
+      <div class="node"><b>Installer cleanup</b><small>Remove exact-name PNG, SVG, and XPM alternatives everywhere except the canonical 512px path, then rebuild caches.</small></div><div class="arrow">→</div>
+      <div class="node"><b><span class="dot green"></span>Canonical black mark</b><small>GTK now resolves <code>systemsketch</code> to <code>512x512/apps/systemsketch.png</code>; the installed bytes match the asset above.</small></div>
+    </div>
   </section>
 
   <section><h2>The deliberate boundary</h2><div class="boundary">
@@ -93,7 +101,7 @@ def main() -> None:
     <div class="list"><h3>Not smuggled into the baseline</h3><ul><li>Excalidraw-shaped chrome</li><li>Custom SystemSketch blocks or bindings</li><li>IcePanel drafts and versions</li><li>File-backed <code>.systemsketch</code> documents</li><li>Any pyblocks runtime or UI code</li></ul></div>
   </div></section>
 
-  <footer>Code map: <a href="../src/App.tsx">stock boundary</a> · <a href="../src/UpdatePill.tsx">update pill</a> · <a href="../scripts/release_lib.py">immutable releases</a> · <a href="../scripts/launch_systemsketch.py">desktop launcher</a> · <a href="../README.md">project README</a></footer>
+  <footer>Code map: <a href="../src/App.tsx">stock boundary</a> · <a href="../scripts/install_desktop.py">desktop icon installer</a> · <a href="../scripts/release_lib.py">immutable releases</a> · <a href="../scripts/launch_systemsketch.py">desktop launcher</a> · <a href="../README.md">project README</a></footer>
 </main></body></html>"""
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(report, encoding="utf-8")

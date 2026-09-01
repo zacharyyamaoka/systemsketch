@@ -8,6 +8,15 @@
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "test:python": "python3 -m unittest discover -s tests -v",
+    "test:context-menu": "node tests/block_context_menu_smoke.mjs",
+    "test:click-to-edit": "node tests/block_click_to_edit_smoke.mjs",
+    "test:fields": "node tests/inspector_live_commit_smoke.mjs",
+    "test:batch": "node tests/block_batch_editing_smoke.mjs",
+    "test:ports": "node tests/block_port_in_window_smoke.mjs",
+    "test:release-ui": "node tests/release_channel_controls_smoke.mjs",
+    "test:selection-menu": "node tests/selection_menu_smoke.mjs",
+    "test:edges": "node tests/block_edges_acceptance.mjs",
+    "test:edge-editor": "node tests/block_edge_editor_smoke.mjs",
     "check": "tsc -b && vitest run && python3 -m unittest discover -s tests -v",
     "release:candidate": "python3 scripts/release.py candidate",
     "release:promote": "python3 scripts/release.py promote",
@@ -20,6 +29,7 @@
     "desktop:stop": "python3 scripts/launch_systemsketch.py --stop --all"
   },
   "dependencies": {
+    "lucide-react": "1.33.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "tldraw": "5.3.2"

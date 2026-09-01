@@ -1,0 +1,1103 @@
+.systemsketch-utilities {
+  position: absolute;
+  z-index: var(--tl-layer-panels);
+  inset: 0;
+  pointer-events: none;
+}
+
+.systemsketch-utility-strip {
+  position: absolute;
+  right: var(--tl-space-2);
+  bottom: var(--tl-space-2);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: max-content;
+  min-height: 44px;
+  padding: 0;
+  overflow: visible;
+  border: 1px solid rgb(15 23 42 / 12%);
+  border-radius: 11px;
+  background: rgb(255 255 255 / 96%);
+  box-shadow: 0 2px 6px rgb(15 23 42 / 8%), 0 10px 30px rgb(15 23 42 / 12%);
+  backdrop-filter: blur(16px);
+  pointer-events: auto;
+}
+
+.systemsketch-utility-strip .tlui-button {
+  position: relative;
+  display: grid;
+  width: 45px;
+  min-width: 45px;
+  height: 42px;
+  min-height: 42px;
+  place-items: center;
+  margin: 0;
+  border: 0;
+  border-left: 1px solid #eceef2;
+  border-radius: 0;
+  color: #252930;
+  background: transparent;
+}
+
+.systemsketch-utility-strip .tlui-button:first-child {
+  border-left: 0;
+  border-radius: 10px 0 0 10px;
+}
+
+.systemsketch-utility-strip .tlui-button:last-child {
+  border-radius: 0 10px 10px 0;
+}
+
+.systemsketch-utility-strip .tlui-button:hover,
+.systemsketch-utility-strip .tlui-button[data-isactive='true'],
+.systemsketch-utility-strip .tlui-button[aria-expanded='true'] {
+  color: #4057dc;
+  background: #eef1ff;
+}
+
+.systemsketch-utility-strip .tlui-button:focus-visible,
+.systemsketch-dev-panel button:focus-visible,
+.systemsketch-help-panel button:focus-visible,
+.systemsketch-board-panel button:focus-visible,
+.systemsketch-preview-mode button:focus-visible {
+  z-index: 1;
+  outline: 2px solid #536dfe;
+  outline-offset: -2px;
+}
+
+.systemsketch-utility-strip .tlui-zoom-menu__button {
+  width: 59px;
+  min-width: 59px;
+  color: #20242b;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.systemsketch-utility-icon {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.systemsketch-help-trigger,
+.systemsketch-dev-trigger {
+  overflow: visible;
+}
+
+.systemsketch-dev-icon {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.55;
+}
+
+.systemsketch-preview-indicator {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid #fff;
+  border-radius: 50%;
+  background: #18a957;
+  box-shadow: 0 0 0 1px rgb(24 169 87 / 8%);
+}
+
+.systemsketch-dev-panel,
+.systemsketch-help-panel,
+.systemsketch-board-panel {
+  position: absolute;
+  right: var(--tl-space-2);
+  box-sizing: border-box;
+  border: 1px solid rgb(15 23 42 / 12%);
+  background: rgb(255 255 255 / 98%);
+  box-shadow: 0 20px 55px rgb(15 23 42 / 18%), 0 2px 8px rgb(15 23 42 / 8%);
+  backdrop-filter: blur(18px);
+  pointer-events: auto;
+  animation: systemsketch-panel-enter 130ms ease-out;
+}
+
+@keyframes systemsketch-panel-enter {
+  from { opacity: 0; transform: translateY(4px) scale(.992); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.systemsketch-dev-panel,
+.systemsketch-help-panel {
+  bottom: 62px;
+  max-height: calc(100vh - 76px);
+  padding: 13px;
+  overflow-y: auto;
+  border-radius: 14px;
+  color: #242931;
+}
+
+.systemsketch-dev-panel {
+  width: min(390px, calc(100vw - 16px));
+}
+
+.systemsketch-help-panel {
+  width: min(340px, calc(100vw - 16px));
+}
+
+.systemsketch-panel-header,
+.systemsketch-board-panel header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.systemsketch-panel-header > div > span,
+.systemsketch-board-panel header > div > span {
+  display: block;
+  color: #7a828c;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.systemsketch-panel-header h2,
+.systemsketch-board-panel header h2 {
+  margin: 2px 0 0;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.systemsketch-panel-header > button,
+.systemsketch-board-panel header > button {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  color: #5e6670;
+  background: #f1f3f5;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.systemsketch-preview-mode {
+  position: absolute;
+  top: var(--tl-space-2);
+  left: 50%;
+  display: grid;
+  min-height: 38px;
+  max-width: calc(100vw - 24px);
+  align-content: center;
+  padding: 4px 5px 4px 12px;
+  border: 1px solid #c9ceff;
+  border-radius: 11px;
+  color: #333c65;
+  background: rgb(249 249 255 / 97%);
+  box-shadow: 0 3px 10px rgb(29 38 91 / 10%), 0 12px 32px rgb(29 38 91 / 10%);
+  backdrop-filter: blur(18px);
+  pointer-events: auto;
+  transform: translateX(-50%);
+  animation: systemsketch-preview-mode-enter 180ms ease-out;
+}
+
+.systemsketch-preview-mode__row {
+  display: flex;
+  min-height: 30px;
+  align-items: center;
+  gap: 9px;
+}
+
+.systemsketch-preview-mode__error {
+  margin: 1px 6px 4px 0;
+  color: #9a2530;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+@keyframes systemsketch-preview-mode-enter {
+  from { opacity: 0; transform: translate(-50%, -5px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.systemsketch-preview-mode__badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #4256df;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.systemsketch-preview-mode__badge i,
+.systemsketch-preview-spotlight__eyebrow i,
+.systemsketch-release-details__automatic i {
+  display: block;
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.systemsketch-preview-mode__detail {
+  color: #656d85;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.systemsketch-preview-mode__actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.systemsketch-dev-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.systemsketch-preview-mode button,
+.systemsketch-dev-actions button {
+  min-height: 28px;
+  padding: 0 11px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.systemsketch-dev-actions button {
+  min-height: 32px;
+  flex: 1 1 auto;
+  padding: 0 8px;
+}
+
+.systemsketch-dev-actions [data-action='make-stable'] {
+  flex: 1.3 1 auto;
+}
+
+/* Returning is the quiet way out; making Stable is the committing action. */
+.systemsketch-preview-mode [data-emphasis='secondary'],
+.systemsketch-dev-actions [data-emphasis='secondary'] {
+  border-color: #c8cde6;
+  color: #3d4667;
+  background: #fff;
+}
+
+.systemsketch-preview-mode [data-emphasis='secondary']:hover:not(:disabled),
+.systemsketch-dev-actions [data-emphasis='secondary']:hover:not(:disabled) {
+  border-color: #a9b1d8;
+  background: #f2f3fb;
+}
+
+.systemsketch-preview-mode [data-emphasis='primary'],
+.systemsketch-dev-actions [data-emphasis='primary'],
+.systemsketch-preview-mode [data-action='make-stable'],
+.systemsketch-dev-actions [data-action='make-stable'] {
+  color: #fff;
+  background: #4458df;
+}
+
+.systemsketch-preview-mode [data-emphasis='primary']:hover:not(:disabled),
+.systemsketch-dev-actions [data-emphasis='primary']:hover:not(:disabled),
+.systemsketch-preview-mode [data-action='make-stable']:hover:not(:disabled),
+.systemsketch-dev-actions [data-action='make-stable']:hover:not(:disabled) {
+  background: #3548cb;
+}
+
+/* Armed states the consequence in its own colour before the build starts. */
+.systemsketch-preview-mode [data-phase='armed'],
+.systemsketch-dev-actions [data-phase='armed'],
+.systemsketch-preview-mode [data-phase='armed']:hover:not(:disabled),
+.systemsketch-dev-actions [data-phase='armed']:hover:not(:disabled) {
+  background: #b4531a;
+  box-shadow: 0 0 0 3px rgb(180 83 26 / 20%);
+}
+
+.systemsketch-preview-mode [data-phase='published'],
+.systemsketch-dev-actions [data-phase='published'] {
+  border-color: #b9e2c6;
+  color: #1f6b3c;
+  background: #e8f7ed;
+}
+
+.systemsketch-preview-mode button:disabled,
+.systemsketch-dev-actions button:disabled {
+  cursor: default;
+  opacity: .55;
+}
+
+.systemsketch-preview-mode [data-phase='published']:disabled,
+.systemsketch-dev-actions [data-phase='published']:disabled {
+  opacity: 1;
+}
+
+.systemsketch-panel-message {
+  margin-top: 12px;
+  margin-bottom: 0;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: #31523b;
+  background: #e8f7ed;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.systemsketch-panel-message--error {
+  color: #842029;
+  background: #ffebed;
+}
+
+.systemsketch-preview-spotlight {
+  margin-top: 12px;
+  padding: 15px;
+  border: 1px solid #aab5ff;
+  border-radius: 12px;
+  color: #19234e;
+  background: linear-gradient(145deg, #f5f6ff, #edf0ff);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 42%);
+}
+
+.systemsketch-preview-spotlight__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #4057dc;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.systemsketch-preview-spotlight h3 {
+  margin: 8px 0 0;
+  font-size: 21px;
+  line-height: 1.15;
+}
+
+.systemsketch-preview-spotlight > p {
+  margin: 6px 0 0;
+  color: #4f5b85;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.systemsketch-preview-spotlight__primary {
+  width: 100%;
+  min-height: 40px;
+  margin-top: 13px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 9px;
+  color: #fff;
+  background: #4458df;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.systemsketch-preview-spotlight__primary:hover:not(:disabled) {
+  background: #3548cb;
+}
+
+.systemsketch-preview-spotlight__primary:disabled {
+  cursor: default;
+  opacity: .55;
+}
+
+.systemsketch-preview-spotlight__links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.systemsketch-preview-spotlight__links button {
+  padding: 3px 0;
+  border: 0;
+  color: #56618c;
+  background: transparent;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.systemsketch-preview-spotlight__links button:hover {
+  color: #3148d4;
+  text-decoration: underline;
+}
+
+.systemsketch-version-row {
+  border-top: 1px solid #eceef2;
+  border-radius: 0;
+}
+
+.systemsketch-version-row__status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #8a919a;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.systemsketch-version-row__status b {
+  color: #a1a7af;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+  transition: transform 120ms ease;
+}
+
+.systemsketch-version-row[aria-expanded='true'] .systemsketch-version-row__status b {
+  transform: rotate(90deg);
+}
+
+.systemsketch-release-details {
+  padding: 11px;
+  border: 1px solid #e3e6ea;
+  border-radius: 10px;
+  background: #f5f6f8;
+}
+
+.systemsketch-release-details__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.systemsketch-release-details__heading span {
+  display: block;
+  color: #6f7781;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.systemsketch-release-details__heading h3 {
+  margin: 2px 0 0;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.systemsketch-release-details__heading code {
+  padding: 4px 6px;
+  border-radius: 6px;
+  color: #626b76;
+  background: #e7e9ed;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.systemsketch-release-details__freshness {
+  margin: 9px 0;
+  color: #4f5761;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.systemsketch-release-details__facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 0;
+}
+
+.systemsketch-release-details__facts div,
+.systemsketch-release-details__changes {
+  padding: 8px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.systemsketch-release-details__facts dt {
+  color: #7a828c;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.systemsketch-release-details__facts dd {
+  margin: 3px 0 0;
+  color: #343a40;
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.systemsketch-release-details__changes {
+  margin-top: 7px;
+  color: #59616b;
+  font-size: 10px;
+}
+
+.systemsketch-release-details__changes > span {
+  color: #4e5660;
+  font-weight: 750;
+}
+
+.systemsketch-release-details__changes ul {
+  margin: 4px 0 0;
+  padding-left: 15px;
+  line-height: 1.4;
+}
+
+.systemsketch-release-details__actions {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.systemsketch-release-details__actions:empty {
+  display: none;
+}
+
+.systemsketch-release-details__actions button {
+  min-height: 32px;
+  padding: 6px 9px;
+  border: 1px solid #d7dae0;
+  border-radius: 8px;
+  color: #30363d;
+  background: #fff;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.systemsketch-release-details__actions button:hover:not(:disabled) {
+  background: #f7f8f9;
+}
+
+.systemsketch-release-details__actions button:disabled {
+  cursor: default;
+  opacity: .5;
+}
+
+.systemsketch-release-details__actions .primary {
+  border-color: #252a31;
+  color: #fff;
+  background: #252a31;
+}
+
+.systemsketch-release-details__actions .primary:hover:not(:disabled) {
+  background: #11151a;
+}
+
+.systemsketch-release-details__automatic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 9px 0 0;
+  color: #818994;
+  font-size: 9px;
+}
+
+.systemsketch-release-details__automatic i {
+  color: #18a957;
+}
+
+.systemsketch-help-row {
+  display: flex;
+  width: 100%;
+  min-height: 38px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 8px;
+  color: #343a40;
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+  text-align: left;
+}
+
+.systemsketch-help-row:hover {
+  background: #f3f4f6;
+}
+
+.systemsketch-help-row kbd {
+  color: #858c95;
+  font: 600 9px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.systemsketch-help-intro {
+  margin: 12px 6px 4px;
+  color: #69717b;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.systemsketch-dev-stable {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 0 11px;
+  border: 1px solid #e3e6ea;
+  border-radius: 10px;
+  background: #f7f8f9;
+}
+
+.systemsketch-dev-stable > span,
+.systemsketch-dev-preset > span,
+.systemsketch-dev-latest > span:not(.systemsketch-dev-latest__glyph) {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  text-align: left;
+}
+
+.systemsketch-dev-stable b,
+.systemsketch-dev-preset b,
+.systemsketch-dev-latest b {
+  color: #242931;
+  font-size: 11px;
+  font-style: normal;
+  line-height: 1.2;
+}
+
+.systemsketch-dev-stable small,
+.systemsketch-dev-preset small,
+.systemsketch-dev-latest em {
+  overflow: hidden;
+  color: #7a828c;
+  font-size: 9px;
+  font-style: normal;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-dev-stable > em {
+  color: #27854d;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.systemsketch-dev-stable > button {
+  padding: 5px 8px;
+  border: 1px solid #d9dce1;
+  border-radius: 7px;
+  color: #46505c;
+  background: #fff;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.systemsketch-dev-latest {
+  display: grid;
+  width: 100%;
+  min-height: 76px;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: 9px;
+  padding: 10px;
+  border: 1px solid #aab5ff;
+  border-radius: 11px;
+  color: #19234e;
+  background: linear-gradient(145deg, #f5f6ff, #edf0ff);
+  cursor: pointer;
+}
+
+.systemsketch-dev-latest:hover:not(:disabled):not([data-current]) {
+  border-color: #7f8fff;
+  background: linear-gradient(145deg, #f1f3ff, #e7ebff);
+}
+
+/* Already here: state, not an offer — no gradient, no pointer, no glow. */
+.systemsketch-dev-latest[data-current] {
+  min-height: 64px;
+  border-color: #e3e6ea;
+  color: #242931;
+  background: #f7f8f9;
+  cursor: default;
+}
+
+.systemsketch-dev-latest[data-current] .systemsketch-dev-latest__glyph {
+  color: #4d57a2;
+  background: #edf0ff;
+}
+
+.systemsketch-dev-latest[data-current] span > small {
+  color: #8a919b;
+}
+
+.systemsketch-dev-latest[data-current] > strong {
+  color: #27854d;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.systemsketch-dev-latest:disabled,
+.systemsketch-dev-preset:disabled,
+.systemsketch-dev-stable > button:disabled {
+  cursor: default;
+  opacity: .58;
+}
+
+.systemsketch-dev-latest__glyph {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 9px;
+  color: #fff;
+  background: #4458df;
+  font-size: 18px;
+  font-weight: 750;
+}
+
+.systemsketch-dev-latest span > small {
+  color: #4057dc;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.systemsketch-dev-latest > strong {
+  color: #5367df;
+  font-size: 10px;
+}
+
+.systemsketch-dev-section-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 14px 3px 6px;
+  color: #737b85;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.systemsketch-dev-section-label small {
+  color: #a0a6ae;
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: .04em;
+}
+
+.systemsketch-dev-presets {
+  display: grid;
+  gap: 5px;
+}
+
+.systemsketch-dev-preset {
+  display: grid;
+  width: 100%;
+  min-height: 54px;
+  grid-template-columns: 31px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: #3e4650;
+  background: transparent;
+  cursor: pointer;
+}
+
+.systemsketch-dev-preset:hover:not(:disabled) {
+  border-color: #e1e4e8;
+  background: #f5f6f8;
+}
+
+.systemsketch-dev-preset > i {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  place-items: center;
+  border-radius: 8px;
+  color: #4d57a2;
+  background: #edf0ff;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.systemsketch-dev-preset > em {
+  color: #7580cb;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 750;
+}
+
+.systemsketch-dev-panel .systemsketch-version-row {
+  margin-top: 11px;
+}
+
+.systemsketch-dev-footer {
+  margin: 10px 4px 0;
+  color: #989fa8;
+  font-size: 8px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.systemsketch-board-panel {
+  top: var(--tl-space-2);
+  bottom: 62px;
+  width: min(360px, calc(100vw - 16px));
+  padding: 16px;
+  border-radius: 14px;
+  color: #242931;
+}
+
+.systemsketch-board-panel__empty {
+  display: grid;
+  height: calc(100% - 48px);
+  place-content: center;
+  justify-items: center;
+  padding: 22px;
+  color: #7a828c;
+  text-align: center;
+}
+
+.systemsketch-board-panel__empty svg {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+  fill: none;
+  stroke: #777f89;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.systemsketch-board-panel__empty strong {
+  color: #3d434b;
+  font-size: 13px;
+}
+
+.systemsketch-board-panel__empty p {
+  max-width: 220px;
+  margin: 5px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .systemsketch-utility-strip,
+  .systemsketch-dev-panel,
+  .systemsketch-help-panel,
+  .systemsketch-board-panel {
+    right: 8px;
+  }
+
+  .systemsketch-utility-strip {
+    bottom: 8px;
+  }
+
+  .systemsketch-dev-panel,
+  .systemsketch-help-panel,
+  .systemsketch-board-panel {
+    width: calc(100vw - 16px);
+  }
+
+  .systemsketch-board-panel {
+    top: 8px;
+    bottom: 60px;
+  }
+
+  .systemsketch-preview-mode {
+    top: 8px;
+    max-width: calc(100vw - 16px);
+  }
+
+  .systemsketch-preview-mode__detail {
+    display: none;
+  }
+
+  .systemsketch-dev-actions {
+    flex-wrap: wrap;
+  }
+}
+
+.tl-theme__dark .systemsketch-utility-strip,
+.tl-theme__dark .systemsketch-dev-panel,
+.tl-theme__dark .systemsketch-help-panel,
+.tl-theme__dark .systemsketch-board-panel {
+  border-color: rgb(255 255 255 / 12%);
+  color: #eceef1;
+  background: rgb(35 37 40 / 96%);
+}
+
+.tl-theme__dark .systemsketch-utility-strip .tlui-button {
+  border-left-color: #40444a;
+  color: #e7e9ec;
+}
+
+.tl-theme__dark .systemsketch-utility-strip .tlui-button:hover,
+.tl-theme__dark .systemsketch-utility-strip .tlui-button[data-isactive='true'],
+.tl-theme__dark .systemsketch-utility-strip .tlui-button[aria-expanded='true'] {
+  color: #fff;
+  background: #454a55;
+}
+
+.tl-theme__dark .systemsketch-panel-header > button,
+.tl-theme__dark .systemsketch-board-panel header > button,
+.tl-theme__dark .systemsketch-help-row:hover {
+  color: #e7e9ec;
+  background: #2d3034;
+}
+
+.tl-theme__dark .systemsketch-preview-mode {
+  border-color: #555f9c;
+  color: #e6e8ff;
+  background: rgb(39 42 57 / 97%);
+}
+
+.tl-theme__dark .systemsketch-preview-mode__badge {
+  color: #9eabff;
+}
+
+.tl-theme__dark .systemsketch-preview-mode__detail {
+  color: #b8bed8;
+}
+
+.tl-theme__dark .systemsketch-preview-mode__error {
+  color: #ff9ba4;
+}
+
+.tl-theme__dark .systemsketch-preview-mode [data-emphasis='secondary'],
+.tl-theme__dark .systemsketch-dev-actions [data-emphasis='secondary'] {
+  border-color: #545a75;
+  color: #dfe3f5;
+  background: #343850;
+}
+
+.tl-theme__dark .systemsketch-preview-mode [data-emphasis='secondary']:hover:not(:disabled),
+.tl-theme__dark .systemsketch-dev-actions [data-emphasis='secondary']:hover:not(:disabled) {
+  border-color: #6b7395;
+  background: #3d4260;
+}
+
+.tl-theme__dark .systemsketch-preview-mode [data-phase='published'],
+.tl-theme__dark .systemsketch-dev-actions [data-phase='published'] {
+  border-color: #2f6a45;
+  color: #a8e8c1;
+  background: #233a2c;
+}
+
+.tl-theme__dark .systemsketch-dev-latest[data-current] {
+  border-color: #41464d;
+  color: #eff1f4;
+  background: #2d3034;
+}
+
+.tl-theme__dark .systemsketch-dev-latest[data-current] .systemsketch-dev-latest__glyph {
+  color: #cbd1ff;
+  background: #3d435f;
+}
+
+.tl-theme__dark .systemsketch-dev-latest[data-current] span > small {
+  color: #adb3bc;
+}
+
+.tl-theme__dark .systemsketch-dev-latest[data-current] > strong {
+  color: #6fce97;
+}
+
+.tl-theme__dark .systemsketch-preview-spotlight {
+  border-color: #5967bc;
+  color: #f0f2ff;
+  background: linear-gradient(145deg, #30364f, #292e45);
+}
+
+.tl-theme__dark .systemsketch-preview-spotlight > p,
+.tl-theme__dark .systemsketch-preview-spotlight__links button {
+  color: #c2c8e9;
+}
+
+.tl-theme__dark .systemsketch-version-row {
+  border-top-color: #3f4349;
+}
+
+.tl-theme__dark .systemsketch-release-details {
+  border-color: #41464d;
+  background: #2d3034;
+}
+
+.tl-theme__dark .systemsketch-release-details__heading code,
+.tl-theme__dark .systemsketch-release-details__facts div,
+.tl-theme__dark .systemsketch-release-details__changes {
+  color: #d7dae0;
+  background: #383b40;
+}
+
+.tl-theme__dark .systemsketch-release-details__freshness,
+.tl-theme__dark .systemsketch-release-details__facts dd,
+.tl-theme__dark .systemsketch-release-details__changes,
+.tl-theme__dark .systemsketch-release-details__changes > span,
+.tl-theme__dark .systemsketch-help-row,
+.tl-theme__dark .systemsketch-board-panel__empty strong {
+  color: #d7dae0;
+}
+
+.tl-theme__dark .systemsketch-help-intro,
+.tl-theme__dark .systemsketch-dev-stable small,
+.tl-theme__dark .systemsketch-dev-preset small,
+.tl-theme__dark .systemsketch-dev-latest em {
+  color: #adb3bc;
+}
+
+.tl-theme__dark .systemsketch-dev-stable,
+.tl-theme__dark .systemsketch-dev-preset:hover:not(:disabled) {
+  border-color: #41464d;
+  background: #2d3034;
+}
+
+.tl-theme__dark .systemsketch-dev-stable b,
+.tl-theme__dark .systemsketch-dev-preset b,
+.tl-theme__dark .systemsketch-dev-latest b {
+  color: #eff1f4;
+}
+
+.tl-theme__dark .systemsketch-dev-latest {
+  border-color: #5967bc;
+  color: #f0f2ff;
+  background: linear-gradient(145deg, #30364f, #292e45);
+}
+
+.tl-theme__dark .systemsketch-dev-preset > i {
+  color: #cbd1ff;
+  background: #3d435f;
+}
+
+.tl-theme__dark .systemsketch-release-details__actions button {
+  border-color: #4b5057;
+  color: #e7e9ec;
+  background: #30343a;
+}
+
+.tl-theme__dark .systemsketch-release-details__actions .primary {
+  border-color: #f1f3f5;
+  color: #202328;
+  background: #f1f3f5;
+}

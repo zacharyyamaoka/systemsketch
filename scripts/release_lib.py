@@ -19,6 +19,11 @@ from pathlib import Path
 PRODUCT = "systemsketch"
 CHANNELS_SCHEMA_VERSION = 1
 MANIFEST_SCHEMA_VERSION = 1
+CONTROLLER_RUNTIME_FILES = (
+    "release_lib.py",
+    "server.py",
+    "workspace_store.py",
+)
 
 
 class ReleaseError(RuntimeError):
@@ -181,11 +186,29 @@ def _hash_file(digest: "hashlib._Hash", root: Path, path: Path) -> None:
     digest.update(b"\0")
 
 
+def controller_fingerprint(scripts_dir: Path) -> str:
+    """Identify the Python API code loaded by one controller process."""
+    digest = hashlib.sha256()
+    for name in CONTROLLER_RUNTIME_FILES:
+        path = scripts_dir / name
+        digest.update(name.encode())
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()[:16]
+
+
 def release_build_id(project_root: Path, dist: Path) -> str:
     digest = hashlib.sha256()
     for path in sorted(path for path in dist.rglob("*") if path.is_file()):
         _hash_file(digest, dist, path)
-    for relative in ("scripts/server.py", "scripts/release_lib.py"):
+    for relative in (
+        "scripts/launch_systemsketch.py",
+        "scripts/release.py",
+        "scripts/release_lib.py",
+        "scripts/server.py",
+        "scripts/workspace_store.py",
+    ):
         path = project_root / relative
         digest.update(relative.encode())
         digest.update(b"\0")
@@ -200,7 +223,7 @@ def build_release(project_root: Path, release_home: Path, dist: Path) -> tuple[s
     dist = dist.resolve()
     if not (dist / "index.html").is_file():
         raise ReleaseError(f"{dist / 'index.html'} is missing")
-    for relative in ("scripts/server.py", "scripts/release_lib.py"):
+    for relative in ("scripts/server.py", "scripts/release_lib.py", "scripts/workspace_store.py"):
         if not (project_root / relative).is_file():
             raise ReleaseError(f"{project_root / relative} is missing")
 
@@ -218,6 +241,7 @@ def build_release(project_root: Path, release_home: Path, dist: Path) -> tuple[s
         runtime.mkdir()
         shutil.copy2(project_root / "scripts" / "server.py", runtime / "server.py")
         shutil.copy2(project_root / "scripts" / "release_lib.py", runtime / "release_lib.py")
+        shutil.copy2(project_root / "scripts" / "workspace_store.py", runtime / "workspace_store.py")
         manifest = {
             "product": PRODUCT,
             "schemaVersion": MANIFEST_SCHEMA_VERSION,
@@ -296,6 +320,7 @@ def install_controller(project_root: Path, release_home: Path) -> Path:
         "release.py": "release.py",
         "release_lib.py": "release_lib.py",
         "server.py": "server.py",
+        "workspace_store.py": "workspace_store.py",
     }
     for source_name, destination_name in mapping.items():
         source = project_root / "scripts" / source_name

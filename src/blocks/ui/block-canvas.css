@@ -1,0 +1,512 @@
+/*
+ * The pyblocks canvas face. Geometry is deliberately not authored here:
+ * layoutBlock supplies every text box, divider and port coordinate so paint,
+ * hit testing and bound connection endpoints cannot drift apart.
+ */
+
+.systemsketch-block-canvas.NodeShape {
+  --node-shadow-border:
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.04);
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: 9px;
+  background: var(--tl-color-panel, #fff);
+  box-shadow: var(--node-shadow-border);
+  color: var(--tl-color-text-1, #27272a);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  overflow: visible;
+}
+
+.systemsketch-block-canvas .BlockNode-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: inherit;
+}
+
+[data-state='select.idle'] .systemsketch-block-canvas [data-pb-inline-field],
+[data-state='select.editing_shape'] .systemsketch-block-canvas [data-pb-inline-field] {
+  pointer-events: all;
+  cursor: text;
+}
+
+.systemsketch-block-canvas [data-pb-inline-field='{"kind":"icon"}'] {
+  cursor: pointer;
+}
+
+.systemsketch-block-canvas .BlockNode-inlineEditor {
+  position: absolute;
+  z-index: 12;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 3px 7px;
+  pointer-events: all;
+  border: 2px solid var(--tl-color-selected, #4f7df3);
+  border-radius: 6px;
+  outline: none;
+  background: var(--tl-color-panel, #fff);
+  color: var(--tl-color-text-1, #27272a);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.2;
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--tl-color-panel, #fff) 88%, transparent),
+    0 5px 18px rgba(15, 23, 42, 0.16);
+  transform-origin: center;
+}
+
+.systemsketch-block-canvas .BlockNode-inlineEditor--title,
+.systemsketch-block-canvas .BlockNode-inlineEditor--portName,
+.systemsketch-block-canvas .BlockNode-inlineEditor--portType,
+.systemsketch-block-canvas .BlockNode-inlineEditor--blockType {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.systemsketch-block-canvas .BlockNode-inlineEditor--title,
+.systemsketch-block-canvas .BlockNode-inlineEditor--portType {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.systemsketch-block-canvas .BlockNode-inlineEditor--description {
+  resize: none;
+  overflow: auto;
+}
+
+/* Port and Expanded share the old white heading band. Expanded still names
+ * the semantic type; the renderer never substitutes a literal "EXPANDED". */
+.systemsketch-block-canvas .NodeShape-heading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--tl-color-divider, rgba(0, 0, 0, 0.12));
+  border-radius: 9px 9px 0 0;
+  background: var(--tl-color-panel, #fff);
+}
+
+.systemsketch-block-canvas .BlockNode-heading {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.systemsketch-block-canvas .BlockNode-headingIcon {
+  flex: 0 0 auto;
+  display: flex;
+  color: var(--tl-color-text-3, #3f3f46);
+}
+
+.systemsketch-block-canvas .BlockNode-headingTitle {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--tl-color-text-1, #27272a);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 40px;
+  letter-spacing: -0.02em;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-block-canvas .BlockNode-headingType {
+  flex: 0 0 auto;
+  max-width: 35%;
+  overflow: hidden;
+  color: var(--tl-color-text-3, #a1a1aa);
+  font-size: 18px;
+  line-height: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Simple is the old IcePanel face: icon and XL title form one centred group,
+ * with description below and the semantic type in the card's lower band. */
+.systemsketch-block-canvas .BlockNode-simpleTitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  overflow: hidden;
+  color: #27272a;
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 50px;
+}
+
+.systemsketch-block-canvas .BlockNode-simpleTitleText {
+  min-width: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.systemsketch-block-canvas .BlockNode-simpleIcon {
+  flex: 0 0 auto;
+  display: flex;
+  color: #3f3f46;
+}
+
+.systemsketch-block-canvas .BlockNode-simpleDescription {
+  overflow: hidden;
+  color: #71717a;
+  font-size: 18px;
+  line-height: 24px;
+  text-align: center;
+}
+
+.systemsketch-block-canvas .BlockNode-simpleType {
+  overflow: hidden;
+  color: #a1a1aa;
+  font-size: 18px;
+  line-height: 24px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-block-canvas .BlockNode-description {
+  overflow: hidden;
+  color: #71717a;
+  font-size: 11px;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The burger grammar is lines only. Full rules split async groups; right-half
+ * rules split conditional branches. There is no invented Expanded inset. */
+.systemsketch-block-canvas .BlockNode-divider {
+  position: absolute;
+  height: 0;
+  border-top: 1px solid var(--tl-color-divider, rgba(0, 0, 0, 0.12));
+}
+
+.systemsketch-block-canvas .BlockNode-dividerHandle {
+  position: absolute;
+  z-index: 2;
+  height: 9px;
+  pointer-events: none;
+  cursor: ns-resize;
+}
+
+[data-state='select.idle'] .systemsketch-block-canvas .BlockNode-dividerHandle {
+  pointer-events: all;
+}
+
+.systemsketch-block-canvas .BlockNode-dividerHandle::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 3px;
+  height: 3px;
+  border-radius: 2px;
+  background: transparent;
+}
+
+.systemsketch-block-canvas .BlockNode-dividerHandle:hover::after {
+  background: var(--tl-color-selected, #3b82f6);
+  opacity: 0.35;
+}
+
+.systemsketch-block-canvas .BlockNode-portLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.systemsketch-block-canvas .BlockNode-portLabel--out {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.systemsketch-block-canvas .BlockNode-portName {
+  overflow: hidden;
+  color: var(--tl-color-text-1, #3f3f46);
+  font-size: 18px;
+  line-height: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-block-canvas .BlockNode-portType {
+  overflow: hidden;
+  color: var(--tl-color-text-3, #a1a1aa);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 18px;
+  line-height: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-block-canvas .BlockNode-portDefault {
+  flex: 0 0 auto;
+  max-width: 88px;
+  padding: 0 7px;
+  overflow: hidden;
+  border: 1px solid var(--tl-color-divider, #e4e4e7);
+  border-radius: 999px;
+  background: var(--tl-color-muted-2, #f4f4f5);
+  color: var(--tl-color-text-2, #71717a);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portDefault,
+html[data-pb-defaultmark='off'] .systemsketch-block-canvas .BlockNode-portDefault {
+  display: none;
+}
+
+html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portName--default {
+  text-decoration: underline dotted var(--tl-color-text-3, #a1a1aa) 1.5px;
+  text-underline-offset: 3px;
+}
+
+/* The 12px pyblocks dot: hollow while unwired, neutral-filled when it owns a
+ * default, type-filled once a cable lands. Its 28px pseudo hit halo restores
+ * the donor's forgiving connection gesture without changing layout geometry. */
+.systemsketch-block-canvas .Port {
+  position: absolute;
+  z-index: 4;
+  width: 12px;
+  height: 12px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  pointer-events: none;
+  background: var(--tl-color-panel, #fff);
+  box-shadow:
+    0 0 0 2px var(--tl-color-panel, #fff),
+    0 0 0 3px var(--port-color, rgba(0, 0, 0, 0.15));
+  transform: translate(-50%, -50%);
+  transition: transform 50ms ease-in-out;
+}
+
+.systemsketch-block-canvas .Port::before {
+  content: '';
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+}
+
+.systemsketch-block-canvas .Port.Port_default:not(.Port_connected) {
+  background: var(--tl-color-text-3, #a1a1aa);
+}
+
+.systemsketch-block-canvas .Port.Port_connected {
+  background: var(--port-color, var(--tl-color-text-3, #71717a));
+}
+
+[data-state='select.idle'] .systemsketch-block-canvas .Port,
+[data-state^='arrow'] .systemsketch-block-canvas .Port {
+  pointer-events: all;
+  cursor: crosshair;
+}
+
+/* While a cable is in flight, every port it could legally land on says so, and
+ * the one under the pointer says so louder. Without this the only feedback for
+ * an illegal drop is that nothing happens, which is indistinguishable from a
+ * missed target. A boundary dot lights for EITHER of its faces — the dot is the
+ * port, and its inner face is a second identity at the same anchor. */
+.systemsketch-block-canvas .Port.Port_eligible {
+  opacity: 1;
+  box-shadow:
+    0 0 0 2px var(--tl-color-panel, #fff),
+    0 0 0 3px var(--port-color, rgba(0, 0, 0, 0.15)),
+    0 0 0 7px color-mix(in srgb, var(--port-color, #c08520) 26%, transparent);
+}
+
+.systemsketch-block-canvas .Port.Port_hinting {
+  opacity: 1;
+  background: var(--port-color, var(--tl-color-text-3, #71717a));
+  box-shadow:
+    0 0 0 2px var(--tl-color-panel, #fff),
+    0 0 0 4px var(--port-color, rgba(0, 0, 0, 0.15)),
+    0 0 0 9px color-mix(in srgb, var(--port-color, #c08520) 38%, transparent);
+  transform: translate(-50%, -50%) scale(1.18);
+}
+
+.systemsketch-block-canvas .Port.Port_subtle {
+  opacity: 0;
+  transition: opacity 120ms ease-in-out, transform 50ms ease-in-out;
+}
+
+.systemsketch-block-canvas:hover .Port.Port_subtle {
+  opacity: 1;
+}
+
+/* The table-borrowed end-of-list gutter. Each lane owns one strip and one
+ * bead; the strip is inset past the port dots' 40px hit halo so revealing the
+ * bead never takes a cable gesture away from the row above it. The wrapper is
+ * transparent to the pointer but still receives :hover from its own children,
+ * which is what lets the pointer travel from the strip onto the bead without
+ * the bead vanishing under it. */
+.systemsketch-block-canvas .BlockNode-portAdd {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.systemsketch-block-canvas .BlockNode-portAddZone {
+  position: absolute;
+  pointer-events: none;
+}
+
+[data-state='select.idle'] .systemsketch-block-canvas .BlockNode-portAddZone {
+  pointer-events: all;
+  cursor: copy;
+}
+
+.systemsketch-block-canvas .BlockNode-portAddBead {
+  position: absolute;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  background: var(--tl-color-selected, #4f7df3);
+  color: #fff;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--tl-color-selected, #4f7df3) 26%, transparent),
+    0 1px 3px rgba(15, 23, 42, 0.25);
+  transform: translate(-50%, -50%);
+  transition: opacity 90ms ease-in-out, transform 90ms ease-in-out;
+  cursor: pointer;
+}
+
+.systemsketch-block-canvas .BlockNode-portAddBead svg {
+  width: 12px;
+  height: 12px;
+}
+
+[data-state='select.idle'] .systemsketch-block-canvas .BlockNode-portAdd:hover .BlockNode-portAddBead {
+  opacity: 1;
+  pointer-events: all;
+}
+
+[data-state='select.idle'] .systemsketch-block-canvas .BlockNode-portAddBead:hover {
+  transform: translate(-50%, -50%) scale(1.12);
+}
+
+/* Press-and-hold reorder. Nothing is written to the document until the drop,
+ * so cables stay put while a row is in flight; these three rules are the whole
+ * of the in-flight feedback. */
+.systemsketch-block-canvas .Port.Port_dragging {
+  z-index: 7;
+  box-shadow:
+    0 0 0 2px var(--tl-color-panel, #fff),
+    0 0 0 3px var(--port-color, rgba(0, 0, 0, 0.15)),
+    0 0 0 7px color-mix(in srgb, var(--tl-color-selected, #4f7df3) 30%, transparent);
+}
+
+/* The held row is a card in flight. It has to be opaque: it passes straight
+ * over the rows it is being moved past, and two labels sharing one line is
+ * unreadable exactly when the user is deciding where to drop. */
+.systemsketch-block-canvas .BlockNode-portLabel--dragging {
+  z-index: 7;
+  border-radius: 6px;
+  background: var(--tl-color-panel, #fff);
+  color: var(--tl-color-selected, #4f7df3);
+  /* Shadow, not a ring: a blue-outlined box on this face already means "you
+   * are editing this text", and a row in flight is not that. */
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.22);
+}
+
+.systemsketch-block-canvas .BlockNode-portDropRule {
+  position: absolute;
+  z-index: 5;
+  height: 0;
+  border-top: 2px solid var(--tl-color-selected, #4f7df3);
+  pointer-events: none;
+}
+
+.systemsketch-block-canvas .BlockNode-portGrip {
+  position: absolute;
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 22px;
+  border-radius: 4px;
+  background: var(--tl-color-muted-2, #f4f4f5);
+  color: var(--tl-color-text-3, #a1a1aa);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+  pointer-events: none;
+}
+
+.systemsketch-block-canvas .BlockNode-portGrip--in {
+  transform: translate(calc(-100% - 14px), -50%);
+}
+
+.systemsketch-block-canvas .BlockNode-portGrip--out {
+  transform: translate(14px, -50%);
+}
+
+.systemsketch-block-canvas .BlockNode-portGrip svg {
+  width: 10px;
+  height: 14px;
+}
+
+/* Port and Expanded retain the old 46px action footer. Simple is chromeless:
+ * its type is positioned in the same lower band but no rule or kebab is drawn. */
+.systemsketch-block-canvas .NodeShape-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 4px 6px 12px;
+  border-top: 1px solid var(--tl-color-divider, rgba(0, 0, 0, 0.12));
+  border-radius: 0 0 9px 9px;
+  background: var(--tl-color-panel, #fff);
+  pointer-events: none;
+}
+
+.systemsketch-block-canvas .NodeFooterMenu {
+  margin-left: auto;
+  pointer-events: all;
+}
+
+.systemsketch-block-canvas .NodeFooterMenu-trigger {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  color: var(--tl-color-text-3, #71717a);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .systemsketch-block-canvas .Port,
+  .systemsketch-block-canvas .BlockNode-portAddBead {
+    transition: none;
+  }
+}

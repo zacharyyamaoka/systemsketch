@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -14,10 +15,12 @@ import time
 import urllib.error
 import urllib.request
 from pathlib import Path
+from urllib.parse import urlencode, urlparse, urlunparse
 
 from release_lib import (
     PRODUCT,
     ReleaseError,
+    controller_fingerprint,
     default_release_home,
     read_channels,
     read_manifest,
@@ -138,7 +141,16 @@ def ensure_stable(release_home: Path, state_home: Path) -> tuple[str, dict]:
     if current:
         if current.get("channel") != "stable":
             raise ReleaseError(f"port {STABLE_PORT} is occupied by another SystemSketch channel")
-        return f"http://127.0.0.1:{STABLE_PORT}/", current
+        if current.get("build") == channels.stable:
+            return f"http://127.0.0.1:{STABLE_PORT}/", current
+        pid_path = state_home / "stable" / "server.pid"
+        if read_pid(pid_path) is None:
+            raise ReleaseError(
+                f"Stable build {current.get('build')} is outdated but its server is not owned by this launcher"
+            )
+        stop_pid(pid_path)
+        if health(STABLE_PORT, timeout=0.4) is not None:
+            raise ReleaseError(f"outdated Stable server on port {STABLE_PORT} did not stop")
     if health(STABLE_PORT, timeout=0.2) is not None:
         raise ReleaseError(f"port {STABLE_PORT} is already occupied")
 
@@ -174,13 +186,33 @@ def ensure_stable(release_home: Path, state_home: Path) -> tuple[str, dict]:
 
 
 def ensure_preview(release_home: Path, state_home: Path) -> tuple[str, dict]:
+    source_root = source_root_from_channels(release_home)
+    expected_controller = controller_fingerprint(source_root / "scripts")
+    preview_state = state_home / "preview"
+    api_pid_path = preview_state / "api.pid"
+    vite_pid_path = preview_state / "vite.pid"
+
     current = health(PREVIEW_PORT)
     if current:
         if current.get("channel") != "preview":
             raise ReleaseError(f"port {PREVIEW_PORT} is occupied by another SystemSketch channel")
-        return f"http://127.0.0.1:{PREVIEW_PORT}/", current
+        if current.get("controllerFingerprint") == expected_controller:
+            return f"http://127.0.0.1:{PREVIEW_PORT}/", current
+        if read_pid(api_pid_path) is None or read_pid(vite_pid_path) is None:
+            raise ReleaseError(
+                "Preview is outdated but its API and Vite processes are not owned by this launcher"
+            )
+        stop_pid(vite_pid_path)
+        stop_pid(api_pid_path)
+        if health(PREVIEW_PORT, timeout=0.4) is not None:
+            raise ReleaseError(f"outdated Preview server on port {PREVIEW_PORT} did not stop")
+    else:
+        stop_pid(vite_pid_path)
+        stop_pid(api_pid_path)
 
-    source_root = source_root_from_channels(release_home)
+    if health(PREVIEW_PORT, timeout=0.2) is not None:
+        raise ReleaseError(f"port {PREVIEW_PORT} is already occupied")
+
     vite = source_root / "node_modules" / ".bin" / "vite"
     if not vite.is_file():
         raise ReleaseError(f"Preview requires `npm install` in {source_root}")
@@ -189,12 +221,6 @@ def ensure_preview(release_home: Path, state_home: Path) -> tuple[str, dict]:
     if fallback_build is None:
         raise ReleaseError("Preview requires at least one verified release")
     dist = release_root(release_home, fallback_build) / "dist"
-
-    preview_state = state_home / "preview"
-    api_pid_path = preview_state / "api.pid"
-    vite_pid_path = preview_state / "vite.pid"
-    stop_pid(api_pid_path)
-    stop_pid(vite_pid_path)
 
     api_pid = spawn_logged(
         [
@@ -248,7 +274,7 @@ def focus_existing(app_id: str) -> bool:
     if not xdotool or not os.environ.get("DISPLAY"):
         return False
     result = subprocess.run(
-        [xdotool, "search", "--class", app_id],
+        [xdotool, "search", "--onlyvisible", "--class", f"^{re.escape(app_id)}$"],
         check=False,
         capture_output=True,
         text=True,
@@ -256,30 +282,25 @@ def focus_existing(app_id: str) -> bool:
     if result.returncode != 0:
         return False
     for window_id in reversed(result.stdout.split()):
-        class_result = subprocess.run(
-            [xdotool, "getwindowclassname", window_id],
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-        if class_result.stdout.strip().casefold() != app_id.casefold():
-            continue
         subprocess.run([xdotool, "windowactivate", window_id], check=False)
         return True
     return False
 
 
-def open_app(url: str, state_home: Path, channel: str) -> None:
-    app_id = "systemsketch-preview" if channel == "preview" else "systemsketch"
-    if focus_existing(app_id):
+def app_id_for_channel(channel: str) -> str:
+    return "systemsketch-preview" if channel == "preview" else "systemsketch"
+
+
+def open_app(url: str, state_home: Path, channel: str, *, new_window: bool = False) -> None:
+    app_id = app_id_for_channel(channel)
+    if not new_window and focus_existing(app_id):
         return
     chrome = chrome_executable()
     if chrome is None:
         raise ReleaseError("Google Chrome or Chromium is required for the desktop window")
     profile = state_home / channel / "browser-profile"
     profile.mkdir(parents=True, exist_ok=True)
-    subprocess.Popen(
-        [
+    command = [
             chrome,
             f"--app={url}",
             f"--class={app_id}",
@@ -287,7 +308,11 @@ def open_app(url: str, state_home: Path, channel: str) -> None:
             f"--user-data-dir={profile}",
             "--no-first-run",
             "--no-default-browser-check",
-        ],
+        ]
+    if new_window:
+        command.append("--new-window")
+    subprocess.Popen(
+        command,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
@@ -301,6 +326,9 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--release-home", type=Path, default=None)
     parser.add_argument("--state-home", type=Path, default=None)
     parser.add_argument("--preview", action="store_true")
+    parser.add_argument("--launch-url")
+    parser.add_argument("file", nargs="?", type=Path, help="Open one local .tldr document")
+    parser.add_argument("--new-window", action="store_true")
     parser.add_argument("--open", dest="open_window", action="store_true")
     parser.add_argument("--no-open", dest="open_window", action="store_false")
     parser.set_defaults(open_window=False)
@@ -339,11 +367,34 @@ def main() -> int:
             return 0
 
         channel = "preview" if arguments.preview else "stable"
+        channel_port = PREVIEW_PORT if arguments.preview else STABLE_PORT
+        if arguments.open_window and not arguments.new_window and arguments.file is None:
+            current = health(channel_port)
+            if current and current.get("channel") == channel and focus_existing(app_id_for_channel(channel)):
+                print(f"SystemSketch {channel.title()}: {current.get('build')}")
+                print(f"http://127.0.0.1:{channel_port}/")
+                return 0
         url, payload = ensure_preview(release_home, state_home) if arguments.preview else ensure_stable(release_home, state_home)
+        requested_file_url = None
+        if arguments.file is not None:
+            requested_file = arguments.file.expanduser().resolve()
+            if not requested_file.name.lower().endswith(".tldr"):
+                raise ReleaseError("SystemSketch can only open .tldr documents")
+            requested_file_url = urlunparse(
+                urlparse(url)._replace(query=urlencode({"board": str(requested_file)}))
+            )
+        launch_url = arguments.launch_url or requested_file_url or url
+        if urlparse(launch_url).netloc != urlparse(url).netloc or urlparse(launch_url).scheme != urlparse(url).scheme:
+            raise ReleaseError("launch URL must use the selected local SystemSketch channel")
         print(f"SystemSketch {channel.title()}: {payload.get('build')}")
-        print(url)
+        print(launch_url)
         if arguments.open_window:
-            open_app(url, state_home, channel)
+            open_app(
+                launch_url,
+                state_home,
+                channel,
+                new_window=arguments.new_window or arguments.file is not None,
+            )
         return 0
     except (OSError, ReleaseError, subprocess.SubprocessError) as cause:
         print(f"SystemSketch launch error: {cause}", file=sys.stderr)
