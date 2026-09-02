@@ -4,7 +4,6 @@
  * Block command and inline-edit seams remain the only writers.
  */
 import {
-  DefaultContextMenu,
   DefaultContextMenuContent,
   TldrawUiMenuCheckboxItem,
   TldrawUiMenuGroup,
@@ -14,6 +13,7 @@ import {
   useValue,
   type TLUiContextMenuProps,
 } from 'tldraw'
+import { ReliableContextMenu } from './ReliableContextMenu'
 
 import {
   BLOCK_VIEWS,
@@ -54,7 +54,6 @@ import {
   type BlockInlineField,
 } from '../inlineBlockEditing'
 import { stepIntoDepthScope } from '../../depth/depthNavigation'
-import { useStockContextMenuRootEpoch } from './stockContextMenuRoot'
 
 function onlySelectedBlock(editor: ReturnType<typeof useEditor>): BlockShape | null {
   const selected = editor.getSelectedShapes()
@@ -90,14 +89,10 @@ function batchSuffix(count: number): string {
  * items below read the selection, and they mount only while the menu is open.
  */
 export function BlockContextMenu(props: TLUiContextMenuProps) {
-  const editor = useEditor()
-  // Remounts the stock root when Radix's uncontrolled `open` gets stranded,
-  // which otherwise makes every right-click after the first one a no-op.
-  const stockRootEpoch = useStockContextMenuRootEpoch(editor)
   return (
-    <DefaultContextMenu key={stockRootEpoch} {...props}>
+    <ReliableContextMenu {...props}>
       <BlockContextMenuItems />
-    </DefaultContextMenu>
+    </ReliableContextMenu>
   )
 }
 

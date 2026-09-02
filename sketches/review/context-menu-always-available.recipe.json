@@ -1,0 +1,58 @@
+{
+  "feature": "Always-available contextual right-click menu",
+  "viewport": { "width": 1280, "height": 720 },
+  "shapes": [
+    {
+      "id": "right-click-target",
+      "type": "block",
+      "x": 300,
+      "y": 300,
+      "props": {
+        "title": "right_click_target",
+        "description": "The menu should open even while this title is being edited.",
+        "blockType": "review fixture",
+        "view": "port",
+        "w": 360,
+        "h": 220,
+        "inputs": [
+          { "id": "in_1", "name": "cursor", "type": "Pointer", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_1", "name": "menu", "type": "Context", "visible": true }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Double-click the Block title so its text field is active",
+      "x": 40,
+      "y": 170,
+      "w": 390,
+      "h": 105,
+      "target": { "shapeId": "right-click-target", "anchor": "left", "dy": -75 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Right-click directly on the active text field",
+      "x": 450,
+      "y": 40,
+      "w": 430,
+      "h": 105,
+      "target": { "shapeId": "right-click-target", "anchor": "top", "dx": -40 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · One right-click always opens the menu; the Block target starts with Block view, Add, and Ports",
+      "x": 40,
+      "y": 555,
+      "w": 500,
+      "h": 120
+    }
+  ]
+}
