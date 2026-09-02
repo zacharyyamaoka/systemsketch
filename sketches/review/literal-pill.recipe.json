@@ -40,10 +40,10 @@
     {
       "id": "step-2",
       "kind": "step",
-      "text": "2 · Drag the pill's right dot onto gain (the row with = 1.0)",
-      "x": 520,
+      "text": "2 · Drag the pill's right dot onto gain (= 1.0)",
+      "x": 530,
       "y": 610,
-      "w": 350,
+      "w": 340,
       "h": 100,
       "target": { "shapeId": "estimate", "anchor": "bottom", "dx": -120 }
     },
