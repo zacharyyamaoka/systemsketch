@@ -399,6 +399,23 @@ TEMPLATE = r'''<!doctype html>
         press-and-hold; this is that, still true where the change was not installed.</p>
       </div>
     </div>
+    <div style="height:14px"></div>
+    <div class="card">
+      <h3>Running this comparison against merged <code>main</code> is what found the lab was dead</h3>
+      <p>On the first run after the merge, <code>STOCK-1</code> did not fail — it <b>timed out
+      waiting for a canvas</b>. The stock lab was coming up as tldraw's crash screen:</p>
+      <pre>ValidationError: At instance.stylesForNextShape.systemsketch:connectionRouting: Unexpected property</pre>
+      <p><code>DevelopmentCanvas</code> re-applies the stored arrow preset on mount so the labs open
+      on the same datum the product does, and since <code>4a748fc</code> that preset writes the
+      cable's routing alongside the arrow's kind. But a style prop only enters the store's schema
+      through the shape util that declares it, and the stock lab mounts tldraw <i>without</i> the
+      Connection shape. An unknown property in instance state is not an ignored style — tldraw fails
+      the whole document.</p>
+      <p>Fixed in <code>applyArrowPreset</code>: the cable half of the preset is now asked for rather
+      than assumed, the arrow half always applies, and the regression test goes red if the guard is
+      removed. Independent of this lane's own changes — the crash lives in a canvas this work never
+      mounts into — but a check that only ever runs on the happy path is not a check.</p>
+    </div>
   </section>
 
   <section>
