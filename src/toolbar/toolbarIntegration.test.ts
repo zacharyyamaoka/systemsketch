@@ -14,7 +14,7 @@ import {
   prepareCreatedShapeForToolbarPreset,
   SYSTEMSKETCH_TOOLBAR_OVERRIDES,
 } from './toolbarIntegration'
-import { ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
+import { CONNECTION_SHAPE_TYPE, ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
 import { DEFAULT_TOOLBAR_PREFERENCES } from './toolbarModel'
 
 function arrowShape(): TLArrowShape {
@@ -95,10 +95,17 @@ describe('Stable Block toolbar seam', () => {
   })
 })
 
-/** An editor that records only what a preset writes to the next-shape channel. */
-function recordingEditor() {
+/**
+ * An editor that records only what a preset writes to the next-shape channel.
+ *
+ * `shapeUtils` is part of the fake because it is what decides whether a
+ * composition has cables: the stock-tldraw lab mounts tldraw without the
+ * Connection shape, and a style prop it does not declare cannot be written.
+ */
+function recordingEditor({ connections = true } = {}) {
   const written = new Map<string, string>()
   const editor = {
+    shapeUtils: connections ? { [CONNECTION_SHAPE_TYPE]: {} } : {},
     setStyleForNextShapes(style: StyleProp<string>, value: string) {
       written.set(style.id, value)
       return editor
@@ -119,6 +126,17 @@ describe('one preset, two connectors', () => {
       expect(written.get(ArrowShapeKindStyle.id)).toBe(kind)
       expect(written.get(ConnectionRoutingStyle.id)).toBe(routing)
     }
+  })
+
+  it('writes only the arrow half into a composition that has no cables', () => {
+    // Regression: the stock-tldraw lab re-applies the stored preset on mount.
+    // Writing `connectionRouting` there put an unknown property into
+    // `instance.stylesForNextShape`, which tldraw validates — the lab came up
+    // as a crash screen with no canvas at all.
+    const { editor, written } = recordingEditor({ connections: false })
+    applyStoredArrowPreset(editor)
+    expect(written.get(ArrowShapeKindStyle.id)).toBe('elbow')
+    expect(written.has(ConnectionRoutingStyle.id)).toBe(false)
   })
 
   it('seeds both styles from the remembered preset when an editor mounts', () => {

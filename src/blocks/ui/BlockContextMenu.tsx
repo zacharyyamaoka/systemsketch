@@ -79,11 +79,27 @@ function batchSuffix(count: number): string {
   return count > 1 ? ` (${count})` : ''
 }
 
+/**
+ * The stock root wraps the canvas: `DefaultContextMenu` renders `<Canvas />`
+ * inside its trigger. So this component subscribes to nothing that changes
+ * while a shape moves — every one of its re-renders is a re-render of the
+ * whole canvas tree, measured as O(shapes) of React work per drag frame. The
+ * items below read the selection, and they mount only while the menu is open.
+ */
 export function BlockContextMenu(props: TLUiContextMenuProps) {
   const editor = useEditor()
   // Remounts the stock root when Radix's uncontrolled `open` gets stranded,
   // which otherwise makes every right-click after the first one a no-op.
   const stockRootEpoch = useStockContextMenuRootEpoch(editor)
+  return (
+    <DefaultContextMenu key={stockRootEpoch} {...props}>
+      <BlockContextMenuItems />
+    </DefaultContextMenu>
+  )
+}
+
+function BlockContextMenuItems() {
+  const editor = useEditor()
   // Structural commands (Add, Step into) still need one unambiguous Block:
   // they create identity and open an inline editor on it.
   const selectedBlock = useValue(
@@ -173,7 +189,7 @@ export function BlockContextMenu(props: TLUiContextMenuProps) {
   }
 
   return (
-    <DefaultContextMenu key={stockRootEpoch} {...props}>
+    <>
       {portTarget ? (
         <TldrawUiMenuGroup id="systemsketch-block-port">
           <TldrawUiMenuItem
@@ -323,6 +339,6 @@ export function BlockContextMenu(props: TLUiContextMenuProps) {
       ) : null}
 
       <DefaultContextMenuContent />
-    </DefaultContextMenu>
+    </>
   )
 }

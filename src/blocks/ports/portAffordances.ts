@@ -87,6 +87,28 @@ export function blockPortAddAffordance(
 	props: BlockShapeProps,
 	side: BlockPortSide,
 ): BlockPortAddAffordance | null {
+	// Answered from the props object's identity: a selected Block asks for both
+	// lanes on every render, and each answer lays out two hypothetical Blocks.
+	let bySide = affordanceMemo.get(props)
+	if (bySide && side in bySide) return bySide[side] ?? null
+	const affordance = computeBlockPortAddAffordance(props, side)
+	if (!bySide) {
+		bySide = {}
+		affordanceMemo.set(props, bySide)
+	}
+	bySide[side] = affordance
+	return affordance
+}
+
+const affordanceMemo = new WeakMap<
+	BlockShapeProps,
+	Partial<Record<BlockPortSide, BlockPortAddAffordance | null>>
+>()
+
+function computeBlockPortAddAffordance(
+	props: BlockShapeProps,
+	side: BlockPortSide,
+): BlockPortAddAffordance | null {
 	if (props.view === 'simple') return null
 
 	const layout = layoutBlock(props)

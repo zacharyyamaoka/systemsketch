@@ -39,6 +39,22 @@ server, override `SYSTEMSKETCH_DEV_PORT` / `SYSTEMSKETCH_API_PORT` rather than k
 Channel moves: `npm run release:candidate` → `release:promote` → `release:rollback`.
 Desktop: `desktop:start`, `desktop:preview`, `desktop:status`, `desktop:stop`.
 
+## The IDE plugins live here
+
+`vscode-systemsketch/` is the VS Code / Cursor extension, and Obsidian's will sit beside it.
+Two rules hold the boundary, and `tests/test_stock_boundary.py` asserts both:
+
+- **A host ships a *build* of the app, never a second canvas.** `scripts/stage_app.mjs` runs
+  the app's own vite build (with `--base ./`, which a webview needs) and stamps which release
+  it staged; the extension's esbuild config bundles the host only. If you find yourself adding
+  a webview entry point beside it, stop — you are forking the product.
+- **`src/embed/sharedWithHost.ts` is the only thing an extension may import from the app.**
+  A host bundles separately, so anything it reaches past that becomes a second, invisible
+  build of that code. Keep every module behind it free of React, tldraw and the DOM.
+
+`npm run plugin:test` drives the packaged VSIX in real VS Code under Xvfb. Cursor's fresh
+profile shows a sign-in wall; the suite reports what it can reach there rather than failing.
+
 ## Proof is the running app, driven in a real browser
 
 ```bash
@@ -53,10 +69,31 @@ CDP journey in `tests/*_smoke.mjs` (`browser_harness.mjs` is the shared driver):
 Python host, headless Chrome, real `Input.dispatchMouseEvent` gestures, assertions read from
 the editor and the DOM, screenshots you actually inspect. Named runners exist —
 `test:ports`, `test:edges`, `test:batch`, `test:click-to-edit`, `test:fields`,
-`test:selection-menu`, `test:context-menu`, `test:release-ui`.
+`test:selection-menu`, `test:context-menu`, `test:release-ui`, `test:workspace`.
+
+`test:windows` is the one journey that is not headless: it drives a real Chrome `--app` window on a
+private Xvfb display, because a headless target has no OS window to count. It must never open a
+window on Zach's screen — keep it on its own `DISPLAY`.
 
 Never point a test at Zach's real board — the app autosaves into it. Use a scratch
 `.systemsketch` (or a `.tldr`, which is still opened and saved unconverted).
+
+## Seed the human review board before handoff
+
+After implementing a feature and before handing over a launched Preview, use the repo-local
+[`systemsketch-review-fixture`](skills/systemsketch-review-fixture/SKILL.md) skill to create
+`sketches/review/<feature>.systemsketch`. Seed the minimum real Blocks, connections, and other
+objects needed to exercise the new interaction, then place numbered text cards and orange
+arrows outside the interaction area to say exactly what Zach should do. Include a separate
+green `PASS WHEN` card with the visible success condition. Give Zach the exact `?board=` URL
+and keep that server running.
+
+This standing instruction may not repeat the feature just implemented. Recover it from the
+task history, diff, source, and regression test. If the fixture skill lacks the new shape,
+binding, state, or gesture, update its narrow guidance/example before generating the board.
+Generate through the real SystemSketch editor/autosave helper rather than hand-maintaining
+tldraw schema JSON. Inspect the generated PNG and drive the saved fixture once in the real
+app; the board complements the smoke test and never replaces it. Never use `~/SystemSketch`.
 
 ## Reports live in `docs/`, and the builder is the source
 

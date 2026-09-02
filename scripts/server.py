@@ -36,7 +36,6 @@ from workspace_store import (
     WorkspacePathError,
     list_documents,
     load_document,
-    pick_document_path,
     rename_document,
     resolve_document_path,
     save_document,
@@ -135,7 +134,6 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
         if path not in {
             "/api/release",
             "/api/workspace/file",
-            "/api/workspace/pick",
             "/api/workspace/rename",
             "/api/workspace/trash",
             "/api/workspace/reveal",
@@ -168,13 +166,6 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                         self.app.files_root,
                         base_digest=base_digest,
                         force=payload.get("force") is True,
-                    )
-                )
-                return
-            if path == "/api/workspace/pick":
-                self._json(
-                    pick_document_path(
-                        payload.get("mode"), payload.get("currentPath"), self.app.files_root
                     )
                 )
                 return
