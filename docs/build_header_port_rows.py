@@ -26,9 +26,13 @@ OUT = ROOT / "docs" / "header-port-rows-2026-09-01.html"
 GALLERY_SPEC = ROOT / "docs" / "header-port-rows-babble-2026-09-01.json"
 GALLERY_HTML = ROOT / "docs" / "header-port-rows-babble-2026-09-01.html"
 FIXTURE = ROOT / "sketches" / "review" / "header-port-rows.systemsketch"
-PREVIEW_PORT = 4390
 BRANCH = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
 COMMIT = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
+FEATURE_BRANCH = "claude/header-port-rows-447683"
+# On the feature branch the report served from its own worktree; merged, it is
+# Zach's Preview that serves this checkout.
+ON_MAIN = BRANCH == "main"
+PREVIEW_PORT = 4322 if ON_MAIN else 4390
 
 
 # ------------------------------------------------------------ measure ------
@@ -75,9 +79,27 @@ def python_total() -> int:
     return int(match.group(1))
 
 
+def landed_range() -> tuple[str, str]:
+    """The two commits whose difference is this feature.
+
+    On the branch that is main and its tip. Once merged, the branch's merge
+    commit against the main it was merged over — measured, never remembered.
+    """
+    if not ON_MAIN:
+        base = subprocess.run(["git", "merge-base", "main", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
+        return base, "HEAD"
+    merge = subprocess.run(
+        ["git", "log", "--merges", "--format=%H", "-1", f"--grep=into {FEATURE_BRANCH}"],
+        cwd=ROOT, capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    if not merge:
+        raise SystemExit(f"no merge of {FEATURE_BRANCH} in main's history")
+    return f"{merge}^2", merge
+
+
 def changed_files() -> list[tuple[str, str]]:
-    base = subprocess.run(["git", "merge-base", "main", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
-    diff = subprocess.run(["git", "diff", "--stat=200", base, "HEAD", "--", "src", "tests", "package.json", "skills", "sketches", "docs/build_header_port_rows_babble.py", "docs/build_header_port_rows.py"], cwd=ROOT, capture_output=True, text=True, check=True).stdout
+    base, tip = landed_range()
+    diff = subprocess.run(["git", "diff", "--stat=200", base, tip, "--", "src", "tests", "package.json", "skills", "sketches", "docs/build_header_port_rows_babble.py", "docs/build_header_port_rows.py"], cwd=ROOT, capture_output=True, text=True, check=True).stdout
     rows = []
     for line in diff.splitlines():
         if "|" not in line:
@@ -242,7 +264,7 @@ def main() -> None:
   .before-after {{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }}
   a {{ color:var(--accent); }}
 </style></head><body><main>
-<div class="kicker">SystemSketch · {date.today().isoformat()} · branch <code>{html.escape(BRANCH)}</code> @ <code>{COMMIT}</code></div>
+<div class="kicker">SystemSketch · {date.today().isoformat()} · {"merged into main, measured @ " if ON_MAIN else "branch " + html.escape(BRANCH) + " @ "}<code>{COMMIT}</code></div>
 <h1>Ports in the header, and the rows they live in</h1>
 <p class="lede">A Block still has only input and output ports. What changed is that every port now says which <b>row</b> of the burger it sits in — the heading is row 0 — and you can put a port in any row from four places that all agree: a hold-and-drag on the canvas, a grip drag in the inspector, a <i>Move to</i> menu, and a bead on the heading's edge that adds a port straight into it.</p>
 
@@ -302,9 +324,9 @@ def main() -> None:
 <div class="grid">
 <figure><img src="{image_data(fixture_png, None, 900)}" alt="Review fixture board"><figcaption><b>sketches/review/header-port-rows.systemsketch</b> Three numbered cues and a PASS WHEN card around a run() Block with raw, gain, transform → payload.</figcaption></figure>
 <div class="card"><h3>Open it</h3>
-<p>Preview for this branch is running from the worktree:</p>
+<p>{"Merged: your Preview serves this checkout." if ON_MAIN else "Preview for this branch is running from the worktree:"}</p>
 <pre>{html.escape(fixture_url)}</pre>
-<p class="muted">Vite on 127.0.0.1:{PREVIEW_PORT}, its API on {PREVIEW_PORT + 1}; your Stable (4321) and Preview (4322) are untouched. The board is disposable — the app autosaves into it; <code>git checkout</code> restores it.</p>
+<p class="muted">{"Vite on 127.0.0.1:4322 with its API on 4323, launched from this checkout; the API must have been started with the source root allowed, which the Preview launcher does since the review-board commit." if ON_MAIN else f"Vite on 127.0.0.1:{PREVIEW_PORT}, its API on {PREVIEW_PORT + 1}; your Stable (4321) and Preview (4322) are untouched."} The board is disposable — the app autosaves into it; <code>git checkout</code> restores it.</p>
 <h3>Gestures to try</h3>
 <ol>
 <li>Press and hold <code>transform</code>'s dot, drag it up into the heading.</li>
@@ -342,7 +364,7 @@ def main() -> None:
 
 <h2>Files</h2>
 <table><thead><tr><th>Path</th><th>Change</th></tr></thead><tbody>{file_rows}</tbody></table>
-<pre>cd ~/systemsketch && git merge {html.escape(BRANCH)} && npm run check && npm run test:rows</pre>
+<pre>{"cd ~/systemsketch && npm run check && npm run test:rows" if ON_MAIN else f"cd ~/systemsketch && git merge {html.escape(BRANCH)} && npm run check && npm run test:rows"}</pre>
 </main></body></html>
 """
     OUT.write_text(page, encoding="utf-8")
