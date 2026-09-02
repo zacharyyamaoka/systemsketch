@@ -47,6 +47,10 @@ describe('connection shape migrations', () => {
 				curve: null,
 				pins: [],
 				elbowRoute: null,
+				// A cable saved before the edge vocabulary is a plain data cable.
+				temporal: 'data',
+				delayValue: '',
+				pillPosition: 0.5,
 			},
 		})
 	})

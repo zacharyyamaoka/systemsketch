@@ -10,11 +10,11 @@
   align-items: center;
   gap: 10px;
   padding: 5px 5px 5px 12px;
-  border: 1px solid #c9ceff;
+  border: 1px solid color-mix(in srgb, var(--ss-accent) 45%, transparent);
   border-radius: 11px;
-  color: #333c65;
-  background: rgb(249 249 255 / 97%);
-  box-shadow: 0 3px 10px rgb(29 38 91 / 10%), 0 12px 32px rgb(29 38 91 / 10%);
+  color: var(--ss-text);
+  background: var(--ss-accent-soft);
+  box-shadow: var(--ss-shadow-2);
   backdrop-filter: blur(18px);
   pointer-events: auto;
   transform: translateX(-50%);
@@ -29,7 +29,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #4256df;
+  color: var(--ss-accent);
   font-size: 10px;
   font-weight: 850;
   letter-spacing: .07em;
@@ -46,7 +46,7 @@
 
 .systemsketch-development-preview__identity small,
 .systemsketch-development-preview > p {
-  color: #656d85;
+  color: var(--ss-text-muted);
   font-size: 10px;
   white-space: nowrap;
 }
@@ -59,7 +59,7 @@
 }
 
 .systemsketch-development-preview > p.error {
-  color: #a1333d;
+  color: var(--ss-danger);
 }
 
 .systemsketch-development-preview > button {
@@ -67,8 +67,8 @@
   padding: 0 10px;
   border: 0;
   border-radius: 7px;
-  color: #fff;
-  background: #4458df;
+  color: var(--ss-accent-text);
+  background: var(--ss-accent);
   cursor: pointer;
   font-size: 10px;
   font-weight: 750;
@@ -89,9 +89,9 @@
   width: min(280px, 100vw);
   overflow: hidden;
   border: 0;
-  border-left: 1px solid var(--tl-color-divider, rgb(0 0 0 / 8%));
+  border-left: 1px solid var(--ss-border);
   border-radius: 0;
-  background: var(--color-panel, #fff);
+  background: var(--ss-surface-raised);
   box-shadow: none;
   pointer-events: auto;
 }
@@ -126,19 +126,4 @@
   .systemsketch-development-app:has(.systemsketch-block-development-inspector) .tlui-layout__top__right {
     display: none;
   }
-}
-
-.tl-theme__dark .systemsketch-development-preview {
-  border-color: #555f9c;
-  color: #e6e8ff;
-  background: rgb(39 42 57 / 97%);
-}
-
-.tl-theme__dark .systemsketch-development-preview__identity span {
-  color: #9eabff;
-}
-
-.tl-theme__dark .systemsketch-development-preview__identity small,
-.tl-theme__dark .systemsketch-development-preview > p {
-  color: #b8bed8;
 }

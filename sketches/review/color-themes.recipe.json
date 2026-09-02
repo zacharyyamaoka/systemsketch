@@ -1,0 +1,73 @@
+{
+  "feature": "Color themes",
+  "viewport": { "width": 1280, "height": 720 },
+  "shapes": [
+    {
+      "id": "subject",
+      "type": "block",
+      "x": 720,
+      "y": 300,
+      "props": {
+        "title": "decode()",
+        "description": "Watch this Block, its ports and the inspector as the theme changes",
+        "blockType": "Function",
+        "view": "port",
+        "w": 360,
+        "h": 210,
+        "inputs": [{ "id": "in_1", "name": "image", "type": "Image", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "latent", "type": "Latent", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Open ☰ (top-left) → Settings → Appearance, and pick Dark Modern",
+      "x": 60,
+      "y": 120,
+      "w": 480,
+      "h": 110,
+      "target": { "x": 40, "y": 40 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Click this Block so the inspector and the selection pill are on screen, then switch to Obsidian Dark, Obsidian Light, Dark, Light",
+      "x": 60,
+      "y": 300,
+      "w": 480,
+      "h": 140,
+      "target": { "shapeId": "subject", "anchor": "left" }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Import VS Code theme… and hand it any theme .json (Cursor ships them in /usr/share/cursor/resources/app/extensions/theme-defaults/themes); remove it with its ×",
+      "x": 60,
+      "y": 480,
+      "w": 480,
+      "h": 140,
+      "target": { "x": 40, "y": 40 }
+    },
+    {
+      "id": "note-1",
+      "kind": "note",
+      "text": "Shape colours are board content: the Block's port dots and any FigJam swatch you pick stay identical in every theme. Only the app around them changes.",
+      "x": 720,
+      "y": 560,
+      "w": 480,
+      "h": 120
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The canvas, the inspector, the selection pill, tldraw's own ☰ menu and the Settings dialog all wear the chosen theme with every label readable — no white flash on reload, and the choice survives a reload.",
+      "x": 60,
+      "y": 660,
+      "w": 620,
+      "h": 130
+    }
+  ]
+}

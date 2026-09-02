@@ -37,6 +37,7 @@ import {
   startBlockPortSection,
   updateBlockDetails,
 } from '../commands/blockCommands'
+import { detachSelectedBlocks, rebuildSelectedBlocks, selectedBlockIds, selectedDetachedGroupIds } from '../detach'
 import { getBlockPortMenuTarget, type BlockPortRef } from '../ports'
 import {
   getBlockSelectionStyles,
@@ -46,10 +47,12 @@ import {
   setBlockPortLayoutForSelection,
   setBlockViewForSelection,
   setConnectionRoutingForSelection,
+  setConnectionTemporalForSelection,
 } from '../commands/blockStyleCommands'
 import {
   CONNECTION_ROUTING_KINDS,
   ConnectionRoutingStyle,
+  ConnectionTemporalStyle,
   type ConnectionRoutingKind,
 } from '../connections/connectionModel'
 import {
@@ -106,6 +109,18 @@ export function BlockContextMenu(props: TLUiContextMenuProps) {
 
 function BlockContextMenuItems() {
   const editor = useEditor()
+  // Detach and its inverse are counts, not one-Block commands: a sweep over a
+  // multi-selection is the normal case, and the label says how many.
+  const detachableCount = useValue(
+    'context-menu detachable Blocks',
+    () => selectedBlockIds(editor).length,
+    [editor],
+  )
+  const rebuildableCount = useValue(
+    'context-menu rebuildable groups',
+    () => selectedDetachedGroupIds(editor).length,
+    [editor],
+  )
   // Structural commands (Add, Step into) still need one unambiguous Block:
   // they create identity and open an inline editor on it.
   const selectedBlock = useValue(
@@ -121,6 +136,11 @@ function BlockContextMenuItems() {
   const connectionRouting = useValue(
     'context-menu connection routing',
     () => getSharedStyleForSelection(editor, ConnectionRoutingStyle),
+    [editor],
+  )
+  const connectionTemporal = useValue(
+    'context-menu connection temporal',
+    () => getSharedStyleForSelection(editor, ConnectionTemporalStyle),
     [editor],
   )
   const connectionCount = useValue(
@@ -386,6 +406,25 @@ function BlockContextMenuItems() {
         </TldrawUiMenuGroup>
       ) : null}
 
+      {detachableCount > 0 || rebuildableCount > 0 ? (
+        <TldrawUiMenuGroup id="systemsketch-block-detach">
+          {detachableCount > 0 ? (
+            <TldrawUiMenuItem
+              id="block-detach-to-primitives"
+              label={`Detach to primitives${batchSuffix(detachableCount)}`}
+              onSelect={() => void detachSelectedBlocks(editor)}
+            />
+          ) : null}
+          {rebuildableCount > 0 ? (
+            <TldrawUiMenuItem
+              id="block-rebuild-from-primitives"
+              label={`Rebuild Block${rebuildableCount > 1 ? 's' : ''} from primitives${batchSuffix(rebuildableCount)}`}
+              onSelect={() => void rebuildSelectedBlocks(editor)}
+            />
+          ) : null}
+        </TldrawUiMenuGroup>
+      ) : null}
+
       {connectionCount > 0 && connectionRouting ? (
         <TldrawUiMenuGroup id="systemsketch-connection-routing">
           <TldrawUiMenuSubmenu
@@ -404,6 +443,22 @@ function BlockContextMenuItems() {
               ))}
             </TldrawUiMenuGroup>
           </TldrawUiMenuSubmenu>
+        </TldrawUiMenuGroup>
+      ) : null}
+
+      {connectionCount > 0 && connectionTemporal ? (
+        <TldrawUiMenuGroup id="systemsketch-connection-temporal">
+          <TldrawUiMenuCheckboxItem
+            id="connection-temporal-delayed"
+            label={`Delayed (z⁻¹)${batchSuffix(connectionCount)}`}
+            checked={isSharedStyleValue(connectionTemporal, 'delayed')}
+            onSelect={() => {
+              setConnectionTemporalForSelection(
+                editor,
+                isSharedStyleValue(connectionTemporal, 'delayed') ? 'data' : 'delayed',
+              )
+            }}
+          />
         </TldrawUiMenuGroup>
       ) : null}
 

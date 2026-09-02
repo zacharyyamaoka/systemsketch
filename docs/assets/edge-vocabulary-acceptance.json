@@ -1,0 +1,228 @@
+[
+  {
+    "id": "EV-1",
+    "label": "a fresh cable is a plain data cable with the pill centred and no value",
+    "observed": {
+      "temporal": "data",
+      "delayValue": "",
+      "pillPosition": 0.5
+    },
+    "desired": {
+      "temporal": "data",
+      "delayValue": "",
+      "pillPosition": 0.5
+    },
+    "ok": true
+  },
+  {
+    "id": "EV-2",
+    "label": "a data cable paints one solid path and no pill",
+    "observed": {
+      "segments": [
+        null
+      ],
+      "dash": [
+        null
+      ],
+      "pill": null
+    },
+    "desired": {
+      "segments": [
+        null
+      ],
+      "dash": [
+        null
+      ],
+      "pill": null
+    },
+    "ok": true
+  },
+  {
+    "id": "EV-3",
+    "label": "the inspector marks the cable delayed",
+    "observed": "delayed",
+    "desired": "delayed",
+    "ok": true
+  },
+  {
+    "id": "EV-4",
+    "label": "a delayed cable is dotted end to end",
+    "observed": {
+      "segments": [
+        "all"
+      ],
+      "dash": [
+        "0.1 6"
+      ]
+    },
+    "desired": {
+      "segments": [
+        "all"
+      ],
+      "dash": [
+        "0.1 6"
+      ]
+    },
+    "ok": true
+  },
+  {
+    "id": "EV-5",
+    "label": "the z⁻¹ pill sits on the middle of the cable",
+    "observed": {
+      "pill": "z⁻¹",
+      "onPath": true
+    },
+    "desired": {
+      "pill": "z⁻¹",
+      "onPath": true
+    },
+    "ok": true
+  },
+  {
+    "id": "EV-6",
+    "label": "the initial value is stored and reads on the pill as z⁻¹ = 1.0",
+    "observed": {
+      "delayValue": "1.0",
+      "pill": "z⁻¹ = 1.0"
+    },
+    "desired": {
+      "delayValue": "1.0",
+      "pill": "z⁻¹ = 1.0"
+    },
+    "ok": true
+  },
+  {
+    "id": "EV-7",
+    "label": "dragging the pill slides it along the cable and stores the new fraction",
+    "observed": {
+      "moved": true,
+      "pillFollowed": true
+    },
+    "desired": {
+      "moved": true,
+      "pillFollowed": true
+    },
+    "ok": true
+  },
+  {
+    "id": "EV-8",
+    "label": "\"Centre the pill\" puts it back at the middle",
+    "observed": 0.5,
+    "desired": 0.5,
+    "ok": true
+  },
+  {
+    "id": "EV-9",
+    "label": "with the switch on the cable paints two segments: dots up to the pill, dashes after",
+    "observed": {
+      "segments": [
+        "before",
+        "after"
+      ],
+      "afterStartsAtPill": true,
+      "afterDashes": true
+    },
+    "desired": {
+      "segments": [
+        "before",
+        "after"
+      ],
+      "afterStartsAtPill": true,
+      "afterDashes": true
+    },
+    "ok": true
+  },
+  {
+    "id": "EV-10",
+    "label": "the switch is remembered in this browser",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "EV-11",
+    "label": "switching it off returns to one dotted path",
+    "observed": [
+      "all"
+    ],
+    "desired": [
+      "all"
+    ],
+    "ok": true
+  },
+  {
+    "id": "EV-12",
+    "label": "marking the cable data again removes the pill and the dots",
+    "observed": {
+      "temporal": "data",
+      "segments": [
+        null
+      ],
+      "pill": null
+    },
+    "desired": {
+      "temporal": "data",
+      "segments": [
+        null
+      ],
+      "pill": null
+    },
+    "ok": true
+  },
+  {
+    "id": "EV-13",
+    "label": "the delayed mark, its value and the pill survive a reload",
+    "observed": {
+      "temporal": "delayed",
+      "delayValue": "1.0",
+      "pillPosition": 0.5,
+      "pill": "z⁻¹ = 1.0",
+      "segments": [
+        "all"
+      ]
+    },
+    "desired": {
+      "temporal": "delayed",
+      "delayValue": "1.0",
+      "pillPosition": 0.5,
+      "pill": "z⁻¹ = 1.0",
+      "segments": [
+        "all"
+      ]
+    },
+    "ok": true
+  },
+  {
+    "id": "EV-14",
+    "label": "a cable into a Branch arm can be marked delayed",
+    "observed": "delayed",
+    "desired": "delayed",
+    "ok": true
+  },
+  {
+    "id": "EV-15",
+    "label": "with the other arm active, the delayed cable fades with its arm and keeps its pill",
+    "observed": {
+      "active": "arm_2",
+      "innerParent": true,
+      "innerArm": "arm_1",
+      "opacity": 0.18,
+      "pill": "z⁻¹"
+    },
+    "desired": {
+      "active": "arm_2",
+      "innerParent": true,
+      "innerArm": "arm_1",
+      "opacity": 0.18,
+      "pill": "z⁻¹"
+    },
+    "ok": true
+  },
+  {
+    "id": "EV-16",
+    "label": "no console errors while driving",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

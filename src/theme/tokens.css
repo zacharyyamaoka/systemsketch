@@ -1,0 +1,345 @@
+/*
+ * The SystemSketch token layer.
+ *
+ * This is the only file in `src/` that may hold a chrome colour literal, and
+ * `tests/test_theme_tokens.py` fails the build if any other stylesheet grows
+ * one. Every other stylesheet references the closed vocabulary below — a
+ * semantic name, never a value — so a theme is a table of values and nothing
+ * else, and no stylesheet ever learns what a host is.
+ *
+ * Three layers:
+ *
+ *   1. The vocabulary — the `--ss-*` names and what each one means.
+ *   2. Themes — one block per source of values, keyed on `data-ss-theme`.
+ *      The default derives every value from tldraw's own palette so the
+ *      chrome cannot disagree with the board it sits on; a host theme reads
+ *      the host's live variables; a palette theme (Obsidian, Dark Modern, an
+ *      imported VS Code theme) arrives as inline values from
+ *      `src/theme/themeModel.ts`.
+ *   3. One place decides which theme is on: the app root stamps
+ *      `data-ss-theme` and `data-ss-color-scheme`, and nothing else does.
+ *
+ * Nothing here needs a light/dark branch. tldraw's tokens already flip with
+ * `.tl-theme__light` / `.tl-theme__dark`, a host's variables are already dark
+ * in a dark workbench, and a palette carries its own scheme. The one exception
+ * is the root fallback at the bottom, which paints the few strips that sit
+ * outside `.tl-container` and any theme nobody has written a block for.
+ *
+ * ---------------------------------------------------------------------------
+ * The vocabulary (per-theme values; a theme supplies exactly these)
+ *
+ *   --ss-surface          the pane behind everything — the canvas
+ *   --ss-surface-raised   a panel, popout, menu or toolbar sitting on it
+ *   --ss-surface-sunken   an input, a well, a resting chip
+ *   --ss-surface-hover    pointer feedback on a transparent control
+ *   --ss-surface-active   pointer feedback on a chip, or a pressed state
+ *   --ss-surface-inverse  a floating pill in the opposite polarity
+ *                         (the selection menu, a tooltip)
+ *   --ss-text             primary copy
+ *   --ss-text-muted       secondary copy, eyebrows, labels
+ *   --ss-text-faint       placeholders and disabled copy — never body text
+ *   --ss-text-inverse     copy on --ss-surface-inverse
+ *   --ss-border           a divider
+ *   --ss-accent           selection and focus
+ *   --ss-accent-text      legible text on --ss-accent
+ *   --ss-danger           a destructive state
+ *   --ss-warning          a cautionary state
+ *   --ss-success          a confirmed state
+ *   --ss-code-surface     the well a code sample sits in
+ *   --ss-code-text        the ink of that sample
+ *   --ss-shadow-1         a resting panel
+ *   --ss-shadow-2         a floating one
+ *
+ * Derived (never per-theme — computed from the twenty above, so a theme can
+ * never make them disagree with its own values)
+ *
+ *   --ss-border-strong          an outline you are meant to notice (an input)
+ *   --ss-border-inverse         a divider on the inverse surface
+ *   --ss-surface-inverse-hover  pointer feedback on the inverse surface
+ *   --ss-accent-hover           the accent under the pointer
+ *   --ss-accent-soft            an accent-tinted surface (an active chip)
+ *   --ss-accent-soft-hover      that chip under the pointer
+ *
+ * One rule about --ss-accent-soft: it is a SURFACE, and copy on it is
+ * --ss-text, never --ss-accent. A mid-luminance accent on a tint of itself
+ * measured 2.6–4.3:1 across every shipped palette, short of 4.5:1 in all of
+ * them; mark an active chip with the tint plus an accent bar or ring instead.
+ *   --ss-danger-soft / --ss-warning-soft / --ss-success-soft
+ *   --ss-focus-ring             the box-shadow of a focused input
+ *   --ss-overlay                the scrim behind a modal
+ *
+ * Add a token only when two call sites genuinely need the same new meaning.
+ * A one-off is a sign the design, not the vocabulary, needs the decision.
+ * ---------------------------------------------------------------------------
+ */
+
+/* Geometry, kept beside the colours so the design surface has one home. These
+ * are not themed; they are the measurements the chrome is laid out on. */
+:root {
+  --systemsketch-chrome-inset: 14px;
+  --systemsketch-top-height: 46px;
+  --systemsketch-bottom-clearance: 68px;
+  --systemsketch-panel-radius: 18px;
+}
+
+@media (max-width: 820px) {
+  :root {
+    --systemsketch-chrome-inset: 8px;
+    --systemsketch-bottom-clearance: 62px;
+  }
+}
+
+/* -------------------------------------------------------------------------
+ * Theme: systemsketch — the default, derived from tldraw.
+ *
+ * Declared on `.tl-container` rather than on the app root, and this is
+ * load-bearing: a custom property is substituted where it is declared, and
+ * `--tl-*` exists only from `.tl-container` down. Declared any higher, every
+ * `var(--tl-…)` here would resolve to nothing and the chrome would inherit
+ * that nothing. tldraw portals its dialogs, popovers and menus into this same
+ * container, so they are covered too.
+ * ---------------------------------------------------------------------- */
+[data-ss-theme='systemsketch'] .tl-container {
+  --ss-surface: var(--tl-color-background);
+  --ss-surface-raised: var(--tl-color-panel);
+  --ss-surface-sunken: var(--tl-color-low);
+  --ss-surface-hover: var(--tl-color-muted-2);
+  --ss-surface-active: var(--tl-color-muted-1);
+  /* The one value not taken from tldraw. The selection pill is FigJam's,
+   * measured at rgb(30,30,30) in docs/figjam-contextual-menu-spec, and FigJam,
+   * Obsidian and VS Code all keep that pill dark in a dark theme too; only
+   * tldraw's tooltip flips to white, and following it would put the
+   * appearance controls' white glyphs on a white bar. */
+  --ss-surface-inverse: #1e1e1e;
+  --ss-text: var(--tl-color-text-1);
+  /* tldraw's text-3 is tuned for its panel; on its `low` surface — where this
+   * chrome puts chips, wells and the settings rail — it measures 4.14:1 in
+   * light, just under the 4.5:1 body-text line. A twelfth of the primary ink
+   * mixed in takes it over on every surface a chrome puts it on. */
+  --ss-text-muted: color-mix(in srgb, var(--tl-color-text-3) 88%, var(--tl-color-text-1));
+  --ss-text-faint: var(--tl-color-text-disabled);
+  --ss-text-inverse: #ffffff;
+  --ss-border: var(--tl-color-divider);
+  --ss-accent: var(--tl-color-selected);
+  --ss-accent-text: var(--tl-color-selected-contrast);
+  --ss-danger: var(--tl-color-danger);
+  --ss-warning: var(--tl-color-warning);
+  --ss-success: var(--tl-color-success);
+  --ss-code-surface: var(--tl-color-low);
+  --ss-code-text: var(--tl-color-text-1);
+  --ss-shadow-1: var(--tl-shadow-1);
+  --ss-shadow-2: var(--tl-shadow-3);
+}
+
+/* -------------------------------------------------------------------------
+ * Theme: vscode — the host's live variables, when SystemSketch is a pane in
+ * VS Code or Cursor. A webview inherits every `--vscode-*` the workbench
+ * defines, already resolved for whichever colour theme is active, so this
+ * block is a pure renaming. The fallbacks are VS Code's own defaults for a
+ * dark workbench and only paint if a variable is missing.
+ * ---------------------------------------------------------------------- */
+[data-ss-theme='vscode'] {
+  --ss-surface: var(--vscode-editor-background, #1e1e1e);
+  --ss-surface-raised: var(--vscode-editorWidget-background, #252526);
+  --ss-surface-sunken: var(--vscode-input-background, #3c3c3c);
+  --ss-surface-hover: var(--vscode-toolbar-hoverBackground, rgb(90 93 94 / 31%));
+  --ss-surface-active: var(--vscode-toolbar-activeBackground, rgb(99 102 103 / 31%));
+  --ss-surface-inverse: var(--vscode-editorHoverWidget-background, #252526);
+  --ss-text: var(--vscode-foreground, #cccccc);
+  --ss-text-muted: var(--vscode-descriptionForeground, rgb(204 204 204 / 70%));
+  --ss-text-faint: var(--vscode-disabledForeground, rgb(204 204 204 / 50%));
+  --ss-text-inverse: var(--vscode-editorHoverWidget-foreground, #cccccc);
+  --ss-border: var(--vscode-widget-border, var(--vscode-panel-border, rgb(128 128 128 / 35%)));
+  --ss-accent: var(--vscode-focusBorder, #007fd4);
+  --ss-accent-text: var(--vscode-button-foreground, #ffffff);
+  --ss-danger: var(--vscode-errorForeground, #f48771);
+  --ss-warning: var(--vscode-editorWarning-foreground, #cca700);
+  --ss-success: var(--vscode-testing-iconPassed, #73c991);
+  --ss-code-surface: var(--vscode-editor-background, #1e1e1e);
+  --ss-code-text: var(--vscode-editor-foreground, #bbbbbb);
+  --ss-shadow-1: 0 1px 3px var(--vscode-widget-shadow, rgb(0 0 0 / 36%));
+  --ss-shadow-2: 0 2px 8px var(--vscode-widget-shadow, rgb(0 0 0 / 36%));
+}
+
+/* -------------------------------------------------------------------------
+ * Theme: obsidian — the host's live variables, for the Obsidian plugin.
+ *
+ * Every name below was read out of Obsidian 1.13.7's bundled `app.css`
+ * (`scripts/extract_obsidian_palette.py` does the reading and records the
+ * resolution); the fallbacks are that theme's default-dark values. The
+ * standalone "Obsidian" palettes in `src/theme/palettes/obsidian.ts` are the
+ * same variables resolved to literals, so a board looks the same whether
+ * Obsidian is hosting it or a person merely chose its look.
+ * ---------------------------------------------------------------------- */
+[data-ss-theme='obsidian'] {
+  --ss-surface: var(--background-primary, #1c1c1c);
+  --ss-surface-raised: var(--background-secondary, #282828);
+  --ss-surface-sunken: var(--background-modifier-form-field, #2e2e2e);
+  --ss-surface-hover: var(--background-modifier-hover, rgb(255 255 255 / 6.7%));
+  --ss-surface-active: var(--background-modifier-active-hover, rgb(255 255 255 / 10%));
+  --ss-surface-inverse: var(--background-modifier-message, rgb(0 0 0 / 90%));
+  --ss-text: var(--text-normal, #dadada);
+  --ss-text-muted: var(--text-muted, #b3b3b3);
+  --ss-text-faint: var(--text-faint, #666666);
+  --ss-text-inverse: var(--text-on-accent, #ffffff);
+  --ss-border: var(--background-modifier-border, #333333);
+  --ss-accent: var(--interactive-accent, hsl(258 88% 66%));
+  --ss-accent-text: var(--text-on-accent, #ffffff);
+  --ss-danger: var(--text-error, #fb464c);
+  --ss-warning: var(--text-warning, #e9973f);
+  --ss-success: var(--color-green, #44cf6e);
+  --ss-code-surface: var(--code-background, #232323);
+  --ss-code-text: var(--code-normal, #dadada);
+  --ss-shadow-1: var(--shadow-s, 0 1px 2px rgb(0 0 0 / 12%), 0 3px 7px rgb(0 0 0 / 18%));
+  --ss-shadow-2: var(--shadow-l, 0 2px 7px rgb(0 0 0 / 7%), 0 6px 25px rgb(0 0 0 / 11%), 0 30px 90px rgb(0 0 0 / 20%));
+}
+
+/* -------------------------------------------------------------------------
+ * Every theme other than the default repaints tldraw's own UI from the
+ * tokens, so its context menu, dialogs and zoom controls wear the same
+ * palette as the chrome around them. The board's selection stroke and shape
+ * colours are deliberately not here: those are document content.
+ * ---------------------------------------------------------------------- */
+[data-ss-theme]:not([data-ss-theme='systemsketch']) .tl-container {
+  --tl-color-background: var(--ss-surface);
+  --tl-color-panel: var(--ss-surface-raised);
+  --tl-color-panel-contrast: var(--ss-border);
+  --tl-color-low: var(--ss-surface-sunken);
+  --tl-color-low-border: var(--ss-border);
+  --tl-color-muted-2: var(--ss-surface-hover);
+  --tl-color-muted-1: var(--ss-surface-active);
+  --tl-color-hint: var(--ss-surface-hover);
+  --tl-color-divider: var(--ss-border);
+  --tl-color-text-0: var(--ss-text);
+  --tl-color-text-1: var(--ss-text);
+  --tl-color-text-3: var(--ss-text-muted);
+  --tl-color-text-disabled: var(--ss-text-faint);
+  --tl-color-selected: var(--ss-accent);
+  --tl-color-selected-contrast: var(--ss-accent-text);
+  --tl-color-primary: var(--ss-accent);
+  --tl-color-focus: var(--ss-accent);
+  --tl-color-tooltip: var(--ss-surface-inverse);
+  --tl-color-text-shadow: var(--ss-text-inverse);
+  --tl-color-danger: var(--ss-danger);
+  --tl-color-warning: var(--ss-warning);
+  --tl-color-success: var(--ss-success);
+  --tl-shadow-1: var(--ss-shadow-1);
+  --tl-shadow-2: var(--ss-shadow-2);
+  --tl-shadow-3: var(--ss-shadow-2);
+  --tl-shadow-4: var(--ss-shadow-2);
+}
+
+/* -------------------------------------------------------------------------
+ * Derived tokens. Declared on the root AND on the container so each is
+ * recomputed from whichever `--ss-*` values are in force at that level.
+ * ---------------------------------------------------------------------- */
+[data-ss-theme],
+[data-ss-theme] .tl-container {
+  /* 55% of the ink: 45% measured 2.5–2.9:1 on a light input, below the 3:1 a
+   * control boundary needs; 55% clears it in every shipped palette. */
+  --ss-border-strong: color-mix(in srgb, var(--ss-text) 55%, transparent);
+  --ss-border-inverse: color-mix(in srgb, var(--ss-text-inverse) 18%, transparent);
+  --ss-surface-inverse-hover: color-mix(in srgb, var(--ss-text-inverse) 14%, transparent);
+  --ss-accent-hover: color-mix(in srgb, var(--ss-accent) 84%, var(--ss-text));
+  --ss-accent-soft: color-mix(in srgb, var(--ss-accent) 12%, transparent);
+  --ss-accent-soft-hover: color-mix(in srgb, var(--ss-accent) 20%, transparent);
+  --ss-danger-soft: color-mix(in srgb, var(--ss-danger) 10%, transparent);
+  --ss-warning-soft: color-mix(in srgb, var(--ss-warning) 12%, transparent);
+  --ss-success-soft: color-mix(in srgb, var(--ss-success) 12%, transparent);
+  --ss-focus-ring: 0 0 0 2px color-mix(in srgb, var(--ss-accent) 28%, transparent);
+  --ss-overlay: color-mix(in srgb, var(--ss-surface-inverse) 40%, transparent);
+}
+
+/* -------------------------------------------------------------------------
+ * Root fallback. Two jobs, both small:
+ *
+ *  - paint the strips that sit outside `.tl-container` (the embed lane's
+ *    loading, error and read-only strips) and the page before the canvas
+ *    mounts;
+ *  - give a theme nobody has written a block for a correct-looking app rather
+ *    than an unstyled one. `resolveHostTheme` in `themeModel.ts` already maps
+ *    an unknown host to `systemsketch`, so this is the second line, not the
+ *    first.
+ *
+ * The values are tldraw's own light and dark palette, copied from
+ * `node_modules/tldraw/tldraw.css` (`.tl-theme__light` / `.tl-theme__dark`).
+ * `:where()` zeroes the specificity so any theme block above beats these
+ * regardless of source order.
+ * ---------------------------------------------------------------------- */
+:where([data-ss-theme]) {
+  --ss-surface: hsl(210 20% 98%);
+  --ss-surface-raised: hsl(0 0% 99%);
+  --ss-surface-sunken: hsl(204 16% 94%);
+  --ss-surface-hover: hsl(0 0% 0% / 4.3%);
+  --ss-surface-active: hsl(0 0% 0% / 10%);
+  --ss-surface-inverse: #1e1e1e;
+  --ss-text: hsl(0 0% 18%);
+  --ss-text-muted: hsl(204 4% 42%);
+  --ss-text-faint: hsl(204 4% 55%);
+  --ss-text-inverse: #ffffff;
+  --ss-border: hsl(0 0% 91%);
+  --ss-accent: hsl(214 84% 56%);
+  --ss-accent-text: hsl(0 0% 100%);
+  --ss-danger: hsl(0 90% 43%);
+  --ss-warning: hsl(27 98% 47%);
+  --ss-success: hsl(123 46% 34%);
+  --ss-code-surface: hsl(204 16% 94%);
+  --ss-code-text: hsl(0 0% 18%);
+  --ss-shadow-1: 0px 1px 2px hsl(0 0% 0% / 25%), 0px 1px 3px hsl(0 0% 0% / 9%);
+  --ss-shadow-2: 0px 1px 2px hsl(0 0% 0% / 28%), 0px 2px 6px hsl(0 0% 0% / 14%);
+}
+
+:where([data-ss-theme][data-ss-color-scheme='dark']) {
+  --ss-surface: hsl(240 5% 6.5%);
+  --ss-surface-raised: hsl(235 6.8% 13.5%);
+  --ss-surface-sunken: hsl(260 4.5% 10.5%);
+  --ss-surface-hover: hsl(0 0% 100% / 5%);
+  --ss-surface-active: hsl(0 0% 100% / 10%);
+  --ss-surface-inverse: #1e1e1e;
+  --ss-text: hsl(0 0% 85%);
+  --ss-text-muted: hsl(204 4% 75%);
+  --ss-text-faint: hsl(204 4% 50%);
+  --ss-text-inverse: #ffffff;
+  --ss-border: hsl(240 9% 22%);
+  --ss-accent: hsl(217 89% 61%);
+  --ss-accent-text: hsl(0 0% 100%);
+  --ss-danger: hsl(0 82% 66%);
+  --ss-warning: hsl(36 100% 57%);
+  --ss-success: hsl(123 38% 57%);
+  --ss-code-surface: hsl(260 4.5% 10.5%);
+  --ss-code-text: hsl(0 0% 85%);
+  --ss-shadow-1: 0px 1px 2px hsl(0 0% 0% / 16.1%), 0px 1px 3px hsl(0 0% 0% / 22%);
+  --ss-shadow-2: 0px 1px 3px hsl(0 0% 0% / 50%), 0px 2px 12px hsl(0 0% 0% / 50%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :where([data-ss-theme][data-ss-color-scheme='system']) {
+    --ss-surface: hsl(240 5% 6.5%);
+    --ss-surface-raised: hsl(235 6.8% 13.5%);
+    --ss-surface-sunken: hsl(260 4.5% 10.5%);
+    --ss-surface-hover: hsl(0 0% 100% / 5%);
+    --ss-surface-active: hsl(0 0% 100% / 10%);
+    --ss-surface-inverse: hsl(0 0% 100%);
+    --ss-text: hsl(0 0% 85%);
+    --ss-text-muted: hsl(204 4% 75%);
+    --ss-text-faint: hsl(204 4% 50%);
+    --ss-text-inverse: hsl(210 13% 18%);
+    --ss-border: hsl(240 9% 22%);
+    --ss-accent: hsl(217 89% 61%);
+    --ss-accent-text: hsl(0 0% 100%);
+    --ss-danger: hsl(0 82% 66%);
+    --ss-warning: hsl(36 100% 57%);
+    --ss-success: hsl(123 38% 57%);
+    --ss-code-surface: hsl(260 4.5% 10.5%);
+    --ss-code-text: hsl(0 0% 85%);
+    --ss-shadow-1: 0px 1px 2px hsl(0 0% 0% / 16.1%), 0px 1px 3px hsl(0 0% 0% / 22%);
+    --ss-shadow-2: 0px 1px 3px hsl(0 0% 0% / 50%), 0px 2px 12px hsl(0 0% 0% / 50%);
+  }
+}
+
+/* The app root itself is painted from the tokens, so the page never flashes a
+ * hardcoded colour before the canvas mounts, in any theme. */
+[data-ss-theme] {
+  color: var(--ss-text);
+  background: var(--ss-surface);
+}

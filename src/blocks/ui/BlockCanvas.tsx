@@ -60,6 +60,8 @@ import {
 } from '../ports'
 import { BlockIconGlyph } from './blockIcons'
 import { stepIntoDepthScope } from '../../depth/depthNavigation'
+import { branchFadeOpacity } from '../../branch/branchScope'
+import { portColor } from './portPalette'
 import './block-canvas.css'
 
 const SIMPLE_ICON_PX = 40
@@ -73,39 +75,44 @@ const boxStyle = (box: BlockRect): CSSProperties => ({
   height: box.h,
 })
 
-function portColor(type: string): string {
-  const normalized = type.trim().toLowerCase()
-  if (normalized === 'image') return '#c060e0'
-  if (normalized === 'text' || normalized === 'str' || normalized === 'string') return '#4caf50'
-  if (normalized === 'model') return '#2196f3'
-  if (normalized === 'number' || normalized === 'int' || normalized === 'float') return '#9e9e9e'
-  if (normalized === 'latent') return '#ff9800'
-  return '#c08520'
-}
-
 interface DrawnPort {
   placed: LaidOutBlockPort
   connected: boolean
   hasDefault: boolean
+  /** Cables landing on this port as a sink — two or more earn a count badge. */
+  producers: number
+}
+
+/** How many cables land on each port as a sink: the count a many-to-one port shows. */
+export function countProducers(connections: readonly { ownPortId: string; ownPolarity: string }[]): Map<string, number> {
+  const counts = new Map<string, number>()
+  for (const connection of connections) {
+    if (connection.ownPolarity !== 'sink') continue
+    counts.set(connection.ownPortId, (counts.get(connection.ownPortId) ?? 0) + 1)
+  }
+  return counts
 }
 
 /** Draw coincident Simple anchors once while retaining their union of states. */
 function portsToDraw(
   placedPorts: readonly LaidOutBlockPort[],
   connectedIds: ReadonlySet<string>,
+  producerCounts: ReadonlyMap<string, number>,
 ): DrawnPort[] {
   const byPoint = new Map<string, DrawnPort>()
   for (const placed of placedPorts) {
     const key = `${Math.round(placed.x * 1000)}:${Math.round(placed.y * 1000)}`
     const connected = connectedIds.has(placed.port.id)
     const hasDefault = placed.side === 'input' && portDefaultValue(placed.port) !== ''
+    const producers = producerCounts.get(placed.port.id) ?? 0
     const current = byPoint.get(key)
     if (current) {
       current.connected ||= connected
       current.hasDefault ||= hasDefault
+      current.producers = Math.max(current.producers, producers)
       continue
     }
-    byPoint.set(key, { placed, connected, hasDefault })
+    byPoint.set(key, { placed, connected, hasDefault, producers })
   }
   return [...byPoint.values()]
 }
@@ -120,7 +127,7 @@ function BlockPortDot({
   dragOffset: number | null
 }) {
   const editor = useEditor()
-  const { placed, connected, hasDefault } = port
+  const { placed, connected, hasDefault, producers } = port
   const portId = placed.port.id
 
   const isHinting = useValue(
@@ -183,7 +190,22 @@ function BlockPortDot({
           ? { transform: `translate(-50%, -50%) translateY(${dragOffset}px)` }
           : null),
       } as CSSProperties}
-    />
+    >
+      {producers >= 2 ? <PortCountBadge portId={portId} count={producers} /> : null}
+    </div>
+  )
+}
+
+/**
+ * Many-to-one, shown as a count. A port with two or more producers wears a
+ * muted pill beside its dot — the inspector's count-chip idiom — and nothing
+ * else: which producer is live is the Branch fade's job, not the cable's.
+ */
+export function PortCountBadge({ portId, count }: { portId: string; count: number }) {
+  return (
+    <span className="Port-count" data-testid={`port-count-${portId}`} aria-label={`${count} cables into this port`}>
+      {count}
+    </span>
   )
 }
 
@@ -613,7 +635,8 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
     () => new Set(connections.map((connection) => connection.ownPortId)),
     [connections],
   )
-  const drawnPorts = portsToDraw(layout.ports, connectedIds)
+  const producerCounts = useMemo(() => countProducers(connections), [connections])
+  const drawnPorts = portsToDraw(layout.ports, connectedIds, producerCounts)
   const simple = layout.view === 'simple'
   const isEditing = useValue(
     'editing Block',
@@ -627,6 +650,8 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
   )
   const drag = useValue('block port drag', () => getBlockPortDrag(editor), [editor])
   const heldPort = drag?.shapeId === shape.id ? drag : null
+  // Inside a Branch, a Block in a non-active arm paints faded with its arm.
+  const fade = useValue('Block branch fade', () => branchFadeOpacity(editor, shape.id), [editor, shape.id])
   // The add gutters are a selection affordance, exactly as the brief asks: they
   // exist for the Block you are working on and nowhere else, so a busy canvas
   // never sprouts a plus under every lane.
@@ -644,6 +669,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
     <HTMLContainer
       className={`NodeShape systemsketch-block-canvas${simple ? ' NodeShape_plain' : ''}`}
       data-block-view={layout.view}
+      style={fade < 1 ? { opacity: fade } : undefined}
       onContextMenu={(event) => {
         const target = event.target instanceof Element
           ? event.target.closest('input, textarea, select')

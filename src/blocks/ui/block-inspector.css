@@ -3,6 +3,8 @@
   box-sizing: border-box;
 }
 
+/* Every colour is a token from src/theme/tokens.css. */
+
 /* The inspector is persistent workspace chrome: a flush 280px dock, not a
    floating popout. The host remains responsible for opening and closing it. */
 .systemsketch-popout.systemsketch-popout--right[data-surface='inspector'] {
@@ -13,9 +15,9 @@
   width: min(280px, 100vw);
   min-height: 0;
   border: 0;
-  border-left: 1px solid var(--tl-color-divider, rgb(0 0 0 / 8%));
+  border-left: 1px solid var(--ss-border);
   border-radius: 0;
-  background: var(--tl-color-panel, #fff);
+  background: var(--ss-surface-raised);
   box-shadow: none;
   backdrop-filter: none;
   animation: none;
@@ -49,8 +51,8 @@
   min-height: 0;
   flex-direction: column;
   overflow: hidden;
-  color: var(--tl-color-text-1, #3f3f46);
-  background: var(--tl-color-panel, #fff);
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
   font: 12px/1.35 Inter, ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -80,8 +82,8 @@
   flex: 0 0 auto;
   gap: 3px;
   padding: 8px 10px;
-  border-bottom: 1px solid var(--tl-color-divider, rgb(0 0 0 / 8%));
-  background: var(--tl-color-panel, #fff);
+  border-bottom: 1px solid var(--ss-border);
+  background: var(--ss-surface-raised);
 }
 
 .block-inspector__tabs > [role='tab'] {
@@ -95,23 +97,21 @@
   border: 1px solid transparent;
   border-radius: 7px;
   background: transparent;
-  color: var(--tl-color-text-3, #71717a);
+  color: var(--ss-text-muted);
   cursor: pointer;
   font-weight: 600;
 }
 
 .block-inspector__tabs > [role='tab']:hover {
-  color: var(--tl-color-text-1, #3f3f46);
-  background: var(--tl-color-muted-2, rgb(136 128 176 / 10%));
+  color: var(--ss-text);
+  background: var(--ss-surface-hover);
 }
 
 .block-inspector__tabs > [role='tab'].is-active {
-  border-color: var(--tl-color-divider, rgb(0 0 0 / 8%));
-  color: var(--tl-color-text-1, #27272a);
-  /* The pyblocks donor resolves this surface to white. tldraw's current
-     `--tl-color-low` is gray, which changes the reference's tab treatment. */
-  background: #fff;
-  box-shadow: 0 1px 2px rgb(25 22 38 / 6%);
+  border-color: var(--ss-border);
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+  box-shadow: var(--ss-shadow-1);
 }
 
 .block-inspector__dock-close {
@@ -125,22 +125,22 @@
   place-items: center;
   border: 0;
   border-radius: 6px;
-  color: var(--tl-color-text-3, #71717a) !important;
-  background: var(--tl-color-panel, #fff);
+  color: var(--ss-text-muted) !important;
+  background: var(--ss-surface-raised);
   cursor: pointer;
 }
 
 .block-inspector__dock-close:hover {
-  background: var(--tl-color-muted-2, rgb(136 128 176 / 12%));
+  background: var(--ss-surface-hover);
 }
 
 .block-inspector__notice {
   margin: 8px 14px 0;
   padding: 7px 9px;
-  border: 1px solid rgb(47 128 237 / 20%);
+  border: 1px solid color-mix(in srgb, var(--ss-accent) 30%, transparent);
   border-radius: 7px;
-  color: #3569ad;
-  background: rgb(47 128 237 / 6%);
+  color: var(--ss-text);
+  background: var(--ss-accent-soft);
   font-size: 10px;
 }
 
@@ -153,7 +153,7 @@
 
 .block-inspector__section {
   padding: 12px 14px;
-  border-bottom: 1px solid rgb(0 0 0 / 6%);
+  border-bottom: 1px solid var(--ss-border);
 }
 
 .block-inspector__section-title {
@@ -161,7 +161,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 10px;
-  color: var(--tl-color-text-3, #a1a1aa);
+  color: var(--ss-text-muted);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: .07em;
@@ -179,7 +179,7 @@
   display: flex;
   flex: 0 0 74px;
   align-items: center;
-  color: var(--tl-color-text-2, #71717a);
+  color: var(--ss-text-muted);
 }
 
 .block-inspector input,
@@ -187,25 +187,30 @@
   min-width: 0;
   flex: 1 1 auto;
   padding: 5px 8px;
-  border: 1px solid var(--tl-color-divider, rgb(0 0 0 / 12%));
+  border: 1px solid var(--ss-border-strong);
   border-radius: 6px;
   outline: 0;
-  color: inherit;
-  background: #fff;
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
   resize: vertical;
+}
+
+.block-inspector input::placeholder,
+.block-inspector textarea::placeholder {
+  color: var(--ss-text-faint);
 }
 
 .block-inspector input:focus,
 .block-inspector textarea:focus,
 .block-inspector button:focus-visible {
-  outline: 2px solid var(--tl-color-selected, #2f80ed);
+  outline: 2px solid var(--ss-accent);
   outline-offset: -1px;
 }
 
 .block-inspector input:disabled,
 .block-inspector textarea:disabled {
-  color: var(--tl-color-text-3, #8b8b94);
-  background: var(--tl-color-muted-1, #f7f7f8);
+  color: var(--ss-text-faint);
+  background: var(--ss-surface-raised);
 }
 
 .block-inspector__icon-well {
@@ -216,9 +221,9 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 1px solid var(--tl-color-divider, rgb(0 0 0 / 12%));
+  border: 1px solid var(--ss-border-strong);
   border-radius: 6px;
-  background: #fff;
+  background: var(--ss-surface-sunken);
 }
 
 .block-inspector__icon-well.is-empty {
@@ -240,10 +245,10 @@
   grid-template-columns: repeat(6, 1fr);
   gap: 3px;
   padding: 7px;
-  border: 1px solid var(--tl-color-divider, rgb(0 0 0 / 12%));
+  border: 1px solid var(--ss-border);
   border-radius: 9px;
-  background: var(--tl-color-panel, #fff);
-  box-shadow: 0 8px 30px rgb(15 23 42 / 16%);
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-2);
 }
 
 .block-inspector__icon-option {
@@ -254,15 +259,15 @@
   place-items: center;
   border: 0;
   border-radius: 6px;
-  color: var(--tl-color-text-2, #52525b);
+  color: var(--ss-text-muted);
   background: transparent;
   cursor: pointer;
 }
 
 .block-inspector__icon-option:hover,
 .block-inspector__icon-option[aria-selected='true'] {
-  color: var(--tl-color-selected, #2f80ed);
-  background: rgb(47 128 237 / 10%);
+  color: var(--ss-text);
+  background: var(--ss-accent-soft);
 }
 
 .block-inspector__display-description {
@@ -277,7 +282,7 @@
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 7px;
-  color: var(--tl-color-text-2, #71717a);
+  color: var(--ss-text-muted);
 }
 
 .block-inspector__field-header label {
@@ -285,14 +290,14 @@
 }
 
 .block-inspector__character-count {
-  color: var(--tl-color-text-3, #a1a1aa);
+  color: var(--ss-text-muted);
   font-size: 10px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 .block-inspector__character-count[data-over-limit='true'] {
-  color: #c2413b;
+  color: var(--ss-danger);
   font-weight: 650;
 }
 
@@ -302,10 +307,10 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 1px solid var(--tl-color-divider, rgb(0 0 0 / 12%));
+  border: 1px solid var(--ss-border-strong);
   border-radius: 7px;
-  color: var(--tl-color-text-3, #71717a);
-  background: #fff;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-sunken);
   cursor: pointer;
 }
 
@@ -315,8 +320,8 @@
 }
 
 .block-inspector__visibility-button[aria-pressed='true'] {
-  border-color: rgb(47 128 237 / 32%);
-  color: var(--tl-color-selected, #2f80ed);
+  border-color: var(--ss-accent);
+  color: var(--ss-accent);
 }
 
 .block-inspector__display-description textarea {
@@ -328,7 +333,7 @@
 .block-inspector__hint,
 .block-inspector__port-help {
   margin: 0;
-  color: var(--tl-color-text-3, #a1a1aa);
+  color: var(--ss-text-muted);
   font-size: 10px;
   line-height: 1.4;
 }
@@ -343,23 +348,23 @@
   min-height: 28px;
   flex: 1 1 0;
   padding: 5px 6px;
-  border: 1px solid var(--tl-color-divider, rgb(0 0 0 / 12%));
+  border: 1px solid var(--ss-border-strong);
   border-radius: 6px;
-  color: var(--tl-color-text-2, #52525b);
-  background: #fff;
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
   cursor: pointer;
   text-transform: capitalize;
 }
 
 .block-inspector__choices button[aria-pressed='true'] {
-  border-color: var(--tl-color-selected, #2f80ed);
-  color: #fff;
-  background: var(--tl-color-selected, #2f80ed);
+  border-color: var(--ss-accent);
+  color: var(--ss-accent-text);
+  background: var(--ss-accent);
 }
 
 .block-inspector__choices button:disabled:not([aria-pressed='true']),
 .block-inspector__choices button[aria-disabled='true']:not([aria-pressed='true']) {
-  color: var(--tl-color-text-3, #a1a1aa);
+  color: var(--ss-text-faint);
 }
 
 .block-inspector__tag-ghost {
@@ -367,10 +372,10 @@
   align-items: center;
   gap: 6px;
   padding: 5px 10px;
-  border: 1px dashed var(--tl-color-divider, rgb(0 0 0 / 18%));
+  border: 1px dashed var(--ss-border-strong);
   border-radius: 7px;
-  color: var(--tl-color-text-3, #71717a);
-  background: #fff;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-sunken);
   font-size: 11.5px;
 }
 
@@ -385,8 +390,8 @@
   padding: 2px 8px;
   border: 0;
   border-radius: 7px;
-  color: var(--tl-color-text-2, #71717a);
-  background: rgb(136 128 176 / 12%);
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-active);
   cursor: pointer;
   font-size: 10px;
   font-weight: 600;
@@ -395,8 +400,8 @@
 }
 
 .block-inspector__count-pill.is-active {
-  color: var(--tl-color-selected, #2f80ed);
-  background: rgb(47 128 237 / 14%);
+  color: var(--ss-text);
+  background: var(--ss-accent-soft);
 }
 
 .block-inspector__icon-button {
@@ -408,14 +413,14 @@
   padding: 0;
   border: 0;
   border-radius: 6px;
-  color: var(--tl-color-text-2, #71717a);
+  color: var(--ss-text-muted);
   background: transparent;
   cursor: pointer;
 }
 
 .block-inspector__icon-button:hover:not(:disabled) {
-  color: var(--tl-color-text-1, #27272a);
-  background: rgb(136 128 176 / 14%);
+  color: var(--ss-text);
+  background: var(--ss-surface-active);
 }
 
 .block-inspector__ports {
@@ -450,7 +455,7 @@
   place-items: center;
   border: 0;
   border-radius: 4px;
-  color: var(--tl-color-text-3, #a1a1aa);
+  color: var(--ss-text-faint);
   background: transparent;
   opacity: .45;
   cursor: grab;
@@ -479,8 +484,8 @@
 .block-inspector__managed-row.is-dragging {
   z-index: 4;
   border-radius: 6px;
-  background: var(--tl-color-panel, #fff);
-  box-shadow: 0 3px 10px rgb(15 23 42 / 22%);
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-2);
 }
 
 .block-inspector__drop-bar {
@@ -489,7 +494,7 @@
   left: 0;
   right: 0;
   height: 0;
-  border-top: 2px solid var(--tl-color-selected, #4f7df3);
+  border-top: 2px solid var(--ss-accent);
   pointer-events: none;
 }
 
@@ -499,8 +504,8 @@
   left: -4px;
   right: -4px;
   border-radius: 6px;
-  background: color-mix(in srgb, var(--tl-color-selected, #4f7df3) 9%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tl-color-selected, #4f7df3) 22%, transparent);
+  background: var(--ss-accent-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ss-accent) 22%, transparent);
   pointer-events: none;
 }
 
@@ -518,7 +523,7 @@
 .block-inspector__divider-line {
   flex: 1;
   height: 1px;
-  background: var(--tl-color-divider, rgb(0 0 0 / 12%));
+  background: var(--ss-border);
 }
 
 .block-inspector__divider--branch .block-inspector__divider-line {
@@ -527,14 +532,14 @@
 
 .block-inspector__divider--header .block-inspector__divider-line {
   height: 2px;
-  background: color-mix(in srgb, var(--tl-color-text-3, #a1a1aa) 55%, transparent);
+  background: var(--ss-border-strong);
 }
 
 .block-inspector__divider-label {
   font-size: 9px;
   font-weight: 600;
   letter-spacing: .09em;
-  color: var(--tl-color-text-3, #a1a1aa);
+  color: var(--ss-text-faint);
   text-transform: uppercase;
 }
 
@@ -547,7 +552,7 @@
   height: 8px;
   margin: -3px 0;
   border-radius: 6px;
-  color: var(--tl-color-text-3, #a1a1aa);
+  color: var(--ss-text-faint);
   font-size: 10px;
   transition: height 90ms ease-in-out;
 }
@@ -555,13 +560,15 @@
 .block-inspector__empty-section.is-open {
   height: 22px;
   margin: 0;
-  border: 1px dashed var(--tl-color-divider, rgb(0 0 0 / 18%));
+  border: 1px dashed var(--ss-border-strong);
 }
 
 .block-inspector__port-row input {
   width: 100%;
 }
 
+/* Type names and defaults are code, and read the code tokens so an imported
+   editor theme colours them the way it colours its own editor. */
 .block-inspector__port-type,
 .block-inspector__port-default,
 .block-inspector__managed-type {
@@ -569,13 +576,19 @@
   font-size: 11px !important;
 }
 
+.block-inspector input.block-inspector__port-type,
+.block-inspector input.block-inspector__port-default {
+  color: var(--ss-code-text);
+  background: var(--ss-code-surface);
+}
+
 .block-inspector__port-default[readonly] {
   cursor: help;
 }
 
 .block-inspector__delete:hover:not(:disabled) {
-  color: #b91c1c;
-  background: rgb(185 28 28 / 8%);
+  color: var(--ss-danger);
+  background: var(--ss-danger-soft);
 }
 
 .block-inspector__managed-row {
@@ -586,9 +599,9 @@
   min-height: 34px;
   align-items: center;
   padding: 2px 3px;
-  border: 1px solid rgb(136 128 176 / 16%);
+  border: 1px solid var(--ss-border);
   border-radius: 8px;
-  background: rgb(136 128 176 / 4%);
+  background: var(--ss-surface-hover);
 }
 
 .block-inspector__managed-row[data-visible='false'] {
@@ -609,7 +622,7 @@
 }
 
 .block-inspector__managed-type {
-  color: var(--tl-color-text-3, #a1a1aa);
+  color: var(--ss-text-muted);
   text-align: right;
 }
 
@@ -627,7 +640,7 @@
   place-items: center;
   border: 0;
   border-radius: 4px;
-  color: var(--tl-color-text-3, #71717a);
+  color: var(--ss-text-muted);
   background: transparent;
   cursor: pointer;
 }
@@ -662,26 +675,30 @@
 
 .block-inspector__notes header p {
   margin: 0;
-  color: var(--tl-color-text-3, #a1a1aa);
+  color: var(--ss-text-muted);
   font-size: 11px;
   line-height: 1.45;
 }
 
 .block-inspector__notes-unavailable {
   padding: 12px;
-  border: 1px solid var(--tl-color-divider, rgb(0 0 0 / 10%));
+  border: 1px solid var(--ss-border);
   border-radius: 9px;
-  color: var(--tl-color-text-2, #71717a);
-  background: var(--tl-color-muted-1, #fbfbfd);
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-sunken);
   font-size: 11px;
   line-height: 1.5;
 }
 
-.block-inspector__notes-editor {
+/* The notes editor is a code well: monospace, and painted from the code
+   tokens so an imported VS Code theme gives it that editor's own surface. */
+.block-inspector .block-inspector__notes-editor {
   min-height: 260px;
   flex: 1 1 auto;
   padding: 12px !important;
   resize: none !important;
+  color: var(--ss-code-text);
+  background: var(--ss-code-surface);
   font: 12px/1.55 ui-monospace, 'SF Mono', Menlo, monospace !important;
 }
 
@@ -690,18 +707,20 @@
   min-height: 220px;
   place-items: center;
   padding: 16px;
-  color: var(--tl-color-text-3, #a1a1aa);
+  color: var(--ss-text-muted);
   text-align: center;
 }
 
+/* The mini menu is the opposite polarity of the board, like the selection
+   pill it usually rides in. */
 .block-mini-menu {
   display: flex;
   align-items: stretch;
   overflow: hidden;
   border-radius: 10px;
-  color: #fff;
-  background: #222326;
-  box-shadow: 0 8px 24px #20242b35;
+  color: var(--ss-text-inverse);
+  background: var(--ss-surface-inverse);
+  box-shadow: var(--ss-shadow-2);
 }
 
 .block-mini-menu__views {
@@ -715,7 +734,7 @@
   padding: 0 8px;
   border: 0;
   border-radius: 7px;
-  color: #dfe1e5;
+  color: var(--ss-text-inverse);
   background: transparent;
   font-size: 10px;
 }
@@ -730,19 +749,19 @@
 
 .block-mini-menu button:hover,
 .block-mini-menu button[aria-pressed='true'] {
-  color: #fff;
-  background: #44464c;
+  color: var(--ss-text-inverse);
+  background: var(--ss-surface-inverse-hover);
 }
 
 .block-mini-menu__step-in,
 .block-mini-menu__inspect {
-  border-left: 1px solid #424349 !important;
+  border-left: 1px solid var(--ss-border-inverse) !important;
   border-radius: 0 !important;
 }
 
 .block-mini-menu__step-in {
   min-width: 54px !important;
-  color: #eee9ff !important;
+  color: var(--ss-text-inverse) !important;
 }
 
 /* Batch (multi-selection) inspector -------------------------------------- */
@@ -756,12 +775,12 @@
   flex: 0 0 auto;
   align-items: center;
   padding: 8px 34px 8px 14px;
-  border-bottom: 1px solid var(--tl-color-divider, rgb(0 0 0 / 8%));
-  background: var(--tl-color-panel, #fff);
+  border-bottom: 1px solid var(--ss-border);
+  background: var(--ss-surface-raised);
 }
 
 .block-inspector__batch-count {
-  color: var(--tl-color-text-1, #27272a);
+  color: var(--ss-text);
   font-size: 12px;
   font-weight: 600;
 }
@@ -772,10 +791,10 @@
 
 .block-inspector__mixed-chip {
   padding: 1px 6px;
-  border: 1px solid var(--tl-color-divider, rgb(0 0 0 / 12%));
+  border: 1px solid var(--ss-border);
   border-radius: 999px;
-  color: var(--tl-color-text-3, #a1a1aa);
-  background: var(--tl-color-muted-2, rgb(136 128 176 / 10%));
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-sunken);
   font-size: 9px;
   font-weight: 600;
   letter-spacing: .04em;
@@ -792,9 +811,13 @@
   display: inline-flex;
   align-items: center;
   padding: 0 10px;
-  border-right: 1px solid #424349;
-  color: #dfe1e5;
+  border-right: 1px solid var(--ss-border-inverse);
+  color: var(--ss-text-inverse);
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.block-inspector__icon-option[aria-selected='true'] {
+  box-shadow: inset 0 0 0 1px var(--ss-accent);
 }
