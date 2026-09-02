@@ -59,6 +59,7 @@ import {
 } from './workspaceModel'
 import { decodeSystemSketchDocument } from './systemSketchFile'
 import './local-workspace.css'
+import { hydrateCustomColors } from '../appearance/customColors'
 import { SettingsGearIcon, SystemSketchSettingsDialog } from '../settings/InterfaceSettings'
 
 const SAVE_DEBOUNCE_MS = 600
@@ -142,6 +143,10 @@ function fingerprint(document: { mtime?: number; size?: number }): DocumentFinge
  */
 function loadDocumentSource(editor: Editor, source: string): string | null {
   const { core } = decodeSystemSketchDocument(source)
+  // A custom colour is a named colour that carries its hex, and the store
+  // validates names as it parses — so every name the file uses is registered
+  // from the text first, or the parse below would reject the document.
+  hydrateCustomColors(core, editor)
   const parsed = parseTldrawJsonFile({ json: core, schema: editor.store.schema })
   if (!parsed.ok) return `tldraw could not read this document (${parsed.error.type})`
   editor.store.mergeRemoteChanges(() => {

@@ -713,12 +713,6 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
       className={`NodeShape systemsketch-block-canvas${simple ? ' NodeShape_plain' : ''}${value ? ' NodeShape_value' : ''}`}
       data-block-view={layout.view}
       style={fade < 1 ? { opacity: fade } : undefined}
-      onContextMenu={(event) => {
-        const target = event.target instanceof Element
-          ? event.target.closest('input, textarea, select')
-          : null
-        if (target && event.currentTarget.contains(target)) event.stopPropagation()
-      }}
       onPointerDownCapture={(event) => {
         // The painted element is the most exact answer available, and it is only
         // available here. A miss is left alone rather than reset to the title:

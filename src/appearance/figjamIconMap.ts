@@ -21,6 +21,30 @@ const ARROWHEADS: ValueToIcon = {
   // tldraw's `square`, `pipe` and `bar` have no FigJam counterpart.
 }
 
+const DASH: ValueToIcon = {
+  solid: 'line-style/Solid',
+  dashed: 'line-style/Dashed',
+  // tldraw's `draw` and `dotted` are its own; `none` is FigJam's No-line icon.
+  none: 'line-style/None',
+}
+
+/**
+ * The icons a trigger shows regardless of its value. FigJam's Line style
+ * trigger is three bars — a line, then two outlined bars — on both a shape and
+ * a connector; its Typeface trigger is `Aa`. Both are read off the pill itself.
+ */
+export const FIGJAM_TRIGGER_ICON: Partial<Record<AppearanceControlId, string>> = {
+  dash: 'trigger/Line style',
+  lineStyle: 'trigger/Line style',
+  font: 'trigger/Typeface',
+}
+
+/** FigJam's menu check, beside the chosen row of Typeface and Font size. */
+export const FIGJAM_CHECK_ICON = 'menu/Check'
+
+/** FigJam's eyedropper, in the picker behind Custom. */
+export const FIGJAM_EYEDROPPER_ICON = 'picker/Eyedropper'
+
 /** All three line-shape styles share FigJam's three icons. */
 const LINE_SHAPE: ValueToIcon = {
   elbow: 'line-shape/Elbowed',
@@ -37,12 +61,9 @@ export const FIGJAM_ICON_FOR: Partial<Record<AppearanceControlId, ValueToIcon>> 
   connectionRouting: LINE_SHAPE,
   arrowKind: LINE_SHAPE,
   spline: LINE_SHAPE,
-  dash: {
-    solid: 'line-style/Solid',
-    dashed: 'line-style/Dashed',
-    // tldraw's `draw` and `dotted` are its own; `none` is FigJam's No-line icon.
-    none: 'line-style/None',
-  },
+  dash: DASH,
+  // A connector's Line style is the dash control with the weight beside it.
+  lineStyle: DASH,
   fill: {
     none: 'fill/No fill',
     semi: 'fill/Transparent',
