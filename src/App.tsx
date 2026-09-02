@@ -1,7 +1,8 @@
 import { getAssetUrlsByImport } from '@tldraw/assets/imports.vite'
 import { Tldraw, type Editor } from 'tldraw'
-import { useCallback } from 'react'
+import { useCallback, useLayoutEffect } from 'react'
 import 'tldraw/tldraw.css'
+import './theme/tokens.css'
 import { EXCALIDRAW_SHAPE_UTILS, registerExcalidrawPasteHandler } from './excalidrawInterop'
 import {
   BlockShapeUtil,
@@ -47,10 +48,11 @@ import {
   useLocalWorkspace,
 } from './workspace/LocalWorkspace'
 import { interfaceScaleCssValues, useInterfaceScale } from './settings/interfaceScale'
+import { installBoardTheme, releasePrepaintTheme, useAppliedTheme } from './theme/themeStore'
 import { installInstantTextEditing } from './instantTextEditing'
 import { installDevelopmentSeam } from './developmentSeam'
 import { enablePasteAtCursor } from './pasteAtCursor'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import './app.css'
 import { SYSTEMSKETCH_THEMES } from './appearance/figjamPalette'
 
@@ -105,6 +107,7 @@ function SystemSketchCanvas() {
   const onMount = useCallback((editor: Editor) => {
     enablePasteAtCursor(editor)
     const stopWorkspace = attach(editor)
+    const stopBoardTheme = installBoardTheme(editor)
     const stopBlockConnections = installBlockConnections(editor)
     const stopDevelopmentSeam = installDevelopmentSeam(editor)
     const stopInstantTextEditing = installInstantTextEditing(editor)
@@ -120,6 +123,7 @@ function SystemSketchCanvas() {
       stopInstantTextEditing()
       stopDevelopmentSeam()
       stopBlockConnections()
+      stopBoardTheme()
       stopWorkspace()
     }
   }, [attach])
@@ -158,6 +162,8 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
     // cycle the preset — but they must still open on the same arrow and the
     // same edge routing the product does, or the lab lies about the datum.
     applyStoredArrowPreset(editor)
+    // Same for the theme: a lab that ignored it would lie about the chrome.
+    const stopBoardTheme = installBoardTheme(editor)
     const stopBlockConnections = isBlockDevelopment
       ? installBlockConnections(editor)
       : () => undefined
@@ -177,6 +183,7 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopBlockConnections()
+      stopBoardTheme()
     }
   }, [isBlockDevelopment])
 
@@ -203,6 +210,33 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
   )
 }
 
+/**
+ * The one place that says which theme is on.
+ *
+ * Two data attributes for the stylesheets and — for a palette — its values
+ * inline. It encloses the workspace dialogs and notices as well as the canvas,
+ * because those are siblings of `<main>` and would otherwise sit outside every
+ * token. `display: contents`, so it draws nothing and moves nothing.
+ */
+function ThemeRoot({ children }: { children: ReactNode }) {
+  const theme = useAppliedTheme()
+  // `index.html` painted the page in the stored theme before this bundle ran;
+  // from here on this element owns the attributes, so the pre-paint copy goes
+  // before the first frame is shown.
+  useLayoutEffect(releasePrepaintTheme, [])
+  return (
+    <div
+      className="systemsketch-theme-root"
+      data-testid="systemsketch-theme-root"
+      data-ss-theme={theme.theme}
+      data-ss-color-scheme={theme.scheme}
+      style={theme.style as CSSProperties | undefined}
+    >
+      {children}
+    </div>
+  )
+}
+
 export function App() {
   const profile = resolveDevelopmentProfile(window.location.search)
 
@@ -217,14 +251,20 @@ export function App() {
   }
 
   if (profile !== 'product') {
-    return <DevelopmentCanvas profile={profile} />
+    return (
+      <ThemeRoot>
+        <DevelopmentCanvas profile={profile} />
+      </ThemeRoot>
+    )
   }
 
   return (
-    <SystemSketchWorkspaceProvider>
-      <ChromeProvider>
-        <SystemSketchCanvas />
-      </ChromeProvider>
-    </SystemSketchWorkspaceProvider>
+    <ThemeRoot>
+      <SystemSketchWorkspaceProvider>
+        <ChromeProvider>
+          <SystemSketchCanvas />
+        </ChromeProvider>
+      </SystemSketchWorkspaceProvider>
+    </ThemeRoot>
   )
 }

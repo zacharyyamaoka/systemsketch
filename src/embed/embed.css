@@ -5,6 +5,11 @@
  * bar already names the file and shows whether it is dirty, and everything a
  * person came to do is on the canvas. Only two things ever paint: a message
  * about an edit that did not land, and a read-only marker.
+ *
+ * These strips sit outside `.tl-container`, so they read the tokens from the
+ * app root — which is why `EmbeddedCanvas` stamps `data-ss-theme` on the
+ * outer wrapper and not only on the canvas. Nothing here knows which host it
+ * is in; in VS Code the tokens are the workbench's own variables.
  */
 
 .systemsketch-embed {
@@ -12,7 +17,8 @@
   inset: 0;
   display: flex;
   flex-direction: column;
-  background: var(--color-background, #fff);
+  color: var(--ss-text);
+  background: var(--ss-surface);
 }
 
 .systemsketch-embed .systemsketch-embedded-app {
@@ -26,8 +32,8 @@
   inset: 0;
   display: grid;
   place-items: center;
-  font: 500 13px/1.4 var(--tl-font-ui, system-ui, sans-serif);
-  color: var(--vscode-descriptionForeground, #6b7280);
+  font: 500 13px/1.4 var(--tl-font-sans, system-ui, sans-serif);
+  color: var(--ss-text-muted);
 }
 
 /* An edit that did not land has to say so before the next one is drawn on it. */
@@ -36,10 +42,10 @@
   align-items: center;
   gap: 12px;
   padding: 8px 10px 8px 14px;
-  font: 500 12px/1.4 var(--tl-font-ui, system-ui, sans-serif);
-  color: var(--vscode-inputValidation-warningForeground, #4a3200);
-  background: var(--vscode-inputValidation-warningBackground, #fff4ce);
-  border-bottom: 1px solid var(--vscode-inputValidation-warningBorder, #e6c07b);
+  font: 500 12px/1.4 var(--tl-font-sans, system-ui, sans-serif);
+  color: var(--ss-text);
+  background: var(--ss-warning-soft);
+  border-bottom: 1px solid var(--ss-warning);
 }
 
 .systemsketch-embed-error span {
@@ -59,7 +65,7 @@
 }
 
 .systemsketch-embed-error button:hover {
-  background: rgb(0 0 0 / 8%);
+  background: var(--ss-surface-active);
 }
 
 .systemsketch-embed-readonly {
@@ -68,11 +74,11 @@
   left: 50%;
   z-index: 400;
   padding: 3px 10px;
-  font: 600 11px/1.4 var(--tl-font-ui, system-ui, sans-serif);
+  font: 600 11px/1.4 var(--tl-font-sans, system-ui, sans-serif);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--vscode-badge-foreground, #fff);
-  background: var(--vscode-badge-background, #4d4d4d);
+  color: var(--ss-text-inverse);
+  background: var(--ss-surface-inverse);
   border-radius: 999px;
   transform: translateX(-50%);
   pointer-events: none;

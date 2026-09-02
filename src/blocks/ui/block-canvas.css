@@ -2,22 +2,23 @@
  * The pyblocks canvas face. Geometry is deliberately not authored here:
  * layoutBlock supplies every text box, divider and port coordinate so paint,
  * hit testing and bound connection endpoints cannot drift apart.
+ *
+ * Colours are tokens from src/theme/tokens.css. A port's type colour arrives
+ * as `--port-color`, set inline from `portColor()` — that is document content
+ * and stays whatever the person chose; only its absence falls back to a token.
  */
 
 .systemsketch-block-canvas.NodeShape {
-  --node-shadow-border:
-    0 0 0 1px rgba(0, 0, 0, 0.06),
-    0 2px 6px rgba(0, 0, 0, 0.08),
-    0 1px 2px rgba(0, 0, 0, 0.04);
+  --node-shadow-border: 0 0 0 1px var(--ss-border), var(--ss-shadow-1);
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   box-sizing: border-box;
   border-radius: 9px;
-  background: var(--tl-color-panel, #fff);
+  background: var(--ss-surface-raised);
   box-shadow: var(--node-shadow-border);
-  color: var(--tl-color-text-1, #27272a);
+  color: var(--ss-text);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   overflow: visible;
 }
@@ -46,16 +47,16 @@
   margin: 0;
   padding: 3px 7px;
   pointer-events: all;
-  border: 2px solid var(--tl-color-selected, #4f7df3);
+  border: 2px solid var(--ss-accent);
   border-radius: 6px;
   outline: none;
-  background: var(--tl-color-panel, #fff);
-  color: var(--tl-color-text-1, #27272a);
+  background: var(--ss-surface-raised);
+  color: var(--ss-text);
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   line-height: 1.2;
   box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--tl-color-panel, #fff) 88%, transparent),
-    0 5px 18px rgba(15, 23, 42, 0.16);
+    0 0 0 2px color-mix(in srgb, var(--ss-surface-raised) 88%, transparent),
+    var(--ss-shadow-2);
   transform-origin: center;
 }
 
@@ -89,9 +90,9 @@
   align-items: center;
   box-sizing: border-box;
   padding: 0 12px;
-  border-bottom: 1px solid var(--tl-color-divider, rgba(0, 0, 0, 0.12));
+  border-bottom: 1px solid var(--ss-border);
   border-radius: 9px 9px 0 0;
-  background: var(--tl-color-panel, #fff);
+  background: var(--ss-surface-raised);
 }
 
 .systemsketch-block-canvas .BlockNode-heading {
@@ -105,14 +106,14 @@
 .systemsketch-block-canvas .BlockNode-headingIcon {
   flex: 0 0 auto;
   display: flex;
-  color: var(--tl-color-text-3, #3f3f46);
+  color: var(--ss-text-muted);
 }
 
 .systemsketch-block-canvas .BlockNode-headingTitle {
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
-  color: var(--tl-color-text-1, #27272a);
+  color: var(--ss-text);
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 36px;
   font-weight: 500;
@@ -127,7 +128,7 @@
   flex: 0 0 auto;
   max-width: 35%;
   overflow: hidden;
-  color: var(--tl-color-text-3, #a1a1aa);
+  color: var(--ss-text-muted);
   font-size: 18px;
   line-height: 24px;
   text-overflow: ellipsis;
@@ -142,7 +143,7 @@
   justify-content: center;
   gap: 12px;
   overflow: hidden;
-  color: #27272a;
+  color: var(--ss-text);
   font-size: 44px;
   font-weight: 600;
   line-height: 50px;
@@ -161,12 +162,12 @@
 .systemsketch-block-canvas .BlockNode-simpleIcon {
   flex: 0 0 auto;
   display: flex;
-  color: #3f3f46;
+  color: var(--ss-text);
 }
 
 .systemsketch-block-canvas .BlockNode-simpleDescription {
   overflow: hidden;
-  color: #71717a;
+  color: var(--ss-text-muted);
   font-size: 18px;
   line-height: 24px;
   text-align: center;
@@ -174,7 +175,7 @@
 
 .systemsketch-block-canvas .BlockNode-simpleType {
   overflow: hidden;
-  color: #a1a1aa;
+  color: var(--ss-text-muted);
   font-size: 18px;
   line-height: 24px;
   text-align: center;
@@ -184,7 +185,7 @@
 
 .systemsketch-block-canvas .BlockNode-description {
   overflow: hidden;
-  color: #71717a;
+  color: var(--ss-text-muted);
   font-size: 11px;
   line-height: 1.45;
   text-overflow: ellipsis;
@@ -196,7 +197,7 @@
 .systemsketch-block-canvas .BlockNode-divider {
   position: absolute;
   height: 0;
-  border-top: 1px solid var(--tl-color-divider, rgba(0, 0, 0, 0.12));
+  border-top: 1px solid var(--ss-border);
 }
 
 .systemsketch-block-canvas .BlockNode-dividerHandle {
@@ -223,7 +224,7 @@
 }
 
 .systemsketch-block-canvas .BlockNode-dividerHandle:hover::after {
-  background: var(--tl-color-selected, #3b82f6);
+  background: var(--ss-accent);
   opacity: 0.35;
 }
 
@@ -242,7 +243,7 @@
 
 .systemsketch-block-canvas .BlockNode-portName {
   overflow: hidden;
-  color: var(--tl-color-text-1, #3f3f46);
+  color: var(--ss-text);
   font-size: 18px;
   line-height: 24px;
   text-overflow: ellipsis;
@@ -251,7 +252,7 @@
 
 .systemsketch-block-canvas .BlockNode-portType {
   overflow: hidden;
-  color: var(--tl-color-text-3, #a1a1aa);
+  color: var(--ss-text-muted);
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 18px;
   line-height: 24px;
@@ -264,10 +265,10 @@
   max-width: 88px;
   padding: 0 7px;
   overflow: hidden;
-  border: 1px solid var(--tl-color-divider, #e4e4e7);
+  border: 1px solid var(--ss-border);
   border-radius: 999px;
-  background: var(--tl-color-muted-2, #f4f4f5);
-  color: var(--tl-color-text-2, #71717a);
+  background: var(--ss-surface-sunken);
+  color: var(--ss-text-muted);
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 13px;
   line-height: 18px;
@@ -281,7 +282,7 @@ html[data-pb-defaultmark='off'] .systemsketch-block-canvas .BlockNode-portDefaul
 }
 
 html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portName--default {
-  text-decoration: underline dotted var(--tl-color-text-3, #a1a1aa) 1.5px;
+  text-decoration: underline dotted var(--ss-text-muted) 1.5px;
   text-underline-offset: 3px;
 }
 
@@ -296,10 +297,10 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   box-sizing: border-box;
   border-radius: 50%;
   pointer-events: none;
-  background: var(--tl-color-panel, #fff);
+  background: var(--ss-surface-raised);
   box-shadow:
-    0 0 0 2px var(--tl-color-panel, #fff),
-    0 0 0 3px var(--port-color, rgba(0, 0, 0, 0.15));
+    0 0 0 2px var(--ss-surface-raised),
+    0 0 0 3px var(--port-color, var(--ss-border-strong));
   transform: translate(-50%, -50%);
   transition: transform 50ms ease-in-out;
 }
@@ -312,11 +313,11 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
 }
 
 .systemsketch-block-canvas .Port.Port_default:not(.Port_connected) {
-  background: var(--tl-color-text-3, #a1a1aa);
+  background: var(--ss-text-muted);
 }
 
 .systemsketch-block-canvas .Port.Port_connected {
-  background: var(--port-color, var(--tl-color-text-3, #71717a));
+  background: var(--port-color, var(--ss-text-muted));
 }
 
 [data-state='select.idle'] .systemsketch-block-canvas .Port,
@@ -333,18 +334,18 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
 .systemsketch-block-canvas .Port.Port_eligible {
   opacity: 1;
   box-shadow:
-    0 0 0 2px var(--tl-color-panel, #fff),
-    0 0 0 3px var(--port-color, rgba(0, 0, 0, 0.15)),
-    0 0 0 7px color-mix(in srgb, var(--port-color, #c08520) 26%, transparent);
+    0 0 0 2px var(--ss-surface-raised),
+    0 0 0 3px var(--port-color, var(--ss-border-strong)),
+    0 0 0 7px color-mix(in srgb, var(--port-color, var(--ss-accent)) 26%, transparent);
 }
 
 .systemsketch-block-canvas .Port.Port_hinting {
   opacity: 1;
-  background: var(--port-color, var(--tl-color-text-3, #71717a));
+  background: var(--port-color, var(--ss-text-muted));
   box-shadow:
-    0 0 0 2px var(--tl-color-panel, #fff),
-    0 0 0 4px var(--port-color, rgba(0, 0, 0, 0.15)),
-    0 0 0 9px color-mix(in srgb, var(--port-color, #c08520) 38%, transparent);
+    0 0 0 2px var(--ss-surface-raised),
+    0 0 0 4px var(--port-color, var(--ss-border-strong)),
+    0 0 0 9px color-mix(in srgb, var(--port-color, var(--ss-accent)) 38%, transparent);
   transform: translate(-50%, -50%) scale(1.18);
 }
 
@@ -400,12 +401,12 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   border-radius: 50%;
   opacity: 0;
   pointer-events: none;
-  background: var(--tl-color-panel, #fff);
-  color: var(--tl-color-selected, #4f7df3);
+  background: var(--ss-surface-raised);
+  color: var(--ss-accent);
   box-shadow:
-    0 0 0 2px var(--tl-color-selected, #4f7df3),
-    0 0 0 5px color-mix(in srgb, var(--tl-color-selected, #4f7df3) 22%, transparent),
-    0 1px 3px rgba(15, 23, 42, 0.2);
+    0 0 0 2px var(--ss-accent),
+    0 0 0 5px color-mix(in srgb, var(--ss-accent) 22%, transparent),
+    var(--ss-shadow-1);
   transform: translate(-50%, -50%);
   transition: opacity 90ms ease-in-out, transform 90ms ease-in-out;
   cursor: pointer;
@@ -431,9 +432,9 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
 .systemsketch-block-canvas .Port.Port_dragging {
   z-index: 7;
   box-shadow:
-    0 0 0 2px var(--tl-color-panel, #fff),
-    0 0 0 3px var(--port-color, rgba(0, 0, 0, 0.15)),
-    0 0 0 7px color-mix(in srgb, var(--tl-color-selected, #4f7df3) 30%, transparent);
+    0 0 0 2px var(--ss-surface-raised),
+    0 0 0 3px var(--port-color, var(--ss-border-strong)),
+    0 0 0 7px color-mix(in srgb, var(--ss-accent) 30%, transparent);
 }
 
 /* The held row is a card in flight. It has to be opaque: it passes straight
@@ -442,18 +443,18 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
 .systemsketch-block-canvas .BlockNode-portLabel--dragging {
   z-index: 7;
   border-radius: 6px;
-  background: var(--tl-color-panel, #fff);
-  color: var(--tl-color-selected, #4f7df3);
+  background: var(--ss-surface-raised);
+  color: var(--ss-accent);
   /* Shadow, not a ring: a blue-outlined box on this face already means "you
    * are editing this text", and a row in flight is not that. */
-  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.22);
+  box-shadow: var(--ss-shadow-2);
 }
 
 .systemsketch-block-canvas .BlockNode-portDropRule {
   position: absolute;
   z-index: 5;
   height: 0;
-  border-top: 2px solid var(--tl-color-selected, #4f7df3);
+  border-top: 2px solid var(--ss-accent);
   pointer-events: none;
 }
 
@@ -466,9 +467,9 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   width: 18px;
   height: 22px;
   border-radius: 4px;
-  background: var(--tl-color-muted-2, #f4f4f5);
-  color: var(--tl-color-text-3, #a1a1aa);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+  background: var(--ss-surface-sunken);
+  color: var(--ss-text-muted);
+  box-shadow: var(--ss-shadow-1);
   pointer-events: none;
 }
 
@@ -495,9 +496,9 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   align-items: center;
   box-sizing: border-box;
   padding: 0 4px 6px 12px;
-  border-top: 1px solid var(--tl-color-divider, rgba(0, 0, 0, 0.12));
+  border-top: 1px solid var(--ss-border);
   border-radius: 0 0 9px 9px;
-  background: var(--tl-color-panel, #fff);
+  background: var(--ss-surface-raised);
   pointer-events: none;
 }
 
@@ -511,7 +512,7 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   min-width: 32px;
   height: 32px;
   flex-shrink: 0;
-  color: var(--tl-color-text-3, #71717a);
+  color: var(--ss-text-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {

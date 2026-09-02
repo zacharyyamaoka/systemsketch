@@ -1,0 +1,131 @@
+  PASS  index.html carries the pre-paint theme stamp
+  PASS  the picker switches Light → Dark Modern live: root palette/dark, tldraw dark class, canvas rgb(31, 31, 31)
+  PASS  the pre-paint stamp on <html> is released once the app root owns the theme
+  PASS  importing Default Light Modern through the file input yields the mapping's own tokens and a light board (rgb(255, 255, 255))
+  PASS  Light: root systemsketch/light, tldraw light, canvas rgb(249, 250, 251)
+  PASS  Light: file title, top-left shell 13.28:1 (≥ 4.5) #2e2e2e on #fcfcfc
+  PASS  Light: timer chip 4.69:1 (≥ 4.5) #666b6f on #edf0f2
+  PASS  Light: Share button 3.79:1 (≥ 3) #ffffff on #3182ed
+  PASS  Light: toolbar tool icon (resting) 13.28:1 (≥ 3) #2e2e2e on #fcfcfc
+  PASS  Light: toolbar tool icon (active) 3.79:1 (≥ 3) #ffffff on #3182ed
+  PASS  Light: Block tool button 13.28:1 (≥ 3) #2e2e2e on #fcfcfc
+  PASS  Light: utility strip button 13.28:1 (≥ 3) #2e2e2e on #fcfcfc
+  PASS  Light: inspector active tab 11.86:1 (≥ 4.5) #2e2e2e on #edf0f2
+  PASS  Light: inspector section title 13.85:1 (≥ 4.5) #272b32 on #fcfcfc
+  PASS  Light: inspector field label 5.23:1 (≥ 4.5) #666b6f on #fcfcfc
+  PASS  Light: inspector input text 11.86:1 (≥ 4.5) #2e2e2e on #edf0f2
+  PASS  Light: inspector input boundary 3.22:1 (≥ 3) #2e2e2e @ 0.55 on #edf0f2
+  PASS  Light: selection pill button 16.67:1 (≥ 4.5) #ffffff on #1e1e1e
+  PASS  Light: Block heading on the canvas 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc
+  PASS  Light: main menu item (tldraw menu) 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc
+  PASS  Light: settings heading 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc
+  PASS  Light: settings body copy 5.23:1 (≥ 4.5) #666b6f on #fcfcfc
+  PASS  Light: settings active category 10.42:1 (≥ 4.5) #2e2e2e on #d6e3f1
+  PASS  Light: settings inactive category 4.69:1 (≥ 4.5) #666b6f on #edf0f2
+  PASS  Light: theme option label (active) 11.53:1 (≥ 4.5) #2e2e2e on #e4edfa
+  PASS  Light: theme option detail 5.23:1 (≥ 4.5) #666b6f on #fcfcfc
+  PASS  Light: Import button 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc
+  PASS  Light: dialog close button icon 13.24:1 (≥ 3) #2e2e2e on #fcfcfc
+  PASS  Dark: root systemsketch/dark, tldraw dark, canvas rgb(16, 16, 17)
+  PASS  Dark: file title, top-left shell 11.54:1 (≥ 4.5) #d9d9d9 on #1f2024
+  PASS  Dark: timer chip 9.79:1 (≥ 4.5) #c0c3c5 on #1a1a1c
+  PASS  Dark: Share button 3.49:1 (≥ 3) #ffffff on #4387f4
+  PASS  Dark: toolbar tool icon (resting) 11.51:1 (≥ 3) #d9d9d9 on #202024
+  PASS  Dark: toolbar tool icon (active) 3.49:1 (≥ 3) #ffffff on #4387f4
+  PASS  Dark: Block tool button 11.51:1 (≥ 3) #d9d9d9 on #202024
+  PASS  Dark: utility strip button 11.54:1 (≥ 3) #d9d9d9 on #1f2024
+  PASS  Dark: inspector active tab 12.31:1 (≥ 4.5) #d9d9d9 on #1a1a1c
+  FAIL  Dark: inspector section title 1.14:1 < 4.5:1
+        #272b32 on #202025 "Block"
+  PASS  Dark: inspector field label 9.14:1 (≥ 4.5) #c0c3c5 on #202025
+  PASS  Dark: inspector input text 12.31:1 (≥ 4.5) #d9d9d9 on #1a1a1c
+  PASS  Dark: inspector input boundary 4.58:1 (≥ 3) #d9d9d9 @ 0.55 on #1a1a1c
+  PASS  Dark: selection pill button 16.67:1 (≥ 4.5) #ffffff on #1e1e1e
+  PASS  Dark: Block heading on the canvas 11.49:1 (≥ 4.5) #d9d9d9 on #202025
+  PASS  Dark: main menu item (tldraw menu) 11.49:1 (≥ 4.5) #d9d9d9 on #202025
+  PASS  Dark: settings heading 11.49:1 (≥ 4.5) #d9d9d9 on #202025
+  PASS  Dark: settings body copy 9.14:1 (≥ 4.5) #c0c3c5 on #202025
+  PASS  Dark: settings active category 10.61:1 (≥ 4.5) #d9d9d9 on #1f2736
+  PASS  Dark: settings inactive category 9.79:1 (≥ 4.5) #c0c3c5 on #1a1a1c
+  PASS  Dark: theme option label (active) 9.85:1 (≥ 4.5) #d9d9d9 on #242c3e
+  PASS  Dark: theme option detail 9.14:1 (≥ 4.5) #c0c3c5 on #202025
+  PASS  Dark: Import button 11.49:1 (≥ 4.5) #d9d9d9 on #202025
+  PASS  Dark: dialog close button icon 11.49:1 (≥ 3) #d9d9d9 on #202025
+  PASS  Obsidian Light: root palette/light, tldraw light, canvas rgb(255, 255, 255)
+  PASS  Obsidian Light: file title, top-left shell 14.77:1 (≥ 4.5) #222222 on #f6f6f6
+  PASS  Obsidian Light: timer chip 6.69:1 (≥ 4.5) #5c5c5c on #ffffff
+  PASS  Obsidian Light: Share button 3.43:1 (≥ 3) #ffffff on #9873f7
+  PASS  Obsidian Light: toolbar tool icon (resting) 14.76:1 (≥ 3) #222222 on #f6f6f6
+  PASS  Obsidian Light: toolbar tool icon (active) 3.43:1 (≥ 3) #ffffff on #9873f7
+  PASS  Obsidian Light: Block tool button 14.76:1 (≥ 3) #222222 on #f6f6f6
+  PASS  Obsidian Light: utility strip button 14.77:1 (≥ 3) #222222 on #f6f6f6
+  PASS  Obsidian Light: inspector active tab 15.91:1 (≥ 4.5) #222222 on #ffffff
+  PASS  Obsidian Light: inspector section title 13.15:1 (≥ 4.5) #272b32 on #f6f6f6
+  PASS  Obsidian Light: inspector field label 6.19:1 (≥ 4.5) #5c5c5c on #f6f6f6
+  PASS  Obsidian Light: inspector input text 15.91:1 (≥ 4.5) #222222 on #ffffff
+  PASS  Obsidian Light: inspector input boundary 3.67:1 (≥ 3) #222222 @ 0.55 on #ffffff
+  PASS  Obsidian Light: selection pill button 17.49:1 (≥ 4.5) #ffffff on #191919
+  PASS  Obsidian Light: Block heading on the canvas 14.72:1 (≥ 4.5) #222222 on #f6f6f6
+  PASS  Obsidian Light: main menu item (tldraw menu) 14.72:1 (≥ 4.5) #222222 on #f6f6f6
+  PASS  Obsidian Light: settings heading 14.72:1 (≥ 4.5) #222222 on #f6f6f6
+  PASS  Obsidian Light: settings body copy 6.19:1 (≥ 4.5) #5c5c5c on #f6f6f6
+  PASS  Obsidian Light: settings active category 14:1 (≥ 4.5) #222222 on #f3eefe
+  PASS  Obsidian Light: settings inactive category 6.69:1 (≥ 4.5) #5c5c5c on #ffffff
+  PASS  Obsidian Light: theme option label (active) 13.03:1 (≥ 4.5) #222222 on #ebe6f6
+  PASS  Obsidian Light: theme option detail 6.19:1 (≥ 4.5) #5c5c5c on #f6f6f6
+  PASS  Obsidian Light: Import button 14.72:1 (≥ 4.5) #222222 on #f6f6f6
+  PASS  Obsidian Light: dialog close button icon 14.72:1 (≥ 3) #222222 on #f6f6f6
+  PASS  Obsidian Dark: root palette/dark, tldraw dark, canvas rgb(28, 28, 28)
+  PASS  Obsidian Dark: file title, top-left shell 10.61:1 (≥ 4.5) #dadada on #282828
+  PASS  Obsidian Dark: timer chip 6.48:1 (≥ 4.5) #b3b3b3 on #2e2e2e
+  PASS  Obsidian Dark: Share button 4.26:1 (≥ 3) #ffffff on #8a5cf5
+  PASS  Obsidian Dark: toolbar tool icon (resting) 10.6:1 (≥ 3) #dadada on #282828
+  PASS  Obsidian Dark: toolbar tool icon (active) 4.26:1 (≥ 3) #ffffff on #8a5cf5
+  PASS  Obsidian Dark: Block tool button 10.6:1 (≥ 3) #dadada on #282828
+  PASS  Obsidian Dark: utility strip button 10.61:1 (≥ 3) #dadada on #282828
+  PASS  Obsidian Dark: inspector active tab 9.71:1 (≥ 4.5) #dadada on #2e2e2e
+  FAIL  Obsidian Dark: inspector section title 1.04:1 < 4.5:1
+        #272b32 on #282828 "Block"
+  PASS  Obsidian Dark: inspector field label 7.03:1 (≥ 4.5) #b3b3b3 on #282828
+  PASS  Obsidian Dark: inspector input text 9.71:1 (≥ 4.5) #dadada on #2e2e2e
+  PASS  Obsidian Dark: inspector input boundary 4.07:1 (≥ 3) #dadada @ 0.55 on #2e2e2e
+  PASS  Obsidian Dark: selection pill button 20.65:1 (≥ 4.5) #ffffff on #030303
+  PASS  Obsidian Dark: Block heading on the canvas 10.55:1 (≥ 4.5) #dadada on #282828
+  PASS  Obsidian Dark: main menu item (tldraw menu) 10.55:1 (≥ 4.5) #dadada on #282828
+  PASS  Obsidian Dark: settings heading 10.55:1 (≥ 4.5) #dadada on #282828
+  PASS  Obsidian Dark: settings body copy 7.03:1 (≥ 4.5) #b3b3b3 on #282828
+  PASS  Obsidian Dark: settings active category 8.61:1 (≥ 4.5) #dadada on #393446
+  PASS  Obsidian Dark: settings inactive category 6.48:1 (≥ 4.5) #b3b3b3 on #2e2e2e
+  PASS  Obsidian Dark: theme option label (active) 9.3:1 (≥ 4.5) #dadada on #342e41
+  PASS  Obsidian Dark: theme option detail 7.03:1 (≥ 4.5) #b3b3b3 on #282828
+  PASS  Obsidian Dark: Import button 10.55:1 (≥ 4.5) #dadada on #282828
+  PASS  Obsidian Dark: dialog close button icon 10.55:1 (≥ 3) #dadada on #282828
+  PASS  Dark Modern: root palette/dark, tldraw dark, canvas rgb(31, 31, 31)
+  PASS  Dark Modern: file title, top-left shell 10.15:1 (≥ 4.5) #cccccc on #202020
+  PASS  Dark Modern: timer chip 4.8:1 (≥ 4.5) #9d9d9d on #313131
+  PASS  Dark Modern: Share button 4.53:1 (≥ 3) #ffffff on #0078d4
+  PASS  Dark Modern: toolbar tool icon (resting) 10.15:1 (≥ 3) #cccccc on #202020
+  PASS  Dark Modern: toolbar tool icon (active) 4.53:1 (≥ 3) #ffffff on #0078d4
+  PASS  Dark Modern: Block tool button 10.15:1 (≥ 3) #cccccc on #202020
+  PASS  Dark Modern: utility strip button 10.15:1 (≥ 3) #cccccc on #202020
+  PASS  Dark Modern: inspector active tab 8.1:1 (≥ 4.5) #cccccc on #313131
+  FAIL  Dark Modern: inspector section title 1.15:1 < 4.5:1
+        #272b32 on #202020 "Block"
+  PASS  Dark Modern: inspector field label 6.01:1 (≥ 4.5) #9d9d9d on #202020
+  PASS  Dark Modern: inspector input text 8.1:1 (≥ 4.5) #cccccc on #313131
+  PASS  Dark Modern: inspector input boundary 3.59:1 (≥ 3) #cccccc @ 0.55 on #313131
+  PASS  Dark Modern: selection pill button 7.29:1 (≥ 4.5) #cccccc on #383838
+  PASS  Dark Modern: Block heading on the canvas 10.15:1 (≥ 4.5) #cccccc on #202020
+  PASS  Dark Modern: main menu item (tldraw menu) 10.15:1 (≥ 4.5) #cccccc on #202020
+  PASS  Dark Modern: settings heading 10.15:1 (≥ 4.5) #cccccc on #202020
+  PASS  Dark Modern: settings body copy 6.01:1 (≥ 4.5) #9d9d9d on #202020
+  PASS  Dark Modern: settings active category 7.33:1 (≥ 4.5) #cccccc on #2b3a45
+  PASS  Dark Modern: settings inactive category 4.8:1 (≥ 4.5) #9d9d9d on #313131
+  PASS  Dark Modern: theme option label (active) 9.07:1 (≥ 4.5) #cccccc on #1c2b36
+  PASS  Dark Modern: theme option detail 6.01:1 (≥ 4.5) #9d9d9d on #202020
+  PASS  Dark Modern: Import button 10.15:1 (≥ 4.5) #cccccc on #202020
+  PASS  Dark Modern: dialog close button icon 10.15:1 (≥ 3) #cccccc on #202020
+  PASS  no console errors from the app during the sweep
+
+122 passed, 3 failed → /home/bam/.claude/jobs/795fecc5/tmp/mutation/theme-contrast.json
+exit 1
