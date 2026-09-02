@@ -121,6 +121,8 @@ The [`.systemsketch` file-type report](docs/systemsketch-file-type-2026-09-01.ht
 
 The [fan-in report](docs/edge-fan-in-2026-09-01.html) records why a second cable onto an occupied input replaced the first: two starter-kit rules that assume an input has one producer. Sinks now fan in exactly as sources fan out, a press on any dot starts a new cable, an existing cable is moved by selecting it and dragging its terminal handle, and the one drop a sink refuses is an exact copy of a wire it already has, judged in the same `judgeConnection` as every other refusal. `npm run test:polarity` carries the six fan-in checks.
 
+The [arrow drawing report](docs/arrow-drawing-2026-09-01.html) records the two arrow changes: an arrow is drawn by clicking its two ends, and drawing one no longer opens a text editor on it. The click gesture is one edge added to tldraw's own state chart — a release that never became a drag creates the arrow and enters `select.dragging_handle`, tldraw's own end-point drag — so binding, snapping, Shift angle-lock, the creation mark and Escape are the stock ones rather than a second implementation. Escape, a second click on the start point, and leaving for another tool each take the half-drawn arrow back. `npm run test:arrows` (15/15) drives it with real pointer events and reads every claim off the painted stroke, including the same two clicks drawing nothing in the pinned stock-tldraw profile.
+
 ## Local files
 
 - SystemSketch opens both `.systemsketch` and `.tldr`, and everything it creates is a `.systemsketch` — the same tldraw file with one extra top-level `systemSketch` envelope. A `.tldr` is saved back as a `.tldr`; changing a document's type is Save As, never rename.

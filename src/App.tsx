@@ -45,6 +45,7 @@ import {
   useLocalWorkspace,
 } from './workspace/LocalWorkspace'
 import { interfaceScaleCssValues, useInterfaceScale } from './settings/interfaceScale'
+import { installArrowClickToPlace } from './arrowClickToPlace'
 import { installInstantTextEditing } from './instantTextEditing'
 import { installDevelopmentSeam } from './developmentSeam'
 import { enablePasteAtCursor } from './pasteAtCursor'
@@ -105,6 +106,7 @@ function SystemSketchCanvas() {
     const stopBlockConnections = installBlockConnections(editor)
     const stopDevelopmentSeam = installDevelopmentSeam(editor)
     const stopInstantTextEditing = installInstantTextEditing(editor)
+    const stopArrowClickToPlace = installArrowClickToPlace(editor)
     const stopBlockClickToEdit = installBlockClickToEdit(editor)
     const stopBlockPortMenuTarget = installBlockPortMenuTarget(editor)
     const stopExcalidrawPaste = registerExcalidrawPasteHandler(editor)
@@ -114,6 +116,7 @@ function SystemSketchCanvas() {
       stopExcalidrawPaste()
       stopBlockPortMenuTarget()
       stopBlockClickToEdit()
+      stopArrowClickToPlace()
       stopInstantTextEditing()
       stopDevelopmentSeam()
       stopBlockConnections()

@@ -8,6 +8,7 @@ import {
   type TLUiToolItem,
   type TLUiToolsContextType,
 } from 'tldraw'
+import { isDrawingArrowWithArrowTool } from '../arrowClickToPlace'
 import { withBlockTool } from '../blocks/blockToolUi'
 import {
   arrowPresetForActivation,
@@ -48,9 +49,9 @@ export function applyArrowPreset(editor: Editor, preset: ArrowPreset): void {
 export function prepareCreatedShapeForToolbarPreset(
   shape: TLShape,
   preset: ArrowPreset,
-  isArrowPointing: boolean,
+  isArrowDrawing: boolean,
 ): TLShape {
-  if (shape.type !== 'arrow' || preset !== 'curve' || !isArrowPointing) return shape
+  if (shape.type !== 'arrow' || preset !== 'curve' || !isArrowDrawing) return shape
   const arrow = shape as TLArrowShape
   return {
     ...arrow,
@@ -63,15 +64,17 @@ export function prepareCreatedShapeForToolbarPreset(
 }
 
 /**
- * The one non-stock drawing behavior in P1. The state-path guard means pasted,
- * imported, duplicated, and programmatically created arrows are left alone.
+ * The one non-stock drawing behavior in P1. The guard asks whether the arrow
+ * TOOL is drawing this arrow — true for a press-drag and for a click-placed
+ * arrow alike — so pasted, imported, duplicated, and programmatically created
+ * arrows are left alone whichever gesture the person happens to be using.
  */
 export function registerToolbarSideEffects(editor: Editor): () => void {
   return editor.sideEffects.registerBeforeCreateHandler('shape', (shape) =>
     prepareCreatedShapeForToolbarPreset(
       shape as TLShape,
       getToolbarPreferences().lastArrowPreset,
-      editor.isIn('arrow.pointing'),
+      isDrawingArrowWithArrowTool(editor),
     ),
   )
 }

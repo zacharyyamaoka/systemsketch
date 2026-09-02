@@ -16,6 +16,7 @@
     "test:release-ui": "node tests/release_channel_controls_smoke.mjs",
     "test:selection-menu": "node tests/selection_menu_smoke.mjs",
     "test:appearance": "node tests/appearance_menu_smoke.mjs",
+    "test:arrows": "node tests/arrow_drawing_smoke.mjs",
     "test:edges": "node tests/block_edges_acceptance.mjs",
     "test:edge-editor": "node tests/block_edge_editor_smoke.mjs",
     "test:scale": "node tests/interface_scale_anchoring_smoke.mjs",

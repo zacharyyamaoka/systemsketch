@@ -1,0 +1,18 @@
+{
+  "straightBow": 0,
+  "curveBow": 32,
+  "clickedInside": {
+    "x": 1120,
+    "y": 610
+  },
+  "boundEnd": {
+    "x": 987,
+    "y": 610
+  },
+  "rectangle": {
+    "x": 1000,
+    "y": 520,
+    "w": 240,
+    "h": 180
+  }
+}
