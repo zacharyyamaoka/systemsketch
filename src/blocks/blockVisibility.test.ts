@@ -52,6 +52,12 @@ describe('Block child visibility', () => {
 		})
 	}
 
+	it('hides a directly parented connection before applying Branch endpoint rules', () => {
+		const parent = block('port')
+		const connection = { ...child(parent.id), type: 'connection' } as TLShape
+		expect(getBlockShapeVisibility(connection, editorWith(parent))).toBe('hidden')
+	})
+
 	it('lets children inherit normal visibility while their Block is expanded', () => {
 		const parent = block('expanded')
 		expect(getBlockShapeVisibility(child(parent.id), editorWith(parent))).toBe('inherit')
