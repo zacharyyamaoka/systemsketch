@@ -145,8 +145,8 @@
   {
     "id": "NESTED-0",
     "label": "decode was drawn inside run",
-    "observed": "shape:CAYxoQgFZn9XXBVwF0DU0",
-    "desired": "shape:CAYxoQgFZn9XXBVwF0DU0",
+    "observed": "shape:M6UDBmW4mytwjstbilaVa",
+    "desired": "shape:M6UDBmW4mytwjstbilaVa",
     "ok": true
   },
   {
@@ -265,8 +265,8 @@
   {
     "id": "SCOPE-2",
     "label": "the new Block is a child of the boundary",
-    "observed": "shape:CAYxoQgFZn9XXBVwF0DU0",
-    "desired": "shape:CAYxoQgFZn9XXBVwF0DU0",
+    "observed": "shape:M6UDBmW4mytwjstbilaVa",
+    "desired": "shape:M6UDBmW4mytwjstbilaVa",
     "ok": true
   },
   {
@@ -293,14 +293,14 @@
     "id": "SCOPE-5",
     "label": "the new Block is inside, fed by the inlet",
     "observed": {
-      "parent": "shape:CAYxoQgFZn9XXBVwF0DU0",
+      "parent": "shape:M6UDBmW4mytwjstbilaVa",
       "wired": [
         "call.in_1",
         "run.in_1"
       ]
     },
     "desired": {
-      "parent": "shape:CAYxoQgFZn9XXBVwF0DU0",
+      "parent": "shape:M6UDBmW4mytwjstbilaVa",
       "wired": [
         "call.in_1",
         "run.in_1"
