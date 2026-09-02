@@ -28,12 +28,27 @@ def figure(key: str) -> str:
     return f"data:image/png;base64,{data}"
 
 
+PALETTE = "src/appearance/figjamPalette.ts"
+ICONS = "src/appearance/figjamIcons.ts"
+ICON_MAP = "src/appearance/figjamIconMap.ts"
+ICON_MAP_TESTS = "src/appearance/figjamIconMap.test.ts"
+
+# Counted from the generated modules, so the report cannot claim more icons or
+# colours than the tree actually carries.
+ICON_COUNT = (REPO / ICONS).read_text(encoding="utf-8").count("viewBox: '")
+PALETTE_COUNT = len([
+    line for line in (REPO / PALETTE).read_text(encoding="utf-8").splitlines()
+    if line.strip().startswith("['") and line.strip().endswith("],")
+])
+ICON_MAP_TESTS_COUNT = unit_test_count(ICON_MAP_TESTS)
+
 CONTROLS = [
     ("Shape", "<code>tldraw:geo</code>", "20", "Searchable-style library grid, 5 per row.",
      "FigJam's picker searches; this one lists, because 20 fits without one."),
-    ("Color", "<code>tldraw:color</code>", "13", "Swatch grid, 7 columns.",
-     "FigJam has 11 saturated hues over 11 light ones; tldraw carries only four light variants, so the "
-     "grid pairs each hue with its twin instead of leaving seven holes."),
+    ("Color", "<code>tldraw:color</code>", str(PALETTE_COUNT), "Swatch grid, 11 columns.",
+     "FigJam's own palette, registered on the editor through a stock theme: 11 saturated hues over their "
+     "light twins, in FigJam's order. tldraw's thirteen stay registered underneath so stored boards keep "
+     "validating."),
     ("Fill", "<code>tldraw:fill</code>", "6", "Labelled mode row above the palette.",
      "Exactly FigJam's Fill / Transparent / No fill idea, with tldraw's three extra treatments."),
     ("Stroke", "<code>tldraw:dash</code>", "5", "Icon row.",
@@ -48,10 +63,15 @@ CONTROLS = [
     ("Text alignment", "<code>tldraw:horizontalAlign</code>", "3", "Icon row.", "Left, centre, right."),
     ("Vertical alignment", "<code>tldraw:verticalAlign</code>", "3", "Icon row.",
      "FigJam has none; Excalidraw does, and so does tldraw."),
-    ("Line shape", "<code>tldraw:arrowKind</code> / <code>tldraw:spline</code>", "2", "Icon row.",
-     "FigJam offers three routings; tldraw's arrows are arc or elbow, and its lines cubic or straight."),
-    ("Start / End point", "<code>tldraw:arrowheadStart</code> / <code>End</code>", "9", "Icon row.",
-     "FigJam shows six and hides the rest behind a &hellip;; tldraw has nine and shows them all."),
+    ("Start point", "<code>tldraw:arrowheadStart</code>", "9", "Icon row.",
+     "First, because FigJam reads start &rarr; shape &rarr; end. FigJam shows six and hides the rest "
+     "behind a &hellip;; tldraw has nine and shows them all."),
+    ("Line shape", "<code>systemsketch:connectionRouting</code> / <code>tldraw:arrowKind</code> / "
+     "<code>tldraw:spline</code>", "3 / 2 / 2", "Icon row.",
+     "A SystemSketch cable carries FigJam's full three &mdash; elbowed, curved, straight. A stock tldraw "
+     "arrow is arc or elbow and a line cubic or straight, so each shows what it can actually hold."),
+    ("End point", "<code>tldraw:arrowheadEnd</code>", "9", "Icon row.",
+     "Last, and its icons are FigJam's own set mirrored, so an arrowhead points the way the arrow travels."),
 ]
 
 DELTAS = [
@@ -113,6 +133,7 @@ SMOKE = "tests/appearance_menu_smoke.mjs"
 CHECKS = [row["label"] for row in journey_results(
     DOCS_DIR / "appearance-menu-results.json", REPO / "tests/appearance_menu_smoke.mjs", REPO / "src")]
 UNIT_TESTS = unit_test_count(MODEL_TESTS)
+
 CONTROL_COUNT = len(CONTROLS)
 
 FILES = [
@@ -128,6 +149,15 @@ FILES = [
      "lines, fills drawn on one square so they can be compared."),
     ("src/appearance/appearance.css", "FigJam tokens",
      "<code>rgb(30,30,30)</code>, 13px radius, 8px padding, 8px clear of the pill."),
+    (PALETTE, f"{PALETTE_COUNT} colours",
+     "FigJam's palette as a stock <code>TLTheme</code>, spread over <code>DEFAULT_THEME</code> so "
+     "tldraw's own thirteen stay registered and stored boards keep validating."),
+    (ICONS, f"{ICON_COUNT} icons",
+     "Generated, not hand-written: the exact path data FigJam draws, keyed by control and by FigJam's "
+     "own name for the value."),
+    (ICON_MAP, f"{ICON_MAP_TESTS_COUNT} unit tests",
+     "Which FigJam icon stands for which tldraw value &mdash; deliberately partial, because tldraw has "
+     "nine arrowheads to FigJam's six and four sizes to its two."),
     (SMOKE, f"{len(CHECKS)} checks",
      "Drives the real product composition and reads two oracles per change."),
 ]
@@ -254,10 +284,89 @@ editor.run(() => {{
   </section>
 
   <section>
-    <h2>3 &middot; Where it deliberately differs from FigJam</h2>
+    <h2>3 &middot; Copying FigJam's own values</h2>
     <p class="sub">
-      Five decisions worth arguing with. Each is a consequence of building on tldraw's styles rather than a
-      shortcut, and each is reversible.
+      A first pass copied FigJam's <em>layout</em> and drew everything else by hand. Zach looked at it and
+      named four things that were still wrong. Each was fixed by reading the value out of FigJam rather
+      than by judging it &mdash; and one of them was a claim of mine that turned out to be false.
+    </p>
+
+    <div class="delta">
+      <h3>The palette: I said this needed a fork. It does not.</h3>
+      <p class="figjam">FigJam: {PALETTE_COUNT} colours in an 11&times;2 grid, plus a Custom picker.</p>
+      <p>
+        I had said FigJam's palette would need a custom colour <code>StyleProp</code>, that a custom style
+        prop means replacing tldraw's built-in shape utils, and that replacing shape utils is a fork &mdash;
+        so the answer was tldraw's thirteen. That reasoning was wrong at the first step.
+        tldraw derives the colour style <em>from the theme</em>: <code>&lt;Tldraw themes={{...}}&gt;</code>
+        calls <code>registerColorsFromThemes</code> before any effect runs or any store loads, and that
+        function calls <code>DefaultColorStyle.addValues(...)</code> for every colour a theme names. The
+        palette is a documented prop on the stock component. No shape util is replaced, no schema forked.
+      </p>
+      <p>
+        The subtlety is in the same function's other half: it also <em>removes</em> any registered colour
+        absent from every theme. A palette of only FigJam's names would unregister tldraw's <code>grey</code>,
+        and a board that had ever stored a grey shape would fail validation on load. So the theme spreads
+        <code>DEFAULT_THEME</code> rather than replacing it &mdash; all thirteen stay registered, and the
+        menu simply shows FigJam's {PALETTE_COUNT}.
+      </p>
+      <p>
+        The hexes are sampled from FigJam's own popover: the centre pixel of each 24px swatch, located from
+        the panel geometry rather than by eye.
+      </p>
+    </div>
+
+    <div class="delta">
+      <h3>The icons: traced, not approximated</h3>
+      <p class="figjam">FigJam: filled paths on a 24&times;24 viewBox, drawn with a CSS variable.</p>
+      <p>
+        {ICON_COUNT} icons were captured from the running application. FigJam's option cells are unlabelled
+        divs, so an icon's meaning only exists in its tooltip: the tracer hovers each cell, reads the
+        tooltip, and reads the SVG under the cursor, so every path arrives already paired with FigJam's own
+        word for it rather than by counting positions in a screenshot.
+      </p>
+      <p>
+        Keys are namespaced by control, and that is not tidiness. FigJam calls two different icons
+        <code>Triangle</code> &mdash; a shape in the library, an outline arrowhead in the endpoint list &mdash;
+        and a first cut keyed on the bare name, which silently drew <em>arrowheads in the shape picker</em>.
+        The failure was silent because an unknown key falls back to a drawn glyph rather than throwing, so
+        <code>{ICON_MAP_TESTS}</code> now fails on any name that was not traced.
+      </p>
+      <p>
+        Arrowheads mirror on the end control: FigJam draws one set of six and flips it for the far end, so
+        the icon always points the way the arrow travels.
+      </p>
+    </div>
+
+    <div class="delta">
+      <h3>The control order follows the arrow</h3>
+      <p class="figjam">FigJam: <code>Change color | Line style | Add text | Start point | Line shape | End point</code>.</p>
+      <p>
+        Where the arrow leaves, how it travels, where it lands. The first pass put the line shape ahead of
+        both ends. This was already in the capture &mdash; the frames are named
+        <code>04-start-point</code>, <code>05-line-shape</code>, <code>06-end-point</code> &mdash; and had
+        simply not been read.
+      </p>
+    </div>
+
+    <div class="delta">
+      <h3>Three line shapes, because we have three</h3>
+      <p class="figjam">FigJam: <code>Elbowed &middot; Curved &middot; Straight</code>.</p>
+      <p>
+        The menu showed two. SystemSketch's own cable style has carried exactly FigJam's three all along
+        &mdash; <code>CONNECTION_ROUTING_KINDS</code> is <code>curved / straight / elbow</code> &mdash; and the
+        appearance menu had simply never surfaced it. It does now, so a cable reaches the full vocabulary,
+        while a stock tldraw arrow keeps the two kinds it actually has. Offering a third to a shape that
+        cannot hold one would be the failure mode this whole model exists to avoid.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>4 &middot; Where it deliberately differs from FigJam</h2>
+    <p class="sub">
+      {len(DELTAS)} decisions worth arguing with. Each is a consequence of building on tldraw's styles rather
+      than a shortcut, and each is reversible.
     </p>
     {''.join(f'''
     <div class="delta">
@@ -268,7 +377,7 @@ editor.run(() => {{
   </section>
 
   <section>
-    <h2>4 &middot; Live proof</h2>
+    <h2>5 &middot; Live proof</h2>
     <p class="sub">
       <code>npm run test:appearance</code> drives the real product composition on an isolated board. Every
       change is checked against <em>two</em> oracles: the pill's own label, which comes from
@@ -288,7 +397,7 @@ editor.run(() => {{
   </section>
 
   <section>
-    <h2>5 &middot; The change</h2>
+    <h2>6 &middot; The change</h2>
     <table>
       <tr><th>File</th><th>Carries</th><th>What it is</th></tr>
       {''.join(f'<tr><td><code>{path}</code></td><td>{size}</td><td>{what}</td></tr>' for path, size, what in FILES)}
