@@ -15,6 +15,7 @@ export * from './ConnectionShapeUtil'
 export * from './PointingBlockPort'
 export * from './installConnections'
 export * from './connectionCommands'
+export * from './connectionPresentation'
 
 import { ConnectionBindingUtil } from './ConnectionBindingUtil'
 import { ConnectionControlPointOverlayUtil } from './ConnectionControlPointOverlayUtil'

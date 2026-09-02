@@ -75,12 +75,15 @@ describe('toolbar preference parsing', () => {
       lastShapeTool: 'arrow-curve',
       lastArrowPreset: 'sideways',
       lastDrawTool: 'highlight',
+      lastSystemTool: 'loop',
     })).toEqual({
       version: 1,
       lastShapeTool: 'arrow-curve',
       lastArrowPreset: DEFAULT_TOOLBAR_PREFERENCES.lastArrowPreset,
       lastDrawTool: 'highlight',
+      lastSystemTool: DEFAULT_TOOLBAR_PREFERENCES.lastSystemTool,
     })
+    expect(parseToolbarPreferences({ lastSystemTool: 'branch' }).lastSystemTool).toBe('branch')
   })
 
   it('falls back safely for corrupt storage values', () => {

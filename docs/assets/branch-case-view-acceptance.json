@@ -1,0 +1,94 @@
+[
+  {
+    "label": "CASE-1 three boards, 94 pre-rendered (view, open, active) layers",
+    "ok": true
+  },
+  {
+    "label": "CASE-2 board a opens Expanded, both arms open, no active arm",
+    "ok": true
+  },
+  {
+    "label": "CASE-3 clicking the else header folds it to its header row",
+    "ok": true
+  },
+  {
+    "label": "CASE-4 the folded arm's cables attach at its header edges (1 in at x=440, 1 out from x=900)",
+    "ok": true
+  },
+  {
+    "label": "CASE-5 the target on the if header makes if active",
+    "ok": true
+  },
+  {
+    "label": "CASE-6 with if active, the else arm's two cables fade to 18%",
+    "ok": true
+  },
+  {
+    "label": "CASE-7 clicking the active target again clears it: all arms active",
+    "ok": true
+  },
+  {
+    "label": "CASE-8 clicking the folded header opens it again",
+    "ok": true
+  },
+  {
+    "label": "CASE-9 Case view keeps only the first open arm",
+    "ok": true
+  },
+  {
+    "label": "CASE-9b in Case view only the open case's wires are drawn (6 cables, none to the folded else row)",
+    "ok": true
+  },
+  {
+    "label": "CASE-10 in Case view opening else folds if",
+    "ok": true
+  },
+  {
+    "label": "CASE-11 in Case view folding the open arm leaves every arm folded",
+    "ok": true
+  },
+  {
+    "label": "CASE-12 the condition cable lands on the Branch band, not on an arm",
+    "ok": true
+  },
+  {
+    "label": "CASE-13 nested board opens with every arm and inner arm open",
+    "ok": true
+  },
+  {
+    "label": "CASE-14 folding the inner (unchanged) lane keeps the pass-through as in-and-out of its header",
+    "ok": true
+  },
+  {
+    "label": "CASE-15 folding safe folds the nested region with it",
+    "ok": true
+  },
+  {
+    "label": "CASE-16 Case view on the nested board keeps only fast open",
+    "ok": true
+  },
+  {
+    "label": "CASE-17 opening safe in Case view folds fast and keeps one inner arm open",
+    "ok": true
+  },
+  {
+    "label": "CASE-18 make-active works in Case view too",
+    "ok": true
+  },
+  {
+    "label": "CASE-19 optional returns: both arms folded to headers via the checkboxes",
+    "ok": true
+  },
+  {
+    "label": "CASE-20 each folded header still feeds its boundary output row (2 cables leave x=1060)",
+    "ok": true
+  },
+  {
+    "label": "CASE-21 one plain port at the consumer: no sub-slot dots anywhere on board a",
+    "ok": true
+  },
+  {
+    "label": "CASE-22 no script errors while driving",
+    "ok": true
+  }
+]

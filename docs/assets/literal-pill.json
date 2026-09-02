@@ -86,7 +86,7 @@
       },
       {
         "terminal": "start",
-        "to": "shape:mW1XYvRPzsxe_YfSyhJ_6",
+        "to": "shape:YlNAYBuwrT8uCUphH9Kre",
         "port": "out_1"
       }
     ],
@@ -98,7 +98,7 @@
       },
       {
         "terminal": "start",
-        "to": "shape:mW1XYvRPzsxe_YfSyhJ_6",
+        "to": "shape:YlNAYBuwrT8uCUphH9Kre",
         "port": "out_1"
       }
     ],
@@ -288,7 +288,7 @@
   },
   {
     "id": "PROD-1",
-    "label": "the product toolbar has a Pill slot beside Block",
+    "label": "the product toolbar carries the Pill in the System design family, and the pill tool is registered",
     "observed": "[true,true]",
     "desired": "[true,true]",
     "ok": true
@@ -310,9 +310,9 @@
   },
   {
     "id": "PROD-3",
-    "label": "the toolbar shows the Pill slot active while drawing",
-    "observed": "false",
-    "desired": "false",
+    "label": "the family slot remembers the Pill as its last tool, and rests once the draw is done",
+    "observed": "[\"pill\",\"false\"]",
+    "desired": "[\"pill\",\"false\"]",
     "ok": true
   },
   {

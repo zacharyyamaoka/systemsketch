@@ -2,7 +2,7 @@
  * The picker rides the cable end in viewport space, so it must not inherit the
  * canvas transform. `position: absolute` inside `InFrontOfTheCanvas` plus a
  * transform written by the reactor is exactly how tldraw's own on-canvas
- * surfaces stay pinned.
+ * surfaces stay pinned. Colours are tokens from src/theme/tokens.css.
  */
 .OnCanvasBlockPicker {
   --systemsketch-block-picker-x: 0px;
@@ -38,17 +38,18 @@
   flex-direction: column;
   min-width: 188px;
   padding: 6px;
-  border: 1px solid var(--color-panel-contrast, #e3e6e9);
+  border: 1px solid var(--ss-border);
   border-radius: 12px;
-  background: var(--color-panel, #fff);
-  box-shadow: 0 10px 30px rgb(15 18 22 / 14%), 0 1px 2px rgb(15 18 22 / 10%);
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-2);
   pointer-events: all;
   font-family: inherit;
 }
 
 .OnCanvasBlockPicker-title {
   padding: 5px 9px 7px;
-  color: var(--color-text-3, #6b7280);
+  color: var(--ss-text-muted);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -63,7 +64,7 @@
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: var(--color-text, #14171a);
+  color: var(--ss-text);
   font: inherit;
   font-size: 13px;
   text-align: left;
@@ -72,7 +73,7 @@
 
 .OnCanvasBlockPicker-item:hover,
 .OnCanvasBlockPicker-item:focus-visible {
-  background: var(--color-muted-2, #f1f3f5);
+  background: var(--ss-surface-hover);
   outline: none;
 }
 
@@ -81,12 +82,12 @@
 }
 
 .OnCanvasBlockPicker-item small {
-  color: var(--color-text-3, #8b929a);
+  color: var(--ss-text-muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 10.5px;
 }
 
 .OnCanvasBlockPicker-item svg {
   flex: none;
-  color: var(--color-text-2, #4b5560);
+  color: var(--ss-text-muted);
 }

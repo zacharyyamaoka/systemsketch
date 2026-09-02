@@ -287,18 +287,22 @@ async function main() {
     await waitFor(page, `document.querySelector('.tl-container')`, 'product canvas')
     await waitFor(page, `Boolean(window.__systemsketch?.editor)`, 'product seam')
     await delay(600)
-    check('PROD-1', 'the product toolbar has a Pill slot beside Block',
+    check('PROD-1', 'the product toolbar carries the Pill in the System design family, and the pill tool is registered',
       await evaluate(page, `JSON.stringify([
-        Boolean(document.querySelector('[data-testid="systemsketch-tool-block"]')),
-        Boolean(document.querySelector('[data-testid="systemsketch-tool-pill"]')),
+        Boolean(document.querySelector('[data-testid="systemsketch-tool-system"]')),
+        Boolean(window.__systemsketch.editor.getStateDescendant('pill')),
       ])`),
       JSON.stringify([true, true]))
     await deselect(page, { x: 700, y: 700 })
     const product = await drawPill(page, { x: 700, y: 480 }, '1')
     check('PROD-2', 'P draws a pill in the product too', { tool: product.tool, view: product.pill?.view ?? null, type: product.pill?.outputs[0]?.type ?? null },
       { tool: 'pill', view: 'value', type: 'int' })
-    check('PROD-3', 'the toolbar shows the Pill slot active while drawing',
-      await evaluate(page, `document.querySelector('[data-testid="systemsketch-tool-pill"]')?.getAttribute('aria-pressed')`), 'false')
+    check('PROD-3', 'the family slot remembers the Pill as its last tool, and rests once the draw is done',
+      await evaluate(page, `JSON.stringify([
+        JSON.parse(localStorage.getItem('systemsketch.toolbar-preferences.v1') ?? '{}').lastSystemTool ?? null,
+        document.querySelector('[data-testid="systemsketch-tool-system"]')?.getAttribute('aria-pressed') ?? null,
+      ])`),
+      JSON.stringify(['pill', 'false']))
     await deselect(page, { x: 700, y: 700 })
     await shot(page, 'literal-pill-product.png')
     check('CLEAN-PROD', 'the product journey raised no local console errors', localConsoleErrors(page), [])

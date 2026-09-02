@@ -40,7 +40,7 @@ import {
   waitFor,
 } from './browser_harness.mjs'
 
-const SHOTS = join(ROOT, 'docs', 'assets')
+const SHOTS = process.env.SYSTEMSKETCH_SMOKE_ARTIFACT_DIR ?? join(ROOT, 'docs', 'assets')
 const results = []
 
 function check(id, label, observed, desired) {
@@ -98,6 +98,9 @@ const blockIds = (page) => evaluate(page, `(() => JSON.stringify(
 
 const cables = (page) =>
   evaluate(page, `document.querySelectorAll('[data-shape-type="connection"]').length`)
+
+const cableRecords = (page) => evaluate(page, `window.__systemsketch?.editor
+  .getCurrentPageShapes().filter((shape) => shape.type === 'connection').length ?? 0`)
 
 const pickerOpen = (page) =>
   evaluate(page, `Boolean(document.querySelector('[data-testid="block-picker"]'))`)
@@ -384,10 +387,14 @@ async function main() {
     await delay(280)
     await setView(page, 'port')
     await delay(420)
-    check('DURABLE-2', 'it survives the boundary leaving Expanded', await cables(page), 1)
+    check('DURABLE-2', 'leaving Expanded hides the cable but preserves its record',
+      { painted: await cables(page), stored: await cableRecords(page) },
+      { painted: 0, stored: 1 })
     await setView(page, 'expanded')
     await delay(420)
-    check('DURABLE-3', 'and coming back', await cables(page), 1)
+    check('DURABLE-3', 'coming back reveals the same cable record',
+      { painted: await cables(page), stored: await cableRecords(page) },
+      { painted: 1, stored: 1 })
     await deselect(page)
     await shot(page, 'edge-accept-durable.png')
 

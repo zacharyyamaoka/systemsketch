@@ -1,0 +1,175 @@
+[
+  {
+    "id": "ARROW-1a",
+    "label": "A selects the arrow tool",
+    "observed": "arrow.idle",
+    "desired": "arrow.idle",
+    "ok": true
+  },
+  {
+    "id": "ARROW-1b",
+    "label": "one click hands the end point to tldraw's own handle drag",
+    "observed": "select.dragging_handle",
+    "desired": "select.dragging_handle",
+    "ok": true
+  },
+  {
+    "id": "ARROW-1c",
+    "label": "the arrow is already drawn from the click to the pointer",
+    "observed": [
+      true,
+      true
+    ],
+    "desired": [
+      true,
+      true
+    ],
+    "ok": true
+  },
+  {
+    "id": "ARROW-1d",
+    "label": "the second click lands it, spanning the two clicked points",
+    "observed": [
+      1,
+      true,
+      true
+    ],
+    "desired": [
+      1,
+      true,
+      true
+    ],
+    "ok": true
+  },
+  {
+    "id": "ARROW-2a",
+    "label": "nothing on the arrow is asking to be typed into",
+    "observed": [
+      null,
+      "select.idle"
+    ],
+    "desired": [
+      null,
+      "select.idle"
+    ],
+    "ok": true
+  },
+  {
+    "id": "ARROW-3a",
+    "label": "press-and-drag still draws exactly the arrow it always did",
+    "observed": [
+      2,
+      true,
+      true
+    ],
+    "desired": [
+      2,
+      true,
+      true
+    ],
+    "ok": true
+  },
+  {
+    "id": "ARROW-3b",
+    "label": "and it does not open a text editor either",
+    "observed": null,
+    "desired": null,
+    "ok": true
+  },
+  {
+    "id": "ARROW-4a",
+    "label": "a rectangle still opens its own name, which is why this feature exists",
+    "observed": "geo",
+    "desired": "geo",
+    "ok": true
+  },
+  {
+    "id": "ARROW-5a",
+    "label": "Escape takes the half-drawn arrow with it and hands back the tool",
+    "observed": [
+      3,
+      2,
+      "arrow.idle"
+    ],
+    "desired": [
+      3,
+      2,
+      "arrow.idle"
+    ],
+    "ok": true
+  },
+  {
+    "id": "ARROW-6a",
+    "label": "a second click on the start point means never mind, not a zero-length arrow",
+    "observed": [
+      2,
+      "arrow.idle"
+    ],
+    "desired": [
+      2,
+      "arrow.idle"
+    ],
+    "ok": true
+  },
+  {
+    "id": "ARROW-7a",
+    "label": "walking away for another tool strands nothing on the board",
+    "observed": [
+      2,
+      true
+    ],
+    "desired": [
+      2,
+      true
+    ],
+    "ok": true
+  },
+  {
+    "id": "ARROW-8a",
+    "label": "the Curve preset bends a click-placed arrow, as it does a dragged one",
+    "observed": [
+      1,
+      true,
+      true
+    ],
+    "desired": [
+      1,
+      true,
+      true
+    ],
+    "ok": true
+  },
+  {
+    "id": "ARROW-9a",
+    "label": "a click that lands inside a shape still binds the arrow to it",
+    "observed": [
+      true,
+      true
+    ],
+    "desired": [
+      true,
+      true
+    ],
+    "ok": true
+  },
+  {
+    "id": "STOCK-1",
+    "label": "in pinned stock tldraw the same two clicks still draw nothing",
+    "observed": [
+      0,
+      "arrow.idle"
+    ],
+    "desired": [
+      0,
+      "arrow.idle"
+    ],
+    "ok": true
+  },
+  {
+    "id": "CLEAN",
+    "label": "no console errors from the app",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

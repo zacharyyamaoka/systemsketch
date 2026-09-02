@@ -16,10 +16,10 @@
   min-height: 44px;
   padding: 0;
   overflow: visible;
-  border: 1px solid rgb(15 23 42 / 12%);
+  border: 1px solid var(--ss-border);
   border-radius: 11px;
-  background: rgb(255 255 255 / 96%);
-  box-shadow: 0 2px 6px rgb(15 23 42 / 8%), 0 10px 30px rgb(15 23 42 / 12%);
+  background: color-mix(in srgb, var(--ss-surface-raised) 96%, transparent);
+  box-shadow: var(--ss-shadow-1);
   backdrop-filter: blur(16px);
   pointer-events: auto;
 }
@@ -34,9 +34,9 @@
   place-items: center;
   margin: 0;
   border: 0;
-  border-left: 1px solid #eceef2;
+  border-left: 1px solid var(--ss-border);
   border-radius: 0;
-  color: #252930;
+  color: var(--ss-text);
   background: transparent;
 }
 
@@ -52,8 +52,8 @@
 .systemsketch-utility-strip .tlui-button:hover,
 .systemsketch-utility-strip .tlui-button[data-isactive='true'],
 .systemsketch-utility-strip .tlui-button[aria-expanded='true'] {
-  color: #4057dc;
-  background: #eef1ff;
+  color: var(--ss-text);
+  background: var(--ss-accent-soft);
 }
 
 .systemsketch-utility-strip .tlui-button:focus-visible,
@@ -62,14 +62,14 @@
 .systemsketch-board-panel button:focus-visible,
 .systemsketch-preview-mode button:focus-visible {
   z-index: 1;
-  outline: 2px solid #536dfe;
+  outline: 2px solid var(--ss-accent);
   outline-offset: -2px;
 }
 
 .systemsketch-utility-strip .tlui-zoom-menu__button {
   width: 59px;
   min-width: 59px;
-  color: #20242b;
+  color: var(--ss-text);
   font-size: 13px;
   font-weight: 750;
 }
@@ -101,10 +101,10 @@
   right: 7px;
   width: 7px;
   height: 7px;
-  border: 1.5px solid #fff;
+  border: 1.5px solid var(--ss-surface-raised);
   border-radius: 50%;
-  background: #18a957;
-  box-shadow: 0 0 0 1px rgb(24 169 87 / 8%);
+  background: var(--ss-success);
+  box-shadow: 0 0 0 1px var(--ss-success-soft);
 }
 
 .systemsketch-dev-panel,
@@ -113,9 +113,9 @@
   position: absolute;
   right: var(--tl-space-2);
   box-sizing: border-box;
-  border: 1px solid rgb(15 23 42 / 12%);
-  background: rgb(255 255 255 / 98%);
-  box-shadow: 0 20px 55px rgb(15 23 42 / 18%), 0 2px 8px rgb(15 23 42 / 8%);
+  border: 1px solid var(--ss-border);
+  background: color-mix(in srgb, var(--ss-surface-raised) 98%, transparent);
+  box-shadow: var(--ss-shadow-2);
   backdrop-filter: blur(18px);
   pointer-events: auto;
   animation: systemsketch-panel-enter 130ms ease-out;
@@ -133,7 +133,7 @@
   padding: 13px;
   overflow-y: auto;
   border-radius: 14px;
-  color: #242931;
+  color: var(--ss-text);
 }
 
 .systemsketch-dev-panel {
@@ -155,7 +155,7 @@
 .systemsketch-panel-header > div > span,
 .systemsketch-board-panel header > div > span {
   display: block;
-  color: #7a828c;
+  color: var(--ss-text-muted);
   font-size: 9px;
   font-weight: 800;
   letter-spacing: .11em;
@@ -178,8 +178,8 @@
   padding: 0;
   border: 0;
   border-radius: 7px;
-  color: #5e6670;
-  background: #f1f3f5;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-sunken);
   cursor: pointer;
   font-size: 18px;
 }
@@ -193,11 +193,11 @@
   max-width: calc(100vw - 24px);
   align-content: center;
   padding: 4px 5px 4px 12px;
-  border: 1px solid #c9ceff;
+  border: 1px solid color-mix(in srgb, var(--ss-accent) 45%, transparent);
   border-radius: 11px;
-  color: #333c65;
-  background: rgb(249 249 255 / 97%);
-  box-shadow: 0 3px 10px rgb(29 38 91 / 10%), 0 12px 32px rgb(29 38 91 / 10%);
+  color: var(--ss-text);
+  background: var(--ss-accent-soft);
+  box-shadow: var(--ss-shadow-2);
   backdrop-filter: blur(18px);
   pointer-events: auto;
   transform: translateX(-50%);
@@ -213,7 +213,7 @@
 
 .systemsketch-preview-mode__error {
   margin: 1px 6px 4px 0;
-  color: #9a2530;
+  color: var(--ss-danger);
   font-size: 10px;
   line-height: 1.4;
 }
@@ -227,7 +227,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #4256df;
+  color: var(--ss-accent);
   font-size: 10px;
   font-weight: 850;
   letter-spacing: .08em;
@@ -247,7 +247,7 @@
 }
 
 .systemsketch-preview-mode__detail {
-  color: #656d85;
+  color: var(--ss-text-muted);
   font-size: 10px;
   white-space: nowrap;
 }
@@ -289,30 +289,30 @@
 /* Returning is the quiet way out; making Stable is the committing action. */
 .systemsketch-preview-mode [data-emphasis='secondary'],
 .systemsketch-dev-actions [data-emphasis='secondary'] {
-  border-color: #c8cde6;
-  color: #3d4667;
-  background: #fff;
+  border-color: color-mix(in srgb, var(--ss-accent) 45%, transparent);
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
 }
 
 .systemsketch-preview-mode [data-emphasis='secondary']:hover:not(:disabled),
 .systemsketch-dev-actions [data-emphasis='secondary']:hover:not(:disabled) {
-  border-color: #a9b1d8;
-  background: #f2f3fb;
+  border-color: color-mix(in srgb, var(--ss-accent) 45%, transparent);
+  background: var(--ss-surface-active);
 }
 
 .systemsketch-preview-mode [data-emphasis='primary'],
 .systemsketch-dev-actions [data-emphasis='primary'],
 .systemsketch-preview-mode [data-action='make-stable'],
 .systemsketch-dev-actions [data-action='make-stable'] {
-  color: #fff;
-  background: #4458df;
+  color: var(--ss-accent-text);
+  background: var(--ss-accent);
 }
 
 .systemsketch-preview-mode [data-emphasis='primary']:hover:not(:disabled),
 .systemsketch-dev-actions [data-emphasis='primary']:hover:not(:disabled),
 .systemsketch-preview-mode [data-action='make-stable']:hover:not(:disabled),
 .systemsketch-dev-actions [data-action='make-stable']:hover:not(:disabled) {
-  background: #3548cb;
+  background: var(--ss-accent-hover);
 }
 
 /* Armed states the consequence in its own colour before the build starts. */
@@ -320,15 +320,15 @@
 .systemsketch-dev-actions [data-phase='armed'],
 .systemsketch-preview-mode [data-phase='armed']:hover:not(:disabled),
 .systemsketch-dev-actions [data-phase='armed']:hover:not(:disabled) {
-  background: #b4531a;
-  box-shadow: 0 0 0 3px rgb(180 83 26 / 20%);
+  background: var(--ss-warning);
+  box-shadow: 0 0 0 3px var(--ss-warning-soft);
 }
 
 .systemsketch-preview-mode [data-phase='published'],
 .systemsketch-dev-actions [data-phase='published'] {
-  border-color: #b9e2c6;
-  color: #1f6b3c;
-  background: #e8f7ed;
+  border-color: color-mix(in srgb, var(--ss-success) 45%, transparent);
+  color: var(--ss-success);
+  background: var(--ss-success-soft);
 }
 
 .systemsketch-preview-mode button:disabled,
@@ -347,32 +347,31 @@
   margin-bottom: 0;
   padding: 9px 10px;
   border-radius: 8px;
-  color: #31523b;
-  background: #e8f7ed;
+  color: var(--ss-success);
+  background: var(--ss-success-soft);
   font-size: 10px;
   line-height: 1.45;
 }
 
 .systemsketch-panel-message--error {
-  color: #842029;
-  background: #ffebed;
+  color: var(--ss-danger);
+  background: var(--ss-danger-soft);
 }
 
 .systemsketch-preview-spotlight {
   margin-top: 12px;
   padding: 15px;
-  border: 1px solid #aab5ff;
+  border: 1px solid color-mix(in srgb, var(--ss-accent) 45%, transparent);
   border-radius: 12px;
-  color: #19234e;
-  background: linear-gradient(145deg, #f5f6ff, #edf0ff);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 42%);
+  color: var(--ss-text);
+  background: var(--ss-accent-soft);
 }
 
 .systemsketch-preview-spotlight__eyebrow {
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #4057dc;
+  color: var(--ss-accent);
   font-size: 10px;
   font-weight: 850;
   letter-spacing: .06em;
@@ -387,7 +386,7 @@
 
 .systemsketch-preview-spotlight > p {
   margin: 6px 0 0;
-  color: #4f5b85;
+  color: var(--ss-text-muted);
   font-size: 11px;
   line-height: 1.45;
 }
@@ -399,15 +398,15 @@
   padding: 8px 12px;
   border: 0;
   border-radius: 9px;
-  color: #fff;
-  background: #4458df;
+  color: var(--ss-accent-text);
+  background: var(--ss-accent);
   cursor: pointer;
   font-size: 12px;
   font-weight: 800;
 }
 
 .systemsketch-preview-spotlight__primary:hover:not(:disabled) {
-  background: #3548cb;
+  background: var(--ss-accent-hover);
 }
 
 .systemsketch-preview-spotlight__primary:disabled {
@@ -425,19 +424,19 @@
 .systemsketch-preview-spotlight__links button {
   padding: 3px 0;
   border: 0;
-  color: #56618c;
+  color: var(--ss-text-muted);
   background: transparent;
   cursor: pointer;
   font-size: 10px;
 }
 
 .systemsketch-preview-spotlight__links button:hover {
-  color: #3148d4;
+  color: var(--ss-accent);
   text-decoration: underline;
 }
 
 .systemsketch-version-row {
-  border-top: 1px solid #eceef2;
+  border-top: 1px solid var(--ss-border);
   border-radius: 0;
 }
 
@@ -445,13 +444,13 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #8a919a;
+  color: var(--ss-text-muted);
   font-size: 10px;
   white-space: nowrap;
 }
 
 .systemsketch-version-row__status b {
-  color: #a1a7af;
+  color: var(--ss-text-faint);
   font-size: 15px;
   font-weight: 500;
   line-height: 1;
@@ -464,9 +463,9 @@
 
 .systemsketch-release-details {
   padding: 11px;
-  border: 1px solid #e3e6ea;
+  border: 1px solid var(--ss-border);
   border-radius: 10px;
-  background: #f5f6f8;
+  background: var(--ss-surface-sunken);
 }
 
 .systemsketch-release-details__heading {
@@ -478,7 +477,7 @@
 
 .systemsketch-release-details__heading span {
   display: block;
-  color: #6f7781;
+  color: var(--ss-text-muted);
   font-size: 9px;
   font-weight: 800;
   letter-spacing: .08em;
@@ -494,15 +493,15 @@
 .systemsketch-release-details__heading code {
   padding: 4px 6px;
   border-radius: 6px;
-  color: #626b76;
-  background: #e7e9ed;
+  color: var(--ss-code-text);
+  background: var(--ss-code-surface);
   font-size: 9px;
   font-weight: 700;
 }
 
 .systemsketch-release-details__freshness {
   margin: 9px 0;
-  color: #4f5761;
+  color: var(--ss-text-muted);
   font-size: 10px;
   line-height: 1.45;
 }
@@ -518,11 +517,11 @@
 .systemsketch-release-details__changes {
   padding: 8px;
   border-radius: 8px;
-  background: #fff;
+  background: var(--ss-surface-raised);
 }
 
 .systemsketch-release-details__facts dt {
-  color: #7a828c;
+  color: var(--ss-text-muted);
   font-size: 8px;
   font-weight: 800;
   letter-spacing: .07em;
@@ -531,7 +530,7 @@
 
 .systemsketch-release-details__facts dd {
   margin: 3px 0 0;
-  color: #343a40;
+  color: var(--ss-text);
   font-size: 10px;
   font-weight: 650;
   line-height: 1.35;
@@ -539,12 +538,12 @@
 
 .systemsketch-release-details__changes {
   margin-top: 7px;
-  color: #59616b;
+  color: var(--ss-text-muted);
   font-size: 10px;
 }
 
 .systemsketch-release-details__changes > span {
-  color: #4e5660;
+  color: var(--ss-text);
   font-weight: 750;
 }
 
@@ -567,17 +566,17 @@
 .systemsketch-release-details__actions button {
   min-height: 32px;
   padding: 6px 9px;
-  border: 1px solid #d7dae0;
+  border: 1px solid var(--ss-border);
   border-radius: 8px;
-  color: #30363d;
-  background: #fff;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
   cursor: pointer;
   font-size: 10px;
   font-weight: 700;
 }
 
 .systemsketch-release-details__actions button:hover:not(:disabled) {
-  background: #f7f8f9;
+  background: var(--ss-surface-active);
 }
 
 .systemsketch-release-details__actions button:disabled {
@@ -586,13 +585,13 @@
 }
 
 .systemsketch-release-details__actions .primary {
-  border-color: #252a31;
-  color: #fff;
-  background: #252a31;
+  border-color: var(--ss-surface-inverse);
+  color: var(--ss-text-inverse);
+  background: var(--ss-surface-inverse);
 }
 
 .systemsketch-release-details__actions .primary:hover:not(:disabled) {
-  background: #11151a;
+  background: color-mix(in srgb, var(--ss-surface-inverse) 86%, var(--ss-text-inverse));
 }
 
 .systemsketch-release-details__automatic {
@@ -601,12 +600,12 @@
   justify-content: center;
   gap: 6px;
   margin: 9px 0 0;
-  color: #818994;
+  color: var(--ss-text-muted);
   font-size: 9px;
 }
 
 .systemsketch-release-details__automatic i {
-  color: #18a957;
+  color: var(--ss-success);
 }
 
 .systemsketch-help-row {
@@ -619,7 +618,7 @@
   padding: 0 9px;
   border: 0;
   border-radius: 8px;
-  color: #343a40;
+  color: var(--ss-text);
   background: transparent;
   cursor: pointer;
   font-size: 11px;
@@ -627,17 +626,17 @@
 }
 
 .systemsketch-help-row:hover {
-  background: #f3f4f6;
+  background: var(--ss-surface-hover);
 }
 
 .systemsketch-help-row kbd {
-  color: #858c95;
+  color: var(--ss-text-faint);
   font: 600 9px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .systemsketch-help-intro {
   margin: 12px 6px 4px;
-  color: #69717b;
+  color: var(--ss-text-muted);
   font-size: 11px;
   line-height: 1.5;
 }
@@ -650,9 +649,9 @@
   gap: 12px;
   margin-top: 12px;
   padding: 0 11px;
-  border: 1px solid #e3e6ea;
+  border: 1px solid var(--ss-border);
   border-radius: 10px;
-  background: #f7f8f9;
+  background: var(--ss-surface-sunken);
 }
 
 .systemsketch-dev-stable > span,
@@ -667,7 +666,7 @@
 .systemsketch-dev-stable b,
 .systemsketch-dev-preset b,
 .systemsketch-dev-latest b {
-  color: #242931;
+  color: var(--ss-text);
   font-size: 11px;
   font-style: normal;
   line-height: 1.2;
@@ -677,7 +676,7 @@
 .systemsketch-dev-preset small,
 .systemsketch-dev-latest em {
   overflow: hidden;
-  color: #7a828c;
+  color: var(--ss-text-muted);
   font-size: 9px;
   font-style: normal;
   line-height: 1.35;
@@ -686,7 +685,7 @@
 }
 
 .systemsketch-dev-stable > em {
-  color: #27854d;
+  color: var(--ss-success);
   font-size: 9px;
   font-style: normal;
   font-weight: 800;
@@ -696,10 +695,10 @@
 
 .systemsketch-dev-stable > button {
   padding: 5px 8px;
-  border: 1px solid #d9dce1;
+  border: 1px solid var(--ss-border);
   border-radius: 7px;
-  color: #46505c;
-  background: #fff;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
   cursor: pointer;
   font-size: 9px;
   font-weight: 750;
@@ -714,38 +713,38 @@
   gap: 10px;
   margin-top: 9px;
   padding: 10px;
-  border: 1px solid #aab5ff;
+  border: 1px solid color-mix(in srgb, var(--ss-accent) 45%, transparent);
   border-radius: 11px;
-  color: #19234e;
-  background: linear-gradient(145deg, #f5f6ff, #edf0ff);
+  color: var(--ss-text);
+  background: var(--ss-accent-soft);
   cursor: pointer;
 }
 
 .systemsketch-dev-latest:hover:not(:disabled):not([data-current]) {
-  border-color: #7f8fff;
-  background: linear-gradient(145deg, #f1f3ff, #e7ebff);
+  border-color: color-mix(in srgb, var(--ss-accent) 45%, transparent);
+  background: var(--ss-accent-soft-hover);
 }
 
-/* Already here: state, not an offer — no gradient, no pointer, no glow. */
+/* Already here: state, not an offer — no tint, no pointer, no glow. */
 .systemsketch-dev-latest[data-current] {
   min-height: 64px;
-  border-color: #e3e6ea;
-  color: #242931;
-  background: #f7f8f9;
+  border-color: var(--ss-border);
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
   cursor: default;
 }
 
 .systemsketch-dev-latest[data-current] .systemsketch-dev-latest__glyph {
-  color: #4d57a2;
-  background: #edf0ff;
+  color: var(--ss-text);
+  background: var(--ss-accent-soft);
 }
 
 .systemsketch-dev-latest[data-current] span > small {
-  color: #8a919b;
+  color: var(--ss-text-muted);
 }
 
 .systemsketch-dev-latest[data-current] > strong {
-  color: #27854d;
+  color: var(--ss-success);
   font-size: 9px;
   font-weight: 800;
   letter-spacing: .04em;
@@ -765,14 +764,14 @@
   height: 34px;
   place-items: center;
   border-radius: 9px;
-  color: #fff;
-  background: #4458df;
+  color: var(--ss-accent-text);
+  background: var(--ss-accent);
   font-size: 18px;
   font-weight: 750;
 }
 
 .systemsketch-dev-latest span > small {
-  color: #4057dc;
+  color: var(--ss-accent);
   font-size: 8px;
   font-weight: 850;
   letter-spacing: .07em;
@@ -780,7 +779,7 @@
 }
 
 .systemsketch-dev-latest > strong {
-  color: #5367df;
+  color: var(--ss-accent);
   font-size: 10px;
 }
 
@@ -789,7 +788,7 @@
   align-items: center;
   justify-content: space-between;
   margin: 14px 3px 6px;
-  color: #737b85;
+  color: var(--ss-text-muted);
   font-size: 8px;
   font-weight: 850;
   letter-spacing: .09em;
@@ -797,7 +796,7 @@
 }
 
 .systemsketch-dev-section-label small {
-  color: #a0a6ae;
+  color: var(--ss-text-faint);
   font-size: 8px;
   font-weight: 750;
   letter-spacing: .04em;
@@ -818,14 +817,14 @@
   padding: 7px 9px;
   border: 1px solid transparent;
   border-radius: 9px;
-  color: #3e4650;
+  color: var(--ss-text);
   background: transparent;
   cursor: pointer;
 }
 
 .systemsketch-dev-preset:hover:not(:disabled) {
-  border-color: #e1e4e8;
-  background: #f5f6f8;
+  border-color: var(--ss-border);
+  background: var(--ss-surface-hover);
 }
 
 .systemsketch-dev-preset > i {
@@ -834,15 +833,15 @@
   height: 29px;
   place-items: center;
   border-radius: 8px;
-  color: #4d57a2;
-  background: #edf0ff;
+  color: var(--ss-text);
+  background: var(--ss-accent-soft);
   font-size: 11px;
   font-style: normal;
   font-weight: 850;
 }
 
 .systemsketch-dev-preset > em {
-  color: #7580cb;
+  color: var(--ss-accent);
   font-size: 9px;
   font-style: normal;
   font-weight: 750;
@@ -854,7 +853,7 @@
 
 .systemsketch-dev-footer {
   margin: 10px 4px 0;
-  color: #989fa8;
+  color: var(--ss-text-faint);
   font-size: 8px;
   line-height: 1.4;
   text-align: center;
@@ -866,7 +865,7 @@
   width: min(360px, calc(100vw - 16px));
   padding: 16px;
   border-radius: 14px;
-  color: #242931;
+  color: var(--ss-text);
 }
 
 .systemsketch-board-panel__empty {
@@ -875,7 +874,7 @@
   place-content: center;
   justify-items: center;
   padding: 22px;
-  color: #7a828c;
+  color: var(--ss-text-muted);
   text-align: center;
 }
 
@@ -884,14 +883,14 @@
   height: 40px;
   margin-bottom: 10px;
   fill: none;
-  stroke: #777f89;
+  stroke: var(--ss-text-muted);
   stroke-width: 1.4;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .systemsketch-board-panel__empty strong {
-  color: #3d434b;
+  color: var(--ss-text);
   font-size: 13px;
 }
 
@@ -939,165 +938,33 @@
   }
 }
 
-.tl-theme__dark .systemsketch-utility-strip,
-.tl-theme__dark .systemsketch-dev-panel,
-.tl-theme__dark .systemsketch-help-panel,
-.tl-theme__dark .systemsketch-board-panel {
-  border-color: rgb(255 255 255 / 12%);
-  color: #eceef1;
-  background: rgb(35 37 40 / 96%);
+.systemsketch-dev-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 2px 0 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--ss-border);
+  border-radius: 10px;
+  cursor: pointer;
 }
 
-.tl-theme__dark .systemsketch-utility-strip .tlui-button {
-  border-left-color: #40444a;
-  color: #e7e9ec;
+.systemsketch-dev-toggle input {
+  margin-top: 3px;
+  accent-color: var(--ss-accent);
 }
 
-.tl-theme__dark .systemsketch-utility-strip .tlui-button:hover,
-.tl-theme__dark .systemsketch-utility-strip .tlui-button[data-isactive='true'],
-.tl-theme__dark .systemsketch-utility-strip .tlui-button[aria-expanded='true'] {
-  color: #fff;
-  background: #454a55;
+.systemsketch-dev-toggle span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.tl-theme__dark .systemsketch-panel-header > button,
-.tl-theme__dark .systemsketch-board-panel header > button,
-.tl-theme__dark .systemsketch-help-row:hover {
-  color: #e7e9ec;
-  background: #2d3034;
+.systemsketch-dev-toggle b {
+  font-size: 12.5px;
 }
 
-.tl-theme__dark .systemsketch-preview-mode {
-  border-color: #555f9c;
-  color: #e6e8ff;
-  background: rgb(39 42 57 / 97%);
-}
-
-.tl-theme__dark .systemsketch-preview-mode__badge {
-  color: #9eabff;
-}
-
-.tl-theme__dark .systemsketch-preview-mode__detail {
-  color: #b8bed8;
-}
-
-.tl-theme__dark .systemsketch-preview-mode__error {
-  color: #ff9ba4;
-}
-
-.tl-theme__dark .systemsketch-preview-mode [data-emphasis='secondary'],
-.tl-theme__dark .systemsketch-dev-actions [data-emphasis='secondary'] {
-  border-color: #545a75;
-  color: #dfe3f5;
-  background: #343850;
-}
-
-.tl-theme__dark .systemsketch-preview-mode [data-emphasis='secondary']:hover:not(:disabled),
-.tl-theme__dark .systemsketch-dev-actions [data-emphasis='secondary']:hover:not(:disabled) {
-  border-color: #6b7395;
-  background: #3d4260;
-}
-
-.tl-theme__dark .systemsketch-preview-mode [data-phase='published'],
-.tl-theme__dark .systemsketch-dev-actions [data-phase='published'] {
-  border-color: #2f6a45;
-  color: #a8e8c1;
-  background: #233a2c;
-}
-
-.tl-theme__dark .systemsketch-dev-latest[data-current] {
-  border-color: #41464d;
-  color: #eff1f4;
-  background: #2d3034;
-}
-
-.tl-theme__dark .systemsketch-dev-latest[data-current] .systemsketch-dev-latest__glyph {
-  color: #cbd1ff;
-  background: #3d435f;
-}
-
-.tl-theme__dark .systemsketch-dev-latest[data-current] span > small {
-  color: #adb3bc;
-}
-
-.tl-theme__dark .systemsketch-dev-latest[data-current] > strong {
-  color: #6fce97;
-}
-
-.tl-theme__dark .systemsketch-preview-spotlight {
-  border-color: #5967bc;
-  color: #f0f2ff;
-  background: linear-gradient(145deg, #30364f, #292e45);
-}
-
-.tl-theme__dark .systemsketch-preview-spotlight > p,
-.tl-theme__dark .systemsketch-preview-spotlight__links button {
-  color: #c2c8e9;
-}
-
-.tl-theme__dark .systemsketch-version-row {
-  border-top-color: #3f4349;
-}
-
-.tl-theme__dark .systemsketch-release-details {
-  border-color: #41464d;
-  background: #2d3034;
-}
-
-.tl-theme__dark .systemsketch-release-details__heading code,
-.tl-theme__dark .systemsketch-release-details__facts div,
-.tl-theme__dark .systemsketch-release-details__changes {
-  color: #d7dae0;
-  background: #383b40;
-}
-
-.tl-theme__dark .systemsketch-release-details__freshness,
-.tl-theme__dark .systemsketch-release-details__facts dd,
-.tl-theme__dark .systemsketch-release-details__changes,
-.tl-theme__dark .systemsketch-release-details__changes > span,
-.tl-theme__dark .systemsketch-help-row,
-.tl-theme__dark .systemsketch-board-panel__empty strong {
-  color: #d7dae0;
-}
-
-.tl-theme__dark .systemsketch-help-intro,
-.tl-theme__dark .systemsketch-dev-stable small,
-.tl-theme__dark .systemsketch-dev-preset small,
-.tl-theme__dark .systemsketch-dev-latest em {
-  color: #adb3bc;
-}
-
-.tl-theme__dark .systemsketch-dev-stable,
-.tl-theme__dark .systemsketch-dev-preset:hover:not(:disabled) {
-  border-color: #41464d;
-  background: #2d3034;
-}
-
-.tl-theme__dark .systemsketch-dev-stable b,
-.tl-theme__dark .systemsketch-dev-preset b,
-.tl-theme__dark .systemsketch-dev-latest b {
-  color: #eff1f4;
-}
-
-.tl-theme__dark .systemsketch-dev-latest {
-  border-color: #5967bc;
-  color: #f0f2ff;
-  background: linear-gradient(145deg, #30364f, #292e45);
-}
-
-.tl-theme__dark .systemsketch-dev-preset > i {
-  color: #cbd1ff;
-  background: #3d435f;
-}
-
-.tl-theme__dark .systemsketch-release-details__actions button {
-  border-color: #4b5057;
-  color: #e7e9ec;
-  background: #30343a;
-}
-
-.tl-theme__dark .systemsketch-release-details__actions .primary {
-  border-color: #f1f3f5;
-  color: #202328;
-  background: #f1f3f5;
+.systemsketch-dev-toggle small {
+  color: var(--ss-text-muted);
+  font-size: 11px;
 }

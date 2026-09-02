@@ -407,10 +407,44 @@ function estimateWrappedLines(
 }
 
 /**
+ * One layout per props object.
+ *
+ * tldraw records are immutable and a move keeps the same `props` object, so
+ * the props' identity changes exactly when the layout's inputs might have. The
+ * renderer, the geometry, the indicator, the port table, the cable validity
+ * checks and the add-port affordance all ask for the same layout of the same
+ * props many times per frame — measured at 157 ms of a 2.3 s select-all drag
+ * on 48 Blocks before this memo, most of it `planBodySlots` and canvas text
+ * measurement. Keyed weakly, so a synthesised props object (the add-port
+ * preview) is collected with its caller.
+ *
+ * Text is measured against whichever fonts are loaded, so every memoised
+ * layout is forgotten once the document's fonts finish loading: a width
+ * measured on a fallback face must not outlive the face it was measured for.
+ */
+let layoutMemo = new WeakMap<BlockShapeProps, BlockLayout>()
+
+if (typeof document !== 'undefined' && 'fonts' in document) {
+	const forgetLayouts = () => {
+		layoutMemo = new WeakMap()
+	}
+	document.fonts.ready.then(forgetLayouts, () => undefined)
+	document.fonts.addEventListener('loadingdone', forgetLayouts)
+}
+
+/**
  * The one geometric projection for the Block. Rendering, selection geometry,
  * connection anchors and frame interaction all consume this immutable result.
  */
 export function layoutBlock(props: BlockShapeProps): BlockLayout {
+	const memoized = layoutMemo.get(props)
+	if (memoized) return memoized
+	const layout = computeBlockLayout(props)
+	layoutMemo.set(props, layout)
+	return layout
+}
+
+function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 	const width = finiteDimension(props.w)
 	const height = finiteDimension(props.h)
 	const bounds = { x: 0, y: 0, w: width, h: height }

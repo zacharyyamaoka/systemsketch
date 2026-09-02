@@ -11,17 +11,22 @@
  * Every control writes through the same `setConnectionRoutingForSelection`
  * command the menu uses, so a batch behaves identically from either entry point.
  */
-import { useCallback } from 'react'
-import { useEditor, useValue, type Editor } from 'tldraw'
+import { useCallback, useEffect, useState } from 'react'
+import { useEditor, useValue, type Editor, type TLShapeId } from 'tldraw'
 
 import {
 	CONNECTION_ROUTING_KINDS,
 	ConnectionRoutingStyle,
+	ConnectionTemporalStyle,
+	PILL_POSITION_DEFAULT,
 	type ConnectionRoutingKind,
+	type ConnectionTemporalKind,
 } from '../connections/connectionModel'
 import {
+	centreConnectionPill,
 	getConnectionBindings,
 	getConnectionDirection,
+	setConnectionDelayValue,
 	type ConnectionBinding,
 	type ConnectionShape,
 } from '../connections'
@@ -29,18 +34,24 @@ import {
 	getSharedStyleForSelection,
 	isSharedStyleValue,
 	setConnectionRoutingForSelection,
+	setConnectionTemporalForSelection,
 } from '../commands'
 import { isBlockShape } from '../blockModel'
+import { sameSharedStyle } from '../commands/blockStyleCommands'
 import { CONNECTION_SHAPE_TYPE } from '../connections/connectionModel'
 import './block-inspector.css'
 
 export interface ConnectionInspectorContext {
 	count: number
 	routing: ReturnType<typeof getSharedStyleForSelection<ConnectionRoutingKind>>
+	/** `data` on this pass, `delayed` one iteration late; shared or mixed across the selection. */
+	temporal: ReturnType<typeof getSharedStyleForSelection<ConnectionTemporalKind>>
 	/** Endpoint summary, only when exactly one cable is selected. */
 	endpoints: { from: string; to: string } | null
 	/** Whether the single selection carries an authored bend or rails. */
 	authored: boolean
+	/** The single selected cable, for the per-cable delay controls. */
+	only: { id: TLShapeId; delayValue: string; pillCentred: boolean } | null
 }
 
 const label = (value: string) => value[0].toUpperCase() + value.slice(1)
@@ -71,6 +82,14 @@ export function getConnectionInspectorContext(editor: Editor): ConnectionInspect
 	return {
 		count: selected.length,
 		routing: getSharedStyleForSelection(editor, ConnectionRoutingStyle),
+		temporal: getSharedStyleForSelection(editor, ConnectionTemporalStyle),
+		only: only
+			? {
+				id: only.id,
+				delayValue: only.props.delayValue,
+				pillCentred: only.props.pillPosition === PILL_POSITION_DEFAULT,
+			}
+			: null,
 		endpoints: bindings && direction
 			? {
 				from: describeEndpoint(editor, bindings[direction.sourceTerminal]),
@@ -83,14 +102,48 @@ export function getConnectionInspectorContext(editor: Editor): ConnectionInspect
 	}
 }
 
+/** Same panel, same words: the previous context is kept, so nothing re-renders. */
+function sameConnectionInspectorContext(
+	previous: unknown,
+	next: ConnectionInspectorContext | null,
+): previous is ConnectionInspectorContext | null {
+	if (previous === next) return true
+	if (typeof previous !== 'object' || previous === null || next === null) return false
+	const before = previous as ConnectionInspectorContext
+	return before.count === next.count
+		&& before.authored === next.authored
+		&& sameSharedStyle(before.routing, next.routing)
+		&& sameSharedStyle(before.temporal, next.temporal)
+		&& (before.only === next.only || (
+			before.only !== null && next.only !== null
+			&& before.only.id === next.only.id
+			&& before.only.delayValue === next.only.delayValue
+			&& before.only.pillCentred === next.only.pillCentred
+		))
+		&& (before.endpoints === next.endpoints || (
+			before.endpoints !== null && next.endpoints !== null
+			&& before.endpoints.from === next.endpoints.from
+			&& before.endpoints.to === next.endpoints.to
+		))
+}
+
 export function EditorConnectionInspector({ editor }: { editor: Editor }) {
+	// Re-resolved whenever a selected cable's record changes — every frame it
+	// is dragged — but kept when the panel would read the same thing.
 	const context = useValue(
 		'connection inspector context',
-		() => getConnectionInspectorContext(editor),
+		(previous?: unknown) => {
+			const next = getConnectionInspectorContext(editor)
+			return sameConnectionInspectorContext(previous, next) ? previous : next
+		},
 		[editor],
 	)
 	const setRouting = useCallback(
 		(routing: ConnectionRoutingKind) => void setConnectionRoutingForSelection(editor, routing),
+		[editor],
+	)
+	const setTemporal = useCallback(
+		(temporal: ConnectionTemporalKind) => void setConnectionTemporalForSelection(editor, temporal),
 		[editor],
 	)
 	const clearAuthored = useCallback(() => {
@@ -150,6 +203,44 @@ export function EditorConnectionInspector({ editor }: { editor: Editor }) {
 					</p>
 				</section>
 
+				<section className="block-inspector__section" data-inspector-section="Temporal">
+					<div className="block-inspector__section-title">Temporal</div>
+					<div className="block-inspector__choices" role="group" aria-label="When the value is read">
+						<button
+							type="button"
+							data-testid="connection-temporal-data"
+							aria-pressed={isSharedStyleValue(context.temporal, 'data')}
+							onClick={() => setTemporal('data')}
+						>
+							Data
+						</button>
+						<button
+							type="button"
+							data-testid="connection-temporal-delayed"
+							aria-pressed={isSharedStyleValue(context.temporal, 'delayed')}
+							onClick={() => setTemporal('delayed')}
+						>
+							Delayed (z⁻¹)
+						</button>
+					</div>
+					<p className="block-inspector__hint">
+						{context.temporal?.type === 'mixed'
+							? 'Mixed — choose one to settle the selection.'
+							: isSharedStyleValue(context.temporal, 'delayed')
+								? 'Read one iteration late: dotted, with a z⁻¹ pill you can slide along the cable.'
+								: 'Read on this pass: the plain data cable.'}
+					</p>
+					{context.only && isSharedStyleValue(context.temporal, 'delayed') ? (
+						<DelayValueField
+							key={context.only.id}
+							connectionId={context.only.id}
+							value={context.only.delayValue}
+							pillCentred={context.only.pillCentred}
+							editor={editor}
+						/>
+					) : null}
+				</section>
+
 				<section className="block-inspector__section" data-inspector-section="Route">
 					<div className="block-inspector__section-title">Route</div>
 					<button
@@ -169,5 +260,62 @@ export function EditorConnectionInspector({ editor }: { editor: Editor }) {
 				</section>
 			</div>
 		</section>
+	)
+}
+
+/**
+ * The initial value a delayed cable shows in its pill, and a way to put the
+ * pill back in the middle after it has been slid along the cable.
+ */
+function DelayValueField({
+	connectionId,
+	value,
+	pillCentred,
+	editor,
+}: {
+	connectionId: TLShapeId
+	value: string
+	pillCentred: boolean
+	editor: Editor
+}) {
+	const [draft, setDraft] = useState(value)
+	useEffect(() => setDraft(value), [value])
+	const commit = useCallback(() => {
+		setConnectionDelayValue(editor, connectionId, draft)
+	}, [editor, connectionId, draft])
+	return (
+		<>
+			<label className="block-inspector__field">
+				<span>= value</span>
+				<input
+					type="text"
+					data-testid="connection-delay-value"
+					aria-label="Initial value"
+					placeholder="1.0"
+					value={draft}
+					onChange={(event) => setDraft(event.target.value)}
+					onBlur={commit}
+					onKeyDown={(event) => {
+						if (event.key === 'Enter') {
+							event.preventDefault()
+							commit()
+							;(event.target as HTMLInputElement).blur()
+						}
+					}}
+				/>
+			</label>
+			<button
+				type="button"
+				className="block-inspector__count-pill"
+				data-testid="connection-pill-centre"
+				disabled={pillCentred}
+				onClick={() => void centreConnectionPill(editor, connectionId)}
+			>
+				Centre the pill
+			</button>
+			<p className="block-inspector__hint">
+				Short values read on the pill as <code>z⁻¹ = value</code>; drag the pill along the cable to place it.
+			</p>
+		</>
 	)
 }

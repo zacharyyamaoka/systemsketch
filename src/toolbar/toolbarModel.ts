@@ -16,11 +16,15 @@ export type ShapeFamilyTool =
 
 export type DrawFamilyTool = 'draw' | 'highlight'
 
+/** The system-design family under the Block slot: Block, Branch, Pill, and room for Loop. */
+export type SystemFamilyTool = 'block' | 'branch' | 'pill'
+
 export interface ToolbarPreferences {
   version: 1
   lastShapeTool: ShapeFamilyTool
   lastArrowPreset: ArrowPreset
   lastDrawTool: DrawFamilyTool
+  lastSystemTool: SystemFamilyTool
 }
 
 /**
@@ -35,6 +39,7 @@ export const DEFAULT_TOOLBAR_PREFERENCES: ToolbarPreferences = {
   lastShapeTool: 'rectangle',
   lastArrowPreset: 'elbow',
   lastDrawTool: 'draw',
+  lastSystemTool: 'block',
 }
 
 const STORAGE_KEY = 'systemsketch.toolbar-preferences.v1'
@@ -50,6 +55,7 @@ const SHAPE_TOOLS: readonly ShapeFamilyTool[] = [
   'arrow-elbow',
 ]
 const DRAW_TOOLS: readonly DrawFamilyTool[] = ['draw', 'highlight']
+const SYSTEM_TOOLS: readonly SystemFamilyTool[] = ['block', 'branch', 'pill']
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -72,6 +78,9 @@ export function parseToolbarPreferences(value: unknown): ToolbarPreferences {
     lastDrawTool: includes(DRAW_TOOLS, value.lastDrawTool)
       ? value.lastDrawTool
       : DEFAULT_TOOLBAR_PREFERENCES.lastDrawTool,
+    lastSystemTool: includes(SYSTEM_TOOLS, value.lastSystemTool)
+      ? value.lastSystemTool
+      : DEFAULT_TOOLBAR_PREFERENCES.lastSystemTool,
   }
 }
 
@@ -164,6 +173,7 @@ export function updateToolbarPreferences(
     next.lastShapeTool === snapshot.lastShapeTool
     && next.lastArrowPreset === snapshot.lastArrowPreset
     && next.lastDrawTool === snapshot.lastDrawTool
+    && next.lastSystemTool === snapshot.lastSystemTool
   ) {
     return snapshot
   }

@@ -28,12 +28,25 @@ export function primaryTextEditorKind(shape: TLShape): PrimaryTextEditorKind | n
 }
 
 /**
+ * Connectors carry a label but are not named by it.
+ *
+ * Instant text editing exists because a new box is almost always about to be
+ * titled — its label IS its content, so drawing one and naming it is a single
+ * thought. A connector is the opposite: its meaning is which two things it
+ * joins, and a label on it is a rare annotation, added deliberately and later.
+ * Opening a caret on every arrow taxes the common case to serve the rare one.
+ * Double-clicking an arrow still opens its label, exactly as in stock tldraw.
+ */
+export const TEXT_ON_DEMAND_SHAPE_TYPES: readonly string[] = ['arrow', 'line']
+
+/**
  * A drawn shape is owned by the tool whose public id matches its shape type.
  * Keeping this check separate from editability prevents paste, duplicate,
  * imports, workspace restore, and other programmatic creation from opening an
  * editor merely because a drawing tool happens to be selected.
  */
 export function isPrimaryTextDrawing(toolId: string | null, shape: TLShape): boolean {
+  if (TEXT_ON_DEMAND_SHAPE_TYPES.includes(shape.type)) return false
   // The Pill tool is the one tool whose id is not its shape type: it draws a
   // Block already in its `value` view, and the literal is that Block's title.
   const drawsShape = toolId === shape.type

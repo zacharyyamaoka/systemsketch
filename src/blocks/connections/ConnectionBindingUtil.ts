@@ -14,7 +14,7 @@ import {
 	type TLShapeId,
 } from 'tldraw'
 import { BLOCK_SHAPE_TYPE, isBlockShape, type BlockShape } from '../blockModel'
-import { getBlockConnectionPort, getBlockConnectionPortPagePoint } from './blockPorts'
+import { getBlockConnectionPortPagePoint, getPortHostPort, isPortHostShape } from './blockPorts'
 import {
 	CONNECTION_BINDING_TYPE,
 	CONNECTION_SHAPE_TYPE,
@@ -81,10 +81,10 @@ export const connectionBindingMigrations = createBindingPropsMigrationSequence({
 /** True while the binding names an existing port on an existing Block. */
 export function connectionBindingIsValid(editor: Editor, binding: ConnectionBinding): boolean {
 	const connection = editor.getShape(binding.fromId)
-	const block = editor.getShape(binding.toId)
+	const host = editor.getShape(binding.toId)
 	return connection?.type === CONNECTION_SHAPE_TYPE
-		&& isBlockShape(block)
-		&& getBlockConnectionPort(block.props, binding.props.portId) !== null
+		&& isPortHostShape(host)
+		&& getPortHostPort(editor, host, binding.props.portId) !== null
 }
 
 /**
@@ -104,12 +104,12 @@ export function connectionEndpointsAreValid(
 	if (!bindings.start || !bindings.end) return true
 	const startBlock = editor.getShape(bindings.start.toId)
 	const endBlock = editor.getShape(bindings.end.toId)
-	if (!isBlockShape(startBlock) || !isBlockShape(endBlock)) return false
+	if (!isPortHostShape(startBlock) || !isPortHostShape(endBlock)) return false
 	const faces = pairBlockFaces(editor, startBlock, endBlock, { requireLive: false })
 	if (!faces) return false
 	if (faces.a !== bindings.start.props.face || faces.b !== bindings.end.props.face) return false
-	const startPort = getBlockConnectionPort(startBlock.props, bindings.start.props.portId)
-	const endPort = getBlockConnectionPort(endBlock.props, bindings.end.props.portId)
+	const startPort = getPortHostPort(editor, startBlock, bindings.start.props.portId)
+	const endPort = getPortHostPort(editor, endBlock, bindings.end.props.portId)
 	if (!startPort || !endPort) return false
 	return portPolarity(startPort.side, faces.a) !== portPolarity(endPort.side, faces.b)
 }
@@ -145,17 +145,28 @@ export class ConnectionBindingUtil extends BindingUtil<ConnectionBinding> {
 
 	override onAfterChangeToShape({
 		binding,
+		shapeBefore,
+		shapeAfter,
+		reason,
 	}: BindingOnShapeChangeOptions<ConnectionBinding>): void {
+		// This runs for every cable on a Block on every frame the Block moves.
+		// A move keeps the props object and the parent, and those are all the
+		// rules read: the ports come from the props, the faces from the place
+		// in the tree. tldraw reports `ancestry` only when an ancestor was
+		// reparented, so that case is always judged in full.
+		if (
+			reason === 'self'
+			&& shapeBefore.props === shapeAfter.props
+			&& shapeBefore.parentId === shapeAfter.parentId
+		) return
 		// Removal or moving an id to the opposite lane invalidates the semantic
 		// edge, and so does a bound Block leaving the scope the cable lives in.
 		// Hiding, reordering, and resizing remain valid and move for free.
-		if (
-			!connectionBindingIsValid(this.editor, binding)
-			|| !connectionEndpointsAreValid(this.editor, binding.fromId)
-		) {
+		if (!connectionBindingIsValid(this.editor, binding)) {
 			this.editor.deleteShapes([binding.fromId])
 			return
 		}
+		// Endpoint validity is judged once, inside settleConnection.
 		settleConnection(this.editor, binding.fromId)
 	}
 
@@ -218,9 +229,9 @@ export function connectionBindingPolarity(
 	editor: Editor,
 	binding: ConnectionBinding,
 ): PortPolarity | null {
-	const block = editor.getShape(binding.toId)
-	if (!isBlockShape(block)) return null
-	const port = getBlockConnectionPort(block.props, binding.props.portId)
+	const host = editor.getShape(binding.toId)
+	if (!isPortHostShape(host)) return null
+	const port = getPortHostPort(editor, host, binding.props.portId)
 	return port ? portPolarity(port.side, binding.props.face) : null
 }
 
@@ -333,9 +344,9 @@ export function createOrUpdateConnectionBinding(
 ): boolean {
 	const connectionId = typeof connection === 'string' ? connection : connection.id
 	const connectionShape = editor.getShape(connectionId)
-	const block = editor.getShape(target)
-	if (connectionShape?.type !== CONNECTION_SHAPE_TYPE || !isBlockShape(block)) return false
-	if (getBlockConnectionPort(block.props, props.portId) === null) return false
+	const host = editor.getShape(target)
+	if (connectionShape?.type !== CONNECTION_SHAPE_TYPE || !isPortHostShape(host)) return false
+	if (getPortHostPort(editor, host, props.portId) === null) return false
 
 	const existingMany = connectionBindingsForTerminal(editor, connectionId, props.terminal)
 	if (existingMany.length > 1) editor.deleteBindings(existingMany.slice(1))
@@ -389,7 +400,7 @@ export function reparentConnectionToScope(editor: Editor, connectionId: TLShapeI
 	const bindings = getConnectionBindings(editor, connectionId)
 	const startBlock = bindings.start ? editor.getShape(bindings.start.toId) : undefined
 	const endBlock = bindings.end ? editor.getShape(bindings.end.toId) : undefined
-	if (!isBlockShape(startBlock) || !isBlockShape(endBlock)) return
+	if (!isPortHostShape(startBlock) || !isPortHostShape(endBlock)) return
 	const faces = pairBlockFaces(editor, startBlock, endBlock, { requireLive: false })
 	if (!faces) return
 	if (faces.scopeId !== connection.parentId) {

@@ -25,9 +25,11 @@ import { useId, useMemo, useState, type ReactNode } from 'react'
 import { BLOCK_TOOL_ID, PILL_TOOL_ID } from '../blocks'
 import { PillIcon } from '../blocks/PillIcon'
 import { BlockIcon } from '../blocks/BlockIcon'
+import { BRANCH_TOOL_ID, BranchIcon } from '../branch'
 import {
   selectDrawFamilyTool,
   selectShapeFamilyTool,
+  selectSystemFamilyTool,
 } from './toolbarIntegration'
 import {
   arrowPresetPressCount,
@@ -36,6 +38,7 @@ import {
   useToolbarPreferences,
   type DrawFamilyTool,
   type ShapeFamilyTool,
+  type SystemFamilyTool,
 } from './toolbarModel'
 import './systemsketch-toolbar.css'
 
@@ -91,6 +94,24 @@ const SHAPE_BY_ID = Object.fromEntries(SHAPE_MENU_ITEMS.map((item) => [item.id, 
   ShapeFamilyTool,
   ShapeMenuItem
 >
+
+/**
+ * The system-design family: the semantic things a system sketch is made of.
+ * Block keeps B; Branch has no key yet and lives one click deeper on purpose,
+ * because it is used far less often than a Block and Zach wants the toolbar,
+ * not the right-click menu, to be where that muscle memory forms.
+ */
+const SYSTEM_MENU_ITEMS: ReadonlyArray<{
+  id: SystemFamilyTool
+  label: string
+  icon: TLUiIconJsx
+  shortcut?: string
+}> = [
+  { id: BLOCK_TOOL_ID, label: 'Block', icon: <BlockIcon />, shortcut: 'B' },
+  { id: BRANCH_TOOL_ID, label: 'Branch', icon: <BranchIcon /> },
+  // A pill is a variable: a literal argument, a named result, or both. P.
+  { id: PILL_TOOL_ID, label: 'Pill', icon: <PillIcon />, shortcut: 'P' },
+]
 
 interface LibraryItem {
   id: string
@@ -193,7 +214,7 @@ function FamilyToolSlot({
   onActivate,
   children,
 }: {
-  family: 'shape' | 'draw'
+  family: 'shape' | 'draw' | 'system'
   icon: string | TLUiIconJsx
   label: string
   active: boolean
@@ -283,6 +304,44 @@ function ShapeFamilySlot({ activeToolId, geo }: { activeToolId: string; geo?: st
           {...item}
           selected={current === item.id}
           onSelect={() => selectShapeFamilyTool(tools, item.id)}
+        />
+      ))}
+    </FamilyToolSlot>
+  )
+}
+
+function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
+  const tools = useTools()
+  const preferences = useToolbarPreferences()
+  const current: SystemFamilyTool = activeToolId === BRANCH_TOOL_ID
+    ? BRANCH_TOOL_ID
+    : activeToolId === BLOCK_TOOL_ID
+      ? BLOCK_TOOL_ID
+      : activeToolId === PILL_TOOL_ID
+        ? PILL_TOOL_ID
+        : preferences.lastSystemTool
+  const currentItem = SYSTEM_MENU_ITEMS.find((item) => item.id === current) ?? SYSTEM_MENU_ITEMS[0]
+  const isActive = activeToolId === BLOCK_TOOL_ID
+    || activeToolId === BRANCH_TOOL_ID
+    || activeToolId === PILL_TOOL_ID
+
+  return (
+    <FamilyToolSlot
+      family="system"
+      icon={currentItem.icon}
+      label={currentItem.shortcut ? `${currentItem.label} · ${currentItem.shortcut}` : currentItem.label}
+      active={isActive}
+      onActivate={() => selectSystemFamilyTool(tools, current)}
+    >
+      <div className="systemsketch-tool-menu__heading">System design</div>
+      {SYSTEM_MENU_ITEMS.map((item) => (
+        <ToolMenuItem
+          key={item.id}
+          icon={item.icon}
+          label={item.label}
+          shortcut={item.shortcut}
+          selected={current === item.id}
+          onSelect={() => selectSystemFamilyTool(tools, item.id)}
         />
       ))}
     </FamilyToolSlot>
@@ -465,11 +524,11 @@ export function SystemSketchFigmaToolbar() {
   )
 
   return (
-    <DefaultToolbar minItems={4} maxItems={8} minSizePx={255} maxSizePx={430}>
+    <DefaultToolbar minItems={4} maxItems={7} minSizePx={255} maxSizePx={380}>
       <SimpleToolSlot tool={tools.select} fallbackIcon="tool-pointer" title="Cursor" active={activeToolId === 'select'} />
       <SimpleToolSlot tool={tools.frame} fallbackIcon="tool-frame" title="Frame" active={activeToolId === 'frame'} />
-      <SimpleToolSlot tool={tools[BLOCK_TOOL_ID]} fallbackIcon={<BlockIcon />} title="Block" active={activeToolId === BLOCK_TOOL_ID} />
-      <SimpleToolSlot tool={tools[PILL_TOOL_ID]} fallbackIcon={<PillIcon />} title="Pill" active={activeToolId === PILL_TOOL_ID} />
+      {/* Block, Branch and Pill share this slot, the way the stock shapes share theirs. */}
+      <SystemFamilySlot activeToolId={activeToolId} />
       <ShapeFamilySlot activeToolId={activeToolId} geo={geo} />
       <DrawFamilySlot activeToolId={activeToolId} />
       <SimpleToolSlot tool={tools.text} fallbackIcon="tool-text" title="Text" active={activeToolId === 'text'} />
