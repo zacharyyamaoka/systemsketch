@@ -179,6 +179,7 @@ async function main() {
     const commands = await paletteState(app.page)
     assert.equal(commands.focusedLabel, 'Search commands')
     assert.ok(commands.options.some((label) => label.includes('Insert Block')))
+    assert.ok(commands.options.some((label) => label.includes('Insert Pill')))
     assert.ok(commands.options.some((label) => label.includes('Find and replace on board')))
     await capture(app.page, COMMANDS_SHOT)
     pass('Ctrl+K opens the command palette with its search input focused and real actions listed')

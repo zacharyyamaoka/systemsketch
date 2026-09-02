@@ -34,6 +34,8 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("createSystemSketchStore", product_source)
         self.assertIn("BlockShapeUtil", source)
         self.assertIn("BlockTool", source)
+        self.assertIn("PillTool", source)
+        self.assertIn("const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, PillTool]", source)
         self.assertIn("...blockConnectionShapeUtils", source)
         self.assertIn("const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]", source)
         self.assertIn("registerExcalidrawPasteHandler(editor)", product_source)
@@ -67,7 +69,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertNotIn('title="Branch"', toolbar_source)
         self.assertNotIn('title="Comment"', toolbar_source)
         self.assertIn("BranchShapeUtil,", source)
-        self.assertIn("const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool]", source)
+        self.assertIn("const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, PillTool]", source)
         self.assertIn("const stopBranchRegions = installBranchRegions(editor)", product_source)
         self.assertIn("const stopBranchClickToEdit = installBranchClickToEdit(editor)", product_source)
         # The Branch is created from the toolbar; the right-click menu must not
@@ -106,7 +108,9 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("tools={EMBEDDED_TOOLS}", embedded)
         self.assertIn("BlockShapeUtil,", embedded)
         self.assertIn("BranchShapeUtil,", embedded)
+        self.assertIn("PillTool,", embedded)
         self.assertIn("...blockConnectionShapeUtils,", embedded)
+        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool]", embedded)
         self.assertIn("Toolbar: SystemSketchFigmaToolbar", embedded)
         self.assertIn("ContextMenu: BlockContextMenu", embedded)
         self.assertIn("InFrontOfTheCanvas: SystemSketchSurfaceHost", embedded)
@@ -120,6 +124,7 @@ class StockBoundaryTests(unittest.TestCase):
         # A released build must not carry a browser-local persistence key that
         # would quietly compete with the file the host opened.
         self.assertNotIn("persistenceKey", embedded)
+        self.assertNotIn("installFlightRecorder", embedded)
 
         store_factory = (
             PROJECT_ROOT / "src" / "store" / "createSystemSketchStore.ts"
@@ -127,12 +132,16 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("createTLStore({", store_factory)
         self.assertIn("records: SYSTEMSKETCH_COMMENT_RECORDS", store_factory)
         self.assertIn("BranchShapeUtil", store_factory)
+        self.assertIn("SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS", store_factory)
 
         portable_export = (
             PROJECT_ROOT / "src" / "export" / "portableTldraw.ts"
         ).read_text(encoding="utf-8")
         self.assertIn("BranchShapeUtil", portable_export)
         self.assertIn("record.type === BRANCH_SHAPE_TYPE", portable_export)
+        self.assertIn("SYSTEMSKETCH_ROUNDED_RECT_GEO", portable_export)
+        self.assertIn("portableValuePillText", portable_export)
+        self.assertIn("freezeDetachedValuePill", portable_export)
 
     def test_the_host_bridge_stays_the_only_thing_an_extension_imports(self) -> None:
         """A host runs in Node and bundles separately, so anything it reaches

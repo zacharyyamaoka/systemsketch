@@ -85,13 +85,13 @@ def preview(variant_id: str, name: str, pattern: str) -> str:
 
             <g class="overlap-only">
               <path class="overlap-halo" d="M342 190 H682"/>
-              <path class="overlap-wire" d="M196 110 H238 C292 110 290 190 342 190 H682 C734 190 734 302 786 302 H904" marker-end="url(#overlap-arrow-{variant_id})"/>
+              <path class="overlap-wire" d="M196 110 H232 V232 H296 C324 232 318 190 342 190 H682 C734 190 734 302 786 302 H904" marker-end="url(#overlap-arrow-{variant_id})"/>
               <path class="overlap-bracket" d="M342 204 V213 H682 V204"/>
               <text class="topology-note overlap-note" x="512" y="224" text-anchor="middle">340-unit shared run · orange cable beneath purple</text>
               <circle class="cross-mark" cx="450" cy="190" r="9"/><circle class="cross-mark" cx="762" cy="94" r="9"/>
             </g>
 
-            <path class="event-wire target-wire" d="M196 84 H270 C308 84 300 190 342 190 H682 C732 190 724 84 778 84 H904" stroke-dasharray="{pattern}" marker-end="url(#event-arrow-{variant_id})"/>
+            <path class="event-wire target-wire" d="M196 84 H220 V190 H682 C732 190 724 84 778 84 H904" stroke-dasharray="{pattern}" marker-end="url(#event-arrow-{variant_id})"/>
 
             {block_svg(24, 32, 172, 'watch_items()', 'Pose')}
             {block_svg(248, 22, 172, 'decode()', 'Frame')}
@@ -102,7 +102,7 @@ def preview(variant_id: str, name: str, pattern: str) -> str:
 
             <g class="route-callout">
               <path d="M205 60 H892"/>
-              <text x="548" y="51" text-anchor="middle">708-unit primary route · two bends + two curves</text>
+              <text x="548" y="51" text-anchor="middle">708-unit board span · elbow + curve</text>
             </g>
           </g>
           <text class="zoom-label" x="550" y="376" text-anchor="middle">45% board-scale proof · all routes remain in view</text>
@@ -173,7 +173,7 @@ HARD_GATES = [
 STORY = {
     "title": "Stress the carrier on a real board",
     "steps": [
-        {"label": "Trace the long route", "caption": "Follow 708 units through two bends and two curves.", "state": "long", "target": "[data-story-to='long']"},
+        {"label": "Trace the long route", "caption": "Follow a 708-unit board span through an elbow and a curve.", "state": "long", "target": "[data-story-to='long']"},
         {"label": "Add the cable bundle", "caption": "Compare it against eight straight, elbow, curved, and vertical neighbours.", "state": "bundle", "target": "[data-story-to='bundle']"},
         {"label": "Cross and share a run", "caption": "Two cables cross it and an orange route sits directly beneath it for 340 units.", "state": "overlap", "target": "[data-story-to='overlap']"},
         {"label": "Reduce the whole board", "caption": "At 45%, check that the gaps survive without breaking route ownership.", "state": "zoom", "target": "[data-story-to='zoom']"},
@@ -264,7 +264,7 @@ def make_variant(item: dict) -> dict:
     duty, gap_min, gap_max = cadence_stats(pattern)
     raw = item["scores"]
     evidence = [
-        f"{duty}% of the repeating pattern remains painted; the 708-unit route, bundle, overlap, and 45% states expose route loss directly.",
+        f"{duty}% of the repeating pattern remains painted; the 708-unit board span, bundle, overlap, and 45% states expose route loss directly.",
         f"The {item['rhythm']} rhythm uses unequal run spacing; visible gaps span {gap_min}–{gap_max}px.",
         f"The reduced state scales the exact same dash array; {gap_max}px is the strongest surviving interruption.",
         "The pattern is presented as a stable Event[T] type mark, not as observed arrivals or queue occupancy.",
@@ -308,7 +308,7 @@ PROJECT = {
     "defaultWhy": "Breath Marks is the provisional default at 97.0/100. Its runs are clearly unmetered, its 4/9/5/4 px gaps make the package marks deliberately unequal, and 93.0% of the route remains painted. It answers the eye-tracking criticism without sliding back into a regular dashed line.",
     "decisionHinge": "The main trade is recognition versus quietness. If far-zoom legibility dominates, choose V4 Syncopated Singles; if the board is extremely dense, choose V1 Quiet Scatter; if ‘burst’ must be unmistakable on short cables, splice V8’s triplet into V3’s mixed gap widths.",
     "invariants": [
-        "Every candidate uses the same six-block, 708-unit watch_items() → dispatch_pick() Event[Item] fixture.",
+        "Every candidate uses the same six-block, 708-unit-span watch_items() → dispatch_pick() Event[Item] fixture.",
         "Every state uses the same eight neighbouring cables, two crossings, and 340-unit shared run.",
         "The source-to-sink geometry is unchanged; only strokeDasharray differs.",
         "Every repeating cadence keeps at least 88% painted carrier and no gap exceeds 9px.",
@@ -326,7 +326,7 @@ PROJECT = {
     "variants": VARIANTS,
     "checks": [
         "Exactly ten distinct gap cadences",
-        "Same blocks, ports, 708-unit route, event colour, and topology",
+        "Same blocks, ports, 708-unit board span, event colour, and topology",
         "Long route / cable bundle / cross + overlap / 45% direct controls and guided story",
         "Exact dash array and measured duty cycle shown for every option",
         "All candidates pass carrier and max-gap hard gates",
@@ -350,6 +350,7 @@ CUSTOM_CSS = r"""
   .feedback-lock .after { stroke-dasharray:46 4 83 9 61 5 97 4; stroke-linecap:butt; }
 
   .variant-grid { grid-template-columns:1fr; }
+  .decision-dock { position:relative; bottom:auto; }
   .prototype-frame, .prototype { min-height:476px; }
   .gap-fixture { min-height:476px; overflow:hidden; background:#f7f8fa; color:#20242c; font-family:Inter,ui-sans-serif,system-ui,sans-serif; }
   .gap-fixture__bar { display:flex; align-items:center; gap:10px; min-height:34px; padding:8px 10px; border-bottom:1px solid #d7dbe2; background:#fff; font-size:10px; }

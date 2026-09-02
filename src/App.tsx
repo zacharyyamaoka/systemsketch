@@ -7,6 +7,7 @@ import { EXCALIDRAW_SHAPE_UTILS, registerExcalidrawPasteHandler } from './excali
 import {
   BlockShapeUtil,
   BlockTool,
+  PillTool,
   getBlockShapeVisibility,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
@@ -59,11 +60,13 @@ import { installArrowClickToPlace } from './arrowClickToPlace'
 import { installBoardTheme, releasePrepaintTheme, useAppliedTheme } from './theme/themeStore'
 import { installInstantTextEditing } from './instantTextEditing'
 import { installDevelopmentSeam } from './developmentSeam'
+import { installFlightRecorder } from './recorder/recorderStore'
 import { enablePasteAtCursor } from './pasteAtCursor'
 import type { CSSProperties, ReactNode } from 'react'
 import './app.css'
 import { SYSTEMSKETCH_THEMES } from './appearance/figjamPalette'
 import { createSystemSketchStore } from './store/createSystemSketchStore'
+import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from './stockPrimitiveVisuals'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
@@ -79,6 +82,7 @@ const SYSTEMSKETCH_COMPONENTS = {
 }
 const SYSTEMSKETCH_SHAPE_UTILS = [
   ...EXCALIDRAW_SHAPE_UTILS,
+  ...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
   BlockShapeUtil,
   BranchShapeUtil,
   ...blockConnectionShapeUtils,
@@ -90,7 +94,7 @@ const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
  * tldraw keeps painting and hit-testing the handle itself.
  */
 const SYSTEMSKETCH_OVERLAY_UTILS = [...blockConnectionOverlayUtils]
-const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool]
+const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, PillTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: DevelopmentPreviewChrome,
 }
@@ -99,8 +103,14 @@ const BLOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: BlockDevelopmentPreviewChrome,
   Toolbar: BlockDevelopmentToolbar,
 }
-const BLOCK_DEVELOPMENT_SHAPE_UTILS = [BlockShapeUtil, BranchShapeUtil, ...blockConnectionShapeUtils]
-const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool]
+const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
+  ...EXCALIDRAW_SHAPE_UTILS,
+  ...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
+  BlockShapeUtil,
+  BranchShapeUtil,
+  ...blockConnectionShapeUtils,
+]
+const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, PillTool]
 const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
 const BLOCK_DEVELOPMENT_OVERLAY_UTILS = [...blockConnectionOverlayUtils]
 
@@ -131,7 +141,9 @@ function SystemSketchCanvas() {
     const stopBlockPortMenuTarget = installBlockPortMenuTarget(editor)
     const stopExcalidrawPaste = registerExcalidrawPasteHandler(editor)
     const stopToolbarSideEffects = registerToolbarSideEffects(editor)
+    const stopFlightRecorder = installFlightRecorder(editor)
     return () => {
+      stopFlightRecorder()
       stopToolbarSideEffects()
       stopExcalidrawPaste()
       stopBlockPortMenuTarget()
@@ -204,7 +216,9 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
       ? installBlockPortMenuTarget(editor)
       : () => undefined
     const stopDevelopmentSeam = installDevelopmentSeam(editor)
+    const stopFlightRecorder = installFlightRecorder(editor)
     return () => {
+      stopFlightRecorder()
       stopDevelopmentSeam()
       stopBlockPortMenuTarget()
       stopBranchRegions()

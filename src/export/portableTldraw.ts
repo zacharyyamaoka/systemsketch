@@ -22,7 +22,15 @@ import {
 
 import { EXCALIDRAW_ROUNDED_RECT_GEO, EXCALIDRAW_SHAPE_UTILS } from '../excalidrawInterop'
 import { SYSTEMSKETCH_THEMES } from '../appearance/figjamPalette'
-import { BlockShapeUtil, isBlockShape } from '../blocks'
+import {
+	BlockShapeUtil,
+	VALUE_FED_MARK,
+	isBlockShape,
+	valueBlockInlet,
+	valueBlockLabel,
+	valueBlockText,
+	type BlockShape,
+} from '../blocks'
 import {
 	BRANCH_SHAPE_TYPE,
 	BranchShapeUtil,
@@ -34,11 +42,16 @@ import {
 	CONNECTION_SHAPE_TYPE,
 	blockConnectionBindingUtils,
 	blockConnectionShapeUtils,
+	getBlockPortConnections,
 	getConnectionTerminals,
 	type ConnectionShape,
 } from '../blocks/connections'
-import { detachBlockToPrimitives } from '../blocks/detach'
+import { detachBlockToPrimitives, type DetachResult } from '../blocks/detach'
 import { SYSTEMSKETCH_COMMENT_RECORDS } from '../comments'
+import {
+	SYSTEMSKETCH_ROUNDED_RECT_GEO,
+	SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
+} from '../stockPrimitiveVisuals'
 
 /**
  * A portable export is made in a second editor, never by temporarily changing
@@ -57,6 +70,7 @@ const PORTABLE_SHAPE_UTILS = replaceConstructorsByType<TLAnyShapeUtilConstructor
 	defaultShapeUtils,
 	[
 		...EXCALIDRAW_SHAPE_UTILS,
+		...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
 		BlockShapeUtil,
 		BranchShapeUtil,
 		...blockConnectionShapeUtils,
@@ -83,6 +97,72 @@ const PORTABLE_COLOR_FALLBACKS: Readonly<Record<string, string>> = {
 
 function blockDepth(editor: Editor, shape: TLShape): number {
 	return editor.getShapeAncestors(shape).filter(isBlockShape).length
+}
+
+/** The text actually painted by a Value-view Block before the clone mutates. */
+function portableValuePillText(editor: Editor, block: BlockShape): string | null {
+	if (block.props.view !== 'value') return null
+	const inlet = valueBlockInlet(block.props)
+	const fed = inlet !== null && getBlockPortConnections(editor, block.id)
+		.some((connection) => connection.ownPortId === inlet.id)
+	const label = valueBlockLabel(block.props)
+	return valueBlockText({ ...label, display: fed ? VALUE_FED_MARK : label.display })
+}
+
+/**
+ * `P` creates a Block in its Value view, not a second custom shape type. The
+ * ordinary Block detach keeps its wiring and semantic metadata; this small
+ * portable-only pass freezes the capsule face rather than exporting the
+ * header/footer chrome used by the other Block views.
+ */
+function freezeDetachedValuePill(
+	editor: Editor,
+	result: DetachResult,
+	label: string,
+): void {
+	const card = editor.getShape<TLGeoShape>(result.cardId)
+	if (!card || card.type !== 'geo') return
+
+	const keep = new Set<TLShapeId>([card.id])
+	for (const id of result.shapeIds) {
+		const shape = editor.getShape(id)
+		if (
+			shape?.type === 'geo'
+			&& shape.props.geo === 'ellipse'
+			&& shape.props.w >= 10
+			&& shape.props.h >= 10
+		) {
+			keep.add(shape.id)
+		}
+	}
+	editor.deleteShapes(result.shapeIds.filter((id) => !keep.has(id)))
+
+	// `oval` is stock tldraw's capsule. The metadata still remembers the full
+	// Value Block, while the visible record no longer needs our custom geo id.
+	editor.updateShape<TLGeoShape>({
+		id: card.id,
+		type: 'geo',
+		props: { geo: 'oval' },
+	})
+	const frozenCard = editor.getShape<TLGeoShape>(card.id)
+	if (!frozenCard) return
+	const scale = 4 / 3
+	editor.createShape({
+		type: 'text',
+		parentId: frozenCard.parentId,
+		x: frozenCard.x + 20,
+		y: frozenCard.y + Math.max(0, (frozenCard.props.h - 32) / 2),
+		props: {
+			richText: toRichText(label),
+			autoSize: false,
+			color: 'black',
+			font: 'mono',
+			scale,
+			size: 's',
+			textAlign: 'middle',
+			w: Math.max(1, (frozenCard.props.w - 40) / scale),
+		},
+	})
 }
 
 const PORTABLE_BRANCH_FORMAT_VERSION = 1
@@ -265,12 +345,24 @@ function normalizeCustomGeometries(editor: Editor): void {
 		}
 		if (
 			shape.type === 'geo'
-			&& String((shape as TLGeoShape).props.geo) === EXCALIDRAW_ROUNDED_RECT_GEO
+			&& (
+				String((shape as TLGeoShape).props.geo) === EXCALIDRAW_ROUNDED_RECT_GEO
+				|| String((shape as TLGeoShape).props.geo) === SYSTEMSKETCH_ROUNDED_RECT_GEO
+			)
 		) {
+			const geo = shape as TLGeoShape
+			const style = geo.meta.systemSketchPrimitiveStyle
+			const radius = style && typeof style === 'object' && !Array.isArray(style)
+				? style.cornerRadius
+				: undefined
+			const stockGeo = typeof radius === 'number'
+				&& radius >= Math.min(geo.props.w, geo.props.h) / 2
+				? 'oval'
+				: 'rectangle'
 			editor.updateShape<TLGeoShape>({
 				id: shape.id,
 				type: 'geo',
-				props: { geo: 'rectangle' },
+				props: { geo: stockGeo },
 			})
 		}
 	}
@@ -292,23 +384,30 @@ function assertPortableRecords(editor: Editor): void {
 			|| record.type === BRANCH_SHAPE_TYPE
 			|| record.type === CONNECTION_SHAPE_TYPE
 		))
+	const customGeometries = editor.store
+		.allRecords()
+		.filter((record) => record.typeName === 'shape' && record.type === 'geo')
+		.filter((record) => (
+			String(record.props.geo) === EXCALIDRAW_ROUNDED_RECT_GEO
+			|| String(record.props.geo) === SYSTEMSKETCH_ROUNDED_RECT_GEO
+		))
 	const customBindings = editor.store
 		.allRecords()
 		.filter((record) => record.typeName === 'binding' && record.type === 'connection')
 	const commentRecords = editor.store
 		.allRecords()
 		.filter(isSystemSketchCommentRecord)
-	if (customShapes.length || customBindings.length || commentRecords.length) {
+	if (customShapes.length || customGeometries.length || customBindings.length || commentRecords.length) {
 		throw new Error('Portable export still contains SystemSketch-only records')
 	}
 }
 
 /**
  * Serialize the current board as a stock-readable `.tldr` without touching the
- * live editor. Blocks become remembered groups of ordinary shapes, Branches
- * become stock frames with frozen headings and an untouched child tree, data
- * edges become stock arrows, and the custom Excalidraw rounded geo falls back
- * to the stock rectangle it visually extends.
+ * live editor. Blocks become remembered groups of ordinary shapes (including
+ * Value-view Blocks as stock oval Pills), Branches become stock frames with
+ * frozen headings and an untouched child tree, data edges become stock arrows,
+ * and custom rounded geos fall back to stock rectangles or ovals.
  */
 export async function exportPortableTldraw(editor: Editor): Promise<string> {
 	const livePageId = editor.getCurrentPageId()
@@ -350,7 +449,20 @@ export async function exportPortableTldraw(editor: Editor): Promise<string> {
 			const blocks = exportEditor.getCurrentPageShapes()
 				.filter(isBlockShape)
 				.sort((left, right) => blockDepth(exportEditor, left) - blockDepth(exportEditor, right))
-			for (const block of blocks) detachBlockToPrimitives(exportEditor, block.id, { mark: false })
+			// Capture fed-pill presentation before the first detach starts replacing
+			// semantic cables with arrows; a later Pill must still freeze what the
+			// live board painted, even when its feeder was detached first.
+			const valuePillLabels = new Map(blocks.map((block) => [
+				block.id,
+				portableValuePillText(exportEditor, block),
+			]))
+			for (const block of blocks) {
+				const result = detachBlockToPrimitives(exportEditor, block.id, { mark: false })
+				const label = valuePillLabels.get(block.id)
+				if (result && label !== null && label !== undefined) {
+					freezeDetachedValuePill(exportEditor, result, label)
+				}
+			}
 
 			for (const shape of [...exportEditor.getCurrentPageShapes()]) {
 				if (shape.type === CONNECTION_SHAPE_TYPE) {

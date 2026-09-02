@@ -10,7 +10,7 @@ import {
 } from 'tldraw'
 import { useEffect, useMemo, useRef } from 'react'
 import { AppearanceControls } from '../appearance/AppearanceControls'
-import { BLOCK_TOOL_ID, getBlockInspectorContext, selectionHasBlockStyles } from '../blocks'
+import { BLOCK_TOOL_ID, PILL_TOOL_ID, getBlockInspectorContext, selectionHasBlockStyles } from '../blocks'
 import {
   EditorBlockInspector,
   EditorBlockSelectionMiniMenu,
@@ -35,6 +35,7 @@ import {
   SystemSketchCommandPalette,
   type CommandPaletteAction,
 } from '../commands'
+import { RecorderIndicator } from '../recorder/RecorderControls'
 import { useChrome } from './ChromeProvider'
 import { SelectionContextualMenu } from './SelectionContextualMenu'
 import type { RightSurface } from './chromeState'
@@ -324,6 +325,14 @@ export function SystemSketchSurfaceHost() {
         run: () => editor.setCurrentTool(BRANCH_TOOL_ID),
       },
       {
+        id: 'insert-pill',
+        label: 'Insert Pill',
+        description: 'Switch to the literal Value Pill tool',
+        keywords: ['value', 'literal', 'variable'],
+        icon: '＝',
+        run: () => editor.setCurrentTool(PILL_TOOL_ID),
+      },
+      {
         id: 'shape-library',
         label: 'Open Shapes library',
         description: 'Browse searchable shape families',
@@ -415,6 +424,7 @@ export function SystemSketchSurfaceHost() {
 
   return (
     <div className="systemsketch-surface-host" data-testid="systemsketch-surface-host">
+      <RecorderIndicator />
       <OnCanvasBlockPicker />
       <HitAreaOverlay />
       <DepthStackNavigator />

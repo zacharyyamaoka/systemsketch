@@ -1,0 +1,325 @@
+[
+  {
+    "id": "TOOL-1",
+    "label": "P selects the pill tool",
+    "observed": "pill",
+    "desired": "pill",
+    "ok": true
+  },
+  {
+    "id": "PILL-1",
+    "label": "a click with the pill tool makes a Block in the value view",
+    "observed": "value",
+    "desired": "value",
+    "ok": true
+  },
+  {
+    "id": "PILL-2",
+    "label": "the literal is the title; one unnamed inlet and outlet, typed from the literal",
+    "observed": {
+      "title": "2.0",
+      "name": "",
+      "type": "float",
+      "inputs": 1,
+      "outputs": 1,
+      "inletType": "float"
+    },
+    "desired": {
+      "title": "2.0",
+      "name": "",
+      "type": "float",
+      "inputs": 1,
+      "outputs": 1,
+      "inletType": "float"
+    },
+    "ok": true
+  },
+  {
+    "id": "PILL-3",
+    "label": "the capsule is one line tall and as wide as its text",
+    "observed": {
+      "h": 56,
+      "fitted": true
+    },
+    "desired": {
+      "h": 56,
+      "fitted": true
+    },
+    "ok": true
+  },
+  {
+    "id": "PILL-4",
+    "label": "the face reads \"= 2.0\"",
+    "observed": "= 2.0",
+    "desired": "= 2.0",
+    "ok": true
+  },
+  {
+    "id": "WIRE-1",
+    "label": "the outlet lands on gain",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "WIRE-2",
+    "label": "gain paints wired",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "WIRE-3",
+    "label": "the grey definition-default chip dims once a cable overrides it",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "WIRE-4",
+    "label": "the pill is the source of the cable, judged at the landing",
+    "observed": [
+      {
+        "terminal": "end",
+        "to": "shape:estimate",
+        "port": "in_2"
+      },
+      {
+        "terminal": "start",
+        "to": "shape:lhUJ1LQgSKxIvtODGblV5",
+        "port": "out_1"
+      }
+    ],
+    "desired": [
+      {
+        "terminal": "end",
+        "to": "shape:estimate",
+        "port": "in_2"
+      },
+      {
+        "terminal": "start",
+        "to": "shape:lhUJ1LQgSKxIvtODGblV5",
+        "port": "out_1"
+      }
+    ],
+    "ok": true
+  },
+  {
+    "id": "NAME-1",
+    "label": "the typed name is the outlet name",
+    "observed": "gain",
+    "desired": "gain",
+    "ok": true
+  },
+  {
+    "id": "NAME-2",
+    "label": "the face reads \"gain = 2.0\"",
+    "observed": "gain = 2.0",
+    "desired": "gain = 2.0",
+    "ok": true
+  },
+  {
+    "id": "NAME-3",
+    "label": "the capsule grew to fit the name",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "NAME-4",
+    "label": "the cable survived the rename",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "LONG-1",
+    "label": "a long literal folds to \"= …\"",
+    "observed": "= …",
+    "desired": "= …",
+    "ok": true
+  },
+  {
+    "id": "LONG-2",
+    "label": "the full literal rides the tooltip",
+    "observed": "{\"quat\": True, \"units\": \"m\", \"frame_id\": \"base_link\"}",
+    "desired": "{\"quat\": True, \"units\": \"m\", \"frame_id\": \"base_link\"}",
+    "ok": true
+  },
+  {
+    "id": "LONG-3",
+    "label": "its outlet is typed dict",
+    "observed": "dict",
+    "desired": "dict",
+    "ok": true
+  },
+  {
+    "id": "PICK-1",
+    "label": "an input dropped on nothing asks what should feed it",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "PICK-2",
+    "label": "Value makes a capsule wired into opts",
+    "observed": {
+      "view": "value",
+      "cables": 2,
+      "offered": false
+    },
+    "desired": {
+      "view": "value",
+      "cables": 2,
+      "offered": false
+    },
+    "ok": true
+  },
+  {
+    "id": "PICK-3",
+    "label": "the picked capsule feeds opts from its outlet",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "PICK-4",
+    "label": "its type follows the literal",
+    "observed": "dict",
+    "desired": "dict",
+    "ok": true
+  },
+  {
+    "id": "FEED-1",
+    "label": "estimate's pose lands on the pill's inlet",
+    "observed": 3,
+    "desired": 3,
+    "ok": true
+  },
+  {
+    "id": "FEED-2",
+    "label": "a fed pill shows ⋯ where its literal would be",
+    "observed": "⋯",
+    "desired": "⋯",
+    "ok": true
+  },
+  {
+    "id": "FEED-3",
+    "label": "naming through the inspector names both rims",
+    "observed": {
+      "inlet": "pose",
+      "outlet": "pose",
+      "face": "pose = ⋯"
+    },
+    "desired": {
+      "inlet": "pose",
+      "outlet": "pose",
+      "face": "pose = ⋯"
+    },
+    "ok": true
+  },
+  {
+    "id": "FEED-4",
+    "label": "the inspector says what feeds the pill",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "FEED-5",
+    "label": "the Value field is read-only while a cable feeds the pill",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "FEED-6",
+    "label": "a fed pill with no type of its own takes the cable's, in the panel and in the record",
+    "observed": {
+      "field": "Pose",
+      "record": {
+        "inlet": "Pose",
+        "outlet": "Pose"
+      }
+    },
+    "desired": {
+      "field": "Pose",
+      "record": {
+        "inlet": "Pose",
+        "outlet": "Pose"
+      }
+    },
+    "ok": true
+  },
+  {
+    "id": "FEED-7",
+    "label": "the same pill feeds encode: one variable, written and read",
+    "observed": 4,
+    "desired": 4,
+    "ok": true
+  },
+  {
+    "id": "VIEW-1",
+    "label": "the inspector offers value beside simple, port and expanded",
+    "observed": "[\"simple\",\"port\",\"expanded\",\"value\"]",
+    "desired": "[\"simple\",\"port\",\"expanded\",\"value\"]",
+    "ok": true
+  },
+  {
+    "id": "VIEW-2",
+    "label": "the inspector shows a Pill section in place of the Block sections",
+    "observed": "[true,false,false,false,false,false]",
+    "desired": "[true,false,false,false,false,false]",
+    "ok": true
+  },
+  {
+    "id": "VIEW-3",
+    "label": "the Pill section reads the literal as the value and the ports' name as the name",
+    "observed": "[\"gain\",\"2.0\",\"float\"]",
+    "desired": "[\"gain\",\"2.0\",\"float\"]",
+    "ok": true
+  },
+  {
+    "id": "CLEAN-DEV",
+    "label": "the Block Dev journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  },
+  {
+    "id": "PROD-1",
+    "label": "the product toolbar carries the Pill in the System design family, and the pill tool is registered",
+    "observed": "[true,true]",
+    "desired": "[true,true]",
+    "ok": true
+  },
+  {
+    "id": "PROD-2",
+    "label": "P draws a pill in the product too",
+    "observed": {
+      "tool": "pill",
+      "view": "value",
+      "type": "int"
+    },
+    "desired": {
+      "tool": "pill",
+      "view": "value",
+      "type": "int"
+    },
+    "ok": true
+  },
+  {
+    "id": "PROD-3",
+    "label": "the family slot remembers the Pill as its last tool, and rests once the draw is done",
+    "observed": "[\"pill\",\"false\"]",
+    "desired": "[\"pill\",\"false\"]",
+    "ok": true
+  },
+  {
+    "id": "CLEAN-PROD",
+    "label": "the product journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

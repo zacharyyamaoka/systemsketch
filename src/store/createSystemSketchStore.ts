@@ -14,6 +14,7 @@ import {
 } from '../blocks/connections'
 import { SYSTEMSKETCH_COMMENT_RECORDS } from '../comments'
 import { EXCALIDRAW_SHAPE_UTILS } from '../excalidrawInterop'
+import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from '../stockPrimitiveVisuals'
 
 function replaceConstructorsByType<T extends { type: string }>(
   defaults: readonly T[],
@@ -27,6 +28,7 @@ const STORE_SHAPE_UTILS = replaceConstructorsByType<TLAnyShapeUtilConstructor>(
   defaultShapeUtils,
   [
     ...EXCALIDRAW_SHAPE_UTILS,
+    ...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
     BlockShapeUtil,
     BranchShapeUtil,
     ...blockConnectionShapeUtils,

@@ -1,0 +1,262 @@
+[
+ {
+  "id": "armed-by-default",
+  "label": "the host was armed for screencast frames by the page on mount",
+  "observed": {
+   "screencast": true,
+   "armed": true
+  },
+  "desired": {
+   "screencast": true,
+   "armed": true
+  },
+  "ok": true
+ },
+ {
+  "id": "clipboard-state",
+  "label": "the Copy row reports the clipboard write as done",
+  "observed": "Copied",
+  "desired": "Copied",
+  "ok": true
+ },
+ {
+  "id": "one-folder",
+  "label": "exactly one recording folder exists after one save",
+  "observed": 1,
+  "desired": 1,
+  "ok": true
+ },
+ {
+  "id": "folder-files",
+  "label": "the folder carries the packet, timeline, snapshots, frames and viewer",
+  "observed": true,
+  "desired": true,
+  "ok": true
+ },
+ {
+  "id": "packet-first-line",
+  "label": "the packet opens with the recording headline",
+  "observed": true,
+  "desired": true,
+  "ok": true
+ },
+ {
+  "id": "packet-note",
+  "label": "the note typed before saving is the first thing after the headline",
+  "observed": true,
+  "desired": true,
+  "ok": true
+ },
+ {
+  "id": "packet-paths",
+  "label": "the packet points at the folder by absolute path",
+  "observed": true,
+  "desired": true,
+  "ok": true
+ },
+ {
+  "id": "packet-on-clipboard",
+  "label": "the clipboard holds the packet verbatim",
+  "observed": true,
+  "desired": true,
+  "ok": true
+ },
+ {
+  "id": "header-mode",
+  "label": "a retroactive save is stamped as such, on the preview channel",
+  "observed": {
+   "mode": "last",
+   "channel": "preview",
+   "framesSource": "screencast"
+  },
+  "desired": {
+   "mode": "last",
+   "channel": "preview",
+   "framesSource": "screencast"
+  },
+  "ok": true
+ },
+ {
+  "id": "lanes",
+  "label": "the timeline carries input, state, store and DOM lanes",
+  "observed": true,
+  "desired": true,
+  "ok": true
+ },
+ {
+  "id": "dom-keydown",
+  "label": "the DOM lane saw the Escape key-down",
+  "observed": true,
+  "desired": true,
+  "ok": true
+ },
+ {
+  "id": "state-port",
+  "label": "the state lane saw the port press that started the cable",
+  "observed": true,
+  "desired": true,
+  "ok": true
+ },
+ {
+  "id": "rows-rebased",
+  "label": "every row is inside the window, from t=0",
+  "observed": true,
+  "desired": true,
+  "ok": true
+ },
+ {
+  "id": "states-mapped",
+  "label": "the packet maps pointing_block_port to the file that defines it",
+  "observed": true,
+  "desired": true,
+  "ok": true
+ },
+ {
+  "id": "frames-kept",
+  "label": "screencast frames exist, named by ms, and stay within one per 300 ms",
+  "observed": {
+   "some": true,
+   "capped": true,
+   "named": true,
+   "listed": true
+  },
+  "desired": {
+   "some": true,
+   "capped": true,
+   "named": true,
+   "listed": true
+  },
+  "ok": true
+ },
+ {
+  "id": "frame-is-jpeg",
+  "label": "a kept frame is a real JPEG",
+  "observed": true,
+  "desired": true,
+  "ok": true
+ },
+ {
+  "id": "snapshots",
+  "label": "the start snapshot is rewound: it holds fewer shapes than the end",
+  "observed": {
+   "start": 0,
+   "end": 3
+  },
+  "desired": {
+   "start": 0,
+   "end": 3
+  },
+  "ok": true
+ },
+ {
+  "id": "rec-bar",
+  "label": "the REC bar is painted at the top while the take runs",
+  "observed": true,
+  "desired": true,
+  "ok": true
+ },
+ {
+  "id": "take-auto-stop",
+  "label": "the take stopped itself once the cap passed",
+  "observed": true,
+  "desired": true,
+  "ok": true
+ },
+ {
+  "id": "take-folder",
+  "label": "the take wrote a second folder",
+  "observed": 2,
+  "desired": 2,
+  "ok": true
+ },
+ {
+  "id": "take-header",
+  "label": "the take is stamped as a take and lasted about the cap",
+  "observed": {
+   "mode": "take",
+   "capped": true
+  },
+  "desired": {
+   "mode": "take",
+   "capped": true
+  },
+  "ok": true
+ },
+ {
+  "id": "take-translating",
+  "label": "the take saw the Block being dragged",
+  "observed": true,
+  "desired": true,
+  "ok": true
+ },
+ {
+  "id": "take-frames-capped",
+  "label": "the take kept at most one frame per 300 ms over its cap",
+  "observed": true,
+  "desired": true,
+  "ok": true
+ },
+ {
+  "id": "take-no-clipboard",
+  "label": "an auto-stopped take leaves the clipboard alone",
+  "observed": "sentinel",
+  "desired": "sentinel",
+  "ok": true
+ },
+ {
+  "id": "playback",
+  "label": "playback.html renders the log, the filmstrip and a loaded frame",
+  "observed": {
+   "lines": true,
+   "strip": true,
+   "frame": true
+  },
+  "desired": {
+   "lines": true,
+   "strip": true,
+   "frame": true
+  },
+  "ok": true
+ },
+ {
+  "id": "toggle-off",
+  "label": "turning the recorder off disables Save and persists the choice",
+  "observed": {
+   "saveDisabled": true,
+   "stored": "off"
+  },
+  "desired": {
+   "saveDisabled": true,
+   "stored": "off"
+  },
+  "ok": true
+ },
+ {
+  "id": "toggle-disarms-host",
+  "label": "the host stops the screencast when the page turns recording off",
+  "observed": false,
+  "desired": false,
+  "ok": true
+ },
+ {
+  "id": "toggle-persists",
+  "label": "the off choice survives a reload",
+  "observed": "false",
+  "desired": "false",
+  "ok": true
+ },
+ {
+  "id": "preset-controls",
+  "label": "the Block Dev preset carries the compact recorder controls",
+  "observed": 4,
+  "desired": 4,
+  "ok": true
+ },
+ {
+  "id": "console-clean",
+  "label": "the journey raised no local console errors",
+  "observed": [],
+  "desired": [],
+  "ok": true
+ }
+]

@@ -30,7 +30,7 @@
   .before-after { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   a { color:var(--accent); }
 </style></head><body><main>
-<div class="kicker">SystemSketch · 2026-09-02 · merged into main, measured @ <code>da86e52</code></div>
+<div class="kicker">SystemSketch · 2026-09-02 · merged into main, measured @ <code>ff05777</code></div>
 <h1>Ports in the header, and the rows they live in</h1>
 <p class="lede">A Block still has only input and output ports. What changed is that every port now says which <b>row</b> of the burger it sits in — the heading is row 0 — and you can put a port in any row from four places that all agree: a hold-and-drag on the canvas, a grip drag in the inspector, a <i>Move to</i> menu, and a bead on the heading's edge that adds a port straight into it.</p>
 
@@ -76,7 +76,7 @@
 <div class="card"><h3>This feature</h3>
 <table><tbody>
 <tr><td><code>npm run test:rows</code> — real browser, lab + product</td><td class="num">14 checks</td></tr>
-<tr><td><code>npx vitest run</code> — 185 files</td><td class="num">526 tests</td></tr>
+<tr><td><code>npx vitest run</code> — 185 files</td><td class="num">527 tests</td></tr>
 <tr><td><code>python3 -m unittest discover -s tests</code></td><td class="num">51 tests</td></tr>
 <tr><td>Review fixture driven in the real app (<code>tests/drive_review_fixture_rows.mjs</code>)</td><td class="num">row 0 ✓</td></tr>
 </tbody></table>
@@ -119,7 +119,7 @@
 <div class="card"><h3>Needs you</h3><ul>
 <li><b>Which surface to lean on.</b> Recommendation: V1 drag as the primary, V2/V3/V4 kept as complements (all shipped). <span class="pill">default if silent: keep all four, polish V1</span></li>
 <li><b>Empty rows.</b> Today a row emptied on both sides disappears. Recommendation: accept until rows get labels. <span class="pill">default: accept</span></li>
-<li><b>Merge order with the pill branch.</b> Recommendation: merge the pill first (its migration stays 3), then this branch renumbered to 4. <span class="pill">default: I renumber on merge</span></li>
+<li><b>Migration ids: resolved, no action.</b> The pill branch has since merged this work and renumbered its own <code>ValueView</code> to 4, keeping <code>PortRows: 3</code>. Verified against that branch when this report was built. <span class="pill">nothing to decide</span></li>
 </ul></div>
 <div class="card"><h3>Deliberately not done</h3><ul>
 <li>No V5 port-editing mode in the app — a mode is the one thing every earlier round of yours rejected.</li>

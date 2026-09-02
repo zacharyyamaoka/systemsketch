@@ -18,6 +18,7 @@ import type { PortHostShape } from '../blocks/connections/blockPorts'
 import type { ConnectionBinding } from '../blocks/connections/ConnectionBindingUtil'
 import type { ConnectionShape } from '../blocks/connections/ConnectionShapeUtil'
 import { getDefaultBranchProps, type BranchShape } from '../branch/branchModel'
+import { createValueBlockProps } from '../blocks/valueBlock'
 import {
 	BOARD_DIAGNOSTIC_CODES,
 	focusBoardDiagnostic,
@@ -214,6 +215,17 @@ function diagnosticEditor(
 }
 
 describe('board diagnostics model', () => {
+	it('treats a standalone Value Pill inlet as optional', () => {
+		const base = block('literal')
+		const literal: BlockShape = {
+			...base,
+			props: createValueBlockProps(getDefaultBlockProps(), '2.0'),
+		}
+		const { editor } = diagnosticEditor([literal])
+
+		expect(getBoardDiagnosticsModel(editor).diagnostics).toEqual([])
+	})
+
 	it('reports Block identity, lane ambiguity, and unresolved inputs deterministically', () => {
 		const malformed = block('malformed', {
 			title: ' ',

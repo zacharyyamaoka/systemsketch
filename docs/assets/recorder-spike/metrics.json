@@ -1,0 +1,38 @@
+{
+  "durationMs": 8352.3,
+  "recorderCostMs": 2.1,
+  "recorderOverheadPct": 0.03,
+  "rows": 124,
+  "rowsPerLane": {
+    "store": 45,
+    "state": 22,
+    "input": 54,
+    "mark": 1,
+    "menu": 2
+  },
+  "inputByName": {
+    "pointer_move": 35,
+    "pointer_down": 6,
+    "pointer_up": 5,
+    "complete": 3,
+    "key_up": 3,
+    "double_click": 1,
+    "right_click": 1
+  },
+  "timelineBytes": 19700,
+  "snapshotBytes": 2412,
+  "frames": 99,
+  "framesPerSecond": 11.9,
+  "frameGapMedianMs": 18,
+  "frameGapMaxMs": 947,
+  "frameBytesMedian": 48630,
+  "frameBytesTotal": 4572039,
+  "framesKept": 15,
+  "framesKeptBytes": 652302,
+  "clockSkewMedianMs": 7,
+  "stateTransitions": 22,
+  "consoleRows": 0,
+  "harnessConsoleErrors": [],
+  "cablesOnBoard": 1,
+  "keepGapMs": 300
+}

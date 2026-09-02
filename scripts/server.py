@@ -30,6 +30,12 @@ from release_lib import (
     rollback_stable,
     source_mtime,
 )
+from recording_store import (
+    FrameSidecar,
+    RecordingError,
+    last_recording,
+    write_recording,
+)
 from workspace_store import (
     WorkspaceConflictError,
     WorkspaceFormatError,
@@ -96,6 +102,15 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             except ReleaseError as cause:
                 self._json({"error": str(cause)}, HTTPStatus.NOT_FOUND)
             return
+        if path == "/api/recordings/last":
+            # "Nothing saved yet" is an answer, not an error: a 404 here would
+            # print a console error on every mount, into the very lane the
+            # recorder captures.
+            self._json({"recording": last_recording(self.app.files_root)})
+            return
+        if path == "/api/recordings/status":
+            self._json(self.app.frames.status())
+            return
         if path == "/api/workspace/list":
             try:
                 values = parse_qs(parsed.query).get("dir", [])
@@ -146,6 +161,8 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
         path = urlparse(self.path).path
         if path not in {
             "/api/release",
+            "/api/recordings",
+            "/api/recordings/arm",
             "/api/workspace/directory",
             "/api/workspace/file",
             "/api/workspace/rename",
@@ -168,6 +185,12 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                 snapshot = payload.get("snapshot") if action == "preview" else None
                 preset = payload.get("preset", "product") if action == "preview" else "product"
                 self._json(self.app.run_action(action, snapshot=snapshot, preset=preset))
+                return
+            if path == "/api/recordings/arm":
+                self._json(self.app.frames.arm(payload.get("enabled") is True, str(payload.get("url", ""))))
+                return
+            if path == "/api/recordings":
+                self._json(self.app.save_recording(payload))
                 return
             if path == "/api/workspace/file":
                 base_digest = payload.get("baseDigest")
@@ -234,6 +257,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             OSError,
             ValueError,
             ReleaseError,
+            RecordingError,
             WorkspacePathError,
             WorkspaceFormatError,
             subprocess.SubprocessError,
@@ -255,6 +279,7 @@ class SystemSketchServer(ThreadingHTTPServer):
         source_root: Path,
         files_root: Path | None = None,
         allow_source_root: bool = False,
+        cdp_port: int | None = None,
     ):
         self.dist = dist.resolve()
         self.channel = channel
@@ -270,7 +295,34 @@ class SystemSketchServer(ThreadingHTTPServer):
             else ()
         )
         self.controller_fingerprint = controller_fingerprint(Path(__file__).resolve().parent)
+        # The screencast sidecar lives beside this file, in the checkout or in
+        # an installed release's runtime/ alike.
+        self.frames = FrameSidecar(
+            Path(__file__).resolve().parent / "recorder_frames.mjs",
+            cdp_port=cdp_port,
+        )
         super().__init__(address, partial(SystemSketchHandler, app=self))
+
+    def server_close(self) -> None:
+        self.frames.stop()
+        super().server_close()
+
+    def save_recording(self, payload: dict) -> dict:
+        """Write the buffer the page handed over, plus the sidecar's frames."""
+        version, _changes = project_metadata(self.source_root)
+        if self.channel == "stable":
+            version = str(read_manifest(self.release_home, self.build).get("version", version))
+        channel = str(payload.get("channel") or self.channel)
+        build = str(payload.get("build") or self.build)
+        return write_recording(
+            payload,
+            self.files_root,
+            source_root=self.source_root,
+            channel=channel,
+            build=build,
+            version=str(payload.get("version") or version),
+            frame_dump=self.frames.dump,
+        )
 
     def health_payload(self) -> dict:
         version, _changes = project_metadata(self.source_root)
@@ -287,6 +339,7 @@ class SystemSketchServer(ThreadingHTTPServer):
                 *(str(root) for root in self.additional_document_roots),
             ],
             "controllerFingerprint": self.controller_fingerprint,
+            "recorderFrames": self.frames.availability()[0],
         }
 
     def reveal_document(self, raw_path: object) -> dict:
@@ -495,6 +548,12 @@ def parse_arguments() -> argparse.Namespace:
         action="store_true",
         help="allow direct document URLs under the Preview source worktree",
     )
+    parser.add_argument(
+        "--cdp-port",
+        type=int,
+        default=None,
+        help="Chrome debugging port of this channel's window, for screencast frames",
+    )
     return parser.parse_args()
 
 
@@ -510,6 +569,7 @@ def main() -> int:
         source_root=arguments.source_root,
         files_root=arguments.files_root,
         allow_source_root=arguments.allow_source_root,
+        cdp_port=arguments.cdp_port,
     )
     print(f"SystemSketch {arguments.channel} controller on http://{arguments.host}:{arguments.port}", flush=True)
     try:

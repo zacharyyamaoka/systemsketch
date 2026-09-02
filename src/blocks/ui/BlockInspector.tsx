@@ -14,6 +14,7 @@ import { LiveTextArea, LiveTextInput, useLiveField } from '../../fields'
 
 import {
   BLOCK_VIEWS,
+  isBlockShape,
   HEADER_ROW,
   type BlockPort,
   type BlockPortSide,
@@ -23,10 +24,13 @@ import {
   portInHeader,
   setBlockViewProps,
 } from '../blockModel'
+import { getBlockPortConnections, type BlockPortConnection } from '../connections/blockPorts'
+import { valueBlockInlet, valueBlockName, valueBlockOutlet } from '../valueBlock'
 import {
   appendBlockPort,
   appendBlockPortProps,
   getBlockInspectorContext,
+  getOnlySelectedBlock,
   sameBlockInspectorContext,
   moveBlockPort,
   moveBlockPortProps,
@@ -83,12 +87,23 @@ export interface BlockInspectorActions {
   beginEdit?(label: string): void
 }
 
+/** What a pill is wired to, read from the cables; the content never reads the editor. */
+export interface PillInspectorFacts {
+  /** `estimate() · pose` when a cable feeds the inlet, else null. */
+  fedBy: string | null
+  /** The type of the port feeding the inlet, when it has one. */
+  fedType: string | null
+  /** Everything the outlet feeds, `encode() · pose` style. */
+  feeds: string[]
+}
+
 export interface BlockInspectorContentProps {
   props: BlockShapeProps
   actions?: BlockInspectorActions
   status?: 'selected' | 'new'
   initialTab?: InspectorTab
   onRequestClose?: () => void
+  pill?: PillInspectorFacts
 }
 
 function TinyIcon({ children }: { children: ReactNode }) {
@@ -311,6 +326,91 @@ function DescriptionEditor({
         Shown at a glance · keep implementation detail in Notes.
       </p>
     </div>
+  )
+}
+
+/**
+ * A pill is a variable, so its inspector speaks that language: a name, a
+ * value, a type, and what it is wired to. Name and type are the ports' (one
+ * name mirrored on both rims), the value is the Block's title, and the value
+ * is read-only while a cable on the inlet supplies it.
+ */
+function PillSection({
+  props,
+  actions,
+  pill,
+}: {
+  props: BlockShapeProps
+  actions?: BlockInspectorActions
+  pill?: PillInspectorFacts
+}) {
+  const readOnly = !actions
+  const outlet = valueBlockOutlet(props)
+  const name = valueBlockName(props)
+  const ownType = outlet?.type ?? valueBlockInlet(props)?.type ?? ''
+  const fedBy = pill?.fedBy ?? null
+  const feeds = pill?.feeds ?? []
+  // A fed pill with no type of its own is whatever feeds it; typing here overrides.
+  const type = ownType !== '' ? ownType : (pill?.fedType ?? '')
+  const patchOutlet = (patch: Partial<Omit<BlockPort, 'id'>>) => {
+    if (outlet) actions?.updatePort('outputs', outlet.id, patch, { continuous: true })
+  }
+
+  return (
+    <section className="block-inspector__section" data-inspector-section="Pill">
+      <div className="block-inspector__section-title">Pill</div>
+
+      <label className="block-inspector__field">
+        <span>Name</span>
+        <LiveTextInput
+          value={name}
+          disabled={readOnly || !outlet}
+          placeholder="gain"
+          ariaLabel="Variable name"
+          beginEdit={() => actions?.beginEdit?.('name pill')}
+          onWrite={(next) => patchOutlet({ name: next })}
+        />
+      </label>
+
+      <label className="block-inspector__field">
+        <span>Value</span>
+        <LiveTextInput
+          value={props.title}
+          disabled={readOnly || fedBy !== null}
+          placeholder={fedBy ? '' : '2.0'}
+          ariaLabel="Literal value"
+          beginEdit={() => actions?.beginEdit?.('edit pill value')}
+          onWrite={(title) => actions?.updateDetails({ title }, { continuous: true })}
+        />
+      </label>
+
+      <label className="block-inspector__field">
+        <span>Type</span>
+        <LiveTextInput
+          value={type}
+          disabled={readOnly || !outlet}
+          placeholder={fedBy ? '' : 'float'}
+          ariaLabel="Variable type"
+          beginEdit={() => actions?.beginEdit?.('retype pill')}
+          onWrite={(next) => patchOutlet({ type: next })}
+        />
+      </label>
+
+      <p className="block-inspector__hint" data-testid="pill-wiring">
+        {fedBy
+          ? `Fed by ${fedBy}${ownType === '' && pill?.fedType ? ` (${pill.fedType})` : ''} — the value comes down the cable; the literal is kept for when it is unwired.`
+          : 'Inlet unwired — the literal is the value.'}
+        {' '}
+        {feeds.length > 0 ? `Feeds ${feeds.join(', ')}.` : 'Outlet unwired.'}
+      </p>
+      <p className="block-inspector__hint">
+        {name === ''
+          ? 'Unnamed: passed inline where it is used.'
+          : `Named: ${name} = … is hoisted before its first use.`}
+        {' '}
+        The type follows the literal; edit it to override.
+      </p>
+    </section>
   )
 }
 
@@ -795,6 +895,7 @@ export function BlockInspectorContent({
   status = 'selected',
   initialTab = 'details',
   onRequestClose,
+  pill,
 }: BlockInspectorContentProps) {
   const [tab, setTab] = useState<InspectorTab>(initialTab)
   const readOnly = !actions
@@ -848,6 +949,10 @@ export function BlockInspectorContent({
         </section>
       ) : (
         <div className="block-inspector__body" role="tabpanel" aria-label="Block details">
+          {props.view === 'value' ? (
+            <PillSection props={props} actions={actions} pill={pill} />
+          ) : (
+            <>
           <section className="block-inspector__section" data-inspector-section="Block">
             <div className="block-inspector__section-title">Block</div>
 
@@ -905,6 +1010,9 @@ export function BlockInspectorContent({
             </button>
           </section>
 
+            </>
+          )}
+
           <section className="block-inspector__section" data-inspector-section="View">
             <div className="block-inspector__section-title">View</div>
             <div className="block-inspector__choices" role="group" aria-label="Block view">
@@ -925,6 +1033,8 @@ export function BlockInspectorContent({
             </p>
           </section>
 
+          {props.view !== 'value' ? (
+            <>
           <PortSection side="inputs" props={props} actions={actions} />
           <PortSection side="outputs" props={props} actions={actions} />
 
@@ -956,6 +1066,8 @@ export function BlockInspectorContent({
               Aligned shares rows between inputs and outputs; offset stacks the outputs below the inputs.
             </p>
           </section>
+            </>
+          ) : null}
         </div>
       )}
     </section>
@@ -986,6 +1098,39 @@ export function EditorBlockInspector({
   )
   const [localDraft, setLocalDraft] = useState<BlockShapeProps | null>(null)
   const draft = toolDraft ?? localDraft ?? (context.kind === 'tool' ? context.props : null)
+
+  // What the selected pill is wired to, in words: read from the same cable
+  // table the dots read, so the panel and the canvas cannot disagree.
+  const pillFacts = useValue<PillInspectorFacts | undefined>(
+    'SystemSketch pill wiring',
+    () => {
+      const selected = getOnlySelectedBlock(editor)
+      if (!selected || selected.props.view !== 'value') return undefined
+      const otherPort = (connection: BlockPortConnection) => {
+        const other = editor.getShape(connection.connectedShapeId)
+        if (!isBlockShape(other)) return null
+        const port = [...other.props.inputs, ...other.props.outputs]
+          .find((candidate) => candidate.id === connection.connectedPortId) ?? null
+        const title = other.props.title || (other.props.view === 'value' ? 'a pill' : 'a Block')
+        return { title, port }
+      }
+      const describe = (connection: BlockPortConnection) => {
+        const found = otherPort(connection)
+        if (!found) return 'a shape'
+        return found.port?.name ? `${found.title} · ${found.port.name}` : found.title
+      }
+      const inlet = selected.props.inputs[0]?.id
+      const outlet = selected.props.outputs[0]?.id
+      const connections = getBlockPortConnections(editor, selected.id)
+      const feeding = connections.find((c) => c.ownPortId === inlet) ?? null
+      return {
+        fedBy: feeding ? describe(feeding) : null,
+        fedType: feeding ? (otherPort(feeding)?.port?.type || null) : null,
+        feeds: connections.filter((c) => c.ownPortId === outlet).map(describe),
+      }
+    },
+    [editor],
+  )
 
   const actions = useMemo<BlockInspectorActions | undefined>(() => {
     if (context.kind === 'selected') {
@@ -1063,6 +1208,7 @@ export function EditorBlockInspector({
       props={context.kind === 'selected' ? context.props : (draft ?? context.props)}
       status={context.kind === 'selected' ? 'selected' : 'new'}
       actions={actions}
+      pill={pillFacts}
       onRequestClose={onRequestClose}
     />
   )

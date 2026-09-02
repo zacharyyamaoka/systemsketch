@@ -1,56 +1,73 @@
 /**
- * A Block's appearance, as a list of stock tldraw shapes.
+ * A Block's appearance expressed as editable tldraw primitives.
  *
- * Ported from pyblocks' `src/pipeline/nodes/detachNode.ts`, which is where this
- * operation was worked out. Two properties carried over unchanged, because they
- * are what make the result trustworthy:
- *
- *  1. Everything is read from `layoutBlock` — the same function the renderer,
- *     the indicator and the binding anchors read. The detached copy therefore
- *     cannot drift from what was on screen a frame earlier.
- *  2. It is pure apart from minting ids (and a DOM text measurer when there is
- *     one), so the look can be asserted in a unit test with no editor at all.
- *     The look is a value, not a side effect.
- *
- * Two approximations are declared rather than hidden: stock-palette port
- * colours (tldraw cannot reach `#c08520`), and square corners where a lucide
- * glyph or a 9px radius has no primitive equivalent.
+ * Geometry comes only from `layoutBlock`, the same authority used by the live
+ * renderer and cable anchors. Visual metadata is interpreted by configured
+ * stock shape utilities: the records stay normal geo / line / text shapes,
+ * while SystemSketch can retain the Block's exact radius, one-pixel rules,
+ * token colours, and type scale.
  */
 import { createShapeId, toRichText } from 'tldraw'
-import type { TLDefaultColorStyle, TLShapeId, TLShapePartial } from 'tldraw'
+import type { TLDefaultColorStyle, TLGeoShape, TLShapeId, TLShapePartial } from 'tldraw'
 
-import type { BlockShapeProps } from '../blockModel'
+import { portDefaultValue, type BlockShapeProps } from '../blockModel'
 import {
+	BLOCK_CORNER_RADIUS,
 	BLOCK_PORT_RADIUS,
 	PORT_TEXT_FONT_PX,
 	PORT_TITLE_FONT_PX,
 	SIMPLE_ICON_GAP_PX,
 	SIMPLE_TEXT_FONT_PX,
 	SIMPLE_TITLE_FONT_PX,
-	TLDRAW_TEXT_S_PX,
 	layoutBlock,
 	type BlockRect,
 	type LaidOutBlockPort,
 } from '../layoutBlock'
-import { portDefaultValue } from '../blockModel'
-import { portTldrawColor } from '../ui/portPalette'
+import { portColor, portTldrawColor } from '../ui/portPalette'
+import {
+	SYSTEMSKETCH_ROUNDED_RECT_GEO,
+	systemSketchPrimitiveMeta,
+} from '../../stockPrimitiveVisuals'
 
-/** tldraw renders a `size: 's'` label at 18px against the default 16px root. */
-const TLDRAW_LINE_HEIGHT = 1.35
+/** The one detached port circle keeps the live indicator's full footprint. */
+export const PORT_INDICATOR_RADIUS = BLOCK_PORT_RADIUS + 3
+
+const SANS_FONT = 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+const MONO_FONT = 'ui-monospace, "SF Mono", Menlo, Consolas, monospace'
 const PORT_LABEL_GAP_PX = 8
 const PORT_DEFAULT_FONT_PX = 13
+const PORT_DEFAULT_LINE_PX = 18
 const PORT_DEFAULT_PAD_X_PX = 7
-const PORT_DEFAULT_MAX_WIDTH_PX = 88
-/** Canvas and tldraw do not always resolve the same fallback face during load. */
-const PORT_TEXT_MEASURE_GUARD = 1.18
+const PORT_DEFAULT_MAX_CONTENT_PX = 88
 
-/**
- * Text runs are measured with the DOM's own measurer when there is one, so a
- * right-aligned output name lands where flexbox put it. The fallback keeps this
- * module importable — and testable — in Node.
- */
 let measureContext: CanvasRenderingContext2D | null | undefined
+const measuredText = new Map<string, number>()
 function measureText(text: string, px: number, family: string, weight = 400): number {
+	const key = `${weight}:${px}:${family}:${text}`
+	const cached = measuredText.get(key)
+	if (cached !== undefined) return cached
+	if (typeof document !== 'undefined') {
+		const probe = document.createElement('span')
+		probe.textContent = text
+		Object.assign(probe.style, {
+			position: 'fixed',
+			left: '-10000px',
+			top: '0',
+			visibility: 'hidden',
+			whiteSpace: 'nowrap',
+			fontFamily: family,
+			fontSize: `${px}px`,
+			fontWeight: String(weight),
+			lineHeight: 'normal',
+		})
+		document.body.appendChild(probe)
+		const width = probe.getBoundingClientRect().width
+		probe.remove()
+		if (width > 0) {
+			measuredText.set(key, width)
+			return width
+		}
+	}
 	if (measureContext === undefined) {
 		measureContext = typeof document === 'undefined'
 			? null
@@ -61,41 +78,64 @@ function measureText(text: string, px: number, family: string, weight = 400): nu
 		const width = measureContext.measureText(text).width
 		if (width > 0) return width
 	}
-	return text.length * px * 0.62
+	return text.length * px * (family === MONO_FONT ? 0.61 : 0.55)
 }
-
 interface TextOptions {
 	text: string
-	/** Font size the Block drew this at, in shape-local pixels. */
 	px: number
-	/** The layout box this text occupies, in shape-local pixels. */
+	lineHeight: number
+	weight: number
 	box: BlockRect
 	origin: { x: number; y: number }
 	font: 'sans' | 'mono'
-	color: TLDefaultColorStyle
+	color: string
+	stockColor: TLDefaultColorStyle
 	align: 'start' | 'middle' | 'end'
+	letterSpacing?: string
+	/** Prevent a one-line DOM label from becoming a two-line text primitive. */
+	naturalWidth?: number
+}
+
+function fontFamily(font: 'sans' | 'mono'): string {
+	return font === 'mono' ? MONO_FONT : SANS_FONT
 }
 
 function textAt(options: TextOptions): TLShapePartial {
-	// A text shape is positioned by its top-left, so centre it inside the row
-	// the layout allocated rather than trusting that row's top edge.
-	const height = options.px * TLDRAW_LINE_HEIGHT
-	const scale = options.px / TLDRAW_TEXT_S_PX
+	const naturalWidth = options.naturalWidth
+		?? measureText(options.text, options.px, fontFamily(options.font), options.weight)
+	// TextShapeUtil floors a fixed width before it measures. The live DOM does
+	// not, so reserve the same +1 tldraw itself uses for auto-sized labels.
+	// RichTextLabel adds a small DOM measurement tolerance on top of that
+	// floor. Keep it inside the row's 8px inter-item gap rather than letting a
+	// final glyph wrap and disappear below the fixed 24px row.
+	const width = Math.max(1, Math.ceil(Math.max(options.box.w, naturalWidth)) + 10)
+	const x = options.align === 'end'
+		? options.box.x + options.box.w - width
+		: options.align === 'middle'
+			? options.box.x + (options.box.w - width) / 2
+			: options.box.x
 	return {
 		id: createShapeId(),
 		type: 'text',
-		x: options.origin.x + options.box.x,
-		y: options.origin.y + options.box.y + (options.box.h - height) / 2,
+		x: options.origin.x + x,
+		y: options.origin.y + options.box.y + (options.box.h - options.lineHeight) / 2,
+		meta: systemSketchPrimitiveMeta({
+			kind: 'text',
+			color: options.color,
+			fontFamily: fontFamily(options.font),
+			fontSize: options.px,
+			fontWeight: options.weight,
+			lineHeight: options.lineHeight,
+			...(options.letterSpacing ? { letterSpacing: options.letterSpacing } : {}),
+		}),
 		props: {
 			richText: toRichText(options.text),
-			color: options.color,
+			color: options.stockColor,
 			size: 's',
 			font: options.font,
-			scale,
+			scale: 1,
 			autoSize: false,
-			// `w` is in the shape's PRE-scale units: a 40px-wide label drawn at
-			// scale 2/3 needs w=60, or tldraw wraps the text mid-word.
-			w: Math.max(1, options.box.w / scale),
+			w: width,
 			textAlign: options.align,
 		},
 	}
@@ -112,6 +152,9 @@ function lineAt(
 		type: 'line',
 		x: origin.x + x,
 		y: origin.y + y,
+		meta: systemSketchPrimitiveMeta({
+			kind: 'line', strokeColor: 'var(--ss-border)', strokeWidth: 1,
+		}),
 		props: {
 			points: {
 				a1: { id: 'a1', index: 'a1' as never, x: 0, y: 0 },
@@ -124,112 +167,186 @@ function lineAt(
 	}
 }
 
-function outlineAt(
+function roundedRectAt(
 	origin: { x: number; y: number },
 	box: BlockRect,
-	color: TLDefaultColorStyle,
+	options: {
+		cornerRadius: number
+		fillColor: string
+		strokeColor: string
+		strokeWidth?: number
+		stockColor?: TLDefaultColorStyle
+		stockFill?: 'none' | 'semi' | 'solid' | 'fill'
+	},
 ): TLShapePartial {
 	return {
 		id: createShapeId(),
 		type: 'geo',
 		x: origin.x + box.x,
 		y: origin.y + box.y,
+		meta: systemSketchPrimitiveMeta({
+			kind: 'geo',
+			cornerRadius: options.cornerRadius,
+			fillColor: options.fillColor,
+			strokeColor: options.strokeColor,
+			strokeWidth: options.strokeWidth ?? 1,
+		}),
 		props: {
-			geo: 'rectangle',
+			geo: SYSTEMSKETCH_ROUNDED_RECT_GEO as TLGeoShape['props']['geo'],
 			w: Math.max(1, box.w),
 			h: Math.max(1, box.h),
-			color,
-			fill: 'none',
+			color: options.stockColor ?? 'grey',
+			fill: options.stockFill ?? 'semi',
 			dash: 'solid',
 			size: 's',
 		},
 	}
 }
 
-interface PortLabelPart {
-	text: string
-	px: number
-	font: 'sans' | 'mono'
-	color: TLDefaultColorStyle
-	/** The default-value chip keeps the live row's horizontal breathing room. */
-	padX?: number
+function ellipseAt(
+	box: BlockRect,
+	options: {
+		fillColor: string
+		strokeColor: string
+		strokeWidth?: number
+		stockColor?: TLDefaultColorStyle
+		stockFill?: 'none' | 'semi' | 'solid' | 'fill'
+	},
+): TLShapePartial {
+	return {
+		id: createShapeId(),
+		type: 'geo',
+		x: box.x,
+		y: box.y,
+		meta: systemSketchPrimitiveMeta({
+			kind: 'geo',
+			fillColor: options.fillColor,
+			strokeColor: options.strokeColor,
+			strokeWidth: options.strokeWidth ?? 1,
+		}),
+		props: {
+			geo: 'ellipse',
+			w: Math.max(1, box.w),
+			h: Math.max(1, box.h),
+			color: options.stockColor ?? 'grey',
+			fill: options.stockFill ?? 'semi',
+			dash: 'solid',
+			size: 's',
+		},
+	}
 }
 
-/**
- * Project the DOM flex row onto independently editable stock text shapes.
- *
- * Inputs read name → type → default; outputs read type → name → default and
- * hug the right edge. Exact boxes make the nested row group's bounds follow
- * what is visibly painted instead of spanning the whole Block.
- */
+interface PortLabelElement {
+	kind: 'name' | 'type' | 'default'
+	text: string
+	font: 'sans' | 'mono'
+	px: number
+	lineHeight: number
+	color: string
+	stockColor: TLDefaultColorStyle
+	contentWidth: number
+	outerWidth: number
+}
+
+/** Project the live flex row into separately editable shapes at the same boxes. */
 function portLabelsAt(
 	placed: LaidOutBlockPort,
 	origin: { x: number; y: number },
 ): TLShapePartial[] {
 	if (!placed.label) return []
 	const defaultValue = placed.side === 'input' ? portDefaultValue(placed.port) : ''
-	const name: PortLabelPart = {
-		text: placed.port.name,
-		px: PORT_TEXT_FONT_PX,
-		font: 'sans',
-		color: 'black',
+	const element = (
+		kind: PortLabelElement['kind'],
+		text: string,
+		font: 'sans' | 'mono',
+		px: number,
+		lineHeight: number,
+		color: string,
+		stockColor: TLDefaultColorStyle,
+	): PortLabelElement => {
+		const measured = measureText(text, px, fontFamily(font))
+		const contentWidth = kind === 'default'
+			? Math.min(PORT_DEFAULT_MAX_CONTENT_PX, measured)
+			: measured
+		return {
+			kind, text, font, px, lineHeight, color, stockColor, contentWidth,
+			outerWidth: contentWidth + (kind === 'default' ? PORT_DEFAULT_PAD_X_PX * 2 + 2 : 0),
+		}
 	}
-	const type: PortLabelPart = {
-		text: placed.port.type,
-		px: PORT_TEXT_FONT_PX,
-		font: 'mono',
-		color: 'grey',
-	}
-	const chip: PortLabelPart = {
-		text: defaultValue === '' ? '' : `= ${defaultValue}`,
-		px: PORT_DEFAULT_FONT_PX,
-		font: 'mono',
-		color: 'grey',
-		padX: PORT_DEFAULT_PAD_X_PX,
-	}
+	const name = element('name', placed.port.name, 'sans', PORT_TEXT_FONT_PX, 24, 'var(--ss-text)', 'black')
+	const type = element('type', placed.port.type, 'mono', PORT_TEXT_FONT_PX, 24, 'var(--ss-text-muted)', 'grey')
+	const chip = element(
+		'default', defaultValue === '' ? '' : `= ${defaultValue}`,
+		'mono', PORT_DEFAULT_FONT_PX, PORT_DEFAULT_LINE_PX, 'var(--ss-text-muted)', 'grey',
+	)
 	const ordered = (placed.side === 'input' ? [name, type, chip] : [type, name, chip])
 		.filter((part) => part.text !== '')
 	if (ordered.length === 0) return []
 
-	const gapWidth = PORT_LABEL_GAP_PX * Math.max(0, ordered.length - 1)
-	const available = Math.max(1, placed.label.w - gapWidth)
-	const desired = ordered.map((part) => {
-		const measured = measureText(
-			part.text,
-			part.px,
-			part.font === 'mono' ? "ui-monospace, monospace" : "'Inter', sans-serif",
-		)
-		const padded = measured * PORT_TEXT_MEASURE_GUARD + 2 + (part.padX ?? 0) * 2
-		return part === chip ? Math.min(PORT_DEFAULT_MAX_WIDTH_PX, padded) : padded
-	})
-	const desiredTotal = desired.reduce((sum, width) => sum + width, 0)
-	const compression = desiredTotal > available ? available / desiredTotal : 1
-	const widths = desired.map((width) => Math.max(1, width * compression))
-	const totalWidth = widths.reduce((sum, width) => sum + width, 0) + gapWidth
+	const gaps = PORT_LABEL_GAP_PX * Math.max(0, ordered.length - 1)
+	const desired = ordered.reduce((sum, part) => sum + part.outerWidth, gaps)
 	let x = placed.side === 'input'
 		? placed.label.x
-		: placed.label.x + placed.label.w - totalWidth
+		: placed.label.x + placed.label.w - desired
+	const result: TLShapePartial[] = []
 
-	return ordered.map((part, index) => {
-		const width = widths[index]
-		const shape = textAt({
-			text: part.text,
-			px: part.px,
-			box: { x, y: placed.label!.y, w: width, h: placed.label!.h },
-			origin,
-			font: part.font,
-			color: part.color,
-			align: part.padX ? 'middle' : 'start',
-		})
-		x += width + PORT_LABEL_GAP_PX
-		return shape
-	})
+	for (const part of ordered) {
+		if (part.kind === 'default') {
+			const pillY = placed.label.y + (placed.label.h - (PORT_DEFAULT_LINE_PX + 2)) / 2
+			result.push(roundedRectAt(origin, {
+				x,
+				y: pillY,
+				w: part.outerWidth,
+				h: PORT_DEFAULT_LINE_PX + 2,
+			}, {
+				cornerRadius: 999,
+				fillColor: 'var(--ss-surface-sunken)',
+				strokeColor: 'var(--ss-border)',
+				stockColor: 'grey',
+				stockFill: 'semi',
+			}))
+			result.push(textAt({
+				text: part.text,
+				px: part.px,
+				lineHeight: part.lineHeight,
+				weight: 400,
+				box: {
+					x: x + PORT_DEFAULT_PAD_X_PX + 1,
+					y: pillY + 1,
+					w: part.contentWidth,
+					h: PORT_DEFAULT_LINE_PX,
+				},
+				origin,
+				font: part.font,
+				color: part.color,
+				stockColor: part.stockColor,
+				align: 'start',
+				naturalWidth: Math.min(part.contentWidth, measureText(part.text, part.px, fontFamily(part.font))),
+			}))
+		} else {
+			result.push(textAt({
+				text: part.text,
+				px: part.px,
+				lineHeight: part.lineHeight,
+				weight: 400,
+				box: { x, y: placed.label.y, w: part.outerWidth, h: placed.label.h },
+				origin,
+				font: part.font,
+				color: part.color,
+				stockColor: part.stockColor,
+				align: 'start',
+				naturalWidth: part.contentWidth,
+			}))
+		}
+		x += part.outerWidth + PORT_LABEL_GAP_PX
+	}
+	return result
 }
 
 export interface PortPrimitiveRow {
 	portId: string
 	side: 'input' | 'output'
-	/** The circle and every visible piece of text belonging to this port. */
+	/** Circle, name, type, and both default-chip shapes for this one row. */
 	shapeIds: TLShapeId[]
 }
 
@@ -237,17 +354,10 @@ export interface BlockPrimitives {
 	/** Card first — it is the shape cables are re-pointed at. */
 	shapes: TLShapePartial[]
 	cardId: TLShapeId
-	/** Row membership used by detach to create nested stock groups. */
+	/** Membership used by detach to make groups nested inside the Block group. */
 	portRows: PortPrimitiveRow[]
 }
 
-/**
- * Build the stock shapes that reproduce one Block's appearance.
- *
- * `connectedPortIds` decides which dots detach filled: a hollow core means no
- * cable, which is what the live canvas draws, and freezing the screen is the
- * whole contract.
- */
 export function primitivesForBlock(
 	props: BlockShapeProps,
 	origin: { x: number; y: number },
@@ -255,25 +365,13 @@ export function primitivesForBlock(
 ): BlockPrimitives {
 	const layout = layoutBlock(props)
 	const { width, height } = layout
-
-	const card: TLShapePartial = {
-		id: createShapeId(),
-		type: 'geo',
-		x: origin.x,
-		y: origin.y,
-		props: {
-			geo: 'rectangle',
-			w: width,
-			h: height,
-			color: 'grey',
-			// 'semi' is the near-white tint, so the card reads the way the Block
-			// draws itself — white against the canvas, with a grey outline.
-			fill: 'semi',
-			dash: 'solid',
-			size: 's',
-		},
-	}
-
+	const card = roundedRectAt(origin, { x: 0, y: 0, w: width, h: height }, {
+		cornerRadius: BLOCK_CORNER_RADIUS,
+		fillColor: 'var(--ss-surface-raised)',
+		strokeColor: 'var(--ss-border)',
+		stockColor: 'grey',
+		stockFill: 'semi',
+	})
 	const parts: TLShapePartial[] = []
 	const portRows = new Map<string, PortPrimitiveRow>()
 	const pushPortPart = (placed: LaidOutBlockPort, partial: TLShapePartial) => {
@@ -287,95 +385,115 @@ export function primitivesForBlock(
 		row.shapeIds.push(partial.id as TLShapeId)
 	}
 
-	// Simple is chromeless: a centred stack on a bare card, no heading band and
-	// no footer rule. Port and Expanded wear both.
 	const chromeless = layout.view === 'simple'
-
 	if (!chromeless) {
 		parts.push(lineAt(origin, layout.headerHeight, width))
-		if (layout.headerIcon) parts.push(outlineAt(origin, layout.headerIcon, 'grey'))
-		// An untitled Block detaches to no text shape at all: an empty tldraw
-		// text shape is an invisible, unselectable box the user has to hunt for.
+		if (layout.headerIcon) {
+			parts.push(roundedRectAt(origin, layout.headerIcon, {
+				cornerRadius: 4,
+				fillColor: 'transparent',
+				strokeColor: 'var(--ss-text-muted)',
+				stockFill: 'none',
+			}))
+		}
 		if (layout.headerTitle && props.title !== '') {
 			parts.push(textAt({
-				text: props.title, px: PORT_TITLE_FONT_PX, box: layout.headerTitle,
-				origin, font: 'mono', color: 'black', align: 'start',
+				text: props.title, px: PORT_TITLE_FONT_PX, lineHeight: 40, weight: 500,
+				box: layout.headerTitle, origin, font: 'mono', color: 'var(--ss-text)',
+				stockColor: 'black', align: 'start', letterSpacing: '-0.02em',
 			}))
 		}
 		if (layout.headerType && props.blockType !== '') {
 			parts.push(textAt({
-				text: props.blockType, px: PORT_TEXT_FONT_PX, box: layout.headerType,
-				origin, font: 'sans', color: 'grey', align: 'end',
+				text: props.blockType, px: PORT_TEXT_FONT_PX, lineHeight: 24, weight: 400,
+				box: layout.headerType, origin, font: 'sans', color: 'var(--ss-text-muted)',
+				stockColor: 'grey', align: 'end',
 			}))
 		}
-
-		// Full rules split async rows, right-half rules split conditional
-		// branches — the same geometry the Block draws.
 		for (const divider of layout.dividers) {
 			parts.push(lineAt(origin, divider.y, divider.w, divider.x))
 		}
 		parts.push(lineAt(origin, layout.footerTop, width))
+
+		const footerCentreY = layout.footerTop + (height - layout.footerTop - 6) / 2
+		const kebabX = origin.x + width - 20
+		for (const dy of [-4, 0, 4]) {
+			parts.push(ellipseAt({ x: kebabX - 1, y: origin.y + footerCentreY + dy - 1, w: 2, h: 2 }, {
+				fillColor: 'var(--ss-text-muted)',
+				strokeColor: 'var(--ss-text-muted)',
+				strokeWidth: 0,
+				stockColor: 'grey',
+				stockFill: 'solid',
+			}))
+		}
 	}
 
-	// The Simple face: an icon box, an XL title, and the S description/type.
-	// A lucide glyph has no primitive equivalent, so the icon becomes a square
-	// outline — the second declared approximation.
-	if (layout.icon) parts.push(outlineAt(origin, layout.icon, 'black'))
+	if (layout.icon) {
+		parts.push(roundedRectAt(origin, layout.icon, {
+			cornerRadius: 6,
+			fillColor: 'transparent',
+			strokeColor: 'var(--ss-text)',
+			stockColor: 'black',
+			stockFill: 'none',
+		}))
+	}
 	if (layout.title && props.title !== '') {
 		const textLeft = layout.icon ? layout.icon.x + layout.icon.w + SIMPLE_ICON_GAP_PX : 0
 		const titleBox = layout.icon
 			? { ...layout.title, x: textLeft, w: Math.max(1, layout.title.x + layout.title.w - textLeft) }
 			: layout.title
 		parts.push(textAt({
-			text: props.title, px: SIMPLE_TITLE_FONT_PX, box: titleBox,
-			origin, font: 'sans', color: 'black', align: layout.icon ? 'start' : 'middle',
+			text: props.title, px: SIMPLE_TITLE_FONT_PX, lineHeight: 50, weight: 600,
+			box: titleBox, origin, font: 'sans', color: 'var(--ss-text)',
+			stockColor: 'black', align: layout.icon ? 'start' : 'middle',
 		}))
 	}
 	if (layout.description && props.showDescription && props.description !== '') {
 		parts.push(textAt({
-			text: props.description, px: SIMPLE_TEXT_FONT_PX, box: layout.description,
-			origin, font: 'sans', color: 'grey', align: 'middle',
+			text: props.description,
+			px: chromeless ? SIMPLE_TEXT_FONT_PX : 11,
+			lineHeight: chromeless ? 24 : 16,
+			weight: 400,
+			box: layout.description,
+			origin,
+			font: 'sans',
+			color: 'var(--ss-text-muted)',
+			stockColor: 'grey',
+			align: chromeless ? 'middle' : 'start',
 		}))
 	}
 	if (layout.typeLabel && props.blockType !== '') {
 		parts.push(textAt({
-			text: props.blockType, px: SIMPLE_TEXT_FONT_PX, box: layout.typeLabel,
-			origin, font: 'sans', color: 'grey', align: 'middle',
+			text: props.blockType, px: SIMPLE_TEXT_FONT_PX, lineHeight: 24, weight: 400,
+			box: layout.typeLabel, origin, font: 'sans', color: 'var(--ss-text-muted)',
+			stockColor: 'grey', align: 'middle',
 		}))
 	}
 
-	// Each label is recorded with its port circle below. `detachBlock` turns
-	// that membership into a nested stock group, so dragging a name moves the
-	// whole port row rather than tearing its text away from its anchor.
 	for (const placed of layout.ports) {
 		for (const label of portLabelsAt(placed, origin)) pushPortPart(placed, label)
 	}
 
-	// The dots last, so they sit above the card. Each port is ONE 12px stock
-	// circle: hollow until a cable lands, grey-filled when an unwired input
-	// carries a default. The live Block uses layered CSS shadows for emphasis;
-	// exporting those as a second ellipse made the editable primitive look like
-	// two distinct ports.
-	// A Simple anchor is invisible until hovered, so the frozen copy draws none.
 	for (const placed of layout.ports) {
 		if (placed.subtle) continue
-		const color = portTldrawColor(placed.port.type)
+		const exactColor = portColor(placed.port.type)
+		const stockColor = portTldrawColor(placed.port.type)
 		const connected = connectedPortIds.has(placed.port.id)
-		const hasDefault = portDefaultValue(placed.port) !== ''
-		pushPortPart(placed, {
-			id: createShapeId(),
-			type: 'geo',
-			x: origin.x + placed.x - BLOCK_PORT_RADIUS,
-			y: origin.y + placed.y - BLOCK_PORT_RADIUS,
-			props: {
-				geo: 'ellipse',
-				w: BLOCK_PORT_RADIUS * 2,
-				h: BLOCK_PORT_RADIUS * 2,
-				color: !connected && hasDefault ? 'grey' : color,
-				fill: connected ? 'fill' : hasDefault ? 'solid' : 'semi',
-				dash: 'solid', size: 's',
-			},
-		})
+		const hasDefault = placed.side === 'input' && portDefaultValue(placed.port) !== ''
+		pushPortPart(placed, ellipseAt({
+			x: origin.x + placed.x - PORT_INDICATOR_RADIUS,
+			y: origin.y + placed.y - PORT_INDICATOR_RADIUS,
+			w: PORT_INDICATOR_RADIUS * 2,
+			h: PORT_INDICATOR_RADIUS * 2,
+		}, {
+			fillColor: connected
+				? exactColor
+				: hasDefault ? 'var(--ss-text-muted)' : 'var(--ss-surface-raised)',
+			strokeColor: exactColor,
+			strokeWidth: 1,
+			stockColor,
+			stockFill: connected ? 'fill' : hasDefault ? 'solid' : 'semi',
+		}))
 	}
 
 	return {

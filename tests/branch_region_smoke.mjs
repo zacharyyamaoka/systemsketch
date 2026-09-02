@@ -207,7 +207,7 @@ async function main() {
     await clickTestId(page, 'systemsketch-tool-system-menu')
     await waitFor(page, `Array.from(document.querySelectorAll('.systemsketch-tool-menu__item')).some((n) => n.textContent.includes('Branch'))`, 'system menu')
     const items = JSON.parse(await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('.systemsketch-tool-menu__item .tlui-button__label')).map((n) => n.textContent.trim()))`))
-    check('BR-3', 'the submenu lists Block and Branch under one heading', items, ['Block', 'Branch'])
+    check('BR-3', 'the submenu lists Block, Branch and Pill under one heading', items, ['Block', 'Branch', 'Pill'])
     const branchItem = JSON.parse(await evaluate(page, `(() => {
       const item = Array.from(document.querySelectorAll('.systemsketch-tool-menu__item')).find((n) => n.textContent.includes('Branch'))
       const r = item.getBoundingClientRect(); return JSON.stringify({ cx: r.x + r.width / 2, cy: r.y + r.height / 2 })

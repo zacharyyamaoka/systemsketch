@@ -13,6 +13,7 @@ import { EXCALIDRAW_SHAPE_UTILS, registerExcalidrawPasteHandler } from '../excal
 import {
   BlockShapeUtil,
   BlockTool,
+  PillTool,
   getBlockShapeVisibility,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
@@ -67,6 +68,7 @@ import type { CSSProperties } from 'react'
 import '../theme/tokens.css'
 import '../app.css'
 import './embed.css'
+import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from '../stockPrimitiveVisuals'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
@@ -93,13 +95,14 @@ const EMBEDDED_COMPONENTS = {
 }
 const EMBEDDED_SHAPE_UTILS = [
   ...EXCALIDRAW_SHAPE_UTILS,
+  ...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
   BlockShapeUtil,
   BranchShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const EMBEDDED_BINDING_UTILS = [...blockConnectionBindingUtils]
 const EMBEDDED_OVERLAY_UTILS = [...blockConnectionOverlayUtils]
-const EMBEDDED_TOOLS = [BlockTool, BranchTool]
+const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool]
 
 /** Long enough that a drag is one write, short enough that a pause is saved. */
 const CHANGE_DEBOUNCE_MS = 250

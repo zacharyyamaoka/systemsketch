@@ -254,7 +254,7 @@ async function proveOverview(page) {
     'overview empty state')
   assert.match(await evaluate(page,
     `document.querySelector('.systemsketch-board-overview__empty').textContent`),
-  /Add a Frame or expand a Block/)
+  /Add a Frame or Branch, or expand a Block/)
   pass('the live empty state explains the two actions that make landmarks appear')
 }
 

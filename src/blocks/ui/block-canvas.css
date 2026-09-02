@@ -286,21 +286,22 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   text-underline-offset: 3px;
 }
 
-/* The 12px pyblocks dot: hollow while unwired, neutral-filled when it owns a
- * default, type-filled once a cable lands. Its 28px pseudo hit halo restores
- * the donor's forgiving connection gesture without changing layout geometry. */
+/* One 18px circle is the whole painted port in both a live Block and its
+ * detached primitive form. The old 12px core plus two CSS shadow rings could
+ * only detach as either two circles or a visibly smaller single circle. The
+ * pseudo element keeps the same 40px hit target, so interaction geometry does
+ * not get less forgiving when the paint is simplified. */
 .systemsketch-block-canvas .Port {
   position: absolute;
   z-index: 4;
-  width: 12px;
-  height: 12px;
+  width: 18px;
+  height: 18px;
   box-sizing: border-box;
+  border: 1px solid var(--port-color, var(--ss-border-strong));
   border-radius: 50%;
   pointer-events: none;
   background: var(--ss-surface-raised);
-  box-shadow:
-    0 0 0 2px var(--ss-surface-raised),
-    0 0 0 3px var(--port-color, var(--ss-border-strong));
+  box-shadow: none;
   transform: translate(-50%, -50%);
   transition: transform 50ms ease-in-out;
 }
@@ -308,7 +309,7 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
 .systemsketch-block-canvas .Port::before {
   content: '';
   position: absolute;
-  inset: -14px;
+  inset: -11px;
   border-radius: 50%;
 }
 
@@ -333,19 +334,14 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
  * port, and its inner face is a second identity at the same anchor. */
 .systemsketch-block-canvas .Port.Port_eligible {
   opacity: 1;
-  box-shadow:
-    0 0 0 2px var(--ss-surface-raised),
-    0 0 0 3px var(--port-color, var(--ss-border-strong)),
-    0 0 0 7px color-mix(in srgb, var(--port-color, var(--ss-accent)) 26%, transparent);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--port-color, var(--ss-accent)) 26%, transparent);
 }
 
 .systemsketch-block-canvas .Port.Port_hinting {
   opacity: 1;
   background: var(--port-color, var(--ss-text-muted));
-  box-shadow:
-    0 0 0 2px var(--ss-surface-raised),
-    0 0 0 4px var(--port-color, var(--ss-border-strong)),
-    0 0 0 9px color-mix(in srgb, var(--port-color, var(--ss-accent)) 38%, transparent);
+  border-width: 2px;
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--port-color, var(--ss-accent)) 38%, transparent);
   transform: translate(-50%, -50%) scale(1.18);
 }
 
@@ -431,10 +427,7 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
  * of the in-flight feedback. */
 .systemsketch-block-canvas .Port.Port_dragging {
   z-index: 7;
-  box-shadow:
-    0 0 0 2px var(--ss-surface-raised),
-    0 0 0 3px var(--port-color, var(--ss-border-strong)),
-    0 0 0 7px color-mix(in srgb, var(--ss-accent) 30%, transparent);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--ss-accent) 30%, transparent);
 }
 
 /* The held row is a card in flight. It has to be opaque: it passes straight
@@ -536,6 +529,63 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   .systemsketch-block-canvas .BlockNode-portAddBead {
     transition: none;
   }
+}
+
+/* The `value` view: a literal argument as a capsule — the sketch's grey pill
+ * with a darker rim, mono text, an inlet on the left rim and an outlet on the
+ * right. The literal is the title, the name is the ports' name; while unnamed
+ * the `=` is the click that names it. Colours are the chrome tokens, so the
+ * capsule wears a host's theme like every other Block face. */
+.systemsketch-block-canvas.NodeShape_value {
+  border-radius: 999px;
+  background: var(--ss-surface-active);
+  box-shadow:
+    0 0 0 1.5px var(--ss-border-strong),
+    var(--ss-shadow-1);
+}
+
+.systemsketch-block-canvas .BlockNode-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  overflow: hidden;
+  color: var(--ss-text);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.systemsketch-block-canvas .BlockNode-valueName,
+.systemsketch-block-canvas .BlockNode-valueText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.systemsketch-block-canvas .BlockNode-valueEquals {
+  flex: 0 0 auto;
+  color: var(--ss-text-muted);
+}
+
+/* A wired input's definition default is still a fact about the callee, but
+ * the cable overrides it: keep it legible, make it quiet. */
+.systemsketch-block-canvas .BlockNode-portDefault--overridden {
+  opacity: 0.5;
+}
+
+.systemsketch-block-canvas .BlockNode-inlineEditor--value {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-weight: 500;
+}
+
+/* A pill fed by a cable shows where its literal would be that the value comes
+ * from elsewhere; the literal itself waits in the record. */
+.systemsketch-block-canvas .BlockNode-valueText--fed {
+  color: var(--ss-text-faint);
+  letter-spacing: 0.08em;
 }
 
 /* Many-to-one: a port with two or more producers wears a count beside its dot. */

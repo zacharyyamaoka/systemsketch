@@ -207,12 +207,12 @@ function overrideTools(
 }
 
 /**
- * Block and Branch share one toolbar slot, so the slot has to remember which
- * of them was picked last — exactly as the shape slot remembers its geo.
+ * Block, Branch and Pill share one toolbar slot, so the slot has to remember
+ * which of them was picked last — exactly as the shape slot remembers its geo.
  */
 function rememberSystemTools(tools: TLUiToolsContextType): TLUiToolsContextType {
   const next: TLUiToolsContextType = { ...tools }
-  for (const id of ['block', 'branch'] as const satisfies readonly SystemFamilyTool[]) {
+  for (const id of ['block', 'branch', 'pill'] as const satisfies readonly SystemFamilyTool[]) {
     const wrapped = wrapTool(tools[id], () => updateToolbarPreferences({ lastSystemTool: id }))
     if (wrapped) next[id] = wrapped
   }

@@ -295,6 +295,11 @@ function addBlockDiagnostics(
 	}
 
 	for (const port of block.props.inputs) {
+		// A Value-view Block is a literal/variable Pill. Its inlet is optional:
+		// unconnected means the Pill's own literal is the source, while a cable
+		// turns it into a named pass-through value. The title/literal validation
+		// above still catches an empty Pill without inventing an unresolved input.
+		if (block.props.view === 'value') continue
 		// A duplicate durable id cannot identify which physical input a cable or
 		// default belongs to. The identity error is the actionable root cause;
 		// suppress derived unresolved rows until that ambiguity is repaired.

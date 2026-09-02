@@ -224,7 +224,10 @@ function primitivesWithMeta(block: BlockShape, connectedPortIds: ReadonlySet<str
 	// and `meta` is not.
 	built.shapes[0] = {
 		...built.shapes[0],
-		meta: detachMeta({ kind: 'block-card', version: DETACH_FORMAT_VERSION }),
+		meta: {
+			...built.shapes[0].meta,
+			...detachMeta({ kind: 'block-card', version: DETACH_FORMAT_VERSION }),
+		},
 	}
 	return built
 }

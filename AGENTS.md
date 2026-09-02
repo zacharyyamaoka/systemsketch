@@ -25,6 +25,21 @@ npm run dev
   `SYSTEMSKETCH_DEV_PORT` / `SYSTEMSKETCH_API_PORT` for an extra server. Never kill Zach's.
 - Channel moves are `release:candidate`, `release:promote`, and `release:rollback`.
 
+## Worktree lifecycle
+
+- Put each bounded implementation track in a fresh temporary worktree based on the current
+  committed `main`. Use the repository's track tooling so the track owns its ports, runtime,
+  and scratch board; do not reuse Stable, Preview, or another track's process.
+- Worktrees isolate files, not design dependencies. Run tracks in parallel only when their
+  contracts are independent, and keep one writer per shared seam.
+- An already-merged worktree is finished. Even when Zach continues in the same chat, create
+  a new worktree from the updated `main` before the next implementation change.
+- Verify in the track, reconcile with current `main`, and re-run the relevant proof on the
+  combined tree. After the merge is verified on `main`, remove the temporary worktree and
+  delete its branch only if it is fully merged. Never remove dirty or unmerged work.
+- In every handoff, name the worktree path, branch or detached commit, base commit, merge
+  status, and whether cleanup is complete.
+
 ## Plugin boundary
 
 - `vscode-systemsketch/` ships a build of the app, never a second canvas. Its staging script

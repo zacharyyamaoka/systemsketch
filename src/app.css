@@ -31,3 +31,23 @@ button {
   color: var(--ss-text);
   background: var(--ss-surface);
 }
+
+/* Stock text protects labels that cross other shapes with a canvas-coloured
+ * halo. A detached Block label sits on its own opaque card, just like the DOM
+ * label it replaced, so that halo only makes the glyph falsely bold. Keep the
+ * override metadata-scoped; normal tldraw text retains its overlap protection. */
+.systemsketch-detached-text-visual .tl-text__outline {
+  text-shadow: none;
+}
+
+.systemsketch-detached-text-visual .tl-text-shape-label {
+  font-weight: var(--systemsketch-detached-font-weight);
+  letter-spacing: var(--systemsketch-detached-letter-spacing);
+}
+
+/* The live Block's resting shadow belongs to the card composite, not tldraw's
+ * global geo style. Scope it to the remembered card record only. */
+.systemsketch-detached-card-visual .tl-svg-container {
+  border-radius: 9px;
+  box-shadow: var(--ss-shadow-1);
+}

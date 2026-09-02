@@ -2,7 +2,7 @@
 /** Prove the follow-up gallery is complete, responsive, and usable. */
 import assert from 'node:assert/strict'
 import { writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { isAbsolute, join } from 'node:path'
 
 import {
   ROOT,
@@ -62,8 +62,9 @@ async function main() {
       const url = new URL(href)
       assert.equal(url.origin, 'http://127.0.0.1:4400')
       assert.equal(url.pathname, '/')
-      assert.equal(url.searchParams.get('board'), join(ROOT, 'sketches', 'review', fixture))
-      assert.match(href, /\?board=%2Fhome%2Fbam%2F\.codex%2Fworktrees%2F8dbf%2Fsystemsketch%2Fsketches%2Freview%2F/)
+      const boardPath = url.searchParams.get('board')
+      assert.ok(boardPath && isAbsolute(boardPath))
+      assert.equal(boardPath.endsWith(join('sketches', 'review', fixture)), true)
     }
     const fixtureResponses = await Promise.all(Array.from(EXPECTED_FIXTURES, async (fixture) => {
       const response = await fetch(`http://127.0.0.1:${app.port}/sketches/review/${fixture}`, {

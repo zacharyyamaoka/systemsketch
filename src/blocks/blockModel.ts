@@ -2,8 +2,15 @@ import { StyleProp, T, type TLShape } from 'tldraw'
 
 export const BLOCK_SHAPE_TYPE = 'block' as const
 export const BLOCK_TOOL_ID = 'block' as const
+/** P draws a Block already wearing its `value` view — the literal-argument pill. */
+export const PILL_TOOL_ID = 'pill' as const
 
-export const BLOCK_VIEWS = ['simple', 'port', 'expanded'] as const
+/**
+ * `value` is the fourth view: a literal argument drawn as a capsule. It is the
+ * same Block, so cables, the polarity judge, click-to-edit, the inspector and
+ * the file format all apply to it unchanged; see `valueBlock.ts`.
+ */
+export const BLOCK_VIEWS = ['simple', 'port', 'expanded', 'value'] as const
 export type BlockView = (typeof BLOCK_VIEWS)[number]
 
 /**
@@ -95,6 +102,7 @@ export const BLOCK_SHAPE_PROPS = {
 		simple: BlockViewSize,
 		port: BlockViewSize,
 		expanded: BlockViewSize,
+		value: BlockViewSize,
 	}),
 	showDescription: BlockShowDescriptionStyle,
 	/** Detailed Markdown from the donor Notes tab. */
@@ -125,6 +133,7 @@ declare module 'tldraw' {
 				simple: BlockViewSize
 				port: BlockViewSize
 				expanded: BlockViewSize
+				value: BlockViewSize
 			}
 			showDescription: boolean
 			notes?: string
@@ -143,6 +152,8 @@ export const DEFAULT_BLOCK_VIEW_SIZES: Readonly<Record<BlockView, BlockViewSize>
 	simple: { w: 320, h: 206 },
 	port: { w: 340, h: 198 },
 	expanded: { w: 560, h: 380 },
+	// A capsule is as wide as its text; this is the empty one, before typing.
+	value: { w: 168, h: 56 },
 }
 
 export function getDefaultBlockProps(): BlockShapeProps {
@@ -150,6 +161,7 @@ export function getDefaultBlockProps(): BlockShapeProps {
 		simple: { ...DEFAULT_BLOCK_VIEW_SIZES.simple },
 		port: { ...DEFAULT_BLOCK_VIEW_SIZES.port },
 		expanded: { ...DEFAULT_BLOCK_VIEW_SIZES.expanded },
+		value: { ...DEFAULT_BLOCK_VIEW_SIZES.value },
 	}
 	return {
 		...views.simple,
@@ -375,6 +387,11 @@ export function isBlockShape(shape: TLShape | null | undefined): shape is BlockS
 
 export function isExpandedBlockShape(shape: TLShape | null | undefined): shape is BlockShape {
 	return isBlockShape(shape) && shape.props.view === 'expanded'
+}
+
+/** A literal argument: a Block wearing the capsule. */
+export function isValueBlockShape(shape: TLShape | null | undefined): shape is BlockShape {
+	return isBlockShape(shape) && shape.props.view === 'value'
 }
 
 export function canBlockContainChildren(view: BlockView): boolean {
