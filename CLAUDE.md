@@ -39,6 +39,22 @@ server, override `SYSTEMSKETCH_DEV_PORT` / `SYSTEMSKETCH_API_PORT` rather than k
 Channel moves: `npm run release:candidate` → `release:promote` → `release:rollback`.
 Desktop: `desktop:start`, `desktop:preview`, `desktop:status`, `desktop:stop`.
 
+## The IDE plugins live here
+
+`vscode-systemsketch/` is the VS Code / Cursor extension, and Obsidian's will sit beside it.
+Two rules hold the boundary, and `tests/test_stock_boundary.py` asserts both:
+
+- **A host ships a *build* of the app, never a second canvas.** `scripts/stage_app.mjs` runs
+  the app's own vite build (with `--base ./`, which a webview needs) and stamps which release
+  it staged; the extension's esbuild config bundles the host only. If you find yourself adding
+  a webview entry point beside it, stop — you are forking the product.
+- **`src/embed/sharedWithHost.ts` is the only thing an extension may import from the app.**
+  A host bundles separately, so anything it reaches past that becomes a second, invisible
+  build of that code. Keep every module behind it free of React, tldraw and the DOM.
+
+`npm run plugin:test` drives the packaged VSIX in real VS Code under Xvfb. Cursor's fresh
+profile shows a sign-in wall; the suite reports what it can reach there rather than failing.
+
 ## Proof is the running app, driven in a real browser
 
 ```bash

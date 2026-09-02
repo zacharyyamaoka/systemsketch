@@ -15,6 +15,7 @@ import {
   appendBlockPort,
   appendBlockPortProps,
   getBlockInspectorContext,
+  sameBlockInspectorContext,
   moveBlockPort,
   moveBlockPortProps,
   patchBlockDetailsProps,
@@ -610,7 +611,10 @@ export function EditorBlockInspector({
 }: EditorBlockInspectorProps) {
   const context = useValue(
     'SystemSketch Block inspector context',
-    () => getBlockInspectorContext(editor),
+    (previous?: unknown) => {
+      const next = getBlockInspectorContext(editor)
+      return sameBlockInspectorContext(previous, next) ? previous : next
+    },
     [editor],
   )
   const [localDraft, setLocalDraft] = useState<BlockShapeProps | null>(null)

@@ -84,7 +84,9 @@ export function keepConnectionsAtBottom(editor: Editor) {
 			}
 		}
 
-		editor.updateShapes(updates)
+		// Nothing to move is the common case — a created cable is already at
+		// the bottom — and an empty update still opens a transaction.
+		if (updates.length > 0) editor.updateShapes(updates)
 	})
 }
 

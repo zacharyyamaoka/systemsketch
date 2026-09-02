@@ -26,9 +26,13 @@ export type SyncAction =
   | { kind: 'conflict' }
   | { kind: 'missing' }
 
-/** The document extension `path` uses, or `null` if it is not a SystemSketch document. */
+/**
+ * The document extension `path` uses, or `null` if it is not a SystemSketch
+ * document. Both separators are split on: an IDE host hands over the operating
+ * system's own path, which on Windows is `C:\\goldens\\01\\target.systemsketch`.
+ */
 export function documentSuffix(path: string): DocumentSuffix | null {
-  const name = (path.split('/').pop() ?? path).toLowerCase()
+  const name = (path.split(/[\\/]/).pop() ?? path).toLowerCase()
   return DOCUMENT_SUFFIXES.find(
     (suffix) => name.length > suffix.length && name.endsWith(suffix),
   ) ?? null
@@ -47,7 +51,7 @@ export function encodeDocumentForPath(path: string, tldrawJson: string): string 
 }
 
 export function documentTitle(path: string): string {
-  const name = path.split('/').pop() ?? path
+  const name = path.split(/[\\/]/).pop() ?? path
   const suffix = documentSuffix(name)
   return suffix ? name.slice(0, -suffix.length) : name
 }
