@@ -131,6 +131,8 @@ The [bottom-right utilities proposal](docs/bottom-right-utilities-proposal-2026-
 
 The [bottom-right utilities implementation report](docs/bottom-right-utilities-implementation-2026-08-31.html) shows the verified live UI: the release card has moved into Help, the board-overview launcher opens a placeholder right panel, stock zoom behavior remains wired, Help shows a green dot only when Stable has newer Preview work available, and Live Preview opens as an independent duplicate of the current board.
 
+The [zoom-controls Appearance preference gallery](docs/zoom-controls-preference-2026-09-02.html) makes that utility strip compact by default: the −/+ step buttons are hidden while the percentage menu remains, Settings → Appearance can restore both stock zoom actions, and the versioned browser-local choice never enters a board file. The report carries the live before/after strip, the actual setting, reload proof, all-theme contrast measurements, and a ready-to-drive review board.
+
 The [Help and Preview-status refinement proposal](docs/help-preview-status-proposal-2026-08-31.html) compares five interactive ways to make the current state quiet and the new-Preview state explicit. The selected implementation splices V4’s conditional spotlight with V2’s fixed Version & updates row.
 
 The [Help and Preview-status implementation report](docs/help-preview-status-implementation-2026-08-31.html) shows the three resulting states: quiet Stable, Stable with a one-click Preview spotlight, and Live Preview with an unmistakable top-center identity. Release status now refreshes automatically in the background; the manual refresh control is gone.
