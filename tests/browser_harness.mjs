@@ -252,7 +252,14 @@ print(build)
  * The release home is always a throwaway directory: a smoke test that reaches
  * a channel control must not be able to move the developer's real Stable.
  */
-export async function startApp({ label, build, channel = 'preview', width = 1440, height = 960 } = {}) {
+export async function startApp({
+  label,
+  build,
+  channel = 'preview',
+  width = 1440,
+  height = 960,
+  allowSourceRoot = false,
+} = {}) {
   const name = label ?? 'systemsketch-smoke'
   const port = await freePort()
   const apiPort = await freePort()
@@ -272,7 +279,7 @@ export async function startApp({ label, build, channel = 'preview', width = 1440
   delete headlessEnv.DISPLAY
   delete headlessEnv.WAYLAND_DISPLAY
 
-  const api = spawn('python3', [
+  const apiArguments = [
     join(ROOT, 'scripts', 'server.py'),
     '--port', String(apiPort),
     '--dist', emptyDist,
@@ -281,7 +288,13 @@ export async function startApp({ label, build, channel = 'preview', width = 1440
     '--release-home', releaseHome,
     '--source-root', ROOT,
     '--files-root', filesRoot,
-  ], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'], env: headlessEnv })
+  ]
+  if (allowSourceRoot) apiArguments.push('--allow-source-root')
+  const api = spawn('python3', apiArguments, {
+    cwd: ROOT,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    env: headlessEnv,
+  })
   const vite = spawn(process.execPath, [
     join(ROOT, 'node_modules', 'vite', 'bin', 'vite.js'),
     '--host', '127.0.0.1', '--port', String(port), '--strictPort',

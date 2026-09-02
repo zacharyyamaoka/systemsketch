@@ -1,0 +1,26 @@
+[
+  {
+    "label": "each visible port row is a stock group nested directly inside the detached Block group",
+    "ok": true
+  },
+  {
+    "label": "every port row contains exactly one circle",
+    "ok": true
+  },
+  {
+    "label": "the circle, name, type and default value all belong to the same input-row group",
+    "ok": true
+  },
+  {
+    "label": "one click on the port name selects the nested row group",
+    "ok": true
+  },
+  {
+    "label": "dragging from the port name moves the circle, name, type and default together",
+    "ok": true
+  },
+  {
+    "label": "the journey produced zero local console errors",
+    "ok": true
+  }
+]

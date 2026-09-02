@@ -1,0 +1,58 @@
+{
+  "feature": "Development worktree document links",
+  "viewport": { "width": 1280, "height": 720 },
+  "shapes": [
+    {
+      "id": "linked-board",
+      "type": "block",
+      "x": 590,
+      "y": 265,
+      "props": {
+        "title": "linked_review_board",
+        "description": "This document lives in sketches/review, outside .track/boards",
+        "blockType": "Document",
+        "view": "port",
+        "w": 390,
+        "h": 205,
+        "inputs": [
+          { "id": "url", "name": "?board=absolute path", "type": "URL", "visible": true }
+        ],
+        "outputs": [
+          { "id": "saved", "name": "autosaved", "type": "File", "visible": true }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Drag this Block a little to trigger autosave",
+      "x": 70,
+      "y": 180,
+      "w": 380,
+      "h": 100,
+      "target": { "shapeId": "linked-board", "anchor": "left" }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Reload this exact ?board= URL",
+      "x": 790,
+      "y": 60,
+      "w": 400,
+      "h": 100,
+      "target": { "shapeId": "linked-board", "anchor": "top" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · No path error appears and the Block remains where you moved it after reload",
+      "x": 80,
+      "y": 510,
+      "w": 560,
+      "h": 110
+    }
+  ]
+}

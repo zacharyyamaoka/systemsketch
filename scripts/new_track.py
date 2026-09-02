@@ -109,6 +109,7 @@ export SYSTEMSKETCH_STATE_HOME="$PWD/.track/state"
 python3 scripts/server.py \\
   --port {api_port} \\
   --files-root "$PWD/.track/boards" \\
+  --allow-source-root \\
   --dist dist \\
   --channel preview \\
   --build track-{name} \\
@@ -152,6 +153,11 @@ at.
 boards — `Untitled.systemsketch`, and any `.tldr` from before that file type
 existed — and the app autosaves into whichever one it opens. `.track/boards/` is
 yours; the server above is already rooted there.
+
+Direct `?board=` links may also open and autosave `.systemsketch` or `.tldr`
+files anywhere inside this track worktree, including `sketches/review/`. The
+File browser remains rooted at `.track/boards/`, and neighboring worktrees or
+arbitrary machine paths remain outside the server's allowed roots.
 
 ## Before you hand anything back
 
