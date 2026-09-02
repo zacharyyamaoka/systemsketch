@@ -46,12 +46,20 @@
       "com.tldraw.shape.geo": 12,
       "com.tldraw.shape.block": 2,
       "com.tldraw.shape.branch": 0,
-      "com.tldraw.shape.connection": 1,
+      "com.tldraw.shape.connection": 2,
       "com.tldraw.binding.arrow": 1,
       "com.tldraw.binding.connection": 1
     }
   },
   "records": [
+    {
+      "name": "",
+      "color": "#E34BA9",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:j6XiQm-smTSN8cu2YrnUX",
+      "typeName": "user"
+    },
     {
       "x": 0,
       "y": 0,
@@ -411,9 +419,9 @@
       "typeName": "binding"
     },
     {
-      "x": -50.36269430051803,
-      "y": -56.82901554404139,
-      "z": 1.0131233595800524,
+      "x": 0,
+      "y": 0,
+      "z": 1,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -603,7 +611,10 @@
         "routing": "elbow",
         "curve": null,
         "pins": [],
-        "elbowRoute": null
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
       },
       "parentId": "page:page",
       "index": "a4s3U",
@@ -698,7 +709,10 @@
         "routing": "elbow",
         "curve": null,
         "pins": [],
-        "elbowRoute": null
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
       },
       "parentId": "page:page",
       "index": "a5k9r",
@@ -738,7 +752,10 @@
         "routing": "elbow",
         "curve": null,
         "pins": [],
-        "elbowRoute": null
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
       },
       "parentId": "page:page",
       "index": "a6UZR",
@@ -799,8 +816,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1600,
-        "h": 900
+        "w": 1360,
+        "h": 1440.800048828125
       },
       "insets": [
         false,
@@ -815,9 +832,9 @@
       "isChatting": false,
       "highlightedUserIds": [],
       "isFocused": true,
-      "devicePixelRatio": 1,
+      "devicePixelRatio": 1.25,
       "isCoarsePointer": false,
-      "isHoveringCanvas": null,
+      "isHoveringCanvas": true,
       "openMenus": [],
       "isChangingStyle": false,
       "isReadonly": false,

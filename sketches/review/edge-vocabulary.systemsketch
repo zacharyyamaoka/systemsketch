@@ -3,13 +3,13 @@
     "formatVersion": 1,
     "application": "SystemSketch",
     "shapes": {
-      "connection": 4,
+      "connection": 3,
       "block": 4,
       "geo": 6,
       "arrow": 1
     },
     "bindings": {
-      "connection": 8
+      "connection": 6
     }
   },
   "tldrawFileFormatVersion": 1,
@@ -52,6 +52,14 @@
   },
   "records": [
     {
+      "name": "",
+      "color": "#E34BA9",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:j6XiQm-smTSN8cu2YrnUX",
+      "typeName": "user"
+    },
+    {
       "x": 0,
       "y": 0,
       "rotation": 0,
@@ -79,6 +87,36 @@
       },
       "parentId": "page:page",
       "index": "a6Dwz",
+      "typeName": "shape"
+    },
+    {
+      "x": 920,
+      "y": 406,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:3lcvt7AHLlri0ZCa2LNs-",
+      "type": "connection",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 219.80973905647556,
+          "y": 4.378680327074562
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      },
+      "parentId": "page:page",
+      "index": "at9GM",
       "typeName": "shape"
     },
     {
@@ -141,7 +179,7 @@
         ]
       },
       "parentId": "page:page",
-      "index": "a9RBQ",
+      "index": "avOxX",
       "typeName": "shape"
     },
     {
@@ -186,7 +224,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aE3kz",
+      "index": "b00hvb",
       "typeName": "shape"
     },
     {
@@ -244,7 +282,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aIuq6",
+      "index": "b048BM",
       "typeName": "shape"
     },
     {
@@ -289,7 +327,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aFg7r",
+      "index": "b01Tmj",
       "typeName": "shape"
     },
     {
@@ -306,9 +344,9 @@
       "typeName": "binding"
     },
     {
-      "x": 166.1658031088083,
-      "y": -1.9067357512953436,
-      "z": 0.8195329087048833,
+      "x": -326.5881966126007,
+      "y": 242.52362778593815,
+      "z": 0.913517247483641,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -355,7 +393,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aG3o2",
+      "index": "b027yM",
       "typeName": "shape"
     },
     {
@@ -416,21 +454,8 @@
         ]
       },
       "parentId": "page:page",
-      "index": "aAq8X",
+      "index": "awGjX",
       "typeName": "shape"
-    },
-    {
-      "meta": {},
-      "id": "binding:b3",
-      "type": "connection",
-      "fromId": "shape:down",
-      "toId": "shape:refine",
-      "props": {
-        "portId": "out_1",
-        "terminal": "start",
-        "face": "outer"
-      },
-      "typeName": "binding"
     },
     {
       "x": 980,
@@ -474,25 +499,12 @@
         }
       },
       "parentId": "page:page",
-      "index": "aHBIM",
+      "index": "b03PpE",
       "typeName": "shape"
     },
     {
-      "meta": {},
-      "id": "binding:b4",
-      "type": "connection",
-      "fromId": "shape:down",
-      "toId": "shape:smooth",
-      "props": {
-        "portId": "in_1",
-        "terminal": "end",
-        "face": "outer"
-      },
-      "typeName": "binding"
-    },
-    {
-      "x": 620,
-      "y": 600,
+      "x": 584.0948346806599,
+      "y": 651.6684412221528,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -542,7 +554,7 @@
         ]
       },
       "parentId": "page:page",
-      "index": "aCXjU",
+      "index": "ayoj2",
       "typeName": "shape"
     },
     {
@@ -567,19 +579,6 @@
       "props": {
         "portId": "in_1",
         "terminal": "end",
-        "face": "outer"
-      },
-      "typeName": "binding"
-    },
-    {
-      "meta": {},
-      "id": "binding:b7",
-      "type": "connection",
-      "fromId": "shape:out",
-      "toId": "shape:refine",
-      "props": {
-        "portId": "out_1",
-        "terminal": "start",
         "face": "outer"
       },
       "typeName": "binding"
@@ -617,8 +616,10 @@
     {
       "editingShapeId": null,
       "croppingShapeId": null,
-      "selectedShapeIds": [],
-      "hoveredShapeId": null,
+      "selectedShapeIds": [
+        "shape:3lcvt7AHLlri0ZCa2LNs-"
+      ],
+      "hoveredShapeId": "shape:refine",
       "erasingShapeIds": [],
       "hintingShapeIds": [],
       "focusedGroupId": null,
@@ -626,19 +627,6 @@
       "id": "instance_page_state:page:page",
       "pageId": "page:page",
       "typeName": "instance_page_state"
-    },
-    {
-      "meta": {},
-      "id": "binding:b8",
-      "type": "connection",
-      "fromId": "shape:out",
-      "toId": "shape:encode",
-      "props": {
-        "portId": "in_1",
-        "terminal": "end",
-        "face": "outer"
-      },
-      "typeName": "binding"
     },
     {
       "x": 120,
@@ -682,7 +670,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aDNjb",
+      "index": "azKqz",
       "typeName": "shape"
     },
     {
@@ -737,38 +725,34 @@
         ]
       },
       "parentId": "page:page",
-      "index": "aBbrE",
+      "index": "axkFA",
       "typeName": "shape"
     },
     {
-      "x": 0,
-      "y": 0,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
       "meta": {},
-      "id": "shape:out",
+      "id": "binding:P0_qXS7ymgfv8fnoOF24g",
       "type": "connection",
+      "fromId": "shape:3lcvt7AHLlri0ZCa2LNs-",
+      "toId": "shape:encode",
       "props": {
-        "start": {
-          "x": 0,
-          "y": 0
-        },
-        "end": {
-          "x": 0,
-          "y": 0
-        },
-        "routing": "elbow",
-        "curve": null,
-        "pins": [],
-        "elbowRoute": null,
-        "temporal": "data",
-        "delayValue": "",
-        "pillPosition": 0.5
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
       },
-      "parentId": "page:page",
-      "index": "a7faU",
-      "typeName": "shape"
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:nRs_DceRNhr2wK04orihz",
+      "type": "connection",
+      "fromId": "shape:3lcvt7AHLlri0ZCa2LNs-",
+      "toId": "shape:refine",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
     },
     {
       "meta": {},
@@ -794,7 +778,7 @@
       "brush": null,
       "scribbles": [],
       "cursor": {
-        "type": "default",
+        "type": "cross",
         "rotation": 0
       },
       "isFocusMode": false,
@@ -804,8 +788,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1600,
-        "h": 900
+        "w": 1360,
+        "h": 1440.800048828125
       },
       "insets": [
         false,
@@ -820,9 +804,9 @@
       "isChatting": false,
       "highlightedUserIds": [],
       "isFocused": true,
-      "devicePixelRatio": 1,
+      "devicePixelRatio": 1.25,
       "isCoarsePointer": false,
-      "isHoveringCanvas": null,
+      "isHoveringCanvas": true,
       "openMenus": [],
       "isChangingStyle": false,
       "isReadonly": false,
@@ -832,36 +816,6 @@
       "id": "instance:instance",
       "currentPageId": "page:page",
       "typeName": "instance"
-    },
-    {
-      "x": 0,
-      "y": 0,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:down",
-      "type": "connection",
-      "props": {
-        "start": {
-          "x": 0,
-          "y": 0
-        },
-        "end": {
-          "x": 0,
-          "y": 0
-        },
-        "routing": "elbow",
-        "curve": null,
-        "pins": [],
-        "elbowRoute": null,
-        "temporal": "data",
-        "delayValue": "",
-        "pillPosition": 0.5
-      },
-      "parentId": "page:page",
-      "index": "a8OGz",
-      "typeName": "shape"
     },
     {
       "name": "",
@@ -912,7 +866,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a8vQOV",
+      "index": "auuBX",
       "typeName": "shape"
     }
   ]
