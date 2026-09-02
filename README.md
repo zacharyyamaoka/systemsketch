@@ -117,6 +117,18 @@ The [Settings and interface-scale implementation gallery](docs/interface-scale-i
 
 The [edge polarity report](docs/edge-polarity-2026-09-01.html) records why an Expanded Block could not be wired to a sibling from its own dots, why a picker-spawned Block came out output-to-output, and why the cable left the port the wrong way — one press rule that committed to a face before the cable had landed. The replacement decides polarity from where the cable lands, using the two Blocks' places in the frame hierarchy (`pairBlockFaces` → `portPolarity`), through one `judgeConnection` that the drop, the eligible-dot highlight, the picker and load-time validation all ask. The report carries the pre-fix reproduction, the scope diagram, the live source at each seam, and `npm run test:polarity` (33/33) beside the unchanged boundary truth table in `npm run test:edges` (33/33).
 
+The [IDE plugin and golden-case report](docs/ide-plugin-and-goldens-2026-09-01.html) shows SystemSketch running as a VS Code / Cursor editor: click a `.systemsketch` or `.tldr` in the file tree and the canvas opens in the pane, with the in-app file menu, share shell and workspace browser removed because the IDE already owns files. The extension lives in [`vscode-systemsketch/`](vscode-systemsketch/README.md) and ships a *build* of the Stable app rather than a second canvas — `npm run package` refuses to package anything else, and a track worktree can never claim to be Stable. The same report covers the golden case folder, now `source.py` + `target.systemsketch` + `generated.systemsketch` with the evidence in `artifacts/`, where the target is the one file nothing in the toolchain ever writes to. Nine checks driven in real VS Code under Xvfb, seven reachable in Cursor behind its first-run sign-in wall.
+
+## The IDE plugin
+
+```bash
+cd ~/systemsketch/vscode-systemsketch && npm install && npm run package
+```
+
+Install the resulting `dist/systemsketch-vscode-0.1.0.vsix` from the Extensions view, or with
+`code --install-extension`. `npm test` there drives the packaged extension in a real IDE.
+Obsidian's plugin will live beside it in this repo when it exists.
+
 ## Local files
 
 - A clean launch reopens the most recent valid document. First launch prepares `~/SystemSketch/Untitled.tldr` and creates it on the first edit or Save.

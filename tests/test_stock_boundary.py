@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import unittest
 from pathlib import Path
 
@@ -55,6 +56,108 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn('title="Block"', toolbar_source)
         self.assertIn('fallbackIcon={<BlockIcon />}', toolbar_source)
         self.assertNotIn('title="Comment"', toolbar_source)
+
+    def test_the_embedded_lane_is_the_same_engine_with_the_file_surfaces_removed(self) -> None:
+        """An IDE host must reach tldraw through the same seams the app does.
+
+        This is the boundary the plugin is most likely to break, because the
+        cheap way to put a canvas in a webview is to write a second, smaller
+        one. These assertions say: the embedded lane composes the *same* Block
+        shape, tool, bindings, overlays and toolbar overrides through tldraw's
+        public props, and the only thing it drops is the chrome that answers
+        "which file am I in" — which the IDE already answers.
+        """
+
+        app = (PROJECT_ROOT / "src" / "App.tsx").read_text(encoding="utf-8")
+        self.assertIn("import { EmbeddedCanvas, isEmbedded } from './embed'", app)
+        self.assertIn("if (isEmbedded()) {", app)
+        # The host decides before the workspace app can mount, so an embedded
+        # canvas never starts a local-workspace session it has to tear down.
+        self.assertLess(app.index("if (isEmbedded())"), app.index("if (profile !== 'product')"))
+
+        embedded = (PROJECT_ROOT / "src" / "embed" / "EmbeddedCanvas.tsx").read_text(encoding="utf-8")
+        self.assertIn("<Tldraw", embedded)
+        self.assertIn("components={EMBEDDED_COMPONENTS}", embedded)
+        self.assertIn("shapeUtils={EMBEDDED_SHAPE_UTILS}", embedded)
+        self.assertIn("bindingUtils={EMBEDDED_BINDING_UTILS}", embedded)
+        self.assertIn("overlayUtils={EMBEDDED_OVERLAY_UTILS}", embedded)
+        self.assertIn("overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}", embedded)
+        self.assertIn("tools={EMBEDDED_TOOLS}", embedded)
+        self.assertIn("BlockShapeUtil,", embedded)
+        self.assertIn("...blockConnectionShapeUtils,", embedded)
+        self.assertIn("Toolbar: SystemSketchFigmaToolbar", embedded)
+        self.assertIn("ContextMenu: BlockContextMenu", embedded)
+        self.assertIn("InFrontOfTheCanvas: SystemSketchSurfaceHost", embedded)
+        # The IDE owns files; the canvas must not grow a second file manager.
+        self.assertIn("MainMenu: null", embedded)
+        self.assertIn("MenuPanel: null", embedded)
+        self.assertIn("SharePanel: null", embedded)
+        self.assertNotIn("SystemSketchWorkspaceProvider", embedded)
+        self.assertNotIn("useLocalWorkspace", embedded)
+        self.assertNotIn("workspaceClient", embedded)
+        # A released build must not carry a browser-local persistence key that
+        # would quietly compete with the file the host opened.
+        self.assertNotIn("persistenceKey", embedded)
+
+    def test_the_host_bridge_stays_the_only_thing_an_extension_imports(self) -> None:
+        """A host runs in Node and bundles separately, so anything it reaches
+        into becomes a second build of that code. One narrow module is the
+        whole contract, and it must stay free of React, tldraw and the DOM."""
+
+        extension = (
+            PROJECT_ROOT / "vscode-systemsketch" / "src" / "extension.ts"
+        ).read_text(encoding="utf-8")
+        app_imports = [
+            line for line in extension.splitlines()
+            if "../../src/" in line
+        ]
+        self.assertTrue(app_imports, "the extension no longer shares the app's format rules")
+        for line in app_imports:
+            self.assertIn("../../src/embed/sharedWithHost", line)
+
+        for module in ("sharedWithHost.ts", "sketchDocument.ts", "embedProtocol.ts"):
+            source = (PROJECT_ROOT / "src" / "embed" / module).read_text(encoding="utf-8")
+            with self.subTest(module=module):
+                self.assertNotIn("from 'react'", source)
+                self.assertNotIn("from 'tldraw'", source)
+                self.assertNotIn("import '", source)
+
+    def test_the_extension_ships_a_build_of_the_app_rather_than_its_own_canvas(self) -> None:
+        """The webview is the app's own vite output, staged and stamped.
+
+        If the extension ever bundles `src/` into a webview of its own, it has
+        forked the product: two canvases, one of which nobody released.
+        """
+
+        esbuild = (
+            PROJECT_ROOT / "vscode-systemsketch" / "esbuild.config.mjs"
+        ).read_text(encoding="utf-8")
+        self.assertIn("src/extension.ts", esbuild)
+        self.assertNotIn("webview", esbuild.split("await build(")[1])
+
+        stage = (
+            PROJECT_ROOT / "vscode-systemsketch" / "scripts" / "stage_app.mjs"
+        ).read_text(encoding="utf-8")
+        # `--base ./` is load-bearing: a webview has no origin root for
+        # vite's default absolute `/assets/...` URLs to resolve against.
+        self.assertIn("'--base', './'", stage)
+        self.assertIn("--require-stable", stage)
+        self.assertIn("matchesStable", stage)
+
+        manifest = json.loads(
+            (PROJECT_ROOT / "vscode-systemsketch" / "package.json").read_text(encoding="utf-8")
+        )
+        selectors = manifest["contributes"]["customEditors"][0]["selector"]
+        self.assertEqual(
+            sorted(item["filenamePattern"] for item in selectors),
+            ["*.systemsketch", "*.tldr"],
+        )
+        commands = {item["command"] for item in manifest["contributes"]["commands"]}
+        # File management belongs to the IDE, so the extension contributes no
+        # New / Open / Save command of its own.
+        self.assertFalse({command for command in commands if command.endswith(".new")})
+        self.assertIn("systemsketch.openCanvas", commands)
+        self.assertEqual(manifest["scripts"]["package"].count("--require-stable"), 1)
 
     def test_requested_icon_is_the_repo_icon(self) -> None:
         icon = PROJECT_ROOT / "assets" / "systemsketch.png"
