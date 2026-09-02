@@ -18,7 +18,7 @@ Use a recipe to describe intent while the helper lets the current SystemSketch e
 - `viewport` is optional and controls the generated screenshot. The default is a conservative 1280×720 so a saved camera fits common review surfaces; use a larger viewport only when the interaction genuinely needs it.
 - `shapes` contains partials accepted by `Editor.createShapes`. Use a safe local `id` such as `subject`; the helper expands it to `shape:subject`. `parentId`, `fromId`, and `toId` accept the same shorthand.
 - `bindings` contains partials accepted by `Editor.createBindings`. Use this for actual semantic connections, never for decorative cue arrows.
-- `callouts` become stock tldraw geo cards. A callout with a `target` also gets a stock orange arrow. They remain editable in the resulting board.
+- `callouts` become stock tldraw geo cards. A callout with a `target` also gets a stock orange elbow arrow bound to the card and, for shape targets, the target shape. They remain editable in the resulting board.
 
 The helper accepts a `text` shorthand on any stock text-bearing shape and converts it to current tldraw rich text. Keep custom shape props native to that feature.
 
@@ -37,7 +37,11 @@ The helper accepts a `text` shorthand on any stock text-bearing shape and conver
 }
 ```
 
-`kind` is `step`, `note`, or `pass`. A target is either `{ "shapeId": "subject", "anchor": "top|right|bottom|left|center", "dx": 0, "dy": 0 }` or `{ "x": 700, "y": 320 }`. A `pass` callout normally has no target and should begin with `PASS WHEN`.
+`kind` is `step`, `note`, or `pass`. A shape target is `{ "shapeId": "subject", "anchor": "top|right|bottom|left", "dx": 0, "dy": 0 }`; an absolute target is `{ "x": 700, "y": 320 }`. A `pass` callout normally has no target and should begin with `PASS WHEN`.
+
+The `anchor` is a geometry contract, not a label. Put the card outside that edge. Use `dy` to choose a point along a `left` or `right` edge and `dx` along a `top` or `bottom` edge; never offset away from the edge. The helper rejects ambiguous center anchors and cross-axis offsets. It binds stock elbow-arrow terminals at precise edge points so moving either object preserves the connection and the arrow's last segment approaches normally.
+
+If several callouts target the same shape edge, give their along-edge offsets at least 48 units of separation. This reserves distinct final approach lanes instead of letting arrowheads and shafts converge at the edge.
 
 ## Common SystemSketch objects
 
@@ -70,4 +74,8 @@ For an Expanded Block, set `view`, `w`, and `h`, then make child shapes use the 
 - Use one step per physical action. If setup takes three gestures, encode the setup into the file.
 - State observable success, not internal implementation: “children disappear and return after re-expanding,” not “visibility callback returns hidden.”
 - Leave at least 80 canvas units between a cue card and the target's interaction bounds.
+- Leave at least 48 canvas units between cue cards. Do not stack borders flush, and avoid routing two arrows through the same narrow corridor.
+- Use cards at least 340×100 canvas units. Prefer more width over more height; shorten prose or enlarge a card before accepting dense wrapping.
+- Keep the full scene inside the declared viewport with margin. `zoomToFit` is not permission to place a card partly outside the screenshot.
+- Inspect the PNG for text clipping, edge cropping, crossings, and arrow approach angles. For changes to the generator itself, run `scripts/create_layout_sweep.mjs` on the same seed before/after and once more on a fresh seed.
 - Keep the saved board small enough that `zoomToFit` leaves labels legible.
