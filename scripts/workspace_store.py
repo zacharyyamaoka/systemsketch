@@ -12,8 +12,8 @@ contract for what is inside:
 
 The browser remains the tldraw schema authority — it authors the envelope in
 ``src/workspace/systemSketchFile.ts``. This module only validates the portable
-file envelope, holds the two types apart, confines paths to one configured
-root, and provides atomic digest-fenced file operations.
+file envelope, holds the two types apart, confines paths to explicitly allowed
+roots, and provides atomic digest-fenced file operations.
 """
 
 from __future__ import annotations
@@ -89,16 +89,22 @@ def default_document_path(files_root: Path) -> Path:
     return workspace / DEFAULT_DOCUMENT_NAME
 
 
-def _resolve_inside_root(raw_path: object, files_root: Path) -> Path:
+def _resolve_inside_root(
+    raw_path: object,
+    files_root: Path,
+    *,
+    additional_roots: tuple[Path, ...] = (),
+) -> Path:
     if not isinstance(raw_path, str) or not raw_path.strip():
         raise WorkspacePathError("path must be a non-empty string")
     candidate = Path(raw_path).expanduser()
     if not candidate.is_absolute():
         raise WorkspacePathError("path must be absolute")
     resolved = candidate.resolve()
-    root = files_root.resolve()
-    if resolved != root and root not in resolved.parents:
-        raise WorkspacePathError(f"path must stay under {root}")
+    roots = (files_root.resolve(), *(root.resolve() for root in additional_roots))
+    if not any(resolved == root or root in resolved.parents for root in roots):
+        allowed = ", ".join(str(root) for root in roots)
+        raise WorkspacePathError(f"path must stay under an allowed root: {allowed}")
     return resolved
 
 
@@ -106,8 +112,17 @@ def resolve_directory(raw_path: object, files_root: Path) -> Path:
     return _resolve_inside_root(raw_path, files_root)
 
 
-def resolve_document_path(raw_path: object, files_root: Path) -> Path:
-    resolved = _resolve_inside_root(raw_path, files_root)
+def resolve_document_path(
+    raw_path: object,
+    files_root: Path,
+    *,
+    additional_roots: tuple[Path, ...] = (),
+) -> Path:
+    resolved = _resolve_inside_root(
+        raw_path,
+        files_root,
+        additional_roots=additional_roots,
+    )
     if document_suffix(resolved.name) is None:
         raise WorkspacePathError(
             "a SystemSketch document must end with "
@@ -275,8 +290,17 @@ def list_documents(raw_dir: object, files_root: Path) -> dict[str, Any]:
     }
 
 
-def load_document(raw_path: object, files_root: Path) -> dict[str, Any]:
-    path = resolve_document_path(raw_path, files_root)
+def load_document(
+    raw_path: object,
+    files_root: Path,
+    *,
+    additional_roots: tuple[Path, ...] = (),
+) -> dict[str, Any]:
+    path = resolve_document_path(
+        raw_path,
+        files_root,
+        additional_roots=additional_roots,
+    )
     try:
         stat = path.stat()
         if stat.st_size > MAX_DOCUMENT_BYTES:
@@ -298,8 +322,17 @@ def load_document(raw_path: object, files_root: Path) -> dict[str, Any]:
     return {**_metadata(path, source, stat), "source": source}
 
 
-def stat_document(raw_path: object, files_root: Path) -> dict[str, Any]:
-    path = resolve_document_path(raw_path, files_root)
+def stat_document(
+    raw_path: object,
+    files_root: Path,
+    *,
+    additional_roots: tuple[Path, ...] = (),
+) -> dict[str, Any]:
+    path = resolve_document_path(
+        raw_path,
+        files_root,
+        additional_roots=additional_roots,
+    )
     try:
         stat = path.stat()
     except FileNotFoundError:
@@ -330,10 +363,15 @@ def save_document(
     source: object,
     files_root: Path,
     *,
+    additional_roots: tuple[Path, ...] = (),
     base_digest: str | None = None,
     force: bool = False,
 ) -> dict[str, Any]:
-    path = resolve_document_path(raw_path, files_root)
+    path = resolve_document_path(
+        raw_path,
+        files_root,
+        additional_roots=additional_roots,
+    )
     rendered = normalize_document_source(source, suffix=document_suffix(path.name))
 
     if path.exists() and not force:
@@ -378,10 +416,19 @@ def rename_document(
     raw_destination: object,
     files_root: Path,
     *,
+    additional_roots: tuple[Path, ...] = (),
     base_digest: str,
 ) -> dict[str, Any]:
-    path = resolve_document_path(raw_path, files_root)
-    destination = resolve_document_path(raw_destination, files_root)
+    path = resolve_document_path(
+        raw_path,
+        files_root,
+        additional_roots=additional_roots,
+    )
+    destination = resolve_document_path(
+        raw_destination,
+        files_root,
+        additional_roots=additional_roots,
+    )
     if path.parent != destination.parent:
         raise WorkspacePathError("rename must keep the document in its current folder")
     if document_suffix(path.name) != document_suffix(destination.name):
@@ -428,10 +475,15 @@ def trash_document(
     raw_path: object,
     files_root: Path,
     *,
+    additional_roots: tuple[Path, ...] = (),
     base_digest: str,
 ) -> dict[str, object]:
     """Move a document to the desktop trash after checking its exact revision."""
-    path = resolve_document_path(raw_path, files_root)
+    path = resolve_document_path(
+        raw_path,
+        files_root,
+        additional_roots=additional_roots,
+    )
     source, stat = _read_identity(path)
     digest = document_digest(source)
     if digest != base_digest:

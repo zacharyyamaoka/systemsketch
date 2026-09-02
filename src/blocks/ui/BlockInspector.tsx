@@ -1,14 +1,26 @@
-import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
+import {
+  Fragment,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from 'react'
 import { type Editor, useValue } from 'tldraw'
 
 import { LiveTextArea, LiveTextInput, useLiveField } from '../../fields'
 
 import {
   BLOCK_VIEWS,
+  HEADER_ROW,
   type BlockPort,
   type BlockPortSide,
   type BlockShapeProps,
   type BlockView,
+  blockPortSections,
+  portInHeader,
   setBlockViewProps,
 } from '../blockModel'
 import {
@@ -18,6 +30,8 @@ import {
   sameBlockInspectorContext,
   moveBlockPort,
   moveBlockPortProps,
+  moveBlockPortToSection,
+  moveBlockPortToSectionProps,
   patchBlockDetailsProps,
   patchBlockPortProps,
   removeBlockPort,
@@ -27,6 +41,7 @@ import {
   updateBlockPort,
   type BlockDetailsPatch,
 } from '../commands/blockCommands'
+import type { BlockPortSectionTarget } from '../ports/portAffordances'
 import {
   setBlockPortLayoutForSelection,
   setBlockShowDescriptionForSelection,
@@ -60,7 +75,10 @@ export interface BlockInspectorActions {
     options?: BlockEditOptions,
   ): void
   removePort(side: BlockPortSide, portId: string): void
+  /** One visual step: neighbours swap, or the port crosses the nearest line. */
   movePort(side: BlockPortSide, portId: string, delta: -1 | 1): void
+  /** Put the port in a row (and arm), before a neighbour or at the end. */
+  movePortToSection(side: BlockPortSide, portId: string, target: BlockPortSectionTarget): void
   /** Open one undo step for a typing gesture. Absent for an unplaced draft. */
   beginEdit?(label: string): void
 }
@@ -108,6 +126,19 @@ function PlusIcon() {
 
 function XIcon() {
   return <TinyIcon><path d="m4 4 8 8m0-8-8 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></TinyIcon>
+}
+
+function GripIcon() {
+  return (
+    <svg viewBox="0 0 10 14" width="10" height="14" aria-hidden="true">
+      {[3, 7, 11].map((y) => (
+        <g key={y}>
+          <circle cx="3.5" cy={y} r="1.05" fill="currentColor" />
+          <circle cx="6.5" cy={y} r="1.05" fill="currentColor" />
+        </g>
+      ))}
+    </svg>
+  )
 }
 
 function ChevronIcon({ direction }: { direction: 'up' | 'down' }) {
@@ -283,19 +314,415 @@ function DescriptionEditor({
   )
 }
 
+const sectionKey = (row: number, branch: number) => `${row}:${branch}`
+
+interface InspectorPortDrag {
+  portId: string
+  startY: number
+  pointerY: number
+  /** Where a release would put the port; null while the pointer offers nothing new. */
+  target: BlockPortSectionTarget | null
+  /** List-local geometry of the offered place. */
+  barY: number | null
+  band: { top: number; bottom: number } | null
+}
+
+interface ListSection {
+  row: number
+  branch: number
+  /** Painted extent of the section's own items. */
+  top: number
+  bottom: number
+  /** Extent that claims the pointer: the gaps to the neighbours split halfway. */
+  claimTop: number
+  claimBottom: number
+  rows: { portId: string; top: number; bottom: number }[]
+}
+
+/**
+ * Read the list as the canvas reads its layout: which section each painted
+ * row belongs to, and where the sections meet. Only `li[data-section]` items
+ * count — the divider lines between them carry no section of their own — so
+ * the same list geometry serves the ordinary and the managed face.
+ */
+function readListSections(
+  list: HTMLUListElement,
+  heldPortId: string,
+): { sections: ListSection[]; listTop: number } {
+  const listRect = list.getBoundingClientRect()
+  const byKey = new Map<string, ListSection>()
+  const order: string[] = []
+  for (const item of list.querySelectorAll<HTMLElement>(':scope > li[data-section]')) {
+    // The held row rides the pointer, so its box says nothing about where the
+    // rows are; the rows it left behind are the geometry.
+    if (item.dataset.portId === heldPortId) continue
+    const key = item.dataset.section ?? ''
+    const rect = item.getBoundingClientRect()
+    let section = byKey.get(key)
+    if (!section) {
+      section = {
+        row: Number(item.dataset.row),
+        branch: Number(item.dataset.branch),
+        top: rect.top,
+        bottom: rect.bottom,
+        claimTop: rect.top,
+        claimBottom: rect.bottom,
+        rows: [],
+      }
+      byKey.set(key, section)
+      order.push(key)
+    }
+    section.top = Math.min(section.top, rect.top)
+    section.bottom = Math.max(section.bottom, rect.bottom)
+    if (item.dataset.portId) {
+      section.rows.push({ portId: item.dataset.portId, top: rect.top, bottom: rect.bottom })
+    }
+  }
+  const sections = order.map((key) => byKey.get(key)!)
+  sections.forEach((section, index) => {
+    const previous = sections[index - 1]
+    const next = sections[index + 1]
+    section.claimTop = previous ? (previous.bottom + section.top) / 2 : Number.NEGATIVE_INFINITY
+    section.claimBottom = next ? (section.bottom + next.top) / 2 : Number.POSITIVE_INFINITY
+  })
+  return { sections, listTop: listRect.top }
+}
+
+/** The place under a client `y`, in the same terms the canvas drop uses. */
+function listDropTarget(
+  list: HTMLUListElement,
+  clientY: number,
+  heldPortId: string,
+): { target: BlockPortSectionTarget; barY: number; band: { top: number; bottom: number } } | null {
+  const { sections, listTop } = readListSections(list, heldPortId)
+  if (sections.length === 0) return null
+  const section = sections.find((candidate) => clientY < candidate.claimBottom) ?? sections[sections.length - 1]
+  const rows = section.rows
+  let before: string | null = null
+  let barY: number
+  if (rows.length === 0) {
+    barY = (section.top + section.bottom) / 2
+  } else {
+    const found = rows.findIndex((row) => clientY < (row.top + row.bottom) / 2)
+    before = found === -1 ? null : rows[found].portId
+    barY = found === 0
+      ? rows[0].top - 3
+      : found === -1
+        ? rows[rows.length - 1].bottom + 3
+        : (rows[found - 1].bottom + rows[found].top) / 2
+  }
+  return {
+    target: { row: section.row, branch: section.branch, before },
+    barY: barY - listTop,
+    band: { top: section.top - listTop - 2, bottom: section.bottom - listTop + 2 },
+  }
+}
+
+function DividerLine({
+  side,
+  kind,
+  index,
+}: {
+  side: BlockPortSide
+  kind: 'header' | 'row' | 'branch'
+  index: number
+}) {
+  return (
+    <li
+      className={`block-inspector__divider block-inspector__divider--${kind}`}
+      data-testid={`inspector-divider-${side}-${kind}-${index}`}
+      aria-hidden="true"
+    >
+      <span className="block-inspector__divider-line" />
+      <span className="block-inspector__divider-label">{kind}</span>
+    </li>
+  )
+}
+
+/**
+ * A row's drop slot when no port of this lane is in it yet. Sections always
+ * exist on both sides — a row is shared — so an empty one still has a place
+ * to be dropped into; it stays slim until a drag makes it a target worth seeing.
+ */
+function EmptySection({
+  side,
+  row,
+  branch,
+  dragging,
+}: {
+  side: BlockPortSide
+  row: number
+  branch: number
+  dragging: boolean
+}) {
+  return (
+    <li
+      className={`block-inspector__empty-section${dragging ? ' is-open' : ''}`}
+      data-section={sectionKey(row, branch)}
+      data-row={row}
+      data-branch={branch}
+      data-testid={`inspector-empty-${side}-${row}-${branch}`}
+      aria-hidden="true"
+    >
+      {dragging ? (row === HEADER_ROW ? 'drop in header' : 'drop here') : null}
+    </li>
+  )
+}
+
 function PortSection({
   side,
-  ports,
+  props,
   actions,
 }: {
   side: BlockPortSide
-  ports: readonly BlockPort[]
+  props: BlockShapeProps
   actions?: BlockInspectorActions
 }) {
   const [managing, setManaging] = useState(false)
+  const [drag, setDrag] = useState<InspectorPortDrag | null>(null)
+  const dragRef = useRef<InspectorPortDrag | null>(null)
+  const listRef = useRef<HTMLUListElement | null>(null)
   const title = side === 'inputs' ? 'Inputs' : 'Outputs'
+  const ports = props[side]
   const visiblePorts = ports.filter((port) => port.visible)
-  const shownPorts = managing ? ports : visiblePorts
+  const shown = (candidates: readonly BlockPort[]) => (
+    managing ? candidates : candidates.filter((port) => port.visible)
+  )
+  // The same table the canvas paints, hidden ports in place: the list is the
+  // burger read top to bottom, so the order here is the order on the Block.
+  const table = blockPortSections(props)
+  const lane = ports.map((port) => port.id)
+  const isFirst = (portId: string) => lane[0] === portId
+  const isLast = (portId: string) => lane[lane.length - 1] === portId
+
+  const endDrag = () => {
+    dragRef.current = null
+    setDrag(null)
+  }
+
+  useEffect(() => endDrag, [])
+
+  const startDrag = (event: ReactPointerEvent<HTMLElement>, portId: string) => {
+    if (!actions || event.button !== 0) return
+    event.preventDefault()
+    event.stopPropagation()
+    const pointerId = event.pointerId
+    const next: InspectorPortDrag = {
+      portId,
+      startY: event.clientY,
+      pointerY: event.clientY,
+      target: null,
+      barY: null,
+      band: null,
+    }
+    dragRef.current = next
+    setDrag(next)
+    const doc = event.currentTarget.ownerDocument
+
+    const onMove = (move: PointerEvent) => {
+      const active = dragRef.current
+      if (!active || move.pointerId !== pointerId) return
+      move.preventDefault()
+      const list = listRef.current
+      const offered = list ? listDropTarget(list, move.clientY, active.portId) : null
+      // A place that would leave the order as it is offers nothing: no bar,
+      // no band, and releasing there is a no-op. The reducer is the oracle,
+      // so hidden ports between two shown ones cannot fool the geometry.
+      const moves = offered
+        ? moveBlockPortToSectionProps(props, side, active.portId, offered.target) !== props
+        : false
+      const updated: InspectorPortDrag = {
+        ...active,
+        pointerY: move.clientY,
+        target: moves && offered ? offered.target : null,
+        barY: moves && offered ? offered.barY : null,
+        band: moves && offered ? offered.band : null,
+      }
+      dragRef.current = updated
+      setDrag(updated)
+    }
+    const finish = (up: PointerEvent, cancelled: boolean) => {
+      if (up.pointerId !== pointerId) return
+      const active = dragRef.current
+      doc.removeEventListener('pointermove', onMove)
+      doc.removeEventListener('pointerup', onUp)
+      doc.removeEventListener('pointercancel', onCancel)
+      doc.removeEventListener('keydown', onKey)
+      endDrag()
+      if (!cancelled && active?.target) actions.movePortToSection(side, active.portId, active.target)
+    }
+    const onUp = (up: PointerEvent) => finish(up, false)
+    const onCancel = (up: PointerEvent) => finish(up, true)
+    const onKey = (key: KeyboardEvent) => {
+      if (key.key === 'Escape') finish({ pointerId } as PointerEvent, true)
+    }
+    doc.addEventListener('pointermove', onMove)
+    doc.addEventListener('pointerup', onUp)
+    doc.addEventListener('pointercancel', onCancel)
+    doc.addEventListener('keydown', onKey)
+  }
+
+  const grip = (port: BlockPort) => (
+    <button
+      type="button"
+      className="block-inspector__grip"
+      disabled={!actions}
+      aria-label={`Drag ${port.name || port.id} to another row`}
+      title="Drag to reorder or move between rows · ↑↓ to step"
+      data-testid={`inspector-port-grip-${side}-${port.id}`}
+      onPointerDown={(event) => startDrag(event, port.id)}
+      onKeyDown={(event) => {
+        if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return
+        event.preventDefault()
+        actions?.movePort(side, port.id, event.key === 'ArrowUp' ? -1 : 1)
+      }}
+    >
+      <GripIcon />
+    </button>
+  )
+
+  const portRow = (port: BlockPort, row: number, branch: number) => {
+    const held = drag?.portId === port.id
+    const style = held && drag ? { transform: `translateY(${drag.pointerY - drag.startY}px)` } : undefined
+    const shared = {
+      'data-section': sectionKey(row, branch),
+      'data-row': row,
+      'data-branch': branch,
+      'data-port-id': port.id,
+      'data-testid': `inspector-port-${side}-${port.id}`,
+    }
+    if (managing) {
+      return (
+        <li
+          key={port.id}
+          className={`block-inspector__managed-row${held ? ' is-dragging' : ''}`}
+          data-visible={port.visible}
+          style={style}
+          {...shared}
+        >
+          {grip(port)}
+          <button
+            type="button"
+            className="block-inspector__eye"
+            disabled={!actions}
+            aria-pressed={port.visible}
+            aria-label={`${port.visible ? 'Hide' : 'Show'} ${port.name || port.id}`}
+            onClick={() => actions?.updatePort(side, port.id, { visible: !port.visible })}
+          >
+            <EyeIcon visible={port.visible} />
+          </button>
+          <span className="block-inspector__managed-name">{port.name || port.id}</span>
+          <span className="block-inspector__managed-type">{port.type || 'type'}</span>
+          <span className="block-inspector__move-controls">
+            <button
+              type="button"
+              disabled={!actions || (isFirst(port.id) && (side === 'outputs' || portInHeader(port)))}
+              aria-label={`Move ${port.name || port.id} up`}
+              onClick={() => actions?.movePort(side, port.id, -1)}
+            >
+              <ChevronIcon direction="up" />
+            </button>
+            <button
+              type="button"
+              disabled={!actions || isLast(port.id)}
+              aria-label={`Move ${port.name || port.id} down`}
+              onClick={() => actions?.movePort(side, port.id, 1)}
+            >
+              <ChevronIcon direction="down" />
+            </button>
+          </span>
+        </li>
+      )
+    }
+    return (
+      <li
+        key={port.id}
+        className={`block-inspector__port-row${held ? ' is-dragging' : ''}`}
+        style={style}
+        {...shared}
+      >
+        {grip(port)}
+        <LiveTextInput
+          className="block-inspector__port-name"
+          value={port.name}
+          disabled={!actions}
+          placeholder="name"
+          ariaLabel={`${side} ${port.id} name`}
+          beginEdit={() => actions?.beginEdit?.('rename block port')}
+          onWrite={(name) => actions?.updatePort(side, port.id, { name }, { continuous: true })}
+        />
+        <LiveTextInput
+          className="block-inspector__port-type"
+          value={port.type}
+          disabled={!actions}
+          placeholder="type"
+          ariaLabel={`${side} ${port.id} type`}
+          beginEdit={() => actions?.beginEdit?.('retype block port')}
+          onWrite={(type) => actions?.updatePort(side, port.id, { type }, { continuous: true })}
+        />
+        {side === 'inputs' ? (
+          <LiveTextInput
+            className="block-inspector__port-default"
+            value={port.defaultValue ?? ''}
+            disabled={!actions}
+            placeholder="="
+            ariaLabel={`Default value for ${port.name || port.id}`}
+            beginEdit={() => actions?.beginEdit?.('edit port default')}
+            onWrite={(defaultValue) =>
+              actions?.updatePort(side, port.id, { defaultValue }, { continuous: true })}
+          />
+        ) : null}
+        <button
+          type="button"
+          className="block-inspector__icon-button block-inspector__delete"
+          disabled={!actions}
+          aria-label={`Remove ${port.name || port.id}`}
+          title="Delete — this can drop a cable bound to the port"
+          onClick={() => actions?.removePort(side, port.id)}
+        >
+          <XIcon />
+        </button>
+      </li>
+    )
+  }
+
+  const dragging = Boolean(drag)
+  const sectionItems = (members: readonly BlockPort[], row: number, branch: number) => {
+    const visible = shown(members)
+    return visible.length > 0
+      ? visible.map((port) => portRow(port, row, branch))
+      : <EmptySection key={`empty-${row}-${branch}`} side={side} row={row} branch={branch} dragging={dragging} />
+  }
+
+  const items: ReactNode[] = []
+  if (side === 'inputs') {
+    // The heading is the first row of the inputs: drag a port above the line
+    // and it rides the heading band. The line is always there to drag above.
+    items.push(...[sectionItems(table.header, HEADER_ROW, 0)].flat())
+    items.push(<DividerLine key="divider-header" side={side} kind="header" index={0} />)
+  }
+  table.rows.forEach((section, rowIndex) => {
+    if (rowIndex > 0) {
+      items.push(<DividerLine key={`divider-row-${section.row}`} side={side} kind="row" index={section.row} />)
+    }
+    if (side === 'inputs') {
+      items.push(...[sectionItems(section.inputs, section.row, 0)].flat())
+      return
+    }
+    section.branches.forEach((arm, armIndex) => {
+      if (armIndex > 0) {
+        items.push(
+          <DividerLine
+            key={`divider-branch-${section.row}-${arm.branch}`}
+            side={side}
+            kind="branch"
+            index={arm.branch}
+          />,
+        )
+      }
+      items.push(...[sectionItems(arm.outputs, section.row, arm.branch)].flat())
+    })
+  })
 
   return (
     <section className="block-inspector__section" aria-label={`${title} ports`} data-inspector-section={title}>
@@ -322,99 +749,39 @@ function PortSection({
         </span>
       </div>
 
-      {shownPorts.length === 0 ? (
-        <p className="block-inspector__hint">
-          {ports.length === 0 ? `No ${side} yet.` : `All ${ports.length} hidden — manage to show.`}
-        </p>
-      ) : managing ? (
-        <ul className="block-inspector__ports block-inspector__ports--managed">
-          {shownPorts.map((port, index) => (
-            <li key={port.id} className="block-inspector__managed-row" data-visible={port.visible}>
-              <button
-                type="button"
-                className="block-inspector__eye"
-                disabled={!actions}
-                aria-pressed={port.visible}
-                aria-label={`${port.visible ? 'Hide' : 'Show'} ${port.name || port.id}`}
-                onClick={() => actions?.updatePort(side, port.id, { visible: !port.visible })}
-              >
-                <EyeIcon visible={port.visible} />
-              </button>
-              <span className="block-inspector__managed-name">{port.name || port.id}</span>
-              <span className="block-inspector__managed-type">{port.type || 'type'}</span>
-              <span className="block-inspector__move-controls">
-                <button
-                  type="button"
-                  disabled={!actions || index === 0}
-                  aria-label={`Move ${port.name || port.id} up`}
-                  onClick={() => actions?.movePort(side, port.id, -1)}
-                >
-                  <ChevronIcon direction="up" />
-                </button>
-                <button
-                  type="button"
-                  disabled={!actions || index === shownPorts.length - 1}
-                  aria-label={`Move ${port.name || port.id} down`}
-                  onClick={() => actions?.movePort(side, port.id, 1)}
-                >
-                  <ChevronIcon direction="down" />
-                </button>
-              </span>
-            </li>
-          ))}
-        </ul>
+      {ports.length === 0 && side === 'outputs' ? (
+        <p className="block-inspector__hint">No outputs yet.</p>
+      ) : !managing && ports.length > 0 && visiblePorts.length === 0 ? (
+        <p className="block-inspector__hint">All {ports.length} hidden — manage to show.</p>
       ) : (
-        <ul className="block-inspector__ports">
-          {shownPorts.map((port) => (
-            <li key={port.id} className="block-inspector__port-row">
-              <LiveTextInput
-                className="block-inspector__port-name"
-                value={port.name}
-                disabled={!actions}
-                placeholder="name"
-                ariaLabel={`${side} ${port.id} name`}
-                beginEdit={() => actions?.beginEdit?.('rename block port')}
-                onWrite={(name) => actions?.updatePort(side, port.id, { name }, { continuous: true })}
-              />
-              <LiveTextInput
-                className="block-inspector__port-type"
-                value={port.type}
-                disabled={!actions}
-                placeholder="type"
-                ariaLabel={`${side} ${port.id} type`}
-                beginEdit={() => actions?.beginEdit?.('retype block port')}
-                onWrite={(type) => actions?.updatePort(side, port.id, { type }, { continuous: true })}
-              />
-              {side === 'inputs' ? (
-                <LiveTextInput
-                  className="block-inspector__port-default"
-                  value={port.defaultValue ?? ''}
-                  disabled={!actions}
-                  placeholder="="
-                  ariaLabel={`Default value for ${port.name || port.id}`}
-                  beginEdit={() => actions?.beginEdit?.('edit port default')}
-                  onWrite={(defaultValue) =>
-                    actions?.updatePort(side, port.id, { defaultValue }, { continuous: true })}
-                />
-              ) : null}
-              <button
-                type="button"
-                className="block-inspector__icon-button block-inspector__delete"
-                disabled={!actions}
-                aria-label={`Remove ${port.name || port.id}`}
-                title="Delete — this can drop a cable bound to the port"
-                onClick={() => actions?.removePort(side, port.id)}
-              >
-                <XIcon />
-              </button>
-            </li>
-          ))}
+        <ul
+          ref={listRef}
+          className={`block-inspector__ports${managing ? ' block-inspector__ports--managed' : ''}${dragging ? ' is-dragging' : ''}`}
+          data-testid={`inspector-ports-${side}`}
+        >
+          {items.map((item, index) => <Fragment key={index}>{item}</Fragment>)}
+          {drag?.band ? (
+            <li
+              className="block-inspector__drop-band"
+              data-testid="inspector-drop-band"
+              aria-hidden="true"
+              style={{ top: drag.band.top, height: Math.max(0, drag.band.bottom - drag.band.top) }}
+            />
+          ) : null}
+          {drag?.barY !== null && drag?.barY !== undefined ? (
+            <li
+              className="block-inspector__drop-bar"
+              data-testid="inspector-drop-bar"
+              aria-hidden="true"
+              style={{ top: drag.barY }}
+            />
+          ) : null}
         </ul>
       )}
 
       {managing && ports.length > 1 ? (
         <p className="block-inspector__port-help">
-          Show or hide without changing port identity · use the arrows to reorder.
+          Show or hide without changing port identity · drag the grip or use the arrows to reorder; cross a line to change row.
         </p>
       ) : null}
     </section>
@@ -558,8 +925,8 @@ export function BlockInspectorContent({
             </p>
           </section>
 
-          <PortSection side="inputs" ports={props.inputs} actions={actions} />
-          <PortSection side="outputs" ports={props.outputs} actions={actions} />
+          <PortSection side="inputs" props={props} actions={actions} />
+          <PortSection side="outputs" props={props} actions={actions} />
 
           <section className="block-inspector__section" data-inspector-section="Ports">
             <div className="block-inspector__section-title">Ports</div>
@@ -636,6 +1003,8 @@ export function EditorBlockInspector({
           void updateBlockPort(editor, id, side, portId, patch, history(options)),
         removePort: (side, portId) => void removeBlockPort(editor, id, side, portId),
         movePort: (side, portId, delta) => void moveBlockPort(editor, id, side, portId, delta),
+        movePortToSection: (side, portId, target) =>
+          void moveBlockPortToSection(editor, id, side, portId, target),
         beginEdit: (label) => void editor.markHistoryStoppingPoint(label),
       }
     }
@@ -657,6 +1026,8 @@ export function EditorBlockInspector({
         changeDraft((props) => removeBlockPortProps(props, side, portId)),
       movePort: (side, portId, delta) =>
         changeDraft((props) => moveBlockPortProps(props, side, portId, delta)),
+      movePortToSection: (side, portId, target) =>
+        changeDraft((props) => moveBlockPortToSectionProps(props, side, portId, target)),
     }
   }, [context, editor, localDraft, onToolDraftChange, toolDraft])
 

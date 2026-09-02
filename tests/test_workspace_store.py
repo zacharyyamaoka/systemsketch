@@ -186,6 +186,50 @@ class WorkspaceStoreTests(unittest.TestCase):
         with self.assertRaisesRegex(WorkspacePathError, "end with .systemsketch or .tldr"):
             save_document(str(self.root / "board.json"), document_source(), self.root)
 
+    def test_an_explicit_additional_root_allows_a_worktree_board_only(self) -> None:
+        with (
+            tempfile.TemporaryDirectory() as development_directory,
+            tempfile.TemporaryDirectory() as outside_directory,
+        ):
+            development_root = Path(development_directory)
+            review = development_root / "sketches" / "review" / "Feature.systemsketch"
+            saved = save_document(
+                str(review),
+                document_source(),
+                self.root,
+                additional_roots=(development_root,),
+            )
+            loaded = load_document(
+                str(review),
+                self.root,
+                additional_roots=(development_root,),
+            )
+
+            self.assertEqual(loaded["digest"], saved["digest"])
+            self.assertEqual(
+                stat_document(
+                    str(review),
+                    self.root,
+                    additional_roots=(development_root,),
+                )["size"],
+                saved["size"],
+            )
+            self.assertEqual(list_documents(None, self.root)["root"], str(self.root))
+            # Extra roots authorize a direct document, not a second browser.
+            # Save As and New Folder must remain rooted in the user's primary
+            # workspace even while a review fixture is open from a worktree.
+            with self.assertRaisesRegex(WorkspacePathError, "stay under an allowed root"):
+                list_documents(str(review.parent), self.root)
+            with self.assertRaisesRegex(WorkspacePathError, "stay under an allowed root"):
+                create_directory(str(review.parent), "Escaped", self.root)
+            self.assertFalse((review.parent / "Escaped").exists())
+            with self.assertRaisesRegex(WorkspacePathError, "stay under an allowed root"):
+                load_document(
+                    str(Path(outside_directory) / "Other.systemsketch"),
+                    self.root,
+                    additional_roots=(development_root,),
+                )
+
     def test_digest_fence_refuses_external_edits_and_missing_updates(self) -> None:
         first = save_document(str(self.path), document_source(1), self.root)
         self.path.write_text(document_source(2), encoding="utf-8")

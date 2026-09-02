@@ -63,7 +63,7 @@
       "y": 105,
       "w": 520,
       "h": 115,
-      "target": { "shapeId": "alpha-loader", "anchor": "left" }
+      "target": { "shapeId": "alpha-frame", "anchor": "left", "dy": -70 }
     },
     {
       "id": "step-2",
@@ -73,7 +73,7 @@
       "y": 310,
       "w": 530,
       "h": 115,
-      "target": { "shapeId": "alpha-loader", "anchor": "left" }
+      "target": { "shapeId": "alpha-loader", "anchor": "left", "dy": -70 }
     },
     {
       "id": "step-3",
@@ -83,7 +83,7 @@
       "y": 515,
       "w": 530,
       "h": 115,
-      "target": { "shapeId": "alpha-frame", "anchor": "left" }
+      "target": { "shapeId": "alpha-loader", "anchor": "left", "dy": 70 }
     },
     {
       "id": "pass",
@@ -92,7 +92,7 @@
       "x": 650,
       "y": 710,
       "w": 690,
-      "h": 105
+      "h": 130
     }
   ]
 }

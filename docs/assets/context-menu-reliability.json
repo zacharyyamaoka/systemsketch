@@ -1,0 +1,34 @@
+[
+  {
+    "label": "one right-click over an active inline field opens the contextual Block menu",
+    "ok": true
+  },
+  {
+    "label": "a normal outside click cannot strand the next right-click",
+    "ok": true
+  },
+  {
+    "label": "a child that swallows contextmenu still gets the selected Block menu on the first gesture",
+    "ok": true
+  },
+  {
+    "label": "active stock Tiptap opens its menu without unmounting the editor view",
+    "ok": true
+  },
+  {
+    "label": "with the floating selection toolbar visible, three consecutive right-clicks open normally",
+    "ok": true
+  },
+  {
+    "label": "window blur with a menu open does not strand the stock root",
+    "ok": true
+  },
+  {
+    "label": "right-clicking the floating toolbar still opens stock canvas commands",
+    "ok": true
+  },
+  {
+    "label": "the real browser journey produced zero local console errors",
+    "ok": true
+  }
+]

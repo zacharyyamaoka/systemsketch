@@ -238,6 +238,7 @@ def ensure_preview(release_home: Path, state_home: Path) -> tuple[str, dict]:
             str(release_home),
             "--source-root",
             str(source_root),
+            "--allow-source-root",
         ],
         cwd=source_root,
         log=log_path(state_home, "preview", "api.log"),

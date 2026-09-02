@@ -1,0 +1,53 @@
+{
+  "ranAt": "2026-09-02T21:57:06.407Z",
+  "checks": [
+    {
+      "label": "−/+ zoom buttons are hidden by default",
+      "ok": true
+    },
+    {
+      "label": "the 100% zoom menu remains visible in the compact default",
+      "ok": true
+    },
+    {
+      "label": "the compact default needs no stored preference",
+      "ok": true
+    },
+    {
+      "label": "Appearance opens with Show zoom −/+ buttons unchecked",
+      "ok": true
+    },
+    {
+      "label": "enabling persists the versioned local preference",
+      "ok": true
+    },
+    {
+      "label": "the restored + button invokes the stock zoom-in action",
+      "ok": true
+    },
+    {
+      "label": "the restored − button invokes the stock zoom-out action",
+      "ok": true
+    },
+    {
+      "label": "shown buttons survive a full reload",
+      "ok": true
+    },
+    {
+      "label": "Appearance reflects the stored enabled state",
+      "ok": true
+    },
+    {
+      "label": "hidden buttons stay hidden after reload",
+      "ok": true
+    },
+    {
+      "label": "the zoom percentage remains available after reload",
+      "ok": true
+    },
+    {
+      "label": "the journey emits no local console errors",
+      "ok": true
+    }
+  ]
+}

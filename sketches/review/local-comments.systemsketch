@@ -7,7 +7,9 @@
       "geo": 4,
       "block": 1
     },
-    "bindings": {}
+    "bindings": {
+      "arrow": 6
+    }
   },
   "tldrawFileFormatVersion": 1,
   "schema": {
@@ -40,8 +42,9 @@
       "com.tldraw.shape.image": 5,
       "com.tldraw.shape.video": 4,
       "com.tldraw.shape.geo": 12,
-      "com.tldraw.shape.block": 2,
-      "com.tldraw.shape.connection": 1,
+      "com.tldraw.shape.block": 3,
+      "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.connection": 2,
       "com.tldraw.binding.arrow": 1,
       "com.tldraw.binding.connection": 1,
       "com.tldraw.comment-thread": 3,
@@ -51,8 +54,8 @@
   },
   "records": [
     {
-      "x": 0,
-      "y": 0,
+      "x": 580,
+      "y": 347.5,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -69,12 +72,12 @@
         "labelColor": "black",
         "bend": 0,
         "start": {
-          "x": 580,
-          "y": 347.5
+          "x": 0,
+          "y": 0
         },
         "end": {
-          "x": 770,
-          "y": 360
+          "x": 190,
+          "y": 37.5
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -91,7 +94,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "ZzaxI",
+      "index": "a3zd9V",
       "typeName": "shape"
     },
     {
@@ -103,8 +106,8 @@
       "typeName": "pointer"
     },
     {
-      "x": 0,
-      "y": 0,
+      "x": 580,
+      "y": 547.5,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -121,12 +124,12 @@
         "labelColor": "black",
         "bend": 0,
         "start": {
-          "x": 580,
-          "y": 547.5
+          "x": 0,
+          "y": 0
         },
         "end": {
-          "x": 770,
-          "y": 360
+          "x": 190,
+          "y": -102.5
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -143,7 +146,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a0zAm",
+      "index": "a4uTzl",
       "typeName": "shape"
     },
     {
@@ -188,7 +191,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a2Ypz",
+      "index": "a2IEX",
       "typeName": "shape"
     },
     {
@@ -233,7 +236,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5ICz",
+      "index": "a5DGA",
       "typeName": "shape"
     },
     {
@@ -278,13 +281,13 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3Llf",
+      "index": "a3M9b",
       "typeName": "shape"
     },
     {
-      "x": 3.6810360941236553,
-      "y": 382.58396510840856,
-      "z": 0.5904900000000001,
+      "x": 0.48780487804877737,
+      "y": -17.19512195121952,
+      "z": 1.0580645161290323,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -331,56 +334,67 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4v1M",
+      "index": "a4ZXz",
       "typeName": "shape"
     },
     {
-      "id": "comment:ClygeYEMMtsFKHvVE14pT",
-      "typeName": "comment",
-      "threadId": "comment-thread:1HEfi8NTmlUdK7NN8L19V",
-      "pageId": "page:page",
-      "authorId": "systemsketch:local-author",
-      "createdAt": 1788385668942,
-      "editedAt": null,
-      "body": {
-        "type": "doc",
-        "content": [
-          {
-            "type": "paragraph",
-            "content": [
-              {
-                "type": "text",
-                "text": "sad"
-              }
-            ]
-          }
-        ]
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:comment-target",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.25
+        },
+        "snap": "edge-point",
+        "terminal": "end"
       },
-      "isDeleted": false,
-      "meta": {}
+      "typeName": "binding"
     },
     {
-      "name": "",
-      "color": "#7B66DC",
-      "imageUrl": "",
       "meta": {},
-      "id": "user:zglYL8Qd0GQe4e7tpY_bV",
-      "typeName": "user"
+      "id": "binding:cue-step-2-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:comment-target",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.6136363636363636
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
     },
     {
-      "name": "",
-      "color": "#02B1CC",
-      "imageUrl": "",
       "meta": {},
-      "id": "user:q97YFLa-f6UrjSp6cnsoX",
-      "typeName": "user"
+      "id": "binding:cue-step-3-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-3-arrow",
+      "toId": "shape:comment-target",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.8863636363636364
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
     },
     {
-      "editingShapeId": "shape:comment-target",
+      "editingShapeId": null,
       "croppingShapeId": null,
-      "selectedShapeIds": [
-        "shape:comment-target"
-      ],
+      "selectedShapeIds": [],
       "hoveredShapeId": null,
       "erasingShapeIds": [],
       "hintingShapeIds": [],
@@ -391,21 +405,58 @@
       "typeName": "instance_page_state"
     },
     {
-      "id": "comment-thread:1HEfi8NTmlUdK7NN8L19V",
-      "typeName": "comment-thread",
-      "pageId": "page:page",
-      "anchor": {
-        "type": "shape",
-        "shapeId": "shape:comment-target",
-        "x": 1,
-        "y": 0,
-        "isPrecise": false
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:cue-step-1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
       },
-      "createdBy": "systemsketch:local-author",
-      "createdAt": 1788385668942,
-      "resolved": null,
-      "isDeleted": false,
-      "meta": {}
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:cue-step-2",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-3-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-3-arrow",
+      "toId": "shape:cue-step-3",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
     },
     {
       "x": 770,
@@ -459,7 +510,7 @@
         ]
       },
       "parentId": "page:page",
-      "index": "a1Vf6",
+      "index": "a1oAz",
       "typeName": "shape"
     },
     {
@@ -496,8 +547,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1025.71435546875,
-        "h": 1086.4285888671875
+        "w": 1440,
+        "h": 900
       },
       "insets": [
         false,
@@ -512,9 +563,9 @@
       "isChatting": false,
       "highlightedUserIds": [],
       "isFocused": true,
-      "devicePixelRatio": 1.399999976158142,
+      "devicePixelRatio": 1,
       "isCoarsePointer": false,
-      "isHoveringCanvas": false,
+      "isHoveringCanvas": null,
       "openMenus": [],
       "isChangingStyle": false,
       "isReadonly": false,
@@ -526,8 +577,16 @@
       "typeName": "instance"
     },
     {
-      "x": 0,
-      "y": 0,
+      "name": "",
+      "color": "#F04F88",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:1XcOltC-A-E2-KA1t4Nhp",
+      "typeName": "user"
+    },
+    {
+      "x": 560,
+      "y": 162.5,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -544,12 +603,12 @@
         "labelColor": "black",
         "bend": 0,
         "start": {
-          "x": 560,
-          "y": 162.5
+          "x": 0,
+          "y": 0
         },
         "end": {
-          "x": 770,
-          "y": 360
+          "x": 210,
+          "y": 142.5
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -566,7 +625,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "ZyRAz",
+      "index": "a2kkw",
       "typeName": "shape"
     }
   ]

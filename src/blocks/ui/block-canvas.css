@@ -458,6 +458,22 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   pointer-events: none;
 }
 
+/* The row (or arm) the held port would join. Tinted, so crossing a divider
+ * reads as arriving in a place rather than as the rule having moved a little;
+ * the heading band gets the same tint, which is what "drag it above the line"
+ * looks like while you are doing it. */
+.systemsketch-block-canvas .BlockNode-portDropBand {
+  position: absolute;
+  z-index: 3;
+  background: var(--ss-accent-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ss-accent) 22%, transparent);
+  pointer-events: none;
+}
+
+.systemsketch-block-canvas .BlockNode-portDropBand--header {
+  background: color-mix(in srgb, var(--ss-accent) 14%, transparent);
+}
+
 .systemsketch-block-canvas .BlockNode-portGrip {
   position: absolute;
   z-index: 7;

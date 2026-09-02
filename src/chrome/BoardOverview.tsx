@@ -9,6 +9,7 @@ import {
 
 const GROUPS: Array<{ kind: BoardOverviewTargetKind; label: string; icon: string }> = [
   { kind: 'frame', label: 'Frames', icon: '▣' },
+  { kind: 'branch', label: 'Branches', icon: '⑂' },
   { kind: 'expanded-block', label: 'Expanded Blocks', icon: '▤' },
 ]
 
@@ -76,7 +77,7 @@ export function BoardOverview() {
         <div className="systemsketch-board-overview__empty">
           <span aria-hidden="true">▣</span>
           <strong>No board landmarks yet</strong>
-          <p>Add a Frame or expand a Block. It will appear here on the page where it lives.</p>
+          <p>Add a Frame or Branch, or expand a Block. It will appear here on the page where it lives.</p>
         </div>
       ) : null}
     </div>

@@ -8,7 +8,9 @@
       "frame": 1,
       "block": 2
     },
-    "bindings": {}
+    "bindings": {
+      "arrow": 6
+    }
   },
   "tldrawFileFormatVersion": 1,
   "schema": {
@@ -41,8 +43,9 @@
       "com.tldraw.shape.image": 5,
       "com.tldraw.shape.video": 4,
       "com.tldraw.shape.geo": 12,
-      "com.tldraw.shape.block": 2,
-      "com.tldraw.shape.connection": 1,
+      "com.tldraw.shape.block": 3,
+      "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.connection": 2,
       "com.tldraw.binding.arrow": 1,
       "com.tldraw.binding.connection": 1,
       "com.tldraw.comment-thread": 3,
@@ -52,8 +55,8 @@
   },
   "records": [
     {
-      "x": 0,
-      "y": 0,
+      "x": 590,
+      "y": 367.5,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -70,12 +73,12 @@
         "labelColor": "black",
         "bend": 0,
         "start": {
-          "x": 590,
-          "y": 367.5
+          "x": 0,
+          "y": 0
         },
         "end": {
-          "x": 820,
-          "y": 570
+          "x": 230,
+          "y": 132.5
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -92,7 +95,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "ZzsRr",
+      "index": "a4zzbp",
       "typeName": "shape"
     },
     {
@@ -104,8 +107,8 @@
       "typeName": "pointer"
     },
     {
-      "x": 0,
-      "y": 0,
+      "x": 590,
+      "y": 572.5,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -122,12 +125,12 @@
         "labelColor": "black",
         "bend": 0,
         "start": {
-          "x": 590,
-          "y": 572.5
+          "x": 0,
+          "y": 0
         },
         "end": {
-          "x": 780,
-          "y": 305
+          "x": 230,
+          "y": 67.5
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -144,7 +147,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a0YjM",
+      "index": "a5uZxV",
       "typeName": "shape"
     },
     {
@@ -189,7 +192,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3P46",
+      "index": "a31Pj",
       "typeName": "shape"
     },
     {
@@ -203,10 +206,10 @@
       "type": "geo",
       "props": {
         "w": 690,
-        "h": 105,
+        "h": 130,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 17,
+        "growY": 0,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -234,7 +237,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6TT2",
+      "index": "a6L4Q",
       "typeName": "shape"
     },
     {
@@ -279,7 +282,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4DPf",
+      "index": "a4rSv",
       "typeName": "shape"
     },
     {
@@ -298,7 +301,7 @@
         "name": "alpha pipeline",
         "color": "black"
       },
-      "index": "a1BOj",
+      "index": "a1U5W",
       "typeName": "shape"
     },
     {
@@ -351,23 +354,69 @@
         }
       },
       "parentId": "page:page",
-      "index": "a538I",
+      "index": "a5aBf",
       "typeName": "shape"
     },
     {
       "meta": {},
       "id": "page:secondary",
       "name": "Secondary",
-      "index": "a2Uxo",
+      "index": "a2KuM",
       "typeName": "page"
     },
     {
-      "name": "",
-      "color": "#02B1CC",
-      "imageUrl": "",
       "meta": {},
-      "id": "user:q97YFLa-f6UrjSp6cnsoX",
-      "typeName": "user"
+      "id": "binding:cue-step-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:alpha-frame",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.22
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:alpha-loader",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.13157894736842105
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-3-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-3-arrow",
+      "toId": "shape:alpha-loader",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.868421052631579
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
     },
     {
       "editingShapeId": null,
@@ -383,19 +432,63 @@
       "typeName": "instance_page_state"
     },
     {
-      "name": "",
-      "color": "#7B66DC",
-      "imageUrl": "",
       "meta": {},
-      "id": "user:LNALdpW2yYtcOIMezt4If",
-      "typeName": "user"
+      "id": "binding:cue-step-1-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:cue-step-1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:cue-step-2",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-3-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-3-arrow",
+      "toId": "shape:cue-step-3",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
     },
     {
       "editingShapeId": null,
       "croppingShapeId": null,
-      "selectedShapeIds": [
-        "shape:alpha-writer"
-      ],
+      "selectedShapeIds": [],
       "hoveredShapeId": null,
       "erasingShapeIds": [],
       "hintingShapeIds": [],
@@ -422,7 +515,10 @@
     {
       "followingUserId": null,
       "opacityForNextShape": 1,
-      "stylesForNextShape": {},
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
       "brush": null,
       "scribbles": [],
       "cursor": {
@@ -436,8 +532,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1280,
-        "h": 720
+        "w": 1440,
+        "h": 900
       },
       "insets": [
         false,
@@ -462,7 +558,7 @@
       "duplicateProps": null,
       "cameraState": "idle",
       "id": "instance:instance",
-      "currentPageId": "page:secondary",
+      "currentPageId": "page:page",
       "typeName": "instance"
     },
     {
@@ -503,7 +599,7 @@
         "inputs": [],
         "outputs": []
       },
-      "index": "a2HQf",
+      "index": "a2UUKV",
       "typeName": "shape"
     },
     {
@@ -544,20 +640,28 @@
         "inputs": [],
         "outputs": []
       },
-      "index": "a1wxj",
+      "index": "a1siQ",
       "typeName": "shape"
     },
     {
-      "x": -617.972972972973,
-      "y": -237.2972972972973,
-      "z": 2.8190476190476192,
+      "name": "",
+      "color": "#39B178",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:yShx0dhsDLYuNT4MSSbCX",
+      "typeName": "user"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 1,
       "meta": {},
       "id": "camera:page:secondary",
       "typeName": "camera"
     },
     {
-      "x": 0,
-      "y": 0,
+      "x": 580,
+      "y": 162.5,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -574,12 +678,12 @@
         "labelColor": "black",
         "bend": 0,
         "start": {
-          "x": 580,
-          "y": 162.5
+          "x": 0,
+          "y": 0
         },
         "end": {
-          "x": 820,
-          "y": 570
+          "x": 200,
+          "y": 72.5
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -596,7 +700,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "ZyN4f",
+      "index": "a3z9YV",
       "typeName": "shape"
     }
   ]

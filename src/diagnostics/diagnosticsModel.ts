@@ -6,7 +6,12 @@ import {
 	type BlockPort,
 	type BlockShape,
 } from '../blocks/blockModel'
-import { getBlockConnectionPort } from '../blocks/connections/blockPorts'
+import {
+	getPortHostPort,
+	isPortHostShape,
+	type BlockConnectionPort,
+	type PortHostShape,
+} from '../blocks/connections/blockPorts'
 import {
 	connectionBindingIsValid,
 	connectionEndpointsAreValid,
@@ -90,8 +95,8 @@ export interface BoardDiagnosticsModel {
 
 interface BoundEndpoint {
 	binding: ConnectionBinding
-	block: BlockShape
-	port: BlockPort
+	host: PortHostShape
+	port: BlockConnectionPort
 	lane: BlockPortLane
 	face: PortFace
 	key: string
@@ -127,12 +132,12 @@ function normalizedName(value: string): string {
 	return value.trim().toLocaleLowerCase()
 }
 
-function endpointKey(endpoint: Pick<BoundEndpoint, 'block' | 'port' | 'face'>): string {
-	return JSON.stringify([endpoint.block.id, endpoint.port.id, endpoint.face])
+function endpointKey(endpoint: Pick<BoundEndpoint, 'host' | 'port' | 'face'>): string {
+	return JSON.stringify([endpoint.host.id, endpoint.port.id, endpoint.face])
 }
 
-function inputKey(blockId: TLShapeId, portId: string): string {
-	return JSON.stringify([blockId, portId])
+function inputKey(hostId: TLShapeId, portId: string): string {
+	return JSON.stringify([hostId, portId])
 }
 
 function stableShapeSort(a: TLShape, b: TLShape): number {
@@ -147,8 +152,14 @@ function blockLabel(block: BlockShape): string {
 	return block.props.title.trim() || 'Untitled Block'
 }
 
+function portHostLabel(host: PortHostShape): string {
+	return isBlockShape(host)
+		? blockLabel(host)
+		: host.props.title.trim() || 'Untitled Branch'
+}
+
 function endpointLabel(endpoint: BoundEndpoint): string {
-	return `${blockLabel(endpoint.block)} · ${endpoint.port.name.trim() || endpoint.port.id}`
+	return `${portHostLabel(endpoint.host)} · ${endpoint.port.name.trim() || endpoint.port.id}`
 }
 
 function resolveEndpoint(
@@ -156,19 +167,15 @@ function resolveEndpoint(
 	binding: ConnectionBinding | undefined,
 ): BoundEndpoint | null {
 	if (!binding || !connectionBindingIsValid(editor, binding)) return null
-	const block = editor.getShape(binding.toId)
-	if (!isBlockShape(block)) return null
-	const projected = getBlockConnectionPort(block.props, binding.props.portId)
-	if (!projected) return null
-	const port = projected.side === 'input'
-		? block.props.inputs.find((candidate) => candidate.id === projected.id)
-		: block.props.outputs.find((candidate) => candidate.id === projected.id)
+	const host = editor.getShape(binding.toId)
+	if (!isPortHostShape(host)) return null
+	const port = getPortHostPort(editor, host, binding.props.portId)
 	if (!port) return null
 	const endpoint: BoundEndpoint = {
 		binding,
-		block,
+		host,
 		port,
-		lane: projected.side,
+		lane: port.side,
 		face: binding.props.face,
 		key: '',
 	}
@@ -323,8 +330,8 @@ function addDuplicateConnectionDiagnostics(
 		const first = duplicates[0]
 		const affectedIds = uniqueShapeIds([
 			...duplicates.map(({ shape }) => shape.id),
-			first.start.block.id,
-			first.end.block.id,
+			first.start.host.id,
+			first.end.host.id,
 		])
 		diagnostics.push({
 			id: diagnosticId(BOARD_DIAGNOSTIC_CODES.duplicateConnection, pair),
@@ -402,8 +409,8 @@ function addCycleDiagnostics(
 		connection.source.face === 'outer' && connection.sink.face === 'outer'
 	))
 	const edges: GraphEdge[] = outer.map((connection) => ({
-		from: connection.source.block.id,
-		to: connection.sink.block.id,
+		from: connection.source.host.id,
+		to: connection.sink.host.id,
 		connectionId: connection.shape.id,
 	}))
 	for (const component of stronglyConnectedComponents(edges)) {
@@ -417,7 +424,7 @@ function addCycleDiagnostics(
 		if (!pageId) continue
 		const names = component.map((id) => {
 			const shape = editor.getShape(id)
-			return isBlockShape(shape) ? blockLabel(shape) : String(id)
+			return isPortHostShape(shape) ? portHostLabel(shape) : String(id)
 		})
 		diagnostics.push({
 			id: diagnosticId(BOARD_DIAGNOSTIC_CODES.dataflowCycle, ...component),
@@ -463,7 +470,7 @@ export function getBoardDiagnosticsModel(editor: Editor): BoardDiagnosticsModel 
 			if (inspected.semantic) connections.push(inspected.semantic)
 			const transient = inspected.transientSink
 			if (transient?.lane === 'input') {
-				transientlyOccupiedInputs.add(inputKey(transient.block.id, transient.port.id))
+				transientlyOccupiedInputs.add(inputKey(transient.host.id, transient.port.id))
 			}
 		}
 	}
@@ -471,7 +478,7 @@ export function getBoardDiagnosticsModel(editor: Editor): BoardDiagnosticsModel 
 	const occupiedInputs = new Set(transientlyOccupiedInputs)
 	for (const connection of connections) {
 		if (connection.sink.lane === 'input') {
-			occupiedInputs.add(inputKey(connection.sink.block.id, connection.sink.port.id))
+			occupiedInputs.add(inputKey(connection.sink.host.id, connection.sink.port.id))
 		}
 	}
 

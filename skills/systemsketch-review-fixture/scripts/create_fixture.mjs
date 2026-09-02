@@ -13,6 +13,7 @@ import {
   startApp,
   waitFor,
 } from '../../../tests/browser_harness.mjs'
+import { validateRecipe } from './layout_quality.mjs'
 
 function usage() {
   return 'Usage: node create_fixture.mjs --recipe RECIPE.json --output BOARD.systemsketch [--screenshot BOARD.png] [--force]'
@@ -41,28 +42,13 @@ function isRecord(value) {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-function finite(value, label) {
-  if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error(`${label} must be a finite number`)
-}
-
 function localId(value, label) {
   if (typeof value !== 'string' || !/^[a-z0-9][a-z0-9_-]*$/i.test(value)) {
     throw new Error(`${label} must use letters, digits, underscores, or hyphens`)
   }
 }
 
-function validateRecipe(recipe) {
-  if (!isRecord(recipe)) throw new Error('recipe must be a JSON object')
-  if (typeof recipe.feature !== 'string' || !recipe.feature.trim()) throw new Error('recipe.feature is required')
-  if (!Array.isArray(recipe.shapes) || recipe.shapes.length === 0) {
-    throw new Error('recipe.shapes must contain at least one real interaction target')
-  }
-  if (!Array.isArray(recipe.callouts) || recipe.callouts.length === 0) {
-    throw new Error('recipe.callouts must contain at least one numbered instruction')
-  }
-  if (recipe.bindings !== undefined && !Array.isArray(recipe.bindings)) {
-    throw new Error('recipe.bindings must be an array when present')
-  }
+function validatePageConfiguration(recipe) {
   const pageIds = new Set()
   if (recipe.pages !== undefined) {
     if (!Array.isArray(recipe.pages) || recipe.pages.length === 0) {
@@ -78,51 +64,10 @@ function validateRecipe(recipe) {
       }
     }
   }
-  const ids = new Set()
   for (const [index, shape] of recipe.shapes.entries()) {
-    if (!isRecord(shape)) throw new Error(`shapes[${index}] must be an object`)
-    localId(shape.id, `shapes[${index}].id`)
-    if (ids.has(shape.id)) throw new Error(`duplicate local id: ${shape.id}`)
-    ids.add(shape.id)
-    if (typeof shape.type !== 'string' || !shape.type) throw new Error(`shapes[${index}].type is required`)
     if (shape.pageId !== undefined && !pageIds.has(shape.pageId)) {
       throw new Error(`shapes[${index}].pageId must name a declared page`)
     }
-    finite(shape.x ?? 0, `shapes[${index}].x`)
-    finite(shape.y ?? 0, `shapes[${index}].y`)
-  }
-  let targetedStep = false
-  let passCard = false
-  for (const [index, callout] of recipe.callouts.entries()) {
-    if (!isRecord(callout)) throw new Error(`callouts[${index}] must be an object`)
-    localId(callout.id, `callouts[${index}].id`)
-    if (ids.has(`cue-${callout.id}`)) throw new Error(`duplicate callout id: ${callout.id}`)
-    ids.add(`cue-${callout.id}`)
-    if (!['step', 'note', 'pass'].includes(callout.kind)) {
-      throw new Error(`callouts[${index}].kind must be step, note, or pass`)
-    }
-    if (typeof callout.text !== 'string' || !callout.text.trim()) {
-      throw new Error(`callouts[${index}].text is required`)
-    }
-    for (const key of ['x', 'y', 'w', 'h']) finite(callout[key], `callouts[${index}].${key}`)
-    if (callout.target !== undefined) {
-      if (!isRecord(callout.target)) throw new Error(`callouts[${index}].target must be an object`)
-      if (typeof callout.target.shapeId === 'string') {
-        if (!ids.has(callout.target.shapeId)) throw new Error(`unknown target shape: ${callout.target.shapeId}`)
-      } else {
-        finite(callout.target.x, `callouts[${index}].target.x`)
-        finite(callout.target.y, `callouts[${index}].target.y`)
-      }
-      if (callout.kind === 'step') targetedStep = true
-    }
-    if (callout.kind === 'pass') passCard = true
-  }
-  if (!targetedStep) throw new Error('at least one step callout must point at its interaction target')
-  if (!passCard) throw new Error('add a pass callout with the visible success condition')
-  if (recipe.viewport !== undefined) {
-    if (!isRecord(recipe.viewport)) throw new Error('recipe.viewport must be an object')
-    finite(recipe.viewport.width, 'recipe.viewport.width')
-    finite(recipe.viewport.height, 'recipe.viewport.height')
   }
 }
 
@@ -201,6 +146,7 @@ async function main() {
 
   const recipe = JSON.parse(await readFile(recipePath, 'utf8'))
   validateRecipe(recipe)
+  validatePageConfiguration(recipe)
   const width = Math.max(900, Math.round(recipe.viewport?.width ?? 1280))
   const height = Math.max(700, Math.round(recipe.viewport?.height ?? 720))
   const app = await startApp({
@@ -289,36 +235,76 @@ async function main() {
       editor.createShapes(cueShapes)
 
       const targetPoint = (target) => {
-        if (typeof target.shapeId !== 'string') return { x: target.x, y: target.y }
+        if (typeof target.shapeId !== 'string') return { point: { x: target.x, y: target.y } }
         const bounds = editor.getShapePageBounds(shapeId(target.shapeId))
         if (!bounds) throw new Error(\`missing target bounds for \${target.shapeId}\`)
-        const anchor = target.anchor ?? 'center'
+        const anchor = target.anchor
         const point = anchor === 'top' ? { x: bounds.midX, y: bounds.minY }
           : anchor === 'right' ? { x: bounds.maxX, y: bounds.midY }
           : anchor === 'bottom' ? { x: bounds.midX, y: bounds.maxY }
           : anchor === 'left' ? { x: bounds.minX, y: bounds.midY }
           : { x: bounds.midX, y: bounds.midY }
-        return { x: point.x + (target.dx ?? 0), y: point.y + (target.dy ?? 0) }
+        const adjusted = { x: point.x + (target.dx ?? 0), y: point.y + (target.dy ?? 0) }
+        return {
+          point: adjusted,
+          shapeId: shapeId(target.shapeId),
+          bounds,
+          normalizedAnchor: {
+            x: Math.max(0, Math.min(1, (adjusted.x - bounds.minX) / bounds.w)),
+            y: Math.max(0, Math.min(1, (adjusted.y - bounds.minY) / bounds.h)),
+          },
+        }
+      }
+      const cueAnchorForTarget = (anchor) => anchor === 'left' ? { x: 1, y: 0.5 }
+        : anchor === 'right' ? { x: 0, y: 0.5 }
+        : anchor === 'top' ? { x: 0.5, y: 1 }
+        : { x: 0.5, y: 0 }
+      const cuePointForTarget = (callout, anchor) => anchor === 'left'
+        ? { x: callout.x + callout.w, y: callout.y + callout.h / 2 }
+        : anchor === 'right'
+          ? { x: callout.x, y: callout.y + callout.h / 2 }
+          : anchor === 'top'
+            ? { x: callout.x + callout.w / 2, y: callout.y + callout.h }
+            : { x: callout.x + callout.w / 2, y: callout.y }
+      const outsideTargetEdge = (callout, target) => {
+        if (!target.bounds) return true
+        const center = { x: callout.x + callout.w / 2, y: callout.y + callout.h / 2 }
+        const anchor = callout.target.anchor
+        return anchor === 'left' ? center.x < target.bounds.minX
+          : anchor === 'right' ? center.x > target.bounds.maxX
+          : anchor === 'top' ? center.y < target.bounds.minY
+          : center.y > target.bounds.maxY
       }
       const arrowIds = []
       for (const callout of recipe.callouts.filter((item) => item.target)) {
         const target = targetPoint(callout.target)
-        const center = { x: callout.x + callout.w / 2, y: callout.y + callout.h / 2 }
-        const dx = target.x - center.x
-        const dy = target.y - center.y
-        const start = Math.abs(dx) >= Math.abs(dy)
-          ? { x: dx >= 0 ? callout.x + callout.w : callout.x, y: center.y }
-          : { x: center.x, y: dy >= 0 ? callout.y + callout.h : callout.y }
+        if (!outsideTargetEdge(callout, target)) {
+          throw new Error(\`cue \${callout.id} is not outside its target's \${callout.target.anchor} edge\`)
+        }
+        const cueAnchor = typeof callout.target.shapeId === 'string'
+          ? cueAnchorForTarget(callout.target.anchor)
+          : (() => {
+              const center = { x: callout.x + callout.w / 2, y: callout.y + callout.h / 2 }
+              const dx = target.point.x - center.x
+              const dy = target.point.y - center.y
+              return Math.abs(dx) >= Math.abs(dy)
+                ? { x: dx >= 0 ? 1 : 0, y: 0.5 }
+                : { x: 0.5, y: dy >= 0 ? 1 : 0 }
+            })()
+        const start = typeof callout.target.shapeId === 'string'
+          ? cuePointForTarget(callout, callout.target.anchor)
+          : { x: callout.x + callout.w * cueAnchor.x, y: callout.y + callout.h * cueAnchor.y }
         const id = shapeId(\`cue-\${callout.id}-arrow\`)
         arrowIds.push(id)
         editor.createShape({
           id,
           type: 'arrow',
-          x: 0,
-          y: 0,
+          x: start.x,
+          y: start.y,
           props: {
-            start,
-            end: target,
+            kind: 'elbow',
+            start: { x: 0, y: 0 },
+            end: { x: target.point.x - start.x, y: target.point.y - start.y },
             color: 'orange',
             dash: 'draw',
             size: 'm',
@@ -328,6 +314,35 @@ async function main() {
             richText: toRichText(''),
           },
         })
+        const arrowBindings = [{
+          id: bindingId(\`cue-\${callout.id}-arrow-start\`),
+          type: 'arrow',
+          fromId: id,
+          toId: shapeId(\`cue-\${callout.id}\`),
+          props: {
+            terminal: 'start',
+            normalizedAnchor: cueAnchor,
+            isExact: false,
+            isPrecise: true,
+            snap: 'edge-point',
+          },
+        }]
+        if (target.shapeId) {
+          arrowBindings.push({
+            id: bindingId(\`cue-\${callout.id}-arrow-end\`),
+            type: 'arrow',
+            fromId: id,
+            toId: target.shapeId,
+            props: {
+              terminal: 'end',
+              normalizedAnchor: target.normalizedAnchor,
+              isExact: false,
+              isPrecise: true,
+              snap: 'edge-point',
+            },
+          })
+        }
+        editor.createBindings(arrowBindings)
       }
       if (arrowIds.length) editor.sendToBack(arrowIds)
       editor.selectNone()
@@ -361,6 +376,37 @@ async function main() {
     await delay(350)
     process.stdout.write('review fixture · cold reopen verified\n')
 
+    const motionProbe = recipe.callouts.find((callout) => typeof callout.target?.shapeId === 'string')
+    if (motionProbe) {
+      const followed = await evaluate(page, `(() => {
+        const editor = window.__systemsketch.editor
+        const targetId = ${JSON.stringify(`shape:${motionProbe.target.shapeId}`)}
+        const arrowId = ${JSON.stringify(`shape:cue-${motionProbe.id}-arrow`)}
+        const target = editor.getShape(targetId)
+        const endpoint = () => {
+          const arrow = editor.getShape(arrowId)
+          const handle = editor.getShapeHandles(arrow)?.find((item) => item.id === 'end')
+          if (!arrow || !handle) throw new Error('missing bound arrow end handle')
+          return editor.getShapePageTransform(arrowId).applyToPoint(handle)
+        }
+        const before = endpoint()
+        try {
+          editor.updateShape({ id: target.id, type: target.type, x: target.x + 64 })
+          const after = endpoint()
+          return { dx: after.x - before.x, dy: after.y - before.y }
+        } finally {
+          editor.updateShape({ id: target.id, type: target.type, x: target.x })
+        }
+      })()`)
+      if (Math.abs(followed.dx - 64) > 1 || Math.abs(followed.dy) > 1) {
+        throw new Error(`bound cue did not follow its target: moved ${followed.dx.toFixed(2)}, ${followed.dy.toFixed(2)}`)
+      }
+      await waitFor(page,
+        `document.querySelector('.systemsketch-file-title i')?.dataset.state === 'clean'`,
+        'fixture autosave after bound-arrow motion probe')
+      await delay(250)
+    }
+
     const documentBytes = await readFile(scratchPath)
     const document = JSON.parse(documentBytes)
     if (Object.keys(document)[0] !== 'systemSketch') throw new Error('saved fixture does not lead with the systemSketch envelope')
@@ -369,6 +415,42 @@ async function main() {
     }
     const savedShapes = document.records.filter((record) => record.typeName === 'shape').length
     if (savedShapes !== expectedShapes) throw new Error(`saved fixture contains ${savedShapes} shapes; expected ${expectedShapes}`)
+    const expectedCueBindings = recipe.callouts.reduce((count, callout) => {
+      if (!callout.target) return count
+      return count + (typeof callout.target.shapeId === 'string' ? 2 : 1)
+    }, 0)
+    const savedBindings = document.records.filter((record) => record.typeName === 'binding')
+    const expectedBindings = (recipe.bindings?.length ?? 0) + expectedCueBindings
+    if (savedBindings.length !== expectedBindings) {
+      throw new Error(`saved fixture contains ${savedBindings.length} bindings; expected ${expectedBindings}`)
+    }
+    for (const callout of recipe.callouts.filter((item) => item.target)) {
+      const arrowId = `shape:cue-${callout.id}-arrow`
+      const arrow = document.records.find((record) => record.id === arrowId)
+      if (arrow?.type !== 'arrow' || arrow.props?.kind !== 'elbow') {
+        throw new Error(`cue ${callout.id} did not persist as a stock elbow arrow`)
+      }
+      const cueBindings = savedBindings.filter((binding) => binding.type === 'arrow' && binding.fromId === arrowId)
+      const startBinding = cueBindings.find((binding) => binding.props?.terminal === 'start')
+      if (startBinding?.toId !== `shape:cue-${callout.id}`) {
+        throw new Error(`cue ${callout.id} arrow start is not bound to its card`)
+      }
+      if (typeof callout.target.shapeId === 'string') {
+        const endBinding = cueBindings.find((binding) => binding.props?.terminal === 'end')
+        const targetId = callout.target.shapeId.startsWith('shape:')
+          ? callout.target.shapeId
+          : `shape:${callout.target.shapeId}`
+        if (endBinding?.toId !== targetId) {
+          throw new Error(`cue ${callout.id} arrow end is not bound to ${targetId}`)
+        }
+        const anchor = endBinding.props?.normalizedAnchor
+        const onNamedEdge = callout.target.anchor === 'left' ? anchor?.x === 0
+          : callout.target.anchor === 'right' ? anchor?.x === 1
+          : callout.target.anchor === 'top' ? anchor?.y === 0
+          : anchor?.y === 1
+        if (!onNamedEdge) throw new Error(`cue ${callout.id} arrow did not persist on the named target edge`)
+      }
+    }
     const errors = localConsoleErrors(page)
     if (errors.length) throw new Error(`browser console errors: ${errors.join('; ')}`)
 
@@ -382,11 +464,12 @@ async function main() {
       output: outputPath,
       screenshot: screenshotPath,
       shapes: savedShapes,
-      bindings: document.records.filter((record) => record.typeName === 'binding').length,
+      bindings: savedBindings.length,
+      cueBindings: expectedCueBindings,
       pages: document.records.filter((record) => record.typeName === 'page').length,
       boardBytes: boardSize,
       screenshotBytes: screenshotSize,
-      verified: 'cold-reopen',
+      verified: motionProbe ? 'cold-reopen+bound-motion' : 'cold-reopen',
     }, null, 2)}\n`)
   } finally {
     app.close()

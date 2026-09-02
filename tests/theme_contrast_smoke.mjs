@@ -91,6 +91,9 @@ const DIALOG_PROBES = [
   { label: 'settings inactive category', selector: '.systemsketch-settings__nav button:not(.is-active):not(:disabled)', kind: 'text' },
   { label: 'theme option label (active)', selector: '.systemsketch-theme-option.is-active .systemsketch-theme-option__label', kind: 'text' },
   { label: 'theme option detail', selector: '.systemsketch-theme-option:not(.is-active) .systemsketch-theme-option__detail', kind: 'text' },
+  { label: 'zoom-controls heading', selector: '.systemsketch-settings__appearance-heading h3', kind: 'text' },
+  { label: 'zoom-buttons preference label', selector: '.systemsketch-settings__toggle-row strong', kind: 'text' },
+  { label: 'zoom-buttons preference detail', selector: '.systemsketch-settings__toggle-row small', kind: 'text' },
   { label: 'Import button', selector: '.systemsketch-settings__import', kind: 'text' },
   { label: 'dialog close button icon', selector: '.systemsketch-settings__header .tlui-button', kind: 'icon' },
 ]

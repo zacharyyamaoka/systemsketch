@@ -55,6 +55,7 @@ import {
   renamedDocumentPath,
   resolveBrowserSelection,
   replaceRememberedDocumentPath,
+  workspaceBrowserDirectory,
   type BrowserRow,
   type DocumentFingerprint,
 } from './workspaceModel'
@@ -84,6 +85,8 @@ type WorkspaceDialogMode = 'open' | 'saveAs' | 'rename' | null
 
 export interface LocalWorkspaceController {
   path: string | null
+  /** A directory the primary-root-only file browser is authorized to list. */
+  browserDirectory: string | null
   title: string
   isPersisted: boolean
   status: WorkspaceStatus
@@ -179,6 +182,7 @@ async function firstReadableRecent(paths: string[]): Promise<{
 
 export function SystemSketchWorkspaceProvider({ children }: { children: ReactNode }) {
   const [path, setPath] = useState<string | null>(null)
+  const [browserHome, setBrowserHome] = useState<{ root: string; directory: string } | null>(null)
   const [isPersisted, setIsPersisted] = useState(false)
   const [status, setStatus] = useState<WorkspaceStatus>({ kind: 'loading' })
   const [recents, setRecents] = useState<string[]>(() => readRecentDocumentPaths())
@@ -186,6 +190,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   const [notice, setNotice] = useState<string | null>(null)
 
   const editorRef = useRef<Editor | null>(null)
+  const browserHomeRef = useRef<{ root: string; directory: string } | null>(null)
   const pathRef = useRef<string | null>(null)
   const sourceRef = useRef<string | null>(null)
   const digestRef = useRef<string | null>(null)
@@ -246,12 +251,15 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
         }
 
         if (cancelled) return
+        const nextBrowserHome = { root: listing.root, directory: listing.dir }
+        browserHomeRef.current = nextBrowserHome
         pathRef.current = selectedPath
         sourceRef.current = document.source
         digestRef.current = document.digest ?? null
         fingerprintRef.current = fingerprint(document)
         if (document.source !== null) updateRecents(rememberDocumentPath(selectedPath))
         setPath(selectedPath)
+        setBrowserHome(nextBrowserHome)
         setIsPersisted(document.source !== null)
         setStatus({ kind: 'clean', at: null })
       } catch (cause) {
@@ -383,7 +391,12 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   }, [waitForSave])
 
   const reserveUntitledPath = useCallback(async () => {
-    const directory = pathRef.current ? parentDirectory(pathRef.current) : undefined
+    const home = browserHomeRef.current
+    const directory = workspaceBrowserDirectory(
+      pathRef.current,
+      home?.root ?? null,
+      home?.directory ?? null,
+    )
     const listing = await listWorkspace(directory)
     const nextPath = nextUntitledDocumentPath(listing.dir, [
       ...listing.documents.map((candidate) => candidate.path),
@@ -669,6 +682,11 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
 
   const controller = useMemo<LocalWorkspaceController>(() => ({
     path,
+    browserDirectory: workspaceBrowserDirectory(
+      path,
+      browserHome?.root ?? null,
+      browserHome?.directory ?? null,
+    ) ?? null,
     title: path ? documentTitle(path) : 'Opening…',
     isPersisted,
     status,
@@ -690,6 +708,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     dismissNotice: () => setNotice(null),
   }), [
     attach,
+    browserHome,
     isPersisted,
     newDocument,
     newWindow,
@@ -948,8 +967,8 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
 
   useEffect(() => {
     if (isRename) return
-    void load(workspace.path ? parentDirectory(workspace.path) : undefined)
-  }, [isRename, load, workspace.path])
+    void load(workspace.browserDirectory ?? undefined)
+  }, [isRename, load, workspace.browserDirectory])
 
   const rows = useMemo(() => browserRows(listing, query), [listing, query])
   const selectedRow = rows.find((row) => row.path === selectedPath) ?? null

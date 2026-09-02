@@ -6,8 +6,9 @@ import {
   type TLShapeId,
 } from 'tldraw'
 import { isExpandedBlockShape } from '../blocks'
+import { isBranchShape } from '../branch/branchModel'
 
-export type BoardOverviewTargetKind = 'frame' | 'expanded-block'
+export type BoardOverviewTargetKind = 'frame' | 'branch' | 'expanded-block'
 
 export interface BoardOverviewTarget {
   id: TLShapeId
@@ -42,6 +43,15 @@ function targetForShape(
       kind: 'frame',
       label: frame.props.name.trim() || 'Untitled frame',
       selected: selectedIds.has(frame.id),
+    }
+  }
+  if (isBranchShape(shape)) {
+    return {
+      id: shape.id,
+      pageId,
+      kind: 'branch',
+      label: shape.props.title.trim() || 'Untitled Branch',
+      selected: selectedIds.has(shape.id),
     }
   }
   if (isExpandedBlockShape(shape)) {

@@ -17,7 +17,7 @@ const PAGE_B = 'page:runtime' as TLPageId
 
 function shape(
   id: string,
-  type: 'frame' | 'block' | 'geo',
+  type: 'frame' | 'branch' | 'block' | 'geo',
   pageId: TLPageId,
   props: Record<string, unknown>,
   index: string,
@@ -49,7 +49,8 @@ function overviewEditor() {
     shape('expanded', 'block', PAGE_A, { view: 'expanded', title: 'Scheduler' }, 'a3'),
     shape('blank-frame', 'frame', PAGE_B, { name: ' ' }, 'a1'),
     shape('blank-block', 'block', PAGE_B, { view: 'expanded', title: '' }, 'a2'),
-    shape('rectangle', 'geo', PAGE_B, { geo: 'rectangle' }, 'a3'),
+    shape('decision', 'branch', PAGE_B, { title: 'Retry policy' }, 'a3'),
+    shape('rectangle', 'geo', PAGE_B, { geo: 'rectangle' }, 'a4'),
   ]
   const byId = new Map(shapes.map((item) => [item.id, item]))
   const byPage = new Map([
@@ -75,11 +76,11 @@ function overviewEditor() {
 }
 
 describe('live board overview', () => {
-  it('projects every page, Frame, and Expanded Block without unrelated shapes', () => {
+  it('projects every page, Frame, Branch, and Expanded Block without unrelated shapes', () => {
     const { editor } = overviewEditor()
     const model = getBoardOverviewModel(editor)
 
-    expect(model.targetCount).toBe(4)
+    expect(model.targetCount).toBe(5)
     expect(model.pages.map((page) => [page.name, page.current])).toEqual([
       ['Architecture', true],
       ['Runtime', false],
@@ -90,12 +91,12 @@ describe('live board overview', () => {
         ['expanded-block', 'Scheduler', true],
       ])
     expect(model.pages[1].targets.map((target) => target.label))
-      .toEqual(['Untitled frame', 'Untitled Block'])
+      .toEqual(['Untitled frame', 'Untitled Block', 'Retry policy'])
   })
 
   it('selects and camera-fits a target after switching to its page', () => {
     const { editor } = overviewEditor()
-    const target = getBoardOverviewModel(editor).pages[1].targets[0]
+    const target = getBoardOverviewModel(editor).pages[1].targets.find(({ kind }) => kind === 'branch')!
     expect(focusBoardOverviewTarget(editor, target)).toBe(true)
     expect(editor.setCurrentPage).toHaveBeenCalledWith(PAGE_B)
     expect(editor.setCurrentTool).toHaveBeenCalledWith('select')

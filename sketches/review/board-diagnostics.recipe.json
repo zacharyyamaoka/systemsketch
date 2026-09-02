@@ -33,7 +33,7 @@
       "y": 120,
       "w": 510,
       "h": 105,
-      "target": { "shapeId": "problem-block", "anchor": "left" }
+      "target": { "shapeId": "problem-block", "anchor": "left", "dy": -80 }
     },
     {
       "id": "step-2",
@@ -43,7 +43,7 @@
       "y": 315,
       "w": 510,
       "h": 110,
-      "target": { "shapeId": "problem-block", "anchor": "left" }
+      "target": { "shapeId": "problem-block", "anchor": "left", "dy": 25 }
     },
     {
       "id": "step-3",
@@ -53,7 +53,7 @@
       "y": 515,
       "w": 530,
       "h": 115,
-      "target": { "shapeId": "problem-block", "anchor": "left" }
+      "target": { "shapeId": "problem-block", "anchor": "left", "dy": 90 }
     },
     {
       "id": "pass",

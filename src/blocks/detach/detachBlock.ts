@@ -65,6 +65,8 @@ import {
 export interface DetachResult {
 	/** The group that took the Block's place — the thing that remembers. */
 	groupId: TLShapeId | null
+	/** Stock groups nested inside the Block group, one per non-empty port row. */
+	portGroupIds: TLShapeId[]
 	/** The rectangle inside it that stood where the Block stood. */
 	cardId: TLShapeId
 	/** Every primitive created, card first. */
@@ -94,7 +96,7 @@ export function detachBlockToPrimitives(
 	// Which dots detach filled: the ports a cable is welded to right now.
 	const wiring = getBlockPortConnections(editor, block.id)
 	const connectedPortIds = new Set(wiring.map((entry) => entry.ownPortId))
-	const { shapes, cardId } = primitivesWithMeta(block, connectedPortIds)
+	const { shapes, cardId, portRows } = primitivesWithMeta(block, connectedPortIds)
 	const shapeIds = shapes.map((partial) => partial.id as TLShapeId)
 
 	// Everything a cable needs to come back, read while the cable still exists.
@@ -116,6 +118,8 @@ export function detachBlockToPrimitives(
 	if (options.mark !== false) editor.markHistoryStoppingPoint('detach to primitives')
 
 	let detachedConnections = 0
+	let groupId: TLShapeId | null = null
+	const portGroupIds: TLShapeId[] = []
 	editor.run(() => {
 		// A Block can be a child of an Expanded frame, and `primitivesForBlock`
 		// positions everything in the Block's own coordinates — parent-local.
@@ -154,14 +158,36 @@ export function detachBlockToPrimitives(
 
 		editor.deleteShape(block.id)
 
+		// A port row is its own stock group inside the larger detached Block:
+		// circle, name, type and default value move as one editable unit. tldraw
+		// deliberately refuses one-child groups, so a completely anonymous row
+		// remains its single circle until there is another visible part to group.
+		const nestedIds = new Set<TLShapeId>()
+		for (const row of portRows) {
+			if (row.shapeIds.length <= 1) continue
+			const rowGroupId = createShapeId()
+			editor.groupShapes(row.shapeIds, { groupId: rowGroupId, select: false })
+			if (!editor.getShape(rowGroupId)) continue
+			portGroupIds.push(rowGroupId)
+			for (const id of row.shapeIds) nestedIds.add(id)
+		}
+
 		// Grouping is what makes the result still feel like "the thing you
 		// detached" — one click selects it, one drag moves it — and it is the
-		// shape that carries the record.
-		editor.setSelectedShapes(shapeIds)
-		if (shapeIds.length > 1) editor.groupShapes(shapeIds)
+		// shape that carries the record. Nested port children are replaced by
+		// their row-group ids at this level; grouping both would flatten them.
+		const topLevelIds = [
+			...shapeIds.filter((id) => !nestedIds.has(id)),
+			...portGroupIds,
+		]
+		editor.setSelectedShapes(topLevelIds)
+		if (topLevelIds.length > 1) {
+			const blockGroupId = createShapeId()
+			editor.groupShapes(topLevelIds, { groupId: blockGroupId })
+			if (editor.getShape(blockGroupId)) groupId = blockGroupId
+		}
 	})
 
-	const groupId = editor.getSelectedShapeIds().find((id) => !shapeIds.includes(id)) ?? null
 	if (groupId !== null) {
 		editor.updateShape({
 			id: groupId,
@@ -188,7 +214,7 @@ export function detachBlockToPrimitives(
 		})
 	}
 
-	return { groupId, cardId, shapeIds, detachedConnections }
+	return { groupId, portGroupIds, cardId, shapeIds, detachedConnections }
 }
 
 function primitivesWithMeta(block: BlockShape, connectedPortIds: ReadonlySet<string>) {

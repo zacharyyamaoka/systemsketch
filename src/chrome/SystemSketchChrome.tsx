@@ -20,6 +20,7 @@ import {
   OnCanvasBlockPicker,
 } from '../blocks/ui'
 import {
+  BRANCH_TOOL_ID,
   EditorBranchInspector,
   EditorBranchSelectionMiniMenu,
   getOnlySelectedBranch,
@@ -313,6 +314,14 @@ export function SystemSketchSurfaceHost() {
         keywords: ['node'],
         icon: '▣',
         run: () => editor.setCurrentTool(BLOCK_TOOL_ID),
+      },
+      {
+        id: 'insert-branch',
+        label: 'Insert Branch',
+        description: 'Switch to the semantic Branch region tool',
+        keywords: ['conditional', 'region'],
+        icon: '⑂',
+        run: () => editor.setCurrentTool(BRANCH_TOOL_ID),
       },
       {
         id: 'shape-library',

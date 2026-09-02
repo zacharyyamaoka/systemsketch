@@ -14,8 +14,10 @@ import {
 	type BlockPort,
 	type BlockShape,
 } from '../blocks/blockModel'
+import type { PortHostShape } from '../blocks/connections/blockPorts'
 import type { ConnectionBinding } from '../blocks/connections/ConnectionBindingUtil'
 import type { ConnectionShape } from '../blocks/connections/ConnectionShapeUtil'
+import { getDefaultBranchProps, type BranchShape } from '../branch/branchModel'
 import {
 	BOARD_DIAGNOSTIC_CODES,
 	focusBoardDiagnostic,
@@ -65,6 +67,35 @@ function block(
 	}
 }
 
+function branch(
+	id: string,
+	options: {
+		title?: string
+		controls?: BranchShape['props']['controls']
+		pageId?: TLPageId
+		index?: string
+	} = {},
+): BranchShape {
+	return {
+		id: createShapeId(id),
+		typeName: 'shape',
+		type: 'branch',
+		x: 0,
+		y: 0,
+		rotation: 0,
+		index: (options.index ?? 'a2') as BranchShape['index'],
+		parentId: options.pageId ?? PAGE_A,
+		isLocked: false,
+		opacity: 1,
+		meta: {},
+		props: {
+			...getDefaultBranchProps(),
+			title: options.title ?? id,
+			controls: options.controls ?? [],
+		},
+	}
+}
+
 function connection(id: string, pageId: TLPageId = PAGE_A, index = 'a8'): ConnectionShape {
 	return {
 		id: createShapeId(id),
@@ -94,7 +125,7 @@ function connection(id: string, pageId: TLPageId = PAGE_A, index = 'a8'): Connec
 
 function binding(
 	connectionShape: ConnectionShape,
-	blockShape: BlockShape,
+	hostShape: PortHostShape,
 	portId: string,
 	terminal: 'start' | 'end',
 ): ConnectionBinding {
@@ -103,7 +134,7 @@ function binding(
 		typeName: 'binding',
 		type: 'connection',
 		fromId: connectionShape.id,
-		toId: blockShape.id,
+		toId: hostShape.id,
 		meta: {},
 		props: { portId, terminal, face: 'outer' },
 	}
@@ -111,9 +142,9 @@ function binding(
 
 function wired(
 	id: string,
-	source: BlockShape,
+	source: PortHostShape,
 	sourcePort: string,
-	sink: BlockShape,
+	sink: PortHostShape,
 	sinkPort: string,
 	index?: string,
 ): { shape: ConnectionShape; bindings: ConnectionBinding[] } {
@@ -239,6 +270,36 @@ describe('board diagnostics model', () => {
 		]))
 		expect(model.diagnostics.some(({ code }) => code === BOARD_DIAGNOSTIC_CODES.unsatisfiedInput))
 			.toBe(false)
+	})
+
+	it('resolves Branch control ports as semantic endpoints', () => {
+		const source = block('source', {
+			title: 'Input data',
+			outputs: [port('out', 'payload')],
+		})
+		const decision = branch('decision', {
+			title: 'Retry policy',
+			controls: [{ id: 'condition', name: 'should retry', type: 'boolean' }],
+		})
+		const first = wired('branch-cable-a', source, 'out', decision, 'condition', 'a3')
+		const second = wired('branch-cable-b', source, 'out', decision, 'condition', 'a4')
+		const { editor } = diagnosticEditor(
+			[source, decision, first.shape, second.shape],
+			[...first.bindings, ...second.bindings],
+		)
+
+		const model = getBoardDiagnosticsModel(editor)
+		expect(model.diagnostics).toHaveLength(1)
+		expect(model.diagnostics[0]).toMatchObject({
+			code: BOARD_DIAGNOSTIC_CODES.duplicateConnection,
+			message: 'Duplicate cable: Input data · payload → Retry policy · should retry',
+		})
+		expect(model.diagnostics[0].affectedIds).toEqual(expect.arrayContaining([
+			source.id,
+			decision.id,
+			first.shape.id,
+			second.shape.id,
+		]))
 	})
 
 	it('does not turn a normal one-ended connection gesture into a problem', () => {

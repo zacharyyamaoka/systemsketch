@@ -26,9 +26,9 @@ import {
 } from 'tldraw'
 
 import { isBlockShape, type BlockPortSide } from '../blockModel'
-import { moveBlockPortToIndex } from '../commands/blockCommands'
+import { moveBlockPortToSection } from '../commands/blockCommands'
 import { getBlockPortDotAtPoint } from '../connections/blockPorts'
-import { blockPortDropTarget } from './portAffordances'
+import { blockPortDropTarget, type BlockPortDropTarget } from './portAffordances'
 
 export const BLOCK_PORT_DRAG_STATE_ID = 'dragging_block_port'
 
@@ -42,10 +42,8 @@ export interface BlockPortRef {
 export interface BlockPortDragState extends BlockPortRef {
 	/** Pointer position in Block-local coordinates; the held row follows this. */
 	pointerY: number
-	/** Where the drop rule is painted, in Block-local coordinates. */
-	indicatorY: number
-	/** Insertion index into `props[side]` as it stands before the drop. */
-	insertIndex: number
+	/** The place the port would land if released now, and where that is painted. */
+	drop: BlockPortDropTarget
 }
 
 function atomFor<T>(
@@ -128,8 +126,8 @@ export class DraggingBlockPort extends StateNode {
 			shape,
 			this.editor.inputs.getCurrentPagePoint(),
 		)
-		const target = blockPortDropTarget(shape.props, ref.side, local.y)
-		setBlockPortDrag(this.editor, { ...ref, pointerY: local.y, ...target })
+		const drop = blockPortDropTarget(shape.props, ref.side, local.y)
+		setBlockPortDrag(this.editor, { ...ref, pointerY: local.y, drop })
 	}
 
 	override onPointerMove(): void {
@@ -156,7 +154,7 @@ export class DraggingBlockPort extends StateNode {
 		const ref = this.ref
 		const drag = getBlockPortDrag(this.editor)
 		if (ref && drag) {
-			moveBlockPortToIndex(this.editor, ref.shapeId, ref.side, ref.portId, drag.insertIndex)
+			moveBlockPortToSection(this.editor, ref.shapeId, ref.side, ref.portId, drag.drop)
 		}
 		this.parent.transition('idle')
 	}

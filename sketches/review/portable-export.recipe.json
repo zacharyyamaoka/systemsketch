@@ -80,7 +80,7 @@
       "y": 120,
       "w": 470,
       "h": 105,
-      "target": { "shapeId": "source", "anchor": "left" }
+      "target": { "shapeId": "source", "anchor": "left", "dy": -60 }
     },
     {
       "id": "step-2",
@@ -88,9 +88,9 @@
       "text": "2 · Confirm the success message, then drag capture() on this live board",
       "x": 60,
       "y": 300,
-      "w": 500,
+      "w": 470,
       "h": 115,
-      "target": { "shapeId": "source", "anchor": "left" }
+      "target": { "shapeId": "source", "anchor": "left", "dy": 60 }
     },
     {
       "id": "pass",
