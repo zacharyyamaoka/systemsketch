@@ -20,10 +20,55 @@
   "ok": true
  },
  {
+  "id": "split-capture-rest",
+  "label": "one quiet split control keeps Save last directly available at rest",
+  "observed": {
+   "primary": "● Save last 30 s",
+   "menu": false,
+   "expanded": "false"
+  },
+  "desired": {
+   "primary": "● Save last 30 s",
+   "menu": false,
+   "expanded": "false"
+  },
+  "ok": true
+ },
+ {
+  "id": "split-capture-menu",
+  "label": "the chevron reveals alternate capture, recovery, duration, and power",
+  "observed": {
+   "take": true,
+   "copy": true,
+   "windows": 5,
+   "power": true
+  },
+  "desired": {
+   "take": true,
+   "copy": true,
+   "windows": 5,
+   "power": true
+  },
+  "ok": true
+ },
+ {
+  "id": "split-capture-escape",
+  "label": "Escape closes the disclosure without dismissing the Dev panel",
+  "observed": {
+   "menu": false,
+   "controls": true
+  },
+  "desired": {
+   "menu": false,
+   "controls": true
+  },
+  "ok": true
+ },
+ {
   "id": "clipboard-state",
-  "label": "the Copy row reports the clipboard write as done",
-  "observed": "Copied",
-  "desired": "Copied",
+  "label": "the disclosed recovery surface reports the clipboard write as done",
+  "observed": "Packet copied",
+  "desired": "Packet copied",
   "ok": true
  },
  {
@@ -235,13 +280,15 @@
  },
  {
   "id": "toggle-off",
-  "label": "turning the recorder off disables Save and persists the choice",
+  "label": "turning the recorder off replaces Save with a direct enable action and persists the choice",
   "observed": {
-   "saveDisabled": true,
+   "primary": "Turn recorder on",
+   "hasSave": false,
    "stored": "off"
   },
   "desired": {
-   "saveDisabled": true,
+   "primary": "Turn recorder on",
+   "hasSave": false,
    "stored": "off"
   },
   "ok": true
@@ -262,9 +309,17 @@
  },
  {
   "id": "preset-controls",
-  "label": "the Block Dev preset carries the compact recorder controls",
-  "observed": 4,
-  "desired": 4,
+  "label": "the Block Dev preset carries the same compact split control",
+  "observed": {
+   "split": true,
+   "primary": "● Save last 5 s",
+   "persistentButtons": 2
+  },
+  "desired": {
+   "split": true,
+   "primary": "● Save last 5 s",
+   "persistentButtons": 2
+  },
   "ok": true
  },
  {

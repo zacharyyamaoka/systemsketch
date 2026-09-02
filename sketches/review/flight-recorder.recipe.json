@@ -68,7 +68,7 @@
     {
       "id": "step-2",
       "kind": "step",
-      "text": "2 · Click the </> button in the bottom-right strip. Under RECORDING, confirm there is no “What went wrong?” text box, then click Save the last 30 s.",
+      "text": "2 · Click </> in the bottom-right. Under RECORDING, open the chevron: Record next, Copy last, window, and power appear. Close it, then click the broad Save last face.",
       "x": 760,
       "y": 80,
       "w": 520,
@@ -86,7 +86,7 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · The Recording section has no text input; Copy last recording names a folder under recordings/; the clipboard begins with “SystemSketch interaction recording”.",
+      "text": "PASS WHEN · Only the split capture persists at rest; its chevron reveals every secondary job; Save last copies a packet beginning “SystemSketch interaction recording”.",
       "x": 160,
       "y": 600,
       "w": 480,

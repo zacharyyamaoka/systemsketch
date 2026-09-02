@@ -120,10 +120,41 @@ async function main() {
     await waitFor(page, `document.querySelector('[data-testid="recorder-controls"][data-enabled="true"]')`, 'recorder rows')
     await shot(page, 'recorder-dev-menu.png')
     check('note-input-absent', 'the Recording section has no prefatory text input', await evaluate(page, `document.querySelector('[data-testid="recorder-note"]')`), null)
+    const splitAtRest = JSON.parse(await evaluate(page, `JSON.stringify({
+      primary: document.querySelector('[data-action="save-last"]').textContent.trim(),
+      menu: Boolean(document.querySelector('[data-testid="recorder-menu"]')),
+      expanded: document.querySelector('[data-action="more"]').getAttribute('aria-expanded'),
+    })`))
+    check('split-capture-rest', 'one quiet split control keeps Save last directly available at rest', splitAtRest, {
+      primary: '● Save last 30 s', menu: false, expanded: 'false',
+    })
+    await clickElement(page, '[data-action="more"]')
+    const splitMenu = JSON.parse(await evaluate(page, `JSON.stringify({
+      take: Boolean(document.querySelector('[data-testid="recorder-menu"] [data-action="take"]')),
+      copy: Boolean(document.querySelector('[data-testid="recorder-menu"] [data-action="copy-last"]')),
+      windows: document.querySelectorAll('[data-testid="recorder-menu"] [data-window]').length,
+      power: Boolean(document.querySelector('[data-testid="recorder-menu"] [data-action="toggle"]')),
+    })`))
+    check('split-capture-menu', 'the chevron reveals alternate capture, recovery, duration, and power', splitMenu, {
+      take: true, copy: true, windows: 5, power: true,
+    })
+    await key(page, 'Escape', 'Escape')
+    const escapedMenu = JSON.parse(await evaluate(page, `JSON.stringify({
+      menu: Boolean(document.querySelector('[data-testid="recorder-menu"]')),
+      controls: Boolean(document.querySelector('[data-testid="recorder-controls"]')),
+    })`))
+    check('split-capture-escape', 'Escape closes the disclosure without dismissing the Dev panel', escapedMenu, {
+      menu: false, controls: true,
+    })
+    await clickElement(page, '[data-action="more"]')
+    await shot(page, 'recorder-split-menu.png')
+    await clickElement(page, '[data-action="more"]')
     await clickElement(page, '[data-action="save-last"]')
-    await waitFor(page, `!document.querySelector('[data-testid="recorder-last-path"]').textContent.includes('Nothing saved')`, 'a saved recording', 30000)
+    await waitFor(page, `document.querySelector('[data-testid="recorder-status"]')?.textContent.includes('Saved')`, 'a saved recording', 30000)
     await delay(300)
     await shot(page, 'recorder-saved.png')
+    await clickElement(page, '[data-action="more"]')
+    await waitFor(page, `!document.querySelector('[data-testid="recorder-last-path"]').textContent.includes('Nothing saved')`, 'the saved recording in the disclosed recovery surface')
 
     let clipboard = null
     try {
@@ -131,8 +162,8 @@ async function main() {
     } catch (error) {
       clipboard = `unreadable: ${error.message}`
     }
-    const copiedMark = await evaluate(page, `document.querySelector('[data-action="copy-last"] em')?.textContent`)
-    check('clipboard-state', 'the Copy row reports the clipboard write as done', copiedMark, 'Copied')
+    const copiedMark = await evaluate(page, `document.querySelector('[data-clipboard="copied"]')?.textContent.trim()`)
+    check('clipboard-state', 'the disclosed recovery surface reports the clipboard write as done', copiedMark, 'Packet copied')
 
     const folders = await recordingFolders(filesRoot)
     check('one-folder', 'exactly one recording folder exists after one save', folders.length, 1)
@@ -169,7 +200,9 @@ async function main() {
 
     // ---- 3. an explicit take at the 5 s cap: red bar, auto-stop, no clipboard
     await clickElement(page, '[data-window="5000"]')
+    await waitFor(page, `document.querySelector('[data-action="more"]')`, 'the closed split control after changing its window')
     await evaluate(page, `navigator.clipboard.writeText('sentinel').catch(() => undefined)`)
+    await clickElement(page, '[data-action="more"]')
     await clickElement(page, '[data-action="take"]')
     await waitFor(page, `document.querySelector('[data-testid="recorder-indicator"]')`, 'REC bar')
     const barText = await evaluate(page, `document.querySelector('[data-testid="recorder-indicator"]').textContent`)
@@ -221,13 +254,17 @@ async function main() {
     await delay(600)
     await clickElement(page, '.systemsketch-dev-trigger')
     await waitFor(page, `document.querySelector('[data-testid="recorder-controls"]')`, 'recorder rows again')
+    await clickElement(page, '[data-action="more"]')
     await clickElement(page, '[data-action="toggle"]')
     await waitFor(page, `document.querySelector('[data-testid="recorder-controls"][data-enabled="false"]')`, 'recorder off')
     const offState = JSON.parse(await evaluate(page, `JSON.stringify({
-      saveDisabled: document.querySelector('[data-action="save-last"]').disabled,
+      primary: document.querySelector('[data-testid="recorder-split"] .systemsketch-recorder__primary').textContent.trim(),
+      hasSave: Boolean(document.querySelector('[data-action="save-last"]')),
       stored: localStorage.getItem('systemsketch.recorder.enabled.v1'),
     })`))
-    check('toggle-off', 'turning the recorder off disables Save and persists the choice', offState, { saveDisabled: true, stored: 'off' })
+    check('toggle-off', 'turning the recorder off replaces Save with a direct enable action and persists the choice', offState, {
+      primary: 'Turn recorder on', hasSave: false, stored: 'off',
+    })
     await delay(300)
     const disarmed = await (await fetch(`http://127.0.0.1:${apiPort}/api/recordings/status`)).json()
     check('toggle-disarms-host', 'the host stops the screencast when the page turns recording off', disarmed.armed, false)
@@ -244,7 +281,11 @@ async function main() {
     await openApp(page, port, '?preset=block-dev')
     await waitFor(page, 'window.__systemsketch?.editor', 'preset editor')
     await waitFor(page, `document.querySelector('.systemsketch-recorder--compact')`, 'compact recorder controls')
-    check('preset-controls', 'the Block Dev preset carries the compact recorder controls', await evaluate(page, `document.querySelectorAll('.systemsketch-recorder--compact button').length`), 4)
+    check('preset-controls', 'the Block Dev preset carries the same compact split control', JSON.parse(await evaluate(page, `JSON.stringify({
+      split: Boolean(document.querySelector('.systemsketch-recorder--compact [data-testid="recorder-split"]')),
+      primary: document.querySelector('.systemsketch-recorder--compact [data-action="save-last"]')?.textContent.trim(),
+      persistentButtons: document.querySelectorAll('.systemsketch-recorder--compact button').length,
+    })`)), { split: true, primary: '● Save last 5 s', persistentButtons: 2 })
 
     const consoleErrors = localConsoleErrors(page)
     check('console-clean', 'the journey raised no local console errors', consoleErrors, [])

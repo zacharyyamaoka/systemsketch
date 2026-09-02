@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { WINDOW_CHOICES_MS } from './flightRecorder'
 import {
@@ -44,39 +44,173 @@ function shortPath(path: string): string {
 export function RecorderControls({ compact = false }: { compact?: boolean }) {
   const state = useRecorderState()
   const elapsed = useElapsed(state.takeStartedAt)
-  if (!state.installed) return null
+  const [menuOpen, setMenuOpen] = useState(false)
+  const splitRef = useRef<HTMLDivElement>(null)
+  const menuId = useId()
   const taking = state.mode === 'take'
   const busy = state.saving
   const disabledReason = !state.enabled ? 'Recorder is off' : busy ? 'Saving…' : ''
 
+  useEffect(() => {
+    if (!menuOpen) return
+    const closeOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !splitRef.current?.contains(event.target)) setMenuOpen(false)
+    }
+    document.addEventListener('pointerdown', closeOutside)
+    return () => document.removeEventListener('pointerdown', closeOutside)
+  }, [menuOpen])
+
+  useEffect(() => {
+    if (taking || busy) setMenuOpen(false)
+  }, [taking, busy])
+
+  useEffect(() => {
+    if (state.error || state.clipboard === 'failed') setMenuOpen(true)
+  }, [state.error, state.clipboard])
+
   const onTake = () => {
+    setMenuOpen(false)
     if (taking) void stopTake()
     else void startTake()
   }
-  const onSaveLast = () => { void saveLast() }
+  const onSaveLast = () => {
+    setMenuOpen(false)
+    void saveLast()
+  }
   const framesLabel = state.framesSource === 'screencast'
-    ? 'frames: Chrome screencast'
+    ? 'Chrome frames'
     : state.framesSource === 'canvas'
-      ? 'frames: canvas only'
-      : 'frames: checking…'
+      ? 'canvas frames'
+      : 'checking frames…'
+  const statusLabel = !state.enabled
+    ? 'Off'
+    : state.error || state.clipboard === 'failed'
+      ? 'Needs attention'
+      : taking
+        ? `REC · ${(elapsed / 1000).toFixed(1)} / ${seconds(state.windowMs)}`
+        : busy
+          ? 'Saving…'
+          : state.clipboard === 'copied'
+            ? 'Saved · packet copied'
+            : `On · ${seconds(state.windowMs)} · ${framesLabel}`
+
+  const primaryControl = taking ? (
+    <button
+      type="button"
+      className="systemsketch-recorder__primary systemsketch-recorder__primary--taking"
+      data-action="take"
+      data-taking="true"
+      disabled={busy}
+      onClick={onTake}
+    >
+      {busy ? 'Saving…' : `■ Stop and save · ${(elapsed / 1000).toFixed(1)} s`}
+    </button>
+  ) : (
+    <div className={`systemsketch-recorder__split${!state.enabled ? ' systemsketch-recorder__split--off' : ''}`} data-testid="recorder-split">
+      <button
+        type="button"
+        className="systemsketch-recorder__primary"
+        data-action={state.enabled ? 'save-last' : 'toggle'}
+        disabled={busy}
+        title={disabledReason || `Save the last ${seconds(state.windowMs)}`}
+        onClick={state.enabled ? onSaveLast : () => setRecorderEnabled(true)}
+      >
+        {state.enabled ? `● Save last ${seconds(state.windowMs)}` : 'Turn recorder on'}
+      </button>
+      <button
+        type="button"
+        className="systemsketch-recorder__more"
+        data-action="more"
+        aria-label="More recorder actions"
+        aria-expanded={menuOpen}
+        aria-controls={menuId}
+        onClick={() => setMenuOpen((open) => !open)}
+      >
+        {menuOpen ? '⌃' : '⌄'}
+      </button>
+    </div>
+  )
+
+  const actionMenu = menuOpen && !taking ? (
+    <div id={menuId} className="systemsketch-recorder__menu" data-testid="recorder-menu">
+      {state.enabled ? (
+        <button type="button" className="systemsketch-recorder__menu-item" data-action="take" disabled={busy} onClick={onTake}>
+          <span>▶ Record next {seconds(state.windowMs)}</span>
+          <small>Stops itself at the cap</small>
+        </button>
+      ) : null}
+      <button
+        type="button"
+        className="systemsketch-recorder__menu-item"
+        data-action="copy-last"
+        disabled={!state.last || busy}
+        onClick={() => void copyLastRecording()}
+      >
+        <span>⧉ Copy last recording</span>
+        <small data-testid="recorder-last-path">{state.last ? shortPath(state.last.path) : 'Nothing saved yet'}</small>
+      </button>
+      <div className="systemsketch-recorder__window" aria-label="Recording window">
+        <span>Window</span>
+        {WINDOW_CHOICES_MS.map((choice) => (
+          <button
+            type="button"
+            key={choice}
+            data-window={choice}
+            data-on={state.windowMs === choice || undefined}
+            onClick={() => {
+              setRecorderWindowMs(choice)
+              setMenuOpen(false)
+            }}
+          >
+            {seconds(choice)}
+          </button>
+        ))}
+      </div>
+      <button
+        type="button"
+        className="systemsketch-recorder__menu-item systemsketch-recorder__power"
+        data-action="toggle"
+        aria-pressed={state.enabled}
+        onClick={() => {
+          setMenuOpen(false)
+          setRecorderEnabled(!state.enabled)
+        }}
+      >
+        <span>{state.enabled ? 'Turn recorder off' : 'Turn recorder on'}</span>
+        <small>{state.enabled ? 'Stops the rolling buffer on this channel' : 'Starts the rolling buffer on this channel'}</small>
+      </button>
+      {state.clipboard ? (
+        <small className="systemsketch-recorder__feedback" data-clipboard={state.clipboard}>
+          {state.clipboard === 'copied' ? 'Packet copied' : 'Clipboard write failed · folder is safe'}
+        </small>
+      ) : null}
+      {state.error ? <p className="systemsketch-panel-message systemsketch-panel-message--error">{state.error}</p> : null}
+      {state.enabled && state.framesSource === 'canvas' && state.framesReason ? (
+        <p className="systemsketch-recorder__hint">{state.framesReason}</p>
+      ) : null}
+    </div>
+  ) : null
+
+  if (!state.installed) return null
 
   if (compact) {
     return (
-      <div className="systemsketch-recorder systemsketch-recorder--compact" data-testid="recorder-controls" data-mode={state.mode}>
-        <button type="button" data-action="save-last" disabled={!state.enabled || busy} title={disabledReason || `Save the last ${seconds(state.windowMs)}`} onClick={onSaveLast}>
-          ● Save last {seconds(state.windowMs)}
-        </button>
-        <button type="button" data-action="take" data-taking={taking || undefined} disabled={!state.enabled || busy} title={disabledReason} onClick={onTake}>
-          {taking ? `■ Stop · ${(elapsed / 1000).toFixed(1)} s` : `▶ Record next ≤ ${seconds(state.windowMs)}`}
-        </button>
-        <button type="button" data-action="copy-last" disabled={!state.last} onClick={() => void copyLastRecording()}>
-          ⧉ Copy last
-        </button>
-        <button type="button" data-action="toggle" aria-pressed={state.enabled} onClick={() => setRecorderEnabled(!state.enabled)}>
-          {state.enabled ? 'Recorder on' : 'Recorder off'}
-        </button>
-        {state.clipboard ? <small data-clipboard={state.clipboard}>{state.clipboard === 'copied' ? 'Copied' : 'Clipboard write failed'}</small> : null}
-        {state.error ? <small className="error">{state.error}</small> : null}
+      <div className="systemsketch-recorder systemsketch-recorder--compact" data-testid="recorder-controls" data-mode={state.mode} data-enabled={state.enabled}>
+        <small className="systemsketch-recorder__compact-status" data-testid="recorder-status">{statusLabel}</small>
+        <div
+          className="systemsketch-recorder__split-shell"
+          ref={splitRef}
+          data-open={menuOpen || undefined}
+          onKeyDown={(event) => {
+            if (menuOpen && event.key === 'Escape') {
+              event.stopPropagation()
+              setMenuOpen(false)
+            }
+          }}
+        >
+          {primaryControl}
+          {actionMenu}
+        </div>
       </div>
     )
   }
@@ -85,93 +219,23 @@ export function RecorderControls({ compact = false }: { compact?: boolean }) {
     <div className="systemsketch-recorder" data-testid="recorder-controls" data-mode={state.mode} data-enabled={state.enabled}>
       <div className="systemsketch-dev-section-label">
         <span>Recording</span>
-        <small>{state.enabled ? framesLabel : 'off on this channel'}</small>
+        <small data-testid="recorder-status">{statusLabel}</small>
       </div>
 
-      <div className="systemsketch-dev-presets">
-        <button
-          type="button"
-          className="systemsketch-dev-preset systemsketch-recorder__row"
-          data-action="save-last"
-          disabled={!state.enabled || busy || taking}
-          title={disabledReason}
-          onClick={onSaveLast}
-        >
-          <i aria-hidden="true" data-glyph="dot">●</i>
-          <span>
-            <b>Save the last {seconds(state.windowMs)}</b>
-            <small>What just happened · frames + state + input → folder, packet on clipboard</small>
-          </span>
-          <em>{busy && !taking ? '…' : '⧉'}</em>
-        </button>
-
-        <button
-          type="button"
-          className="systemsketch-dev-preset systemsketch-recorder__row"
-          data-action="take"
-          data-taking={taking || undefined}
-          disabled={!state.enabled || busy}
-          title={disabledReason}
-          onClick={onTake}
-        >
-          <i aria-hidden="true" data-glyph={taking ? 'stop' : 'play'}>{taking ? '■' : '▶'}</i>
-          <span>
-            <b>{taking ? `Stop and save · ${(elapsed / 1000).toFixed(1)} s` : `Record next ≤ ${seconds(state.windowMs)}`}</b>
-            <small>{taking ? `Stops itself at ${seconds(state.windowMs)}` : 'Explicit take · red bar at the top · stops at the cap'}</small>
-          </span>
-          <em>{taking ? '■' : '↗'}</em>
-        </button>
-
-        <button
-          type="button"
-          className="systemsketch-dev-preset systemsketch-recorder__row"
-          data-action="copy-last"
-          disabled={!state.last || busy}
-          onClick={() => void copyLastRecording()}
-        >
-          <i aria-hidden="true" data-glyph="copy">⧉</i>
-          <span>
-            <b>Copy last recording</b>
-            <small data-testid="recorder-last-path">{state.last ? shortPath(state.last.path) : 'Nothing saved yet'}</small>
-          </span>
-          <em>{state.clipboard === 'copied' ? 'Copied' : state.clipboard === 'failed' ? 'Failed' : '⧉'}</em>
-        </button>
+      <div
+        className="systemsketch-recorder__split-shell"
+        ref={splitRef}
+        data-open={menuOpen || undefined}
+        onKeyDown={(event) => {
+          if (menuOpen && event.key === 'Escape') {
+            event.stopPropagation()
+            setMenuOpen(false)
+          }
+        }}
+      >
+        {primaryControl}
+        {actionMenu}
       </div>
-
-      <div className="systemsketch-recorder__window">
-        <span>window</span>
-        {WINDOW_CHOICES_MS.map((choice) => (
-          <button
-            type="button"
-            key={choice}
-            data-window={choice}
-            data-on={state.windowMs === choice || undefined}
-            disabled={taking}
-            onClick={() => setRecorderWindowMs(choice)}
-          >
-            {seconds(choice)}
-          </button>
-        ))}
-        <button
-          type="button"
-          className="systemsketch-recorder__toggle"
-          data-action="toggle"
-          aria-pressed={state.enabled}
-          onClick={() => setRecorderEnabled(!state.enabled)}
-        >
-          {state.enabled ? 'On' : 'Off'}
-        </button>
-      </div>
-
-      {state.error ? <p className="systemsketch-panel-message systemsketch-panel-message--error">{state.error}</p> : null}
-      {state.clipboard === 'failed' ? (
-        <p className="systemsketch-panel-message systemsketch-panel-message--error">
-          The clipboard refused the write. The folder is saved; use Copy last recording.
-        </p>
-      ) : null}
-      {state.enabled && state.framesSource === 'canvas' && state.framesReason ? (
-        <p className="systemsketch-recorder__hint">{state.framesReason}</p>
-      ) : null}
     </div>
   )
 }

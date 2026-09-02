@@ -90,8 +90,8 @@ FILES = {
     "src/recorder/flightRecorder.ts": "the ring buffer: seven lanes on one clock, window trim, rewind of the start snapshot",
     "src/recorder/recorderStore.ts": "policy, arm/disarm, save, clipboard, the external store the UI reads",
     "src/recorder/recorderClient.ts": "the three host calls",
-    "src/recorder/RecorderControls.tsx": "Dev-menu rows, compact preset controls, the REC bar",
-    "src/recorder/recorder.css": "row accents, chips, the bar",
+    "src/recorder/RecorderControls.tsx": "the split-capture control, compact preset form, and REC bar",
+    "src/recorder/recorder.css": "split action, disclosure menu, duration chips, and REC bar",
     "scripts/recording_store.py": "folder writer, packet, state→source map, playback.html, retention, the sidecar owner",
     "scripts/recorder_frames.mjs": "the screencast sidecar",
     "tests/recorder_smoke.mjs": "the real-browser proof",
@@ -233,7 +233,7 @@ TEMPLATE = r"""<!doctype html>
 <div class="hero">
   <div class="kicker">SystemSketch · implementation report · 1 September 2026 · follows the state-recorder design review</div>
   <h1>The flight recorder, built</h1>
-  <p class="lede">Steps 1 to 6 of the design review are in the tree and proved in a real browser: an always-armed ring buffer in the page, a Recording section in the Dev menu with <b>Save the last 30 s</b>, <b>Record next ≤ 30 s</b> and <b>Copy last recording</b>, a red bar during a take, a Python route that writes one folder per recording with the packet first, a Node sidecar that keeps Chrome's screencast in a ring behind one launcher flag, and a <code>playback.html</code> in every folder. Recording is <b>on by default in Preview and the isolated presets, off by default in Stable</b>, with a persisted toggle either way. Your question about the cost of the screenshots is answered with a measurement in §1.</p>
+  <p class="lede">Steps 1 to 6 of the design review are in the tree and proved in a real browser: an always-armed ring buffer in the page, a quiet split-capture control whose broad face <b>saves the last 30 s</b> while its chevron reveals Record next, Copy last, duration, and power, a red bar during a take, a Python route that writes one folder per recording with the packet first, a Node sidecar that keeps Chrome's screencast in a ring behind one launcher flag, and a <code>playback.html</code> in every folder. Recording is <b>on by default in Preview and the isolated presets, off by default in Stable</b>. Your question about the cost of the screenshots is answered with a measurement in §1.</p>
   <div class="badges">
     <span class="badge ok">journey __PASSED__ / __TOTAL__ checks · real Chrome, real folder, real clipboard</span>
     <span class="badge ok">__RECORDER_TESTS__ buffer unit tests · __PY_TESTS__ host unit tests · tsc clean</span>
@@ -267,7 +267,7 @@ TEMPLATE = r"""<!doctype html>
   <p class="sub">The six steps of the design review's §7, each one where the review said it would go. __NEW_LINES__ new lines across __NEW_FILES__ files; the stock-boundary test still passes because nothing new sits beside the engine.</p>
   <ol class="steps">
     <li><b>The ring buffer — <code>src/recorder/flightRecorder.ts</code></b><span>Seven lanes on one clock (input · dom · state · menu · store · console · mark), trimmed to the window on every push. The DOM lane is the finding from the spike made real: capture-phase <code>keydown</code>/<code>keyup</code>/<code>pointerdown</code> on the window, with the UI element hit, so Escape into a menu is recorded even though tldraw never sees it. A retroactive save <b>rewinds</b> the end snapshot through the window's diffs with tldraw's own <code>reverseRecordsDiff</code>, so <code>start.snapshot.json</code> is real for both modes. Installed from <code>onMount</code> in the product and in the presets, never in the embedded IDE lane.</span></li>
-    <li><b>Dev menu, REC bar, policy — <code>src/recorder/RecorderControls.tsx</code>, <code>recorderStore.ts</code></b><span>The Recording section sits between Isolated presets and Version &amp; updates, in the panel's own row grammar; window chips 5 / 15 / 30 / 60 / 120 s; no prefatory text box, because context can be typed directly before pasting the packet; an On/Off chip. The bar is portaled onto <code>document.body</code> because the canvas layer sits under tldraw's top chrome. The presets get the same three verbs in a compact strip inside their identity bar.</span></li>
+    <li><b>Split capture, REC bar, policy — <code>src/recorder/RecorderControls.tsx</code>, <code>recorderStore.ts</code></b><span>The Recording section sits between Isolated presets and Version &amp; updates. At rest only one split control persists: its broad face saves the last window, while the chevron reveals Record next, Copy last, 5 / 15 / 30 / 60 / 120 s, and power. During a take the whole control becomes Stop and save. There is no prefatory text box; context belongs in the chat before the packet. The presets use the same split interaction in compact form. The REC bar is portaled onto <code>document.body</code> because the canvas layer sits under tldraw's top chrome.</span></li>
     <li><b>Host route and writer — <code>scripts/server.py</code>, <code>scripts/recording_store.py</code></b><span><code>POST /api/recordings</code> writes <code>~/SystemSketch/recordings/&lt;local time&gt;-&lt;note&gt;/</code> staged then renamed, keeps the last 20, and returns the packet; <code>GET /api/recordings/last</code> refills the clipboard after a reload; <code>POST /api/recordings/arm</code> tells the host whether the page wants frames. The packet maps every state seen to the file that defines it by indexing <code>id = '…'</code> declarations under <code>src/</code> and tldraw's tools.</span></li>
     <li><b>Frames — <code>scripts/recorder_frames.mjs</code> + one launcher flag</b><span><code>--remote-debugging-port</code> per channel (4324 Preview, 4325 Stable) on the desktop Chrome, passed to the host as <code>--cdp-port</code>. The host spawns the sidecar lazily when a page arms it; the sidecar attaches to every page of that Chrome, keeps a ring of screencast frames per page while armed, and on save writes the wall-time slice into the folder at one frame per 300 ms. Both files travel with a release's <code>runtime/</code> and count toward the controller fingerprint.</span></li>
     <li><b>Proof — <code>tests/recorder_smoke.mjs</code> (<code>npm run test:recorder</code>)</b><span>__TOTAL__ checks read off the disk and the DOM (§3). The harness learned to start Chrome first and hand its DevTools port to the host, the way the launcher does.</span></li>
@@ -283,11 +283,12 @@ TEMPLATE = r"""<!doctype html>
 
 <section>
   <h2>3 · Proof, in the real app</h2>
-  <p class="sub">One fresh headless instance: draw two Blocks, wire them, press Escape, prove there is no prefatory text input, and save the last 30 s from the Dev menu; then a 5 s take that stops itself; then open the folder's <code>playback.html</code>; then turn the recorder off and reload. Everything below is read from that run.</p>
+  <p class="sub">One fresh headless instance: draw two Blocks, wire them, press Escape, prove the quiet split control and its complete chevron menu, and save the last 30 s from the broad face; then a 5 s take that stops itself; then open the folder's <code>playback.html</code>; then turn the recorder off and reload. Everything below is read from that run.</p>
   <div class="two">
-    <figure><img src="__SHOT_MENU__" alt="The Dev menu with the Recording section"><figcaption><strong>The Recording section, in the Dev menu</strong> Save the last 30 s · Record next ≤ 30 s · Copy last recording · window chips · On. No prefatory text box competes with the chat where the packet will be pasted.</figcaption></figure>
+    <figure><img src="__SHOT_MENU__" alt="The Dev menu with the closed split-capture control"><figcaption><strong>Quiet at rest</strong> One broad Save last face and one chevron replace three persistent action rows, five chips, and a power chip.</figcaption></figure>
+    <figure><img src="__SHOT_SPLIT_MENU__" alt="The split-capture disclosure menu"><figcaption><strong>Complete on demand</strong> The chevron reveals Record next, Copy last with its recording identity, duration choices, and power in one bounded menu.</figcaption></figure>
     <figure><img src="__SHOT_BAR_STRIP__" alt="The REC bar, close up" style="margin-bottom:10px"><img src="__SHOT_BAR__" alt="The REC bar during a take"><figcaption><strong>A take running</strong> The red bar across the top with the elapsed time against the 5 s cap, and the row turned into Stop and save.</figcaption></figure>
-    <figure><img src="__SHOT_SAVED__" alt="The Dev menu after a save"><figcaption><strong>After Save</strong> The Copy row now names the folder; the Copy row's mark read <code>Copied</code>, and the clipboard held the packet verbatim.</figcaption></figure>
+    <figure><img src="__SHOT_SAVED__" alt="The Dev menu after a save"><figcaption><strong>After Save</strong> The control collapses again and its status reads <code>Saved · packet copied</code>; the disclosed recovery action names the folder and recopies the packet.</figcaption></figure>
     <figure><img src="__SHOT_PLAYBACK__" alt="playback.html"><figcaption><strong>playback.html, opened from file://</strong> Frames on the left, lanes streaming on the right, the filmstrip below, the packet under it.</figcaption></figure>
   </div>
   <h3 style="margin-top:26px">The first recording's lanes</h3>
@@ -309,7 +310,7 @@ TEMPLATE = r"""<!doctype html>
     </div>
     <div class="card">
       <h3>Every time</h3>
-      <p>Something odd happens → <code>&lt;/&gt;</code> → <b>Save the last 30 s</b> → paste into the agent. If context will help, type it directly in the chat before pasting. The packet is prose plus absolute paths; the agent Reads <code>README.md</code>, greps <code>timeline.jsonl</code>, opens the frames it needs. <b>Copy last recording</b> refills the clipboard after a reload. For a bug you can reproduce, <b>Record next ≤ 30 s</b>, do it, stop or let the cap stop it. Open any folder's <code>playback.html</code> to watch it yourself.</p>
+      <p>Something odd happens → <code>&lt;/&gt;</code> → click the broad <b>Save last 30 s</b> face → paste into the agent. If context will help, type it directly in the chat before pasting. The packet is prose plus absolute paths; the agent Reads <code>README.md</code>, greps <code>timeline.jsonl</code>, and opens the frames it needs. Open the chevron for <b>Copy last recording</b>, <b>Record next</b>, duration, or power. During an explicit take the full split control becomes <b>Stop and save</b>.</p>
     </div>
   </div>
 </section>
@@ -355,6 +356,7 @@ def main() -> None:
         "__LAUNCH__": esc(LAUNCH),
         "__ROUTES__": esc(ROUTES),
         "__SHOT_MENU__": png_uri(ASSETS / "recorder-dev-menu.png", (1040, 160, 1440, 900), 800),
+        "__SHOT_SPLIT_MENU__": png_uri(ASSETS / "recorder-split-menu.png", (1040, 160, 1440, 900), 800),
         "__SHOT_BAR__": png_uri(ASSETS / "recorder-rec-bar.png", (0, 0, 1440, 900), 1100),
         "__SHOT_BAR_STRIP__": png_uri(ASSETS / "recorder-rec-bar.png", (0, 0, 1440, 64), 1100),
         "__SHOT_SAVED__": png_uri(ASSETS / "recorder-saved.png", (1040, 160, 1440, 900), 800),
