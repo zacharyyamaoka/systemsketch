@@ -525,6 +525,12 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		if (getConnectionBindings(this.editor, connection.id)[terminal]) {
 			// Settled: make the document read source → sink.
 			normalizeConnectionDirection(this.editor, connection.id)
+			// A cable you just DREW is not left selected. Its terminal handles sit
+			// exactly on the dots it joins, and a selected cable's handle wins the
+			// next press on that dot — so leaving it selected would turn "wire this
+			// output to a second input" into "drag the first wire away". A cable
+			// you re-routed stays selected: you chose it, and its handles are live.
+			if (isCreatingShape) this.editor.selectNone()
 			return
 		}
 
