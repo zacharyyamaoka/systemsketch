@@ -56,6 +56,7 @@ import {
 } from '../ports'
 import { BlockIconGlyph } from './blockIcons'
 import { stepIntoDepthScope } from '../../depth/depthNavigation'
+import { portColor } from './portPalette'
 import './block-canvas.css'
 
 const SIMPLE_ICON_PX = 40
@@ -68,16 +69,6 @@ const boxStyle = (box: BlockRect): CSSProperties => ({
   width: box.w,
   height: box.h,
 })
-
-function portColor(type: string): string {
-  const normalized = type.trim().toLowerCase()
-  if (normalized === 'image') return '#c060e0'
-  if (normalized === 'text' || normalized === 'str' || normalized === 'string') return '#4caf50'
-  if (normalized === 'model') return '#2196f3'
-  if (normalized === 'number' || normalized === 'int' || normalized === 'float') return '#9e9e9e'
-  if (normalized === 'latent') return '#ff9800'
-  return '#c08520'
-}
 
 interface DrawnPort {
   placed: LaidOutBlockPort
