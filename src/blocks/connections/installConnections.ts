@@ -7,7 +7,20 @@ import { BLOCK_PORT_DRAG_STATE_ID, DraggingBlockPort } from '../ports/portIntera
 import { installConnectionProximity } from './connectionProximity'
 import { keepConnectionsAtBottom } from './keepConnectionsAtBottom'
 
-export const CONNECTION_START_STATES: readonly string[] = ['select.idle']
+/**
+ * The states a press on a port turns into a cable.
+ *
+ * `arrow.idle` is here because A and a port mean the same thing they mean
+ * apart: draw the connector you have chosen. On empty canvas the arrow tool
+ * draws tldraw's arrow; on a port it draws a data edge — and since the arrow
+ * preset also sets the edge routing (`toolbarIntegration.applyArrowPreset`),
+ * the two come out the same shape. The port stylesheet has always lit its dots
+ * under `[data-state^='arrow']`; this is the half of that seam that acts.
+ */
+export const CONNECTION_START_STATES: readonly string[] = ['select.idle', 'arrow.idle']
+
+/** True once the arrow tool has taken a press we are about to take back. */
+const isPendingArrow = (path: string): boolean => path.startsWith('arrow.')
 
 /** Add the donor's connection gesture states to tldraw's stock select tool. */
 export function registerBlockConnectionToolStates(editor: Editor): boolean {
@@ -85,6 +98,12 @@ export function installBlockConnectionInteraction(editor: Editor): () => void {
 			// anchors share the edge midpoints.
 			const path = editor.getPath()
 			if (path === 'select.pointing_resize_handle' || path === 'select.pointing_handle') return
+			// `arrow.pointing` creates its arrow on entry, and a plain tool switch
+			// runs `onExit` without dispatching cancel — which would strand a
+			// zero-length arrow under the port for the rest of the session. Cancel
+			// the gesture properly first: tldraw bails to its own creation mark, so
+			// the press leaves the document exactly as it found it.
+			if (isPendingArrow(path)) editor.cancel()
 			editor.setCurrentTool('select.pointing_block_port', info)
 		})
 	}

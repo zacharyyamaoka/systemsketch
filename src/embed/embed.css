@@ -1,0 +1,79 @@
+/*
+ * Chrome for SystemSketch running inside an IDE editor pane.
+ *
+ * There is deliberately almost nothing here. The pane is small, the host's tab
+ * bar already names the file and shows whether it is dirty, and everything a
+ * person came to do is on the canvas. Only two things ever paint: a message
+ * about an edit that did not land, and a read-only marker.
+ */
+
+.systemsketch-embed {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background, #fff);
+}
+
+.systemsketch-embed .systemsketch-embedded-app {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.systemsketch-embed-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: 500 13px/1.4 var(--tl-font-ui, system-ui, sans-serif);
+  color: var(--vscode-descriptionForeground, #6b7280);
+}
+
+/* An edit that did not land has to say so before the next one is drawn on it. */
+.systemsketch-embed-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px 8px 14px;
+  font: 500 12px/1.4 var(--tl-font-ui, system-ui, sans-serif);
+  color: var(--vscode-inputValidation-warningForeground, #4a3200);
+  background: var(--vscode-inputValidation-warningBackground, #fff4ce);
+  border-bottom: 1px solid var(--vscode-inputValidation-warningBorder, #e6c07b);
+}
+
+.systemsketch-embed-error span {
+  flex: 1 1 auto;
+}
+
+.systemsketch-embed-error button {
+  flex: 0 0 auto;
+  padding: 0 6px;
+  font-size: 15px;
+  line-height: 1;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.systemsketch-embed-error button:hover {
+  background: rgb(0 0 0 / 8%);
+}
+
+.systemsketch-embed-readonly {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  z-index: 400;
+  padding: 3px 10px;
+  font: 600 11px/1.4 var(--tl-font-ui, system-ui, sans-serif);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vscode-badge-foreground, #fff);
+  background: var(--vscode-badge-background, #4d4d4d);
+  border-radius: 999px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}

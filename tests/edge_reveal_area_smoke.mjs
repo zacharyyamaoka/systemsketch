@@ -182,6 +182,17 @@ async function checkChromeRule(app) {
   await clickAt(page, 1250, 840)
   await delay(260)
 
+  // A new cable follows the toolbar's arrow preset, which starts on Elbow. The
+  // rule proved here is about chrome sitting over the reveal box, and its
+  // offsets were written against the curved cable's single control point — so
+  // this asks for curved instead of inheriting whatever the datum happens to be.
+  const quarter = await pointOnCable(page, 0.25)
+  await clickAt(page, quarter.cx, quarter.cy)
+  await delay(400)
+  await setRouting(page, await pointOnCable(page, 0.25), 'curved')
+  await clickAt(page, 1250, 840)
+  await delay(260)
+
   const at = await pointOnCable(page, 0.25)
   await clickAt(page, at.cx, at.cy)
   await delay(500)
@@ -239,6 +250,15 @@ async function main() {
     }
     await mouse(page, 'mouseReleased', into.cx, into.cy)
     await delay(420)
+    await deselect(page)
+
+    // A new cable follows the toolbar's arrow preset, which starts on Elbow.
+    // This first section is about the CURVED cable's reveal box, so ask for it
+    // rather than leaning on a default that has since moved.
+    const quarter = await pointOnCable(page, 0.25)
+    await clickAt(page, quarter.cx, quarter.cy)
+    await delay(320)
+    await setRouting(page, await pointOnCable(page, 0.25), 'curved')
     await deselect(page)
 
     // ------------------------------------------------------------ curved ---

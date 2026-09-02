@@ -14,8 +14,15 @@
     "ok": true
   },
   {
+    "id": "ROUTE-DEFAULT",
+    "label": "a new cable opens on the elbow the toolbar starts on",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
     "id": "ROUTE-CURVED",
-    "label": "the default route is a cubic",
+    "label": "choosing Curved draws a cubic",
     "observed": true,
     "desired": true,
     "ok": true

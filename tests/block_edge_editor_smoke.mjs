@@ -221,12 +221,27 @@ async function main() {
     check('WIRED', 'a cable joins the two Blocks', await cables(page), 1)
     check('ZORDER', 'the cable paints under the Blocks', await cableIsUnderBlocks(page), true)
     await deselect(page)
-    await shot(page, 'edge-editor-curved.png')
+    await shot(page, 'edge-editor-default-elbow.png')
 
-    const curvedPath = await cablePath(page)
-    check('ROUTE-CURVED', 'the default route is a cubic', /^M .* C /.test(curvedPath ?? ''), true)
+    // A new cable takes whatever the toolbar's arrow preset is, and that starts
+    // on Elbow — so the default route here is the orthogonal one, not a cubic.
+    const defaultPath = await cablePath(page)
+    check('ROUTE-DEFAULT', 'a new cable opens on the elbow the toolbar starts on',
+      (defaultPath ?? '').split(/L/).length - 1 >= 2, true)
 
     // ---------------------------------------------------- Figma's rule ---
+    // The single-control-point rule below is the CURVED cable's rule, so this
+    // section asks for curved out loud rather than leaning on a default that
+    // has since moved to elbow.
+    const firstQuarter = await pointOnCable(page, 0.25)
+    await clickAt(page, firstQuarter.cx, firstQuarter.cy)
+    await delay(300)
+    await setRouting(page, await pointOnCable(page, 0.25), 'curved')
+    await deselect(page)
+    const curvedPath = await cablePath(page)
+    check('ROUTE-CURVED', 'choosing Curved draws a cubic', /^M .* C /.test(curvedPath ?? ''), true)
+    await shot(page, 'edge-editor-curved.png')
+
     const onCable = await pointOnCable(page, 0.25)
     const mid = await pointOnCable(page, 0.5)
     await clickAt(page, onCable.cx, onCable.cy)

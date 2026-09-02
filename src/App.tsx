@@ -27,6 +27,7 @@ import {
   resolveDevelopmentProfile,
   type DevelopmentProfileId,
 } from './developmentProfiles'
+import { EmbeddedCanvas, isEmbedded } from './embed'
 import { ChromeProvider } from './chrome/ChromeProvider'
 import {
   SystemSketchMenuPanel,
@@ -36,6 +37,7 @@ import {
 import { SystemSketchNavigationPanel } from './SystemSketchUtilities'
 import { SystemSketchFigmaToolbar } from './toolbar/SystemSketchToolbar'
 import {
+  applyStoredArrowPreset,
   registerToolbarSideEffects,
   SYSTEMSKETCH_TOOLBAR_OVERRIDES,
 } from './toolbar/toolbarIntegration'
@@ -150,6 +152,10 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
   const isBlockDevelopment = profile === 'block-dev'
   const onMount = useCallback((editor: Editor) => {
     enablePasteAtCursor(editor)
+    // The development profiles keep tldraw's stock toolbar, so they cannot
+    // cycle the preset — but they must still open on the same arrow and the
+    // same edge routing the product does, or the lab lies about the datum.
+    applyStoredArrowPreset(editor)
     const stopBlockConnections = isBlockDevelopment
       ? installBlockConnections(editor)
       : () => undefined
@@ -196,6 +202,16 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
 
 export function App() {
   const profile = resolveDevelopmentProfile(window.location.search)
+
+  /**
+   * An IDE that hosts SystemSketch installs its bridge before this bundle
+   * runs, so the decision is already made by the time App renders. The
+   * embedded lane is the same canvas and the same seams; what it drops is the
+   * local workspace, because the host opened the file and owns saving it.
+   */
+  if (isEmbedded()) {
+    return <EmbeddedCanvas />
+  }
 
   if (profile !== 'product') {
     return <DevelopmentCanvas profile={profile} />
