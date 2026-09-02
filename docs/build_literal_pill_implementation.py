@@ -73,8 +73,10 @@ def measure() -> dict[str, object]:
     picker = read("src/blocks/connections/blockPicker.ts")
     preset = re.search(r"\{ id: 'value', label: '(\w+)', icon: '(\w+)'", picker)
     checks = json.loads((ASSETS / "literal-pill.json").read_text(encoding="utf-8"))
-    # The working tree against main: what this build describes, committed or not.
-    diff = git("diff", "--stat=140", "main", "--", "src", "tests", "package.json").strip().splitlines()
+    # The working tree against the point this branch left main: what this build
+    # describes, committed or not, without peers' later main commits reading as deletions.
+    base = git("merge-base", "main", "HEAD").strip()
+    diff = git("diff", "--stat=140", base, "--", "src", "tests", "package.json").strip().splitlines()
     summary = diff[-1] if diff else ""
     return {
         "views": [v.strip().strip("'") for v in views.group(1).split(",") if v.strip()],
