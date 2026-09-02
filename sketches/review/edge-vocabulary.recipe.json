@@ -357,18 +357,18 @@
       "kind": "step",
       "text": "4 · Open the Dev Hub (</> bottom right) and switch on \"Dash after the z⁻¹ pill\": the run after the pill turns dashed. Mark the seed cable (estimate → refine) delayed too, via right-click › Delayed (z⁻¹), and compare.",
       "x": 980,
-      "y": 620,
+      "y": 610,
       "w": 520,
-      "h": 130
+      "h": 150
     },
     {
       "id": "pass",
       "kind": "pass",
       "text": "PASS WHEN the back cable is dotted with a z⁻¹ pill you can slide, the pill shows = 1.0 after step 2, the Dev Hub switch dashes the run after the pill, and a reload keeps all of it.",
-      "x": 980,
-      "y": 780,
-      "w": 400,
-      "h": 150
+      "x": 1000,
+      "y": 810,
+      "w": 380,
+      "h": 160
     }
   ]
 }

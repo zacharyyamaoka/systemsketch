@@ -78,7 +78,7 @@
         "pillPosition": 0.5
       },
       "parentId": "page:page",
-      "index": "a6b42",
+      "index": "a6Dwz",
       "typeName": "shape"
     },
     {
@@ -141,7 +141,7 @@
         ]
       },
       "parentId": "page:page",
-      "index": "a9H9z",
+      "index": "a9RBQ",
       "typeName": "shape"
     },
     {
@@ -186,7 +186,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aE78r",
+      "index": "aE3kz",
       "typeName": "shape"
     },
     {
@@ -203,8 +203,8 @@
       "typeName": "binding"
     },
     {
-      "x": 980,
-      "y": 780,
+      "x": 1000,
+      "y": 810,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -212,11 +212,11 @@
       "id": "shape:cue-pass",
       "type": "geo",
       "props": {
-        "w": 400,
-        "h": 150,
+        "w": 380,
+        "h": 160,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 32,
+        "growY": 52,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -244,7 +244,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aI9Jv",
+      "index": "aIuq6",
       "typeName": "shape"
     },
     {
@@ -289,7 +289,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aFFZr",
+      "index": "aFg7r",
       "typeName": "shape"
     },
     {
@@ -306,9 +306,9 @@
       "typeName": "binding"
     },
     {
-      "x": 103.98963730569946,
-      "y": -6.880829015544052,
-      "z": 0.8752834467120182,
+      "x": 166.1658031088083,
+      "y": -1.9067357512953436,
+      "z": 0.8195329087048833,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -355,7 +355,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aGISf",
+      "index": "aG3o2",
       "typeName": "shape"
     },
     {
@@ -416,7 +416,7 @@
         ]
       },
       "parentId": "page:page",
-      "index": "aAwxb",
+      "index": "aAq8X",
       "typeName": "shape"
     },
     {
@@ -434,7 +434,7 @@
     },
     {
       "x": 980,
-      "y": 620,
+      "y": 610,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -443,10 +443,10 @@
       "type": "geo",
       "props": {
         "w": 520,
-        "h": 130,
+        "h": 150,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 52,
+        "growY": 32,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -474,7 +474,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aHwWI",
+      "index": "aHBIM",
       "typeName": "shape"
     },
     {
@@ -542,7 +542,7 @@
         ]
       },
       "parentId": "page:page",
-      "index": "aClaX",
+      "index": "aCXjU",
       "typeName": "shape"
     },
     {
@@ -611,7 +611,7 @@
         "pillPosition": 0.5
       },
       "parentId": "page:page",
-      "index": "a5pKf",
+      "index": "a55Uo",
       "typeName": "shape"
     },
     {
@@ -682,7 +682,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aDyHb",
+      "index": "aDNjb",
       "typeName": "shape"
     },
     {
@@ -737,7 +737,7 @@
         ]
       },
       "parentId": "page:page",
-      "index": "aBU7g",
+      "index": "aBbrE",
       "typeName": "shape"
     },
     {
@@ -767,16 +767,8 @@
         "pillPosition": 0.5
       },
       "parentId": "page:page",
-      "index": "a7Msn",
+      "index": "a7faU",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#F2555A",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:xnJDJXsIWhS3sNZmbLS2D",
-      "typeName": "user"
     },
     {
       "meta": {},
@@ -868,8 +860,16 @@
         "pillPosition": 0.5
       },
       "parentId": "page:page",
-      "index": "a8rqI",
+      "index": "a8OGz",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#7B66DC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:rDIdhb_3uvD3BIpZJeMUk",
+      "typeName": "user"
     },
     {
       "x": 0,
@@ -912,7 +912,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a8weSt",
+      "index": "a8vQOV",
       "typeName": "shape"
     }
   ]
