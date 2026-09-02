@@ -292,16 +292,20 @@ class ReleaseSystemTests(unittest.TestCase):
             ["/usr/bin/xdotool", "search", "--onlyvisible", "--class", "^systemsketch$"],
         )
 
-    def test_desktop_entry_registers_tldr_and_forwards_the_opened_file(self) -> None:
+    def test_desktop_entry_registers_both_document_types_and_forwards_the_opened_file(self) -> None:
         entry = installer.desktop_entry(
             Path("/usr/bin/python3"),
             Path("/opt/systemsketch/launch_systemsketch.py"),
             Path("/opt/systemsketch/runtime"),
         )
-        self.assertIn("MimeType=application/vnd.tldraw+json;", entry)
+        self.assertIn(
+            "MimeType=application/vnd.systemsketch+json;application/vnd.tldraw+json;", entry
+        )
         self.assertIn("Exec=/usr/bin/python3 /opt/systemsketch/launch_systemsketch.py", entry)
         self.assertIn("--release-home /opt/systemsketch/runtime %f", entry)
-        self.assertIn(b'<glob pattern="*.tldr"/>', installer.mime_package())
+        mime = installer.mime_package()
+        self.assertIn(b'<glob pattern="*.systemsketch"/>', mime)
+        self.assertIn(b'<glob pattern="*.tldr"/>', mime)
 
     def test_desktop_install_removes_icon_variants_that_outrank_the_requested_png(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

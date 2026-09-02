@@ -117,16 +117,19 @@ The [Settings and interface-scale implementation gallery](docs/interface-scale-i
 
 The [edge polarity report](docs/edge-polarity-2026-09-01.html) records why an Expanded Block could not be wired to a sibling from its own dots, why a picker-spawned Block came out output-to-output, and why the cable left the port the wrong way — one press rule that committed to a face before the cable had landed. The replacement decides polarity from where the cable lands, using the two Blocks' places in the frame hierarchy (`pairBlockFaces` → `portPolarity`), through one `judgeConnection` that the drop, the eligible-dot highlight, the picker and load-time validation all ask. The report carries the pre-fix reproduction, the scope diagram, the live source at each seam, and `npm run test:polarity` (33/33) beside the unchanged boundary truth table in `npm run test:edges` (33/33).
 
+The [`.systemsketch` file-type report](docs/systemsketch-file-type-2026-09-01.html) records SystemSketch's own document type: the tldraw file envelope plus one top-level `systemSketch` key holding a plain inventory of the board. Everything the app makes is now a `.systemsketch`; a `.tldr` still opens, edits, and saves back as a `.tldr`, unconverted. The suffix decides the encoding, enforced independently in the browser and in the Python host, and the report proves it three ways — the real `parseTldrawJsonFile` accepting the core and refusing the envelope, `npm run test:file-type` (13/13) in the product build, and `npm run test:file-type-stable` (6/6) against the deployed Stable channel.
+
 The [fan-in report](docs/edge-fan-in-2026-09-01.html) records why a second cable onto an occupied input replaced the first: two starter-kit rules that assume an input has one producer. Sinks now fan in exactly as sources fan out, a press on any dot starts a new cable, an existing cable is moved by selecting it and dragging its terminal handle, and the one drop a sink refuses is an exact copy of a wire it already has, judged in the same `judgeConnection` as every other refusal. `npm run test:polarity` carries the six fan-in checks.
 
 ## Local files
 
-- A clean launch reopens the most recent valid document. First launch prepares `~/SystemSketch/Untitled.tldr` and creates it on the first edit or Save.
+- SystemSketch opens both `.systemsketch` and `.tldr`, and everything it creates is a `.systemsketch` — the same tldraw file with one extra top-level `systemSketch` envelope. A `.tldr` is saved back as a `.tldr`; changing a document's type is Save As, never rename.
+- A clean launch reopens the most recent valid document. First launch prepares `~/SystemSketch/Untitled.systemsketch`, or keeps an existing `Untitled.tldr` if the workspace already has one, and creates it on the first edit or Save.
 - **File → Open…** and **Save As…** use the operating system’s native file chooser, with its normal scrolling, bookmarks, and search within SystemSketch’s allowed local root. If the desktop chooser is unavailable, SystemSketch falls back to its repaired in-app workspace browser. Click the filename beside the menu to rename in place.
 - The native chooser creates and starts in `~/SystemSketch` instead of eagerly rendering the busy home directory; documents already inside a project subfolder still reopen beside that file.
 - `Ctrl+S`, `Ctrl+Shift+S`, `Ctrl+O`, and `Ctrl+N` drive the expected file actions.
 - Clean external edits from an agent or second window reload automatically. A competing local edit pauses with **Use disk version** and **Keep my version** choices.
-- Installing the desktop entry registers `.tldr`; opening one from the file manager launches it in a new SystemSketch window.
+- Installing the desktop entry registers both `.systemsketch` and `.tldr`; opening one from the file manager launches it in a new SystemSketch window.
 
 ## Commands
 
