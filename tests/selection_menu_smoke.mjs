@@ -35,6 +35,7 @@ import {
   waitFor,
 } from './browser_harness.mjs'
 
+const RESULTS = join(ROOT, 'docs', 'selection-menu-results.json')
 const SHOT = join(ROOT, 'docs', 'selection-menu-live-2026-09-01.png')
 /** Frames for the implementation report, written by the run that asserts them. */
 const FRAMES = {
@@ -315,6 +316,11 @@ async function main() {
 
     assert.deepEqual(localConsoleErrors(page), [])
     pass('the physical journey produced zero local console errors')
+
+    // The run's own record, for the report builder. Written last, so it exists
+    // only if every check above actually passed — a report can then prove its
+    // verdicts happened rather than restating labels from source.
+    await writeFile(RESULTS, JSON.stringify(checks.map((label) => ({ label, ok: true })), null, 1))
 
     process.stdout.write(`\n  ${checks.length}/${checks.length} browser checks passed\n  ${SHOT}\n`)
     for (const path of Object.values(FRAMES)) process.stdout.write(`  ${path}\n`)

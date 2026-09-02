@@ -11,7 +11,6 @@ measure itself should fail loudly instead of publishing a guess.
 from __future__ import annotations
 
 import json
-import re
 import subprocess
 from pathlib import Path
 
@@ -43,20 +42,44 @@ def unit_test_count(relative_test_path: str) -> int:
     return int(report["numPassedTests"])
 
 
-# `pass('…')` is how every tests/*_smoke.mjs records a completed check.
-_CHECK = re.compile(r"""\bpass\(\s*(['"])(?P<label>(?:\\.|(?!\1).)*)\1\s*\)""")
+def journey_results(
+    results: Path,
+    journey: Path,
+    source_root: Path,
+) -> list[dict]:
+    """A browser journey's own results, refused if anything has moved since.
 
+    Two halves, and each covers the other's blind spot. Reading the run's own
+    output rather than the journey's source means the labels AND the verdicts
+    are things that actually happened — source extraction gives current labels
+    but cannot show a check ever executed. Reading a file, though, says nothing
+    about when: edit the journey, or edit the app, do not re-run, and stale
+    verdicts keep looking freshly measured on every rebuild.
 
-def browser_checks(relative_smoke_path: str) -> list[str]:
-    """The check labels a smoke test declares, read from its source.
-
-    Taken from the file rather than from a run: the labels are what the report
-    lists, and reading them here means a renamed or added check shows up on the
-    page without anyone remembering to copy it across.
+    So both are compared. The source-root check is the one that matters most in
+    a shared checkout: a peer refactoring the product invalidates every browser
+    verdict on disk, and a report is exactly where that would go unnoticed.
     """
-    source = (REPO / relative_smoke_path).read_text(encoding="utf-8")
-    labels = [match.group("label") for match in _CHECK.finditer(source)]
-    if not labels:
-        raise SystemExit(f"no pass(...) checks found in {relative_smoke_path}")
-    # Undo the escaping the JavaScript source needs, e.g. shape\'s -> shape's.
-    return [re.sub(r"\\(.)", r"\1", label) for label in labels]
+    if not results.exists():
+        raise SystemExit(f"{results.name} is missing — run `node {journey}` first")
+
+    measured = results.stat().st_mtime
+    if measured < journey.stat().st_mtime:
+        raise SystemExit(
+            f"{results.name} predates {journey.name}: these verdicts came from an "
+            f"older version of the journey. Re-run `node {journey}`."
+        )
+
+    newest = max(
+        (path for path in source_root.rglob("*")
+         if path.is_file() and path.suffix in {".ts", ".tsx", ".css"}),
+        key=lambda path: path.stat().st_mtime,
+        default=None,
+    )
+    if newest is not None and measured < newest.stat().st_mtime:
+        raise SystemExit(
+            f"{results.name} predates {newest.relative_to(source_root.parent)}: these "
+            f"verdicts were measured against different source. Re-run `node {journey}`."
+        )
+
+    return json.loads(results.read_text())

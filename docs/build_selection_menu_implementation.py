@@ -11,9 +11,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from report_measurements import browser_checks, line_count, unit_test_count
+from report_measurements import journey_results, line_count, unit_test_count
 
 DOCS_DIR = Path(__file__).resolve().parent
+REPO = DOCS_DIR.parent
 OUTPUT_PATH = DOCS_DIR / "selection-menu-implementation-2026-09-01.html"
 
 FRAMES = {
@@ -77,7 +78,12 @@ PLACEMENT_TESTS = "src/chrome/selectionMenuPlacement.test.ts"
 SHELL = "src/chrome/SelectionContextualMenu.tsx"
 SMOKE = "tests/selection_menu_smoke.mjs"
 
-CHECKS = browser_checks(SMOKE)
+# The journey's own results, not its source. Reading the run's output proves
+# each verdict happened; `journey_results` then refuses if those verdicts predate
+# either the journey or the newest file under src/, because a peer refactoring
+# the product invalidates every browser verdict on disk.
+CHECKS = [row["label"] for row in journey_results(
+    DOCS_DIR / "selection-menu-results.json", REPO / "tests/selection_menu_smoke.mjs", REPO / "src")]
 UNIT_TESTS = unit_test_count(PLACEMENT_TESTS)
 
 FILES = [
