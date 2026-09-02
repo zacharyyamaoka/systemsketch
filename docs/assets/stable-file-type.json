@@ -1,12 +1,12 @@
 {
-  "build": "783d08dff12ade77",
+  "build": "b6d4a11bdaca833c",
   "url": "http://127.0.0.1:4321",
   "results": [
     {
       "id": "STABLE-BUILD",
       "label": "the page on http://127.0.0.1:4321 is the build the channel manifest calls Stable",
-      "observed": "783d08dff12ade77",
-      "desired": "783d08dff12ade77",
+      "observed": "b6d4a11bdaca833c",
+      "desired": "b6d4a11bdaca833c",
       "ok": true
     },
     {
