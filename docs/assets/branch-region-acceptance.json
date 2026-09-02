@@ -256,24 +256,41 @@
   },
   {
     "id": "BR-17",
-    "label": "cables run straight to the Blocks inside the arms and to the control port on the band",
+    "label": "cables run straight to the Blocks inside the arms, to the control port on the band, and out again",
     "observed": [
+      "block:cached().out_1 ↔ block:publish().in_1",
       "block:decode().out_1 ↔ block:estimate().in_1",
       "block:decode().out_1 ↔ block:fallback().in_1",
+      "block:estimate().out_1 ↔ block:publish().in_1",
       "block:flag().out_1 ↔ branch:Branch.ctrl_1"
     ],
     "desired": [
+      "block:cached().out_1 ↔ block:publish().in_1",
       "block:decode().out_1 ↔ block:estimate().in_1",
       "block:decode().out_1 ↔ block:fallback().in_1",
+      "block:estimate().out_1 ↔ block:publish().in_1",
       "block:flag().out_1 ↔ branch:Branch.ctrl_1"
     ],
     "ok": true
   },
   {
     "id": "BR-18",
-    "label": "three cables paint",
-    "observed": 3,
-    "desired": 3,
+    "label": "five cables paint",
+    "observed": 5,
+    "desired": 5,
+    "ok": true
+  },
+  {
+    "id": "BR-18b",
+    "label": "a port with two producers wears a count badge; single-producer ports do not",
+    "observed": {
+      "publish": "2",
+      "estimate": null
+    },
+    "desired": {
+      "publish": "2",
+      "estimate": null
+    },
     "ok": true
   },
   {
@@ -325,9 +342,9 @@
   },
   {
     "id": "BR-22",
-    "label": "the other two cables still paint in Expanded view",
-    "observed": 3,
-    "desired": 3,
+    "label": "the other cables still paint in Expanded view",
+    "observed": 5,
+    "desired": 5,
     "ok": true
   },
   {
@@ -378,10 +395,68 @@
     "ok": true
   },
   {
+    "id": "BR-25b",
+    "label": "active path: the chosen arm's cable into publish stays live, the outside competitor into the same port fades (iii), the non-chosen arm's cable fades (ii)",
+    "observed": [
+      1,
+      0.18,
+      0.18
+    ],
+    "desired": [
+      1,
+      0.18,
+      0.18
+    ],
+    "ok": true
+  },
+  {
     "id": "BR-26",
     "label": "the same target again clears it: all arms active",
     "observed": null,
     "desired": null,
+    "ok": true
+  },
+  {
+    "id": "BR-26b",
+    "label": "with no arm chosen every cable is full",
+    "observed": [
+      1,
+      1,
+      1
+    ],
+    "desired": [
+      1,
+      1,
+      1
+    ],
+    "ok": true
+  },
+  {
+    "id": "BR-26c",
+    "label": "choosing the other arm: the pass-through competitor reads full, the now non-chosen arm's cable fades",
+    "observed": [
+      0.18,
+      1,
+      1
+    ],
+    "desired": [
+      0.18,
+      1,
+      1
+    ],
+    "ok": true
+  },
+  {
+    "id": "BR-26d",
+    "label": "removing one producer drops the port back to one cable and the badge disappears",
+    "observed": {
+      "cables": 4,
+      "badge": null
+    },
+    "desired": {
+      "cables": 4,
+      "badge": null
+    },
     "ok": true
   },
   {
@@ -407,9 +482,9 @@
   },
   {
     "id": "BR-28",
-    "label": "in Case view only the open case's wires paint (decode→estimate and the control cable)",
-    "observed": 2,
-    "desired": 2,
+    "label": "in Case view only the open case's wires paint (decode→estimate, estimate→publish and the control cable)",
+    "observed": 3,
+    "desired": 3,
     "ok": true
   },
   {
@@ -528,7 +603,7 @@
           "hidden": false
         }
       ],
-      "cables": 3
+      "cables": 4
     },
     "desired": {
       "children": [
@@ -543,7 +618,7 @@
           "hidden": false
         }
       ],
-      "cables": 3
+      "cables": 4
     },
     "ok": true
   },

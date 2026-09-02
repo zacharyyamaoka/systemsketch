@@ -138,6 +138,44 @@ async function portBlock(page, from, to, title) {
  * Select the Branch by its band, clear of every text field: a click on the
  * title of an already-selected Branch is (correctly) the edit gesture.
  */
+/** Computed opacity of the cable whose two hosts carry these titles. */
+async function cableOpacityBetween(page, titleA, titleB) {
+  return evaluate(page, `(() => {
+    const editor = window.__systemsketch.editor
+    const wanted = ${JSON.stringify([titleA, titleB].sort())}
+    const cable = editor.getCurrentPageShapes().filter((s) => s.type === 'connection').find((s) => {
+      const titles = editor.getBindingsFromShape(s.id, 'connection').map((b) => editor.getShape(b.toId).props.title).sort()
+      return JSON.stringify(titles) === JSON.stringify(wanted)
+    })
+    if (!cable) return null
+    const svg = document.querySelector('[data-shape-id="' + cable.id + '"] svg')
+    return svg ? Number(getComputedStyle(svg).opacity) : null
+  })()`)
+}
+
+/** A screen point on the painted path of that cable, for a real click. */
+async function cableMidpoint(page, titleA, titleB) {
+  return JSON.parse(await evaluate(page, `(() => {
+    const editor = window.__systemsketch.editor
+    const wanted = ${JSON.stringify([titleA, titleB].sort())}
+    const cable = editor.getCurrentPageShapes().filter((s) => s.type === 'connection').find((s) => {
+      const titles = editor.getBindingsFromShape(s.id, 'connection').map((b) => editor.getShape(b.toId).props.title).sort()
+      return JSON.stringify(titles) === JSON.stringify(wanted)
+    })
+    const path = document.querySelector('[data-shape-id="' + cable.id + '"] path')
+    const point = path.getPointAtLength(path.getTotalLength() * 0.5)
+    const m = path.getScreenCTM()
+    return JSON.stringify({ x: m.a * point.x + m.c * point.y + m.e, y: m.b * point.x + m.d * point.y + m.f })
+  })()`))
+}
+
+async function badgeText(page, block, portId) {
+  return evaluate(page, `(() => {
+    const badge = document.querySelector('${scope(block)} [data-testid="port-count-${portId}"]')
+    return badge ? badge.textContent.trim() : null
+  })()`)
+}
+
 async function selectBranch(page) {
   const band = await box(page, '.systemsketch-branch-canvas .Branch-band')
   await clickAt(page, band.x + band.w - 6, band.cy)
@@ -182,7 +220,7 @@ async function main() {
 
     // 2 · Draw the region.
     // Tall enough that a port-view Block fits inside one arm's body.
-    await dragBox(page, { x: 560, y: 120 }, { x: 1180, y: 680 })
+    await dragBox(page, { x: 420, y: 120 }, { x: 1040, y: 680 })
     let branch = await branchRecord(page)
     check('BR-5', 'a drawn Branch has two open arms and no control ports',
       { arms: branch.arms.map((a) => [a.title, a.open]), controls: branch.controls.length, view: branch.view },
@@ -259,8 +297,11 @@ async function main() {
     const armB = toScreen(rows.x + 140, rows.tops[1] + 20)
     const estimate = await portBlock(page, armA, { x: armA.x + 250, y: armA.y + 130 }, 'estimate()')
     const fallback = await portBlock(page, armB, { x: armB.x + 250, y: armB.y + 130 }, 'fallback()')
-    const decode = await portBlock(page, { x: 140, y: 300 }, { x: 390, y: 430 }, 'decode()')
-    const flag = await portBlock(page, { x: 140, y: 560 }, { x: 390, y: 690 }, 'flag()')
+    const decode = await portBlock(page, { x: 20, y: 300 }, { x: 270, y: 430 }, 'decode()')
+    const flag = await portBlock(page, { x: 20, y: 560 }, { x: 270, y: 690 }, 'flag()')
+    // Two producers into one consumer outside the region: the chosen arm's and an outside competitor's.
+    const publish = await portBlock(page, { x: 1110, y: 160 }, { x: 1360, y: 290 }, 'publish()')
+    const cached = await portBlock(page, { x: 1110, y: 560 }, { x: 1360, y: 690 }, 'cached()')
     check('BR-16', 'Blocks drawn in the arms are children of the Branch, stamped with their arm',
       await childArms(page, branch.id),
       [{ title: 'estimate()', arm: 'arm_1', hidden: false }, { title: 'fallback()', arm: 'arm_2', hidden: false }])
@@ -271,10 +312,17 @@ async function main() {
       estimateIn: await box(page, portDot(estimate, 'input', 'in_1')),
       fallbackIn: await box(page, portDot(fallback, 'input', 'in_1')),
       control: await box(page, '[data-testid="branch-control-dot-ctrl_1"]'),
+      estimateOut: await box(page, portDot(estimate, 'output', 'out_1')),
+      cachedOut: await box(page, portDot(cached, 'output', 'out_1')),
+      publishIn: await box(page, portDot(publish, 'input', 'in_1')),
     }
     await dragFrom(page, dots.decodeOut, dots.estimateIn)
     await dragFrom(page, dots.decodeOut, dots.fallbackIn)
     await dragFrom(page, dots.flagOut, dots.control)
+    // A port-view Block is wider than the box it was drawn from: keep every dot
+    // left of the inspector dock, which owns the pointer from x = 1520.
+    await dragFrom(page, dots.estimateOut, dots.publishIn)
+    await dragFrom(page, dots.cachedOut, dots.publishIn)
     await delay(300)
     const wiring = JSON.parse(await editorEval(page, `
       const cables = editor.getCurrentPageShapes().filter((s) => s.type === 'connection')
@@ -282,12 +330,17 @@ async function main() {
         const bindings = editor.getBindingsFromShape(cable.id, 'connection')
         return bindings.map((b) => editor.getShape(b.toId).type + ':' + (editor.getShape(b.toId).props.title ?? '') + '.' + b.props.portId).sort().join(' ↔ ')
       }).sort())`))
-    check('BR-17', 'cables run straight to the Blocks inside the arms and to the control port on the band', wiring, [
+    check('BR-17', 'cables run straight to the Blocks inside the arms, to the control port on the band, and out again', wiring, [
+      'block:cached().out_1 ↔ block:publish().in_1',
       'block:decode().out_1 ↔ block:estimate().in_1',
       'block:decode().out_1 ↔ block:fallback().in_1',
+      'block:estimate().out_1 ↔ block:publish().in_1',
       'block:flag().out_1 ↔ branch:Branch.ctrl_1',
     ])
-    check('BR-18', 'three cables paint', await paintedCables(page), 3)
+    check('BR-18', 'five cables paint', await paintedCables(page), 5)
+    check('BR-18b', 'a port with two producers wears a count badge; single-producer ports do not',
+      { publish: await badgeText(page, publish, 'in_1'), estimate: await badgeText(page, estimate, 'in_1') },
+      { publish: '2', estimate: null })
     await shot(page, 'branch-region-3-wired.png')
 
     // 6 · Fold: the cable into the folded arm attaches at the header row edge.
@@ -305,10 +358,10 @@ async function main() {
       return JSON.stringify({ x: p.x + c.left, y: p.y + c.top })`))
     // Two cables leave decode: the one to fallback now ends at the folded header's left edge.
     const ends = []
-    for (let index = 0; index < 3; index += 1) ends.push(await cableEnds(page, index))
+    for (let index = 0; index < 5; index += 1) ends.push(await cableEnds(page, index))
     const atHeader = ends.find((end) => Math.abs(end.to.x - geometry.x) < 3 && Math.abs(end.to.y - geometry.y) < 3)
     check('BR-21', 'the cable into the folded arm re-attaches at the arm header\'s left edge centre', Boolean(atHeader), true)
-    check('BR-22', 'the other two cables still paint in Expanded view', await paintedCables(page), 3)
+    check('BR-22', 'the other cables still paint in Expanded view', await paintedCables(page), 5)
     await shot(page, 'branch-region-4-folded.png')
     await clickTestId(page, 'branch-arm-fold-arm_2')
     branch = await branchRecord(page)
@@ -323,17 +376,38 @@ async function main() {
     check('BR-25', 'the Block in the non-active arm fades to the token; the active one does not',
       [await opacityOf(page, `${scope(fallback)} .systemsketch-block-canvas`), await opacityOf(page, `${scope(estimate)} .systemsketch-block-canvas`)],
       [0.18, 1])
+    const trio = async () => [
+      await cableOpacityBetween(page, 'estimate()', 'publish()'),
+      await cableOpacityBetween(page, 'cached()', 'publish()'),
+      await cableOpacityBetween(page, 'decode()', 'fallback()'),
+    ]
+    check('BR-25b', 'active path: the chosen arm\'s cable into publish stays live, the outside competitor into the same port fades (iii), the non-chosen arm\'s cable fades (ii)',
+      await trio(), [1, 0.18, 0.18])
     await shot(page, 'branch-region-5-active.png')
     await clickTestId(page, 'branch-arm-active-arm_1')
     branch = await branchRecord(page)
     check('BR-26', 'the same target again clears it: all arms active', branch.activeArmId, null)
+    check('BR-26b', 'with no arm chosen every cable is full', await trio(), [1, 1, 1])
+    await clickTestId(page, 'branch-arm-active-arm_2')
+    check('BR-26c', 'choosing the other arm: the pass-through competitor reads full, the now non-chosen arm\'s cable fades',
+      await trio(), [0.18, 1, 1])
+    await clickTestId(page, 'branch-arm-active-arm_2')
+    // The badge follows the cables: delete the competitor with a real click and Delete.
+    const mid = await cableMidpoint(page, 'cached()', 'publish()')
+    await clickAt(page, mid.x, mid.y)
+    await delay(200)
+    await key(page, 'Delete', 'Delete')
+    await delay(300)
+    check('BR-26d', 'removing one producer drops the port back to one cable and the badge disappears',
+      { cables: await paintedCables(page), badge: await badgeText(page, publish, 'in_1') }, { cables: 4, badge: null })
+    await deselect(page, { x: 90, y: 940 })
 
     // 8 · Case view from the pill: one open arm, only its wires.
     await selectBranch(page)
     await clickTestId(page, 'branch-pill-view-case')
     branch = await branchRecord(page)
     check('BR-27', 'Case view keeps only the first open arm open', { view: branch.view, open: branch.arms.map((a) => a.open) }, { view: 'case', open: [true, false, false] })
-    check('BR-28', 'in Case view only the open case\'s wires paint (decode→estimate and the control cable)', await paintedCables(page), 2)
+    check('BR-28', 'in Case view only the open case\'s wires paint (decode→estimate, estimate→publish and the control cable)', await paintedCables(page), 3)
     await shot(page, 'branch-region-6-case.png')
     await clickTestId(page, 'branch-arm-fold-arm_2')
     branch = await branchRecord(page)
@@ -356,7 +430,7 @@ async function main() {
         { id: 'arm_1', title: 'if fast', open: false }, { id: 'arm_2', title: 'else', open: true }, { id: 'arm_3', title: 'elif', open: false }] })
     check('BR-33', 'the children, their arms and the cables survive too',
       { children: await childArms(page, reloaded.id), cables: await editorEval(page, `return editor.getCurrentPageShapes().filter((s) => s.type === 'connection').length`) },
-      { children: [{ title: 'estimate()', arm: 'arm_1', hidden: true }, { title: 'fallback()', arm: 'arm_2', hidden: false }], cables: 3 })
+      { children: [{ title: 'estimate()', arm: 'arm_1', hidden: true }, { title: 'fallback()', arm: 'arm_2', hidden: false }], cables: 4 })
     check('BR-34', 'no console errors while driving', errors.count?.() ?? errors.length ?? 0, 0)
   } finally {
     app.close()

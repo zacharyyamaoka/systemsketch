@@ -23,7 +23,7 @@ import {
 	useValue,
 	vecModelValidator,
 } from 'tldraw'
-import { getBlockPortDotAtPoint } from './blockPorts'
+import { getBlockPortConnections, getBlockPortDotAtPoint } from './blockPorts'
 import {
 	HitPaddedCubicBezier2d,
 	HitPaddedEdge2d,
@@ -67,7 +67,8 @@ import {
 	firstOuterPortForPolarity,
 } from './connectionRules'
 import { anchorFaceForScope, blockScopeId } from './connectionScope'
-import { branchFadeOpacity } from '../../branch/branchScope'
+import { BRANCH_FADE_OPACITY } from '../../branch/branchModel'
+import { branchAncestry, branchFadeOpacity } from '../../branch/branchScope'
 import {
 	getBentCurveCubicControlPoints,
 	getConnectionCenterPoint,
@@ -654,9 +655,47 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 	)
 }
 
-/** The lower of the two ends' Branch fades: a cable is as faded as either end. */
+/**
+ * The active-path rule for a cable, as Zach's many-to-one design states it.
+ *
+ * With an arm chosen, a cable fades when (i, ii) either end sits in a
+ * non-chosen arm — the ends' own fade — or (iii) it lands on a port that a
+ * live cable from the chosen arm also reaches, and does not come from that
+ * arm itself: phi-resolution at the consumer, so an outside competitor reads
+ * at 18% while the chosen arm's cable stays live. A control cable into a band
+ * never fades by (iii): the condition is evaluated whichever arm runs. With no
+ * arm chosen everything is full, and nothing is ever emphasised.
+ */
 export function connectionBranchFade(editor: Editor, connection: ConnectionShape | TLShapeId): number {
 	const bindings = getConnectionBindings(editor, connection)
+	const ends = endsBranchFade(editor, bindings)
+	if (ends < 1) return ends
+	const connectionId = typeof connection === 'string' ? connection : connection.id
+	for (const binding of [bindings.start, bindings.end]) {
+		if (!binding) continue
+		const host = editor.getShape(binding.toId)
+		if (!host || host.type !== 'block') continue
+		const table = getBlockPortConnections(editor, host.id)
+		const mine = table.find((entry) => entry.connectionId === connectionId)
+		if (!mine || mine.ownPolarity !== 'sink') continue
+		const myLevels = branchAncestry(editor, mine.connectedShapeId)
+		for (const other of table) {
+			if (other.connectionId === connectionId) continue
+			if (other.ownPortId !== mine.ownPortId || other.ownPolarity !== 'sink') continue
+			for (const level of branchAncestry(editor, other.connectedShapeId)) {
+				const chosen = level.branch.props.activeArmId
+				if (chosen === null || level.armId !== chosen) continue
+				if (myLevels.some((own) => own.branch.id === level.branch.id && own.armId === chosen)) continue
+				if (endsBranchFade(editor, getConnectionBindings(editor, other.connectionId)) < 1) continue
+				return BRANCH_FADE_OPACITY
+			}
+		}
+	}
+	return 1
+}
+
+/** The lower of the two ends' Branch fades: a cable is as faded as either end. */
+function endsBranchFade(editor: Editor, bindings: ReturnType<typeof getConnectionBindings>): number {
 	let opacity = 1
 	for (const binding of [bindings.start, bindings.end]) {
 		if (!binding) continue

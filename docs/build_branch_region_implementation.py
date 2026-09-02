@@ -176,7 +176,7 @@ code{{padding:2px 5px;border-radius:5px;background:#1b2639;color:#d7e4fa}}a{{col
 <body><main>
 <div class="eyebrow">SystemSketch · Branch region · {html.escape(branch_name)}</div>
 <h1>An <em>if</em> with a band,<br />arms, and no ports of its own.</h1>
-<p class="lede">A Branch is a frame-like region, not a Block. Blocks drop into its arms, cables run straight to them, and the only ports the region owns are the control ports on its band. Arms fold to their header row (a cable into a folded arm lands on that row's edge), one arm can be made active (the others fade to 18%), and Case view keeps one arm open at a time and draws only its wires. The tool lives in a system-design submenu under the Block slot, the pill reads <code>Branch · + port · + arm · E · C · ◎ · Inspect</code>, and the inspector copies the Block's idiom with two lists.</p>
+<p class="lede">A Branch is a frame-like region, not a Block. Blocks drop into its arms, cables run straight to them, and the only ports the region owns are the control ports on its band. Arms fold to their header row (a cable into a folded arm lands on that row's edge), one arm can be made active (the others fade to 18%), and Case view keeps one arm open at a time and draws only its wires. The tool lives in a system-design submenu under the Block slot, the pill reads <code>Branch · + port · + arm · E · C · ◎ · Inspect</code>, and the inspector copies the Block's idiom with two lists. With an arm chosen, the other arms' cables and any outside competitor into a port the chosen arm also feeds fade to 18%, and a port with two or more producers wears a count badge.</p>
 <div class="stats">
 <div class="stat"><b>{passed}/{len(checks)}</b><span>real-browser checks (test:branch)</span></div>
 <div class="stat"><b>{unit_tests}</b><span>new unit tests in src/branch</span></div>
@@ -194,23 +194,23 @@ code{{padding:2px 5px;border-radius:5px;background:#1b2639;color:#d7e4fa}}a{{col
 <h2>Authored on the canvas and in the inspector</h2>
 <p class="muted">Control ports come from the band's blue "+" bubble or the inspector's "+"; arms from the dashed "+ arm" row under the region or the inspector. Both open the new field for typing in place. Titles edit on a single click, like a Block's.</p>
 <div class="shots one">
-<figure><img src="{crop_uri(shot('2-authored'), (540, 50, 1800, 940), 1180)}" alt="Branch with one control port and three arms, pill and inspector open" /><figcaption><b>One control port, three arms.</b> The pill above, the inspector at right (CONTROL PORTS with its "1 on band" chip; ARMS with drag grip, title, fold chevron, active target and ×), and the "+ arm" row hanging off the bottom edge while the region is selected.</figcaption></figure>
+<figure><img src="{crop_uri(shot('2-authored'), (400, 50, 1800, 940), 1180)}" alt="Branch with one control port and three arms, pill and inspector open" /><figcaption><b>One control port, three arms.</b> The pill above, the inspector at right (CONTROL PORTS with its "1 on band" chip; ARMS with drag grip, title, fold chevron, active target and ×), and the "+ arm" row hanging off the bottom edge while the region is selected.</figcaption></figure>
 </div>
 
 <h2>Cables run straight in; a control port takes a cable like any input</h2>
 <div class="shots one">
-<figure><img src="{crop_uri(shot('3-wired'), (100, 90, 1220, 910), 1180)}" alt="decode wired to two Blocks inside the arms, flag wired to the band's control port" /><figcaption><b>Three cables.</b> <code>decode()</code> fans out to <code>estimate()</code> in the first arm and <code>fallback()</code> in the second; <code>flag()</code> lands on the <code>fast</code> control port. The Branch is transparent to scoping, so these are ordinary outer-face connections through the existing binding and rules.</figcaption></figure>
+<figure><img src="{crop_uri(shot('3-wired'), (0, 90, 1470, 910), 1180)}" alt="decode wired to two Blocks inside the arms, flag wired to the band's control port" /><figcaption><b>Five cables.</b> <code>decode()</code> fans out to <code>estimate()</code> in the first arm and <code>fallback()</code> in the second; <code>flag()</code> lands on the <code>fast</code> control port; <code>estimate()</code> and the outside <code>cached()</code> both feed <code>publish()</code>, whose input wears the "2" count badge. The Branch is transparent to scoping, so these are ordinary outer-face connections through the existing binding and rules.</figcaption></figure>
 </div>
 
 <h2>Fold re-attaches at the header; active fades the rest</h2>
 <div class="shots">
-<figure><img src="{crop_uri(shot('4-folded'), (100, 90, 1220, 700), 1100)}" alt="else arm folded, its Block hidden, the cable ending at the header's left edge" /><figcaption><b>Folded.</b> The <code>else</code> arm keeps only its header row; <code>fallback()</code> is hidden, not deleted, and decode's second cable now ends at the row's left edge centre.</figcaption></figure>
-<figure><img src="{crop_uri(shot('5-active'), (100, 90, 1220, 910), 1100)}" alt="if fast arm active, the other arms and their Blocks faded" /><figcaption><b>Active.</b> ◎ on <code>if fast</code> marks it; every other arm, its Blocks and the cables touching them fade to the 18% token. Clicking ◎ again clears it.</figcaption></figure>
+<figure><img src="{crop_uri(shot('4-folded'), (0, 90, 1470, 700), 1100)}" alt="else arm folded, its Block hidden, the cable ending at the header's left edge" /><figcaption><b>Folded.</b> The <code>else</code> arm keeps only its header row; <code>fallback()</code> is hidden, not deleted, and decode's second cable now ends at the row's left edge centre.</figcaption></figure>
+<figure><img src="{crop_uri(shot('5-active'), (0, 90, 1470, 910), 1100)}" alt="if fast arm active, the other arms and their Blocks faded" /><figcaption><b>Active.</b> ◎ on <code>if fast</code> marks it; every other arm, its Blocks and the cables touching them fade to the 18% token, and so does the outside competitor <code>cached()</code> → <code>publish()</code>, because the chosen arm's <code>estimate()</code> → <code>publish()</code> reaches the same port (clause iii). Choosing <code>else</code> instead leaves that competitor at full. Clicking ◎ again clears it.</figcaption></figure>
 </div>
 
 <h2>Case view</h2>
 <div class="shots one">
-<figure><img src="{crop_uri(shot('6-case'), (540, 50, 1800, 580), 1180)}" alt="Case view with one open arm and only its wires" /><figcaption><b>C on the pill.</b> At most one arm open; opening another folds the rest. Any cable touching a folded arm is not drawn, so only the open case's wires remain. E returns to the Expanded layout.</figcaption></figure>
+<figure><img src="{crop_uri(shot('6-case'), (400, 50, 1800, 580), 1180)}" alt="Case view with one open arm and only its wires" /><figcaption><b>C on the pill.</b> At most one arm open; opening another folds the rest. Any cable touching a folded arm is not drawn, so only the open case's wires remain. E returns to the Expanded layout.</figcaption></figure>
 </div>
 
 <h2>The seam</h2>
@@ -221,6 +221,8 @@ code{{padding:2px 5px;border-radius:5px;background:#1b2639;color:#d7e4fa}}a{{col
 <div class="decision"><b>Arm membership is a stamp.</b> A child's arm is derived from geometry (the open arm whose row holds its top edge) after each completed operation and written to <code>meta.branchArm</code>. A child of a folded arm keeps its stamp: its row has no body, so geometry would re-home it, which is exactly what a fold must survive.</div>
 <div class="decision"><b>Port host, not a second port system.</b> <code>blockPorts.ts</code> reads ports from a host (Block or Branch) through one table, so a control port welds with the existing binding, polarity and fan-in rules.</div>
 <div class="decision"><b>The body is transparent.</b> Cables live in the page's scope and paint under the region; a filled body would hide them.</div>
+<div class="decision"><b>The active path is a fade, never an emphasis.</b> With an arm chosen, a cable fades when either end sits in a non-chosen arm, or when it lands on a port that a live cable from the chosen arm also reaches and does not come from that arm — phi-resolution at the consumer, Zach's many-to-one rule. Control cables into the band never fade that way. Nothing is thickened or tinted; emphasis belongs to a future live-data view.</div>
+<div class="decision"><b>Many-to-one shows as a count.</b> A port with two or more producers wears a muted "2" pill beside its dot, on every Block port and band port, following the cables as they land and leave.</div>
 <div class="decision"><b>The geometry trusts the record.</b> The base box tool holds a 1×1 placeholder during a drag-create and scales the record by new-bounds / initial-bounds; reporting the layout's height there shrank every arm to its floor.</div>
 </div>
 </div>
@@ -239,6 +241,7 @@ code{{padding:2px 5px;border-radius:5px;background:#1b2639;color:#d7e4fa}}a{{col
 <h2>Left, and deliberately not done</h2>
 <div class="grid">
 <div class="card"><h3>Left (next, not blocked)</h3><ul>
+<li><span class="tick">→</span>The exclusivity lint: many-to-one is legal only when the producers are mutually exclusive by construction (sibling arms of one region, or inside against outside across an implicit arm). Zach's rule is written as pure functions in <code>docs/many_to_one_rule.py</code> on <code>main</code>; the editor draws the count and the fade but does not yet judge legality.</li>
 <li><span class="tick">→</span>Reordering arms by dragging their header row on the canvas. The inspector's ⋮⋮ grip reorders today; on-canvas reorder needs a handle seam and a decision about what a drag on a header means.</li>
 <li><span class="tick">→</span>Resizing a region by its handles is unit-tested (the delta spreads over the open arms) but not driven by the journey.</li>
 <li><span class="tick">→</span>A Branch nested inside a Branch fades as a whole (unit-tested); the journey nests nothing.</li>

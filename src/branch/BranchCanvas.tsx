@@ -15,6 +15,7 @@ import { HTMLContainer, useEditor, useValue } from 'tldraw'
 import { getBlockPortConnections } from '../blocks/connections/blockPorts'
 import { judgeConnection } from '../blocks/connections/connectionRules'
 import { getEligiblePorts, portState } from '../blocks/ports'
+import { PortCountBadge, countProducers } from '../blocks/ui/BlockCanvas'
 import { portColor } from '../blocks/ui/portPalette'
 import { BranchInlineEditor } from './BranchInlineEditor'
 import {
@@ -48,10 +49,11 @@ const boxStyle = (box: BranchRect): CSSProperties => ({
 	height: box.h,
 })
 
-function ControlPortDot({ shape, control, connected }: {
+function ControlPortDot({ shape, control, connected, producers }: {
 	shape: BranchShape
 	control: BranchControlLayout
 	connected: boolean
+	producers: number
 }) {
 	const editor = useEditor()
 	const portId = control.port.id
@@ -84,7 +86,9 @@ function ControlPortDot({ shape, control, connected }: {
 			data-block-port-side="input"
 			data-testid={`branch-control-dot-${portId}`}
 			style={{ '--port-color': portColor(control.port.type), left: control.x, top: control.y } as CSSProperties}
-		/>
+		>
+			{producers >= 2 ? <PortCountBadge portId={portId} count={producers} /> : null}
+		</div>
 	)
 }
 
@@ -164,6 +168,7 @@ export function BranchCanvas({ shape }: { shape: BranchShape }) {
 	const layout = branchLayout(shape.props)
 	const connections = useValue('Branch port connections', () => getBlockPortConnections(editor, shape.id), [editor, shape.id])
 	const connectedIds = useMemo(() => new Set(connections.map((connection) => connection.ownPortId)), [connections])
+	const producerCounts = useMemo(() => countProducers(connections), [connections])
 	const isEditing = useValue('editing Branch', () => editor.getEditingShapeId() === shape.id, [editor, shape.id])
 	const isSelected = useValue('selected Branch', () => editor.getSelectedShapeIds().includes(shape.id), [editor, shape.id])
 	// A Branch inside another Branch's non-active arm fades as a whole.
@@ -242,6 +247,7 @@ export function BranchCanvas({ shape }: { shape: BranchShape }) {
 						shape={shape}
 						control={control}
 						connected={connectedIds.has(control.port.id)}
+						producers={producerCounts.get(control.port.id) ?? 0}
 					/>
 				))}
 
