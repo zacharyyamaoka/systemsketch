@@ -24,6 +24,27 @@
     "ok": true
   },
   {
+    "id": "FANOUT-1",
+    "label": "the next press on the same output starts a second cable, not a move",
+    "observed": {
+      "cables": 2,
+      "wired": [
+        "encode.out_1",
+        "merge.in_1",
+        "merge.in_2"
+      ]
+    },
+    "desired": {
+      "cables": 2,
+      "wired": [
+        "encode.out_1",
+        "merge.in_1",
+        "merge.in_2"
+      ]
+    },
+    "ok": true
+  },
+  {
     "id": "SIBLING-2",
     "label": "merge.in → encode.out makes the same wire from the input dot",
     "observed": 1,
@@ -75,6 +96,89 @@
       "to": "encode.out",
       "leavesRight": true,
       "arrivesRight": true
+    },
+    "ok": true
+  },
+  {
+    "id": "FANIN-1",
+    "label": "a second producer onto an occupied input joins it — the first cable stays",
+    "observed": 2,
+    "desired": 2,
+    "ok": true
+  },
+  {
+    "id": "FANIN-2",
+    "label": "both producers and the input read as wired",
+    "observed": [
+      "encode.out_1",
+      "filter.out_1",
+      "merge.in_1"
+    ],
+    "desired": [
+      "encode.out_1",
+      "filter.out_1",
+      "merge.in_1"
+    ],
+    "ok": true
+  },
+  {
+    "id": "FANIN-3",
+    "label": "the same wire a second time is refused",
+    "observed": 2,
+    "desired": 2,
+    "ok": true
+  },
+  {
+    "id": "FANIN-4",
+    "label": "pressing the occupied input starts a NEW cable rather than moving one",
+    "observed": {
+      "offered": true,
+      "cables": 3
+    },
+    "desired": {
+      "offered": true,
+      "cables": 3
+    },
+    "ok": true
+  },
+  {
+    "id": "FANIN-5",
+    "label": "declining leaves the two cables in place",
+    "observed": 2,
+    "desired": 2,
+    "ok": true
+  },
+  {
+    "id": "FANIN-6-SELECT",
+    "label": "the encode cable is selected by clicking it in the gap",
+    "observed": [
+      "connection"
+    ],
+    "desired": [
+      "connection"
+    ],
+    "ok": true
+  },
+  {
+    "id": "FANIN-6",
+    "label": "a selected cable is re-routed by dragging its handle off the input",
+    "observed": {
+      "cables": 2,
+      "wired": [
+        "encode.out_1",
+        "filter.out_1",
+        "merge.in_1",
+        "merge.in_2"
+      ]
+    },
+    "desired": {
+      "cables": 2,
+      "wired": [
+        "encode.out_1",
+        "filter.out_1",
+        "merge.in_1",
+        "merge.in_2"
+      ]
     },
     "ok": true
   },
@@ -145,8 +249,8 @@
   {
     "id": "NESTED-0",
     "label": "decode was drawn inside run",
-    "observed": "shape:M6UDBmW4mytwjstbilaVa",
-    "desired": "shape:M6UDBmW4mytwjstbilaVa",
+    "observed": "shape:b-AjIUnIzu00wUzdq7V8c",
+    "desired": "shape:b-AjIUnIzu00wUzdq7V8c",
     "ok": true
   },
   {
@@ -265,8 +369,8 @@
   {
     "id": "SCOPE-2",
     "label": "the new Block is a child of the boundary",
-    "observed": "shape:M6UDBmW4mytwjstbilaVa",
-    "desired": "shape:M6UDBmW4mytwjstbilaVa",
+    "observed": "shape:b-AjIUnIzu00wUzdq7V8c",
+    "desired": "shape:b-AjIUnIzu00wUzdq7V8c",
     "ok": true
   },
   {
@@ -293,14 +397,14 @@
     "id": "SCOPE-5",
     "label": "the new Block is inside, fed by the inlet",
     "observed": {
-      "parent": "shape:M6UDBmW4mytwjstbilaVa",
+      "parent": "shape:b-AjIUnIzu00wUzdq7V8c",
       "wired": [
         "call.in_1",
         "run.in_1"
       ]
     },
     "desired": {
-      "parent": "shape:M6UDBmW4mytwjstbilaVa",
+      "parent": "shape:b-AjIUnIzu00wUzdq7V8c",
       "wired": [
         "call.in_1",
         "run.in_1"

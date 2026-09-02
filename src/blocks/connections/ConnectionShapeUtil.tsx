@@ -21,7 +21,7 @@ import {
 	useValue,
 	vecModelValidator,
 } from 'tldraw'
-import { getBlockPortConnections, getBlockPortDotAtPoint } from './blockPorts'
+import { getBlockPortDotAtPoint } from './blockPorts'
 import {
 	HitPaddedCubicBezier2d,
 	HitPaddedEdge2d,
@@ -329,13 +329,6 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 	}
 
 	/**
-	 * Which connection a completed drop would replace. Tracked during the drag
-	 * and acted on at the end, so an abandoned drag never destroys the wire it
-	 * merely hovered.
-	 */
-	private pendingReplacementId: TLShapeId | null = null
-
-	/**
 	 * Base state of an authored-rail drag, captured on the first tick. A grow
 	 * gesture inserts a rail; re-applying every tick against the same base means
 	 * one drag grows exactly one rail and keeps adjusting it, rather than
@@ -460,7 +453,6 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 
 		if (!anchoredBinding) {
 			// Nothing to judge against: a cable with no welded end just follows.
-			this.pendingReplacementId = null
 			updatePortState(this.editor, { hintingPort: null, eligiblePorts: null })
 			removeConnectionBinding(this.editor, connection, terminal)
 			return {
@@ -475,12 +467,16 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		// flat, computed once per move and handed to the port affordance as well —
 		// a port that cannot accept the cable must not light up.
 		const excludeBlocks = blocksThatWouldCycle(this.editor, anchor)
-		updatePortState(this.editor, { eligiblePorts: { anchor, excludeBlocks } })
+		updatePortState(this.editor, {
+			eligiblePorts: { anchor, excludeBlocks, connectionId: connection.id },
+		})
 
-		const target = findConnectionTarget(this.editor, pagePoint, anchor, { excludeBlocks })
+		const target = findConnectionTarget(this.editor, pagePoint, anchor, {
+			excludeBlocks,
+			connectionId: connection.id,
+		})
 
 		if (!target) {
-			this.pendingReplacementId = null
 			updatePortState(this.editor, { hintingPort: null })
 			removeConnectionBinding(this.editor, connection, terminal)
 			// The scope under the pointer decides which face the anchored end is
@@ -500,17 +496,10 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 
 		setAnchoredFace(this.editor, anchoredBinding, target.anchor.face)
 
-		// A sink takes one cable. Landing a second on it replaces the first
-		// rather than stacking two wires nobody can tell apart. Sources fan out.
-		const occupant = target.target.polarity === 'sink'
-			? getBlockPortConnections(this.editor, target.hit.shapeId).find((existing) => (
-				existing.connectionId !== connection.id
-				&& existing.ownPortId === target.target.portId
-				&& existing.ownFace === target.target.face
-			))
-			: undefined
-		this.pendingReplacementId = occupant?.connectionId ?? null
-
+		// Sources fan out and sinks fan in: a second cable onto an occupied input
+		// joins it rather than replacing what is there. The one thing a drop
+		// never makes is a second copy of a wire that already exists, and the
+		// rules refuse that before it gets here.
 		updatePortState(this.editor, {
 			hintingPort: { shapeId: target.hit.shapeId, portId: target.target.portId },
 		})
@@ -530,10 +519,6 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		{ handle, isCreatingShape }: TLHandleDragInfo<ConnectionShape>,
 	): void {
 		this.activeRailDrag = null
-		if (this.pendingReplacementId) {
-			this.editor.deleteShapes([this.pendingReplacementId])
-			this.pendingReplacementId = null
-		}
 		clearPortDragState(this.editor)
 
 		if (handle.id !== 'start' && handle.id !== 'end') return
@@ -542,6 +527,12 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		if (getConnectionBindings(this.editor, connection.id)[terminal]) {
 			// Settled: make the document read source → sink.
 			normalizeConnectionDirection(this.editor, connection.id)
+			// A cable you just DREW is not left selected. Its terminal handles sit
+			// exactly on the dots it joins, and a selected cable's handle wins the
+			// next press on that dot — so leaving it selected would turn "wire this
+			// output to a second input" into "drag the first wire away". A cable
+			// you re-routed stays selected: you chose it, and its handles are live.
+			if (isCreatingShape) this.editor.selectNone()
 			return
 		}
 
@@ -570,7 +561,6 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 	}
 
 	override onHandleDragCancel(): void {
-		this.pendingReplacementId = null
 		this.activeRailDrag = null
 		clearPortDragState(this.editor)
 	}

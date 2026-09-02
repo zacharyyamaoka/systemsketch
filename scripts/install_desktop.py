@@ -45,7 +45,7 @@ Icon={APP_ID}
 Terminal=false
 Categories=Development;Graphics;
 Keywords=Whiteboard;System;Design;Sketch;tldraw;
-MimeType=application/vnd.tldraw+json;
+MimeType=application/vnd.systemsketch+json;application/vnd.tldraw+json;
 StartupNotify=true
 StartupWMClass={APP_ID}
 Actions=TryPreview;
@@ -59,6 +59,10 @@ Exec={preview}
 def mime_package() -> bytes:
     return b"""<?xml version="1.0" encoding="UTF-8"?>
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/vnd.systemsketch+json">
+    <comment>SystemSketch document</comment>
+    <glob pattern="*.systemsketch"/>
+  </mime-type>
   <mime-type type="application/vnd.tldraw+json">
     <comment>tldraw document</comment>
     <glob pattern="*.tldr"/>

@@ -133,6 +133,11 @@ async function main() {
     await page.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: item.cx, y: item.cy, button: 'left', buttons: 1, clickCount: 1 })
     await page.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: item.cx, y: item.cy, button: 'left', clickCount: 1 })
     await delay(700)
+    // The picked Block opens its title editor; port presses are ignored while a
+    // text field is open, so leave it the way a person would before wiring on.
+    await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape' })
+    await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape' })
+    await delay(300)
     const spawned = (await blockIds(page)).find((id) => !before.includes(id))
     if (spawned) names[spawned] = 'call'
     const wired = (await portClasses(page)).filter((entry) => entry.connected)
@@ -140,6 +145,19 @@ async function main() {
     check('STABLE-3', 'the picked Block is wired through its input, beside the sibling cable that stays',
       wired, ['call.in_1', 'encode.out_1', 'merge.in_1'])
     await shot(page, 'stable-polarity-picker.png')
+
+    // Fan-in on the deployed build: the picked Block's output back onto
+    // merge.in_1, which encode.out_1 already feeds — the first cable must stay.
+    if (spawned) {
+      dots['call.out'] = await box(page, portDot(spawned, 'output', 'out_1'))
+      const fanIn = await dragFrom(page, dots['call.out'], dots['merge.in'])
+      check('STABLE-4', 'a second producer onto the occupied input joins it', fanIn.count, 3)
+      check('STABLE-5', 'every dot on the way reads as wired',
+        (await portClasses(page)).filter((entry) => entry.connected)
+          .map((entry) => `${names[entry.shape] ?? '?'}.${entry.port}`).sort(),
+        ['call.in_1', 'call.out_1', 'encode.out_1', 'merge.in_1'])
+      await shot(page, 'stable-fanin.png')
+    }
 
     check('STABLE-CLEAN', 'no local console errors', localConsoleErrors(page), [])
     const failed = results.filter((result) => !result.ok)

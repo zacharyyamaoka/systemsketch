@@ -31,7 +31,9 @@
     "desktop:start": "python3 scripts/launch_systemsketch.py --no-open",
     "desktop:preview": "python3 scripts/launch_systemsketch.py --preview --no-open",
     "desktop:status": "python3 scripts/launch_systemsketch.py --status",
-    "desktop:stop": "python3 scripts/launch_systemsketch.py --stop --all"
+    "desktop:stop": "python3 scripts/launch_systemsketch.py --stop --all",
+    "test:file-type": "node tests/systemsketch_file_type_smoke.mjs",
+    "test:file-type-stable": "node tests/stable_file_type_probe.mjs"
   },
   "dependencies": {
     "lucide-react": "1.33.0",

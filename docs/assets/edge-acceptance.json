@@ -87,19 +87,6 @@
     "ok": true
   },
   {
-    "id": "PICKER-0",
-    "label": "a child's output dropped outside its frame offers nothing and leaves no cable",
-    "observed": {
-      "offered": false,
-      "cables": 0
-    },
-    "desired": {
-      "offered": false,
-      "cables": 0
-    },
-    "ok": true
-  },
-  {
     "id": "PICKER-1",
     "label": "a cable into empty space offers a Block",
     "observed": true,
