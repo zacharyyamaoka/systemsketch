@@ -1,0 +1,83 @@
+{
+  "feature": "Detached layered port visuals",
+  "viewport": { "width": 1280, "height": 720 },
+  "shapes": [
+    {
+      "id": "reference",
+      "type": "block",
+      "x": 100,
+      "y": 300,
+      "props": {
+        "title": "normalize",
+        "description": "Live reference — leave this Block attached.",
+        "blockType": "Function",
+        "icon": "",
+        "view": "port",
+        "w": 420,
+        "h": 180,
+        "showDescription": true,
+        "portLayout": "inline",
+        "inputs": [
+          { "id": "in_1", "name": "window", "type": "int", "defaultValue": "5", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_1", "name": "result", "type": "float", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "subject",
+      "type": "block",
+      "x": 760,
+      "y": 300,
+      "props": {
+        "title": "normalize",
+        "description": "Detach this copy and compare its port layers.",
+        "blockType": "Function",
+        "icon": "",
+        "view": "port",
+        "w": 420,
+        "h": 180,
+        "showDescription": true,
+        "portLayout": "inline",
+        "inputs": [
+          { "id": "in_1", "name": "window", "type": "int", "defaultValue": "5", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_1", "name": "result", "type": "float", "visible": true }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "reference-note",
+      "kind": "note",
+      "text": "REFERENCE · Leave attached. Compare hollow result with filled window.",
+      "x": 80,
+      "y": 110,
+      "w": 430,
+      "h": 100
+    },
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Right-click the LOWER Block → Detach to primitives",
+      "x": 700,
+      "y": 110,
+      "w": 480,
+      "h": 100,
+      "target": { "shapeId": "subject", "anchor": "top" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Both ports keep their 18 px ring; only defaulted window has a centred 12 px grey core. Rows stay grouped.",
+      "x": 240,
+      "y": 560,
+      "w": 800,
+      "h": 100
+    }
+  ]
+}

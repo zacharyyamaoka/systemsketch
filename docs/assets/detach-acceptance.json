@@ -32,6 +32,23 @@
     "ok": true
   },
   {
+    "id": "CONNECTED-PORT-LAYERS",
+    "label": "the connected port becomes an 18px outer ring plus its centred 12px filled core",
+    "observed": [
+      [
+        18,
+        12
+      ]
+    ],
+    "desired": [
+      [
+        18,
+        12
+      ]
+    ],
+    "ok": true
+  },
+  {
     "id": "CABLE-BECOMES-ARROW",
     "label": "the semantic cable becomes a stock arrow, and no cable is left",
     "observed": {

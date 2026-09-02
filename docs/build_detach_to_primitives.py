@@ -236,11 +236,11 @@ TEMPLATE = r'''<!doctype html>
       </div>
       <div class="card">
         <h3><span class="tag warn">GIVES UP</span></h3>
-        <p>Block behaviour, live layout, semantic port identity on the canvas, and two declared
-        approximations: stock-palette port colours (tldraw cannot reach <code>#c08520</code>) and
-        square corners where a 9px radius or a lucide glyph has no primitive equivalent. Ungrouping
-        with <code>Ctrl+Shift+G</code> discards the record too — that is the honest meaning of taking
-        it apart by hand.</p>
+        <p>Block behaviour, live layout, and semantic port identity on the canvas. Exact colours,
+        one-pixel strokes, rounded cards and value pills now travel through supported stock-shape
+        display seams; lucide icons remain outline-primitive approximations. Ungrouping with
+        <code>Ctrl+Shift+G</code> discards the record too — that is the honest meaning of taking it
+        apart by hand.</p>
       </div>
     </div>
   </section>
@@ -419,7 +419,7 @@ TEMPLATE = r'''<!doctype html>
         <tr><td class="mono">src/blocks/detach/detachModel.ts</td><td>The record and its reader. Pure; no editor, no tldraw runtime.</td><td class="mono">__MODEL_LINES__</td></tr>
         <tr><td class="mono">src/blocks/detach/blockPrimitives.ts</td><td>The look as a value — asserted without an editor.</td><td class="mono">__PRIMITIVE_LINES__</td></tr>
         <tr><td class="mono">src/blocks/detach/detachBlock.ts</td><td>Both commands, and everything that touches the editor.</td><td class="mono">__COMMAND_LINES__</td></tr>
-        <tr><td class="mono">src/blocks/ui/portPalette.ts</td><td>One table for a port's colour, so the live hex and the stock approximation cannot drift.</td><td class="mono">—</td></tr>
+        <tr><td class="mono">src/blocks/ui/portPalette.ts</td><td>One table for a port's exact live colour and its portable stock fallback.</td><td class="mono">—</td></tr>
         <tr><td class="mono">src/blocks/ui/BlockContextMenu.tsx</td><td>Both menu items, counted for a multi-selection.</td><td class="mono">—</td></tr>
         <tr><td class="mono">src/workspace/LocalWorkspace.tsx</td><td>The export: borrow, serialize, bail, and hold autosave off across it.</td><td class="mono">—</td></tr>
         <tr><td class="mono">tests/block_detach_smoke.mjs</td><td>The journey behind §6.</td><td class="mono">—</td></tr>

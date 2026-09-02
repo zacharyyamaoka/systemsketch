@@ -68,20 +68,20 @@ code{{padding:2px 5px;border-radius:5px;background:#1b2639;color:#d7e4fa}}a{{col
 </head>
 <body><main>
 <div class="eyebrow">SystemSketch · Detach to primitives</div>
-<h1>One port circle.<br />One movable row.</h1>
-<p class="lede">Detached Blocks now turn every visible port into one stock ellipse, then nest that circle with its name, type, and optional default value inside a stock tldraw group. The large remembered Block group stays intact; the row can move independently without tearing its label away from its port.</p>
-<div class="stats"><div class="stat"><b>1</b><span>ellipse per visible port</span></div><div class="stat"><b>2 levels</b><span>Block group → port-row groups</span></div><div class="stat"><b>{passed}/{len(checks)}</b><span>real-browser checks</span></div></div>
+<h1>Layered port.<br />One movable row.</h1>
+<p class="lede">Detached Blocks turn every visible port into an 18 px stock-ellipse ring and add a centred 12 px stock-ellipse core when the port is connected or owns a default. Both layers stay nested with the name, type, and optional default value inside one stock tldraw group.</p>
+<div class="stats"><div class="stat"><b>18 / 12</b><span>ring / optional core, in pixels</span></div><div class="stat"><b>2 levels</b><span>Block group → port-row groups</span></div><div class="stat"><b>{passed}/{len(checks)}</b><span>real-browser checks</span></div></div>
 
 <h2>The gesture, before and after</h2>
-<p class="muted">The second frame comes from a real pointer drag that begins on <code>payload</code>. The result circle, name, and type stay put; all four input-row parts move together.</p>
+<p class="muted">The second frame comes from a real pointer drag that begins on <code>payload</code>. The result ring, name, and type stay put; every primitive in the defaulted input row moves together.</p>
 <div class="shots">
-<figure><img src="{crop_uri(BEFORE)}" alt="Detached Block with single-circle port rows" /><figcaption><b>Detached.</b> One circle at each boundary; the Block remains one outer group.</figcaption></figure>
-<figure><img src="{crop_uri(AFTER)}" alt="Input port row moved as a nested group" /><figcaption><b>Row moved.</b> The blue selection encloses circle + payload + int + = 5.</figcaption></figure>
+<figure><img src="{crop_uri(BEFORE)}" alt="Detached Block with layered port rows" /><figcaption><b>Detached.</b> Every port has an outer ring; the defaulted input also has its filled core.</figcaption></figure>
+<figure><img src="{crop_uri(AFTER)}" alt="Input port row moved as a nested group" /><figcaption><b>Row moved.</b> The blue selection encloses ring + core + payload + int + = 5.</figcaption></figure>
 </div>
 
 <h2>The ownership tree</h2>
 <div class="tree">
-<div class="card"><strong>Detached Block group</strong><div class="node">Card, header, dividers, description</div><div class="node row">Input row group<div class="node">ellipse · payload · int · = 5</div></div><div class="node row">Output row group<div class="node">ellipse · result · float</div></div></div>
+<div class="card"><strong>Detached Block group</strong><div class="node">Card, header, dividers, description</div><div class="node row">Input row group<div class="node">outer ring · filled core · payload · int · = 5</div></div><div class="node row">Output row group<div class="node">outer ring · result · float</div></div></div>
 <div class="card"><ul>{rows}</ul></div>
 </div>
 
