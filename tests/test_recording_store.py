@@ -88,7 +88,7 @@ class RecordingStoreTests(unittest.TestCase):
             self.assertEqual(header["channel"], "preview")
             self.assertEqual(header["framesSource"], "none")
             rows = [json.loads(line) for line in (folder / "timeline.jsonl").read_text(encoding="utf-8").splitlines()]
-            self.assertEqual(len(rows), 6)
+            self.assertEqual(len(rows), 7)
 
             playback = (folder / "playback.html").read_text(encoding="utf-8")
             self.assertIn("here it broke", playback)
