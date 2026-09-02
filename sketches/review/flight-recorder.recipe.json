@@ -1,0 +1,96 @@
+{
+  "feature": "Flight recorder: save the last 30 s",
+  "viewport": { "width": 1400, "height": 820 },
+  "shapes": [
+    {
+      "id": "camera",
+      "type": "block",
+      "x": 160,
+      "y": 330,
+      "props": {
+        "title": "camera()",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 170,
+        "inputs": [],
+        "outputs": [{ "id": "out_1", "name": "frame", "type": "Frame", "visible": true }]
+      }
+    },
+    {
+      "id": "detector",
+      "type": "block",
+      "x": 720,
+      "y": 330,
+      "props": {
+        "title": "detector()",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 170,
+        "inputs": [{ "id": "in_1", "name": "frame", "type": "Frame", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "boxes", "type": "Boxes", "visible": true }]
+      }
+    },
+    {
+      "id": "cable",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    }
+  ],
+  "bindings": [
+    { "id": "b1", "type": "connection", "fromId": "cable", "toId": "camera", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "b2", "type": "connection", "fromId": "cable", "toId": "detector", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Drag detector() down about 150 px, then press Escape. The recorder is already running: nothing to start.",
+      "x": 720,
+      "y": 600,
+      "w": 520,
+      "h": 110,
+      "target": { "shapeId": "detector", "anchor": "bottom" }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Click the </> button in the bottom-right strip. Under RECORDING, type a line into “What went wrong?” and click Save the last 30 s.",
+      "x": 760,
+      "y": 80,
+      "w": 520,
+      "h": 120
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Paste the clipboard into an agent chat. Copy last recording refills it; the folder it names holds playback.html.",
+      "x": 160,
+      "y": 80,
+      "w": 520,
+      "h": 120
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Copy last recording names a folder under recordings/, the clipboard begins with “SystemSketch interaction recording”, and its transitions include select.translating.",
+      "x": 160,
+      "y": 600,
+      "w": 480,
+      "h": 130
+    }
+  ]
+}
