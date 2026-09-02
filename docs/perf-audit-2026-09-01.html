@@ -54,15 +54,15 @@
   @media(max-width:880px){.two{grid-template-columns:1fr}}
 </style></head><body><main>
 <header class="hero">
-  <div class="kicker">SystemSketch · performance audit · claude/perf-audit-dbfece @ 743d7f9</div>
+  <div class="kicker">SystemSketch · performance audit · claude/perf-audit-dbfece @ 904ae53</div>
   <h1>Why it felt slow, measured — and what is faster now</h1>
   <p class="lede">A CDP journey seeds 48 Port-view Blocks wired by 68 elbow cables, then drives eight gestures
   while recording frame gaps, long tasks and a sampled CPU profile. Eight per-frame wastes were found in SystemSketch's own code;
   all are fixed on this branch and re-measured with the same instrument.</p>
   <div class="badges">
     <span class="badge ok">tsc clean</span>
-    <span class="badge ok">372 unit tests</span>
-    <span class="badge ok">29 Python tests</span>
+    <span class="badge ok">379 unit tests</span>
+    <span class="badge ok">30 Python tests</span>
     <span class="badge ok">180 browser checks across 11 journeys</span>
     <span class="badge">dev build, headless Chrome, software GPU — pessimistic, attributions hold</span>
   </div>
@@ -99,7 +99,7 @@
 
 <section>
   <h2>3 · The eight findings</h2>
-  <p class="sub">Ranked by what they cost per gesture. Each carries the diff this branch applies, read from git at build time.</p>
+  <p class="sub">Ranked by what they cost per gesture. Each carries the diff the fix commit applies, read from git at build time between the two pinned commits.</p>
   <article class="phase"><header><span class="pnum">1</span><h3>Every window blur rebuilt the whole canvas</h3></header><p class="where"><code>src/blocks/ui/stockContextMenuRoot.ts</code></p><p>The stock context-menu root is remounted through a React <code>key</code> to un-stick Radix's uncontrolled <code>open</code> state — and tldraw renders <code>&lt;Canvas /&gt;</code> <em>inside</em> that root's trigger. The remount was wired to every <code>window</code> blur, so each switch to a terminal and back tore down and rebuilt every shape's DOM, React tree and subscriptions. tldraw registers no blur handler of its own, so the menu registry is still exact at blur time: the remount now runs only when a menu was actually open when the window lost focus, and the existing wedge detector still catches anything that slips past on the next right-click.</p><div class="evidence"><b>617 ms</b> longest frame and <b>868 ms</b> CPU per blur before → <b>33 ms</b> and <b>49 ms</b> after; long tasks 2 → 0.</div><details><summary><code>src/blocks/ui/stockContextMenuRoot.ts</code></summary><pre>diff --git a/src/blocks/ui/stockContextMenuRoot.ts b/src/blocks/ui/stockContextMenuRoot.ts
 index 79391b7..f9abdf8 100644
 --- a/src/blocks/ui/stockContextMenuRoot.ts
@@ -720,7 +720,7 @@ index 64133a8..e29cba8 100644
     Nothing in the delta since the previous Stable adds per-frame work by itself — it is the file browser, the embed lane and the FigJam
     chrome tokens — but it is the first Stable carrying the whole edge stack, the docked inspectors and the semantic context menu together,
     and those are where the eight wastes live.</p>
-    <p>The real board: <code>/home/bam/SystemSketch/01_linear_chain.tldr</code>: 107,049 bytes, 102 records — 23 block, 9 image, 9 connection, 7 geo, 7 text, 1 arrow. Small — none of the wastes is about scale. Two are about <em>habit</em>: finding 1 fires on every
+    <p>The real board: <code>/home/bam/SystemSketch/01_linear_chain.tldr</code>: 122,393 bytes, 123 records — 29 block, 13 connection, 9 image, 8 text, 7 geo, 2 arrow. Small — none of the wastes is about scale. Two are about <em>habit</em>: finding 1 fires on every
     switch to another window, and Zach switches between sessions constantly.</p>
     <p>Checked and ruled out: the desktop app's Chrome runs on the hardware GPU (its GPU process carries no software-rendering flag);
     the Python host's 1.5 s stat poll and 15 s release refresh cost under a millisecond each; no timer reloads the document.
@@ -732,7 +732,7 @@ index 64133a8..e29cba8 100644
 <section>
   <h2>5 · Proof</h2>
   <table><thead><tr><th>Journey</th><th>Checks</th><th>Verdict</th></tr></thead><tbody><tr><td><code>npm run test:context-menu</code></td><td class=n>12 / 12</td><td class=c yes>green</td></tr><tr><td><code>npm run test:polarity</code></td><td class=n>42 / 42</td><td class=c yes>green</td></tr><tr><td><code>npm run test:workspace</code></td><td class=n>10 / 10</td><td class=c yes>green</td></tr><tr><td><code>npm run test:edges</code></td><td class=n>33 / 33</td><td class=c yes>green</td></tr><tr><td><code>npm run test:fields</code></td><td class=n>9 / 9</td><td class=c yes>green</td></tr><tr><td><code>npm run test:ports</code></td><td class=n>14 / 14</td><td class=c yes>green</td></tr><tr><td><code>npm run test:selection-menu</code></td><td class=n>9 / 9</td><td class=c yes>green</td></tr><tr><td><code>npm run test:click-to-edit</code></td><td class=n>9 / 9</td><td class=c yes>green</td></tr><tr><td><code>npm run test:batch</code></td><td class=n>11 / 11</td><td class=c yes>green</td></tr><tr><td><code>npm run test:edge-editor</code></td><td class=n>18 / 18</td><td class=c yes>green</td></tr><tr><td><code>npm run test:reveal</code></td><td class=n>13 / 13</td><td class=c yes>green</td></tr></tbody></table>
-  <p class="sub" style="margin-top:12px">Plus <code>tsc -b</code>, 372 vitest cases and 29 Python cases, and <code>vite build</code> of the production bundle, all green on this branch.
+  <p class="sub" style="margin-top:12px">Plus <code>tsc -b</code>, 379 vitest cases and 30 Python cases, and <code>vite build</code> of the production bundle, all green on this branch.
   The journeys cover every seam touched: the context menu (including its window-blur check), edge polarity and fan-in, the inspectors' field commits, port gestures, the selection menu, the workspace window flow.</p>
 </section>
 
@@ -743,7 +743,7 @@ index 64133a8..e29cba8 100644
       <li><b>Stock tldraw's per-frame cost</b> — the shapes layer re-maps every rendering shape when any shape moves. Proportional to shape count, not ours to fork.</li>
       <li><b><code>backdrop-filter: blur()</code></b> on the top bars, the toolbar and the full-height popout (7 declarations). Each is a compositor layer re-blurred whenever the canvas repaints. Invisible on an RTX 4080; would matter on an integrated GPU. Removing it is a taste call, so it is offered, not taken.</li>
       <li><b>Selection menu placement</b> reads <code>getBoundingClientRect</code> and queries the bottom chrome on every camera change while something is selected. Measured at ~13 ms per 1.5 s drag after the fixes — small, and unmounted during manipulation anyway.</li>
-      <li><b>The 1.5 s stat poll</b> logs every request; the largest host logs are: <ul><li><code>desktop-v2/preview/api.log</code> — 21.8 MB</li><li><code>desktop-v2/stable/server.log</code> — 15.0 MB</li><li><code>server.log</code> — 13.9 MB</li><li><code>preview/server.log</code> — 6.0 MB</li></ul> Disk, not speed. Rotating or silencing <code>stat</code> 200s is a one-line change in <code>scripts/server.py</code> if wanted.</li>
+      <li><b>The 1.5 s stat poll</b> logs every request; the largest host logs are: <ul><li><code>desktop-v2/preview/api.log</code> — 21.8 MB</li><li><code>desktop-v2/stable/server.log</code> — 15.2 MB</li><li><code>server.log</code> — 13.9 MB</li><li><code>preview/server.log</code> — 6.0 MB</li></ul> Disk, not speed. Rotating or silencing <code>stat</code> 200s is a one-line change in <code>scripts/server.py</code> if wanted.</li>
       <li><b>Cable drags</b> still rebind on every pointer move, which hands every reader of tldraw's bindings index a new map. That is how tldraw's own arrows work too.</li>
     </ul>
   </div>
@@ -759,6 +759,6 @@ index 64133a8..e29cba8 100644
   </div>
 </section>
 
-<footer>Built by <code>docs/build_perf_audit.py</code> from <code>claude/perf-audit-dbfece</code> at <code>743d7f9</code>, merge base <code>743d7f9</code>.
+<footer>Built by <code>docs/build_perf_audit.py</code> from <code>claude/perf-audit-dbfece</code> at <code>904ae53</code>; the diffs are <code>743d7f9</code> → <code>4013d12</code>, the probe runs measured those two trees.
 The probe: <code>node tests/perf_probe.mjs &lt;label&gt; [blocks]</code>. Re-run both labels and rebuild to refresh every number on this page.</footer>
 </main></body></html>

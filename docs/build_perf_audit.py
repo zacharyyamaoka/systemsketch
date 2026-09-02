@@ -92,21 +92,22 @@ def inclusive_ms(probe: dict, name: str, needle: str) -> float:
     return 0.0
 
 
-def merge_base() -> str:
-    return sh("git", "merge-base", "HEAD", "main").strip()
-
-
-BASE = merge_base()
+# The two commits this report describes, pinned: the tree the probe's `baseline`
+# run measured, and the commit that carries the fixes its `after` run measured.
+# A merge base would read empty the day the branch lands on main, and `HEAD`
+# would describe whatever the tree is standing on when someone rebuilds.
+BASE = "743d7f9"
+FIX = "4013d12"
 HEAD = sh("git", "rev-parse", "--short", "HEAD").strip()
 BRANCH = sh("git", "rev-parse", "--abbrev-ref", "HEAD").strip()
 
 
 def diff_of(path: str, context: int = 3) -> str:
-    return sh("git", "diff", f"-U{context}", BASE, "--", path)
+    return sh("git", "diff", f"-U{context}", BASE, FIX, "--", path)
 
 
 def diff_stat() -> str:
-    return sh("git", "diff", "--stat", BASE, "--", "src/").strip()
+    return sh("git", "diff", "--stat", BASE, FIX, "--", "src/").strip()
 
 
 def stable_manifest() -> dict | None:
@@ -453,7 +454,7 @@ def main() -> None:
 
 <section>
   <h2>3 · The eight findings</h2>
-  <p class="sub">Ranked by what they cost per gesture. Each carries the diff this branch applies, read from git at build time.</p>
+  <p class="sub">Ranked by what they cost per gesture. Each carries the diff the fix commit applies, read from git at build time between the two pinned commits.</p>
   {''.join(findings)}
   <details class="card"><summary>Full <code>src/</code> diff stat against the merge base</summary><pre class="light">{esc(diff_stat())}</pre></details>
 </section>
@@ -504,7 +505,7 @@ def main() -> None:
   </div>
 </section>
 
-<footer>Built by <code>docs/build_perf_audit.py</code> from <code>{esc(BRANCH)}</code> at <code>{esc(HEAD)}</code>, merge base <code>{esc(BASE[:7])}</code>.
+<footer>Built by <code>docs/build_perf_audit.py</code> from <code>{esc(BRANCH)}</code> at <code>{esc(HEAD)}</code>; the diffs are <code>{esc(BASE)}</code> → <code>{esc(FIX)}</code>, the probe runs measured those two trees.
 The probe: <code>node tests/perf_probe.mjs &lt;label&gt; [blocks]</code>. Re-run both labels and rebuild to refresh every number on this page.</footer>
 """
 
