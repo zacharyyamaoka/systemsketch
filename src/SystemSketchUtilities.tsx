@@ -40,6 +40,7 @@ import { getPortablePreviewSnapshot, loadPreviewCloneFromCurrentUrl } from './pr
 import { useChrome } from './chrome/ChromeProvider'
 import { startReleaseRefresh } from './releaseRefresh'
 import { cablePresentation, setDashAfterPill } from './blocks/connections/connectionPresentation'
+import { useAppearancePreferences } from './settings/appearancePreferences'
 import './systemsketch-utilities.css'
 
 type BusyKey = ReleaseAction | `preview:${DevelopmentProfileId}`
@@ -126,6 +127,7 @@ function ChannelActions({
 export function SystemSketchNavigationPanel() {
   const editor = useEditor()
   const actions = useActions()
+  const { showZoomButtons } = useAppearancePreferences()
   const { addDialog } = useDialogs()
   const { rightSurface, setRight, toggleRight } = useChrome()
   const [status, setStatus] = useState<ReleaseStatus | null>(null)
@@ -529,21 +531,27 @@ export function SystemSketchNavigationPanel() {
         >
           <BoardOverviewIcon />
         </TldrawUiToolbarButton>
-        <TldrawUiToolbarButton
-          type="icon"
-          title="Zoom out"
-          onClick={() => actions['zoom-out'].onSelect('navigation-zone')}
-        >
-          <TldrawUiButtonIcon small icon="minus" />
-        </TldrawUiToolbarButton>
+        {showZoomButtons ? (
+          <TldrawUiToolbarButton
+            type="icon"
+            title="Zoom out"
+            data-testid="systemsketch-zoom-out"
+            onClick={() => actions['zoom-out'].onSelect('navigation-zone')}
+          >
+            <TldrawUiButtonIcon small icon="minus" />
+          </TldrawUiToolbarButton>
+        ) : null}
         <DefaultZoomMenu />
-        <TldrawUiToolbarButton
-          type="icon"
-          title="Zoom in"
-          onClick={() => actions['zoom-in'].onSelect('navigation-zone')}
-        >
-          <TldrawUiButtonIcon small icon="plus" />
-        </TldrawUiToolbarButton>
+        {showZoomButtons ? (
+          <TldrawUiToolbarButton
+            type="icon"
+            title="Zoom in"
+            data-testid="systemsketch-zoom-in"
+            onClick={() => actions['zoom-in'].onSelect('navigation-zone')}
+          >
+            <TldrawUiButtonIcon small icon="plus" />
+          </TldrawUiToolbarButton>
+        ) : null}
         <TldrawUiToolbarButton
           type="icon"
           className="systemsketch-dev-trigger"

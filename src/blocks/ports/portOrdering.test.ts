@@ -16,11 +16,17 @@ import {
 import { blockPortSlotCount, blockPortViewHeightForSlots, layoutBlock } from '../layoutBlock'
 import {
 	blockPortIndex,
+	blockPortRowCount,
 	insertBlockPortForInlineEditing,
 	insertBlockPortProps,
+	moveBlockPortProps,
 	moveBlockPortToIndex,
 	moveBlockPortToIndexProps,
+	moveBlockPortToSection,
+	moveBlockPortToSectionProps,
+	startBlockPortSectionProps,
 } from '../commands/blockCommands'
+import { portBranch, portRow } from '../blockModel'
 
 function port(id: string, overrides: Partial<BlockPort> = {}): BlockPort {
 	return { id, name: id, type: '', visible: true, ...overrides }
@@ -123,12 +129,136 @@ describe('moveBlockPortToIndexProps', () => {
 		expect(moveBlockPortToIndexProps(props, 'inputs', 'nope', 0)).toBe(props)
 	})
 
-	it('preserves port identity and every per-port marker', () => {
+	it('preserves port identity within a section, and adopts the row of the port it now follows', () => {
 		const marked = blockShape({
-			inputs: [port('in_1'), port('in_2', { groupStart: true, defaultValue: '5' })],
+			inputs: [port('in_1'), port('in_2', { defaultValue: '5' }), port('in_3', { row: 2 })],
 		}).props
-		const moved = moveBlockPortToIndexProps(marked, 'inputs', 'in_2', 0)
-		expect(moved.inputs[0]).toBe(marked.inputs[1])
+		const within = moveBlockPortToIndexProps(marked, 'inputs', 'in_2', 0)
+		expect(within.inputs[0]).toBe(marked.inputs[1])
+		const across = moveBlockPortToIndexProps(marked, 'inputs', 'in_1', 3)
+		expect(ids(across.inputs)).toEqual(['in_2', 'in_3', 'in_1'])
+		expect(portRow(across.inputs[2])).toBe(2)
+		expect(across.inputs[2].defaultValue).toBe(marked.inputs[0].defaultValue)
+	})
+})
+
+describe('moveBlockPortToSectionProps', () => {
+	const props = blockShape({
+		inputs: [port('cond', { row: 0 }), port('in_1'), port('in_2'), port('in_3', { row: 2 })],
+		outputs: [port('out_1'), port('out_2', { branch: 1 }), port('out_3', { row: 2 })],
+	}).props
+	const place = (ports: readonly BlockPort[]) => ports.map((entry) => `${entry.id}@${portRow(entry)}.${portBranch(entry)}`)
+
+	it('lifts an input into the heading, keeping its identity', () => {
+		const next = moveBlockPortToSectionProps(props, 'inputs', 'in_2', { row: 0, branch: 0, before: null })
+		expect(place(next.inputs)).toEqual(['cond@0.0', 'in_2@0.0', 'in_1@1.0', 'in_3@2.0'])
+		expect(next.inputs[1].name).toBe('in_2')
+		expect(next.outputs).toBe(props.outputs)
+	})
+
+	it('lands before the named neighbour inside the target section', () => {
+		const next = moveBlockPortToSectionProps(props, 'inputs', 'in_3', { row: 1, branch: 0, before: 'in_2' })
+		expect(place(next.inputs)).toEqual(['cond@0.0', 'in_1@1.0', 'in_3@1.0', 'in_2@1.0'])
+	})
+
+	it('moves an output into another arm, and into another row', () => {
+		// out_1 was alone in its arm, so joining out_2's arm leaves one arm: the
+		// half-line goes, and the two are simply together.
+		const arm = moveBlockPortToSectionProps(props, 'outputs', 'out_1', { row: 1, branch: 1, before: null })
+		expect(place(arm.outputs)).toEqual(['out_2@1.0', 'out_1@1.0', 'out_3@2.0'])
+		const shared = moveBlockPortToSectionProps(
+			{ ...props, outputs: [port('out_0'), ...props.outputs] },
+			'outputs', 'out_1', { row: 1, branch: 1, before: null },
+		)
+		expect(place(shared.outputs)).toEqual(['out_0@1.0', 'out_2@1.1', 'out_1@1.1', 'out_3@2.0'])
+		const row = moveBlockPortToSectionProps(props, 'outputs', 'out_2', { row: 2, branch: 0, before: 'out_3' })
+		expect(place(row.outputs)).toEqual(['out_1@1.0', 'out_2@2.0', 'out_3@2.0'])
+	})
+
+	it('never puts an output in the heading, nor an input in an arm', () => {
+		const output = moveBlockPortToSectionProps(props, 'outputs', 'out_1', { row: 0, branch: 0, before: null })
+		expect(portRow(output.outputs.find((entry) => entry.id === 'out_1')!)).toBe(1)
+		const input = moveBlockPortToSectionProps(props, 'inputs', 'in_1', { row: 2, branch: 3, before: null })
+		expect(portBranch(input.inputs.find((entry) => entry.id === 'in_1')!)).toBe(0)
+	})
+
+	it('compacts a row left empty on both sides, so rows stay dense', () => {
+		const next = moveBlockPortToSectionProps(
+			moveBlockPortToSectionProps(props, 'inputs', 'in_3', { row: 1, branch: 0, before: null }),
+			'outputs', 'out_3', { row: 1, branch: 0, before: null },
+		)
+		expect(blockPortRowCount(next)).toBe(1)
+	})
+
+	it('returns the same props object when the drop changes nothing', () => {
+		expect(moveBlockPortToSectionProps(props, 'inputs', 'in_2', { row: 1, branch: 0, before: null })).toBe(props)
+		expect(moveBlockPortToSectionProps(props, 'inputs', 'in_1', { row: 1, branch: 0, before: 'in_2' })).toBe(props)
+		expect(moveBlockPortToSectionProps(props, 'inputs', 'nope', { row: 0, branch: 0, before: null })).toBe(props)
+	})
+})
+
+describe('moveBlockPortProps steps visually', () => {
+	const props = blockShape({
+		inputs: [port('cond', { row: 0 }), port('in_1'), port('in_2'), port('in_3', { row: 2 })],
+		outputs: [port('out_1'), port('out_2', { branch: 1 })],
+	}).props
+
+	it('swaps neighbours within a section', () => {
+		expect(ids(moveBlockPortProps(props, 'inputs', 'in_2', -1).inputs)).toEqual(['cond', 'in_2', 'in_1', 'in_3'])
+	})
+
+	it('steps across a line into the neighbouring section', () => {
+		const up = moveBlockPortProps(props, 'inputs', 'in_3', -1)
+		expect(ids(up.inputs)).toEqual(['cond', 'in_1', 'in_2', 'in_3'])
+		expect(portRow(up.inputs[3])).toBe(1)
+		const down = moveBlockPortProps(props, 'inputs', 'in_2', 1)
+		expect(ids(down.inputs)).toEqual(['cond', 'in_1', 'in_2', 'in_3'])
+		expect(portRow(down.inputs[2])).toBe(2)
+		// Stepping down across the half-line joins the arm below at its top; the
+		// arm it left is empty, so the line goes and the order reads unchanged.
+		const arm = moveBlockPortProps(props, 'outputs', 'out_1', 1)
+		expect(ids(arm.outputs)).toEqual(['out_1', 'out_2'])
+		expect(arm.outputs.map(portBranch)).toEqual([0, 0])
+	})
+
+	it('lifts the first body input into the heading, and stops at the lane ends otherwise', () => {
+		const lifted = moveBlockPortProps(props, 'inputs', 'in_1', -1)
+		expect(ids(lifted.inputs)).toEqual(['cond', 'in_1', 'in_2', 'in_3'])
+		expect(portRow(lifted.inputs[1])).toBe(0)
+		expect(moveBlockPortProps(props, 'inputs', 'cond', -1)).toBe(props)
+		expect(moveBlockPortProps(props, 'inputs', 'in_3', 1)).toBe(props)
+		expect(moveBlockPortProps(props, 'outputs', 'out_2', 1)).toBe(props)
+	})
+})
+
+describe('startBlockPortSectionProps', () => {
+	const props = blockShape({
+		inputs: [port('in_1'), port('in_2', { row: 2 })],
+		outputs: [port('out_1'), port('out_2', { row: 2 })],
+	}).props
+
+	it('opens a new row under the port\'s own, shifting later rows on both sides', () => {
+		const next = startBlockPortSectionProps(props, 'inputs', 'in_1', 'row')
+		expect(next.inputs.map((entry) => [entry.id, portRow(entry)])).toEqual([['in_1', 2], ['in_2', 3]])
+		expect(next.outputs.map((entry) => [entry.id, portRow(entry)])).toEqual([['out_1', 1], ['out_2', 3]])
+		expect(blockPortRowCount(next)).toBe(3)
+	})
+
+	it('opens a new arm under an output\'s own, inside its row', () => {
+		const next = startBlockPortSectionProps(props, 'outputs', 'out_1', 'branch')
+		expect(portBranch(next.outputs[0])).toBe(0)
+		expect(next.outputs[0].id).toBe('out_1')
+		// out_1 was alone in arm 0, so arm 0 is now empty and compacts away.
+		expect(blockPortRowCount(next)).toBe(2)
+		const shared = startBlockPortSectionProps(
+			{ ...props, outputs: [port('out_1'), port('out_9'), port('out_2', { row: 2 })] },
+			'outputs', 'out_1', 'branch',
+		)
+		expect(shared.outputs.map((entry) => [entry.id, portBranch(entry)])).toEqual([['out_9', 0], ['out_1', 1], ['out_2', 0]])
+	})
+
+	it('refuses an arm for an input', () => {
+		expect(startBlockPortSectionProps(props, 'inputs', 'in_1', 'branch')).toBe(props)
 	})
 })
 
@@ -178,6 +308,17 @@ describe('editor-backed in-window port commands', () => {
 			reason: 'missing-port',
 		})
 		expect(fixture.history).toEqual(['reorder block port'])
+	})
+
+	it('moves a port to the heading in one labelled history step', () => {
+		const fixture = mockEditor()
+		const result = moveBlockPortToSection(fixture.editor, fixture.current().id, 'inputs', 'in_2', {
+			row: 0, branch: 0, before: null,
+		})
+		expect(result.ok).toBe(true)
+		expect(fixture.current().props.inputs.map((entry) => [entry.id, portRow(entry)]))
+			.toEqual([['in_2', 0], ['in_1', 1]])
+		expect(fixture.history).toEqual(['move block port to header'])
 	})
 
 	it('opens no undo step when a drop lands where the port already was', () => {

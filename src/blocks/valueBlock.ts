@@ -144,9 +144,8 @@ function samePort(port: BlockPort | undefined, wanted: BlockPort): boolean {
 		&& port.type === wanted.type
 		&& port.visible
 		&& port.defaultValue === undefined
-		&& port.groupStart === undefined
-		&& port.branchStart === undefined
-		&& port.header === undefined
+		&& port.row === undefined
+		&& port.branch === undefined
 }
 
 /**

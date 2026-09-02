@@ -32,6 +32,10 @@ import {
   useThemeChoice,
 } from '../theme/themeStore'
 import { paletteFromVsCodeTheme, parseVsCodeThemeText, slugify } from '../theme/vscodeTheme'
+import {
+  updateAppearancePreferences,
+  useAppearancePreferences,
+} from './appearancePreferences'
 import './interface-settings.css'
 
 export function SettingsGearIcon(props: ComponentProps<'svg'>) {
@@ -230,6 +234,7 @@ function swatchOf(palettes: readonly ThemePalette[], id: string): SwatchTokens {
 function AppearancePanel() {
   const choice = useThemeChoice()
   const imported = useImportedPalettes()
+  const { showZoomButtons } = useAppearancePreferences()
   const options = themeOptions(BUILT_IN_PALETTES, imported)
   const palettes = [...BUILT_IN_PALETTES, ...imported]
   const fileInput = useRef<HTMLInputElement | null>(null)
@@ -346,6 +351,27 @@ function AppearancePanel() {
           {importMessage.text}
         </p>
       ) : null}
+
+      <section className="systemsketch-settings__appearance-section" aria-labelledby="zoom-controls-title">
+        <div className="systemsketch-settings__appearance-heading">
+          <h3 id="zoom-controls-title">Zoom controls</h3>
+          <p>Choose how compact the bottom-right navigation strip should be.</p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          className="systemsketch-settings__toggle-row"
+          aria-checked={showZoomButtons}
+          data-testid="systemsketch-show-zoom-buttons"
+          onClick={() => updateAppearancePreferences({ showZoomButtons: !showZoomButtons })}
+        >
+          <span>
+            <strong>Show zoom −/+ buttons</strong>
+            <small>The zoom percentage remains available when these step buttons are hidden.</small>
+          </span>
+          <i aria-hidden="true"><span /></i>
+        </button>
+      </section>
     </section>
   )
 }

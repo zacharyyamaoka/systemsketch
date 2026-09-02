@@ -52,7 +52,8 @@ import { stepIntoDepthScope } from '../depth/depthNavigation'
 const blockVersions = createShapePropsMigrationIds(BLOCK_SHAPE_TYPE, {
 	RestorePyblocksUi: 1,
 	PortLayoutStyle: 2,
-	ValueView: 3,
+	PortRows: 3,
+	ValueView: 4,
 })
 
 const LEGACY_VIEW_SIZES = {
@@ -236,6 +237,40 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 			},
 			// The pre-style validator accepted a present portLayout, so stepping
 			// back down needs no change to the record.
+			down: 'none',
+		}, {
+			id: blockVersions.PortRows,
+			up(props) {
+				// A row used to be a marker on the port that started it (`groupStart`),
+				// an arm likewise (`branchStart`), and the heading a flag (`header`).
+				// Now every port names its row and arm, so a row can hold a port from
+				// either side, or be empty on one side, and a port can move between
+				// rows without dragging a boundary along. Replay the old split rule to
+				// number each port, then drop the markers.
+				for (const side of ['inputs', 'outputs'] as const) {
+					const ports = props[side]
+					if (!Array.isArray(ports)) continue
+					let row = 1
+					let branch = 0
+					let inGroup = 0
+					props[side] = ports.map((port: Record<string, unknown>) => {
+						const { groupStart, branchStart, header, ...rest } = port
+						if (side === 'inputs' && header === true) return { ...rest, row: 0 }
+						if (inGroup > 0 && groupStart === true) {
+							row += 1
+							branch = 0
+							inGroup = 0
+						} else if (side === 'outputs' && inGroup > 0 && branchStart === true) {
+							branch += 1
+						}
+						inGroup += 1
+						const next: Record<string, unknown> = { ...rest }
+						if (row !== 1) next.row = row
+						if (branch !== 0) next.branch = branch
+						return next
+					})
+				}
+			},
 			down: 'none',
 		}, {
 			id: blockVersions.ValueView,

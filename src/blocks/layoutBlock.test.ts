@@ -180,11 +180,11 @@ describe('layoutBlock donor geometry', () => {
 		const props = withBox(makeBlock({
 			inputs: [
 				{ id: 'in_1', name: 'a', type: '', visible: true },
-				{ id: 'in_2', name: 'b', type: '', visible: true, groupStart: true },
+				{ id: 'in_2', name: 'b', type: '', visible: true, row: 2 },
 			],
 			outputs: [
 				{ id: 'out_1', name: 'r', type: '', visible: true },
-				{ id: 'out_2', name: 's', type: '', visible: true, groupStart: true },
+				{ id: 'out_2', name: 's', type: '', visible: true, row: 2 },
 			],
 		}), 340, 48 + 8 + 3 * 44 + 8 + 46)
 		expect(blockPortSlotCount(props)).toBe(3)
@@ -204,7 +204,7 @@ describe('layoutBlock donor geometry', () => {
 		const props = withBox(makeBlock({
 			outputs: [
 				{ id: 'out_1', name: 'ok', type: '', visible: true },
-				{ id: 'out_2', name: 'err', type: '', visible: true, branchStart: true },
+				{ id: 'out_2', name: 'err', type: '', visible: true, branch: 1 },
 			],
 		}), 340, 48 + 8 + 3 * 44 + 8 + 46)
 		expect(blockPortSlotCount(props)).toBe(3)
@@ -224,7 +224,7 @@ describe('layoutBlock donor geometry', () => {
 			name,
 			type: '',
 			visible: true,
-			header: true,
+			row: 0,
 		}))
 		const props = makeBlock({
 			inputs: [...headerPorts, { id: 'in_1', name: 'rows', type: '', visible: true }],
@@ -239,6 +239,51 @@ describe('layoutBlock donor geometry', () => {
 		expect((headings[0].y + headings[2].y) / 2).toBe(layout.headerHeight / 2)
 		expect(blockPortSlotCount(props)).toBe(1)
 		for (const heading of headings) expect(heading.label).toBeNull()
+	})
+
+	it('tiles the Port body into row bands meeting on the dividers, arms meeting on the half-lines', () => {
+		const props = withBox(makeBlock({
+			inputs: [
+				{ id: 'in_1', name: 'a', type: '', visible: true },
+				{ id: 'in_2', name: 'b', type: '', visible: true, row: 2 },
+			],
+			outputs: [
+				{ id: 'out_1', name: 'r', type: '', visible: true },
+				{ id: 'out_2', name: 's', type: '', visible: true, branch: 1 },
+				{ id: 'out_3', name: 't', type: '', visible: true, row: 2 },
+			],
+		}), 340, 48 + 8 + 5 * 44 + 8 + 46)
+		const layout = layoutBlock(props)
+		expect(layout.headerBand).toEqual({ top: 0, bottom: layout.headerHeight })
+		expect(layout.sections.map((section) => section.row)).toEqual([1, 2])
+		const [first, second] = layout.sections
+		const groupDivider = layout.dividers.find((divider) => divider.kind === 'group')!
+		const branchDivider = layout.dividers.find((divider) => divider.kind === 'branch')!
+		expect(first.band.top).toBe(layout.bodyTop)
+		expect(first.band.bottom).toBe(groupDivider.y)
+		expect(second.band.top).toBe(groupDivider.y)
+		expect(second.band.bottom).toBe(layout.bodyTop + layout.pitch * blockPortSlotCount(props))
+		expect(first.branches.map((arm) => arm.branch)).toEqual([0, 1])
+		expect(first.branches[0].band).toEqual({ top: first.band.top, bottom: branchDivider.y })
+		expect(first.branches[1].band).toEqual({ top: branchDivider.y, bottom: first.band.bottom })
+		expect(second.branches).toEqual([{ branch: 0, band: second.band }])
+	})
+
+	it('tiles the Expanded body the same way, from the weighted sections', () => {
+		const layout = layoutBlock(makeBlock({
+			view: 'expanded',
+			inputs: [{ id: 'in_1', name: 'a', type: '', visible: true }],
+			outputs: [
+				{ id: 'out_1', name: 'r', type: '', visible: true },
+				{ id: 'out_2', name: 's', type: '', visible: true, row: 2 },
+			],
+		}))
+		const region = layout.footerTop - layout.bodyTop
+		expect(layout.sections).toHaveLength(2)
+		expect(layout.sections[0].band.top).toBe(layout.bodyTop)
+		expect(layout.sections[0].band.bottom).toBeCloseTo(layout.sections[1].band.top)
+		expect(layout.sections[1].band.bottom).toBeCloseTo(layout.bodyTop + region)
+		expect(layout.sections[0].band.bottom).toBe(layout.dividers[0].y)
 	})
 
 	it('projects Expanded into the same real child frame below its donor heading', () => {
@@ -268,9 +313,9 @@ describe('layoutBlock donor geometry', () => {
 		outputs: [
 			{ id: 'out_1', name: 'a', type: '', visible: true },
 			{ id: 'out_2', name: 'b', type: '', visible: true },
-			{ id: 'out_3', name: 'c', type: '', visible: true, branchStart: true },
-			{ id: 'out_4', name: 'd', type: '', visible: true },
-			{ id: 'out_5', name: 'e', type: '', visible: true, branchStart: true },
+			{ id: 'out_3', name: 'c', type: '', visible: true, branch: 1 },
+			{ id: 'out_4', name: 'd', type: '', visible: true, branch: 1 },
+			{ id: 'out_5', name: 'e', type: '', visible: true, branch: 2 },
 		],
 		...overrides,
 	})

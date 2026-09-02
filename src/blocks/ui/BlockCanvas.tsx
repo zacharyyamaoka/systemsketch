@@ -23,10 +23,13 @@ import {
 } from 'tldraw'
 
 import {
+  HEADER_ROW,
   blockIcon,
   expandedSectionWeights,
   isBlockShape,
   portDefaultValue,
+  portInHeader,
+  portRow,
   type BlockPortSide,
   type BlockShape,
 } from '../blockModel'
@@ -48,6 +51,7 @@ import {
 } from '../layoutBlock'
 import { insertBlockPortForInlineEditing } from '../commands/blockCommands'
 import {
+  blockHeaderPortAddAffordance,
   blockPortAddAffordance,
   getBlockPortDrag,
   getEligiblePorts,
@@ -170,11 +174,15 @@ function BlockPortDot({
     isHinting ? 'Port_hinting' : isEligible ? 'Port_eligible' : '',
   ].filter(Boolean).join(' ')
 
+  // A header dot carries no label, so its name rides the tooltip instead.
+  const inHeader = placed.side === 'input' && portInHeader(placed.port)
   return (
     <div
       className={classes}
       data-block-port-id={portId}
       data-block-port-side={placed.side}
+      data-block-port-row={portRow(placed.port)}
+      title={inHeader && !placed.subtle ? placed.port.name || undefined : undefined}
       style={{
         '--port-color': portColor(placed.port.type),
         left: placed.x,
@@ -565,13 +573,17 @@ function PortAddAffordance({
   shape,
   side,
   affordance,
+  header = false,
 }: {
   shape: BlockShape
   side: BlockPortSide
   affordance: BlockPortAddAffordance
+  /** The heading's own gutter: the port is born in row 0. */
+  header?: boolean
 }) {
   const editor = useEditor()
   const lane = side === 'inputs' ? 'input' : 'output'
+  const where = header ? 'header' : side
 
   const addPort = useCallback(() => {
     const result = insertBlockPortForInlineEditing(
@@ -579,16 +591,17 @@ function PortAddAffordance({
       shape.id,
       side,
       Number.MAX_SAFE_INTEGER,
+      header ? { section: { row: HEADER_ROW, branch: 0 } } : {},
     )
     if (!result.ok) return
     requestBlockInlineEdit(editor, shape.id, { kind: 'portName', side, portId: result.port.id })
-  }, [editor, shape.id, side])
+  }, [editor, header, shape.id, side])
 
   return (
-    <div className={`BlockNode-portAdd BlockNode-portAdd--${lane}`}>
+    <div className={`BlockNode-portAdd BlockNode-portAdd--${header ? 'header' : lane}`}>
       <div
         className="BlockNode-portAddZone"
-        data-testid={`block-port-add-zone-${side}`}
+        data-testid={`block-port-add-zone-${where}`}
         style={boxStyle(affordance.zone)}
       />
       {/*
@@ -598,10 +611,10 @@ function PortAddAffordance({
       */}
       <div
         role="button"
-        aria-label={`Add ${lane} port to ${shape.props.title.trim() || 'this Block'} on canvas`}
-        title={`Add ${lane} port`}
+        aria-label={`Add ${header ? 'header' : lane} port to ${shape.props.title.trim() || 'this Block'} on canvas`}
+        title={header ? 'Add header port' : `Add ${lane} port`}
         className="BlockNode-portAddBead"
-        data-testid={`block-port-add-${side}`}
+        data-testid={`block-port-add-${where}`}
         style={{ left: affordance.x, top: affordance.y }}
         onPointerDown={(event) => event.stopPropagation()}
         onClick={addPort}
@@ -625,14 +638,29 @@ function PortDragOverlay({
   width: number
 }) {
   const inputs = drag.side === 'inputs'
+  const { drop } = drag
   return (
     <>
+      {/* The band the port would join is tinted, so crossing a line reads as
+          arriving somewhere, not merely as a rule that moved. */}
+      <div
+        className={`BlockNode-portDropBand${drop.row === HEADER_ROW ? ' BlockNode-portDropBand--header' : ''}`}
+        data-testid="block-port-drop-band"
+        data-drop-row={drop.row}
+        data-drop-branch={drop.branch}
+        style={{
+          left: inputs ? 0 : width / 2,
+          top: drop.band.top,
+          width: width / 2,
+          height: Math.max(0, drop.band.bottom - drop.band.top),
+        }}
+      />
       <div
         className="BlockNode-portDropRule"
         data-testid="block-port-drop-rule"
         style={{
           left: inputs ? 0 : width / 2,
-          top: drag.indicatorY,
+          top: drop.indicatorY,
           width: width / 2,
         }}
       />
@@ -707,6 +735,9 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
         return affordance ? [{ side, affordance }] : []
       })
     : []
+  const headerAffordance = !simple && isSelected && !isEditing && !heldPort
+    ? blockHeaderPortAddAffordance(shape.props)
+    : null
 
   return (
     <HTMLContainer
@@ -790,6 +821,14 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
             affordance={affordance}
           />
         ))}
+        {headerAffordance ? (
+          <PortAddAffordance
+            shape={shape}
+            side="inputs"
+            affordance={headerAffordance}
+            header
+          />
+        ) : null}
         {isEditing ? <BlockInlineEditor shape={shape} /> : null}
       </div>
 

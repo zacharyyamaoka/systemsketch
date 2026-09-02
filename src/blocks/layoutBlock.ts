@@ -1,10 +1,9 @@
 import {
 	blockIcon,
 	blockPortLayout,
+	blockPortSections,
 	expandedSectionWeights,
 	portInHeader,
-	portStartsBranch,
-	portStartsGroup,
 	type BlockPort,
 	type BlockShapeProps,
 	type BlockView,
@@ -98,6 +97,23 @@ export interface BlockDivider {
 	}
 }
 
+/** A horizontal band of the Block, in Block-local y. */
+export interface BlockLayoutBand {
+	top: number
+	bottom: number
+}
+
+/**
+ * Where one body row is painted, and where each of its output arms is. The
+ * bands tile the body: a row's band runs from the divider above it to the
+ * divider below, so a pointer's y always names exactly one row and one arm.
+ */
+export interface BlockLayoutSection {
+	row: number
+	band: BlockLayoutBand
+	branches: { branch: number; band: BlockLayoutBand }[]
+}
+
 export interface BlockLayout {
 	view: BlockView
 	portLayout: PortLayout
@@ -108,6 +124,10 @@ export interface BlockLayout {
 	/** Port/Expanded heading paint and selectable frame handle; null in Simple. */
 	header: BlockRect | null
 	headerHeight: number
+	/** Row 0, the band header inputs ride; null in Simple. */
+	headerBand: BlockLayoutBand | null
+	/** The body rows the layout painted, in order; empty in Simple. */
+	sections: readonly BlockLayoutSection[]
 	/** Paint body below the heading. Simple remains the whole face for compatibility. */
 	body: BlockRect
 	bodyTop: number
@@ -134,25 +154,21 @@ function finiteDimension(value: number): number {
 	return Number.isFinite(value) ? Math.max(1, value) : 1
 }
 
-/** Split an ordered port list at its markers. A marker on the first port is a no-op. */
-function splitPorts(
-	ports: readonly BlockPort[],
-	startsNew: (port: BlockPort) => boolean,
-): BlockPort[][] {
-	const groups: BlockPort[][] = []
-	for (const port of ports) {
-		if (groups.length === 0 || (startsNew(port) && groups[groups.length - 1].length > 0)) {
-			groups.push([])
-		}
-		groups[groups.length - 1].push(port)
-	}
-	return groups
-}
-
 interface BodySlotPlan {
 	slotCount: number
 	slotOf: Map<string, number>
 	dividers: { kind: 'group' | 'branch'; slot: number }[]
+	/**
+	 * The rows in paint order with their slot ranges, and for each output arm
+	 * the slot its half-line divider took — `null` for a row's first arm, which
+	 * starts at the row itself.
+	 */
+	rows: {
+		row: number
+		start: number
+		end: number
+		branches: { branch: number; dividerSlot: number | null }[]
+	}[]
 }
 
 /**
@@ -160,45 +176,58 @@ interface BodySlotPlan {
  * dividers each consume a full slot, exactly as in the mature pyblocks face.
  */
 function planBodySlots(props: BlockShapeProps): BodySlotPlan {
-	const bodyInputs = props.inputs.filter((port) => port.visible && !portInHeader(port))
-	const outputs = props.outputs.filter((port) => port.visible)
-	const inputGroups = splitPorts(bodyInputs, portStartsGroup)
-	const outputGroups = splitPorts(outputs, portStartsGroup)
-	const groupCount = Math.max(inputGroups.length, outputGroups.length, 1)
+	const sections = blockPortSections(props, { visibleOnly: true })
 	const portLayout = blockPortLayout(props)
 
 	const slotOf = new Map<string, number>()
 	const dividers: BodySlotPlan['dividers'] = []
+	const rows: BodySlotPlan['rows'] = []
 	let slot = 0
-	for (let group = 0; group < groupCount; group += 1) {
-		if (group > 0) {
+	sections.rows.forEach((section, rowIndex) => {
+		if (rowIndex > 0) {
 			dividers.push({ kind: 'group', slot })
 			slot += 1
 		}
 
-		const inputs = inputGroups[group] ?? []
-		const branches = splitPorts(outputGroups[group] ?? [], portStartsBranch)
-		const outputSequence: ({ kind: 'port'; port: BlockPort } | { kind: 'divider' })[] = []
-		branches.forEach((branch, index) => {
-			if (index > 0) outputSequence.push({ kind: 'divider' })
-			for (const port of branch) outputSequence.push({ kind: 'port', port })
+		const inputs = section.inputs
+		const outputSequence: (
+			| { kind: 'port'; port: BlockPort }
+			| { kind: 'divider'; branch: number }
+		)[] = []
+		section.branches.forEach((arm, armIndex) => {
+			if (armIndex > 0) outputSequence.push({ kind: 'divider', branch: arm.branch })
+			for (const port of arm.outputs) outputSequence.push({ kind: 'port', port })
 		})
 
+		const rowStart = slot
 		const inputStart = slot
 		const outputStart = portLayout === 'inline' ? slot : slot + inputs.length
 		inputs.forEach((port, index) => slotOf.set(port.id, inputStart + index))
+		const dividerSlotOfArm = new Map<number, number>()
 		outputSequence.forEach((entry, index) => {
 			if (entry.kind === 'port') slotOf.set(entry.port.id, outputStart + index)
-			else dividers.push({ kind: 'branch', slot: outputStart + index })
+			else {
+				dividers.push({ kind: 'branch', slot: outputStart + index })
+				dividerSlotOfArm.set(entry.branch, outputStart + index)
+			}
 		})
 
-		const rows = portLayout === 'inline'
+		const used = portLayout === 'inline'
 			? Math.max(inputs.length, outputSequence.length)
 			: inputs.length + outputSequence.length
-		slot += Math.max(rows, 1)
-	}
+		slot += Math.max(used, 1)
+		rows.push({
+			row: section.row,
+			start: rowStart,
+			end: slot,
+			branches: section.branches.map((arm) => ({
+				branch: arm.branch,
+				dividerSlot: dividerSlotOfArm.get(arm.branch) ?? null,
+			})),
+		})
+	})
 
-	return { slotCount: Math.max(slot, 1), slotOf, dividers }
+	return { slotCount: Math.max(slot, 1), slotOf, dividers, rows }
 }
 
 export function blockPortSlotCount(props: BlockShapeProps): number {
@@ -244,38 +273,44 @@ function placeExpandedBody(
 	bodyBottom: number,
 	place: (port: BlockPort, side: 'input' | 'output', y: number) => void,
 	dividers: BlockDivider[],
+	sections: BlockLayoutSection[],
 ) {
 	const regionHeight = Math.max(0, bodyBottom - bodyTop)
 	const weights = expandedSectionWeights(props)
-	const bodyInputs = props.inputs.filter((port) => port.visible && !portInHeader(port))
-	const outputs = props.outputs.filter((port) => port.visible)
-	const inputGroups = splitPorts(bodyInputs, portStartsGroup)
-	const outputGroups = splitPorts(outputs, portStartsGroup)
-	const groupCount = Math.max(inputGroups.length, outputGroups.length, 1)
+	const table = blockPortSections(props, { visibleOnly: true })
 
 	const groups: {
+		row: number
 		inputs: BlockPort[]
-		branches: BlockPort[][]
+		branches: { branch: number; ports: BlockPort[] }[]
 		key: string
 		weight: number
 		slots: number
 	}[] = []
 
-	for (let index = 0; index < groupCount; index += 1) {
-		const inputs = inputGroups[index] ?? []
-		const groupOutputs = outputGroups[index] ?? []
-		const branches = groupOutputs.length > 0 ? splitPorts(groupOutputs, portStartsBranch) : []
+	table.rows.forEach((section, index) => {
+		const inputs = section.inputs
+		const groupOutputs = section.branches.flatMap((arm) => arm.outputs)
+		const branches = groupOutputs.length > 0
+			? section.branches.map((arm) => ({ branch: arm.branch, ports: arm.outputs }))
+			: []
 		const outputSlots = groupOutputs.length + Math.max(0, branches.length - 1)
 		const firstPort = groupOutputs[0] ?? inputs[0]
 		const key = `g:${firstPort ? firstPort.id : index}`
 		const slots = Math.max(inputs.length, outputSlots)
-		groups.push({ inputs, branches, key, weight: weights[key] ?? slots + 1, slots })
-	}
+		groups.push({ row: section.row, inputs, branches, key, weight: weights[key] ?? slots + 1, slots })
+	})
 
 	const totalWeight = groups.reduce((sum, group) => sum + group.weight, 0) || 1
 	let groupTop = bodyTop
 	groups.forEach((group, groupIndex) => {
 		const groupHeight = (regionHeight * group.weight) / totalWeight
+		const groupSection: BlockLayoutSection = {
+			row: group.row,
+			band: { top: groupTop, bottom: groupTop + groupHeight },
+			branches: [],
+		}
+		sections.push(groupSection)
 		if (groupIndex > 0) {
 			const previous = groups[groupIndex - 1]
 			dividers.push({
@@ -300,40 +335,46 @@ function placeExpandedBody(
 			place(port, 'input', groupTop + (groupHeight * (index + 1)) / (group.inputs.length + 1))
 		})
 
-		const sections = group.branches.map((branch) => {
-			const key = `b:${branch[0].id}`
-			return { branch, key, weight: weights[key] ?? branch.length + 1 }
+		const arms = group.branches.map((arm) => {
+			const key = `b:${arm.ports[0].id}`
+			return { ...arm, key, weight: weights[key] ?? arm.ports.length + 1 }
 		})
-		const sectionTotal = sections.reduce((sum, section) => sum + section.weight, 0) || 1
-		let sectionTop = groupTop
-		sections.forEach((section, sectionIndex) => {
-			const sectionHeight = (groupHeight * section.weight) / sectionTotal
-			if (sectionIndex > 0) {
-				const previous = sections[sectionIndex - 1]
+		const armTotal = arms.reduce((sum, arm) => sum + arm.weight, 0) || 1
+		let armTop = groupTop
+		arms.forEach((arm, armIndex) => {
+			const armHeight = (groupHeight * arm.weight) / armTotal
+			groupSection.branches.push({
+				branch: arm.branch,
+				band: { top: armTop, bottom: armTop + armHeight },
+			})
+			if (armIndex > 0) {
+				const previous = arms[armIndex - 1]
 				dividers.push({
 					kind: 'branch',
 					x: width / 2,
-					y: sectionTop,
+					y: armTop,
 					w: width / 2,
 					adjust: {
 						prevKey: previous.key,
-						nextKey: section.key,
+						nextKey: arm.key,
 						prevWeight: previous.weight,
-						nextWeight: section.weight,
-						rangeTop: sectionTop - (groupHeight * previous.weight) / sectionTotal,
-						rangeBottom: sectionTop + sectionHeight,
-						prevMin: minExpandedSectionHeight(previous.branch.length),
-						nextMin: minExpandedSectionHeight(section.branch.length),
+						nextWeight: arm.weight,
+						rangeTop: armTop - (groupHeight * previous.weight) / armTotal,
+						rangeBottom: armTop + armHeight,
+						prevMin: minExpandedSectionHeight(previous.ports.length),
+						nextMin: minExpandedSectionHeight(arm.ports.length),
 					},
 				})
 			}
-			section.branch.forEach((port, index) => {
-				place(port, 'output', sectionTop + (
-					sectionHeight * (index + 1)
-				) / (section.branch.length + 1))
+			arm.ports.forEach((port, index) => {
+				place(port, 'output', armTop + (armHeight * (index + 1)) / (arm.ports.length + 1))
 			})
-			sectionTop += sectionHeight
+			armTop += armHeight
 		})
+		// A row with no visible outputs still has one arm, spanning the row.
+		if (groupSection.branches.length === 0) {
+			groupSection.branches.push({ branch: 0, band: { ...groupSection.band } })
+		}
 
 		groupTop += groupHeight
 	})
@@ -482,6 +523,9 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 			height,
 			header: null,
 			headerHeight: 0,
+			// A capsule has no burger: no heading band, no body rows to divide.
+			headerBand: null,
+			sections: [],
 			body: bounds,
 			bodyTop: 0,
 			footerTop: height,
@@ -608,6 +652,8 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 			height,
 			header: null,
 			headerHeight,
+			headerBand: null,
+			sections: [],
 			body: bounds,
 			bodyTop,
 			footerTop,
@@ -650,6 +696,7 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 
 	const descriptionReserve = showsDescription(props) ? DESCRIPTION_LINE_HEIGHT_PX + 4 : 0
 	const dividers: BlockDivider[] = []
+	const sections: BlockLayoutSection[] = []
 	let pitch = NODE_ROW_HEIGHT_PX
 
 	if (view === 'expanded') {
@@ -667,7 +714,7 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 			}
 			placed.push({ port, side, x, y, label, subtle: false, lifted: true })
 		}
-		placeExpandedBody(props, width, bodyTop, bodyBottom, place, dividers)
+		placeExpandedBody(props, width, bodyTop, bodyBottom, place, dividers, sections)
 	} else {
 		const plan = planBodySlots(props)
 		const available = Math.max(
@@ -676,6 +723,26 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 		)
 		pitch = Math.min(NODE_ROW_HEIGHT_PX, available / plan.slotCount)
 		const centreOf = (slot: number) => bodyTop + pitch * slot + pitch / 2
+
+		// Bands meet on the divider lines, which sit at a slot's centre; the
+		// first row starts at the body and the last runs to the rows' end.
+		const rowsBottom = bodyTop + pitch * plan.slotCount
+		plan.rows.forEach((row, index) => {
+			const top = index === 0 ? bodyTop : centreOf(row.start - 1)
+			const bottom = index === plan.rows.length - 1
+				? rowsBottom
+				: centreOf(plan.rows[index + 1].start - 1)
+			const branches = row.branches.map((arm, armIndex) => ({
+				branch: arm.branch,
+				band: {
+					top: armIndex === 0 || arm.dividerSlot === null ? top : centreOf(arm.dividerSlot),
+					bottom: armIndex === row.branches.length - 1
+						? bottom
+						: centreOf(row.branches[armIndex + 1].dividerSlot ?? row.end),
+				},
+			}))
+			sections.push({ row: row.row, band: { top, bottom }, branches })
+		})
 
 		const placeBody = (ports: readonly BlockPort[], side: 'input' | 'output') => {
 			for (const port of ports) {
@@ -759,6 +826,8 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 		height,
 		header,
 		headerHeight,
+		headerBand: { top: 0, bottom: headerHeight },
+		sections,
 		body,
 		bodyTop,
 		footerTop,

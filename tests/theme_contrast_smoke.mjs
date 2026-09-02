@@ -70,7 +70,7 @@ const PROBES = [
   { label: 'Share button', selector: '.systemsketch-share-button', kind: 'text-on-accent' },
   { label: 'toolbar tool icon (resting)', selector: '.tlui-main-toolbar__tools .tlui-button__tool:not([aria-pressed="true"])', kind: 'icon' },
   { label: 'toolbar tool icon (active)', selector: '.tlui-main-toolbar__tools .tlui-button__tool[aria-pressed="true"]', kind: 'icon', pseudo: '::after' },
-  { label: 'Block tool button', selector: '[data-testid="systemsketch-tool-block"]', kind: 'icon' },
+  { label: 'System tool-family button', selector: '[data-testid="systemsketch-tool-system"]', kind: 'icon' },
   { label: 'utility strip button', selector: '.systemsketch-utility-strip .tlui-button', kind: 'icon' },
   { label: 'inspector active tab', selector: '.block-inspector__tabs > [role="tab"].is-active', kind: 'text' },
   { label: 'inspector section title', selector: '.block-inspector__section-title', kind: 'text' },
@@ -91,6 +91,9 @@ const DIALOG_PROBES = [
   { label: 'settings inactive category', selector: '.systemsketch-settings__nav button:not(.is-active):not(:disabled)', kind: 'text' },
   { label: 'theme option label (active)', selector: '.systemsketch-theme-option.is-active .systemsketch-theme-option__label', kind: 'text' },
   { label: 'theme option detail', selector: '.systemsketch-theme-option:not(.is-active) .systemsketch-theme-option__detail', kind: 'text' },
+  { label: 'zoom-controls heading', selector: '.systemsketch-settings__appearance-heading h3', kind: 'text' },
+  { label: 'zoom-buttons preference label', selector: '.systemsketch-settings__toggle-row strong', kind: 'text' },
+  { label: 'zoom-buttons preference detail', selector: '.systemsketch-settings__toggle-row small', kind: 'text' },
   { label: 'Import button', selector: '.systemsketch-settings__import', kind: 'text' },
   { label: 'dialog close button icon', selector: '.systemsketch-settings__header .tlui-button', kind: 'icon' },
 ]
@@ -223,7 +226,7 @@ async function setStoredTheme(page, theme) {
 
 async function waitForApp(page) {
   await waitFor(page, `document.querySelector('.tl-container') && document.querySelector('[data-testid="systemsketch-theme-root"]')`, 'the app root')
-  await waitFor(page, `document.querySelector('[data-testid="systemsketch-tool-block"]')`, 'the toolbar')
+  await waitFor(page, `document.querySelector('[data-testid="systemsketch-tool-system"]')`, 'the toolbar')
   await delay(400)
 }
 

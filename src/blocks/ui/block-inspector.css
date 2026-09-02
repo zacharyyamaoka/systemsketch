@@ -424,6 +424,7 @@
 }
 
 .block-inspector__ports {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -433,14 +434,133 @@
 }
 
 .block-inspector__port-row {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 64px 22px;
+  grid-template-columns: 14px minmax(0, 1fr) 64px 22px;
   gap: 5px;
   align-items: center;
 }
 
 .block-inspector__port-row:has(.block-inspector__port-default) {
-  grid-template-columns: minmax(0, 1fr) 56px 44px 22px;
+  grid-template-columns: 14px minmax(0, 1fr) 56px 44px 22px;
+}
+
+/* The grip is the row's only handle: everything else on the row already means
+ * edit or delete. It rides the row's left edge, faint until the row is hovered. */
+.block-inspector__grip {
+  display: grid;
+  width: 14px;
+  height: 24px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 4px;
+  color: var(--ss-text-faint);
+  background: transparent;
+  opacity: .45;
+  cursor: grab;
+  touch-action: none;
+}
+
+.block-inspector__port-row:hover .block-inspector__grip,
+.block-inspector__managed-row:hover .block-inspector__grip,
+.block-inspector__grip:focus-visible {
+  opacity: 1;
+}
+
+.block-inspector__grip:disabled {
+  opacity: .2;
+  cursor: default;
+}
+
+.block-inspector__ports.is-dragging .block-inspector__grip {
+  cursor: grabbing;
+}
+
+/* The held row is a card in flight, exactly as on the canvas: opaque, lifted,
+ * and the only thing that moves. The rows it passes stay put; the bar and the
+ * band say where it would land. */
+.block-inspector__port-row.is-dragging,
+.block-inspector__managed-row.is-dragging {
+  z-index: 4;
+  border-radius: 6px;
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-2);
+}
+
+.block-inspector__drop-bar {
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 2px solid var(--ss-accent);
+  pointer-events: none;
+}
+
+.block-inspector__drop-band {
+  position: absolute;
+  z-index: 1;
+  left: -4px;
+  right: -4px;
+  border-radius: 6px;
+  background: var(--ss-accent-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ss-accent) 22%, transparent);
+  pointer-events: none;
+}
+
+/* The lines of the burger, as the canvas draws them: a full line for a row,
+ * the right half for an arm, and the heading's own line at the top of the
+ * inputs — the one you drag a port above. */
+.block-inspector__divider {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 12px;
+  margin: -1px 0;
+}
+
+.block-inspector__divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--ss-border);
+}
+
+.block-inspector__divider--branch .block-inspector__divider-line {
+  margin-left: 50%;
+}
+
+.block-inspector__divider--header .block-inspector__divider-line {
+  height: 2px;
+  background: var(--ss-border-strong);
+}
+
+.block-inspector__divider-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .09em;
+  color: var(--ss-text-faint);
+  text-transform: uppercase;
+}
+
+/* A section with no port of this lane: slim, so an empty row costs little,
+ * and open while a drag could land in it. */
+.block-inspector__empty-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 8px;
+  margin: -3px 0;
+  border-radius: 6px;
+  color: var(--ss-text-faint);
+  font-size: 10px;
+  transition: height 90ms ease-in-out;
+}
+
+.block-inspector__empty-section.is-open {
+  height: 22px;
+  margin: 0;
+  border: 1px dashed var(--ss-border-strong);
 }
 
 .block-inspector__port-row input {
@@ -472,8 +592,9 @@
 }
 
 .block-inspector__managed-row {
+  position: relative;
   display: grid;
-  grid-template-columns: 26px minmax(0, 1fr) 48px 28px;
+  grid-template-columns: 14px 26px minmax(0, 1fr) 48px 28px;
   gap: 4px;
   min-height: 34px;
   align-items: center;

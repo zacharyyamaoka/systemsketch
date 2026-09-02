@@ -119,6 +119,7 @@ const noopActions: BlockInspectorActions = {
   updatePort() {},
   removePort() {},
   movePort() {},
+  movePortToSection() {},
 }
 
 describe('the Pill section', () => {
