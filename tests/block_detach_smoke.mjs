@@ -72,7 +72,18 @@ const painted = (page) => evaluate(page, `(() => {
   return JSON.stringify(counts)
 })()`).then(JSON.parse)
 
+/**
+ * Wait for a painted Block, then measure it.
+ *
+ * Waiting rather than reading once is not politeness. The local workspace polls
+ * the file every 1.5s and reloads on a clean external change, and a reload
+ * re-runs `loadSnapshot` — for a frame or two the canvas has no Block in it at
+ * all. Measuring on the first look turned this journey intermittent.
+ */
 async function blockCanvasBox(page, index = 0) {
+  await waitFor(page,
+    `document.querySelectorAll('.systemsketch-block-canvas').length > ${index}`,
+    `a painted Block at index ${index}`)
   const value = await evaluate(page, `(() => {
     const element = document.querySelectorAll('.systemsketch-block-canvas')[${index}]
     if (!element) return null
@@ -80,6 +91,38 @@ async function blockCanvasBox(page, index = 0) {
     return JSON.stringify({ x: rect.x, y: rect.y, w: rect.width, h: rect.height })
   })()`)
   if (!value) throw new Error(`Missing Block canvas at index ${index}`)
+  const rect = JSON.parse(value)
+  return { ...rect, cx: rect.x + rect.w / 2, cy: rect.y + rect.h / 2 }
+}
+
+/** Remembered outer groups and their immediate nested port-row groups. */
+async function detachedTree(page) {
+  return evaluate(page, `(() => {
+    const editor = window.__systemsketch?.editor
+    if (!editor) return JSON.stringify({ blocks: [], rows: [] })
+    const blocks = editor.getCurrentPageShapes()
+      .filter((shape) => shape.type === 'group' && shape.meta?.systemSketch?.kind === 'block')
+      .map((shape) => shape.id)
+    const rows = blocks.flatMap((blockId) => editor.getSortedChildIdsForParent(blockId)
+      .filter((id) => editor.getShape(id)?.type === 'group'))
+    return JSON.stringify({ blocks, rows })
+  })()`).then(JSON.parse)
+}
+
+/** A shape's page bounds projected into client coordinates. */
+async function shapeBox(page, shapeId) {
+  const value = await evaluate(page, `(() => {
+    const editor = window.__systemsketch?.editor
+    const bounds = editor?.getShapePageBounds(${JSON.stringify(shapeId)})
+    if (!editor || !bounds) return null
+    const topLeft = editor.pageToViewport({ x: bounds.x, y: bounds.y })
+    const bottomRight = editor.pageToViewport({ x: bounds.maxX, y: bounds.maxY })
+    return JSON.stringify({
+      x: topLeft.x, y: topLeft.y,
+      w: bottomRight.x - topLeft.x, h: bottomRight.y - topLeft.y,
+    })
+  })()`)
+  if (!value) throw new Error(`Missing shape bounds for ${shapeId}`)
   const rect = JSON.parse(value)
   return { ...rect, cx: rect.x + rect.w / 2, cy: rect.y + rect.h / 2 }
 }
@@ -150,14 +193,16 @@ async function main() {
     await waitFor(page, `document.querySelectorAll('[data-shape-type="block"]').length === 1`,
       'one Block to become primitives')
     const afterOne = await painted(page)
+    const afterOneTree = await detachedTree(page)
     check('BECOMES-STOCK', 'the detached Block is gone and stock primitives stand in its place',
       {
         blocks: afterOne.block ?? 0,
         geo: (afterOne.geo ?? 0) > 0,
         text: (afterOne.text ?? 0) > 0,
-        group: afterOne.group ?? 0,
+        blockGroups: afterOneTree.blocks.length,
+        portRowGroups: afterOneTree.rows.length,
       },
-      { blocks: 1, geo: true, text: true, group: 1 })
+      { blocks: 1, geo: true, text: true, blockGroups: 1, portRowGroups: 1 })
     check('CABLE-BECOMES-ARROW', 'the semantic cable becomes a stock arrow, and no cable is left',
       { cables: await cables(page), arrows: afterOne.arrow ?? 0 },
       { cables: 0, arrows: 1 })
@@ -178,9 +223,11 @@ async function main() {
     // arrow — found by driving the review fixture, not by this file.
     const lonely = await blockCanvasBox(page, 0)
     await runMenuItem(page, lonely, 'block-detach-to-primitives', 'Detach to primitives')
-    await waitFor(page, `document.querySelectorAll('[data-shape-type="group"]').length === 1`,
+    await waitFor(page, `window.__systemsketch.editor.getCurrentPageShapes()
+      .filter((shape) => shape.type === 'group' && shape.meta?.systemSketch?.kind === 'block').length === 1`,
       'one Block to become a group')
-    const lonelyGroup = await box(page, '[data-shape-type="group"]')
+    const [lonelyGroupId] = (await detachedTree(page)).blocks
+    const lonelyGroup = await shapeBox(page, lonelyGroupId)
     await runMenuItem(page, lonelyGroup, 'block-rebuild-from-primitives', 'Rebuild from primitives')
     await waitFor(page, `document.querySelectorAll('[data-shape-type="block"]').length === 2`,
       'the lone Block to be rebuilt')
@@ -200,9 +247,14 @@ async function main() {
     await runMenuItem(page, selected, 'block-detach-to-primitives', 'Detach to primitives')
     await waitFor(page, `document.querySelectorAll('[data-shape-type="block"]').length === 0`,
       'both Blocks to become primitives')
+    const bothTree = await detachedTree(page)
     check('SWEEPS-A-SELECTION', 'one command detaches the whole selection into two groups',
-      { blocks: (await painted(page)).block ?? 0, groups: (await painted(page)).group ?? 0 },
-      { blocks: 0, groups: 2 })
+      {
+        blocks: (await painted(page)).block ?? 0,
+        blockGroups: bothTree.blocks.length,
+        portRowGroups: bothTree.rows.length,
+      },
+      { blocks: 0, blockGroups: 2, portRowGroups: 2 })
     await shot(page, 'detach-after-both.png')
 
     await saved(page)
@@ -227,16 +279,22 @@ async function main() {
 
     // -------------------------------------------- move it, then rebuild -----
     await openApp(page, port, `?board=${encodeURIComponent(boardPath)}`)
-    await waitFor(page, `document.querySelectorAll('[data-shape-type="group"]').length === 2`,
+    await waitFor(page, `document.querySelectorAll('[data-shape-type="group"]').length >= 4`,
       'both groups to reopen from the .tldr')
+    const reopenedTree = await detachedTree(page)
     check('REOPENS-AS-PRIMITIVES', 'reopened, it is still stock shapes — no SystemSketch shape',
-      { blocks: (await painted(page)).block ?? 0, groups: (await painted(page)).group ?? 0 },
-      { blocks: 0, groups: 2 })
+      {
+        blocks: (await painted(page)).block ?? 0,
+        blockGroups: reopenedTree.blocks.length,
+        portRowGroups: reopenedTree.rows.length,
+      },
+      { blocks: 0, blockGroups: 2, portRowGroups: 2 })
 
     // A real drag, and a big one: the rebuild has to land where the group was
     // LEFT, and a two-pixel nudge is a signal small enough for a rebuild that
     // ignored the group entirely to pass by coincidence.
-    const groupBefore = await box(page, '[data-shape-type="group"]')
+    const movedGroupId = reopenedTree.blocks[0]
+    const groupBefore = await shapeBox(page, movedGroupId)
     await clickAt(page, groupBefore.cx, groupBefore.cy)
     // Out-wait tldraw's 450ms double-click window before pressing the same spot
     // again: two presses inside it enter the group instead of dragging it, and
@@ -246,13 +304,13 @@ async function main() {
       { x: groupBefore.cx, y: groupBefore.cy },
       { x: groupBefore.cx, y: groupBefore.cy + 220 })
     await delay(300)
-    const groupAfter = await box(page, '[data-shape-type="group"]')
+    const groupAfter = await shapeBox(page, movedGroupId)
     const moved = Math.round(groupAfter.cy - groupBefore.cy)
     if (Math.abs(moved) < 100) throw new Error(`the group barely moved (${moved}px) — the position check would be meaningless`)
 
     await shortcut(page, 'a', 'KeyA', 2)
     await delay(300)
-    const anyGroup = await box(page, '[data-shape-type="group"]')
+    const anyGroup = await shapeBox(page, movedGroupId)
     await runMenuItem(page, anyGroup, 'block-rebuild-from-primitives', 'Rebuild from primitives')
     await waitFor(page, `document.querySelectorAll('[data-shape-type="block"]').length === 2`,
       'both Blocks to be rebuilt from what the groups remembered')
