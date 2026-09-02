@@ -21,6 +21,8 @@ PRODUCT = "systemsketch"
 CHANNELS_SCHEMA_VERSION = 1
 MANIFEST_SCHEMA_VERSION = 1
 CONTROLLER_RUNTIME_FILES = (
+    "recorder_frames.mjs",
+    "recording_store.py",
     "release_lib.py",
     "server.py",
     "workspace_store.py",
@@ -328,6 +330,8 @@ def build_release(project_root: Path, release_home: Path, dist: Path) -> tuple[s
         shutil.copy2(project_root / "scripts" / "server.py", runtime / "server.py")
         shutil.copy2(project_root / "scripts" / "release_lib.py", runtime / "release_lib.py")
         shutil.copy2(project_root / "scripts" / "workspace_store.py", runtime / "workspace_store.py")
+        shutil.copy2(project_root / "scripts" / "recording_store.py", runtime / "recording_store.py")
+        shutil.copy2(project_root / "scripts" / "recorder_frames.mjs", runtime / "recorder_frames.mjs")
         manifest = {
             "product": PRODUCT,
             "schemaVersion": MANIFEST_SCHEMA_VERSION,
@@ -408,6 +412,8 @@ def install_controller(project_root: Path, release_home: Path) -> Path:
         "release_lib.py": "release_lib.py",
         "server.py": "server.py",
         "workspace_store.py": "workspace_store.py",
+        "recording_store.py": "recording_store.py",
+        "recorder_frames.mjs": "recorder_frames.mjs",
     }
     for source_name, destination_name in mapping.items():
         source = project_root / "scripts" / source_name

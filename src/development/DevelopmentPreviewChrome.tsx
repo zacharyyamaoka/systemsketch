@@ -51,6 +51,7 @@ import {
   resolveDevelopmentProfile,
 } from '../developmentProfiles'
 import { loadPreviewCloneFromCurrentUrl } from '../previewClone'
+import { RecorderControls, RecorderIndicator } from '../recorder/RecorderControls'
 import { runReleaseAction } from '../releaseClient'
 import './development-preview.css'
 
@@ -207,6 +208,9 @@ export function DevelopmentPreviewChrome() {
       <button type="button" disabled={busy} onClick={() => void returnToStable()}>
         {busy ? 'Returning…' : 'Return to Stable'}
       </button>
+      {/* The presets are where bugs are expected, so the recorder lives here too. */}
+      <RecorderControls compact />
+      <RecorderIndicator label={developmentProfileLabel(profile)} />
     </aside>
   )
 }

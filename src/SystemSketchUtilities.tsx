@@ -37,6 +37,8 @@ import {
   type MakeStablePhase,
 } from './releaseModel'
 import { getPortablePreviewSnapshot, loadPreviewCloneFromCurrentUrl } from './previewClone'
+import { RecorderControls } from './recorder/RecorderControls'
+import { setRecorderChannel } from './recorder/recorderStore'
 import { useChrome } from './chrome/ChromeProvider'
 import { startReleaseRefresh } from './releaseRefresh'
 import { cablePresentation, setDashAfterPill } from './blocks/connections/connectionPresentation'
@@ -262,6 +264,11 @@ export function SystemSketchNavigationPanel() {
 
   const isPreview = status?.channel === 'preview'
   const previewAvailable = hasNewPreview(status)
+
+  // The recorder stamps each packet with the channel it was taken from.
+  useEffect(() => {
+    if (status) setRecorderChannel({ channel: status.channel, build: status.build, version: status.version })
+  }, [status])
   const releaseSummary = versionStatusLabel(status)
   const makeStable = makeStablePhase(status, {
     armed,
@@ -445,6 +452,8 @@ export function SystemSketchNavigationPanel() {
               </button>
             ))}
           </div>
+
+          <RecorderControls />
 
           <button
             type="button"

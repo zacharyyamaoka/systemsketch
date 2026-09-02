@@ -259,6 +259,7 @@ export async function startApp({
   width = 1440,
   height = 960,
   allowSourceRoot = false,
+  cdpToApi = false,
 } = {}) {
   const name = label ?? 'systemsketch-smoke'
   const port = await freePort()
@@ -279,6 +280,26 @@ export async function startApp({
   delete headlessEnv.DISPLAY
   delete headlessEnv.WAYLAND_DISPLAY
 
+  // Chrome first: it depends on nothing, and a journey that proves the flight
+  // recorder's frames needs its DevTools port BEFORE the Python host starts,
+  // the way the desktop launcher hands `--cdp-port` to the real host.
+  const chrome = spawn(chromePath, [
+    '--headless=new', '--disable-dev-shm-usage', '--disable-gpu', '--no-sandbox',
+    '--no-first-run', '--no-default-browser-check', '--disable-extensions',
+    '--remote-allow-origins=*', '--remote-debugging-address=127.0.0.1', '--remote-debugging-port=0',
+    '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1',
+    `--user-data-dir=${chromeProfile}`, `--window-size=${width},${height}`, 'about:blank',
+  ], { stdio: 'ignore' })
+  let earlyCdpPort = null
+  if (cdpToApi) {
+    try {
+      earlyCdpPort = await waitForDevTools(chromeProfile, chrome)
+    } catch (error) {
+      chrome.kill('SIGKILL')
+      throw error
+    }
+  }
+
   const apiArguments = [
     join(ROOT, 'scripts', 'server.py'),
     '--port', String(apiPort),
@@ -288,6 +309,7 @@ export async function startApp({
     '--release-home', releaseHome,
     '--source-root', ROOT,
     '--files-root', filesRoot,
+    ...(earlyCdpPort ? ['--cdp-port', String(earlyCdpPort)] : []),
   ]
   if (allowSourceRoot) apiArguments.push('--allow-source-root')
   const api = spawn('python3', apiArguments, {
@@ -309,13 +331,6 @@ export async function startApp({
       child.stderr.on('data', (chunk) => process.stderr.write(chunk))
     }
   }
-  const chrome = spawn(chromePath, [
-    '--headless=new', '--disable-dev-shm-usage', '--disable-gpu', '--no-sandbox',
-    '--no-first-run', '--no-default-browser-check', '--disable-extensions',
-    '--remote-allow-origins=*', '--remote-debugging-address=127.0.0.1', '--remote-debugging-port=0',
-    '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1',
-    `--user-data-dir=${chromeProfile}`, `--window-size=${width},${height}`, 'about:blank',
-  ], { stdio: 'ignore' })
 
   const close = () => {
     chrome.kill('SIGKILL')
@@ -331,7 +346,7 @@ export async function startApp({
       } catch { if (attempt === 120) throw new Error('Vite never became ready') }
       await delay(100)
     }
-    const cdpPort = await waitForDevTools(chromeProfile, chrome)
+    const cdpPort = earlyCdpPort ?? await waitForDevTools(chromeProfile, chrome)
     const page = await newPage(cdpPort)
     await page.send('Page.enable')
     await page.send('Runtime.enable')
