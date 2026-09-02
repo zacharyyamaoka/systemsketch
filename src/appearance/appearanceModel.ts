@@ -26,6 +26,13 @@ import {
   type StyleProp,
 } from 'tldraw'
 
+import { ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
+import {
+  FIGJAM_COLOR_LABELS,
+  FIGJAM_COLOR_NAMES,
+  FIGJAM_PALETTE_COLUMNS,
+} from './figjamPalette'
+
 export type AppearanceControlId =
   | 'geo'
   | 'color'
@@ -37,6 +44,7 @@ export type AppearanceControlId =
   | 'verticalAlign'
   | 'arrowKind'
   | 'spline'
+  | 'connectionRouting'
   | 'arrowheadStart'
   | 'arrowheadEnd'
 
@@ -69,21 +77,14 @@ export interface AppearanceControl {
 const option = (value: string, label: string): AppearanceOption => ({ value, label })
 
 /**
- * tldraw's thirteen colours, neutrals first and then each hue beside its light
- * twin, so the grid reads in rows the way FigJam's saturated-over-light pair
- * does. FigJam has eleven full pairs; tldraw only carries four light variants,
- * so an 11x2 grid would be mostly holes.
+ * FigJam's palette, in FigJam's own order: eleven saturated colours, then the
+ * eleven light twins beneath them. These are registered on the editor through
+ * a stock theme (see `figjamPalette.ts`), so every name here is a value
+ * `DefaultColorStyle` actually accepts.
  */
-export const APPEARANCE_COLORS = [
-  'black', 'grey', 'white',
-  'red', 'light-red',
-  'orange', 'yellow',
-  'green', 'light-green',
-  'blue', 'light-blue',
-  'violet', 'light-violet',
-] as const
+export const APPEARANCE_COLORS = FIGJAM_COLOR_NAMES
 
-export const APPEARANCE_COLOR_COLUMNS = 7
+export const APPEARANCE_COLOR_COLUMNS = FIGJAM_PALETTE_COLUMNS
 
 /** tldraw's fill values, named the way FigJam names the three it has. */
 const FILL_OPTIONS = [
@@ -131,14 +132,32 @@ const VERTICAL_ALIGN_OPTIONS = [
   option('end', 'Bottom'),
 ] as const
 
-const ARROW_KIND_OPTIONS = [
-  option('arc', 'Curved'),
+/**
+ * FigJam's line shapes, in FigJam's order: `Elbowed Curved Straight`, read out
+ * of its own popover. A SystemSketch cable has exactly these three, so this is
+ * the one control that reaches FigJam's full vocabulary.
+ */
+const CONNECTION_ROUTING_OPTIONS = [
   option('elbow', 'Elbowed'),
+  option('curved', 'Curved'),
+  option('straight', 'Straight'),
+] as const
+
+/**
+ * tldraw's own arrow and line carry a narrower vocabulary than a cable: an
+ * arrow is arced or elbowed, a line is straight or curved. They are shown as
+ * the same control with the same glyphs, holding whichever of FigJam's three
+ * the shape can actually be — the menu never offers a state a shape cannot
+ * hold, which is the rule the whole model is built on.
+ */
+const ARROW_KIND_OPTIONS = [
+  option('elbow', 'Elbowed'),
+  option('arc', 'Curved'),
 ] as const
 
 const SPLINE_OPTIONS = [
-  option('line', 'Straight'),
   option('cubic', 'Curved'),
+  option('line', 'Straight'),
 ] as const
 
 /** FigJam shows six endings and hides the rest; tldraw has nine, all shown. */
@@ -222,6 +241,19 @@ const DEFINITIONS: readonly Definition[] = [
     style: DefaultVerticalAlignStyle as StyleProp<string>,
     options: VERTICAL_ALIGN_OPTIONS, layout: 'row',
   },
+  // Start, shape, end — the order FigJam uses, and the order the arrow itself
+  // reads in: where it leaves, how it travels, where it lands. Captured from
+  // FigJam's connector menu as `Start point | Line shape | End point`.
+  {
+    id: 'arrowheadStart', label: 'Start point',
+    style: ArrowShapeArrowheadStartStyle as StyleProp<string>,
+    options: ARROWHEAD_OPTIONS, layout: 'row',
+  },
+  {
+    id: 'connectionRouting', label: 'Line shape',
+    style: ConnectionRoutingStyle as StyleProp<string>,
+    options: CONNECTION_ROUTING_OPTIONS, layout: 'row',
+  },
   {
     id: 'arrowKind', label: 'Line shape', style: ArrowShapeKindStyle as StyleProp<string>,
     options: ARROW_KIND_OPTIONS, layout: 'row',
@@ -231,19 +263,16 @@ const DEFINITIONS: readonly Definition[] = [
     options: SPLINE_OPTIONS, layout: 'row',
   },
   {
-    id: 'arrowheadStart', label: 'Start point',
-    style: ArrowShapeArrowheadStartStyle as StyleProp<string>,
-    options: ARROWHEAD_OPTIONS, layout: 'row',
-  },
-  {
     id: 'arrowheadEnd', label: 'End point',
     style: ArrowShapeArrowheadEndStyle as StyleProp<string>,
     options: ARROWHEAD_OPTIONS, layout: 'row',
   },
 ]
 
-/** `light-red` reads as `Light red` in a tooltip. */
+/** FigJam's own name for a colour, falling back to a readable slug. */
 export function colorLabel(value: string): string {
+  const figjam = FIGJAM_COLOR_LABELS[value]
+  if (figjam) return figjam
   const words = value.replace(/-/g, ' ')
   return words.charAt(0).toUpperCase() + words.slice(1)
 }

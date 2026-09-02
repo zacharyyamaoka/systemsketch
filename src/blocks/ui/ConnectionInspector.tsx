@@ -31,6 +31,7 @@ import {
 	setConnectionRoutingForSelection,
 } from '../commands'
 import { isBlockShape } from '../blockModel'
+import { sameSharedStyle } from '../commands/blockStyleCommands'
 import { CONNECTION_SHAPE_TYPE } from '../connections/connectionModel'
 import './block-inspector.css'
 
@@ -83,10 +84,33 @@ export function getConnectionInspectorContext(editor: Editor): ConnectionInspect
 	}
 }
 
+/** Same panel, same words: the previous context is kept, so nothing re-renders. */
+function sameConnectionInspectorContext(
+	previous: unknown,
+	next: ConnectionInspectorContext | null,
+): previous is ConnectionInspectorContext | null {
+	if (previous === next) return true
+	if (typeof previous !== 'object' || previous === null || next === null) return false
+	const before = previous as ConnectionInspectorContext
+	return before.count === next.count
+		&& before.authored === next.authored
+		&& sameSharedStyle(before.routing, next.routing)
+		&& (before.endpoints === next.endpoints || (
+			before.endpoints !== null && next.endpoints !== null
+			&& before.endpoints.from === next.endpoints.from
+			&& before.endpoints.to === next.endpoints.to
+		))
+}
+
 export function EditorConnectionInspector({ editor }: { editor: Editor }) {
+	// Re-resolved whenever a selected cable's record changes — every frame it
+	// is dragged — but kept when the panel would read the same thing.
 	const context = useValue(
 		'connection inspector context',
-		() => getConnectionInspectorContext(editor),
+		(previous?: unknown) => {
+			const next = getConnectionInspectorContext(editor)
+			return sameConnectionInspectorContext(previous, next) ? previous : next
+		},
 		[editor],
 	)
 	const setRouting = useCallback(

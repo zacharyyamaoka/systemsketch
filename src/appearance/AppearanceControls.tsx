@@ -24,7 +24,7 @@ import './appearance.css'
  * Where FigJam draws a hairline. Its pill groups what a thing *is* apart from
  * how it is painted, and both apart from its text.
  */
-const GROUP_STARTS = new Set(['color', 'font', 'arrowKind'])
+const GROUP_STARTS = new Set(['color', 'font', 'arrowheadStart'])
 
 /**
  * The appearance half of the selection menu, modelled on FigJam's.

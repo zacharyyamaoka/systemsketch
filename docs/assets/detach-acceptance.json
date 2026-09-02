@@ -1,0 +1,200 @@
+[
+  {
+    "id": "AUTHORED",
+    "label": "two Blocks and one semantic cable are authored through the real tools",
+    "observed": {
+      "blocks": 2,
+      "cables": 1
+    },
+    "desired": {
+      "blocks": 2,
+      "cables": 1
+    },
+    "ok": true
+  },
+  {
+    "id": "BECOMES-STOCK",
+    "label": "the detached Block is gone and stock primitives stand in its place",
+    "observed": {
+      "blocks": 1,
+      "geo": true,
+      "text": true,
+      "group": 1
+    },
+    "desired": {
+      "blocks": 1,
+      "geo": true,
+      "text": true,
+      "group": 1
+    },
+    "ok": true
+  },
+  {
+    "id": "CABLE-BECOMES-ARROW",
+    "label": "the semantic cable becomes a stock arrow, and no cable is left",
+    "observed": {
+      "cables": 0,
+      "arrows": 1
+    },
+    "desired": {
+      "cables": 0,
+      "arrows": 1
+    },
+    "ok": true
+  },
+  {
+    "id": "ONE-UNDO",
+    "label": "a single Ctrl+Z puts the whole detach back — Block, cable and all",
+    "observed": {
+      "blocks": 2,
+      "cables": 1
+    },
+    "desired": {
+      "blocks": 2,
+      "cables": 1
+    },
+    "ok": true
+  },
+  {
+    "id": "REBUILDS-AGAINST-A-LIVE-BLOCK",
+    "label": "rebuilding one of a wired pair restores the cable to the Block that never left",
+    "observed": {
+      "blocks": 2,
+      "cables": 1,
+      "arrows": 0
+    },
+    "desired": {
+      "blocks": 2,
+      "cables": 1,
+      "arrows": 0
+    },
+    "ok": true
+  },
+  {
+    "id": "SWEEPS-A-SELECTION",
+    "label": "one command detaches the whole selection into two groups",
+    "observed": {
+      "blocks": 0,
+      "groups": 2
+    },
+    "desired": {
+      "blocks": 0,
+      "groups": 2
+    },
+    "ok": true
+  },
+  {
+    "id": "SURVIVES-THE-FILE",
+    "label": "the saved .tldr carries the record on the group, and marks the card",
+    "observed": [
+      "arrow:connection",
+      "geo:block-card",
+      "geo:block-card",
+      "group:block",
+      "group:block"
+    ],
+    "desired": [
+      "arrow:connection",
+      "geo:block-card",
+      "geo:block-card",
+      "group:block",
+      "group:block"
+    ],
+    "ok": true
+  },
+  {
+    "id": "REMEMBERS-THE-SEMANTICS",
+    "label": "and the record is the whole Block, not a picture of one",
+    "observed": [
+      "decode",
+      "sink"
+    ],
+    "desired": [
+      "decode",
+      "sink"
+    ],
+    "ok": true
+  },
+  {
+    "id": "IS-A-REAL-TLDRAW-FILE",
+    "label": "while the document itself stays a plain tldraw file",
+    "observed": {
+      "envelope": false,
+      "customShapes": false
+    },
+    "desired": {
+      "envelope": false,
+      "customShapes": false
+    },
+    "ok": true
+  },
+  {
+    "id": "REOPENS-AS-PRIMITIVES",
+    "label": "reopened, it is still stock shapes — no SystemSketch shape",
+    "observed": {
+      "blocks": 0,
+      "groups": 2
+    },
+    "desired": {
+      "blocks": 0,
+      "groups": 2
+    },
+    "ok": true
+  },
+  {
+    "id": "REBUILDS-THE-BLOCKS",
+    "label": "the Blocks come back, and the arrow is a semantic cable again",
+    "observed": {
+      "blocks": 2,
+      "cables": 1,
+      "arrows": 0,
+      "groups": 0
+    },
+    "desired": {
+      "blocks": 2,
+      "cables": 1,
+      "arrows": 0,
+      "groups": 0
+    },
+    "ok": true
+  },
+  {
+    "id": "REBUILDS-THE-SEMANTICS",
+    "label": "with their titles and ports, not a picture of them",
+    "observed": {
+      "titles": [
+        "decode",
+        "sink"
+      ],
+      "ports": [
+        "in_1",
+        "out_1"
+      ]
+    },
+    "desired": {
+      "titles": [
+        "decode",
+        "sink"
+      ],
+      "ports": [
+        "in_1",
+        "out_1"
+      ]
+    },
+    "ok": true
+  },
+  {
+    "id": "REBUILDS-WHERE-THE-GROUP-IS",
+    "label": "at where the group was left (moved 220px), not where the Block once was",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "CLEAN",
+    "label": "the journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

@@ -1,0 +1,4 @@
+interface:
+  display_name: "SystemSketch Review Fixture"
+  short_description: "Build feature-specific visual review boards"
+  default_prompt: "Use $systemsketch-review-fixture to seed a visual verification board for the feature I just implemented."

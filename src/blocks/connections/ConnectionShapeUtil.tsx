@@ -6,6 +6,8 @@ import {
 	T,
 	Vec,
 	createComputedCache,
+	createShapePropsMigrationIds,
+	createShapePropsMigrationSequence,
 	createShapeId,
 	isShapeId,
 	type Editor,
@@ -136,10 +138,34 @@ export const connectionShapeProps: RecordProps<ConnectionShape> = {
 	elbowRoute: elbowRouteValidator.nullable(),
 }
 
+const connectionVersions = createShapePropsMigrationIds(CONNECTION_SHAPE_TYPE, {
+	AddAuthoredRoutingGeometry: 1,
+})
+
+const connectionShapeMigrations = createShapePropsMigrationSequence({
+	sequence: [{
+		id: connectionVersions.AddAuthoredRoutingGeometry,
+		up(props) {
+			// Connections created before authored routing landed have none of these
+			// keys. Make the automatic route explicit before the current validator
+			// sees the persisted record.
+			if (props.curve === undefined) props.curve = null
+			if (props.pins === undefined) props.pins = []
+			if (props.elbowRoute === undefined) props.elbowRoute = null
+		},
+		down(props) {
+			delete props.curve
+			delete props.pins
+			delete props.elbowRoute
+		},
+	}],
+})
+
 /** A minimal semantic cable: custom identity and stock tldraw handle lifecycle. */
 export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 	static override type = CONNECTION_SHAPE_TYPE
 	static override props = connectionShapeProps
+	static override migrations = connectionShapeMigrations
 
 	override getDefaultProps(): ConnectionShape['props'] {
 		return {

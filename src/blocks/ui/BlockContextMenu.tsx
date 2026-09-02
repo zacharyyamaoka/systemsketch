@@ -31,6 +31,7 @@ import {
   removeBlockPort,
   updateBlockDetails,
 } from '../commands/blockCommands'
+import { detachSelectedBlocks, rebuildSelectedBlocks, selectedBlockIds, selectedDetachedGroupIds } from '../detach'
 import { getBlockPortMenuTarget, type BlockPortRef } from '../ports'
 import {
   getBlockSelectionStyles,
@@ -79,11 +80,39 @@ function batchSuffix(count: number): string {
   return count > 1 ? ` (${count})` : ''
 }
 
+/**
+ * The stock root wraps the canvas: `DefaultContextMenu` renders `<Canvas />`
+ * inside its trigger. So this component subscribes to nothing that changes
+ * while a shape moves — every one of its re-renders is a re-render of the
+ * whole canvas tree, measured as O(shapes) of React work per drag frame. The
+ * items below read the selection, and they mount only while the menu is open.
+ */
 export function BlockContextMenu(props: TLUiContextMenuProps) {
   const editor = useEditor()
   // Remounts the stock root when Radix's uncontrolled `open` gets stranded,
   // which otherwise makes every right-click after the first one a no-op.
   const stockRootEpoch = useStockContextMenuRootEpoch(editor)
+  return (
+    <DefaultContextMenu key={stockRootEpoch} {...props}>
+      <BlockContextMenuItems />
+    </DefaultContextMenu>
+  )
+}
+
+function BlockContextMenuItems() {
+  const editor = useEditor()
+  // Detach and its inverse are counts, not one-Block commands: a sweep over a
+  // multi-selection is the normal case, and the label says how many.
+  const detachableCount = useValue(
+    'context-menu detachable Blocks',
+    () => selectedBlockIds(editor).length,
+    [editor],
+  )
+  const rebuildableCount = useValue(
+    'context-menu rebuildable groups',
+    () => selectedDetachedGroupIds(editor).length,
+    [editor],
+  )
   // Structural commands (Add, Step into) still need one unambiguous Block:
   // they create identity and open an inline editor on it.
   const selectedBlock = useValue(
@@ -173,7 +202,7 @@ export function BlockContextMenu(props: TLUiContextMenuProps) {
   }
 
   return (
-    <DefaultContextMenu key={stockRootEpoch} {...props}>
+    <>
       {portTarget ? (
         <TldrawUiMenuGroup id="systemsketch-block-port">
           <TldrawUiMenuItem
@@ -301,6 +330,25 @@ export function BlockContextMenu(props: TLUiContextMenuProps) {
         </TldrawUiMenuGroup>
       ) : null}
 
+      {detachableCount > 0 || rebuildableCount > 0 ? (
+        <TldrawUiMenuGroup id="systemsketch-block-detach">
+          {detachableCount > 0 ? (
+            <TldrawUiMenuItem
+              id="block-detach-to-primitives"
+              label={`Detach to primitives${batchSuffix(detachableCount)}`}
+              onSelect={() => void detachSelectedBlocks(editor)}
+            />
+          ) : null}
+          {rebuildableCount > 0 ? (
+            <TldrawUiMenuItem
+              id="block-rebuild-from-primitives"
+              label={`Rebuild Block${rebuildableCount > 1 ? 's' : ''} from primitives${batchSuffix(rebuildableCount)}`}
+              onSelect={() => void rebuildSelectedBlocks(editor)}
+            />
+          ) : null}
+        </TldrawUiMenuGroup>
+      ) : null}
+
       {connectionCount > 0 && connectionRouting ? (
         <TldrawUiMenuGroup id="systemsketch-connection-routing">
           <TldrawUiMenuSubmenu
@@ -323,6 +371,6 @@ export function BlockContextMenu(props: TLUiContextMenuProps) {
       ) : null}
 
       <DefaultContextMenuContent />
-    </DefaultContextMenu>
+    </>
   )
 }

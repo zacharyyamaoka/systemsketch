@@ -16,11 +16,13 @@
     "test:release-ui": "node tests/release_channel_controls_smoke.mjs",
     "test:selection-menu": "node tests/selection_menu_smoke.mjs",
     "test:appearance": "node tests/appearance_menu_smoke.mjs",
+    "test:arrows": "node tests/arrow_drawing_smoke.mjs",
     "test:edges": "node tests/block_edges_acceptance.mjs",
     "test:edge-editor": "node tests/block_edge_editor_smoke.mjs",
     "test:scale": "node tests/interface_scale_anchoring_smoke.mjs",
     "test:reveal": "node tests/edge_reveal_area_smoke.mjs",
     "test:polarity": "node tests/edge_polarity_smoke.mjs",
+    "test:visibility": "node tests/block_collapse_visibility_smoke.mjs",
     "test:workspace": "node tests/workspace_browser_smoke.mjs",
     "test:windows": "node tests/desktop_windows_smoke.mjs",
     "test:arrow-sync": "node tests/edge_arrow_sync_smoke.mjs",
@@ -38,7 +40,11 @@
     "desktop:status": "python3 scripts/launch_systemsketch.py --status",
     "desktop:stop": "python3 scripts/launch_systemsketch.py --stop --all",
     "test:file-type": "node tests/systemsketch_file_type_smoke.mjs",
-    "test:file-type-stable": "node tests/stable_file_type_probe.mjs"
+    "test:file-type-stable": "node tests/stable_file_type_probe.mjs",
+    "test:detach": "node tests/block_detach_smoke.mjs",
+    "test:theme": "node --experimental-strip-types tests/theme_contrast_smoke.mjs",
+    "theme:import": "node --experimental-strip-types scripts/import_vscode_theme.mjs",
+    "theme:obsidian": "python3 scripts/extract_obsidian_palette.py"
   },
   "dependencies": {
     "lucide-react": "1.33.0",

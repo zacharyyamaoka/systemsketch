@@ -10,6 +10,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { getDefaultBlockProps, type BlockShape } from './blocks/blockModel'
 import { getBlockInlineField, rememberBlockInlineField } from './blocks/inlineBlockEditing'
 import {
+  TEXT_ON_DEMAND_SHAPE_TYPES,
   installInstantTextEditing,
   isPrimaryTextDrawing,
   primaryTextEditorKind,
@@ -125,7 +126,7 @@ function beginGesture(harness: ReturnType<typeof editorHarness>, toolId: string)
 
 describe('instant primary text editing', () => {
   it('recognizes every stock drawing shape with a primary text field plus Block', () => {
-    for (const type of ['geo', 'arrow', 'note', 'text']) {
+    for (const type of ['geo', 'note', 'text']) {
       const candidate = shape(type, { richText: toRichText('') })
       expect(primaryTextEditorKind(candidate)).toBe('rich-text')
       expect(isPrimaryTextDrawing(type, candidate)).toBe(true)
@@ -135,6 +136,18 @@ describe('instant primary text editing', () => {
     expect(primaryTextEditorKind(blockShape())).toBe('block-title')
     expect(primaryTextEditorKind(shape('draw', { segments: [] }))).toBe(null)
     expect(primaryTextEditorKind(shape('connection', {}))).toBe(null)
+  })
+
+  it('leaves a connector to be labelled on demand, never on creation', () => {
+    expect(TEXT_ON_DEMAND_SHAPE_TYPES).toEqual(['arrow', 'line'])
+
+    for (const type of TEXT_ON_DEMAND_SHAPE_TYPES) {
+      const drawn = shape(type, { richText: toRichText('') })
+      // tldraw's own editor is still the right one for a deliberate
+      // double-click; drawing one simply does not reach for it.
+      expect(primaryTextEditorKind(drawn)).toBe('rich-text')
+      expect(isPrimaryTextDrawing(type, drawn)).toBe(false)
+    }
   })
 
   it('uses tldraw rich-text editing after the stock draw gesture completes', () => {

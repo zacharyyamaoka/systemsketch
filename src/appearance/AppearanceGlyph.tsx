@@ -2,6 +2,8 @@ import type { ReactElement, ReactNode } from 'react'
 import { useValue, type Editor } from 'tldraw'
 
 import type { AppearanceControl } from './appearanceModel'
+import { FIGJAM_ICONS } from './figjamIcons'
+import { figjamIconName } from './figjamIconMap'
 
 /**
  * What an appearance option looks like.
@@ -20,6 +22,15 @@ export function AppearanceGlyph({
 }) {
   if (control.id === 'color') {
     return <ColorSwatch editor={editor} name={value} />
+  }
+  // FigJam's own icon wherever FigJam draws this value. The drawn glyphs below
+  // stay for the states tldraw has and FigJam does not.
+  const figjam = figjamIconName(control.id, value)
+  if (figjam && FIGJAM_ICONS[figjam]) {
+    // FigJam draws one arrowhead set and mirrors it for the far end, so the
+    // icon always points the way the arrow travels. The traced paths are the
+    // start orientation; the end control flips them.
+    return <FigjamGlyph name={figjam} flipped={control.id === 'arrowheadEnd'} />
   }
   if (control.id === 'fill') {
     return <FillGlyph value={value} />
@@ -43,6 +54,38 @@ export function AppearanceGlyph({
     return <RoutingGlyph value={value} />
   }
   return <ArrowheadGlyph value={value} atStart={control.id === 'arrowheadStart'} />
+}
+
+/**
+ * One of FigJam's traced icons, drawn at its own viewBox.
+ *
+ * FigJam's icons are filled paths, not strokes, so this sets `data-filled` and
+ * lets the stylesheet paint them with `currentColor` — the same way FigJam
+ * paints its own with a CSS variable.
+ */
+function FigjamGlyph({ name, flipped }: { name: string; flipped?: boolean }) {
+  const icon = FIGJAM_ICONS[name]
+  // FigJam's control icons are square; its typeface icons are the word drawn in
+  // that face, and are much wider than tall. Letterboxing a 47x10 word into a
+  // 24px square would shrink it to nothing, so a wide icon keeps its own ratio.
+  const [, , width, height] = icon.viewBox.split(' ').map(Number)
+  const wide = width > height * 1.2
+  return (
+    <svg
+      viewBox={icon.viewBox}
+      className="systemsketch-appearance__glyph"
+      data-filled=""
+      data-natural={wide ? '' : undefined}
+      data-flipped={flipped ? '' : undefined}
+      data-icon={name}
+      style={wide ? { width: `${(width / height) * 14}px`, height: '14px' } : undefined}
+      aria-hidden="true"
+    >
+      {icon.paths.map((path, index) => (
+        <path key={index} d={path.d} fillRule={path.rule as 'evenodd' | 'nonzero' | undefined} />
+      ))}
+    </svg>
+  )
 }
 
 function Svg({ children }: { children: ReactNode }) {

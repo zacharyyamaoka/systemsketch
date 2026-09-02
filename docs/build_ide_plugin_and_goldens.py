@@ -440,13 +440,14 @@ python3 scripts/bootstrap_systemsketch_goldens.py</code></pre>
   </div>
 
   <div class="card">
-    <h3 style="margin-top:0">The board stays light in a dark workbench <span class="tag warn">deliberate</span></h3>
-    <p>Throwing tldraw's dark mode from the host bridge works — it was measured doing exactly
-    that. It is not switched on, because SystemSketch's popout chrome is authored light-only:
-    the inspector's header colour and divider are fixed light values, so a dark board renders
-    its title invisible. The host's choice is still carried to the canvas and stamped on the
-    root, and the journey pins today's answer, so turning it on has to be a deliberate change
-    made alongside themed panels.</p>
+    <h3 style="margin-top:0">The board follows the workbench <span class="tag">shipped</span></h3>
+    <p>The host's light/dark choice now reaches tldraw itself — the journey reads
+    <code>.tl-theme__dark</code> and the painted canvas colour off the webview — and the chrome
+    around it wears the workbench's own <code>--vscode-*</code> variables through one theme
+    block in <code>src/theme/tokens.css</code>. The inspector that used to render its title
+    near-black on near-black is measured as a WCAG ratio in the host's theme, on the same
+    element, and must clear 4.5:1. How the token layer works, and what it measured across
+    five themes, is in the <a href="theming-{date.today().isoformat()}.html">theming report</a>.</p>
   </div>
 </section>
 

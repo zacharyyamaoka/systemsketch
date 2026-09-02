@@ -5,6 +5,7 @@
  */
 import {
   useCallback,
+  useMemo,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
@@ -48,12 +49,14 @@ import { insertBlockPortForInlineEditing } from '../commands/blockCommands'
 import {
   blockPortAddAffordance,
   getBlockPortDrag,
+  getEligiblePorts,
   portState,
   type BlockPortAddAffordance,
   type BlockPortDragState,
 } from '../ports'
 import { BlockIconGlyph } from './blockIcons'
 import { stepIntoDepthScope } from '../../depth/depthNavigation'
+import { portColor } from './portPalette'
 import './block-canvas.css'
 
 const SIMPLE_ICON_PX = 40
@@ -66,16 +69,6 @@ const boxStyle = (box: BlockRect): CSSProperties => ({
   width: box.w,
   height: box.h,
 })
-
-function portColor(type: string): string {
-  const normalized = type.trim().toLowerCase()
-  if (normalized === 'image') return '#c060e0'
-  if (normalized === 'text' || normalized === 'str' || normalized === 'string') return '#4caf50'
-  if (normalized === 'model') return '#2196f3'
-  if (normalized === 'number' || normalized === 'int' || normalized === 'float') return '#9e9e9e'
-  if (normalized === 'latent') return '#ff9800'
-  return '#c08520'
-}
 
 interface DrawnPort {
   placed: LaidOutBlockPort
@@ -132,7 +125,7 @@ function BlockPortDot({
   const isEligible = useValue(
     'port eligible',
     () => {
-      const { eligiblePorts } = portState.get(editor)
+      const eligiblePorts = getEligiblePorts(editor)
       if (!eligiblePorts) return false
       return judgeConnection(
         editor,
@@ -571,13 +564,17 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
   const editor = useEditor()
   const layout = layoutBlock(shape.props)
   // A cable on either face of a port fills its dot: the dot is the port, and
-  // the faces are the two sides of the boundary it sits on.
-  const connectedIds = useValue(
-    'connected Block port ids',
-    () => new Set(
-      getBlockPortConnections(editor, shape.id).map((connection) => connection.ownPortId),
-    ),
+  // the faces are the two sides of the boundary it sits on. The wiring table
+  // keeps its identity while its entries do, so a Block that merely moved —
+  // whose record changed but whose cables did not — does not repaint here.
+  const connections = useValue(
+    'Block port connections',
+    () => getBlockPortConnections(editor, shape.id),
     [editor, shape.id],
+  )
+  const connectedIds = useMemo(
+    () => new Set(connections.map((connection) => connection.ownPortId)),
+    [connections],
   )
   const drawnPorts = portsToDraw(layout.ports, connectedIds)
   const simple = layout.view === 'simple'
