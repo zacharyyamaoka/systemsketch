@@ -1,0 +1,137 @@
+[
+  {
+    "id": "AUTHORED",
+    "label": "a real board: two Blocks and one semantic cable",
+    "observed": {
+      "blocks": 2,
+      "cables": 1
+    },
+    "desired": {
+      "blocks": 2,
+      "cables": 1
+    },
+    "ok": true
+  },
+  {
+    "id": "OFFERS-TLDR",
+    "label": "the export dialog names the format it writes",
+    "observed": {
+      "title": "Export to tldraw",
+      "suffix": ".tldr"
+    },
+    "desired": {
+      "title": "Export to tldraw",
+      "suffix": ".tldr"
+    },
+    "ok": true
+  },
+  {
+    "id": "EXPORTS-A-PLAIN-TLDRAW-FILE",
+    "label": "the exported file holds only stock shapes, and carries no SystemSketch envelope",
+    "observed": {
+      "types": [
+        "arrow",
+        "geo",
+        "group",
+        "line",
+        "text"
+      ],
+      "envelope": false,
+      "version": 1
+    },
+    "desired": {
+      "types": [
+        "arrow",
+        "geo",
+        "group",
+        "line",
+        "text"
+      ],
+      "envelope": false,
+      "version": 1
+    },
+    "ok": true
+  },
+  {
+    "id": "EXPORT-REMEMBERS",
+    "label": "and every Block is still in there, as a record on its group",
+    "observed": [
+      "decode",
+      "sink"
+    ],
+    "desired": [
+      "decode",
+      "sink"
+    ],
+    "ok": true
+  },
+  {
+    "id": "DOCUMENT-SURVIVES-ON-SCREEN",
+    "label": "the board on screen is unchanged — still Blocks, still wired",
+    "observed": {
+      "blocks": 2,
+      "cables": 1
+    },
+    "desired": {
+      "blocks": 2,
+      "cables": 1
+    },
+    "ok": true
+  },
+  {
+    "id": "DOCUMENT-SURVIVES-ON-DISK",
+    "label": "and so is the .systemsketch on disk — the export borrowed it and put it back",
+    "observed": {
+      "types": [
+        "block",
+        "connection"
+      ],
+      "envelope": true,
+      "detachedGroups": 0
+    },
+    "desired": {
+      "types": [
+        "block",
+        "connection"
+      ],
+      "envelope": true,
+      "detachedGroups": 0
+    },
+    "ok": true
+  },
+  {
+    "id": "TLDR-OPENS-AS-PRIMITIVES",
+    "label": "the exported file opens with no SystemSketch shape in it",
+    "observed": 0,
+    "desired": 0,
+    "ok": true
+  },
+  {
+    "id": "ROUND-TRIPS",
+    "label": ".systemsketch → .tldr → Blocks again, with the cable",
+    "observed": {
+      "blocks": 2,
+      "cables": 1,
+      "titles": [
+        "decode",
+        "sink"
+      ]
+    },
+    "desired": {
+      "blocks": 2,
+      "cables": 1,
+      "titles": [
+        "decode",
+        "sink"
+      ]
+    },
+    "ok": true
+  },
+  {
+    "id": "CLEAN",
+    "label": "the journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]
