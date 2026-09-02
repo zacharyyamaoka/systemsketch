@@ -87,7 +87,8 @@ export function blockPortAddAffordance(
 	props: BlockShapeProps,
 	side: BlockPortSide,
 ): BlockPortAddAffordance | null {
-	if (props.view === 'simple') return null
+	// Simple has no lanes to grow, and a capsule has exactly one outlet by definition.
+	if (props.view === 'simple' || props.view === 'value') return null
 
 	const layout = layoutBlock(props)
 	const lane = layout.ports.filter((placed) => placed.side === laneSide(side))

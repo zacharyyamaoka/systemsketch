@@ -5,6 +5,7 @@ import {
 	createShapePropsMigrationSequence,
 	Group2d,
 	Rectangle2d,
+	Stadium2d,
 	type RecordProps,
 	type TLDragShapesInInfo,
 	type TLDragShapesOutInfo,
@@ -14,6 +15,8 @@ import {
 import {
 	BLOCK_SHAPE_PROPS,
 	BLOCK_SHAPE_TYPE,
+	DEFAULT_BLOCK_VIEW_SIZES,
+	PILL_TOOL_ID,
 	canReparentDraggedShapesIntoBlock,
 	canBlockContainChildren,
 	findBlockContainmentTarget,
@@ -22,6 +25,13 @@ import {
 	resizeBlockProps,
 	type BlockShape,
 } from './blockModel'
+import {
+	createValueBlockProps,
+	isBlankBlockProps,
+	normalizeValueBlockProps,
+	valueBlockLabel,
+	valueBlockText,
+} from './valueBlock'
 import {
 	blockInlineFieldAtPoint,
 	blockInlineFieldFromClientPoint,
@@ -32,6 +42,7 @@ import {
 import {
 	BLOCK_CORNER_RADIUS,
 	BLOCK_PORT_RADIUS,
+	VALUE_FONT_PX,
 	layoutBlock,
 	type BlockLayout,
 } from './layoutBlock'
@@ -41,6 +52,7 @@ import { stepIntoDepthScope } from '../depth/depthNavigation'
 const blockVersions = createShapePropsMigrationIds(BLOCK_SHAPE_TYPE, {
 	RestorePyblocksUi: 1,
 	PortLayoutStyle: 2,
+	ValueView: 3,
 })
 
 const LEGACY_VIEW_SIZES = {
@@ -73,6 +85,20 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 	const ink = '#27272a'
 	const muted = '#a1a1aa'
 	const divider = '#e4e4e7'
+
+	if (layout.view === 'value') {
+		return (
+			<g pointerEvents="none">
+				<rect x={0.75} y={0.75} width={Math.max(0, w - 1.5)} height={Math.max(0, h - 1.5)} rx={h / 2} fill="#f4f4f5" stroke="#9ca3af" strokeWidth={1.5} />
+				<text x={w / 2} y={h / 2} textAnchor="middle" dominantBaseline="middle" fill={ink} fontFamily="ui-monospace, monospace" fontSize={VALUE_FONT_PX} fontWeight={500}>
+					{valueBlockText(valueBlockLabel(shape.props))}
+				</text>
+				{layout.ports.filter((placed) => !placed.subtle).map((placed) => (
+					<circle key={`${placed.side}:${placed.port.id}`} cx={placed.x} cy={placed.y} r={BLOCK_PORT_RADIUS} fill={surface} stroke={exportPortColor(placed.port.type)} strokeWidth={2} />
+				))}
+			</g>
+		)
+	}
 
 	return (
 		<g pointerEvents="none">
@@ -211,14 +237,70 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 			// The pre-style validator accepted a present portLayout, so stepping
 			// back down needs no change to the record.
 			down: 'none',
+		}, {
+			id: blockVersions.ValueView,
+			up(props) {
+				// The Block gained a fourth view, `value` — the capsule a literal
+				// argument wears. Every Block remembers a box per view, so records
+				// written before the view existed need its box filled in.
+				const views = props.views as Record<string, { w: number; h: number }> | undefined
+				if (views && !views.value) {
+					props.views = { ...views, value: { ...DEFAULT_BLOCK_VIEW_SIZES.value } }
+				}
+			},
+			down(props) {
+				const views = props.views as Record<string, { w: number; h: number }> | undefined
+				if (views?.value) {
+					const { value: _value, ...rest } = views
+					props.views = rest
+				}
+				if (props.view === 'value') {
+					// An older reader has no capsule; the Simple card is the honest fallback.
+					props.view = 'simple'
+					const box = (props.views as Record<string, { w: number; h: number }> | undefined)?.simple
+					if (box) {
+						props.w = box.w
+						props.h = box.h
+					}
+				}
+			},
 		}],
 	})
+
+	/**
+	 * The capsule's invariants (no inputs, one typed outlet, a box that fits
+	 * the text) hold on every write, however the write arrived: a typed
+	 * literal, a batch view switch, a pasted record.
+	 */
+	override onBeforeCreate(next: BlockShape): BlockShape | void {
+		// The Pill tool draws through the stock box tool, whose click path makes
+		// the default Block and never calls the tool's onCreate (only the drag
+		// path does). This seam sees every creation, so a blank Block drawn while
+		// the Pill tool is active becomes a capsule here — before the box tool
+		// reads its size to centre it on the click.
+		const drawnAsPill = this.editor.getCurrentToolId() === PILL_TOOL_ID
+			&& isBlankBlockProps(next.props)
+		const props = drawnAsPill
+			? createValueBlockProps(next.props)
+			: normalizeValueBlockProps(next.props)
+		return props === next.props ? undefined : { ...next, props }
+	}
+
+	/** A capsule sizes itself to its text; there is nothing to drag a handle for. */
+	override canResize(shape: BlockShape): boolean {
+		return shape.props.view !== 'value'
+	}
 
 	override getDefaultProps(): BlockShape['props'] {
 		return getDefaultBlockProps()
 	}
 
 	override onBeforeUpdate(previous: BlockShape, next: BlockShape): BlockShape | void {
+		if (next.props.view === 'value') {
+			const props = normalizeValueBlockProps(next.props, previous.props)
+			return props === next.props ? undefined : { ...next, props }
+		}
+
 		const viewChanged = previous.props.view !== next.props.view
 		const sizeChanged = previous.props.w !== next.props.w || previous.props.h !== next.props.h
 		const remembered = next.props.views[next.props.view]
@@ -327,11 +409,17 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	override getGeometry(shape: BlockShape) {
 		const layout = layoutBlock(shape.props)
 		const isContainer = canBlockContainChildren(shape.props.view)
-		const body = new Rectangle2d({
-			width: layout.bounds.w,
-			height: layout.bounds.h,
-			isFilled: !isContainer,
-		})
+		const body = shape.props.view === 'value'
+			? new Stadium2d({
+					width: layout.bounds.w,
+					height: layout.bounds.h,
+					isFilled: true,
+				})
+			: new Rectangle2d({
+					width: layout.bounds.w,
+					height: layout.bounds.h,
+					isFilled: !isContainer,
+				})
 		const header = isContainer && layout.header
 			? new Rectangle2d({
 					width: layout.header.w,
@@ -364,7 +452,7 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	override getIndicatorPath(shape: BlockShape): Path2D {
 		const { w, h } = layoutBlock(shape.props).bounds
 		const path = new Path2D()
-		path.roundRect(0, 0, w, h, BLOCK_CORNER_RADIUS)
+		path.roundRect(0, 0, w, h, shape.props.view === 'value' ? h / 2 : BLOCK_CORNER_RADIUS)
 		const drawn = new Set<string>()
 		for (const port of layoutBlock(shape.props).ports) {
 			if (port.subtle) continue

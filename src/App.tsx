@@ -6,6 +6,7 @@ import { EXCALIDRAW_SHAPE_UTILS, registerExcalidrawPasteHandler } from './excali
 import {
   BlockShapeUtil,
   BlockTool,
+  PillTool,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
 } from './blocks'
@@ -78,7 +79,7 @@ const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
  * tldraw keeps painting and hit-testing the handle itself.
  */
 const SYSTEMSKETCH_OVERLAY_UTILS = [...blockConnectionOverlayUtils]
-const SYSTEMSKETCH_TOOLS = [BlockTool]
+const SYSTEMSKETCH_TOOLS = [BlockTool, PillTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: DevelopmentPreviewChrome,
 }
@@ -197,7 +198,7 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
         persistenceKey={developmentPersistenceKey(profile)}
         shapeUtils={isBlockDevelopment ? BLOCK_DEVELOPMENT_SHAPE_UTILS : undefined}
         themes={SYSTEMSKETCH_THEMES}
-        tools={isBlockDevelopment ? [BlockTool] : undefined}
+        tools={isBlockDevelopment ? [BlockTool, PillTool] : undefined}
       />
     </main>
   )

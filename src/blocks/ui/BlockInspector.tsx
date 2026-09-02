@@ -557,7 +557,9 @@ export function BlockInspectorContent({
             </p>
           </section>
 
-          <PortSection side="inputs" ports={props.inputs} actions={actions} />
+          {props.view !== 'value' ? (
+            <PortSection side="inputs" ports={props.inputs} actions={actions} />
+          ) : null}
           <PortSection side="outputs" ports={props.outputs} actions={actions} />
 
           <section className="block-inspector__section" data-inspector-section="Ports">

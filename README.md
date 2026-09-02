@@ -129,6 +129,8 @@ The [IDE plugin and golden-case report](docs/ide-plugin-and-goldens-2026-09-01.h
 
 The [literal-argument pill Babble + Prune](docs/literal-pill-babble-2026-09-01.html) compares five ways to draw a literal call argument (`estimate(frame, 2.0)`) as a source: a stock Capsule, a Block in a `value` view, a pill docked on its port, the workflow kit's inline literal on the row, and a locals rail owned by the enclosing Expanded Block. Every hero is live on one run() fixture and regenerates its Python as you click, with estimate's own definition default kept on the row so the two can never share a rendering. It provisionally recommends the Value Block with the inline row as its single-use form; nothing in the renderer changed.
 
+The [literal-argument pill implementation report](docs/literal-pill-implementation-2026-09-01.html) shows the chosen Capsule live: the Block's fourth view, `value`, drawn by **P** or picked as **Value** from a dropped cable, with the literal as its title, the outlet's name as the variable name, the type inferred from the literal, a long literal folded to `= …`, and a wired input's definition-default chip dimmed. `npm run test:pill` drives all of it in the real app (27 checks across Block Dev and the product), and the report records why the capsule is made in the shape util's create seam rather than the tool.
+
 ## The IDE plugin
 
 ```bash

@@ -341,6 +341,7 @@ async function main() {
       { label: 'Simple', checked: 'false' },
       { label: 'Port', checked: 'false' },
       { label: 'Expanded', checked: 'false' },
+      { label: 'Value', checked: 'false' },
     ])
     await clickMenuCheckbox(page, 'block-view', 'Simple')
     await waitFor(page,
@@ -361,6 +362,7 @@ async function main() {
       { label: 'Simple', checked: 'true' },
       { label: 'Port', checked: 'false' },
       { label: 'Expanded', checked: 'false' },
+      { label: 'Value', checked: 'false' },
     ])
     await openSubmenu(page, 'block-ports')
     assert.deepEqual(await menuCheckboxes(page, 'block-ports'), [

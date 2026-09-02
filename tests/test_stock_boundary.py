@@ -31,6 +31,8 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}", product_source)
         self.assertIn("BlockShapeUtil", source)
         self.assertIn("BlockTool", source)
+        self.assertIn("PillTool", source)
+        self.assertIn("const SYSTEMSKETCH_TOOLS = [BlockTool, PillTool]", source)
         self.assertIn("...blockConnectionShapeUtils", source)
         self.assertIn("const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]", source)
         self.assertIn("registerExcalidrawPasteHandler(editor)", product_source)

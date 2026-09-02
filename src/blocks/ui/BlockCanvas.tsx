@@ -30,6 +30,7 @@ import {
   type BlockShape,
 } from '../blockModel'
 import { BlockInlineEditor } from '../BlockInlineEditor'
+import { valueBlockLabel, valueBlockOutlet } from '../valueBlock'
 import { getBlockPortConnections } from '../connections/blockPorts'
 import { judgeConnection } from '../connections/connectionRules'
 import {
@@ -299,6 +300,54 @@ function BlockFooterMenu({ shape }: { shape: BlockShape }) {
   )
 }
 
+/**
+ * The capsule: `= 2.0`, or `gain = 2.0` once named. The literal is the Block's
+ * title and the name is its outlet's name, so both are ordinary inline fields.
+ * While unnamed, the `=` itself carries the name field — that is the click
+ * that names a literal — and a folded literal keeps its full text in the
+ * capsule's tooltip.
+ */
+function ValueFace({ shape }: { shape: BlockShape }) {
+  const layout = layoutBlock(shape.props)
+  const label = valueBlockLabel(shape.props)
+  const outlet = valueBlockOutlet(shape.props)
+  const nameField = outlet
+    ? blockInlineFieldAttribute({ kind: 'portName', side: 'outputs', portId: outlet.id })
+    : undefined
+  return layout.title ? (
+    <div
+      className="BlockNode-value"
+      style={boxStyle(layout.title)}
+      title={label.folded ? label.literal : undefined}
+      data-testid="block-value"
+    >
+      {label.name !== '' ? (
+        <span
+          className="BlockNode-valueName"
+          data-pb-inline-field={nameField}
+          data-testid="block-value-name"
+        >
+          {label.name}
+        </span>
+      ) : null}
+      <span
+        className="BlockNode-valueEquals"
+        data-pb-inline-field={label.name === '' ? nameField : undefined}
+        title={label.name === '' ? 'Name this value' : undefined}
+      >
+        =
+      </span>
+      <span
+        className="BlockNode-valueText"
+        data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
+        data-testid="block-value-text"
+      >
+        {label.display}
+      </span>
+    </div>
+  ) : null
+}
+
 function SimpleFace({ shape }: { shape: BlockShape }) {
   const layout = layoutBlock(shape.props)
   const icon = blockIcon(shape.props)
@@ -383,9 +432,12 @@ function BlockHeading({ shape, height }: { shape: BlockShape; height: number }) 
 function PortLabels({
   ports,
   drag,
+  connectedIds,
 }: {
   ports: readonly LaidOutBlockPort[]
   drag: BlockPortDragState | null
+  /** A wired input dims its definition-default chip: the cable overrides it. */
+  connectedIds: ReadonlySet<string>
 }) {
   return (
     <>
@@ -424,8 +476,14 @@ function PortLabels({
             {placed.port.type}
           </span>
         ) : null
+        const overridden = connectedIds.has(placed.port.id)
         const chip = defaultValue !== '' ? (
-          <span className="BlockNode-portDefault" title={`= ${defaultValue}`}>
+          <span
+            className={overridden
+              ? 'BlockNode-portDefault BlockNode-portDefault--overridden'
+              : 'BlockNode-portDefault'}
+            title={overridden ? `default = ${defaultValue}, overridden by the cable` : `= ${defaultValue}`}
+          >
             = {defaultValue}
           </span>
         ) : null
@@ -581,6 +639,9 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
   )
   const drawnPorts = portsToDraw(layout.ports, connectedIds)
   const simple = layout.view === 'simple'
+  const value = layout.view === 'value'
+  // The two faces without a heading, rows, footer or add gutters.
+  const plain = simple || value
   const isEditing = useValue(
     'editing Block',
     () => editor.getEditingShapeId() === shape.id,
@@ -596,7 +657,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
   // The add gutters are a selection affordance, exactly as the brief asks: they
   // exist for the Block you are working on and nowhere else, so a busy canvas
   // never sprouts a plus under every lane.
-  const addAffordances = !simple && isSelected && !isEditing && !heldPort
+  const addAffordances = !plain && isSelected && !isEditing && !heldPort
     ? (['inputs', 'outputs'] as const).flatMap((side) => {
         const affordance = blockPortAddAffordance(shape.props, side)
         return affordance ? [{ side, affordance }] : []
@@ -605,7 +666,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
 
   return (
     <HTMLContainer
-      className={`NodeShape systemsketch-block-canvas${simple ? ' NodeShape_plain' : ''}`}
+      className={`NodeShape systemsketch-block-canvas${simple ? ' NodeShape_plain' : ''}${value ? ' NodeShape_value' : ''}`}
       data-block-view={layout.view}
       onContextMenu={(event) => {
         const target = event.target instanceof Element
@@ -628,9 +689,13 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
       }}
     >
       <div className="BlockNode-layer">
-        {simple ? <SimpleFace shape={shape} /> : <BlockHeading shape={shape} height={layout.headerHeight} />}
+        {simple
+          ? <SimpleFace shape={shape} />
+          : value
+            ? <ValueFace shape={shape} />
+            : <BlockHeading shape={shape} height={layout.headerHeight} />}
 
-        {!simple ? (
+        {!plain ? (
           <>
             {layout.dividers.map((divider, index) => (
               <div
@@ -650,7 +715,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
                   />
                 ) : null)
               : null}
-            <PortLabels ports={layout.ports} drag={heldPort} />
+            <PortLabels ports={layout.ports} drag={heldPort} connectedIds={connectedIds} />
             {layout.description ? (
               <div
                 className="BlockNode-description"
@@ -689,7 +754,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
         {isEditing ? <BlockInlineEditor shape={shape} /> : null}
       </div>
 
-      {!simple ? (
+      {!plain ? (
         <div
           className="NodeShape-footer"
           style={{ top: layout.footerTop, height: Math.max(0, layout.bounds.h - layout.footerTop) }}

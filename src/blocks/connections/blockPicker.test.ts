@@ -43,3 +43,20 @@ describe('block picker presets', () => {
 		expect(blockPickerPresetsFor(true).map((preset) => preset.id)).not.toContain('sink')
 	})
 })
+
+describe('the Value preset', () => {
+	it('is offered only to a cable that wants a producer', () => {
+		expect(blockPickerPresetsFor(true).some((preset) => preset.id === 'value')).toBe(true)
+		expect(blockPickerPresetsFor(false).some((preset) => preset.id === 'value')).toBe(false)
+	})
+
+	it('arrives as an unnamed literal in the value view', () => {
+		const value = BLOCK_PICKER_PRESETS.find((preset) => preset.id === 'value')!
+		const props = blockPresetProps(value, getDefaultBlockProps())
+		expect(props.view).toBe('value')
+		expect(props.blockType).toBe('literal')
+		expect(props.inputs).toEqual([])
+		expect(props.outputs).toEqual([{ id: 'out_1', name: '', type: '', visible: true }])
+		expect(firstOuterPortForPolarity(props, 'source')?.id).toBe('out_1')
+	})
+})

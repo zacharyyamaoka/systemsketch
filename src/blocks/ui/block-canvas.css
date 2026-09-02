@@ -520,3 +520,52 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
     transition: none;
   }
 }
+
+/* The `value` view: a literal argument as a capsule — the sketch's grey pill
+ * with a darker rim, mono text, and the one outlet on its right rim. The
+ * literal is the title, the name is the outlet's name; while unnamed the `=`
+ * is the click that names it. */
+.systemsketch-block-canvas.NodeShape_value {
+  border-radius: 999px;
+  background: var(--tl-color-muted-2, #f4f4f5);
+  box-shadow:
+    0 0 0 1.5px #9ca3af,
+    0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.systemsketch-block-canvas .BlockNode-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  overflow: hidden;
+  color: var(--tl-color-text-1, #27272a);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.systemsketch-block-canvas .BlockNode-valueName,
+.systemsketch-block-canvas .BlockNode-valueText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.systemsketch-block-canvas .BlockNode-valueEquals {
+  flex: 0 0 auto;
+  color: var(--tl-color-text-2, #71717a);
+}
+
+/* A wired input's definition default is still a fact about the callee, but
+ * the cable overrides it: keep it legible, make it quiet. */
+.systemsketch-block-canvas .BlockNode-portDefault--overridden {
+  opacity: 0.5;
+}
+
+.systemsketch-block-canvas .BlockNode-inlineEditor--value {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-weight: 500;
+}

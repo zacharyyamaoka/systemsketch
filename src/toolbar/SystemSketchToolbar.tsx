@@ -22,7 +22,8 @@ import {
   type TLUiToolItem,
 } from 'tldraw'
 import { useId, useMemo, useState, type ReactNode } from 'react'
-import { BLOCK_TOOL_ID } from '../blocks'
+import { BLOCK_TOOL_ID, PILL_TOOL_ID } from '../blocks'
+import { PillIcon } from '../blocks/PillIcon'
 import { BlockIcon } from '../blocks/BlockIcon'
 import {
   selectDrawFamilyTool,
@@ -464,10 +465,11 @@ export function SystemSketchFigmaToolbar() {
   )
 
   return (
-    <DefaultToolbar minItems={4} maxItems={7} minSizePx={255} maxSizePx={380}>
+    <DefaultToolbar minItems={4} maxItems={8} minSizePx={255} maxSizePx={430}>
       <SimpleToolSlot tool={tools.select} fallbackIcon="tool-pointer" title="Cursor" active={activeToolId === 'select'} />
       <SimpleToolSlot tool={tools.frame} fallbackIcon="tool-frame" title="Frame" active={activeToolId === 'frame'} />
       <SimpleToolSlot tool={tools[BLOCK_TOOL_ID]} fallbackIcon={<BlockIcon />} title="Block" active={activeToolId === BLOCK_TOOL_ID} />
+      <SimpleToolSlot tool={tools[PILL_TOOL_ID]} fallbackIcon={<PillIcon />} title="Pill" active={activeToolId === PILL_TOOL_ID} />
       <ShapeFamilySlot activeToolId={activeToolId} geo={geo} />
       <DrawFamilySlot activeToolId={activeToolId} />
       <SimpleToolSlot tool={tools.text} fallbackIcon="tool-text" title="Text" active={activeToolId === 'text'} />

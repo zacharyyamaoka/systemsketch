@@ -31,6 +31,8 @@ export const BLOCK_PICKER_PRESETS: readonly BlockPickerPreset[] = [
 	{ id: 'store', label: 'Store', icon: 'Database', blockType: 'store', view: 'port', inputs: 1, outputs: 1 },
 	{ id: 'sink', label: 'Sink', icon: 'Terminal', blockType: 'sink', view: 'port', inputs: 1, outputs: 0 },
 	{ id: 'source', label: 'Source', icon: 'Zap', blockType: 'source', view: 'port', inputs: 0, outputs: 1 },
+	// A literal argument: the capsule. Offered only to a cable that wants a producer.
+	{ id: 'value', label: 'Value', icon: 'Braces', blockType: 'literal', view: 'value', inputs: 0, outputs: 1 },
 	{ id: 'group', label: 'Expanded group', icon: 'Boxes', blockType: 'group', view: 'expanded', inputs: 1, outputs: 1 },
 ]
 
@@ -103,7 +105,9 @@ export function blockPresetProps(
 	}))
 	const outputs = Array.from({ length: preset.outputs }, (_, index) => ({
 		id: `out_${index + 1}`,
-		name: `out_${index + 1}`,
+		// A capsule's outlet name IS the variable name, and a fresh literal has
+		// none: it is passed inline until someone names it.
+		name: preset.view === 'value' ? '' : `out_${index + 1}`,
 		type: '',
 		visible: true,
 	}))
