@@ -60,14 +60,27 @@ export const BlockPort = T.object({
 	visible: T.boolean,
 	/** Python-style input default, e.g. `window: int = 5`. */
 	defaultValue: T.string.optional(),
-	/** Begins a new async body row; ignored on a side's first port. */
-	groupStart: T.boolean.optional(),
-	/** Outputs only: begins a conditional branch within the current row. */
-	branchStart: T.boolean.optional(),
-	/** Inputs only: place the port's dot in the heading band. */
-	header: T.boolean.optional(),
+	/**
+	 * Which row of the burger the port sits in. Row `0` is the heading band,
+	 * which only inputs may occupy: the data that shapes the Block's control
+	 * flow — a callable, a predicate, an iterable. Rows `1` and up are the body
+	 * rows, the parallel lanes the body splits into. Absent means the first
+	 * body row, so a port with no row is exactly where it always was.
+	 */
+	row: T.number.optional(),
+	/**
+	 * Outputs only: which conditional arm of its row the port belongs to, `0`
+	 * being the first. Arms are the mutually exclusive output sets a half-line
+	 * divides. Absent means the first arm.
+	 */
+	branch: T.number.optional(),
 })
 export type BlockPort = T.TypeOf<typeof BlockPort>
+
+/** The heading band is the row every input may be lifted into. */
+export const HEADER_ROW = 0
+/** Where a port with no row of its own lives. */
+export const FIRST_BODY_ROW = 1
 
 export const BLOCK_SHAPE_PROPS = {
 	w: T.number,
@@ -184,16 +197,176 @@ export function portDefaultValue(port: BlockPort): string {
 	return port.defaultValue ?? ''
 }
 
-export function portStartsGroup(port: BlockPort): boolean {
-	return port.groupStart ?? false
+/** The one reader for a port's row. */
+export function portRow(port: BlockPort): number {
+	return port.row ?? FIRST_BODY_ROW
 }
 
-export function portStartsBranch(port: BlockPort): boolean {
-	return port.branchStart ?? false
+/** The one reader for a port's arm within its row. */
+export function portBranch(port: BlockPort): number {
+	return port.branch ?? 0
 }
 
 export function portInHeader(port: BlockPort): boolean {
-	return port.header ?? false
+	return portRow(port) === HEADER_ROW
+}
+
+/** One place in the burger: a row, and for outputs an arm within it. */
+export interface BlockPortSection {
+	row: number
+	branch: number
+}
+
+export function portSection(port: BlockPort): BlockPortSection {
+	return { row: portRow(port), branch: portBranch(port) }
+}
+
+export function sameBlockPortSection(a: BlockPortSection, b: BlockPortSection): boolean {
+	return a.row === b.row && a.branch === b.branch
+}
+
+/** A port record carrying `section`, with the default row and arm left implicit. */
+export function withBlockPortSection(port: BlockPort, section: BlockPortSection): BlockPort {
+	const { row: _row, branch: _branch, ...rest } = port
+	const next: BlockPort = { ...rest }
+	if (section.row !== FIRST_BODY_ROW) next.row = section.row
+	if (section.branch !== 0) next.branch = section.branch
+	return next
+}
+
+export interface BlockRowSections {
+	/** Row 0: the inputs riding the heading band. */
+	header: BlockPort[]
+	/** Body rows in order, each with its inputs and its ordered output arms. */
+	rows: {
+		row: number
+		inputs: BlockPort[]
+		branches: { branch: number; outputs: BlockPort[] }[]
+	}[]
+}
+
+/**
+ * The burger as a table: which ports sit in which row, and in which arm.
+ *
+ * This is the one grouping every consumer reads — the layout, the inspector's
+ * list, the drop rule and the row menu — so a row means the same thing in all
+ * of them. Rows are numbered from the ports themselves: a row exists because a
+ * port on either side claims it, and the header always exists for inputs.
+ *
+ * `visibleOnly` considers only visible ports, and drops a body row or arm that
+ * no visible port claims — the layout has nothing to draw there. Every other
+ * consumer wants the hidden ports in place, keeping their row.
+ */
+export function blockPortSections(
+	props: Pick<BlockShapeProps, 'inputs' | 'outputs'>,
+	{ visibleOnly = false }: { visibleOnly?: boolean } = {},
+): BlockRowSections {
+	const consider = (ports: readonly BlockPort[]) => (
+		visibleOnly ? ports.filter((port) => port.visible) : ports
+	)
+	const inputs = consider(props.inputs)
+	const outputs = consider(props.outputs)
+	const header = inputs.filter((port) => portInHeader(port))
+	const bodyInputs = inputs.filter((port) => !portInHeader(port))
+
+	const rowNumbers = new Set<number>([FIRST_BODY_ROW])
+	for (const port of bodyInputs) rowNumbers.add(Math.max(FIRST_BODY_ROW, portRow(port)))
+	for (const port of outputs) rowNumbers.add(Math.max(FIRST_BODY_ROW, portRow(port)))
+	const highest = Math.max(...rowNumbers)
+
+	const rows: BlockRowSections['rows'] = []
+	for (let row = FIRST_BODY_ROW; row <= highest; row += 1) {
+		const rowInputs = bodyInputs.filter((port) => Math.max(FIRST_BODY_ROW, portRow(port)) === row)
+		const rowOutputs = outputs.filter((port) => Math.max(FIRST_BODY_ROW, portRow(port)) === row)
+		if (visibleOnly && row !== FIRST_BODY_ROW && rowInputs.length === 0 && rowOutputs.length === 0) {
+			continue
+		}
+		const branchNumbers = new Set<number>([0])
+		for (const port of rowOutputs) branchNumbers.add(portBranch(port))
+		const branches: { branch: number; outputs: BlockPort[] }[] = []
+		for (let branch = 0; branch <= Math.max(...branchNumbers); branch += 1) {
+			const armOutputs = rowOutputs.filter((port) => portBranch(port) === branch)
+			if (visibleOnly && branch !== 0 && armOutputs.length === 0) continue
+			branches.push({ branch, outputs: armOutputs })
+		}
+		rows.push({ row, inputs: rowInputs, branches })
+	}
+	return { header, rows }
+}
+
+function samePortList(a: readonly BlockPort[], b: readonly BlockPort[]): boolean {
+	return a.length === b.length && a.every((port, index) => port === b[index])
+}
+
+/**
+ * Put the row grammar into canonical form, so that every reader sees one
+ * shape of the truth: rows are dense from 1, arms are dense from 0 within
+ * their row, a header port is always an input, and each lane's stored order
+ * is its visual order — header first, then row by row, arm by arm.
+ *
+ * Returns the very same props object when nothing had to change, so a caller
+ * can use identity to know whether a write is needed.
+ */
+export function normalizeBlockPortRows(props: BlockShapeProps): BlockShapeProps {
+	const clampInputs = props.inputs.map((port) => {
+		const row = Math.max(HEADER_ROW, Math.round(portRow(port)))
+		const section = { row, branch: 0 }
+		return sameBlockPortSection(portSection(port), section)
+			&& port.row !== FIRST_BODY_ROW && port.branch !== 0
+			? port
+			: withBlockPortSection(port, section)
+	})
+	const clampOutputs = props.outputs.map((port) => {
+		const row = Math.max(FIRST_BODY_ROW, Math.round(portRow(port)))
+		const branch = Math.max(0, Math.round(portBranch(port)))
+		const section = { row, branch }
+		return sameBlockPortSection(portSection(port), section)
+			&& port.row !== FIRST_BODY_ROW && port.branch !== 0
+			? port
+			: withBlockPortSection(port, section)
+	})
+
+	// Rows are dense: a row exists because a port claims it, on either side.
+	const usedRows = [...new Set([
+		...clampInputs.filter((port) => !portInHeader(port)).map(portRow),
+		...clampOutputs.map(portRow),
+	])].sort((a, b) => a - b)
+	const rowOf = new Map(usedRows.map((row, index) => [row, FIRST_BODY_ROW + index]))
+	rowOf.set(HEADER_ROW, HEADER_ROW)
+
+	// Arms are dense within their row.
+	const branchOf = new Map<string, number>()
+	for (const row of usedRows) {
+		const used = [...new Set(
+			clampOutputs.filter((port) => portRow(port) === row).map(portBranch),
+		)].sort((a, b) => a - b)
+		used.forEach((branch, index) => branchOf.set(`${row}:${branch}`, index))
+	}
+
+	const renumber = (port: BlockPort, side: BlockPortSide): BlockPort => {
+		const row = rowOf.get(portRow(port)) ?? FIRST_BODY_ROW
+		const branch = side === 'outputs'
+			? branchOf.get(`${portRow(port)}:${portBranch(port)}`) ?? 0
+			: 0
+		const section = { row, branch }
+		return sameBlockPortSection(portSection(port), section) ? port : withBlockPortSection(port, section)
+	}
+	const sortBySection = (ports: BlockPort[]) => ports
+		.map((port, index) => ({ port, index }))
+		.sort((a, b) => (
+			portRow(a.port) - portRow(b.port)
+			|| portBranch(a.port) - portBranch(b.port)
+			|| a.index - b.index
+		))
+		.map((entry) => entry.port)
+
+	const sortedInputs = sortBySection(clampInputs.map((port) => renumber(port, 'inputs')))
+	const sortedOutputs = sortBySection(clampOutputs.map((port) => renumber(port, 'outputs')))
+	// A lane that did not change keeps its array, so identity keeps meaning "untouched".
+	const inputs = samePortList(sortedInputs, props.inputs) ? props.inputs : sortedInputs
+	const outputs = samePortList(sortedOutputs, props.outputs) ? props.outputs : sortedOutputs
+	if (inputs === props.inputs && outputs === props.outputs) return props
+	return { ...props, inputs, outputs }
 }
 
 export function isBlockShape(shape: TLShape | null | undefined): shape is BlockShape {
@@ -270,9 +443,15 @@ export function mergeBlockResizeProps(
 
 export type BlockPortSide = 'inputs' | 'outputs'
 
+/**
+ * Add a port to the end of a section — by default the end of the first body
+ * row. A section is asked for by the heading bead (row 0) and by "add in this
+ * row"; the lane is then put back in visual order.
+ */
 export function appendBlockPortToProps(
 	props: BlockShapeProps,
 	side: BlockPortSide,
+	section: BlockPortSection = { row: FIRST_BODY_ROW, branch: 0 },
 ): { props: BlockShapeProps; port: BlockPort } {
 	const prefix = side === 'inputs' ? 'in' : 'out'
 	const highest = props[side].reduce((best, port) => {
@@ -280,10 +459,11 @@ export function appendBlockPortToProps(
 		return match ? Math.max(best, Number(match[1])) : best
 	}, 0)
 	const id = `${prefix}_${highest + 1}`
-	const port: BlockPort = { id, name: id, type: '', visible: true }
+	const port = withBlockPortSection({ id, name: id, type: '', visible: true }, section)
+	const appended = normalizeBlockPortRows({ ...props, [side]: [...props[side], port] })
 	return {
-		props: { ...props, [side]: [...props[side], port] },
-		port,
+		props: appended,
+		port: appended[side].find((candidate) => candidate.id === id) ?? port,
 	}
 }
 

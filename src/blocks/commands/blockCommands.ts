@@ -2,17 +2,30 @@ import type { Editor, TLShapeId } from 'tldraw'
 
 import {
   BLOCK_TOOL_ID,
-  appendBlockPortToProps,
+  FIRST_BODY_ROW,
+  HEADER_ROW,
   type BlockPort,
+  type BlockPortSection,
   type BlockPortSide,
   type BlockShape,
   type BlockShapeProps,
   type BlockView,
+  blockPortSections,
   getDefaultBlockProps,
   isBlockShape,
+  normalizeBlockPortRows,
+  portBranch,
+  portInHeader,
+  portRow,
+  portSection,
+  sameBlockPortSection,
   setBlockViewProps,
+  withBlockPortSection,
 } from '../blockModel'
-import { growBlockPortViewToFit } from '../ports/portAffordances'
+import {
+  growBlockPortViewToFit,
+  type BlockPortSectionTarget,
+} from '../ports/portAffordances'
 import {
   getBlockSelectionStyles,
   sameBlockSelectionStyles,
@@ -189,19 +202,29 @@ function nextPortId(ports: readonly BlockPort[], side: BlockPortSide): string {
   return `${prefix}_${highest + 1}`
 }
 
+export type BlockPortSeed = Partial<Pick<BlockPort, 'name' | 'type' | 'visible' | 'row' | 'branch'>>
+
+/**
+ * Add a port at the end of a section — the first body row unless the seed
+ * names another, such as the heading (row 0) for a control-flow input. The
+ * lane is then in visual order again, so the new port sits with its row.
+ */
 export function appendBlockPortProps(
   props: BlockShapeProps,
   side: BlockPortSide,
-  initial: Partial<Pick<BlockPort, 'name' | 'type' | 'visible'>> = {},
+  initial: BlockPortSeed = {},
 ): BlockShapeProps {
   const id = nextPortId(props[side], side)
-  const port: BlockPort = {
+  const port = withBlockPortSection({
     id,
     name: initial.name ?? id,
     type: initial.type ?? '',
     visible: initial.visible ?? true,
-  }
-  return { ...props, [side]: [...props[side], port] }
+  }, {
+    row: initial.row ?? FIRST_BODY_ROW,
+    branch: initial.branch ?? 0,
+  })
+  return normalizeBlockPortRows({ ...props, [side]: [...props[side], port] })
 }
 
 /** Add a visible port with an identity independent from its editable name. */
@@ -209,7 +232,7 @@ export function appendBlockPort(
   editor: Editor,
   shapeId: TLShapeId,
   side: BlockPortSide,
-  initial: Partial<Pick<BlockPort, 'name' | 'type' | 'visible'>> = {},
+  initial: BlockPortSeed = {},
   options: BlockCommandOptions = {},
 ): BlockCommandResult {
   return updateBlockProps(
@@ -228,14 +251,24 @@ export function insertBlockPortProps(
   props: BlockShapeProps,
   side: BlockPortSide,
   index: number,
+  like?: string,
 ): { props: BlockShapeProps; port: BlockPort } {
-  const appended = appendBlockPortToProps(props, side)
-  const ports = [...appended.props[side]]
-  const port = ports.pop()
-  if (!port) return appended
-  const at = Math.min(Math.max(0, Math.round(index)), ports.length)
+  const lane = props[side]
+  const at = Math.min(Math.max(0, Math.round(index)), lane.length)
+  // The new port joins the section of the port it is placed beside: the one
+  // named, else the one it lands in front of, else the one it follows.
+  const reference = (like ? lane.find((port) => port.id === like) : undefined)
+    ?? lane[at]
+    ?? lane[at - 1]
+  const section: BlockPortSection = reference
+    ? portSection(reference)
+    : { row: FIRST_BODY_ROW, branch: 0 }
+  const id = nextPortId(lane, side)
+  const port = withBlockPortSection({ id, name: id, type: '', visible: true }, section)
+  const ports = [...lane]
   ports.splice(at, 0, port)
-  return { props: { ...appended.props, [side]: ports }, port }
+  const next = normalizeBlockPortRows({ ...props, [side]: ports })
+  return { props: next, port: next[side].find((candidate) => candidate.id === id) ?? port }
 }
 
 /**
@@ -267,7 +300,7 @@ export function insertBlockPortForInlineEditing(
   shapeId: TLShapeId,
   side: BlockPortSide,
   index: number,
-  options: BlockCommandOptions = {},
+  options: BlockCommandOptions & { like?: string; section?: BlockPortSection } = {},
 ): BlockPortCreationResult {
   let created: BlockPort | null = null
   const result = updateBlockProps(
@@ -275,7 +308,15 @@ export function insertBlockPortForInlineEditing(
     shapeId,
     (props) => {
       const revealed = props.view === 'simple' ? setBlockViewProps(props, 'port') : props
-      const inserted = insertBlockPortProps(revealed, side, index)
+      if (options.section) {
+        // Asked for a section rather than a position: the heading bead, or a
+        // row's own "add here". The port goes to that section's end.
+        const id = nextPortId(revealed[side], side)
+        const appended = appendBlockPortProps(revealed, side, options.section)
+        created = appended[side].find((port) => port.id === id) ?? null
+        return growBlockPortViewToFit(appended)
+      }
+      const inserted = insertBlockPortProps(revealed, side, index, options.like)
       created = inserted.port
       return growBlockPortViewToFit(inserted.props)
     },
@@ -386,25 +427,177 @@ export function moveBlockPort(
   return result
 }
 
+/**
+ * One visual step up or down the lane, as the inspector arrows and the menu's
+ * Move up / Move down mean it. Within a section the two neighbours swap; at a
+ * section's edge the port steps across the line into the next section — an
+ * input stepping up out of the first body row lifts into the heading. The
+ * last port stepping down goes nowhere: a step never invents a row.
+ */
 export function moveBlockPortProps(
   props: BlockShapeProps,
   side: BlockPortSide,
   portId: string,
   delta: -1 | 1,
 ): BlockShapeProps {
-  const index = props[side].findIndex((port) => port.id === portId)
-  const target = index + delta
-  if (index < 0 || target < 0 || target >= props[side].length) return props
-  const ports = [...props[side]]
-  ;[ports[index], ports[target]] = [ports[target], ports[index]]
-  return { ...props, [side]: ports }
+  const lane = props[side]
+  const index = lane.findIndex((port) => port.id === portId)
+  if (index < 0) return props
+  const port = lane[index]
+  const neighbourIndex = index + delta
+  if (neighbourIndex < 0) {
+    return side === 'inputs' && !portInHeader(port)
+      ? moveBlockPortToSectionProps(props, side, portId, { row: HEADER_ROW, branch: 0, before: null })
+      : props
+  }
+  if (neighbourIndex >= lane.length) return props
+  const neighbour = lane[neighbourIndex]
+  if (sameBlockPortSection(portSection(port), portSection(neighbour))) {
+    const ports = [...lane]
+    ;[ports[index], ports[neighbourIndex]] = [ports[neighbourIndex], ports[index]]
+    return { ...props, [side]: ports }
+  }
+  return moveBlockPortToSectionProps(props, side, portId, {
+    ...portSection(neighbour),
+    before: delta > 0 ? neighbour.id : null,
+  })
+}
+
+function samePorts(a: readonly BlockPort[], b: readonly BlockPort[]): boolean {
+  return a.length === b.length && a.every((port, index) => port === b[index])
+}
+
+/**
+ * Put one port in a place in the burger: a row, an arm for an output, and the
+ * neighbour it lands before (or the section's end). This is the one reducer
+ * behind every assignment — the canvas drop, the inspector drop and the row
+ * menu — so all three agree on what a place means. Returns the same props
+ * object when nothing would move, so no empty undo step is ever opened.
+ */
+export function moveBlockPortToSectionProps(
+  props: BlockShapeProps,
+  side: BlockPortSide,
+  portId: string,
+  target: BlockPortSectionTarget,
+): BlockShapeProps {
+  const lane = props[side]
+  const from = lane.findIndex((port) => port.id === portId)
+  if (from < 0) return props
+  const section: BlockPortSection = {
+    row: Math.max(side === 'inputs' ? HEADER_ROW : FIRST_BODY_ROW, Math.round(target.row)),
+    branch: side === 'outputs' ? Math.max(0, Math.round(target.branch)) : 0,
+  }
+  const current = lane[from]
+  const moved = sameBlockPortSection(portSection(current), section)
+    ? current
+    : withBlockPortSection(current, section)
+  const rest = lane.filter((port) => port.id !== portId)
+  const beforeIndex = target.before && target.before !== portId
+    ? rest.findIndex((port) => port.id === target.before)
+    : -1
+  rest.splice(beforeIndex >= 0 ? beforeIndex : rest.length, 0, moved)
+  const next = normalizeBlockPortRows({ ...props, [side]: rest })
+  return samePorts(next.inputs, props.inputs) && samePorts(next.outputs, props.outputs)
+    ? props
+    : next
+}
+
+/** One history step for a whole assignment; port ids are never rewritten. */
+export function moveBlockPortToSection(
+  editor: Editor,
+  shapeId: TLShapeId,
+  side: BlockPortSide,
+  portId: string,
+  target: BlockPortSectionTarget,
+  options: BlockCommandOptions = {},
+): BlockCommandResult {
+  const shape = editor.getShape(shapeId)
+  if (!shape || !isBlockShape(shape)) return { ok: false, reason: 'missing-block' }
+  if (!shape.props[side].some((port) => port.id === portId)) {
+    return { ok: false, reason: 'missing-port' }
+  }
+  return updateBlockProps(
+    editor,
+    shapeId,
+    (props) => moveBlockPortToSectionProps(props, side, portId, target),
+    {
+      historyLabel: options.historyLabel
+        ?? (target.row === HEADER_ROW ? 'move block port to header' : 'move block port'),
+    },
+  )
+}
+
+/**
+ * Open a new section right below the port's own and move the port into it: a
+ * new row (on both sides, since rows are shared) or, for an output, a new arm
+ * of its row. Later rows and arms shift down to make room.
+ */
+export function startBlockPortSectionProps(
+  props: BlockShapeProps,
+  side: BlockPortSide,
+  portId: string,
+  kind: 'row' | 'branch',
+): BlockShapeProps {
+  const port = props[side].find((candidate) => candidate.id === portId)
+  if (!port) return props
+  if (kind === 'branch' && side !== 'outputs') return props
+  const row = portRow(port)
+  const branch = portBranch(port)
+  const shift = (candidate: BlockPort, laneSide: BlockPortSide): BlockPort => {
+    if (candidate.id === portId && laneSide === side) {
+      return withBlockPortSection(candidate, kind === 'row'
+        ? { row: row + 1, branch: 0 }
+        : { row, branch: branch + 1 })
+    }
+    if (kind === 'row') {
+      return !portInHeader(candidate) && portRow(candidate) > row
+        ? withBlockPortSection(candidate, { row: portRow(candidate) + 1, branch: portBranch(candidate) })
+        : candidate
+    }
+    return laneSide === 'outputs' && portRow(candidate) === row && portBranch(candidate) > branch
+      ? withBlockPortSection(candidate, { row, branch: portBranch(candidate) + 1 })
+      : candidate
+  }
+  return normalizeBlockPortRows({
+    ...props,
+    inputs: props.inputs.map((candidate) => shift(candidate, 'inputs')),
+    outputs: props.outputs.map((candidate) => shift(candidate, 'outputs')),
+  })
+}
+
+export function startBlockPortSection(
+  editor: Editor,
+  shapeId: TLShapeId,
+  side: BlockPortSide,
+  portId: string,
+  kind: 'row' | 'branch',
+  options: BlockCommandOptions = {},
+): BlockCommandResult {
+  const shape = editor.getShape(shapeId)
+  if (!shape || !isBlockShape(shape)) return { ok: false, reason: 'missing-block' }
+  if (!shape.props[side].some((port) => port.id === portId)) {
+    return { ok: false, reason: 'missing-port' }
+  }
+  return updateBlockProps(
+    editor,
+    shapeId,
+    (props) => startBlockPortSectionProps(props, side, portId, kind),
+    { historyLabel: options.historyLabel ?? (kind === 'row' ? 'start block row' : 'start block branch') },
+  )
+}
+
+/** How many body rows the Block has, on either side. */
+export function blockPortRowCount(props: BlockShapeProps): number {
+  return blockPortSections(props).rows.length
 }
 
 /**
  * Reorder a lane by dropping one port at an insertion index measured against
- * the list *before* the move — the index a drop target or an "add above / add
- * below" menu naturally produces. Returns the same props object when the drop
- * would not move anything, so the caller never opens an empty undo step.
+ * the list *before* the move — the index an "add above / add below" style
+ * caller naturally produces. The port takes the section of the port it now
+ * follows (or, at the front, the one it precedes), so an index is always a
+ * place in the burger too. Returns the same props object when the drop would
+ * not move anything, so the caller never opens an empty undo step.
  */
 export function moveBlockPortToIndexProps(
   props: BlockShapeProps,
@@ -418,9 +611,15 @@ export function moveBlockPortToIndexProps(
   const [moved] = ports.splice(from, 1)
   const clamped = Math.min(Math.max(0, Math.round(insertIndex)), props[side].length)
   const target = Math.min(clamped > from ? clamped - 1 : clamped, ports.length)
-  if (target === from) return props
-  ports.splice(target, 0, moved)
-  return { ...props, [side]: ports }
+  const reference = ports[target - 1] ?? ports[target]
+  const section = reference ? portSection(reference) : portSection(moved)
+  const placed = sameBlockPortSection(portSection(moved), section)
+    ? moved
+    : withBlockPortSection(moved, section)
+  if (target === from && placed === moved) return props
+  ports.splice(target, 0, placed)
+  const next = normalizeBlockPortRows({ ...props, [side]: ports })
+  return samePorts(next[side], props[side]) ? props : next
 }
 
 /** One history step for a whole reorder gesture; port ids are never rewritten. */
