@@ -40,7 +40,12 @@
     "desktop:status": "python3 scripts/launch_systemsketch.py --status",
     "desktop:stop": "python3 scripts/launch_systemsketch.py --stop --all",
     "test:file-type": "node tests/systemsketch_file_type_smoke.mjs",
+    "test:case-view": "node tests/branch_case_view_smoke.mjs",
+    "test:authoring": "node tests/branch_authoring_smoke.mjs",
+    "test:branch": "node tests/branch_region_smoke.mjs",
+    "test:edge-vocabulary": "node tests/edge_vocabulary_smoke.mjs",
     "test:file-type-stable": "node tests/stable_file_type_probe.mjs",
+    "test:detach": "node tests/block_detach_smoke.mjs",
     "test:theme": "node --experimental-strip-types tests/theme_contrast_smoke.mjs",
     "theme:import": "node --experimental-strip-types scripts/import_vscode_theme.mjs",
     "theme:obsidian": "python3 scripts/extract_obsidian_palette.py"

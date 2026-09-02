@@ -521,3 +521,29 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
     transition: none;
   }
 }
+
+/* Many-to-one: a port with two or more producers wears a count beside its dot. */
+.systemsketch-block-canvas .Port .Port-count {
+  position: absolute;
+  top: 50%;
+  box-sizing: border-box;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 7px;
+  background: var(--ss-surface-active);
+  color: var(--ss-text-muted);
+  font: 600 10px/16px Inter, ui-sans-serif, system-ui, sans-serif;
+  text-align: center;
+  white-space: nowrap;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.systemsketch-block-canvas .Port_end .Port-count {
+  right: calc(100% + 6px);
+}
+
+.systemsketch-block-canvas .Port_start .Port-count {
+  left: calc(100% + 6px);
+}

@@ -3,7 +3,6 @@ import type { Editor, TLParentId, TLShape, TLShapeId, VecLike } from 'tldraw'
 import {
 	isBlockShape,
 	isExpandedBlockShape,
-	type BlockShape,
 	type BlockShapeProps,
 } from '../blockModel'
 import {
@@ -11,8 +10,10 @@ import {
 	getBlockPortConnections,
 	getBlockPortDotsNear,
 	getLiveBlockPorts,
+	isPortHostShape,
 	type BlockConnectionPort,
 	type BlockPortDotHit,
+	type PortHostShape,
 } from './blockPorts'
 import {
 	arePortTypesCompatible,
@@ -75,7 +76,7 @@ export interface JudgeOptions {
 
 type RulesReader = ScopeReader & { store?: Editor['store'] }
 
-function livePort(editor: RulesReader, block: BlockShape, portId: string): BlockConnectionPort | null {
+function livePort(editor: RulesReader, block: PortHostShape, portId: string): BlockConnectionPort | null {
 	return getLiveBlockPorts(editor as Editor, block).find((port) => port.id === portId) ?? null
 }
 
@@ -98,7 +99,7 @@ export function judgeConnection(
 ): ConnectionVerdict {
 	const shapeA = editor.getShape(a.shapeId)
 	const shapeB = editor.getShape(b.shapeId)
-	if (!isBlockShape(shapeA) || !isBlockShape(shapeB)) return { ok: false, reason: 'missing-port' }
+	if (!isPortHostShape(shapeA) || !isPortHostShape(shapeB)) return { ok: false, reason: 'missing-port' }
 	const portA = livePort(editor, shapeA, a.portId)
 	const portB = livePort(editor, shapeB, b.portId)
 	if (!portA || !portB) return { ok: false, reason: 'missing-port' }
@@ -182,7 +183,7 @@ export function connectedBlocksByPolarity(
 	while (toVisit.length > 0) {
 		const id = toVisit.shift()
 		if (!id || found.has(id)) continue
-		if (!isBlockShape(editor.getShape(id))) continue
+		if (!isPortHostShape(editor.getShape(id))) continue
 		found.add(id)
 		for (const connection of getBlockPortConnections(editor, id)) {
 			if (connection.ownFace !== 'outer' || connection.connectedFace !== 'outer') continue
@@ -203,7 +204,7 @@ export function connectedBlocksByPolarity(
  */
 export function blocksThatWouldCycle(editor: Editor, anchor: PortDot): Set<TLShapeId> | null {
 	const shape = editor.getShape(anchor.shapeId)
-	if (!isBlockShape(shape)) return null
+	if (!isPortHostShape(shape)) return null
 	const port = livePort(editor, shape, anchor.portId)
 	if (!port) return null
 	return connectedBlocksByPolarity(

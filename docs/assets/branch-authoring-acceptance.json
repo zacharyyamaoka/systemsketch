@@ -1,0 +1,78 @@
+[
+  {
+    "label": "AUTH-1 five prototypes render",
+    "ok": true
+  },
+  {
+    "label": "AUTH-2 V1 opens on the bare canvas with the empty inspector",
+    "ok": true
+  },
+  {
+    "label": "AUTH-3 V1 Add › Branch region creates the region and a Branch section in the inspector",
+    "ok": true
+  },
+  {
+    "label": "AUTH-4 V1 Control ports + opens a name field",
+    "ok": true
+  },
+  {
+    "label": "AUTH-5 V1 naming the port puts fast on the band",
+    "ok": true
+  },
+  {
+    "label": "AUTH-6 V1 the band carries the fast dot label at the region's left edge",
+    "ok": true
+  },
+  {
+    "label": "AUTH-7 V1 Arms + adds a second arm",
+    "ok": true
+  },
+  {
+    "label": "AUTH-8 V1 arm 1 renamed to if fast:",
+    "ok": true
+  },
+  {
+    "label": "AUTH-9 V1 arm 2 renamed to else:",
+    "ok": true
+  },
+  {
+    "label": "AUTH-10 V1 wiring lands on one plain encode.pose port (two cables end at x=1030)",
+    "ok": true
+  },
+  {
+    "label": "AUTH-11 V1 fold from the arm row folds else on the canvas",
+    "ok": true
+  },
+  {
+    "label": "AUTH-12 V1 make-active from the arm row fades the other arm",
+    "ok": true
+  },
+  {
+    "label": "AUTH-13 V4 typing \"if fast:\" names the arm and derives the fast control port",
+    "ok": true
+  },
+  {
+    "label": "AUTH-14 V4 the derived list shows exactly one port after one line",
+    "ok": true
+  },
+  {
+    "label": "AUTH-15 V4 an elif that reads gain derives a second band dot",
+    "ok": true
+  },
+  {
+    "label": "AUTH-16 V4 the band now carries fast and gain",
+    "ok": true
+  },
+  {
+    "label": "AUTH-17 V2 the + on the band adds and names a control port without the inspector",
+    "ok": true
+  },
+  {
+    "label": "AUTH-18 V2 + arm and click-to-edit rename work on the canvas",
+    "ok": true
+  },
+  {
+    "label": "AUTH-19 no script errors while driving",
+    "ok": true
+  }
+]
