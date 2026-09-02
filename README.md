@@ -121,6 +121,8 @@ The [`.systemsketch` file-type report](docs/systemsketch-file-type-2026-09-01.ht
 
 The [fan-in report](docs/edge-fan-in-2026-09-01.html) records why a second cable onto an occupied input replaced the first: two starter-kit rules that assume an input has one producer. Sinks now fan in exactly as sources fan out, a press on any dot starts a new cable, an existing cable is moved by selecting it and dragging its terminal handle, and the one drop a sink refuses is an exact copy of a wire it already has, judged in the same `judgeConnection` as every other refusal. `npm run test:polarity` carries the six fan-in checks.
 
+The [literal-argument pill Babble + Prune](docs/literal-pill-babble-2026-09-01.html) compares five ways to draw a literal call argument (`estimate(frame, 2.0)`) as a source: a stock Capsule, a Block in a `value` view, a pill docked on its port, the workflow kit's inline literal on the row, and a locals rail owned by the enclosing Expanded Block. Every hero is live on one run() fixture and regenerates its Python as you click, with estimate's own definition default kept on the row so the two can never share a rendering. It provisionally recommends the Value Block with the inline row as its single-use form; nothing in the renderer changed.
+
 ## Local files
 
 - SystemSketch opens both `.systemsketch` and `.tldr`, and everything it creates is a `.systemsketch` — the same tldraw file with one extra top-level `systemSketch` envelope. A `.tldr` is saved back as a `.tldr`; changing a document's type is Save As, never rename.
