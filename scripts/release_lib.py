@@ -10,6 +10,7 @@ import hashlib
 import json
 import os
 import shutil
+import subprocess
 import tempfile
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
@@ -26,6 +27,19 @@ CONTROLLER_RUNTIME_FILES = (
     "server.py",
     "workspace_store.py",
 )
+# What this project calls "source": the inputs that can change the built app.
+# One definition, used by both `source_mtime` (is there newer local work?) and
+# `source_provenance` (was this build made from a clean tree?) — so a report,
+# a capture or a docs page a peer regenerated can never make a build dirty.
+SOURCE_PATHS = (
+    "src",
+    "scripts",
+    "package.json",
+    "package-lock.json",
+    "vite.config.ts",
+    "index.html",
+)
+MAX_REPORTED_DIRTY_PATHS = 12
 
 
 class ReleaseError(RuntimeError):
@@ -37,6 +51,28 @@ class ReleaseChannels:
     stable: str | None = None
     candidate: str | None = None
     previous: str | None = None
+
+
+@dataclass(frozen=True)
+class SourceProvenance:
+    """Which source a build came from.
+
+    A build id is a content address over the shipped bytes, which makes the
+    artifact immutable but says nothing about the tree that produced it — and
+    that tree keeps moving. Every field is ``None`` when the project root is
+    not a readable Git checkout: an honest "unknown" beats a fabricated clean.
+    """
+
+    commit: str | None = None
+    branch: str | None = None
+    dirty: bool | None = None
+    dirty_paths: tuple[str, ...] = ()
+
+    def manifest_fields(self) -> dict[str, object]:
+        """The subset a release records. The dirty file list is for the
+        refusal message, not for the manifest — it is about the moment of the
+        build, not about the artifact."""
+        return {"commit": self.commit, "branch": self.branch, "sourceDirty": self.dirty}
 
 
 def utc_now() -> str:
@@ -162,14 +198,7 @@ def project_metadata(project_root: Path) -> tuple[str, list[str]]:
 
 def source_mtime(project_root: Path) -> float:
     latest = 0.0
-    candidates = [
-        project_root / "src",
-        project_root / "scripts",
-        project_root / "package.json",
-        project_root / "package-lock.json",
-        project_root / "vite.config.ts",
-        project_root / "index.html",
-    ]
+    candidates = [project_root / relative for relative in SOURCE_PATHS]
     for candidate in candidates:
         paths = candidate.rglob("*") if candidate.is_dir() else (candidate,)
         for path in paths:
@@ -179,6 +208,63 @@ def source_mtime(project_root: Path) -> float:
                 except OSError:
                     pass
     return latest
+
+
+def _git(project_root: Path, *arguments: str) -> str | None:
+    """One git command's raw stdout, or None if git cannot answer.
+
+    A missing git, a directory that is not a checkout, and a command that fails
+    are the same answer here — the caller has no provenance to record — so the
+    release path never fails because of the reporting layer.
+
+    Deliberately unstripped: `git status --porcelain` encodes a file's state in
+    two leading columns, so trimming the output would shift the first line by
+    one character and report a path that does not exist.
+    """
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(project_root), *arguments],
+            capture_output=True,
+            text=True,
+            timeout=20,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return completed.stdout if completed.returncode == 0 else None
+
+
+def source_provenance(project_root: Path) -> SourceProvenance:
+    """The commit, branch, and source cleanliness of `project_root`.
+
+    Dirtiness is judged over `SOURCE_PATHS` only, and untracked files count:
+    an untracked module under `src/` is an input the build can pick up, while a
+    regenerated report under `docs/` is not an input at all.
+    """
+    commit = _git(project_root, "rev-parse", "HEAD")
+    if commit is None:
+        return SourceProvenance()
+    commit = commit.strip()
+    branch = (_git(project_root, "rev-parse", "--abbrev-ref", "HEAD") or "").strip() or None
+    status = _git(project_root, "status", "--porcelain", "--", *SOURCE_PATHS)
+    if status is None:
+        return SourceProvenance(commit=commit, branch=branch)
+    paths: list[str] = []
+    for line in status.splitlines():
+        # Porcelain v1: two status columns, a space, then the path.
+        entry = line[3:].strip()
+        # A rename reads "old -> new"; the new name is the one on disk.
+        if " -> " in entry:
+            entry = entry.split(" -> ", 1)[1]
+        if entry:
+            paths.append(entry.strip('"'))
+    ordered = tuple(sorted(set(paths)))
+    return SourceProvenance(
+        commit=commit,
+        branch=branch if branch != "HEAD" else None,
+        dirty=bool(ordered),
+        dirty_paths=ordered,
+    )
 
 
 def _hash_file(digest: "hashlib._Hash", root: Path, path: Path) -> None:
@@ -254,6 +340,7 @@ def build_release(project_root: Path, release_home: Path, dist: Path) -> tuple[s
             "releasedAt": utc_now(),
             "sourceRoot": str(project_root),
             "sourceTime": source_mtime(project_root),
+            **source_provenance(project_root).manifest_fields(),
             "changes": changes,
         }
         _atomic_json(staging / "manifest.json", manifest)

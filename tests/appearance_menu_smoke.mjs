@@ -40,7 +40,11 @@ const FRAMES = {
 
 /** FigJam's order, as the model lays it out for a geo shape. */
 const SHAPE_CONTROLS = ['geo', 'color', 'dash', 'size', 'font', 'align', 'verticalAlign']
-const CONNECTOR_CONTROLS = ['color', 'dash', 'size', 'font', 'arrowKind', 'arrowheadStart', 'arrowheadEnd']
+// FigJam's connector order, captured from its own menu as
+// `Change color | Line style | Add text | Start point | Line shape | End point`:
+// the controls read the way the arrow does — where it leaves, how it travels,
+// where it lands.
+const CONNECTOR_CONTROLS = ['color', 'dash', 'size', 'font', 'arrowheadStart', 'arrowKind', 'arrowheadEnd']
 
 const EMPTY_CANVAS = { x: 200, y: 820 }
 
@@ -246,6 +250,12 @@ async function main() {
     const connector = await readMenu(page)
     assert.deepEqual(connector.controls, CONNECTOR_CONTROLS)
     assert.equal(connector.shapeType, 'arrow')
+    // The line shape must sit between the two ends, not before them.
+    assert.ok(
+      connector.controls.indexOf('arrowheadStart') < connector.controls.indexOf('arrowKind') &&
+        connector.controls.indexOf('arrowKind') < connector.controls.indexOf('arrowheadEnd'),
+      'line shape belongs between start and end',
+    )
     const ends = await openControl(page, 'arrowheadEnd')
     assert.ok(ends.panel.options.find((o) => o.value === 'triangle'))
     await pickOption(page, 'arrowheadEnd', 'triangle')

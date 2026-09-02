@@ -8,7 +8,7 @@
 A worktree gives an agent its own files, index and HEAD. It does *not* give it
 its own ports, its own release runtime, or its own board — all three default to
 machine-global paths, so two agents sharing them will quietly fight over Zach's
-running Preview and his real `~/SystemSketch/Untitled.tldr`. This script closes
+running Preview and his real board in `~/SystemSketch/`. This script closes
 those three gaps at creation time so a track agent never has to discover them.
 
 Deliberately does not touch `package.json`: `npm run dev` is pinned to 4322 with
@@ -148,9 +148,10 @@ not. The default release home is `~/.local/share/systemsketch/runtime`, which is
 what Zach's Preview on 4322 serves. Publishing there replaces what he is looking
 at.
 
-**Never point a test at `~/SystemSketch/Untitled.tldr`.** That is his real board
-and the app autosaves into it. `.track/boards/` is yours; the server above is
-already rooted there.
+**Never point a test at anything in `~/SystemSketch/`.** Those are his real
+boards — `Untitled.systemsketch`, and any `.tldr` from before that file type
+existed — and the app autosaves into whichever one it opens. `.track/boards/` is
+yours; the server above is already rooted there.
 
 ## Before you hand anything back
 
