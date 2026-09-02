@@ -379,7 +379,8 @@ def main() -> None:
 <tr><td>Edge editor</td><td><code>npm run test:edge-editor</code> — <span class="ok">{passed(EDITOR)}</span>. Now asserts the elbow default and asks for curved before testing the curve's control point.</td></tr>
 <tr><td>Control-point reveal</td><td><code>npm run test:reveal</code> — <span class="ok">{passed(REVEAL)}</span>. Same: both scenes state their routing rather than inheriting it.</td></tr>
 <tr><td>Edge polarity</td><td><code>npm run test:polarity</code> — <span class="ok">{passed(POLARITY)}</span>, unchanged and untouched by the new default.</td></tr>
-<tr><td>Also re-run green</td><td><code>test:edges</code> 33/33 · <code>test:ports</code> 14/14 · <code>test:context-menu</code> 12/12 · <code>test:batch</code> 11/11 · <code>test:appearance</code> 12/12 · <code>test:selection-menu</code> · <code>test:click-to-edit</code> 9/9 · <code>test:fields</code> 9/9 · <code>test:scale</code> 12/12</td></tr>
+<tr><td>Merged with main first</td><td>Landed on top of the fan-in, <code>.systemsketch</code> file-type and FigJam-chrome work. <code>installConnections.ts</code> was the real conflict: fan-in had added an overlay check before a dot press is claimed, so the arrow-cancel sits after it, on the same <code>path</code> it reads.</td></tr>
+<tr><td>Also re-run green, post-merge</td><td><code>test:file-type</code> 13/13 · <code>test:edges</code> 33/33 · <code>test:ports</code> · <code>test:context-menu</code> · <code>test:batch</code> · <code>test:appearance</code> · <code>test:selection-menu</code> · <code>test:click-to-edit</code> · <code>test:fields</code> · <code>test:scale</code></td></tr>
 </table>
 
 <h3>Two journeys had to be told what they were testing</h3>
@@ -415,8 +416,8 @@ def main() -> None:
 
 <h3>Needs you</h3>
 <ul class="decision">
-<li>Open <a href="http://127.0.0.1:4360/">http://127.0.0.1:4360/</a> and cycle A a few times. Draw an arrow, then wire two Blocks. That is the whole feature.</li>
-<li>Then: merge this branch, or tell me what to change first.</li>
+<li>Open <strong>Preview</strong> — <a href="http://127.0.0.1:4322/">http://127.0.0.1:4322/</a> — and cycle A a few times. Draw an arrow, then wire two Blocks. That is the whole feature.</li>
+<li>Stable is untouched. Promote when you are happy: <code>npm run release:candidate</code> then <code>npm run release:promote</code>.</li>
 </ul>
 
 </main></body></html>
