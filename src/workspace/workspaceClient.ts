@@ -39,13 +39,6 @@ export interface WorkspaceDocumentSaved {
   size: number
 }
 
-export interface WorkspaceNativePick {
-  available: boolean
-  cancelled: boolean
-  path: string | null
-  replaceExisting?: boolean
-}
-
 export class WorkspaceConflict extends Error {
   readonly diskMtime: number | null
   readonly diskDigest: string | null
@@ -109,13 +102,6 @@ async function post(path: string, payload: Record<string, unknown>): Promise<Rec
       body: JSON.stringify(payload),
     }),
   )
-}
-
-export async function pickWorkspaceDocument(input: {
-  mode: 'open' | 'save'
-  currentPath: string | null
-}): Promise<WorkspaceNativePick> {
-  return (await post('/api/workspace/pick', input)) as unknown as WorkspaceNativePick
 }
 
 export async function writeWorkspaceDocument(input: {

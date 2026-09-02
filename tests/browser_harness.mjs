@@ -323,6 +323,7 @@ export async function startApp({ label, build, channel = 'preview', width = 1440
       page,
       port,
       apiPort,
+      cdpPort,
       filesRoot,
       releaseHome,
       close: () => { page.close(); close() },

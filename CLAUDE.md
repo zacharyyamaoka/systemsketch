@@ -53,7 +53,11 @@ CDP journey in `tests/*_smoke.mjs` (`browser_harness.mjs` is the shared driver):
 Python host, headless Chrome, real `Input.dispatchMouseEvent` gestures, assertions read from
 the editor and the DOM, screenshots you actually inspect. Named runners exist —
 `test:ports`, `test:edges`, `test:batch`, `test:click-to-edit`, `test:fields`,
-`test:selection-menu`, `test:context-menu`, `test:release-ui`.
+`test:selection-menu`, `test:context-menu`, `test:release-ui`, `test:workspace`.
+
+`test:windows` is the one journey that is not headless: it drives a real Chrome `--app` window on a
+private Xvfb display, because a headless target has no OS window to count. It must never open a
+window on Zach's screen — keep it on its own `DISPLAY`.
 
 Never point a test at Zach's real board — the app autosaves into it. Use a scratch `.tldr`.
 

@@ -119,6 +119,8 @@ The [edge polarity report](docs/edge-polarity-2026-09-01.html) records why an Ex
 
 The [fan-in report](docs/edge-fan-in-2026-09-01.html) records why a second cable onto an occupied input replaced the first: two starter-kit rules that assume an input has one producer. Sinks now fan in exactly as sources fan out, a press on any dot starts a new cable, an existing cable is moved by selecting it and dragging its terminal handle, and the one drop a sink refuses is an exact copy of a wire it already has, judged in the same `judgeConnection` as every other refusal. `npm run test:polarity` carries the six fan-in checks.
 
+The [in-app file browser and windows report](docs/in-app-file-browser-2026-09-01.html) records why File › Open used to hang: the Python host ran `zenity` as a subprocess inside the HTTP handler with no timeout, and the browser awaited that fetch with no deadline either, so the in-app fallback the code already had could only fire on a *fast* failure. The chooser is now the app's own browser — filter, breadcrumb, arrow keys, places — reading the same digest-fenced workspace API the canvas saves through, and a Python test refuses any future `zenity`/`kdialog`/`yad` in `scripts/`. Any board can also be sent to its own desktop window (`Ctrl+Shift+N`, or **Open in new window**); `npm run test:workspace` proves the browser in headless Chrome and `npm run test:windows` proves the windows in a real Chrome `--app` window on a private Xvfb display, counted by the X server rather than by the DOM.
+
 ## Local files
 
 - A clean launch reopens the most recent valid document. First launch prepares `~/SystemSketch/Untitled.tldr` and creates it on the first edit or Save.

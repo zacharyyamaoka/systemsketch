@@ -17,7 +17,6 @@ from workspace_store import (  # noqa: E402
     WorkspacePathError,
     list_documents,
     load_document,
-    pick_document_path,
     rename_document,
     save_document,
     stat_document,
@@ -103,59 +102,23 @@ class WorkspaceStoreTests(unittest.TestCase):
             trash_document(str(self.path), self.root, base_digest=saved["digest"])
         self.assertEqual(run.call_args.args[0], ["/usr/bin/gio", "trash", str(self.path)])
 
-    def test_native_open_chooser_returns_an_existing_tldr_path(self) -> None:
-        self.path.parent.mkdir(parents=True)
-        self.path.write_text(document_source(), encoding="utf-8")
-        completed = type(
-            "Completed",
-            (),
-            {"returncode": 0, "stdout": f"{self.path}\n", "stderr": ""},
-        )()
-        with patch("workspace_store.shutil.which", return_value="/usr/bin/zenity"), patch(
-            "workspace_store.subprocess.run", return_value=completed
-        ) as run:
-            picked = pick_document_path("open", str(self.path), self.root)
+    def test_the_host_never_shells_out_to_a_desktop_file_chooser(self) -> None:
+        """The in-app browser is the only chooser.
 
-        self.assertEqual(picked["path"], str(self.path))
-        self.assertFalse(picked["cancelled"])
-        self.assertIn("--file-filter=SystemSketch files | *.tldr", run.call_args.args[0])
+        A GUI subprocess run inside an HTTP handler makes a second application
+        a hard dependency of File > Open: when zenity wedged, the request never
+        returned and the whole Open path wedged with it.
+        """
+        scripts = PROJECT_ROOT / "scripts"
+        for module in sorted(scripts.glob("*.py")):
+            source = module.read_text(encoding="utf-8")
+            for chooser in ("zenity", "kdialog", "yad", "--file-selection"):
+                self.assertNotIn(chooser, source, f"{module.name} reintroduced {chooser}")
 
-    def test_native_save_chooser_adds_tldr_and_preserves_overwrite_confirmation(self) -> None:
-        selected = self.root / "SystemSketch" / "Copy"
-        completed = type(
-            "Completed",
-            (),
-            {"returncode": 0, "stdout": f"{selected}\n", "stderr": ""},
-        )()
-        with patch("workspace_store.shutil.which", return_value="/usr/bin/zenity"), patch(
-            "workspace_store.subprocess.run", return_value=completed
-        ) as run:
-            picked = pick_document_path("save", str(self.path), self.root)
-
-        self.assertEqual(picked["path"], f"{selected}.tldr")
-        self.assertIn("--save", run.call_args.args[0])
-        self.assertIn("--confirm-overwrite", run.call_args.args[0])
-
-    def test_native_chooser_avoids_the_busy_files_root(self) -> None:
-        top_level_document = self.root / "Loose.tldr"
-        completed = type("Completed", (), {"returncode": 1, "stdout": "", "stderr": ""})()
-        with patch("workspace_store.shutil.which", return_value="/usr/bin/zenity"), patch(
-            "workspace_store.subprocess.run", return_value=completed
-        ) as run:
-            pick_document_path("open", str(top_level_document), self.root)
-
-        workspace = self.root / "SystemSketch"
-        self.assertTrue(workspace.is_dir())
-        self.assertIn(f"--filename={workspace}/", run.call_args.args[0])
-
-    def test_native_chooser_cancellation_and_unavailability_are_not_errors(self) -> None:
-        cancelled = type("Completed", (), {"returncode": 1, "stdout": "", "stderr": ""})()
-        with patch("workspace_store.shutil.which", return_value="/usr/bin/zenity"), patch(
-            "workspace_store.subprocess.run", return_value=cancelled
-        ):
-            self.assertTrue(pick_document_path("open", None, self.root)["cancelled"])
-        with patch("workspace_store.shutil.which", return_value=None):
-            self.assertFalse(pick_document_path("open", None, self.root)["available"])
+    def test_no_workspace_endpoint_spawns_a_chooser(self) -> None:
+        server = (PROJECT_ROOT / "scripts" / "server.py").read_text(encoding="utf-8")
+        self.assertNotIn("/api/workspace/pick", server)
+        self.assertIn("/api/workspace/list", server)
 
 
 if __name__ == "__main__":
