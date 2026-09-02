@@ -145,9 +145,9 @@ async function main() {
     check('TOOL-1', 'P selects the pill tool', first.tool, 'pill')
     const pill = first.pill
     check('PILL-1', 'a click with the pill tool makes a Block in the value view', pill?.view ?? null, 'value')
-    check('PILL-2', 'the literal is the title; the outlet is unnamed and typed from the literal',
-      pill ? { title: pill.title, name: pill.outputs[0]?.name, type: pill.outputs[0]?.type, inputs: pill.inputs.length, outputs: pill.outputs.length } : null,
-      { title: '2.0', name: '', type: 'float', inputs: 0, outputs: 1 })
+    check('PILL-2', 'the literal is the title; one unnamed inlet and outlet, typed from the literal',
+      pill ? { title: pill.title, name: pill.outputs[0]?.name, type: pill.outputs[0]?.type, inputs: pill.inputs.length, outputs: pill.outputs.length, inletType: pill.inputs[0]?.type } : null,
+      { title: '2.0', name: '', type: 'float', inputs: 1, outputs: 1, inletType: 'float' })
     check('PILL-3', 'the capsule is one line tall and as wide as its text',
       pill ? { h: pill.h, fitted: pill.w >= 96 && pill.w < 200 } : null, { h: 56, fitted: true })
     check('PILL-4', 'the face reads "= 2.0"', await valueText(page, pill.id), '= 2.0')
@@ -220,15 +220,59 @@ async function main() {
     await deselect(page, { x: 1000, y: 800 })
     await shot(page, 'literal-pill-picked.png')
 
+    // ---- a pill can be fed: a variable holding a call's result ---------------
+    const result = (await drawPill(page, { x: 1060, y: 520 }, '')).pill
+    const poseOut = await box(page, portDot(ESTIMATE, 'output', 'out_1'))
+    const resultIn = await box(page, portDot(result.id, 'input', 'in_1'))
+    const fedDrop = await dragFrom(page, poseOut, resultIn)
+    check('FEED-1', "estimate's pose lands on the pill's inlet", fedDrop.count, 3)
+    check('FEED-2', 'a fed pill shows ⋯ where its literal would be',
+      await evaluate(page, `document.querySelector('[data-shape-id="${result.id}"] [data-testid="block-value-fed"]')?.textContent ?? null`), '⋯')
+    await deselect(page, { x: 1000, y: 800 })
+    const resultFace = await box(page, `[data-shape-id="${result.id}"] .BlockNode-valueEquals`)
+    await clickAt(page, resultFace.cx, resultFace.cy)
+    await delay(300)
+    await waitFor(page, `document.querySelector('[data-inspector-section="Pill"] input[aria-label="Variable name"]')`, 'Pill name field')
+    const nameField = await box(page, '[data-inspector-section="Pill"] input[aria-label="Variable name"]')
+    await clickAt(page, nameField.cx, nameField.cy)
+    await page.send('Input.insertText', { text: 'pose' })
+    await key(page, 'Enter', 'Enter')
+    await delay(300)
+    const named2 = (await blocks(page)).find((block) => block.id === result.id)
+    check('FEED-3', 'naming through the inspector names both rims',
+      { inlet: named2.inputs[0].name, outlet: named2.outputs[0].name, face: await valueText(page, result.id) },
+      { inlet: 'pose', outlet: 'pose', face: 'pose = ⋯' })
+    check('FEED-4', 'the inspector says what feeds the pill',
+      (await evaluate(page, `document.querySelector('[data-testid="pill-wiring"]')?.textContent ?? ''`)).includes('Fed by estimate() · pose'), true)
+    check('FEED-5', 'the Value field is read-only while a cable feeds the pill',
+      await evaluate(page, `document.querySelector('[data-inspector-section="Pill"] input[aria-label="Literal value"]')?.disabled ?? null`), true)
+    check('FEED-6', "a fed pill with no type of its own reads the cable's: Pose",
+      await evaluate(page, `document.querySelector('[data-inspector-section="Pill"] input[aria-label="Variable type"]')?.value ?? null`), 'Pose')
+    await shot(page, 'literal-pill-fed-inspector.png')
+    await deselect(page, { x: 1000, y: 800 })
+    const resultOut = await box(page, portDot(result.id, 'output', 'out_1'))
+    const encodePose = await box(page, portDot(ENCODE, 'input', 'in_1'))
+    const onward = await dragFrom(page, resultOut, encodePose)
+    check('FEED-7', 'the same pill feeds encode: one variable, written and read', onward.count, 4)
+    await deselect(page, { x: 1000, y: 800 })
+    await shot(page, 'literal-pill-fed.png')
+
     // ---- the value view is one of the Block's views in the inspector ---------
     await clickAt(page, face.cx, face.cy)
     await delay(300)
     check('VIEW-1', 'the inspector offers value beside simple, port and expanded',
       await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('[data-inspector-section="View"] button')).map((node) => node.textContent.trim()))`),
       JSON.stringify(['simple', 'port', 'expanded', 'value']))
-    check('VIEW-2', 'the inspector hides the inputs lane for a capsule',
-      await evaluate(page, `Boolean(document.querySelector('[data-inspector-section="Inputs"], [aria-label="Add input port"]'))`),
-      false)
+    check('VIEW-2', 'the inspector shows a Pill section in place of the Block sections',
+      await evaluate(page, `JSON.stringify(['Pill', 'Block', 'Tags', 'Inputs', 'Outputs', 'Ports'].map((name) => Boolean(document.querySelector('[data-inspector-section="' + name + '"]'))))`),
+      JSON.stringify([true, false, false, false, false, false]))
+    check('VIEW-3', 'the Pill section reads the literal as the value and the ports\' name as the name',
+      await evaluate(page, `JSON.stringify([
+        document.querySelector('[data-inspector-section="Pill"] input[aria-label="Variable name"]')?.value,
+        document.querySelector('[data-inspector-section="Pill"] input[aria-label="Literal value"]')?.value,
+        document.querySelector('[data-inspector-section="Pill"] input[aria-label="Variable type"]')?.value,
+      ])`),
+      JSON.stringify(['gain', '2.0', 'float']))
     await shot(page, 'literal-pill-inspector.png')
     await deselect(page, { x: 1000, y: 800 })
 

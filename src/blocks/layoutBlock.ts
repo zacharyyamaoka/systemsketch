@@ -430,12 +430,12 @@ export function layoutBlock(props: BlockShapeProps): BlockLayout {
 	const placed: LaidOutBlockPort[] = []
 
 	if (view === 'value') {
-		// The capsule: one text box across the whole face, the outlet centred on
-		// the right rim. An input on a value Block is a record oddity, not a
-		// port to draw; it keeps a quiet anchor so a stored cable still resolves.
+		// The capsule: one text box across the whole face, the inlet centred on
+		// the left rim and the outlet on the right — a pill is a variable, fed
+		// or read or both, so both rims carry a dot.
 		const midpoint = height / 2
 		for (const port of props.inputs.filter((candidate) => candidate.visible)) {
-			placed.push({ port, side: 'input', x: 0, y: midpoint, label: null, subtle: true, lifted: false })
+			placed.push({ port, side: 'input', x: 0, y: midpoint, label: null, subtle: false, lifted: false })
 		}
 		for (const port of props.outputs.filter((candidate) => candidate.visible)) {
 			placed.push({ port, side: 'output', x: width, y: midpoint, label: null, subtle: false, lifted: false })

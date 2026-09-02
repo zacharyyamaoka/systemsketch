@@ -63,11 +63,11 @@ describe('folding', () => {
 })
 
 describe('a fresh pill', () => {
-	it('is a Block in the value view with no inputs and one unnamed, typed outlet', () => {
+	it('is a Block in the value view with one unnamed, typed inlet and outlet', () => {
 		const props = createValueBlockProps(getDefaultBlockProps(), '2.0')
 		expect(props.view).toBe('value')
 		expect(props.blockType).toBe('literal')
-		expect(props.inputs).toEqual([])
+		expect(props.inputs).toEqual([{ id: 'in_1', name: '', type: 'float', visible: true }])
 		expect(props.outputs).toEqual([{ id: 'out_1', name: '', type: 'float', visible: true }])
 		expect(props.h).toBe(VALUE_HEIGHT_PX)
 		expect(props.views.value).toEqual({ w: props.w, h: props.h })
@@ -99,17 +99,40 @@ describe('normalizeValueBlockProps', () => {
 		expect(normalizeValueBlockProps(props, props)).toBe(props)
 	})
 
-	it('strips inputs and keeps exactly one outlet, preserving its identity and name', () => {
+	it('keeps exactly one inlet and one outlet, preserving identity and mirroring the name', () => {
 		const props = valueBlock({
-			inputs: [{ id: 'in_1', name: 'x', type: '', visible: true }],
+			inputs: [
+				{ id: 'in_3', name: 'x', type: '', visible: false, defaultValue: '1.0' },
+				{ id: 'in_4', name: 'extra', type: '', visible: true },
+			],
 			outputs: [
 				{ id: 'out_7', name: 'gain', type: 'float', visible: false },
 				{ id: 'out_8', name: 'extra', type: '', visible: true },
 			],
 		})
 		const next = normalizeValueBlockProps(props)
-		expect(next.inputs).toEqual([])
+		expect(next.inputs).toEqual([{ id: 'in_3', name: 'gain', type: 'float', visible: true }])
 		expect(next.outputs).toEqual([{ id: 'out_7', name: 'gain', type: 'float', visible: true }])
+	})
+
+	it('honours a rename through either rim', () => {
+		const previous = valueBlock()
+		const viaOutlet = normalizeValueBlockProps(
+			{ ...previous, outputs: [{ ...previous.outputs[0], name: 'k' }] }, previous)
+		expect(viaOutlet.inputs[0].name).toBe('k')
+		expect(viaOutlet.outputs[0].name).toBe('k')
+		const viaInlet = normalizeValueBlockProps(
+			{ ...previous, inputs: [{ ...previous.inputs[0], name: 'scale' }] }, previous)
+		expect(viaInlet.outputs[0].name).toBe('scale')
+		expect(viaInlet.inputs[0].name).toBe('scale')
+	})
+
+	it('gives a record with only an inlet its name and an outlet', () => {
+		const sink = normalizeValueBlockProps({
+			...createValueBlockProps(getDefaultBlockProps(), '', 'payload'),
+			outputs: [],
+		})
+		expect(sink.outputs).toEqual([{ id: 'out_1', name: 'payload', type: '', visible: true }])
 	})
 
 	it('re-infers the type when the literal changes and keeps it otherwise', () => {
@@ -142,21 +165,28 @@ describe('normalizeValueBlockProps', () => {
 		}, 'port')
 		const switched = normalizeValueBlockProps(setBlockViewProps(port, 'value'), port)
 		expect(switched.view).toBe('value')
-		expect(switched.inputs).toEqual([])
+		expect(switched.inputs).toEqual([{ id: 'in_1', name: 'out_1', type: 'float', visible: true }])
 		expect(switched.outputs[0]).toMatchObject({ id: 'out_1', name: 'out_1', type: 'float' })
 		expect(switched.h).toBe(VALUE_HEIGHT_PX)
 	})
 })
 
 describe('the capsule layout', () => {
-	it('puts the one outlet on the right rim at mid-height and the text across the face', () => {
+	it('puts the inlet on the left rim, the outlet on the right, both at mid-height, and the text across the face', () => {
 		const props = createValueBlockProps(getDefaultBlockProps(), '2.0', 'gain')
 		const layout = layoutBlock(props)
 		expect(layout.view).toBe('value')
 		expect(layout.header).toBeNull()
 		expect(layout.footerTop).toBe(props.h)
-		expect(layout.ports).toHaveLength(1)
+		expect(layout.ports).toHaveLength(2)
 		expect(layout.ports[0]).toMatchObject({
+			side: 'input',
+			x: 0,
+			y: props.h / 2,
+			subtle: false,
+			label: null,
+		})
+		expect(layout.ports[1]).toMatchObject({
 			side: 'output',
 			x: props.w,
 			y: props.h / 2,

@@ -45,18 +45,20 @@ describe('block picker presets', () => {
 })
 
 describe('the Value preset', () => {
-	it('is offered only to a cable that wants a producer', () => {
+	it('answers a cable that wants a producer and one that wants a consumer', () => {
+		// A variable can be typed as a literal and read, or fed a result and named.
 		expect(blockPickerPresetsFor(true).some((preset) => preset.id === 'value')).toBe(true)
-		expect(blockPickerPresetsFor(false).some((preset) => preset.id === 'value')).toBe(false)
+		expect(blockPickerPresetsFor(false).some((preset) => preset.id === 'value')).toBe(true)
 	})
 
-	it('arrives as an unnamed literal in the value view', () => {
+	it('arrives as an unnamed variable in the value view, an inlet and an outlet', () => {
 		const value = BLOCK_PICKER_PRESETS.find((preset) => preset.id === 'value')!
 		const props = blockPresetProps(value, getDefaultBlockProps())
 		expect(props.view).toBe('value')
 		expect(props.blockType).toBe('literal')
-		expect(props.inputs).toEqual([])
+		expect(props.inputs).toEqual([{ id: 'in_1', name: '', type: '', visible: true }])
 		expect(props.outputs).toEqual([{ id: 'out_1', name: '', type: '', visible: true }])
 		expect(firstOuterPortForPolarity(props, 'source')?.id).toBe('out_1')
+		expect(firstOuterPortForPolarity(props, 'sink')?.id).toBe('in_1')
 	})
 })

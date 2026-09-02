@@ -15,20 +15,22 @@
   },
   {
     "id": "PILL-2",
-    "label": "the literal is the title; the outlet is unnamed and typed from the literal",
+    "label": "the literal is the title; one unnamed inlet and outlet, typed from the literal",
     "observed": {
       "title": "2.0",
       "name": "",
       "type": "float",
-      "inputs": 0,
-      "outputs": 1
+      "inputs": 1,
+      "outputs": 1,
+      "inletType": "float"
     },
     "desired": {
       "title": "2.0",
       "name": "",
       "type": "float",
-      "inputs": 0,
-      "outputs": 1
+      "inputs": 1,
+      "outputs": 1,
+      "inletType": "float"
     },
     "ok": true
   },
@@ -84,7 +86,7 @@
       },
       {
         "terminal": "start",
-        "to": "shape:Oik6q_-sjOytpzYFHrZLw",
+        "to": "shape:j3L-hL3vHY9ct4y0ZzUgb",
         "port": "out_1"
       }
     ],
@@ -96,7 +98,7 @@
       },
       {
         "terminal": "start",
-        "to": "shape:Oik6q_-sjOytpzYFHrZLw",
+        "to": "shape:j3L-hL3vHY9ct4y0ZzUgb",
         "port": "out_1"
       }
     ],
@@ -188,6 +190,63 @@
     "ok": true
   },
   {
+    "id": "FEED-1",
+    "label": "estimate's pose lands on the pill's inlet",
+    "observed": 3,
+    "desired": 3,
+    "ok": true
+  },
+  {
+    "id": "FEED-2",
+    "label": "a fed pill shows ⋯ where its literal would be",
+    "observed": "⋯",
+    "desired": "⋯",
+    "ok": true
+  },
+  {
+    "id": "FEED-3",
+    "label": "naming through the inspector names both rims",
+    "observed": {
+      "inlet": "pose",
+      "outlet": "pose",
+      "face": "pose = ⋯"
+    },
+    "desired": {
+      "inlet": "pose",
+      "outlet": "pose",
+      "face": "pose = ⋯"
+    },
+    "ok": true
+  },
+  {
+    "id": "FEED-4",
+    "label": "the inspector says what feeds the pill",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "FEED-5",
+    "label": "the Value field is read-only while a cable feeds the pill",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "FEED-6",
+    "label": "a fed pill with no type of its own reads the cable's: Pose",
+    "observed": "Pose",
+    "desired": "Pose",
+    "ok": true
+  },
+  {
+    "id": "FEED-7",
+    "label": "the same pill feeds encode: one variable, written and read",
+    "observed": 4,
+    "desired": 4,
+    "ok": true
+  },
+  {
     "id": "VIEW-1",
     "label": "the inspector offers value beside simple, port and expanded",
     "observed": "[\"simple\",\"port\",\"expanded\",\"value\"]",
@@ -196,9 +255,16 @@
   },
   {
     "id": "VIEW-2",
-    "label": "the inspector hides the inputs lane for a capsule",
-    "observed": false,
-    "desired": false,
+    "label": "the inspector shows a Pill section in place of the Block sections",
+    "observed": "[true,false,false,false,false,false]",
+    "desired": "[true,false,false,false,false,false]",
+    "ok": true
+  },
+  {
+    "id": "VIEW-3",
+    "label": "the Pill section reads the literal as the value and the ports' name as the name",
+    "observed": "[\"gain\",\"2.0\",\"float\"]",
+    "desired": "[\"gain\",\"2.0\",\"float\"]",
     "ok": true
   },
   {

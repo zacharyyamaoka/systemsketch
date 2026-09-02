@@ -30,7 +30,7 @@ import {
   type BlockShape,
 } from '../blockModel'
 import { BlockInlineEditor } from '../BlockInlineEditor'
-import { valueBlockLabel, valueBlockOutlet } from '../valueBlock'
+import { VALUE_FED_MARK, valueBlockInlet, valueBlockLabel, valueBlockOutlet } from '../valueBlock'
 import { getBlockPortConnections } from '../connections/blockPorts'
 import { judgeConnection } from '../connections/connectionRules'
 import {
@@ -302,24 +302,37 @@ function BlockFooterMenu({ shape }: { shape: BlockShape }) {
 
 /**
  * The capsule: `= 2.0`, or `gain = 2.0` once named. The literal is the Block's
- * title and the name is its outlet's name, so both are ordinary inline fields.
+ * title and the name is its ports' name, so both are ordinary inline fields.
  * While unnamed, the `=` itself carries the name field — that is the click
  * that names a literal — and a folded literal keeps its full text in the
- * capsule's tooltip.
+ * capsule's tooltip. A cable on the inlet supplies the value instead: the
+ * face then shows `⋯` where the literal was, and the literal waits.
  */
-function ValueFace({ shape }: { shape: BlockShape }) {
+function ValueFace({
+  shape,
+  connectedIds,
+}: {
+  shape: BlockShape
+  connectedIds: ReadonlySet<string>
+}) {
   const layout = layoutBlock(shape.props)
   const label = valueBlockLabel(shape.props)
   const outlet = valueBlockOutlet(shape.props)
+  const inlet = valueBlockInlet(shape.props)
+  const fed = inlet !== null && connectedIds.has(inlet.id)
   const nameField = outlet
     ? blockInlineFieldAttribute({ kind: 'portName', side: 'outputs', portId: outlet.id })
     : undefined
+  const tooltip = fed
+    ? `Fed by the cable on its inlet${label.literal.trim() !== '' ? ` · the literal ${label.literal} is kept for when it is unwired` : ''}`
+    : label.folded ? label.literal : undefined
   return layout.title ? (
     <div
       className="BlockNode-value"
       style={boxStyle(layout.title)}
-      title={label.folded ? label.literal : undefined}
+      title={tooltip}
       data-testid="block-value"
+      data-fed={fed ? 'true' : undefined}
     >
       {label.name !== '' ? (
         <span
@@ -338,11 +351,11 @@ function ValueFace({ shape }: { shape: BlockShape }) {
         =
       </span>
       <span
-        className="BlockNode-valueText"
+        className={fed ? 'BlockNode-valueText BlockNode-valueText--fed' : 'BlockNode-valueText'}
         data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
-        data-testid="block-value-text"
+        data-testid={fed ? 'block-value-fed' : 'block-value-text'}
       >
-        {label.display}
+        {fed ? VALUE_FED_MARK : label.display}
       </span>
     </div>
   ) : null
@@ -692,7 +705,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
         {simple
           ? <SimpleFace shape={shape} />
           : value
-            ? <ValueFace shape={shape} />
+            ? <ValueFace shape={shape} connectedIds={connectedIds} />
             : <BlockHeading shape={shape} height={layout.headerHeight} />}
 
         {!plain ? (

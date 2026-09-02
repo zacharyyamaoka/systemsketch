@@ -569,3 +569,10 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-weight: 500;
 }
+
+/* A pill fed by a cable shows where its literal would be that the value comes
+ * from elsewhere; the literal itself waits in the record. */
+.systemsketch-block-canvas .BlockNode-valueText--fed {
+  color: var(--tl-color-text-3, #a1a1aa);
+  letter-spacing: 0.08em;
+}

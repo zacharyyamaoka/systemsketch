@@ -155,6 +155,7 @@ def anatomy_svg(m: dict[str, object]) -> str:
     <text x="{pad + 62}" y="{h/2 + 8}" font-size="24" font-weight="500" fill="#71717a">=</text>
     <text x="{pad + 92}" y="{h/2 + 8}" font-size="24" font-weight="500" fill="#27272a">2.0</text>
     <circle cx="{w}" cy="{h/2}" r="6" fill="#fff" stroke="#c08520" stroke-width="2"/>
+    <circle cx="0" cy="{h/2}" r="6" fill="#fff" stroke="#c08520" stroke-width="2"/>
     <line x1="{pad}" y1="{h + 12}" x2="{pad + 50}" y2="{h + 12}" stroke="#6e6a63" stroke-width="1"/>
     <line x1="{pad + 25}" y1="{h + 12}" x2="{pad + 25}" y2="{h + 40}" stroke="#6e6a63" stroke-width="1"/>
     <line x1="{pad + 92}" y1="{h + 12}" x2="{pad + 132}" y2="{h + 12}" stroke="#6e6a63" stroke-width="1"/>
@@ -173,6 +174,9 @@ def anatomy_svg(m: dict[str, object]) -> str:
     <text x="395" y="68" fill="#6e6a63">{h}px tall · {m["VALUE_MIN_WIDTH_PX"]}–{m["VALUE_MAX_WIDTH_PX"]}px wide · not resizable</text>
     <line x1="388" y1="48" x2="358" y2="62" stroke="#6e6a63" marker-end="url(#arr)"/>
     <line x1="388" y1="92" x2="370" y2="88" stroke="#6e6a63" marker-end="url(#arr)"/>
+    <text x="14" y="26">inlet = fed by a cable</text>
+    <text x="14" y="42" fill="#6e6a63">the face shows ⋯ and the literal waits</text>
+    <line x1="40" y1="48" x2="56" y2="80" stroke="#6e6a63" marker-end="url(#arr)"/>
   </g>
 </svg>
 """
@@ -196,8 +200,9 @@ def build() -> str:
     views = " · ".join(m["views"])
     seams = [
         ("src/blocks/blockModel.ts", "`BLOCK_VIEWS` gains `value`; every Block remembers a box for it; `isValueBlockShape`, `PILL_TOOL_ID`."),
-        ("src/blocks/valueBlock.ts", "The capsule's semantics: literal → type, name → hoist, fold rule, and `normalizeValueBlockProps`, the invariant applied on every write."),
-        ("src/blocks/layoutBlock.ts", "The `value` branch: one text box across the face, the outlet centred on the right rim, no heading, rows or footer."),
+        ("src/blocks/valueBlock.ts", "The capsule's semantics: literal → type, name → hoist, fold rule, and `normalizeValueBlockProps`, the invariant applied on every write — one inlet and one outlet mirroring one name and type."),
+        ("src/blocks/layoutBlock.ts", "The `value` branch: one text box across the face, the inlet centred on the left rim and the outlet on the right, no heading, rows or footer."),
+        ("src/blocks/ui/BlockInspector.tsx", "The Pill section — Name, Value, Type, what feeds it and what it feeds — in place of the Block, Tags, Inputs, Outputs and Ports sections; the View row stays."),
         ("src/blocks/BlockShapeUtil.tsx", f"Stadium geometry and indicator; migration {m['migration']} fills the remembered box on old records; `onBeforeCreate` turns a blank Block drawn by the Pill tool into a capsule; `onBeforeUpdate` re-normalises; `canResize` is false."),
         ("src/blocks/ui/BlockCanvas.tsx", "`ValueFace`: name · `=` · literal as ordinary inline fields; the `=` carries the name field while unnamed; a wired input's default chip is dimmed."),
         ("src/blocks/inlineBlockEditing.ts", "Editor placement and double-click reading for the two capsule fields."),
@@ -221,8 +226,10 @@ def build() -> str:
 <h1>The literal argument is a pill, and P draws it</h1>
 <p class="lede">You picked V1 Capsule from <a href="{GALLERY}">the five directions</a>. It is live as the Block's fourth view, <code>value</code>:
 the same primitive wearing a capsule, so cables, the polarity judge, click-to-edit, the inspector, batch styles and the file format apply to it unchanged.
-Press <b>{esc(m['kbd'].upper())}</b>, click, type the literal. Its outlet's name is the variable name — empty means the literal is passed inline —
-and its type follows the literal. Every claim below was driven in the real app by <code>npm run test:pill</code>.</p>
+Press <b>{esc(m['kbd'].upper())}</b>, click, type the literal. A pill is a variable, so it carries an inlet on its left rim and an outlet on its right:
+type a literal and wire the outlet (a source), wire a result into the inlet and name it (a sink), or both (<code>pose = estimate(…)</code> passed on).
+The ports' name is the variable name — empty means the literal is passed inline — and the type follows the literal.
+Every claim below was driven in the real app by <code>npm run test:pill</code>.</p>
 
 <div class="facts">
   <div class="fact"><b>{m['passed']}/{len(m['checks'])}</b><span>browser checks, Block Dev + product</span></div>
@@ -245,7 +252,11 @@ and its type follows the literal. Every claim below was driven in the real app b
 {figure("literal-pill-picked.png", "<b>Value makes a capsule already wired into <code>opts</code>,</b> its literal open for typing, exactly as a picked Call opens its title.")}
 </div>
 <div class="pair">
-{figure("literal-pill-inspector.png", "<b>The inspector knows the fourth view.</b> Value sits beside Simple, Port and Expanded; the inputs lane is hidden because a capsule has none; the outlet is editable like any port.")}
+{figure("literal-pill-fed.png", "<b>A pill can be fed.</b> <code>estimate</code>'s <code>pose</code> lands on a pill's inlet; the face shows <code>⋯</code> where its literal would be, and the same pill's outlet feeds <code>encode</code> — one variable, written and read.")}
+{figure("literal-pill-fed-inspector.png", "<b>The Pill section for a fed pill.</b> Name (both rims), Value read-only while the cable supplies it, Type read from the cable when the pill has none of its own, and a line saying what feeds it.")}
+</div>
+<div class="pair">
+{figure("literal-pill-inspector.png", "<b>The Pill section for a literal.</b> Name, Value and Type instead of the Block sections; the View row stays because a pill is a Block. What the outlet feeds is spelled out.")}
 {figure("literal-pill-product.png", "<b>The product composition:</b> the Pill slot beside Block in the toolbar, and <code>P</code> draws a capsule on the real board.")}
 </div>
 
@@ -271,6 +282,7 @@ before the box tool reads its size to centre it.</p>
 <p>Every neighbouring journey was re-run on this tree: polarity 42/42, edge acceptance 33/33, click-to-edit 9/9, batch editing, context menu 12/12, ports, fields, selection menu, edge editor, reveal, arrow sync, file type. Two of them enumerate the View submenu and now expect the fourth entry.</p>
 
 <h2>Decisions you can reverse in a line</h2>
+<div class="decision"><b>Both rims always carry a dot.</b> Source, sink or both is decided by what you wire, not by a pill kind; an unwired inlet is just a hollow dot. A fed pill's literal is kept in the record and shown again the moment the cable is removed.</div>
 <div class="decision"><b>The <code>=</code> is the click that names an unnamed pill.</b> There is no ghost "name" placeholder; the tooltip on <code>=</code> says <i>Name this value</i>, and the inspector's Outputs row edits the same field. A hover hint is a CSS rule away.</div>
 <div class="decision"><b>A capsule is not resizable.</b> It is as wide as its text ({m['VALUE_MIN_WIDTH_PX']}–{m['VALUE_MAX_WIDTH_PX']}px), like a tldraw text shape with auto width; the resize handles are hidden for the value view only.</div>
 <div class="decision"><b>The type is re-inferred only when the literal changes.</b> Typing a type by hand in the inspector sticks until the literal is edited; an expression the spelling cannot type (<code>math.pi</code>) keeps the type it had.</div>
