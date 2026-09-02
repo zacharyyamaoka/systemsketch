@@ -168,6 +168,13 @@ async function main() {
     check('SIBLING-1-DIR', 'the cable leaves the output rightward and enters the input rightward',
       await describeCable(page, dots),
       { from: 'encode.out', to: 'merge.in', leavesRight: true, arrivesRight: true })
+    // Straight on, no click in between: the same output to a second input. The
+    // cable just drawn must not be left selected with its handle on this dot,
+    // or this press would drag the first wire away instead of adding one.
+    const fanOut = await dragFrom(page, dots['encode.out'], dots['merge.in2'])
+    check('FANOUT-1', 'the next press on the same output starts a second cable, not a move',
+      { cables: fanOut.count, wired: await wiredPorts(page, names) },
+      { cables: 2, wired: ['encode.out_1', 'merge.in_1', 'merge.in_2'] })
     await clearCables(page, restA)
 
     // --- SIBLING-2: the same wire made from the OTHER dot.

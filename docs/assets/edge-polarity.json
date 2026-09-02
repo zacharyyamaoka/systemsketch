@@ -24,6 +24,27 @@
     "ok": true
   },
   {
+    "id": "FANOUT-1",
+    "label": "the next press on the same output starts a second cable, not a move",
+    "observed": {
+      "cables": 2,
+      "wired": [
+        "encode.out_1",
+        "merge.in_1",
+        "merge.in_2"
+      ]
+    },
+    "desired": {
+      "cables": 2,
+      "wired": [
+        "encode.out_1",
+        "merge.in_1",
+        "merge.in_2"
+      ]
+    },
+    "ok": true
+  },
+  {
     "id": "SIBLING-2",
     "label": "merge.in → encode.out makes the same wire from the input dot",
     "observed": 1,
@@ -228,8 +249,8 @@
   {
     "id": "NESTED-0",
     "label": "decode was drawn inside run",
-    "observed": "shape:-Q1CXbzpxqN5e0QrDjQIc",
-    "desired": "shape:-Q1CXbzpxqN5e0QrDjQIc",
+    "observed": "shape:b-AjIUnIzu00wUzdq7V8c",
+    "desired": "shape:b-AjIUnIzu00wUzdq7V8c",
     "ok": true
   },
   {
@@ -348,8 +369,8 @@
   {
     "id": "SCOPE-2",
     "label": "the new Block is a child of the boundary",
-    "observed": "shape:-Q1CXbzpxqN5e0QrDjQIc",
-    "desired": "shape:-Q1CXbzpxqN5e0QrDjQIc",
+    "observed": "shape:b-AjIUnIzu00wUzdq7V8c",
+    "desired": "shape:b-AjIUnIzu00wUzdq7V8c",
     "ok": true
   },
   {
@@ -376,14 +397,14 @@
     "id": "SCOPE-5",
     "label": "the new Block is inside, fed by the inlet",
     "observed": {
-      "parent": "shape:-Q1CXbzpxqN5e0QrDjQIc",
+      "parent": "shape:b-AjIUnIzu00wUzdq7V8c",
       "wired": [
         "call.in_1",
         "run.in_1"
       ]
     },
     "desired": {
-      "parent": "shape:-Q1CXbzpxqN5e0QrDjQIc",
+      "parent": "shape:b-AjIUnIzu00wUzdq7V8c",
       "wired": [
         "call.in_1",
         "run.in_1"
