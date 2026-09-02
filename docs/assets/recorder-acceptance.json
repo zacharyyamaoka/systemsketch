@@ -13,6 +13,13 @@
   "ok": true
  },
  {
+  "id": "note-input-absent",
+  "label": "the Recording section has no prefatory text input",
+  "observed": null,
+  "desired": null,
+  "ok": true
+ },
+ {
   "id": "clipboard-state",
   "label": "the Copy row reports the clipboard write as done",
   "observed": "Copied",
@@ -41,10 +48,18 @@
   "ok": true
  },
  {
-  "id": "packet-note",
-  "label": "the note typed before saving is the first thing after the headline",
-  "observed": true,
-  "desired": true,
+  "id": "packet-without-ui-note",
+  "label": "saving without a UI note produces a complete, path-bearing packet",
+  "observed": {
+   "emptyHeaderNote": true,
+   "saysNoNote": true,
+   "hasTimelinePath": true
+  },
+  "desired": {
+   "emptyHeaderNote": true,
+   "saysNoNote": true,
+   "hasTimelinePath": true
+  },
   "ok": true
  },
  {

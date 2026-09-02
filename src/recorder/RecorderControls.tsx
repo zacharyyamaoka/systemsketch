@@ -43,7 +43,6 @@ function shortPath(path: string): string {
 
 export function RecorderControls({ compact = false }: { compact?: boolean }) {
   const state = useRecorderState()
-  const [note, setNote] = useState('')
   const elapsed = useElapsed(state.takeStartedAt)
   if (!state.installed) return null
   const taking = state.mode === 'take'
@@ -51,10 +50,10 @@ export function RecorderControls({ compact = false }: { compact?: boolean }) {
   const disabledReason = !state.enabled ? 'Recorder is off' : busy ? 'Saving…' : ''
 
   const onTake = () => {
-    if (taking) void stopTake(note).then(() => setNote(''))
+    if (taking) void stopTake()
     else void startTake()
   }
-  const onSaveLast = () => { void saveLast(note).then(() => setNote('')) }
+  const onSaveLast = () => { void saveLast() }
   const framesLabel = state.framesSource === 'screencast'
     ? 'frames: Chrome screencast'
     : state.framesSource === 'canvas'
@@ -138,17 +137,6 @@ export function RecorderControls({ compact = false }: { compact?: boolean }) {
           <em>{state.clipboard === 'copied' ? 'Copied' : state.clipboard === 'failed' ? 'Failed' : '⧉'}</em>
         </button>
       </div>
-
-      <label className="systemsketch-recorder__note">
-        <span>What went wrong?</span>
-        <input
-          type="text"
-          value={note}
-          placeholder="optional · becomes the first line of the packet"
-          onChange={(event) => setNote(event.target.value)}
-          data-testid="recorder-note"
-        />
-      </label>
 
       <div className="systemsketch-recorder__window">
         <span>window</span>

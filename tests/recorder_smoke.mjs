@@ -119,9 +119,7 @@ async function main() {
     await clickElement(page, '.systemsketch-dev-trigger')
     await waitFor(page, `document.querySelector('[data-testid="recorder-controls"][data-enabled="true"]')`, 'recorder rows')
     await shot(page, 'recorder-dev-menu.png')
-    const note = await box(page, '[data-testid="recorder-note"]')
-    await clickAt(page, note.cx, note.cy)
-    await page.send('Input.insertText', { text: 'cable landed, then the detector would not move' })
+    check('note-input-absent', 'the Recording section has no prefatory text input', await evaluate(page, `document.querySelector('[data-testid="recorder-note"]')`), null)
     await clickElement(page, '[data-action="save-last"]')
     await waitFor(page, `!document.querySelector('[data-testid="recorder-last-path"]').textContent.includes('Nothing saved')`, 'a saved recording', 30000)
     await delay(300)
@@ -142,7 +140,11 @@ async function main() {
     check('folder-files', 'the folder carries the packet, timeline, snapshots, frames and viewer',
       ['README.md', 'end.snapshot.json', 'frames', 'frames.jsonl', 'header.json', 'playback.html', 'start.snapshot.json', 'states.json', 'timeline.jsonl'].every((name) => first.files.includes(name)), true)
     check('packet-first-line', 'the packet opens with the recording headline', first.packet.startsWith('SystemSketch interaction recording'), true)
-    check('packet-note', 'the note typed before saving is the first thing after the headline', first.packet.includes('Note from the person recording:\n  cable landed, then the detector would not move'), true)
+    check('packet-without-ui-note', 'saving without a UI note produces a complete, path-bearing packet', {
+      emptyHeaderNote: first.header.note === '',
+      saysNoNote: first.packet.includes('No note was typed.'),
+      hasTimelinePath: first.packet.includes(`${folders[0]}/timeline.jsonl`),
+    }, { emptyHeaderNote: true, saysNoNote: true, hasTimelinePath: true })
     check('packet-paths', 'the packet points at the folder by absolute path', first.packet.includes(`${folders[0]}/timeline.jsonl`), true)
     check('packet-on-clipboard', 'the clipboard holds the packet verbatim', typeof clipboard === 'string' && clipboard === first.packet, true)
     check('header-mode', 'a retroactive save is stamped as such, on the preview channel', { mode: first.header.mode, channel: first.header.channel, framesSource: first.header.framesSource }, { mode: 'last', channel: 'preview', framesSource: 'screencast' })

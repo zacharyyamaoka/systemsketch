@@ -60,14 +60,6 @@
       "typeName": "pointer"
     },
     {
-      "name": "",
-      "color": "#9D5BD2",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:rTDZ0EXQTIMzMQA6Lacmr",
-      "typeName": "user"
-    },
-    {
       "x": 720,
       "y": 600,
       "rotation": 0,
@@ -109,7 +101,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6cbr",
+      "index": "a6UYq",
       "typeName": "shape"
     },
     {
@@ -152,7 +144,7 @@
         "pillPosition": 0.5
       },
       "parentId": "page:page",
-      "index": "a34Wv",
+      "index": "a3mMA",
       "typeName": "shape"
     },
     {
@@ -189,7 +181,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · Copy last recording names a folder under recordings/, the clipboard begins with “SystemSketch interaction recording”, and its transitions include select.translating."
+                  "text": "PASS WHEN · The Recording section has no text input; Copy last recording names a folder under recordings/; the clipboard begins with “SystemSketch interaction recording”."
                 }
               ]
             }
@@ -197,7 +189,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a97Ov",
+      "index": "a9jIM",
       "typeName": "shape"
     },
     {
@@ -214,7 +206,7 @@
         "h": 120,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 2,
+        "growY": 32,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -234,7 +226,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "2 · Click the </> button in the bottom-right strip. Under RECORDING, type a line into “What went wrong?” and click Save the last 30 s."
+                  "text": "2 · Click the </> button in the bottom-right strip. Under RECORDING, confirm there is no “What went wrong?” text box, then click Save the last 30 s."
                 }
               ]
             }
@@ -242,7 +234,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a7Jej",
+      "index": "a7uTM",
       "typeName": "shape"
     },
     {
@@ -308,8 +300,16 @@
         }
       },
       "parentId": "page:page",
-      "index": "a81tQ",
+      "index": "a8qu2",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#BD54C6",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:NN53Gi9B7yb-4SSwNJFIR",
+      "typeName": "user"
     },
     {
       "editingShapeId": null,
@@ -432,7 +432,7 @@
         ]
       },
       "parentId": "page:page",
-      "index": "a4N1f",
+      "index": "a4gq6",
       "typeName": "shape"
     },
     {
@@ -476,7 +476,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3cNW",
+      "index": "a3trhG",
       "typeName": "shape"
     },
     {
@@ -531,7 +531,7 @@
         ]
       },
       "parentId": "page:page",
-      "index": "a5gdE",
+      "index": "a5hdM",
       "typeName": "shape"
     }
   ]

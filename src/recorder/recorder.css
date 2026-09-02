@@ -16,34 +16,6 @@
   background: var(--ss-danger-soft);
 }
 
-.systemsketch-recorder__note {
-  display: grid;
-  gap: 3px;
-  margin: 8px 3px 0;
-  color: var(--ss-text-muted);
-  font-size: 8px;
-  font-weight: 850;
-  letter-spacing: .09em;
-  text-transform: uppercase;
-}
-
-.systemsketch-recorder__note input {
-  width: 100%;
-  padding: 6px 8px;
-  border: 1px solid var(--ss-border);
-  border-radius: 7px;
-  color: var(--ss-text);
-  background: var(--ss-surface-raised);
-  font: 11px/1.3 inherit;
-  letter-spacing: normal;
-  text-transform: none;
-}
-
-.systemsketch-recorder__note input:focus {
-  border-color: var(--ss-focus-ring);
-  outline: none;
-}
-
 .systemsketch-recorder__window {
   display: flex;
   flex-wrap: wrap;
