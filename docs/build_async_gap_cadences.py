@@ -264,7 +264,7 @@ def make_variant(item: dict) -> dict:
     duty, gap_min, gap_max = cadence_stats(pattern)
     raw = item["scores"]
     evidence = [
-        f"{duty}% of the repeating pattern remains painted; crossing and 45% states expose route loss directly.",
+        f"{duty}% of the repeating pattern remains painted; the 708-unit route, bundle, overlap, and 45% states expose route loss directly.",
         f"The {item['rhythm']} rhythm uses unequal run spacing; visible gaps span {gap_min}–{gap_max}px.",
         f"The reduced state scales the exact same dash array; {gap_max}px is the strongest surviving interruption.",
         "The pattern is presented as a stable Event[T] type mark, not as observed arrivals or queue occupancy.",
@@ -285,7 +285,7 @@ def make_variant(item: dict) -> dict:
         ],
         "keepParts": [item["model"], item["rhythm"], f"{duty}% carrier"],
         "proof": [
-            "Isolated, crossing, and 45% buttons drive the same states as the guided story.",
+            "Long-route, bundle, overlap, and 45% buttons drive the same states as the guided story.",
             f"The monochrome fingerprint exposes the exact array: {pattern}.",
             "The underlying source-to-sink path never changes; only its stroke paint changes.",
         ],
@@ -302,13 +302,14 @@ PROJECT = {
     "schemaVersion": 3,
     "title": "Ten gap-coded burst cadences",
     "kicker": "SystemSketch · async edge micro-study · Babble 10",
-    "brief": "Invert the first Burst Cadence: keep a mostly continuous event rail, then let each symbolic package appear as a small dropout. The gaps are unequally spaced and often unequal in width, but every candidate preserves at least 88% carrier so the eye can follow the connection.",
+    "brief": "Invert the first Burst Cadence: keep a mostly continuous event rail, then let each symbolic package appear as a small dropout. Every candidate now runs through the same long, busy topology—bundles, crossings, partial overlap, and a 45% overview—so the eye-tracking judgment reflects a real board rather than a short specimen.",
     "count": 10,
     "defaultId": "v3",
     "defaultWhy": "Breath Marks is the provisional default at 97.0/100. Its runs are clearly unmetered, its 4/9/5/4 px gaps make the package marks deliberately unequal, and 93.0% of the route remains painted. It answers the eye-tracking criticism without sliding back into a regular dashed line.",
     "decisionHinge": "The main trade is recognition versus quietness. If far-zoom legibility dominates, choose V4 Syncopated Singles; if the board is extremely dense, choose V1 Quiet Scatter; if ‘burst’ must be unmistakable on short cables, splice V8’s triplet into V3’s mixed gap widths.",
     "invariants": [
-        "Every candidate uses the same watch_items() → dispatch_pick() Event[Item] fixture and solid Pose baseline.",
+        "Every candidate uses the same six-block, 708-unit watch_items() → dispatch_pick() Event[Item] fixture.",
+        "Every state uses the same eight neighbouring cables, two crossings, and 340-unit shared run.",
         "The source-to-sink geometry is unchanged; only strokeDasharray differs.",
         "Every repeating cadence keeps at least 88% painted carrier and no gap exceeds 9px.",
         "Gaps are a categorical Event[T] fingerprint, not a literal count or measured arrival trace.",
@@ -325,8 +326,8 @@ PROJECT = {
     "variants": VARIANTS,
     "checks": [
         "Exactly ten distinct gap cadences",
-        "Same blocks, ports, route, event colour, and solid data baseline",
-        "Isolated / crossing / 45% direct controls and guided story",
+        "Same blocks, ports, 708-unit route, event colour, and topology",
+        "Long route / cable bundle / cross + overlap / 45% direct controls and guided story",
         "Exact dash array and measured duty cycle shown for every option",
         "All candidates pass carrier and max-gap hard gates",
         "Pick, shortlist, reject, splice, copy, and download",
@@ -348,36 +349,53 @@ CUSTOM_CSS = r"""
   .feedback-lock .before { stroke-dasharray:30 7 4 8 12 34; stroke-linecap:round; }
   .feedback-lock .after { stroke-dasharray:46 4 83 9 61 5 97 4; stroke-linecap:butt; }
 
-  .prototype-frame, .prototype { min-height:368px; }
-  .gap-fixture { min-height:368px; overflow:hidden; background:#f7f8fa; color:#20242c; font-family:Inter,ui-sans-serif,system-ui,sans-serif; }
+  .variant-grid { grid-template-columns:1fr; }
+  .prototype-frame, .prototype { min-height:476px; }
+  .gap-fixture { min-height:476px; overflow:hidden; background:#f7f8fa; color:#20242c; font-family:Inter,ui-sans-serif,system-ui,sans-serif; }
   .gap-fixture__bar { display:flex; align-items:center; gap:10px; min-height:34px; padding:8px 10px; border-bottom:1px solid #d7dbe2; background:#fff; font-size:10px; }
   .gap-fixture__bar span { color:#7c3aed; font:750 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.08em; }
   .gap-fixture__bar b { font-size:11px; }
   .gap-fixture__bar i { margin-left:auto; color:#77808f; font-size:9px; }
   .gap-fixture svg { display:block; width:100%; }
   .gap-fixture .canvas { fill:#f7f8fa; }
-  .gap-fixture__scene { transform-origin:350px 112px; transition:transform .18s ease; }
+  .gap-fixture__scene { transform-origin:550px 195px; transition:transform .18s ease; }
   .gap-fixture .block rect { fill:#fff; stroke:#c9ced8; stroke-width:1.2; }
   .gap-fixture .block line { stroke:#d5d9e0; stroke-width:1; }
   .gap-fixture .block circle { fill:#c08520; }
+  .gap-fixture .block .data-port { fill:#64748b; }
   .gap-fixture .block text { fill:#252a33; font-size:10px; }
   .gap-fixture .block .type { fill:#7b8492; font-size:8.5px; }
-  .gap-fixture .block .title { font:500 15px/1 ui-monospace,SFMono-Regular,Menlo,monospace; }
-  .event-wire { fill:none; stroke:#7c3aed; stroke-width:2.2; stroke-linecap:butt; }
-  .event-head { fill:#7c3aed; }
+  .gap-fixture .block .title { font:600 13px/1 ui-monospace,SFMono-Regular,Menlo,monospace; }
+  .lane-guide { fill:none; stroke:#e3e6eb; stroke-width:1; stroke-dasharray:2 7; }
+  .event-wire, .secondary-event { fill:none; stroke:#7c3aed; stroke-width:2.4; stroke-linecap:butt; }
+  .target-wire { filter:drop-shadow(0 0 1.5px rgba(124,58,237,.3)); }
   .data-wire { fill:none; stroke:#657080; stroke-width:1.8; stroke-linecap:round; }
-  .data-head { fill:#657080; }
-  .crossing-edge { opacity:0; fill:none; stroke:#4b5563; stroke-width:2; transition:opacity .14s ease; }
-  .edge-note, .zoom-label { fill:#7b8492; font-size:9px; font-style:italic; }
+  .context-wire { fill:none; stroke:#657080; stroke-width:1.8; stroke-linecap:round; }
+  .secondary-event { opacity:.62; }
+  .crossing-wire { stroke:#334155; }
+  .crossing-wire.dotted { stroke-dasharray:2 7; stroke-linecap:round; }
+  .bundle-cable, .overlap-only { opacity:0; transition:opacity .16s ease; }
+  .overlap-halo { fill:none; stroke:#fbbf24; stroke-width:7; opacity:.58; }
+  .overlap-wire { fill:none; stroke:#d97706; stroke-width:2.4; }
+  .overlap-bracket { fill:none; stroke:#b45309; stroke-width:1; }
+  .cross-mark { fill:none; stroke:#ef4444; stroke-width:1.5; stroke-dasharray:2 3; }
+  .topology-note, .zoom-label, .route-callout text { fill:#697383; font-size:9px; font-style:italic; }
+  .route-callout path { fill:none; stroke:#a7afbb; stroke-width:1; stroke-dasharray:3 4; }
+  .route-callout { opacity:.82; }
   .zoom-label { opacity:0; transition:opacity .14s ease; }
-  .prototype[data-story-state="crossing"] .crossing-edge { opacity:1; }
+  .prototype[data-story-state="bundle"] .bundle-cable { opacity:.82; }
+  .prototype[data-story-state="overlap"] .bundle-cable { opacity:.55; }
+  .prototype[data-story-state="overlap"] .overlap-only { opacity:1; }
+  .prototype[data-story-state="zoom"] .bundle-cable { opacity:.72; }
+  .prototype[data-story-state="zoom"] .overlap-only { opacity:.9; }
   .prototype[data-story-state="zoom"] .gap-fixture__scene { transform:scale(.45); }
   .prototype[data-story-state="zoom"] .zoom-label { opacity:1; }
   .gap-state-controls { display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 10px 12px; border-top:1px solid #d7dbe2; background:#fff; }
   .gap-state-controls span { margin-right:5px; color:#77808f; font:650 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace; text-transform:uppercase; letter-spacing:.06em; }
   .gap-state-controls button { min-height:27px; padding:6px 9px; border:1px solid #c9ced8; border-radius:4px; background:#fff; color:#4e5662; font:650 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace; }
-  .prototype[data-story-state="isolated"] [data-story-to="isolated"],
-  .prototype[data-story-state="crossing"] [data-story-to="crossing"],
+  .prototype[data-story-state="long"] [data-story-to="long"],
+  .prototype[data-story-state="bundle"] [data-story-to="bundle"],
+  .prototype[data-story-state="overlap"] [data-story-to="overlap"],
   .prototype[data-story-state="zoom"] [data-story-to="zoom"] { border-color:#7c3aed; background:#f2edff; color:#5b21b6; }
 
   .fingerprint { min-height:134px; padding:16px; background:#fbfbfc; }
@@ -401,7 +419,7 @@ def feedback_html() -> str:
       <section class="feedback-lock" aria-labelledby="feedback-heading">
         <div class="feedback-lock__head">
           <div><div class="eyebrow">Feedback incorporated</div><h2 id="feedback-heading">Invert the mark: gaps are the packets.</h2></div>
-          <p>The first Burst Cadence made silence the dominant shape. That signalled intermittence, but the route fragmented. This pass holds a continuous carrier and cuts tiny, irregular Morse-like gaps into it. <a href="async-edge-styles-2026-09-02.html">Return to the five-family study and tldraw implementation path.</a></p>
+          <p>The first Burst Cadence made silence the dominant shape. That signalled intermittence, but the route fragmented. This pass holds a continuous carrier and cuts tiny, irregular Morse-like gaps into it. Every card now includes the requested long route, eight-cable bundle, two crossings, partial overlap, and 45% board view. <a href="async-edge-styles-2026-09-02.html">Return to the five-family study and tldraw implementation path.</a></p>
         </div>
         <div class="feedback-lock__compare">
           <figure><svg viewBox="0 0 420 44"><path class="before" d="M14 22 H406"/></svg><figcaption><b>Before.</b> Large 34px silence; strong intermittence, weak eye tracking.</figcaption></figure>
