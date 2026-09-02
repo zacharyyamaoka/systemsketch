@@ -353,7 +353,7 @@ def main() -> None:
 <div class="card"><h3>Needs you</h3><ul>
 <li><b>Which surface to lean on.</b> Recommendation: V1 drag as the primary, V2/V3/V4 kept as complements (all shipped). <span class="pill">default if silent: keep all four, polish V1</span></li>
 <li><b>Empty rows.</b> Today a row emptied on both sides disappears. Recommendation: accept until rows get labels. <span class="pill">default: accept</span></li>
-<li><b>Merge order with the pill branch.</b> Recommendation: merge the pill first (its migration stays 3), then this branch renumbered to 4. <span class="pill">default: I renumber on merge</span></li>
+<li><b>Migration ids: resolved, no action.</b> The pill branch has since merged this work and renumbered its own <code>ValueView</code> to 4, keeping <code>PortRows: 3</code>. Verified against that branch when this report was built. <span class="pill">nothing to decide</span></li>
 </ul></div>
 <div class="card"><h3>Deliberately not done</h3><ul>
 <li>No V5 port-editing mode in the app — a mode is the one thing every earlier round of yours rejected.</li>
