@@ -10,7 +10,7 @@ import {
 } from 'tldraw'
 import { isDrawingArrowWithArrowTool } from '../arrowClickToPlace'
 import { withBlockTool } from '../blocks/blockToolUi'
-import { ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
+import { CONNECTION_SHAPE_TYPE, ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
 import {
   arrowPresetForActivation,
   connectionRoutingForArrowPreset,
@@ -45,6 +45,21 @@ export function arrowPresetFromShapeTool(tool: `arrow-${ArrowPreset}`): ArrowPre
 }
 
 /**
+ * Does this composition have cables at all?
+ *
+ * `stylesForNextShape` is validated against the store's own schema, and a style
+ * prop only enters that schema through the shape util that declares it. The
+ * stock-tldraw lab mounts tldraw *without* the Connection shape, so writing the
+ * cable routing there is not an ignored style — it is an unknown property in
+ * instance state, and tldraw fails the whole document with a validation error
+ * and its crash screen. So the second half of the preset is asked for, never
+ * assumed. The arrow half is stock tldraw and always applies.
+ */
+function hasConnectionShape(editor: Editor): boolean {
+  return editor.shapeUtils[CONNECTION_SHAPE_TYPE] !== undefined
+}
+
+/**
  * One choice, two shapes.
  *
  * An arrow and a data edge are the same idea drawn on different subjects, so
@@ -55,7 +70,9 @@ export function arrowPresetFromShapeTool(tool: `arrow-${ArrowPreset}`): ArrowPre
  */
 export function applyArrowPreset(editor: Editor, preset: ArrowPreset): void {
   editor.setStyleForNextShapes(ArrowShapeKindStyle, preset === 'elbow' ? 'elbow' : 'arc')
-  editor.setStyleForNextShapes(ConnectionRoutingStyle, connectionRoutingForArrowPreset(preset))
+  if (hasConnectionShape(editor)) {
+    editor.setStyleForNextShapes(ConnectionRoutingStyle, connectionRoutingForArrowPreset(preset))
+  }
 }
 
 /**
