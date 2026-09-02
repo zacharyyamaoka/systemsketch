@@ -11,32 +11,38 @@
 
 .systemsketch-appearance__trigger {
   display: flex;
-  min-width: 40px;
-  height: 32px;
+  height: 40px;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  margin: 4px 0;
-  padding: 0 7px;
+  gap: 2px;
+  padding: 0 4px;
   border: 0;
-  border-radius: 8px;
-  color: #f1f2f4;
+  border-radius: 5px;
+  color: #fff;
   background: transparent;
   cursor: pointer;
 }
 
+/* FigJam separates control groups with a 1px hairline the full height of the
+ * pill, rather than by spacing them apart. */
+.systemsketch-appearance__separator {
+  width: 1px;
+  height: 40px;
+  flex: 0 0 auto;
+  background: #383838;
+}
+
 .systemsketch-appearance__trigger:hover,
 .systemsketch-appearance__trigger[data-state='open'] {
-  background: #3a3b40;
+  background: #383838;
 }
 
 .systemsketch-appearance__chevron {
-  width: 0;
-  height: 0;
-  border-top: 3.5px solid currentcolor;
-  border-right: 3px solid transparent;
-  border-left: 3px solid transparent;
-  opacity: .62;
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  fill: currentcolor;
 }
 
 /* Popover ---------------------------------------------------------------- */
@@ -59,12 +65,16 @@
 /* FigJam separates the mode row from the palette with a hairline. It labels
  * its three fills on one line; tldraw has six, so they run two to a row rather
  * than squeezing the labels into wrapping. */
+/* One row, divided from the palette by the same 1px hairline the pill uses
+ * between groups. FigJam's divider spans the full panel width, so the rule sits
+ * on the panel's own padding box rather than on the row. */
 .systemsketch-appearance__mode {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 2px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  margin: -8px -8px 0;
+  padding: 8px;
+  border-bottom: 1px solid #383838;
 }
 
 .systemsketch-appearance__options {
@@ -113,7 +123,7 @@
 
 .systemsketch-appearance__option[aria-checked='true'] {
   color: #fff;
-  background: #8257ee;
+  background: #9747ff;
 }
 
 /* Swatches --------------------------------------------------------------- */
@@ -124,7 +134,7 @@
   height: 24px;
   border-radius: 50%;
   background: #757575;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 22%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 20%);
 }
 
 .systemsketch-appearance__trigger .systemsketch-appearance__swatch {
@@ -159,21 +169,27 @@
 /* FigJam rings the chosen swatch rather than filling its cell. */
 .systemsketch-appearance__panel[data-layout='swatches'] .systemsketch-appearance__options
   .systemsketch-appearance__option[aria-checked='true'] .systemsketch-appearance__swatch {
-  box-shadow: 0 0 0 2px #1e1e1e, 0 0 0 4px #8257ee;
+  box-shadow: 0 0 0 2px #1e1e1e, 0 0 0 4px #9747ff;
 }
 
 /* Glyphs ----------------------------------------------------------------- */
 
 .systemsketch-appearance__glyph {
   display: block;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   flex: 0 0 auto;
   fill: none;
   stroke: currentcolor;
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+/* FigJam draws its control icons as filled paths rather than strokes. */
+.systemsketch-appearance__glyph[data-filled] {
+  fill: currentcolor;
+  stroke: none;
 }
 
 .systemsketch-appearance__glyph [data-role='solid'] {

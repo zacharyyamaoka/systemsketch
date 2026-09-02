@@ -1,96 +1,42 @@
 /**
  * Reading and writing a document a host handed over, by its suffix alone.
  *
- * A `.systemsketch` file *is* a tldraw file — same `tldrawFileFormatVersion`,
- * `schema` and `records` — with one extra top-level `systemSketch` key written
- * in front of them. Reading strips that key and hands the remainder to
- * tldraw's own parser; a `.tldr` has no key to strip and so travels the
- * identical path untouched. That is the backwards compatibility: one reader,
- * not two.
+ * The rules themselves live in the workspace lane — `systemSketchFile.ts` owns
+ * the envelope, `workspaceModel.ts` owns what each suffix means. This module
+ * exists to say, in one place, exactly which of those an embedded editor uses,
+ * and to add the two things a host needs that a workspace does not:
  *
- * Everything here is a pure string → string transform. No tldraw import, no
- * editor, no DOM — so the VS Code extension host can share this module with
- * the canvas and both ends agree on the format by construction.
+ * - `decodeDocumentText`, because a host hands over *text* rather than the
+ *   `{core, manifest}` pair the workspace lane wants;
+ * - `isBlankDocument`, because a freshly seeded golden target is a zero-byte
+ *   file, and an empty file is a blank board rather than a parse failure.
+ *   Getting that wrong is the difference between "click the target and start
+ *   drawing" and a quarantine screen on every new case.
  *
- * SEAM: the local-workspace lane owns the same envelope for files it saves
- * through the Python host. When both lanes are on one branch this module
- * should re-export that one rather than restate it.
+ * Everything reachable from here stays pure — no tldraw, no React, no DOM — so
+ * the VS Code extension host can share it with the canvas and both ends agree
+ * on the format by construction rather than by two implementations agreeing.
  */
 
-export const SYSTEMSKETCH_ENVELOPE_KEY = 'systemSketch'
-export const SYSTEMSKETCH_FORMAT_VERSION = 1
-export const SYSTEMSKETCH_APPLICATION = 'SystemSketch'
-export const SYSTEMSKETCH_SUFFIX = '.systemsketch'
-export const TLDRAW_SUFFIX = '.tldr'
-export const DOCUMENT_SUFFIXES = [SYSTEMSKETCH_SUFFIX, TLDRAW_SUFFIX] as const
+import { decodeSystemSketchDocument } from '../workspace/systemSketchFile'
+import { encodeDocumentForPath } from '../workspace/workspaceModel'
 
-export type DocumentSuffix = (typeof DOCUMENT_SUFFIXES)[number]
-
-/**
- * A plain inventory of what a document holds, not a claim about which types
- * are "ours": a reader can see four Blocks and three cables without loading a
- * store, and a future `.tldr` exporter knows what it has to detach.
- */
-export interface SystemSketchManifest {
-  formatVersion: number
-  application: string
-  shapes: Record<string, number>
-  bindings: Record<string, number>
-}
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-/** The document suffix `path` uses, or `null` if it is not one SystemSketch owns. */
-export function documentSuffix(path: string): DocumentSuffix | null {
-  const name = (path.split(/[\\/]/).pop() ?? path).toLowerCase()
-  return DOCUMENT_SUFFIXES.find(
-    (suffix) => name.length > suffix.length && name.endsWith(suffix),
-  ) ?? null
-}
-
-/** Which on-disk encoding a path implies. The suffix decides; nothing else does. */
-export function documentEncoding(path: string): 'systemsketch' | 'tldraw' {
-  return documentSuffix(path) === SYSTEMSKETCH_SUFFIX ? 'systemsketch' : 'tldraw'
-}
-
-export function documentTitle(path: string): string {
-  const name = path.split(/[\\/]/).pop() ?? path
-  const suffix = documentSuffix(name)
-  return suffix ? name.slice(0, -suffix.length) : name
-}
-
-function tally(records: unknown): {
-  shapes: Record<string, number>
-  bindings: Record<string, number>
-} {
-  const shapes: Record<string, number> = {}
-  const bindings: Record<string, number> = {}
-  if (!Array.isArray(records)) return { shapes, bindings }
-  for (const record of records) {
-    if (!isPlainObject(record)) continue
-    const bucket = record.typeName === 'shape'
-      ? shapes
-      : record.typeName === 'binding'
-        ? bindings
-        : null
-    if (!bucket) continue
-    const type = typeof record.type === 'string' ? record.type : 'unknown'
-    bucket[type] = (bucket[type] ?? 0) + 1
-  }
-  return { shapes, bindings }
-}
-
-export function systemSketchManifest(records: unknown): SystemSketchManifest {
-  const { shapes, bindings } = tally(records)
-  return {
-    formatVersion: SYSTEMSKETCH_FORMAT_VERSION,
-    application: SYSTEMSKETCH_APPLICATION,
-    shapes,
-    bindings,
-  }
-}
+export {
+  SYSTEMSKETCH_APPLICATION,
+  SYSTEMSKETCH_ENVELOPE_KEY,
+  SYSTEMSKETCH_FORMAT_VERSION,
+  systemSketchManifest,
+  type SystemSketchManifest,
+} from '../workspace/systemSketchFile'
+export {
+  DOCUMENT_SUFFIXES,
+  SYSTEMSKETCH_SUFFIX,
+  TLDRAW_SUFFIX,
+  documentEncoding,
+  documentSuffix,
+  documentTitle,
+  type DocumentSuffix,
+} from '../workspace/workspaceModel'
 
 /**
  * Strip the envelope, if there is one, and return tldraw's own file text.
@@ -101,44 +47,15 @@ export function systemSketchManifest(records: unknown): SystemSketchManifest {
  * parse error in its own words instead of this module inventing one.
  */
 export function decodeDocumentText(source: string): string {
-  if (!source.includes(`"${SYSTEMSKETCH_ENVELOPE_KEY}"`)) return source
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(source)
-  } catch {
-    return source
-  }
-  if (!isPlainObject(parsed) || !(SYSTEMSKETCH_ENVELOPE_KEY in parsed)) return source
-  const { [SYSTEMSKETCH_ENVELOPE_KEY]: _envelope, ...core } = parsed
-  return JSON.stringify(core)
+  return decodeSystemSketchDocument(source).core
 }
 
-/**
- * Wrap portable tldraw JSON for `path`, and only if `path` asks for it.
- *
- * The envelope is written first so the file's first bytes identify it, and
- * re-encoding an already-wrapped document replaces the envelope rather than
- * nesting a second one.
- */
+/** Wrap serialized tldraw JSON for `path`, and only if `path` asks for it. */
 export function encodeDocumentText(path: string, tldrawJson: string): string {
-  if (documentEncoding(path) !== 'systemsketch') return tldrawJson
-  const parsed: unknown = JSON.parse(tldrawJson)
-  if (!isPlainObject(parsed)) throw new Error('a SystemSketch document must be a JSON object')
-  const { [SYSTEMSKETCH_ENVELOPE_KEY]: _replaced, ...core } = parsed
-  return JSON.stringify({
-    [SYSTEMSKETCH_ENVELOPE_KEY]: systemSketchManifest(core.records),
-    ...core,
-  })
+  return encodeDocumentForPath(path, tldrawJson)
 }
 
-/**
- * Whether a host handed us a document with nothing in it yet.
- *
- * A brand-new golden target is a zero-byte file, and an empty file is not a
- * parse failure — it is a blank board waiting to be drawn on. Treating it as
- * an error is the difference between "click the target and start drawing" and
- * a quarantine screen on every new case.
- */
+/** Whether a host handed us a document with nothing in it yet. */
 export function isBlankDocument(source: string): boolean {
   return source.trim().length === 0
 }

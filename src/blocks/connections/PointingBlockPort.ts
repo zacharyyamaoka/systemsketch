@@ -10,13 +10,10 @@ import {
 	type TLShapeId,
 	type VecLike,
 } from 'tldraw'
-import { isBlockShape } from '../blockModel'
 import {
 	getBlockConnectionPortPagePoint,
-	getBlockPortConnections,
 	getLiveBlockPorts,
 } from './blockPorts'
-import { reconnectPageUnits } from './connectionHit'
 import {
 	BLOCK_PORT_DRAG_STATE_ID,
 	canReorderBlockPort,
@@ -110,75 +107,6 @@ function outerPolarity(editor: Editor, dot: PortDot): PortPolarity | null {
 }
 
 /**
- * The one cable a press on this dot would re-route, if any.
- *
- * A sink takes one cable, so pressing a wired sink means "move that wire". The
- * rule reads the OUTER face only — the kit's rule, unchanged: a press on an
- * Expanded Block's outlet starts a new outward cable even while a child feeds
- * the outlet from inside, because that internal wire is reached by dragging
- * its own handle, and taking the press for it would make the outward gesture
- * impossible from that dot.
- */
-function reroutableConnection(editor: Editor, dot: PortDot) {
-	if (outerPolarity(editor, dot) !== 'sink') return null
-	return getBlockPortConnections(editor, dot.shapeId).find((connection) => (
-		connection.ownPortId === dot.portId && connection.ownFace === 'outer'
-	)) ?? null
-}
-
-/**
- * Give an existing wire precedence over the port dot the press happened to land on.
- *
- * At 1× zoom the painted `.Port` element covers the whole of tldraw's own handle
- * radius around a cable's end, so a press aimed at the cable never reaches the
- * handle — the dot takes it. Usually harmless, because a single-connection port
- * re-routes its existing cable below. But where sibling ports overlap, the dot on
- * top can be a neighbour with no cable, and the same gesture then starts a NEW
- * cable instead of moving the one you were aiming at.
- *
- * So: if a port that already carries a cable sits within the profile's reconnect
- * radius, that port wins the press. A press on a port that is already wired is
- * left alone — it is already the answer.
- */
-function preferWiredPortNearby(
-	editor: Editor,
-	info: PointingBlockPortInfo,
-): PointingBlockPortInfo {
-	const pressedIsWired = getBlockPortConnections(editor, info.shapeId)
-		.some((connection) => connection.ownPortId === info.portId)
-	if (pressedIsWired) return info
-
-	const radius = reconnectPageUnits(editor.getZoomLevel())
-	if (radius <= 0) return info
-
-	const point = editor.inputs.getCurrentPagePoint()
-	let best: PointingBlockPortInfo | null = null
-	let bestDistance = radius
-
-	for (const shape of editor.getCurrentPageShapes()) {
-		if (!isBlockShape(shape) || editor.isShapeHidden(shape)) continue
-		const bounds = editor.getShapePageBounds(shape)
-		if (!bounds || !bounds.containsPoint(point, radius)) continue
-
-		const wired = new Set(
-			getBlockPortConnections(editor, shape.id).map((connection) => connection.ownPortId),
-		)
-		if (wired.size === 0) continue
-
-		const transform = editor.getShapePageTransform(shape)
-		for (const port of getLiveBlockPorts(editor, shape.id)) {
-			if (port.hidden || !wired.has(port.id)) continue
-			const distance = Vec.Dist(point, transform.applyToPoint(port))
-			if (distance > bestDistance) continue
-			bestDistance = distance
-			best = { shapeId: shape.id, portId: port.id }
-		}
-	}
-
-	return best ?? info
-}
-
-/**
  * Which way a picker-spawned Block sits relative to the port that asked for it.
  *
  * A source's consumer goes to the right; a sink's producer goes to the left.
@@ -205,7 +133,7 @@ export class PointingBlockPort extends StateNode {
 	info: PointingBlockPortInfo | null = null
 
 	override onEnter(info: PointingBlockPortInfo): void {
-		this.info = info?.shapeId ? preferWiredPortNearby(this.editor, info) : null
+		this.info = info?.shapeId ? info : null
 	}
 
 	override onExit(): void {
@@ -215,23 +143,11 @@ export class PointingBlockPort extends StateNode {
 	override onPointerMove(info: TLPointerEventInfo): void {
 		if (!this.info || !this.editor.inputs.getIsDragging()) return
 
-		// A sink holds one cable. Dragging from a wired sink moves that cable
-		// rather than starting a second one nobody could tell apart.
-		const existing = reroutableConnection(this.editor, this.info)
-		if (existing) {
-			const shape = this.editor.getShape<ConnectionShape>(existing.connectionId)
-			const handle = this.editor.getShapeHandles(existing.connectionId)
-				?.find((candidate) => candidate.id === existing.terminal)
-			if (shape && handle) {
-				this.parent.transition('dragging_handle', {
-					...info,
-					target: 'handle',
-					shape,
-					handle,
-				})
-				return
-			}
-		}
+		// A press on a dot always starts a NEW cable — outputs fan out and inputs
+		// fan in, so a wired dot is not a reason to move what is there. An
+		// existing cable is moved the way any tldraw shape is edited: select it
+		// and drag its terminal handle, which the capture listener leaves to
+		// tldraw's own `pointing_handle`.
 
 		// Stock dragging_handle measures movement from inputs.originPagePoint (the
 		// press), not from the later drag-threshold event. Create the cable at the

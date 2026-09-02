@@ -39,6 +39,7 @@ export type ConnectionRefusal =
 	| 'same-polarity'
 	| 'type-mismatch'
 	| 'cycle'
+	| 'duplicate'
 
 export interface JudgedEndpoint extends PortEndpoint {
 	side: BlockPortLane
@@ -64,6 +65,12 @@ export interface JudgeOptions {
 	excludeBlocks?: ReadonlySet<TLShapeId> | null
 	/** Validation of a stored cable: hidden ports and collapsed frames stay legal. */
 	existing?: boolean
+	/**
+	 * The cable being judged, so a wire already joining these two faces counts
+	 * as a duplicate only when it is some OTHER cable — a reconnect drag that
+	 * lands back where it started is not a copy of itself.
+	 */
+	connectionId?: TLShapeId
 }
 
 type RulesReader = ScopeReader & { store?: Editor['store'] }
@@ -80,6 +87,8 @@ function livePort(editor: RulesReader, block: BlockShape, portId: string): Block
  *   3. the faces must differ in polarity — one emits, one receives
  *   4. the types must be compatible (a seam; permissive today)
  *   5. between outer faces, the landing must not close a loop
+ *   6. the two faces must not already be joined — sinks fan in, but a second
+ *      copy of the same wire is nothing anyone can tell apart
  */
 export function judgeConnection(
 	editor: RulesReader,
@@ -130,8 +139,29 @@ export function judgeConnection(
 	) {
 		return { ok: false, reason: 'cycle' }
 	}
+	if (!options.existing && facesAlreadyJoined(editor, endpointA, endpointB, options.connectionId)) {
+		return { ok: false, reason: 'duplicate' }
+	}
 
 	return { ok: true, a: endpointA, b: endpointB, source, sink, scopeId: faces.scopeId }
+}
+
+/** Is there some other cable already welded to exactly these two faces? */
+function facesAlreadyJoined(
+	editor: RulesReader,
+	a: JudgedEndpoint,
+	b: JudgedEndpoint,
+	except: TLShapeId | undefined,
+): boolean {
+	if (!editor.store) return false
+	return getBlockPortConnections(editor as Editor, a.shapeId).some((connection) => (
+		connection.connectionId !== except
+		&& connection.ownPortId === a.portId
+		&& connection.ownFace === a.face
+		&& connection.connectedShapeId === b.shapeId
+		&& connection.connectedPortId === b.portId
+		&& connection.connectedFace === b.face
+	))
 }
 
 /* -------------------------------- cycles ---------------------------------- */
@@ -205,6 +235,8 @@ export function findConnectionTarget(
 	anchor: PortDot,
 	options: {
 		excludeBlocks?: ReadonlySet<TLShapeId> | null
+		/** The cable whose loose end is landing, exempt from the duplicate rule. */
+		connectionId?: TLShapeId
 		screenRadius?: number
 		pageRadius?: number
 	} = {},
@@ -214,7 +246,7 @@ export function findConnectionTarget(
 			editor,
 			anchor,
 			{ shapeId: hit.shapeId, portId: hit.port.id },
-			{ excludeBlocks: options.excludeBlocks },
+			{ excludeBlocks: options.excludeBlocks, connectionId: options.connectionId },
 		)
 		if (verdict.ok) return { hit, verdict, anchor: verdict.a, target: verdict.b }
 	}

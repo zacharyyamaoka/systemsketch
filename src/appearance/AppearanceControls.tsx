@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import {
   TldrawUiPopover,
   TldrawUiPopoverContent,
@@ -16,12 +17,14 @@ import {
   type AppearanceOption,
 } from './appearanceModel'
 import { AppearanceGlyph } from './AppearanceGlyph'
+import { CHEVRON_PATH, CHEVRON_VIEWBOX, POPOVER_GAP, SWATCH_SIZE } from './figjamTokens'
 import './appearance.css'
 
-/** Measured from FigJam: docs/figjam-appearance-menu-spec-2026-09-01.html. */
-const POPOVER_GAP = 8
-/** The trigger's vertical margin inside the pill, from appearance.css. */
-const TRIGGER_INSET = 4
+/**
+ * Where FigJam draws a hairline. Its pill groups what a thing *is* apart from
+ * how it is painted, and both apart from its text.
+ */
+const GROUP_STARTS = new Set(['color', 'font', 'arrowKind'])
 
 /**
  * The appearance half of the selection menu, modelled on FigJam's.
@@ -43,8 +46,13 @@ export function AppearanceControls() {
 
   return (
     <div className="systemsketch-appearance" data-testid="systemsketch-appearance">
-      {controls.map((control) => (
-        <AppearanceTrigger key={control.id} editor={editor} control={control} />
+      {controls.map((control, index) => (
+        <Fragment key={control.id}>
+          {index > 0 && GROUP_STARTS.has(control.id)
+            ? <span className="systemsketch-appearance__separator" aria-hidden="true" />
+            : null}
+          <AppearanceTrigger editor={editor} control={control} />
+        </Fragment>
       ))}
     </div>
   )
@@ -78,13 +86,15 @@ function AppearanceTrigger({ editor, control }: { editor: Editor; control: Appea
           title={triggerLabel(control)}
         >
           <AppearanceGlyph control={control} value={current?.value} editor={editor} />
-          <span className="systemsketch-appearance__chevron" aria-hidden="true" />
+          {/* FigJam's own chevron, the same filled path on every trigger. */}
+          <svg className="systemsketch-appearance__chevron" viewBox={CHEVRON_VIEWBOX} aria-hidden="true">
+            <path d={CHEVRON_PATH} />
+          </svg>
         </button>
       </TldrawUiPopoverTrigger>
-      {/* FigJam leaves 8px between the popover and the *pill*. Radix measures
-          from the trigger, which is inset 4px inside the pill, so the offset
-          that produces the measured gap is 8 + 4. */}
-      <TldrawUiPopoverContent side="top" align="center" sideOffset={TRIGGER_INSET + POPOVER_GAP}>
+      {/* The trigger now fills the pill's height, so Radix's offset from the
+          trigger is the same 8px FigJam leaves above the pill. */}
+      <TldrawUiPopoverContent side="top" align="center" sideOffset={POPOVER_GAP}>
         <div
           className="systemsketch-appearance__panel"
           data-layout={control.layout}
@@ -107,7 +117,12 @@ function AppearanceTrigger({ editor, control }: { editor: Editor; control: Appea
             className="systemsketch-appearance__options"
             role="group"
             aria-label={control.label}
-            style={control.columns ? { gridTemplateColumns: `repeat(${control.columns}, 1fr)` } : undefined}
+            // Fixed columns, not fractions: FigJam's swatches sit on a 32px
+            // pitch (24px circle + 8px gap) regardless of how wide the mode row
+            // above makes the panel.
+            style={control.columns
+              ? { gridTemplateColumns: `repeat(${control.columns}, ${SWATCH_SIZE}px)` }
+              : undefined}
           >
             {control.options.map((option) => (
               <OptionButton

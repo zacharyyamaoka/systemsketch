@@ -51,6 +51,8 @@ export interface PortState {
 		anchor: PortDot
 		/** Blocks that would close a cycle, precomputed once per move. */
 		excludeBlocks: ReadonlySet<TLShapeId> | null
+		/** The cable in flight, so its own current landing is not a duplicate of itself. */
+		connectionId: TLShapeId
 	} | null
 }
 

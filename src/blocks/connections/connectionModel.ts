@@ -13,9 +13,16 @@ export type ConnectionRoutingKind = (typeof CONNECTION_ROUTING_KINDS)[number]
  * of cables and choosing Curved must be one write, and tldraw's shared-style
  * machinery already reports whether that bundle agrees. `elbow` is additive —
  * a stored `curved` or `straight` cable still validates unchanged.
+ *
+ * Being a style is also what lets a data edge follow the arrow: the toolbar
+ * writes this through `setStyleForNextShapes` beside tldraw's own arrow kind
+ * (see `toolbarIntegration.applyArrowPreset`), so one press of A settles both.
+ * The default is `elbow` because that is the shape SystemSketch draws most,
+ * and because a datum that disagrees with the toolbar's own default would show
+ * up as a curved first cable on a fresh install.
  */
 export const ConnectionRoutingStyle = StyleProp.defineEnum('systemsketch:connectionRouting', {
-	defaultValue: 'curved',
+	defaultValue: 'elbow',
 	values: CONNECTION_ROUTING_KINDS,
 })
 

@@ -1,0 +1,72 @@
+{
+  "build": "783d08dff12ade77",
+  "url": "http://127.0.0.1:4321",
+  "results": [
+    {
+      "id": "STABLE-BUILD",
+      "label": "the page on http://127.0.0.1:4321 is the build the channel manifest calls Stable",
+      "observed": "783d08dff12ade77",
+      "desired": "783d08dff12ade77",
+      "ok": true
+    },
+    {
+      "id": "STABLE-OPENS-SYSTEMSKETCH",
+      "label": "Stable accepted a .systemsketch path and named it",
+      "observed": "stable-file-type-probe",
+      "desired": "stable-file-type-probe",
+      "ok": true
+    },
+    {
+      "id": "STABLE-AUTHORS",
+      "label": "two Blocks and a semantic cable are authored on Stable",
+      "observed": {
+        "blocks": 2,
+        "cables": 1
+      },
+      "desired": {
+        "blocks": 2,
+        "cables": 1
+      },
+      "ok": true
+    },
+    {
+      "id": "STABLE-WRITES-THE-ENVELOPE",
+      "label": "the file Stable wrote is a .systemsketch document",
+      "observed": {
+        "firstKey": "systemSketch",
+        "application": "SystemSketch",
+        "formatVersion": 1,
+        "blocks": 2,
+        "tldrawFileFormatVersion": 1
+      },
+      "desired": {
+        "firstKey": "systemSketch",
+        "application": "SystemSketch",
+        "formatVersion": 1,
+        "blocks": 2,
+        "tldrawFileFormatVersion": 1
+      },
+      "ok": true
+    },
+    {
+      "id": "STABLE-REOPENS",
+      "label": "Stable reopens what it wrote, cable included",
+      "observed": {
+        "blocks": 2,
+        "cables": 1
+      },
+      "desired": {
+        "blocks": 2,
+        "cables": 1
+      },
+      "ok": true
+    },
+    {
+      "id": "CLEAN",
+      "label": "the probe raised no local console errors",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    }
+  ]
+}

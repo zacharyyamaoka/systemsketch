@@ -6,7 +6,7 @@
     "a blank target.systemsketch opens as a SystemSketch canvas, not a quarantine screen",
     "the pane hosts the real SystemSketch toolbar, Block tool included",
     "the in-app file menu and share shell are absent; the board surfaces remain",
-    "the workbench theme reaches the canvas — .monaco-workbench paints rgb(37, 37, 38), the canvas records \"dark\", and the board stays light on purpose",
+    "the workbench theme reaches the canvas — .monaco-workbench paints rgb(243, 243, 243), the canvas records \"light\", and the board stays light on purpose",
     "a canvas edit marks the tab dirty and writes nothing until the IDE saves",
     "Ctrl+S writes a .systemsketch: a tldraw file behind one SystemSketch envelope",
     "reopening the saved file redraws the Block that was saved"

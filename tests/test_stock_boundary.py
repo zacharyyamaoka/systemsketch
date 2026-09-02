@@ -115,12 +115,37 @@ class StockBoundaryTests(unittest.TestCase):
         for line in app_imports:
             self.assertIn("../../src/embed/sharedWithHost", line)
 
-        for module in ("sharedWithHost.ts", "sketchDocument.ts", "embedProtocol.ts"):
-            source = (PROJECT_ROOT / "src" / "embed" / module).read_text(encoding="utf-8")
-            with self.subTest(module=module):
+        # The chain, not just its head: `sketchDocument.ts` delegates the
+        # envelope and the suffix rules to the workspace lane rather than
+        # restating them, so those modules are inside the host's bundle too.
+        reachable = [
+            PROJECT_ROOT / "src" / "embed" / "sharedWithHost.ts",
+            PROJECT_ROOT / "src" / "embed" / "sketchDocument.ts",
+            PROJECT_ROOT / "src" / "embed" / "embedProtocol.ts",
+            PROJECT_ROOT / "src" / "workspace" / "systemSketchFile.ts",
+            PROJECT_ROOT / "src" / "workspace" / "workspaceModel.ts",
+        ]
+        for path in reachable:
+            source = path.read_text(encoding="utf-8")
+            with self.subTest(module=path.name):
                 self.assertNotIn("from 'react'", source)
                 self.assertNotIn("from 'tldraw'", source)
                 self.assertNotIn("import '", source)
+
+    def test_the_embed_lane_does_not_keep_a_second_copy_of_the_envelope(self) -> None:
+        """One codec, or the two ends agree only by coincidence.
+
+        Both lanes write `.systemsketch` files — the workspace through the
+        Python host, an IDE through its own editor. A second implementation of
+        the envelope would not fail loudly when it drifted; it would write
+        files the other lane quietly mis-reads.
+        """
+
+        embed = (PROJECT_ROOT / "src" / "embed" / "sketchDocument.ts").read_text(encoding="utf-8")
+        self.assertIn("from '../workspace/systemSketchFile'", embed)
+        self.assertIn("from '../workspace/workspaceModel'", embed)
+        for restated in ("JSON.stringify({", "typeName === 'shape'", "DOCUMENT_SUFFIXES = ["):
+            self.assertNotIn(restated, embed, "the embed lane restated the envelope")
 
     def test_the_extension_ships_a_build_of_the_app_rather_than_its_own_canvas(self) -> None:
         """The webview is the app's own vite output, staged and stamped.

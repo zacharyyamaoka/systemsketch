@@ -71,7 +71,8 @@ the editor and the DOM, screenshots you actually inspect. Named runners exist �
 `test:ports`, `test:edges`, `test:batch`, `test:click-to-edit`, `test:fields`,
 `test:selection-menu`, `test:context-menu`, `test:release-ui`.
 
-Never point a test at Zach's real board — the app autosaves into it. Use a scratch `.tldr`.
+Never point a test at Zach's real board — the app autosaves into it. Use a scratch
+`.systemsketch` (or a `.tldr`, which is still opened and saved unconverted).
 
 ## Reports live in `docs/`, and the builder is the source
 

@@ -1,0 +1,137 @@
+[
+  {
+    "id": "TOOLBAR-1",
+    "label": "the arrow rows are listed in the order A walks them",
+    "observed": [
+      "Elbow arrow",
+      "Straight arrow",
+      "Curved arrow"
+    ],
+    "desired": [
+      "Elbow arrow",
+      "Straight arrow",
+      "Curved arrow"
+    ],
+    "ok": true
+  },
+  {
+    "id": "TOOLBAR-2",
+    "label": "and Elbow is the one a single A reaches",
+    "observed": [
+      "A",
+      "A × 2",
+      "A × 3"
+    ],
+    "desired": [
+      "A",
+      "A × 2",
+      "A × 3"
+    ],
+    "ok": true
+  },
+  {
+    "id": "START-ARROW",
+    "label": "the first A of a fresh app draws an elbow arrow",
+    "observed": "elbow",
+    "desired": "elbow",
+    "ok": true
+  },
+  {
+    "id": "START-EDGE-1",
+    "label": "and a cable drawn from a port lands",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "START-EDGE-2",
+    "label": "shaped like the arrow beside it",
+    "observed": "elbow",
+    "desired": "elbow",
+    "ok": true
+  },
+  {
+    "id": "STRAIGHT-ARROW",
+    "label": "cycling to Straight draws a straight arrow",
+    "observed": "straight",
+    "desired": "straight",
+    "ok": true
+  },
+  {
+    "id": "STRAIGHT-EDGE",
+    "label": "and the next data edge is straight too",
+    "observed": "straight",
+    "desired": "straight",
+    "ok": true
+  },
+  {
+    "id": "CURVE-ARROW",
+    "label": "cycling to Curved draws a curved arrow",
+    "observed": "curved",
+    "desired": "curved",
+    "ok": true
+  },
+  {
+    "id": "CURVE-EDGE",
+    "label": "and the next data edge is curved too",
+    "observed": "curved",
+    "desired": "curved",
+    "ok": true
+  },
+  {
+    "id": "WRAP-ARROW",
+    "label": "cycling to Elbow draws a elbow arrow",
+    "observed": "elbow",
+    "desired": "elbow",
+    "ok": true
+  },
+  {
+    "id": "WRAP-EDGE",
+    "label": "and the next data edge is elbow too",
+    "observed": "elbow",
+    "desired": "elbow",
+    "ok": true
+  },
+  {
+    "id": "PORT-EDGE-1",
+    "label": "with A armed, a drag from a port draws a data edge",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "PORT-EDGE-2",
+    "label": "and no arrow is left behind by the press that started it",
+    "observed": 0,
+    "desired": 0,
+    "ok": true
+  },
+  {
+    "id": "PORT-EDGE-3",
+    "label": "the edge takes the shape A is holding",
+    "observed": "elbow",
+    "desired": "elbow",
+    "ok": true
+  },
+  {
+    "id": "PORT-EDGE-4",
+    "label": "while the same tool on empty canvas still draws an arrow",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "PORT-EDGE-5",
+    "label": "of the same shape as the edge",
+    "observed": "elbow",
+    "desired": "elbow",
+    "ok": true
+  },
+  {
+    "id": "CLEAN",
+    "label": "the whole journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]
