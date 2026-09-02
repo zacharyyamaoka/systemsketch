@@ -3,8 +3,11 @@ import {
   breadcrumbTrail,
   browserRows,
   claimUntitledPath,
+  documentEncoding,
   documentPathFor,
+  documentSuffix,
   documentTitle,
+  encodeDocumentForPath,
   nextSyncAction,
   moveBrowserSelection,
   nextUntitledDocumentPath,
@@ -16,23 +19,67 @@ import {
 } from './workspaceModel'
 
 describe('local workspace model', () => {
-  it('normalizes safe names to portable .tldr paths', () => {
-    expect(documentPathFor('/home/zach/SystemSketch', 'API map.tldr')).toBe(
-      '/home/zach/SystemSketch/API map.tldr',
+  it('makes new documents .systemsketch and honours a typed .tldr', () => {
+    expect(documentPathFor('/home/zach/SystemSketch', 'API map')).toBe(
+      '/home/zach/SystemSketch/API map.systemsketch',
+    )
+    expect(documentPathFor('/home/zach/SystemSketch', 'API map.systemsketch')).toBe(
+      '/home/zach/SystemSketch/API map.systemsketch',
+    )
+    expect(documentPathFor('/home/zach/SystemSketch', 'Export.tldr')).toBe(
+      '/home/zach/SystemSketch/Export.tldr',
     )
     expect(documentPathFor('/home/zach/SystemSketch', '../bad/name')).toBe(
-      '/home/zach/SystemSketch/-bad-name.tldr',
+      '/home/zach/SystemSketch/-bad-name.systemsketch',
     )
+  })
+
+  it('reads a title out of either extension, and renaming never changes the type', () => {
+    expect(documentTitle('/home/zach/SystemSketch/New.systemsketch')).toBe('New')
+    expect(documentTitle('/home/zach/SystemSketch/Legacy.tldr')).toBe('Legacy')
+    expect(documentSuffix('/home/zach/SystemSketch/Legacy.TLDR')).toBe('.tldr')
+    expect(documentSuffix('/home/zach/SystemSketch/notes.json')).toBe(null)
     expect(renamedDocumentPath('/home/zach/SystemSketch/Old.tldr', 'New')).toBe(
       '/home/zach/SystemSketch/New.tldr',
     )
-    expect(documentTitle('/home/zach/SystemSketch/New.tldr')).toBe('New')
+    expect(renamedDocumentPath('/home/zach/SystemSketch/Old.systemsketch', 'New')).toBe(
+      '/home/zach/SystemSketch/New.systemsketch',
+    )
   })
 
-  it('allocates the first unused untitled document', () => {
+  it('wraps the envelope for .systemsketch and leaves .tldr byte-identical', () => {
+    const tldrawJson = JSON.stringify({
+      tldrawFileFormatVersion: 1,
+      schema: { schemaVersion: 2, sequences: {} },
+      records: [
+        { id: 'shape:a', typeName: 'shape', type: 'block' },
+        { id: 'shape:b', typeName: 'shape', type: 'block' },
+        { id: 'binding:c', typeName: 'binding', type: 'connection' },
+      ],
+    })
+
+    expect(documentEncoding('/boards/Map.systemsketch')).toBe('systemsketch')
+    expect(documentEncoding('/boards/Map.tldr')).toBe('tldraw')
+    expect(encodeDocumentForPath('/boards/Map.tldr', tldrawJson)).toBe(tldrawJson)
+
+    const wrapped = JSON.parse(encodeDocumentForPath('/boards/Map.systemsketch', tldrawJson))
+    expect(Object.keys(wrapped)[0]).toBe('systemSketch')
+    expect(wrapped.systemSketch.shapes).toEqual({ block: 2 })
+    expect(wrapped.systemSketch.bindings).toEqual({ connection: 1 })
+    expect(wrapped.records).toHaveLength(3)
+  })
+
+  it('allocates the next untitled document by title, across both extensions', () => {
     expect(nextUntitledDocumentPath('/boards', ['/boards/Untitled.tldr'])).toBe(
-      '/boards/Untitled 2.tldr',
+      '/boards/Untitled 2.systemsketch',
     )
+    expect(nextUntitledDocumentPath('/boards', [])).toBe('/boards/Untitled.systemsketch')
+    expect(
+      nextUntitledDocumentPath('/boards', [
+        '/boards/Untitled.systemsketch',
+        '/boards/Untitled 2.tldr',
+      ]),
+    ).toBe('/boards/Untitled 3.systemsketch')
   })
 
   it('reloads clean external edits and protects dirty ones', () => {
@@ -64,6 +111,20 @@ describe('in-app file browser', () => {
       { name: 'Gripper.tldr', title: 'Gripper', path: '/home/z/SystemSketch/Gripper.tldr', mtime: 20 },
     ],
   }
+
+  it('reports each document type, from the host or from the suffix', () => {
+    const rows = browserRows(
+      {
+        directories: [{ name: 'Robotics', path: '/home/z/SystemSketch/Robotics' }],
+        documents: [
+          { name: 'New.systemsketch', title: 'New', path: '/home/z/SystemSketch/New.systemsketch', mtime: 1, kind: 'systemsketch' as const },
+          { name: 'Legacy.tldr', title: 'Legacy', path: '/home/z/SystemSketch/Legacy.tldr', mtime: 2 },
+        ],
+      },
+      '',
+    )
+    expect(rows.map((row) => row.encoding)).toEqual([null, 'systemsketch', 'tldraw'])
+  })
 
   it('lists folders before documents and filters both', () => {
     expect(browserRows(listing, '').map((row) => row.title)).toEqual(['Robotics', 'Arm', 'Gripper'])
@@ -126,8 +187,16 @@ describe('untitled reservations across windows', () => {
     const first = nextUntitledDocumentPath('/boards', [])
     claimUntitledPath(first, 1000, storage)
     const second = nextUntitledDocumentPath('/boards', readUntitledClaims(1000, storage))
-    expect(first).toBe('/boards/Untitled.tldr')
-    expect(second).toBe('/boards/Untitled 2.tldr')
+    expect(first).toBe('/boards/Untitled.systemsketch')
+    expect(second).toBe('/boards/Untitled 2.systemsketch')
+  })
+
+  it('reserves the title, so a claim blocks that name in either extension', () => {
+    const storage = fakeStorage()
+    claimUntitledPath('/boards/Untitled.tldr', 1000, storage)
+    expect(nextUntitledDocumentPath('/boards', readUntitledClaims(1000, storage))).toBe(
+      '/boards/Untitled 2.systemsketch',
+    )
   })
 
   it('lets a stale reservation expire so names are never lost for good', () => {

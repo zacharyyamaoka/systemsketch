@@ -59,7 +59,8 @@ the editor and the DOM, screenshots you actually inspect. Named runners exist �
 private Xvfb display, because a headless target has no OS window to count. It must never open a
 window on Zach's screen — keep it on its own `DISPLAY`.
 
-Never point a test at Zach's real board — the app autosaves into it. Use a scratch `.tldr`.
+Never point a test at Zach's real board — the app autosaves into it. Use a scratch
+`.systemsketch` (or a `.tldr`, which is still opened and saved unconverted).
 
 ## Reports live in `docs/`, and the builder is the source
 

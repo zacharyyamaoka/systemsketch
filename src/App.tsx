@@ -36,6 +36,7 @@ import {
 import { SystemSketchNavigationPanel } from './SystemSketchUtilities'
 import { SystemSketchFigmaToolbar } from './toolbar/SystemSketchToolbar'
 import {
+  applyStoredArrowPreset,
   registerToolbarSideEffects,
   SYSTEMSKETCH_TOOLBAR_OVERRIDES,
 } from './toolbar/toolbarIntegration'
@@ -150,6 +151,10 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
   const isBlockDevelopment = profile === 'block-dev'
   const onMount = useCallback((editor: Editor) => {
     enablePasteAtCursor(editor)
+    // The development profiles keep tldraw's stock toolbar, so they cannot
+    // cycle the preset — but they must still open on the same arrow and the
+    // same edge routing the product does, or the lab lies about the datum.
+    applyStoredArrowPreset(editor)
     const stopBlockConnections = isBlockDevelopment
       ? installBlockConnections(editor)
       : () => undefined

@@ -1,0 +1,161 @@
+[
+  {
+    "id": "AUTHORED",
+    "label": "two Blocks and one cable are authored through the real tools",
+    "observed": {
+      "blocks": 2,
+      "cables": 1
+    },
+    "desired": {
+      "blocks": 2,
+      "cables": 1
+    },
+    "ok": true
+  },
+  {
+    "id": "ENVELOPE-FIRST",
+    "label": "the file identifies itself in its first key",
+    "observed": "systemSketch",
+    "desired": "systemSketch",
+    "ok": true
+  },
+  {
+    "id": "ENVELOPE-INVENTORY",
+    "label": "the envelope names what the board actually holds",
+    "observed": {
+      "application": "SystemSketch",
+      "formatVersion": 1,
+      "blocks": 2,
+      "connections": 2
+    },
+    "desired": {
+      "application": "SystemSketch",
+      "formatVersion": 1,
+      "blocks": 2,
+      "connections": 2
+    },
+    "ok": true
+  },
+  {
+    "id": "STILL-A-TLDRAW-FILE",
+    "label": "the rest of the document is an unchanged tldraw file",
+    "observed": {
+      "version": 1,
+      "schema": true,
+      "records": true
+    },
+    "desired": {
+      "version": 1,
+      "schema": true,
+      "records": true
+    },
+    "ok": true
+  },
+  {
+    "id": "TITLE-DROPS-THE-SUFFIX",
+    "label": "the file title reads the new extension",
+    "observed": "Pipeline",
+    "desired": "Pipeline",
+    "ok": true
+  },
+  {
+    "id": "SKETCH-RELOADS",
+    "label": "a .systemsketch reload restores the Blocks and the cable",
+    "observed": {
+      "blocks": 2,
+      "cables": 1
+    },
+    "desired": {
+      "blocks": 2,
+      "cables": 1
+    },
+    "ok": true
+  },
+  {
+    "id": "SKETCH-TITLES",
+    "label": "the semantic Block titles survive the round trip",
+    "observed": [
+      "decode",
+      "sink"
+    ],
+    "desired": [
+      "decode",
+      "sink"
+    ],
+    "ok": true
+  },
+  {
+    "id": "TLDR-OPENS",
+    "label": "a plain .tldr opens with its Blocks and cable intact",
+    "observed": {
+      "blocks": 2,
+      "cables": 1
+    },
+    "desired": {
+      "blocks": 2,
+      "cables": 1
+    },
+    "ok": true
+  },
+  {
+    "id": "TLDR-TITLE",
+    "label": "the legacy document keeps its own name",
+    "observed": "Legacy",
+    "desired": "Legacy",
+    "ok": true
+  },
+  {
+    "id": "TLDR-STAYS-TLDR",
+    "label": "editing a .tldr saves it back without an envelope",
+    "observed": {
+      "envelope": false,
+      "firstKey": "tldrawFileFormatVersion",
+      "blockRecords": 3
+    },
+    "desired": {
+      "envelope": false,
+      "firstKey": "tldrawFileFormatVersion",
+      "blockRecords": 3
+    },
+    "ok": true
+  },
+  {
+    "id": "RENAME-KEEPS-THE-TYPE",
+    "label": "renaming a .systemsketch offers .systemsketch, not .tldr",
+    "observed": ".systemsketch",
+    "desired": ".systemsketch",
+    "ok": true
+  },
+  {
+    "id": "OPEN-LISTS-BOTH",
+    "label": "the Open browser offers both document types, each labelled",
+    "observed": [
+      {
+        "title": "Legacy",
+        "kind": "tldraw"
+      },
+      {
+        "title": "Pipeline",
+        "kind": "systemsketch"
+      }
+    ],
+    "desired": [
+      {
+        "title": "Legacy",
+        "kind": "tldraw"
+      },
+      {
+        "title": "Pipeline",
+        "kind": "systemsketch"
+      }
+    ],
+    "ok": true
+  },
+  {
+    "id": "CLEAN",
+    "label": "the journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

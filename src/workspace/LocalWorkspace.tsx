@@ -33,12 +33,15 @@ import {
   type WorkspaceListing,
 } from './workspaceClient'
 import {
+  SYSTEMSKETCH_SUFFIX,
   breadcrumbTrail,
   browserRows,
   claimUntitledPath,
   documentHref,
   documentPathFor,
+  documentSuffix,
   documentTitle,
+  encodeDocumentForPath,
   forgetDocumentPath,
   moveBrowserSelection,
   nextSyncAction,
@@ -54,6 +57,7 @@ import {
   type BrowserRow,
   type DocumentFingerprint,
 } from './workspaceModel'
+import { decodeSystemSketchDocument } from './systemSketchFile'
 import './local-workspace.css'
 import { SettingsGearIcon, SystemSketchSettingsDialog } from '../settings/InterfaceSettings'
 
@@ -131,8 +135,14 @@ function fingerprint(document: { mtime?: number; size?: number }): DocumentFinge
     : { mtime: document.mtime, size: document.size }
 }
 
+/**
+ * One reader for both document types. `.systemsketch` loses its envelope here
+ * and `.tldr` passes through byte-identical, so from this line down tldraw is
+ * parsing exactly the portable file it has always parsed.
+ */
 function loadDocumentSource(editor: Editor, source: string): string | null {
-  const parsed = parseTldrawJsonFile({ json: source, schema: editor.store.schema })
+  const { core } = decodeSystemSketchDocument(source)
+  const parsed = parseTldrawJsonFile({ json: core, schema: editor.store.schema })
   if (!parsed.ok) return `tldraw could not read this document (${parsed.error.type})`
   editor.store.mergeRemoteChanges(() => {
     loadSnapshot(editor.store, parsed.value.getStoreSnapshot())
@@ -256,7 +266,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     const sourcePromise = queuedSource ?? serializeTldrawJson(editor!)
     let savedSuccessfully = false
     try {
-      const source = await sourcePromise
+      const source = encodeDocumentForPath(boardPath, await sourcePromise)
       const saved = await writeWorkspaceDocument({
         path: boardPath,
         source,
@@ -348,7 +358,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     setStatus({ kind: 'saving' })
     savingRef.current = true
     try {
-      const source = await serializeTldrawJson(editor)
+      const source = encodeDocumentForPath(nextPath, await serializeTldrawJson(editor))
       await writeWorkspaceDocument({ path: nextPath, source, baseDigest: null, force })
       updateRecents(rememberDocumentPath(nextPath))
       window.location.assign(documentHref(nextPath))
@@ -748,6 +758,10 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
   const listRef = useRef<HTMLDivElement | null>(null)
   const crumbsRef = useRef<HTMLElement | null>(null)
   const isRename = mode === 'rename'
+  // Rename never changes a document's type, so it shows the suffix the file
+  // already has. Everything else is making a new file, which is .systemsketch.
+  const suffix = (isRename && workspace.path ? documentSuffix(workspace.path) : null)
+    ?? SYSTEMSKETCH_SUFFIX
 
   const load = useCallback(async (directory?: string) => {
     setBusy(true)
@@ -793,7 +807,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
     setError(null)
     try {
       if (mode === 'open') {
-        if (!selectedRow) throw new Error('Choose a .tldr document to open.')
+        if (!selectedRow) throw new Error('Choose a document to open.')
         await activate(selectedRow)
         if (selectedRow.kind === 'folder') setBusy(false)
       } else if (mode === 'saveAs') {
@@ -899,7 +913,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                   if (event.key === 'Enter') void submit()
                 }}
               />
-              <span>.tldr</span>
+              <span>{suffix}</span>
             </div>
             <p>{workspace.path ? parentDirectory(workspace.path) : ''}</p>
           </div>
@@ -989,14 +1003,18 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                   >
                     <span aria-hidden="true">{row.kind === 'folder' ? '▰' : '◇'}</span>
                     <b>{row.title}</b>
-                    <small>{row.kind === 'folder' ? 'Folder' : relativeDay(row.mtime ?? 0)}</small>
+                    <small data-kind={row.encoding ?? 'folder'}>
+                      {row.kind === 'folder'
+                        ? 'Folder'
+                        : `${row.encoding === 'tldraw' ? 'tldraw' : 'sketch'} · ${relativeDay(row.mtime ?? 0)}`}
+                    </small>
                   </button>
                 ))}
                 {!busy && listing && !rows.length ? (
                   <p className="systemsketch-workspace-file-list__empty">
                     {query
                       ? `Nothing here matches “${query}”.`
-                      : 'This folder has no .tldr documents yet.'}
+                      : 'This folder has no SystemSketch documents yet.'}
                   </p>
                 ) : null}
               </div>
@@ -1005,7 +1023,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                   <input autoFocus value={name} aria-label="File name" onChange={(event) => setName(event.target.value)} onKeyDown={(event) => {
                     if (event.key === 'Enter') void submit()
                   }} />
-                  <span>.tldr</span>
+                  <span>{suffix}</span>
                 </div>
               ) : null}
             </div>

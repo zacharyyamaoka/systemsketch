@@ -327,7 +327,12 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--state-home", type=Path, default=None)
     parser.add_argument("--preview", action="store_true")
     parser.add_argument("--launch-url")
-    parser.add_argument("file", nargs="?", type=Path, help="Open one local .tldr document")
+    parser.add_argument(
+        "file",
+        nargs="?",
+        type=Path,
+        help="Open one local .systemsketch or .tldr document",
+    )
     parser.add_argument("--new-window", action="store_true")
     parser.add_argument("--open", dest="open_window", action="store_true")
     parser.add_argument("--no-open", dest="open_window", action="store_false")
@@ -378,8 +383,10 @@ def main() -> int:
         requested_file_url = None
         if arguments.file is not None:
             requested_file = arguments.file.expanduser().resolve()
-            if not requested_file.name.lower().endswith(".tldr"):
-                raise ReleaseError("SystemSketch can only open .tldr documents")
+            if not requested_file.name.lower().endswith((".systemsketch", ".tldr")):
+                raise ReleaseError(
+                    "SystemSketch can only open .systemsketch or .tldr documents"
+                )
             requested_file_url = urlunparse(
                 urlparse(url)._replace(query=urlencode({"board": str(requested_file)}))
             )

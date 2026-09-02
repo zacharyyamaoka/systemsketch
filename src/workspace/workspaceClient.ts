@@ -1,7 +1,11 @@
+/** Which on-disk encoding a listed document uses. The Python host derives it from the suffix. */
+export type WorkspaceDocumentKind = 'systemsketch' | 'tldraw'
+
 export interface WorkspaceDocumentEntry {
   name: string
   title: string
   path: string
+  kind: WorkspaceDocumentKind
   mtime: number
   size: number
 }
@@ -11,6 +15,7 @@ export interface WorkspaceListing {
   exists: boolean
   parent: string | null
   root: string
+  /** The document a clean launch opens: an existing `Untitled`, else a new `.systemsketch` one. */
   defaultDocument: string
   directories: { name: string; path: string }[]
   documents: WorkspaceDocumentEntry[]

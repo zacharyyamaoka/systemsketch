@@ -13,8 +13,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
 from workspace_store import (  # noqa: E402
+    SYSTEMSKETCH_FORMAT_VERSION,
     WorkspaceConflictError,
+    WorkspaceFormatError,
     WorkspacePathError,
+    default_document_path,
     list_documents,
     load_document,
     rename_document,
@@ -24,42 +27,97 @@ from workspace_store import (  # noqa: E402
 )
 
 
-def document_source(marker: int = 1) -> str:
+def tldraw_source(marker: int = 1) -> str:
+    """A plain tldraw file — what a `.tldr` document holds."""
     return json.dumps(
         {
             "tldrawFileFormatVersion": 1,
             "schema": {"schemaVersion": 2, "sequences": {}},
-            "records": [{"id": f"shape:{marker}", "typeName": "shape"}],
+            "records": [{"id": f"shape:{marker}", "typeName": "shape", "type": "block"}],
         }
     )
+
+
+def document_source(marker: int = 1, *, format_version: int = SYSTEMSKETCH_FORMAT_VERSION) -> str:
+    """The same file wrapped as `.systemsketch`, envelope first."""
+    document = {
+        "systemSketch": {
+            "formatVersion": format_version,
+            "application": "SystemSketch",
+            "shapes": {"block": 1},
+            "bindings": {},
+        }
+    }
+    document.update(json.loads(tldraw_source(marker)))
+    return json.dumps(document)
 
 
 class WorkspaceStoreTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
         self.root = Path(self.temporary.name)
-        self.path = self.root / "SystemSketch" / "Architecture.tldr"
+        self.path = self.root / "SystemSketch" / "Architecture.systemsketch"
+        self.legacy = self.root / "SystemSketch" / "Legacy.tldr"
 
     def tearDown(self) -> None:
         self.temporary.cleanup()
 
-    def test_atomic_save_read_stat_and_listing_use_plain_tldr_files(self) -> None:
+    def test_atomic_save_read_stat_and_listing_carry_both_document_types(self) -> None:
         saved = save_document(str(self.path), document_source(), self.root)
+        save_document(str(self.legacy), tldraw_source(), self.root)
         loaded = load_document(str(self.path), self.root)
         stat = stat_document(str(self.path), self.root)
         listing = list_documents(None, self.root)
 
         self.assertEqual(saved["digest"], loaded["digest"])
         self.assertEqual(stat["size"], saved["size"])
-        self.assertEqual([item["title"] for item in listing["documents"]], ["Architecture"])
-        self.assertEqual(listing["defaultDocument"], str(self.root / "SystemSketch" / "Untitled.tldr"))
+        self.assertEqual(
+            [(item["title"], item["kind"]) for item in listing["documents"]],
+            [("Architecture", "systemsketch"), ("Legacy", "tldraw")],
+        )
+        self.assertEqual(
+            listing["defaultDocument"],
+            str(self.root / "SystemSketch" / "Untitled.systemsketch"),
+        )
         self.assertTrue(self.path.read_text(encoding="utf-8").endswith("\n"))
 
+    def test_the_suffix_decides_the_encoding_in_both_directions(self) -> None:
+        """A `.systemsketch` must carry the envelope; a `.tldr` must not."""
+        with self.assertRaisesRegex(WorkspaceFormatError, "must carry a systemSketch envelope"):
+            save_document(str(self.path), tldraw_source(), self.root)
+        with self.assertRaisesRegex(WorkspaceFormatError, "must stay a plain tldraw file"):
+            save_document(str(self.legacy), document_source(), self.root)
+
+        # Reading is the lenient direction: a hand-renamed file still opens.
+        renamed_by_hand = self.root / "SystemSketch" / "ByHand.systemsketch"
+        renamed_by_hand.parent.mkdir(parents=True, exist_ok=True)
+        renamed_by_hand.write_text(tldraw_source(), encoding="utf-8")
+        self.assertEqual(load_document(str(renamed_by_hand), self.root)["title"], "ByHand")
+
+    def test_a_document_from_a_newer_systemsketch_is_refused_rather_than_guessed_at(self) -> None:
+        future = self.root / "SystemSketch" / "Future.systemsketch"
+        future.parent.mkdir(parents=True, exist_ok=True)
+        future.write_text(
+            document_source(format_version=SYSTEMSKETCH_FORMAT_VERSION + 1), encoding="utf-8"
+        )
+        with self.assertRaisesRegex(WorkspaceFormatError, "written by a newer SystemSketch"):
+            load_document(str(future), self.root)
+
+    def test_an_existing_legacy_untitled_board_stays_the_default_document(self) -> None:
+        legacy_default = self.root / "SystemSketch" / "Untitled.tldr"
+        legacy_default.parent.mkdir(parents=True, exist_ok=True)
+        legacy_default.write_text(tldraw_source(), encoding="utf-8")
+        self.assertEqual(default_document_path(self.root), legacy_default)
+
+        current_default = self.root / "SystemSketch" / "Untitled.systemsketch"
+        current_default.write_text(document_source(), encoding="utf-8")
+        self.assertEqual(default_document_path(self.root), current_default)
+
     def test_paths_are_confined_to_the_configured_root(self) -> None:
-        outside = self.root.parent / "outside.tldr"
+        outside = self.root.parent / "outside.systemsketch"
         with self.assertRaisesRegex(WorkspacePathError, "stay under"):
             save_document(str(outside), document_source(), self.root)
-        with self.assertRaisesRegex(WorkspacePathError, "end with .tldr"):
+        with self.assertRaisesRegex(WorkspacePathError, "end with .systemsketch or .tldr"):
             save_document(str(self.root / "board.json"), document_source(), self.root)
 
     def test_digest_fence_refuses_external_edits_and_missing_updates(self) -> None:
@@ -77,20 +135,30 @@ class WorkspaceStoreTests(unittest.TestCase):
                 str(self.path), document_source(4), self.root, base_digest=latest["digest"]
             )
 
-    def test_rename_is_no_clobber_and_revision_checked(self) -> None:
+    def test_rename_is_no_clobber_revision_checked_and_type_preserving(self) -> None:
         first = save_document(str(self.path), document_source(1), self.root)
-        destination = self.path.with_name("Renamed.tldr")
+        destination = self.path.with_name("Renamed.systemsketch")
         renamed = rename_document(
             str(self.path), str(destination), self.root, base_digest=first["digest"]
         )
         self.assertFalse(self.path.exists())
         self.assertEqual(renamed["path"], str(destination))
 
-        occupied = self.path.with_name("Occupied.tldr")
+        occupied = self.path.with_name("Occupied.systemsketch")
         save_document(str(occupied), document_source(2), self.root)
         with self.assertRaisesRegex(WorkspaceConflictError, "already exists"):
             rename_document(
                 str(destination), str(occupied), self.root, base_digest=renamed["digest"]
+            )
+
+        # A rename that changed the extension would relabel the bytes without
+        # rewriting them, so it is refused rather than silently corrupting.
+        with self.assertRaisesRegex(WorkspacePathError, "cannot change a document's type"):
+            rename_document(
+                str(destination),
+                str(destination.with_name("Renamed.tldr")),
+                self.root,
+                base_digest=renamed["digest"],
             )
 
     def test_delete_moves_the_exact_loaded_revision_to_desktop_trash(self) -> None:
@@ -119,7 +187,6 @@ class WorkspaceStoreTests(unittest.TestCase):
         server = (PROJECT_ROOT / "scripts" / "server.py").read_text(encoding="utf-8")
         self.assertNotIn("/api/workspace/pick", server)
         self.assertIn("/api/workspace/list", server)
-
 
 if __name__ == "__main__":
     unittest.main()

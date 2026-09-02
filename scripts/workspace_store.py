@@ -1,8 +1,19 @@
-"""Safe local-file storage for SystemSketch ``.tldr`` workspaces.
+"""Safe local-file storage for SystemSketch workspaces.
 
-The browser remains the tldraw schema authority. This module only validates the
-portable file envelope, confines paths to one configured root, and provides
-atomic digest-fenced file operations.
+SystemSketch owns two document extensions and treats the extension as the
+contract for what is inside:
+
+``.systemsketch``
+    A tldraw file plus one extra top-level ``systemSketch`` envelope. This is
+    what every new document is written as.
+``.tldr``
+    A plain tldraw file, with no envelope. Opened, edited and saved in place so
+    existing boards keep working; never silently converted.
+
+The browser remains the tldraw schema authority — it authors the envelope in
+``src/workspace/systemSketchFile.ts``. This module only validates the portable
+file envelope, holds the two types apart, confines paths to one configured
+root, and provides atomic digest-fenced file operations.
 """
 
 from __future__ import annotations
@@ -17,9 +28,15 @@ from pathlib import Path
 from typing import Any
 
 
+SYSTEMSKETCH_SUFFIX = ".systemsketch"
 TLDRAW_SUFFIX = ".tldr"
+DOCUMENT_SUFFIXES = (SYSTEMSKETCH_SUFFIX, TLDRAW_SUFFIX)
+DOCUMENT_KINDS = {SYSTEMSKETCH_SUFFIX: "systemsketch", TLDRAW_SUFFIX: "tldraw"}
+SYSTEMSKETCH_ENVELOPE_KEY = "systemSketch"
+SYSTEMSKETCH_FORMAT_VERSION = 1
 DEFAULT_WORKSPACE_DIRNAME = "SystemSketch"
-DEFAULT_DOCUMENT_NAME = f"Untitled{TLDRAW_SUFFIX}"
+DEFAULT_DOCUMENT_STEM = "Untitled"
+DEFAULT_DOCUMENT_NAME = f"{DEFAULT_DOCUMENT_STEM}{SYSTEMSKETCH_SUFFIX}"
 MAX_DOCUMENT_BYTES = 64 * 1024 * 1024
 
 
@@ -40,12 +57,36 @@ class WorkspaceConflictError(RuntimeError):
         self.disk_digest = disk_digest
 
 
+def document_suffix(name: object) -> str | None:
+    """The SystemSketch extension ``name`` uses, or ``None`` if it uses neither."""
+    lowered = str(name).lower()
+    for suffix in DOCUMENT_SUFFIXES:
+        if len(lowered) > len(suffix) and lowered.endswith(suffix):
+            return suffix
+    return None
+
+
+def document_kind(path: Path) -> str:
+    return DOCUMENT_KINDS.get(document_suffix(path.name) or "", "tldraw")
+
+
 def default_workspace_dir(files_root: Path) -> Path:
     return files_root.resolve() / DEFAULT_WORKSPACE_DIRNAME
 
 
 def default_document_path(files_root: Path) -> Path:
-    return default_workspace_dir(files_root) / DEFAULT_DOCUMENT_NAME
+    """The document a clean launch opens.
+
+    New workspaces get ``Untitled.systemsketch``, but a workspace that already
+    holds an ``Untitled.tldr`` from before this file type existed keeps opening
+    that one. Changing the default extension must not orphan someone's board.
+    """
+    workspace = default_workspace_dir(files_root)
+    for suffix in DOCUMENT_SUFFIXES:
+        candidate = workspace / f"{DEFAULT_DOCUMENT_STEM}{suffix}"
+        if candidate.is_file():
+            return candidate
+    return workspace / DEFAULT_DOCUMENT_NAME
 
 
 def _resolve_inside_root(raw_path: object, files_root: Path) -> Path:
@@ -67,20 +108,25 @@ def resolve_directory(raw_path: object, files_root: Path) -> Path:
 
 def resolve_document_path(raw_path: object, files_root: Path) -> Path:
     resolved = _resolve_inside_root(raw_path, files_root)
-    if not resolved.name.lower().endswith(TLDRAW_SUFFIX) or resolved.name == TLDRAW_SUFFIX:
-        raise WorkspacePathError(f"a SystemSketch document must end with {TLDRAW_SUFFIX}")
+    if document_suffix(resolved.name) is None:
+        raise WorkspacePathError(
+            "a SystemSketch document must end with "
+            + " or ".join(DOCUMENT_SUFFIXES)
+        )
     return resolved
 
 
 def document_title(path: Path) -> str:
-    return path.name[: -len(TLDRAW_SUFFIX)]
+    suffix = document_suffix(path.name)
+    return path.name[: -len(suffix)] if suffix else path.name
 
 
 def document_digest(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def normalize_document_source(source: object) -> str:
+def _parse_document(source: object) -> dict[str, Any]:
+    """Validate the portable tldraw envelope both document types share."""
     if not isinstance(source, str) or not source.strip():
         raise WorkspaceFormatError("document source must be a non-empty string")
     if len(source.encode("utf-8")) > MAX_DOCUMENT_BYTES:
@@ -97,6 +143,44 @@ def normalize_document_source(source: object) -> str:
         raise WorkspaceFormatError("document is missing a records list")
     if not isinstance(document.get("schema"), dict):
         raise WorkspaceFormatError("document is missing a schema object")
+
+    envelope = document.get(SYSTEMSKETCH_ENVELOPE_KEY)
+    if envelope is not None:
+        if not isinstance(envelope, dict):
+            raise WorkspaceFormatError(f"{SYSTEMSKETCH_ENVELOPE_KEY} must be an object")
+        version = envelope.get("formatVersion")
+        if not isinstance(version, int):
+            raise WorkspaceFormatError(
+                f"{SYSTEMSKETCH_ENVELOPE_KEY} is missing an integer formatVersion"
+            )
+        if version > SYSTEMSKETCH_FORMAT_VERSION:
+            raise WorkspaceFormatError(
+                f"this document was written by a newer SystemSketch "
+                f"(.systemsketch format {version}, this build reads {SYSTEMSKETCH_FORMAT_VERSION})"
+            )
+    return document
+
+
+def normalize_document_source(source: object, *, suffix: str | None = None) -> str:
+    """Render a document for disk, optionally holding it to one extension's contract.
+
+    Reading passes no ``suffix``: anything openable should open, including a
+    ``.tldr`` hand-renamed to ``.systemsketch``. Writing passes the destination
+    suffix, and then the rule is exact — a ``.systemsketch`` must carry the
+    envelope and a ``.tldr`` must not. That is what stops the two types from
+    quietly becoming one type with two names.
+    """
+    document = _parse_document(source)
+    has_envelope = document.get(SYSTEMSKETCH_ENVELOPE_KEY) is not None
+    if suffix == SYSTEMSKETCH_SUFFIX and not has_envelope:
+        raise WorkspaceFormatError(
+            f"a {SYSTEMSKETCH_SUFFIX} document must carry a {SYSTEMSKETCH_ENVELOPE_KEY} envelope"
+        )
+    if suffix == TLDRAW_SUFFIX and has_envelope:
+        raise WorkspaceFormatError(
+            f"a {TLDRAW_SUFFIX} document must stay a plain tldraw file "
+            f"(it carries a {SYSTEMSKETCH_ENVELOPE_KEY} envelope)"
+        )
     return json.dumps(document, ensure_ascii=False, indent=2) + "\n"
 
 
@@ -131,13 +215,14 @@ def list_documents(raw_dir: object, files_root: Path) -> dict[str, Any]:
             try:
                 if entry.is_dir():
                     directories.append({"name": entry.name, "path": str(entry.resolve())})
-                elif entry.is_file() and entry.name.lower().endswith(TLDRAW_SUFFIX):
+                elif entry.is_file() and document_suffix(entry.name) is not None:
                     stat = entry.stat()
                     documents.append(
                         {
                             "name": entry.name,
                             "title": document_title(entry),
                             "path": str(entry.resolve()),
+                            "kind": document_kind(entry),
                             "mtime": stat.st_mtime,
                             "size": stat.st_size,
                         }
@@ -209,7 +294,7 @@ def save_document(
     force: bool = False,
 ) -> dict[str, Any]:
     path = resolve_document_path(raw_path, files_root)
-    rendered = normalize_document_source(source)
+    rendered = normalize_document_source(source, suffix=document_suffix(path.name))
 
     if path.exists() and not force:
         disk_source, disk_stat = _read_identity(path)
@@ -259,6 +344,10 @@ def rename_document(
     destination = resolve_document_path(raw_destination, files_root)
     if path.parent != destination.parent:
         raise WorkspacePathError("rename must keep the document in its current folder")
+    if document_suffix(path.name) != document_suffix(destination.name):
+        raise WorkspacePathError(
+            "rename cannot change a document's type; use Save As to write the other format"
+        )
     source, stat = _read_identity(path)
     digest = document_digest(source)
     if digest != base_digest:

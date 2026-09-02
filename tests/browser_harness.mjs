@@ -265,6 +265,13 @@ export async function startApp({ label, build, channel = 'preview', width = 1440
     ? await stageStableRelease(releaseHome, emptyDist)
     : build ?? name
 
+  // A journey drives a headless browser, so its controller must be headless
+  // too: with a display inherited, File > Open would spawn a real GTK file
+  // chooser onto the developer's screen and block until a person closed it.
+  const headlessEnv = { ...process.env }
+  delete headlessEnv.DISPLAY
+  delete headlessEnv.WAYLAND_DISPLAY
+
   const api = spawn('python3', [
     join(ROOT, 'scripts', 'server.py'),
     '--port', String(apiPort),
@@ -274,7 +281,7 @@ export async function startApp({ label, build, channel = 'preview', width = 1440
     '--release-home', releaseHome,
     '--source-root', ROOT,
     '--files-root', filesRoot,
-  ], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] })
+  ], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'], env: headlessEnv })
   const vite = spawn(process.execPath, [
     join(ROOT, 'node_modules', 'vite', 'bin', 'vite.js'),
     '--host', '127.0.0.1', '--port', String(port), '--strictPort',
