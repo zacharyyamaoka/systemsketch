@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { configDefaults } from 'vitest/config'
 
 const runtimeProcess = Reflect.get(globalThis, 'process') as {
   env?: Record<string, string | undefined>
@@ -18,6 +19,14 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['@tldraw/assets'],
+  },
+  test: {
+    /**
+     * A track worktree under `.claude/worktrees/` is a second checkout of this
+     * repo, so vitest otherwise collects its tests too — doubling the count and
+     * letting an unrelated lane turn `npm run check` red here.
+     */
+    exclude: [...configDefaults.exclude, '**/.claude/worktrees/**'],
   },
   server: {
     host: '127.0.0.1',
