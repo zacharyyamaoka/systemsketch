@@ -14,10 +14,18 @@ export {
   documentTitle,
   encodeDocumentText,
   isBlankDocument,
+  newerDocumentVersion,
   systemSketchManifest,
   DOCUMENT_SUFFIXES,
   SYSTEMSKETCH_ENVELOPE_KEY,
   SYSTEMSKETCH_SUFFIX,
   TLDRAW_SUFFIX,
 } from './sketchDocument'
-export { decideOutgoing, externalChangeMessage } from './embedSession'
+export {
+  acceptOutgoing,
+  createFlushableDebounce,
+  decideOutgoing,
+  EMPTY_OUTGOING_QUEUE,
+  externalChangeMessage,
+  queueOutgoing,
+} from './embedSession'

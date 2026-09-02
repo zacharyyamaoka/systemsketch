@@ -38,6 +38,39 @@ function parseArguments(argv) {
   return result
 }
 
+function isRecord(value) {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function localId(value, label) {
+  if (typeof value !== 'string' || !/^[a-z0-9][a-z0-9_-]*$/i.test(value)) {
+    throw new Error(`${label} must use letters, digits, underscores, or hyphens`)
+  }
+}
+
+function validatePageConfiguration(recipe) {
+  const pageIds = new Set()
+  if (recipe.pages !== undefined) {
+    if (!Array.isArray(recipe.pages) || recipe.pages.length === 0) {
+      throw new Error('recipe.pages must be a non-empty array when present')
+    }
+    for (const [index, page] of recipe.pages.entries()) {
+      if (!isRecord(page)) throw new Error(`pages[${index}] must be an object`)
+      localId(page.id, `pages[${index}].id`)
+      if (pageIds.has(page.id)) throw new Error(`duplicate local page id: ${page.id}`)
+      pageIds.add(page.id)
+      if (typeof page.name !== 'string' || !page.name.trim()) {
+        throw new Error(`pages[${index}].name is required`)
+      }
+    }
+  }
+  for (const [index, shape] of recipe.shapes.entries()) {
+    if (shape.pageId !== undefined && !pageIds.has(shape.pageId)) {
+      throw new Error(`shapes[${index}].pageId must name a declared page`)
+    }
+  }
+}
+
 async function exists(path) {
   try {
     await access(path, fsConstants.F_OK)
@@ -59,6 +92,41 @@ async function atomicWrite(path, bytes) {
   await rename(temporary, path)
 }
 
+/**
+ * Reload through the product's real dirty-document guard.
+ *
+ * A fixture is deliberately created through autosave, then cold-reopened. The
+ * workspace lifecycle may still raise Chromium's before-unload confirmation
+ * while a final flush settles; an unattended CDP journey must acknowledge that
+ * guard or `Page.reload` waits forever. This accepts only a dialog raised by
+ * this helper's own disposable reload.
+ */
+async function guardedReload(page, timeoutMs = 20000) {
+  const firstEvent = page.events.length
+  let settled = false
+  let failure
+  const reload = page.send('Page.reload', { ignoreCache: true })
+    .catch((cause) => { failure = cause })
+    .finally(() => { settled = true })
+  const deadline = Date.now() + timeoutMs
+  let handledDialog = false
+  let loadSeen = false
+  while ((!settled || !loadSeen) && Date.now() < deadline) {
+    const reloadEvents = page.events.slice(firstEvent)
+    const dialog = reloadEvents
+      .find((event) => event.method === 'Page.javascriptDialogOpening')
+    if (dialog && !handledDialog) {
+      handledDialog = true
+      await page.send('Page.handleJavaScriptDialog', { accept: true })
+    }
+    loadSeen = reloadEvents.some((event) => event.method === 'Page.loadEventFired')
+    await delay(40)
+  }
+  if (!settled || !loadSeen) throw new Error('timed out cold-reopening the saved fixture')
+  await reload
+  if (failure) throw failure
+}
+
 async function main() {
   const args = parseArguments(process.argv.slice(2))
   const recipePath = resolve(args.recipe)
@@ -78,6 +146,7 @@ async function main() {
 
   const recipe = JSON.parse(await readFile(recipePath, 'utf8'))
   validateRecipe(recipe)
+  validatePageConfiguration(recipe)
   const width = Math.max(900, Math.round(recipe.viewport?.width ?? 1280))
   const height = Math.max(700, Math.round(recipe.viewport?.height ?? 720))
   const app = await startApp({
@@ -90,15 +159,31 @@ async function main() {
   const { page, port } = app
 
   try {
+    process.stdout.write('review fixture · app ready\n')
     await openApp(page, port, `?board=${encodeURIComponent(scratchPath)}`)
     await waitFor(page, 'window.__systemsketch?.editor', 'the real SystemSketch editor')
+    process.stdout.write('review fixture · editor ready\n')
 
     const created = await evaluate(page, `(() => {
       const recipe = ${JSON.stringify(recipe)}
       const editor = window.__systemsketch.editor
       const shapeId = (id) => id.startsWith('shape:') ? id : \`shape:\${id}\`
       const bindingId = (id) => id.startsWith('binding:') ? id : \`binding:\${id}\`
-      const parentId = (id) => id.startsWith('page:') || id.startsWith('shape:') ? id : shapeId(id)
+      const pageAliases = {}
+      const configuredPages = recipe.pages ?? []
+      if (configuredPages.length) {
+        const firstPageId = editor.getCurrentPageId()
+        pageAliases[configuredPages[0].id] = firstPageId
+        editor.renamePage(firstPageId, configuredPages[0].name)
+        for (const page of configuredPages.slice(1)) {
+          const id = page.id.startsWith('page:') ? page.id : \`page:\${page.id}\`
+          editor.createPage({ id, name: page.name })
+          pageAliases[page.id] = id
+        }
+        editor.setCurrentPage(firstPageId)
+      }
+      const parentId = (id) => pageAliases[id]
+        ?? (id.startsWith('page:') || id.startsWith('shape:') ? id : shapeId(id))
       const toRichText = (text) => ({
         type: 'doc',
         content: String(text).split('\\n').map((line) => line
@@ -106,21 +191,21 @@ async function main() {
           : { type: 'paragraph' }),
       })
       const normalizeShape = (shape) => {
-        const { id, parentId: parent, text, props = {}, ...rest } = shape
+        const { id, parentId: parent, pageId: page, text, props = {}, ...rest } = shape
         const normalizedProps = { ...props }
         if (typeof text === 'string') normalizedProps.richText = toRichText(text)
         return {
           ...rest,
           id: shapeId(id),
-          ...(parent ? { parentId: parentId(parent) } : {}),
+          ...(parent ? { parentId: parentId(parent) } : page ? { parentId: parentId(page) } : {}),
           props: normalizedProps,
         }
       }
       editor.createShapes(recipe.shapes.map(normalizeShape))
       if (recipe.bindings?.length) {
-        editor.createBindings(recipe.bindings.map((binding) => ({
+        editor.createBindings(recipe.bindings.map((binding, index) => ({
           ...binding,
-          id: bindingId(binding.id),
+          id: bindingId(binding.id ?? (binding.type + '-' + (index + 1))),
           fromId: shapeId(binding.fromId),
           toId: shapeId(binding.toId),
         })))
@@ -263,8 +348,9 @@ async function main() {
       editor.selectNone()
       editor.zoomToFit({ animation: { duration: 0 } })
       return {
-        count: editor.getCurrentPageShapes().length,
-        ids: editor.getCurrentPageShapes().map((shape) => shape.id).sort(),
+        count: editor.store.allRecords().filter((record) => record.typeName === 'shape').length,
+        ids: editor.store.allRecords().filter((record) => record.typeName === 'shape').map((shape) => shape.id).sort(),
+        pages: editor.getPages().map((page) => ({ id: page.id, name: page.name })),
       }
     })()`)
 
@@ -273,18 +359,22 @@ async function main() {
     if (created.count !== expectedShapes) {
       throw new Error(`editor created ${created.count} shapes; expected ${expectedShapes}`)
     }
+    process.stdout.write(`review fixture · ${created.count} shapes created\n`)
     await waitFor(page,
       `document.querySelector('.systemsketch-file-title i')?.dataset.state === 'clean'`,
       'fixture autosave')
-    await waitFor(page, `window.__systemsketch.editor.getCurrentPageShapes().length === ${expectedShapes}`,
+    process.stdout.write('review fixture · autosave clean\n')
+    await waitFor(page, `window.__systemsketch.editor.store.allRecords().filter((record) => record.typeName === 'shape').length === ${expectedShapes}`,
       'the complete saved scene')
     await delay(250)
 
-    await openApp(page, port, `?board=${encodeURIComponent(scratchPath)}`)
+    await guardedReload(page)
+    process.stdout.write('review fixture · reload accepted\n')
     await waitFor(page,
-      `window.__systemsketch?.editor?.getCurrentPageShapes().length === ${expectedShapes}`,
+      `window.__systemsketch?.editor?.store.allRecords().filter((record) => record.typeName === 'shape').length === ${expectedShapes}`,
       'the cold-reopened fixture')
     await delay(350)
+    process.stdout.write('review fixture · cold reopen verified\n')
 
     const motionProbe = recipe.callouts.find((callout) => typeof callout.target?.shapeId === 'string')
     if (motionProbe) {
@@ -376,6 +466,7 @@ async function main() {
       shapes: savedShapes,
       bindings: savedBindings.length,
       cueBindings: expectedCueBindings,
+      pages: document.records.filter((record) => record.typeName === 'page').length,
       boardBytes: boardSize,
       screenshotBytes: screenshotSize,
       verified: motionProbe ? 'cold-reopen+bound-motion' : 'cold-reopen',

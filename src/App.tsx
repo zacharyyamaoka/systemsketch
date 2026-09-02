@@ -1,6 +1,6 @@
 import { getAssetUrlsByImport } from '@tldraw/assets/imports.vite'
 import { Tldraw, type Editor } from 'tldraw'
-import { useCallback, useLayoutEffect } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import 'tldraw/tldraw.css'
 import './theme/tokens.css'
 import { EXCALIDRAW_SHAPE_UTILS, registerExcalidrawPasteHandler } from './excalidrawInterop'
@@ -65,6 +65,7 @@ import { enablePasteAtCursor } from './pasteAtCursor'
 import type { CSSProperties, ReactNode } from 'react'
 import './app.css'
 import { SYSTEMSKETCH_THEMES } from './appearance/figjamPalette'
+import { createSystemSketchStore } from './store/createSystemSketchStore'
 import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from './stockPrimitiveVisuals'
 
 const ASSET_URLS = getAssetUrlsByImport()
@@ -124,6 +125,8 @@ function SystemSketchCanvas() {
   const { attach } = useLocalWorkspace()
   const interfaceScale = useInterfaceScale()
   const scaleCss = interfaceScaleCssValues(interfaceScale)
+  const [store] = useState(createSystemSketchStore)
+  useEffect(() => () => store.dispose(), [store])
   const onMount = useCallback((editor: Editor) => {
     enablePasteAtCursor(editor)
     const stopWorkspace = attach(editor)
@@ -176,6 +179,7 @@ function SystemSketchCanvas() {
         overlayUtils={SYSTEMSKETCH_OVERLAY_UTILS}
         overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
         shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}
+        store={store}
         themes={SYSTEMSKETCH_THEMES}
         tools={SYSTEMSKETCH_TOOLS}
       />

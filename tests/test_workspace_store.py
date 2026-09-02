@@ -17,7 +17,9 @@ from workspace_store import (  # noqa: E402
     WorkspaceConflictError,
     WorkspaceFormatError,
     WorkspacePathError,
+    create_directory,
     default_document_path,
+    document_digest,
     list_documents,
     load_document,
     rename_document,
@@ -94,14 +96,78 @@ class WorkspaceStoreTests(unittest.TestCase):
         renamed_by_hand.write_text(tldraw_source(), encoding="utf-8")
         self.assertEqual(load_document(str(renamed_by_hand), self.root)["title"], "ByHand")
 
-    def test_a_document_from_a_newer_systemsketch_is_refused_rather_than_guessed_at(self) -> None:
+    def test_a_document_from_a_newer_systemsketch_loads_exactly_but_cannot_be_overwritten(self) -> None:
         future = self.root / "SystemSketch" / "Future.systemsketch"
         future.parent.mkdir(parents=True, exist_ok=True)
-        future.write_text(
-            document_source(format_version=SYSTEMSKETCH_FORMAT_VERSION + 1), encoding="utf-8"
-        )
+        source = document_source(format_version=SYSTEMSKETCH_FORMAT_VERSION + 1)
+        future.write_text(source, encoding="utf-8")
+        loaded = load_document(str(future), self.root)
+        self.assertEqual(loaded["source"], source)
         with self.assertRaisesRegex(WorkspaceFormatError, "written by a newer SystemSketch"):
-            load_document(str(future), self.root)
+            save_document(
+                str(future), source, self.root, base_digest=loaded["digest"]
+            )
+
+    def test_create_directory_is_visible_nested_and_preserves_unicode(self) -> None:
+        parent = self.root / "SystemSketch"
+        parent.mkdir()
+        created = create_directory(str(parent), "  Architecture Ω  ", self.root)
+        nested = create_directory(created["path"], "Drafts", self.root)
+
+        self.assertEqual(created, {
+            "name": "Architecture Ω",
+            "path": str(parent / "Architecture Ω"),
+        })
+        self.assertEqual(nested["path"], str(parent / "Architecture Ω" / "Drafts"))
+        self.assertIn(created, list_documents(str(parent), self.root)["directories"])
+
+    def test_create_directory_rejects_invisible_unsafe_and_colliding_names(self) -> None:
+        parent = self.root / "SystemSketch"
+        parent.mkdir()
+        for name in ("", " ", ".", "..", ".hidden", "a/b", "a\\b", "bad\nname"):
+            with self.subTest(name=repr(name)), self.assertRaises(WorkspacePathError):
+                create_directory(str(parent), name, self.root)
+
+        occupied_file = parent / "Taken"
+        occupied_file.write_text("occupied", encoding="utf-8")
+        with self.assertRaisesRegex(WorkspacePathError, "already exists"):
+            create_directory(str(parent), "Taken", self.root)
+        occupied_file.unlink()
+        (parent / "Taken").mkdir()
+        with self.assertRaisesRegex(WorkspacePathError, "already exists"):
+            create_directory(str(parent), "Taken", self.root)
+
+    def test_create_directory_requires_a_real_confined_parent(self) -> None:
+        missing = self.root / "missing"
+        with self.assertRaisesRegex(WorkspacePathError, "does not exist"):
+            create_directory(str(missing), "Folder", self.root)
+        file_parent = self.root / "file"
+        file_parent.write_text("not a folder", encoding="utf-8")
+        with self.assertRaisesRegex(WorkspacePathError, "not a directory"):
+            create_directory(str(file_parent), "Folder", self.root)
+        with self.assertRaisesRegex(WorkspacePathError, "stay under"):
+            create_directory(str(self.root.parent), "Outside", self.root)
+
+    def test_zero_byte_documents_open_blank_and_save_their_first_real_revision(self) -> None:
+        """Standalone matches the IDE's intentional zero-byte new-file state."""
+        for path, first_revision in (
+            (self.path, document_source()),
+            (self.legacy, tldraw_source()),
+        ):
+            with self.subTest(suffix=path.suffix):
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b"")
+
+                loaded = load_document(str(path), self.root)
+                self.assertEqual(loaded["source"], "")
+                self.assertEqual(loaded["size"], 0)
+                self.assertEqual(loaded["digest"], document_digest(""))
+
+                saved = save_document(
+                    str(path), first_revision, self.root, base_digest=loaded["digest"]
+                )
+                self.assertGreater(saved["size"], 0)
+                self.assertEqual(load_document(str(path), self.root)["digest"], saved["digest"])
 
     def test_an_existing_legacy_untitled_board_stays_the_default_document(self) -> None:
         legacy_default = self.root / "SystemSketch" / "Untitled.tldr"
@@ -140,7 +206,23 @@ class WorkspaceStoreTests(unittest.TestCase):
             )
 
             self.assertEqual(loaded["digest"], saved["digest"])
+            self.assertEqual(
+                stat_document(
+                    str(review),
+                    self.root,
+                    additional_roots=(development_root,),
+                )["size"],
+                saved["size"],
+            )
             self.assertEqual(list_documents(None, self.root)["root"], str(self.root))
+            # Extra roots authorize a direct document, not a second browser.
+            # Save As and New Folder must remain rooted in the user's primary
+            # workspace even while a review fixture is open from a worktree.
+            with self.assertRaisesRegex(WorkspacePathError, "stay under an allowed root"):
+                list_documents(str(review.parent), self.root)
+            with self.assertRaisesRegex(WorkspacePathError, "stay under an allowed root"):
+                create_directory(str(review.parent), "Escaped", self.root)
+            self.assertFalse((review.parent / "Escaped").exists())
             with self.assertRaisesRegex(WorkspacePathError, "stay under an allowed root"):
                 load_document(
                     str(Path(outside_directory) / "Other.systemsketch"),

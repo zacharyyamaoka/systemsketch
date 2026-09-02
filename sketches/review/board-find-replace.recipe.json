@@ -1,0 +1,98 @@
+{
+  "feature": "Command palette and cross-page Find & Replace",
+  "viewport": { "width": 1440, "height": 900 },
+  "pages": [
+    { "id": "review", "name": "Review" },
+    { "id": "secondary", "name": "Secondary" }
+  ],
+  "shapes": [
+    {
+      "id": "alpha-frame",
+      "type": "frame",
+      "pageId": "review",
+      "x": 780,
+      "y": 180,
+      "props": {
+        "name": "alpha pipeline",
+        "w": 460,
+        "h": 250
+      }
+    },
+    {
+      "id": "alpha-loader",
+      "type": "block",
+      "pageId": "review",
+      "x": 820,
+      "y": 475,
+      "props": {
+        "title": "alpha_loader()",
+        "description": "A replaceable Block-title match on Review",
+        "blockType": "Function",
+        "view": "port",
+        "w": 390,
+        "h": 190,
+        "inputs": [],
+        "outputs": []
+      }
+    },
+    {
+      "id": "alpha-writer",
+      "type": "block",
+      "pageId": "secondary",
+      "x": 650,
+      "y": 260,
+      "props": {
+        "title": "alpha_writer()",
+        "description": "A real match on the Secondary page",
+        "blockType": "Function",
+        "view": "port",
+        "w": 390,
+        "h": 210,
+        "inputs": [],
+        "outputs": []
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Press Ctrl/⌘ + K to inspect named commands; switch to Find or press Ctrl/⌘ + F",
+      "x": 60,
+      "y": 105,
+      "w": 520,
+      "h": 115,
+      "target": { "shapeId": "alpha-frame", "anchor": "left", "dy": -70 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Find “a·lpha” (omit the middle dot when typing); choose a·lpha_writer() to jump to the Secondary page, then return to Review",
+      "x": 60,
+      "y": 310,
+      "w": 530,
+      "h": 115,
+      "target": { "shapeId": "alpha-loader", "anchor": "left", "dy": -70 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Replace “a·lpha” (omit the middle dot when typing) with “beta” using All, close the palette, then Undo exactly once",
+      "x": 60,
+      "y": 515,
+      "w": 530,
+      "h": 115,
+      "target": { "shapeId": "alpha-loader", "anchor": "left", "dy": 70 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Results identify both pages, clicking one navigates and selects it, Replace All changes the two Block titles plus Frame name, and one Undo restores all three.",
+      "x": 650,
+      "y": 710,
+      "w": 690,
+      "h": 130
+    }
+  ]
+}

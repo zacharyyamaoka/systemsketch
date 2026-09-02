@@ -66,11 +66,11 @@ const THRESHOLDS = { text: 4.5, 'text-on-accent': 3, icon: 3, boundary: 3 }
  */
 const PROBES = [
   { label: 'file title, top-left shell', selector: '.systemsketch-top-left-shell .systemsketch-file-title', kind: 'text' },
-  { label: 'timer chip', selector: '.systemsketch-timer', kind: 'text' },
+  { label: 'comments button', selector: '.systemsketch-top-right-shell .systemsketch-shell-icon-button', kind: 'icon' },
   { label: 'Share button', selector: '.systemsketch-share-button', kind: 'text-on-accent' },
   { label: 'toolbar tool icon (resting)', selector: '.tlui-main-toolbar__tools .tlui-button__tool:not([aria-pressed="true"])', kind: 'icon' },
   { label: 'toolbar tool icon (active)', selector: '.tlui-main-toolbar__tools .tlui-button__tool[aria-pressed="true"]', kind: 'icon', pseudo: '::after' },
-  { label: 'System tool-family button', selector: '[data-testid="systemsketch-tool-system"]', kind: 'icon' },
+  { label: 'Block and Branch family button', selector: '[data-testid="systemsketch-tool-system"]', kind: 'icon' },
   { label: 'utility strip button', selector: '.systemsketch-utility-strip .tlui-button', kind: 'icon' },
   { label: 'inspector active tab', selector: '.block-inspector__tabs > [role="tab"].is-active', kind: 'text' },
   { label: 'inspector section title', selector: '.block-inspector__section-title', kind: 'text' },
@@ -226,7 +226,7 @@ async function setStoredTheme(page, theme) {
 
 async function waitForApp(page) {
   await waitFor(page, `document.querySelector('.tl-container') && document.querySelector('[data-testid="systemsketch-theme-root"]')`, 'the app root')
-  await waitFor(page, `document.querySelector('[data-testid="systemsketch-tool-system"]')`, 'the toolbar')
+  await waitFor(page, `document.querySelector('[data-testid="systemsketch-tool-system"] .systemsketch-block-icon')`, 'the Block-first system toolbar family')
   await delay(400)
 }
 

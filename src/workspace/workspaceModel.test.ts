@@ -16,6 +16,7 @@ import {
   resolveBrowserSelection,
   rememberDocumentPath,
   renamedDocumentPath,
+  workspaceBrowserDirectory,
 } from './workspaceModel'
 
 describe('local workspace model', () => {
@@ -80,6 +81,30 @@ describe('local workspace model', () => {
         '/boards/Untitled 2.tldr',
       ]),
     ).toBe('/boards/Untitled 3.systemsketch')
+  })
+
+  it('browses beside primary documents but falls back from a direct worktree board', () => {
+    expect(workspaceBrowserDirectory(
+      '/home/z/SystemSketch/Projects/Map.systemsketch',
+      '/home/z',
+      '/home/z/SystemSketch',
+    )).toBe('/home/z/SystemSketch/Projects')
+    expect(workspaceBrowserDirectory(
+      '/worktrees/review/Map.systemsketch',
+      '/home/z',
+      '/home/z/SystemSketch',
+    )).toBe('/home/z/SystemSketch')
+    // A textual prefix is not a filesystem boundary.
+    expect(workspaceBrowserDirectory(
+      '/home/z-other/Map.systemsketch',
+      '/home/z',
+      '/home/z/SystemSketch',
+    )).toBe('/home/z/SystemSketch')
+    expect(workspaceBrowserDirectory(
+      'C:\\worktree\\Map.systemsketch',
+      'C:\\Users\\Zach',
+      'C:\\Users\\Zach\\SystemSketch',
+    )).toBe('C:\\Users\\Zach\\SystemSketch')
   })
 
   it('reloads clean external edits and protects dirty ones', () => {

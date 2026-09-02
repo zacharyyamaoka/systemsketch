@@ -40,6 +40,7 @@ from workspace_store import (
     WorkspaceConflictError,
     WorkspaceFormatError,
     WorkspacePathError,
+    create_directory,
     list_documents,
     load_document,
     rename_document,
@@ -162,6 +163,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             "/api/release",
             "/api/recordings",
             "/api/recordings/arm",
+            "/api/workspace/directory",
             "/api/workspace/file",
             "/api/workspace/rename",
             "/api/workspace/trash",
@@ -202,6 +204,13 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                         additional_roots=self.app.additional_document_roots,
                         base_digest=base_digest,
                         force=payload.get("force") is True,
+                    )
+                )
+                return
+            if path == "/api/workspace/directory":
+                self._json(
+                    create_directory(
+                        payload.get("parent"), payload.get("name"), self.app.files_root
                     )
                 )
                 return

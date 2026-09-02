@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
+  createCompatibilityCopyText,
   decodeDocumentText,
   documentEncoding,
   documentSuffix,
   documentTitle,
   encodeDocumentText,
   isBlankDocument,
+  newerDocumentVersion,
   systemSketchManifest,
   SYSTEMSKETCH_ENVELOPE_KEY,
 } from './sketchDocument'
@@ -108,5 +110,50 @@ describe('a blank target is a blank board, not a broken file', () => {
 
   it('does not treat a real document as blank', () => {
     expect(isBlankDocument(TLDRAW_FILE)).toBe(false)
+  })
+})
+
+describe('newer .systemsketch envelopes are protected from downgrade', () => {
+  const newerFile = JSON.stringify({
+    ...JSON.parse(TLDRAW_FILE),
+    systemSketch: {
+      formatVersion: 2,
+      application: 'SystemSketch',
+      shapes: { block: 2 },
+      bindings: { connection: 1 },
+      futureMetadata: { mustSurvive: true },
+    },
+  })
+
+  it('marks a newer envelope read-only with an actionable explanation', () => {
+    expect(newerDocumentVersion('/x/target.systemsketch', newerFile)).toEqual({
+      readOnly: true,
+      formatVersion: 2,
+      supportedVersion: 1,
+      message: 'This file uses SystemSketch format version 2, but this build supports version 1. It is open read-only to prevent data loss.',
+    })
+  })
+
+  it('creates a current-format copy while leaving the future source untouched', () => {
+    const before = newerFile
+    const copy = createCompatibilityCopyText('/x/target compatible copy.systemsketch', newerFile)
+    const parsed = JSON.parse(copy)
+
+    expect(newerFile).toBe(before)
+    expect(parsed.systemSketch.formatVersion).toBe(1)
+    expect(parsed.systemSketch.futureMetadata).toBeUndefined()
+    expect(parsed.records).toEqual(JSON.parse(TLDRAW_FILE).records)
+    expect(newerDocumentVersion('/x/copy.systemsketch', copy)).toBeNull()
+  })
+
+  it('allows the supported envelope and leaves .tldr authority with its suffix', () => {
+    const supportedFile = encodeDocumentText('/x/target.systemsketch', TLDRAW_FILE)
+    expect(newerDocumentVersion('/x/target.systemsketch', supportedFile)).toBeNull()
+    expect(newerDocumentVersion('/x/target.tldr', newerFile)).toBeNull()
+  })
+
+  it('does not claim malformed or unversioned text is a newer format', () => {
+    expect(newerDocumentVersion('/x/target.systemsketch', '{"systemSketch": broken')).toBeNull()
+    expect(newerDocumentVersion('/x/target.systemsketch', TLDRAW_FILE)).toBeNull()
   })
 })

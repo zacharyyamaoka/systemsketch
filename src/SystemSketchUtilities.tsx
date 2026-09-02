@@ -44,6 +44,7 @@ import { startReleaseRefresh } from './releaseRefresh'
 import { cablePresentation, setDashAfterPill } from './blocks/connections/connectionPresentation'
 import { useAppearancePreferences } from './settings/appearancePreferences'
 import './systemsketch-utilities.css'
+import { getBoardDiagnosticsModel } from './diagnostics'
 
 type BusyKey = ReleaseAction | `preview:${DevelopmentProfileId}`
 
@@ -66,6 +67,15 @@ function BoardOverviewIcon() {
     <svg viewBox="0 0 20 20" aria-hidden="true" className="systemsketch-utility-icon">
       <rect x="4.5" y="4.5" width="11" height="11" rx="1" />
       <path d="M2.5 6.5h4M2.5 13.5h4M13.5 2.5v4M6.5 2.5v4M13.5 13.5v4M6.5 13.5v4M13.5 6.5h4M13.5 13.5h4" />
+    </svg>
+  )
+}
+
+function ProblemsIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true" className="systemsketch-utility-icon">
+      <path d="M10 2.5 18 17H2L10 2.5Z" />
+      <path d="M10 7v4.5M10 14.5h.01" />
     </svg>
   )
 }
@@ -150,6 +160,12 @@ export function SystemSketchNavigationPanel() {
   const helpPanelId = useId()
   const releaseDetailsId = useId()
   const boardPanelOpen = rightSurface === 'board-overview'
+  const problemsPanelOpen = rightSurface === 'diagnostics'
+  const problemCount = useValue(
+    'SystemSketch Problems count',
+    () => getBoardDiagnosticsModel(editor).counts.total,
+    [editor],
+  )
   const orderedPresets = useMemo(() => orderDevelopmentPresets(recentIds), [recentIds])
 
   const refresh = useCallback(() => {
@@ -289,6 +305,12 @@ export function SystemSketchNavigationPanel() {
 
   const toggleBoardPanel = () => {
     toggleRight('board-overview')
+    setDevOpen(false)
+    setHelpOpen(false)
+  }
+
+  const toggleProblemsPanel = () => {
+    toggleRight('diagnostics')
     setDevOpen(false)
     setHelpOpen(false)
   }
@@ -539,6 +561,21 @@ export function SystemSketchNavigationPanel() {
           onClick={toggleBoardPanel}
         >
           <BoardOverviewIcon />
+        </TldrawUiToolbarButton>
+        <TldrawUiToolbarButton
+          type="icon"
+          className="systemsketch-diagnostics-trigger"
+          title={problemCount === 1 ? 'Problems — 1 issue' : `Problems — ${problemCount} issues`}
+          aria-expanded={problemsPanelOpen}
+          aria-controls={problemsPanelOpen ? 'systemsketch-right-popout' : undefined}
+          onClick={toggleProblemsPanel}
+        >
+          <ProblemsIcon />
+          {problemCount > 0 ? (
+            <span className="systemsketch-problem-count" aria-hidden="true">
+              {problemCount > 99 ? '99+' : problemCount}
+            </span>
+          ) : null}
         </TldrawUiToolbarButton>
         {showZoomButtons ? (
           <TldrawUiToolbarButton

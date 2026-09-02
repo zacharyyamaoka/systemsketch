@@ -1,11 +1,16 @@
 import * as vscode from 'vscode'
 import { readFileSync } from 'node:fs'
 import {
+  createCompatibilityCopyText,
   documentSuffix,
   documentTitle,
+  newerDocumentVersion,
+  SYSTEMSKETCH_SUFFIX,
   type EmbedToHostMessage,
   type HostToEmbedMessage,
 } from '../../src/embed/sharedWithHost'
+import { CanvasCheckpointStore } from './checkpointStore'
+import { enqueueSessionWrite } from './sessionWriteQueue'
 
 const VIEW_TYPE = 'systemsketch.editor'
 
@@ -27,7 +32,10 @@ const VIEW_TYPE = 'systemsketch.editor'
 export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.window.registerCustomEditorProvider(VIEW_TYPE, new SystemSketchEditorProvider(context), {
-      supportsMultipleEditorsPerDocument: true,
+      // Recovery intentionally has one durable checkpoint per document URI.
+      // Keep one canvas owner for that URI; source + canvas side-by-side still
+      // works, while two canvases cannot race to replace each other's recovery.
+      supportsMultipleEditorsPerDocument: false,
       webviewOptions: { retainContextWhenHidden: true },
     }),
     vscode.commands.registerCommand('systemsketch.openSource', (resource?: vscode.Uri) =>
@@ -77,7 +85,11 @@ async function showBundledBuild(context: vscode.ExtensionContext): Promise<void>
 }
 
 class SystemSketchEditorProvider implements vscode.CustomTextEditorProvider {
-  constructor(private readonly context: vscode.ExtensionContext) {}
+  private readonly checkpoints: CanvasCheckpointStore
+
+  constructor(private readonly context: vscode.ExtensionContext) {
+    this.checkpoints = new CanvasCheckpointStore(context.globalStorageUri.fsPath)
+  }
 
   async resolveCustomTextEditor(
     document: vscode.TextDocument,
@@ -95,17 +107,57 @@ class SystemSketchEditorProvider implements vscode.CustomTextEditorProvider {
     /** Text this extension itself wrote, so its echo is not read as an edit. */
     let expectedText: string | null = null
     let writes = Promise.resolve()
+    const sourceUri = document.uri.toString()
+    let session = createNonce()
 
     const post = (message: HostToEmbedMessage): Thenable<boolean> =>
       (disposed ? Promise.resolve(false) : panel.webview.postMessage(message))
 
+    const reportCheckpointError = (cause: unknown): void => {
+      void post({
+        type: 'host-error',
+        message: cause instanceof Error ? cause.message : 'Could not retain the canvas checkpoint',
+        retryable: false,
+      })
+    }
+    const clearCheckpoint = (checkpointSession = session): void => {
+      try {
+        // Multiple canvas panes may share one TextDocument. Only the pane that
+        // owns the stored checkpoint may discard it: another pane also sees
+        // this document event, but its panel-local `expectedText` cannot tell
+        // that the write originated next door.
+        this.checkpoints.clear(sourceUri, checkpointSession)
+      } catch (cause) {
+        reportCheckpointError(cause)
+      }
+    }
+    const settleCheckpoint = (
+      checkpointSession: string,
+      revision: number,
+      sourceText: string,
+    ): void => {
+      try {
+        this.checkpoints.settle(sourceUri, checkpointSession, revision, sourceText)
+      } catch (cause) {
+        reportCheckpointError(cause)
+      }
+    }
+
     const open = (): void => {
+      let recovery: { snapshot: unknown } | null = null
+      try {
+        recovery = this.checkpoints.adopt(sourceUri, document.getText(), session)
+      } catch (cause) {
+        reportCheckpointError(cause)
+      }
       void post({
         type: 'open',
         path: document.uri.fsPath,
         text: document.getText(),
         version: document.version,
         readOnly: isReadOnly(document.uri),
+        session,
+        recovery: recovery ? { snapshot: recovery.snapshot } : undefined,
       })
       void post({ type: 'appearance', colorScheme: currentColorScheme() })
     }
@@ -121,10 +173,13 @@ class SystemSketchEditorProvider implements vscode.CustomTextEditorProvider {
       // Someone else moved the file: the JSON was hand-edited, a generator
       // rewrote it, or a branch changed under the open tab. The canvas reloads.
       expectedText = null
+      clearCheckpoint()
+      session = createNonce()
       void post({
         type: 'external-change',
         text,
         version: event.document.version,
+        session,
         reason: 'source-edit',
       })
     })
@@ -143,36 +198,93 @@ class SystemSketchEditorProvider implements vscode.CustomTextEditorProvider {
         void vscode.window.showErrorMessage(`SystemSketch: ${raw.message}`)
         return
       }
-      if (raw.type !== 'change' || isReadOnly(document.uri)) return
+      if (raw.type === 'checkpoint') {
+        if (isReadOnly(document.uri) || raw.session !== session) return
+        try {
+          this.checkpoints.save(
+            sourceUri,
+            document.getText(),
+            session,
+            raw.revision,
+            raw.snapshot,
+          )
+        } catch (cause) {
+          reportCheckpointError(cause)
+        }
+        return
+      }
+      if (raw.type === 'checkpoint-settled') {
+        if (raw.session !== session) return
+        settleCheckpoint(session, raw.revision, document.getText())
+        return
+      }
+      if (raw.type === 'request-compatible-copy') {
+        if (raw.session !== session || raw.baseVersion !== document.version) return
+        const source = document.getText()
+        if (!newerDocumentVersion(document.uri.fsPath, source)) return
+        const requestedSession = raw.session
+        const requestedVersion = raw.baseVersion
+        void createCompatibilityCopy(document.uri, source, () => (
+          session === requestedSession
+          && document.version === requestedVersion
+          && document.getText() === source
+          && newerDocumentVersion(document.uri.fsPath, document.getText()) !== null
+        )).catch(async (cause: unknown) => {
+          await post({
+            type: 'host-error',
+            message: cause instanceof Error ? cause.message : 'Could not create the editable copy',
+            retryable: false,
+          })
+        })
+        return
+      }
+      if (raw.type !== 'change' || isReadOnly(document.uri) || raw.session !== session) return
 
-      writes = writes.then(async () => {
+      writes = enqueueSessionWrite(writes, raw.session, () => session, async () => {
+        if (raw.session !== session) return
         // The canvas edited a version of the file that no longer exists. Do not
         // resolve that by preferring one side: hand the newer document back and
         // let the board be redrawn from what is actually there.
         if (raw.baseVersion !== document.version) {
+          clearCheckpoint(raw.session)
+          session = createNonce()
           await post({
             type: 'external-change',
             text: document.getText(),
             version: document.version,
+            session,
             reason: 'stale-change',
           })
           return
         }
         if (raw.text === document.getText()) {
+          settleCheckpoint(
+            raw.session,
+            raw.checkpointRevision,
+            raw.text,
+          )
           await post({ type: 'accepted', version: document.version })
           return
         }
         expectedText = raw.text
-        if (await replaceDocumentText(document, raw.text)) return
+        const replaced = await replaceDocumentText(document, raw.text)
+        if (raw.session !== session) return
+        if (replaced) {
+          settleCheckpoint(
+            raw.session,
+            raw.checkpointRevision,
+            raw.text,
+          )
+          return
+        }
 
         expectedText = null
         await post({
-          type: 'external-change',
-          text: document.getText(),
-          version: document.version,
-          reason: 'write-failed',
+          type: 'host-error',
+          message: 'The editor could not apply this canvas edit. Retry to keep the live board.',
         })
       }).catch(async (cause: unknown) => {
+        if (raw.session !== session) return
         expectedText = null
         await post({
           type: 'host-error',
@@ -237,6 +349,39 @@ class SystemSketchEditorProvider implements vscode.CustomTextEditorProvider {
       .replace(/ crossorigin/g, '')
       .replace('</head>', `${bridge}\n  </head>`)
   }
+}
+
+async function createCompatibilityCopy(
+  sourceUri: vscode.Uri,
+  source: string,
+  isStillCurrent: () => boolean,
+): Promise<void> {
+  const stem = documentTitle(sourceUri.path)
+  const slash = sourceUri.path.lastIndexOf('/')
+  const defaultUri = sourceUri.with({
+    path: `${sourceUri.path.slice(0, slash + 1)}${stem} compatible copy.systemsketch`,
+  })
+  const destination = await vscode.window.showSaveDialog({
+    defaultUri,
+    filters: { 'SystemSketch document': ['systemsketch'] },
+    saveLabel: 'Create editable copy',
+    title: 'Create an editable current-format copy',
+  })
+  if (!destination) return
+  if (documentSuffix(destination.path) !== SYSTEMSKETCH_SUFFIX) {
+    throw new Error('An editable compatibility copy must end with .systemsketch')
+  }
+  if (!isStillCurrent()) {
+    throw new Error('The source file changed while the copy dialog was open. Try again from the latest version.')
+  }
+  const copy = createCompatibilityCopyText(destination.fsPath, source)
+  await vscode.workspace.fs.writeFile(destination, Buffer.from(copy, 'utf8'))
+  await vscode.commands.executeCommand(
+    'vscode.openWith',
+    destination,
+    VIEW_TYPE,
+    vscode.ViewColumn.Active,
+  )
 }
 
 function currentColorScheme(): 'light' | 'dark' {

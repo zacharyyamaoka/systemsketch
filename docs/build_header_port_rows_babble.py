@@ -841,7 +841,7 @@ def reference_html() -> str:
         </div>
         <div class="reference-grid">{cards}</div>
       </section>
-    """
+    """.strip()
 
 
 def main() -> None:

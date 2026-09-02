@@ -1058,7 +1058,7 @@ def reference_html(numbers: dict[str, str]) -> str:
         <div><b>Python's own grammar</b>
           <code>ast.Constant</code> is an argument: it belongs to the call. <code>ast.Name</code> is a binding: it belongs to the scope. The pill's name is the difference between the two, and the definition default belongs to neither — it is a fact about <code>estimate</code>.</div>
       </div>
-    """
+    """.strip()
     measured = (f'<p class="measured">Measured at build time from the tree: the default chip is capped at '
                 f'{esc(numbers["chip_max_width"])} at {esc(numbers["chip_font"])} monospace beside {esc(numbers["port_font"])} port names, '
                 f'on a Port view {esc(numbers["port_view_width"])}px wide — which is why the real row above reads `g… fl…`.</p>')
@@ -1072,7 +1072,7 @@ def reference_html(numbers: dict[str, str]) -> str:
         {prior}
         {measured}
       </section>
-    """
+    """.strip()
 
 
 def main() -> None:

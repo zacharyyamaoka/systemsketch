@@ -1,0 +1,79 @@
+{
+  "feature": "Shapes library and board overview",
+  "viewport": { "width": 1440, "height": 900 },
+  "shapes": [
+    {
+      "id": "pipeline-frame",
+      "type": "frame",
+      "x": 800,
+      "y": 210,
+      "props": {
+        "name": "Pipeline Frame",
+        "w": 500,
+        "h": 330
+      }
+    },
+    {
+      "id": "expanded-runtime",
+      "type": "block",
+      "x": 850,
+      "y": 580,
+      "props": {
+        "title": "Expanded Runtime",
+        "description": "A live Board overview landmark",
+        "blockType": "Runtime",
+        "view": "expanded",
+        "w": 400,
+        "h": 230,
+        "inputs": [
+          { "id": "in_1", "name": "request", "type": "Task", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_1", "name": "result", "type": "Result", "visible": true }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Open Shapes at top-left, search “decision”, then click Decision",
+      "x": 60,
+      "y": 120,
+      "w": 480,
+      "h": 110,
+      "target": { "x": 700, "y": 450 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Undo once; reopen Shapes and confirm Decision is first in Recents",
+      "x": 60,
+      "y": 300,
+      "w": 480,
+      "h": 110,
+      "target": { "x": 700, "y": 450 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Open Board overview at bottom-right and click Pipeline Frame, then Expanded Runtime",
+      "x": 60,
+      "y": 510,
+      "w": 500,
+      "h": 120,
+      "target": { "shapeId": "pipeline-frame", "anchor": "left" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Library insert is selected at viewport center, one Undo removes it, Recents remembers it, and each overview row selects and centers its real target.",
+      "x": 60,
+      "y": 690,
+      "w": 650,
+      "h": 120
+    }
+  ]
+}

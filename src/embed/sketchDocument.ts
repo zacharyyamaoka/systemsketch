@@ -4,7 +4,7 @@
  * The rules themselves live in the workspace lane — `systemSketchFile.ts` owns
  * the envelope, `workspaceModel.ts` owns what each suffix means. This module
  * exists to say, in one place, exactly which of those an embedded editor uses,
- * and to add the two things a host needs that a workspace does not:
+ * and to add the things a host needs that a workspace does not:
  *
  * - `decodeDocumentText`, because a host hands over *text* rather than the
  *   `{core, manifest}` pair the workspace lane wants;
@@ -12,14 +12,23 @@
  *   file, and an empty file is a blank board rather than a parse failure.
  *   Getting that wrong is the difference between "click the target and start
  *   drawing" and a quarantine screen on every new case.
+ * - `newerDocumentVersion`, because an older embedded build must never
+ *   downgrade a newer envelope just because its tldraw core still parses.
  *
  * Everything reachable from here stays pure — no tldraw, no React, no DOM — so
  * the VS Code extension host can share it with the canvas and both ends agree
  * on the format by construction rather than by two implementations agreeing.
  */
 
-import { decodeSystemSketchDocument } from '../workspace/systemSketchFile'
-import { encodeDocumentForPath } from '../workspace/workspaceModel'
+import {
+  decodeSystemSketchDocument,
+  SYSTEMSKETCH_FORMAT_VERSION,
+} from '../workspace/systemSketchFile'
+import {
+  documentSuffix,
+  encodeDocumentForPath,
+  SYSTEMSKETCH_SUFFIX,
+} from '../workspace/workspaceModel'
 
 export {
   SYSTEMSKETCH_APPLICATION,
@@ -53,6 +62,46 @@ export function decodeDocumentText(source: string): string {
 /** Wrap serialized tldraw JSON for `path`, and only if `path` asks for it. */
 export function encodeDocumentText(path: string, tldrawJson: string): string {
   return encodeDocumentForPath(path, tldrawJson)
+}
+
+/**
+ * Explicitly downgrade only the wrapper of a readable future document.
+ *
+ * The source is never mutated. Unknown future envelope metadata is omitted
+ * from the new current-format copy, while the stock tldraw core is retained.
+ */
+export function createCompatibilityCopyText(destinationPath: string, source: string): string {
+  return encodeDocumentText(destinationPath, decodeDocumentText(source))
+}
+
+export interface NewerDocumentVersion {
+  readOnly: true
+  formatVersion: number
+  supportedVersion: number
+  message: string
+}
+
+/**
+ * Refuse write access when a `.systemsketch` envelope came from a newer app.
+ *
+ * The core may still be useful enough to display, but re-serializing it with
+ * this build would replace its newer envelope with version 1 and could erase
+ * metadata this build does not understand. The suffix remains authoritative:
+ * a `.tldr` is not reclassified by arbitrary JSON inside it.
+ */
+export function newerDocumentVersion(
+  path: string,
+  source: string,
+): NewerDocumentVersion | null {
+  if (documentSuffix(path) !== SYSTEMSKETCH_SUFFIX) return null
+  const manifest = decodeSystemSketchDocument(source).manifest
+  if (manifest === null || manifest.formatVersion <= SYSTEMSKETCH_FORMAT_VERSION) return null
+  return {
+    readOnly: true,
+    formatVersion: manifest.formatVersion,
+    supportedVersion: SYSTEMSKETCH_FORMAT_VERSION,
+    message: `This file uses SystemSketch format version ${manifest.formatVersion}, but this build supports version ${SYSTEMSKETCH_FORMAT_VERSION}. It is open read-only to prevent data loss.`,
+  }
 }
 
 /** Whether a host handed us a document with nothing in it yet. */

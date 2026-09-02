@@ -8,24 +8,22 @@ import {
   TldrawUiDropdownMenuItem,
   TldrawUiDropdownMenuRoot,
   TldrawUiDropdownMenuTrigger,
-  TldrawUiInput,
   TldrawUiPopover,
   TldrawUiPopoverContent,
   TldrawUiPopoverTrigger,
   TldrawUiToolbarButton,
-  createShapeId,
   useEditor,
   useTools,
   useValue,
-  type TLGeoShape,
   type TLUiIconJsx,
   type TLUiToolItem,
 } from 'tldraw'
-import { useId, useMemo, useState, type ReactNode } from 'react'
+import { useId, useState, type ReactNode } from 'react'
 import { BLOCK_TOOL_ID, PILL_TOOL_ID } from '../blocks'
 import { PillIcon } from '../blocks/PillIcon'
 import { BlockIcon } from '../blocks/BlockIcon'
 import { BRANCH_TOOL_ID, BranchIcon } from '../branch'
+import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
 import {
   selectDrawFamilyTool,
   selectShapeFamilyTool,
@@ -111,32 +109,6 @@ const SYSTEM_MENU_ITEMS: ReadonlyArray<{
   { id: BRANCH_TOOL_ID, label: 'Branch', icon: <BranchIcon /> },
   // A pill is a variable: a literal argument, a named result, or both. P.
   { id: PILL_TOOL_ID, label: 'Pill', icon: <PillIcon />, shortcut: 'P' },
-]
-
-interface LibraryItem {
-  id: string
-  label: string
-  section: 'Basic' | 'Flowchart'
-  geo: TLGeoShape['props']['geo']
-  icon: string
-  width?: number
-  height?: number
-}
-
-const LIBRARY_ITEMS: readonly LibraryItem[] = [
-  { id: 'rectangle', label: 'Rectangle', section: 'Basic', geo: 'rectangle', icon: 'geo-rectangle' },
-  { id: 'ellipse', label: 'Ellipse', section: 'Basic', geo: 'ellipse', icon: 'geo-ellipse' },
-  { id: 'triangle', label: 'Triangle', section: 'Basic', geo: 'triangle', icon: 'geo-triangle' },
-  { id: 'diamond', label: 'Diamond', section: 'Basic', geo: 'diamond', icon: 'geo-diamond' },
-  { id: 'hexagon', label: 'Hexagon', section: 'Basic', geo: 'hexagon', icon: 'geo-hexagon' },
-  { id: 'star', label: 'Star', section: 'Basic', geo: 'star', icon: 'geo-star' },
-  { id: 'cloud', label: 'Cloud', section: 'Basic', geo: 'cloud', icon: 'geo-cloud', width: 170 },
-  { id: 'process', label: 'Process', section: 'Flowchart', geo: 'rectangle', icon: 'geo-rectangle', width: 190 },
-  { id: 'decision', label: 'Decision', section: 'Flowchart', geo: 'diamond', icon: 'geo-diamond' },
-  { id: 'terminator', label: 'Terminator', section: 'Flowchart', geo: 'oval', icon: 'geo-oval', width: 180, height: 80 },
-  { id: 'data', label: 'Data', section: 'Flowchart', geo: 'rhombus', icon: 'geo-rhombus' },
-  { id: 'manual-input', label: 'Manual input', section: 'Flowchart', geo: 'trapezoid', icon: 'geo-trapezoid', width: 180 },
-  { id: 'cloud-service', label: 'Cloud service', section: 'Flowchart', geo: 'cloud', icon: 'geo-cloud', width: 180 },
 ]
 
 function isSupportedShapeTool(value: string | undefined): value is ShapeFamilyTool {
@@ -376,58 +348,14 @@ function DrawFamilySlot({ activeToolId }: { activeToolId: string }) {
   )
 }
 
-function LibraryTile({ item, onInsert }: { item: LibraryItem; onInsert(item: LibraryItem): void }) {
-  return (
-    <button
-      type="button"
-      className="systemsketch-library-tile"
-      title={`Insert ${item.label}`}
-      data-testid={`systemsketch-library-${item.id}`}
-      onClick={() => onInsert(item)}
-    >
-      <TldrawUiButtonIcon icon={item.icon} />
-      <span>{item.label}</span>
-    </button>
-  )
-}
-
 function LibrarySlot() {
   const editor = useEditor()
   const popoverId = `systemsketch-library-${useId()}`
   const [isOpen, setIsOpen] = useState(false)
-  const [query, setQuery] = useState('')
-  const normalizedQuery = query.trim().toLowerCase()
-  const filtered = useMemo(
-    () => LIBRARY_ITEMS.filter((item) => item.label.toLowerCase().includes(normalizedQuery)),
-    [normalizedQuery],
-  )
-
-  const insertItem = (item: LibraryItem) => {
-    const id = createShapeId()
-    const center = editor.getViewportPageBounds().center
-    const width = item.width ?? 150
-    const height = item.height ?? 100
-    editor.run(() => {
-      editor.markHistoryStoppingPoint(`insert_library_shape:${item.id}`)
-      editor.createShape<TLGeoShape>({
-        id,
-        type: 'geo',
-        x: center.x - width / 2,
-        y: center.y - height / 2,
-        props: { geo: item.geo, w: width, h: height },
-      })
-      editor.setCurrentTool('select')
-      editor.select(id)
-    })
-    editor.menus.clearOpenMenus()
-    setIsOpen(false)
-    setQuery('')
-  }
 
   const setOpen = (open: boolean) => {
     if (!open) editor.menus.clearOpenMenus()
     setIsOpen(open)
-    if (!open) setQuery('')
   }
 
   return (
@@ -464,37 +392,11 @@ function LibrarySlot() {
               <TldrawUiButtonIcon icon="cross-2" small />
             </TldrawUiButton>
           </header>
-          <TldrawUiInput
+          <ShapeLibraryBrowser
             autoFocus
-            autoSelect
-            className="systemsketch-library-search"
-            aria-label="Search shapes"
-            placeholder="Search shapes"
-            value={query}
-            onValueChange={setQuery}
             onCancel={() => setOpen(false)}
+            onInserted={() => setOpen(false)}
           />
-          <div className="systemsketch-library-panel__body">
-            {(['Basic', 'Flowchart'] as const).map((section) => {
-              const items = filtered.filter((item) => item.section === section)
-              if (items.length === 0) return null
-              return (
-                <section key={section}>
-                  <h3>{section}</h3>
-                  <div className="systemsketch-library-grid">
-                    {items.map((item) => <LibraryTile key={item.id} item={item} onInsert={insertItem} />)}
-                  </div>
-                </section>
-              )
-            })}
-            {filtered.length === 0 ? (
-              <div className="systemsketch-library-empty">
-                <TldrawUiButtonIcon icon="question-mark-circle" />
-                <strong>No matching shapes</strong>
-                <span>Try rectangle, decision, or cloud.</span>
-              </div>
-            ) : null}
-          </div>
         </aside>
       </TldrawUiPopoverContent>
     </TldrawUiPopover>

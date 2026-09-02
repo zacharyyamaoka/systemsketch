@@ -1,0 +1,68 @@
+{
+  "feature": "Problems-style board diagnostics",
+  "viewport": { "width": 1440, "height": 900 },
+  "shapes": [
+    {
+      "id": "problem-block",
+      "type": "block",
+      "x": 790,
+      "y": 270,
+      "props": {
+        "title": "",
+        "description": "Intentionally missing a title and an input value",
+        "blockType": "Function",
+        "view": "port",
+        "w": 400,
+        "h": 230,
+        "inputs": [
+          { "id": "in_request", "name": "request", "type": "Task", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_result", "name": "result", "type": "Result", "visible": true }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Click Problems (warning triangle) in the bottom-right utility strip",
+      "x": 60,
+      "y": 120,
+      "w": 510,
+      "h": 105,
+      "target": { "shapeId": "problem-block", "anchor": "left", "dy": -80 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · In the Problems panel, filter Warnings and click “Block has no title”",
+      "x": 60,
+      "y": 315,
+      "w": 510,
+      "h": 110,
+      "target": { "shapeId": "problem-block", "anchor": "left", "dy": 25 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Give this Block a title and input default; reopen Problems to watch both rows disappear",
+      "x": 60,
+      "y": 515,
+      "w": 530,
+      "h": 115,
+      "target": { "shapeId": "problem-block", "anchor": "left", "dy": 90 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Clicking a row selects and fits its real Block, and repairing the board removes the derived rows without dismissing a transient warning into the file.",
+      "x": 650,
+      "y": 665,
+      "w": 680,
+      "h": 125
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+.systemsketch-library-browser {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.systemsketch-library-browser .systemsketch-library-search {
+  flex: 0 0 auto;
+  margin: 0 14px 5px;
+}
+
+.systemsketch-library-browser .systemsketch-library-panel__body {
+  min-height: 0;
+  flex: 1;
+  padding: 2px 14px 15px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.systemsketch-library-browser .systemsketch-library-panel__body section h3 {
+  margin: 11px 0 7px;
+}
+
+.systemsketch-library-section-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 27px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 7px;
+  color: var(--ss-text-muted);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .055em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.systemsketch-library-section-toggle:hover {
+  color: var(--ss-text);
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-library-section-toggle__count {
+  color: var(--ss-text-faint);
+  font-size: 9px;
+  letter-spacing: 0;
+}
+
+.systemsketch-library-section-toggle__chevron {
+  margin-left: auto;
+  font-size: 13px;
+  transform: rotate(-90deg);
+  transition: transform 100ms ease-out;
+}
+
+.systemsketch-library-section-toggle[aria-expanded='true']
+  .systemsketch-library-section-toggle__chevron {
+  transform: rotate(0);
+}
+
+.systemsketch-library-recents-empty {
+  margin: 0;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-sunken);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.systemsketch-library-browser .systemsketch-library-tile {
+  min-height: 66px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .systemsketch-library-section-toggle__chevron {
+    transition: none;
+  }
+}

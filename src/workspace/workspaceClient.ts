@@ -44,6 +44,11 @@ export interface WorkspaceDocumentSaved {
   size: number
 }
 
+export interface WorkspaceDirectoryCreated {
+  name: string
+  path: string
+}
+
 export class WorkspaceConflict extends Error {
   readonly diskMtime: number | null
   readonly diskDigest: string | null
@@ -109,18 +114,57 @@ async function post(path: string, payload: Record<string, unknown>): Promise<Rec
   )
 }
 
+function workspaceWritePayload(input: {
+  path: string
+  source: string
+  baseDigest: string | null
+  force?: boolean
+}): Record<string, unknown> {
+  return {
+    path: input.path,
+    source: input.source,
+    baseDigest: input.baseDigest,
+    force: input.force === true,
+  }
+}
+
 export async function writeWorkspaceDocument(input: {
   path: string
   source: string
   baseDigest: string | null
   force?: boolean
 }): Promise<WorkspaceDocumentSaved> {
-  return (await post('/api/workspace/file', {
-    path: input.path,
-    source: input.source,
-    baseDigest: input.baseDigest,
-    force: input.force === true,
-  })) as unknown as WorkspaceDocumentSaved
+  return (await post('/api/workspace/file', workspaceWritePayload(input))) as unknown as WorkspaceDocumentSaved
+}
+
+export async function createWorkspaceDirectory(
+  parent: string,
+  name: string,
+): Promise<WorkspaceDirectoryCreated> {
+  return (await post('/api/workspace/directory', { parent, name })) as unknown as WorkspaceDirectoryCreated
+}
+
+/**
+ * Best-effort final write after the page has committed to leaving.
+ *
+ * The ordinary save path remains authoritative while the page is alive. This
+ * deliberately uses fetch's keepalive flag and does not wait for a response,
+ * because pagehide gives the client no remaining UI in which to resolve a
+ * conflict. The same digest fence still makes the server refuse clobbering an
+ * external edit.
+ */
+export function flushWorkspaceDocument(input: {
+  path: string
+  source: string
+  baseDigest: string | null
+  force?: boolean
+}): Promise<Response> {
+  return fetch('/api/workspace/file', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(workspaceWritePayload(input)),
+    keepalive: true,
+  })
 }
 
 export async function renameWorkspaceDocument(input: {

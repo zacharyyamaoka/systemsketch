@@ -8,6 +8,10 @@ Use a recipe to describe intent while the helper lets the current SystemSketch e
 {
   "feature": "Short human name",
   "viewport": { "width": 1280, "height": 720 },
+  "pages": [
+    { "id": "review", "name": "Review" },
+    { "id": "secondary", "name": "Secondary" }
+  ],
   "shapes": [],
   "bindings": [],
   "callouts": []
@@ -16,11 +20,16 @@ Use a recipe to describe intent while the helper lets the current SystemSketch e
 
 - `feature` is required.
 - `viewport` is optional and controls the generated screenshot. The default is a conservative 1280×720 so a saved camera fits common review surfaces; use a larger viewport only when the interaction genuinely needs it.
-- `shapes` contains partials accepted by `Editor.createShapes`. Use a safe local `id` such as `subject`; the helper expands it to `shape:subject`. `parentId`, `fromId`, and `toId` accept the same shorthand.
-- `bindings` contains partials accepted by `Editor.createBindings`. Use this for actual semantic connections, never for decorative cue arrows.
+- `pages` is optional. The first entry becomes the visible review page; later entries seed real additional pages for cross-page navigation features. Use safe local ids such as `review` and `secondary`.
+- `shapes` contains partials accepted by `Editor.createShapes`. Use a safe local `id` such as `subject`; the helper expands it to `shape:subject`. `parentId`, `fromId`, and `toId` accept the same shorthand. A top-level shape may use `pageId: "secondary"` to live on a page declared above; nested shapes still use `parentId`.
+- `bindings` contains partials accepted by `Editor.createBindings`. A stable `id` is optional; the helper mints one from the binding type and position when omitted. Use this for actual semantic connections, never for decorative cue arrows.
 - `callouts` become stock tldraw geo cards. A callout with a `target` also gets a stock orange elbow arrow bound to the card and, for shape targets, the target shape. They remain editable in the resulting board.
 
 The helper accepts a `text` shorthand on any stock text-bearing shape and converts it to current tldraw rich text. Keep custom shape props native to that feature.
+
+## Chrome and derived-panel features
+
+Comments, Problems, and Find & Replace are real chrome/read-model interactions, not fixture record types. Seed the smallest honest board state that makes the panel useful, put the literal keyboard or menu gesture in the callouts, and drive it after generation. Do not hand-author comment records, diagnostic rows, or search results in recipe JSON: comments must be created through the live Comments panel, while diagnostics and search results must be derived from the real board.
 
 ## Callouts
 

@@ -30,6 +30,8 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("bindingUtils={SYSTEMSKETCH_BINDING_UTILS}", product_source)
         self.assertIn("tools={SYSTEMSKETCH_TOOLS}", product_source)
         self.assertIn("overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}", product_source)
+        self.assertIn("store={store}", product_source)
+        self.assertIn("createSystemSketchStore", product_source)
         self.assertIn("BlockShapeUtil", source)
         self.assertIn("BlockTool", source)
         self.assertIn("PillTool", source)
@@ -101,10 +103,14 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("bindingUtils={EMBEDDED_BINDING_UTILS}", embedded)
         self.assertIn("overlayUtils={EMBEDDED_OVERLAY_UTILS}", embedded)
         self.assertIn("overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}", embedded)
+        self.assertIn("store={store}", embedded)
+        self.assertIn("createSystemSketchStore", embedded)
         self.assertIn("tools={EMBEDDED_TOOLS}", embedded)
         self.assertIn("BlockShapeUtil,", embedded)
         self.assertIn("BranchShapeUtil,", embedded)
+        self.assertIn("PillTool,", embedded)
         self.assertIn("...blockConnectionShapeUtils,", embedded)
+        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool]", embedded)
         self.assertIn("Toolbar: SystemSketchFigmaToolbar", embedded)
         self.assertIn("ContextMenu: BlockContextMenu", embedded)
         self.assertIn("InFrontOfTheCanvas: SystemSketchSurfaceHost", embedded)
@@ -118,6 +124,24 @@ class StockBoundaryTests(unittest.TestCase):
         # A released build must not carry a browser-local persistence key that
         # would quietly compete with the file the host opened.
         self.assertNotIn("persistenceKey", embedded)
+        self.assertNotIn("installFlightRecorder", embedded)
+
+        store_factory = (
+            PROJECT_ROOT / "src" / "store" / "createSystemSketchStore.ts"
+        ).read_text(encoding="utf-8")
+        self.assertIn("createTLStore({", store_factory)
+        self.assertIn("records: SYSTEMSKETCH_COMMENT_RECORDS", store_factory)
+        self.assertIn("BranchShapeUtil", store_factory)
+        self.assertIn("SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS", store_factory)
+
+        portable_export = (
+            PROJECT_ROOT / "src" / "export" / "portableTldraw.ts"
+        ).read_text(encoding="utf-8")
+        self.assertIn("BranchShapeUtil", portable_export)
+        self.assertIn("record.type === BRANCH_SHAPE_TYPE", portable_export)
+        self.assertIn("SYSTEMSKETCH_ROUNDED_RECT_GEO", portable_export)
+        self.assertIn("portableValuePillText", portable_export)
+        self.assertIn("freezeDetachedValuePill", portable_export)
 
     def test_the_host_bridge_stays_the_only_thing_an_extension_imports(self) -> None:
         """A host runs in Node and bundles separately, so anything it reaches
@@ -134,6 +158,10 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertTrue(app_imports, "the extension no longer shares the app's format rules")
         for line in app_imports:
             self.assertIn("../../src/embed/sharedWithHost", line)
+
+        # The durable recovery store has one checkpoint per document URI, so
+        # the provider must preserve that single-canvas ownership invariant.
+        self.assertIn("supportsMultipleEditorsPerDocument: false", extension)
 
         # The chain, not just its head: `sketchDocument.ts` delegates the
         # envelope and the suffix rules to the workspace lane rather than

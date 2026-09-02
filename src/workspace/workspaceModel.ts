@@ -61,6 +61,40 @@ export function parentDirectory(path: string): string {
   return separator <= 0 ? '/' : path.slice(0, separator)
 }
 
+function comparableAbsolutePath(path: string): string {
+  let comparable = path.replace(/\\/g, '/')
+  while (comparable.length > 1 && comparable.endsWith('/')) comparable = comparable.slice(0, -1)
+  // Windows paths are case-insensitive. The browser may receive one spelling
+  // from an IDE URL and another from the workspace host, so compare drives in
+  // the same way the filesystem does.
+  if (/^[a-z]:\//i.test(comparable)) comparable = comparable.toLowerCase()
+  return comparable
+}
+
+/**
+ * Pick the directory an app-owned file browser should open in.
+ *
+ * A development Preview may be authorized to load one document directly from
+ * its source worktree. That extra document root deliberately does not grant
+ * directory-listing authority, so Save As / New must fall back to the primary
+ * workspace instead of trying to browse beside the source fixture.
+ */
+export function workspaceBrowserDirectory(
+  documentPath: string | null,
+  primaryRoot: string | null,
+  defaultDirectory: string | null,
+): string | undefined {
+  if (!defaultDirectory) return undefined
+  if (!documentPath || !primaryRoot) return defaultDirectory
+
+  const candidate = comparableAbsolutePath(documentPath)
+  const root = comparableAbsolutePath(primaryRoot)
+  const isInsidePrimaryRoot = root === '/'
+    ? candidate.startsWith('/')
+    : candidate === root || candidate.startsWith(`${root}/`)
+  return isInsidePrimaryRoot ? parentDirectory(documentPath.replace(/\\/g, '/')) : defaultDirectory
+}
+
 /**
  * Turn a typed name into a document path. A name that already names a known
  * type keeps it, so `Export.tldr` in Save As really does write a `.tldr`;
