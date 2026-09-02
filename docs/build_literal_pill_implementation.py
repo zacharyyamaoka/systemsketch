@@ -211,7 +211,7 @@ def build() -> str:
         ("src/blocks/PillTool.ts", f"`{m['kbd'].upper()}` — the stock box tool, centring the capsule on whatever was drawn."),
         ("src/blocks/connections/blockPicker.ts", f"The `{m['preset_label']}` preset, offered only to a cable that wants a producer; its outlet arrives unnamed."),
         ("src/instantTextEditing.ts", "The Pill tool is the one tool whose id is not its shape type, so the creation gate names it."),
-        ("src/toolbar/SystemSketchToolbar.tsx", "The Pill slot beside Block in the product toolbar; the Block Dev toolbar gets the same item."),
+        ("src/toolbar/SystemSketchToolbar.tsx", "The Pill is the third member of the System design family slot (Block · Branch · Pill, remembered like the stock shapes); the Block Dev toolbar gets its own item."),
     ]
     seam_cards = "".join(
         f'<div class="seam"><b>{esc(path)}</b><p>{note}</p></div>' for path, note in seams
@@ -259,7 +259,7 @@ Every claim below was driven in the real app by <code>npm run test:pill</code>.<
 </div>
 <div class="pair">
 {figure("literal-pill-inspector.png", "<b>The Pill section for a literal.</b> Name, Value and Type instead of the Block sections; the View row stays because a pill is a Block. What the outlet feeds is spelled out.")}
-{figure("literal-pill-product.png", "<b>The product composition:</b> the Pill slot beside Block in the toolbar, and <code>P</code> draws a capsule on the real board.")}
+{figure("literal-pill-product.png", "<b>The product composition:</b> the Pill lives in the toolbar's System design family with Block and Branch, and <code>P</code> draws a capsule on the real board.")}
 </div>
 
 <h2>Anatomy</h2>
