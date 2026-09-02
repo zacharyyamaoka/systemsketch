@@ -1,0 +1,117 @@
+[
+  {
+    "id": "AREA-DRAWN",
+    "label": "the reveal region is a rectangle around the cable",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "CURVED-OUTSIDE",
+    "label": "outside the region, only the two terminals are offered",
+    "observed": [
+      "end",
+      "start"
+    ],
+    "desired": [
+      "end",
+      "start"
+    ],
+    "ok": true
+  },
+  {
+    "id": "CURVED-INSIDE",
+    "label": "inside it — 90px off the stroke — the control point appears",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "BOUNDARY",
+    "label": "the region has an edge, and it is where the rectangle says",
+    "observed": {
+      "justInside": 3,
+      "justOutside": 2
+    },
+    "desired": {
+      "justInside": 3,
+      "justOutside": 2
+    },
+    "ok": true
+  },
+  {
+    "id": "ELBOW-AREA",
+    "label": "the elbow gets its own, larger rectangle",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "ELBOW-GAP",
+    "label": "the box contains a point no corridor could ever reach",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "ELBOW-INSIDE",
+    "label": "standing on that point reveals the segment handles",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "ELBOW-OUTSIDE",
+    "label": "and leaving it puts them away",
+    "observed": [
+      "end",
+      "start"
+    ],
+    "desired": [
+      "end",
+      "start"
+    ],
+    "ok": true
+  },
+  {
+    "id": "STRAIGHT-INSIDE",
+    "label": "a straight cable offers its control point the same way",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "CLEAN",
+    "label": "the journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  },
+  {
+    "id": "CHROME-BASELINE",
+    "label": "inside the region, the control point is offered",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "CHROME-OVERLAPS",
+    "label": "the menu really does sit over the reveal region",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "CHROME",
+    "label": "a pointer over the contextual menu is not a pointer over the board",
+    "observed": [
+      "end",
+      "start"
+    ],
+    "desired": [
+      "end",
+      "start"
+    ],
+    "ok": true
+  }
+]

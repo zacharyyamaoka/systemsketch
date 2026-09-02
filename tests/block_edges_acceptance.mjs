@@ -73,10 +73,8 @@ async function box(page, selector) {
 /**
  * A real point ON a cable, at a fraction of its length, in client pixels.
  *
- * The path element's bounding-box centre is not on the curve — and worse, the
- * curve's own midpoint belongs to the insert `+`, a different affordance with a
- * different job. Sampling the path is the only way to press the cable where a
- * user would.
+ * The path element's bounding-box centre is not on the curve, so sampling the
+ * path is the only way to press the cable where a user would.
  */
 async function pointOnCable(page, t) {
   const value = await evaluate(page, `(() => {

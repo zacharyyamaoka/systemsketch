@@ -24,19 +24,17 @@ import {
 	type BlockPickerPreset,
 } from '../connections/blockPicker'
 import {
-	getConnectionPageCenter,
 	getConnectionTerminals,
 	type ConnectionShape,
 } from '../connections/ConnectionShapeUtil'
 import { CONNECTION_SHAPE_TYPE } from '../connections/connectionModel'
 
-/** Where the offer sits: a loose terminal, or the midpoint of a cable to split. */
+/** The loose terminal the offer sits on, in page space. */
 function pickerAnchorPagePoint(
 	editor: Editor,
 	connection: ConnectionShape,
 	location: BlockPickerLocation,
 ): Vec {
-	if (location === 'middle') return getConnectionPageCenter(editor, connection)
 	const local = getConnectionTerminals(editor, connection)[location]
 	return editor.getShapePageTransform(connection).applyToPoint(local)
 }
@@ -67,7 +65,22 @@ export function OnCanvasBlockPicker() {
 			}
 			const page = pickerAnchorPagePoint(editor, connection, state.terminal)
 			const viewport = editor.pageToViewport(page)
-			container.style.transform = `translate(${viewport.x}px, ${viewport.y}px)`
+			// Custom properties rather than `transform`, so the stylesheet keeps
+			// ownership of how the interface scale is applied on top of the anchor.
+			container.style.setProperty('--systemsketch-block-picker-x', `${viewport.x}px`)
+			container.style.setProperty('--systemsketch-block-picker-y', `${viewport.y}px`)
+
+			// A cable that reaches LEFT for a producer must not have the panel laid
+			// over it, so the panel goes on the far side of the terminal. The one
+			// exception is a terminal close enough to the viewport's left edge that
+			// the panel would land entirely off-screen: an invisible offer is worse
+			// than one on the "wrong" side, and the cable still points the way.
+			const wantsLeft = state.terminal === 'start'
+			const fitsLeft = viewport.x - container.offsetWidth >= 0
+			container.style.setProperty(
+				'--systemsketch-block-picker-side',
+				wantsLeft && fitsLeft ? '-100%' : '0px',
+			)
 		},
 		[editor, container],
 	)
@@ -102,6 +115,18 @@ export function OnCanvasBlockPicker() {
 		target.addEventListener('keydown', onKeyDown, { capture: true })
 		return () => target.removeEventListener('keydown', onKeyDown, { capture: true })
 	}, [open, close, editor])
+
+	// Where the cable should meet the panel: the vertical centre of the first
+	// option, because that is the one the wire would flow into. Measured from
+	// the rendered panel so it survives the option list changing, and re-measured
+	// per open because the interface scale changes what "first row" measures.
+	useEffect(() => {
+		if (!open || !container) return
+		const first = container.querySelector<HTMLElement>('.OnCanvasBlockPicker-item')
+		if (!first) return
+		const anchor = first.offsetTop + first.offsetHeight / 2
+		container.style.setProperty('--systemsketch-block-picker-anchor', `${anchor}px`)
+	}, [open, container])
 
 	// A press anywhere else is a decline, not a pick.
 	useEffect(() => {

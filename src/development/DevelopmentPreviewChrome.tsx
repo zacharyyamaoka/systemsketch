@@ -41,6 +41,7 @@ import {
   EditorBlockInspector,
   EditorConnectionInspector,
   getConnectionInspectorContext,
+  HitAreaOverlay,
   OnCanvasBlockPicker,
 } from '../blocks/ui'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
@@ -144,6 +145,7 @@ export function BlockDevelopmentPreviewChrome() {
       <DevelopmentPreviewChrome />
       <DepthStackNavigator />
       <OnCanvasBlockPicker />
+      <HitAreaOverlay />
       {showInspector || showConnectionInspector ? (
         <aside
           className="systemsketch-block-development-inspector"

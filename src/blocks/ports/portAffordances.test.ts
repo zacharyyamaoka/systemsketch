@@ -8,12 +8,13 @@ import {
 } from '../blockModel'
 import {
 	NODE_ROW_HEIGHT_PX,
+	PORT_LABEL_HEIGHT_PX,
 	blockPortSlotCount,
 	blockPortViewHeightForSlots,
 	layoutBlock,
 } from '../layoutBlock'
 import {
-	PORT_ADD_ZONE_INSET_PX,
+	PORT_ADD_ZONE_HALF_WIDTH_PX,
 	blockPortAddAffordance,
 	blockPortDropTarget,
 	growBlockPortViewToFit,
@@ -36,10 +37,18 @@ function block(overrides: Partial<BlockShapeProps> = {}): BlockShapeProps {
 	}
 }
 
-function portY(props: BlockShapeProps, portId: string): number {
+function placedPort(props: BlockShapeProps, portId: string) {
 	const placed = layoutBlock(props).ports.find((entry) => entry.port.id === portId)
 	if (!placed) throw new Error(`no laid-out port ${portId}`)
-	return placed.y
+	return placed
+}
+
+function portY(props: BlockShapeProps, portId: string): number {
+	return placedPort(props, portId).y
+}
+
+function portX(props: BlockShapeProps, portId: string): number {
+	return placedPort(props, portId).x
 }
 
 describe('growBlockPortViewToFit', () => {
@@ -72,29 +81,52 @@ describe('growBlockPortViewToFit', () => {
 })
 
 describe('blockPortAddAffordance', () => {
-	it('offers one bead per lane, each in its own gutter and clear of the edge', () => {
+	it('puts each bead on the very edge its own lane of dots stands on', () => {
 		const props = block()
 		const inputs = blockPortAddAffordance(props, 'inputs')!
 		const outputs = blockPortAddAffordance(props, 'outputs')!
-		// Clear of the 2px selection box tldraw paints on the edge above the
-		// shape's HTML, which would otherwise slice the bead's glyph in half.
-		expect(inputs.x).toBeGreaterThan(2)
-		expect(inputs.x).toBeLessThan(props.w / 2)
-		expect(props.w - outputs.x).toBe(inputs.x)
+		// The promise the bead makes: click here and a dot appears *here*. The
+		// laid-out dots are the only witness that can hold the two together.
+		expect(inputs.x).toBe(portX(props, 'in_1'))
+		expect(outputs.x).toBe(portX(props, 'out_1'))
+		expect(inputs.x).toBe(0)
+		expect(outputs.x).toBe(props.w)
 	})
 
-	it('starts the hover strip clear of the last port hit halo', () => {
+	it('keeps the bead on the edge in Expanded, where the rows are not on a grid', () => {
+		const props = block({ view: 'expanded' })
+		expect(blockPortAddAffordance(props, 'inputs')!.x).toBe(portX(props, 'in_1'))
+		expect(blockPortAddAffordance(props, 'outputs')!.x).toBe(portX(props, 'out_1'))
+	})
+
+	it('bands the hover strip across the edge rather than beside it', () => {
+		const props = block()
+		for (const side of ['inputs', 'outputs'] as const) {
+			const affordance = blockPortAddAffordance(props, side)!
+			expect(affordance.zone.w).toBe(PORT_ADD_ZONE_HALF_WIDTH_PX * 2)
+			expect(affordance.zone.x + affordance.zone.w / 2).toBe(affordance.x)
+		}
+	})
+
+	it('starts the hover strip below the last row, whose label owns its own clicks', () => {
 		const props = block()
 		const inputs = blockPortAddAffordance(props, 'inputs')
-		expect(inputs?.zone.x).toBe(PORT_ADD_ZONE_INSET_PX)
-		expect(inputs?.zone.y).toBeGreaterThan(portY(props, 'in_2'))
-		expect(inputs?.zone.w).toBe(props.w / 2 - PORT_ADD_ZONE_INSET_PX)
+		expect(inputs?.zone.y).toBeGreaterThanOrEqual(
+			portY(props, 'in_2') + PORT_LABEL_HEIGHT_PX / 2,
+		)
 	})
 
 	it('keeps the two lanes on opposite halves so a hover is never ambiguous', () => {
 		const props = block()
 		const inputs = blockPortAddAffordance(props, 'inputs')!
 		const outputs = blockPortAddAffordance(props, 'outputs')!
+		expect(inputs.zone.x + inputs.zone.w).toBeLessThanOrEqual(outputs.zone.x)
+	})
+
+	it('narrows both bands rather than letting them meet on a narrow Block', () => {
+		const narrow = block({ w: 24, views: { ...block().views, port: { w: 24, h: 198 } } })
+		const inputs = blockPortAddAffordance(narrow, 'inputs')!
+		const outputs = blockPortAddAffordance(narrow, 'outputs')!
 		expect(inputs.zone.x + inputs.zone.w).toBeLessThanOrEqual(outputs.zone.x)
 	})
 
@@ -119,6 +151,31 @@ describe('blockPortAddAffordance', () => {
 		const layout = layoutBlock(props)
 		expect(affordance.zone.y).toBe(layout.bodyTop)
 		expect(affordance.y).toBeCloseTo(portY(props, 'in_1'), 5)
+	})
+
+	// A Block with nothing on either side has no dot to copy an anchor from, and
+	// it is the state every freshly drawn Block starts in — so both views are
+	// checked against the row the *first* port actually lands on.
+	it('offers a Block with no ports at all the edge and row its first port would take', () => {
+		const empty = block({ inputs: [], outputs: [] })
+		const first = block({ inputs: [port('in_1')], outputs: [port('out_1')] })
+		const inputs = blockPortAddAffordance(empty, 'inputs')!
+		const outputs = blockPortAddAffordance(empty, 'outputs')!
+		expect(inputs.x).toBe(portX(first, 'in_1'))
+		expect(inputs.y).toBeCloseTo(portY(first, 'in_1'), 5)
+		expect(outputs.x).toBe(portX(first, 'out_1'))
+		expect(outputs.y).toBeCloseTo(portY(first, 'out_1'), 5)
+	})
+
+	it('offers an Expanded Block with no ports the edge and row its first port would take', () => {
+		const empty = block({ view: 'expanded', inputs: [], outputs: [] })
+		const first = block({ view: 'expanded', inputs: [port('in_1')], outputs: [port('out_1')] })
+		const inputs = blockPortAddAffordance(empty, 'inputs')!
+		const outputs = blockPortAddAffordance(empty, 'outputs')!
+		expect(inputs.x).toBe(portX(first, 'in_1'))
+		expect(inputs.y).toBeCloseTo(portY(first, 'in_1'), 5)
+		expect(outputs.x).toBe(portX(first, 'out_1'))
+		expect(outputs.y).toBeCloseTo(portY(first, 'out_1'), 5)
 	})
 
 	it('has nothing to offer in Simple view, which paints no rows', () => {

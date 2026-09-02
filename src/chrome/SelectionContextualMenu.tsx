@@ -13,6 +13,7 @@ import {
   placeSelectionMenu,
   type SelectionMenuSide,
 } from './selectionMenuPlacement'
+import { useInterfaceScale } from '../settings/interfaceScale'
 
 /**
  * Select-tool states in which the pointer is manipulating the selection.
@@ -101,6 +102,14 @@ function PositionedSelectionMenu({ label, className, children }: SelectionContex
     return () => observer.disconnect()
   }, [sizeEpoch])
 
+  // The interface scale changes how many viewport pixels the menu occupies,
+  // which moves where its centre lands — but it is applied as a transform, and
+  // a transform does not fire a ResizeObserver. Bump the same epoch.
+  const interfaceScale = useInterfaceScale()
+  useEffect(() => {
+    sizeEpoch.update((epoch) => epoch + 1)
+  }, [interfaceScale, sizeEpoch])
+
   useQuickReactor(
     'systemsketch selection menu position',
     () => {
@@ -150,7 +159,10 @@ function PositionedSelectionMenu({ label, className, children }: SelectionContex
           : undefined,
       })
 
-      element.style.transform = `translate(${placement.x}px, ${placement.y}px)`
+      // Custom properties rather than `transform`, so the stylesheet keeps
+      // ownership of how the interface scale is applied on top of the anchor.
+      element.style.setProperty('--systemsketch-selection-menu-x', `${placement.x}px`)
+      element.style.setProperty('--systemsketch-selection-menu-y', `${placement.y}px`)
       element.dataset.side = placement.side satisfies SelectionMenuSide
       element.dataset.visible = 'true'
     },

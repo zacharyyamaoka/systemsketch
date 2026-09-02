@@ -12,12 +12,14 @@ import {
   useValue,
 } from 'tldraw'
 import { useEffect, useRef } from 'react'
+import { AppearanceControls } from '../appearance/AppearanceControls'
 import { BLOCK_TOOL_ID, getBlockInspectorContext, selectionHasBlockStyles } from '../blocks'
 import {
   EditorBlockInspector,
   EditorBlockSelectionMiniMenu,
   EditorConnectionInspector,
   getConnectionInspectorContext,
+  HitAreaOverlay,
   OnCanvasBlockPicker,
 } from '../blocks/ui'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
@@ -258,11 +260,22 @@ function SelectionMiniMenu() {
       className="systemsketch-selection-menu"
       label="Selection actions"
     >
+      {/* Appearance rides on both branches. A Block carries no tldraw styles of
+          its own, so it contributes nothing here — but a Block selected
+          *alongside* a rectangle must not put the rectangle's colour out of
+          reach. The control renders nothing when the selection has no styles,
+          so the Block-only pill is unchanged. */}
       {hasBlocks ? (
-        <EditorBlockSelectionMiniMenu editor={editor} onOpenInspector={() => setRight('inspector')} />
+        <>
+          <EditorBlockSelectionMiniMenu editor={editor} onOpenInspector={() => setRight('inspector')} />
+          <AppearanceControls />
+        </>
       ) : (
         <>
           <span className="systemsketch-selection-count">{selectionCount} selected</span>
+          {/* Appearance first, the way FigJam leads with what the thing looks
+              like; Inspect stays on the right as the way out to detail. */}
+          <AppearanceControls />
           <TldrawUiToolbarButton
             type="icon"
             className="systemsketch-selection-action"
@@ -315,6 +328,7 @@ export function SystemSketchSurfaceHost() {
   return (
     <div className="systemsketch-surface-host" data-testid="systemsketch-surface-host">
       <OnCanvasBlockPicker />
+      <HitAreaOverlay />
       <DepthStackNavigator />
       {leftSurface ? (
         <aside

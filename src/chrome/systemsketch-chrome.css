@@ -508,11 +508,21 @@
  */
 .systemsketch-selection-menu {
   --systemsketch-selection-menu-height: 40px;
+  --systemsketch-selection-menu-x: 0px;
+  --systemsketch-selection-menu-y: 0px;
 
   position: absolute;
   z-index: var(--tl-layer-menus, 400);
   top: 0;
   left: 0;
+  /* Placed in real viewport pixels, then scaled about that exact point, so the
+   * interface setting makes the menu bigger without moving it off the
+   * selection. The origin has to be the top-left corner because the placement
+   * policy positions the menu by its top-left and measures the scaled size. */
+  transform:
+    translate(var(--systemsketch-selection-menu-x), var(--systemsketch-selection-menu-y))
+    scale(var(--systemsketch-interface-scale, 1));
+  transform-origin: 0 0;
   opacity: 0;
   transition: opacity 80ms ease-in-out;
 }
@@ -583,11 +593,6 @@
 
 .systemsketch-selection-menu .systemsketch-selection-action:hover {
   background: #393b40;
-}
-
-.systemsketch-selection-menu .systemsketch-selection-action--danger:hover {
-  color: #ffcfca;
-  background: #5a302c;
 }
 
 .systemsketch-popout--right[data-surface='inspector']:has(.block-inspector__header) > .systemsketch-popout__header {

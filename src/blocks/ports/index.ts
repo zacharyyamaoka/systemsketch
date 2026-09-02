@@ -1,5 +1,5 @@
 export {
-	PORT_ADD_ZONE_INSET_PX,
+	PORT_ADD_ZONE_HALF_WIDTH_PX,
 	blockPortAddAffordance,
 	blockPortDropTarget,
 	growBlockPortViewToFit,

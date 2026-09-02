@@ -358,11 +358,12 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
 }
 
 /* The table-borrowed end-of-list gutter. Each lane owns one strip and one
- * bead; the strip is inset past the port dots' 40px hit halo so revealing the
- * bead never takes a cable gesture away from the row above it. The wrapper is
- * transparent to the pointer but still receives :hover from its own children,
- * which is what lets the pointer travel from the strip onto the bead without
- * the bead vanishing under it. */
+ * bead, both straddling that lane's edge in the same column as its port dots.
+ * The dots stay reachable because they paint above the strip (z-index 4 to its
+ * none), so where the two overlap the dot is what the pointer finds. The
+ * wrapper is transparent to the pointer but still receives :hover from its own
+ * children, which is what lets the pointer travel from the strip onto the bead
+ * without the bead vanishing under it. */
 .systemsketch-block-canvas .BlockNode-portAdd {
   position: absolute;
   inset: 0;
@@ -379,6 +380,14 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   cursor: copy;
 }
 
+/* Hollow, in the selection colour, rather than a filled blue pill — and the
+ * edge is the whole reason. tldraw paints the selection box in .tl-overlays,
+ * above this shape's HTML and inside a stacking context no z-index here can
+ * escape, so its 2px line runs down the middle of anything sitting on the edge.
+ * Through a filled bead that line erased the plus's white vertical stroke and
+ * left the glyph reading as a minus. Drawing the glyph in the selection colour
+ * instead hands the line a stroke of its own colour to land on: the plus
+ * survives being crossed, exactly as the hollow port dot beside it does. */
 .systemsketch-block-canvas .BlockNode-portAddBead {
   position: absolute;
   z-index: 6;
@@ -391,11 +400,12 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   border-radius: 50%;
   opacity: 0;
   pointer-events: none;
-  background: var(--tl-color-selected, #4f7df3);
-  color: #fff;
+  background: var(--tl-color-panel, #fff);
+  color: var(--tl-color-selected, #4f7df3);
   box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--tl-color-selected, #4f7df3) 26%, transparent),
-    0 1px 3px rgba(15, 23, 42, 0.25);
+    0 0 0 2px var(--tl-color-selected, #4f7df3),
+    0 0 0 5px color-mix(in srgb, var(--tl-color-selected, #4f7df3) 22%, transparent),
+    0 1px 3px rgba(15, 23, 42, 0.2);
   transform: translate(-50%, -50%);
   transition: opacity 90ms ease-in-out, transform 90ms ease-in-out;
   cursor: pointer;

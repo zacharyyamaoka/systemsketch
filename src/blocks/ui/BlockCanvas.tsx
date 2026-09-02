@@ -480,11 +480,13 @@ function PortLabels({
  * The table-style "add one more" affordance, borrowed wholesale from a
  * spreadsheet's end-of-list gutter: hover the empty space under a lane and the
  * next row offers itself. Two of these exist per Block — inputs own the left
- * half, outputs the right — which is what makes a single gesture unambiguous
+ * edge, outputs the right — which is what makes a single gesture unambiguous
  * about which lane it means.
  *
- * The strip stays clear of the last port's 40px hit halo, so revealing the bead
- * can never cost you a cable drag from the port above it.
+ * Strip and bead both sit on their lane's edge, in the column the dots occupy,
+ * so the bead reads as the next port rather than as a button near one. The
+ * dots keep the gesture: they paint above the strip, so a press on a real port
+ * still starts a cable.
  */
 function PortAddAffordance({
   shape,
@@ -532,7 +534,9 @@ function PortAddAffordance({
         onClick={addPort}
       >
         <svg viewBox="0 0 12 12" aria-hidden="true">
-          <path d="M6 2.4v7.2M2.4 6h7.2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+          {/* 2px matches the selection line that lands on the vertical stroke,
+              so the crossing reads as one continuous stroke, not a seam. */}
+          <path d="M6 2.4v7.2M2.4 6h7.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         </svg>
       </div>
     </div>

@@ -6,7 +6,8 @@
  * of `layoutBlock` — the add bead by laying out the *hypothetical* Block that
  * already has the new port, the drop target by comparing the pointer against
  * the ports the layout actually placed. That is the only way the affordance and
- * the row it promises cannot drift apart when the body grammar changes.
+ * the row and column it promises cannot drift apart when the body grammar or
+ * the edges move.
  */
 import {
 	appendBlockPortToProps,
@@ -24,33 +25,29 @@ import {
 } from '../layoutBlock'
 
 /**
- * A port dot paints a 40px pseudo-element hit halo. The hover strip starts
- * outside that halo horizontally so revealing the bead can never take a
- * connection gesture away from the port above it.
+ * Half-width of the hover strip, which straddles the lane's own edge rather
+ * than sitting inset beside it: the bead it reveals lands on that edge, so you
+ * should be able to ask for the port where the port is going to appear. 20 is
+ * the radius of the hit halo a port dot already paints, which makes the strip
+ * and the dots one continuous column instead of two targets fighting over one.
+ *
+ * Sharing that column costs the connection gesture nothing. A dot and its halo
+ * paint at `z-index: 4` against this strip's none, so wherever the two overlap
+ * the dot is the element under the pointer and a press there still starts a
+ * cable. What the strip needs is vertical separation, and `top` below supplies
+ * it by starting under the last row's label box.
  */
-export const PORT_ADD_ZONE_INSET_PX = 21
+export const PORT_ADD_ZONE_HALF_WIDTH_PX = 20
 
-/** Clear of the last row's label box, which owns click-to-edit. */
+/** Clear of the last row — its label box owns click-to-edit, its dot the cable. */
 const PORT_ADD_LABEL_CLEARANCE_PX = 2
 
-/**
- * The bead sits just inside its edge rather than centred on it.
- *
- * A selected shape's selection box is painted by tldraw in `.tl-overlays`,
- * above the shape's own HTML and inside a stacking context no `z-index` here
- * can escape. A bead centred on the edge — where the port dot itself will land
- * — has that 2px line drawn straight down its middle, which erases the plus's
- * vertical stroke and leaves the glyph reading as a minus. Measured in the real
- * browser; the same line already crosses the port dots. The gutter is also
- * where a table paints its own add affordance, so this reads correctly.
- */
-const PORT_ADD_BEAD_INSET_PX = 12
 const PORT_ADD_MIN_ZONE_PX = 10
 const PORT_ADD_BEAD_MARGIN_PX = 4
 
 export interface BlockPortAddAffordance {
 	side: BlockPortSide
-	/** Bead centre in Block-local coordinates, in its lane's gutter. */
+	/** Bead centre in Block-local coordinates, on the lane's edge with the dots. */
 	x: number
 	y: number
 	/** The strip that reveals the bead on hover. */
@@ -112,20 +109,27 @@ export function blockPortAddAffordance(
 		placed.port.id === appended.port.id
 	))
 	const preferredY = previewPort?.y ?? top + (bottom - top) / 2
+	// The bead's column is read back out of the preview exactly like its row:
+	// whichever edge the layout just put the promised dot on is the edge the
+	// bead sits on, so the bead and the dot it becomes cannot land in different
+	// columns however the edges move. A lane with no rows yet answers from the
+	// same preview — it is laid out whether or not the lane is already occupied.
+	const x = previewPort?.x ?? (side === 'inputs' ? 0 : layout.width)
+	// Never let the two bands meet in the middle of a very narrow Block: one
+	// hover has to mean one lane.
+	const halfWidth = Math.min(PORT_ADD_ZONE_HALF_WIDTH_PX, layout.width / 2)
 
 	return {
 		side,
-		x: side === 'inputs'
-			? PORT_ADD_BEAD_INSET_PX
-			: layout.width - PORT_ADD_BEAD_INSET_PX,
+		x,
 		y: Math.min(
 			bottom - PORT_ADD_BEAD_MARGIN_PX,
 			Math.max(top + PORT_ADD_BEAD_MARGIN_PX, preferredY),
 		),
 		zone: {
-			x: side === 'inputs' ? PORT_ADD_ZONE_INSET_PX : layout.width / 2,
+			x: x - halfWidth,
 			y: top,
-			w: Math.max(0, layout.width / 2 - PORT_ADD_ZONE_INSET_PX),
+			w: halfWidth * 2,
 			h: bottom - top,
 		},
 		grownHeight: grown.h,

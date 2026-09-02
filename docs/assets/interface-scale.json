@@ -1,0 +1,86 @@
+[
+  {
+    "id": "PICKER-ANCHOR-100",
+    "label": "at 100% the cable finishes on the picker's first option",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "PICKER-ANCHOR-140",
+    "label": "and still does at 140%, on the same point of the board",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "PICKER-GROWS",
+    "label": "and it is 1.4x bigger, because it is still chrome",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "MENU-SELECTION-STABLE",
+    "label": "the Block itself does not move with the interface scale",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "MENU-CENTRED-100",
+    "label": "at 100% the menu is centred on the selection",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "MENU-CENTRED-140",
+    "label": "and stays centred on it at 140%",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "MENU-GAP-STABLE",
+    "label": "with the same gap to the selection, measured in board pixels",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "MENU-GROWS",
+    "label": "and it is 1.4x bigger",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "MASK-TRACES-100",
+    "label": "at 100% the depth mask traces the scope Block",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "MASK-TRACES-140",
+    "label": "and still traces it at 140%",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "MASK-DOES-NOT-GROW",
+    "label": "the mask does not scale — it draws the board, not chrome",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "CLEAN",
+    "label": "the journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

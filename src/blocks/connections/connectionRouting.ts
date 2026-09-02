@@ -150,10 +150,7 @@ export function getConnectionPath(
 	}
 }
 
-/**
- * The visible midpoint — where the control point sits, and where the insert
- * handle anchors a Block dropped into the middle of a cable.
- */
+/** The visible midpoint — where the control point sits. */
 export function getConnectionCenterPoint(
 	routing: ConnectionRoutingKind,
 	start: VecLike,

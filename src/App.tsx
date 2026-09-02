@@ -69,6 +69,11 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
+/**
+ * Added to tldraw's own overlays, not replacing them: this one paints a halo
+ * under a revealed control point so it is big enough to see and aim at, while
+ * tldraw keeps painting and hit-testing the handle itself.
+ */
 const SYSTEMSKETCH_OVERLAY_UTILS = [...blockConnectionOverlayUtils]
 const SYSTEMSKETCH_TOOLS = [BlockTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {

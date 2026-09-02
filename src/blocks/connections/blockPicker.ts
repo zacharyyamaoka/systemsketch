@@ -34,15 +34,12 @@ export const BLOCK_PICKER_PRESETS: readonly BlockPickerPreset[] = [
 	{ id: 'group', label: 'Expanded group', icon: 'Boxes', blockType: 'group', view: 'expanded', inputs: 1, outputs: 1 },
 ]
 
-/** Where on the cable the offer is anchored, and what it is answering for. */
-export type BlockPickerLocation = ConnectionTerminal | 'middle'
+/** Which end of the cable the offer is anchored to. */
+export type BlockPickerLocation = ConnectionTerminal
 
 export interface BlockPickerState {
 	connectionId: TLShapeId
-	/**
-	 * A terminal means "this loose end is asking"; `middle` means "this cable is
-	 * being split", which anchors the offer to the visible midpoint instead.
-	 */
+	/** The loose end that is asking, and where the offer anchors. */
 	terminal: BlockPickerLocation
 	/** Page point the new Block's matching port should land on. */
 	anchor: VecLike
@@ -56,6 +53,10 @@ export const blockPickerState = new EditorAtom<BlockPickerState | null>(
 )
 
 export function openBlockPicker(editor: Editor, state: BlockPickerState): void {
+	// An open offer is the thing to answer. Leaving the cable selected underneath
+	// it puts the selection menu on screen at the same time, competing with the
+	// offer for the same click — the donor clears the selection here too.
+	editor.selectNone()
 	blockPickerState.set(editor, state)
 }
 

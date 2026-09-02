@@ -1,0 +1,121 @@
+/*
+ * Development instrument. Every region is drawn in the same red family so the
+ * eye reads them as one class of thing — "places that answer a pointer" — and
+ * the fill is kept translucent so the shapes underneath stay legible while the
+ * regions are up.
+ */
+.systemsketch-hit-areas {
+  position: absolute;
+  z-index: 500;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.systemsketch-hit-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  border: 1.5px solid rgb(220 38 38 / 90%);
+  background: rgb(220 38 38 / 16%);
+}
+
+.systemsketch-hit-area > span {
+  position: absolute;
+  top: -16px;
+  left: 0;
+  padding: 0 3px;
+  border-radius: 3px;
+  background: rgb(220 38 38 / 92%);
+  color: #fff;
+  font: 700 9px/14px ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* The port radii are circles, and drawing them as squares would overstate the
+ * corners by 41% — exactly the misreading this overlay exists to prevent. */
+.systemsketch-hit-area[data-round='true'] {
+  border-radius: 50%;
+}
+
+.systemsketch-hit-area[data-round='true'] > span {
+  display: none;
+}
+
+.systemsketch-hit-area[data-kind='reveal'] {
+  border-color: rgb(220 38 38 / 95%);
+  border-style: dashed;
+  background: rgb(220 38 38 / 10%);
+}
+
+.systemsketch-hit-area[data-kind='port-snap'] {
+  border-color: rgb(234 88 12 / 85%);
+  background: rgb(234 88 12 / 16%);
+}
+
+.systemsketch-hit-area[data-kind='port-reconnect'] {
+  border-color: rgb(190 24 93 / 85%);
+  background: rgb(190 24 93 / 14%);
+}
+
+.systemsketch-hit-area[data-kind='add-zone'] {
+  border-color: rgb(147 51 234 / 85%);
+  background: rgb(147 51 234 / 16%);
+}
+
+.systemsketch-hit-areas__legend {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgb(15 18 22 / 88%);
+  color: #fff;
+  font: 500 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.systemsketch-hit-areas__legend b {
+  margin-right: 4px;
+}
+
+.systemsketch-hit-areas__legend em {
+  margin-left: 6px;
+  color: #9aa3ad;
+  font-style: normal;
+}
+
+.systemsketch-hit-areas__legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid;
+  margin-left: 8px;
+}
+
+.systemsketch-hit-areas__legend i[data-kind='reveal'] {
+  border-color: rgb(220 38 38 / 95%);
+  border-style: dashed;
+  background: rgb(220 38 38 / 30%);
+}
+
+.systemsketch-hit-areas__legend i[data-kind='port-snap'] {
+  border-color: rgb(234 88 12 / 85%);
+  border-radius: 50%;
+  background: rgb(234 88 12 / 30%);
+}
+
+.systemsketch-hit-areas__legend i[data-kind='port-reconnect'] {
+  border-color: rgb(190 24 93 / 85%);
+  border-radius: 50%;
+  background: rgb(190 24 93 / 30%);
+}
+
+.systemsketch-hit-areas__legend i[data-kind='add-zone'] {
+  border-color: rgb(147 51 234 / 85%);
+  background: rgb(147 51 234 / 30%);
+}

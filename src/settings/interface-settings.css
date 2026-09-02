@@ -10,6 +10,29 @@
   zoom: var(--systemsketch-interface-scale);
 }
 
+/*
+ * ...but a surface that pins to a BOARD coordinate must be exempt.
+ *
+ * `zoom` establishes a new coordinate scale for everything inside it, so a
+ * child placed at `translate(400px, 300px)` inside `zoom: 1.4` renders at
+ * (560, 420). That is right for chrome laid out against the window and wrong
+ * for chrome positioned from the camera: those compute real viewport pixels
+ * from `pageToViewport` / `pageToScreen`, and the canvas itself does not scale
+ * with the interface setting. Cancelling the layer's zoom puts them back into
+ * real pixels.
+ *
+ * The two that are still chrome then re-apply the scale to their own painting,
+ * about their own anchor, so they keep growing with the setting — see their
+ * `transform` rules. The depth mask traces the board itself and therefore does
+ * not re-apply it at all.
+ */
+.systemsketch-app .systemsketch-selection-menu,
+.systemsketch-app .OnCanvasBlockPicker,
+.systemsketch-app .systemsketch-hit-areas,
+.systemsketch-app .systemsketch-depth-mask {
+  zoom: var(--systemsketch-interface-scale-inverse);
+}
+
 /* Menus, dialogs, tooltips, and toasts are portaled beside the UI layout. */
 .systemsketch-app .tl-container > * > .tlui-menu,
 .systemsketch-app .tlui-popover__content,

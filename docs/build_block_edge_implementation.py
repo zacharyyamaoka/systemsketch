@@ -47,6 +47,7 @@ def code(text: str) -> str:
 
 ACCEPTANCE = json.loads((ASSETS / "edge-acceptance.json").read_text())
 EDITOR = json.loads((ASSETS / "edge-editor.json").read_text())
+SCALE = json.loads((ASSETS / "interface-scale.json").read_text())
 
 
 # --------------------------------------------------------------------------- #
@@ -163,6 +164,29 @@ systemsketch: {
 }
 """
 
+def source_slice(path: Path, start_marker: str, end_marker: str) -> str:
+    """Quote a real file, so a snippet in the report cannot drift from the tree."""
+    text = path.read_text()
+    begin = text.index(start_marker)
+    return text[begin:text.index(end_marker, begin)].rstrip()
+
+
+SCALE_FIX = "\n".join([
+    source_slice(
+        PROJECT_ROOT / "src/settings/interface-settings.css",
+        "/*\n * ...but a surface that pins to a BOARD coordinate",
+        "/* Menus, dialogs, tooltips",
+    ),
+    "",
+    "/* ...and the two that are still chrome re-apply the scale to their own",
+    " * painting, about their own anchor, so they keep growing with the setting. */",
+    source_slice(
+        PROJECT_ROOT / "src/chrome/systemsketch-chrome.css",
+        ".systemsketch-selection-menu {",
+        "/* Buttons inside re-enable pointer events",
+    ),
+])
+
 FIGMA_RULE = """
 // ConnectionShapeUtil.getHandles — Figma's rule.
 // Selection alone is the wrong trigger: a selected cable spanning the board
@@ -210,7 +234,6 @@ PHASES = [
         "The whole pure elbow package from pyblocks — A* router, pins, path, nudge — 1 800 lines with its own 73 tests, importing neither tldraw nor React.",
         "Three routings; one control point on curved/straight that activates into a bend, one per draggable segment on elbow, with authored routes running between fixed port dongles.",
         "Figma's rule: control points appear only while a selected cable is near the pointer.",
-        "A <code>+</code> at every cable's midpoint splices a Block into it, re-aiming the original cable and carrying its old destination on a second.",
         "Cables paint under Blocks, per parent — what makes an Expanded Block's internal wiring readable.",
         "A connection inspector, so a selected cable finally has a home in the dock.",
     ]),
@@ -245,7 +268,6 @@ INVENTORY = [
     ("<b>Occupied input replaced, not doubled</b>", "missing", "yes"),
     ("<b>Drop on nothing → on-canvas picker</b>", "missing", "yes"),
     ("<b>Tap a port → same picker</b>", "missing", "yes"),
-    ("<b>Centre <code>+</code> → splice a Block into a cable</b>", "missing", "yes"),
     ("<b>Cables painted below Blocks, per parent</b>", "missing", "yes"),
     ("<b>Boundary inner faces</b>", "missing", "yes"),
     ("<b>Tunable hit profile</b>", "missing", "yes"),
@@ -271,14 +293,12 @@ NOT_CLAIMED = [
 ]
 
 DECISIONS = [
-    ("The midpoint of a cable belongs to the <code>+</code>",
-     "Clicking a cable at its exact midpoint opens the insert offer rather than selecting the cable — the same trade the image-pipeline kit makes. The ring is 16px painted, 24px pressable, so a click a few pixels either side selects normally. Worth knowing because it is the one place the two affordances collide."),
     ("A refused drop offers nothing",
      "The kit opens its picker for any drop with no binding, including one onto an illegal port. Now that a drag lights its legal targets, a refusal has already been shown — and offering to create a Block on top of the Block you were aiming at is the wrong alternative."),
     ("Switching routing forgets the previous route",
      "A <code>curve</code> waypoint means nothing to an elbow and a pinned rail means nothing to a bezier. Carried across, they snap the cable back into a shape you abandoned. Routing is a <code>StyleProp</code>, so a batch write only sends <code>routing</code> — the reset lives on the shape, in <code>onBeforeUpdate</code>."),
-    ("A picked or spliced Block opens its title editor",
-     "Same rule your Block tool already follows after a draw, applied to the two new ways a Block can arrive."),
+    ("A picked Block opens its title editor",
+     "Same rule your Block tool already follows after a draw, applied to the new way a Block can arrive."),
     ("One dev-only test seam",
      "tldraw v5 paints handles to a <code>&lt;canvas&gt;</code>, so “is a control point being offered” has no DOM to read. <code>src/developmentSeam.ts</code> exposes the overlay ids under <code>import.meta.env.DEV</code> only — verified absent from the production bundle."),
 ]
@@ -298,6 +318,8 @@ def rows(results):
 
 def main() -> None:
     scene = evidence("edge-accept-scene.png")
+    scale100 = data_uri(ASSETS / "interface-scale-100.png")
+    scale140 = data_uri(ASSETS / "interface-scale-140.png")
     b1a = evidence("edge-accept-boundary-1a-drop.png")
     b1c = evidence("edge-accept-boundary-1c-drop.png")
     afford = evidence("edge-accept-affordance.png")
@@ -307,8 +329,6 @@ def main() -> None:
     bent = evidence("edge-editor-bent.png")
     elbow = evidence("edge-editor-elbow.png")
     controlpoints = evidence("edge-editor-controlpoints.png")
-    insert_picker = evidence("edge-editor-insert-picker.png", WIDE_CROP)
-    inserted = evidence("edge-editor-inserted.png")
     inspector = data_uri(ASSETS / "edge-editor-inspector.png")
 
     phases = "\n".join(
@@ -334,6 +354,7 @@ def main() -> None:
 
     accept_pass = sum(1 for r in ACCEPTANCE if r["ok"])
     editor_pass = sum(1 for r in EDITOR if r["ok"])
+    scale_pass = sum(1 for r in SCALE if r["ok"])
 
     report = f"""<!doctype html>
 <html lang="en">
@@ -411,12 +432,12 @@ def main() -> None:
       fail. The armed cable that stranded itself on a tool change is deleted rather than patched —
       and the click it was occupying is what the on-canvas picker needed. On top of that the whole
       donor came across: eligible/hinting ports, the cycle veto, occupied-input replacement, the hit
-      profile you A/B'd in August, elbow routing with draggable segments, a <code>+</code> that
-      splices a Block into a cable, cables painted under Blocks, and an inspector for a selected
-      edge.</p>
+      profile you A/B'd in August, elbow routing with draggable segments, cables painted under
+      Blocks, and an inspector for a selected edge.</p>
     <div class="badges">
       <span class="badge ok">{accept_pass}/{len(ACCEPTANCE)} boundary &amp; picker checks</span>
       <span class="badge ok">{editor_pass}/{len(EDITOR)} edge-editor checks</span>
+      <span class="badge ok">{scale_pass}/{len(SCALE)} interface-scale checks</span>
       <span class="badge ok">289 unit · 24 Python</span>
       <span class="badge ok">64 pre-existing browser checks still green</span>
       <span class="badge">tldraw 5.3.2</span>
@@ -427,6 +448,7 @@ def main() -> None:
       <div class="stat"><b>0</b><span>ways left to strand a cable</span></div>
       <div class="stat"><b>17</b><span>donor capabilities landed</span></div>
       <div class="stat"><b>1&nbsp;800</b><span>lines of pure elbow router, with its own 73 tests</span></div>
+      <div class="stat"><b>3</b><span>surfaces that mis-anchored at 140%, now pinned</span></div>
     </div>
   </header>
 
@@ -528,18 +550,6 @@ def main() -> None:
     </div>
     <pre style="margin-top:18px">{code(FIGMA_RULE)}</pre>
 
-    <h3 style="margin-top:28px">Splice a Block into a cable</h3>
-    <div class="two">
-      <figure><img src="{insert_picker}" alt="The insert offer at a cable midpoint">
-        <figcaption><strong>The <code>+</code></strong>At every fully-bound cable's midpoint, quiet
-          until you approach it. Pressable without selecting the cable first — inserting into a path
-          is a thing you do while looking at the path.</figcaption></figure>
-      <figure><img src="{inserted}" alt="A Block spliced into a cable">
-        <figcaption><strong>Spliced</strong>The original cable is re-aimed at the new Block and a
-          second carries its old destination, so the two ends you already wired stay
-          wired.</figcaption></figure>
-    </div>
-
     <h3 style="margin-top:28px">And a home in the dock</h3>
     <figure><img src="{inspector}" alt="The connection inspector">
       <figcaption><strong>Connection inspector</strong>Routing lived only in a right-click gesture,
@@ -548,9 +558,46 @@ def main() -> None:
         either entry point.</figcaption></figure>
   </section>
 
+  <!-- ----------------------------------------------------------------- 5b -->
+  <section>
+    <h2>6 · Found by your screenshot: canvas-anchored chrome at 140%</h2>
+    <p class="sub">You reported the picker “floating off in space”, and guessed it was related to the
+      contextual menu also being wrong. It was — one cause, three surfaces, and it only appears at a
+      non-default <b>interface scale</b>. Measured in the product profile before the fix: at 100% the
+      picker landed at (908, 466) with the cable end at (900, 458); at 140% the same gesture put it
+      at (1271, 652). 908 × 1.4 = 1271.2, 466 × 1.4 = 652.4 — exact.</p>
+    <div class="note" style="margin-bottom:18px"><b>Why.</b> The interface scale enlarges chrome with
+      CSS <code>zoom</code> on the surface layer. <code>zoom</code> establishes a new coordinate scale
+      for everything inside it, so a child placed at <code>translate(400px, 300px)</code> inside
+      <code>zoom: 1.4</code> renders at (560, 420). That is correct for chrome laid out against the
+      window and wrong for chrome positioned from the <em>camera</em> — which computes real viewport
+      pixels, for a board that deliberately does <em>not</em> scale with the setting. Three surfaces
+      were in the second category and inside the zoomed layer: the picker (mine), the selection
+      contextual menu and the depth mask (both pre-existing).</p>
+    <pre>{code(SCALE_FIX)}</pre>
+    <div class="two" style="margin-top:18px">
+      <figure><img src="{scale100}" alt="Canvas-anchored chrome at 100%">
+        <figcaption><strong>100%</strong>The offer at the cable end.</figcaption></figure>
+      <figure><img src="{scale140}" alt="Canvas-anchored chrome at 140%">
+        <figcaption><strong>140%</strong>Same anchor to the pixel, and 1.4× bigger — because it is
+          still chrome. The board underneath is unchanged.</figcaption></figure>
+    </div>
+    <table style="margin-top:20px">
+      <thead><tr><th>Check</th><th></th><th></th></tr></thead>
+      <tbody>{rows(SCALE)}</tbody>
+    </table>
+    <div class="note good" style="margin-top:16px"><b>Mutation-tested.</b> Removing the three-line
+      exemption turns <b>7 of these 12 red</b>, so the gate can actually fail. The depth mask is the
+      strict case: it traces the board, so it must land on the Block <em>and</em> must not
+      grow — it is drawing the canvas, not chrome.</div>
+    <div class="note" style="margin-top:14px"><b>Also fixed while here:</b> the offer now clears the
+      selection when it opens, so the selection menu does not sit on screen competing with it for the
+      same click. That is the donor's behaviour too.</div>
+  </section>
+
   <!-- ------------------------------------------------------------------ 6 -->
   <section>
-    <h2>6 · What the trim cost, and what came back</h2>
+    <h2>7 · What the trim cost, and what came back</h2>
     <p class="sub">The old cable was a hand-trimmed re-derivation of the image-pipeline starter kit —
       which is what <code>pyblocks/src/pipeline/</code> already is, plus weeks of your fixes. Seventeen
       capabilities were missing. Seventeen landed.</p>
@@ -562,13 +609,13 @@ def main() -> None:
 
   <!-- ------------------------------------------------------------------ 7 -->
   <section>
-    <h2>7 · The phases, as planned</h2>
+    <h2>8 · The phases, as planned</h2>
     {phases}
   </section>
 
   <!-- ------------------------------------------------------------------ 8 -->
   <section>
-    <h2>8 · Calls I made</h2>
+    <h2>9 · Calls I made</h2>
     <table><tbody>{decisions}</tbody></table>
     <h3 style="margin-top:28px">Deliberately not claimed</h3>
     <table><tbody>{not_claimed}</tbody></table>
@@ -576,9 +623,9 @@ def main() -> None:
 
   <!-- ------------------------------------------------------------------ 9 -->
   <section>
-    <h2>9 · Proof</h2>
-    <p class="sub">Two browser journeys, both driven through the real product build with real pointer
-      events, both reading the painted document. Plus every pre-existing journey re-run for
+    <h2>10 · Proof</h2>
+    <p class="sub">Three browser journeys, all driven through the real product build with real
+      pointer events, all reading the painted document. Plus every pre-existing journey re-run for
       regressions: context menu 12/12, click-to-edit 9/9, fields 9/9, batch 11/11, ports 14/14,
       selection menu 9/9.</p>
     <div class="two">
@@ -600,6 +647,7 @@ def main() -> None:
   <footer>
     Acceptance <code>tests/block_edges_acceptance.mjs</code> ·
     editor <code>tests/block_edge_editor_smoke.mjs</code> ·
+    interface scale <code>tests/interface_scale_anchoring_smoke.mjs</code> ·
     donor <code>~/pyblocks/src/pipeline/</code> and <code>~/pyblocks/src/blocks/elbow/</code> ·
     kits re-scaffolded with <code>npx create-tldraw -t workflow</code> / <code>-t image-pipeline</code> ·
     tldraw 5.3.2 · Stable unchanged.

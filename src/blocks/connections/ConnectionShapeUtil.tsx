@@ -706,21 +706,6 @@ export function getConnectionShapePath(
 	})
 }
 
-export function getConnectionPageCenter(
-	editor: Editor,
-	connection: ConnectionShape,
-): Vec {
-	const { start, end } = getConnectionTerminals(editor, connection)
-	const local = getConnectionCenterPoint(connection.props.routing, start, end, {
-		curve: connection.props.curve,
-		route: connection.props.routing === 'elbow'
-			? getConnectionElbowRoute(editor, connection)
-			: undefined,
-	})
-	return editor.getShapePageTransform(connection).applyToPoint(local)
-}
-
-
 /**
  * Offer a Block for a cable terminal that landed on nothing, and wire it up.
  *

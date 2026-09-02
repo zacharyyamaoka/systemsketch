@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * Real-browser proof for the edge editor: three routings, control points that
- * only appear under Figma's rule, a `+` that splices a Block into a cable, and
- * cables painted under Blocks.
+ * only appear under Figma's rule, cables painted under Blocks, and the
+ * connection inspector.
  *
  * Driven through the real product build with real pointer events; every
  * assertion reads the painted document.
@@ -56,9 +56,8 @@ async function box(page, selector) {
 /**
  * A real point ON the cable, at a fraction of its length, in client pixels.
  *
- * The path element's bounding-box centre is not on the curve, and the midpoint
- * itself belongs to the insert `+`. Sampling the path is the only way to press
- * the cable where the user would.
+ * The path element's bounding-box centre is not on the curve, so sampling the
+ * path is the only way to press the cable where the user would.
  */
 async function pointOnCable(page, t) {
   const value = await evaluate(page, `(() => {
@@ -228,8 +227,6 @@ async function main() {
     check('ROUTE-CURVED', 'the default route is a cubic', /^M .* C /.test(curvedPath ?? ''), true)
 
     // ---------------------------------------------------- Figma's rule ---
-    // Press the cable a quarter along: its exact midpoint belongs to the insert
-    // `+`, which is a different affordance with a different job.
     const onCable = await pointOnCable(page, 0.25)
     const mid = await pointOnCable(page, 0.5)
     await clickAt(page, onCable.cx, onCable.cy)
@@ -279,31 +276,12 @@ async function main() {
     await deselect(page)
     await shot(page, 'edge-editor-elbow.png')
 
-    // --------------------------------------------------- splice a Block ---
-    await setRouting(page, await pointOnCable(page, 0.25), 'curved')
-    await deselect(page)
-    const cableForInsert = await pointOnCable(page, 0.5)
-    // The `+` rides the cable's midpoint; hover it, then press.
-    await mouse(page, 'mouseMoved', cableForInsert.cx, cableForInsert.cy)
-    await delay(320)
-    await shot(page, 'edge-editor-insert-handle.png')
-    await mouse(page, 'mousePressed', cableForInsert.cx, cableForInsert.cy, { buttons: 1 })
-    await mouse(page, 'mouseReleased', cableForInsert.cx, cableForInsert.cy)
-    await delay(420)
-    check('INSERT-1', 'the midpoint handle offers a Block',
-      await evaluate(page, `Boolean(document.querySelector('[data-testid="block-picker"]'))`), true)
-    await shot(page, 'edge-editor-insert-picker.png')
-    const item = await box(page, '[data-testid="block-picker-transform"]')
-    await clickAt(page, item.cx, item.cy)
-    await delay(600)
-    check('INSERT-2', 'picking splices a third Block in', (await blockIds(page)).length, 3)
-    check('INSERT-3', 'and the one cable becomes two', await cables(page), 2)
-    await deselect(page)
-    await shot(page, 'edge-editor-inserted.png')
-
     // ---------------------------------------------------- the inspector ---
     // A selected cable is the dock's other subject; before this it had no home
-    // in the panel at all and routing lived only in a right-click gesture.
+    // in the panel at all and routing lived only in a right-click gesture. Back
+    // to curved first, because the inspector is read for which routing it shows.
+    await setRouting(page, await pointOnCable(page, 0.25), 'curved')
+    await deselect(page)
     await clickAt(page, (await pointOnCable(page, 0.3)).cx, (await pointOnCable(page, 0.3)).cy)
     await delay(400)
     check('INSPECT-1', 'selecting a cable opens the connection inspector',
