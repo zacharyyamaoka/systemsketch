@@ -1,0 +1,660 @@
+{
+  "systemSketch": {
+    "formatVersion": 1,
+    "application": "SystemSketch",
+    "shapes": {
+      "arrow": 4,
+      "geo": 6,
+      "block": 1
+    },
+    "bindings": {}
+  },
+  "tldrawFileFormatVersion": 1,
+  "schema": {
+    "schemaVersion": 2,
+    "sequences": {
+      "com.tldraw.store": 5,
+      "com.tldraw.asset": 1,
+      "com.tldraw.camera": 1,
+      "com.tldraw.document": 2,
+      "com.tldraw.instance": 26,
+      "com.tldraw.instance_page_state": 5,
+      "com.tldraw.page": 1,
+      "com.tldraw.instance_presence": 6,
+      "com.tldraw.pointer": 1,
+      "com.tldraw.shape": 4,
+      "com.tldraw.user": 1,
+      "com.tldraw.asset.image": 6,
+      "com.tldraw.asset.video": 5,
+      "com.tldraw.asset.bookmark": 2,
+      "com.tldraw.shape.group": 0,
+      "com.tldraw.shape.text": 4,
+      "com.tldraw.shape.bookmark": 2,
+      "com.tldraw.shape.draw": 5,
+      "com.tldraw.shape.note": 13,
+      "com.tldraw.shape.line": 5,
+      "com.tldraw.shape.frame": 1,
+      "com.tldraw.shape.arrow": 8,
+      "com.tldraw.shape.highlight": 4,
+      "com.tldraw.shape.embed": 4,
+      "com.tldraw.shape.image": 5,
+      "com.tldraw.shape.video": 4,
+      "com.tldraw.shape.geo": 12,
+      "com.tldraw.shape.block": 2,
+      "com.tldraw.shape.connection": 1,
+      "com.tldraw.binding.arrow": 1,
+      "com.tldraw.binding.connection": 1
+    }
+  },
+  "records": [
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 540,
+          "y": 605
+        },
+        "end": {
+          "x": 700,
+          "y": 605
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "ZzLfv",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "lastActivityTimestamp": 0,
+      "meta": {},
+      "id": "pointer:pointer",
+      "typeName": "pointer"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-3-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 1360,
+          "y": 200
+        },
+        "end": {
+          "x": 1320,
+          "y": 300
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a0ipE",
+      "typeName": "shape"
+    },
+    {
+      "x": 60,
+      "y": 120,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1",
+      "type": "geo",
+      "props": {
+        "w": 480,
+        "h": 150,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 2,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 · Click the rectangle → the colour disc on the pill → the rainbow Custom cell at the end of the palette → type A3F2C1 and press Enter. Then reload the page."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a4ZLv",
+      "typeName": "shape"
+    },
+    {
+      "x": 60,
+      "y": 760,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-pass",
+      "type": "geo",
+      "props": {
+        "w": 640,
+        "h": 170,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 42,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "PASS WHEN · the rectangle is mint on the canvas and on the pill's colour disc, and still mint after the reload · the arrow's Line style popover shows the weights beside the dashes under one hairline, and the arrow is thick and dashed · the mixed selection's pill reads “2 selected” with “1 Block” before S P E"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a8cpb",
+      "typeName": "shape"
+    },
+    {
+      "x": 60,
+      "y": 540,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2",
+      "type": "geo",
+      "props": {
+        "w": 480,
+        "h": 130,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "2 · Click the arrow → the three-bar Line style trigger → pick Thick on the left, then Dashed on the right"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a5lEv",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    {
+      "x": 1150,
+      "y": 90,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-3",
+      "type": "geo",
+      "props": {
+        "w": 420,
+        "h": 110,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "3 · Drag a selection box around this Block and the rectangle together"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a6n96",
+      "typeName": "shape"
+    },
+    {
+      "x": 700,
+      "y": 720,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-note-1",
+      "type": "geo",
+      "props": {
+        "w": 480,
+        "h": 120,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 32,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "blue",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The hex lives in the file as custom-a3f2c1 — on the shape itself, not in a side registry — which is why the reload in step 1 is part of the test."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a7mUN",
+      "typeName": "shape"
+    },
+    {
+      "editingShapeId": null,
+      "croppingShapeId": null,
+      "selectedShapeIds": [],
+      "hoveredShapeId": null,
+      "erasingShapeIds": [],
+      "hintingShapeIds": [],
+      "focusedGroupId": null,
+      "meta": {},
+      "id": "instance_page_state:page:page",
+      "pageId": "page:page",
+      "typeName": "instance_page_state"
+    },
+    {
+      "x": 700,
+      "y": 560,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 340,
+          "y": 90
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a2yIU",
+      "typeName": "shape"
+    },
+    {
+      "x": 1150,
+      "y": 300,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:subject",
+      "type": "block",
+      "props": {
+        "w": 340,
+        "h": 198,
+        "title": "decode()",
+        "description": "Select me together with the rectangle",
+        "blockType": "Function",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "image",
+            "type": "Image",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "latent",
+            "type": "Latent",
+            "visible": true
+          }
+        ]
+      },
+      "parentId": "page:page",
+      "index": "a3XzD",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#EC5E41",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:OIMaZsVvRHXKgCFe-7Hnb",
+      "typeName": "user"
+    },
+    {
+      "meta": {},
+      "id": "page:page",
+      "name": "Page 1",
+      "index": "a1",
+      "typeName": "page"
+    },
+    {
+      "gridSize": 10,
+      "name": "",
+      "meta": {},
+      "id": "document:document",
+      "typeName": "document"
+    },
+    {
+      "followingUserId": null,
+      "opacityForNextShape": 1,
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
+      "brush": null,
+      "scribbles": [],
+      "cursor": {
+        "type": "default",
+        "rotation": 0
+      },
+      "isFocusMode": false,
+      "exportBackground": true,
+      "isDebugMode": false,
+      "isToolLocked": false,
+      "screenBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 1600,
+        "h": 913
+      },
+      "insets": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "zoomBrush": null,
+      "isGridMode": false,
+      "isPenMode": false,
+      "chatMessage": "",
+      "isChatting": false,
+      "highlightedUserIds": [],
+      "isFocused": true,
+      "devicePixelRatio": 1,
+      "isCoarsePointer": false,
+      "isHoveringCanvas": null,
+      "openMenus": [],
+      "isChangingStyle": false,
+      "isReadonly": false,
+      "meta": {},
+      "duplicateProps": null,
+      "cameraState": "idle",
+      "id": "instance:instance",
+      "currentPageId": "page:page",
+      "typeName": "instance"
+    },
+    {
+      "name": "",
+      "color": "#E34BA9",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:GlTn20d9pQ4bTvITVAUjy",
+      "typeName": "user"
+    },
+    {
+      "x": 700,
+      "y": 300,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:rect",
+      "type": "geo",
+      "props": {
+        "w": 340,
+        "h": 160,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "black",
+        "labelColor": "black",
+        "fill": "none",
+        "size": "m",
+        "font": "draw",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "colour me"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a15If",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 540,
+          "y": 195
+        },
+        "end": {
+          "x": 700,
+          "y": 380
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "ZyNzzV",
+      "typeName": "shape"
+    }
+  ]
+}

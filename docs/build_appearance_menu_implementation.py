@@ -74,7 +74,7 @@ def rgb_to_hex(css: str) -> str:
 def token(name: str) -> str:
     """One `export const NAME = ...` out of figjamTokens.ts, as source text."""
     source = (REPO / "src/appearance/figjamTokens.ts").read_text(encoding="utf-8")
-    match = re.search(rf"^export const {name} = (.+?)$", source, re.M)
+    match = re.search(rf"^export const {name}(?::[^=]+)? = (.+?)$", source, re.M)
     if not match:
         raise SystemExit(f"figjamTokens.ts no longer defines {name}")
     return match.group(1).strip().rstrip(",")
@@ -164,7 +164,7 @@ PICKER_FIELD = find(PICKER_TREE, lambda n: n["tag"] == "input" and n.get("type")
 PICKER_TRACK = find(PICKER_TREE, lambda n: n["w"] == 152 and n["h"] == 16)[0]
 PICKER_THUMB = find(PICKER_TREE, lambda n: n["w"] == 16 and n["h"] == 16 and "4px solid" in n["border"])[0]
 FONT_SIZES = figjam_font_sizes()
-LADDER = json.loads(re.sub(r"(\w+):", r'"\1":', token("FONT_SIZE_LADDER").split("=")[-1].strip()))
+LADDER = json.loads(re.sub(r"(\w+):", r'"\1":', token("FONT_SIZE_LADDER")))
 
 # Each row: what was read out of FigJam, and the token the product carries.
 # The build refuses to publish if any pair disagrees.

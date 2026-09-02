@@ -149,4 +149,4 @@ if __name__ == "__main__":
         print("figjamIcons.ts is current")
     else:
         open(MODULE, "w").write(text)
-        print(f"wrote {MODULE}: {text.count('viewBox: ')} icons")
+        print(f"wrote {MODULE}: {text.count(chr(10) + '  ' + chr(39))} icons")
