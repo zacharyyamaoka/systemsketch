@@ -9,3 +9,8 @@ docs/screenshots/
 # Report builders crop their source captures at build time and write the result
 # back beside them; the originals are the evidence, the crops are output.
 docs/assets/crop-*.png
+
+# The FigJam capture harness writes its raw readings and shots here; the
+# distilled readings the product is checked against live in docs/assets/.
+tools/figjam/appearance/
+tools/figjam/shots/

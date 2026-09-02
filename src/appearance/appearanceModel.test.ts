@@ -74,15 +74,60 @@ describe('appearance controls', () => {
   })
 
   it('gives a shape its shape, paint and typography, in FigJam order', () => {
+    // Captured from FigJam's shape pill: `Shape | Change color, Line style |
+    // Typeface, Font size | ... | Text alignment`. Font size follows Typeface.
     expect(ids(buildAppearanceControls(SHAPE_WITH_TEXT))).toEqual([
-      'geo', 'color', 'dash', 'size', 'font', 'align', 'verticalAlign',
+      'geo', 'color', 'dash', 'font', 'size', 'align', 'verticalAlign',
     ])
   })
 
   it('gives a connector its routing and endpoints instead', () => {
+    // FigJam's connector pill has one Line style holding both weight and
+    // dash, so neither `dash` nor `size` appears on its own.
     expect(ids(buildAppearanceControls(CONNECTOR))).toEqual([
-      'color', 'dash', 'size', 'arrowheadStart', 'arrowKind', 'arrowheadEnd',
+      'color', 'lineStyle', 'arrowheadStart', 'arrowKind', 'arrowheadEnd',
     ])
+  })
+
+  it('merges a connector\'s weight and dash into one Line style, beside each other', () => {
+    const lineStyle = buildAppearanceControls(CONNECTOR).find((c) => c.id === 'lineStyle')!
+    expect(lineStyle.style).toBe(DefaultDashStyle)
+    expect(lineStyle.trigger).toBe('icon')
+    expect(lineStyle.modePlacement).toBe('beside')
+    expect(lineStyle.modeControl?.style).toBe(DefaultSizeStyle)
+    // FigJam's two weights sit on the ends; tldraw's middle two keep their names.
+    expect(lineStyle.modeControl?.options.map((option) => option.label))
+      .toEqual(['Thin', 'Medium', 'Large', 'Thick'])
+    expect(triggerLabel(lineStyle)).toBe('Line style, draw')
+  })
+
+  it('shows a shape\'s Line style as labelled chips behind the same fixed icon', () => {
+    const dash = buildAppearanceControls(SHAPE_WITH_TEXT).find((c) => c.id === 'dash')!
+    expect(dash.label).toBe('Line style')
+    expect(dash.layout).toBe('chips')
+    expect(dash.trigger).toBe('icon')
+    expect(dash.modeControl).toBeUndefined()
+  })
+
+  it('names a shape\'s size the way FigJam does: a Font size combobox after Typeface', () => {
+    const controls = buildAppearanceControls(SHAPE_WITH_TEXT)
+    const size = controls.find((c) => c.id === 'size')!
+    expect(size.label).toBe('Font size')
+    expect(size.trigger).toBe('text')
+    expect(size.layout).toBe('list')
+    expect(ids(controls).indexOf('font')).toBe(ids(controls).indexOf('size') - 1)
+    expect(buildAppearanceControls(SHAPE_WITH_TEXT).find((c) => c.id === 'font')!.trigger).toBe('icon')
+  })
+
+  it('keeps Font size for text selected beside a cable, which has no dash to merge into', () => {
+    const textAndCable = styleMap([
+      [DefaultColorStyle, shared('black')],
+      [DefaultSizeStyle, shared('m')],
+      [DefaultFontStyle, shared('sans')],
+      [ConnectionRoutingStyle, shared('elbow')],
+    ])
+    expect(ids(buildAppearanceControls(textAndCable)))
+      .toEqual(['color', 'size', 'font', 'connectionRouting'])
   })
 
   it('orders the connector controls the way the arrow itself reads', () => {
@@ -111,15 +156,29 @@ describe('appearance controls', () => {
     // A bare connector has no fill and no geo, so neither may appear.
     const controls = buildAppearanceControls(CONNECTOR)
     expect(controls.some((control) => control.id === 'geo')).toBe(false)
-    expect(controls.some((control) => control.modeControl)).toBe(false)
+    expect(controls.find((control) => control.id === 'color')?.modeControl).toBeUndefined()
   })
 
   it('stacks fill above the palette the way FigJam does, rather than beside it', () => {
     const color = buildAppearanceControls(SHAPE_WITH_TEXT).find((c) => c.id === 'color')!
     expect(color.modeControl?.style).toBe(DefaultFillStyle)
+    expect(color.modePlacement).toBe('above')
     expect(color.modeControl?.options.map((option) => option.label)).toEqual([
       'No fill', 'Transparent', 'Solid', 'Fill', 'Pattern', 'Lined',
     ])
+  })
+
+  it('gives the palette its 22nd cell, and reads a custom colour as Custom rather than mixed', () => {
+    const color = buildAppearanceControls(SHAPE_WITH_TEXT).find((c) => c.id === 'color')!
+    expect(color.custom).toBe(true)
+    expect(color.options).toHaveLength(21)
+
+    const custom = buildAppearanceControls(styleMap([[DefaultColorStyle, shared('custom-a3f2c1')]]))[0]
+    expect(selectedOption(custom)).toEqual({ value: 'custom-a3f2c1', label: 'Custom' })
+    expect(triggerLabel(custom)).toBe('Color, custom')
+    // A name that is not a custom colour is still nothing.
+    const stranger = buildAppearanceControls(styleMap([[DefaultColorStyle, shared('chartreuse')]]))[0]
+    expect(selectedOption(stranger)).toBeUndefined()
   })
 
   it('offers every value the style accepts, so the menu can show any document state', () => {
@@ -152,7 +211,7 @@ describe('appearance controls', () => {
   it('labels the trigger with its value, and says mixed when there is none', () => {
     const controls = buildAppearanceControls(SHAPE_WITH_TEXT)
     expect(triggerLabel(controls.find((c) => c.id === 'geo')!)).toBe('Shape, rectangle')
-    expect(triggerLabel(controls.find((c) => c.id === 'size')!)).toBe('Size, medium')
+    expect(triggerLabel(controls.find((c) => c.id === 'size')!)).toBe('Font size, medium')
 
     const mixedColor = buildAppearanceControls(styleMap([[DefaultColorStyle, mixed]]))[0]
     expect(triggerLabel(mixedColor)).toBe('Color, mixed')

@@ -4,6 +4,7 @@ import { BLOCK_VIEWS, type BlockView } from '../blockModel'
 import { getOnlySelectedBlock, setBlockView } from '../commands/blockCommands'
 import {
   getBlockSelectionStyles,
+  getSelectedShapesFlat,
   setBlockViewForSelection,
 } from '../commands/blockStyleCommands'
 import { stepIntoDepthScope } from '../../depth/depthNavigation'
@@ -18,8 +19,14 @@ export interface BlockSelectionMiniMenuProps {
   onSetView(view: BlockView): void
   onOpenInspector(): void
   onStepInto?: () => void
-  /** Present only for a batch selection, e.g. `9 Blocks`. */
+  /** Present only for a batch selection, e.g. `9 Blocks` — or `5 selected` when other shapes are in it. */
   selectionLabel?: string
+  /**
+   * Present when the selection is not only Blocks: names how many of it the
+   * S / P / E group actually governs, e.g. `2 Blocks`, so the group reads as
+   * the Blocks' setting rather than as the selection's.
+   */
+  scopeLabel?: string
 }
 
 /** Content only; the shared shell supplies TldrawUiContextualToolbar positioning. */
@@ -29,6 +36,7 @@ export function BlockSelectionMiniMenu({
   onOpenInspector,
   onStepInto,
   selectionLabel,
+  scopeLabel,
 }: BlockSelectionMiniMenuProps) {
   return (
     <div
@@ -41,6 +49,9 @@ export function BlockSelectionMiniMenu({
         <span className="block-mini-menu__count">{selectionLabel}</span>
       ) : null}
       <div className="block-mini-menu__views" role="group" aria-label="Block view">
+        {scopeLabel ? (
+          <span className="block-mini-menu__scope">{scopeLabel}</span>
+        ) : null}
         {BLOCK_VIEWS.map((candidate) => (
           <button
             key={candidate}
@@ -90,6 +101,11 @@ export function EditorBlockSelectionMiniMenu({
     () => getBlockSelectionStyles(editor),
     [editor],
   )
+  const selectionCount = useValue(
+    'SystemSketch Block selection size',
+    () => getSelectedShapesFlat(editor).length,
+    [editor],
+  )
 
   if (block) {
     return (
@@ -106,10 +122,16 @@ export function EditorBlockSelectionMiniMenu({
 
   if (!styles.view) return null
 
+  // Two Blocks and three shapes is "5 selected", with the S / P / E group
+  // marked as the two Blocks' — not "2 Blocks", which read as though the
+  // Blocks had overridden the selection.
+  const blocks = `${styles.blockCount} ${styles.blockCount === 1 ? 'Block' : 'Blocks'}`
+  const mixed = selectionCount > styles.blockCount
   return (
     <BlockSelectionMiniMenu
       view={styles.view}
-      selectionLabel={`${styles.blockCount} ${styles.blockCount === 1 ? 'Block' : 'Blocks'}`}
+      selectionLabel={mixed ? `${selectionCount} selected` : blocks}
+      scopeLabel={mixed ? blocks : undefined}
       onSetView={(view) => void setBlockViewForSelection(editor, view)}
       onOpenInspector={onOpenInspector}
     />

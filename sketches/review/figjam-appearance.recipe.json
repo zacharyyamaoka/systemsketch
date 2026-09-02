@@ -1,0 +1,127 @@
+{
+  "feature": "FigJam appearance fidelity",
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "shapes": [
+    {
+      "id": "rect",
+      "type": "geo",
+      "x": 700,
+      "y": 300,
+      "props": {
+        "w": 340,
+        "h": 160,
+        "geo": "rectangle"
+      },
+      "text": "colour me"
+    },
+    {
+      "id": "arrow",
+      "type": "arrow",
+      "x": 700,
+      "y": 560,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 340,
+          "y": 90
+        }
+      }
+    },
+    {
+      "id": "subject",
+      "type": "block",
+      "x": 1150,
+      "y": 300,
+      "props": {
+        "title": "decode()",
+        "description": "Select me together with the rectangle",
+        "blockType": "Function",
+        "view": "port",
+        "w": 340,
+        "h": 198,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "image",
+            "type": "Image",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "latent",
+            "type": "Latent",
+            "visible": true
+          }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Click the rectangle → the colour disc on the pill → the rainbow Custom cell at the end of the palette → type A3F2C1 and press Enter. Then reload the page.",
+      "x": 60,
+      "y": 120,
+      "w": 480,
+      "h": 150,
+      "target": {
+        "shapeId": "rect",
+        "anchor": "left"
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Click the arrow → the three-bar Line style trigger → pick Thick on the left, then Dashed on the right",
+      "x": 60,
+      "y": 540,
+      "w": 480,
+      "h": 130,
+      "target": {
+        "shapeId": "arrow",
+        "anchor": "left"
+      }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Drag a selection box around this Block and the rectangle together",
+      "x": 1150,
+      "y": 90,
+      "w": 420,
+      "h": 110,
+      "target": {
+        "shapeId": "subject",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "note-1",
+      "kind": "note",
+      "text": "The hex lives in the file as custom-a3f2c1 — on the shape itself, not in a side registry — which is why the reload in step 1 is part of the test.",
+      "x": 700,
+      "y": 720,
+      "w": 480,
+      "h": 120
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · the rectangle is mint on the canvas and on the pill's colour disc, and still mint after the reload · the arrow's Line style popover shows the weights beside the dashes under one hairline, and the arrow is thick and dashed · the mixed selection's pill reads “2 selected” with “1 Block” before S P E",
+      "x": 60,
+      "y": 760,
+      "w": 640,
+      "h": 170
+    }
+  ]
+}

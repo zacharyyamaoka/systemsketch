@@ -8,6 +8,7 @@ import {
 } from 'tldraw'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import 'tldraw/tldraw.css'
+import { hydrateCustomColors } from '../appearance/customColors'
 import { EXCALIDRAW_SHAPE_UTILS, registerExcalidrawPasteHandler } from '../excalidrawInterop'
 import {
   BlockShapeUtil,
@@ -125,6 +126,8 @@ function EmbeddedSurface({
     if (openDocument.readOnly) editor.updateInstanceState({ isReadonly: true })
     const core = decodeDocumentText(openDocument.text)
     if (!isBlankDocument(core)) {
+      // Custom colours are validated by name as the file parses; see LocalWorkspace.
+      hydrateCustomColors(core, editor)
       const parsed = parseTldrawJsonFile({ json: core, schema: editor.store.schema })
       if (parsed.ok) {
         editor.store.mergeRemoteChanges(() => {
