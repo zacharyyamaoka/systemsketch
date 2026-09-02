@@ -58,6 +58,19 @@ verifiable from the tree; nothing here needs the author.
   `getPath`, `menus.getOpenMenus`, `getStoreSnapshot`, `reverseRecordsDiff`, and
   the existing component seams; `tests/test_stock_boundary.py` must keep passing.
 
+## Merge state on 2026-09-02
+
+Zach asked for the merge. The branch absorbed that day's `main` cleanly (a new
+theme-token gate arrived with it; `src/recorder/recorder.css` now names tokens only)
+and every gate was re-run green. `git merge --ff-only` into his checkout was refused
+because a peer had uncommitted work in six of the same files (README.md,
+package.json, scripts/server.py, scripts/launch_systemsketch.py,
+tests/browser_harness.mjs, tests/test_release_system.py). That work was left alone.
+When it lands, the merge is still one fast-forward. A review board is committed at
+`sketches/review/flight-recorder.systemsketch` (recipe and PNG beside it); note that
+the fixture helper on `main` does not bind cue arrows at either end, in this board
+or in the peers' boards, so a moved target leaves the orange arrow behind.
+
 ## What to do next
 
 1. **Zach merges and relaunches.** Not an agent's call. After the merge:
