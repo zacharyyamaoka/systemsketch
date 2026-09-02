@@ -4,11 +4,11 @@
     "ok": true
   },
   {
-    "label": "every port row contains exactly one circle",
+    "label": "every port row contains its outer circle inside the nested row group",
     "ok": true
   },
   {
-    "label": "the circle, name, type and default value all belong to the same input-row group",
+    "label": "the ring, optional core, name, type and default all belong to the same port-row group",
     "ok": true
   },
   {

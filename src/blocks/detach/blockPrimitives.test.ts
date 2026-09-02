@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { getDefaultBlockProps, type BlockPort, type BlockShapeProps } from '../blockModel'
 import { layoutBlock } from '../layoutBlock'
-import { PORT_INDICATOR_RADIUS, primitivesForBlock } from './blockPrimitives'
+import { PORT_CORE_RADIUS, PORT_INDICATOR_RADIUS, primitivesForBlock } from './blockPrimitives'
 import {
 	SYSTEMSKETCH_ROUNDED_RECT_GEO,
 	readSystemSketchPrimitiveStyle,
@@ -77,6 +77,13 @@ describe('a Block as stock primitives', () => {
 			})).toHaveLength(1)
 		}
 		const inputShapes = built.portRows[0].shapeIds.map((id) => byId.get(id)!)
+		expect(inputShapes.filter((shape) => {
+			const props = shape.props as { geo?: string; w?: number }
+			return props.geo === 'ellipse' && props.w === PORT_CORE_RADIUS * 2
+		})).toHaveLength(1)
+		const outputShapes = built.portRows[1].shapeIds.map((id) => byId.get(id)!)
+		expect(outputShapes.filter((shape) =>
+			(shape.props as { geo?: string }).geo === 'ellipse')).toHaveLength(1)
 		expect(inputShapes.some((shape) =>
 			(shape.props as { geo?: string }).geo === SYSTEMSKETCH_ROUNDED_RECT_GEO)).toBe(true)
 		const inputText = inputShapes
@@ -98,20 +105,29 @@ describe('a Block as stock primitives', () => {
 		expect(textOf(named.shapes).join()).toContain('decode')
 	})
 
-	it('freezes what was on screen: a wired dot detaches filled, an unwired one hollow', () => {
+	it('freezes what was on screen: every port has a ring and only wired ports add a core', () => {
 		const props = blockProps({
 			view: 'port',
 			inputs: [port('in_1', 'frame')],
 			outputs: [port('out_1', 'rgb')],
 		})
-		const circles = (connected: ReadonlySet<string>) =>
+		const circleWidths = (connected: ReadonlySet<string>) =>
 			primitivesForBlock(props, { x: 0, y: 0 }, connected).shapes
-				.filter((shape) => (shape.props as { geo?: string }).geo === 'ellipse'
-					&& (shape.props as { w: number }).w === PORT_INDICATOR_RADIUS * 2)
-				.map((shape) => (shape.props as { fill: string }).fill)
+				.filter((shape) => {
+					const circle = shape.props as { geo?: string; w: number }
+					return circle.geo === 'ellipse'
+						&& (circle.w === PORT_INDICATOR_RADIUS * 2 || circle.w === PORT_CORE_RADIUS * 2)
+				})
+				.map((shape) => (shape.props as { w: number }).w)
 
-		expect(circles(new Set())).toEqual(['semi', 'semi'])
-		expect(circles(new Set(['in_1', 'out_1']))).toEqual(['fill', 'fill'])
+		expect(circleWidths(new Set())).toEqual([
+			PORT_INDICATOR_RADIUS * 2,
+			PORT_INDICATOR_RADIUS * 2,
+		])
+		expect(circleWidths(new Set(['in_1', 'out_1']))).toEqual([
+			PORT_INDICATOR_RADIUS * 2, PORT_CORE_RADIUS * 2,
+			PORT_INDICATOR_RADIUS * 2, PORT_CORE_RADIUS * 2,
+		])
 	})
 
 	it('draws an unwired input that carries a default as present, not as connected', () => {
@@ -120,10 +136,17 @@ describe('a Block as stock primitives', () => {
 			inputs: [{ ...port('in_1', 'window', 'int'), defaultValue: '5' }],
 		})
 		const built = primitivesForBlock(props, { x: 0, y: 0 })
-		const circle = built.shapes
+		const ring = built.shapes
 			.find((shape) => (shape.props as { geo?: string }).geo === 'ellipse'
 				&& (shape.props as { w: number }).w === PORT_INDICATOR_RADIUS * 2)
-		expect(circle!.props).toMatchObject({ fill: 'solid', color: 'grey' })
+		const core = built.shapes
+			.find((shape) => (shape.props as { geo?: string }).geo === 'ellipse'
+				&& (shape.props as { w: number }).w === PORT_CORE_RADIUS * 2)
+		expect(ring!.props).toMatchObject({ fill: 'semi' })
+		expect(core!.props).toMatchObject({ fill: 'solid', color: 'grey' })
+		expect(readSystemSketchPrimitiveStyle(core as never)).toMatchObject({
+			kind: 'geo', fillColor: 'var(--ss-text-muted)', strokeWidth: 0,
+		})
 		expect(textOf(built.shapes).join()).toContain('= 5')
 		expect(built.shapes.some((shape) => {
 			const style = readSystemSketchPrimitiveStyle(shape as never)

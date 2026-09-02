@@ -134,8 +134,10 @@ async function main() {
         && shape.meta?.systemSketch?.kind === 'block')
       const rowGroups = blockGroups.flatMap((group) => editor.getSortedChildIdsForParent(group.id)
         .map((id) => editor.getShape(id)).filter((shape) => shape?.type === 'group'))
-      const circles = shapes.filter((shape) => shape.type === 'geo'
+      const outerCircles = shapes.filter((shape) => shape.type === 'geo'
         && shape.props.geo === 'ellipse' && shape.props.w === 18 && shape.props.h === 18)
+      const innerCircles = shapes.filter((shape) => shape.type === 'geo'
+        && shape.props.geo === 'ellipse' && shape.props.w === 12 && shape.props.h === 12)
       const pills = shapes.filter((shape) => shape.type === 'geo'
         && shape.props.geo === 'systemsketch-rounded-rect'
         && shape.meta?.systemSketchPrimitiveStyle?.cornerRadius === 999)
@@ -144,8 +146,10 @@ async function main() {
       return JSON.stringify({
         blockGroups: blockGroups.length,
         rowGroups: rowGroups.length,
-        circles: circles.length,
-        circleWidths: circles.map((shape) => shape.props.w),
+        outerCircles: outerCircles.length,
+        innerCircles: innerCircles.length,
+        outerCircleWidths: outerCircles.map((shape) => shape.props.w),
+        innerCircleWidths: innerCircles.map((shape) => shape.props.w),
         pills: pills.length,
         functionText: functionText ? {
           w: functionText.props.w,
@@ -169,8 +173,10 @@ async function main() {
     ])
     const score = JSON.parse(stdout.trim())
     const checks = {
-      oneOuterSizedCirclePerPort: detached.circles === 4
-        && detached.circleWidths.every((width) => width === 18),
+      layeredPortVisualsMatchLiveBlock: detached.outerCircles === 4
+        && detached.outerCircleWidths.every((width) => width === 18)
+        && detached.innerCircles === 1
+        && detached.innerCircleWidths.every((width) => width === 12),
       nestedPortRows: detached.rowGroups === 4,
       defaultPillPresent: detached.pills === 1,
       functionStaysSingleLine: detached.functionText?.bounds?.h <= 25

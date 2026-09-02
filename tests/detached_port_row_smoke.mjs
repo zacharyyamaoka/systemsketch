@@ -70,6 +70,8 @@ async function detachedStructure(page) {
             id,
             type: shape.type,
             geo: shape.props?.geo ?? null,
+            w: shape.props?.w ?? null,
+            h: shape.props?.h ?? null,
             text: shape.type === 'text' ? plain(shape) : '',
             parentId: shape.parentId,
           }
@@ -128,12 +130,13 @@ async function main() {
 
     for (const row of structure.rows) {
       assert.equal(row.parentId, structure.outerId)
-      assert.equal(row.children.filter((child) => child.geo === 'ellipse').length, 1,
-        'a detached port row must contain one circle, not a ring plus a core')
+      assert.equal(row.children.filter((child) => child.geo === 'ellipse'
+        && child.w === 18 && child.h === 18).length, 1,
+      'a detached port row must contain exactly one 18px outer ring')
       assert.ok(row.children.every((child) => child.parentId === row.id),
         'every row part must share the nested group parent')
     }
-    pass('every port row contains exactly one circle')
+    pass('every port row contains its outer circle inside the nested row group')
 
     const inputRow = structure.rows.find((row) =>
       row.children.some((child) => child.text.includes('payload')))
@@ -142,7 +145,14 @@ async function main() {
     assert.match(inputText, /payload/)
     assert.match(inputText, /int/)
     assert.match(inputText, /= 5/)
-    pass('the circle, name, type and default value all belong to the same input-row group')
+    assert.equal(inputRow.children.filter((child) => child.geo === 'ellipse'
+      && child.w === 12 && child.h === 12).length, 1,
+      'the defaulted input should detach as an outer ring plus an inner filled circle')
+    const outputRow = structure.rows.find((row) => row.id !== inputRow.id)
+    assert.ok(outputRow, 'the output row should remain present')
+    assert.equal(outputRow.children.filter((child) => child.geo === 'ellipse').length, 1,
+      'the hollow output should detach as an outer ring only')
+    pass('the ring, optional core, name, type and default all belong to the same port-row group')
 
     await shot(page, 'detached-port-row-before-move.png')
 
