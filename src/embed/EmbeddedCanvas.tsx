@@ -13,6 +13,7 @@ import { EXCALIDRAW_SHAPE_UTILS, registerExcalidrawPasteHandler } from '../excal
 import {
   BlockShapeUtil,
   BlockTool,
+  getBlockShapeVisibility,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
 } from '../blocks'
@@ -31,12 +32,14 @@ import {
   SYSTEMSKETCH_TOOLBAR_OVERRIDES,
 } from '../toolbar/toolbarIntegration'
 import { interfaceScaleCssValues, useInterfaceScale } from '../settings/interfaceScale'
+import { resolveHostTheme } from '../theme/themeModel'
 import { installInstantTextEditing } from '../instantTextEditing'
 import { enablePasteAtCursor } from '../pasteAtCursor'
 import { readEmbedHostBridge, type HostToEmbedMessage } from './embedProtocol'
 import { decideOutgoing, externalChangeMessage, type EmbeddedDocument } from './embedSession'
 import { decodeDocumentText, encodeDocumentText, isBlankDocument } from './sketchDocument'
 import type { CSSProperties } from 'react'
+import '../theme/tokens.css'
 import '../app.css'
 import './embed.css'
 
@@ -98,21 +101,17 @@ function EmbeddedSurface({
   const editorRef = useRef<Editor | null>(null)
 
   /**
-   * The host's theme reaches the embedded chrome, and stops at the board.
+   * The host's theme reaches the board, not just the pane around it.
    *
-   * Throwing tldraw's own dark mode from here works — it was measured doing
-   * exactly that in VS Code's dark workbench — and it is deliberately not
-   * done, because SystemSketch's panels are authored light-only: the popout
-   * header's `color` and divider are fixed light values, so a dark board ships
-   * an inspector with an invisible title. The board therefore looks exactly
-   * like the app it is a build of, which is the promise the extension makes.
-   *
-   * The signal is carried all the way here anyway, and stamped on the root, so
-   * the day those panels are themed this becomes one call — and the journey
-   * pins today's answer so that change has to be made on purpose.
+   * tldraw owns light/dark for everything it paints behind one user
+   * preference, and every `--tl-*` token the chrome derives from flips with
+   * it, so following the host is this one supported call. The chrome around
+   * the board reads the host's own variables through the `data-ss-theme`
+   * stamped on the wrapper below, so a dark workbench gets a dark, legible
+   * pane — the plugin journey measures the contrast rather than trusting this.
    */
   useEffect(() => {
-    editorRef.current?.user.updateUserPreferences({ colorScheme: 'light' })
+    editorRef.current?.user.updateUserPreferences({ colorScheme })
   }, [colorScheme, openDocument])
 
   const onMount = useCallback((editor: Editor) => {
@@ -181,6 +180,7 @@ function EmbeddedSurface({
         assetUrls={ASSET_URLS}
         bindingUtils={EMBEDDED_BINDING_UTILS}
         components={EMBEDDED_COMPONENTS}
+        getShapeVisibility={getBlockShapeVisibility}
         licenseKey={TLDRAW_LICENSE_KEY}
         onMount={onMount}
         overlayUtils={EMBEDDED_OVERLAY_UTILS}
@@ -204,6 +204,12 @@ export function EmbeddedCanvas() {
   const [openDocument, setOpenDocument] = useState<OpenState | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [colorScheme, setColorScheme] = useState<'light' | 'dark'>('light')
+  /**
+   * Which theme block paints the chrome: the host's own, if `tokens.css` has
+   * one for the name it announced, else the default — a host nobody has
+   * written a theme for gets a correct-looking app rather than an unstyled one.
+   */
+  const hostTheme = resolveHostTheme(bridge?.host)
   const documentRef = useRef<OpenState | null>(null)
   const settledTextRef = useRef<string | null>(null)
   const inFlightRef = useRef(false)
@@ -278,7 +284,12 @@ export function EmbeddedCanvas() {
   if (!bridge) return null
   if (!openDocument) {
     return (
-      <div className="systemsketch-embed-loading" data-testid="systemsketch-embed-loading">
+      <div
+        className="systemsketch-embed-loading"
+        data-testid="systemsketch-embed-loading"
+        data-ss-theme={hostTheme}
+        data-ss-color-scheme={colorScheme}
+      >
         Opening SystemSketch…
       </div>
     )
@@ -290,6 +301,8 @@ export function EmbeddedCanvas() {
         className="systemsketch-embed"
         data-testid="systemsketch-embed"
         data-embed-color-scheme={colorScheme}
+        data-ss-theme={hostTheme}
+        data-ss-color-scheme={colorScheme}
       >
         {error ? (
           <div className="systemsketch-embed-error" role="alert" data-testid="systemsketch-embed-error">

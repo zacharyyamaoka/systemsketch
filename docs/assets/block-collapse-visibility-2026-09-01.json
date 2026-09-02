@@ -1,0 +1,149 @@
+[
+  {
+    "id": "EXPANDED-1",
+    "label": "Expanded paints the boundary and all three children",
+    "observed": {
+      "blocks": 4,
+      "connections": 4
+    },
+    "desired": {
+      "blocks": 4,
+      "connections": 4
+    },
+    "ok": true
+  },
+  {
+    "id": "EXPANDED-2",
+    "label": "all authored records are live while Expanded",
+    "observed": {
+      "blocks": 4,
+      "connections": 4,
+      "hidden": 0
+    },
+    "desired": {
+      "blocks": 4,
+      "connections": 4,
+      "hidden": 0
+    },
+    "ok": true
+  },
+  {
+    "id": "SIMPLE-1",
+    "label": "Simple paints only the boundary Block",
+    "observed": {
+      "blocks": 1,
+      "connections": 0
+    },
+    "desired": {
+      "blocks": 1,
+      "connections": 0
+    },
+    "ok": true
+  },
+  {
+    "id": "SIMPLE-2",
+    "label": "Simple preserves every child and cable record",
+    "observed": {
+      "blocks": 4,
+      "connections": 4,
+      "hidden": 7
+    },
+    "desired": {
+      "blocks": 4,
+      "connections": 4,
+      "hidden": 7
+    },
+    "ok": true
+  },
+  {
+    "id": "PORT-1",
+    "label": "Port paints only the boundary Block and its own ports",
+    "observed": {
+      "blocks": 1,
+      "connections": 0
+    },
+    "desired": {
+      "blocks": 1,
+      "connections": 0
+    },
+    "ok": true
+  },
+  {
+    "id": "PORT-2",
+    "label": "Port preserves every child and cable record",
+    "observed": {
+      "blocks": 4,
+      "connections": 4,
+      "hidden": 7
+    },
+    "desired": {
+      "blocks": 4,
+      "connections": 4,
+      "hidden": 7
+    },
+    "ok": true
+  },
+  {
+    "id": "RELOAD-1",
+    "label": "the opaque Port projection survives reload",
+    "observed": {
+      "blocks": 1,
+      "connections": 0
+    },
+    "desired": {
+      "blocks": 1,
+      "connections": 0
+    },
+    "ok": true
+  },
+  {
+    "id": "RELOAD-2",
+    "label": "reload still retains the hidden composite records",
+    "observed": {
+      "blocks": 4,
+      "connections": 4,
+      "hidden": 7
+    },
+    "desired": {
+      "blocks": 4,
+      "connections": 4,
+      "hidden": 7
+    },
+    "ok": true
+  },
+  {
+    "id": "RESTORE-1",
+    "label": "re-expanding restores the exact painted composite",
+    "observed": {
+      "blocks": 4,
+      "connections": 4
+    },
+    "desired": {
+      "blocks": 4,
+      "connections": 4
+    },
+    "ok": true
+  },
+  {
+    "id": "RESTORE-2",
+    "label": "re-expanding reveals rather than recreates records",
+    "observed": {
+      "blocks": 4,
+      "connections": 4,
+      "hidden": 0
+    },
+    "desired": {
+      "blocks": 4,
+      "connections": 4,
+      "hidden": 0
+    },
+    "ok": true
+  },
+  {
+    "id": "CLEAN",
+    "label": "the journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

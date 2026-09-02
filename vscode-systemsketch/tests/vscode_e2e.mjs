@@ -673,21 +673,50 @@ async function main() {
     const workbenchIsDark = workbench.dark
     const canvasTheme = await inCanvas(page, canvas, `({
       declared: $doc.querySelector('[data-embed-color-scheme]')?.dataset.embedColorScheme ?? null,
+      theme: $doc.querySelector('[data-ss-theme]')?.dataset.ssTheme ?? null,
       painted: Boolean($doc.querySelector('.tl-theme__dark')),
+      canvas: (() => {
+        const background = $doc.querySelector('.tl-background')
+        return background ? getComputedStyle(background).backgroundColor : null
+      })(),
+      // The workbench's own editor background, as the webview receives it —
+      // the value the canvas is expected to be painted with.
+      editorBackground: getComputedStyle($doc.documentElement).getPropertyValue('--vscode-editor-background').trim() || null,
+      surface: (() => {
+        const root = $doc.querySelector('[data-ss-theme]')
+        return root ? getComputedStyle(root).getPropertyValue('--ss-surface').trim() : null
+      })(),
     })`)
-    // The host's choice reaches the canvas; the *board* deliberately stays
-    // light, because SystemSketch's popout chrome is authored light-only and a
-    // dark board renders its inspector header invisible. This pin is what
-    // makes flipping that a deliberate change rather than a side effect.
+    // The canvas is painted with the workbench's editor background, not a
+    // colour of the extension's own.
+    const asRgb = (hex) => {
+      const m = /^#([0-9a-f]{6})$/i.exec(hex ?? '')
+      if (!m) return null
+      const [r, g, b] = [0, 2, 4].map((o) => parseInt(m[1].slice(o, o + 2), 16))
+      return `rgb(${r}, ${g}, ${b})`
+    }
+    if (asRgb(canvasTheme.editorBackground)) {
+      assert.equal(
+        canvasTheme.canvas,
+        asRgb(canvasTheme.editorBackground),
+        `the canvas is not painted with the workbench's editor background ${canvasTheme.editorBackground}`,
+      )
+    }
+    // The host's choice reaches the board itself: tldraw paints dark when the
+    // workbench is dark, and the chrome around it reads the workbench's own
+    // variables through the \`vscode\` theme block. The pane is measured for
+    // legibility below, once the inspector is open.
     assert.deepEqual(
-      canvasTheme,
-      { declared: workbenchIsDark ? 'dark' : 'light', painted: false },
-      'the host theme did not reach the canvas, or the board went dark before the chrome did',
+      { declared: canvasTheme.declared, theme: canvasTheme.theme, painted: canvasTheme.painted },
+      { declared: workbenchIsDark ? 'dark' : 'light', theme: 'vscode', painted: workbenchIsDark },
+      'the host theme did not reach the board, or the chrome is not wearing the vscode theme',
     )
     checks.push(
-      `the workbench theme reaches the canvas —`
+      `the workbench theme reaches the board —`
       + ` ${workbench.selector} paints ${workbench.background}, the canvas records`
-      + ` "${canvasTheme.declared}", and the board stays light on purpose`,
+      + ` "${canvasTheme.declared}", tldraw paints ${canvasTheme.painted ? 'dark' : 'light'}`
+      + ` (${canvasTheme.canvas} = the workbench's editor.background ${canvasTheme.editorBackground}),`
+      + ` and the chrome wears the "${canvasTheme.theme}" theme`,
     )
 
     if (hostName !== 'Cursor') await runCommand(page, 'View: Toggle Secondary Side Bar Visibility')
@@ -727,6 +756,48 @@ async function main() {
     await drawBlock(page, canvas, iframe, { x: [0.30, 0.20, 0.42], y: [0.40, 0.25, 0.55] })
     assert.equal(await readFile(targetPath, 'utf8'), '', 'a canvas edit wrote to disk before Ctrl+S')
     checks.push('a canvas edit marks the tab dirty and writes nothing until the IDE saves')
+
+    // The pane is legible in the host's theme: the inspector's copy measured
+    // against what it is painted on, as a WCAG ratio, not a screenshot review.
+    // This is the exact thing that used to fail — a near-black title on a
+    // near-black board — so it is asserted on the same element.
+    const legibility = await inCanvas(page, canvas, `(() => {
+      const parse = (text) => {
+        let m = text.match(/^rgba?\\(([^)]+)\\)$/)
+        if (m) { const p = m[1].split(/[\\s,\\/]+/).filter(Boolean).map(Number); return { r: p[0] / 255, g: p[1] / 255, b: p[2] / 255, a: p.length > 3 ? p[3] : 1 } }
+        m = text.match(/^color\\(srgb ([^)]+)\\)$/)
+        if (m) { const p = m[1].split(/[\\s\\/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 } }
+        return null
+      }
+      const over = (top, below) => { const a = top.a + below.a * (1 - top.a); if (!a) return { r: 0, g: 0, b: 0, a: 0 }; const mix = (c) => (top[c] * top.a + below[c] * below.a * (1 - top.a)) / a; return { r: mix('r'), g: mix('g'), b: mix('b'), a } }
+      const lum = ({ r, g, b }) => { const ch = (v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4); return 0.2126 * ch(r) + 0.7152 * ch(g) + 0.0722 * ch(b) }
+      const measure = (selector) => {
+        const element = [...$doc.querySelectorAll(selector)].find((n) => n.getBoundingClientRect().height > 0)
+        if (!element) return { selector, found: false }
+        const fg = parse(getComputedStyle(element).color)
+        let bg = { r: 0, g: 0, b: 0, a: 0 }
+        for (let node = element; node && bg.a < 0.999; node = node.parentElement) {
+          const c = parse(getComputedStyle(node).backgroundColor)
+          if (c && c.a > 0) bg = over(bg, c)
+        }
+        bg = over(bg, { r: 1, g: 1, b: 1, a: 1 })
+        const [hi, lo] = [lum(over(fg, bg)), lum(bg)].sort((x, y) => y - x)
+        return { selector, found: true, ratio: Math.round(((hi + 0.05) / (lo + 0.05)) * 100) / 100 }
+      }
+      return [
+        measure('.block-inspector__section-title'),
+        measure('.block-inspector__field > span'),
+        measure('.block-inspector__tabs > [role="tab"].is-active'),
+      ]
+    })()`)
+    for (const reading of legibility) {
+      assert.equal(reading.found, true, `${reading.selector} is not on screen`)
+      assert.ok(reading.ratio >= 4.5, `${reading.selector} measures ${reading.ratio}:1 in the host's theme`)
+    }
+    checks.push(
+      `the inspector is legible in the ${workbenchIsDark ? 'dark' : 'light'} workbench —`
+      + legibility.map((reading) => ` ${reading.selector.replace(/^\.block-inspector__/, '')} ${reading.ratio}:1`).join(','),
+    )
 
     const savedTarget = await saveAndRead(
       page,
