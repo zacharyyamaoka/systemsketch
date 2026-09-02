@@ -114,3 +114,7 @@ Peers write here in real time — this is the normal case, not an edge case.
   every commit.
 - Never reset, clean, or checkout over someone else's work.
 - Don't kill a server you did not start.
+- Don't delete a worktree by eye. `python3 scripts/sweep_worktrees.py` reports which ones are
+  spent — merged into `main`, nothing uncommitted, nobody working in them — and `--remove`
+  deletes only those. Merged alone is not enough: peers routinely leave uncommitted source in
+  a worktree whose branch has already landed.
