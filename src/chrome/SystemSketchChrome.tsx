@@ -5,12 +5,15 @@ import {
   useEditor,
   usePassThroughWheelEvents,
   useTldrawUiComponents,
+  useToasts,
   useValue,
   type Editor,
 } from 'tldraw'
 import { useEffect, useMemo, useRef } from 'react'
 import { AppearanceControls } from '../appearance/AppearanceControls'
 import { BLOCK_TOOL_ID, PILL_TOOL_ID, getBlockInspectorContext, selectionHasBlockStyles } from '../blocks'
+import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
+import { describeOrganizeNodesOutcome, organizeNodes } from '../blocks/layout'
 import {
   EditorBlockInspector,
   EditorBlockSelectionMiniMenu,
@@ -269,6 +272,7 @@ function SelectionMiniMenu() {
 export function SystemSketchSurfaceHost() {
   const editor = useEditor()
   const actions = useActions()
+  const { addToast } = useToasts()
   const {
     leftSurface,
     rightSurface,
@@ -356,6 +360,32 @@ export function SystemSketchSurfaceHost() {
         run: () => setRight('comments'),
       },
       {
+        id: 'tidy-edges',
+        label: 'Tidy edges',
+        description: 'Separate overlapping elbow channels without moving nodes',
+        keywords: ['nudge', 'cables', 'connections', 'layout'],
+        icon: '≋',
+        disabled: () => !editor.getCurrentPageShapes().some((shape) => shape.type === 'connection'),
+        run: () => {
+          const outcome = tidyEdges(editor, {
+            scope: editor.getSelectedShapeIds().length > 0 ? 'selection' : 'all',
+          })
+          addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
+        },
+      },
+      {
+        id: 'organize-nodes',
+        label: 'Organize nodes',
+        description: 'Arrange Blocks left to right while preserving model order',
+        keywords: ['tidy', 'blocks', 'auto layout', 'elk'],
+        icon: '▦',
+        disabled: () => editor.getCurrentPageShapes().filter((shape) => shape.type === 'block').length < 2,
+        run: async () => {
+          const outcome = await organizeNodes(editor)
+          addToast({ title: describeOrganizeNodesOutcome(outcome), severity: 'info' })
+        },
+      },
+      {
         id: 'select-all',
         label: 'Select all',
         shortcut: 'Ctrl A',
@@ -387,7 +417,7 @@ export function SystemSketchSurfaceHost() {
         run: () => stock('zoom-to-fit'),
       },
     ]
-  }, [actions, editor, setLeft, setRight, setToolbar])
+  }, [actions, addToast, editor, setLeft, setRight, setToolbar])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {

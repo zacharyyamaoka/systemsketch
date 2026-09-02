@@ -6,6 +6,8 @@ SystemSketch starts from one deliberately boring datum: the stock tldraw whitebo
 
 The [35-item repo improvement review](docs/repo-improvement-review-2026-09-02.html) ranks the audited gaps, shows the top ten already running with real-browser evidence, and gives each shipped fix and remaining candidate its own accept checkbox and review note. The [follow-up decision gallery](docs/repo-improvement-followup-review-2026-09-02.html) covers the revised future-format workflow plus comments, commands, timer removal, diagnostics, and folder creation with one accept checkbox and note field per change. These are temporary decision surfaces; code and ordinary regression tests remain the living specification.
 
+The [Tidy Edges + Organize Nodes comparison](docs/layout-comparison-2026-09-02.html) runs the ported PyBlocks architecture against 40 increasingly messy synthetic cases: 20 edge-channel fixtures and 20 node-layout fixtures, each with an interactive before/after canvas and measured invariants. The companion [`tidy-edges.systemsketch`](sketches/review/tidy-edges.systemsketch) and [`organize-nodes.systemsketch`](sketches/review/organize-nodes.systemsketch) boards are ready for direct human verification.
+
 [Open the rendered foundation report](docs/systemsketch-foundation-2026-08-30.html)
 
 ## The starting point

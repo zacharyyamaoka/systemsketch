@@ -10,6 +10,7 @@ import {
   TldrawUiMenuItem,
   TldrawUiMenuSubmenu,
   useEditor,
+  useToasts,
   useValue,
   type TLUiContextMenuProps,
 } from 'tldraw'
@@ -55,6 +56,8 @@ import {
   ConnectionTemporalStyle,
   type ConnectionRoutingKind,
 } from '../connections/connectionModel'
+import { describeTidyEdgesOutcome, tidyEdges } from '../connections/tidyEdges'
+import { describeOrganizeNodesOutcome, organizeNodes } from '../layout'
 import {
   requestBlockInlineEdit,
   type BlockInlineField,
@@ -104,6 +107,7 @@ export function BlockContextMenu(props: TLUiContextMenuProps) {
 
 function BlockContextMenuItems() {
   const editor = useEditor()
+  const { addToast } = useToasts()
   // Detach and its inverse are counts, not one-Block commands: a sweep over a
   // multi-selection is the normal case, and the label says how many.
   const detachableCount = useValue(
@@ -141,6 +145,17 @@ function BlockContextMenuItems() {
   const connectionCount = useValue(
     'context-menu connection count',
     () => getSelectedConnectionCount(editor),
+    [editor],
+  )
+  const pageCounts = useValue(
+    'context-menu layout subjects',
+    () => editor.getCurrentPageShapes().reduce(
+      (counts, shape) => ({
+        blocks: counts.blocks + (shape.type === 'block' ? 1 : 0),
+        connections: counts.connections + (shape.type === 'connection' ? 1 : 0),
+      }),
+      { blocks: 0, connections: 0 },
+    ),
     [editor],
   )
   // Same menu, different subject. The right-click that opened it recorded the
@@ -190,6 +205,18 @@ function BlockContextMenuItems() {
 
   const setRouting = (routing: ConnectionRoutingKind) => {
     setConnectionRoutingForSelection(editor, routing)
+  }
+
+  const runTidyEdges = () => {
+    const outcome = tidyEdges(editor, {
+      scope: editor.getSelectedShapeIds().length > 0 ? 'selection' : 'all',
+    })
+    addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
+  }
+
+  const runOrganizeNodes = async () => {
+    const outcome = await organizeNodes(editor)
+    addToast({ title: describeOrganizeNodesOutcome(outcome), severity: 'info' })
   }
 
   // The new port joins its subject's row and arm, so "add below" a header
@@ -453,6 +480,23 @@ function BlockContextMenuItems() {
                 isSharedStyleValue(connectionTemporal, 'delayed') ? 'data' : 'delayed',
               )
             }}
+          />
+        </TldrawUiMenuGroup>
+      ) : null}
+
+      {pageCounts.blocks > 1 || pageCounts.connections > 0 ? (
+        <TldrawUiMenuGroup id="systemsketch-layout">
+          <TldrawUiMenuItem
+            id="tidy-edges"
+            label="Tidy edges"
+            disabled={pageCounts.connections === 0}
+            onSelect={runTidyEdges}
+          />
+          <TldrawUiMenuItem
+            id="organize-nodes"
+            label="Organize nodes"
+            disabled={pageCounts.blocks < 2}
+            onSelect={() => void runOrganizeNodes()}
           />
         </TldrawUiMenuGroup>
       ) : null}
