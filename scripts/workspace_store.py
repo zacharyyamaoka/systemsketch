@@ -125,7 +125,7 @@ def document_digest(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def _parse_document(source: object) -> dict[str, Any]:
+def _parse_document(source: object, *, allow_future: bool = False) -> dict[str, Any]:
     """Validate the portable tldraw envelope both document types share."""
     if not isinstance(source, str) or not source.strip():
         raise WorkspaceFormatError("document source must be a non-empty string")
@@ -153,12 +153,44 @@ def _parse_document(source: object) -> dict[str, Any]:
             raise WorkspaceFormatError(
                 f"{SYSTEMSKETCH_ENVELOPE_KEY} is missing an integer formatVersion"
             )
-        if version > SYSTEMSKETCH_FORMAT_VERSION:
+        if version > SYSTEMSKETCH_FORMAT_VERSION and not allow_future:
             raise WorkspaceFormatError(
                 f"this document was written by a newer SystemSketch "
                 f"(.systemsketch format {version}, this build reads {SYSTEMSKETCH_FORMAT_VERSION})"
             )
     return document
+
+
+def create_directory(raw_parent: object, raw_name: object, files_root: Path) -> dict[str, str]:
+    """Create one visible workspace folder without guessing at the requested name."""
+    parent = resolve_directory(raw_parent, files_root)
+    if not parent.exists():
+        raise WorkspacePathError(f"parent folder does not exist: {parent}")
+    if not parent.is_dir():
+        raise WorkspacePathError(f"not a directory: {parent}")
+    if not isinstance(raw_name, str):
+        raise WorkspacePathError("folder name must be a string")
+    name = raw_name.strip()
+    if not name or name in {".", ".."}:
+        raise WorkspacePathError("folder name must not be empty, . or ..")
+    if name.startswith("."):
+        raise WorkspacePathError("folder name must not start with .")
+    if any(character in name for character in ("/", "\\", "\0")):
+        raise WorkspacePathError("folder name must not contain a path separator")
+    if any(ord(character) < 32 or ord(character) == 127 for character in name):
+        raise WorkspacePathError("folder name must not contain control characters")
+
+    destination = parent / name
+    # Resolve before mkdir so a symlinked parent cannot lead the operation out
+    # of the configured workspace root between path composition and creation.
+    resolved = _resolve_inside_root(str(destination), files_root)
+    try:
+        resolved.mkdir(exist_ok=False)
+    except FileExistsError as error:
+        raise WorkspacePathError(f"{name} already exists") from error
+    except OSError as error:
+        raise WorkspacePathError(f"could not create {name}: {error}") from error
+    return {"name": name, "path": str(resolved)}
 
 
 def normalize_document_source(source: object, *, suffix: str | None = None) -> str:
@@ -254,7 +286,15 @@ def load_document(raw_path: object, files_root: Path) -> dict[str, Any]:
         raise
     except (OSError, UnicodeDecodeError) as error:
         raise WorkspacePathError(f"could not read {path}: {error}") from error
-    normalize_document_source(source)
+    # IDE hosts seed a new custom-editor target as a zero-byte file. Standalone
+    # must give that exact representation the same meaning: an intentional
+    # blank canvas whose first user edit becomes a normal encoded document.
+    # Non-blank bytes keep the existing host validation before reaching tldraw.
+    if source.strip():
+        # Reads may return a structurally valid future envelope byte-for-byte so
+        # the browser can offer an explicit compatibility copy. Every write path
+        # still calls normalize_document_source(), which refuses a downgrade.
+        _parse_document(source, allow_future=True)
     return {**_metadata(path, source, stat), "source": source}
 
 

@@ -28,6 +28,27 @@ export interface EmbedChangeMessage {
   type: 'change'
   text: string
   baseVersion: number
+  session: string
+  /** The latest opaque recovery checkpoint represented by this text. */
+  checkpointRevision: number
+}
+
+/**
+ * A synchronous stock Editor snapshot retained by the host until full tldraw
+ * serialization lands. The host treats `snapshot` as opaque recovery data.
+ */
+export interface EmbedCheckpointMessage {
+  type: 'checkpoint'
+  snapshot: unknown
+  session: string
+  revision: number
+}
+
+/** The async serialization caught up with this recovery checkpoint. */
+export interface EmbedCheckpointSettledMessage {
+  type: 'checkpoint-settled'
+  session: string
+  revision: number
 }
 
 /** SystemSketch failed at something the host should surface in its own UI. */
@@ -36,7 +57,25 @@ export interface EmbedErrorMessage {
   message: string
 }
 
-export type EmbedToHostMessage = EmbedReadyMessage | EmbedChangeMessage | EmbedErrorMessage
+/** A user-approved request to create, never overwrite, an editable downgrade copy. */
+export interface EmbedCompatibilityCopyRequest {
+  type: 'request-compatible-copy'
+  session: string
+  baseVersion: number
+}
+
+export type EmbedToHostMessage =
+  | EmbedReadyMessage
+  | EmbedChangeMessage
+  | EmbedCheckpointMessage
+  | EmbedCheckpointSettledMessage
+  | EmbedCompatibilityCopyRequest
+  | EmbedErrorMessage
+
+export interface EmbedRecoveryCheckpoint {
+  /** A value previously returned by stock Editor.getSnapshot(). */
+  snapshot: unknown
+}
 
 /** The host handing over the file it opened. Arrives first, and on reload. */
 export interface EmbedOpenMessage {
@@ -46,6 +85,10 @@ export interface EmbedOpenMessage {
   text: string
   version: number
   readOnly: boolean
+  /** Host-generated fence; stale webviews cannot replace this checkpoint. */
+  session: string
+  /** Present only when the host recovered an unsaved teardown checkpoint. */
+  recovery?: EmbedRecoveryCheckpoint
 }
 
 /** The file changed underneath us: another editor, a checkout, a generator. */
@@ -53,6 +96,8 @@ export interface EmbedExternalChangeMessage {
   type: 'external-change'
   text: string
   version: number
+  /** Rotated whenever a non-canvas writer replaces the document. */
+  session: string
   /** Why the host is replacing the canvas, in words a person can act on. */
   reason: 'source-edit' | 'stale-change' | 'write-failed'
 }
@@ -67,6 +112,8 @@ export interface EmbedAcceptedMessage {
 export interface EmbedHostErrorMessage {
   type: 'host-error'
   message: string
+  /** False for recovery-cache failures that do not invalidate an in-flight edit. */
+  retryable?: boolean
 }
 
 /**

@@ -65,8 +65,7 @@ export function ChromeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || state.openOrder.length === 0) return
-      // Radix owns the toolbar popover's focus restoration and Escape lifecycle.
-      // Its onOpenChange callback will remove the surface from this shared stack.
+      // The command dialog owns focus restoration and Escape while it is open.
       if (state.openOrder.at(-1)?.startsWith('toolbar:')) return
       event.preventDefault()
       event.stopPropagation()

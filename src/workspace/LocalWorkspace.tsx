@@ -7,7 +7,6 @@ import {
   TldrawUiMenuSubmenu,
   useDialogs,
   loadSnapshot,
-  parseTldrawJsonFile,
   serializeTldrawJson,
   type Editor,
 } from 'tldraw'
@@ -23,6 +22,8 @@ import {
 } from 'react'
 import {
   WorkspaceConflict,
+  createWorkspaceDirectory,
+  flushWorkspaceDocument,
   listWorkspace,
   readWorkspaceDocument,
   renameWorkspaceDocument,
@@ -57,7 +58,8 @@ import {
   type BrowserRow,
   type DocumentFingerprint,
 } from './workspaceModel'
-import { decodeSystemSketchDocument } from './systemSketchFile'
+import { inspectWorkspaceDocumentSource } from './workspaceDocument'
+import { installWorkspaceLifecycleProtection } from './workspaceLifecycle'
 import './local-workspace.css'
 import { SettingsGearIcon, SystemSketchSettingsDialog } from '../settings/InterfaceSettings'
 
@@ -72,6 +74,8 @@ export type WorkspaceStatus =
   | { kind: 'saving' }
   | { kind: 'conflict' }
   | { kind: 'missing' }
+  | { kind: 'future'; message: string; formatVersion: number; supportedVersion: number }
+  | { kind: 'quarantined'; message: string }
   | { kind: 'error'; message: string }
 
 type WorkspaceDialogMode = 'open' | 'saveAs' | 'rename' | null
@@ -140,14 +144,14 @@ function fingerprint(document: { mtime?: number; size?: number }): DocumentFinge
  * and `.tldr` passes through byte-identical, so from this line down tldraw is
  * parsing exactly the portable file it has always parsed.
  */
-function loadDocumentSource(editor: Editor, source: string): string | null {
-  const { core } = decodeSystemSketchDocument(source)
-  const parsed = parseTldrawJsonFile({ json: core, schema: editor.store.schema })
-  if (!parsed.ok) return `tldraw could not read this document (${parsed.error.type})`
-  editor.store.mergeRemoteChanges(() => {
-    loadSnapshot(editor.store, parsed.value.getStoreSnapshot())
-  })
-  return null
+function loadDocumentSource(editor: Editor, source: string) {
+  const inspected = inspectWorkspaceDocumentSource(source, editor.store.schema)
+  if (inspected.kind === 'ready' || inspected.kind === 'future') {
+    editor.store.mergeRemoteChanges(() => {
+      loadSnapshot(editor.store, inspected.snapshot)
+    })
+  }
+  return inspected
 }
 
 async function firstReadableRecent(paths: string[]): Promise<{
@@ -181,11 +185,18 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   const fingerprintRef = useRef<DocumentFingerprint | null>(null)
   const dirtyRef = useRef(false)
   const savingRef = useRef(false)
+  /** True for unreadable recovery and parseable future-format documents alike. */
+  const protectedRef = useRef(false)
   const queuedSourceRef = useRef<Promise<string> | null>(null)
   // Counts document changes, so a save knows whether more arrived while it ran.
   const changeEpochRef = useRef(0)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const autosaveStopRef = useRef<(() => void) | null>(null)
+  const startAutosaveRef = useRef<() => void>(() => {})
   const persistRef = useRef<(force?: boolean) => Promise<void>>(async () => {})
+  const finalFlushRef = useRef<() => void>(() => {})
+  const statusRef = useRef(status)
+  statusRef.current = status
 
   const updateRecents = useCallback((next: string[]) => setRecents(next), [])
 
@@ -253,11 +264,34 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     }, SAVE_DEBOUNCE_MS)
   }, [])
 
+  const protectDocument = useCallback((
+    editor: Editor,
+    protection:
+      | { kind: 'quarantined'; message: string }
+      | { kind: 'future'; message: string; formatVersion: number; supportedVersion: number },
+  ) => {
+    if (saveTimerRef.current !== null) {
+      window.clearTimeout(saveTimerRef.current)
+      saveTimerRef.current = null
+    }
+    autosaveStopRef.current?.()
+    autosaveStopRef.current = null
+    protectedRef.current = true
+    dirtyRef.current = false
+    queuedSourceRef.current = null
+    editor.updateInstanceState({ isReadonly: true })
+    setStatus(protection)
+  }, [])
+
   const persist = useCallback(async (force = false) => {
     const boardPath = pathRef.current
     const editor = editorRef.current
     const queuedSource = queuedSourceRef.current
     if (boardPath === null || (editor === null && queuedSource === null)) return
+    if (protectedRef.current) {
+      setNotice('This file is protected. Create a separate editable copy to keep the original untouched.')
+      return
+    }
     if (savingRef.current) {
       if (dirtyRef.current) scheduleSave()
       return
@@ -299,6 +333,32 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     }
   }, [scheduleSave, updateRecents])
   persistRef.current = persist
+
+  const finalFlush = useCallback(() => {
+    const boardPath = pathRef.current
+    if (protectedRef.current || !dirtyRef.current || boardPath === null) return
+    if (saveTimerRef.current !== null) {
+      window.clearTimeout(saveTimerRef.current)
+      saveTimerRef.current = null
+    }
+
+    const editor = editorRef.current
+    const sourcePromise = queuedSourceRef.current
+      ?? (editor ? serializeTldrawJson(editor) : null)
+    if (sourcePromise === null) return
+
+    const baseDigest = digestRef.current
+    void sourcePromise.then((tldrawSource) => flushWorkspaceDocument({
+      path: boardPath,
+      source: encodeDocumentForPath(boardPath, tldrawSource),
+      baseDigest,
+    })).catch(() => {
+      // There is no remaining page UI after pagehide. The ordinary save kicked
+      // off by visibilitychange/beforeunload is still running, and the browser
+      // close prompt already gave the user the explicit chance to stay.
+    })
+  }, [])
+  finalFlushRef.current = finalFlush
 
   const waitForSave = useCallback(async () => {
     const deadline = Date.now() + 5000
@@ -357,6 +417,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   const saveAs = useCallback(async (nextPath: string, force = false) => {
     const editor = editorRef.current
     if (!editor || savingRef.current) throw new Error('The document is not ready to save yet.')
+    const previousStatus = statusRef.current
     setStatus({ kind: 'saving' })
     savingRef.current = true
     try {
@@ -365,7 +426,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       updateRecents(rememberDocumentPath(nextPath))
       window.location.assign(documentHref(nextPath))
     } catch (cause) {
-      setStatus({ kind: 'clean', at: null })
+      setStatus(previousStatus)
       throw cause
     } finally {
       savingRef.current = false
@@ -375,7 +436,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   const rename = useCallback(async (nextPath: string) => {
     const currentPath = pathRef.current
     if (!currentPath || nextPath === currentPath) return
-    if (!sourceRef.current) {
+    if (sourceRef.current === null) {
       await saveAs(nextPath)
       return
     }
@@ -419,11 +480,18 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
         setStatus({ kind: 'missing' })
         return
       }
-      const loadError = loadDocumentSource(editor, document.source)
-      if (loadError) {
-        setStatus({ kind: 'error', message: loadError })
+      const inspected = loadDocumentSource(editor, document.source)
+      if (inspected.kind === 'quarantined' || inspected.kind === 'future') {
+        sourceRef.current = document.source
+        digestRef.current = document.digest ?? null
+        fingerprintRef.current = fingerprint(document)
+        setIsPersisted(true)
+        protectDocument(editor, inspected)
         return
       }
+      protectedRef.current = false
+      editor.updateInstanceState({ isReadonly: false })
+      startAutosaveRef.current()
       sourceRef.current = document.source
       digestRef.current = document.digest ?? null
       fingerprintRef.current = fingerprint(document)
@@ -435,12 +503,12 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     } catch (cause) {
       setStatus({ kind: 'error', message: errorMessage(cause) })
     }
-  }, [updateRecents])
+  }, [protectDocument, updateRecents])
 
   const trash = useCallback(async () => {
     const boardPath = pathRef.current
     if (!boardPath) return
-    if (!sourceRef.current) {
+    if (sourceRef.current === null) {
       await newDocument()
       return
     }
@@ -458,35 +526,58 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
 
   const attach = useCallback((editor: Editor) => {
     editorRef.current = editor
-    if (sourceRef.current !== null) {
-      const loadError = loadDocumentSource(editor, sourceRef.current)
-      if (loadError) setStatus({ kind: 'error', message: loadError })
+    let disposed = false
+
+    const startAutosave = () => {
+      if (
+        disposed
+        || protectedRef.current
+        || editorRef.current !== editor
+        || autosaveStopRef.current !== null
+      ) return
+
+      autosaveStopRef.current = editor.store.listen((entry) => {
+        if (removesDocumentBoundary(entry)) return
+        dirtyRef.current = true
+        changeEpochRef.current += 1
+        // No serialisation here. The store flushes listeners once per frame, so
+        // this ran on every frame of a drag and serialised the whole document
+        // each time — while only the copy taken after the debounce is ever
+        // written. `persist` serialises once, when it saves. And a status that
+        // is already dirty stays the same object, or every frame re-renders
+        // everything that reads the workspace context.
+        setStatus((current) => (
+          current.kind === 'conflict' || current.kind === 'dirty' ? current : { kind: 'dirty' }
+        ))
+        scheduleSave()
+      }, { source: 'user', scope: 'document' })
     }
-    const stop = editor.store.listen((entry) => {
-      if (removesDocumentBoundary(entry)) return
-      dirtyRef.current = true
-      changeEpochRef.current += 1
-      // No serialisation here. The store flushes listeners once per frame, so
-      // this ran on every frame of a drag and serialised the whole document
-      // each time — while only the copy taken after the debounce is ever
-      // written. `persist` serialises once, when it saves. And a status that
-      // is already dirty stays the same object, or every frame re-renders
-      // everything that reads the workspace context.
-      setStatus((current) => (
-        current.kind === 'conflict' || current.kind === 'dirty' ? current : { kind: 'dirty' }
-      ))
-      scheduleSave()
-    }, { source: 'user', scope: 'document' })
+    startAutosaveRef.current = startAutosave
+
+    if (sourceRef.current !== null) {
+      const inspected = loadDocumentSource(editor, sourceRef.current)
+      if (inspected.kind === 'quarantined' || inspected.kind === 'future') {
+        protectDocument(editor, inspected)
+      }
+    }
+    if (!protectedRef.current) {
+      editor.updateInstanceState({ isReadonly: false })
+      startAutosave()
+    }
+
     return () => {
-      stop()
+      disposed = true
+      autosaveStopRef.current?.()
+      autosaveStopRef.current = null
+      if (startAutosaveRef.current === startAutosave) startAutosaveRef.current = () => {}
       // The editor is going away. If edits are still unsaved, take the one
       // snapshot a later `persist` will need once it can no longer ask for it.
-      if (dirtyRef.current && queuedSourceRef.current === null) {
+      if (!protectedRef.current && dirtyRef.current && queuedSourceRef.current === null) {
         queuedSourceRef.current = serializeTldrawJson(editor)
       }
       if (editorRef.current === editor) editorRef.current = null
     }
-  }, [scheduleSave])
+  }, [protectDocument, scheduleSave])
 
   useEffect(() => {
     if (!path) return
@@ -554,18 +645,19 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   }, [notice])
 
   useEffect(() => {
-    const flush = () => {
-      if (saveTimerRef.current !== null) {
-        window.clearTimeout(saveTimerRef.current)
-        saveTimerRef.current = null
+    return installWorkspaceLifecycleProtection({
+      windowTarget: window,
+      documentTarget: document,
+      hasUnsavedChanges: () => !protectedRef.current && dirtyRef.current,
+      flush: () => {
+        if (saveTimerRef.current !== null) {
+          window.clearTimeout(saveTimerRef.current)
+          saveTimerRef.current = null
+        }
         void persistRef.current()
-      }
-    }
-    window.addEventListener('pagehide', flush)
-    return () => {
-      window.removeEventListener('pagehide', flush)
-      flush()
-    }
+      },
+      finalFlush: () => finalFlushRef.current(),
+    })
   }, [])
 
   const controller = useMemo<LocalWorkspaceController>(() => ({
@@ -631,24 +723,60 @@ function WorkspaceLoading({ status }: { status: WorkspaceStatus }) {
 function WorkspaceAlert() {
   const workspace = useLocalWorkspace()
   const { status } = workspace
-  if (status.kind !== 'conflict' && status.kind !== 'missing' && status.kind !== 'error') return null
+  if (
+    status.kind !== 'conflict'
+    && status.kind !== 'missing'
+    && status.kind !== 'future'
+    && status.kind !== 'quarantined'
+    && status.kind !== 'error'
+  ) return null
   return (
-    <aside className={`systemsketch-workspace-alert is-${status.kind}`} role="alert">
+    <aside
+      className={`systemsketch-workspace-alert is-${status.kind}`}
+      role="alert"
+      data-testid={
+        status.kind === 'quarantined'
+          ? 'workspace-quarantine'
+          : status.kind === 'future' ? 'workspace-future-format' : undefined
+      }
+    >
       <div>
         <strong>
           {status.kind === 'conflict'
             ? 'This file changed somewhere else'
             : status.kind === 'missing'
               ? 'This file was moved or deleted'
-              : 'The file could not be saved'}
+              : status.kind === 'future'
+                ? 'A newer-format original is protected'
+                : status.kind === 'quarantined'
+                  ? 'This file is open read-only for safety'
+                : 'The file could not be saved'}
         </strong>
-        <span>{status.kind === 'error' ? status.message : workspace.path}</span>
+        <span>
+          {status.kind === 'future'
+            ? `${status.message} Create an editable current-format copy; the original remains byte-for-byte untouched and newer-only metadata may be omitted.`
+            : status.kind === 'quarantined'
+            ? `${status.message}. The original file has not been changed.`
+            : status.kind === 'error' ? status.message : workspace.path}
+        </span>
       </div>
       <div className="systemsketch-workspace-alert__actions">
         {status.kind === 'conflict' ? (
           <>
             <button type="button" onClick={() => void workspace.takeDisk()}>Use disk version</button>
             <button type="button" className="primary" onClick={() => void workspace.save(true)}>Keep my version</button>
+          </>
+        ) : status.kind === 'future' ? (
+          <>
+            <button type="button" onClick={() => workspace.showDialog('open')}>Open another…</button>
+            <button type="button" className="primary" onClick={() => workspace.showDialog('saveAs')}>
+              Create editable copy…
+            </button>
+          </>
+        ) : status.kind === 'quarantined' ? (
+          <>
+            <button type="button" onClick={() => workspace.showDialog('open')}>Open another…</button>
+            <button type="button" className="primary" onClick={() => workspace.showDialog('saveAs')}>Save recovery as…</button>
           </>
         ) : (
           <button type="button" onClick={() => workspace.showDialog('saveAs')}>Save As…</button>
@@ -682,6 +810,10 @@ export function SystemSketchMainMenu() {
           ? 'Conflict'
           : workspace.status.kind === 'missing'
             ? 'Missing'
+            : workspace.status.kind === 'quarantined'
+              ? 'Read-only recovery'
+            : workspace.status.kind === 'future'
+              ? 'Newer format · protected'
             : workspace.status.kind === 'error'
               ? 'Error'
               : 'Opening'
@@ -709,9 +841,9 @@ export function SystemSketchMainMenu() {
                 </TldrawUiMenuSubmenu>
               </TldrawUiMenuGroup>
               <TldrawUiMenuGroup id="file-save">
-                <TldrawUiMenuItem id="save-document" label="Save" kbd="cmd+s" onSelect={() => void workspace.save()} />
+                <TldrawUiMenuItem id="save-document" label="Save" kbd="cmd+s" disabled={workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'} onSelect={() => void workspace.save()} />
                 <TldrawUiMenuItem id="save-as-document" label="Save As…" kbd="cmd+shift+s" onSelect={() => workspace.showDialog('saveAs')} />
-                <TldrawUiMenuItem id="rename-document" label="Rename…" onSelect={() => workspace.showDialog('rename')} />
+                <TldrawUiMenuItem id="rename-document" label="Rename…" disabled={workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'} onSelect={() => workspace.showDialog('rename')} />
               </TldrawUiMenuGroup>
               <TldrawUiMenuGroup id="file-location">
                 <TldrawUiMenuItem id="reveal-document" label="Show in Files" onSelect={() => void workspace.reveal()} />
@@ -737,7 +869,11 @@ export function SystemSketchMainMenu() {
         className="systemsketch-file-title"
         aria-label={`${workspace.title} ${statusLabel}`}
         title={`${workspace.path ?? ''} · ${statusLabel}`}
-        onClick={() => workspace.showDialog('rename')}
+        onClick={() => workspace.showDialog(
+          workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'
+            ? 'saveAs'
+            : 'rename',
+        )}
       >
         <span>{workspace.title}</span>
         <i data-state={workspace.status.kind} aria-label={statusLabel} />
@@ -767,9 +903,18 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
   const [listing, setListing] = useState<WorkspaceListing | null>(null)
   const [selectedPath, setSelectedPath] = useState<string | null>(null)
   const [query, setQuery] = useState('')
-  const [name, setName] = useState(() => workspace.title)
+  const recoveryMode = useRef(workspace.status.kind === 'quarantined').current
+  const compatibilityMode = useRef(workspace.status.kind === 'future').current
+  const [name, setName] = useState(() => (
+    recoveryMode
+      ? `${workspace.title} recovery`
+      : compatibilityMode ? `${workspace.title} compatible copy` : workspace.title
+  ))
   const [error, setError] = useState<string | null>(null)
+  const [replacePath, setReplacePath] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [creatingFolder, setCreatingFolder] = useState(false)
+  const [folderName, setFolderName] = useState('')
   const listRef = useRef<HTMLDivElement | null>(null)
   const crumbsRef = useRef<HTMLElement | null>(null)
   const isRename = mode === 'rename'
@@ -786,6 +931,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
       setListing(next)
       setSelectedPath(null)
       setQuery('')
+      setReplacePath(null)
     } catch (cause) {
       setError(errorMessage(cause))
     } finally {
@@ -814,21 +960,43 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
       return
     }
     if (mode === 'open') await workspace.open(row.path)
-    else setName(row.title)
+    else {
+      setName(row.title)
+      setReplacePath(null)
+    }
   }, [load, mode, workspace])
 
-  const submit = useCallback(async () => {
+  const createFolder = useCallback(async () => {
+    if (!listing) return
     setBusy(true)
     setError(null)
+    try {
+      const created = await createWorkspaceDirectory(listing.dir, folderName)
+      setCreatingFolder(false)
+      setFolderName('')
+      await load(created.path)
+    } catch (cause) {
+      setError(errorMessage(cause))
+      setBusy(false)
+    }
+  }, [folderName, listing, load])
+
+  const submit = useCallback(async (force = false) => {
+    setBusy(true)
+    setError(null)
+    let attemptedPath: string | null = null
     try {
       if (mode === 'open') {
         if (!selectedRow) throw new Error('Choose a document to open.')
         await activate(selectedRow)
         if (selectedRow.kind === 'folder') setBusy(false)
       } else if (mode === 'saveAs') {
-        const nextPath = listing ? documentPathFor(listing.dir, name) : null
+        const nextPath = force && replacePath
+          ? replacePath
+          : listing ? documentPathFor(listing.dir, name) : null
         if (!nextPath) throw new Error('Enter a file name.')
-        await workspace.saveAs(nextPath)
+        attemptedPath = nextPath
+        await workspace.saveAs(nextPath, force)
       } else {
         const nextPath = workspace.path ? renamedDocumentPath(workspace.path, name) : null
         if (!nextPath) throw new Error('Enter a file name.')
@@ -836,10 +1004,16 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
         workspace.closeDialog()
       }
     } catch (cause) {
-      setError(errorMessage(cause))
+      if (mode === 'saveAs' && !force && attemptedPath && cause instanceof WorkspaceConflict) {
+        setReplacePath(attemptedPath)
+        setError(`“${documentTitle(attemptedPath)}” already exists. Replace it with this document?`)
+      } else {
+        setReplacePath(null)
+        setError(errorMessage(cause))
+      }
       setBusy(false)
     }
-  }, [activate, listing, mode, name, selectedRow, workspace])
+  }, [activate, listing, mode, name, replacePath, selectedRow, workspace])
 
   const openInNewWindow = useCallback(async () => {
     if (!selectedRow || selectedRow.kind !== 'document') return
@@ -866,7 +1040,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
           ?.scrollIntoView({ block: 'nearest' })
         return
       }
-      if (event.key === 'Enter' && !busy) {
+      if (event.key === 'Enter' && !busy && (!typing || mode === 'open')) {
         event.preventDefault()
         void submit()
         return
@@ -982,6 +1156,17 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                     </span>
                   ))}
                 </nav>
+                <button
+                  type="button"
+                  className="systemsketch-workspace-new-folder-button"
+                  data-testid="workspace-new-folder"
+                  disabled={busy || !listing?.exists}
+                  onClick={() => {
+                    setCreatingFolder(true)
+                    setFolderName('')
+                    setError(null)
+                  }}
+                >+ Folder</button>
                 <input
                   className="systemsketch-workspace-search"
                   data-testid="workspace-filter"
@@ -993,6 +1178,43 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                   onChange={(event) => setQuery(event.target.value)}
                 />
               </div>
+              {creatingFolder ? (
+                <form className="systemsketch-workspace-new-folder" onSubmit={(event) => {
+                  event.preventDefault()
+                  void createFolder()
+                }}>
+                  <label htmlFor="workspace-new-folder-name">New folder</label>
+                  <input
+                    id="workspace-new-folder-name"
+                    data-testid="workspace-new-folder-name"
+                    autoFocus
+                    value={folderName}
+                    onChange={(event) => setFolderName(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        // Submit exactly once, and do not also let the dialog's
+                        // window-level Enter shortcut open the selected row.
+                        event.preventDefault()
+                        event.stopPropagation()
+                        void createFolder()
+                        return
+                      }
+                      if (event.key !== 'Escape') return
+                      event.preventDefault()
+                      event.stopPropagation()
+                      setCreatingFolder(false)
+                      setFolderName('')
+                      setError(null)
+                    }}
+                  />
+                  <button type="submit" disabled={busy || !folderName.trim()}>Create</button>
+                  <button type="button" onClick={() => {
+                    setCreatingFolder(false)
+                    setFolderName('')
+                    setError(null)
+                  }}>Cancel</button>
+                </form>
+              ) : null}
               <div
                 className="systemsketch-workspace-file-list"
                 ref={listRef}
@@ -1012,7 +1234,11 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                     onClick={() => {
                       setSelectedPath(row.path)
                       if (row.kind === 'folder') void load(row.path)
-                      else if (mode === 'saveAs') setName(row.title)
+                      else if (mode === 'saveAs') {
+                        setName(row.title)
+                        setReplacePath(null)
+                        setError(null)
+                      }
                     }}
                     onDoubleClick={() => void activate(row)}
                   >
@@ -1035,7 +1261,11 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
               </div>
               {mode === 'saveAs' ? (
                 <div className="systemsketch-workspace-name-field is-save-as">
-                  <input autoFocus value={name} aria-label="File name" onChange={(event) => setName(event.target.value)} onKeyDown={(event) => {
+                  <input autoFocus value={name} aria-label="File name" onChange={(event) => {
+                    setName(event.target.value)
+                    setReplacePath(null)
+                    setError(null)
+                  }} onKeyDown={(event) => {
                     if (event.key === 'Enter') void submit()
                   }} />
                   <span>{suffix}</span>
@@ -1047,7 +1277,11 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
 
         {error ? <p className="systemsketch-workspace-dialog__error" role="alert">{error}</p> : null}
         <footer>
-          <button type="button" onClick={workspace.closeDialog}>Cancel</button>
+          <button
+            type="button"
+            data-testid={replacePath ? 'workspace-replace-cancel' : undefined}
+            onClick={workspace.closeDialog}
+          >Cancel</button>
           <div className="systemsketch-workspace-dialog__confirm">
             {mode === 'open' ? (
               <button
@@ -1061,16 +1295,16 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
             ) : null}
             <button
               type="button"
-              className="primary"
-              data-testid="workspace-confirm"
+              className={`primary${replacePath ? ' is-danger' : ''}`}
+              data-testid={replacePath ? 'workspace-replace' : 'workspace-confirm'}
               disabled={busy || (mode === 'open' && !selectedRow)}
-              onClick={() => void submit()}
+              onClick={() => void submit(Boolean(replacePath))}
             >
               {busy
                 ? 'Working…'
                 : mode === 'open'
                   ? selectedRow?.kind === 'folder' ? 'Open folder' : 'Open'
-                  : mode === 'saveAs' ? 'Save' : 'Rename'}
+                  : replacePath ? 'Replace' : mode === 'saveAs' ? 'Save' : 'Rename'}
             </button>
           </div>
         </footer>

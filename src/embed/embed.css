@@ -3,8 +3,8 @@
  *
  * There is deliberately almost nothing here. The pane is small, the host's tab
  * bar already names the file and shows whether it is dirty, and everything a
- * person came to do is on the canvas. Only two things ever paint: a message
- * about an edit that did not land, and a read-only marker.
+ * person came to do is on the canvas. Only three things ever paint: a message
+ * about an edit that did not land, a recovered-edit status, and a read-only marker.
  *
  * These strips sit outside `.tl-container`, so they read the tokens from the
  * app root — which is why `EmbeddedCanvas` stamps `data-ss-theme` on the
@@ -64,8 +64,24 @@
   cursor: pointer;
 }
 
+.systemsketch-embed-error button.systemsketch-embed-error__retry {
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid var(--ss-warning);
+}
+
 .systemsketch-embed-error button:hover {
   background: var(--ss-surface-active);
+}
+
+.systemsketch-embed-recovery {
+  padding: 7px 14px;
+  font: 600 11px/1.4 var(--tl-font-sans, system-ui, sans-serif);
+  color: var(--ss-text);
+  background: var(--ss-success-soft);
+  border-bottom: 1px solid var(--ss-success);
+  text-align: center;
 }
 
 .systemsketch-embed-readonly {
@@ -81,5 +97,17 @@
   background: var(--ss-surface-inverse);
   border-radius: 999px;
   transform: translateX(-50%);
-  pointer-events: none;
+  pointer-events: auto;
+}
+
+.systemsketch-embed-readonly button {
+  margin-left: 8px;
+  padding: 3px 8px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
 }

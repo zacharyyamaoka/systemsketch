@@ -172,6 +172,20 @@ export function detachBlockToPrimitives(
 				props: block.props,
 			}),
 		})
+	} else {
+		// tldraw deliberately refuses to group one shape. A blank Simple Block
+		// can detach to only its card, so let that card carry the full record
+		// itself; rebuildDetachedBlocks already accepts any selected shape with
+		// block metadata and uses its own bounds when there is no child card.
+		editor.updateShape({
+			id: cardId,
+			type: 'geo',
+			meta: detachMeta({
+				kind: 'block',
+				version: DETACH_FORMAT_VERSION,
+				props: block.props,
+			}),
+		})
 	}
 
 	return { groupId, cardId, shapeIds, detachedConnections }
@@ -229,6 +243,7 @@ function rebuildCableAsArrow(
 		}
 	}
 
+	const routing = (cable.connection.props as { routing?: ConnectionRoutingKind }).routing ?? 'elbow'
 	const arrowId = createShapeId()
 	editor.createShape({
 		id: arrowId,
@@ -238,8 +253,11 @@ function rebuildCableAsArrow(
 		props: {
 			start: { x: 0, y: 0 },
 			end: { x: end.x - start.x, y: end.y - start.y },
+			kind: routing === 'elbow' ? 'elbow' : 'arc',
+			bend: routing === 'curved' ? 32 : 0,
 			color: 'grey',
 			size: 's',
+			dash: 'solid',
 			// A data edge is drawn as a plain run between two dots — no heads.
 			// Detach keeps the look, so the arrow that replaces it wears none
 			// either; direction lives in the record, not in a glyph the Block
@@ -250,7 +268,7 @@ function rebuildCableAsArrow(
 		meta: detachMeta({
 			kind: 'connection',
 			version: DETACH_FORMAT_VERSION,
-			routing: (cable.connection.props as { routing?: ConnectionRoutingKind }).routing ?? 'elbow',
+			routing,
 			ends,
 		}),
 	})

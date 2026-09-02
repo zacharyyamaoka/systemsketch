@@ -1,9 +1,5 @@
 import {
-  DefaultToolbar,
   TldrawUiButton,
-  TldrawUiPopover,
-  TldrawUiPopoverContent,
-  TldrawUiPopoverTrigger,
   TldrawUiToolbarButton,
   useActions,
   useEditor,
@@ -11,7 +7,7 @@ import {
   useTldrawUiComponents,
   useValue,
 } from 'tldraw'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { AppearanceControls } from '../appearance/AppearanceControls'
 import { BLOCK_TOOL_ID, getBlockInspectorContext, selectionHasBlockStyles } from '../blocks'
 import {
@@ -23,6 +19,15 @@ import {
   OnCanvasBlockPicker,
 } from '../blocks/ui'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
+import { PortableShareButton } from '../export/PortableShareButton'
+import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
+import { BoardOverview } from './BoardOverview'
+import { LocalCommentsPanel } from '../comments'
+import { BoardDiagnosticsPanel } from '../diagnostics'
+import {
+  SystemSketchCommandPalette,
+  type CommandPaletteAction,
+} from '../commands'
 import { useChrome } from './ChromeProvider'
 import { SelectionContextualMenu } from './SelectionContextualMenu'
 import type { RightSurface } from './chromeState'
@@ -55,19 +60,10 @@ function CommandIcon() {
   )
 }
 
-function BlockIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true">
-      <rect x="3" y="3" width="14" height="14" rx="3" />
-      <path d="M3 7.5h14M6 5.25h.01M8.5 5.25h.01" />
-    </svg>
-  )
-}
-
 export function SystemSketchMenuPanel() {
   const editor = useEditor()
   const { MainMenu, PageMenu } = useTldrawUiComponents()
-  const { leftSurface, toggleLeft } = useChrome()
+  const { leftSurface, toggleLeft, toolbarSurface, setToolbar } = useChrome()
   const ref = useRef<HTMLElement>(null)
   usePassThroughWheelEvents(ref)
   const isSinglePageMode = useValue(
@@ -95,6 +91,15 @@ export function SystemSketchMenuPanel() {
         onClick={() => toggleLeft('shapes')}
       >
         <ShapesIcon />
+      </TldrawUiButton>
+      <TldrawUiButton
+        type="icon"
+        className="systemsketch-shell-icon-button"
+        title="Search and commands"
+        aria-expanded={toolbarSurface !== null}
+        onClick={() => setToolbar(toolbarSurface ? null : 'commands')}
+      >
+        <CommandIcon />
       </TldrawUiButton>
     </nav>
   )
@@ -126,90 +131,28 @@ export function SystemSketchSharePanel() {
       >
         <PanelIcon />
       </TldrawUiButton>
-      <span className="systemsketch-timer" aria-label="Timer placeholder">◉ 03:00</span>
-      <TldrawUiButton type="primary" className="systemsketch-share-button" title="Share placeholder">
-        Share
-      </TldrawUiButton>
+      <PortableShareButton />
     </nav>
   )
 }
 
-function ShapeTile({ label, kind = 'square' }: { label: string; kind?: string }) {
-  return (
-    <button type="button" className="systemsketch-shape-tile" aria-label={label} title={`${label} placeholder`}>
-      <i data-kind={kind} />
-    </button>
-  )
-}
-
 function ShapesLibrary() {
-  return (
-    <div className="systemsketch-library-body">
-      <label className="systemsketch-panel-search">
-        <span aria-hidden="true">⌕</span>
-        <input placeholder="Search shapes" aria-label="Search shapes" />
-      </label>
-      <section>
-        <h3><span>Recents</span><span aria-hidden="true">⌃</span></h3>
-        <div className="systemsketch-shape-grid">
-          <ShapeTile label="Recent rectangle" />
-        </div>
-      </section>
-      <section>
-        <h3><span>Connections</span><span aria-hidden="true">⌃</span></h3>
-        <div className="systemsketch-connection-grid" aria-label="Connection placeholders">
-          <button type="button" title="Elbow connection placeholder">↱</button>
-          <button type="button" title="Curved connection placeholder">⤴</button>
-          <button type="button" title="Arrow connection placeholder">↗</button>
-          <button type="button" title="Network connection placeholder">⌘</button>
-        </div>
-      </section>
-      <section>
-        <h3><span>Basic</span><span aria-hidden="true">⌃</span></h3>
-        <div className="systemsketch-shape-grid">
-          <ShapeTile label="Rectangle" />
-          <ShapeTile label="Ellipse" kind="circle" />
-          <ShapeTile label="Diamond" kind="diamond" />
-          <ShapeTile label="Triangle" kind="triangle" />
-          <ShapeTile label="Rounded rectangle" kind="rounded" />
-          <ShapeTile label="Pentagon" kind="pentagon" />
-          <ShapeTile label="Plus" kind="plus" />
-          <ShapeTile label="Star" kind="star" />
-        </div>
-      </section>
-      <section>
-        <h3><span>Flowchart</span><span aria-hidden="true">⌃</span></h3>
-        <div className="systemsketch-shape-grid">
-          <ShapeTile label="Process" kind="process" />
-          <ShapeTile label="Database" kind="database" />
-          <ShapeTile label="Document" kind="document" />
-          <ShapeTile label="Decision" kind="diamond" />
-        </div>
-      </section>
-    </div>
-  )
-}
-
-function PlaceholderEmptyState({ icon, title, detail }: { icon: string; title: string; detail: string }) {
-  return (
-    <div className="systemsketch-panel-empty">
-      <span aria-hidden="true">{icon}</span>
-      <strong>{title}</strong>
-      <p>{detail}</p>
-    </div>
-  )
+  const { setLeft } = useChrome()
+  return <ShapeLibraryBrowser autoFocus onCancel={() => setLeft(null)} onInserted={() => setLeft(null)} />
 }
 
 function RightSurfaceBody({ surface, onClose }: { surface: RightSurface; onClose(): void }) {
   const editor = useEditor()
+  const readOnly = useValue(
+    'SystemSketch comments read-only state',
+    () => editor.getInstanceState().isReadonly,
+    [editor],
+  )
   if (surface === 'board-overview') {
-    return (
-      <PlaceholderEmptyState
-        icon="▣"
-        title="Board overview"
-        detail="Frames, regions, and board navigation will live here."
-      />
-    )
+    return <BoardOverview />
+  }
+  if (surface === 'diagnostics') {
+    return <BoardDiagnosticsPanel editor={editor} />
   }
   if (surface === 'inspector') {
     // A selected cable is the dock's other subject. The Block lens wins when
@@ -220,13 +163,7 @@ function RightSurfaceBody({ surface, onClose }: { surface: RightSurface; onClose
     }
     return <EditorBlockInspector editor={editor} onRequestClose={onClose} />
   }
-  return (
-    <PlaceholderEmptyState
-      icon="◯"
-      title="Comments"
-      detail="Give feedback, ask a question, or leave a note. Comment data is not wired yet."
-    />
-  )
+  return <LocalCommentsPanel editor={editor} readOnly={readOnly} />
 }
 
 function SelectionMiniMenu() {
@@ -292,7 +229,15 @@ function SelectionMiniMenu() {
 
 export function SystemSketchSurfaceHost() {
   const editor = useEditor()
-  const { leftSurface, rightSurface, setLeft, setRight } = useChrome()
+  const actions = useActions()
+  const {
+    leftSurface,
+    rightSurface,
+    toolbarSurface,
+    setLeft,
+    setRight,
+    setToolbar,
+  } = useChrome()
   const blockInspectorContextKey = useValue(
     'systemsketch Block inspector context',
     () => {
@@ -309,18 +254,113 @@ export function SystemSketchSurfaceHost() {
   )
   const previousBlockInspectorContextKey = useRef<string | null>(null)
 
+  const commandActions = useMemo<CommandPaletteAction[]>(() => {
+    const stock = (id: string) => actions[id]?.onSelect('menu')
+    return [
+      {
+        id: 'find-board',
+        label: 'Find and replace on board',
+        description: 'Search editable text across every page',
+        keywords: ['search', 'replace'],
+        shortcut: 'Ctrl F',
+        icon: '⌕',
+        keepOpen: true,
+        run: () => setToolbar('find-replace'),
+      },
+      {
+        id: 'insert-block',
+        label: 'Insert Block',
+        description: 'Switch to the semantic Block tool',
+        keywords: ['node'],
+        icon: '▣',
+        run: () => editor.setCurrentTool(BLOCK_TOOL_ID),
+      },
+      {
+        id: 'shape-library',
+        label: 'Open Shapes library',
+        description: 'Browse searchable shape families',
+        keywords: ['insert'],
+        icon: '◇',
+        run: () => setLeft('shapes'),
+      },
+      {
+        id: 'show-problems',
+        label: 'Show board Problems',
+        description: 'List diagnostics and navigate to affected objects',
+        keywords: ['lint', 'diagnostics'],
+        icon: '⚠',
+        run: () => setRight('diagnostics'),
+      },
+      {
+        id: 'show-comments',
+        label: 'Show comments',
+        description: 'Review local discussions attached to this board',
+        icon: '◌',
+        run: () => setRight('comments'),
+      },
+      {
+        id: 'select-all',
+        label: 'Select all',
+        shortcut: 'Ctrl A',
+        icon: '◎',
+        run: () => stock('select-all'),
+      },
+      {
+        id: 'undo',
+        label: 'Undo',
+        shortcut: 'Ctrl Z',
+        icon: '↶',
+        disabled: () => !editor.getCanUndo(),
+        run: () => stock('undo'),
+      },
+      {
+        id: 'redo',
+        label: 'Redo',
+        shortcut: 'Ctrl Shift Z',
+        icon: '↷',
+        disabled: () => !editor.getCanRedo(),
+        run: () => stock('redo'),
+      },
+      {
+        id: 'zoom-to-fit',
+        label: 'Zoom to fit',
+        description: 'Show the whole current page',
+        shortcut: 'Shift 1',
+        icon: '⌗',
+        run: () => stock('zoom-to-fit'),
+      },
+    ]
+  }, [actions, editor, setLeft, setRight, setToolbar])
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return
+      const key = event.key.toLowerCase()
+      if (key !== 'k' && key !== 'f') return
+      event.preventDefault()
+      event.stopPropagation()
+      setToolbar(key === 'f' ? 'find-replace' : 'commands')
+    }
+    window.addEventListener('keydown', onKeyDown, true)
+    return () => window.removeEventListener('keydown', onKeyDown, true)
+  }, [setToolbar])
+
   useEffect(() => {
     if (
       blockInspectorContextKey
       && blockInspectorContextKey !== previousBlockInspectorContextKey.current
+      && rightSurface !== 'board-overview'
+      && rightSurface !== 'diagnostics'
     ) {
       setRight('inspector')
     }
     previousBlockInspectorContextKey.current = blockInspectorContextKey
-  }, [blockInspectorContextKey, setRight])
+  }, [blockInspectorContextKey, rightSurface, setRight])
 
   const rightTitle = rightSurface === 'board-overview'
     ? 'Board overview'
+    : rightSurface === 'diagnostics'
+      ? 'Problems'
     : rightSurface === 'inspector'
       ? 'Inspector'
       : 'Comments'
@@ -365,97 +405,16 @@ export function SystemSketchSurfaceHost() {
         </aside>
       ) : null}
 
+      {toolbarSurface ? (
+        <SystemSketchCommandPalette
+          initialMode={toolbarSurface}
+          actions={commandActions}
+          onModeChange={setToolbar}
+          onClose={() => setToolbar(null)}
+        />
+      ) : null}
+
       <SelectionMiniMenu />
-    </div>
-  )
-}
-
-export function SystemSketchToolbar() {
-  const editor = useEditor()
-  const actions = useActions()
-  const { rightSurface, setRight, toolbarSurface, setToolbar } = useChrome()
-  const isOpen = toolbarSurface === 'commands'
-  const isBlockTool = useValue(
-    'systemsketch Block tool selected',
-    () => editor.getCurrentToolId() === BLOCK_TOOL_ID,
-    [editor],
-  )
-
-  const runAction = (id: string) => {
-    actions[id]?.onSelect('toolbar')
-    setToolbar(null)
-  }
-
-  return (
-    <div className="systemsketch-toolbar-shell" data-testid="systemsketch-toolbar-shell">
-      <DefaultToolbar />
-      <div className="systemsketch-toolbar-extras">
-        <TldrawUiButton
-          type="icon"
-          className="systemsketch-block-tool-button"
-          title="Block"
-          isActive={isBlockTool}
-          aria-pressed={isBlockTool}
-          aria-expanded={rightSurface === 'inspector'}
-          onClick={() => {
-            editor.setCurrentTool(BLOCK_TOOL_ID)
-            setRight('inspector')
-          }}
-        >
-          <BlockIcon />
-        </TldrawUiButton>
-        <TldrawUiPopover
-          id="systemsketch-toolbar-commands"
-          open={isOpen}
-          onOpenChange={(open) => setToolbar(open ? 'commands' : null)}
-        >
-          <TldrawUiPopoverTrigger>
-            <TldrawUiButton
-              type="icon"
-              className="systemsketch-toolbar-menu-button"
-              title="Commands and palettes"
-              aria-expanded={isOpen}
-            >
-              <CommandIcon />
-            </TldrawUiButton>
-          </TldrawUiPopoverTrigger>
-          <TldrawUiPopoverContent side="top" align="end" sideOffset={8} collisionPadding={16}>
-            <section
-              className="systemsketch-toolbar-menu"
-              aria-label="Commands and palettes"
-              data-testid="systemsketch-toolbar-menu"
-              data-systemsketch-chrome
-              onWheel={(event) => event.stopPropagation()}
-            >
-              <label className="systemsketch-panel-search">
-                <span aria-hidden="true">⌕</span>
-                <input
-                  autoFocus
-                  placeholder="Search"
-                  aria-label="Search commands"
-                  onKeyDown={(event) => event.stopPropagation()}
-                />
-              </label>
-              <span className="systemsketch-toolbar-menu__eyebrow">Suggestions</span>
-              <button type="button" disabled>
-                <span>⌕ &nbsp; Find and replace…</span><kbd>Ctrl F</kbd>
-              </button>
-              <button type="button" onClick={() => runAction('select-all')}>
-                <span>◎ &nbsp; Select all</span><kbd>Ctrl A</kbd>
-              </button>
-              <button type="button" onClick={() => runAction('undo')}>
-                <span>↶ &nbsp; Undo</span><kbd>Ctrl Z</kbd>
-              </button>
-              <span className="systemsketch-toolbar-menu__eyebrow">Quick colors</span>
-              <div className="systemsketch-color-row" aria-label="Color placeholders">
-                {['violet', 'orange', 'yellow', 'green', 'white'].map((color) => (
-                  <button key={color} type="button" data-color={color} aria-label={`${color} placeholder`} />
-                ))}
-              </div>
-            </section>
-          </TldrawUiPopoverContent>
-        </TldrawUiPopover>
-      </div>
     </div>
   )
 }

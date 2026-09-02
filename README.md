@@ -2,13 +2,17 @@
 
 SystemSketch starts from one deliberately boring datum: the stock tldraw whiteboard. Its engine, drawing tools, and shortcuts stay stock while narrow supported seams add local files, board overview, zoom, Help, and the Stable/Preview workflow.
 
+## Current improvement review
+
+The [35-item repo improvement review](docs/repo-improvement-review-2026-09-02.html) ranks the audited gaps, shows the top ten already running with real-browser evidence, and gives each shipped fix and remaining candidate its own accept checkbox and review note. The [follow-up decision gallery](docs/repo-improvement-followup-review-2026-09-02.html) covers the revised future-format workflow plus comments, commands, timer removal, diagnostics, and folder creation with one accept checkbox and note field per change. These are temporary decision surfaces; code and ordinary regression tests remain the living specification.
+
 [Open the rendered foundation report](docs/systemsketch-foundation-2026-08-30.html)
 
 ## The starting point
 
 - `tldraw@5.3.2`, pinned exactly.
 - Stock `<Tldraw>` engine extended through its supported component, shape, and mount seams.
-- One ordinary local `.tldr` file is canonical; autosave and smart reopen survive refreshes.
+- One local `.systemsketch` document is canonical; autosave and smart reopen survive refreshes, while portable export produces a stock-readable `.tldr`.
 - Self-hosted tldraw assets and the SDK license-key seam.
 - Release status is tucked into Help instead of occupying the top of the canvas.
 
@@ -91,7 +95,7 @@ The [Block primitive port review and five-direction UI gallery](docs/block-primi
 
 The [major UI shell implementation proposals](docs/major-ui-shell-proposals-2026-08-31.html) compare five ways to compose the persistent top capsules, inset left/right popouts, selected-object mini menu, and above-toolbar menus. The provisional V1 recommendation maps each region to the narrowest public tldraw seam and keeps the top-right collaboration capsule permanently visible.
 
-The [major UI shell + Block implementation gallery](docs/major-ui-shell-block-implementation-2026-08-31.html) shows the selected direction running in Preview, maps each surface to its public tldraw seam, and records browser proof for the historical expanded-Block nesting bug. The shell geometry and Block inspector are working; shapes, comments, board-overview, collaboration, and quick-command contents remain explicit placeholders.
+The [major UI shell + Block implementation gallery](docs/major-ui-shell-block-implementation-2026-08-31.html) shows the selected direction running in Preview, maps each surface to its public tldraw seam, and records browser proof for the historical expanded-Block nesting bug. At that historical snapshot, shapes, comments, board overview, collaboration, and quick commands were explicit placeholders; the current review galleries above show the implemented comments, overview, shape library, and commands.
 
 The [Excalidraw rounded-corner paste investigation](docs/excalidraw-rounded-corners-investigation-2026-08-31.html) traces the current conversion loss and recommends a custom geo plus a thin external-content adapter as the smallest maintainable fix.
 

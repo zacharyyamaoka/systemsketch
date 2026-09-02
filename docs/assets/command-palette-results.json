@@ -1,0 +1,42 @@
+[
+  {
+    "label": "Ctrl+K opens the command palette with its search input focused and real actions listed",
+    "ok": true
+  },
+  {
+    "label": "typing and Enter run the filtered command callback, then close the palette",
+    "ok": true
+  },
+  {
+    "label": "Tab stays inside the modal; Escape closes it and restores focus to the visible trigger",
+    "ok": true
+  },
+  {
+    "label": "Ctrl+F finds Block, Frame, and rich-text adapters in stable order across two pages",
+    "ok": true
+  },
+  {
+    "label": "clicking a result opens its page, selects the shape, and camera-reveals it",
+    "ok": true
+  },
+  {
+    "label": "Replace and Replace All update all supported adapters while retaining rich-text marks",
+    "ok": true
+  },
+  {
+    "label": "one Ctrl+Z restores the entire Replace All batch while preserving the earlier single replacement",
+    "ok": true
+  },
+  {
+    "label": "a match spanning formatting is explained, disabled, and safely unchanged even on Enter",
+    "ok": true
+  },
+  {
+    "label": "locked shape text is searchable and navigable but its replacement controls stay disabled",
+    "ok": true
+  },
+  {
+    "label": "the complete keyboard, navigation, edit, undo, and refusal journey emits no browser errors",
+    "ok": true
+  }
+]

@@ -14,29 +14,36 @@
 export type {
   EmbedAcceptedMessage,
   EmbedAppearanceMessage,
+  EmbedCheckpointMessage,
+  EmbedCheckpointSettledMessage,
   EmbedChangeMessage,
+  EmbedCompatibilityCopyRequest,
   EmbedErrorMessage,
   EmbedExternalChangeMessage,
   EmbedHostErrorMessage,
   EmbedOpenMessage,
   EmbedReadyMessage,
+  EmbedRecoveryCheckpoint,
   EmbedToHostMessage,
   HostToEmbedMessage,
 } from './embedProtocol'
 export { EMBED_HOST_KEY } from './embedProtocol'
 
 export {
+  createCompatibilityCopyText,
   decodeDocumentText,
   documentEncoding,
   documentSuffix,
   documentTitle,
   encodeDocumentText,
   isBlankDocument,
+  newerDocumentVersion,
   systemSketchManifest,
   DOCUMENT_SUFFIXES,
   SYSTEMSKETCH_ENVELOPE_KEY,
   SYSTEMSKETCH_SUFFIX,
   TLDRAW_SUFFIX,
   type DocumentSuffix,
+  type NewerDocumentVersion,
   type SystemSketchManifest,
 } from './sketchDocument'
