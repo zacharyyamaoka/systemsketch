@@ -41,10 +41,12 @@ import {
   setBlockPortLayoutForSelection,
   setBlockViewForSelection,
   setConnectionRoutingForSelection,
+  setConnectionTemporalForSelection,
 } from '../commands/blockStyleCommands'
 import {
   CONNECTION_ROUTING_KINDS,
   ConnectionRoutingStyle,
+  ConnectionTemporalStyle,
   type ConnectionRoutingKind,
 } from '../connections/connectionModel'
 import {
@@ -128,6 +130,11 @@ function BlockContextMenuItems() {
   const connectionRouting = useValue(
     'context-menu connection routing',
     () => getSharedStyleForSelection(editor, ConnectionRoutingStyle),
+    [editor],
+  )
+  const connectionTemporal = useValue(
+    'context-menu connection temporal',
+    () => getSharedStyleForSelection(editor, ConnectionTemporalStyle),
     [editor],
   )
   const connectionCount = useValue(
@@ -367,6 +374,22 @@ function BlockContextMenuItems() {
               ))}
             </TldrawUiMenuGroup>
           </TldrawUiMenuSubmenu>
+        </TldrawUiMenuGroup>
+      ) : null}
+
+      {connectionCount > 0 && connectionTemporal ? (
+        <TldrawUiMenuGroup id="systemsketch-connection-temporal">
+          <TldrawUiMenuCheckboxItem
+            id="connection-temporal-delayed"
+            label={`Delayed (z⁻¹)${batchSuffix(connectionCount)}`}
+            checked={isSharedStyleValue(connectionTemporal, 'delayed')}
+            onSelect={() => {
+              setConnectionTemporalForSelection(
+                editor,
+                isSharedStyleValue(connectionTemporal, 'delayed') ? 'data' : 'delayed',
+              )
+            }}
+          />
         </TldrawUiMenuGroup>
       ) : null}
 

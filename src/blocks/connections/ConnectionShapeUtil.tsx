@@ -59,6 +59,10 @@ import {
 	type ConnectionTerminal,
 	type PortDot,
 	type PortFace,
+	ConnectionTemporalStyle,
+	type ConnectionTemporalKind,
+	clampPillPosition,
+	PILL_POSITION_DEFAULT,
 } from './connectionModel'
 import {
 	blocksThatWouldCycle,
@@ -67,6 +71,19 @@ import {
 	firstOuterPortForPolarity,
 } from './connectionRules'
 import { anchorFaceForScope, blockScopeId } from './connectionScope'
+import {
+	cablePresentation,
+	DELAY_DOT_GAP_PX,
+	DELAY_DOT_PX,
+	DELAY_PILL_HEIGHT,
+	delayPillLabel,
+	delayPillWidth,
+	fractionNearest,
+	PATH_LENGTH_UNITS,
+	pointAtFraction,
+	polylineLength,
+	splitDashArrays,
+} from './connectionPresentation'
 import { BRANCH_FADE_OPACITY } from '../../branch/branchModel'
 import { branchAncestry, branchFadeOpacity } from '../../branch/branchScope'
 import {
@@ -113,6 +130,12 @@ declare module 'tldraw' {
 			 * segment. Null = auto-routed (A* plus pins).
 			 */
 			elbowRoute: ConnectionElbowRouteModel | null
+			/** `data` on this pass, `delayed` one iteration later (a loop's back edge). */
+			temporal: ConnectionTemporalKind
+			/** The initial value a delayed cable names in its pill, `= value`; empty = none. */
+			delayValue: string
+			/** Where the z⁻¹ pill sits, as a fraction of the cable's arc length. */
+			pillPosition: number
 		}
 	}
 }
@@ -138,10 +161,14 @@ export const connectionShapeProps: RecordProps<ConnectionShape> = {
 	curve: T.object({ dx: T.number, dy: T.number }).nullable(),
 	pins: T.arrayOf(elbowPinValidator),
 	elbowRoute: elbowRouteValidator.nullable(),
+	temporal: ConnectionTemporalStyle,
+	delayValue: T.string,
+	pillPosition: T.number,
 }
 
 const connectionVersions = createShapePropsMigrationIds(CONNECTION_SHAPE_TYPE, {
 	AddAuthoredRoutingGeometry: 1,
+	AddTemporalQualifier: 2,
 })
 
 const connectionShapeMigrations = createShapePropsMigrationSequence({
@@ -159,6 +186,19 @@ const connectionShapeMigrations = createShapePropsMigrationSequence({
 			delete props.curve
 			delete props.pins
 			delete props.elbowRoute
+		},
+	}, {
+		id: connectionVersions.AddTemporalQualifier,
+		up(props) {
+			// Every cable saved before the edge vocabulary is a plain data cable.
+			if (props.temporal === undefined) props.temporal = 'data'
+			if (props.delayValue === undefined) props.delayValue = ''
+			if (props.pillPosition === undefined) props.pillPosition = PILL_POSITION_DEFAULT
+		},
+		down(props) {
+			delete props.temporal
+			delete props.delayValue
+			delete props.pillPosition
 		},
 	}],
 })
@@ -179,6 +219,9 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			curve: null,
 			pins: [],
 			elbowRoute: null,
+			temporal: 'data',
+			delayValue: '',
+			pillPosition: PILL_POSITION_DEFAULT,
 		}
 	}
 
@@ -306,6 +349,16 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			{ id: 'end', type: 'vertex', index: 'a1' as IndexKey, x: end.x, y: end.y },
 		]
 
+		// The z⁻¹ pill is a thing you can see, so it is always a thing you can
+		// drag: it rides the cable at `pillPosition` and slides along it.
+		if (connection.props.temporal === 'delayed') {
+			const pill = pointAtFraction(
+				getConnectionRenderPoints(this.editor, connection),
+				clampPillPosition(connection.props.pillPosition),
+			)
+			handles.push({ id: 'pill', type: 'virtual', index: 'a1V' as IndexKey, x: pill.x, y: pill.y })
+		}
+
 		// Figma's rule: a selected edge offers its control points only while the
 		// pointer is near it. Without this, selecting a cable sprinkles handles
 		// across the board and every one of them is a thing you can knock.
@@ -373,6 +426,17 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		connection: ConnectionShape,
 		{ handle }: TLHandleDragInfo<ConnectionShape>,
 	) {
+		// The pill slides along the cable: the nearest point of the routed path
+		// to the pointer, kept clear of both ports.
+		if (handle.id === 'pill') {
+			const points = getConnectionRenderPoints(this.editor, connection)
+			return {
+				id: connection.id,
+				type: CONNECTION_SHAPE_TYPE,
+				props: { pillPosition: clampPillPosition(fractionNearest(points, handle)) },
+			}
+		}
+
 		// A dragged control point activates a bend through the pointer. Dragging
 		// it on a straight cable turns that cable into a curve — activation in the
 		// Excalidraw sense, which is what the FR's "drag it and it becomes curved"
@@ -598,14 +662,16 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 	}
 
 	override toSvg(connection: ConnectionShape) {
+		const path = getConnectionShapePath(this.editor, connection)
+		if (connection.props.temporal !== 'delayed') {
+			return <path d={path} fill="none" stroke="#475569" strokeLinecap="round" strokeWidth={2} />
+		}
+		const pill = delayPillGeometry(this.editor, connection)
 		return (
-			<path
-				d={getConnectionShapePath(this.editor, connection)}
-				fill="none"
-				stroke="#475569"
-				strokeLinecap="round"
-				strokeWidth={2}
-			/>
+			<g>
+				<DelayedCablePaths path={path} pill={pill} dashAfterPill={cablePresentation.get().dashAfterPill} stroke="#475569" />
+				<DelayPill pill={pill} label={delayPillLabel(connection.props.delayValue)} stroke="#475569" fill="#ffffff" ink="#1d2230" />
+			</g>
 		)
 	}
 
@@ -641,17 +707,158 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		() => connectionBranchFade(editor, connection),
 		[editor, connection.id],
 	)
+	const delayed = connection.props.temporal === 'delayed'
+	const dashAfterPill = useValue('dash after pill', () => cablePresentation.get().dashAfterPill, [])
+	const pill = useValue(
+		'delay pill geometry',
+		() => (delayed ? delayPillGeometry(editor, connection) : null),
+		[editor, connection, delayed],
+	)
+	const stroke = 'var(--tl-color-text-3, #475569)'
+	if (!delayed || !pill) {
+		return (
+			<SVGContainer style={{ opacity }}>
+				<path
+					d={path}
+					fill="none"
+					stroke={stroke}
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					strokeWidth={2}
+				/>
+			</SVGContainer>
+		)
+	}
 	return (
-		<SVGContainer style={{ opacity }}>
+		<SVGContainer style={{ opacity }} data-temporal="delayed">
+			<DelayedCablePaths path={path} pill={pill} dashAfterPill={dashAfterPill} stroke={stroke} />
+			<DelayPill
+				pill={pill}
+				label={delayPillLabel(connection.props.delayValue)}
+				stroke={stroke}
+				fill="var(--ss-surface, #ffffff)"
+				ink="var(--ss-text, #1d2230)"
+			/>
+		</SVGContainer>
+	)
+}
+
+interface DelayPillGeometry {
+	x: number
+	y: number
+	/** Arc length of the routed cable, in shape units. */
+	length: number
+	dash: ReturnType<typeof splitDashArrays>
+}
+
+/** Where the pill sits on this cable's routed path, and the dashes that split there. */
+export function delayPillGeometry(editor: Editor, connection: ConnectionShape): DelayPillGeometry {
+	const points = getConnectionRenderPoints(editor, connection)
+	const t = clampPillPosition(connection.props.pillPosition)
+	const at = pointAtFraction(points, t)
+	const length = polylineLength(points)
+	return { x: at.x, y: at.y, length, dash: splitDashArrays(length, t) }
+}
+
+/**
+ * The delayed line: dotted end to end by default, or dotted up to the pill
+ * and dashed after it when the presentation switch says so. The split draws
+ * the same smooth path twice with complementary dash arrays normalised to
+ * `pathLength`, so a curve stays a curve.
+ */
+function DelayedCablePaths({
+	path,
+	pill,
+	dashAfterPill,
+	stroke,
+}: {
+	path: string
+	pill: DelayPillGeometry
+	dashAfterPill: boolean
+	stroke: string
+}) {
+	if (!dashAfterPill) {
+		return (
 			<path
 				d={path}
 				fill="none"
-				stroke="var(--tl-color-text-3, #475569)"
+				stroke={stroke}
 				strokeLinecap="round"
 				strokeLinejoin="round"
 				strokeWidth={2}
+				strokeDasharray={`${DELAY_DOT_PX} ${DELAY_DOT_GAP_PX}`}
+				data-delay-segment="all"
 			/>
-		</SVGContainer>
+		)
+	}
+	return (
+		<>
+			<path
+				d={path}
+				pathLength={PATH_LENGTH_UNITS}
+				fill="none"
+				stroke={stroke}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				strokeWidth={2}
+				strokeDasharray={pill.dash.before}
+				data-delay-segment="before"
+			/>
+			<path
+				d={path}
+				pathLength={PATH_LENGTH_UNITS}
+				fill="none"
+				stroke={stroke}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				strokeWidth={2}
+				strokeDasharray={pill.dash.after}
+				data-delay-segment="after"
+			/>
+		</>
+	)
+}
+
+/** The z⁻¹ pill: a value store riding the cable, in the port default chip's grammar. */
+function DelayPill({
+	pill,
+	label,
+	stroke,
+	fill,
+	ink,
+}: {
+	pill: DelayPillGeometry
+	label: string
+	stroke: string
+	fill: string
+	ink: string
+}) {
+	const width = delayPillWidth(label)
+	return (
+		<g transform={`translate(${pill.x} ${pill.y})`} data-testid="connection-delay-pill">
+			<rect
+				x={-width / 2}
+				y={-DELAY_PILL_HEIGHT / 2}
+				width={width}
+				height={DELAY_PILL_HEIGHT}
+				rx={DELAY_PILL_HEIGHT / 2}
+				fill={fill}
+				stroke={stroke}
+				strokeWidth={1.3}
+			/>
+			<text
+				x={0}
+				y={4}
+				textAnchor="middle"
+				fontSize={12}
+				fontWeight={700}
+				fontFamily="'JetBrains Mono', ui-monospace, Menlo, monospace"
+				fill={ink}
+				style={{ userSelect: 'none' }}
+			>
+				{label}
+			</text>
+		</g>
 	)
 }
 
@@ -782,6 +989,21 @@ export function getConnectionShapeGeometryPoints(
 ): Vec[] {
 	const connection = editor.getShape<ConnectionShape>(connectionId)
 	if (!connection || connection.type !== CONNECTION_SHAPE_TYPE) return []
+	return sampleConnectionPoints(editor, connection, CABLE_PROXIMITY_SAMPLES)
+}
+
+/**
+ * The routed path as a polyline dense enough to place a mark on by arc length:
+ * exact for an elbow or a straight cable, sampled for a curve.
+ */
+export function getConnectionRenderPoints(
+	editor: Editor,
+	connection: ConnectionShape,
+): Vec[] {
+	return sampleConnectionPoints(editor, connection, CABLE_RENDER_SAMPLES)
+}
+
+function sampleConnectionPoints(editor: Editor, connection: ConnectionShape, sampleCount: number): Vec[] {
 	const { source, sink } = getConnectionEndpoints(editor, connection)
 	const { routing, curve } = connection.props
 
@@ -795,8 +1017,8 @@ export function getConnectionShapeGeometryPoints(
 		? getBentCurveCubicControlPoints(source, sink, curve)
 		: getConnectionControlPoints(source, sink)
 	const samples: Vec[] = []
-	for (let step = 0; step <= CABLE_PROXIMITY_SAMPLES; step += 1) {
-		const t = step / CABLE_PROXIMITY_SAMPLES
+	for (let step = 0; step <= sampleCount; step += 1) {
+		const t = step / sampleCount
 		const u = 1 - t
 		samples.push(new Vec(
 			u * u * u * source.x + 3 * u * u * t * cp1.x + 3 * u * t * t * cp2.x + t * t * t * sink.x,
@@ -808,6 +1030,8 @@ export function getConnectionShapeGeometryPoints(
 
 /** Enough to keep the proximity answer smooth on a long curve, cheap to walk. */
 const CABLE_PROXIMITY_SAMPLES = 24
+/** Enough that a pill placed by arc length sits on the drawn curve, not beside it. */
+const CABLE_RENDER_SAMPLES = 64
 
 /** Resolve both handles in connection-local coordinates. */
 export function getConnectionTerminals(editor: Editor, connection: ConnectionShape) {
