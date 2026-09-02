@@ -349,13 +349,17 @@ export function stampBranchChildArms(editor: Editor, branch: BranchShape): numbe
 	const updates: Array<{ id: TLShapeId; type: string; meta: Record<string, unknown> }> = []
 	const layout = branchLayout(branch.props)
 	for (const child of branchArmChildren(editor, branch)) {
-		// Only geometry can re-home a child: an open arm's row must hold its top
-		// edge. Children of folded arms keep the stamp they have.
-		const row = layout.arms.find((arm) => arm.bodyH > 0 && child.y >= arm.rowTop && child.y < arm.bottom)
 		const stamped = child.meta?.[BRANCH_ARM_META_KEY]
-		const stampedIsLive = typeof stamped === 'string'
-			&& branch.props.arms.some((arm) => arm.id === stamped)
-		const armId = row?.arm.id ?? (stampedIsLive ? (stamped as string) : branchArmIdOfChild(branch, child))
+		const stampedArm = typeof stamped === 'string'
+			? branch.props.arms.find((arm) => arm.id === stamped)
+			: undefined
+		// A child of a FOLDED arm keeps its stamp: its row has no body, so its
+		// top edge now overlaps whatever open arm sits below, and geometry would
+		// re-home it there — which is exactly the misreading a fold must survive.
+		if (stampedArm && !stampedArm.open) continue
+		// Otherwise geometry wins: the open arm whose row holds the top edge.
+		const row = layout.arms.find((arm) => arm.bodyH > 0 && child.y >= arm.rowTop && child.y < arm.bottom)
+		const armId = row?.arm.id ?? stampedArm?.id ?? branchArmIdOfChild(branch, child)
 		if (!armId || stamped === armId) continue
 		updates.push({ id: child.id, type: child.type, meta: { ...child.meta, [BRANCH_ARM_META_KEY]: armId } })
 	}

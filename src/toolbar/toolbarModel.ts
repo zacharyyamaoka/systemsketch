@@ -173,6 +173,7 @@ export function updateToolbarPreferences(
     next.lastShapeTool === snapshot.lastShapeTool
     && next.lastArrowPreset === snapshot.lastArrowPreset
     && next.lastDrawTool === snapshot.lastDrawTool
+    && next.lastSystemTool === snapshot.lastSystemTool
   ) {
     return snapshot
   }

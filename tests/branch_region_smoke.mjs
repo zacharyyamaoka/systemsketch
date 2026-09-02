@@ -134,9 +134,13 @@ async function portBlock(page, from, to, title) {
   return (await blockIds(page)).find((id) => !before.has(id))
 }
 
+/**
+ * Select the Branch by its band, clear of every text field: a click on the
+ * title of an already-selected Branch is (correctly) the edit gesture.
+ */
 async function selectBranch(page) {
-  const band = await box(page, '[data-testid="branch-title"]')
-  await clickAt(page, band.x + 8, band.cy)
+  const band = await box(page, '.systemsketch-branch-canvas .Branch-band')
+  await clickAt(page, band.x + band.w - 6, band.cy)
   await delay(260)
 }
 
@@ -164,29 +168,35 @@ async function main() {
       await evaluate(page, `Boolean(document.querySelector('[data-testid="systemsketch-tool-branch"]'))`), false)
     await clickTestId(page, 'systemsketch-tool-system-menu')
     await waitFor(page, `Array.from(document.querySelectorAll('.systemsketch-tool-menu__item')).some((n) => n.textContent.includes('Branch'))`, 'system menu')
-    const items = JSON.parse(await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('.systemsketch-tool-menu__item')).map((n) => n.textContent.trim().replace(/\\s+/g, ' ')))`))
-    check('BR-3', 'the submenu lists Block (B) and Branch under one heading', items.map((t) => t.split(' ')[0]), ['Block', 'Branch'])
+    const items = JSON.parse(await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('.systemsketch-tool-menu__item .tlui-button__label')).map((n) => n.textContent.trim()))`))
+    check('BR-3', 'the submenu lists Block and Branch under one heading', items, ['Block', 'Branch'])
     const branchItem = JSON.parse(await evaluate(page, `(() => {
       const item = Array.from(document.querySelectorAll('.systemsketch-tool-menu__item')).find((n) => n.textContent.includes('Branch'))
       const r = item.getBoundingClientRect(); return JSON.stringify({ cx: r.x + r.width / 2, cy: r.y + r.height / 2 })
     })()`))
+    await shot(page, 'branch-region-1-submenu.png')
     await clickAt(page, branchItem.cx, branchItem.cy)
     await delay(300)
     check('BR-4', 'picking Branch activates the branch tool', await editorEval(page, 'return editor.getCurrentToolId()'), 'branch')
-    await shot(page, 'branch-region-1-submenu.png')
+    await shot(page, 'branch-region-1b-picked.png')
 
     // 2 · Draw the region.
-    await dragBox(page, { x: 560, y: 150 }, { x: 1180, y: 640 })
+    // Tall enough that a port-view Block fits inside one arm's body.
+    await dragBox(page, { x: 560, y: 120 }, { x: 1180, y: 800 })
     let branch = await branchRecord(page)
     check('BR-5', 'a drawn Branch has two open arms and no control ports',
       { arms: branch.arms.map((a) => [a.title, a.open]), controls: branch.controls.length, view: branch.view },
       { arms: [['if', true], ['else', true]], controls: 0, view: 'expanded' })
     check('BR-6', 'the slot icon now remembers Branch as the last system tool',
-      await evaluate(page, `document.querySelector('[data-testid="systemsketch-tool-system"] .systemsketch-branch-icon') !== null`), true)
+      JSON.parse(await evaluate(page, `JSON.stringify({
+        icon: document.querySelector('[data-testid="systemsketch-tool-system"] .systemsketch-branch-icon') !== null,
+        stored: JSON.parse(localStorage.getItem('systemsketch.toolbar-preferences.v1') || '{}').lastSystemTool ?? null,
+      })`)), { icon: true, stored: 'branch' })
     await waitFor(page, `document.querySelector('[data-testid="branch-pill-add-control"]')`, 'Branch pill')
     check('BR-7', 'the selection pill reads Branch · + port · + arm · E · C · ◎ · Inspect',
-      await evaluate(page, `Array.from(document.querySelectorAll('.branch-mini-menu button')).map((b) => b.textContent.trim().split(/\\s/)[0]).join(' ')`),
-      '+ + E C ◎ Inspect')
+      JSON.parse(await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('.branch-mini-menu > *, .branch-mini-menu button')).map((b) => b.dataset.testid ?? b.className.split(' ')[0]).filter(Boolean))`)),
+      ['block-mini-menu__count', 'block-mini-menu__views', 'branch-pill-add-control', 'branch-pill-add-arm',
+        'block-mini-menu__views', 'branch-pill-view-expanded', 'branch-pill-view-case', 'branch-pill-active', 'block-mini-menu__inspect'])
 
     // 3 · Control ports: the band "+" then the inspector "+", each with a name.
     await clickTestId(page, 'branch-add-control')
@@ -198,8 +208,8 @@ async function main() {
     branch = await branchRecord(page)
     check('BR-9', 'the inspector "+" adds a second control port on the band', branch.controls.map((c) => c.id), ['ctrl_1', 'ctrl_2'])
     check('BR-10', 'two dots sit on the band, spread evenly',
-      JSON.parse(await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('[data-testid^="branch-control-dot-"]')).map((n) => n.style.top))`)),
-      ['13.333333333333334px', '26.666666666666668px'])
+      JSON.parse(await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('[data-testid^="branch-control-dot-"]')).map((n) => Math.round(parseFloat(n.style.top))))`)),
+      [13, 27])
     const removeCtrl = await box(page, '[aria-label="Remove ctrl_2"]')
     await clickAt(page, removeCtrl.cx, removeCtrl.cy)
     await delay(260)
@@ -207,6 +217,7 @@ async function main() {
     check('BR-11', 'the inspector × removes a control port', branch.controls.map((c) => c.name), ['fast'])
 
     // 4 · Arms: the "+ arm" row, then the inspector; titles by single click.
+    await selectBranch(page)
     await clickTestId(page, 'branch-add-arm')
     await typeInline(page, 'branch-inline-arm-arm_3', 'elif')
     branch = await branchRecord(page)

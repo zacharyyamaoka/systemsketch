@@ -198,7 +198,9 @@ export function branchLayout(props: BranchShapeProps): BranchLayout {
 		title,
 		controls,
 		arms,
-		addArmRow: { x: 8, y: cursor - 2, w: Math.max(0, w - 16), h: BRANCH_ADD_ARM_ROW_HEIGHT },
+		// Hangs off the bottom edge, as the "+" bubble hangs off the band's left
+		// edge: a selected-only affordance never takes room inside the region.
+		addArmRow: { x: 8, y: cursor + BRANCH_PAD_BOTTOM + 6, w: Math.max(0, w - 16), h: BRANCH_ADD_ARM_ROW_HEIGHT },
 		addControl: { x: 0, y: BRANCH_BAND_HEIGHT / 2 },
 	}
 }

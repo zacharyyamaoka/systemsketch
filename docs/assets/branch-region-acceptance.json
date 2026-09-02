@@ -1,0 +1,536 @@
+[
+  {
+    "id": "BR-1",
+    "label": "the Block slot is a family with a submenu, not a bare button",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "BR-2",
+    "label": "Branch is not a top-level toolbar slot",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "BR-3",
+    "label": "the submenu lists Block and Branch under one heading",
+    "observed": [
+      "Block",
+      "Branch"
+    ],
+    "desired": [
+      "Block",
+      "Branch"
+    ],
+    "ok": true
+  },
+  {
+    "id": "BR-4",
+    "label": "picking Branch activates the branch tool",
+    "observed": "branch",
+    "desired": "branch",
+    "ok": true
+  },
+  {
+    "id": "BR-5",
+    "label": "a drawn Branch has two open arms and no control ports",
+    "observed": {
+      "arms": [
+        [
+          "if",
+          true
+        ],
+        [
+          "else",
+          true
+        ]
+      ],
+      "controls": 0,
+      "view": "expanded"
+    },
+    "desired": {
+      "arms": [
+        [
+          "if",
+          true
+        ],
+        [
+          "else",
+          true
+        ]
+      ],
+      "controls": 0,
+      "view": "expanded"
+    },
+    "ok": true
+  },
+  {
+    "id": "BR-6",
+    "label": "the slot icon now remembers Branch as the last system tool",
+    "observed": {
+      "icon": true,
+      "stored": "branch"
+    },
+    "desired": {
+      "icon": true,
+      "stored": "branch"
+    },
+    "ok": true
+  },
+  {
+    "id": "BR-7",
+    "label": "the selection pill reads Branch · + port · + arm · E · C · ◎ · Inspect",
+    "observed": [
+      "block-mini-menu__count",
+      "block-mini-menu__views",
+      "branch-pill-add-control",
+      "branch-pill-add-arm",
+      "block-mini-menu__views",
+      "branch-pill-view-expanded",
+      "branch-pill-view-case",
+      "branch-pill-active",
+      "block-mini-menu__inspect"
+    ],
+    "desired": [
+      "block-mini-menu__count",
+      "block-mini-menu__views",
+      "branch-pill-add-control",
+      "branch-pill-add-arm",
+      "block-mini-menu__views",
+      "branch-pill-view-expanded",
+      "branch-pill-view-case",
+      "branch-pill-active",
+      "block-mini-menu__inspect"
+    ],
+    "ok": true
+  },
+  {
+    "id": "BR-8",
+    "label": "the band \"+\" adds a control port and its name is typed in place",
+    "observed": [
+      {
+        "id": "ctrl_1",
+        "name": "fast"
+      }
+    ],
+    "desired": [
+      {
+        "id": "ctrl_1",
+        "name": "fast"
+      }
+    ],
+    "ok": true
+  },
+  {
+    "id": "BR-9",
+    "label": "the inspector \"+\" adds a second control port on the band",
+    "observed": [
+      "ctrl_1",
+      "ctrl_2"
+    ],
+    "desired": [
+      "ctrl_1",
+      "ctrl_2"
+    ],
+    "ok": true
+  },
+  {
+    "id": "BR-10",
+    "label": "two dots sit on the band, spread evenly",
+    "observed": [
+      13,
+      27
+    ],
+    "desired": [
+      13,
+      27
+    ],
+    "ok": true
+  },
+  {
+    "id": "BR-11",
+    "label": "the inspector × removes a control port",
+    "observed": [
+      "fast"
+    ],
+    "desired": [
+      "fast"
+    ],
+    "ok": true
+  },
+  {
+    "id": "BR-12",
+    "label": "the \"+ arm\" row adds an arm and its title is typed in place",
+    "observed": [
+      "if",
+      "else",
+      "elif"
+    ],
+    "desired": [
+      "if",
+      "else",
+      "elif"
+    ],
+    "ok": true
+  },
+  {
+    "id": "BR-13",
+    "label": "the inspector \"+\" adds an arm too",
+    "observed": 4,
+    "desired": 4,
+    "ok": true
+  },
+  {
+    "id": "BR-14",
+    "label": "the inspector × removes an arm",
+    "observed": [
+      "if",
+      "else",
+      "elif"
+    ],
+    "desired": [
+      "if",
+      "else",
+      "elif"
+    ],
+    "ok": true
+  },
+  {
+    "id": "BR-15",
+    "label": "a single click on an arm title of the selected Branch edits it",
+    "observed": "if fast",
+    "desired": "if fast",
+    "ok": true
+  },
+  {
+    "id": "BR-16",
+    "label": "Blocks drawn in the arms are children of the Branch, stamped with their arm",
+    "observed": [
+      {
+        "title": "estimate()",
+        "arm": "arm_1",
+        "hidden": false
+      },
+      {
+        "title": "fallback()",
+        "arm": "arm_2",
+        "hidden": false
+      }
+    ],
+    "desired": [
+      {
+        "title": "estimate()",
+        "arm": "arm_1",
+        "hidden": false
+      },
+      {
+        "title": "fallback()",
+        "arm": "arm_2",
+        "hidden": false
+      }
+    ],
+    "ok": true
+  },
+  {
+    "id": "BR-17",
+    "label": "cables run straight to the Blocks inside the arms and to the control port on the band",
+    "observed": [
+      "block:decode().out_1 ↔ block:estimate().in_1",
+      "block:decode().out_1 ↔ block:fallback().in_1",
+      "block:flag().out_1 ↔ branch:Branch.ctrl_1"
+    ],
+    "desired": [
+      "block:decode().out_1 ↔ block:estimate().in_1",
+      "block:decode().out_1 ↔ block:fallback().in_1",
+      "block:flag().out_1 ↔ branch:Branch.ctrl_1"
+    ],
+    "ok": true
+  },
+  {
+    "id": "BR-18",
+    "label": "three cables paint",
+    "observed": 3,
+    "desired": 3,
+    "ok": true
+  },
+  {
+    "id": "BR-19",
+    "label": "the chevron folds the arm",
+    "observed": [
+      true,
+      false,
+      true
+    ],
+    "desired": [
+      true,
+      false,
+      true
+    ],
+    "ok": true
+  },
+  {
+    "id": "BR-20",
+    "label": "the folded arm's Block is hidden, not deleted",
+    "observed": [
+      [
+        "estimate()",
+        false
+      ],
+      [
+        "fallback()",
+        true
+      ]
+    ],
+    "desired": [
+      [
+        "estimate()",
+        false
+      ],
+      [
+        "fallback()",
+        true
+      ]
+    ],
+    "ok": true
+  },
+  {
+    "id": "BR-21",
+    "label": "the cable into the folded arm re-attaches at the arm header's left edge centre",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "BR-22",
+    "label": "the other two cables still paint in Expanded view",
+    "observed": 3,
+    "desired": 3,
+    "ok": true
+  },
+  {
+    "id": "BR-23",
+    "label": "the chevron opens it again and its Block returns",
+    "observed": {
+      "open": [
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        false,
+        false
+      ]
+    },
+    "desired": {
+      "open": [
+        true,
+        true,
+        true
+      ],
+      "hidden": [
+        false,
+        false
+      ]
+    },
+    "ok": true
+  },
+  {
+    "id": "BR-24",
+    "label": "the target makes the arm active",
+    "observed": "arm_1",
+    "desired": "arm_1",
+    "ok": true
+  },
+  {
+    "id": "BR-25",
+    "label": "the Block in the non-active arm fades to the token; the active one does not",
+    "observed": [
+      0.18,
+      1
+    ],
+    "desired": [
+      0.18,
+      1
+    ],
+    "ok": true
+  },
+  {
+    "id": "BR-26",
+    "label": "the same target again clears it: all arms active",
+    "observed": null,
+    "desired": null,
+    "ok": true
+  },
+  {
+    "id": "BR-27",
+    "label": "Case view keeps only the first open arm open",
+    "observed": {
+      "view": "case",
+      "open": [
+        true,
+        false,
+        false
+      ]
+    },
+    "desired": {
+      "view": "case",
+      "open": [
+        true,
+        false,
+        false
+      ]
+    },
+    "ok": true
+  },
+  {
+    "id": "BR-28",
+    "label": "in Case view only the open case's wires paint (decode→estimate and the control cable)",
+    "observed": 2,
+    "desired": 2,
+    "ok": true
+  },
+  {
+    "id": "BR-29",
+    "label": "opening another arm in Case view folds the first",
+    "observed": [
+      false,
+      true,
+      false
+    ],
+    "desired": [
+      false,
+      true,
+      false
+    ],
+    "ok": true
+  },
+  {
+    "id": "BR-30",
+    "label": "and the wires follow the open case",
+    "observed": 2,
+    "desired": 2,
+    "ok": true
+  },
+  {
+    "id": "BR-31",
+    "label": "back to Expanded the arms stay as they were",
+    "observed": {
+      "view": "expanded",
+      "open": [
+        false,
+        true,
+        false
+      ]
+    },
+    "desired": {
+      "view": "expanded",
+      "open": [
+        false,
+        true,
+        false
+      ]
+    },
+    "ok": true
+  },
+  {
+    "id": "BR-32",
+    "label": "the Branch, its control port, its arms and their fold state survive a reload",
+    "observed": {
+      "title": "Branch",
+      "controls": [
+        {
+          "id": "ctrl_1",
+          "name": "fast"
+        }
+      ],
+      "arms": [
+        {
+          "id": "arm_1",
+          "title": "if fast",
+          "open": false
+        },
+        {
+          "id": "arm_2",
+          "title": "else",
+          "open": true
+        },
+        {
+          "id": "arm_3",
+          "title": "elif",
+          "open": false
+        }
+      ]
+    },
+    "desired": {
+      "title": "Branch",
+      "controls": [
+        {
+          "id": "ctrl_1",
+          "name": "fast"
+        }
+      ],
+      "arms": [
+        {
+          "id": "arm_1",
+          "title": "if fast",
+          "open": false
+        },
+        {
+          "id": "arm_2",
+          "title": "else",
+          "open": true
+        },
+        {
+          "id": "arm_3",
+          "title": "elif",
+          "open": false
+        }
+      ]
+    },
+    "ok": true
+  },
+  {
+    "id": "BR-33",
+    "label": "the children, their arms and the cables survive too",
+    "observed": {
+      "children": [
+        {
+          "title": "estimate()",
+          "arm": "arm_1",
+          "hidden": true
+        },
+        {
+          "title": "fallback()",
+          "arm": "arm_2",
+          "hidden": false
+        }
+      ],
+      "cables": 3
+    },
+    "desired": {
+      "children": [
+        {
+          "title": "estimate()",
+          "arm": "arm_1",
+          "hidden": true
+        },
+        {
+          "title": "fallback()",
+          "arm": "arm_2",
+          "hidden": false
+        }
+      ],
+      "cables": 3
+    },
+    "ok": true
+  },
+  {
+    "id": "BR-34",
+    "label": "no console errors while driving",
+    "observed": 0,
+    "desired": 0,
+    "ok": true
+  }
+]
