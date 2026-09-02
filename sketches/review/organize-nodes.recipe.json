@@ -1,0 +1,60 @@
+{
+  "feature": "Organize a tangled Block graph",
+  "viewport": { "width": 2200, "height": 1050 },
+  "shapes": [
+    { "id": "stage-a", "type": "block", "x": 810, "y": 430, "props": { "title": "capture()", "blockType": "call", "view": "port", "w": 270, "h": 170, "inputs": [], "outputs": [{ "id": "out_1", "name": "frame", "type": "Data", "visible": true }] } },
+    { "id": "stage-b", "type": "block", "x": 870, "y": 470, "props": { "title": "normalize()", "blockType": "call", "view": "port", "w": 270, "h": 170, "inputs": [{ "id": "in_1", "name": "frame", "type": "Data", "visible": true }], "outputs": [{ "id": "out_1", "name": "tensor", "type": "Data", "visible": true }] } },
+    { "id": "stage-c", "type": "block", "x": 760, "y": 500, "props": { "title": "encode()", "blockType": "call", "view": "port", "w": 270, "h": 170, "inputs": [{ "id": "in_1", "name": "tensor", "type": "Data", "visible": true }], "outputs": [{ "id": "out_1", "name": "latent", "type": "Data", "visible": true }] } },
+    { "id": "stage-d", "type": "block", "x": 920, "y": 410, "props": { "title": "infer()", "blockType": "call", "view": "port", "w": 270, "h": 170, "inputs": [{ "id": "in_1", "name": "latent", "type": "Data", "visible": true }], "outputs": [{ "id": "out_1", "name": "result", "type": "Data", "visible": true }] } },
+    { "id": "stage-e", "type": "block", "x": 830, "y": 540, "props": { "title": "decode()", "blockType": "call", "view": "port", "w": 270, "h": 170, "inputs": [{ "id": "in_1", "name": "result", "type": "Data", "visible": true }], "outputs": [{ "id": "out_1", "name": "image", "type": "Data", "visible": true }] } },
+    { "id": "stage-f", "type": "block", "x": 890, "y": 510, "props": { "title": "display()", "blockType": "call", "view": "port", "w": 270, "h": 170, "inputs": [{ "id": "in_1", "name": "image", "type": "Data", "visible": true }], "outputs": [] } },
+    { "id": "cable-ab", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "temporal": "data", "delayValue": "", "pillPosition": 0.5 } },
+    { "id": "cable-bc", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "temporal": "data", "delayValue": "", "pillPosition": 0.5 } },
+    { "id": "cable-cd", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "temporal": "data", "delayValue": "", "pillPosition": 0.5 } },
+    { "id": "cable-de", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "temporal": "data", "delayValue": "", "pillPosition": 0.5 } },
+    { "id": "cable-ef", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "temporal": "data", "delayValue": "", "pillPosition": 0.5 } }
+  ],
+  "bindings": [
+    { "id": "ab-start", "type": "connection", "fromId": "cable-ab", "toId": "stage-a", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "ab-end", "type": "connection", "fromId": "cable-ab", "toId": "stage-b", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "id": "bc-start", "type": "connection", "fromId": "cable-bc", "toId": "stage-b", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "bc-end", "type": "connection", "fromId": "cable-bc", "toId": "stage-c", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "id": "cd-start", "type": "connection", "fromId": "cable-cd", "toId": "stage-c", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "cd-end", "type": "connection", "fromId": "cable-cd", "toId": "stage-d", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "id": "de-start", "type": "connection", "fromId": "cable-de", "toId": "stage-d", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "de-end", "type": "connection", "fromId": "cable-de", "toId": "stage-e", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "id": "ef-start", "type": "connection", "fromId": "cable-ef", "toId": "stage-e", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "ef-end", "type": "connection", "fromId": "cable-ef", "toId": "stage-f", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Leave the canvas selection empty, then press Ctrl+K",
+      "x": 40,
+      "y": 40,
+      "w": 560,
+      "h": 110,
+      "target": { "shapeId": "stage-a", "anchor": "top", "dx": -80 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Type “Organize nodes” and press Enter",
+      "x": 650,
+      "y": 820,
+      "w": 560,
+      "h": 110,
+      "target": { "shapeId": "stage-f", "anchor": "bottom", "dx": 60 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · All six Blocks form one readable left-to-right chain with no overlap, and every cable reconnects",
+      "x": 1360,
+      "y": 40,
+      "w": 760,
+      "h": 120
+    }
+  ]
+}
