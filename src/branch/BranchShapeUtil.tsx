@@ -81,6 +81,14 @@ export class BranchShapeUtil extends BaseFrameLikeShapeUtil<BranchShape> {
 		return getDefaultBranchProps()
 	}
 
+	/** A programmatic create with an off-layout height lands consistent. */
+	override onBeforeCreate(next: BranchShape): BranchShape | void {
+		// The base box tool's 1×1 placeholder is resized within the same gesture.
+		if (next.props.w <= 1 && next.props.h <= 1) return
+		const props = reconcileBranchProps(next.props, next.props)
+		if (props !== next.props) return { ...next, props }
+	}
+
 	override onBeforeUpdate(previous: BranchShape, next: BranchShape): BranchShape | void {
 		const props = reconcileBranchProps(previous.props, next.props)
 		if (props !== next.props) return { ...next, props }
@@ -133,8 +141,19 @@ export class BranchShapeUtil extends BaseFrameLikeShapeUtil<BranchShape> {
 
 	override getGeometry(shape: BranchShape) {
 		const layout = branchLayout(shape.props)
-		const body = new Rectangle2d({ width: layout.w, height: layout.h, isFilled: false })
-		const band = new Rectangle2d({ width: layout.band.w, height: layout.band.h, isFilled: true, isLabel: true })
+		// The record, not the layout: during a drag-create the base box tool
+		// holds a 1×1 placeholder and scales props by new-bounds / initial-bounds,
+		// so bounds taller than the record would shrink every arm to its floor.
+		const body = new Rectangle2d({ width: shape.props.w, height: shape.props.h, isFilled: false })
+		// The labels sit inside the body, so they add nothing to the bounds —
+		// and during the 1×1 placeholder they must not widen them to the layout.
+		const band = new Rectangle2d({
+			width: layout.band.w,
+			height: layout.band.h,
+			isFilled: true,
+			isLabel: true,
+			excludeFromShapeBounds: true,
+		})
 		const headers = layout.arms.map((row) => new Rectangle2d({
 			x: row.header.x,
 			y: row.header.y,
@@ -142,6 +161,7 @@ export class BranchShapeUtil extends BaseFrameLikeShapeUtil<BranchShape> {
 			height: row.header.h,
 			isFilled: true,
 			isLabel: true,
+			excludeFromShapeBounds: true,
 		}))
 		const dots = layout.controls.map((control) => new Circle2d({
 			x: control.x - BRANCH_PORT_RADIUS,

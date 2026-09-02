@@ -67,6 +67,27 @@
     "ok": true
   },
   {
+    "id": "BR-5b",
+    "label": "the region follows the drag: the height lands on the open arms, evenly",
+    "observed": {
+      "w": 620,
+      "h": 680,
+      "arms": [
+        283,
+        283
+      ]
+    },
+    "desired": {
+      "w": 620,
+      "h": 680,
+      "arms": [
+        283,
+        283
+      ]
+    },
+    "ok": true
+  },
+  {
     "id": "BR-6",
     "label": "the slot icon now remembers Branch as the last system tool",
     "observed": {

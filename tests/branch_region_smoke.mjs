@@ -187,6 +187,10 @@ async function main() {
     check('BR-5', 'a drawn Branch has two open arms and no control ports',
       { arms: branch.arms.map((a) => [a.title, a.open]), controls: branch.controls.length, view: branch.view },
       { arms: [['if', true], ['else', true]], controls: 0, view: 'expanded' })
+    check('BR-5b', 'the region follows the drag: the height lands on the open arms, evenly',
+      { w: await editorEval(page, `return editor.getCurrentPageShapes().find((s) => s.type === 'branch').props.w`), h: branch.h,
+        arms: JSON.parse(await editorEval(page, `return JSON.stringify(editor.getCurrentPageShapes().find((s) => s.type === 'branch').props.arms.map((a) => a.h))`)) },
+      { w: 620, h: 680, arms: [283, 283] })
     check('BR-6', 'the slot icon now remembers Branch as the last system tool',
       JSON.parse(await evaluate(page, `JSON.stringify({
         icon: document.querySelector('[data-testid="systemsketch-tool-system"] .systemsketch-branch-icon') !== null,
