@@ -71,18 +71,18 @@
     "label": "the region follows the drag: the height lands on the open arms, evenly",
     "observed": {
       "w": 620,
-      "h": 680,
+      "h": 560,
       "arms": [
-        283,
-        283
+        223,
+        223
       ]
     },
     "desired": {
       "w": 620,
-      "h": 680,
+      "h": 560,
       "arms": [
-        283,
-        283
+        223,
+        223
       ]
     },
     "ok": true
