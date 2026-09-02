@@ -31,6 +31,7 @@ from release_lib import (  # noqa: E402
 import launch_systemsketch as launcher  # noqa: E402
 import release as release_cli  # noqa: E402
 import install_desktop as installer  # noqa: E402
+import new_track as track_builder  # noqa: E402
 from server import SystemSketchServer  # noqa: E402
 
 
@@ -121,6 +122,51 @@ class ReleaseSystemTests(unittest.TestCase):
                 self.assertEqual(read_channels(release_home).stable, build)
             finally:
                 server.server_close()
+
+    def test_only_preview_can_authorize_its_source_worktree(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source_root = root / "track"
+            files_root = source_root / ".track" / "boards"
+            source_root.mkdir()
+            (source_root / "package.json").write_text(
+                '{"version": "0.1.0"}',
+                encoding="utf-8",
+            )
+            files_root.mkdir(parents=True)
+            server = SystemSketchServer(
+                ("127.0.0.1", 0),
+                dist=root / "dist",
+                channel="preview",
+                build="track-test",
+                release_home=root / "release",
+                source_root=source_root,
+                files_root=files_root,
+                allow_source_root=True,
+            )
+            try:
+                self.assertEqual(server.additional_document_roots, (source_root,))
+                self.assertEqual(
+                    server.health_payload()["documentRoots"],
+                    [str(files_root), str(source_root)],
+                )
+            finally:
+                server.server_close()
+
+            with self.assertRaisesRegex(ReleaseError, "only be authorized in Preview"):
+                SystemSketchServer(
+                    ("127.0.0.1", 0),
+                    dist=root / "dist",
+                    channel="stable",
+                    build="stable-test",
+                    release_home=root / "release",
+                    source_root=source_root,
+                    files_root=files_root,
+                    allow_source_root=True,
+                )
+
+    def test_track_launchers_authorize_only_their_own_source_worktree(self) -> None:
+        self.assertIn("--allow-source-root", track_builder.SERVE_TEMPLATE)
 
     def test_preview_action_delegates_window_ownership_to_the_launcher(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -320,6 +366,7 @@ class ReleaseSystemTests(unittest.TestCase):
                 [state_home / "preview" / "vite.pid", state_home / "preview" / "api.pid"],
             )
             self.assertEqual(spawn.call_count, 2)
+            self.assertIn("--allow-source-root", spawn.call_args_list[0].args[0])
 
     def test_window_focus_uses_an_exact_visible_app_class(self) -> None:
         search_result = type("Completed", (), {"returncode": 0, "stdout": "42\n"})()
