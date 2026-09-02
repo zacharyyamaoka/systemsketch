@@ -1,5 +1,6 @@
 export * from './blockModel'
 export * from './blockPlacement'
+export * from './blockVisibility'
 export * from './layoutBlock'
 export * from './blockClickToEdit'
 export * from './ports'

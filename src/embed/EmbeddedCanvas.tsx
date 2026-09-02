@@ -12,6 +12,7 @@ import { EXCALIDRAW_SHAPE_UTILS, registerExcalidrawPasteHandler } from '../excal
 import {
   BlockShapeUtil,
   BlockTool,
+  getBlockShapeVisibility,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
 } from '../blocks'
@@ -178,6 +179,7 @@ function EmbeddedSurface({
         assetUrls={ASSET_URLS}
         bindingUtils={EMBEDDED_BINDING_UTILS}
         components={EMBEDDED_COMPONENTS}
+        getShapeVisibility={getBlockShapeVisibility}
         licenseKey={TLDRAW_LICENSE_KEY}
         onMount={onMount}
         overlayUtils={EMBEDDED_OVERLAY_UTILS}

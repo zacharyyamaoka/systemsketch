@@ -6,6 +6,7 @@ import { EXCALIDRAW_SHAPE_UTILS, registerExcalidrawPasteHandler } from './excali
 import {
   BlockShapeUtil,
   BlockTool,
+  getBlockShapeVisibility,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
 } from './blocks'
@@ -138,6 +139,7 @@ function SystemSketchCanvas() {
         assetUrls={ASSET_URLS}
         bindingUtils={SYSTEMSKETCH_BINDING_UTILS}
         components={SYSTEMSKETCH_COMPONENTS}
+        getShapeVisibility={getBlockShapeVisibility}
         licenseKey={TLDRAW_LICENSE_KEY}
         onMount={onMount}
         overlayUtils={SYSTEMSKETCH_OVERLAY_UTILS}
@@ -190,6 +192,7 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
         assetUrls={ASSET_URLS}
         bindingUtils={isBlockDevelopment ? BLOCK_DEVELOPMENT_BINDING_UTILS : undefined}
         components={isBlockDevelopment ? BLOCK_DEVELOPMENT_COMPONENTS : STOCK_DEVELOPMENT_COMPONENTS}
+        getShapeVisibility={isBlockDevelopment ? getBlockShapeVisibility : undefined}
         licenseKey={TLDRAW_LICENSE_KEY}
         onMount={onMount}
         overlayUtils={isBlockDevelopment ? BLOCK_DEVELOPMENT_OVERLAY_UTILS : undefined}
