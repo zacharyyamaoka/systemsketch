@@ -224,3 +224,17 @@
   width: 16px;
   height: 16px;
 }
+
+/* A traced icon that is much wider than tall — FigJam's typeface names are the
+ * word drawn in that face — keeps its own proportions instead of being
+ * letterboxed into the 24px square the other icons share. */
+.systemsketch-appearance__glyph[data-natural] {
+  width: auto;
+  flex: 0 0 auto;
+}
+
+/* FigJam draws one set of arrowheads and mirrors it for the opposite end, so an
+ * icon always points the way the arrow travels. */
+.systemsketch-appearance__glyph[data-flipped] {
+  transform: scaleX(-1);
+}

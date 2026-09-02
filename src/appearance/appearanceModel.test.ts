@@ -16,9 +16,11 @@ import {
 } from 'tldraw'
 import { describe, expect, it } from 'vitest'
 
+import { ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
 import {
   APPEARANCE_COLORS,
   buildAppearanceControls,
+  colorLabel,
   selectedOption,
   triggerLabel,
   type AppearanceControl,
@@ -57,6 +59,12 @@ const CONNECTOR = styleMap([
   [ArrowShapeArrowheadEndStyle, shared('arrow')],
 ])
 
+/** A SystemSketch cable: the one connector that carries all three line shapes. */
+const CABLE = styleMap([
+  [DefaultColorStyle, shared('black')],
+  [ConnectionRoutingStyle, shared('elbow')],
+])
+
 const ids = (controls: AppearanceControl[]) => controls.map((control) => control.id)
 
 describe('appearance controls', () => {
@@ -73,7 +81,29 @@ describe('appearance controls', () => {
 
   it('gives a connector its routing and endpoints instead', () => {
     expect(ids(buildAppearanceControls(CONNECTOR))).toEqual([
-      'color', 'dash', 'size', 'arrowKind', 'arrowheadStart', 'arrowheadEnd',
+      'color', 'dash', 'size', 'arrowheadStart', 'arrowKind', 'arrowheadEnd',
+    ])
+  })
+
+  it('orders the connector controls the way the arrow itself reads', () => {
+    // FigJam's connector menu, captured from the running app, is
+    // `Change color | Line style | Add text | Start point | Line shape | End
+    // point`: where the arrow leaves, how it travels, where it lands. Any
+    // control whose label is `Line shape` must sit between the two ends.
+    const order = ids(buildAppearanceControls(CONNECTOR))
+    const controls = buildAppearanceControls(CONNECTOR)
+    const shape = controls.findIndex((control) => control.label === 'Line shape')
+    expect(order.indexOf('arrowheadStart')).toBeLessThan(shape)
+    expect(shape).toBeLessThan(order.indexOf('arrowheadEnd'))
+  })
+
+  it('offers a cable all three of FigJam line shapes', () => {
+    // FigJam shows `Elbowed Curved Straight`; a SystemSketch cable is the one
+    // connector that can hold all three, so it must show all three.
+    const controls = buildAppearanceControls(CABLE)
+    const shape = controls.find((control) => control.id === 'connectionRouting')!
+    expect(shape.options.map((option) => option.label)).toEqual([
+      'Elbowed', 'Curved', 'Straight',
     ])
   })
 
@@ -128,11 +158,20 @@ describe('appearance controls', () => {
     expect(triggerLabel(mixedColor)).toBe('Color, mixed')
   })
 
-  it('lays the palette out as a grid, with light variants beside their hue', () => {
+  it('lays the palette out as FigJam does: eleven hues over their light twins', () => {
     const color = buildAppearanceControls(SHAPE_WITH_TEXT).find((c) => c.id === 'color')!
     expect(color.layout).toBe('swatches')
-    expect(color.columns).toBe(7)
-    expect(APPEARANCE_COLORS.indexOf('light-red')).toBe(APPEARANCE_COLORS.indexOf('red') + 1)
-    expect(APPEARANCE_COLORS.indexOf('light-blue')).toBe(APPEARANCE_COLORS.indexOf('blue') + 1)
+    expect(color.columns).toBe(11)
+    expect(APPEARANCE_COLORS).toHaveLength(21)
+    // Each light twin sits directly under its hue, one full row down.
+    for (const hue of ['red', 'orange', 'yellow', 'green', 'teal', 'blue', 'violet', 'pink']) {
+      const names: readonly string[] = APPEARANCE_COLORS
+      expect(names.indexOf(`light-${hue}`)).toBe(names.indexOf(hue) + 11)
+    }
+  })
+
+  it('names each colour the way FigJam names it', () => {
+    expect(colorLabel('dark-gray')).toBe('Dark gray')
+    expect(colorLabel('light-teal')).toBe('Light teal')
   })
 })
