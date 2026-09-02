@@ -195,3 +195,166 @@ export function removesDocumentBoundary(entry: {
 }): boolean {
   return Object.values(entry.changes.removed).some((record) => record.typeName === 'document')
 }
+
+export const UNTITLED_CLAIMS_KEY = 'systemsketch.untitledClaims.v1'
+export const UNTITLED_CLAIM_TTL_MS = 12 * 60 * 60 * 1000
+
+/**
+ * Paths a window has reserved for an untitled board it has not written yet.
+ *
+ * Two windows opened seconds apart would otherwise both compute `Untitled 2`
+ * — `nextUntitledDocumentPath` can only see what is already on disk, and a
+ * brand-new board writes nothing until its first edit. A claim is a short-lived
+ * local reservation, never a file, so a crashed window cannot leak a name.
+ */
+export function readUntitledClaims(
+  now: number = Date.now(),
+  storage: Pick<Storage, 'getItem'> = window.localStorage,
+): string[] {
+  try {
+    const value = JSON.parse(storage.getItem(UNTITLED_CLAIMS_KEY) ?? '[]')
+    if (!Array.isArray(value)) return []
+    return value
+      .filter((entry): entry is { path: string; at: number } =>
+        typeof entry === 'object'
+        && entry !== null
+        && typeof (entry as { path?: unknown }).path === 'string'
+        && typeof (entry as { at?: unknown }).at === 'number')
+      .filter((entry) => now - entry.at < UNTITLED_CLAIM_TTL_MS)
+      .map((entry) => entry.path)
+  } catch {
+    return []
+  }
+}
+
+export function claimUntitledPath(
+  path: string,
+  now: number = Date.now(),
+  storage: Pick<Storage, 'getItem' | 'setItem'> = window.localStorage,
+): string[] {
+  const kept = readUntitledClaims(now, storage).filter((candidate) => candidate !== path)
+  const next = [...kept, path]
+  try {
+    storage.setItem(
+      UNTITLED_CLAIMS_KEY,
+      JSON.stringify(next.map((candidate) => ({ path: candidate, at: now }))),
+    )
+  } catch {
+    // A reservation is a convenience; the digest fence still refuses a clash.
+  }
+  return next
+}
+
+export interface BrowserRow {
+  kind: 'folder' | 'document'
+  /** Which document type a row is, so the list can say so; null for a folder. */
+  encoding: 'systemsketch' | 'tldraw' | null
+  name: string
+  title: string
+  path: string
+  mtime: number | null
+}
+
+export interface BrowserListingShape {
+  directories: { name: string; path: string }[]
+  documents: {
+    name: string
+    title: string
+    path: string
+    mtime: number
+    kind?: 'systemsketch' | 'tldraw'
+  }[]
+}
+
+/** Folders first, then documents, both already filtered by the search box. */
+export function browserRows(
+  listing: BrowserListingShape | null,
+  query: string,
+): BrowserRow[] {
+  if (!listing) return []
+  const needle = query.trim().toLowerCase()
+  const matches = (value: string) => !needle || value.toLowerCase().includes(needle)
+  return [
+    ...listing.directories
+      .filter((directory) => matches(directory.name))
+      .map((directory): BrowserRow => ({
+        kind: 'folder',
+        encoding: null,
+        name: directory.name,
+        title: directory.name,
+        path: directory.path,
+        mtime: null,
+      })),
+    ...listing.documents
+      .filter((document) => matches(document.title) || matches(document.name))
+      .map((document): BrowserRow => ({
+        kind: 'document',
+        // The host reports the encoding; the suffix is the fallback, and the
+        // two cannot disagree because the host derives its answer the same way.
+        encoding: document.kind ?? documentEncoding(document.path),
+        name: document.name,
+        title: document.title,
+        path: document.path,
+        mtime: document.mtime,
+      })),
+  ]
+}
+
+/**
+ * Which row should be selected once the visible set changes.
+ *
+ * Keeping a selection that a filter just hid would leave Enter pointing at a
+ * document the user can no longer see, so a hidden selection falls back to the
+ * first document — or the first folder, when the filter matched only folders.
+ */
+export function resolveBrowserSelection(
+  rows: readonly BrowserRow[],
+  selectedPath: string | null,
+): string | null {
+  if (selectedPath !== null && rows.some((row) => row.path === selectedPath)) return selectedPath
+  const preferred = rows.find((row) => row.kind === 'document') ?? rows[0]
+  return preferred?.path ?? null
+}
+
+/** Arrow-key movement over the visible rows, clamped at both ends. */
+export function moveBrowserSelection(
+  rows: readonly BrowserRow[],
+  selectedPath: string | null,
+  delta: number,
+): string | null {
+  if (!rows.length) return null
+  const current = rows.findIndex((row) => row.path === selectedPath)
+  if (current === -1) return delta > 0 ? rows[0].path : rows[rows.length - 1].path
+  const next = Math.min(rows.length - 1, Math.max(0, current + delta))
+  return rows[next].path
+}
+
+export interface BreadcrumbSegment {
+  label: string
+  path: string
+}
+
+/**
+ * The clickable path from the workspace root down to the open folder.
+ *
+ * A folder outside the root cannot be reached through the API, so an unrelated
+ * directory collapses to a single segment rather than pretending to be nested.
+ */
+export function breadcrumbTrail(directory: string, root: string): BreadcrumbSegment[] {
+  const trimmedRoot = root.replace(/\/+$/, '')
+  const rootLabel = trimmedRoot.split('/').pop() || '/'
+  const rootSegment: BreadcrumbSegment = { label: rootLabel, path: trimmedRoot || '/' }
+  if (directory === trimmedRoot || !trimmedRoot) return [rootSegment]
+  if (!directory.startsWith(`${trimmedRoot}/`)) {
+    return [{ label: directory.split('/').pop() || directory, path: directory }]
+  }
+  const rest = directory.slice(trimmedRoot.length + 1).split('/').filter(Boolean)
+  let walked = trimmedRoot
+  return [
+    rootSegment,
+    ...rest.map((segment) => {
+      walked = `${walked}/${segment}`
+      return { label: segment, path: walked }
+    }),
+  ]
+}
