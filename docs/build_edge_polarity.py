@@ -115,13 +115,18 @@ HEAD = git_head()
 
 SRC = PROJECT_ROOT / "src" / "blocks" / "connections"
 
+# The commit that landed this fix; its parent is the "before" tree the report quotes.
+# Pinned, not `HEAD` — HEAD moves on and the old markers move out from under it.
+FIX_COMMIT = "8b25045"
+BEFORE = f"{FIX_COMMIT}^"
+
 OLD_PRESS_RULE = git_slice(
-    "HEAD", "src/blocks/connections/blockPorts.ts",
+    BEFORE, "src/blocks/connections/blockPorts.ts",
     "/**\n * Which face a press on a boundary dot starts a cable from.",
     "/** Every port id that shares a boundary dot",
 )
 OLD_TWINS = git_slice(
-    "HEAD", "src/blocks/connections/blockPorts.ts",
+    BEFORE, "src/blocks/connections/blockPorts.ts",
     "function withInnerFaces(",
     "/**\n * Project semantic port identity",
 )
