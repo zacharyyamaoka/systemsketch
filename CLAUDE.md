@@ -78,6 +78,23 @@ window on Zach's screen — keep it on its own `DISPLAY`.
 Never point a test at Zach's real board — the app autosaves into it. Use a scratch
 `.systemsketch` (or a `.tldr`, which is still opened and saved unconverted).
 
+## Seed the human review board before handoff
+
+After implementing a feature and before handing over a launched Preview, use the repo-local
+[`systemsketch-review-fixture`](skills/systemsketch-review-fixture/SKILL.md) skill to create
+`sketches/review/<feature>.systemsketch`. Seed the minimum real Blocks, connections, and other
+objects needed to exercise the new interaction, then place numbered text cards and orange
+arrows outside the interaction area to say exactly what Zach should do. Include a separate
+green `PASS WHEN` card with the visible success condition. Give Zach the exact `?board=` URL
+and keep that server running.
+
+This standing instruction may not repeat the feature just implemented. Recover it from the
+task history, diff, source, and regression test. If the fixture skill lacks the new shape,
+binding, state, or gesture, update its narrow guidance/example before generating the board.
+Generate through the real SystemSketch editor/autosave helper rather than hand-maintaining
+tldraw schema JSON. Inspect the generated PNG and drive the saved fixture once in the real
+app; the board complements the smoke test and never replaces it. Never use `~/SystemSketch`.
+
 ## Reports live in `docs/`, and the builder is the source
 
 Every report is a `docs/build_<name>.py` that emits `docs/<name>-<date>.html`, self-contained,
