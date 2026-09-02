@@ -101,55 +101,6 @@
     },
     "textLayout": [
       {
-        "text": "status",
-        "clientWidth": 62,
-        "scrollWidth": 62,
-        "clientHeight": 24,
-        "scrollHeight": 24
-      },
-      {
-        "text": "payload",
-        "clientWidth": 78,
-        "scrollWidth": 78,
-        "clientHeight": 24,
-        "scrollHeight": 24
-      },
-      {
-        "text": "bool",
-        "clientWidth": 54,
-        "scrollWidth": 54,
-        "clientHeight": 24,
-        "scrollHeight": 24
-      },
-      {
-        "text": "result",
-        "clientWidth": 59,
-        "scrollWidth": 59,
-        "clientHeight": 24,
-        "scrollHeight": 24
-      },
-      {
-        "text": "int",
-        "clientWidth": 43,
-        "scrollWidth": 43,
-        "clientHeight": 24,
-        "scrollHeight": 24
-      },
-      {
-        "text": "image",
-        "clientWidth": 65,
-        "scrollWidth": 65,
-        "clientHeight": 24,
-        "scrollHeight": 24
-      },
-      {
-        "text": "Keeps each port row aligned with its semantic boundary.",
-        "clientWidth": 406,
-        "scrollWidth": 406,
-        "clientHeight": 16,
-        "scrollHeight": 16
-      },
-      {
         "text": "= 5",
         "clientWidth": 34,
         "scrollWidth": 34,
@@ -157,9 +108,9 @@
         "scrollHeight": 18
       },
       {
-        "text": "Function",
-        "clientWidth": 84,
-        "scrollWidth": 84,
+        "text": "bool",
+        "clientWidth": 54,
+        "scrollWidth": 54,
         "clientHeight": 24,
         "scrollHeight": 24
       },
@@ -171,11 +122,60 @@
         "scrollHeight": 24
       },
       {
+        "text": "Function",
+        "clientWidth": 84,
+        "scrollWidth": 84,
+        "clientHeight": 24,
+        "scrollHeight": 24
+      },
+      {
+        "text": "image",
+        "clientWidth": 65,
+        "scrollWidth": 65,
+        "clientHeight": 24,
+        "scrollHeight": 24
+      },
+      {
+        "text": "int",
+        "clientWidth": 43,
+        "scrollWidth": 43,
+        "clientHeight": 24,
+        "scrollHeight": 24
+      },
+      {
+        "text": "Keeps each port row aligned with its semantic boundary.",
+        "clientWidth": 406,
+        "scrollWidth": 406,
+        "clientHeight": 16,
+        "scrollHeight": 16
+      },
+      {
         "text": "normalize",
         "clientWidth": 329,
         "scrollWidth": 329,
         "clientHeight": 40,
         "scrollHeight": 40
+      },
+      {
+        "text": "payload",
+        "clientWidth": 78,
+        "scrollWidth": 78,
+        "clientHeight": 24,
+        "scrollHeight": 24
+      },
+      {
+        "text": "result",
+        "clientWidth": 59,
+        "scrollWidth": 59,
+        "clientHeight": 24,
+        "scrollHeight": 24
+      },
+      {
+        "text": "status",
+        "clientWidth": 62,
+        "scrollWidth": 62,
+        "clientHeight": 24,
+        "scrollHeight": 24
       },
       {
         "text": "window",

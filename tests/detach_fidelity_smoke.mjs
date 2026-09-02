@@ -164,7 +164,7 @@ async function main() {
           scrollWidth: node.scrollWidth,
           clientHeight: node.clientHeight,
           scrollHeight: node.scrollHeight,
-        })),
+        })).sort((a, b) => a.text.localeCompare(b.text)),
       })
     })()`))
 
