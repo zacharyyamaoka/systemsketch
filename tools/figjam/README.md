@@ -44,6 +44,40 @@ reads the SVG under the cursor. Output is `appearance/icons-traced.json`.
 - **`pkill -f <pattern>` can kill the calling shell.** The wrapper's own command
   line matches the pattern. Use `pkill -f "[p]attern"`.
 
+## The pill's own chrome, and the picker
+
+`icon_trace.py` only sees option cells. Three things live outside them and were
+still being approximated until they were read: the fixed icons on the triggers
+(Line style's three bars, Typeface's `Aa`), the Custom cell and the picker
+behind it, and the exact box a popover cell and its divider occupy.
+
+```bash
+cd ~/systemsketch/tools/figjam && CDP_PORT=9333 python3 chrome_trace.py
+cd ~/systemsketch/tools/figjam && CDP_PORT=9333 python3 custom_state_trace.py
+cd ~/systemsketch/tools/figjam && CDP_PORT=9333 python3 typeface_trace.py
+```
+
+`chrome_trace.py` dumps the pill and each popover as a DOM tree — geometry
+relative to its panel, computed colours, radii, fonts, pseudo-element
+backgrounds (the slider tracks paint through `::before`), and every SVG's path
+data — then types a hex into the picker so the next two can read what FigJam
+shows once a shape carries a custom colour. The distilled result is
+`docs/assets/figjam-chrome-traced.json`; the raw trees stay in `appearance/`,
+which is gitignored.
+
+`emit_icons.py` regenerates `src/appearance/figjamIcons.ts` from the two
+captures, so an icon is either in a capture or not in the product:
+
+```bash
+cd ~/systemsketch && python3 tools/figjam/emit_icons.py --check
+```
+
+Two readings worth knowing before trusting a purple: a labelled chip (Fill /
+Transparent / No fill) is chosen in `#9747ff`, but an icon-only cell and the
+ring around the chosen swatch use `#8a38f5`. And the Fill chips carry a 24px
+icon with no left padding while the Solid / Dashed / None chips carry a 16px
+icon in a 24px slot with 4px before it — two components in FigJam, kept as two.
+
 ## Reading the output
 
 FigJam's option cells are unlabelled `div`s — an icon's meaning exists only in
@@ -56,6 +90,8 @@ name, or the shape picker quietly fills up with arrowheads.
 
 | File | Holds |
 |---|---|
-| `docs/assets/figjam-icons-traced.json` | 49 icons, namespaced by control |
+| `docs/assets/figjam-icons-traced.json` | 49 option-cell icons, namespaced by control |
 | `docs/assets/figjam-palette-hex.json` | 21 colours + Custom, sampled from the swatch centres |
 | `docs/assets/figjam-menu-inventory.json` | every control and popover, per subject, with geometry |
+| `docs/assets/figjam-chrome-traced.json` | the pill's triggers, the Custom cell and picker, and the Line style, Font size, Typeface and alignment popovers as DOM trees |
+| `docs/assets/figjam-chrome-*.png`, `figjam-custom-state-palette.png`, `figjam-typeface-popover.png` | the frames those trees were read from |

@@ -677,3 +677,14 @@
   font-weight: 600;
   white-space: nowrap;
 }
+
+/* In a mixed selection the S / P / E group names the Blocks it governs. */
+.block-mini-menu__scope {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 4px 0 7px;
+  color: #a1a4ab;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}

@@ -1,0 +1,652 @@
+{
+ "color": {
+  "file": "docs/appearance-menu-1-color-2026-09-01.png",
+  "pill": {
+   "x": 414,
+   "y": 319,
+   "w": 632.9,
+   "h": 40
+  },
+  "panel": {
+   "x": 345,
+   "y": 182,
+   "w": 454.6,
+   "h": 129
+  },
+  "picker": null,
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "value",
+    "x": 479.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 544.9,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "dash",
+    "kind": "icon",
+    "x": 598.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 663.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 719.9,
+    "y": 319,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 872.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 928.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "picker": {
+  "file": "docs/appearance-menu-4-custom-picker-2026-09-01.png",
+  "pill": {
+   "x": 414,
+   "y": 319,
+   "w": 632.9,
+   "h": 40
+  },
+  "panel": {
+   "x": 345,
+   "y": 182,
+   "w": 454.6,
+   "h": 129
+  },
+  "picker": {
+   "x": 597,
+   "y": 311,
+   "w": 184,
+   "h": 310
+  },
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "value",
+    "x": 479.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 544.9,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "dash",
+    "kind": "icon",
+    "x": 598.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 663.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 719.9,
+    "y": 319,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 872.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 928.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "custom": {
+  "file": "docs/appearance-menu-5-custom-applied-2026-09-01.png",
+  "pill": {
+   "x": 414,
+   "y": 319,
+   "w": 632.9,
+   "h": 40
+  },
+  "panel": {
+   "x": 345,
+   "y": 182,
+   "w": 454.6,
+   "h": 129
+  },
+  "picker": {
+   "x": 597,
+   "y": 311,
+   "w": 184,
+   "h": 310
+  },
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "value",
+    "x": 479.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 544.9,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "dash",
+    "kind": "icon",
+    "x": 598.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 663.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 719.9,
+    "y": 319,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 872.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 928.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "chips": {
+  "file": "docs/appearance-menu-8-shape-line-style-2026-09-01.png",
+  "pill": {
+   "x": 414,
+   "y": 319,
+   "w": 632.9,
+   "h": 40
+  },
+  "panel": {
+   "x": 431,
+   "y": 263,
+   "w": 391.2,
+   "h": 48
+  },
+  "picker": null,
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "value",
+    "x": 479.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 544.9,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "dash",
+    "kind": "icon",
+    "x": 598.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 663.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 719.9,
+    "y": 319,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 872.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 928.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "fontSize": {
+  "file": "docs/appearance-menu-7-font-size-2026-09-01.png",
+  "pill": {
+   "x": 414,
+   "y": 319,
+   "w": 632.9,
+   "h": 40
+  },
+  "panel": {
+   "x": 727,
+   "y": 175,
+   "w": 129,
+   "h": 136
+  },
+  "picker": null,
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "value",
+    "x": 479.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 544.9,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "dash",
+    "kind": "icon",
+    "x": 598.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 663.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 719.9,
+    "y": 319,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 872.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 928.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "shape": {
+  "file": "docs/appearance-menu-2-shape-2026-09-01.png",
+  "pill": {
+   "x": 414,
+   "y": 319,
+   "w": 632.9,
+   "h": 40
+  },
+  "panel": {
+   "x": 222,
+   "y": 161,
+   "w": 571.4,
+   "h": 150
+  },
+  "picker": null,
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "value",
+    "x": 479.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 544.9,
+    "y": 319,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "dash",
+    "kind": "icon",
+    "x": 598.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 663.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 719.9,
+    "y": 319,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 872.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 928.9,
+    "y": 319,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "lineStyle": {
+  "file": "docs/appearance-menu-6-line-style-2026-09-01.png",
+  "pill": {
+   "x": 490,
+   "y": 359,
+   "w": 479.9,
+   "h": 40
+  },
+  "panel": {
+   "x": 485,
+   "y": 307,
+   "w": 305,
+   "h": 44
+  },
+  "picker": null,
+  "triggers": [
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 555.9,
+    "y": 359,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "lineStyle",
+    "kind": "icon",
+    "x": 609.9,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 674.9,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowheadStart",
+    "kind": "value",
+    "x": 739.9,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowKind",
+    "kind": "value",
+    "x": 795.9,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowheadEnd",
+    "kind": "value",
+    "x": 851.9,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "connector": {
+  "file": "docs/appearance-menu-3-connector-2026-09-01.png",
+  "pill": {
+   "x": 490,
+   "y": 359,
+   "w": 479.9,
+   "h": 40
+  },
+  "panel": null,
+  "picker": null,
+  "triggers": [
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 555.9,
+    "y": 359,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "lineStyle",
+    "kind": "icon",
+    "x": 609.9,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 674.9,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowheadStart",
+    "kind": "value",
+    "x": 739.9,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowKind",
+    "kind": "value",
+    "x": 795.9,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowheadEnd",
+    "kind": "value",
+    "x": 851.9,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
+ "mixed": {
+  "file": "docs/appearance-menu-9-mixed-selection-2026-09-01.png",
+  "pill": {
+   "x": 358,
+   "y": 299,
+   "w": 784.1,
+   "h": 40
+  },
+  "panel": null,
+  "picker": null,
+  "triggers": [
+   {
+    "control": "geo",
+    "kind": "value",
+    "x": 635.1,
+    "y": 299,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 700.1,
+    "y": 299,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "dash",
+    "kind": "icon",
+    "x": 754.1,
+    "y": 299,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 819.1,
+    "y": 299,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "size",
+    "kind": "text",
+    "x": 875.1,
+    "y": 299,
+    "w": 144,
+    "h": 40
+   },
+   {
+    "control": "align",
+    "kind": "value",
+    "x": 1028.1,
+    "y": 299,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "verticalAlign",
+    "kind": "value",
+    "x": 1084.1,
+    "y": 299,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ }
+}

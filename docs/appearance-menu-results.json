@@ -1,10 +1,10 @@
 [
  {
-  "label": "a selected shape gets shape, paint and typography controls, in FigJam order",
+  "label": "a selected shape gets shape, paint and typography controls, in FigJam order and at FigJam's widths",
   "ok": true
  },
  {
-  "label": "the colour popover stacks the fill row over the palette, 8px above the pill",
+  "label": "the colour popover stacks the fill row over the palette at FigJam's pitch, 8px above the pill, with a Custom cell",
   "ok": true
  },
  {
@@ -16,11 +16,31 @@
   "ok": true
  },
  {
-  "label": "the stroke popover offers every dash the document can hold, and applies one",
+  "label": "Custom opens FigJam's 184x310 picker flush under the palette, on the current colour",
   "ok": true
  },
  {
-  "label": "size and typeface are closed named ladders, and both write through",
+  "label": "typing a hex applies it as a custom colour: the shape, the trigger and the Custom cell all show it",
+  "ok": true
+ },
+ {
+  "label": "dragging the saturation/value square repaints the shape live, as one history step",
+  "ok": true
+ },
+ {
+  "label": "the opacity slider writes tldraw's shape opacity, and undoes as one step",
+  "ok": true
+ },
+ {
+  "label": "a board naming a custom colour saves the hex in the file and reopens painted with it",
+  "ok": true
+ },
+ {
+  "label": "a shape's Line style is a row of labelled chips offering every dash the document can hold",
+  "ok": true
+ },
+ {
+  "label": "Font size lists each rung at its own size and names the chosen one on its trigger; Typeface keeps Aa",
   "ok": true
  },
  {
@@ -32,6 +52,10 @@
   "ok": true
  },
  {
+  "label": "a connector's Line style holds weight beside dash in one 44px popover, and both write through",
+  "ok": true
+ },
+ {
   "label": "a connector gets routing and endpoints, and an endpoint applies",
   "ok": true
  },
@@ -40,7 +64,7 @@
   "ok": true
  },
  {
-  "label": "a Block selected beside a shape keeps the shape's appearance reachable",
+  "label": "a Block selected beside a shape keeps the shape's appearance reachable, and the pill counts the whole selection",
   "ok": true
  },
  {

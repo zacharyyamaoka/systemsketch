@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { FIGJAM_ICON_FOR, figjamIconName } from './figjamIconMap'
+import {
+  FIGJAM_CHECK_ICON,
+  FIGJAM_EYEDROPPER_ICON,
+  FIGJAM_ICON_FOR,
+  FIGJAM_TRIGGER_ICON,
+  figjamIconName,
+} from './figjamIconMap'
 import { FIGJAM_ICONS } from './figjamIcons'
 
 describe('FigJam icon map', () => {
@@ -14,7 +20,22 @@ describe('FigJam icon map', () => {
         if (!FIGJAM_ICONS[icon]) missing.push(`${control}.${value} -> ${icon}`)
       }
     }
+    for (const [control, icon] of Object.entries(FIGJAM_TRIGGER_ICON)) {
+      if (!FIGJAM_ICONS[icon]) missing.push(`trigger ${control} -> ${icon}`)
+    }
+    for (const icon of [FIGJAM_CHECK_ICON, FIGJAM_EYEDROPPER_ICON]) {
+      if (!FIGJAM_ICONS[icon]) missing.push(icon)
+    }
     expect(missing).toEqual([])
+  })
+
+  it('gives a shape and a connector the same Line style icons', () => {
+    // One trigger icon and one set of dash icons, whichever pill they are on:
+    // that is what FigJam does, and what the muscle memory is for.
+    expect(FIGJAM_TRIGGER_ICON.dash).toBe('trigger/Line style')
+    expect(FIGJAM_TRIGGER_ICON.lineStyle).toBe('trigger/Line style')
+    expect(FIGJAM_ICON_FOR.lineStyle).toEqual(FIGJAM_ICON_FOR.dash)
+    expect(figjamIconName('lineStyle', 'dashed')).toBe('line-style/Dashed')
   })
 
   it('keeps each control in its own namespace', () => {
