@@ -47,6 +47,12 @@ export const SIMPLE_TITLE_LINE_PX = 50
 export const SIMPLE_TEXT_LINE_PX = 24
 export const SIMPLE_ICON_PX = 40
 export const SIMPLE_ICON_GAP_PX = 12
+/** The `value` view: a capsule one line tall, as wide as its text, one outlet on its rim. */
+export const VALUE_HEIGHT_PX = 56
+export const VALUE_PAD_X = 20
+export const VALUE_FONT_PX = 24
+export const VALUE_MIN_WIDTH_PX = 96
+export const VALUE_MAX_WIDTH_PX = 640
 const SIMPLE_STACK_GAP_PX = 10
 const SIMPLE_PAD_X = 16
 const SIMPLE_TITLE_MAX_LINES = 2
@@ -379,18 +385,37 @@ function showsDescription(props: BlockShapeProps): boolean {
 }
 
 let simpleMeasureContext: CanvasRenderingContext2D | null | undefined
-function measureSimpleText(text: string, px: number, weight: number): number {
+const TEXT_FAMILIES = {
+	sans: { css: "'Inter', sans-serif", advance: 0.55 },
+	mono: { css: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace", advance: 0.6 },
+} as const
+
+/**
+ * Measure a run of text in one of the Block's two faces. Off the DOM (unit
+ * tests, the Python host) the answer is a deterministic per-glyph advance, so
+ * a layout computed there is stable rather than exact.
+ */
+export function measureBlockText(
+	text: string,
+	px: number,
+	weight: number,
+	family: keyof typeof TEXT_FAMILIES = 'sans',
+): number {
 	if (simpleMeasureContext === undefined) {
 		simpleMeasureContext = typeof document === 'undefined'
 			? null
 			: (document.createElement('canvas').getContext('2d') ?? null)
 	}
 	if (simpleMeasureContext) {
-		simpleMeasureContext.font = `${weight} ${px}px 'Inter', sans-serif`
+		simpleMeasureContext.font = `${weight} ${px}px ${TEXT_FAMILIES[family].css}`
 		const width = simpleMeasureContext.measureText(text).width
 		if (width > 0) return width
 	}
-	return text.length * px * 0.55
+	return text.length * px * TEXT_FAMILIES[family].advance
+}
+
+function measureSimpleText(text: string, px: number, weight: number): number {
+	return measureBlockText(text, px, weight, 'sans')
 }
 
 function estimateWrappedLines(
@@ -478,6 +503,45 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 	const bodyTop = headerHeight + NODE_ROW_HEADER_GAP_PX
 	const footerTop = Math.max(bodyTop, height - NODE_FOOTER_HEIGHT_PX)
 	const placed: LaidOutBlockPort[] = []
+
+	if (view === 'value') {
+		// The capsule: one text box across the whole face, the inlet centred on
+		// the left rim and the outlet on the right — a pill is a variable, fed
+		// or read or both, so both rims carry a dot.
+		const midpoint = height / 2
+		for (const port of props.inputs.filter((candidate) => candidate.visible)) {
+			placed.push({ port, side: 'input', x: 0, y: midpoint, label: null, subtle: false, lifted: false })
+		}
+		for (const port of props.outputs.filter((candidate) => candidate.visible)) {
+			placed.push({ port, side: 'output', x: width, y: midpoint, label: null, subtle: false, lifted: false })
+		}
+		return {
+			view,
+			portLayout,
+			bounds,
+			width,
+			height,
+			header: null,
+			headerHeight: 0,
+			// A capsule has no burger: no heading band, no body rows to divide.
+			headerBand: null,
+			sections: [],
+			body: bounds,
+			bodyTop: 0,
+			footerTop: height,
+			pitch: NODE_ROW_HEIGHT_PX,
+			description: null,
+			frameInterior: null,
+			ports: placed,
+			title: { x: VALUE_PAD_X, y: 0, w: Math.max(0, width - VALUE_PAD_X * 2), h: height },
+			typeLabel: null,
+			icon: null,
+			dividers: [],
+			headerIcon: null,
+			headerTitle: null,
+			headerType: null,
+		}
+	}
 
 	if (view === 'simple') {
 		const innerWidth = Math.max(0, width - SIMPLE_PAD_X * 2)

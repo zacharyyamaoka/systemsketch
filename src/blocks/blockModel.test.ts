@@ -233,3 +233,21 @@ describe('expanded Block containment regression', () => {
 		expect(canReparentDraggedShapesIntoBlock(frame, [sibling])).toBe(true)
 	})
 })
+
+describe('the value view', () => {
+	it('is remembered like every other view, with its own box', () => {
+		const props = getDefaultBlockProps()
+		expect(props.views.value).toEqual({ w: 168, h: 56 })
+		const value = setBlockViewProps({ ...props, w: 400, h: 300 }, 'value')
+		expect(value.view).toBe('value')
+		expect({ w: value.w, h: value.h }).toEqual({ w: 168, h: 56 })
+		// The Simple box just left is parked, and comes back on the way out.
+		expect(value.views.simple).toEqual({ w: 400, h: 300 })
+		const back = setBlockViewProps(value, 'simple')
+		expect({ w: back.w, h: back.h }).toEqual({ w: 400, h: 300 })
+	})
+
+	it('never contains children', () => {
+		expect(canBlockContainChildren('value')).toBe(false)
+	})
+})

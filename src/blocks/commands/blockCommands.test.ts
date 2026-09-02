@@ -92,6 +92,7 @@ describe('block command integration surface', () => {
         simple: { w: 210, h: 130 },
         port: { w: 330, h: 240 },
         expanded: { w: 500, h: 410 },
+        value: { w: 168, h: 56 },
       } },
     ))
     expect(updateBlockDetails(fixture.editor, fixture.current().id, { title: 'decode' }).ok).toBe(true)
@@ -142,6 +143,7 @@ describe('block command integration surface', () => {
         simple: { w: 210, h: 130 },
         port: { w: 360, h: 250 },
         expanded: { w: 520, h: 420 },
+        value: { w: 168, h: 56 },
       },
     }))
 

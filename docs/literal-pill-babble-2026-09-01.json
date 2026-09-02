@@ -1,0 +1,676 @@
+{
+  "schemaVersion": 3,
+  "title": "Five ways to draw a literal argument",
+  "kicker": "SystemSketch · /babble 5 · 2026-09-01",
+  "brief": "`pose = estimate(frame, 2.0)` — the 2.0 is not estimate's default, it is a value fed in from outside, like `gain = 2.0; estimate(frame, gain)`. Assuming a pill carries such a source, what goes on it and how could it look? Every direction is drawn on the same run() fixture, with estimate's own default (1.0) present so the two never get confused.",
+  "count": 5,
+  "invariants": [
+    "The literal is a source: data flows out of it into an input port, and which end is the source is judged at the landing (the app's existing rule).",
+    "Python grammar on the object: `name = value`, `= value` when unnamed, `= …` when long.",
+    "estimate's definition default (`= 1.0`, grey chip) stays on the row; a wired or supplied port dims it.",
+    "Prototype-only: HTML/CSS in the app's idiom, nothing in the renderer, no .systemsketch schema change."
+  ],
+  "boundary": "HTML/CSS specimens in the app's idiom — nothing is implemented in the renderer and no .systemsketch schema changed. The state changes, the regenerated code strip and the prune controls are real; editing text, dragging, tooltips and persistence are simulated. The reference board at the top is the real app, driven headlessly.",
+  "axes": [
+    {
+      "name": "Where the literal lives",
+      "values": [
+        "free capsule on canvas",
+        "free Block on canvas",
+        "docked on its port",
+        "on the port row",
+        "in run()'s locals zone"
+      ]
+    },
+    {
+      "name": "What owns it",
+      "values": [
+        "the page",
+        "the page",
+        "the consuming Block",
+        "the consuming Block",
+        "the enclosing Expanded Block"
+      ]
+    },
+    {
+      "name": "How it becomes a variable",
+      "values": [
+        "edit the text",
+        "edit the heading",
+        "pull it off the socket",
+        "Extract to variable",
+        "type in the row"
+      ]
+    },
+    {
+      "name": "Long value",
+      "values": [
+        "= … + hover card",
+        "preview in the body",
+        "= … + hover card",
+        "{…} field + hover",
+        "= {…} row + hover"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "fr1",
+      "name": "The picture regenerates one Python program",
+      "weight": 30,
+      "why": "SystemSketch is a lens over source (the goldens go source.py ↔ target.systemsketch). A drawing that could mean estimate(frame, 2.0), gain = 2.0 + estimate(frame, gain), or estimate(frame) with the default is a bug, not a style.",
+      "passCondition": "From the canvas alone, a reader can say which of the three programs the literal regenerates to, without opening an inspector.",
+      "anchors": {
+        "1": "A supplied literal and the definition default look the same, or a name changes nothing visible.",
+        "3": "Literal and default are distinct, but whether the value is hoisted (named) is ambiguous or lives in two places.",
+        "5": "All three states are visibly distinct and the name sits exactly where Python puts it."
+      }
+    },
+    {
+      "id": "fr2",
+      "name": "No new whiteboard vocabulary",
+      "weight": 25,
+      "why": "The design rests on tldraw staying stock and on composing from things a whiteboard user already knows (Block, port dot, cable, click-to-edit). Every new gesture is a relearning cost Zach has ruled out.",
+      "passCondition": "Every gesture in the direction already exists in the app or in tldraw; only a style value or a command is new.",
+      "anchors": {
+        "1": "A new primitive with its own drag, snap, or edit behaviour.",
+        "3": "Existing primitives, but one new gesture (a new binding, a dock, a rail) to learn.",
+        "5": "Only existing primitives and existing gestures; the new thing is a value of an existing style or one menu command."
+      }
+    },
+    {
+      "id": "fr3",
+      "name": "Literals do not bury the pipeline",
+      "weight": 20,
+      "why": "Real calls carry several scalar parameters. If each costs a shape and a cable, decode → estimate → encode disappears under its own arguments — the reason the workflow kit keeps a single-use literal on the row.",
+      "passCondition": "Three literal arguments on one Block add at most one row each and no cable that crosses the pipeline.",
+      "anchors": {
+        "1": "Every literal always costs a free shape plus a cable.",
+        "3": "A shape plus a cable, but compact, or avoidable for the common case.",
+        "5": "A single-use literal costs a row or less; shapes appear only when a value is shared or named."
+      }
+    },
+    {
+      "id": "fr4",
+      "name": "Long values stay legible",
+      "weight": 10,
+      "why": "A dict or a long string as an argument is common; the sketch already folds it to `= …`. It must never widen a Block or a row, and the whole value must be one gesture away.",
+      "passCondition": "A dict literal renders folded and can be read in full without leaving the canvas.",
+      "anchors": {
+        "1": "The long value pushes the layout or is simply cut off with no way to read it.",
+        "3": "Folded, with the full value only in a tooltip or an inspector.",
+        "5": "Folded, with the full value readable in place on demand."
+      }
+    },
+    {
+      "id": "fr5",
+      "name": "Promotes to a named, shared value in one move",
+      "weight": 15,
+      "why": "`var = 2.0; estimate(frame, var)` is the refactor in the brief (extract variable). Naming, and then feeding two calls from one source, should be one gesture each and land the name where Python puts it.",
+      "passCondition": "A literal can be named in place and its outlet can feed a second consumer without duplicating the value.",
+      "anchors": {
+        "1": "No way to name or share without redrawing.",
+        "3": "Naming works; sharing requires duplicating the literal or a second step.",
+        "5": "Name in place, fan out from the same outlet the port model already has."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "g1",
+      "name": "Source ≠ definition default",
+      "why": "The grey `= 1.0` chip on estimate's row is a fact about estimate; the 2.0 is a fact about this call. If they render identically, estimate(frame) and estimate(frame, 1.0) become one picture."
+    },
+    {
+      "id": "g2",
+      "name": "tldraw stays stock",
+      "why": "Composed only through the Block shape, port, cable/binding, geo and text seams. No forked drag, snap or z-order logic."
+    },
+    {
+      "id": "g3",
+      "name": "Same fixture, same fidelity",
+      "why": "run() → decode → estimate(frame, 2.0) → encode(pose, {…}) on every hero, with estimate's own default 1.0 present so the gate above is testable."
+    }
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "Capsule",
+      "accent": "#c08520",
+      "thesis": "The sketch, formalised: a stock oval reading `= 2.0`, one outlet on its rim, wired into the port like anything else.",
+      "previewLabel": "run() · click the pills",
+      "preview": "<div class=\"lp\" data-v=\"v1\"><div class=\"lp-expanded\"><div class=\"lp-frame\" style=\"left:10px;top:44px;width:580px;height:236px\"><div class=\"lp-frame-head\"><span class=\"lp-title\">run()</span><span class=\"lp-kind\">def</span></div></div><span class=\"lp-frame-port\" style=\"left:18px;top:208px\">raw <em>bytes</em></span><span class=\"lp-frame-port is-right\" style=\"right:18px;top:208px\"><em>bytes</em> payload</span><div class=\"lp-block\" data-lp=\"decode\" style=\"left:36px;top:90px;width:140px;height:70px\"><div class=\"lp-block-head\"><span class=\"lp-title\">decode()</span><span class=\"lp-kind\">call</span></div><div class=\"lp-rows\"><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">raw</span><span class=\"lp-type\">bytes</span></span><span class=\"lp-out\"><span class=\"lp-type\">Frame</span><span class=\"lp-name\">frame</span></span></div></div><div class=\"lp-foot\">⋮</div></div><div class=\"lp-block\" data-lp=\"estimate\" style=\"left:226px;top:90px;width:142px;height:88px\"><div class=\"lp-block-head\"><span class=\"lp-title\">estimate()</span><span class=\"lp-kind\">call</span></div><div class=\"lp-rows\"><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">frame</span><span class=\"lp-type\">Frame</span></span><span class=\"lp-out\"><span class=\"lp-type\">Pose</span><span class=\"lp-name\">pose</span></span></div><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">gain</span><span class=\"lp-type\">float</span><span class=\"lp-chip is-dim\">= 1.0</span></span></div></div><div class=\"lp-foot\">⋮</div></div><div class=\"lp-block\" data-lp=\"encode\" style=\"left:418px;top:90px;width:158px;height:88px\"><div class=\"lp-block-head\"><span class=\"lp-title\">encode()</span><span class=\"lp-kind\">call</span></div><div class=\"lp-rows\"><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">pose</span><span class=\"lp-type\">Pose</span></span><span class=\"lp-out\"><span class=\"lp-type\">bytes</span><span class=\"lp-name\">payload</span></span></div><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">opts</span><span class=\"lp-type\">dict</span><span class=\"lp-chip is-dim\">= None</span></span></div></div><div class=\"lp-foot\">⋮</div></div><svg class=\"lp-wires\" viewBox=\"0 0 600 384\" aria-hidden=\"true\"><path d=\"M10,200 H22 V131 H36\"/><path d=\"M176,131 H226\"/><path d=\"M368,131 H418\"/><path d=\"M576,131 H583 V200 H590\"/><path d=\"M170,232 H200 V149 H226\"/><path d=\"M360,232 H392 V149 H418\"/></svg><i class=\"lp-dot is-wired\" style=\"left:10px;top:200px\"></i><i class=\"lp-dot is-wired\" style=\"left:590px;top:200px\"></i><i class=\"lp-dot is-wired\" style=\"left:36px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:176px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:226px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:368px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:418px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:576px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:226px;top:149px\"></i><i class=\"lp-dot is-wired\" style=\"left:418px;top:149px\"></i><div class=\"lp-pill gain\" data-lp=\"pill-gain\" style=\"left:106px;top:220px;width:64px\"><span data-when=\"base preview\" data-story-to=\"named\">= 2.0</span><span data-when=\"named\">gain = 2.0</span><i class=\"lp-dot is-wired lp-pill-dot\"></i></div><div class=\"lp-pill opts\" data-lp=\"pill-opts\" style=\"left:314px;top:220px;width:46px\"><span data-story-to=\"preview\">= …</span><i class=\"lp-dot is-wired lp-pill-dot\"></i></div><div class=\"lp-card\" data-when=\"preview\" style=\"left:262px;top:148px;--caret:70px\"><div class=\"lp-card-head\">dict · 3 keys</div><div>{&quot;quat&quot;: True,</div><div>&quot;units&quot;: &quot;m&quot;,</div><div>&quot;frame_id&quot;: &quot;base_link&quot;}</div></div></div><div class=\"lp-code\" style=\"top:292px\"><div class=\"lp-line\">def run(raw: bytes) -&gt; bytes:</div><div class=\"lp-line\">    frame = decode(raw)</div><div class=\"lp-line is-hot\" data-when=\"base preview\">    pose = estimate(frame, 2.0)</div><div class=\"lp-line is-hot\" data-when=\"named\">    gain = 2.0</div><div class=\"lp-line is-hot\" data-when=\"named\">    pose = estimate(frame, gain)</div><div class=\"lp-line\">    payload = encode(pose, {&quot;quat&quot;: True, &quot;units&quot;: &quot;m&quot;, &quot;frame_id&quot;: &quot;base_link&quot;})</div><div class=\"lp-line\">    return payload</div></div><button type=\"button\" class=\"lp-reset\" data-story-to=\"base\">↺ reset</button></div>",
+      "story": {
+        "title": "A capsule is a source",
+        "steps": [
+          {
+            "label": "The literal is its own shape",
+            "caption": "2.0 sits in a capsule wired into gain. The grey `= 1.0` on the row is estimate's definition default, dimmed because this call overrides it.",
+            "state": "base",
+            "target": "[data-lp=\"pill-gain\"]"
+          },
+          {
+            "label": "Name it",
+            "caption": "Click the text and type a name, like a Block title. The name is the only thing that changes the Python: `gain = 2.0` is hoisted above the call.",
+            "state": "named",
+            "target": "[data-lp=\"pill-gain\"]"
+          },
+          {
+            "label": "A long value folds",
+            "caption": "The dict wired into encode.opts reads `= …`; hovering it (here, a click) shows the whole literal in a card.",
+            "state": "preview",
+            "target": "[data-lp=\"pill-opts\"]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Anatomy · the 2×2 from the sketch",
+          "caption": "One object with an optional name. `= …` folds a long value; the outlet is the same 12px dot every port has.",
+          "html": "<div class=\"lp-sheet\"><div class=\"lp-cell\"><small>short · no name</small><div class=\"lp-cell-body\"><span class=\"lp-pill lp-pill--inline\">= 2.0<i class=\"lp-dot is-wired lp-pill-dot\"></i></span></div></div><div class=\"lp-cell\"><small>short · named</small><div class=\"lp-cell-body\"><span class=\"lp-pill lp-pill--inline\">gain = 2.0<i class=\"lp-dot is-wired lp-pill-dot\"></i></span></div></div><div class=\"lp-cell\"><small>long · no name</small><div class=\"lp-cell-body\"><span class=\"lp-pill lp-pill--inline\">= …<i class=\"lp-dot is-wired lp-pill-dot\"></i></span></div></div><div class=\"lp-cell\"><small>long · named</small><div class=\"lp-cell-body\"><span class=\"lp-pill lp-pill--inline\">opts = …<i class=\"lp-dot is-wired lp-pill-dot\"></i></span></div></div></div>"
+        }
+      ],
+      "decisions": [
+        {
+          "label": "The object",
+          "value": "tldraw's own `oval` geo silhouette with a single outlet dot; text edits like any tldraw text."
+        },
+        {
+          "label": "Name is the semantics",
+          "value": "An unnamed capsule regenerates inline; a named one hoists `name = value` immediately before its first consumer."
+        },
+        {
+          "label": "Long value",
+          "value": "`= …` on the capsule, the full literal in a hover card (touch: tap)."
+        }
+      ],
+      "bestWhen": "A value is a thing you want to see and point at — a tunable, a constant with a name — and calls have one or two such arguments.",
+      "losesWhen": "A call has four scalar parameters: four capsules and four cables hide the pipeline the diagram exists to show.",
+      "keepParts": [
+        "capsule silhouette from the sketch",
+        "name-is-the-semantics rule",
+        "`= …` fold with hover card"
+      ],
+      "proof": [
+        "The hero is the shared fixture with the definition default and the supplied literal both visible.",
+        "Naming and the long-value card are live states; the code strip regenerates three distinct programs from three distinct pictures."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "Capsule vs grey chip separates supplied from default; the named state is a different label and a different code line. Three pictures, three programs.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 4,
+          "evidence": "Oval, text and cable all exist in stock tldraw and the app; the outlet on a non-Block shape is the one new thing (a port on a geo, or a Block in a capsule view).",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 2,
+          "evidence": "Every literal is a shape and a cable, always. Compact, but the hero already shows two capsules and two extra cables for two arguments.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "`= …` keeps the capsule 46px wide; the card shows all three lines of the dict in place.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "Name by editing the text; the outlet fans out exactly like a Block output already does (fan-out merged 2026-09-01).",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The supplied 2.0 is a separate shape; the definition default stays the grey row chip, dimmed when overridden."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Oval geo + text + one outlet + the existing cable/binding seam; no new drag or snap logic."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The hero draws run(), decode, estimate with its 1.0 default, encode with the dict, at the same scale as every other variant."
+        }
+      }
+    },
+    {
+      "id": "v2",
+      "name": "Value Block",
+      "accent": "#3f6fa8",
+      "thesis": "A Block in a fourth view: heading holds the value or its name, the outlet carries the inferred type, and the body already exists for long values.",
+      "previewLabel": "run() · click the cards",
+      "preview": "<div class=\"lp\" data-v=\"v2\"><div class=\"lp-expanded\"><div class=\"lp-frame\" style=\"left:10px;top:44px;width:580px;height:236px\"><div class=\"lp-frame-head\"><span class=\"lp-title\">run()</span><span class=\"lp-kind\">def</span></div></div><span class=\"lp-frame-port\" style=\"left:18px;top:208px\">raw <em>bytes</em></span><span class=\"lp-frame-port is-right\" style=\"right:18px;top:208px\"><em>bytes</em> payload</span><div class=\"lp-block\" data-lp=\"decode\" style=\"left:36px;top:90px;width:140px;height:70px\"><div class=\"lp-block-head\"><span class=\"lp-title\">decode()</span><span class=\"lp-kind\">call</span></div><div class=\"lp-rows\"><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">raw</span><span class=\"lp-type\">bytes</span></span><span class=\"lp-out\"><span class=\"lp-type\">Frame</span><span class=\"lp-name\">frame</span></span></div></div><div class=\"lp-foot\">⋮</div></div><div class=\"lp-block\" data-lp=\"estimate\" style=\"left:226px;top:90px;width:142px;height:88px\"><div class=\"lp-block-head\"><span class=\"lp-title\">estimate()</span><span class=\"lp-kind\">call</span></div><div class=\"lp-rows\"><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">frame</span><span class=\"lp-type\">Frame</span></span><span class=\"lp-out\"><span class=\"lp-type\">Pose</span><span class=\"lp-name\">pose</span></span></div><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">gain</span><span class=\"lp-type\">float</span><span class=\"lp-chip is-dim\">= 1.0</span></span></div></div><div class=\"lp-foot\">⋮</div></div><div class=\"lp-block\" data-lp=\"encode\" style=\"left:418px;top:90px;width:158px;height:88px\"><div class=\"lp-block-head\"><span class=\"lp-title\">encode()</span><span class=\"lp-kind\">call</span></div><div class=\"lp-rows\"><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">pose</span><span class=\"lp-type\">Pose</span></span><span class=\"lp-out\"><span class=\"lp-type\">bytes</span><span class=\"lp-name\">payload</span></span></div><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">opts</span><span class=\"lp-type\">dict</span><span class=\"lp-chip is-dim\">= None</span></span></div></div><div class=\"lp-foot\">⋮</div></div><svg class=\"lp-wires\" viewBox=\"0 0 600 384\" aria-hidden=\"true\"><path d=\"M10,200 H22 V131 H36\"/><path d=\"M176,131 H226\"/><path d=\"M368,131 H418\"/><path d=\"M576,131 H583 V200 H590\"/><path d=\"M170,233 H200 V149 H226\"/><path d=\"M360,219 H392 V149 H418\"/></svg><i class=\"lp-dot is-wired\" style=\"left:10px;top:200px\"></i><i class=\"lp-dot is-wired\" style=\"left:590px;top:200px\"></i><i class=\"lp-dot is-wired\" style=\"left:36px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:176px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:226px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:368px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:418px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:576px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:226px;top:149px\"></i><i class=\"lp-dot is-wired\" style=\"left:418px;top:149px\"></i><div class=\"lp-vcard\" data-lp=\"card-gain\" data-when=\"base open\" data-story-to=\"named\" style=\"left:86px;top:220px;width:84px\"><div class=\"lp-vhead\"><span class=\"lp-vtitle\">2.0</span><span class=\"lp-kind\">float</span><i class=\"lp-dot is-wired lp-vdot\"></i></div></div><div class=\"lp-vcard\" data-lp=\"card-gain-named\" data-when=\"named\" style=\"left:86px;top:220px;width:84px\"><div class=\"lp-vhead\"><span class=\"lp-vtitle\">gain</span><span class=\"lp-kind\">float</span><i class=\"lp-dot is-wired lp-vdot\"></i></div><div class=\"lp-vbody\"><div>2.0</div></div></div><div class=\"lp-vcard\" data-lp=\"card-opts\" data-when=\"base named\" data-story-to=\"open\" style=\"left:270px;top:206px;width:90px\"><div class=\"lp-vhead\"><span class=\"lp-vtitle\">{…}</span><span class=\"lp-kind\">dict</span><i class=\"lp-dot is-wired lp-vdot\"></i></div><div class=\"lp-vbody\"><div>&quot;quat&quot;: True,</div><div>&quot;units&quot;: &quot;m&quot;, …</div></div></div><div class=\"lp-vcard is-open\" data-lp=\"card-opts-open\" data-when=\"open\" style=\"left:270px;top:206px;width:90px\"><div class=\"lp-vhead\"><span class=\"lp-vtitle\">{…}</span><span class=\"lp-kind\">dict</span><i class=\"lp-dot is-wired lp-vdot\"></i></div><div class=\"lp-vbody\"><div>{&quot;quat&quot;: True,</div><div>&quot;units&quot;: &quot;m&quot;,</div><div>&quot;frame_id&quot;: &quot;base_link&quot;}</div></div></div></div><div class=\"lp-code\" style=\"top:292px\"><div class=\"lp-line\">def run(raw: bytes) -&gt; bytes:</div><div class=\"lp-line\">    frame = decode(raw)</div><div class=\"lp-line is-hot\" data-when=\"base open\">    pose = estimate(frame, 2.0)</div><div class=\"lp-line is-hot\" data-when=\"named\">    gain = 2.0</div><div class=\"lp-line is-hot\" data-when=\"named\">    pose = estimate(frame, gain)</div><div class=\"lp-line\">    payload = encode(pose, {&quot;quat&quot;: True, &quot;units&quot;: &quot;m&quot;, &quot;frame_id&quot;: &quot;base_link&quot;})</div><div class=\"lp-line\">    return payload</div></div><button type=\"button\" class=\"lp-reset\" data-story-to=\"base\">↺ reset</button></div>",
+      "story": {
+        "title": "The value is a Block",
+        "steps": [
+          {
+            "label": "Same primitive, new view",
+            "caption": "The literal is a Block whose view is `value`. Its heading holds 2.0, its tag the inferred type, its outlet is an ordinary port — so click-to-edit, the inspector, batch styles and fan-out come free.",
+            "state": "base",
+            "target": "[data-lp=\"card-gain\"]"
+          },
+          {
+            "label": "Name it",
+            "caption": "Naming moves the value into the body and puts the name in the heading, where a Block's title already lives.",
+            "state": "named",
+            "target": "[data-lp=\"card-gain-named\"]"
+          },
+          {
+            "label": "A long value has a body",
+            "caption": "The dict shows a two-line preview without hovering. Click to open the whole literal in place.",
+            "state": "open",
+            "target": "[data-lp=\"card-opts-open\"]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Anatomy · a Block wearing its value",
+          "caption": "Heading = value or name, tag = inferred type, body = the value once named or long. Nothing here is new chrome.",
+          "html": "<div class=\"lp-sheet\"><div class=\"lp-cell\"><small>short · no name</small><div class=\"lp-cell-body\"><span class=\"lp-vcard lp-vcard--inline\" style=\"width:84px\"><div class=\"lp-vhead\"><span class=\"lp-vtitle\">2.0</span><span class=\"lp-kind\">float</span><i class=\"lp-dot is-wired lp-vdot\"></i></div></span></div></div><div class=\"lp-cell\"><small>short · named</small><div class=\"lp-cell-body\"><span class=\"lp-vcard lp-vcard--inline\" style=\"width:84px\"><div class=\"lp-vhead\"><span class=\"lp-vtitle\">gain</span><span class=\"lp-kind\">float</span><i class=\"lp-dot is-wired lp-vdot\"></i></div><div class=\"lp-vbody\"><div>2.0</div></div></span></div></div><div class=\"lp-cell\"><small>long · no name</small><div class=\"lp-cell-body\"><span class=\"lp-vcard lp-vcard--inline\" style=\"width:110px\"><div class=\"lp-vhead\"><span class=\"lp-vtitle\">{…}</span><span class=\"lp-kind\">dict</span><i class=\"lp-dot is-wired lp-vdot\"></i></div><div class=\"lp-vbody\"><div>&quot;quat&quot;: True,</div><div>&quot;units&quot;: &quot;m&quot;, …</div></div></span></div></div><div class=\"lp-cell\"><small>long · named</small><div class=\"lp-cell-body\"><span class=\"lp-vcard lp-vcard--inline\" style=\"width:110px\"><div class=\"lp-vhead\"><span class=\"lp-vtitle\">opts</span><span class=\"lp-kind\">dict</span><i class=\"lp-dot is-wired lp-vdot\"></i></div><div class=\"lp-vbody\"><div>&quot;quat&quot;: True,</div><div>&quot;units&quot;: &quot;m&quot;, …</div></div></span></div></div></div>"
+        }
+      ],
+      "decisions": [
+        {
+          "label": "The object",
+          "value": "The existing Block shape with `view: 'value'` — one more value of the view style, no new shape util."
+        },
+        {
+          "label": "Type on the outlet",
+          "value": "The inferred type (`float`, `dict`) shows where a Block shows its kind, so cables can be type-checked by the same judge."
+        },
+        {
+          "label": "Long value",
+          "value": "Preview lines in the body by default; open expands the card, no hover needed."
+        }
+      ],
+      "bestWhen": "You want zero new machinery: every Block behaviour (edit, inspect, batch, wire, fan out, save) applies to values the day it ships.",
+      "losesWhen": "The card is heavier than a capsule; a page of small constants looks like a page of tiny Blocks.",
+      "keepParts": [
+        "Block view `value` (no new shape)",
+        "type tag on the outlet",
+        "preview-in-body for long values"
+      ],
+      "proof": [
+        "Three live states on the shared fixture; the open dict card shows all three lines in place.",
+        "The code strip hoists `gain = 2.0` only in the named state."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "Card vs grey chip; named state changes heading and body and the code line. Three pictures, three programs.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "No new shape, gesture or binding: a Block view value. Everything shown is the Block's existing chrome.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 1,
+          "evidence": "A card plus a cable per literal, and the card is larger than a capsule; two arguments already fill the strip under the pipeline.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "Preview visible with no hover; open state shows the full dict in the body without a floating card.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "Title edit names it; a Block output already fans out.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The value card is a separate shape; the definition default stays the grey row chip."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Adds a value to the existing view style prop; the Block util already renders headings, bodies and ports."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The hero draws run(), decode, estimate with its 1.0 default, encode with the dict, at the same scale as every other variant."
+        }
+      }
+    },
+    {
+      "id": "v3",
+      "name": "Docked plug",
+      "accent": "#2f7f62",
+      "thesis": "The pill plugs straight into its port — no cable. Pull it off the socket and it becomes a free source named after the parameter.",
+      "previewLabel": "run() · click the plug",
+      "preview": "<div class=\"lp\" data-v=\"v3\"><div class=\"lp-expanded\"><div class=\"lp-frame\" style=\"left:10px;top:44px;width:580px;height:236px\"><div class=\"lp-frame-head\"><span class=\"lp-title\">run()</span><span class=\"lp-kind\">def</span></div></div><span class=\"lp-frame-port\" style=\"left:18px;top:208px\">raw <em>bytes</em></span><span class=\"lp-frame-port is-right\" style=\"right:18px;top:208px\"><em>bytes</em> payload</span><div class=\"lp-block\" data-lp=\"decode\" style=\"left:36px;top:90px;width:140px;height:70px\"><div class=\"lp-block-head\"><span class=\"lp-title\">decode()</span><span class=\"lp-kind\">call</span></div><div class=\"lp-rows\"><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">raw</span><span class=\"lp-type\">bytes</span></span><span class=\"lp-out\"><span class=\"lp-type\">Frame</span><span class=\"lp-name\">frame</span></span></div></div><div class=\"lp-foot\">⋮</div></div><div class=\"lp-block\" data-lp=\"estimate\" style=\"left:226px;top:90px;width:142px;height:88px\"><div class=\"lp-block-head\"><span class=\"lp-title\">estimate()</span><span class=\"lp-kind\">call</span></div><div class=\"lp-rows\"><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">frame</span><span class=\"lp-type\">Frame</span></span><span class=\"lp-out\"><span class=\"lp-type\">Pose</span><span class=\"lp-name\">pose</span></span></div><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">gain</span><span class=\"lp-type\">float</span><span class=\"lp-chip is-dim\">= 1.0</span></span></div></div><div class=\"lp-foot\">⋮</div></div><div class=\"lp-block\" data-lp=\"encode\" style=\"left:418px;top:90px;width:158px;height:88px\"><div class=\"lp-block-head\"><span class=\"lp-title\">encode()</span><span class=\"lp-kind\">call</span></div><div class=\"lp-rows\"><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">pose</span><span class=\"lp-type\">Pose</span></span><span class=\"lp-out\"><span class=\"lp-type\">bytes</span><span class=\"lp-name\">payload</span></span></div><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">opts</span><span class=\"lp-type\">dict</span><span class=\"lp-chip is-dim\">= None</span></span></div></div><div class=\"lp-foot\">⋮</div></div><svg class=\"lp-wires\" viewBox=\"0 0 600 384\" aria-hidden=\"true\"><path d=\"M10,200 H22 V131 H36\"/><path d=\"M176,131 H226\"/><path d=\"M368,131 H418\"/><path d=\"M576,131 H583 V200 H590\"/><path d=\"M170,232 H200 V149 H226\" data-when=\"unplugged\"/></svg><i class=\"lp-dot is-wired\" style=\"left:10px;top:200px\"></i><i class=\"lp-dot is-wired\" style=\"left:590px;top:200px\"></i><i class=\"lp-dot is-wired\" style=\"left:36px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:176px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:226px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:368px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:418px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:576px;top:131px\"></i><i class=\"lp-dot is-plugged\" data-when=\"docked preview\" style=\"left:226px;top:149px\"></i><i class=\"lp-dot is-wired\" data-when=\"unplugged\" style=\"left:226px;top:149px\"></i><i class=\"lp-dot is-plugged\" style=\"left:418px;top:149px\"></i><div class=\"lp-pill gain is-docked\" data-lp=\"plug-gain\" style=\"left:186px;top:138px;width:44px\"><span data-when=\"docked preview\" data-story-to=\"unplugged\">2.0</span><span data-when=\"unplugged\" data-story-to=\"docked\">gain = 2.0</span><i class=\"lp-dot is-wired lp-pill-dot\" data-when=\"unplugged\"></i></div><div class=\"lp-pill opts is-docked\" data-lp=\"plug-opts\" style=\"left:378px;top:138px;width:44px\"><span data-story-to=\"preview\">{…}</span></div><div class=\"lp-card is-below\" data-when=\"preview\" style=\"left:330px;top:172px;--caret:66px\"><div class=\"lp-card-head\">dict · 3 keys</div><div>{&quot;quat&quot;: True,</div><div>&quot;units&quot;: &quot;m&quot;,</div><div>&quot;frame_id&quot;: &quot;base_link&quot;}</div></div></div><div class=\"lp-code\" style=\"top:292px\"><div class=\"lp-line\">def run(raw: bytes) -&gt; bytes:</div><div class=\"lp-line\">    frame = decode(raw)</div><div class=\"lp-line is-hot\" data-when=\"docked preview\">    pose = estimate(frame, 2.0)</div><div class=\"lp-line is-hot\" data-when=\"unplugged\">    gain = 2.0</div><div class=\"lp-line is-hot\" data-when=\"unplugged\">    pose = estimate(frame, gain)</div><div class=\"lp-line\">    payload = encode(pose, {&quot;quat&quot;: True, &quot;units&quot;: &quot;m&quot;, &quot;frame_id&quot;: &quot;base_link&quot;})</div><div class=\"lp-line\">    return payload</div></div><button type=\"button\" class=\"lp-reset\" data-story-to=\"docked\">↺ reset</button></div>",
+      "story": {
+        "title": "Position is the refactor",
+        "steps": [
+          {
+            "label": "Docked = literal argument",
+            "caption": "The pill sits on the socket: 2.0 is the argument, nothing else is drawn. A dark dot means 'a plug is in'.",
+            "state": "docked",
+            "target": "[data-lp=\"plug-gain\"]"
+          },
+          {
+            "label": "Pull it off",
+            "caption": "Drag it away and it is a free pill with a cable — and it takes the parameter's name, so the code hoists `gain = 2.0`. Drag it back to inline it.",
+            "state": "unplugged",
+            "target": "[data-lp=\"plug-gain\"]"
+          },
+          {
+            "label": "Long value, docked",
+            "caption": "A docked `= …` still folds; a click shows the whole literal.",
+            "state": "preview",
+            "target": "[data-lp=\"plug-opts\"]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Anatomy · docked is unnamed by definition",
+          "caption": "A docked pill is the argument itself. Pulling it off the socket is what names it (after the parameter), so the named cells are free pills.",
+          "html": "<div class=\"lp-sheet\"><div class=\"lp-cell\"><small>short · no name</small><div class=\"lp-cell-body\"><span class=\"lp-pill lp-pill--inline is-docked\">2.0</span><span class=\"lp-stub\"><i class=\"lp-dot is-plugged lp-stub-dot\"></i><span class=\"lp-name\">gain</span><span class=\"lp-type\">float</span></span></div></div><div class=\"lp-cell\"><small>short · named</small><div class=\"lp-cell-body\"><span class=\"lp-pill lp-pill--inline\">gain = 2.0<i class=\"lp-dot is-wired lp-pill-dot\"></i></span><span class=\"lp-arrow\">⟶</span><span class=\"lp-stub\"><i class=\"lp-dot is-wired lp-stub-dot\"></i><span class=\"lp-name\">gain</span><span class=\"lp-type\">float</span></span></div></div><div class=\"lp-cell\"><small>long · no name</small><div class=\"lp-cell-body\"><span class=\"lp-pill lp-pill--inline is-docked\">{…}</span><span class=\"lp-stub\"><i class=\"lp-dot is-plugged lp-stub-dot\"></i><span class=\"lp-name\">opts</span><span class=\"lp-type\">dict</span></span></div></div><div class=\"lp-cell\"><small>long · named</small><div class=\"lp-cell-body\"><span class=\"lp-pill lp-pill--inline\">opts = {…}<i class=\"lp-dot is-wired lp-pill-dot\"></i></span><span class=\"lp-arrow\">⟶</span><span class=\"lp-stub\"><i class=\"lp-dot is-wired lp-stub-dot\"></i><span class=\"lp-name\">opts</span><span class=\"lp-type\">dict</span></span></div></div></div>"
+        }
+      ],
+      "decisions": [
+        {
+          "label": "Docked",
+          "value": "A pill↔port binding (a new binding type through the BindingUtil seam) keeps the pill flush on the socket; no cable is drawn, and the pill shows only the value (`2.0`, `{…}`) because nothing is being assigned."
+        },
+        {
+          "label": "Unplug = extract variable",
+          "value": "Detaching creates the cable and proposes the parameter's name, so the position of the pill is the inline/hoisted decision."
+        },
+        {
+          "label": "Sockets",
+          "value": "A plugged port dot is dark; a wired one is gold; a default-only one is grey — three dot states."
+        }
+      ],
+      "bestWhen": "You want the economy of a row for single-use literals but the same object for shared ones — one pill, two positions.",
+      "losesWhen": "Docking is a new snap behaviour to learn and to build; a docked pill in the gap between two Blocks is cramped at the current Block spacing.",
+      "keepParts": [
+        "dock/undock as the inline/extract gesture",
+        "parameter name proposed on extract",
+        "plugged-dot state"
+      ],
+      "proof": [
+        "The docked, unplugged and preview states are live; the pill animates off the socket and the cable appears.",
+        "The code strip switches from inline to hoisted only when the pill is off the socket."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 4,
+          "evidence": "Docked/unplugged map to inline/hoisted and the default chip stays distinct; but a docked pill that is later renamed has two positions for one program, and the auto-name is a proposal the reader cannot see was accepted.",
+          "confidence": "medium"
+        },
+        "fr2": {
+          "score": 2,
+          "evidence": "Docking is a new binding and a new drag-off gesture; nothing in the app or in stock tldraw plugs a shape onto a port today.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "A docked literal costs no cable and no free shape; it still costs a pill-width in the gap before the Block.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "`= …` folds; the card floats over the neighbouring Block because the docked pill has no room of its own.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "Naming is the unplug itself; sharing then fans out from the free pill — two gestures rather than one.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "A docked pill is a shape on the socket; the definition default remains the grey chip on the row."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "A new binding type is a supported seam; snapping reuses tldraw's own snap. No engine change, but the gate is passed on the seam, not on zero new code."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The hero draws run(), decode, estimate with its 1.0 default, encode with the dict, at the same scale as every other variant."
+        }
+      }
+    },
+    {
+      "id": "v4",
+      "name": "Inline literal",
+      "accent": "#7667c6",
+      "thesis": "No shape at all: the unconnected row carries its literal in an editable field, exactly as the workflow kit's NodeInputRow does. A pill appears only when you extract.",
+      "previewLabel": "run() · click × or ⤴",
+      "preview": "<div class=\"lp\" data-v=\"v4\"><div class=\"lp-expanded\"><div class=\"lp-frame\" style=\"left:10px;top:44px;width:580px;height:236px\"><div class=\"lp-frame-head\"><span class=\"lp-title\">run()</span><span class=\"lp-kind\">def</span></div></div><span class=\"lp-frame-port\" style=\"left:18px;top:208px\">raw <em>bytes</em></span><span class=\"lp-frame-port is-right\" style=\"right:18px;top:208px\"><em>bytes</em> payload</span><div class=\"lp-block\" data-lp=\"decode\" style=\"left:36px;top:90px;width:140px;height:70px\"><div class=\"lp-block-head\"><span class=\"lp-title\">decode()</span><span class=\"lp-kind\">call</span></div><div class=\"lp-rows\"><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">raw</span><span class=\"lp-type\">bytes</span></span><span class=\"lp-out\"><span class=\"lp-type\">Frame</span><span class=\"lp-name\">frame</span></span></div></div><div class=\"lp-foot\">⋮</div></div><div class=\"lp-block\" data-lp=\"estimate\" style=\"left:226px;top:90px;width:142px;height:88px\"><div class=\"lp-block-head\"><span class=\"lp-title\">estimate()</span><span class=\"lp-kind\">call</span></div><div class=\"lp-rows\"><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">frame</span><span class=\"lp-type\">Frame</span></span><span class=\"lp-out\"><span class=\"lp-type\">Pose</span><span class=\"lp-name\">pose</span></span></div><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">gain</span><span class=\"lp-type\">float</span><span class=\"lp-field\" data-when=\"base\" data-lp=\"field-gain\">2.0<b class=\"lp-fx\" data-story-to=\"cleared\" title=\"Clear the literal\">×</b><b class=\"lp-fx\" data-story-to=\"extracted\" title=\"Extract to variable\">⤴</b></span><span class=\"lp-chip\" data-when=\"cleared\" data-lp=\"chip-gain\" data-story-to=\"base\">= 1.0</span><span class=\"lp-chip is-dim\" data-when=\"extracted\">= 1.0</span></span></div></div><div class=\"lp-foot\">⋮</div></div><div class=\"lp-block\" data-lp=\"encode\" style=\"left:418px;top:90px;width:158px;height:88px\"><div class=\"lp-block-head\"><span class=\"lp-title\">encode()</span><span class=\"lp-kind\">call</span></div><div class=\"lp-rows\"><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">pose</span><span class=\"lp-type\">Pose</span></span><span class=\"lp-out\"><span class=\"lp-type\">bytes</span><span class=\"lp-name\">payload</span></span></div><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">opts</span><span class=\"lp-type\">dict</span><span class=\"lp-field\" data-lp=\"field-opts\">{…}</span></span></div></div><div class=\"lp-foot\">⋮</div></div><svg class=\"lp-wires\" viewBox=\"0 0 600 384\" aria-hidden=\"true\"><path d=\"M10,200 H22 V131 H36\"/><path d=\"M176,131 H226\"/><path d=\"M368,131 H418\"/><path d=\"M576,131 H583 V200 H590\"/><path d=\"M170,232 H200 V149 H226\" data-when=\"extracted\"/></svg><i class=\"lp-dot is-wired\" style=\"left:10px;top:200px\"></i><i class=\"lp-dot is-wired\" style=\"left:590px;top:200px\"></i><i class=\"lp-dot is-wired\" style=\"left:36px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:176px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:226px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:368px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:418px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:576px;top:131px\"></i><i class=\"lp-dot is-literal\" data-when=\"base\" style=\"left:226px;top:149px\"></i><i class=\"lp-dot is-default\" data-when=\"cleared\" style=\"left:226px;top:149px\"></i><i class=\"lp-dot is-wired\" data-when=\"extracted\" style=\"left:226px;top:149px\"></i><i class=\"lp-dot is-literal\" style=\"left:418px;top:149px\"></i><div class=\"lp-pill gain\" data-lp=\"pill-gain\" data-when=\"extracted\" style=\"left:70px;top:220px;width:100px\"><span>gain = 2.0</span><i class=\"lp-dot is-wired lp-pill-dot\"></i></div></div><div class=\"lp-code\" style=\"top:292px\"><div class=\"lp-line\">def run(raw: bytes) -&gt; bytes:</div><div class=\"lp-line\">    frame = decode(raw)</div><div class=\"lp-line is-hot\" data-when=\"base\">    pose = estimate(frame, 2.0)</div><div class=\"lp-line is-hot\" data-when=\"cleared\">    pose = estimate(frame)          # gain falls back to 1.0</div><div class=\"lp-line is-hot\" data-when=\"extracted\">    gain = 2.0</div><div class=\"lp-line is-hot\" data-when=\"extracted\">    pose = estimate(frame, gain)</div><div class=\"lp-line\">    payload = encode(pose, {&quot;quat&quot;: True, &quot;units&quot;: &quot;m&quot;, &quot;frame_id&quot;: &quot;base_link&quot;})</div><div class=\"lp-line\">    return payload</div></div><button type=\"button\" class=\"lp-reset\" data-story-to=\"base\">↺ reset</button></div>",
+      "story": {
+        "title": "The row carries it",
+        "steps": [
+          {
+            "label": "The argument lives on the row",
+            "caption": "`gain float 2.0`: the solid field is the supplied literal (a dark dot says so); the grey chip would be the definition default. Nothing new is drawn on the canvas.",
+            "state": "base",
+            "target": "[data-lp=\"field-gain\"]"
+          },
+          {
+            "label": "Clear it",
+            "caption": "Clear the field and estimate's own default shows as the grey chip; the code drops the argument.",
+            "state": "cleared",
+            "target": "[data-lp=\"chip-gain\"]"
+          },
+          {
+            "label": "Extract to variable",
+            "caption": "⤴ hoists it into a pill with a cable — the Capsule appears only when a name is wanted.",
+            "state": "extracted",
+            "target": "[data-lp=\"pill-gain\"]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Anatomy · the row carries it",
+          "caption": "Solid field = supplied literal; grey chip = definition default. A name has nowhere to live on a row, so the named cells become a pill by extraction.",
+          "html": "<div class=\"lp-sheet\"><div class=\"lp-cell\"><small>short · no name</small><div class=\"lp-cell-body\"><span class=\"lp-stub lp-stub--row\"><i class=\"lp-dot is-literal lp-stub-dot\"></i><span class=\"lp-name\">gain</span><span class=\"lp-type\">float</span><span class=\"lp-field\">2.0</span></span></div></div><div class=\"lp-cell\"><small>short · named</small><div class=\"lp-cell-body\"><span class=\"lp-stub lp-stub--row\"><i class=\"lp-dot is-wired lp-stub-dot\"></i><span class=\"lp-name\">gain</span><span class=\"lp-type\">float</span></span><span class=\"lp-arrow\">⟵</span><span class=\"lp-pill lp-pill--inline\">gain = 2.0<i class=\"lp-dot is-wired lp-pill-dot\"></i></span></div></div><div class=\"lp-cell\"><small>long · no name</small><div class=\"lp-cell-body\"><span class=\"lp-stub lp-stub--row\"><i class=\"lp-dot is-literal lp-stub-dot\"></i><span class=\"lp-name\">opts</span><span class=\"lp-type\">dict</span><span class=\"lp-field\">{…}</span></span></div></div><div class=\"lp-cell\"><small>long · named</small><div class=\"lp-cell-body\"><span class=\"lp-stub lp-stub--row\"><i class=\"lp-dot is-wired lp-stub-dot\"></i><span class=\"lp-name\">opts</span><span class=\"lp-type\">dict</span></span><span class=\"lp-arrow\">⟵</span><span class=\"lp-pill lp-pill--inline\">opts = …<i class=\"lp-dot is-wired lp-pill-dot\"></i></span></div></div></div>"
+        }
+      ],
+      "decisions": [
+        {
+          "label": "The object",
+          "value": "None. The port row gains an editable value field, in the spot the definition-default chip already occupies."
+        },
+        {
+          "label": "Supplied vs default",
+          "value": "Solid field + dark dot = supplied; grey chip + grey dot = default. Wiring a cable hides the field (the kit's rule)."
+        },
+        {
+          "label": "Extract",
+          "value": "A context-menu command creates the pill and the cable, proposing the parameter name."
+        }
+      ],
+      "bestWhen": "Calls carry many scalar parameters and the pipeline's silhouette matters more than any one value — the common case in an image pipeline.",
+      "losesWhen": "The row is already tight: at the current Block width the chip alone crowds the name to `g…` (see the reference capture). Shared values need the extract step.",
+      "keepParts": [
+        "field-on-the-row for single-use literals",
+        "solid-vs-ghost supplied/default rule",
+        "Extract to variable command"
+      ],
+      "proof": [
+        "Base, cleared and extracted are live; the dot changes dark → grey → gold with the state.",
+        "The code strip shows inline, defaulted and hoisted programs for the three states."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 4,
+          "evidence": "Inline, defaulted and hoisted are three pictures and three programs; but supplied-1.0 vs default-1.0 rests on field weight alone on the same row.",
+          "confidence": "medium"
+        },
+        "fr2": {
+          "score": 4,
+          "evidence": "The kit's own NodeInputRow, in the slot the app's default chip already uses; the only new thing is the Extract command.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "A literal costs nothing beyond the row it already has; the pipeline strip stays empty.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 3,
+          "evidence": "`{…}` fits, but the row has the least room of any direction — the real app already ellipsises `g… fl…` at 340px — and the full value is hover-only.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 3,
+          "evidence": "Naming means extracting first; sharing is impossible inline.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "Solid field with a dark dot vs grey chip with a grey dot — distinct, though it is the subtlest pair in the set."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "A field on a row the Block util already lays out; the Extract command composes existing create-shape and connect operations."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The hero draws run(), decode, estimate with its 1.0 default, encode with the dict, at the same scale as every other variant."
+        }
+      }
+    },
+    {
+      "id": "v5",
+      "name": "Locals rail",
+      "accent": "#b84939",
+      "thesis": "run() owns its literals: they are rows in a locals zone inside the Expanded Block, each with an outlet, wired to whichever call uses them.",
+      "previewLabel": "run() · click a row or ▾",
+      "preview": "<div class=\"lp\" data-v=\"v5\"><div class=\"lp-expanded\" data-when=\"base named\"><div class=\"lp-frame\" style=\"left:10px;top:44px;width:580px;height:236px\"><div class=\"lp-frame-head\"><span class=\"lp-title\">run()</span><span class=\"lp-kind\"><span class=\"lp-collapse\" data-lp=\"collapse\" data-story-to=\"collapsed\" title=\"Collapse to Port view\">▾</span>def</span></div></div><span class=\"lp-frame-port\" style=\"left:18px;top:208px\">raw <em>bytes</em></span><span class=\"lp-frame-port is-right\" style=\"right:18px;top:208px\"><em>bytes</em> payload</span><div class=\"lp-block\" data-lp=\"decode\" style=\"left:36px;top:90px;width:140px;height:70px\"><div class=\"lp-block-head\"><span class=\"lp-title\">decode()</span><span class=\"lp-kind\">call</span></div><div class=\"lp-rows\"><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">raw</span><span class=\"lp-type\">bytes</span></span><span class=\"lp-out\"><span class=\"lp-type\">Frame</span><span class=\"lp-name\">frame</span></span></div></div><div class=\"lp-foot\">⋮</div></div><div class=\"lp-block\" data-lp=\"estimate\" style=\"left:226px;top:90px;width:142px;height:88px\"><div class=\"lp-block-head\"><span class=\"lp-title\">estimate()</span><span class=\"lp-kind\">call</span></div><div class=\"lp-rows\"><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">frame</span><span class=\"lp-type\">Frame</span></span><span class=\"lp-out\"><span class=\"lp-type\">Pose</span><span class=\"lp-name\">pose</span></span></div><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">gain</span><span class=\"lp-type\">float</span><span class=\"lp-chip is-dim\">= 1.0</span></span></div></div><div class=\"lp-foot\">⋮</div></div><div class=\"lp-block\" data-lp=\"encode\" style=\"left:418px;top:90px;width:158px;height:88px\"><div class=\"lp-block-head\"><span class=\"lp-title\">encode()</span><span class=\"lp-kind\">call</span></div><div class=\"lp-rows\"><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">pose</span><span class=\"lp-type\">Pose</span></span><span class=\"lp-out\"><span class=\"lp-type\">bytes</span><span class=\"lp-name\">payload</span></span></div><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">opts</span><span class=\"lp-type\">dict</span><span class=\"lp-chip is-dim\">= None</span></span></div></div><div class=\"lp-foot\">⋮</div></div><svg class=\"lp-wires\" viewBox=\"0 0 600 384\" aria-hidden=\"true\"><path d=\"M10,200 H22 V131 H36\"/><path d=\"M176,131 H226\"/><path d=\"M368,131 H418\"/><path d=\"M576,131 H583 V200 H590\"/><path d=\"M146,245 H200 V149 H226\"/><path d=\"M146,263 H392 V149 H418\"/></svg><i class=\"lp-dot is-wired\" style=\"left:10px;top:200px\"></i><i class=\"lp-dot is-wired\" style=\"left:590px;top:200px\"></i><i class=\"lp-dot is-wired\" style=\"left:36px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:176px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:226px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:368px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:418px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:576px;top:131px\"></i><i class=\"lp-dot is-wired\" style=\"left:226px;top:149px\"></i><i class=\"lp-dot is-wired\" style=\"left:418px;top:149px\"></i><div class=\"lp-locals\" data-lp=\"locals\" style=\"left:18px;top:222px;width:128px\"><div class=\"lp-locals-head\">locals</div><div class=\"lp-lrow\" data-lp=\"local-gain\" data-story-to=\"named\"><span data-when=\"base collapsed\">= 2.0</span><span data-when=\"named\">gain = 2.0</span></div><div class=\"lp-lrow\"><span>= {…}</span></div></div><i class=\"lp-dot is-wired\" style=\"left:146px;top:245px\"></i><i class=\"lp-dot is-wired\" style=\"left:146px;top:263px\"></i></div><div class=\"lp-block\" data-lp=\"run-collapsed\" data-when=\"collapsed\" style=\"left:36px;top:90px;width:168px;height:70px\"><div class=\"lp-block-head\"><span class=\"lp-title\">run()</span><span class=\"lp-kind\"><span class=\"lp-collapse\" data-lp=\"expand\" data-story-to=\"base\" title=\"Expand\">▸</span>def</span></div><div class=\"lp-rows\"><div class=\"lp-row\"><span class=\"lp-in\"><span class=\"lp-name\">raw</span><span class=\"lp-type\">bytes</span></span><span class=\"lp-out\"><span class=\"lp-type\">bytes</span><span class=\"lp-name\">payload</span></span></div></div><div class=\"lp-foot\">⋮</div></div><i class=\"lp-dot \" data-when=\"collapsed\" style=\"left:36px;top:131px\"></i><i class=\"lp-dot \" data-when=\"collapsed\" style=\"left:204px;top:131px\"></i><div class=\"lp-code\" style=\"top:292px\"><div class=\"lp-line\">def run(raw: bytes) -&gt; bytes:</div><div class=\"lp-line\">    frame = decode(raw)</div><div class=\"lp-line is-hot\" data-when=\"base collapsed\">    pose = estimate(frame, 2.0)</div><div class=\"lp-line is-hot\" data-when=\"named\">    gain = 2.0</div><div class=\"lp-line is-hot\" data-when=\"named\">    pose = estimate(frame, gain)</div><div class=\"lp-line\">    payload = encode(pose, {&quot;quat&quot;: True, &quot;units&quot;: &quot;m&quot;, &quot;frame_id&quot;: &quot;base_link&quot;})</div><div class=\"lp-line\">    return payload</div></div><button type=\"button\" class=\"lp-reset\" data-story-to=\"base\">↺ reset</button></div>",
+      "story": {
+        "title": "Literals belong to the scope",
+        "steps": [
+          {
+            "label": "A zone, not a shape",
+            "caption": "Inside run() a small locals zone lists every literal as a row with an outlet. The rows are the same grammar as port rows.",
+            "state": "base",
+            "target": "[data-lp=\"locals\"]"
+          },
+          {
+            "label": "Name it in the row",
+            "caption": "Typing a name in the row hoists it; the row reads `gain = 2.0` and the code follows.",
+            "state": "named",
+            "target": "[data-lp=\"local-gain\"]"
+          },
+          {
+            "label": "Collapse the scope",
+            "caption": "Collapse run() to its Port view and the locals go with it — literals are private to the function, exactly like Python.",
+            "state": "collapsed",
+            "target": "[data-lp=\"expand\"]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Anatomy · rows in the scope that owns them",
+          "caption": "Each local is a row with an outlet, like a port row. Unnamed rows exist only while a literal has one consumer; naming is typing in the row.",
+          "html": "<div class=\"lp-sheet\"><div class=\"lp-cell\"><small>short · no name</small><div class=\"lp-cell-body\"><span class=\"lp-locals lp-locals--inline\"><span class=\"lp-lrow\">= 2.0</span><i class=\"lp-dot is-wired lp-local-dot\"></i></span></div></div><div class=\"lp-cell\"><small>short · named</small><div class=\"lp-cell-body\"><span class=\"lp-locals lp-locals--inline\"><span class=\"lp-lrow\">gain = 2.0</span><i class=\"lp-dot is-wired lp-local-dot\"></i></span></div></div><div class=\"lp-cell\"><small>long · no name</small><div class=\"lp-cell-body\"><span class=\"lp-locals lp-locals--inline\"><span class=\"lp-lrow\">= {…}</span><i class=\"lp-dot is-wired lp-local-dot\"></i></span></div></div><div class=\"lp-cell\"><small>long · named</small><div class=\"lp-cell-body\"><span class=\"lp-locals lp-locals--inline\"><span class=\"lp-lrow\">opts = {…}</span><i class=\"lp-dot is-wired lp-local-dot\"></i></span></div></div></div>"
+        }
+      ],
+      "decisions": [
+        {
+          "label": "Owner",
+          "value": "The enclosing Expanded Block, not the page: the zone is part of run()'s layout, so it moves, collapses and saves with run()."
+        },
+        {
+          "label": "Rows",
+          "value": "Each literal is a row with an outlet, sharing the port row's typography and dot; a row feeds any number of consumers."
+        },
+        {
+          "label": "Long value",
+          "value": "`= {…}` on the row, full value on hover; the zone never widens."
+        }
+      ],
+      "bestWhen": "You think of a function's constants as its state — the class-family sketch with a state zone on top — and want every literal findable in one place.",
+      "losesWhen": "Every literal is now far from its consumer, so each needs a cable across the frame; an unnamed row in a zone called locals reads as a variable.",
+      "keepParts": [
+        "locals zone as part of the Expanded layout",
+        "row-with-outlet grammar",
+        "collapse-hides-locals scope rule"
+      ],
+      "proof": [
+        "Base, named and collapsed are live; collapsing swaps the frame for a Port-view run() with the same two ports.",
+        "The code strip hoists `gain = 2.0` only in the named state; collapse is presentational and changes nothing."
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "Row vs grey chip; named row changes the code line; collapse leaves the program untouched. The zone additionally states the scope the literal belongs to.",
+          "confidence": "medium"
+        },
+        "fr2": {
+          "score": 3,
+          "evidence": "A new region inside the Block's layout with its own rows and outlets — the rows reuse port typography, but the zone itself is a new part of the Block to learn.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 3,
+          "evidence": "A literal costs a row (good) plus a cable across the frame to its consumer (the hero shows two cables spanning the strip).",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "`= {…}` keeps the row narrow; the full value is hover-only.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "Type the name in the row; a row's outlet fans out to as many calls as use it.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The literal is a row in run()'s zone; the definition default remains the grey chip on estimate's row."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "A layout region inside the existing Block util; outlets use the existing port and cable seams."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The hero draws run(), decode, estimate with its 1.0 default, encode with the dict, at the same scale as every other variant."
+        }
+      }
+    }
+  ],
+  "checks": [
+    "Exactly five structural directions on the where-it-lives / who-owns-it axes",
+    "Same run() fixture, same definition default, same scale on every hero",
+    "Visual atlas before the score audit; no winner cue in the atlas",
+    "Every hero has a three-step story with live direct controls on the same states",
+    "Five weighted FRs and three gates frozen before the previews were built; weights sum to 100",
+    "Every score carries evidence and a confidence",
+    "Reference board is the real app driven headlessly, plus the sketches from the brief"
+  ],
+  "defaultId": "v2",
+  "defaultWhy": "Value Block leads at 84/100, a fragile margin over Capsule at 83: it is the same Block primitive wearing a fourth view, so click-to-edit, the inspector, batch styles, fan-out and the file format apply to values the day it ships, and a long value has a body to live in. The Capsule silhouette from your sketch can simply be what that view looks like.",
+  "decisionHinge": "The order is decided by how much weight 'literals do not bury the pipeline' carries. At 20% the two free-shape directions lead; raise it to 30% (taking 10 from vocabulary) and Inline literal (V4) moves to the top at ~83 while Value Block drops to ~80 — which is the workflow kit's own answer. The strongest splice is therefore V2's model with V4's row as the docked, single-use form: a value is a Block, but an unnamed literal with one consumer is allowed to live on the row until you name or share it.",
+  "totals": {
+    "v1": 83.0,
+    "v2": 84.0,
+    "v3": 70.0,
+    "v4": 79.0,
+    "v5": 80.0
+  }
+}

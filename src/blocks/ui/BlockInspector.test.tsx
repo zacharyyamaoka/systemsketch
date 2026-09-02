@@ -2,7 +2,8 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import { getDefaultBlockProps } from '../blockModel'
-import { BlockInspectorContent } from './BlockInspector'
+import { createValueBlockProps } from '../valueBlock'
+import { BlockInspectorContent, type BlockInspectorActions } from './BlockInspector'
 import { BlockSelectionMiniMenu } from './BlockSelectionMiniMenu'
 
 describe('Block inspector content', () => {
@@ -108,5 +109,53 @@ describe('Block inspector content', () => {
 
     expect(port).not.toContain('Step in')
     expect(expanded).toContain('Step in')
+  })
+})
+
+const noopActions: BlockInspectorActions = {
+  updateDetails() {},
+  setView() {},
+  addPort() {},
+  updatePort() {},
+  removePort() {},
+  movePort() {},
+  movePortToSection() {},
+}
+
+describe('the Pill section', () => {
+  it('replaces the Block sections for a value-view Block and says what feeds it', () => {
+    const pill = createValueBlockProps(getDefaultBlockProps(), '2.0', 'gain')
+    const html = renderToStaticMarkup(
+      <BlockInspectorContent
+        props={pill}
+        status="selected"
+        pill={{ fedBy: 'estimate() · pose', fedType: 'Pose', feeds: ['encode() · pose'] }}
+      />,
+    )
+    expect(html).toContain('data-inspector-section="Pill"')
+    expect(html).toContain('aria-label="Variable name"')
+    expect(html).toContain('aria-label="Literal value"')
+    expect(html).toContain('aria-label="Variable type"')
+    expect(html).toContain('Fed by estimate() · pose')
+    expect(html).toContain('Feeds encode() · pose')
+    expect(html).toContain('data-inspector-section="View"')
+    for (const section of ['Block', 'Tags', 'Inputs', 'Outputs', 'Ports']) {
+      expect(html).not.toContain(`data-inspector-section="${section}"`)
+    }
+  })
+
+  it('reads the literal as the value and disables it only while a cable feeds the inlet', () => {
+    const pill = createValueBlockProps(getDefaultBlockProps(), '2.0', 'gain')
+    const unfed = renderToStaticMarkup(
+      <BlockInspectorContent props={pill} status="selected" actions={noopActions} pill={{ fedBy: null, fedType: null, feeds: [] }} />,
+    )
+    expect(unfed).toContain('Inlet unwired')
+    expect(unfed).toContain('aria-label="Literal value" value="2.0"')
+    expect(unfed).not.toContain('disabled="" aria-label="Literal value"')
+    const fed = renderToStaticMarkup(
+      <BlockInspectorContent props={pill} status="selected" actions={noopActions} pill={{ fedBy: 'decode() · frame', fedType: 'Frame', feeds: [] }} />,
+    )
+    expect(fed).toContain('disabled="" aria-label="Literal value"')
+    expect(fed).toContain('Fed by decode() · frame')
   })
 })

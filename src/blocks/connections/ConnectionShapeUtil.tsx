@@ -40,6 +40,7 @@ import {
 	type BlockShape,
 } from '../blockModel'
 import {
+	adoptCableTypeIntoPills,
 	connectionBindingPolarity,
 	connectionHasBothTerminals,
 	createOrUpdateConnectionBinding,
@@ -617,8 +618,10 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		const terminal = handle.id as ConnectionTerminal
 
 		if (getConnectionBindings(this.editor, connection.id)[terminal]) {
-			// Settled: make the document read source → sink.
+			// Settled: make the document read source → sink, and let an untyped
+			// pill take the type of the port it just met.
 			normalizeConnectionDirection(this.editor, connection.id)
+			adoptCableTypeIntoPills(this.editor, connection.id)
 			// A cable you just DREW is not left selected. Its terminal handles sit
 			// exactly on the dots it joins, and a selected cable's handle wins the
 			// next press on that dot — so leaving it selected would turn "wire this
@@ -1173,6 +1176,7 @@ export function offerBlockForLooseTerminal(
 					return
 				}
 				normalizeConnectionDirection(editor, connectionId)
+				adoptCableTypeIntoPills(editor, connectionId)
 				editor.select(blockId)
 			})
 			// The Block arrives unnamed, and naming it is the next thing anyone

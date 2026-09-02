@@ -22,7 +22,8 @@ import {
   type TLUiToolItem,
 } from 'tldraw'
 import { useId, useMemo, useState, type ReactNode } from 'react'
-import { BLOCK_TOOL_ID } from '../blocks'
+import { BLOCK_TOOL_ID, PILL_TOOL_ID } from '../blocks'
+import { PillIcon } from '../blocks/PillIcon'
 import { BlockIcon } from '../blocks/BlockIcon'
 import { BRANCH_TOOL_ID, BranchIcon } from '../branch'
 import {
@@ -108,6 +109,8 @@ const SYSTEM_MENU_ITEMS: ReadonlyArray<{
 }> = [
   { id: BLOCK_TOOL_ID, label: 'Block', icon: <BlockIcon />, shortcut: 'B' },
   { id: BRANCH_TOOL_ID, label: 'Branch', icon: <BranchIcon /> },
+  // A pill is a variable: a literal argument, a named result, or both. P.
+  { id: PILL_TOOL_ID, label: 'Pill', icon: <PillIcon />, shortcut: 'P' },
 ]
 
 interface LibraryItem {
@@ -314,9 +317,13 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
     ? BRANCH_TOOL_ID
     : activeToolId === BLOCK_TOOL_ID
       ? BLOCK_TOOL_ID
-      : preferences.lastSystemTool
+      : activeToolId === PILL_TOOL_ID
+        ? PILL_TOOL_ID
+        : preferences.lastSystemTool
   const currentItem = SYSTEM_MENU_ITEMS.find((item) => item.id === current) ?? SYSTEM_MENU_ITEMS[0]
-  const isActive = activeToolId === BLOCK_TOOL_ID || activeToolId === BRANCH_TOOL_ID
+  const isActive = activeToolId === BLOCK_TOOL_ID
+    || activeToolId === BRANCH_TOOL_ID
+    || activeToolId === PILL_TOOL_ID
 
   return (
     <FamilyToolSlot
@@ -520,7 +527,7 @@ export function SystemSketchFigmaToolbar() {
     <DefaultToolbar minItems={4} maxItems={7} minSizePx={255} maxSizePx={380}>
       <SimpleToolSlot tool={tools.select} fallbackIcon="tool-pointer" title="Cursor" active={activeToolId === 'select'} />
       <SimpleToolSlot tool={tools.frame} fallbackIcon="tool-frame" title="Frame" active={activeToolId === 'frame'} />
-      {/* Block and Branch share this slot, the way the stock shapes share theirs. */}
+      {/* Block, Branch and Pill share this slot, the way the stock shapes share theirs. */}
       <SystemFamilySlot activeToolId={activeToolId} />
       <ShapeFamilySlot activeToolId={activeToolId} geo={geo} />
       <DrawFamilySlot activeToolId={activeToolId} />
