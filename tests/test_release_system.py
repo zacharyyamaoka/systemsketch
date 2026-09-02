@@ -55,10 +55,9 @@ class ReleaseSystemTests(unittest.TestCase):
         """A committed checkout shaped like this project: enough for a release."""
         scripts = root / "scripts"
         scripts.mkdir(parents=True)
-        for name in (
-            "launch_systemsketch.py", "release.py", "release_lib.py",
-            "server.py", "workspace_store.py",
-        ):
+        # The runtime files come from the list that ships them, so adding one
+        # to a release cannot silently leave this scaffold behind.
+        for name in ("launch_systemsketch.py", "release.py", *CONTROLLER_RUNTIME_FILES):
             (scripts / name).write_text(f"# {name}\n", encoding="utf-8")
         (root / "package.json").write_text('{"version": "9.9.9"}', encoding="utf-8")
         (root / "src").mkdir()
