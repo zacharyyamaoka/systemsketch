@@ -158,7 +158,7 @@ def anatomy_svg(m: dict[str, object]) -> str:
     <line x1="{pad}" y1="{h + 12}" x2="{pad + 50}" y2="{h + 12}" stroke="#6e6a63" stroke-width="1"/>
     <line x1="{pad + 25}" y1="{h + 12}" x2="{pad + 25}" y2="{h + 40}" stroke="#6e6a63" stroke-width="1"/>
     <line x1="{pad + 92}" y1="{h + 12}" x2="{pad + 132}" y2="{h + 12}" stroke="#6e6a63" stroke-width="1"/>
-    <line x1="{pad + 132}" y1="{h + 12}" x2="{w + 28}" y2="{h + 88}" stroke="#6e6a63" stroke-width="1" marker-end="url(#arr)"/>
+    <path d="M{pad + 132},{h + 12} H{w + 28} V{h + 86}" fill="none" stroke="#6e6a63" stroke-width="1" marker-end="url(#arr)"/>
   </g>
   <g font-size="12" fill="#3d3a35">
     <text x="60" y="176">outlet name = the variable name</text>
