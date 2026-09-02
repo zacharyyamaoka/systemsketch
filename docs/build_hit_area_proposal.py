@@ -16,7 +16,11 @@ from __future__ import annotations
 import base64
 import html
 import json
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from report_measurements import journey_results  # noqa: E402
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DOCS = PROJECT_ROOT / "docs"
@@ -46,7 +50,7 @@ def code(text: str) -> str:
     return html.escape(text.strip("\n"))
 
 
-REVEAL = json.loads((ASSETS / "edge-reveal.json").read_text())
+REVEAL = journey_results(ASSETS / "edge-reveal.json", PROJECT_ROOT / "tests" / "edge_reveal_area_smoke.mjs", PROJECT_ROOT / "src")
 
 
 REVEAL_CODE = """

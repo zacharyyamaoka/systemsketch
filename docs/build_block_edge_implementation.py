@@ -12,7 +12,11 @@ from __future__ import annotations
 import base64
 import html
 import json
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from report_measurements import journey_results, source_slice  # noqa: E402
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DOCS = PROJECT_ROOT / "docs"
@@ -45,86 +49,42 @@ def code(text: str) -> str:
     return html.escape(text.strip("\n"))
 
 
-ACCEPTANCE = json.loads((ASSETS / "edge-acceptance.json").read_text())
-EDITOR = json.loads((ASSETS / "edge-editor.json").read_text())
-SCALE = json.loads((ASSETS / "interface-scale.json").read_text())
+ACCEPTANCE = journey_results(ASSETS / "edge-acceptance.json", PROJECT_ROOT / "tests" / "block_edges_acceptance.mjs", PROJECT_ROOT / "src")
+EDITOR = journey_results(ASSETS / "edge-editor.json", PROJECT_ROOT / "tests" / "block_edge_editor_smoke.mjs", PROJECT_ROOT / "src")
+SCALE = journey_results(ASSETS / "interface-scale.json", PROJECT_ROOT / "tests" / "interface_scale_anchoring_smoke.mjs", PROJECT_ROOT / "src")
 
 
 # --------------------------------------------------------------------------- #
 # Code
 # --------------------------------------------------------------------------- #
 
-INNER_FACES = """
-// blockModel.ts — a boundary port grows a second identity.
-export const INNER_PORT_SUFFIX = '__inner'
+INNER_FACES = source_slice(
+    PROJECT_ROOT / "src/blocks/connections/connectionModel.ts",
+    "/**\n * Which side of a Block boundary a cable meets a port from.",
+    "export function oppositePolarity",
+)
 
-// blockPorts.ts — same anchor, flipped terminal, hidden outside `expanded`.
-function withInnerFaces(ports, view) {
-  const inside = view === 'expanded'
-  return ports.flatMap((port) => [port, {
-    ...port,
-    id: innerPortId(port.id),
-    terminal: port.terminal === 'start' ? 'end' : 'start',   // FLIPPED
-    hidden: port.hidden || !inside,                          // present in every view
-    inner: true,
-  }])
-}
-"""
+SCOPE_RULE = source_slice(
+    PROJECT_ROOT / "src/blocks/connections/connectionScope.ts",
+    "/**\n * Scopes: the one idea that makes a boundary port unambiguous.",
+    "/** The slice of the editor the scope rules read",
+)
 
-SCOPE_RULE = """
-// blockPorts.ts — which FACE a cable coming from `fromShapeId` may land on.
-//
-// A boundary port is a member of two scopes and a cable belongs to exactly one.
-// Terminal alone is not enough: both faces sit at the same coordinate, so the
-// filter would happily accept `decode.out → run.in` — data leaving the box
-// through its own inlet.
-function faceIsInScope(editor, port, blockId, fromShapeId) {
-  if (!fromShapeId) return true                    // no scope to compare yet
-  const from = editor.getShape(fromShapeId)
-  const internal = fromShapeId === blockId
-    || (from !== undefined && editor.hasAncestor(from, blockId))
-  return port.inner ? internal : !internal
-}
-
-// installConnections.ts — and ONE authority for which face a press starts from.
-// The DOM listener used to re-derive "nearest port" and silently overrule the
-// painted dot's own choice, because it ran last.
-const pressedPortId = dot.dataset.blockPortId
-const face = activeBlockPortFace(editor, pressedShapeId, pressedPortId)
-"""
-
-NO_ARMED_STATE = """
-// PointingBlockPort.ts — two exits, and no state that outlives the gesture.
-export class PointingBlockPort extends StateNode {
-  onPointerMove(info) { if (dragging) this.parent.transition('dragging_handle', {...}) }
-  onPointerUp(info)   { this.parent.transition('idle', info); offerBlockFromPort(...) }
-  onLongPress(info)   { /* reorder — unchanged */ }
-}
-
-// ConnectionShapeUtil.tsx — a cable that landed on EMPTY SPACE is a question.
-onHandleDragEnd(connection, { handle, isCreatingShape }) {
-  if (getConnectionBindings(this.editor, connection.id)[terminal]) return
-  // tldraw hands this the INITIAL handle, so ask the pointer where it landed.
-  const dropPoint = this.editor.inputs.getCurrentPagePoint()
-  const overABlock = this.editor.getShapeAtPoint(dropPoint, {
-    hitInside: true, filter: (shape) => isBlockShape(shape),
-  }) !== undefined
-  if (isCreatingShape && !overABlock) {
-    offerBlockForLooseTerminal(this.editor, connection.id, terminal)   // the picker
-    return
-  }
-  if (!connectionHasBothTerminals(this.editor, connection.id)) {
-    this.editor.deleteShapes([connection.id])
-  }
-}
-
-// OnCanvasBlockPicker.tsx — the offer's lifetime is DERIVED, not enumerated.
-useQuickReactor('tool guard', () => {
-  if (blockPickerState.get(editor) === null) return
-  if (editor.getCurrentToolId() === 'select') return
-  closeBlockPicker(editor)                       // A, the toolbar, anything future
-}, [editor])
-"""
+NO_ARMED_STATE = "\n".join([
+    "// PointingBlockPort.ts — two exits, and no state that outlives the gesture.",
+    source_slice(
+        PROJECT_ROOT / "src/blocks/connections/PointingBlockPort.ts",
+        "export class PointingBlockPort extends StateNode {",
+        "\toverride onLongPress",
+    ),
+    "",
+    "// ConnectionShapeUtil.tsx — where a cable that landed on nothing is answered.",
+    source_slice(
+        PROJECT_ROOT / "src/blocks/connections/ConnectionShapeUtil.tsx",
+        "\t\t// A release within reach of a dot was aimed at that dot.",
+        "\t\tif (!connectionHasBothTerminals",
+    ),
+])
 
 AFFORDANCE = """
 // ConnectionShapeUtil.onHandleDrag — refusal, made visible.
@@ -164,11 +124,35 @@ systemsketch: {
 }
 """
 
-def source_slice(path: Path, start_marker: str, end_marker: str) -> str:
-    """Quote a real file, so a snippet in the report cannot drift from the tree."""
-    text = path.read_text()
-    begin = text.index(start_marker)
-    return text[begin:text.index(end_marker, begin)].rstrip()
+def unit_test_totals() -> tuple[int, int]:
+    """Count the unit suite by running it, not by remembering a number.
+
+    A hardcoded total in a report that gets regenerated is a number that drifts
+    silently — and this one did: a stranded track worktree under
+    `.claude/worktrees/` was being collected as a second copy of the whole
+    checkout, so the suite read 610 across 77 files when it is 310 across 39.
+    `vite.config.ts` excludes that path now, and measuring here means the report
+    cannot repeat a stale figure even if it comes back.
+    """
+    import json as _json
+    import subprocess
+    import tempfile
+
+    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as handle:
+        out = Path(handle.name)
+    # A red suite must stop the report rather than let it publish a green badge.
+    result = subprocess.run(
+        ["npx", "vitest", "run", "--reporter=json", f"--outputFile={out}"],
+        cwd=PROJECT_ROOT, capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        raise SystemExit(
+            "vitest is not green, so this report cannot claim it is:\n"
+            + result.stderr[-2000:]
+        )
+    report = _json.loads(out.read_text())
+    out.unlink(missing_ok=True)
+    return report["numPassedTests"], len(report["testResults"])
 
 
 SCALE_FIX = "\n".join([
@@ -210,7 +194,12 @@ PHASES = [
         "The cache degrades to the pure projection when an editor has no store, because the cache is a memo and the projection is the truth.",
     ]),
     ("1", "Boundary inner faces", "shipped", [
-        "Every port derives a <code>…__inner</code> twin: same anchor, flipped terminal, hidden outside Expanded so a welded cable survives a view switch.",
+        "A boundary port carries two faces — <code>outer</code>, in the scope its Block lives in, "
+        "and <code>inner</code>, in the scope an Expanded Block itself defines. One dot on screen, "
+        "two identities, and the face is recorded on the binding so the document says which. "
+        "<em>(Shipped first as a derived <code>…__inner</code> twin port; generalised later the same "
+        "day into the scope model quoted above, which derives polarity from the frame hierarchy "
+        "instead of from which dot was pressed. Same fix, fewer moving parts.)</em>",
         "<b>One</b> authority for which face a press starts from — the DOM listener was re-deriving “nearest port” and silently overruling the painted dot, because <code>queueMicrotask</code> made it run last.",
         "A scope rule at the drop: a cable whose other end is inside this Block must meet the inner face; anything else must meet the outer one.",
     ]),
@@ -355,6 +344,7 @@ def main() -> None:
     accept_pass = sum(1 for r in ACCEPTANCE if r["ok"])
     editor_pass = sum(1 for r in EDITOR if r["ok"])
     scale_pass = sum(1 for r in SCALE if r["ok"])
+    unit_tests, unit_files = unit_test_totals()
 
     report = f"""<!doctype html>
 <html lang="en">
@@ -438,7 +428,7 @@ def main() -> None:
       <span class="badge ok">{accept_pass}/{len(ACCEPTANCE)} boundary &amp; picker checks</span>
       <span class="badge ok">{editor_pass}/{len(EDITOR)} edge-editor checks</span>
       <span class="badge ok">{scale_pass}/{len(SCALE)} interface-scale checks</span>
-      <span class="badge ok">289 unit · 24 Python</span>
+      <span class="badge ok">{unit_tests} unit &#183; {unit_files} files &#183; 24 Python</span>
       <span class="badge ok">64 pre-existing browser checks still green</span>
       <span class="badge">tldraw 5.3.2</span>
       <span class="badge">Stable untouched</span>
