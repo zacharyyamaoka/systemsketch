@@ -115,6 +115,8 @@ The [interface-scale proposal and five-variant comparison](docs/ui-scale-proposa
 
 The [Settings and interface-scale implementation gallery](docs/interface-scale-implementation-2026-08-31.html) shows the shipped flow in the real Preview app and records browser proof for reload persistence, enlarged chrome, unchanged canvas zoom, and pixel-identical board geometry at UI 100% and 125%.
 
+The [edge polarity report](docs/edge-polarity-2026-09-01.html) records why an Expanded Block could not be wired to a sibling from its own dots, why a picker-spawned Block came out output-to-output, and why the cable left the port the wrong way — one press rule that committed to a face before the cable had landed. The replacement decides polarity from where the cable lands, using the two Blocks' places in the frame hierarchy (`pairBlockFaces` → `portPolarity`), through one `judgeConnection` that the drop, the eligible-dot highlight, the picker and load-time validation all ask. The report carries the pre-fix reproduction, the scope diagram, the live source at each seam, and `npm run test:polarity` (33/33) beside the unchanged boundary truth table in `npm run test:edges` (33/33).
+
 ## Local files
 
 - A clean launch reopens the most recent valid document. First launch prepares `~/SystemSketch/Untitled.tldr` and creates it on the first edit or Save.

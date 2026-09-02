@@ -1,4 +1,4 @@
-import { Vec, type Editor, type TLShapeId, type VecLike } from 'tldraw'
+import { Vec, type Editor, type TLParentId, type TLShapeId, type VecLike } from 'tldraw'
 import { EditorAtom } from '../ports/portState'
 import type { BlockShapeProps, BlockView } from '../blockModel'
 import type { ConnectionTerminal } from './connectionModel'
@@ -34,15 +34,27 @@ export const BLOCK_PICKER_PRESETS: readonly BlockPickerPreset[] = [
 	{ id: 'group', label: 'Expanded group', icon: 'Boxes', blockType: 'group', view: 'expanded', inputs: 1, outputs: 1 },
 ]
 
-/** Which end of the cable the offer is anchored to. */
-export type BlockPickerLocation = ConnectionTerminal
+/** The presets that can actually answer the cable: a producer needs an output, a consumer an input. */
+export function blockPickerPresetsFor(wantsProducer: boolean): BlockPickerPreset[] {
+	return BLOCK_PICKER_PRESETS.filter((preset) => (
+		wantsProducer ? preset.outputs > 0 : preset.inputs > 0
+	))
+}
 
 export interface BlockPickerState {
 	connectionId: TLShapeId
-	/** The loose end that is asking, and where the offer anchors. */
-	terminal: BlockPickerLocation
+	/** The loose handle that is asking, and where the offer anchors. */
+	terminal: ConnectionTerminal
 	/** Page point the new Block's matching port should land on. */
 	anchor: VecLike
+	/**
+	 * Whether the cable is looking for something to feed it (a producer, whose
+	 * output lands on the cable end) or something to feed (a consumer). Decides
+	 * which presets are offered and which side of the cable end the panel sits.
+	 */
+	wantsProducer: boolean
+	/** The scope the new Block will be created in: a page or an Expanded Block. */
+	scopeId: TLParentId
 	onPick: (preset: BlockPickerPreset, anchorInPageSpace: Vec) => void
 	onClose: () => void
 }

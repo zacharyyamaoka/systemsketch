@@ -1,5 +1,5 @@
 import type { Editor, TLShapeId } from 'tldraw'
-import { activeBlockPortFace, getBlockConnectionPortAtPoint } from './blockPorts'
+import { getBlockPortDotAtPoint } from './blockPorts'
 import { cleanupStaleConnections } from './ConnectionBindingUtil'
 import { PointingBlockPort, type PointingBlockPortInfo } from './PointingBlockPort'
 import { BLOCK_PORT_DRAG_STATE_ID, DraggingBlockPort } from '../ports/portInteraction'
@@ -42,30 +42,21 @@ export function installBlockConnectionInteraction(editor: Editor): () => void {
 		const dot = target.closest<HTMLElement>('.systemsketch-block-canvas .Port')
 		if (dot === null) return
 
-		// Identity comes from the dot that was pressed, not from a second
-		// geometric lookup. A boundary dot carries two faces at one coordinate, so
-		// re-deriving "nearest port" here would pick whichever of the two sorts
-		// first and silently overrule the face rule.
+		// Identity comes from the dot that was pressed. Nothing about direction
+		// is decided here: a dot is a dot, and which face of it the cable leaves
+		// from is the landing's decision.
 		const pressedPortId = dot.dataset.blockPortId
 		const pressedShapeId = dot.closest<HTMLElement>('[data-shape-id]')?.dataset.shapeId
-		const face = pressedPortId && pressedShapeId
-			? activeBlockPortFace(editor, pressedShapeId as TLShapeId, pressedPortId)
-			: null
-		const hit = face
-			? { shapeId: pressedShapeId as TLShapeId, port: face }
+		const info: PointingBlockPortInfo | null = pressedPortId && pressedShapeId
+			? { shapeId: pressedShapeId as TLShapeId, portId: pressedPortId }
 			: (() => {
 				// Fallback for a press that landed on the halo of a dot whose own
 				// element the browser did not report — keep the forgiving magnet.
 				const pagePoint = editor.screenToPage({ x: event.clientX, y: event.clientY })
-				const nearest = getBlockConnectionPortAtPoint(editor, pagePoint)
-				return nearest ? { shapeId: nearest.shapeId, port: nearest.port } : null
+				const nearest = getBlockPortDotAtPoint(editor, pagePoint)
+				return nearest ? { shapeId: nearest.shapeId, portId: nearest.port.id } : null
 			})()
-		if (!hit) return
-		const info: PointingBlockPortInfo = {
-			shapeId: hit.shapeId,
-			portId: hit.port.id,
-			terminal: hit.port.terminal,
-		}
+		if (!info) return
 		// Let tldraw record the same pointer-down first, then replace its generic
 		// canvas/shape pointing state before the browser can deliver a move. A
 		// synchronous capture-phase transition is overwritten by tldraw's own

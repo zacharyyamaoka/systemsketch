@@ -156,7 +156,9 @@ async function setView(page, view) {
 
 async function deselect(page) {
   await clickAt(page, 200, 830)
-  await delay(200)
+  // Past tldraw's 450 ms double-click window, so two deselects in a row can
+  // never become a double-click that starts a text shape on the canvas.
+  await delay(340)
 }
 
 /** Press a port, drag to a point, release. Returns what the release produced. */
@@ -181,20 +183,29 @@ async function dragFrom(page, from, to, { shotName, steps = 10 } = {}) {
   return { midClasses, offered: await pickerOpen(page), count: await cables(page) }
 }
 
-/** Remove every cable on the board, so each case starts from a known state. */
+/**
+ * Remove every cable on the board, so each case starts from a known state.
+ *
+ * Fixture reset, not a claim: cables paint UNDER Blocks and curve back over
+ * the card they leave, so a click "on the cable" can select — and Delete —
+ * the Block behind it instead. The seam removes what the pointer cannot
+ * reliably reach. Nothing asserted anywhere reads from this.
+ */
 async function clearCables(page) {
   if (await pickerOpen(page)) {
     await key(page, 'Escape', 'Escape')
     await delay(280)
   }
-  for (let guard = 0; guard < 6 && (await cables(page)) > 0; guard += 1) {
-    await deselect(page)
-    const at = await pointOnCable(page, 0.25)
-    await clickAt(page, at.cx, at.cy)
-    await key(page, 'Delete', 'Delete')
-    await delay(260)
-  }
   await deselect(page)
+  await evaluate(page, `(() => {
+    const editor = window.__systemsketch?.editor
+    if (!editor) return
+    const ids = editor.getCurrentPageShapes()
+      .filter((shape) => shape.type === 'connection')
+      .map((shape) => shape.id)
+    if (ids.length > 0) editor.deleteShapes(ids)
+  })()`)
+  await delay(200)
   return cables(page)
 }
 
@@ -273,7 +284,14 @@ async function main() {
       (await portClasses(page)).some((entry) => entry.eligible || entry.hinting), false)
 
     // ------------------------------------------------------------ picker ---
-    const toEmpty = await dragFrom(page, dots['decode.out'], { x: 1180, y: 620 })
+    // A cable lives in one scope. decode is inside run, so its output can
+    // only be offered a Block INSIDE run: a drop on the page outside the
+    // frame is a scope the port cannot reach, and is discarded quietly.
+    const INSIDE_RUN = { x: 740, y: 600 }
+    const outsideScope = await dragFrom(page, dots['decode.out'], { x: 1100, y: 780 })
+    check('PICKER-0', 'a child\'s output dropped outside its frame offers nothing and leaves no cable',
+      { offered: outsideScope.offered, cables: outsideScope.count }, { offered: false, cables: 0 })
+    const toEmpty = await dragFrom(page, dots['decode.out'], INSIDE_RUN)
     check('PICKER-1', 'a cable into empty space offers a Block', toEmpty.offered, true)
     await shot(page, 'edge-accept-picker-open.png')
     const beforePick = (await blockIds(page)).length
@@ -301,7 +319,7 @@ async function main() {
     }
     await deselect(page)
 
-    const declined = await dragFrom(page, dots['decode.out'], { x: 1180, y: 620 })
+    const declined = await dragFrom(page, dots['decode.out'], INSIDE_RUN)
     check('PICKER-6', 'declining is offered', declined.offered, true)
     await key(page, 'Escape', 'Escape')
     await delay(380)

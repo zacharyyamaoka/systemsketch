@@ -27,7 +27,7 @@ import {
 
 import { isBlockShape, type BlockPortSide } from '../blockModel'
 import { moveBlockPortToIndex } from '../commands/blockCommands'
-import { getBlockConnectionPortAtPoint } from '../connections/blockPorts'
+import { getBlockPortDotAtPoint } from '../connections/blockPorts'
 import { blockPortDropTarget } from './portAffordances'
 
 export const BLOCK_PORT_DRAG_STATE_ID = 'dragging_block_port'
@@ -189,7 +189,7 @@ export function installBlockPortMenuTarget(editor: Editor): () => void {
 			setBlockPortMenuTarget(editor, null)
 			return
 		}
-		const hit = getBlockConnectionPortAtPoint(editor, editor.inputs.getCurrentPagePoint())
+		const hit = getBlockPortDotAtPoint(editor, editor.inputs.getCurrentPagePoint())
 		setBlockPortMenuTarget(editor, hit
 			? {
 				shapeId: hit.shapeId,

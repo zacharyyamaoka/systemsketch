@@ -17,23 +17,25 @@ import {
 } from 'tldraw'
 
 import {
-	BLOCK_PICKER_PRESETS,
+	blockPickerPresetsFor,
 	blockPickerState,
 	closeBlockPicker,
-	type BlockPickerLocation,
 	type BlockPickerPreset,
 } from '../connections/blockPicker'
 import {
 	getConnectionTerminals,
 	type ConnectionShape,
 } from '../connections/ConnectionShapeUtil'
-import { CONNECTION_SHAPE_TYPE } from '../connections/connectionModel'
+import {
+	CONNECTION_SHAPE_TYPE,
+	type ConnectionTerminal,
+} from '../connections/connectionModel'
 
 /** The loose terminal the offer sits on, in page space. */
 function pickerAnchorPagePoint(
 	editor: Editor,
 	connection: ConnectionShape,
-	location: BlockPickerLocation,
+	location: ConnectionTerminal,
 ): Vec {
 	const local = getConnectionTerminals(editor, connection)[location]
 	return editor.getShapePageTransform(connection).applyToPoint(local)
@@ -48,6 +50,16 @@ export function OnCanvasBlockPicker() {
 	// paints at the viewport origin on the frame it opens.
 	const [container, setContainer] = useState<HTMLDivElement | null>(null)
 	const open = useValue('block picker open', () => blockPickerState.get(editor) !== null, [editor])
+	// Only the presets that can answer: a cable looking for a producer is not
+	// helped by a Sink, and one looking for a consumer not by a Source.
+	const presets = useValue(
+		'block picker presets',
+		() => {
+			const state = blockPickerState.get(editor)
+			return state ? blockPickerPresetsFor(state.wantsProducer) : []
+		},
+		[editor],
+	)
 
 	const close = useCallback(() => closeBlockPicker(editor), [editor])
 
@@ -75,7 +87,7 @@ export function OnCanvasBlockPicker() {
 			// exception is a terminal close enough to the viewport's left edge that
 			// the panel would land entirely off-screen: an invisible offer is worse
 			// than one on the "wrong" side, and the cable still points the way.
-			const wantsLeft = state.terminal === 'start'
+			const wantsLeft = state.wantsProducer
 			const fitsLeft = viewport.x - container.offsetWidth >= 0
 			container.style.setProperty(
 				'--systemsketch-block-picker-side',
@@ -167,7 +179,7 @@ export function OnCanvasBlockPicker() {
 			onPointerDown={stopEventPropagation}
 		>
 			<div className="OnCanvasBlockPicker-title">Insert a Block</div>
-			{BLOCK_PICKER_PRESETS.map((preset) => (
+			{presets.map((preset) => (
 				<button
 					key={preset.id}
 					type="button"

@@ -1,0 +1,299 @@
+[
+  {
+    "id": "SIBLING-1",
+    "label": "encode.out → merge.in wires two Expanded siblings",
+    "observed": 0,
+    "desired": 1,
+    "ok": false
+  },
+  {
+    "id": "SIBLING-1-DIR",
+    "label": "the cable leaves the output rightward and enters the input rightward",
+    "observed": null,
+    "desired": {
+      "from": "encode.out",
+      "to": "merge.in",
+      "leavesRight": true,
+      "arrivesRight": true
+    },
+    "ok": false
+  },
+  {
+    "id": "SIBLING-2",
+    "label": "merge.in → encode.out makes the same wire from the input dot",
+    "observed": 0,
+    "desired": 1,
+    "ok": false
+  },
+  {
+    "id": "SIBLING-2-DIR",
+    "label": "and it is still drawn from the output to the input",
+    "observed": null,
+    "desired": {
+      "from": "encode.out",
+      "to": "merge.in",
+      "leavesRight": true,
+      "arrivesRight": true
+    },
+    "ok": false
+  },
+  {
+    "id": "SIBLING-3",
+    "label": "input → input between siblings is refused",
+    "observed": 1,
+    "desired": 0,
+    "ok": false
+  },
+  {
+    "id": "SIBLING-4",
+    "label": "a Block feeding its own input is refused",
+    "observed": 2,
+    "desired": 0,
+    "ok": false
+  },
+  {
+    "id": "PICKER-1",
+    "label": "a cable from an Expanded output into empty space offers a Block",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "PICKER-2",
+    "label": "picking creates one Block and binds the cable",
+    "observed": {
+      "created": true,
+      "cables": 2
+    },
+    "desired": {
+      "created": true,
+      "cables": 1
+    },
+    "ok": false
+  },
+  {
+    "id": "PICKER-3",
+    "label": "the new Block is wired through its INPUT, not its output",
+    "observed": [
+      "call.out_1",
+      "encode.in_1",
+      "encode.out_1",
+      "merge.in_1"
+    ],
+    "desired": [
+      "call.in_1",
+      "encode.out_1"
+    ],
+    "ok": false
+  },
+  {
+    "id": "PICKER-4",
+    "label": "and the cable leaves encode.out rightward into call.in",
+    "observed": {
+      "from": "encode.in",
+      "to": "merge.in",
+      "leavesRight": true,
+      "arrivesRight": true
+    },
+    "desired": {
+      "from": "encode.out",
+      "to": "call.in",
+      "leavesRight": true,
+      "arrivesRight": true
+    },
+    "ok": false
+  },
+  {
+    "id": "PICKER-5",
+    "label": "a sibling of the cable's other end lands on the page",
+    "observed": "page:page",
+    "desired": "page:page",
+    "ok": true
+  },
+  {
+    "id": "SIBLING-CLEAR",
+    "label": "the sibling scene is cleared",
+    "observed": 0,
+    "desired": 0,
+    "ok": true
+  },
+  {
+    "id": "NESTED-0",
+    "label": "decode was drawn inside run",
+    "observed": "shape:q9-M15qIHLLfYEjvsmDfF",
+    "desired": "shape:q9-M15qIHLLfYEjvsmDfF",
+    "ok": true
+  },
+  {
+    "id": "NESTED-1",
+    "label": "the boundary input feeds the inner Block",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "NESTED-1-DIR",
+    "label": "and leaves the inlet heading INTO the box",
+    "observed": {
+      "from": "run.in",
+      "to": "decode.in",
+      "leavesRight": true,
+      "arrivesRight": true
+    },
+    "desired": {
+      "from": "run.in",
+      "to": "decode.in",
+      "leavesRight": true,
+      "arrivesRight": true
+    },
+    "ok": true
+  },
+  {
+    "id": "NESTED-2",
+    "label": "the inner Block returns through the boundary output",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "NESTED-2-DIR",
+    "label": "and arrives at the outlet from inside the box",
+    "observed": {
+      "from": "decode.out",
+      "to": "run.out",
+      "leavesRight": true,
+      "arrivesRight": true
+    },
+    "desired": {
+      "from": "decode.out",
+      "to": "run.out",
+      "leavesRight": true,
+      "arrivesRight": true
+    },
+    "ok": true
+  },
+  {
+    "id": "NESTED-3",
+    "label": "data leaving the box through its own inlet is refused",
+    "observed": 0,
+    "desired": 0,
+    "ok": true
+  },
+  {
+    "id": "NESTED-4",
+    "label": "the outlet acting as a source for the inside is refused",
+    "observed": 0,
+    "desired": 0,
+    "ok": true
+  },
+  {
+    "id": "SCOPE-1",
+    "label": "a child's output into the boundary's empty interior offers a Block",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "SCOPE-2",
+    "label": "the new Block is a child of the boundary",
+    "observed": "shape:q9-M15qIHLLfYEjvsmDfF",
+    "desired": "shape:q9-M15qIHLLfYEjvsmDfF",
+    "ok": true
+  },
+  {
+    "id": "SCOPE-3",
+    "label": "wired from decode.out into its input",
+    "observed": [
+      "call.in_1",
+      "decode.out_1"
+    ],
+    "desired": [
+      "call.in_1",
+      "decode.out_1"
+    ],
+    "ok": true
+  },
+  {
+    "id": "SCOPE-4",
+    "label": "the boundary inlet dragged into its own interior offers a Block",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "SCOPE-5",
+    "label": "the new Block is inside, fed by the inlet",
+    "observed": {
+      "parent": "shape:q9-M15qIHLLfYEjvsmDfF",
+      "wired": [
+        "call.in_1",
+        "run.in_1"
+      ]
+    },
+    "desired": {
+      "parent": "shape:q9-M15qIHLLfYEjvsmDfF",
+      "wired": [
+        "call.in_1",
+        "run.in_1"
+      ]
+    },
+    "ok": true
+  },
+  {
+    "id": "SCOPE-5-DIR",
+    "label": "and the cable leaves the inlet heading into the box",
+    "observed": {
+      "from": "run.in",
+      "to": "call.in",
+      "leavesRight": true,
+      "arrivesRight": true
+    },
+    "desired": {
+      "from": "run.in",
+      "to": "call.in",
+      "leavesRight": true,
+      "arrivesRight": true
+    },
+    "ok": true
+  },
+  {
+    "id": "SCOPE-6",
+    "label": "the boundary output dragged outside offers a Block",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "SCOPE-7",
+    "label": "the new Block lands on the page, fed by the outlet",
+    "observed": {
+      "parent": "page:page",
+      "wired": [
+        "call.out_1",
+        "run.out_1"
+      ]
+    },
+    "desired": {
+      "parent": "page:page",
+      "wired": [
+        "call.in_1",
+        "run.out_1"
+      ]
+    },
+    "ok": false
+  },
+  {
+    "id": "SCOPE-8",
+    "label": "the offer is closed",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "CLEAN",
+    "label": "the whole journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

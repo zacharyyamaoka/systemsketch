@@ -43,7 +43,7 @@ function binding(blockId: BlockShape['id']): ConnectionBinding {
 		fromId: createShapeId('connection'),
 		toId: blockId,
 		meta: {},
-		props: { portId: 'in_a', terminal: 'end' },
+		props: { portId: 'in_a', terminal: 'end', face: 'outer' },
 	}
 }
 
@@ -104,7 +104,7 @@ describe('connection binding geometry', () => {
 		const hidden = getConnectionBindingPositionInPageSpace(editor, semanticBinding)
 		const visibleFallback = getConnectionBindingPositionInPageSpace(editor, {
 				...semanticBinding,
-				props: { portId: 'in_b', terminal: 'end' },
+				props: { portId: 'in_b', terminal: 'end', face: 'outer' },
 			})
 		expect(hidden && { x: hidden.x, y: hidden.y }).toEqual(
 			visibleFallback && { x: visibleFallback.x, y: visibleFallback.y },

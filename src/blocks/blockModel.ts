@@ -268,35 +268,6 @@ export function mergeBlockResizeProps(
 	return resizeBlockProps(props, w, h)
 }
 
-/**
- * Every boundary port has an INNER face: a derived twin at the same anchor with
- * the flipped terminal, so the inside of an Expanded Block can be wired.
- *
- * A port's side is its direction, and that equation is true for a leaf Block and
- * false for a boundary: from the page, `raw bytes` is a sink; from inside the
- * frame it is a source. Rather than teach the whole connection layer about
- * scopes, the boundary grows a second identity at the same coordinate. Exactly
- * one of the two faces matches any given drag terminal, so there is nothing to
- * disambiguate — and the dot draws once, carrying the union of both faces.
- *
- * Twins exist in EVERY view so a cable welded to one survives a view switch;
- * they are hidden outside `expanded`, where the inside is not on screen.
- */
-export const INNER_PORT_SUFFIX = '__inner'
-
-export function innerPortId(portId: string): string {
-	return `${portId}${INNER_PORT_SUFFIX}`
-}
-
-export function isInnerPortId(portId: string): boolean {
-	return portId.endsWith(INNER_PORT_SUFFIX)
-}
-
-/** The boundary port an id names: an inner face maps to its outer port, anything else to itself. */
-export function outerPortId(portId: string): string {
-	return isInnerPortId(portId) ? portId.slice(0, -INNER_PORT_SUFFIX.length) : portId
-}
-
 export type BlockPortSide = 'inputs' | 'outputs'
 
 export function appendBlockPortToProps(

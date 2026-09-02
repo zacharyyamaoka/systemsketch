@@ -1,5 +1,5 @@
 import { WeakCache, atom, type Atom, type Editor, type TLShapeId } from 'tldraw'
-import type { ConnectionTerminal } from '../connections/connectionModel'
+import type { PortDot } from '../connections/connectionModel'
 
 /**
  * An atom scoped to one editor instance.
@@ -34,25 +34,23 @@ export class EditorAtom<T> {
 	}
 }
 
-export interface PortIdentifier {
-	shapeId: TLShapeId
-	portId: string
-}
+export type PortIdentifier = PortDot
 
 /**
  * Which ports a drag could legally land on, and which one it is over.
  *
  * Without this, the only feedback for an illegal drop is that nothing happens —
  * indistinguishable from a missed target. `eligiblePorts` is set the moment a
- * cable starts moving and lights every legal counterpart; `hintingPort` lights
- * the single port the pointer is currently on.
+ * cable starts moving; each dot asks the rules whether a cable from `anchor`
+ * may land on it. `hintingPort` lights the single dot the pointer is on.
  */
 export interface PortState {
 	hintingPort: PortIdentifier | null
 	eligiblePorts: {
-		terminal: ConnectionTerminal
-		/** Blocks that would close a cycle. Inner faces ignore this — see `inner`. */
-		excludeBlocks: Set<TLShapeId> | null
+		/** The end of the cable that is already welded. */
+		anchor: PortDot
+		/** Blocks that would close a cycle, precomputed once per move. */
+		excludeBlocks: ReadonlySet<TLShapeId> | null
 	} | null
 }
 

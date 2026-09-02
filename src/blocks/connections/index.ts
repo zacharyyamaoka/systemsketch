@@ -1,4 +1,6 @@
 export * from './connectionModel'
+export * from './connectionScope'
+export * from './connectionRules'
 export * from './connectionRouting'
 export * from './connectionHit'
 export * from './connectionProximity'

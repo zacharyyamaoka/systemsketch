@@ -21,6 +21,8 @@ import {
 } from '../connections/connectionModel'
 import {
 	getConnectionBindings,
+	getConnectionDirection,
+	type ConnectionBinding,
 	type ConnectionShape,
 } from '../connections'
 import {
@@ -43,16 +45,18 @@ export interface ConnectionInspectorContext {
 
 const label = (value: string) => value[0].toUpperCase() + value.slice(1)
 
-function describeEndpoint(editor: Editor, shapeId: string | undefined, portId: string | undefined) {
-	if (!shapeId || !portId) return '—'
-	const shape = editor.getShape(shapeId as never)
+function describeEndpoint(editor: Editor, binding: ConnectionBinding | undefined) {
+	if (!binding) return '—'
+	const shape = editor.getShape(binding.toId)
 	if (!isBlockShape(shape)) return '—'
 	const port = [...shape.props.inputs, ...shape.props.outputs]
-		.find((candidate) => portId.startsWith(candidate.id))
+		.find((candidate) => candidate.id === binding.props.portId)
 	// An unnamed Block still has a type; "transform.in_1" reads far better than
-	// "Block.in_1" for one the picker just made.
+	// "Block.in_1" for one the picker just made. An inner face says so: a cable
+	// on the inside of a boundary port is a different wire from one outside it.
 	const name = shape.props.title || shape.props.blockType || 'Block'
-	return `${name}.${port?.name || port?.id || portId}`
+	const face = binding.props.face === 'inner' ? ' (inside)' : ''
+	return `${name}.${port?.name || port?.id || binding.props.portId}${face}`
 }
 
 /** Resolve what the dock should show for the current selection. */
@@ -63,13 +67,14 @@ export function getConnectionInspectorContext(editor: Editor): ConnectionInspect
 
 	const only = selected.length === 1 ? selected[0] : null
 	const bindings = only ? getConnectionBindings(editor, only) : null
+	const direction = only ? getConnectionDirection(editor, only) : null
 	return {
 		count: selected.length,
 		routing: getSharedStyleForSelection(editor, ConnectionRoutingStyle),
-		endpoints: bindings
+		endpoints: bindings && direction
 			? {
-				from: describeEndpoint(editor, bindings.start?.toId, bindings.start?.props.portId),
-				to: describeEndpoint(editor, bindings.end?.toId, bindings.end?.props.portId),
+				from: describeEndpoint(editor, bindings[direction.sourceTerminal]),
+				to: describeEndpoint(editor, bindings[direction.sinkTerminal]),
 			}
 			: null,
 		authored: only

@@ -25,20 +25,13 @@ import {
   blockIcon,
   expandedSectionWeights,
   isBlockShape,
-  outerPortId,
   portDefaultValue,
   type BlockPortSide,
   type BlockShape,
 } from '../blockModel'
 import { BlockInlineEditor } from '../BlockInlineEditor'
-import type { ConnectionBinding } from '../connections/ConnectionBindingUtil'
-import { CONNECTION_BINDING_TYPE } from '../connections/connectionModel'
-import {
-  activeBlockPortFace,
-  blockPortFaceIds,
-  getBlockInnerFace,
-  getLiveBlockPorts,
-} from '../connections/blockPorts'
+import { getBlockPortConnections } from '../connections/blockPorts'
+import { judgeConnection } from '../connections/connectionRules'
 import {
   blockInlineFieldAttribute,
   parseBlockInlineFieldAttribute,
@@ -124,39 +117,29 @@ function BlockPortDot({
   const { placed, connected, hasDefault } = port
   const portId = placed.port.id
 
-  // The inner face of this boundary port, when it is live — the Expanded view.
-  // It shares this dot's anchor, so the dot answers for both.
-  const innerFace = useValue(
-    'inner face',
-    () => getBlockInnerFace(getLiveBlockPorts(editor, shape.id), portId),
-    [editor, shape.id, portId],
-  )
-
   const isHinting = useValue(
     'port hinting',
     () => {
       const { hintingPort } = portState.get(editor)
-      if (!hintingPort || hintingPort.shapeId !== shape.id) return false
-      return blockPortFaceIds(portId).includes(hintingPort.portId)
+      return hintingPort?.shapeId === shape.id && hintingPort.portId === portId
     },
     [editor, shape.id, portId],
   )
 
+  // The dot asks the same rules the drop will: may a cable from the anchored
+  // end land here? Either face of this dot may be the answer, and the rules
+  // pick the one the two Blocks' places in the tree allow.
   const isEligible = useValue(
     'port eligible',
     () => {
       const { eligiblePorts } = portState.get(editor)
       if (!eligiblePorts) return false
-      const faces = getLiveBlockPorts(editor, shape.id)
-        .filter((candidate) => blockPortFaceIds(portId).includes(candidate.id) && !candidate.hidden)
-      return faces.some((face) => {
-        if (face.terminal !== eligiblePorts.terminal) return false
-        // The cycle-exclusion set conflates a Block's inside with its outside,
-        // so an inner face ignores it: a child feeding its parent's outlet is
-        // the hierarchy working, not a loop.
-        if (!face.inner && eligiblePorts.excludeBlocks?.has(shape.id)) return false
-        return true
-      })
+      return judgeConnection(
+        editor,
+        eligiblePorts.anchor,
+        { shapeId: shape.id, portId },
+        { excludeBlocks: eligiblePorts.excludeBlocks },
+      ).ok
     },
     [editor, shape.id, portId],
   )
@@ -176,7 +159,6 @@ function BlockPortDot({
       className={classes}
       data-block-port-id={portId}
       data-block-port-side={placed.side}
-      data-block-port-inner={innerFace ? 'true' : undefined}
       style={{
         '--port-color': portColor(placed.port.type),
         left: placed.x,
@@ -187,13 +169,9 @@ function BlockPortDot({
       } as CSSProperties}
       onPointerDown={() => {
         if (!editor.getStateDescendant('select.pointing_block_port')) return
-        const active = activeBlockPortFace(editor, shape.id, portId)
-        if (!active) return
-        editor.setCurrentTool('select.pointing_block_port', {
-          shapeId: shape.id,
-          portId: active.id,
-          terminal: active.terminal,
-        })
+        // The dot, and only the dot. Which face the cable leaves from is
+        // decided where it lands.
+        editor.setCurrentTool('select.pointing_block_port', { shapeId: shape.id, portId })
       }}
     />
   )
@@ -592,14 +570,12 @@ export interface BlockCanvasProps {
 export function BlockCanvas({ shape }: BlockCanvasProps) {
   const editor = useEditor()
   const layout = layoutBlock(shape.props)
-  // Outer ids only: a cable welded to a boundary port's inner face fills the
-  // same dot, because the dot is the port and the faces are its two identities.
+  // A cable on either face of a port fills its dot: the dot is the port, and
+  // the faces are the two sides of the boundary it sits on.
   const connectedIds = useValue(
     'connected Block port ids',
     () => new Set(
-      editor
-        .getBindingsToShape<ConnectionBinding>(shape.id, CONNECTION_BINDING_TYPE)
-        .map((binding) => outerPortId(binding.props.portId)),
+      getBlockPortConnections(editor, shape.id).map((connection) => connection.ownPortId),
     ),
     [editor, shape.id],
   )

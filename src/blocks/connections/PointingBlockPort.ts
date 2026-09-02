@@ -24,21 +24,31 @@ import {
 } from '../ports/portInteraction'
 import { clearPortDragState } from '../ports/portState'
 import { createOrUpdateConnectionBinding } from './ConnectionBindingUtil'
-import { offerBlockForLooseTerminal, type ConnectionShape } from './ConnectionShapeUtil'
+import {
+	offerBlockForLooseTerminal,
+	outerScopeOf,
+	type ConnectionShape,
+} from './ConnectionShapeUtil'
 import {
 	CONNECTION_SHAPE_TYPE,
-	oppositeConnectionTerminal,
+	portPolarity,
 	type ConnectionTerminal,
+	type PortDot,
+	type PortPolarity,
 } from './connectionModel'
 
 /** How far from the pressed port a picker-spawned Block is offered. */
 export const BLOCK_PICKER_SPACING_PX = 120
 
-export interface PointingBlockPortInfo {
-	shapeId: TLShapeId
-	portId: string
-	terminal: ConnectionTerminal
-}
+/**
+ * What a press on a dot knows: the dot. Not a face, not a direction.
+ *
+ * Which face the cable leaves from — and so which way it points — is decided
+ * by where it lands, in `ConnectionShapeUtil.dragTerminal`. A press that
+ * committed to a face here could only ever wire one side of a boundary, which
+ * is the bug this replaces.
+ */
+export type PointingBlockPortInfo = PortDot
 
 interface CreatedConnection {
 	connectionId: TLShapeId
@@ -48,6 +58,15 @@ interface CreatedConnection {
 	handle: TLHandle
 }
 
+/** The handle a new cable holds still at the pressed dot; the other one is dragged. */
+const ANCHORED_TERMINAL: ConnectionTerminal = 'start'
+const DRAGGED_TERMINAL: ConnectionTerminal = 'end'
+
+/**
+ * Weld a new cable's `start` to the pressed dot's OUTER face and leave `end`
+ * loose. The face is provisional — the drag re-faces it as the pointer moves
+ * between scopes — and the terminal names carry no direction of their own.
+ */
 function createConnectionFromPort(
 	editor: Editor,
 	origin: PointingBlockPortInfo,
@@ -65,23 +84,46 @@ function createConnectionFromPort(
 
 	if (!createOrUpdateConnectionBinding(editor, connectionId, origin.shapeId, {
 		portId: origin.portId,
-		terminal: origin.terminal,
+		face: 'outer',
+		terminal: ANCHORED_TERMINAL,
 	})) {
 		editor.bailToMark(markId)
 		return null
 	}
 
 	const shape = editor.getShape<ConnectionShape>(connectionId)
-	const draggingTerminal = oppositeConnectionTerminal(origin.terminal)
 	const handle = editor.getShapeHandles(connectionId)?.find((candidate) => (
-		candidate.id === draggingTerminal
+		candidate.id === DRAGGED_TERMINAL
 	))
 	if (!shape || !handle) {
 		editor.bailToMark(markId)
 		return null
 	}
 
-	return { connectionId, draggingTerminal, markId, shape, handle }
+	return { connectionId, draggingTerminal: DRAGGED_TERMINAL, markId, shape, handle }
+}
+
+/** The polarity of a dot seen from outside its Block — the kit's reading. */
+function outerPolarity(editor: Editor, dot: PortDot): PortPolarity | null {
+	const port = getLiveBlockPorts(editor, dot.shapeId).find((candidate) => candidate.id === dot.portId)
+	return port ? portPolarity(port.side, 'outer') : null
+}
+
+/**
+ * The one cable a press on this dot would re-route, if any.
+ *
+ * A sink takes one cable, so pressing a wired sink means "move that wire". The
+ * rule reads the OUTER face only — the kit's rule, unchanged: a press on an
+ * Expanded Block's outlet starts a new outward cable even while a child feeds
+ * the outlet from inside, because that internal wire is reached by dragging
+ * its own handle, and taking the press for it would make the outward gesture
+ * impossible from that dot.
+ */
+function reroutableConnection(editor: Editor, dot: PortDot) {
+	if (outerPolarity(editor, dot) !== 'sink') return null
+	return getBlockPortConnections(editor, dot.shapeId).find((connection) => (
+		connection.ownPortId === dot.portId && connection.ownFace === 'outer'
+	)) ?? null
 }
 
 /**
@@ -129,7 +171,7 @@ function preferWiredPortNearby(
 			const distance = Vec.Dist(point, transform.applyToPoint(port))
 			if (distance > bestDistance) continue
 			bestDistance = distance
-			best = { shapeId: shape.id, portId: port.id, terminal: port.terminal }
+			best = { shapeId: shape.id, portId: port.id }
 		}
 	}
 
@@ -139,13 +181,10 @@ function preferWiredPortNearby(
 /**
  * Which way a picker-spawned Block sits relative to the port that asked for it.
  *
- * A `start` terminal is a source, so its consumer goes to the right; an `end`
- * terminal is a sink, so its producer goes to the left. That one rule also
- * places an inner face's Block *inside* the boundary, because an inner face
- * carries the flipped terminal.
+ * A source's consumer goes to the right; a sink's producer goes to the left.
  */
-export function blockPickerDirection(terminal: ConnectionTerminal): 1 | -1 {
-	return terminal === 'start' ? 1 : -1
+export function blockPickerDirection(polarity: PortPolarity): 1 | -1 {
+	return polarity === 'source' ? 1 : -1
 }
 
 /**
@@ -176,24 +215,21 @@ export class PointingBlockPort extends StateNode {
 	override onPointerMove(info: TLPointerEventInfo): void {
 		if (!this.info || !this.editor.inputs.getIsDragging()) return
 
-		// An input holds one cable. Dragging from a wired input moves that cable
+		// A sink holds one cable. Dragging from a wired sink moves that cable
 		// rather than starting a second one nobody could tell apart.
-		if (this.info.terminal === 'end') {
-			const existing = getBlockPortConnections(this.editor, this.info.shapeId)
-				.find((connection) => connection.ownPortId === this.info?.portId)
-			if (existing) {
-				const shape = this.editor.getShape<ConnectionShape>(existing.connectionId)
-				const handle = this.editor.getShapeHandles(existing.connectionId)
-					?.find((candidate) => candidate.id === this.info?.terminal)
-				if (shape && handle) {
-					this.parent.transition('dragging_handle', {
-						...info,
-						target: 'handle',
-						shape,
-						handle,
-					})
-					return
-				}
+		const existing = reroutableConnection(this.editor, this.info)
+		if (existing) {
+			const shape = this.editor.getShape<ConnectionShape>(existing.connectionId)
+			const handle = this.editor.getShapeHandles(existing.connectionId)
+				?.find((candidate) => candidate.id === existing.terminal)
+			if (shape && handle) {
+				this.parent.transition('dragging_handle', {
+					...info,
+					target: 'handle',
+					shape,
+					handle,
+				})
+				return
 			}
 		}
 
@@ -204,7 +240,6 @@ export class PointingBlockPort extends StateNode {
 			this.editor,
 			this.info.shapeId,
 			this.info.portId,
-			this.info.terminal,
 		)
 		const created = origin
 			? createConnectionFromPort(this.editor, this.info, origin)
@@ -234,9 +269,12 @@ export class PointingBlockPort extends StateNode {
 	override onLongPress(info: TLPointerEventInfo): void {
 		if (!this.info) return
 		if (!this.editor.getStateDescendant(`select.${BLOCK_PORT_DRAG_STATE_ID}`)) return
+		const port = getLiveBlockPorts(this.editor, this.info.shapeId)
+			.find((candidate) => candidate.id === this.info?.portId)
+		if (!port) return
 		const ref: BlockPortRef = {
 			shapeId: this.info.shapeId,
-			side: this.info.terminal === 'start' ? 'outputs' : 'inputs',
+			side: port.side === 'output' ? 'outputs' : 'inputs',
 			portId: this.info.portId,
 		}
 		if (!canReorderBlockPort(this.editor, ref)) return
@@ -264,21 +302,19 @@ export class PointingBlockPort extends StateNode {
  * Tap a port: stretch a cable to open space and offer a Block for its far end.
  *
  * The cable is real from the first frame, so the picker has something to anchor
- * to and a decline has something concrete to remove.
+ * to and a decline has something concrete to remove. A tap has no landing to
+ * read a scope from, so it reads the dot from OUTSIDE — a consumer to the right
+ * of an output, a producer to the left of an input — in the Block's own scope.
  */
 export function offerBlockFromPort(editor: Editor, pressed: PointingBlockPortInfo): void {
-	const origin = getBlockConnectionPortPagePoint(
-		editor,
-		pressed.shapeId,
-		pressed.portId,
-		pressed.terminal,
-	)
-	if (!origin) return
+	const origin = getBlockConnectionPortPagePoint(editor, pressed.shapeId, pressed.portId)
+	const polarity = outerPolarity(editor, pressed)
+	if (!origin || !polarity) return
 
 	const created = createConnectionFromPort(editor, pressed, origin)
 	if (!created) return
 
-	const direction = blockPickerDirection(pressed.terminal)
+	const direction = blockPickerDirection(polarity)
 	const target = new Vec(origin.x + direction * BLOCK_PICKER_SPACING_PX, origin.y)
 	const shape = editor.getShape<ConnectionShape>(created.connectionId)
 	if (shape) {
@@ -290,5 +326,12 @@ export function offerBlockFromPort(editor: Editor, pressed: PointingBlockPortInf
 		})
 	}
 
-	offerBlockForLooseTerminal(editor, created.connectionId, created.draggingTerminal)
+	if (!offerBlockForLooseTerminal(
+		editor,
+		created.connectionId,
+		created.draggingTerminal,
+		outerScopeOf(editor, pressed.shapeId),
+	)) {
+		editor.bailToMark(created.markId)
+	}
 }

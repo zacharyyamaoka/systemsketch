@@ -7,11 +7,13 @@ import {
 	Vec,
 	createComputedCache,
 	createShapeId,
+	isShapeId,
 	type Editor,
 	type IndexKey,
 	type RecordProps,
 	type TLHandle,
 	type TLHandleDragInfo,
+	type TLParentId,
 	type TLShape,
 	type TLShapeId,
 	type VecModel,
@@ -19,11 +21,7 @@ import {
 	useValue,
 	vecModelValidator,
 } from 'tldraw'
-import {
-	getAllConnectedBlocks,
-	getBlockConnectionPortAtPoint,
-	getLiveBlockPorts,
-} from './blockPorts'
+import { getBlockPortConnections, getBlockPortDotAtPoint } from './blockPorts'
 import {
 	HitPaddedCubicBezier2d,
 	HitPaddedEdge2d,
@@ -37,24 +35,36 @@ import { clearPortDragState, nearbyConnection, updatePortState } from '../ports/
 import {
 	BLOCK_SHAPE_TYPE,
 	getDefaultBlockProps,
-	isBlockShape,
-	isInnerPortId,
 	type BlockShape,
 } from '../blockModel'
 import {
+	connectionBindingPolarity,
 	connectionHasBothTerminals,
 	createOrUpdateConnectionBinding,
 	getConnectionBindingPositionInPageSpace,
 	getConnectionBindings,
+	getConnectionDirection,
+	normalizeConnectionDirection,
 	removeConnectionBinding,
+	type ConnectionBinding,
 } from './ConnectionBindingUtil'
 import {
 	CONNECTION_SHAPE_TYPE,
 	ConnectionRoutingStyle,
 	oppositeConnectionTerminal,
+	oppositePolarity,
 	type ConnectionRoutingKind,
 	type ConnectionTerminal,
+	type PortDot,
+	type PortFace,
 } from './connectionModel'
+import {
+	blocksThatWouldCycle,
+	dropScopeAt,
+	findConnectionTarget,
+	firstOuterPortForPolarity,
+} from './connectionRules'
+import { anchorFaceForScope, blockScopeId } from './connectionScope'
 import {
 	getBentCurveCubicControlPoints,
 	getConnectionCenterPoint,
@@ -208,7 +218,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 	 * live, so the corridor follows the active hit profile at every zoom.
 	 */
 	override getGeometry(connection: ConnectionShape) {
-		const { start, end } = getConnectionTerminals(this.editor, connection)
+		const { source, sink } = getConnectionEndpoints(this.editor, connection)
 		const { curve, routing } = connection.props
 		const pad = () => cableHitPadPageUnits(
 			this.editor.getZoomLevel(),
@@ -227,7 +237,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 
 		if (routing === 'straight' && !curve) {
 			return withCableHitPad(
-				new HitPaddedEdge2d({ start: Vec.From(start), end: Vec.From(end) }),
+				new HitPaddedEdge2d({ start: Vec.From(source), end: Vec.From(sink) }),
 				pad,
 			)
 		}
@@ -235,14 +245,14 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		// A dragged control point turns a straight cable into a curve — activation
 		// in the Excalidraw sense — so both bent cases share one geometry.
 		const [cp1, cp2] = curve
-			? getBentCurveCubicControlPoints(start, end, curve)
-			: getConnectionControlPoints(start, end)
+			? getBentCurveCubicControlPoints(source, sink, curve)
+			: getConnectionControlPoints(source, sink)
 		return withCableHitPad(
 			new HitPaddedCubicBezier2d({
-				start: Vec.From(start),
+				start: Vec.From(source),
 				cp1,
 				cp2,
-				end: Vec.From(end),
+				end: Vec.From(sink),
 			}),
 			pad,
 		)
@@ -302,7 +312,8 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			return handles
 		}
 
-		const center = getConnectionCenterPoint(connection.props.routing, start, end, {
+		const { source, sink } = getConnectionEndpoints(this.editor, connection)
+		const center = getConnectionCenterPoint(connection.props.routing, source, sink, {
 			curve: connection.props.curve,
 		})
 		handles.push({
@@ -344,10 +355,10 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		// Excalidraw sense, which is what the FR's "drag it and it becomes curved"
 		// describes.
 		if (handle.id === 'bend') {
-			const { start, end } = getConnectionTerminals(this.editor, connection)
+			const { source, sink } = getConnectionEndpoints(this.editor, connection)
 			const curve: ConnectionCurve = {
-				dx: handle.x - (start.x + end.x) / 2,
-				dy: handle.y - (start.y + end.y) / 2,
+				dx: handle.x - (source.x + sink.x) / 2,
+				dy: handle.y - (source.y + sink.y) / 2,
 			}
 			return {
 				id: connection.id,
@@ -361,8 +372,8 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		// runs in the dongle frame: the rails live between the two fixed port
 		// legs, never touching the ports themselves.
 		if (handle.id.startsWith('route:') || handle.id.startsWith('grow:')) {
-			const { start, end } = getConnectionTerminals(this.editor, connection)
-			const dongles = dongleEndpoints(start, end)
+			const { source, sink } = getConnectionEndpoints(this.editor, connection)
+			const dongles = dongleEndpoints(source, sink)
 			if (
 				this.activeRailDrag?.connectionId !== connection.id
 				|| this.activeRailDrag?.handleId !== handle.id
@@ -405,10 +416,10 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		if (handle.id.startsWith('segment:')) {
 			const segmentIndex = Number(handle.id.slice('segment:'.length))
 			if (!Number.isInteger(segmentIndex)) return undefined
-			const { start, end } = getConnectionTerminals(this.editor, connection)
+			const { source, sink } = getConnectionEndpoints(this.editor, connection)
 			const input = getElbowRouteInput(
-				start,
-				end,
+				source,
+				sink,
 				getConnectionElbowBoxes(this.editor, connection),
 				connection.props.pins,
 			)
@@ -422,40 +433,33 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		}
 
 		if (handle.id !== 'start' && handle.id !== 'end') return
-		const terminal = handle.id as ConnectionTerminal
-		const opposite = oppositeConnectionTerminal(terminal)
+		return this.dragTerminal(connection, handle.id, handle)
+	}
+
+	/**
+	 * The loose end of a cable, following the pointer.
+	 *
+	 * The other end is welded to a dot. Which FACE of that dot — and therefore
+	 * which way the cable points — is not fixed at the press: it is whatever the
+	 * landing needs. Over a port, the rules judge the pair and hand back both
+	 * faces. Over empty space, the scope under the pointer decides the anchored
+	 * face, so a cable dragged from an Expanded Block's outlet into its own
+	 * interior already reads as the inside returning through the outlet, and the
+	 * offer made on release puts the new Block inside.
+	 */
+	private dragTerminal(
+		connection: ConnectionShape,
+		terminal: ConnectionTerminal,
+		handle: TLHandle,
+	) {
+		const anchoredTerminal = oppositeConnectionTerminal(terminal)
+		const anchoredBinding = getConnectionBindings(this.editor, connection)[anchoredTerminal]
 		const pagePoint = this.editor.getShapePageTransform(connection).applyToPoint(handle)
-		// Which Blocks would close a loop if this end landed on them. The walk is
-		// flat, so it is computed once per move and handed to the port affordance
-		// as well — a port that cannot accept the cable must not light up.
-		const anchoredShapeId = getConnectionBindings(this.editor, connection)[opposite]?.toId
-		const target = getBlockConnectionPortAtPoint(this.editor, pagePoint, {
-			terminal,
-			fromShapeId: anchoredShapeId,
-		})
 
-		const wouldCycle = anchoredShapeId
-			? getAllConnectedBlocks(this.editor, anchoredShapeId, terminal)
-			: null
-
-		updatePortState(this.editor, {
-			eligiblePorts: { terminal, excludeBlocks: wouldCycle },
-		})
-
-		// A hierarchy edge — either end on a boundary port's INNER face — is exempt
-		// from the cycle veto. The flat walk conflates a Block's inside with its
-		// outside, so a child feeding its own parent's outlet reads as a cycle when
-		// it is the hierarchy working as designed.
-		const oppositeBinding = getConnectionBindings(this.editor, connection)[opposite]
-		const isHierarchyEdge = (target?.port.inner ?? false)
-			|| (oppositeBinding ? isInnerPortId(oppositeBinding.props.portId) : false)
-		const vetoed = !isHierarchyEdge
-			&& target !== null
-			&& (wouldCycle?.has(target.shapeId) ?? false)
-
-		if (!target || vetoed) {
+		if (!anchoredBinding) {
+			// Nothing to judge against: a cable with no welded end just follows.
 			this.pendingReplacementId = null
-			updatePortState(this.editor, { hintingPort: null })
+			updatePortState(this.editor, { hintingPort: null, eligiblePorts: null })
 			removeConnectionBinding(this.editor, connection, terminal)
 			return {
 				id: connection.id,
@@ -464,18 +468,54 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			}
 		}
 
-		// An input takes one cable. Landing a second on it replaces the first
-		// rather than stacking two wires nobody can tell apart. Outputs fan out.
-		const occupant = target.existingConnections
-			.find((existing) => existing.connectionId !== connection.id)
-		this.pendingReplacementId = occupant && terminal === 'end' ? occupant.connectionId : null
+		const anchor: PortDot = { shapeId: anchoredBinding.toId, portId: anchoredBinding.props.portId }
+		// Which Blocks would close a loop if this end landed on them. The walk is
+		// flat, computed once per move and handed to the port affordance as well —
+		// a port that cannot accept the cable must not light up.
+		const excludeBlocks = blocksThatWouldCycle(this.editor, anchor)
+		updatePortState(this.editor, { eligiblePorts: { anchor, excludeBlocks } })
+
+		const target = findConnectionTarget(this.editor, pagePoint, anchor, { excludeBlocks })
+
+		if (!target) {
+			this.pendingReplacementId = null
+			updatePortState(this.editor, { hintingPort: null })
+			removeConnectionBinding(this.editor, connection, terminal)
+			// The scope under the pointer decides which face the anchored end is
+			// reaching out from, so the cable is drawn — and the offer is made —
+			// for the place the pointer actually is.
+			const scope = dropScopeAt(this.editor, pagePoint)
+			const face = scope.kind === 'scope'
+				? anchorFaceForScope(this.editor, anchor, scope.scopeId)
+				: null
+			setAnchoredFace(this.editor, anchoredBinding, face ?? 'outer')
+			return {
+				id: connection.id,
+				type: CONNECTION_SHAPE_TYPE,
+				props: { [terminal]: { x: handle.x, y: handle.y } },
+			}
+		}
+
+		setAnchoredFace(this.editor, anchoredBinding, target.anchor.face)
+
+		// A sink takes one cable. Landing a second on it replaces the first
+		// rather than stacking two wires nobody can tell apart. Sources fan out.
+		const occupant = target.target.polarity === 'sink'
+			? getBlockPortConnections(this.editor, target.hit.shapeId).find((existing) => (
+				existing.connectionId !== connection.id
+				&& existing.ownPortId === target.target.portId
+				&& existing.ownFace === target.target.face
+			))
+			: undefined
+		this.pendingReplacementId = occupant?.connectionId ?? null
 
 		updatePortState(this.editor, {
-			hintingPort: { shapeId: target.shapeId, portId: target.port.id },
+			hintingPort: { shapeId: target.hit.shapeId, portId: target.target.portId },
 		})
 
-		createOrUpdateConnectionBinding(this.editor, connection, target.shape.id, {
-			portId: target.port.id,
+		createOrUpdateConnectionBinding(this.editor, connection, target.hit.shapeId, {
+			portId: target.target.portId,
+			face: target.target.face,
 			terminal,
 		})
 		// A binding may reparent the connection. Returning the captured shape here
@@ -497,25 +537,29 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		if (handle.id !== 'start' && handle.id !== 'end') return
 		const terminal = handle.id as ConnectionTerminal
 
-		if (getConnectionBindings(this.editor, connection.id)[terminal]) return
+		if (getConnectionBindings(this.editor, connection.id)[terminal]) {
+			// Settled: make the document read source → sink.
+			normalizeConnectionDirection(this.editor, connection.id)
+			return
+		}
 
-		// A cable that landed on EMPTY SPACE is a question: offer what to put
-		// there. A cable that landed on a Block and was refused is not — the user
-		// was aiming at that Block, and creating a new one on top of it is not the
-		// alternative they wanted. Refusal is already shown during the drag, by the
-		// illegal port never lighting up.
+		// A cable that landed in EMPTY SPACE is a question: offer what to put
+		// there, in the scope it landed in. A cable that landed on a collapsed
+		// Block and was refused is not — the user was aiming at that Block, and
+		// creating a new one on top of it is not the alternative they wanted.
+		// Refusal is already shown during the drag, by the illegal port never
+		// lighting up.
 		// tldraw hands `onHandleDragEnd` the INITIAL handle, not the current one —
 		// `DraggingHandle.complete()` passes `this.initialHandle`. Asking that where
 		// the cable landed answers with where it started, which is always on the
 		// Block whose port was pressed.
 		const dropPoint = this.editor.inputs.getCurrentPagePoint()
-		const overABlock = this.editor.getShapeAtPoint(dropPoint, {
-			hitInside: true,
-			filter: (shape) => isBlockShape(shape),
-		}) !== undefined
-		if (isCreatingShape && !overABlock) {
-			offerBlockForLooseTerminal(this.editor, connection.id, terminal)
-			return
+		// A release within reach of a dot was aimed at that dot. If it is still
+		// unbound here the rules refused it, and refusal is quiet: no offer.
+		const aimedAtPort = getBlockPortDotAtPoint(this.editor, dropPoint) !== null
+		const scope = dropScopeAt(this.editor, dropPoint)
+		if (isCreatingShape && !aimedAtPort && scope.kind === 'scope') {
+			if (offerBlockForLooseTerminal(this.editor, connection.id, terminal, scope.scopeId)) return
 		}
 
 		if (!connectionHasBothTerminals(this.editor, connection.id)) {
@@ -552,6 +596,16 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 	override getAriaDescriptor(_shape: ConnectionShape): string {
 		return 'Block connection'
 	}
+}
+
+/** Re-face the welded end of an in-flight cable; a no-op when it already matches. */
+function setAnchoredFace(editor: Editor, binding: ConnectionBinding, face: PortFace): void {
+	if (binding.props.face === face) return
+	editor.updateBinding<ConnectionBinding>({
+		id: binding.id,
+		type: binding.type,
+		props: { face },
+	})
 }
 
 function ConnectionShapeComponent({ connection }: { connection: ConnectionShape }) {
@@ -592,15 +646,15 @@ export function getConnectionElbowRoute(
 }
 
 function computeConnectionElbowRoute(editor: Editor, connection: ConnectionShape): ElbowRoute {
-	const { start, end } = getConnectionTerminals(editor, connection)
+	const { source, sink } = getConnectionEndpoints(editor, connection)
 	// An authored route replaces the A*: the user owns the rails, and the
 	// normalize pass re-binds the end segments to the live ports.
 	if (connection.props.elbowRoute) {
-		return authoredElbowRoute(connection.props.elbowRoute, start, end)
+		return authoredElbowRoute(connection.props.elbowRoute, source, sink)
 	}
 	return getElbowConnectionRoute(
-		start,
-		end,
+		source,
+		sink,
 		getConnectionElbowBoxes(editor, connection),
 		connection.props.pins,
 	)
@@ -611,23 +665,32 @@ const connectionElbowRouteCache = createComputedCache(
 	(editor: Editor, connection: ConnectionShape) => computeConnectionElbowRoute(editor, connection),
 )
 
-/** The bound Blocks' boxes, in the cable's own space, as router obstacles. */
+/**
+ * The bound Blocks' boxes, in the cable's own space, as router obstacles.
+ *
+ * A face looks into one scope, and the Block it belongs to is only an obstacle
+ * in the OTHER one: a cable leaving an outlet has to get out of the way of the
+ * Block's card, but a cable arriving at that outlet from inside the frame is
+ * already inside the box, and routing it around its own container is how an
+ * elbow ends up wrapping the board. An inner face contributes no box.
+ */
 function getConnectionElbowBoxes(
 	editor: Editor,
 	connection: ConnectionShape,
 ): ConnectionElbowBoxes {
 	const bindings = getConnectionBindings(editor, connection)
+	const direction = getConnectionDirection(editor, connection)
 	const inverse = Mat.Inverse(editor.getShapePageTransform(connection))
-	const toLocalBox = (shapeId: TLShapeId | undefined) => {
-		if (!shapeId) return null
-		const bounds = editor.getShapePageBounds(shapeId)
+	const toLocalBox = (binding: ConnectionBinding | undefined) => {
+		if (!binding || binding.props.face === 'inner') return null
+		const bounds = editor.getShapePageBounds(binding.toId)
 		if (!bounds) return null
 		const topLeft = Mat.applyToPoint(inverse, { x: bounds.minX, y: bounds.minY })
 		return { x: topLeft.x, y: topLeft.y, w: bounds.width, h: bounds.height }
 	}
 	return {
-		start: toLocalBox(bindings.start?.toId),
-		end: toLocalBox(bindings.end?.toId),
+		start: toLocalBox(bindings[direction.sourceTerminal]),
+		end: toLocalBox(bindings[direction.sinkTerminal]),
 	}
 }
 
@@ -644,25 +707,25 @@ export function getConnectionShapeGeometryPoints(
 ): Vec[] {
 	const connection = editor.getShape<ConnectionShape>(connectionId)
 	if (!connection || connection.type !== CONNECTION_SHAPE_TYPE) return []
-	const { start, end } = getConnectionTerminals(editor, connection)
+	const { source, sink } = getConnectionEndpoints(editor, connection)
 	const { routing, curve } = connection.props
 
 	if (routing === 'elbow') {
 		return getConnectionElbowRoute(editor, connection).points.map((point: { x: number; y: number }) =>
 			Vec.From(point))
 	}
-	if (routing === 'straight' && !curve) return [Vec.From(start), Vec.From(end)]
+	if (routing === 'straight' && !curve) return [Vec.From(source), Vec.From(sink)]
 
 	const [cp1, cp2] = curve
-		? getBentCurveCubicControlPoints(start, end, curve)
-		: getConnectionControlPoints(start, end)
+		? getBentCurveCubicControlPoints(source, sink, curve)
+		: getConnectionControlPoints(source, sink)
 	const samples: Vec[] = []
 	for (let step = 0; step <= CABLE_PROXIMITY_SAMPLES; step += 1) {
 		const t = step / CABLE_PROXIMITY_SAMPLES
 		const u = 1 - t
 		samples.push(new Vec(
-			u * u * u * start.x + 3 * u * u * t * cp1.x + 3 * u * t * t * cp2.x + t * t * t * end.x,
-			u * u * u * start.y + 3 * u * u * t * cp1.y + 3 * u * t * t * cp2.y + t * t * t * end.y,
+			u * u * u * source.x + 3 * u * u * t * cp1.x + 3 * u * t * t * cp2.x + t * t * t * sink.x,
+			u * u * u * source.y + 3 * u * u * t * cp1.y + 3 * u * t * t * cp2.y + t * t * t * sink.y,
 		))
 	}
 	return samples
@@ -671,7 +734,7 @@ export function getConnectionShapeGeometryPoints(
 /** Enough to keep the proximity answer smooth on a long curve, cheap to walk. */
 const CABLE_PROXIMITY_SAMPLES = 24
 
-/** Resolve both endpoints in connection-local coordinates. */
+/** Resolve both handles in connection-local coordinates. */
 export function getConnectionTerminals(editor: Editor, connection: ConnectionShape) {
 	let start: VecModel | undefined
 	let end: VecModel | undefined
@@ -693,12 +756,31 @@ export function getConnectionTerminals(editor: Editor, connection: ConnectionSha
 	}
 }
 
+/**
+ * The cable's two ends by ROLE, in connection-local coordinates.
+ *
+ * Every route is drawn from the source to the sink: it leaves the source
+ * heading +x and arrives at the sink heading +x, which is right for an output
+ * on a right edge, an input on a left edge, and — because the polarity flips
+ * with the face — for the inside of an inlet or an outlet just the same.
+ */
+export function getConnectionEndpoints(editor: Editor, connection: ConnectionShape) {
+	const terminals = getConnectionTerminals(editor, connection)
+	const direction = getConnectionDirection(editor, connection)
+	return {
+		source: terminals[direction.sourceTerminal],
+		sink: terminals[direction.sinkTerminal],
+		sourceTerminal: direction.sourceTerminal,
+		sinkTerminal: direction.sinkTerminal,
+	}
+}
+
 export function getConnectionShapePath(
 	editor: Editor,
 	connection: ConnectionShape,
 ): string {
-	const { start, end } = getConnectionTerminals(editor, connection)
-	return getConnectionPath(connection.props.routing, start, end, {
+	const { source, sink } = getConnectionEndpoints(editor, connection)
+	return getConnectionPath(connection.props.routing, source, sink, {
 		curve: connection.props.curve,
 		route: connection.props.routing === 'elbow'
 			? getConnectionElbowRoute(editor, connection)
@@ -709,25 +791,44 @@ export function getConnectionShapePath(
 /**
  * Offer a Block for a cable terminal that landed on nothing, and wire it up.
  *
- * The new Block is offset so its first port of the needed terminal lands exactly
- * under the cable end — the kit's placement rule, and the reason the result
- * looks deliberate rather than dropped. A declined offer deletes the cable,
- * because a half-bound cable is not a document state anything else can read.
+ * The new Block goes into the scope the cable landed in — inside the Expanded
+ * Block whose interior the pointer was over, or beside the cable's other end —
+ * and is offset so its first port of the needed polarity lands exactly under
+ * the cable end: the kit's placement rule, and the reason the result looks
+ * deliberate rather than dropped. A declined offer deletes the cable, because a
+ * half-bound cable is not a document state anything else can read.
+ *
+ * Returns false when the landing scope is one the anchored end cannot reach —
+ * a cable from a Block on the page dropped inside some OTHER Expanded Block —
+ * so the caller can discard the cable instead of offering the impossible.
  */
 export function offerBlockForLooseTerminal(
 	editor: Editor,
 	connectionId: TLShapeId,
 	terminal: ConnectionTerminal,
-): void {
+	scopeId: TLParentId,
+): boolean {
 	const connection = editor.getShape<ConnectionShape>(connectionId)
-	if (!connection || connection.type !== CONNECTION_SHAPE_TYPE) return
+	if (!connection || connection.type !== CONNECTION_SHAPE_TYPE) return false
+	const anchoredBinding = getConnectionBindings(editor, connection)[oppositeConnectionTerminal(terminal)]
+	if (!anchoredBinding) return false
+	const anchor: PortDot = { shapeId: anchoredBinding.toId, portId: anchoredBinding.props.portId }
+	const face = anchorFaceForScope(editor, anchor, scopeId)
+	if (!face) return false
+	setAnchoredFace(editor, anchoredBinding, face)
+	const anchoredPolarity = connectionBindingPolarity(editor, { ...anchoredBinding, props: { ...anchoredBinding.props, face } })
+	if (!anchoredPolarity) return false
+	const needed = oppositePolarity(anchoredPolarity)
+
 	const local = getConnectionTerminals(editor, connection)[terminal]
-	const anchor = editor.getShapePageTransform(connection).applyToPoint(local)
+	const anchorPoint = editor.getShapePageTransform(connection).applyToPoint(local)
 
 	openBlockPicker(editor, {
 		connectionId,
 		terminal,
-		anchor,
+		anchor: anchorPoint,
+		wantsProducer: needed === 'source',
+		scopeId,
 		onClose: () => {
 			const cable = editor.getShape(connectionId)
 			if (!cable) return
@@ -738,47 +839,57 @@ export function offerBlockForLooseTerminal(
 		onPick: (preset, anchorInPageSpace) => {
 			const blockId = createShapeId()
 			editor.run(() => {
-				editor.createShape({
-					id: blockId,
-					type: BLOCK_SHAPE_TYPE,
-					x: anchorInPageSpace.x,
-					y: anchorInPageSpace.y,
-					props: blockPresetProps(preset, getDefaultBlockProps()),
-				})
-
-				const created = editor.getShape<BlockShape>(blockId)
-				if (!created) return
-				// Only the OUTER faces are candidates: the new Block is a sibling of
-				// the cable's other end, not a boundary the cable is passing through.
-				const landing = getLiveBlockPorts(editor, blockId)
-					.find((port) => port.terminal === terminal && !port.hidden && !port.inner)
+				const props = blockPresetProps(preset, getDefaultBlockProps())
+				const landing = firstOuterPortForPolarity(props, needed)
 				if (!landing) {
-					editor.deleteShapes([blockId])
 					if (!connectionHasBothTerminals(editor, connectionId)) {
 						editor.deleteShapes([connectionId])
 					}
 					return
 				}
-
-				editor.updateShape({
+				// Position in the scope's own space: a child of an Expanded Block
+				// is placed relative to that Block, exactly as a drawn one is.
+				const origin = new Vec(anchorInPageSpace.x - landing.x, anchorInPageSpace.y - landing.y)
+				const inParent = isShapeId(scopeId)
+					? Mat.applyToPoint(Mat.Inverse(editor.getShapePageTransform(scopeId)), origin)
+					: origin
+				editor.createShape({
 					id: blockId,
 					type: BLOCK_SHAPE_TYPE,
-					x: anchorInPageSpace.x - landing.x,
-					y: anchorInPageSpace.y - landing.y,
+					parentId: scopeId,
+					x: inParent.x,
+					y: inParent.y,
+					props,
 				})
+
+				const created = editor.getShape<BlockShape>(blockId)
+				if (!created) return
 				createOrUpdateConnectionBinding(editor, connectionId, blockId, {
 					portId: landing.id,
+					face: 'outer',
 					terminal,
 				})
 				if (!connectionHasBothTerminals(editor, connectionId)) {
 					editor.deleteShapes([connectionId, blockId])
 					return
 				}
+				normalizeConnectionDirection(editor, connectionId)
 				editor.select(blockId)
 			})
 			// The Block arrives unnamed, and naming it is the next thing anyone
 			// does — the same rule the Block tool already follows after a draw.
-			requestBlockInlineEdit(editor, blockId, { kind: 'title' })
+			if (editor.getShape(blockId)) requestBlockInlineEdit(editor, blockId, { kind: 'title' })
 		},
 	})
+	return true
+}
+
+/** The scope a cable's welded end lives in from outside — where a tap's offer goes. */
+export function outerScopeOf(editor: Editor, shapeId: TLShapeId): TLParentId {
+	return blockScopeId(editor, shapeId)
+}
+
+/** Page bounds helper shared by tests and overlays. */
+export function connectionPageBounds(editor: Editor, connectionId: TLShapeId): Box | null {
+	return editor.getShapePageBounds(connectionId) ?? null
 }

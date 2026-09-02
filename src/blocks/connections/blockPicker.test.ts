@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { getDefaultBlockProps } from '../blockModel'
-import { BLOCK_PICKER_PRESETS, blockPresetProps } from './blockPicker'
-import { getBlockConnectionPorts } from './blockPorts'
+import { BLOCK_PICKER_PRESETS, blockPickerPresetsFor, blockPresetProps } from './blockPicker'
+import { firstOuterPortForPolarity } from './connectionRules'
 
 describe('block picker presets', () => {
 	it('offers at least one preset that can receive a cable and one that can send', () => {
@@ -26,12 +26,20 @@ describe('block picker presets', () => {
 		expect({ w: props.w, h: props.h }).toEqual(base.views.expanded)
 	})
 
-	it('gives every preset a landing port for the terminal it advertises', () => {
+	it('gives every preset a landing port for the polarity it advertises', () => {
 		for (const preset of BLOCK_PICKER_PRESETS) {
-			const ports = getBlockConnectionPorts(blockPresetProps(preset, getDefaultBlockProps()))
-			const outer = ports.filter((port) => !port.inner)
-			expect(outer.filter((port) => port.terminal === 'end')).toHaveLength(preset.inputs)
-			expect(outer.filter((port) => port.terminal === 'start')).toHaveLength(preset.outputs)
+			const props = blockPresetProps(preset, getDefaultBlockProps())
+			expect(firstOuterPortForPolarity(props, 'sink') !== null).toBe(preset.inputs > 0)
+			expect(firstOuterPortForPolarity(props, 'source') !== null).toBe(preset.outputs > 0)
 		}
+	})
+
+	it('offers only the presets that can answer the cable', () => {
+		// A cable looking for a consumer is not helped by a Source; one looking
+		// for a producer is not helped by a Sink.
+		expect(blockPickerPresetsFor(false).every((preset) => preset.inputs > 0)).toBe(true)
+		expect(blockPickerPresetsFor(true).every((preset) => preset.outputs > 0)).toBe(true)
+		expect(blockPickerPresetsFor(false).map((preset) => preset.id)).not.toContain('source')
+		expect(blockPickerPresetsFor(true).map((preset) => preset.id)).not.toContain('sink')
 	})
 })

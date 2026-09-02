@@ -98,7 +98,7 @@ export function HitAreaOverlay() {
 			if (!isBlockShape(shape) || editor.isShapeHidden(shape)) continue
 			const transform = editor.getShapePageTransform(shape.id)
 			for (const port of getLiveBlockPorts(editor, shape)) {
-				if (port.hidden || port.inner) continue
+				if (port.hidden) continue
 				const page = transform.applyToPoint(port)
 				const centre = toViewport(page.x, page.y)
 				painted.push({
