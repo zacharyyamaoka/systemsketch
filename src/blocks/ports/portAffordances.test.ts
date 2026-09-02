@@ -15,6 +15,7 @@ import {
 } from '../layoutBlock'
 import {
 	PORT_ADD_ZONE_HALF_WIDTH_PX,
+	blockHeaderPortAddAffordance,
 	blockPortAddAffordance,
 	blockPortDropTarget,
 	growBlockPortViewToFit,
@@ -190,19 +191,21 @@ describe('blockPortAddAffordance', () => {
 
 describe('blockPortDropTarget', () => {
 	const props = block()
+	const at = (target: ReturnType<typeof blockPortDropTarget>) => (
+		[target.row, target.branch, target.before] as const
+	)
 
 	it('drops above the first row when held over the top of the body', () => {
-		expect(blockPortDropTarget(props, 'inputs', portY(props, 'in_1') - 12).insertIndex).toBe(0)
+		expect(at(blockPortDropTarget(props, 'inputs', portY(props, 'in_1') - 12))).toEqual([1, 0, 'in_1'])
 	})
 
 	it('drops between two rows when held between them', () => {
 		const between = (portY(props, 'in_1') + portY(props, 'in_2')) / 2
-		expect(blockPortDropTarget(props, 'inputs', between + 1).insertIndex).toBe(1)
+		expect(at(blockPortDropTarget(props, 'inputs', between + 1))).toEqual([1, 0, 'in_2'])
 	})
 
 	it('drops at the end when held below the last row', () => {
-		const target = blockPortDropTarget(props, 'inputs', portY(props, 'in_2') + 40)
-		expect(target.insertIndex).toBe(props.inputs.length)
+		expect(at(blockPortDropTarget(props, 'inputs', portY(props, 'in_2') + 40))).toEqual([1, 0, null])
 	})
 
 	it('paints the rule between the two rows it would split', () => {
@@ -210,29 +213,86 @@ describe('blockPortDropTarget', () => {
 		expect(blockPortDropTarget(props, 'inputs', between + 1).indicatorY).toBeCloseTo(between, 5)
 	})
 
-	it('keeps the rule inside the body however far the pointer travels', () => {
+	it('offers an input the heading band above the body, and never an output', () => {
 		const layout = layoutBlock(props)
-		for (const y of [-500, 5000]) {
-			const { indicatorY } = blockPortDropTarget(props, 'inputs', y)
-			expect(indicatorY).toBeGreaterThanOrEqual(layout.bodyTop)
-			expect(indicatorY).toBeLessThanOrEqual(layout.footerTop)
-		}
+		const lifted = blockPortDropTarget(props, 'inputs', layout.headerHeight / 2)
+		expect(at(lifted)).toEqual([0, 0, null])
+		expect(lifted.band).toEqual(layout.headerBand)
+		expect(lifted.indicatorY).toBeLessThanOrEqual(layout.headerHeight)
+		expect(at(blockPortDropTarget(props, 'outputs', layout.headerHeight / 2))).toEqual([1, 0, 'out_1'])
+	})
+
+	it('lands an input before or after the header dots already there', () => {
+		const withHeader = block({
+			inputs: [port('cond', { row: 0 }), port('iter', { row: 0 }), port('in_1')],
+		})
+		const condY = portY(withHeader, 'cond')
+		const iterY = portY(withHeader, 'iter')
+		expect(at(blockPortDropTarget(withHeader, 'inputs', condY - 4))).toEqual([0, 0, 'cond'])
+		expect(at(blockPortDropTarget(withHeader, 'inputs', (condY + iterY) / 2 + 1))).toEqual([0, 0, 'iter'])
+		expect(at(blockPortDropTarget(withHeader, 'inputs', iterY + 4))).toEqual([0, 0, null])
+	})
+
+	it('names the row whose band holds the pointer, and the arm for an output', () => {
+		const rows = block({
+			inputs: [port('in_1'), port('in_2', { row: 2 })],
+			outputs: [port('out_1'), port('out_2', { branch: 1 }), port('out_3', { row: 2 })],
+		})
+		const grown = growBlockPortViewToFit(rows)
+		const layout = layoutBlock(grown)
+		const second = layout.sections[1]
+		expect(at(blockPortDropTarget(grown, 'inputs', second.band.top + 2))).toEqual([2, 0, 'in_2'])
+		const secondArm = layout.sections[0].branches[1]
+		expect(at(blockPortDropTarget(grown, 'outputs', secondArm.band.top + 2))).toEqual([1, 1, 'out_2'])
+		expect(blockPortDropTarget(grown, 'outputs', secondArm.band.top + 2).band).toEqual(secondArm.band)
+		expect(at(blockPortDropTarget(grown, 'outputs', 5000))).toEqual([2, 0, null])
+	})
+
+	it('keeps the rule inside the band however far the pointer travels', () => {
+		const layout = layoutBlock(props)
+		const above = blockPortDropTarget(props, 'outputs', -500)
+		expect(above.indicatorY).toBeGreaterThanOrEqual(layout.bodyTop)
+		const below = blockPortDropTarget(props, 'inputs', 5000)
+		expect(below.indicatorY).toBeLessThanOrEqual(layout.footerTop)
 	})
 
 	it('reads each lane on its own, so an input never lands among outputs', () => {
-		expect(blockPortDropTarget(props, 'outputs', portY(props, 'out_1') + 40).insertIndex).toBe(1)
+		expect(at(blockPortDropTarget(props, 'outputs', portY(props, 'out_1') + 40))).toEqual([1, 0, null])
 	})
 
-	it('skips hidden ports as targets but keeps their index intact', () => {
+	it('never names a hidden port as the neighbour to land beside', () => {
 		const withHidden = block({
 			inputs: [port('in_1'), port('in_2', { visible: false }), port('in_3')],
 		})
 		const target = blockPortDropTarget(withHidden, 'inputs', portY(withHidden, 'in_3') - 4)
-		// in_3 is the second row painted, but the third entry in the lane.
-		expect(target.insertIndex).toBe(2)
+		expect(target.before).toBe('in_3')
 	})
 
 	it('offers the end of an empty lane', () => {
-		expect(blockPortDropTarget(block({ outputs: [] }), 'outputs', 100).insertIndex).toBe(0)
+		expect(at(blockPortDropTarget(block({ outputs: [] }), 'outputs', 100))).toEqual([1, 0, null])
+	})
+})
+
+describe('blockHeaderPortAddAffordance', () => {
+	it('sits on the heading edge, at the row the next header dot would take', () => {
+		const props = block()
+		const affordance = blockHeaderPortAddAffordance(props)!
+		const layout = layoutBlock(props)
+		expect(affordance.side).toBe('inputs')
+		expect(affordance.x).toBe(0)
+		expect(affordance.y).toBe(layout.headerHeight / 2)
+		expect(affordance.zone).toMatchObject({ x: -PORT_ADD_ZONE_HALF_WIDTH_PX, y: 0, h: layout.headerHeight })
+		expect(affordance.zone.x + affordance.zone.w).toBeLessThanOrEqual(12)
+	})
+
+	it('offers the slot under the last header dot once there are some', () => {
+		const props = block({ inputs: [port('cond', { row: 0 }), port('in_1')] })
+		const affordance = blockHeaderPortAddAffordance(props)!
+		expect(affordance.y).toBeGreaterThan(portY(props, 'cond'))
+		expect(affordance.y).toBeLessThan(layoutBlock(props).headerHeight)
+	})
+
+	it('has nothing to offer in Simple view', () => {
+		expect(blockHeaderPortAddAffordance(block({ view: 'simple' }))).toBeNull()
 	})
 })

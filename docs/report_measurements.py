@@ -83,3 +83,29 @@ def journey_results(
         )
 
     return json.loads(results.read_text())
+
+def source_slice(path: Path, start_marker: str, end_marker: str) -> str:
+    """Quote real source, so a snippet cannot outlive the code it describes.
+
+    Measured numbers were only half the drift problem. A report's prose and its
+    code snippets describe a *mechanism*, and a mechanism can be replaced while
+    every number on the page stays true — which is worse than a stale count,
+    because the page then reads as freshly measured and explains something that
+    no longer exists. Quoting the file turns that into a build failure: delete
+    the function and the report refuses rather than publishing fiction.
+    """
+    if not path.exists():
+        raise SystemExit(
+            f"{path.name} is gone, so the snippet quoting it cannot be built. "
+            f"The report describes a mechanism that no longer exists — rewrite that section."
+        )
+    text = path.read_text()
+    try:
+        begin = text.index(start_marker)
+        return text[begin:text.index(end_marker, begin)].rstrip()
+    except ValueError:
+        raise SystemExit(
+            f"{path.name} no longer contains {start_marker.strip()[:60]!r}. "
+            f"The report is describing a mechanism that has been replaced — "
+            f"rewrite that section rather than re-pointing the marker at something similar."
+        ) from None

@@ -35,17 +35,43 @@ describe('a Block as stock primitives', () => {
 		const { shapes } = primitivesForBlock(props, origin)
 		const dot = layout.ports[0]
 
-		// Every dot is drawn as a ring plus a core, centred on the layout's own
-		// port centre. Anything else means detach has its own idea of where a
-		// port is, which is the bug this asserts against.
-		const rings = shapes.filter((shape) =>
+		// Every port is one circle centred on layoutBlock's own port centre.
+		// Anything else means detach has its own idea of where a port is.
+		const circles = shapes.filter((shape) =>
 			(shape.props as { geo?: string }).geo === 'ellipse')
-		expect(rings.length).toBe(2)
-		for (const ring of rings) {
-			const w = (ring.props as { w: number }).w
-			expect(ring.x! + w / 2).toBeCloseTo(origin.x + dot.x, 6)
-			expect(ring.y! + w / 2).toBeCloseTo(origin.y + dot.y, 6)
+		expect(circles.length).toBe(1)
+		for (const circle of circles) {
+			const w = (circle.props as { w: number }).w
+			expect(circle.x! + w / 2).toBeCloseTo(origin.x + dot.x, 6)
+			expect(circle.y! + w / 2).toBeCloseTo(origin.y + dot.y, 6)
 		}
+	})
+
+	it('describes one nested group worth of shapes for every visible port row', () => {
+		const props = blockProps({
+			view: 'port',
+			inputs: [{ ...port('in_1', 'window', 'int'), defaultValue: '5' }],
+			outputs: [port('out_1', 'result', 'float')],
+		})
+		const built = primitivesForBlock(props, { x: 0, y: 0 })
+		const byId = new Map(built.shapes.map((shape) => [shape.id, shape]))
+
+		expect(built.portRows.map((row) => `${row.side}:${row.portId}`))
+			.toEqual(['input:in_1', 'output:out_1'])
+		for (const row of built.portRows) {
+			expect(row.shapeIds.length).toBeGreaterThanOrEqual(3)
+			expect(row.shapeIds.every((id) => byId.has(id))).toBe(true)
+			expect(row.shapeIds.filter((id) =>
+				(byId.get(id)!.props as { geo?: string }).geo === 'ellipse')).toHaveLength(1)
+		}
+		const inputText = built.portRows[0].shapeIds
+			.map((id) => byId.get(id))
+			.filter((shape) => shape?.type === 'text')
+			.map((shape) => JSON.stringify((shape!.props as { richText: unknown }).richText))
+			.join(' ')
+		expect(inputText).toContain('window')
+		expect(inputText).toContain('int')
+		expect(inputText).toContain('= 5')
 	})
 
 	it('emits no text shape for an empty field', () => {
@@ -83,6 +109,7 @@ describe('a Block as stock primitives', () => {
 			.find((shape) => (shape.props as { geo?: string }).geo === 'ellipse'
 				&& (shape.props as { w: number }).w === 12)
 		expect(core!.props).toMatchObject({ fill: 'solid', color: 'grey' })
+		expect(textOf(primitivesForBlock(props, { x: 0, y: 0 }).shapes).join()).toContain('= 5')
 	})
 
 	it('draws no dots for the Simple face, whose anchors are invisible until hovered', () => {

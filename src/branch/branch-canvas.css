@@ -1,0 +1,204 @@
+/*
+ * The Branch region's face. A container, not a card: no fill behind the
+ * arms, so the cables that live in the Branch's scope (page or enclosing
+ * Expanded Block, painted beneath it) stay visible through it. Only the band
+ * and the arm headers carry a surface. Geometry comes from branchLayout, as
+ * the Block's does from layoutBlock, so paint and hit testing cannot drift.
+ */
+
+.systemsketch-branch-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: 0 0 0 1.2px var(--ss-border-strong);
+  color: var(--ss-text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  overflow: visible;
+}
+
+.systemsketch-branch-canvas .Branch-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: inherit;
+}
+
+/* The band: the region's title, and the values the branch decides on. */
+.systemsketch-branch-canvas .Branch-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--ss-border-strong);
+  border-radius: 6px 6px 0 0;
+  background: color-mix(in srgb, var(--ss-surface-raised) 92%, transparent);
+}
+
+.systemsketch-branch-canvas .Branch-title {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: ui-monospace, "JetBrains Mono", Menlo, monospace;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--ss-text);
+}
+
+.systemsketch-branch-canvas .Branch-controlName {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  color: var(--ss-text-muted);
+}
+
+[data-state='select.idle'] .systemsketch-branch-canvas [data-branch-field],
+[data-state='select.editing_shape'] .systemsketch-branch-canvas [data-branch-field] {
+  pointer-events: all;
+  cursor: text;
+}
+
+/* Arm headers: chevron, title, make-active target. */
+.systemsketch-branch-canvas .Branch-armHeader {
+  position: absolute;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+  background: color-mix(in srgb, var(--ss-surface-raised) 70%, transparent);
+}
+
+.systemsketch-branch-canvas .Branch-armHeader[data-active='true'] .Branch-armTitle {
+  color: var(--ss-accent);
+}
+
+.systemsketch-branch-canvas .Branch-divider {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--ss-text);
+}
+
+.systemsketch-branch-canvas .Branch-armTitle {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ss-text);
+}
+
+.systemsketch-branch-canvas .Branch-chevron,
+.systemsketch-branch-canvas .Branch-target,
+.systemsketch-branch-canvas .Branch-addControl,
+.systemsketch-branch-canvas .Branch-addArm {
+  position: absolute;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ss-text-muted);
+  font: inherit;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.systemsketch-branch-canvas .Branch-chevron {
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.systemsketch-branch-canvas .Branch-chevron:hover {
+  background: color-mix(in srgb, var(--ss-text) 8%, transparent);
+  color: var(--ss-text);
+}
+
+.systemsketch-branch-canvas .Branch-target {
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+}
+
+.systemsketch-branch-canvas .Branch-target svg {
+  display: block;
+}
+
+.systemsketch-branch-canvas .Branch-target:hover {
+  background: color-mix(in srgb, var(--ss-text) 8%, transparent);
+  color: var(--ss-text);
+}
+
+.systemsketch-branch-canvas .Branch-target[aria-pressed='true'] {
+  color: var(--ss-accent);
+}
+
+.systemsketch-branch-canvas .Branch-activeLabel {
+  position: absolute;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ss-accent);
+  pointer-events: none;
+}
+
+/* The "+" bubble on the band's left edge: add a control port. */
+.systemsketch-branch-canvas .Branch-addControl {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--ss-accent);
+  background: var(--ss-surface-raised);
+  color: var(--ss-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ss-accent) 22%, transparent);
+  transform: translate(-50%, -50%);
+  z-index: 6;
+}
+
+.systemsketch-branch-canvas .Branch-addControl svg {
+  display: block;
+  width: 12px;
+  height: 12px;
+}
+
+/* The dashed "+ arm" row under the last arm. */
+.systemsketch-branch-canvas .Branch-addArm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed var(--ss-border-strong);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ss-text-muted);
+  background: color-mix(in srgb, var(--ss-surface-raised) 60%, transparent);
+}
+
+.systemsketch-branch-canvas .Branch-addArm:hover {
+  border-color: var(--ss-accent);
+  color: var(--ss-accent);
+}
+
+.systemsketch-branch-canvas .Branch-inlineEditor {
+  z-index: 12;
+}

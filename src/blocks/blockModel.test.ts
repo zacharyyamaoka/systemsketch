@@ -11,10 +11,12 @@ import {
 	findBlockContainmentTarget,
 	getDefaultBlockProps,
 	mergeBlockResizeProps,
+	blockPortSections,
+	normalizeBlockPortRows,
+	portBranch,
 	portDefaultValue,
 	portInHeader,
-	portStartsBranch,
-	portStartsGroup,
+	portRow,
 	resizeBlockProps,
 	setBlockPlacementViewProps,
 	setBlockViewProps,
@@ -79,9 +81,70 @@ describe('Block model', () => {
 		expect(blockPortLayout(props)).toBe('inline')
 		expect(expandedSectionWeights(props)).toEqual({})
 		expect(portDefaultValue(port)).toBe('')
-		expect(portStartsGroup(port)).toBe(false)
-		expect(portStartsBranch(port)).toBe(false)
+		expect(portRow(port)).toBe(1)
+		expect(portBranch(port)).toBe(0)
 		expect(portInHeader(port)).toBe(false)
+	})
+
+	describe('rows are explicit on every port', () => {
+		const port = (id: string, overrides: Partial<BlockShape['props']['inputs'][number]> = {}) => (
+			{ id, name: id, type: '', visible: true, ...overrides }
+		)
+		const props = (
+			inputs: BlockShape['props']['inputs'],
+			outputs: BlockShape['props']['outputs'],
+		) => ({ ...getDefaultBlockProps(), inputs, outputs })
+
+		it('tables the burger: the header, then rows shared by both sides, each with its arms', () => {
+			const table = blockPortSections(props(
+				[port('cond', { row: 0 }), port('a'), port('b', { row: 2 })],
+				[port('x'), port('y', { branch: 1 }), port('z', { row: 3 })],
+			))
+			expect(table.header.map((entry) => entry.id)).toEqual(['cond'])
+			expect(table.rows.map((row) => ({
+				row: row.row,
+				inputs: row.inputs.map((entry) => entry.id),
+				branches: row.branches.map((arm) => arm.outputs.map((entry) => entry.id)),
+			}))).toEqual([
+				{ row: 1, inputs: ['a'], branches: [['x'], ['y']] },
+				{ row: 2, inputs: ['b'], branches: [[]] },
+				{ row: 3, inputs: [], branches: [['z']] },
+			])
+		})
+
+		it('drops rows and arms no visible port claims when asked for the painted table', () => {
+			const table = blockPortSections(props(
+				[port('a'), port('b', { row: 2, visible: false })],
+				[port('x'), port('y', { row: 3 })],
+			), { visibleOnly: true })
+			expect(table.rows.map((row) => row.row)).toEqual([1, 3])
+		})
+
+		it('normalises to dense rows, dense arms, inputs never in an arm, outputs never in the header', () => {
+			const messy = props(
+				[port('late', { row: 5 }), port('cond', { row: 0, branch: 2 }), port('a', { row: 1 })],
+				[port('x', { row: 0, branch: 3 }), port('y', { row: 5 }), port('z', { row: 5, branch: 7 })],
+			)
+			const clean = normalizeBlockPortRows(messy)
+			expect(clean.inputs.map((entry) => [entry.id, portRow(entry), portBranch(entry)]))
+				.toEqual([['cond', 0, 0], ['a', 1, 0], ['late', 2, 0]])
+			expect(clean.outputs.map((entry) => [entry.id, portRow(entry), portBranch(entry)]))
+				.toEqual([['x', 1, 0], ['y', 2, 0], ['z', 2, 1]])
+			expect(clean.inputs[0]).not.toHaveProperty('branch')
+			expect(clean.inputs[1]).not.toHaveProperty('row')
+		})
+
+		it('returns the very same object when nothing needed to change', () => {
+			const tidy = props([port('cond', { row: 0 }), port('a')], [port('x'), port('y', { row: 2 })])
+			expect(normalizeBlockPortRows(tidy)).toBe(tidy)
+		})
+
+		it('appends a port into the section it is asked for, in visual order', () => {
+			const base = props([port('a'), port('b', { row: 2 })], [])
+			const { props: next, port: created } = appendBlockPortToProps(base, 'inputs', { row: 0, branch: 0 })
+			expect(portInHeader(created)).toBe(true)
+			expect(next.inputs.map((entry) => entry.id)).toEqual(['in_1', 'a', 'b'])
+		})
 	})
 
 	it('remembers an independent size for every visual view', () => {

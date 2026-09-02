@@ -23,10 +23,13 @@ import {
 } from 'tldraw'
 
 import {
+  HEADER_ROW,
   blockIcon,
   expandedSectionWeights,
   isBlockShape,
   portDefaultValue,
+  portInHeader,
+  portRow,
   type BlockPortSide,
   type BlockShape,
 } from '../blockModel'
@@ -47,6 +50,7 @@ import {
 } from '../layoutBlock'
 import { insertBlockPortForInlineEditing } from '../commands/blockCommands'
 import {
+  blockHeaderPortAddAffordance,
   blockPortAddAffordance,
   getBlockPortDrag,
   getEligiblePorts,
@@ -56,6 +60,7 @@ import {
 } from '../ports'
 import { BlockIconGlyph } from './blockIcons'
 import { stepIntoDepthScope } from '../../depth/depthNavigation'
+import { branchFadeOpacity } from '../../branch/branchScope'
 import { portColor } from './portPalette'
 import './block-canvas.css'
 
@@ -74,25 +79,40 @@ interface DrawnPort {
   placed: LaidOutBlockPort
   connected: boolean
   hasDefault: boolean
+  /** Cables landing on this port as a sink — two or more earn a count badge. */
+  producers: number
+}
+
+/** How many cables land on each port as a sink: the count a many-to-one port shows. */
+export function countProducers(connections: readonly { ownPortId: string; ownPolarity: string }[]): Map<string, number> {
+  const counts = new Map<string, number>()
+  for (const connection of connections) {
+    if (connection.ownPolarity !== 'sink') continue
+    counts.set(connection.ownPortId, (counts.get(connection.ownPortId) ?? 0) + 1)
+  }
+  return counts
 }
 
 /** Draw coincident Simple anchors once while retaining their union of states. */
 function portsToDraw(
   placedPorts: readonly LaidOutBlockPort[],
   connectedIds: ReadonlySet<string>,
+  producerCounts: ReadonlyMap<string, number>,
 ): DrawnPort[] {
   const byPoint = new Map<string, DrawnPort>()
   for (const placed of placedPorts) {
     const key = `${Math.round(placed.x * 1000)}:${Math.round(placed.y * 1000)}`
     const connected = connectedIds.has(placed.port.id)
     const hasDefault = placed.side === 'input' && portDefaultValue(placed.port) !== ''
+    const producers = producerCounts.get(placed.port.id) ?? 0
     const current = byPoint.get(key)
     if (current) {
       current.connected ||= connected
       current.hasDefault ||= hasDefault
+      current.producers = Math.max(current.producers, producers)
       continue
     }
-    byPoint.set(key, { placed, connected, hasDefault })
+    byPoint.set(key, { placed, connected, hasDefault, producers })
   }
   return [...byPoint.values()]
 }
@@ -107,7 +127,7 @@ function BlockPortDot({
   dragOffset: number | null
 }) {
   const editor = useEditor()
-  const { placed, connected, hasDefault } = port
+  const { placed, connected, hasDefault, producers } = port
   const portId = placed.port.id
 
   const isHinting = useValue(
@@ -153,11 +173,15 @@ function BlockPortDot({
     isHinting ? 'Port_hinting' : isEligible ? 'Port_eligible' : '',
   ].filter(Boolean).join(' ')
 
+  // A header dot carries no label, so its name rides the tooltip instead.
+  const inHeader = placed.side === 'input' && portInHeader(placed.port)
   return (
     <div
       className={classes}
       data-block-port-id={portId}
       data-block-port-side={placed.side}
+      data-block-port-row={portRow(placed.port)}
+      title={inHeader && !placed.subtle ? placed.port.name || undefined : undefined}
       style={{
         '--port-color': portColor(placed.port.type),
         left: placed.x,
@@ -166,7 +190,22 @@ function BlockPortDot({
           ? { transform: `translate(-50%, -50%) translateY(${dragOffset}px)` }
           : null),
       } as CSSProperties}
-    />
+    >
+      {producers >= 2 ? <PortCountBadge portId={portId} count={producers} /> : null}
+    </div>
+  )
+}
+
+/**
+ * Many-to-one, shown as a count. A port with two or more producers wears a
+ * muted pill beside its dot — the inspector's count-chip idiom — and nothing
+ * else: which producer is live is the Branch fade's job, not the cable's.
+ */
+export function PortCountBadge({ portId, count }: { portId: string; count: number }) {
+  return (
+    <span className="Port-count" data-testid={`port-count-${portId}`} aria-label={`${count} cables into this port`}>
+      {count}
+    </span>
   )
 }
 
@@ -463,13 +502,17 @@ function PortAddAffordance({
   shape,
   side,
   affordance,
+  header = false,
 }: {
   shape: BlockShape
   side: BlockPortSide
   affordance: BlockPortAddAffordance
+  /** The heading's own gutter: the port is born in row 0. */
+  header?: boolean
 }) {
   const editor = useEditor()
   const lane = side === 'inputs' ? 'input' : 'output'
+  const where = header ? 'header' : side
 
   const addPort = useCallback(() => {
     const result = insertBlockPortForInlineEditing(
@@ -477,16 +520,17 @@ function PortAddAffordance({
       shape.id,
       side,
       Number.MAX_SAFE_INTEGER,
+      header ? { section: { row: HEADER_ROW, branch: 0 } } : {},
     )
     if (!result.ok) return
     requestBlockInlineEdit(editor, shape.id, { kind: 'portName', side, portId: result.port.id })
-  }, [editor, shape.id, side])
+  }, [editor, header, shape.id, side])
 
   return (
-    <div className={`BlockNode-portAdd BlockNode-portAdd--${lane}`}>
+    <div className={`BlockNode-portAdd BlockNode-portAdd--${header ? 'header' : lane}`}>
       <div
         className="BlockNode-portAddZone"
-        data-testid={`block-port-add-zone-${side}`}
+        data-testid={`block-port-add-zone-${where}`}
         style={boxStyle(affordance.zone)}
       />
       {/*
@@ -496,10 +540,10 @@ function PortAddAffordance({
       */}
       <div
         role="button"
-        aria-label={`Add ${lane} port to ${shape.props.title.trim() || 'this Block'} on canvas`}
-        title={`Add ${lane} port`}
+        aria-label={`Add ${header ? 'header' : lane} port to ${shape.props.title.trim() || 'this Block'} on canvas`}
+        title={header ? 'Add header port' : `Add ${lane} port`}
         className="BlockNode-portAddBead"
-        data-testid={`block-port-add-${side}`}
+        data-testid={`block-port-add-${where}`}
         style={{ left: affordance.x, top: affordance.y }}
         onPointerDown={(event) => event.stopPropagation()}
         onClick={addPort}
@@ -523,14 +567,29 @@ function PortDragOverlay({
   width: number
 }) {
   const inputs = drag.side === 'inputs'
+  const { drop } = drag
   return (
     <>
+      {/* The band the port would join is tinted, so crossing a line reads as
+          arriving somewhere, not merely as a rule that moved. */}
+      <div
+        className={`BlockNode-portDropBand${drop.row === HEADER_ROW ? ' BlockNode-portDropBand--header' : ''}`}
+        data-testid="block-port-drop-band"
+        data-drop-row={drop.row}
+        data-drop-branch={drop.branch}
+        style={{
+          left: inputs ? 0 : width / 2,
+          top: drop.band.top,
+          width: width / 2,
+          height: Math.max(0, drop.band.bottom - drop.band.top),
+        }}
+      />
       <div
         className="BlockNode-portDropRule"
         data-testid="block-port-drop-rule"
         style={{
           left: inputs ? 0 : width / 2,
-          top: drag.indicatorY,
+          top: drop.indicatorY,
           width: width / 2,
         }}
       />
@@ -576,7 +635,8 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
     () => new Set(connections.map((connection) => connection.ownPortId)),
     [connections],
   )
-  const drawnPorts = portsToDraw(layout.ports, connectedIds)
+  const producerCounts = useMemo(() => countProducers(connections), [connections])
+  const drawnPorts = portsToDraw(layout.ports, connectedIds, producerCounts)
   const simple = layout.view === 'simple'
   const isEditing = useValue(
     'editing Block',
@@ -590,6 +650,8 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
   )
   const drag = useValue('block port drag', () => getBlockPortDrag(editor), [editor])
   const heldPort = drag?.shapeId === shape.id ? drag : null
+  // Inside a Branch, a Block in a non-active arm paints faded with its arm.
+  const fade = useValue('Block branch fade', () => branchFadeOpacity(editor, shape.id), [editor, shape.id])
   // The add gutters are a selection affordance, exactly as the brief asks: they
   // exist for the Block you are working on and nowhere else, so a busy canvas
   // never sprouts a plus under every lane.
@@ -599,17 +661,15 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
         return affordance ? [{ side, affordance }] : []
       })
     : []
+  const headerAffordance = !simple && isSelected && !isEditing && !heldPort
+    ? blockHeaderPortAddAffordance(shape.props)
+    : null
 
   return (
     <HTMLContainer
       className={`NodeShape systemsketch-block-canvas${simple ? ' NodeShape_plain' : ''}`}
       data-block-view={layout.view}
-      onContextMenu={(event) => {
-        const target = event.target instanceof Element
-          ? event.target.closest('input, textarea, select')
-          : null
-        if (target && event.currentTarget.contains(target)) event.stopPropagation()
-      }}
+      style={fade < 1 ? { opacity: fade } : undefined}
       onPointerDownCapture={(event) => {
         // The painted element is the most exact answer available, and it is only
         // available here. A miss is left alone rather than reset to the title:
@@ -683,6 +743,14 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
             affordance={affordance}
           />
         ))}
+        {headerAffordance ? (
+          <PortAddAffordance
+            shape={shape}
+            side="inputs"
+            affordance={headerAffordance}
+            header
+          />
+        ) : null}
         {isEditing ? <BlockInlineEditor shape={shape} /> : null}
       </div>
 

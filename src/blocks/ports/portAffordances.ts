@@ -10,18 +10,26 @@
  * the edges move.
  */
 import {
+	HEADER_ROW,
 	appendBlockPortToProps,
+	portBranch,
+	portInHeader,
+	portRow,
 	resizeBlockProps,
+	type BlockPortSection,
 	type BlockPortSide,
 	type BlockShapeProps,
 } from '../blockModel'
 import {
+	HEADER_PORT_PITCH_PX,
 	NODE_ROW_HEIGHT_PX,
 	PORT_LABEL_HEIGHT_PX,
 	blockPortSlotCount,
 	blockPortViewHeightForSlots,
 	layoutBlock,
+	type BlockLayoutBand,
 	type BlockRect,
+	type LaidOutBlockPort,
 } from '../layoutBlock'
 
 /**
@@ -158,19 +166,82 @@ function computeBlockPortAddAffordance(
 	}
 }
 
-export interface BlockPortDropTarget {
-	/** Insertion index into `props[side]` as it stands *before* the move. */
-	insertIndex: number
+/**
+ * The "add a port to the heading" bead: the same table gutter, on the band
+ * where control-flow inputs live. The strip straddles the heading's left edge
+ * beside the header dots and stops short of the title, whose click-to-edit
+ * begins at the heading's own padding.
+ *
+ * The heading grows into the body to fit its dots, never the box, so the
+ * promised height is always the current height.
+ */
+export function blockHeaderPortAddAffordance(
+	props: BlockShapeProps,
+): BlockPortAddAffordance | null {
+	if (props.view === 'simple') return null
+	const layout = layoutBlock(props)
+	const headerDots = layout.ports.filter((placed) => (
+		placed.side === 'input' && portInHeader(placed.port)
+	))
+	const lowest = headerDots.reduce((low, placed) => Math.max(low, placed.y), Number.NEGATIVE_INFINITY)
+	const preferredY = headerDots.length === 0 ? layout.headerHeight / 2 : lowest + HEADER_PORT_PITCH_PX
+	const halfWidth = Math.min(PORT_ADD_ZONE_HALF_WIDTH_PX, layout.width / 2)
+	return {
+		side: 'inputs',
+		x: 0,
+		y: Math.min(layout.headerHeight - PORT_ADD_BEAD_MARGIN_PX, preferredY),
+		zone: {
+			x: -halfWidth,
+			y: 0,
+			w: halfWidth + HEADER_ADD_ZONE_INSET_PX,
+			h: layout.headerHeight,
+		},
+		grownHeight: layout.height,
+	}
+}
+
+/** The strip reaches only this far into the heading, clear of the title. */
+const HEADER_ADD_ZONE_INSET_PX = 10
+
+/** A place in the burger to put a port, plus where in that place. */
+export interface BlockPortSectionTarget extends BlockPortSection {
+	/** Insert before this port of the section, or at the section's end. */
+	before: string | null
+}
+
+export interface BlockPortDropTarget extends BlockPortSectionTarget {
 	/** Where to paint the drop rule, in Block-local coordinates. */
 	indicatorY: number
+	/** The band the held port would join, painted while the drop is offered. */
+	band: BlockLayoutBand
+}
+
+function positionAmong(
+	members: readonly LaidOutBlockPort[],
+	localY: number,
+	band: BlockLayoutBand,
+	gap: number,
+): { before: string | null; indicatorY: number } {
+	const clamp = (y: number) => Math.min(band.bottom, Math.max(band.top, y))
+	if (members.length === 0) return { before: null, indicatorY: clamp((band.top + band.bottom) / 2) }
+	const found = members.findIndex((member) => localY < member.y)
+	const before = found === -1 ? null : members[found].port.id
+	const raw = found === 0
+		? members[0].y - gap
+		: found === -1
+			? members[members.length - 1].y + gap
+			: (members[found - 1].y + members[found].y) / 2
+	return { before, indicatorY: clamp(raw) }
 }
 
 /**
- * Read a held pointer's Block-local `y` as a position in one lane's order.
+ * Read a held pointer's Block-local `y` as a place in the burger: the row
+ * whose band holds it, the arm within that row for an output, and the visible
+ * neighbour it would land before. Above the body, an input is offered the
+ * heading band — row 0 — which is the whole of "drag it above the line".
  *
- * Only the ports the layout placed take part, so hidden ports keep their index
- * without ever becoming a drop target, and header inputs sort above body inputs
- * exactly as they are painted.
+ * Only the ports the layout placed take part, so a hidden port is never a
+ * neighbour to land beside, yet keeps its own place in the stored order.
  */
 export function blockPortDropTarget(
 	props: BlockShapeProps,
@@ -178,29 +249,43 @@ export function blockPortDropTarget(
 	localY: number,
 ): BlockPortDropTarget {
 	const layout = layoutBlock(props)
-	const order = props[side]
-	const placedBySide = layout.ports.filter((placed) => placed.side === laneSide(side))
-	const lane = order.flatMap((port, index) => {
-		const placed = placedBySide.find((candidate) => candidate.port.id === port.id)
-		return placed ? [{ index, y: placed.y }] : []
-	})
-
+	const lane = [...layout.ports.filter((placed) => placed.side === laneSide(side))]
+		.sort((a, b) => a.y - b.y)
 	const gap = (layout.pitch > 0 ? layout.pitch : NODE_ROW_HEIGHT_PX) / 2
-	if (lane.length === 0) {
-		return { insertIndex: order.length, indicatorY: layout.bodyTop + gap }
+
+	if (side === 'inputs' && layout.headerBand && localY < layout.bodyTop) {
+		const band = layout.headerBand
+		const members = lane.filter((placed) => portInHeader(placed.port))
+		return {
+			row: HEADER_ROW,
+			branch: 0,
+			band,
+			...positionAmong(members, localY, band, HEADER_PORT_PITCH_PX / 2),
+		}
 	}
 
-	const found = lane.findIndex((entry) => localY < entry.y)
-	const slot = found === -1 ? lane.length : found
-	const insertIndex = slot === lane.length ? order.length : lane[slot].index
-	const rawIndicator = slot === 0
-		? lane[0].y - gap
-		: slot === lane.length
-			? lane[lane.length - 1].y + gap
-			: (lane[slot - 1].y + lane[slot].y) / 2
-
+	const sections = layout.sections
+	if (sections.length === 0) {
+		const band = { top: layout.bodyTop, bottom: layout.footerTop }
+		return { row: 1, branch: 0, band, before: null, indicatorY: layout.bodyTop + gap }
+	}
+	const last = sections[sections.length - 1]
+	const section = sections.find((candidate) => localY < candidate.band.bottom) ?? last
+	const arms = section.branches
+	const arm = side === 'outputs'
+		? arms.find((candidate) => localY < candidate.band.bottom) ?? arms[arms.length - 1]
+		: arms[0]
+	const band = side === 'outputs' && arm ? arm.band : section.band
+	const branch = side === 'outputs' && arm ? arm.branch : 0
+	const members = lane.filter((placed) => (
+		!portInHeader(placed.port)
+		&& portRow(placed.port) === section.row
+		&& (side === 'inputs' || portBranch(placed.port) === branch)
+	))
 	return {
-		insertIndex,
-		indicatorY: Math.min(layout.footerTop, Math.max(layout.bodyTop, rawIndicator)),
+		row: section.row,
+		branch,
+		band,
+		...positionAmong(members, localY, band, gap),
 	}
 }

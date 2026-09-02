@@ -87,6 +87,19 @@
     "ok": true
   },
   {
+    "id": "PICKER-0",
+    "label": "a child's output dropped outside its frame offers nothing and leaves no cable",
+    "observed": {
+      "offered": false,
+      "cables": 0
+    },
+    "desired": {
+      "offered": false,
+      "cables": 0
+    },
+    "ok": true
+  },
+  {
     "id": "PICKER-1",
     "label": "a cable into empty space offers a Block",
     "observed": true,
@@ -237,16 +250,28 @@
   },
   {
     "id": "DURABLE-2",
-    "label": "it survives the boundary leaving Expanded",
-    "observed": 1,
-    "desired": 1,
+    "label": "leaving Expanded hides the cable but preserves its record",
+    "observed": {
+      "painted": 0,
+      "stored": 1
+    },
+    "desired": {
+      "painted": 0,
+      "stored": 1
+    },
     "ok": true
   },
   {
     "id": "DURABLE-3",
-    "label": "and coming back",
-    "observed": 1,
-    "desired": 1,
+    "label": "coming back reveals the same cable record",
+    "observed": {
+      "painted": 1,
+      "stored": 1
+    },
+    "desired": {
+      "painted": 1,
+      "stored": 1
+    },
     "ok": true
   },
   {

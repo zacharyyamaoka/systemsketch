@@ -27,6 +27,7 @@ import {
 } from 'tldraw'
 
 import { ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
+import { isCustomColor } from './customColors'
 import {
   FIGJAM_COLOR_LABELS,
   FIGJAM_COLOR_NAMES,
@@ -38,6 +39,7 @@ export type AppearanceControlId =
   | 'color'
   | 'fill'
   | 'dash'
+  | 'lineStyle'
   | 'size'
   | 'font'
   | 'align'
@@ -48,8 +50,21 @@ export type AppearanceControlId =
   | 'arrowheadStart'
   | 'arrowheadEnd'
 
-/** How a popover lays its options out. */
-export type AppearanceLayout = 'swatches' | 'row' | 'list' | 'library'
+/**
+ * How a popover lays its options out. FigJam has three idioms and this copies
+ * them: a `row` of 24px icon cells, a row of labelled `chips`, and a `list`
+ * of rows with a check mark; the `swatches` grid and the shape `library` are
+ * the two one-offs.
+ */
+export type AppearanceLayout = 'swatches' | 'row' | 'chips' | 'list' | 'library'
+
+/**
+ * What the trigger shows. Most show the current `value`'s glyph, the way
+ * FigJam's Start point shows the chosen arrowhead. Line style and Typeface
+ * show a fixed `icon` whatever the value, and Font size shows the value's
+ * name as `text` in a 144px combobox — all three read off FigJam's pill.
+ */
+export type AppearanceTrigger = 'value' | 'icon' | 'text'
 
 export interface AppearanceOption {
   value: string
@@ -65,13 +80,18 @@ export interface AppearanceControl {
   value: SharedStyle<string>
   options: readonly AppearanceOption[]
   layout: AppearanceLayout
+  trigger: AppearanceTrigger
   /** Swatch grids only. */
   columns?: number
+  /** Swatch grids only: the 22nd cell, which opens the picker. */
+  custom?: boolean
   /**
-   * A second control rendered as a row above this one's options, the way
-   * FigJam stacks Fill / Transparent / No fill above its palette.
+   * A second control in the same popover, writing a different style. FigJam
+   * stacks Fill / Transparent / No fill `above` its palette, and puts a
+   * connector's Thin / Thick `beside` its Solid / Dashed.
    */
   modeControl?: AppearanceControl
+  modePlacement?: 'above' | 'beside'
 }
 
 const option = (value: string, label: string): AppearanceOption => ({ value, label })
@@ -110,6 +130,17 @@ const SIZE_OPTIONS = [
   option('m', 'Medium'),
   option('l', 'Large'),
   option('xl', 'Extra large'),
+] as const
+
+/**
+ * The same four rungs as a connector's stroke weight, where FigJam has two:
+ * its icons sit on the ends and tldraw's middle two keep their own names.
+ */
+const WEIGHT_OPTIONS = [
+  option('s', 'Thin'),
+  option('m', 'Medium'),
+  option('l', 'Large'),
+  option('xl', 'Thick'),
 ] as const
 
 /** FigJam's four typefaces, in FigJam's order, on tldraw's four fonts. */
@@ -203,71 +234,104 @@ interface Definition {
   style: StyleProp<string>
   options: readonly AppearanceOption[]
   layout: AppearanceLayout
+  trigger: AppearanceTrigger
   columns?: number
 }
 
-/**
- * In FigJam's order: what the thing *is*, then how it is painted, then its
- * text, then — for connectors — how it is routed and capped.
- */
-const DEFINITIONS: readonly Definition[] = [
-  {
+const DEFINITIONS: Readonly<Record<Exclude<AppearanceControlId, 'fill' | 'lineStyle'>, Definition>> = {
+  geo: {
     id: 'geo', label: 'Shape', style: GeoShapeGeoStyle as StyleProp<string>,
-    options: GEO_OPTIONS, layout: 'library',
+    options: GEO_OPTIONS, layout: 'library', trigger: 'value',
   },
-  {
+  color: {
     id: 'color', label: 'Color', style: DefaultColorStyle as StyleProp<string>,
     options: APPEARANCE_COLORS.map((value) => option(value, colorLabel(value))),
-    layout: 'swatches', columns: APPEARANCE_COLOR_COLUMNS,
+    layout: 'swatches', trigger: 'value', columns: APPEARANCE_COLOR_COLUMNS,
   },
-  {
-    id: 'dash', label: 'Stroke', style: DefaultDashStyle as StyleProp<string>,
-    options: DASH_OPTIONS, layout: 'row',
+  // A shape's Line style: FigJam's Solid / Dashed / None as labelled chips
+  // behind the same fixed three-bar icon a connector's uses.
+  dash: {
+    id: 'dash', label: 'Line style', style: DefaultDashStyle as StyleProp<string>,
+    options: DASH_OPTIONS, layout: 'chips', trigger: 'icon',
   },
-  {
-    id: 'size', label: 'Size', style: DefaultSizeStyle as StyleProp<string>,
-    options: SIZE_OPTIONS, layout: 'list',
+  // A shape's size is FigJam's Font size: a combobox that names the rung,
+  // after Typeface, listing each rung at its own size. tldraw's one `size`
+  // also drives the stroke, which report §4 records as a deliberate deviation.
+  size: {
+    id: 'size', label: 'Font size', style: DefaultSizeStyle as StyleProp<string>,
+    options: SIZE_OPTIONS, layout: 'list', trigger: 'text',
   },
-  {
+  font: {
     id: 'font', label: 'Typeface', style: DefaultFontStyle as StyleProp<string>,
-    options: FONT_OPTIONS, layout: 'list',
+    options: FONT_OPTIONS, layout: 'list', trigger: 'icon',
   },
-  {
+  align: {
     id: 'align', label: 'Text alignment', style: DefaultHorizontalAlignStyle as StyleProp<string>,
-    options: ALIGN_OPTIONS, layout: 'row',
+    options: ALIGN_OPTIONS, layout: 'row', trigger: 'value',
   },
-  {
+  verticalAlign: {
     id: 'verticalAlign', label: 'Vertical alignment',
     style: DefaultVerticalAlignStyle as StyleProp<string>,
-    options: VERTICAL_ALIGN_OPTIONS, layout: 'row',
+    options: VERTICAL_ALIGN_OPTIONS, layout: 'row', trigger: 'value',
   },
-  // Start, shape, end — the order FigJam uses, and the order the arrow itself
-  // reads in: where it leaves, how it travels, where it lands. Captured from
-  // FigJam's connector menu as `Start point | Line shape | End point`.
-  {
+  arrowheadStart: {
     id: 'arrowheadStart', label: 'Start point',
     style: ArrowShapeArrowheadStartStyle as StyleProp<string>,
-    options: ARROWHEAD_OPTIONS, layout: 'row',
+    options: ARROWHEAD_OPTIONS, layout: 'row', trigger: 'value',
   },
-  {
+  connectionRouting: {
     id: 'connectionRouting', label: 'Line shape',
     style: ConnectionRoutingStyle as StyleProp<string>,
-    options: CONNECTION_ROUTING_OPTIONS, layout: 'row',
+    options: CONNECTION_ROUTING_OPTIONS, layout: 'row', trigger: 'value',
   },
-  {
+  arrowKind: {
     id: 'arrowKind', label: 'Line shape', style: ArrowShapeKindStyle as StyleProp<string>,
-    options: ARROW_KIND_OPTIONS, layout: 'row',
+    options: ARROW_KIND_OPTIONS, layout: 'row', trigger: 'value',
   },
-  {
+  spline: {
     id: 'spline', label: 'Line shape', style: LineShapeSplineStyle as StyleProp<string>,
-    options: SPLINE_OPTIONS, layout: 'row',
+    options: SPLINE_OPTIONS, layout: 'row', trigger: 'value',
   },
-  {
+  arrowheadEnd: {
     id: 'arrowheadEnd', label: 'End point',
     style: ArrowShapeArrowheadEndStyle as StyleProp<string>,
-    options: ARROWHEAD_OPTIONS, layout: 'row',
+    options: ARROWHEAD_OPTIONS, layout: 'row', trigger: 'value',
   },
+}
+
+/**
+ * A shape's pill, in FigJam's order: what it is, how it is painted, its text.
+ * Captured as `Shape | Change color, Line style | Typeface, Font size | ... |
+ * Text alignment` — Font size sits after Typeface, not beside Line style.
+ */
+const SHAPE_ORDER: readonly AppearanceControlId[] = [
+  'geo', 'color', 'dash', 'font', 'size', 'align', 'verticalAlign',
 ]
+
+/**
+ * A connector's pill: `Change color | Line style | Add text | Start point |
+ * Line shape | End point`. Its Line style holds both weight and dash, so
+ * neither appears on its own; the ends and the shape between them read the
+ * way the arrow does — where it leaves, how it travels, where it lands.
+ */
+const CONNECTOR_ORDER: readonly AppearanceControlId[] = [
+  'geo', 'color', 'lineStyle', 'font', 'align', 'verticalAlign',
+  'arrowheadStart', 'connectionRouting', 'arrowKind', 'spline', 'arrowheadEnd',
+]
+
+/** The styles that only a connector or a line carries. */
+const CONNECTOR_STYLES = [
+  ArrowShapeArrowheadStartStyle,
+  ArrowShapeArrowheadEndStyle,
+  ArrowShapeKindStyle,
+  LineShapeSplineStyle,
+  ConnectionRoutingStyle,
+] as StyleProp<string>[]
+
+/** True when anything in the selection is a connector, so Line style merges weight and dash. */
+export function isConnectorSelection(styles: ReadonlySharedStyleMap): boolean {
+  return CONNECTOR_STYLES.some((style) => styles.get(style) !== undefined)
+}
 
 /** FigJam's own name for a colour, falling back to a readable slug. */
 export function colorLabel(value: string): string {
@@ -283,8 +347,31 @@ function fillControl(styles: ReadonlySharedStyleMap): AppearanceControl | undefi
   if (!value) return undefined
   return {
     id: 'fill', label: 'Fill', style: DefaultFillStyle as StyleProp<string>,
-    value, options: FILL_OPTIONS, layout: 'row',
+    value, options: FILL_OPTIONS, layout: 'chips', trigger: 'value',
   }
+}
+
+/**
+ * A connector's Line style: FigJam's one popover holding `Thin Thick | Solid
+ * Dashed`, so this is the dash control with the weight control beside it.
+ * Both still write their own tldraw style; only the popover is shared.
+ */
+function lineStyleControl(styles: ReadonlySharedStyleMap): AppearanceControl | undefined {
+  const dash = styles.get(DefaultDashStyle as StyleProp<string>)
+  if (!dash) return undefined
+  const control: AppearanceControl = {
+    id: 'lineStyle', label: 'Line style', style: DefaultDashStyle as StyleProp<string>,
+    value: dash, options: DASH_OPTIONS, layout: 'row', trigger: 'icon',
+  }
+  const size = styles.get(DefaultSizeStyle as StyleProp<string>)
+  if (size) {
+    control.modeControl = {
+      id: 'size', label: 'Weight', style: DefaultSizeStyle as StyleProp<string>,
+      value: size, options: WEIGHT_OPTIONS, layout: 'row', trigger: 'value',
+    }
+    control.modePlacement = 'beside'
+  }
+  return control
 }
 
 /**
@@ -293,31 +380,62 @@ function fillControl(styles: ReadonlySharedStyleMap): AppearanceControl | undefi
  * A control exists only when tldraw reports the style as relevant, which is why
  * a connector shows routing and endpoints while a shape shows fill and why both
  * grow the typography group the moment they carry text — the same
- * driven-by-what-the-selection-has rule FigJam uses.
+ * driven-by-what-the-selection-has rule FigJam uses. Which of FigJam's two
+ * pills is copied depends on the same map: a connector anywhere in the
+ * selection merges weight and dash into one Line style, as FigJam does.
  */
 export function buildAppearanceControls(
   styles: ReadonlySharedStyleMap | null,
 ): AppearanceControl[] {
   if (!styles) return []
+  const connector = isConnectorSelection(styles)
   const controls: AppearanceControl[] = []
-  for (const definition of DEFINITIONS) {
+  for (const id of connector ? CONNECTOR_ORDER : SHAPE_ORDER) {
+    if (id === 'lineStyle') {
+      const lineStyle = lineStyleControl(styles)
+      if (lineStyle) {
+        controls.push(lineStyle)
+        continue
+      }
+      // A selection with a size but no dash (text beside a cable) keeps Font size.
+      const size = styles.get(DEFINITIONS.size.style)
+      if (size) controls.push({ ...DEFINITIONS.size, value: size })
+      continue
+    }
+    const definition = DEFINITIONS[id as keyof typeof DEFINITIONS]
     const value = styles.get(definition.style)
     if (!value) continue
     const control: AppearanceControl = { ...definition, value }
     if (definition.id === 'color') {
       const mode = fillControl(styles)
-      if (mode) control.modeControl = mode
+      if (mode) {
+        control.modeControl = mode
+        control.modePlacement = 'above'
+      }
+      control.custom = true
     }
     controls.push(control)
   }
   return controls
 }
 
-/** The option currently applied, or undefined when the selection disagrees. */
+/** FigJam's word for the 22nd cell, and for the trigger while a custom colour is applied. */
+export const CUSTOM_LABEL = 'Custom'
+
+/**
+ * The option currently applied, or undefined when the selection disagrees.
+ * A custom colour is not in the swatch list but is still one definite value,
+ * so it reads as `Custom` rather than as mixed.
+ */
 export function selectedOption(control: AppearanceControl): AppearanceOption | undefined {
   const shared = control.value
   if (shared.type !== 'shared') return undefined
-  return control.options.find((candidate) => candidate.value === shared.value)
+  const found = control.options.find((candidate) => candidate.value === shared.value)
+  if (found) return found
+  if (control.id === 'color' && isCustomColor(shared.value)) {
+    return option(shared.value, CUSTOM_LABEL)
+  }
+  return undefined
 }
 
 /** What the trigger says when the selection disagrees, as tldraw's own panel does. */

@@ -4,7 +4,6 @@
  * Block command and inline-edit seams remain the only writers.
  */
 import {
-  DefaultContextMenu,
   DefaultContextMenuContent,
   TldrawUiMenuCheckboxItem,
   TldrawUiMenuGroup,
@@ -14,21 +13,28 @@ import {
   useValue,
   type TLUiContextMenuProps,
 } from 'tldraw'
+import { ReliableContextMenu } from './ReliableContextMenu'
 
 import {
   BLOCK_VIEWS,
+  HEADER_ROW,
   PORT_LAYOUTS,
   blockIcon,
   isBlockShape,
+  portInHeader,
+  portRow,
   type BlockPortSide,
   type BlockShape,
 } from '../blockModel'
 import {
   appendBlockPortForInlineEditing,
   blockPortIndex,
+  blockPortRowCount,
   insertBlockPortForInlineEditing,
-  moveBlockPortToIndex,
+  moveBlockPort,
+  moveBlockPortToSection,
   removeBlockPort,
+  startBlockPortSection,
   updateBlockDetails,
 } from '../commands/blockCommands'
 import { detachSelectedBlocks, rebuildSelectedBlocks, selectedBlockIds, selectedDetachedGroupIds } from '../detach'
@@ -41,10 +47,12 @@ import {
   setBlockPortLayoutForSelection,
   setBlockViewForSelection,
   setConnectionRoutingForSelection,
+  setConnectionTemporalForSelection,
 } from '../commands/blockStyleCommands'
 import {
   CONNECTION_ROUTING_KINDS,
   ConnectionRoutingStyle,
+  ConnectionTemporalStyle,
   type ConnectionRoutingKind,
 } from '../connections/connectionModel'
 import {
@@ -52,7 +60,6 @@ import {
   type BlockInlineField,
 } from '../inlineBlockEditing'
 import { stepIntoDepthScope } from '../../depth/depthNavigation'
-import { useStockContextMenuRootEpoch } from './stockContextMenuRoot'
 
 function onlySelectedBlock(editor: ReturnType<typeof useEditor>): BlockShape | null {
   const selected = editor.getSelectedShapes()
@@ -88,14 +95,10 @@ function batchSuffix(count: number): string {
  * items below read the selection, and they mount only while the menu is open.
  */
 export function BlockContextMenu(props: TLUiContextMenuProps) {
-  const editor = useEditor()
-  // Remounts the stock root when Radix's uncontrolled `open` gets stranded,
-  // which otherwise makes every right-click after the first one a no-op.
-  const stockRootEpoch = useStockContextMenuRootEpoch(editor)
   return (
-    <DefaultContextMenu key={stockRootEpoch} {...props}>
+    <ReliableContextMenu {...props}>
       <BlockContextMenuItems />
-    </DefaultContextMenu>
+    </ReliableContextMenu>
   )
 }
 
@@ -130,6 +133,11 @@ function BlockContextMenuItems() {
     () => getSharedStyleForSelection(editor, ConnectionRoutingStyle),
     [editor],
   )
+  const connectionTemporal = useValue(
+    'context-menu connection temporal',
+    () => getSharedStyleForSelection(editor, ConnectionTemporalStyle),
+    [editor],
+  )
   const connectionCount = useValue(
     'context-menu connection count',
     () => getSelectedConnectionCount(editor),
@@ -146,8 +154,15 @@ function BlockContextMenuItems() {
       const shape = editor.getShape(target.shapeId)
       if (!isBlockShape(shape) || shape.isLocked) return null
       const lane = shape.props[target.side]
-      return lane.some((port) => port.id === target.portId)
-        ? { target, count: lane.length }
+      const port = lane.find((candidate) => candidate.id === target.portId)
+      return port
+        ? {
+          target,
+          count: lane.length,
+          row: portRow(port),
+          inHeader: portInHeader(port),
+          rowCount: blockPortRowCount(shape.props),
+        }
         : null
     },
     [editor],
@@ -177,9 +192,13 @@ function BlockContextMenuItems() {
     setConnectionRoutingForSelection(editor, routing)
   }
 
+  // The new port joins its subject's row and arm, so "add below" a header
+  // port is another header port.
   const addPortAt = (target: BlockPortRef, offset: 0 | 1) => {
     const index = blockPortIndexOf(editor, target) + offset
-    const result = insertBlockPortForInlineEditing(editor, target.shapeId, target.side, index)
+    const result = insertBlockPortForInlineEditing(editor, target.shapeId, target.side, index, {
+      like: target.portId,
+    })
     if (!result.ok) return
     requestBlockInlineEdit(editor, target.shapeId, {
       kind: 'portName',
@@ -188,17 +207,19 @@ function BlockContextMenuItems() {
     })
   }
 
-  // An insertion index is measured against the lane as it stands before the
-  // move, so stepping down has to clear the neighbour it swaps with.
+  // One visual step: within a row the neighbours swap, at a row's edge the
+  // port crosses the line, and an input stepping up out of the first body row
+  // lifts into the heading.
   const movePort = (target: BlockPortRef, delta: -1 | 1) => {
-    const index = blockPortIndexOf(editor, target)
-    moveBlockPortToIndex(
-      editor,
-      target.shapeId,
-      target.side,
-      target.portId,
-      delta < 0 ? index - 1 : index + 2,
-    )
+    moveBlockPort(editor, target.shapeId, target.side, target.portId, delta)
+  }
+
+  const moveToRow = (target: BlockPortRef, row: number) => {
+    moveBlockPortToSection(editor, target.shapeId, target.side, target.portId, {
+      row,
+      branch: 0,
+      before: null,
+    })
   }
 
   return (
@@ -218,7 +239,8 @@ function BlockContextMenuItems() {
           <TldrawUiMenuItem
             id="block-port-move-up"
             label="Move up"
-            disabled={blockPortIndexOf(editor, portTarget.target) === 0}
+            disabled={blockPortIndexOf(editor, portTarget.target) === 0
+              && (portTarget.target.side === 'outputs' || portTarget.inHeader)}
             onSelect={() => movePort(portTarget.target, -1)}
           />
           <TldrawUiMenuItem
@@ -227,6 +249,55 @@ function BlockContextMenuItems() {
             disabled={blockPortIndexOf(editor, portTarget.target) >= portTarget.count - 1}
             onSelect={() => movePort(portTarget.target, 1)}
           />
+          {/* The header is a row like any other here: the one an input's
+              control-flow data lives in. */}
+          <TldrawUiMenuSubmenu id="block-port-row" label="Move to">
+            <TldrawUiMenuGroup id="block-port-row-options">
+              {portTarget.target.side === 'inputs' ? (
+                <TldrawUiMenuCheckboxItem
+                  id="block-port-row-header"
+                  label="Header"
+                  checked={portTarget.inHeader}
+                  onSelect={() => moveToRow(portTarget.target, HEADER_ROW)}
+                />
+              ) : null}
+              {Array.from({ length: portTarget.rowCount }, (_, index) => index + 1).map((row) => (
+                <TldrawUiMenuCheckboxItem
+                  key={row}
+                  id={`block-port-row-${row}`}
+                  label={`Row ${row}`}
+                  checked={portTarget.row === row}
+                  onSelect={() => moveToRow(portTarget.target, row)}
+                />
+              ))}
+            </TldrawUiMenuGroup>
+            <TldrawUiMenuGroup id="block-port-row-new">
+              <TldrawUiMenuItem
+                id="block-port-new-row"
+                label="New row below"
+                onSelect={() => void startBlockPortSection(
+                  editor,
+                  portTarget.target.shapeId,
+                  portTarget.target.side,
+                  portTarget.target.portId,
+                  'row',
+                )}
+              />
+              {portTarget.target.side === 'outputs' ? (
+                <TldrawUiMenuItem
+                  id="block-port-new-branch"
+                  label="New branch below"
+                  onSelect={() => void startBlockPortSection(
+                    editor,
+                    portTarget.target.shapeId,
+                    portTarget.target.side,
+                    portTarget.target.portId,
+                    'branch',
+                  )}
+                />
+              ) : null}
+            </TldrawUiMenuGroup>
+          </TldrawUiMenuSubmenu>
           <TldrawUiMenuItem
             id="block-port-delete"
             label="Delete port"
@@ -367,6 +438,22 @@ function BlockContextMenuItems() {
               ))}
             </TldrawUiMenuGroup>
           </TldrawUiMenuSubmenu>
+        </TldrawUiMenuGroup>
+      ) : null}
+
+      {connectionCount > 0 && connectionTemporal ? (
+        <TldrawUiMenuGroup id="systemsketch-connection-temporal">
+          <TldrawUiMenuCheckboxItem
+            id="connection-temporal-delayed"
+            label={`Delayed (z⁻¹)${batchSuffix(connectionCount)}`}
+            checked={isSharedStyleValue(connectionTemporal, 'delayed')}
+            onSelect={() => {
+              setConnectionTemporalForSelection(
+                editor,
+                isSharedStyleValue(connectionTemporal, 'delayed') ? 'data' : 'delayed',
+              )
+            }}
+          />
         </TldrawUiMenuGroup>
       ) : null}
 

@@ -7,6 +7,7 @@ import {
   useActions,
   useDialogs,
   useEditor,
+  useValue,
 } from 'tldraw'
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import {
@@ -38,6 +39,8 @@ import {
 import { getPortablePreviewSnapshot, loadPreviewCloneFromCurrentUrl } from './previewClone'
 import { useChrome } from './chrome/ChromeProvider'
 import { startReleaseRefresh } from './releaseRefresh'
+import { cablePresentation, setDashAfterPill } from './blocks/connections/connectionPresentation'
+import { useAppearancePreferences } from './settings/appearancePreferences'
 import './systemsketch-utilities.css'
 
 type BusyKey = ReleaseAction | `preview:${DevelopmentProfileId}`
@@ -124,6 +127,7 @@ function ChannelActions({
 export function SystemSketchNavigationPanel() {
   const editor = useEditor()
   const actions = useActions()
+  const { showZoomButtons } = useAppearancePreferences()
   const { addDialog } = useDialogs()
   const { rightSurface, setRight, toggleRight } = useChrome()
   const [status, setStatus] = useState<ReleaseStatus | null>(null)
@@ -131,6 +135,7 @@ export function SystemSketchNavigationPanel() {
   const [helpOpen, setHelpOpen] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [recentIds, setRecentIds] = useState<DevelopmentPresetId[]>(readRecentDevelopmentPresets)
+  const dashAfterPill = useValue('dash after pill', () => cablePresentation.get().dashAfterPill, [])
   const [busy, setBusy] = useState<BusyKey | null>(null)
   const [armed, setArmed] = useState(false)
   const [published, setPublished] = useState(false)
@@ -400,6 +405,23 @@ export function SystemSketchNavigationPanel() {
           )}
 
           <div className="systemsketch-dev-section-label">
+            <span>Cable presentation</span>
+            <small>This browser, live</small>
+          </div>
+          <label className="systemsketch-dev-toggle">
+            <input
+              type="checkbox"
+              data-testid="systemsketch-dev-dash-after-pill"
+              checked={dashAfterPill}
+              onChange={(event) => setDashAfterPill(event.target.checked)}
+            />
+            <span>
+              <b>Dash after the z⁻¹ pill</b>
+              <small>Delayed cables: dotted up to the pill, dashed after it</small>
+            </span>
+          </label>
+
+          <div className="systemsketch-dev-section-label">
             <span>Isolated presets</span>
             <small>{recentIds.length ? 'Recent first' : 'Independent boards'}</small>
           </div>
@@ -509,21 +531,27 @@ export function SystemSketchNavigationPanel() {
         >
           <BoardOverviewIcon />
         </TldrawUiToolbarButton>
-        <TldrawUiToolbarButton
-          type="icon"
-          title="Zoom out"
-          onClick={() => actions['zoom-out'].onSelect('navigation-zone')}
-        >
-          <TldrawUiButtonIcon small icon="minus" />
-        </TldrawUiToolbarButton>
+        {showZoomButtons ? (
+          <TldrawUiToolbarButton
+            type="icon"
+            title="Zoom out"
+            data-testid="systemsketch-zoom-out"
+            onClick={() => actions['zoom-out'].onSelect('navigation-zone')}
+          >
+            <TldrawUiButtonIcon small icon="minus" />
+          </TldrawUiToolbarButton>
+        ) : null}
         <DefaultZoomMenu />
-        <TldrawUiToolbarButton
-          type="icon"
-          title="Zoom in"
-          onClick={() => actions['zoom-in'].onSelect('navigation-zone')}
-        >
-          <TldrawUiButtonIcon small icon="plus" />
-        </TldrawUiToolbarButton>
+        {showZoomButtons ? (
+          <TldrawUiToolbarButton
+            type="icon"
+            title="Zoom in"
+            data-testid="systemsketch-zoom-in"
+            onClick={() => actions['zoom-in'].onSelect('navigation-zone')}
+          >
+            <TldrawUiButtonIcon small icon="plus" />
+          </TldrawUiToolbarButton>
+        ) : null}
         <TldrawUiToolbarButton
           type="icon"
           className="systemsketch-dev-trigger"

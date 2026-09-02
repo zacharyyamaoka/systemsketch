@@ -1,0 +1,69 @@
+{
+  "feature": "Detached port rows",
+  "viewport": { "width": 1440, "height": 900 },
+  "shapes": [
+    {
+      "id": "subject",
+      "type": "block",
+      "x": 650,
+      "y": 250,
+      "props": {
+        "title": "transform",
+        "description": "Detach, then rearrange one port row",
+        "blockType": "Function",
+        "view": "port",
+        "w": 420,
+        "h": 280,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "payload",
+            "type": "int",
+            "defaultValue": "5",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "result",
+            "type": "float",
+            "visible": true
+          }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Right-click transform and choose\nDetach to primitives",
+      "x": 90,
+      "y": 180,
+      "w": 370,
+      "h": 105,
+      "target": { "shapeId": "subject", "anchor": "left", "dy": -45 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Click payload once to select its row group,\nthen drag it by the name",
+      "x": 90,
+      "y": 390,
+      "w": 420,
+      "h": 115,
+      "target": { "shapeId": "subject", "anchor": "left", "dy": 35 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Each port is one circle, and moving payload keeps its circle, name, int, and = 5 together while result stays put.",
+      "x": 620,
+      "y": 650,
+      "w": 520,
+      "h": 110
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-09-02T05:42:59.689Z",
+  "ranAt": "2026-09-02T21:59:04.952Z",
   "themes": [
     {
       "id": "systemsketch:light",
@@ -76,8 +76,8 @@
           "ok": true
         },
         {
-          "label": "Block tool button",
-          "selector": "[data-testid=\"systemsketch-tool-block\"]",
+          "label": "System tool-family button",
+          "selector": "[data-testid=\"systemsketch-tool-system\"]",
           "kind": "icon",
           "threshold": 3,
           "found": true,
@@ -284,6 +284,42 @@
           "ok": true
         },
         {
+          "label": "zoom-controls heading",
+          "selector": ".systemsketch-settings__appearance-heading h3",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.24,
+          "text": "Zoom controls",
+          "ok": true
+        },
+        {
+          "label": "zoom-buttons preference label",
+          "selector": ".systemsketch-settings__toggle-row strong",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.24,
+          "text": "Show zoom −/+ buttons",
+          "ok": true
+        },
+        {
+          "label": "zoom-buttons preference detail",
+          "selector": ".systemsketch-settings__toggle-row small",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#666b6f",
+          "bg": "#fcfcfc",
+          "ratio": 5.23,
+          "text": "The zoom percentage remains available wh",
+          "ok": true
+        },
+        {
           "label": "Import button",
           "selector": ".systemsketch-settings__import",
           "kind": "text",
@@ -388,8 +424,8 @@
           "ok": true
         },
         {
-          "label": "Block tool button",
-          "selector": "[data-testid=\"systemsketch-tool-block\"]",
+          "label": "System tool-family button",
+          "selector": "[data-testid=\"systemsketch-tool-system\"]",
           "kind": "icon",
           "threshold": 3,
           "found": true,
@@ -596,6 +632,42 @@
           "ok": true
         },
         {
+          "label": "zoom-controls heading",
+          "selector": ".systemsketch-settings__appearance-heading h3",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#202025",
+          "ratio": 11.49,
+          "text": "Zoom controls",
+          "ok": true
+        },
+        {
+          "label": "zoom-buttons preference label",
+          "selector": ".systemsketch-settings__toggle-row strong",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#202025",
+          "ratio": 11.49,
+          "text": "Show zoom −/+ buttons",
+          "ok": true
+        },
+        {
+          "label": "zoom-buttons preference detail",
+          "selector": ".systemsketch-settings__toggle-row small",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#c0c3c5",
+          "bg": "#202025",
+          "ratio": 9.14,
+          "text": "The zoom percentage remains available wh",
+          "ok": true
+        },
+        {
           "label": "Import button",
           "selector": ".systemsketch-settings__import",
           "kind": "text",
@@ -700,8 +772,8 @@
           "ok": true
         },
         {
-          "label": "Block tool button",
-          "selector": "[data-testid=\"systemsketch-tool-block\"]",
+          "label": "System tool-family button",
+          "selector": "[data-testid=\"systemsketch-tool-system\"]",
           "kind": "icon",
           "threshold": 3,
           "found": true,
@@ -908,6 +980,42 @@
           "ok": true
         },
         {
+          "label": "zoom-controls heading",
+          "selector": ".systemsketch-settings__appearance-heading h3",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.72,
+          "text": "Zoom controls",
+          "ok": true
+        },
+        {
+          "label": "zoom-buttons preference label",
+          "selector": ".systemsketch-settings__toggle-row strong",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.72,
+          "text": "Show zoom −/+ buttons",
+          "ok": true
+        },
+        {
+          "label": "zoom-buttons preference detail",
+          "selector": ".systemsketch-settings__toggle-row small",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#5c5c5c",
+          "bg": "#f6f6f6",
+          "ratio": 6.19,
+          "text": "The zoom percentage remains available wh",
+          "ok": true
+        },
+        {
           "label": "Import button",
           "selector": ".systemsketch-settings__import",
           "kind": "text",
@@ -1012,8 +1120,8 @@
           "ok": true
         },
         {
-          "label": "Block tool button",
-          "selector": "[data-testid=\"systemsketch-tool-block\"]",
+          "label": "System tool-family button",
+          "selector": "[data-testid=\"systemsketch-tool-system\"]",
           "kind": "icon",
           "threshold": 3,
           "found": true,
@@ -1220,6 +1328,42 @@
           "ok": true
         },
         {
+          "label": "zoom-controls heading",
+          "selector": ".systemsketch-settings__appearance-heading h3",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.55,
+          "text": "Zoom controls",
+          "ok": true
+        },
+        {
+          "label": "zoom-buttons preference label",
+          "selector": ".systemsketch-settings__toggle-row strong",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.55,
+          "text": "Show zoom −/+ buttons",
+          "ok": true
+        },
+        {
+          "label": "zoom-buttons preference detail",
+          "selector": ".systemsketch-settings__toggle-row small",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#b3b3b3",
+          "bg": "#282828",
+          "ratio": 7.03,
+          "text": "The zoom percentage remains available wh",
+          "ok": true
+        },
+        {
           "label": "Import button",
           "selector": ".systemsketch-settings__import",
           "kind": "text",
@@ -1324,8 +1468,8 @@
           "ok": true
         },
         {
-          "label": "Block tool button",
-          "selector": "[data-testid=\"systemsketch-tool-block\"]",
+          "label": "System tool-family button",
+          "selector": "[data-testid=\"systemsketch-tool-system\"]",
           "kind": "icon",
           "threshold": 3,
           "found": true,
@@ -1532,6 +1676,42 @@
           "ok": true
         },
         {
+          "label": "zoom-controls heading",
+          "selector": ".systemsketch-settings__appearance-heading h3",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
+          "text": "Zoom controls",
+          "ok": true
+        },
+        {
+          "label": "zoom-buttons preference label",
+          "selector": ".systemsketch-settings__toggle-row strong",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
+          "text": "Show zoom −/+ buttons",
+          "ok": true
+        },
+        {
+          "label": "zoom-buttons preference detail",
+          "selector": ".systemsketch-settings__toggle-row small",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#9d9d9d",
+          "bg": "#202020",
+          "ratio": 6.01,
+          "text": "The zoom percentage remains available wh",
+          "ok": true
+        },
+        {
           "label": "Import button",
           "selector": ".systemsketch-settings__import",
           "kind": "text",
@@ -1604,7 +1784,7 @@
       "ok": true
     },
     {
-      "label": "Light: Block tool button 13.28:1 (≥ 3) #2e2e2e on #fcfcfc",
+      "label": "Light: System tool-family button 13.28:1 (≥ 3) #2e2e2e on #fcfcfc",
       "ok": true
     },
     {
@@ -1668,6 +1848,18 @@
       "ok": true
     },
     {
+      "label": "Light: zoom-controls heading 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: zoom-buttons preference label 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: zoom-buttons preference detail 5.23:1 (≥ 4.5) #666b6f on #fcfcfc",
+      "ok": true
+    },
+    {
       "label": "Light: Import button 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc",
       "ok": true
     },
@@ -1700,7 +1892,7 @@
       "ok": true
     },
     {
-      "label": "Dark: Block tool button 11.51:1 (≥ 3) #d9d9d9 on #202024",
+      "label": "Dark: System tool-family button 11.51:1 (≥ 3) #d9d9d9 on #202024",
       "ok": true
     },
     {
@@ -1764,6 +1956,18 @@
       "ok": true
     },
     {
+      "label": "Dark: zoom-controls heading 11.49:1 (≥ 4.5) #d9d9d9 on #202025",
+      "ok": true
+    },
+    {
+      "label": "Dark: zoom-buttons preference label 11.49:1 (≥ 4.5) #d9d9d9 on #202025",
+      "ok": true
+    },
+    {
+      "label": "Dark: zoom-buttons preference detail 9.14:1 (≥ 4.5) #c0c3c5 on #202025",
+      "ok": true
+    },
+    {
       "label": "Dark: Import button 11.49:1 (≥ 4.5) #d9d9d9 on #202025",
       "ok": true
     },
@@ -1796,7 +2000,7 @@
       "ok": true
     },
     {
-      "label": "Obsidian Light: Block tool button 14.76:1 (≥ 3) #222222 on #f6f6f6",
+      "label": "Obsidian Light: System tool-family button 14.76:1 (≥ 3) #222222 on #f6f6f6",
       "ok": true
     },
     {
@@ -1860,6 +2064,18 @@
       "ok": true
     },
     {
+      "label": "Obsidian Light: zoom-controls heading 14.72:1 (≥ 4.5) #222222 on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: zoom-buttons preference label 14.72:1 (≥ 4.5) #222222 on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: zoom-buttons preference detail 6.19:1 (≥ 4.5) #5c5c5c on #f6f6f6",
+      "ok": true
+    },
+    {
       "label": "Obsidian Light: Import button 14.72:1 (≥ 4.5) #222222 on #f6f6f6",
       "ok": true
     },
@@ -1892,7 +2108,7 @@
       "ok": true
     },
     {
-      "label": "Obsidian Dark: Block tool button 10.6:1 (≥ 3) #dadada on #282828",
+      "label": "Obsidian Dark: System tool-family button 10.6:1 (≥ 3) #dadada on #282828",
       "ok": true
     },
     {
@@ -1956,6 +2172,18 @@
       "ok": true
     },
     {
+      "label": "Obsidian Dark: zoom-controls heading 10.55:1 (≥ 4.5) #dadada on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: zoom-buttons preference label 10.55:1 (≥ 4.5) #dadada on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: zoom-buttons preference detail 7.03:1 (≥ 4.5) #b3b3b3 on #282828",
+      "ok": true
+    },
+    {
       "label": "Obsidian Dark: Import button 10.55:1 (≥ 4.5) #dadada on #282828",
       "ok": true
     },
@@ -1988,7 +2216,7 @@
       "ok": true
     },
     {
-      "label": "Dark Modern: Block tool button 10.15:1 (≥ 3) #cccccc on #202020",
+      "label": "Dark Modern: System tool-family button 10.15:1 (≥ 3) #cccccc on #202020",
       "ok": true
     },
     {
@@ -2052,6 +2280,18 @@
       "ok": true
     },
     {
+      "label": "Dark Modern: zoom-controls heading 10.15:1 (≥ 4.5) #cccccc on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: zoom-buttons preference label 10.15:1 (≥ 4.5) #cccccc on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: zoom-buttons preference detail 6.01:1 (≥ 4.5) #9d9d9d on #202020",
+      "ok": true
+    },
+    {
       "label": "Dark Modern: Import button 10.15:1 (≥ 4.5) #cccccc on #202020",
       "ok": true
     },
@@ -2085,6 +2325,6 @@
     "ratio": 13.24,
     "text": "Settings"
   },
-  "passed": 125,
+  "passed": 140,
   "failed": 0
 }

@@ -1,10 +1,12 @@
 export {
 	PORT_ADD_ZONE_HALF_WIDTH_PX,
+	blockHeaderPortAddAffordance,
 	blockPortAddAffordance,
 	blockPortDropTarget,
 	growBlockPortViewToFit,
 	type BlockPortAddAffordance,
 	type BlockPortDropTarget,
+	type BlockPortSectionTarget,
 } from './portAffordances'
 export {
 	BLOCK_PORT_DRAG_STATE_ID,

@@ -19,13 +19,15 @@
       "blocks": 1,
       "geo": true,
       "text": true,
-      "group": 1
+      "blockGroups": 1,
+      "portRowGroups": 1
     },
     "desired": {
       "blocks": 1,
       "geo": true,
       "text": true,
-      "group": 1
+      "blockGroups": 1,
+      "portRowGroups": 1
     },
     "ok": true
   },
@@ -75,11 +77,13 @@
     "label": "one command detaches the whole selection into two groups",
     "observed": {
       "blocks": 0,
-      "groups": 2
+      "blockGroups": 2,
+      "portRowGroups": 2
     },
     "desired": {
       "blocks": 0,
-      "groups": 2
+      "blockGroups": 2,
+      "portRowGroups": 2
     },
     "ok": true
   },
@@ -133,11 +137,13 @@
     "label": "reopened, it is still stock shapes — no SystemSketch shape",
     "observed": {
       "blocks": 0,
-      "groups": 2
+      "blockGroups": 2,
+      "portRowGroups": 2
     },
     "desired": {
       "blocks": 0,
-      "groups": 2
+      "blockGroups": 2,
+      "portRowGroups": 2
     },
     "ok": true
   },

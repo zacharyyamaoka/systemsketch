@@ -108,7 +108,13 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             try:
                 if len(values) != 1:
                     raise WorkspacePathError("exactly one path query parameter is required")
-                self._json(load_document(values[0], self.app.files_root))
+                self._json(
+                    load_document(
+                        values[0],
+                        self.app.files_root,
+                        additional_roots=self.app.additional_document_roots,
+                    )
+                )
             except FileNotFoundError:
                 self._json({"path": values[0], "source": None})
             except (WorkspacePathError, WorkspaceFormatError) as cause:
@@ -119,7 +125,13 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             try:
                 if len(values) != 1:
                     raise WorkspacePathError("exactly one path query parameter is required")
-                self._json(stat_document(values[0], self.app.files_root))
+                self._json(
+                    stat_document(
+                        values[0],
+                        self.app.files_root,
+                        additional_roots=self.app.additional_document_roots,
+                    )
+                )
             except FileNotFoundError:
                 self._json({"path": values[0], "mtime": None})
             except WorkspacePathError as cause:
@@ -164,6 +176,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                         payload.get("path"),
                         payload.get("source"),
                         self.app.files_root,
+                        additional_roots=self.app.additional_document_roots,
                         base_digest=base_digest,
                         force=payload.get("force") is True,
                     )
@@ -180,6 +193,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                         payload.get("path"),
                         payload.get("destination"),
                         self.app.files_root,
+                        additional_roots=self.app.additional_document_roots,
                         base_digest=base_digest,
                     )
                 )
@@ -187,7 +201,10 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             if path == "/api/workspace/trash":
                 self._json(
                     trash_document(
-                        payload.get("path"), self.app.files_root, base_digest=base_digest
+                        payload.get("path"),
+                        self.app.files_root,
+                        additional_roots=self.app.additional_document_roots,
+                        base_digest=base_digest,
                     )
                 )
                 return
@@ -228,6 +245,7 @@ class SystemSketchServer(ThreadingHTTPServer):
         release_home: Path,
         source_root: Path,
         files_root: Path | None = None,
+        allow_source_root: bool = False,
     ):
         self.dist = dist.resolve()
         self.channel = channel
@@ -235,6 +253,13 @@ class SystemSketchServer(ThreadingHTTPServer):
         self.release_home = release_home.resolve()
         self.source_root = source_root.resolve()
         self.files_root = (files_root or Path.home()).expanduser().resolve()
+        if allow_source_root and channel != "preview":
+            raise ReleaseError("the source worktree can only be authorized in Preview")
+        self.additional_document_roots = (
+            (self.source_root,)
+            if allow_source_root and self.source_root != self.files_root
+            else ()
+        )
         self.controller_fingerprint = controller_fingerprint(Path(__file__).resolve().parent)
         super().__init__(address, partial(SystemSketchHandler, app=self))
 
@@ -248,11 +273,19 @@ class SystemSketchServer(ThreadingHTTPServer):
             "build": self.build,
             "version": version,
             "workspaceRoot": str(self.files_root),
+            "documentRoots": [
+                str(self.files_root),
+                *(str(root) for root in self.additional_document_roots),
+            ],
             "controllerFingerprint": self.controller_fingerprint,
         }
 
     def reveal_document(self, raw_path: object) -> dict:
-        path = resolve_document_path(raw_path, self.files_root)
+        path = resolve_document_path(
+            raw_path,
+            self.files_root,
+            additional_roots=self.additional_document_roots,
+        )
         target = path.parent
         opener = next((value for value in ("xdg-open", "gio") if shutil.which(value)), None)
         if opener is None:
@@ -448,6 +481,11 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--release-home", type=Path, default=None)
     parser.add_argument("--source-root", type=Path, required=True)
     parser.add_argument("--files-root", type=Path, default=None)
+    parser.add_argument(
+        "--allow-source-root",
+        action="store_true",
+        help="allow direct document URLs under the Preview source worktree",
+    )
     return parser.parse_args()
 
 
@@ -462,6 +500,7 @@ def main() -> int:
         release_home=release_home,
         source_root=arguments.source_root,
         files_root=arguments.files_root,
+        allow_source_root=arguments.allow_source_root,
     )
     print(f"SystemSketch {arguments.channel} controller on http://{arguments.host}:{arguments.port}", flush=True)
     try:

@@ -8,6 +8,7 @@ import {
 } from 'tldraw'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import 'tldraw/tldraw.css'
+import { hydrateCustomColors } from '../appearance/customColors'
 import { EXCALIDRAW_SHAPE_UTILS, registerExcalidrawPasteHandler } from '../excalidrawInterop'
 import {
   BlockShapeUtil,
@@ -17,6 +18,12 @@ import {
   installBlockPortMenuTarget,
 } from '../blocks'
 import { BlockContextMenu } from '../blocks/ui'
+import {
+  BranchShapeUtil,
+  BranchTool,
+  installBranchClickToEdit,
+  installBranchRegions,
+} from '../branch'
 import {
   blockConnectionBindingUtils,
   blockConnectionOverlayUtils,
@@ -68,11 +75,12 @@ const EMBEDDED_COMPONENTS = {
 const EMBEDDED_SHAPE_UTILS = [
   ...EXCALIDRAW_SHAPE_UTILS,
   BlockShapeUtil,
+  BranchShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const EMBEDDED_BINDING_UTILS = [...blockConnectionBindingUtils]
 const EMBEDDED_OVERLAY_UTILS = [...blockConnectionOverlayUtils]
-const EMBEDDED_TOOLS = [BlockTool]
+const EMBEDDED_TOOLS = [BlockTool, BranchTool]
 
 /** Long enough that a drag is one write, short enough that a pause is saved. */
 const CHANGE_DEBOUNCE_MS = 250
@@ -118,6 +126,8 @@ function EmbeddedSurface({
     if (openDocument.readOnly) editor.updateInstanceState({ isReadonly: true })
     const core = decodeDocumentText(openDocument.text)
     if (!isBlankDocument(core)) {
+      // Custom colours are validated by name as the file parses; see LocalWorkspace.
+      hydrateCustomColors(core, editor)
       const parsed = parseTldrawJsonFile({ json: core, schema: editor.store.schema })
       if (parsed.ok) {
         editor.store.mergeRemoteChanges(() => {
@@ -132,6 +142,8 @@ function EmbeddedSurface({
     const stopBlockConnections = installBlockConnections(editor)
     const stopInstantTextEditing = installInstantTextEditing(editor)
     const stopBlockClickToEdit = installBlockClickToEdit(editor)
+    const stopBranchClickToEdit = installBranchClickToEdit(editor)
+    const stopBranchRegions = installBranchRegions(editor)
     const stopBlockPortMenuTarget = installBlockPortMenuTarget(editor)
     const stopExcalidrawPaste = registerExcalidrawPasteHandler(editor)
     const stopToolbarSideEffects = registerToolbarSideEffects(editor)
@@ -155,6 +167,8 @@ function EmbeddedSurface({
       stopToolbarSideEffects()
       stopExcalidrawPaste()
       stopBlockPortMenuTarget()
+      stopBranchRegions()
+      stopBranchClickToEdit()
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopBlockConnections()

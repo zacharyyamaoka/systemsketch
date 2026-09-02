@@ -1,0 +1,64 @@
+/* Branch inspector: the Block inspector's idiom with two list sections. */
+
+.branch-inspector__count {
+  cursor: default;
+}
+
+.branch-inspector__control-row {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.8fr) 14px 28px;
+}
+
+.branch-inspector__colour {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ss-text) 12%, transparent);
+  justify-self: center;
+}
+
+.branch-inspector__arm-row {
+  grid-template-columns: 18px minmax(0, 1fr) 28px 28px 28px;
+  align-items: center;
+}
+
+.branch-inspector__arm-row[data-drag-over='true'] {
+  box-shadow: 0 -2px 0 0 var(--ss-accent);
+}
+
+.branch-inspector__arm-row[data-dragging='true'] {
+  opacity: 0.55;
+}
+
+.branch-inspector__grip {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ss-text-muted);
+  cursor: grab;
+  touch-action: none;
+}
+
+.branch-inspector__grip:active {
+  cursor: grabbing;
+}
+
+.branch-inspector__fold[aria-pressed='true'],
+.branch-inspector__active[aria-pressed='true'] {
+  color: var(--ss-accent);
+  border-color: var(--ss-accent);
+}
+
+.branch-mini-menu__add {
+  min-width: 52px !important;
+  font-size: 11px !important;
+  white-space: nowrap;
+}
+
+.branch-mini-menu .block-mini-menu__views + .block-mini-menu__views {
+  border-left: 1px solid var(--ss-border-inverse);
+}

@@ -3,7 +3,7 @@ import { useValue, type Editor } from 'tldraw'
 
 import type { AppearanceControl } from './appearanceModel'
 import { FIGJAM_ICONS } from './figjamIcons'
-import { figjamIconName } from './figjamIconMap'
+import { FIGJAM_TRIGGER_ICON, figjamIconName } from './figjamIconMap'
 
 /**
  * What an appearance option looks like.
@@ -22,6 +22,11 @@ export function AppearanceGlyph({
 }) {
   if (control.id === 'color') {
     return <ColorSwatch editor={editor} name={value} />
+  }
+  // FigJam's Font size list draws no glyph: each row is its own name, at its
+  // own size, and the label carries that.
+  if (control.id === 'size' && control.layout === 'list') {
+    return null
   }
   // FigJam's own icon wherever FigJam draws this value. The drawn glyphs below
   // stay for the states tldraw has and FigJam does not.
@@ -57,13 +62,37 @@ export function AppearanceGlyph({
 }
 
 /**
+ * What the trigger shows. Line style and Typeface show one fixed icon whatever
+ * the value — FigJam's three bars, FigJam's `Aa` — and everything else shows
+ * the current value the way its popover draws it.
+ */
+export function TriggerGlyph({
+  control, value, editor,
+}: {
+  control: AppearanceControl
+  value: string | undefined
+  editor: Editor
+}) {
+  const fixed = control.trigger === 'icon' ? FIGJAM_TRIGGER_ICON[control.id] : undefined
+  if (fixed && FIGJAM_ICONS[fixed]) return <FigjamGlyph name={fixed} />
+  return <AppearanceGlyph control={control} value={value} editor={editor} />
+}
+
+/**
  * One of FigJam's traced icons, drawn at its own viewBox.
  *
  * FigJam's icons are filled paths, not strokes, so this sets `data-filled` and
  * lets the stylesheet paint them with `currentColor` — the same way FigJam
  * paints its own with a CSS variable.
  */
-function FigjamGlyph({ name, flipped }: { name: string; flipped?: boolean }) {
+export function FigjamGlyph({
+  name, flipped, className, role,
+}: {
+  name: string
+  flipped?: boolean
+  className?: string
+  role?: string
+}) {
   const icon = FIGJAM_ICONS[name]
   // FigJam's control icons are square; its typeface icons are the word drawn in
   // that face, and are much wider than tall. Letterboxing a 47x10 word into a
@@ -73,11 +102,12 @@ function FigjamGlyph({ name, flipped }: { name: string; flipped?: boolean }) {
   return (
     <svg
       viewBox={icon.viewBox}
-      className="systemsketch-appearance__glyph"
+      className={className ?? 'systemsketch-appearance__glyph'}
       data-filled=""
       data-natural={wide ? '' : undefined}
       data-flipped={flipped ? '' : undefined}
       data-icon={name}
+      data-role={role}
       style={wide ? { width: `${(width / height) * 14}px`, height: '14px' } : undefined}
       aria-hidden="true"
     >
