@@ -1,0 +1,681 @@
+{
+ "rows": [
+  {
+   "tool": "LabVIEW Case Structure",
+   "mechanism": "region; selector terminal on the left border; tunnels on both borders",
+   "evaluation": "exactly one case; waits for all inputs; outputs leave together",
+   "visible": "no — one case at a time; NI's KB says it cannot be done",
+   "merge": "output tunnel: must be wired in every case or the VI breaks (\"Tunnel: missing assignment\"); Use Default If Unwired is the discouraged escape",
+   "lesson": "region is right; the unwired tunnel is Python's may-be-unbound; the two-sided tunnels are why side-by-side cases were declined",
+   "cite": "[1][2][3][4][5][11]"
+  },
+  {
+   "tool": "LabVIEW Select",
+   "mechanism": "node with s, t, f inputs",
+   "evaluation": "both t and f computed (a node needs all inputs)",
+   "visible": "yes",
+   "merge": "the node itself",
+   "lesson": "this is V4; NI recommends it only when both values are already available, Case when code must not run",
+   "cite": "[7][8]"
+  },
+  {
+   "tool": "LabVIEW For / While",
+   "mechanism": "region; tunnels, auto-indexing tunnels, shift registers, N and i on the border",
+   "evaluation": "body repeats",
+   "visible": "yes (one subdiagram)",
+   "merge": "shift register / tunnel",
+   "lesson": "one idiom carries every control construct — Kodosky: the box's boundary 'could hold iteration state information'",
+   "cite": "[9][14]"
+  },
+  {
+   "tool": "LEGO Mindstorms NXT (G-based)",
+   "mechanism": "region with cases stacked above and below",
+   "evaluation": "one case",
+   "visible": "yes, stacked",
+   "merge": "tunnels",
+   "lesson": "NI staff: it 'works because there's almost always only one wire' and is 'a pain' once tunnels multiply — side-by-side arms are viable exactly when there are no tunnels",
+   "cite": "[5]"
+  },
+  {
+   "tool": "Green & Petre; Whitley & Blackwell",
+   "mechanism": "empirical",
+   "evaluation": "—",
+   "visible": "—",
+   "merge": "—",
+   "lesson": "every subject did worse on LabVIEW conditionals than on text; the 'invisible arms' load working memory; users call nested cases spaghetti",
+   "cite": "[6][13]"
+  },
+  {
+   "tool": "Dennis / Arvind dataflow (switch, merge)",
+   "mechanism": "gate actors: a T-gate/F-gate (switch) per value entering, a controlled merge per value leaving, all driven by one decider",
+   "evaluation": "only the gated arm receives tokens",
+   "visible": "yes, both arms drawn",
+   "merge": "controlled merge actor, one per value that leaves; an uncontrolled merge is nondeterministic",
+   "lesson": "the original one-join-per-leaving-value rule; unrestricted switch/merge makes bounded scheduling undecidable (BDF)",
+   "cite": "[15][16][17][18]"
+  },
+  {
+   "tool": "SSA φ (Cytron 1991)",
+   "mechanism": "φ-function at the join block, one operand per control-flow predecessor",
+   "evaluation": "'each execution of a φ-function uses only one of the operands'",
+   "visible": "—",
+   "merge": "the φ",
+   "lesson": "the yield dot is a φ with one operand per arm",
+   "cite": "[19]"
+  },
+  {
+   "tool": "Sea of nodes (Click 1995; HotSpot C2, Graal)",
+   "mechanism": "If node splits control into True/False projections; a Region node merges; Phi nodes hang off the Region with data inputs aligned to its control inputs",
+   "evaluation": "control token reaches one projection",
+   "visible": "yes",
+   "merge": "Phi attached to the Region: 'the PHI nodes at that REGION latch the data value coming from the matching control input'",
+   "lesson": "V2 literally: the join belongs to the region; V8 later left the IR because effect/control chains made graphs hard to read",
+   "cite": "[20][21][39][22]"
+  },
+  {
+   "tool": "Program Dependence Graph (Ferrante 1987)",
+   "mechanism": "region nodes group every statement with the same control condition under the predicate's T or F edge",
+   "evaluation": "—",
+   "visible": "yes",
+   "merge": "data-dependence edges",
+   "lesson": "'branch as region' formalised in 1987; the arm is the set of statements control-dependent on the test",
+   "cite": "[23]"
+  },
+  {
+   "tool": "MLIR scf.if / scf.yield",
+   "mechanism": "one op with then/else regions; results leave through scf.yield; scf.index_switch for N-way",
+   "evaluation": "one region runs",
+   "visible": "yes, both regions in the text",
+   "merge": "the op's results: 'the types of the yielded values must match the result types'; both regions must yield",
+   "lesson": "the asymmetry: 'operations inside a region can reference values defined outside of the region' (no input tunnels) but 'a value defined in a region can never be used outside of the region' (yield is the only exit)",
+   "cite": "[24][25]"
+  },
+  {
+   "tool": "TensorFlow v1 → v2",
+   "mechanism": "v1: one Switch per captured tensor and one Merge per output (Dennis-style); v2: a single If op whose branch functions close over inputs",
+   "evaluation": "untaken arm gets dead tokens (v1); not executed (v2)",
+   "visible": "—",
+   "merge": "Merge per output (v1); the If op's outputs, same number and type per branch (v2)",
+   "lesson": "an ecosystem that started with token routing moved to the region form, for gradients, XLA and fewer bugs",
+   "cite": "[26][27][28]"
+  },
+  {
+   "tool": "Simulink If + If Action Subsystem + Merge",
+   "mechanism": "a port-style If block emits action signals; bodies are conditionally executed subsystems; an explicit Merge block joins",
+   "evaluation": "only the selected subsystem runs; Switch evaluates both inputs unless 'conditional input branch execution' is on",
+   "visible": "yes",
+   "merge": "Merge: 'equal to the most recently computed output of its driving blocks'; signals share memory",
+   "lesson": "V3's free-standing merge node; a MathWorks engineer prefers If/Merge over Switch: 'I don't like reliance on an optimization to provide good behavior'",
+   "cite": "[29][30][31][32][33]"
+  },
+  {
+   "tool": "Ptolemy II Case actor",
+   "mechanism": "a composite with one refinement per case, each with its own director",
+   "evaluation": "one refinement",
+   "visible": "one at a time",
+   "merge": "container ports: 'all refinements have the same ports'",
+   "lesson": "tunnels by construction; the region's meaning comes from a director, not from the drawing",
+   "cite": "[34]"
+  },
+  {
+   "tool": "Prograph",
+   "mechanism": "conditional on the method: cases with a control annotation ('if this operation succeeds, go to the next case')",
+   "evaluation": "one case",
+   "visible": "one at a time",
+   "merge": "method outputs",
+   "lesson": "the same one-visible-case cost as LabVIEW, at method level",
+   "cite": "[35][40]"
+  },
+  {
+   "tool": "Flow-based programming (Morrison)",
+   "mechanism": "a selector component with ACC and REJ output ports",
+   "evaluation": "packet routed",
+   "visible": "yes",
+   "merge": "none: streams converge on a port",
+   "lesson": "router-node branching with no join; fine for packets, wrong for a value that must exist once after the if",
+   "cite": "[38][41]"
+  },
+  {
+   "tool": "GHC Core / Enso",
+   "mechanism": "Case with one shared result type for all alternatives; Enso's if_then_else is a lazy method",
+   "evaluation": "lazy: only the chosen alternative",
+   "visible": "yes",
+   "merge": "the expression's own typed result",
+   "lesson": "an if-expression joins by being a value: V4 is right for `a if c else b`",
+   "cite": "[36][37]"
+  },
+  {
+   "tool": "Blender Geometry Nodes: Switch, Menu Switch, Index Switch",
+   "mechanism": "select node (N inputs → 1 output)",
+   "evaluation": "lazy since 3.0: 'only the input that is passed through the node is evaluated'; fields may still evaluate both",
+   "visible": "yes; Menu Switch hides sockets feeding inactive inputs",
+   "merge": "the node is the join",
+   "lesson": "V4's best case; Blender has no conditional zone, so a statement-level if has no home there",
+   "cite": "[42][43][44][45]"
+  },
+  {
+   "tool": "Blender zones (Repeat, Simulation, For-Each, Closure)",
+   "mechanism": "semantic region with a portless input side and an Output node on the way out",
+   "evaluation": "body per iteration",
+   "visible": "yes",
+   "merge": "the zone's Output node",
+   "lesson": "the one live precedent for outside cables reaching straight into a semantic region: 'nodes inside the zone can also take inputs from nodes outside the zone… however, nodes inside the zone can't send their outputs to nodes outside the zone' — the asymmetry, shipped",
+   "cite": "[46][47][48]"
+  },
+  {
+   "tool": "Houdini: Switch SOP, Switch-If, VOP Switch",
+   "mechanism": "select node",
+   "evaluation": "SOPs cook by demand, so only the chosen input cooks; the VOP Switch says the opposite: 'all inputs are evaluated (cooked)'",
+   "visible": "yes",
+   "merge": "the node passes one input through unchanged",
+   "lesson": "laziness is an engine property, not a node property; the same name means both things in one product",
+   "cite": "[49][50][51][52]"
+  },
+  {
+   "tool": "Nuke Switch",
+   "mechanism": "select node with a 'which' knob",
+   "evaluation": "pull-based; unused inputs need not be validated",
+   "visible": "yes",
+   "merge": "the node",
+   "lesson": "same as Houdini",
+   "cite": "[53][54]"
+  },
+  {
+   "tool": "Unreal Blueprints: Branch, Select",
+   "mechanism": "Branch is an exec pin (True/False pulses); Select is a data node",
+   "evaluation": "Branch pulses one side; Select evaluates both (UE-20044, open since 2015)",
+   "visible": "yes",
+   "merge": "exec wires reconverge on one pin; data rejoined by Select or a variable",
+   "lesson": "control and data diverge: the pure Select beside the Branch still runs both arms",
+   "cite": "[55][56][57]"
+  },
+  {
+   "tool": "Unity Visual Scripting; Shader Graph Branch",
+   "mechanism": "If/Switch on flow; Select and Branch on data",
+   "evaluation": "flow runs one side; Shader Graph: 'both sides of the branch are evaluated in the shader, and the branch not used is discarded'",
+   "visible": "yes",
+   "merge": "Select / Branch",
+   "lesson": "same divergence as Unreal",
+   "cite": "[58][59]"
+  },
+  {
+   "tool": "Max/MSP and Pure Data: gate, switch, select, route, spigot, moses",
+   "mechanism": "message routers (1→N) and selectors (N→1)",
+   "evaluation": "lazy by construction: an outlet that does not fire triggers nothing",
+   "visible": "yes",
+   "merge": "implicit fan-in, several cords into one inlet",
+   "lesson": "router branching with no join primitive; the untaken message simply never arrives",
+   "cite": "[60][61][62]"
+  },
+  {
+   "tool": "Node-RED: switch, join",
+   "mechanism": "router: rules → outputs, stop at first match or check all",
+   "evaluation": "message passing",
+   "visible": "yes",
+   "merge": "implicit fan-in, or a join that waits on counts/timeouts",
+   "lesson": "recombination is where routers hurt: a join waiting on the untaken branch needs a count or a timeout",
+   "cite": "[63][64]"
+  },
+  {
+   "tool": "n8n: If, Switch, Merge",
+   "mechanism": "router with labelled true/false handles",
+   "evaluation": "v1 executes branches in turn; v0 Merge could make both If outputs execute",
+   "visible": "yes",
+   "merge": "a Merge node that 'always waits until the data from both inputs is available'",
+   "lesson": "the v0 bug is the router-plus-merge failure mode in the wild",
+   "cite": "[65][66][67]"
+  },
+  {
+   "tool": "Grasshopper and Dynamo",
+   "mechanism": "select nodes (Stream Filter, If) and routers (Stream Gate, Dispatch)",
+   "evaluation": "eager: Grasshopper gates 'leak' (Data Dam is the workaround); Dynamo's If replicates over lists and truncates (issue #6258, open since 2016)",
+   "visible": "yes",
+   "merge": "the node",
+   "lesson": "an eager engine turns a select node into a bug report",
+   "cite": "[68][69][70][71]"
+  },
+  {
+   "tool": "TouchDesigner Switch TOP/CHOP",
+   "mechanism": "select node",
+   "evaluation": "pull system: inactive inputs don't cook unless blending or viewed",
+   "visible": "yes",
+   "merge": "the node",
+   "lesson": "laziness again an engine property",
+   "cite": "[72][73]"
+  },
+  {
+   "tool": "Enso (ex-Luna)",
+   "mechanism": "an expression inside one node: `if a then b else c` is a line of code",
+   "evaluation": "lazy method",
+   "visible": "as text in one node",
+   "merge": "the node's value",
+   "lesson": "dual syntax makes the conditional a node, not a region; no sub-graph bodies",
+   "cite": "[74][75]"
+  },
+  {
+   "tool": "Flyde, NoFlo, React Flow",
+   "mechanism": "router: a Conditional node with true/false output ports; React Flow branches by writing undefined/null to the dead handle",
+   "evaluation": "packets",
+   "visible": "yes",
+   "merge": "implicit fan-in",
+   "lesson": "a dead-port convention is what a router needs where a region needs nothing",
+   "cite": "[76][77][78]"
+  },
+  {
+   "tool": "Scratch/Blockly; Nassi–Shneiderman; DRAKON",
+   "mechanism": "nested blocks / side-by-side columns / flowchart with layout law",
+   "evaluation": "one body runs",
+   "visible": "yes, both, always",
+   "merge": "fall-through to the next block",
+   "lesson": "the readable, structurally scoped references; DRAKON's layout law: main route on the skewer, 'the further to the right, the worse', no crossings",
+   "cite": "[79][80][81]"
+  }
+ ],
+ "sources": [
+  {
+   "id": 1,
+   "title": "NI LabVIEW Help — Case Structures: Executing a Section of Code Based on Input Values",
+   "url": "https://www.ni.com/docs/en-US/bundle/labview/page/case-structures-executing-a-section-of-code-based-on-input-values.html"
+  },
+  {
+   "id": 2,
+   "title": "NI Knowledge Base — Viewing All Conditions of Case Structure at the Same Time in LabVIEW",
+   "url": "https://knowledge.ni.com/KnowledgeArticleDetails?id=kA03q000000oxFhCAI&l=en-US"
+  },
+  {
+   "id": 3,
+   "title": "NI LabVIEW Help — Avoiding Wiring Unwired Output Tunnels on Case Structures",
+   "url": "https://www.ni.com/docs/en-US/bundle/labview/page/avoiding-wiring-unwired-output-tunnels-on-case-structures.html"
+  },
+  {
+   "id": 4,
+   "title": "NI LabVIEW Help — Failing to Wire a Tunnel in All Cases of a Structure",
+   "url": "https://www.ni.com/docs/en-US/bundle/labview/page/failing-to-wire-a-tunnel-in-all-cases-of-a-structure.html"
+  },
+  {
+   "id": 5,
+   "title": "NI Idea Exchange — Show both cases of a True/False Case Structure (declined 2016)",
+   "url": "https://forums.ni.com/t5/LabVIEW-Idea-Exchange/Show-both-cases-of-a-True-False-Case-Structure/idi-p/1716298"
+  },
+  {
+   "id": 6,
+   "title": "Green & Petre (1996) — Usability Analysis of Visual Programming Environments: a cognitive dimensions framework",
+   "url": "https://web.engr.oregonstate.edu/~burnett/CS589and584/CS589-papers/CogDimsPaper.pdf"
+  },
+  {
+   "id": 7,
+   "title": "NI — LabVIEW Equivalent of If, If-Else, and Switch Statements",
+   "url": "https://www.ni.com/en/support/documentation/supplemental/21/labview-equivalent-of-if--if-else--and-switch-statements.html"
+  },
+  {
+   "id": 8,
+   "title": "NI LabVIEW Help — Select Function (rajsite mirror of NI's help)",
+   "url": "https://rajsite.github.io/unofficial-lvdocs/glang/Select.html"
+  },
+  {
+   "id": 9,
+   "title": "Kodosky (2020) — LabVIEW, HOPL IV",
+   "url": "https://dl.acm.org/doi/10.1145/3386328"
+  },
+  {
+   "id": 10,
+   "title": "NI LabVIEW Help — Wiring Tunnels Automatically in Structures with Multiple Cases (Linked Input Tunnels)",
+   "url": "https://www.ni.com/docs/en-TO/bundle/labview/page/wiring-tunnels-automatically-in-structures-with-multiple-cases.html"
+  },
+  {
+   "id": 11,
+   "title": "NI LabVIEW Help — LabVIEW Style Checklist (rajsite mirror)",
+   "url": "https://rajsite.github.io/unofficial-lvdocs/lvdevconcepts/checklist.html"
+  },
+  {
+   "id": 12,
+   "title": "NI Idea Exchange — case structure output tunnel option: take from partner if not wired (AristosQueue on invisible pass-through)",
+   "url": "https://forums.ni.com/t5/LabVIEW-Idea-Exchange/case-structure-output-tunnel-option-take-from-partner-if-not/idi-p/3110615"
+  },
+  {
+   "id": 13,
+   "title": "Whitley & Blackwell (2001) — Visual Programming in the Wild: A Survey of LabVIEW Programmers",
+   "url": "https://www.sciencedirect.com/science/article/abs/pii/S1045926X00901988"
+  },
+  {
+   "id": 14,
+   "title": "NI LabVIEW Help — Shift Registers: Passing Values between Loop Iterations (rajsite mirror)",
+   "url": "https://rajsite.github.io/unofficial-lvdocs/lvconcepts/shift_registers_concepts.html"
+  },
+  {
+   "id": 15,
+   "title": "Dennis & Misunas (1975) — A Preliminary Architecture for a Basic Data-Flow Processor",
+   "url": "https://www.cs.auckland.ac.nz/courses/compsci703s1c/resources/Dennis.pdf"
+  },
+  {
+   "id": 16,
+   "title": "Arvind & Culler (1986) — Dataflow Architectures, MIT/LCS/TM-294",
+   "url": "https://dspace.mit.edu/bitstream/handle/1721.1/149103/MIT-LCS-TM-294.pdf?sequence=1&isAllowed=y"
+  },
+  {
+   "id": 17,
+   "title": "Buck & Lee (1993) — Scheduling Dynamic Dataflow Graphs with Bounded Memory Using the Token Flow Model",
+   "url": "https://bears.ece.ucsb.edu/class/ece253/papers/buck93.pdf"
+  },
+  {
+   "id": 18,
+   "title": "Lee & Parks (1995) — Dataflow Process Networks, Proc. IEEE",
+   "url": "https://bears.ece.ucsb.edu/class/ece253/papers/lee_parks_ieee95.pdf"
+  },
+  {
+   "id": 19,
+   "title": "Cytron, Ferrante, Rosen, Wegman, Zadeck (1991) — Efficiently Computing SSA Form and the Control Dependence Graph",
+   "url": "https://www.cs.utexas.edu/~pingali/CS380C/2010/papers/ssaCytron.pdf"
+  },
+  {
+   "id": 20,
+   "title": "Click & Paleczny (1995) — A Simple Graph-Based Intermediate Representation",
+   "url": "https://www.oracle.com/technetwork/java/javase/tech/c2-ir95-150110.pdf"
+  },
+  {
+   "id": 21,
+   "title": "SeaOfNodes/Simple tutorial, ch. 5 — If Statement, Phi, and Region",
+   "url": "https://github.com/SeaOfNodes/Simple/blob/main/chapter05/README.md"
+  },
+  {
+   "id": 22,
+   "title": "V8 team — Land ahoy: leaving the Sea of Nodes",
+   "url": "https://v8.dev/blog/leaving-the-sea-of-nodes"
+  },
+  {
+   "id": 23,
+   "title": "Ferrante, Ottenstein, Warren (1987) — The Program Dependence Graph and Its Use in Optimization",
+   "url": "https://web.eecs.umich.edu/~mahlke/courses/583f23/reading/ferrante_toplas_87.pdf"
+  },
+  {
+   "id": 24,
+   "title": "MLIR — 'scf' Dialect (scf.if, scf.yield, scf.index_switch)",
+   "url": "https://mlir.llvm.org/docs/Dialects/SCFDialect/"
+  },
+  {
+   "id": 25,
+   "title": "MLIR Language Reference — Regions",
+   "url": "https://mlir.llvm.org/docs/LangRef/"
+  },
+  {
+   "id": 26,
+   "title": "Yu, Abadi, Barham et al. (2018) — Dynamic Control Flow in Large-Scale Machine Learning, EuroSys",
+   "url": "https://parsa.epfl.ch/course-info/cs723/papers/dynamicControlFLow.pdf"
+  },
+  {
+   "id": 27,
+   "title": "TensorFlow RFC 20180507 — 'Functional' cond design doc (cond_v2)",
+   "url": "https://github.com/tensorflow/community/blob/master/rfcs/20180507-cond-v2.md"
+  },
+  {
+   "id": 28,
+   "title": "OpenXLA — Operation Semantics: Conditional",
+   "url": "https://openxla.org/xla/operation_semantics"
+  },
+  {
+   "id": 29,
+   "title": "MathWorks — Simulink Merge block",
+   "url": "https://www.mathworks.com/help/simulink/slref/merge.html"
+  },
+  {
+   "id": 30,
+   "title": "MathWorks — Simulink If Action Subsystem",
+   "url": "https://www.mathworks.com/help/simulink/slref/ifactionsubsystem.html"
+  },
+  {
+   "id": 31,
+   "title": "MathWorks — Simulink If block",
+   "url": "https://www.mathworks.com/help/simulink/slref/if.html"
+  },
+  {
+   "id": 32,
+   "title": "MathWorks — Conditional input branch execution",
+   "url": "https://www.mathworks.com/help/simulink/gui/conditionalinputbranchexecution.html"
+  },
+  {
+   "id": 33,
+   "title": "Popinchalk (2009) — A Better If-Else Construct, Guy on Simulink",
+   "url": "https://blogs.mathworks.com/simulink/2009/08/20/a-better-if-else-construct/"
+  },
+  {
+   "id": 34,
+   "title": "Ptolemy II — ptolemy.actor.lib.hoc.Case source",
+   "url": "https://github.com/icyphy/ptII/blob/master/ptolemy/actor/lib/hoc/Case.java"
+  },
+  {
+   "id": 35,
+   "title": "MacTech 10(11) — Prograph CPX: A Tutorial",
+   "url": "http://preserve.mactech.com/articles/mactech/Vol.10/10.11/PrographCPXTutorial/index.html"
+  },
+  {
+   "id": 36,
+   "title": "GHC — compiler/GHC/Core.hs (Case, Alt)",
+   "url": "https://github.com/ghc/ghc/blob/master/compiler/GHC/Core.hs"
+  },
+  {
+   "id": 37,
+   "title": "Enso — Standard.Base.Data.Boolean (if_then_else, lazy arguments)",
+   "url": "https://github.com/enso-org/enso/blob/develop/distribution/lib/Standard/Base/0.0.0-dev/src/Data/Boolean.enso"
+  },
+  {
+   "id": 38,
+   "title": "Morrison — Basic Concepts of Flow-Based Programming",
+   "url": "https://www.jpaulmorrison.com/fbp/concepts.shtml"
+  },
+  {
+   "id": 39,
+   "title": "Duboscq et al. (2013) — Graal IR: An Extensible Declarative Intermediate Representation",
+   "url": "https://ssw.jku.at/General/Staff/GD/APPLC-2013-paper_12.pdf"
+  },
+  {
+   "id": 40,
+   "title": "Cox & Gauvin (2011) — Controlled dataflow visual programming languages, VINCI (abstract)",
+   "url": "https://dl.acm.org/doi/10.1145/2016656.2016665"
+  },
+  {
+   "id": 41,
+   "title": "Johnston, Hanna, Millar (2004) — Advances in Dataflow Programming Languages, ACM Computing Surveys",
+   "url": "https://www.cs.tufts.edu/comp/150CMP/papers/dataflow-johnston-acm04.pdf"
+  },
+  {
+   "id": 42,
+   "title": "Blender Manual — Switch Node",
+   "url": "https://docs.blender.org/manual/en/latest/modeling/geometry_nodes/utilities/switch.html"
+  },
+  {
+   "id": 43,
+   "title": "Blender Manual — Menu Switch Node",
+   "url": "https://docs.blender.org/manual/en/latest/modeling/geometry_nodes/utilities/menu_switch.html"
+  },
+  {
+   "id": 44,
+   "title": "Blender Manual — Index Switch Node",
+   "url": "https://docs.blender.org/manual/en/latest/modeling/geometry_nodes/utilities/index_switch.html"
+  },
+  {
+   "id": 45,
+   "title": "Blender 3.0 release notes — Nodes & Physics (lazy evaluation of Switch)",
+   "url": "https://developer.blender.org/docs/release_notes/3.0/nodes_physics/"
+  },
+  {
+   "id": 46,
+   "title": "Blender Manual — Repeat Zone",
+   "url": "https://docs.blender.org/manual/en/latest/modeling/geometry_nodes/utilities/repeat_zone.html"
+  },
+  {
+   "id": 47,
+   "title": "Blender Manual — Simulation Zone",
+   "url": "https://docs.blender.org/manual/en/latest/modeling/geometry_nodes/simulation/simulation_zone.html"
+  },
+  {
+   "id": 48,
+   "title": "Blender 5.0 release notes — Geometry Nodes (Closure zone)",
+   "url": "https://developer.blender.org/docs/release_notes/5.0/geometry_nodes/"
+  },
+  {
+   "id": 49,
+   "title": "SideFX — Switch SOP",
+   "url": "https://www.sidefx.com/docs/houdini/nodes/sop/switch.html"
+  },
+  {
+   "id": 50,
+   "title": "SideFX — Switch-If SOP",
+   "url": "https://www.sidefx.com/docs/houdini/nodes/sop/switchif.html"
+  },
+  {
+   "id": 51,
+   "title": "SideFX — Switch VOP",
+   "url": "https://www.sidefx.com/docs/houdini/nodes/vop/switch.html"
+  },
+  {
+   "id": 52,
+   "title": "SideFX HDK — SOP data flow (cooking)",
+   "url": "https://www.sidefx.com/docs/hdk/_h_d_k__data_flow__s_o_p.html"
+  },
+  {
+   "id": 53,
+   "title": "Foundry — Nuke Switch node",
+   "url": "https://learn.foundry.com/nuke/content/reference_guide/merge_nodes/switch.html"
+  },
+  {
+   "id": 54,
+   "title": "Foundry NDK — Op architecture (validate/request)",
+   "url": "https://learn.foundry.com/nuke/developers/63/ndkdevguide/intro/oparchitecture.html"
+  },
+  {
+   "id": 55,
+   "title": "Epic — Flow Control in Unreal Engine (Branch, Sequence)",
+   "url": "https://dev.epicgames.com/documentation/unreal-engine/flow-control-in-unreal-engine"
+  },
+  {
+   "id": 56,
+   "title": "Epic — Blueprint API: Select",
+   "url": "https://dev.epicgames.com/documentation/en-us/unreal-engine/BlueprintAPI/Utilities/Select"
+  },
+  {
+   "id": 57,
+   "title": "Unreal forums — Select node always calculates both inputs (UE-20044)",
+   "url": "https://forums.unrealengine.com/t/select-node-always-calculates-both-inputs/328718"
+  },
+  {
+   "id": 58,
+   "title": "Unity Visual Scripting — Control nodes (If, Switch, Select)",
+   "url": "https://docs.unity3d.com/Packages/com.unity.visualscripting@1.9/manual/vs-control.html"
+  },
+  {
+   "id": 59,
+   "title": "Unity Shader Graph — Branch Node",
+   "url": "https://docs.unity3d.com/Packages/com.unity.shadergraph@17.1/manual/Branch-Node.html"
+  },
+  {
+   "id": 60,
+   "title": "Cycling '74 — Max reference: gate",
+   "url": "https://docs.cycling74.com/reference/gate/"
+  },
+  {
+   "id": 61,
+   "title": "Cycling '74 — Max reference: switch",
+   "url": "https://docs.cycling74.com/reference/switch/"
+  },
+  {
+   "id": 62,
+   "title": "Pure Data — reference help patches (spigot, moses, select, route)",
+   "url": "https://github.com/pure-data/pure-data/tree/master/doc/5.reference"
+  },
+  {
+   "id": 63,
+   "title": "Node-RED — switch node help",
+   "url": "https://github.com/node-red/node-red/blob/master/packages/node_modules/@node-red/nodes/locales/en-US/function/10-switch.html"
+  },
+  {
+   "id": 64,
+   "title": "Node-RED — split/join node help",
+   "url": "https://github.com/node-red/node-red/blob/master/packages/node_modules/@node-red/nodes/locales/en-US/sequence/17-split.html"
+  },
+  {
+   "id": 65,
+   "title": "n8n — If node",
+   "url": "https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.if"
+  },
+  {
+   "id": 66,
+   "title": "n8n — Merge node",
+   "url": "https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.merge/"
+  },
+  {
+   "id": 67,
+   "title": "n8n — Understand execution order",
+   "url": "https://docs.n8n.io/build/flow-logic/understand-execution-order"
+  },
+  {
+   "id": 68,
+   "title": "Grasshopper docs — Stream Filter",
+   "url": "https://grasshopperdocs.com/components/grasshoppersets/streamFilter.html"
+  },
+  {
+   "id": 69,
+   "title": "McNeel forum — Stream Filter, Gate and Data Dam",
+   "url": "https://discourse.mcneel.com/t/stream-filter-gate-and-data-dam/93526"
+  },
+  {
+   "id": 70,
+   "title": "Dynamo — CoreNodeModels/Logic/If.cs",
+   "url": "https://github.com/DynamoDS/Dynamo/blob/master/src/Libraries/CoreNodeModels/Logic/If.cs"
+  },
+  {
+   "id": 71,
+   "title": "Dynamo issue #6258 — If node truncates lists",
+   "url": "https://github.com/DynamoDS/Dynamo/issues/6258"
+  },
+  {
+   "id": 72,
+   "title": "Derivative — Switch TOP",
+   "url": "https://docs.derivative.ca/Switch_TOP"
+  },
+  {
+   "id": 73,
+   "title": "Derivative — Cook (pull system)",
+   "url": "https://docs.derivative.ca/Cook"
+  },
+  {
+   "id": 74,
+   "title": "Enso — syntax README (dual visual/textual syntax)",
+   "url": "https://github.com/enso-org/enso/blob/develop/docs/syntax/README.md"
+  },
+  {
+   "id": 75,
+   "title": "Enso — syntax: functions (if-then-else mixfix)",
+   "url": "https://github.com/enso-org/enso/blob/develop/docs/syntax/functions.md"
+  },
+  {
+   "id": 76,
+   "title": "Flyde — Conditional node source",
+   "url": "https://github.com/flydelabs/flyde/blob/main/nodes/src/ControlFlow/Conditional/Conditional.flyde.ts"
+  },
+  {
+   "id": 77,
+   "title": "NoFlo — components documentation",
+   "url": "https://noflojs.org/documentation/components/"
+  },
+  {
+   "id": 78,
+   "title": "React Flow — Computing flows (branching)",
+   "url": "https://reactflow.dev/learn/advanced-use/computing-flows"
+  },
+  {
+   "id": 79,
+   "title": "Scratch Wiki — If () Then, Else block",
+   "url": "https://en.scratch-wiki.info/wiki/If_()_Then,_Else_(block)"
+  },
+  {
+   "id": 80,
+   "title": "Wikipedia — Nassi–Shneiderman diagram",
+   "url": "https://en.wikipedia.org/wiki/Nassi%E2%80%93Shneiderman_diagram"
+  },
+  {
+   "id": 81,
+   "title": "DRAKON — language description (skewer, secondary routes)",
+   "url": "https://drakon-editor.sourceforge.net/DRAKON.pdf"
+  }
+ ]
+}
