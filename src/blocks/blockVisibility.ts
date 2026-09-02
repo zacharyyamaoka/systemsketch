@@ -30,12 +30,15 @@ export function getBlockShapeVisibility(
 	shape: TLShape,
 	editor: Editor,
 ): 'hidden' | 'inherit' {
+	if (isShapeId(shape.parentId)) {
+		const parent = editor.getShape(shape.parentId)
+		if (isBlockShape(parent) && parent.props.view !== 'expanded') return 'hidden'
+	}
 	if (shape.type === CONNECTION_SHAPE_TYPE) {
 		return connectionHiddenByBranch(editor, shape) ? 'hidden' : 'inherit'
 	}
 	if (!isShapeId(shape.parentId)) return 'inherit'
 	const parent = editor.getShape(shape.parentId)
-	if (isBlockShape(parent) && parent.props.view !== 'expanded') return 'hidden'
 	if (isBranchShape(parent) && isHiddenByFoldedArm(editor, shape)) return 'hidden'
 	return 'inherit'
 }
