@@ -252,6 +252,19 @@ def build() -> str:
       </div>
     </div>
 
+    <div class="note" style="border-color:#c7e6d3; background:var(--green-soft)">
+      <b>Merged with the <code>.systemsketch</code> file type, and re-proved against it.</b>
+      That work landed on <code>main</code> while this was being built, and it edits the same five files.
+      Two of its decisions had to be folded in rather than merged over: a row now carries the document's
+      <em>encoding</em> beside the folder/document distinction, so it can say <code>sketch</code> or
+      <code>tldraw</code>; and its narrower fix for the same crash &mdash; refusing the chooser when the
+      controller has no <code>DISPLAY</code> &mdash; was dropped, because there is no longer a chooser to
+      refuse. A unit test caught the semantic half: a new board is a <code>.systemsketch</code> now, and
+      collision is judged on the <em>title</em>, so an untitled reservation blocks that name in either
+      extension. Both journeys below were re-run against the merged tree, with both document types in the
+      fixture.
+    </div>
+
     <div class="note">
       <b>The regression guard is a test, not a habit.</b>
       <code>test_the_host_never_shells_out_to_a_desktop_file_chooser</code> greps every
@@ -268,11 +281,12 @@ def build() -> str:
       actually use needs: a filter, a breadcrumb, arrow keys, places, and a second confirm button.
     </p>
     <figure>
-      <img src="{figure('browser')}" alt="The SystemSketch open dialog listing a folder and two boards">
+      <img src="{figure('browser')}" alt="The SystemSketch open dialog listing a folder, two .systemsketch boards and one .tldr">
       <figcaption>
         <b>Ctrl+O, in the running app.</b> Places (the SystemSketch folder, then Home), Recent, a breadcrumb
-        whose last crumb is the folder you are in, and the folder's own subfolders and <code>.tldr</code>
-        documents. The first document is pre-selected, so Enter means something before you touch anything.
+        whose last crumb is the folder you are in, and the folder's own subfolders and documents &mdash; each
+        row naming its own type, <code>sketch</code> or <code>tldraw</code>. The first document is
+        pre-selected, so Enter means something before you touch anything.
       </figcaption>
     </figure>
     <div class="pair" style="margin-top:18px">

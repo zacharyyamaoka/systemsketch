@@ -36,6 +36,7 @@ function freeDisplay() {
 function emptyDocument(name) {
   return JSON.stringify(
     {
+      systemSketch: { formatVersion: 1, application: 'SystemSketch', shapes: {}, bindings: {} },
       tldrawFileFormatVersion: 1,
       schema: { schemaVersion: 2, sequences: {} },
       records: [
@@ -135,7 +136,7 @@ async function main() {
   const profile = await mkdtemp(join(tmpdir(), 'systemsketch-windows-profile-'))
   const workspace = join(filesRoot, 'SystemSketch')
   await mkdir(workspace, { recursive: true })
-  await writeFile(join(workspace, 'Arm.tldr'), emptyDocument('Arm'))
+  await writeFile(join(workspace, 'Arm.systemsketch'), emptyDocument('Arm'))
   await mkdir(join(ROOT, 'docs', 'assets'), { recursive: true })
 
   const xvfb = spawn('Xvfb', [display, '-screen', '0', `${SCREEN.width}x${SCREEN.height}x24`, '-nolisten', 'tcp'], {
@@ -171,7 +172,7 @@ async function main() {
     }
 
     // The desktop launcher's own window recipe, aimed at a private display.
-    const boardUrl = `http://127.0.0.1:${port}/?board=${encodeURIComponent(join(workspace, 'Arm.tldr'))}`
+    const boardUrl = `http://127.0.0.1:${port}/?board=${encodeURIComponent(join(workspace, 'Arm.systemsketch'))}`
     chrome = spawn(chromePath, [
       `--app=${boardUrl}`,
       `--class=${APP_CLASS}`,

@@ -35,16 +35,27 @@ const SHOT_SECOND_WINDOW = join(ASSETS, 'workspace-second-window.png')
 const RESULTS = join(ASSETS, 'workspace-browser-results.json')
 
 /** An empty but valid portable tldraw document. */
-function emptyDocument(name) {
+function tldrawCore(name) {
+  return {
+    tldrawFileFormatVersion: 1,
+    schema: { schemaVersion: 2, sequences: {} },
+    records: [
+      { typeName: 'document', id: 'document:document', gridSize: 10, name },
+      { typeName: 'page', id: 'page:page', name: 'Page 1', index: 'a1', meta: {} },
+    ],
+  }
+}
+
+/**
+ * The suffix decides the encoding, so a fixture must carry the right one: a
+ * `.systemsketch` leads with the envelope, a `.tldr` is the bare tldraw file.
+ */
+function documentFor(path, name) {
+  const core = tldrawCore(name)
   return JSON.stringify(
-    {
-      tldrawFileFormatVersion: 1,
-      schema: { schemaVersion: 2, sequences: {} },
-      records: [
-        { typeName: 'document', id: 'document:document', gridSize: 10, name },
-        { typeName: 'page', id: 'page:page', name: 'Page 1', index: 'a1', meta: {} },
-      ],
-    },
+    path.endsWith('.systemsketch')
+      ? { systemSketch: { formatVersion: 1, application: 'SystemSketch', shapes: {}, bindings: {} }, ...core }
+      : core,
     null,
     2,
   )
@@ -54,15 +65,26 @@ async function seed(filesRoot) {
   const workspace = join(filesRoot, 'SystemSketch')
   const nested = join(workspace, 'Robotics')
   await mkdir(nested, { recursive: true })
-  await writeFile(join(workspace, 'Arm.tldr'), emptyDocument('Arm'))
-  await writeFile(join(workspace, 'Gripper.tldr'), emptyDocument('Gripper'))
-  await writeFile(join(nested, 'Elbow.tldr'), emptyDocument('Elbow'))
+  // Both document types, because the browser has to show both.
+  for (const path of [
+    join(workspace, 'Arm.systemsketch'),
+    join(workspace, 'Gripper.systemsketch'),
+    join(workspace, 'Legacy.tldr'),
+    join(nested, 'Elbow.systemsketch'),
+  ]) {
+    await writeFile(path, documentFor(path, path.split('/').pop().replace(/\.[^.]+$/, '')))
+  }
   return { workspace, nested }
 }
 
 const rowTitles = (page) => evaluate(page, `JSON.stringify(
   Array.from(document.querySelectorAll('[data-testid="workspace-row"]'))
     .map((row) => \`\${row.dataset.kind}:\${row.querySelector('b').textContent}\`))`)
+
+/** What each row says it is: `folder`, `systemsketch`, or `tldraw`. */
+const rowKinds = (page) => evaluate(page, `JSON.stringify(
+  Array.from(document.querySelectorAll('[data-testid="workspace-row"] small'))
+    .map((cell) => cell.dataset.kind))`)
 
 const selectedRow = (page) => evaluate(page, `(() => {
   const row = document.querySelector('[data-testid="workspace-row"].selected')
@@ -115,7 +137,7 @@ async function main() {
     assert.equal(pick.status, 404, 'the desktop-chooser endpoint still answers')
     pass('the host no longer exposes a subprocess file chooser (/api/workspace/pick → 404)')
 
-    await openApp(page, port, `?board=${encodeURIComponent(join(workspace, 'Arm.tldr'))}`)
+    await openApp(page, port, `?board=${encodeURIComponent(join(workspace, 'Arm.systemsketch'))}`)
     await waitFor(page, `document.querySelector('[data-testid="systemsketch-app"]')`, 'the app')
     assert.equal(await evaluate(page, 'document.title'), 'Arm — SystemSketch')
     pass('the window title names the open board, so many windows stay tellable apart')
@@ -138,11 +160,14 @@ async function main() {
     await key(page, 'o', 'KeyO', 2)
     await waitFor(page, `document.querySelector('[data-testid="workspace-dialog"]')`, 'the file browser')
     assert.deepEqual(JSON.parse(await rowTitles(page)), [
-      'folder:Robotics', 'document:Arm', 'document:Gripper',
+      'folder:Robotics', 'document:Arm', 'document:Gripper', 'document:Legacy',
+    ])
+    assert.deepEqual(JSON.parse(await rowKinds(page)), [
+      'folder', 'systemsketch', 'systemsketch', 'tldraw',
     ])
     assert.deepEqual(JSON.parse(await crumbs(page)).slice(-1), ['SystemSketch'])
     await shoot(page, SHOT_BROWSER)
-    pass('Ctrl+O opens the in-app browser, listing this folder and its documents')
+    pass('Ctrl+O lists this folder, naming each document\u2019s own type')
 
     // 4. Typing filters the folder; arrow keys and Enter never touch the mouse.
     await clickElement(page, '[data-testid="workspace-filter"]')
@@ -193,7 +218,7 @@ async function main() {
     const third = all.find((target) => /Untitled/.test(decodeURIComponent(target.url)))
     assert.ok(third, 'Ctrl+Shift+N did not open a fresh untitled board')
     assert.ok(
-      !decodeURIComponent(third.url).includes(join(nested, 'Elbow.tldr')),
+      !decodeURIComponent(third.url).includes(join(nested, 'Elbow.systemsketch')),
       'the new window reused an open board instead of a fresh one',
     )
     const thirdPage = await new Cdp(third.webSocketDebuggerUrl).open()

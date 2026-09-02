@@ -12,7 +12,7 @@
   "ok": true
  },
  {
-  "label": "Ctrl+O opens the in-app browser, listing this folder and its documents",
+  "label": "Ctrl+O lists this folder, naming each document’s own type",
   "ok": true
  },
  {
