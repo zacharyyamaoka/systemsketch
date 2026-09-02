@@ -1,0 +1,374 @@
+{
+  "feature": "Delayed cable (z⁻¹ pill)",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "shapes": [
+    {
+      "id": "estimate",
+      "type": "block",
+      "x": 120,
+      "y": 330,
+      "props": {
+        "title": "estimate()",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 170,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "refine",
+      "type": "block",
+      "x": 620,
+      "y": 330,
+      "props": {
+        "title": "refine()",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 190,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "encode",
+      "type": "block",
+      "x": 1120,
+      "y": 330,
+      "props": {
+        "title": "encode()",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 170,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "bytes",
+            "type": "bytes",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "smooth",
+      "type": "block",
+      "x": 620,
+      "y": 600,
+      "props": {
+        "title": "smooth()",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 170,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "seed",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "back",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "delayed",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "out",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "down",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "b1",
+      "type": "connection",
+      "fromId": "seed",
+      "toId": "estimate",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b2",
+      "type": "connection",
+      "fromId": "seed",
+      "toId": "refine",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b3",
+      "type": "connection",
+      "fromId": "down",
+      "toId": "refine",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b4",
+      "type": "connection",
+      "fromId": "down",
+      "toId": "smooth",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b5",
+      "type": "connection",
+      "fromId": "back",
+      "toId": "smooth",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b6",
+      "type": "connection",
+      "fromId": "back",
+      "toId": "refine",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b7",
+      "type": "connection",
+      "fromId": "out",
+      "toId": "refine",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b8",
+      "type": "connection",
+      "fromId": "out",
+      "toId": "encode",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "note-loop",
+      "kind": "note",
+      "text": "refine() → smooth() → back into refine(): a loop's back edge drawn between two Blocks, because the Loop region does not exist yet. The back cable is already marked delayed.",
+      "x": 120,
+      "y": 80,
+      "w": 520,
+      "h": 120
+    },
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Click the dotted cable from smooth.pose back into refine.pose. In the inspector, Temporal reads Delayed (z⁻¹).",
+      "x": 700,
+      "y": 80,
+      "w": 380,
+      "h": 120,
+      "target": {
+        "shapeId": "smooth",
+        "anchor": "top",
+        "dx": -40
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Type 1.0 in the inspector's = value field and press Enter. The pill reads z⁻¹ = 1.0.",
+      "x": 1120,
+      "y": 80,
+      "w": 380,
+      "h": 110
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Drag the pill along the cable, then click Centre the pill in the inspector.",
+      "x": 120,
+      "y": 820,
+      "w": 420,
+      "h": 100
+    },
+    {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 · Open the Dev Hub (</> bottom right) and switch on \"Dash after the z⁻¹ pill\": the run after the pill turns dashed. Mark the seed cable (estimate → refine) delayed too, via right-click › Delayed (z⁻¹), and compare.",
+      "x": 980,
+      "y": 620,
+      "w": 520,
+      "h": 130
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN the back cable is dotted with a z⁻¹ pill you can slide, the pill shows = 1.0 after step 2, the Dev Hub switch dashes the run after the pill, and a reload keeps all of it.",
+      "x": 980,
+      "y": 780,
+      "w": 400,
+      "h": 150
+    }
+  ]
+}
