@@ -137,6 +137,8 @@ Install the resulting `dist/systemsketch-vscode-0.1.0.vsix` from the Extensions 
 `code --install-extension`. `npm test` there drives the packaged extension in a real IDE.
 Obsidian's plugin will live beside it in this repo when it exists.
 
+The [host-theming work order](docs/work-order-host-theming.md) is the next unit of work, written to be handed to an agent: one closed token vocabulary in `src/theme/`, themes that supply *values* (the default derived from tldraw's own palette so the chrome cannot disagree with the board, a `vscode` one mapping to `--vscode-*`, an `obsidian` one when that plugin exists), and one place that decides which is on. It carries the measured size of the job — 666 colour literals across 14 stylesheets — four runnable increments, the split between chrome and document content that must not be themed, and two gates: a lint test, and a browser journey that measures contrast ratios rather than reviewing screenshots.
+
 ## Local files
 
 - SystemSketch opens both `.systemsketch` and `.tldr`, and everything it creates is a `.systemsketch` — the same tldraw file with one extra top-level `systemSketch` envelope. A `.tldr` is saved back as a `.tldr`; changing a document's type is Save As, never rename.
