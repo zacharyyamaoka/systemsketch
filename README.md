@@ -121,6 +121,8 @@ The [`.systemsketch` file-type report](docs/systemsketch-file-type-2026-09-01.ht
 
 The [fan-in report](docs/edge-fan-in-2026-09-01.html) records why a second cable onto an occupied input replaced the first: two starter-kit rules that assume an input has one producer. Sinks now fan in exactly as sources fan out, a press on any dot starts a new cable, an existing cable is moved by selecting it and dragging its terminal handle, and the one drop a sink refuses is an exact copy of a wire it already has, judged in the same `judgeConnection` as every other refusal. `npm run test:polarity` carries the six fan-in checks.
 
+The [state-recorder design review](docs/state-recorder-design-2026-09-01.html) answers the "Recording program state" prompt: a rolling flight recorder that saves the last 30 s as a folder (timestamped Chrome screencast frames plus a JSONL timeline of input, state-chart path, menus, store diffs and console) and puts a prose-plus-paths packet on the clipboard for an agent. Prior art is surveyed from Playwright's trace viewer to Jam.dev and your own `bam_logger` note, five frame sources are scored, and the two load-bearing claims were measured in the real app by `docs/recorder_spike.mjs`: the in-page recorder cost 2 ms over an 8 s Block interaction, and `Page.startScreencast` delivered 99 frames with the inspector and menus in them. The page carries a working playback viewer built from that run. Design and evidence only — no product code yet.
+
 ## Local files
 
 - SystemSketch opens both `.systemsketch` and `.tldr`, and everything it creates is a `.systemsketch` — the same tldraw file with one extra top-level `systemSketch` envelope. A `.tldr` is saved back as a `.tldr`; changing a document's type is Save As, never rename.

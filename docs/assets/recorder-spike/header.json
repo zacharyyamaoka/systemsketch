@@ -1,0 +1,34 @@
+{
+  "startedAt": "2026-09-02T03:54:54.857Z",
+  "url": "http://127.0.0.1:35545/?board=%2Ftmp%2Frecorder-spike-files-AYvPJe%2FSystemSketch%2Frecorder-spike.systemsketch",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.0.0 Safari/537.36",
+  "devicePixelRatio": 1,
+  "viewport": {
+    "w": 1440,
+    "h": 960
+  },
+  "screenBounds": {
+    "x": 0,
+    "y": 0,
+    "w": 1440,
+    "h": 960
+  },
+  "camera": {
+    "x": 0,
+    "y": 0,
+    "z": 1,
+    "meta": {},
+    "id": "camera:page:page",
+    "typeName": "camera"
+  },
+  "pageId": "page:page",
+  "shapeCount": 0,
+  "pathAtStart": "select.idle",
+  "selectedAtStart": [],
+  "durationMs": 8352.3,
+  "recorderCostMs": 2.1,
+  "pathAtEnd": "select.idle",
+  "selectedAtEnd": [
+    "shape:Boi0moAxl9AUz5mU_o5hF"
+  ]
+}
