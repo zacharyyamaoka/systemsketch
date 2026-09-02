@@ -1,0 +1,380 @@
+{
+  "clkTck": 100,
+  "capturedAt": "2026-09-02T04:35:19.262Z",
+  "gesture": "recorder_spike.mjs — draw two Blocks, add ports, wire a cable, drag the detector, right-click, ctrl+wheel",
+  "chrome": {
+    "version": "Google Chrome 149.0.7827.155",
+    "headless": "new",
+    "gpu": "disabled (--disable-gpu, software compositing)",
+    "viewport": "1440x960 @1x"
+  },
+  "settleMs": 250,
+  "variants": {
+    "A": null,
+    "B": {
+      "format": "jpeg",
+      "quality": 70,
+      "everyNthFrame": 1
+    },
+    "C": {
+      "format": "jpeg",
+      "quality": 60,
+      "everyNthFrame": 2,
+      "maxWidth": 960,
+      "maxHeight": 640
+    },
+    "D": {
+      "format": "jpeg",
+      "quality": 50,
+      "everyNthFrame": 3,
+      "maxWidth": 720,
+      "maxHeight": 480
+    }
+  },
+  "order": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "runs": [
+    {
+      "variant": "A",
+      "run": 1,
+      "wallMs": 8353,
+      "cpuSeconds": 1.9,
+      "cpuPct": 22.7,
+      "raf": {
+        "count": 499,
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 33.3,
+        "over33": 1
+      },
+      "longTasks": {
+        "count": 1,
+        "totalMs": 55
+      },
+      "frames": 0,
+      "frameBytes": 0,
+      "fps": 0,
+      "detail": {
+        "cpuReapedSeconds": 0.02,
+        "processesBefore": 13,
+        "processesAfter": 13,
+        "probeWindowMs": 8354.4,
+        "longestTaskMs": 55,
+        "visibility": "visible",
+        "nodeCpuSeconds": 0.052,
+        "cablesOnBoard": 1,
+        "profileDir": "/tmp/recorder-cost-chrome-9B3WNF"
+      }
+    },
+    {
+      "variant": "B",
+      "run": 1,
+      "wallMs": 8373,
+      "cpuSeconds": 3.73,
+      "cpuPct": 44.5,
+      "raf": {
+        "count": 496,
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 50,
+        "over33": 4
+      },
+      "longTasks": {
+        "count": 1,
+        "totalMs": 68
+      },
+      "frames": 97,
+      "frameBytes": 4490830,
+      "fps": 11.6,
+      "detail": {
+        "cpuReapedSeconds": 0.02,
+        "processesBefore": 13,
+        "processesAfter": 13,
+        "probeWindowMs": 8374.3,
+        "longestTaskMs": 68,
+        "visibility": "visible",
+        "nodeCpuSeconds": 0.149,
+        "cablesOnBoard": 1,
+        "profileDir": "/tmp/recorder-cost-chrome-Pgl6JG"
+      }
+    },
+    {
+      "variant": "C",
+      "run": 1,
+      "wallMs": 8411,
+      "cpuSeconds": 2.97,
+      "cpuPct": 35.3,
+      "raf": {
+        "count": 502,
+        "p50": 16.7,
+        "p95": 16.7,
+        "max": 50,
+        "over33": 1
+      },
+      "longTasks": {
+        "count": 1,
+        "totalMs": 66
+      },
+      "frames": 49,
+      "frameBytes": 986236,
+      "fps": 5.8,
+      "detail": {
+        "cpuReapedSeconds": 0.02,
+        "processesBefore": 13,
+        "processesAfter": 13,
+        "probeWindowMs": 8411.2,
+        "longestTaskMs": 66,
+        "visibility": "visible",
+        "nodeCpuSeconds": 0.084,
+        "cablesOnBoard": 1,
+        "profileDir": "/tmp/recorder-cost-chrome-mw0rV0"
+      }
+    },
+    {
+      "variant": "D",
+      "run": 1,
+      "wallMs": 8386,
+      "cpuSeconds": 2.7,
+      "cpuPct": 32.2,
+      "raf": {
+        "count": 500,
+        "p50": 16.7,
+        "p95": 16.7,
+        "max": 50,
+        "over33": 1
+      },
+      "longTasks": {
+        "count": 1,
+        "totalMs": 61
+      },
+      "frames": 32,
+      "frameBytes": 350321,
+      "fps": 3.8,
+      "detail": {
+        "cpuReapedSeconds": 0.02,
+        "processesBefore": 13,
+        "processesAfter": 13,
+        "probeWindowMs": 8388.1,
+        "longestTaskMs": 61,
+        "visibility": "visible",
+        "nodeCpuSeconds": 0.068,
+        "cablesOnBoard": 1,
+        "profileDir": "/tmp/recorder-cost-chrome-5hYfEB"
+      }
+    },
+    {
+      "variant": "A",
+      "run": 2,
+      "wallMs": 8408,
+      "cpuSeconds": 2.15,
+      "cpuPct": 25.6,
+      "raf": {
+        "count": 497,
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 50,
+        "over33": 5
+      },
+      "longTasks": {
+        "count": 1,
+        "totalMs": 53
+      },
+      "frames": 0,
+      "frameBytes": 0,
+      "fps": 0,
+      "detail": {
+        "cpuReapedSeconds": 0.02,
+        "processesBefore": 13,
+        "processesAfter": 13,
+        "probeWindowMs": 8409.5,
+        "longestTaskMs": 53,
+        "visibility": "visible",
+        "nodeCpuSeconds": 0.059,
+        "cablesOnBoard": 1,
+        "profileDir": "/tmp/recorder-cost-chrome-o44CtS"
+      }
+    },
+    {
+      "variant": "B",
+      "run": 2,
+      "wallMs": 8368,
+      "cpuSeconds": 3.42,
+      "cpuPct": 40.9,
+      "raf": {
+        "count": 500,
+        "p50": 16.7,
+        "p95": 16.7,
+        "max": 33.3,
+        "over33": 1
+      },
+      "longTasks": {
+        "count": 1,
+        "totalMs": 54
+      },
+      "frames": 91,
+      "frameBytes": 4205946,
+      "fps": 10.9,
+      "detail": {
+        "cpuReapedSeconds": 0.01,
+        "processesBefore": 13,
+        "processesAfter": 13,
+        "probeWindowMs": 8368.7,
+        "longestTaskMs": 54,
+        "visibility": "visible",
+        "nodeCpuSeconds": 0.126,
+        "cablesOnBoard": 1,
+        "profileDir": "/tmp/recorder-cost-chrome-6Cav1Z"
+      }
+    },
+    {
+      "variant": "C",
+      "run": 2,
+      "wallMs": 8344,
+      "cpuSeconds": 2.7,
+      "cpuPct": 32.4,
+      "raf": {
+        "count": 499,
+        "p50": 16.7,
+        "p95": 16.7,
+        "max": 33.3,
+        "over33": 1
+      },
+      "longTasks": {
+        "count": 1,
+        "totalMs": 55
+      },
+      "frames": 45,
+      "frameBytes": 907758,
+      "fps": 5.4,
+      "detail": {
+        "cpuReapedSeconds": 0.02,
+        "processesBefore": 13,
+        "processesAfter": 13,
+        "probeWindowMs": 8344.7,
+        "longestTaskMs": 55,
+        "visibility": "visible",
+        "nodeCpuSeconds": 0.07,
+        "cablesOnBoard": 1,
+        "profileDir": "/tmp/recorder-cost-chrome-df4Cib"
+      }
+    },
+    {
+      "variant": "D",
+      "run": 2,
+      "wallMs": 8340,
+      "cpuSeconds": 2.46,
+      "cpuPct": 29.5,
+      "raf": {
+        "count": 498,
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 33.3,
+        "over33": 1
+      },
+      "longTasks": {
+        "count": 1,
+        "totalMs": 53
+      },
+      "frames": 31,
+      "frameBytes": 333886,
+      "fps": 3.7,
+      "detail": {
+        "cpuReapedSeconds": 0.02,
+        "processesBefore": 13,
+        "processesAfter": 13,
+        "probeWindowMs": 8340.9,
+        "longestTaskMs": 53,
+        "visibility": "visible",
+        "nodeCpuSeconds": 0.048,
+        "cablesOnBoard": 1,
+        "profileDir": "/tmp/recorder-cost-chrome-GkRHn9"
+      }
+    }
+  ],
+  "summary": {
+    "A": {
+      "wallMs": 8380.5,
+      "cpuSeconds": 2.03,
+      "cpuPct": 24.15,
+      "raf": {
+        "count": 498,
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 41.65,
+        "over33": 3
+      },
+      "longTasks": {
+        "count": 1,
+        "totalMs": 54
+      },
+      "frames": 0,
+      "frameBytes": 0,
+      "fps": 0
+    },
+    "B": {
+      "wallMs": 8370.5,
+      "cpuSeconds": 3.58,
+      "cpuPct": 42.7,
+      "raf": {
+        "count": 498,
+        "p50": 16.7,
+        "p95": 16.75,
+        "max": 41.65,
+        "over33": 2.5
+      },
+      "longTasks": {
+        "count": 1,
+        "totalMs": 61
+      },
+      "frames": 94,
+      "frameBytes": 4348388,
+      "fps": 11.25
+    },
+    "C": {
+      "wallMs": 8377.5,
+      "cpuSeconds": 2.84,
+      "cpuPct": 33.85,
+      "raf": {
+        "count": 500.5,
+        "p50": 16.7,
+        "p95": 16.7,
+        "max": 41.65,
+        "over33": 1
+      },
+      "longTasks": {
+        "count": 1,
+        "totalMs": 60.5
+      },
+      "frames": 47,
+      "frameBytes": 946997,
+      "fps": 5.6
+    },
+    "D": {
+      "wallMs": 8363,
+      "cpuSeconds": 2.58,
+      "cpuPct": 30.85,
+      "raf": {
+        "count": 499,
+        "p50": 16.7,
+        "p95": 16.75,
+        "max": 41.65,
+        "over33": 1
+      },
+      "longTasks": {
+        "count": 1,
+        "totalMs": 57
+      },
+      "frames": 31.5,
+      "frameBytes": 342103.5,
+      "fps": 3.75
+    }
+  }
+}

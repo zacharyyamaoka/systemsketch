@@ -32,7 +32,15 @@ from release_lib import (
 STABLE_PORT = int(os.environ.get("SYSTEMSKETCH_STABLE_PORT", "4321"))
 PREVIEW_PORT = int(os.environ.get("SYSTEMSKETCH_PREVIEW_PORT", "4322"))
 PREVIEW_API_PORT = int(os.environ.get("SYSTEMSKETCH_PREVIEW_API_PORT", "4323"))
+# Each channel's Chrome opens a DevTools port so the flight recorder's sidecar
+# can screencast the window. Loopback only; Chrome refuses any browser origin.
+PREVIEW_CDP_PORT = int(os.environ.get("SYSTEMSKETCH_PREVIEW_CDP_PORT", "4324"))
+STABLE_CDP_PORT = int(os.environ.get("SYSTEMSKETCH_STABLE_CDP_PORT", "4325"))
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
+def cdp_port_for_channel(channel: str) -> int:
+    return PREVIEW_CDP_PORT if channel == "preview" else STABLE_CDP_PORT
 
 
 def default_state_home() -> Path:
@@ -177,6 +185,8 @@ def ensure_stable(release_home: Path, state_home: Path) -> tuple[str, dict]:
             str(release_home),
             "--source-root",
             str(source_root),
+            "--cdp-port",
+            str(STABLE_CDP_PORT),
         ],
         cwd=root,
         log=log_path(state_home, "stable", "server.log"),
@@ -238,6 +248,8 @@ def ensure_preview(release_home: Path, state_home: Path) -> tuple[str, dict]:
             str(release_home),
             "--source-root",
             str(source_root),
+            "--cdp-port",
+            str(PREVIEW_CDP_PORT),
         ],
         cwd=source_root,
         log=log_path(state_home, "preview", "api.log"),
@@ -308,6 +320,7 @@ def open_app(url: str, state_home: Path, channel: str, *, new_window: bool = Fal
             f"--user-data-dir={profile}",
             "--no-first-run",
             "--no-default-browser-check",
+            f"--remote-debugging-port={cdp_port_for_channel(channel)}",
         ]
     if new_window:
         command.append("--new-window")

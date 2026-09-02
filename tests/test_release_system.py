@@ -13,6 +13,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
 from release_lib import (  # noqa: E402
+    CONTROLLER_RUNTIME_FILES,
     controller_fingerprint,
     promote_candidate,
     read_channels,
@@ -226,13 +227,7 @@ class ReleaseSystemTests(unittest.TestCase):
             dist = self.make_dist(root, "controller-hash")
             scripts = root / "scripts"
             scripts.mkdir()
-            for name in (
-                "launch_systemsketch.py",
-                "release.py",
-                "release_lib.py",
-                "server.py",
-                "workspace_store.py",
-            ):
+            for name in ("launch_systemsketch.py", "release.py", *CONTROLLER_RUNTIME_FILES):
                 (scripts / name).write_text(f"# {name}\n", encoding="utf-8")
             before = release_build_id(root, dist)
             (scripts / "launch_systemsketch.py").write_text("# launcher changed\n", encoding="utf-8")
@@ -241,7 +236,7 @@ class ReleaseSystemTests(unittest.TestCase):
     def test_controller_fingerprint_changes_with_the_preview_api_runtime(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             scripts = Path(directory)
-            for name in ("release_lib.py", "server.py", "workspace_store.py"):
+            for name in CONTROLLER_RUNTIME_FILES:
                 (scripts / name).write_text(f"# {name}\n", encoding="utf-8")
             before = controller_fingerprint(scripts)
             (scripts / "workspace_store.py").write_text("# workspace API changed\n", encoding="utf-8")

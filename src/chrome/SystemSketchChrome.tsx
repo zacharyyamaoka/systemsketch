@@ -23,6 +23,7 @@ import {
   OnCanvasBlockPicker,
 } from '../blocks/ui'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
+import { RecorderIndicator } from '../recorder/RecorderControls'
 import { useChrome } from './ChromeProvider'
 import { SelectionContextualMenu } from './SelectionContextualMenu'
 import type { RightSurface } from './chromeState'
@@ -327,6 +328,7 @@ export function SystemSketchSurfaceHost() {
 
   return (
     <div className="systemsketch-surface-host" data-testid="systemsketch-surface-host">
+      <RecorderIndicator />
       <OnCanvasBlockPicker />
       <HitAreaOverlay />
       <DepthStackNavigator />

@@ -49,6 +49,7 @@ import {
 import { interfaceScaleCssValues, useInterfaceScale } from './settings/interfaceScale'
 import { installInstantTextEditing } from './instantTextEditing'
 import { installDevelopmentSeam } from './developmentSeam'
+import { installFlightRecorder } from './recorder/recorderStore'
 import { enablePasteAtCursor } from './pasteAtCursor'
 import type { CSSProperties } from 'react'
 import './app.css'
@@ -111,7 +112,9 @@ function SystemSketchCanvas() {
     const stopBlockPortMenuTarget = installBlockPortMenuTarget(editor)
     const stopExcalidrawPaste = registerExcalidrawPasteHandler(editor)
     const stopToolbarSideEffects = registerToolbarSideEffects(editor)
+    const stopFlightRecorder = installFlightRecorder(editor)
     return () => {
+      stopFlightRecorder()
       stopToolbarSideEffects()
       stopExcalidrawPaste()
       stopBlockPortMenuTarget()
@@ -169,7 +172,9 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
       ? installBlockPortMenuTarget(editor)
       : () => undefined
     const stopDevelopmentSeam = installDevelopmentSeam(editor)
+    const stopFlightRecorder = installFlightRecorder(editor)
     return () => {
+      stopFlightRecorder()
       stopDevelopmentSeam()
       stopBlockPortMenuTarget()
       stopBlockClickToEdit()
