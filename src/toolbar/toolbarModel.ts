@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from 'react'
 
+import type { ConnectionRoutingKind } from '../blocks/connections/connectionModel'
+
 export type ArrowPreset = 'straight' | 'curve' | 'elbow'
 
 export type ShapeFamilyTool =
@@ -21,10 +23,17 @@ export interface ToolbarPreferences {
   lastDrawTool: DrawFamilyTool
 }
 
+/**
+ * Elbow is the datum, for arrows and for data edges alike.
+ *
+ * "That is the most common one we use" — so a fresh install draws an elbow
+ * before anyone has touched a control, and `lastArrowPreset` is the single
+ * value both the arrow tool and the edge layer read to know what that means.
+ */
 export const DEFAULT_TOOLBAR_PREFERENCES: ToolbarPreferences = {
   version: 1,
   lastShapeTool: 'rectangle',
-  lastArrowPreset: 'straight',
+  lastArrowPreset: 'elbow',
   lastDrawTool: 'draw',
 }
 
@@ -68,6 +77,41 @@ export function parseToolbarPreferences(value: unknown): ToolbarPreferences {
 
 export function nextArrowPreset(preset: ArrowPreset): ArrowPreset {
   return ARROW_PRESETS[(ARROW_PRESETS.indexOf(preset) + 1) % ARROW_PRESETS.length]
+}
+
+/**
+ * The one table that makes an arrow and a data edge the same choice.
+ *
+ * Both vocabularies name the same three shapes; only the words differ, because
+ * tldraw's arrow calls its bezier `arc` while the cable calls it `curved`. A
+ * preset therefore *is* a routing, and every surface that sets one sets both.
+ */
+export const ARROW_PRESET_ROUTING: Record<ArrowPreset, ConnectionRoutingKind> = {
+  straight: 'straight',
+  curve: 'curved',
+  elbow: 'elbow',
+}
+
+export function connectionRoutingForArrowPreset(preset: ArrowPreset): ConnectionRoutingKind {
+  return ARROW_PRESET_ROUTING[preset]
+}
+
+/**
+ * How many presses of A, from a freshly started app, land on this preset.
+ *
+ * The toolbar prints this beside each arrow, and it has to be derived rather
+ * than typed: the cycle is a rotation, so moving the starting preset silently
+ * renumbers every rung. Deriving it means the hint cannot drift from the key.
+ */
+export function arrowPresetPressCount(preset: ArrowPreset): number {
+  const start = ARROW_PRESETS.indexOf(DEFAULT_TOOLBAR_PREFERENCES.lastArrowPreset)
+  const target = ARROW_PRESETS.indexOf(preset)
+  return ((target - start + ARROW_PRESETS.length) % ARROW_PRESETS.length) + 1
+}
+
+/** Every arrow preset in the order A walks them from a fresh start. */
+export function arrowPresetsInPressOrder(): ArrowPreset[] {
+  return [...ARROW_PRESETS].sort((a, b) => arrowPresetPressCount(a) - arrowPresetPressCount(b))
 }
 
 export function arrowPresetForActivation(

@@ -1,4 +1,4 @@
-import { WeakCache, atom, type Atom, type Editor, type TLShapeId } from 'tldraw'
+import { WeakCache, atom, computed, type Atom, type Computed, type Editor, type TLShapeId } from 'tldraw'
 import type { PortDot } from '../connections/connectionModel'
 
 /**
@@ -67,6 +67,47 @@ export function updatePortState(editor: Editor, update: Partial<PortState>): voi
 
 export function clearPortDragState(editor: Editor): void {
 	updatePortState(editor, { hintingPort: null, eligiblePorts: null })
+}
+
+type EligiblePorts = PortState['eligiblePorts']
+
+function sameEligiblePorts(before: EligiblePorts, after: EligiblePorts): boolean {
+	if (before === after) return true
+	if (!before || !after) return false
+	if (before.connectionId !== after.connectionId) return false
+	if (
+		before.anchor.shapeId !== after.anchor.shapeId
+		|| before.anchor.portId !== after.anchor.portId
+	) return false
+	const a = before.excludeBlocks
+	const b = after.excludeBlocks
+	if (a === b) return true
+	if (!a || !b || a.size !== b.size) return false
+	for (const id of a) if (!b.has(id)) return false
+	return true
+}
+
+const eligiblePortsSignals = new WeakCache<Editor, Computed<EligiblePorts>>()
+
+/**
+ * `eligiblePorts` as a signal that changes only when a landing would be judged
+ * differently.
+ *
+ * The drag rewrites the whole port state on every pointer move, and every dot
+ * on the board re-asks the rules whenever the state it reads changes — 11 ms
+ * of judging per second of cable drag on 48 Blocks, measured. The anchor and
+ * the cycle set are the rules' only inputs from here, and they hold still for
+ * the length of a drag, so the dots read them through this equality-guarded
+ * view instead of the raw atom.
+ */
+export function getEligiblePorts(editor: Editor): EligiblePorts {
+	return eligiblePortsSignals
+		.get(editor, () => computed(
+			'eligible ports',
+			() => portState.get(editor).eligiblePorts,
+			{ isEqual: sameEligiblePorts },
+		))
+		.get()
 }
 
 /**

@@ -1,0 +1,18 @@
+[
+ {
+  "label": "SystemSketch runs as one real desktop window in Chrome app mode",
+  "ok": true
+ },
+ {
+  "label": "Ctrl+Shift+N adds a second X window on its own board (Untitled — SystemSketch)",
+  "ok": true
+ },
+ {
+  "label": "each window carries its own board name at the X level, not just in the DOM",
+  "ok": true
+ },
+ {
+  "label": "captured both windows from the X display",
+  "ok": true
+ }
+]

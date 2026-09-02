@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import contextlib
+import io
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -13,21 +16,59 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
 from release_lib import (  # noqa: E402
+    ReleaseError,
+    SOURCE_PATHS,
     controller_fingerprint,
     promote_candidate,
     read_channels,
     read_manifest,
     release_build_id,
     rollback_stable,
+    source_provenance,
     source_root_from_channels,
     stage_candidate,
 )
 import launch_systemsketch as launcher  # noqa: E402
+import release as release_cli  # noqa: E402
 import install_desktop as installer  # noqa: E402
 from server import SystemSketchServer  # noqa: E402
 
 
+def git(root: Path, *arguments: str) -> str:
+    completed = subprocess.run(
+        [
+            "git",
+            "-c", "user.email=test@systemsketch.local",
+            "-c", "user.name=SystemSketch Test",
+            "-c", "commit.gpgsign=false",
+            "-C", str(root),
+            *arguments,
+        ],
+        capture_output=True, text=True, check=True,
+    )
+    return completed.stdout
+
+
 class ReleaseSystemTests(unittest.TestCase):
+    def make_git_project(self, root: Path) -> Path:
+        """A committed checkout shaped like this project: enough for a release."""
+        scripts = root / "scripts"
+        scripts.mkdir(parents=True)
+        for name in (
+            "launch_systemsketch.py", "release.py", "release_lib.py",
+            "server.py", "workspace_store.py",
+        ):
+            (scripts / name).write_text(f"# {name}\n", encoding="utf-8")
+        (root / "package.json").write_text('{"version": "9.9.9"}', encoding="utf-8")
+        (root / "src").mkdir()
+        (root / "src" / "App.tsx").write_text("export const App = () => null\n", encoding="utf-8")
+        (root / "docs").mkdir()
+        (root / "docs" / "report.html").write_text("<main>report</main>", encoding="utf-8")
+        git(root, "init", "-q", "-b", "main")
+        git(root, "add", "-A")
+        git(root, "commit", "-qm", "initial")
+        return root
+
     def make_dist(self, root: Path, marker: str) -> Path:
         dist = root / f"dist-{marker}"
         dist.mkdir()
@@ -324,6 +365,86 @@ class ReleaseSystemTests(unittest.TestCase):
             self.assertTrue(unrelated_icon.exists())
             self.assertFalse(stale_svg.exists())
             self.assertFalse(stale_png.exists())
+
+
+    def test_a_release_records_the_commit_it_was_built_from(self) -> None:
+        """A build id is a content address; it says nothing about the source.
+
+        The tree that produced a build keeps moving — several sessions edit it
+        at once — so without a commit there is no way back from a Stable
+        artifact to the code inside it.
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project = self.make_git_project(root / "project")
+            release_home = root / "runtime"
+
+            build, manifest = stage_candidate(project, release_home, self.make_dist(root, "one"))
+            head = git(project, "rev-parse", "HEAD").strip()
+
+            self.assertEqual(manifest["commit"], head)
+            self.assertEqual(manifest["branch"], "main")
+            self.assertFalse(manifest["sourceDirty"])
+            # Old controllers read these manifests, so the schema must not move.
+            self.assertEqual(manifest["schemaVersion"], 1)
+            self.assertEqual(read_manifest(release_home, build)["commit"], head)
+
+    def test_only_source_makes_a_build_dirty(self) -> None:
+        """Regenerated reports must never block a release.
+
+        Peers rewrite `docs/` captures constantly; if that counted as dirty,
+        the gate would be permanently red and would simply be turned off.
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            project = self.make_git_project(Path(directory) / "project")
+
+            (project / "docs" / "report.html").write_text("<main>rebuilt</main>", encoding="utf-8")
+            (project / "docs" / "capture.png").write_bytes(b"\x89PNG")
+            self.assertFalse(source_provenance(project).dirty)
+
+            (project / "package.json").write_text('{"version": "9.9.9", "x": 1}', encoding="utf-8")
+            (project / "src" / "Untracked.tsx").write_text("export const x = 1\n", encoding="utf-8")
+            dirty = source_provenance(project)
+            self.assertTrue(dirty.dirty)
+            # Both names intact: `git status --porcelain` puts two status
+            # columns before the path, so trimming its output would eat the
+            # first character of the first line.
+            self.assertEqual(dirty.dirty_paths, ("package.json", "src/Untracked.tsx"))
+            self.assertIn("package.json", SOURCE_PATHS)
+
+    def test_a_tree_with_no_git_records_unknown_rather_than_clean(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            plain = Path(directory) / "plain"
+            (plain / "src").mkdir(parents=True)
+            provenance = source_provenance(plain)
+            self.assertIsNone(provenance.commit)
+            self.assertIsNone(provenance.dirty)
+            self.assertEqual(provenance.dirty_paths, ())
+
+    def test_a_release_refuses_a_dirty_source_tree_unless_overridden(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = self.make_git_project(Path(directory) / "project")
+            release_cli.refuse_dirty_source(False, project)  # clean: no refusal
+
+            (project / "src" / "App.tsx").write_text("export const App = () => 1\n", encoding="utf-8")
+            with self.assertRaises(ReleaseError) as refusal:
+                release_cli.refuse_dirty_source(False, project)
+            self.assertIn("src/App.tsx", str(refusal.exception))
+            self.assertIn("--allow-dirty", str(refusal.exception))
+
+            with contextlib.redirect_stdout(io.StringIO()) as spoken:
+                release_cli.refuse_dirty_source(True, project)  # the deliberate override
+            self.assertIn("src/App.tsx", spoken.getvalue())
+
+    def test_a_dirty_release_says_so_in_its_own_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project = self.make_git_project(root / "project")
+            (project / "src" / "App.tsx").write_text("export const App = () => 2\n", encoding="utf-8")
+
+            _build, manifest = stage_candidate(project, root / "runtime", self.make_dist(root, "dirty"))
+            self.assertTrue(manifest["sourceDirty"])
+            self.assertEqual(manifest["commit"], git(project, "rev-parse", "HEAD").strip())
 
 
 if __name__ == "__main__":

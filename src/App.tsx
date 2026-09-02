@@ -6,6 +6,7 @@ import { EXCALIDRAW_SHAPE_UTILS, registerExcalidrawPasteHandler } from './excali
 import {
   BlockShapeUtil,
   BlockTool,
+  getBlockShapeVisibility,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
 } from './blocks'
@@ -27,6 +28,7 @@ import {
   resolveDevelopmentProfile,
   type DevelopmentProfileId,
 } from './developmentProfiles'
+import { EmbeddedCanvas, isEmbedded } from './embed'
 import { ChromeProvider } from './chrome/ChromeProvider'
 import {
   SystemSketchMenuPanel,
@@ -36,6 +38,7 @@ import {
 import { SystemSketchNavigationPanel } from './SystemSketchUtilities'
 import { SystemSketchFigmaToolbar } from './toolbar/SystemSketchToolbar'
 import {
+  applyStoredArrowPreset,
   registerToolbarSideEffects,
   SYSTEMSKETCH_TOOLBAR_OVERRIDES,
 } from './toolbar/toolbarIntegration'
@@ -51,6 +54,7 @@ import { installDevelopmentSeam } from './developmentSeam'
 import { enablePasteAtCursor } from './pasteAtCursor'
 import type { CSSProperties } from 'react'
 import './app.css'
+import { SYSTEMSKETCH_THEMES } from './appearance/figjamPalette'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
@@ -138,11 +142,13 @@ function SystemSketchCanvas() {
         assetUrls={ASSET_URLS}
         bindingUtils={SYSTEMSKETCH_BINDING_UTILS}
         components={SYSTEMSKETCH_COMPONENTS}
+        getShapeVisibility={getBlockShapeVisibility}
         licenseKey={TLDRAW_LICENSE_KEY}
         onMount={onMount}
         overlayUtils={SYSTEMSKETCH_OVERLAY_UTILS}
         overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
         shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}
+        themes={SYSTEMSKETCH_THEMES}
         tools={SYSTEMSKETCH_TOOLS}
       />
     </main>
@@ -153,6 +159,10 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
   const isBlockDevelopment = profile === 'block-dev'
   const onMount = useCallback((editor: Editor) => {
     enablePasteAtCursor(editor)
+    // The development profiles keep tldraw's stock toolbar, so they cannot
+    // cycle the preset — but they must still open on the same arrow and the
+    // same edge routing the product does, or the lab lies about the datum.
+    applyStoredArrowPreset(editor)
     const stopBlockConnections = isBlockDevelopment
       ? installBlockConnections(editor)
       : () => undefined
@@ -185,12 +195,14 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
         assetUrls={ASSET_URLS}
         bindingUtils={isBlockDevelopment ? BLOCK_DEVELOPMENT_BINDING_UTILS : undefined}
         components={isBlockDevelopment ? BLOCK_DEVELOPMENT_COMPONENTS : STOCK_DEVELOPMENT_COMPONENTS}
+        getShapeVisibility={isBlockDevelopment ? getBlockShapeVisibility : undefined}
         licenseKey={TLDRAW_LICENSE_KEY}
         onMount={onMount}
         overlayUtils={isBlockDevelopment ? BLOCK_DEVELOPMENT_OVERLAY_UTILS : undefined}
         overrides={isBlockDevelopment ? BLOCK_DEVELOPMENT_OVERRIDES : undefined}
         persistenceKey={developmentPersistenceKey(profile)}
         shapeUtils={isBlockDevelopment ? BLOCK_DEVELOPMENT_SHAPE_UTILS : undefined}
+        themes={SYSTEMSKETCH_THEMES}
         tools={isBlockDevelopment ? [BlockTool] : undefined}
       />
     </main>
@@ -199,6 +211,16 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
 
 export function App() {
   const profile = resolveDevelopmentProfile(window.location.search)
+
+  /**
+   * An IDE that hosts SystemSketch installs its bridge before this bundle
+   * runs, so the decision is already made by the time App renders. The
+   * embedded lane is the same canvas and the same seams; what it drops is the
+   * local workspace, because the host opened the file and owns saving it.
+   */
+  if (isEmbedded()) {
+    return <EmbeddedCanvas />
+  }
 
   if (profile !== 'product') {
     return <DevelopmentCanvas profile={profile} />

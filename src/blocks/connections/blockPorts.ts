@@ -58,6 +58,24 @@ export function getBlockConnectionPorts(
 	props: BlockShapeProps,
 	options: { includeHidden?: boolean } = {},
 ): BlockConnectionPort[] {
+	// Memoised on the props object, like the layout it projects: the binding
+	// side effects and the polarity reads ask for this table on every drag
+	// frame of every cable, and a moved Block keeps its props object.
+	let entry = connectionPortsMemo.get(props)
+	if (!entry) {
+		const all = projectBlockConnectionPorts(props)
+		entry = { all, visible: all.filter((port) => !port.hidden) }
+		connectionPortsMemo.set(props, entry)
+	}
+	return options.includeHidden ? entry.all : entry.visible
+}
+
+const connectionPortsMemo = new WeakMap<
+	BlockShapeProps,
+	{ all: BlockConnectionPort[]; visible: BlockConnectionPort[] }
+>()
+
+function projectBlockConnectionPorts(props: BlockShapeProps): BlockConnectionPort[] {
 	const layout = layoutBlock(props)
 	const placedById = new Map(layout.ports.map((placed) => [placed.port.id, placed]))
 
@@ -91,7 +109,7 @@ export function getBlockConnectionPorts(
 		})
 	})
 
-	return options.includeHidden ? ports : ports.filter((port) => !port.hidden)
+	return ports
 }
 
 /**
@@ -175,6 +193,38 @@ export interface BlockPortConnection {
  * when the entry was first made, and a port added after that would never
  * resolve — a wired dot that stays hollow, measured on 2026-09-01.
  */
+/**
+ * Two wiring tables are the same when every entry is: the cache then keeps the
+ * previous array, and a Block that merely moved does not repaint its dots. The
+ * derive itself still runs on every record change; what this stops is every
+ * reader downstream of it.
+ */
+function sameBlockPortConnections(
+	before: BlockPortConnection[],
+	after: BlockPortConnection[],
+): boolean {
+	if (before === after) return true
+	if (before.length !== after.length) return false
+	for (let index = 0; index < before.length; index += 1) {
+		const a = before[index]
+		const b = after[index]
+		if (
+			a.connectionId !== b.connectionId
+			|| a.terminal !== b.terminal
+			|| a.ownPortId !== b.ownPortId
+			|| a.ownFace !== b.ownFace
+			|| a.ownSide !== b.ownSide
+			|| a.ownPolarity !== b.ownPolarity
+			|| a.connectedShapeId !== b.connectedShapeId
+			|| a.connectedPortId !== b.connectedPortId
+			|| a.connectedFace !== b.connectedFace
+			|| a.connectedSide !== b.connectedSide
+			|| a.connectedPolarity !== b.connectedPolarity
+		) return false
+	}
+	return true
+}
+
 const blockPortConnectionsCache = createComputedCache(
 	'block port connections',
 	(editor: Editor, cached: BlockShape): BlockPortConnection[] => {
@@ -209,6 +259,7 @@ const blockPortConnectionsCache = createComputedCache(
 		}
 		return connections
 	},
+	{ areResultsEqual: sameBlockPortConnections },
 )
 
 export function getBlockPortConnections(

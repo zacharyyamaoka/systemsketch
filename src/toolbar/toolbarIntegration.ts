@@ -10,8 +10,10 @@ import {
 } from 'tldraw'
 import { isDrawingArrowWithArrowTool } from '../arrowClickToPlace'
 import { withBlockTool } from '../blocks/blockToolUi'
+import { ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
 import {
   arrowPresetForActivation,
+  connectionRoutingForArrowPreset,
   getToolbarPreferences,
   shapeToolForArrowPreset,
   updateToolbarPreferences,
@@ -42,8 +44,31 @@ export function arrowPresetFromShapeTool(tool: `arrow-${ArrowPreset}`): ArrowPre
   return tool.slice('arrow-'.length) as ArrowPreset
 }
 
+/**
+ * One choice, two shapes.
+ *
+ * An arrow and a data edge are the same idea drawn on different subjects, so
+ * the preset writes both next-shape styles at once: pressing A until the arrow
+ * is elbowed leaves the next cable elbowed too, and switching to Curve curves
+ * both. Two `StyleProp`s, one gesture — tldraw's own next-shape channel does
+ * the rest, including for a cable created from a port press.
+ */
 export function applyArrowPreset(editor: Editor, preset: ArrowPreset): void {
   editor.setStyleForNextShapes(ArrowShapeKindStyle, preset === 'elbow' ? 'elbow' : 'arc')
+  editor.setStyleForNextShapes(ConnectionRoutingStyle, connectionRoutingForArrowPreset(preset))
+}
+
+/**
+ * Seed both styles from the remembered preset, on mount.
+ *
+ * Without this the app would only agree with the toolbar once you pressed A:
+ * `stylesForNextShape` rides tldraw's persisted instance state, so a board
+ * saved while Curve was active would reopen curved however the toolbar reads.
+ * Preferences are the source of truth for "what does the app draw next", so
+ * they are re-applied every time an editor mounts.
+ */
+export function applyStoredArrowPreset(editor: Editor): void {
+  applyArrowPreset(editor, getToolbarPreferences().lastArrowPreset)
 }
 
 export function prepareCreatedShapeForToolbarPreset(
@@ -70,6 +95,7 @@ export function prepareCreatedShapeForToolbarPreset(
  * arrows are left alone whichever gesture the person happens to be using.
  */
 export function registerToolbarSideEffects(editor: Editor): () => void {
+  applyStoredArrowPreset(editor)
   return editor.sideEffects.registerBeforeCreateHandler('shape', (shape) =>
     prepareCreatedShapeForToolbarPreset(
       shape as TLShape,

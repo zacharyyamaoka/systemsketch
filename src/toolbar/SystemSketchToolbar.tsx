@@ -29,6 +29,9 @@ import {
   selectShapeFamilyTool,
 } from './toolbarIntegration'
 import {
+  arrowPresetPressCount,
+  arrowPresetsInPressOrder,
+  shapeToolForArrowPreset,
   useToolbarPreferences,
   type DrawFamilyTool,
   type ShapeFamilyTool,
@@ -42,16 +45,36 @@ interface ShapeMenuItem {
   shortcut?: string
 }
 
-const SHAPE_MENU_ITEMS: readonly ShapeMenuItem[] = [
+const GEO_MENU_ITEMS: readonly ShapeMenuItem[] = [
   { id: 'rectangle', label: 'Rectangle', icon: 'geo-rectangle', shortcut: 'R' },
   { id: 'ellipse', label: 'Ellipse', icon: 'geo-ellipse', shortcut: 'O' },
   { id: 'triangle', label: 'Triangle', icon: 'geo-triangle' },
   { id: 'diamond', label: 'Diamond', icon: 'geo-diamond' },
   { id: 'line', label: 'Line', icon: 'tool-line', shortcut: 'L' },
-  { id: 'arrow-straight', label: 'Straight arrow', icon: 'tool-arrow', shortcut: 'A' },
-  { id: 'arrow-curve', label: 'Curved arrow', icon: 'arrow-arc', shortcut: 'A × 2' },
-  { id: 'arrow-elbow', label: 'Elbow arrow', icon: 'arrow-elbow', shortcut: 'A × 3' },
 ]
+
+const ARROW_LABELS = {
+  straight: { label: 'Straight arrow', icon: 'tool-arrow' },
+  curve: { label: 'Curved arrow', icon: 'arrow-arc' },
+  elbow: { label: 'Elbow arrow', icon: 'arrow-elbow' },
+} as const
+
+/**
+ * The arrows, listed in the order A walks them and labelled with how many
+ * presses that is. Both come from the cycle itself, so the rows stay honest
+ * when the starting preset moves — it now starts on Elbow, which is also the
+ * shape a new data edge takes.
+ */
+const ARROW_MENU_ITEMS: readonly ShapeMenuItem[] = arrowPresetsInPressOrder().map((preset) => {
+  const count = arrowPresetPressCount(preset)
+  return {
+    id: shapeToolForArrowPreset(preset),
+    ...ARROW_LABELS[preset],
+    shortcut: count === 1 ? 'A' : `A × ${count}`,
+  }
+})
+
+const SHAPE_MENU_ITEMS: readonly ShapeMenuItem[] = [...GEO_MENU_ITEMS, ...ARROW_MENU_ITEMS]
 
 const DRAW_MENU_ITEMS: ReadonlyArray<{
   id: DrawFamilyTool
@@ -243,7 +266,7 @@ function ShapeFamilySlot({ activeToolId, geo }: { activeToolId: string; geo?: st
       onActivate={() => selectShapeFamilyTool(tools, current)}
     >
       <div className="systemsketch-tool-menu__heading">Shapes</div>
-      {SHAPE_MENU_ITEMS.slice(0, 5).map((item) => (
+      {GEO_MENU_ITEMS.map((item) => (
         <ToolMenuItem
           key={item.id}
           {...item}
@@ -253,7 +276,7 @@ function ShapeFamilySlot({ activeToolId, geo }: { activeToolId: string; geo?: st
       ))}
       <div className="systemsketch-tool-menu__separator" role="separator" />
       <div className="systemsketch-tool-menu__heading">Arrows · repeat A to cycle</div>
-      {SHAPE_MENU_ITEMS.slice(5).map((item) => (
+      {ARROW_MENU_ITEMS.map((item) => (
         <ToolMenuItem
           key={item.id}
           {...item}

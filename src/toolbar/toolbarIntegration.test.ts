@@ -1,10 +1,21 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { Editor, TLArrowShape, TLGeoShape, TLUiToolsContextType } from 'tldraw'
 import {
+  ArrowShapeKindStyle,
+  type Editor,
+  type StyleProp,
+  type TLArrowShape,
+  type TLGeoShape,
+  type TLUiToolsContextType,
+} from 'tldraw'
+import {
+  applyArrowPreset,
+  applyStoredArrowPreset,
   CURVE_ARROW_BEND,
   prepareCreatedShapeForToolbarPreset,
   SYSTEMSKETCH_TOOLBAR_OVERRIDES,
 } from './toolbarIntegration'
+import { ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
+import { DEFAULT_TOOLBAR_PREFERENCES } from './toolbarModel'
 
 function arrowShape(): TLArrowShape {
   return {
@@ -81,5 +92,40 @@ describe('Stable Block toolbar seam', () => {
     expect(overridden?.block.kbd).toBe('b')
     overridden?.block.onSelect('toolbar')
     expect(setCurrentTool).toHaveBeenCalledWith('block')
+  })
+})
+
+/** An editor that records only what a preset writes to the next-shape channel. */
+function recordingEditor() {
+  const written = new Map<string, string>()
+  const editor = {
+    setStyleForNextShapes(style: StyleProp<string>, value: string) {
+      written.set(style.id, value)
+      return editor
+    },
+  } as unknown as Editor
+  return { editor, written }
+}
+
+describe('one preset, two connectors', () => {
+  it('writes the arrow kind and the edge routing from a single choice', () => {
+    for (const [preset, kind, routing] of [
+      ['elbow', 'elbow', 'elbow'],
+      ['curve', 'arc', 'curved'],
+      ['straight', 'arc', 'straight'],
+    ] as const) {
+      const { editor, written } = recordingEditor()
+      applyArrowPreset(editor, preset)
+      expect(written.get(ArrowShapeKindStyle.id)).toBe(kind)
+      expect(written.get(ConnectionRoutingStyle.id)).toBe(routing)
+    }
+  })
+
+  it('seeds both styles from the remembered preset when an editor mounts', () => {
+    const { editor, written } = recordingEditor()
+    applyStoredArrowPreset(editor)
+    expect(DEFAULT_TOOLBAR_PREFERENCES.lastArrowPreset).toBe('elbow')
+    expect(written.get(ArrowShapeKindStyle.id)).toBe('elbow')
+    expect(written.get(ConnectionRoutingStyle.id)).toBe('elbow')
   })
 })

@@ -1,0 +1,42 @@
+[
+ {
+  "label": "the host no longer exposes a subprocess file chooser (/api/workspace/pick → 404)",
+  "ok": true
+ },
+ {
+  "label": "the window title names the open board, so many windows stay tellable apart",
+  "ok": true
+ },
+ {
+  "label": "File offers New window beside New and Open… (File, Settings, Edit, View)",
+  "ok": true
+ },
+ {
+  "label": "Ctrl+O lists this folder, naming each document’s own type",
+  "ok": true
+ },
+ {
+  "label": "the filter narrows the folder and pre-selects the match",
+  "ok": true
+ },
+ {
+  "label": "Enter opens the filtered document, and the title follows it",
+  "ok": true
+ },
+ {
+  "label": "a folder opens in place, and the breadcrumb shows the way back",
+  "ok": true
+ },
+ {
+  "label": "“Open in new window” opens the selected board in a second live window",
+  "ok": true
+ },
+ {
+  "label": "Ctrl+Shift+N opens a third window on its own board (Untitled — SystemSketch)",
+  "ok": true
+ },
+ {
+  "label": "no browser warnings or errors during the journey",
+  "ok": true
+ }
+]
