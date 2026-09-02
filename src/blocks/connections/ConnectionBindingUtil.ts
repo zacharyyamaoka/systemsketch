@@ -13,7 +13,7 @@ import {
 	type TLBinding,
 	type TLShapeId,
 } from 'tldraw'
-import { isBlockShape } from '../blockModel'
+import { BLOCK_SHAPE_TYPE, isBlockShape, type BlockShape } from '../blockModel'
 import { getBlockConnectionPort, getBlockConnectionPortPagePoint } from './blockPorts'
 import {
 	CONNECTION_BINDING_TYPE,
@@ -290,6 +290,38 @@ export function normalizeConnectionDirection(
 		})
 	})
 	return true
+}
+
+/**
+ * A pill with no type of its own takes the type of the port its cable meets,
+ * on either rim: a result wired into `pose` becomes a `Pose`, an empty literal
+ * wired into `gain: float` becomes a `float`. A pill that already has a type
+ * keeps it; the type is written into the record so the file carries it.
+ */
+export function adoptCableTypeIntoPills(editor: Editor, connection: ConnectionShape | TLShapeId): void {
+	const connectionId = typeof connection === 'string' ? connection : connection.id
+	const bindings = getConnectionBindings(editor, connectionId)
+	if (!bindings.start || !bindings.end) return
+	const ends = [bindings.start, bindings.end].map((binding) => {
+		const shape = editor.getShape(binding.toId)
+		if (!isBlockShape(shape)) return null
+		const port = [...shape.props.inputs, ...shape.props.outputs]
+			.find((candidate) => candidate.id === binding.props.portId)
+		return { shape, type: port?.type ?? '' }
+	})
+	const [a, b] = ends
+	if (!a || !b) return
+	for (const [pill, other] of [[a, b], [b, a]] as const) {
+		if (pill.shape.props.view !== 'value' || pill.type !== '' || other.type === '') continue
+		editor.updateShape<BlockShape>({
+			id: pill.shape.id,
+			type: BLOCK_SHAPE_TYPE,
+			props: {
+				inputs: pill.shape.props.inputs.map((port) => ({ ...port, type: other.type })),
+				outputs: pill.shape.props.outputs.map((port) => ({ ...port, type: other.type })),
+			},
+		})
+	}
 }
 
 /** Create or retarget exactly one semantic binding for a connection terminal. */

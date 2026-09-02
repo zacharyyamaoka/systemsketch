@@ -246,8 +246,12 @@ async function main() {
       (await evaluate(page, `document.querySelector('[data-testid="pill-wiring"]')?.textContent ?? ''`)).includes('Fed by estimate() · pose'), true)
     check('FEED-5', 'the Value field is read-only while a cable feeds the pill',
       await evaluate(page, `document.querySelector('[data-inspector-section="Pill"] input[aria-label="Literal value"]')?.disabled ?? null`), true)
-    check('FEED-6', "a fed pill with no type of its own reads the cable's: Pose",
-      await evaluate(page, `document.querySelector('[data-inspector-section="Pill"] input[aria-label="Variable type"]')?.value ?? null`), 'Pose')
+    check('FEED-6', "a fed pill with no type of its own takes the cable's, in the panel and in the record",
+      {
+        field: await evaluate(page, `document.querySelector('[data-inspector-section="Pill"] input[aria-label="Variable type"]')?.value ?? null`),
+        record: { inlet: named2.inputs[0].type, outlet: named2.outputs[0].type },
+      },
+      { field: 'Pose', record: { inlet: 'Pose', outlet: 'Pose' } })
     await shot(page, 'literal-pill-fed-inspector.png')
     await deselect(page, { x: 1000, y: 800 })
     const resultOut = await box(page, portDot(result.id, 'output', 'out_1'))

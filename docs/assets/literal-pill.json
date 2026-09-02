@@ -86,7 +86,7 @@
       },
       {
         "terminal": "start",
-        "to": "shape:j3L-hL3vHY9ct4y0ZzUgb",
+        "to": "shape:mW1XYvRPzsxe_YfSyhJ_6",
         "port": "out_1"
       }
     ],
@@ -98,7 +98,7 @@
       },
       {
         "terminal": "start",
-        "to": "shape:j3L-hL3vHY9ct4y0ZzUgb",
+        "to": "shape:mW1XYvRPzsxe_YfSyhJ_6",
         "port": "out_1"
       }
     ],
@@ -234,9 +234,21 @@
   },
   {
     "id": "FEED-6",
-    "label": "a fed pill with no type of its own reads the cable's: Pose",
-    "observed": "Pose",
-    "desired": "Pose",
+    "label": "a fed pill with no type of its own takes the cable's, in the panel and in the record",
+    "observed": {
+      "field": "Pose",
+      "record": {
+        "inlet": "Pose",
+        "outlet": "Pose"
+      }
+    },
+    "desired": {
+      "field": "Pose",
+      "record": {
+        "inlet": "Pose",
+        "outlet": "Pose"
+      }
+    },
     "ok": true
   },
   {
