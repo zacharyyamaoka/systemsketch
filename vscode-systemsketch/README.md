@@ -59,11 +59,11 @@ cd ~/systemsketch/vscode-systemsketch && npm test
 
 That installs the VSIX into a throwaway profile, launches real VS Code under Xvfb, and drives
 it over CDP — opening a blank golden target from the tree, clicking the Block tool, drawing,
-saving, reopening, and reading the bytes that landed on disk. Nine checks; the oracle for
+saving, reopening, and reading the bytes that landed on disk. Ten checks; the oracle for
 every one is either the workbench's own DOM or the file itself.
 
 `CODE_PATH=/usr/bin/cursor npm test` runs the same journey in Cursor. A fresh Cursor profile
-shows a sign-in wall over its workbench, so the suite reports the seven checks it can reach
+shows a sign-in wall over its workbench, so the suite reports the eight checks it can reach
 there and names the two it cannot, rather than failing or pretending.
 
 ## How it works
