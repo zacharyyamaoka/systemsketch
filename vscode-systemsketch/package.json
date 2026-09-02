@@ -1,0 +1,120 @@
+{
+  "name": "systemsketch-vscode",
+  "displayName": "SystemSketch",
+  "description": "Open .systemsketch and .tldr files in the SystemSketch canvas, inside VS Code and Cursor.",
+  "version": "0.1.0",
+  "publisher": "bam-robotics",
+  "license": "UNLICENSED",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zacharyyamaoka/systemsketch.git",
+    "directory": "vscode-systemsketch"
+  },
+  "icon": "media/systemsketch.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "systemsketch",
+    "tldraw",
+    "diagram",
+    "whiteboard",
+    "cursor"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "systemsketch.editor",
+        "displayName": "SystemSketch",
+        "priority": "default",
+        "selector": [
+          {
+            "filenamePattern": "*.systemsketch"
+          },
+          {
+            "filenamePattern": "*.tldr"
+          }
+        ]
+      }
+    ],
+    "languages": [
+      {
+        "id": "json",
+        "extensions": [
+          ".systemsketch",
+          ".tldr"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "systemsketch.openSource",
+        "category": "SystemSketch",
+        "title": "Open Source",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "systemsketch.openCanvas",
+        "category": "SystemSketch",
+        "title": "Open Canvas",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "systemsketch.openSourceToSide",
+        "category": "SystemSketch",
+        "title": "Open Source to the Side",
+        "icon": "$(split-horizontal)"
+      },
+      {
+        "command": "systemsketch.openCanvasToSide",
+        "category": "SystemSketch",
+        "title": "Open Canvas to the Side",
+        "icon": "$(split-horizontal)"
+      },
+      {
+        "command": "systemsketch.showBuild",
+        "category": "SystemSketch",
+        "title": "Show Bundled Build"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "systemsketch.openSource",
+          "alt": "systemsketch.openSourceToSide",
+          "when": "activeCustomEditorId == systemsketch.editor",
+          "group": "navigation"
+        },
+        {
+          "command": "systemsketch.openCanvas",
+          "alt": "systemsketch.openCanvasToSide",
+          "when": "activeCustomEditorId != systemsketch.editor && resourceExtname =~ /^\\.(systemsketch|tldr)$/",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "stage": "node scripts/stage_app.mjs",
+    "build": "node scripts/stage_app.mjs && node esbuild.config.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "check": "npm run typecheck && npm run build",
+    "package": "node scripts/stage_app.mjs --require-stable && node esbuild.config.mjs && vsce package --allow-missing-repository --out dist/systemsketch-vscode-0.1.0.vsix",
+    "test": "npm run package:dev && node tests/vscode_e2e.mjs",
+    "package:dev": "npm run build && vsce package --allow-missing-repository --out dist/systemsketch-vscode-0.1.0.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "@types/vscode": "1.85.0",
+    "@vscode/vsce": "3.6.2",
+    "esbuild": "0.25.5",
+    "typescript": "5.8.3"
+  }
+}

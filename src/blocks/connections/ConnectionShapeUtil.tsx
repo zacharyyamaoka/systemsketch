@@ -145,7 +145,9 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		return {
 			start: { x: 0, y: 0 },
 			end: { x: 100, y: 0 },
-			routing: 'curved',
+			// Overridden by `stylesForNextShape` on every real creation; kept in
+			// step with `ConnectionRoutingStyle` so the two never disagree.
+			routing: 'elbow',
 			curve: null,
 			pins: [],
 			elbowRoute: null,
