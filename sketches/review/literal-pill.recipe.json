@@ -41,9 +41,9 @@
       "id": "step-2",
       "kind": "step",
       "text": "2 · Drag the pill's right dot onto gain (the row with = 1.0)",
-      "x": 560,
+      "x": 520,
       "y": 610,
-      "w": 360,
+      "w": 350,
       "h": 100,
       "target": { "shapeId": "estimate", "anchor": "bottom", "dx": -120 }
     },
@@ -71,9 +71,9 @@
       "id": "pass",
       "kind": "pass",
       "text": "PASS WHEN · the grey = 1.0 chip dims, the capsule reads gain = 2.0, and the Value fed by pose reads pose = ⋯ with Type Pose in the inspector",
-      "x": 940,
+      "x": 920,
       "y": 480,
-      "w": 320,
+      "w": 340,
       "h": 180
     }
   ]
