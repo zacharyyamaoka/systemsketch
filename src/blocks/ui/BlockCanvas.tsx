@@ -138,12 +138,18 @@ function BlockPortDot({
         editor,
         eligiblePorts.anchor,
         { shapeId: shape.id, portId },
-        { excludeBlocks: eligiblePorts.excludeBlocks },
+        { excludeBlocks: eligiblePorts.excludeBlocks, connectionId: eligiblePorts.connectionId },
       ).ok
     },
     [editor, shape.id, portId],
   )
 
+  // No pointer handler here on purpose. The capture listener in
+  // `installConnections.ts` is the ONE authority for a press on a dot: it lets
+  // tldraw take the press first, so a selected cable's terminal handle — which
+  // sits exactly on this dot — becomes a handle drag, and only a press tldraw
+  // did not claim becomes a new cable. A synchronous transition from this
+  // element would run before tldraw's own handler and take that choice away.
   const classes = [
     'Port',
     placed.side === 'input' ? 'Port_end' : 'Port_start',
@@ -167,12 +173,6 @@ function BlockPortDot({
           ? { transform: `translate(-50%, -50%) translateY(${dragOffset}px)` }
           : null),
       } as CSSProperties}
-      onPointerDown={() => {
-        if (!editor.getStateDescendant('select.pointing_block_port')) return
-        // The dot, and only the dot. Which face the cable leaves from is
-        // decided where it lands.
-        editor.setCurrentTool('select.pointing_block_port', { shapeId: shape.id, portId })
-      }}
     />
   )
 }

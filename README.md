@@ -117,6 +117,8 @@ The [Settings and interface-scale implementation gallery](docs/interface-scale-i
 
 The [edge polarity report](docs/edge-polarity-2026-09-01.html) records why an Expanded Block could not be wired to a sibling from its own dots, why a picker-spawned Block came out output-to-output, and why the cable left the port the wrong way — one press rule that committed to a face before the cable had landed. The replacement decides polarity from where the cable lands, using the two Blocks' places in the frame hierarchy (`pairBlockFaces` → `portPolarity`), through one `judgeConnection` that the drop, the eligible-dot highlight, the picker and load-time validation all ask. The report carries the pre-fix reproduction, the scope diagram, the live source at each seam, and `npm run test:polarity` (33/33) beside the unchanged boundary truth table in `npm run test:edges` (33/33).
 
+The [fan-in report](docs/edge-fan-in-2026-09-01.html) records why a second cable onto an occupied input replaced the first: two starter-kit rules that assume an input has one producer. Sinks now fan in exactly as sources fan out, a press on any dot starts a new cable, an existing cable is moved by selecting it and dragging its terminal handle, and the one drop a sink refuses is an exact copy of a wire it already has, judged in the same `judgeConnection` as every other refusal. `npm run test:polarity` carries the six fan-in checks.
+
 ## Local files
 
 - A clean launch reopens the most recent valid document. First launch prepares `~/SystemSketch/Untitled.tldr` and creates it on the first edit or Save.
