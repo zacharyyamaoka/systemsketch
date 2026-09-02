@@ -3,10 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f8f8f8" />
+    <meta name="color-scheme" content="light dark" />
     <title>SystemSketch</title>
   </head>
   <body>
+    <script data-ss-prepaint>
+      // Paint the page in the chosen theme before the bundle arrives, so a dark
+      // theme never opens on a white flash. Reads only what `themeModel.ts`
+      // wrote; the app root takes over the attributes on mount and releases
+      // these (see `releasePrepaintTheme`). Inside an IDE the host's bridge is
+      // already installed, and its name picks the theme block instead.
+      (function () {
+        try {
+          var root = document.documentElement
+          var bridge = window.__systemSketchEmbedHost
+          var known = ['vscode', 'obsidian']
+          if (bridge && typeof bridge.host === 'string') {
+            root.setAttribute('data-ss-theme', known.indexOf(bridge.host) >= 0 ? bridge.host : 'systemsketch')
+            root.setAttribute('data-ss-color-scheme', 'light')
+            return
+          }
+          var stored = JSON.parse(window.localStorage.getItem('systemsketch.theme.v1') || 'null')
+          var scheme = stored && stored.version === 1 ? stored.scheme : null
+          root.setAttribute('data-ss-theme', 'systemsketch')
+          root.setAttribute('data-ss-color-scheme', scheme === 'dark' || scheme === 'system' ? scheme : 'light')
+        } catch (error) {
+          // No storage, or none of ours: the bundle decides.
+        }
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

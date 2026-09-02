@@ -1,0 +1,2090 @@
+{
+  "ranAt": "2026-09-02T05:42:59.689Z",
+  "themes": [
+    {
+      "id": "systemsketch:light",
+      "label": "Light",
+      "scheme": "light",
+      "state": {
+        "theme": "systemsketch",
+        "scheme": "light",
+        "tldrawDark": false,
+        "canvas": "rgb(249, 250, 251)",
+        "htmlStillStamped": false,
+        "inlineSurface": null
+      },
+      "probes": [
+        {
+          "label": "file title, top-left shell",
+          "selector": ".systemsketch-top-left-shell .systemsketch-file-title",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.28,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "timer chip",
+          "selector": ".systemsketch-timer",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#666b6f",
+          "bg": "#edf0f2",
+          "ratio": 4.69,
+          "text": "◉ 03:00",
+          "ok": true
+        },
+        {
+          "label": "Share button",
+          "selector": ".systemsketch-share-button",
+          "kind": "text-on-accent",
+          "threshold": 3,
+          "found": true,
+          "fg": "#ffffff",
+          "bg": "#3182ed",
+          "ratio": 3.79,
+          "text": "Share",
+          "ok": true
+        },
+        {
+          "label": "toolbar tool icon (resting)",
+          "selector": ".tlui-main-toolbar__tools .tlui-button__tool:not([aria-pressed=\"true\"])",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.28,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "toolbar tool icon (active)",
+          "selector": ".tlui-main-toolbar__tools .tlui-button__tool[aria-pressed=\"true\"]",
+          "kind": "icon",
+          "threshold": 3,
+          "pseudo": "::after",
+          "found": true,
+          "fg": "#ffffff",
+          "bg": "#3182ed",
+          "ratio": 3.79,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "Block tool button",
+          "selector": "[data-testid=\"systemsketch-tool-block\"]",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.28,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "utility strip button",
+          "selector": ".systemsketch-utility-strip .tlui-button",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.28,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "inspector active tab",
+          "selector": ".block-inspector__tabs > [role=\"tab\"].is-active",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#edf0f2",
+          "ratio": 11.86,
+          "text": "Details",
+          "ok": true
+        },
+        {
+          "label": "inspector section title",
+          "selector": ".block-inspector__section-title",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#666b6f",
+          "bg": "#fcfcfc",
+          "ratio": 5.23,
+          "text": "Block",
+          "ok": true
+        },
+        {
+          "label": "inspector field label",
+          "selector": ".block-inspector__field > span",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#666b6f",
+          "bg": "#fcfcfc",
+          "ratio": 5.23,
+          "text": "Title",
+          "ok": true
+        },
+        {
+          "label": "inspector input text",
+          "selector": ".block-inspector__section input:not([disabled])",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#edf0f2",
+          "ratio": 11.86,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "inspector input boundary",
+          "selector": ".block-inspector__section input:not([disabled])",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#2e2e2e @ 0.55",
+          "bg": "#edf0f2",
+          "ratio": 3.22,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "selection pill count",
+          "selector": ".systemsketch-selection-menu[data-visible=\"true\"] .systemsketch-selection-count, .systemsketch-selection-menu[data-visible=\"true\"] .block-mini-menu__count",
+          "kind": "text",
+          "threshold": 4.5,
+          "optional": true,
+          "found": false
+        },
+        {
+          "label": "selection pill button",
+          "selector": ".systemsketch-selection-menu[data-visible=\"true\"] .block-mini-menu button, .systemsketch-selection-menu[data-visible=\"true\"] .systemsketch-selection-action",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#ffffff",
+          "bg": "#1e1e1e",
+          "ratio": 16.67,
+          "text": "Ssimple",
+          "ok": true
+        },
+        {
+          "label": "Block heading on the canvas",
+          "selector": ".systemsketch-block-canvas .BlockNode-headingTitle, .systemsketch-block-canvas .BlockNode-simpleTitleText",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.24,
+          "text": "Theme probe",
+          "ok": true
+        },
+        {
+          "label": "left popout header",
+          "selector": ".systemsketch-popout--left .systemsketch-popout__header h2",
+          "kind": "text",
+          "threshold": 4.5,
+          "optional": true,
+          "found": false
+        },
+        {
+          "label": "main menu item (tldraw menu)",
+          "selector": "[data-testid=\"main-menu.settings\"]",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.24,
+          "text": "Settings",
+          "ok": true
+        },
+        {
+          "label": "settings heading",
+          "selector": ".systemsketch-settings__intro h2",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.24,
+          "text": "Color theme",
+          "ok": true
+        },
+        {
+          "label": "settings body copy",
+          "selector": ".systemsketch-settings__intro p",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#666b6f",
+          "bg": "#fcfcfc",
+          "ratio": 5.23,
+          "text": "The board, its menus and every panel wea",
+          "ok": true
+        },
+        {
+          "label": "settings active category",
+          "selector": ".systemsketch-settings__nav button.is-active",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#d6e3f1",
+          "ratio": 10.42,
+          "text": "Appearance",
+          "ok": true
+        },
+        {
+          "label": "settings inactive category",
+          "selector": ".systemsketch-settings__nav button:not(.is-active):not(:disabled)",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#666b6f",
+          "bg": "#edf0f2",
+          "ratio": 4.69,
+          "text": "Interface",
+          "ok": true
+        },
+        {
+          "label": "theme option label (active)",
+          "selector": ".systemsketch-theme-option.is-active .systemsketch-theme-option__label",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#e4edfa",
+          "ratio": 11.53,
+          "text": "Light",
+          "ok": true
+        },
+        {
+          "label": "theme option detail",
+          "selector": ".systemsketch-theme-option:not(.is-active) .systemsketch-theme-option__detail",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#666b6f",
+          "bg": "#fcfcfc",
+          "ratio": 5.23,
+          "text": "SystemSketch",
+          "ok": true
+        },
+        {
+          "label": "Import button",
+          "selector": ".systemsketch-settings__import",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.24,
+          "text": "Import VS Code theme…",
+          "ok": true
+        },
+        {
+          "label": "dialog close button icon",
+          "selector": ".systemsketch-settings__header .tlui-button",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.24,
+          "text": "",
+          "ok": true
+        }
+      ],
+      "screenshots": [
+        "docs/assets/theme-systemsketch-light.png",
+        "docs/assets/theme-systemsketch-light-settings.png"
+      ]
+    },
+    {
+      "id": "systemsketch:dark",
+      "label": "Dark",
+      "scheme": "dark",
+      "state": {
+        "theme": "systemsketch",
+        "scheme": "dark",
+        "tldrawDark": true,
+        "canvas": "rgb(16, 16, 17)",
+        "htmlStillStamped": false,
+        "inlineSurface": null
+      },
+      "probes": [
+        {
+          "label": "file title, top-left shell",
+          "selector": ".systemsketch-top-left-shell .systemsketch-file-title",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#1f2024",
+          "ratio": 11.54,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "timer chip",
+          "selector": ".systemsketch-timer",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#c0c3c5",
+          "bg": "#1a1a1c",
+          "ratio": 9.79,
+          "text": "◉ 03:00",
+          "ok": true
+        },
+        {
+          "label": "Share button",
+          "selector": ".systemsketch-share-button",
+          "kind": "text-on-accent",
+          "threshold": 3,
+          "found": true,
+          "fg": "#ffffff",
+          "bg": "#4387f4",
+          "ratio": 3.49,
+          "text": "Share",
+          "ok": true
+        },
+        {
+          "label": "toolbar tool icon (resting)",
+          "selector": ".tlui-main-toolbar__tools .tlui-button__tool:not([aria-pressed=\"true\"])",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#202024",
+          "ratio": 11.51,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "toolbar tool icon (active)",
+          "selector": ".tlui-main-toolbar__tools .tlui-button__tool[aria-pressed=\"true\"]",
+          "kind": "icon",
+          "threshold": 3,
+          "pseudo": "::after",
+          "found": true,
+          "fg": "#ffffff",
+          "bg": "#4387f4",
+          "ratio": 3.49,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "Block tool button",
+          "selector": "[data-testid=\"systemsketch-tool-block\"]",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#202024",
+          "ratio": 11.51,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "utility strip button",
+          "selector": ".systemsketch-utility-strip .tlui-button",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#1f2024",
+          "ratio": 11.54,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "inspector active tab",
+          "selector": ".block-inspector__tabs > [role=\"tab\"].is-active",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#1a1a1c",
+          "ratio": 12.31,
+          "text": "Details",
+          "ok": true
+        },
+        {
+          "label": "inspector section title",
+          "selector": ".block-inspector__section-title",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#c0c3c5",
+          "bg": "#202025",
+          "ratio": 9.14,
+          "text": "Block",
+          "ok": true
+        },
+        {
+          "label": "inspector field label",
+          "selector": ".block-inspector__field > span",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#c0c3c5",
+          "bg": "#202025",
+          "ratio": 9.14,
+          "text": "Title",
+          "ok": true
+        },
+        {
+          "label": "inspector input text",
+          "selector": ".block-inspector__section input:not([disabled])",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#1a1a1c",
+          "ratio": 12.31,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "inspector input boundary",
+          "selector": ".block-inspector__section input:not([disabled])",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#d9d9d9 @ 0.55",
+          "bg": "#1a1a1c",
+          "ratio": 4.58,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "selection pill count",
+          "selector": ".systemsketch-selection-menu[data-visible=\"true\"] .systemsketch-selection-count, .systemsketch-selection-menu[data-visible=\"true\"] .block-mini-menu__count",
+          "kind": "text",
+          "threshold": 4.5,
+          "optional": true,
+          "found": false
+        },
+        {
+          "label": "selection pill button",
+          "selector": ".systemsketch-selection-menu[data-visible=\"true\"] .block-mini-menu button, .systemsketch-selection-menu[data-visible=\"true\"] .systemsketch-selection-action",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#ffffff",
+          "bg": "#1e1e1e",
+          "ratio": 16.67,
+          "text": "Ssimple",
+          "ok": true
+        },
+        {
+          "label": "Block heading on the canvas",
+          "selector": ".systemsketch-block-canvas .BlockNode-headingTitle, .systemsketch-block-canvas .BlockNode-simpleTitleText",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#202025",
+          "ratio": 11.49,
+          "text": "Theme probe",
+          "ok": true
+        },
+        {
+          "label": "left popout header",
+          "selector": ".systemsketch-popout--left .systemsketch-popout__header h2",
+          "kind": "text",
+          "threshold": 4.5,
+          "optional": true,
+          "found": false
+        },
+        {
+          "label": "main menu item (tldraw menu)",
+          "selector": "[data-testid=\"main-menu.settings\"]",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#202025",
+          "ratio": 11.49,
+          "text": "Settings",
+          "ok": true
+        },
+        {
+          "label": "settings heading",
+          "selector": ".systemsketch-settings__intro h2",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#202025",
+          "ratio": 11.49,
+          "text": "Color theme",
+          "ok": true
+        },
+        {
+          "label": "settings body copy",
+          "selector": ".systemsketch-settings__intro p",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#c0c3c5",
+          "bg": "#202025",
+          "ratio": 9.14,
+          "text": "The board, its menus and every panel wea",
+          "ok": true
+        },
+        {
+          "label": "settings active category",
+          "selector": ".systemsketch-settings__nav button.is-active",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#1f2736",
+          "ratio": 10.61,
+          "text": "Appearance",
+          "ok": true
+        },
+        {
+          "label": "settings inactive category",
+          "selector": ".systemsketch-settings__nav button:not(.is-active):not(:disabled)",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#c0c3c5",
+          "bg": "#1a1a1c",
+          "ratio": 9.79,
+          "text": "Interface",
+          "ok": true
+        },
+        {
+          "label": "theme option label (active)",
+          "selector": ".systemsketch-theme-option.is-active .systemsketch-theme-option__label",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#242c3e",
+          "ratio": 9.85,
+          "text": "Dark",
+          "ok": true
+        },
+        {
+          "label": "theme option detail",
+          "selector": ".systemsketch-theme-option:not(.is-active) .systemsketch-theme-option__detail",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#c0c3c5",
+          "bg": "#202025",
+          "ratio": 9.14,
+          "text": "SystemSketch",
+          "ok": true
+        },
+        {
+          "label": "Import button",
+          "selector": ".systemsketch-settings__import",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#202025",
+          "ratio": 11.49,
+          "text": "Import VS Code theme…",
+          "ok": true
+        },
+        {
+          "label": "dialog close button icon",
+          "selector": ".systemsketch-settings__header .tlui-button",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#202025",
+          "ratio": 11.49,
+          "text": "",
+          "ok": true
+        }
+      ],
+      "screenshots": [
+        "docs/assets/theme-systemsketch-dark.png",
+        "docs/assets/theme-systemsketch-dark-settings.png"
+      ]
+    },
+    {
+      "id": "obsidian-light",
+      "label": "Obsidian Light",
+      "scheme": "light",
+      "state": {
+        "theme": "palette",
+        "scheme": "light",
+        "tldrawDark": false,
+        "canvas": "rgb(255, 255, 255)",
+        "htmlStillStamped": false,
+        "inlineSurface": "#ffffff"
+      },
+      "probes": [
+        {
+          "label": "file title, top-left shell",
+          "selector": ".systemsketch-top-left-shell .systemsketch-file-title",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.77,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "timer chip",
+          "selector": ".systemsketch-timer",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#5c5c5c",
+          "bg": "#ffffff",
+          "ratio": 6.69,
+          "text": "◉ 03:00",
+          "ok": true
+        },
+        {
+          "label": "Share button",
+          "selector": ".systemsketch-share-button",
+          "kind": "text-on-accent",
+          "threshold": 3,
+          "found": true,
+          "fg": "#ffffff",
+          "bg": "#9873f7",
+          "ratio": 3.43,
+          "text": "Share",
+          "ok": true
+        },
+        {
+          "label": "toolbar tool icon (resting)",
+          "selector": ".tlui-main-toolbar__tools .tlui-button__tool:not([aria-pressed=\"true\"])",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.76,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "toolbar tool icon (active)",
+          "selector": ".tlui-main-toolbar__tools .tlui-button__tool[aria-pressed=\"true\"]",
+          "kind": "icon",
+          "threshold": 3,
+          "pseudo": "::after",
+          "found": true,
+          "fg": "#ffffff",
+          "bg": "#9873f7",
+          "ratio": 3.43,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "Block tool button",
+          "selector": "[data-testid=\"systemsketch-tool-block\"]",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.76,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "utility strip button",
+          "selector": ".systemsketch-utility-strip .tlui-button",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.77,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "inspector active tab",
+          "selector": ".block-inspector__tabs > [role=\"tab\"].is-active",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#ffffff",
+          "ratio": 15.91,
+          "text": "Details",
+          "ok": true
+        },
+        {
+          "label": "inspector section title",
+          "selector": ".block-inspector__section-title",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#5c5c5c",
+          "bg": "#f6f6f6",
+          "ratio": 6.19,
+          "text": "Block",
+          "ok": true
+        },
+        {
+          "label": "inspector field label",
+          "selector": ".block-inspector__field > span",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#5c5c5c",
+          "bg": "#f6f6f6",
+          "ratio": 6.19,
+          "text": "Title",
+          "ok": true
+        },
+        {
+          "label": "inspector input text",
+          "selector": ".block-inspector__section input:not([disabled])",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#ffffff",
+          "ratio": 15.91,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "inspector input boundary",
+          "selector": ".block-inspector__section input:not([disabled])",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#222222 @ 0.55",
+          "bg": "#ffffff",
+          "ratio": 3.67,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "selection pill count",
+          "selector": ".systemsketch-selection-menu[data-visible=\"true\"] .systemsketch-selection-count, .systemsketch-selection-menu[data-visible=\"true\"] .block-mini-menu__count",
+          "kind": "text",
+          "threshold": 4.5,
+          "optional": true,
+          "found": false
+        },
+        {
+          "label": "selection pill button",
+          "selector": ".systemsketch-selection-menu[data-visible=\"true\"] .block-mini-menu button, .systemsketch-selection-menu[data-visible=\"true\"] .systemsketch-selection-action",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#ffffff",
+          "bg": "#191919",
+          "ratio": 17.49,
+          "text": "Ssimple",
+          "ok": true
+        },
+        {
+          "label": "Block heading on the canvas",
+          "selector": ".systemsketch-block-canvas .BlockNode-headingTitle, .systemsketch-block-canvas .BlockNode-simpleTitleText",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.72,
+          "text": "Theme probe",
+          "ok": true
+        },
+        {
+          "label": "left popout header",
+          "selector": ".systemsketch-popout--left .systemsketch-popout__header h2",
+          "kind": "text",
+          "threshold": 4.5,
+          "optional": true,
+          "found": false
+        },
+        {
+          "label": "main menu item (tldraw menu)",
+          "selector": "[data-testid=\"main-menu.settings\"]",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.72,
+          "text": "Settings",
+          "ok": true
+        },
+        {
+          "label": "settings heading",
+          "selector": ".systemsketch-settings__intro h2",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.72,
+          "text": "Color theme",
+          "ok": true
+        },
+        {
+          "label": "settings body copy",
+          "selector": ".systemsketch-settings__intro p",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#5c5c5c",
+          "bg": "#f6f6f6",
+          "ratio": 6.19,
+          "text": "The board, its menus and every panel wea",
+          "ok": true
+        },
+        {
+          "label": "settings active category",
+          "selector": ".systemsketch-settings__nav button.is-active",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#f3eefe",
+          "ratio": 14,
+          "text": "Appearance",
+          "ok": true
+        },
+        {
+          "label": "settings inactive category",
+          "selector": ".systemsketch-settings__nav button:not(.is-active):not(:disabled)",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#5c5c5c",
+          "bg": "#ffffff",
+          "ratio": 6.69,
+          "text": "Interface",
+          "ok": true
+        },
+        {
+          "label": "theme option label (active)",
+          "selector": ".systemsketch-theme-option.is-active .systemsketch-theme-option__label",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#ebe6f6",
+          "ratio": 13.03,
+          "text": "Obsidian Light",
+          "ok": true
+        },
+        {
+          "label": "theme option detail",
+          "selector": ".systemsketch-theme-option:not(.is-active) .systemsketch-theme-option__detail",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#5c5c5c",
+          "bg": "#f6f6f6",
+          "ratio": 6.19,
+          "text": "SystemSketch",
+          "ok": true
+        },
+        {
+          "label": "Import button",
+          "selector": ".systemsketch-settings__import",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.72,
+          "text": "Import VS Code theme…",
+          "ok": true
+        },
+        {
+          "label": "dialog close button icon",
+          "selector": ".systemsketch-settings__header .tlui-button",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.72,
+          "text": "",
+          "ok": true
+        }
+      ],
+      "screenshots": [
+        "docs/assets/theme-obsidian-light.png",
+        "docs/assets/theme-obsidian-light-settings.png"
+      ]
+    },
+    {
+      "id": "obsidian-dark",
+      "label": "Obsidian Dark",
+      "scheme": "dark",
+      "state": {
+        "theme": "palette",
+        "scheme": "dark",
+        "tldrawDark": true,
+        "canvas": "rgb(28, 28, 28)",
+        "htmlStillStamped": false,
+        "inlineSurface": "#1C1C1C"
+      },
+      "probes": [
+        {
+          "label": "file title, top-left shell",
+          "selector": ".systemsketch-top-left-shell .systemsketch-file-title",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.61,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "timer chip",
+          "selector": ".systemsketch-timer",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#b3b3b3",
+          "bg": "#2e2e2e",
+          "ratio": 6.48,
+          "text": "◉ 03:00",
+          "ok": true
+        },
+        {
+          "label": "Share button",
+          "selector": ".systemsketch-share-button",
+          "kind": "text-on-accent",
+          "threshold": 3,
+          "found": true,
+          "fg": "#ffffff",
+          "bg": "#8a5cf5",
+          "ratio": 4.26,
+          "text": "Share",
+          "ok": true
+        },
+        {
+          "label": "toolbar tool icon (resting)",
+          "selector": ".tlui-main-toolbar__tools .tlui-button__tool:not([aria-pressed=\"true\"])",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.6,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "toolbar tool icon (active)",
+          "selector": ".tlui-main-toolbar__tools .tlui-button__tool[aria-pressed=\"true\"]",
+          "kind": "icon",
+          "threshold": 3,
+          "pseudo": "::after",
+          "found": true,
+          "fg": "#ffffff",
+          "bg": "#8a5cf5",
+          "ratio": 4.26,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "Block tool button",
+          "selector": "[data-testid=\"systemsketch-tool-block\"]",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.6,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "utility strip button",
+          "selector": ".systemsketch-utility-strip .tlui-button",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.61,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "inspector active tab",
+          "selector": ".block-inspector__tabs > [role=\"tab\"].is-active",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#2e2e2e",
+          "ratio": 9.71,
+          "text": "Details",
+          "ok": true
+        },
+        {
+          "label": "inspector section title",
+          "selector": ".block-inspector__section-title",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#b3b3b3",
+          "bg": "#282828",
+          "ratio": 7.03,
+          "text": "Block",
+          "ok": true
+        },
+        {
+          "label": "inspector field label",
+          "selector": ".block-inspector__field > span",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#b3b3b3",
+          "bg": "#282828",
+          "ratio": 7.03,
+          "text": "Title",
+          "ok": true
+        },
+        {
+          "label": "inspector input text",
+          "selector": ".block-inspector__section input:not([disabled])",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#2e2e2e",
+          "ratio": 9.71,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "inspector input boundary",
+          "selector": ".block-inspector__section input:not([disabled])",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#dadada @ 0.55",
+          "bg": "#2e2e2e",
+          "ratio": 4.07,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "selection pill count",
+          "selector": ".systemsketch-selection-menu[data-visible=\"true\"] .systemsketch-selection-count, .systemsketch-selection-menu[data-visible=\"true\"] .block-mini-menu__count",
+          "kind": "text",
+          "threshold": 4.5,
+          "optional": true,
+          "found": false
+        },
+        {
+          "label": "selection pill button",
+          "selector": ".systemsketch-selection-menu[data-visible=\"true\"] .block-mini-menu button, .systemsketch-selection-menu[data-visible=\"true\"] .systemsketch-selection-action",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#ffffff",
+          "bg": "#030303",
+          "ratio": 20.65,
+          "text": "Ssimple",
+          "ok": true
+        },
+        {
+          "label": "Block heading on the canvas",
+          "selector": ".systemsketch-block-canvas .BlockNode-headingTitle, .systemsketch-block-canvas .BlockNode-simpleTitleText",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.55,
+          "text": "Theme probe",
+          "ok": true
+        },
+        {
+          "label": "left popout header",
+          "selector": ".systemsketch-popout--left .systemsketch-popout__header h2",
+          "kind": "text",
+          "threshold": 4.5,
+          "optional": true,
+          "found": false
+        },
+        {
+          "label": "main menu item (tldraw menu)",
+          "selector": "[data-testid=\"main-menu.settings\"]",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.55,
+          "text": "Settings",
+          "ok": true
+        },
+        {
+          "label": "settings heading",
+          "selector": ".systemsketch-settings__intro h2",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.55,
+          "text": "Color theme",
+          "ok": true
+        },
+        {
+          "label": "settings body copy",
+          "selector": ".systemsketch-settings__intro p",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#b3b3b3",
+          "bg": "#282828",
+          "ratio": 7.03,
+          "text": "The board, its menus and every panel wea",
+          "ok": true
+        },
+        {
+          "label": "settings active category",
+          "selector": ".systemsketch-settings__nav button.is-active",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#393446",
+          "ratio": 8.61,
+          "text": "Appearance",
+          "ok": true
+        },
+        {
+          "label": "settings inactive category",
+          "selector": ".systemsketch-settings__nav button:not(.is-active):not(:disabled)",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#b3b3b3",
+          "bg": "#2e2e2e",
+          "ratio": 6.48,
+          "text": "Interface",
+          "ok": true
+        },
+        {
+          "label": "theme option label (active)",
+          "selector": ".systemsketch-theme-option.is-active .systemsketch-theme-option__label",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#342e41",
+          "ratio": 9.3,
+          "text": "Obsidian Dark",
+          "ok": true
+        },
+        {
+          "label": "theme option detail",
+          "selector": ".systemsketch-theme-option:not(.is-active) .systemsketch-theme-option__detail",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#b3b3b3",
+          "bg": "#282828",
+          "ratio": 7.03,
+          "text": "SystemSketch",
+          "ok": true
+        },
+        {
+          "label": "Import button",
+          "selector": ".systemsketch-settings__import",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.55,
+          "text": "Import VS Code theme…",
+          "ok": true
+        },
+        {
+          "label": "dialog close button icon",
+          "selector": ".systemsketch-settings__header .tlui-button",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.55,
+          "text": "",
+          "ok": true
+        }
+      ],
+      "screenshots": [
+        "docs/assets/theme-obsidian-dark.png",
+        "docs/assets/theme-obsidian-dark-settings.png"
+      ]
+    },
+    {
+      "id": "dark-modern",
+      "label": "Dark Modern",
+      "scheme": "dark",
+      "state": {
+        "theme": "palette",
+        "scheme": "dark",
+        "tldrawDark": true,
+        "canvas": "rgb(31, 31, 31)",
+        "htmlStillStamped": false,
+        "inlineSurface": "#1f1f1f"
+      },
+      "probes": [
+        {
+          "label": "file title, top-left shell",
+          "selector": ".systemsketch-top-left-shell .systemsketch-file-title",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "timer chip",
+          "selector": ".systemsketch-timer",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#9d9d9d",
+          "bg": "#313131",
+          "ratio": 4.8,
+          "text": "◉ 03:00",
+          "ok": true
+        },
+        {
+          "label": "Share button",
+          "selector": ".systemsketch-share-button",
+          "kind": "text-on-accent",
+          "threshold": 3,
+          "found": true,
+          "fg": "#ffffff",
+          "bg": "#0078d4",
+          "ratio": 4.53,
+          "text": "Share",
+          "ok": true
+        },
+        {
+          "label": "toolbar tool icon (resting)",
+          "selector": ".tlui-main-toolbar__tools .tlui-button__tool:not([aria-pressed=\"true\"])",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "toolbar tool icon (active)",
+          "selector": ".tlui-main-toolbar__tools .tlui-button__tool[aria-pressed=\"true\"]",
+          "kind": "icon",
+          "threshold": 3,
+          "pseudo": "::after",
+          "found": true,
+          "fg": "#ffffff",
+          "bg": "#0078d4",
+          "ratio": 4.53,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "Block tool button",
+          "selector": "[data-testid=\"systemsketch-tool-block\"]",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "utility strip button",
+          "selector": ".systemsketch-utility-strip .tlui-button",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "inspector active tab",
+          "selector": ".block-inspector__tabs > [role=\"tab\"].is-active",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#313131",
+          "ratio": 8.1,
+          "text": "Details",
+          "ok": true
+        },
+        {
+          "label": "inspector section title",
+          "selector": ".block-inspector__section-title",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#9d9d9d",
+          "bg": "#202020",
+          "ratio": 6.01,
+          "text": "Block",
+          "ok": true
+        },
+        {
+          "label": "inspector field label",
+          "selector": ".block-inspector__field > span",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#9d9d9d",
+          "bg": "#202020",
+          "ratio": 6.01,
+          "text": "Title",
+          "ok": true
+        },
+        {
+          "label": "inspector input text",
+          "selector": ".block-inspector__section input:not([disabled])",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#313131",
+          "ratio": 8.1,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "inspector input boundary",
+          "selector": ".block-inspector__section input:not([disabled])",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#cccccc @ 0.55",
+          "bg": "#313131",
+          "ratio": 3.59,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "selection pill count",
+          "selector": ".systemsketch-selection-menu[data-visible=\"true\"] .systemsketch-selection-count, .systemsketch-selection-menu[data-visible=\"true\"] .block-mini-menu__count",
+          "kind": "text",
+          "threshold": 4.5,
+          "optional": true,
+          "found": false
+        },
+        {
+          "label": "selection pill button",
+          "selector": ".systemsketch-selection-menu[data-visible=\"true\"] .block-mini-menu button, .systemsketch-selection-menu[data-visible=\"true\"] .systemsketch-selection-action",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#383838",
+          "ratio": 7.29,
+          "text": "Ssimple",
+          "ok": true
+        },
+        {
+          "label": "Block heading on the canvas",
+          "selector": ".systemsketch-block-canvas .BlockNode-headingTitle, .systemsketch-block-canvas .BlockNode-simpleTitleText",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
+          "text": "Theme probe",
+          "ok": true
+        },
+        {
+          "label": "left popout header",
+          "selector": ".systemsketch-popout--left .systemsketch-popout__header h2",
+          "kind": "text",
+          "threshold": 4.5,
+          "optional": true,
+          "found": false
+        },
+        {
+          "label": "main menu item (tldraw menu)",
+          "selector": "[data-testid=\"main-menu.settings\"]",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
+          "text": "Settings",
+          "ok": true
+        },
+        {
+          "label": "settings heading",
+          "selector": ".systemsketch-settings__intro h2",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
+          "text": "Color theme",
+          "ok": true
+        },
+        {
+          "label": "settings body copy",
+          "selector": ".systemsketch-settings__intro p",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#9d9d9d",
+          "bg": "#202020",
+          "ratio": 6.01,
+          "text": "The board, its menus and every panel wea",
+          "ok": true
+        },
+        {
+          "label": "settings active category",
+          "selector": ".systemsketch-settings__nav button.is-active",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#2b3a45",
+          "ratio": 7.33,
+          "text": "Appearance",
+          "ok": true
+        },
+        {
+          "label": "settings inactive category",
+          "selector": ".systemsketch-settings__nav button:not(.is-active):not(:disabled)",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#9d9d9d",
+          "bg": "#313131",
+          "ratio": 4.8,
+          "text": "Interface",
+          "ok": true
+        },
+        {
+          "label": "theme option label (active)",
+          "selector": ".systemsketch-theme-option.is-active .systemsketch-theme-option__label",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#1c2b36",
+          "ratio": 9.07,
+          "text": "Dark Modern",
+          "ok": true
+        },
+        {
+          "label": "theme option detail",
+          "selector": ".systemsketch-theme-option:not(.is-active) .systemsketch-theme-option__detail",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#9d9d9d",
+          "bg": "#202020",
+          "ratio": 6.01,
+          "text": "SystemSketch",
+          "ok": true
+        },
+        {
+          "label": "Import button",
+          "selector": ".systemsketch-settings__import",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
+          "text": "Import VS Code theme…",
+          "ok": true
+        },
+        {
+          "label": "dialog close button icon",
+          "selector": ".systemsketch-settings__header .tlui-button",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
+          "text": "",
+          "ok": true
+        }
+      ],
+      "screenshots": [
+        "docs/assets/theme-dark-modern.png",
+        "docs/assets/theme-dark-modern-settings.png"
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "label": "index.html carries the pre-paint theme stamp",
+      "ok": true
+    },
+    {
+      "label": "the picker switches Light → Dark Modern live: root palette/dark, tldraw dark class, canvas rgb(31, 31, 31)",
+      "ok": true
+    },
+    {
+      "label": "the pre-paint stamp on <html> is released once the app root owns the theme",
+      "ok": true
+    },
+    {
+      "label": "importing Default Light Modern through the file input yields the mapping's own tokens and a light board (rgb(255, 255, 255))",
+      "ok": true
+    },
+    {
+      "label": "Light: root systemsketch/light, tldraw light, canvas rgb(249, 250, 251)",
+      "ok": true
+    },
+    {
+      "label": "Light: file title, top-left shell 13.28:1 (≥ 4.5) #2e2e2e on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: timer chip 4.69:1 (≥ 4.5) #666b6f on #edf0f2",
+      "ok": true
+    },
+    {
+      "label": "Light: Share button 3.79:1 (≥ 3) #ffffff on #3182ed",
+      "ok": true
+    },
+    {
+      "label": "Light: toolbar tool icon (resting) 13.28:1 (≥ 3) #2e2e2e on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: toolbar tool icon (active) 3.79:1 (≥ 3) #ffffff on #3182ed",
+      "ok": true
+    },
+    {
+      "label": "Light: Block tool button 13.28:1 (≥ 3) #2e2e2e on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: utility strip button 13.28:1 (≥ 3) #2e2e2e on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: inspector active tab 11.86:1 (≥ 4.5) #2e2e2e on #edf0f2",
+      "ok": true
+    },
+    {
+      "label": "Light: inspector section title 5.23:1 (≥ 4.5) #666b6f on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: inspector field label 5.23:1 (≥ 4.5) #666b6f on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: inspector input text 11.86:1 (≥ 4.5) #2e2e2e on #edf0f2",
+      "ok": true
+    },
+    {
+      "label": "Light: inspector input boundary 3.22:1 (≥ 3) #2e2e2e @ 0.55 on #edf0f2",
+      "ok": true
+    },
+    {
+      "label": "Light: selection pill button 16.67:1 (≥ 4.5) #ffffff on #1e1e1e",
+      "ok": true
+    },
+    {
+      "label": "Light: Block heading on the canvas 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: main menu item (tldraw menu) 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: settings heading 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: settings body copy 5.23:1 (≥ 4.5) #666b6f on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: settings active category 10.42:1 (≥ 4.5) #2e2e2e on #d6e3f1",
+      "ok": true
+    },
+    {
+      "label": "Light: settings inactive category 4.69:1 (≥ 4.5) #666b6f on #edf0f2",
+      "ok": true
+    },
+    {
+      "label": "Light: theme option label (active) 11.53:1 (≥ 4.5) #2e2e2e on #e4edfa",
+      "ok": true
+    },
+    {
+      "label": "Light: theme option detail 5.23:1 (≥ 4.5) #666b6f on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: Import button 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: dialog close button icon 13.24:1 (≥ 3) #2e2e2e on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Dark: root systemsketch/dark, tldraw dark, canvas rgb(16, 16, 17)",
+      "ok": true
+    },
+    {
+      "label": "Dark: file title, top-left shell 11.54:1 (≥ 4.5) #d9d9d9 on #1f2024",
+      "ok": true
+    },
+    {
+      "label": "Dark: timer chip 9.79:1 (≥ 4.5) #c0c3c5 on #1a1a1c",
+      "ok": true
+    },
+    {
+      "label": "Dark: Share button 3.49:1 (≥ 3) #ffffff on #4387f4",
+      "ok": true
+    },
+    {
+      "label": "Dark: toolbar tool icon (resting) 11.51:1 (≥ 3) #d9d9d9 on #202024",
+      "ok": true
+    },
+    {
+      "label": "Dark: toolbar tool icon (active) 3.49:1 (≥ 3) #ffffff on #4387f4",
+      "ok": true
+    },
+    {
+      "label": "Dark: Block tool button 11.51:1 (≥ 3) #d9d9d9 on #202024",
+      "ok": true
+    },
+    {
+      "label": "Dark: utility strip button 11.54:1 (≥ 3) #d9d9d9 on #1f2024",
+      "ok": true
+    },
+    {
+      "label": "Dark: inspector active tab 12.31:1 (≥ 4.5) #d9d9d9 on #1a1a1c",
+      "ok": true
+    },
+    {
+      "label": "Dark: inspector section title 9.14:1 (≥ 4.5) #c0c3c5 on #202025",
+      "ok": true
+    },
+    {
+      "label": "Dark: inspector field label 9.14:1 (≥ 4.5) #c0c3c5 on #202025",
+      "ok": true
+    },
+    {
+      "label": "Dark: inspector input text 12.31:1 (≥ 4.5) #d9d9d9 on #1a1a1c",
+      "ok": true
+    },
+    {
+      "label": "Dark: inspector input boundary 4.58:1 (≥ 3) #d9d9d9 @ 0.55 on #1a1a1c",
+      "ok": true
+    },
+    {
+      "label": "Dark: selection pill button 16.67:1 (≥ 4.5) #ffffff on #1e1e1e",
+      "ok": true
+    },
+    {
+      "label": "Dark: Block heading on the canvas 11.49:1 (≥ 4.5) #d9d9d9 on #202025",
+      "ok": true
+    },
+    {
+      "label": "Dark: main menu item (tldraw menu) 11.49:1 (≥ 4.5) #d9d9d9 on #202025",
+      "ok": true
+    },
+    {
+      "label": "Dark: settings heading 11.49:1 (≥ 4.5) #d9d9d9 on #202025",
+      "ok": true
+    },
+    {
+      "label": "Dark: settings body copy 9.14:1 (≥ 4.5) #c0c3c5 on #202025",
+      "ok": true
+    },
+    {
+      "label": "Dark: settings active category 10.61:1 (≥ 4.5) #d9d9d9 on #1f2736",
+      "ok": true
+    },
+    {
+      "label": "Dark: settings inactive category 9.79:1 (≥ 4.5) #c0c3c5 on #1a1a1c",
+      "ok": true
+    },
+    {
+      "label": "Dark: theme option label (active) 9.85:1 (≥ 4.5) #d9d9d9 on #242c3e",
+      "ok": true
+    },
+    {
+      "label": "Dark: theme option detail 9.14:1 (≥ 4.5) #c0c3c5 on #202025",
+      "ok": true
+    },
+    {
+      "label": "Dark: Import button 11.49:1 (≥ 4.5) #d9d9d9 on #202025",
+      "ok": true
+    },
+    {
+      "label": "Dark: dialog close button icon 11.49:1 (≥ 3) #d9d9d9 on #202025",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: root palette/light, tldraw light, canvas rgb(255, 255, 255)",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: file title, top-left shell 14.77:1 (≥ 4.5) #222222 on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: timer chip 6.69:1 (≥ 4.5) #5c5c5c on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: Share button 3.43:1 (≥ 3) #ffffff on #9873f7",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: toolbar tool icon (resting) 14.76:1 (≥ 3) #222222 on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: toolbar tool icon (active) 3.43:1 (≥ 3) #ffffff on #9873f7",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: Block tool button 14.76:1 (≥ 3) #222222 on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: utility strip button 14.77:1 (≥ 3) #222222 on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: inspector active tab 15.91:1 (≥ 4.5) #222222 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: inspector section title 6.19:1 (≥ 4.5) #5c5c5c on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: inspector field label 6.19:1 (≥ 4.5) #5c5c5c on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: inspector input text 15.91:1 (≥ 4.5) #222222 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: inspector input boundary 3.67:1 (≥ 3) #222222 @ 0.55 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: selection pill button 17.49:1 (≥ 4.5) #ffffff on #191919",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: Block heading on the canvas 14.72:1 (≥ 4.5) #222222 on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: main menu item (tldraw menu) 14.72:1 (≥ 4.5) #222222 on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: settings heading 14.72:1 (≥ 4.5) #222222 on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: settings body copy 6.19:1 (≥ 4.5) #5c5c5c on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: settings active category 14:1 (≥ 4.5) #222222 on #f3eefe",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: settings inactive category 6.69:1 (≥ 4.5) #5c5c5c on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: theme option label (active) 13.03:1 (≥ 4.5) #222222 on #ebe6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: theme option detail 6.19:1 (≥ 4.5) #5c5c5c on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: Import button 14.72:1 (≥ 4.5) #222222 on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: dialog close button icon 14.72:1 (≥ 3) #222222 on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: root palette/dark, tldraw dark, canvas rgb(28, 28, 28)",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: file title, top-left shell 10.61:1 (≥ 4.5) #dadada on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: timer chip 6.48:1 (≥ 4.5) #b3b3b3 on #2e2e2e",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: Share button 4.26:1 (≥ 3) #ffffff on #8a5cf5",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: toolbar tool icon (resting) 10.6:1 (≥ 3) #dadada on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: toolbar tool icon (active) 4.26:1 (≥ 3) #ffffff on #8a5cf5",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: Block tool button 10.6:1 (≥ 3) #dadada on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: utility strip button 10.61:1 (≥ 3) #dadada on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: inspector active tab 9.71:1 (≥ 4.5) #dadada on #2e2e2e",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: inspector section title 7.03:1 (≥ 4.5) #b3b3b3 on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: inspector field label 7.03:1 (≥ 4.5) #b3b3b3 on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: inspector input text 9.71:1 (≥ 4.5) #dadada on #2e2e2e",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: inspector input boundary 4.07:1 (≥ 3) #dadada @ 0.55 on #2e2e2e",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: selection pill button 20.65:1 (≥ 4.5) #ffffff on #030303",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: Block heading on the canvas 10.55:1 (≥ 4.5) #dadada on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: main menu item (tldraw menu) 10.55:1 (≥ 4.5) #dadada on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: settings heading 10.55:1 (≥ 4.5) #dadada on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: settings body copy 7.03:1 (≥ 4.5) #b3b3b3 on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: settings active category 8.61:1 (≥ 4.5) #dadada on #393446",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: settings inactive category 6.48:1 (≥ 4.5) #b3b3b3 on #2e2e2e",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: theme option label (active) 9.3:1 (≥ 4.5) #dadada on #342e41",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: theme option detail 7.03:1 (≥ 4.5) #b3b3b3 on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: Import button 10.55:1 (≥ 4.5) #dadada on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: dialog close button icon 10.55:1 (≥ 3) #dadada on #282828",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: root palette/dark, tldraw dark, canvas rgb(31, 31, 31)",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: file title, top-left shell 10.15:1 (≥ 4.5) #cccccc on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: timer chip 4.8:1 (≥ 4.5) #9d9d9d on #313131",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: Share button 4.53:1 (≥ 3) #ffffff on #0078d4",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: toolbar tool icon (resting) 10.15:1 (≥ 3) #cccccc on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: toolbar tool icon (active) 4.53:1 (≥ 3) #ffffff on #0078d4",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: Block tool button 10.15:1 (≥ 3) #cccccc on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: utility strip button 10.15:1 (≥ 3) #cccccc on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: inspector active tab 8.1:1 (≥ 4.5) #cccccc on #313131",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: inspector section title 6.01:1 (≥ 4.5) #9d9d9d on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: inspector field label 6.01:1 (≥ 4.5) #9d9d9d on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: inspector input text 8.1:1 (≥ 4.5) #cccccc on #313131",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: inspector input boundary 3.59:1 (≥ 3) #cccccc @ 0.55 on #313131",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: selection pill button 7.29:1 (≥ 4.5) #cccccc on #383838",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: Block heading on the canvas 10.15:1 (≥ 4.5) #cccccc on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: main menu item (tldraw menu) 10.15:1 (≥ 4.5) #cccccc on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: settings heading 10.15:1 (≥ 4.5) #cccccc on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: settings body copy 6.01:1 (≥ 4.5) #9d9d9d on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: settings active category 7.33:1 (≥ 4.5) #cccccc on #2b3a45",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: settings inactive category 4.8:1 (≥ 4.5) #9d9d9d on #313131",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: theme option label (active) 9.07:1 (≥ 4.5) #cccccc on #1c2b36",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: theme option detail 6.01:1 (≥ 4.5) #9d9d9d on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: Import button 10.15:1 (≥ 4.5) #cccccc on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: dialog close button icon 10.15:1 (≥ 3) #cccccc on #202020",
+      "ok": true
+    },
+    {
+      "label": "no console errors from the app during the sweep",
+      "ok": true
+    }
+  ],
+  "importer": {
+    "file": "/usr/share/cursor/resources/app/extensions/theme-defaults/themes/light_modern.json",
+    "name": "Default Light Modern",
+    "scheme": "light",
+    "expectedSurface": "#ffffff",
+    "canvas": "rgb(255, 255, 255)",
+    "message": "Imported Default Light Modern. It did not name 2 of the 20 tokens (warning, shadow1); those use VS Code's defaults.",
+    "option": "Default Light Modern",
+    "tokensMatch": true
+  },
+  "menuProbe": {
+    "label": "main menu item (tldraw menu)",
+    "selector": "[data-testid=\"main-menu.settings\"]",
+    "kind": "text",
+    "phase": "menu",
+    "found": true,
+    "fg": "#2e2e2e",
+    "bg": "#fcfcfc",
+    "ratio": 13.24,
+    "text": "Settings"
+  },
+  "passed": 125,
+  "failed": 0
+}

@@ -44,14 +44,14 @@
 
 .systemsketch-settings {
   width: min(760px, calc((100vw - 48px) * var(--systemsketch-interface-scale-inverse)));
-  color: #272b32;
-  background: #fff;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
 }
 
 .systemsketch-settings__header {
   height: 54px;
   padding-inline-start: 18px;
-  border-bottom: 1px solid #e9eaed;
+  border-bottom: 1px solid var(--ss-border);
 }
 
 .systemsketch-settings__title-icon {
@@ -59,7 +59,7 @@
   height: 19px;
   margin-right: 9px;
   fill: none;
-  stroke: #626974;
+  stroke: var(--ss-text-muted);
   stroke-width: 1.45;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -85,8 +85,8 @@
   flex-direction: column;
   gap: 3px;
   padding: 16px 10px;
-  border-right: 1px solid #e9eaed;
-  background: #f7f7f8;
+  border-right: 1px solid var(--ss-border);
+  background: var(--ss-surface-sunken);
 }
 
 .systemsketch-settings__nav button {
@@ -97,7 +97,7 @@
   padding: 0 11px;
   border: 0;
   border-radius: 8px;
-  color: #6c727c;
+  color: var(--ss-text-muted);
   background: transparent;
   cursor: default;
   font-size: 12px;
@@ -110,8 +110,9 @@
 }
 
 .systemsketch-settings__nav button.is-active {
-  color: #4e37bd;
-  background: #ece8ff;
+  color: var(--ss-text);
+  background: var(--ss-accent-soft);
+  box-shadow: inset 3px 0 0 var(--ss-accent);
 }
 
 .systemsketch-settings__nav svg {
@@ -131,7 +132,7 @@
 
 .systemsketch-settings__eyebrow {
   margin-bottom: 7px;
-  color: #7253df;
+  color: var(--ss-accent);
   font-size: 9px;
   font-weight: 850;
   letter-spacing: .12em;
@@ -147,7 +148,7 @@
 
 .systemsketch-settings__intro h2 {
   margin: 0;
-  color: #252930;
+  color: var(--ss-text);
   font-size: 22px;
   line-height: 1.2;
 }
@@ -155,7 +156,7 @@
 .systemsketch-settings__intro p,
 .systemsketch-settings__note p {
   margin: 7px 0 0;
-  color: #747b86;
+  color: var(--ss-text-muted);
   font-size: 11px;
   font-weight: 500;
   line-height: 1.55;
@@ -164,10 +165,10 @@
 .systemsketch-settings__intro output {
   min-width: 62px;
   padding: 8px 10px;
-  border: 1px solid #dedfe4;
+  border: 1px solid var(--ss-border);
   border-radius: 8px;
-  color: #3f4650;
-  background: #f8f8f9;
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
   font: 760 13px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
   text-align: center;
 }
@@ -178,19 +179,19 @@
   align-items: center;
   gap: 11px;
   margin-top: 34px;
-  color: #7b818a;
+  color: var(--ss-text-muted);
   font-size: 11px;
   font-weight: 760;
 }
 
 .systemsketch-settings__slider-row .large {
-  color: #505761;
+  color: var(--ss-text);
   font-size: 18px;
 }
 
 .systemsketch-settings__slider-row input {
   width: 100%;
-  accent-color: #7253df;
+  accent-color: var(--ss-accent);
 }
 
 .systemsketch-settings__presets {
@@ -203,10 +204,10 @@
 .systemsketch-settings__presets button,
 .systemsketch-settings__reset {
   min-height: 34px;
-  border: 1px solid #dedfe4;
+  border: 1px solid var(--ss-border);
   border-radius: 8px;
-  color: #626974;
-  background: #fff;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-raised);
   cursor: pointer;
   font-size: 11px;
   font-weight: 730;
@@ -214,15 +215,15 @@
 
 .systemsketch-settings__presets button:hover,
 .systemsketch-settings__reset:hover:not(:disabled) {
-  border-color: #bdb1ee;
-  color: #5137bd;
-  background: #f4f1ff;
+  border-color: color-mix(in srgb, var(--ss-accent) 45%, transparent);
+  color: var(--ss-text);
+  background: var(--ss-accent-soft);
 }
 
 .systemsketch-settings__presets button.is-active {
-  border-color: #7253df;
-  color: #fff;
-  background: #7253df;
+  border-color: var(--ss-accent);
+  color: var(--ss-accent-text);
+  background: var(--ss-accent);
 }
 
 .systemsketch-settings__note {
@@ -231,13 +232,13 @@
   gap: 10px;
   margin-top: 30px;
   padding: 14px 15px;
-  border: 1px solid #e8e5f5;
+  border: 1px solid var(--ss-border);
   border-radius: 10px;
-  background: #faf9ff;
+  background: var(--ss-accent-soft);
 }
 
 .systemsketch-settings__note strong {
-  color: #3f4650;
+  color: var(--ss-text);
   font-size: 11px;
 }
 
@@ -247,8 +248,8 @@
   margin-top: 4px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: #3da878;
-  box-shadow: 0 0 0 3px rgb(61 168 120 / 13%);
+  background: var(--ss-success);
+  box-shadow: 0 0 0 3px var(--ss-success-soft);
 }
 
 .systemsketch-settings__reset {
@@ -284,4 +285,210 @@
   .systemsketch-settings__panel {
     padding: 26px 22px;
   }
+}
+
+/* Appearance — the theme picker ------------------------------------------ */
+
+.systemsketch-settings__nav button:not(:disabled) {
+  cursor: pointer;
+}
+
+.systemsketch-settings__nav button:not(:disabled):not(.is-active):hover {
+  color: var(--ss-text);
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-theme-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.systemsketch-theme-option {
+  position: relative;
+}
+
+.systemsketch-theme-option > [role='radio'] {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 10px;
+  border: 1px solid var(--ss-border);
+  border-radius: 10px;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
+  cursor: pointer;
+  text-align: left;
+}
+
+.systemsketch-theme-option > [role='radio']:hover {
+  border-color: color-mix(in srgb, var(--ss-accent) 45%, transparent);
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-theme-option.is-active > [role='radio'] {
+  border-color: var(--ss-accent);
+  background: var(--ss-accent-soft);
+  box-shadow: var(--ss-focus-ring);
+}
+
+.systemsketch-theme-option > [role='radio']:focus-visible {
+  outline: 2px solid var(--ss-accent);
+  outline-offset: 2px;
+}
+
+.systemsketch-theme-option__text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.systemsketch-theme-option__label {
+  font-size: 12px;
+  font-weight: 730;
+}
+
+.systemsketch-theme-option__detail {
+  overflow: hidden;
+  color: var(--ss-text-muted);
+  font-size: 10px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-theme-option__remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--ss-text-muted);
+  background: transparent;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.systemsketch-theme-option__remove:hover {
+  color: var(--ss-danger);
+  background: var(--ss-danger-soft);
+}
+
+/* The swatch paints from the palette's own values (see ThemeSwatch). */
+.systemsketch-theme-swatch {
+  display: flex;
+  width: 44px;
+  height: 30px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border: 1px solid var(--ss-border);
+  border-radius: 7px;
+}
+
+.systemsketch-theme-swatch__half {
+  position: relative;
+  flex: 1 1 0;
+  background: var(--swatch-surface);
+}
+
+.systemsketch-theme-swatch__panel {
+  position: absolute;
+  inset: 5px 5px 5px 5px;
+  border: 1px solid var(--swatch-border);
+  border-radius: 3px;
+  background: var(--swatch-raised);
+}
+
+.systemsketch-theme-swatch__panel::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 55%;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--swatch-text);
+}
+
+.systemsketch-theme-swatch__accent {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--swatch-accent);
+}
+
+.systemsketch-theme-swatch[data-halves='2'] .systemsketch-theme-swatch__panel {
+  inset: 5px 2px 5px 5px;
+}
+
+.systemsketch-theme-swatch[data-halves='2'] .systemsketch-theme-swatch__half + .systemsketch-theme-swatch__half .systemsketch-theme-swatch__panel {
+  inset: 5px 5px 5px 2px;
+}
+
+.systemsketch-settings__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 19px;
+}
+
+.systemsketch-settings__import {
+  min-height: 34px;
+  padding: 0 13px;
+  border: 1px solid var(--ss-border);
+  border-radius: 8px;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 730;
+}
+
+.systemsketch-settings__import:hover {
+  border-color: color-mix(in srgb, var(--ss-accent) 45%, transparent);
+  color: var(--ss-text);
+  background: var(--ss-accent-soft);
+}
+
+.systemsketch-settings__hint {
+  color: var(--ss-text-muted);
+  font-size: 10px;
+}
+
+.systemsketch-settings__hint code {
+  padding: 1px 4px;
+  border-radius: 4px;
+  color: var(--ss-code-text);
+  background: var(--ss-code-surface);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.systemsketch-settings__message {
+  margin: 12px 0 0;
+  padding: 9px 11px;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.systemsketch-settings__message.is-note {
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+}
+
+.systemsketch-settings__message.is-error {
+  color: var(--ss-danger);
+  background: var(--ss-danger-soft);
 }

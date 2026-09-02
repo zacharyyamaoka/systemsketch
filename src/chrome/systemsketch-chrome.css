@@ -1,11 +1,5 @@
-:root {
-  --systemsketch-chrome-inset: 14px;
-  --systemsketch-top-height: 46px;
-  --systemsketch-bottom-clearance: 68px;
-  --systemsketch-panel-radius: 18px;
-  --systemsketch-panel-border: rgb(26 31 39 / 12%);
-  --systemsketch-panel-shadow: 0 22px 70px rgb(18 22 29 / 16%), 0 2px 9px rgb(18 22 29 / 8%);
-}
+/* Every colour here is a token from src/theme/tokens.css; the geometry the
+ * chrome is laid out on lives there too. */
 
 .systemsketch-top-left-shell,
 .systemsketch-top-right-shell {
@@ -15,11 +9,11 @@
   height: var(--systemsketch-top-height);
   align-items: center;
   padding: 4px;
-  border: 1px solid var(--systemsketch-panel-border);
+  border: 1px solid var(--ss-border);
   border-radius: 15px;
-  color: #252930;
-  background: rgb(255 255 255 / 96%);
-  box-shadow: 0 2px 7px rgb(15 23 42 / 8%), 0 12px 34px rgb(15 23 42 / 11%);
+  color: var(--ss-text);
+  background: color-mix(in srgb, var(--ss-surface-raised) 96%, transparent);
+  box-shadow: var(--ss-shadow-1);
   backdrop-filter: blur(16px);
   pointer-events: auto;
 }
@@ -42,7 +36,7 @@
 .systemsketch-top-left-shell .systemsketch-file-title {
   max-width: min(30vw, 250px);
   height: 36px;
-  border-right: 1px solid #e9eaed;
+  border-right: 1px solid var(--ss-border);
   border-radius: 0;
 }
 
@@ -57,7 +51,7 @@
 .systemsketch-top-left-shell .tlui-button[aria-expanded='true'],
 .systemsketch-top-right-shell .tlui-button:hover,
 .systemsketch-top-right-shell .tlui-button[aria-expanded='true'] {
-  background: #f0f1f4;
+  background: var(--ss-surface-hover);
 }
 
 .systemsketch-shell-icon-button svg,
@@ -79,8 +73,8 @@
   min-height: 30px !important;
   margin: 0 3px;
   border-radius: 50% !important;
-  color: #fff !important;
-  background: #c95c38 !important;
+  color: var(--ss-accent-text) !important;
+  background: var(--ss-accent) !important;
   font-size: 11px;
   font-weight: 850;
 }
@@ -91,10 +85,10 @@
   min-width: 76px;
   place-items: center;
   padding: 0 9px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--ss-border);
   border-radius: 9px;
-  color: #707680;
-  background: #f8f8f7;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-sunken);
   font: 700 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
@@ -102,10 +96,14 @@
   width: auto !important;
   min-width: 58px !important;
   padding: 0 13px !important;
-  color: #fff !important;
-  background: #8257ee !important;
+  color: var(--ss-accent-text) !important;
+  background: var(--ss-accent) !important;
   font-size: 11px;
   font-weight: 800;
+}
+
+.systemsketch-share-button:hover {
+  background: var(--ss-accent-hover) !important;
 }
 
 .systemsketch-surface-host {
@@ -124,11 +122,11 @@
   min-height: 220px;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--systemsketch-panel-border);
+  border: 1px solid var(--ss-border);
   border-radius: var(--systemsketch-panel-radius);
-  color: #272b32;
-  background: rgb(255 255 255 / 97%);
-  box-shadow: var(--systemsketch-panel-shadow);
+  color: var(--ss-text);
+  background: color-mix(in srgb, var(--ss-surface-raised) 97%, transparent);
+  box-shadow: var(--ss-shadow-2);
   backdrop-filter: blur(18px);
   pointer-events: auto;
   animation: systemsketch-popout-enter 150ms cubic-bezier(.22, .8, .28, 1);
@@ -156,12 +154,12 @@
   justify-content: space-between;
   gap: 12px;
   padding: 13px 14px 11px;
-  border-bottom: 1px solid #eceef1;
+  border-bottom: 1px solid var(--ss-border);
 }
 
 .systemsketch-popout__header span {
   display: block;
-  color: #858b94;
+  color: var(--ss-text-muted);
   font-size: 8px;
   font-weight: 850;
   letter-spacing: .12em;
@@ -170,6 +168,7 @@
 
 .systemsketch-popout__header h2 {
   margin: 2px 0 0;
+  color: var(--ss-text);
   font-size: 15px;
   line-height: 1.15;
 }
@@ -182,10 +181,15 @@
   padding: 0;
   border: 0;
   border-radius: 8px;
-  color: #626974;
-  background: #f1f2f4;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-sunken);
   cursor: pointer;
   font-size: 19px;
+}
+
+.systemsketch-popout__header button:hover {
+  color: var(--ss-text);
+  background: var(--ss-surface-active);
 }
 
 .systemsketch-library-body,
@@ -203,16 +207,16 @@
   align-items: center;
   gap: 7px;
   padding: 0 9px;
-  border: 1px solid #e4e6e9;
+  border: 1px solid var(--ss-border);
   border-radius: 8px;
-  color: #8b929b;
-  background: #f5f6f7;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-sunken);
 }
 
 .systemsketch-panel-search:focus-within {
-  border-color: #7657ef;
-  box-shadow: 0 0 0 2px rgb(118 87 239 / 13%);
-  background: #fff;
+  border-color: var(--ss-accent);
+  box-shadow: var(--ss-focus-ring);
+  background: var(--ss-surface-raised);
 }
 
 .systemsketch-panel-search input {
@@ -220,10 +224,14 @@
   flex: 1;
   border: 0;
   outline: 0;
-  color: #2f343b;
+  color: var(--ss-text);
   background: transparent;
   font: inherit;
   font-size: 11px;
+}
+
+.systemsketch-panel-search input::placeholder {
+  color: var(--ss-text-faint);
 }
 
 .systemsketch-library-body section {
@@ -253,14 +261,14 @@
   padding: 0;
   border: 0;
   border-radius: 9px;
-  color: #3c424a;
+  color: var(--ss-text);
   background: transparent;
   cursor: pointer;
 }
 
 .systemsketch-shape-tile:hover,
 .systemsketch-connection-grid button:hover {
-  background: #f0f1f3;
+  background: var(--ss-surface-hover);
 }
 
 .systemsketch-shape-tile i {
@@ -275,7 +283,8 @@
 .systemsketch-shape-tile i[data-kind='rounded'] { width: 28px; border-radius: 10px; }
 .systemsketch-shape-tile i[data-kind='diamond'] { width: 19px; height: 19px; transform: rotate(45deg); }
 .systemsketch-shape-tile i[data-kind='triangle'] { border: 0; clip-path: polygon(50% 4%, 96% 94%, 4% 94%); background: currentColor; }
-.systemsketch-shape-tile i[data-kind='triangle']::after { content: ''; position: absolute; inset: 3px; clip-path: inherit; background: #fff; }
+/* The knockout that hollows a filled glyph must match the panel it sits on. */
+.systemsketch-shape-tile i[data-kind='triangle']::after { content: ''; position: absolute; inset: 3px; clip-path: inherit; background: var(--ss-surface-raised); }
 .systemsketch-shape-tile i[data-kind='plus'] { border: 0; }
 .systemsketch-shape-tile i[data-kind='plus']::before,
 .systemsketch-shape-tile i[data-kind='plus']::after { content: ''; position: absolute; border-radius: 2px; background: currentColor; }
@@ -286,7 +295,7 @@
 .systemsketch-shape-tile i[data-kind='database'] { width: 25px; border-radius: 50% / 16%; }
 .systemsketch-shape-tile i[data-kind='document'] { border-radius: 2px 2px 8px 2px; }
 .systemsketch-shape-tile i[data-kind='pentagon'] { border: 0; clip-path: polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%); background: currentColor; }
-.systemsketch-shape-tile i[data-kind='pentagon']::after { content: ''; position: absolute; inset: 2px; clip-path: inherit; background: #fff; }
+.systemsketch-shape-tile i[data-kind='pentagon']::after { content: ''; position: absolute; inset: 2px; clip-path: inherit; background: var(--ss-surface-raised); }
 
 .systemsketch-connection-grid {
   display: grid;
@@ -306,7 +315,7 @@
   place-content: center;
   justify-items: center;
   padding: 28px;
-  color: #838a94;
+  color: var(--ss-text-muted);
   text-align: center;
 }
 
@@ -316,14 +325,14 @@
   height: 46px;
   place-items: center;
   margin-bottom: 12px;
-  border: 1px solid #e0e3e7;
+  border: 1px solid var(--ss-border);
   border-radius: 13px;
-  background: #f5f6f7;
+  background: var(--ss-surface-sunken);
   font-size: 22px;
 }
 
 .systemsketch-panel-empty strong {
-  color: #3a4048;
+  color: var(--ss-text);
   font-size: 13px;
 }
 
@@ -337,12 +346,12 @@
 .systemsketch-placeholder-card {
   padding: 13px;
   border-radius: 12px;
-  background: #f3f4f6;
+  background: var(--ss-surface-sunken);
 }
 
 .systemsketch-placeholder-card span {
   display: block;
-  color: #858b94;
+  color: var(--ss-text-muted);
   font-size: 8px;
   font-weight: 800;
   letter-spacing: .1em;
@@ -357,7 +366,7 @@
 
 .systemsketch-placeholder-card p {
   margin: 5px 0 0;
-  color: #6f7680;
+  color: var(--ss-text-muted);
   font-size: 10px;
   line-height: 1.45;
 }
@@ -369,13 +378,13 @@
   justify-content: space-between;
   margin-top: 7px;
   padding: 0 10px;
-  border: 1px solid #eaebee;
+  border: 1px solid var(--ss-border);
   border-radius: 9px;
   font-size: 10px;
 }
 
 .systemsketch-placeholder-row b {
-  color: #69717b;
+  color: var(--ss-text-muted);
 }
 
 .systemsketch-toolbar-shell {
@@ -392,10 +401,10 @@
   gap: 3px;
   padding: 3px;
   margin: 0 0 calc(var(--tl-space-3) + var(--tl-sab)) 7px;
-  border: 1px solid rgb(15 23 42 / 10%);
+  border: 1px solid var(--ss-border);
   border-radius: 13px;
-  background: rgb(255 255 255 / 96%);
-  box-shadow: 0 2px 5px rgb(15 23 42 / 8%), 0 8px 22px rgb(15 23 42 / 10%);
+  background: color-mix(in srgb, var(--ss-surface-raised) 96%, transparent);
+  box-shadow: var(--ss-shadow-1);
   pointer-events: auto;
 }
 
@@ -409,38 +418,38 @@
 }
 
 .systemsketch-block-tool-button {
-  color: #323740 !important;
+  color: var(--ss-text) !important;
   background: transparent !important;
 }
 
 .systemsketch-block-tool-button:hover,
 .systemsketch-block-tool-button[data-isactive='true'] {
-  color: #fff !important;
-  background: #5f7fe8 !important;
+  color: var(--ss-accent-text) !important;
+  background: var(--ss-accent) !important;
 }
 
 .systemsketch-toolbar-menu-button {
-  color: #6e45dc !important;
-  background: #eee9ff !important;
+  color: var(--ss-text) !important;
+  background: var(--ss-accent-soft) !important;
 }
 
 .systemsketch-toolbar-menu-button:hover,
 .systemsketch-toolbar-menu-button[aria-expanded='true'] {
-  background: #e4ddff !important;
+  background: var(--ss-accent-soft-hover) !important;
 }
 
 .systemsketch-toolbar-menu {
   width: min(330px, calc(100vw - 32px));
   padding: 10px;
   border-radius: 13px;
-  color: #292d34;
-  background: #fff;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
 }
 
 .systemsketch-toolbar-menu__eyebrow {
   display: block;
   margin: 10px 7px 4px;
-  color: #9298a0;
+  color: var(--ss-text-muted);
   font-size: 8px;
   font-weight: 800;
   letter-spacing: .09em;
@@ -456,7 +465,7 @@
   padding: 0 8px;
   border: 0;
   border-radius: 7px;
-  color: #343941;
+  color: var(--ss-text);
   background: transparent;
   cursor: pointer;
   font-size: 11px;
@@ -464,16 +473,16 @@
 }
 
 .systemsketch-toolbar-menu > button:hover:not(:disabled) {
-  background: #f0f1f3;
+  background: var(--ss-surface-hover);
 }
 
 .systemsketch-toolbar-menu > button:disabled {
-  color: #777e87;
+  color: var(--ss-text-faint);
   cursor: default;
 }
 
 .systemsketch-toolbar-menu kbd {
-  color: #a1a6ad;
+  color: var(--ss-text-faint);
   font: 650 8px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
@@ -487,17 +496,20 @@
   width: 22px;
   height: 22px;
   padding: 0;
-  border: 2px solid #fff;
+  border: 2px solid var(--ss-surface-raised);
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 0 1px #d8dbe0;
+  background: var(--ss-surface-raised);
+  box-shadow: 0 0 0 1px var(--ss-border-strong);
   cursor: pointer;
 }
 
-.systemsketch-color-row button[data-color='violet'] { background: #7c4dff; }
-.systemsketch-color-row button[data-color='orange'] { background: #eb7048; }
-.systemsketch-color-row button[data-color='yellow'] { background: #f2c84b; }
-.systemsketch-color-row button[data-color='green'] { background: #63bd79; }
+/* The quick-colour swatches are shape colours — document content, the same
+ * in every theme — so they stay literal. See the allowlist in
+ * tests/test_theme_tokens.py. */
+.systemsketch-color-row button[data-color='violet'] { background: #7c4dff; } /* ss-content: shape colour */
+.systemsketch-color-row button[data-color='orange'] { background: #eb7048; } /* ss-content: shape colour */
+.systemsketch-color-row button[data-color='yellow'] { background: #f2c84b; } /* ss-content: shape colour */
+.systemsketch-color-row button[data-color='green'] { background: #63bd79; } /* ss-content: shape colour */
 
 /* Selection contextual menu ----------------------------------------------
  *
@@ -545,18 +557,18 @@
   pointer-events: all;
 }
 
+/* The pill is the opposite polarity of the board, FigJam's dark-on-light;
+ * in a dark theme the inverse surface flips light, the way tldraw's own
+ * tooltip does. */
 .systemsketch-selection-menu__bar {
   display: flex;
   height: var(--systemsketch-selection-menu-height);
   align-items: stretch;
   padding: 0 4px;
   border-radius: 13px;
-  color: #fff;
-  background: #1e1e1e;
-  box-shadow:
-    0 0 0.5px rgb(0 0 0 / 12%),
-    0 10px 16px rgb(0 0 0 / 12%),
-    0 2px 5px rgb(0 0 0 / 15%);
+  color: var(--ss-text-inverse);
+  background: var(--ss-surface-inverse);
+  box-shadow: var(--ss-shadow-2);
 }
 
 /* The Block menu supplies its own surface when it stands alone; nested in the
@@ -573,8 +585,8 @@
   min-height: 36px;
   place-items: center;
   padding: 0 11px;
-  border-right: 1px solid #414348;
-  color: #c9cbd0;
+  border-right: 1px solid var(--ss-border-inverse);
+  color: var(--ss-text-inverse);
   font-size: 9px;
   font-weight: 750;
   white-space: nowrap;
@@ -586,13 +598,13 @@
   height: 36px;
   padding: 0 10px;
   border-radius: 0;
-  color: #f4f5f6;
+  color: var(--ss-text-inverse);
   font-size: 9px;
   font-weight: 750;
 }
 
 .systemsketch-selection-menu .systemsketch-selection-action:hover {
-  background: #393b40;
+  background: var(--ss-surface-inverse-hover);
 }
 
 .systemsketch-popout--right[data-surface='inspector']:has(.block-inspector__header) > .systemsketch-popout__header {
@@ -604,16 +616,11 @@
 .systemsketch-top-right-shell button:focus-visible,
 .systemsketch-toolbar-menu button:focus-visible,
 .systemsketch-toolbar-menu input:focus-visible {
-  outline: 2px solid #6c55e7;
+  outline: 2px solid var(--ss-accent);
   outline-offset: 2px;
 }
 
 @media (max-width: 820px) {
-  :root {
-    --systemsketch-chrome-inset: 8px;
-    --systemsketch-bottom-clearance: 62px;
-  }
-
   .systemsketch-top-left-shell {
     max-width: calc(100vw - 220px);
   }
@@ -658,41 +665,4 @@
   .systemsketch-popout {
     animation: none;
   }
-}
-
-.tl-theme__dark .systemsketch-top-left-shell,
-.tl-theme__dark .systemsketch-top-right-shell,
-.tl-theme__dark .systemsketch-popout,
-.tl-theme__dark .systemsketch-toolbar-extras,
-.tl-theme__dark .systemsketch-toolbar-menu {
-  border-color: rgb(255 255 255 / 13%);
-  color: #eceef1;
-  background: rgb(37 39 43 / 97%);
-}
-
-.tl-theme__dark .systemsketch-top-left-shell .systemsketch-file-title,
-.tl-theme__dark .systemsketch-popout__header {
-  border-color: #41444a;
-}
-
-.tl-theme__dark .systemsketch-top-left-shell .tlui-button:hover,
-.tl-theme__dark .systemsketch-top-right-shell .tlui-button:hover,
-.tl-theme__dark .systemsketch-top-left-shell .tlui-button[aria-expanded='true'],
-.tl-theme__dark .systemsketch-top-right-shell .tlui-button[aria-expanded='true'],
-.tl-theme__dark .systemsketch-popout__header button,
-.tl-theme__dark .systemsketch-panel-search,
-.tl-theme__dark .systemsketch-placeholder-card,
-.tl-theme__dark .systemsketch-panel-empty > span {
-  color: #e3e5e8;
-  background: #303338;
-}
-
-.tl-theme__dark .systemsketch-shape-tile i[data-kind='triangle']::after,
-.tl-theme__dark .systemsketch-shape-tile i[data-kind='pentagon']::after {
-  background: #25272b;
-}
-
-.tl-theme__dark .systemsketch-placeholder-row,
-.tl-theme__dark .systemsketch-panel-search {
-  border-color: #44474d;
 }
