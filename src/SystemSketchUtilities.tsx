@@ -7,6 +7,7 @@ import {
   useActions,
   useDialogs,
   useEditor,
+  useValue,
 } from 'tldraw'
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import {
@@ -40,6 +41,7 @@ import { RecorderControls } from './recorder/RecorderControls'
 import { setRecorderChannel } from './recorder/recorderStore'
 import { useChrome } from './chrome/ChromeProvider'
 import { startReleaseRefresh } from './releaseRefresh'
+import { cablePresentation, setDashAfterPill } from './blocks/connections/connectionPresentation'
 import './systemsketch-utilities.css'
 
 type BusyKey = ReleaseAction | `preview:${DevelopmentProfileId}`
@@ -133,6 +135,7 @@ export function SystemSketchNavigationPanel() {
   const [helpOpen, setHelpOpen] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [recentIds, setRecentIds] = useState<DevelopmentPresetId[]>(readRecentDevelopmentPresets)
+  const dashAfterPill = useValue('dash after pill', () => cablePresentation.get().dashAfterPill, [])
   const [busy, setBusy] = useState<BusyKey | null>(null)
   const [armed, setArmed] = useState(false)
   const [published, setPublished] = useState(false)
@@ -405,6 +408,23 @@ export function SystemSketchNavigationPanel() {
               </button>
             </>
           )}
+
+          <div className="systemsketch-dev-section-label">
+            <span>Cable presentation</span>
+            <small>This browser, live</small>
+          </div>
+          <label className="systemsketch-dev-toggle">
+            <input
+              type="checkbox"
+              data-testid="systemsketch-dev-dash-after-pill"
+              checked={dashAfterPill}
+              onChange={(event) => setDashAfterPill(event.target.checked)}
+            />
+            <span>
+              <b>Dash after the z⁻¹ pill</b>
+              <small>Delayed cables: dotted up to the pill, dashed after it</small>
+            </span>
+          </label>
 
           <div className="systemsketch-dev-section-label">
             <span>Isolated presets</span>

@@ -10,6 +10,7 @@ import {
   usePassThroughWheelEvents,
   useTldrawUiComponents,
   useValue,
+  type Editor,
 } from 'tldraw'
 import { useEffect, useRef } from 'react'
 import { AppearanceControls } from '../appearance/AppearanceControls'
@@ -22,6 +23,11 @@ import {
   HitAreaOverlay,
   OnCanvasBlockPicker,
 } from '../blocks/ui'
+import {
+  EditorBranchInspector,
+  EditorBranchSelectionMiniMenu,
+  getOnlySelectedBranch,
+} from '../branch'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
 import { RecorderIndicator } from '../recorder/RecorderControls'
 import { useChrome } from './ChromeProvider'
@@ -212,15 +218,7 @@ function RightSurfaceBody({ surface, onClose }: { surface: RightSurface; onClose
       />
     )
   }
-  if (surface === 'inspector') {
-    // A selected cable is the dock's other subject. The Block lens wins when
-    // both could apply, because a Block carries far more to edit.
-    if (getBlockInspectorContext(editor).kind === 'empty'
-      && getConnectionInspectorContext(editor) !== null) {
-      return <EditorConnectionInspector editor={editor} />
-    }
-    return <EditorBlockInspector editor={editor} onRequestClose={onClose} />
-  }
+  if (surface === 'inspector') return <InspectorDock editor={editor} onClose={onClose} />
   return (
     <PlaceholderEmptyState
       icon="◯"
@@ -228,6 +226,29 @@ function RightSurfaceBody({ surface, onClose }: { surface: RightSurface; onClose
       detail="Give feedback, ask a question, or leave a note. Comment data is not wired yet."
     />
   )
+}
+
+/**
+ * Which inspector the dock shows for the current selection.
+ *
+ * A selected Branch is its own subject; a selected cable is the dock's other
+ * subject. The Block lens wins when both could apply, because a Block carries
+ * far more to edit.
+ */
+function InspectorDock({ editor, onClose }: { editor: Editor; onClose(): void }) {
+  const subject = useValue(
+    'systemsketch inspector subject',
+    () => {
+      if (getOnlySelectedBranch(editor)) return 'branch'
+      if (getBlockInspectorContext(editor).kind === 'empty'
+        && getConnectionInspectorContext(editor) !== null) return 'connection'
+      return 'block'
+    },
+    [editor],
+  )
+  if (subject === 'branch') return <EditorBranchInspector editor={editor} onRequestClose={onClose} />
+  if (subject === 'connection') return <EditorConnectionInspector editor={editor} />
+  return <EditorBlockInspector editor={editor} onRequestClose={onClose} />
 }
 
 function SelectionMiniMenu() {
@@ -254,7 +275,23 @@ function SelectionMiniMenu() {
     () => selectionHasBlockStyles(editor),
     [editor],
   )
+  const hasBranch = useValue(
+    'systemsketch selection is one Branch',
+    () => getOnlySelectedBranch(editor) !== null,
+    [editor],
+  )
   if (!canShow) return null
+
+  if (hasBranch) {
+    return (
+      <SelectionContextualMenu
+        className="systemsketch-selection-menu"
+        label="Selection actions"
+      >
+        <EditorBranchSelectionMiniMenu editor={editor} onOpenInspector={() => setRight('inspector')} />
+      </SelectionContextualMenu>
+    )
+  }
 
   return (
     <SelectionContextualMenu
@@ -297,6 +334,8 @@ export function SystemSketchSurfaceHost() {
   const blockInspectorContextKey = useValue(
     'systemsketch Block inspector context',
     () => {
+      const branch = getOnlySelectedBranch(editor)
+      if (branch) return `branch:${branch.id}`
       const context = getBlockInspectorContext(editor)
       if (context.kind === 'selected') return context.shape.id
       if (context.kind === 'multi') return `multi:${context.styles.blockCount}`

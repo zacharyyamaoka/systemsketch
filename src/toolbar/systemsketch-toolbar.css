@@ -1,4 +1,5 @@
-/* P1 deliberately scopes its few DefaultToolbar class dependencies to the app. */
+/* P1 deliberately scopes its few DefaultToolbar class dependencies to the app.
+ * Every colour is a token from src/theme/tokens.css. */
 .systemsketch-app .tlui-main-toolbar__extras,
 .systemsketch-app .tlui-main-toolbar__mobile-style-panel {
   display: none;
@@ -17,10 +18,10 @@
   min-height: 46px;
   padding: 3px;
   overflow: visible;
-  border: 1px solid rgb(15 23 42 / 11%);
+  border: 1px solid var(--ss-border);
   border-radius: 11px;
-  background: rgb(255 255 255 / 97%);
-  box-shadow: 0 2px 6px rgb(15 23 42 / 8%), 0 12px 34px rgb(15 23 42 / 13%);
+  background: color-mix(in srgb, var(--ss-surface-raised) 97%, transparent);
+  box-shadow: var(--ss-shadow-1);
   contain: layout style;
   backdrop-filter: blur(16px);
 }
@@ -40,7 +41,7 @@
   min-width: 43px;
   height: 40px;
   min-height: 40px;
-  color: #333943;
+  color: var(--ss-text);
 }
 
 .systemsketch-app .tlui-main-toolbar__tools .tlui-button__tool::after {
@@ -49,18 +50,18 @@
 }
 
 .systemsketch-app .tlui-main-toolbar__tools .tlui-button__tool:hover::after {
-  background: #eff1f5;
+  background: var(--ss-surface-hover);
   opacity: 1;
 }
 
 .systemsketch-app .tlui-main-toolbar__tools .tlui-button__tool[aria-pressed='true'],
 .systemsketch-app .tlui-main-toolbar__tools .tlui-button__tool[data-isactive='true'] {
-  color: #fff;
+  color: var(--ss-accent-text);
 }
 
 .systemsketch-app .tlui-main-toolbar__tools .tlui-button__tool[aria-pressed='true']::after,
 .systemsketch-app .tlui-main-toolbar__tools .tlui-button__tool[data-isactive='true']::after {
-  background: #536dfe;
+  background: var(--ss-accent);
   opacity: 1;
 }
 
@@ -91,18 +92,18 @@
   place-items: center;
   padding: 0 !important;
   border-radius: 4px !important;
-  color: #6c7480;
+  color: var(--ss-text-muted);
   background: transparent;
 }
 
 .systemsketch-family-tool__menu:hover,
 .systemsketch-family-tool__menu[data-state='open'] {
-  color: #20252c;
-  background: rgb(255 255 255 / 72%);
+  color: var(--ss-text);
+  background: color-mix(in srgb, var(--ss-surface-raised) 72%, transparent);
 }
 
 .systemsketch-family-tool[data-isactive='true'] .systemsketch-family-tool__menu {
-  color: rgb(255 255 255 / 78%);
+  color: color-mix(in srgb, var(--ss-accent-text) 78%, transparent);
 }
 
 .systemsketch-family-tool__menu .tlui-icon {
@@ -114,14 +115,14 @@
   box-sizing: border-box;
   width: 220px;
   padding: 6px;
-  border: 1px solid rgb(15 23 42 / 12%);
+  border: 1px solid var(--ss-border);
   border-radius: 11px;
-  box-shadow: 0 16px 44px rgb(15 23 42 / 18%), 0 2px 7px rgb(15 23 42 / 8%);
+  box-shadow: var(--ss-shadow-2);
 }
 
 .systemsketch-tool-menu__heading {
   padding: 7px 8px 5px;
-  color: #7a828d;
+  color: var(--ss-text-muted);
   font-size: 9px;
   font-weight: 800;
   letter-spacing: .075em;
@@ -131,7 +132,7 @@
 .systemsketch-tool-menu__separator {
   height: 1px;
   margin: 5px 4px;
-  background: #e8eaee;
+  background: var(--ss-border);
 }
 
 .systemsketch-tool-menu__item {
@@ -146,19 +147,19 @@
 }
 
 .systemsketch-tool-menu__item[data-isactive='true'] {
-  color: #3f56c7;
-  background: #eef1ff;
+  color: var(--ss-text);
+  background: var(--ss-accent-soft);
 }
 
 .systemsketch-tool-menu__item kbd {
-  color: #8a919b;
+  color: var(--ss-text-muted);
   font-family: inherit;
   font-size: 9px;
   font-weight: 700;
 }
 
 .systemsketch-tool-menu__check {
-  color: #536dfe;
+  color: var(--ss-accent);
   font-size: 11px;
   font-weight: 900;
   text-align: center;
@@ -169,7 +170,7 @@
   flex: 0 0 auto;
   margin-left: 2px !important;
   padding-left: 3px;
-  border-left: 1px solid #e5e7eb;
+  border-left: 1px solid var(--ss-border);
 }
 
 .systemsketch-library-trigger {
@@ -184,11 +185,11 @@
   flex-direction: column;
   box-sizing: border-box;
   overflow: hidden;
-  border: 1px solid rgb(15 23 42 / 12%);
+  border: 1px solid var(--ss-border);
   border-radius: 14px;
-  color: #262c35;
-  background: rgb(255 255 255 / 98%);
-  box-shadow: 0 22px 60px rgb(15 23 42 / 20%), 0 3px 9px rgb(15 23 42 / 8%);
+  color: var(--ss-text);
+  background: color-mix(in srgb, var(--ss-surface-raised) 98%, transparent);
+  box-shadow: var(--ss-shadow-2);
 }
 
 .systemsketch-library-panel__header {
@@ -200,7 +201,7 @@
 
 .systemsketch-library-panel__header span {
   display: block;
-  color: #808792;
+  color: var(--ss-text-muted);
   font-size: 9px;
   font-weight: 800;
   letter-spacing: .09em;
@@ -217,8 +218,8 @@
   width: 30px;
   height: 30px;
   border-radius: 7px;
-  color: #616a76;
-  background: #f0f2f5;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-sunken);
 }
 
 .systemsketch-library-search {
@@ -233,7 +234,7 @@
 
 .systemsketch-library-panel__body section h3 {
   margin: 14px 0 8px;
-  color: #606975;
+  color: var(--ss-text-muted);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: .055em;
@@ -255,19 +256,19 @@
   justify-content: center;
   gap: 7px;
   padding: 8px 4px;
-  border: 1px solid #e1e5eb;
+  border: 1px solid var(--ss-border);
   border-radius: 9px;
-  color: #424b58;
-  background: #f8f9fb;
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
   cursor: pointer;
 }
 
 .systemsketch-library-tile:hover,
 .systemsketch-library-tile:focus-visible {
-  border-color: #9baaf7;
+  border-color: var(--ss-accent);
   outline: none;
-  color: #4057d6;
-  background: #f0f2ff;
+  color: var(--ss-text);
+  background: var(--ss-accent-soft);
 }
 
 .systemsketch-library-tile .tlui-icon {
@@ -290,7 +291,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #747d89;
+  color: var(--ss-text-muted);
   text-align: center;
 }
 
@@ -301,7 +302,7 @@
 }
 
 .systemsketch-library-empty strong {
-  color: #454d58;
+  color: var(--ss-text);
   font-size: 12px;
 }
 

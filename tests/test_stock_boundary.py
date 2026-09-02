@@ -26,6 +26,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("InFrontOfTheCanvas: SystemSketchSurfaceHost", source)
         self.assertIn("components={SYSTEMSKETCH_COMPONENTS}", product_source)
         self.assertIn("shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}", product_source)
+        self.assertIn("getShapeVisibility={getBlockShapeVisibility}", product_source)
         self.assertIn("bindingUtils={SYSTEMSKETCH_BINDING_UTILS}", product_source)
         self.assertIn("tools={SYSTEMSKETCH_TOOLS}", product_source)
         self.assertIn("overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}", product_source)
@@ -40,6 +41,8 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("const stopBlockConnections = installBlockConnections(editor)", product_source)
         self.assertIn("const stopInstantTextEditing = installInstantTextEditing(editor)", product_source)
         self.assertIn("stopInstantTextEditing()", product_source)
+        self.assertIn("const stopArrowClickToPlace = installArrowClickToPlace(editor)", product_source)
+        self.assertIn("stopArrowClickToPlace()", product_source)
         self.assertIn("stopBlockConnections()", product_source)
         self.assertIn("<SystemSketchWorkspaceProvider>", source)
         self.assertIn("<ChromeProvider>", source)
@@ -53,9 +56,22 @@ class StockBoundaryTests(unittest.TestCase):
         toolbar_source = (
             PROJECT_ROOT / "src" / "toolbar" / "SystemSketchToolbar.tsx"
         ).read_text(encoding="utf-8")
-        self.assertIn('title="Block"', toolbar_source)
-        self.assertIn('fallbackIcon={<BlockIcon />}', toolbar_source)
+        # Block and Branch share one slot, composed the way the stock shape
+        # family is: a FamilyToolSlot with a chevron and a menu, never a second
+        # toolbar. The Branch must not be a top-level slot of its own.
+        self.assertIn('family="system"', toolbar_source)
+        self.assertIn("label: 'Block', icon: <BlockIcon />", toolbar_source)
+        self.assertIn("label: 'Branch', icon: <BranchIcon />", toolbar_source)
+        self.assertNotIn('title="Branch"', toolbar_source)
         self.assertNotIn('title="Comment"', toolbar_source)
+        self.assertIn("BranchShapeUtil,", source)
+        self.assertIn("const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool]", source)
+        self.assertIn("const stopBranchRegions = installBranchRegions(editor)", product_source)
+        self.assertIn("const stopBranchClickToEdit = installBranchClickToEdit(editor)", product_source)
+        # The Branch is created from the toolbar; the right-click menu must not
+        # grow an "Add > Branch region" row (the muscle memory Zach refused).
+        context_menu = (PROJECT_ROOT / "src" / "blocks" / "ui" / "BlockContextMenu.tsx").read_text(encoding="utf-8")
+        self.assertNotIn("Branch region", context_menu)
 
     def test_the_embedded_lane_is_the_same_engine_with_the_file_surfaces_removed(self) -> None:
         """An IDE host must reach tldraw through the same seams the app does.
@@ -79,11 +95,13 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("<Tldraw", embedded)
         self.assertIn("components={EMBEDDED_COMPONENTS}", embedded)
         self.assertIn("shapeUtils={EMBEDDED_SHAPE_UTILS}", embedded)
+        self.assertIn("getShapeVisibility={getBlockShapeVisibility}", embedded)
         self.assertIn("bindingUtils={EMBEDDED_BINDING_UTILS}", embedded)
         self.assertIn("overlayUtils={EMBEDDED_OVERLAY_UTILS}", embedded)
         self.assertIn("overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}", embedded)
         self.assertIn("tools={EMBEDDED_TOOLS}", embedded)
         self.assertIn("BlockShapeUtil,", embedded)
+        self.assertIn("BranchShapeUtil,", embedded)
         self.assertIn("...blockConnectionShapeUtils,", embedded)
         self.assertIn("Toolbar: SystemSketchFigmaToolbar", embedded)
         self.assertIn("ContextMenu: BlockContextMenu", embedded)

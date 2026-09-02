@@ -26,6 +26,32 @@ export const ConnectionRoutingStyle = StyleProp.defineEnum('systemsketch:connect
 	values: CONNECTION_ROUTING_KINDS,
 })
 
+export const CONNECTION_TEMPORAL_KINDS = ['data', 'delayed'] as const
+export type ConnectionTemporalKind = (typeof CONNECTION_TEMPORAL_KINDS)[number]
+
+/**
+ * When a cable's value is read: `data` on this pass, `delayed` one iteration
+ * later — a loop's back edge. A style for the same reason routing is: marking
+ * a bundle of cables delayed is one write, and the shared-style machinery
+ * already reports whether a selection agrees. `delayed` draws the cable dotted
+ * and gives it a z⁻¹ pill; see `connectionPresentation.ts`.
+ */
+export const ConnectionTemporalStyle = StyleProp.defineEnum('systemsketch:connectionTemporal', {
+	defaultValue: 'data',
+	values: CONNECTION_TEMPORAL_KINDS,
+})
+
+/** Where the z⁻¹ pill sits along the cable, as a fraction of its arc length. */
+export const PILL_POSITION_DEFAULT = 0.5
+export const PILL_POSITION_MIN = 0.05
+export const PILL_POSITION_MAX = 0.95
+
+/** Keep the pill on the cable and clear of both ports. */
+export function clampPillPosition(t: number): number {
+	if (!Number.isFinite(t)) return PILL_POSITION_DEFAULT
+	return Math.min(PILL_POSITION_MAX, Math.max(PILL_POSITION_MIN, t))
+}
+
 /**
  * The two handles tldraw drags. Nothing more.
  *
