@@ -18,6 +18,12 @@ import {
 } from '../blocks'
 import { BlockContextMenu } from '../blocks/ui'
 import {
+  BranchShapeUtil,
+  BranchTool,
+  installBranchClickToEdit,
+  installBranchRegions,
+} from '../branch'
+import {
   blockConnectionBindingUtils,
   blockConnectionOverlayUtils,
   blockConnectionShapeUtils,
@@ -68,11 +74,12 @@ const EMBEDDED_COMPONENTS = {
 const EMBEDDED_SHAPE_UTILS = [
   ...EXCALIDRAW_SHAPE_UTILS,
   BlockShapeUtil,
+  BranchShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const EMBEDDED_BINDING_UTILS = [...blockConnectionBindingUtils]
 const EMBEDDED_OVERLAY_UTILS = [...blockConnectionOverlayUtils]
-const EMBEDDED_TOOLS = [BlockTool]
+const EMBEDDED_TOOLS = [BlockTool, BranchTool]
 
 /** Long enough that a drag is one write, short enough that a pause is saved. */
 const CHANGE_DEBOUNCE_MS = 250
@@ -132,6 +139,8 @@ function EmbeddedSurface({
     const stopBlockConnections = installBlockConnections(editor)
     const stopInstantTextEditing = installInstantTextEditing(editor)
     const stopBlockClickToEdit = installBlockClickToEdit(editor)
+    const stopBranchClickToEdit = installBranchClickToEdit(editor)
+    const stopBranchRegions = installBranchRegions(editor)
     const stopBlockPortMenuTarget = installBlockPortMenuTarget(editor)
     const stopExcalidrawPaste = registerExcalidrawPasteHandler(editor)
     const stopToolbarSideEffects = registerToolbarSideEffects(editor)
@@ -155,6 +164,8 @@ function EmbeddedSurface({
       stopToolbarSideEffects()
       stopExcalidrawPaste()
       stopBlockPortMenuTarget()
+      stopBranchRegions()
+      stopBranchClickToEdit()
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopBlockConnections()

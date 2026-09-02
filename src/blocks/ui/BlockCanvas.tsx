@@ -56,6 +56,7 @@ import {
 } from '../ports'
 import { BlockIconGlyph } from './blockIcons'
 import { stepIntoDepthScope } from '../../depth/depthNavigation'
+import { branchFadeOpacity } from '../../branch/branchScope'
 import { portColor } from './portPalette'
 import './block-canvas.css'
 
@@ -590,6 +591,8 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
   )
   const drag = useValue('block port drag', () => getBlockPortDrag(editor), [editor])
   const heldPort = drag?.shapeId === shape.id ? drag : null
+  // Inside a Branch, a Block in a non-active arm paints faded with its arm.
+  const fade = useValue('Block branch fade', () => branchFadeOpacity(editor, shape.id), [editor, shape.id])
   // The add gutters are a selection affordance, exactly as the brief asks: they
   // exist for the Block you are working on and nowhere else, so a busy canvas
   // never sprouts a plus under every lane.
@@ -604,6 +607,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
     <HTMLContainer
       className={`NodeShape systemsketch-block-canvas${simple ? ' NodeShape_plain' : ''}`}
       data-block-view={layout.view}
+      style={fade < 1 ? { opacity: fade } : undefined}
       onContextMenu={(event) => {
         const target = event.target instanceof Element
           ? event.target.closest('input, textarea, select')

@@ -67,6 +67,7 @@ import {
 	firstOuterPortForPolarity,
 } from './connectionRules'
 import { anchorFaceForScope, blockScopeId } from './connectionScope'
+import { branchFadeOpacity } from '../../branch/branchScope'
 import {
 	getBentCurveCubicControlPoints,
 	getConnectionCenterPoint,
@@ -201,7 +202,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 	override canBind({ bindingType, fromShapeType, toShapeType }: Parameters<ShapeUtil['canBind']>[0]): boolean {
 		return bindingType === 'connection'
 			&& fromShapeType === CONNECTION_SHAPE_TYPE
-			&& toShapeType === 'block'
+			&& (toShapeType === 'block' || toShapeType === 'branch')
 	}
 
 	override canEdit(_shape: ConnectionShape): boolean {
@@ -633,8 +634,14 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		() => getConnectionShapePath(editor, connection),
 		[editor, connection],
 	)
+	// A cable touching a non-active Branch arm fades with that arm.
+	const opacity = useValue(
+		'block connection branch fade',
+		() => connectionBranchFade(editor, connection),
+		[editor, connection.id],
+	)
 	return (
-		<SVGContainer>
+		<SVGContainer style={{ opacity }}>
 			<path
 				d={path}
 				fill="none"
@@ -645,6 +652,17 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 			/>
 		</SVGContainer>
 	)
+}
+
+/** The lower of the two ends' Branch fades: a cable is as faded as either end. */
+export function connectionBranchFade(editor: Editor, connection: ConnectionShape | TLShapeId): number {
+	const bindings = getConnectionBindings(editor, connection)
+	let opacity = 1
+	for (const binding of [bindings.start, bindings.end]) {
+		if (!binding) continue
+		opacity = Math.min(opacity, branchFadeOpacity(editor, binding.toId))
+	}
+	return opacity
 }
 
 /**

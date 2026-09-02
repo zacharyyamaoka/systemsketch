@@ -10,6 +10,7 @@ import {
 } from 'tldraw'
 import { isDrawingArrowWithArrowTool } from '../arrowClickToPlace'
 import { withBlockTool } from '../blocks/blockToolUi'
+import { withBranchTool } from '../branch/branchToolUi'
 import { CONNECTION_SHAPE_TYPE, ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
 import {
   arrowPresetForActivation,
@@ -20,6 +21,7 @@ import {
   type ArrowPreset,
   type DrawFamilyTool,
   type ShapeFamilyTool,
+  type SystemFamilyTool,
 } from './toolbarModel'
 
 export const CURVE_ARROW_BEND = 32
@@ -204,8 +206,30 @@ function overrideTools(
   return next
 }
 
+/**
+ * Block and Branch share one toolbar slot, so the slot has to remember which
+ * of them was picked last — exactly as the shape slot remembers its geo.
+ */
+function rememberSystemTools(tools: TLUiToolsContextType): TLUiToolsContextType {
+  const next: TLUiToolsContextType = { ...tools }
+  for (const id of ['block', 'branch'] as const satisfies readonly SystemFamilyTool[]) {
+    const wrapped = wrapTool(tools[id], () => updateToolbarPreferences({ lastSystemTool: id }))
+    if (wrapped) next[id] = wrapped
+  }
+  return next
+}
+
 export const SYSTEMSKETCH_TOOLBAR_OVERRIDES: TLUiOverrides = {
-  tools: (editor, tools) => withBlockTool(editor, overrideTools(editor, tools)),
+  tools: (editor, tools) =>
+    rememberSystemTools(withBranchTool(editor, withBlockTool(editor, overrideTools(editor, tools)))),
+}
+
+export function selectSystemFamilyTool(
+  tools: TLUiToolsContextType,
+  tool: SystemFamilyTool,
+  source: TLUiEventSource = 'toolbar',
+): void {
+  tools[tool]?.onSelect(source)
 }
 
 export function selectShapeFamilyTool(

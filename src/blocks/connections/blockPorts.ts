@@ -2,11 +2,14 @@ import {
 	Vec,
 	createComputedCache,
 	type Editor,
+	type TLShape,
 	type TLShapeId,
 	type VecLike,
 } from 'tldraw'
 import { isBlockShape, type BlockShape, type BlockShapeProps } from '../blockModel'
 import { layoutBlock } from '../layoutBlock'
+import { branchLayout, isBranchShape, type BranchShape } from '../../branch/branchModel'
+import { branchFoldAttachPoint } from '../../branch/branchScope'
 import { portSnapPageUnits } from './connectionHit'
 import {
 	CONNECTION_BINDING_TYPE,
@@ -113,15 +116,49 @@ function projectBlockConnectionPorts(props: BlockShapeProps): BlockConnectionPor
 }
 
 /**
- * The cached port table for a live Block.
+ * A shape that carries ports: a Block, or a Branch with control ports on its
+ * band. The connection layer reads both through this one table, so a cable
+ * welds to a control port with the same binding, rules and paint as a Block's
+ * input — the Branch is only a second kind of host, not a second edge model.
+ */
+export type PortHostShape = BlockShape | BranchShape
+
+export function isPortHostShape(shape: TLShape | null | undefined): shape is PortHostShape {
+	return isBlockShape(shape) || isBranchShape(shape)
+}
+
+/** A Branch's control ports as the connection layer sees them: inputs on the band. */
+export function getBranchConnectionPorts(branch: BranchShape): BlockConnectionPort[] {
+	const layout = branchLayout(branch.props)
+	return layout.controls.map((control) => ({
+		id: control.port.id,
+		name: control.port.name,
+		type: control.port.type,
+		side: 'input' as const,
+		hidden: false,
+		x: control.x,
+		y: control.y,
+		anchor: { x: control.x / layout.w, y: control.y / layout.h },
+		subtle: false,
+	}))
+}
+
+function projectHostPorts(host: PortHostShape): BlockConnectionPort[] {
+	return isBranchShape(host)
+		? getBranchConnectionPorts(host)
+		: getBlockConnectionPorts(host.props, { includeHidden: true })
+}
+
+/**
+ * The cached port table for a live host.
  *
- * tldraw's computed cache re-evaluates only when the Block record changes, so
- * the port dot, the drag hit test, the connected-state read and the binding
+ * tldraw's computed cache re-evaluates only when the record changes, so the
+ * port dot, the drag hit test, the connected-state read and the binding
  * position all resolve the same projection without recomputing the layout per
  * pointer move.
  */
-const blockPortsCache = createComputedCache('block ports', (_editor: Editor, block: BlockShape) => (
-	getBlockConnectionPorts(block.props, { includeHidden: true })
+const blockPortsCache = createComputedCache('block ports', (_editor: Editor, host: PortHostShape) => (
+	projectHostPorts(host)
 ))
 
 /**
@@ -134,12 +171,21 @@ const blockPortsCache = createComputedCache('block ports', (_editor: Editor, blo
  */
 export function getLiveBlockPorts(
 	editor: Editor,
-	shape: BlockShape | TLShapeId,
+	shape: TLShape | TLShapeId,
 ): BlockConnectionPort[] {
-	const block = typeof shape === 'string' ? editor.getShape(shape) : shape
-	if (!isBlockShape(block)) return []
-	if (!editor.store) return getBlockConnectionPorts(block.props, { includeHidden: true })
-	return blockPortsCache.get(editor, block.id) ?? []
+	const host = typeof shape === 'string' ? editor.getShape(shape) : shape
+	if (!isPortHostShape(host)) return []
+	if (!editor.store) return projectHostPorts(host)
+	return blockPortsCache.get(editor, host.id) ?? []
+}
+
+/** Resolve a port on a live host by id, hidden or not. */
+export function getPortHostPort(
+	editor: Editor,
+	shape: TLShape | TLShapeId,
+	portId: string,
+): BlockConnectionPort | null {
+	return getLiveBlockPorts(editor, shape).find((port) => port.id === portId) ?? null
 }
 
 /** Resolve identity back to live geometry, hidden or not. */
@@ -154,14 +200,20 @@ export function getBlockConnectionPort(
 /** The page-space position of a named port, hidden or not. */
 export function getBlockConnectionPortPagePoint(
 	editor: Editor,
-	shape: BlockShape | TLShapeId,
+	shape: TLShape | TLShapeId,
 	portId: string,
 ): Vec | null {
-	const block = typeof shape === 'string' ? editor.getShape(shape) : shape
-	if (!isBlockShape(block)) return null
-	const port = getLiveBlockPorts(editor, block.id).find((candidate) => candidate.id === portId)
+	const host = typeof shape === 'string' ? editor.getShape(shape) : shape
+	if (!isPortHostShape(host)) return null
+	const port = getLiveBlockPorts(editor, host.id).find((candidate) => candidate.id === portId)
 	if (!port) return null
-	return editor.getShapePageTransform(block.id).applyToPoint(port)
+	// Inside a folded Branch arm the dot is not on screen; the cable attaches
+	// at that arm's header edge instead — left for an input, right for an output.
+	if (editor.store) {
+		const attach = branchFoldAttachPoint(editor, host.id, port.side === 'input' ? 'in' : 'out')
+		if (attach) return attach
+	}
+	return editor.getShapePageTransform(host.id).applyToPoint(port)
 }
 
 /* ----------------------------- the wiring table ---------------------------- */
@@ -227,9 +279,9 @@ function sameBlockPortConnections(
 
 const blockPortConnectionsCache = createComputedCache(
 	'block port connections',
-	(editor: Editor, cached: BlockShape): BlockPortConnection[] => {
+	(editor: Editor, cached: PortHostShape): BlockPortConnection[] => {
 		const block = editor.getShape(cached.id)
-		if (!isBlockShape(block)) return []
+		if (!isPortHostShape(block)) return []
 		const ownPorts = getLiveBlockPorts(editor, block)
 		const bindings = editor.getBindingsToShape<ConnectionBinding>(block.id, CONNECTION_BINDING_TYPE)
 		const connections: BlockPortConnection[] = []
@@ -239,7 +291,7 @@ const blockPortConnectionsCache = createComputedCache(
 			if (!oppositeBinding) continue
 			const ownPort = ownPorts.find((port) => port.id === binding.props.portId)
 			const connectedShape = editor.getShape(oppositeBinding.toId)
-			const connectedPort = isBlockShape(connectedShape)
+			const connectedPort = isPortHostShape(connectedShape)
 				? getLiveBlockPorts(editor, connectedShape).find((port) => port.id === oppositeBinding.props.portId)
 				: undefined
 			if (!ownPort || !connectedPort) continue
@@ -264,7 +316,7 @@ const blockPortConnectionsCache = createComputedCache(
 
 export function getBlockPortConnections(
 	editor: Editor,
-	shape: BlockShape | TLShapeId,
+	shape: TLShape | TLShapeId,
 ): BlockPortConnection[] {
 	const id = typeof shape === 'string' ? shape : shape.id
 	if (!editor.store) return []
@@ -274,7 +326,7 @@ export function getBlockPortConnections(
 /** True when either face of a dot carries a cable. */
 export function blockPortIsConnected(
 	editor: Editor,
-	shape: BlockShape | TLShapeId,
+	shape: TLShape | TLShapeId,
 	portId: string,
 ): boolean {
 	return getBlockPortConnections(editor, shape).some((connection) => connection.ownPortId === portId)
@@ -283,7 +335,7 @@ export function blockPortIsConnected(
 /* ------------------------------ dot hit testing ---------------------------- */
 
 export interface BlockPortDotHit {
-	shape: BlockShape
+	shape: PortHostShape
 	shapeId: TLShapeId
 	port: BlockConnectionPort
 	pagePoint: Vec
@@ -326,7 +378,7 @@ export function getBlockPortDotsNear(
 	const shapes = editor.getCurrentPageShapesSorted()
 	for (let index = shapes.length - 1; index >= 0; index -= 1) {
 		const shape = shapes[index]
-		if (!isBlockShape(shape) || shape.isLocked || editor.isShapeHidden(shape)) continue
+		if (!isPortHostShape(shape) || shape.isLocked || editor.isShapeHidden(shape)) continue
 
 		const bounds = editor.getShapePageBounds(shape.id)
 		if (!bounds) continue
