@@ -6,7 +6,11 @@ asserts the behaviour they show.
 from __future__ import annotations
 
 import base64
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from report_measurements import browser_checks, line_count, unit_test_count
 
 DOCS_DIR = Path(__file__).resolve().parent
 OUTPUT_PATH = DOCS_DIR / "appearance-menu-implementation-2026-09-01.html"
@@ -94,35 +98,31 @@ DELTAS = [
     ),
 ]
 
-CHECKS = [
-    "a selected shape gets shape, paint and typography controls, in FigJam order",
-    "the colour popover stacks the fill row over the palette, 8px above the pill",
-    "choosing a colour repaints the shape and rings the chosen swatch",
-    "the fill row and the palette write different styles from one popover",
-    "the stroke popover offers every dash the document can hold, and applies one",
-    "size and typeface are closed named ladders, and both write through",
-    "the shape picker changes a rectangle into an ellipse",
-    "each appearance change is one history step",
-    "a connector gets routing and endpoints, and an endpoint applies",
-    "a selection that disagrees reports mixed instead of one shape's value",
-    "a Block selected beside a shape keeps the shape's appearance reachable",
-    "the physical journey produced zero local console errors",
-]
+
+MODEL = "src/appearance/appearanceModel.ts"
+MODEL_TESTS = "src/appearance/appearanceModel.test.ts"
+SHELL = "src/appearance/AppearanceControls.tsx"
+GLYPHS = "src/appearance/AppearanceGlyph.tsx"
+SMOKE = "tests/appearance_menu_smoke.mjs"
+
+CHECKS = browser_checks(SMOKE)
+UNIT_TESTS = unit_test_count(MODEL_TESTS)
+CONTROL_COUNT = len(CONTROLS)
 
 FILES = [
-    ("src/appearance/appearanceModel.ts", "10 unit tests",
+    (MODEL, f"{UNIT_TESTS} unit tests",
      "Which controls a selection gets and what each offers, as a pure function of tldraw's "
      "<code>ReadonlySharedStyleMap</code>. No React, no DOM."),
-    ("src/appearance/AppearanceControls.tsx", "the shell",
+    (SHELL, f"{line_count(SHELL)} lines",
      "One <code>TldrawUiPopover</code> per control; writes go through "
      "<code>markHistoryStoppingPoint</code> + <code>setStyleForSelectedShapes</code> + "
      "<code>setStyleForNextShapes</code>, the same path tldraw's own panel uses."),
-    ("src/appearance/AppearanceGlyph.tsx", "11 glyph families",
+    (GLYPHS, f"{line_count(GLYPHS)} lines",
      "FigJam previews a value rather than naming it &mdash; sizes drawn at their weight, endings drawn as "
      "lines, fills drawn on one square so they can be compared."),
     ("src/appearance/appearance.css", "FigJam tokens",
      "<code>rgb(30,30,30)</code>, 13px radius, 8px padding, 8px clear of the pill."),
-    ("tests/appearance_menu_smoke.mjs", "12 checks",
+    (SMOKE, f"{len(CHECKS)} checks",
      "Drives the real product composition and reads two oracles per change."),
 ]
 
@@ -198,9 +198,9 @@ def build() -> str:
     <a href="figjam-appearance-menu-spec-2026-09-01.html">FigJam lays them out</a>, over tldraw's own styles.
   </p>
   <div class="chips">
-    <span class="chip ok">12/12 browser checks</span>
-    <span class="chip ok">10 model unit tests</span>
-    <span class="chip">10 controls &middot; 0 new shape props</span>
+    <span class="chip ok">{len(CHECKS)}/{len(CHECKS)} browser checks</span>
+    <span class="chip ok">{UNIT_TESTS} model unit tests</span>
+    <span class="chip">{CONTROL_COUNT} controls &middot; 0 new shape props</span>
     <span class="chip">tldraw 5.3.2, unforked</span>
   </div>
 
@@ -232,7 +232,7 @@ def build() -> str:
   <section>
     <h2>2 &middot; The controls</h2>
     <p class="sub">
-      Ten controls over stock tldraw styles. No new shape props, no schema change, nothing that would move
+      {CONTROL_COUNT} controls over stock tldraw styles. No new shape props, no schema change, nothing that would move
       the boundary this repo guards.
     </p>
     <table>

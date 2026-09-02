@@ -7,7 +7,11 @@ away from the check it illustrates.
 from __future__ import annotations
 
 import base64
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from report_measurements import browser_checks, line_count, unit_test_count
 
 DOCS_DIR = Path(__file__).resolve().parent
 OUTPUT_PATH = DOCS_DIR / "selection-menu-implementation-2026-09-01.html"
@@ -67,26 +71,23 @@ DEFECTS = [
     ),
 ]
 
-CHECKS = [
-    "a selected shape gets one 40px pill, centred on the selection and 16px clear of its overlay",
-    "zooming resizes the shape but never the menu, and the gap stays put",
-    "a selection against the top edge flips the menu below instead of clamping it onto the shape",
-    "pushed into the gutter the menu clamps to the 20px margin instead of leaving the viewport",
-    "a selection larger than the viewport parks the menu above the tool belt, not at the window edge",
-    "dragging a shape removes the menu for the gesture and re-anchors it on release",
-    "resizing from a handle removes the menu for the gesture and re-anchors it on release",
-    "panning the selection off screen hides the menu and stops it answering hit tests",
-    "the physical journey produced zero local console errors",
-]
+
+PLACEMENT = "src/chrome/selectionMenuPlacement.ts"
+PLACEMENT_TESTS = "src/chrome/selectionMenuPlacement.test.ts"
+SHELL = "src/chrome/SelectionContextualMenu.tsx"
+SMOKE = "tests/selection_menu_smoke.mjs"
+
+CHECKS = browser_checks(SMOKE)
+UNIT_TESTS = unit_test_count(PLACEMENT_TESTS)
 
 FILES = [
-    ("src/chrome/selectionMenuPlacement.ts", "132 lines",
+    (PLACEMENT, f"{line_count(PLACEMENT)} lines",
      "The policy, as a pure function of measured rectangles: centre, offset, flip, clamp. "
      "Four named constants, each carrying the measurement it came from."),
-    ("src/chrome/selectionMenuPlacement.test.ts", "13 tests",
+    (PLACEMENT_TESTS, f"{UNIT_TESTS} tests",
      "Unit coverage for every branch, including the two that only appear at the edges of the "
      "viewport and the one where the menu is wider than its own safe area."),
-    ("src/chrome/SelectionContextualMenu.tsx", "178 lines",
+    (SHELL, f"{line_count(SHELL)} lines",
      "The shell: the manipulation gate, a <code>ResizeObserver</code> for content-driven width, and a "
      "<code>useQuickReactor</code> that writes <code>transform</code> once per frame."),
     ("src/chrome/SystemSketchChrome.tsx", "1 swap",
@@ -95,7 +96,7 @@ FILES = [
     ("src/chrome/systemsketch-chrome.css", "tokens",
      "Height 40, radius 13, <code>rgb(30,30,30)</code>, the three-layer shadow, and the visibility "
      "contract. The nested Block menu drops its own surface so there is one pill, not two."),
-    ("tests/selection_menu_smoke.mjs", "9 checks",
+    (SMOKE, f"{len(CHECKS)} checks",
      "Real-browser proof in the product composition. It also writes the frames on this page."),
 ]
 
@@ -183,8 +184,8 @@ def build() -> str:
     what shipped against it, and the proof that it did.
   </p>
   <div class="chips">
-    <span class="chip ok">9/9 browser checks</span>
-    <span class="chip ok">13 placement unit tests</span>
+    <span class="chip ok">{len(CHECKS)}/{len(CHECKS)} browser checks</span>
+    <span class="chip ok">{UNIT_TESTS} placement unit tests</span>
     <span class="chip">product composition &middot; 1440 &times; 960</span>
     <span class="chip">tldraw 5.3.2, unforked</span>
   </div>
@@ -233,7 +234,7 @@ y = clamp(y, SCREEN_MARGIN, vsb.h - toolbarBounds.h - SCREEN_MARGIN)</pre>
       invert the primitive's own formula and hand it a synthetic rectangle that lands the toolbar wherever you
       like. That was rejected: it would make SystemSketch's placement silently depend on a private constant, so
       a tldraw upgrade that changed <code>TOOLBAR_GAP</code> would move our menu with no failing test and no
-      diff. Owning 132 lines of placement is cheaper than owning that coupling.
+      diff. Owning {line_count(PLACEMENT)} lines of placement is cheaper than owning that coupling.
     </p>
     <p class="sub">
       Everything <em>except</em> the policy is still stock, and none of it is reached through a fork:
@@ -344,7 +345,7 @@ y = clamp(y, SELECTION_MENU_MARGIN, floor - SELECTION_MENU_MARGIN - menu.h)</pre
   <footer>
     <p>
       <b>Reproduce.</b> <code>npm run test:selection-menu</code> for the browser proof and its frames;
-      <code>npm run check</code> for types, the 13 placement unit tests, and the Python suite. Rebuild this
+      <code>npm run check</code> for types, the {UNIT_TESTS} placement unit tests, and the Python suite. Rebuild this
       page with <code>python3 docs/build_selection_menu_implementation.py</code>.
     </p>
     <p>

@@ -102,7 +102,7 @@
   <section>
     <h2>2 &middot; The controls</h2>
     <p class="sub">
-      Ten controls over stock tldraw styles. No new shape props, no schema change, nothing that would move
+      10 controls over stock tldraw styles. No new shape props, no schema change, nothing that would move
       the boundary this repo guards.
     </p>
     <table>
@@ -180,7 +180,7 @@ editor.run(() => {
     <h2>5 &middot; The change</h2>
     <table>
       <tr><th>File</th><th>Carries</th><th>What it is</th></tr>
-      <tr><td><code>src/appearance/appearanceModel.ts</code></td><td>10 unit tests</td><td>Which controls a selection gets and what each offers, as a pure function of tldraw's <code>ReadonlySharedStyleMap</code>. No React, no DOM.</td></tr><tr><td><code>src/appearance/AppearanceControls.tsx</code></td><td>the shell</td><td>One <code>TldrawUiPopover</code> per control; writes go through <code>markHistoryStoppingPoint</code> + <code>setStyleForSelectedShapes</code> + <code>setStyleForNextShapes</code>, the same path tldraw's own panel uses.</td></tr><tr><td><code>src/appearance/AppearanceGlyph.tsx</code></td><td>11 glyph families</td><td>FigJam previews a value rather than naming it &mdash; sizes drawn at their weight, endings drawn as lines, fills drawn on one square so they can be compared.</td></tr><tr><td><code>src/appearance/appearance.css</code></td><td>FigJam tokens</td><td><code>rgb(30,30,30)</code>, 13px radius, 8px padding, 8px clear of the pill.</td></tr><tr><td><code>tests/appearance_menu_smoke.mjs</code></td><td>12 checks</td><td>Drives the real product composition and reads two oracles per change.</td></tr>
+      <tr><td><code>src/appearance/appearanceModel.ts</code></td><td>10 unit tests</td><td>Which controls a selection gets and what each offers, as a pure function of tldraw's <code>ReadonlySharedStyleMap</code>. No React, no DOM.</td></tr><tr><td><code>src/appearance/AppearanceControls.tsx</code></td><td>153 lines</td><td>One <code>TldrawUiPopover</code> per control; writes go through <code>markHistoryStoppingPoint</code> + <code>setStyleForSelectedShapes</code> + <code>setStyleForNextShapes</code>, the same path tldraw's own panel uses.</td></tr><tr><td><code>src/appearance/AppearanceGlyph.tsx</code></td><td>232 lines</td><td>FigJam previews a value rather than naming it &mdash; sizes drawn at their weight, endings drawn as lines, fills drawn on one square so they can be compared.</td></tr><tr><td><code>src/appearance/appearance.css</code></td><td>FigJam tokens</td><td><code>rgb(30,30,30)</code>, 13px radius, 8px padding, 8px clear of the pill.</td></tr><tr><td><code>tests/appearance_menu_smoke.mjs</code></td><td>12 checks</td><td>Drives the real product composition and reads two oracles per change.</td></tr>
     </table>
   </section>
 

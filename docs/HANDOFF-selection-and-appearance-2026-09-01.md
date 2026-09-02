@@ -157,11 +157,24 @@ Do not rediscover these.
    turn Zach's check red. Excluded in `vite.config.ts`; the real figure for this
    checkout is **310 in 39 files**.
 
+   The natural next worry is *what else walks the tree*, and the answer is
+   nothing: `tsconfig.app.json` is `"include": ["src"]`, and
+   `tsc -p tsconfig.app.json --listFiles | grep -c .claude/worktrees` is `0`.
+   `npm run check` was only ever wrong through vitest, and that hole is closed.
+
 6. **`getSelectionRotatedScreenBounds()` is client-space**, not
    container-relative — it goes through `pageToScreen`, which *adds*
    `screenBounds.x/y`. For an overlay in `InFrontOfTheCanvas`, subtract
    `getViewportScreenBounds()`'s point, which is what tldraw's own primitive
    does internally.
+
+7. **A number frozen into a regenerated report drifts silently.** It looks
+   freshly measured on every rebuild and is not. `docs/report_measurements.py`
+   reads test counts, line counts and a smoke test's own `pass(...)` labels from
+   the live repo at build time, and raises rather than publishing if a suite is
+   red. Both implementation reports use it; use it for any new one. This is
+   CLAUDE.md's own rule, and it is easy to break by copying a figure into a
+   `build_*.py` constant.
 
 ---
 
