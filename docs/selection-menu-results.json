@@ -1,0 +1,38 @@
+[
+ {
+  "label": "a selected shape gets one 40px pill, centred on the selection and 16px clear of its overlay",
+  "ok": true
+ },
+ {
+  "label": "zooming resizes the shape but never the menu, and the gap stays put",
+  "ok": true
+ },
+ {
+  "label": "a selection against the top edge flips the menu below instead of clamping it onto the shape",
+  "ok": true
+ },
+ {
+  "label": "pushed into the gutter the menu clamps to the 20px margin instead of leaving the viewport",
+  "ok": true
+ },
+ {
+  "label": "a selection larger than the viewport parks the menu above the tool belt, not at the window edge",
+  "ok": true
+ },
+ {
+  "label": "dragging a shape removes the menu for the gesture and re-anchors it on release",
+  "ok": true
+ },
+ {
+  "label": "resizing from a handle removes the menu for the gesture and re-anchors it on release",
+  "ok": true
+ },
+ {
+  "label": "panning the selection off screen hides the menu and stops it answering hit tests",
+  "ok": true
+ },
+ {
+  "label": "the physical journey produced zero local console errors",
+  "ok": true
+ }
+]

@@ -1,0 +1,50 @@
+[
+ {
+  "label": "a selected shape gets shape, paint and typography controls, in FigJam order",
+  "ok": true
+ },
+ {
+  "label": "the colour popover stacks the fill row over the palette, 8px above the pill",
+  "ok": true
+ },
+ {
+  "label": "choosing a colour repaints the shape and rings the chosen swatch",
+  "ok": true
+ },
+ {
+  "label": "the fill row and the palette write different styles from one popover",
+  "ok": true
+ },
+ {
+  "label": "the stroke popover offers every dash the document can hold, and applies one",
+  "ok": true
+ },
+ {
+  "label": "size and typeface are closed named ladders, and both write through",
+  "ok": true
+ },
+ {
+  "label": "the shape picker changes a rectangle into an ellipse",
+  "ok": true
+ },
+ {
+  "label": "each appearance change is one history step",
+  "ok": true
+ },
+ {
+  "label": "a connector gets routing and endpoints, and an endpoint applies",
+  "ok": true
+ },
+ {
+  "label": "a selection that disagrees reports mixed instead of one shape's value",
+  "ok": true
+ },
+ {
+  "label": "a Block selected beside a shape keeps the shape's appearance reachable",
+  "ok": true
+ },
+ {
+  "label": "the physical journey produced zero local console errors",
+  "ok": true
+ }
+]
