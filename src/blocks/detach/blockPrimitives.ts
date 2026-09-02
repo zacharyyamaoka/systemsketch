@@ -30,15 +30,19 @@ import {
 	TLDRAW_TEXT_S_PX,
 	layoutBlock,
 	type BlockRect,
+	type LaidOutBlockPort,
 } from '../layoutBlock'
 import { portDefaultValue } from '../blockModel'
 import { portTldrawColor } from '../ui/portPalette'
 
-/** The painted ring around a port dot: a 12px core inside a 3px colour ring. */
-export const PORT_INDICATOR_RADIUS = BLOCK_PORT_RADIUS + 3
-
 /** tldraw renders a `size: 's'` label at 18px against the default 16px root. */
 const TLDRAW_LINE_HEIGHT = 1.35
+const PORT_LABEL_GAP_PX = 8
+const PORT_DEFAULT_FONT_PX = 13
+const PORT_DEFAULT_PAD_X_PX = 7
+const PORT_DEFAULT_MAX_WIDTH_PX = 88
+/** Canvas and tldraw do not always resolve the same fallback face during load. */
+const PORT_TEXT_MEASURE_GUARD = 1.18
 
 /**
  * Text runs are measured with the DOM's own measurer when there is one, so a
@@ -142,10 +146,99 @@ function outlineAt(
 	}
 }
 
+interface PortLabelPart {
+	text: string
+	px: number
+	font: 'sans' | 'mono'
+	color: TLDefaultColorStyle
+	/** The default-value chip keeps the live row's horizontal breathing room. */
+	padX?: number
+}
+
+/**
+ * Project the DOM flex row onto independently editable stock text shapes.
+ *
+ * Inputs read name → type → default; outputs read type → name → default and
+ * hug the right edge. Exact boxes make the nested row group's bounds follow
+ * what is visibly painted instead of spanning the whole Block.
+ */
+function portLabelsAt(
+	placed: LaidOutBlockPort,
+	origin: { x: number; y: number },
+): TLShapePartial[] {
+	if (!placed.label) return []
+	const defaultValue = placed.side === 'input' ? portDefaultValue(placed.port) : ''
+	const name: PortLabelPart = {
+		text: placed.port.name,
+		px: PORT_TEXT_FONT_PX,
+		font: 'sans',
+		color: 'black',
+	}
+	const type: PortLabelPart = {
+		text: placed.port.type,
+		px: PORT_TEXT_FONT_PX,
+		font: 'mono',
+		color: 'grey',
+	}
+	const chip: PortLabelPart = {
+		text: defaultValue === '' ? '' : `= ${defaultValue}`,
+		px: PORT_DEFAULT_FONT_PX,
+		font: 'mono',
+		color: 'grey',
+		padX: PORT_DEFAULT_PAD_X_PX,
+	}
+	const ordered = (placed.side === 'input' ? [name, type, chip] : [type, name, chip])
+		.filter((part) => part.text !== '')
+	if (ordered.length === 0) return []
+
+	const gapWidth = PORT_LABEL_GAP_PX * Math.max(0, ordered.length - 1)
+	const available = Math.max(1, placed.label.w - gapWidth)
+	const desired = ordered.map((part) => {
+		const measured = measureText(
+			part.text,
+			part.px,
+			part.font === 'mono' ? "ui-monospace, monospace" : "'Inter', sans-serif",
+		)
+		const padded = measured * PORT_TEXT_MEASURE_GUARD + 2 + (part.padX ?? 0) * 2
+		return part === chip ? Math.min(PORT_DEFAULT_MAX_WIDTH_PX, padded) : padded
+	})
+	const desiredTotal = desired.reduce((sum, width) => sum + width, 0)
+	const compression = desiredTotal > available ? available / desiredTotal : 1
+	const widths = desired.map((width) => Math.max(1, width * compression))
+	const totalWidth = widths.reduce((sum, width) => sum + width, 0) + gapWidth
+	let x = placed.side === 'input'
+		? placed.label.x
+		: placed.label.x + placed.label.w - totalWidth
+
+	return ordered.map((part, index) => {
+		const width = widths[index]
+		const shape = textAt({
+			text: part.text,
+			px: part.px,
+			box: { x, y: placed.label!.y, w: width, h: placed.label!.h },
+			origin,
+			font: part.font,
+			color: part.color,
+			align: part.padX ? 'middle' : 'start',
+		})
+		x += width + PORT_LABEL_GAP_PX
+		return shape
+	})
+}
+
+export interface PortPrimitiveRow {
+	portId: string
+	side: 'input' | 'output'
+	/** The circle and every visible piece of text belonging to this port. */
+	shapeIds: TLShapeId[]
+}
+
 export interface BlockPrimitives {
 	/** Card first — it is the shape cables are re-pointed at. */
 	shapes: TLShapePartial[]
 	cardId: TLShapeId
+	/** Row membership used by detach to create nested stock groups. */
+	portRows: PortPrimitiveRow[]
 }
 
 /**
@@ -182,6 +275,17 @@ export function primitivesForBlock(
 	}
 
 	const parts: TLShapePartial[] = []
+	const portRows = new Map<string, PortPrimitiveRow>()
+	const pushPortPart = (placed: LaidOutBlockPort, partial: TLShapePartial) => {
+		parts.push(partial)
+		const key = `${placed.side}:${placed.port.id}`
+		let row = portRows.get(key)
+		if (!row) {
+			row = { portId: placed.port.id, side: placed.side, shapeIds: [] }
+			portRows.set(key, row)
+		}
+		row.shapeIds.push(partial.id as TLShapeId)
+	}
 
 	// Simple is chromeless: a centred stack on a bare card, no heading band and
 	// no footer rule. Port and Expanded wear both.
@@ -240,73 +344,25 @@ export function primitivesForBlock(
 		}))
 	}
 
-	// Port labels. The NAME hugs the edge its dot sits on and the type sits
-	// inboard of it, mirroring the DOM's span order on each side. Names are
-	// aligned to their box's edge, so their anchoring never depends on how this
-	// measurer's font differs from tldraw's; only the TYPE's offset rides on
-	// the measured name.
-	const gap = 6
+	// Each label is recorded with its port circle below. `detachBlock` turns
+	// that membership into a nested stock group, so dragging a name moves the
+	// whole port row rather than tearing its text away from its anchor.
 	for (const placed of layout.ports) {
-		if (!placed.label) continue
-		const nameWidth = Math.min(
-			measureText(placed.port.name, PORT_TEXT_FONT_PX, "'Inter', sans-serif"),
-			placed.label.w,
-		)
-		const hasType = placed.port.type !== ''
-		if (placed.side === 'input') {
-			if (placed.port.name !== '') {
-				parts.push(textAt({
-					text: placed.port.name, px: PORT_TEXT_FONT_PX, box: placed.label,
-					origin, font: 'sans', color: 'black', align: 'start',
-				}))
-			}
-			if (hasType) {
-				const x = placed.label.x + nameWidth + gap
-				parts.push(textAt({
-					text: placed.port.type, px: PORT_TEXT_FONT_PX,
-					box: { ...placed.label, x, w: Math.max(1, placed.label.x + placed.label.w - x) },
-					origin, font: 'mono', color: 'grey', align: 'start',
-				}))
-			}
-		} else {
-			if (placed.port.name !== '') {
-				parts.push(textAt({
-					text: placed.port.name, px: PORT_TEXT_FONT_PX, box: placed.label,
-					origin, font: 'sans', color: 'black', align: 'end',
-				}))
-			}
-			if (hasType) {
-				parts.push(textAt({
-					text: placed.port.type, px: PORT_TEXT_FONT_PX,
-					box: { ...placed.label, w: Math.max(1, placed.label.w - nameWidth - gap) },
-					origin, font: 'mono', color: 'grey', align: 'end',
-				}))
-			}
-		}
+		for (const label of portLabelsAt(placed, origin)) pushPortPart(placed, label)
 	}
 
-	// The dots last, so they sit above the card. A dot is a 12px core inside a
-	// colour ring with the card showing through between them: hollow until a
-	// cable lands, grey-filled when an unwired input carries a default.
+	// The dots last, so they sit above the card. Each port is ONE 12px stock
+	// circle: hollow until a cable lands, grey-filled when an unwired input
+	// carries a default. The live Block uses layered CSS shadows for emphasis;
+	// exporting those as a second ellipse made the editable primitive look like
+	// two distinct ports.
 	// A Simple anchor is invisible until hovered, so the frozen copy draws none.
 	for (const placed of layout.ports) {
 		if (placed.subtle) continue
 		const color = portTldrawColor(placed.port.type)
 		const connected = connectedPortIds.has(placed.port.id)
 		const hasDefault = portDefaultValue(placed.port) !== ''
-		parts.push({
-			id: createShapeId(),
-			type: 'geo',
-			x: origin.x + placed.x - PORT_INDICATOR_RADIUS,
-			y: origin.y + placed.y - PORT_INDICATOR_RADIUS,
-			props: {
-				geo: 'ellipse',
-				w: PORT_INDICATOR_RADIUS * 2,
-				h: PORT_INDICATOR_RADIUS * 2,
-				color, fill: 'none', dash: 'solid', size: 's',
-			},
-		})
-		parts.push({
+		pushPortPart(placed, {
 			id: createShapeId(),
 			type: 'geo',
 			x: origin.x + placed.x - BLOCK_PORT_RADIUS,
@@ -322,5 +378,9 @@ export function primitivesForBlock(
 		})
 	}
 
-	return { shapes: [card, ...parts], cardId: card.id as TLShapeId }
+	return {
+		shapes: [card, ...parts],
+		cardId: card.id as TLShapeId,
+		portRows: [...portRows.values()],
+	}
 }
