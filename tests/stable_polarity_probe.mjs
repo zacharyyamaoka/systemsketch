@@ -141,6 +141,21 @@ async function main() {
       wired, ['call.in_1', 'encode.out_1', 'merge.in_1'])
     await shot(page, 'stable-polarity-picker.png')
 
+    // Fan-in on the deployed build: the picked Block's output back onto
+    // merge.in_1, which encode.out_1 already feeds — the first cable must stay.
+    if (spawned) {
+      dots['call.out'] = await box(page, portDot(spawned, 'output', 'out_1'))
+      const cablesBefore = (await portClasses(page)).length // any read keeps the pointer settled
+      void cablesBefore
+      const fanIn = await dragFrom(page, dots['call.out'], dots['merge.in'])
+      check('STABLE-4', 'a second producer onto the occupied input joins it', fanIn.count, 3)
+      check('STABLE-5', 'every dot on the way reads as wired',
+        (await portClasses(page)).filter((entry) => entry.connected)
+          .map((entry) => `${names[entry.shape] ?? '?'}.${entry.port}`).sort(),
+        ['call.in_1', 'call.out_1', 'encode.out_1', 'merge.in_1'])
+      await shot(page, 'stable-fanin.png')
+    }
+
     check('STABLE-CLEAN', 'no local console errors', localConsoleErrors(page), [])
     const failed = results.filter((result) => !result.ok)
     process.stdout.write(`\n${results.length - failed.length}/${results.length} checks passed against ${STABLE_URL} build ${build}\n`)
