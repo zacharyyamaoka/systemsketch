@@ -1,5 +1,5 @@
-SystemSketch interaction recording — 2026-09-02T21:45:39.196Z · 6.4 s · the last 30 s (retroactive)
-channel preview · build recorder-smoke · http://127.0.0.1:37059/?board=%2Ftmp%2Frecorder-smoke-files-yiaKkL%2FSystemSketch%2Frecorder-proof.systemsketch
+SystemSketch interaction recording — 2026-09-02T21:48:03.288Z · 7.0 s · the last 30 s (retroactive)
+channel preview · build recorder-smoke · http://127.0.0.1:38465/?board=%2Ftmp%2Frecorder-smoke-files-MWdG85%2FSystemSketch%2Frecorder-proof.systemsketch
 viewport 1440×960 @1x · state path select.idle → select.idle · 3 shapes at the end
 
 Note from the person recording:
@@ -7,24 +7,24 @@ Note from the person recording:
 
 State-chart transitions (17):
   +   1.01s  select.idle  →  block.idle   (store)
-  +   1.12s  block.idle  →  block.pointing   (pointer_down)
-  +   1.14s  block.pointing  →  select.resizing   (pointer_move)
-  +   1.34s  select.resizing  →  select.idle   (pointer_up)
-  +   1.37s  select.idle  →  select.editing_shape   (store)
-  +   1.38s  select.editing_shape  →  select.idle   (complete)
-  +   2.50s  select.idle  →  block.idle   (store)
+  +   1.11s  block.idle  →  block.pointing   (pointer_down)
+  +   1.12s  block.pointing  →  select.resizing   (pointer_move)
+  +   1.33s  select.resizing  →  select.idle   (pointer_up)
+  +   1.35s  select.idle  →  select.editing_shape   (store)
+  +   1.37s  select.editing_shape  →  select.idle   (complete)
+  +   2.49s  select.idle  →  block.idle   (store)
   +   2.59s  block.idle  →  block.pointing   (pointer_down)
-  +   2.60s  block.pointing  →  select.resizing   (pointer_move)
-  +   2.79s  select.resizing  →  select.idle   (pointer_up)
-  +   2.81s  select.idle  →  select.editing_shape   (store)
-  +   2.82s  select.editing_shape  →  select.idle   (complete)
-  +   3.92s  select.idle  →  select.pointing_canvas   (pointer_down)
-  +   3.93s  select.pointing_canvas  →  select.idle   (pointer_up)
-  +   4.35s  select.idle  →  select.pointing_block_port   (pointer_down)
-  +   4.37s  select.pointing_block_port  →  select.dragging_handle   (pointer_move)
-  +   4.78s  select.dragging_handle  →  select.idle   (pointer_up)
+  +   2.61s  block.pointing  →  select.resizing   (pointer_move)
+  +   2.81s  select.resizing  →  select.idle   (pointer_up)
+  +   2.83s  select.idle  →  select.editing_shape   (store)
+  +   2.84s  select.editing_shape  →  select.idle   (complete)
+  +   3.95s  select.idle  →  select.pointing_canvas   (pointer_down)
+  +   3.96s  select.pointing_canvas  →  select.idle   (pointer_up)
+  +   4.39s  select.idle  →  select.pointing_block_port   (pointer_down)
+  +   4.41s  select.pointing_block_port  →  select.dragging_handle   (pointer_move)
+  +   4.82s  select.dragging_handle  →  select.idle   (pointer_up)
 
-Totals: 46 input events (33 moves, 4 presses, 0 key downs) · 19 DOM events · 39 store diffs · 0 menu changes · 0 console rows · 13 frames
+Totals: 46 input events (33 moves, 4 presses, 0 key downs) · 19 DOM events · 39 store diffs · 0 menu changes · 0 console rows · 14 frames
 
 States seen, and the file that defines each:
   select                       node_modules/tldraw/dist-esm/lib/tools/SelectTool/SelectTool.mjs
@@ -38,10 +38,10 @@ States seen, and the file that defines each:
   dragging_handle              node_modules/tldraw/dist-esm/lib/tools/SelectTool/childStates/DraggingHandle.mjs
 
 Read these files, in this order:
-1. /tmp/recorder-smoke-files-yiaKkL/SystemSketch/recordings/2026-09-02_14-45-39-cable-landed-then-the-detector-w/README.md  — this summary
-2. /tmp/recorder-smoke-files-yiaKkL/SystemSketch/recordings/2026-09-02_14-45-39-cable-landed-then-the-detector-w/timeline.jsonl  — every event, one JSON object per line. `t` is ms since the start. Lanes: input (what tldraw's state chart received), dom (raw keydown/keyup/pointerdown on the window, with the UI element hit), state (state-chart path changes), menu (open menus), store (record diffs: add/update/remove with the changed keys), console (console calls and uncaught errors), mark (notes).
-3. /tmp/recorder-smoke-files-yiaKkL/SystemSketch/recordings/2026-09-02_14-45-39-cable-landed-then-the-detector-w/frames/  — 13 screenshots named by ms since the start (f-001032.jpg = +1.03 s). To see what the screen showed after an event at t, open the first frame with a larger number. Chrome screencast frames: what the window actually showed, UI chrome included, no mouse pointer (the input lane has it).
-4. /tmp/recorder-smoke-files-yiaKkL/SystemSketch/recordings/2026-09-02_14-45-39-cable-landed-then-the-detector-w/start.snapshot.json  — the tldraw store (document + session records) at t=0; /tmp/recorder-smoke-files-yiaKkL/SystemSketch/recordings/2026-09-02_14-45-39-cable-landed-then-the-detector-w/end.snapshot.json is the store at save time. `editor.store.loadStoreSnapshot(start)` then replaying the store lane reproduces every instant.
-5. /tmp/recorder-smoke-files-yiaKkL/SystemSketch/recordings/2026-09-02_14-45-39-cable-landed-then-the-detector-w/playback.html  — open in a browser: slow frames, fast lanes, one scrubber; #t=<ms> deep-links a moment.
+1. /tmp/recorder-smoke-files-MWdG85/SystemSketch/recordings/2026-09-02_14-48-03-cable-landed-then-the-detector-w/README.md  — this summary
+2. /tmp/recorder-smoke-files-MWdG85/SystemSketch/recordings/2026-09-02_14-48-03-cable-landed-then-the-detector-w/timeline.jsonl  — every event, one JSON object per line. `t` is ms since the start. Lanes: input (what tldraw's state chart received), dom (raw keydown/keyup/pointerdown on the window, with the UI element hit), state (state-chart path changes), menu (open menus), store (record diffs: add/update/remove with the changed keys), console (console calls and uncaught errors), mark (notes).
+3. /tmp/recorder-smoke-files-MWdG85/SystemSketch/recordings/2026-09-02_14-48-03-cable-landed-then-the-detector-w/frames/  — 14 screenshots named by ms since the start (f-001022.jpg = +1.02 s). To see what the screen showed after an event at t, open the first frame with a larger number. Chrome screencast frames: what the window actually showed, UI chrome included, no mouse pointer (the input lane has it).
+4. /tmp/recorder-smoke-files-MWdG85/SystemSketch/recordings/2026-09-02_14-48-03-cable-landed-then-the-detector-w/start.snapshot.json  — the tldraw store (document + session records) at t=0; /tmp/recorder-smoke-files-MWdG85/SystemSketch/recordings/2026-09-02_14-48-03-cable-landed-then-the-detector-w/end.snapshot.json is the store at save time. `editor.store.loadStoreSnapshot(start)` then replaying the store lane reproduces every instant.
+5. /tmp/recorder-smoke-files-MWdG85/SystemSketch/recordings/2026-09-02_14-48-03-cable-landed-then-the-detector-w/playback.html  — open in a browser: slow frames, fast lanes, one scrubber; #t=<ms> deep-links a moment.
 
-Recorder cost inside the page: 3.7 ms over 6.37 s of uptime.
+Recorder cost inside the page: 5.3 ms over 6.95 s of uptime.

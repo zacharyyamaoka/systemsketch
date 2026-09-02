@@ -1,25 +1,26 @@
-/* Recorder rows reuse the Dev panel's preset-row grammar; only the accents are new. */
+/* Recorder rows reuse the Dev panel's preset-row grammar; only the accents are new.
+   Every colour is a theme token, so the section wears whatever theme the host does. */
 
 .systemsketch-recorder__row > i[data-glyph="dot"] {
-  color: #c4392c;
-  background: #fdecea;
+  color: var(--ss-danger);
+  background: var(--ss-danger-soft);
 }
 
 .systemsketch-recorder__row[data-taking] > i,
 .systemsketch-recorder__row[data-taking] > em {
-  color: #c4392c;
+  color: var(--ss-danger);
 }
 
 .systemsketch-recorder__row[data-taking] {
-  border-color: #f0c4bd;
-  background: #fdf5f4;
+  border-color: color-mix(in srgb, var(--ss-danger) 35%, transparent);
+  background: var(--ss-danger-soft);
 }
 
 .systemsketch-recorder__note {
   display: grid;
   gap: 3px;
   margin: 8px 3px 0;
-  color: #737b85;
+  color: var(--ss-text-muted);
   font-size: 8px;
   font-weight: 850;
   letter-spacing: .09em;
@@ -29,17 +30,17 @@
 .systemsketch-recorder__note input {
   width: 100%;
   padding: 6px 8px;
-  border: 1px solid #e1e4e8;
+  border: 1px solid var(--ss-border);
   border-radius: 7px;
-  color: #242931;
-  background: #fff;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
   font: 11px/1.3 inherit;
   letter-spacing: normal;
   text-transform: none;
 }
 
 .systemsketch-recorder__note input:focus {
-  border-color: #7580cb;
+  border-color: var(--ss-focus-ring);
   outline: none;
 }
 
@@ -49,24 +50,24 @@
   align-items: center;
   gap: 4px;
   margin: 8px 3px 0;
-  color: #737b85;
+  color: var(--ss-text-muted);
   font-size: 9px;
 }
 
 .systemsketch-recorder__window button {
   padding: 3px 8px;
-  border: 1px solid #e1e4e8;
+  border: 1px solid var(--ss-border);
   border-radius: 999px;
-  color: #3e4650;
-  background: #fff;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
   cursor: pointer;
   font: 700 9px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .systemsketch-recorder__window button[data-on] {
-  border-color: #4b56d2;
-  color: #fff;
-  background: #4b56d2;
+  border-color: var(--ss-accent);
+  color: var(--ss-accent-text);
+  background: var(--ss-accent);
 }
 
 .systemsketch-recorder__window button:disabled {
@@ -79,14 +80,14 @@
 }
 
 .systemsketch-recorder__toggle[aria-pressed="true"] {
-  border-color: #bfe3cd;
-  color: #0e6b36;
-  background: #eefaf2;
+  border-color: color-mix(in srgb, var(--ss-success) 40%, transparent);
+  color: var(--ss-success);
+  background: var(--ss-success-soft);
 }
 
 .systemsketch-recorder__hint {
   margin: 6px 3px 0;
-  color: #8a6206;
+  color: var(--ss-warning);
   font-size: 9px;
   line-height: 1.4;
 }
@@ -103,10 +104,10 @@
 
 .systemsketch-recorder--compact button {
   padding: 5px 9px;
-  border: 1px solid #dde1e7;
+  border: 1px solid var(--ss-border);
   border-radius: 7px;
-  color: #2f3640;
-  background: #fff;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
   cursor: pointer;
   font: 700 10px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
@@ -117,23 +118,23 @@
 }
 
 .systemsketch-recorder--compact button[data-action="save-last"] {
-  border-color: #f0c4bd;
-  color: #c4392c;
+  border-color: color-mix(in srgb, var(--ss-danger) 35%, transparent);
+  color: var(--ss-danger);
 }
 
 .systemsketch-recorder--compact button[data-taking] {
-  color: #fff;
-  background: #c4392c;
-  border-color: #c4392c;
+  color: var(--ss-text-inverse);
+  background: var(--ss-danger);
+  border-color: var(--ss-danger);
 }
 
 .systemsketch-recorder--compact small {
-  color: #6b7280;
+  color: var(--ss-text-muted);
   font-size: 9px;
 }
 
 .systemsketch-recorder--compact small.error {
-  color: #c4392c;
+  color: var(--ss-danger);
 }
 
 /* The REC bar: across the top, above tldraw's own chrome, only during a take. */
@@ -151,8 +152,8 @@
   gap: 12px;
   height: 30px;
   padding: 0 12px;
-  color: #fff;
-  background: rgba(196, 57, 44, .94);
+  color: var(--ss-text-inverse);
+  background: color-mix(in srgb, var(--ss-danger) 94%, transparent);
   font: 700 12px/30px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   letter-spacing: .06em;
   pointer-events: auto;
@@ -164,7 +165,7 @@
   height: 8px;
   margin-right: 8px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--ss-text-inverse);
   vertical-align: -1px;
   animation: systemsketch-recorder-blink 1s infinite;
 }
@@ -175,9 +176,9 @@
 
 .systemsketch-recorder-indicator button {
   padding: 3px 10px;
-  border: 1px solid rgba(255, 255, 255, .7);
+  border: 1px solid color-mix(in srgb, var(--ss-text-inverse) 70%, transparent);
   border-radius: 6px;
-  color: #fff;
+  color: var(--ss-text-inverse);
   background: transparent;
   cursor: pointer;
   font: inherit;
@@ -185,13 +186,5 @@
 }
 
 .systemsketch-recorder-indicator button:hover:not(:disabled) {
-  background: rgba(255, 255, 255, .16);
-}
-
-.tl-theme__dark .systemsketch-recorder__note input,
-.tl-theme__dark .systemsketch-recorder__window button:not([data-on]),
-.tl-theme__dark .systemsketch-recorder--compact button:not([data-taking]) {
-  border-color: #3a4150;
-  color: #d9dee6;
-  background: #1c2129;
+  background: color-mix(in srgb, var(--ss-text-inverse) 16%, transparent);
 }
