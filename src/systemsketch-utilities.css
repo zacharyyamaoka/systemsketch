@@ -85,8 +85,27 @@
 }
 
 .systemsketch-help-trigger,
-.systemsketch-dev-trigger {
+.systemsketch-dev-trigger,
+.systemsketch-diagnostics-trigger {
   overflow: visible;
+}
+
+.systemsketch-problem-count {
+  position: absolute;
+  top: 4px;
+  right: 3px;
+  display: grid;
+  min-width: 14px;
+  height: 14px;
+  place-items: center;
+  padding: 0 2px;
+  border: 1.5px solid var(--ss-surface-raised);
+  border-radius: 999px;
+  color: var(--ss-text-inverse);
+  background: var(--ss-danger);
+  font-size: 7px;
+  font-weight: 850;
+  line-height: 1;
 }
 
 .systemsketch-dev-icon {
@@ -186,7 +205,7 @@
 
 .systemsketch-preview-mode {
   position: absolute;
-  top: var(--tl-space-2);
+  top: calc(var(--systemsketch-chrome-inset) + var(--systemsketch-top-height) + 8px);
   left: 50%;
   display: grid;
   min-height: 38px;
@@ -925,7 +944,7 @@
   }
 
   .systemsketch-preview-mode {
-    top: 8px;
+    top: calc(var(--systemsketch-chrome-inset) + var(--systemsketch-top-height) + 8px);
     max-width: calc(100vw - 16px);
   }
 

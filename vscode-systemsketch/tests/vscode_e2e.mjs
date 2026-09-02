@@ -34,6 +34,11 @@ const CAPTURE_DIR = process.env.SYSTEMSKETCH_E2E_CAPTURE_DIR
 const CAPTURE_PREFIX = process.env.SYSTEMSKETCH_E2E_CAPTURE_PREFIX ?? 'vscode'
 const DEFAULT_TIMEOUT_MS = 30_000
 const WEBVIEW_DOCUMENT = `(document.getElementById('active-frame')?.contentDocument ?? document)`
+// Block and Branch intentionally share one top-level system-design slot. A
+// fresh profile starts that family on Block, whose inline icon is the stable
+// proof that clicking the family button will select the Block tool.
+const SYSTEM_TOOL_SELECTOR = '[data-testid="systemsketch-tool-system"]'
+const BLOCK_TOOL_ICON_SELECTOR = `${SYSTEM_TOOL_SELECTOR} .systemsketch-block-icon`
 
 function delay(milliseconds) {
   return new Promise((resolveDelay) => setTimeout(resolveDelay, milliseconds))
@@ -465,14 +470,14 @@ async function elementRect(page, context, selector) {
  * boundary rather than swallowed or mistaken for a plugin failure.
  */
 async function pointerReachesCanvas(page, context, iframe) {
-  const tool = await elementRect(page, context, '[data-testid="systemsketch-tool-block"]')
+  const tool = await elementRect(page, context, BLOCK_TOOL_ICON_SELECTOR)
   await clickInCanvas(page, context, iframe, tool.x + tool.width / 2, tool.y + tool.height / 2)
   try {
     await waitFor(
       () => inCanvas(
         page,
         context,
-        `$doc.querySelector('[data-testid="systemsketch-tool-block"]')?.getAttribute('aria-pressed') === 'true'`,
+        `$doc.querySelector(${JSON.stringify(SYSTEM_TOOL_SELECTOR)})?.getAttribute('aria-pressed') === 'true'`,
       ),
       'the Block tool to activate',
       6_000,
@@ -513,13 +518,13 @@ async function freeCanvasPoint(page, context, bias) {
 
 async function drawBlock(page, context, iframe, bias) {
   const before = await inCanvas(page, context, `$doc.querySelectorAll('.NodeShape').length`)
-  const tool = await elementRect(page, context, '[data-testid="systemsketch-tool-block"]')
+  const tool = await elementRect(page, context, BLOCK_TOOL_ICON_SELECTOR)
   await clickInCanvas(page, context, iframe, tool.x + tool.width / 2, tool.y + tool.height / 2)
   await waitFor(
     () => inCanvas(
       page,
       context,
-      `$doc.querySelector('[data-testid="systemsketch-tool-block"]')?.getAttribute('aria-pressed') === 'true'`,
+      `$doc.querySelector(${JSON.stringify(SYSTEM_TOOL_SELECTOR)})?.getAttribute('aria-pressed') === 'true'`,
     ),
     `the Block tool to activate from a click at`
     + ` (${Math.round(iframe.x + tool.x)}, ${Math.round(iframe.y + tool.y)})`
@@ -634,7 +639,7 @@ async function main() {
       'the tldraw canvas did not mount',
     )
     assert.equal(
-      await inCanvas(page, canvas, `Boolean($doc.querySelector('[data-testid="systemsketch-tool-block"]'))`),
+      await inCanvas(page, canvas, `Boolean($doc.querySelector(${JSON.stringify(BLOCK_TOOL_ICON_SELECTOR)}))`),
       true,
       'the SystemSketch toolbar is missing its Block tool',
     )

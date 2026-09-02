@@ -1,6 +1,6 @@
 export type LeftSurface = 'shapes' | 'files'
-export type RightSurface = 'comments' | 'inspector' | 'board-overview'
-export type ToolbarSurface = 'commands'
+export type RightSurface = 'comments' | 'inspector' | 'board-overview' | 'diagnostics'
+export type ToolbarSurface = 'commands' | 'find-replace'
 
 export type ChromeSurfaceId =
   | `left:${LeftSurface}`
@@ -89,4 +89,3 @@ export function reduceChromeState(state: ChromeState, action: ChromeAction): Chr
       return INITIAL_CHROME_STATE
   }
 }
-

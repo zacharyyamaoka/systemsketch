@@ -30,6 +30,8 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("bindingUtils={SYSTEMSKETCH_BINDING_UTILS}", product_source)
         self.assertIn("tools={SYSTEMSKETCH_TOOLS}", product_source)
         self.assertIn("overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}", product_source)
+        self.assertIn("store={store}", product_source)
+        self.assertIn("createSystemSketchStore", product_source)
         self.assertIn("BlockShapeUtil", source)
         self.assertIn("BlockTool", source)
         self.assertIn("...blockConnectionShapeUtils", source)
@@ -99,6 +101,8 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("bindingUtils={EMBEDDED_BINDING_UTILS}", embedded)
         self.assertIn("overlayUtils={EMBEDDED_OVERLAY_UTILS}", embedded)
         self.assertIn("overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}", embedded)
+        self.assertIn("store={store}", embedded)
+        self.assertIn("createSystemSketchStore", embedded)
         self.assertIn("tools={EMBEDDED_TOOLS}", embedded)
         self.assertIn("BlockShapeUtil,", embedded)
         self.assertIn("BranchShapeUtil,", embedded)
@@ -117,6 +121,19 @@ class StockBoundaryTests(unittest.TestCase):
         # would quietly compete with the file the host opened.
         self.assertNotIn("persistenceKey", embedded)
 
+        store_factory = (
+            PROJECT_ROOT / "src" / "store" / "createSystemSketchStore.ts"
+        ).read_text(encoding="utf-8")
+        self.assertIn("createTLStore({", store_factory)
+        self.assertIn("records: SYSTEMSKETCH_COMMENT_RECORDS", store_factory)
+        self.assertIn("BranchShapeUtil", store_factory)
+
+        portable_export = (
+            PROJECT_ROOT / "src" / "export" / "portableTldraw.ts"
+        ).read_text(encoding="utf-8")
+        self.assertIn("BranchShapeUtil", portable_export)
+        self.assertIn("record.type === BRANCH_SHAPE_TYPE", portable_export)
+
     def test_the_host_bridge_stays_the_only_thing_an_extension_imports(self) -> None:
         """A host runs in Node and bundles separately, so anything it reaches
         into becomes a second build of that code. One narrow module is the
@@ -132,6 +149,10 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertTrue(app_imports, "the extension no longer shares the app's format rules")
         for line in app_imports:
             self.assertIn("../../src/embed/sharedWithHost", line)
+
+        # The durable recovery store has one checkpoint per document URI, so
+        # the provider must preserve that single-canvas ownership invariant.
+        self.assertIn("supportsMultipleEditorsPerDocument: false", extension)
 
         # The chain, not just its head: `sketchDocument.ts` delegates the
         # envelope and the suffix rules to the workspace lane rather than

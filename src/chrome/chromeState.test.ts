@@ -51,5 +51,26 @@ describe('SystemSketch chrome state', () => {
     expect(withInspector.rightSurface).toBe('inspector')
     expect(withInspector.openOrder).toEqual(['left:shapes', 'right:inspector'])
   })
-})
 
+  it('treats Problems as a real right-side surface', () => {
+    const problems = reduceChromeState(INITIAL_CHROME_STATE, {
+      type: 'set-right',
+      surface: 'diagnostics',
+    })
+    expect(problems.rightSurface).toBe('diagnostics')
+    expect(problems.openOrder).toEqual(['right:diagnostics'])
+  })
+
+  it('switches command palette modes in the shared transient stack', () => {
+    const commands = reduceChromeState(INITIAL_CHROME_STATE, {
+      type: 'set-toolbar',
+      surface: 'commands',
+    })
+    const find = reduceChromeState(commands, {
+      type: 'set-toolbar',
+      surface: 'find-replace',
+    })
+    expect(find.toolbarSurface).toBe('find-replace')
+    expect(find.openOrder).toEqual(['toolbar:find-replace'])
+  })
+})

@@ -41,9 +41,28 @@ import { interfaceScaleCssValues, useInterfaceScale } from '../settings/interfac
 import { resolveHostTheme } from '../theme/themeModel'
 import { installInstantTextEditing } from '../instantTextEditing'
 import { enablePasteAtCursor } from '../pasteAtCursor'
+import { createSystemSketchStore } from '../store/createSystemSketchStore'
 import { readEmbedHostBridge, type HostToEmbedMessage } from './embedProtocol'
-import { decideOutgoing, externalChangeMessage, type EmbeddedDocument } from './embedSession'
-import { decodeDocumentText, encodeDocumentText, isBlankDocument } from './sketchDocument'
+import {
+  acceptOutgoing,
+  createCoalescingAsyncRunner,
+  createFlushableDebounce,
+  EMPTY_OUTGOING_QUEUE,
+  externalChangeMessage,
+  failOutgoing,
+  installEmbeddedLifecycleFlush,
+  queueOutgoing,
+  retryOutgoing,
+  type EmbeddedDocument,
+  type OutgoingQueueState,
+} from './embedSession'
+import {
+  decodeDocumentText,
+  encodeDocumentText,
+  isBlankDocument,
+  newerDocumentVersion,
+  type NewerDocumentVersion,
+} from './sketchDocument'
 import type { CSSProperties } from 'react'
 import '../theme/tokens.css'
 import '../app.css'
@@ -84,28 +103,45 @@ const EMBEDDED_TOOLS = [BlockTool, BranchTool]
 
 /** Long enough that a drag is one write, short enough that a pause is saved. */
 const CHANGE_DEBOUNCE_MS = 250
+/** Avoid serializing every pointer move while retaining a lifecycle flush. */
+const SERIALIZATION_DEBOUNCE_MS = 80
 
 interface OpenState extends EmbeddedDocument {
+  /** Read-only as requested by the host, before local format protection. */
+  hostReadOnly: boolean
   /** The document text exactly as the host handed it over. */
   text: string
+  /** Host-generated fence for checkpoints and serialized changes. */
+  session: string
+  /** Opaque stock Editor snapshot recovered after an interrupted teardown. */
+  recovery?: { snapshot: unknown }
   /** Bumped on every host-driven load so the store is rebuilt, never patched. */
   nonce: number
+  /** Present only when SystemSketch, rather than the host, protects the wrapper. */
+  formatProtection?: NewerDocumentVersion
 }
 
 function EmbeddedSurface({
   document: openDocument,
   colorScheme,
   onCanvasText,
+  onCanvasCheckpoint,
   onLoadError,
+  onCompatibilityCopyAvailable,
 }: {
   document: OpenState
   colorScheme: 'light' | 'dark'
-  onCanvasText(text: string): void
+  onCanvasText(text: string, sourceNonce: number, checkpointRevision: number): void
+  onCanvasCheckpoint(snapshot: unknown, sourceNonce: number, revision: number): void
   onLoadError(message: string): void
+  onCompatibilityCopyAvailable(available: boolean): void
 }) {
   const interfaceScale = useInterfaceScale()
   const scaleCss = interfaceScaleCssValues(interfaceScale)
   const editorRef = useRef<Editor | null>(null)
+  const [store] = useState(createSystemSketchStore)
+
+  useEffect(() => () => store.dispose(), [store])
 
   /**
    * The host's theme reaches the board, not just the pane around it.
@@ -123,19 +159,43 @@ function EmbeddedSurface({
 
   const onMount = useCallback((editor: Editor) => {
     editorRef.current = editor
+    onCompatibilityCopyAvailable(false)
     if (openDocument.readOnly) editor.updateInstanceState({ isReadonly: true })
     const core = decodeDocumentText(openDocument.text)
-    if (!isBlankDocument(core)) {
-      // Custom colours are validated by name as the file parses; see LocalWorkspace.
-      hydrateCustomColors(core, editor)
-      const parsed = parseTldrawJsonFile({ json: core, schema: editor.store.schema })
-      if (parsed.ok) {
+    // Custom colours are validated by name while a snapshot is loaded. Register
+    // every name before either the durable document or an interrupted-edit
+    // checkpoint reaches tldraw's stock schema.
+    hydrateCustomColors(core, editor)
+    let recoveredCheckpoint = false
+    if (openDocument.recovery) {
+      try {
+        hydrateCustomColors(JSON.stringify(openDocument.recovery.snapshot) ?? '', editor)
         editor.store.mergeRemoteChanges(() => {
-          loadSnapshot(editor.store, parsed.value.getStoreSnapshot())
+          loadSnapshot(
+            editor.store,
+            openDocument.recovery?.snapshot as Parameters<typeof loadSnapshot>[1],
+          )
         })
-      } else {
-        onLoadError(`tldraw could not read this document (${parsed.error.type})`)
+        recoveredCheckpoint = true
+      } catch {
+        onLoadError('SystemSketch could not restore the interrupted edit checkpoint.')
       }
+    }
+    if (!recoveredCheckpoint) {
+      if (!isBlankDocument(core)) {
+        const parsed = parseTldrawJsonFile({ json: core, schema: editor.store.schema })
+        if (parsed.ok) {
+          editor.store.mergeRemoteChanges(() => {
+            loadSnapshot(editor.store, parsed.value.getStoreSnapshot())
+          })
+          if (openDocument.formatProtection) onCompatibilityCopyAvailable(true)
+        } else {
+          onLoadError(`tldraw could not read this document (${parsed.error.type})`)
+        }
+      }
+    }
+    if (openDocument.formatProtection && recoveredCheckpoint) {
+      onCompatibilityCopyAvailable(true)
     }
 
     enablePasteAtCursor(editor)
@@ -150,20 +210,88 @@ function EmbeddedSurface({
 
     // Only `source: 'user'` fires here, so loading the host's document above —
     // a remote change — cannot bounce straight back out as an edit.
-    let timer: number | undefined
+    let serializationRequests = 0
+    let flushThroughRequest = 0
+    let checkpointedRequest = 0
+    let latestSerializedText: string | null = null
+    let latestSerializedRevision = 0
+    const postLatestSerialization = createFlushableDebounce(() => {
+      if (latestSerializedText !== null) {
+        onCanvasText(latestSerializedText, openDocument.nonce, latestSerializedRevision)
+      }
+    }, CHANGE_DEBOUNCE_MS)
+    const serializeLatest = createCoalescingAsyncRunner(
+      async () => {
+        const revision = serializationRequests
+        return { text: await serializeTldrawJson(editor), revision }
+      },
+      ({ text, revision }) => {
+        latestSerializedText = text
+        latestSerializedRevision = revision
+        postLatestSerialization.trigger()
+        // A lifecycle boundary may have arrived while serialization was still
+        // resolving. In that case the just-finished cached payload leaves now,
+        // rather than starting a fresh debounce the dying webview cannot wait.
+        if (serializationRequests <= flushThroughRequest) {
+          postLatestSerialization.flush()
+        }
+      },
+      () => {
+        onLoadError('SystemSketch could not serialize the canvas.')
+      },
+    )
+    const checkpointLatest = () => {
+      if (serializationRequests === 0 || checkpointedRequest >= serializationRequests) return
+      try {
+        checkpointedRequest = serializationRequests
+        onCanvasCheckpoint(editor.getSnapshot(), openDocument.nonce, checkpointedRequest)
+      } catch {
+        onLoadError('SystemSketch could not checkpoint the canvas before it closed.')
+      }
+    }
+    const serializePending = () => {
+      // Move a stock Editor snapshot into host ownership before the official
+      // serializer starts resolving assets. The host keeps it opaque and uses
+      // stock loadSnapshot if an interrupted pane must be recovered.
+      checkpointLatest()
+      serializeLatest()
+    }
+    const requestSerialization = () => {
+      serializationRequests += 1
+      pendingSerialization.trigger()
+    }
+    const pendingSerialization = createFlushableDebounce(
+      serializePending,
+      SERIALIZATION_DEBOUNCE_MS,
+    )
+    const flushCachedSerialization = () => {
+      flushThroughRequest = serializationRequests
+      pendingSerialization.flush()
+      // A serializer may already be running while a newer request is waiting.
+      // The synchronous checkpoint crosses into host ownership before teardown.
+      checkpointLatest()
+      postLatestSerialization.flush()
+    }
+    const stopLifecycleFlush = installEmbeddedLifecycleFlush({
+      windowTarget: window,
+      documentTarget: document,
+      flush: flushCachedSerialization,
+    })
     const stopListening = editor.store.listen(() => {
-      window.clearTimeout(timer)
-      timer = window.setTimeout(() => {
-        void serializeTldrawJson(editor).then(onCanvasText).catch(() => {
-          onLoadError('SystemSketch could not serialize the canvas.')
-        })
-      }, CHANGE_DEBOUNCE_MS)
+      // A short serialization debounce coalesces pointer moves. pagehide and
+      // cleanup flush it before the dying webview can strand the last gesture.
+      requestSerialization()
     }, { source: 'user', scope: 'document' })
+    if (recoveredCheckpoint && !openDocument.readOnly) requestSerialization()
 
     return () => {
-      window.clearTimeout(timer)
-      if (editorRef.current === editor) editorRef.current = null
       stopListening()
+      // Teardown is also a save boundary. Serialize before the editor and its
+      // store are released so a final drag or keystroke is not dropped merely
+      // because it did not sit idle for the full debounce window.
+      flushCachedSerialization()
+      stopLifecycleFlush()
+      if (editorRef.current === editor) editorRef.current = null
       stopToolbarSideEffects()
       stopExcalidrawPaste()
       stopBlockPortMenuTarget()
@@ -173,7 +301,7 @@ function EmbeddedSurface({
       stopInstantTextEditing()
       stopBlockConnections()
     }
-  }, [openDocument, onCanvasText, onLoadError])
+  }, [openDocument, onCanvasCheckpoint, onCanvasText, onCompatibilityCopyAvailable, onLoadError])
 
   return (
     <main
@@ -197,6 +325,7 @@ function EmbeddedSurface({
         overlayUtils={EMBEDDED_OVERLAY_UTILS}
         overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
         shapeUtils={EMBEDDED_SHAPE_UTILS}
+        store={store}
         tools={EMBEDDED_TOOLS}
       />
     </main>
@@ -214,7 +343,9 @@ export function EmbeddedCanvas() {
   const bridge = useRef(readEmbedHostBridge()).current
   const [openDocument, setOpenDocument] = useState<OpenState | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [retryHostWrite, setRetryHostWrite] = useState(false)
   const [colorScheme, setColorScheme] = useState<'light' | 'dark'>('light')
+  const [canCompatibilityCopy, setCanCompatibilityCopy] = useState(false)
   /**
    * Which theme block paints the chrome: the host's own, if `tokens.css` has
    * one for the name it announced, else the default — a host nobody has
@@ -222,8 +353,24 @@ export function EmbeddedCanvas() {
    */
   const hostTheme = resolveHostTheme(bridge?.host)
   const documentRef = useRef<OpenState | null>(null)
-  const settledTextRef = useRef<string | null>(null)
-  const inFlightRef = useRef(false)
+  const outgoingRef = useRef<OutgoingQueueState>(EMPTY_OUTGOING_QUEUE)
+  const outgoingRevisionRef = useRef({ settled: 0, pending: 0 })
+
+  const postChange = useCallback((
+    current: OpenState,
+    text: string,
+    baseVersion: number,
+    checkpointRevision: number,
+  ) => {
+    if (!bridge) return
+    bridge.post({
+      type: 'change',
+      text,
+      baseVersion,
+      session: current.session,
+      checkpointRevision,
+    })
+  }, [bridge])
 
   useEffect(() => {
     if (!bridge) return
@@ -232,28 +379,70 @@ export function EmbeddedCanvas() {
       if (typeof message !== 'object' || message === null) return
       if (message.type === 'open' || message.type === 'external-change') {
         const previous = documentRef.current
+        const path = message.type === 'open' ? message.path : previous?.path ?? ''
+        const hostReadOnly = message.type === 'open'
+          ? message.readOnly
+          : previous?.hostReadOnly ?? false
+        const newerVersion = newerDocumentVersion(path, message.text)
         const next: OpenState = {
-          path: message.type === 'open' ? message.path : previous?.path ?? '',
-          readOnly: message.type === 'open' ? message.readOnly : previous?.readOnly ?? false,
+          path,
+          hostReadOnly,
+          readOnly: hostReadOnly || newerVersion?.readOnly === true,
           text: message.text,
           version: message.version,
+          session: message.session,
+          recovery: message.type === 'open' ? message.recovery : undefined,
           nonce: (previous?.nonce ?? 0) + 1,
+          formatProtection: hostReadOnly ? undefined : newerVersion ?? undefined,
         }
         documentRef.current = next
-        settledTextRef.current = null
-        inFlightRef.current = false
+        outgoingRef.current = EMPTY_OUTGOING_QUEUE
+        outgoingRevisionRef.current = { settled: 0, pending: 0 }
+        setRetryHostWrite(false)
+        setCanCompatibilityCopy(false)
         setOpenDocument(next)
-        setError(message.type === 'open' ? null : externalChangeMessage(message.reason))
+        setError(
+          newerVersion?.message
+          ?? (message.type === 'open' ? null : externalChangeMessage(message.reason)),
+        )
         return
       }
       if (message.type === 'accepted') {
         const current = documentRef.current
         if (current) {
-          const next = { ...current, version: message.version }
+          const next = { ...current, version: message.version, recovery: undefined }
           documentRef.current = next
           setOpenDocument(next)
+          const transition = acceptOutgoing({
+            document: next,
+            state: outgoingRef.current,
+          })
+          outgoingRef.current = transition.state
+          const pendingRevision = outgoingRevisionRef.current.pending
+          if (transition.decision?.kind === 'post') {
+            outgoingRevisionRef.current = { settled: pendingRevision, pending: 0 }
+            postChange(
+              next,
+              transition.decision.text,
+              transition.decision.baseVersion,
+              pendingRevision,
+            )
+          } else {
+            outgoingRevisionRef.current = {
+              settled: Math.max(outgoingRevisionRef.current.settled, pendingRevision),
+              pending: 0,
+            }
+            if (transition.decision?.kind === 'hold' && transition.decision.reason === 'unchanged') {
+              bridge.post({
+                type: 'checkpoint-settled',
+                session: next.session,
+                revision: pendingRevision,
+              })
+            }
+          }
+          setRetryHostWrite(false)
+          setError(null)
         }
-        inFlightRef.current = false
         return
       }
       if (message.type === 'appearance') {
@@ -261,18 +450,35 @@ export function EmbeddedCanvas() {
         return
       }
       if (message.type === 'host-error') {
-        inFlightRef.current = false
+        if (message.retryable === false) {
+          setRetryHostWrite(false)
+          setError(message.message)
+          return
+        }
+        const state = outgoingRef.current
+        const retainedRevision = state.pendingText === null
+          ? outgoingRevisionRef.current.settled
+          : outgoingRevisionRef.current.pending
+        outgoingRef.current = failOutgoing(outgoingRef.current)
+        outgoingRevisionRef.current = { settled: 0, pending: retainedRevision }
+        setRetryHostWrite(true)
         setError(message.message)
       }
     }
     window.addEventListener('message', onMessage)
     bridge.post({ type: 'ready' })
     return () => window.removeEventListener('message', onMessage)
-  }, [bridge])
+  }, [bridge, postChange])
 
-  const onCanvasText = useCallback((tldrawJson: string) => {
+  const onCanvasText = useCallback((
+    tldrawJson: string,
+    sourceNonce: number,
+    checkpointRevision: number,
+  ) => {
     const current = documentRef.current
-    if (!bridge || !current) return
+    // A host-driven reload remounts the surface. Its old cleanup may finish
+    // serialization asynchronously; never apply those bytes to the newer file.
+    if (!bridge || !current || current.nonce !== sourceNonce) return
     let text: string
     try {
       text = encodeDocumentText(current.path, tldrawJson)
@@ -280,17 +486,82 @@ export function EmbeddedCanvas() {
       setError(cause instanceof Error ? cause.message : String(cause))
       return
     }
-    const decision = decideOutgoing({
+    const transition = queueOutgoing({
       document: current,
       text,
-      settledText: settledTextRef.current,
-      inFlight: inFlightRef.current,
+      state: outgoingRef.current,
     })
-    if (decision.kind !== 'post') return
-    inFlightRef.current = true
-    settledTextRef.current = decision.text
-    bridge.post({ type: 'change', text: decision.text, baseVersion: decision.baseVersion })
+    outgoingRef.current = transition.state
+    if (transition.decision?.kind === 'post') {
+      outgoingRevisionRef.current = { settled: checkpointRevision, pending: 0 }
+    } else if (transition.decision?.kind === 'hold' && transition.decision.reason === 'in-flight') {
+      outgoingRevisionRef.current.pending = checkpointRevision
+    }
+    if (transition.decision?.kind === 'hold' && transition.decision.reason === 'unchanged') {
+      outgoingRevisionRef.current.settled = Math.max(
+        outgoingRevisionRef.current.settled,
+        checkpointRevision,
+      )
+      bridge.post({
+        type: 'checkpoint-settled',
+        session: current.session,
+        revision: checkpointRevision,
+      })
+      return
+    }
+    if (transition.decision?.kind !== 'post') return
+    setRetryHostWrite(false)
+    setError(null)
+    postChange(
+      current,
+      transition.decision.text,
+      transition.decision.baseVersion,
+      checkpointRevision,
+    )
+  }, [bridge, postChange])
+
+  const onCanvasCheckpoint = useCallback((
+    snapshot: unknown,
+    sourceNonce: number,
+    revision: number,
+  ) => {
+    const current = documentRef.current
+    if (!bridge || !current || current.readOnly || current.nonce !== sourceNonce) return
+    bridge.post({
+      type: 'checkpoint',
+      snapshot,
+      session: current.session,
+      revision,
+    })
   }, [bridge])
+
+  const retryFailedHostWrite = useCallback(() => {
+    const current = documentRef.current
+    if (!bridge || !current) return
+    const pendingRevision = outgoingRevisionRef.current.pending
+    const transition = retryOutgoing({ document: current, state: outgoingRef.current })
+    outgoingRef.current = transition.state
+    if (transition.decision?.kind !== 'post') return
+    outgoingRevisionRef.current = { settled: pendingRevision, pending: 0 }
+    setRetryHostWrite(false)
+    setError(null)
+    postChange(
+      current,
+      transition.decision.text,
+      transition.decision.baseVersion,
+      pendingRevision,
+    )
+  }, [bridge, postChange])
+
+  const requestCompatibilityCopy = useCallback(() => {
+    const current = documentRef.current
+    if (!bridge || !current?.formatProtection || !canCompatibilityCopy) return
+    bridge.post({
+      type: 'request-compatible-copy',
+      session: current.session,
+      baseVersion: current.version,
+    })
+  }, [bridge, canCompatibilityCopy])
 
   if (!bridge) return null
   if (!openDocument) {
@@ -318,12 +589,29 @@ export function EmbeddedCanvas() {
         {error ? (
           <div className="systemsketch-embed-error" role="alert" data-testid="systemsketch-embed-error">
             <span>{error}</span>
+            {retryHostWrite ? (
+              <button type="button" className="systemsketch-embed-error__retry" onClick={retryFailedHostWrite}>
+                Retry
+              </button>
+            ) : null}
             <button type="button" aria-label="Dismiss" onClick={() => setError(null)}>×</button>
+          </div>
+        ) : null}
+        {openDocument.recovery ? (
+          <div className="systemsketch-embed-recovery" role="status" data-testid="systemsketch-embed-recovery">
+            Recovered unsaved canvas edits from the closed pane. The IDE is catching up…
           </div>
         ) : null}
         {openDocument.readOnly ? (
           <div className="systemsketch-embed-readonly" data-testid="systemsketch-embed-readonly">
-            Read-only
+            <span>Read-only</span>
+            {openDocument.formatProtection && canCompatibilityCopy ? (
+              <button
+                type="button"
+                data-testid="systemsketch-compatible-copy"
+                onClick={requestCompatibilityCopy}
+              >Create editable copy…</button>
+            ) : null}
           </div>
         ) : null}
         <EmbeddedSurface
@@ -331,7 +619,9 @@ export function EmbeddedCanvas() {
           document={openDocument}
           colorScheme={colorScheme}
           onCanvasText={onCanvasText}
+          onCanvasCheckpoint={onCanvasCheckpoint}
           onLoadError={setError}
+          onCompatibilityCopyAvailable={setCanCompatibilityCopy}
         />
       </div>
     </ChromeProvider>

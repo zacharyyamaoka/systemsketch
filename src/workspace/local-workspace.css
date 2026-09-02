@@ -46,6 +46,8 @@
 
 .systemsketch-file-title i[data-state='conflict'],
 .systemsketch-file-title i[data-state='missing'],
+.systemsketch-file-title i[data-state='future'],
+.systemsketch-file-title i[data-state='quarantined'],
 .systemsketch-file-title i[data-state='error'] {
   background: var(--ss-danger);
 }
@@ -227,6 +229,57 @@
   cursor: pointer;
 }
 
+.systemsketch-workspace-pathbar > .systemsketch-workspace-new-folder-button {
+  width: auto;
+  padding: 0 9px;
+  color: var(--ss-text-muted);
+  white-space: nowrap;
+}
+
+.systemsketch-workspace-new-folder {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ss-border);
+  background: var(--ss-surface-sunken);
+}
+
+.systemsketch-workspace-new-folder label {
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.systemsketch-workspace-new-folder input {
+  min-width: 90px;
+  height: 28px;
+  flex: 1;
+  padding: 0 9px;
+  border: 1px solid var(--ss-border);
+  border-radius: 7px;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
+}
+
+.systemsketch-workspace-new-folder input:focus {
+  border-color: var(--ss-accent);
+  outline: none;
+  box-shadow: var(--ss-focus-ring);
+}
+
+.systemsketch-workspace-new-folder button {
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--ss-border);
+  border-radius: 7px;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .systemsketch-workspace-pathbar code {
   overflow: hidden;
   color: var(--ss-text-muted);
@@ -377,6 +430,11 @@
   border-color: var(--ss-border-inverse);
   color: var(--ss-text-inverse);
   background: var(--ss-surface-inverse);
+}
+
+.systemsketch-workspace-dialog > footer button.is-danger {
+  border-color: var(--ss-danger);
+  background: var(--ss-danger);
 }
 
 .systemsketch-workspace-dialog button:disabled {
