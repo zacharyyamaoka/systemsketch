@@ -65,6 +65,7 @@ import { enablePasteAtCursor } from './pasteAtCursor'
 import type { CSSProperties, ReactNode } from 'react'
 import './app.css'
 import { SYSTEMSKETCH_THEMES } from './appearance/figjamPalette'
+import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from './stockPrimitiveVisuals'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
@@ -80,6 +81,7 @@ const SYSTEMSKETCH_COMPONENTS = {
 }
 const SYSTEMSKETCH_SHAPE_UTILS = [
   ...EXCALIDRAW_SHAPE_UTILS,
+  ...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
   BlockShapeUtil,
   BranchShapeUtil,
   ...blockConnectionShapeUtils,
@@ -100,7 +102,13 @@ const BLOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: BlockDevelopmentPreviewChrome,
   Toolbar: BlockDevelopmentToolbar,
 }
-const BLOCK_DEVELOPMENT_SHAPE_UTILS = [BlockShapeUtil, BranchShapeUtil, ...blockConnectionShapeUtils]
+const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
+  ...EXCALIDRAW_SHAPE_UTILS,
+  ...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
+  BlockShapeUtil,
+  BranchShapeUtil,
+  ...blockConnectionShapeUtils,
+]
 const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, PillTool]
 const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
 const BLOCK_DEVELOPMENT_OVERLAY_UTILS = [...blockConnectionOverlayUtils]

@@ -1,0 +1,97 @@
+{
+  "feature": "Detach visual fidelity and movable port rows",
+  "viewport": { "width": 1700, "height": 1190 },
+  "shapes": [
+    {
+      "id": "reference",
+      "type": "block",
+      "x": 660,
+      "y": 90,
+      "props": {
+        "title": "normalize",
+        "description": "Live reference — leave this Block attached.",
+        "blockType": "Function",
+        "icon": "",
+        "view": "port",
+        "w": 420,
+        "h": 276,
+        "showDescription": true,
+        "portLayout": "inline",
+        "inputs": [
+          { "id": "in_1", "name": "window", "type": "int", "defaultValue": "5", "visible": true },
+          { "id": "in_2", "name": "payload", "type": "image", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_1", "name": "result", "type": "float", "visible": true },
+          { "id": "out_2", "name": "status", "type": "bool", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "subject",
+      "type": "block",
+      "x": 660,
+      "y": 500,
+      "props": {
+        "title": "normalize",
+        "description": "Detach this Block, then move one port row.",
+        "blockType": "Function",
+        "icon": "",
+        "view": "port",
+        "w": 420,
+        "h": 276,
+        "showDescription": true,
+        "portLayout": "inline",
+        "inputs": [
+          { "id": "in_1", "name": "window", "type": "int", "defaultValue": "5", "visible": true },
+          { "id": "in_2", "name": "payload", "type": "image", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_1", "name": "result", "type": "float", "visible": true },
+          { "id": "out_2", "name": "status", "type": "bool", "visible": true }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "reference-note",
+      "kind": "note",
+      "text": "REFERENCE · Leave the upper Block attached and compare its pixels to the lower result.",
+      "x": 80,
+      "y": 150,
+      "w": 430,
+      "h": 110
+    },
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Right-click the LOWER Block → Detach to primitives",
+      "x": 80,
+      "y": 500,
+      "w": 430,
+      "h": 110,
+      "target": { "shapeId": "subject", "anchor": "left" }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Click a detached port name once, then drag the selected row",
+      "x": 1170,
+      "y": 500,
+      "w": 450,
+      "h": 110,
+      "target": { "shapeId": "subject", "anchor": "right", "dy": -35 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Lower matches upper: one 18 px circle per port; Function stays on one line; = 5 keeps its rounded pill; the card keeps 9 px corners and shadow. Dragging a port name moves its entire row.",
+      "x": 510,
+      "y": 870,
+      "w": 720,
+      "h": 160
+    }
+  ]
+}

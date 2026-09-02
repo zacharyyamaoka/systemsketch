@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest'
 
 import { getDefaultBlockProps, type BlockPort, type BlockShapeProps } from '../blockModel'
 import { layoutBlock } from '../layoutBlock'
-import { primitivesForBlock } from './blockPrimitives'
+import { PORT_INDICATOR_RADIUS, primitivesForBlock } from './blockPrimitives'
+import {
+	SYSTEMSKETCH_ROUNDED_RECT_GEO,
+	readSystemSketchPrimitiveStyle,
+} from '../../stockPrimitiveVisuals'
 
 const port = (id: string, name: string, type = ''): BlockPort =>
 	({ id, name, type, visible: true })
@@ -25,7 +29,14 @@ describe('a Block as stock primitives', () => {
 		expect(shapes[0].id).toBe(cardId)
 		expect(shapes[0].type).toBe('geo')
 		expect({ x: shapes[0].x, y: shapes[0].y }).toEqual({ x: 120, y: 80 })
-		expect(shapes[0].props).toMatchObject({ geo: 'rectangle', w: layout.width, h: layout.height })
+		expect(shapes[0].props).toMatchObject({
+			geo: SYSTEMSKETCH_ROUNDED_RECT_GEO,
+			w: layout.width,
+			h: layout.height,
+		})
+		expect(readSystemSketchPrimitiveStyle(shapes[0] as never)).toMatchObject({
+			kind: 'geo', cornerRadius: 9, strokeWidth: 1,
+		})
 	})
 
 	it('reads every position from layoutBlock, so the copy cannot drift', () => {
@@ -35,10 +46,9 @@ describe('a Block as stock primitives', () => {
 		const { shapes } = primitivesForBlock(props, origin)
 		const dot = layout.ports[0]
 
-		// Every port is one circle centred on layoutBlock's own port centre.
-		// Anything else means detach has its own idea of where a port is.
 		const circles = shapes.filter((shape) =>
-			(shape.props as { geo?: string }).geo === 'ellipse')
+			(shape.props as { geo?: string; w?: number }).geo === 'ellipse'
+			&& (shape.props as { w?: number }).w === PORT_INDICATOR_RADIUS * 2)
 		expect(circles.length).toBe(1)
 		for (const circle of circles) {
 			const w = (circle.props as { w: number }).w
@@ -61,13 +71,17 @@ describe('a Block as stock primitives', () => {
 		for (const row of built.portRows) {
 			expect(row.shapeIds.length).toBeGreaterThanOrEqual(3)
 			expect(row.shapeIds.every((id) => byId.has(id))).toBe(true)
-			expect(row.shapeIds.filter((id) =>
-				(byId.get(id)!.props as { geo?: string }).geo === 'ellipse')).toHaveLength(1)
+			expect(row.shapeIds.filter((id) => {
+				const props = byId.get(id)!.props as { geo?: string; w?: number }
+				return props.geo === 'ellipse' && props.w === PORT_INDICATOR_RADIUS * 2
+			})).toHaveLength(1)
 		}
-		const inputText = built.portRows[0].shapeIds
-			.map((id) => byId.get(id))
-			.filter((shape) => shape?.type === 'text')
-			.map((shape) => JSON.stringify((shape!.props as { richText: unknown }).richText))
+		const inputShapes = built.portRows[0].shapeIds.map((id) => byId.get(id)!)
+		expect(inputShapes.some((shape) =>
+			(shape.props as { geo?: string }).geo === SYSTEMSKETCH_ROUNDED_RECT_GEO)).toBe(true)
+		const inputText = inputShapes
+			.filter((shape) => shape.type === 'text')
+			.map((shape) => JSON.stringify((shape.props as { richText: unknown }).richText))
 			.join(' ')
 		expect(inputText).toContain('window')
 		expect(inputText).toContain('int')
@@ -90,14 +104,14 @@ describe('a Block as stock primitives', () => {
 			inputs: [port('in_1', 'frame')],
 			outputs: [port('out_1', 'rgb')],
 		})
-		const cores = (connected: ReadonlySet<string>) =>
+		const circles = (connected: ReadonlySet<string>) =>
 			primitivesForBlock(props, { x: 0, y: 0 }, connected).shapes
 				.filter((shape) => (shape.props as { geo?: string }).geo === 'ellipse'
-					&& (shape.props as { w: number }).w === 12)
+					&& (shape.props as { w: number }).w === PORT_INDICATOR_RADIUS * 2)
 				.map((shape) => (shape.props as { fill: string }).fill)
 
-		expect(cores(new Set())).toEqual(['semi', 'semi'])
-		expect(cores(new Set(['in_1', 'out_1']))).toEqual(['fill', 'fill'])
+		expect(circles(new Set())).toEqual(['semi', 'semi'])
+		expect(circles(new Set(['in_1', 'out_1']))).toEqual(['fill', 'fill'])
 	})
 
 	it('draws an unwired input that carries a default as present, not as connected', () => {
@@ -105,11 +119,16 @@ describe('a Block as stock primitives', () => {
 			view: 'port',
 			inputs: [{ ...port('in_1', 'window', 'int'), defaultValue: '5' }],
 		})
-		const core = primitivesForBlock(props, { x: 0, y: 0 }).shapes
+		const built = primitivesForBlock(props, { x: 0, y: 0 })
+		const circle = built.shapes
 			.find((shape) => (shape.props as { geo?: string }).geo === 'ellipse'
-				&& (shape.props as { w: number }).w === 12)
-		expect(core!.props).toMatchObject({ fill: 'solid', color: 'grey' })
-		expect(textOf(primitivesForBlock(props, { x: 0, y: 0 }).shapes).join()).toContain('= 5')
+				&& (shape.props as { w: number }).w === PORT_INDICATOR_RADIUS * 2)
+		expect(circle!.props).toMatchObject({ fill: 'solid', color: 'grey' })
+		expect(textOf(built.shapes).join()).toContain('= 5')
+		expect(built.shapes.some((shape) => {
+			const style = readSystemSketchPrimitiveStyle(shape as never)
+			return style?.kind === 'geo' && style.cornerRadius === 999
+		})).toBe(true)
 	})
 
 	it('draws no dots for the Simple face, whose anchors are invisible until hovered', () => {
@@ -130,7 +149,23 @@ describe('a Block as stock primitives', () => {
 	it('colours a port by the same family the live canvas paints', () => {
 		const props = blockProps({ view: 'port', inputs: [port('in_1', 'frame', 'image')] })
 		const ring = primitivesForBlock(props, { x: 0, y: 0 }).shapes
-			.find((shape) => (shape.props as { geo?: string }).geo === 'ellipse')
+			.find((shape) => (shape.props as { geo?: string; w?: number }).geo === 'ellipse'
+				&& (shape.props as { w?: number }).w === PORT_INDICATOR_RADIUS * 2)
 		expect((ring!.props as { color: string }).color).toBe('violet')
+		expect(readSystemSketchPrimitiveStyle(ring as never)).toMatchObject({
+			kind: 'geo', strokeColor: '#c060e0', strokeWidth: 1,
+		})
+	})
+
+	it('keeps a long header type on one line with the live font metrics', () => {
+		const props = blockProps({ view: 'port', title: 'decode', blockType: 'Function' })
+		const typeShape = primitivesForBlock(props, { x: 0, y: 0 }).shapes
+			.find((shape) => shape.type === 'text'
+				&& JSON.stringify((shape.props as { richText: unknown }).richText).includes('Function'))
+		expect(typeShape).toBeDefined()
+		expect((typeShape!.props as { w: number }).w).toBeGreaterThan(70)
+		expect(readSystemSketchPrimitiveStyle(typeShape as never)).toMatchObject({
+			kind: 'text', fontSize: 18, lineHeight: 24, fontWeight: 400,
+		})
 	})
 })

@@ -6,6 +6,13 @@ import {
   type TLGeoShape,
   type TLShape,
 } from 'tldraw'
+import { createElement, type CSSProperties } from 'react'
+import {
+  SYSTEMSKETCH_ROUNDED_RECT_GEO,
+  getSystemSketchRoundedRectPath,
+  readSystemSketchPrimitiveStyle,
+  systemSketchGeoDisplayValues,
+} from './stockPrimitiveVisuals'
 
 export const EXCALIDRAW_ROUNDED_RECT_GEO = 'excalidraw-rounded-rect'
 export const EXCALIDRAW_ROUNDNESS_META_KEY = 'excalidrawRoundness'
@@ -99,7 +106,7 @@ function readShapeRoundness(shape: TLGeoShape): ExcalidrawRoundness {
   return parseExcalidrawRoundness(meta[EXCALIDRAW_ROUNDNESS_META_KEY]) ?? { type: 3 }
 }
 
-const ExcalidrawGeoShapeUtil = GeoShapeUtil.configure({
+const ConfiguredExcalidrawGeoShapeUtil = GeoShapeUtil.configure({
   customGeoTypes: {
     [EXCALIDRAW_ROUNDED_RECT_GEO]: {
       icon: 'geo-rectangle',
@@ -112,8 +119,30 @@ const ExcalidrawGeoShapeUtil = GeoShapeUtil.configure({
           shape.props.fill !== 'none',
         ),
     },
+    [SYSTEMSKETCH_ROUNDED_RECT_GEO]: {
+      icon: 'geo-rectangle',
+      snapType: 'polygon',
+      getPath: (w, h, shape) => {
+        const style = readSystemSketchPrimitiveStyle(shape)
+        const radius = style?.kind === 'geo' ? (style.cornerRadius ?? 0) : 0
+        return getSystemSketchRoundedRectPath(w, h, radius, shape.props.fill !== 'none')
+      },
+    },
   },
+  getCustomDisplayValues: (_editor, shape) => systemSketchGeoDisplayValues(shape),
 })
+
+class ExcalidrawGeoShapeUtil extends ConfiguredExcalidrawGeoShapeUtil {
+  override component(shape: TLGeoShape) {
+    const rendered = super.component(shape)
+    const semantic = shape.meta.systemSketch
+    if (!isRecord(semantic) || semantic.kind !== 'block-card') return rendered
+    return createElement('span', {
+      className: 'systemsketch-detached-card-visual',
+      style: { display: 'contents' } as CSSProperties,
+    }, rendered)
+  }
+}
 
 export const EXCALIDRAW_SHAPE_UTILS = [ExcalidrawGeoShapeUtil]
 

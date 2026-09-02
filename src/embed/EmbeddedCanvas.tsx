@@ -48,6 +48,7 @@ import type { CSSProperties } from 'react'
 import '../theme/tokens.css'
 import '../app.css'
 import './embed.css'
+import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from '../stockPrimitiveVisuals'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
@@ -74,6 +75,7 @@ const EMBEDDED_COMPONENTS = {
 }
 const EMBEDDED_SHAPE_UTILS = [
   ...EXCALIDRAW_SHAPE_UTILS,
+  ...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
   BlockShapeUtil,
   BranchShapeUtil,
   ...blockConnectionShapeUtils,
