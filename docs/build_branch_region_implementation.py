@@ -210,7 +210,7 @@ code{{padding:2px 5px;border-radius:5px;background:#1b2639;color:#d7e4fa}}a{{col
 
 <h2>Case view</h2>
 <div class="shots one">
-<figure><img src="{crop_uri(shot('6-case'), (400, 50, 1800, 580), 1180)}" alt="Case view with one open arm and only its wires" /><figcaption><b>C on the pill.</b> At most one arm open; opening another folds the rest. Any cable touching a folded arm is not drawn, so only the open case's wires remain. E returns to the Expanded layout.</figcaption></figure>
+<figure><img src="{crop_uri(shot('6-case'), (400, 50, 1800, 545), 1180)}" alt="Case view with one open arm and only its wires" /><figcaption><b>C on the pill.</b> At most one arm open; opening another folds the rest. Any cable touching a folded arm is not drawn, so only the open case's wires remain. E returns to the Expanded layout.</figcaption></figure>
 </div>
 
 <h2>The seam</h2>
@@ -241,17 +241,17 @@ code{{padding:2px 5px;border-radius:5px;background:#1b2639;color:#d7e4fa}}a{{col
 <h2>Left, and deliberately not done</h2>
 <div class="grid">
 <div class="card"><h3>Left (next, not blocked)</h3><ul>
-<li><span class="tick">→</span>The exclusivity lint: many-to-one is legal only when the producers are mutually exclusive by construction (sibling arms of one region, or inside against outside across an implicit arm). Zach's rule is written as pure functions in <code>docs/many_to_one_rule.py</code> on <code>main</code>; the editor draws the count and the fade but does not yet judge legality.</li>
-<li><span class="tick">→</span>Reordering arms by dragging their header row on the canvas. The inspector's ⋮⋮ grip reorders today; on-canvas reorder needs a handle seam and a decision about what a drag on a header means.</li>
-<li><span class="tick">→</span>Resizing a region by its handles is unit-tested (the delta spreads over the open arms) but not driven by the journey.</li>
-<li><span class="tick">→</span>A Branch nested inside a Branch fades as a whole (unit-tested); the journey nests nothing.</li>
-<li><span class="tick">→</span>The VS Code / Cursor host registers the shape and tool but was not re-driven.</li>
+<li><span class="tick">→</span><span>The exclusivity lint: many-to-one is legal only when the producers are mutually exclusive by construction (sibling arms of one region, or inside against outside across an implicit arm). Zach's rule is written as pure functions in <code>docs/many_to_one_rule.py</code> on <code>main</code>; the editor draws the count and the fade but does not yet judge legality.</span></li>
+<li><span class="tick">→</span><span>Reordering arms by dragging their header row on the canvas. The inspector's ⋮⋮ grip reorders today; on-canvas reorder needs a handle seam and a decision about what a drag on a header means.</span></li>
+<li><span class="tick">→</span><span>Resizing a region by its handles is unit-tested (the delta spreads over the open arms) but not driven by the journey.</span></li>
+<li><span class="tick">→</span><span>A Branch nested inside a Branch fades as a whole (unit-tested); the journey nests nothing.</span></li>
+<li><span class="tick">→</span><span>The VS Code / Cursor host registers the shape and tool but was not re-driven.</span></li>
 </ul></div>
 <div class="card"><h3>Deliberately not done</h3><ul>
-<li><span class="tick">✕</span>No "Add › Branch region" in the right-click menu, per the contract; the boundary test asserts its absence.</li>
-<li><span class="tick">✕</span>No ports on arms. Consumers keep one plain port with ordinary fan-in.</li>
-<li><span class="tick">✕</span>Arm titles are free text, not code, for now.</li>
-<li><span class="tick">✕</span>No schema migration: arm membership rides in <code>meta</code>, and the shape's own props start at version 0.</li>
+<li><span class="tick">✕</span><span>No "Add › Branch region" in the right-click menu, per the contract; the boundary test asserts its absence.</span></li>
+<li><span class="tick">✕</span><span>No ports on arms. Consumers keep one plain port with ordinary fan-in.</span></li>
+<li><span class="tick">✕</span><span>Arm titles are free text, not code, for now.</span></li>
+<li><span class="tick">✕</span><span>No schema migration: arm membership rides in <code>meta</code>, and the shape's own props start at version 0.</span></li>
 </ul></div>
 </div>
 
