@@ -1,0 +1,354 @@
+{
+  "feature": "Branch region",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "shapes": [
+    {
+      "id": "decode",
+      "type": "block",
+      "x": 120,
+      "y": 300,
+      "props": {
+        "title": "decode()",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 170,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "raw",
+            "type": "bytes",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "flag",
+      "type": "block",
+      "x": 120,
+      "y": 560,
+      "props": {
+        "title": "flag()",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 150,
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "fast",
+            "type": "bool",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "branch",
+      "type": "branch",
+      "x": 560,
+      "y": 140,
+      "props": {
+        "title": "Branch",
+        "view": "expanded",
+        "activeArmId": null,
+        "w": 640,
+        "h": 474,
+        "controls": [
+          {
+            "id": "ctrl_1",
+            "name": "fast",
+            "type": "bool"
+          }
+        ],
+        "arms": [
+          {
+            "id": "arm_1",
+            "title": "if fast",
+            "open": true,
+            "h": 180
+          },
+          {
+            "id": "arm_2",
+            "title": "else",
+            "open": true,
+            "h": 180
+          }
+        ]
+      }
+    },
+    {
+      "id": "estimate",
+      "type": "block",
+      "parentId": "branch",
+      "x": 170,
+      "y": 92,
+      "meta": {
+        "branchArm": "arm_1"
+      },
+      "props": {
+        "title": "estimate()",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 150,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "fallback",
+      "type": "block",
+      "parentId": "branch",
+      "x": 170,
+      "y": 304,
+      "meta": {
+        "branchArm": "arm_2"
+      },
+      "props": {
+        "title": "fallback()",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 150,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "c1",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    },
+    {
+      "id": "c2",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    },
+    {
+      "id": "c3",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "type": "connection",
+      "fromId": "c1",
+      "toId": "decode",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "id": "b1"
+    },
+    {
+      "type": "connection",
+      "fromId": "c1",
+      "toId": "estimate",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "id": "b2"
+    },
+    {
+      "type": "connection",
+      "fromId": "c2",
+      "toId": "decode",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "id": "b3"
+    },
+    {
+      "type": "connection",
+      "fromId": "c2",
+      "toId": "fallback",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "id": "b4"
+    },
+    {
+      "type": "connection",
+      "fromId": "c3",
+      "toId": "flag",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "id": "b5"
+    },
+    {
+      "type": "connection",
+      "fromId": "c3",
+      "toId": "branch",
+      "props": {
+        "portId": "ctrl_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "id": "b6"
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 \u00b7 Click the \u2304 chevron on the else arm to fold it. Its Block hides and decode's cable lands on the folded header.",
+      "x": 1260,
+      "y": 120,
+      "w": 300,
+      "h": 130,
+      "target": {
+        "shapeId": "branch",
+        "anchor": "right",
+        "dy": 31
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 \u00b7 Click the \u25ce target on the if fast arm. The else arm and its wire fade; click \u25ce again to clear.",
+      "x": 1260,
+      "y": 290,
+      "w": 300,
+      "h": 120,
+      "target": {
+        "shapeId": "branch",
+        "anchor": "right",
+        "dy": -181
+      }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 \u00b7 Select the Branch (click its band) and press C on the pill. Only the open case's wires remain; E brings them back.",
+      "x": 1260,
+      "y": 450,
+      "w": 300,
+      "h": 130,
+      "target": {
+        "shapeId": "branch",
+        "anchor": "right",
+        "dy": -217
+      }
+    },
+    {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 \u00b7 With the Branch selected, click the blue + on the band's left edge and name a second control port. Then Block slot \u2304 \u203a Branch draws another region.",
+      "x": 560,
+      "y": 640,
+      "w": 640,
+      "h": 124,
+      "target": {
+        "shapeId": "branch",
+        "anchor": "bottom"
+      }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN \u00b7 folding keeps the cable and re-attaches it at the header, \u25ce fades the other arm, C shows one case's wires only, and a reload keeps all of it.",
+      "x": 120,
+      "y": 790,
+      "w": 1080,
+      "h": 70
+    }
+  ]
+}

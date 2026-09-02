@@ -13,6 +13,12 @@ import {
 } from './blocks'
 import { BlockContextMenu } from './blocks/ui'
 import {
+  BranchShapeUtil,
+  BranchTool,
+  installBranchClickToEdit,
+  installBranchRegions,
+} from './branch'
+import {
   blockConnectionBindingUtils,
   blockConnectionOverlayUtils,
   blockConnectionShapeUtils,
@@ -73,6 +79,7 @@ const SYSTEMSKETCH_COMPONENTS = {
 const SYSTEMSKETCH_SHAPE_UTILS = [
   ...EXCALIDRAW_SHAPE_UTILS,
   BlockShapeUtil,
+  BranchShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
@@ -82,7 +89,7 @@ const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
  * tldraw keeps painting and hit-testing the handle itself.
  */
 const SYSTEMSKETCH_OVERLAY_UTILS = [...blockConnectionOverlayUtils]
-const SYSTEMSKETCH_TOOLS = [BlockTool]
+const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: DevelopmentPreviewChrome,
 }
@@ -91,7 +98,8 @@ const BLOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: BlockDevelopmentPreviewChrome,
   Toolbar: BlockDevelopmentToolbar,
 }
-const BLOCK_DEVELOPMENT_SHAPE_UTILS = [BlockShapeUtil, ...blockConnectionShapeUtils]
+const BLOCK_DEVELOPMENT_SHAPE_UTILS = [BlockShapeUtil, BranchShapeUtil, ...blockConnectionShapeUtils]
+const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool]
 const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
 const BLOCK_DEVELOPMENT_OVERLAY_UTILS = [...blockConnectionOverlayUtils]
 
@@ -115,6 +123,8 @@ function SystemSketchCanvas() {
     const stopInstantTextEditing = installInstantTextEditing(editor)
     const stopArrowClickToPlace = installArrowClickToPlace(editor)
     const stopBlockClickToEdit = installBlockClickToEdit(editor)
+    const stopBranchClickToEdit = installBranchClickToEdit(editor)
+    const stopBranchRegions = installBranchRegions(editor)
     const stopBlockPortMenuTarget = installBlockPortMenuTarget(editor)
     const stopExcalidrawPaste = registerExcalidrawPasteHandler(editor)
     const stopToolbarSideEffects = registerToolbarSideEffects(editor)
@@ -122,6 +132,8 @@ function SystemSketchCanvas() {
       stopToolbarSideEffects()
       stopExcalidrawPaste()
       stopBlockPortMenuTarget()
+      stopBranchRegions()
+      stopBranchClickToEdit()
       stopBlockClickToEdit()
       stopArrowClickToPlace()
       stopInstantTextEditing()
@@ -178,6 +190,12 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
     const stopBlockClickToEdit = isBlockDevelopment
       ? installBlockClickToEdit(editor)
       : () => undefined
+    const stopBranchClickToEdit = isBlockDevelopment
+      ? installBranchClickToEdit(editor)
+      : () => undefined
+    const stopBranchRegions = isBlockDevelopment
+      ? installBranchRegions(editor)
+      : () => undefined
     const stopBlockPortMenuTarget = isBlockDevelopment
       ? installBlockPortMenuTarget(editor)
       : () => undefined
@@ -185,6 +203,8 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
     return () => {
       stopDevelopmentSeam()
       stopBlockPortMenuTarget()
+      stopBranchRegions()
+      stopBranchClickToEdit()
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopBlockConnections()
@@ -210,7 +230,7 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
         persistenceKey={developmentPersistenceKey(profile)}
         shapeUtils={isBlockDevelopment ? BLOCK_DEVELOPMENT_SHAPE_UTILS : undefined}
         themes={SYSTEMSKETCH_THEMES}
-        tools={isBlockDevelopment ? [BlockTool] : undefined}
+        tools={isBlockDevelopment ? BLOCK_DEVELOPMENT_TOOLS : undefined}
       />
     </main>
   )

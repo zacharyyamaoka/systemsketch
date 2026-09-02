@@ -26,7 +26,9 @@ import {
 import {
   CONNECTION_SHAPE_TYPE,
   ConnectionRoutingStyle,
+  ConnectionTemporalStyle,
   type ConnectionRoutingKind,
+  type ConnectionTemporalKind,
 } from '../connections/connectionModel'
 
 export type BlockStyleResult =
@@ -165,6 +167,19 @@ export interface BlockSelectionStyles {
 }
 
 /** Two shared-style readings are the same when a control would look the same. */
+/** Mark every selected cable as read on this pass (`data`) or one iteration late (`delayed`). */
+export function setConnectionTemporalForSelection(
+  editor: Editor,
+  temporal: ConnectionTemporalKind,
+): BlockStyleResult {
+  return setStyleForSelection(
+    editor,
+    ConnectionTemporalStyle,
+    temporal,
+    temporal === 'delayed' ? 'mark cables delayed (z⁻¹)' : 'mark cables as data',
+  )
+}
+
 export function sameSharedStyle<T>(
   a: SharedStyle<T> | undefined,
   b: SharedStyle<T> | undefined,
