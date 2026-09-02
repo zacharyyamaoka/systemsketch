@@ -1,5 +1,6 @@
-import type { Editor, TLShapeId } from 'tldraw'
+import type { Editor, TLShapeId, VecLike } from 'tldraw'
 import { getBlockPortDotAtPoint } from './blockPorts'
+import { CONNECTION_SHAPE_TYPE } from './connectionModel'
 import { cleanupStaleConnections } from './ConnectionBindingUtil'
 import { PointingBlockPort, type PointingBlockPortInfo } from './PointingBlockPort'
 import { BLOCK_PORT_DRAG_STATE_ID, DraggingBlockPort } from '../ports/portInteraction'
@@ -19,6 +20,14 @@ export function registerBlockConnectionToolStates(editor: Editor): boolean {
 		select.addChild(DraggingBlockPort)
 	}
 	return true
+}
+
+/** Is a selected cable offering a terminal handle under this page point? */
+function pressIsOnConnectionHandle(editor: Editor, pagePoint: VecLike): boolean {
+	const overlay = editor.overlays.getOverlayAtPoint(pagePoint, editor.getHitTestMargin())
+	if (!overlay || overlay.type !== 'shape_handle') return false
+	const shapeId = (overlay.props as { shapeId?: TLShapeId }).shapeId
+	return shapeId !== undefined && editor.getShape(shapeId)?.type === CONNECTION_SHAPE_TYPE
 }
 
 /**
@@ -42,6 +51,16 @@ export function installBlockConnectionInteraction(editor: Editor): () => void {
 		const dot = target.closest<HTMLElement>('.systemsketch-block-canvas .Port')
 		if (dot === null) return
 
+		// A selected cable's terminal handle sits exactly on the dot, and a press
+		// there MOVES that cable — the only way an existing cable is re-routed.
+		// Asked the same way tldraw's select tool asks, and asked HERE rather than
+		// after the fact: measured on 2026-09-01, the microtask below still saw
+		// `select.idle` for such a press, so waiting to see what tldraw decides is
+		// too late. Only a cable's handle yields. A selected Block's own outline is
+		// an overlay too, and a dot on that outline is still a dot.
+		const pagePoint = editor.screenToPage({ x: event.clientX, y: event.clientY })
+		if (pressIsOnConnectionHandle(editor, pagePoint)) return
+
 		// Identity comes from the dot that was pressed. Nothing about direction
 		// is decided here: a dot is a dot, and which face of it the cable leaves
 		// from is the landing's decision.
@@ -52,7 +71,6 @@ export function installBlockConnectionInteraction(editor: Editor): () => void {
 			: (() => {
 				// Fallback for a press that landed on the halo of a dot whose own
 				// element the browser did not report — keep the forgiving magnet.
-				const pagePoint = editor.screenToPage({ x: event.clientX, y: event.clientY })
 				const nearest = getBlockPortDotAtPoint(editor, pagePoint)
 				return nearest ? { shapeId: nearest.shapeId, portId: nearest.port.id } : null
 			})()
@@ -62,12 +80,11 @@ export function installBlockConnectionInteraction(editor: Editor): () => void {
 		// synchronous capture-phase transition is overwritten by tldraw's own
 		// pointer handler later in this event.
 		queueMicrotask(() => {
-			// Selection foreground handles are painted and hit-tested by tldraw's
-			// canvas overlay, so their DOM target is indistinguishable from an empty
-			// point near a port. Let the stock resize gesture win after it has had a
-			// chance to identify itself. This matters most in Simple view, whose
-			// quiet side anchors intentionally share the edge midpoints.
-			if (editor.getPath() === 'select.pointing_resize_handle') return
+			// Belt and braces for a stock gesture that identified itself before this
+			// ran: resize handles matter most in Simple view, whose quiet side
+			// anchors share the edge midpoints.
+			const path = editor.getPath()
+			if (path === 'select.pointing_resize_handle' || path === 'select.pointing_handle') return
 			editor.setCurrentTool('select.pointing_block_port', info)
 		})
 	}

@@ -23,6 +23,7 @@ import {
   clickAt,
   delay,
   ensureDir,
+  evaluate,
   key,
   localConsoleErrors,
   openApp,
@@ -80,6 +81,21 @@ async function describeCable(page, dots) {
   }
 }
 
+/** The index of the painted cable whose path starts on a given dot. */
+async function cableIndexFrom(page, dots, label) {
+  const count = await cables(page)
+  for (let index = 0; index < count; index += 1) {
+    const ends = await cableEnds(page, index)
+    if (nearestDot(ends.from, dots) === label) return index
+  }
+  throw new Error(`No cable leaves ${label}`)
+}
+
+/** Selected shape types — selection has no DOM projection in tldraw v5, so this is a fixture read. */
+const selectedTypes = (page) => evaluate(page,
+  `JSON.stringify((window.__systemsketch?.editor.getSelectedShapes() ?? []).map((shape) => shape.type))`)
+  .then((value) => JSON.parse(value ?? '[]'))
+
 /** Pick a preset from the open offer and return the Block it created. */
 async function pickCall(page, before) {
   const item = await box(page, '[data-testid="block-picker-call"]')
@@ -111,7 +127,7 @@ async function main() {
     // Zach's screenshot: two Expanded Blocks next to each other. Drawn as Port
     // view first so both fit left of the inspector, then switched to Expanded,
     // which restores each Block's remembered 560 × 380 box.
-    const restA = { x: 300, y: 780 }
+    const restA = { x: 640, y: 830 }
     await drawBlock(page, { x: 60, y: 140 }, { x: 400, y: 340 }, 'encode')
     const [encode] = await blockIds(page)
     await addPort(page, 'inputs')
@@ -126,12 +142,19 @@ async function main() {
     await setView(page, 'expanded')
     await deselect(page, restA)
 
-    const names = { [encode]: 'encode', [merge]: 'merge' }
+    // A second producer on the page, for the fan-in cases.
+    await drawBlock(page, { x: 60, y: 560 }, { x: 400, y: 760 }, 'filter')
+    const filter = (await blockIds(page)).find((id) => id !== encode && id !== merge)
+    await addPort(page, 'outputs')
+    await deselect(page, restA)
+
+    const names = { [encode]: 'encode', [merge]: 'merge', [filter]: 'filter' }
     const dots = {
       'encode.in': await box(page, portDot(encode, 'input', 'in_1')),
       'encode.out': await box(page, portDot(encode, 'output', 'out_1')),
       'merge.in': await box(page, portDot(merge, 'input', 'in_1')),
       'merge.in2': await box(page, portDot(merge, 'input', 'in_2')),
+      'filter.out': await box(page, portDot(filter, 'output', 'out_1')),
     }
     await shot(page, 'polarity-sibling-scene.png')
 
@@ -172,6 +195,40 @@ async function main() {
     await shot(page, 'polarity-passthrough-drop.png')
     await clearCables(page, restA)
 
+    // --- FAN-IN: an input takes many cables; only an exact duplicate is refused.
+    await dragFrom(page, dots['encode.out'], dots['merge.in'])
+    const second = await dragFrom(page, dots['filter.out'], dots['merge.in'], {
+      shotName: 'polarity-fanin-drag.png',
+    })
+    await shot(page, 'polarity-fanin-two.png')
+    check('FANIN-1', 'a second producer onto an occupied input joins it — the first cable stays',
+      second.count, 2)
+    check('FANIN-2', 'both producers and the input read as wired',
+      await wiredPorts(page, names), ['encode.out_1', 'filter.out_1', 'merge.in_1'])
+    const duplicate = await dragFrom(page, dots['encode.out'], dots['merge.in'])
+    check('FANIN-3', 'the same wire a second time is refused', duplicate.count, 2)
+    const fromOccupied = await dragFrom(page, dots['merge.in'], { x: 900, y: 640 })
+    check('FANIN-4', 'pressing the occupied input starts a NEW cable rather than moving one',
+      { offered: fromOccupied.offered, cables: fromOccupied.count }, { offered: true, cables: 3 })
+    await key(page, 'Escape', 'Escape')
+    await delay(380)
+    check('FANIN-5', 'declining leaves the two cables in place', await cables(page), 2)
+    // Move one of the two by its own handle: select the encode cable (found by
+    // which dot its path leaves from, since DOM order says nothing about that),
+    // then press the dot its END handle sits on and drag to the other input.
+    const encodeIndex = await cableIndexFrom(page, dots, 'encode.out')
+    const encodeCable = await pointOnCable(page, 0.5, encodeIndex)
+    await clickAt(page, encodeCable.cx, encodeCable.cy)
+    await delay(300)
+    check('FANIN-6-SELECT', 'the encode cable is selected by clicking it in the gap',
+      await selectedTypes(page), ['connection'])
+    const moved = await dragFrom(page, dots['merge.in'], dots['merge.in2'])
+    check('FANIN-6', 'a selected cable is re-routed by dragging its handle off the input',
+      { cables: moved.count, wired: await wiredPorts(page, names) },
+      { cables: 2, wired: ['encode.out_1', 'filter.out_1', 'merge.in_1', 'merge.in_2'] })
+    await shot(page, 'polarity-fanin-moved.png')
+    await clearCables(page, restA)
+
     // --- PICKER: the reported "order is switched" gesture.
     const before = await blockIds(page)
     const toEmpty = await dragFrom(page, dots['encode.out'], { x: 700, y: 640 })
@@ -198,6 +255,7 @@ async function main() {
     if (spawned) await deleteBlock(page, spawned, restA)
     await deleteBlock(page, encode, restA)
     await deleteBlock(page, merge, restA)
+    await deleteBlock(page, filter, restA)
     check('SIBLING-CLEAR', 'the sibling scene is cleared', (await blockIds(page)).length, 0)
 
     // ============================================================ NESTED ===
