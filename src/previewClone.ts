@@ -1,4 +1,5 @@
 import type { Editor, TLAssetId, TLEditorSnapshot } from 'tldraw'
+import { hydrateCustomColors } from './appearance/customColors'
 import { readPreviewClone } from './releaseClient'
 
 function blobToDataUrl(blob: Blob): Promise<string> {
@@ -39,6 +40,9 @@ export async function loadPreviewCloneFromCurrentUrl(editor: Editor): Promise<bo
   const token = url.searchParams.get('previewClone')
   if (!token) return false
   const snapshot = await readPreviewClone(token)
+  // The clone is validated as it loads, so any custom colour it names must
+  // already be registered — the same rule as opening a file.
+  hydrateCustomColors(JSON.stringify(snapshot), editor)
   editor.loadSnapshot(snapshot as TLEditorSnapshot, { forceOverwriteSessionState: true })
   url.searchParams.delete('previewClone')
   window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)

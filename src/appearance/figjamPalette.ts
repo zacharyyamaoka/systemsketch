@@ -69,6 +69,11 @@ export const FIGJAM_PALETTE_COLUMNS = 11
 
 export const FIGJAM_COLOR_NAMES = FIGJAM_PALETTE.map(([name]) => name)
 
+/** The one hex FigJam publishes per colour, by name. */
+export const FIGJAM_COLOR_HEX: Record<string, string> = Object.fromEntries(
+  FIGJAM_PALETTE.map(([name, hex]) => [name, hex]),
+)
+
 /** FigJam's own word for a colour, for the tooltip on its swatch. */
 export const FIGJAM_COLOR_LABELS: Record<string, string> = Object.fromEntries(
   FIGJAM_PALETTE.map(([name, , label]) => [name, label]),
@@ -109,7 +114,7 @@ function readableInk(hex: string): string {
  * colour, so the family stays internally consistent and a reviewer can check
  * one relationship rather than 294 hand-picked hexes.
  */
-function colorFromSwatch(hex: string): TLDefaultColor {
+export function colorFromSwatch(hex: string): TLDefaultColor {
   return {
     solid: hex,
     fill: hex,
@@ -127,6 +132,33 @@ function colorFromSwatch(hex: string): TLDefaultColor {
     highlightP3: lighten(hex, 0.35),
   }
 }
+
+type ColorTable = Record<string, TLDefaultColor>
+
+/**
+ * tldraw's own default theme also has to carry every colour this app can
+ * store — and this is the trap under the trap.
+ *
+ * `registerColorsFromThemes` registers the colours of *whichever* themes a
+ * store is created with and removes the rest. `parseTldrawJsonFile`, which
+ * every load path uses, creates a store of its own with no themes at all, so
+ * opening a file resets the enum to tldraw's thirteen — and any FigJam-only
+ * or custom name in that file fails validation on the very parse that would
+ * load it. The one object every such path resolves through is
+ * `DEFAULT_THEME` (`resolveThemes(undefined)` is `{ default: DEFAULT_THEME }`),
+ * so a colour is added *there* as well as to the theme this app paints with.
+ * Only names missing from it are added: tldraw's own entries are left alone,
+ * because the default theme is what a themeless store would paint with, and
+ * `FIGJAM_THEME` below is the one that actually paints here.
+ */
+function extendDefaultTheme(name: string, color: TLDefaultColor): void {
+  const light = DEFAULT_THEME.colors.light as unknown as ColorTable
+  const dark = DEFAULT_THEME.colors.dark as unknown as ColorTable
+  if (!(name in light)) light[name] = color
+  if (!(name in dark)) dark[name] = color
+}
+
+for (const [name, hex] of FIGJAM_PALETTE) extendDefaultTheme(name, colorFromSwatch(hex))
 
 const LIGHT_COLORS = Object.fromEntries(
   FIGJAM_PALETTE.map(([name, hex]) => [name, colorFromSwatch(hex)]),
@@ -158,3 +190,27 @@ export const FIGJAM_THEME: TLTheme = {
 
 /** What `<Tldraw themes={...}>` takes. Keyed by theme id, hence `default`. */
 export const SYSTEMSKETCH_THEMES = { default: FIGJAM_THEME }
+
+/**
+ * Give the theme one more colour, in place.
+ *
+ * In place is the point. `TldrawEditor` re-runs `registerColorsFromThemes`
+ * on the `themes` prop every time it renders, and that call *unregisters*
+ * any colour absent from every theme it is handed. A custom colour kept in a
+ * side table would therefore be registered by the picker and silently
+ * removed by the next re-render, and the first shape edit after that would
+ * fail validation. Adding it to the very object the prop points at means
+ * every re-registration sees it. Returns false when the name was already there.
+ */
+export function addThemeColor(name: string, hex: string): boolean {
+  const light = FIGJAM_THEME.colors.light as unknown as ColorTable
+  const dark = FIGJAM_THEME.colors.dark as unknown as ColorTable
+  if (name in light && name in dark) return false
+  const color = colorFromSwatch(hex)
+  light[name] = color
+  dark[name] = color
+  // And into tldraw's default theme, so the file parser's themeless store
+  // keeps the name registered — see `extendDefaultTheme`.
+  extendDefaultTheme(name, color)
+  return true
+}

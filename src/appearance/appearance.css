@@ -1,21 +1,26 @@
 /* Appearance controls in the selection menu.
  *
- * Tokens from FigJam, measured in docs/figjam-appearance-menu-spec-2026-09-01.html:
- * the popover shares the pill's surface (rgb(30,30,30), 13px radius, 8px
- * padding) and opens 8px above it, which is tldraw's own popover default.
+ * Every value here was read out of FigJam's running editor — see
+ * `figjamTokens.ts` for the numbers and where each came from, and
+ * `docs/assets/figjam-chrome-traced.json` for the DOM they were read from.
+ * The pill and every popover share one surface (rgb(30,30,30), 13px radius,
+ * 8px padding); popovers open 8px above the pill, which is tldraw's default.
  */
 .systemsketch-appearance {
   display: flex;
   align-items: stretch;
 }
 
+/* A trigger is 56px: the 24px icon butted against the 16px chevron, 8px
+ * either side. The colour trigger comes to 54px because its 18px swatch sits
+ * in a 22px ring box instead of a 24px icon. */
 .systemsketch-appearance__trigger {
   display: flex;
   height: 40px;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  padding: 0 4px;
+  gap: 0;
+  padding: 0 8px;
   border: 0;
   border-radius: 5px;
   color: #fff;
@@ -23,12 +28,29 @@
   cursor: pointer;
 }
 
+/* Font size is a combobox: 144px, the rung's name at 11px, chevron at the end. */
+.systemsketch-appearance__trigger[data-trigger='text'] {
+  width: 144px;
+  justify-content: space-between;
+  padding: 0 8px 0 12px;
+}
+
+.systemsketch-appearance__trigger-text {
+  flex: 1;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
 /* FigJam separates control groups with a 1px hairline the full height of the
- * pill, rather than by spacing them apart. */
+ * pill, with 4px clear on each side. */
 .systemsketch-appearance__separator {
   width: 1px;
   height: 40px;
   flex: 0 0 auto;
+  margin: 0 4px;
   background: #383838;
 }
 
@@ -51,7 +73,6 @@
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 8px;
   padding: 8px;
   border-radius: 13px;
   color: #fff;
@@ -62,71 +83,187 @@
     0 2px 5px rgb(0 0 0 / 15%);
 }
 
-/* FigJam separates the mode row from the palette with a hairline. It labels
- * its three fills on one line; tldraw has six, so they run two to a row rather
- * than squeezing the labels into wrapping. */
-/* One row, divided from the palette by the same 1px hairline the pill uses
- * between groups. FigJam's divider spans the full panel width, so the rule sits
- * on the panel's own padding box rather than on the row. */
-.systemsketch-appearance__mode {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  margin: -8px -8px 0;
-  padding: 8px;
-  border-bottom: 1px solid #383838;
-}
-
+/* An icon row: 24px cells on a 32px pitch, so Start point's seven cells make
+ * the panel 232px wide and Text alignment's three make it 104px. */
 .systemsketch-appearance__options {
   display: flex;
-  gap: 4px;
-}
-
-.systemsketch-appearance__panel[data-layout='swatches'] .systemsketch-appearance__options {
-  display: grid;
   gap: 8px;
-}
-
-.systemsketch-appearance__panel[data-layout='list'] .systemsketch-appearance__options,
-.systemsketch-appearance__panel[data-layout='library'] .systemsketch-appearance__options {
-  display: grid;
-  max-height: 268px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-.systemsketch-appearance__panel[data-layout='library'] .systemsketch-appearance__options {
-  grid-template-columns: repeat(5, 1fr);
-  gap: 2px;
 }
 
 .systemsketch-appearance__option {
   display: flex;
-  min-width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
   align-items: center;
-  gap: 9px;
-  padding: 0 7px;
+  justify-content: center;
+  padding: 0;
   border: 0;
-  border-radius: 8px;
-  color: #e9eaec;
+  border-radius: 5px;
+  color: #fff;
   background: transparent;
   cursor: pointer;
   font-size: 11px;
-  font-weight: 650;
+  font-weight: 450;
   white-space: nowrap;
 }
 
 .systemsketch-appearance__option:hover {
-  background: #3a3b40;
+  background: rgb(255 255 255 / 10%);
 }
 
+/* An icon-only cell is chosen in FigJam's deeper purple. */
 .systemsketch-appearance__option[aria-checked='true'] {
-  color: #fff;
+  background: #8a38f5;
+}
+
+/* A connector's Line style: weight beside dash, one hairline between them,
+ * cutting the full height of the panel. The row is 28px tall, so the panel
+ * comes to 44px, as FigJam's does. */
+.systemsketch-appearance__panel[data-mode='beside'] {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.systemsketch-appearance__group {
+  display: flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 8px;
+}
+
+.systemsketch-appearance__panel[data-mode='beside'] .systemsketch-appearance__options {
+  min-height: 28px;
+  align-items: center;
+}
+
+.systemsketch-appearance__divider {
+  width: 1px;
+  flex: 0 0 auto;
+  align-self: stretch;
+  margin: -8px 0;
+  background: #383838;
+}
+
+/* Chips: a labelled row. FigJam has two chip styles and this keeps both.
+ *
+ * The Fill row above the palette: a 24px icon, then the name with 8px after
+ * it, chosen in #9747ff. The row is 32px tall (4px clear around the chips),
+ * ends in a hairline the full width of the panel, and the palette starts
+ * 12px below that. */
+.systemsketch-appearance__mode {
+  display: flex;
+  gap: 8px;
+  margin: 0 -8px 8px;
+  padding: 4px 12px 12px;
+  border-bottom: 1px solid #383838;
+}
+
+.systemsketch-appearance__mode .systemsketch-appearance__option {
+  width: auto;
+  padding: 0 8px 0 0;
+}
+
+.systemsketch-appearance__mode .systemsketch-appearance__option[aria-checked='true'] {
   background: #9747ff;
 }
 
+/* A shape's Line style row: a 16px icon in a 24px slot, 4px before it and
+ * 8px after the name, chosen in the deeper purple. */
+.systemsketch-appearance__panel[data-layout='chips'] .systemsketch-appearance__options {
+  padding: 4px;
+}
+
+.systemsketch-appearance__panel[data-layout='chips'] .systemsketch-appearance__option {
+  width: auto;
+  padding: 0 8px 0 4px;
+}
+
+.systemsketch-appearance__panel[data-layout='chips'] .systemsketch-appearance__glyph {
+  width: 16px;
+  height: 16px;
+  margin: 0 4px;
+}
+
+/* Lists: Typeface and Font size. The panel pads 8px top and bottom only;
+ * each row is 24px tall with the check in a 16px slot, then the value. */
+.systemsketch-appearance__panel[data-layout='list'] {
+  padding: 8px 0;
+}
+
+.systemsketch-appearance__panel[data-layout='list'] .systemsketch-appearance__options {
+  flex-direction: column;
+  gap: 0;
+}
+
+.systemsketch-appearance__panel[data-layout='list'] .systemsketch-appearance__option {
+  width: auto;
+  min-height: 24px;
+  height: auto;
+  justify-content: flex-start;
+  gap: 4px;
+  margin: 0 8px;
+  padding: 0 8px 0 4px;
+}
+
+.systemsketch-appearance__check {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  fill: currentcolor;
+  opacity: 0;
+}
+
+.systemsketch-appearance__option[aria-checked='true'] .systemsketch-appearance__check {
+  opacity: 1;
+}
+
+/* FigJam marks a list row with the check alone, not a fill. */
+.systemsketch-appearance__panel[data-layout='list'] .systemsketch-appearance__option[aria-checked='true'] {
+  background: transparent;
+}
+
+.systemsketch-appearance__panel[data-layout='list'] .systemsketch-appearance__option:hover {
+  background: rgb(255 255 255 / 10%);
+}
+
+.systemsketch-appearance__panel[data-layout='list'] .systemsketch-appearance__label {
+  padding: 4px 0;
+  line-height: 16px;
+}
+
+/* The shape library: every geo, five to a row. */
+.systemsketch-appearance__panel[data-layout='library'] .systemsketch-appearance__options {
+  display: grid;
+  max-height: 268px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.systemsketch-appearance__panel[data-layout='library'] .systemsketch-appearance__option {
+  width: auto;
+  min-width: 32px;
+  height: 32px;
+  justify-content: flex-start;
+  gap: 9px;
+  padding: 0 7px;
+  border-radius: 8px;
+}
+
 /* Swatches --------------------------------------------------------------- */
+
+/* 24px discs on a 32px pitch, inset 4px from the panel's padding, so the
+ * grid is 368px wide and the panel 129px tall under the Fill row. */
+.systemsketch-appearance__panel[data-layout='swatches'] .systemsketch-appearance__options {
+  display: grid;
+  align-self: flex-start;
+  gap: 8px;
+  padding: 4px;
+}
 
 .systemsketch-appearance__swatch {
   display: block;
@@ -137,9 +274,11 @@
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 20%);
 }
 
+/* On the trigger: an 18px disc in a 22px ring box. */
 .systemsketch-appearance__trigger .systemsketch-appearance__swatch {
   width: 18px;
   height: 18px;
+  margin: 2px;
 }
 
 /* A mixed selection has no one colour to show. */
@@ -149,15 +288,10 @@
     #3a3b40;
 }
 
-/* A swatch cell is only ever the circle: the grid column may be wider, so the
- * button centres its swatch rather than stretching to fill. */
+/* A swatch cell is only ever the circle. */
 .systemsketch-appearance__panel[data-layout='swatches'] .systemsketch-appearance__options
   .systemsketch-appearance__option {
-  display: grid;
-  min-width: 0;
-  height: 24px;
-  place-items: center;
-  padding: 0;
+  border-radius: 50%;
   background: transparent;
 }
 
@@ -166,10 +300,58 @@
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 45%);
 }
 
-/* FigJam rings the chosen swatch rather than filling its cell. */
+/* FigJam rings the chosen swatch rather than filling its cell: 2px of surface,
+ * then 2px of the deeper purple. */
 .systemsketch-appearance__panel[data-layout='swatches'] .systemsketch-appearance__options
   .systemsketch-appearance__option[aria-checked='true'] .systemsketch-appearance__swatch {
-  box-shadow: 0 0 0 2px #1e1e1e, 0 0 0 4px #9747ff;
+  box-shadow: 0 0 0 2px #1e1e1e, 0 0 0 4px #8a38f5;
+}
+
+/* The 22nd cell: a 32px box on the same pitch, overhanging its slot by 4px. */
+.systemsketch-appearance__custom {
+  display: block;
+  width: 32px;
+  height: 32px;
+  margin: -4px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.systemsketch-appearance__custom-ring {
+  display: block;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  padding: 2px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+}
+
+/* Idle: the wheel is the disc, under a white radial highlight. */
+.systemsketch-appearance__custom-disc {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background:
+    radial-gradient(50% 50%, #fff 0%, rgb(255 255 255 / 0%) 100%),
+    conic-gradient(#f00, #ffa800 47.73deg, #ff0 79.56deg, #0f0 121.33deg, #0ff 180.99deg, #00f 238.67deg, #f0f 294.36deg, #f00 360deg),
+    #c4c4c4;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 20%);
+}
+
+/* Active: the disc is the colour, and the wheel is a 2px ring around it. */
+.systemsketch-appearance__custom[data-active] .systemsketch-appearance__custom-ring {
+  background:
+    linear-gradient(#1e1e1e, #1e1e1e) padding-box,
+    conic-gradient(#f00, #ffa800 47.73deg, #ff0 79.56deg, #0f0 121.33deg, #0ff 180.99deg, #00f 238.67deg, #f0f 294.36deg, #f00 360deg) border-box;
+}
+
+.systemsketch-appearance__custom:hover .systemsketch-appearance__custom-disc {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 45%);
 }
 
 /* Glyphs ----------------------------------------------------------------- */
@@ -212,17 +394,7 @@
 
 .systemsketch-appearance__label {
   flex: 1;
-}
-
-/* The mode row names its options, the way FigJam labels Fill / Transparent. */
-.systemsketch-appearance__mode .systemsketch-appearance__option {
-  gap: 7px;
-  padding: 0 8px;
-}
-
-.systemsketch-appearance__mode .systemsketch-appearance__glyph {
-  width: 16px;
-  height: 16px;
+  text-align: left;
 }
 
 /* A traced icon that is much wider than tall — FigJam's typeface names are the
@@ -237,4 +409,159 @@
  * icon always points the way the arrow travels. */
 .systemsketch-appearance__glyph[data-flipped] {
   transform: scaleX(-1);
+}
+
+/* The picker --------------------------------------------------------------
+ *
+ * 184 x 310, flush under the palette and centred on the Custom cell. Three
+ * bands: eyedropper and hex field; hue and opacity; the saturation / value
+ * square running to the bottom edge. */
+.systemsketch-appearance__picker {
+  display: flex;
+  width: 184px;
+  height: 310px;
+  flex-direction: column;
+  border-radius: 13px;
+  color: #fff;
+  background: #1e1e1e;
+  box-shadow:
+    0 0 .5px rgb(0 0 0 / 12%),
+    0 10px 16px rgb(0 0 0 / 12%),
+    0 2px 5px rgb(0 0 0 / 15%);
+}
+
+.systemsketch-appearance__picker-head {
+  display: flex;
+  height: 64px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px 0 8px;
+}
+
+.systemsketch-appearance__eyedropper {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  color: #fff;
+  background: transparent;
+  cursor: pointer;
+}
+
+.systemsketch-appearance__eyedropper:hover {
+  background: #383838;
+}
+
+.systemsketch-appearance__eyedropper:disabled {
+  opacity: .4;
+  cursor: default;
+}
+
+.systemsketch-appearance__hex {
+  display: flex;
+  box-sizing: border-box;
+  height: 32px;
+  flex: 1;
+  align-items: center;
+  border: 1px solid #444;
+  border-radius: 5px;
+  background: #383838;
+}
+
+.systemsketch-appearance__hex[data-focused] {
+  border-color: #0c8ce9;
+}
+
+.systemsketch-appearance__hex-input {
+  width: 100%;
+  height: 100%;
+  padding: 0 0 0 7px;
+  border: 0;
+  border-radius: 5px;
+  color: #fff;
+  background: transparent;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 450;
+  outline: none;
+}
+
+.systemsketch-appearance__hex-input::selection {
+  background: #0c8ce9;
+}
+
+.systemsketch-appearance__sliders {
+  display: flex;
+  height: 62px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px 16px 16px;
+}
+
+/* The thumb travels the 152px box; the track paints 8px past each end. */
+.systemsketch-appearance__slider {
+  position: relative;
+  height: 16px;
+  cursor: pointer;
+  touch-action: none;
+  outline: none;
+}
+
+.systemsketch-appearance__slider::before {
+  position: absolute;
+  inset: 0 -8px;
+  border-radius: 9999px;
+  content: '';
+}
+
+.systemsketch-appearance__slider[data-slider='hue']::before {
+  background: linear-gradient(90deg, #f00 8px, #ff0, #0f0, #0ff, #00f, #f0f, #f00 calc(100% - 8px));
+}
+
+.systemsketch-appearance__slider[data-slider='alpha']::before {
+  background-color: #fff;
+  background-image:
+    linear-gradient(90deg, transparent 0, transparent 8px, var(--systemsketch-picker-color) calc(100% - 8px), var(--systemsketch-picker-color) 100%),
+    url("data:image/svg+xml;utf8,%3Csvg%20width%3D%222%22%20height%3D%222%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M0%200h1v2h1V1H0%22%20fill-rule%3D%22nonzero%22%20fill%3D%22%23e1e1e1%22%2F%3E%3C%2Fsvg%3E");
+  background-size: auto, auto 66.67%;
+}
+
+/* One thumb for all three: 16px, a 4px white border, a hairline ring inside
+ * and out, over a 12px shadow disc. */
+.systemsketch-appearance__thumb {
+  position: absolute;
+  top: 0;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border: 4px solid #fff;
+  border-radius: 9999px;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 20%),
+    inset 0 0 0 1px rgb(0 0 0 / 20%),
+    0 1px 3px rgb(0 0 0 / 10%),
+    0 5px 12px rgb(0 0 0 / 13%),
+    0 0 .5px rgb(0 0 0 / 15%);
+  pointer-events: none;
+}
+
+.systemsketch-appearance__thumb[data-reticle] {
+  transform: translate(-50%, -50%);
+}
+
+.systemsketch-appearance__sv {
+  position: relative;
+  width: 184px;
+  height: 184px;
+  border-radius: 0 0 13px 13px;
+  background:
+    linear-gradient(to top, #000, rgb(0 0 0 / 0%)),
+    linear-gradient(to right, #fff, var(--systemsketch-picker-hue));
+  cursor: crosshair;
+  touch-action: none;
+  outline: none;
 }
