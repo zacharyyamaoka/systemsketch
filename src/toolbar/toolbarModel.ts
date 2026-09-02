@@ -16,8 +16,8 @@ export type ShapeFamilyTool =
 
 export type DrawFamilyTool = 'draw' | 'highlight'
 
-/** The system-design family under the Block slot: Block, Branch, and room for Loop. */
-export type SystemFamilyTool = 'block' | 'branch'
+/** The system-design family under the Block slot: Block, Branch, Pill, and room for Loop. */
+export type SystemFamilyTool = 'block' | 'branch' | 'pill'
 
 export interface ToolbarPreferences {
   version: 1
@@ -55,7 +55,7 @@ const SHAPE_TOOLS: readonly ShapeFamilyTool[] = [
   'arrow-elbow',
 ]
 const DRAW_TOOLS: readonly DrawFamilyTool[] = ['draw', 'highlight']
-const SYSTEM_TOOLS: readonly SystemFamilyTool[] = ['block', 'branch']
+const SYSTEM_TOOLS: readonly SystemFamilyTool[] = ['block', 'branch', 'pill']
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null

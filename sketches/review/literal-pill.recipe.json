@@ -1,0 +1,80 @@
+{
+  "feature": "Literal argument pill",
+  "viewport": { "width": 1280, "height": 820 },
+  "shapes": [
+    {
+      "id": "estimate",
+      "type": "block",
+      "x": 520,
+      "y": 300,
+      "props": {
+        "title": "estimate()",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 340,
+        "h": 198,
+        "showDescription": false,
+        "inputs": [
+          { "id": "in_1", "name": "frame", "type": "Frame", "visible": true },
+          { "id": "in_2", "name": "gain", "type": "float", "visible": true, "defaultValue": "1.0" }
+        ],
+        "outputs": [
+          { "id": "out_1", "name": "pose", "type": "Pose", "visible": true }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Press P, click the empty spot below, type 2.0, Enter",
+      "x": 40,
+      "y": 40,
+      "w": 440,
+      "h": 100,
+      "target": { "x": 260, "y": 378 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Drag the pill's right dot onto gain (= 1.0)",
+      "x": 530,
+      "y": 610,
+      "w": 340,
+      "h": 100,
+      "target": { "shapeId": "estimate", "anchor": "bottom", "dx": -120 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Click the pill, then click its = and type gain, Enter",
+      "x": 40,
+      "y": 560,
+      "w": 440,
+      "h": 100,
+      "target": { "x": 260, "y": 422 }
+    },
+    {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 · Drag pose into empty canvas, pick Value, name it pose",
+      "x": 920,
+      "y": 60,
+      "w": 340,
+      "h": 120,
+      "target": { "shapeId": "estimate", "anchor": "right", "dy": -20 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · the grey = 1.0 chip dims, the capsule reads gain = 2.0, and the Value fed by pose reads pose = ⋯ with Type Pose in the inspector",
+      "x": 920,
+      "y": 480,
+      "w": 340,
+      "h": 180
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import {
 	getBlockInlineField,
 	type BlockInlineField,
 } from './inlineBlockEditing'
+import { VALUE_FONT_PX } from './layoutBlock'
 import { BLOCK_ICONS } from './ui/blockIcons'
 
 const DISPLAY_DESCRIPTION_LIMIT = 120
@@ -100,12 +101,26 @@ function editorStyle(
 		width,
 		height,
 		textAlign: align,
-		fontSize: field.kind === 'title'
-			? (props.view === 'simple' ? 38 : 30)
-			: field.kind.startsWith('port')
-				? 17
-				: 16,
+		fontSize: props.view === 'value'
+			? VALUE_FONT_PX
+			: field.kind === 'title'
+				? (props.view === 'simple' ? 38 : 30)
+				: field.kind.startsWith('port')
+					? 17
+					: 16,
 	}
+}
+
+/** What an empty field promises: on a capsule the title is the literal and the outlet is its name. */
+function placeholderFor(props: BlockShapeProps, field: BlockInlineField): string {
+	if (props.view === 'value') return field.kind === 'title' ? 'value' : 'name'
+	return field.kind === 'title'
+		? 'Title'
+		: field.kind === 'blockType'
+			? 'Type'
+			: field.kind === 'portName'
+				? 'Port name'
+				: 'Port type'
 }
 
 function testIdFor(field: BlockInlineField): string {
@@ -163,7 +178,9 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 	const style = editorStyle(shape.props, field, placement.box, placement.align)
 	const common = {
 		ref: editorRef as never,
-		className: `BlockNode-inlineEditor BlockNode-inlineEditor--${field.kind}`,
+		className: `BlockNode-inlineEditor BlockNode-inlineEditor--${field.kind}${
+			shape.props.view === 'value' ? ' BlockNode-inlineEditor--value' : ''
+		}`,
 		style,
 		value,
 		'data-testid': testIdFor(field),
@@ -229,15 +246,7 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 							? 'Edit port name'
 							: 'Edit port type'
 			}
-			placeholder={
-				field.kind === 'title'
-					? 'Title'
-					: field.kind === 'blockType'
-						? 'Type'
-						: field.kind === 'portName'
-							? 'Port name'
-							: 'Port type'
-			}
+			placeholder={placeholderFor(shape.props, field)}
 			onChange={(event) => writeField(event.target.value)}
 		/>
 	)

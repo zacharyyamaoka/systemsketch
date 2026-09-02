@@ -32,6 +32,8 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}", product_source)
         self.assertIn("BlockShapeUtil", source)
         self.assertIn("BlockTool", source)
+        self.assertIn("PillTool", source)
+        self.assertIn("const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, PillTool]", source)
         self.assertIn("...blockConnectionShapeUtils", source)
         self.assertIn("const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]", source)
         self.assertIn("registerExcalidrawPasteHandler(editor)", product_source)
@@ -65,7 +67,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertNotIn('title="Branch"', toolbar_source)
         self.assertNotIn('title="Comment"', toolbar_source)
         self.assertIn("BranchShapeUtil,", source)
-        self.assertIn("const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool]", source)
+        self.assertIn("const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, PillTool]", source)
         self.assertIn("const stopBranchRegions = installBranchRegions(editor)", product_source)
         self.assertIn("const stopBranchClickToEdit = installBranchClickToEdit(editor)", product_source)
         # The Branch is created from the toolbar; the right-click menu must not

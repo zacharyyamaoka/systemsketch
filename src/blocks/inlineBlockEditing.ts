@@ -8,7 +8,13 @@
 import { atom, type Atom, type Editor, type TLShapeId } from 'tldraw'
 
 import type { BlockShape, BlockShapeProps } from './blockModel'
-import { layoutBlock, type BlockRect } from './layoutBlock'
+import {
+	VALUE_FONT_PX,
+	VALUE_PAD_X,
+	layoutBlock,
+	measureBlockText,
+	type BlockRect,
+} from './layoutBlock'
 
 export type BlockInlineField =
 	| { kind: 'title' | 'blockType' | 'icon' | 'description' }
@@ -105,6 +111,22 @@ export function blockInlineEditorPlacement(
 	const height = layout.bounds.h
 	const headerHeight = layout.headerHeight
 	const footerTop = layout.footerTop
+
+	if (props.view === 'value') {
+		// The capsule has two fields: the literal (its title) across the whole
+		// face, and the variable name (its outlet's name) at the left end.
+		if (field.kind === 'title') {
+			return layout.title ? { box: layout.title, align: 'center' } : null
+		}
+		if (field.kind === 'portName' && field.side === 'outputs') {
+			const editorWidth = Math.max(84, Math.min(180, width / 2))
+			return {
+				box: { x: VALUE_PAD_X, y: (height - 30) / 2, w: editorWidth, h: 30 },
+				align: 'left',
+			}
+		}
+		return null
+	}
 
 	switch (field.kind) {
 		case 'title': {
@@ -233,6 +255,17 @@ export function blockInlineFieldAtPointOrNull(
 	point: { x: number; y: number },
 ): BlockInlineField | null {
 	const layout = layoutBlock(props)
+	if (props.view === 'value') {
+		// The painted spans answer a single click exactly; this is the reading
+		// for a double-click that landed beside them: the left end names, the
+		// rest edits the literal.
+		const outlet = props.outputs[0]
+		const nameWidth = measureBlockText(outlet?.name || '=', VALUE_FONT_PX, 500, 'mono') + 12
+		if (outlet && point.x <= VALUE_PAD_X + nameWidth) {
+			return { kind: 'portName', side: 'outputs', portId: outlet.id }
+		}
+		return contains(layout.title, point) ? { kind: 'title' } : null
+	}
 	if (contains(layout.icon ?? layout.headerIcon, point)) return { kind: 'icon' }
 	if (contains(layout.typeLabel ?? layout.headerType, point)) return { kind: 'blockType' }
 	if (contains(layout.description, point)) return { kind: 'description' }

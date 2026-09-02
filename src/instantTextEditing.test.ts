@@ -284,3 +284,24 @@ describe('instant primary text editing', () => {
     expect(harness.editor.off).toHaveBeenCalledTimes(2)
   })
 })
+
+describe('the Pill tool draws Blocks', () => {
+  it('opens the literal for typing after a pill is drawn, and nothing else', () => {
+    const pill = {
+      id: 'shape:pill',
+      typeName: 'shape',
+      type: 'block',
+      x: 0,
+      y: 0,
+      rotation: 0,
+      index: 'a1',
+      parentId: 'page:page',
+      isLocked: false,
+      opacity: 1,
+      meta: {},
+      props: getDefaultBlockProps(),
+    } as unknown as BlockShape
+    expect(isPrimaryTextDrawing('pill', pill)).toBe(true)
+    expect(isPrimaryTextDrawing('pill', { ...pill, type: 'geo' } as unknown as BlockShape)).toBe(false)
+  })
+})
