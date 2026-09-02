@@ -182,6 +182,8 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   const dirtyRef = useRef(false)
   const savingRef = useRef(false)
   const queuedSourceRef = useRef<Promise<string> | null>(null)
+  // Counts document changes, so a save knows whether more arrived while it ran.
+  const changeEpochRef = useRef(0)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const persistRef = useRef<(force?: boolean) => Promise<void>>(async () => {})
 
@@ -263,6 +265,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
 
     savingRef.current = true
     setStatus({ kind: 'saving' })
+    const changeEpoch = changeEpochRef.current
     const sourcePromise = queuedSource ?? serializeTldrawJson(editor!)
     let savedSuccessfully = false
     try {
@@ -279,10 +282,9 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       savedSuccessfully = true
       setIsPersisted(true)
       updateRecents(rememberDocumentPath(boardPath))
-      if (queuedSourceRef.current === sourcePromise) {
-        queuedSourceRef.current = null
-        dirtyRef.current = false
-      }
+      if (queuedSourceRef.current === sourcePromise) queuedSourceRef.current = null
+      // Clean only if nothing changed while the save was in flight.
+      if (changeEpochRef.current === changeEpoch) dirtyRef.current = false
       setStatus(dirtyRef.current ? { kind: 'dirty' } : { kind: 'clean', at: Date.now() })
     } catch (cause) {
       dirtyRef.current = true
@@ -463,12 +465,25 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     const stop = editor.store.listen((entry) => {
       if (removesDocumentBoundary(entry)) return
       dirtyRef.current = true
-      queuedSourceRef.current = serializeTldrawJson(editor)
-      setStatus((current) => current.kind === 'conflict' ? current : { kind: 'dirty' })
+      changeEpochRef.current += 1
+      // No serialisation here. The store flushes listeners once per frame, so
+      // this ran on every frame of a drag and serialised the whole document
+      // each time — while only the copy taken after the debounce is ever
+      // written. `persist` serialises once, when it saves. And a status that
+      // is already dirty stays the same object, or every frame re-renders
+      // everything that reads the workspace context.
+      setStatus((current) => (
+        current.kind === 'conflict' || current.kind === 'dirty' ? current : { kind: 'dirty' }
+      ))
       scheduleSave()
     }, { source: 'user', scope: 'document' })
     return () => {
       stop()
+      // The editor is going away. If edits are still unsaved, take the one
+      // snapshot a later `persist` will need once it can no longer ask for it.
+      if (dirtyRef.current && queuedSourceRef.current === null) {
+        queuedSourceRef.current = serializeTldrawJson(editor)
+      }
       if (editorRef.current === editor) editorRef.current = null
     }
   }, [scheduleSave])

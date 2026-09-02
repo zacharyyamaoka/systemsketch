@@ -164,6 +164,26 @@ export interface BlockSelectionStyles {
   showDescription: SharedStyle<boolean> | undefined
 }
 
+/** Two shared-style readings are the same when a control would look the same. */
+export function sameSharedStyle<T>(
+  a: SharedStyle<T> | undefined,
+  b: SharedStyle<T> | undefined,
+): boolean {
+  if (a === b) return true
+  if (!a || !b || a.type !== b.type) return false
+  return a.type !== 'shared' || b.type !== 'shared' || a.value === b.value
+}
+
+export function sameBlockSelectionStyles(
+  a: BlockSelectionStyles,
+  b: BlockSelectionStyles,
+): boolean {
+  return a.blockCount === b.blockCount
+    && sameSharedStyle(a.view, b.view)
+    && sameSharedStyle(a.portLayout, b.portLayout)
+    && sameSharedStyle(a.showDescription, b.showDescription)
+}
+
 export function getBlockSelectionStyles(editor: Editor): BlockSelectionStyles {
   return {
     blockCount: getSelectedBlocks(editor).length,

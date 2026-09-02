@@ -37,6 +37,10 @@ export function isStockContextMenuOpen(editor: Editor): boolean {
 /**
  * Returns a value to use as the stock context-menu root's `key`. Every change
  * remounts that root, which is what resets Radix's stuck `open` state.
+ *
+ * Because the canvas lives inside that root, this hook must be the only
+ * reactive thing in the component that renders it: a subscription there that
+ * changes per frame re-renders the canvas per frame.
  */
 export function useStockContextMenuRootEpoch(editor: Editor): number {
 	const [epoch, setEpoch] = useState(0)
@@ -64,11 +68,22 @@ export function useStockContextMenuRootEpoch(editor: Editor): number {
 			}, WEDGE_GRACE_MS)
 		}
 
+		// Losing the window only strands Radix when a menu was showing as the
+		// portal came down; a blur with nothing open leaves nothing to reset.
+		// The reset is a rebuild of the whole shape DOM — 617 ms on a 48-Block
+		// board, measured — so it is not spent on every alt-tab. tldraw clears
+		// no menus on blur itself, so the registry is still exact here; and if
+		// a menu ever does get stranded, the wedge detector above catches the
+		// next right-click.
+		const onBlur = () => {
+			if (isStockContextMenuOpen(editor)) remount()
+		}
+
 		container.addEventListener('contextmenu', onContextMenu, true)
-		view.addEventListener('blur', remount)
+		view.addEventListener('blur', onBlur)
 		return () => {
 			container.removeEventListener('contextmenu', onContextMenu, true)
-			view.removeEventListener('blur', remount)
+			view.removeEventListener('blur', onBlur)
 		}
 	}, [editor])
 

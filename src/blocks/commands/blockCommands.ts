@@ -13,7 +13,11 @@ import {
   setBlockViewProps,
 } from '../blockModel'
 import { growBlockPortViewToFit } from '../ports/portAffordances'
-import { getBlockSelectionStyles, type BlockSelectionStyles } from './blockStyleCommands'
+import {
+  getBlockSelectionStyles,
+  sameBlockSelectionStyles,
+  type BlockSelectionStyles,
+} from './blockStyleCommands'
 
 export type BlockCommandFailure = 'missing-block' | 'missing-port' | 'unchanged'
 
@@ -79,6 +83,36 @@ export function getBlockInspectorContext(editor: Editor): BlockInspectorContext 
     return { kind: 'tool', props: getDefaultBlockProps() }
   }
   return { kind: 'empty' }
+}
+
+/**
+ * Whether a freshly resolved context would show the inspector the same thing.
+ *
+ * The context is derived from the selection, so it is re-resolved whenever a
+ * selected record changes — including every frame the Block is dragged, when
+ * its record changes but its props do not. The panel reads the Block's id and
+ * props; keeping the previous object when those are unchanged is what keeps
+ * an open inspector from re-rendering per frame.
+ */
+export function sameBlockInspectorContext(
+  previous: unknown,
+  next: BlockInspectorContext,
+): previous is BlockInspectorContext {
+  if (typeof previous !== 'object' || previous === null) return false
+  const before = previous as BlockInspectorContext
+  if (before.kind !== next.kind) return false
+  switch (next.kind) {
+    case 'selected':
+      return before.kind === 'selected'
+        && before.shape.id === next.shape.id
+        && before.props === next.props
+        && before.shape.isLocked === next.shape.isLocked
+    case 'multi':
+      return before.kind === 'multi' && sameBlockSelectionStyles(before.styles, next.styles)
+    case 'tool':
+    case 'empty':
+      return true
+  }
 }
 
 /**

@@ -145,17 +145,28 @@ export class ConnectionBindingUtil extends BindingUtil<ConnectionBinding> {
 
 	override onAfterChangeToShape({
 		binding,
+		shapeBefore,
+		shapeAfter,
+		reason,
 	}: BindingOnShapeChangeOptions<ConnectionBinding>): void {
+		// This runs for every cable on a Block on every frame the Block moves.
+		// A move keeps the props object and the parent, and those are all the
+		// rules read: the ports come from the props, the faces from the place
+		// in the tree. tldraw reports `ancestry` only when an ancestor was
+		// reparented, so that case is always judged in full.
+		if (
+			reason === 'self'
+			&& shapeBefore.props === shapeAfter.props
+			&& shapeBefore.parentId === shapeAfter.parentId
+		) return
 		// Removal or moving an id to the opposite lane invalidates the semantic
 		// edge, and so does a bound Block leaving the scope the cable lives in.
 		// Hiding, reordering, and resizing remain valid and move for free.
-		if (
-			!connectionBindingIsValid(this.editor, binding)
-			|| !connectionEndpointsAreValid(this.editor, binding.fromId)
-		) {
+		if (!connectionBindingIsValid(this.editor, binding)) {
 			this.editor.deleteShapes([binding.fromId])
 			return
 		}
+		// Endpoint validity is judged once, inside settleConnection.
 		settleConnection(this.editor, binding.fromId)
 	}
 

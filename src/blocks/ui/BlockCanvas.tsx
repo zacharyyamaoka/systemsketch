@@ -5,6 +5,7 @@
  */
 import {
   useCallback,
+  useMemo,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
@@ -48,6 +49,7 @@ import { insertBlockPortForInlineEditing } from '../commands/blockCommands'
 import {
   blockPortAddAffordance,
   getBlockPortDrag,
+  getEligiblePorts,
   portState,
   type BlockPortAddAffordance,
   type BlockPortDragState,
@@ -132,7 +134,7 @@ function BlockPortDot({
   const isEligible = useValue(
     'port eligible',
     () => {
-      const { eligiblePorts } = portState.get(editor)
+      const eligiblePorts = getEligiblePorts(editor)
       if (!eligiblePorts) return false
       return judgeConnection(
         editor,
@@ -571,13 +573,17 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
   const editor = useEditor()
   const layout = layoutBlock(shape.props)
   // A cable on either face of a port fills its dot: the dot is the port, and
-  // the faces are the two sides of the boundary it sits on.
-  const connectedIds = useValue(
-    'connected Block port ids',
-    () => new Set(
-      getBlockPortConnections(editor, shape.id).map((connection) => connection.ownPortId),
-    ),
+  // the faces are the two sides of the boundary it sits on. The wiring table
+  // keeps its identity while its entries do, so a Block that merely moved —
+  // whose record changed but whose cables did not — does not repaint here.
+  const connections = useValue(
+    'Block port connections',
+    () => getBlockPortConnections(editor, shape.id),
     [editor, shape.id],
+  )
+  const connectedIds = useMemo(
+    () => new Set(connections.map((connection) => connection.ownPortId)),
+    [connections],
   )
   const drawnPorts = portsToDraw(layout.ports, connectedIds)
   const simple = layout.view === 'simple'

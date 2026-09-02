@@ -21,6 +21,7 @@ export {
 export {
 	EditorAtom,
 	clearPortDragState,
+	getEligiblePorts,
 	portState,
 	updatePortState,
 	type PortIdentifier,
