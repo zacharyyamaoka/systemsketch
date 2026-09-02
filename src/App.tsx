@@ -52,6 +52,7 @@ import { installDevelopmentSeam } from './developmentSeam'
 import { enablePasteAtCursor } from './pasteAtCursor'
 import type { CSSProperties } from 'react'
 import './app.css'
+import { SYSTEMSKETCH_THEMES } from './appearance/figjamPalette'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
@@ -142,6 +143,7 @@ function SystemSketchCanvas() {
         overlayUtils={SYSTEMSKETCH_OVERLAY_UTILS}
         overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
         shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}
+        themes={SYSTEMSKETCH_THEMES}
         tools={SYSTEMSKETCH_TOOLS}
       />
     </main>
@@ -194,6 +196,7 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
         overrides={isBlockDevelopment ? BLOCK_DEVELOPMENT_OVERRIDES : undefined}
         persistenceKey={developmentPersistenceKey(profile)}
         shapeUtils={isBlockDevelopment ? BLOCK_DEVELOPMENT_SHAPE_UTILS : undefined}
+        themes={SYSTEMSKETCH_THEMES}
         tools={isBlockDevelopment ? [BlockTool] : undefined}
       />
     </main>
