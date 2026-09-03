@@ -7,7 +7,7 @@ import {
 } from 'tldraw'
 import { SYSTEMSKETCH_THEMES } from '../appearance/figjamPalette'
 import { BlockShapeUtil } from '../blocks'
-import { BranchShapeUtil } from '../branch'
+import { BranchArmShapeUtil, BranchShapeUtil } from '../branch'
 import {
   blockConnectionBindingUtils,
   blockConnectionShapeUtils,
@@ -33,6 +33,7 @@ const STORE_SHAPE_UTILS = replaceConstructorsByType<TLAnyShapeUtilConstructor>(
     ...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
     BlockShapeUtil,
     BranchShapeUtil,
+    BranchArmShapeUtil,
     ...blockConnectionShapeUtils,
   ],
 )

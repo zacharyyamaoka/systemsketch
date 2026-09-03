@@ -19,7 +19,6 @@ import {
 	PILL_TOOL_ID,
 	canReparentDraggedShapesIntoBlock,
 	canBlockContainChildren,
-	findBlockContainmentTarget,
 	getDefaultBlockProps,
 	mergeBlockResizeProps,
 	resizeBlockProps,
@@ -52,6 +51,11 @@ import {
 } from './layoutBlock'
 import { BlockCanvas } from './ui/BlockCanvas'
 import { stepIntoDepthScope } from '../depth/depthNavigation'
+import {
+	BranchArmShapeUtil,
+	isBranchArmShape,
+	type BranchArmShape,
+} from '../branch/BranchArmShapeUtil'
 
 const blockVersions = createShapePropsMigrationIds(BLOCK_SHAPE_TYPE, {
 	RestorePyblocksUi: 1,
@@ -524,9 +528,24 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 		return path
 	}
 
-	private getContainerTarget(shape: BlockShape, allowAncestorProxy: boolean): BlockShape | undefined {
+	private getContainerTarget(
+		shape: BlockShape,
+		allowAncestorProxy: boolean,
+	): BlockShape | BranchArmShape | undefined {
+		if (canBlockContainChildren(shape.props.view)) return shape
+		if (!allowAncestorProxy) return undefined
 		const ancestors = this.editor.getShapeAncestors(shape)
-		return findBlockContainmentTarget(shape, ancestors, allowAncestorProxy)
+		// The closest real container wins. Arm frames and Expanded Blocks share
+		// the same stock ancestor behavior; the arm frame is intentionally not a
+		// second semantic scope.
+		for (let index = ancestors.length - 1; index >= 0; index -= 1) {
+			const ancestor = ancestors[index]
+			if (isBranchArmShape(ancestor)) return ancestor
+			if (ancestor.type === 'block' && canBlockContainChildren(ancestor.props.view)) {
+				return ancestor
+			}
+		}
+		return undefined
 	}
 
 	override isFrameLike(shape: BlockShape): boolean {
@@ -541,7 +560,11 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 		// must decline so tldraw can continue to the expanded frame behind it.
 		if (this.editor.getPath() !== 'select.translating') return false
 		const container = this.getContainerTarget(shape, true)
-		return Boolean(container && super.canReceiveNewChildrenOfType(container, type))
+		if (!container) return false
+		return isBranchArmShape(container)
+			? (this.editor.getShapeUtil(container) as BranchArmShapeUtil)
+				.canReceiveNewChildrenOfType(container, type)
+			: super.canReceiveNewChildrenOfType(container, type)
 	}
 
 	override canRemoveChildrenOfType(shape: BlockShape, type: TLShape['type']): boolean {
@@ -569,11 +592,13 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 		info: TLDragShapesInInfo,
 	): void {
 		const container = this.getContainerTarget(shape, true)
-		if (
-			!container
-			|| container.isLocked
-			|| !canReparentDraggedShapesIntoBlock(container, draggingShapes)
-		) return
+		if (!container || container.isLocked) return
+		if (isBranchArmShape(container)) {
+			const armUtil = this.editor.getShapeUtil(container) as BranchArmShapeUtil
+			armUtil.onDragShapesIn(container, draggingShapes, info)
+			return
+		}
+		if (!canReparentDraggedShapesIntoBlock(container, draggingShapes)) return
 		super.onDragShapesIn(container, draggingShapes, info)
 	}
 
@@ -584,6 +609,11 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	): void {
 		const container = this.getContainerTarget(shape, true)
 		if (!container) return
+		if (isBranchArmShape(container)) {
+			const armUtil = this.editor.getShapeUtil(container) as BranchArmShapeUtil
+			armUtil.onDragShapesOut(container, draggingShapes, info)
+			return
+		}
 		super.onDragShapesOut(container, draggingShapes, info)
 	}
 

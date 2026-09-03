@@ -15,6 +15,7 @@ import {
 } from './blocks'
 import { BlockContextMenu } from './blocks/ui'
 import {
+  BranchArmShapeUtil,
   BranchShapeUtil,
   BranchTool,
   installBranchClickToEdit,
@@ -87,6 +88,7 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   ...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
   BlockShapeUtil,
   BranchShapeUtil,
+  BranchArmShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
@@ -105,6 +107,7 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   ...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
   BlockShapeUtil,
   BranchShapeUtil,
+  BranchArmShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, PillTool]

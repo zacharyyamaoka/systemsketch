@@ -52,9 +52,11 @@ import {
 } from '../commands/blockStyleCommands'
 import {
   CONNECTION_ROUTING_KINDS,
+  CONNECTION_TEMPORAL_KINDS,
   ConnectionRoutingStyle,
   ConnectionTemporalStyle,
   type ConnectionRoutingKind,
+  type ConnectionTemporalKind,
 } from '../connections/connectionModel'
 import { describeTidyEdgesOutcome, getTidyEdgesSelection, tidyEdges } from '../connections/tidyEdges'
 import { describeOrganizeNodesOutcome, organizeNodes } from '../layout'
@@ -212,6 +214,10 @@ function BlockContextMenuItems() {
 
   const setRouting = (routing: ConnectionRoutingKind) => {
     setConnectionRoutingForSelection(editor, routing)
+  }
+
+  const setTemporal = (temporal: ConnectionTemporalKind) => {
+    setConnectionTemporalForSelection(editor, temporal)
   }
 
   const runTidyEdges = () => {
@@ -492,17 +498,22 @@ function BlockContextMenuItems() {
 
       {connectionCount > 0 && connectionTemporal ? (
         <TldrawUiMenuGroup id="systemsketch-connection-temporal">
-          <TldrawUiMenuCheckboxItem
-            id="connection-temporal-delayed"
-            label={`Delayed (z⁻¹)${batchSuffix(connectionCount)}`}
-            checked={isSharedStyleValue(connectionTemporal, 'delayed')}
-            onSelect={() => {
-              setConnectionTemporalForSelection(
-                editor,
-                isSharedStyleValue(connectionTemporal, 'delayed') ? 'data' : 'delayed',
-              )
-            }}
-          />
+          <TldrawUiMenuSubmenu
+            id="connection-temporal"
+            label={`Edge type${batchSuffix(connectionCount)}`}
+          >
+            <TldrawUiMenuGroup id="connection-temporal-options">
+              {CONNECTION_TEMPORAL_KINDS.map((temporal) => (
+                <TldrawUiMenuCheckboxItem
+                  key={temporal}
+                  id={`connection-temporal-${temporal}`}
+                  label={temporal === 'delayed' ? 'Delayed (z⁻¹)' : labelFor(temporal)}
+                  checked={isSharedStyleValue(connectionTemporal, temporal)}
+                  onSelect={() => setTemporal(temporal)}
+                />
+              ))}
+            </TldrawUiMenuGroup>
+          </TldrawUiMenuSubmenu>
         </TldrawUiMenuGroup>
       ) : null}
 

@@ -1,0 +1,116 @@
+{
+  "feature": "Branch arm frames",
+  "viewport": { "width": 2000, "height": 1000 },
+  "shapes": [
+    {
+      "id": "branch",
+      "type": "branch",
+      "x": 600,
+      "y": 140,
+      "props": {
+        "title": "Branch arm frames",
+        "view": "expanded",
+        "w": 760,
+        "h": 590,
+        "activeArmId": null,
+        "controls": [],
+        "arms": [
+          { "id": "arm_1", "title": "if", "open": true, "h": 240 },
+          { "id": "arm_2", "title": "else", "open": true, "h": 240 }
+        ]
+      }
+    },
+    {
+      "id": "header-block",
+      "type": "block",
+      "parentId": "branch",
+      "x": 30,
+      "y": 48,
+      "meta": { "branchArm": "arm_1" },
+      "props": {
+        "title": "header overlap()",
+        "description": "This Block should paint above the if header.",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 300,
+        "h": 170
+      }
+    },
+    {
+      "id": "clip-block",
+      "type": "block",
+      "parentId": "branch",
+      "x": 400,
+      "y": 210,
+      "meta": { "branchArm": "arm_1" },
+      "props": {
+        "title": "divider clip()",
+        "description": "This Block deliberately extends into else.",
+        "blockType": "Function",
+        "view": "port",
+        "w": 320,
+        "h": 198,
+        "inputs": [],
+        "outputs": [{ "id": "out_1", "name": "pose", "type": "Pose", "visible": true }]
+      }
+    },
+    {
+      "id": "else-block",
+      "type": "block",
+      "parentId": "branch",
+      "x": 110,
+      "y": 370,
+      "meta": { "branchArm": "arm_2" },
+      "props": {
+        "title": "inside else()",
+        "description": "A normal Block owned by else.",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 280,
+        "h": 170
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Confirm header overlap() sits above the if header; the header itself must not crop the Block",
+      "x": 40,
+      "y": 100,
+      "w": 440,
+      "h": 120,
+      "target": { "shapeId": "header-block", "anchor": "left", "dy": -20 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Confirm divider clip() stops exactly at the else divider—none of its body or ports may enter else",
+      "x": 1460,
+      "y": 250,
+      "w": 480,
+      "h": 125,
+      "target": { "shapeId": "clip-block", "anchor": "right", "dy": -20 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Fold if, then open it again. Both if Blocks should disappear and return; inside else() must remain",
+      "x": 40,
+      "y": 650,
+      "w": 470,
+      "h": 125,
+      "target": { "shapeId": "branch", "anchor": "left", "dy": 80 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Every Block is visibly owned by one arm, overlapping the arm's own header is allowed, crossing into a neighboring arm is clipped, and fold/unfold still preserves the Blocks",
+      "x": 1410,
+      "y": 620,
+      "w": 540,
+      "h": 160
+    }
+  ]
+}
