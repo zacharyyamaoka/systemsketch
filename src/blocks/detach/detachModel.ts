@@ -21,7 +21,10 @@
 import type { JsonObject } from 'tldraw'
 
 import type { BlockShapeProps } from '../blockModel'
-import type { ConnectionRoutingKind } from '../connections/connectionModel'
+import type {
+	ConnectionRoutingKind,
+	ConnectionTemporalKind,
+} from '../connections/connectionModel'
 import type { ConnectionTerminal, PortFace } from '../connections/connectionModel'
 
 /** The single key SystemSketch claims inside any shape's `meta`. */
@@ -57,6 +60,12 @@ export interface DetachedConnectionRecord {
 	kind: 'connection'
 	version: number
 	routing: ConnectionRoutingKind
+	/** The visual/semantic edge vocabulary needed if this arrow is rebuilt. */
+	temporal: ConnectionTemporalKind
+	delayValue: string
+	pillPosition: number
+	/** False for an arrow detached on its own; unrelated Block rebuilds leave it primitive. */
+	rebuildWithBlocks: boolean
 	/** Keyed by the terminal each end held, so a rebuild re-binds the same way round. */
 	ends: Partial<Record<ConnectionTerminal, DetachedConnectionEnd>>
 }
@@ -113,6 +122,12 @@ export function readDetachedRecord(meta: unknown): DetachedRecord | null {
 			kind: 'connection',
 			version: record.version,
 			routing: (record.routing as ConnectionRoutingKind) ?? 'elbow',
+			temporal: record.temporal === 'async' || record.temporal === 'delayed'
+				? record.temporal
+				: 'data',
+			delayValue: typeof record.delayValue === 'string' ? record.delayValue : '',
+			pillPosition: typeof record.pillPosition === 'number' ? record.pillPosition : 0.5,
+			rebuildWithBlocks: record.rebuildWithBlocks !== false,
 			ends,
 		}
 	}
