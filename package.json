@@ -65,6 +65,7 @@
     "test:workspace-followup": "node tests/workspace_followup_smoke.mjs",
     "test:followup-review": "node tests/followup_review_gallery_smoke.mjs",
     "test:detach-fidelity": "node tests/detach_fidelity_smoke.mjs",
+    "test:detach-edge-fidelity": "node tests/detach_edge_fidelity_smoke.mjs",
     "test:detached-port-row": "node tests/detached_port_row_smoke.mjs",
     "test:worktree-paths": "node tests/development_worktree_paths_smoke.mjs",
     "test:theme": "node --experimental-strip-types tests/theme_contrast_smoke.mjs",
