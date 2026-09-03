@@ -480,12 +480,17 @@ async function main() {
     assert.ok(popover.viewport - popover.right >= POPOVER_COLLISION_PADDING,
       'the colour panel is flush against the right window edge')
     // The clamp is genuinely exercised: centred on this trigger the panel would
-    // have started left of the padding — which is exactly the x=0 the audit
-    // measured — so the padding, not luck, is what put it where it is.
+    // cross one of the padded viewport edges. The responsive selection pill may
+    // put the trigger on either side, so both clamp directions are valid proof.
     const centredX = Math.round(trigger.x + trigger.width / 2 - popover.width / 2)
+    const centredRight = centredX + popover.width
     measured.popover.centredX = centredX
-    assert.ok(centredX < POPOVER_COLLISION_PADDING,
-      `centred on this trigger the panel would start at ${centredX}px, so no clamp was tested`)
+    measured.popover.centredRight = centredRight
+    assert.ok(
+      centredX < POPOVER_COLLISION_PADDING
+        || centredRight > popover.viewport - POPOVER_COLLISION_PADDING,
+      `centred on this trigger the panel would span ${centredX}..${centredRight}px, so no clamp was tested`,
+    )
     await shot(page, SHOTS.appearance)
     pass('the appearance palette keeps the app-wide 12px clear of the window edge')
 

@@ -45,7 +45,7 @@ import { startReleaseRefresh } from './releaseRefresh'
 import { cablePresentation, setSolidBeforePill } from './blocks/connections/connectionPresentation'
 import { useAppearancePreferences } from './settings/appearancePreferences'
 import './systemsketch-utilities.css'
-import { getBoardDiagnosticsModel } from './diagnostics'
+import { useBoardDiagnosticsModel } from './diagnostics'
 
 type BusyKey = ReleaseAction | `preview:${DevelopmentProfileId}`
 
@@ -164,11 +164,7 @@ export function SystemSketchNavigationPanel() {
   const releaseDetailsId = useId()
   const boardPanelOpen = rightSurface === 'board-overview'
   const problemsPanelOpen = rightSurface === 'diagnostics'
-  const problemCount = useValue(
-    'SystemSketch Problems count',
-    () => getBoardDiagnosticsModel(editor).counts.total,
-    [editor],
-  )
+  const problemCount = useBoardDiagnosticsModel(editor).counts.total
   const orderedPresets = useMemo(() => orderDevelopmentPresets(recentIds), [recentIds])
   const previewNoticeVisible = status?.channel === 'preview' && recorderState.mode !== 'take'
   const previewNoticePlacement = useTopNoticePlacement(previewNoticeRef, previewNoticeVisible)

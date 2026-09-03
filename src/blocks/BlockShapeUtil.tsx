@@ -61,6 +61,8 @@ const blockVersions = createShapePropsMigrationIds(BLOCK_SHAPE_TYPE, {
 	PortLayoutStyle: 2,
 	PortRows: 3,
 	ValueView: 4,
+	DiffState: 5,
+	FieldDiffs: 6,
 })
 
 const LEGACY_VIEW_SIZES = {
@@ -304,6 +306,45 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 						props.w = box.w
 						props.h = box.h
 					}
+				}
+			},
+		}, {
+			id: blockVersions.DiffState,
+			up(props) {
+				// `state` became a StyleProp with the shared diff/linter vocabulary.
+				// Style props are required, so boards written before the diff feature
+				// need the ordinary state made explicit before validation runs.
+				if (props.state === undefined) props.state = 'normal'
+			},
+			down(props) {
+				delete props.state
+				for (const side of ['inputs', 'outputs'] as const) {
+					const ports = props[side]
+					if (!Array.isArray(ports)) continue
+					props[side] = ports
+						.filter((port: Record<string, unknown>) => port.state !== 'removed')
+						.map((port: Record<string, unknown>) => {
+							const { state: _state, stateBefore: _before, ...rest } = port
+							return rest
+						})
+				}
+			},
+		}, {
+			id: blockVersions.FieldDiffs,
+			up() {
+				// Optional diff metadata needs no forward default. Advancing the
+				// sequence still records the reader contract for its downgrade path.
+			},
+			down(props) {
+				delete props.fieldDiffs
+				delete props.priorPose
+				for (const side of ['inputs', 'outputs'] as const) {
+					const ports = props[side]
+					if (!Array.isArray(ports)) continue
+					props[side] = ports.map((port: Record<string, unknown>) => {
+						const { fieldDiffs: _fields, ...rest } = port
+						return rest
+					})
 				}
 			},
 		}],

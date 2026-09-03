@@ -1,13 +1,13 @@
 import { useState } from 'react'
-import { type Editor, useValue } from 'tldraw'
+import type { Editor } from 'tldraw'
 
 import {
 	focusBoardDiagnostic,
-	getBoardDiagnosticsModel,
 	type BoardDiagnostic,
 	type BoardDiagnosticsModel,
 	type BoardDiagnosticSeverity,
 } from './diagnosticsModel'
+import { useBoardDiagnosticsModel } from './useBoardDiagnosticsModel'
 import './diagnostics.css'
 
 export type BoardDiagnosticFilter = 'all' | BoardDiagnosticSeverity
@@ -179,11 +179,7 @@ export interface BoardDiagnosticsPanelProps {
 /** Live Problems-style panel. Its parent owns opening and closing the surface. */
 export function BoardDiagnosticsPanel({ editor }: BoardDiagnosticsPanelProps) {
 	const [filter, setFilter] = useState<BoardDiagnosticFilter>('all')
-	const model = useValue(
-		'SystemSketch board diagnostics',
-		() => getBoardDiagnosticsModel(editor),
-		[editor],
-	)
+	const model = useBoardDiagnosticsModel(editor)
 	return (
 		<BoardDiagnosticsView
 			model={model}

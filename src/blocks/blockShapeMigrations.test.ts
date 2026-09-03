@@ -49,6 +49,25 @@ function markerBlock(): Omit<BlockShape, 'props'> & { props: Record<string, unkn
 }
 
 describe('Block shape migrations', () => {
+	it('gives pre-diff Blocks the required ordinary state', () => {
+		const store = createTLStore({ shapeUtils: [BlockShapeUtil], bindingUtils: [] })
+		const currentSchema = store.schema.serialize()
+		const legacy = markerBlock()
+		legacy.props.inputs = []
+		legacy.props.outputs = []
+		delete legacy.props.state
+		const snapshot = {
+			schema: {
+				...currentSchema,
+				sequences: { ...currentSchema.sequences, [BLOCK_MIGRATION_SEQUENCE]: 4 },
+			},
+			store: { [legacy.id]: legacy },
+		} as unknown as TLStoreSnapshot
+
+		expect(() => store.loadStoreSnapshot(snapshot)).not.toThrow()
+		expect((store.get(legacy.id) as BlockShape).props.state).toBe('normal')
+	})
+
 	it('turns row and arm markers into the row and arm every port now names', () => {
 		const store = createTLStore({ shapeUtils: [BlockShapeUtil], bindingUtils: [] })
 		const currentSchema = store.schema.serialize()
