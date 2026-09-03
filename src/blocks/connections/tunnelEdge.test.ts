@@ -3,42 +3,56 @@ import { describe, expect, it } from 'vitest'
 import {
 	TUNNEL_MIN_PATH_LENGTH,
 	TUNNEL_STUB_LENGTH,
+	tunnelDisplayState,
 	tunnelPathPresentation,
-	tunnelRouteIsRevealed,
 	tunnelVisualForPoints,
 } from './tunnelEdge'
 
-describe('tunnel reveal contract', () => {
-	it('keeps ordinary cables visible and hides an idle tunnel route', () => {
-		expect(tunnelRouteIsRevealed({
+describe('tunnel display contract', () => {
+	it('keeps an ordinary edge visible and an idle configured tunnel underground', () => {
+		expect(tunnelDisplayState({
 			enabled: false,
-			layerFocused: false,
-			edgeFocused: false,
-			endpointFocused: false,
-			reattaching: false,
-		})).toBe(true)
-		expect(tunnelRouteIsRevealed({
+			layer: '',
+			focusedLayer: null,
+			contextFocused: false,
+		})).toBe('off')
+		expect(tunnelDisplayState({
 			enabled: true,
-			layerFocused: false,
-			edgeFocused: false,
-			endpointFocused: false,
-			reattaching: false,
-		})).toBe(false)
+			layer: 'Diagnostics',
+			focusedLayer: null,
+			contextFocused: false,
+		})).toBe('hidden')
 	})
 
-	it.each(['layerFocused', 'edgeFocused', 'endpointFocused', 'reattaching'] as const)(
-		'reveals for %s',
-		(trigger) => {
-			expect(tunnelRouteIsRevealed({
-				enabled: true,
-				layerFocused: false,
-				edgeFocused: false,
-				endpointFocused: false,
-				reattaching: false,
-				[trigger]: true,
-			})).toBe(true)
-		},
-	)
+	it('previews the whole route on hover or selection without removing its mouths', () => {
+		expect(tunnelDisplayState({
+			enabled: true,
+			layer: 'Diagnostics',
+			focusedLayer: null,
+			contextFocused: true,
+		})).toBe('preview')
+	})
+
+	it('reveals the active layer and tunnels every edge outside it', () => {
+		expect(tunnelDisplayState({
+			enabled: true,
+			layer: 'Diagnostics',
+			focusedLayer: 'Diagnostics',
+			contextFocused: false,
+		})).toBe('revealed')
+		expect(tunnelDisplayState({
+			enabled: false,
+			layer: '',
+			focusedLayer: 'Diagnostics',
+			contextFocused: false,
+		})).toBe('hidden')
+		expect(tunnelDisplayState({
+			enabled: false,
+			layer: '',
+			focusedLayer: 'Diagnostics',
+			contextFocused: true,
+		})).toBe('preview')
+	})
 })
 
 describe('tunnel path presentation', () => {

@@ -14,6 +14,7 @@ import {
   localConsoleErrors,
   makeChecklist,
   mouse,
+  newPage,
   openApp,
   startApp,
   typeSlowly,
@@ -23,6 +24,7 @@ import {
 const ASSETS = join(ROOT, 'docs', 'assets')
 const INSPECTOR_SHOT = join(ASSETS, 'edge-tunnel-inspector-live-2026-09-02.png')
 const HIDDEN_SHOT = join(ASSETS, 'edge-tunnel-hidden-live-2026-09-02.png')
+const HOVER_SHOT = join(ASSETS, 'edge-tunnel-hover-live-2026-09-02.png')
 const FOCUSED_SHOT = join(ASSETS, 'edge-tunnel-layer-focus-live-2026-09-02.png')
 const RESULTS = join(ASSETS, 'edge-tunnel-results-2026-09-02.json')
 const REVIEW_FIXTURE = join(ROOT, 'sketches', 'review', 'edge-tunnel.systemsketch')
@@ -54,9 +56,18 @@ const SEED = `(() => {
       temporal: 'data', delayValue: '', pillPosition: 0.5,
     },
   }
+  const otherEdge = {
+    id: 'shape:other-edge', type: 'connection', x: 0, y: 0,
+    props: {
+      start: { x: 220, y: 650 }, end: { x: 1080, y: 650 }, routing: 'straight',
+      curve: null, pins: [], elbowRoute: null, routeMode: 'automatic',
+      temporal: 'data', delayValue: '', pillPosition: 0.5,
+      tunnel: false, tunnelLayer: '',
+    },
+  }
   editor.run(() => {
     editor.createShapes([source, target])
-    editor.createShape(edge)
+    editor.createShapes([edge, otherEdge])
     editor.createBindings([
       { type: 'connection', fromId: edge.id, toId: source.id,
         props: { portId: 'out_1', terminal: 'start', face: 'outer' } },
@@ -78,9 +89,9 @@ async function moveAway(page) {
   await delay(260)
 }
 
-async function tunnelPaint(page) {
+async function tunnelPaint(page, shapeId = 'shape:tunnel-edge') {
   return JSON.parse(await evaluate(page, `(() => {
-    const root = document.querySelector('[data-shape-id="shape:tunnel-edge"]')
+    const root = document.querySelector('[data-shape-id="' + ${JSON.stringify(shapeId)} + '"]')
     const svg = root?.querySelector('[data-tunnel]')
     const path = svg?.querySelector('path')
     return JSON.stringify({
@@ -149,23 +160,32 @@ async function main() {
 
     const middle = await pathPoint(app.page, 0.5)
     await mouse(app.page, 'mouseMoved', middle.x, middle.y)
-    await waitFor(app.page, `document.querySelector('[data-tunnel="revealed"]')`, 'edge hover reveal')
+    await waitFor(app.page, `document.querySelector('[data-shape-id="shape:tunnel-edge"] [data-tunnel="preview"]')`, 'edge hover preview')
     paint = await tunnelPaint(app.page)
-    assert.deepEqual({ state: paint.state, vias: paint.vias, dash: paint.dash }, { state: 'revealed', vias: 0, dash: null })
-    pass('hovering the hidden route restores the full cable without changing its model')
+    assert.deepEqual({ state: paint.state, vias: paint.vias, dash: paint.dash }, { state: 'preview', vias: 2, dash: null })
+    pass('hover restores the full cable while both outlined tunnel mouths remain visible')
+    await screenshot(app.page, HOVER_SHOT)
 
     await moveAway(app.page)
     await evaluate(app.page, `void window.__systemsketch.editor.select('shape:tunnel-source')`)
-    await waitFor(app.page, `document.querySelector('[data-tunnel="revealed"]')`, 'endpoint reveal')
-    pass('selecting either endpoint Block restores the full route')
+    await waitFor(app.page, `document.querySelector('[data-shape-id="shape:tunnel-edge"] [data-tunnel="preview"]')`, 'endpoint preview')
+    paint = await tunnelPaint(app.page)
+    assert.equal(paint.vias, 2)
+    pass('endpoint focus previews the complete route without removing its tunnel mouths')
 
     await evaluate(app.page, `void window.__systemsketch.editor.selectNone()`)
     await moveAway(app.page)
     await waitFor(app.page, `document.querySelector('[data-tunnel="hidden"]')`, 'tunnel hidden before layer focus')
     await clickElement(app.page, '[data-testid="tunnel-layer-focus"][data-tunnel-layer="Diagnostics"]')
     await waitFor(app.page, `document.querySelector('[data-testid="tunnel-layer-focus"][data-tunnel-layer="Diagnostics"][aria-pressed="true"]')`, 'layer focused')
-    await waitFor(app.page, `document.querySelector('[data-tunnel="revealed"]')`, 'layer reveal')
-    pass('the persistent Diagnostics layer chip reveals every tunnel assigned to that layer')
+    await waitFor(app.page, `document.querySelector('[data-shape-id="shape:tunnel-edge"] [data-tunnel="revealed"]')`, 'layer member revealed')
+    await waitFor(app.page, `document.querySelector('[data-shape-id="shape:other-edge"] [data-tunnel="hidden"]')`, 'other edge tunneled')
+    paint = await tunnelPaint(app.page)
+    const otherPaint = await tunnelPaint(app.page, 'shape:other-edge')
+    assert.deepEqual({ state: paint.state, vias: paint.vias }, { state: 'revealed', vias: 0 })
+    assert.equal(otherPaint.vias, 2)
+    assert.match(otherPaint.dash, /^34(?:[ ,])/)
+    pass('layer focus removes its members’ mouths and tunnels every edge outside the layer')
     await screenshot(app.page, FOCUSED_SHOT)
 
     await evaluate(app.page, `void window.__systemsketch.editor.updateShape({
@@ -177,13 +197,16 @@ async function main() {
     await waitFor(app.page, `document.querySelector('[data-tunnel="hidden"]')`, 'layer focus cleared')
     paint = await tunnelPaint(app.page)
     assert.equal(paint.delayPill, false)
-    pass('clicking the active layer again returns the cable underground')
+    assert.equal((await tunnelPaint(app.page, 'shape:other-edge')).state, 'off')
+    pass('clearing layer focus restores ordinary visibility and the configured tunnel baseline')
     await evaluate(app.page, `void window.__systemsketch.editor.select('shape:tunnel-target')`)
     await waitFor(app.page, `document.querySelector('[data-testid="connection-delay-pill"]')`, 'delayed pill restored with endpoint')
+    paint = await tunnelPaint(app.page)
+    assert.deepEqual({ state: paint.state, vias: paint.vias, delayPill: paint.delayPill }, { state: 'preview', vias: 2, delayPill: true })
     await evaluate(app.page, `void window.__systemsketch.editor.updateShape({
       id: 'shape:tunnel-edge', type: 'connection', props: { temporal: 'data', delayValue: '' }
     })`)
-    pass('a delayed edge hides its z⁻¹ pill underground and restores it with the full route')
+    pass('a delayed edge hides its z⁻¹ pill underground and restores it with the full mouth-marked preview')
 
     await delay(1200)
     await openApp(app.page, app.port, `?board=${encodeURIComponent(board)}`)
@@ -195,22 +218,41 @@ async function main() {
     assert.deepEqual(restored, { tunnel: true, tunnelLayer: 'Diagnostics' })
     pass('tunnel mode and layer persist through the ordinary .systemsketch autosave')
 
-    await openApp(app.page, app.port, `?board=${encodeURIComponent(reviewBoard)}`)
-    await waitFor(app.page, `window.__systemsketch?.editor?.getShape('shape:tunnel')?.props?.tunnel === true`, 'saved review fixture', 20_000)
-    await moveAway(app.page)
-    await waitFor(app.page, `document.querySelector('[data-shape-id="shape:tunnel"] [data-tunnel="hidden"]')`, 'fixture idle tunnel')
-    const fixtureMiddle = await pathPoint(app.page, 0.5, 'shape:tunnel')
-    await mouse(app.page, 'mouseMoved', fixtureMiddle.x, fixtureMiddle.y)
-    await waitFor(app.page, `document.querySelector('[data-shape-id="shape:tunnel"] [data-tunnel="revealed"]')`, 'fixture hover reveal')
-    await moveAway(app.page)
-    await clickElement(app.page, '[data-testid="tunnel-layer-focus"][data-tunnel-layer="Diagnostics"]')
-    await waitFor(app.page, `document.querySelector('[data-shape-id="shape:tunnel"] [data-tunnel="revealed"]')`, 'fixture layer reveal')
-    await clickElement(app.page, '[data-testid="tunnel-layer-focus"][data-tunnel-layer="Diagnostics"]')
-    await evaluate(app.page, `void window.__systemsketch.editor.select('shape:decode')`)
-    await waitFor(app.page, `document.querySelector('[data-shape-id="shape:tunnel"] [data-tunnel="revealed"]')`, 'fixture endpoint reveal')
-    pass('the saved review fixture was opened and driven through hover, layer, and endpoint focus')
+    process.stdout.write('  … opening the saved two-edge review fixture\n')
+    const fixturePage = await newPage(app.cdpPort)
+    let fixtureConsoleErrors = []
+    try {
+      await fixturePage.send('Page.enable')
+      await fixturePage.send('Runtime.enable')
+      await fixturePage.send('Log.enable')
+      await fixturePage.send('Emulation.setDeviceMetricsOverride', {
+        width: 1600, height: 900, deviceScaleFactor: 1, mobile: false,
+      })
+      await openApp(fixturePage, app.port, `?board=${encodeURIComponent(reviewBoard)}`)
+      await waitFor(fixturePage, `window.__systemsketch?.editor?.getShape('shape:tunnel')?.props?.tunnel === true`, 'saved review fixture', 20_000)
+      process.stdout.write('  … driving fixture hover preview\n')
+      await moveAway(fixturePage)
+      await waitFor(fixturePage, `document.querySelector('[data-shape-id="shape:tunnel"] [data-tunnel="hidden"]')`, 'fixture idle tunnel')
+      await waitFor(fixturePage, `document.querySelector('[data-shape-id="shape:other"] [data-tunnel="off"]')`, 'fixture ordinary edge')
+      const fixtureMiddle = await pathPoint(fixturePage, 0.5, 'shape:tunnel')
+      await mouse(fixturePage, 'mouseMoved', fixtureMiddle.x, fixtureMiddle.y)
+      await waitFor(fixturePage, `document.querySelector('[data-shape-id="shape:tunnel"] [data-tunnel="preview"]')`, 'fixture hover preview')
+      assert.equal((await tunnelPaint(fixturePage, 'shape:tunnel')).vias, 2)
+      await moveAway(fixturePage)
+      process.stdout.write('  … driving fixture layer isolation\n')
+      await clickElement(fixturePage, '[data-testid="tunnel-layer-focus"][data-tunnel-layer="Diagnostics"]')
+      await waitFor(fixturePage, `document.querySelector('[data-shape-id="shape:tunnel"] [data-tunnel="revealed"]')`, 'fixture layer reveal')
+      await waitFor(fixturePage, `document.querySelector('[data-shape-id="shape:other"] [data-tunnel="hidden"]')`, 'fixture other edge tunneled')
+      await clickElement(fixturePage, '[data-testid="tunnel-layer-focus"][data-tunnel-layer="Diagnostics"]')
+      await evaluate(fixturePage, `void window.__systemsketch.editor.select('shape:decode')`)
+      await waitFor(fixturePage, `document.querySelector('[data-shape-id="shape:tunnel"] [data-tunnel="preview"]')`, 'fixture endpoint preview')
+      fixtureConsoleErrors = localConsoleErrors(fixturePage)
+    } finally {
+      fixturePage.close()
+    }
+    pass('the saved review fixture was driven through hover preview and layer isolation')
 
-    assert.deepEqual(localConsoleErrors(app.page), [])
+    assert.deepEqual([...localConsoleErrors(app.page), ...fixtureConsoleErrors], [])
     pass('the complete journey produced zero local console errors')
     await writeFile(RESULTS, JSON.stringify(checks.map((label) => ({ label, ok: true })), null, 2))
     process.stdout.write(`\n  ${checks.length}/${checks.length} browser checks passed\n  ${HIDDEN_SHOT}\n`)

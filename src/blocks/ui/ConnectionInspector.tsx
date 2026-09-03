@@ -378,7 +378,7 @@ export function EditorConnectionInspector({ editor }: { editor: Editor }) {
 								</button>
 							)}
 							<p className="block-inspector__hint">
-								Reveals with its layer, edge, endpoint Block, or port reattachment focus.
+								Hover previews the route with its tunnel mouths. Layer focus reveals it and tunnels other edges.
 							</p>
 						</div>
 					) : null}

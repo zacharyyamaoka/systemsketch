@@ -14,9 +14,12 @@
         "blockType": "Function",
         "view": "port",
         "w": 340,
-        "h": 190,
+        "h": 220,
         "inputs": [{ "id": "in_raw", "name": "raw", "type": "bytes", "visible": true }],
-        "outputs": [{ "id": "out_frame", "name": "frame", "type": "Frame", "visible": true }]
+        "outputs": [
+          { "id": "out_frame", "name": "frame", "type": "Frame", "visible": true },
+          { "id": "out_trace", "name": "trace", "type": "Trace", "visible": true, "row": 2 }
+        ]
       }
     },
     {
@@ -30,8 +33,11 @@
         "blockType": "Function",
         "view": "port",
         "w": 340,
-        "h": 190,
-        "inputs": [{ "id": "in_frame", "name": "frame", "type": "Frame", "visible": true }],
+        "h": 220,
+        "inputs": [
+          { "id": "in_frame", "name": "frame", "type": "Frame", "visible": true },
+          { "id": "in_trace", "name": "trace", "type": "Trace", "visible": true, "row": 2 }
+        ],
         "outputs": [{ "id": "out_pose", "name": "pose", "type": "Pose", "visible": true }]
       }
     },
@@ -54,6 +60,26 @@
         "tunnel": true,
         "tunnelLayer": "Diagnostics"
       }
+    },
+    {
+      "id": "other",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 100, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": ""
+      }
     }
   ],
   "bindings": [
@@ -70,33 +96,37 @@
       "fromId": "tunnel",
       "toId": "estimate",
       "props": { "terminal": "end", "portId": "in_frame", "face": "outer" }
+    },
+    {
+      "id": "other-start",
+      "type": "connection",
+      "fromId": "other",
+      "toId": "decode",
+      "props": { "terminal": "start", "portId": "out_trace", "face": "outer" }
+    },
+    {
+      "id": "other-end",
+      "type": "connection",
+      "fromId": "other",
+      "toId": "estimate",
+      "props": { "terminal": "end", "portId": "in_trace", "face": "outer" }
     }
   ],
   "callouts": [
     {
-      "id": "endpoint",
-      "kind": "step",
-      "text": "2 · Click decode() to focus an endpoint Block.",
-      "x": 20,
-      "y": 400,
-      "w": 360,
-      "h": 110,
-      "target": { "shapeId": "decode", "anchor": "left", "dy": 0 }
-    },
-    {
       "id": "hover-run",
       "kind": "step",
-      "text": "1 · Hover the empty run between the two outlined vias.",
+      "text": "1 · Hover the empty run: the cable returns but both mouths stay.",
       "x": 680,
       "y": 120,
       "w": 430,
       "h": 110,
-      "target": { "x": 895, "y": 455 }
+      "target": { "x": 895, "y": 430 }
     },
     {
       "id": "layer",
       "kind": "step",
-      "text": "3 · Click Diagnostics in the Layers bar above the canvas.",
+      "text": "2 · Click Diagnostics: its mouths leave and the other edge tunnels.",
       "x": 1160,
       "y": 120,
       "w": 380,
@@ -106,10 +136,10 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN the full cable returns for each focus, then becomes two short stubs again when focus leaves.",
-      "x": 600,
+      "text": "PASS WHEN hover shows the whole Diagnostics cable with both mouths, then layer focus removes its mouths and tunnels the other cable.",
+      "x": 500,
       "y": 690,
-      "w": 600,
+      "w": 700,
       "h": 120
     }
   ]

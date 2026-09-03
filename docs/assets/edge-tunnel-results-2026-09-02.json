@@ -8,23 +8,23 @@
     "ok": true
   },
   {
-    "label": "hovering the hidden route restores the full cable without changing its model",
+    "label": "hover restores the full cable while both outlined tunnel mouths remain visible",
     "ok": true
   },
   {
-    "label": "selecting either endpoint Block restores the full route",
+    "label": "endpoint focus previews the complete route without removing its tunnel mouths",
     "ok": true
   },
   {
-    "label": "the persistent Diagnostics layer chip reveals every tunnel assigned to that layer",
+    "label": "layer focus removes its members’ mouths and tunnels every edge outside the layer",
     "ok": true
   },
   {
-    "label": "clicking the active layer again returns the cable underground",
+    "label": "clearing layer focus restores ordinary visibility and the configured tunnel baseline",
     "ok": true
   },
   {
-    "label": "a delayed edge hides its z⁻¹ pill underground and restores it with the full route",
+    "label": "a delayed edge hides its z⁻¹ pill underground and restores it with the full mouth-marked preview",
     "ok": true
   },
   {
@@ -32,7 +32,7 @@
     "ok": true
   },
   {
-    "label": "the saved review fixture was opened and driven through hover, layer, and endpoint focus",
+    "label": "the saved review fixture was driven through hover preview and layer isolation",
     "ok": true
   },
   {

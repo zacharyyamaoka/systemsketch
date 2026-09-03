@@ -87,7 +87,7 @@ import {
 	polylineLength,
 	splitDashArrays,
 } from './connectionPresentation'
-import { tunnelRouteIsRevealed, tunnelVisualForPoints, type TunnelVisual } from './tunnelEdge'
+import { tunnelDisplayState, tunnelVisualForPoints, type TunnelVisual } from './tunnelEdge'
 import { getFocusedTunnelLayer } from './tunnelLayers'
 import { BRANCH_FADE_OPACITY } from '../../branch/branchModel'
 import { branchAncestry, branchFadeOpacity } from '../../branch/branchScope'
@@ -788,8 +788,8 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		[editor, connection, delayed],
 	)
 	const stroke = 'var(--tl-color-text-3, #475569)'
-	const tunnelRevealed = useValue(
-		'connection tunnel reveal',
+	const tunnelState = useValue(
+		'connection tunnel display',
 		() => {
 			const bindings = getConnectionBindings(editor, connection)
 			const selected = new Set(editor.getSelectedShapeIds())
@@ -797,13 +797,13 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 			const endpointIds = [bindings.start?.toId, bindings.end?.toId]
 				.filter((id): id is TLShapeId => id !== undefined)
 			const edgeFocused = selected.has(connection.id) || hovered === connection.id
-			return tunnelRouteIsRevealed({
+			return tunnelDisplayState({
 				enabled: connection.props.tunnel,
-				layerFocused: connection.props.tunnelLayer !== ''
-					&& getFocusedTunnelLayer(editor) === connection.props.tunnelLayer,
-				edgeFocused,
-				endpointFocused: endpointIds.some((id) => selected.has(id) || hovered === id),
-				reattaching: edgeFocused && editor.isIn('select.dragging_handle'),
+				layer: connection.props.tunnelLayer,
+				focusedLayer: getFocusedTunnelLayer(editor),
+				contextFocused: edgeFocused
+					|| endpointIds.some((id) => selected.has(id) || hovered === id)
+					|| (edgeFocused && editor.isIn('select.dragging_handle')),
 			})
 		},
 		[editor, connection.id, connection.props.tunnel, connection.props.tunnelLayer],
@@ -813,27 +813,31 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		() => getConnectionRenderPoints(editor, connection),
 		[editor, connection],
 	)
-	const tunnel = connection.props.tunnel
-		? tunnelVisualForPoints(renderPoints, tunnelRevealed)
+	const tunnelMouths = tunnelState === 'hidden' || tunnelState === 'preview'
+		? tunnelVisualForPoints(renderPoints, false)
 		: null
+	const hiddenTunnel = tunnelState === 'hidden' ? tunnelMouths : null
+	const paintedTunnelState = tunnelMouths || tunnelState === 'off'
+		? tunnelState
+		: 'revealed'
 	if (!delayed || !pill) {
 		const length = polylineLength(renderPoints)
 		return (
 			<SVGContainer
 				style={{ opacity }}
 				data-temporal={connection.props.temporal}
-				data-tunnel={connection.props.tunnel ? (tunnel ? 'hidden' : 'revealed') : 'off'}
+				data-tunnel={paintedTunnelState}
 			>
-				<DataCablePath path={path} length={length} temporal={connection.props.temporal} stroke={stroke} tunnel={tunnel} />
-				{tunnel ? <TunnelVias tunnel={tunnel} stroke={stroke} fill="var(--ss-surface, #ffffff)" /> : null}
+				<DataCablePath path={path} length={length} temporal={connection.props.temporal} stroke={stroke} tunnel={hiddenTunnel} />
+				{tunnelMouths ? <TunnelVias tunnel={tunnelMouths} stroke={stroke} fill="var(--ss-surface, #ffffff)" /> : null}
 			</SVGContainer>
 		)
 	}
-	if (tunnel) {
+	if (hiddenTunnel) {
 		return (
 			<SVGContainer style={{ opacity }} data-temporal="delayed" data-tunnel="hidden">
-				<DataCablePath path={path} length={polylineLength(renderPoints)} temporal="delayed" stroke={stroke} tunnel={tunnel} />
-				<TunnelVias tunnel={tunnel} stroke={stroke} fill="var(--ss-surface, #ffffff)" />
+				<DataCablePath path={path} length={polylineLength(renderPoints)} temporal="delayed" stroke={stroke} tunnel={hiddenTunnel} />
+				<TunnelVias tunnel={hiddenTunnel} stroke={stroke} fill="var(--ss-surface, #ffffff)" />
 			</SVGContainer>
 		)
 	}
@@ -841,9 +845,10 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		<SVGContainer
 			style={{ opacity }}
 			data-temporal="delayed"
-			data-tunnel={connection.props.tunnel ? 'revealed' : 'off'}
+			data-tunnel={paintedTunnelState}
 		>
 			<DelayedCablePaths path={path} pill={pill} solidBeforePill={solidBeforePill} stroke={stroke} />
+			{tunnelMouths ? <TunnelVias tunnel={tunnelMouths} stroke={stroke} fill="var(--ss-surface, #ffffff)" /> : null}
 			<DelayPill
 				pill={pill}
 				label={delayPillLabel(connection.props.delayValue)}

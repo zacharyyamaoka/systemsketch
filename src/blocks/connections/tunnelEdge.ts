@@ -3,8 +3,9 @@
  *
  * A tunnel is still one ordinary connection. Only its idle presentation
  * changes: the long run leaves the surface while a short stub and outlined
- * via remain at both endpoints. Any context that could reasonably need the
- * route brings it back.
+ * via remain at both endpoints. Hover and selection preview the complete run
+ * without removing those mouths; focusing a layer reveals only that layer and
+ * tunnels every other semantic edge.
  */
 import type { VecLike } from 'tldraw'
 
@@ -16,21 +17,27 @@ export const TUNNEL_STUB_LENGTH = 34
 /** Two readable stubs plus a real hidden middle. Shorter cables stay visible. */
 export const TUNNEL_MIN_PATH_LENGTH = TUNNEL_STUB_LENGTH * 2 + 16
 
-export interface TunnelRevealContext {
+export type TunnelDisplayState = 'off' | 'hidden' | 'preview' | 'revealed'
+
+export interface TunnelDisplayContext {
 	enabled: boolean
-	layerFocused: boolean
-	edgeFocused: boolean
-	endpointFocused: boolean
-	reattaching: boolean
+	layer: string
+	focusedLayer: string | null
+	contextFocused: boolean
 }
 
-/** Whether a tunnel cable should draw its complete route right now. */
-export function tunnelRouteIsRevealed(context: TunnelRevealContext): boolean {
-	if (!context.enabled) return true
-	return context.layerFocused
-		|| context.edgeFocused
-		|| context.endpointFocused
-		|| context.reattaching
+/**
+ * Resolve the four paint states without changing the semantic connection.
+ * Hover/selection previews the complete route but keeps its tunnel mouths.
+ * A focused layer alone removes its own mouths and tunnels every other edge.
+ */
+export function tunnelDisplayState(context: TunnelDisplayContext): TunnelDisplayState {
+	if (context.focusedLayer) {
+		if (context.layer === context.focusedLayer) return 'revealed'
+		return context.contextFocused ? 'preview' : 'hidden'
+	}
+	if (!context.enabled) return 'off'
+	return context.contextFocused ? 'preview' : 'hidden'
 }
 
 export interface TunnelPathPresentation {
