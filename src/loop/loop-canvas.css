@@ -48,11 +48,19 @@
   background: color-mix(in srgb, var(--ss-surface-raised) 92%, transparent);
 }
 
-/* Centred, because an operator's name belongs over the middle of it. */
+/*
+ * Centred, because an operator's name belongs over the middle of it — and
+ * bounded, because the header's three tenants share one row. Every one of them
+ * truncates rather than crossing a neighbour; the full string stays available
+ * as a tooltip.
+ */
 .systemsketch-loop-canvas .Loop-title {
   position: absolute;
   transform: translate(-50%, -50%);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 18px;
   color: var(--ss-text);
@@ -62,16 +70,18 @@
   position: absolute;
   transform: translateY(-50%);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 12.5px;
   color: var(--ss-text-muted);
 }
 
 .systemsketch-loop-canvas .Loop-turn {
   position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   box-sizing: border-box;
+  text-align: center;
+  line-height: 20px;
   border-radius: 11px;
   border: 1px solid var(--ss-accent);
   background: var(--ss-accent-soft);
@@ -79,6 +89,10 @@
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 11px;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 8px;
 }
 
 .systemsketch-loop-canvas .Loop-menuDot {

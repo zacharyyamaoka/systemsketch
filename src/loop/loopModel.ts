@@ -128,10 +128,13 @@ export interface LoopLayout {
 	h: number
 	header: { x: number; y: number; w: number; h: number }
 	footer: { x: number; y: number; w: number; h: number } | null
-	title: { x: number; y: number }
+	/** Centre point AND the band it may fill, so it can truncate rather than collide. */
+	title: { x: number; y: number; w: number }
 	turn: { x: number; y: number; w: number; h: number } | null
 	iterable: LoopPortLayout
 	item: LoopPortLayout
+	/** How wide a port's type label may be before it truncates. */
+	labelMax: number
 	body: { x: number; y: number; w: number; h: number }
 }
 
@@ -146,8 +149,15 @@ export function loopLayout(props: LoopShapeProps): LoopLayout {
 	const headerH = Math.min(LOOP_HEADER_HEIGHT, h)
 	const footerH = h >= headerH + LOOP_FOOTER_HEIGHT + 24 ? LOOP_FOOTER_HEIGHT : 0
 
+	// The header has three tenants on one row — the port type labels on the
+	// left, the centred title, the turn chip on the right — and at 300px wide
+	// with a long turn string they all wanted the same pixels. The QA sweep
+	// caught the title running through the chip and the chip crossing the
+	// region's right edge, so the row is now allocated rather than hoped for.
+	const labelMax = Math.min(Math.max(64, w * 0.3), 220)
+
 	// The collection lands ON the wall, at the header's port row.
-	const iterableY = Math.min(headerH / 2, 28)
+	const iterableY = Math.min(headerH / 2 - 4, 24)
 	const iterable: LoopPortLayout = {
 		port: props.iterable,
 		side: 'input',
@@ -167,23 +177,26 @@ export function loopLayout(props: LoopShapeProps): LoopLayout {
 		side: 'output',
 		x: itemX,
 		y: headerH,
-		label: { x: itemX + LOOP_LABEL_INSET, y: Math.max(12, headerH - 12), anchor: 'start' },
+		label: { x: itemX + LOOP_LABEL_INSET, y: Math.max(iterableY + 18, headerH - 11), anchor: 'start' },
 		elbowSide: 'bottom',
 		facesInward: true,
 	}
 
 	const turnText = props.turn.trim()
-	const turnW = turnText ? Math.min(w * 0.42, labelWidth(turnText) + 20) : 0
-	const turn = turnText ? { x: w - 14 - turnW, y: iterableY - 11, w: turnW, h: 22 } : null
-
-	// The title is centred, but never under the iterable label or the turn chip.
-	const leftGuard = LOOP_LABEL_INSET + labelWidth(props.iterable.type) + 12
-	const rightGuard = turn ? w - turn.x + 12 : 14
-	const centre = w / 2
-	const title = {
-		x: Math.min(Math.max(centre, leftGuard + 30), Math.max(leftGuard + 30, w - rightGuard - 30)),
-		y: iterableY,
+	let turnW = turnText ? Math.min(w * 0.32, labelWidth(turnText) + 20) : 0
+	let bandEnd = (turnW ? w - 14 - turnW : w - 14) - 16
+	const bandStart = LOOP_LABEL_INSET + labelMax + 16
+	// The chip yields first when the row runs out: it reports a live state, and
+	// the title is what identifies the region.
+	if (turnW && bandEnd - bandStart < 60) {
+		turnW = 0
+		bandEnd = w - 14 - 16
 	}
+	const turn = turnW
+		? { x: w - 14 - turnW, y: iterableY - 11, w: turnW, h: 22 }
+		: null
+	const bandW = Math.max(0, bandEnd - bandStart)
+	const title = { x: bandStart + bandW / 2, y: iterableY, w: bandW }
 
 	return {
 		w,
@@ -194,6 +207,7 @@ export function loopLayout(props: LoopShapeProps): LoopLayout {
 		turn,
 		iterable,
 		item,
+		labelMax,
 		body: { x: 0, y: headerH, w, h: Math.max(0, h - headerH - footerH) },
 	}
 }

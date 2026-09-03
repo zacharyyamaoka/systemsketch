@@ -88,7 +88,8 @@
     "test:export": "node tests/tldraw_export_smoke.mjs",
     "test:definitions": "node tests/definition_linking_smoke.mjs",
     "test:expanded-layout-scope": "node tests/expanded_block_layout_scope_smoke.mjs",
-    "test:loop": "node tests/loop_region_smoke.mjs"
+    "test:loop": "node tests/loop_region_smoke.mjs",
+    "test:loop-qa": "node tests/loop_region_qa.mjs"
   },
   "dependencies": {
     "elkjs": "0.12.0",

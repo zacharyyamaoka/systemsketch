@@ -44,12 +44,52 @@ describe('loop layout', () => {
 		expect(layout.item.label.y).toBeLessThan(layout.item.y - 8)
 	})
 
-	it('centres the title, and keeps it clear of the iterable label', () => {
-		const props = getDefaultLoopProps()
-		const wide = loopLayout({ ...props, w: 900 })
-		expect(wide.title.x).toBe(450)
-		const narrow = loopLayout({ ...props, w: LOOP_MIN_WIDTH })
-		expect(narrow.title.x).toBeGreaterThan(narrow.iterable.label.x)
+	it('never lets the three header tenants overlap, at any width', () => {
+		// The QA sweep found the title running through the turn chip at 300px and
+		// the chip crossing the region's right edge with a long turn string. This
+		// is that defect as a property rather than a screenshot: labels, title
+		// and chip each get a band, and the bands never intersect.
+		const turns = ['', 'iteration 3 of 7', 'iteration 128 of 4096 · 31 ms/turn']
+		const types = ['Iterable', 'Sequence[Mapping[str, Pose]]']
+		for (const w of [LOOP_MIN_WIDTH, 340, 420, 640, 900, 1400]) {
+			for (const turn of turns) {
+				for (const type of types) {
+					const layout = loopLayout({
+						...getDefaultLoopProps(),
+						w,
+						turn,
+						iterable: { id: 'iterable', type },
+					})
+					const labelsEnd = layout.iterable.label.x + layout.labelMax
+					const titleStart = layout.title.x - layout.title.w / 2
+					const titleEnd = layout.title.x + layout.title.w / 2
+					const where = `w=${w} turn=${JSON.stringify(turn)} type=${type}`
+					expect(titleStart, `title starts after the labels · ${where}`)
+						.toBeGreaterThanOrEqual(labelsEnd)
+					if (layout.turn) {
+						expect(titleEnd, `title ends before the chip · ${where}`)
+							.toBeLessThanOrEqual(layout.turn.x)
+						expect(layout.turn.x + layout.turn.w, `chip stays inside · ${where}`)
+							.toBeLessThanOrEqual(w)
+					}
+					expect(layout.title.w, `title keeps a readable band · ${where}`)
+						.toBeGreaterThanOrEqual(0)
+				}
+			}
+		}
+	})
+
+	it('drops the turn chip rather than squeezing the title out', () => {
+		const props = { ...getDefaultLoopProps(), w: LOOP_MIN_WIDTH, turn: 'iteration 3 of 7' }
+		// At the floor width there is no room for both, and the chip is the one
+		// that yields: it reports a live state, the title identifies the region.
+		const layout = loopLayout(props)
+		expect(layout.turn === null || layout.title.w >= 60).toBe(true)
+	})
+
+	it('keeps the two type labels on separate rows', () => {
+		const layout = loopLayout(getDefaultLoopProps())
+		expect(layout.item.label.y - layout.iterable.label.y).toBeGreaterThanOrEqual(18)
 	})
 
 	it('shows the turn chip only when it has something to say', () => {

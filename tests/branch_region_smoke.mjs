@@ -216,7 +216,11 @@ async function main() {
     await clickTestId(page, 'systemsketch-tool-system')
     await waitFor(page, `Array.from(document.querySelectorAll('.systemsketch-tool-menu__item')).some((n) => n.textContent.includes('Branch'))`, 'system menu')
     const items = JSON.parse(await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('.systemsketch-tool-menu__item .tlui-button__label')).map((n) => n.textContent.trim()))`))
-    check('BR-3', 'the submenu lists Block, Branch and Pill under one heading', items, ['Block', 'Branch', 'Pill'])
+    // The Loop region joined this family on 2026-09-03, one click deep for the
+    // same reason Branch is: it is used less often than a Block, and the
+    // toolbar rather than the right-click menu is where the habit forms.
+    check('BR-3', 'the submenu lists Block, Branch, Loop and Pill under one heading',
+      items, ['Block', 'Branch', 'Loop', 'Pill'])
     const branchItem = JSON.parse(await evaluate(page, `(() => {
       const item = Array.from(document.querySelectorAll('.systemsketch-tool-menu__item')).find((n) => n.textContent.includes('Branch'))
       const r = item.getBoundingClientRect(); return JSON.stringify({ cx: r.x + r.width / 2, cy: r.y + r.height / 2 })

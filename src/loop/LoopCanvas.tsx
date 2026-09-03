@@ -83,7 +83,11 @@ export function LoopCanvas({ shape }: { shape: LoopShape }) {
 					{layout.footer ? (
 						<div className="Loop-footer" style={{ top: layout.footer.y, height: layout.footer.h }} />
 					) : null}
-					<div className="Loop-title" style={{ left: layout.title.x, top: layout.title.y }}>
+					<div
+						className="Loop-title"
+						style={{ left: layout.title.x, top: layout.title.y, width: layout.title.w }}
+						title={shape.props.title}
+					>
 						{shape.props.title}
 					</div>
 					{layout.turn ? (
@@ -99,8 +103,9 @@ export function LoopCanvas({ shape }: { shape: LoopShape }) {
 						<div
 							key={`${placed.port.id}-label`}
 							className="Loop-portLabel"
-							style={{ left: placed.label.x, top: placed.label.y }}
+							style={{ left: placed.label.x, top: placed.label.y, maxWidth: layout.labelMax }}
 							data-testid={`loop-port-label-${placed.port.id}`}
+							title={placed.port.type}
 						>
 							{placed.port.type}
 						</div>

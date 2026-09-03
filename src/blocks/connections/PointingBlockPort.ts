@@ -230,8 +230,18 @@ export function offerBlockFromPort(editor: Editor, pressed: PointingBlockPortInf
 	const created = createConnectionFromPort(editor, pressed, origin)
 	if (!created) return
 
+	// The offered Block goes where the cable is already pointing. A Block's
+	// ports face left and right, so the old x-only rule was the whole truth for
+	// them; a region's header port faces DOWN, and offering its consumer off to
+	// the right put the picker on top of the header it just left.
+	const port = getLiveBlockPorts(editor, pressed.shapeId)
+		.find((candidate) => candidate.id === pressed.portId)
 	const direction = blockPickerDirection(polarity)
-	const target = new Vec(origin.x + direction * BLOCK_PICKER_SPACING_PX, origin.y)
+	const target = port?.elbowSide === 'bottom'
+		? new Vec(origin.x, origin.y + BLOCK_PICKER_SPACING_PX)
+		: port?.elbowSide === 'top'
+			? new Vec(origin.x, origin.y - BLOCK_PICKER_SPACING_PX)
+			: new Vec(origin.x + direction * BLOCK_PICKER_SPACING_PX, origin.y)
 	const shape = editor.getShape<ConnectionShape>(created.connectionId)
 	if (shape) {
 		const local = editor.getPointInShapeSpace(shape, target)

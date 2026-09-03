@@ -2,6 +2,7 @@ import type { Editor, TLParentId, TLShape, TLShapeId } from 'tldraw'
 
 import { canBlockContainChildren, isBlockShape } from '../blockModel'
 import { isBranchShape } from '../../branch/branchModel'
+import { isLoopShape } from '../../loop/loopModel'
 import { isImportedPageFrame } from '../../singlePageDocument'
 import type { PortDot, PortFace } from './connectionModel'
 
@@ -92,7 +93,12 @@ export function anchorFaceForScope(
 	scopeId: TLParentId,
 ): PortFace | null {
 	const shape = editor.getShape(anchor.shapeId)
-	if (!isBlockShape(shape) && !isBranchShape(shape)) return null
+	// Every port host, not a hand-written list of two. Spelling the hosts out
+	// here is what made a TAP on a Loop's item port do nothing while a drag
+	// from the same dot worked: `offerBlockForLooseTerminal` asks this function
+	// for a face, got null, and bailed silently. The QA sweep caught it by
+	// running the same tap on a Block port as a control.
+	if (!isBlockShape(shape) && !isBranchShape(shape) && !isLoopShape(shape)) return null
 	if (scopeId === shape.id) return hostIsLiveScope(shape) ? 'inner' : null
 	if (scopeId === blockScopeId(editor, shape.id)) return 'outer'
 	return null

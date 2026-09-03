@@ -1,0 +1,19 @@
+{
+  "observations": [
+    {
+      "case": "tap-port",
+      "note": "picker on a Loop port=1, on a Block port=1 · opens 65px below",
+      "picker": 1,
+      "control": 1,
+      "below": {
+        "dy": 65,
+        "dx": 6
+      }
+    },
+    {
+      "case": "console",
+      "note": "local errors=0",
+      "errors": []
+    }
+  ]
+}
