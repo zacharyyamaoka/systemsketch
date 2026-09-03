@@ -26,6 +26,7 @@ import {
   delay,
   ensureDir,
   evaluate,
+  key,
   localConsoleErrors,
   openApp,
   startApp,
@@ -221,13 +222,16 @@ async function main() {
     await delay(500)
     const identity = await box(page, '.systemsketch-file-title')
     await clickAt(page, identity.cx, identity.cy)
-    await waitFor(page, `document.querySelector('.systemsketch-workspace-dialog')`, 'the rename dialog')
-    check('RENAME-KEEPS-THE-TYPE', 'renaming a .systemsketch offers .systemsketch, not .tldr',
-      await evaluate(page,
-        `document.querySelector('.systemsketch-workspace-name-field span')?.textContent`),
-      '.systemsketch')
-    await shot(page, 'file-type-rename-dialog.png')
-    await clickAt(page, 200, 900)
+    await waitFor(page, `document.querySelector('.systemsketch-file-title-input')`, 'the inline rename field')
+    check('RENAME-KEEPS-THE-TYPE', 'renaming starts inline while the current .systemsketch identity remains visible in the board URL',
+      await evaluate(page, `JSON.stringify({
+        modal: Boolean(document.querySelector('.systemsketch-workspace-dialog')),
+        value: document.querySelector('.systemsketch-file-title-input')?.value,
+        path: new URL(location.href).searchParams.get('board'),
+      })`).then(JSON.parse),
+      { modal: false, value: 'Pipeline', path: sketchPath })
+    await shot(page, 'file-type-inline-rename.png')
+    await key(page, 'Escape', 'Escape')
     await delay(300)
 
     // ---------------------------------------------------------------- 5 -----

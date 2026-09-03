@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-09-02T21:59:04.952Z",
+  "ranAt": "2026-09-03T22:32:22.158Z",
   "themes": [
     {
       "id": "systemsketch:light",
@@ -27,15 +27,15 @@
           "ok": true
         },
         {
-          "label": "timer chip",
-          "selector": ".systemsketch-timer",
-          "kind": "text",
-          "threshold": 4.5,
+          "label": "comments button",
+          "selector": ".systemsketch-top-right-shell .systemsketch-shell-icon-button",
+          "kind": "icon",
+          "threshold": 3,
           "found": true,
-          "fg": "#666b6f",
-          "bg": "#edf0f2",
-          "ratio": 4.69,
-          "text": "◉ 03:00",
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.28,
+          "text": "",
           "ok": true
         },
         {
@@ -76,7 +76,7 @@
           "ok": true
         },
         {
-          "label": "System tool-family button",
+          "label": "Block and Branch family button",
           "selector": "[data-testid=\"systemsketch-tool-system\"]",
           "kind": "icon",
           "threshold": 3,
@@ -144,7 +144,7 @@
           "fg": "#2e2e2e",
           "bg": "#edf0f2",
           "ratio": 11.86,
-          "text": "",
+          "text": "Theme probe",
           "ok": true
         },
         {
@@ -156,16 +156,8 @@
           "fg": "#2e2e2e @ 0.55",
           "bg": "#edf0f2",
           "ratio": 3.22,
-          "text": "",
+          "text": "Theme probe",
           "ok": true
-        },
-        {
-          "label": "selection pill count",
-          "selector": ".systemsketch-selection-menu[data-visible=\"true\"] .systemsketch-selection-count, .systemsketch-selection-menu[data-visible=\"true\"] .block-mini-menu__count",
-          "kind": "text",
-          "threshold": 4.5,
-          "optional": true,
-          "found": false
         },
         {
           "label": "selection pill button",
@@ -209,6 +201,18 @@
           "bg": "#fcfcfc",
           "ratio": 13.24,
           "text": "Settings",
+          "ok": true
+        },
+        {
+          "label": "Settings outline icon",
+          "selector": "[data-testid=\"main-menu.settings\"] svg",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.24,
+          "text": "",
           "ok": true
         },
         {
@@ -256,7 +260,7 @@
           "fg": "#666b6f",
           "bg": "#edf0f2",
           "ratio": 4.69,
-          "text": "Interface",
+          "text": "GeneralLater",
           "ok": true
         },
         {
@@ -342,12 +346,229 @@
           "ratio": 13.24,
           "text": "",
           "ok": true
+        },
+        {
+          "label": "inline rename field text",
+          "selector": ".systemsketch-file-title-input",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.24,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "inline rename field boundary",
+          "selector": ".systemsketch-file-title-input",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#3182ed",
+          "bg": "#fcfcfc",
+          "ratio": 3.69,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "workspace sidebar section heading",
+          "selector": ".systemsketch-workspace-browser > aside > strong",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "Places",
+          "ok": true
+        },
+        {
+          "label": "workspace place label",
+          "selector": "[data-testid=\"workspace-place\"] span",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "SystemSketch",
+          "ok": true
+        },
+        {
+          "label": "workspace place path",
+          "selector": "[data-testid=\"workspace-place\"] small",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "ok": true
+        },
+        {
+          "label": "workspace recent label",
+          "selector": "[data-testid=\"workspace-recent\"] span",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "workspace recent path",
+          "selector": "[data-testid=\"workspace-recent\"] small",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "ok": true
+        },
+        {
+          "label": "workspace parent-folder icon",
+          "selector": "[data-testid=\"workspace-parent\"]",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "←",
+          "ok": true
+        },
+        {
+          "label": "workspace breadcrumb link",
+          "selector": ".systemsketch-workspace-crumbs button:not(:disabled)",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "theme-contrast-files-IcITta",
+          "ok": true
+        },
+        {
+          "label": "workspace current breadcrumb",
+          "selector": ".systemsketch-workspace-crumbs button:disabled",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "SystemSketch",
+          "ok": true
+        },
+        {
+          "label": "workspace filter text",
+          "selector": ".systemsketch-workspace-search",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "visible",
+          "ok": true
+        },
+        {
+          "label": "workspace filter placeholder",
+          "selector": ".systemsketch-workspace-search",
+          "kind": "text",
+          "threshold": 4.5,
+          "foregroundPseudo": "::placeholder",
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "visible",
+          "ok": true
+        },
+        {
+          "label": "workspace filter boundary",
+          "selector": ".systemsketch-workspace-search",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "visible",
+          "ok": true
+        },
+        {
+          "label": "workspace empty-state text",
+          "selector": ".systemsketch-workspace-file-list__empty",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "Nothing here matches “visible”.",
+          "ok": true
+        },
+        {
+          "label": "workspace footer action",
+          "selector": ".systemsketch-workspace-dialog > footer > button",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "Cancel",
+          "ok": true
+        },
+        {
+          "label": "command-palette search text",
+          "selector": ".systemsketch-command-palette__search input",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.24,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "command-palette search boundary",
+          "selector": ".systemsketch-command-palette__search",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#3182ed",
+          "bg": "#fcfcfc",
+          "ratio": 3.69,
+          "text": "⌕Search commandsEsc",
+          "ok": true
         }
       ],
       "screenshots": [
         "docs/assets/theme-systemsketch-light.png",
-        "docs/assets/theme-systemsketch-light-settings.png"
-      ]
+        "docs/assets/theme-systemsketch-light-settings.png",
+        "docs/assets/theme-systemsketch-light-rename.png",
+        "docs/assets/theme-systemsketch-light-workspace-filter.png"
+      ],
+      "gearPaint": {
+        "fill": "none",
+        "stroke": "rgb(46, 46, 46)",
+        "strokeWidth": "2px"
+      },
+      "renameInputStyle": {
+        "color": "rgb(46, 46, 46)",
+        "caret": "rgb(46, 46, 46)",
+        "fontFamily": "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+      }
     },
     {
       "id": "systemsketch:dark",
@@ -375,15 +596,15 @@
           "ok": true
         },
         {
-          "label": "timer chip",
-          "selector": ".systemsketch-timer",
-          "kind": "text",
-          "threshold": 4.5,
+          "label": "comments button",
+          "selector": ".systemsketch-top-right-shell .systemsketch-shell-icon-button",
+          "kind": "icon",
+          "threshold": 3,
           "found": true,
-          "fg": "#c0c3c5",
-          "bg": "#1a1a1c",
-          "ratio": 9.79,
-          "text": "◉ 03:00",
+          "fg": "#d9d9d9",
+          "bg": "#1f2024",
+          "ratio": 11.54,
+          "text": "",
           "ok": true
         },
         {
@@ -424,7 +645,7 @@
           "ok": true
         },
         {
-          "label": "System tool-family button",
+          "label": "Block and Branch family button",
           "selector": "[data-testid=\"systemsketch-tool-system\"]",
           "kind": "icon",
           "threshold": 3,
@@ -492,7 +713,7 @@
           "fg": "#d9d9d9",
           "bg": "#1a1a1c",
           "ratio": 12.31,
-          "text": "",
+          "text": "Theme probe",
           "ok": true
         },
         {
@@ -504,16 +725,8 @@
           "fg": "#d9d9d9 @ 0.55",
           "bg": "#1a1a1c",
           "ratio": 4.58,
-          "text": "",
+          "text": "Theme probe",
           "ok": true
-        },
-        {
-          "label": "selection pill count",
-          "selector": ".systemsketch-selection-menu[data-visible=\"true\"] .systemsketch-selection-count, .systemsketch-selection-menu[data-visible=\"true\"] .block-mini-menu__count",
-          "kind": "text",
-          "threshold": 4.5,
-          "optional": true,
-          "found": false
         },
         {
           "label": "selection pill button",
@@ -557,6 +770,18 @@
           "bg": "#202025",
           "ratio": 11.49,
           "text": "Settings",
+          "ok": true
+        },
+        {
+          "label": "Settings outline icon",
+          "selector": "[data-testid=\"main-menu.settings\"] svg",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#202025",
+          "ratio": 11.49,
+          "text": "",
           "ok": true
         },
         {
@@ -604,7 +829,7 @@
           "fg": "#c0c3c5",
           "bg": "#1a1a1c",
           "ratio": 9.79,
-          "text": "Interface",
+          "text": "GeneralLater",
           "ok": true
         },
         {
@@ -690,12 +915,228 @@
           "ratio": 11.49,
           "text": "",
           "ok": true
+        },
+        {
+          "label": "inline rename field text",
+          "selector": ".systemsketch-file-title-input",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#202025",
+          "ratio": 11.49,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "inline rename field boundary",
+          "selector": ".systemsketch-file-title-input",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#4387f4",
+          "bg": "#202025",
+          "ratio": 4.64,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "workspace sidebar section heading",
+          "selector": ".systemsketch-workspace-browser > aside > strong",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "Places",
+          "ok": true
+        },
+        {
+          "label": "workspace place label",
+          "selector": "[data-testid=\"workspace-place\"] span",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "SystemSketch",
+          "ok": true
+        },
+        {
+          "label": "workspace place path",
+          "selector": "[data-testid=\"workspace-place\"] small",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "ok": true
+        },
+        {
+          "label": "workspace recent label",
+          "selector": "[data-testid=\"workspace-recent\"] span",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "workspace recent path",
+          "selector": "[data-testid=\"workspace-recent\"] small",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "ok": true
+        },
+        {
+          "label": "workspace parent-folder icon",
+          "selector": "[data-testid=\"workspace-parent\"]",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "←",
+          "ok": true
+        },
+        {
+          "label": "workspace breadcrumb link",
+          "selector": ".systemsketch-workspace-crumbs button:not(:disabled)",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "theme-contrast-files-IcITta",
+          "ok": true
+        },
+        {
+          "label": "workspace current breadcrumb",
+          "selector": ".systemsketch-workspace-crumbs button:disabled",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "SystemSketch",
+          "ok": true
+        },
+        {
+          "label": "workspace filter text",
+          "selector": ".systemsketch-workspace-search",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "visible",
+          "ok": true
+        },
+        {
+          "label": "workspace filter placeholder",
+          "selector": ".systemsketch-workspace-search",
+          "kind": "text",
+          "threshold": 4.5,
+          "foregroundPseudo": "::placeholder",
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "visible",
+          "ok": true
+        },
+        {
+          "label": "workspace filter boundary",
+          "selector": ".systemsketch-workspace-search",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "visible",
+          "ok": true
+        },
+        {
+          "label": "workspace empty-state text",
+          "selector": ".systemsketch-workspace-file-list__empty",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "Nothing here matches “visible”.",
+          "ok": true
+        },
+        {
+          "label": "workspace footer action",
+          "selector": ".systemsketch-workspace-dialog > footer > button",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "Cancel",
+          "ok": true
+        },
+        {
+          "label": "command-palette search text",
+          "selector": ".systemsketch-command-palette__search input",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#d9d9d9",
+          "bg": "#202025",
+          "ratio": 11.49,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "command-palette search boundary",
+          "selector": ".systemsketch-command-palette__search",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#4387f4",
+          "bg": "#202025",
+          "ratio": 4.64,
+          "text": "⌕Search commandsEsc",
+          "ok": true
         }
       ],
       "screenshots": [
         "docs/assets/theme-systemsketch-dark.png",
-        "docs/assets/theme-systemsketch-dark-settings.png"
-      ]
+        "docs/assets/theme-systemsketch-dark-settings.png",
+        "docs/assets/theme-systemsketch-dark-rename.png"
+      ],
+      "gearPaint": {
+        "fill": "none",
+        "stroke": "rgb(217, 217, 217)",
+        "strokeWidth": "2px"
+      },
+      "renameInputStyle": {
+        "color": "rgb(217, 217, 217)",
+        "caret": "rgb(217, 217, 217)",
+        "fontFamily": "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+      }
     },
     {
       "id": "obsidian-light",
@@ -723,15 +1164,15 @@
           "ok": true
         },
         {
-          "label": "timer chip",
-          "selector": ".systemsketch-timer",
-          "kind": "text",
-          "threshold": 4.5,
+          "label": "comments button",
+          "selector": ".systemsketch-top-right-shell .systemsketch-shell-icon-button",
+          "kind": "icon",
+          "threshold": 3,
           "found": true,
-          "fg": "#5c5c5c",
-          "bg": "#ffffff",
-          "ratio": 6.69,
-          "text": "◉ 03:00",
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.77,
+          "text": "",
           "ok": true
         },
         {
@@ -772,7 +1213,7 @@
           "ok": true
         },
         {
-          "label": "System tool-family button",
+          "label": "Block and Branch family button",
           "selector": "[data-testid=\"systemsketch-tool-system\"]",
           "kind": "icon",
           "threshold": 3,
@@ -840,7 +1281,7 @@
           "fg": "#222222",
           "bg": "#ffffff",
           "ratio": 15.91,
-          "text": "",
+          "text": "Theme probe",
           "ok": true
         },
         {
@@ -852,16 +1293,8 @@
           "fg": "#222222 @ 0.55",
           "bg": "#ffffff",
           "ratio": 3.67,
-          "text": "",
+          "text": "Theme probe",
           "ok": true
-        },
-        {
-          "label": "selection pill count",
-          "selector": ".systemsketch-selection-menu[data-visible=\"true\"] .systemsketch-selection-count, .systemsketch-selection-menu[data-visible=\"true\"] .block-mini-menu__count",
-          "kind": "text",
-          "threshold": 4.5,
-          "optional": true,
-          "found": false
         },
         {
           "label": "selection pill button",
@@ -905,6 +1338,18 @@
           "bg": "#f6f6f6",
           "ratio": 14.72,
           "text": "Settings",
+          "ok": true
+        },
+        {
+          "label": "Settings outline icon",
+          "selector": "[data-testid=\"main-menu.settings\"] svg",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.72,
+          "text": "",
           "ok": true
         },
         {
@@ -952,7 +1397,7 @@
           "fg": "#5c5c5c",
           "bg": "#ffffff",
           "ratio": 6.69,
-          "text": "Interface",
+          "text": "GeneralLater",
           "ok": true
         },
         {
@@ -1038,12 +1483,228 @@
           "ratio": 14.72,
           "text": "",
           "ok": true
+        },
+        {
+          "label": "inline rename field text",
+          "selector": ".systemsketch-file-title-input",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.72,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "inline rename field boundary",
+          "selector": ".systemsketch-file-title-input",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#9873f7",
+          "bg": "#f6f6f6",
+          "ratio": 3.17,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "workspace sidebar section heading",
+          "selector": ".systemsketch-workspace-browser > aside > strong",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "Places",
+          "ok": true
+        },
+        {
+          "label": "workspace place label",
+          "selector": "[data-testid=\"workspace-place\"] span",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "SystemSketch",
+          "ok": true
+        },
+        {
+          "label": "workspace place path",
+          "selector": "[data-testid=\"workspace-place\"] small",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "ok": true
+        },
+        {
+          "label": "workspace recent label",
+          "selector": "[data-testid=\"workspace-recent\"] span",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "workspace recent path",
+          "selector": "[data-testid=\"workspace-recent\"] small",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "ok": true
+        },
+        {
+          "label": "workspace parent-folder icon",
+          "selector": "[data-testid=\"workspace-parent\"]",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "←",
+          "ok": true
+        },
+        {
+          "label": "workspace breadcrumb link",
+          "selector": ".systemsketch-workspace-crumbs button:not(:disabled)",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "theme-contrast-files-IcITta",
+          "ok": true
+        },
+        {
+          "label": "workspace current breadcrumb",
+          "selector": ".systemsketch-workspace-crumbs button:disabled",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "SystemSketch",
+          "ok": true
+        },
+        {
+          "label": "workspace filter text",
+          "selector": ".systemsketch-workspace-search",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "visible",
+          "ok": true
+        },
+        {
+          "label": "workspace filter placeholder",
+          "selector": ".systemsketch-workspace-search",
+          "kind": "text",
+          "threshold": 4.5,
+          "foregroundPseudo": "::placeholder",
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "visible",
+          "ok": true
+        },
+        {
+          "label": "workspace filter boundary",
+          "selector": ".systemsketch-workspace-search",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "visible",
+          "ok": true
+        },
+        {
+          "label": "workspace empty-state text",
+          "selector": ".systemsketch-workspace-file-list__empty",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "Nothing here matches “visible”.",
+          "ok": true
+        },
+        {
+          "label": "workspace footer action",
+          "selector": ".systemsketch-workspace-dialog > footer > button",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "Cancel",
+          "ok": true
+        },
+        {
+          "label": "command-palette search text",
+          "selector": ".systemsketch-command-palette__search input",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.72,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "command-palette search boundary",
+          "selector": ".systemsketch-command-palette__search",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#9873f7",
+          "bg": "#f6f6f6",
+          "ratio": 3.17,
+          "text": "⌕Search commandsEsc",
+          "ok": true
         }
       ],
       "screenshots": [
         "docs/assets/theme-obsidian-light.png",
-        "docs/assets/theme-obsidian-light-settings.png"
-      ]
+        "docs/assets/theme-obsidian-light-settings.png",
+        "docs/assets/theme-obsidian-light-rename.png"
+      ],
+      "gearPaint": {
+        "fill": "none",
+        "stroke": "rgb(34, 34, 34)",
+        "strokeWidth": "2px"
+      },
+      "renameInputStyle": {
+        "color": "rgb(34, 34, 34)",
+        "caret": "rgb(34, 34, 34)",
+        "fontFamily": "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+      }
     },
     {
       "id": "obsidian-dark",
@@ -1071,15 +1732,15 @@
           "ok": true
         },
         {
-          "label": "timer chip",
-          "selector": ".systemsketch-timer",
-          "kind": "text",
-          "threshold": 4.5,
+          "label": "comments button",
+          "selector": ".systemsketch-top-right-shell .systemsketch-shell-icon-button",
+          "kind": "icon",
+          "threshold": 3,
           "found": true,
-          "fg": "#b3b3b3",
-          "bg": "#2e2e2e",
-          "ratio": 6.48,
-          "text": "◉ 03:00",
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.61,
+          "text": "",
           "ok": true
         },
         {
@@ -1120,7 +1781,7 @@
           "ok": true
         },
         {
-          "label": "System tool-family button",
+          "label": "Block and Branch family button",
           "selector": "[data-testid=\"systemsketch-tool-system\"]",
           "kind": "icon",
           "threshold": 3,
@@ -1188,7 +1849,7 @@
           "fg": "#dadada",
           "bg": "#2e2e2e",
           "ratio": 9.71,
-          "text": "",
+          "text": "Theme probe",
           "ok": true
         },
         {
@@ -1200,16 +1861,8 @@
           "fg": "#dadada @ 0.55",
           "bg": "#2e2e2e",
           "ratio": 4.07,
-          "text": "",
+          "text": "Theme probe",
           "ok": true
-        },
-        {
-          "label": "selection pill count",
-          "selector": ".systemsketch-selection-menu[data-visible=\"true\"] .systemsketch-selection-count, .systemsketch-selection-menu[data-visible=\"true\"] .block-mini-menu__count",
-          "kind": "text",
-          "threshold": 4.5,
-          "optional": true,
-          "found": false
         },
         {
           "label": "selection pill button",
@@ -1253,6 +1906,18 @@
           "bg": "#282828",
           "ratio": 10.55,
           "text": "Settings",
+          "ok": true
+        },
+        {
+          "label": "Settings outline icon",
+          "selector": "[data-testid=\"main-menu.settings\"] svg",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.55,
+          "text": "",
           "ok": true
         },
         {
@@ -1300,7 +1965,7 @@
           "fg": "#b3b3b3",
           "bg": "#2e2e2e",
           "ratio": 6.48,
-          "text": "Interface",
+          "text": "GeneralLater",
           "ok": true
         },
         {
@@ -1386,12 +2051,228 @@
           "ratio": 10.55,
           "text": "",
           "ok": true
+        },
+        {
+          "label": "inline rename field text",
+          "selector": ".systemsketch-file-title-input",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.55,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "inline rename field boundary",
+          "selector": ".systemsketch-file-title-input",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#8a5cf5",
+          "bg": "#282828",
+          "ratio": 3.46,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "workspace sidebar section heading",
+          "selector": ".systemsketch-workspace-browser > aside > strong",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "Places",
+          "ok": true
+        },
+        {
+          "label": "workspace place label",
+          "selector": "[data-testid=\"workspace-place\"] span",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "SystemSketch",
+          "ok": true
+        },
+        {
+          "label": "workspace place path",
+          "selector": "[data-testid=\"workspace-place\"] small",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "ok": true
+        },
+        {
+          "label": "workspace recent label",
+          "selector": "[data-testid=\"workspace-recent\"] span",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "workspace recent path",
+          "selector": "[data-testid=\"workspace-recent\"] small",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "ok": true
+        },
+        {
+          "label": "workspace parent-folder icon",
+          "selector": "[data-testid=\"workspace-parent\"]",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "←",
+          "ok": true
+        },
+        {
+          "label": "workspace breadcrumb link",
+          "selector": ".systemsketch-workspace-crumbs button:not(:disabled)",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "theme-contrast-files-IcITta",
+          "ok": true
+        },
+        {
+          "label": "workspace current breadcrumb",
+          "selector": ".systemsketch-workspace-crumbs button:disabled",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "SystemSketch",
+          "ok": true
+        },
+        {
+          "label": "workspace filter text",
+          "selector": ".systemsketch-workspace-search",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "visible",
+          "ok": true
+        },
+        {
+          "label": "workspace filter placeholder",
+          "selector": ".systemsketch-workspace-search",
+          "kind": "text",
+          "threshold": 4.5,
+          "foregroundPseudo": "::placeholder",
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "visible",
+          "ok": true
+        },
+        {
+          "label": "workspace filter boundary",
+          "selector": ".systemsketch-workspace-search",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "visible",
+          "ok": true
+        },
+        {
+          "label": "workspace empty-state text",
+          "selector": ".systemsketch-workspace-file-list__empty",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "Nothing here matches “visible”.",
+          "ok": true
+        },
+        {
+          "label": "workspace footer action",
+          "selector": ".systemsketch-workspace-dialog > footer > button",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "Cancel",
+          "ok": true
+        },
+        {
+          "label": "command-palette search text",
+          "selector": ".systemsketch-command-palette__search input",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.55,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "command-palette search boundary",
+          "selector": ".systemsketch-command-palette__search",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#8a5cf5",
+          "bg": "#282828",
+          "ratio": 3.46,
+          "text": "⌕Search commandsEsc",
+          "ok": true
         }
       ],
       "screenshots": [
         "docs/assets/theme-obsidian-dark.png",
-        "docs/assets/theme-obsidian-dark-settings.png"
-      ]
+        "docs/assets/theme-obsidian-dark-settings.png",
+        "docs/assets/theme-obsidian-dark-rename.png"
+      ],
+      "gearPaint": {
+        "fill": "none",
+        "stroke": "rgb(218, 218, 218)",
+        "strokeWidth": "2px"
+      },
+      "renameInputStyle": {
+        "color": "rgb(218, 218, 218)",
+        "caret": "rgb(218, 218, 218)",
+        "fontFamily": "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+      }
     },
     {
       "id": "dark-modern",
@@ -1419,15 +2300,15 @@
           "ok": true
         },
         {
-          "label": "timer chip",
-          "selector": ".systemsketch-timer",
-          "kind": "text",
-          "threshold": 4.5,
+          "label": "comments button",
+          "selector": ".systemsketch-top-right-shell .systemsketch-shell-icon-button",
+          "kind": "icon",
+          "threshold": 3,
           "found": true,
-          "fg": "#9d9d9d",
-          "bg": "#313131",
-          "ratio": 4.8,
-          "text": "◉ 03:00",
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
+          "text": "",
           "ok": true
         },
         {
@@ -1468,7 +2349,7 @@
           "ok": true
         },
         {
-          "label": "System tool-family button",
+          "label": "Block and Branch family button",
           "selector": "[data-testid=\"systemsketch-tool-system\"]",
           "kind": "icon",
           "threshold": 3,
@@ -1536,7 +2417,7 @@
           "fg": "#cccccc",
           "bg": "#313131",
           "ratio": 8.1,
-          "text": "",
+          "text": "Theme probe",
           "ok": true
         },
         {
@@ -1548,16 +2429,8 @@
           "fg": "#cccccc @ 0.55",
           "bg": "#313131",
           "ratio": 3.59,
-          "text": "",
+          "text": "Theme probe",
           "ok": true
-        },
-        {
-          "label": "selection pill count",
-          "selector": ".systemsketch-selection-menu[data-visible=\"true\"] .systemsketch-selection-count, .systemsketch-selection-menu[data-visible=\"true\"] .block-mini-menu__count",
-          "kind": "text",
-          "threshold": 4.5,
-          "optional": true,
-          "found": false
         },
         {
           "label": "selection pill button",
@@ -1601,6 +2474,18 @@
           "bg": "#202020",
           "ratio": 10.15,
           "text": "Settings",
+          "ok": true
+        },
+        {
+          "label": "Settings outline icon",
+          "selector": "[data-testid=\"main-menu.settings\"] svg",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
+          "text": "",
           "ok": true
         },
         {
@@ -1648,7 +2533,7 @@
           "fg": "#9d9d9d",
           "bg": "#313131",
           "ratio": 4.8,
-          "text": "Interface",
+          "text": "GeneralLater",
           "ok": true
         },
         {
@@ -1734,12 +2619,228 @@
           "ratio": 10.15,
           "text": "",
           "ok": true
+        },
+        {
+          "label": "inline rename field text",
+          "selector": ".systemsketch-file-title-input",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "inline rename field boundary",
+          "selector": ".systemsketch-file-title-input",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#0078d4",
+          "bg": "#202020",
+          "ratio": 3.6,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "workspace sidebar section heading",
+          "selector": ".systemsketch-workspace-browser > aside > strong",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "Places",
+          "ok": true
+        },
+        {
+          "label": "workspace place label",
+          "selector": "[data-testid=\"workspace-place\"] span",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "SystemSketch",
+          "ok": true
+        },
+        {
+          "label": "workspace place path",
+          "selector": "[data-testid=\"workspace-place\"] small",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "ok": true
+        },
+        {
+          "label": "workspace recent label",
+          "selector": "[data-testid=\"workspace-recent\"] span",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "theme-contrast",
+          "ok": true
+        },
+        {
+          "label": "workspace recent path",
+          "selector": "[data-testid=\"workspace-recent\"] small",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "ok": true
+        },
+        {
+          "label": "workspace parent-folder icon",
+          "selector": "[data-testid=\"workspace-parent\"]",
+          "kind": "icon",
+          "threshold": 3,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "←",
+          "ok": true
+        },
+        {
+          "label": "workspace breadcrumb link",
+          "selector": ".systemsketch-workspace-crumbs button:not(:disabled)",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "theme-contrast-files-IcITta",
+          "ok": true
+        },
+        {
+          "label": "workspace current breadcrumb",
+          "selector": ".systemsketch-workspace-crumbs button:disabled",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "SystemSketch",
+          "ok": true
+        },
+        {
+          "label": "workspace filter text",
+          "selector": ".systemsketch-workspace-search",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "visible",
+          "ok": true
+        },
+        {
+          "label": "workspace filter placeholder",
+          "selector": ".systemsketch-workspace-search",
+          "kind": "text",
+          "threshold": 4.5,
+          "foregroundPseudo": "::placeholder",
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "visible",
+          "ok": true
+        },
+        {
+          "label": "workspace filter boundary",
+          "selector": ".systemsketch-workspace-search",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "visible",
+          "ok": true
+        },
+        {
+          "label": "workspace empty-state text",
+          "selector": ".systemsketch-workspace-file-list__empty",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "Nothing here matches “visible”.",
+          "ok": true
+        },
+        {
+          "label": "workspace footer action",
+          "selector": ".systemsketch-workspace-dialog > footer > button",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#000000",
+          "bg": "#ffffff",
+          "ratio": 21,
+          "text": "Cancel",
+          "ok": true
+        },
+        {
+          "label": "command-palette search text",
+          "selector": ".systemsketch-command-palette__search input",
+          "kind": "text",
+          "threshold": 4.5,
+          "found": true,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
+          "text": "",
+          "ok": true
+        },
+        {
+          "label": "command-palette search boundary",
+          "selector": ".systemsketch-command-palette__search",
+          "kind": "boundary",
+          "threshold": 3,
+          "found": true,
+          "fg": "#0078d4",
+          "bg": "#202020",
+          "ratio": 3.6,
+          "text": "⌕Search commandsEsc",
+          "ok": true
         }
       ],
       "screenshots": [
         "docs/assets/theme-dark-modern.png",
-        "docs/assets/theme-dark-modern-settings.png"
-      ]
+        "docs/assets/theme-dark-modern-settings.png",
+        "docs/assets/theme-dark-modern-rename.png"
+      ],
+      "gearPaint": {
+        "fill": "none",
+        "stroke": "rgb(204, 204, 204)",
+        "strokeWidth": "2px"
+      },
+      "renameInputStyle": {
+        "color": "rgb(204, 204, 204)",
+        "caret": "rgb(204, 204, 204)",
+        "fontFamily": "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+      }
     }
   ],
   "checks": [
@@ -1764,11 +2865,19 @@
       "ok": true
     },
     {
+      "label": "Light: Settings uses a stroked outline gear (2px)",
+      "ok": true
+    },
+    {
+      "label": "Light: workspace text and caret share theme ink in the app typeface",
+      "ok": true
+    },
+    {
       "label": "Light: file title, top-left shell 13.28:1 (≥ 4.5) #2e2e2e on #fcfcfc",
       "ok": true
     },
     {
-      "label": "Light: timer chip 4.69:1 (≥ 4.5) #666b6f on #edf0f2",
+      "label": "Light: comments button 13.28:1 (≥ 3) #2e2e2e on #fcfcfc",
       "ok": true
     },
     {
@@ -1784,7 +2893,7 @@
       "ok": true
     },
     {
-      "label": "Light: System tool-family button 13.28:1 (≥ 3) #2e2e2e on #fcfcfc",
+      "label": "Light: Block and Branch family button 13.28:1 (≥ 3) #2e2e2e on #fcfcfc",
       "ok": true
     },
     {
@@ -1821,6 +2930,10 @@
     },
     {
       "label": "Light: main menu item (tldraw menu) 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: Settings outline icon 13.24:1 (≥ 3) #2e2e2e on #fcfcfc",
       "ok": true
     },
     {
@@ -1868,7 +2981,83 @@
       "ok": true
     },
     {
+      "label": "Light: inline rename field text 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: inline rename field boundary 3.69:1 (≥ 3) #3182ed on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: workspace sidebar section heading 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Light: workspace place label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Light: workspace place path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Light: workspace recent label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Light: workspace recent path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Light: workspace parent-folder icon 21:1 (≥ 3) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Light: workspace breadcrumb link 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Light: workspace current breadcrumb 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Light: workspace filter text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Light: workspace filter placeholder 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Light: workspace filter boundary 21:1 (≥ 3) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Light: workspace empty-state text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Light: workspace footer action 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Light: command-palette search text 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc",
+      "ok": true
+    },
+    {
+      "label": "Light: command-palette search boundary 3.69:1 (≥ 3) #3182ed on #fcfcfc",
+      "ok": true
+    },
+    {
       "label": "Dark: root systemsketch/dark, tldraw dark, canvas rgb(16, 16, 17)",
+      "ok": true
+    },
+    {
+      "label": "Dark: Settings uses a stroked outline gear (2px)",
+      "ok": true
+    },
+    {
+      "label": "Dark: workspace text and caret share theme ink in the app typeface",
       "ok": true
     },
     {
@@ -1876,7 +3065,7 @@
       "ok": true
     },
     {
-      "label": "Dark: timer chip 9.79:1 (≥ 4.5) #c0c3c5 on #1a1a1c",
+      "label": "Dark: comments button 11.54:1 (≥ 3) #d9d9d9 on #1f2024",
       "ok": true
     },
     {
@@ -1892,7 +3081,7 @@
       "ok": true
     },
     {
-      "label": "Dark: System tool-family button 11.51:1 (≥ 3) #d9d9d9 on #202024",
+      "label": "Dark: Block and Branch family button 11.51:1 (≥ 3) #d9d9d9 on #202024",
       "ok": true
     },
     {
@@ -1929,6 +3118,10 @@
     },
     {
       "label": "Dark: main menu item (tldraw menu) 11.49:1 (≥ 4.5) #d9d9d9 on #202025",
+      "ok": true
+    },
+    {
+      "label": "Dark: Settings outline icon 11.49:1 (≥ 3) #d9d9d9 on #202025",
       "ok": true
     },
     {
@@ -1976,7 +3169,83 @@
       "ok": true
     },
     {
+      "label": "Dark: inline rename field text 11.49:1 (≥ 4.5) #d9d9d9 on #202025",
+      "ok": true
+    },
+    {
+      "label": "Dark: inline rename field boundary 4.64:1 (≥ 3) #4387f4 on #202025",
+      "ok": true
+    },
+    {
+      "label": "Dark: workspace sidebar section heading 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark: workspace place label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark: workspace place path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark: workspace recent label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark: workspace recent path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark: workspace parent-folder icon 21:1 (≥ 3) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark: workspace breadcrumb link 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark: workspace current breadcrumb 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark: workspace filter text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark: workspace filter placeholder 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark: workspace filter boundary 21:1 (≥ 3) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark: workspace empty-state text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark: workspace footer action 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark: command-palette search text 11.49:1 (≥ 4.5) #d9d9d9 on #202025",
+      "ok": true
+    },
+    {
+      "label": "Dark: command-palette search boundary 4.64:1 (≥ 3) #4387f4 on #202025",
+      "ok": true
+    },
+    {
       "label": "Obsidian Light: root palette/light, tldraw light, canvas rgb(255, 255, 255)",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: Settings uses a stroked outline gear (2px)",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: workspace text and caret share theme ink in the app typeface",
       "ok": true
     },
     {
@@ -1984,7 +3253,7 @@
       "ok": true
     },
     {
-      "label": "Obsidian Light: timer chip 6.69:1 (≥ 4.5) #5c5c5c on #ffffff",
+      "label": "Obsidian Light: comments button 14.77:1 (≥ 3) #222222 on #f6f6f6",
       "ok": true
     },
     {
@@ -2000,7 +3269,7 @@
       "ok": true
     },
     {
-      "label": "Obsidian Light: System tool-family button 14.76:1 (≥ 3) #222222 on #f6f6f6",
+      "label": "Obsidian Light: Block and Branch family button 14.76:1 (≥ 3) #222222 on #f6f6f6",
       "ok": true
     },
     {
@@ -2037,6 +3306,10 @@
     },
     {
       "label": "Obsidian Light: main menu item (tldraw menu) 14.72:1 (≥ 4.5) #222222 on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: Settings outline icon 14.72:1 (≥ 3) #222222 on #f6f6f6",
       "ok": true
     },
     {
@@ -2084,7 +3357,83 @@
       "ok": true
     },
     {
+      "label": "Obsidian Light: inline rename field text 14.72:1 (≥ 4.5) #222222 on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: inline rename field boundary 3.17:1 (≥ 3) #9873f7 on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: workspace sidebar section heading 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: workspace place label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: workspace place path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: workspace recent label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: workspace recent path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: workspace parent-folder icon 21:1 (≥ 3) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: workspace breadcrumb link 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: workspace current breadcrumb 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: workspace filter text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: workspace filter placeholder 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: workspace filter boundary 21:1 (≥ 3) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: workspace empty-state text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: workspace footer action 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: command-palette search text 14.72:1 (≥ 4.5) #222222 on #f6f6f6",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: command-palette search boundary 3.17:1 (≥ 3) #9873f7 on #f6f6f6",
+      "ok": true
+    },
+    {
       "label": "Obsidian Dark: root palette/dark, tldraw dark, canvas rgb(28, 28, 28)",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: Settings uses a stroked outline gear (2px)",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: workspace text and caret share theme ink in the app typeface",
       "ok": true
     },
     {
@@ -2092,7 +3441,7 @@
       "ok": true
     },
     {
-      "label": "Obsidian Dark: timer chip 6.48:1 (≥ 4.5) #b3b3b3 on #2e2e2e",
+      "label": "Obsidian Dark: comments button 10.61:1 (≥ 3) #dadada on #282828",
       "ok": true
     },
     {
@@ -2108,7 +3457,7 @@
       "ok": true
     },
     {
-      "label": "Obsidian Dark: System tool-family button 10.6:1 (≥ 3) #dadada on #282828",
+      "label": "Obsidian Dark: Block and Branch family button 10.6:1 (≥ 3) #dadada on #282828",
       "ok": true
     },
     {
@@ -2145,6 +3494,10 @@
     },
     {
       "label": "Obsidian Dark: main menu item (tldraw menu) 10.55:1 (≥ 4.5) #dadada on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: Settings outline icon 10.55:1 (≥ 3) #dadada on #282828",
       "ok": true
     },
     {
@@ -2192,7 +3545,83 @@
       "ok": true
     },
     {
+      "label": "Obsidian Dark: inline rename field text 10.55:1 (≥ 4.5) #dadada on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: inline rename field boundary 3.46:1 (≥ 3) #8a5cf5 on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: workspace sidebar section heading 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: workspace place label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: workspace place path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: workspace recent label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: workspace recent path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: workspace parent-folder icon 21:1 (≥ 3) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: workspace breadcrumb link 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: workspace current breadcrumb 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: workspace filter text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: workspace filter placeholder 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: workspace filter boundary 21:1 (≥ 3) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: workspace empty-state text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: workspace footer action 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: command-palette search text 10.55:1 (≥ 4.5) #dadada on #282828",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Dark: command-palette search boundary 3.46:1 (≥ 3) #8a5cf5 on #282828",
+      "ok": true
+    },
+    {
       "label": "Dark Modern: root palette/dark, tldraw dark, canvas rgb(31, 31, 31)",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: Settings uses a stroked outline gear (2px)",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: workspace text and caret share theme ink in the app typeface",
       "ok": true
     },
     {
@@ -2200,7 +3629,7 @@
       "ok": true
     },
     {
-      "label": "Dark Modern: timer chip 4.8:1 (≥ 4.5) #9d9d9d on #313131",
+      "label": "Dark Modern: comments button 10.15:1 (≥ 3) #cccccc on #202020",
       "ok": true
     },
     {
@@ -2216,7 +3645,7 @@
       "ok": true
     },
     {
-      "label": "Dark Modern: System tool-family button 10.15:1 (≥ 3) #cccccc on #202020",
+      "label": "Dark Modern: Block and Branch family button 10.15:1 (≥ 3) #cccccc on #202020",
       "ok": true
     },
     {
@@ -2253,6 +3682,10 @@
     },
     {
       "label": "Dark Modern: main menu item (tldraw menu) 10.15:1 (≥ 4.5) #cccccc on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: Settings outline icon 10.15:1 (≥ 3) #cccccc on #202020",
       "ok": true
     },
     {
@@ -2300,6 +3733,74 @@
       "ok": true
     },
     {
+      "label": "Dark Modern: inline rename field text 10.15:1 (≥ 4.5) #cccccc on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: inline rename field boundary 3.6:1 (≥ 3) #0078d4 on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: workspace sidebar section heading 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: workspace place label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: workspace place path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: workspace recent label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: workspace recent path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: workspace parent-folder icon 21:1 (≥ 3) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: workspace breadcrumb link 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: workspace current breadcrumb 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: workspace filter text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: workspace filter placeholder 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: workspace filter boundary 21:1 (≥ 3) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: workspace empty-state text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: workspace footer action 21:1 (≥ 4.5) #000000 on #ffffff",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: command-palette search text 10.15:1 (≥ 4.5) #cccccc on #202020",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: command-palette search boundary 3.6:1 (≥ 3) #0078d4 on #202020",
+      "ok": true
+    },
+    {
       "label": "no console errors from the app during the sweep",
       "ok": true
     }
@@ -2325,6 +3826,6 @@
     "ratio": 13.24,
     "text": "Settings"
   },
-  "passed": 140,
+  "passed": 240,
   "failed": 0
 }

@@ -1,0 +1,8 @@
+[
+  "clicking the title enters a selected inline filename field without opening a modal",
+  "Escape cancels an inline draft without changing the document identity",
+  "F2 focuses the same selected field, Enter commits, and .systemsketch stays protected",
+  "clicking back to the canvas commits the title without an extra confirmation",
+  "invalid names keep focus in place with an inline, accessible correction",
+  "the inline naming journey completed without browser errors"
+]

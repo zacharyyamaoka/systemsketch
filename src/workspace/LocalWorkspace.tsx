@@ -1302,6 +1302,19 @@ export function SystemSketchMainMenu() {
   const workspace = useLocalWorkspace()
   const { addDialog } = useDialogs()
   const confirm = useConfirm()
+  const [isRenamingInline, setIsRenamingInline] = useState(false)
+  const [renameDraft, setRenameDraft] = useState('')
+  const [renameError, setRenameError] = useState<string | null>(null)
+  const [renameBusy, setRenameBusy] = useState(false)
+  const titleInputRef = useRef<HTMLInputElement | null>(null)
+  const renameInFlightRef = useRef(false)
+  const cancelRenameOnBlurRef = useRef(false)
+
+  const restoreTitleFocus = useCallback(() => {
+    window.requestAnimationFrame(() => {
+      document.querySelector<HTMLElement>('[data-testid="systemsketch-file-title"]')?.focus()
+    })
+  }, [])
 
   /** The ask, in the app's own dialog rather than the browser's. */
   const requestTrash = async () => {
@@ -1329,6 +1342,85 @@ export function SystemSketchMainMenu() {
             : workspace.status.kind === 'error'
               ? 'Error'
               : 'Opening'
+  const renameNeedsCopy = workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'
+
+  /**
+   * A document name is one small, reversible choice. Keep it in the shell
+   * where people already look, rather than moving their attention into a
+   * modal. The workspace still owns the actual rename, including its digest
+   * fence and file-type preservation.
+   */
+  const beginInlineRename = useCallback(() => {
+    if (renameNeedsCopy) {
+      workspace.showDialog('saveAs')
+      return
+    }
+    setRenameDraft(workspace.title)
+    setRenameError(null)
+    setIsRenamingInline(true)
+  }, [renameNeedsCopy, workspace])
+
+  const cancelInlineRename = useCallback(() => {
+    setRenameDraft(workspace.title)
+    setRenameError(null)
+    setIsRenamingInline(false)
+    restoreTitleFocus()
+  }, [restoreTitleFocus, workspace.title])
+
+  const commitInlineRename = useCallback(async () => {
+    if (renameInFlightRef.current || renameNeedsCopy) return
+    const nextPath = workspace.path ? renamedDocumentPath(workspace.path, renameDraft) : null
+    if (!nextPath) {
+      setRenameError('Give this board a name.')
+      window.requestAnimationFrame(() => titleInputRef.current?.focus())
+      return
+    }
+    if (nextPath === workspace.path) {
+      cancelInlineRename()
+      return
+    }
+
+    renameInFlightRef.current = true
+    setRenameBusy(true)
+    setRenameError(null)
+    try {
+      await workspace.rename(nextPath)
+      setIsRenamingInline(false)
+    } catch (cause) {
+      setRenameError(errorMessage(cause))
+      window.requestAnimationFrame(() => titleInputRef.current?.focus())
+    } finally {
+      renameInFlightRef.current = false
+      setRenameBusy(false)
+    }
+  }, [cancelInlineRename, renameDraft, renameNeedsCopy, workspace])
+
+  // A familiar, zero-pointer route for renaming. Ignore actual text fields so
+  // F2 remains harmless while a person is already typing elsewhere.
+  useEffect(() => {
+    if (!isRenamingInline) return
+    const frame = window.requestAnimationFrame(() => {
+      titleInputRef.current?.focus()
+      titleInputRef.current?.select()
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [isRenamingInline])
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'F2' || event.defaultPrevented || isRenamingInline) return
+      const target = event.target
+      if (
+        target instanceof HTMLElement
+        && (target.matches('input, textarea, select') || target.isContentEditable)
+      ) return
+      event.preventDefault()
+      beginInlineRename()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [beginInlineRename, isRenamingInline])
+
   return (
     <div className="systemsketch-file-identity">
       <DefaultMainMenu>
@@ -1369,7 +1461,7 @@ export function SystemSketchMainMenu() {
                     workspace.status.kind === 'future' ? 'portableCopy' : 'exportTldraw',
                   )}
                 />
-                <TldrawUiMenuItem id="rename-document" label="Rename…" disabled={workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'} onSelect={() => workspace.showDialog('rename')} />
+                <TldrawUiMenuItem id="rename-document" label="Rename" kbd="f2" onSelect={beginInlineRename} />
               </TldrawUiMenuGroup>
               <TldrawUiMenuGroup id="file-location">
                 <TldrawUiMenuItem id="reveal-document" label="Show in Files" onSelect={() => workspace.runAction(workspace.reveal)} />
@@ -1395,20 +1487,64 @@ export function SystemSketchMainMenu() {
           <DefaultMainMenuContent />
         </>
       </DefaultMainMenu>
-      <TldrawUiButton
-        type="low"
-        className="systemsketch-file-title"
-        aria-label={`${workspace.title} ${statusLabel}`}
-        title={`${workspace.path ?? ''} · ${statusLabel}`}
-        onClick={() => workspace.showDialog(
-          workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'
-            ? workspace.status.kind === 'future' ? 'portableCopy' : 'open'
-            : 'rename',
-        )}
-      >
-        <span>{workspace.title}</span>
-        <i data-state={workspace.status.kind} aria-label={statusLabel} />
-      </TldrawUiButton>
+      {isRenamingInline ? (
+        <div
+          className="systemsketch-file-title-editor"
+          data-testid="systemsketch-inline-rename"
+          data-error={renameError ? 'true' : undefined}
+        >
+          <input
+            ref={titleInputRef}
+            className="systemsketch-file-title-input"
+            aria-label="Rename document"
+            aria-describedby="systemsketch-inline-rename-help"
+            aria-invalid={renameError ? true : undefined}
+            value={renameDraft}
+            disabled={renameBusy}
+            onChange={(event) => {
+              setRenameDraft(event.target.value)
+              setRenameError(null)
+            }}
+            onBlur={() => {
+              if (cancelRenameOnBlurRef.current) {
+                cancelRenameOnBlurRef.current = false
+                cancelInlineRename()
+                return
+              }
+              void commitInlineRename()
+            }}
+            onKeyDown={(event) => {
+              if (event.nativeEvent.isComposing) return
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                void commitInlineRename()
+                return
+              }
+              if (event.key === 'Escape') {
+                event.preventDefault()
+                cancelRenameOnBlurRef.current = true
+                event.currentTarget.blur()
+              }
+            }}
+          />
+          <span id="systemsketch-inline-rename-help" className="systemsketch-file-title-help">
+            {renameError ?? 'Press Enter to rename, Escape to cancel'}
+          </span>
+          <i data-state={workspace.status.kind} aria-label={statusLabel} />
+        </div>
+      ) : (
+        <TldrawUiButton
+          type="low"
+          className="systemsketch-file-title"
+          data-testid="systemsketch-file-title"
+          aria-label={`${workspace.title} ${statusLabel}. Click to ${renameNeedsCopy ? 'save a copy' : 'rename'}.`}
+          title={`${workspace.path ?? ''} · ${statusLabel}`}
+          onClick={beginInlineRename}
+        >
+          <span>{workspace.title}</span>
+          <i data-state={workspace.status.kind} aria-label={statusLabel} />
+        </TldrawUiButton>
+      )}
     </div>
   )
 }

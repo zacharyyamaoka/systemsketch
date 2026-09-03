@@ -8,7 +8,7 @@
   "ok": true
  },
  {
-  "label": "the dialog focuses its useful field, Escape closes it, and focus returns to its launcher",
+  "label": "the title focuses its useful inline field, Escape cancels it, and focus returns to its launcher",
   "ok": true
  },
  {

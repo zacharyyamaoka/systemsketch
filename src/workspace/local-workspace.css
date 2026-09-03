@@ -31,7 +31,8 @@
   white-space: nowrap;
 }
 
-.systemsketch-file-title i {
+.systemsketch-file-title i,
+.systemsketch-file-title-editor i {
   width: 6px;
   height: 6px;
   flex: 0 0 auto;
@@ -40,7 +41,9 @@
 }
 
 .systemsketch-file-title i[data-state='dirty'],
-.systemsketch-file-title i[data-state='saving'] {
+.systemsketch-file-title i[data-state='saving'],
+.systemsketch-file-title-editor i[data-state='dirty'],
+.systemsketch-file-title-editor i[data-state='saving'] {
   background: var(--ss-warning);
 }
 
@@ -48,8 +51,81 @@
 .systemsketch-file-title i[data-state='missing'],
 .systemsketch-file-title i[data-state='future'],
 .systemsketch-file-title i[data-state='quarantined'],
-.systemsketch-file-title i[data-state='error'] {
+.systemsketch-file-title i[data-state='error'],
+.systemsketch-file-title-editor i[data-state='conflict'],
+.systemsketch-file-title-editor i[data-state='missing'],
+.systemsketch-file-title-editor i[data-state='future'],
+.systemsketch-file-title-editor i[data-state='quarantined'],
+.systemsketch-file-title-editor i[data-state='error'] {
   background: var(--ss-danger);
+}
+
+/* The document identity is an inline control, not a tiny launcher for a
+ * modal. Keep the edit field in exactly the same footprint so the top chrome
+ * never jumps while someone is naming a board. */
+.systemsketch-file-title-editor {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  max-width: min(32vw, 280px);
+  height: 32px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 9px;
+}
+
+.systemsketch-file-title-input {
+  min-width: 0;
+  width: 100%;
+  height: 28px;
+  padding: 0 7px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--ss-text);
+  caret-color: var(--ss-text);
+  background: var(--ss-surface-raised);
+  font: inherit;
+  font-weight: 600;
+  outline: none;
+}
+
+.systemsketch-file-title-input:focus {
+  border-color: var(--ss-accent);
+  box-shadow: var(--ss-focus-ring);
+}
+
+.systemsketch-file-title-input:disabled {
+  cursor: wait;
+  opacity: .72;
+}
+
+.systemsketch-file-title-help {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.systemsketch-file-title-editor[data-error='true'] .systemsketch-file-title-help {
+  z-index: calc(var(--tl-layer-panels) + 1);
+  top: calc(100% + 6px);
+  left: 0;
+  width: max-content;
+  max-width: min(300px, calc(100vw - 24px));
+  height: auto;
+  padding: 6px 8px;
+  overflow: visible;
+  clip: auto;
+  border: 1px solid color-mix(in srgb, var(--ss-danger) 55%, transparent);
+  border-radius: 7px;
+  color: var(--ss-text);
+  background: var(--ss-danger-soft);
+  box-shadow: var(--ss-shadow-1);
+  font-size: 10px;
+  line-height: 1.25;
+  white-space: normal;
 }
 
 .systemsketch-workspace-loading {
@@ -530,6 +606,10 @@ body:has(.systemsketch-preview-mode) .systemsketch-workspace-alert {
 
 @media (max-width: 640px) {
   .systemsketch-file-title {
+    max-width: 32vw;
+  }
+
+  .systemsketch-file-title-editor {
     max-width: 32vw;
   }
 

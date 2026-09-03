@@ -99,12 +99,9 @@ const DIALOG_PROBES = [
   { label: 'dialog close button icon', selector: '.systemsketch-settings__header .tlui-button', kind: 'icon' },
 ]
 
-const WORKSPACE_RENAME_PROBES = [
-  { label: 'rename field label', selector: '.systemsketch-workspace-dialog__rename label', kind: 'text' },
-  { label: 'rename field text', selector: '.systemsketch-workspace-name-field input', kind: 'text' },
-  { label: 'rename field boundary', selector: '.systemsketch-workspace-name-field', kind: 'boundary' },
-  { label: 'rename file suffix', selector: '.systemsketch-workspace-name-field span', kind: 'text' },
-  { label: 'rename parent path', selector: '.systemsketch-workspace-dialog__rename p', kind: 'text' },
+const INLINE_RENAME_PROBES = [
+  { label: 'inline rename field text', selector: '.systemsketch-file-title-input', kind: 'text' },
+  { label: 'inline rename field boundary', selector: '.systemsketch-file-title-input', kind: 'boundary' },
 ]
 
 const WORKSPACE_BROWSER_PROBES = [
@@ -311,11 +308,17 @@ async function closeDialog(page) {
   await delay(150)
 }
 
-async function openRenameDialog(page) {
+async function openInlineRename(page) {
   const title = await box(page, '.systemsketch-file-title')
   await clickAt(page, title.cx, title.cy)
-  await waitFor(page, `document.querySelector('[data-testid="workspace-dialog"][data-mode="rename"]')`, 'the rename dialog')
+  await waitFor(page, `document.querySelector('[data-testid="systemsketch-inline-rename"]')`, 'the inline rename field')
   await delay(150)
+}
+
+async function closeInlineRename(page) {
+  await key(page, 'Escape', 'Escape')
+  await waitFor(page, `!document.querySelector('[data-testid="systemsketch-inline-rename"]')`, 'the inline rename field to close')
+  await delay(120)
 }
 
 async function openWorkspaceBrowser(page) {
@@ -449,17 +452,16 @@ async function main() {
       entry.screenshots.push(await shot(page, `theme-${theme.id.replace(':', '-')}-settings.png`))
       await closeDialog(page)
 
-      await openRenameDialog(page)
-      const rename = await measure(page, WORKSPACE_RENAME_PROBES)
-      const renamePortal = await workspacePortalState(page)
+      await openInlineRename(page)
+      const rename = await measure(page, INLINE_RENAME_PROBES)
       const renameInputStyle = JSON.parse(await evaluate(page, `(() => {
-        const input = document.querySelector('.systemsketch-workspace-name-field input')
+        const input = document.querySelector('.systemsketch-file-title-input')
         if (!input) return 'null'
         const style = getComputedStyle(input)
         return JSON.stringify({ color: style.color, caret: style.caretColor, fontFamily: style.fontFamily })
       })()`))
       entry.screenshots.push(await shot(page, `theme-${theme.id.replace(':', '-')}-rename.png`))
-      await closeWorkspaceDialog(page)
+      await closeInlineRename(page)
 
       await openWorkspaceBrowser(page)
       const workspaceBrowser = await measure(page, WORKSPACE_BROWSER_PROBES)
@@ -485,7 +487,7 @@ async function main() {
       } else {
         fail(`${theme.label}: workspace text and caret share theme ink in the app typeface`, JSON.stringify(renameInputStyle))
       }
-      for (const [kind, state] of [['Rename', renamePortal], ['Open workspace', browserPortal]]) {
+      for (const [kind, state] of [['Open workspace', browserPortal]]) {
         if (state.root && state.host && state.dialog && state.hostInThemeRoot && state.dialogInThemeHost) {
           pass(`${theme.label}: ${kind} remains inside the active theme portal host`)
         } else {
