@@ -634,9 +634,11 @@
   }
 }
 
-/* Preview occupies its own second chrome row. Side popouts move below it only
- * while that row exists, so no action is hidden merely to avoid a collision. */
-.systemsketch-app:has(.systemsketch-preview-mode) .systemsketch-popout {
+/* A notice uses the top row when it genuinely fits. Side popouts move only
+ * when the measured fallback row is occupied. Active REC takes priority over
+ * passive Preview status and is the only notice rendered while it runs. */
+.systemsketch-app:has(.systemsketch-preview-mode[data-placement='below']) .systemsketch-popout,
+body:has(.systemsketch-recorder-indicator[data-placement='below']) .systemsketch-popout {
   top: calc(var(--systemsketch-chrome-inset) + var(--systemsketch-top-height) + 58px);
 }
 

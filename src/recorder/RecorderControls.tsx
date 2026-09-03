@@ -1,11 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { WINDOW_CHOICES_MS } from './flightRecorder'
+import { useTopNoticePlacement } from '../chrome/topNoticePlacement'
 import {
   copyLastRecording,
-  saveLast,
-  setRecorderEnabled,
-  setRecorderWindowMs,
+  EXPLICIT_RECORDING_LIMIT_MS,
   startTake,
   stopTake,
   useRecorderState,
@@ -15,15 +13,12 @@ import './recorder.css'
 /**
  * The recorder's controls, in the Dev panel's own row grammar.
  *
- * Three verbs and one cap: save what just happened, record the next take,
- * copy the last packet again; the window is chosen from chips so it can never
- * be unset. `compact` is the same surface shrunk for the isolated presets,
- * whose chrome is a single identity bar rather than the Dev panel.
+ * One primary path: Start recording, reproduce the bug, Stop and save. Copying
+ * the last packet remains behind the adjoining disclosure. `compact` is the
+ * same surface shrunk for the isolated presets.
  */
 
-function seconds(ms: number): string {
-  return `${Math.round(ms / 1000)} s`
-}
+const LIMIT_LABEL = `${EXPLICIT_RECORDING_LIMIT_MS / 60_000} min`
 
 function useElapsed(since: number | null): number {
   const [now, setNow] = useState(() => Date.now())
@@ -49,7 +44,6 @@ export function RecorderControls({ compact = false }: { compact?: boolean }) {
   const menuId = useId()
   const taking = state.mode === 'take'
   const busy = state.saving
-  const disabledReason = !state.enabled ? 'Recorder is off' : busy ? 'Saving…' : ''
 
   useEffect(() => {
     if (!menuOpen) return
@@ -68,54 +62,45 @@ export function RecorderControls({ compact = false }: { compact?: boolean }) {
     if (state.error || state.clipboard === 'failed') setMenuOpen(true)
   }, [state.error, state.clipboard])
 
-  const onTake = () => {
+  const onRecord = () => {
     setMenuOpen(false)
     if (taking) void stopTake()
     else void startTake()
   }
-  const onSaveLast = () => {
-    setMenuOpen(false)
-    void saveLast()
-  }
-  const framesLabel = state.framesSource === 'screencast'
-    ? 'Chrome frames'
-    : state.framesSource === 'canvas'
-      ? 'canvas frames'
-      : 'checking frames…'
-  const statusLabel = !state.enabled
-    ? 'Off'
-    : state.error || state.clipboard === 'failed'
-      ? 'Needs attention'
-      : taking
-        ? `REC · ${(elapsed / 1000).toFixed(1)} / ${seconds(state.windowMs)}`
-        : busy
-          ? 'Saving…'
+  const statusLabel = state.error || state.clipboard === 'failed'
+    ? 'Needs attention'
+    : taking
+      ? `REC · ${(elapsed / 1000).toFixed(1)} / ${LIMIT_LABEL}`
+      : busy
+        ? 'Saving…'
+        : state.notice
+          ? 'Cancelled · nothing saved'
           : state.clipboard === 'copied'
             ? 'Saved · packet copied'
-            : `On · ${seconds(state.windowMs)} · ${framesLabel}`
+            : `Ready · ${LIMIT_LABEL} maximum`
 
   const primaryControl = taking ? (
     <button
       type="button"
       className="systemsketch-recorder__primary systemsketch-recorder__primary--taking"
-      data-action="take"
+      data-action="stop-recording"
       data-taking="true"
       disabled={busy}
-      onClick={onTake}
+      onClick={onRecord}
     >
       {busy ? 'Saving…' : `■ Stop and save · ${(elapsed / 1000).toFixed(1)} s`}
     </button>
   ) : (
-    <div className={`systemsketch-recorder__split${!state.enabled ? ' systemsketch-recorder__split--off' : ''}`} data-testid="recorder-split">
+    <div className="systemsketch-recorder__split" data-testid="recorder-split">
       <button
         type="button"
         className="systemsketch-recorder__primary"
-        data-action={state.enabled ? 'save-last' : 'toggle'}
+        data-action="start-recording"
         disabled={busy}
-        title={disabledReason || `Save the last ${seconds(state.windowMs)}`}
-        onClick={state.enabled ? onSaveLast : () => setRecorderEnabled(true)}
+        title="Start recording · one minute maximum"
+        onClick={onRecord}
       >
-        {state.enabled ? `● Save last ${seconds(state.windowMs)}` : 'Turn recorder on'}
+        ● Start recording
       </button>
       <button
         type="button"
@@ -133,12 +118,6 @@ export function RecorderControls({ compact = false }: { compact?: boolean }) {
 
   const actionMenu = menuOpen && !taking ? (
     <div id={menuId} className="systemsketch-recorder__menu" data-testid="recorder-menu">
-      {state.enabled ? (
-        <button type="button" className="systemsketch-recorder__menu-item" data-action="take" disabled={busy} onClick={onTake}>
-          <span>▶ Record next {seconds(state.windowMs)}</span>
-          <small>Stops itself at the cap</small>
-        </button>
-      ) : null}
       <button
         type="button"
         className="systemsketch-recorder__menu-item"
@@ -149,43 +128,16 @@ export function RecorderControls({ compact = false }: { compact?: boolean }) {
         <span>⧉ Copy last recording</span>
         <small data-testid="recorder-last-path">{state.last ? shortPath(state.last.path) : 'Nothing saved yet'}</small>
       </button>
-      <div className="systemsketch-recorder__window" aria-label="Recording window">
-        <span>Window</span>
-        {WINDOW_CHOICES_MS.map((choice) => (
-          <button
-            type="button"
-            key={choice}
-            data-window={choice}
-            data-on={state.windowMs === choice || undefined}
-            onClick={() => {
-              setRecorderWindowMs(choice)
-              setMenuOpen(false)
-            }}
-          >
-            {seconds(choice)}
-          </button>
-        ))}
-      </div>
-      <button
-        type="button"
-        className="systemsketch-recorder__menu-item systemsketch-recorder__power"
-        data-action="toggle"
-        aria-pressed={state.enabled}
-        onClick={() => {
-          setMenuOpen(false)
-          setRecorderEnabled(!state.enabled)
-        }}
-      >
-        <span>{state.enabled ? 'Turn recorder off' : 'Turn recorder on'}</span>
-        <small>{state.enabled ? 'Stops the rolling buffer on this channel' : 'Starts the rolling buffer on this channel'}</small>
-      </button>
+      <small className="systemsketch-recorder__policy">
+        Stop saves and copies · the {LIMIT_LABEL} limit cancels without saving
+      </small>
       {state.clipboard ? (
         <small className="systemsketch-recorder__feedback" data-clipboard={state.clipboard}>
           {state.clipboard === 'copied' ? 'Packet copied' : 'Clipboard write failed · folder is safe'}
         </small>
       ) : null}
       {state.error ? <p className="systemsketch-panel-message systemsketch-panel-message--error">{state.error}</p> : null}
-      {state.enabled && state.framesSource === 'canvas' && state.framesReason ? (
+      {state.framesSource === 'canvas' && state.framesReason ? (
         <p className="systemsketch-recorder__hint">{state.framesReason}</p>
       ) : null}
     </div>
@@ -195,7 +147,7 @@ export function RecorderControls({ compact = false }: { compact?: boolean }) {
 
   if (compact) {
     return (
-      <div className="systemsketch-recorder systemsketch-recorder--compact" data-testid="recorder-controls" data-mode={state.mode} data-enabled={state.enabled}>
+      <div className="systemsketch-recorder systemsketch-recorder--compact" data-testid="recorder-controls" data-mode={state.mode}>
         <small className="systemsketch-recorder__compact-status" data-testid="recorder-status">{statusLabel}</small>
         <div
           className="systemsketch-recorder__split-shell"
@@ -216,7 +168,7 @@ export function RecorderControls({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <div className="systemsketch-recorder" data-testid="recorder-controls" data-mode={state.mode} data-enabled={state.enabled}>
+    <div className="systemsketch-recorder" data-testid="recorder-controls" data-mode={state.mode}>
       <div className="systemsketch-dev-section-label">
         <span>Recording</span>
         <small data-testid="recorder-status">{statusLabel}</small>
@@ -241,28 +193,36 @@ export function RecorderControls({ compact = false }: { compact?: boolean }) {
 }
 
 /**
- * The bar across the top of the window while an explicit take runs. Owned by
+ * The high-priority top notice while an explicit take runs. Owned by
  * the existing `InFrontOfTheCanvas` surface (no new tldraw seam), but painted
- * through a portal onto `document.body`: the canvas layer sits under tldraw's
- * own top chrome, and a status bar that hides behind the Share button is not
- * a status bar. Rendered only in take mode — a retroactive save has nothing
- * to announce.
+ * through a portal onto the app theme root: the canvas layer sits under
+ * tldraw's own top chrome, while the theme root keeps the notice inside the
+ * SystemSketch token scope. It uses the same measured collision rule as the
+ * Preview notice, which yields the slot entirely while recording is active.
  */
 export function RecorderIndicator({ label }: { label?: string }) {
   const state = useRecorderState()
   const elapsed = useElapsed(state.takeStartedAt)
+  const indicatorRef = useRef<HTMLDivElement>(null)
+  const placement = useTopNoticePlacement(indicatorRef, state.installed && state.mode === 'take')
   if (!state.installed || state.mode !== 'take' || typeof document === 'undefined') return null
-  const total = state.windowMs
+  const portalTarget = document.querySelector<HTMLElement>('.systemsketch-theme-root') ?? document.body
   return createPortal(
-    <div className="systemsketch-recorder-indicator" role="status" data-testid="recorder-indicator">
+    <div
+      ref={indicatorRef}
+      className="systemsketch-recorder-indicator"
+      role="status"
+      data-testid="recorder-indicator"
+      data-placement={placement}
+    >
       <span><i aria-hidden="true" />REC{label ? ` · ${label}` : ''}</span>
       <span className="systemsketch-recorder-indicator__clock">
-        {(elapsed / 1000).toFixed(1)} s / {seconds(total)}
+        {(elapsed / 1000).toFixed(1)} s / {LIMIT_LABEL}
       </span>
       <button type="button" disabled={state.saving} onClick={() => void stopTake()}>
         {state.saving ? 'Saving…' : 'Stop and save'}
       </button>
     </div>,
-    document.body,
+    portalTarget,
   )
 }

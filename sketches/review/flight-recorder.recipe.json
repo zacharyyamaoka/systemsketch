@@ -1,5 +1,5 @@
 {
-  "feature": "Flight recorder: save the last 30 s",
+  "feature": "Flight recorder: explicit start and stop",
   "viewport": { "width": 1400, "height": 820 },
   "shapes": [
     {
@@ -58,39 +58,39 @@
     {
       "id": "step-1",
       "kind": "step",
-      "text": "1 · Drag detector() down about 150 px, then press Escape. The recorder is already running: nothing to start.",
+      "text": "1 · Click </> in the bottom-right. Under RECORDING, click the broad Start recording face. The red REC notice should replace Preview without covering either top capsule.",
       "x": 720,
       "y": 600,
       "w": 520,
-      "h": 110,
+      "h": 150,
       "target": { "shapeId": "detector", "anchor": "bottom" }
     },
     {
       "id": "step-2",
       "kind": "step",
-      "text": "2 · Click </> in the bottom-right. Under RECORDING, open the chevron: Record next, Copy last, window, and power appear. Close it, then click the broad Save last face.",
+      "text": "2 · Close Dev, then reproduce the bug: drag detector() down about 150 px and press Escape. Reopen Dev or use the red notice; click Stop and save before one minute.",
       "x": 760,
       "y": 80,
       "w": 520,
-      "h": 120
+      "h": 150
     },
     {
       "id": "step-3",
       "kind": "step",
-      "text": "3 · Paste the clipboard into an agent chat. Copy last recording refills it; the folder it names holds playback.html.",
+      "text": "3 · Paste into an agent chat. The chevron at rest contains only Copy last recording plus the note that one minute cancels without saving.",
       "x": 160,
       "y": 80,
       "w": 520,
-      "h": 120
+      "h": 135
     },
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · Only the split capture persists at rest; its chevron reveals every secondary job; Save last copies a packet beginning “SystemSketch interaction recording”.",
+      "text": "PASS WHEN · Start is the only primary action; Stop saves and copies a packet beginning “SystemSketch interaction recording”; Preview and REC never overlap the top chrome.",
       "x": 160,
       "y": 600,
       "w": 480,
-      "h": 130
+      "h": 160
     }
   ]
 }

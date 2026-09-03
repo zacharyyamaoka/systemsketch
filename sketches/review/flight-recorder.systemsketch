@@ -9,7 +9,8 @@
       "arrow": 1
     },
     "bindings": {
-      "connection": 2
+      "connection": 2,
+      "arrow": 2
     }
   },
   "tldrawFileFormatVersion": 1,
@@ -31,11 +32,9 @@
       "com.tldraw.asset.video": 5,
       "com.tldraw.asset.bookmark": 2,
       "com.tldraw.shape.group": 0,
-      "com.tldraw.shape.text": 4,
       "com.tldraw.shape.bookmark": 2,
       "com.tldraw.shape.draw": 5,
       "com.tldraw.shape.note": 13,
-      "com.tldraw.shape.line": 5,
       "com.tldraw.shape.frame": 1,
       "com.tldraw.shape.arrow": 8,
       "com.tldraw.shape.highlight": 4,
@@ -43,22 +42,19 @@
       "com.tldraw.shape.image": 5,
       "com.tldraw.shape.video": 4,
       "com.tldraw.shape.geo": 12,
-      "com.tldraw.shape.block": 2,
+      "com.tldraw.shape.text": 4,
+      "com.tldraw.shape.line": 5,
+      "com.tldraw.shape.block": 4,
       "com.tldraw.shape.branch": 0,
       "com.tldraw.shape.connection": 2,
       "com.tldraw.binding.arrow": 1,
-      "com.tldraw.binding.connection": 1
+      "com.tldraw.binding.connection": 1,
+      "com.tldraw.comment-thread": 3,
+      "com.tldraw.comment": 1,
+      "com.tldraw.comment-reaction": 1
     }
   },
   "records": [
-    {
-      "name": "",
-      "color": "#FF802B",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:pDgVoGhIMyTqePhVlyTlR",
-      "typeName": "user"
-    },
     {
       "x": 0,
       "y": 0,
@@ -66,14 +62,6 @@
       "meta": {},
       "id": "pointer:pointer",
       "typeName": "pointer"
-    },
-    {
-      "name": "",
-      "color": "#02B1CC",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:DFGZems22AghGSEk5HN_t",
-      "typeName": "user"
     },
     {
       "x": 720,
@@ -86,10 +74,10 @@
       "type": "geo",
       "props": {
         "w": 520,
-        "h": 110,
+        "h": 150,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 12,
+        "growY": 2,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -109,7 +97,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "1 · Drag detector() down about 150 px, then press Escape. The recorder is already running: nothing to start."
+                  "text": "1 · Click </> in the bottom-right. Under RECORDING, click the broad Start recording face. The red REC notice should replace Preview without covering either top capsule."
                 }
               ]
             }
@@ -117,7 +105,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6f2b",
+      "index": "a62XU",
       "typeName": "shape"
     },
     {
@@ -160,7 +148,7 @@
         "pillPosition": 0.5
       },
       "parentId": "page:page",
-      "index": "a3Rf6",
+      "index": "a3y3A",
       "typeName": "shape"
     },
     {
@@ -174,7 +162,7 @@
       "type": "geo",
       "props": {
         "w": 480,
-        "h": 130,
+        "h": 160,
         "geo": "rectangle",
         "dash": "draw",
         "growY": 22,
@@ -197,7 +185,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · Only the split capture persists at rest; its chevron reveals every secondary job; Save last copies a packet beginning “SystemSketch interaction recording”."
+                  "text": "PASS WHEN · Start is the only primary action; Stop saves and copies a packet beginning “SystemSketch interaction recording”; Preview and REC never overlap the top chrome."
                 }
               ]
             }
@@ -205,7 +193,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a9SN6",
+      "index": "a93FE",
       "typeName": "shape"
     },
     {
@@ -219,10 +207,10 @@
       "type": "geo",
       "props": {
         "w": 520,
-        "h": 120,
+        "h": 150,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 32,
+        "growY": 2,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -242,7 +230,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "2 · Click </> in the bottom-right. Under RECORDING, open the chevron: Record next, Copy last, window, and power appear. Close it, then click the broad Save last face."
+                  "text": "2 · Close Dev, then reproduce the bug: drag detector() down about 150 px and press Escape. Reopen Dev or use the red notice; click Stop and save before one minute."
                 }
               ]
             }
@@ -250,7 +238,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a70vv",
+      "index": "a7IXM",
       "typeName": "shape"
     },
     {
@@ -285,10 +273,10 @@
       "type": "geo",
       "props": {
         "w": 520,
-        "h": 120,
+        "h": 135,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 2,
+        "growY": 0,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -308,7 +296,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "3 · Paste the clipboard into an agent chat. Copy last recording refills it; the folder it names holds playback.html."
+                  "text": "3 · Paste into an agent chat. The chevron at rest contains only Copy last recording plus the note that one minute cancels without saving."
                 }
               ]
             }
@@ -316,8 +304,26 @@
         }
       },
       "parentId": "page:page",
-      "index": "a82z7",
+      "index": "a8oHf",
       "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:detector",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
     },
     {
       "editingShapeId": null,
@@ -331,6 +337,24 @@
       "id": "instance_page_state:page:page",
       "pageId": "page:page",
       "typeName": "instance_page_state"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:cue-step-1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
     },
     {
       "meta": {},
@@ -349,7 +373,10 @@
     {
       "followingUserId": null,
       "opacityForNextShape": 1,
-      "stylesForNextShape": {},
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
       "brush": null,
       "scribbles": [],
       "cursor": {
@@ -363,8 +390,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1280,
-        "h": 720
+        "w": 1400,
+        "h": 820
       },
       "insets": [
         false,
@@ -391,6 +418,14 @@
       "id": "instance:instance",
       "currentPageId": "page:page",
       "typeName": "instance"
+    },
+    {
+      "name": "",
+      "color": "#9D5BD2",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:e_mT_qOcqKjNSjdzvQkft",
+      "typeName": "user"
     },
     {
       "x": 160,
@@ -421,6 +456,10 @@
           "expanded": {
             "w": 560,
             "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
           }
         },
         "showDescription": true,
@@ -437,12 +476,12 @@
         ]
       },
       "parentId": "page:page",
-      "index": "a44Gf",
+      "index": "a4ltb",
       "typeName": "shape"
     },
     {
-      "x": 0,
-      "y": 0,
+      "x": 980,
+      "y": 600,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -459,12 +498,12 @@
         "labelColor": "black",
         "bend": 0,
         "start": {
-          "x": 980,
-          "y": 600
+          "x": 0,
+          "y": 0
         },
         "end": {
-          "x": 870,
-          "y": 500
+          "x": -110,
+          "y": -100
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -481,7 +520,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3y9bV",
+      "index": "a6eVy",
       "typeName": "shape"
     },
     {
@@ -513,6 +552,10 @@
           "expanded": {
             "w": 560,
             "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
           }
         },
         "showDescription": true,
@@ -536,7 +579,7 @@
         ]
       },
       "parentId": "page:page",
-      "index": "a5pMf",
+      "index": "a5Tib",
       "typeName": "shape"
     }
   ]

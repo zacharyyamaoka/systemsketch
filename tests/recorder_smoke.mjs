@@ -5,17 +5,17 @@
  * Every claim is read off the disk the host wrote to and off the painted
  * document, never off the recorder's own report of itself:
  *
- *   1. In Preview the recorder is armed by default and the host can screencast
- *      the window over Chrome's debugging port.
- *   2. "Save the last 30 s" writes one folder — packet first, then timeline,
- *      frames, snapshots, playback — and puts the packet on the clipboard.
+ *   1. Preview is idle and unarmed until Start recording is pressed.
+ *   2. Start → reproduce → Stop and save writes one folder — packet first,
+ *      then timeline, frames, snapshots, playback — and copies the packet.
  *   3. The timeline carries the lanes the design promised, including the DOM
  *      lane that sees keys tldraw never receives, and the packet maps the
  *      states seen to the files that define them.
- *   4. An explicit take shows the red bar, stops itself at the cap, and saves
- *      a folder without touching the clipboard.
+ *   4. The one-minute safety cap cancels and discards rather than silently
+ *      saving a forgotten recording.
  *   5. playback.html opens on its own and renders the frames and the log.
- *   6. The toggle turns recording off, and the choice survives a reload.
+ *   6. Preview and REC notices share a measured collision rule: use the top
+ *      row when they fit, otherwise drop below the corner chrome.
  *
  * The journey works in a throwaway files root, so it can never touch a real
  * board or a real recordings folder.
@@ -31,7 +31,6 @@ import {
   evaluate,
   key,
   localConsoleErrors,
-  mouse,
   openApp,
   startApp,
   waitFor,
@@ -81,6 +80,44 @@ async function readRecording(folder) {
   return { header, rows, frames, packet, files, frameFiles }
 }
 
+async function setViewport(page, width, height = 960) {
+  await page.send('Emulation.setDeviceMetricsOverride', {
+    width, height, deviceScaleFactor: 1, mobile: false,
+  })
+  await delay(350)
+}
+
+async function noticeGeometry(page, noticeSelector) {
+  return JSON.parse(await evaluate(page, `(() => {
+    const read = (selector) => {
+      const node = document.querySelector(selector)
+      if (!node) return null
+      const rect = node.getBoundingClientRect()
+      return { x: rect.x, y: rect.y, right: rect.right, bottom: rect.bottom }
+    }
+    return JSON.stringify({
+      left: read('[data-testid="systemsketch-top-left-shell"]'),
+      notice: read(${JSON.stringify(noticeSelector)}),
+      right: read('[data-testid="systemsketch-top-right-shell"]'),
+      placement: document.querySelector(${JSON.stringify(noticeSelector)})?.dataset.placement ?? null,
+    })
+  })()`))
+}
+
+function overlaps(a, b) {
+  return a && b && a.x < b.right && a.right > b.x && a.y < b.bottom && a.bottom > b.y
+}
+
+async function waitForRecorderArmed(apiPort, desired, timeoutMs = 5000) {
+  const deadline = Date.now() + timeoutMs
+  while (Date.now() < deadline) {
+    const status = await (await fetch(`http://127.0.0.1:${apiPort}/api/recordings/status`)).json()
+    if (status.armed === desired) return status
+    await delay(80)
+  }
+  throw new Error(`Timed out waiting for recorder armed=${desired}`)
+}
+
 async function main() {
   const app = await startApp({ label: 'recorder-smoke', build: 'recorder-smoke', cdpToApi: true })
   const { page, port, apiPort, filesRoot } = app
@@ -96,11 +133,90 @@ async function main() {
     await waitFor(page, `document.querySelector('.tl-canvas')`, 'canvas')
     await delay(900)
 
-    // ---- 1. armed by default, screencast available
+    // ---- 1. idle means genuinely idle, and Preview uses only a fitting row
     const status = await (await fetch(`http://127.0.0.1:${apiPort}/api/recordings/status`)).json()
-    check('armed-by-default', 'the host was armed for screencast frames by the page on mount', { screencast: status.screencast, armed: status.armed }, { screencast: true, armed: true })
+    check('idle-unarmed', 'opening Preview does not start the recorder or Chrome capture', {
+      screencast: status.screencast, armed: status.armed,
+    }, { screencast: true, armed: false })
 
-    // ---- the interaction under test
+    await setViewport(page, 1990)
+    const widePreview = await noticeGeometry(page, '[data-testid="systemsketch-preview-mode"]')
+    check('preview-inline-when-fit', 'a wide window keeps Preview in the top chrome gap', {
+      placement: widePreview.placement,
+      clear: !overlaps(widePreview.left, widePreview.notice) && !overlaps(widePreview.notice, widePreview.right),
+    }, { placement: 'inline', clear: true })
+
+    await setViewport(page, 900)
+    const narrowPreview = await noticeGeometry(page, '[data-testid="systemsketch-preview-mode"]')
+    check('preview-drops-when-tight', 'a tighter window drops Preview below both corner capsules', {
+      placement: narrowPreview.placement,
+      clear: !overlaps(narrowPreview.left, narrowPreview.notice) && !overlaps(narrowPreview.notice, narrowPreview.right),
+    }, { placement: 'below', clear: true })
+
+    // ---- 2. Start is the only capture path in the interface
+    await clickElement(page, '.systemsketch-dev-trigger')
+    await waitFor(page, `document.querySelector('[data-testid="recorder-controls"][data-mode="idle"]')`, 'recorder controls')
+    await shot(page, 'recorder-dev-menu.png')
+    check('note-input-absent', 'the Recording section has no prefatory text input', await evaluate(page, `document.querySelector('[data-testid="recorder-note"]')`), null)
+    const splitAtRest = JSON.parse(await evaluate(page, `JSON.stringify({
+      primary: document.querySelector('[data-action="start-recording"]').textContent.trim(),
+      menu: Boolean(document.querySelector('[data-testid="recorder-menu"]')),
+      expanded: document.querySelector('[data-action="more"]').getAttribute('aria-expanded'),
+      retrospective: Boolean(document.querySelector('[data-action="save-last"], [data-window], [data-action="toggle"]')),
+    })`))
+    check('start-stop-rest', 'one quiet split control keeps Start recording directly available', splitAtRest, {
+      primary: '● Start recording', menu: false, expanded: 'false', retrospective: false,
+    })
+    await clickElement(page, '[data-action="more"]')
+    const splitMenu = JSON.parse(await evaluate(page, `JSON.stringify({
+      copy: Boolean(document.querySelector('[data-testid="recorder-menu"] [data-action="copy-last"]')),
+      policy: document.querySelector('[data-testid="recorder-menu"] .systemsketch-recorder__policy').textContent.trim(),
+      extraCaptureActions: document.querySelectorAll('[data-testid="recorder-menu"] [data-action]:not([data-action="copy-last"])').length,
+    })`))
+    check('start-stop-menu', 'the chevron keeps only recovery and the one-minute safety rule', splitMenu, {
+      copy: true,
+      policy: 'Stop saves and copies · the 1 min limit cancels without saving',
+      extraCaptureActions: 0,
+    })
+    await key(page, 'Escape', 'Escape')
+    const escapedMenu = JSON.parse(await evaluate(page, `JSON.stringify({
+      menu: Boolean(document.querySelector('[data-testid="recorder-menu"]')),
+      controls: Boolean(document.querySelector('[data-testid="recorder-controls"]')),
+    })`))
+    check('start-stop-escape', 'Escape closes the disclosure without dismissing the Dev panel', escapedMenu, {
+      menu: false, controls: true,
+    })
+    await clickElement(page, '[data-action="more"]')
+    await shot(page, 'recorder-split-menu.png')
+    await clickElement(page, '[data-action="more"]')
+    await clickElement(page, '[data-action="start-recording"]')
+    await waitFor(page, `document.querySelector('[data-testid="recorder-indicator"]')`, 'REC notice')
+    await waitForRecorderArmed(apiPort, true)
+
+    const activeNotice = await noticeGeometry(page, '[data-testid="recorder-indicator"]')
+    const activeNoticeStyle = JSON.parse(await evaluate(page, `(() => {
+      const style = getComputedStyle(document.querySelector('[data-testid="recorder-indicator"]'))
+      return JSON.stringify({
+        backgroundColor: style.backgroundColor,
+        borderTopWidth: style.borderTopWidth,
+      })
+    })()`))
+    const activeChrome = JSON.parse(await evaluate(page, `JSON.stringify({
+      previewVisible: Boolean(document.querySelector('[data-testid="systemsketch-preview-mode"]')),
+      text: document.querySelector('[data-testid="recorder-indicator"]').textContent.replace(/\\s+/g, ' ').trim(),
+    })`))
+    check('rec-notice-priority', 'REC replaces passive Preview status and clears the corner chrome', {
+      previewVisible: activeChrome.previewVisible,
+      placement: activeNotice.placement,
+      clear: !overlaps(activeNotice.left, activeNotice.notice) && !overlaps(activeNotice.notice, activeNotice.right),
+      labels: /REC/.test(activeChrome.text) && /1 min/.test(activeChrome.text) && /Stop and save/.test(activeChrome.text),
+      styled: activeNoticeStyle.borderTopWidth === '1px' && activeNoticeStyle.backgroundColor !== 'rgba(0, 0, 0, 0)',
+    }, { previewVisible: false, placement: 'below', clear: true, labels: true, styled: true })
+    await shot(page, 'recorder-rec-bar.png')
+    await setViewport(page, 1440)
+
+    // Reproduce the bug while the explicit take is active.
+    await clickAt(page, 200, 880)
     await drawBlock(page, { x: 300, y: 260 }, { x: 640, y: 460 }, 'camera')
     await addPort(page, 'outputs')
     await delay(300)
@@ -112,49 +228,16 @@ async function main() {
     await delay(250)
     await dragFrom(page, await box(page, portDot(blocks.camera, 'output', 'out_1')), await box(page, portDot(blocks.detector, 'input', 'in_1')), { steps: 12 })
     await delay(300)
-    await key(page, 'Escape', 'Escape') // a key tldraw does not always see: the DOM lane must
+    await key(page, 'Escape', 'Escape')
     await delay(400)
 
-    // ---- 2. save the last 30 s from the Dev menu
+    await clickElement(page, '[data-testid="recorder-indicator"] button')
+    await waitFor(page, `!document.querySelector('[data-testid="recorder-indicator"]')`, 'manual Stop and save', 30000)
     await clickElement(page, '.systemsketch-dev-trigger')
-    await waitFor(page, `document.querySelector('[data-testid="recorder-controls"][data-enabled="true"]')`, 'recorder rows')
-    await shot(page, 'recorder-dev-menu.png')
-    check('note-input-absent', 'the Recording section has no prefatory text input', await evaluate(page, `document.querySelector('[data-testid="recorder-note"]')`), null)
-    const splitAtRest = JSON.parse(await evaluate(page, `JSON.stringify({
-      primary: document.querySelector('[data-action="save-last"]').textContent.trim(),
-      menu: Boolean(document.querySelector('[data-testid="recorder-menu"]')),
-      expanded: document.querySelector('[data-action="more"]').getAttribute('aria-expanded'),
-    })`))
-    check('split-capture-rest', 'one quiet split control keeps Save last directly available at rest', splitAtRest, {
-      primary: '● Save last 30 s', menu: false, expanded: 'false',
-    })
-    await clickElement(page, '[data-action="more"]')
-    const splitMenu = JSON.parse(await evaluate(page, `JSON.stringify({
-      take: Boolean(document.querySelector('[data-testid="recorder-menu"] [data-action="take"]')),
-      copy: Boolean(document.querySelector('[data-testid="recorder-menu"] [data-action="copy-last"]')),
-      windows: document.querySelectorAll('[data-testid="recorder-menu"] [data-window]').length,
-      power: Boolean(document.querySelector('[data-testid="recorder-menu"] [data-action="toggle"]')),
-    })`))
-    check('split-capture-menu', 'the chevron reveals alternate capture, recovery, duration, and power', splitMenu, {
-      take: true, copy: true, windows: 5, power: true,
-    })
-    await key(page, 'Escape', 'Escape')
-    const escapedMenu = JSON.parse(await evaluate(page, `JSON.stringify({
-      menu: Boolean(document.querySelector('[data-testid="recorder-menu"]')),
-      controls: Boolean(document.querySelector('[data-testid="recorder-controls"]')),
-    })`))
-    check('split-capture-escape', 'Escape closes the disclosure without dismissing the Dev panel', escapedMenu, {
-      menu: false, controls: true,
-    })
-    await clickElement(page, '[data-action="more"]')
-    await shot(page, 'recorder-split-menu.png')
-    await clickElement(page, '[data-action="more"]')
-    await clickElement(page, '[data-action="save-last"]')
-    await waitFor(page, `document.querySelector('[data-testid="recorder-status"]')?.textContent.includes('Saved')`, 'a saved recording', 30000)
-    await delay(300)
+    await waitFor(page, `document.querySelector('[data-testid="recorder-status"]')?.textContent.includes('Saved')`, 'saved status', 30000)
     await shot(page, 'recorder-saved.png')
     await clickElement(page, '[data-action="more"]')
-    await waitFor(page, `!document.querySelector('[data-testid="recorder-last-path"]').textContent.includes('Nothing saved')`, 'the saved recording in the disclosed recovery surface')
+    await waitFor(page, `!document.querySelector('[data-testid="recorder-last-path"]').textContent.includes('Nothing saved')`, 'saved recording recovery surface')
 
     let clipboard = null
     try {
@@ -163,7 +246,7 @@ async function main() {
       clipboard = `unreadable: ${error.message}`
     }
     const copiedMark = await evaluate(page, `document.querySelector('[data-clipboard="copied"]')?.textContent.trim()`)
-    check('clipboard-state', 'the disclosed recovery surface reports the clipboard write as done', copiedMark, 'Packet copied')
+    check('clipboard-state', 'Stop and save reports the clipboard write as done', copiedMark, 'Packet copied')
 
     const folders = await recordingFolders(filesRoot)
     check('one-folder', 'exactly one recording folder exists after one save', folders.length, 1)
@@ -178,7 +261,7 @@ async function main() {
     }, { emptyHeaderNote: true, saysNoNote: true, hasTimelinePath: true })
     check('packet-paths', 'the packet points at the folder by absolute path', first.packet.includes(`${folders[0]}/timeline.jsonl`), true)
     check('packet-on-clipboard', 'the clipboard holds the packet verbatim', typeof clipboard === 'string' && clipboard === first.packet, true)
-    check('header-mode', 'a retroactive save is stamped as such, on the preview channel', { mode: first.header.mode, channel: first.header.channel, framesSource: first.header.framesSource }, { mode: 'last', channel: 'preview', framesSource: 'screencast' })
+    check('header-mode', 'the saved recording is an explicit take on Preview', { mode: first.header.mode, channel: first.header.channel, framesSource: first.header.framesSource }, { mode: 'take', channel: 'preview', framesSource: 'screencast' })
 
     const lanes = new Set(first.rows.map((row) => row.lane))
     check('lanes', 'the timeline carries input, state, store and DOM lanes', ['input', 'state', 'store', 'dom'].every((lane) => lanes.has(lane)), true)
@@ -193,50 +276,13 @@ async function main() {
     const firstFrameFile = first.frameFiles[0]
     const bytes = firstFrameFile ? (await readFile(join(folders[0], 'frames', firstFrameFile))).length : 0
     check('frame-is-jpeg', 'a kept frame is a real JPEG', bytes > 1000, true)
-    check('snapshots', 'the start snapshot is rewound: it holds fewer shapes than the end', {
+    check('snapshots', 'the take snapshot begins at Start and the end contains the reproduction', {
       start: Object.values(JSON.parse(await readFile(join(folders[0], 'start.snapshot.json'), 'utf8')).store).filter((record) => record.typeName === 'shape').length,
       end: Object.values(JSON.parse(await readFile(join(folders[0], 'end.snapshot.json'), 'utf8')).store).filter((record) => record.typeName === 'shape').length,
     }, { start: 0, end: 3 })
 
-    // ---- 3. an explicit take at the 5 s cap: red bar, auto-stop, no clipboard
-    await clickElement(page, '[data-window="5000"]')
-    await waitFor(page, `document.querySelector('[data-action="more"]')`, 'the closed split control after changing its window')
-    await evaluate(page, `navigator.clipboard.writeText('sentinel').catch(() => undefined)`)
-    await clickElement(page, '[data-action="more"]')
-    await clickElement(page, '[data-action="take"]')
-    await waitFor(page, `document.querySelector('[data-testid="recorder-indicator"]')`, 'REC bar')
-    const barText = await evaluate(page, `document.querySelector('[data-testid="recorder-indicator"]').textContent`)
-    check('rec-bar', 'the REC bar is painted at the top while the take runs', /REC/.test(barText) && /5 s/.test(barText), true)
-    await shot(page, 'recorder-rec-bar.png')
-    // Move the detector while the take runs, pressing on its body rather than its title.
-    const detector = await box(page, `[data-shape-id="${blocks.detector}"]`)
-    await mouse(page, 'mouseMoved', detector.cx, detector.cy + 40)
-    await mouse(page, 'mousePressed', detector.cx, detector.cy + 40, { buttons: 1 })
-    for (let step = 1; step <= 10; step += 1) {
-      await mouse(page, 'mouseMoved', detector.cx + 6 * step, detector.cy + 40 + 12 * step, { buttons: 1 })
-      await delay(30)
-    }
-    await mouse(page, 'mouseReleased', detector.cx + 60, detector.cy + 160)
-    const takeStarted = Date.now()
-    await waitFor(page, `!document.querySelector('[data-testid="recorder-indicator"]')`, 'the take to stop itself', 12000)
-    const stoppedAfter = Date.now() - takeStarted
-    check('take-auto-stop', 'the take stopped itself once the cap passed', stoppedAfter < 9000, true)
-    // Dragging on the canvas dismissed the Dev panel (outside click), so open it again.
-    await clickElement(page, '.systemsketch-dev-trigger')
-    await waitFor(page, `document.querySelector('[data-testid="recorder-controls"][data-mode="idle"]')`, 'the recorder to be idle again')
-    await delay(400)
-    const afterTake = await recordingFolders(filesRoot)
-    check('take-folder', 'the take wrote a second folder', afterTake.length, 2)
-    const take = await readRecording(afterTake[1])
-    check('take-header', 'the take is stamped as a take and lasted about the cap', { mode: take.header.mode, capped: take.header.durationMs >= 4500 && take.header.durationMs <= 6500 }, { mode: 'take', capped: true })
-    check('take-translating', 'the take saw the Block being dragged', take.rows.some((row) => row.lane === 'state' && row.to === 'select.translating'), true)
-    check('take-frames-capped', 'the take kept at most one frame per 300 ms over its cap', take.frames.length <= Math.ceil(take.header.durationMs / 300) + 2 && take.frames.length > 0, true)
-    let clipboardAfterTake = null
-    try { clipboardAfterTake = await evaluate(page, 'navigator.clipboard.readText()') } catch { clipboardAfterTake = null }
-    check('take-no-clipboard', 'an auto-stopped take leaves the clipboard alone', clipboardAfterTake, 'sentinel')
-
-    // ---- 4. playback.html stands on its own
-    await page.send('Page.navigate', { url: `file://${afterTake[0]}/playback.html#t=${Math.round(first.header.durationMs)}` })
+    // ---- 3. playback.html stands on its own
+    await page.send('Page.navigate', { url: `file://${folders[0]}/playback.html#t=${Math.round(first.header.durationMs)}` })
     await waitFor(page, `document.querySelectorAll('#log div').length > 0`, 'playback log')
     await waitFor(page, `document.querySelector('#frame').naturalWidth > 0`, 'playback frame image')
     const playback = JSON.parse(await evaluate(page, `JSON.stringify({
@@ -248,44 +294,38 @@ async function main() {
     check('playback', 'playback.html renders the log, the filmstrip and a loaded frame', { lines: playback.logLines > 0, strip: playback.strip === first.frames.length, frame: playback.frameLoaded }, { lines: true, strip: true, frame: true })
     await shot(page, 'recorder-playback.png')
 
-    // ---- 5. the toggle, and its persistence
+    // ---- 4. the one-minute timer cancels and discards
     await openApp(page, port, `?board=${encodeURIComponent(board)}`)
     await waitFor(page, 'window.__systemsketch?.editor', 'editor seam again')
     await delay(600)
     await clickElement(page, '.systemsketch-dev-trigger')
-    await waitFor(page, `document.querySelector('[data-testid="recorder-controls"]')`, 'recorder rows again')
-    await clickElement(page, '[data-action="more"]')
-    await clickElement(page, '[data-action="toggle"]')
-    await waitFor(page, `document.querySelector('[data-testid="recorder-controls"][data-enabled="false"]')`, 'recorder off')
-    const offState = JSON.parse(await evaluate(page, `JSON.stringify({
-      primary: document.querySelector('[data-testid="recorder-split"] .systemsketch-recorder__primary').textContent.trim(),
-      hasSave: Boolean(document.querySelector('[data-action="save-last"]')),
-      stored: localStorage.getItem('systemsketch.recorder.enabled.v1'),
-    })`))
-    check('toggle-off', 'turning the recorder off replaces Save with a direct enable action and persists the choice', offState, {
-      primary: 'Turn recorder on', hasSave: false, stored: 'off',
-    })
-    await delay(300)
-    const disarmed = await (await fetch(`http://127.0.0.1:${apiPort}/api/recordings/status`)).json()
-    check('toggle-disarms-host', 'the host stops the screencast when the page turns recording off', disarmed.armed, false)
-    await openApp(page, port, `?board=${encodeURIComponent(board)}`)
-    await waitFor(page, 'window.__systemsketch?.editor', 'editor seam after reload')
-    await delay(500)
-    await clickElement(page, '.systemsketch-dev-trigger')
-    await waitFor(page, `document.querySelector('[data-testid="recorder-controls"]')`, 'recorder rows after reload')
-    check('toggle-persists', 'the off choice survives a reload', await evaluate(page, `document.querySelector('[data-testid="recorder-controls"]').dataset.enabled`), 'false')
-    await clickElement(page, '[data-action="toggle"]')
-    await waitFor(page, `document.querySelector('[data-testid="recorder-controls"][data-enabled="true"]')`, 'recorder on again')
+    await waitFor(page, `document.querySelector('[data-action="start-recording"]')`, 'Start recording again')
+    await evaluate(page, `(() => {
+      const original = window.setTimeout.bind(window)
+      window.__restoreRecorderTimeout = () => { window.setTimeout = original }
+      window.setTimeout = (callback, delay, ...args) => original(callback, delay === 60000 ? 350 : delay, ...args)
+      return true
+    })()`)
+    await clickElement(page, '[data-action="start-recording"]')
+    await waitFor(page, `document.querySelector('[data-testid="recorder-indicator"]')`, 'REC notice before cancellation')
+    await evaluate(page, `window.__restoreRecorderTimeout()`)
+    await waitFor(page, `document.querySelector('[data-testid="recorder-status"]')?.textContent.includes('Cancelled')`, 'one-minute cancellation', 5000)
+    await waitForRecorderArmed(apiPort, false)
+    check('limit-cancels', 'the one-minute safety timer returns to idle without saving', {
+      indicator: Boolean(await evaluate(page, `document.querySelector('[data-testid="recorder-indicator"]')`)),
+      folders: (await recordingFolders(filesRoot)).length,
+      status: await evaluate(page, `document.querySelector('[data-testid="recorder-status"]').textContent.trim()`),
+    }, { indicator: false, folders: 1, status: 'Cancelled · nothing saved' })
 
-    // ---- 6. the isolated preset has the compact controls too
+    // ---- 5. the isolated preset has the same explicit control
     await openApp(page, port, '?preset=block-dev')
     await waitFor(page, 'window.__systemsketch?.editor', 'preset editor')
     await waitFor(page, `document.querySelector('.systemsketch-recorder--compact')`, 'compact recorder controls')
-    check('preset-controls', 'the Block Dev preset carries the same compact split control', JSON.parse(await evaluate(page, `JSON.stringify({
+    check('preset-controls', 'the Block Dev preset carries the same compact Start control', JSON.parse(await evaluate(page, `JSON.stringify({
       split: Boolean(document.querySelector('.systemsketch-recorder--compact [data-testid="recorder-split"]')),
-      primary: document.querySelector('.systemsketch-recorder--compact [data-action="save-last"]')?.textContent.trim(),
+      primary: document.querySelector('.systemsketch-recorder--compact [data-action="start-recording"]')?.textContent.trim(),
       persistentButtons: document.querySelectorAll('.systemsketch-recorder--compact button').length,
-    })`)), { split: true, primary: '● Save last 5 s', persistentButtons: 2 })
+    })`)), { split: true, primary: '● Start recording', persistentButtons: 2 })
 
     const consoleErrors = localConsoleErrors(page)
     check('console-clean', 'the journey raised no local console errors', consoleErrors, [])

@@ -90,8 +90,10 @@ FILES = {
     "src/recorder/flightRecorder.ts": "the ring buffer: seven lanes on one clock, window trim, rewind of the start snapshot",
     "src/recorder/recorderStore.ts": "policy, arm/disarm, save, clipboard, the external store the UI reads",
     "src/recorder/recorderClient.ts": "the three host calls",
-    "src/recorder/RecorderControls.tsx": "the split-capture control, compact preset form, and REC bar",
-    "src/recorder/recorder.css": "split action, disclosure menu, duration chips, and REC bar",
+    "src/recorder/RecorderControls.tsx": "the explicit Start/Stop split control, compact preset form, and REC notice",
+    "src/recorder/recorder.css": "split action, recovery menu, and REC notice",
+    "src/chrome/topNoticePlacement.ts": "the measured inline-or-below top-notice rule",
+    "src/chrome/topNoticePlacement.test.ts": "the notice-placement boundary tests",
     "scripts/recording_store.py": "folder writer, packet, state→source map, playback.html, retention, the sidecar owner",
     "scripts/recorder_frames.mjs": "the screencast sidecar",
     "tests/recorder_smoke.mjs": "the real-browser proof",
@@ -107,7 +109,7 @@ NEW_LINES = sum(line_count(path) for path in FILES)
 ONMOUNT = source_slice(REPO / "src" / "App.tsx", "    const stopFlightRecorder = installFlightRecorder(editor)\n    return () => {", "      stopToolbarSideEffects()")
 LAUNCH = source_slice(REPO / "scripts" / "launch_systemsketch.py", "    command = [\n            chrome,", "    if new_window:")
 ROUTES = source_slice(REPO / "scripts" / "server.py", '        if path == "/api/recordings/arm":', '            if path == "/api/workspace/file":')
-POLICY = source_slice(REPO / "src" / "recorder" / "recorderStore.ts", "export function defaultRecorderEnabled(): boolean {", "export function readStoredWindowMs")
+POLICY = source_slice(REPO / "src" / "recorder" / "recorderStore.ts", "/**\n * One recorder per page", "export interface RecorderChannelInfo")
 EVERY_NTH = source_slice(REPO / "scripts" / "recorder_frames.mjs", "// Measured (docs/assets/recorder-spike/screencast-cost.json)", "const MAX_WIDTH")
 
 
@@ -233,7 +235,7 @@ TEMPLATE = r"""<!doctype html>
 <div class="hero">
   <div class="kicker">SystemSketch · implementation report · 1 September 2026 · follows the state-recorder design review</div>
   <h1>The flight recorder, built</h1>
-  <p class="lede">Steps 1 to 6 of the design review are in the tree and proved in a real browser: an always-armed ring buffer in the page, a quiet split-capture control whose broad face <b>saves the last 30 s</b> while its chevron reveals Record next, Copy last, duration, and power, a red bar during a take, a Python route that writes one folder per recording with the packet first, a Node sidecar that keeps Chrome's screencast in a ring behind one launcher flag, and a <code>playback.html</code> in every folder. Recording is <b>on by default in Preview and the isolated presets, off by default in Stable</b>. Your question about the cost of the screenshots is answered with a measurement in §1.</p>
+  <p class="lede">Steps 1 to 6 of the design review are in the tree, with the interaction simplified around a person reproducing a bug: the quiet split control starts an explicit take, becomes <b>Stop and save</b>, and keeps only Copy last behind its chevron. Nothing records or asks Chrome for frames at rest. At one minute an unfinished take is cancelled without saving. A manual stop writes the packet first, copies it, and leaves <code>playback.html</code> in the folder. Preview and REC now share a measured top-notice slot: inline when the center gap is safe, below the corner capsules when it is not, and never both at once. The retrospective ring-buffer path remains dormant in source for a future machine-oriented mode. The screenshot cost measurement remains in §1.</p>
   <div class="badges">
     <span class="badge ok">journey __PASSED__ / __TOTAL__ checks · real Chrome, real folder, real clipboard</span>
     <span class="badge ok">__RECORDER_TESTS__ buffer unit tests · __PY_TESTS__ host unit tests · tsc clean</span>
@@ -243,7 +245,7 @@ TEMPLATE = r"""<!doctype html>
 </div>
 
 <section>
-  <h2>1 · Your two questions</h2>
+  <h2>1 · Capture cost and idle policy</h2>
   <div class="two">
     <div class="card">
       <h3>What do the screenshots cost?</h3>
@@ -252,10 +254,10 @@ TEMPLATE = r"""<!doctype html>
       <p class="muted">Caveat: headless Chrome with the GPU disabled, so capture and JPEG encoding were all on the CPU; a GPU-backed desktop window should be cheaper in absolute terms. The relative picture — cost per frame, none at rest, no jank — is the finding. The in-page half stays at the design review's __SPIKE_COST__ ms per __SPIKE_DUR__ s.</p>
     </div>
     <div class="card">
-      <h3>Off in Stable, on where bugs are expected — yes</h3>
-      <p>Adopted exactly as you proposed. The default is decided synchronously at mount, which a retroactive recorder needs, and it is a one-liner: the app runs from the dev server in Preview and in every isolated preset, and from a built release in Stable, so <code>import.meta.env.DEV</code> <i>is</i> the channel split. A persisted toggle in the Recording section overrides it in either direction and disarms the host's screencast the moment you turn it off (proved in the journey). Stable therefore costs nothing until you opt in.</p>
+      <h3>Idle until Start</h3>
+      <p>The app installs the control in Preview, Stable, and isolated presets, but it does not start the in-page recorder or arm Chrome. Clicking Start does both and takes the exact start snapshot. Clicking Stop saves and copies; reaching 60 seconds stops, disarms, discards, and reports that nothing was saved. The older preference/window functions, <code>saveLast()</code>, and the three former install calls stay in source as dormant code, so a later machine-oriented retrospective mode can be restored without making it the human default.</p>
       <pre class="light">__POLICY__</pre>
-      <p class="muted" style="margin-top:12px">The launcher opens the debugging port for both channels regardless, so opting in on Stable works without another relaunch. It is loopback-only, and Chrome refuses any browser origin on it; the sidecar connects as a plain Node client (verified against a Chrome started without any origin allow-list).</p>
+      <p class="muted" style="margin-top:12px">The launcher opens the debugging port for both channels, but the sidecar remains unarmed until Start. It is loopback-only, and Chrome refuses any browser origin on it; the sidecar connects as a plain Node client (verified against a Chrome started without any origin allow-list).</p>
     </div>
   </div>
   <table style="margin-top:18px"><thead><tr><th>Variant</th><th>Chrome CPU</th><th>% of a core</th><th>Δ vs A</th><th>rAF p50 / p95 / max (ms)</th><th>frames &gt; 33 ms</th><th>frames delivered</th><th>bytes</th></tr></thead><tbody>__COST_ROWS__</tbody></table>
@@ -264,12 +266,13 @@ TEMPLATE = r"""<!doctype html>
 
 <section>
   <h2>2 · What shipped, step by step</h2>
-  <p class="sub">The six steps of the design review's §7, each one where the review said it would go. __NEW_LINES__ new lines across __NEW_FILES__ files; the stock-boundary test still passes because nothing new sits beside the engine.</p>
+  <p class="sub">The original six implementation seams plus the new shared top-notice rule. __NEW_LINES__ lines across __NEW_FILES__ files; the stock-boundary test still passes because nothing new sits beside the engine.</p>
   <ol class="steps">
-    <li><b>The ring buffer — <code>src/recorder/flightRecorder.ts</code></b><span>Seven lanes on one clock (input · dom · state · menu · store · console · mark), trimmed to the window on every push. The DOM lane is the finding from the spike made real: capture-phase <code>keydown</code>/<code>keyup</code>/<code>pointerdown</code> on the window, with the UI element hit, so Escape into a menu is recorded even though tldraw never sees it. A retroactive save <b>rewinds</b> the end snapshot through the window's diffs with tldraw's own <code>reverseRecordsDiff</code>, so <code>start.snapshot.json</code> is real for both modes. Installed from <code>onMount</code> in the product and in the presets, never in the embedded IDE lane.</span></li>
-    <li><b>Split capture, REC bar, policy — <code>src/recorder/RecorderControls.tsx</code>, <code>recorderStore.ts</code></b><span>The Recording section sits between Isolated presets and Version &amp; updates. At rest only one split control persists: its broad face saves the last window, while the chevron reveals Record next, Copy last, 5 / 15 / 30 / 60 / 120 s, and power. During a take the whole control becomes Stop and save. There is no prefatory text box; context belongs in the chat before the packet. The presets use the same split interaction in compact form. The REC bar is portaled onto <code>document.body</code> because the canvas layer sits under tldraw's top chrome.</span></li>
+    <li><b>The ring buffer — <code>src/recorder/flightRecorder.ts</code></b><span>Seven lanes on one clock (input · dom · state · menu · store · console · mark), trimmed to the window on every push. The DOM lane is the finding from the spike made real: capture-phase <code>keydown</code>/<code>keyup</code>/<code>pointerdown</code> on the window, with the UI element hit, so Escape into a menu is recorded even though tldraw never sees it. Explicit takes use the snapshot captured at Start. The retrospective <code>collect('last')</code> rewind through tldraw's own <code>reverseRecordsDiff</code> remains implemented but is not reachable from the interface.</span></li>
+    <li><b>Start/Stop, REC notice, policy — <code>src/recorder/RecorderControls.tsx</code>, <code>recorderStore.ts</code></b><span>The Recording section sits between Isolated presets and Version &amp; updates. At rest its broad face says Start recording and the chevron contains only Copy last recording plus the one-minute cancellation rule. During a take the control becomes Stop and save. There is no prefatory text box; context belongs in the chat before the packet. The presets use the same compact interaction. A compact red REC notice is portaled onto the app theme root and takes priority over passive Preview status while active.</span></li>
+    <li><b>One top-notice lane — <code>src/chrome/topNoticePlacement.ts</code></b><span>Preview and REC measure their painted width against both corner capsules with a 12 px safety gap. The notice occupies the center gap when it fits and drops beneath the chrome when it does not. Popouts follow the second row, and active REC temporarily suppresses Preview, so callouts cannot pile on top of each other.</span></li>
     <li><b>Host route and writer — <code>scripts/server.py</code>, <code>scripts/recording_store.py</code></b><span><code>POST /api/recordings</code> writes <code>~/SystemSketch/recordings/&lt;local time&gt;-&lt;note&gt;/</code> staged then renamed, keeps the last 20, and returns the packet; <code>GET /api/recordings/last</code> refills the clipboard after a reload; <code>POST /api/recordings/arm</code> tells the host whether the page wants frames. The packet maps every state seen to the file that defines it by indexing <code>id = '…'</code> declarations under <code>src/</code> and tldraw's tools.</span></li>
-    <li><b>Frames — <code>scripts/recorder_frames.mjs</code> + one launcher flag</b><span><code>--remote-debugging-port</code> per channel (4324 Preview, 4325 Stable) on the desktop Chrome, passed to the host as <code>--cdp-port</code>. The host spawns the sidecar lazily when a page arms it; the sidecar attaches to every page of that Chrome, keeps a ring of screencast frames per page while armed, and on save writes the wall-time slice into the folder at one frame per 300 ms. Both files travel with a release's <code>runtime/</code> and count toward the controller fingerprint.</span></li>
+    <li><b>Frames — <code>scripts/recorder_frames.mjs</code> + one launcher flag</b><span><code>--remote-debugging-port</code> per channel (4324 Preview, 4325 Stable) on the desktop Chrome, passed to the host as <code>--cdp-port</code>. Start arms the host and lazily spawns the sidecar; Stop or cancellation disarms it. While active, the sidecar attaches to every matching page, keeps a 60 s ring, and on save writes the wall-time slice into the folder at one frame per 300 ms. Every take also sends start/end canvas frames; the writer prefers Chrome, but uses those when a nominally available screencast has zero targets or returns no frames. Both sidecar files travel with a release's <code>runtime/</code> and count toward the controller fingerprint.</span></li>
     <li><b>Proof — <code>tests/recorder_smoke.mjs</code> (<code>npm run test:recorder</code>)</b><span>__TOTAL__ checks read off the disk and the DOM (§3). The harness learned to start Chrome first and hand its DevTools port to the host, the way the launcher does.</span></li>
     <li><b><code>playback.html</code> per recording + state→source map</b><span>Written into every folder by the host: frames by relative path, rows inlined, lane filters, a synthetic pointer, <code>#t=&lt;ms&gt;</code> deep links. Opens from <code>file://</code> with no server.</span></li>
   </ol>
@@ -283,11 +286,11 @@ TEMPLATE = r"""<!doctype html>
 
 <section>
   <h2>3 · Proof, in the real app</h2>
-  <p class="sub">One fresh headless instance: draw two Blocks, wire them, press Escape, prove the quiet split control and its complete chevron menu, and save the last 30 s from the broad face; then a 5 s take that stops itself; then open the folder's <code>playback.html</code>; then turn the recorder off and reload. Everything below is read from that run.</p>
+  <p class="sub">One fresh Chrome instance: prove the host is unarmed at rest; exercise Preview at wide and narrow widths; inspect the quiet Start control and recovery-only chevron; start a take, reproduce a wired two-Block interaction, stop manually, and read the folder, clipboard, snapshots, frames, and viewer. Then run the exact 60 s timer through a shortened clock and prove cancellation creates no second folder. Everything below is read from that run.</p>
   <div class="two">
-    <figure><img src="__SHOT_MENU__" alt="The Dev menu with the closed split-capture control"><figcaption><strong>Quiet at rest</strong> One broad Save last face and one chevron replace three persistent action rows, five chips, and a power chip.</figcaption></figure>
-    <figure><img src="__SHOT_SPLIT_MENU__" alt="The split-capture disclosure menu"><figcaption><strong>Complete on demand</strong> The chevron reveals Record next, Copy last with its recording identity, duration choices, and power in one bounded menu.</figcaption></figure>
-    <figure><img src="__SHOT_BAR_STRIP__" alt="The REC bar, close up" style="margin-bottom:10px"><img src="__SHOT_BAR__" alt="The REC bar during a take"><figcaption><strong>A take running</strong> The red bar across the top with the elapsed time against the 5 s cap, and the row turned into Stop and save.</figcaption></figure>
+    <figure><img src="__SHOT_MENU__" alt="The Dev menu with the closed split-capture control"><figcaption><strong>Quiet at rest</strong> One broad Start recording face and one recovery chevron. The host and Chrome capture are unarmed.</figcaption></figure>
+    <figure><img src="__SHOT_SPLIT_MENU__" alt="The split-capture disclosure menu"><figcaption><strong>Only recovery on demand</strong> The chevron reveals Copy last recording and states the one-minute cancel-without-save rule—no retroactive save, duration, or power controls.</figcaption></figure>
+    <figure><img src="__SHOT_BAR_STRIP__" alt="The REC notice, close up" style="margin-bottom:10px"><img src="__SHOT_BAR__" alt="The REC notice during a take"><figcaption><strong>A take running</strong> REC replaces Preview, drops below the corner capsules at this tighter width, and exposes Stop and save beside the elapsed time and one-minute cap.</figcaption></figure>
     <figure><img src="__SHOT_SAVED__" alt="The Dev menu after a save"><figcaption><strong>After Save</strong> The control collapses again and its status reads <code>Saved · packet copied</code>; the disclosed recovery action names the folder and recopies the packet.</figcaption></figure>
     <figure><img src="__SHOT_PLAYBACK__" alt="playback.html"><figcaption><strong>playback.html, opened from file://</strong> Frames on the left, lanes streaming on the right, the filmstrip below, the packet under it.</figcaption></figure>
   </div>
@@ -310,7 +313,7 @@ TEMPLATE = r"""<!doctype html>
     </div>
     <div class="card">
       <h3>Every time</h3>
-      <p>Something odd happens → <code>&lt;/&gt;</code> → click the broad <b>Save last 30 s</b> face → paste into the agent. If context will help, type it directly in the chat before pasting. The packet is prose plus absolute paths; the agent Reads <code>README.md</code>, greps <code>timeline.jsonl</code>, and opens the frames it needs. Open the chevron for <b>Copy last recording</b>, <b>Record next</b>, duration, or power. During an explicit take the full split control becomes <b>Stop and save</b>.</p>
+      <p>Open <code>&lt;/&gt;</code> → click <b>Start recording</b> → close Dev and reproduce the bug → click <b>Stop and save</b> in the REC notice or Dev panel → paste into the agent. Add context directly in the chat before pasting if it helps. The packet is prose plus absolute paths; the agent reads <code>README.md</code>, greps <code>timeline.jsonl</code>, and opens the frames it needs. If you forget to stop, the take cancels at one minute and saves nothing. The chevron can recopy the last successful packet.</p>
     </div>
   </div>
 </section>
@@ -320,7 +323,7 @@ TEMPLATE = r"""<!doctype html>
   <ul>
     <li><b>Step 7 stays parked</b>, as you asked: replay-to-test and the Chrome trace export.</li>
     <li><b>The screencast numbers are headless.</b> A windowed, GPU-backed measurement would be the next honest data point if the desktop ever feels heavier while recording.</li>
-    <li><b>No merge.</b> This follow-up is isolated on <code>__BRANCH__</code> at <code>__HEAD__</code>, based on the recorder implementation branch. It has not been merged into either that branch or <code>main</code>.</li>
+    <li><b>Integration is explicit.</b> This page was rendered from <code>__BRANCH__</code> at <code>__HEAD__</code>; the final handoff names its base, merge state, and worktree cleanup state.</li>
   </ul>
 </section>
 
@@ -355,10 +358,10 @@ def main() -> None:
         "__ONMOUNT__": esc(ONMOUNT),
         "__LAUNCH__": esc(LAUNCH),
         "__ROUTES__": esc(ROUTES),
-        "__SHOT_MENU__": png_uri(ASSETS / "recorder-dev-menu.png", (1040, 160, 1440, 900), 800),
-        "__SHOT_SPLIT_MENU__": png_uri(ASSETS / "recorder-split-menu.png", (1040, 160, 1440, 900), 800),
-        "__SHOT_BAR__": png_uri(ASSETS / "recorder-rec-bar.png", (0, 0, 1440, 900), 1100),
-        "__SHOT_BAR_STRIP__": png_uri(ASSETS / "recorder-rec-bar.png", (0, 0, 1440, 64), 1100),
+        "__SHOT_MENU__": png_uri(ASSETS / "recorder-dev-menu.png", (500, 250, 900, 900), 800),
+        "__SHOT_SPLIT_MENU__": png_uri(ASSETS / "recorder-split-menu.png", (500, 250, 900, 900), 800),
+        "__SHOT_BAR__": png_uri(ASSETS / "recorder-rec-bar.png", (0, 0, 900, 900), 1100),
+        "__SHOT_BAR_STRIP__": png_uri(ASSETS / "recorder-rec-bar.png", (0, 0, 900, 132), 1100),
         "__SHOT_SAVED__": png_uri(ASSETS / "recorder-saved.png", (1040, 160, 1440, 900), 800),
         "__SHOT_PLAYBACK__": png_uri(ASSETS / "recorder-playback.png", None, 1100),
         "__LANE_TILES__": lane_tiles(),

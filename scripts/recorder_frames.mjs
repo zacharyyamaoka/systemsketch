@@ -25,7 +25,7 @@ import { createInterface } from 'node:readline'
 const args = parseArgs(process.argv.slice(2))
 const CDP_PORT = Number(args['cdp-port'])
 const URL_PREFIX = String(args['url-prefix'] ?? '')
-const WINDOW_MS = Number(args['window-ms'] ?? 30_000)
+const WINDOW_MS = Number(args['window-ms'] ?? 60_000)
 const MAX_BYTES = Number(args['max-bytes'] ?? 160 * 1024 * 1024)
 const QUALITY = Number(args.quality ?? 70)
 // Measured (docs/assets/recorder-spike/screencast-cost.json): the cost is ~17 ms
@@ -37,7 +37,7 @@ const MAX_WIDTH = Number(args['max-width'] ?? 0)
 const DISCOVER_MS = 1500
 
 if (!Number.isFinite(CDP_PORT) || !URL_PREFIX) {
-  process.stderr.write('usage: recorder_frames.mjs --cdp-port N --url-prefix http://127.0.0.1:4322/ [--window-ms 30000]\n')
+  process.stderr.write('usage: recorder_frames.mjs --cdp-port N --url-prefix http://127.0.0.1:4322/ [--window-ms 60000]\n')
   process.exit(2)
 }
 

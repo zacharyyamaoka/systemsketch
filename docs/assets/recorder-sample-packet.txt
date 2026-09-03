@@ -1,46 +1,48 @@
-SystemSketch interaction recording — 2026-09-02T23:40:17.956Z · 6.8 s · the last 30 s (retroactive)
-channel preview · build recorder-smoke · http://127.0.0.1:38197/?board=%2Ftmp%2Frecorder-smoke-files-44GSJQ%2FSystemSketch%2Frecorder-proof.systemsketch
+SystemSketch interaction recording — 2026-09-03T00:56:12.407Z · 5.7 s · an explicit take
+channel preview · build recorder-smoke · http://127.0.0.1:36545/?board=%2Ftmp%2Frecorder-smoke-files-Qeubsd%2FSystemSketch%2Frecorder-proof.systemsketch
 viewport 1440×960 @1x · state path select.idle → select.idle · 3 shapes at the end
 
 No note was typed.
 
-State-chart transitions (17):
-  +   1.00s  select.idle  →  block.idle   (store)
-  +   1.08s  block.idle  →  block.pointing   (pointer_down)
-  +   1.10s  block.pointing  →  select.resizing   (pointer_move)
-  +   1.29s  select.resizing  →  select.idle   (pointer_up)
-  +   1.31s  select.idle  →  select.editing_shape   (store)
-  +   1.33s  select.editing_shape  →  select.idle   (complete)
-  +   2.44s  select.idle  →  block.idle   (store)
-  +   2.53s  block.idle  →  block.pointing   (pointer_down)
-  +   2.55s  block.pointing  →  select.resizing   (pointer_move)
-  +   2.74s  select.resizing  →  select.idle   (pointer_up)
-  +   2.76s  select.idle  →  select.editing_shape   (store)
-  +   2.76s  select.editing_shape  →  select.idle   (complete)
-  +   3.87s  select.idle  →  select.pointing_canvas   (pointer_down)
-  +   3.87s  select.pointing_canvas  →  select.idle   (pointer_up)
-  +   4.30s  select.idle  →  select.pointing_block_port   (pointer_down)
-  +   4.32s  select.pointing_block_port  →  select.dragging_handle   (pointer_move)
-  +   4.71s  select.dragging_handle  →  select.idle   (pointer_up)
+State-chart transitions (19):
+  +   0.58s  select.idle  →  select.pointing_canvas   (pointer_down)
+  +   0.59s  select.pointing_canvas  →  select.idle   (pointer_up)
+  +   0.78s  select.idle  →  block.idle   (store)
+  +   0.87s  block.idle  →  block.pointing   (pointer_down)
+  +   0.89s  block.pointing  →  select.resizing   (pointer_move)
+  +   1.09s  select.resizing  →  select.idle   (pointer_up)
+  +   1.11s  select.idle  →  select.editing_shape   (store)
+  +   1.13s  select.editing_shape  →  select.idle   (complete)
+  +   2.24s  select.idle  →  block.idle   (store)
+  +   2.33s  block.idle  →  block.pointing   (pointer_down)
+  +   2.35s  block.pointing  →  select.resizing   (pointer_move)
+  +   2.56s  select.resizing  →  select.idle   (pointer_up)
+  +   2.57s  select.idle  →  select.editing_shape   (store)
+  +   2.59s  select.editing_shape  →  select.idle   (complete)
+  +   3.68s  select.idle  →  select.pointing_canvas   (pointer_down)
+  +   3.69s  select.pointing_canvas  →  select.idle   (pointer_up)
+  +   4.12s  select.idle  →  select.pointing_block_port   (pointer_down)
+  +   4.13s  select.pointing_block_port  →  select.dragging_handle   (pointer_move)
+  +   4.54s  select.dragging_handle  →  select.idle   (pointer_up)
 
-Totals: 48 input events (33 moves, 4 presses, 0 key downs) · 23 DOM events · 40 store diffs · 0 menu changes · 0 console rows · 14 frames
+Totals: 49 input events (32 moves, 5 presses, 1 key downs) · 18 DOM events · 40 store diffs · 0 menu changes · 0 console rows · 19 frames
 
 States seen, and the file that defines each:
   select                       node_modules/tldraw/dist-esm/lib/tools/SelectTool/SelectTool.mjs
   idle                         node_modules/tldraw/dist-esm/lib/tools/SelectTool/childStates/Idle.mjs
+  pointing_canvas              node_modules/tldraw/dist-esm/lib/tools/SelectTool/childStates/PointingCanvas.mjs
   block                        src/blocks/BlockTool.ts
   pointing                     node_modules/@tldraw/editor/dist-esm/lib/editor/tools/BaseBoxShapeTool/children/Pointing.mjs
   resizing                     node_modules/tldraw/dist-esm/lib/tools/SelectTool/childStates/Resizing.mjs
   editing_shape                node_modules/tldraw/dist-esm/lib/tools/SelectTool/childStates/EditingShape.mjs
-  pointing_canvas              node_modules/tldraw/dist-esm/lib/tools/SelectTool/childStates/PointingCanvas.mjs
   pointing_block_port          src/blocks/connections/PointingBlockPort.ts
   dragging_handle              node_modules/tldraw/dist-esm/lib/tools/SelectTool/childStates/DraggingHandle.mjs
 
 Read these files, in this order:
-1. /tmp/recorder-smoke-files-44GSJQ/SystemSketch/recordings/2026-09-02_16-40-17-last/README.md  — this summary
-2. /tmp/recorder-smoke-files-44GSJQ/SystemSketch/recordings/2026-09-02_16-40-17-last/timeline.jsonl  — every event, one JSON object per line. `t` is ms since the start. Lanes: input (what tldraw's state chart received), dom (raw keydown/keyup/pointerdown on the window, with the UI element hit), state (state-chart path changes), menu (open menus), store (record diffs: add/update/remove with the changed keys), console (console calls and uncaught errors), mark (notes).
-3. /tmp/recorder-smoke-files-44GSJQ/SystemSketch/recordings/2026-09-02_16-40-17-last/frames/  — 14 screenshots named by ms since the start (f-001010.jpg = +1.01 s). To see what the screen showed after an event at t, open the first frame with a larger number. Chrome screencast frames: what the window actually showed, UI chrome included, no mouse pointer (the input lane has it).
-4. /tmp/recorder-smoke-files-44GSJQ/SystemSketch/recordings/2026-09-02_16-40-17-last/start.snapshot.json  — the tldraw store (document + session records) at t=0; /tmp/recorder-smoke-files-44GSJQ/SystemSketch/recordings/2026-09-02_16-40-17-last/end.snapshot.json is the store at save time. `editor.store.loadStoreSnapshot(start)` then replaying the store lane reproduces every instant.
-5. /tmp/recorder-smoke-files-44GSJQ/SystemSketch/recordings/2026-09-02_16-40-17-last/playback.html  — open in a browser: slow frames, fast lanes, one scrubber; #t=<ms> deep-links a moment.
+1. /tmp/recorder-smoke-files-Qeubsd/SystemSketch/recordings/2026-09-02_17-56-12-take/README.md  — this summary
+2. /tmp/recorder-smoke-files-Qeubsd/SystemSketch/recordings/2026-09-02_17-56-12-take/timeline.jsonl  — every event, one JSON object per line. `t` is ms since the start. Lanes: input (what tldraw's state chart received), dom (raw keydown/keyup/pointerdown on the window, with the UI element hit), state (state-chart path changes), menu (open menus), store (record diffs: add/update/remove with the changed keys), console (console calls and uncaught errors), mark (notes).
+3. /tmp/recorder-smoke-files-Qeubsd/SystemSketch/recordings/2026-09-02_17-56-12-take/frames/  — 19 screenshots named by ms since the start (f-000379.jpg = +0.38 s). To see what the screen showed after an event at t, open the first frame with a larger number. Chrome screencast frames: what the window actually showed, UI chrome included, no mouse pointer (the input lane has it).
+4. /tmp/recorder-smoke-files-Qeubsd/SystemSketch/recordings/2026-09-02_17-56-12-take/start.snapshot.json  — the tldraw store (document + session records) at t=0; /tmp/recorder-smoke-files-Qeubsd/SystemSketch/recordings/2026-09-02_17-56-12-take/end.snapshot.json is the store at save time. `editor.store.loadStoreSnapshot(start)` then replaying the store lane reproduces every instant.
+5. /tmp/recorder-smoke-files-Qeubsd/SystemSketch/recordings/2026-09-02_17-56-12-take/playback.html  — open in a browser: slow frames, fast lanes, one scrubber; #t=<ms> deep-links a moment.
 
-Recorder cost inside the page: 2.7 ms over 6.77 s of uptime.
+Recorder cost inside the page: 3 ms over 5.68 s of uptime.

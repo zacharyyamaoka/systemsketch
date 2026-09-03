@@ -18,15 +18,15 @@ import {
 /**
  * One recorder per page, and one small external store the UI reads.
  *
- * Policy, in one line: the buffer is armed by default wherever the app runs
- * from the dev server (Preview and the isolated presets — the places bugs are
- * expected) and off by default in a built Stable, with a persisted toggle
- * either way. `import.meta.env.DEV` is exactly that channel split, and it is
- * known synchronously at mount, which a retroactive recorder needs.
+ * Policy, in one line: recording is explicit. Nothing listens or asks Chrome
+ * for frames until the person presses Start; Stop saves and copies the packet.
+ * A forgotten take is cancelled and discarded at the one-minute safety cap.
+ * The older retrospective policy remains below as dormant code, not UI.
  */
 
 export const RECORDER_ENABLED_KEY = 'systemsketch.recorder.enabled.v1'
 export const RECORDER_WINDOW_KEY = 'systemsketch.recorder.window-ms.v1'
+export const EXPLICIT_RECORDING_LIMIT_MS = 60_000
 
 export interface RecorderChannelInfo {
   channel: string
@@ -44,6 +44,7 @@ export interface RecorderUiState {
   saving: boolean
   last: SavedRecording | null
   error: string | null
+  notice: string | null
   clipboard: 'copied' | 'failed' | null
   framesSource: FramesSource | 'unknown'
   framesReason: string
@@ -52,12 +53,13 @@ export interface RecorderUiState {
 const INITIAL: RecorderUiState = {
   installed: false,
   enabled: false,
-  windowMs: DEFAULT_WINDOW_MS,
+  windowMs: EXPLICIT_RECORDING_LIMIT_MS,
   mode: 'idle',
   takeStartedAt: null,
   saving: false,
   last: null,
   error: null,
+  notice: null,
   clipboard: null,
   framesSource: 'unknown',
   framesReason: '',
@@ -69,6 +71,7 @@ let editorRef: Editor | null = null
 let channelInfo: RecorderChannelInfo = { channel: 'unknown', build: 'unknown', version: '' }
 let takeTimer: ReturnType<typeof setTimeout> | null = null
 let takeStartCanvasFrame: CanvasFrame | null = null
+let hostSyncGeneration = 0
 const listeners = new Set<() => void>()
 
 function emit(next: Partial<RecorderUiState>): void {
@@ -121,18 +124,21 @@ function persist(key: string, value: string): void {
 
 /** Tell the host whether this page wants frames; remember what it can offer. */
 async function syncHost(enabled: boolean): Promise<void> {
+  const generation = ++hostSyncGeneration
   try {
     const status = await armRecorder(enabled, window.location.href)
+    if (generation !== hostSyncGeneration) return
     emit({ framesSource: status.screencast ? 'screencast' : 'canvas', framesReason: status.reason })
   } catch (cause) {
+    if (generation !== hostSyncGeneration) return
     emit({ framesSource: 'canvas', framesReason: cause instanceof Error ? cause.message : String(cause) })
   }
 }
 
-function startRecorder(): void {
+function startRecorder(windowMs = state.windowMs): void {
   if (!editorRef || recorder?.running) return
   recorder?.stop()
-  recorder = new FlightRecorder(editorRef, { windowMs: state.windowMs })
+  recorder = new FlightRecorder(editorRef, { windowMs })
   recorder.start()
 }
 
@@ -155,13 +161,23 @@ function clearTakeTimer(): void {
  */
 export function installFlightRecorder(editor: Editor): () => void {
   editorRef = editor
-  const enabled = readStoredEnabled() ?? defaultRecorderEnabled()
-  emit({ installed: true, enabled, windowMs: readStoredWindowMs(), error: null })
-  if (enabled) startRecorder()
-  void syncHost(enabled)
+  emit({
+    installed: true,
+    enabled: true,
+    windowMs: EXPLICIT_RECORDING_LIMIT_MS,
+    error: null,
+    notice: null,
+  })
+  // Retrospective mode is intentionally parked. Keeping these calls here as
+  // code-shaped documentation makes restoring the old opt-in policy small:
+  // const enabled = readStoredEnabled() ?? defaultRecorderEnabled()
+  // if (enabled) startRecorder(readStoredWindowMs())
+  // void syncHost(enabled)
+  void syncHost(false)
   void readLastRecording().then((last) => { if (last) emit({ last }) }).catch(() => undefined)
   return () => {
     stopRecorder()
+    void syncHost(false)
     editorRef = null
     emit({ installed: false })
   }
@@ -209,14 +225,27 @@ async function canvasFrame(t: number): Promise<CanvasFrame | null> {
 }
 
 export async function startTake(): Promise<void> {
-  if (!recorder?.running || state.mode === 'take') return
+  if (!editorRef || state.mode === 'take') return
+  startRecorder(EXPLICIT_RECORDING_LIMIT_MS)
+  if (!recorder?.running) return
   recorder.beginTake()
-  takeStartCanvasFrame = state.framesSource === 'canvas' ? await canvasFrame(0) : null
-  emit({ mode: 'take', takeStartedAt: Date.now(), error: null, clipboard: null })
+  takeStartCanvasFrame = null
+  emit({
+    mode: 'take',
+    takeStartedAt: Date.now(),
+    windowMs: EXPLICIT_RECORDING_LIMIT_MS,
+    error: null,
+    notice: null,
+    clipboard: null,
+  })
+  void syncHost(true)
+  // Always prepare a cheap shapes-only first frame. It is used only when the
+  // host cannot provide a screencast, but does not race the visible Start.
+  void canvasFrame(0).then((frame) => {
+    if (state.mode === 'take' && recorder?.isTaking) takeStartCanvasFrame = frame
+  })
   clearTakeTimer()
-  // The cap is the point: a forgotten take stops itself and saves. No gesture
-  // means no clipboard, so the Copy row lights up instead.
-  takeTimer = setTimeout(() => { void saveNow('take', '', { fromTimer: true }) }, state.windowMs)
+  takeTimer = setTimeout(cancelTake, EXPLICIT_RECORDING_LIMIT_MS)
 }
 
 export async function stopTake(note = ''): Promise<SavedRecording | null> {
@@ -224,32 +253,61 @@ export async function stopTake(note = ''): Promise<SavedRecording | null> {
   return saveNow('take', note)
 }
 
+/** A forgotten recording is discarded rather than silently saved as evidence. */
+export function cancelTake(): void {
+  if (state.mode !== 'take') return
+  clearTakeTimer()
+  takeStartCanvasFrame = null
+  recorder?.stop()
+  recorder = null
+  void syncHost(false)
+  emit({
+    mode: 'idle',
+    takeStartedAt: null,
+    saving: false,
+    error: null,
+    clipboard: null,
+    notice: 'Cancelled at the 1 min safety limit · nothing saved',
+  })
+}
+
+/**
+ * Parked retrospective path. It is intentionally absent from the interface;
+ * keep it working so a later machine-oriented capture mode can opt back in.
+ */
 export async function saveLast(note = ''): Promise<SavedRecording | null> {
   return saveNow('last', note)
 }
 
-async function saveNow(mode: RecorderMode, note: string, options: { fromTimer?: boolean } = {}): Promise<SavedRecording | null> {
+async function saveNow(mode: RecorderMode, note: string): Promise<SavedRecording | null> {
   if (!recorder?.running) {
     emit({ error: 'The recorder is off. Turn it on to record.' })
     return null
   }
   if (state.saving) return null
   clearTakeTimer()
-  emit({ saving: true, error: null, clipboard: null })
+  emit({ saving: true, error: null, notice: null, clipboard: null })
   try {
     const payload = recorder.collect(mode, note)
+    // The host's availability probe only proves that a debugging port exists;
+    // Chrome may still have zero attached targets or deliver no frames before
+    // a very short take stops. Always send the two cheap shapes-only frames and
+    // let the writer prefer screencast frames when its dump is non-empty.
     const canvasFrames: CanvasFrame[] = []
-    if (state.framesSource === 'canvas') {
-      if (mode === 'take' && takeStartCanvasFrame) canvasFrames.push(takeStartCanvasFrame)
-      const end = await canvasFrame(payload.header.durationMs)
-      if (end) canvasFrames.push(end)
-    }
+    if (mode === 'take' && takeStartCanvasFrame) canvasFrames.push(takeStartCanvasFrame)
+    const end = await canvasFrame(payload.header.durationMs)
+    if (end) canvasFrames.push(end)
     takeStartCanvasFrame = null
     const saved = await saveRecording(payload, { ...channelInfo, canvasFrames })
+    stopRecorder()
+    void syncHost(false)
     emit({ last: saved, mode: 'idle', takeStartedAt: null, saving: false })
-    if (!options.fromTimer) await copyToClipboard(saved.packet)
+    await copyToClipboard(saved.packet)
     return saved
   } catch (cause) {
+    takeStartCanvasFrame = null
+    stopRecorder()
+    void syncHost(false)
     emit({ saving: false, mode: 'idle', takeStartedAt: null, error: cause instanceof Error ? cause.message : String(cause) })
     return null
   }
