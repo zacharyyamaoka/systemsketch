@@ -33,6 +33,8 @@ def main() -> None:
             'src/blocks/ui/BlockSelectionMiniMenu.tsx', 'selectionLabel'),
         'mixed Block scope renders a count': source_has(
             'src/blocks/ui/BlockSelectionMiniMenu.tsx', 'scopeLabel'),
+        'context-menu batch labels append a count': source_has(
+            'src/blocks/ui/BlockContextMenu.tsx', 'batchSuffix'),
         'batch inspector uses “Batch edit”': source_has(
             'src/blocks/ui/BlockBatchInspector.tsx', '>Batch edit<'),
         'selection identity refreshes the Block controls': source_has(
@@ -41,6 +43,7 @@ def main() -> None:
     assert not source_guards['ordinary menu renders a selected-count chip']
     assert not source_guards['Block mini menu accepts a count label']
     assert not source_guards['mixed Block scope renders a count']
+    assert not source_guards['context-menu batch labels append a count']
     assert source_guards['batch inspector uses “Batch edit”']
     assert source_guards['selection identity refreshes the Block controls']
 

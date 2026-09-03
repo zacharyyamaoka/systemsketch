@@ -330,13 +330,12 @@ async function main() {
     await openSelectionMenu(page)
     const viewLabel = await evaluate(page,
       `document.querySelector('[data-testid="context-menu-sub.block-view-button"]').textContent.trim()`)
-    assert.ok(viewLabel.includes('(3)'), `Block view names the batch size, got ${viewLabel}`)
+    assert.equal(viewLabel, 'Block view')
     assert.equal(await evaluate(page,
       `Boolean(document.querySelector('[data-testid="context-menu-sub.block-add-button"]'))`), false,
       'structural Add stays behind a single Block')
-    assert.ok(await evaluate(page,
-      `document.querySelector('[data-testid="context-menu-sub.block-ports-button"]').textContent.includes('(3)')`),
-      'Ports also names the batch size')
+    assert.equal(await evaluate(page,
+      `document.querySelector('[data-testid="context-menu-sub.block-ports-button"]').textContent.trim()`), 'Ports')
     await openSubmenu(page, 'block-view')
     assert.deepEqual(await menuCheckboxes(page, 'block-view'), [
       { label: 'Simple', checked: 'false' },
@@ -348,7 +347,7 @@ async function main() {
     await waitFor(page,
       `document.querySelectorAll('.systemsketch-block-canvas[data-block-view="simple"]').length === 3`,
       'three Simple Blocks from the context menu')
-    pass('the right-click menu batches Block view over the whole selection, unchecked while mixed, with structural Add withheld')
+    pass('the right-click menu batches Block view without a selected-count suffix, unchecked while mixed, with structural Add withheld')
 
     // Reopen: the write has to be durable and reflected back on the next open,
     // and the menu has to survive being dismissed at all.
