@@ -705,7 +705,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		const pill = delayPillGeometry(this.editor, connection)
 		return (
 			<g>
-				<DelayedCablePaths path={path} pill={pill} dashAfterPill={cablePresentation.get().dashAfterPill} stroke="#475569" />
+				<DelayedCablePaths path={path} pill={pill} solidBeforePill={cablePresentation.get().solidBeforePill} stroke="#475569" />
 				<DelayPill pill={pill} label={delayPillLabel(connection.props.delayValue)} stroke="#475569" fill="#ffffff" ink="#1d2230" />
 			</g>
 		)
@@ -744,7 +744,7 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		[editor, connection.id],
 	)
 	const delayed = connection.props.temporal === 'delayed'
-	const dashAfterPill = useValue('dash after pill', () => cablePresentation.get().dashAfterPill, [])
+	const solidBeforePill = useValue('solid before pill', () => cablePresentation.get().solidBeforePill, [])
 	const pill = useValue(
 		'delay pill geometry',
 		() => (delayed ? delayPillGeometry(editor, connection) : null),
@@ -761,7 +761,7 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 	}
 	return (
 		<SVGContainer style={{ opacity }} data-temporal="delayed">
-			<DelayedCablePaths path={path} pill={pill} dashAfterPill={dashAfterPill} stroke={stroke} />
+			<DelayedCablePaths path={path} pill={pill} solidBeforePill={solidBeforePill} stroke={stroke} />
 			<DelayPill
 				pill={pill}
 				label={delayPillLabel(connection.props.delayValue)}
@@ -822,23 +822,23 @@ export function delayPillGeometry(editor: Editor, connection: ConnectionShape): 
 }
 
 /**
- * The delayed line: dotted end to end by default, or dotted up to the pill
- * and dashed after it when the presentation switch says so. The split draws
+ * The delayed line: dotted end to end by default, or solid up to the pill
+ * and dotted after it when the presentation switch says so. The split draws
  * the same smooth path twice with complementary dash arrays normalised to
  * `pathLength`, so a curve stays a curve.
  */
 function DelayedCablePaths({
 	path,
 	pill,
-	dashAfterPill,
+	solidBeforePill,
 	stroke,
 }: {
 	path: string
 	pill: DelayPillGeometry
-	dashAfterPill: boolean
+	solidBeforePill: boolean
 	stroke: string
 }) {
-	if (!dashAfterPill) {
+	if (!solidBeforePill) {
 		return (
 			<path
 				d={path}

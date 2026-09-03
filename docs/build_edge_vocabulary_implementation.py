@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Build `docs/edge-vocabulary-implementation-2026-09-02.html`.
 
-The delayed-cable vocabulary shipped on `track/edge-vocabulary`: a cable marked
+The delayed-cable vocabulary on `track/delayed-edge-solid-before-dots-after`: a cable marked
 `delayed` draws dotted and carries a z⁻¹ pill that slides along it and can name
-its initial value; a Dev Hub switch draws the run after the pill dashed. Every
+its initial value; a Dev Hub switch draws the run before the pill solid. Every
 number here is measured from the tree at build time; the frames come from the
 real-browser journey.
 """
@@ -64,11 +64,10 @@ MIGRATION = re.search(r"AddTemporalQualifier: (\d+)", SHAPE).group(1)
 PILL_MIN = re.search(r"PILL_POSITION_MIN = ([\d.]+)", MODEL).group(1)
 PILL_MAX = re.search(r"PILL_POSITION_MAX = ([\d.]+)", MODEL).group(1)
 DOT = re.search(r"DELAY_DOT_GAP_PX = (\d+)", PRESENTATION).group(1)
-DASH = re.search(r"DELAY_DASH_PX = (\d+)", PRESENTATION).group(1)
 STORAGE_KEY = re.search(r"CABLE_PRESENTATION_KEY = '([^']+)'", PRESENTATION).group(1)
 checks = json.loads(ACCEPTANCE.read_text(encoding="utf-8")) if ACCEPTANCE.exists() else []
 PASSED = sum(1 for c in checks if c.get("ok"))
-TRACK_PORT = "4350"
+TRACK_PORT = "4360"
 FIXTURE = REPO / "sketches/review/edge-vocabulary.systemsketch"
 FIXTURE_URL = f"http://127.0.0.1:{TRACK_PORT}/?board=" + str(FIXTURE).replace("/", "%2F")
 
@@ -78,7 +77,7 @@ def seam_svg() -> str:
         ("connection record", "temporal · delayValue · pillPosition", "StyleProp + two props, migration v" + MIGRATION),
         ("shared styles", "inspector · right-click · batch", "one write per selection"),
         ("ConnectionShapeUtil", "dotted path · pill · handle", "arc length on the routed polyline"),
-        ("Dev Hub switch", "dash after the pill", "an atom, remembered per browser"),
+        ("Dev Hub switch", "solid before the pill", "an atom, remembered per browser"),
     ]
     parts = ['<svg viewBox="0 0 1100 200" class="seam" role="img" aria-label="The seam">']
     x = 20
@@ -128,9 +127,9 @@ def build() -> str:
     wide = (60, 100, 1800, 960)
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Delayed cable: the z⁻¹ pill</title><style>{CSS}</style></head><body><main>
-<div class="eyebrow">SystemSketch · track/edge-vocabulary · {HEAD}</div>
+<div class="eyebrow">SystemSketch · {html.escape(BRANCH)} · {HEAD}</div>
 <h1>A cable can now be read one iteration late.</h1>
-<p class="lede">Mark a cable <b>delayed</b> and it draws dotted with a <b>z⁻¹ pill</b> riding it: centred by default, slid along the cable by its own handle, and naming the initial value in the port-default grammar (<code>z⁻¹ = 1.0</code>). Solid stays the plain data cable; dashed stays reserved for the async rail. A switch in the Dev Hub draws the run after the pill dashed instead, so you can judge the two line styles on a real board. Built on top of the Branch track, proven in a real browser, not merged.</p>
+<p class="lede">Mark a cable <b>delayed</b> and it draws dotted with a <b>z⁻¹ pill</b> riding it: centred by default, slid along the cable by its own handle, and naming the initial value in the port-default grammar (<code>z⁻¹ = 1.0</code>). Solid stays the plain data cable; dashed stays reserved for the async rail. A switch in the Dev Hub makes the run before the pill solid while leaving the run after it dotted, so the line reads as current value → z⁻¹ → delayed value. Proven in a real browser.</p>
 <div class="facts">
 <div class="fact"><b>{PASSED}/{len(checks)}</b><span>real-browser checks (<code>npm run test:edge-vocabulary</code>)</span></div>
 <div class="fact"><b>{UNIT_TESTS}</b><span>new unit tests on the pure geometry, dash arrays, pill label and the stored switch</span></div>
@@ -144,19 +143,19 @@ def build() -> str:
 {figure('edge-vocabulary-3-value.png', canvas, '<b>Initial value.</b> <code>= value</code> in the inspector reads on the pill as <code>z⁻¹ = 1.0</code>.', 560)}
 {figure('edge-vocabulary-4-dragged.png', canvas, '<b>Slid along the cable.</b> The pill has its own handle; dragging it stores a new fraction of the arc length. "Centre the pill" puts it back.', 560)}
 </div>
-{figure('edge-vocabulary-5-dash-after.png', wide, '<b>The Dev Hub switch.</b> "Dash after the z⁻¹ pill": dotted up to the pill, dashed after it. Remembered per browser, off by default.')}
+{figure('edge-vocabulary-5-solid-before.png', wide, '<b>The Dev Hub switch.</b> "Solid before the z⁻¹ pill": solid up to the pill, dotted after it. Remembered per browser, off by default.')}
 {figure('edge-vocabulary-6-branch-fade.png', canvas, '<b>With the Branch.</b> A delayed cable into a Branch arm keeps its pill and still fades to 18% when another arm is made active.')}
 
-<h2>2 · Dotted, or dash after the pill</h2>
-<p>Zach was not sure which reads better once a delayed cable merges with others. Both are one switch apart on the same board, so the question can be settled by drawing rather than arguing. The dots are {DOT}px apart; the dashes {DASH}px long. On a short cable the pill covers most of the run either way; the difference shows on a long back edge.</p>
+<h2>2 · Dotted, or solid before the pill</h2>
+<p>The corrected alternative makes the signal chronology explicit: the current value is solid until z⁻¹, then the delayed value is dotted. Both treatments are one switch apart on the same board. The dots are {DOT}px apart; on a short cable the pill covers most of the transition, while the difference is clearest on a long back edge.</p>
 <div class="pair">
 {figure('edge-vocabulary-2-delayed.png', (400, 300, 1100, 460), '<b>Dotted whole cable</b> (default).', 560)}
-{figure('edge-vocabulary-5-dash-after.png', (400, 300, 1100, 460), '<b>Dotted before, dashed after the pill</b> (Dev Hub switch).', 560)}
+{figure('edge-vocabulary-5-solid-before.png', (400, 300, 1100, 460), '<b>Solid before, dotted after the pill</b> (Dev Hub switch).', 560)}
 </div>
 
 <h2>3 · The record and the seam</h2>
 {seam_svg()}
-<p>Three props on the connection: <code>temporal: 'data' | 'delayed'</code> is a tldraw <code>StyleProp</code>, so the inspector, the right-click menu and a batch selection share one write and one shared-or-mixed report, exactly as routing does; <code>delayValue</code> is the text after <code>=</code>; <code>pillPosition</code> is a fraction of the routed arc length. The shape util samples the routed path (exact for elbow and straight, 64 samples for a curve), places the pill by arc length, offers a <code>pill</code> handle that projects the pointer back onto the path, and paints either one dotted path or two copies of the same smooth path with complementary dash arrays normalised to <code>pathLength</code>. The switch is an atom read by every delayed cable and remembered under <code>{STORAGE_KEY}</code>.</p>
+<p>Three props on the connection: <code>temporal: 'data' | 'delayed'</code> is a tldraw <code>StyleProp</code>, so the inspector, the right-click menu and a batch selection share one write and one shared-or-mixed report, exactly as routing does; <code>delayValue</code> is the text after <code>=</code>; <code>pillPosition</code> is a fraction of the routed arc length. The shape util samples the routed path (exact for elbow and straight, 64 samples for a curve), places the pill by arc length, offers a <code>pill</code> handle that projects the pointer back onto the path, and paints either one dotted path or two copies of the same smooth path with complementary solid-before and dotted-after arrays normalised to <code>pathLength</code>. The switch is an atom read by every delayed cable and remembered under <code>{STORAGE_KEY}</code>; the old <code>dashAfterPill</code> preference migrates to the corrected alternative.</p>
 <pre><code>{html.escape(STAT)}</code></pre>
 
 <h2>4 · Browser proof</h2>
@@ -165,9 +164,9 @@ def build() -> str:
 
 <h2>5 · Decision surface</h2>
 <div class="decision">
-<div><h4>Done and proved</h4><ul><li>Delayed mark, dotted line, z⁻¹ pill with initial value, pill handle drag, centre command, right-click toggle, inspector section, Dev Hub switch, migration, persistence.</li><li>{PASSED}/{len(checks)} browser checks; <code>npm run check</code> green (tsc, vitest, Python incl. the stock-boundary test).</li><li>Review fixture on the track server: <a href="{html.escape(FIXTURE_URL)}">{html.escape(FIXTURE_URL)}</a></li></ul></div>
+<div><h4>Done and proved</h4><ul><li>Delayed mark, dotted line, z⁻¹ pill with initial value, pill handle drag, centre command, right-click toggle, inspector section, corrected solid-before/dotted-after Dev Hub alternative, migration, persistence.</li><li>{PASSED}/{len(checks)} browser checks; <code>npm run check</code> green (tsc, vitest, Python incl. the stock-boundary test).</li><li>Review fixture on the track server: <a href="{html.escape(FIXTURE_URL)}">{html.escape(FIXTURE_URL)}</a></li></ul></div>
 <div><h4>Left</h4><ul><li>The appearance pill (FigJam-style) does not yet carry a z⁻¹ toggle; the selection pill's Inspect and the right-click menu do.</li><li>Inline double-click editing of the value on the pill; the inspector field is the editor today.</li><li>No Loop region yet: the fixture draws the back edge between two Blocks by hand and says so.</li><li>Export (<code>toSvg</code>) draws the pill and dots, but was not driven.</li></ul></div>
-<div><h4>Needs you</h4><ul><li><b>Merge <code>track/edge-vocabulary</code></b> (it contains the Branch track). Default if silent: stays on the track, server up on {TRACK_PORT}.</li><li><b>Which line style</b> after a few real diagrams: dotted whole cable, or dotted-then-dashed. Default if silent: dotted whole cable; the switch stays in the Dev Hub.</li><li><b>Pill text</b>: <code>z⁻¹</code> as shipped, or the word <code>next</code>? Default: <code>z⁻¹</code>.</li></ul></div>
+<div><h4>Needs you</h4><ul><li><b>Which line style</b> after a few real diagrams: dotted whole cable, or solid-before/dotted-after. Default if silent: dotted whole cable; the switch stays in the Dev Hub.</li><li><b>Pill text</b>: <code>z⁻¹</code> as shipped, or the word <code>next</code>? Default: <code>z⁻¹</code>.</li></ul></div>
 <div><h4>Deliberately not done</h4><ul><li>No landing glyph (M4 was rejected). No colour schemes for wires (noted for later). No async rail.</li><li>No new shape: the pill is part of the cable, so nothing else has to know it exists.</li></ul></div>
 </div>
 

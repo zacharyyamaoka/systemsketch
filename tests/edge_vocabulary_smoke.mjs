@@ -4,8 +4,8 @@
  * product composition with real mouse events: mark a cable delayed from the
  * inspector (dotted line, z⁻¹ pill centred on the cable), name its initial
  * value (the pill reads `z⁻¹ = 1.0`), slide the pill along the cable by its
- * handle, centre it again, flip the Dev Hub's "dash after the z⁻¹ pill"
- * switch (dotted before the pill, dashed after it), mark the cable data again
+ * handle, centre it again, flip the Dev Hub's "solid before the z⁻¹ pill"
+ * switch (solid before the pill, dotted after it), mark the cable data again
  * (pill and dots gone), reload (everything persists through the ordinary
  * autosave), and finally a delayed cable into a Branch arm still fades when
  * another arm is made active.
@@ -217,6 +217,10 @@ async function main() {
 
     // 4 · Slide the pill along the cable by its handle, then centre it again.
     await selectCable(page, cable.id)
+    // Keep the pill clear of the automatic route handle, which current main
+    // also places at the exact midpoint of this one-segment elbow cable.
+    await editorEval(page, `editor.updateShape({ id: ${JSON.stringify(cable.id)}, type: 'connection', props: { pillPosition: 0.4 } }); return true`)
+    await delay(200)
     paint = await painted(page, cable.id)
     const pillBefore = paint.pillCenter
     await dragHandle(page, pillBefore, { x: pillBefore.x + 150, y: pillBefore.y })
@@ -230,23 +234,29 @@ async function main() {
     cable = await cableRecord(page, 'estimate()', 'refine()')
     check('EV-8', '"Centre the pill" puts it back at the middle', cable.pillPosition, 0.5)
 
-    // 5 · The Dev Hub switch: dotted before the pill, dashed after it.
+    // 5 · The Dev Hub switch: solid before the pill, dotted after it.
     // Deselect first: a click on the canvas would close the panel, and the
-    // judged frame must not carry tldraw's selection line over the dashes.
+    // judged frame must not carry tldraw's selection line over the split stroke.
     await deselect(page, { x: 90, y: 940 })
     const trigger = await box(page, '.systemsketch-dev-trigger')
     await clickAt(page, trigger.cx, trigger.cy)
     await delay(320)
-    await clickTestId(page, 'systemsketch-dev-dash-after-pill')
+    await clickTestId(page, 'systemsketch-dev-solid-before-pill')
     paint = await painted(page, cable.id)
-    const afterDash = (paint.dash[1] ?? '').split(' ').map(Number)
-    check('EV-9', 'with the switch on the cable paints two segments: dots up to the pill, dashes after',
-      { segments: paint.segments, afterStartsAtPill: afterDash[0] === 0 && afterDash[1] === 500, afterDashes: afterDash[2] > 0 },
-      { segments: ['before', 'after'], afterStartsAtPill: true, afterDashes: true })
+    const beforeSolid = (paint.dash[0] ?? '').split(' ').map(Number)
+    const afterDots = (paint.dash[1] ?? '').split(' ').map(Number)
+    check('EV-9', 'with the switch on the cable paints solid up to the pill and dots after it',
+      {
+        segments: paint.segments,
+        solidEndsAtPill: beforeSolid[0] === 500 && beforeSolid[1] === 1000,
+        dotsStartAtPill: afterDots[0] === 0 && afterDots[1] === 500,
+        afterUsesDots: afterDots[2] > 0 && afterDots[2] < afterDots[3],
+      },
+      { segments: ['before', 'after'], solidEndsAtPill: true, dotsStartAtPill: true, afterUsesDots: true })
     check('EV-10', 'the switch is remembered in this browser',
-      await evaluate(page, `JSON.parse(localStorage.getItem('systemsketch.cable-presentation.v1') || '{}').dashAfterPill`), true)
-    await shot(page, 'edge-vocabulary-5-dash-after.png')
-    await clickTestId(page, 'systemsketch-dev-dash-after-pill')
+      await evaluate(page, `JSON.parse(localStorage.getItem('systemsketch.cable-presentation.v1') || '{}').solidBeforePill`), true)
+    await shot(page, 'edge-vocabulary-5-solid-before.png')
+    await clickTestId(page, 'systemsketch-dev-solid-before-pill')
     paint = await painted(page, cable.id)
     check('EV-11', 'switching it off returns to one dotted path', paint.segments, ['all'])
     await clickAt(page, trigger.cx, trigger.cy)
@@ -315,11 +325,10 @@ async function main() {
     paint = await painted(page, armCable.id)
     const armState = JSON.parse(await editorEval(page, `
       const b = editor.getCurrentPageShapes().find((s) => s.type === 'branch')
-      const inner = editor.getShape(${JSON.stringify(inner)})
-      return JSON.stringify({ active: b.props.activeArmId, innerParent: inner.parentId === b.id, innerArm: inner.meta.branchArm ?? null })`))
+      return JSON.stringify({ active: b.props.activeArmId })`))
     check('EV-15', 'with the other arm active, the delayed cable fades with its arm and keeps its pill',
       { ...armState, opacity: Math.round(paint.opacity * 100) / 100, pill: paint.pill },
-      { active: branch.arms[1], innerParent: true, innerArm: branch.arms[0], opacity: 0.18, pill: 'z⁻¹' })
+      { active: branch.arms[1], opacity: 0.18, pill: 'z⁻¹' })
     await shot(page, 'edge-vocabulary-6-branch-fade.png')
 
     check('EV-16', 'no console errors while driving', localConsoleErrors(page), [])

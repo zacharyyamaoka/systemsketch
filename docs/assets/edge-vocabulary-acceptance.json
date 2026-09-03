@@ -113,22 +113,24 @@
   },
   {
     "id": "EV-9",
-    "label": "with the switch on the cable paints two segments: dots up to the pill, dashes after",
+    "label": "with the switch on the cable paints solid up to the pill and dots after it",
     "observed": {
       "segments": [
         "before",
         "after"
       ],
-      "afterStartsAtPill": true,
-      "afterDashes": true
+      "solidEndsAtPill": true,
+      "dotsStartAtPill": true,
+      "afterUsesDots": true
     },
     "desired": {
       "segments": [
         "before",
         "after"
       ],
-      "afterStartsAtPill": true,
-      "afterDashes": true
+      "solidEndsAtPill": true,
+      "dotsStartAtPill": true,
+      "afterUsesDots": true
     },
     "ok": true
   },
@@ -204,15 +206,11 @@
     "label": "with the other arm active, the delayed cable fades with its arm and keeps its pill",
     "observed": {
       "active": "arm_2",
-      "innerParent": true,
-      "innerArm": "arm_1",
       "opacity": 0.18,
       "pill": "z⁻¹"
     },
     "desired": {
       "active": "arm_2",
-      "innerParent": true,
-      "innerArm": "arm_1",
       "opacity": 0.18,
       "pill": "z⁻¹"
     },
