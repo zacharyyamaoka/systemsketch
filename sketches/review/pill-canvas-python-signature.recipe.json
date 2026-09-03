@@ -1,0 +1,72 @@
+{
+  "feature": "Canvas Python-signature pill entry",
+  "viewport": { "width": 1280, "height": 760 },
+  "shapes": [
+    {
+      "id": "pill",
+      "type": "block",
+      "x": 560,
+      "y": 348,
+      "props": {
+        "title": "",
+        "description": "",
+        "blockType": "literal",
+        "view": "value",
+        "w": 96,
+        "h": 56,
+        "showDescription": false,
+        "inputs": [{ "id": "in_1", "name": "", "type": "", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "", "type": "", "visible": true }]
+      }
+    },
+    {
+      "id": "consumer",
+      "type": "block",
+      "x": 800,
+      "y": 290,
+      "props": {
+        "title": "encode()",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 180,
+        "showDescription": false,
+        "inputs": [{ "id": "in_1", "name": "pose", "type": "Pose", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "payload", "type": "bytes", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Click the blank pill’s =, then type pose: Pose = 2 and press Enter",
+      "x": 410,
+      "y": 90,
+      "w": 430,
+      "h": 110,
+      "target": { "shapeId": "pill", "anchor": "top", "dx": 0 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Its right rim is still a live Pose outlet; wire it into encode() if you want to continue",
+      "x": 790,
+      "y": 550,
+      "w": 400,
+      "h": 110,
+      "target": { "shapeId": "consumer", "anchor": "bottom", "dx": -90 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · the capsule reads pose: Pose = 2, with name, type, and value visibly distinct. The Name, Value, and Type inspector fields remain raw direct access.",
+      "x": 70,
+      "y": 500,
+      "w": 470,
+      "h": 130
+    }
+  ]
+}

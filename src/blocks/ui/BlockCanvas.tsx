@@ -358,6 +358,9 @@ function ValueFace({
   const nameField = outlet
     ? blockInlineFieldAttribute({ kind: 'portName', side: 'outputs', portId: outlet.id })
     : undefined
+  const typeField = outlet
+    ? blockInlineFieldAttribute({ kind: 'portType', side: 'outputs', portId: outlet.id })
+    : undefined
   const tooltip = [valueBlockExactText(label)]
   if (label.folded) tooltip.push('The capsule abbreviates this literal as …')
   if (inletConnected) tooltip.push('Connected on the inlet — this pill remains manual.')
@@ -369,12 +372,26 @@ function ValueFace({
       data-testid="block-value"
     >
       {label.name !== '' ? (
-        <span
-          className="BlockNode-valueName"
-          data-pb-inline-field={nameField}
-          data-testid="block-value-name"
-        >
-          {label.name}
+        <span className="BlockNode-valueDeclaration">
+          <span
+            className="BlockNode-valueName"
+            data-pb-inline-field={nameField}
+            data-testid="block-value-name"
+          >
+            {label.name}
+          </span>
+          {label.type !== '' ? (
+            <>
+              <span className="BlockNode-valueColon" data-pb-inline-field={nameField}>:</span>{' '}
+              <span
+                className="BlockNode-valueType"
+                data-pb-inline-field={typeField}
+                data-testid="block-value-type"
+              >
+                {label.type}
+              </span>
+            </>
+          ) : null}
         </span>
       ) : null}
       <span

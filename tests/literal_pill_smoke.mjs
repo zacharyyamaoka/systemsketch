@@ -1,7 +1,7 @@
 /**
  * The literal-argument pill, driven in a real browser.
  *
- *   P draws a capsule and the literal types straight in; its outlet wires into
+ *   P starts on a variable name and accepts Python-shaped declarations; its outlet wires into
  *   a consumer's input and dims that input's definition default; a click on
  *   `=` names it (and the name is the outlet's name); a long literal folds to
  *   `…` with the full text in the tooltip; an input dropped on empty canvas
@@ -23,6 +23,7 @@ import {
   localConsoleErrors,
   openApp,
   startApp,
+  shortcut,
   waitFor,
 } from './browser_harness.mjs'
 import {
@@ -116,15 +117,15 @@ async function seedConsumers(page) {
   await delay(400)
 }
 
-/** Press P, click a spot, type the literal, Enter. Returns the pill made. */
-async function drawPill(page, at, literal) {
+/** Press P, click a spot, type its name or declaration, Enter. Returns the pill made. */
+async function drawPill(page, at, source) {
   const before = new Set((await blocks(page)).map((block) => block.id))
   await key(page, 'p', 'KeyP')
   await delay(120)
   const tool = await evaluate(page, `window.__systemsketch.editor.getCurrentToolId()`)
   await clickAt(page, at.x, at.y)
-  await waitFor(page, `document.querySelector('[data-testid="block-inline-title"]')`, 'literal editor')
-  await page.send('Input.insertText', { text: literal })
+  await waitFor(page, `document.querySelector('[data-testid="block-inline-port-name-outputs-out_1"]')`, 'pill declaration editor')
+  await page.send('Input.insertText', { text: source })
   await key(page, 'Enter', 'Enter')
   await delay(320)
   const pill = (await blocks(page)).find((block) => !before.has(block.id)) ?? null
@@ -143,7 +144,7 @@ async function main() {
     await seedConsumers(page)
     await deselect(page, { x: 1000, y: 800 })
 
-    // ---- P draws a capsule and the literal types straight in --------------
+    // ---- P starts on a declaration, with concise literal shorthand --------
     const first = await drawPill(page, { x: 300, y: 520 }, '2.0')
     check('TOOL-1', 'P selects the pill tool', first.tool, 'pill')
     const pill = first.pill
@@ -156,6 +157,23 @@ async function main() {
     check('PILL-4', 'the face reads "= 2.0"', await valueText(page, pill.id), '= 2.0')
     await deselect(page, { x: 1000, y: 800 })
     await shot(page, 'literal-pill-typed.png')
+
+    const declared = (await drawPill(page, { x: 1040, y: 700 }, 'pose: Pose = 2')).pill
+    check('PARSER-1', 'a Python-shaped canvas declaration fills name, value, and explicit type',
+      declared ? {
+        name: declared.outputs[0]?.name, value: declared.title,
+        inletType: declared.inputs[0]?.type, outletType: declared.outputs[0]?.type,
+      } : null,
+      { name: 'pose', value: '2', inletType: 'Pose', outletType: 'Pose' })
+    check('PARSER-2', 'the painted pill uses Python annotation order and separate semantic spans',
+      declared ? await evaluate(page, `JSON.stringify({
+        text: Array.from(document.querySelector('[data-shape-id="${declared.id}"] [data-testid="block-value"]')?.children ?? []).map((node) => node.textContent.trim()).join(' '),
+        name: document.querySelector('[data-shape-id="${declared.id}"] [data-testid="block-value-name"]')?.textContent,
+        type: document.querySelector('[data-shape-id="${declared.id}"] [data-testid="block-value-type"]')?.textContent,
+      })`) : null,
+      JSON.stringify({ text: 'pose: Pose = 2', name: 'pose', type: 'Pose' }))
+    await deselect(page, { x: 1000, y: 820 })
+    await shot(page, 'literal-pill-python-signature.png')
 
     // ---- the outlet wires into gain and dims its definition default --------
     const gainSelector = portDot(ESTIMATE, 'input', 'in_2')
@@ -184,7 +202,7 @@ async function main() {
     await delay(320)
     const named = (await blocks(page)).find((block) => block.id === pill.id)
     check('NAME-1', 'the typed name is the outlet name', named.outputs[0].name, 'gain')
-    check('NAME-2', 'the face reads "gain = 2.0"', await valueText(page, pill.id), 'gain = 2.0')
+    check('NAME-2', 'the face reads "gain: float = 2.0"', await valueText(page, pill.id), 'gain: float = 2.0')
     check('NAME-3', 'the capsule grew to fit the name', named.w > pill.w, true)
     check('NAME-4', 'the cable survived the rename', await cables(page), 1)
     await deselect(page, { x: 1000, y: 800 })
@@ -220,7 +238,7 @@ async function main() {
         sourceFace: await valueText(page, pill.id),
         copyFace: copiedId ? await valueText(page, copiedId) : null,
       },
-      { source: 'gain', copy: 'gain_copy', sourceFace: 'gain = 2.0', copyFace: 'gain_copy = 2.0' })
+      { source: 'gain', copy: 'gain_copy', sourceFace: 'gain: float = 2.0', copyFace: 'gain_copy: float = 2.0' })
     check('COPY-3', 'the underscore is a complete visible glyph, not a clipped descender',
       await evaluate(page, `(() => {
         const root = document.querySelector('[data-shape-id="${copiedId}"] [data-testid="block-value"]')
@@ -241,7 +259,7 @@ async function main() {
           verticallyClipped: name.scrollHeight > name.clientHeight,
         }
       })()`),
-      { text: 'gain_copy', raw: 'gain_copy = 2.0', lineHeight: '30px', insideFace: true, verticallyClipped: false })
+      { text: 'gain_copy', raw: 'gain_copy: float = 2.0', lineHeight: '30px', insideFace: true, verticallyClipped: false })
     await deselect(page, { x: 1000, y: 800 })
     await shot(page, 'literal-pill-copy-independent.png')
 
@@ -264,7 +282,7 @@ async function main() {
     await shot(page, 'literal-pill-picker-open.png')
     const item = await box(page, '[data-testid="block-picker-value"]')
     await clickAt(page, item.cx, item.cy)
-    await waitFor(page, `document.querySelector('[data-testid="block-inline-title"]')`, 'picked literal editor')
+    await waitFor(page, `document.querySelector('[data-testid="block-inline-port-name-outputs-out_1"]')`, 'picked pill declaration editor')
     await page.send('Input.insertText', { text: '{}' })
     await key(page, 'Enter', 'Enter')
     await delay(320)
@@ -281,7 +299,9 @@ async function main() {
     await shot(page, 'literal-pill-picked.png')
 
     // ---- a pill can be fed: a variable holding a call's result ---------------
-    const result = (await drawPill(page, { x: 1060, y: 520 }, 'fallback')).pill
+    // A declaration gives this opaque expression a literal slot without
+    // inventing a type. A bare word is deliberately the canvas name gesture.
+    const result = (await drawPill(page, { x: 1060, y: 520 }, 'source = fallback')).pill
     const poseOut = await box(page, portDot(ESTIMATE, 'output', 'out_1'))
     const resultIn = await box(page, portDot(result.id, 'input', 'in_1'))
     const fedDrop = await dragFrom(page, poseOut, resultIn)
@@ -298,6 +318,7 @@ async function main() {
     await waitFor(page, `document.querySelector('[data-inspector-section="Pill"] input[aria-label="Variable name"]')`, 'Pill name field')
     const nameField = await box(page, '[data-inspector-section="Pill"] input[aria-label="Variable name"]')
     await clickAt(page, nameField.cx, nameField.cy)
+    await shortcut(page, 'a', 'KeyA', 2)
     await page.send('Input.insertText', { text: 'pose' })
     await key(page, 'Enter', 'Enter')
     await delay(300)
@@ -324,7 +345,7 @@ async function main() {
         record: { inlet: adopted?.inputs[0]?.type ?? null, outlet: adopted?.outputs[0]?.type ?? null },
         face: await valueText(page, result.id),
       },
-      { record: { inlet: 'Pose', outlet: 'Pose' }, face: 'pose = fallback' })
+      { record: { inlet: 'Pose', outlet: 'Pose' }, face: 'pose: Pose = fallback' })
     await shot(page, 'literal-pill-fed-inspector.png')
     await deselect(page, { x: 1000, y: 800 })
     const resultOut = await box(page, portDot(result.id, 'output', 'out_1'))
@@ -359,6 +380,20 @@ async function main() {
     check('VIEW-5', 'the Value context menu does not offer Definition-linking actions',
       await evaluate(page, `Boolean(document.querySelector('[data-testid="context-menu.block-duplicate-unlinked"]'))`), false)
     await key(page, 'Escape', 'Escape')
+    const rawName = await box(page, '[data-inspector-section="Pill"] input[aria-label="Variable name"]')
+    await clickAt(page, rawName.cx, rawName.cy)
+    await shortcut(page, 'a', 'KeyA', 2)
+    await page.send('Input.insertText', { text: 'raw: bytes = 2.0' })
+    await key(page, 'Enter', 'Enter')
+    await delay(240)
+    const rawInspector = (await blocks(page)).find((block) => block.id === pill.id)
+    check('INSPECTOR-RAW', 'the inspector name is direct access, not canvas auto-formatting',
+      rawInspector ? {
+        name: rawInspector.outputs[0]?.name,
+        value: rawInspector.title,
+        type: rawInspector.outputs[0]?.type,
+      } : null,
+      { name: 'raw: bytes = 2.0', value: '2.0', type: 'float' })
     await shot(page, 'literal-pill-inspector.png')
     await deselect(page, { x: 1000, y: 800 })
 

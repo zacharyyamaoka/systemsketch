@@ -27,6 +27,8 @@ import {
 	valueBlockLabel,
 	valueBlockText,
 } from './valueBlock'
+import { applyCanvasPillSignature, canvasPortSignaturePatch } from './canvasPython'
+import { patchBlockPortProps } from './commands/blockCommands'
 import {
 	blockInlineFieldAtPoint,
 	blockInlineFieldFromClientPoint,
@@ -187,6 +189,13 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 		// reads its size to centre it on the click.
 		const drawnAsPill = this.editor.getCurrentToolId() === PILL_TOOL_ID
 			&& isBlankBlockProps(next.props)
+		if (drawnAsPill) {
+			// A fresh capsule begins on its variable name, just like a new code
+			// line. `name: Type = value` is then expanded on edit completion.
+			rememberBlockInlineField(this.editor, next.id, {
+				kind: 'portName', side: 'outputs', portId: 'out_1',
+			})
+		}
 		const props = drawnAsPill
 			? createValueBlockProps(next.props)
 			: normalizeValueBlockProps(next.props)
@@ -307,10 +316,40 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 
 	override onEditStart(shape: BlockShape): void {
 		ensureBlockInlineField(this.editor, shape.id)
+		const field = getBlockInlineField(this.editor, shape.id)
+		// Stock's creation lifecycle can begin editing before `onBeforeCreate`
+		// records its preferred field. Resolve that race at the lifecycle seam
+		// too, but only for an actually blank new capsule — an existing value's
+		// title remains its value editor.
+		if (
+			shape.props.view === 'value'
+			&& shape.props.title === ''
+			&& shape.props.outputs[0]?.name === ''
+			&& field.kind === 'title'
+		) {
+			rememberBlockInlineField(this.editor, shape.id, {
+				kind: 'portName', side: 'outputs', portId: shape.props.outputs[0]?.id ?? 'out_1',
+			})
+		}
 	}
 
 	override onEditEnd(shape: BlockShape): void {
-		if (getBlockInlineField(this.editor, shape.id).kind === 'title') {
+		const field = getBlockInlineField(this.editor, shape.id)
+		if (field.kind === 'portName') {
+			const port = shape.props[field.side].find((candidate) => candidate.id === field.portId)
+			if (port) {
+				const props = shape.props.view === 'value'
+					? applyCanvasPillSignature(shape.props, port.name)
+					: (() => {
+						const patch = canvasPortSignaturePatch(port, field.side, port.name)
+						return patch ? patchBlockPortProps(shape.props, field.side, port.id, patch) : shape.props
+					})()
+				if (props !== shape.props) {
+					this.editor.updateShape<BlockShape>({ id: shape.id, type: shape.type, props })
+				}
+			}
+		}
+		if (field.kind === 'title') {
 			commitBlockDefinitionName(this.editor, shape.id)
 		}
 		clearBlockInlineField(this.editor, shape.id)

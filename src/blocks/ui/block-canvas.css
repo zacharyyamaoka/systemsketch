@@ -695,6 +695,26 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   line-height: inherit;
 }
 
+/* A named pill reads like its Python declaration: `pose: Pose = 2`. The
+ * annotation is quieter than the variable but remains independently editable. */
+.systemsketch-block-canvas .BlockNode-valueDeclaration {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.systemsketch-block-canvas .BlockNode-valueColon {
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-block-canvas .BlockNode-valueType {
+  min-width: 0;
+  margin-left: 5px;
+  overflow: hidden;
+  color: var(--ss-text-muted);
+  text-overflow: ellipsis;
+}
+
 .systemsketch-block-canvas .BlockNode-valueEquals {
   flex: 0 0 auto;
   color: var(--ss-text-muted);

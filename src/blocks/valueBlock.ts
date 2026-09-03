@@ -68,6 +68,8 @@ export function isFoldedLiteral(literal: string): boolean {
 export interface ValueBlockLabel {
 	/** The variable name; '' when the literal is passed inline. */
 	name: string
+	/** The Python annotation carried by the mirrored ports. */
+	type: string
 	/** The literal exactly as typed. */
 	literal: string
 	/** What the capsule paints after `=`: the literal, or an explicit `…` abbreviation. */
@@ -88,11 +90,17 @@ export function valueBlockName(props: BlockShapeProps): string {
 	return valueBlockOutlet(props)?.name ?? valueBlockInlet(props)?.name ?? ''
 }
 
+/** The variable annotation: the outlet wins, as it does for the name. */
+export function valueBlockType(props: BlockShapeProps): string {
+	return valueBlockOutlet(props)?.type ?? valueBlockInlet(props)?.type ?? ''
+}
+
 export function valueBlockLabel(props: BlockShapeProps): ValueBlockLabel {
 	const literal = props.title
 	const folded = isFoldedLiteral(literal)
 	return {
 		name: valueBlockName(props),
+		type: valueBlockType(props),
 		literal,
 		// A pill is a direct rendering of its stored literal. Do not trim
 		// punctuation or whitespace away just because it is subtle in a compact
@@ -104,7 +112,9 @@ export function valueBlockLabel(props: BlockShapeProps): ValueBlockLabel {
 
 /** The text the capsule paints, name and all. */
 export function valueBlockText(label: ValueBlockLabel): string {
-	return label.name === '' ? `= ${label.display}` : `${label.name} = ${label.display}`
+	if (label.name === '') return `= ${label.display}`
+	const annotation = label.type === '' ? label.name : `${label.name}: ${label.type}`
+	return `${annotation} = ${label.display}`
 }
 
 /** The entire stored pill label, before a visible `…` abbreviation is applied. */
@@ -196,8 +206,14 @@ export function normalizeValueBlockProps(
 	const kept = mirrored(
 		outletExisting?.type, inletExisting?.type, previousOutlet?.type, previousInlet?.type,
 	)
+	const explicitTypeChanged = previous !== undefined
+		&& previous.view === 'value'
+		&& kept !== (previousOutlet?.type ?? previousInlet?.type ?? '')
+	// A title-only write follows Python's literal spelling. A canvas signature
+	// writes title and annotation together, though, and its explicit annotation
+	// must win over the inferred spelling (`pose: Pose = 2`, not `pose: int`).
 	const type = literalChanged
-		? (inferred !== '' ? inferred : kept)
+		? (explicitTypeChanged && kept !== '' ? kept : (inferred !== '' ? inferred : kept))
 		: (kept !== '' ? kept : inferred)
 
 	const outlet: BlockPort = { id: outletExisting?.id ?? 'out_1', name, type, visible: true }
