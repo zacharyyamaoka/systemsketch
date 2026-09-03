@@ -1,0 +1,150 @@
+{
+  "feature": "Detached arrow live reflow",
+  "viewport": { "width": 1400, "height": 820 },
+  "shapes": [
+    {
+      "id": "source",
+      "type": "block",
+      "x": 70,
+      "y": 330,
+      "props": {
+        "title": "source",
+        "blockType": "Function",
+        "view": "port",
+        "w": 230,
+        "h": 160,
+        "inputs": [],
+        "outputs": [
+          { "id": "out_1", "name": "result", "type": "float", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "subject",
+      "type": "block",
+      "x": 500,
+      "y": 260,
+      "props": {
+        "title": "normalize",
+        "description": "Detach, then move this card.",
+        "blockType": "Function",
+        "view": "port",
+        "w": 360,
+        "h": 200,
+        "inputs": [
+          { "id": "in_1", "name": "window", "type": "int", "defaultValue": "5", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_1", "name": "result", "type": "float", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "sink",
+      "type": "block",
+      "x": 1080,
+      "y": 150,
+      "props": {
+        "title": "sink",
+        "blockType": "Function",
+        "view": "port",
+        "w": 220,
+        "h": 160,
+        "inputs": [
+          { "id": "in_1", "name": "value", "type": "float", "visible": true }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "elbow",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 100, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "curve",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 100, "y": 0 },
+        "routing": "curved",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "type": "connection",
+      "fromId": "elbow",
+      "toId": "source",
+      "props": { "portId": "out_1", "terminal": "start", "face": "outer" }
+    },
+    {
+      "type": "connection",
+      "fromId": "elbow",
+      "toId": "subject",
+      "props": { "portId": "in_1", "terminal": "end", "face": "outer" }
+    },
+    {
+      "type": "connection",
+      "fromId": "curve",
+      "toId": "subject",
+      "props": { "portId": "out_1", "terminal": "start", "face": "outer" }
+    },
+    {
+      "type": "connection",
+      "fromId": "curve",
+      "toId": "sink",
+      "props": { "portId": "in_1", "terminal": "end", "face": "outer" }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Right-click normalize → Detach to primitives",
+      "x": 460,
+      "y": 50,
+      "w": 440,
+      "h": 100,
+      "target": { "shapeId": "subject", "anchor": "top" }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Drag the detached normalize group 150 px down-right",
+      "x": 40,
+      "y": 650,
+      "w": 480,
+      "h": 110
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The elbow stays orthogonal and the curve re-bends between its ports. Neither route rotates as a frozen drawing.",
+      "x": 570,
+      "y": 650,
+      "w": 760,
+      "h": 110
+    }
+  ]
+}
