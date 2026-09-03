@@ -12,7 +12,7 @@ import {
 import { useEffect, useMemo, useRef } from 'react'
 import { AppearanceControls } from '../appearance/AppearanceControls'
 import { BLOCK_TOOL_ID, PILL_TOOL_ID, getBlockInspectorContext, selectionHasBlockStyles } from '../blocks'
-import { describeTidyEdgesOutcome, getTidyEdgesSelection, tidyEdges } from '../blocks/connections/tidyEdges'
+import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
 import { describeOrganizeNodesOutcome, organizeNodes } from '../blocks/layout'
 import {
   EditorBlockInspector,
@@ -41,6 +41,10 @@ import {
 import { RecorderIndicator } from '../recorder/RecorderControls'
 import { useChrome } from './ChromeProvider'
 import { SelectionContextualMenu } from './SelectionContextualMenu'
+import {
+  getSelectionLayoutActionAvailability,
+  SelectionLayoutActions,
+} from './SelectionLayoutActions'
 import type { RightSurface } from './chromeState'
 import './systemsketch-chrome.css'
 
@@ -196,6 +200,7 @@ function InspectorDock({ editor, onClose }: { editor: Editor; onClose(): void })
 
 function SelectionMiniMenu() {
   const editor = useEditor()
+  const { addToast } = useToasts()
   const { setRight } = useChrome()
   const canShow = useValue(
     'systemsketch selection mini menu',
@@ -206,9 +211,12 @@ function SelectionMiniMenu() {
     ),
     [editor],
   )
-  const selectionCount = useValue(
-    'systemsketch selection count',
-    () => editor.getSelectedShapeIds().length,
+  // A Block stays a Block selection as the user adds or removes peers. Keep a
+  // selection-identity value so its batch controls refresh across those
+  // transitions without narrating the selected count in the menu.
+  const selectionKey = useValue(
+    'systemsketch selection identity',
+    () => Array.from(editor.getSelectedShapeIds()).sort().join(','),
     [editor],
   )
   // Any Block in the selection — one, nine, or nested inside a group — gets the
@@ -223,6 +231,19 @@ function SelectionMiniMenu() {
     () => getOnlySelectedBranch(editor) !== null,
     [editor],
   )
+  const layoutActions = useValue(
+    'systemsketch selection layout actions',
+    () => getSelectionLayoutActionAvailability(editor),
+    [editor],
+  )
+  const runTidyEdges = () => {
+    const outcome = tidyEdges(editor)
+    addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
+  }
+  const runOrganizeNodes = async () => {
+    const outcome = await organizeNodes(editor)
+    addToast({ title: describeOrganizeNodesOutcome(outcome), severity: 'info' })
+  }
   if (!canShow) return null
 
   if (hasBranch) {
@@ -248,15 +269,28 @@ function SelectionMiniMenu() {
           so the Block-only pill is unchanged. */}
       {hasBlocks ? (
         <>
-          <EditorBlockSelectionMiniMenu editor={editor} onOpenInspector={() => setRight('inspector')} />
+          <EditorBlockSelectionMiniMenu
+            key={selectionKey}
+            editor={editor}
+            onOpenInspector={() => setRight('inspector')}
+          />
           <AppearanceControls />
+          <SelectionLayoutActions
+            {...layoutActions}
+            onTidyEdges={runTidyEdges}
+            onOrganizeNodes={() => void runOrganizeNodes()}
+          />
         </>
       ) : (
         <>
-          <span className="systemsketch-selection-count">{selectionCount} selected</span>
           {/* Appearance first, the way FigJam leads with what the thing looks
               like; Inspect stays on the right as the way out to detail. */}
           <AppearanceControls />
+          <SelectionLayoutActions
+            {...layoutActions}
+            onTidyEdges={runTidyEdges}
+            onOrganizeNodes={() => void runOrganizeNodes()}
+          />
           <TldrawUiToolbarButton
             type="icon"
             className="systemsketch-selection-action"
@@ -364,10 +398,10 @@ export function SystemSketchSurfaceHost() {
       {
         id: 'tidy-edges',
         label: 'Tidy edges',
-        description: 'Separate overlapping elbow channels without moving nodes',
+        description: 'Route automatic elbows around Blocks, then separate their channels',
         keywords: ['nudge', 'cables', 'connections', 'layout'],
         icon: '≋',
-        disabled: () => getTidyEdgesSelection(editor).length === 0,
+        disabled: () => !getSelectionLayoutActionAvailability(editor).tidyEdges,
         run: () => {
           const outcome = tidyEdges(editor)
           addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
@@ -379,7 +413,7 @@ export function SystemSketchSurfaceHost() {
         description: 'Arrange Blocks left to right while preserving model order',
         keywords: ['tidy', 'blocks', 'auto layout', 'elk'],
         icon: '▦',
-        disabled: () => editor.getSelectedShapes().filter((shape) => shape.type === 'block').length < 2,
+        disabled: () => !getSelectionLayoutActionAvailability(editor).organizeNodes,
         run: async () => {
           const outcome = await organizeNodes(editor)
           addToast({ title: describeOrganizeNodesOutcome(outcome), severity: 'info' })

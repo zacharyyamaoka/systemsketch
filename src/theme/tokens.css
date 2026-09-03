@@ -80,6 +80,13 @@
   --systemsketch-top-height: 46px;
   --systemsketch-bottom-clearance: 68px;
   --systemsketch-panel-radius: 18px;
+
+  /* Full-surface modals belong in tldraw's EditorPortal. InFrontOfTheCanvas is
+   * a fixed layer-250 stacking context, so no descendant z-index can cover the
+   * panel/menu chrome at layers 300/400. Keep ordinary modals aligned with
+   * tldraw dialogs; exceptional blocking/status surfaces may deliberately sit
+   * above this layer. */
+  --systemsketch-layer-modal: var(--tl-layer-canvas-overlays, 500);
 }
 
 @media (max-width: 820px) {

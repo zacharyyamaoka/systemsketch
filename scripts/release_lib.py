@@ -27,7 +27,9 @@ CONTROLLER_RUNTIME_FILES = (
     "server.py",
     "workspace_store.py",
 )
-# What this project calls "source": the inputs that can change the built app.
+# What this project calls "source": the inputs that can change the built app
+# or either host plugin. Keep the host paths narrow: their node_modules and
+# dist directories are build products, not release inputs.
 # One definition, used by both `source_mtime` (is there newer local work?) and
 # `source_provenance` (was this build made from a clean tree?) — so a report,
 # a capture or a docs page a peer regenerated can never make a build dirty.
@@ -38,6 +40,20 @@ SOURCE_PATHS = (
     "package-lock.json",
     "vite.config.ts",
     "index.html",
+    "vscode-systemsketch/src",
+    "vscode-systemsketch/scripts",
+    "vscode-systemsketch/media",
+    "vscode-systemsketch/package.json",
+    "vscode-systemsketch/package-lock.json",
+    "vscode-systemsketch/esbuild.config.mjs",
+    "vscode-systemsketch/tsconfig.json",
+    "vscode-systemsketch/.vscodeignore",
+    "obsidian-systemsketch/src",
+    "obsidian-systemsketch/package.json",
+    "obsidian-systemsketch/package-lock.json",
+    "obsidian-systemsketch/esbuild.config.mjs",
+    "obsidian-systemsketch/tsconfig.json",
+    "obsidian-systemsketch/manifest.json",
 )
 MAX_REPORTED_DIRTY_PATHS = 12
 
@@ -302,6 +318,14 @@ def release_build_id(project_root: Path, dist: Path) -> str:
         digest.update(b"\0")
         digest.update(path.read_bytes())
         digest.update(b"\0")
+    # A wrapper-only change still needs a distinct release identity. Otherwise
+    # the app bytes would reuse an older manifest and promotion could silently
+    # keep an obsolete VSIX or Obsidian bundle beside a new source commit.
+    for relative in SOURCE_PATHS:
+        candidate = project_root / relative
+        paths = candidate.rglob("*") if candidate.is_dir() else (candidate,)
+        for path in sorted(path for path in paths if path.is_file()):
+            _hash_file(digest, project_root, path)
     return digest.hexdigest()[:16]
 
 

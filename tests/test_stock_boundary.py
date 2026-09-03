@@ -44,17 +44,20 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("enablePasteAtCursor(editor)", development_source)
         self.assertIn("const stopWorkspace = attach(editor)", product_source)
         self.assertIn("const stopBlockConnections = installBlockConnections(editor)", product_source)
+        self.assertIn("const stopDefinitionLinking = installDefinitionLinking(editor)", product_source)
         self.assertIn("const stopInstantTextEditing = installInstantTextEditing(editor)", product_source)
         self.assertIn("stopInstantTextEditing()", product_source)
         self.assertIn("const stopArrowClickToPlace = installArrowClickToPlace(editor)", product_source)
         self.assertIn("stopArrowClickToPlace()", product_source)
         self.assertIn("stopBlockConnections()", product_source)
+        self.assertIn("stopDefinitionLinking()", product_source)
         self.assertIn("<SystemSketchWorkspaceProvider>", source)
         self.assertIn("<ChromeProvider>", source)
         self.assertNotIn("persistenceKey=", product_source)
         self.assertIn("persistenceKey={developmentPersistenceKey(profile)}", development_source)
         self.assertIn("if (profile !== 'product')", source)
         self.assertIn("isBlockDevelopment\n      ? installInstantTextEditing(editor)", development_source)
+        self.assertIn("isBlockDevelopment\n      ? installDefinitionLinking(editor)", development_source)
         self.assertNotIn("<UpdatePill", source)
         self.assertFalse((PROJECT_ROOT / "src" / "UpdatePill.tsx").exists())
 
@@ -70,6 +73,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertNotIn('title="Branch"', toolbar_source)
         self.assertNotIn('title="Comment"', toolbar_source)
         self.assertIn("BranchShapeUtil,", source)
+        self.assertIn("BranchArmShapeUtil,", source)
         self.assertIn("const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, PillTool]", source)
         self.assertIn("const stopBranchRegions = installBranchRegions(editor)", product_source)
         self.assertIn("const stopBranchClickToEdit = installBranchClickToEdit(editor)", product_source)
@@ -108,6 +112,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("tools={EMBEDDED_TOOLS}", embedded)
         self.assertIn("BlockShapeUtil,", embedded)
         self.assertIn("BranchShapeUtil,", embedded)
+        self.assertIn("BranchArmShapeUtil,", embedded)
         self.assertIn("PillTool,", embedded)
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS,", embedded)
         self.assertIn("...blockConnectionShapeUtils,", embedded)
@@ -126,6 +131,8 @@ class StockBoundaryTests(unittest.TestCase):
         # would quietly compete with the file the host opened.
         self.assertNotIn("persistenceKey", embedded)
         self.assertNotIn("installFlightRecorder", embedded)
+        self.assertIn("const stopDefinitionLinking = installDefinitionLinking(editor)", embedded)
+        self.assertIn("stopDefinitionLinking()", embedded)
 
         store_factory = (
             PROJECT_ROOT / "src" / "store" / "createSystemSketchStore.ts"
@@ -133,6 +140,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("createTLStore({", store_factory)
         self.assertIn("records: SYSTEMSKETCH_COMMENT_RECORDS", store_factory)
         self.assertIn("BranchShapeUtil", store_factory)
+        self.assertIn("BranchArmShapeUtil", store_factory)
         self.assertIn("SYSTEMSKETCH_ARROW_SHAPE_UTILS", store_factory)
         self.assertIn("SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS", store_factory)
 
@@ -148,6 +156,8 @@ class StockBoundaryTests(unittest.TestCase):
             PROJECT_ROOT / "src" / "export" / "portableTldraw.ts"
         ).read_text(encoding="utf-8")
         self.assertIn("BranchShapeUtil", portable_export)
+        self.assertIn("BranchArmShapeUtil", portable_export)
+        self.assertIn("unwrapBranchArmFrames", portable_export)
         self.assertIn("record.type === BRANCH_SHAPE_TYPE", portable_export)
         self.assertIn("SYSTEMSKETCH_ROUNDED_RECT_GEO", portable_export)
         self.assertIn("portableValuePillText", portable_export)

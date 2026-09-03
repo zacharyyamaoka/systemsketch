@@ -32,6 +32,8 @@ import {
 	type BranchView,
 } from './branchModel'
 import { branchArmIdOfChild } from './branchScope'
+import { isBranchArmShape } from './BranchArmShapeUtil'
+import { reconcileBranchArmFrames } from './branchArmFrames'
 
 export type BranchCommandFailure = 'missing-branch' | 'missing-arm' | 'missing-port' | 'unchanged'
 
@@ -56,7 +58,11 @@ export function branchArmChildren(editor: Editor, branch: BranchShape): TLShape[
 	return editor
 		.getSortedChildIdsForParent(branch.id)
 		.map((id) => editor.getShape(id))
-		.filter((shape): shape is TLShape => shape !== undefined && shape.type !== 'connection')
+		.filter((shape): shape is TLShape => (
+			shape !== undefined
+			&& shape.type !== 'connection'
+			&& !isBranchArmShape(shape)
+		))
 }
 
 /**
@@ -100,6 +106,8 @@ function applyBranchProps(
 		editor.updateShape<BranchShape>({ id: branch.id, type: branch.type, props: next })
 		if (moves.length > 0) editor.updateShapes(moves as never)
 		if (orphans.length > 0) editor.reparentShapes(orphans, branch.parentId)
+		const current = editor.getShape(branch.id)
+		if (isBranchShape(current)) reconcileBranchArmFrames(editor, current)
 	})
 	return { ok: true, shapeId: branch.id, props: next }
 }
@@ -346,23 +354,6 @@ export function setBranchView(
  * the row it was dropped in has no body to be inside of any more.
  */
 export function stampBranchChildArms(editor: Editor, branch: BranchShape): number {
-	const updates: Array<{ id: TLShapeId; type: string; meta: Record<string, unknown> }> = []
-	const layout = branchLayout(branch.props)
-	for (const child of branchArmChildren(editor, branch)) {
-		const stamped = child.meta?.[BRANCH_ARM_META_KEY]
-		const stampedArm = typeof stamped === 'string'
-			? branch.props.arms.find((arm) => arm.id === stamped)
-			: undefined
-		// A child of a FOLDED arm keeps its stamp: its row has no body, so its
-		// top edge now overlaps whatever open arm sits below, and geometry would
-		// re-home it there — which is exactly the misreading a fold must survive.
-		if (stampedArm && !stampedArm.open) continue
-		// Otherwise geometry wins: the open arm whose row holds the top edge.
-		const row = layout.arms.find((arm) => arm.bodyH > 0 && child.y >= arm.rowTop && child.y < arm.bottom)
-		const armId = row?.arm.id ?? stampedArm?.id ?? branchArmIdOfChild(branch, child)
-		if (!armId || stamped === armId) continue
-		updates.push({ id: child.id, type: child.type, meta: { ...child.meta, [BRANCH_ARM_META_KEY]: armId } })
-	}
-	if (updates.length > 0) editor.updateShapes(updates as never)
-	return updates.length
+	const repair = reconcileBranchArmFrames(editor, branch)
+	return repair.created + repair.updated + repair.reparented + repair.removed
 }

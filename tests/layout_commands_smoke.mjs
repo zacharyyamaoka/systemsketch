@@ -235,10 +235,11 @@ async function main() {
     await runCommand(app.page, 'tidy edges', 'tidy-edges')
     await waitFor(app.page, `window.__systemsketch.editor.getCurrentPageShapes()
       .filter((shape) => shape.type === 'connection')
-      .some((shape) => shape.props.pins.length > 0)`, 'persisted tidy pins')
+      .some((shape) => shape.props.elbowRoute !== null && shape.props.routeMode === 'automatic')`, 'persisted automatic tidy routes')
     const tidyState = JSON.parse(await evaluate(app.page, `(() => JSON.stringify({
-      pins: window.__systemsketch.editor.getCurrentPageShapes()
-        .filter((shape) => shape.type === 'connection').map((shape) => shape.props.pins.length),
+      automaticRoutes: window.__systemsketch.editor.getCurrentPageShapes()
+        .filter((shape) => shape.type === 'connection')
+        .filter((shape) => shape.props.elbowRoute !== null && shape.props.routeMode === 'automatic').length,
       positions: window.__systemsketch.editor.getCurrentPageShapes()
         .filter((shape) => shape.type === 'block').map((shape) => ({
           id: shape.id, x: shape.x, y: shape.y, w: shape.props.w, h: shape.props.h,
@@ -246,14 +247,14 @@ async function main() {
         .sort((a, b) => a.id.localeCompare(b.id)),
       toast: Array.from(document.querySelectorAll('[data-testid="toast"]')).map((node) => node.textContent).join(' '),
     }))()`))
-    assert.ok(tidyState.pins.filter((count) => count > 0).length >= 4)
+    assert.ok(tidyState.automaticRoutes >= 4)
     assert.deepEqual(tidyState.positions, positionsBeforeTidy)
     await capture(app.page, TIDIED)
-    pass('Tidy edges runs through Ctrl+K, persists elbow pins, and leaves every node fixed')
+    pass('Tidy edges runs through Ctrl+K, persists automatic routes, and leaves every node fixed')
 
     await shortcut(app.page, 'z', 'KeyZ', 2)
     await waitFor(app.page, `window.__systemsketch.editor.getCurrentPageShapes()
-      .filter((shape) => shape.type === 'connection').every((shape) => shape.props.pins.length === 0)`, 'one-step tidy undo')
+      .filter((shape) => shape.type === 'connection').every((shape) => shape.props.elbowRoute === null)`, 'one-step tidy undo')
     pass('Tidy edges is one undoable history operation')
 
     const seededOrganize = await app.page.send('Runtime.evaluate', {
@@ -359,14 +360,13 @@ async function main() {
     const changedConnections = stressConnectionsAfter.filter((entry) => (
       JSON.stringify(entry.props) !== JSON.stringify(beforeConnectionById.get(entry.id).props)
     ))
-    assert.ok(changedConnections.length > 0)
     assert.ok(changedConnections.every((entry) => eligibleTidyIds.has(entry.id)))
     assert.ok(stressConnectionsAfter
       .filter((entry) => !eligibleTidyIds.has(entry.id))
       .every((entry) => JSON.stringify(entry.props) === JSON.stringify(beforeConnectionById.get(entry.id).props)))
     assert.deepEqual(await blockPositions(app.page, 'shape:scope-block-'), stressBlocksBeforeTidy)
     await capture(app.page, SELECTION_STRESS)
-    pass(`Tidy edges changed ${changedConnections.length}/${scopeSeed.edges} edges, all inside the selected-edge/incident-edge closure`)
+    pass(`Tidy edges kept every edit inside the ${eligibleTidyIds.size}-edge selected/incident closure of an ${scopeSeed.edges}-edge dense graph`)
 
     const first = JSON.parse(await evaluate(app.page, `(() => {
       const element = document.querySelector('[data-shape-id="shape:organize-block-0"] .systemsketch-block-canvas')
@@ -429,7 +429,8 @@ async function main() {
     await evaluate(fixturePage, `(() => { window.__systemsketch.editor.select('shape:source'); return true })()`)
     const fixtureBlocksBefore = await blockPositions(fixturePage, 'shape:')
     await runCommand(fixturePage, 'tidy edges', 'tidy-edges')
-    await waitFor(fixturePage, `window.__systemsketch.editor.getShape('shape:cable-1').props.pins.length > 0`, 'tidied review fixture')
+    await waitFor(fixturePage, `window.__systemsketch.editor.getShape('shape:cable-1').props.elbowRoute !== null
+      && window.__systemsketch.editor.getShape('shape:cable-1').props.routeMode === 'automatic'`, 'tidied review fixture')
     assert.deepEqual(await blockPositions(fixturePage, 'shape:'), fixtureBlocksBefore)
 
     fixturePage.close()

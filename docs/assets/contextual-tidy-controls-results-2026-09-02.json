@@ -1,0 +1,22 @@
+[
+  {
+    "label": "an edge-only selection exposes Tidy edges, with no inapplicable Organize nodes button",
+    "ok": true
+  },
+  {
+    "label": "clicking the toolbar runs the existing selection-scoped edge command and leaves nodes and unselected edges unchanged",
+    "ok": true
+  },
+  {
+    "label": "one selected Block exposes Tidy edges for its incident cables without pretending one node can be organized",
+    "ok": true
+  },
+  {
+    "label": "two selected Blocks expose both actions and the grid button invokes the existing Organize nodes command",
+    "ok": true
+  },
+  {
+    "label": "the contextual toolbar journey produced zero local console errors",
+    "ok": true
+  }
+]

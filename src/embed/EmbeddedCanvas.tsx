@@ -17,9 +17,11 @@ import {
   getBlockShapeVisibility,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
+  installDefinitionLinking,
 } from '../blocks'
 import { BlockContextMenu } from '../blocks/ui'
 import {
+  BranchArmShapeUtil,
   BranchShapeUtil,
   BranchTool,
   installBranchClickToEdit,
@@ -108,6 +110,7 @@ const EMBEDDED_SHAPE_UTILS = [
   ...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
   BlockShapeUtil,
   BranchShapeUtil,
+  BranchArmShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const EMBEDDED_BINDING_UTILS = [...blockConnectionBindingUtils]
@@ -216,6 +219,7 @@ function EmbeddedSurface({
     }
 
     enablePasteAtCursor(editor)
+    const stopDefinitionLinking = installDefinitionLinking(editor)
     const stopBlockConnections = installBlockConnections(editor)
     const stopConnectorControlVisibility = installConnectorControlVisibility(editor)
     const stopInstantTextEditing = installInstantTextEditing(editor)
@@ -319,6 +323,7 @@ function EmbeddedSurface({
       stopInstantTextEditing()
       stopConnectorControlVisibility()
       stopBlockConnections()
+      stopDefinitionLinking()
     }
   }, [openDocument, onCanvasCheckpoint, onCanvasText, onCompatibilityCopyAvailable, onLoadError])
 

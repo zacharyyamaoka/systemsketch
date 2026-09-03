@@ -77,10 +77,19 @@ async function branchRecord(page) {
 
 async function childArms(page, branchId) {
   return JSON.parse(await editorEval(page, `
-    return JSON.stringify(editor.getSortedChildIdsForParent(${JSON.stringify(branchId)})
+    const direct = editor.getSortedChildIdsForParent(${JSON.stringify(branchId)})
       .map((id) => editor.getShape(id))
+    const framed = direct
+      .filter((shape) => shape.type === 'branch-arm')
+      .flatMap((frame) => editor.getSortedChildIdsForParent(frame.id)
+        .map((id) => editor.getShape(id))
+        .filter((shape) => shape.type === 'block')
+        .map((shape) => ({ shape, arm: frame.props.armId })))
+    const legacy = direct
       .filter((shape) => shape.type === 'block')
-      .map((shape) => ({ title: shape.props.title, arm: shape.meta.branchArm ?? null, hidden: editor.isShapeHidden(shape) })))`))
+      .map((shape) => ({ shape, arm: shape.meta.branchArm ?? null }))
+    return JSON.stringify([...framed, ...legacy]
+      .map(({ shape, arm }) => ({ title: shape.props.title, arm, hidden: editor.isShapeHidden(shape) })))`))
 }
 
 async function paintedCables(page) {
@@ -237,7 +246,7 @@ async function main() {
     await waitFor(page, `document.querySelector('[data-testid="branch-pill-add-control"]')`, 'Branch pill')
     check('BR-7', 'the selection pill reads Branch · + port · + arm · E · C · ◎ · Inspect',
       JSON.parse(await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('.branch-mini-menu > *, .branch-mini-menu button')).map((b) => b.dataset.testid ?? b.className.split(' ')[0]).filter(Boolean))`)),
-      ['block-mini-menu__count', 'block-mini-menu__views', 'branch-pill-add-control', 'branch-pill-add-arm',
+      ['block-mini-menu__subject', 'block-mini-menu__views', 'branch-pill-add-control', 'branch-pill-add-arm',
         'block-mini-menu__views', 'branch-pill-view-expanded', 'branch-pill-view-case', 'branch-pill-active', 'block-mini-menu__inspect'])
 
     // 3 · Control ports: the band "+" then the inspector "+", each with a name.
@@ -302,7 +311,7 @@ async function main() {
     // Two producers into one consumer outside the region: the chosen arm's and an outside competitor's.
     const publish = await portBlock(page, { x: 1110, y: 160 }, { x: 1360, y: 290 }, 'publish()')
     const cached = await portBlock(page, { x: 1110, y: 560 }, { x: 1360, y: 690 }, 'cached()')
-    check('BR-16', 'Blocks drawn in the arms are children of the Branch, stamped with their arm',
+    check('BR-16', 'Blocks drawn in the arms are children of their arm frames and retain their semantic arm',
       await childArms(page, branch.id),
       [{ title: 'estimate()', arm: 'arm_1', hidden: false }, { title: 'fallback()', arm: 'arm_2', hidden: false }])
 

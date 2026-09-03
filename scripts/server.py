@@ -390,6 +390,15 @@ class SystemSketchServer(ThreadingHTTPServer):
             "canPreview": (self.source_root / "node_modules" / ".bin" / "vite").is_file(),
             "canPromote": self.channel == "preview",
             "canRollback": channels.previous is not None,
+            "hostArtifactsReady": bool(
+                channels.stable
+                and (
+                    self.release_home
+                    / "host-releases"
+                    / channels.stable
+                    / "manifest.json"
+                ).is_file()
+            ),
         }
         if message:
             payload["message"] = message
@@ -526,9 +535,20 @@ class SystemSketchServer(ThreadingHTTPServer):
                 ],
                 cwd=self.source_root,
                 check=True,
-                timeout=300,
+                timeout=900,
             )
-            return self.release_payload(message="Verified Preview published for the next Stable launch.")
+            stable = read_channels(self.release_home).stable
+            host_ready = bool(
+                stable
+                and (self.release_home / "host-releases" / stable / "manifest.json").is_file()
+            )
+            return self.release_payload(
+                message=(
+                    "Standalone Preview published; host plugins also rebuilt."
+                    if host_ready
+                    else "Standalone Preview published; the host-plugin rebuild needs attention."
+                )
+            )
         rollback_stable(self.release_home)
         return self.release_payload(message="Previous verified build selected for the next Stable launch.")
 

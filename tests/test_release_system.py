@@ -119,7 +119,13 @@ class ReleaseSystemTests(unittest.TestCase):
                 self.assertEqual(payload["channel"], "stable")
                 self.assertTrue(payload["isCurrent"])
                 self.assertFalse(payload["canPromote"])
+                self.assertFalse(payload["hostArtifactsReady"])
                 self.assertEqual(read_channels(release_home).stable, build)
+
+                host_manifest = release_home / "host-releases" / build / "manifest.json"
+                host_manifest.parent.mkdir(parents=True)
+                host_manifest.write_text("{}\n", encoding="utf-8")
+                self.assertTrue(server.release_payload()["hostArtifactsReady"])
             finally:
                 server.server_close()
 
@@ -319,6 +325,83 @@ class ReleaseSystemTests(unittest.TestCase):
             (scripts / "launch_systemsketch.py").write_text("# launcher changed\n", encoding="utf-8")
             self.assertNotEqual(before, release_build_id(root, dist))
 
+    def test_host_plugin_changes_produce_a_new_release_build(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            dist = self.make_dist(root, "host-hash")
+            scripts = root / "scripts"
+            scripts.mkdir()
+            for name in ("launch_systemsketch.py", "release.py", *CONTROLLER_RUNTIME_FILES):
+                (scripts / name).write_text(f"# {name}\n", encoding="utf-8")
+            host_source = root / "vscode-systemsketch" / "src" / "extension.ts"
+            host_source.parent.mkdir(parents=True)
+            host_source.write_text("export const host = 1\n", encoding="utf-8")
+
+            before = release_build_id(root, dist)
+            host_source.write_text("export const host = 2\n", encoding="utf-8")
+
+            self.assertNotEqual(before, release_build_id(root, dist))
+
+    def test_host_plugin_failure_cannot_interrupt_standalone_stable(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            release_home = root / "runtime"
+            first, _ = stage_candidate(PROJECT_ROOT, release_home, self.make_dist(root, "first"))
+            promote_candidate(release_home)
+            second, second_manifest = stage_candidate(
+                PROJECT_ROOT,
+                release_home,
+                self.make_dist(root, "second"),
+            )
+
+            with patch.object(
+                release_cli,
+                "build_candidate",
+                return_value=(second, second_manifest),
+            ), patch.object(
+                release_cli,
+                "build_host_artifacts",
+                side_effect=ReleaseError("host build failed"),
+            ), patch.object(
+                release_cli,
+                "install_controller",
+            ), contextlib.redirect_stderr(io.StringIO()) as warning:
+                build, host_manifest = release_cli.promote_release(release_home)
+
+            self.assertEqual(build, second)
+            self.assertIsNone(host_manifest)
+            self.assertIn("standalone Stable", warning.getvalue())
+            self.assertIn("host build failed", warning.getvalue())
+            self.assertEqual(read_channels(release_home).stable, second)
+            self.assertEqual(read_channels(release_home).candidate, second)
+
+    def test_successful_promotion_selects_standalone_before_building_hosts(self) -> None:
+        order: list[str] = []
+        release_home = Path("/tmp/systemsketch-test-release")
+        host_manifest = {"build": "candidate"}
+        with patch.object(
+            release_cli,
+            "build_candidate",
+            side_effect=lambda *_args, **_kwargs: (order.append("candidate") or ("candidate", {})),
+        ), patch.object(
+            release_cli,
+            "build_host_artifacts",
+            side_effect=lambda *_args, **_kwargs: (order.append("hosts") or host_manifest),
+        ), patch.object(
+            release_cli,
+            "promote_candidate",
+            side_effect=lambda *_args, **_kwargs: order.append("promote"),
+        ), patch.object(
+            release_cli,
+            "install_controller",
+            side_effect=lambda *_args, **_kwargs: order.append("controller"),
+        ):
+            build, result = release_cli.promote_release(release_home)
+
+        self.assertEqual(build, "candidate")
+        self.assertIs(result, host_manifest)
+        self.assertEqual(order, ["candidate", "promote", "controller", "hosts"])
+
     def test_controller_fingerprint_changes_with_the_preview_api_runtime(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             scripts = Path(directory)
@@ -452,6 +535,8 @@ class ReleaseSystemTests(unittest.TestCase):
             # first character of the first line.
             self.assertEqual(dirty.dirty_paths, ("package.json", "src/Untracked.tsx"))
             self.assertIn("package.json", SOURCE_PATHS)
+            self.assertIn("vscode-systemsketch/src", SOURCE_PATHS)
+            self.assertIn("obsidian-systemsketch/src", SOURCE_PATHS)
 
     def test_a_tree_with_no_git_records_unknown_rather_than_clean(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

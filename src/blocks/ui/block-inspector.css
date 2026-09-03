@@ -779,7 +779,7 @@
   background: var(--ss-surface-raised);
 }
 
-.block-inspector__batch-count {
+.block-inspector__batch-title {
   color: var(--ss-text);
   font-size: 12px;
   font-weight: 600;
@@ -807,7 +807,7 @@
 
 /* Batch mini menu -------------------------------------------------------- */
 
-.block-mini-menu__count {
+.block-mini-menu__subject {
   display: inline-flex;
   align-items: center;
   padding: 0 10px;
@@ -821,16 +821,14 @@
 .block-inspector__icon-option[aria-selected='true'] {
   box-shadow: inset 0 0 0 1px var(--ss-accent);
 }
-
-/* In a mixed selection the S / P / E group names the Blocks it governs:
- * the count's own ink, dimmed, so it reads as a caption on the pill. */
-.block-mini-menu__scope {
+.block-inspector__definition-badge {
   display: inline-flex;
-  align-items: center;
-  padding: 0 4px 0 7px;
-  color: var(--ss-text-inverse);
-  opacity: .7;
-  font-size: 10px;
-  font-weight: 600;
-  white-space: nowrap;
+  width: max-content;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border: 1px solid color-mix(in srgb, var(--ss-warning) 45%, var(--ss-border));
+  border-radius: 999px;
+  color: color-mix(in srgb, var(--ss-warning) 72%, var(--ss-text));
+  font-size: 11px;
+  font-weight: 650;
 }

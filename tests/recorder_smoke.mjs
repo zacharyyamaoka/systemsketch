@@ -189,9 +189,23 @@ async function main() {
     await clickElement(page, '[data-action="more"]')
     await shot(page, 'recorder-split-menu.png')
     await clickElement(page, '[data-action="more"]')
+    await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const original = editor.toImage.bind(editor)
+      const calls = []
+      editor.toImage = (...args) => {
+        calls.push({ format: args[1]?.format, pixelRatio: args[1]?.pixelRatio })
+        return original(...args)
+      }
+      window.__recorderCanvasExportCalls = calls
+      return true
+    })()`)
     await clickElement(page, '[data-action="start-recording"]')
     await waitFor(page, `document.querySelector('[data-testid="recorder-indicator"]')`, 'REC notice')
     await waitForRecorderArmed(apiPort, true)
+    await delay(250)
+    check('screencast-skips-canvas-fallback', 'an available screencast does not rasterise the whole board as a redundant fallback',
+      await evaluate(page, 'window.__recorderCanvasExportCalls.length'), 0)
 
     const activeNotice = await noticeGeometry(page, '[data-testid="recorder-indicator"]')
     const activeNoticeStyle = JSON.parse(await evaluate(page, `(() => {
@@ -233,6 +247,8 @@ async function main() {
 
     await clickElement(page, '[data-testid="recorder-indicator"] button')
     await waitFor(page, `!document.querySelector('[data-testid="recorder-indicator"]')`, 'manual Stop and save', 30000)
+    check('screencast-save-skips-canvas-fallback', 'saving a screencast take does not rasterise an unnecessary ending PNG',
+      await evaluate(page, 'window.__recorderCanvasExportCalls.length'), 0)
     await clickElement(page, '.systemsketch-dev-trigger')
     await waitFor(page, `document.querySelector('[data-testid="recorder-status"]')?.textContent.includes('Saved')`, 'saved status', 30000)
     await shot(page, 'recorder-saved.png')

@@ -167,7 +167,7 @@ export interface BlockSelectionStyles {
 }
 
 /** Two shared-style readings are the same when a control would look the same. */
-/** Mark every selected cable as read on this pass (`data`) or one iteration late (`delayed`). */
+/** Mark every selected cable as plain data, async delivery, or one iteration late. */
 export function setConnectionTemporalForSelection(
   editor: Editor,
   temporal: ConnectionTemporalKind,
@@ -176,7 +176,11 @@ export function setConnectionTemporalForSelection(
     editor,
     ConnectionTemporalStyle,
     temporal,
-    temporal === 'delayed' ? 'mark cables delayed (z⁻¹)' : 'mark cables as data',
+    temporal === 'delayed'
+      ? 'mark cables delayed (z⁻¹)'
+      : temporal === 'async'
+        ? 'mark cables async'
+        : 'mark cables as data',
   )
 }
 

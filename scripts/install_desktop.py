@@ -9,7 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from release import build_candidate
+from release import build_candidate, try_build_host_artifacts
 from release_lib import (
     ReleaseError,
     default_release_home,
@@ -99,6 +99,7 @@ def main() -> int:
         build, _manifest = build_candidate(release_home)
         promote_candidate(release_home)
         launcher = install_controller(PROJECT_ROOT, release_home)
+        try_build_host_artifacts(release_home, build)
 
         icon_source = PROJECT_ROOT / "assets" / "systemsketch.png"
         if not icon_source.is_file():

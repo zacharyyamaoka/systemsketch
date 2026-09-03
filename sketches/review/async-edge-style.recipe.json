@@ -1,0 +1,123 @@
+{
+  "feature": "Async edge type · V1 packet cadence",
+  "viewport": { "width": 1900, "height": 1200 },
+  "shapes": [
+    {
+      "id": "short-source", "type": "block", "x": 650, "y": 300,
+      "props": {
+        "title": "emit_short()", "blockType": "call", "view": "port", "w": 250, "h": 150,
+        "inputs": [{ "id": "in_1", "name": "clock", "type": "Tick", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "packet", "type": "Packet", "visible": true }]
+      }
+    },
+    {
+      "id": "short-sink", "type": "block", "x": 1030, "y": 300,
+      "props": {
+        "title": "receive_short()", "blockType": "call", "view": "port", "w": 250, "h": 150,
+        "inputs": [{ "id": "in_1", "name": "packet", "type": "Packet", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "ack", "type": "Ack", "visible": true }]
+      }
+    },
+    {
+      "id": "west-top", "type": "block", "x": 220, "y": 540,
+      "props": {
+        "title": "camera_bus()", "blockType": "source", "view": "port", "w": 250, "h": 150,
+        "inputs": [{ "id": "in_1", "name": "sync", "type": "Clock", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "frames", "type": "Frame", "visible": true }]
+      }
+    },
+    {
+      "id": "west-bottom", "type": "block", "x": 220, "y": 800,
+      "props": {
+        "title": "telemetry()", "blockType": "source", "view": "port", "w": 250, "h": 150,
+        "inputs": [{ "id": "in_1", "name": "poll", "type": "Tick", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "events", "type": "Event", "visible": true }]
+      }
+    },
+    {
+      "id": "hub-top", "type": "block", "x": 800, "y": 540,
+      "props": {
+        "title": "broker()", "blockType": "queue", "view": "port", "w": 250, "h": 150,
+        "inputs": [{ "id": "in_1", "name": "messages", "type": "Message", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "batch", "type": "Batch", "visible": true }]
+      }
+    },
+    {
+      "id": "hub-bottom", "type": "block", "x": 800, "y": 800,
+      "props": {
+        "title": "archive()", "blockType": "sink", "view": "port", "w": 250, "h": 150,
+        "inputs": [{ "id": "in_1", "name": "records", "type": "Record", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "receipt", "type": "Ack", "visible": true }]
+      }
+    },
+    {
+      "id": "east-top", "type": "block", "x": 1400, "y": 540,
+      "props": {
+        "title": "render()", "blockType": "worker", "view": "port", "w": 250, "h": 150,
+        "inputs": [{ "id": "in_1", "name": "frames", "type": "Frame", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "events", "type": "Event", "visible": true }]
+      }
+    },
+    {
+      "id": "east-bottom", "type": "block", "x": 1400, "y": 800,
+      "props": {
+        "title": "persist()", "blockType": "worker", "view": "port", "w": 250, "h": 150,
+        "inputs": [{ "id": "in_1", "name": "events", "type": "Event", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "status", "type": "Status", "visible": true }]
+      }
+    },
+
+    { "id": "candidate", "type": "connection", "x": 0, "y": 0, "props": { "routing": "straight", "temporal": "data" } },
+    { "id": "async-cross-a", "type": "connection", "x": 0, "y": 0, "props": { "routing": "straight", "temporal": "async" } },
+    { "id": "async-cross-b", "type": "connection", "x": 0, "y": 0, "props": { "routing": "straight", "temporal": "async" } },
+    { "id": "async-east", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow", "temporal": "async" } },
+    { "id": "async-return", "type": "connection", "x": 0, "y": 0, "props": { "routing": "curved", "temporal": "async" } },
+    { "id": "data-top", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "data-bottom", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow", "temporal": "data" } },
+    { "id": "data-middle", "type": "connection", "x": 0, "y": 0, "props": { "routing": "curved", "temporal": "data" } }
+  ],
+  "bindings": [
+    { "id": "candidate-start", "type": "connection", "fromId": "candidate", "toId": "short-source", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "candidate-end", "type": "connection", "fromId": "candidate", "toId": "short-sink", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+
+    { "id": "async-a-start", "type": "connection", "fromId": "async-cross-a", "toId": "west-top", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "async-a-end", "type": "connection", "fromId": "async-cross-a", "toId": "east-bottom", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "id": "async-b-start", "type": "connection", "fromId": "async-cross-b", "toId": "west-bottom", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "async-b-end", "type": "connection", "fromId": "async-cross-b", "toId": "east-top", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "id": "async-east-start", "type": "connection", "fromId": "async-east", "toId": "hub-top", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "async-east-end", "type": "connection", "fromId": "async-east", "toId": "east-top", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "id": "async-return-start", "type": "connection", "fromId": "async-return", "toId": "east-top", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "async-return-end", "type": "connection", "fromId": "async-return", "toId": "hub-bottom", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+
+    { "id": "data-top-start", "type": "connection", "fromId": "data-top", "toId": "west-top", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "data-top-end", "type": "connection", "fromId": "data-top", "toId": "east-top", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "id": "data-bottom-start", "type": "connection", "fromId": "data-bottom", "toId": "west-bottom", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "data-bottom-end", "type": "connection", "fromId": "data-bottom", "toId": "east-bottom", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "id": "data-middle-start", "type": "connection", "fromId": "data-middle", "toId": "hub-top", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "data-middle-end", "type": "connection", "fromId": "data-middle", "toId": "hub-bottom", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } }
+  ],
+  "callouts": [
+    {
+      "id": "note", "kind": "note",
+      "text": "Four async cables and three solid data cables are pre-seeded below: long runs, crossings, elbows, curves, and a right-to-left return.",
+      "x": 70, "y": 60, "w": 460, "h": 150
+    },
+    {
+      "id": "step-1", "kind": "step",
+      "text": "1 · Click the short solid cable between emit_short() and receive_short(). In the inspector choose Edge type → Async.",
+      "x": 640, "y": 60, "w": 620, "h": 150,
+      "target": { "shapeId": "short-source", "anchor": "top", "dx": 105 }
+    },
+    {
+      "id": "step-2", "kind": "step",
+      "text": "2 · Right-click any packet-marked cable. Open Edge type and confirm Async is checked; Data and Delayed remain separate choices.",
+      "x": 1350, "y": 60, "w": 470, "h": 150,
+      "target": { "shapeId": "east-top", "anchor": "top", "dx": -90 }
+    },
+    {
+      "id": "pass", "kind": "pass",
+      "text": "PASS WHEN the short target becomes the fifth async cable, its tiny packet gaps remain visible, long/crossing routes stay easy to trace, and the solid data cables still read as a different edge type.",
+      "x": 70, "y": 1030, "w": 740, "h": 140
+    }
+  ]
+}

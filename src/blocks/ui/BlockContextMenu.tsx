@@ -52,9 +52,11 @@ import {
 } from '../commands/blockStyleCommands'
 import {
   CONNECTION_ROUTING_KINDS,
+  CONNECTION_TEMPORAL_KINDS,
   ConnectionRoutingStyle,
   ConnectionTemporalStyle,
   type ConnectionRoutingKind,
+  type ConnectionTemporalKind,
 } from '../connections/connectionModel'
 import { describeTidyEdgesOutcome, getTidyEdgesSelection, tidyEdges } from '../connections/tidyEdges'
 import { describeOrganizeNodesOutcome, organizeNodes } from '../layout'
@@ -63,6 +65,11 @@ import {
   type BlockInlineField,
 } from '../inlineBlockEditing'
 import { stepIntoDepthScope } from '../../depth/depthNavigation'
+import {
+  duplicateBlockUnlinked,
+  linkedBlockOccurrences,
+  unlinkBlockDefinition,
+} from '../definitions/definitionLinking'
 
 function onlySelectedBlock(editor: ReturnType<typeof useEditor>): BlockShape | null {
   const selected = editor.getSelectedShapes()
@@ -77,17 +84,6 @@ function blockPortIndexOf(editor: ReturnType<typeof useEditor>, target: BlockPor
 
 function labelFor(value: string): string {
   return value[0].toUpperCase() + value.slice(1)
-}
-
-/**
- * Menus that write a style are gated on the selection, not on a single shape.
- *
- * A checkbox is checked only when tldraw reports the whole selection as
- * sharing that value; a mixed selection shows every option unchecked and one
- * click resolves it, which is how the stock style menus already behave.
- */
-function batchSuffix(count: number): string {
-  return count > 1 ? ` (${count})` : ''
 }
 
 /**
@@ -108,8 +104,8 @@ export function BlockContextMenu(props: TLUiContextMenuProps) {
 function BlockContextMenuItems() {
   const editor = useEditor()
   const { addToast } = useToasts()
-  // Detach and its inverse are counts, not one-Block commands: a sweep over a
-  // multi-selection is the normal case, and the label says how many.
+  // Detach and its inverse are selection-scoped commands: a sweep over a
+  // multi-selection is the normal case, without narrating a selected total.
   const detachableCount = useValue(
     'context-menu detachable Blocks',
     () => selectedBlockIds(editor).length,
@@ -126,6 +122,11 @@ function BlockContextMenuItems() {
     'context-menu selected Block',
     () => onlySelectedBlock(editor),
     [editor],
+  )
+  const linkedOccurrenceCount = useValue(
+    'selected Block linked occurrence count',
+    () => selectedBlock ? linkedBlockOccurrences(editor, selectedBlock).length : 0,
+    [editor, selectedBlock?.id],
   )
   const blockStyles = useValue(
     'context-menu Block selection styles',
@@ -202,6 +203,10 @@ function BlockContextMenuItems() {
 
   const setRouting = (routing: ConnectionRoutingKind) => {
     setConnectionRoutingForSelection(editor, routing)
+  }
+
+  const setTemporal = (temporal: ConnectionTemporalKind) => {
+    setConnectionTemporalForSelection(editor, temporal)
   }
 
   const runTidyEdges = () => {
@@ -337,7 +342,7 @@ function BlockContextMenuItems() {
         <TldrawUiMenuGroup id="systemsketch-block-authoring">
           <TldrawUiMenuSubmenu
             id="block-view"
-            label={`Block view${batchSuffix(blockStyles.blockCount)}`}
+            label="Block view"
           >
             <TldrawUiMenuGroup id="block-view-options">
               {BLOCK_VIEWS.map((view) => (
@@ -394,7 +399,7 @@ function BlockContextMenuItems() {
 
           <TldrawUiMenuSubmenu
             id="block-ports"
-            label={`Ports${batchSuffix(blockStyles.blockCount)}`}
+            label="Ports"
           >
             <TldrawUiMenuGroup id="block-port-layout">
               {PORT_LAYOUTS.map((layout) => (
@@ -423,19 +428,36 @@ function BlockContextMenuItems() {
         </TldrawUiMenuGroup>
       ) : null}
 
+      {selectedBlock ? (
+        <TldrawUiMenuGroup id="systemsketch-block-definition">
+          <TldrawUiMenuItem
+            id="block-duplicate-unlinked"
+            label="Duplicate unlinked"
+            onSelect={() => void duplicateBlockUnlinked(editor, selectedBlock.id)}
+          />
+          {linkedOccurrenceCount > 1 ? (
+            <TldrawUiMenuItem
+              id="block-unlink-definition"
+              label="Unlink"
+              onSelect={() => void unlinkBlockDefinition(editor, selectedBlock.id)}
+            />
+          ) : null}
+        </TldrawUiMenuGroup>
+      ) : null}
+
       {detachableCount > 0 || rebuildableCount > 0 ? (
         <TldrawUiMenuGroup id="systemsketch-block-detach">
           {detachableCount > 0 ? (
             <TldrawUiMenuItem
               id="block-detach-to-primitives"
-              label={`Detach to primitives${batchSuffix(detachableCount)}`}
+              label="Detach to primitives"
               onSelect={() => void detachSelectedBlocks(editor)}
             />
           ) : null}
           {rebuildableCount > 0 ? (
             <TldrawUiMenuItem
               id="block-rebuild-from-primitives"
-              label={`Rebuild Block${rebuildableCount > 1 ? 's' : ''} from primitives${batchSuffix(rebuildableCount)}`}
+              label="Rebuild from primitives"
               onSelect={() => void rebuildSelectedBlocks(editor)}
             />
           ) : null}
@@ -446,7 +468,7 @@ function BlockContextMenuItems() {
         <TldrawUiMenuGroup id="systemsketch-connection-routing">
           <TldrawUiMenuSubmenu
             id="connection-routing"
-            label={`Routing${batchSuffix(connectionCount)}`}
+            label="Routing"
           >
             <TldrawUiMenuGroup id="connection-routing-options">
               {CONNECTION_ROUTING_KINDS.map((routing) => (
@@ -465,17 +487,22 @@ function BlockContextMenuItems() {
 
       {connectionCount > 0 && connectionTemporal ? (
         <TldrawUiMenuGroup id="systemsketch-connection-temporal">
-          <TldrawUiMenuCheckboxItem
-            id="connection-temporal-delayed"
-            label={`Delayed (z⁻¹)${batchSuffix(connectionCount)}`}
-            checked={isSharedStyleValue(connectionTemporal, 'delayed')}
-            onSelect={() => {
-              setConnectionTemporalForSelection(
-                editor,
-                isSharedStyleValue(connectionTemporal, 'delayed') ? 'data' : 'delayed',
-              )
-            }}
-          />
+          <TldrawUiMenuSubmenu
+            id="connection-temporal"
+            label="Edge type"
+          >
+            <TldrawUiMenuGroup id="connection-temporal-options">
+              {CONNECTION_TEMPORAL_KINDS.map((temporal) => (
+                <TldrawUiMenuCheckboxItem
+                  key={temporal}
+                  id={`connection-temporal-${temporal}`}
+                  label={temporal === 'delayed' ? 'Delayed (z⁻¹)' : labelFor(temporal)}
+                  checked={isSharedStyleValue(connectionTemporal, temporal)}
+                  onSelect={() => setTemporal(temporal)}
+                />
+              ))}
+            </TldrawUiMenuGroup>
+          </TldrawUiMenuSubmenu>
         </TldrawUiMenuGroup>
       ) : null}
 

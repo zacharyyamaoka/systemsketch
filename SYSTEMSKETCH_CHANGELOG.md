@@ -2,6 +2,10 @@
 
 ## 0.1.0
 
+- Made host plugins a best-effort follow-up to Preview → Stable. Promotion publishes the verified
+  standalone app first, then builds one VSIX shared by VS Code/Cursor plus the guarded Obsidian
+  bundle. A host failure cannot interrupt or roll back Stable; successful artifacts are checksummed
+  under the same build identity, while installation remains explicit.
 - Started from the stock tldraw 5.3.2 whiteboard and default interface.
 - Added a bottom-right utility strip for board overview, zoom, and Help-hosted release controls.
 - Added a green Help indicator only when newer Preview work is available.
