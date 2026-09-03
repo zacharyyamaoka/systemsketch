@@ -211,9 +211,12 @@ function SelectionMiniMenu() {
     ),
     [editor],
   )
-  const selectionCount = useValue(
-    'systemsketch selection count',
-    () => editor.getSelectedShapeIds().length,
+  // A Block stays a Block selection as the user adds or removes peers. Keep a
+  // selection-identity value so its batch controls refresh across those
+  // transitions without narrating the selected count in the menu.
+  const selectionKey = useValue(
+    'systemsketch selection identity',
+    () => Array.from(editor.getSelectedShapeIds()).sort().join(','),
     [editor],
   )
   // Any Block in the selection — one, nine, or nested inside a group — gets the
@@ -266,7 +269,11 @@ function SelectionMiniMenu() {
           so the Block-only pill is unchanged. */}
       {hasBlocks ? (
         <>
-          <EditorBlockSelectionMiniMenu editor={editor} onOpenInspector={() => setRight('inspector')} />
+          <EditorBlockSelectionMiniMenu
+            key={selectionKey}
+            editor={editor}
+            onOpenInspector={() => setRight('inspector')}
+          />
           <AppearanceControls />
           <SelectionLayoutActions
             {...layoutActions}
@@ -276,7 +283,6 @@ function SelectionMiniMenu() {
         </>
       ) : (
         <>
-          <span className="systemsketch-selection-count">{selectionCount} selected</span>
           {/* Appearance first, the way FigJam leads with what the thing looks
               like; Inspect stays on the right as the way out to detail. */}
           <AppearanceControls />

@@ -1,0 +1,35 @@
+{
+  "checks": [
+    "moving a review target keeps its orange cue arrow bound",
+    "the three-Block pill starts with S / P / E and has no selected-count summary",
+    "Inspect names the state “Batch edit”, not a selected total",
+    "the saved fixture journey produces zero local console errors"
+  ],
+  "before": {
+    "x": 540,
+    "y": 300,
+    "bound": 1
+  },
+  "after": {
+    "x": 580,
+    "y": 300,
+    "bound": 1
+  },
+  "menu": {
+    "text": "S\nsimple\nP\nport\nE\nexpanded\nE\nvalue\nInspect",
+    "obsoleteSummary": false,
+    "controls": [
+      "S\n",
+      "P\nport",
+      "E\nexpanded",
+      "E\nvalue",
+      "In"
+    ]
+  },
+  "inspectorHeading": "Batch edit",
+  "board": "/home/bam/.codex/worktrees/271b/systemsketch/sketches/review/selection-count-removal.systemsketch",
+  "screenshots": {
+    "menu": "/home/bam/.codex/worktrees/271b/systemsketch/docs/selection-count-removal-live-2026-09-02.png",
+    "bound": "/home/bam/.codex/worktrees/271b/systemsketch/docs/selection-count-removal-bound-2026-09-02.png"
+  }
+}

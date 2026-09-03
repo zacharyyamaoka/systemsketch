@@ -4,6 +4,8 @@ SystemSketch starts from one deliberately boring datum: the stock tldraw whitebo
 
 ## Current improvement review
 
+The [count-free selection-menu gallery](docs/selection-count-removal-2026-09-02.html) records the FigJam-aligned removal of visible selection totals: three Blocks retain their S / P / E, appearance and Inspect actions with no “3 selected” or “3 Blocks” prefix; the Inspector calls the state **Batch edit**. It includes the saved review-board journey and source-level guardrails for the replacement selection-identity refresh.
+
 The [Expanded Block footer-drag gallery](docs/expanded-footer-drag-2026-09-02.html) proves the footer and painted port words are real drag handles again while the open middle remains drawable child canvas. Its focused real-browser journey covers both selected and cold footer drags, a port-text drag, and the negative interior control.
 
 The [35-item repo improvement review](docs/repo-improvement-review-2026-09-02.html) ranks the audited gaps, shows the top ten already running with real-browser evidence, and gives each shipped fix and remaining candidate its own accept checkbox and review note. The [follow-up decision gallery](docs/repo-improvement-followup-review-2026-09-02.html) covers the revised future-format workflow plus comments, commands, timer removal, diagnostics, and folder creation with one accept checkbox and note field per change. These are temporary decision surfaces; code and ordinary regression tests remain the living specification.

@@ -67,8 +67,6 @@ export function BlockBatchInspectorContent({
   onRequestClose,
 }: BlockBatchInspectorContentProps) {
   const readOnly = !actions
-  const blockLabel = `${blockCount} ${blockCount === 1 ? 'Block' : 'Blocks'}`
-
   return (
     <section
       className="block-inspector block-inspector--batch"
@@ -77,7 +75,7 @@ export function BlockBatchInspectorContent({
       data-block-count={blockCount}
     >
       <header className="block-inspector__batch-header">
-        <span className="block-inspector__batch-count">{blockLabel} selected</span>
+        <span className="block-inspector__batch-title">Batch edit</span>
         {onRequestClose ? (
           <button
             type="button"
@@ -110,8 +108,7 @@ export function BlockBatchInspectorContent({
             ))}
           </div>
           <p className="block-inspector__hint">
-            Applies to all {blockLabel.toLowerCase()} · each Block keeps its own remembered size
-            per view.
+            Applies to every selected Block · each Block keeps its own remembered size per view.
           </p>
         </section>
 
