@@ -2,6 +2,12 @@ import { describe, expect, it } from 'vitest'
 
 import { clampPillPosition, PILL_POSITION_DEFAULT, PILL_POSITION_MAX, PILL_POSITION_MIN } from './connectionModel'
 import {
+	ASYNC_CARRIER_PX,
+	ASYNC_CADENCE_PX,
+	ASYNC_PACKET_DASHARRAY,
+	ASYNC_PACKET_GAP_PX,
+	ASYNC_PACKET_PX,
+	asyncDashOffsetForLength,
 	DEFAULT_CABLE_PRESENTATION,
 	delayPillLabel,
 	delayPillWidth,
@@ -57,6 +63,21 @@ describe('arc length along a polyline', () => {
 })
 
 describe('split dash arrays', () => {
+	it('encodes async V1 as equal rests around one small packet mark', () => {
+		expect(ASYNC_PACKET_DASHARRAY).toBe('56 4 10 4')
+		expect(ASYNC_CARRIER_PX).toBeGreaterThan(ASYNC_PACKET_PX)
+		expect(ASYNC_PACKET_GAP_PX).toBeLessThan(ASYNC_PACKET_PX)
+		expect(ASYNC_CADENCE_PX).toBe(74)
+		expect(ASYNC_CARRIER_PX + ASYNC_PACKET_GAP_PX * 2 + ASYNC_PACKET_PX).toBe(ASYNC_CADENCE_PX)
+	})
+
+	it('centres one complete packet mark only when a run is shorter than one cadence', () => {
+		expect(asyncDashOffsetForLength(96)).toBe(0)
+		expect(asyncDashOffsetForLength(ASYNC_CADENCE_PX)).toBe(0)
+		expect(asyncDashOffsetForLength(60)).toBe(35)
+		expect(asyncDashOffsetForLength(18)).toBe(56)
+	})
+
 	it('dot up to the pill, dash after it, each pattern outlasting the path', () => {
 		const { before, after } = splitDashArrays(500, 0.5)
 		const b = before.split(' ').map(Number)

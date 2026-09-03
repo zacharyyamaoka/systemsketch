@@ -5,8 +5,9 @@
  * iteration late. Two marks say so — the line is dotted (weaker, in the
  * background, as Zach put it) and a z⁻¹ pill rides the cable, centred by
  * default and draggable along it, optionally naming the initial value with
- * the same `= value` grammar the port default chips use. Solid stays the
- * plain data cable; dashed is reserved for the async/event rail.
+ * the same `= value` grammar the port default chips use. Solid stays the plain
+ * data cable. Async uses a mostly-continuous carrier punctuated by small packet
+ * dashes; delayed keeps the dotted z⁻¹ vocabulary.
  *
  * Everything geometric here is editor-free so it unit-tests directly: arc
  * length along a polyline, the point at a fraction of it, the fraction nearest
@@ -121,6 +122,30 @@ export function fractionNearest(points: readonly VecLike[], p: VecLike): number 
 }
 
 /* ------------------------------ dash arrays ------------------------------ */
+
+/**
+ * Async V1: equal rests between small packet marks. SVG alternates paint and
+ * gaps, so this reads as a 56-unit carrier, 4-unit micro-gap, 10-unit packet,
+ * then another 4-unit micro-gap before the cadence repeats. Butt caps keep the
+ * tiny gaps legible instead of visually closing them with round end caps.
+ */
+export const ASYNC_CARRIER_PX = 56
+export const ASYNC_PACKET_GAP_PX = 4
+export const ASYNC_PACKET_PX = 10
+export const ASYNC_PACKET_DASHARRAY = `${ASYNC_CARRIER_PX} ${ASYNC_PACKET_GAP_PX} ${ASYNC_PACKET_PX} ${ASYNC_PACKET_GAP_PX}`
+export const ASYNC_CADENCE_PX = ASYNC_CARRIER_PX + ASYNC_PACKET_GAP_PX * 2 + ASYNC_PACKET_PX
+
+/**
+ * Normal and long cables start V1 at phase zero. Below one full cadence there
+ * is not enough path to reach both micro-gaps, so phase just that short run to
+ * centre one complete gap–packet–gap mark. The cadence itself never changes.
+ */
+export function asyncDashOffsetForLength(lengthPx: number): number {
+	if (!Number.isFinite(lengthPx) || lengthPx >= ASYNC_CADENCE_PX) return 0
+	const packetMark = ASYNC_PACKET_GAP_PX * 2 + ASYNC_PACKET_PX
+	const markStart = Math.max(0, (Math.max(0, lengthPx) - packetMark) / 2)
+	return ASYNC_CARRIER_PX - markStart
+}
 
 /** The dot: a zero-length dash with a round cap paints a disc of the stroke width. */
 export const DELAY_DOT_PX = 0.1

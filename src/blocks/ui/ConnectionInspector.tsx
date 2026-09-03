@@ -16,6 +16,7 @@ import { useEditor, useValue, type Editor, type TLShapeId } from 'tldraw'
 
 import {
 	CONNECTION_ROUTING_KINDS,
+	CONNECTION_TEMPORAL_KINDS,
 	ConnectionRoutingStyle,
 	ConnectionTemporalStyle,
 	PILL_POSITION_DEFAULT,
@@ -44,7 +45,7 @@ import './block-inspector.css'
 export interface ConnectionInspectorContext {
 	count: number
 	routing: ReturnType<typeof getSharedStyleForSelection<ConnectionRoutingKind>>
-	/** `data` on this pass, `delayed` one iteration late; shared or mixed across the selection. */
+	/** Plain data, async delivery, or one-iteration delay; shared or mixed across the selection. */
 	temporal: ReturnType<typeof getSharedStyleForSelection<ConnectionTemporalKind>>
 	/** Endpoint summary, only when exactly one cable is selected. */
 	endpoints: { from: string; to: string } | null
@@ -55,6 +56,9 @@ export interface ConnectionInspectorContext {
 }
 
 const label = (value: string) => value[0].toUpperCase() + value.slice(1)
+
+const temporalLabel = (temporal: ConnectionTemporalKind) =>
+	temporal === 'delayed' ? 'Delayed (z⁻¹)' : label(temporal)
 
 function describeEndpoint(editor: Editor, binding: ConnectionBinding | undefined) {
 	if (!binding) return '—'
@@ -203,32 +207,29 @@ export function EditorConnectionInspector({ editor }: { editor: Editor }) {
 					</p>
 				</section>
 
-				<section className="block-inspector__section" data-inspector-section="Temporal">
-					<div className="block-inspector__section-title">Temporal</div>
-					<div className="block-inspector__choices" role="group" aria-label="When the value is read">
-						<button
-							type="button"
-							data-testid="connection-temporal-data"
-							aria-pressed={isSharedStyleValue(context.temporal, 'data')}
-							onClick={() => setTemporal('data')}
-						>
-							Data
-						</button>
-						<button
-							type="button"
-							data-testid="connection-temporal-delayed"
-							aria-pressed={isSharedStyleValue(context.temporal, 'delayed')}
-							onClick={() => setTemporal('delayed')}
-						>
-							Delayed (z⁻¹)
-						</button>
+				<section className="block-inspector__section" data-inspector-section="Edge type">
+					<div className="block-inspector__section-title">Edge type</div>
+					<div className="block-inspector__choices" role="group" aria-label="Connection edge type">
+						{CONNECTION_TEMPORAL_KINDS.map((temporal) => (
+							<button
+								key={temporal}
+								type="button"
+								data-testid={`connection-temporal-${temporal}`}
+								aria-pressed={isSharedStyleValue(context.temporal, temporal)}
+								onClick={() => setTemporal(temporal)}
+							>
+								{temporalLabel(temporal)}
+							</button>
+						))}
 					</div>
 					<p className="block-inspector__hint">
 						{context.temporal?.type === 'mixed'
 							? 'Mixed — choose one to settle the selection.'
 							: isSharedStyleValue(context.temporal, 'delayed')
 								? 'Read one iteration late: dotted, with a z⁻¹ pill you can slide along the cable.'
-								: 'Read on this pass: the plain data cable.'}
+								: isSharedStyleValue(context.temporal, 'async')
+									? 'Async delivery: small packet marks ride a mostly continuous cable.'
+									: 'Read on this pass: the plain data cable.'}
 					</p>
 					{context.only && isSharedStyleValue(context.temporal, 'delayed') ? (
 						<DelayValueField

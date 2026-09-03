@@ -73,6 +73,8 @@ import {
 } from './connectionRules'
 import { anchorFaceForScope, blockScopeId } from './connectionScope'
 import {
+	ASYNC_PACKET_DASHARRAY,
+	asyncDashOffsetForLength,
 	cablePresentation,
 	DELAY_DOT_GAP_PX,
 	DELAY_DOT_PX,
@@ -131,7 +133,7 @@ declare module 'tldraw' {
 			 * segment. Null = auto-routed (A* plus pins).
 			 */
 			elbowRoute: ConnectionElbowRouteModel | null
-			/** `data` on this pass, `delayed` one iteration later (a loop's back edge). */
+			/** Plain `data`, intermittent `async`, or one-iteration-late `delayed`. */
 			temporal: ConnectionTemporalKind
 			/** The initial value a delayed cable names in its pill, `= value`; empty = none. */
 			delayValue: string
@@ -668,7 +670,8 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 	override toSvg(connection: ConnectionShape) {
 		const path = getConnectionShapePath(this.editor, connection)
 		if (connection.props.temporal !== 'delayed') {
-			return <path d={path} fill="none" stroke="#475569" strokeLinecap="round" strokeWidth={2} />
+			const length = polylineLength(getConnectionRenderPoints(this.editor, connection))
+			return <DataCablePath path={path} length={length} temporal={connection.props.temporal} stroke="#475569" />
 		}
 		const pill = delayPillGeometry(this.editor, connection)
 		return (
@@ -720,16 +723,10 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 	)
 	const stroke = 'var(--tl-color-text-3, #475569)'
 	if (!delayed || !pill) {
+		const length = polylineLength(getConnectionRenderPoints(editor, connection))
 		return (
-			<SVGContainer style={{ opacity }}>
-				<path
-					d={path}
-					fill="none"
-					stroke={stroke}
-					strokeLinecap="round"
-					strokeLinejoin="round"
-					strokeWidth={2}
-				/>
+			<SVGContainer style={{ opacity }} data-temporal={connection.props.temporal}>
+				<DataCablePath path={path} length={length} temporal={connection.props.temporal} stroke={stroke} />
 			</SVGContainer>
 		)
 	}
@@ -744,6 +741,37 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 				ink="var(--ss-text, #1d2230)"
 			/>
 		</SVGContainer>
+	)
+}
+
+/**
+ * The paths without a z⁻¹ pill. Keeping this one component behind both the
+ * live canvas and `toSvg` makes the async cadence export exactly as drawn.
+ */
+function DataCablePath({
+	path,
+	length,
+	temporal,
+	stroke,
+}: {
+	path: string
+	length: number
+	temporal: ConnectionTemporalKind
+	stroke: string
+}) {
+	const async = temporal === 'async'
+	return (
+		<path
+			d={path}
+			fill="none"
+			stroke={stroke}
+			strokeLinecap={async ? 'butt' : 'round'}
+			strokeLinejoin="round"
+			strokeWidth={2}
+			strokeDasharray={async ? ASYNC_PACKET_DASHARRAY : undefined}
+			strokeDashoffset={async ? asyncDashOffsetForLength(length) : undefined}
+			data-edge-type={temporal}
+		/>
 	)
 }
 
