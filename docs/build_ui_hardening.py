@@ -110,6 +110,7 @@ CANDIDATES: list[tuple[str, str, str]] = [
     ("B", "The empty inspector ignores the app's own empty-state pattern", "shipped-2"),
     ("B", "The dock repeats its own title above the panel's", "shipped-3"),
     ("C", "The dock re-opens itself after an explicit close", "shipped-4"),
+    ("C", "Escape closes the dock instead of returning the tool to select", "shipped-4"),
     ("C", "Native window.confirm for two destructive actions", "shipped-5"),
     ("C", "Clipboard failures are silent in the comment source copy", "open"),
     ("C", "No event.repeat guard on the global Ctrl+P/K/F capture", "open"),
@@ -152,11 +153,16 @@ SHIPPED: list[tuple[str, str, str, str]] = [
      "whiteboard does not have. <code>Show inspector</code> in the command palette is the one "
      "deliberate way back to a dock you dismissed without changing the selection.",
      "src/chrome/shapeFactsModel.ts"),
-    ("4", "An explicit dismissal of the dock is respected",
+    ("4", "An explicit dismissal of the dock is respected, and Escape stays on the canvas",
      "Measured: the dock auto-opened, the user closed it, and selecting a second Block re-opened "
      "it. The close is now remembered against the context it was made on and released when the "
-     "selection empties, so it sticks for that run of selections and never becomes permanent.",
-     "src/chrome/SystemSketchChrome.tsx"),
+     "selection empties, so it sticks for that run of selections and never becomes permanent. A "
+     "dock that follows the selection is also open most of the time, which made a second rule "
+     "necessary: Escape no longer closes it. Drawing a rectangle selects it and opens the dock, so "
+     "the Escape meant to return the geo tool to select was closing the panel instead — leaving "
+     "the tool armed with no selection pill. Escape closes the surfaces a person opened; the dock "
+     "closes with its own \u00d7 or by clearing the selection.",
+     "src/chrome/ChromeProvider.tsx"),
     ("5", "One app-owned confirm replaces both native ones",
      "Deleting a comment thread and moving a board to Trash asked with <code>window.confirm</code>: "
      "an OS modal that steals focus from a canvas mid-gesture, cannot wear the board's theme, and "

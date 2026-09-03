@@ -81,15 +81,25 @@ export function ChromeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || state.openOrder.length === 0) return
+      const latest = state.openOrder.at(-1)
       // The command dialog owns focus restoration and Escape while it is open.
-      if (state.openOrder.at(-1)?.startsWith('toolbar:')) return
+      if (latest?.startsWith('toolbar:')) return
+      // The inspector is the one surface nobody asks for: it follows the
+      // selection, so it is open most of the time a person is working, and
+      // swallowing Escape for it would take the key away from the canvas that
+      // needs it. Measured: drawing a rectangle selects it, which opened the
+      // dock, so the Escape that should have returned the geo tool to select
+      // closed the dock instead — leaving the tool armed and no selection pill.
+      // Escape closes the surfaces a person opened; the dock closes with its
+      // own × or by clearing the selection.
+      if (latest === 'right:inspector') return
       event.preventDefault()
       event.stopPropagation()
       closeLatest()
     }
     window.addEventListener('keydown', onKeyDown, true)
     return () => window.removeEventListener('keydown', onKeyDown, true)
-  }, [closeLatest, state.openOrder.length])
+  }, [closeLatest, state.openOrder])
 
   const value = useMemo<ChromeController>(() => ({
     ...state,

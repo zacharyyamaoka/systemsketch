@@ -9,6 +9,7 @@
     "the facts panel Fit to view action really moves the camera",
     "the dock header close button closes a headerless-subject panel",
     "closing the dock sticks for that run of selections and releases on an empty selection",
+    "Escape returns the tool to select rather than being swallowed by the dock",
     "every Block mini-menu control carries a tooltip and an accessible name",
     "the appearance palette keeps the app-wide 12px clear of the window edge",
     "a keyboard-focused appearance swatch paints a ring on the inverse panel",
@@ -104,6 +105,10 @@
       "afterClose": "false",
       "afterNextSelect": "false",
       "afterReset": "true"
+    },
+    "escape": {
+      "tool": "select",
+      "dockOpen": true
     },
     "miniMenu": [
       {

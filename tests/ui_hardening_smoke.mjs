@@ -29,6 +29,7 @@ import {
   ROOT,
   clickAt,
   delay,
+  drag,
   evaluate,
   key,
   localConsoleErrors,
@@ -363,7 +364,54 @@ async function main() {
       'the dismissal outlived the selection it applied to and the dock never returns')
     pass('closing the dock sticks for that run of selections and releases on an empty selection')
 
+    // ---- 4b. Escape belongs to the canvas while only the dock is open ----
+    // The dock follows the selection, so it is open most of the time a person
+    // is working. Swallowing Escape for it took the key away from the tool:
+    // drawing a rectangle selected it, opened the dock, and the Escape meant to
+    // return the geo tool to select closed the dock instead — arming the tool
+    // with no way out and no selection pill.
+    // The real gesture, not a programmatic one: click the canvas so it holds
+    // focus, arm the rectangle with its own shortcut, drag one out — which
+    // selects it and therefore opens the dock — then press Escape.
+    await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      editor.selectNone()
+      editor.zoomToFit({ animation: { duration: 0 } })
+      return 'reset'
+    })()`)
+    await delay(400)
+    await clickAt(page, 140, 700)
+    await delay(200)
+    await key(page, 'r', 'KeyR')
+    await drag(page, { x: 120, y: 640 }, { x: 300, y: 760 })
+    await delay(400)
+    await waitFor(page, `document.querySelector('[data-testid="systemsketch-right-popout"]')`,
+      'the dock the drawn shape opens')
+    await key(page, 'Escape', 'Escape')
+    await delay(400)
+    const afterEscape = JSON.parse(await evaluate(page, `(() => JSON.stringify({
+      tool: window.__systemsketch.editor.getCurrentToolId(),
+      dockOpen: Boolean(document.querySelector('[data-testid="systemsketch-right-popout"]')),
+    }))()`))
+    measured.escape = afterEscape
+    assert.equal(afterEscape.tool, 'select',
+      `Escape did not reach the canvas: the tool is still ${afterEscape.tool}`)
+    assert.equal(afterEscape.dockOpen, true,
+      'Escape closed the dock instead of letting the canvas have the key')
+    pass('Escape returns the tool to select rather than being swallowed by the dock')
+
     // ---- 6. The Block view switcher explains itself ----------------------
+    // Clear the rectangle the Escape check drew, then put a Block back in the
+    // selection so this reads the Block pill rather than the plain-shape one.
+    await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const drawn = editor.getSelectedShapes().filter((shape) => shape.type === 'geo')
+      if (drawn.length) editor.deleteShapes(drawn.map((shape) => shape.id))
+      return 'tidied'
+    })()`)
+    await delay(300)
+    await selectKind(page, 'block', 0)
+    await delay(300)
     const miniMenu = JSON.parse(await evaluate(page, `(() => {
       const buttons = [...document.querySelectorAll('.block-mini-menu button')]
       return JSON.stringify(buttons.map((button) => ({
