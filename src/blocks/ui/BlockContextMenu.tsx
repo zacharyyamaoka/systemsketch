@@ -56,7 +56,7 @@ import {
   ConnectionTemporalStyle,
   type ConnectionRoutingKind,
 } from '../connections/connectionModel'
-import { describeTidyEdgesOutcome, tidyEdges } from '../connections/tidyEdges'
+import { describeTidyEdgesOutcome, getTidyEdgesSelection, tidyEdges } from '../connections/tidyEdges'
 import { describeOrganizeNodesOutcome, organizeNodes } from '../layout'
 import {
   requestBlockInlineEdit,
@@ -147,15 +147,12 @@ function BlockContextMenuItems() {
     () => getSelectedConnectionCount(editor),
     [editor],
   )
-  const pageCounts = useValue(
-    'context-menu layout subjects',
-    () => editor.getCurrentPageShapes().reduce(
-      (counts, shape) => ({
-        blocks: counts.blocks + (shape.type === 'block' ? 1 : 0),
-        connections: counts.connections + (shape.type === 'connection' ? 1 : 0),
-      }),
-      { blocks: 0, connections: 0 },
-    ),
+  const layoutSelection = useValue(
+    'context-menu selected layout subjects',
+    () => ({
+      blocks: editor.getSelectedShapes().filter((shape) => shape.type === 'block').length,
+      edges: getTidyEdgesSelection(editor).length,
+    }),
     [editor],
   )
   // Same menu, different subject. The right-click that opened it recorded the
@@ -208,9 +205,7 @@ function BlockContextMenuItems() {
   }
 
   const runTidyEdges = () => {
-    const outcome = tidyEdges(editor, {
-      scope: editor.getSelectedShapeIds().length > 0 ? 'selection' : 'all',
-    })
+    const outcome = tidyEdges(editor)
     addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
   }
 
@@ -484,18 +479,18 @@ function BlockContextMenuItems() {
         </TldrawUiMenuGroup>
       ) : null}
 
-      {pageCounts.blocks > 1 || pageCounts.connections > 0 ? (
+      {layoutSelection.blocks > 0 || layoutSelection.edges > 0 ? (
         <TldrawUiMenuGroup id="systemsketch-layout">
           <TldrawUiMenuItem
             id="tidy-edges"
             label="Tidy edges"
-            disabled={pageCounts.connections === 0}
+            disabled={layoutSelection.edges === 0}
             onSelect={runTidyEdges}
           />
           <TldrawUiMenuItem
             id="organize-nodes"
             label="Organize nodes"
-            disabled={pageCounts.blocks < 2}
+            disabled={layoutSelection.blocks < 2}
             onSelect={() => void runOrganizeNodes()}
           />
         </TldrawUiMenuGroup>

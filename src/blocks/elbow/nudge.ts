@@ -144,6 +144,17 @@ export interface NudgeReport {
   /** Total length of coincident collinear overlap, before and after. */
   overlapBefore: number
   overlapAfter: number
+  /** Local channel-cadence failures that remain after the pass. */
+  spacingDefects: ChannelSpacingDefect[]
+}
+
+export interface ChannelSpacingDefect {
+  axis: 'x' | 'y'
+  channel: number
+  cables: number[]
+  gap: number
+  expected: number
+  kind: 'stacked' | 'uneven'
 }
 
 /* ------------------------------- measuring ------------------------------- */
@@ -256,6 +267,103 @@ function candidates(
   return buckets
 }
 
+function spansOverlap(a: Candidate, b: Candidate, tolerance: number): boolean {
+  return Math.min(a.hi, b.hi) - Math.max(a.lo, b.lo) > tolerance
+}
+
+function overlapComponents(bundle: readonly Candidate[], tolerance: number): Candidate[][] {
+  const unseen = new Set(bundle.map((_, index) => index))
+  const components: Candidate[][] = []
+  while (unseen.size > 0) {
+    const first = unseen.values().next().value as number
+    unseen.delete(first)
+    const queue = [first]
+    const component: Candidate[] = []
+    while (queue.length > 0) {
+      const index = queue.shift()!
+      component.push(bundle[index])
+      for (const other of [...unseen]) {
+        if (!spansOverlap(bundle[index], bundle[other], tolerance)) continue
+        unseen.delete(other)
+        queue.push(other)
+      }
+    }
+    components.push(component)
+  }
+  return components
+}
+
+/**
+ * Audit the local visual contract aggregate overlap cannot see: channels that
+ * are stacked or leave a 7/21-style gap around an authored rail instead of the
+ * requested cadence. Only segments that shared an overlapping input channel
+ * are compared, and coincident authored/authored rails are exempt because the
+ * command is forbidden from moving either one.
+ */
+export function channelSpacingDefects(
+  before: readonly ElbowRoute[],
+  after: readonly ElbowRoute[],
+  locked: readonly boolean[] = [],
+  options: Partial<NudgeOptions> = {},
+): ChannelSpacingDefect[] {
+  const opts = { ...DEFAULT_NUDGE_OPTIONS, ...options }
+  const defects: ChannelSpacingDefect[] = []
+  for (const bundle of candidates(before, opts.tolerance).values()) {
+    for (const component of overlapComponents(bundle, opts.tolerance)) {
+      if (component.length < 2) continue
+      const members = component.map((candidate) => {
+        const point = after[candidate.cable]?.points[candidate.at]
+        const channel = candidate.axis === 'x' ? point?.y : point?.x
+        return { candidate, channel, locked: Boolean(locked[candidate.cable]) }
+      }).filter((member): member is typeof member & { channel: number } =>
+        member.channel !== undefined)
+      members.sort((a, b) => a.channel - b.channel || a.candidate.cable - b.candidate.cable)
+
+      const groups: typeof members[] = []
+      for (const member of members) {
+        const group = groups.at(-1)
+        if (group && Math.abs(group[0].channel - member.channel) <= opts.tolerance) group.push(member)
+        else groups.push([member])
+      }
+
+      for (const group of groups) {
+        const overlapping = group.some((a, index) => group.slice(index + 1).some((b) =>
+          spansOverlap(a.candidate, b.candidate, opts.tolerance)
+          && !(a.locked && b.locked)))
+        if (!overlapping) continue
+        defects.push({
+          axis: component[0].axis,
+          channel: component[0].channel,
+          cables: group.map((member) => member.candidate.cable),
+          gap: 0,
+          expected: opts.spacing,
+          kind: 'stacked',
+        })
+      }
+
+      for (let index = 0; index + 1 < groups.length; index += 1) {
+        const left = groups[index]
+        const right = groups[index + 1]
+        if (left.every((member) => member.locked) && right.every((member) => member.locked)) continue
+        const overlapping = left.some((a) => right.some((b) =>
+          spansOverlap(a.candidate, b.candidate, opts.tolerance)))
+        if (!overlapping) continue
+        const gap = right[0].channel - left[0].channel
+        if (Math.abs(gap - opts.spacing) <= opts.tolerance) continue
+        defects.push({
+          axis: component[0].axis,
+          channel: component[0].channel,
+          cables: [...left, ...right].map((member) => member.candidate.cable),
+          gap,
+          expected: opts.spacing,
+          kind: 'uneven',
+        })
+      }
+    }
+  }
+  return defects
+}
+
 /**
  * Order a bundle so that spreading it introduces no crossings. Returns the
  * cable order plus the pairs whose crossing is unavoidable.
@@ -317,6 +425,103 @@ export function orderBundle(bundle: readonly Candidate[]): {
   return { order, forced }
 }
 
+/** Distinct authored channel coordinates, with tolerance-level jitter folded together. */
+function lockedChannels(
+  bundle: readonly Candidate[],
+  locked: readonly boolean[],
+  tolerance: number,
+): number[] {
+  const sorted = bundle
+    .filter((candidate) => locked[candidate.cable])
+    .map((candidate) => candidate.channel)
+    .sort((a, b) => a - b)
+  const unique: number[] = []
+  for (const channel of sorted) {
+    if (unique.every((existing) => Math.abs(existing - channel) > tolerance)) unique.push(channel)
+  }
+  return unique
+}
+
+/**
+ * Pick one channel for every free member of a bundle.
+ *
+ * Without a lock, the original centred rank assignment remains unchanged. A
+ * single authored rail instead becomes the cadence anchor: free rails occupy
+ * consecutive ±spacing slots around it. This avoids the half-step defect in
+ * even bundles (7 px on one side and 21 px on the other at 14 px spacing) and
+ * the duplicate free slot produced by two coincident locks.
+ *
+ * Multiple distinct authored channels may not lie on the same spacing grid.
+ * They remain fixed; the fallback chooses the closest collision-free slots
+ * generated around both the bundle centre and every authored coordinate.
+ */
+function assignBundleChannels(
+  bundle: readonly Candidate[],
+  order: readonly number[],
+  locked: readonly boolean[],
+  spacing: number,
+  tolerance: number,
+): Map<number, number> {
+  const targets = new Map<number, number>()
+  const freeOrder = order.filter((index) => !locked[bundle[index].cable])
+  if (freeOrder.length === 0) return targets
+
+  const centre = bundle.reduce((sum, candidate) => sum + candidate.channel, 0) / bundle.length
+  const anchors = lockedChannels(bundle, locked, tolerance)
+  if (anchors.length === 0) {
+    const first = -((bundle.length - 1) / 2) * spacing
+    for (let rank = 0; rank < order.length; rank += 1) {
+      targets.set(order[rank], centre + first + rank * spacing)
+    }
+    return targets
+  }
+
+  if (anchors.length === 1) {
+    const anchor = anchors[0]
+    const lockedRanks = order
+      .map((index, rank) => locked[bundle[index].cable] ? rank : -1)
+      .filter((rank) => rank >= 0)
+    const firstLocked = Math.min(...lockedRanks)
+    const lastLocked = Math.max(...lockedRanks)
+    const requiredLeft = order.slice(0, firstLocked)
+      .filter((index) => !locked[bundle[index].cable]).length
+    const requiredRight = order.slice(lastLocked + 1)
+      .filter((index) => !locked[bundle[index].cable]).length
+    const preferredLeft = Math.ceil(freeOrder.length / 2)
+    const leftCount = Math.max(
+      requiredLeft,
+      Math.min(freeOrder.length - requiredRight, preferredLeft),
+    )
+    const slots = [
+      ...Array.from({ length: leftCount }, (_, index) =>
+        anchor - (leftCount - index) * spacing),
+      ...Array.from({ length: freeOrder.length - leftCount }, (_, index) =>
+        anchor + (index + 1) * spacing),
+    ]
+    freeOrder.forEach((index, rank) => targets.set(index, slots[rank]))
+    return targets
+  }
+
+  const searchRadius = freeOrder.length + anchors.length + 6
+  const rawSlots = [centre, ...anchors].flatMap((base) =>
+    Array.from({ length: searchRadius * 2 + 1 }, (_, index) =>
+      base + (index - searchRadius) * spacing))
+  const candidates = rawSlots
+    .sort((a, b) => Math.abs(a - centre) - Math.abs(b - centre) || a - b)
+    .filter((value, index, values) =>
+      values.findIndex((other) => Math.abs(other - value) <= tolerance) === index)
+  const chosen: number[] = []
+  for (const value of candidates) {
+    if (anchors.some((anchor) => Math.abs(anchor - value) < spacing - tolerance)) continue
+    if (chosen.some((channel) => Math.abs(channel - value) < spacing - tolerance)) continue
+    chosen.push(value)
+    if (chosen.length === freeOrder.length) break
+  }
+  chosen.sort((a, b) => a - b)
+  freeOrder.forEach((index, rank) => targets.set(index, chosen[rank]))
+  return targets
+}
+
 /**
  * Spread every shared channel apart. Pure: the input routes are not mutated.
  */
@@ -341,6 +546,10 @@ export function nudgeRoutes(
 
   for (const bundle of candidates(routes, opts.tolerance).values()) {
     if (bundle.length < 2) continue
+    // A constraint-only bundle is context for selected movable routes, not an
+    // operation of its own. Skipping it keeps selection-scoped calls local and
+    // prevents unrelated authored crossings from leaking into the outcome.
+    if (bundle.every((candidate) => locked[candidate.cable])) continue
     // Only a bundle whose members actually overlap needs splitting.
     const overlapping = bundle.some((a) =>
       bundle.some((b) => a !== b && Math.min(a.hi, b.hi) - Math.max(a.lo, b.lo) > opts.tolerance),
@@ -355,24 +564,12 @@ export function nudgeRoutes(
       cables: order.map((i) => bundle[i].cable),
     })
 
-    const centre = bundle.reduce((s, c) => s + c.channel, 0) / bundle.length
-    const first = -((bundle.length - 1) / 2) * opts.spacing
-    // Channels a locked cable already owns. A free cable may not land on one.
-    const taken = bundle
-      .filter((c) => locked[c.cable])
-      .map((c) => c.channel)
-    order.forEach((idx, rank) => {
+    const targets = assignBundleChannels(bundle, order, locked, opts.spacing, opts.tolerance)
+    order.forEach((idx) => {
       const c = bundle[idx]
       if (locked[c.cable]) return
-      let target = centre + first + rank * opts.spacing
-      // Nudge past an occupied channel rather than onto it, in the direction
-      // this cable was already ordered towards.
-      const away = rank < (bundle.length - 1) / 2 ? -1 : 1
-      let guard = 0
-      while (taken.some((t) => Math.abs(t - target) <= opts.tolerance) && guard < bundle.length) {
-        target += away * opts.spacing
-        guard += 1
-      }
+      const target = targets.get(idx)
+      if (target === undefined) return
       const key = c.axis === 'x' ? 'y' : 'x'
       const pts = next[c.cable].points
       // Move the segment and both of its neighbouring legs' shared coordinate.
@@ -387,5 +584,6 @@ export function nudgeRoutes(
     forcedCrossings,
     overlapBefore,
     overlapAfter: coincidentOverlap(next, opts.tolerance),
+    spacingDefects: channelSpacingDefects(routes, next, locked, opts),
   }
 }

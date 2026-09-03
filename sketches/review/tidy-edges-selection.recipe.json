@@ -1,0 +1,98 @@
+{
+  "feature": "Tidy selection-local edge channels",
+  "viewport": { "width": 1600, "height": 900 },
+  "shapes": [
+    {
+      "id": "source",
+      "type": "block",
+      "x": 210,
+      "y": 330,
+      "props": {
+        "title": "source()",
+        "description": "These five outputs are the fixed left endpoints.",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 260,
+        "inputs": [],
+        "outputs": [
+          { "id": "out_1", "name": "alpha", "type": "Data", "visible": true },
+          { "id": "out_2", "name": "beta", "type": "Data", "visible": true },
+          { "id": "out_3", "name": "gamma", "type": "Data", "visible": true },
+          { "id": "out_4", "name": "delta", "type": "Data", "visible": true },
+          { "id": "out_5", "name": "epsilon", "type": "Data", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "target",
+      "type": "block",
+      "x": 1070,
+      "y": 260,
+      "props": {
+        "title": "target()",
+        "description": "These five inputs are the fixed right endpoints.",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 260,
+        "inputs": [
+          { "id": "in_1", "name": "alpha", "type": "Data", "visible": true },
+          { "id": "in_2", "name": "beta", "type": "Data", "visible": true },
+          { "id": "in_3", "name": "gamma", "type": "Data", "visible": true },
+          { "id": "in_4", "name": "delta", "type": "Data", "visible": true },
+          { "id": "in_5", "name": "epsilon", "type": "Data", "visible": true }
+        ],
+        "outputs": []
+      }
+    },
+    { "id": "cable-1", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "temporal": "data", "delayValue": "", "pillPosition": 0.5 } },
+    { "id": "cable-2", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "temporal": "data", "delayValue": "", "pillPosition": 0.5 } },
+    { "id": "cable-3", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "temporal": "data", "delayValue": "", "pillPosition": 0.5 } },
+    { "id": "cable-4", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "temporal": "data", "delayValue": "", "pillPosition": 0.5 } },
+    { "id": "cable-5", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "temporal": "data", "delayValue": "", "pillPosition": 0.5 } }
+  ],
+  "bindings": [
+    { "id": "c1-start", "type": "connection", "fromId": "cable-1", "toId": "source", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "c1-end", "type": "connection", "fromId": "cable-1", "toId": "target", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "id": "c2-start", "type": "connection", "fromId": "cable-2", "toId": "source", "props": { "portId": "out_2", "terminal": "start", "face": "outer" } },
+    { "id": "c2-end", "type": "connection", "fromId": "cable-2", "toId": "target", "props": { "portId": "in_2", "terminal": "end", "face": "outer" } },
+    { "id": "c3-start", "type": "connection", "fromId": "cable-3", "toId": "source", "props": { "portId": "out_3", "terminal": "start", "face": "outer" } },
+    { "id": "c3-end", "type": "connection", "fromId": "cable-3", "toId": "target", "props": { "portId": "in_3", "terminal": "end", "face": "outer" } },
+    { "id": "c4-start", "type": "connection", "fromId": "cable-4", "toId": "source", "props": { "portId": "out_4", "terminal": "start", "face": "outer" } },
+    { "id": "c4-end", "type": "connection", "fromId": "cable-4", "toId": "target", "props": { "portId": "in_4", "terminal": "end", "face": "outer" } },
+    { "id": "c5-start", "type": "connection", "fromId": "cable-5", "toId": "source", "props": { "portId": "out_5", "terminal": "start", "face": "outer" } },
+    { "id": "c5-end", "type": "connection", "fromId": "cable-5", "toId": "target", "props": { "portId": "in_5", "terminal": "end", "face": "outer" } }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Click the Source Block to select its five incident edges",
+      "x": 40,
+      "y": 40,
+      "w": 500,
+      "h": 110,
+      "target": { "shapeId": "source", "anchor": "top", "dx": -60 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Press Ctrl+K, type “Tidy edges”, then press Enter",
+      "x": 1100,
+      "y": 40,
+      "w": 460,
+      "h": 110,
+      "target": { "x": 730, "y": 460 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The five selected/incident elbow channels separate evenly while both Blocks and every endpoint stay fixed",
+      "x": 730,
+      "y": 700,
+      "w": 650,
+      "h": 120
+    }
+  ]
+}

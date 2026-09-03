@@ -1,0 +1,101 @@
+{
+  "feature": "Organize mixed aligned and offset multi-port Blocks",
+  "viewport": { "width": 2200, "height": 1100 },
+  "shapes": [
+    { "id": "port-a", "type": "block", "x": 840, "y": 360, "props": { "title": "source()", "blockType": "call", "view": "port", "portLayout": "inline", "w": 290, "h": 220, "inputs": [], "outputs": [
+      { "id": "out_1", "name": "red", "type": "Data", "visible": true },
+      { "id": "out_2", "name": "green", "type": "Data", "visible": true },
+      { "id": "out_3", "name": "blue", "type": "Data", "visible": true }
+    ] } },
+    { "id": "port-b", "type": "block", "x": 900, "y": 430, "props": { "title": "offset_a()", "blockType": "call", "view": "port", "portLayout": "offset", "w": 320, "h": 320, "inputs": [
+      { "id": "in_1", "name": "red", "type": "Data", "visible": true },
+      { "id": "in_2", "name": "green", "type": "Data", "visible": true },
+      { "id": "in_3", "name": "blue", "type": "Data", "visible": true }
+    ], "outputs": [
+      { "id": "out_1", "name": "red", "type": "Data", "visible": true },
+      { "id": "out_2", "name": "green", "type": "Data", "visible": true },
+      { "id": "out_3", "name": "blue", "type": "Data", "visible": true }
+    ] } },
+    { "id": "port-c", "type": "block", "x": 790, "y": 500, "props": { "title": "aligned()", "blockType": "call", "view": "port", "portLayout": "inline", "w": 250, "h": 240, "inputs": [
+      { "id": "in_1", "name": "red", "type": "Data", "visible": true },
+      { "id": "in_2", "name": "green", "type": "Data", "visible": true },
+      { "id": "in_3", "name": "blue", "type": "Data", "visible": true }
+    ], "outputs": [
+      { "id": "out_1", "name": "red", "type": "Data", "visible": true },
+      { "id": "out_2", "name": "green", "type": "Data", "visible": true },
+      { "id": "out_3", "name": "blue", "type": "Data", "visible": true }
+    ] } },
+    { "id": "port-d", "type": "block", "x": 990, "y": 390, "props": { "title": "offset_b()", "blockType": "call", "view": "port", "portLayout": "offset", "w": 350, "h": 340, "inputs": [
+      { "id": "in_1", "name": "red", "type": "Data", "visible": true },
+      { "id": "in_2", "name": "green", "type": "Data", "visible": true },
+      { "id": "in_3", "name": "blue", "type": "Data", "visible": true }
+    ], "outputs": [
+      { "id": "out_1", "name": "red", "type": "Data", "visible": true },
+      { "id": "out_2", "name": "green", "type": "Data", "visible": true },
+      { "id": "out_3", "name": "blue", "type": "Data", "visible": true }
+    ] } },
+    { "id": "port-e", "type": "block", "x": 850, "y": 570, "props": { "title": "sink()", "blockType": "call", "view": "port", "portLayout": "inline", "w": 300, "h": 220, "inputs": [
+      { "id": "in_1", "name": "red", "type": "Data", "visible": true },
+      { "id": "in_2", "name": "green", "type": "Data", "visible": true },
+      { "id": "in_3", "name": "blue", "type": "Data", "visible": true }
+    ], "outputs": [] } },
+    { "id": "port-f", "type": "block", "x": 730, "y": 430, "props": { "title": "auxiliary()", "blockType": "call", "view": "port", "portLayout": "inline", "w": 230, "h": 180, "inputs": [
+      { "id": "in_1", "name": "tap", "type": "Data", "visible": true }
+    ], "outputs": [
+      { "id": "out_1", "name": "tap", "type": "Data", "visible": true }
+    ] } },
+    { "id": "edge-ab-1", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow" } },
+    { "id": "edge-ab-2", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow" } },
+    { "id": "edge-ab-3", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow" } },
+    { "id": "edge-bc-1", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow" } },
+    { "id": "edge-bc-2", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow" } },
+    { "id": "edge-bc-3", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow" } },
+    { "id": "edge-cd-1", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow" } },
+    { "id": "edge-cd-2", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow" } },
+    { "id": "edge-cd-3", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow" } },
+    { "id": "edge-de-1", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow" } },
+    { "id": "edge-de-2", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow" } },
+    { "id": "edge-de-3", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow" } },
+    { "id": "edge-bf", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow" } },
+    { "id": "edge-fd", "type": "connection", "x": 0, "y": 0, "props": { "routing": "elbow" } }
+  ],
+  "bindings": [
+    { "type": "connection", "fromId": "edge-ab-1", "toId": "port-a", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-ab-1", "toId": "port-b", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-ab-2", "toId": "port-a", "props": { "portId": "out_2", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-ab-2", "toId": "port-b", "props": { "portId": "in_2", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-ab-3", "toId": "port-a", "props": { "portId": "out_3", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-ab-3", "toId": "port-b", "props": { "portId": "in_3", "terminal": "end", "face": "outer" } },
+
+    { "type": "connection", "fromId": "edge-bc-1", "toId": "port-b", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-bc-1", "toId": "port-c", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-bc-2", "toId": "port-b", "props": { "portId": "out_2", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-bc-2", "toId": "port-c", "props": { "portId": "in_2", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-bc-3", "toId": "port-b", "props": { "portId": "out_3", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-bc-3", "toId": "port-c", "props": { "portId": "in_3", "terminal": "end", "face": "outer" } },
+
+    { "type": "connection", "fromId": "edge-cd-1", "toId": "port-c", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-cd-1", "toId": "port-d", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-cd-2", "toId": "port-c", "props": { "portId": "out_2", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-cd-2", "toId": "port-d", "props": { "portId": "in_2", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-cd-3", "toId": "port-c", "props": { "portId": "out_3", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-cd-3", "toId": "port-d", "props": { "portId": "in_3", "terminal": "end", "face": "outer" } },
+
+    { "type": "connection", "fromId": "edge-de-1", "toId": "port-d", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-de-1", "toId": "port-e", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-de-2", "toId": "port-d", "props": { "portId": "out_2", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-de-2", "toId": "port-e", "props": { "portId": "in_2", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-de-3", "toId": "port-d", "props": { "portId": "out_3", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-de-3", "toId": "port-e", "props": { "portId": "in_3", "terminal": "end", "face": "outer" } },
+
+    { "type": "connection", "fromId": "edge-bf", "toId": "port-b", "props": { "portId": "out_2", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-bf", "toId": "port-f", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-fd", "toId": "port-f", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge-fd", "toId": "port-d", "props": { "portId": "in_2", "terminal": "end", "face": "outer" } }
+  ],
+  "callouts": [
+    { "id": "step-1", "kind": "step", "text": "1 · Drag a marquee around all six tangled Blocks", "x": 40, "y": 80, "w": 520, "h": 110, "target": { "shapeId": "port-a", "anchor": "left", "dy": -40 } },
+    { "id": "step-2", "kind": "step", "text": "2 · Press Ctrl+K, type “Organize nodes”, then press Enter", "x": 40, "y": 770, "w": 600, "h": 120, "target": { "shapeId": "port-e", "anchor": "left", "dy": 40 } },
+    { "id": "pass", "kind": "pass", "text": "PASS WHEN · Only the six selected Blocks move into a readable left-to-right graph; parallel cables land on their exact aligned or offset port rows", "x": 1390, "y": 70, "w": 760, "h": 150 }
+  ]
+}
