@@ -1,0 +1,68 @@
+{
+  "corridor": {
+    "x": 416,
+    "y": 166,
+    "width": 584,
+    "height": 447
+  },
+  "before": {
+    "d": "M 400 398 C 566.6666666666666 398 733.3333333333334 228 900 228",
+    "length": 533.12646484375,
+    "stroke": "rgb(110, 116, 119)",
+    "strokeWidth": 2,
+    "strokeLinecap": "round",
+    "strokeLinejoin": "round"
+  },
+  "after": {
+    "d": "M 400 398 C 566.6666666666666 398 733.3333333333334 228 900 228",
+    "length": 533.12646484375,
+    "stroke": "rgb(110, 116, 119)",
+    "strokeWidth": 2,
+    "strokeLinecap": "round",
+    "strokeLinejoin": "round"
+  },
+  "geometry": {
+    "rms": 0.000012775816300695015,
+    "max": 0.00006103515625
+  },
+  "pixels": {
+    "score": 0.999965,
+    "wholeSimilarity": 1,
+    "foregroundSimilarity": 0.999971,
+    "edgeSimilarity": 0.999924,
+    "foregroundPixels": 2113,
+    "totalPixels": 261048
+  },
+  "arrow": {
+    "kind": "arc",
+    "dash": "solid",
+    "exactPathSnapshot": true,
+    "remembered": {
+      "kind": "connection",
+      "version": 1,
+      "routing": "curved",
+      "ends": {
+        "start": {
+          "portId": "out_1",
+          "face": "outer"
+        },
+        "end": {
+          "portId": "in_1",
+          "face": "outer"
+        }
+      }
+    }
+  },
+  "checks": {
+    "stockArrowRemembersCable": true,
+    "routeRmsAtMostHalfPixel": true,
+    "routeMaxAtMostOnePixel": true,
+    "pathLengthWithinHalfPixel": true,
+    "strokeColorMatches": true,
+    "strokeWidthMatches": true,
+    "roundedStrokeMatches": true,
+    "foregroundSimilarityAtLeast99Percent": true,
+    "edgeSimilarityAtLeast99Percent": true,
+    "noConsoleErrors": true
+  }
+}

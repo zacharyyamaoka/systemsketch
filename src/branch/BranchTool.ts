@@ -31,9 +31,9 @@ export class BranchTool extends BaseBoxShapeTool {
 		const enclosed = enclosedSiblingIds(this.editor, created)
 		if (enclosed.length > 0) {
 			this.editor.reparentShapes(enclosed, created.id)
-			const branch = this.editor.getShape(created.id)
-			if (isBranchShape(branch)) stampBranchChildArms(this.editor, branch)
 		}
+		const branch = this.editor.getShape(created.id)
+		if (isBranchShape(branch)) stampBranchChildArms(this.editor, branch)
 		if (this.editor.getInstanceState().isToolLocked) {
 			this.editor.setCurrentTool(BRANCH_TOOL_ID)
 		} else {

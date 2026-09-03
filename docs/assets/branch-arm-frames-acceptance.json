@@ -1,0 +1,184 @@
+[
+  {
+    "id": "BAF-1",
+    "label": "each semantic arm has one invisible full-row frame",
+    "observed": [
+      {
+        "armId": "arm_1",
+        "x": 0,
+        "y": 40,
+        "w": 720,
+        "h": 227
+      },
+      {
+        "armId": "arm_2",
+        "x": 0,
+        "y": 267,
+        "w": 720,
+        "h": 227
+      }
+    ],
+    "desired": [
+      {
+        "armId": "arm_1",
+        "x": 0,
+        "y": 40,
+        "w": 720,
+        "h": 227
+      },
+      {
+        "armId": "arm_2",
+        "x": 0,
+        "y": 267,
+        "w": 720,
+        "h": 227
+      }
+    ],
+    "ok": true
+  },
+  {
+    "id": "BAF-2",
+    "label": "Blocks are real children of the matching arm frame",
+    "observed": [
+      {
+        "id": "shape:header-overlap-proof",
+        "parentType": "branch-arm",
+        "parentArm": "arm_1"
+      },
+      {
+        "id": "shape:divider-clip-proof",
+        "parentType": "branch-arm",
+        "parentArm": "arm_1"
+      }
+    ],
+    "desired": [
+      {
+        "id": "shape:header-overlap-proof",
+        "parentType": "branch-arm",
+        "parentArm": "arm_1"
+      },
+      {
+        "id": "shape:divider-clip-proof",
+        "parentType": "branch-arm",
+        "parentArm": "arm_1"
+      }
+    ],
+    "ok": true
+  },
+  {
+    "id": "BAF-2b",
+    "label": "selecting an internal arm frame resolves to the semantic Branch",
+    "observed": [
+      "shape:branch-arm-frame-proof"
+    ],
+    "desired": [
+      "shape:branch-arm-frame-proof"
+    ],
+    "ok": true
+  },
+  {
+    "id": "BAF-3",
+    "label": "the child mask is exactly the four corners of its arm row",
+    "observed": [
+      {
+        "x": 320,
+        "y": 180
+      },
+      {
+        "x": 1040,
+        "y": 180
+      },
+      {
+        "x": 1040,
+        "y": 407
+      },
+      {
+        "x": 320,
+        "y": 407
+      }
+    ],
+    "desired": [
+      {
+        "x": 320,
+        "y": 180
+      },
+      {
+        "x": 1040,
+        "y": 180
+      },
+      {
+        "x": 1040,
+        "y": 407
+      },
+      {
+        "x": 320,
+        "y": 407
+      }
+    ],
+    "ok": true
+  },
+  {
+    "id": "BAF-4",
+    "label": "content paints above its own header but stops at the next arm",
+    "observed": {
+      "overOwnHeader": "shape:header-overlap-proof",
+      "beforeDivider": "shape:divider-clip-proof",
+      "afterDivider": null,
+      "paintedAfterDivider": "shape:branch-arm-frame-proof"
+    },
+    "desired": {
+      "overOwnHeader": "shape:header-overlap-proof",
+      "beforeDivider": "shape:divider-clip-proof",
+      "afterDivider": null,
+      "paintedAfterDivider": "shape:branch-arm-frame-proof"
+    },
+    "ok": true
+  },
+  {
+    "id": "BAF-5",
+    "label": "folding the arm hides both framed Blocks without deleting them",
+    "observed": {
+      "hidden": [
+        true,
+        true
+      ],
+      "present": [
+        true,
+        true
+      ]
+    },
+    "desired": {
+      "hidden": [
+        true,
+        true
+      ],
+      "present": [
+        true,
+        true
+      ]
+    },
+    "ok": true
+  },
+  {
+    "id": "BAF-6",
+    "label": "undo and redo treat fold plus frame repair as one ordinary history step",
+    "observed": {
+      "open": false,
+      "hidden": true,
+      "frames": 2
+    },
+    "desired": {
+      "open": false,
+      "hidden": true,
+      "frames": 2
+    },
+    "ok": true
+  },
+  {
+    "id": "BAF-7",
+    "label": "the browser journey emitted no local application errors",
+    "observed": 0,
+    "desired": 0,
+    "ok": true
+  }
+]

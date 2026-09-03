@@ -15,14 +15,16 @@
   },
   {
     "id": "BR-3",
-    "label": "the submenu lists Block and Branch under one heading",
+    "label": "the submenu lists Block, Branch and Pill under one heading",
     "observed": [
       "Block",
-      "Branch"
+      "Branch",
+      "Pill"
     ],
     "desired": [
       "Block",
-      "Branch"
+      "Branch",
+      "Pill"
     ],
     "ok": true
   },
@@ -227,7 +229,7 @@
   },
   {
     "id": "BR-16",
-    "label": "Blocks drawn in the arms are children of the Branch, stamped with their arm",
+    "label": "Blocks drawn in the arms are children of their arm frames and retain their semantic arm",
     "observed": [
       {
         "title": "estimate()",
