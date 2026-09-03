@@ -24,6 +24,13 @@ export interface DocumentFingerprint {
 
 export const AUTOSAVE_RETRY_DELAYS_MS = [1_000, 3_000, 8_000] as const
 
+export interface AutosaveSchedule {
+  /** The first edit in the still-unpersisted burst. */
+  pendingSince: number
+  /** Delay from `now` until the next save attempt. */
+  delayMs: number
+}
+
 export type SyncAction =
   | { kind: 'idle' }
   | { kind: 'reload' }
@@ -177,6 +184,29 @@ export function autosaveRetryDelay(
 ): number | null {
   if (options.conflict || options.force) return null
   return AUTOSAVE_RETRY_DELAYS_MS[failedAttempts] ?? null
+}
+
+/**
+ * Debounce nearby edits without allowing a continuous gesture to defer its
+ * first save forever.
+ *
+ * WHY: draw.io 31.4.2 gives its local recovery draft both an idle delay and a
+ * 30-second ceiling (DrawioFile.js L2216-L2238). Keeping the original start
+ * time gives SystemSketch the same bounded-loss window while retaining its
+ * shorter normal debounce. Retry backoff is intentionally handled separately.
+ */
+export function autosaveSchedule(
+  now: number,
+  pendingSince: number | null,
+  debounceMs: number,
+  maxDelayMs: number,
+): AutosaveSchedule {
+  const startedAt = pendingSince ?? now
+  const remainingBeforeDeadline = Math.max(0, maxDelayMs - (now - startedAt))
+  return {
+    pendingSince: startedAt,
+    delayMs: Math.min(debounceMs, remainingBeforeDeadline),
+  }
 }
 
 /**

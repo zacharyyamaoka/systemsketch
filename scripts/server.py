@@ -45,6 +45,7 @@ from workspace_store import (
     WorkspaceConflictError,
     WorkspaceFormatError,
     WorkspacePathError,
+    WorkspaceStorageError,
     create_directory,
     list_documents,
     load_document,
@@ -63,6 +64,16 @@ PREVIEW_PRESETS = {
     "block-dev": "Block Dev",
     "stock": "Stock tldraw",
 }
+
+
+def _post_failure_status(cause: BaseException) -> HTTPStatus:
+    """Classify operational POST failures without making validation retryable."""
+    # WHY: workspaceClient retries 5xx save failures but correctly stops on
+    # semantic 4xx responses. Returning every filesystem fault as 409 made the
+    # accepted transient-autosave retry path impossible to reach.
+    if isinstance(cause, (WorkspaceStorageError, OSError)):
+        return HTTPStatus.SERVICE_UNAVAILABLE
+    return HTTPStatus.CONFLICT
 
 
 class HostEventLog:
@@ -372,10 +383,11 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             RecordingError,
             WorkspacePathError,
             WorkspaceFormatError,
+            WorkspaceStorageError,
             subprocess.SubprocessError,
         ) as cause:
             self._record_exception(cause)
-            self._json({"error": str(cause)}, HTTPStatus.CONFLICT)
+            self._json({"error": str(cause)}, _post_failure_status(cause))
 
 
 class SystemSketchServer(ThreadingHTTPServer):

@@ -9,6 +9,7 @@ import {
   documentTitle,
   encodeDocumentForPath,
   exportedTldrawPath,
+  autosaveSchedule,
   autosaveRetryDelay,
   canApplyExternalReload,
   nextSyncAction,
@@ -176,6 +177,21 @@ describe('local workspace model', () => {
       .toEqual([1_000, 3_000, 8_000, null])
     expect(autosaveRetryDelay(0, { conflict: true })).toBeNull()
     expect(autosaveRetryDelay(0, { force: true })).toBeNull()
+  })
+
+  it('debounces ordinary edits but never pushes a save past the burst deadline', () => {
+    expect(autosaveSchedule(1_000, null, 600, 30_000)).toEqual({
+      pendingSince: 1_000,
+      delayMs: 600,
+    })
+    expect(autosaveSchedule(30_500, 1_000, 600, 30_000)).toEqual({
+      pendingSince: 1_000,
+      delayMs: 500,
+    })
+    expect(autosaveSchedule(31_100, 1_000, 600, 30_000)).toEqual({
+      pendingSince: 1_000,
+      delayMs: 0,
+    })
   })
 
   it('keeps a bounded, de-duplicated MRU list', () => {

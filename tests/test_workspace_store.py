@@ -3,12 +3,14 @@ from __future__ import annotations
 import json
 import multiprocessing
 import os
+import stat as stat_module
 import tempfile
 import threading
 import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import sys
@@ -17,11 +19,14 @@ import sys
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
+import workspace_store  # noqa: E402
+
 from workspace_store import (  # noqa: E402
     SYSTEMSKETCH_FORMAT_VERSION,
     WorkspaceConflictError,
     WorkspaceFormatError,
     WorkspacePathError,
+    WorkspaceStorageError,
     create_directory,
     default_document_path,
     document_digest,
@@ -106,6 +111,281 @@ class WorkspaceStoreTests(unittest.TestCase):
             str(self.root / "SystemSketch" / "Untitled.systemsketch"),
         )
         self.assertTrue(self.path.read_text(encoding="utf-8").endswith("\n"))
+
+    def test_staged_save_retries_two_mismatched_readbacks_then_publishes(self) -> None:
+        staged_paths: list[Path] = []
+
+        def readback(staged_path: Path) -> bytes:
+            staged_paths.append(staged_path)
+            exact = staged_path.read_bytes()
+            return exact + b"mismatch" if len(staged_paths) < 3 else exact
+
+        with patch("workspace_store._read_staged_bytes", side_effect=readback):
+            saved = save_document(
+                str(self.path), document_source(1), self.root, lock_root=self.lock_root
+            )
+
+        self.assertEqual(len(staged_paths), 3)
+        self.assertEqual(len(set(staged_paths)), 3, "each retry must use a fresh inode")
+        self.assertEqual(saved["digest"], stat_document(str(self.path), self.root)["digest"])
+        self.assertEqual(list(self.path.parent.glob(f".{self.path.stem}.*.tmp")), [])
+
+    def test_all_staged_readback_mismatches_preserve_canonical_and_clean_temps(self) -> None:
+        base = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+        original = self.path.read_bytes()
+        staged_paths: list[Path] = []
+
+        def mismatched_readback(staged_path: Path) -> bytes:
+            staged_paths.append(staged_path)
+            return staged_path.read_bytes() + b"mismatch"
+
+        with patch("workspace_store._read_staged_bytes", side_effect=mismatched_readback):
+            with self.assertRaisesRegex(WorkspaceStorageError, "after 3 attempts"):
+                save_document(
+                    str(self.path),
+                    document_source(2),
+                    self.root,
+                    base_digest=base["digest"],
+                    lock_root=self.lock_root,
+                )
+
+        self.assertEqual(len(staged_paths), 3)
+        self.assertEqual(len(set(staged_paths)), 3, "a mismatched inode must not be reused")
+        self.assertEqual(self.path.read_bytes(), original)
+        self.assertEqual(list(self.path.parent.glob(f".{self.path.stem}.*.tmp")), [])
+
+    def test_save_returns_metadata_from_the_confirmed_canonical_readback(self) -> None:
+        base = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+
+        with patch(
+            "workspace_store._read_identity", wraps=workspace_store._read_identity
+        ) as read_identity:
+            saved = save_document(
+                str(self.path),
+                document_source(2),
+                self.root,
+                base_digest=base["digest"],
+                lock_root=self.lock_root,
+            )
+
+        self.assertEqual(
+            read_identity.call_count,
+            2,
+            "an update must read once for CAS and once after atomic publication",
+        )
+        self.assertEqual(saved, stat_document(str(self.path), self.root))
+
+    def test_atomic_replace_preserves_existing_mode_but_new_files_stay_private(self) -> None:
+        base = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+        self.path.chmod(0o640)
+
+        save_document(
+            str(self.path),
+            document_source(2),
+            self.root,
+            base_digest=base["digest"],
+            lock_root=self.lock_root,
+        )
+
+        self.assertEqual(stat_module.S_IMODE(self.path.stat().st_mode), 0o640)
+        fresh = self.path.with_name("Fresh.systemsketch")
+        save_document(str(fresh), document_source(3), self.root, lock_root=self.lock_root)
+        self.assertEqual(stat_module.S_IMODE(fresh.stat().st_mode), 0o600)
+
+        privileged = self.path.with_name("Privileged.systemsketch")
+        privileged_base = save_document(
+            str(privileged), document_source(1), self.root, lock_root=self.lock_root
+        )
+        privileged.chmod(0o6755)
+        save_document(
+            str(privileged),
+            document_source(2),
+            self.root,
+            base_digest=privileged_base["digest"],
+            lock_root=self.lock_root,
+        )
+        self.assertEqual(stat_module.S_IMODE(privileged.stat().st_mode), 0o755)
+
+    def test_atomic_replace_preserves_an_existing_alternate_group_for_0660(self) -> None:
+        base = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+        original_gid = self.path.stat().st_gid
+        alternate_gid = next(
+            (gid for gid in os.getgroups() if gid != original_gid),
+            None,
+        )
+        if alternate_gid is None:
+            self.skipTest("the test account has no alternate supplementary group")
+        try:
+            os.chown(self.path, -1, alternate_gid)
+        except OSError as error:
+            self.skipTest(f"the test account cannot select its supplementary group: {error}")
+        self.path.chmod(0o660)
+
+        save_document(
+            str(self.path),
+            document_source(2),
+            self.root,
+            base_digest=base["digest"],
+            lock_root=self.lock_root,
+        )
+
+        saved_stat = self.path.stat()
+        self.assertEqual(saved_stat.st_gid, alternate_gid)
+        self.assertEqual(stat_module.S_IMODE(saved_stat.st_mode), 0o660)
+
+    def test_permission_preservation_sets_alternate_gid_before_0660_mode(self) -> None:
+        staged = self.root / "staged.tmp"
+        staged.write_bytes(b"candidate")
+        initial_gid = staged.stat().st_gid
+        target_gid = initial_gid + 1
+        disk_stat = SimpleNamespace(st_mode=0o660, st_gid=target_gid)
+        operations: list[tuple[object, ...]] = []
+        real_fchmod = os.fchmod
+
+        def record_fchown(descriptor: int, uid: int, gid: int) -> None:
+            operations.append(("gid", uid, gid))
+
+        def record_fchmod(descriptor: int, mode: int) -> None:
+            operations.append(("mode", mode))
+            real_fchmod(descriptor, mode)
+
+        with (
+            patch(
+                "workspace_store.os.fstat",
+                side_effect=[
+                    SimpleNamespace(st_gid=initial_gid),
+                    SimpleNamespace(st_gid=target_gid),
+                ],
+            ),
+            patch("workspace_store.os.fchown", side_effect=record_fchown),
+            patch("workspace_store.os.fchmod", side_effect=record_fchmod),
+        ):
+            workspace_store._preserve_existing_mode(staged, disk_stat)
+
+        self.assertEqual(
+            operations,
+            [("gid", -1, target_gid), ("mode", 0o660)],
+            "the replacement must establish its group before granting group access",
+        )
+        self.assertEqual(stat_module.S_IMODE(staged.stat().st_mode), 0o660)
+
+    def test_permission_fallback_never_grants_group_bits_to_the_wrong_gid(self) -> None:
+        staged = self.root / "staged.tmp"
+        staged.write_bytes(b"candidate")
+        staged_gid = staged.stat().st_gid
+        disk_stat = SimpleNamespace(st_mode=0o660, st_gid=staged_gid + 1)
+
+        with patch(
+            "workspace_store.os.fchown",
+            side_effect=PermissionError("group cannot be preserved"),
+        ):
+            workspace_store._preserve_existing_mode(staged, disk_stat)
+
+        saved_stat = staged.stat()
+        self.assertEqual(saved_stat.st_gid, staged_gid)
+        self.assertEqual(stat_module.S_IMODE(saved_stat.st_mode), 0o600)
+
+    def test_replayed_save_after_a_lost_http_response_is_idempotent(self) -> None:
+        base = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+        committed = save_document(
+            str(self.path),
+            document_source(2),
+            self.root,
+            base_digest=base["digest"],
+            lock_root=self.lock_root,
+        )
+        committed_stat = self.path.stat()
+
+        replayed = save_document(
+            str(self.path),
+            document_source(2),
+            self.root,
+            base_digest=base["digest"],
+            lock_root=self.lock_root,
+        )
+        replayed_stat = self.path.stat()
+
+        self.assertEqual(replayed, committed)
+        self.assertEqual(replayed_stat.st_ino, committed_stat.st_ino)
+        self.assertEqual(replayed_stat.st_mtime_ns, committed_stat.st_mtime_ns)
+        self.assertEqual(list(self.path.parent.glob(f".{self.path.stem}.*.tmp")), [])
+
+    def test_same_bytes_do_not_bypass_create_only_no_clobber(self) -> None:
+        save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+        original_stat = self.path.stat()
+
+        with self.assertRaisesRegex(WorkspaceConflictError, "already exists"):
+            save_document(
+                str(self.path), document_source(1), self.root, lock_root=self.lock_root
+            )
+
+        current_stat = self.path.stat()
+        self.assertEqual(current_stat.st_ino, original_stat.st_ino)
+        self.assertEqual(current_stat.st_mtime_ns, original_stat.st_mtime_ns)
+
+    def test_replayed_save_retries_directory_durability_before_acknowledging(self) -> None:
+        base = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+        committed = save_document(
+            str(self.path),
+            document_source(2),
+            self.root,
+            base_digest=base["digest"],
+            lock_root=self.lock_root,
+        )
+
+        with patch(
+            "workspace_store._fsync_directory",
+            wraps=workspace_store._fsync_directory,
+        ) as sync_directory:
+            replayed = save_document(
+                str(self.path),
+                document_source(2),
+                self.root,
+                base_digest=base["digest"],
+                lock_root=self.lock_root,
+            )
+
+        self.assertEqual(replayed, committed)
+        sync_directory.assert_called_once_with(self.path.parent)
+
+    def test_external_replace_after_publication_is_reported_without_blind_retry(self) -> None:
+        base = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+        external = workspace_store.normalize_document_source(
+            document_source(9), suffix=".systemsketch"
+        )
+
+        def external_write(_directory: Path) -> None:
+            self.path.write_text(external, encoding="utf-8")
+
+        with patch("workspace_store._fsync_directory", side_effect=external_write):
+            with self.assertRaisesRegex(
+                WorkspaceConflictError, "changed before the save could be confirmed"
+            ):
+                save_document(
+                    str(self.path),
+                    document_source(2),
+                    self.root,
+                    base_digest=base["digest"],
+                    lock_root=self.lock_root,
+                )
+
+        self.assertEqual(self.path.read_text(encoding="utf-8"), external)
 
     def test_stat_digest_hashes_exact_bytes_before_newline_decoding(self) -> None:
         self.path.parent.mkdir(parents=True)

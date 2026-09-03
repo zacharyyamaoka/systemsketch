@@ -23,6 +23,7 @@ import hashlib
 import json
 import os
 import shutil
+import stat as stat_module
 import subprocess
 import tempfile
 from collections.abc import Iterator
@@ -41,6 +42,7 @@ DEFAULT_WORKSPACE_DIRNAME = "SystemSketch"
 DEFAULT_DOCUMENT_STEM = "Untitled"
 DEFAULT_DOCUMENT_NAME = f"{DEFAULT_DOCUMENT_STEM}{SYSTEMSKETCH_SUFFIX}"
 MAX_DOCUMENT_BYTES = 64 * 1024 * 1024
+SAVE_VERIFY_ATTEMPTS = 3
 
 
 class WorkspacePathError(ValueError):
@@ -49,6 +51,10 @@ class WorkspacePathError(ValueError):
 
 class WorkspaceFormatError(ValueError):
     """The supplied text was not a portable tldraw document."""
+
+
+class WorkspaceStorageError(RuntimeError):
+    """A valid workspace operation could not complete because storage failed."""
 
 
 class WorkspaceConflictError(RuntimeError):
@@ -438,6 +444,104 @@ def _read_identity(path: Path) -> tuple[str, os.stat_result, str]:
     return source, stat, _document_bytes_digest(raw_source)
 
 
+def _read_staged_bytes(path: Path) -> bytes:
+    """Read one staged candidate back through the filesystem for verification."""
+    with path.open("rb") as staged_file:
+        return staged_file.read(MAX_DOCUMENT_BYTES + 1)
+
+
+def _stage_verified_document(path: Path, rendered_bytes: bytes) -> Path:
+    """Durably stage and verify exact document bytes before they can become canonical.
+
+    WHY/SOURCE: draw.io Desktop v31.4.2's ``saveFile`` reads the completed
+    canonical file back and retries at most three times when the bytes differ
+    (``src/main/electron.js``). SystemSketch ports that proven invariant at its
+    atomic staging seam instead: retrying ``O_TRUNC`` writes to the canonical
+    path would discard our stronger no-partial-write guarantee and could
+    overwrite a non-locking external editor.
+    """
+    last_error: OSError | None = None
+    for _attempt in range(SAVE_VERIFY_ATTEMPTS):
+        temporary_path: Path | None = None
+        verified = False
+        try:
+            descriptor, temporary_name = tempfile.mkstemp(
+                prefix=f".{path.stem}.", suffix=".tmp", dir=path.parent
+            )
+            temporary_path = Path(temporary_name)
+            with os.fdopen(descriptor, "wb") as output:
+                output.write(rendered_bytes)
+                output.flush()
+                os.fsync(output.fileno())
+            if _read_staged_bytes(temporary_path) == rendered_bytes:
+                verified = True
+                return temporary_path
+        except OSError as error:
+            last_error = error
+        finally:
+            if temporary_path is not None and not verified:
+                try:
+                    temporary_path.unlink()
+                except FileNotFoundError:
+                    pass
+                except OSError as error:
+                    last_error = error
+
+    detail = f": {last_error}" if last_error is not None else ""
+    raise WorkspaceStorageError(
+        f"could not verify an exact staged write for {path.name} "
+        f"after {SAVE_VERIFY_ATTEMPTS} attempts{detail}"
+    )
+
+
+def _preserve_existing_mode(temporary_path: Path, disk_stat: os.stat_result) -> None:
+    """Carry safe POSIX group ownership and mode across an inode-replacing save."""
+    try:
+        with temporary_path.open("rb") as staged_file:
+            descriptor = staged_file.fileno()
+            desired_mode = stat_module.S_IMODE(disk_stat.st_mode) & 0o777
+            staged_gid = os.fstat(descriptor).st_gid
+            if staged_gid != disk_stat.st_gid:
+                try:
+                    os.fchown(descriptor, -1, disk_stat.st_gid)
+                except OSError:
+                    # An unprivileged writer may legitimately be unable to
+                    # reproduce a file's group. The confirmed gid below, not
+                    # the syscall outcome, decides whether group access is safe.
+                    pass
+                staged_gid = os.fstat(descriptor).st_gid
+                if staged_gid != disk_stat.st_gid:
+                    # WHY: ``mkstemp`` inherits the process/directory group. If
+                    # that differs from a shared 0660 document, copying its
+                    # group bits would expose the replacement to the wrong
+                    # principals. Keep the save available, but fail closed by
+                    # stripping group access when the original gid cannot be
+                    # established. Apply gid before mode because chown may clear
+                    # permission bits on POSIX systems.
+                    desired_mode &= ~stat_module.S_IRWXG
+
+            # ``mkstemp`` correctly makes new documents private (0600), but an
+            # atomic replace must not silently privatize an existing shared
+            # document. Preserve ordinary rwx bits only: a content rewrite must
+            # not restore setuid/setgid/sticky privileges onto the new inode.
+            os.fchmod(descriptor, desired_mode)
+            os.fsync(descriptor)
+    except OSError as error:
+        raise WorkspaceStorageError(
+            f"could not preserve permissions for {temporary_path.name}: {error}"
+        ) from error
+
+
+def _read_save_identity(path: Path, action: str) -> tuple[str, os.stat_result, str]:
+    """Read a save revision while keeping path/format faults distinct from I/O."""
+    try:
+        return _read_identity(path)
+    except WorkspacePathError as error:
+        if isinstance(error.__cause__, OSError):
+            raise WorkspaceStorageError(f"could not {action} {path.name}: {error}") from error
+        raise
+
+
 def save_document(
     raw_path: object,
     source: object,
@@ -454,33 +558,68 @@ def save_document(
         additional_roots=additional_roots,
     )
     rendered = normalize_document_source(source, suffix=document_suffix(path.name))
+    rendered_bytes = rendered.encode("utf-8")
+    rendered_digest = _document_bytes_digest(rendered_bytes)
 
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
     except OSError as error:
-        raise WorkspacePathError(f"could not create {path.parent}: {error}") from error
+        raise WorkspaceStorageError(f"could not create {path.parent}: {error}") from error
 
-    descriptor, temporary_name = tempfile.mkstemp(
-        prefix=f".{path.stem}.", suffix=".tmp", dir=path.parent
-    )
+    temporary_path = _stage_verified_document(path, rendered_bytes)
     try:
-        with os.fdopen(descriptor, "w", encoding="utf-8") as output:
-            output.write(rendered)
-            output.flush()
-            os.fsync(output.fileno())
         # Staging before the lock keeps unrelated preparation out of the
         # transaction and narrows the window in which an external, non-locking
         # writer could race the final compare-and-replace.
         with document_locks(lock_root, path):
-            if not force:
+            disk_stat: os.stat_result | None = None
+            if force:
                 try:
-                    _disk_source, disk_stat, disk_digest = _read_identity(path)
+                    disk_stat = path.stat()
+                except FileNotFoundError:
+                    pass
+            else:
+                try:
+                    disk_source, disk_stat, disk_digest = _read_save_identity(
+                        path, "read the current revision of"
+                    )
                 except FileNotFoundError:
                     if base_digest is not None:
                         raise WorkspaceConflictError(
                             f"{path.name} was removed from disk", None, None
                         )
                 else:
+                    # A null base is the create-only Save As/export contract;
+                    # identical bytes cannot prove this request created them.
+                    if base_digest is not None and disk_digest != base_digest and (
+                        disk_digest == rendered_digest and disk_source == rendered
+                    ):
+                        # WHY: a bounded browser HTTP request can time out after
+                        # the replace commits but before its response arrives.
+                        # draw.io's Electron IPC callback has no equivalent HTTP
+                        # response deadline. Exact desired bytes therefore prove
+                        # this is an idempotent replay, not a new conflict. Retry
+                        # the directory sync too: the missing response may have
+                        # followed a replace whose first durability sync failed.
+                        _fsync_directory(path.parent)
+                        replay_source, replay_stat, replay_digest = _read_save_identity(
+                            path, "confirm the replayed revision of"
+                        )
+                        if (
+                            replay_digest != rendered_digest
+                            or replay_source != rendered
+                        ):
+                            raise WorkspaceConflictError(
+                                f"{path.name} changed before the replay could be confirmed",
+                                replay_stat.st_mtime,
+                                replay_digest,
+                            )
+                        return _metadata(
+                            path,
+                            replay_source,
+                            replay_stat,
+                            digest=replay_digest,
+                        )
                     if base_digest is None:
                         raise WorkspaceConflictError(
                             f"{path.name} already exists", disk_stat.st_mtime, disk_digest
@@ -491,12 +630,40 @@ def save_document(
                             disk_stat.st_mtime,
                             disk_digest,
                         )
-            os.replace(temporary_name, path)
+            if disk_stat is not None:
+                _preserve_existing_mode(temporary_path, disk_stat)
+            os.replace(temporary_path, path)
             _fsync_directory(path.parent)
-            return _metadata(path, rendered)
+            try:
+                canonical_source, canonical_stat, canonical_digest = _read_save_identity(
+                    path, "confirm the saved revision of"
+                )
+            except FileNotFoundError as error:
+                raise WorkspaceConflictError(
+                    f"{path.name} disappeared before the save could be confirmed",
+                    None,
+                    None,
+                ) from error
+            if canonical_digest != rendered_digest or canonical_source != rendered:
+                # A process that does not honor our advisory lock may replace
+                # the path after publication. Report its revision; blindly
+                # retrying here would clobber a legitimate external edit.
+                raise WorkspaceConflictError(
+                    f"{path.name} changed before the save could be confirmed",
+                    canonical_stat.st_mtime,
+                    canonical_digest,
+                )
+            return _metadata(
+                path,
+                canonical_source,
+                canonical_stat,
+                digest=canonical_digest,
+            )
+    except OSError as error:
+        raise WorkspaceStorageError(f"could not save {path.name}: {error}") from error
     finally:
         try:
-            os.unlink(temporary_name)
+            temporary_path.unlink()
         except OSError:
             pass
 

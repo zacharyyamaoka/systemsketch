@@ -63,6 +63,7 @@
     "test:repo-ui": "node tests/library_overview_smoke.mjs",
     "test:review": "node tests/review_gallery_smoke.mjs",
     "test:workspace-safety": "node tests/workspace_safety_smoke.mjs",
+    "test:drawio-alignment": "node tests/drawio_persistence_alignment_smoke.mjs",
     "test:comments": "node tests/local_comments_smoke.mjs",
     "test:commands": "node tests/command_palette_smoke.mjs",
     "test:diagnostics": "node tests/board_diagnostics_smoke.mjs",

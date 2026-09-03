@@ -41,6 +41,7 @@ import {
   TLDRAW_SUFFIX,
   breadcrumbTrail,
   browserRows,
+  autosaveSchedule,
   autosaveRetryDelay,
   canApplyExternalReload,
   claimUntitledPath,
@@ -78,6 +79,7 @@ import { emitRecorderDiagnostic } from '../recorder/recorderEvents'
 import { consolidateDocumentToSinglePage } from '../singlePageDocument'
 
 const SAVE_DEBOUNCE_MS = 600
+const MAX_AUTOSAVE_DELAY_MS = 30_000
 const WATCH_INTERVAL_MS = 1500
 const NOTICE_TIMEOUT_MS = 6000
 
@@ -93,6 +95,13 @@ export type WorkspaceStatus =
   | { kind: 'error'; message: string }
 
 type WorkspaceDialogMode = 'open' | 'saveAs' | 'exportTldraw' | 'rename' | null
+
+interface WorkspaceSaveAttempt {
+  path: string
+  source: string
+  baseDigest: string | null
+  changeEpoch: number
+}
 
 export interface LocalWorkspaceController {
   path: string | null
@@ -235,9 +244,11 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   // person explicitly keeps their version or accepts the disk revision.
   const conflictRef = useRef(false)
   const queuedSourceRef = useRef<Promise<string> | null>(null)
+  const retrySaveRef = useRef<WorkspaceSaveAttempt | null>(null)
   // Counts document changes, so a save knows whether more arrived while it ran.
   const changeEpochRef = useRef(0)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const autosavePendingSinceRef = useRef<number | null>(null)
   const autosaveRetryCountRef = useRef(0)
   const autosaveStopRef = useRef<(() => void) | null>(null)
   const startAutosaveRef = useRef<() => void>(() => {})
@@ -278,11 +289,13 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   }, [])
   const enterConflict = useCallback(() => {
     conflictRef.current = true
+    retrySaveRef.current = null
     autosaveRetryCountRef.current = 0
     if (saveTimerRef.current !== null) {
       window.clearTimeout(saveTimerRef.current)
       saveTimerRef.current = null
     }
+    autosavePendingSinceRef.current = null
     setStatus({ kind: 'conflict' })
   }, [])
 
@@ -353,26 +366,62 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     retryAttempt?: number,
   ) => {
     if (conflictRef.current) return
-    if (retryAttempt === undefined) autosaveRetryCountRef.current = 0
+    let effectiveDelayMs = delayMs
+    const isExactReplay = retryAttempt !== undefined || retrySaveRef.current !== null
+    if (!isExactReplay) {
+      autosaveRetryCountRef.current = 0
+      // WHY: draw.io 31.4.2 bounds a continuously postponed local save at
+      // 30 seconds. A long drag therefore cannot keep the only new revision in
+      // memory forever; nearby edits still coalesce behind the 600 ms debounce.
+      const schedule = autosaveSchedule(
+        performance.now(),
+        autosavePendingSinceRef.current,
+        delayMs,
+        MAX_AUTOSAVE_DELAY_MS,
+      )
+      autosavePendingSinceRef.current = schedule.pendingSince
+      effectiveDelayMs = schedule.delayMs
+    } else {
+      // An exact replay remains its own recovery attempt even if a newer edit
+      // accelerates the timer. Do not reset its bounded attempt count or mix
+      // its backoff with the edit-burst deadline.
+      autosavePendingSinceRef.current = null
+    }
     const rescheduled = saveTimerRef.current !== null
     if (saveTimerRef.current !== null) window.clearTimeout(saveTimerRef.current)
     saveTimerRef.current = window.setTimeout(() => {
       saveTimerRef.current = null
       void persistRef.current()
-    }, delayMs)
+    }, effectiveDelayMs)
     if (!rescheduled) {
       emitRecorderDiagnostic({
         lane: 'workspace', name: 'autosave-scheduled',
-        summary: retryAttempt === undefined ? 'autosave scheduled' : 'autosave retry scheduled',
-        detail: { path: pathRef.current, delayMs, retryAttempt, changeEpoch: changeEpochRef.current },
+        summary: isExactReplay ? 'autosave retry scheduled' : 'autosave scheduled',
+        detail: {
+          path: pathRef.current,
+          delayMs: effectiveDelayMs,
+          requestedDelayMs: delayMs,
+          retryAttempt,
+          changeEpoch: changeEpochRef.current,
+        },
       })
     }
   }, [])
+
+  const resumeDirtyAutosave = useCallback(() => {
+    if (!dirtyRef.current) return
+    // A rename/export/Save As also occupies the single filesystem lane. If a
+    // canvas edit arrived while that request was active, the timer may already
+    // have observed `savingRef`; hand the still-dirty revision a fresh turn.
+    setStatus((current) => current.kind === 'conflict' ? current : { kind: 'dirty' })
+    scheduleSave()
+  }, [scheduleSave])
 
   const scheduleSinglePageMigrationSave = useCallback(() => {
     dirtyRef.current = true
     changeEpochRef.current += 1
     queuedSourceRef.current = null
+    retrySaveRef.current = null
     setStatus({ kind: 'dirty' })
     scheduleSave()
   }, [scheduleSave])
@@ -387,6 +436,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       window.clearTimeout(saveTimerRef.current)
       saveTimerRef.current = null
     }
+    autosavePendingSinceRef.current = null
     autosaveStopRef.current?.()
     autosaveStopRef.current = null
     protectedRef.current = true
@@ -394,6 +444,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     dirtyRef.current = false
     autosaveRetryCountRef.current = 0
     queuedSourceRef.current = null
+    retrySaveRef.current = null
     editor.updateInstanceState({ isReadonly: true })
     setStatus(protection)
   }, [])
@@ -402,35 +453,55 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     const boardPath = pathRef.current
     const editor = editorRef.current
     const queuedSource = queuedSourceRef.current
-    if (boardPath === null || (editor === null && queuedSource === null)) return
+    const pendingRetry = !force && retrySaveRef.current?.path === boardPath
+      ? retrySaveRef.current
+      : null
+    if (
+      boardPath === null
+      || (editor === null && queuedSource === null && pendingRetry === null)
+    ) return
     if (protectedRef.current) {
       setNotice('This file is protected. Create a separate editable copy to keep the original untouched.')
       return
     }
     if (savingRef.current) {
-      if (dirtyRef.current) scheduleSave()
+      // The active save's `finally` schedules any newer dirty revision. Avoid
+      // a second timer here, especially after the 30-second ceiling expires.
       return
     }
 
+    if (saveTimerRef.current !== null) {
+      window.clearTimeout(saveTimerRef.current)
+      saveTimerRef.current = null
+    }
+    autosavePendingSinceRef.current = null
     savingRef.current = true
     setStatus({ kind: 'saving' })
-    const changeEpoch = changeEpochRef.current
+    if (force) retrySaveRef.current = null
+    const changeEpoch = pendingRetry?.changeEpoch ?? changeEpochRef.current
+    const baseDigest = pendingRetry?.baseDigest ?? digestRef.current
     const saveStarted = performance.now()
     emitRecorderDiagnostic({
       lane: 'workspace', name: 'autosave-start', summary: force ? 'forced save started' : 'autosave started',
-      detail: { path: boardPath, force, baseDigest: digestRef.current, changeEpoch },
+      detail: { path: boardPath, force, baseDigest, changeEpoch, replayingAttempt: pendingRetry !== null },
     })
-    const sourcePromise = queuedSource ?? serializeTldrawJson(editor!)
+    const sourcePromise = pendingRetry
+      ? null
+      : queuedSource ?? serializeTldrawJson(editor!)
+    let attempt: WorkspaceSaveAttempt | null = pendingRetry
     let savedSuccessfully = false
     let retry: { delayMs: number; attempt: number } | null = null
     try {
-      const source = encodeDocumentForPath(boardPath, await sourcePromise)
+      const source = pendingRetry?.source
+        ?? encodeDocumentForPath(boardPath, await sourcePromise!)
+      attempt ??= { path: boardPath, source, baseDigest, changeEpoch }
       const saved = await writeWorkspaceDocument({
         path: boardPath,
         source,
-        baseDigest: digestRef.current,
+        baseDigest: attempt.baseDigest,
         force,
       })
+      retrySaveRef.current = null
       digestRef.current = saved.digest
       fingerprintRef.current = { mtime: saved.mtime, size: saved.size, digest: saved.digest }
       sourceRef.current = source
@@ -439,7 +510,10 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       autosaveRetryCountRef.current = 0
       setIsPersisted(true)
       updateRecents(rememberDocumentPath(boardPath))
-      if (queuedSourceRef.current === sourcePromise) queuedSourceRef.current = null
+      if (
+        (sourcePromise !== null && queuedSourceRef.current === sourcePromise)
+        || changeEpochRef.current === changeEpoch
+      ) queuedSourceRef.current = null
       // Clean only if nothing changed while the save was in flight.
       if (changeEpochRef.current === changeEpoch) dirtyRef.current = false
       setStatus(dirtyRef.current ? { kind: 'dirty' } : { kind: 'clean', at: Date.now() })
@@ -459,16 +533,26 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       })
     } catch (cause) {
       dirtyRef.current = true
-      const delayMs = isRetryableWorkspaceFailure(cause)
+      const retryable = isRetryableWorkspaceFailure(cause)
+      const delayMs = retryable
         ? autosaveRetryDelay(autosaveRetryCountRef.current, { force })
         : null
       if (cause instanceof WorkspaceConflict) {
         enterConflict()
-      } else if (delayMs !== null) {
-        // WHY: a transient controller failure must resume saving without making
-        // the person edit again; semantic failures and conflicts still stop here.
-        autosaveRetryCountRef.current += 1
-        retry = { delayMs, attempt: autosaveRetryCountRef.current }
+      } else if (retryable && !force && attempt !== null) {
+        // WHY: retry the exact failed bytes and base revision first. If request
+        // B committed but its HTTP response was lost, sending newer edit C
+        // against old base A would manufacture a conflict; acknowledging B's
+        // idempotent replay advances the digest, then C gets its own save.
+        // Keep B even after automatic backoff is exhausted, so a later manual
+        // save or edit cannot accidentally replace it with unsafe C/A.
+        retrySaveRef.current = attempt
+        if (delayMs !== null) {
+          autosaveRetryCountRef.current += 1
+          retry = { delayMs, attempt: autosaveRetryCountRef.current }
+        }
+      } else {
+        retrySaveRef.current = null
       }
       if (!(cause instanceof WorkspaceConflict)) {
         setStatus({ kind: 'error', message: errorMessage(cause) })
@@ -500,6 +584,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       window.clearTimeout(saveTimerRef.current)
       saveTimerRef.current = null
     }
+    autosavePendingSinceRef.current = null
 
     const editor = editorRef.current
     const sourcePromise = queuedSourceRef.current
@@ -582,20 +667,51 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     const editor = editorRef.current
     if (!editor || savingRef.current) throw new Error('The document is not ready to save yet.')
     const previousStatus = statusRef.current
+    const saveEpoch = changeEpochRef.current
+    const wasProtected = protectedRef.current
     setStatus({ kind: 'saving' })
     savingRef.current = true
     try {
       const source = encodeDocumentForPath(nextPath, await serializeTldrawJson(editor))
-      await writeWorkspaceDocument({ path: nextPath, source, baseDigest: null, force })
+      const saved = await writeWorkspaceDocument({ path: nextPath, source, baseDigest: null, force })
       updateRecents(rememberDocumentPath(nextPath))
-      window.location.assign(documentHref(nextPath))
+      // WHY: draw.io's Make Copy changes the live file identity to the copy,
+      // but its shadow flag still protects an edit made while that write ran.
+      // Switch this mounted editor to the accepted digest without reloading;
+      // a later epoch stays dirty and autosaves against the new path.
+      const hasNewerEdits = changeEpochRef.current !== saveEpoch
+      if (saveTimerRef.current !== null) {
+        window.clearTimeout(saveTimerRef.current)
+        saveTimerRef.current = null
+      }
+      autosavePendingSinceRef.current = null
+      pathRef.current = nextPath
+      sourceRef.current = source
+      digestRef.current = saved.digest
+      fingerprintRef.current = { mtime: saved.mtime, size: saved.size, digest: saved.digest }
+      conflictRef.current = false
+      retrySaveRef.current = null
+      dirtyRef.current = hasNewerEdits
+      if (!hasNewerEdits) queuedSourceRef.current = null
+      setPath(nextPath)
+      setIsPersisted(true)
+      setStatus(hasNewerEdits ? { kind: 'dirty' } : { kind: 'clean', at: Date.now() })
+      if (wasProtected) {
+        // Recovery/future-format copies reload once so the new, safe document
+        // leaves read-only quarantine through the normal bootstrap path.
+        window.location.assign(documentHref(nextPath))
+      } else {
+        window.history.replaceState(null, '', documentHref(nextPath))
+        closeDialog()
+      }
     } catch (cause) {
       setStatus(previousStatus)
       throw cause
     } finally {
       savingRef.current = false
+      resumeDirtyAutosave()
     }
-  }, [updateRecents])
+  }, [closeDialog, resumeDirtyAutosave, updateRecents])
 
   /**
    * Write a stock-readable `.tldr` from an isolated cloned editor.
@@ -621,14 +737,12 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       })
     } finally {
       savingRef.current = false
-      if (dirtyRef.current) {
-        setStatus({ kind: 'dirty' })
-        scheduleSave()
-      } else {
+      if (dirtyRef.current) resumeDirtyAutosave()
+      else {
         setStatus({ kind: 'clean', at: Date.now() })
       }
     }
-  }, [scheduleSave, waitForSave])
+  }, [resumeDirtyAutosave, waitForSave])
 
   const rename = useCallback(async (nextPath: string) => {
     const currentPath = pathRef.current
@@ -665,8 +779,9 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       throw cause
     } finally {
       savingRef.current = false
+      resumeDirtyAutosave()
     }
-  }, [enterConflict, saveAs, updateRecents, waitForSave])
+  }, [enterConflict, resumeDirtyAutosave, saveAs, updateRecents, waitForSave])
 
   const reloadFromDisk = useCallback(async ({
     expectedDiskDigest = null,
@@ -734,7 +849,9 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       digestRef.current = document.digest ?? null
       fingerprintRef.current = fingerprint(document)
       dirtyRef.current = false
+      autosavePendingSinceRef.current = null
       queuedSourceRef.current = null
+      retrySaveRef.current = null
       setIsPersisted(true)
       updateRecents(rememberDocumentPath(boardPath))
       setStatus({ kind: 'clean', at: Date.now() })
@@ -832,13 +949,29 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     let polling = false
     let pollController: AbortController | null = null
     const poll = async () => {
-      if (cancelled || polling || savingRef.current || !editorRef.current) return
+      if (
+        cancelled
+        || polling
+        || savingRef.current
+        || retrySaveRef.current !== null
+        || !editorRef.current
+      ) return
       polling = true
       const controller = new AbortController()
       pollController = controller
       try {
         const disk = await statWorkspaceDocument(path, { signal: controller.signal })
-        if (cancelled || savingRef.current || !editorRef.current || pathRef.current !== path) return
+        if (
+          cancelled
+          || savingRef.current
+          || retrySaveRef.current !== null
+          || !editorRef.current
+          || pathRef.current !== path
+        ) return
+        // WHY: after an HTTP response is lost, the just-written disk bytes can
+        // look external to this client. The queued exact replay is the safe
+        // arbiter: it accepts only those intended bytes and digest-conflicts on
+        // anything else. Polling must not manufacture a conflict first.
         const action = nextSyncAction({
           disk: disk.mtime === null || disk.size === undefined
             ? null
@@ -914,6 +1047,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
           window.clearTimeout(saveTimerRef.current)
           saveTimerRef.current = null
         }
+        autosavePendingSinceRef.current = null
         void persistRef.current()
       },
       finalFlush: () => finalFlushRef.current(),
@@ -1040,8 +1174,26 @@ function WorkspaceAlert() {
       <div className="systemsketch-workspace-alert__actions">
         {status.kind === 'conflict' ? (
           <>
-            <button type="button" onClick={() => workspace.runAction(workspace.takeDisk)}>Use disk version</button>
-            <button type="button" className="primary" onClick={() => workspace.runAction(() => workspace.save(true))}>Keep my version</button>
+            <button
+              type="button"
+              data-testid="workspace-conflict-use-disk"
+              onClick={() => workspace.runAction(workspace.takeDisk)}
+            >Use disk version</button>
+            {/* WHY: draw.io puts Make Copy beside its destructive conflict
+                choices. Surface Save As here so preserving both revisions is
+                the obvious path, not a feature the person has to remember. */}
+            <button
+              type="button"
+              className="primary"
+              data-testid="workspace-conflict-make-copy"
+              onClick={() => workspace.showDialog('saveAs')}
+            >Save my version as…</button>
+            <button
+              type="button"
+              className="is-danger"
+              data-testid="workspace-conflict-overwrite"
+              onClick={() => workspace.runAction(() => workspace.save(true))}
+            >Overwrite disk version</button>
           </>
         ) : status.kind === 'future' ? (
           <>
@@ -1187,10 +1339,15 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
   const [query, setQuery] = useState('')
   const recoveryMode = useRef(workspace.status.kind === 'quarantined').current
   const compatibilityMode = useRef(workspace.status.kind === 'future').current
+  const conflictCopyMode = useRef(mode === 'saveAs' && workspace.status.kind === 'conflict').current
   const [name, setName] = useState(() => (
     recoveryMode
       ? `${workspace.title} recovery`
-      : compatibilityMode ? `${workspace.title} compatible copy` : workspace.title
+      : compatibilityMode
+        ? `${workspace.title} compatible copy`
+        // WHY: draw.io's safe conflict action creates a separately named copy.
+        // Default away from the contested path so Enter cannot overwrite it.
+        : conflictCopyMode ? `${workspace.title} local copy` : workspace.title
   ))
   const [error, setError] = useState<string | null>(null)
   const [replacePath, setReplacePath] = useState<string | null>(null)
@@ -1423,7 +1580,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                 {mode === 'open'
                   ? 'Open a document'
                   : mode === 'saveAs'
-                    ? 'Save a copy'
+                    ? conflictCopyMode ? 'Preserve your version' : 'Save a copy'
                     : mode === 'exportTldraw' ? 'Export to tldraw' : 'Rename document'}
               </h2>
             </Dialog.Title>
