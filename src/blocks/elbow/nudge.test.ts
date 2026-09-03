@@ -184,7 +184,9 @@ describe('multi-segment routes (an obstacle between the pair)', () => {
     const before = routes()
     expect(before.every((r) => r.points.length === 6)).toBe(true)
     const report = nudgeRoutes(before)
-    expect(report.overlapBefore).toBeCloseTo(1904, 6)
+    // The single-edge planner now keeps the full 24px obstacle padding, so
+    // these shared runs are shorter than the old raw-boundary routes.
+    expect(report.overlapBefore).toBeCloseTo(1328, 6)
     expect(report.overlapAfter).toBe(0)
     expect(countCrossings(report.routes)).toBe(0)
     // Three distinct bundles: two vertical channels and the horizontal run.

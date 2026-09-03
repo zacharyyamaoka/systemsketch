@@ -105,8 +105,10 @@ function adjacentPointIsOnSide(endpoint: ElbowRouteInput['start'], adjacent: Elb
 
 /**
  * Validate a route against the complete one-edge input. Endpoint boxes are
- * special: the first/last segment may cross its own inflated box while leaving
- * through the bound port, but no later segment may re-enter it.
+ * special: the first/last segment may cross its own card while leaving through
+ * the bound port, but no later segment may re-enter the card itself. Its outer
+ * padding is intentionally soft so a nearby obstacle may shorten the dongle
+ * and turn inside that aesthetic margin without drawing behind the Block.
  */
 export function routeClearsInput(route: ElbowRoute, input: ElbowRouteInput): boolean {
 	if (!routeIsOrthogonal(route) || route.points.length < 2) return false
@@ -120,11 +122,11 @@ export function routeClearsInput(route: ElbowRoute, input: ElbowRouteInput): boo
 	const lastSegment = route.points.length - 2
 	for (let index = 0; index <= lastSegment; index += 1) {
 		if (index > 0 && input.start.box
-			&& segmentHitsRect(route.points[index], route.points[index + 1], expanded(input.start.box, padding))) {
+			&& segmentHitsRect(route.points[index], route.points[index + 1], input.start.box)) {
 			return false
 		}
 		if (index < lastSegment && input.end.box
-			&& segmentHitsRect(route.points[index], route.points[index + 1], expanded(input.end.box, padding))) {
+			&& segmentHitsRect(route.points[index], route.points[index + 1], input.end.box)) {
 			return false
 		}
 	}
