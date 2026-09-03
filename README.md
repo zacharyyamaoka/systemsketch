@@ -40,7 +40,10 @@ flowchart LR
 - **Open Live Preview** snapshots the current board, opens the copy in a new Preview window, and then lets the two browser profiles evolve independently.
 - Browser-local images are made portable during that one-time handoff rather than pointing back to Stable's private asset store.
 - Stable and Preview use separate ports and browser profiles; when they intentionally point at the same local file, a content-digest fence prevents silent clobbers.
-- **Publish Preview** runs type checks, frontend tests, Python release tests, and a production build before advancing the Stable pointer.
+- **Publish Preview** runs type checks, frontend tests, Python release tests, a production build,
+  and the VS Code/Cursor and Obsidian plugin builds before advancing the Stable pointer. Host
+  artifacts are immutable beside that Stable build; installing them remains explicit so publishing
+  never reloads an application Zach is using.
 - The previous verified Stable build remains available for rollback on the next launch.
 
 ## Development operating loop
@@ -200,6 +203,12 @@ cd ~/systemsketch/vscode-systemsketch && npm install && npm run package
 
 Install the resulting `dist/systemsketch-vscode-0.1.0.vsix` from the Extensions view, or with
 `code --install-extension`. `npm test` there drives the packaged extension in a real IDE.
+
+**Make Preview Stable** also rebuilds this VSIX and the Obsidian bundle before it advances Stable.
+The accepted copies live under `~/.local/share/systemsketch/runtime/host-releases/<build>/`, with
+one checksum manifest naming the shared VS Code/Cursor package and every Obsidian plugin file.
+The working-tree `dist/` folders are left on the same build for convenient manual installation;
+publishing does not install or reload either host behind your back.
 
 The Obsidian host lives beside it in [`obsidian-systemsketch/`](obsidian-systemsketch/README.md).
 It opens and autosaves both document suffixes through `TextFileView`, follows the host's light

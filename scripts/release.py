@@ -4,10 +4,14 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
+import shutil
 import subprocess
 import sys
 import tempfile
+from datetime import UTC, datetime
 from pathlib import Path
 
 from release_lib import (
@@ -19,12 +23,173 @@ from release_lib import (
     read_channels,
     read_manifest,
     rollback_stable,
+    source_mtime,
     source_provenance,
     stage_candidate,
 )
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+HOST_ARTIFACT_SCHEMA_VERSION = 1
+OBSIDIAN_ARTIFACT_FILES = ("main.js", "styles.css", "manifest.json", "bundle.json")
+
+
+def host_artifact_root(release_home: Path, build: str) -> Path:
+    return release_home / "host-releases" / build
+
+
+def read_host_artifact_manifest(release_home: Path, build: str) -> dict:
+    path = host_artifact_root(release_home, build) / "manifest.json"
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as cause:
+        raise ReleaseError(f"host artifacts for {build} have no readable manifest: {cause}") from cause
+    if (
+        not isinstance(payload, dict)
+        or payload.get("product") != "systemsketch-hosts"
+        or payload.get("schemaVersion") != HOST_ARTIFACT_SCHEMA_VERSION
+        or payload.get("build") != build
+    ):
+        raise ReleaseError(f"host artifacts for {build} have an invalid manifest")
+    return payload
+
+
+def _artifact_record(root: Path, path: Path) -> dict[str, object]:
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    return {
+        "path": path.relative_to(root).as_posix(),
+        "bytes": path.stat().st_size,
+        "sha256": digest,
+    }
+
+
+def build_host_artifacts(
+    release_home: Path,
+    build: str,
+    *,
+    project_root: Path = PROJECT_ROOT,
+) -> dict:
+    """Build both host plugins before ``build`` is allowed to become Stable.
+
+    The working directories are disposable build output. The durable result is
+    one atomic, immutable directory under ``host-releases/<build>``. VS Code
+    and Cursor intentionally share the VSIX; Obsidian carries its guarded
+    same-document bundle from the same recorded source.
+    """
+    release_home = release_home.resolve()
+    project_root = project_root.resolve()
+    release = read_manifest(release_home, build)
+    destination = host_artifact_root(release_home, build)
+    if destination.is_dir():
+        return read_host_artifact_manifest(release_home, build)
+
+    vscode_root = project_root / "vscode-systemsketch"
+    obsidian_root = project_root / "obsidian-systemsketch"
+    for required in (
+        vscode_root / "package.json",
+        vscode_root / "scripts" / "stage_app.mjs",
+        obsidian_root / "package.json",
+        obsidian_root / "esbuild.config.mjs",
+    ):
+        if not required.is_file():
+            raise ReleaseError(f"host plugin source is missing: {required}")
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    staging = Path(tempfile.mkdtemp(prefix=f".{build}.", dir=destination.parent))
+    environment = os.environ.copy()
+    environment["SYSTEMSKETCH_RELEASE_HOME"] = str(release_home)
+    try:
+        for host_root in (vscode_root, obsidian_root):
+            subprocess.run(
+                ["npm", "ci", "--no-audit", "--no-fund"],
+                cwd=host_root,
+                check=True,
+                env=environment,
+            )
+
+        subprocess.run(["npm", "run", "typecheck"], cwd=vscode_root, check=True, env=environment)
+        subprocess.run(
+            ["node", "scripts/stage_app.mjs", "--require-release", build],
+            cwd=vscode_root,
+            check=True,
+            env=environment,
+        )
+        subprocess.run(["node", "esbuild.config.mjs"], cwd=vscode_root, check=True, env=environment)
+
+        try:
+            vscode_package = json.loads((vscode_root / "package.json").read_text(encoding="utf-8"))
+            vscode_version = vscode_package["version"]
+        except (OSError, ValueError, KeyError) as cause:
+            raise ReleaseError(f"could not read the VS Code plugin version: {cause}") from cause
+        vscode_output = staging / "vscode" / f"systemsketch-vscode-{vscode_version}.vsix"
+        vscode_output.parent.mkdir()
+        subprocess.run(
+            [
+                str(vscode_root / "node_modules" / ".bin" / "vsce"),
+                "package",
+                "--allow-missing-repository",
+                "--out",
+                str(vscode_output),
+            ],
+            cwd=vscode_root,
+            check=True,
+            env=environment,
+        )
+        if not vscode_output.is_file():
+            raise ReleaseError("VS Code packaging produced no VSIX")
+
+        subprocess.run(["npm", "run", "typecheck"], cwd=obsidian_root, check=True, env=environment)
+        subprocess.run(["node", "esbuild.config.mjs"], cwd=obsidian_root, check=True, env=environment)
+        subprocess.run(
+            ["node", "tests/provenance.mjs"],
+            cwd=obsidian_root,
+            check=True,
+            env=environment,
+        )
+        obsidian_output = staging / "obsidian"
+        obsidian_output.mkdir()
+        for name in OBSIDIAN_ARTIFACT_FILES:
+            source = obsidian_root / "dist" / name
+            if not source.is_file():
+                raise ReleaseError(f"Obsidian packaging produced no {name}")
+            shutil.copy2(source, obsidian_output / name)
+
+        released_source_time = release.get("sourceTime")
+        if not isinstance(released_source_time, (int, float)):
+            raise ReleaseError(f"release {build} records no source time")
+        if source_mtime(project_root) > released_source_time:
+            raise ReleaseError(
+                "source changed while the host plugins were building; Stable was not advanced"
+            )
+
+        obsidian_records = {
+            name: _artifact_record(staging, obsidian_output / name)
+            for name in OBSIDIAN_ARTIFACT_FILES
+        }
+        vscode_record = _artifact_record(staging, vscode_output)
+        payload = {
+            "product": "systemsketch-hosts",
+            "schemaVersion": HOST_ARTIFACT_SCHEMA_VERSION,
+            "build": build,
+            "version": release.get("version"),
+            "sourceCommit": release.get("commit"),
+            "sourceDirty": release.get("sourceDirty"),
+            "builtAt": datetime.now(UTC).isoformat(),
+            "artifacts": {
+                "vscode": vscode_record,
+                "cursor": {**vscode_record, "sharedWith": "vscode"},
+                "obsidian": {"files": obsidian_records},
+            },
+        }
+        (staging / "manifest.json").write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        os.replace(staging, destination)
+    finally:
+        if staging.exists():
+            shutil.rmtree(staging)
+    return read_host_artifact_manifest(release_home, build)
 
 
 def refuse_dirty_source(allow_dirty: bool, project_root: Path = PROJECT_ROOT) -> None:
@@ -82,6 +247,19 @@ def build_candidate(release_home: Path, *, allow_dirty: bool = False) -> tuple[s
         return build, manifest
 
 
+def promote_release(release_home: Path, *, allow_dirty: bool = False) -> tuple[str, dict]:
+    """Verify one candidate and its host plugins, then atomically select it."""
+    build, _manifest = build_candidate(release_home, allow_dirty=allow_dirty)
+    print(f"Verified candidate {build}")
+    host_manifest = build_host_artifacts(release_home, build)
+    promote_candidate(release_home)
+    install_controller(PROJECT_ROOT, release_home)
+    print(f"Built VS Code, Cursor, and Obsidian plugins for Stable {build}.")
+    print(f"Host artifacts: {host_artifact_root(release_home, build)}")
+    print("Published for the next Stable launch; host installation remains explicit.")
+    return build, host_manifest
+
+
 def channel_provenance(release_home: Path, build: str | None) -> dict | None:
     """What a channel's build says about the source it came from."""
     if build is None:
@@ -90,12 +268,14 @@ def channel_provenance(release_home: Path, build: str | None) -> dict | None:
         manifest = read_manifest(release_home, build)
     except ReleaseError:
         return {"build": build, "commit": None, "branch": None, "sourceDirty": None}
+    host_manifest = host_artifact_root(release_home, build) / "manifest.json"
     return {
         "build": build,
         "commit": manifest.get("commit"),
         "branch": manifest.get("branch"),
         "sourceDirty": manifest.get("sourceDirty"),
         "releasedAt": manifest.get("releasedAt"),
+        "hostArtifacts": str(host_artifact_root(release_home, build)) if host_manifest.is_file() else None,
     }
 
 
@@ -136,13 +316,11 @@ def main() -> int:
             return 0
         if arguments.command == "rollback":
             rollback_stable(release_home)
+        elif arguments.command == "promote":
+            promote_release(release_home, allow_dirty=arguments.allow_dirty)
         else:
             build, _manifest = build_candidate(release_home, allow_dirty=arguments.allow_dirty)
             print(f"Verified candidate {build}")
-            if arguments.command == "promote":
-                promote_candidate(release_home)
-                install_controller(PROJECT_ROOT, release_home)
-                print("Published for the next Stable launch.")
         print_status(release_home)
         return 0
     except (OSError, ReleaseError, subprocess.CalledProcessError) as cause:
