@@ -1,15 +1,16 @@
 {
   "systemSketch": {
-    "formatVersion": 1,
+    "formatVersion": 2,
     "application": "SystemSketch",
     "shapes": {
-      "connection": 3,
+      "connection": 4,
       "block": 4,
       "geo": 6,
       "arrow": 1
     },
     "bindings": {
-      "connection": 6
+      "connection": 8,
+      "arrow": 2
     }
   },
   "tldrawFileFormatVersion": 1,
@@ -31,34 +32,30 @@
       "com.tldraw.asset.video": 5,
       "com.tldraw.asset.bookmark": 2,
       "com.tldraw.shape.group": 0,
-      "com.tldraw.shape.text": 4,
       "com.tldraw.shape.bookmark": 2,
       "com.tldraw.shape.draw": 5,
       "com.tldraw.shape.note": 13,
-      "com.tldraw.shape.line": 5,
       "com.tldraw.shape.frame": 1,
-      "com.tldraw.shape.arrow": 8,
       "com.tldraw.shape.highlight": 4,
       "com.tldraw.shape.embed": 4,
       "com.tldraw.shape.image": 5,
       "com.tldraw.shape.video": 4,
       "com.tldraw.shape.geo": 12,
-      "com.tldraw.shape.block": 2,
+      "com.tldraw.shape.arrow": 8,
+      "com.tldraw.shape.text": 4,
+      "com.tldraw.shape.line": 5,
+      "com.tldraw.shape.block": 4,
       "com.tldraw.shape.branch": 0,
-      "com.tldraw.shape.connection": 2,
+      "com.tldraw.shape.branch-arm": 0,
+      "com.tldraw.shape.connection": 3,
       "com.tldraw.binding.arrow": 1,
-      "com.tldraw.binding.connection": 1
+      "com.tldraw.binding.connection": 1,
+      "com.tldraw.comment-thread": 3,
+      "com.tldraw.comment": 1,
+      "com.tldraw.comment-reaction": 1
     }
   },
   "records": [
-    {
-      "name": "",
-      "color": "#E34BA9",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:j6XiQm-smTSN8cu2YrnUX",
-      "typeName": "user"
-    },
     {
       "x": 0,
       "y": 0,
@@ -81,42 +78,13 @@
         "curve": null,
         "pins": [],
         "elbowRoute": null,
+        "routeMode": "automatic",
         "temporal": "delayed",
         "delayValue": "",
         "pillPosition": 0.5
       },
       "parentId": "page:page",
-      "index": "a6Dwz",
-      "typeName": "shape"
-    },
-    {
-      "x": 920,
-      "y": 406,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:3lcvt7AHLlri0ZCa2LNs-",
-      "type": "connection",
-      "props": {
-        "start": {
-          "x": 0,
-          "y": 0
-        },
-        "end": {
-          "x": 219.80973905647556,
-          "y": 4.378680327074562
-        },
-        "routing": "elbow",
-        "curve": null,
-        "pins": [],
-        "elbowRoute": null,
-        "temporal": "data",
-        "delayValue": "",
-        "pillPosition": 0.5
-      },
-      "parentId": "page:page",
-      "index": "at9GM",
+      "index": "a6IsE",
       "typeName": "shape"
     },
     {
@@ -156,11 +124,16 @@
           "expanded": {
             "w": 560,
             "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
           }
         },
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
+        "definitionId": "SI8PvSbPhCOskQstDW2XT",
         "inputs": [
           {
             "id": "in_1",
@@ -176,11 +149,20 @@
             "type": "Pose",
             "visible": true
           }
-        ]
+        ],
+        "definitionKey": "estimate"
       },
       "parentId": "page:page",
-      "index": "avOxX",
+      "index": "a9EOj",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#BD54C6",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:oAwdl8L1mW2UYS9rTjLBL",
+      "typeName": "user"
     },
     {
       "x": 700,
@@ -193,10 +175,10 @@
       "type": "geo",
       "props": {
         "w": 380,
-        "h": 120,
+        "h": 140,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 32,
+        "growY": 12,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -224,7 +206,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "b00hvb",
+      "index": "aEvqj",
       "typeName": "shape"
     },
     {
@@ -242,7 +224,7 @@
     },
     {
       "x": 1000,
-      "y": 810,
+      "y": 850,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -251,10 +233,10 @@
       "type": "geo",
       "props": {
         "w": 380,
-        "h": 160,
+        "h": 220,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 52,
+        "growY": 0,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -274,7 +256,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN the back cable is dotted with a z⁻¹ pill you can slide, the pill shows = 1.0 after step 2, the Dev Hub switch dashes the run after the pill, and a reload keeps all of it."
+                  "text": "PASS WHEN the back cable is dotted with a z⁻¹ pill you can slide, the pill shows = 1.0 after step 2, the Dev Hub switch makes only the run before the pill solid, and a reload keeps all of it."
                 }
               ]
             }
@@ -282,11 +264,11 @@
         }
       },
       "parentId": "page:page",
-      "index": "b048BM",
+      "index": "aIbv6",
       "typeName": "shape"
     },
     {
-      "x": 1120,
+      "x": 1130,
       "y": 80,
       "rotation": 0,
       "isLocked": false,
@@ -296,10 +278,10 @@
       "type": "geo",
       "props": {
         "w": 380,
-        "h": 110,
+        "h": 140,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 12,
+        "growY": 0,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -327,7 +309,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "b01Tmj",
+      "index": "aFU95",
       "typeName": "shape"
     },
     {
@@ -344,16 +326,16 @@
       "typeName": "binding"
     },
     {
-      "x": -326.5881966126007,
-      "y": 242.52362778593815,
-      "z": 0.913517247483641,
+      "x": 0,
+      "y": 0,
+      "z": 1,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
     },
     {
       "x": 120,
-      "y": 820,
+      "y": 880,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -362,7 +344,7 @@
       "type": "geo",
       "props": {
         "w": 420,
-        "h": 100,
+        "h": 120,
         "geo": "rectangle",
         "dash": "draw",
         "growY": 0,
@@ -393,7 +375,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "b027yM",
+      "index": "aGym2",
       "typeName": "shape"
     },
     {
@@ -425,11 +407,16 @@
           "expanded": {
             "w": 560,
             "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
           }
         },
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
+        "definitionId": "UZ8Ph8inIByyFS1MUxbgS",
         "inputs": [
           {
             "id": "in_1",
@@ -451,11 +438,25 @@
             "type": "Pose",
             "visible": true
           }
-        ]
+        ],
+        "definitionKey": "refine"
       },
       "parentId": "page:page",
-      "index": "awGjX",
+      "index": "aAsnM",
       "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:b3",
+      "type": "connection",
+      "fromId": "shape:down",
+      "toId": "shape:refine",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
     },
     {
       "x": 980,
@@ -468,7 +469,7 @@
       "type": "geo",
       "props": {
         "w": 520,
-        "h": 150,
+        "h": 180,
         "geo": "rectangle",
         "dash": "draw",
         "growY": 32,
@@ -491,7 +492,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "4 · Open the Dev Hub (</> bottom right) and switch on \"Dash after the z⁻¹ pill\": the run after the pill turns dashed. Mark the seed cable (estimate → refine) delayed too, via right-click › Delayed (z⁻¹), and compare."
+                  "text": "4 · Open the Dev Hub (</> bottom right) and switch on \"Solid before the z⁻¹ pill\": the run into the pill turns solid and the run after it stays dotted. Mark the seed cable (estimate → refine) delayed too, via right-click › Delayed (z⁻¹), and compare."
                 }
               ]
             }
@@ -499,12 +500,25 @@
         }
       },
       "parentId": "page:page",
-      "index": "b03PpE",
+      "index": "aHxfU",
       "typeName": "shape"
     },
     {
-      "x": 584.0948346806599,
-      "y": 651.6684412221528,
+      "meta": {},
+      "id": "binding:b4",
+      "type": "connection",
+      "fromId": "shape:down",
+      "toId": "shape:smooth",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 620,
+      "y": 600,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -531,11 +545,16 @@
           "expanded": {
             "w": 560,
             "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
           }
         },
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
+        "definitionId": "ZTEbQOtfxihDqK7cgiJ-o",
         "inputs": [
           {
             "id": "in_1",
@@ -551,10 +570,11 @@
             "type": "Pose",
             "visible": true
           }
-        ]
+        ],
+        "definitionKey": "smooth"
       },
       "parentId": "page:page",
-      "index": "ayoj2",
+      "index": "aCb96",
       "typeName": "shape"
     },
     {
@@ -584,6 +604,37 @@
       "typeName": "binding"
     },
     {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:smooth",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.36666666666666664,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:b7",
+      "type": "connection",
+      "fromId": "shape:out",
+      "toId": "shape:refine",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
       "x": 0,
       "y": 0,
       "rotation": 0,
@@ -605,21 +656,20 @@
         "curve": null,
         "pins": [],
         "elbowRoute": null,
+        "routeMode": "automatic",
         "temporal": "data",
         "delayValue": "",
         "pillPosition": 0.5
       },
       "parentId": "page:page",
-      "index": "a55Uo",
+      "index": "a5XLA",
       "typeName": "shape"
     },
     {
       "editingShapeId": null,
       "croppingShapeId": null,
-      "selectedShapeIds": [
-        "shape:3lcvt7AHLlri0ZCa2LNs-"
-      ],
-      "hoveredShapeId": "shape:refine",
+      "selectedShapeIds": [],
+      "hoveredShapeId": null,
       "erasingShapeIds": [],
       "hintingShapeIds": [],
       "focusedGroupId": null,
@@ -627,6 +677,19 @@
       "id": "instance_page_state:page:page",
       "pageId": "page:page",
       "typeName": "instance_page_state"
+    },
+    {
+      "meta": {},
+      "id": "binding:b8",
+      "type": "connection",
+      "fromId": "shape:out",
+      "toId": "shape:encode",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
     },
     {
       "x": 120,
@@ -639,10 +702,10 @@
       "type": "geo",
       "props": {
         "w": 520,
-        "h": 120,
+        "h": 150,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 32,
+        "growY": 2,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -670,7 +733,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "azKqz",
+      "index": "aDZOz",
       "typeName": "shape"
     },
     {
@@ -702,11 +765,16 @@
           "expanded": {
             "w": 560,
             "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
           }
         },
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
+        "definitionId": "nu0BETeobeLGaqFXcnGfj",
         "inputs": [
           {
             "id": "in_1",
@@ -722,37 +790,61 @@
             "type": "bytes",
             "visible": true
           }
-        ]
+        ],
+        "definitionKey": "encode"
       },
       "parentId": "page:page",
-      "index": "axkFA",
+      "index": "aBnb2",
       "typeName": "shape"
     },
     {
       "meta": {},
-      "id": "binding:P0_qXS7ymgfv8fnoOF24g",
-      "type": "connection",
-      "fromId": "shape:3lcvt7AHLlri0ZCa2LNs-",
-      "toId": "shape:encode",
+      "id": "binding:cue-step-1-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:cue-step-1",
       "props": {
-        "portId": "in_1",
-        "terminal": "end",
-        "face": "outer"
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
       },
       "typeName": "binding"
     },
     {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
       "meta": {},
-      "id": "binding:nRs_DceRNhr2wK04orihz",
+      "id": "shape:out",
       "type": "connection",
-      "fromId": "shape:3lcvt7AHLlri0ZCa2LNs-",
-      "toId": "shape:refine",
       "props": {
-        "portId": "out_1",
-        "terminal": "start",
-        "face": "outer"
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
       },
-      "typeName": "binding"
+      "parentId": "page:page",
+      "index": "a7kJI",
+      "typeName": "shape"
     },
     {
       "meta": {},
@@ -778,7 +870,7 @@
       "brush": null,
       "scribbles": [],
       "cursor": {
-        "type": "cross",
+        "type": "default",
         "rotation": 0
       },
       "isFocusMode": false,
@@ -788,8 +880,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1360,
-        "h": 1440.800048828125
+        "w": 1280,
+        "h": 720
       },
       "insets": [
         false,
@@ -804,9 +896,9 @@
       "isChatting": false,
       "highlightedUserIds": [],
       "isFocused": true,
-      "devicePixelRatio": 1.25,
+      "devicePixelRatio": 1,
       "isCoarsePointer": false,
-      "isHoveringCanvas": true,
+      "isHoveringCanvas": null,
       "openMenus": [],
       "isChangingStyle": false,
       "isReadonly": false,
@@ -818,16 +910,47 @@
       "typeName": "instance"
     },
     {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:down",
+      "type": "connection",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      },
+      "parentId": "page:page",
+      "index": "a8sYI",
+      "typeName": "shape"
+    },
+    {
       "name": "",
-      "color": "#7B66DC",
+      "color": "#9D5BD2",
       "imageUrl": "",
       "meta": {},
-      "id": "user:rDIdhb_3uvD3BIpZJeMUk",
+      "id": "user:7QDPBzKTuSjLqj98iFm6R",
       "typeName": "user"
     },
     {
-      "x": 0,
-      "y": 0,
+      "x": 890,
+      "y": 220,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -844,12 +967,12 @@
         "labelColor": "black",
         "bend": 0,
         "start": {
-          "x": 890,
-          "y": 200
+          "x": 0,
+          "y": 0
         },
         "end": {
-          "x": 730,
-          "y": 600
+          "x": -160,
+          "y": 380
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -866,7 +989,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "auuBX",
+      "index": "aEyTVh",
       "typeName": "shape"
     }
   ]

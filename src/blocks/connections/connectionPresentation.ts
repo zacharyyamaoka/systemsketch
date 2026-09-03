@@ -7,7 +7,8 @@
  * default and draggable along it, optionally naming the initial value with
  * the same `= value` grammar the port default chips use. Solid stays the plain
  * data cable. Async uses a mostly-continuous carrier punctuated by small packet
- * dashes; delayed keeps the dotted z⁻¹ vocabulary.
+ * dashes. The alternate delayed treatment makes the value before z⁻¹ solid
+ * and the next value after it dotted.
  *
  * Everything geometric here is editor-free so it unit-tests directly: arc
  * length along a polyline, the point at a fraction of it, the fraction nearest
@@ -22,11 +23,11 @@ import { clampPillPosition } from './connectionModel'
 export const CABLE_PRESENTATION_KEY = 'systemsketch.cable-presentation.v1'
 
 export interface CablePresentation {
-	/** Draw the segment after the z⁻¹ pill dashed instead of dotted. */
-	dashAfterPill: boolean
+	/** Draw the value before z⁻¹ solid and the value after it dotted. */
+	solidBeforePill: boolean
 }
 
-export const DEFAULT_CABLE_PRESENTATION: CablePresentation = { dashAfterPill: false }
+export const DEFAULT_CABLE_PRESENTATION: CablePresentation = { solidBeforePill: false }
 
 export function readCablePresentation(
 	storage: Pick<Storage, 'getItem'> | null = typeof window === 'undefined' ? null : window.localStorage,
@@ -35,9 +36,12 @@ export function readCablePresentation(
 	try {
 		const parsed = JSON.parse(storage.getItem(CABLE_PRESENTATION_KEY) ?? '{}')
 		return {
-			dashAfterPill: typeof parsed?.dashAfterPill === 'boolean'
-				? parsed.dashAfterPill
-				: DEFAULT_CABLE_PRESENTATION.dashAfterPill,
+			solidBeforePill: typeof parsed?.solidBeforePill === 'boolean'
+				? parsed.solidBeforePill
+				// Keep an enabled V1 alternative enabled while correcting what it paints.
+				: typeof parsed?.dashAfterPill === 'boolean'
+					? parsed.dashAfterPill
+					: DEFAULT_CABLE_PRESENTATION.solidBeforePill,
 		}
 	} catch {
 		return { ...DEFAULT_CABLE_PRESENTATION }
@@ -58,8 +62,8 @@ export function writeCablePresentation(
 /** The live value every delayed cable reads; changing it repaints them all. */
 export const cablePresentation = atom<CablePresentation>('cable presentation', readCablePresentation())
 
-export function setDashAfterPill(dashAfterPill: boolean): CablePresentation {
-	const next = { ...cablePresentation.get(), dashAfterPill }
+export function setSolidBeforePill(solidBeforePill: boolean): CablePresentation {
+	const next = { ...cablePresentation.get(), solidBeforePill }
 	cablePresentation.set(next)
 	writeCablePresentation(next)
 	return next
@@ -150,22 +154,20 @@ export function asyncDashOffsetForLength(lengthPx: number): number {
 /** The dot: a zero-length dash with a round cap paints a disc of the stroke width. */
 export const DELAY_DOT_PX = 0.1
 export const DELAY_DOT_GAP_PX = 6
-export const DELAY_DASH_PX = 8
-export const DELAY_DASH_GAP_PX = 6
 
 /** `pathLength` the split paths are normalised to, so dashes are set in path units. */
 export const PATH_LENGTH_UNITS = 1000
 
 export interface SplitDashArrays {
-	/** Dotted up to the pill, then a gap that outlasts the path. */
+	/** Solid up to the pill, then a gap that outlasts the path. */
 	before: string
-	/** A gap up to the pill, then dashed to the end, then a gap that outlasts the path. */
+	/** A gap up to the pill, then dotted to the end, then a gap that outlasts the path. */
 	after: string
 }
 
 /**
  * Two dash arrays that, drawn on the same path with `pathLength=1000`, paint
- * dots before the pill and dashes after it. Each pattern ends with a gap of a
+ * solid before the pill and dots after it. Each pattern ends with a gap of a
  * full path so SVG's repeating never spills one style into the other's run.
  */
 export function splitDashArrays(lengthPx: number, t: number): SplitDashArrays {
@@ -173,23 +175,15 @@ export function splitDashArrays(lengthPx: number, t: number): SplitDashArrays {
 	const unit = lengthPx > 0 ? PATH_LENGTH_UNITS / lengthPx : 1
 	const dot = DELAY_DOT_PX * unit
 	const dotGap = DELAY_DOT_GAP_PX * unit
-	const dash = DELAY_DASH_PX * unit
-	const dashGap = DELAY_DASH_GAP_PX * unit
 	const pillAt = fraction * PATH_LENGTH_UNITS
 
-	const before: number[] = []
-	let covered = 0
-	while (covered < pillAt) {
-		before.push(dot, dotGap)
-		covered += dot + dotGap
-	}
-	before.push(0, PATH_LENGTH_UNITS)
+	const before: number[] = [pillAt, PATH_LENGTH_UNITS]
 
 	const after: number[] = [0, pillAt]
-	covered = pillAt
+	let covered = pillAt
 	while (covered < PATH_LENGTH_UNITS) {
-		after.push(dash, dashGap)
-		covered += dash + dashGap
+		after.push(dot, dotGap)
+		covered += dot + dotGap
 	}
 	after.push(0, PATH_LENGTH_UNITS)
 

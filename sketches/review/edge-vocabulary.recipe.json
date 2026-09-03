@@ -1,8 +1,8 @@
 {
   "feature": "Delayed cable (z⁻¹ pill)",
   "viewport": {
-    "width": 1600,
-    "height": 900
+    "width": 1640,
+    "height": 1100
   },
   "shapes": [
     {
@@ -318,7 +318,7 @@
       "x": 120,
       "y": 80,
       "w": 520,
-      "h": 120
+      "h": 150
     },
     {
       "id": "step-1",
@@ -327,7 +327,7 @@
       "x": 700,
       "y": 80,
       "w": 380,
-      "h": 120,
+      "h": 140,
       "target": {
         "shapeId": "smooth",
         "anchor": "top",
@@ -338,37 +338,37 @@
       "id": "step-2",
       "kind": "step",
       "text": "2 · Type 1.0 in the inspector's = value field and press Enter. The pill reads z⁻¹ = 1.0.",
-      "x": 1120,
+      "x": 1130,
       "y": 80,
       "w": 380,
-      "h": 110
+      "h": 140
     },
     {
       "id": "step-3",
       "kind": "step",
       "text": "3 · Drag the pill along the cable, then click Centre the pill in the inspector.",
       "x": 120,
-      "y": 820,
+      "y": 880,
       "w": 420,
-      "h": 100
+      "h": 120
     },
     {
       "id": "step-4",
       "kind": "step",
-      "text": "4 · Open the Dev Hub (</> bottom right) and switch on \"Dash after the z⁻¹ pill\": the run after the pill turns dashed. Mark the seed cable (estimate → refine) delayed too, via right-click › Delayed (z⁻¹), and compare.",
+      "text": "4 · Open the Dev Hub (</> bottom right) and switch on \"Solid before the z⁻¹ pill\": the run into the pill turns solid and the run after it stays dotted. Mark the seed cable (estimate → refine) delayed too, via right-click › Delayed (z⁻¹), and compare.",
       "x": 980,
       "y": 610,
       "w": 520,
-      "h": 150
+      "h": 180
     },
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN the back cable is dotted with a z⁻¹ pill you can slide, the pill shows = 1.0 after step 2, the Dev Hub switch dashes the run after the pill, and a reload keeps all of it.",
+      "text": "PASS WHEN the back cable is dotted with a z⁻¹ pill you can slide, the pill shows = 1.0 after step 2, the Dev Hub switch makes only the run before the pill solid, and a reload keeps all of it.",
       "x": 1000,
-      "y": 810,
+      "y": 850,
       "w": 380,
-      "h": 160
+      "h": 220
     }
   ]
 }
