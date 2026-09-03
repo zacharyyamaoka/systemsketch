@@ -34,6 +34,29 @@ def git(*args: str) -> str:
                           text=True).stdout.strip()
 
 
+QA_FRAMES = [
+    ("baseline", "The shipped default, as the datum for every other frame."),
+    ("narrow", "300px wide with a turn chip. Before the fix the title ran straight "
+               "through the chip; now the chip yields and the title centres in what is left."),
+    ("turn", "A turn string nobody sized the chip for. It truncates with an ellipsis and "
+             "keeps its 14px inset from the region's edge."),
+    ("long-types", "Types long enough to reach the centred title. Both truncate; the two "
+                   "rows stay apart."),
+    ("wide", "1180×200 — the header's three tenants at their most crowded horizontally."),
+    ("floor", "At the 180px floor, where the footer must yield rather than overlap."),
+    ("selected", "Stock resize handles and semantic port dots sharing the same edge."),
+    ("dark", "The region derives its chrome from --tl-* tokens, so dark comes free."),
+    ("zoomed-out", "At 5% the region is a bare rectangle. That is tldraw culling detail, "
+                   "the same as a Block."),
+    ("nested", "A Loop inside a Loop: the inner one is a real child and is clipped by its "
+               "parent."),
+    ("fan-out", "One element, three consumers. Correct, and the three parallel runs are "
+                "worth a design decision before anyone draws this for real."),
+    ("tap-port", "A tap now offers a Block, and it opens BELOW the port — the direction the "
+                 "cable points."),
+]
+
+
 def measure() -> dict:
     loop = sorted((REPO / "src" / "loop").glob("*.ts*"))
     journey = (REPO / "tests" / "loop_region_smoke.mjs").read_text()
@@ -49,6 +72,7 @@ def measure() -> dict:
         "base": git("rev-parse", "--short", "main"),
         "diffstat": git("diff", "--stat", "main...HEAD").splitlines()[-1:],
         "header_h": model.split("LOOP_HEADER_HEIGHT = ")[1].split("\n")[0],
+        "qa": json.loads((DOCS / "assets" / "loop-qa" / "observations.json").read_text())["observations"],
         "tldraw": json.loads((REPO / "package.json").read_text())["dependencies"]["tldraw"],
     }
 
@@ -103,6 +127,10 @@ def build() -> str:
     modules = "".join(f'<tr><td><code>src/loop/{name}</code></td><td class="num">{lines}</td></tr>'
                       for name, lines in facts["modules"])
     commits = "".join(f"<li><code>{esc(line)}</code></li>" for line in facts["commits"])
+    qa_frames = "".join(
+        f'<figure style="margin:0 0 18px"><img class="shot" src="{data_uri(DOCS / "assets" / "loop-qa" / (name + ".png"))}" '
+        f'alt="{esc(name)}"><figcaption><strong>{esc(name)}</strong> — {note}</figcaption></figure>'
+        for name, note in QA_FRAMES if (DOCS / "assets" / "loop-qa" / f"{name}.png").exists())
     return f"""<style>{CSS}</style><div class="wrap">
 <p class="eyebrow">SystemSketch · golden 10 · implementation</p>
 <h1>The Loop region, with the item on an ordinary solid cable</h1>
@@ -183,6 +211,45 @@ sufficient; the claim is about a real board.</p>
   carry returns on a <strong>dotted</strong> one with its <code>z⁻¹</code> pill. No legend is
   needed to tell them apart — which is the entire claim of B.</figcaption>
 </figure>
+
+<h2>The visual QA sweep, and what it found</h2>
+<p><code>npm run test:loop-qa</code> is a capture rig rather than a pass/fail journey. It
+drives the region through the cases that actually break a canvas UI and writes one frame and
+one machine-readable observation each, so every frame can be looked at rather than trusted.
+Three real defects came out of looking.</p>
+<table>
+<tr><th style="width:250px">Defect</th><th>What it was, and what fixed it</th></tr>
+<tr><td><strong>The header had three tenants and no allocation</strong></td>
+<td>The type labels, the centred title and the turn chip all wanted the same pixels. At 300px
+the title ran straight through the chip; a long turn string crowded the region's edge and
+nothing truncated. The row is now allocated — labels get a bounded budget, the title centres
+in the band that survives, and <strong>the chip yields first</strong> because it reports a
+live state while the title identifies the region. All three truncate with an ellipsis and
+keep the full string as a tooltip. The old assertion on the title's exact x is replaced by a
+property over six widths × three turn strings × two type lengths.</td></tr>
+<tr><td><strong>A tap on a Loop port did nothing</strong></td>
+<td>…while a drag from the same dot worked. <code>anchorFaceForScope</code> spelled its hosts
+out by hand — <code>isBlockShape || isBranchShape</code> — exactly as <code>canBind</code>
+had, so the picker asked for a face, got <code>null</code>, and bailed with no error.
+<strong>Second instance of one bug: a hand-written host list.</strong> The rig only caught it
+because it ran the same tap on a Block port as a control.</td></tr>
+<tr><td><strong>The picker opened the wrong way</strong></td>
+<td>Off to the right, on top of the header the cable had just left. The offered Block now
+goes where the cable points, which for a header port is down — the same
+<code>elbowSide</code> the router reads.</td></tr>
+</table>
+<p class="note warn"><strong>One flaw was in the rig, not the product.</strong> The
+<code>tap-port</code> case left a picker open, and the <code>export</code> case that followed
+reported the region's chrome missing from the SVG — a defect that vanished when the case ran
+alone. Each case now cancels and resets first. A rig that lies about a real feature is worse
+than no rig.</p>
+<div class="grid2">
+{qa_frames}
+</div>
+<p class="note"><strong>Left as a design question, not a bug.</strong> The
+<code>fan-out</code> frame shows one element feeding three Blocks as three parallel
+horizontal runs — the bundle of parallel arrows this whole thread started by rejecting. It is
+correct and it is ugly, and it wants a decision before anyone draws it for real.</p>
 
 <h2>Known, and deliberately left</h2>
 <p class="note warn"><strong>The item cable's elbow route laps the region.</strong> The
