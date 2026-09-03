@@ -36,7 +36,7 @@ export function freshnessLabel(status: ReleaseStatus): string {
  * The Preview → Stable transition, as one explicit state.
  *
  * `armed` is the deliberate second click: promoting runs the full check suite,
- * builds the app and all host plugins, then moves the Stable pointer. A stray
+ * publishes the standalone app, then attempts the host-plugin builds. A stray
  * click on an always-visible control must not start that transaction.
  */
 export type MakeStablePhase = 'unavailable' | 'idle' | 'armed' | 'working' | 'published'
@@ -61,10 +61,15 @@ export function makeStableLabel(phase: MakeStablePhase): string {
   return 'Make Preview Stable'
 }
 
-export function previewDetailLabel(phase: MakeStablePhase): string {
-  if (phase === 'armed') return 'Checks and builds app + host plugins, then points Stable here.'
-  if (phase === 'working') return 'Building the app and host plugins — this takes a few minutes.'
-  if (phase === 'published') return 'Stable now points here · host plugins ready · return to launch it.'
+export function previewDetailLabel(phase: MakeStablePhase, hostArtifactsReady?: boolean): string {
+  if (phase === 'armed') return 'Publishes standalone Stable first, then attempts the host-plugin builds.'
+  if (phase === 'working') return 'Publishing standalone Stable · host-plugin rebuild follows.'
+  if (phase === 'published' && hostArtifactsReady) {
+    return 'Standalone Stable updated · host plugins rebuilt · return to launch it.'
+  }
+  if (phase === 'published') {
+    return 'Standalone Stable updated · host-plugin rebuild needs attention · return to launch it.'
+  }
   return 'Live working copy · Stable stays unchanged'
 }
 

@@ -22,13 +22,16 @@ import { access, cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/pro
 import { constants as fsConstants } from 'node:fs'
 import net from 'node:net'
 import { tmpdir } from 'node:os'
-import { dirname, join, resolve } from 'node:path'
+import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const TEST_DIR = dirname(fileURLToPath(import.meta.url))
 const EXTENSION_ROOT = dirname(TEST_DIR)
 const PROJECT_ROOT = dirname(EXTENSION_ROOT)
 const VSIX = join(EXTENSION_ROOT, 'dist', 'systemsketch-vscode-0.1.0.vsix')
+const INSTALLED_EXTENSION = process.env.SYSTEMSKETCH_E2E_INSTALLED_EXTENSION_DIR
+  ? resolve(process.env.SYSTEMSKETCH_E2E_INSTALLED_EXTENSION_DIR)
+  : null
 const CAPTURE_DIR = process.env.SYSTEMSKETCH_E2E_CAPTURE_DIR
   ?? join(PROJECT_ROOT, 'docs', 'assets')
 const CAPTURE_PREFIX = process.env.SYSTEMSKETCH_E2E_CAPTURE_PREFIX ?? 'vscode'
@@ -564,7 +567,7 @@ function shapeCount(document, type) {
 async function main() {
   const hostPath = await findHost()
   const hostName = hostPath.toLowerCase().includes('cursor') ? 'Cursor' : 'Visual Studio Code'
-  await access(VSIX, fsConstants.R_OK)
+  await access(INSTALLED_EXTENSION ?? VSIX, fsConstants.R_OK)
 
   const testRoot = await mkdtemp(join(tmpdir(), 'systemsketch-vscode-e2e-'))
   const userData = join(testRoot, 'user-data')
@@ -577,6 +580,7 @@ async function main() {
   let hostProcess
   let page
   let recentOutput = ''
+  let bundledApp = null
 
   try {
     await mkdir(userData, { recursive: true })
@@ -588,12 +592,18 @@ async function main() {
     await writeFile(targetPath, '', 'utf8')
     await writeFile(join(workspace, 'source.py'), 'def run(raw: bytes) -> bytes:\n    return raw\n', 'utf8')
 
-    await run(hostPath, [
-      '--user-data-dir', userData,
-      '--extensions-dir', extensions,
-      '--install-extension', VSIX,
-      '--force',
-    ])
+    if (INSTALLED_EXTENSION) {
+      const isolatedExtension = join(extensions, basename(INSTALLED_EXTENSION))
+      await cp(INSTALLED_EXTENSION, isolatedExtension, { recursive: true })
+      bundledApp = JSON.parse(await readFile(join(isolatedExtension, 'dist', 'app', 'app.json'), 'utf8'))
+    } else {
+      await run(hostPath, [
+        '--user-data-dir', userData,
+        '--extensions-dir', extensions,
+        '--install-extension', VSIX,
+        '--force',
+      ])
+    }
 
     hostProcess = spawn('xvfb-run', [
       '-a', '-s', '-screen 0 1600x1000x24',
@@ -743,6 +753,7 @@ async function main() {
     if (!drivable) {
       await recordResults({
         host: hostName,
+        bundledApp,
         editor: 'systemsketch.editor',
         passed: checks.length,
         checks,
@@ -837,6 +848,7 @@ async function main() {
     if (await signInGate(page)) {
       await recordResults({
         host: hostName,
+        bundledApp,
         editor: 'systemsketch.editor',
         passed: checks.length,
         checks,
@@ -903,6 +915,7 @@ async function main() {
 
     await recordResults({
       host: hostName,
+      bundledApp,
       editor: 'systemsketch.editor',
       passed: checks.length,
       checks,

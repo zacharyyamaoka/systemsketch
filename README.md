@@ -44,10 +44,10 @@ flowchart LR
 - **Open Live Preview** snapshots the current board, opens the copy in a new Preview window, and then lets the two browser profiles evolve independently.
 - Browser-local images are made portable during that one-time handoff rather than pointing back to Stable's private asset store.
 - Stable and Preview use separate ports and browser profiles; when they intentionally point at the same local file, a content-digest fence prevents silent clobbers.
-- **Publish Preview** runs type checks, frontend tests, Python release tests, a production build,
-  and the VS Code/Cursor and Obsidian plugin builds before advancing the Stable pointer. Host
-  artifacts are immutable beside that Stable build; installing them remains explicit so publishing
-  never reloads an application Zach is using.
+- **Publish Preview** runs type checks, frontend tests, Python release tests, and a production build
+  before advancing the standalone Stable pointer. It then attempts the VS Code/Cursor and Obsidian
+  plugin builds as a best-effort follow-up; a host failure cannot roll back or interrupt the app.
+  Successful host artifacts are immutable beside that Stable build.
 - The previous verified Stable build remains available for rollback on the next launch.
 
 ## Development operating loop
@@ -210,11 +210,13 @@ cd ~/systemsketch/vscode-systemsketch && npm install && npm run package
 Install the resulting `dist/systemsketch-vscode-0.1.0.vsix` from the Extensions view, or with
 `code --install-extension`. `npm test` there drives the packaged extension in a real IDE.
 
-**Make Preview Stable** also rebuilds this VSIX and the Obsidian bundle before it advances Stable.
+**Make Preview Stable** publishes the standalone app first, then attempts to rebuild this VSIX and
+the Obsidian bundle. A plugin failure leaves the new standalone Stable available.
 The accepted copies live under `~/.local/share/systemsketch/runtime/host-releases/<build>/`, with
 one checksum manifest naming the shared VS Code/Cursor package and every Obsidian plugin file.
-The working-tree `dist/` folders are left on the same build for convenient manual installation;
-publishing does not install or reload either host behind your back.
+The working-tree `dist/` folders are left on the same build for convenient manual installation.
+Rebuilding does not update the already-installed copies, so merely reloading VS Code, Cursor, or
+Obsidian still uses the old plugin until the new artifact is installed or copied into that host.
 The [atomic host-plugin promotion report](docs/host-plugin-promotion-2026-09-02.html) shows the
 transaction, artifact ledger, failure behavior, and real VS Code/Cursor/Obsidian proof.
 

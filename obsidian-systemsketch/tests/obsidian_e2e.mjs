@@ -13,6 +13,9 @@ import { fileURLToPath } from 'node:url'
 const TEST_DIR = dirname(fileURLToPath(import.meta.url))
 const PLUGIN_ROOT = dirname(TEST_DIR)
 const PROJECT_ROOT = dirname(PLUGIN_ROOT)
+const PLUGIN_SOURCE = process.env.SYSTEMSKETCH_E2E_INSTALLED_PLUGIN_DIR
+  ? resolve(process.env.SYSTEMSKETCH_E2E_INSTALLED_PLUGIN_DIR)
+  : join(PLUGIN_ROOT, 'dist')
 const CAPTURE_DIR = process.env.SYSTEMSKETCH_E2E_CAPTURE_DIR ?? join(PROJECT_ROOT, 'docs', 'assets')
 const TIMEOUT_MS = 30_000
 const BLOCK_TOOL = '[data-testid="systemsketch-tool-system"] .systemsketch-block-icon'
@@ -277,14 +280,16 @@ let processHandle
 let page
 let recentOutput = ''
 const exceptions = []
+let bundledApp = null
 
 try {
   await mkdir(install, { recursive: true })
   await mkdir(profile, { recursive: true })
   await mkdir(CAPTURE_DIR, { recursive: true })
   for (const file of ['main.js', 'styles.css', 'manifest.json', 'bundle.json']) {
-    await cp(join(PLUGIN_ROOT, 'dist', file), join(install, file))
+    await cp(join(PLUGIN_SOURCE, file), join(install, file))
   }
+  bundledApp = JSON.parse(await readFile(join(install, 'bundle.json'), 'utf8'))
   await writeFile(targetPath, '', 'utf8')
   await writeFile(tldrPath, '', 'utf8')
   await writeFile(join(vault, 'Demo.md'), '# Embedded SystemSketch\n\n![[target.systemsketch|700x420]]\n', 'utf8')
@@ -418,6 +423,7 @@ try {
   const result = {
     checks: checks.length,
     host: 'Obsidian',
+    bundledApp,
     drivable,
     autosaveModifyEvents: 1,
     targetBlocks: shapeCount(savedTarget, 'block'),
