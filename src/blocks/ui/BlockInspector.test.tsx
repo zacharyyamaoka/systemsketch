@@ -88,9 +88,10 @@ describe('Block inspector content', () => {
     expect(html).toContain('aria-pressed="true"')
     expect(html).toContain('Step in')
     expect(html).toContain('Inspect')
-    expect(html).toContain('data-testid="block-pill-view-value"')
-    expect(html).toContain('aria-label="Show value view"')
-    expect(html).toContain('>V<span>value</span>')
+    expect(html).toContain('data-testid="block-pill-view-expanded"')
+    expect(html).toContain('aria-label="Show expanded view"')
+    expect(html).not.toContain('block-pill-view-value')
+    expect(html).not.toContain('Show value view')
   })
 
   it('offers Step in only when the selected Block is Expanded', () => {
@@ -112,6 +113,17 @@ describe('Block inspector content', () => {
 
     expect(port).not.toContain('Step in')
     expect(expanded).toContain('Step in')
+  })
+
+  it('does not render Block presentation controls for a Value capsule', () => {
+    const html = renderToStaticMarkup(
+      <BlockSelectionMiniMenu
+        view={{ type: 'shared', value: 'value' }}
+        onSetView={() => {}}
+        onOpenInspector={() => {}}
+      />,
+    )
+    expect(html).toBe('')
   })
 
   it('turns the active scope action into Step out', () => {
@@ -156,8 +168,7 @@ describe('the Pill section', () => {
     expect(html).toContain('aria-label="Variable type"')
     expect(html).toContain('Fed by estimate() · pose')
     expect(html).toContain('Feeds encode() · pose')
-    expect(html).toContain('data-inspector-section="View"')
-    for (const section of ['Block', 'Tags', 'Inputs', 'Outputs', 'Ports']) {
+    for (const section of ['Block', 'Tags', 'View', 'Inputs', 'Outputs', 'Ports']) {
       expect(html).not.toContain(`data-inspector-section="${section}"`)
     }
   })

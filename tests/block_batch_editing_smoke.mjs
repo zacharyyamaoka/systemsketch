@@ -236,7 +236,6 @@ async function main() {
       { glyph: 'S', label: 'Show simple view' },
       { glyph: 'P', label: 'Show port view' },
       { glyph: 'E', label: 'Show expanded view' },
-      { glyph: 'V', label: 'Show value view' },
     ])
     pass('a marquee over three Blocks keeps the Block mini menu and its shared view without a count summary')
 
@@ -351,7 +350,6 @@ async function main() {
       { label: 'Simple', checked: 'false' },
       { label: 'Port', checked: 'false' },
       { label: 'Expanded', checked: 'false' },
-      { label: 'Value', checked: 'false' },
     ])
     await clickMenuCheckbox(page, 'block-view', 'Simple')
     await waitFor(page,
@@ -372,7 +370,6 @@ async function main() {
       { label: 'Simple', checked: 'true' },
       { label: 'Port', checked: 'false' },
       { label: 'Expanded', checked: 'false' },
-      { label: 'Value', checked: 'false' },
     ])
     await openSubmenu(page, 'block-ports')
     assert.deepEqual(await menuCheckboxes(page, 'block-ports'), [

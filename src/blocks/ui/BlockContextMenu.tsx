@@ -17,7 +17,7 @@ import {
 import { ReliableContextMenu } from './ReliableContextMenu'
 
 import {
-  BLOCK_VIEWS,
+  BLOCK_PRESENTATION_VIEWS,
   HEADER_ROW,
   PORT_LAYOUTS,
   blockIcon,
@@ -49,6 +49,7 @@ import {
 import { getBlockPortMenuTarget, type BlockPortRef } from '../ports'
 import {
   getBlockSelectionStyles,
+  getSelectedBlocks,
   getSelectedConnectionCount,
   getSharedStyleForSelection,
   isSharedStyleValue,
@@ -158,6 +159,11 @@ function BlockContextMenuItems() {
   const blockStyles = useValue(
     'context-menu Block selection styles',
     () => getBlockSelectionStyles(editor),
+    [editor],
+  )
+  const hasValueRepresentation = useValue(
+    'SystemSketch Value representation in context selection',
+    () => getSelectedBlocks(editor).some((block) => block.props.view === 'value'),
     [editor],
   )
   const connectionRouting = useValue(
@@ -362,14 +368,14 @@ function BlockContextMenuItems() {
         </TldrawUiMenuGroup>
       ) : null}
 
-      {blockStyles.blockCount > 0 ? (
+      {blockStyles.blockCount > 0 && !hasValueRepresentation ? (
         <TldrawUiMenuGroup id="systemsketch-block-authoring">
           <TldrawUiMenuSubmenu
             id="block-view"
             label="Block view"
           >
             <TldrawUiMenuGroup id="block-view-options">
-              {BLOCK_VIEWS.map((view) => (
+              {BLOCK_PRESENTATION_VIEWS.map((view) => (
                 <TldrawUiMenuCheckboxItem
                   key={view}
                   id={`block-view-${view}`}

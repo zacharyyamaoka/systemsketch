@@ -14,7 +14,8 @@
 import type { SharedStyle } from 'tldraw'
 
 import {
-  BLOCK_VIEWS,
+  BLOCK_PRESENTATION_VIEWS,
+  type BlockPresentationView,
   PORT_LAYOUTS,
   type BlockView,
   type PortLayout,
@@ -22,7 +23,7 @@ import {
 import './block-inspector.css'
 
 export interface BlockBatchInspectorActions {
-  setView(view: BlockView): void
+  setView(view: BlockPresentationView): void
   setPortLayout(portLayout: PortLayout): void
   setShowDescription(showDescription: boolean): void
 }
@@ -95,7 +96,7 @@ export function BlockBatchInspectorContent({
             <MixedChip shared={view} />
           </div>
           <div className="block-inspector__choices" role="group" aria-label="Block view">
-            {BLOCK_VIEWS.map((candidate) => (
+            {BLOCK_PRESENTATION_VIEWS.map((candidate) => (
               <button
                 key={candidate}
                 type="button"

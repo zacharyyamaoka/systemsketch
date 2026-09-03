@@ -113,6 +113,9 @@ async function main() {
 
     await openSubmenu(page, 'block-view')
     assert.equal((await menuCheckboxBox(page, 'block-view', 'Port')).checked, 'true')
+    assert.deepEqual(JSON.parse(await evaluate(page, `JSON.stringify(Array.from(
+      document.querySelectorAll('[data-testid="context-menu-sub.block-view-content"] [role="menuitemcheckbox"]'),
+    ).map((item) => item.textContent.trim()))`)), ['Simple', 'Port', 'Expanded'])
     await clickMenuCheckbox(page, 'block-view', 'Simple')
     await waitFor(page, `document.querySelector('.systemsketch-block-canvas[data-block-view="simple"]')`, 'Simple view')
     pass('Block view exposes checked Simple / Port / Expanded choices')

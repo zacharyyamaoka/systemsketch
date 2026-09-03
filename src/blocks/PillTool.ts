@@ -3,7 +3,8 @@ import { BLOCK_SHAPE_TYPE, PILL_TOOL_ID, isBlockShape, type BlockShape } from '.
 import { createValueBlockProps } from './valueBlock'
 
 /**
- * P draws a pill: a Block already wearing its `value` view.
+ * P creates a literal pill: the separate `value` representation carried by
+ * the Block primitive.
  *
  * The stock box tool owns pointer capture, click/drag creation, cancellation
  * and history, exactly as it does for the Block tool. Whatever box the gesture

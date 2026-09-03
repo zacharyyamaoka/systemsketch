@@ -144,7 +144,7 @@ async function main() {
     const first = await drawPill(page, { x: 300, y: 520 }, '2.0')
     check('TOOL-1', 'P selects the pill tool', first.tool, 'pill')
     const pill = first.pill
-    check('PILL-1', 'a click with the pill tool makes a Block in the value view', pill?.view ?? null, 'value')
+    check('PILL-1', 'a click with the pill tool creates the separate Value capsule', pill?.view ?? null, 'value')
     check('PILL-2', 'the literal is the title; one unnamed inlet and outlet, typed from the literal',
       pill ? { title: pill.title, name: pill.outputs[0]?.name, type: pill.outputs[0]?.type, inputs: pill.inputs.length, outputs: pill.outputs.length, inletType: pill.inputs[0]?.type } : null,
       { title: '2.0', name: '', type: 'float', inputs: 1, outputs: 1, inletType: 'float' })
@@ -261,15 +261,17 @@ async function main() {
     await deselect(page, { x: 1000, y: 800 })
     await shot(page, 'literal-pill-fed.png')
 
-    // ---- the value view is one of the Block's views in the inspector ---------
+    // ---- a value is a pill representation, not a Block view -----------------
     await clickAt(page, face.cx, face.cy)
     await delay(300)
-    check('VIEW-1', 'the inspector offers value beside simple, port and expanded',
+    check('VIEW-0', 'selecting a Value capsule does not show the ordinary Block selection pill',
+      await evaluate(page, `Boolean(document.querySelector('.block-mini-menu'))`), false)
+    check('VIEW-1', 'the pill inspector does not offer Block-view conversion controls',
       await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('[data-inspector-section="View"] button')).map((node) => node.textContent.trim()))`),
-      JSON.stringify(['simple', 'port', 'expanded', 'value']))
+      JSON.stringify([]))
     check('VIEW-2', 'the inspector shows a Pill section in place of the Block sections',
-      await evaluate(page, `JSON.stringify(['Pill', 'Block', 'Tags', 'Inputs', 'Outputs', 'Ports'].map((name) => Boolean(document.querySelector('[data-inspector-section="' + name + '"]'))))`),
-      JSON.stringify([true, false, false, false, false, false]))
+      await evaluate(page, `JSON.stringify(['Pill', 'Block', 'Tags', 'View', 'Inputs', 'Outputs', 'Ports'].map((name) => Boolean(document.querySelector('[data-inspector-section="' + name + '"]'))))`),
+      JSON.stringify([true, false, false, false, false, false, false]))
     check('VIEW-3', 'the Pill section reads the literal as the value and the ports\' name as the name',
       await evaluate(page, `JSON.stringify([
         document.querySelector('[data-inspector-section="Pill"] input[aria-label="Variable name"]')?.value,
@@ -277,6 +279,11 @@ async function main() {
         document.querySelector('[data-inspector-section="Pill"] input[aria-label="Variable type"]')?.value,
       ])`),
       JSON.stringify(['gain', '2.0', 'float']))
+    await clickAt(page, face.cx, face.cy, 'right')
+    await waitFor(page, `document.querySelector('[data-testid="context-menu"]')`, 'the Value context menu')
+    check('VIEW-4', 'the Value context menu does not offer ordinary Block authoring or view conversion',
+      await evaluate(page, `Boolean(document.querySelector('[data-testid="context-menu-sub.block-view-button"]'))`), false)
+    await key(page, 'Escape', 'Escape')
     await shot(page, 'literal-pill-inspector.png')
     await deselect(page, { x: 1000, y: 800 })
 

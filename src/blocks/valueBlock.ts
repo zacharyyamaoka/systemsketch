@@ -1,11 +1,12 @@
 /**
- * The Block's `value` view: a literal argument drawn as a capsule.
+ * The separate `value` representation: a literal argument drawn as a capsule.
  *
  * `pose = estimate(frame, 2.0)` — the 2.0 is not estimate's default, it is a
- * value fed in from outside, a source. The capsule is the Block primitive
- * wearing a fourth view rather than a new shape, so cables, the polarity
- * judge, click-to-edit, the inspector, batch styles and the file format all
- * apply to it unchanged.
+ * value fed in from outside, a source. The capsule shares the Block
+ * primitive rather than creating a new shape, so cables, the polarity judge,
+ * click-to-edit, the inspector, and the file format apply to it unchanged.
+ * It is nevertheless intentionally excluded from ordinary Block presentation
+ * and batch-style controls.
  *
  * A pill is a variable, so it can be fed as well as read: it always has one
  * inlet on its left rim and one outlet on its right, and what is wired decides
