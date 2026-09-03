@@ -158,8 +158,10 @@ class StockBoundaryTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("BranchShapeUtil", portable_export)
         self.assertIn("BranchArmShapeUtil", portable_export)
-        self.assertIn("unwrapBranchArmFrames", portable_export)
-        self.assertIn("record.type === BRANCH_SHAPE_TYPE", portable_export)
+        # Branch lowering is shared with the live Detach command so export
+        # cannot grow a second, subtly different custom-record conversion.
+        self.assertIn("detachBranchToPrimitives", portable_export)
+        self.assertIn("isBranchShape", portable_export)
         self.assertIn("SYSTEMSKETCH_ROUNDED_RECT_GEO", portable_export)
         self.assertIn("portableValuePillText", portable_export)
         self.assertIn("freezeDetachedValuePill", portable_export)

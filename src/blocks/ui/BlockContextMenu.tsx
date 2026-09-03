@@ -39,10 +39,10 @@ import {
   updateBlockDetails,
 } from '../commands/blockCommands'
 import {
-  detachSelectedBlocks,
+  detachSelectedPrimitives,
   detachSelectedConnections,
   rebuildSelectedBlocks,
-  selectedBlockIds,
+  selectedDetachableIds,
   selectedConnectionIds,
   selectedDetachedGroupIds,
 } from '../detach'
@@ -119,8 +119,8 @@ function BlockContextMenuItems() {
   // Detach and its inverse are selection-scoped commands: a sweep over a
   // multi-selection is the normal case, without narrating a selected total.
   const detachableCount = useValue(
-    'context-menu detachable Blocks',
-    () => selectedBlockIds(editor).length,
+    'context-menu detachable composites',
+    () => selectedDetachableIds(editor).length,
     [editor],
   )
   const detachableConnectionCount = useValue(
@@ -475,7 +475,7 @@ function BlockContextMenuItems() {
             <TldrawUiMenuItem
               id="block-detach-to-primitives"
               label="Detach to primitives"
-              onSelect={() => void detachSelectedBlocks(editor)}
+              onSelect={() => void detachSelectedPrimitives(editor)}
             />
           ) : null}
           {rebuildableCount > 0 ? (

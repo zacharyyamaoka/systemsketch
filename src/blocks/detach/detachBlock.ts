@@ -25,7 +25,7 @@
  * group and its `meta` with it, which is the honest meaning of taking the
  * thing apart by hand.
  */
-import { createShapeId } from 'tldraw'
+import { createShapeId, toRichText } from 'tldraw'
 import type {
 	Editor,
 	TLArrowBinding,
@@ -56,20 +56,17 @@ import {
 	type ConnectionBinding,
 } from '../connections/ConnectionBindingUtil'
 import {
-	getConnectionRenderPoints,
-	getConnectionShapePath,
 	getConnectionTerminals,
 	type ConnectionShape,
 } from '../connections/ConnectionShapeUtil'
-import { cablePresentation } from '../connections/connectionPresentation'
-import {
-	systemSketchPrimitiveMeta,
-	type SystemSketchArrowPrimitiveStyle,
-} from '../../stockPrimitiveVisuals'
+import { detachBranchToPrimitives } from '../../branch/detachBranch'
+import { isBranchShape } from '../../branch/branchModel'
 import { primitivesForBlock } from './blockPrimitives'
 import {
 	DETACH_FORMAT_VERSION,
 	detachMeta,
+	detachedDelayPillArrowId,
+	detachedDelayPillMeta,
 	readDetachedBlock,
 	readDetachedConnection,
 	isDetachedCard,
@@ -288,14 +285,10 @@ function rebuildCableAsArrow(
 
 	const routing = (cable.connection.props as { routing?: ConnectionRoutingKind }).routing ?? 'elbow'
 	const arrowId = createShapeId()
-	const primitiveStyle = detachedCablePrimitiveStyle(
-		editor,
-		cable.connection as ConnectionShape,
-		start,
-	)
 	editor.createShape({
 		id: arrowId,
 		type: 'arrow',
+		parentId: cable.connection.parentId,
 		x: start.x,
 		y: start.y,
 		props: {
@@ -305,7 +298,7 @@ function rebuildCableAsArrow(
 			bend: routing === 'curved' ? 32 : 0,
 			color: 'grey',
 			size: 's',
-			dash: 'solid',
+			dash: dashForDetachedTemporal((cable.connection as ConnectionShape).props.temporal),
 			// A data edge is drawn as a plain run between two dots — no heads.
 			// Detach keeps the look, so the arrow that replaces it wears none
 			// either; direction lives in the record, not in a glyph the Block
@@ -313,7 +306,7 @@ function rebuildCableAsArrow(
 			arrowheadStart: 'none',
 			arrowheadEnd: 'none',
 		},
-		meta: systemSketchPrimitiveMeta(primitiveStyle, detachMeta({
+		meta: detachMeta({
 			kind: 'connection',
 			version: DETACH_FORMAT_VERSION,
 			routing,
@@ -322,8 +315,15 @@ function rebuildCableAsArrow(
 			pillPosition: (cable.connection as ConnectionShape).props.pillPosition,
 			rebuildWithBlocks: true,
 			ends,
-		})),
+		}),
 	})
+	const pillGroupId = createDetachedDelayPill(editor, {
+		arrowId,
+		connection: cable.connection as ConnectionShape,
+		start,
+		end,
+	})
+	groupDetachedEdgeWithPill(editor, arrowId, pillGroupId)
 	editor.createBinding<TLArrowBinding>({
 		type: 'arrow',
 		fromId: arrowId,
@@ -357,46 +357,96 @@ function rebuildCableAsArrow(
 	return 1
 }
 
-/** Capture the exact semantic cable body in the replacement arrow's space. */
-function detachedCablePrimitiveStyle(
+function dashForDetachedTemporal(temporal: ConnectionShape['props']['temporal']): 'solid' | 'dashed' | 'dotted' {
+	if (temporal === 'async') return 'dashed'
+	if (temporal === 'delayed') return 'dotted'
+	return 'solid'
+}
+
+/**
+ * Stock tldraw has no inline delay pill. Lower it to the most literal stock
+ * composition instead: an independent oval and text label beside a dotted
+ * arrow. Both still render in a viewer that ignores every metadata key.
+ */
+function createDetachedDelayPill(
 	editor: Editor,
-	connection: ConnectionShape,
-	arrowOriginPage: { x: number; y: number },
-): SystemSketchArrowPrimitiveStyle {
-	const pageTransform = editor.getShapePageTransform(connection)
-	const origin = pageTransform.applyToPoint({ x: 0, y: 0 })
-	const basisX = pageTransform.applyToPoint({ x: 1, y: 0 })
-	const basisY = pageTransform.applyToPoint({ x: 0, y: 1 })
-	const transform = {
-		a: basisX.x - origin.x,
-		b: basisX.y - origin.y,
-		c: basisY.x - origin.x,
-		d: basisY.y - origin.y,
-		e: origin.x - arrowOriginPage.x,
-		f: origin.y - arrowOriginPage.y,
+	input: {
+		arrowId: TLShapeId
+		connection: ConnectionShape
+		start: { x: number; y: number }
+		end: { x: number; y: number }
+	},
+): TLShapeId | null {
+	const { arrowId, connection, start, end } = input
+	if (connection.props.temporal !== 'delayed') return null
+	const label = `z⁻¹${connection.props.delayValue ? ` = ${connection.props.delayValue}` : ''}`
+	const fraction = Math.min(0.9, Math.max(0.1, connection.props.pillPosition))
+	const point = {
+		x: start.x + (end.x - start.x) * fraction,
+		y: start.y + (end.y - start.y) * fraction,
 	}
-	const place = (point: { x: number; y: number }) => ({
-		x: transform.a * point.x + transform.c * point.y + transform.e,
-		y: transform.b * point.x + transform.d * point.y + transform.f,
-	})
-	const terminals = getConnectionTerminals(editor, connection)
-	return {
-		kind: 'arrow',
-		strokeColor: 'var(--tl-color-text-3, #475569)',
-		strokeWidth: 2,
-		presentation: {
-			temporal: connection.props.temporal,
-			delayValue: connection.props.delayValue,
-			pillPosition: connection.props.pillPosition,
-			dashAfterPill: cablePresentation.get().dashAfterPill,
+	const width = Math.max(54, Math.min(180, 20 + label.length * 9))
+	const height = 26
+	const pillId = createShapeId()
+	const labelId = createShapeId()
+	editor.createShapes([
+		{
+			id: pillId,
+			type: 'geo',
+			parentId: connection.parentId,
+			x: point.x - width / 2,
+			y: point.y - height - 10,
+			props: { geo: 'oval', w: width, h: height, color: 'grey', fill: 'semi', dash: 'solid', size: 's' },
 		},
-		path: {
-			d: getConnectionShapePath(editor, connection),
-			transform,
-			frame: { start: place(terminals.start), end: place(terminals.end) },
-			samples: getConnectionRenderPoints(editor, connection).map((point) => point.toJson()),
+		{
+			id: labelId,
+			type: 'text',
+			parentId: connection.parentId,
+			x: point.x - width / 2 + 8,
+			y: point.y - height - 4,
+			props: {
+				richText: toRichText(label), autoSize: false, color: 'black', font: 'mono',
+				scale: 0.68, size: 's', textAlign: 'middle', w: Math.max(1, (width - 16) / 0.68),
+			},
 		},
+	])
+	// A pill is a separate, ordinary stock group: its oval and label copy and
+	// move as one object rather than becoming two loose decorations.
+	const groupId = createShapeId()
+	editor.groupShapes([pillId, labelId], { groupId, select: false })
+	if (editor.getShape(groupId)) {
+		editor.updateShape({ id: groupId, type: 'group', meta: detachedDelayPillMeta(arrowId) })
+		return groupId
 	}
+	return null
+}
+
+/**
+ * A delayed edge remains a stock group in its own right. The nested pill group
+ * gives the `z⁻¹` oval and label their own edit/move unit; this outer group
+ * makes normal stock selection, copy, and dragging take the arrow *and* that
+ * independent pill together.
+ */
+function groupDetachedEdgeWithPill(
+	editor: Editor,
+	arrowId: TLShapeId,
+	pillGroupId: TLShapeId | null,
+): TLShapeId | null {
+	if (!pillGroupId) return null
+	const groupId = createShapeId()
+	editor.groupShapes([arrowId, pillGroupId], { groupId, select: false })
+	return editor.getShape(groupId) ? groupId : null
+}
+
+/** The direct stock edge group (if this arrow owns a delayed pill). */
+function detachedEdgeGroupId(editor: Editor, arrowId: TLShapeId): TLShapeId | null {
+	const arrow = editor.getShape(arrowId)
+	if (!arrow) return null
+	const parent = editor.getShape(arrow.parentId)
+	if (!parent || parent.type !== 'group') return null
+	const hasPill = editor.getSortedChildIdsForParent(parent.id)
+		.some((childId) => detachedDelayPillArrowId(editor.getShape(childId)?.meta) === arrowId)
+	return hasPill ? parent.id : null
 }
 
 /** Every selected semantic cable, including cables nested in selected groups. */
@@ -424,21 +474,29 @@ export function selectedConnectionIds(editor: Editor): TLShapeId[] {
 export function detachSelectedConnections(editor: Editor): TLShapeId[] {
 	const connectionIds = selectedConnectionIds(editor)
 	if (connectionIds.length === 0) return []
+	// groupShapes is a stock editor command and is only available from the
+	// select tool. Direct arrow detach can be invoked while a connection tool is
+	// active, unlike Block detachment which already selects its composites.
+	if (editor.getCurrentToolId() !== 'select') editor.setCurrentTool('select')
 	editor.markHistoryStoppingPoint('detach arrows')
 	const arrowIds: TLShapeId[] = []
+	const selectionIds: TLShapeId[] = []
 	editor.run(() => {
 		for (const connectionId of connectionIds) {
 			const connection = editor.getShape(connectionId)
 			if (!connection || connection.type !== CONNECTION_SHAPE_TYPE) continue
 			const arrowId = detachConnectionToArrow(editor, connection as ConnectionShape)
-			if (arrowId) arrowIds.push(arrowId)
+			if (arrowId) {
+				arrowIds.push(arrowId)
+				selectionIds.push(detachedEdgeGroupId(editor, arrowId) ?? arrowId)
+			}
 		}
-		editor.setSelectedShapes(arrowIds)
+		editor.setSelectedShapes(selectionIds)
 	})
 	return arrowIds
 }
 
-function detachConnectionToArrow(
+export function detachConnectionToArrow(
 	editor: Editor,
 	connection: ConnectionShape,
 ): TLShapeId | null {
@@ -475,24 +533,28 @@ function detachConnectionToArrow(
 			bend: routing === 'curved' ? 32 : 0,
 			color: 'grey',
 			size: 's',
-			dash: 'solid',
+			dash: dashForDetachedTemporal(connection.props.temporal),
 			arrowheadStart: 'none',
 			arrowheadEnd: 'none',
 		},
-		meta: systemSketchPrimitiveMeta(
-			detachedCablePrimitiveStyle(editor, connection, pagePoints.start),
-			detachMeta({
-				kind: 'connection',
-				version: DETACH_FORMAT_VERSION,
-				routing,
-				temporal: connection.props.temporal,
-				delayValue: connection.props.delayValue,
-				pillPosition: connection.props.pillPosition,
-				rebuildWithBlocks: false,
-				ends,
-			}),
-		),
+		meta: detachMeta({
+			kind: 'connection',
+			version: DETACH_FORMAT_VERSION,
+			routing,
+			temporal: connection.props.temporal,
+			delayValue: connection.props.delayValue,
+			pillPosition: connection.props.pillPosition,
+			rebuildWithBlocks: false,
+			ends,
+		}),
 	})
+	const pillGroupId = createDetachedDelayPill(editor, {
+		arrowId,
+		connection,
+		start: pagePoints.start,
+		end: pagePoints.end,
+	})
+	groupDetachedEdgeWithPill(editor, arrowId, pillGroupId)
 
 	for (const terminal of ['start', 'end'] as const) {
 		const binding = bindings[terminal]
@@ -546,6 +608,27 @@ export function selectedBlockIds(editor: Editor): TLShapeId[] {
 }
 
 /**
+ * Every custom composite selected through the current tree. A Branch lowers
+ * before its descendants so its invisible arm helpers are released first; an
+ * Expanded Block lowers before its descendants for the same parent-preserving
+ * reason. "Detach to primitives" is a stock portability command, not a
+ * Block-only command.
+ */
+export function selectedDetachableIds(editor: Editor): TLShapeId[] {
+	const found: TLShapeId[] = []
+	const visit = (ids: readonly TLShapeId[]) => {
+		for (const id of ids) {
+			const shape = editor.getShape(id)
+			if (!shape) continue
+			if (isBranchShape(shape) || isBlockShape(shape)) found.push(id)
+			visit(editor.getSortedChildIdsForParent(id))
+		}
+	}
+	visit(editor.getSelectedShapeIds())
+	return [...new Set(found)]
+}
+
+/**
  * Every Block on the current page, nesting included.
  *
  * What the `.tldr` export sweeps. Parent before child for the same reason the
@@ -564,14 +647,39 @@ export function allBlockIds(editor: Editor): TLShapeId[] {
 	return [...new Set(found)]
 }
 
+/** All registered custom composites on the page, nesting included. */
+export function allDetachableIds(editor: Editor): TLShapeId[] {
+	const found: TLShapeId[] = []
+	const visit = (ids: readonly TLShapeId[]) => {
+		for (const id of ids) {
+			const shape = editor.getShape(id)
+			if (!shape) continue
+			if (isBranchShape(shape) || isBlockShape(shape)) found.push(id)
+			visit(editor.getSortedChildIdsForParent(id))
+		}
+	}
+	visit(editor.getSortedChildIdsForParent(editor.getCurrentPageId()))
+	return [...new Set(found)]
+}
+
 /** Detach every Block on the page in one undoable step. */
 export function detachAllBlocks(editor: Editor): DetachResult[] {
 	return detachBlocks(editor, allBlockIds(editor))
 }
 
+/** Detach every custom visual on the page, including Branch arm projections. */
+export function detachAllPrimitives(editor: Editor): DetachResult[] {
+	return detachPrimitives(editor, allDetachableIds(editor))
+}
+
 /** Detach every selected Block in one undoable step. */
 export function detachSelectedBlocks(editor: Editor): DetachResult[] {
 	return detachBlocks(editor, selectedBlockIds(editor))
+}
+
+/** The selection-scoped command exposed as "Detach to primitives". */
+export function detachSelectedPrimitives(editor: Editor): DetachResult[] {
+	return detachPrimitives(editor, selectedDetachableIds(editor))
 }
 
 function detachBlocks(editor: Editor, ids: readonly TLShapeId[]): DetachResult[] {
@@ -582,6 +690,25 @@ function detachBlocks(editor: Editor, ids: readonly TLShapeId[]): DetachResult[]
 	const results: DetachResult[] = []
 	editor.run(() => {
 		for (const id of ids) {
+			const result = detachBlockToPrimitives(editor, id, { mark: false })
+			if (result !== null) results.push(result)
+		}
+	})
+	return results
+}
+
+function detachPrimitives(editor: Editor, ids: readonly TLShapeId[]): DetachResult[] {
+	if (ids.length === 0) return []
+	editor.markHistoryStoppingPoint('detach to primitives')
+	const results: DetachResult[] = []
+	editor.run(() => {
+		for (const id of ids) {
+			const shape = editor.getShape(id)
+			if (isBranchShape(shape)) {
+				detachBranchToPrimitives(editor, id)
+				continue
+			}
+			if (!isBlockShape(shape)) continue
 			const result = detachBlockToPrimitives(editor, id, { mark: false })
 			if (result !== null) results.push(result)
 		}
@@ -723,18 +850,21 @@ export function rebuildSelectedBlocks(editor: Editor): RebuildResult {
 					pillPosition: arrow.record.pillPosition,
 				},
 			})
-			for (const [terminal, blockId, end] of [
+				for (const [terminal, blockId, end] of [
 				['start', startBlock, startEnd] as const,
 				['end', endBlock, endEnd] as const,
-			]) {
+				]) {
 				editor.createBinding<ConnectionBinding>({
 					type: CONNECTION_BINDING_TYPE,
 					fromId: connectionId,
 					toId: blockId,
 					props: { portId: end.portId, terminal, face: end.face },
 				})
-			}
-			editor.deleteShape(arrow.id)
+				}
+				// The pill remains independently editable *inside* its stock edge
+				// group. Drop the containing group as one unit so no oval/text
+				// descendants survive when the semantic cable returns.
+				editor.deleteShape(detachedEdgeGroupId(editor, arrow.id) ?? arrow.id)
 			rebuiltConnections += 1
 		}
 

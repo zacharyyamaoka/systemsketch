@@ -17,6 +17,7 @@ import {
 import { blockIds, drawBlock } from './block_journey_helpers.mjs'
 
 const EVIDENCE = join(ROOT, 'docs', 'assets', 'repo-improvements-share.png')
+const STOCK_EVIDENCE = join(ROOT, 'docs', 'assets', 'stock-tldr-primitives-stock-render.png')
 
 const checks = []
 function check(label, condition, detail = '') {
@@ -99,7 +100,7 @@ async function main() {
       })
       editor.createShape({ id: 'shape:portable-pill-cable', type: 'connection', x: 0, y: 0,
         props: { start: { x: 0, y: 0 }, end: { x: 100, y: 0 }, routing: 'elbow',
-          curve: null, pins: [], elbowRoute: null } })
+          curve: null, pins: [], elbowRoute: null, temporal: 'delayed', delayValue: '7', pillPosition: 0.62 } })
       editor.createBindings([
         { type: 'connection', fromId: 'shape:portable-pill-cable', toId: authored.id,
           props: { portId: 'out0', terminal: 'start', face: 'outer' } },
@@ -108,6 +109,20 @@ async function main() {
       ])
       editor.createShape({ id: 'shape:portable-pink', type: 'geo', x: 590, y: 520,
         props: { geo: 'ellipse', w: 130, h: 90, color: 'pink' } })
+      editor.createShapes([
+        { id: 'shape:portable-async-source', type: 'block', x: 1120, y: 650,
+          props: { title: 'async source', view: 'port', inputs: [], outputs: [{ id: 'out0', name: 'event', type: 'Event', visible: true }] } },
+        { id: 'shape:portable-async-target', type: 'block', x: 1500, y: 650,
+          props: { title: 'async target', view: 'port', inputs: [{ id: 'in0', name: 'event', type: 'Event', visible: true }], outputs: [] } },
+        { id: 'shape:portable-async-edge', type: 'connection', x: 0, y: 0,
+          props: { start: { x: 0, y: 0 }, end: { x: 100, y: 0 }, routing: 'straight', temporal: 'async', curve: null, pins: [], elbowRoute: null } },
+      ])
+      editor.createBindings([
+        { type: 'connection', fromId: 'shape:portable-async-edge', toId: 'shape:portable-async-source',
+          props: { portId: 'out0', terminal: 'start', face: 'outer' } },
+        { type: 'connection', fromId: 'shape:portable-async-edge', toId: 'shape:portable-async-target',
+          props: { portId: 'in0', terminal: 'end', face: 'outer' } },
+      ])
       editor.createShape({
         id: 'shape:portable-secondary-frame', type: 'frame', x: 1400, y: 80,
         props: { name: 'Secondary', w: 780, h: 600 },
@@ -192,7 +207,13 @@ async function main() {
     await writeFile(EVIDENCE, Buffer.from(capture.data, 'base64'))
 
     await clickElement(page, '[data-testid="export-portable-tldr"]')
-    const downloadedPath = await waitForDownload(downloads)
+    let downloadedPath
+    try {
+      downloadedPath = await waitForDownload(downloads)
+    } catch (error) {
+      const status = await evaluate(page, `document.querySelector('[data-testid="systemsketch-share-menu"] [role="status"]')?.textContent ?? ''`)
+      throw new Error(`${error.message}; export status: ${status}`)
+    }
     const source = await readFile(downloadedPath, 'utf8')
     const after = await evaluate(page, `JSON.stringify(window.__systemsketch.editor.getSnapshot())`)
     const portable = JSON.parse(source)
@@ -204,8 +225,8 @@ async function main() {
       .map((record) => record.type)
 
     check('export leaves the live snapshot byte-identical', before === after)
-    check('the live one-canvas board still paints all five Blocks, including the framed blank and both Pills',
-      (await blockIds(page)).length === 5)
+    check('the live one-canvas board still paints all seven Blocks, including the framed blank, both Pills and async pair',
+      (await blockIds(page)).length === 7)
     check('portable JSON contains no custom Block or connection shape',
       !shapeTypes.includes('block') && !shapeTypes.includes('connection'), shapeTypes.join(', '))
     check('portable JSON contains no custom Branch shape', !shapeTypes.includes('branch'))
@@ -214,7 +235,7 @@ async function main() {
       record.typeName === 'shape'
       && record.meta?.systemSketch?.kind === 'block')
     check('all detached Blocks remember enough to rebuild, including both Pills and a one-card blank',
-      rememberedBlocks.length === 5, `remembered ${rememberedBlocks.length} of 5`)
+      rememberedBlocks.length === 7, `remembered ${rememberedBlocks.length} of 7`)
 
     const literalPill = rememberedBlocks.find((record) =>
       record.meta.systemSketch.props?.view === 'value'
@@ -243,10 +264,29 @@ async function main() {
     const detachedCable = portable.records.find((record) =>
       record.typeName === 'shape'
       && record.type === 'arrow'
-      && record.meta?.systemSketch?.kind === 'connection')
-    check('a bound elbow cable stays a solid stock elbow',
+      && record.meta?.systemSketch?.kind === 'connection'
+      && record.meta.systemSketch.temporal === 'data')
+    check('a data edge lowers to an honest solid stock elbow',
       detachedCable?.props?.kind === 'elbow' && detachedCable?.props?.dash === 'solid',
       detachedCable ? `${detachedCable.props.kind}/${detachedCable.props.dash}` : 'missing arrow')
+    const detachedAsync = portable.records.find((record) => record.typeName === 'shape'
+      && record.type === 'arrow' && record.meta?.systemSketch?.kind === 'connection'
+      && record.meta.systemSketch.temporal === 'async')
+    const detachedDelayed = portable.records.find((record) => record.typeName === 'shape'
+      && record.type === 'arrow' && record.meta?.systemSketch?.kind === 'connection'
+      && record.meta.systemSketch.temporal === 'delayed')
+    check('an async edge lowers to stock dashed arrow props while retaining only semantic metadata',
+      detachedAsync?.props?.dash === 'dashed' && !detachedAsync?.meta?.systemSketchPrimitiveStyle,
+      detachedAsync ? detachedAsync.props.dash : 'missing async arrow')
+    check('a delayed edge lowers to a stock dotted arrow plus standalone stock oval/text z⁻¹ pill',
+      detachedDelayed?.props?.dash === 'dotted'
+        && portable.records.some((record) => record.typeName === 'shape' && record.type === 'geo'
+          && record.props?.geo === 'oval')
+        && portable.records.some((record) => record.typeName === 'shape' && record.type === 'group'
+          && record.meta?.systemSketch?.kind === 'connection-delay-pill')
+        && portable.records.some((record) => record.typeName === 'shape' && record.type === 'text'
+          && JSON.stringify(record.props?.richText).includes('z⁻¹ = 7')),
+      detachedDelayed ? detachedDelayed.props.dash : 'missing delayed arrow')
 
     const customColors = new Set([
       'dark-gray', 'teal', 'pink', 'gray', 'light-gray', 'light-orange',
@@ -321,6 +361,24 @@ async function main() {
     const parsed = parseTldrawJsonFile({ json: source, schema: createTLSchema() })
     check('stock tldraw schema accepts the exported file', parsed.ok,
       parsed.ok ? 'accepted' : parsed.error.type)
+    const stockSvg = await evaluate(page, `window.__systemsketch.renderStockTldraw(${JSON.stringify(source)})`)
+    check('default tldraw ShapeUtils render the detached file without SystemSketch paint hooks',
+      typeof stockSvg === 'string' && stockSvg.includes('<svg')
+        && !stockSvg.includes('systemsketch-detached') && !stockSvg.includes('data-detached-edge-type'),
+      typeof stockSvg === 'string' ? `${stockSvg.length} stock SVG bytes` : 'no SVG')
+    await evaluate(page, `(() => {
+      const host = document.createElement('div')
+      host.id = 'stock-portability-render'
+      host.dataset.testid = 'stock-portability-render'
+      host.style.cssText = 'position:fixed;inset:0;background:white;z-index:99999;padding:24px;overflow:hidden'
+      host.innerHTML = ${JSON.stringify(stockSvg)}
+      document.body.appendChild(host)
+      return true
+    })()`)
+    await waitFor(page, `document.querySelector('#stock-portability-render svg')`, 'default tldraw SVG mounted in the browser')
+    const stockShot = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
+    await writeFile(STOCK_EVIDENCE, Buffer.from(stockShot.data, 'base64'))
+    await evaluate(page, `document.querySelector('#stock-portability-render')?.remove(); true`)
     check('browser reports no local console errors', localConsoleErrors(page).length === 0,
       localConsoleErrors(page).join('; '))
   } finally {

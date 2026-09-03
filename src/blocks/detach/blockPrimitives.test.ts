@@ -3,10 +3,6 @@ import { describe, expect, it } from 'vitest'
 import { getDefaultBlockProps, type BlockPort, type BlockShapeProps } from '../blockModel'
 import { layoutBlock } from '../layoutBlock'
 import { PORT_CORE_RADIUS, PORT_INDICATOR_RADIUS, primitivesForBlock } from './blockPrimitives'
-import {
-	SYSTEMSKETCH_ROUNDED_RECT_GEO,
-	readSystemSketchPrimitiveStyle,
-} from '../../stockPrimitiveVisuals'
 
 const port = (id: string, name: string, type = ''): BlockPort =>
 	({ id, name, type, visible: true })
@@ -30,13 +26,11 @@ describe('a Block as stock primitives', () => {
 		expect(shapes[0].type).toBe('geo')
 		expect({ x: shapes[0].x, y: shapes[0].y }).toEqual({ x: 120, y: 80 })
 		expect(shapes[0].props).toMatchObject({
-			geo: SYSTEMSKETCH_ROUNDED_RECT_GEO,
+			geo: 'rectangle',
 			w: layout.width,
 			h: layout.height,
 		})
-		expect(readSystemSketchPrimitiveStyle(shapes[0] as never)).toMatchObject({
-			kind: 'geo', cornerRadius: 9, strokeWidth: 1,
-		})
+		expect(shapes[0].meta).toBeUndefined()
 	})
 
 	it('reads every position from layoutBlock, so the copy cannot drift', () => {
@@ -85,7 +79,7 @@ describe('a Block as stock primitives', () => {
 		expect(outputShapes.filter((shape) =>
 			(shape.props as { geo?: string }).geo === 'ellipse')).toHaveLength(1)
 		expect(inputShapes.some((shape) =>
-			(shape.props as { geo?: string }).geo === SYSTEMSKETCH_ROUNDED_RECT_GEO)).toBe(true)
+			(shape.props as { geo?: string }).geo === 'oval')).toBe(true)
 		const inputText = inputShapes
 			.filter((shape) => shape.type === 'text')
 			.map((shape) => JSON.stringify((shape.props as { richText: unknown }).richText))
@@ -144,13 +138,10 @@ describe('a Block as stock primitives', () => {
 				&& (shape.props as { w: number }).w === PORT_CORE_RADIUS * 2)
 		expect(ring!.props).toMatchObject({ fill: 'semi' })
 		expect(core!.props).toMatchObject({ fill: 'solid', color: 'grey' })
-		expect(readSystemSketchPrimitiveStyle(core as never)).toMatchObject({
-			kind: 'geo', fillColor: 'var(--ss-text-muted)', strokeWidth: 0,
-		})
 		expect(textOf(built.shapes).join()).toContain('= 5')
 		expect(built.shapes.some((shape) => {
-			const style = readSystemSketchPrimitiveStyle(shape as never)
-			return style?.kind === 'geo' && style.cornerRadius === 999
+			const geo = shape.props as { geo?: string }
+			return geo.geo === 'oval'
 		})).toBe(true)
 	})
 
@@ -158,6 +149,22 @@ describe('a Block as stock primitives', () => {
 		const props = blockProps({ view: 'simple', title: 'decode', inputs: [port('in_1', 'frame')] })
 		const { shapes } = primitivesForBlock(props, { x: 0, y: 0 })
 		expect(shapes.some((shape) => (shape.props as { geo?: string }).geo === 'ellipse')).toBe(false)
+	})
+
+	it('lowers a Value Block directly to a stock oval, label and rim dots', () => {
+		const props = blockProps({
+			view: 'value', title: '2.0',
+			inputs: [port('in_1', 'gain', 'float')],
+			outputs: [port('out_1', 'gain', 'float')],
+		})
+		const built = primitivesForBlock(props, { x: 30, y: 50 })
+		expect((built.shapes[0].props as { geo?: string }).geo).toBe('oval')
+		expect(textOf(built.shapes).join()).toContain('gain = 2.0')
+		expect(built.shapes.filter((shape) =>
+			(shape.props as { geo?: string; w?: number }).geo === 'ellipse'
+			&& (shape.props as { w?: number }).w === PORT_INDICATOR_RADIUS * 2,
+		)).toHaveLength(2)
+		expect(built.shapes.every((shape) => shape.meta === undefined)).toBe(true)
 	})
 
 	it('gives Port and Expanded their chrome, and Simple none', () => {
@@ -175,9 +182,7 @@ describe('a Block as stock primitives', () => {
 			.find((shape) => (shape.props as { geo?: string; w?: number }).geo === 'ellipse'
 				&& (shape.props as { w?: number }).w === PORT_INDICATOR_RADIUS * 2)
 		expect((ring!.props as { color: string }).color).toBe('violet')
-		expect(readSystemSketchPrimitiveStyle(ring as never)).toMatchObject({
-			kind: 'geo', strokeColor: '#c060e0', strokeWidth: 1,
-		})
+		expect(ring!.meta).toBeUndefined()
 	})
 
 	it('keeps a long header type on one line with the live font metrics', () => {
@@ -187,8 +192,6 @@ describe('a Block as stock primitives', () => {
 				&& JSON.stringify((shape.props as { richText: unknown }).richText).includes('Function'))
 		expect(typeShape).toBeDefined()
 		expect((typeShape!.props as { w: number }).w).toBeGreaterThan(70)
-		expect(readSystemSketchPrimitiveStyle(typeShape as never)).toMatchObject({
-			kind: 'text', fontSize: 18, lineHeight: 24, fontWeight: 400,
-		})
+		expect(typeShape!.meta).toBeUndefined()
 	})
 })

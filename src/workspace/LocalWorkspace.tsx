@@ -63,7 +63,7 @@ import {
 import { inspectWorkspaceDocumentSource } from './workspaceDocument'
 import { installWorkspaceLifecycleProtection } from './workspaceLifecycle'
 import { decodeSystemSketchDocument } from './systemSketchFile'
-import { detachAllBlocks } from '../blocks/detach'
+import { detachAllPrimitives } from '../blocks/detach'
 import './local-workspace.css'
 import { hydrateCustomColors } from '../appearance/customColors'
 import { SettingsGearIcon, SystemSketchSettingsDialog } from '../settings/InterfaceSettings'
@@ -556,7 +556,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     setStatus({ kind: 'saving' })
     const mark = editor.markHistoryStoppingPoint('export to .tldr')
     try {
-      detachAllBlocks(editor)
+      detachAllPrimitives(editor)
       const source = await serializeTldrawJson(editor)
       await writeWorkspaceDocument({ path: destination, source, baseDigest: null, force: true })
     } finally {

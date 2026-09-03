@@ -1,4 +1,5 @@
-import type { Editor } from 'tldraw'
+import { serializeTldrawJson, type Editor } from 'tldraw'
+import { renderWithStockTldraw } from './export/stockTldrawPrimitives'
 
 /**
  * A read-only development seam for the browser journeys.
@@ -23,6 +24,10 @@ export interface SystemSketchDevelopmentSeam {
 	overlayIds(): string[]
 	/** Painted stacking order of a shape within its parent, for z-order claims. */
 	shapeIndex(shapeId: string): string | null
+	/** Render a detached `.tldr` through default tldraw utilities only. */
+	renderStockTldraw(json: string): Promise<string>
+	/** Serialize the live board for a default-renderer proof. */
+	serializeTldraw(): Promise<string>
 }
 
 declare global {
@@ -38,6 +43,17 @@ export function installDevelopmentSeam(editor: Editor): () => void {
 		editor,
 		overlayIds: () => editor.overlays.getCurrentOverlays().map((overlay) => overlay.id),
 		shapeIndex: (shapeId) => editor.getShape(shapeId as never)?.index ?? null,
+		renderStockTldraw: async (json) => {
+			const container = editor.getContainer().ownerDocument.createElement('div')
+			container.style.cssText = 'position:fixed;left:-10000px;top:-10000px;width:1px;height:1px;overflow:hidden'
+			editor.getContainer().ownerDocument.body.appendChild(container)
+			try {
+				return await renderWithStockTldraw(json, container)
+			} finally {
+				container.remove()
+			}
+		},
+		serializeTldraw: () => serializeTldrawJson(editor),
 	}
 
 	return () => {

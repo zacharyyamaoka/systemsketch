@@ -2,10 +2,9 @@
  * A Block's appearance expressed as editable tldraw primitives.
  *
  * Geometry comes only from `layoutBlock`, the same authority used by the live
- * renderer and cable anchors. Visual metadata is interpreted by configured
- * stock shape utilities: the records stay normal geo / line / text shapes,
- * while SystemSketch can retain the Block's exact radius, one-pixel rules,
- * token colours, and type scale.
+ * renderer and cable anchors. The resulting records deliberately use only
+ * stock tldraw props: a detached Block must remain meaningful when its
+ * metadata is ignored and no SystemSketch shape utility is registered.
  */
 import { createShapeId, toRichText } from 'tldraw'
 import type { TLDefaultColorStyle, TLGeoShape, TLShapeId, TLShapePartial } from 'tldraw'
@@ -24,10 +23,7 @@ import {
 	type LaidOutBlockPort,
 } from '../layoutBlock'
 import { portColor, portTldrawColor } from '../ui/portPalette'
-import {
-	SYSTEMSKETCH_ROUNDED_RECT_GEO,
-	systemSketchPrimitiveMeta,
-} from '../../stockPrimitiveVisuals'
+import { valueBlockLabel, valueBlockText } from '../valueBlock'
 
 /** The outer ring keeps the live indicator's full 18px footprint. */
 export const PORT_INDICATOR_RADIUS = BLOCK_PORT_RADIUS + 3
@@ -121,15 +117,6 @@ function textAt(options: TextOptions): TLShapePartial {
 		type: 'text',
 		x: options.origin.x + x,
 		y: options.origin.y + options.box.y + (options.box.h - options.lineHeight) / 2,
-		meta: systemSketchPrimitiveMeta({
-			kind: 'text',
-			color: options.color,
-			fontFamily: fontFamily(options.font),
-			fontSize: options.px,
-			fontWeight: options.weight,
-			lineHeight: options.lineHeight,
-			...(options.letterSpacing ? { letterSpacing: options.letterSpacing } : {}),
-		}),
 		props: {
 			richText: toRichText(options.text),
 			color: options.stockColor,
@@ -154,9 +141,6 @@ function lineAt(
 		type: 'line',
 		x: origin.x + x,
 		y: origin.y + y,
-		meta: systemSketchPrimitiveMeta({
-			kind: 'line', strokeColor: 'var(--ss-border)', strokeWidth: 1,
-		}),
 		props: {
 			points: {
 				a1: { id: 'a1', index: 'a1' as never, x: 0, y: 0 },
@@ -186,15 +170,13 @@ function roundedRectAt(
 		type: 'geo',
 		x: origin.x + box.x,
 		y: origin.y + box.y,
-		meta: systemSketchPrimitiveMeta({
-			kind: 'geo',
-			cornerRadius: options.cornerRadius,
-			fillColor: options.fillColor,
-			strokeColor: options.strokeColor,
-			strokeWidth: options.strokeWidth ?? 1,
-		}),
 		props: {
-			geo: SYSTEMSKETCH_ROUNDED_RECT_GEO as TLGeoShape['props']['geo'],
+			// tldraw's stock oval is its capsule primitive. It is an honest
+			// approximation for default-value chips; every other rounded surface
+			// becomes the ordinary editable rectangle.
+			geo: (options.cornerRadius >= Math.min(box.w, box.h) / 2
+				? 'oval'
+				: 'rectangle') as TLGeoShape['props']['geo'],
 			w: Math.max(1, box.w),
 			h: Math.max(1, box.h),
 			color: options.stockColor ?? 'grey',
@@ -220,12 +202,6 @@ function ellipseAt(
 		type: 'geo',
 		x: box.x,
 		y: box.y,
-		meta: systemSketchPrimitiveMeta({
-			kind: 'geo',
-			fillColor: options.fillColor,
-			strokeColor: options.strokeColor,
-			strokeWidth: options.strokeWidth ?? 1,
-		}),
 		props: {
 			geo: 'ellipse',
 			w: Math.max(1, box.w),
@@ -368,7 +344,7 @@ export function primitivesForBlock(
 	const layout = layoutBlock(props)
 	const { width, height } = layout
 	const card = roundedRectAt(origin, { x: 0, y: 0, w: width, h: height }, {
-		cornerRadius: BLOCK_CORNER_RADIUS,
+		cornerRadius: layout.view === 'value' ? height / 2 : BLOCK_CORNER_RADIUS,
 		fillColor: 'var(--ss-surface-raised)',
 		strokeColor: 'var(--ss-border)',
 		stockColor: 'grey',
@@ -385,6 +361,32 @@ export function primitivesForBlock(
 			portRows.set(key, row)
 		}
 		row.shapeIds.push(partial.id as TLShapeId)
+	}
+
+	// A Value Block is already a pill in the semantic canvas. Detaching keeps
+	// that truth with stock `geo: oval`, ordinary stock text, and rim dots — no
+	// custom radius renderer or portable-only cleanup pass required.
+	if (layout.view === 'value') {
+		if (layout.title) {
+			parts.push(textAt({
+				text: valueBlockText(valueBlockLabel(props)), px: PORT_TITLE_FONT_PX,
+				lineHeight: layout.title.h, weight: 500, box: layout.title, origin,
+				font: 'mono', color: 'var(--ss-text)', stockColor: 'black', align: 'middle',
+			}))
+		}
+		for (const placed of layout.ports) {
+			const exactColor = portColor(placed.port.type)
+			const stockColor = portTldrawColor(placed.port.type)
+			pushPortPart(placed, ellipseAt({
+				x: origin.x + placed.x - PORT_INDICATOR_RADIUS,
+				y: origin.y + placed.y - PORT_INDICATOR_RADIUS,
+				w: PORT_INDICATOR_RADIUS * 2, h: PORT_INDICATOR_RADIUS * 2,
+			}, {
+				fillColor: 'var(--ss-surface-raised)', strokeColor: exactColor, strokeWidth: 1,
+				stockColor, stockFill: 'semi',
+			}))
+		}
+		return { shapes: [card, ...parts], cardId: card.id as TLShapeId, portRows: [...portRows.values()] }
 	}
 
 	const chromeless = layout.view === 'simple'

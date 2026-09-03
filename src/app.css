@@ -45,12 +45,6 @@ button {
   letter-spacing: var(--systemsketch-detached-letter-spacing);
 }
 
-/* The live Block's resting shadow belongs to the card composite, not tldraw's
- * global geo style. Scope it to the remembered card record only. */
-.systemsketch-detached-card-visual .tl-svg-container {
-  border-radius: 9px;
-  box-shadow: var(--ss-shadow-1);
-}
 .systemsketch-authored-arrow__stock {
 	display: contents;
 }

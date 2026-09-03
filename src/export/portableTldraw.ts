@@ -1,6 +1,5 @@
 import {
 	Editor,
-	createShapeId,
 	createTLStore,
 	defaultBindingUtils,
 	defaultAddFontsFromNode,
@@ -13,11 +12,9 @@ import {
 	toRichText,
 	type TLAnyBindingUtilConstructor,
 	type TLAnyShapeUtilConstructor,
-	type TLFrameShape,
 	type TLGeoShape,
 	type TLShape,
 	type TLShapeId,
-	type TLShapePartial,
 } from 'tldraw'
 
 import { EXCALIDRAW_ROUNDED_RECT_GEO, EXCALIDRAW_SHAPE_UTILS } from '../excalidrawInterop'
@@ -32,29 +29,24 @@ import {
 	type BlockShape,
 } from '../blocks'
 import {
-	BRANCH_ARM_SHAPE_TYPE,
-	BRANCH_SHAPE_TYPE,
 	BranchArmShapeUtil,
 	BranchShapeUtil,
-	branchLayout,
 	isBranchShape,
-	unwrapBranchArmFrames,
-	type BranchShape,
 } from '../branch'
 import {
 	CONNECTION_SHAPE_TYPE,
 	blockConnectionBindingUtils,
 	blockConnectionShapeUtils,
 	getBlockPortConnections,
-	getConnectionTerminals,
-	type ConnectionShape,
 } from '../blocks/connections'
-import { detachBlockToPrimitives, type DetachResult } from '../blocks/detach'
+import { detachBlockToPrimitives, detachConnectionToArrow, type DetachResult } from '../blocks/detach'
+import { detachBranchToPrimitives } from '../branch/detachBranch'
 import { SYSTEMSKETCH_COMMENT_RECORDS } from '../comments'
 import {
 	SYSTEMSKETCH_ROUNDED_RECT_GEO,
 	SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
 } from '../stockPrimitiveVisuals'
+import { assertStockPrimitives } from './stockTldrawPrimitives'
 
 /**
  * A portable export is made in a second editor, never by temporarily changing
@@ -169,171 +161,6 @@ function freezeDetachedValuePill(
 	})
 }
 
-const PORTABLE_BRANCH_FORMAT_VERSION = 1
-
-function branchLine(
-	parentId: TLShapeId,
-	y: number,
-	width: number,
-	weight: 's' | 'm' = 's',
-): TLShapePartial {
-	return {
-		id: createShapeId(),
-		type: 'line',
-		parentId,
-		x: 0,
-		y,
-		props: {
-			points: {
-				a1: { id: 'a1', index: 'a1' as never, x: 0, y: 0 },
-				a2: { id: 'a2', index: 'a2' as never, x: width, y: 0 },
-			},
-			color: 'grey',
-			dash: 'solid',
-			size: weight,
-		},
-	}
-}
-
-function branchText(
-	parentId: TLShapeId,
-	text: string,
-	box: { x: number; y: number; w: number },
-	options: { align?: 'start' | 'middle'; color?: 'black' | 'grey'; font?: 'sans' | 'mono'; scale?: number } = {},
-): TLShapePartial | null {
-	if (!text) return null
-	const scale = options.scale ?? 0.78
-	return {
-		id: createShapeId(),
-		type: 'text',
-		parentId,
-		x: box.x,
-		y: box.y,
-		props: {
-			richText: toRichText(text),
-			autoSize: false,
-			color: options.color ?? 'black',
-			font: options.font ?? 'sans',
-			scale,
-			size: 's',
-			textAlign: options.align ?? 'start',
-			w: Math.max(1, box.w / scale),
-		},
-	}
-}
-
-/**
- * Freeze a Branch region into stock frame chrome while retaining its identity
- * and child tree. Updating the isolated store record in place is important:
- * deleting a frame-like record would also delete descendants and bindings,
- * while reparenting nested regions out and back can perturb their transforms.
- */
-function detachBranchToStockFrame(editor: Editor, branch: BranchShape): void {
-	const layout = branchLayout(branch.props)
-	const priorSystemSketchMeta = branch.meta.systemSketch
-	const frame: TLFrameShape = {
-		...branch,
-		type: 'frame',
-		props: {
-			w: branch.props.w,
-			h: branch.props.h,
-			name: branch.props.title || 'Branch',
-			color: 'black',
-		},
-		meta: {
-			...branch.meta,
-			systemSketch: {
-				...(priorSystemSketchMeta && typeof priorSystemSketchMeta === 'object' && !Array.isArray(priorSystemSketchMeta)
-					? priorSystemSketchMeta
-					: {}),
-				kind: 'branch',
-				version: PORTABLE_BRANCH_FORMAT_VERSION,
-				props: structuredClone(branch.props),
-			},
-		},
-	} as unknown as TLFrameShape
-
-	// The id, parent, transform and index do not change, so direct children,
-	// nested Branches and arrow bindings remain attached to the same region.
-	editor.store.put([frame])
-
-	const chrome: Array<TLShapePartial | null> = [
-		branchLine(branch.id, layout.band.h, layout.w),
-		branchText(
-			branch.id,
-			branch.props.title || 'Branch',
-			{ x: 12, y: 7, w: Math.max(1, layout.w - 24) },
-			{ align: 'middle', font: 'mono', scale: 0.86 },
-		),
-	]
-
-	for (const control of layout.controls) {
-		chrome.push({
-			id: createShapeId(),
-			type: 'geo',
-			parentId: branch.id,
-			x: Math.max(1, control.x + 1),
-			y: control.y - 5,
-			props: {
-				geo: 'ellipse',
-				w: 10,
-				h: 10,
-				color: 'yellow',
-				fill: 'semi',
-				dash: 'solid',
-				size: 's',
-			},
-		})
-		chrome.push(branchText(
-			branch.id,
-			[control.port.name, control.port.type].filter(Boolean).join(': '),
-			{ x: 15, y: control.y - 9, w: Math.min(140, Math.max(1, layout.w * 0.3)) },
-			{ color: 'grey', scale: 0.66 },
-		))
-	}
-
-	for (const row of layout.arms) {
-		if (row.dividerY !== null) chrome.push(branchLine(branch.id, row.dividerY, layout.w, 'm'))
-		chrome.push(branchText(
-			branch.id,
-			`${row.arm.open ? '⌄' : '›'} ${row.arm.title || 'case'}`,
-			{ x: 10, y: row.rowTop + 5, w: Math.max(1, layout.w - 20) },
-			{ scale: 0.74 },
-		))
-	}
-
-	editor.createShapes(chrome.filter((shape): shape is TLShapePartial => shape !== null))
-}
-
-/**
- * A malformed or interrupted cable should not make the whole export invalid.
- * Normal cables disappear while their Blocks detach; this fallback turns any
- * surviving loose semantic cable into a plain stock arrow with the same ends.
- */
-function detachLooseConnection(editor: Editor, connection: ConnectionShape): void {
-	const terminals = getConnectionTerminals(editor, connection)
-	editor.deleteShape(connection.id)
-	editor.createShape({
-		id: connection.id,
-		type: 'arrow',
-		parentId: connection.parentId,
-		x: connection.x,
-		y: connection.y,
-		rotation: connection.rotation,
-		index: connection.index,
-		props: {
-			start: terminals.start,
-			end: terminals.end,
-			kind: connection.props.routing === 'elbow' ? 'elbow' : 'arc',
-			arrowheadStart: 'none',
-			arrowheadEnd: 'none',
-		},
-		meta: connection.meta,
-	})
-	// Deleting the custom record also removes its custom bindings. Reusing the id
-	// keeps any metadata reference stable without teaching stock tldraw a new id.
-}
-
 function normalizeCustomGeometries(editor: Editor): void {
 	for (const shape of editor.getCurrentPageShapes()) {
 		const props = shape.props as unknown as Record<string, unknown>
@@ -377,34 +204,6 @@ function isSystemSketchCommentRecord(record: { typeName: string }): boolean {
 	return typeName === 'comment'
 		|| typeName === 'comment-thread'
 		|| typeName === 'comment-reaction'
-}
-
-function assertPortableRecords(editor: Editor): void {
-	const customShapes = editor.store
-		.allRecords()
-		.filter((record) => record.typeName === 'shape')
-		.filter((record) => (
-			record.type === 'block'
-			|| record.type === BRANCH_SHAPE_TYPE
-			|| record.type === BRANCH_ARM_SHAPE_TYPE
-			|| record.type === CONNECTION_SHAPE_TYPE
-		))
-	const customGeometries = editor.store
-		.allRecords()
-		.filter((record) => record.typeName === 'shape' && record.type === 'geo')
-		.filter((record) => (
-			String(record.props.geo) === EXCALIDRAW_ROUNDED_RECT_GEO
-			|| String(record.props.geo) === SYSTEMSKETCH_ROUNDED_RECT_GEO
-		))
-	const customBindings = editor.store
-		.allRecords()
-		.filter((record) => record.typeName === 'binding' && record.type === 'connection')
-	const commentRecords = editor.store
-		.allRecords()
-		.filter(isSystemSketchCommentRecord)
-	if (customShapes.length || customGeometries.length || customBindings.length || commentRecords.length) {
-		throw new Error('Portable export still contains SystemSketch-only records')
-	}
 }
 
 /**
@@ -451,11 +250,6 @@ export async function exportPortableTldraw(editor: Editor): Promise<string> {
 
 		for (const page of exportEditor.getPages()) {
 			exportEditor.setCurrentPage(page.id)
-			// Arm frames are an editing-time projection. Restore their children to
-			// the semantic Branch before either Blocks or Branches become stock.
-			for (const branch of exportEditor.getCurrentPageShapes().filter(isBranchShape)) {
-				unwrapBranchArmFrames(exportEditor, branch)
-			}
 			const blocks = exportEditor.getCurrentPageShapes()
 				.filter(isBlockShape)
 				.sort((left, right) => blockDepth(exportEditor, left) - blockDepth(exportEditor, right))
@@ -476,11 +270,11 @@ export async function exportPortableTldraw(editor: Editor): Promise<string> {
 
 			for (const shape of [...exportEditor.getCurrentPageShapes()]) {
 				if (shape.type === CONNECTION_SHAPE_TYPE) {
-					detachLooseConnection(exportEditor, shape as ConnectionShape)
+					detachConnectionToArrow(exportEditor, shape as never)
 				}
 			}
 			for (const branch of exportEditor.getCurrentPageShapes().filter(isBranchShape)) {
-				detachBranchToStockFrame(exportEditor, branch)
+				detachBranchToPrimitives(exportEditor, branch.id)
 			}
 			normalizeCustomGeometries(exportEditor)
 		}
@@ -502,7 +296,7 @@ export async function exportPortableTldraw(editor: Editor): Promise<string> {
 				.filter(isSystemSketchCommentRecord)
 				.map((record) => record.id),
 		)
-		assertPortableRecords(exportEditor)
+		assertStockPrimitives(exportEditor.store.allRecords())
 		return await serializeTldrawJson(exportEditor)
 	} finally {
 		clone?.dispose()

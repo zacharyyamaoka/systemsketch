@@ -70,6 +70,18 @@ export interface DetachedConnectionRecord {
 	ends: Partial<Record<ConnectionTerminal, DetachedConnectionEnd>>
 }
 
+/**
+ * A stock-only delay label accompanies a detached delayed arrow. It is visual
+ * geometry, not an alternate renderer: stock tldraw paints the oval and text
+ * while this reference merely lets SystemSketch remove it if the arrow is
+ * rebuilt into a semantic cable.
+ */
+export interface DetachedConnectionDelayPillRecord {
+	kind: 'connection-delay-pill'
+	version: number
+	arrowId: string
+}
+
 export type DetachedRecord =
 	| DetachedBlockRecord
 	| DetachedCardRecord
@@ -84,6 +96,24 @@ export function detachMeta(record: DetachedRecord): JsonObject {
 	// The record is JSON by construction — every field is a string, a number,
 	// a boolean, or a Block prop, and a Block prop is never a class.
 	return { [SYSTEMSKETCH_META_KEY]: record as unknown as JsonObject }
+}
+
+export function detachedDelayPillMeta(arrowId: string): JsonObject {
+	return {
+		[SYSTEMSKETCH_META_KEY]: {
+			kind: 'connection-delay-pill',
+			version: DETACH_FORMAT_VERSION,
+			arrowId,
+		} as unknown as JsonObject,
+	}
+}
+
+/** The owning arrow for a generated delay pill, if this is one. */
+export function detachedDelayPillArrowId(meta: unknown): string | null {
+	if (!isObject(meta)) return null
+	const record = meta[SYSTEMSKETCH_META_KEY]
+	if (!isObject(record) || record.kind !== 'connection-delay-pill') return null
+	return typeof record.arrowId === 'string' ? record.arrowId : null
 }
 
 /**
