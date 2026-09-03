@@ -79,8 +79,9 @@ describe('making Preview the Stable build', () => {
     expect(makeStablePhase(preview, { ...resting, armed: true })).toBe('armed')
     expect(makeStableLabel('idle')).toBe('Make Preview Stable')
     expect(makeStableLabel('armed')).toContain('Confirm')
-    expect(previewDetailLabel('armed')).toContain('standalone Stable first')
-    expect(previewDetailLabel('armed')).toContain('host-plugin builds')
+    expect(previewDetailLabel('armed')).toContain('working copy')
+    expect(previewDetailLabel('armed')).toContain('uncommitted source changes are recorded')
+    expect(previewDetailLabel('armed')).toContain('host plugins build')
   })
 
   it('keeps work in progress and the finished result distinguishable', () => {

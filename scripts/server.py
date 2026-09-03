@@ -660,18 +660,40 @@ class SystemSketchServer(ThreadingHTTPServer):
         if action == "promote":
             if self.channel != "preview":
                 raise ReleaseError("publishing is only available from live Preview")
-            subprocess.run(
-                [
-                    sys.executable,
-                    str(self.source_root / "scripts" / "release.py"),
-                    "--release-home",
-                    str(self.release_home),
-                    "promote",
-                ],
-                cwd=self.source_root,
-                check=True,
-                timeout=900,
-            )
+            # Preview is deliberately served from its live worktree, not an
+            # already-staged immutable release. The UI's second confirmation
+            # is therefore the explicit acknowledgement that it may publish
+            # that worktree even when it has uncommitted source changes. The
+            # release manifest records sourceDirty, so the resulting Stable is
+            # never presented as a clean commit it did not come from.
+            command = [
+                sys.executable,
+                str(self.source_root / "scripts" / "release.py"),
+                "--release-home",
+                str(self.release_home),
+                "--allow-dirty",
+                "promote",
+            ]
+            try:
+                subprocess.run(
+                    command,
+                    cwd=self.source_root,
+                    check=True,
+                    timeout=900,
+                    capture_output=True,
+                    text=True,
+                )
+            except subprocess.CalledProcessError as cause:
+                # CalledProcessError otherwise reduces a useful release
+                # refusal to "returned non-zero exit status 1" in the banner.
+                # The child emits its actionable diagnostics on stdout/stderr.
+                output = "\n".join(
+                    part.strip()
+                    for part in (cause.stdout, cause.stderr)
+                    if isinstance(part, str) and part.strip()
+                )
+                message = output or "Preview could not be published; the release command exited unsuccessfully."
+                raise ReleaseError(message) from cause
             stable = read_channels(self.release_home).stable
             host_ready = bool(
                 stable

@@ -1,0 +1,58 @@
+{
+  "feature": "Preview promotion records a dirty working copy",
+  "viewport": { "width": 1280, "height": 720 },
+  "shapes": [
+    {
+      "id": "release-note",
+      "type": "block",
+      "x": 450,
+      "y": 510,
+      "props": {
+        "title": "release_preview()",
+        "description": "The board stays safe while Preview becomes Stable.",
+        "blockType": "Function",
+        "view": "port",
+        "w": 350,
+        "h": 190,
+        "inputs": [
+          { "id": "preview", "name": "Preview", "type": "Working copy", "visible": true }
+        ],
+        "outputs": [
+          { "id": "stable", "name": "Stable", "type": "Immutable build", "visible": true }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · In the Preview header, click Make Preview Stable.",
+      "x": 48,
+      "y": 140,
+      "w": 410,
+      "h": 106,
+      "target": { "x": 770, "y": 72 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Read the dirty-working-copy note, then click Confirm · replaces Stable.",
+      "x": 48,
+      "y": 310,
+      "w": 410,
+      "h": 112,
+      "target": { "x": 1005, "y": 72 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Stable updates and the release manifest records any uncommitted source changes.",
+      "x": 900,
+      "y": 540,
+      "w": 340,
+      "h": 130
+    }
+  ]
+}

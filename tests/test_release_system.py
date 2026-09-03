@@ -265,6 +265,64 @@ class ReleaseSystemTests(unittest.TestCase):
             finally:
                 server.server_close()
 
+    def test_preview_promotion_explicitly_allows_and_records_a_dirty_working_copy(self) -> None:
+        """The confirmed Preview action is the UI equivalent of --allow-dirty.
+
+        Preview is Vite's live worktree, so requiring it to be clean made the
+        visible "Make Preview Stable" action unusable in exactly the workflow
+        it describes. The release script still records sourceDirty; this test
+        pins the server boundary that passes that explicit acknowledgement.
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project = self.make_git_project(root / "project")
+            (project / "src" / "App.tsx").write_text(
+                "export const App = () => 2\n", encoding="utf-8"
+            )
+            server = SystemSketchServer(
+                ("127.0.0.1", 0),
+                dist=root / "dist",
+                channel="preview",
+                build="working-tree",
+                release_home=root / "runtime",
+                source_root=project,
+            )
+            try:
+                with patch("server.subprocess.run") as run:
+                    server.run_action("promote")
+                command = run.call_args.args[0]
+                self.assertIn("--allow-dirty", command)
+                self.assertLess(command.index("--allow-dirty"), command.index("promote"))
+                self.assertTrue(run.call_args.kwargs["capture_output"])
+                self.assertTrue(run.call_args.kwargs["text"])
+            finally:
+                server.server_close()
+
+    def test_preview_promotion_returns_the_release_diagnostic_to_the_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project = self.make_git_project(root / "project")
+            server = SystemSketchServer(
+                ("127.0.0.1", 0),
+                dist=root / "dist",
+                channel="preview",
+                build="working-tree",
+                release_home=root / "runtime",
+                source_root=project,
+            )
+            failure = subprocess.CalledProcessError(
+                1,
+                ["release.py", "promote"],
+                output="release progress",
+                stderr="SystemSketch release error: npm run check failed",
+            )
+            try:
+                with patch("server.subprocess.run", side_effect=failure):
+                    with self.assertRaisesRegex(ReleaseError, "npm run check failed"):
+                        server.run_action("promote")
+            finally:
+                server.server_close()
+
     def test_preview_clone_is_a_one_time_snapshot(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

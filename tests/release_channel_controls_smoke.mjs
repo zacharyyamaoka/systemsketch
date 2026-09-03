@@ -116,6 +116,7 @@ async function previewChannel() {
     assert.equal(banner[0].emphasis, 'secondary')
     assert.notEqual(banner[0].background, banner[1].background)
     pass('Preview shows Return to Stable and Make Preview Stable together, with the committing action emphasised')
+    const idleMakeStableBackground = banner[1].background
 
     assert.equal(
       await evaluate(page, `document.querySelector('${BANNER} .systemsketch-preview-mode__detail').textContent.trim()`),
@@ -127,13 +128,13 @@ async function previewChannel() {
     banner = await channelActions(page, `${BANNER} .systemsketch-preview-mode__actions`)
     assert.equal(banner[1].phase, 'armed')
     assert.equal(banner[1].label, 'Confirm · replaces Stable')
-    assert.equal(banner[1].background, 'rgb(180, 83, 26)')
+    assert.notEqual(banner[1].background, idleMakeStableBackground)
     assert.equal(await releasePosts(page), 0)
     pass('the first click only arms the control: it restates the consequence and sends nothing')
 
     assert.match(
       await evaluate(page, `document.querySelector('${BANNER} .systemsketch-preview-mode__detail').textContent`),
-      /points Stable at this working tree/)
+      /uncommitted source changes are recorded/)
     pass('the banner detail line explains what confirming will do, in place')
 
     await screenshot(page, SHOT_ARMED)
@@ -217,17 +218,17 @@ async function stableChannel() {
       return JSON.stringify({
         tag: card.tagName,
         current: card.hasAttribute('data-current'),
-        gradient: getComputedStyle(card).backgroundImage !== 'none',
+        tinted: getComputedStyle(card).backgroundColor !== 'rgba(0, 0, 0, 0)',
         cursor: getComputedStyle(card).cursor,
         text: card.textContent.replace(/\\s+/g, ' ').trim(),
       })
     })()`))
     assert.equal(offer.tag, 'BUTTON')
     assert.equal(offer.current, false)
-    assert.equal(offer.gradient, true)
+    assert.equal(offer.tinted, true)
     assert.equal(offer.cursor, 'pointer')
     assert.match(offer.text, /Open Latest Preview/)
-    pass('from Stable the same row keeps its call-out gradient, because there it really is the offer')
+    pass('from Stable the same row stays a tinted call-to-action, because there it really is the offer')
 
     assert.equal(await evaluate(page, `Boolean(document.querySelector('.systemsketch-dev-actions'))`), false)
     assert.equal(
@@ -294,8 +295,8 @@ async function publishFlow() {
 
     assert.match(
       await evaluate(page, `document.querySelector('${BANNER} .systemsketch-preview-mode__detail').textContent`),
-      /Stable now points here/)
-    pass('the banner says where Stable now points instead of leaving the result implicit')
+      /Standalone Stable updated/)
+    pass('the banner says Stable updated and names the next step instead of leaving the result implicit')
 
     await screenshot(page, SHOT_PUBLISHED)
 
@@ -304,6 +305,10 @@ async function publishFlow() {
     assert.equal(typeof channels.stable, 'string')
     assert.equal(channels.stable, channels.candidate)
     pass('the isolated release home now points Stable at the freshly built candidate')
+
+    const manifest = JSON.parse(await readFile(join(releaseHome, 'releases', channels.stable, 'manifest.json'), 'utf8'))
+    assert.equal(manifest.sourceDirty, true)
+    pass('the live Preview working copy is explicitly marked dirty in the Stable manifest')
 
     const errors = localConsoleErrors(page)
     assert.deepEqual(errors, [], `console errors: ${errors.join(' | ')}`)
