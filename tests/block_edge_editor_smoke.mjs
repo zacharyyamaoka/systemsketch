@@ -95,7 +95,9 @@ const cablePath = (page) => evaluate(page,
  * renderer is about to paint — one step from the pixels, not from the model.
  */
 const handleIds = (page) => evaluate(page,
-  `JSON.stringify((window.__systemsketch?.overlayIds() ?? []).filter((id) => id.startsWith('handle:')))`)
+  `JSON.stringify((window.__systemsketch?.overlayIds() ?? [])
+    .filter((id) => id.startsWith('handle:'))
+    .map((id) => id.split(':').slice(3).join(':')))`)
   .then((value) => JSON.parse(value ?? '[]'))
 
 /**
@@ -246,18 +248,18 @@ async function main() {
     const mid = await pointOnCable(page, 0.5)
     await clickAt(page, onCable.cx, onCable.cy)
     await delay(300)
-    // Selected, but the pointer parked far away.
+    // No post-selection pointer move: this is the exact regression. Previously
+    // the selection changed after the proximity observer had run, so the bend
+    // appeared only after another mouseMoved event.
+    const immediateHandles = await handleIds(page)
     await mouse(page, 'mouseMoved', 260, 800)
     await delay(320)
     const farHandles = await handleIds(page)
-    await mouse(page, 'mouseMoved', onCable.cx, onCable.cy)
-    await delay(320)
-    const nearHandles = await handleIds(page)
     await shot(page, 'edge-editor-controlpoints.png')
-    check('FIGMA-1', 'a selected cable with the pointer far away offers only its two terminals',
-      farHandles.length, 2)
-    check('FIGMA-2', 'and offers its control point as the pointer approaches',
-      nearHandles.length, 3)
+    check('CONTROL-1', 'the selected cable offers its bend on the selection event itself',
+      immediateHandles.includes('bend'), true)
+    check('CONTROL-2', 'the bend remains offered when the pointer leaves the cable',
+      farHandles.includes('bend'), true)
 
     // ------------------------------------------------- drag it to bend ---
     const before = await cablePath(page)

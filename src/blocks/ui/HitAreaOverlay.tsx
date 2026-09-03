@@ -13,8 +13,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useEditor, useQuickReactor } from 'tldraw'
 
-import { getConnectionRevealBounds } from '../connections/connectionProximity'
-import { CONNECTION_SHAPE_TYPE } from '../connections/connectionModel'
 import { CONNECTION_PORT_MAGNET_RADIUS, getLiveBlockPorts } from '../connections/blockPorts'
 import { portSnapPageUnits, reconnectPageUnits } from '../connections/connectionHit'
 import { isBlockShape } from '../blockModel'
@@ -24,7 +22,7 @@ export const HIT_AREA_QUERY_KEY = 'hitareas'
 
 interface PaintedRegion {
 	key: string
-	kind: 'reveal' | 'port-snap' | 'port-reconnect' | 'add-zone'
+	kind: 'port-snap' | 'port-reconnect' | 'add-zone'
 	label: string
 	/** Viewport-space rectangle, in real pixels. */
 	x: number
@@ -72,23 +70,6 @@ export function HitAreaOverlay() {
 		const zoom = editor.getZoomLevel()
 		const painted: PaintedRegion[] = []
 		const toViewport = (x: number, y: number) => editor.pageToViewport({ x, y })
-
-		// --- a selected cable's reveal region -------------------------------
-		for (const shape of editor.getSelectedShapes()) {
-			if (shape.type !== CONNECTION_SHAPE_TYPE) continue
-			const bounds = getConnectionRevealBounds(editor, shape.id)
-			if (!bounds) continue
-			const topLeft = toViewport(bounds.minX, bounds.minY)
-			painted.push({
-				key: `reveal:${shape.id}`,
-				kind: 'reveal',
-				label: 'control points reveal',
-				x: topLeft.x,
-				y: topLeft.y,
-				w: bounds.w * zoom,
-				h: bounds.h * zoom,
-			})
-		}
 
 		// --- every visible port's drop-snap and reconnect radius ------------
 		const snap = portSnapPageUnits(zoom) * zoom
@@ -184,7 +165,6 @@ export function HitAreaOverlay() {
 			))}
 			<div className="systemsketch-hit-areas__legend">
 				<b>Hit areas</b>
-				<i data-kind="reveal" /> control-point reveal
 				<i data-kind="port-snap" /> port drop snap
 				<i data-kind="port-reconnect" /> reconnect radius
 				<i data-kind="add-zone" /> add-port gutter
