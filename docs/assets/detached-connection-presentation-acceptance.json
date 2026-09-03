@@ -1,0 +1,180 @@
+{
+  "immediate": [
+    {
+      "routing": "curved",
+      "rebuildWithBlocks": true,
+      "temporal": "async",
+      "delayValue": "",
+      "exact": true,
+      "presentationBody": true,
+      "dash": "56 4 10 4",
+      "cap": "butt",
+      "pill": null,
+      "bindings": 2
+    },
+    {
+      "routing": "straight",
+      "rebuildWithBlocks": false,
+      "temporal": "async",
+      "delayValue": "",
+      "exact": true,
+      "presentationBody": true,
+      "dash": "56 4 10 4",
+      "cap": "butt",
+      "pill": null,
+      "bindings": 2
+    },
+    {
+      "routing": "elbow",
+      "rebuildWithBlocks": true,
+      "temporal": "delayed",
+      "delayValue": "11",
+      "exact": true,
+      "presentationBody": true,
+      "dash": "0.1 6",
+      "cap": "round",
+      "pill": "z⁻¹ = 11",
+      "bindings": 2
+    }
+  ],
+  "moved": [
+    {
+      "routing": "curved",
+      "rebuildWithBlocks": true,
+      "temporal": "async",
+      "delayValue": "",
+      "exact": false,
+      "presentationBody": true,
+      "dash": "56 4 10 4",
+      "cap": "butt",
+      "pill": null,
+      "bindings": 2
+    },
+    {
+      "routing": "straight",
+      "rebuildWithBlocks": false,
+      "temporal": "async",
+      "delayValue": "",
+      "exact": false,
+      "presentationBody": true,
+      "dash": "56 4 10 4",
+      "cap": "butt",
+      "pill": null,
+      "bindings": 2
+    },
+    {
+      "routing": "elbow",
+      "rebuildWithBlocks": true,
+      "temporal": "delayed",
+      "delayValue": "11",
+      "exact": false,
+      "presentationBody": true,
+      "dash": "0.1 6",
+      "cap": "round",
+      "pill": "z⁻¹ = 11",
+      "bindings": 2
+    }
+  ],
+  "reloaded": [
+    {
+      "routing": "curved",
+      "rebuildWithBlocks": true,
+      "temporal": "async",
+      "delayValue": "",
+      "exact": false,
+      "presentationBody": true,
+      "dash": "56 4 10 4",
+      "cap": "butt",
+      "pill": null,
+      "bindings": 2
+    },
+    {
+      "routing": "straight",
+      "rebuildWithBlocks": false,
+      "temporal": "async",
+      "delayValue": "",
+      "exact": false,
+      "presentationBody": true,
+      "dash": "56 4 10 4",
+      "cap": "butt",
+      "pill": null,
+      "bindings": 2
+    },
+    {
+      "routing": "elbow",
+      "rebuildWithBlocks": true,
+      "temporal": "delayed",
+      "delayValue": "11",
+      "exact": false,
+      "presentationBody": true,
+      "dash": "0.1 6",
+      "cap": "round",
+      "pill": "z⁻¹ = 11",
+      "bindings": 2
+    }
+  ],
+  "exported": {
+    "async": [
+      {
+        "dash": "56 4 10 4",
+        "cap": "butt"
+      },
+      {
+        "dash": "56 4 10 4",
+        "cap": "butt"
+      }
+    ],
+    "delayedDash": "0.1 6",
+    "pill": "z⁻¹ = 11"
+  },
+  "crops": [
+    {
+      "key": "delayed",
+      "score": {
+        "score": 1,
+        "wholeSimilarity": 1,
+        "foregroundSimilarity": 1,
+        "edgeSimilarity": 1,
+        "foregroundPixels": 832,
+        "totalPixels": 16660
+      }
+    },
+    {
+      "key": "async-block",
+      "score": {
+        "score": 1,
+        "wholeSimilarity": 1,
+        "foregroundSimilarity": 1,
+        "edgeSimilarity": 1,
+        "foregroundPixels": 679,
+        "totalPixels": 14210
+      }
+    },
+    {
+      "key": "async-direct",
+      "score": {
+        "score": 1,
+        "wholeSimilarity": 1,
+        "foregroundSimilarity": 1,
+        "edgeSimilarity": 1,
+        "foregroundPixels": 1568,
+        "totalPixels": 43840
+      }
+    }
+  ],
+  "checks": {
+    "standaloneMenuActionExists": true,
+    "standaloneAndBlockDetachBothConvert": true,
+    "standaloneStaysIndependent": true,
+    "exactFrameUsesPresentationRenderer": true,
+    "asyncCadenceAndCapsMatch": true,
+    "delayedDotsAndTextMatch": true,
+    "svgExportKeepsPresentation": true,
+    "edgeCropsAtLeast99Percent": true,
+    "movementHandsGeometryToStock": true,
+    "movementKeepsPresentation": true,
+    "bindingsRemainLive": true,
+    "reloadKeepsPresentation": true,
+    "noConsoleErrors": true
+  }
+}

@@ -51,13 +51,17 @@ import {
 	type ConnectionRoutingKind,
 	type ConnectionTerminal,
 } from '../connections/connectionModel'
-import type { ConnectionBinding } from '../connections/ConnectionBindingUtil'
+import {
+	getConnectionBindings,
+	type ConnectionBinding,
+} from '../connections/ConnectionBindingUtil'
 import {
 	getConnectionRenderPoints,
 	getConnectionShapePath,
 	getConnectionTerminals,
 	type ConnectionShape,
 } from '../connections/ConnectionShapeUtil'
+import { cablePresentation } from '../connections/connectionPresentation'
 import {
 	systemSketchPrimitiveMeta,
 	type SystemSketchArrowPrimitiveStyle,
@@ -313,6 +317,10 @@ function rebuildCableAsArrow(
 			kind: 'connection',
 			version: DETACH_FORMAT_VERSION,
 			routing,
+			temporal: (cable.connection as ConnectionShape).props.temporal,
+			delayValue: (cable.connection as ConnectionShape).props.delayValue,
+			pillPosition: (cable.connection as ConnectionShape).props.pillPosition,
+			rebuildWithBlocks: true,
 			ends,
 		})),
 	})
@@ -376,6 +384,12 @@ function detachedCablePrimitiveStyle(
 		kind: 'arrow',
 		strokeColor: 'var(--tl-color-text-3, #475569)',
 		strokeWidth: 2,
+		presentation: {
+			temporal: connection.props.temporal,
+			delayValue: connection.props.delayValue,
+			pillPosition: connection.props.pillPosition,
+			dashAfterPill: cablePresentation.get().dashAfterPill,
+		},
 		path: {
 			d: getConnectionShapePath(editor, connection),
 			transform,
@@ -383,6 +397,128 @@ function detachedCablePrimitiveStyle(
 			samples: getConnectionRenderPoints(editor, connection).map((point) => point.toJson()),
 		},
 	}
+}
+
+/** Every selected semantic cable, including cables nested in selected groups. */
+export function selectedConnectionIds(editor: Editor): TLShapeId[] {
+	const found: TLShapeId[] = []
+	const visit = (ids: readonly TLShapeId[]) => {
+		for (const id of ids) {
+			const shape = editor.getShape(id)
+			if (!shape) continue
+			if (shape.type === CONNECTION_SHAPE_TYPE) found.push(id)
+			visit(editor.getSortedChildIdsForParent(id))
+		}
+	}
+	visit(editor.getSelectedShapeIds())
+	return [...new Set(found)]
+}
+
+/**
+ * Detach selected cables without detaching either Block.
+ *
+ * Each result is an ordinary stock arrow with stock arrow bindings. Its
+ * namespaced metadata carries only the finite paint stock arrows cannot name,
+ * plus the connection record needed by the existing rebuild path.
+ */
+export function detachSelectedConnections(editor: Editor): TLShapeId[] {
+	const connectionIds = selectedConnectionIds(editor)
+	if (connectionIds.length === 0) return []
+	editor.markHistoryStoppingPoint('detach arrows')
+	const arrowIds: TLShapeId[] = []
+	editor.run(() => {
+		for (const connectionId of connectionIds) {
+			const connection = editor.getShape(connectionId)
+			if (!connection || connection.type !== CONNECTION_SHAPE_TYPE) continue
+			const arrowId = detachConnectionToArrow(editor, connection as ConnectionShape)
+			if (arrowId) arrowIds.push(arrowId)
+		}
+		editor.setSelectedShapes(arrowIds)
+	})
+	return arrowIds
+}
+
+function detachConnectionToArrow(
+	editor: Editor,
+	connection: ConnectionShape,
+): TLShapeId | null {
+	const terminals = getConnectionTerminals(editor, connection)
+	const pageTransform = editor.getShapePageTransform(connection)
+	const pagePoints = {
+		start: pageTransform.applyToPoint(terminals.start),
+		end: pageTransform.applyToPoint(terminals.end),
+	}
+	const bindings = getConnectionBindings(editor, connection)
+	const ends: Partial<Record<ConnectionTerminal, DetachedConnectionEnd>> = {}
+	for (const terminal of ['start', 'end'] as const) {
+		const binding = bindings[terminal]
+		if (binding) ends[terminal] = {
+			portId: binding.props.portId,
+			face: binding.props.face,
+		}
+	}
+
+	const arrowId = createShapeId()
+	const routing = connection.props.routing
+	editor.createShape({
+		id: arrowId,
+		type: 'arrow',
+		x: pagePoints.start.x,
+		y: pagePoints.start.y,
+		props: {
+			start: { x: 0, y: 0 },
+			end: {
+				x: pagePoints.end.x - pagePoints.start.x,
+				y: pagePoints.end.y - pagePoints.start.y,
+			},
+			kind: routing === 'elbow' ? 'elbow' : 'arc',
+			bend: routing === 'curved' ? 32 : 0,
+			color: 'grey',
+			size: 's',
+			dash: 'solid',
+			arrowheadStart: 'none',
+			arrowheadEnd: 'none',
+		},
+		meta: systemSketchPrimitiveMeta(
+			detachedCablePrimitiveStyle(editor, connection, pagePoints.start),
+			detachMeta({
+				kind: 'connection',
+				version: DETACH_FORMAT_VERSION,
+				routing,
+				temporal: connection.props.temporal,
+				delayValue: connection.props.delayValue,
+				pillPosition: connection.props.pillPosition,
+				rebuildWithBlocks: false,
+				ends,
+			}),
+		),
+	})
+
+	for (const terminal of ['start', 'end'] as const) {
+		const binding = bindings[terminal]
+		const target = binding ? editor.getShape(binding.toId) : undefined
+		if (!binding || !target) continue
+		const bounds = editor.getShapeGeometry(target).bounds
+		const local = editor.getShapePageTransform(target).clone().invert()
+			.applyToPoint(pagePoints[terminal])
+		editor.createBinding<TLArrowBinding>({
+			type: 'arrow',
+			fromId: arrowId,
+			toId: target.id,
+			props: {
+				terminal,
+				normalizedAnchor: {
+					x: (local.x - bounds.x) / Math.max(1, bounds.width),
+					y: (local.y - bounds.y) / Math.max(1, bounds.height),
+				},
+				isPrecise: true,
+				isExact: true,
+			},
+		})
+	}
+
+	editor.deleteShape(connection.id)
+	return arrowId
 }
 
 /**
@@ -506,7 +642,10 @@ export function rebuildSelectedBlocks(editor: Editor): RebuildResult {
 	// Read every arrow that remembers a cable BEFORE anything is deleted: the
 	// bindings that say which card each end held die with the card.
 	const arrows = editor.getCurrentPageShapes()
-		.filter((shape) => shape.type === 'arrow' && readDetachedConnection(shape.meta))
+		.filter((shape) => {
+			const record = shape.type === 'arrow' ? readDetachedConnection(shape.meta) : null
+			return record?.rebuildWithBlocks === true
+		})
 		.map((shape) => ({
 			id: shape.id,
 			record: readDetachedConnection(shape.meta)!,
@@ -579,6 +718,9 @@ export function rebuildSelectedBlocks(editor: Editor): RebuildResult {
 					start: { x: 0, y: 0 },
 					end: { x: endPoint.x - startPoint.x, y: endPoint.y - startPoint.y },
 					routing: arrow.record.routing,
+					temporal: arrow.record.temporal,
+					delayValue: arrow.record.delayValue,
+					pillPosition: arrow.record.pillPosition,
 				},
 			})
 			for (const [terminal, blockId, end] of [

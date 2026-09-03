@@ -27,6 +27,10 @@ describe('what a detached group remembers', () => {
 			kind: 'connection',
 			version: DETACH_FORMAT_VERSION,
 			routing: 'elbow',
+			temporal: 'delayed',
+			delayValue: '11',
+			pillPosition: 0.65,
+			rebuildWithBlocks: true,
 			ends: {
 				start: { portId: 'out_1', face: 'outer' },
 				end: { portId: 'in_1', face: 'inner' },
@@ -34,6 +38,10 @@ describe('what a detached group remembers', () => {
 		})
 		const read = readDetachedConnection(meta)
 		expect(read?.routing).toBe('elbow')
+		expect(read?.temporal).toBe('delayed')
+		expect(read?.delayValue).toBe('11')
+		expect(read?.pillPosition).toBe(0.65)
+		expect(read?.rebuildWithBlocks).toBe(true)
 		expect(read?.ends.start).toEqual({ portId: 'out_1', face: 'outer' })
 		expect(read?.ends.end).toEqual({ portId: 'in_1', face: 'inner' })
 	})

@@ -777,16 +777,20 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
  * The paths without a z⁻¹ pill. Keeping this one component behind both the
  * live canvas and `toSvg` makes the async cadence export exactly as drawn.
  */
-function DataCablePath({
+export function DataCablePath({
 	path,
 	length,
 	temporal,
 	stroke,
+	strokeWidth = 2,
+	vectorEffect,
 }: {
 	path: string
 	length: number
 	temporal: ConnectionTemporalKind
 	stroke: string
+	strokeWidth?: number
+	vectorEffect?: 'non-scaling-stroke'
 }) {
 	const async = temporal === 'async'
 	return (
@@ -796,15 +800,16 @@ function DataCablePath({
 			stroke={stroke}
 			strokeLinecap={async ? 'butt' : 'round'}
 			strokeLinejoin="round"
-			strokeWidth={2}
+			strokeWidth={strokeWidth}
 			strokeDasharray={async ? ASYNC_PACKET_DASHARRAY : undefined}
 			strokeDashoffset={async ? asyncDashOffsetForLength(length) : undefined}
+			vectorEffect={vectorEffect}
 			data-edge-type={temporal}
 		/>
 	)
 }
 
-interface DelayPillGeometry {
+export interface DelayPillGeometry {
 	x: number
 	y: number
 	/** Arc length of the routed cable, in shape units. */
@@ -827,16 +832,20 @@ export function delayPillGeometry(editor: Editor, connection: ConnectionShape): 
  * the same smooth path twice with complementary dash arrays normalised to
  * `pathLength`, so a curve stays a curve.
  */
-function DelayedCablePaths({
+export function DelayedCablePaths({
 	path,
 	pill,
 	solidBeforePill,
 	stroke,
+	strokeWidth = 2,
+	vectorEffect,
 }: {
 	path: string
 	pill: DelayPillGeometry
 	solidBeforePill: boolean
 	stroke: string
+	strokeWidth?: number
+	vectorEffect?: 'non-scaling-stroke'
 }) {
 	if (!solidBeforePill) {
 		return (
@@ -846,8 +855,9 @@ function DelayedCablePaths({
 				stroke={stroke}
 				strokeLinecap="round"
 				strokeLinejoin="round"
-				strokeWidth={2}
+				strokeWidth={strokeWidth}
 				strokeDasharray={`${DELAY_DOT_PX} ${DELAY_DOT_GAP_PX}`}
+				vectorEffect={vectorEffect}
 				data-delay-segment="all"
 			/>
 		)
@@ -861,8 +871,9 @@ function DelayedCablePaths({
 				stroke={stroke}
 				strokeLinecap="round"
 				strokeLinejoin="round"
-				strokeWidth={2}
+				strokeWidth={strokeWidth}
 				strokeDasharray={pill.dash.before}
+				vectorEffect={vectorEffect}
 				data-delay-segment="before"
 			/>
 			<path
@@ -872,8 +883,9 @@ function DelayedCablePaths({
 				stroke={stroke}
 				strokeLinecap="round"
 				strokeLinejoin="round"
-				strokeWidth={2}
+				strokeWidth={strokeWidth}
 				strokeDasharray={pill.dash.after}
+				vectorEffect={vectorEffect}
 				data-delay-segment="after"
 			/>
 		</>
@@ -881,7 +893,7 @@ function DelayedCablePaths({
 }
 
 /** The z⁻¹ pill: a value store riding the cable, in the port default chip's grammar. */
-function DelayPill({
+export function DelayPill({
 	pill,
 	label,
 	stroke,

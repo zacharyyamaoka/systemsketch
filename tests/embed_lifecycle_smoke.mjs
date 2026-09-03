@@ -74,6 +74,13 @@ async function visibleShapeCount(page) {
 async function drawRectangleAndUnload(page, expectedBefore) {
   assert.equal(await visibleShapeCount(page), expectedBefore)
   await clickElement(page, '[data-testid="systemsketch-tool-shape"]')
+  await waitFor(page, `Array.from(document.querySelectorAll('.systemsketch-tool-menu__item'))
+    .some((node) => node.textContent.includes('Rectangle'))`, 'Shape family menu')
+  await evaluate(page, `(() => {
+    const row = Array.from(document.querySelectorAll('.systemsketch-tool-menu__item'))
+      .find((node) => node.textContent.includes('Rectangle'))
+    row?.click()
+  })()`)
   await waitFor(
     page,
     `document.querySelector('[data-testid="systemsketch-tool-shape"]')?.getAttribute('aria-pressed') === 'true'`,

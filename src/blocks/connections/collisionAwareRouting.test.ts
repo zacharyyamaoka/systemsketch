@@ -75,6 +75,33 @@ describe('single-edge collision planning — independent of nudging', () => {
 		expect(routeClearsInput(previous, input)).toBe(false)
 		expect(stabilizeOrthogonalRoute(previous, planned, input).points).toEqual(planned.points)
 	})
+
+	it('allows a legal early turn inside the endpoint padding but outside the Block', () => {
+		const input = {
+			start: { point: { x: 120, y: 40 }, side: 'right' as const, box: { x: 0, y: 0, w: 120, h: 80 } },
+			end: { point: { x: 800, y: 40 }, side: 'left' as const, box: { x: 800, y: 0, w: 120, h: 80 } },
+			obstacles: [{ x: 165, y: -40, w: 130, h: 160 }],
+		}
+		const planned = planOrthogonalRoute(input)
+		expect(planned.points[1].x).toBe(141)
+		expect(routeClearsInput(planned, input)).toBe(true)
+	})
+
+	it('routes around obstacle padding instead of accepting a raw-boundary graze', () => {
+		const input = {
+			start: { point: { x: 120, y: 40 }, side: 'right' as const, box: { x: 0, y: 0, w: 120, h: 80 } },
+			end: { point: { x: 800, y: 140 }, side: 'left' as const, box: { x: 800, y: 100, w: 120, h: 80 } },
+			obstacles: [
+				{ x: 650, y: -220, w: 90, h: 220 },
+				{ x: 650, y: 140, w: 90, h: 220 },
+			],
+		}
+		const planned = planOrthogonalRoute(input)
+		expect(routeClearsInput(planned, input)).toBe(true)
+		expect(planned.points).not.toEqual([
+			{ x: 120, y: 40 }, { x: 460, y: 40 }, { x: 460, y: 140 }, { x: 800, y: 140 },
+		])
+	})
 })
 
 describe('collision-safe bundle nudging — independent of pathfinding', () => {

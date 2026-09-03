@@ -473,6 +473,38 @@ function donglePosition(bounds: ElbowBounds, side: ElbowSide, point: ElbowPoint)
   }
 }
 
+/**
+ * Shorten an endpoint keep-out when a third-party keep-out occupies its normal
+ * dongle rail. The endpoint's own padding is aesthetic; obstacle clearance is
+ * a hard constraint. Clamping the dongle to the obstacle boundary preserves
+ * both: the cable still leaves through the requested side and may turn in the
+ * small legal pocket before the obstacle.
+ */
+function clampDongleBeforeObstacles(
+  keepOut: ElbowBounds,
+  endpoint: ElbowEndpoint,
+  obstacles: readonly ElbowBounds[],
+): ElbowBounds {
+  let [left, top, right, bottom] = keepOut
+  const { point, side } = endpoint
+  for (const obstacle of obstacles) {
+    if (side === 'right') {
+      const crossesRail = point.y > obstacle[1] + 1e-6 && point.y < obstacle[3] - 1e-6
+      if (crossesRail && obstacle[0] > point.x + 1e-6 && obstacle[0] < right) right = obstacle[0]
+    } else if (side === 'left') {
+      const crossesRail = point.y > obstacle[1] + 1e-6 && point.y < obstacle[3] - 1e-6
+      if (crossesRail && obstacle[2] < point.x - 1e-6 && obstacle[2] > left) left = obstacle[2]
+    } else if (side === 'bottom') {
+      const crossesRail = point.x > obstacle[0] + 1e-6 && point.x < obstacle[2] - 1e-6
+      if (crossesRail && obstacle[1] > point.y + 1e-6 && obstacle[1] < bottom) bottom = obstacle[1]
+    } else {
+      const crossesRail = point.x > obstacle[0] + 1e-6 && point.x < obstacle[2] - 1e-6
+      if (crossesRail && obstacle[3] < point.y - 1e-6 && obstacle[3] > top) top = obstacle[3]
+    }
+  }
+  return [left, top, right, bottom]
+}
+
 // ---------------------------------------------------------------------------
 // Polyline hygiene — pyblocks' own, ported from src/whiteboard/elbowRouting.ts
 // ---------------------------------------------------------------------------
@@ -671,7 +703,7 @@ function attemptRoute(
   const endElement = end.box ? boundsOfRect(end.box) : boundsAroundPoint(end.point)
   const common = unionBounds([startElement, endElement])
 
-  const [startKeepOut, endKeepOut] = dynamicKeepOuts(
+  let [startKeepOut, endKeepOut] = dynamicKeepOuts(
     startElement,
     endElement,
     common,
@@ -679,6 +711,9 @@ function attemptRoute(
     offsetFromSide(end.side, options.padding, options.padding),
     reach,
   )
+
+  startKeepOut = clampDongleBeforeObstacles(startKeepOut, start, obstacleBounds)
+  endKeepOut = clampDongleBeforeObstacles(endKeepOut, end, obstacleBounds)
 
   const startDongle = donglePosition(startKeepOut, start.side, start.point)
   const endDongle = donglePosition(endKeepOut, end.side, end.point)
@@ -744,20 +779,19 @@ function autoPoints(
   options: ElbowRouteOptions,
 ): { points: ElbowPoint[]; fallback: boolean } {
   const obstacleBounds = obstacles.map((rect) => expandBounds(boundsOfRect(rect), options.padding))
-  const solid = obstacles.map((rect) => boundsOfRect(rect))
 
   const midline = attemptRoute(start, end, obstacleBounds, options, 'midline')
-  if (midline.points && !polylineHits(midline.points, solid)) {
+  if (midline.points && !polylineHits(midline.points, obstacleBounds)) {
     return { points: midline.points, fallback: false }
   }
 
   const tight = attemptRoute(start, end, obstacleBounds, options, 'tight')
-  if (tight.points && !polylineHits(tight.points, solid)) {
+  if (tight.points && !polylineHits(tight.points, obstacleBounds)) {
     return { points: tight.points, fallback: false }
   }
   // Nothing clears everything. Prefer a real route over a stub, but say so.
   const best = tight.points ?? midline.points
-  if (best) return { points: best, fallback: false }
+  if (best) return { points: best, fallback: true }
   return { points: fallbackPoints(start, end, options.legLength), fallback: true }
 }
 

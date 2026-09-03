@@ -1,0 +1,81 @@
+{
+  "feature": "Detach arrows with exact edge presentation",
+  "viewport": { "width": 1600, "height": 1200 },
+  "shapes": [
+    {
+      "id": "direct-source", "type": "block", "x": 130, "y": 340,
+      "props": {
+        "title": "emit_async", "blockType": "Function", "view": "port", "w": 260, "h": 150,
+        "inputs": [],
+        "outputs": [{ "id": "out_1", "name": "events", "type": "Event", "visible": true }]
+      }
+    },
+    {
+      "id": "direct-sink", "type": "block", "x": 1040, "y": 310,
+      "props": {
+        "title": "consume_async", "blockType": "Function", "view": "port", "w": 300, "h": 150,
+        "inputs": [{ "id": "in_1", "name": "events", "type": "Event", "visible": true }],
+        "outputs": []
+      }
+    },
+    {
+      "id": "delay-source", "type": "block", "x": 130, "y": 680,
+      "props": {
+        "title": "previous", "blockType": "Function", "view": "port", "w": 260, "h": 150,
+        "inputs": [],
+        "outputs": [{ "id": "out_1", "name": "state", "type": "State", "visible": true }]
+      }
+    },
+    {
+      "id": "delay-target", "type": "block", "x": 1040, "y": 650,
+      "props": {
+        "title": "accumulate", "description": "Detach this Block after trying the edge-only action above.",
+        "blockType": "Function", "view": "port", "w": 330, "h": 180,
+        "inputs": [{ "id": "in_1", "name": "state", "type": "State", "visible": true }],
+        "outputs": []
+      }
+    },
+    {
+      "id": "async-edge", "type": "connection", "x": 0, "y": 0,
+      "props": {
+        "routing": "curved", "temporal": "async", "delayValue": "", "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "delayed-edge", "type": "connection", "x": 0, "y": 0,
+      "props": {
+        "routing": "elbow", "temporal": "delayed", "delayValue": "11", "pillPosition": 0.58
+      }
+    }
+  ],
+  "bindings": [
+    { "type": "connection", "fromId": "async-edge", "toId": "direct-source", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "async-edge", "toId": "direct-sink", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "delayed-edge", "toId": "delay-source", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "delayed-edge", "toId": "delay-target", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } }
+  ],
+  "callouts": [
+    {
+      "id": "step-1", "kind": "step",
+      "text": "1 · Right-click the Async cable → Detach arrow. Neither Block should detach.",
+      "x": 70, "y": 120, "w": 560, "h": 120,
+      "target": { "shapeId": "direct-source", "anchor": "top", "dx": 95 }
+    },
+    {
+      "id": "step-2", "kind": "step",
+      "text": "2 · Right-click accumulate → Detach to primitives. The delayed cable must keep its dots and z⁻¹ = 11 pill.",
+      "x": 900, "y": 120, "w": 620, "h": 120,
+      "target": { "shapeId": "delay-target", "anchor": "top", "dx": -85 }
+    },
+    {
+      "id": "step-3", "kind": "step",
+      "text": "3 · Drag consume_async and the detached accumulate group. Both arrows should re-route normally without losing their style.",
+      "x": 70, "y": 1000, "w": 650, "h": 110
+    },
+    {
+      "id": "pass", "kind": "pass",
+      "text": "PASS WHEN · Async keeps the 56·4·10·4 packet cadence; Delayed stays dotted with z⁻¹ = 11; curves/elbows reflow after movement.",
+      "x": 790, "y": 1000, "w": 730, "h": 110
+    }
+  ]
+}
