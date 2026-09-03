@@ -1,0 +1,132 @@
+{
+  "format": "systemsketch-recording-v2",
+  "clock": "milliseconds since header.startedAtWall",
+  "durationMs": 5717.9,
+  "moments": 5,
+  "captureHealth": {
+    "id": 3,
+    "ok": true,
+    "captured": 170,
+    "droppedForDensity": 127,
+    "requestedKeyframes": 68,
+    "keyframesMatched": 68,
+    "largestRawGapMs": 97,
+    "target": "http://127.0.0.1:41025/?board=%2Ftmp%2Frecorder-smoke-files-Yi1w1a%2FSystemSketch%2Frecorder-proof.systemsketch",
+    "targetId": "F7CCDC4AE2915C28CAB0DC989EF8642B",
+    "targets": 1,
+    "cdpPort": 38375,
+    "source": "screencast",
+    "framesKept": 43,
+    "largestKeptGapMs": 333,
+    "durationMs": 5717.9
+  },
+  "privacy": {
+    "networkBodies": "not captured",
+    "clipboardContents": "not captured",
+    "textInput": "event lengths only; key names remain in the input lane",
+    "passwordValues": "not captured"
+  },
+  "artifacts": [
+    {
+      "file": "README.md",
+      "bytes": 5065,
+      "description": "compact handoff packet"
+    },
+    {
+      "file": "actions.jsonl",
+      "bytes": 538,
+      "description": "semantic app command detail",
+      "rows": 4
+    },
+    {
+      "file": "browser-errors.jsonl",
+      "bytes": 0,
+      "description": "structured browser errors and stacks",
+      "rows": 0
+    },
+    {
+      "file": "capture-health.json",
+      "bytes": 466,
+      "description": "screencast target and frame-gap diagnostics"
+    },
+    {
+      "file": "end.snapshot.json",
+      "bytes": 5278,
+      "description": "store snapshot at recording end"
+    },
+    {
+      "file": "frames.jsonl",
+      "bytes": 4711,
+      "description": "frame timestamps and capture reasons",
+      "rows": 43
+    },
+    {
+      "file": "header.json",
+      "bytes": 3407,
+      "description": "recording and environment identity"
+    },
+    {
+      "file": "host.jsonl",
+      "bytes": 1669,
+      "description": "bounded local controller request log",
+      "rows": 9
+    },
+    {
+      "file": "moments.json",
+      "bytes": 1018,
+      "description": "high-signal seek index paired with frames",
+      "rows": 5
+    },
+    {
+      "file": "network.jsonl",
+      "bytes": 3542,
+      "description": "request timing and failures without bodies",
+      "rows": 8
+    },
+    {
+      "file": "performance.jsonl",
+      "bytes": 0,
+      "description": "long-task detail",
+      "rows": 0
+    },
+    {
+      "file": "playback.html",
+      "bytes": 119132,
+      "description": "self-contained synchronized viewer"
+    },
+    {
+      "file": "start.snapshot.json",
+      "bytes": 2862,
+      "description": "store snapshot at recording start"
+    },
+    {
+      "file": "states.json",
+      "bytes": 790,
+      "description": "state-chart source map"
+    },
+    {
+      "file": "store.full.jsonl",
+      "bytes": 72812,
+      "description": "lossless replay diffs with complete records",
+      "rows": 40
+    },
+    {
+      "file": "timeline.jsonl",
+      "bytes": 34061,
+      "description": "compact causal index on the recording clock",
+      "rows": 204
+    },
+    {
+      "file": "ui-hits.jsonl",
+      "bytes": 56876,
+      "description": "focus, target geometry, and hit-test stacks",
+      "rows": 36
+    },
+    {
+      "file": "workspace.jsonl",
+      "bytes": 6135,
+      "description": "workspace and autosave lifecycle detail",
+      "rows": 23
+    }
+  ]
+}

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -12,6 +13,10 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
+import time
+import traceback
+from collections import deque
 from functools import partial
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -60,6 +65,76 @@ PREVIEW_PRESETS = {
 }
 
 
+class HostEventLog:
+    """Bounded controller diagnostics, sliced onto a recording's wall clock."""
+
+    def __init__(self, limit: int = 4000):
+        self.events: deque[dict] = deque(maxlen=limit)
+        self.lock = threading.Lock()
+
+    def append(self, event: dict) -> None:
+        with self.lock:
+            self.events.append({"wall": round(time.time() * 1000, 1), **event})
+
+    def between(self, started_at_wall: float, ended_at_wall: float) -> list[dict]:
+        with self.lock:
+            selected = [dict(event) for event in self.events if started_at_wall <= float(event["wall"]) <= ended_at_wall]
+        for event in selected:
+            event["t"] = round(float(event["wall"]) - started_at_wall, 1)
+        return selected
+
+
+def _git_output(source_root: Path, *args: str) -> bytes:
+    result = subprocess.run(
+        ["git", "-C", str(source_root), *args],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        check=False,
+        timeout=10,
+    )
+    return result.stdout if result.returncode == 0 else b""
+
+
+def source_build_identity(source_root: Path, controller: str) -> dict:
+    revision = _git_output(source_root, "rev-parse", "HEAD").decode(errors="replace").strip() or None
+    status = _git_output(source_root, "status", "--porcelain=v1", "-z")
+    diff = _git_output(source_root, "diff", "--binary", "HEAD")
+    digest = hashlib.sha256()
+    digest.update(status)
+    digest.update(diff)
+    dirty_paths = []
+    for raw in status.split(b"\0"):
+        if not raw:
+            continue
+        text = raw.decode(errors="replace")
+        dirty_paths.append(text[3:] if len(text) > 3 else text)
+    # A dirty-tree hash must also distinguish untracked file contents. Keep the
+    # work bounded; giant generated assets are identified by path, size, and
+    # mtime rather than read into the controller.
+    for raw in _git_output(source_root, "ls-files", "--others", "--exclude-standard", "-z").split(b"\0"):
+        if not raw:
+            continue
+        relative = raw.decode(errors="replace")
+        path = source_root / relative
+        try:
+            stat = path.stat()
+            digest.update(raw)
+            digest.update(f"{stat.st_size}:{stat.st_mtime_ns}".encode())
+            if path.is_file() and stat.st_size <= 16 * 1024 * 1024:
+                digest.update(path.read_bytes())
+        except OSError:
+            continue
+    return {
+        "sourceRoot": str(source_root),
+        "revision": revision,
+        "dirty": bool(status),
+        "workingTreeHash": digest.hexdigest() if status else None,
+        "dirtyPaths": dirty_paths[:200],
+        "dirtyPathCount": len(dirty_paths),
+        "controllerFingerprint": controller,
+    }
+
+
 class SystemSketchHandler(SimpleHTTPRequestHandler):
     server_version = "SystemSketch/0.1"
 
@@ -76,6 +151,18 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
         super().end_headers()
 
     def _json(self, payload: dict, status: HTTPStatus = HTTPStatus.OK) -> None:
+        parsed_path = urlparse(self.path).path
+        if parsed_path.startswith("/api/"):
+            started = getattr(self, "_request_started", time.perf_counter())
+            error = payload.get("error") if isinstance(payload, dict) else None
+            self.app.host_events.append({
+                "method": self.command,
+                "path": parsed_path,
+                "status": int(status),
+                "durationMs": round((time.perf_counter() - started) * 1000, 1),
+                "level": "error" if int(status) >= 400 else "info",
+                "summary": f"{self.command} {parsed_path} → {int(status)}" + (f": {error}" if error else ""),
+            })
         content = (json.dumps(payload, ensure_ascii=False) + "\n").encode()
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
@@ -83,7 +170,21 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(content)
 
+    def _record_exception(self, cause: BaseException) -> None:
+        path = urlparse(self.path).path
+        self.app.host_events.append({
+            "method": self.command,
+            "path": path,
+            "kind": "exception",
+            "level": "error",
+            "errorType": type(cause).__name__,
+            "message": str(cause),
+            "stack": traceback.format_exc(limit=30),
+            "summary": f"{self.command} {path}: {type(cause).__name__}: {cause}",
+        })
+
     def do_GET(self) -> None:
+        self._request_started = time.perf_counter()
         parsed = urlparse(self.path)
         path = parsed.path
         if path == "/api/health":
@@ -93,6 +194,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             try:
                 self._json(self.app.release_payload())
             except ReleaseError as cause:
+                self._record_exception(cause)
                 self._json({"error": str(cause)}, HTTPStatus.CONFLICT)
             return
         if path == "/api/preview-clone":
@@ -100,6 +202,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                 token = parse_qs(parsed.query).get("token", [""])[0]
                 self._json({"snapshot": self.app.consume_preview_clone(token)})
             except ReleaseError as cause:
+                self._record_exception(cause)
                 self._json({"error": str(cause)}, HTTPStatus.NOT_FOUND)
             return
         if path == "/api/recordings/last":
@@ -117,6 +220,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                 requested = values[0] if len(values) == 1 else None
                 self._json(list_documents(requested, self.app.files_root))
             except WorkspacePathError as cause:
+                self._record_exception(cause)
                 self._json({"error": str(cause)}, HTTPStatus.BAD_REQUEST)
             return
         if path == "/api/workspace/file":
@@ -134,6 +238,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             except FileNotFoundError:
                 self._json({"path": values[0], "source": None})
             except (WorkspacePathError, WorkspaceFormatError) as cause:
+                self._record_exception(cause)
                 self._json({"error": str(cause)}, HTTPStatus.BAD_REQUEST)
             return
         if path == "/api/workspace/stat":
@@ -151,6 +256,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             except FileNotFoundError:
                 self._json({"path": values[0], "mtime": None})
             except WorkspacePathError as cause:
+                self._record_exception(cause)
                 self._json({"error": str(cause)}, HTTPStatus.BAD_REQUEST)
             return
         if path == "/":
@@ -158,6 +264,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
         super().do_GET()
 
     def do_POST(self) -> None:
+        self._request_started = time.perf_counter()
         path = urlparse(self.path).path
         if path not in {
             "/api/release",
@@ -242,6 +349,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                 return
             self._json(self.app.reveal_document(payload.get("path")))
         except WorkspaceConflictError as cause:
+            self._record_exception(cause)
             self._json(
                 {
                     "error": str(cause),
@@ -251,7 +359,8 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                 },
                 HTTPStatus.CONFLICT,
             )
-        except FileNotFoundError:
+        except FileNotFoundError as cause:
+            self._record_exception(cause)
             self._json({"error": "the document no longer exists"}, HTTPStatus.NOT_FOUND)
         except (
             OSError,
@@ -262,6 +371,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             WorkspaceFormatError,
             subprocess.SubprocessError,
         ) as cause:
+            self._record_exception(cause)
             self._json({"error": str(cause)}, HTTPStatus.CONFLICT)
 
 
@@ -295,6 +405,7 @@ class SystemSketchServer(ThreadingHTTPServer):
             else ()
         )
         self.controller_fingerprint = controller_fingerprint(Path(__file__).resolve().parent)
+        self.host_events = HostEventLog()
         # The screencast sidecar lives beside this file, in the checkout or in
         # an installed release's runtime/ alike.
         self.frames = FrameSidecar(
@@ -314,6 +425,9 @@ class SystemSketchServer(ThreadingHTTPServer):
             version = str(read_manifest(self.release_home, self.build).get("version", version))
         channel = str(payload.get("channel") or self.channel)
         build = str(payload.get("build") or self.build)
+        header = payload.get("header") if isinstance(payload.get("header"), dict) else {}
+        started_at_wall = float(header.get("startedAtWall") or 0)
+        ended_at_wall = float(header.get("endedAtWall") or time.time() * 1000)
         return write_recording(
             payload,
             self.files_root,
@@ -322,6 +436,8 @@ class SystemSketchServer(ThreadingHTTPServer):
             build=build,
             version=str(payload.get("version") or version),
             frame_dump=self.frames.dump,
+            host_events=self.host_events.between(started_at_wall, ended_at_wall),
+            build_identity=source_build_identity(self.source_root, self.controller_fingerprint),
         )
 
     def health_payload(self) -> dict:

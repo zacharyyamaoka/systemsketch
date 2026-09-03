@@ -41,7 +41,7 @@ if (!Number.isFinite(CDP_PORT) || !URL_PREFIX) {
   process.exit(2)
 }
 
-/** @type {Map<string, {url: string, ws: WebSocket, ring: {wall: number, buf: Buffer}[], bytes: number, seq: number, pending: Map<number, (v: any) => void>, casting: boolean}>} */
+/** @type {Map<string, {id: string, url: string, ws: WebSocket, ring: {wall: number, buf: Buffer}[], bytes: number, seq: number, pending: Map<number, (v: any) => void>, casting: boolean}>} */
 const targets = new Map()
 let armed = false
 const log = (...parts) => process.stderr.write(`[recorder_frames] ${parts.join(' ')}\n`)
@@ -99,7 +99,7 @@ function trim(target, now) {
 
 async function attach(page) {
   const ws = new WebSocket(page.webSocketDebuggerUrl)
-  const target = { url: page.url, ws, ring: [], bytes: 0, seq: 0, pending: new Map(), casting: false }
+  const target = { id: page.id, url: page.url, ws, ring: [], bytes: 0, seq: 0, pending: new Map(), casting: false }
   targets.set(page.id, target)
   await new Promise((resolve, reject) => {
     ws.addEventListener('open', resolve, { once: true })
@@ -162,26 +162,72 @@ function pickTarget(url) {
   return list.reduce((best, target) => (target.ring.length > (best?.ring.length ?? -1) ? target : best), null)
 }
 
-async function dump({ dir, fromWall, toWall, keepGapMs = 300, url }) {
+async function dump({ dir, fromWall, toWall, keepGapMs = 300, url, keyWalls = [] }) {
   const target = pickTarget(url)
-  if (!target) return { ok: true, frames: [], captured: 0, reason: 'no page attached' }
+  if (!target) return { ok: true, frames: [], captured: 0, targets: targets.size, reason: 'no page attached' }
   const from = Number(fromWall), to = Number(toWall)
   const slack = 60
   const inRange = target.ring.filter((frame) => frame.wall >= from - slack && frame.wall <= to + slack)
   await mkdir(dir, { recursive: true })
-  const kept = []
-  let lastKept = -Infinity
+  const selected = new Map()
+  const keep = (index, reason) => {
+    if (index < 0 || index >= inRange.length) return false
+    if (!selected.has(index)) selected.set(index, new Set())
+    selected.get(index).add(reason)
+    return true
+  }
+  if (inRange.length) {
+    keep(0, 'start')
+    keep(inRange.length - 1, 'end')
+  }
+  let lastPeriodic = -Infinity
   for (let index = 0; index < inRange.length; index += 1) {
+    if (inRange[index].wall - lastPeriodic >= keepGapMs) {
+      keep(index, 'cadence')
+      lastPeriodic = inRange[index].wall
+    }
+  }
+  let keyframesMatched = 0
+  for (const rawWall of keyWalls) {
+    const wall = Number(rawWall)
+    if (!Number.isFinite(wall)) continue
+    let index = inRange.findIndex((frame) => frame.wall >= wall)
+    if (index < 0) index = inRange.length - 1
+    if (index >= 0 && Math.abs(inRange[index].wall - wall) <= Math.max(500, keepGapMs * 2)) {
+      if (keep(index, 'event')) keyframesMatched += 1
+    }
+  }
+  const kept = []
+  const usedTimes = new Set()
+  for (const index of [...selected.keys()].sort((a, b) => a - b)) {
     const frame = inRange[index]
-    const last = index === inRange.length - 1
-    if (index !== 0 && !last && frame.wall - lastKept < keepGapMs) continue
-    lastKept = frame.wall
-    const t = Math.max(0, Math.round(frame.wall - from))
+    let t = Math.max(0, Math.round(frame.wall - from))
+    while (usedTimes.has(t)) t += 1
+    usedTimes.add(t)
     const file = `f-${String(t).padStart(6, '0')}.jpg`
     await writeFile(join(dir, file), frame.buf)
-    kept.push({ t, bytes: frame.buf.length, file: `frames/${file}`, wall: frame.wall })
+    kept.push({
+      t,
+      bytes: frame.buf.length,
+      file: `frames/${file}`,
+      wall: frame.wall,
+      reasons: [...selected.get(index)],
+    })
   }
-  return { ok: true, frames: kept, captured: inRange.length, target: target.url }
+  const rawGaps = inRange.slice(1).map((frame, index) => frame.wall - inRange[index].wall)
+  return {
+    ok: true,
+    frames: kept,
+    captured: inRange.length,
+    droppedForDensity: Math.max(0, inRange.length - kept.length),
+    requestedKeyframes: keyWalls.length,
+    keyframesMatched,
+    largestRawGapMs: rawGaps.length ? Math.round(Math.max(...rawGaps)) : null,
+    target: target.url,
+    targetId: target.id,
+    targets: targets.size,
+    cdpPort: CDP_PORT,
+  }
 }
 
 async function handle(message) {
@@ -196,7 +242,7 @@ async function handle(message) {
     case 'status':
       return {
         ok: true, armed, cdpPort: CDP_PORT, urlPrefix: URL_PREFIX, windowMs: WINDOW_MS,
-        targets: [...targets.values()].map((target) => ({ url: target.url, frames: target.ring.length, bytes: target.bytes, casting: target.casting })),
+        targets: [...targets.values()].map((target) => ({ id: target.id, url: target.url, frames: target.ring.length, bytes: target.bytes, casting: target.casting })),
       }
     case 'dump':
       return dump(message)

@@ -33,7 +33,7 @@ import launch_systemsketch as launcher  # noqa: E402
 import release as release_cli  # noqa: E402
 import install_desktop as installer  # noqa: E402
 import new_track as track_builder  # noqa: E402
-from server import SystemSketchServer  # noqa: E402
+from server import HostEventLog, SystemSketchServer, source_build_identity  # noqa: E402
 
 
 def git(root: Path, *arguments: str) -> str:
@@ -75,6 +75,28 @@ class ReleaseSystemTests(unittest.TestCase):
         dist.mkdir()
         (dist / "index.html").write_text(f"<main>{marker}</main>", encoding="utf-8")
         return dist
+
+    def test_recording_build_identity_distinguishes_a_dirty_tree(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.make_git_project(Path(directory))
+            clean = source_build_identity(root, "controller-a")
+            self.assertFalse(clean["dirty"])
+            self.assertIsNone(clean["workingTreeHash"])
+            (root / "src" / "App.tsx").write_text("export const App = () => 2\n", encoding="utf-8")
+            dirty = source_build_identity(root, "controller-a")
+            self.assertTrue(dirty["dirty"])
+            self.assertEqual(dirty["revision"], clean["revision"])
+            self.assertEqual(dirty["dirtyPaths"], ["src/App.tsx"])
+            self.assertRegex(dirty["workingTreeHash"], r"^[0-9a-f]{64}$")
+
+    def test_host_event_log_rebases_only_the_recording_window(self) -> None:
+        log = HostEventLog()
+        log.events.extend([
+            {"wall": 900.0, "summary": "before"},
+            {"wall": 1100.0, "summary": "inside"},
+            {"wall": 1400.0, "summary": "after"},
+        ])
+        self.assertEqual(log.between(1000, 1300), [{"wall": 1100.0, "summary": "inside", "t": 100.0}])
 
     def test_candidate_promote_and_rollback_keep_immutable_builds(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

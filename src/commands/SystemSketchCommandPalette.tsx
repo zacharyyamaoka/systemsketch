@@ -27,6 +27,7 @@ import {
   type CommandPaletteMode,
 } from './commandModel'
 import './commands.css'
+import { recordSemanticAction } from '../recorder/recorderEvents'
 
 export interface SystemSketchCommandPaletteProps {
   actions?: readonly CommandPaletteAction[]
@@ -156,7 +157,11 @@ export function SystemSketchCommandPalette({
   const runAction = async (action: CommandPaletteAction) => {
     if (commandPaletteActionDisabled(editor, action)) return
     try {
-      await action.run(editor)
+      await recordSemanticAction(action.id, action.label, () => action.run(editor), {
+        surface: 'command-palette',
+        selection: editor.getSelectedShapeIds(),
+        tool: editor.getCurrentToolId(),
+      })
       if (!action.keepOpen) onClose()
     } catch (error) {
       setStatus(`Could not run ${action.label}.`)

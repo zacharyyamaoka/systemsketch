@@ -73,11 +73,19 @@ async function recordingFolders(filesRoot) {
 async function readRecording(folder) {
   const header = JSON.parse(await readFile(join(folder, 'header.json'), 'utf8'))
   const rows = (await readFile(join(folder, 'timeline.jsonl'), 'utf8')).split('\n').filter(Boolean).map((line) => JSON.parse(line))
+  const storeDiffs = (await readFile(join(folder, 'store.full.jsonl'), 'utf8')).split('\n').filter(Boolean).map((line) => JSON.parse(line))
   const frames = (await readFile(join(folder, 'frames.jsonl'), 'utf8')).split('\n').filter(Boolean).map((line) => JSON.parse(line))
+  const manifest = JSON.parse(await readFile(join(folder, 'manifest.json'), 'utf8'))
+  const moments = JSON.parse(await readFile(join(folder, 'moments.json'), 'utf8'))
+  const captureHealth = JSON.parse(await readFile(join(folder, 'capture-health.json'), 'utf8'))
+  const uiHits = (await readFile(join(folder, 'ui-hits.jsonl'), 'utf8')).split('\n').filter(Boolean).map((line) => JSON.parse(line))
+  const workspace = (await readFile(join(folder, 'workspace.jsonl'), 'utf8')).split('\n').filter(Boolean).map((line) => JSON.parse(line))
+  const actions = (await readFile(join(folder, 'actions.jsonl'), 'utf8')).split('\n').filter(Boolean).map((line) => JSON.parse(line))
+  const host = (await readFile(join(folder, 'host.jsonl'), 'utf8')).split('\n').filter(Boolean).map((line) => JSON.parse(line))
   const packet = await readFile(join(folder, 'README.md'), 'utf8')
   const files = (await readdir(folder)).sort()
   const frameFiles = (await readdir(join(folder, 'frames'))).sort()
-  return { header, rows, frames, packet, files, frameFiles }
+  return { header, rows, storeDiffs, frames, manifest, moments, captureHealth, uiHits, workspace, actions, host, packet, files, frameFiles }
 }
 
 async function setViewport(page, width, height = 960) {
@@ -252,7 +260,12 @@ async function main() {
     check('one-folder', 'exactly one recording folder exists after one save', folders.length, 1)
     const first = await readRecording(folders[0])
     check('folder-files', 'the folder carries the packet, timeline, snapshots, frames and viewer',
-      ['README.md', 'end.snapshot.json', 'frames', 'frames.jsonl', 'header.json', 'playback.html', 'start.snapshot.json', 'states.json', 'timeline.jsonl'].every((name) => first.files.includes(name)), true)
+      [
+        'README.md', 'manifest.json', 'moments.json', 'end.snapshot.json', 'frames', 'frames.jsonl', 'capture-health.json',
+        'header.json', 'playback.html', 'start.snapshot.json', 'states.json', 'timeline.jsonl', 'store.full.jsonl',
+        'network.jsonl', 'workspace.jsonl', 'actions.jsonl', 'ui-hits.jsonl', 'performance.jsonl',
+        'browser-errors.jsonl', 'host.jsonl',
+      ].every((name) => first.files.includes(name)), true)
     check('packet-first-line', 'the packet opens with the recording headline', first.packet.startsWith('SystemSketch interaction recording'), true)
     check('packet-without-ui-note', 'saving without a UI note produces a complete, path-bearing packet', {
       emptyHeaderNote: first.header.note === '',
@@ -264,15 +277,21 @@ async function main() {
     check('header-mode', 'the saved recording is an explicit take on Preview', { mode: first.header.mode, channel: first.header.channel, framesSource: first.header.framesSource }, { mode: 'take', channel: 'preview', framesSource: 'screencast' })
 
     const lanes = new Set(first.rows.map((row) => row.lane))
-    check('lanes', 'the timeline carries input, state, store and DOM lanes', ['input', 'state', 'store', 'dom'].every((lane) => lanes.has(lane)), true)
+    check('lanes', 'the timeline carries canvas, DOM, network, UI and workspace lanes', ['input', 'state', 'store', 'dom', 'network', 'ui', 'workspace'].every((lane) => lanes.has(lane)), true)
     check('dom-keydown', 'the DOM lane saw the Escape key-down', first.rows.some((row) => row.lane === 'dom' && row.event === 'keydown' && row.key === 'Escape'), true)
     check('state-port', 'the state lane saw the port press that started the cable', first.rows.some((row) => row.lane === 'state' && row.to === 'select.pointing_block_port'), true)
     check('rows-rebased', 'every row is inside the window, from t=0', first.rows.every((row) => row.t >= 0 && row.t <= first.header.windowMs), true)
     check('states-mapped', 'the packet maps pointing_block_port to the file that defines it', /pointing_block_port\s+src\/blocks\//.test(first.packet), true)
-    const maxFrames = Math.ceil(first.header.durationMs / 300) + 2
-    check('frames-kept', 'screencast frames exist, named by ms, and stay within one per 300 ms',
-      { some: first.frames.length > 0, capped: first.frames.length <= maxFrames, named: first.frameFiles.every((name) => /^f-\d{6}\.jpg$/.test(name)), listed: first.frameFiles.length === first.frames.length },
-      { some: true, capped: true, named: true, listed: true })
+    const maxFrames = Math.ceil(first.header.durationMs / 300) + first.captureHealth.requestedKeyframes + 2
+    check('frames-kept', 'screencast frames exist, stay bounded, and retain event-aware reasons',
+      {
+        some: first.frames.length > 0,
+        capped: first.frames.length <= maxFrames,
+        named: first.frameFiles.every((name) => /^f-\d{6}\.jpg$/.test(name)),
+        listed: first.frameFiles.length === first.frames.length,
+        eventAware: first.frames.some((frame) => frame.reasons?.includes('event')),
+      },
+      { some: true, capped: true, named: true, listed: true, eventAware: true })
     const firstFrameFile = first.frameFiles[0]
     const bytes = firstFrameFile ? (await readFile(join(folders[0], 'frames', firstFrameFile))).length : 0
     check('frame-is-jpeg', 'a kept frame is a real JPEG', bytes > 1000, true)
@@ -280,18 +299,53 @@ async function main() {
       start: Object.values(JSON.parse(await readFile(join(folders[0], 'start.snapshot.json'), 'utf8')).store).filter((record) => record.typeName === 'shape').length,
       end: Object.values(JSON.parse(await readFile(join(folders[0], 'end.snapshot.json'), 'utf8')).store).filter((record) => record.typeName === 'shape').length,
     }, { start: 0, end: 3 })
+    const replay = structuredClone(JSON.parse(await readFile(join(folders[0], 'start.snapshot.json'), 'utf8')).store)
+    for (const entry of first.storeDiffs) {
+      for (const [id, record] of Object.entries(entry.changes.added ?? {})) replay[id] = record
+      for (const id of Object.keys(entry.changes.removed ?? {})) delete replay[id]
+      for (const [id, pair] of Object.entries(entry.changes.updated ?? {})) replay[id] = pair[1]
+    }
+    const endStore = JSON.parse(await readFile(join(folders[0], 'end.snapshot.json'), 'utf8')).store
+    const withoutPointer = (store) => Object.fromEntries(Object.entries(store).filter(([, record]) => record.typeName !== 'pointer').sort(([a], [b]) => a.localeCompare(b)))
+    check('lossless-replay', 'start snapshot plus the full store lane reconstructs the final non-pointer store exactly',
+      JSON.stringify(withoutPointer(replay)), JSON.stringify(withoutPointer(endStore)))
+    const completeAddedShapes = first.storeDiffs.flatMap((entry) => Object.values(entry.changes.added ?? {})).filter((record) => record.typeName === 'shape')
+    check('lossless-store', 'the replay lane carries complete records and links back to compact store rows', {
+      addedShapes: completeAddedShapes.length,
+      completeProps: completeAddedShapes.every((shape) => shape.props && typeof shape.props === 'object'),
+      linked: first.rows.filter((row) => row.lane === 'store').every((row) => first.storeDiffs.some((entry) => entry.id === row.detail)),
+    }, { addedShapes: 3, completeProps: true, linked: true })
+    check('progressive-index', 'manifest and moments expose deep evidence without putting bodies on the clipboard', {
+      format: first.manifest.format,
+      networkBodies: first.manifest.privacy.networkBodies,
+      buildRevision: typeof first.header.buildIdentity.revision === 'string',
+      windowId: typeof first.header.windowId === 'string',
+      captureTarget: typeof first.captureHealth.targetId === 'string',
+      moments: Array.isArray(first.moments),
+      hitGeometry: first.uiHits.some((detail) => detail.data?.target?.rect && Array.isArray(detail.data?.hitStack)),
+      autosaveDetail: first.workspace.some((detail) => detail.data?.path && detail.data?.phase),
+      semanticAction: first.actions.some((detail) => detail.data?.zone === 'right'),
+      hostRequests: first.host.some((event) => event.path === '/api/workspace/file' && typeof event.durationMs === 'number'),
+    }, {
+      format: 'systemsketch-recording-v2', networkBodies: 'not captured', buildRevision: true,
+      windowId: true, captureTarget: true, moments: true, hitGeometry: true,
+      autosaveDetail: true, semanticAction: true, hostRequests: true,
+    })
 
     // ---- 3. playback.html stands on its own
     await page.send('Page.navigate', { url: `file://${folders[0]}/playback.html#t=${Math.round(first.header.durationMs)}` })
     await waitFor(page, `document.querySelectorAll('#log div').length > 0`, 'playback log')
     await waitFor(page, `document.querySelector('#frame').naturalWidth > 0`, 'playback frame image')
+    await evaluate(page, `document.querySelectorAll('#log [data-detail]')[document.querySelectorAll('#log [data-detail]').length - 1].click()`)
+    await waitFor(page, `document.querySelector('#detail').open && document.querySelector('#detailpane').textContent.includes('"id"')`, 'playback detail disclosure')
     const playback = JSON.parse(await evaluate(page, `JSON.stringify({
       logLines: document.querySelectorAll('#log div').length,
       strip: document.querySelectorAll('#strip img').length,
       frameLoaded: document.querySelector('#frame').naturalWidth > 0,
+      detailOpened: document.querySelector('#detail').open,
       title: document.title,
     })`))
-    check('playback', 'playback.html renders the log, the filmstrip and a loaded frame', { lines: playback.logLines > 0, strip: playback.strip === first.frames.length, frame: playback.frameLoaded }, { lines: true, strip: true, frame: true })
+    check('playback', 'playback.html renders the log, filmstrip, frame, and on-demand detail', { lines: playback.logLines > 0, strip: playback.strip === first.frames.length, frame: playback.frameLoaded, detail: playback.detailOpened }, { lines: true, strip: true, frame: true, detail: true })
     await shot(page, 'recorder-playback.png')
 
     // ---- 4. the one-minute timer cancels and discards
@@ -341,6 +395,9 @@ async function main() {
     // travels with it, so the report can show a real one.
     await writeFile(join(ROOT, 'docs', 'assets', 'recorder-sample-packet.txt'), first.packet)
     await writeFile(join(ROOT, 'docs', 'assets', 'recorder-sample-timeline.jsonl'), first.rows.map((row) => JSON.stringify(row)).join('\n') + '\n')
+    await writeFile(join(ROOT, 'docs', 'assets', 'recorder-sample-manifest.json'), JSON.stringify(first.manifest, null, 2) + '\n')
+    await writeFile(join(ROOT, 'docs', 'assets', 'recorder-sample-moments.json'), JSON.stringify(first.moments, null, 2) + '\n')
+    await writeFile(join(ROOT, 'docs', 'assets', 'recorder-sample-store-full.jsonl'), first.storeDiffs.map((row) => JSON.stringify(row)).join('\n') + '\n')
     await writeFile(RESULTS, JSON.stringify(results, null, 1))
     process.stdout.write(`\nall ${results.length} checks passed · ${RESULTS}\n`)
   } finally {

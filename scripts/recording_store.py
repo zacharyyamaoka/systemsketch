@@ -6,12 +6,16 @@ turns both into one folder under the workspace:
 
     ~/SystemSketch/recordings/<local time>-<note>/
         README.md            the packet — prose first, then absolute paths
+        manifest.json        progressive-disclosure index and privacy boundary
+        moments.json         high-signal events paired with their nearest frame
         header.json          where and when, viewport, camera, channel, counts
         timeline.jsonl       one JSON object per row; `t` is ms since start
+        store.full.jsonl     complete records for deterministic replay
         start.snapshot.json  the tldraw store at t=0 (rewound for a retroactive save)
         end.snapshot.json    the tldraw store at save time
         frames/f-<ms>.jpg    Chrome screencast frames named by ms since start
         frames.jsonl         one line per kept frame
+        *.jsonl              workspace/network/UI/perf/error/action/host detail
         playback.html        the viewer: slow frames, fast lanes, one scrubber
 
 Written the way boards and preview clones are: staged, fsynced, then renamed
@@ -23,6 +27,7 @@ installed release without the checkout's environment.
 from __future__ import annotations
 
 import html
+import inspect
 import json
 import os
 import re
@@ -40,11 +45,21 @@ RECORDINGS_DIRNAME = "recordings"
 KEEP_LAST_RECORDINGS = 20
 KEEP_FRAME_GAP_MS = 300
 MAX_ROWS = 200_000
+MAX_DETAILS = 100_000
+MAX_STORE_DIFFS = 100_000
 STATE_ID_PATTERN = re.compile(r"\bid\s*=\s*['\"]([a-z][a-z0-9_]*)['\"]")
 # `static override id = BLOCK_TOOL_ID` — the id lives in a constant declared elsewhere.
 STATE_ID_CONSTANT_USE = re.compile(r"\bid\s*=\s*([A-Z][A-Z0-9_]{2,})\b")
 STATE_ID_CONSTANT_DEF = re.compile(r"\b([A-Z][A-Z0-9_]{2,})\s*=\s*['\"]([a-z][a-z0-9_]*)['\"]")
 STATE_INDEX_TTL_S = 60.0
+
+DETAIL_FILES = {
+    "network": "network.jsonl",
+    "workspace": "workspace.jsonl",
+    "action": "actions.jsonl",
+    "ui": "ui-hits.jsonl",
+    "perf": "performance.jsonl",
+}
 
 
 class RecordingError(RuntimeError):
@@ -211,7 +226,112 @@ def _seconds(ms: object) -> str:
         return "?"
 
 
-def build_packet(header: dict, rows: list[dict], frames: list[dict], folder: Path, state_map: dict[str, str | None]) -> str:
+def _row_summary(row: dict) -> str:
+    if isinstance(row.get("summary"), str):
+        return row["summary"]
+    lane = row.get("lane")
+    if lane == "console":
+        return " ".join(str(value) for value in row.get("args", []))[:240]
+    if lane == "state":
+        return f"{row.get('from')} → {row.get('to')}"
+    if lane == "menu":
+        return "menus: " + (", ".join(row.get("open", [])) or "closed")
+    if lane == "dom":
+        return f"{row.get('event')} on {row.get('on', '?')}"
+    return str(row.get("name") or lane or "event")
+
+
+def build_moments(rows: list[dict], frames: list[dict], host_events: list[dict]) -> list[dict]:
+    """A small seek index; raw lanes remain authoritative and complete."""
+    moments: list[dict] = []
+
+    def nearest_frame(t: float) -> str | None:
+        if not frames:
+            return None
+        after = next((frame for frame in frames if float(frame.get("t", 0)) >= t), None)
+        return str((after or frames[-1]).get("file"))
+
+    for row in rows:
+        lane = row.get("lane")
+        level = row.get("level")
+        interesting = False
+        severity = "info"
+        kind = str(row.get("name") or lane)
+        if lane == "console" and level == "error":
+            interesting, severity, kind = True, "error", "browser-error"
+        elif lane == "network" and (level == "error" or int(row.get("status") or 0) >= 400):
+            interesting, severity, kind = True, "error", "network-failure"
+        elif lane == "workspace" and level == "error":
+            interesting, severity, kind = True, "error", "workspace-failure"
+        elif lane == "action":
+            interesting, severity, kind = True, "error" if level == "error" else "info", "app-action"
+        elif lane == "perf" and level == "warn":
+            interesting, severity, kind = True, "warn", "performance-stall"
+        elif lane == "menu" and row.get("open"):
+            interesting, severity, kind = True, "info", "menu-opened"
+        if not interesting:
+            continue
+        t = float(row.get("t") or 0)
+        moments.append({
+            "t": t,
+            "severity": severity,
+            "kind": kind,
+            "lane": lane,
+            "summary": _row_summary(row),
+            "detail": row.get("detail"),
+            "frame": nearest_frame(t),
+        })
+
+    for event in host_events:
+        status = int(event.get("status") or 0)
+        if status < 400 and event.get("level") != "error":
+            continue
+        t = float(event.get("t") or 0)
+        moments.append({
+            "t": t,
+            "severity": "error",
+            "kind": "host-error",
+            "lane": "host",
+            "summary": str(event.get("summary") or f"{event.get('method', '')} {event.get('path', '')} → {status}"),
+            "frame": nearest_frame(t),
+        })
+
+    return sorted(moments, key=lambda item: (float(item["t"]), item["kind"]))[:500]
+
+
+def _artifact(path: Path, root: Path, description: str, rows: int | None = None) -> dict:
+    result = {
+        "file": str(path.relative_to(root)),
+        "bytes": path.stat().st_size,
+        "description": description,
+    }
+    if rows is not None:
+        result["rows"] = rows
+    return result
+
+
+def _script_json(value: object) -> str:
+    """JSON safe inside a literal script block, including captured `</script>`."""
+    return (
+        json.dumps(value, ensure_ascii=False)
+        .replace("&", "\\u0026")
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("\u2028", "\\u2028")
+        .replace("\u2029", "\\u2029")
+    )
+
+
+def build_packet(
+    header: dict,
+    rows: list[dict],
+    frames: list[dict],
+    folder: Path,
+    state_map: dict[str, str | None],
+    *,
+    moments: list[dict] | None = None,
+    detail_counts: dict[str, int] | None = None,
+) -> str:
     duration_s = float(header.get("durationMs") or 0) / 1000
     lanes: dict[str, int] = {}
     inputs: dict[str, int] = {}
@@ -234,6 +354,8 @@ def build_packet(header: dict, rows: list[dict], frames: list[dict], folder: Pat
         "canvas": "Canvas-only frames: tldraw's shape export at the start and end, no UI chrome — this page had no Chrome debugging port for a screencast.",
         "none": "No frames were captured for this recording; the text lanes carry the interaction.",
     }[frames_source if frames_source in ("screencast", "canvas") else "none"]
+    moments = moments or []
+    detail_counts = detail_counts or {}
 
     lines: list[str] = []
     lines.append(f"SystemSketch interaction recording — {header.get('startedAt')} · {duration_s:.1f} s · {mode_label}")
@@ -258,16 +380,31 @@ def build_packet(header: dict, rows: list[dict], frames: list[dict], folder: Pat
         for row in errors[:12]:
             lines.append(f"  +{_seconds(row.get('t'))}s  {' '.join(str(argument) for argument in row.get('args', []))[:200]}")
         lines.append("")
+    if moments:
+        lines.append(f"Indexed moments ({len(moments)}; the first {min(8, len(moments))}):")
+        for moment in moments[:8]:
+            lines.append(
+                f"  +{_seconds(moment.get('t')):>7}s  {str(moment.get('severity', 'info')).upper():<5} "
+                f"{moment.get('summary', moment.get('kind', 'event'))}"
+            )
+        if len(moments) > 8:
+            lines.append(f"  … {len(moments) - 8} more in moments.json")
+        lines.append("")
     lines.append(f"State-chart transitions ({len(transitions)}):")
-    for row in transitions[:80]:
+    for row in transitions[:12]:
         lines.append(f"  +{_seconds(row.get('t')):>7}s  {row.get('from')}  →  {row.get('to')}   ({row.get('trigger')})")
-    if len(transitions) > 80:
-        lines.append(f"  … {len(transitions) - 80} more in timeline.jsonl")
+    if len(transitions) > 12:
+        lines.append(f"  … {len(transitions) - 12} more in timeline.jsonl")
     lines.append("")
     lines.append(
         f"Totals: {lanes.get('input', 0)} input events ({inputs.get('pointer_move', 0)} moves, {inputs.get('pointer_down', 0)} presses, "
         f"{inputs.get('key_down', 0)} key downs) · {lanes.get('dom', 0)} DOM events · {lanes.get('store', 0)} store diffs · "
         f"{lanes.get('menu', 0)} menu changes · {len(console_rows)} console rows · {len(frames)} frames"
+    )
+    lines.append(
+        f"Deep lanes: {lanes.get('action', 0)} app actions · {lanes.get('workspace', 0)} workspace events · "
+        f"{lanes.get('network', 0)} network events · {lanes.get('perf', 0)} performance events · "
+        f"{detail_counts.get('store', 0)} lossless store diffs"
     )
     lines.append("")
     if state_map:
@@ -277,24 +414,34 @@ def build_packet(header: dict, rows: list[dict], frames: list[dict], folder: Pat
         lines.append("")
     lines.append("Read these files, in this order:")
     lines.append(f"1. {folder / 'README.md'}  — this summary")
+    lines.append(f"2. {folder / 'manifest.json'}  — artifact index, counts, sizes, capture health, and privacy boundaries")
+    lines.append(f"3. {folder / 'moments.json'}  — errors, stalls, app actions, and menu moments already paired with the nearest frame")
     lines.append(
-        f"2. {folder / 'timeline.jsonl'}  — every event, one JSON object per line. `t` is ms since the start. Lanes: input (what tldraw's "
-        "state chart received), dom (raw keydown/keyup/pointerdown on the window, with the UI element hit), state (state-chart path changes), "
-        "menu (open menus), store (record diffs: add/update/remove with the changed keys), console (console calls and uncaught errors), mark (notes)."
+        f"4. {folder / 'timeline.jsonl'}  — the compact causal index, one JSON object per line. `t` is ms since the start. Lanes: input (what tldraw's "
+        "state chart received), dom (raw key, pointer, and click events on the window, with the UI element hit), state (state-chart path changes), "
+        "menu (open menus), store (compact add/update/remove summaries), console, action, workspace, network, perf, ui, and mark."
     )
     if frames:
         first = frames[1] if len(frames) > 1 else frames[0]
         lines.append(
-            f"3. {folder / 'frames'}/  — {len(frames)} screenshots named by ms since the start ({first.get('file', '').split('/')[-1]} = +{_seconds(first.get('t'))} s). "
-            "To see what the screen showed after an event at t, open the first frame with a larger number. " + frame_note
+            f"5. {folder / 'frames'}/  — {len(frames)} event-aware screenshots named by ms since the start ({first.get('file', '').split('/')[-1]} = +{_seconds(first.get('t'))} s). "
+            "Use the frame named by moments.json, or open the first frame with a larger t. " + frame_note
         )
     else:
-        lines.append(f"3. (no frames) — {frame_note}")
+        lines.append(f"5. (no frames) — {frame_note}")
     lines.append(
-        f"4. {folder / 'start.snapshot.json'}  — the tldraw store (document + session records) at t=0; "
-        f"{folder / 'end.snapshot.json'} is the store at save time. `editor.store.loadStoreSnapshot(start)` then replaying the store lane reproduces every instant."
+        f"6. {folder / 'store.full.jsonl'}  — complete added, removed, and before/after updated records; "
+        "timeline store rows point here by `detail` id"
     )
-    lines.append(f"5. {folder / 'playback.html'}  — open in a browser: slow frames, fast lanes, one scrubber; #t=<ms> deep-links a moment.")
+    lines.append(
+        f"7. {folder / 'start.snapshot.json'}  — the tldraw store (document + session records) at t=0; "
+        f"{folder / 'end.snapshot.json'} is the store at save time. `editor.store.loadStoreSnapshot(start)` then replaying `store.full.jsonl` reproduces every document instant."
+    )
+    lines.append(
+        f"8. {folder / 'workspace.jsonl'}, network.jsonl, ui-hits.jsonl, performance.jsonl, browser-errors.jsonl, actions.jsonl, host.jsonl "
+        "— detailed lanes; open only when the compact index points there"
+    )
+    lines.append(f"9. {folder / 'playback.html'}  — open in a browser: slow frames, fast lanes, one scrubber; #t=<ms> deep-links a moment.")
     lines.append("")
     lines.append(f"Recorder cost inside the page: {header.get('recorderCostMs', '?')} ms over {_seconds(header.get('recorderUptimeMs'))} s of uptime.")
     lines.append("")
@@ -329,9 +476,11 @@ PLAYBACK_TEMPLATE = """<!doctype html>
   .cursor.down{background:var(--red);box-shadow:0 0 0 6px #c4392c55}
   .log{height:100%;max-height:62vh;overflow:auto;border:1px solid var(--line);border-radius:8px;background:#0f1216;padding:8px 10px;font:11.5px/1.55 ui-monospace,monospace;color:#cfd7e6}
   .log div{white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+  .log div[data-detail]{cursor:pointer}
+  .log div[data-detail]:hover{background:#ffffff18}
   .log div.now{background:#ffffff14}
   .log .t{color:#7d8794;display:inline-block;width:66px}
-  .log .lane{display:inline-block;width:56px;font-weight:700}
+  .log .lane{display:inline-block;width:78px;font-weight:700}
   .controls{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;align-items:center;font:12.5px ui-monospace,monospace}
   .controls input[type=range]{flex:1;min-width:200px}
   .controls button{padding:5px 11px;border:1px solid var(--line);border-radius:7px;background:#fafbfc;font:700 12px ui-monospace,monospace;cursor:pointer}
@@ -340,6 +489,9 @@ PLAYBACK_TEMPLATE = """<!doctype html>
   .frames{display:flex;gap:4px;overflow-x:auto;grid-column:1/-1;padding-top:4px}
   .frames img{height:54px;border:2px solid transparent;border-radius:4px;cursor:pointer}
   .frames img.on{border-color:var(--blue)}
+  .detail{grid-column:1/-1;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fbfcfd}
+  .detail summary{cursor:pointer;font-weight:700}
+  .detail pre{max-height:280px;overflow:auto;border:0;padding:8px 0 0;background:transparent}
   pre{margin:14px 0 0;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fbfcfd;font:12px/1.55 ui-monospace,monospace;white-space:pre-wrap}
 </style>
 </head>
@@ -356,22 +508,26 @@ PLAYBACK_TEMPLATE = """<!doctype html>
     <span class="lanes" id="lanes"></span>
   </div>
   <div class="frames" id="strip"></div>
+  <details class="detail" id="detail"><summary>Selected event detail</summary><pre id="detailpane">Click a highlighted timeline row to inspect its full detail.</pre></details>
 </div>
 <pre id="packet">__PACKET__</pre>
 <script>
 (() => {
   const frames = __FRAMES__;
   const rows = __ROWS__;
+  const details = __DETAILS__;
+  const detailById = new Map(details.map((detail) => [detail.id, detail]));
   const dur = __DUR__;
   const FW = __FW__, FH = __FH__;
-  const colours = { input: '#7aa2ff', dom: '#9fd0ff', state: '#75d39b', store: '#c39bff', menu: '#f2b46b', console: '#f28b7d', mark: '#ff9ad5' };
+  const colours = { input: '#7aa2ff', dom: '#9fd0ff', state: '#75d39b', store: '#c39bff', menu: '#f2b46b', console: '#f28b7d', mark: '#ff9ad5', network: '#f0c96f', workspace: '#60d4c2', action: '#8fb8ff', perf: '#ff9e64', ui: '#b7c6d9' };
   const img = document.getElementById('frame'), empty = document.getElementById('empty'), cursor = document.getElementById('cursor');
   const log = document.getElementById('log'), scrub = document.getElementById('scrub'), tlabel = document.getElementById('tlabel');
   const screen = document.getElementById('screen'), play = document.getElementById('play'), strip = document.getElementById('strip'), lanesBox = document.getElementById('lanes');
-  const hidden = new Set();
+  const detailBox = document.getElementById('detail'), detailPane = document.getElementById('detailpane');
+  const hidden = new Set(['input', 'dom', 'store', 'ui']);
   for (const lane of Object.keys(colours)) {
     const label = document.createElement('label');
-    label.innerHTML = `<input type="checkbox" checked data-lane="${lane}"><span style="color:${colours[lane]}">${lane}</span>`;
+    label.innerHTML = `<input type="checkbox" ${hidden.has(lane) ? '' : 'checked'} data-lane="${lane}"><span style="color:${colours[lane]}">${lane}</span>`;
     label.querySelector('input').addEventListener('change', (e) => { e.target.checked ? hidden.delete(lane) : hidden.add(lane); rebuild(+scrub.value); });
     lanesBox.appendChild(label);
   }
@@ -384,10 +540,11 @@ PLAYBACK_TEMPLATE = """<!doctype html>
     if (r.lane === 'menu') return 'open: ' + ((r.open || []).join(', ') || '(none)');
     if (r.lane === 'mark') return '✎ ' + r.text;
     if (r.lane === 'console') return r.level + ': ' + (r.args || []).join(' ');
+    if (r.summary) return r.summary;
     return JSON.stringify(r);
   };
-  let shown = -1, rendered = 0, lines = [];
-  function rebuild(t) { log.innerHTML = ''; rendered = 0; lines = []; shown = -1; render(t); }
+  let shown = -1, rendered = 0, lines = [], pointerDown = false;
+  function rebuild(t) { log.innerHTML = ''; rendered = 0; lines = []; shown = -1; pointerDown = false; render(t); }
   function render(t) {
     let fi = -1;
     for (let i = 0; i < frames.length; i++) if (frames[i].t <= t) fi = i;
@@ -399,9 +556,20 @@ PLAYBACK_TEMPLATE = """<!doctype html>
     }
     while (rendered < rows.length && rows[rendered].t <= t) {
       const r = rows[rendered];
+      const eventName = r.name || r.event || '';
+      if (/pointer_down|pointerdown/.test(eventName)) pointerDown = true;
+      if (/pointer_up|pointerup|pointercancel|cancel/.test(eventName)) pointerDown = false;
       if (!hidden.has(r.lane)) {
         const div = document.createElement('div');
         div.innerHTML = `<span class="t">+${(r.t / 1000).toFixed(2)}s</span><span class="lane" style="color:${colours[r.lane] || '#fff'}">${r.lane}</span>${text(r).replace(/</g, '&lt;')}`;
+        if (r.detail && detailById.has(r.detail)) {
+          div.dataset.detail = r.detail;
+          div.title = 'Click for full detail';
+          div.addEventListener('click', () => {
+            detailPane.textContent = JSON.stringify(detailById.get(r.detail), null, 2);
+            detailBox.open = true;
+          });
+        }
         log.appendChild(div); lines.push(div);
       }
       rendered++;
@@ -413,7 +581,7 @@ PLAYBACK_TEMPLATE = """<!doctype html>
       const scale = Math.min(rect.width / FW, rect.height / FH);
       const ox = (rect.width - FW * scale) / 2, oy = (rect.height - FH * scale) / 2;
       cursor.style.left = (ox + last.screen[0] * scale) + 'px'; cursor.style.top = (oy + last.screen[1] * scale) + 'px';
-      cursor.classList.toggle('down', /pointer_down|pointerdown|pointer_move/.test(last.name || last.event || '') && !/pointer_up/.test(last.name || ''));
+      cursor.classList.toggle('down', pointerDown);
     }
     log.scrollTop = log.scrollHeight;
     tlabel.textContent = Math.round(t) + ' ms';
@@ -434,7 +602,7 @@ PLAYBACK_TEMPLATE = """<!doctype html>
 """
 
 
-def playback_html(header: dict, rows: list[dict], frames: list[dict], packet: str) -> str:
+def playback_html(header: dict, rows: list[dict], frames: list[dict], details: list[dict], packet: str) -> str:
     viewport = header.get("viewport") or {}
     width = int(viewport.get("w") or 1440)
     height = int(viewport.get("h") or 960)
@@ -452,8 +620,9 @@ def playback_html(header: dict, rows: list[dict], frames: list[dict], packet: st
         "__DUR__": str(int(float(header.get("durationMs") or 0))),
         "__FW__": str(width),
         "__FH__": str(height),
-        "__FRAMES__": json.dumps(slim_frames),
-        "__ROWS__": json.dumps(rows),
+        "__FRAMES__": _script_json(slim_frames),
+        "__ROWS__": _script_json(rows),
+        "__DETAILS__": _script_json(details),
         "__PACKET__": html.escape(packet),
     }.items():
         page = page.replace(slot, value)
@@ -482,15 +651,26 @@ def write_recording(
     build: str,
     version: str,
     frame_dump=None,
+    host_events: list[dict] | None = None,
+    build_identity: dict | None = None,
 ) -> dict:
     """Write one recording folder. `frame_dump(frames_dir, header)` may add screencast frames."""
     header = dict(_require(payload, "header", dict))
     rows = _require(payload, "rows", list)
+    details = payload.get("details", [])
+    store_diffs = payload.get("storeDiffs", [])
     start_snapshot = _require(payload, "startSnapshot", dict)
     end_snapshot = _require(payload, "endSnapshot", dict)
     if len(rows) > MAX_ROWS:
         raise RecordingError(f"recording holds {len(rows)} rows; the cap is {MAX_ROWS}")
     rows = [row for row in rows if isinstance(row, dict)]
+    if not isinstance(details, list) or len(details) > MAX_DETAILS:
+        raise RecordingError(f"recording details must be a list capped at {MAX_DETAILS}")
+    if not isinstance(store_diffs, list) or len(store_diffs) > MAX_STORE_DIFFS:
+        raise RecordingError(f"recording store diffs must be a list capped at {MAX_STORE_DIFFS}")
+    details = [item for item in details if isinstance(item, dict)]
+    store_diffs = [item for item in store_diffs if isinstance(item, dict)]
+    host_events = [item for item in (host_events or []) if isinstance(item, dict)]
 
     root = recordings_dir(files_root)
     root.mkdir(parents=True, exist_ok=True)
@@ -501,11 +681,19 @@ def write_recording(
         frames_dir.mkdir()
         frames: list[dict] = []
         frames_source = "none"
+        frame_dump_result: dict = {}
         if frame_dump is not None:
-            dumped = frame_dump(frames_dir, header)
+            positional = [
+                parameter for parameter in inspect.signature(frame_dump).parameters.values()
+                if parameter.kind in (parameter.POSITIONAL_ONLY, parameter.POSITIONAL_OR_KEYWORD)
+            ]
+            dumped = frame_dump(frames_dir, header, rows) if len(positional) >= 3 else frame_dump(frames_dir, header)
             if isinstance(dumped, dict) and dumped.get("frames"):
+                frame_dump_result = {key: value for key, value in dumped.items() if key != "frames"}
                 frames = [dict(frame) for frame in dumped["frames"]]
                 frames_source = "screencast"
+            elif isinstance(dumped, dict):
+                frame_dump_result = {key: value for key, value in dumped.items() if key != "frames"}
         canvas_frames = payload.get("canvasFrames")
         if not frames and isinstance(canvas_frames, list):
             import base64
@@ -522,6 +710,18 @@ def write_recording(
                 frames_source = "canvas"
         frames.sort(key=lambda frame: frame["t"])
 
+        frame_gaps = [
+            float(current.get("t", 0)) - float(previous.get("t", 0))
+            for previous, current in zip(frames, frames[1:])
+        ]
+        capture_health = {
+            **frame_dump_result,
+            "source": frames_source,
+            "framesKept": len(frames),
+            "largestKeptGapMs": round(max(frame_gaps), 1) if frame_gaps else None,
+            "durationMs": header.get("durationMs"),
+        }
+
         header.update({
             "channel": channel,
             "build": build,
@@ -529,19 +729,106 @@ def write_recording(
             "framesSource": frames_source,
             "frames": len(frames),
             "savedAt": datetime.now(UTC).isoformat(),
+            "buildIdentity": build_identity or {},
+            "detailCounts": {
+                "details": len(details),
+                "store": len(store_diffs),
+                "host": len(host_events),
+            },
         })
         state_map = state_sources(rows, source_root)
         destination = _unique_destination(root, stamp)
-        packet = build_packet(header, rows, frames, destination, state_map)
+        moments = build_moments(rows, frames, host_events)
+        packet = build_packet(
+            header,
+            rows,
+            frames,
+            destination,
+            state_map,
+            moments=moments,
+            detail_counts=header["detailCounts"],
+        )
 
         _text(staging / "header.json", json.dumps(header, ensure_ascii=False, indent=2) + "\n")
         _text(staging / "timeline.jsonl", "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows))
+        _text(staging / "store.full.jsonl", "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in store_diffs))
         _text(staging / "start.snapshot.json", json.dumps(start_snapshot, ensure_ascii=False))
         _text(staging / "end.snapshot.json", json.dumps(end_snapshot, ensure_ascii=False))
         _text(staging / "frames.jsonl", "".join(json.dumps(frame, ensure_ascii=False) + "\n" for frame in frames))
+        _text(staging / "capture-health.json", json.dumps(capture_health, ensure_ascii=False, indent=2) + "\n")
+        _text(staging / "moments.json", json.dumps(moments, ensure_ascii=False, indent=2) + "\n")
+        _text(staging / "host.jsonl", "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in host_events))
+
+        error_detail_ids = {
+            row.get("detail") for row in rows
+            if row.get("lane") == "console" and row.get("level") == "error" and row.get("detail")
+        }
+        detail_groups: dict[str, list[dict]] = {filename: [] for filename in DETAIL_FILES.values()}
+        detail_groups["browser-errors.jsonl"] = []
+        for detail in details:
+            lane = str(detail.get("lane", ""))
+            filename = DETAIL_FILES.get(lane)
+            if lane == "dom" and detail.get("kind") == "ui-hit":
+                filename = "ui-hits.jsonl"
+            if filename:
+                detail_groups[filename].append(detail)
+            if detail.get("id") in error_detail_ids:
+                detail_groups["browser-errors.jsonl"].append(detail)
+        for filename, lane_details in detail_groups.items():
+            _text(staging / filename, "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in lane_details))
+
         _text(staging / "states.json", json.dumps(state_map, ensure_ascii=False, indent=2) + "\n")
         _text(staging / "README.md", packet)
-        _text(staging / "playback.html", playback_html(header, rows, frames, packet))
+        _text(staging / "playback.html", playback_html(header, rows, frames, details, packet))
+
+        artifact_descriptions = {
+            "README.md": "compact handoff packet",
+            "header.json": "recording and environment identity",
+            "timeline.jsonl": "compact causal index on the recording clock",
+            "moments.json": "high-signal seek index paired with frames",
+            "store.full.jsonl": "lossless replay diffs with complete records",
+            "start.snapshot.json": "store snapshot at recording start",
+            "end.snapshot.json": "store snapshot at recording end",
+            "frames.jsonl": "frame timestamps and capture reasons",
+            "capture-health.json": "screencast target and frame-gap diagnostics",
+            "states.json": "state-chart source map",
+            "network.jsonl": "request timing and failures without bodies",
+            "workspace.jsonl": "workspace and autosave lifecycle detail",
+            "actions.jsonl": "semantic app command detail",
+            "ui-hits.jsonl": "focus, target geometry, and hit-test stacks",
+            "performance.jsonl": "long-task detail",
+            "browser-errors.jsonl": "structured browser errors and stacks",
+            "host.jsonl": "bounded local controller request log",
+            "playback.html": "self-contained synchronized viewer",
+        }
+        row_counts = {
+            "timeline.jsonl": len(rows),
+            "moments.json": len(moments),
+            "store.full.jsonl": len(store_diffs),
+            "frames.jsonl": len(frames),
+            "host.jsonl": len(host_events),
+            **{filename: len(values) for filename, values in detail_groups.items()},
+        }
+        artifacts = [
+            _artifact(path, staging, artifact_descriptions[path.name], row_counts.get(path.name))
+            for path in sorted(staging.iterdir())
+            if path.is_file() and path.name in artifact_descriptions
+        ]
+        manifest = {
+            "format": "systemsketch-recording-v2",
+            "clock": "milliseconds since header.startedAtWall",
+            "durationMs": header.get("durationMs"),
+            "moments": len(moments),
+            "captureHealth": capture_health,
+            "privacy": {
+                "networkBodies": "not captured",
+                "clipboardContents": "not captured",
+                "textInput": "event lengths only; key names remain in the input lane",
+                "passwordValues": "not captured",
+            },
+            "artifacts": artifacts,
+        }
+        _text(staging / "manifest.json", json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
         os.replace(staging, destination)
     except Exception:
         shutil.rmtree(staging, ignore_errors=True)
@@ -701,10 +988,30 @@ class FrameSidecar:
                 payload["sidecar"] = {"error": str(cause)}
         return payload
 
-    def dump(self, frames_dir: Path, header: dict, *, keep_gap_ms: int = KEEP_FRAME_GAP_MS) -> dict | None:
+    def dump(
+        self,
+        frames_dir: Path,
+        header: dict,
+        rows: list[dict] | None = None,
+        *,
+        keep_gap_ms: int = KEEP_FRAME_GAP_MS,
+    ) -> dict | None:
         ok, _reason = self.availability()
         if not ok or not self._alive() or not self.armed:
             return None
+        key_times = []
+        started = float(header.get("startedAtWall") or 0)
+        for row in rows or []:
+            lane = row.get("lane")
+            important = (
+                lane == "state"
+                or lane in {"action", "workspace"}
+                or (lane == "console" and row.get("level") == "error")
+                or (lane == "network" and row.get("level") == "error")
+                or (lane == "dom" and row.get("event") in {"pointerdown", "click", "keydown"})
+            )
+            if important:
+                key_times.append(started + float(row.get("t") or 0))
         try:
             reply = self._request({
                 "op": "dump",
@@ -713,6 +1020,7 @@ class FrameSidecar:
                 "toWall": header.get("endedAtWall"),
                 "keepGapMs": keep_gap_ms,
                 "url": header.get("url", ""),
+                "keyWalls": key_times,
             }, timeout=30.0)
         except (RecordingError, OSError):
             return None

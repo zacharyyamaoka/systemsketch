@@ -10,6 +10,7 @@ import {
   summariseDiff,
   trimBefore,
 } from './flightRecorder'
+import { emitRecorderDiagnostic } from './recorderEvents'
 
 type Listener = (...args: never[]) => void
 
@@ -185,6 +186,41 @@ describe('FlightRecorder', () => {
     expect(Object.keys(payload.startSnapshot.store)).toEqual(['shape:early'])
     expect(payload.rows.map((row) => row.lane)).toEqual(['mark', 'store'])
     expect(payload.rows[0].t).toBe(0)
+    expect(payload.storeDiffs).toHaveLength(1)
+    expect(payload.storeDiffs[0]).toMatchObject({
+      t: 500,
+      source: 'user',
+      changes: { added: { 'shape:late': shape('shape:late', 0) } },
+    })
+    expect(payload.rows[1].detail).toBe(payload.storeDiffs[0].id)
+    recorder.stop()
+  })
+
+  it('indexes semantic app facts while keeping their full detail out of the compact row', () => {
+    let clock = 0
+    const fake = fakeEditor({})
+    const recorder = new FlightRecorder(fake.editor, { now: () => clock, wallNow: () => clock, domTarget: null })
+    recorder.start()
+    recorder.beginTake()
+    clock = 25
+    emitRecorderDiagnostic({
+      lane: 'workspace',
+      name: 'autosave-error',
+      summary: 'autosave conflict',
+      level: 'error',
+      detail: { path: '/tmp/board.systemsketch', phase: 'conflict', diskDigest: 'abc' },
+    })
+    const payload = recorder.collect('take')
+    const row = payload.rows.find((candidate) => candidate.lane === 'workspace')
+    expect(row).toMatchObject({ name: 'autosave-error', summary: 'autosave conflict', level: 'error' })
+    expect(row?.path).toBeUndefined()
+    expect(payload.details).toEqual([{
+      id: row?.detail,
+      t: 25,
+      lane: 'workspace',
+      kind: 'autosave-error',
+      data: { path: '/tmp/board.systemsketch', phase: 'conflict', diskDigest: 'abc' },
+    }])
     recorder.stop()
   })
 

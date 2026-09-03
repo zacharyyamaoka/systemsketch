@@ -1,3 +1,5 @@
+import { emitRecorderDiagnostic } from '../recorder/recorderEvents'
+
 /** Which on-disk encoding a listed document uses. The Python host derives it from the suffix. */
 export type WorkspaceDocumentKind = 'systemsketch' | 'tldraw'
 
@@ -87,21 +89,62 @@ async function expectOk(response: Response): Promise<Record<string, unknown>> {
   return payload
 }
 
+async function traceWorkspace<T>(
+  name: string,
+  summary: string,
+  detail: Record<string, unknown>,
+  run: () => Promise<T>,
+): Promise<T> {
+  const started = performance.now()
+  emitRecorderDiagnostic({
+    lane: 'workspace', name, summary: `${summary} started`, detail: { ...detail, phase: 'start' },
+  })
+  try {
+    const result = await run()
+    emitRecorderDiagnostic({
+      lane: 'workspace', name, summary: `${summary} completed`,
+      detail: { ...detail, phase: 'complete', durationMs: +(performance.now() - started).toFixed(1) },
+    })
+    return result
+  } catch (cause) {
+    emitRecorderDiagnostic({
+      lane: 'workspace', name, summary: `${summary} failed`, level: 'error',
+      detail: {
+        ...detail,
+        phase: cause instanceof WorkspaceConflict ? 'conflict' : 'error',
+        durationMs: +(performance.now() - started).toFixed(1),
+        error: cause instanceof Error
+          ? { name: cause.name, message: cause.message, stack: cause.stack }
+          : String(cause),
+        diskMtime: cause instanceof WorkspaceConflict ? cause.diskMtime : undefined,
+        diskDigest: cause instanceof WorkspaceConflict ? cause.diskDigest : undefined,
+      },
+    })
+    throw cause
+  }
+}
+
 export async function listWorkspace(dir?: string): Promise<WorkspaceListing> {
   const query = dir ? `?dir=${encodeURIComponent(dir)}` : ''
-  return (await expectOk(await fetch(`/api/workspace/list${query}`))) as unknown as WorkspaceListing
+  return traceWorkspace('list', 'workspace listing', { dir: dir ?? null }, async () => (
+    (await expectOk(await fetch(`/api/workspace/list${query}`))) as unknown as WorkspaceListing
+  ))
 }
 
 export async function readWorkspaceDocument(path: string): Promise<WorkspaceDocument> {
-  return (await expectOk(
-    await fetch(`/api/workspace/file?path=${encodeURIComponent(path)}`),
-  )) as unknown as WorkspaceDocument
+  return traceWorkspace('read', 'board read', { path }, async () => (
+    (await expectOk(
+      await fetch(`/api/workspace/file?path=${encodeURIComponent(path)}`),
+    )) as unknown as WorkspaceDocument
+  ))
 }
 
 export async function statWorkspaceDocument(path: string): Promise<WorkspaceDocumentStat> {
-  return (await expectOk(
-    await fetch(`/api/workspace/stat?path=${encodeURIComponent(path)}`),
-  )) as unknown as WorkspaceDocumentStat
+  return traceWorkspace('stat', 'board revision check', { path }, async () => (
+    (await expectOk(
+      await fetch(`/api/workspace/stat?path=${encodeURIComponent(path)}`),
+    )) as unknown as WorkspaceDocumentStat
+  ))
 }
 
 async function post(path: string, payload: Record<string, unknown>): Promise<Record<string, unknown>> {
@@ -134,14 +177,23 @@ export async function writeWorkspaceDocument(input: {
   baseDigest: string | null
   force?: boolean
 }): Promise<WorkspaceDocumentSaved> {
-  return (await post('/api/workspace/file', workspaceWritePayload(input))) as unknown as WorkspaceDocumentSaved
+  return traceWorkspace('write', 'board save', {
+    path: input.path,
+    baseDigest: input.baseDigest,
+    force: input.force === true,
+    sourceBytes: new TextEncoder().encode(input.source).length,
+  }, async () => (
+    (await post('/api/workspace/file', workspaceWritePayload(input))) as unknown as WorkspaceDocumentSaved
+  ))
 }
 
 export async function createWorkspaceDirectory(
   parent: string,
   name: string,
 ): Promise<WorkspaceDirectoryCreated> {
-  return (await post('/api/workspace/directory', { parent, name })) as unknown as WorkspaceDirectoryCreated
+  return traceWorkspace('mkdir', 'folder creation', { parent, name }, async () => (
+    (await post('/api/workspace/directory', { parent, name })) as unknown as WorkspaceDirectoryCreated
+  ))
 }
 
 /**
@@ -159,6 +211,16 @@ export function flushWorkspaceDocument(input: {
   baseDigest: string | null
   force?: boolean
 }): Promise<Response> {
+  emitRecorderDiagnostic({
+    lane: 'workspace', name: 'final-flush', summary: 'final board flush requested',
+    detail: {
+      path: input.path,
+      baseDigest: input.baseDigest,
+      force: input.force === true,
+      sourceBytes: new TextEncoder().encode(input.source).length,
+      phase: 'requested',
+    },
+  })
   return fetch('/api/workspace/file', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -172,16 +234,18 @@ export async function renameWorkspaceDocument(input: {
   destination: string
   baseDigest: string
 }): Promise<WorkspaceDocumentSaved> {
-  return (await post('/api/workspace/rename', input)) as unknown as WorkspaceDocumentSaved
+  return traceWorkspace('rename', 'board rename', input, async () => (
+    (await post('/api/workspace/rename', input)) as unknown as WorkspaceDocumentSaved
+  ))
 }
 
 export async function trashWorkspaceDocument(input: {
   path: string
   baseDigest: string
 }): Promise<void> {
-  await post('/api/workspace/trash', input)
+  await traceWorkspace('trash', 'board trash', input, async () => { await post('/api/workspace/trash', input) })
 }
 
 export async function revealWorkspaceDocument(path: string): Promise<void> {
-  await post('/api/workspace/reveal', { path })
+  await traceWorkspace('reveal', 'board reveal', { path }, async () => { await post('/api/workspace/reveal', { path }) })
 }

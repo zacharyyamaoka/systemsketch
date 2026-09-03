@@ -1,0 +1,96 @@
+{
+  "feature": "Flight recorder: progressive deep capture",
+  "viewport": { "width": 1400, "height": 900 },
+  "shapes": [
+    {
+      "id": "camera",
+      "type": "block",
+      "x": 160,
+      "y": 370,
+      "props": {
+        "title": "camera()",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 170,
+        "inputs": [],
+        "outputs": [{ "id": "out_1", "name": "frame", "type": "Frame", "visible": true }]
+      }
+    },
+    {
+      "id": "detector",
+      "type": "block",
+      "x": 720,
+      "y": 370,
+      "props": {
+        "title": "detector()",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 170,
+        "inputs": [{ "id": "in_1", "name": "frame", "type": "Frame", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "boxes", "type": "Boxes", "visible": true }]
+      }
+    },
+    {
+      "id": "cable",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    }
+  ],
+  "bindings": [
+    { "id": "b1", "type": "connection", "fromId": "cable", "toId": "camera", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "b2", "type": "connection", "fromId": "cable", "toId": "detector", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Open Dev (</>, bottom-right). Under RECORDING, click Start recording. Close Dev after the red REC notice appears.",
+      "x": 720,
+      "y": 650,
+      "w": 520,
+      "h": 135,
+      "target": { "shapeId": "detector", "anchor": "bottom" }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Drag detector() down about 150 px. Open the command palette and choose Show board Problems, then close it with Escape.",
+      "x": 760,
+      "y": 130,
+      "w": 520,
+      "h": 135
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Click Stop and save. In the copied packet, open manifest.json, moments.json, then store.full.jsonl only if deeper evidence is needed.",
+      "x": 160,
+      "y": 130,
+      "w": 520,
+      "h": 135
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The folder reports screencast frames plus build/window/Chrome-target identity, complete store diffs, and indexed action, workspace, network, UI-hit, performance, browser-error, and host lanes.",
+      "x": 160,
+      "y": 650,
+      "w": 500,
+      "h": 165
+    }
+  ]
+}

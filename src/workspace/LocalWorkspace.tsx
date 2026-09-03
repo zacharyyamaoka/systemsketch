@@ -68,6 +68,7 @@ import './local-workspace.css'
 import { hydrateCustomColors } from '../appearance/customColors'
 import { SettingsGearIcon, SystemSketchSettingsDialog } from '../settings/InterfaceSettings'
 import { importLegacyPyblocksSystemSketch } from '../import/legacyPyblocksSystemSketch'
+import { emitRecorderDiagnostic } from '../recorder/recorderEvents'
 
 const SAVE_DEBOUNCE_MS = 600
 const WATCH_INTERVAL_MS = 1500
@@ -293,11 +294,18 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   }, [updateRecents])
 
   const scheduleSave = useCallback(() => {
+    const rescheduled = saveTimerRef.current !== null
     if (saveTimerRef.current !== null) window.clearTimeout(saveTimerRef.current)
     saveTimerRef.current = window.setTimeout(() => {
       saveTimerRef.current = null
       void persistRef.current()
     }, SAVE_DEBOUNCE_MS)
+    if (!rescheduled) {
+      emitRecorderDiagnostic({
+        lane: 'workspace', name: 'autosave-scheduled', summary: 'autosave scheduled',
+        detail: { path: pathRef.current, delayMs: SAVE_DEBOUNCE_MS, changeEpoch: changeEpochRef.current },
+      })
+    }
   }, [])
 
   const protectDocument = useCallback((
@@ -340,6 +348,11 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     savingRef.current = true
     setStatus({ kind: 'saving' })
     const changeEpoch = changeEpochRef.current
+    const saveStarted = performance.now()
+    emitRecorderDiagnostic({
+      lane: 'workspace', name: 'autosave-start', summary: force ? 'forced save started' : 'autosave started',
+      detail: { path: boardPath, force, baseDigest: digestRef.current, changeEpoch },
+    })
     const sourcePromise = queuedSource ?? serializeTldrawJson(editor!)
     let savedSuccessfully = false
     try {
@@ -360,6 +373,20 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       // Clean only if nothing changed while the save was in flight.
       if (changeEpochRef.current === changeEpoch) dirtyRef.current = false
       setStatus(dirtyRef.current ? { kind: 'dirty' } : { kind: 'clean', at: Date.now() })
+      emitRecorderDiagnostic({
+        lane: 'workspace', name: 'autosave-complete', summary: dirtyRef.current ? 'save completed; newer edits remain' : 'autosave completed',
+        detail: {
+          path: boardPath,
+          force,
+          durationMs: +(performance.now() - saveStarted).toFixed(1),
+          digest: saved.digest,
+          mtime: saved.mtime,
+          size: saved.size,
+          changeEpoch,
+          currentChangeEpoch: changeEpochRef.current,
+          dirtyAfterSave: dirtyRef.current,
+        },
+      })
     } catch (cause) {
       dirtyRef.current = true
       setStatus(
@@ -367,6 +394,18 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
           ? { kind: 'conflict' }
           : { kind: 'error', message: errorMessage(cause) },
       )
+      emitRecorderDiagnostic({
+        lane: 'workspace', name: 'autosave-error', summary: cause instanceof WorkspaceConflict ? 'autosave conflict' : 'autosave failed', level: 'error',
+        detail: {
+          path: boardPath,
+          force,
+          durationMs: +(performance.now() - saveStarted).toFixed(1),
+          changeEpoch,
+          error: cause instanceof Error ? { name: cause.name, message: cause.message, stack: cause.stack } : String(cause),
+          diskMtime: cause instanceof WorkspaceConflict ? cause.diskMtime : undefined,
+          diskDigest: cause instanceof WorkspaceConflict ? cause.diskDigest : undefined,
+        },
+      })
     } finally {
       savingRef.current = false
       if (dirtyRef.current && savedSuccessfully) scheduleSave()

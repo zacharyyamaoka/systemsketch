@@ -47,9 +47,21 @@ def payload(note: str = "", started: str = "2026-09-01T20:41:03.000Z") -> dict:
             {"t": 5, "lane": "state", "from": "select.idle", "to": "block.pointing", "trigger": "pointer_down"},
             {"t": 12.5, "lane": "state", "from": "select.idle", "to": "select.pointing_block_port", "trigger": "pointer_down"},
             {"t": 40, "lane": "state", "from": "select.pointing_block_port", "to": "select.dragging_handle", "trigger": "pointer_move"},
-            {"t": 900, "lane": "store", "source": "user", "ops": [{"op": "add", "id": "shape:c", "type": "connection"}]},
-            {"t": 950, "lane": "console", "level": "error", "args": ["boom"]},
+            {"t": 900, "lane": "store", "source": "user", "detail": "store-1", "ops": [{"op": "add", "id": "shape:c", "type": "connection"}]},
+            {"t": 950, "lane": "console", "level": "error", "args": ["boom </script>"], "detail": "error-1"},
+            {"t": 975, "lane": "workspace", "name": "autosave-error", "summary": "autosave conflict", "level": "error", "detail": "workspace-1"},
             {"t": 1000, "lane": "mark", "text": "here it broke"},
+        ],
+        "details": [
+            {"id": "error-1", "t": 950, "lane": "console", "kind": "uncaught-error", "data": {"message": "boom", "stack": "Error: boom\n at x.ts:4"}},
+            {"id": "workspace-1", "t": 975, "lane": "workspace", "kind": "autosave-error", "data": {"path": "/tmp/x.systemsketch", "phase": "conflict"}},
+        ],
+        "storeDiffs": [
+            {"id": "store-1", "t": 900, "source": "user", "changes": {
+                "added": {"shape:c": {"id": "shape:c", "typeName": "shape", "type": "connection", "props": {"label": "complete"}}},
+                "removed": {},
+                "updated": {},
+            }},
         ],
         "startSnapshot": {"store": {}, "schema": {}},
         "endSnapshot": {"store": {"shape:c": {"id": "shape:c", "typeName": "shape", "type": "connection"}}, "schema": {}},
@@ -67,11 +79,18 @@ class RecordingStoreTests(unittest.TestCase):
                 channel="preview",
                 build="working-tree",
                 version="0.1.0",
+                host_events=[{"t": 940, "wall": 1_756_759_263_940, "method": "POST", "path": "/api/workspace/file", "status": 409, "level": "error", "summary": "POST /api/workspace/file → 409", "stack": "Traceback: WorkspaceConflictError"}],
+                build_identity={"revision": "abc123", "dirty": True, "workingTreeHash": "tree123"},
             )
             folder = Path(result["path"])
             self.assertEqual(folder.parent, recordings_dir(files_root))
             self.assertTrue(folder.name.endswith("-cable-jumped"), folder.name)
-            for name in ("README.md", "header.json", "timeline.jsonl", "start.snapshot.json", "end.snapshot.json", "frames.jsonl", "playback.html", "states.json"):
+            for name in (
+                "README.md", "manifest.json", "moments.json", "header.json", "timeline.jsonl", "store.full.jsonl",
+                "start.snapshot.json", "end.snapshot.json", "frames.jsonl", "capture-health.json", "playback.html", "states.json",
+                "network.jsonl", "workspace.jsonl", "actions.jsonl", "ui-hits.jsonl", "performance.jsonl",
+                "browser-errors.jsonl", "host.jsonl",
+            ):
                 self.assertTrue((folder / name).is_file(), name)
             self.assertFalse(list(recordings_dir(files_root).glob(".staging-*")))
 
@@ -87,12 +106,26 @@ class RecordingStoreTests(unittest.TestCase):
             header = json.loads((folder / "header.json").read_text(encoding="utf-8"))
             self.assertEqual(header["channel"], "preview")
             self.assertEqual(header["framesSource"], "none")
+            self.assertEqual(header["buildIdentity"]["workingTreeHash"], "tree123")
             rows = [json.loads(line) for line in (folder / "timeline.jsonl").read_text(encoding="utf-8").splitlines()]
-            self.assertEqual(len(rows), 7)
+            self.assertEqual(len(rows), 8)
+            full_store = [json.loads(line) for line in (folder / "store.full.jsonl").read_text().splitlines()]
+            self.assertEqual(full_store[0]["changes"]["added"]["shape:c"]["props"]["label"], "complete")
+            manifest = json.loads((folder / "manifest.json").read_text())
+            self.assertEqual(manifest["format"], "systemsketch-recording-v2")
+            self.assertEqual(manifest["privacy"]["networkBodies"], "not captured")
+            moments = json.loads((folder / "moments.json").read_text())
+            self.assertTrue(any(moment["kind"] == "workspace-failure" for moment in moments))
+            self.assertIn("Error: boom", (folder / "browser-errors.jsonl").read_text())
+            self.assertIn("/tmp/x.systemsketch", (folder / "workspace.jsonl").read_text())
+            self.assertIn("/api/workspace/file", (folder / "host.jsonl").read_text())
+            self.assertIn("WorkspaceConflictError", (folder / "host.jsonl").read_text())
 
             playback = (folder / "playback.html").read_text(encoding="utf-8")
             self.assertIn("here it broke", playback)
             self.assertIn('"lane": "state"', playback)
+            self.assertNotIn('"boom </script>"', playback)
+            self.assertIn("boom \\u003c/script\\u003e", playback)
 
     def test_the_state_map_points_at_the_files_that_define_the_states(self) -> None:
         sources = state_sources(payload()["rows"], PROJECT_ROOT)
@@ -190,7 +223,11 @@ class RecordingStoreTests(unittest.TestCase):
             Path("/tmp/rec"),
             {"pointing_block_port": "src/blocks/ports/PointingBlockPort.ts"},
         )
-        order = [text.index(marker) for marker in ("1. /tmp/rec/README.md", "2. /tmp/rec/timeline.jsonl", "3. /tmp/rec/frames/", "4. /tmp/rec/start.snapshot.json", "5. /tmp/rec/playback.html")]
+        order = [text.index(marker) for marker in (
+            "1. /tmp/rec/README.md", "2. /tmp/rec/manifest.json", "3. /tmp/rec/moments.json",
+            "4. /tmp/rec/timeline.jsonl", "5. /tmp/rec/frames/", "6. /tmp/rec/store.full.jsonl",
+            "7. /tmp/rec/start.snapshot.json", "8. /tmp/rec/workspace.jsonl", "9. /tmp/rec/playback.html",
+        )]
         self.assertEqual(order, sorted(order))
         self.assertIn("pointing_block_port          src/blocks/ports/PointingBlockPort.ts", text)
         self.assertNotIn("No note was typed.", text)

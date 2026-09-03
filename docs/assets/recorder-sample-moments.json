@@ -1,0 +1,47 @@
+[
+  {
+    "t": 762.5,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "opened inspector",
+    "detail": "chrome-right-000010",
+    "frame": "frames/f-000792.jpg"
+  },
+  {
+    "t": 909.6,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "opened inspector",
+    "detail": "chrome-right-000015",
+    "frame": "frames/f-000924.jpg"
+  },
+  {
+    "t": 2408,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "opened inspector",
+    "detail": "chrome-right-000050",
+    "frame": "frames/f-002425.jpg"
+  },
+  {
+    "t": 4189,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "opened inspector",
+    "detail": "chrome-right-000084",
+    "frame": "frames/f-004222.jpg"
+  },
+  {
+    "t": 5210.6,
+    "severity": "info",
+    "kind": "app-action",
+    "lane": "action",
+    "summary": "closed latest app surface",
+    "detail": null,
+    "frame": "frames/f-005240.jpg"
+  }
+]
