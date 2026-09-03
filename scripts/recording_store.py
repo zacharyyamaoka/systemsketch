@@ -607,7 +607,7 @@ class FrameSidecar:
     for straight into the recording's staging folder.
     """
 
-    def __init__(self, script: Path, *, cdp_port: int | None, window_ms: int = 30_000, node: str | None = None):
+    def __init__(self, script: Path, *, cdp_port: int | None, window_ms: int = 60_000, node: str | None = None):
         self.script = script
         self.cdp_port = cdp_port
         self.window_ms = window_ms

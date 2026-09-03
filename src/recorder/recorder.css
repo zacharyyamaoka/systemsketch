@@ -1,47 +1,129 @@
-/* Recorder rows reuse the Dev panel's preset-row grammar; only the accents are new.
-   Every colour is a theme token, so the section wears whatever theme the host does. */
+/* One safe default stays visible; alternate capture, recovery, and policy live
+   behind the adjoining disclosure. Every colour comes from the host theme. */
 
-.systemsketch-recorder__row > i[data-glyph="dot"] {
-  color: var(--ss-danger);
-  background: var(--ss-danger-soft);
-}
-
-.systemsketch-recorder__row[data-taking] > i,
-.systemsketch-recorder__row[data-taking] > em {
-  color: var(--ss-danger);
-}
-
-.systemsketch-recorder__row[data-taking] {
-  border-color: color-mix(in srgb, var(--ss-danger) 35%, transparent);
-  background: var(--ss-danger-soft);
-}
-
-.systemsketch-recorder__note {
+.systemsketch-recorder__split-shell {
+  position: relative;
   display: grid;
-  gap: 3px;
-  margin: 8px 3px 0;
-  color: var(--ss-text-muted);
-  font-size: 8px;
-  font-weight: 850;
-  letter-spacing: .09em;
-  text-transform: uppercase;
+  gap: 6px;
 }
 
-.systemsketch-recorder__note input {
+.systemsketch-recorder__split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+}
+
+.systemsketch-recorder__primary,
+.systemsketch-recorder__more {
+  min-height: 46px;
+  border: 1px solid var(--ss-accent);
+  color: var(--ss-accent-text);
+  background: var(--ss-accent);
+  cursor: pointer;
+  font: 750 11px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.systemsketch-recorder__primary {
   width: 100%;
-  padding: 6px 8px;
+  border-radius: 9px 0 0 9px;
+}
+
+.systemsketch-recorder__more {
+  border-left-color: color-mix(in srgb, var(--ss-accent-text) 36%, transparent);
+  border-radius: 0 9px 9px 0;
+  font-size: 14px;
+}
+
+.systemsketch-recorder__primary:hover:not(:disabled),
+.systemsketch-recorder__more:hover:not(:disabled) {
+  background: var(--ss-accent-hover);
+}
+
+.systemsketch-recorder__primary:focus-visible,
+.systemsketch-recorder__more:focus-visible,
+.systemsketch-recorder__menu button:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 0;
+  box-shadow: var(--ss-focus-ring);
+}
+
+.systemsketch-recorder__primary:disabled,
+.systemsketch-recorder__more:disabled {
+  cursor: default;
+  opacity: .55;
+}
+
+.systemsketch-recorder__primary--taking {
+  border-radius: 9px;
+  border-color: var(--ss-danger);
+  background: var(--ss-danger);
+}
+
+.systemsketch-recorder__primary--taking:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ss-danger) 84%, var(--ss-text));
+}
+
+.systemsketch-recorder__split--off .systemsketch-recorder__primary,
+.systemsketch-recorder__split--off .systemsketch-recorder__more {
+  border-color: var(--ss-border-strong);
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+}
+
+.systemsketch-recorder__split--off .systemsketch-recorder__more {
+  border-left-color: var(--ss-border);
+}
+
+.systemsketch-recorder__menu {
+  position: absolute;
+  z-index: 20;
+  bottom: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  display: grid;
+  gap: 4px;
+  padding: 8px;
   border: 1px solid var(--ss-border);
+  border-radius: 10px;
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-2);
+}
+
+.systemsketch-recorder__menu-item {
+  display: grid;
+  width: 100%;
+  gap: 2px;
+  padding: 8px 9px;
+  border: 0;
   border-radius: 7px;
   color: var(--ss-text);
-  background: var(--ss-surface-raised);
-  font: 11px/1.3 inherit;
-  letter-spacing: normal;
-  text-transform: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: 700 10px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-.systemsketch-recorder__note input:focus {
-  border-color: var(--ss-focus-ring);
-  outline: none;
+.systemsketch-recorder__menu-item:hover:not(:disabled) {
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-recorder__menu-item:disabled {
+  cursor: default;
+  opacity: .5;
+}
+
+.systemsketch-recorder__menu-item small {
+  overflow: hidden;
+  color: var(--ss-text-muted);
+  font-size: 8px;
+  font-weight: 550;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-recorder__power {
+  border-top: 1px solid var(--ss-border);
+  border-radius: 0 0 7px 7px;
 }
 
 .systemsketch-recorder__window {
@@ -49,7 +131,9 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
-  margin: 8px 3px 0;
+  padding: 7px 9px;
+  border-top: 1px solid var(--ss-border);
+  border-bottom: 1px solid var(--ss-border);
   color: var(--ss-text-muted);
   font-size: 9px;
 }
@@ -70,23 +154,25 @@
   background: var(--ss-accent);
 }
 
-.systemsketch-recorder__window button:disabled {
-  cursor: default;
-  opacity: .55;
-}
-
-.systemsketch-recorder__toggle {
-  margin-left: auto;
-}
-
-.systemsketch-recorder__toggle[aria-pressed="true"] {
-  border-color: color-mix(in srgb, var(--ss-success) 40%, transparent);
+.systemsketch-recorder__feedback {
+  padding: 5px 8px 1px;
   color: var(--ss-success);
-  background: var(--ss-success-soft);
+  font: 700 9px/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.systemsketch-recorder__feedback[data-clipboard="failed"] {
+  color: var(--ss-danger);
+}
+
+.systemsketch-recorder__policy {
+  padding: 6px 9px 3px;
+  border-top: 1px solid var(--ss-border);
+  color: var(--ss-text-muted);
+  font: 600 8px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .systemsketch-recorder__hint {
-  margin: 6px 3px 0;
+  margin: 2px 8px 4px;
   color: var(--ss-warning);
   font-size: 9px;
   line-height: 1.4;
@@ -96,67 +182,68 @@
 
 .systemsketch-recorder--compact {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   margin-top: 8px;
 }
 
-.systemsketch-recorder--compact button {
-  padding: 5px 9px;
-  border: 1px solid var(--ss-border);
-  border-radius: 7px;
-  color: var(--ss-text);
-  background: var(--ss-surface-raised);
-  cursor: pointer;
-  font: 700 10px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+.systemsketch-recorder--compact .systemsketch-recorder__split-shell {
+  width: min(300px, 100%);
 }
 
-.systemsketch-recorder--compact button:disabled {
-  cursor: default;
-  opacity: .5;
-}
-
-.systemsketch-recorder--compact button[data-action="save-last"] {
-  border-color: color-mix(in srgb, var(--ss-danger) 35%, transparent);
-  color: var(--ss-danger);
-}
-
-.systemsketch-recorder--compact button[data-taking] {
-  color: var(--ss-text-inverse);
-  background: var(--ss-danger);
-  border-color: var(--ss-danger);
-}
-
-.systemsketch-recorder--compact small {
+.systemsketch-recorder__compact-status {
+  min-width: 0;
+  overflow: hidden;
   color: var(--ss-text-muted);
-  font-size: 9px;
+  font: 700 8px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.systemsketch-recorder--compact small.error {
-  color: var(--ss-danger);
+.systemsketch-recorder--compact .systemsketch-recorder__primary,
+.systemsketch-recorder--compact .systemsketch-recorder__more {
+  min-height: 34px;
 }
 
-/* The REC bar: across the top, above tldraw's own chrome, only during a take. */
+.systemsketch-recorder--compact .systemsketch-recorder__menu {
+  top: calc(100% + 5px);
+  right: 0;
+  bottom: auto;
+  left: auto;
+  width: 300px;
+}
+
+/* Active REC owns the shared top-notice slot; the passive Preview notice is
+   hidden while this is mounted. The slot drops below the corner capsules when
+   their measured widths leave no safe inline gap. */
 
 .systemsketch-recorder-indicator {
   position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  /* Above tldraw's UI layer and every popout: the bar is the one thing that must never hide. */
+  top: calc(var(--systemsketch-chrome-inset) + var(--systemsketch-top-height) + 8px);
+  left: 50%;
+  box-sizing: border-box;
+  width: min(520px, calc(100vw - (var(--systemsketch-chrome-inset) * 2)));
   z-index: 100000;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(72px, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  height: 30px;
-  padding: 0 12px;
+  min-height: 42px;
+  padding: 5px 6px 5px 12px;
+  border: 1px solid color-mix(in srgb, var(--ss-danger) 70%, transparent);
+  border-radius: 11px;
   color: var(--ss-text-inverse);
-  background: color-mix(in srgb, var(--ss-danger) 94%, transparent);
-  font: 700 12px/30px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  background: color-mix(in srgb, var(--ss-danger) 96%, transparent);
+  box-shadow: var(--ss-shadow-2);
+  backdrop-filter: blur(18px);
+  font: 700 11px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   letter-spacing: .06em;
   pointer-events: auto;
+  transform: translateX(-50%);
+}
+
+.systemsketch-recorder-indicator[data-placement='inline'] {
+  top: var(--systemsketch-chrome-inset);
 }
 
 .systemsketch-recorder-indicator i {
@@ -175,7 +262,8 @@
 }
 
 .systemsketch-recorder-indicator button {
-  padding: 3px 10px;
+  min-height: 30px;
+  padding: 3px 11px;
   border: 1px solid color-mix(in srgb, var(--ss-text-inverse) 70%, transparent);
   border-radius: 6px;
   color: var(--ss-text-inverse);
@@ -183,6 +271,7 @@
   cursor: pointer;
   font: inherit;
   line-height: 1.4;
+  white-space: nowrap;
 }
 
 .systemsketch-recorder-indicator button:hover:not(:disabled) {

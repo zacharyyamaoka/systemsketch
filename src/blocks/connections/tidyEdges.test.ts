@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { ConnectionShape } from './ConnectionShapeUtil'
-import { describeTidyEdgesOutcome, tidyEdgeRole } from './tidyEdges'
+import { describeTidyEdgesOutcome, getTidyEdgesSelection, tidyEdgeRole } from './tidyEdges'
 
 function connection(
 	routing: ConnectionShape['props']['routing'],
@@ -35,6 +35,53 @@ function connection(
 }
 
 describe('tidy edges command contract', () => {
+	it('scopes to explicit edges plus every edge incident to a selected Block', () => {
+		const edges = ['ab', 'ca', 'de'].map((id) => ({
+			...connection('elbow'),
+			id: `shape:${id}`,
+		}))
+		const endpoints: Record<string, string[]> = {
+			'shape:ab': ['shape:a', 'shape:b'],
+			'shape:ca': ['shape:c', 'shape:a'],
+			'shape:de': ['shape:d', 'shape:e'],
+		}
+		const editor = {
+			getCurrentPageShapes: () => edges,
+			getSelectedShapeIds: () => ['shape:a', 'shape:de'],
+			getSelectedShapes: () => [{ id: 'shape:a', type: 'block' }, edges[2]],
+			getBindingsFromShape: (shape: ConnectionShape) =>
+				endpoints[shape.id].map((toId) => ({ toId })),
+		} as never
+
+		expect(getTidyEdgesSelection(editor).map((edge) => edge.id)).toEqual([
+			'shape:ab',
+			'shape:ca',
+			'shape:de',
+		])
+	})
+
+	it('does not turn an empty selection into an implicit whole-page sweep', () => {
+		const edge = connection('elbow')
+		const editor = {
+			getCurrentPageShapes: () => [edge],
+			getSelectedShapeIds: () => [],
+			getSelectedShapes: () => [],
+			getBindingsFromShape: () => [],
+		} as never
+		expect(getTidyEdgesSelection(editor)).toEqual([])
+	})
+
+	it('does not treat unrelated selected shapes as incident nodes', () => {
+		const edge = connection('elbow')
+		const editor = {
+			getCurrentPageShapes: () => [edge],
+			getSelectedShapeIds: () => ['shape:note'],
+			getSelectedShapes: () => [{ id: 'shape:note', type: 'note' }],
+			getBindingsFromShape: () => [{ toId: 'shape:note' }],
+		} as never
+		expect(getTidyEdgesSelection(editor)).toEqual([])
+	})
+
 	it('moves only automatic elbows and treats authored geometry as locked', () => {
 		expect(tidyEdgeRole(connection('elbow'))).toBe('free')
 		expect(tidyEdgeRole(connection('elbow', {

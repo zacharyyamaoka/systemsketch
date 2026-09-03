@@ -38,8 +38,9 @@ import {
 } from './releaseModel'
 import { getPortablePreviewSnapshot, loadPreviewCloneFromCurrentUrl } from './previewClone'
 import { RecorderControls } from './recorder/RecorderControls'
-import { setRecorderChannel } from './recorder/recorderStore'
+import { setRecorderChannel, useRecorderState } from './recorder/recorderStore'
 import { useChrome } from './chrome/ChromeProvider'
+import { useTopNoticePlacement } from './chrome/topNoticePlacement'
 import { startReleaseRefresh } from './releaseRefresh'
 import { cablePresentation, setDashAfterPill } from './blocks/connections/connectionPresentation'
 import { useAppearancePreferences } from './settings/appearancePreferences'
@@ -153,7 +154,9 @@ export function SystemSketchNavigationPanel() {
   const [published, setPublished] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const recorderState = useRecorderState()
   const rootRef = useRef<HTMLDivElement>(null)
+  const previewNoticeRef = useRef<HTMLElement>(null)
   const refreshInFlight = useRef<Promise<void> | null>(null)
   const cloneImportStarted = useRef(false)
   const devPanelId = useId()
@@ -167,6 +170,8 @@ export function SystemSketchNavigationPanel() {
     [editor],
   )
   const orderedPresets = useMemo(() => orderDevelopmentPresets(recentIds), [recentIds])
+  const previewNoticeVisible = status?.channel === 'preview' && recorderState.mode !== 'take'
+  const previewNoticePlacement = useTopNoticePlacement(previewNoticeRef, previewNoticeVisible)
 
   const refresh = useCallback(() => {
     if (refreshInFlight.current) return refreshInFlight.current
@@ -353,10 +358,12 @@ export function SystemSketchNavigationPanel() {
 
   return (
     <div ref={rootRef} className="systemsketch-utilities" data-testid="systemsketch-utilities">
-      {isPreview ? (
+      {isPreview && recorderState.mode !== 'take' ? (
         <aside
+          ref={previewNoticeRef}
           className="systemsketch-preview-mode"
           data-phase={makeStable}
+          data-placement={previewNoticePlacement}
           data-testid="systemsketch-preview-mode"
           aria-label="Preview mode"
         >

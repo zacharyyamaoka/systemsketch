@@ -66,6 +66,37 @@ describe('organizeGraph', () => {
 		expect(JSON.stringify({ nodes, edges })).toBe(snapshot)
 	})
 
+	it('aligns exact port rows across mixed aligned and offset Blocks', async () => {
+		const nodes = [
+			{
+				id: 'aligned-source', x: 70, y: 140, width: 120, height: 120,
+				ports: [{ id: 'a-out', side: 'right' as const, x: 120, y: 20 }],
+			},
+			{
+				id: 'offset-middle', x: 84, y: 148, width: 160, height: 130,
+				ports: [
+					{ id: 'b-in', side: 'left' as const, x: 0, y: 70 },
+					{ id: 'b-out', side: 'right' as const, x: 160, y: 30 },
+				],
+			},
+			{
+				id: 'offset-sink', x: 90, y: 156, width: 110, height: 150,
+				ports: [{ id: 'c-in', side: 'left' as const, x: 0, y: 90 }],
+			},
+		]
+		const result = await organizeGraph(nodes, [
+			{ id: 'ab', source: 'aligned-source', sourcePort: 'a-out', target: 'offset-middle', targetPort: 'b-in' },
+			{ id: 'bc', source: 'offset-middle', sourcePort: 'b-out', target: 'offset-sink', targetPort: 'c-in' },
+		])
+		const byId = new Map(result.nodes.map((node) => [node.id, node]))
+		expect(Math.abs(
+			byId.get('aligned-source')!.y + 20 - (byId.get('offset-middle')!.y + 70),
+		)).toBeLessThan(1)
+		expect(Math.abs(
+			byId.get('offset-middle')!.y + 30 - (byId.get('offset-sink')!.y + 90),
+		)).toBeLessThan(1)
+	})
+
 	it('drops edges outside the supplied node scope', async () => {
 		const nodes = [
 			{ id: 'a', x: 0, y: 0, width: 80, height: 40 },

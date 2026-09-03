@@ -120,6 +120,30 @@ class RecordingStoreTests(unittest.TestCase):
             self.assertTrue((Path(result["path"]) / "frames" / "f-012400.png").is_file())
             self.assertIn("Canvas-only frames", result["packet"])
 
+    def test_canvas_frames_win_when_screencast_is_available_but_empty(self) -> None:
+        import base64
+
+        png = base64.b64encode(b"\x89PNG\r\n\x1a\nfake").decode("ascii")
+
+        def empty_dump(_frames_dir: Path, _header: dict) -> dict:
+            return {"ok": True, "frames": [], "targets": 0}
+
+        with tempfile.TemporaryDirectory() as directory:
+            data = payload()
+            data["canvasFrames"] = [{"t": 0, "png": png}, {"t": 12_400, "png": png}]
+            result = write_recording(
+                data,
+                Path(directory),
+                source_root=PROJECT_ROOT,
+                channel="preview",
+                build="b",
+                version="v",
+                frame_dump=empty_dump,
+            )
+            self.assertEqual(result["framesSource"], "canvas")
+            self.assertEqual(result["frames"], 2)
+            self.assertTrue((Path(result["path"]) / "frames" / "f-000000.png").is_file())
+
     def test_a_frame_dump_makes_the_recording_a_screencast_one(self) -> None:
         def dump(frames_dir: Path, header: dict) -> dict:
             (frames_dir / "f-000300.jpg").write_bytes(b"jpeg")
@@ -172,6 +196,7 @@ class RecordingStoreTests(unittest.TestCase):
 
     def test_the_sidecar_reports_why_frames_are_unavailable(self) -> None:
         sidecar = FrameSidecar(PROJECT_ROOT / "scripts" / "recorder_frames.mjs", cdp_port=None)
+        self.assertEqual(sidecar.window_ms, 60_000)
         available, reason = sidecar.availability()
         self.assertFalse(available)
         self.assertIn("debugging port", reason)

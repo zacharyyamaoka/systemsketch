@@ -223,6 +223,10 @@
   animation: systemsketch-preview-mode-enter 180ms ease-out;
 }
 
+.systemsketch-preview-mode[data-placement='inline'] {
+  top: var(--systemsketch-chrome-inset);
+}
+
 .systemsketch-preview-mode__row {
   display: flex;
   min-height: 30px;
@@ -944,7 +948,6 @@
   }
 
   .systemsketch-preview-mode {
-    top: calc(var(--systemsketch-chrome-inset) + var(--systemsketch-top-height) + 8px);
     max-width: calc(100vw - 16px);
   }
 

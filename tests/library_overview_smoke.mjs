@@ -54,6 +54,7 @@ async function chromeGeometry(page) {
       left: read('[data-testid="systemsketch-top-left-shell"]'),
       preview: read('[data-testid="systemsketch-preview-mode"]'),
       right: read('[data-testid="systemsketch-top-right-shell"]'),
+      placement: document.querySelector('[data-testid="systemsketch-preview-mode"]')?.dataset.placement ?? null,
     })
   })()`))
 }
@@ -63,7 +64,7 @@ function overlaps(a, b) {
 }
 
 async function proveResponsiveChrome(page) {
-  for (const width of [1440, 900, 560]) {
+  for (const width of [1990, 1440, 900, 560]) {
     await setViewport(page, width)
     const boxes = await chromeGeometry(page)
     assert.ok(boxes.left && boxes.preview && boxes.right, `missing chrome at ${width}px`)
@@ -77,6 +78,14 @@ async function proveResponsiveChrome(page) {
       `document.querySelector('[title="Shapes library"]').getBoundingClientRect().width > 0
        && document.querySelector('[title="Comments and inspector"]').getBoundingClientRect().width > 0
        && document.querySelectorAll('[data-testid="systemsketch-preview-mode"] button').length === 2`), true)
+    if (width === 1990) assert.equal(boxes.placement, 'inline', 'wide Preview should use the top-row gap')
+    if (width === 560) assert.equal(boxes.placement, 'below', 'narrow Preview should drop below the corner chrome')
+    if (boxes.placement === 'inline') {
+      assert.ok(Math.abs(boxes.preview.y - boxes.left.y) < 2, `inline Preview is off-row at ${width}px`)
+    } else {
+      assert.ok(boxes.preview.y >= Math.max(boxes.left.bottom, boxes.right.bottom) + 7,
+        `dropped Preview is too close to corner chrome at ${width}px`)
+    }
     await screenshot(page, `library-overview-chrome-${width}-2026-09-02.png`)
     pass(`${width}px keeps both corner capsules and every Preview action usable without overlap`)
   }
