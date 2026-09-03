@@ -119,7 +119,13 @@ class ReleaseSystemTests(unittest.TestCase):
                 self.assertEqual(payload["channel"], "stable")
                 self.assertTrue(payload["isCurrent"])
                 self.assertFalse(payload["canPromote"])
+                self.assertFalse(payload["hostArtifactsReady"])
                 self.assertEqual(read_channels(release_home).stable, build)
+
+                host_manifest = release_home / "host-releases" / build / "manifest.json"
+                host_manifest.parent.mkdir(parents=True)
+                host_manifest.write_text("{}\n", encoding="utf-8")
+                self.assertTrue(server.release_payload()["hostArtifactsReady"])
             finally:
                 server.server_close()
 
@@ -336,7 +342,7 @@ class ReleaseSystemTests(unittest.TestCase):
 
             self.assertNotEqual(before, release_build_id(root, dist))
 
-    def test_host_plugin_failure_cannot_advance_stable(self) -> None:
+    def test_host_plugin_failure_cannot_interrupt_standalone_stable(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             release_home = root / "runtime"
@@ -356,13 +362,20 @@ class ReleaseSystemTests(unittest.TestCase):
                 release_cli,
                 "build_host_artifacts",
                 side_effect=ReleaseError("host build failed"),
-            ), self.assertRaisesRegex(ReleaseError, "host build failed"):
-                release_cli.promote_release(release_home)
+            ), patch.object(
+                release_cli,
+                "install_controller",
+            ), contextlib.redirect_stderr(io.StringIO()) as warning:
+                build, host_manifest = release_cli.promote_release(release_home)
 
-            self.assertEqual(read_channels(release_home).stable, first)
+            self.assertEqual(build, second)
+            self.assertIsNone(host_manifest)
+            self.assertIn("standalone Stable", warning.getvalue())
+            self.assertIn("host build failed", warning.getvalue())
+            self.assertEqual(read_channels(release_home).stable, second)
             self.assertEqual(read_channels(release_home).candidate, second)
 
-    def test_successful_promotion_builds_hosts_before_selecting_stable(self) -> None:
+    def test_successful_promotion_selects_standalone_before_building_hosts(self) -> None:
         order: list[str] = []
         release_home = Path("/tmp/systemsketch-test-release")
         host_manifest = {"build": "candidate"}
@@ -387,7 +400,7 @@ class ReleaseSystemTests(unittest.TestCase):
 
         self.assertEqual(build, "candidate")
         self.assertIs(result, host_manifest)
-        self.assertEqual(order, ["candidate", "hosts", "promote", "controller"])
+        self.assertEqual(order, ["candidate", "promote", "controller", "hosts"])
 
     def test_controller_fingerprint_changes_with_the_preview_api_runtime(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

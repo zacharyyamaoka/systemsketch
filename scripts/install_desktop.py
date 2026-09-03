@@ -9,7 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from release import build_candidate, build_host_artifacts
+from release import build_candidate, try_build_host_artifacts
 from release_lib import (
     ReleaseError,
     default_release_home,
@@ -97,9 +97,9 @@ def main() -> int:
     data_home = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share"))
     try:
         build, _manifest = build_candidate(release_home)
-        build_host_artifacts(release_home, build)
         promote_candidate(release_home)
         launcher = install_controller(PROJECT_ROOT, release_home)
+        try_build_host_artifacts(release_home, build)
 
         icon_source = PROJECT_ROOT / "assets" / "systemsketch.png"
         if not icon_source.is_file():

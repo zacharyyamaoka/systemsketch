@@ -1,0 +1,131 @@
+{
+  "feature": "Connector hover controls and straight arrows",
+  "viewport": { "width": 1280, "height": 720 },
+  "shapes": [
+    {
+      "id": "source",
+      "type": "block",
+      "x": 520,
+      "y": 170,
+      "props": {
+        "title": "prepare()",
+        "description": "Data source",
+        "blockType": "Function",
+        "view": "port",
+        "w": 300,
+        "h": 160,
+        "inputs": [],
+        "outputs": [
+          { "id": "out_1", "name": "samples", "type": "Tensor", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "sink",
+      "type": "block",
+      "x": 930,
+      "y": 260,
+      "props": {
+        "title": "consume()",
+        "description": "Data sink",
+        "blockType": "Function",
+        "view": "port",
+        "w": 300,
+        "h": 160,
+        "inputs": [
+          { "id": "in_1", "name": "samples", "type": "Tensor", "visible": true }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "data-edge",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "normal-arrow",
+      "type": "arrow",
+      "x": 550,
+      "y": 370,
+      "props": {
+        "kind": "elbow",
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 300, "y": 90 },
+        "elbowMidPoint": 0.52,
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "dash": "solid"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "data-edge-start",
+      "type": "connection",
+      "fromId": "data-edge",
+      "toId": "source",
+      "props": { "portId": "out_1", "terminal": "start", "face": "outer" }
+    },
+    {
+      "id": "data-edge-end",
+      "type": "connection",
+      "fromId": "data-edge",
+      "toId": "sink",
+      "props": { "portId": "in_1", "terminal": "end", "face": "outer" }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Select the data edge. Move outside its outer rectangle, then into the empty middle",
+      "x": 20,
+      "y": 100,
+      "w": 380,
+      "h": 120,
+      "target": { "shapeId": "source", "anchor": "left", "dy": -25 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Select the normal arrow and repeat: endpoints stay; interior rail controls hide and return",
+      "x": 20,
+      "y": 300,
+      "w": 380,
+      "h": 130,
+      "target": { "x": 590, "y": 400 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Open Line shape in the arrow pill and choose Straight",
+      "x": 20,
+      "y": 550,
+      "w": 430,
+      "h": 110,
+      "target": { "x": 700, "y": 370 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Both connectors keep endpoints, reveal interior controls only inside the padded route rectangle, and Straight produces a perfect line",
+      "x": 760,
+      "y": 550,
+      "w": 500,
+      "h": 150
+    }
+  ]
+}

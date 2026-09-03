@@ -369,7 +369,9 @@ export function SystemSketchNavigationPanel() {
         >
           <div className="systemsketch-preview-mode__row">
             <span className="systemsketch-preview-mode__badge"><i aria-hidden="true" />Preview</span>
-            <span className="systemsketch-preview-mode__detail">{previewDetailLabel(makeStable)}</span>
+            <span className="systemsketch-preview-mode__detail">
+              {previewDetailLabel(makeStable, status?.hostArtifactsReady)}
+            </span>
             {channelActions('systemsketch-preview-mode__actions')}
           </div>
           {error ? (
