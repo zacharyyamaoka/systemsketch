@@ -111,7 +111,7 @@
     {
       "id": "step-3",
       "kind": "step",
-      "text": "3 · Open Line shape in the arrow pill and choose Straight",
+      "text": "3 · Open Line shape, choose Curved, then move onto the arrow without closing the menu",
       "x": 20,
       "y": 550,
       "w": 430,
@@ -121,11 +121,11 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · Both connectors keep endpoints, reveal interior controls only inside the padded route rectangle, and Straight produces a perfect line",
-      "x": 760,
-      "y": 550,
-      "w": 500,
-      "h": 150
+      "text": "PASS WHEN · After switching routing, moving onto the selected arrow reveals its middle control without another click",
+      "x": 790,
+      "y": 540,
+      "w": 470,
+      "h": 110
     }
   ]
 }

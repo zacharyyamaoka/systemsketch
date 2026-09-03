@@ -12,17 +12,21 @@ const isConnector = (shape: TLShape): boolean => (
 	shape.type === 'arrow' || shape.type === CONNECTION_SHAPE_TYPE
 )
 
-function isOverCanvas(
-	target: EventTarget | null,
+function isWithinCanvasViewport(
+	container: HTMLElement,
 	clientX: number,
 	clientY: number,
 ): boolean {
-	if (target instanceof Element && target.closest('.tl-canvas') !== null) return true
-	// Pointer capture retargets an arrow-creation release to tldraw's outer
-	// container. `elementFromPoint` answers what is visually under that pointer,
-	// retaining the old rule that chrome outside `.tl-canvas` never reveals
-	// controls while allowing the just-created arrow to reveal on release.
-	return document.elementFromPoint(clientX, clientY)?.closest('.tl-canvas') !== null
+	// tldraw keeps a transparent menu-dismiss layer over the canvas while a
+	// style popover is open. The pointer is still visibly over the canvas, so
+	// membership must follow viewport coordinates rather than the topmost node.
+	const canvas = container.querySelector('.tl-canvas')
+	if (!(canvas instanceof HTMLElement)) return false
+	const bounds = canvas.getBoundingClientRect()
+	return clientX >= bounds.left
+		&& clientX <= bounds.right
+		&& clientY >= bounds.top
+		&& clientY <= bounds.bottom
 }
 
 /** The padded route rectangle for one selected connector, in page space. */
@@ -58,15 +62,15 @@ export function getConnectorControlBounds(editor: Editor, shapeId: TLShapeId): B
  */
 export function installConnectorControlVisibility(editor: Editor): () => void {
 	const container = editor.getContainer()
-	let lastPointer: { clientX: number; clientY: number; target: EventTarget | null } | null = null
+	let lastPointer: { clientX: number; clientY: number } | null = null
 
 	const clear = () => {
 		if (nearbyConnector.get(editor) !== null) nearbyConnector.set(editor, null)
 	}
 
 	const update = () => {
-		if (!lastPointer || !isOverCanvas(
-			lastPointer.target,
+		if (!lastPointer || !isWithinCanvasViewport(
+			container,
 			lastPointer.clientX,
 			lastPointer.clientY,
 		)) {
@@ -89,17 +93,17 @@ export function installConnectorControlVisibility(editor: Editor): () => void {
 	}
 
 	const remember = (event: PointerEvent) => {
-		lastPointer = { clientX: event.clientX, clientY: event.clientY, target: event.target }
+		lastPointer = { clientX: event.clientX, clientY: event.clientY }
 		update()
 	}
 	const onPointerDown = (event: PointerEvent) => {
-		lastPointer = { clientX: event.clientX, clientY: event.clientY, target: event.target }
+		lastPointer = { clientX: event.clientX, clientY: event.clientY }
 		// Selection may be committed later in this event dispatch. Re-evaluate once
 		// it has settled so the initial click reveals controls immediately.
 		requestAnimationFrame(update)
 	}
 	const onPointerUp = (event: PointerEvent) => {
-		lastPointer = { clientX: event.clientX, clientY: event.clientY, target: event.target }
+		lastPointer = { clientX: event.clientX, clientY: event.clientY }
 		// Arrow creation commits its selected shape on release, after listeners on
 		// the container have run. The same post-dispatch check keeps creation and a
 		// normal selection click on the identical no-extra-move path.

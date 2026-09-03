@@ -26,6 +26,7 @@ import {
   key,
   localConsoleErrors,
   makeChecklist,
+  mouse,
   openApp,
   shortcut,
   startApp,
@@ -47,6 +48,7 @@ const FRAMES = {
   chips: join(ROOT, 'docs', 'appearance-menu-8-shape-line-style-2026-09-01.png'),
   mixed: join(ROOT, 'docs', 'appearance-menu-9-mixed-selection-2026-09-01.png'),
   arrowRouting: join(ROOT, 'docs', 'assets', 'arrow-routing-three-options.png'),
+  arrowRoutingSwitched: join(ROOT, 'docs', 'assets', 'arrow-routing-switched-control.png'),
 }
 
 /**
@@ -204,9 +206,13 @@ async function clearBoard(page) {
 
 const geometry = {}
 
-async function frame(page, name) {
+async function saveScreenshot(page, path) {
   const capture = await page.send('Page.captureScreenshot', { format: 'png' })
-  await writeFile(FRAMES[name], Buffer.from(capture.data, 'base64'))
+  await writeFile(path, Buffer.from(capture.data, 'base64'))
+}
+
+async function frame(page, name) {
+  await saveScreenshot(page, FRAMES[name])
   const reading = await readMenu(page)
   geometry[name] = {
     file: FRAMES[name].slice(ROOT.length + 1),
@@ -496,8 +502,25 @@ async function main() {
     })()`))
     assert.deepEqual(straightArrow, { type: 'arrow', kind: 'arc', bend: 0 })
     assert.equal((await readMenu(page)).labels.arrowKind, 'Line shape, straight')
+    const switchedArrowBounds = JSON.parse(await evaluate(page, `(() => {
+      const editor = window.__systemsketch?.editor
+      const arrow = editor?.getOnlySelectedShape()
+      const bounds = arrow && editor.getShapePageBounds(arrow.id)
+      return JSON.stringify(bounds ? editor.pageToScreen(bounds.center) : null)
+    })()`))
+    assert.ok(switchedArrowBounds, 'the switched arrow still has selected bounds')
+    await mouse(page, 'mouseMoved', switchedArrowBounds.x, switchedArrowBounds.y)
+    await delay(240)
+    const switchedArrowHandles = JSON.parse(await evaluate(page, `(() => {
+      const editor = window.__systemsketch?.editor
+      const arrow = editor?.getOnlySelectedShape()
+      return JSON.stringify(arrow ? (editor.getShapeHandles(arrow) ?? []).map((handle) => handle.id) : [])
+    })()`))
+    assert.ok(switchedArrowHandles.includes('middle'),
+      'the transparent menu-dismiss layer must not hide the switched arrow control inside its rectangle')
+    await saveScreenshot(page, FRAMES.arrowRoutingSwitched)
     await closeControl(page, 'arrowKind')
-    pass('an arrow offers Elbowed, Curved, and Straight; Straight round-trips through stock arc plus zero bend')
+    pass('an arrow offers Elbowed, Curved, and Straight; switching preserves its in-rectangle control point')
 
     const ends = await openControl(page, 'arrowheadEnd')
     assert.ok(ends.panel.options.find((o) => o.value === 'triangle'))
