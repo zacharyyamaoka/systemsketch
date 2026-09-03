@@ -252,7 +252,7 @@ class RootStampTests(unittest.TestCase):
         self.assertNotIn("updateUserPreferences({ colorScheme: 'light' })", embedded)
 
 
-class NativeTextControlTests(unittest.TestCase):
+class NativeWorkspaceControlTests(unittest.TestCase):
     def test_workspace_text_inputs_own_their_theme_ink_and_typeface(self) -> None:
         """Native form ink follows the browser/OS unless the app claims it.
 
@@ -275,6 +275,22 @@ class NativeTextControlTests(unittest.TestCase):
         )
         self.assertEqual(placeholder.get("color"), "var(--ss-text-muted)")
         self.assertEqual(placeholder.get("opacity"), "1")
+
+    def test_workspace_buttons_own_their_theme_ink_and_typeface(self) -> None:
+        """Places, Recents, and icon-only buttons must not use UA ink."""
+        css = WORKSPACE_CSS.read_text(encoding="utf-8")
+        block = declarations_in_block(
+            css,
+            r"\.systemsketch-workspace-dialog button",
+        )
+        self.assertEqual(block.get("color"), "var(--ss-text)")
+        self.assertEqual(block.get("font-family"), "inherit")
+
+        current_path = declarations_in_block(
+            css,
+            r"\.systemsketch-workspace-browser > aside button\.is-current small",
+        )
+        self.assertEqual(current_path.get("color"), "var(--ss-text)")
 
 
 if __name__ == "__main__":
