@@ -15,6 +15,7 @@ import {
   setBlockShowDescriptionForSelection,
   setBlockViewForSelection,
   setConnectionRoutingForSelection,
+  setConnectionTemporalForSelection,
 } from './blockStyleCommands'
 import {
   fakeBlock,
@@ -137,6 +138,20 @@ describe('Block batch style commands', () => {
     expect(fixture.shape('one')?.props.routing).toBe('straight')
     expect(fixture.styleWrites)
       .toEqual([{ style: 'systemsketch:connectionRouting', value: 'straight' }])
+  })
+
+  it('batches the async edge type through the semantic connection style', () => {
+    const fixture = styleTestEditor([
+      fakeConnection('one', 'curved', 'data'),
+      fakeConnection('two', 'straight', 'delayed'),
+    ])
+
+    expect(setConnectionTemporalForSelection(fixture.editor, 'async').ok).toBe(true)
+    expect(fixture.shape('one')?.props.temporal).toBe('async')
+    expect(fixture.shape('two')?.props.temporal).toBe('async')
+    expect(fixture.styleWrites)
+      .toEqual([{ style: 'systemsketch:connectionTemporal', value: 'async' }])
+    expect(fixture.historyLabels).toEqual(['mark cables async'])
   })
 
   it('keeps the Block style ids stable so saved boards and next-shape memory match', () => {
