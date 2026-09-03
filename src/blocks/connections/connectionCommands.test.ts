@@ -25,6 +25,7 @@ function connection(): ConnectionShape {
       curve: null,
       pins: [],
       elbowRoute: null,
+	  routeMode: 'automatic',
       temporal: 'data',
       delayValue: '',
       pillPosition: 0.5,

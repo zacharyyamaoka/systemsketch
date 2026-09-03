@@ -36,12 +36,20 @@ import { fileURLToPath } from 'node:url'
 const EXTENSION_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const PROJECT_ROOT = resolve(EXTENSION_ROOT, '..')
 const outputIndex = process.argv.indexOf('--out-dir')
+const releaseIndex = process.argv.indexOf('--require-release')
 const APP_DIR = outputIndex === -1
   ? join(EXTENSION_ROOT, 'dist', 'app')
   : resolve(process.cwd(), process.argv[outputIndex + 1] ?? '')
+const REQUIRED_RELEASE = releaseIndex === -1 ? null : process.argv[releaseIndex + 1]
 
 if (outputIndex !== -1 && !process.argv[outputIndex + 1]) {
   throw new Error('--out-dir requires a destination')
+}
+if (releaseIndex !== -1 && !REQUIRED_RELEASE) {
+  throw new Error('--require-release requires a build id')
+}
+if (releaseIndex !== -1 && process.argv.includes('--require-stable')) {
+  throw new Error('--require-release and --require-stable are mutually exclusive')
 }
 
 function releaseHome() {
@@ -52,22 +60,25 @@ function releaseHome() {
   return join(dataHome, 'systemsketch', 'runtime')
 }
 
-/** The Stable release and its manifest, or `null` when nothing is published. */
-function stableRelease() {
+/** One immutable release and its manifest, or `null` when it is unavailable. */
+function releaseByBuild(build) {
   const home = releaseHome()
-  const channels = join(home, 'channels.json')
-  if (!existsSync(channels)) return null
-  let build
-  try {
-    build = JSON.parse(readFileSync(channels, 'utf8')).stable
-  } catch {
-    return null
-  }
   if (typeof build !== 'string' || !build) return null
   const manifestPath = join(home, 'releases', build, 'manifest.json')
   if (!existsSync(manifestPath)) return null
   try {
     return { build, manifest: JSON.parse(readFileSync(manifestPath, 'utf8')) }
+  } catch {
+    return null
+  }
+}
+
+/** The Stable release and its manifest, or `null` when nothing is published. */
+function stableRelease() {
+  const channels = join(releaseHome(), 'channels.json')
+  if (!existsSync(channels)) return null
+  try {
+    return releaseByBuild(JSON.parse(readFileSync(channels, 'utf8')).stable)
   } catch {
     return null
   }
@@ -106,42 +117,56 @@ function sourceCommit() {
 async function main() {
   const requireStable = process.argv.includes('--require-stable')
   const stable = stableRelease()
+  const selected = REQUIRED_RELEASE ? releaseByBuild(REQUIRED_RELEASE) : stable
   const currentSource = sourceMtime()
-  const stableSource = typeof stable?.manifest?.sourceTime === 'number'
-    ? stable.manifest.sourceTime
+  const releaseSource = typeof selected?.manifest?.sourceTime === 'number'
+    ? selected.manifest.sourceTime
     : null
   const commit = sourceCommit()
   // `sourceTime` is a timestamp, so it only means anything when both sides are
   // the *same* tree: a worktree checked out this morning is older than Stable
   // by the clock and is nevertheless entirely different source. Requiring the
   // root to match too is what stops a track worktree claiming to be Stable.
-  const stableRoot = typeof stable?.manifest?.sourceRoot === 'string'
-    ? resolve(stable.manifest.sourceRoot)
+  const releaseRoot = typeof selected?.manifest?.sourceRoot === 'string'
+    ? resolve(selected.manifest.sourceRoot)
     : null
-  const sameTree = stableRoot !== null && stableRoot === PROJECT_ROOT
-  const matchesStable = stable !== null
+  const recordedCommit = typeof selected?.manifest?.commit === 'string'
+    ? selected.manifest.commit
+    : null
+  const sameTree = releaseRoot !== null && releaseRoot === PROJECT_ROOT
+  const sameCommit = recordedCommit === null || recordedCommit === commit
+  const matchesRelease = selected !== null
     && sameTree
+    && sameCommit
     && currentSource !== null
-    && stableSource !== null
-    && currentSource <= stableSource
+    && releaseSource !== null
+    && currentSource <= releaseSource
+  const releaseLabel = REQUIRED_RELEASE ? `release ${REQUIRED_RELEASE}` : `Stable ${selected?.build}`
 
-  if (stable && !sameTree) {
-    const message = `this checkout (${PROJECT_ROOT}) is not the tree Stable ${stable.build}`
-      + ` was built from (${stableRoot ?? 'unrecorded'})`
-    if (requireStable) {
-      throw new Error(`${message}. Package from the main checkout, or stage without --require-stable.`)
+  if (REQUIRED_RELEASE && !selected) {
+    throw new Error(`required release ${REQUIRED_RELEASE} is not available in ${releaseHome()}`)
+  } else if (selected && !sameTree) {
+    const message = `this checkout (${PROJECT_ROOT}) is not the tree ${releaseLabel}`
+      + ` was built from (${releaseRoot ?? 'unrecorded'})`
+    if (requireStable || REQUIRED_RELEASE) {
+      throw new Error(`${message}. Package from the recorded release checkout.`)
     }
     console.warn(`stage_app: ${message}; staging it as a development build.`)
-  } else if (!stable) {
+  } else if (selected && !sameCommit) {
+    const message = `this checkout is at ${commit ?? 'an unknown commit'}, but ${releaseLabel}`
+      + ` records ${recordedCommit}`
+    if (requireStable || REQUIRED_RELEASE) throw new Error(message)
+    console.warn(`stage_app: ${message}; staging it as a development build.`)
+  } else if (!selected) {
     const message = 'no Stable SystemSketch release is published — run `npm run release:candidate`'
       + ' then `npm run release:promote` first'
     if (requireStable) throw new Error(message)
     console.warn(`stage_app: ${message}; staging the working tree instead.`)
-  } else if (!matchesStable) {
-    const message = `this source tree is newer than Stable ${stable.build}`
-    if (requireStable) {
+  } else if (!matchesRelease) {
+    const message = `this source tree is newer than ${releaseLabel}`
+    if (requireStable || REQUIRED_RELEASE) {
       throw new Error(
-        `${message}. Promote it first, or stage without --require-stable for a development build.`,
+        `${message}. Build again, or stage without a release requirement for development.`,
       )
     }
     console.warn(`stage_app: ${message}; staging it anyway as a development build.`)
@@ -166,20 +191,20 @@ async function main() {
   await writeFile(
     join(APP_DIR, 'app.json'),
     `${JSON.stringify({
-      stableBuild: stable?.build ?? null,
-      version: stable?.manifest?.version ?? null,
-      releasedAt: stable?.manifest?.releasedAt ?? null,
-      stableSourceTime: stableSource,
+      stableBuild: selected?.build ?? null,
+      version: selected?.manifest?.version ?? null,
+      releasedAt: selected?.manifest?.releasedAt ?? null,
+      stableSourceTime: releaseSource,
       stagedSourceTime: currentSource,
       sourceCommit: commit,
-      matchesStable,
-      channel: matchesStable ? 'stable' : 'development',
+      matchesStable: matchesRelease,
+      channel: matchesRelease ? 'stable' : 'development',
     }, null, 2)}\n`,
     'utf8',
   )
 
   console.log(
-    `stage_app: staged ${matchesStable ? `Stable ${stable.build}` : 'a development build'} into`
+    `stage_app: staged ${matchesRelease ? releaseLabel : 'a development build'} into`
     + ` ${APP_DIR.replace(`${PROJECT_ROOT}/`, '')}`,
   )
 }

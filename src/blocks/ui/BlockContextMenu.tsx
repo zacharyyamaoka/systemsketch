@@ -63,6 +63,11 @@ import {
   type BlockInlineField,
 } from '../inlineBlockEditing'
 import { stepIntoDepthScope } from '../../depth/depthNavigation'
+import {
+  duplicateBlockUnlinked,
+  linkedBlockOccurrences,
+  unlinkBlockDefinition,
+} from '../definitions/definitionLinking'
 
 function onlySelectedBlock(editor: ReturnType<typeof useEditor>): BlockShape | null {
   const selected = editor.getSelectedShapes()
@@ -126,6 +131,11 @@ function BlockContextMenuItems() {
     'context-menu selected Block',
     () => onlySelectedBlock(editor),
     [editor],
+  )
+  const linkedOccurrenceCount = useValue(
+    'selected Block linked occurrence count',
+    () => selectedBlock ? linkedBlockOccurrences(editor, selectedBlock).length : 0,
+    [editor, selectedBlock?.id],
   )
   const blockStyles = useValue(
     'context-menu Block selection styles',
@@ -419,6 +429,23 @@ function BlockContextMenuItems() {
                 />
               </TldrawUiMenuGroup>
             </TldrawUiMenuSubmenu>
+          ) : null}
+        </TldrawUiMenuGroup>
+      ) : null}
+
+      {selectedBlock ? (
+        <TldrawUiMenuGroup id="systemsketch-block-definition">
+          <TldrawUiMenuItem
+            id="block-duplicate-unlinked"
+            label="Duplicate unlinked"
+            onSelect={() => void duplicateBlockUnlinked(editor, selectedBlock.id)}
+          />
+          {linkedOccurrenceCount > 1 ? (
+            <TldrawUiMenuItem
+              id="block-unlink-definition"
+              label="Unlink"
+              onSelect={() => void unlinkBlockDefinition(editor, selectedBlock.id)}
+            />
           ) : null}
         </TldrawUiMenuGroup>
       ) : null}

@@ -117,6 +117,7 @@ function connection(id: string, pageId: TLPageId = PAGE_A, index = 'a8'): Connec
 			curve: null,
 			pins: [],
 			elbowRoute: null,
+			routeMode: 'automatic',
 			temporal: 'data',
 			delayValue: '',
 			pillPosition: 0.5,
