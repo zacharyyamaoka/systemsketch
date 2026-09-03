@@ -26,6 +26,7 @@ function connection(
 			curve: null,
 			pins: [],
 			elbowRoute: null,
+			routeMode: 'automatic',
 			temporal: 'data',
 			delayValue: '',
 			pillPosition: 0.5,
@@ -86,8 +87,20 @@ describe('tidy edges command contract', () => {
 		expect(tidyEdgeRole(connection('elbow'))).toBe('free')
 		expect(tidyEdgeRole(connection('elbow', {
 			elbowRoute: { startAxis: 'x', corners: [] },
+			routeMode: 'authored',
 		}))).toBe('locked')
-		expect(tidyEdgeRole(connection('elbow', { curve: { dx: 10, dy: 5 } }))).toBe('locked')
+		expect(tidyEdgeRole(connection('elbow', {
+			pins: [{ index: 1, axis: 'y', t: 0.5, offset: 20 }],
+			routeMode: 'authored',
+		}))).toBe('locked')
+		expect(tidyEdgeRole(connection('elbow', {
+			elbowRoute: { startAxis: 'x', corners: [] },
+			routeMode: 'automatic',
+		}))).toBe('free')
+		expect(tidyEdgeRole(connection('elbow', {
+			curve: { dx: 10, dy: 5 },
+			routeMode: 'authored',
+		}))).toBe('locked')
 		expect(tidyEdgeRole(connection('curved'))).toBe('ignored')
 		expect(tidyEdgeRole(connection('straight'))).toBe('ignored')
 	})
@@ -99,6 +112,8 @@ describe('tidy edges command contract', () => {
 			ignored: 1,
 			bundles: 3,
 			forcedCrossings: 1,
+			unresolved: 0,
+			revertedNudges: 0,
 		})).toBe('Tidied 6 edges, kept 2 hand-routed, skipped 1 non-elbow, 1 crossing cannot be removed')
 		expect(describeTidyEdgesOutcome({
 			tidied: 0,
@@ -106,6 +121,8 @@ describe('tidy edges command contract', () => {
 			ignored: 0,
 			bundles: 0,
 			forcedCrossings: 0,
+			unresolved: 0,
+			revertedNudges: 0,
 		})).toBe('Edges are already tidy')
 	})
 })

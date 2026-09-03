@@ -142,12 +142,12 @@
   "label": "saving without a UI note produces a complete, path-bearing packet",
   "observed": {
    "emptyHeaderNote": true,
-   "saysNoNote": true,
+   "omitsLegacyNoNote": true,
    "hasTimelinePath": true
   },
   "desired": {
    "emptyHeaderNote": true,
-   "saysNoNote": true,
+   "omitsLegacyNoNote": true,
    "hasTimelinePath": true
   },
   "ok": true

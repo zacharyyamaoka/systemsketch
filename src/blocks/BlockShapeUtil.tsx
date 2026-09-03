@@ -36,8 +36,10 @@ import {
 	blockInlineFieldFromClientPoint,
 	clearBlockInlineField,
 	ensureBlockInlineField,
+	getBlockInlineField,
 	rememberBlockInlineField,
 } from './inlineBlockEditing'
+import { commitBlockDefinitionName } from './definitions/definitionLinking'
 import {
 	BLOCK_CORNER_RADIUS,
 	BLOCK_PORT_RADIUS,
@@ -444,6 +446,9 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	}
 
 	override onEditEnd(shape: BlockShape): void {
+		if (getBlockInlineField(this.editor, shape.id).kind === 'title') {
+			commitBlockDefinitionName(this.editor, shape.id)
+		}
 		clearBlockInlineField(this.editor, shape.id)
 	}
 

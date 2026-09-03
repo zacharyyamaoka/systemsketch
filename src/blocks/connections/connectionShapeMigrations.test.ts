@@ -47,11 +47,45 @@ describe('connection shape migrations', () => {
 				curve: null,
 				pins: [],
 				elbowRoute: null,
+				routeMode: 'automatic',
 				// A cable saved before the edge vocabulary is a plain data cable.
 				temporal: 'data',
 				delayValue: '',
 				pillPosition: 0.5,
 			},
+		})
+	})
+
+	it('conservatively marks legacy saved elbow geometry as authored', () => {
+		const store = createTLStore({ shapeUtils: [ConnectionShapeUtil], bindingUtils: [] })
+		const currentSchema = store.schema.serialize()
+		const base = legacyConnection()
+		const legacy = {
+			...base,
+			props: {
+				...base.props,
+				curve: null,
+				pins: [{ index: 1, axis: 'x' as const, t: 0.5, offset: 40 }],
+				elbowRoute: null,
+				temporal: 'data' as const,
+				delayValue: '',
+				pillPosition: 0.5,
+			},
+		}
+		const snapshot = {
+			schema: {
+				...currentSchema,
+				sequences: {
+					...currentSchema.sequences,
+					[CONNECTION_MIGRATION_SEQUENCE]: 2,
+				},
+			},
+			store: { [legacy.id]: legacy },
+		} as unknown as TLStoreSnapshot
+
+		store.loadStoreSnapshot(snapshot)
+		expect(store.get(legacy.id)).toMatchObject({
+			props: { pins: legacy.props.pins, routeMode: 'authored' },
 		})
 	})
 })

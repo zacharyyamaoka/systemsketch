@@ -36,6 +36,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("BlockTool", source)
         self.assertIn("PillTool", source)
         self.assertIn("const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, PillTool]", source)
+        self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS", source)
         self.assertIn("...blockConnectionShapeUtils", source)
         self.assertIn("const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]", source)
         self.assertIn("registerExcalidrawPasteHandler(editor)", product_source)
@@ -43,17 +44,20 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("enablePasteAtCursor(editor)", development_source)
         self.assertIn("const stopWorkspace = attach(editor)", product_source)
         self.assertIn("const stopBlockConnections = installBlockConnections(editor)", product_source)
+        self.assertIn("const stopDefinitionLinking = installDefinitionLinking(editor)", product_source)
         self.assertIn("const stopInstantTextEditing = installInstantTextEditing(editor)", product_source)
         self.assertIn("stopInstantTextEditing()", product_source)
         self.assertIn("const stopArrowClickToPlace = installArrowClickToPlace(editor)", product_source)
         self.assertIn("stopArrowClickToPlace()", product_source)
         self.assertIn("stopBlockConnections()", product_source)
+        self.assertIn("stopDefinitionLinking()", product_source)
         self.assertIn("<SystemSketchWorkspaceProvider>", source)
         self.assertIn("<ChromeProvider>", source)
         self.assertNotIn("persistenceKey=", product_source)
         self.assertIn("persistenceKey={developmentPersistenceKey(profile)}", development_source)
         self.assertIn("if (profile !== 'product')", source)
         self.assertIn("isBlockDevelopment\n      ? installInstantTextEditing(editor)", development_source)
+        self.assertIn("isBlockDevelopment\n      ? installDefinitionLinking(editor)", development_source)
         self.assertNotIn("<UpdatePill", source)
         self.assertFalse((PROJECT_ROOT / "src" / "UpdatePill.tsx").exists())
 
@@ -102,7 +106,6 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("shapeUtils={EMBEDDED_SHAPE_UTILS}", embedded)
         self.assertIn("getShapeVisibility={getBlockShapeVisibility}", embedded)
         self.assertIn("bindingUtils={EMBEDDED_BINDING_UTILS}", embedded)
-        self.assertIn("overlayUtils={EMBEDDED_OVERLAY_UTILS}", embedded)
         self.assertIn("overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}", embedded)
         self.assertIn("store={store}", embedded)
         self.assertIn("createSystemSketchStore", embedded)
@@ -111,6 +114,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("BranchShapeUtil,", embedded)
         self.assertIn("BranchArmShapeUtil,", embedded)
         self.assertIn("PillTool,", embedded)
+        self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS,", embedded)
         self.assertIn("...blockConnectionShapeUtils,", embedded)
         self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool]", embedded)
         self.assertIn("Toolbar: SystemSketchFigmaToolbar", embedded)
@@ -127,6 +131,8 @@ class StockBoundaryTests(unittest.TestCase):
         # would quietly compete with the file the host opened.
         self.assertNotIn("persistenceKey", embedded)
         self.assertNotIn("installFlightRecorder", embedded)
+        self.assertIn("const stopDefinitionLinking = installDefinitionLinking(editor)", embedded)
+        self.assertIn("stopDefinitionLinking()", embedded)
 
         store_factory = (
             PROJECT_ROOT / "src" / "store" / "createSystemSketchStore.ts"
@@ -135,7 +141,16 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("records: SYSTEMSKETCH_COMMENT_RECORDS", store_factory)
         self.assertIn("BranchShapeUtil", store_factory)
         self.assertIn("BranchArmShapeUtil", store_factory)
+        self.assertIn("SYSTEMSKETCH_ARROW_SHAPE_UTILS", store_factory)
         self.assertIn("SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS", store_factory)
+
+        arrow_util = (
+            PROJECT_ROOT / "src" / "systemSketchArrow.tsx"
+        ).read_text(encoding="utf-8")
+        self.assertIn("class SystemSketchArrowShapeUtil extends ArrowShapeUtil", arrow_util)
+        self.assertIn("return super.onHandleDrag(shape, info)", arrow_util)
+        self.assertIn("return super.component(shape)", arrow_util)
+        self.assertIn("return super.toSvg(shape, ctx)", arrow_util)
 
         portable_export = (
             PROJECT_ROOT / "src" / "export" / "portableTldraw.ts"

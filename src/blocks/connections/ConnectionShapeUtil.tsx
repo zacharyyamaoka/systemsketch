@@ -33,7 +33,7 @@ import {
 } from './connectionHit'
 import { blockPresetProps, openBlockPicker } from './blockPicker'
 import { requestBlockInlineEdit } from '../inlineBlockEditing'
-import { clearPortDragState, nearbyConnection, updatePortState } from '../ports/portState'
+import { clearPortDragState, updatePortState } from '../ports/portState'
 import {
 	BLOCK_SHAPE_TYPE,
 	getDefaultBlockProps,
@@ -120,17 +120,19 @@ declare module 'tldraw' {
 			routing: ConnectionRoutingKind
 			/**
 			 * The waypoint a dragged control point put on a curved or straight
-			 * cable, as an offset from the endpoint midpoint. Null = the automatic
-			 * route. Stored relative so the bend rides with the Blocks.
+			 * cable, as an offset from the endpoint midpoint. Stored relative so
+			 * the bend rides with the Blocks. Null means no curved/straight bend.
 			 */
 			curve: ConnectionCurve | null
-			/** Pinned elbow rails, in the frame spanned by the two endpoints. */
+			/** Legacy/single-axis elbow rails; any non-empty set is person-authored. */
 			pins: ElbowPin[]
 			/**
-			 * The authored multi-elbow polyline, entered by dragging an end
-			 * segment. Null = auto-routed (A* plus pins).
+			 * A resolved multi-elbow polyline. Automatic Tidy snapshots and
+			 * person-authored routes share this geometry; `routeMode` owns it.
 			 */
 			elbowRoute: ConnectionElbowRouteModel | null
+			/** Who owns the current routing geometry. Tidy may only replace automatic routes. */
+			routeMode: 'automatic' | 'authored'
 			/** `data` on this pass, `delayed` one iteration later (a loop's back edge). */
 			temporal: ConnectionTemporalKind
 			/** The initial value a delayed cable names in its pill, `= value`; empty = none. */
@@ -162,6 +164,7 @@ export const connectionShapeProps: RecordProps<ConnectionShape> = {
 	curve: T.object({ dx: T.number, dy: T.number }).nullable(),
 	pins: T.arrayOf(elbowPinValidator),
 	elbowRoute: elbowRouteValidator.nullable(),
+	routeMode: T.literalEnum('automatic', 'authored'),
 	temporal: ConnectionTemporalStyle,
 	delayValue: T.string,
 	pillPosition: T.number,
@@ -170,6 +173,7 @@ export const connectionShapeProps: RecordProps<ConnectionShape> = {
 const connectionVersions = createShapePropsMigrationIds(CONNECTION_SHAPE_TYPE, {
 	AddAuthoredRoutingGeometry: 1,
 	AddTemporalQualifier: 2,
+	AddRouteOwnership: 3,
 })
 
 const connectionShapeMigrations = createShapePropsMigrationSequence({
@@ -201,6 +205,21 @@ const connectionShapeMigrations = createShapePropsMigrationSequence({
 			delete props.delayValue
 			delete props.pillPosition
 		},
+	}, {
+		id: connectionVersions.AddRouteOwnership,
+		up(props) {
+			// Old files cannot distinguish a user pin from an old Tidy pin. Preserve
+			// geometry rather than guessing: any stored bend migrates as authored.
+			if (props.routeMode === undefined) {
+				const pins = Array.isArray(props.pins) ? props.pins : []
+				props.routeMode = props.curve !== null || props.elbowRoute !== null || pins.length > 0
+					? 'authored'
+					: 'automatic'
+			}
+		},
+		down(props) {
+			delete props.routeMode
+		},
 	}],
 })
 
@@ -220,6 +239,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			curve: null,
 			pins: [],
 			elbowRoute: null,
+			routeMode: 'automatic',
 			temporal: 'data',
 			delayValue: '',
 			pillPosition: PILL_POSITION_DEFAULT,
@@ -240,7 +260,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		next: ConnectionShape,
 	): ConnectionShape | void {
 		if (previous.props.routing === next.props.routing) return
-		const cleared = { curve: null, pins: [], elbowRoute: null }
+		const cleared = { curve: null, pins: [], elbowRoute: null, routeMode: 'automatic' as const }
 		return { ...next, props: { ...next.props, ...cleared } }
 	}
 
@@ -335,7 +355,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 	/**
 	 * Two terminals, plus whatever control points this routing offers.
 	 *
-	 * A `curved` or `straight` cable gets one: a `create` handle sitting inert on
+	 * A `curved` or `straight` cable gets one: a `virtual` handle sitting on
 	 * the midpoint until it is dragged, at which point it activates into a bend
 	 * and becomes a `vertex`. An `elbow` cable gets one per user-draggable
 	 * segment — Excalidraw's model. On an auto route the two END segments grow a
@@ -360,11 +380,6 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			handles.push({ id: 'pill', type: 'virtual', index: 'a1V' as IndexKey, x: pill.x, y: pill.y })
 		}
 
-		// Figma's rule: a selected edge offers its control points only while the
-		// pointer is near it. Without this, selecting a cable sprinkles handles
-		// across the board and every one of them is a thing you can knock.
-		if (nearbyConnection.get(this.editor) !== connection.id) return handles
-
 		if (connection.props.routing === 'elbow') {
 			const route = getConnectionElbowRoute(this.editor, connection)
 			const authored = connection.props.elbowRoute !== null
@@ -387,7 +402,10 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 						: `segment:${segment.index}`
 				handles.push({
 					id,
-					type: 'virtual',
+					// Elbow arrows use vertex handles for their draggable rails. A
+					// data edge does too: selecting either connector now produces the
+					// same always-visible control rather than a second hover-gated UI.
+					type: 'vertex',
 					index: `a${handleIndex++}` as IndexKey,
 					x: segment.midpoint.x,
 					y: segment.midpoint.y,
@@ -402,7 +420,10 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		})
 		handles.push({
 			id: 'bend',
-			type: connection.props.curve ? 'vertex' : 'create',
+			// Stock curved arrows keep their midpoint visible on selection. A
+			// straight / curved data edge follows that same interaction pattern;
+			// dragging this virtual point activates it into a persistent vertex.
+			type: connection.props.curve ? 'vertex' : 'virtual',
 			index: 'a2' as IndexKey,
 			x: center.x,
 			y: center.y,
@@ -451,7 +472,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			return {
 				id: connection.id,
 				type: CONNECTION_SHAPE_TYPE,
-				props: { curve },
+				props: { curve, routeMode: 'authored' as const },
 			}
 		}
 
@@ -495,7 +516,10 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			return {
 				id: connection.id,
 				type: CONNECTION_SHAPE_TYPE,
-				props: { elbowRoute: captureAuthoredRoute(moved, dongles.start, dongles.end) },
+				props: {
+					elbowRoute: captureAuthoredRoute(moved, dongles.start, dongles.end),
+					routeMode: 'authored' as const,
+				},
 			}
 		}
 
@@ -516,7 +540,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			return {
 				id: connection.id,
 				type: CONNECTION_SHAPE_TYPE,
-				props: { pins: pins as ElbowPin[] },
+				props: { pins: pins as ElbowPin[], routeMode: 'authored' as const },
 			}
 		}
 
