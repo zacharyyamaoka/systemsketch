@@ -175,15 +175,14 @@ const CONNECTION_ROUTING_OPTIONS = [
 ] as const
 
 /**
- * tldraw's own arrow and line carry a narrower vocabulary than a cable: an
- * arrow is arced or elbowed, a line is straight or curved. They are shown as
- * the same control with the same glyphs, holding whichever of FigJam's three
- * the shape can actually be — the menu never offers a state a shape cannot
- * hold, which is the rule the whole model is built on.
+ * Stock tldraw stores Straight and Curved arrows under the same `arc` kind;
+ * the arrow's bend distinguishes them. The appearance adapter translates the
+ * three visible FigJam choices back to stock `kind` + `bend` props.
  */
 const ARROW_KIND_OPTIONS = [
   option('elbow', 'Elbowed'),
-  option('arc', 'Curved'),
+  option('curve', 'Curved'),
+  option('straight', 'Straight'),
 ] as const
 
 const SPLINE_OPTIONS = [

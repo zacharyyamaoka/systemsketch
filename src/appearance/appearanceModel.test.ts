@@ -152,6 +152,14 @@ describe('appearance controls', () => {
     ])
   })
 
+  it('offers an arrow the same elbowed, curved, and straight vocabulary', () => {
+    const shape = buildAppearanceControls(CONNECTOR)
+      .find((control) => control.id === 'arrowKind')!
+    expect(shape.options.map((option) => option.label)).toEqual([
+      'Elbowed', 'Curved', 'Straight',
+    ])
+  })
+
   it('never offers a control the selection cannot accept', () => {
     // A bare connector has no fill and no geo, so neither may appear.
     const controls = buildAppearanceControls(CONNECTOR)

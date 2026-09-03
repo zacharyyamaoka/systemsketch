@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * Real-browser proof that arrows and semantic data edges share one selected
- * connector interaction: their control points appear on the selection event,
- * stay visible away from the stroke, and elbow rails can be grown repeatedly.
+ * connector interaction: terminals remain visible, interior controls follow
+ * the padded route rectangle, and elbow rails can be grown repeatedly.
  */
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -60,13 +60,37 @@ const controlPoints = (page) => evaluate(page,
 
 async function pointOnShapePath(page, type, fraction) {
   const value = await evaluate(page, `(() => {
-    const path = document.querySelector('[data-shape-type=${JSON.stringify(type)}] path')
+    const paths = [...document.querySelectorAll('[data-shape-type=${JSON.stringify(type)}] path')]
+      .filter((candidate) => typeof candidate.getTotalLength === 'function')
+    const path = paths.sort((a, b) => b.getTotalLength() - a.getTotalLength())[0]
     if (!path) return null
     const point = path.getPointAtLength(path.getTotalLength() * ${fraction})
     const screen = point.matrixTransform(path.getScreenCTM())
     return JSON.stringify({ x: screen.x, y: screen.y })
   })()`)
   if (!value) throw new Error(`No ${type} path to sample`)
+  return JSON.parse(value)
+}
+
+async function pointOnShapeGeometry(page, type) {
+  const value = await evaluate(page, `(() => {
+    const editor = window.__systemsketch?.editor
+    const shape = editor?.getCurrentPageShapes().filter((item) => item.type === ${JSON.stringify(type)}).at(-1)
+    if (!editor || !shape) return null
+    const vertices = editor.getShapeGeometry(shape).vertices ?? []
+    let best = null
+    for (let index = 0; index < vertices.length - 1; index += 1) {
+      const a = vertices[index]
+      const b = vertices[index + 1]
+      const length = Math.hypot(b.x - a.x, b.y - a.y)
+      if (!best || length > best.length) best = { a, b, length }
+    }
+    if (!best) return null
+    const local = { x: (best.a.x + best.b.x) / 2, y: (best.a.y + best.b.y) / 2 }
+    const pagePoint = editor.getShapePageTransform(shape.id).applyToPoint(local)
+    return JSON.stringify(editor.pageToScreen(pagePoint))
+  })()`)
+  if (!value) throw new Error(`No ${type} geometry to sample`)
   return JSON.parse(value)
 }
 
@@ -106,6 +130,18 @@ async function selectedHandlePoint(page, id) {
   return JSON.parse(value)
 }
 
+async function selectedShapeBoundsCenter(page) {
+  const value = await evaluate(page, `(() => {
+    const editor = window.__systemsketch?.editor
+    const shape = editor?.getOnlySelectedShape()
+    const bounds = shape && editor.getShapePageBounds(shape.id)
+    if (!editor || !bounds) return null
+    return JSON.stringify(editor.pageToScreen(bounds.center))
+  })()`)
+  if (!value) throw new Error('Missing selected connector bounds')
+  return JSON.parse(value)
+}
+
 const arrowRouteState = (page) => evaluate(page, `(() => {
   const editor = window.__systemsketch?.editor
   const arrow = editor?.getOnlySelectedShape()
@@ -134,11 +170,12 @@ async function main() {
     await waitFor(page, `window.__systemsketch?.editor`, 'development editor seam')
     await delay(700)
 
-    // Semantic data edge: the selection event itself must expose controls.
+    // The selection click ends inside the route rectangle, so controls appear
+    // immediately without a follow-up move.
     await drawBlock(page, { x: 180, y: 570 }, { x: 450, y: 740 }, 'source')
     await addPort(page, 'outputs')
     await clickAt(page, 1240, 820)
-    await drawBlock(page, { x: 830, y: 570 }, { x: 1100, y: 740 }, 'sink')
+    await drawBlock(page, { x: 830, y: 260 }, { x: 1100, y: 430 }, 'sink')
     await addPort(page, 'inputs')
     await clickAt(page, 1240, 820)
     await connectPorts(page)
@@ -147,28 +184,54 @@ async function main() {
     await clickAt(page, edgePoint.x, edgePoint.y)
     await delay(260)
     const edgeImmediate = await controlPoints(page)
-    check('EDGE-SELECT', 'data-edge controls exist before any post-selection pointer move',
+    check('EDGE-SELECT', 'data-edge interior controls exist on the selection click itself',
       edgeImmediate.some((id) => /^(grow|segment|route):/.test(id)), true)
 
     await mouse(page, 'mouseMoved', 1240, 160)
     await delay(260)
     const edgeFar = await controlPoints(page)
-    check('EDGE-STABLE', 'moving away does not hide the selected data-edge controls',
-      edgeFar.sort(), edgeImmediate.sort())
+    check('EDGE-TERMINALS', 'outside the rectangle, only data-edge terminals remain',
+      edgeFar.sort(), ['end', 'start'])
+    await shot(page, 'connector-data-edge-terminals-only.png')
+
+    const edgeInside = await selectedShapeBoundsCenter(page)
+    await mouse(page, 'mouseMoved', edgeInside.x, edgeInside.y)
+    await delay(260)
+    const edgeReturned = await controlPoints(page)
+    check('EDGE-BOUNDS', 'inside the route rectangle, data-edge interior controls return',
+      edgeReturned.some((id) => /^(grow|segment|route):/.test(id)), true)
     await shot(page, 'connector-data-edge-controls.png')
 
     // Stock arrow semantics remain stock; only elbow segment authoring is added.
     await clickAt(page, 1240, 820)
     await shortcut(page, 'a', 'KeyA')
-    await drag(page, { x: 260, y: 180 }, { x: 960, y: 410 })
+    await drag(page, { x: 260, y: 150 }, { x: 760, y: 220 })
+    await shortcut(page, 'v', 'KeyV')
+    await clickAt(page, 1240, 820)
+    const arrowPoint = await pointOnShapeGeometry(page, 'arrow')
+    await clickAt(page, arrowPoint.x, arrowPoint.y)
     await waitFor(page,
       `window.__systemsketch.editor.getOnlySelectedShape()?.type === 'arrow'`,
       'selected elbow arrow')
 
     const arrowImmediate = await controlPoints(page)
     const initialRouteHandles = arrowImmediate.filter((id) => id.startsWith('systemsketch-route:'))
-    check('ARROW-SELECT', 'the elbow arrow exposes its editable segment controls immediately',
+    check('ARROW-SELECT', 'the arrow exposes interior controls on its selection event',
       initialRouteHandles.length >= 2, true)
+
+    await mouse(page, 'mouseMoved', 1240, 760)
+    await delay(260)
+    check('ARROW-TERMINALS', 'outside the rectangle, only arrow terminals remain',
+      (await controlPoints(page)).sort(), ['end', 'start'])
+    await shot(page, 'connector-arrow-terminals-only.png')
+
+    const arrowInside = await selectedShapeBoundsCenter(page)
+    await mouse(page, 'mouseMoved', arrowInside.x, arrowInside.y)
+    await delay(260)
+    check('ARROW-BOUNDS', 'inside the route rectangle, arrow interior controls return',
+      (await controlPoints(page)).filter((id) => id.startsWith('systemsketch-route:')).length
+        >= initialRouteHandles.length,
+      true)
 
     // Repeating the same Excalidraw-style end-segment gesture grows another
     // orthogonal rail on every drag.

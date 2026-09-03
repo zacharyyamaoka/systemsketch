@@ -9,13 +9,15 @@ import {
 } from 'tldraw'
 import {
   applyArrowPreset,
+  applyArrowPresetToSelection,
   applyStoredArrowPreset,
+  arrowPresetForShape,
   CURVE_ARROW_BEND,
   prepareCreatedShapeForToolbarPreset,
   SYSTEMSKETCH_TOOLBAR_OVERRIDES,
 } from './toolbarIntegration'
 import { CONNECTION_SHAPE_TYPE, ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
-import { DEFAULT_TOOLBAR_PREFERENCES } from './toolbarModel'
+import { DEFAULT_TOOLBAR_PREFERENCES, updateToolbarPreferences } from './toolbarModel'
 
 function arrowShape(): TLArrowShape {
   return {
@@ -52,6 +54,19 @@ function arrowShape(): TLArrowShape {
 }
 
 describe('curved-arrow creation adapter', () => {
+	it('reads straight, curved, and elbow from stock kind plus bend', () => {
+		const straight = arrowShape()
+		expect(arrowPresetForShape(straight)).toBe('straight')
+		expect(arrowPresetForShape({
+			...straight,
+			props: { ...straight.props, bend: -24 },
+		})).toBe('curve')
+		expect(arrowPresetForShape({
+			...straight,
+			props: { ...straight.props, kind: 'elbow' },
+		})).toBe('elbow')
+	})
+
   it('adds a bend only to a Curve arrow created by arrow.pointing', () => {
     const original = arrowShape()
     const curved = prepareCreatedShapeForToolbarPreset(original, 'curve', true) as TLArrowShape
@@ -115,6 +130,34 @@ function recordingEditor({ connections = true } = {}) {
 }
 
 describe('one preset, two connectors', () => {
+	it('translates a straight appearance choice to stock arc plus zero bend', () => {
+		const straight = arrowShape()
+		const curved = { ...straight, props: { ...straight.props, bend: 18 } }
+		const updated: unknown[] = []
+		const nextStyles = new Map<string, string>()
+		const editor = {
+			shapeUtils: { [CONNECTION_SHAPE_TYPE]: {} },
+			getSelectedShapes: () => [curved],
+			updateShapes: (patches: unknown[]) => updated.push(...patches),
+			setStyleForNextShapes: (style: StyleProp<string>, value: string) => {
+				nextStyles.set(style.id, value)
+			},
+		} as unknown as Editor
+
+		applyArrowPresetToSelection(editor, 'straight')
+		expect(updated).toEqual([{
+			id: straight.id,
+			type: 'arrow',
+			props: { kind: 'arc', bend: 0 },
+		}])
+		expect(nextStyles.get(ArrowShapeKindStyle.id)).toBe('arc')
+		expect(nextStyles.get(ConnectionRoutingStyle.id)).toBe('straight')
+		updateToolbarPreferences({
+			lastArrowPreset: DEFAULT_TOOLBAR_PREFERENCES.lastArrowPreset,
+			lastShapeTool: DEFAULT_TOOLBAR_PREFERENCES.lastShapeTool,
+		})
+	})
+
   it('writes the arrow kind and the edge routing from a single choice', () => {
     for (const [preset, kind, routing] of [
       ['elbow', 'elbow', 'elbow'],

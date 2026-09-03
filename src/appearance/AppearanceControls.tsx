@@ -8,6 +8,7 @@ import {
   useValue,
   type Editor,
   type StyleProp,
+  type TLArrowShape,
 } from 'tldraw'
 
 import {
@@ -31,6 +32,11 @@ import {
   SWATCH_SIZE,
 } from './figjamTokens'
 import './appearance.css'
+import {
+  applyArrowPresetToSelection,
+  arrowPresetForShape,
+} from '../toolbar/toolbarIntegration'
+import type { ArrowPreset } from '../toolbar/toolbarModel'
 
 /**
  * Where FigJam draws a hairline. Its pill groups what a thing *is* apart from
@@ -53,7 +59,28 @@ const GROUP_STARTS = new Set(['color', 'font', 'align', 'arrowheadStart'])
 export function AppearanceControls() {
   const editor = useEditor()
   const styles = useRelevantStyles()
-  const controls = buildAppearanceControls(styles)
+  const selectedArrowRouting = useValue(
+    'selected arrow routing',
+    () => {
+      const arrows = editor.getSelectedShapes()
+        .filter((shape): shape is TLArrowShape => shape.type === 'arrow')
+      if (arrows.length === 0) return null
+      const first = arrowPresetForShape(arrows[0])
+      return arrows.every((shape) => (
+        arrowPresetForShape(shape) === first
+      )) ? first : 'mixed'
+    },
+    [editor],
+  )
+  const controls = buildAppearanceControls(styles).map((control) => {
+    if (control.id !== 'arrowKind' || selectedArrowRouting === null) return control
+    return {
+      ...control,
+      value: selectedArrowRouting === 'mixed'
+        ? { type: 'mixed' as const }
+        : { type: 'shared' as const, value: selectedArrowRouting },
+    }
+  })
 
   if (controls.length === 0) return null
 
@@ -78,6 +105,16 @@ export function applyStyle(editor: Editor, style: StyleProp<string>, value: stri
     if (editor.isIn('select')) editor.setStyleForSelectedShapes(style, value)
     editor.setStyleForNextShapes(style, value)
   })
+}
+
+function isArrowPreset(value: string): value is ArrowPreset {
+  return value === 'straight' || value === 'curve' || value === 'elbow'
+}
+
+/** One history step around the stock arrow prop translation. */
+export function applyArrowRouting(editor: Editor, preset: ArrowPreset) {
+  editor.markHistoryStoppingPoint('appearance')
+  editor.run(() => applyArrowPresetToSelection(editor, preset))
 }
 
 function AppearanceTrigger({ editor, control }: { editor: Editor; control: AppearanceControl }) {
@@ -198,7 +235,13 @@ function OptionButton({
       aria-checked={isCurrent}
       aria-label={option.label}
       title={option.label}
-      onClick={() => applyStyle(editor, control.style, option.value)}
+      onClick={() => {
+        if (control.id === 'arrowKind' && isArrowPreset(option.value)) {
+          applyArrowRouting(editor, option.value)
+        } else {
+          applyStyle(editor, control.style, option.value)
+        }
+      }}
     >
       {/* A list row keeps FigJam's check slot whether or not it is chosen. */}
       {list ? <FigjamGlyph name={FIGJAM_CHECK_ICON} className="systemsketch-appearance__check" /> : null}
