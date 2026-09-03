@@ -138,6 +138,11 @@ export type HostToEmbedMessage =
 /** The object a host installs on `window` under {@link EMBED_HOST_KEY}. */
 export interface EmbedHostBridge {
   post(message: EmbedToHostMessage): void
+  /**
+   * Same-document hosts may deliver inbound messages directly. Webview hosts
+   * omit this and keep using the browser's `message` event.
+   */
+  subscribe?(handler: (message: HostToEmbedMessage) => void): () => void
   /** How the host wants to be named in the canvas, e.g. `vscode`. */
   readonly host?: string
   /** Which SystemSketch build the host shipped, for an honest provenance line. */

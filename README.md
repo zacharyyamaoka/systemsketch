@@ -192,11 +192,16 @@ cd ~/systemsketch/vscode-systemsketch && npm install && npm run package
 
 Install the resulting `dist/systemsketch-vscode-0.1.0.vsix` from the Extensions view, or with
 `code --install-extension`. `npm test` there drives the packaged extension in a real IDE.
-Obsidian's plugin will live beside it in this repo when it exists.
+
+The Obsidian host lives beside it in [`obsidian-systemsketch/`](obsidian-systemsketch/README.md).
+It opens and autosaves both document suffixes through `TextFileView`, follows the host's light
+or dark appearance, and renders `![[board.systemsketch]]` as a read-only canvas. The
+[Obsidian plugin implementation report](docs/obsidian-plugin-2026-09-02.html) carries the
+failed iframe spike, bounded same-document fallback, provenance gate, and real isolated-vault proof.
 
 The [host-theming work order](docs/work-order-host-theming.md) is the next unit of work, written to be handed to an agent: one closed token vocabulary in `src/theme/`, themes that supply *values* (the default derived from tldraw's own palette so the chrome cannot disagree with the board, a `vscode` one mapping to `--vscode-*`, an `obsidian` one when that plugin exists), and one place that decides which is on. It carries the measured size of the job — 666 colour literals across 14 stylesheets — four runnable increments, the split between chrome and document content that must not be themed, and two gates: a lint test, and a browser journey that measures contrast ratios rather than reviewing screenshots.
 
-The [Obsidian plugin work order](docs/work-order-obsidian-plugin.md) is the next unit, written to be handed to an agent: the same host seam, a second host. Most of it is already built — `src/embed/` is host-agnostic, `resolveHostTheme` already names `obsidian`, and `src/theme/palettes/obsidian.ts` is a full palette generated from the real Obsidian 1.13.7 stylesheet waiting for a host that does not exist yet. The order carries the one architectural decision that is genuinely open (an Obsidian plugin has no webview, so holding "one build of the canvas, never two" means an iframe over the staged build rather than a bundled `main.js` — spike it first, and if it fails, what you owe instead), what Obsidian's autosaving document model changes about the journey's assertions, and where to take plumbing from the pyblocks donor without taking its second canvas.
+The [Obsidian plugin work order](docs/work-order-obsidian-plugin.md) records the shipped unit's original constraints: the same host seam, a second host; spike the iframe first; and if Obsidian's resource model defeats it, make the fallback explicit, scoped, provenance-matched, and independently guarded.
 
 The [theming implementation report](docs/theming-2026-09-01.html) shows that work order shipped: `src/theme/tokens.css` is the only stylesheet in `src/` with a chrome colour literal (enforced by `tests/test_theme_tokens.py`), the default theme derives every value from tldraw's own palette, and Settings → Appearance offers Light, Dark, Match system, Obsidian Light/Dark (read out of Obsidian 1.13.7's own `app.css`), Dark Modern (read out of the theme file Cursor ships, include chain resolved) and any VS Code theme `.json` a person imports. `npm run test:theme` drives all five in a real browser and measures WCAG contrast on every piece of chrome that carries text — 125 checks, mutation-tested red — and the VS Code plugin's board now follows the workbench, with the inspector's legibility measured in the dark theme rather than pinned light.
 

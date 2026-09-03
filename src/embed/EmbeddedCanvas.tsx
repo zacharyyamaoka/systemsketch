@@ -43,7 +43,11 @@ import { resolveHostTheme } from '../theme/themeModel'
 import { installInstantTextEditing } from '../instantTextEditing'
 import { enablePasteAtCursor } from '../pasteAtCursor'
 import { createSystemSketchStore } from '../store/createSystemSketchStore'
-import { readEmbedHostBridge, type HostToEmbedMessage } from './embedProtocol'
+import {
+  readEmbedHostBridge,
+  type EmbedHostBridge,
+  type HostToEmbedMessage,
+} from './embedProtocol'
 import {
   acceptOutgoing,
   createCoalescingAsyncRunner,
@@ -342,8 +346,14 @@ function EmbeddedSurface({
  * in here; there is a board, and every change to it is offered straight back
  * to the host, which owns the dirty tab and the ⌘S that flushes it.
  */
-export function EmbeddedCanvas() {
-  const bridge = useRef(readEmbedHostBridge()).current
+export interface EmbeddedCanvasProps {
+  /** Direct injection for a host mounted in this document, such as Obsidian. */
+  bridge?: EmbedHostBridge | null
+}
+
+export function EmbeddedCanvas({ bridge: injectedBridge }: EmbeddedCanvasProps = {}) {
+  const detectedBridge = useRef(readEmbedHostBridge()).current
+  const bridge = injectedBridge ?? detectedBridge
   const [openDocument, setOpenDocument] = useState<OpenState | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [retryHostWrite, setRetryHostWrite] = useState(false)
@@ -377,8 +387,7 @@ export function EmbeddedCanvas() {
 
   useEffect(() => {
     if (!bridge) return
-    const onMessage = (event: MessageEvent<HostToEmbedMessage>) => {
-      const message = event.data
+    const receive = (message: HostToEmbedMessage) => {
       if (typeof message !== 'object' || message === null) return
       if (message.type === 'open' || message.type === 'external-change') {
         const previous = documentRef.current
@@ -468,9 +477,15 @@ export function EmbeddedCanvas() {
         setError(message.message)
       }
     }
-    window.addEventListener('message', onMessage)
+    const onMessage = (event: MessageEvent<HostToEmbedMessage>) => receive(event.data)
+    const unsubscribe = bridge.subscribe
+      ? bridge.subscribe(receive)
+      : (() => {
+          window.addEventListener('message', onMessage)
+          return () => window.removeEventListener('message', onMessage)
+        })()
     bridge.post({ type: 'ready' })
-    return () => window.removeEventListener('message', onMessage)
+    return unsubscribe
   }, [bridge, postChange])
 
   const onCanvasText = useCallback((

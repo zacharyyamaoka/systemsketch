@@ -232,6 +232,51 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("systemsketch.openCanvas", commands)
         self.assertEqual(manifest["scripts"]["package"].count("--require-stable"), 1)
 
+    def test_obsidian_fallback_is_one_explicit_scoped_canvas_exception(self) -> None:
+        """Obsidian has no webview and its resource URLs defeated the iframe spike.
+
+        The accepted fallback may bundle the existing EmbeddedCanvas into the
+        plugin document, but it may not grow another canvas or reach into any
+        other app module directly. Its CSS must stay inside the plugin root,
+        and its provenance must match the app staged for the VS Code host.
+        """
+
+        plugin = PROJECT_ROOT / "obsidian-systemsketch"
+        manifest = json.loads((plugin / "manifest.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["id"], "systemsketch-obsidian")
+        self.assertTrue(manifest["isDesktopOnly"])
+
+        deep_imports: list[tuple[str, str]] = []
+        for path in sorted((plugin / "src").glob("*.ts")):
+            for line in path.read_text(encoding="utf-8").splitlines():
+                if "../../src/" in line:
+                    deep_imports.append((path.name, line.strip()))
+        self.assertTrue(deep_imports)
+        for module, line in deep_imports:
+            with self.subTest(module=module, line=line):
+                self.assertTrue(
+                    "../../src/embed/sharedWithHost" in line
+                    or "../../src/embed/EmbeddedCanvas" in line,
+                    "the Obsidian fallback expanded beyond its declared embed seam",
+                )
+
+        canvas_importers = {
+            module for module, line in deep_imports if "EmbeddedCanvas" in line
+        }
+        self.assertEqual(canvas_importers, {"embed.ts", "view.ts"})
+
+        build = (plugin / "esbuild.config.mjs").read_text(encoding="utf-8")
+        self.assertIn("same-document-fallback", build)
+        self.assertIn("Obsidian getResourcePath()", build)
+        self.assertIn("reference.sourceCommit !== sourceCommit", build)
+        self.assertIn("prefixSelector", build)
+        self.assertIn(".systemsketch-obsidian-scope", build)
+
+        protocol = (PROJECT_ROOT / "src" / "embed" / "embedProtocol.ts").read_text(encoding="utf-8")
+        canvas = (PROJECT_ROOT / "src" / "embed" / "EmbeddedCanvas.tsx").read_text(encoding="utf-8")
+        self.assertIn("subscribe?(handler:", protocol)
+        self.assertIn("bridge.subscribe(receive)", canvas)
+
     def test_requested_icon_is_the_repo_icon(self) -> None:
         icon = PROJECT_ROOT / "assets" / "systemsketch.png"
         self.assertTrue(icon.is_file())

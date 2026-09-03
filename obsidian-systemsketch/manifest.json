@@ -1,0 +1,9 @@
+{
+  "id": "systemsketch-obsidian",
+  "name": "SystemSketch",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Open, edit, and embed .systemsketch and .tldr files with the existing SystemSketch canvas.",
+  "author": "Zach Yamaoka",
+  "isDesktopOnly": true
+}

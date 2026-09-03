@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["react", "react-dom", "vite/client"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "../src/embed/sharedWithHost.ts",
+    "../src/embed/embedProtocol.ts",
+    "../src/embed/sketchDocument.ts",
+    "../src/embed/EmbeddedCanvas.tsx",
+    "../src/vite-env.d.ts"
+  ]
+}

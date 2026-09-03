@@ -35,7 +35,14 @@ import { fileURLToPath } from 'node:url'
 
 const EXTENSION_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const PROJECT_ROOT = resolve(EXTENSION_ROOT, '..')
-const APP_DIR = join(EXTENSION_ROOT, 'dist', 'app')
+const outputIndex = process.argv.indexOf('--out-dir')
+const APP_DIR = outputIndex === -1
+  ? join(EXTENSION_ROOT, 'dist', 'app')
+  : resolve(process.cwd(), process.argv[outputIndex + 1] ?? '')
+
+if (outputIndex !== -1 && !process.argv[outputIndex + 1]) {
+  throw new Error('--out-dir requires a destination')
+}
 
 function releaseHome() {
   if (process.env.SYSTEMSKETCH_RELEASE_HOME) {
@@ -88,6 +95,14 @@ function sourceMtime() {
   return Number.isFinite(value) ? value : null
 }
 
+function sourceCommit() {
+  const result = spawnSync('git', ['rev-parse', 'HEAD'], {
+    cwd: PROJECT_ROOT,
+    encoding: 'utf8',
+  })
+  return result.status === 0 && result.stdout.trim() ? result.stdout.trim() : null
+}
+
 async function main() {
   const requireStable = process.argv.includes('--require-stable')
   const stable = stableRelease()
@@ -95,6 +110,7 @@ async function main() {
   const stableSource = typeof stable?.manifest?.sourceTime === 'number'
     ? stable.manifest.sourceTime
     : null
+  const commit = sourceCommit()
   // `sourceTime` is a timestamp, so it only means anything when both sides are
   // the *same* tree: a worktree checked out this morning is older than Stable
   // by the clock and is nevertheless entirely different source. Requiring the
@@ -155,6 +171,7 @@ async function main() {
       releasedAt: stable?.manifest?.releasedAt ?? null,
       stableSourceTime: stableSource,
       stagedSourceTime: currentSource,
+      sourceCommit: commit,
       matchesStable,
       channel: matchesStable ? 'stable' : 'development',
     }, null, 2)}\n`,

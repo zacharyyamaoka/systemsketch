@@ -21,6 +21,7 @@ export type {
   EmbedErrorMessage,
   EmbedExternalChangeMessage,
   EmbedHostErrorMessage,
+  EmbedHostBridge,
   EmbedOpenMessage,
   EmbedReadyMessage,
   EmbedRecoveryCheckpoint,

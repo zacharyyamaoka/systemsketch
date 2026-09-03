@@ -1,0 +1,43 @@
+.systemsketch-obsidian-content {
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.systemsketch-obsidian-scope {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  color: var(--text-normal);
+  background: var(--background-primary);
+}
+
+.systemsketch-obsidian-editor {
+  height: 100%;
+}
+
+.systemsketch-obsidian-editor > .systemsketch-embed,
+.systemsketch-obsidian-embed > .systemsketch-embed {
+  height: 100%;
+}
+
+.systemsketch-obsidian-embed-container {
+  display: block;
+  width: 100%;
+}
+
+.systemsketch-obsidian-embed {
+  min-height: 180px;
+  overflow: hidden;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+}
+
+.systemsketch-obsidian-embed .systemsketch-embedded-app {
+  pointer-events: none;
+}
+
+.systemsketch-obsidian-embed .systemsketch-toolbar,
+.systemsketch-obsidian-embed .tlui-toolbar,
+.systemsketch-obsidian-embed [data-testid='systemsketch-surface-host'] {
+  display: none !important;
+}

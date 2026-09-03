@@ -1,0 +1,1 @@
+declare const __SYSTEMSKETCH_SOURCE_COMMIT__: string

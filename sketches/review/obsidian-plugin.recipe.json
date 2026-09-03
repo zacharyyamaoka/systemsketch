@@ -1,0 +1,100 @@
+{
+  "feature": "Obsidian host: edit, theme, and embed",
+  "viewport": { "width": 1600, "height": 900 },
+  "shapes": [
+    {
+      "id": "reader",
+      "type": "block",
+      "x": 570,
+      "y": 330,
+      "props": {
+        "title": "read_board()",
+        "description": "Editable in Obsidian through TextFileView autosave",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 180,
+        "inputs": [],
+        "outputs": [{ "id": "out_1", "name": "document", "type": "SystemSketch", "visible": true }]
+      }
+    },
+    {
+      "id": "renderer",
+      "type": "block",
+      "x": 1060,
+      "y": 330,
+      "props": {
+        "title": "render_embed()",
+        "description": "The same board appears read-only inside Markdown",
+        "blockType": "call",
+        "view": "port",
+        "w": 340,
+        "h": 180,
+        "inputs": [{ "id": "in_1", "name": "document", "type": "SystemSketch", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "preview", "type": "Canvas", "visible": true }]
+      }
+    },
+    {
+      "id": "document-cable",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    }
+  ],
+  "bindings": [
+    { "id": "cable-start", "type": "connection", "fromId": "document-cable", "toId": "reader", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "id": "cable-end", "type": "connection", "fromId": "document-cable", "toId": "renderer", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Open this file in Obsidian. Double-click read_board(), rename it read_obsidian(), then wait for the dirty dot to clear.",
+      "x": 60,
+      "y": 330,
+      "w": 400,
+      "h": 150,
+      "target": { "shapeId": "reader", "anchor": "left" }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Keep the inspector open and switch Obsidian from Light to Dark. The board and every inspector label must follow.",
+      "x": 1080,
+      "y": 40,
+      "w": 460,
+      "h": 150,
+      "target": { "shapeId": "renderer", "anchor": "top" }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · In Demo.md, add ![[obsidian-plugin.systemsketch|700x420]] and switch to Reading view. Try to drag this Block in the embed.",
+      "x": 1000,
+      "y": 630,
+      "w": 500,
+      "h": 150,
+      "target": { "shapeId": "renderer", "anchor": "bottom" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Reopening preserves read_obsidian(), the inline preview shows both Blocks and this cable, and the embedded Block does not move.",
+      "x": 60,
+      "y": 630,
+      "w": 620,
+      "h": 150
+    }
+  ]
+}

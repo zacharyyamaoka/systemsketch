@@ -1,0 +1,24 @@
+{
+  "name": "systemsketch-obsidian",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "stage:reference": "node ../vscode-systemsketch/scripts/stage_app.mjs",
+    "build:host": "node esbuild.config.mjs",
+    "build": "npm run stage:reference && npm run build:host",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "check": "npm run typecheck && npm run build",
+    "test:provenance": "node tests/provenance.mjs",
+    "test:e2e": "node tests/obsidian_e2e.mjs",
+    "test": "npm run check && npm run test:provenance && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "esbuild": "0.25.5",
+    "obsidian": "1.8.7",
+    "postcss": "8.5.6",
+    "postcss-prefix-selector": "2.1.1",
+    "typescript": "7.0.2"
+  }
+}

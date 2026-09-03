@@ -32,6 +32,8 @@
     "plugin:build": "npm --prefix vscode-systemsketch run build",
     "plugin:package": "npm --prefix vscode-systemsketch run package",
     "plugin:test": "npm --prefix vscode-systemsketch test",
+    "obsidian:build": "npm --prefix obsidian-systemsketch run build",
+    "obsidian:test": "npm --prefix obsidian-systemsketch test",
     "check": "tsc -b && vitest run && python3 -m unittest discover -s tests -v",
     "release:candidate": "python3 scripts/release.py candidate",
     "release:promote": "python3 scripts/release.py promote",
