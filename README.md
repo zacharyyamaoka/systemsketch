@@ -2,8 +2,6 @@
 
 SystemSketch starts from one deliberately boring datum: the stock tldraw whiteboard. Its engine, drawing tools, and shortcuts stay stock while narrow supported seams add local files, board overview, zoom, Help, and the Stable/Preview workflow.
 
-The [Cursor / VS Code golden compatibility gallery](docs/ide-golden-compatibility-2026-09-02.html) shows the legacy PyBlocks import path, the fully migrated 96-file target/generated corpus, and the real disposable-host proof: 96/96 files open in Cursor with the SystemSketch toolbar, no error surface, and unchanged bytes.
-
 ## Current improvement review
 
 The [Expanded Block footer-drag gallery](docs/expanded-footer-drag-2026-09-02.html) proves the footer and painted port words are real drag handles again while the open middle remains drawable child canvas. Its focused real-browser journey covers both selected and cold footer drags, a port-text drag, and the negative interior control.

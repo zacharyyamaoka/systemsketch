@@ -4,6 +4,8 @@ Open a `.systemsketch` or `.tldr` file from the file tree and the SystemSketch c
 appears in the editor pane. Draw, press <kbd>Ctrl</kbd>+<kbd>S</kbd>, and the file on disk
 is what changed.
 
+The [golden compatibility gallery](../docs/ide-golden-compatibility-2026-09-02.html) shows the legacy PyBlocks import path, the migrated 96-file target/generated corpus, and the disposable-host proof: 96/96 files open in Cursor with the SystemSketch toolbar, no error surface, and unchanged bytes.
+
 ![The canvas in an editor pane](../docs/assets/vscode-target-block-saved.png)
 
 ## What it is, and what it deliberately is not
