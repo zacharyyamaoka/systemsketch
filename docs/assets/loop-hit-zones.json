@@ -1,0 +1,28 @@
+{
+  "what": "editor.getShapeAtPoint at the painted midpoint of every cable on sketches/review/loop-region.systemsketch, plus the region's own bands. Measured in the running app over CDP, not derived from geometry.",
+  "before": {
+    "commit": "105b7c2",
+    "cables": [
+      { "id": "c-back", "parent": "page", "insideRegion": true, "selects": null },
+      { "id": "c-body", "parent": "page", "insideRegion": true, "selects": null },
+      { "id": "c-item", "parent": "page", "insideRegion": true, "selects": null },
+      { "id": "c-seed", "parent": "page", "insideRegion": true, "selects": "loop" },
+      { "id": "c-iterable", "parent": "page", "insideRegion": false, "selects": "connection" },
+      { "id": "c-out", "parent": "page", "insideRegion": false, "selects": "connection" }
+    ],
+    "bands": { "header": "loop", "footer": null, "openBody": null }
+  },
+  "after": {
+    "commit": "ff12d25",
+    "cables": [
+      { "id": "c-back", "parent": "loop", "insideRegion": true, "selects": "connection" },
+      { "id": "c-body", "parent": "loop", "insideRegion": true, "selects": "connection" },
+      { "id": "c-item", "parent": "loop", "insideRegion": true, "selects": "connection" },
+      { "id": "c-seed", "parent": "loop", "insideRegion": true, "selects": "connection" },
+      { "id": "c-iterable", "parent": "loop", "insideRegion": false, "selects": "connection" },
+      { "id": "c-out", "parent": "loop", "insideRegion": false, "selects": "connection" }
+    ],
+    "bands": { "header": "loop", "footer": "loop", "openBody": null }
+  },
+  "openBodyIsIntentional": "A region's open face must stay drawable, so answering nothing there is the desired result, not a miss."
+}

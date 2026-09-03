@@ -76,7 +76,26 @@ def measure() -> dict:
         "header_h": model.split("LOOP_HEADER_HEIGHT = ")[1].split("\n")[0],
         "qa": json.loads((DOCS / "assets" / "loop-qa" / "observations.json").read_text())["observations"],
         "tldraw": json.loads((REPO / "package.json").read_text())["dependencies"]["tldraw"],
+        "hits": json.loads((DOCS / "assets" / "loop-hit-zones.json").read_text()),
+        "frame_rule": frame_rule(),
+        "shared": len((REPO / "src" / "blocks" / "containerGeometry.ts").read_text().splitlines()),
+        "callers": sorted(
+            path.relative_to(REPO).as_posix()
+            for path in REPO.glob("src/**/*.tsx")
+            if "containerHitGeometry({" in path.read_text()
+        ),
     }
+
+
+def frame_rule() -> list[str]:
+    """The tldraw lines the whole bug hangs on, read from the pinned package."""
+    source = (REPO / "node_modules" / "@tldraw" / "editor" / "dist-esm" / "lib"
+              / "editor" / "Editor.mjs").read_text().splitlines()
+    start = next(i for i, line in enumerate(source) if "getShapeAtPoint(point, opts" in line)
+    body = source[start:start + 60]
+    first = next(i for i, line in enumerate(body) if "if (isShapeFrameLike) {" in line)
+    return [f"{start + first + n + 1}  {line.rstrip()}"
+            for n, line in enumerate(body[first:first + 10])]
 
 
 CSS = """
@@ -129,6 +148,23 @@ def build() -> str:
     modules = "".join(f'<tr><td><code>src/loop/{name}</code></td><td class="num">{lines}</td></tr>'
                       for name, lines in facts["modules"])
     commits = "".join(f"<li><code>{esc(line)}</code></li>" for line in facts["commits"])
+    hits = facts["hits"]
+    def selects(entry):
+        return ('<span class="tag win">that cable</span>' if entry["selects"] == "connection"
+                else '<span class="tag bad">the region</span>' if entry["selects"] == "loop"
+                else '<span class="tag bad">nothing</span>')
+    after_by_id = {entry["id"]: entry for entry in hits["after"]["cables"]}
+    hit_rows = "".join(
+        f'<tr><td><code>{esc(before["id"])}</code></td>'
+        f'<td>{"yes" if before["insideRegion"] else "no"}</td>'
+        f'<td>{selects(before)}</td><td>{selects(after_by_id[before["id"]])}</td></tr>'
+        for before in hits["before"]["cables"])
+    band = lambda side, key: (
+        '<span class="tag win">the region</span>' if hits[side]["bands"][key] == "loop"
+        else '<span class="tag bad">nothing</span>' if key != "openBody"
+        else '<span class="tag win">nothing — stays drawable</span>')
+    callers = "".join(f"<li><code>{esc(name)}</code></li>" for name in facts["callers"])
+    frame_rule = esc("\n".join(facts["frame_rule"]))
     qa_frames = "".join(
         f'<figure style="margin:0 0 18px"><img class="shot" src="{data_uri(DOCS / "assets" / "loop-qa" / (name + ".png"))}" '
         f'alt="{esc(name)}"><figcaption><strong>{esc(name)}</strong> — {note}</figcaption></figure>'
@@ -289,6 +325,48 @@ whatever it is given); <code>break</code>, <code>else</code>, and nested loops.<
 chrome's <em>generic</em> selection pill — appearance controls it has no styles for, plus
 Tidy/Organize, plus Inspect — while a Branch gets a mini-menu of its own. What belongs on a
 Loop's pill is a decision, not a defect, so it is unchanged.</p>
+
+<h2>The clicking bugs, and why they were one bug</h2>
+<p>Two symptoms on the review board: the footer could not be selected, and the cables running
+inside the region could not be clicked at all. They share a root, and it is a rule in stock
+tldraw {facts['tldraw']} rather than anything the Loop invented — <code>Editor.getShapeAtPoint</code>,
+read here out of the pinned package:</p>
+<pre><code>{frame_rule}</code></pre>
+<p>Line 4368 is why a header works: an <code>isLabel</code> child is solid chrome. Line 4371 is
+the whole problem — inside a frame-like face the search <strong>stops and answers nothing</strong>,
+so nothing painted underneath can ever be reached. And the predicate on 4370 is the identical
+call tldraw uses to find a drop target (<code>isPointInShape(…, hitInside: true)</code>), so a
+container that accepts a dropped Block necessarily hides what is beneath it. That cannot be
+tuned away in geometry; it had to be answered twice, in two different places.</p>
+
+<h3>The footer: one contract instead of three copies</h3>
+<p>Block, Branch and Loop each built this geometry by hand, and the Loop's copy simply had no
+footer rectangle — the band you reached for carried no hit area at all. All three now build it
+through <code>src/blocks/containerGeometry.ts</code> ({facts['shared']} lines), and the Expanded Block's
+eight existing measurements in <code>blockSelectableArea.test.ts</code> pass against the shared
+helper unchanged:</p>
+<ul>{callers}</ul>
+
+<h3>The cables: a tree fact, not a geometry one</h3>
+<p>The identical cable <em>inside an Expanded Block</em> always worked — purely because being
+that Block's child sorted it above the frame. A Loop and a Branch draw a frame without defining
+a scope, so their cables stayed in the page beneath them. A cable now takes the innermost region
+that holds it. <code>blockScopeId</code> reads straight through a region, so the cable's
+<strong>scope</strong> — which decides polarity and what may be wired to what — is unchanged;
+only the parent it paints among moves.</p>
+<div class="note warn">A Branch <strong>arm</strong> is deliberately excluded. An arm folds, and
+tldraw hides a folded frame's children — an arm that owned a cable would swallow it on every
+fold instead of letting it reattach to the arm's header edge. <code>test:branch</code> caught
+exactly that at BR-20.</div>
+<table>
+<tr><th>Cable</th><th>Runs inside the region</th><th>Before — click selects</th><th>After</th></tr>
+{hit_rows}
+<tr><td><code>footer band</code></td><td>—</td><td>{band('before', 'footer')}</td><td>{band('after', 'footer')}</td></tr>
+<tr><td><code>open face</code></td><td>—</td><td>{band('before', 'openBody')}</td><td>{band('after', 'openBody')}</td></tr>
+</table>
+<p>The open face answering nothing is the intended result, not a miss: a region you can see
+through has to stay drawable. Boards saved before this still parent their cables to the page,
+so the settle also runs on load, after the single-page merge.</p>
 
 <h2>The track</h2>
 <table>
