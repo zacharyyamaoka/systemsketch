@@ -7,7 +7,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
 } from 'react'
-import { useEditor, useValue } from 'tldraw'
+import { EditorPortal, useEditor, useValue } from 'tldraw'
 
 import {
   boardSearchFieldLabel,
@@ -250,13 +250,16 @@ export function SystemSketchCommandPalette({
   const replaceableCount = matches.filter((match) => match.replaceable).length
 
   return (
-    <div
-      ref={rootRef}
-      className="systemsketch-command-palette__backdrop"
-      data-testid="systemsketch-command-palette"
-      onMouseDown={dismissBackdrop}
-      onKeyDown={onKeyDown}
-    >
+    // InFrontOfTheCanvas is a fixed stacking context below tldraw's panels.
+    // A full-surface modal must use the stock portal seam to cover app chrome.
+    <EditorPortal>
+      <div
+        ref={rootRef}
+        className="systemsketch-command-palette__backdrop"
+        data-testid="systemsketch-command-palette"
+        onMouseDown={dismissBackdrop}
+        onKeyDown={onKeyDown}
+      >
       <section
         className="systemsketch-command-palette"
         role="dialog"
@@ -430,6 +433,7 @@ export function SystemSketchCommandPalette({
           <span><kbd>↑</kbd><kbd>↓</kbd> Navigate · <kbd>Enter</kbd> Open</span>
         </footer>
       </section>
-    </div>
+      </div>
+    </EditorPortal>
   )
 }

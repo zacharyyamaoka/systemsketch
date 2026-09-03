@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -12,6 +13,7 @@ vi.mock('tldraw', async (importOriginal) => {
   const actual = await importOriginal<typeof import('tldraw')>()
   return {
     ...actual,
+    EditorPortal: ({ children }: { children: ReactNode }) => children,
     useEditor: () => mocks.editor,
     useValue: (_name: string, read: () => unknown) => read(),
   }
