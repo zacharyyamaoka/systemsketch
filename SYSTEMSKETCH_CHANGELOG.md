@@ -20,6 +20,7 @@
 - Added a dedicated Dev shelf beside Help for Stable, Latest Preview, version controls, and recent-first isolated presets.
 - Added pre-mount `Block Dev` and `Stock tldraw` compositions on the one Preview runtime; each isolated preset owns an independent browser-local board while Latest Preview keeps the current-board duplicate flow.
 - Added the Block / Port / Edge tracer bullet to `Block Dev`: stock toolbar integration, right inspector, remembered Simple/Port/Expanded views, real nested frames, stable port identities, and semantic port-to-port cables that follow movement, survive hide/reload, and participate in tldraw history.
+- Made an Expanded Block's visible footer and painted port words true selection and drag handles while preserving the open middle as drawable child canvas.
 - Added view-only Depth Stack navigation for Expanded Blocks: camera-fitted scope boundaries, numeric arbitrary depth, structural Up, direct ancestor/root jumps, and exact root-camera recovery over the real `parentId` chain.
 - Ported pyblocks' native semantic context menu: checked Block views, Add Input/Output/Icon/Description/Type with immediate inline editing, checked Offset/Aligned port layout, Expanded depth entry, and Curved/Straight connection routing while retaining stock tldraw commands.
 - Kept the context menu on tldraw's public default root and stock content, made batchable Block items survive multi-selection, and reset the stock Radix root on desktop-window blur so returning to SystemSketch cannot strand the next right-clicks on an invisible capture layer.

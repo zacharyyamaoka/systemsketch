@@ -3,6 +3,7 @@ import {
 	blockPortLayout,
 	blockPortSections,
 	expandedSectionWeights,
+	portDefaultValue,
 	portInHeader,
 	type BlockPort,
 	type BlockShapeProps,
@@ -41,6 +42,16 @@ export const HEADER_ICON_PX = 22
 const HEADER_PAD_X = 12
 const HEADER_GAP_PX = 8
 
+/** Keep these in step with the painted flex row in `block-canvas.css`. */
+const PORT_LABEL_GAP_PX = 8
+const PORT_DEFAULT_CHIP_FONT_PX = 13
+/** 7px horizontal padding and a 1px border on both sides. */
+const PORT_DEFAULT_CHIP_CHROME_PX = 16
+const PORT_DEFAULT_CHIP_MAX_PX = 88
+
+/** Breathing room beyond the final glyph in an Expanded Block's grab band. */
+export const PORT_LABEL_HIT_PAD_PX = 8
+
 export const SIMPLE_TITLE_FONT_PX = TLDRAW_TEXT_XL_PX
 export const SIMPLE_TEXT_FONT_PX = TLDRAW_TEXT_S_PX
 export const SIMPLE_TITLE_LINE_PX = 50
@@ -73,6 +84,8 @@ export interface LaidOutBlockPort {
 	y: number
 	/** Name/type box, absent for Simple and header inputs. */
 	label: BlockRect | null
+	/** The part of `label` occupied by its painted flex-row content. */
+	labelContent: BlockRect | null
 	/** Simple anchors exist for cables but remain visually quiet until hover. */
 	subtle: boolean
 	/** Expanded labels lift above the dot line so internal cables do not strike them. */
@@ -132,6 +145,8 @@ export interface BlockLayout {
 	body: BlockRect
 	bodyTop: number
 	footerTop: number
+	/** The visible action strip; absent from the two chromeless views. */
+	footer: BlockRect | null
 	pitch: number
 	description: BlockRect | null
 	/** Drawable child area, non-null only for the real Expanded frame. */
@@ -414,6 +429,56 @@ export function measureBlockText(
 	return text.length * px * TEXT_FAMILIES[family].advance
 }
 
+/** Width of the name, type, default chip, and the gaps painted between them. */
+function portLabelContentWidth(port: BlockPort, side: 'input' | 'output'): number {
+	const parts: number[] = []
+	if (port.name !== '') parts.push(measureBlockText(port.name, PORT_TEXT_FONT_PX, 400))
+	if (port.type !== '') parts.push(measureBlockText(port.type, PORT_TEXT_FONT_PX, 400, 'mono'))
+	const defaultValue = side === 'input' ? portDefaultValue(port) : ''
+	if (defaultValue !== '') {
+		parts.push(Math.min(
+			PORT_DEFAULT_CHIP_MAX_PX,
+			measureBlockText(`= ${defaultValue}`, PORT_DEFAULT_CHIP_FONT_PX, 400, 'mono')
+				+ PORT_DEFAULT_CHIP_CHROME_PX,
+		))
+	}
+	if (parts.length === 0) return 0
+	return parts.reduce((total, part) => total + part, 0)
+		+ PORT_LABEL_GAP_PX * (parts.length - 1)
+}
+
+/** Pack the measured content against the same lane edge as the painted row. */
+function portLabelContentBox(
+	port: BlockPort,
+	side: 'input' | 'output',
+	label: BlockRect,
+): BlockRect {
+	const w = Math.max(0, Math.min(label.w, portLabelContentWidth(port, side)))
+	return {
+		x: side === 'input' ? label.x : label.x + label.w - w,
+		y: label.y,
+		w,
+		h: label.h,
+	}
+}
+
+/**
+ * The pointer target behind one Expanded port label. It joins the words to the
+ * Block edge, but deliberately stops after the painted content so the middle
+ * of the frame remains drawable child canvas.
+ */
+export function portLabelHitArea(placed: LaidOutBlockPort, width: number): BlockRect | null {
+	if (placed.subtle || !placed.labelContent) return null
+	const content = placed.labelContent
+	const near = placed.side === 'input' ? 0 : width
+	const far = placed.side === 'input'
+		? content.x + content.w + PORT_LABEL_HIT_PAD_PX
+		: content.x - PORT_LABEL_HIT_PAD_PX
+	const left = Math.max(0, Math.min(near, far))
+	const right = Math.min(width, Math.max(near, far))
+	return { x: left, y: content.y, w: Math.max(0, right - left), h: content.h }
+}
+
 function measureSimpleText(text: string, px: number, weight: number): number {
 	return measureBlockText(text, px, weight, 'sans')
 }
@@ -510,10 +575,10 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 		// or read or both, so both rims carry a dot.
 		const midpoint = height / 2
 		for (const port of props.inputs.filter((candidate) => candidate.visible)) {
-			placed.push({ port, side: 'input', x: 0, y: midpoint, label: null, subtle: false, lifted: false })
+			placed.push({ port, side: 'input', x: 0, y: midpoint, label: null, labelContent: null, subtle: false, lifted: false })
 		}
 		for (const port of props.outputs.filter((candidate) => candidate.visible)) {
-			placed.push({ port, side: 'output', x: width, y: midpoint, label: null, subtle: false, lifted: false })
+			placed.push({ port, side: 'output', x: width, y: midpoint, label: null, labelContent: null, subtle: false, lifted: false })
 		}
 		return {
 			view,
@@ -529,6 +594,7 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 			body: bounds,
 			bodyTop: 0,
 			footerTop: height,
+			footer: null,
 			pitch: NODE_ROW_HEIGHT_PX,
 			description: null,
 			frameInterior: null,
@@ -628,6 +694,7 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 				x: 0,
 				y: midpoint,
 				label: null,
+				labelContent: null,
 				subtle: true,
 				lifted: false,
 			})
@@ -639,6 +706,7 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 				x: width,
 				y: midpoint,
 				label: null,
+				labelContent: null,
 				subtle: true,
 				lifted: false,
 			})
@@ -657,6 +725,7 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 			body: bounds,
 			bodyTop,
 			footerTop,
+			footer: null,
 			pitch: NODE_ROW_HEIGHT_PX,
 			description,
 			frameInterior: null,
@@ -689,6 +758,7 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 			x: 0,
 			y,
 			label: null,
+			labelContent: null,
 			subtle: false,
 			lifted: false,
 		})
@@ -712,7 +782,8 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 				w: labelWidth,
 				h: PORT_LABEL_HEIGHT_PX,
 			}
-			placed.push({ port, side, x, y, label, subtle: false, lifted: true })
+			const labelContent = portLabelContentBox(port, side, label)
+			placed.push({ port, side, x, y, label, labelContent, subtle: false, lifted: true })
 		}
 		placeExpandedBody(props, width, bodyTop, bodyBottom, place, dividers, sections)
 	} else {
@@ -761,7 +832,8 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 					w: labelWidth,
 					h: PORT_LABEL_HEIGHT_PX,
 				}
-				placed.push({ port, side, x, y, label, subtle: false, lifted: false })
+				const labelContent = portLabelContentBox(port, side, label)
+				placed.push({ port, side, x, y, label, labelContent, subtle: false, lifted: false })
 			}
 		}
 
@@ -831,6 +903,7 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 		body,
 		bodyTop,
 		footerTop,
+		footer: { x: 0, y: footerTop, w: width, h: Math.max(0, height - footerTop) },
 		pitch,
 		description,
 		frameInterior: view === 'expanded'

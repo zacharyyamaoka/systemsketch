@@ -832,11 +832,8 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
         {isEditing ? <BlockInlineEditor shape={shape} /> : null}
       </div>
 
-      {!plain ? (
-        <div
-          className="NodeShape-footer"
-          style={{ top: layout.footerTop, height: Math.max(0, layout.bounds.h - layout.footerTop) }}
-        >
+      {layout.footer ? (
+        <div className="NodeShape-footer" style={boxStyle(layout.footer)}>
           <BlockFooterMenu shape={shape} />
         </div>
       ) : null}

@@ -1,0 +1,70 @@
+{
+  "feature": "Expanded Block footer drag",
+  "viewport": { "width": 1500, "height": 950 },
+  "shapes": [
+    {
+      "id": "subject",
+      "type": "block",
+      "x": 600,
+      "y": 290,
+      "props": {
+        "title": "merge()",
+        "description": "",
+        "showDescription": false,
+        "blockType": "call",
+        "view": "expanded",
+        "w": 560,
+        "h": 380,
+        "inputs": [
+          { "id": "in_1", "name": "pose", "type": "Pose", "visible": true },
+          { "id": "in_2", "name": "other", "type": "Pose", "visible": true, "row": 2 }
+        ],
+        "outputs": [
+          { "id": "out_1", "name": "result", "type": "Pose", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "inner",
+      "type": "block",
+      "parentId": "subject",
+      "x": 180,
+      "y": 130,
+      "props": {
+        "title": "decode()",
+        "blockType": "Function",
+        "view": "simple",
+        "w": 220,
+        "h": 130,
+        "inputs": [
+          { "id": "in_1", "name": "pose", "type": "Pose", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_1", "name": "decoded", "type": "Pose", "visible": true }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Drag the blank LEFT side of the footer 200 px left. Avoid the ⋮ menu.",
+      "x": 600,
+      "y": 760,
+      "w": 560,
+      "h": 110,
+      "target": { "shapeId": "subject", "anchor": "bottom", "dx": -170 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The Expanded frame and decode() move together; every port stays attached.",
+      "x": 500,
+      "y": 80,
+      "w": 580,
+      "h": 110
+    }
+  ]
+}

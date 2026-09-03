@@ -44,7 +44,9 @@ import {
 	BLOCK_PORT_RADIUS,
 	VALUE_FONT_PX,
 	layoutBlock,
+	portLabelHitArea,
 	type BlockLayout,
+	type BlockRect,
 } from './layoutBlock'
 import { BlockCanvas } from './ui/BlockCanvas'
 import { stepIntoDepthScope } from '../depth/depthNavigation'
@@ -463,6 +465,21 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 					isLabel: true,
 				})
 			: null
+		const chrome = isContainer
+			? [
+					...layout.ports.map((placed) => portLabelHitArea(placed, layout.width)),
+					layout.footer,
+				]
+				.filter((rect): rect is BlockRect => rect !== null && rect.w > 0 && rect.h > 0)
+				.map((rect) => new Rectangle2d({
+					x: rect.x,
+					y: rect.y,
+					width: rect.w,
+					height: rect.h,
+					isFilled: true,
+					isLabel: true,
+				}))
+			: []
 		const portGeometry = layout.ports
 			.filter((port) => !port.subtle)
 			.map((port) => new Circle2d({
@@ -473,7 +490,9 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 				isLabel: true,
 				excludeFromShapeBounds: true,
 			}))
-		return new Group2d({ children: [body, ...(header ? [header] : []), ...portGeometry] })
+		return new Group2d({
+			children: [body, ...(header ? [header] : []), ...chrome, ...portGeometry],
+		})
 	}
 
 	override component(shape: BlockShape) {
