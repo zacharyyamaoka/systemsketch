@@ -59,7 +59,6 @@
     "test:selectable": "node tests/block_footer_drag_smoke.mjs",
     "test:embed-lifecycle": "node tests/embed_lifecycle_smoke.mjs",
     "test:portable": "node tests/portable_tldraw_export_smoke.mjs",
-
     "test:stock-tldr-primitives": "node tests/stock_tldr_primitives_smoke.mjs",
     "test:repo-ui": "node tests/library_overview_smoke.mjs",
     "test:review": "node tests/review_gallery_smoke.mjs",

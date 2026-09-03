@@ -61,7 +61,7 @@ async function main() {
       editor.createShapes([
         block('shape:data-a', 'data source', 80, 120),
         block('shape:data-b', 'data sink', 460, 120),
-        block('shape:async-a', 'async source', 850, 120),
+        block('shape:async-a', 'async source', 780, 120),
         block('shape:async-b', 'async sink', 1160, 120),
         block('shape:delay-a', 'delay source', 80, 360),
         block('shape:delay-b', 'delay sink', 460, 360),
@@ -72,6 +72,8 @@ async function main() {
         } },
         { id: 'shape:branch-child', type: 'block', parentId: 'shape:branch', x: 80, y: 100,
           props: { title: 'inside branch', view: 'simple', inputs: [], outputs: [] } },
+        { id: 'shape:nested-edge', type: 'connection', parentId: 'shape:branch', x: 80, y: 220,
+          props: { start: { x: 0, y: 0 }, end: { x: 320, y: 0 }, routing: 'straight', temporal: 'delayed', delayValue: 'nested', pillPosition: 0.55, curve: null, pins: [], elbowRoute: null } },
         { id: 'shape:data-edge', type: 'connection', x: 0, y: 0, props: { start: { x: 0, y: 0 }, end: { x: 100, y: 0 }, routing: 'elbow', temporal: 'data', curve: null, pins: [], elbowRoute: null } },
         { id: 'shape:async-edge', type: 'connection', x: 0, y: 0, props: { start: { x: 0, y: 0 }, end: { x: 100, y: 0 }, routing: 'straight', temporal: 'async', curve: null, pins: [], elbowRoute: null } },
         { id: 'shape:delay-edge', type: 'connection', x: 0, y: 0, props: { start: { x: 0, y: 0 }, end: { x: 100, y: 0 }, routing: 'curved', temporal: 'delayed', delayValue: '11', pillPosition: 0.6, curve: null, pins: [], elbowRoute: null } },
@@ -93,6 +95,9 @@ async function main() {
       return true
     })()`)
     await delay(700)
+    const nestedEdgeBefore = JSON.parse(await evaluate(page, `JSON.stringify(
+      window.__systemsketch.editor.getShapePageBounds('shape:nested-edge').center
+    )`))
     const directArrowPoint = JSON.parse(await evaluate(page, `(() => {
       const editor = window.__systemsketch.editor
       editor.setSelectedShapes(['shape:direct-edge'])
@@ -148,6 +153,10 @@ async function main() {
       const bindings = editor.store.allRecords().filter((record) => record.typeName === 'binding')
       const temporal = Object.fromEntries(shapes.filter((shape) => shape.type === 'arrow')
         .map((shape) => [shape.meta?.systemSketch?.temporal, shape.props.dash]))
+      const nestedArrow = shapes.find((shape) => shape.type === 'arrow'
+        && shape.meta?.systemSketch?.delayValue === 'nested')
+      const nestedEdgeGroup = nestedArrow && editor.getShape(nestedArrow.parentId)
+      const nestedCenter = nestedArrow && editor.getShapePageBounds(nestedArrow.id)?.center
       const stockSvg = await window.__systemsketch.renderStockTldraw(source)
       const host = document.createElement('div')
       host.id = 'stock-live-detach-render'
@@ -163,6 +172,10 @@ async function main() {
         directArrow: shapes.find((shape) => shape.type === 'arrow' && shape.meta?.systemSketch?.delayValue === 'direct')?.props.dash,
         directPillGroup: shapes.some((shape) => shape.type === 'group' && shape.meta?.systemSketch?.kind === 'connection-delay-pill'
           && shape.meta?.systemSketch?.arrowId && shapes.some((arrow) => arrow.id === shape.meta.systemSketch.arrowId && arrow.meta?.systemSketch?.delayValue === 'direct')),
+        nestedEdgeStayedInFrame: nestedEdgeGroup?.parentId === 'shape:branch',
+        nestedEdgeKeptPosition: Boolean(nestedCenter
+          && Math.abs(nestedCenter.x - ${JSON.stringify(nestedEdgeBefore.x)}) < 0.01
+          && Math.abs(nestedCenter.y - ${JSON.stringify(nestedEdgeBefore.y)}) < 0.01),
         customPrimitiveStyle: shapes.some((shape) => shape.meta?.systemSketchPrimitiveStyle),
         customGeo: shapes.some((shape) => shape.type === 'geo' && ['systemsketch-rounded-rect', 'excalidraw-rounded-rect'].includes(shape.props.geo)),
         customPaintMarkers: document.querySelectorAll('.systemsketch-detached-card-visual, .systemsketch-detached-arrow__body, .systemsketch-detached-arrow-presentation__body, .systemsketch-detached-text-visual, [data-detached-edge-type], [data-detached-delay-segment]').length,
@@ -179,10 +192,12 @@ async function main() {
     assert.equal(result.temporal.data, 'solid')
     assert.equal(result.temporal.async, 'dashed')
     assert.equal(result.temporal.delayed, 'dotted')
-    assert.equal(result.delayPillGroups, 2)
+    assert.equal(result.delayPillGroups, 3)
     assert.equal(result.delayPillText, true)
     assert.equal(result.directArrow, 'dotted')
     assert.equal(result.directPillGroup, true)
+    assert.equal(result.nestedEdgeStayedInFrame, true)
+    assert.equal(result.nestedEdgeKeptPosition, true)
     assert.equal(result.customPrimitiveStyle, false)
     assert.equal(result.customGeo, false)
     assert.equal(result.customPaintMarkers, 0)

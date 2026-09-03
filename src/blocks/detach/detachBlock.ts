@@ -284,16 +284,18 @@ function rebuildCableAsArrow(
 	}
 
 	const routing = (cable.connection.props as { routing?: ConnectionRoutingKind }).routing ?? 'elbow'
+	const localStart = pointInParentSpace(editor, cable.connection.parentId, start)
+	const localEnd = pointInParentSpace(editor, cable.connection.parentId, end)
 	const arrowId = createShapeId()
 	editor.createShape({
 		id: arrowId,
 		type: 'arrow',
 		parentId: cable.connection.parentId,
-		x: start.x,
-		y: start.y,
+		x: localStart.x,
+		y: localStart.y,
 		props: {
 			start: { x: 0, y: 0 },
-			end: { x: end.x - start.x, y: end.y - start.y },
+			end: { x: localEnd.x - localStart.x, y: localEnd.y - localStart.y },
 			kind: routing === 'elbow' ? 'elbow' : 'arc',
 			bend: routing === 'curved' ? 32 : 0,
 			color: 'grey',
@@ -320,8 +322,8 @@ function rebuildCableAsArrow(
 	const pillGroupId = createDetachedDelayPill(editor, {
 		arrowId,
 		connection: cable.connection as ConnectionShape,
-		start,
-		end,
+		start: localStart,
+		end: localEnd,
 	})
 	groupDetachedEdgeWithPill(editor, arrowId, pillGroupId)
 	editor.createBinding<TLArrowBinding>({
@@ -361,6 +363,16 @@ function dashForDetachedTemporal(temporal: ConnectionShape['props']['temporal'])
 	if (temporal === 'async') return 'dashed'
 	if (temporal === 'delayed') return 'dotted'
 	return 'solid'
+}
+
+/** Convert a page point to the coordinate space used by children of `parentId`. */
+function pointInParentSpace(
+	editor: Editor,
+	parentId: TLShape['parentId'],
+	point: { x: number; y: number },
+): { x: number; y: number } {
+	const parent = editor.getShape(parentId)
+	return parent ? editor.getPointInShapeSpace(parent, point) : point
 }
 
 /**
@@ -518,16 +530,21 @@ export function detachConnectionToArrow(
 
 	const arrowId = createShapeId()
 	const routing = connection.props.routing
+	const localPoints = {
+		start: pointInParentSpace(editor, connection.parentId, pagePoints.start),
+		end: pointInParentSpace(editor, connection.parentId, pagePoints.end),
+	}
 	editor.createShape({
 		id: arrowId,
 		type: 'arrow',
-		x: pagePoints.start.x,
-		y: pagePoints.start.y,
+		parentId: connection.parentId,
+		x: localPoints.start.x,
+		y: localPoints.start.y,
 		props: {
 			start: { x: 0, y: 0 },
 			end: {
-				x: pagePoints.end.x - pagePoints.start.x,
-				y: pagePoints.end.y - pagePoints.start.y,
+				x: localPoints.end.x - localPoints.start.x,
+				y: localPoints.end.y - localPoints.start.y,
 			},
 			kind: routing === 'elbow' ? 'elbow' : 'arc',
 			bend: routing === 'curved' ? 32 : 0,
@@ -551,8 +568,8 @@ export function detachConnectionToArrow(
 	const pillGroupId = createDetachedDelayPill(editor, {
 		arrowId,
 		connection,
-		start: pagePoints.start,
-		end: pagePoints.end,
+		start: localPoints.start,
+		end: localPoints.end,
 	})
 	groupDetachedEdgeWithPill(editor, arrowId, pillGroupId)
 
@@ -608,11 +625,9 @@ export function selectedBlockIds(editor: Editor): TLShapeId[] {
 }
 
 /**
- * Every custom composite selected through the current tree. A Branch lowers
- * before its descendants so its invisible arm helpers are released first; an
- * Expanded Block lowers before its descendants for the same parent-preserving
- * reason. "Detach to primitives" is a stock portability command, not a
- * Block-only command.
+ * Every custom visual selected through the current tree. Ordering is imposed
+ * by `detachPrimitives`; discovery only needs to include Branches, Blocks, and
+ * loose semantic connections nested anywhere below the selection.
  */
 export function selectedDetachableIds(editor: Editor): TLShapeId[] {
 	const found: TLShapeId[] = []
@@ -620,7 +635,7 @@ export function selectedDetachableIds(editor: Editor): TLShapeId[] {
 		for (const id of ids) {
 			const shape = editor.getShape(id)
 			if (!shape) continue
-			if (isBranchShape(shape) || isBlockShape(shape)) found.push(id)
+			if (isBranchShape(shape) || isBlockShape(shape) || shape.type === CONNECTION_SHAPE_TYPE) found.push(id)
 			visit(editor.getSortedChildIdsForParent(id))
 		}
 	}
@@ -647,14 +662,14 @@ export function allBlockIds(editor: Editor): TLShapeId[] {
 	return [...new Set(found)]
 }
 
-/** All registered custom composites on the page, nesting included. */
+/** All registered custom visuals on the page, nesting included. */
 export function allDetachableIds(editor: Editor): TLShapeId[] {
 	const found: TLShapeId[] = []
 	const visit = (ids: readonly TLShapeId[]) => {
 		for (const id of ids) {
 			const shape = editor.getShape(id)
 			if (!shape) continue
-			if (isBranchShape(shape) || isBlockShape(shape)) found.push(id)
+			if (isBranchShape(shape) || isBlockShape(shape) || shape.type === CONNECTION_SHAPE_TYPE) found.push(id)
 			visit(editor.getSortedChildIdsForParent(id))
 		}
 	}
@@ -699,18 +714,29 @@ function detachBlocks(editor: Editor, ids: readonly TLShapeId[]): DetachResult[]
 
 function detachPrimitives(editor: Editor, ids: readonly TLShapeId[]): DetachResult[] {
 	if (ids.length === 0) return []
+	if (editor.getCurrentToolId() !== 'select') editor.setCurrentTool('select')
 	editor.markHistoryStoppingPoint('detach to primitives')
 	const results: DetachResult[] = []
 	editor.run(() => {
+		// Parent containers release their helpers first, then Blocks convert their
+		// bound cables, and finally any surviving loose cable becomes a stock arrow.
+		// Keeping connections last prevents an explicitly selected cable from
+		// losing the reversible Block-detach metadata path.
 		for (const id of ids) {
 			const shape = editor.getShape(id)
 			if (isBranchShape(shape)) {
 				detachBranchToPrimitives(editor, id)
-				continue
 			}
+		}
+		for (const id of ids) {
+			const shape = editor.getShape(id)
 			if (!isBlockShape(shape)) continue
 			const result = detachBlockToPrimitives(editor, id, { mark: false })
 			if (result !== null) results.push(result)
+		}
+		for (const id of ids) {
+			const shape = editor.getShape(id)
+			if (shape?.type === CONNECTION_SHAPE_TYPE) detachConnectionToArrow(editor, shape as ConnectionShape)
 		}
 	})
 	return results
