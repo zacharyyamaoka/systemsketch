@@ -119,7 +119,8 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool]", embedded)
         self.assertIn("Toolbar: SystemSketchFigmaToolbar", embedded)
         self.assertIn("ContextMenu: BlockContextMenu", embedded)
-        self.assertIn("InFrontOfTheCanvas: SystemSketchSurfaceHost", embedded)
+        self.assertIn("InFrontOfTheCanvas: EmbeddedSystemSketchSurfaceHost", embedded)
+        self.assertIn('<DepthStackNavigator placement="floating" />', embedded)
         # The IDE owns files; the canvas must not grow a second file manager.
         self.assertIn("MainMenu: null", embedded)
         self.assertIn("MenuPanel: null", embedded)

@@ -69,6 +69,7 @@ import { hydrateCustomColors } from '../appearance/customColors'
 import { SettingsGearIcon, SystemSketchSettingsDialog } from '../settings/InterfaceSettings'
 import { importLegacyPyblocksSystemSketch } from '../import/legacyPyblocksSystemSketch'
 import { emitRecorderDiagnostic } from '../recorder/recorderEvents'
+import { consolidateDocumentToSinglePage } from '../singlePageDocument'
 
 const SAVE_DEBOUNCE_MS = 600
 const WATCH_INTERVAL_MS = 1500
@@ -181,7 +182,13 @@ function loadDocumentSource(editor: Editor, source: string) {
       loadSnapshot(editor.store, inspected.snapshot)
     })
   }
-  return inspected
+  const singlePageMigration = (
+    inspected.kind === 'legacy-pyblocks'
+    || inspected.kind === 'ready'
+  )
+    ? consolidateDocumentToSinglePage(editor)
+    : { changed: false, pageCountBefore: 0, frameIds: [] }
+  return { ...inspected, singlePageMigration }
 }
 
 async function firstReadableRecent(paths: string[]): Promise<{
@@ -307,6 +314,14 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       })
     }
   }, [])
+
+  const scheduleSinglePageMigrationSave = useCallback(() => {
+    dirtyRef.current = true
+    changeEpochRef.current += 1
+    queuedSourceRef.current = null
+    setStatus({ kind: 'dirty' })
+    scheduleSave()
+  }, [scheduleSave])
 
   const protectDocument = useCallback((
     editor: Editor,
@@ -622,10 +637,11 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       setIsPersisted(true)
       updateRecents(rememberDocumentPath(boardPath))
       setStatus({ kind: 'clean', at: Date.now() })
+      if (inspected.singlePageMigration.changed) scheduleSinglePageMigrationSave()
     } catch (cause) {
       setStatus({ kind: 'error', message: errorMessage(cause) })
     }
-  }, [protectDocument, updateRecents])
+  }, [protectDocument, scheduleSinglePageMigrationSave, updateRecents])
 
   const trash = useCallback(async () => {
     const boardPath = pathRef.current
@@ -649,6 +665,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   const attach = useCallback((editor: Editor) => {
     editorRef.current = editor
     let disposed = false
+    let migratedToSinglePage = false
 
     const startAutosave = () => {
       if (
@@ -678,6 +695,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
 
     if (sourceRef.current !== null) {
       const inspected = loadDocumentSource(editor, sourceRef.current)
+      migratedToSinglePage = inspected.singlePageMigration.changed
       if (inspected.kind === 'quarantined' || inspected.kind === 'future') {
         protectDocument(editor, inspected)
       }
@@ -685,6 +703,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     if (!protectedRef.current) {
       editor.updateInstanceState({ isReadonly: false })
       startAutosave()
+      if (migratedToSinglePage) scheduleSinglePageMigrationSave()
     }
 
     return () => {
@@ -699,7 +718,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       }
       if (editorRef.current === editor) editorRef.current = null
     }
-  }, [protectDocument, scheduleSave])
+  }, [protectDocument, scheduleSave, scheduleSinglePageMigrationSave])
 
   useEffect(() => {
     if (!path) return

@@ -28,8 +28,7 @@
   margin: var(--systemsketch-chrome-inset) var(--systemsketch-chrome-inset) 0 0;
 }
 
-.systemsketch-top-left-shell .systemsketch-file-identity,
-.systemsketch-top-left-shell .tlui-page-menu__trigger {
+.systemsketch-top-left-shell .systemsketch-file-identity {
   height: 36px;
 }
 
@@ -337,7 +336,6 @@
   border: 0;
   color: var(--ss-text);
   background: transparent;
-  cursor: pointer;
   text-align: left;
 }
 
@@ -347,9 +345,12 @@
   border-radius: 8px;
 }
 
-.systemsketch-board-overview__page-row:hover,
 .systemsketch-board-overview__target:hover {
   background: var(--ss-surface-hover);
+}
+
+.systemsketch-board-overview__target {
+  cursor: pointer;
 }
 
 .systemsketch-board-overview__page-row[data-current='true'] {

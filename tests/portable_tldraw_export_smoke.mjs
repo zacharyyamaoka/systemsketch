@@ -108,13 +108,17 @@ async function main() {
       ])
       editor.createShape({ id: 'shape:portable-pink', type: 'geo', x: 590, y: 520,
         props: { geo: 'ellipse', w: 130, h: 90, color: 'pink' } })
-      editor.createPage({ id: 'page:portable-secondary', name: 'Secondary' })
-      editor.setCurrentPage('page:portable-secondary')
-      editor.createShape({ id: 'shape:portable-secondary-block', type: 'block', x: 120, y: 140,
+      editor.createShape({
+        id: 'shape:portable-secondary-frame', type: 'frame', x: 1400, y: 80,
+        props: { name: 'Secondary', w: 780, h: 600 },
+      })
+      editor.createShape({ id: 'shape:portable-secondary-block', type: 'block',
+        parentId: 'shape:portable-secondary-frame', x: 120, y: 140,
         props: { title: '' } })
       editor.createShape({
         id: 'shape:portable-outer-branch',
         type: 'branch',
+        parentId: 'shape:portable-secondary-frame',
         x: 80,
         y: 80,
         rotation: 0.12,
@@ -200,8 +204,8 @@ async function main() {
       .map((record) => record.type)
 
     check('export leaves the live snapshot byte-identical', before === after)
-    check('the live board still paints all four Blocks, including both Pills',
-      (await blockIds(page)).length === 4)
+    check('the live one-canvas board still paints all five Blocks, including the framed blank and both Pills',
+      (await blockIds(page)).length === 5)
     check('portable JSON contains no custom Block or connection shape',
       !shapeTypes.includes('block') && !shapeTypes.includes('connection'), shapeTypes.join(', '))
     check('portable JSON contains no custom Branch shape', !shapeTypes.includes('branch'))
@@ -255,7 +259,7 @@ async function main() {
       .filter((record) => record.typeName === 'shape' && record.type === 'geo')
       .every((record) => record.props?.geo !== 'excalidraw-rounded-rect'
         && record.props?.geo !== 'systemsketch-rounded-rect'))
-    check('portable export preserves the board’s active page', portable.records
+    check('portable export preserves the board’s active canvas', portable.records
       .some((record) => record.typeName === 'instance' && record.currentPageId === setup.firstPage))
 
     const portableShapes = new Map(portable.records
@@ -310,7 +314,7 @@ async function main() {
     })()`)
     check('export does not unregister custom colors from the live editor', livePaletteIntact)
 
-    check('every exported page is free of custom records', portable.records
+    check('the exported canvas is free of custom records', portable.records
       .filter((record) => record.typeName === 'shape')
       .every((record) => record.type !== 'block' && record.type !== 'branch' && record.type !== 'connection'))
 

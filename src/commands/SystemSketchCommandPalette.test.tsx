@@ -61,6 +61,6 @@ describe('SystemSketch command palette', () => {
     expect(html).toContain('aria-label="Find on board"')
     expect(html).toContain('placeholder="Replace with…"')
     expect(html).toContain('disabled=""')
-    expect(html).toContain('Searches all pages; hidden shapes stay hidden')
+    expect(html).toContain('Searches the board; hidden shapes stay hidden')
   })
 })

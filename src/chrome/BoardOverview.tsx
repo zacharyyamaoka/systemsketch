@@ -1,6 +1,5 @@
 import { useEditor, useValue } from 'tldraw'
 import {
-  focusBoardOverviewPage,
   focusBoardOverviewTarget,
   getBoardOverviewModel,
   type BoardOverviewTarget,
@@ -42,22 +41,16 @@ export function BoardOverview() {
 
   return (
     <div className="systemsketch-board-overview" data-testid="systemsketch-board-overview">
-      <nav aria-label="Pages and board landmarks">
+      <nav aria-label="Board landmarks">
         {model.pages.map((page) => (
           <section key={page.id} className="systemsketch-board-overview__page">
-            <button
-              type="button"
+            <div
               className="systemsketch-board-overview__page-row"
-              data-current={page.current || undefined}
-              aria-current={page.current ? 'page' : undefined}
-              data-page-id={page.id}
-              title={`Open and fit ${page.name}`}
-              onClick={() => focusBoardOverviewPage(editor, page.id)}
             >
               <span className="systemsketch-board-overview__glyph" aria-hidden="true">◫</span>
-              <strong>{page.name}</strong>
+              <strong>Board</strong>
               <span>{page.targets.length}</span>
-            </button>
+            </div>
             {GROUPS.map((group) => {
               const targets = page.targets.filter((target) => target.kind === group.kind)
               if (targets.length === 0) return null
@@ -77,7 +70,7 @@ export function BoardOverview() {
         <div className="systemsketch-board-overview__empty">
           <span aria-hidden="true">▣</span>
           <strong>No board landmarks yet</strong>
-          <p>Add a Frame or Branch, or expand a Block. It will appear here on the page where it lives.</p>
+          <p>Add a Frame or Branch, or expand a Block. It will appear here as a board landmark.</p>
         </div>
       ) : null}
     </div>

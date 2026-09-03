@@ -1,4 +1,4 @@
-import type { Editor, TLCamera, TLPageId, TLShapeId } from 'tldraw'
+import { atom, type Atom, type Editor, type TLCamera, type TLPageId, type TLShapeId } from 'tldraw'
 
 import {
   isBlockShape,
@@ -24,13 +24,14 @@ export interface DepthPathEntry {
 export interface DepthNavigationModel {
   pageId: TLPageId
   pageName: string
-  current: BlockShape
+  current: BlockShape | null
   entries: DepthPathEntry[]
   depth: number
   parent: DepthPathEntry | null
 }
 
 interface DepthNavigationStore {
+  scopeId: Atom<TLShapeId | null>
   snapshot: DepthNavigationSnapshot
   listeners: Set<() => void>
   rootCamera: TLCamera | null
@@ -43,6 +44,7 @@ function storeFor(editor: Editor): DepthNavigationStore {
   let store = stores.get(editor)
   if (!store) {
     store = {
+      scopeId: atom('SystemSketch depth scope', null),
       snapshot: { scopeId: null },
       listeners: new Set(),
       rootCamera: null,
@@ -56,6 +58,7 @@ function storeFor(editor: Editor): DepthNavigationStore {
 function publish(editor: Editor, scopeId: TLShapeId | null): void {
   const store = storeFor(editor)
   if (store.snapshot.scopeId === scopeId) return
+  store.scopeId.set(scopeId)
   store.snapshot = { scopeId }
   for (const listener of store.listeners) listener()
 }
@@ -86,6 +89,18 @@ export function getDepthNavigationSnapshot(editor: Editor): DepthNavigationSnaps
   return storeFor(editor).snapshot
 }
 
+/**
+ * The active scope as a reactive tldraw value.
+ *
+ * Shape visibility is computed by tldraw, not React. Reading the atom from
+ * that computation invalidates its visibility cache the instant Step In
+ * changes, so hidden siblings also disappear from hit testing in the same
+ * transaction.
+ */
+export function getActiveDepthScopeId(editor: Editor): TLShapeId | null {
+  return storeFor(editor).scopeId.get()
+}
+
 export function subscribeDepthNavigation(editor: Editor, listener: () => void): () => void {
   const store = storeFor(editor)
   store.listeners.add(listener)
@@ -96,10 +111,20 @@ export function getDepthNavigationModel(
   editor: Editor,
   scopeId: TLShapeId | null,
 ): DepthNavigationModel | null {
-  if (!scopeId) return null
+  const page = editor.getCurrentPage()
+  const rootName = 'Board'
+  if (!scopeId) {
+    return {
+      pageId: page.id,
+      pageName: rootName,
+      current: null,
+      entries: [],
+      depth: 0,
+      parent: null,
+    }
+  }
   const blocks = blockPath(editor, scopeId)
   if (!blocks) return null
-  const page = editor.getCurrentPage()
   const entries = blocks.map<DepthPathEntry>((block, index) => ({
     id: block.id,
     name: blockName(block),
@@ -109,7 +134,7 @@ export function getDepthNavigationModel(
   }))
   return {
     pageId: page.id,
-    pageName: page.name.trim() || 'Board',
+    pageName: rootName,
     current: blocks[blocks.length - 1],
     entries,
     depth: entries.length,
@@ -124,12 +149,15 @@ export function stepIntoDepthScope(editor: Editor, shapeId: TLShapeId): boolean 
   if (editor.getAncestorPageId(target) !== editor.getCurrentPageId()) return false
 
   const store = storeFor(editor)
-  const active = getDepthNavigationModel(editor, store.snapshot.scopeId)
-  if (active) {
-    if (active.current.id === target.id) return false
+  const active = store.snapshot.scopeId
+    ? getDepthNavigationModel(editor, store.snapshot.scopeId)
+    : null
+  if (active?.current) {
+    const activeScopeId = active.current.id
+    if (activeScopeId === target.id) return false
     const isDescendant = editor
       .getShapeAncestors(target)
-      .some((ancestor) => ancestor.id === active.current.id)
+      .some((ancestor) => ancestor.id === activeScopeId)
     if (!isDescendant) return false
   } else {
     store.rootCamera = { ...editor.getCamera() }
@@ -145,8 +173,10 @@ export function stepIntoDepthScope(editor: Editor, shapeId: TLShapeId): boolean 
 /** Jump to a real Expanded-Block ancestor already present in the current path. */
 export function stepToDepthAncestor(editor: Editor, shapeId: TLShapeId): boolean {
   const store = storeFor(editor)
-  const active = getDepthNavigationModel(editor, store.snapshot.scopeId)
-  if (!active || active.current.id === shapeId) return false
+  const active = store.snapshot.scopeId
+    ? getDepthNavigationModel(editor, store.snapshot.scopeId)
+    : null
+  if (!active?.current || active.current.id === shapeId) return false
   const target = active.entries.find((entry) => entry.id === shapeId)
   if (!target?.canFocus) return false
 
@@ -159,7 +189,9 @@ export function stepToDepthAncestor(editor: Editor, shapeId: TLShapeId): boolean
 /** Ascend through the nearest focusable Block parent, or return to the page root. */
 export function stepOutOfDepthScope(editor: Editor): boolean {
   const store = storeFor(editor)
-  const active = getDepthNavigationModel(editor, store.snapshot.scopeId)
+  const active = store.snapshot.scopeId
+    ? getDepthNavigationModel(editor, store.snapshot.scopeId)
+    : null
   if (!active) return false
   const parent = [...active.entries]
     .slice(0, -1)

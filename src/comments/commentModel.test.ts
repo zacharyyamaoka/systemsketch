@@ -261,7 +261,7 @@ describe('local comment projection and navigation', () => {
 
     expect(model.map((item) => item.record.id)).toEqual([shapeThread.id, pageThread.id])
     expect(model[0]).toMatchObject({
-      anchorLabel: 'Pipeline · Architecture',
+      anchorLabel: 'Pipeline',
       targetExists: true,
       source: { path: 'pipeline.py', startLine: 8 },
     })

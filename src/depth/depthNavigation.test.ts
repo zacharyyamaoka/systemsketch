@@ -88,6 +88,16 @@ function fakeEditor(shapes: BlockShape[]) {
 }
 
 describe('Depth Stack navigation', () => {
+  it('projects the single root canvas at depth zero without exposing an internal page name', () => {
+    const { editor } = fakeEditor([])
+    expect(getDepthNavigationModel(editor, null)).toMatchObject({
+      pageName: 'Board',
+      current: null,
+      entries: [],
+      depth: 0,
+    })
+  })
+
   it('projects an arbitrary real parent chain without a fixed depth ceiling', () => {
     const shapes: BlockShape[] = []
     let parentId = TEST_PAGE_ID as BlockShape['parentId']

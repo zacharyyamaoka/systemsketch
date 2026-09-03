@@ -54,6 +54,9 @@ function validatePageConfiguration(recipe) {
     if (!Array.isArray(recipe.pages) || recipe.pages.length === 0) {
       throw new Error('recipe.pages must be a non-empty array when present')
     }
+    if (recipe.pages.length > 1) {
+      throw new Error('SystemSketch fixtures have one canvas; represent former pages as stock Frames')
+    }
     for (const [index, page] of recipe.pages.entries()) {
       if (!isRecord(page)) throw new Error(`pages[${index}] must be an object`)
       localId(page.id, `pages[${index}].id`)
@@ -175,11 +178,6 @@ async function main() {
         const firstPageId = editor.getCurrentPageId()
         pageAliases[configuredPages[0].id] = firstPageId
         editor.renamePage(firstPageId, configuredPages[0].name)
-        for (const page of configuredPages.slice(1)) {
-          const id = page.id.startsWith('page:') ? page.id : \`page:\${page.id}\`
-          editor.createPage({ id, name: page.name })
-          pageAliases[page.id] = id
-        }
         editor.setCurrentPage(firstPageId)
       }
       const parentId = (id) => pageAliases[id]

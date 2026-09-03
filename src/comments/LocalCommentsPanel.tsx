@@ -195,7 +195,7 @@ export function LocalCommentsPanel({
     ? 'Anchored to the selected shape'
     : model.anchor.type === 'point'
       ? 'Anchored to the centre of the current view'
-      : 'Anchored to the current page'
+      : 'Anchored to the board'
 
   function submitThread(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()

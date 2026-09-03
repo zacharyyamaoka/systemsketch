@@ -34,6 +34,7 @@ import {
 } from '../blocks/connections'
 import { ChromeProvider } from '../chrome/ChromeProvider'
 import { SystemSketchSurfaceHost } from '../chrome/SystemSketchChrome'
+import { DepthStackNavigator } from '../depth/DepthStackNavigator'
 import { SystemSketchFigmaToolbar } from '../toolbar/SystemSketchToolbar'
 import {
   registerToolbarSideEffects,
@@ -80,9 +81,20 @@ import {
   importLegacyPyblocksSystemSketch,
   parseLegacyPyblocksSystemSketch,
 } from '../import/legacyPyblocksSystemSketch'
+import { consolidateDocumentToSinglePage } from '../singlePageDocument'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
+const SYSTEMSKETCH_EDITOR_OPTIONS = { maxPages: 1 }
+
+function EmbeddedSystemSketchSurfaceHost() {
+  return (
+    <>
+      <SystemSketchSurfaceHost />
+      <DepthStackNavigator placement="floating" />
+    </>
+  )
+}
 
 /**
  * The embedded chrome: the product's canvas with the file surfaces removed.
@@ -97,7 +109,7 @@ const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
  */
 const EMBEDDED_COMPONENTS = {
   ContextMenu: BlockContextMenu,
-  InFrontOfTheCanvas: SystemSketchSurfaceHost,
+  InFrontOfTheCanvas: EmbeddedSystemSketchSurfaceHost,
   MainMenu: null,
   MenuPanel: null,
   SharePanel: null,
@@ -217,6 +229,9 @@ function EmbeddedSurface({
     if (openDocument.formatProtection && recoveredCheckpoint) {
       onCompatibilityCopyAvailable(true)
     }
+    const singlePageMigration = openDocument.formatProtection
+      ? { changed: false }
+      : consolidateDocumentToSinglePage(editor)
 
     enablePasteAtCursor(editor)
     const stopDefinitionLinking = installDefinitionLinking(editor)
@@ -304,7 +319,9 @@ function EmbeddedSurface({
       // cleanup flush it before the dying webview can strand the last gesture.
       requestSerialization()
     }, { source: 'user', scope: 'document' })
-    if (recoveredCheckpoint && !openDocument.readOnly) requestSerialization()
+    if ((recoveredCheckpoint || singlePageMigration.changed) && !openDocument.readOnly) {
+      requestSerialization()
+    }
 
     return () => {
       stopListening()
@@ -346,6 +363,7 @@ function EmbeddedSurface({
         getShapeVisibility={getBlockShapeVisibility}
         licenseKey={TLDRAW_LICENSE_KEY}
         onMount={onMount}
+        options={SYSTEMSKETCH_EDITOR_OPTIONS}
         overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
         shapeUtils={EMBEDDED_SHAPE_UTILS}
         store={store}

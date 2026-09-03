@@ -171,7 +171,7 @@ export function SystemSketchCommandPalette({
 
   const navigateToMatch = (match: BoardSearchMatch) => {
     if (focusBoardSearchMatch(editor, match)) {
-      setStatus(`Selected result on ${match.pageName}.`)
+      setStatus('Selected result on the board.')
     } else {
       setStatus('That result is no longer on the board.')
     }
@@ -299,7 +299,7 @@ export function SystemSketchCommandPalette({
             ref={queryRef}
             value={query}
             aria-label={mode === 'commands' ? 'Search commands' : 'Find on board'}
-            placeholder={mode === 'commands' ? 'Type a command…' : 'Find text on every page…'}
+            placeholder={mode === 'commands' ? 'Type a command…' : 'Find text on the board…'}
             aria-controls={listboxId}
             aria-activedescendant={activeDescendant}
             autoComplete="off"
@@ -366,7 +366,7 @@ export function SystemSketchCommandPalette({
             ? `${filteredActions.length} ${filteredActions.length === 1 ? 'command' : 'commands'}`
             : findQuery
               ? `${matches.length} ${matches.length === 1 ? 'match' : 'matches'} across the board`
-              : 'Searches all pages; hidden shapes stay hidden'}
+              : 'Searches the board; hidden shapes stay hidden'}
         </div>
 
         <ul id={listboxId} className="systemsketch-command-palette__results" role="listbox" aria-label={mode === 'commands' ? 'Commands' : 'Board matches'}>
@@ -429,7 +429,7 @@ export function SystemSketchCommandPalette({
         {visibleItems.length === 0 ? (
           <div className="systemsketch-command-palette__empty" role="status">
             <strong>{query ? 'No results' : mode === 'commands' ? 'No commands available' : 'Type to search the board'}</strong>
-            <span>{query ? 'Try a shorter or less specific search.' : 'Results include text from every page.'}</span>
+            <span>{query ? 'Try a shorter or less specific search.' : 'Results include text from the whole board.'}</span>
           </div>
         ) : null}
 

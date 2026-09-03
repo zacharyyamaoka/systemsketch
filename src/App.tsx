@@ -73,6 +73,8 @@ import { installConnectorControlVisibility } from './installConnectorControlVisi
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
+/** SystemSketch has one durable canvas; structural depth replaces pages. */
+const SYSTEMSKETCH_EDITOR_OPTIONS = { maxPages: 1 }
 const SYSTEMSKETCH_COMPONENTS = {
   ContextMenu: BlockContextMenu,
   InFrontOfTheCanvas: SystemSketchSurfaceHost,
@@ -180,6 +182,7 @@ function SystemSketchCanvas() {
         getShapeVisibility={getBlockShapeVisibility}
         licenseKey={TLDRAW_LICENSE_KEY}
         onMount={onMount}
+        options={SYSTEMSKETCH_EDITOR_OPTIONS}
         overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
         shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}
         store={store}

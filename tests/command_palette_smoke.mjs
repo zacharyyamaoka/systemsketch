@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Real-browser proof for the command palette and cross-page board find/replace.
+ * Real-browser proof for the command palette and board-wide find/replace.
  *
  * The server, browser profile, files root, and board are all throwaway. The
  * journey seeds its scratch document through the public development editor
@@ -117,16 +117,21 @@ async function seedScratchBoard(page) {
         props: { title: 'LockedNeedle', description: 'Searchable, intentionally protected' },
       },
     ])
-    editor.createPage({ id: 'page:palette-archive', name: 'Archive' })
-    editor.setCurrentPage('page:palette-archive')
+    editor.createShape({
+      id: 'shape:palette-archive-frame',
+      type: 'frame',
+      x: 1320,
+      y: 100,
+      props: { name: 'Archive', w: 500, h: 400 },
+    })
     editor.createShape({
       id: 'shape:palette-archive',
       type: 'block',
-      x: 320,
-      y: 240,
-      props: { title: 'Decode archive', description: 'Second-page result' },
+      parentId: 'shape:palette-archive-frame',
+      x: 80,
+      y: 120,
+      props: { title: 'Decode archive', description: 'Named-Frame result' },
     })
-    editor.setCurrentPage(firstPage)
     editor.setCurrentTool('select')
     editor.selectNone()
     editor.zoomToFit({ animation: { duration: 0 } })
@@ -287,7 +292,7 @@ async function main() {
       await clickElement(app.page, '[aria-label="Close Inspector"]')
     }
 
-    // 3. Ctrl+F searches every page through ShapeUtil text readers.
+    // 3. Ctrl+F searches the one board through ShapeUtil text readers.
     await shortcut(app.page, 'f', 'KeyF', 2)
     await waitFor(
       app.page,
@@ -298,7 +303,7 @@ async function main() {
     await waitFor(
       app.page,
       `document.querySelectorAll('[role="option"][data-replaceable="true"]').length === 4`,
-      'four writable matches across pages',
+      'four writable matches across the board',
     )
     const matchState = JSON.parse(await evaluate(app.page, `(() => {
       const rows = Array.from(document.querySelectorAll('[role="option"][data-shape-id]'))
@@ -312,25 +317,24 @@ async function main() {
     assert.equal(matchState.summary, '4 matches across the board')
     assert.deepEqual(matchState.ids, [
       'shape:palette-block',
+      'shape:palette-archive',
       'shape:palette-frame',
       'shape:palette-rich',
-      'shape:palette-archive',
     ])
-    assert.deepEqual(matchState.fields, ['block-title', 'frame-name', 'rich-text', 'block-title'])
-    assert.equal(new Set(matchState.pages).size, 2)
+    assert.deepEqual(matchState.fields, ['block-title', 'block-title', 'frame-name', 'rich-text'])
+    assert.equal(new Set(matchState.pages).size, 1)
     await capture(app.page, FIND_SHOT)
-    pass('Ctrl+F finds Block, Frame, and rich-text adapters in stable order across two pages')
+    pass('Ctrl+F finds Block, Frame, and rich-text adapters in stable order across one board')
 
     await clickElement(app.page, '[role="option"][data-shape-id="shape:palette-archive"]')
     await waitFor(
       app.page,
-      `window.__systemsketch.editor.getCurrentPageId() === 'page:palette-archive'
-        && window.__systemsketch.editor.getOnlySelectedShape()?.id === 'shape:palette-archive'`,
-      'cross-page result navigation',
+      `window.__systemsketch.editor.getOnlySelectedShape()?.id === 'shape:palette-archive'`,
+      'nested Frame result navigation',
     )
-    pass('clicking a result opens its page, selects the shape, and camera-reveals it')
+    pass('clicking a result selects its shape inside a named Frame and camera-reveals it')
 
-    // Replace one on page two, then replace the remaining three as one undo step.
+    // Replace one in the Archive Frame, then replace the remaining three as one undo step.
     await clickElement(app.page, 'input[aria-label="Replace with"]')
     await typeSlowly(app.page, 'Parse')
     await clickElement(app.page, '.systemsketch-command-palette__replace-controls button:first-of-type')
@@ -383,8 +387,6 @@ async function main() {
     // 4. A formatting-boundary match remains navigable but cannot be corrupted.
     await evaluate(app.page, `(() => {
       const editor = window.__systemsketch.editor
-      const pipeline = editor.getPages().find((page) => page.name === 'Pipeline')
-      if (pipeline) editor.setCurrentPage(pipeline.id)
       editor.selectNone()
       editor.zoomToFit({ animation: { duration: 0 } })
       return true

@@ -2,6 +2,7 @@ import type { Editor, TLParentId, TLShape, TLShapeId } from 'tldraw'
 
 import { canBlockContainChildren, isBlockShape } from '../blockModel'
 import { isBranchShape } from '../../branch/branchModel'
+import { isImportedPageFrame } from '../../singlePageDocument'
 import type { PortDot, PortFace } from './connectionModel'
 
 /** A shape a cable can weld to: a Block, or a Branch through its control ports. */
@@ -20,8 +21,8 @@ function hostIsLiveScope(host: ScopeHost): boolean {
 /**
  * Scopes: the one idea that makes a boundary port unambiguous.
  *
- * Every Block lives in a scope — the nearest Block above it, or the page. An
- * Expanded Block also DEFINES a scope: the inside of its frame. A cable joins
+ * Every Block lives in a scope — the nearest Block above it, an imported-page
+ * Frame, or the root canvas. An Expanded Block also DEFINES a scope: the inside of its frame. A cable joins
  * two faces in the same scope, and a face's polarity follows from which scope
  * it looks into (`portPolarity`). So the question "may these two ports be
  * wired, and which way does the data go?" is answered entirely by the two
@@ -31,11 +32,12 @@ function hostIsLiveScope(host: ScopeHost): boolean {
 /** The slice of the editor the scope rules read, narrow so a test can stub it. */
 export type ScopeReader = Pick<Editor, 'getShape' | 'getShapeParent' | 'getAncestorPageId'>
 
-/** The scope a shape lives in: its nearest Block ancestor, else its page. */
+/** The scope a shape lives in: nearest Block / imported-page Frame, else root. */
 export function blockScopeId(editor: ScopeReader, shapeId: TLShapeId): TLParentId {
 	let parent: TLShape | undefined = editor.getShapeParent(shapeId)
 	while (parent) {
 		if (isBlockShape(parent)) return parent.id
+		if (isImportedPageFrame(parent)) return parent.id
 		parent = editor.getShapeParent(parent)
 	}
 	return editor.getAncestorPageId(shapeId) ?? ('page:page' as TLParentId)

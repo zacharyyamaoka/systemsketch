@@ -181,7 +181,6 @@ async function proveLibrary(page) {
 async function seedOverview(page) {
   await evaluate(page, `(() => {
     const editor = window.__systemsketch.editor
-    const firstPage = editor.getCurrentPageId()
     editor.createShapes([
       {
         id: 'shape:overview-frame',
@@ -198,10 +197,6 @@ async function seedOverview(page) {
         props: { title: 'Expanded Runtime', view: 'expanded', w: 500, h: 360 },
       },
     ])
-    if (!editor.getPage('page:overview-secondary')) {
-      editor.createPage({ id: 'page:overview-secondary', name: 'Subsystems' })
-    }
-    editor.setCurrentPage(firstPage)
     editor.selectNone()
     editor.zoomToFit()
     return true
@@ -216,10 +211,10 @@ async function proveOverview(page) {
   const text = await evaluate(page, `document.querySelector('[data-testid="systemsketch-board-overview"]').textContent`)
   assert.match(text, /Pipeline Frame/)
   assert.match(text, /Expanded Runtime/)
-  assert.match(text, /Subsystems/)
+  assert.match(text, /Board/)
   assert.match(text, /Frames/)
   assert.match(text, /Expanded Blocks/)
-  pass('overview lists live pages, Frames, and Expanded Blocks by their real names')
+  pass('overview lists one board with Frames and Expanded Blocks by their real names')
 
   await clickElement(page, '[data-overview-target="shape:overview-frame"]')
   await delay(420)
@@ -246,12 +241,10 @@ async function proveOverview(page) {
       && Boolean(document.querySelector('[data-testid="systemsketch-board-overview"]'))`), true)
   pass('clicking an Expanded Block selects and fits it without replacing the overview with Inspector')
 
-  await clickElement(page, '[data-page-id="page:overview-secondary"]')
-  await delay(350)
   assert.equal(await evaluate(page,
-    `window.__systemsketch.editor.getCurrentPageId() === 'page:overview-secondary'
-      && window.__systemsketch.editor.getSelectedShapeIds().length === 0`), true)
-  pass('clicking a page switches to it, clears stale selection, and fits its contents')
+    `window.__systemsketch.editor.getPages().length === 1
+      && !document.querySelector('[data-page-id], .tlui-page-menu__trigger')`), true)
+  pass('overview and top-left chrome expose one board with no page navigation surface')
 
   await screenshot(page, 'library-overview-panel-2026-09-02.png')
   await evaluate(page, `(() => {

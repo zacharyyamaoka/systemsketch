@@ -197,17 +197,16 @@ export function describeCommentAnchor(
   thread: TLCommentThread,
 ): { label: string; targetExists: boolean } {
   const page = editor.getPage(thread.pageId)
-  const pageName = page?.name.trim() || 'Untitled page'
   const anchor = thread.anchor
   if (anchor.type === 'shape') {
     const shape = editor.getShape(anchor.shapeId)
     return shape
-      ? { label: `${shapeLabel(editor, shape)} · ${pageName}`, targetExists: true }
-      : { label: `Missing shape · ${pageName}`, targetExists: false }
+      ? { label: shapeLabel(editor, shape), targetExists: true }
+      : { label: 'Missing shape', targetExists: false }
   }
-  if (anchor.type === 'point') return { label: `Canvas point · ${pageName}`, targetExists: true }
-  if (anchor.type === 'region') return { label: `Canvas region · ${pageName}`, targetExists: true }
-  return { label: `Page · ${pageName}`, targetExists: Boolean(page) }
+  if (anchor.type === 'point') return { label: 'Canvas point', targetExists: true }
+  if (anchor.type === 'region') return { label: 'Canvas region', targetExists: true }
+  return { label: 'Board', targetExists: Boolean(page) }
 }
 
 /** A live read projection; comment records remain the single source of truth. */

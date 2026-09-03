@@ -16,11 +16,11 @@
     "ok": true
   },
   {
-    "label": "Ctrl+F finds Block, Frame, and rich-text adapters in stable order across two pages",
+    "label": "Ctrl+F finds Block, Frame, and rich-text adapters in stable order across one board",
     "ok": true
   },
   {
-    "label": "clicking a result opens its page, selects the shape, and camera-reveals it",
+    "label": "clicking a result selects its shape inside a named Frame and camera-reveals it",
     "ok": true
   },
   {

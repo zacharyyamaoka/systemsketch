@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import { getDefaultBlockProps, setBlockViewProps, type BlockShape } from './blockModel'
 import { getBlockShapeVisibility } from './blockVisibility'
+import { stepIntoDepthScope } from '../depth/depthNavigation'
 
 function block(view: BlockShape['props']['view']): BlockShape {
 	return {
@@ -66,5 +67,30 @@ describe('Block child visibility', () => {
 	it('does not hide page-owned shapes or external cables', () => {
 		const parent = block('simple')
 		expect(getBlockShapeVisibility(child('page:page'), editorWith(parent))).toBe('inherit')
+	})
+
+	it('isolates the active Expanded Block through editor visibility rather than a screen mask', () => {
+		const scope = block('expanded')
+		const inside = child(scope.id)
+		const outside = child('page:page')
+		const shapes = new Map([scope, inside, outside].map((shape) => [shape.id, shape]))
+		const editor = {
+			getShape: (id: TLShape['id']) => shapes.get(id),
+			getShapeAncestors: (shape: TLShape) => shape.parentId === scope.id ? [scope] : [],
+			hasAncestor: (shape: TLShape, id: TLShape['id']) => shape.parentId === id,
+			getAncestorPageId: () => 'page:page',
+			getCurrentPageId: () => 'page:page',
+			getCurrentPage: () => ({ id: 'page:page', name: 'Page 1' }),
+			getShapePageBounds: () => ({ x: 0, y: 0, w: 400, h: 300 }),
+			getCamera: () => ({ x: 0, y: 0, z: 1 }),
+			setCurrentTool: () => undefined,
+			selectNone: () => undefined,
+			zoomToBounds: () => undefined,
+		} as unknown as Editor
+
+		expect(stepIntoDepthScope(editor, scope.id)).toBe(true)
+		expect(getBlockShapeVisibility(scope, editor)).toBe('visible')
+		expect(getBlockShapeVisibility(inside, editor)).toBe('inherit')
+		expect(getBlockShapeVisibility(outside, editor)).toBe('hidden')
 	})
 })

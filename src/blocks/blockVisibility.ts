@@ -9,6 +9,7 @@ import {
 } from '../branch/branchScope'
 import { getConnectionBindings } from './connections/ConnectionBindingUtil'
 import { CONNECTION_SHAPE_TYPE } from './connections/connectionModel'
+import { getActiveDepthScopeId } from '../depth/depthNavigation'
 
 /**
  * A Block is an opaque leaf unless its active view is Expanded, and a Branch
@@ -29,7 +30,16 @@ import { CONNECTION_SHAPE_TYPE } from './connections/connectionModel'
 export function getBlockShapeVisibility(
 	shape: TLShape,
 	editor: Editor,
-): 'hidden' | 'inherit' {
+): 'visible' | 'hidden' | 'inherit' {
+	const depthScopeId = getActiveDepthScopeId(editor)
+	if (depthScopeId && editor.getShape(depthScopeId)) {
+		// The entered Block must explicitly override a hidden ancestor. Its
+		// descendants then inherit the ordinary Block / Branch visibility rules
+		// below, while everything outside the scope leaves both rendering and
+		// hit testing. This is true isolation rather than a canvas-coloured mask.
+		if (shape.id === depthScopeId) return 'visible'
+		if (!editor.hasAncestor(shape, depthScopeId)) return 'hidden'
+	}
 	if (isShapeId(shape.parentId)) {
 		const parent = editor.getShape(shape.parentId)
 		if (isBlockShape(parent) && parent.props.view !== 'expanded') return 'hidden'

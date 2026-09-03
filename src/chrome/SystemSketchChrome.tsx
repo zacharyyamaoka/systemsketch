@@ -76,27 +76,20 @@ function CommandIcon() {
 }
 
 export function SystemSketchMenuPanel() {
-  const editor = useEditor()
-  const { MainMenu, PageMenu } = useTldrawUiComponents()
+  const { MainMenu } = useTldrawUiComponents()
   const { leftSurface, toggleLeft, toolbarSurface, setToolbar } = useChrome()
   const ref = useRef<HTMLElement>(null)
   usePassThroughWheelEvents(ref)
-  const isSinglePageMode = useValue(
-    'systemsketch single page mode',
-    () => editor.options.maxPages <= 1,
-    [editor],
-  )
-
   return (
     <nav
       ref={ref}
       className="systemsketch-top-left-shell"
-      aria-label="Board, pages, and library"
+      aria-label="Board, depth, and library"
       data-testid="systemsketch-top-left-shell"
       data-systemsketch-chrome
     >
       {MainMenu ? <MainMenu /> : null}
-      {PageMenu && !isSinglePageMode ? <PageMenu /> : null}
+      <DepthStackNavigator placement="menu" />
       <TldrawUiButton
         type="icon"
         className="systemsketch-shell-icon-button"
@@ -341,7 +334,7 @@ export function SystemSketchSurfaceHost() {
       {
         id: 'find-board',
         label: 'Find and replace on board',
-        description: 'Search editable text across every page',
+        description: 'Search editable text across the entire board',
         keywords: ['search', 'replace'],
         shortcut: 'Ctrl F',
         icon: '⌕',
@@ -445,7 +438,7 @@ export function SystemSketchSurfaceHost() {
       {
         id: 'zoom-to-fit',
         label: 'Zoom to fit',
-        description: 'Show the whole current page',
+        description: 'Show the whole board',
         shortcut: 'Shift 1',
         icon: '⌗',
         run: () => stock('zoom-to-fit'),
@@ -491,7 +484,6 @@ export function SystemSketchSurfaceHost() {
       <RecorderIndicator />
       <OnCanvasBlockPicker />
       <HitAreaOverlay />
-      <DepthStackNavigator />
       {leftSurface ? (
         <aside
           id="systemsketch-left-popout"

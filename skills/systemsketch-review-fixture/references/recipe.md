@@ -9,8 +9,7 @@ Use a recipe to describe intent while the helper lets the current SystemSketch e
   "feature": "Short human name",
   "viewport": { "width": 1280, "height": 720 },
   "pages": [
-    { "id": "review", "name": "Review" },
-    { "id": "secondary", "name": "Secondary" }
+    { "id": "review", "name": "Review" }
   ],
   "shapes": [],
   "bindings": [],
@@ -20,8 +19,8 @@ Use a recipe to describe intent while the helper lets the current SystemSketch e
 
 - `feature` is required.
 - `viewport` is optional and controls the generated screenshot. The default is a conservative 1280×720 so a saved camera fits common review surfaces; use a larger viewport only when the interaction genuinely needs it.
-- `pages` is optional. The first entry becomes the visible review page; later entries seed real additional pages for cross-page navigation features. Use safe local ids such as `review` and `secondary`.
-- `shapes` contains partials accepted by `Editor.createShapes`. Use a safe local `id` such as `subject`; the helper expands it to `shape:subject`. `parentId`, `fromId`, and `toId` accept the same shorthand. A top-level shape may use `pageId: "secondary"` to live on a page declared above; nested shapes still use `parentId`.
+- `pages` is optional and may contain only the one internal review canvas. Use a safe local id such as `review`. To represent sections that came from old tldraw pages, create named stock Frames on this canvas and parent their content to those Frames.
+- `shapes` contains partials accepted by `Editor.createShapes`. Use a safe local `id` such as `subject`; the helper expands it to `shape:subject`. `parentId`, `fromId`, and `toId` accept the same shorthand. A top-level shape may use `pageId: "review"` to target the declared canvas; nested shapes use `parentId`.
 - `bindings` contains partials accepted by `Editor.createBindings`. A stable `id` is optional; the helper mints one from the binding type and position when omitted. Use this for actual semantic connections, never for decorative cue arrows.
 - `callouts` become stock tldraw geo cards. A callout with a `target` also gets a stock orange elbow arrow bound to the card and, for shape targets, the target shape. They remain editable in the resulting board.
 
@@ -76,6 +75,8 @@ A partial Block lets the current `BlockShapeUtil` fill every omitted default:
 ```
 
 For an Expanded Block, set `view`, `w`, and `h`, then make child shapes use the Block's shorthand id as `parentId`. For a semantic cable, create a `connection` shape plus its two `connection` bindings with the exact current props from the feature source or an existing acceptance test. Do not imitate a semantic cable with a stock arrow.
+
+SystemSketch documents have one canvas. When a fixture needs to demonstrate a legacy multi-page import, seed named stock Frames such as `Architecture` and `Runtime` side by side and parent each former page's objects to its Frame. The product migration itself must be proven by an automated test that opens a real multi-page `.tldr`; do not make the review helper create forbidden product pages.
 
 For a Branch, seed only the semantic `branch` and its ordinary direct children, stamping each child with `meta.branchArm`. The live editor projects those children into internal `branch-arm` frames when the board loads. Never put `branch-arm` records in a recipe: they are derived implementation details that the current document format persists automatically, while older boards are upgraded on load.
 

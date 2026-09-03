@@ -25,6 +25,7 @@ import {
 	type PortPolarity,
 } from './connectionModel'
 import { pairBlockFaces, type ScopeReader } from './connectionScope'
+import { isImportedPageFrame } from '../../singlePageDocument'
 
 /**
  * The rules. One function decides whether two ports may be wired and which
@@ -275,10 +276,11 @@ export function dropScopeAt(editor: Editor, pagePoint: VecLike): DropScope {
 	const hit = editor.getShapeAtPoint(pagePoint, {
 		hitInside: true,
 		hitFrameInside: true,
-		filter: (shape) => isBlockShape(shape),
+		filter: (shape) => isBlockShape(shape) || isImportedPageFrame(shape),
 	})
 	if (!hit) return { kind: 'scope', scopeId: editor.getCurrentPageId() }
 	if (isExpandedBlockShape(hit)) return { kind: 'scope', scopeId: hit.id }
+	if (isImportedPageFrame(hit)) return { kind: 'scope', scopeId: hit.id }
 	return { kind: 'block', block: hit }
 }
 

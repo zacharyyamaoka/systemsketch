@@ -1,0 +1,117 @@
+{
+  "feature": "True Step In isolation and single-canvas depth navigation",
+  "viewport": { "width": 1920, "height": 1080 },
+  "pages": [
+    { "id": "review", "name": "Review" }
+  ],
+  "shapes": [
+    {
+      "id": "active-scope",
+      "type": "block",
+      "x": 650,
+      "y": 240,
+      "props": {
+        "title": "run()",
+        "description": "The scope that should become its own board",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 700,
+        "h": 520,
+        "inputs": [
+          { "id": "bytes", "name": "bytes", "type": "Bytes", "visible": true },
+          { "id": "in_1", "name": "in_1", "type": "", "visible": true },
+          { "id": "in_2", "name": "in_2", "type": "", "visible": true }
+        ],
+        "outputs": [
+          { "id": "decoded", "name": "decoded", "type": "Value", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "inside-decoder",
+      "type": "block",
+      "parentId": "active-scope",
+      "x": 190,
+      "y": 155,
+      "props": {
+        "title": "decode()",
+        "description": "This child must remain visible after Step In",
+        "blockType": "Function",
+        "view": "simple",
+        "w": 320,
+        "h": 180,
+        "inputs": [],
+        "outputs": []
+      }
+    },
+    {
+      "id": "outside-sibling",
+      "type": "block",
+      "x": 1510,
+      "y": 235,
+      "props": {
+        "title": "unrelated()",
+        "description": "This must disappear in run() scope",
+        "blockType": "Function",
+        "view": "simple",
+        "w": 320,
+        "h": 180,
+        "inputs": [],
+        "outputs": []
+      }
+    },
+    {
+      "id": "former-page-frame",
+      "type": "frame",
+      "x": 1490,
+      "y": 540,
+      "props": {
+        "name": "Legacy page → Frame",
+        "w": 350,
+        "h": 220
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Select run() and click Step in. unrelated() and the legacy Frame should disappear completely.",
+      "x": 70,
+      "y": 265,
+      "w": 470,
+      "h": 120,
+      "target": { "shapeId": "active-scope", "anchor": "left", "dy": -115 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Inside run(), select its border and drag a corner wider. The ports and stock resize handle stay usable outside the edge.",
+      "x": 70,
+      "y": 520,
+      "w": 490,
+      "h": 130,
+      "target": { "shapeId": "active-scope", "anchor": "left", "dy": 155 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Open the depth control beside the filename; it should show Board at 0 and run() at depth 1.",
+      "x": 720,
+      "y": 40,
+      "w": 560,
+      "h": 110,
+      "target": { "shapeId": "active-scope", "anchor": "top", "dx": 0 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Only run() and decode() remain in scope; stretching reveals nothing else; every perimeter port and resize control stays visible and interactive.",
+      "x": 600,
+      "y": 860,
+      "w": 850,
+      "h": 130
+    }
+  ]
+}

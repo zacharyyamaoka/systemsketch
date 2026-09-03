@@ -56,6 +56,7 @@ Inspect all six PNGs together and critique each against the same visible gates: 
 - A fixture supplements ordinary regression tests and real-browser proof; it does not replace them.
 - Preserve meaningful product semantics. A real cable has real connection bindings; an orange instructional arrow uses stock arrow bindings only to preserve its cue geometry and remains non-semantic.
 - Keep the board disposable, focused, and safe to edit. One primary interaction is ideal; split unrelated interactions into separate fixtures.
+- Keep exactly one canvas. Model legacy tldraw pages as named stock Frames; the helper intentionally rejects multi-page recipes.
 - Never point a generator, smoke test, or launched review URL at Zach's real board.
 
 ## Provenance

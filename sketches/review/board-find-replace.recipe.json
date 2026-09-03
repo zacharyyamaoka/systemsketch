@@ -1,53 +1,64 @@
 {
-  "feature": "Command palette and cross-page Find & Replace",
-  "viewport": { "width": 1440, "height": 900 },
+  "feature": "Command palette and board-wide Find & Replace",
+  "viewport": { "width": 1440, "height": 1000 },
   "pages": [
-    { "id": "review", "name": "Review" },
-    { "id": "secondary", "name": "Secondary" }
+    { "id": "review", "name": "Review" }
   ],
   "shapes": [
     {
       "id": "alpha-frame",
       "type": "frame",
       "pageId": "review",
-      "x": 780,
-      "y": 180,
+      "x": 720,
+      "y": 120,
       "props": {
         "name": "alpha pipeline",
-        "w": 460,
-        "h": 250
+        "w": 560,
+        "h": 270
       }
     },
     {
       "id": "alpha-loader",
       "type": "block",
-      "pageId": "review",
-      "x": 820,
-      "y": 475,
+      "parentId": "alpha-frame",
+      "x": 70,
+      "y": 65,
       "props": {
         "title": "alpha_loader()",
-        "description": "A replaceable Block-title match on Review",
+        "description": "A replaceable Block-title match in Architecture",
         "blockType": "Function",
         "view": "port",
-        "w": 390,
-        "h": 190,
+        "w": 410,
+        "h": 155,
         "inputs": [],
         "outputs": []
       }
     },
     {
+      "id": "runtime-frame",
+      "type": "frame",
+      "pageId": "review",
+      "x": 720,
+      "y": 455,
+      "props": {
+        "name": "Runtime",
+        "w": 560,
+        "h": 270
+      }
+    },
+    {
       "id": "alpha-writer",
       "type": "block",
-      "pageId": "secondary",
-      "x": 650,
-      "y": 260,
+      "parentId": "runtime-frame",
+      "x": 70,
+      "y": 55,
       "props": {
         "title": "alpha_writer()",
-        "description": "A real match on the Secondary page",
+        "description": "A second real match in the Runtime Frame",
         "blockType": "Function",
         "view": "port",
-        "w": 390,
-        "h": 210,
+        "w": 410,
+        "h": 165,
         "inputs": [],
         "outputs": []
       }
@@ -68,12 +79,12 @@
     {
       "id": "step-2",
       "kind": "step",
-      "text": "2 · Find “a·lpha” (omit the middle dot when typing); choose a·lpha_writer() to jump to the Secondary page, then return to Review",
+      "text": "2 · Find “a·lpha” (omit the middle dot when typing); choose a·lpha_writer() to select it in the Runtime Frame",
       "x": 60,
       "y": 310,
       "w": 530,
       "h": 115,
-      "target": { "shapeId": "alpha-loader", "anchor": "left", "dy": -70 }
+      "target": { "shapeId": "alpha-writer", "anchor": "left", "dy": -45 }
     },
     {
       "id": "step-3",
@@ -83,14 +94,14 @@
       "y": 515,
       "w": 530,
       "h": 115,
-      "target": { "shapeId": "alpha-loader", "anchor": "left", "dy": 70 }
+      "target": { "shapeId": "alpha-loader", "anchor": "left", "dy": 55 }
     },
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · Results identify both pages, clicking one navigates and selects it, Replace All changes the two Block titles plus Frame name, and one Undo restores all three.",
+      "text": "PASS WHEN · Results cover both named Frames, clicking one selects it, Replace All changes both Block titles plus the alpha Frame name, and one Undo restores all three.",
       "x": 650,
-      "y": 710,
+      "y": 800,
       "w": 690,
       "h": 130
     }

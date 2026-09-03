@@ -1,0 +1,186 @@
+{
+  "checks": [
+    {
+      "id": "M1",
+      "label": "fixture is a real saved two-page tldraw file",
+      "observed": [
+        "Architecture",
+        "Runtime"
+      ],
+      "desired": [
+        "Architecture",
+        "Runtime"
+      ],
+      "ok": true
+    },
+    {
+      "id": "M2",
+      "label": "the product exposes exactly one durable canvas",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "M3",
+      "label": "the editor rejects creation of additional pages",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "M4",
+      "label": "former page names survive as stock Frames",
+      "observed": [
+        "Architecture",
+        "Runtime"
+      ],
+      "desired": [
+        "Architecture",
+        "Runtime"
+      ],
+      "ok": true
+    },
+    {
+      "id": "M5",
+      "label": "each former page keeps its own content inside its Frame",
+      "observed": [
+        1,
+        1
+      ],
+      "desired": [
+        1,
+        1
+      ],
+      "ok": true
+    },
+    {
+      "id": "M6",
+      "label": "Depth Stack occupies the old page-menu slot",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "M7",
+      "label": "the stock page selector is absent",
+      "observed": false,
+      "desired": false,
+      "ok": true
+    },
+    {
+      "id": "M8",
+      "label": "the one-canvas migration is saved back to disk",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "M9",
+      "label": "the saved file contains both imported-page Frames",
+      "observed": 2,
+      "desired": 2,
+      "ok": true
+    },
+    {
+      "id": "I1",
+      "label": "Step In removes unrelated shapes from the rendered board",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "I2",
+      "label": "unrelated records are hidden by the editor, not covered by a mask",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "I3",
+      "label": "the active Block and its child remain real interactive shapes",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "I4",
+      "label": "the old four-rectangle scope mask no longer exists",
+      "observed": false,
+      "desired": false,
+      "ok": true
+    },
+    {
+      "id": "R0",
+      "label": "the pointer reaches the stock resize overlay outside the Block",
+      "observed": "selection_fg:bottom_left",
+      "desired": "selection_fg:bottom_left",
+      "ok": true
+    },
+    {
+      "id": "R0b",
+      "label": "pointer-down enters the stock resize state",
+      "observed": "select.pointing_resize_handle",
+      "desired": "select.pointing_resize_handle",
+      "ok": true
+    },
+    {
+      "id": "R0c",
+      "label": "pointer movement enters active stock resizing",
+      "observed": "select.resizing",
+      "desired": "select.resizing",
+      "ok": true
+    },
+    {
+      "id": "R1",
+      "label": "the stock resize control remains draggable outside the active perimeter",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "R2",
+      "label": "stretching the active Block cannot reveal unrelated canvas content",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "R3",
+      "label": "input and output ports visibly straddle the Block perimeter",
+      "observed": {
+        "inputCrosses": true,
+        "outputCrosses": true,
+        "inputVisible": true,
+        "outputVisible": true
+      },
+      "desired": {
+        "inputCrosses": true,
+        "outputCrosses": true,
+        "inputVisible": true,
+        "outputVisible": true
+      },
+      "ok": true
+    },
+    {
+      "id": "R4",
+      "label": "resizing still leaves every unrelated record isolated",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "D1",
+      "label": "the in-slot Depth Stack exposes root and current scope",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "Q1",
+      "label": "the physical migration and resize journey emits no local console errors",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    }
+  ]
+}

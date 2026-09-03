@@ -152,10 +152,10 @@ export function BoardDiagnosticsView({
 					return (
 						<section key={page.pageId} className="systemsketch-diagnostics__page" aria-labelledby={headingId}>
 							<h3 id={headingId}>
-								<span>{page.pageName}</span>
+								<span>Board</span>
 								<b>{pageDiagnostics.length}</b>
 							</h3>
-							<ul aria-label={`${page.pageName} problems`}>
+							<ul aria-label="Board problems">
 								{pageDiagnostics.map((diagnostic) => (
 									<DiagnosticRow
 										key={diagnostic.id}

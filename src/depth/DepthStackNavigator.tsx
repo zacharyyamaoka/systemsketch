@@ -4,8 +4,6 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
-  type CSSProperties,
-  type PointerEvent as ReactPointerEvent,
 } from 'react'
 import { useEditor, useValue } from 'tldraw'
 
@@ -20,48 +18,6 @@ import {
 } from './depthNavigation'
 import './depth-stack-navigator.css'
 
-interface ScreenFrame {
-  x: number
-  y: number
-  w: number
-  h: number
-  viewportW: number
-  viewportH: number
-}
-
-function stopScopeMaskPointer(event: ReactPointerEvent<HTMLElement>): void {
-  event.preventDefault()
-  event.stopPropagation()
-}
-
-function ScopeMask({ frame }: { frame: ScreenFrame }) {
-  const left = Math.max(0, Math.min(frame.viewportW, frame.x))
-  const top = Math.max(0, Math.min(frame.viewportH, frame.y))
-  const right = Math.max(left, Math.min(frame.viewportW, frame.x + frame.w))
-  const bottom = Math.max(top, Math.min(frame.viewportH, frame.y + frame.h))
-  const shared = {
-    onPointerDown: stopScopeMaskPointer,
-    onDoubleClick: stopScopeMaskPointer,
-  }
-  return (
-    <div
-      className="systemsketch-depth-mask"
-      aria-hidden="true"
-      data-systemsketch-chrome
-      onWheel={(event) => event.stopPropagation()}
-    >
-      <i {...shared} style={{ left: 0, top: 0, width: frame.viewportW, height: top }} />
-      <i {...shared} style={{ left: 0, top: bottom, width: frame.viewportW, height: frame.viewportH - bottom }} />
-      <i {...shared} style={{ left: 0, top, width: left, height: bottom - top }} />
-      <i {...shared} style={{ left: right, top, width: frame.viewportW - right, height: bottom - top }} />
-      <span
-        className="systemsketch-depth-mask__edge"
-        style={{ left, top, width: right - left, height: bottom - top }}
-      />
-    </div>
-  )
-}
-
 function StackGlyph() {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true">
@@ -71,7 +27,9 @@ function StackGlyph() {
   )
 }
 
-export function DepthStackNavigator() {
+export function DepthStackNavigator({ placement = 'floating' }: {
+  placement?: 'menu' | 'floating'
+}) {
   const editor = useEditor()
   const rootRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
@@ -91,27 +49,6 @@ export function DepthStackNavigator() {
     () => editor.getCurrentPageId(),
     [editor],
   )
-  const frame = useValue<ScreenFrame | null>(
-    'SystemSketch depth scope screen frame',
-    () => {
-      if (!model) return null
-      const bounds = editor.getShapePageBounds(model.current.id)
-      if (!bounds) return null
-      const point = editor.pageToScreen(bounds.point)
-      const zoom = editor.getZoomLevel()
-      const viewport = editor.getViewportScreenBounds()
-      return {
-        x: point.x,
-        y: point.y,
-        w: bounds.w * zoom,
-        h: bounds.h * zoom,
-        viewportW: viewport.w,
-        viewportH: viewport.h,
-      }
-    },
-    [editor, model?.current.id],
-  )
-
   useEffect(() => {
     if (snapshot.scopeId && (!model || model.pageId !== currentPageId)) {
       discardDepthScope(editor)
@@ -142,30 +79,31 @@ export function DepthStackNavigator() {
     }
   }, [open])
 
-  if (!model || !frame) return null
+  if (!model || (placement === 'floating' && !model.current)) return null
   const parentName = model.parent?.name ?? model.pageName
+  const currentName = model.current?.props.title.trim() || model.pageName
 
   return (
-    <>
-      <ScopeMask frame={frame} />
       <div
         ref={rootRef}
-        className="systemsketch-depth-navigator"
+        className={`systemsketch-depth-navigator systemsketch-depth-navigator--${placement}`}
         data-testid="systemsketch-depth-navigator"
         data-depth={model.depth}
         data-systemsketch-chrome
         onWheel={(event) => event.stopPropagation()}
       >
         <nav className="systemsketch-depth-pill" aria-label="System depth">
-          <button
-            type="button"
-            className="systemsketch-depth-pill__up"
-            aria-label={`Step out to ${parentName}`}
-            title={`Step out to ${parentName}`}
-            onClick={() => void stepOutOfDepthScope(editor)}
-          >
-            ↑
-          </button>
+          {model.current ? (
+            <button
+              type="button"
+              className="systemsketch-depth-pill__up"
+              aria-label={`Step out to ${parentName}`}
+              title={`Step out to ${parentName}`}
+              onClick={() => void stepOutOfDepthScope(editor)}
+            >
+              ↑
+            </button>
+          ) : null}
           <button
             type="button"
             className="systemsketch-depth-pill__trigger"
@@ -175,7 +113,7 @@ export function DepthStackNavigator() {
             onClick={() => setOpen((current) => !current)}
           >
             <span className="systemsketch-depth-pill__glyph"><StackGlyph /></span>
-            <span className="systemsketch-depth-pill__name">{model.current.props.title.trim() || 'Untitled Block'}</span>
+            <span className="systemsketch-depth-pill__name">{currentName}</span>
             <span className="systemsketch-depth-pill__count" aria-label={`Depth ${model.depth}`}>{model.depth}</span>
             <span className="systemsketch-depth-pill__chevron" aria-hidden="true">⌄</span>
           </button>
@@ -193,16 +131,30 @@ export function DepthStackNavigator() {
               <b>{model.depth} {model.depth === 1 ? 'level' : 'levels'}</b>
             </header>
             <div className="systemsketch-depth-popover__path">
-              <button
-                type="button"
-                role="menuitem"
-                className="systemsketch-depth-row systemsketch-depth-row--root"
-                onClick={() => void returnToDepthRoot(editor)}
-              >
-                <i aria-hidden="true" />
-                <span><b>{model.pageName}</b><small>root canvas</small></span>
-                <em>0</em>
-              </button>
+              {model.current ? (
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="systemsketch-depth-row systemsketch-depth-row--root"
+                  onClick={() => void returnToDepthRoot(editor)}
+                >
+                  <i aria-hidden="true" />
+                  <span><b>{model.pageName}</b><small>root canvas</small></span>
+                  <em>0</em>
+                </button>
+              ) : (
+                <div
+                  role="menuitem"
+                  tabIndex={-1}
+                  aria-disabled="true"
+                  aria-current="page"
+                  className="systemsketch-depth-row systemsketch-depth-row--root is-current"
+                >
+                  <i aria-hidden="true" />
+                  <span><b>{model.pageName}</b><small>root canvas</small></span>
+                  <em>0</em>
+                </div>
+              )}
               {model.entries.map((entry) => entry.isCurrent ? (
                 <div
                   key={entry.id}
@@ -235,9 +187,8 @@ export function DepthStackNavigator() {
           </aside>
         ) : null}
         <span className="systemsketch-depth-status" aria-live="polite">
-          Current scope: {model.current.props.title.trim() || 'Untitled Block'}, depth {model.depth}
+          Current scope: {currentName}, depth {model.depth}
         </span>
       </div>
-    </>
   )
 }

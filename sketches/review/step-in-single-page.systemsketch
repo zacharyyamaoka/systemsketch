@@ -4,9 +4,9 @@
     "application": "SystemSketch",
     "shapes": {
       "arrow": 3,
+      "block": 3,
       "geo": 4,
-      "frame": 2,
-      "block": 2
+      "frame": 1
     },
     "bindings": {
       "arrow": 6
@@ -56,8 +56,8 @@
   },
   "records": [
     {
-      "x": 590,
-      "y": 367.5,
+      "x": 560,
+      "y": 585,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -78,8 +78,8 @@
           "y": 0
         },
         "end": {
-          "x": 200,
-          "y": 180
+          "x": 90,
+          "y": 70
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -96,7 +96,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a4n2pV",
+      "index": "a5sfUl",
       "typeName": "shape"
     },
     {
@@ -108,8 +108,8 @@
       "typeName": "pointer"
     },
     {
-      "x": 590,
-      "y": 572.5,
+      "x": 1000,
+      "y": 150,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -130,8 +130,8 @@
           "y": 0
         },
         "end": {
-          "x": 200,
-          "y": -255
+          "x": 0,
+          "y": 90
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -148,12 +148,59 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5yz6t",
+      "index": "a6wozG",
       "typeName": "shape"
     },
     {
-      "x": 60,
-      "y": 105,
+      "x": 1510,
+      "y": 235,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:outside-sibling",
+      "type": "block",
+      "props": {
+        "w": 320,
+        "h": 180,
+        "title": "unrelated()",
+        "description": "This must disappear in run() scope",
+        "blockType": "Function",
+        "icon": "",
+        "view": "simple",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "rOvQ8U_Bq801GbwjtK5x2",
+        "inputs": [],
+        "outputs": [],
+        "definitionKey": "unrelated"
+      },
+      "parentId": "page:page",
+      "index": "a2ukX",
+      "typeName": "shape"
+    },
+    {
+      "x": 70,
+      "y": 265,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -161,11 +208,11 @@
       "id": "shape:cue-step-1",
       "type": "geo",
       "props": {
-        "w": 520,
-        "h": 115,
+        "w": 470,
+        "h": 120,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 0,
+        "growY": 2,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -185,7 +232,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "1 · Press Ctrl/⌘ + K to inspect named commands; switch to Find or press Ctrl/⌘ + F"
+                  "text": "1 · Select run() and click Step in. unrelated() and the legacy Frame should disappear completely."
                 }
               ]
             }
@@ -193,12 +240,12 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3wRv",
+      "index": "a4kxE",
       "typeName": "shape"
     },
     {
-      "x": 650,
-      "y": 800,
+      "x": 600,
+      "y": 860,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -206,7 +253,7 @@
       "id": "shape:cue-pass",
       "type": "geo",
       "props": {
-        "w": 690,
+        "w": 850,
         "h": 130,
         "geo": "rectangle",
         "dash": "draw",
@@ -230,7 +277,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · Results cover both named Frames, clicking one selects it, Replace All changes both Block titles plus the alpha Frame name, and one Undo restores all three."
+                  "text": "PASS WHEN · Only run() and decode() remain in scope; stretching reveals nothing else; every perimeter port and resize control stays visible and interactive."
                 }
               ]
             }
@@ -238,12 +285,12 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6lgM",
+      "index": "a7o0r",
       "typeName": "shape"
     },
     {
-      "x": 60,
-      "y": 310,
+      "x": 70,
+      "y": 520,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -251,11 +298,11 @@
       "id": "shape:cue-step-2",
       "type": "geo",
       "props": {
-        "w": 530,
-        "h": 115,
+        "w": 490,
+        "h": 130,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 7,
+        "growY": 0,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -275,7 +322,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "2 · Find “a·lpha” (omit the middle dot when typing); choose a·lpha_writer() to select it in the Runtime Frame"
+                  "text": "2 · Inside run(), select its border and drag a corner wider. The ports and stock resize handle stay usable outside the edge."
                 }
               ]
             }
@@ -283,39 +330,20 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4JsI",
+      "index": "a5btb",
       "typeName": "shape"
     },
     {
-      "x": 720,
-      "y": 120,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:alpha-frame",
-      "type": "frame",
-      "parentId": "page:page",
-      "props": {
-        "w": 560,
-        "h": 270,
-        "name": "alpha pipeline",
-        "color": "black"
-      },
-      "index": "a16CA",
-      "typeName": "shape"
-    },
-    {
-      "x": 2.439024390243908,
-      "y": -29.69512195121945,
-      "z": 1.025,
+      "x": 0,
+      "y": 0,
+      "z": 1,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
     },
     {
-      "x": 60,
-      "y": 515,
+      "x": 720,
+      "y": 40,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -323,11 +351,11 @@
       "id": "shape:cue-step-3",
       "type": "geo",
       "props": {
-        "w": 530,
-        "h": 115,
+        "w": 560,
+        "h": 110,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 7,
+        "growY": 0,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -347,7 +375,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "3 · Replace “a·lpha” (omit the middle dot when typing) with “beta” using All, close the palette, then Undo exactly once"
+                  "text": "3 · Open the depth control beside the filename; it should show Board at 0 and run() at depth 1."
                 }
               ]
             }
@@ -355,7 +383,80 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5erX",
+      "index": "a674E",
+      "typeName": "shape"
+    },
+    {
+      "x": 650,
+      "y": 240,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:active-scope",
+      "type": "block",
+      "props": {
+        "w": 700,
+        "h": 520,
+        "title": "run()",
+        "description": "The scope that should become its own board",
+        "blockType": "Function",
+        "icon": "",
+        "view": "expanded",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "D_kAstXuGMQ_q1fAdlMuR",
+        "inputs": [
+          {
+            "id": "bytes",
+            "name": "bytes",
+            "type": "Bytes",
+            "visible": true
+          },
+          {
+            "id": "in_1",
+            "name": "in_1",
+            "type": "",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "in_2",
+            "type": "",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "decoded",
+            "name": "decoded",
+            "type": "Value",
+            "visible": true
+          }
+        ],
+        "definitionKey": "run"
+      },
+      "parentId": "page:page",
+      "index": "a1xlz",
       "typeName": "shape"
     },
     {
@@ -363,13 +464,13 @@
       "id": "binding:cue-step-1-arrow-end",
       "type": "arrow",
       "fromId": "shape:cue-step-1-arrow",
-      "toId": "shape:alpha-frame",
+      "toId": "shape:active-scope",
       "props": {
         "isPrecise": true,
         "isExact": false,
         "normalizedAnchor": {
           "x": 0,
-          "y": 0.24074074074074073
+          "y": 0.27884615384615385
         },
         "snap": "edge-point",
         "terminal": "end"
@@ -381,13 +482,13 @@
       "id": "binding:cue-step-2-arrow-end",
       "type": "arrow",
       "fromId": "shape:cue-step-2-arrow",
-      "toId": "shape:alpha-writer",
+      "toId": "shape:active-scope",
       "props": {
         "isPrecise": true,
         "isExact": false,
         "normalizedAnchor": {
           "x": 0,
-          "y": 0.22727272727272727
+          "y": 0.7980769230769231
         },
         "snap": "edge-point",
         "terminal": "end"
@@ -399,13 +500,13 @@
       "id": "binding:cue-step-3-arrow-end",
       "type": "arrow",
       "fromId": "shape:cue-step-3-arrow",
-      "toId": "shape:alpha-loader",
+      "toId": "shape:active-scope",
       "props": {
         "isPrecise": true,
         "isExact": false,
         "normalizedAnchor": {
-          "x": 0,
-          "y": 0.8548387096774194
+          "x": 0.5,
+          "y": 0
         },
         "snap": "edge-point",
         "terminal": "end"
@@ -426,6 +527,53 @@
       "typeName": "instance_page_state"
     },
     {
+      "x": 190,
+      "y": 155,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:inside-decoder",
+      "type": "block",
+      "parentId": "shape:active-scope",
+      "props": {
+        "w": 320,
+        "h": 180,
+        "title": "decode()",
+        "description": "This child must remain visible after Step In",
+        "blockType": "Function",
+        "icon": "",
+        "view": "simple",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "AbJYXNjF0IiSw5CrC63SW",
+        "inputs": [],
+        "outputs": [],
+        "definitionKey": "decode"
+      },
+      "index": "a1v32",
+      "typeName": "shape"
+    },
+    {
       "meta": {},
       "id": "binding:cue-step-1-arrow-start",
       "type": "arrow",
@@ -442,14 +590,6 @@
         "terminal": "start"
       },
       "typeName": "binding"
-    },
-    {
-      "name": "",
-      "color": "#EC5E41",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:HmcXuPX3ZypzuvRUS_i__",
-      "typeName": "user"
     },
     {
       "meta": {},
@@ -479,13 +619,40 @@
         "isPrecise": true,
         "isExact": false,
         "normalizedAnchor": {
-          "x": 1,
-          "y": 0.5
+          "x": 0.5,
+          "y": 1
         },
         "snap": "edge-point",
         "terminal": "start"
       },
       "typeName": "binding"
+    },
+    {
+      "x": 1490,
+      "y": 540,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:former-page-frame",
+      "type": "frame",
+      "props": {
+        "w": 350,
+        "h": 220,
+        "name": "Legacy page → Frame",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "a3o22",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#BD54C6",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:5xg6BOsioNqSZwwuOkvjf",
+      "typeName": "user"
     },
     {
       "meta": {},
@@ -521,8 +688,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1440,
-        "h": 1000
+        "w": 1920,
+        "h": 1080
       },
       "insets": [
         false,
@@ -551,102 +718,8 @@
       "typeName": "instance"
     },
     {
-      "x": 70,
-      "y": 65,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:alpha-loader",
-      "type": "block",
-      "parentId": "shape:alpha-frame",
-      "props": {
-        "w": 410,
-        "h": 155,
-        "title": "alpha_loader()",
-        "description": "A replaceable Block-title match in Architecture",
-        "blockType": "Function",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "definitionId": "ODm_bNA9YIP2KCTk10lT1",
-        "inputs": [],
-        "outputs": [],
-        "definitionKey": "alpha_loader"
-      },
-      "index": "a1Ecr",
-      "typeName": "shape"
-    },
-    {
-      "x": 70,
-      "y": 55,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:alpha-writer",
-      "type": "block",
-      "parentId": "shape:runtime-frame",
-      "props": {
-        "w": 410,
-        "h": 165,
-        "title": "alpha_writer()",
-        "description": "A second real match in the Runtime Frame",
-        "blockType": "Function",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "definitionId": "rLXbn4PDZ4VssEz09Td7Q",
-        "inputs": [],
-        "outputs": [],
-        "definitionKey": "alpha_writer"
-      },
-      "index": "a1OUzV",
-      "typeName": "shape"
-    },
-    {
-      "x": 580,
-      "y": 162.5,
+      "x": 540,
+      "y": 325,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -667,8 +740,8 @@
           "y": 0
         },
         "end": {
-          "x": 140,
-          "y": 22.5
+          "x": 110,
+          "y": 60
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -685,26 +758,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3ywBx",
-      "typeName": "shape"
-    },
-    {
-      "x": 720,
-      "y": 455,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:runtime-frame",
-      "type": "frame",
-      "parentId": "page:page",
-      "props": {
-        "w": 560,
-        "h": 270,
-        "name": "Runtime",
-        "color": "black"
-      },
-      "index": "a2x0n",
+      "index": "a4v2Gl",
       "typeName": "shape"
     }
   ]

@@ -1,35 +1,22 @@
-.systemsketch-depth-mask {
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.systemsketch-depth-mask > i {
-  position: absolute;
-  display: block;
-  background: var(--ss-surface);
-  pointer-events: auto;
-}
-
-.systemsketch-depth-mask__edge {
-  position: absolute;
-  box-sizing: border-box;
-  border: 2px solid color-mix(in srgb, var(--ss-accent) 45%, transparent);
-  border-radius: 11px;
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--ss-surface-raised) 45%, transparent);
-  pointer-events: none;
-}
-
 .systemsketch-depth-navigator {
-  position: absolute;
   z-index: var(--tl-layer-panels);
-  top: var(--systemsketch-chrome-inset);
-  left: 50%;
   color: var(--ss-text);
   pointer-events: auto;
+}
+
+.systemsketch-depth-navigator--floating {
+  position: absolute;
+  top: var(--systemsketch-chrome-inset);
+  left: 50%;
   transform: translateX(-50%);
+}
+
+.systemsketch-depth-navigator--menu {
+  position: relative;
+  min-width: 0;
+  height: 36px;
+  flex: 0 1 auto;
+  border-right: 1px solid var(--ss-border);
 }
 
 .systemsketch-depth-pill {
@@ -42,6 +29,15 @@
   background: color-mix(in srgb, var(--ss-surface-raised) 97%, transparent);
   box-shadow: var(--ss-shadow-1);
   backdrop-filter: blur(16px);
+}
+
+.systemsketch-depth-navigator--menu .systemsketch-depth-pill {
+  height: 36px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .systemsketch-depth-pill button {
@@ -139,6 +135,11 @@
   box-shadow: var(--ss-shadow-2);
   backdrop-filter: blur(18px);
   transform: translateX(-50%);
+}
+
+.systemsketch-depth-navigator--menu .systemsketch-depth-popover {
+  left: 0;
+  transform: none;
 }
 
 .systemsketch-depth-popover header {
@@ -276,7 +277,7 @@
 }
 
 @media (max-width: 900px) {
-  .systemsketch-depth-navigator {
+  .systemsketch-depth-navigator--floating {
     top: calc(var(--systemsketch-chrome-inset) + var(--systemsketch-top-height) + 8px);
   }
 

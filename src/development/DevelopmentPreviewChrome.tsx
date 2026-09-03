@@ -160,7 +160,7 @@ export function BlockDevelopmentPreviewChrome() {
   return (
     <>
       <DevelopmentPreviewChrome />
-      <DepthStackNavigator />
+      <DepthStackNavigator placement="floating" />
       <OnCanvasBlockPicker />
       <HitAreaOverlay />
       {showInspector || showConnectionInspector ? (
