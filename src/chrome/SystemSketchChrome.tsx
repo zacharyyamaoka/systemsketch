@@ -364,7 +364,7 @@ export function SystemSketchSurfaceHost() {
       {
         id: 'tidy-edges',
         label: 'Tidy edges',
-        description: 'Separate overlapping elbow channels without moving nodes',
+        description: 'Route automatic elbows around Blocks, then separate their channels',
         keywords: ['nudge', 'cables', 'connections', 'layout'],
         icon: '≋',
         disabled: () => getTidyEdgesSelection(editor).length === 0,

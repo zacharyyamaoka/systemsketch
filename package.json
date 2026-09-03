@@ -68,6 +68,7 @@
     "test:theme": "node --experimental-strip-types tests/theme_contrast_smoke.mjs",
     "test:zoom-controls": "node tests/zoom_controls_preference_smoke.mjs",
     "test:layout-commands": "node tests/layout_commands_smoke.mjs",
+    "test:collision-routing": "node tests/collision_aware_routing_smoke.mjs",
     "theme:import": "node --experimental-strip-types scripts/import_vscode_theme.mjs",
     "theme:obsidian": "python3 scripts/extract_obsidian_palette.py",
     "test:export": "node tests/tldraw_export_smoke.mjs"

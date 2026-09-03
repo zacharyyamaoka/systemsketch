@@ -1,30 +1,38 @@
 /**
- * Tidy edges — spread shared elbow channels as a one-shot command.
+ * Tidy edges — route automatic elbows around obstacles, then spread channels.
  *
- * This is the editor adapter for the pure `nudgeRoutes` implementation already
- * shared with PyBlocks. Automatic elbow routes may move; authored routes remain
- * immovable constraints; curved and straight connections are ignored. Routes
- * are compared in page space and persisted as the same endpoint-relative pins
- * the existing elbow editor uses, so the operation is undoable and repeatable.
+ * This is orchestration only. Obstacle collection, one-edge A*, route
+ * stabilization, collision-safe bundle nudging, and persistence live in
+ * separate functions and carry independent tests. Automatic elbow routes may
+ * move; authored routes remain immovable constraints; curved and straight
+ * connections are ignored.
  * Scope is always explicit: selected edges plus edges incident to any selected
  * Block. An empty selection never sweeps the page.
  */
 import { Mat, type Editor, type TLShapeId } from 'tldraw'
 
+import { branchAncestry } from '../../branch/branchScope'
+import { isBranchShape } from '../../branch/branchModel'
 import { isBlockShape } from '../blockModel'
 import {
-	createPin,
-	nudgeRoutes,
-	routeElbow,
-	type ElbowPin,
 	type ElbowRoute,
+	type ElbowRouteInput,
 } from '../elbow'
 import {
 	getConnectionElbowRoute,
 	getConnectionEndpoints,
 	type ConnectionShape,
 } from './ConnectionShapeUtil'
+import {
+	nudgeRoutesWithoutObstacleCollisions,
+	planOrthogonalRoute,
+	routeClearsInput,
+	routesHaveSamePoints,
+	stabilizeOrthogonalRoute,
+} from './collisionAwareRouting'
+import { captureResolvedRoute, dongleEndpoints, type ConnectionElbowRouteModel } from './elbowAuthoredRoute'
 import { CONNECTION_SHAPE_TYPE } from './connectionModel'
+import { collectConnectionRoutingScene } from './routingObstacles'
 
 export interface TidyEdgesOutcome {
 	tidied: number
@@ -32,6 +40,8 @@ export interface TidyEdgesOutcome {
 	ignored: number
 	bundles: number
 	forcedCrossings: number
+	unresolved: number
+	revertedNudges: number
 }
 
 export const EMPTY_TIDY_EDGES_OUTCOME: TidyEdgesOutcome = {
@@ -40,10 +50,12 @@ export const EMPTY_TIDY_EDGES_OUTCOME: TidyEdgesOutcome = {
 	ignored: 0,
 	bundles: 0,
 	forcedCrossings: 0,
+	unresolved: 0,
+	revertedNudges: 0,
 }
 
 export function describeTidyEdgesOutcome(outcome: TidyEdgesOutcome): string {
-	if (outcome.tidied === 0 && outcome.locked === 0) {
+	if (outcome.tidied === 0 && outcome.locked === 0 && outcome.unresolved === 0) {
 		return outcome.ignored > 0
 			? `Nothing to tidy — ${outcome.ignored} edge${plural(outcome.ignored)} ${
 				outcome.ignored === 1 ? 'is' : 'are'
@@ -56,6 +68,12 @@ export function describeTidyEdgesOutcome(outcome: TidyEdgesOutcome): string {
 	if (outcome.forcedCrossings > 0) {
 		parts.push(`${outcome.forcedCrossings} crossing${plural(outcome.forcedCrossings)} cannot be removed`)
 	}
+	if (outcome.unresolved > 0) {
+		parts.push(`${outcome.unresolved} route${plural(outcome.unresolved)} could not clear every obstacle`)
+	}
+	if (outcome.revertedNudges > 0) {
+		parts.push(`kept ${outcome.revertedNudges} channel${plural(outcome.revertedNudges)} clear of Blocks`)
+	}
 	return parts.join(', ')
 }
 
@@ -67,7 +85,7 @@ export type TidyEdgeRole = 'free' | 'locked' | 'ignored'
 
 export function tidyEdgeRole(connection: ConnectionShape): TidyEdgeRole {
 	if (connection.props.routing !== 'elbow') return 'ignored'
-	if (connection.props.elbowRoute !== null || connection.props.curve !== null) return 'locked'
+	if (connection.props.routeMode === 'authored' || connection.props.curve !== null) return 'locked'
 	return 'free'
 }
 
@@ -104,20 +122,51 @@ export function tidyEdges(
 	// sibling without silently rewriting that sibling.
 	const participants = connections.filter((connection) =>
 		movable.has(connection.id) || connection.props.routing === 'elbow')
-	const pageRoutes = participants.map((connection) =>
-		toPageRoute(editor, connection, movable.has(connection.id)))
+	const currentRoutes = participants.map((connection) => routeInPage(editor, connection))
+	const inputsByRoute: (ElbowRouteInput | undefined)[] = participants.map(() => undefined)
 	const lockedFlags = participants.map((connection) => !movable.has(connection.id))
-	const report = nudgeRoutes(
-		pageRoutes,
-		options.spacing === undefined ? {} : { spacing: options.spacing },
+	let unresolved = 0
+	const plannedRoutes = participants.map((connection, index) => {
+		if (lockedFlags[index]) return currentRoutes[index]
+		const scene = collectConnectionRoutingScene(editor, connection)
+		inputsByRoute[index] = scene.input
+		const planned = planOrthogonalRoute(scene.input)
+		const stable = stabilizeOrthogonalRoute(currentRoutes[index], planned, scene.input)
+		if (!routeClearsInput(stable, scene.input)) {
+			lockedFlags[index] = true
+			unresolved += 1
+			return currentRoutes[index]
+		}
+		return stable
+	})
+	const report = nudgeRoutesWithoutObstacleCollisions(
+		plannedRoutes,
+		inputsByRoute,
 		lockedFlags,
+		options.spacing === undefined ? {} : { spacing: options.spacing },
 	)
 
-	const edits: { id: TLShapeId; type: typeof CONNECTION_SHAPE_TYPE; props: { pins: ElbowPin[] } }[] = []
+	const edits: {
+		id: TLShapeId
+		type: typeof CONNECTION_SHAPE_TYPE
+		props: {
+			pins: []
+			elbowRoute: ConnectionElbowRouteModel
+			routeMode: 'automatic'
+		}
+	}[] = []
 	participants.forEach((connection, index) => {
-		if (!movable.has(connection.id)) return
-		const pins = pinsForRoute(editor, connection, pageRoutes[index], report.routes[index])
-		if (pins) edits.push({ id: connection.id, type: CONNECTION_SHAPE_TYPE, props: { pins } })
+		if (!movable.has(connection.id) || lockedFlags[index]) return
+		if (routesHaveSamePoints(currentRoutes[index], report.routes[index])) return
+		edits.push({
+			id: connection.id,
+			type: CONNECTION_SHAPE_TYPE,
+			props: {
+				pins: [],
+				elbowRoute: automaticRouteModel(editor, connection, report.routes[index]),
+				routeMode: 'automatic',
+			},
+		})
 	})
 	if (edits.length > 0) {
 		editor.markHistoryStoppingPoint('tidy edges')
@@ -130,6 +179,8 @@ export function tidyEdges(
 		ignored,
 		bundles: report.bundles.length,
 		forcedCrossings: report.forcedCrossings.length,
+		unresolved,
+		revertedNudges: report.reverted.length,
 	}
 }
 
@@ -142,59 +193,41 @@ export function getTidyEdgesSelection(
 ): ConnectionShape[] {
 	const selected = new Set(editor.getSelectedShapeIds())
 	if (selected.size === 0) return []
-	const selectedBlocks = new Set(editor.getSelectedShapes().filter(isBlockShape).map((shape) => shape.id))
+	const selectedShapes = editor.getSelectedShapes()
+	const selectedBlocks = new Set(selectedShapes.filter(isBlockShape).map((shape) => shape.id))
+	const selectedBranches = new Set(selectedShapes.filter(isBranchShape).map((shape) => shape.id))
 	return connections.filter((connection) => {
 		if (selected.has(connection.id)) return true
 		const bound = editor.getBindingsFromShape(connection, 'connection').map((binding) => binding.toId)
-		return bound.some((id) => selectedBlocks.has(id))
+		return bound.some((id) => selectedBlocks.has(id)
+			|| selectedBranches.has(id)
+			|| (selectedBranches.size > 0
+				&& branchAncestry(editor, id).some((level) => selectedBranches.has(level.branch.id))))
 	})
 }
 
-/** Recompute pinned routes from their pristine auto-route for idempotence. */
-function toPageRoute(
-	editor: Editor,
-	connection: ConnectionShape,
-	ignoreAutomaticPins: boolean,
-): ElbowRoute {
+/** Resolve the currently painted connection polyline into page coordinates. */
+export function routeInPage(editor: Editor, connection: ConnectionShape): ElbowRoute {
 	const transform = editor.getShapePageTransform(connection)
-	const authored = getConnectionElbowRoute(editor, connection)
-	const { source, sink } = getConnectionEndpoints(editor, connection)
-	const pristine = ignoreAutomaticPins && connection.props.pins.length > 0
-		? routeElbow({
-			start: { point: source, side: 'right', box: null },
-			end: { point: sink, side: 'left', box: null },
-		})
-		: authored
+	const route = getConnectionElbowRoute(editor, connection)
 	return {
-		...pristine,
-		points: pristine.points.map((point) => {
+		...route,
+		points: route.points.map((point) => {
 			const pagePoint = Mat.applyToPoint(transform, point)
 			return { x: pagePoint.x, y: pagePoint.y }
 		}),
 	}
 }
 
-function pinsForRoute(
+/** Persist a page-space automatic route in the endpoint-relative authored model. */
+export function automaticRouteModel(
 	editor: Editor,
 	connection: ConnectionShape,
-	before: ElbowRoute,
-	after: ElbowRoute,
-): ElbowPin[] | null {
+	route: ElbowRoute,
+): ConnectionElbowRouteModel {
 	const inverse = Mat.Inverse(editor.getShapePageTransform(connection))
 	const { source, sink } = getConnectionEndpoints(editor, connection)
-	const pins: ElbowPin[] = []
-
-	for (let index = 1; index + 2 < before.points.length; index += 1) {
-		const previous = before.points[index]
-		const next = after.points[index]
-		if (Math.abs(previous.x - next.x) < 1e-6 && Math.abs(previous.y - next.y) < 1e-6) continue
-		const segmentEnd = before.points[index + 1]
-		const axis: 'x' | 'y' = Math.abs(previous.y - segmentEnd.y) <= Math.abs(previous.x - segmentEnd.x)
-			? 'x'
-			: 'y'
-		const local = Mat.applyToPoint(inverse, next)
-		const value = axis === 'x' ? local.y : local.x
-		pins.push(createPin(index, axis, value, source, sink))
-	}
-	return pins.length > 0 ? pins : null
+	const localPoints = route.points.map((point) => Mat.applyToPoint(inverse, point))
+	const dongles = dongleEndpoints(source, sink)
+	return captureResolvedRoute(localPoints, dongles.start, dongles.end)
 }
