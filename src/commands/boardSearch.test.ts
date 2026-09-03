@@ -89,13 +89,35 @@ function makeEditor(
   const editor = {
     getPages: () => pages,
     getPage: (id: TLPageId) => pages.find((candidate) => candidate.id === id),
+    // tldraw's `getPageShapeIds` returns every shape ON the page, descendants
+    // included — not just the page's direct children. The double said direct
+    // children only, which is why no unit test ever exercised a nested shape
+    // and the cross-parent ordering bug lived entirely in the browser journey.
     getPageShapeIds: (candidate: TLPage | TLPageId) => {
       const id = typeof candidate === 'string' ? candidate : candidate.id
-      return new Set([...shapes.values()].filter((item) => item.parentId === id).map((item) => item.id))
+      const onPage = (item: TLShape): boolean => {
+        if (item.parentId === id) return true
+        const parent = shapes.get(item.parentId as TLShapeId)
+        return parent ? onPage(parent) : false
+      }
+      return new Set([...shapes.values()].filter(onPage).map((item) => item.id))
+    },
+    getShapeAncestors: (candidate: TLShape | TLShapeId) => {
+      const start = typeof candidate === 'string' ? shapes.get(candidate) : candidate
+      const chain: TLShape[] = []
+      let parent = start ? shapes.get(start.parentId as TLShapeId) : undefined
+      while (parent) {
+        chain.unshift(parent)
+        parent = shapes.get(parent.parentId as TLShapeId)
+      }
+      return chain
     },
     getShape: (id: TLShapeId) => shapes.get(id),
     getAncestorPageId: (candidate: TLShape | TLShapeId) => {
-      const item = typeof candidate === 'string' ? shapes.get(candidate) : candidate
+      let item = typeof candidate === 'string' ? shapes.get(candidate) : candidate
+      while (item && shapes.has(item.parentId as TLShapeId)) {
+        item = shapes.get(item.parentId as TLShapeId)
+      }
       return item?.parentId as TLPageId | undefined
     },
     getShapeUtil: (candidate: TLShape) => ({
@@ -135,6 +157,50 @@ function makeEditor(
 }
 
 describe('board text search', () => {
+  it('orders matches by reading order, not by indices from different parents', () => {
+    // The regression this locks: a fractional index orders siblings only, so a
+    // page-level shape's index and a Frame child's index were being compared on
+    // two scales that never met. Measured on the real board, a Frame child
+    // indexed `a1JsX` sorted above a page-level Block indexed `a1THA` — a shape
+    // listed above the Frame it visually sits inside. tldraw randomises the low
+    // digits of an index, so the same board listed its matches in different
+    // orders from one run to the next.
+    const board = page('board', 'Board', 'a1')
+    const frame = shape('needle-frame', 'frame', board.id, 'a4q2I', { name: 'Needle frame' })
+    const harness = makeEditor([board], [
+      block('needle-block', board.id, 'a1THA', 'Needle block'),
+      frame,
+      // The child's own index is lower than the page-level Block's, and a naive
+      // comparison therefore puts it first.
+      block('needle-child', frame.id as unknown as TLPageId, 'a1JsX', 'Needle child'),
+    ])
+
+    const found = searchBoard(harness.editor, 'Needle')
+    expect(found.map((match) => match.shapeId)).toEqual([
+      createShapeId('needle-block'),
+      createShapeId('needle-frame'),
+      createShapeId('needle-child'),
+    ])
+  })
+
+  it('keeps a nested shape with its parent even when the parent sorts last', () => {
+    const board = page('board', 'Board', 'a1')
+    const frame = shape('needle-frame', 'frame', board.id, 'a1', { name: 'Needle frame' })
+    const harness = makeEditor([board], [
+      frame,
+      block('needle-child', frame.id as unknown as TLPageId, 'a9', 'Needle child'),
+      block('needle-last', board.id, 'a2', 'Needle last'),
+    ])
+
+    // The child sorts inside its Frame's slot, before the Frame's next sibling —
+    // never after it, whatever its own index happens to be.
+    expect(searchBoard(harness.editor, 'Needle').map((match) => match.shapeId)).toEqual([
+      createShapeId('needle-frame'),
+      createShapeId('needle-child'),
+      createShapeId('needle-last'),
+    ])
+  })
+
   it('finds literal text case-insensitively and supports case and whole-word constraints', () => {
     expect(findTextOccurrences('Alpha alpha alphabet a.lpha', 'alpha')).toEqual([
       { start: 0, end: 5 },

@@ -2,6 +2,7 @@ import {
   TldrawUiButton,
   TldrawUiToolbarButton,
   useActions,
+  useDialogs,
   useEditor,
   usePassThroughWheelEvents,
   useTldrawUiComponents,
@@ -9,7 +10,7 @@ import {
   useValue,
   type Editor,
 } from 'tldraw'
-import { useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { AppearanceControls } from '../appearance/AppearanceControls'
 import { BLOCK_TOOL_ID, PILL_TOOL_ID, getBlockInspectorContext, selectionHasBlockStyles } from '../blocks'
 import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
@@ -40,6 +41,14 @@ import {
   type CommandPaletteAction,
 } from '../commands'
 import { RecorderIndicator } from '../recorder/RecorderControls'
+import { ShapeFactsPanel } from './ShapeFactsPanel'
+import {
+  inspectorSubjectOwnsHeader,
+  inspectorSubjectTitle,
+  readInspectorSubject,
+  type InspectorSubject,
+} from './inspectorSubject'
+import { SystemSketchSettingsDialog } from '../settings/InterfaceSettings'
 import { useChrome } from './ChromeProvider'
 import { SelectionContextualMenu } from './SelectionContextualMenu'
 import {
@@ -118,6 +127,7 @@ export function SystemSketchMenuPanel() {
 
 export function SystemSketchSharePanel() {
   const { rightSurface, toggleRight } = useChrome()
+  const { addDialog } = useDialogs()
   const ref = useRef<HTMLElement>(null)
   usePassThroughWheelEvents(ref)
 
@@ -129,7 +139,27 @@ export function SystemSketchSharePanel() {
       data-testid="systemsketch-top-right-shell"
       data-systemsketch-chrome
     >
-      <TldrawUiButton type="low" className="systemsketch-avatar-button" title="Profile placeholder">
+      {/* There is no identity to show — SystemSketch is local and single-user —
+          so this badge used to be a button labelled "Profile placeholder" that
+          did nothing when pressed. A control in the chrome has to do the thing
+          its shape promises, and the honest thing behind a profile badge in a
+          local app is the preferences it would have opened: the same Settings
+          dialog the main menu opens, at the same id so the two share one
+          instance. */}
+      <TldrawUiButton
+        type="low"
+        className="systemsketch-avatar-button"
+        title="Settings — theme and interface scale"
+        aria-label="Open settings"
+        data-testid="systemsketch-avatar-button"
+        /* Landing on Appearance rather than Interface: theme is the preference
+           closest to what a profile badge implies, and it is the one a person
+           reaches for first on a new machine. */
+        onClick={() => addDialog({
+          id: 'systemsketch-settings',
+          component: (props) => <SystemSketchSettingsDialog {...props} category="appearance" />,
+        })}
+      >
         Z
       </TldrawUiButton>
       <TldrawUiButton
@@ -152,7 +182,15 @@ function ShapesLibrary() {
   return <ShapeLibraryBrowser autoFocus onCancel={() => setLeft(null)} onInserted={() => setLeft(null)} />
 }
 
-function RightSurfaceBody({ surface, onClose }: { surface: RightSurface; onClose(): void }) {
+function RightSurfaceBody({
+  surface,
+  subject,
+  onClose,
+}: {
+  surface: RightSurface
+  subject: InspectorSubject
+  onClose(): void
+}) {
   const editor = useEditor()
   const readOnly = useValue(
     'SystemSketch comments read-only state',
@@ -165,37 +203,58 @@ function RightSurfaceBody({ surface, onClose }: { surface: RightSurface; onClose
   if (surface === 'diagnostics') {
     return <BoardDiagnosticsPanel editor={editor} />
   }
-  if (surface === 'inspector') return <InspectorDock editor={editor} onClose={onClose} />
+  if (surface === 'inspector') return <InspectorDock editor={editor} subject={subject} onClose={onClose} />
   return <LocalCommentsPanel editor={editor} readOnly={readOnly} />
 }
 
 /**
- * Which inspector the dock shows for the current selection.
+ * The dock's body for a resolved subject.
  *
- * A selected Branch is its own subject; a selected cable is the dock's other
- * subject. The Block lens wins when both could apply, because a Block carries
- * far more to edit.
+ * Precedence and header ownership both live in `inspectorSubject.ts`; this only
+ * maps a subject to its panel. The `shape` arm is the new one: `Inspect` is
+ * offered for every selection, so an ordinary rectangle now lands on the facts
+ * tldraw actually holds instead of on "Select a Block to inspect it."
  */
-function InspectorDock({ editor, onClose }: { editor: Editor; onClose(): void }) {
-  const subject = useValue(
-    'systemsketch inspector subject',
-    () => {
-      if (getOnlySelectedBranch(editor)) return 'branch'
-      if (getBlockInspectorContext(editor).kind === 'empty'
-        && getConnectionInspectorContext(editor) !== null) return 'connection'
-      return 'block'
-    },
-    [editor],
-  )
+function InspectorDock({
+  editor,
+  subject,
+  onClose,
+}: {
+  editor: Editor
+  subject: InspectorSubject
+  onClose(): void
+}) {
   if (subject === 'branch') return <EditorBranchInspector editor={editor} onRequestClose={onClose} />
   if (subject === 'connection') return <EditorConnectionInspector editor={editor} />
+  if (subject === 'shape') return <ShapeFactsPanel editor={editor} />
+  if (subject === 'empty') return <InspectorEmptyState />
   return <EditorBlockInspector editor={editor} onRequestClose={onClose} />
+}
+
+/**
+ * Nothing selected.
+ *
+ * The old empty state was a bare `<p>` centred in an otherwise blank 280px
+ * column. Every other panel in this app already has a designed empty state —
+ * glyph, heading, one sentence of guidance — and `.systemsketch-panel-empty` is
+ * that pattern, so the dock uses it rather than a fourth look.
+ */
+function InspectorEmptyState() {
+  return (
+    <div className="systemsketch-panel-empty" data-testid="systemsketch-inspector-empty">
+      <span aria-hidden="true">▣</span>
+      <strong>Nothing selected</strong>
+      <p>
+        Select a Block, a Branch or a cable to edit it here. Any other shape shows
+        what the board knows about it.
+      </p>
+    </div>
+  )
 }
 
 function SelectionMiniMenu() {
   const editor = useEditor()
   const { addToast } = useToasts()
-  const { setRight } = useChrome()
   const canShow = useValue(
     'systemsketch selection mini menu',
     () => (
@@ -246,7 +305,7 @@ function SelectionMiniMenu() {
         className="systemsketch-selection-menu"
         label="Selection actions"
       >
-        <EditorBranchSelectionMiniMenu editor={editor} onOpenInspector={() => setRight('inspector')} />
+        <EditorBranchSelectionMiniMenu editor={editor} />
       </SelectionContextualMenu>
     )
   }
@@ -263,11 +322,7 @@ function SelectionMiniMenu() {
           so the Block-only pill is unchanged. */}
       {hasBlocks ? (
         <>
-          <EditorBlockSelectionMiniMenu
-            key={selectionKey}
-            editor={editor}
-            onOpenInspector={() => setRight('inspector')}
-          />
+          <EditorBlockSelectionMiniMenu key={selectionKey} editor={editor} />
           <AppearanceControls />
           <SelectionLayoutActions
             {...layoutActions}
@@ -278,21 +333,15 @@ function SelectionMiniMenu() {
       ) : (
         <>
           {/* Appearance first, the way FigJam leads with what the thing looks
-              like; Inspect stays on the right as the way out to detail. */}
+              like. There is no Inspect button on either branch any more: the
+              dock follows the selection, so the pill only carries the things
+              that change the shape. */}
           <AppearanceControls />
           <SelectionLayoutActions
             {...layoutActions}
             onTidyEdges={runTidyEdges}
             onOrganizeNodes={() => void runOrganizeNodes()}
           />
-          <TldrawUiToolbarButton
-            type="icon"
-            className="systemsketch-selection-action"
-            title="Open inspector"
-            onClick={() => setRight('inspector')}
-          >
-            Inspect
-          </TldrawUiToolbarButton>
         </>
       )}
     </SelectionContextualMenu>
@@ -311,6 +360,15 @@ export function SystemSketchSurfaceHost() {
     setRight,
     setToolbar,
   } = useChrome()
+  /**
+   * What the dock is currently about, as one comparable string.
+   *
+   * `null` means "nothing the dock can speak about", which is now only an empty
+   * selection: the pill no longer carries an Inspect button, so the dock has to
+   * follow the selection by itself for EVERY subject, an ordinary rectangle
+   * included. A button that only ever meant "show me the panel for what I
+   * already selected" was a step the selection had already taken.
+   */
   const blockInspectorContextKey = useValue(
     'systemsketch Block inspector context',
     () => {
@@ -323,11 +381,47 @@ export function SystemSketchSurfaceHost() {
       // Selecting a cable opens the dock too — it is the panel's other subject.
       const connection = getConnectionInspectorContext(editor)
       if (connection) return `connection:${connection.count}`
+      // Any other selection is the shape lens. Keyed on the ids themselves so
+      // moving from one rectangle to another is a new context, exactly as it is
+      // for one Block to another.
+      const selected = editor.getSelectedShapeIds()
+      if (selected.length > 0) return `shape:${[...selected].sort().join(',')}`
       return null
     },
     [editor],
   )
   const previousBlockInspectorContextKey = useRef<string | null>(null)
+  /**
+   * The context the user last dismissed the dock on.
+   *
+   * Without this, closing the inspector was undone by the next click: the
+   * auto-open effect fires whenever the context key changes, so selecting a
+   * second Block re-opened the panel the user had just closed. Remembering the
+   * dismissal makes the close stick for the rest of that run of selections;
+   * clearing the selection (key `null`) or opening the dock by hand releases it.
+   */
+  const dismissedInspectorContextKey = useRef<string | null>(null)
+  const inspectorSubject = useValue(
+    'systemsketch inspector subject',
+    () => readInspectorSubject(editor, {
+      getOnlySelectedBranch,
+      getBlockInspectorContextKind: (target) => getBlockInspectorContext(target).kind,
+      getConnectionInspectorContext,
+    }),
+    [editor],
+  )
+
+  /** Closing the dock records the dismissal; opening it by hand clears one. */
+  const closeRightSurface = useCallback(() => {
+    if (rightSurface === 'inspector') {
+      dismissedInspectorContextKey.current = blockInspectorContextKey ?? 'dismissed'
+    }
+    setRight(null)
+  }, [blockInspectorContextKey, rightSurface, setRight])
+  const openInspector = useCallback(() => {
+    dismissedInspectorContextKey.current = null
+    setRight('inspector')
+  }, [setRight])
 
   const commandActions = useMemo<CommandPaletteAction[]>(() => {
     const stock = (id: string) => actions[id]?.onSelect('menu')
@@ -381,6 +475,14 @@ export function SystemSketchSurfaceHost() {
         keywords: ['lint', 'diagnostics'],
         icon: '⚠',
         run: () => setRight('diagnostics'),
+      },
+      {
+        id: 'show-inspector',
+        label: 'Show inspector',
+        description: 'Open the panel for the current selection',
+        keywords: ['inspect', 'properties', 'dock'],
+        icon: '▤',
+        run: () => openInspector(),
       },
       {
         id: 'show-comments',
@@ -445,7 +547,7 @@ export function SystemSketchSurfaceHost() {
         run: () => stock('zoom-to-fit'),
       },
     ]
-  }, [actions, addToast, editor, setLeft, setRight, setToolbar])
+  }, [actions, addToast, editor, openInspector, setLeft, setRight, setToolbar])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -461,9 +563,12 @@ export function SystemSketchSurfaceHost() {
   }, [setToolbar])
 
   useEffect(() => {
+    // An empty selection ends the run the dismissal applied to.
+    if (blockInspectorContextKey === null) dismissedInspectorContextKey.current = null
     if (
       blockInspectorContextKey
       && blockInspectorContextKey !== previousBlockInspectorContextKey.current
+      && dismissedInspectorContextKey.current === null
       && rightSurface !== 'board-overview'
       && rightSurface !== 'diagnostics'
     ) {
@@ -477,7 +582,7 @@ export function SystemSketchSurfaceHost() {
     : rightSurface === 'diagnostics'
       ? 'Problems'
     : rightSurface === 'inspector'
-      ? 'Inspector'
+      ? inspectorSubjectTitle(inspectorSubject)
       : 'Comments'
 
   return (
@@ -510,14 +615,33 @@ export function SystemSketchSurfaceHost() {
           aria-label={rightTitle}
           data-testid="systemsketch-right-popout"
           data-surface={rightSurface}
+          data-inspector-subject={rightSurface === 'inspector' ? inspectorSubject : undefined}
+          /* Which element draws the header, and the stylesheet obeys it rather
+             than repeating the list. `body` means the panel below supplies its
+             own title and close button; `frame` means it does not, and the
+             dock's header stays. Before this the inspector hid the header for
+             every subject, which left a cable, an ordinary shape and an empty
+             selection in a headerless column with no pointer way out. */
+          data-inspector-header={rightSurface === 'inspector'
+            ? (inspectorSubjectOwnsHeader(inspectorSubject) ? 'body' : 'frame')
+            : undefined}
           data-systemsketch-chrome
           onWheel={(event) => event.stopPropagation()}
         >
           <header className="systemsketch-popout__header">
             <div><span>Right panel</span><h2>{rightTitle}</h2></div>
-            <button type="button" aria-label={`Close ${rightTitle}`} onClick={() => setRight(null)}>×</button>
+            <button
+              type="button"
+              aria-label={`Close ${rightTitle}`}
+              data-testid="systemsketch-right-popout-close"
+              onClick={closeRightSurface}
+            >×</button>
           </header>
-          <RightSurfaceBody surface={rightSurface} onClose={() => setRight(null)} />
+          <RightSurfaceBody
+            surface={rightSurface}
+            subject={inspectorSubject}
+            onClose={closeRightSurface}
+          />
         </aside>
       ) : null}
 

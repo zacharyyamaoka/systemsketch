@@ -28,6 +28,7 @@ import {
   CHEVRON_PATH,
   CHEVRON_VIEWBOX,
   FONT_SIZE_LADDER,
+  POPOVER_COLLISION_PADDING,
   POPOVER_GAP,
   SWATCH_SIZE,
 } from './figjamTokens'
@@ -151,8 +152,17 @@ function AppearanceTrigger({ editor, control }: { editor: Editor; control: Appea
         </button>
       </TldrawUiPopoverTrigger>
       {/* The trigger fills the pill's height, so Radix's offset from the
-          trigger is the same 8px FigJam leaves above the pill. */}
-      <TldrawUiPopoverContent side="top" align="center" sideOffset={POPOVER_GAP}>
+          trigger is the same 8px FigJam leaves above the pill. `collisionPadding`
+          is what stops a wide palette from being clamped flush to the window:
+          measured at 1440, the 455px colour panel opened at x=0 against a
+          trigger at x=183, cutting the first swatch column in half. Every other
+          popover in the app already keeps the same 12px. */}
+      <TldrawUiPopoverContent
+        side="top"
+        align="center"
+        sideOffset={POPOVER_GAP}
+        collisionPadding={POPOVER_COLLISION_PADDING}
+      >
         <AppearancePanel control={control} editor={editor} />
       </TldrawUiPopoverContent>
     </TldrawUiPopover>
@@ -163,8 +173,15 @@ function AppearancePanel({ control, editor }: { control: AppearanceControl; edit
   const mode = control.modeControl
   const beside = mode && control.modePlacement === 'beside'
   return (
+    // `role="menu"` is load-bearing, not decoration: every option below is a
+    // `menuitemradio`, and that role is only defined inside a menu. Measured
+    // before this, the 28 swatches sat in `role="group"` under a plain div, so
+    // the whole panel was an ARIA structure no assistive technology could read
+    // as a set of choices.
     <div
       className="systemsketch-appearance__panel"
+      role="menu"
+      aria-label={control.label}
       data-layout={control.layout}
       data-mode={mode ? control.modePlacement : undefined}
       data-testid={`systemsketch-appearance-panel-${control.id}`}
@@ -296,7 +313,13 @@ function CustomColorCell({ control, editor }: { control: AppearanceControl; edit
           </span>
         </button>
       </TldrawUiPopoverTrigger>
-      <TldrawUiPopoverContent side="bottom" align="center" sideOffset={POPOVER_GAP} autoFocusFirstButton={false}>
+      <TldrawUiPopoverContent
+        side="bottom"
+        align="center"
+        sideOffset={POPOVER_GAP}
+        collisionPadding={POPOVER_COLLISION_PADDING}
+        autoFocusFirstButton={false}
+      >
         <CustomColorPicker editor={editor} control={control} />
       </TldrawUiPopoverContent>
     </TldrawUiPopover>

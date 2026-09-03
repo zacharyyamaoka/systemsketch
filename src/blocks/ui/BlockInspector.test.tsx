@@ -79,7 +79,6 @@ describe('Block inspector content', () => {
       <BlockSelectionMiniMenu
         view={{ type: 'shared', value: 'expanded' }}
         onSetView={() => {}}
-        onOpenInspector={() => {}}
         depthAction={{ direction: 'in', onSelect() {} }}
       />,
     )
@@ -87,7 +86,7 @@ describe('Block inspector content', () => {
     expect(html).toContain('Selected Block actions')
     expect(html).toContain('aria-pressed="true"')
     expect(html).toContain('Step in')
-    expect(html).toContain('Inspect')
+    expect(html).not.toContain('Inspect')
     expect(html).toContain('data-testid="block-pill-view-expanded"')
     expect(html).toContain('aria-label="Show expanded view"')
     expect(html).not.toContain('block-pill-view-value')
@@ -99,14 +98,12 @@ describe('Block inspector content', () => {
       <BlockSelectionMiniMenu
         view={{ type: 'shared', value: 'port' }}
         onSetView={() => {}}
-        onOpenInspector={() => {}}
       />,
     )
     const expanded = renderToStaticMarkup(
       <BlockSelectionMiniMenu
         view={{ type: 'shared', value: 'expanded' }}
         onSetView={() => {}}
-        onOpenInspector={() => {}}
         depthAction={{ direction: 'in', onSelect() {} }}
       />,
     )
@@ -120,7 +117,6 @@ describe('Block inspector content', () => {
       <BlockSelectionMiniMenu
         view={{ type: 'shared', value: 'value' }}
         onSetView={() => {}}
-        onOpenInspector={() => {}}
       />,
     )
     expect(html).toBe('')
@@ -131,7 +127,6 @@ describe('Block inspector content', () => {
       <BlockSelectionMiniMenu
         view={{ type: 'shared', value: 'expanded' }}
         onSetView={() => {}}
-        onOpenInspector={() => {}}
         depthAction={{ direction: 'out', onSelect() {} }}
       />,
     )

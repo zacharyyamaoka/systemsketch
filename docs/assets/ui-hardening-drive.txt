@@ -1,0 +1,6 @@
+FIXTURE LOADED: {"total":12,"blocks":["estimate()","encode()"],"geos":7,"arrows":3,"title":"ui-hardening-drive"}
+STEP 3 dock: {"subject":"shape","title":"Selection","closeVisible":true,"facts":"RIGHT PANEL | Selection | × | Rectangle | GEOMETRY | Position | 740, 620 | Size | 260 × 150 | APPEARANCE | Colour | Black | Fill | None | Dash | Draw | Size | M | Font | Draw | Colour, fill and text are edited on the sel"}
+STEPS 1-2 dock: {"afterFirstBlock":"true","afterSecondBlock":"false"}
+STEP 4 ring: {"role":"tab","outline":"solid 2px","focusVisible":true,"scrollbar":"thin"}
+STEP 5 settings: {"category":"appearance"}
+CONSOLE: []

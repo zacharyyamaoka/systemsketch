@@ -69,6 +69,7 @@ import { hydrateCustomColors } from '../appearance/customColors'
 import { SettingsGearIcon, SystemSketchSettingsDialog } from '../settings/InterfaceSettings'
 import { importLegacyPyblocksSystemSketch } from '../import/legacyPyblocksSystemSketch'
 import { emitRecorderDiagnostic } from '../recorder/recorderEvents'
+import { useConfirm } from '../chrome/ConfirmDialog'
 import { consolidateDocumentToSinglePage } from '../singlePageDocument'
 
 const SAVE_DEBOUNCE_MS = 600
@@ -103,6 +104,13 @@ export interface LocalWorkspaceController {
   saveAs(path: string, force?: boolean): Promise<void>
   exportTldraw(destination: string): Promise<void>
   rename(path: string): Promise<void>
+  /**
+   * Moves the open board to Trash unconditionally.
+   *
+   * The confirmation deliberately lives at the call site rather than in here:
+   * this provider is mounted *above* `<Tldraw>`, so it has no dialog stack of
+   * its own, and asking from here is what forced the old `window.confirm`.
+   */
   trash(): Promise<void>
   reveal(): Promise<void>
   takeDisk(): Promise<void>
@@ -652,7 +660,6 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     }
     await waitForSave()
     if (!digestRef.current) throw new Error('The current file revision is not available yet.')
-    if (!window.confirm(`Move “${documentTitle(boardPath)}” to Trash?`)) return
     await trashWorkspaceDocument({ path: boardPath, baseDigest: digestRef.current })
     updateRecents(forgetDocumentPath(boardPath))
     window.location.assign(documentHref(await reserveUntitledPath()))
@@ -949,6 +956,17 @@ function WorkspaceNotice() {
 export function SystemSketchMainMenu() {
   const workspace = useLocalWorkspace()
   const { addDialog } = useDialogs()
+  const confirm = useConfirm()
+
+  /** The ask, in the app's own dialog rather than the browser's. */
+  const requestTrash = async () => {
+    const confirmed = await confirm({
+      title: `Move “${workspace.title}” to Trash?`,
+      body: 'The board leaves this folder and a new untitled board opens in its place. Your file manager can restore it from Trash.',
+      confirmLabel: 'Move to Trash',
+    })
+    if (confirmed) await workspace.trash()
+  }
   const statusLabel = workspace.status.kind === 'clean'
     ? 'Saved'
     : workspace.status.kind === 'saving'
@@ -1001,7 +1019,12 @@ export function SystemSketchMainMenu() {
               </TldrawUiMenuGroup>
               <TldrawUiMenuGroup id="file-location">
                 <TldrawUiMenuItem id="reveal-document" label="Show in Files" onSelect={() => void workspace.reveal()} />
-                <TldrawUiMenuItem id="trash-document" label="Move to Trash…" disabled={!workspace.isPersisted} onSelect={() => void workspace.trash()} />
+                <TldrawUiMenuItem
+                  id="trash-document"
+                  label="Move to Trash…"
+                  disabled={!workspace.isPersisted}
+                  onSelect={() => void requestTrash()}
+                />
               </TldrawUiMenuGroup>
             </TldrawUiMenuSubmenu>
           </TldrawUiMenuGroup>

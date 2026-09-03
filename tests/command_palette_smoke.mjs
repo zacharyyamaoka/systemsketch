@@ -315,13 +315,20 @@ async function main() {
       })
     })()`))
     assert.equal(matchState.summary, '4 matches across the board')
+    // Reading order, and the Archive Block comes last because the Frame that
+    // holds it was created last. The order asserted here used to be
+    // block, archive, frame, rich — which no rule produces: `searchBoard` was
+    // comparing the fractional indices of page-level shapes against Frame
+    // children, two scales that never met, and the low digits of a tldraw index
+    // are randomised. The same board listed its matches two different ways from
+    // one run to the next; this expectation happened to match one of them.
     assert.deepEqual(matchState.ids, [
       'shape:palette-block',
-      'shape:palette-archive',
       'shape:palette-frame',
       'shape:palette-rich',
+      'shape:palette-archive',
     ])
-    assert.deepEqual(matchState.fields, ['block-title', 'block-title', 'frame-name', 'rich-text'])
+    assert.deepEqual(matchState.fields, ['block-title', 'frame-name', 'rich-text', 'block-title'])
     assert.equal(new Set(matchState.pages).size, 1)
     await capture(app.page, FIND_SHOT)
     pass('Ctrl+F finds Block, Frame, and rich-text adapters in stable order across one board')

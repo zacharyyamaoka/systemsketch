@@ -110,6 +110,38 @@
   opacity: 1;
 }
 
+/* A category that is not built yet stays focusable (see the `aria-disabled`
+ * note in InterfaceSettings.tsx) and says so on the row, so the reason is
+ * visible rather than hidden in a `title` no disabled button renders.
+ *
+ * Its label deliberately keeps `--ss-text-muted` rather than fading to
+ * `--ss-text-faint`. Making the row reachable also made it real copy — a
+ * person can Tab to it and a screen reader reads it — and the contrast gate
+ * measures it accordingly: faint put it at 2.3–4.4:1 across the four shipped
+ * palettes, under the 4.5:1 body-text line in every one. The `Later` badge is
+ * what says the row is inert, which is one signal doing the job instead of two
+ * where the second breaks legibility. */
+.systemsketch-settings__nav button[data-disabled] .systemsketch-settings__nav-badge,
+.systemsketch-settings__nav button[data-disabled] em {
+  opacity: .85;
+}
+
+.systemsketch-settings__nav button[data-disabled] em {
+  margin-left: auto;
+  padding: 1px 6px;
+  border: 1px solid var(--ss-border);
+  border-radius: 999px;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.systemsketch-settings__nav button[data-disabled]:hover {
+  background: transparent;
+}
+
 .systemsketch-settings__nav button.is-active {
   color: var(--ss-text);
   background: var(--ss-accent-soft);
