@@ -20,6 +20,7 @@ import {
 	type BranchArmLayout,
 	type BranchShape,
 } from './branchModel'
+import { isBranchArmShape } from './BranchArmShapeUtil'
 
 /** One level of the walk: a Branch ancestor and the arm the next shape down sits in. */
 export interface BranchAncestryLevel {
@@ -38,6 +39,10 @@ export interface BranchAncestryLevel {
  * the arm whose row holds the child's top edge.
  */
 export function branchArmIdOfChild(branch: BranchShape, child: TLShape): string | null {
+	if (
+		isBranchArmShape(child)
+		&& branch.props.arms.some((arm) => arm.id === child.props.armId)
+	) return child.props.armId
 	const stamped = child.meta?.[BRANCH_ARM_META_KEY]
 	if (typeof stamped === 'string' && branch.props.arms.some((arm) => arm.id === stamped)) {
 		return stamped

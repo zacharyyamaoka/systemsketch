@@ -217,7 +217,7 @@ async function main() {
     const replacement = await readFile(recoveryPath, 'utf8')
     assert.notEqual(replacement, occupiedSource)
     assert.equal(await readFile(brokenPath, 'utf8'), brokenSource)
-    assert.equal(JSON.parse(replacement).systemSketch.formatVersion, 1)
+    assert.equal(JSON.parse(replacement).systemSketch.formatVersion, 2)
     const forcedWrite = page.events
       .filter((event) => event.method === 'Network.requestWillBeSent')
       .map((event) => event.params.request)

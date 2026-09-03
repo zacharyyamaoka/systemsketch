@@ -55,7 +55,7 @@ describe('the envelope is one key, added and removed', () => {
     const parsed = JSON.parse(encoded)
     expect(Object.keys(parsed)[0]).toBe(SYSTEMSKETCH_ENVELOPE_KEY)
     expect(parsed[SYSTEMSKETCH_ENVELOPE_KEY]).toEqual({
-      formatVersion: 1,
+      formatVersion: 2,
       application: 'SystemSketch',
       shapes: { block: 2, geo: 1 },
       bindings: { connection: 1 },
@@ -94,7 +94,7 @@ describe('the envelope is one key, added and removed', () => {
 
   it('counts nothing when a document has no records yet', () => {
     expect(systemSketchManifest(undefined)).toEqual({
-      formatVersion: 1,
+      formatVersion: 2,
       application: 'SystemSketch',
       shapes: {},
       bindings: {},
@@ -117,7 +117,7 @@ describe('newer .systemsketch envelopes are protected from downgrade', () => {
   const newerFile = JSON.stringify({
     ...JSON.parse(TLDRAW_FILE),
     systemSketch: {
-      formatVersion: 2,
+      formatVersion: 3,
       application: 'SystemSketch',
       shapes: { block: 2 },
       bindings: { connection: 1 },
@@ -128,9 +128,9 @@ describe('newer .systemsketch envelopes are protected from downgrade', () => {
   it('marks a newer envelope read-only with an actionable explanation', () => {
     expect(newerDocumentVersion('/x/target.systemsketch', newerFile)).toEqual({
       readOnly: true,
-      formatVersion: 2,
-      supportedVersion: 1,
-      message: 'This file uses SystemSketch format version 2, but this build supports version 1. It is open read-only to prevent data loss.',
+      formatVersion: 3,
+      supportedVersion: 2,
+      message: 'This file uses SystemSketch format version 3, but this build supports version 2. It is open read-only to prevent data loss.',
     })
   })
 
@@ -140,7 +140,7 @@ describe('newer .systemsketch envelopes are protected from downgrade', () => {
     const parsed = JSON.parse(copy)
 
     expect(newerFile).toBe(before)
-    expect(parsed.systemSketch.formatVersion).toBe(1)
+    expect(parsed.systemSketch.formatVersion).toBe(2)
     expect(parsed.systemSketch.futureMetadata).toBeUndefined()
     expect(parsed.records).toEqual(JSON.parse(TLDRAW_FILE).records)
     expect(newerDocumentVersion('/x/copy.systemsketch', copy)).toBeNull()

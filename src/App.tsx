@@ -11,9 +11,11 @@ import {
   getBlockShapeVisibility,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
+  installDefinitionLinking,
 } from './blocks'
 import { BlockContextMenu } from './blocks/ui'
 import {
+  BranchArmShapeUtil,
   BranchShapeUtil,
   BranchTool,
   installBranchClickToEdit,
@@ -86,6 +88,7 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   ...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
   BlockShapeUtil,
   BranchShapeUtil,
+  BranchArmShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
@@ -104,6 +107,7 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   ...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
   BlockShapeUtil,
   BranchShapeUtil,
+  BranchArmShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, PillTool]
@@ -124,6 +128,7 @@ function SystemSketchCanvas() {
   useEffect(() => () => store.dispose(), [store])
   const onMount = useCallback((editor: Editor) => {
     enablePasteAtCursor(editor)
+    const stopDefinitionLinking = installDefinitionLinking(editor)
     const stopWorkspace = attach(editor)
     const stopBoardTheme = installBoardTheme(editor)
     const stopBlockConnections = installBlockConnections(editor)
@@ -149,6 +154,7 @@ function SystemSketchCanvas() {
       stopInstantTextEditing()
       stopDevelopmentSeam()
       stopBlockConnections()
+      stopDefinitionLinking()
       stopBoardTheme()
       stopWorkspace()
     }
@@ -194,6 +200,9 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
     const stopBlockConnections = isBlockDevelopment
       ? installBlockConnections(editor)
       : () => undefined
+    const stopDefinitionLinking = isBlockDevelopment
+      ? installDefinitionLinking(editor)
+      : () => undefined
     const stopInstantTextEditing = isBlockDevelopment
       ? installInstantTextEditing(editor)
       : () => undefined
@@ -220,6 +229,7 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopBlockConnections()
+      stopDefinitionLinking()
       stopBoardTheme()
     }
   }, [isBlockDevelopment])

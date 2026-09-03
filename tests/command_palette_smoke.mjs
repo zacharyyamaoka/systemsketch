@@ -147,6 +147,34 @@ async function paletteState(page) {
   })()`))
 }
 
+async function paletteLayerState(page) {
+  return JSON.parse(await evaluate(page, `(() => {
+    const backdrop = document.querySelector('[data-testid="systemsketch-command-palette"]')
+    const samples = {
+      preview: '[data-testid="systemsketch-preview-mode"]',
+      topLeft: '.systemsketch-top-left-shell',
+      topRight: '.systemsketch-top-right-shell',
+      utilities: '.systemsketch-utility-strip',
+    }
+    const covered = Object.fromEntries(Object.entries(samples).map(([name, selector]) => {
+      const element = document.querySelector(selector)
+      if (!element) return [name, null]
+      const rect = element.getBoundingClientRect()
+      const top = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+      return [name, {
+        covered: top === backdrop || backdrop.contains(top),
+        topClass: top?.className ?? null,
+      }]
+    }))
+    return JSON.stringify({
+      portalHost: backdrop?.parentElement?.classList.contains('tl-portal-host') ?? false,
+      backdropLayer: getComputedStyle(backdrop).zIndex,
+      canvasFrontLayer: getComputedStyle(document.querySelector('.tl-canvas__in-front')).zIndex,
+      covered,
+    })
+  })()`))
+}
+
 async function main() {
   await ensureDir(ASSETS)
   const app = await startApp({
@@ -181,6 +209,16 @@ async function main() {
     assert.ok(commands.options.some((label) => label.includes('Insert Block')))
     assert.ok(commands.options.some((label) => label.includes('Insert Pill')))
     assert.ok(commands.options.some((label) => label.includes('Find and replace on board')))
+    const layer = await paletteLayerState(app.page)
+    assert.deepEqual(
+      Object.fromEntries(Object.entries(layer.covered).map(([name, state]) => [name, state?.covered])),
+      { preview: true, topLeft: true, topRight: true, utilities: true },
+      `application chrome escaped the command-palette backdrop: ${JSON.stringify(layer.covered)}`,
+    )
+    assert.equal(layer.portalHost, true, 'the modal did not escape the canvas stacking context')
+    assert.equal(Number(layer.backdropLayer), 500)
+    assert.ok(Number(layer.backdropLayer) > Number(layer.canvasFrontLayer))
+    pass('the portaled modal backdrop covers Preview and every top-level chrome region')
     await capture(app.page, COMMANDS_SHOT)
     pass('Ctrl+P opens the command palette with its search input focused and real actions listed')
 

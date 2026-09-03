@@ -1,0 +1,172 @@
+{
+  "feature": "Automatic Definition linking and explicit unlinking",
+  "viewport": { "width": 2100, "height": 1300 },
+  "shapes": [
+    {
+      "id": "linked-a",
+      "type": "block",
+      "x": 580,
+      "y": 300,
+      "props": {
+        "title": "run()",
+        "description": "Linked occurrence A — edit me",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 560,
+        "h": 380,
+        "definitionId": "review-definition-run",
+        "definitionKey": "run",
+        "inputs": [{ "id": "in_bytes", "name": "bytes", "type": "Bytes", "visible": true }],
+        "outputs": [{ "id": "out_pose", "name": "pose", "type": "Pose", "visible": true }]
+      }
+    },
+    {
+      "id": "decode-inside-a",
+      "type": "block",
+      "parentId": "linked-a",
+      "x": 105,
+      "y": 105,
+      "props": {
+        "title": "decode()",
+        "description": "Shared expanded body",
+        "blockType": "call",
+        "view": "simple",
+        "w": 320,
+        "h": 180,
+        "definitionId": "review-definition-decode",
+        "definitionKey": "decode"
+      }
+    },
+    {
+      "id": "linked-b",
+      "type": "block",
+      "x": 1320,
+      "y": 300,
+      "props": {
+        "title": "run()",
+        "description": "Linked occurrence A — edit me",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 560,
+        "h": 380,
+        "definitionId": "review-definition-run",
+        "definitionKey": "run",
+        "inputs": [{ "id": "in_bytes", "name": "bytes", "type": "Bytes", "visible": true }],
+        "outputs": [{ "id": "out_pose", "name": "pose", "type": "Pose", "visible": true }]
+      }
+    },
+    {
+      "id": "decode-inside-b",
+      "type": "block",
+      "parentId": "linked-b",
+      "x": 105,
+      "y": 105,
+      "props": {
+        "title": "decode()",
+        "description": "Shared expanded body",
+        "blockType": "call",
+        "view": "simple",
+        "w": 320,
+        "h": 180,
+        "definitionId": "review-definition-decode",
+        "definitionKey": "decode"
+      }
+    },
+    {
+      "id": "draft-one",
+      "type": "block",
+      "x": 720,
+      "y": 810,
+      "props": {
+        "title": "run()",
+        "description": "Different internals stay safe as a draft",
+        "blockType": "Experimental",
+        "view": "simple",
+        "w": 360,
+        "h": 220,
+        "definitionId": "review-definition-run-draft-1",
+        "definitionKey": "run_draft_1",
+        "draftOrdinal": 1,
+        "inputs": [{ "id": "in_seed", "name": "seed", "type": "Int", "visible": true }],
+        "outputs": [{ "id": "out_debug", "name": "debug", "type": "Log", "visible": true }]
+      }
+    },
+    {
+      "id": "unlink-sandbox",
+      "type": "block",
+      "x": 1420,
+      "y": 960,
+      "props": {
+        "title": "helper()",
+        "description": "Right-click and choose Duplicate unlinked",
+        "blockType": "Function",
+        "view": "simple",
+        "w": 360,
+        "h": 220,
+        "definitionId": "review-definition-helper",
+        "definitionKey": "helper"
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Edit run() A’s description or ports; run() B should update immediately",
+      "x": 40,
+      "y": 180,
+      "w": 430,
+      "h": 115,
+      "target": { "shapeId": "linked-a", "anchor": "left", "dy": -90 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Step into A and rename decode(); the child inside B should mirror it",
+      "x": 40,
+      "y": 420,
+      "w": 430,
+      "h": 115,
+      "target": { "shapeId": "linked-a", "anchor": "left", "dy": 45 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Notice this different run() kept its title and received a quiet Draft 1 badge",
+      "x": 150,
+      "y": 820,
+      "w": 430,
+      "h": 115,
+      "target": { "shapeId": "draft-one", "anchor": "left", "dy": -45 }
+    },
+    {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 · Right-click helper() → Duplicate unlinked; expect helper_1() with independent content",
+      "x": 1320,
+      "y": 760,
+      "w": 560,
+      "h": 115,
+      "target": { "shapeId": "unlink-sandbox", "anchor": "top", "dx": 65 }
+    },
+    {
+      "id": "note",
+      "kind": "note",
+      "text": "Try switching only run() B to Port view: its view and compact appearance stay local while its Definition remains linked.",
+      "x": 790,
+      "y": 110,
+      "w": 510,
+      "h": 115
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Linked content and expanded bodies mirror, compact appearance stays local, Draft 1 remains independent, and explicit unlinking creates a uniquely named copy.",
+      "x": 610,
+      "y": 1120,
+      "w": 720,
+      "h": 125
+    }
+  ]
+}

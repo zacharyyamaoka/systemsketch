@@ -25,7 +25,7 @@ const { checks, pass } = makeChecklist()
 const SEED = `(() => {
   const editor = window.__systemsketch.editor
   const source = {
-    id: 'shape:contextual-source', type: 'block', x: 760, y: 500,
+    id: 'shape:contextual-source', type: 'block', x: 220, y: 500,
     props: {
       w: 280, h: 210, title: 'Source', view: 'port',
       inputs: [{ id: 'in0', name: 'trigger', type: 'event', visible: true }],
@@ -33,7 +33,7 @@ const SEED = `(() => {
     },
   }
   const target = {
-    id: 'shape:contextual-target', type: 'block', x: 220, y: 180,
+    id: 'shape:contextual-target', type: 'block', x: 760, y: 180,
     props: {
       w: 300, h: 230, title: 'Target', view: 'port',
       inputs: [{ id: 'in0', name: 'packet', type: 'bytes', visible: true }],
@@ -107,9 +107,10 @@ async function main() {
 
     const positionsBeforeTidy = await blockPositions(app.page)
     await clickElement(app.page, '[data-testid="selection-action-tidy-edges"]')
-    await waitFor(app.page, `window.__systemsketch.editor.getShape('shape:contextual-edge-0').props.pins.length > 0`, 'contextual edge tidy')
+    await waitFor(app.page, `window.__systemsketch.editor.getShape('shape:contextual-edge-0').props.elbowRoute !== null
+      && window.__systemsketch.editor.getShape('shape:contextual-edge-0').props.routeMode === 'automatic'`, 'contextual edge tidy')
     assert.deepEqual(await blockPositions(app.page), positionsBeforeTidy)
-    assert.equal(await evaluate(app.page, `window.__systemsketch.editor.getShape('shape:contextual-edge-1').props.pins.length`), 0)
+    assert.equal(await evaluate(app.page, `window.__systemsketch.editor.getShape('shape:contextual-edge-1').props.elbowRoute`), null)
     pass('clicking the toolbar runs the existing selection-scoped edge command and leaves nodes and unselected edges unchanged')
 
     await evaluate(app.page, `(() => { window.__systemsketch.editor.select('shape:contextual-source'); return true })()`)
@@ -136,7 +137,14 @@ async function main() {
 
     const positionsBeforeOrganize = await blockPositions(app.page)
     await clickElement(app.page, '[data-testid="selection-action-organize-nodes"]')
-    await waitFor(app.page, `window.__systemsketch.editor.getShape('shape:contextual-source').x < window.__systemsketch.editor.getShape('shape:contextual-target').x`, 'contextual node organization', 30_000)
+    await waitFor(app.page, `(() => {
+      const source = window.__systemsketch.editor.getShape('shape:contextual-source')
+      const target = window.__systemsketch.editor.getShape('shape:contextual-target')
+      return Math.abs(source.x - ${positionsBeforeOrganize[0].x}) > .5
+        || Math.abs(source.y - ${positionsBeforeOrganize[0].y}) > .5
+        || Math.abs(target.x - ${positionsBeforeOrganize[1].x}) > .5
+        || Math.abs(target.y - ${positionsBeforeOrganize[1].y}) > .5
+    })()`, 'contextual node organization', 30_000)
     assert.notDeepEqual(await blockPositions(app.page), positionsBeforeOrganize)
     pass('two selected Blocks expose both actions and the grid button invokes the existing Organize nodes command')
 

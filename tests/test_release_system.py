@@ -319,6 +319,76 @@ class ReleaseSystemTests(unittest.TestCase):
             (scripts / "launch_systemsketch.py").write_text("# launcher changed\n", encoding="utf-8")
             self.assertNotEqual(before, release_build_id(root, dist))
 
+    def test_host_plugin_changes_produce_a_new_release_build(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            dist = self.make_dist(root, "host-hash")
+            scripts = root / "scripts"
+            scripts.mkdir()
+            for name in ("launch_systemsketch.py", "release.py", *CONTROLLER_RUNTIME_FILES):
+                (scripts / name).write_text(f"# {name}\n", encoding="utf-8")
+            host_source = root / "vscode-systemsketch" / "src" / "extension.ts"
+            host_source.parent.mkdir(parents=True)
+            host_source.write_text("export const host = 1\n", encoding="utf-8")
+
+            before = release_build_id(root, dist)
+            host_source.write_text("export const host = 2\n", encoding="utf-8")
+
+            self.assertNotEqual(before, release_build_id(root, dist))
+
+    def test_host_plugin_failure_cannot_advance_stable(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            release_home = root / "runtime"
+            first, _ = stage_candidate(PROJECT_ROOT, release_home, self.make_dist(root, "first"))
+            promote_candidate(release_home)
+            second, second_manifest = stage_candidate(
+                PROJECT_ROOT,
+                release_home,
+                self.make_dist(root, "second"),
+            )
+
+            with patch.object(
+                release_cli,
+                "build_candidate",
+                return_value=(second, second_manifest),
+            ), patch.object(
+                release_cli,
+                "build_host_artifacts",
+                side_effect=ReleaseError("host build failed"),
+            ), self.assertRaisesRegex(ReleaseError, "host build failed"):
+                release_cli.promote_release(release_home)
+
+            self.assertEqual(read_channels(release_home).stable, first)
+            self.assertEqual(read_channels(release_home).candidate, second)
+
+    def test_successful_promotion_builds_hosts_before_selecting_stable(self) -> None:
+        order: list[str] = []
+        release_home = Path("/tmp/systemsketch-test-release")
+        host_manifest = {"build": "candidate"}
+        with patch.object(
+            release_cli,
+            "build_candidate",
+            side_effect=lambda *_args, **_kwargs: (order.append("candidate") or ("candidate", {})),
+        ), patch.object(
+            release_cli,
+            "build_host_artifacts",
+            side_effect=lambda *_args, **_kwargs: (order.append("hosts") or host_manifest),
+        ), patch.object(
+            release_cli,
+            "promote_candidate",
+            side_effect=lambda *_args, **_kwargs: order.append("promote"),
+        ), patch.object(
+            release_cli,
+            "install_controller",
+            side_effect=lambda *_args, **_kwargs: order.append("controller"),
+        ):
+            build, result = release_cli.promote_release(release_home)
+
+        self.assertEqual(build, "candidate")
+        self.assertIs(result, host_manifest)
+        self.assertEqual(order, ["candidate", "hosts", "promote", "controller"])
+
     def test_controller_fingerprint_changes_with_the_preview_api_runtime(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             scripts = Path(directory)
@@ -452,6 +522,8 @@ class ReleaseSystemTests(unittest.TestCase):
             # first character of the first line.
             self.assertEqual(dirty.dirty_paths, ("package.json", "src/Untracked.tsx"))
             self.assertIn("package.json", SOURCE_PATHS)
+            self.assertIn("vscode-systemsketch/src", SOURCE_PATHS)
+            self.assertIn("obsidian-systemsketch/src", SOURCE_PATHS)
 
     def test_a_tree_with_no_git_records_unknown_rather_than_clean(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

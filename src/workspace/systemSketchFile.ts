@@ -21,7 +21,7 @@
  */
 
 export const SYSTEMSKETCH_ENVELOPE_KEY = 'systemSketch'
-export const SYSTEMSKETCH_FORMAT_VERSION = 1
+export const SYSTEMSKETCH_FORMAT_VERSION = 2
 export const SYSTEMSKETCH_APPLICATION = 'SystemSketch'
 
 /**

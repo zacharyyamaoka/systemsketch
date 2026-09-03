@@ -24,6 +24,7 @@ import {
   portInHeader,
   setBlockViewProps,
 } from '../blockModel'
+import { commitBlockDefinitionName, definitionBadge } from '../definitions/definitionLinking'
 import { getBlockPortConnections, type BlockPortConnection } from '../connections/blockPorts'
 import { valueBlockInlet, valueBlockName, valueBlockOutlet } from '../valueBlock'
 import {
@@ -85,6 +86,8 @@ export interface BlockInspectorActions {
   movePortToSection(side: BlockPortSide, portId: string, target: BlockPortSectionTarget): void
   /** Open one undo step for a typing gesture. Absent for an unplaced draft. */
   beginEdit?(label: string): void
+  /** Resolve a same-name collision only when the title gesture is complete. */
+  commitTitle?(): void
 }
 
 /** What a pill is wired to, read from the cables; the content never reads the editor. */
@@ -965,7 +968,11 @@ export function BlockInspectorContent({
                 ariaLabel="Block title"
                 beginEdit={() => actions?.beginEdit?.('rename block')}
                 onWrite={(title) => actions?.updateDetails({ title }, { continuous: true })}
+                onEditEnd={() => actions?.commitTitle?.()}
               />
+              {definitionBadge(props) ? (
+                <small className="block-inspector__definition-badge">{definitionBadge(props)}</small>
+              ) : null}
             </label>
 
             <div className="block-inspector__field">
@@ -1151,6 +1158,7 @@ export function EditorBlockInspector({
         movePortToSection: (side, portId, target) =>
           void moveBlockPortToSection(editor, id, side, portId, target),
         beginEdit: (label) => void editor.markHistoryStoppingPoint(label),
+        commitTitle: () => commitBlockDefinitionName(editor, id),
       }
     }
     if (context.kind !== 'tool' || !onToolDraftChange) return undefined

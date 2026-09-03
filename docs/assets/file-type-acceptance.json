@@ -24,13 +24,13 @@
     "label": "the envelope names what the board actually holds",
     "observed": {
       "application": "SystemSketch",
-      "formatVersion": 1,
+      "formatVersion": 2,
       "blocks": 2,
       "connections": 2
     },
     "desired": {
       "application": "SystemSketch",
-      "formatVersion": 1,
+      "formatVersion": 2,
       "blocks": 2,
       "connections": 2
     },

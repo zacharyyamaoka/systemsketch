@@ -1,0 +1,54 @@
+{
+  "feature": "Command palette backdrop covers application chrome",
+  "viewport": { "width": 1500, "height": 820 },
+  "shapes": [
+    {
+      "id": "subject",
+      "type": "block",
+      "x": 780,
+      "y": 280,
+      "props": {
+        "title": "Modal layer check",
+        "description": "This board and every application control should dim together",
+        "blockType": "Function",
+        "view": "port",
+        "w": 390,
+        "h": 210,
+        "inputs": [{ "id": "in_1", "name": "Ctrl+P", "type": "Shortcut", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "uniform backdrop", "type": "Visual", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Press Ctrl+P anywhere on this board",
+      "x": 100,
+      "y": 300,
+      "w": 430,
+      "h": 110,
+      "target": { "shapeId": "subject", "anchor": "left", "dy": -20 }
+    },
+    {
+      "id": "step-2",
+      "kind": "note",
+      "text": "2 · Compare the Preview pill and corner controls with this Block; all should sit beneath one uniform gray scrim",
+      "x": 90,
+      "y": 500,
+      "w": 520,
+      "h": 130,
+      "target": { "shapeId": "subject", "anchor": "left", "dy": 60 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Commands stays bright while Preview, both top control groups, the bottom utilities, and the board are uniformly dimmed and cannot be clicked",
+      "x": 680,
+      "y": 620,
+      "w": 760,
+      "h": 120
+    }
+  ]
+}

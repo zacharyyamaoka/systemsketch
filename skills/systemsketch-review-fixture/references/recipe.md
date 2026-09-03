@@ -77,6 +77,8 @@ A partial Block lets the current `BlockShapeUtil` fill every omitted default:
 
 For an Expanded Block, set `view`, `w`, and `h`, then make child shapes use the Block's shorthand id as `parentId`. For a semantic cable, create a `connection` shape plus its two `connection` bindings with the exact current props from the feature source or an existing acceptance test. Do not imitate a semantic cable with a stock arrow.
 
+For a Branch, seed only the semantic `branch` and its ordinary direct children, stamping each child with `meta.branchArm`. The live editor projects those children into internal `branch-arm` frames when the board loads. Never put `branch-arm` records in a recipe: they are derived implementation details that the current document format persists automatically, while older boards are upgraded on load.
+
 ## Review quality
 
 - Pre-arrange the state immediately before the primary gesture.

@@ -1,4 +1,4 @@
-import { StyleProp, T, type TLShape } from 'tldraw'
+import { StyleProp, T, createShapeId, type TLShape } from 'tldraw'
 
 export const BLOCK_SHAPE_TYPE = 'block' as const
 export const BLOCK_TOOL_ID = 'block' as const
@@ -115,6 +115,12 @@ export const BLOCK_SHAPE_PROPS = {
 	portLayout: BlockPortLayoutStyle,
 	/** Manual expanded-section weights keyed by `g:<id>` / `b:<id>`. */
 	expandedWeights: T.dict(T.string, T.number).optional(),
+	/** Opaque identity shared by every occurrence of one callable definition. */
+	definitionId: T.string.optional(),
+	/** Collision-free export / namespace key. The canvas keeps showing `title`. */
+	definitionKey: T.string.optional(),
+	/** Present only while this definition is a same-name, different-body draft. */
+	draftOrdinal: T.number.optional(),
 	inputs: T.arrayOf(BlockPort),
 	outputs: T.arrayOf(BlockPort),
 } as const
@@ -139,6 +145,9 @@ declare module 'tldraw' {
 			notes?: string
 			portLayout: PortLayout
 			expandedWeights?: Record<string, number>
+			definitionId?: string
+			definitionKey?: string
+			draftOrdinal?: number
 			inputs: BlockPort[]
 			outputs: BlockPort[]
 		}
@@ -174,6 +183,7 @@ export function getDefaultBlockProps(): BlockShapeProps {
 		showDescription: true,
 		notes: '',
 		portLayout: 'inline',
+		definitionId: createShapeId().slice('shape:'.length),
 		inputs: [],
 		outputs: [],
 	}

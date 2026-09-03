@@ -526,9 +526,11 @@ class SystemSketchServer(ThreadingHTTPServer):
                 ],
                 cwd=self.source_root,
                 check=True,
-                timeout=300,
+                timeout=900,
             )
-            return self.release_payload(message="Verified Preview published for the next Stable launch.")
+            return self.release_payload(
+                message="Verified Preview and host plugins published for the next Stable launch."
+            )
         rollback_stable(self.release_home)
         return self.release_payload(message="Previous verified build selected for the next Stable launch.")
 
