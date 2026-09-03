@@ -1,0 +1,44 @@
+{
+  "feature": "Open the command palette with Ctrl+P",
+  "viewport": { "width": 1500, "height": 820 },
+  "shapes": [
+    {
+      "id": "subject",
+      "type": "block",
+      "x": 760,
+      "y": 290,
+      "props": {
+        "title": "Search",
+        "description": "The board stays visible behind the command palette",
+        "blockType": "Function",
+        "view": "port",
+        "w": 360,
+        "h": 200,
+        "inputs": [{ "id": "in_1", "name": "query", "type": "Text", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "matches", "type": "List", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Press Ctrl+P anywhere on this board",
+      "x": 100,
+      "y": 330,
+      "w": 430,
+      "h": 110,
+      "target": { "shapeId": "subject", "anchor": "left", "dy": 0 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The Commands palette opens centered, its search field is focused, and the browser print dialog does not appear",
+      "x": 660,
+      "y": 610,
+      "w": 720,
+      "h": 120
+    }
+  ]
+}

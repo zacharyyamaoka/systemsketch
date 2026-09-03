@@ -163,14 +163,14 @@ async function main() {
     await waitFor(app.page, 'window.__systemsketch?.editor', 'the scratch board editor', 30_000)
     await waitFor(
       app.page,
-      `document.querySelector('[title="Search and commands"]')`,
+      `document.querySelector('[title="Search and commands (Ctrl+P)"]')`,
       'the visible Search and commands action',
       30_000,
     )
     await seedScratchBoard(app.page)
 
-    // 1. Ctrl+K opens the real callback-driven command mode with focus ready.
-    await shortcut(app.page, 'k', 'KeyK', 2)
+    // 1. Ctrl+P opens the real callback-driven command mode with focus ready.
+    await shortcut(app.page, 'p', 'KeyP', 2)
     await waitFor(
       app.page,
       `document.querySelector('[data-testid="systemsketch-command-palette"] h2')?.textContent === 'Commands'`,
@@ -182,7 +182,7 @@ async function main() {
     assert.ok(commands.options.some((label) => label.includes('Insert Pill')))
     assert.ok(commands.options.some((label) => label.includes('Find and replace on board')))
     await capture(app.page, COMMANDS_SHOT)
-    pass('Ctrl+K opens the command palette with its search input focused and real actions listed')
+    pass('Ctrl+P opens the command palette with its search input focused and real actions listed')
 
     await typeSlowly(app.page, 'insert block')
     await waitFor(
@@ -205,7 +205,7 @@ async function main() {
     })()`)
 
     // 2. The visible trigger proves focus containment and restoration, not only shortcuts.
-    await clickElement(app.page, '[title="Search and commands"]')
+    await clickElement(app.page, '[title="Search and commands (Ctrl+P)"]')
     await waitFor(
       app.page,
       `document.activeElement?.getAttribute('aria-label') === 'Search commands'`,
@@ -238,7 +238,7 @@ async function main() {
       'Escape dismissal',
     )
     assert.equal(
-      await evaluate(app.page, `document.activeElement?.getAttribute('title')`),
+      await evaluate(app.page, `document.activeElement?.getAttribute('aria-label')`),
       'Search and commands',
     )
     pass('Tab stays inside the modal; Escape closes it and restores focus to the visible trigger')

@@ -106,7 +106,9 @@ export function SystemSketchMenuPanel() {
       <TldrawUiButton
         type="icon"
         className="systemsketch-shell-icon-button"
-        title="Search and commands"
+        title="Search and commands (Ctrl+P)"
+        aria-label="Search and commands"
+        aria-keyshortcuts="Control+P Meta+P"
         aria-expanded={toolbarSurface !== null}
         onClick={() => setToolbar(toolbarSurface ? null : 'commands')}
       >
@@ -423,7 +425,7 @@ export function SystemSketchSurfaceHost() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return
       const key = event.key.toLowerCase()
-      if (key !== 'k' && key !== 'f') return
+      if (key !== 'p' && key !== 'k' && key !== 'f') return
       event.preventDefault()
       event.stopPropagation()
       setToolbar(key === 'f' ? 'find-replace' : 'commands')

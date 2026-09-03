@@ -8,6 +8,8 @@ The [35-item repo improvement review](docs/repo-improvement-review-2026-09-02.ht
 
 The [Tidy Edges + Organize Nodes comparison](docs/layout-comparison-2026-09-02.html) runs the ported PyBlocks architecture against 40 increasingly messy synthetic cases: 20 edge-channel fixtures and 20 node-layout fixtures, each with an interactive before/after canvas and measured invariants. The companion [`tidy-edges.systemsketch`](sketches/review/tidy-edges.systemsketch) and [`organize-nodes.systemsketch`](sketches/review/organize-nodes.systemsketch) boards are ready for direct human verification.
 
+The [Ctrl+P command-palette implementation gallery](docs/command-palette-ctrl-p-2026-09-02.html) shows the editor-style shortcut opening the real Commands dialog with search focused while suppressing the browser print action. Ctrl+K remains a compatibility alias, Ctrl+F still opens board Find & replace, and the linked review board is ready to drive on the isolated track server.
+
 [Open the rendered foundation report](docs/systemsketch-foundation-2026-08-30.html)
 
 ## The starting point
