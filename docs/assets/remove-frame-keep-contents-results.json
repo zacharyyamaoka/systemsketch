@@ -2,9 +2,9 @@
   "checks": [
     {
       "id": "M1",
-      "label": "right-clicking one unlocked Frame offers Remove frame",
-      "observed": "Remove frame",
-      "desired": "Remove frame",
+      "label": "right-clicking one unlocked Frame offers Delete frame, leave children",
+      "observed": "Delete frame, leave children",
+      "desired": "Delete frame, leave children",
       "ok": true
     },
     {

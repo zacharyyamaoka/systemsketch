@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the self-contained Remove frame evidence gallery."""
+"""Build the self-contained Delete frame, leave children evidence gallery."""
 
 from __future__ import annotations
 
@@ -40,7 +40,7 @@ def main() -> None:
     )
     document = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Remove frame, keep contents · SystemSketch</title>
+<title>Delete frame, leave children · SystemSketch</title>
 <style>
 :root{{--paper:#f4f1ea;--ink:#242320;--muted:#6d6961;--line:#d6d0c5;--blue:#2f7fe7;--green:#18794e;--orange:#ed8a31;--card:#fff}}
 *{{box-sizing:border-box}}body{{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}}
@@ -57,7 +57,7 @@ pre{{overflow:auto;padding:22px;border-radius:16px;background:#20242b;color:#e9e
 <h1>Remove the boundary.<br>Keep the system.</h1>
 <p class="lede">A stock Frame now has a dedicated right-click command that removes only the boundary. Its contents keep their exact page positions, nested Frames remain nested, and one Undo restores the whole containment relationship.</p>
 <div class="hero">
-  <article class="card"><div class="eyebrow">Right-click command</div><div class="command">Remove frame</div><p>Visible only for one selected, unlocked stock Frame. It is deliberately distinct from the stock destructive Delete command.</p></article>
+  <article class="card"><div class="eyebrow">Right-click command</div><div class="command">Delete frame, leave children</div><p>Visible only for one selected, unlocked stock Frame. Its label states the preservation rule directly and distinguishes it from stock destructive Delete.</p></article>
   <article class="card"><div class="eyebrow">One transaction</div><div class="flow"><span class="chip">lift children</span><span class="arrow">→</span><span class="chip">delete empty frame</span><span class="arrow">→</span><span class="chip">select survivors</span></div><p>tldraw’s supported reparent primitive preserves page-space geometry and keeps nested subtrees intact.</p></article>
 </div>
 <section><h2>The invariant is visible</h2><div class="rules">

@@ -561,7 +561,7 @@ function BlockContextMenuItems() {
         <TldrawUiMenuGroup id="systemsketch-frame">
           <TldrawUiMenuItem
             id="frame-remove-keep-contents"
-            label="Remove frame"
+            label="Delete frame, leave children"
             onSelect={() => void removeFrameKeepContents(editor, selectedFrame.id)}
           />
         </TldrawUiMenuGroup>
