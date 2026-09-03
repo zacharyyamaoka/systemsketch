@@ -11,6 +11,7 @@
     "test:context-menu": "node tests/block_context_menu_smoke.mjs",
     "test:click-to-edit": "node tests/block_click_to_edit_smoke.mjs",
     "test:fields": "node tests/inspector_live_commit_smoke.mjs",
+    "test:field-guidance": "node tests/inspector_field_guidance_smoke.mjs",
     "test:batch": "node tests/block_batch_editing_smoke.mjs",
     "test:ports": "node tests/block_port_in_window_smoke.mjs",
     "test:rows": "node tests/block_port_rows_smoke.mjs",

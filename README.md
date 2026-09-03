@@ -4,6 +4,14 @@ SystemSketch starts from one deliberately boring datum: the stock tldraw whitebo
 
 ## Current improvement review
 
+The [UI and visual-language PEP](docs/pep-ui-visual-language.md) establishes
+the maintained rule for blank authored fields: permanent labels plus short,
+generic field-role guidance—never fabricated example content.
+
+The [inspector field-guidance gallery](docs/inspector-field-guidance-2026-09-03.html)
+shows the shared vocabulary, the captured running inspector, and the real-browser
+evidence behind this change.
+
 The [Loop region implementation gallery](docs/loop-region-implementation-2026-09-03.html) builds golden 10's `for` as a frame-like region whose header is an operator, with the element leaving through a real port on an ordinary solid cable. It also records the container hit-zone contract every region now shares: an `isLabel` band is solid chrome, a frame-like face stops tldraw's hit search, and — because the same predicate resolves a drop target — a cable inside a region has to be that region's child to stay clickable. The companion [`loop-region.systemsketch`](sketches/review/loop-region.systemsketch) board is ready for direct human verification.
 
 The [`?` and projection implementation report](docs/unknown-projection-implementation-2026-09-03.html) lands both picks from the two galleries below. `UNKNOWN_TOKEN = '?'` is the one spelling for *we looked and cannot tell* — blank still means *nobody annotated this*, and `Any` is left alone because a program can declare it. **Mark unresolved** sets `blockType: 'unresolved'` and the view to Simple in one undo step, and fills with a single `?` only the type slots that are empty: `self: Client` survives, because the receiver is annotated where the call is written, and a name is never touched. Nothing is inferred from a neighbouring cable, a row that already states a type goes unknown through the port's own **Mark unknown**, and nothing is *policed* — type a `?` into a name and it stays. One `?` per row is the pyblocks projection's convention, written down in that repo's `docs/unknown-slot-convention.md`, not a rule this layer enforces. A projection is an ordinary Block: **Split** joins the connection-drop offer, titles itself from the type on the cable, and its accessor rows are normalized in one place, so `.pose.translation.x` stays a single row and carries no `?` at all. No new shape, no new port field, no migration. Proof is `npm run test:unknown` — 28/28 checks driven in a real browser — plus the [`unknown-projection.systemsketch`](sketches/review/unknown-projection.systemsketch) board.

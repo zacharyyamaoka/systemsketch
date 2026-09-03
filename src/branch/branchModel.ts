@@ -278,7 +278,9 @@ export function appendBranchControlProps(
 	initial: Partial<Pick<BranchControlPort, 'name' | 'type'>> = {},
 ): { props: BranchShapeProps; port: BranchControlPort } {
 	const id = nextControlId(props.controls)
-	const port: BranchControlPort = { id, name: initial.name ?? id, type: initial.type ?? '' }
+	// An implementation id is not a helpful starting value for a control name.
+	// Keep it stable in `id`; the blank label receives the inspector's guidance.
+	const port: BranchControlPort = { id, name: initial.name ?? '', type: initial.type ?? '' }
 	return { props: { ...props, controls: [...props.controls, port] }, port }
 }
 
@@ -311,7 +313,7 @@ export function appendBranchArmProps(
 	const open = props.view === 'expanded' || !props.arms.some((arm) => arm.open)
 	const arm: BranchArm = {
 		id,
-		title: initial.title ?? 'case',
+		title: initial.title ?? '',
 		open,
 		h: initial.h ?? BRANCH_DEFAULT_ARM_HEIGHT,
 	}

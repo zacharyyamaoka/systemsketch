@@ -1,0 +1,10 @@
+{
+  "checks": [
+    "a blank Block names Title, Type, and Display description without filling them",
+    "a newly added port keeps its internal id private and shows Name, Type, and Default",
+    "a blank Pill names Name, Value, and Type without gain, 2.0, or float",
+    "the saved review fixture opens, exercises blank Block and Pill fields, and keeps its bound cue attached",
+    "the browser journey has no local console errors"
+  ],
+  "screenshot": "/home/bam/.codex/worktrees/b335/systemsketch-track-inspector-field-guidance/docs/assets/inspector-field-guidance-2026-09-03.png"
+}
