@@ -780,6 +780,15 @@ function autoPoints(
 ): { points: ElbowPoint[]; fallback: boolean } {
   const obstacleBounds = obstacles.map((rect) => expandBounds(boundsOfRect(rect), options.padding))
 
+  // An output returning to its own input is a feedback loop, not a shortest
+  // path problem. The two endpoint boxes are exactly equal, so A* has two
+  // symmetric routes; choosing the lower one leaves the header and top-edge
+  // effect ports clear, and makes the loop read consistently.
+  const selfLoop = belowSelfLoopPoints(start, end, options.padding)
+  if (selfLoop && !polylineHits(selfLoop, obstacleBounds)) {
+    return { points: selfLoop, fallback: false }
+  }
+
   const midline = attemptRoute(start, end, obstacleBounds, options, 'midline')
   if (midline.points && !polylineHits(midline.points, obstacleBounds)) {
     return { points: midline.points, fallback: false }
@@ -793,6 +802,37 @@ function autoPoints(
   const best = tight.points ?? midline.points
   if (best) return { points: best, fallback: true }
   return { points: fallbackPoints(start, end, options.legLength), fallback: true }
+}
+
+/** The deterministic lower loop for an ordinary output returning to its own input. */
+function belowSelfLoopPoints(
+  start: ElbowEndpoint,
+  end: ElbowEndpoint,
+  padding: number,
+): ElbowPoint[] | null {
+  const box = start.box
+  if (
+    !box
+    || !end.box
+    || start.side !== 'right'
+    || end.side !== 'left'
+    || !nearlyEqual(box.x, end.box.x)
+    || !nearlyEqual(box.y, end.box.y)
+    || !nearlyEqual(box.w, end.box.w)
+    || !nearlyEqual(box.h, end.box.h)
+  ) return null
+
+  const right = box.x + box.w + padding
+  const left = box.x - padding
+  const below = box.y + box.h + padding
+  return [
+    { ...start.point },
+    { x: right, y: start.point.y },
+    { x: right, y: below },
+    { x: left, y: below },
+    { x: left, y: end.point.y },
+    { ...end.point },
+  ]
 }
 
 function buildSegments(points: readonly ElbowPoint[]): ElbowSegment[] {

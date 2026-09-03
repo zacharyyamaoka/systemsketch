@@ -1,0 +1,48 @@
+{
+  "feature": "Block self-loop routing",
+  "viewport": { "width": 1280, "height": 800 },
+  "shapes": [
+    {
+      "id": "subject",
+      "type": "block",
+      "x": 440,
+      "y": 290,
+      "props": {
+        "title": "pose()",
+        "description": "A self-loop must travel below this Function.",
+        "blockType": "Function",
+        "view": "port",
+        "w": 400,
+        "h": 240,
+        "inputs": [
+          { "id": "in_1", "name": "pose", "type": "Pose", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_1", "name": "result", "type": "Pose", "visible": true }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Drag the result port onto the pose port.",
+      "x": 940,
+      "y": 270,
+      "w": 340,
+      "h": 110,
+      "target": { "shapeId": "subject", "anchor": "right", "dy": 0 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Loop stays below, outside.",
+      "x": 420,
+      "y": 670,
+      "w": 440,
+      "h": 110
+    }
+  ]
+}
