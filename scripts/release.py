@@ -69,7 +69,7 @@ def build_host_artifacts(
     *,
     project_root: Path = PROJECT_ROOT,
 ) -> dict:
-    """Build both host plugins before ``build`` is allowed to become Stable.
+    """Build both host plugins for an already verified app release.
 
     The working directories are disposable build output. The durable result is
     one atomic, immutable directory under ``host-releases/<build>``. VS Code
@@ -164,7 +164,7 @@ def build_host_artifacts(
             raise ReleaseError(f"release {build} records no source time")
         if source_mtime(project_root) > released_source_time:
             raise ReleaseError(
-                "source changed while the host plugins were building; Stable was not advanced"
+                "source changed while the host plugins were building; host artifacts were discarded"
             )
 
         obsidian_records = {
@@ -252,16 +252,34 @@ def build_candidate(release_home: Path, *, allow_dirty: bool = False) -> tuple[s
         return build, manifest
 
 
-def promote_release(release_home: Path, *, allow_dirty: bool = False) -> tuple[str, dict]:
-    """Verify one candidate and its host plugins, then atomically select it."""
+def try_build_host_artifacts(release_home: Path, build: str) -> dict | None:
+    """Best-effort host follow-up that cannot invalidate standalone Stable."""
+    try:
+        return build_host_artifacts(release_home, build)
+    except (OSError, ReleaseError, subprocess.CalledProcessError) as cause:
+        print(
+            f"warning: standalone Stable {build} is published, but its host plugins did not build: {cause}",
+            file=sys.stderr,
+        )
+        print(
+            "warning: fix the host build and run the promotion again to retry; Stable will stay available.",
+            file=sys.stderr,
+        )
+        return None
+
+
+def promote_release(release_home: Path, *, allow_dirty: bool = False) -> tuple[str, dict | None]:
+    """Verify and select standalone Stable, then attempt its host builds."""
     build, _manifest = build_candidate(release_home, allow_dirty=allow_dirty)
     print(f"Verified candidate {build}")
-    host_manifest = build_host_artifacts(release_home, build)
     promote_candidate(release_home)
     install_controller(PROJECT_ROOT, release_home)
-    print(f"Built VS Code, Cursor, and Obsidian plugins for Stable {build}.")
-    print(f"Host artifacts: {host_artifact_root(release_home, build)}")
-    print("Published for the next Stable launch; host installation remains explicit.")
+    print(f"Published standalone Stable {build} for the next launch.")
+    host_manifest = try_build_host_artifacts(release_home, build)
+    if host_manifest is not None:
+        print(f"Built VS Code, Cursor, and Obsidian plugins for Stable {build}.")
+        print(f"Host artifacts: {host_artifact_root(release_home, build)}")
+    print("Host installation remains explicit.")
     return build, host_manifest
 
 

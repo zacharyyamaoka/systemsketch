@@ -1,0 +1,127 @@
+[
+  {
+    "id": "AS-1",
+    "label": "a newly drawn connection remains ordinary data",
+    "observed": "data",
+    "desired": "data",
+    "ok": true
+  },
+  {
+    "id": "AS-2",
+    "label": "the inspector presents the three semantic edge types",
+    "observed": {
+      "title": "Edge type",
+      "choices": [
+        "Data",
+        "Async",
+        "Delayed (z⁻¹)"
+      ]
+    },
+    "desired": {
+      "title": "Edge type",
+      "choices": [
+        "Data",
+        "Async",
+        "Delayed (z⁻¹)"
+      ]
+    },
+    "ok": true
+  },
+  {
+    "id": "AS-3",
+    "label": "choosing Async paints the selected V1 packet cadence",
+    "observed": {
+      "temporal": "async",
+      "dash": "56 4 10 4",
+      "offset": "35",
+      "cap": "butt",
+      "edgeType": "async",
+      "pill": false
+    },
+    "desired": {
+      "temporal": "async",
+      "dash": "56 4 10 4",
+      "offset": "35",
+      "cap": "butt",
+      "edgeType": "async",
+      "pill": false
+    },
+    "ok": true
+  },
+  {
+    "id": "AS-4",
+    "label": "SVG export uses the same cadence and cap",
+    "observed": {
+      "dash": "56 4 10 4",
+      "offset": "35",
+      "cap": "butt"
+    },
+    "desired": {
+      "dash": "56 4 10 4",
+      "offset": "35",
+      "cap": "butt"
+    },
+    "ok": true
+  },
+  {
+    "id": "AS-5",
+    "label": "right-click exposes the same selector with Async checked",
+    "observed": [
+      {
+        "label": "Data",
+        "checked": "unchecked"
+      },
+      {
+        "label": "Async",
+        "checked": "checked"
+      },
+      {
+        "label": "Delayed (z⁻¹)",
+        "checked": "unchecked"
+      }
+    ],
+    "desired": [
+      {
+        "label": "Data",
+        "checked": "unchecked"
+      },
+      {
+        "label": "Async",
+        "checked": "checked"
+      },
+      {
+        "label": "Delayed (z⁻¹)",
+        "checked": "unchecked"
+      }
+    ],
+    "ok": true
+  },
+  {
+    "id": "AS-6",
+    "label": "autosave and reload preserve the async edge type and paint",
+    "observed": {
+      "temporal": "async",
+      "dash": "56 4 10 4",
+      "offset": "35",
+      "cap": "butt",
+      "edgeType": "async",
+      "pill": false
+    },
+    "desired": {
+      "temporal": "async",
+      "dash": "56 4 10 4",
+      "offset": "35",
+      "cap": "butt",
+      "edgeType": "async",
+      "pill": false
+    },
+    "ok": true
+  },
+  {
+    "id": "AS-7",
+    "label": "the happy path produced no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

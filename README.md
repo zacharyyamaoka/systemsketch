@@ -4,6 +4,8 @@ SystemSketch starts from one deliberately boring datum: the stock tldraw whitebo
 
 ## Current improvement review
 
+The [count-free selection-menu gallery](docs/selection-count-removal-2026-09-02.html) records the FigJam-aligned removal of visible selection totals: three Blocks retain their S / P / E, appearance and Inspect actions with no “3 selected” or “3 Blocks” prefix; the Inspector calls the state **Batch edit**. It includes the saved review-board journey and source-level guardrails for the replacement selection-identity refresh.
+
 The [Expanded Block footer-drag gallery](docs/expanded-footer-drag-2026-09-02.html) proves the footer and painted port words are real drag handles again while the open middle remains drawable child canvas. Its focused real-browser journey covers both selected and cold footer drags, a port-text drag, and the negative interior control.
 
 The [35-item repo improvement review](docs/repo-improvement-review-2026-09-02.html) ranks the audited gaps, shows the top ten already running with real-browser evidence, and gives each shipped fix and remaining candidate its own accept checkbox and review note. The [follow-up decision gallery](docs/repo-improvement-followup-review-2026-09-02.html) covers the revised future-format workflow plus comments, commands, timer removal, diagnostics, and folder creation with one accept checkbox and note field per change. These are temporary decision surfaces; code and ordinary regression tests remain the living specification.
@@ -48,10 +50,10 @@ flowchart LR
 - **Open Live Preview** snapshots the current board, opens the copy in a new Preview window, and then lets the two browser profiles evolve independently.
 - Browser-local images are made portable during that one-time handoff rather than pointing back to Stable's private asset store.
 - Stable and Preview use separate ports and browser profiles; when they intentionally point at the same local file, a content-digest fence prevents silent clobbers.
-- **Publish Preview** runs type checks, frontend tests, Python release tests, a production build,
-  and the VS Code/Cursor and Obsidian plugin builds before advancing the Stable pointer. Host
-  artifacts are immutable beside that Stable build; installing them remains explicit so publishing
-  never reloads an application Zach is using.
+- **Publish Preview** runs type checks, frontend tests, Python release tests, and a production build
+  before advancing the standalone Stable pointer. It then attempts the VS Code/Cursor and Obsidian
+  plugin builds as a best-effort follow-up; a host failure cannot roll back or interrupt the app.
+  Successful host artifacts are immutable beside that Stable build.
 - The previous verified Stable build remains available for rollback on the next launch.
 
 ## Development operating loop
@@ -122,9 +124,11 @@ AI work: docs/async-edge-styles-2026-09-02.html records the five-family explorat
 The [many-to-one report](docs/many-to-one-2026-09-02.html) answers how a board says which of several cables into one port is live: a many-to-one port is a φ, and choosing an arm reads it. Zach's transparency plan is written out as three clauses in `docs/many_to_one_rule.py` (not the chosen arm; an end inside a non-chosen arm; φ-resolution at the port) and run at build time on the nested-branch and loop fixtures; "inactive" is choosing a region's implicit arm (zero iterations, unchanged), which is what makes a pass-through read at full opacity with no special case. The same table yields the lint: many-to-one is legal only when some region makes the producers exclusive, so Zach's two-estimate() board lints and his branch board passes. Five variants on two fixtures (transparency only, live-wire emphasis, bypass drawn through, an explicit merge node, port-side badge and lint); V1 wins with V5's badge and lint as the splice, and the prior-art table covers bypass and mute semantics in Houdini, TouchDesigner, Blender, Nuke, Simulink and LabVIEW and live-path highlighting in LabVIEW, Simulink and Unreal.
 The [Branch region implementation report](docs/branch-region-implementation-2026-09-02.html) adds the first region that is not a Block: a frame-like `if` whose band carries an editable title and the control ports it decides on, whose arms each hold Blocks under a titled header row, and which has no ports of its own anywhere else. Arms fold to their header (a cable into a folded arm lands on that row's edge), one arm can be made active while the rest fade, and Case view keeps one arm open at a time and draws only its wires. The tool sits in a system-design submenu under the Block slot; the selection pill, the inspector's two lists and the on-canvas `+` affordances all write through one command module. With an arm active, the cables of the other arms and any outside competitor into a port the active arm also feeds fade to 18%, and a port with two or more producers wears a count badge. A 35-check real-browser journey (`npm run test:branch`) draws, authors, wires, folds, activates, switches view and reloads.
 
-The [Branch arm-frame implementation gallery](docs/branch-arm-frames-implementation-2026-09-02.html) makes that membership visible at every boundary: each arm is projected into one invisible stock frame spanning its header and body, so Blocks remain above their own arm header but are clipped at the next arm. It records the load/undo/export safety work, the full unchanged 40-check Branch journey, a focused six-check clipping proof, and a ready-to-drive review board.
+The [Branch arm-frame implementation gallery](docs/branch-arm-frames-implementation-2026-09-02.html) makes that membership visible at every boundary: each arm is projected into one invisible stock frame spanning its header and body, so Blocks remain above their own arm header but are clipped at the next arm. It records the load/undo/export safety work, the full unchanged 40-check Branch journey, a focused eight-check clipping proof, and a ready-to-drive review board.
 
 The [delayed-cable implementation report](docs/edge-vocabulary-implementation-2026-09-02.html) ships the first word of the edge vocabulary on `track/edge-vocabulary`: a cable marked **delayed** draws dotted and carries a z⁻¹ pill, centred on the routed path by default and slid along it by its own handle, that names the initial value in the port-default grammar (`z⁻¹ = 1.0`). `temporal` is a tldraw `StyleProp` beside routing, so the inspector, the right-click menu and a batch selection share one write; old boards migrate to `data`. A Dev Hub switch draws the run after the pill dashed instead, so dotted-whole versus dotted-then-dashed can be judged on a real board. `npm run test:edge-vocabulary` proves it with 16 real-browser checks, including a delayed cable fading with its Branch arm.
+
+The [async-edge implementation gallery](docs/async-edge-style-implementation-2026-09-02.html) adds **Async** to the connection inspector’s three-way **Edge type** selector beside Data and Delayed. It ships the chosen V1 cadence (`56 4 10 4`) through the app-owned tldraw `StyleProp`, uses one shared path for canvas and SVG export, and centers one complete packet mark only on runs shorter than the 74-unit cadence. The [review fixture](sketches/review/async-edge-style.systemsketch) puts four async cables among long, crossing, curved, elbow, opposing-direction, and solid-data routes; the short target becomes async cable five. `npm run test:async-edge-style` proves the selector, context menu, exact paint, export, autosave/reload, and console cleanliness in 7 real-browser checks.
 
 The [FigJam contextual menu specification](docs/figjam-contextual-menu-spec-2026-09-01.html) records how FigJam actually places its selection menu, measured from the running editor over the DevTools Protocol rather than from documentation: one 40px dark pill, centred on the selection, 16px clear of the selection overlay, flipped below at a 20px top margin, clamped to a safe area that treats the bottom tool belt as an obstacle, never scaled by zoom, and removed from the DOM during drags and resizes. The last two sections put those constants next to tldraw's `TldrawUiContextualToolbar`, which SystemSketch already uses, and name the two behaviours that are absent rather than merely different.
 
@@ -218,13 +222,15 @@ cd ~/systemsketch/vscode-systemsketch && npm install && npm run package
 Install the resulting `dist/systemsketch-vscode-0.1.0.vsix` from the Extensions view, or with
 `code --install-extension`. `npm test` there drives the packaged extension in a real IDE.
 
-**Make Preview Stable** also rebuilds this VSIX and the Obsidian bundle before it advances Stable.
+**Make Preview Stable** publishes the standalone app first, then attempts to rebuild this VSIX and
+the Obsidian bundle. A plugin failure leaves the new standalone Stable available.
 The accepted copies live under `~/.local/share/systemsketch/runtime/host-releases/<build>/`, with
 one checksum manifest naming the shared VS Code/Cursor package and every Obsidian plugin file.
-The working-tree `dist/` folders are left on the same build for convenient manual installation;
-publishing does not install or reload either host behind your back.
-The [atomic host-plugin promotion report](docs/host-plugin-promotion-2026-09-02.html) shows the
-transaction, artifact ledger, failure behavior, and real VS Code/Cursor/Obsidian proof.
+The working-tree `dist/` folders are left on the same build for convenient manual installation.
+Rebuilding does not update the already-installed copies, so merely reloading VS Code, Cursor, or
+Obsidian still uses the old plugin until the new artifact is installed or copied into that host.
+The [host-plugin promotion report](docs/host-plugin-promotion-2026-09-02.html) shows the decoupled
+failure behavior, artifact ledger, reload boundary, and real VS Code/Cursor/Obsidian proof.
 
 The Obsidian host lives beside it in [`obsidian-systemsketch/`](obsidian-systemsketch/README.md).
 It opens and autosaves both document suffixes through `TextFileView`, follows the host's light
