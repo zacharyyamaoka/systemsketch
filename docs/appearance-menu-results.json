@@ -56,7 +56,7 @@
   "ok": true
  },
  {
-  "label": "an arrow offers Elbowed, Curved, and Straight; Straight round-trips through stock arc plus zero bend",
+  "label": "an arrow offers Elbowed, Curved, and Straight; switching preserves its in-rectangle control point",
   "ok": true
  },
  {
@@ -68,7 +68,7 @@
   "ok": true
  },
  {
-  "label": "a Block selected beside a shape keeps the shape's appearance reachable, and the pill counts the whole selection",
+  "label": "a Block selected beside a shape keeps the shape's appearance reachable without a count summary",
   "ok": true
  },
  {

@@ -31,7 +31,7 @@ def main() -> None:
     appearance = passing_checks(DOCS / "appearance-menu-results.json")
     straight_check = next(
         item for item in appearance
-        if "Straight round-trips" in item["label"]
+        if "switching preserves" in item["label"]
     )
     images = {
         "edge_out": image_uri(ASSETS / "connector-data-edge-terminals-only.png"),
@@ -39,6 +39,7 @@ def main() -> None:
         "arrow_out": image_uri(ASSETS / "connector-arrow-terminals-only.png"),
         "arrow_in": image_uri(ASSETS / "connector-arrow-multi-elbow.png"),
         "routing": image_uri(ASSETS / "arrow-routing-three-options.png"),
+        "routing_switched": image_uri(ASSETS / "arrow-routing-switched-control.png"),
         "fixture": image_uri(ROOT / "sketches" / "review" / "connector-hover-straight.png"),
     }
     rows = "\n".join(
@@ -64,7 +65,7 @@ section{{margin-top:24px;padding:29px;border-radius:22px}} .head{{display:flex;j
 .compare{{display:grid;grid-template-columns:1fr 1fr;gap:16px}} figure{{margin:0;overflow:hidden;border:1px solid var(--line);border-radius:17px;background:#f8fafc}} figure img{{display:block;width:100%;height:310px;object-fit:cover;object-position:center}} figcaption{{padding:14px 16px;border-top:1px solid var(--line);background:white;color:var(--muted);font-size:12px}} figcaption strong{{display:block;color:var(--ink);font-size:15px}}
 .flow{{display:grid;grid-template-columns:1fr 58px 1fr 58px 1fr;gap:10px;align-items:center}} .step{{min-height:150px;padding:18px;border:1px solid var(--line);border-radius:15px;background:#fafbfd}} .step b{{display:block;margin-bottom:7px;font-size:18px}} .step p{{margin:0;color:var(--muted);font-size:13px}} .arrow{{text-align:center;color:var(--blue);font-size:28px;font-weight:900}}
 .rule{{margin-top:16px;padding:16px 18px;border-left:4px solid var(--orange);border-radius:4px 12px 12px 4px;background:#fff7ef}} .rule code{{font-weight:760}}
-.straight{{display:grid;grid-template-columns:1.35fr .65fr;gap:18px;align-items:center}} .straight img,.fixture img{{display:block;width:100%;border:1px solid var(--line);border-radius:16px}} .straight ul{{padding-left:20px;color:var(--muted)}}
+.straight{{display:grid;grid-template-columns:1.35fr .65fr;gap:18px;align-items:center}} .straight img,.fixture img{{display:block;width:100%;border:1px solid var(--line);border-radius:16px}} .straight .stack{{display:grid;gap:10px}} .straight small{{color:var(--muted)}} .straight ul{{padding-left:20px;color:var(--muted)}}
 table{{width:100%;border-collapse:collapse}} th,td{{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}} th{{color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase}} .ok{{display:grid;width:20px;height:20px;place-items:center;border-radius:50%;color:white;background:var(--green)}}
 .fixture{{display:grid;grid-template-columns:1.4fr .6fr;gap:18px;align-items:start}} .instructions{{display:grid;gap:10px}} .instructions div{{padding:14px;border:1px solid var(--line);border-radius:12px;background:#fafbfd}} .instructions b{{color:var(--blue)}}
 footer{{padding:24px 2px 0;color:var(--muted);font-size:12px}} code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}
@@ -86,13 +87,13 @@ footer{{padding:24px 2px 0;color:var(--muted);font-size:12px}} code{{font-family
 <div class="rule"><strong>The contract:</strong> <code>start + end</code> are unconditional. Delay pills stay unconditional because they are visible semantic objects. Only <code>bend / segment / grow / route</code> handles read the shared proximity signal.</div></section>
 
 <section><div class="head"><h2>Straight is stock, too</h2><p>The missing menu choice was a representation mismatch, not a missing renderer.</p></div>
-<div class="straight"><img src="{images['routing']}" alt="Arrow routing popover with elbowed curved and straight options"><div><p>tldraw stores both curved and straight arrows as <code>kind: arc</code>. Bend distinguishes them:</p><ul><li><strong>Elbowed</strong> → <code>kind: elbow</code></li><li><strong>Curved</strong> → <code>kind: arc</code>, nonzero bend</li><li><strong>Straight</strong> → <code>kind: arc</code>, <code>bend: 0</code></li></ul><p><span class="ok" style="display:inline-grid">✓</span> {html.escape(straight_check['label'])}</p></div></div></section>
+<div class="straight"><div class="stack"><img src="{images['routing']}" alt="Arrow routing popover with elbowed curved and straight options"><img src="{images['routing_switched']}" alt="A curved arrow showing its middle control while the routing menu remains open"><small>Regression proof: after switching the selected arrow, moving into its rectangle reveals the middle control even while tldraw's transparent menu-dismiss layer is active.</small></div><div><p>tldraw stores both curved and straight arrows as <code>kind: arc</code>. Bend distinguishes them:</p><ul><li><strong>Elbowed</strong> → <code>kind: elbow</code></li><li><strong>Curved</strong> → <code>kind: arc</code>, nonzero bend</li><li><strong>Straight</strong> → <code>kind: arc</code>, <code>bend: 0</code></li></ul><p>The proximity observer now asks whether pointer coordinates are inside the canvas viewport—not which transient overlay is the topmost DOM node.</p><p><span class="ok" style="display:inline-grid">✓</span> {html.escape(straight_check['label'])}</p></div></div></section>
 
 <section><div class="head"><h2>Executed evidence</h2><p>The browser journey selects each connector, crosses its rectangle in both directions, then exercises repeated elbow growth.</p></div>
 <table><thead><tr><th></th><th>Check</th><th>Observed behavior</th></tr></thead><tbody>{rows}</tbody></table></section>
 
 <section><div class="head"><h2>Human review board</h2><p>Generated through the real editor, cold-reopened, and verified with real semantic connection bindings.</p></div>
-<div class="fixture"><img src="{images['fixture']}" alt="Connector hover and straight arrow review fixture"><div class="instructions"><div><b>1</b><br>Select the data edge; move outside and back inside its outer rectangle.</div><div><b>2</b><br>Repeat on the normal arrow. Endpoints must never disappear.</div><div><b>3</b><br>Open Line shape and choose Straight.</div><div><b>Pass</b><br>Both connectors share the reveal rule and the arrow becomes a perfect line.</div></div></div></section>
+<div class="fixture"><img src="{images['fixture']}" alt="Connector hover and arrow routing review fixture"><div class="instructions"><div><b>1</b><br>Select the data edge; move outside and back inside its outer rectangle.</div><div><b>2</b><br>Repeat on the normal arrow. Endpoints must never disappear.</div><div><b>3</b><br>Open Line shape, choose Curved, then move onto the arrow without closing the menu.</div><div><b>Pass</b><br>The curved arrow's middle control appears under the pointer without another click.</div></div></div></section>
 <footer>Generated from the live SystemSketch tree on 2026-09-02. The gallery is self-contained; all images and interaction code are embedded.</footer>
 </main><script>
 const buttons=[...document.querySelectorAll('[data-state]')];
