@@ -62,7 +62,9 @@ export function makeStableLabel(phase: MakeStablePhase): string {
 }
 
 export function previewDetailLabel(phase: MakeStablePhase, hostArtifactsReady?: boolean): string {
-  if (phase === 'armed') return 'Publishes standalone Stable first, then attempts the host-plugin builds.'
+  if (phase === 'armed') {
+    return 'Publishes this working copy as standalone Stable; uncommitted source changes are recorded, then host plugins build.'
+  }
   if (phase === 'working') return 'Publishing standalone Stable · host-plugin rebuild follows.'
   if (phase === 'published' && hostArtifactsReady) {
     return 'Standalone Stable updated · host plugins rebuilt · return to launch it.'
