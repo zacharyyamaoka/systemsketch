@@ -354,8 +354,13 @@ async function main() {
       }
     })()`)
 
-    const expectedShapes = recipe.shapes.length + recipe.callouts.length
+    const expectedAuthoredShapes = recipe.shapes.length + recipe.callouts.length
       + recipe.callouts.filter((callout) => callout.target).length
+    // Each Branch arm is projected into one persisted internal frame by the
+    // real app. Recipes stay semantic and never author those helper records.
+    const expectedShapes = expectedAuthoredShapes + recipe.shapes
+      .filter((shape) => shape.type === 'branch')
+      .reduce((count, shape) => count + (shape.props?.arms?.length ?? 0), 0)
     if (created.count !== expectedShapes) {
       throw new Error(`editor created ${created.count} shapes; expected ${expectedShapes}`)
     }
@@ -410,7 +415,7 @@ async function main() {
     const documentBytes = await readFile(scratchPath)
     const document = JSON.parse(documentBytes)
     if (Object.keys(document)[0] !== 'systemSketch') throw new Error('saved fixture does not lead with the systemSketch envelope')
-    if (document.systemSketch?.application !== 'SystemSketch' || document.systemSketch?.formatVersion !== 1) {
+    if (document.systemSketch?.application !== 'SystemSketch' || document.systemSketch?.formatVersion !== 2) {
       throw new Error('saved fixture has an invalid SystemSketch manifest')
     }
     const savedShapes = document.records.filter((record) => record.typeName === 'shape').length

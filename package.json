@@ -49,6 +49,7 @@
     "test:case-view": "node tests/branch_case_view_smoke.mjs",
     "test:authoring": "node tests/branch_authoring_smoke.mjs",
     "test:branch": "node tests/branch_region_smoke.mjs",
+    "test:branch-frames": "node tests/branch_arm_frames_smoke.mjs",
     "test:edge-vocabulary": "node tests/edge_vocabulary_smoke.mjs",
     "test:async-edge-style": "node tests/async_edge_style_smoke.mjs",
     "test:file-type-stable": "node tests/stable_file_type_probe.mjs",
@@ -65,14 +66,18 @@
     "test:workspace-followup": "node tests/workspace_followup_smoke.mjs",
     "test:followup-review": "node tests/followup_review_gallery_smoke.mjs",
     "test:detach-fidelity": "node tests/detach_fidelity_smoke.mjs",
+    "test:detach-edge-fidelity": "node tests/detach_edge_fidelity_smoke.mjs",
     "test:detached-port-row": "node tests/detached_port_row_smoke.mjs",
     "test:worktree-paths": "node tests/development_worktree_paths_smoke.mjs",
     "test:theme": "node --experimental-strip-types tests/theme_contrast_smoke.mjs",
     "test:zoom-controls": "node tests/zoom_controls_preference_smoke.mjs",
     "test:layout-commands": "node tests/layout_commands_smoke.mjs",
+    "test:collision-routing": "node tests/collision_aware_routing_smoke.mjs",
+    "test:contextual-layout": "node tests/contextual_layout_actions_smoke.mjs",
     "theme:import": "node --experimental-strip-types scripts/import_vscode_theme.mjs",
     "theme:obsidian": "python3 scripts/extract_obsidian_palette.py",
-    "test:export": "node tests/tldraw_export_smoke.mjs"
+    "test:export": "node tests/tldraw_export_smoke.mjs",
+    "test:definitions": "node tests/definition_linking_smoke.mjs"
   },
   "dependencies": {
     "elkjs": "0.12.0",

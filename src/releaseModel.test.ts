@@ -79,14 +79,15 @@ describe('making Preview the Stable build', () => {
     expect(makeStablePhase(preview, { ...resting, armed: true })).toBe('armed')
     expect(makeStableLabel('idle')).toBe('Make Preview Stable')
     expect(makeStableLabel('armed')).toContain('Confirm')
-    expect(previewDetailLabel('armed')).toContain('points Stable at this working tree')
+    expect(previewDetailLabel('armed')).toContain('host plugins')
+    expect(previewDetailLabel('armed')).toContain('points Stable here')
   })
 
   it('keeps work in progress and the finished result distinguishable', () => {
     expect(makeStablePhase(preview, { ...resting, working: true, armed: true })).toBe('working')
     expect(makeStablePhase(preview, { ...resting, published: true })).toBe('published')
     expect(makeStableLabel('working')).toBe('Making Stable…')
-    expect(previewDetailLabel('working')).toContain('takes a minute')
+    expect(previewDetailLabel('working')).toContain('takes a few minutes')
     expect(previewDetailLabel('idle')).toBe('Live working copy · Stable stays unchanged')
   })
 

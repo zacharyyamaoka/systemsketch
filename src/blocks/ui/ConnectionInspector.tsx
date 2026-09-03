@@ -100,9 +100,7 @@ export function getConnectionInspectorContext(editor: Editor): ConnectionInspect
 				to: describeEndpoint(editor, bindings[direction.sinkTerminal]),
 			}
 			: null,
-		authored: only
-			? only.props.curve !== null || only.props.pins.length > 0 || only.props.elbowRoute !== null
-			: false,
+		authored: only ? only.props.routeMode === 'authored' : false,
 	}
 }
 
@@ -158,7 +156,7 @@ export function EditorConnectionInspector({ editor }: { editor: Editor }) {
 		editor.updateShapes(selected.map((connection) => ({
 			id: connection.id,
 			type: CONNECTION_SHAPE_TYPE,
-			props: { curve: null, pins: [], elbowRoute: null },
+			props: { curve: null, pins: [], elbowRoute: null, routeMode: 'automatic' },
 		})))
 	}, [editor])
 

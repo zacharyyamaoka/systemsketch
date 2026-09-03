@@ -32,10 +32,13 @@ import {
 	type BlockShape,
 } from '../blocks'
 import {
+	BRANCH_ARM_SHAPE_TYPE,
 	BRANCH_SHAPE_TYPE,
+	BranchArmShapeUtil,
 	BranchShapeUtil,
 	branchLayout,
 	isBranchShape,
+	unwrapBranchArmFrames,
 	type BranchShape,
 } from '../branch'
 import {
@@ -73,6 +76,7 @@ const PORTABLE_SHAPE_UTILS = replaceConstructorsByType<TLAnyShapeUtilConstructor
 		...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
 		BlockShapeUtil,
 		BranchShapeUtil,
+		BranchArmShapeUtil,
 		...blockConnectionShapeUtils,
 	],
 )
@@ -382,6 +386,7 @@ function assertPortableRecords(editor: Editor): void {
 		.filter((record) => (
 			record.type === 'block'
 			|| record.type === BRANCH_SHAPE_TYPE
+			|| record.type === BRANCH_ARM_SHAPE_TYPE
 			|| record.type === CONNECTION_SHAPE_TYPE
 		))
 	const customGeometries = editor.store
@@ -446,6 +451,11 @@ export async function exportPortableTldraw(editor: Editor): Promise<string> {
 
 		for (const page of exportEditor.getPages()) {
 			exportEditor.setCurrentPage(page.id)
+			// Arm frames are an editing-time projection. Restore their children to
+			// the semantic Branch before either Blocks or Branches become stock.
+			for (const branch of exportEditor.getCurrentPageShapes().filter(isBranchShape)) {
+				unwrapBranchArmFrames(exportEditor, branch)
+			}
 			const blocks = exportEditor.getCurrentPageShapes()
 				.filter(isBlockShape)
 				.sort((left, right) => blockDepth(exportEditor, left) - blockDepth(exportEditor, right))

@@ -20,6 +20,7 @@ import {
 	foldedUnderCaseView,
 	isHiddenByFoldedArm,
 } from './branchScope'
+import { BRANCH_ARM_SHAPE_TYPE, type BranchArmShape } from './BranchArmShapeUtil'
 
 function shape(id: string, type: string, parentId: string, x: number, y: number, extra: Partial<TLShape> = {}): TLShape {
 	return {
@@ -41,6 +42,13 @@ function shape(id: string, type: string, parentId: string, x: number, y: number,
 
 function branch(id: string, parentId: string, x: number, y: number, props = getDefaultBranchProps()): BranchShape {
 	return shape(id, 'branch', parentId, x, y, { props } as Partial<TLShape>) as BranchShape
+}
+
+function armFrame(id: string, parentId: BranchShape['id'], armId: string, y: number): BranchArmShape {
+	return shape(id, BRANCH_ARM_SHAPE_TYPE, parentId, 0, y, {
+		meta: { branchArm: armId },
+		props: { w: open.w, h: 100, armId },
+	} as Partial<TLShape>) as BranchArmShape
 }
 
 /** The slice of the editor the scope walk reads, over an in-memory tree. */
@@ -76,6 +84,17 @@ describe('arm membership', () => {
 		expect(branchArmIdOfChild(region, stamped)).toBe('arm_1')
 		const stale = { ...inSecond, meta: { branchArm: 'arm_gone' } }
 		expect(branchArmIdOfChild(region, stale)).toBe('arm_2')
+	})
+
+	it('reads the structural helper as the direct Branch child for deep descendants', () => {
+		const region = branch('br', 'page:page', 100, 100)
+		const frame = armFrame('arm-frame', region.id, 'arm_2', layout.arms[1].rowTop)
+		const nested = shape('nested', 'block', frame.id, 20, 30)
+		const editor = stubEditor([region, frame, nested])
+
+		expect(branchArmIdOfChild(region, frame)).toBe('arm_2')
+		expect(branchAncestry(editor, nested.id).map((level) => [level.child.id, level.armId]))
+			.toEqual([[frame.id, 'arm_2']])
 	})
 })
 

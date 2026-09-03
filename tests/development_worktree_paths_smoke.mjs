@@ -115,7 +115,7 @@ try {
     'the primary-workspace Save As copy',
   )
   assert.equal(await readFile(linkedBoard, 'utf8'), linkedSource)
-  assert.equal(JSON.parse(await readFile(savedCopy, 'utf8')).systemSketch.formatVersion, 1)
+  assert.equal(JSON.parse(await readFile(savedCopy, 'utf8')).systemSketch.formatVersion, 2)
 
   // New uses the same confined browser-home decision even though it does not
   // show the dialog. It must reserve its Untitled path under the primary root.
@@ -160,7 +160,7 @@ try {
     'the primary-workspace editable copy',
   )
   assert.equal(await readFile(futureBoard, 'utf8'), futureSource)
-  assert.equal(JSON.parse(await readFile(futureCopy, 'utf8')).systemSketch.formatVersion, 1)
+  assert.equal(JSON.parse(await readFile(futureCopy, 'utf8')).systemSketch.formatVersion, 2)
 
   const listedWorktree = await fetch(
     `http://127.0.0.1:${apiPort}/api/workspace/list?dir=${encodeURIComponent(linkedDirectory)}`,
