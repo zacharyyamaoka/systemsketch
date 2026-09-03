@@ -22,10 +22,10 @@ def esc(value: str) -> str:
     return html.escape(value)
 
 
-BUILD = "ab3102c597f58392"
-COMMIT = "f8c0221b7e2d1c40724fde7106f4b9ebbf88ada1"
-VSIX_SHA = "8c281403acce958a00b7e0a299090aa1bc20fe453f3055ebaf861d03f856499e"
-OBSIDIAN_SHA = "4fb8a87724d046f5ef822b1890666ed6ce1ec4e0e56a4121522a82125dd47afa"
+BUILD = "99e0181e0b5b253c"
+COMMIT = "b8a0c1d91a602d005cf1294c2eacf765e4c5f585"
+VSIX_SHA = "ff7cf28cfd282f3e1885baffaec900c07d7098c148b13f98355b35534bebdb20"
+OBSIDIAN_SHA = "f23a15de9b604e9008d0adccf8bd38073acc91293fe48bad529f26003754263d"
 
 
 def main() -> None:
@@ -164,7 +164,7 @@ def main() -> None:
         <article class="proof"><div class="count">10 / 10</div><h3>VS Code</h3><p>Open, edit, dirty state, save, reopen, `.tldr`, and external reload.</p></article>
         <article class="proof"><div class="count">8 / 8 reachable</div><h3>Cursor</h3><p>Same VSIX. The fresh-profile sign-in wall blocks the final two checks; the suite names them instead of guessing.</p></article>
         <article class="proof"><div class="count">8 / 8</div><h3>Obsidian</h3><p>Autosave, external reload, `.tldr`, embeds, and both host themes.</p></article>
-        <article class="proof"><div class="count">669 + 71</div><h3>Regression suites</h3><p>Vitest files and Python release tests remained green.</p></article>
+        <article class="proof"><div class="count">669 + 72</div><h3>Regression suites</h3><p>Vitest files and Python release tests remained green.</p></article>
       </div>
     </div>
   </section>
@@ -175,9 +175,9 @@ def main() -> None:
     <table class="ledger">
       <thead><tr><th>Host</th><th>Artifact</th><th>Bytes</th><th>SHA-256</th></tr></thead>
       <tbody>
-        <tr><td>VS Code</td><td class="mono">vscode/systemsketch-vscode-0.1.0.vsix</td><td>2,975,771</td><td class="mono">{VSIX_SHA}</td></tr>
-        <tr><td>Cursor</td><td>Shares the exact VSIX above</td><td>2,975,771</td><td class="mono">{VSIX_SHA}</td></tr>
-        <tr><td>Obsidian</td><td class="mono">obsidian/main.js + styles.css + manifest.json + bundle.json</td><td>7,992,978</td><td class="mono">main.js {OBSIDIAN_SHA}</td></tr>
+        <tr><td>VS Code</td><td class="mono">vscode/systemsketch-vscode-0.1.0.vsix</td><td>2,975,792</td><td class="mono">{VSIX_SHA}</td></tr>
+        <tr><td>Cursor</td><td>Shares the exact VSIX above</td><td>2,975,792</td><td class="mono">{VSIX_SHA}</td></tr>
+        <tr><td>Obsidian</td><td class="mono">obsidian/main.js + styles.css + manifest.json + bundle.json</td><td>7,993,198</td><td class="mono">main.js {OBSIDIAN_SHA}</td></tr>
       </tbody>
     </table>
     <p style="margin-top:12px">Durable location: <code>~/.local/share/systemsketch/runtime/host-releases/&lt;build&gt;/</code>. Working-tree <code>dist/</code> copies remain convenient for explicit installation.</p>

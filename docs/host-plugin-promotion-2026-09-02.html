@@ -110,7 +110,7 @@
       <div class="outcome" id="outcome" data-state="pass">
         <div class="outcome-card"><small>Before confirmation</small><strong>Stable = previous verified build</strong></div>
         <div class="arrow">→</div>
-        <div class="outcome-card next"><small id="next-label">After verified host artifacts</small><strong id="next-value">Stable = ab3102c5</strong></div>
+        <div class="outcome-card next"><small id="next-label">After verified host artifacts</small><strong id="next-value">Stable = 99e0181e</strong></div>
       </div>
     </div>
   </section>
@@ -130,20 +130,20 @@
         <article class="proof"><div class="count">10 / 10</div><h3>VS Code</h3><p>Open, edit, dirty state, save, reopen, `.tldr`, and external reload.</p></article>
         <article class="proof"><div class="count">8 / 8 reachable</div><h3>Cursor</h3><p>Same VSIX. The fresh-profile sign-in wall blocks the final two checks; the suite names them instead of guessing.</p></article>
         <article class="proof"><div class="count">8 / 8</div><h3>Obsidian</h3><p>Autosave, external reload, `.tldr`, embeds, and both host themes.</p></article>
-        <article class="proof"><div class="count">669 + 71</div><h3>Regression suites</h3><p>Vitest files and Python release tests remained green.</p></article>
+        <article class="proof"><div class="count">669 + 72</div><h3>Regression suites</h3><p>Vitest files and Python release tests remained green.</p></article>
       </div>
     </div>
   </section>
 
   <section>
-    <div class="section-head"><div><div class="eyebrow">Immutable output</div><h2>Proof build ab3102c597f58392</h2></div>
-      <p>One manifest ties each accepted byte to the app build and source commit <code>f8c0221b7e2d</code>.</p></div>
+    <div class="section-head"><div><div class="eyebrow">Immutable output</div><h2>Proof build 99e0181e0b5b253c</h2></div>
+      <p>One manifest ties each accepted byte to the app build and source commit <code>b8a0c1d91a60</code>.</p></div>
     <table class="ledger">
       <thead><tr><th>Host</th><th>Artifact</th><th>Bytes</th><th>SHA-256</th></tr></thead>
       <tbody>
-        <tr><td>VS Code</td><td class="mono">vscode/systemsketch-vscode-0.1.0.vsix</td><td>2,975,771</td><td class="mono">8c281403acce958a00b7e0a299090aa1bc20fe453f3055ebaf861d03f856499e</td></tr>
-        <tr><td>Cursor</td><td>Shares the exact VSIX above</td><td>2,975,771</td><td class="mono">8c281403acce958a00b7e0a299090aa1bc20fe453f3055ebaf861d03f856499e</td></tr>
-        <tr><td>Obsidian</td><td class="mono">obsidian/main.js + styles.css + manifest.json + bundle.json</td><td>7,992,978</td><td class="mono">main.js 4fb8a87724d046f5ef822b1890666ed6ce1ec4e0e56a4121522a82125dd47afa</td></tr>
+        <tr><td>VS Code</td><td class="mono">vscode/systemsketch-vscode-0.1.0.vsix</td><td>2,975,792</td><td class="mono">ff7cf28cfd282f3e1885baffaec900c07d7098c148b13f98355b35534bebdb20</td></tr>
+        <tr><td>Cursor</td><td>Shares the exact VSIX above</td><td>2,975,792</td><td class="mono">ff7cf28cfd282f3e1885baffaec900c07d7098c148b13f98355b35534bebdb20</td></tr>
+        <tr><td>Obsidian</td><td class="mono">obsidian/main.js + styles.css + manifest.json + bundle.json</td><td>7,993,198</td><td class="mono">main.js f23a15de9b604e9008d0adccf8bd38073acc91293fe48bad529f26003754263d</td></tr>
       </tbody>
     </table>
     <p style="margin-top:12px">Durable location: <code>~/.local/share/systemsketch/runtime/host-releases/&lt;build&gt;/</code>. Working-tree <code>dist/</code> copies remain convenient for explicit installation.</p>
@@ -181,7 +181,7 @@
     const ok = kind === 'pass'; pass.setAttribute('aria-pressed', String(ok)); fail.setAttribute('aria-pressed', String(!ok))
     outcome.dataset.state = kind
     nextLabel.textContent = ok ? 'After verified host artifacts' : 'After the build error'
-    nextValue.textContent = ok ? 'Stable = ab3102c5' : 'Stable = unchanged'
+    nextValue.textContent = ok ? 'Stable = 99e0181e' : 'Stable = unchanged'
   }
   pass.onclick = () => state('pass'); fail.onclick = () => state('fail')
   const shots = {
