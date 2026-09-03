@@ -1,6 +1,6 @@
 {
   "systemSketch": {
-    "formatVersion": 1,
+    "formatVersion": 2,
     "application": "SystemSketch",
     "shapes": {
       "arrow": 4,
@@ -46,7 +46,8 @@
       "com.tldraw.shape.line": 5,
       "com.tldraw.shape.block": 4,
       "com.tldraw.shape.branch": 0,
-      "com.tldraw.shape.connection": 2,
+      "com.tldraw.shape.branch-arm": 0,
+      "com.tldraw.shape.connection": 3,
       "com.tldraw.binding.arrow": 1,
       "com.tldraw.binding.connection": 1,
       "com.tldraw.comment-thread": 3,
@@ -96,7 +97,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a6q93V",
+      "index": "a6tjm",
       "typeName": "shape"
     },
     {
@@ -161,8 +162,16 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a7v0zl",
+      "index": "a7xPTt",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#39B178",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:9irR94CiZNr2vKdb6leAz",
+      "typeName": "user"
     },
     {
       "x": 20,
@@ -206,12 +215,12 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5sAz",
+      "index": "a5i3n",
       "typeName": "shape"
     },
     {
-      "x": 760,
-      "y": 550,
+      "x": 790,
+      "y": 540,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -219,11 +228,11 @@
       "id": "shape:cue-pass",
       "type": "geo",
       "props": {
-        "w": 500,
-        "h": 150,
+        "w": 470,
+        "h": 110,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 2,
+        "growY": 12,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -243,7 +252,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · Both connectors keep endpoints, reveal interior controls only inside the padded route rectangle, and Straight produces a perfect line"
+                  "text": "PASS WHEN · After switching routing, moving onto the selected arrow reveals its middle control without another click"
                 }
               ]
             }
@@ -251,7 +260,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a8gFX",
+      "index": "a8z1Y",
       "typeName": "shape"
     },
     {
@@ -296,12 +305,12 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6YGM",
+      "index": "a6Iqv",
       "typeName": "shape"
     },
     {
       "x": 48.888888888888886,
-      "y": -13.499999999999986,
+      "y": 1.5000000000000142,
       "z": 0.9290322580645161,
       "meta": {},
       "id": "camera:page:page",
@@ -321,7 +330,7 @@
         "h": 110,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 0,
+        "growY": 12,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -341,7 +350,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "3 · Open Line shape in the arrow pill and choose Straight"
+                  "text": "3 · Open Line shape, choose Curved, then move onto the arrow without closing the menu"
                 }
               ]
             }
@@ -349,7 +358,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a7UfUV",
+      "index": "a7sKI",
       "typeName": "shape"
     },
     {
@@ -374,12 +383,13 @@
         "curve": null,
         "pins": [],
         "elbowRoute": null,
+        "routeMode": "automatic",
         "temporal": "data",
         "delayValue": "",
         "pillPosition": 0.5
       },
       "parentId": "page:page",
-      "index": "a31nj",
+      "index": "a342z",
       "typeName": "shape"
     },
     {
@@ -451,6 +461,7 @@
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
+        "definitionId": "maq3ueSZB0a-T6A6gz9bN",
         "inputs": [
           {
             "id": "in_1",
@@ -459,10 +470,11 @@
             "visible": true
           }
         ],
-        "outputs": []
+        "outputs": [],
+        "definitionKey": "consume"
       },
       "parentId": "page:page",
-      "index": "a45nUG",
+      "index": "a4ADAG",
       "typeName": "shape"
     },
     {
@@ -557,6 +569,7 @@
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
+        "definitionId": "8DCHyBtkv4VJwge0dzmqf",
         "inputs": [],
         "outputs": [
           {
@@ -565,19 +578,12 @@
             "type": "Tensor",
             "visible": true
           }
-        ]
+        ],
+        "definitionKey": "prepare"
       },
       "parentId": "page:page",
-      "index": "a3lyo",
+      "index": "a3tZN",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#E34BA9",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:Bpvus7SSxODmQgrDQSQWf",
-      "typeName": "user"
     },
     {
       "meta": {},
@@ -696,7 +702,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a4QlQ",
+      "index": "a4MWQ",
       "typeName": "shape"
     },
     {
@@ -740,7 +746,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5xUUn",
+      "index": "a5v7IG",
       "typeName": "shape"
     }
   ]
