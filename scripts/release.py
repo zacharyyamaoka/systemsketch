@@ -128,6 +128,7 @@ def build_host_artifacts(
                 str(vscode_root / "node_modules" / ".bin" / "vsce"),
                 "package",
                 "--allow-missing-repository",
+                "--skip-license",
                 "--out",
                 str(vscode_output),
             ],
