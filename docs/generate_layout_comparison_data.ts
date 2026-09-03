@@ -3,6 +3,7 @@ import { writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 
 import {
+	channelSpacingDefects,
 	coincidentOverlap,
 	countCrossings,
 	nudgeRoutes,
@@ -32,6 +33,7 @@ interface NodeScenario {
 	summary: string
 	nodes: OrganizeGraphNode[]
 	edges: OrganizeGraphEdge[]
+	portGoal?: 'align-all' | 'route-exact'
 }
 
 const routeFromPoints = (points: ElbowPoint[]): ElbowRoute => ({
@@ -274,7 +276,8 @@ function generatedGraph(
 		components?: number
 		cycle?: boolean
 		variable?: boolean
-		topology?: 'chain' | 'diamond' | 'fan-out' | 'fan-in' | 'tree' | 'ladder'
+		topology?: 'chain' | 'diamond' | 'fan-out' | 'fan-in' | 'tree' | 'ladder' | 'multi-chain'
+		ports?: 'aligned' | 'offset' | 'mixed'
 	} = {},
 ): NodeScenario {
 	const random = seeded(20260902 + Number(id.slice(0, 2)) * 997)
@@ -297,7 +300,11 @@ function generatedGraph(
 		seen.add(key)
 		pairs.push([source, target])
 	}
-	if (options.topology === 'diamond' && count >= 4) {
+	if (options.topology === 'multi-chain') {
+		for (let index = 0; index + 1 < count; index += 1) {
+			for (let lane = 0; lane < 3; lane += 1) pairs.push([index, index + 1])
+		}
+	} else if (options.topology === 'diamond' && count >= 4) {
 		add(0, 1); add(0, 2); add(1, 3); add(2, 3)
 	} else if (options.topology === 'fan-out') {
 		for (let index = 1; index < count; index += 1) add(0, index)
@@ -344,37 +351,114 @@ function generatedGraph(
 			node.y = 110 + Math.floor(index / 2) * 24
 		})
 	}
+	let edges: OrganizeGraphEdge[] = pairs.map(([source, target], index) => ({
+		id: `${id}-e${index}`,
+		source: nodes[source].id,
+		target: nodes[target].id,
+	}))
+	let graphNodes: OrganizeGraphNode[] = nodes
+	if (options.ports) {
+		const enriched = addSyntheticPorts(nodes, edges, options.ports)
+		graphNodes = enriched.nodes
+		edges = enriched.edges
+	}
 	return {
 		id,
 		title,
 		summary,
-		nodes,
-		edges: pairs.map(([source, target], index) => ({
-			id: `${id}-e${index}`,
-			source: nodes[source].id,
-			target: nodes[target].id,
-		})),
+		nodes: graphNodes,
+		edges,
+		portGoal: options.ports
+			? options.topology === 'multi-chain' ? 'align-all' : 'route-exact'
+			: undefined,
 	}
+}
+
+function addSyntheticPorts(
+	nodes: readonly OrganizeGraphNode[],
+	edges: readonly OrganizeGraphEdge[],
+	mode: 'aligned' | 'offset' | 'mixed',
+): { nodes: OrganizeGraphNode[]; edges: OrganizeGraphEdge[] } {
+	const incoming = new Map(nodes.map((node) => [node.id, 0]))
+	const outgoing = new Map(nodes.map((node) => [node.id, 0]))
+	for (const edge of edges) {
+		incoming.set(edge.target, (incoming.get(edge.target) ?? 0) + 1)
+		outgoing.set(edge.source, (outgoing.get(edge.source) ?? 0) + 1)
+	}
+	const portSets = new Map<string, { inputs: string[]; outputs: string[] }>()
+	const enrichedNodes = nodes.map((node, index) => {
+		const inputCount = Math.max(2, Math.min(4, incoming.get(node.id) ?? 0))
+		const outputCount = Math.max(2, Math.min(4, outgoing.get(node.id) ?? 0))
+		const portLayout = mode === 'mixed' ? (index % 2 === 0 ? 'aligned' : 'offset') : mode
+		const slots = portLayout === 'aligned'
+			? Math.max(inputCount, outputCount)
+			: inputCount + outputCount
+		const height = Math.max(node.height, 32 + slots * 28)
+		const inputs = Array.from({ length: inputCount }, (_, portIndex) => `${node.id}::in-${portIndex}`)
+		const outputs = Array.from({ length: outputCount }, (_, portIndex) => `${node.id}::out-${portIndex}`)
+		portSets.set(node.id, { inputs, outputs })
+		return {
+			...node,
+			height,
+			portLayout,
+			ports: [
+				...inputs.map((portId, portIndex) => ({
+					id: portId,
+					side: 'left' as const,
+					x: 0,
+					y: 30 + portIndex * 28,
+				})),
+				...outputs.map((portId, portIndex) => ({
+					id: portId,
+					side: 'right' as const,
+					x: node.width,
+					y: 30 + (portLayout === 'offset' ? inputCount * 28 : 0) + portIndex * 28,
+				})),
+			],
+		}
+	})
+	const usedInputs = new Map<string, number>()
+	const usedOutputs = new Map<string, number>()
+	const enrichedEdges = edges.map((edge) => {
+		const source = portSets.get(edge.source)!
+		const target = portSets.get(edge.target)!
+		const sourceIndex = usedOutputs.get(edge.source) ?? 0
+		const targetIndex = usedInputs.get(edge.target) ?? 0
+		usedOutputs.set(edge.source, sourceIndex + 1)
+		usedInputs.set(edge.target, targetIndex + 1)
+		return {
+			...edge,
+			sourcePort: source.outputs[sourceIndex % source.outputs.length],
+			targetPort: target.inputs[targetIndex % target.inputs.length],
+		}
+	})
+	return { nodes: enrichedNodes, edges: enrichedEdges }
 }
 
 type NodeConfigOptions = {
 	components?: number
 	cycle?: boolean
 	variable?: boolean
-	topology?: 'chain' | 'diamond' | 'fan-out' | 'fan-in' | 'tree' | 'ladder'
+	topology?: 'chain' | 'diamond' | 'fan-out' | 'fan-in' | 'tree' | 'ladder' | 'multi-chain'
+	ports?: 'aligned' | 'offset' | 'mixed'
 }
 
 const NODE_CONFIGS: Array<[string, string, string, number, number, number, NodeConfigOptions?]> = [
 	['01-overlap-pair', 'Overlapping pair', 'Two connected nodes begin almost directly on top of each other.', 2, 2, 1, { topology: 'chain' }],
 	['02-reversed-chain', 'Reversed chain', 'Three logical stages are placed in reverse reading order.', 3, 3, 2, { topology: 'chain' }],
 	['03-diamond', 'Tangled diamond', 'A split and join begin as one compact knot.', 4, 3, 4, { topology: 'diamond' }],
+	['21-aligned-multiport', 'Aligned multi-port pipeline', 'Three parallel lanes cross four Blocks whose input/output rows share the same heights.', 4, 4, 9, { topology: 'multi-chain', ports: 'aligned', variable: true }],
+	['22-offset-multiport', 'Offset multi-port pipeline', 'Three parallel lanes cross four Blocks whose outputs sit below their inputs.', 4, 4, 9, { topology: 'multi-chain', ports: 'offset', variable: true }],
 	['04-fan-out', 'Five-way fan-out', 'One source drives four successors packed into the same patch.', 5, 2, 4, { topology: 'fan-out' }],
 	['05-fan-in', 'Five-way fan-in', 'Four producers converge on one consumer from arbitrary positions.', 5, 2, 4, { topology: 'fan-in' }],
+	['23-mixed-port-layouts', 'Mixed aligned / offset Blocks', 'Three parallel lanes cross five alternating aligned and offset Blocks.', 5, 5, 12, { topology: 'multi-chain', ports: 'mixed', variable: true }],
 	['06-fork-join', 'Fork and join', 'Seven nodes make a two-sided fork with a final merge.', 7, 4, 9],
+	['24-parallel-port-lanes', 'Parallel multi-port lanes', 'Ten Blocks carry several edges across distinct input/output rows.', 10, 5, 20, { topology: 'ladder', ports: 'aligned', variable: true }],
 	['07-zigzag', 'Zigzag pipeline', 'Eight stages have the right topology but a noisy spatial order.', 8, 5, 10],
 	['08-two-chains', 'Two disconnected chains', 'Independent flows overlap each other before component separation.', 8, 4, 7, { components: 2 }],
 	['09-cycle', 'Small feedback cycle', 'A cyclic graph must break one edge while arranging the remaining flow.', 8, 4, 10, { cycle: true }],
 	['10-variable-blocks', 'Mixed Block sizes', 'Widths and heights vary while ten nodes share a cramped area.', 10, 5, 14, { variable: true }],
+	['25-variable-offset-ports', 'Mixed sizes with offset ports', 'Twelve varied Blocks combine unequal dimensions with non-centred ports.', 12, 5, 24, { ports: 'offset', variable: true }],
 	['11-dense-dag', 'Dense ten-node DAG', 'Extra cross-layer dependencies obscure a short core pipeline.', 10, 5, 20],
 	['12-three-components', 'Three components', 'Three independent subsystems start interleaved.', 12, 4, 12, { components: 3, variable: true }],
 	['13-wide-star', 'Wide star', 'A broad one-to-many topology needs vertical distribution.', 12, 3, 18, { topology: 'fan-out' }],
@@ -382,6 +466,7 @@ const NODE_CONFIGS: Array<[string, string, string, number, number, number, NodeC
 	['15-binary-tree', 'Binary tree', 'Fifteen nodes need breadth without losing left-to-right depth.', 15, 4, 20, { topology: 'tree' }],
 	['16-feedback-network', 'Feedback network', 'A larger DAG carries one explicit back edge.', 16, 6, 28, { cycle: true, variable: true }],
 	['17-mixed-density', 'Mixed-density pipeline', 'Sparse early stages feed a dense central transform.', 18, 6, 34, { variable: true }],
+	['26-dense-mixed-ports', 'Dense mixed-port network', 'Twenty-four Blocks mix aligned and offset layouts across fifty-four port-bound edges.', 24, 7, 54, { ports: 'mixed', variable: true }],
 	['18-tangled-twenty-four', 'Twenty-four-node knot', 'A realistic mid-size graph is compressed into a small square.', 24, 7, 46, { variable: true }],
 	['19-five-subsystems', 'Five interleaved subsystems', 'Thirty nodes from five components begin spatially indistinguishable.', 30, 6, 50, { components: 5, variable: true }],
 	['20-fifty-eighty', '50 nodes / 80 edges', 'The measured PyBlocks stress scale, deliberately seeded as a pile.', 50, 8, 80, { variable: true }],
@@ -430,15 +515,21 @@ function routesForGraph(nodes: readonly OrganizeGraphNode[], edges: readonly Org
 		const obstacles = nodes
 			.filter((node) => node.id !== source.id && node.id !== target.id)
 			.map((node) => ({ x: node.x, y: node.y, w: node.width, h: node.height }))
+		const sourcePort = source.ports?.find((port) => port.id === edge.sourcePort)
+		const targetPort = target.ports?.find((port) => port.id === edge.targetPort)
 		return [routeElbow({
 			start: {
-				point: { x: source.x + source.width, y: source.y + source.height / 2 },
-				side: 'right',
+				point: sourcePort
+					? { x: source.x + sourcePort.x, y: source.y + sourcePort.y }
+					: { x: source.x + source.width, y: source.y + source.height / 2 },
+				side: sourcePort?.side ?? 'right',
 				box: sourceBox,
 			},
 			end: {
-				point: { x: target.x, y: target.y + target.height / 2 },
-				side: 'left',
+				point: targetPort
+					? { x: target.x + targetPort.x, y: target.y + targetPort.y }
+					: { x: target.x, y: target.y + target.height / 2 },
+				side: targetPort?.side ?? 'left',
 				box: targetBox,
 			},
 			obstacles,
@@ -458,6 +549,14 @@ function graphMetrics(nodes: readonly OrganizeGraphNode[], edges: readonly Organ
 	const minY = Math.min(...nodes.map((node) => node.y))
 	const maxX = Math.max(...nodes.map((node) => node.x + node.width))
 	const maxY = Math.max(...nodes.map((node) => node.y + node.height))
+	const portDeltas = edges.flatMap((edge) => {
+		const source = byId.get(edge.source)
+		const target = byId.get(edge.target)
+		const sourcePort = source?.ports?.find((port) => port.id === edge.sourcePort)
+		const targetPort = target?.ports?.find((port) => port.id === edge.targetPort)
+		if (!source || !target || !sourcePort || !targetPort) return []
+		return [Math.abs(source.y + sourcePort.y - target.y - targetPort.y)]
+	})
 	return {
 		nodeOverlapPairs: overlap.pairs,
 		nodeOverlapArea: overlap.area,
@@ -466,7 +565,38 @@ function graphMetrics(nodes: readonly OrganizeGraphNode[], edges: readonly Organ
 		edgeOverlap: round(coincidentOverlap(routes)),
 		width: round(maxX - minX),
 		height: round(maxY - minY),
+		portBoundEdges: portDeltas.length,
+		alignedPortEdges: portDeltas.filter((delta) => delta < 1).length,
+		meanPortRowDelta: portDeltas.length
+			? round(portDeltas.reduce((sum, delta) => sum + delta, 0) / portDeltas.length)
+			: 0,
 	}
+}
+
+function assertRoutesUseDeclaredPorts(
+	id: string,
+	nodes: readonly OrganizeGraphNode[],
+	edges: readonly OrganizeGraphEdge[],
+	routes: readonly ElbowRoute[],
+): void {
+	const byId = new Map(nodes.map((node) => [node.id, node]))
+	edges.forEach((edge, index) => {
+		if (!edge.sourcePort && !edge.targetPort) return
+		const source = byId.get(edge.source)
+		const target = byId.get(edge.target)
+		const sourcePort = source?.ports?.find((port) => port.id === edge.sourcePort)
+		const targetPort = target?.ports?.find((port) => port.id === edge.targetPort)
+		const route = routes[index]
+		if (!source || !target || !sourcePort || !targetPort || !route) {
+			throw new Error(`${id}: a port-bound edge does not resolve to two declared ports`)
+		}
+		const first = route.points[0]
+		const last = route.points.at(-1)!
+		if (first.x !== source.x + sourcePort.x || first.y !== source.y + sourcePort.y
+			|| last.x !== target.x + targetPort.x || last.y !== target.y + targetPort.y) {
+			throw new Error(`${id}: rendered route endpoint drifted from its declared port`)
+		}
+	})
 }
 
 async function main() {
@@ -474,6 +604,13 @@ async function main() {
 		const locked = Array.from({ length: scenario.routes.length }, (_, routeIndex) =>
 			Boolean(scenario.locked?.[routeIndex]))
 		const report = nudgeRoutes(scenario.routes, {}, locked)
+		const spacingBefore = channelSpacingDefects(scenario.routes, scenario.routes, locked).length
+		const crossingsBefore = countCrossings(scenario.routes)
+		const crossingsAfter = countCrossings(report.routes)
+		const introducedCrossings = Math.max(0, crossingsAfter - crossingsBefore)
+		const constrainedCrossings = locked.some(Boolean)
+			? Math.max(0, introducedCrossings - report.forcedCrossings.length)
+			: 0
 		if (!orthogonal(report.routes)) {
 			throw new Error(`${scenario.id}: nudge made a non-orthogonal route ${JSON.stringify(report.routes.map((route) => route.points))}`)
 		}
@@ -484,6 +621,21 @@ async function main() {
 				|| route.points.at(-1)!.x !== after.points.at(-1)!.x
 				|| route.points.at(-1)!.y !== after.points.at(-1)!.y
 		})) throw new Error(`${scenario.id}: nudge moved an endpoint`)
+		if (scenario.routes.some((route, routeIndex) => locked[routeIndex]
+			&& JSON.stringify(route.points) !== JSON.stringify(report.routes[routeIndex].points))) {
+			throw new Error(`${scenario.id}: nudge moved authored geometry`)
+		}
+		if (report.spacingDefects.length > 0) {
+			throw new Error(`${scenario.id}: channel cadence defects remain ${JSON.stringify(report.spacingDefects)}`)
+		}
+		if (!locked.some(Boolean) && introducedCrossings > report.forcedCrossings.length) {
+			throw new Error(`${scenario.id}: tidy introduced an avoidable crossing`)
+		}
+		const repeated = nudgeRoutes(report.routes, {}, locked)
+		if (JSON.stringify(repeated.routes.map((route) => route.points))
+			!== JSON.stringify(report.routes.map((route) => route.points))) {
+			throw new Error(`${scenario.id}: a second tidy pass changed the result`)
+		}
 		return {
 			id: scenario.id,
 			difficulty: index + 1,
@@ -495,16 +647,19 @@ async function main() {
 				routes: scenario.routes.map((route) => route.points),
 				metrics: {
 					overlap: round(report.overlapBefore),
-					crossings: countCrossings(scenario.routes),
+					crossings: crossingsBefore,
+					spacingDefects: spacingBefore,
 				},
 			},
 			after: {
 				routes: report.routes.map((route) => route.points),
 				metrics: {
 					overlap: round(report.overlapAfter),
-					crossings: countCrossings(report.routes),
+					crossings: crossingsAfter,
 					bundles: report.bundles.length,
 					forcedCrossings: report.forcedCrossings.length,
+					constrainedCrossings,
+					spacingDefects: report.spacingDefects.length,
 				},
 			},
 		}
@@ -514,6 +669,7 @@ async function main() {
 	for (let index = 0; index < NODE_SCENARIOS.length; index += 1) {
 		const scenario = NODE_SCENARIOS[index]
 		const beforeRoutes = routesForGraph(scenario.nodes, scenario.edges)
+		assertRoutesUseDeclaredPorts(scenario.id, scenario.nodes, scenario.edges, beforeRoutes)
 		const started = performance.now()
 		const organized = await organizeGraph(scenario.nodes, scenario.edges)
 		const layoutMs = performance.now() - started
@@ -522,9 +678,17 @@ async function main() {
 			throw new Error(`${scenario.id}: ELK output was not deterministic`)
 		}
 		const afterRoutes = routesForGraph(organized.nodes, scenario.edges)
+		assertRoutesUseDeclaredPorts(scenario.id, organized.nodes, scenario.edges, afterRoutes)
 		const beforeMetrics = graphMetrics(scenario.nodes, scenario.edges, beforeRoutes)
 		const afterMetrics = graphMetrics(organized.nodes, scenario.edges, afterRoutes)
 		if (afterMetrics.nodeOverlapPairs !== 0) throw new Error(`${scenario.id}: organized nodes still overlap`)
+		if (scenario.portGoal && afterMetrics.portBoundEdges !== scenario.edges.length) {
+			throw new Error(`${scenario.id}: not every evaluated edge resolves to declared ports`)
+		}
+		if (scenario.portGoal === 'align-all'
+			&& afterMetrics.alignedPortEdges !== afterMetrics.portBoundEdges) {
+			throw new Error(`${scenario.id}: a linear multi-port pipeline did not align every connected port row`)
+		}
 		nodeCases.push({
 			id: scenario.id,
 			difficulty: index + 1,
@@ -533,6 +697,7 @@ async function main() {
 			before: { nodes: scenario.nodes, edges: scenario.edges, routes: beforeRoutes.map((route) => route.points), metrics: beforeMetrics },
 			after: { nodes: organized.nodes, edges: scenario.edges, routes: afterRoutes.map((route) => route.points), metrics: afterMetrics },
 			layoutMs: round(layoutMs),
+			portGoal: scenario.portGoal ?? null,
 		})
 	}
 
@@ -547,13 +712,18 @@ async function main() {
 			totalBeforeAfterCanvases: (edgeCases.length + nodeCases.length) * 2,
 			edgeOverlapBefore: round(edgeCases.reduce((sum, item) => sum + item.before.metrics.overlap, 0)),
 			edgeOverlapAfter: round(edgeCases.reduce((sum, item) => sum + item.after.metrics.overlap, 0)),
+			edgeSpacingDefectsBefore: edgeCases.reduce((sum, item) => sum + item.before.metrics.spacingDefects, 0),
+			edgeSpacingDefectsAfter: edgeCases.reduce((sum, item) => sum + item.after.metrics.spacingDefects, 0),
 			nodeOverlapPairsBefore: nodeCases.reduce((sum, item) => sum + item.before.metrics.nodeOverlapPairs, 0),
 			nodeOverlapPairsAfter: nodeCases.reduce((sum, item) => sum + item.after.metrics.nodeOverlapPairs, 0),
 			maxLayoutMs: Math.max(...nodeCases.map((item) => item.layoutMs)),
+			portAwareNodeCases: nodeCases.filter((item) => item.after.metrics.portBoundEdges > 0).length,
+			portAlignmentGateCases: nodeCases.filter((item) => item.portGoal === 'align-all').length,
 		},
 	}
-	if (data.summary.edgeCases !== 20 || data.summary.nodeCases !== 20) {
-		throw new Error('comparison suite must contain exactly 20 cases per command')
+	if (data.summary.edgeCases !== 20 || data.summary.nodeCases !== 26
+		|| data.summary.portAwareNodeCases !== 6 || data.summary.portAlignmentGateCases !== 3) {
+		throw new Error('comparison suite must contain 20 edge, 26 node, 6 port-aware cases, and 3 exact-alignment gates')
 	}
 	const output = resolve(process.env.SYSTEMSKETCH_LAYOUT_DATA ?? 'docs/assets/layout-comparison-cases.json')
 	await writeFile(output, `${JSON.stringify(data, null, 2)}\n`, 'utf8')

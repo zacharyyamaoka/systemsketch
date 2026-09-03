@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Real-app proof for Tidy edges, Organize nodes, and their 40-case report. */
+/** Real-app proof for Tidy edges, Organize nodes, selection isolation, and the evaluation report. */
 import assert from 'node:assert/strict'
 import { copyFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -26,6 +26,7 @@ const ASSETS = join(ROOT, 'docs', 'assets')
 const BEFORE = join(ASSETS, 'layout-commands-live-before-2026-09-02.png')
 const TIDIED = join(ASSETS, 'layout-commands-live-tidied-2026-09-02.png')
 const ORGANIZED = join(ASSETS, 'layout-commands-live-organized-2026-09-02.png')
+const SELECTION_STRESS = join(ASSETS, 'layout-selection-scope-stress-2026-09-02.png')
 const REPORT = join(ASSETS, 'layout-comparison-report-2026-09-02.png')
 const { checks, pass } = makeChecklist()
 
@@ -79,7 +80,7 @@ const SEED_TIDY = `(() => {
     editor.createShapes(edges)
     editor.createBindings(bindings)
   })
-  editor.selectNone()
+  editor.select(source.id)
   editor.zoomToFit({ animation: { duration: 0 } })
   return true
 })()`
@@ -119,11 +120,77 @@ const SEED_ORGANIZE = `(() => {
   return true
 })()`
 
+const SEED_SCOPE_STRESS = `(() => {
+  const editor = window.__systemsketch.editor
+  const blocks = Array.from({ length: 36 }, (_, index) => ({
+    id: 'shape:scope-block-' + index,
+    type: 'block',
+    x: 180 + (index % 6) * 92 + (index % 3) * 11,
+    y: 160 + (index % 5) * 72 + (index % 4) * 9,
+    props: {
+      w: 150 + (index % 4) * 22,
+      h: 140 + (index % 3) * 28,
+      title: 'Scope ' + (index + 1), view: 'port',
+      portLayout: index % 2 === 0 ? 'inline' : 'offset',
+      inputs: Array.from({ length: 3 }, (_, port) => ({
+        id: 'in' + port, name: 'input ' + (port + 1), type: 'data', visible: true,
+      })),
+      outputs: Array.from({ length: 3 }, (_, port) => ({
+        id: 'out' + port, name: 'output ' + (port + 1), type: 'data', visible: true,
+      })),
+    },
+  }))
+  const pairs = []
+  for (let source = 0; source < 27; source += 1) {
+    const column = source % 9
+    pairs.push([source, source + 9])
+    pairs.push([source, 9 + Math.floor(source / 9) * 9 + ((column + 1) % 9)])
+    pairs.push([source, 9 + Math.floor(source / 9) * 9 + ((column + 2) % 9)])
+  }
+  for (let lane = 0; lane < 6; lane += 1) pairs.push([30, 31])
+  const edges = []
+  const bindings = []
+  pairs.forEach(([source, target], index) => {
+    const id = 'shape:scope-edge-' + index
+    edges.push({ id, type: 'connection', x: 0, y: 0, props: {
+      start: { x: 0, y: 0 }, end: { x: 0, y: 0 }, routing: 'elbow',
+      curve: null, pins: [], elbowRoute: null,
+    } })
+    bindings.push(
+      { type: 'connection', fromId: id, toId: blocks[source].id,
+        props: { portId: 'out' + (index % 3), terminal: 'start', face: 'outer' } },
+      { type: 'connection', fromId: id, toId: blocks[target].id,
+        props: { portId: 'in' + (index % 3), terminal: 'end', face: 'outer' } },
+    )
+  })
+  editor.run(() => {
+    editor.createShapes(blocks)
+    editor.createShapes(edges)
+    editor.createBindings(bindings)
+  })
+  window.__scopeStress = {
+    blockIds: blocks.map((block) => block.id),
+    organizeIds: blocks.slice(0, 18).map((block) => block.id),
+    explicitEdgeId: 'shape:scope-edge-' + (pairs.length - 1),
+  }
+  editor.select(...window.__scopeStress.organizeIds)
+  editor.zoomToSelection({ animation: { duration: 0 } })
+  return { blocks: blocks.length, edges: edges.length }
+})()`
+
 async function blockPositions(page, prefix) {
   return JSON.parse(await evaluate(page, `(() => JSON.stringify(
     window.__systemsketch.editor.getCurrentPageShapes()
       .filter((shape) => shape.type === 'block' && shape.id.startsWith(${JSON.stringify(prefix)}))
       .map((shape) => ({ id: shape.id, x: shape.x, y: shape.y, w: shape.props.w, h: shape.props.h }))
+      .sort((a, b) => a.id.localeCompare(b.id))))()`))
+}
+
+async function connectionProps(page, prefix) {
+  return JSON.parse(await evaluate(page, `(() => JSON.stringify(
+    window.__systemsketch.editor.getCurrentPageShapes()
+      .filter((shape) => shape.type === 'connection' && shape.id.startsWith(${JSON.stringify(prefix)}))
+      .map((shape) => ({ id: shape.id, props: shape.props }))
       .sort((a, b) => a.id.localeCompare(b.id))))()`))
 }
 
@@ -209,10 +276,12 @@ async function main() {
     })()`)
     await evaluate(app.page, `(() => {
       window.__systemsketch.editor.createBindings(window.__layoutSeed.bindings)
+      window.__systemsketch.editor.select(...window.__layoutSeed.blocks.map((block) => block.id))
       return true
     })()`)
     await delay(600)
-    const positionsBeforeOrganize = await blockPositions(app.page, 'shape:')
+    const positionsBeforeOrganize = await blockPositions(app.page, 'shape:organize-')
+    const outsideBeforeOrganize = await blockPositions(app.page, 'shape:layout-')
     const overlapsBefore = overlapPairs(positionsBeforeOrganize)
     assert.ok(overlapsBefore > 0)
     const anchorBefore = {
@@ -222,9 +291,10 @@ async function main() {
 
     await runCommand(app.page, 'organize nodes', 'organize-nodes')
     await delay(500)
-    const positionsAfterOrganize = await blockPositions(app.page, 'shape:')
+    const positionsAfterOrganize = await blockPositions(app.page, 'shape:organize-')
     assert.notDeepEqual(positionsAfterOrganize, positionsBeforeOrganize)
     assert.equal(overlapPairs(positionsAfterOrganize), 0)
+    assert.deepEqual(await blockPositions(app.page, 'shape:layout-'), outsideBeforeOrganize)
     const anchorAfter = {
       x: Math.min(...positionsAfterOrganize.map((shape) => shape.x)),
       y: Math.min(...positionsAfterOrganize.map((shape) => shape.y)),
@@ -232,13 +302,71 @@ async function main() {
     assert.ok(Math.abs(anchorBefore.x - anchorAfter.x) < 0.5)
     assert.ok(Math.abs(anchorBefore.y - anchorAfter.y) < 0.5)
     await capture(app.page, ORGANIZED)
-    pass('Organize nodes runs through Ctrl+K, removes all node overlap, and preserves the graph anchor')
+    pass('Organize nodes moves only the six selected Blocks, removes their overlap, and preserves their graph anchor')
 
     await shortcut(app.page, 'z', 'KeyZ', 2)
     const blockZeroBefore = positionsBeforeOrganize.find((shape) => shape.id === 'shape:organize-block-0')
     await waitFor(app.page, `Math.abs(window.__systemsketch.editor.getShape('shape:organize-block-0').x - ${blockZeroBefore.x}) < .5`, 'one-step organize undo')
-    assert.deepEqual(await blockPositions(app.page, 'shape:'), positionsBeforeOrganize)
+    assert.deepEqual(await blockPositions(app.page, 'shape:organize-'), positionsBeforeOrganize)
+    assert.deepEqual(await blockPositions(app.page, 'shape:layout-'), outsideBeforeOrganize)
     pass('Organize nodes is one undoable history operation')
+
+    const scopeSeed = await evaluate(app.page, SEED_SCOPE_STRESS)
+    assert.deepEqual(scopeSeed, { blocks: 36, edges: 87 })
+    await delay(900)
+    const stressBefore = await blockPositions(app.page, 'shape:scope-block-')
+    const selectedStressIds = new Set(JSON.parse(await evaluate(app.page, 'JSON.stringify(window.__scopeStress.organizeIds)')))
+    const selectedStressBefore = stressBefore.filter((shape) => selectedStressIds.has(shape.id))
+    const unselectedStressBefore = stressBefore.filter((shape) => !selectedStressIds.has(shape.id))
+    assert.ok(overlapPairs(selectedStressBefore) > 0)
+    await runCommand(app.page, 'organize nodes', 'organize-nodes')
+    await delay(900)
+    const stressAfterOrganize = await blockPositions(app.page, 'shape:scope-block-')
+    const selectedStressAfter = stressAfterOrganize.filter((shape) => selectedStressIds.has(shape.id))
+    const unselectedStressAfter = stressAfterOrganize.filter((shape) => !selectedStressIds.has(shape.id))
+    assert.notDeepEqual(selectedStressAfter, selectedStressBefore)
+    assert.equal(overlapPairs(selectedStressAfter), 0)
+    assert.deepEqual(unselectedStressAfter, unselectedStressBefore)
+    pass('Organize nodes isolates 18 selected Blocks inside a 36-Block / 87-edge multi-port view')
+
+    await shortcut(app.page, 'z', 'KeyZ', 2)
+    await waitFor(app.page, `Math.abs(window.__systemsketch.editor.getShape('shape:scope-block-0').x - ${selectedStressBefore[0].x}) < .5`, 'stress organize undo')
+    assert.deepEqual(await blockPositions(app.page, 'shape:scope-block-'), stressBefore)
+
+    const selectedTidyIds = JSON.parse(await evaluate(app.page, `(() => {
+      const editor = window.__systemsketch.editor
+      const ids = ['shape:scope-block-0', 'shape:scope-block-9', window.__scopeStress.explicitEdgeId]
+      editor.select(...ids)
+      return JSON.stringify(ids)
+    })()`))
+    const selectedTidySet = new Set(selectedTidyIds)
+    const eligibleTidyIds = new Set(JSON.parse(await evaluate(app.page, `(() => {
+      const editor = window.__systemsketch.editor
+      const selectedBlocks = new Set(editor.getSelectedShapeIds().filter((id) => editor.getShape(id)?.type === 'block'))
+      return JSON.stringify(editor.getCurrentPageShapes().filter((shape) => {
+        if (shape.type !== 'connection') return false
+        if (editor.getSelectedShapeIds().includes(shape.id)) return true
+        return editor.getBindingsFromShape(shape, 'connection').some((binding) => selectedBlocks.has(binding.toId))
+      }).map((shape) => shape.id).sort())
+    })()`)))
+    assert.ok(eligibleTidyIds.size > selectedTidySet.size)
+    const stressConnectionsBefore = await connectionProps(app.page, 'shape:scope-edge-')
+    const stressBlocksBeforeTidy = await blockPositions(app.page, 'shape:scope-block-')
+    await runCommand(app.page, 'tidy edges', 'tidy-edges')
+    await delay(900)
+    const stressConnectionsAfter = await connectionProps(app.page, 'shape:scope-edge-')
+    const beforeConnectionById = new Map(stressConnectionsBefore.map((entry) => [entry.id, entry]))
+    const changedConnections = stressConnectionsAfter.filter((entry) => (
+      JSON.stringify(entry.props) !== JSON.stringify(beforeConnectionById.get(entry.id).props)
+    ))
+    assert.ok(changedConnections.length > 0)
+    assert.ok(changedConnections.every((entry) => eligibleTidyIds.has(entry.id)))
+    assert.ok(stressConnectionsAfter
+      .filter((entry) => !eligibleTidyIds.has(entry.id))
+      .every((entry) => JSON.stringify(entry.props) === JSON.stringify(beforeConnectionById.get(entry.id).props)))
+    assert.deepEqual(await blockPositions(app.page, 'shape:scope-block-'), stressBlocksBeforeTidy)
+    await capture(app.page, SELECTION_STRESS)
+    pass(`Tidy edges changed ${changedConnections.length}/${scopeSeed.edges} edges, all inside the selected-edge/incident-edge closure`)
 
     const first = JSON.parse(await evaluate(app.page, `(() => {
       const element = document.querySelector('[data-shape-id="shape:organize-block-0"] .systemsketch-block-canvas')
@@ -262,13 +390,16 @@ async function main() {
     await reportPage.send('Page.navigate', {
       url: `http://127.0.0.1:${app.port}/docs/layout-comparison-2026-09-02.html`,
     })
-    await waitFor(reportPage, `document.querySelectorAll('.case').length === 40`, '40 report cases', 30_000)
+    await waitFor(reportPage, `document.querySelectorAll('.case').length === 46`, '46 report cases', 30_000)
+    await waitFor(reportPage, `document.documentElement.dataset.reportReady === 'true'`, 'report interactions', 30_000)
     assert.equal(await evaluate(reportPage, `document.querySelectorAll('.case[data-kind="edges"]').length`), 20)
-    assert.equal(await evaluate(reportPage, `document.querySelectorAll('.case[data-kind="nodes"]').length`), 20)
-    assert.equal(await evaluate(reportPage, `document.querySelectorAll('.compare svg').length`), 80)
+    assert.equal(await evaluate(reportPage, `document.querySelectorAll('.case[data-kind="nodes"]').length`), 26)
+    assert.equal(await evaluate(reportPage, `document.querySelectorAll('.compare svg').length`), 92)
+    assert.equal(await evaluate(reportPage, `document.querySelectorAll('.case[data-kind="nodes"] circle').length > 100`), true)
+    await evaluate(reportPage, `document.querySelector('[data-filter="nodes"]').scrollIntoView({ block: 'center' })`)
     await clickElement(reportPage, '[data-filter="nodes"]')
     assert.equal(await evaluate(reportPage, `document.querySelectorAll('.case[data-kind="edges"]:not([hidden])').length`), 0)
-    assert.equal(await evaluate(reportPage, `document.querySelectorAll('.case[data-kind="nodes"]:not([hidden])').length`), 20)
+    assert.equal(await evaluate(reportPage, `document.querySelectorAll('.case[data-kind="nodes"]:not([hidden])').length`), 26)
     await evaluate(reportPage, `document.querySelector('.case[data-kind="nodes"] .compare').scrollIntoView({ block: 'center' })`)
     await clickElement(reportPage, '.case[data-kind="nodes"] .compare')
     await waitFor(reportPage, `document.querySelector('#zoom[open]')`, 'full-screen comparison')
@@ -276,15 +407,15 @@ async function main() {
     await clickElement(reportPage, '[data-filter="all"]')
     await evaluate(reportPage, `window.scrollTo(0, 0)`)
     await capture(reportPage, REPORT)
-    pass('the self-contained report renders 20 + 20 cases, filters, and full-screen inspection')
+    pass('the self-contained report renders 20 edge + 26 node cases, port geometry, filters, and full-screen inspection')
 
     assert.deepEqual(localConsoleErrors(reportPage), [])
     pass('the real-app and report journeys produced zero local console errors')
 
     const tidyFixture = join(app.filesRoot, 'SystemSketch', 'tidy-edges-review.systemsketch')
-    const organizeFixture = join(app.filesRoot, 'SystemSketch', 'organize-nodes-review.systemsketch')
-    await copyFile(join(ROOT, 'sketches', 'review', 'tidy-edges.systemsketch'), tidyFixture)
-    await copyFile(join(ROOT, 'sketches', 'review', 'organize-nodes.systemsketch'), organizeFixture)
+    const organizeFixture = join(app.filesRoot, 'SystemSketch', 'organize-nodes-port-layout-review.systemsketch')
+    await copyFile(join(ROOT, 'sketches', 'review', 'tidy-edges-selection.systemsketch'), tidyFixture)
+    await copyFile(join(ROOT, 'sketches', 'review', 'organize-nodes-port-layout.systemsketch'), organizeFixture)
     fixturePage = await newPage(app.cdpPort)
     await fixturePage.send('Page.enable')
     await fixturePage.send('Runtime.enable')
@@ -295,6 +426,7 @@ async function main() {
 
     await openApp(fixturePage, app.port, `?board=${encodeURIComponent(tidyFixture)}`)
     await waitFor(fixturePage, `window.__systemsketch?.editor?.getShape('shape:cable-1')`, 'tidy review fixture')
+    await evaluate(fixturePage, `(() => { window.__systemsketch.editor.select('shape:source'); return true })()`)
     const fixtureBlocksBefore = await blockPositions(fixturePage, 'shape:')
     await runCommand(fixturePage, 'tidy edges', 'tidy-edges')
     await waitFor(fixturePage, `window.__systemsketch.editor.getShape('shape:cable-1').props.pins.length > 0`, 'tidied review fixture')
@@ -309,16 +441,22 @@ async function main() {
       width: 1500, height: 980, deviceScaleFactor: 1, mobile: false,
     })
     await openApp(fixturePage, app.port, `?board=${encodeURIComponent(organizeFixture)}`)
-    await waitFor(fixturePage, `window.__systemsketch?.editor?.getShape('shape:stage-a')`, 'organize review fixture')
-    assert.ok(overlapPairs(await blockPositions(fixturePage, 'shape:')) > 0)
+    await waitFor(fixturePage, `window.__systemsketch?.editor?.getShape('shape:port-a')`, 'multi-port organize review fixture')
+    await evaluate(fixturePage, `(() => {
+      window.__systemsketch.editor.select(
+        'shape:port-a', 'shape:port-b', 'shape:port-c',
+        'shape:port-d', 'shape:port-e', 'shape:port-f')
+      return true
+    })()`)
+    assert.ok(overlapPairs(await blockPositions(fixturePage, 'shape:port-')) > 0)
     await runCommand(fixturePage, 'organize nodes', 'organize-nodes')
-    await waitFor(fixturePage, `window.__systemsketch.editor.getShape('shape:stage-f').x > 1200`, 'organized review fixture', 30_000)
-    assert.equal(overlapPairs(await blockPositions(fixturePage, 'shape:')), 0)
+    await waitFor(fixturePage, `window.__systemsketch.editor.getShape('shape:port-e').x > 1400`, 'organized multi-port review fixture', 30_000)
+    assert.equal(overlapPairs(await blockPositions(fixturePage, 'shape:port-')), 0)
     assert.deepEqual(localConsoleErrors(fixturePage), [])
-    pass('both generated review fixtures complete their intended gesture in the real app')
+    pass('both generated review fixtures—including the mixed-port board—complete their intended gesture in the real app')
 
     process.stdout.write(`\n  ${checks.length}/${checks.length} browser checks passed\n`)
-    for (const path of [BEFORE, TIDIED, ORGANIZED, REPORT]) process.stdout.write(`  ${path}\n`)
+    for (const path of [BEFORE, TIDIED, ORGANIZED, SELECTION_STRESS, REPORT]) process.stdout.write(`  ${path}\n`)
   } finally {
     fixturePage?.close()
     reportPage?.close()

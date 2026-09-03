@@ -6,9 +6,12 @@
  * immovable constraints; curved and straight connections are ignored. Routes
  * are compared in page space and persisted as the same endpoint-relative pins
  * the existing elbow editor uses, so the operation is undoable and repeatable.
+ * Scope is always explicit: selected edges plus edges incident to any selected
+ * Block. An empty selection never sweeps the page.
  */
 import { Mat, type Editor, type TLShapeId } from 'tldraw'
 
+import { isBlockShape } from '../blockModel'
 import {
 	createPin,
 	nudgeRoutes,
@@ -69,7 +72,6 @@ export function tidyEdgeRole(connection: ConnectionShape): TidyEdgeRole {
 }
 
 export interface TidyEdgesOptions {
-	scope?: 'all' | 'selection'
 	spacing?: number
 }
 
@@ -77,29 +79,34 @@ export function tidyEdges(
 	editor: Editor,
 	options: TidyEdgesOptions = {},
 ): TidyEdgesOutcome {
-	const { scope = 'all' } = options
 	const connections = editor.getCurrentPageShapes().filter(
 		(shape): shape is ConnectionShape => shape.type === CONNECTION_SHAPE_TYPE,
 	)
-	const inScope = scope === 'selection' ? withinSelection(editor, connections) : connections
-	if (inScope.length === 0) return EMPTY_TIDY_EDGES_OUTCOME
+	const selected = new Set(getTidyEdgesSelection(editor, connections).map((connection) => connection.id))
+	if (selected.size === 0) return EMPTY_TIDY_EDGES_OUTCOME
 
-	const free: ConnectionShape[] = []
-	const locked: ConnectionShape[] = []
+	const movable = new Set<TLShapeId>()
+	let locked = 0
 	let ignored = 0
-	for (const connection of inScope) {
+	for (const connection of connections) {
+		if (!selected.has(connection.id)) continue
 		const role = tidyEdgeRole(connection)
-		if (role === 'free') free.push(connection)
-		else if (role === 'locked') locked.push(connection)
+		if (role === 'free') movable.add(connection.id)
+		else if (role === 'locked') locked += 1
 		else ignored += 1
 	}
-	if (free.length === 0) {
-		return { ...EMPTY_TIDY_EDGES_OUTCOME, locked: locked.length, ignored }
+	if (movable.size === 0) {
+		return { ...EMPTY_TIDY_EDGES_OUTCOME, locked, ignored }
 	}
 
-	const participants = [...free, ...locked]
-	const pageRoutes = participants.map((connection) => toPageRoute(editor, connection))
-	const lockedFlags = participants.map((_, index) => index >= free.length)
+	// Unselected elbows remain immutable but participate as routing constraints.
+	// This makes selecting one edge useful: it can move away from an overlapping
+	// sibling without silently rewriting that sibling.
+	const participants = connections.filter((connection) =>
+		movable.has(connection.id) || connection.props.routing === 'elbow')
+	const pageRoutes = participants.map((connection) =>
+		toPageRoute(editor, connection, movable.has(connection.id)))
+	const lockedFlags = participants.map((connection) => !movable.has(connection.id))
 	const report = nudgeRoutes(
 		pageRoutes,
 		options.spacing === undefined ? {} : { spacing: options.spacing },
@@ -107,7 +114,8 @@ export function tidyEdges(
 	)
 
 	const edits: { id: TLShapeId; type: typeof CONNECTION_SHAPE_TYPE; props: { pins: ElbowPin[] } }[] = []
-	free.forEach((connection, index) => {
+	participants.forEach((connection, index) => {
+		if (!movable.has(connection.id)) return
 		const pins = pinsForRoute(editor, connection, pageRoutes[index], report.routes[index])
 		if (pins) edits.push({ id: connection.id, type: CONNECTION_SHAPE_TYPE, props: { pins } })
 	})
@@ -118,29 +126,40 @@ export function tidyEdges(
 
 	return {
 		tidied: edits.length,
-		locked: locked.length,
+		locked,
 		ignored,
 		bundles: report.bundles.length,
 		forcedCrossings: report.forcedCrossings.length,
 	}
 }
 
-function withinSelection(editor: Editor, connections: ConnectionShape[]): ConnectionShape[] {
+/** Explicit edges plus every edge incident to at least one selected Block. */
+export function getTidyEdgesSelection(
+	editor: Editor,
+	connections = editor.getCurrentPageShapes().filter(
+		(shape): shape is ConnectionShape => shape.type === CONNECTION_SHAPE_TYPE,
+	),
+): ConnectionShape[] {
 	const selected = new Set(editor.getSelectedShapeIds())
-	if (selected.size === 0) return connections
+	if (selected.size === 0) return []
+	const selectedBlocks = new Set(editor.getSelectedShapes().filter(isBlockShape).map((shape) => shape.id))
 	return connections.filter((connection) => {
 		if (selected.has(connection.id)) return true
 		const bound = editor.getBindingsFromShape(connection, 'connection').map((binding) => binding.toId)
-		return bound.length > 0 && bound.every((id) => selected.has(id))
+		return bound.some((id) => selectedBlocks.has(id))
 	})
 }
 
 /** Recompute pinned routes from their pristine auto-route for idempotence. */
-function toPageRoute(editor: Editor, connection: ConnectionShape): ElbowRoute {
+function toPageRoute(
+	editor: Editor,
+	connection: ConnectionShape,
+	ignoreAutomaticPins: boolean,
+): ElbowRoute {
 	const transform = editor.getShapePageTransform(connection)
 	const authored = getConnectionElbowRoute(editor, connection)
 	const { source, sink } = getConnectionEndpoints(editor, connection)
-	const pristine = connection.props.pins.length > 0
+	const pristine = ignoreAutomaticPins && connection.props.pins.length > 0
 		? routeElbow({
 			start: { point: source, side: 'right', box: null },
 			end: { point: sink, side: 'left', box: null },

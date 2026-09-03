@@ -61,9 +61,10 @@ export { DEFAULT_ELBOW_OPTIONS, pinElbowSegment, routeElbow } from './elbowRoute
 export type { ElbowPathOptions } from './elbowPath'
 export { elbowPath, elbowPointAt, elbowRouteLength } from './elbowPath'
 
-export type { NudgeOptions, NudgeReport } from './nudge'
+export type { ChannelSpacingDefect, NudgeOptions, NudgeReport } from './nudge'
 export {
   DEFAULT_NUDGE_OPTIONS,
+  channelSpacingDefects,
   coincidentOverlap,
   countCrossings,
   nudgeRoutes,

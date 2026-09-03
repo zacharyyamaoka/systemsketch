@@ -12,7 +12,7 @@ import {
 import { useEffect, useMemo, useRef } from 'react'
 import { AppearanceControls } from '../appearance/AppearanceControls'
 import { BLOCK_TOOL_ID, PILL_TOOL_ID, getBlockInspectorContext, selectionHasBlockStyles } from '../blocks'
-import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
+import { describeTidyEdgesOutcome, getTidyEdgesSelection, tidyEdges } from '../blocks/connections/tidyEdges'
 import { describeOrganizeNodesOutcome, organizeNodes } from '../blocks/layout'
 import {
   EditorBlockInspector,
@@ -367,11 +367,9 @@ export function SystemSketchSurfaceHost() {
         description: 'Separate overlapping elbow channels without moving nodes',
         keywords: ['nudge', 'cables', 'connections', 'layout'],
         icon: '≋',
-        disabled: () => !editor.getCurrentPageShapes().some((shape) => shape.type === 'connection'),
+        disabled: () => getTidyEdgesSelection(editor).length === 0,
         run: () => {
-          const outcome = tidyEdges(editor, {
-            scope: editor.getSelectedShapeIds().length > 0 ? 'selection' : 'all',
-          })
+          const outcome = tidyEdges(editor)
           addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
         },
       },
@@ -381,7 +379,7 @@ export function SystemSketchSurfaceHost() {
         description: 'Arrange Blocks left to right while preserving model order',
         keywords: ['tidy', 'blocks', 'auto layout', 'elk'],
         icon: '▦',
-        disabled: () => editor.getCurrentPageShapes().filter((shape) => shape.type === 'block').length < 2,
+        disabled: () => editor.getSelectedShapes().filter((shape) => shape.type === 'block').length < 2,
         run: async () => {
           const outcome = await organizeNodes(editor)
           addToast({ title: describeOrganizeNodesOutcome(outcome), severity: 'info' })
