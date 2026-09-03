@@ -5,6 +5,7 @@ import {
   TldrawUiDialogTitle,
   type TLUiDialogProps,
 } from 'tldraw'
+import { Settings } from 'lucide-react'
 import { useRef, useState, type ChangeEvent, type ComponentProps, type CSSProperties, type ReactNode } from 'react'
 import {
   DEFAULT_INTERFACE_SCALE,
@@ -39,12 +40,7 @@ import {
 import './interface-settings.css'
 
 export function SettingsGearIcon(props: ComponentProps<'svg'>) {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" {...props}>
-      <path d="M7.95 2.7h4.1l.52 2.05c.36.15.7.35 1.02.58l2.03-.59 2.05 3.55-1.52 1.47a6.8 6.8 0 0 1 0 1.18l1.52 1.47-2.05 3.55-2.03-.59c-.32.23-.66.43-1.02.58L12.05 18h-4.1l-.52-2.05a6.43 6.43 0 0 1-1.02-.58l-2.03.59-2.05-3.55 1.52-1.47a6.8 6.8 0 0 1 0-1.18L2.33 8.29l2.05-3.55 2.03.59c.32-.23.66-.43 1.02-.58L7.95 2.7Z" />
-      <circle cx="10" cy="10.35" r="2.35" />
-    </svg>
-  )
+  return <Settings aria-hidden="true" {...props} />
 }
 
 function CategoryIcon({ children }: { children: ReactNode }) {

@@ -106,6 +106,29 @@
   box-shadow: var(--ss-shadow-2);
 }
 
+/* Native text controls do not inherit `color` or `font-family` reliably. On a
+ * machine whose browser chrome prefers dark controls that left an unstyled
+ * input with white system ink even while SystemSketch was wearing Light.
+ * Keep this rule at the workspace boundary so Rename, Save As, Export, Filter,
+ * and any later workspace text field all resolve from the active app theme. */
+.systemsketch-workspace-dialog input:not([type]),
+.systemsketch-workspace-dialog input[type='text'],
+.systemsketch-workspace-dialog input[type='search'] {
+  color: var(--ss-text);
+  caret-color: var(--ss-text);
+  font-family: inherit;
+}
+
+.systemsketch-workspace-dialog input::placeholder {
+  color: var(--ss-text-muted);
+  opacity: 1;
+}
+
+.systemsketch-workspace-dialog input::selection {
+  color: var(--ss-accent-text);
+  background: var(--ss-accent);
+}
+
 .systemsketch-workspace-dialog > header,
 .systemsketch-workspace-dialog > footer {
   display: flex;
@@ -365,6 +388,7 @@
   border: 0;
   outline: 0;
   background: transparent;
+  font-size: 13px;
 }
 
 .systemsketch-workspace-name-field span {
