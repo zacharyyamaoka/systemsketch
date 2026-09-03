@@ -5,7 +5,6 @@ from __future__ import annotations
 import base64
 import html
 import re
-import subprocess
 from pathlib import Path
 
 
@@ -30,9 +29,6 @@ def test_count(path: Path) -> int:
 
 
 def build() -> str:
-    sha = subprocess.check_output(
-        ["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, text=True
-    ).strip()
     unit_files = [
         ROOT / "src/blocks/connections/routingObstacles.test.ts",
         ROOT / "src/blocks/connections/collisionAwareRouting.test.ts",
@@ -171,7 +167,7 @@ def build() -> str:
       <p>libavoid remains a benchmark, not a dependency: its browser/WASM distribution brings LGPL obligations.</p></div></div>
   </section>
 
-  <footer>Built from live tree {esc(sha)} · self-contained HTML · screenshots produced by <code>npm run test:collision-routing</code></footer>
+  <footer>Built from the reconciled live tree · self-contained HTML · screenshots produced by <code>npm run test:collision-routing</code></footer>
 </main><script>
   for (const card of document.querySelectorAll('[data-case]')) {{
     const image = card.querySelector('img');
