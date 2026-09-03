@@ -12,6 +12,8 @@ The [Tidy Edges + Organize Nodes comparison](docs/layout-comparison-2026-09-02.h
 
 The [organizing inside an Expanded Block architecture gallery](docs/organize-inside-block-babble-2026-09-02.html) compares five ways for a fixed parent’s inner-face ports to influence selected child placement. It provisionally recommends two ephemeral boundary rails inside the existing flat ELK solve—not a persisted fake Block and not an ELK-owned compound parent—with exact port identity/order, SystemSketch-owned routing, scope-local processing, and a hard no-overflow guard.
 
+The [contextual tidy-controls implementation gallery](docs/contextual-tidy-controls-2026-09-02.html) adds those same selection-scoped commands to the floating toolbar: a bent-route glyph appears for selected or incident semantic edges, while a FigJam-like 3×3 grid appears for two or more selected Blocks. Inapplicable controls stay out of the compact pill, both buttons carry accessible names and tooltips, and the five-check real-browser journey proves edge-only, incident-edge, mixed availability, invocation, and zero console errors. Its [`contextual-tidy-controls.systemsketch`](sketches/review/contextual-tidy-controls.systemsketch) review board exercises both controls against a fixed unselected sentinel.
+
 The [Ctrl+P command-palette implementation gallery](docs/command-palette-ctrl-p-2026-09-02.html) shows the editor-style shortcut opening the real Commands dialog with search focused while suppressing the browser print action. Ctrl+K remains a compatibility alias, Ctrl+F still opens board Find & replace, and the linked review board is ready to drive on the current Preview.
 
 [Open the rendered foundation report](docs/systemsketch-foundation-2026-08-30.html)
