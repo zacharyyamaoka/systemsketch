@@ -58,8 +58,9 @@ import {
   type ConnectionRoutingKind,
   type ConnectionTemporalKind,
 } from '../connections/connectionModel'
-import { describeTidyEdgesOutcome, getTidyEdgesSelection, tidyEdges } from '../connections/tidyEdges'
+import { describeTidyEdgesOutcome, tidyEdges } from '../connections/tidyEdges'
 import { describeOrganizeNodesOutcome, organizeNodes } from '../layout'
+import { getSelectionLayoutActionAvailability } from '../../chrome/SelectionLayoutActions'
 import {
   requestBlockInlineEdit,
   type BlockInlineField,
@@ -150,10 +151,7 @@ function BlockContextMenuItems() {
   )
   const layoutSelection = useValue(
     'context-menu selected layout subjects',
-    () => ({
-      blocks: editor.getSelectedShapes().filter((shape) => shape.type === 'block').length,
-      edges: getTidyEdgesSelection(editor).length,
-    }),
+    () => getSelectionLayoutActionAvailability(editor),
     [editor],
   )
   // Same menu, different subject. The right-click that opened it recorded the
@@ -506,18 +504,18 @@ function BlockContextMenuItems() {
         </TldrawUiMenuGroup>
       ) : null}
 
-      {layoutSelection.blocks > 0 || layoutSelection.edges > 0 ? (
+      {layoutSelection.tidyEdges || layoutSelection.organizeNodes ? (
         <TldrawUiMenuGroup id="systemsketch-layout">
           <TldrawUiMenuItem
             id="tidy-edges"
             label="Tidy edges"
-            disabled={layoutSelection.edges === 0}
+            disabled={!layoutSelection.tidyEdges}
             onSelect={runTidyEdges}
           />
           <TldrawUiMenuItem
             id="organize-nodes"
             label="Organize nodes"
-            disabled={layoutSelection.blocks < 2}
+            disabled={!layoutSelection.organizeNodes}
             onSelect={() => void runOrganizeNodes()}
           />
         </TldrawUiMenuGroup>

@@ -1,0 +1,30 @@
+[
+  {
+    "label": "one selected Expanded Block with three immediate children exposes both layout actions",
+    "ok": true
+  },
+  {
+    "label": "Tidy edges changes direct-scope cables only; 20 outside Blocks, 20 outside cables, and nested contents remain byte-stable",
+    "ok": true
+  },
+  {
+    "label": "Organize nodes moves immediate children only, keeps them inside the parent, and leaves parent, nested descendants, exterior incident cable, and dense outside graph unchanged",
+    "ok": true
+  },
+  {
+    "label": "one disconnected child does not expose an arbitrary Organize nodes action",
+    "ok": true
+  },
+  {
+    "label": "one boundary-connected child does expose Organize nodes because its parent port is a real alignment target",
+    "ok": true
+  },
+  {
+    "label": "the generated review fixture keeps its cue binding attached and completes both intended layout gestures in the real app",
+    "ok": true
+  },
+  {
+    "label": "the Expanded Block layout journey produced zero local console errors",
+    "ok": true
+  }
+]
