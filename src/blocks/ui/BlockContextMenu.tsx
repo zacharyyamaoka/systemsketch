@@ -74,6 +74,7 @@ import {
   linkedBlockOccurrences,
   unlinkBlockDefinition,
 } from '../definitions/definitionLinking'
+import { getOnlySelectedFrame, removeFrameKeepContents } from '../../frames/removeFrame'
 
 function onlySelectedBlock(editor: ReturnType<typeof useEditor>): BlockShape | null {
   const selected = editor.getSelectedShapes()
@@ -130,6 +131,11 @@ function BlockContextMenuItems() {
   const activeDepthScopeId = useValue(
     'context-menu active depth scope',
     () => getActiveDepthScopeId(editor),
+    [editor],
+  )
+  const selectedFrame = useValue(
+    'context-menu selected Frame',
+    () => getOnlySelectedFrame(editor),
     [editor],
   )
   const linkedOccurrenceCount = useValue(
@@ -525,6 +531,16 @@ function BlockContextMenuItems() {
             label="Organize nodes"
             disabled={!layoutSelection.organizeNodes}
             onSelect={() => void runOrganizeNodes()}
+          />
+        </TldrawUiMenuGroup>
+      ) : null}
+
+      {selectedFrame ? (
+        <TldrawUiMenuGroup id="systemsketch-frame">
+          <TldrawUiMenuItem
+            id="frame-remove-keep-contents"
+            label="Remove frame"
+            onSelect={() => void removeFrameKeepContents(editor, selectedFrame.id)}
           />
         </TldrawUiMenuGroup>
       ) : null}
