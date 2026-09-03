@@ -9,12 +9,19 @@ import {
   type InspectorSubject,
 } from './inspectorSubject'
 
-const EMPTY = { hasBranch: false, hasBlockContext: false, hasConnection: false, hasSelection: false }
+const EMPTY = {
+  hasBranch: false, hasLoop: false, hasBlockContext: false, hasConnection: false, hasSelection: false,
+}
 
 describe('resolveInspectorSubject', () => {
   it('keeps the precedence the chrome used to hold inline', () => {
     expect(resolveInspectorSubject({ ...EMPTY, hasBranch: true, hasBlockContext: true, hasSelection: true }))
       .toBe('branch')
+    // A Branch wins over a Loop too — they cannot both be the only selection,
+    // but if a reader ever answered both true the region subject still wins
+    // over the Block lens below it.
+    expect(resolveInspectorSubject({ ...EMPTY, hasLoop: true, hasBlockContext: true, hasSelection: true }))
+      .toBe('loop')
     expect(resolveInspectorSubject({ ...EMPTY, hasConnection: true, hasSelection: true }))
       .toBe('connection')
     // A Block wins over a cable, because a Block carries far more to edit.
@@ -42,6 +49,7 @@ describe('inspectorSubjectOwnsHeader', () => {
     const owns: Record<InspectorSubject, boolean> = {
       block: true,
       branch: true,
+      loop: true,
       connection: false,
       shape: false,
       empty: false,
@@ -64,8 +72,10 @@ describe('readInspectorSubject', () => {
     branch: unknown,
     kind: string,
     connection: unknown,
+    loop: unknown = null,
   ) => ({
     getOnlySelectedBranch: () => branch,
+    getOnlySelectedLoop: () => loop,
     getBlockInspectorContextKind: () => kind,
     getConnectionInspectorContext: () => connection,
   })
@@ -85,5 +95,9 @@ describe('readInspectorSubject', () => {
     for (const kind of ['selected', 'multi', 'tool']) {
       expect(readInspectorSubject(editor(['shape:a']), reader(null, kind, null))).toBe('block')
     }
+  })
+
+  it('reads a selected Loop as the loop lens, ahead of the Block lens', () => {
+    expect(readInspectorSubject(editor(['shape:loop']), reader(null, 'empty', null, {}))).toBe('loop')
   })
 })

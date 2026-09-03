@@ -13,15 +13,15 @@
  */
 import type { Editor } from 'tldraw'
 
-export type InspectorSubject = 'block' | 'branch' | 'connection' | 'shape' | 'empty'
+export type InspectorSubject = 'block' | 'branch' | 'loop' | 'connection' | 'shape' | 'empty'
 
 /**
  * The panels that render their own close button — `BlockInspectorContent`'s tab
- * strip, `BlockBatchInspectorContent`'s batch header, and the Branch
- * inspector's header. `ConnectionInspector` and `ShapeFactsPanel` do not, and
+ * strip, `BlockBatchInspectorContent`'s batch header, and the Branch and Loop
+ * inspectors' headers. `ConnectionInspector` and `ShapeFactsPanel` do not, and
  * neither does the empty state, so those three keep the dock's own header.
  */
-const SUBJECTS_WITH_OWN_HEADER: ReadonlySet<InspectorSubject> = new Set(['block', 'branch'])
+const SUBJECTS_WITH_OWN_HEADER: ReadonlySet<InspectorSubject> = new Set(['block', 'branch', 'loop'])
 
 export function inspectorSubjectOwnsHeader(subject: InspectorSubject): boolean {
   return SUBJECTS_WITH_OWN_HEADER.has(subject)
@@ -39,6 +39,8 @@ export function inspectorSubjectTitle(subject: InspectorSubject): string {
 export interface InspectorSubjectInputs {
   /** A Branch is the only thing selected. */
   hasBranch: boolean
+  /** A Loop is the only thing selected. */
+  hasLoop: boolean
   /** The Block lens has something to say: a Block, a batch, or the armed tool. */
   hasBlockContext: boolean
   /** At least one cable is selected. */
@@ -49,13 +51,14 @@ export interface InspectorSubjectInputs {
 
 /**
  * The precedence, unchanged from the version that lived inline in the chrome:
- * a Branch is its own subject, then a cable, then the Block lens — which wins
- * whenever it could apply, because a Block carries far more to edit. What is
- * new is the tail: a selection none of them claim is an ordinary shape, and
- * only a genuinely empty selection is `empty`.
+ * a Branch or a Loop is its own subject, then a cable, then the Block lens —
+ * which wins whenever it could apply, because a Block carries far more to
+ * edit. What is new is the tail: a selection none of them claim is an
+ * ordinary shape, and only a genuinely empty selection is `empty`.
  */
 export function resolveInspectorSubject(inputs: InspectorSubjectInputs): InspectorSubject {
   if (inputs.hasBranch) return 'branch'
+  if (inputs.hasLoop) return 'loop'
   if (!inputs.hasBlockContext && inputs.hasConnection) return 'connection'
   if (inputs.hasBlockContext) return 'block'
   return inputs.hasSelection ? 'shape' : 'empty'
@@ -63,6 +66,7 @@ export function resolveInspectorSubject(inputs: InspectorSubjectInputs): Inspect
 
 export interface InspectorSubjectReader {
   getOnlySelectedBranch(editor: Editor): unknown
+  getOnlySelectedLoop(editor: Editor): unknown
   getBlockInspectorContextKind(editor: Editor): string
   getConnectionInspectorContext(editor: Editor): unknown
 }
@@ -74,6 +78,7 @@ export function readInspectorSubject(
 ): InspectorSubject {
   return resolveInspectorSubject({
     hasBranch: Boolean(reader.getOnlySelectedBranch(editor)),
+    hasLoop: Boolean(reader.getOnlySelectedLoop(editor)),
     hasBlockContext: reader.getBlockInspectorContextKind(editor) !== 'empty',
     hasConnection: reader.getConnectionInspectorContext(editor) !== null,
     hasSelection: editor.getSelectedShapeIds().length > 0,
