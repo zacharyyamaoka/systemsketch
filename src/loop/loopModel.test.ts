@@ -35,9 +35,12 @@ describe('loop layout', () => {
 		expect(layout.item.y).toBe(LOOP_HEADER_HEIGHT)
 		expect(layout.item.x).toBe(LOOP_ITEM_PORT_INSET)
 		expect(layout.item.side).toBe('output')
+		// On the wall, so the router's "an output leaves rightward" invariant is
+		// true and the run into the body is short.
+		expect(layout.item.x).toBe(0)
 		// The label clears the dot's row, so the first cable drawn from it does
 		// not strike the word through.
-		expect(layout.item.label.y).toBeLessThan(layout.item.y - 8)
+		expect(layout.item.label.y).toBeGreaterThan(layout.item.y + 8)
 	})
 
 	it('centres the title, and keeps it clear of the iterable label', () => {

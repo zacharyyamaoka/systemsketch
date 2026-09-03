@@ -1,0 +1,500 @@
+{
+ "feature": "Loop region \u00b7 B solid drop",
+ "viewport": {
+  "width": 2200,
+  "height": 1200
+ },
+ "pages": [
+  {
+   "id": "review",
+   "name": "Review"
+  }
+ ],
+ "shapes": [
+  {
+   "id": "loop",
+   "type": "loop",
+   "x": 460,
+   "y": 120,
+   "props": {
+    "w": 900,
+    "h": 520,
+    "title": "For Loop",
+    "iterable": {
+     "id": "iterable",
+     "name": "others",
+     "type": "Poses"
+    },
+    "item": {
+     "id": "item",
+     "name": "other",
+     "type": "Pose"
+    },
+    "turn": "iteration 3 of 7"
+   }
+  },
+  {
+   "id": "run",
+   "type": "block",
+   "x": 40,
+   "y": 150,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "others",
+      "type": "Poses",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "estimate",
+   "type": "block",
+   "x": 40,
+   "y": 400,
+   "props": {
+    "title": "estimate()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "merge",
+   "type": "block",
+   "x": 640,
+   "y": 300,
+   "props": {
+    "title": "merge()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 340,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "other",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "smooth",
+   "type": "block",
+   "x": 1060,
+   "y": 380,
+   "props": {
+    "title": "smooth()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 260,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "encode",
+   "type": "block",
+   "x": 1500,
+   "y": 400,
+   "props": {
+    "title": "encode()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "c-iterable",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "c-item",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "c-seed",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "c-body",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "c-back",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "delayed",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "c-out",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  }
+ ],
+ "bindings": [
+  {
+   "type": "connection",
+   "fromId": "c-iterable",
+   "toId": "run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-iterable",
+   "toId": "loop",
+   "props": {
+    "portId": "iterable",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-item",
+   "toId": "loop",
+   "props": {
+    "portId": "item",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-item",
+   "toId": "merge",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-seed",
+   "toId": "estimate",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-seed",
+   "toId": "merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-body",
+   "toId": "merge",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-body",
+   "toId": "smooth",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-back",
+   "toId": "smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-back",
+   "toId": "merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-out",
+   "toId": "smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-out",
+   "toId": "encode",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  }
+ ],
+ "callouts": [
+  {
+   "id": "step-1",
+   "kind": "step",
+   "text": "1 \u00b7 Press the Block slot's chevron in the toolbar and choose Loop, then drag a second region on the empty canvas below.",
+   "x": -480,
+   "y": 130,
+   "w": 420,
+   "h": 180,
+   "target": {
+    "shapeId": "loop",
+    "anchor": "left",
+    "dy": 40
+   }
+  },
+  {
+   "id": "step-2",
+   "kind": "step",
+   "text": "2 \u00b7 Drag from the header's `other` dot to any Block input. It welds an ordinary SOLID cable \u2014 that is B.",
+   "x": -480,
+   "y": 360,
+   "w": 420,
+   "h": 160,
+   "target": {
+    "shapeId": "loop",
+    "anchor": "left",
+    "dy": 180
+   }
+  },
+  {
+   "id": "step-3",
+   "kind": "step",
+   "text": "3 \u00b7 Compare the two line styles: the item cable is solid, the smooth() back cable is dotted with its z-1 pill. Drag merge() and watch both reflow.",
+   "x": -480,
+   "y": 580,
+   "w": 420,
+   "h": 200,
+   "target": {
+    "shapeId": "merge",
+    "anchor": "left",
+    "dy": 60
+   }
+  },
+  {
+   "id": "pass",
+   "kind": "pass",
+   "text": "PASS WHEN the element's cable and the carry's cable are unmistakably different lines, with no legend.",
+   "x": 1900,
+   "y": 130,
+   "w": 420,
+   "h": 160
+  },
+  {
+   "id": "note-1",
+   "kind": "note",
+   "text": "KNOWN: the item cable's elbow route takes a lap around the region before entering the body. The binding is right and the line style is right; only the path is ugly. The live router asks every port to 'leave rightward and escape its shape's box', and a region's box is the whole region.",
+   "x": 460,
+   "y": 720,
+   "w": 900,
+   "h": 160
+  }
+ ]
+}

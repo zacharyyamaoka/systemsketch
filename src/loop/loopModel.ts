@@ -37,8 +37,20 @@ export const LOOP_MIN_WIDTH = 300
 export const LOOP_MIN_HEIGHT = 180
 export const LOOP_CORNER_RADIUS = 6
 export const LOOP_PORT_RADIUS = 6
-/** Where the item outlet sits along the header's bottom edge. */
-export const LOOP_ITEM_PORT_INSET = 36
+/**
+ * The item outlet sits ON the wall at the header's bottom corner, directly
+ * under the `Iterable` inlet — which is where Zach drew it, and which is also
+ * the only place the shipped router can serve.
+ *
+ * `getElbowRouteInput` states the model's invariant plainly: "a cable always
+ * leaves an output rightward and enters an input leftward". A port on the
+ * header's TOP edge breaks it — measured on the first review board, an item
+ * cable to a Block 120px below and to the right took a 900px detour out past
+ * the region's right wall and back. Putting the port on the wall makes
+ * "rightward" true again, so the run into the body is short and straight with
+ * no change to the routing layer.
+ */
+export const LOOP_ITEM_PORT_INSET = 0
 /** Left padding for a port's label, matching the Branch's control labels. */
 export const LOOP_LABEL_INSET = 14
 
@@ -137,18 +149,17 @@ export function loopLayout(props: LoopShapeProps): LoopLayout {
 		y: iterableY,
 		label: { x: LOOP_LABEL_INSET, y: iterableY, anchor: 'start' },
 	}
-	// The element leaves from the header's bottom edge, inside the wall. Its
-	// label sits ABOVE the dot rather than beside it: a cable leaving this port
-	// runs right or down, and a label on that line would be struck through by
-	// the first cable anyone draws — which is exactly what the first acceptance
-	// screenshot showed.
+	// The element leaves the header at its bottom corner. Its label sits BELOW
+	// the dot: the cable leaves rightward along that exact row, and a label on
+	// the row would be struck through by the first cable anyone draws — which
+	// is what the first acceptance screenshot showed.
 	const itemX = Math.min(LOOP_ITEM_PORT_INSET, w / 2)
 	const item: LoopPortLayout = {
 		port: props.item,
 		side: 'output',
 		x: itemX,
 		y: headerH,
-		label: { x: itemX + LOOP_LABEL_INSET, y: Math.max(12, headerH - 13), anchor: 'start' },
+		label: { x: itemX + LOOP_LABEL_INSET, y: headerH + 13, anchor: 'start' },
 	}
 
 	const turnText = props.turn.trim()
