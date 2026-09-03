@@ -42,10 +42,12 @@ export function BlockSelectionMiniMenu({
           <button
             key={candidate}
             type="button"
+            aria-label={`Show ${candidate} view`}
             aria-pressed={view.type === 'shared' && view.value === candidate}
+            data-testid={`block-pill-view-${candidate}`}
             onClick={() => onSetView(candidate)}
           >
-            {candidate === 'simple' ? 'S' : candidate === 'port' ? 'P' : 'E'}
+            {candidate.slice(0, 1).toUpperCase()}
             <span>{candidate}</span>
           </button>
         ))}

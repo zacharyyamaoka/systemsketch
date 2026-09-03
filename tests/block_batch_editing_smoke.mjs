@@ -58,6 +58,10 @@ async function miniMenuState(page) {
       selectionSummary: menu.querySelector('.block-mini-menu__count, .block-mini-menu__scope')?.textContent ?? null,
       view: menu.dataset.view,
       pressed: Array.from(menu.querySelectorAll('[aria-pressed="true"] span')).map((s) => s.textContent),
+      views: Array.from(menu.querySelectorAll('.block-mini-menu__views[aria-label="Block view"] button')).map((button) => ({
+        glyph: button.childNodes[0]?.textContent?.trim() ?? null,
+        label: button.getAttribute('aria-label'),
+      })),
     })
   })()`))
 }
@@ -228,6 +232,12 @@ async function main() {
     assert.equal(menu.selectionSummary, null)
     assert.equal(menu.view, 'port')
     assert.deepEqual(menu.pressed, ['port'])
+    assert.deepEqual(menu.views, [
+      { glyph: 'S', label: 'Show simple view' },
+      { glyph: 'P', label: 'Show port view' },
+      { glyph: 'E', label: 'Show expanded view' },
+      { glyph: 'V', label: 'Show value view' },
+    ])
     pass('a marquee over three Blocks keeps the Block mini menu and its shared view without a count summary')
 
     // --- The headline gesture: Port -> Expanded, all at once --------------

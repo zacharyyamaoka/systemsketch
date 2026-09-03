@@ -88,6 +88,9 @@ describe('Block inspector content', () => {
     expect(html).toContain('aria-pressed="true"')
     expect(html).toContain('Step in')
     expect(html).toContain('Inspect')
+    expect(html).toContain('data-testid="block-pill-view-value"')
+    expect(html).toContain('aria-label="Show value view"')
+    expect(html).toContain('>V<span>value</span>')
   })
 
   it('offers Step in only when the selected Block is Expanded', () => {
