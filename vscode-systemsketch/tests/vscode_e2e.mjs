@@ -639,6 +639,11 @@ async function main() {
       'the tldraw canvas did not mount',
     )
     assert.equal(
+      await inCanvas(page, canvas, `($doc.querySelector('[data-testid="systemsketch-embed-error"]')?.textContent ?? null)`),
+      null,
+      'the mounted canvas reported a document-format error',
+    )
+    assert.equal(
       await inCanvas(page, canvas, `Boolean($doc.querySelector(${JSON.stringify(BLOCK_TOOL_ICON_SELECTOR)}))`),
       true,
       'the SystemSketch toolbar is missing its Block tool',

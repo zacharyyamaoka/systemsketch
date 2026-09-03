@@ -96,6 +96,22 @@ class WorkspaceStoreTests(unittest.TestCase):
         renamed_by_hand.write_text(tldraw_source(), encoding="utf-8")
         self.assertEqual(load_document(str(renamed_by_hand), self.root)["title"], "ByHand")
 
+    def test_a_legacy_pyblocks_systemsketch_is_readable_but_never_writable(self) -> None:
+        legacy = self.root / "SystemSketch" / "Golden.systemsketch"
+        legacy.parent.mkdir(parents=True, exist_ok=True)
+        source = json.dumps({
+            "version": 1,
+            "nodes": [],
+            "edges": [],
+            "viewport": {"x": 0, "y": 0, "zoom": 1},
+            "metadata": {"pyblocks.golden": {"version": 1}},
+        })
+        legacy.write_text(source, encoding="utf-8")
+
+        self.assertEqual(load_document(str(legacy), self.root)["source"], source)
+        with self.assertRaisesRegex(WorkspaceFormatError, "tldrawFileFormatVersion"):
+            save_document(str(legacy), source, self.root, base_digest=document_digest(source))
+
     def test_a_document_from_a_newer_systemsketch_loads_exactly_but_cannot_be_overwritten(self) -> None:
         future = self.root / "SystemSketch" / "Future.systemsketch"
         future.parent.mkdir(parents=True, exist_ok=True)

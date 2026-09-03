@@ -73,6 +73,10 @@ import '../app.css'
 import './embed.css'
 import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from '../stockPrimitiveVisuals'
 import { SYSTEMSKETCH_ARROW_SHAPE_UTILS } from '../systemSketchArrow'
+import {
+  importLegacyPyblocksSystemSketch,
+  parseLegacyPyblocksSystemSketch,
+} from '../import/legacyPyblocksSystemSketch'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
@@ -190,14 +194,19 @@ function EmbeddedSurface({
     }
     if (!recoveredCheckpoint) {
       if (!isBlankDocument(core)) {
-        const parsed = parseTldrawJsonFile({ json: core, schema: editor.store.schema })
-        if (parsed.ok) {
-          editor.store.mergeRemoteChanges(() => {
-            loadSnapshot(editor.store, parsed.value.getStoreSnapshot())
-          })
-          if (openDocument.formatProtection) onCompatibilityCopyAvailable(true)
+        const legacy = parseLegacyPyblocksSystemSketch(core)
+        if (legacy) {
+          importLegacyPyblocksSystemSketch(editor, legacy)
         } else {
-          onLoadError(`tldraw could not read this document (${parsed.error.type})`)
+          const parsed = parseTldrawJsonFile({ json: core, schema: editor.store.schema })
+          if (parsed.ok) {
+            editor.store.mergeRemoteChanges(() => {
+              loadSnapshot(editor.store, parsed.value.getStoreSnapshot())
+            })
+            if (openDocument.formatProtection) onCompatibilityCopyAvailable(true)
+          } else {
+            onLoadError(`tldraw could not read this document (${parsed.error.type})`)
+          }
         }
       }
     }

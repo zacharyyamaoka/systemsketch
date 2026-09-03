@@ -4,6 +4,8 @@ Open a `.systemsketch` or `.tldr` file from the file tree and the SystemSketch c
 appears in the editor pane. Draw, press <kbd>Ctrl</kbd>+<kbd>S</kbd>, and the file on disk
 is what changed.
 
+The [golden compatibility gallery](../docs/ide-golden-compatibility-2026-09-02.html) shows the legacy PyBlocks import path, the migrated 96-file target/generated corpus, and the disposable-host proof: 96/96 files open in Cursor with the SystemSketch toolbar, no error surface, and unchanged bytes.
+
 ![The canvas in an editor pane](../docs/assets/vscode-target-block-saved.png)
 
 ## What it is, and what it deliberately is not
@@ -65,6 +67,19 @@ every one is either the workbench's own DOM or the file itself.
 `CODE_PATH=/usr/bin/cursor npm test` runs the same journey in Cursor. A fresh Cursor profile
 shows a sign-in wall over its workbench, so the suite reports the eight checks it can reach
 there and names the two it cannot, rather than failing or pretending.
+
+To prove every PyBlocks golden opens through the packaged extension, run the corpus sweep:
+
+```bash
+SYSTEMSKETCH_CORPUS_ROOT=~/pyblocks/examples/systemsketch_goldens npm run test:corpus
+CODE_PATH=/usr/bin/cursor SYSTEMSKETCH_CORPUS_ROOT=~/pyblocks/examples/systemsketch_goldens npm run test:corpus
+```
+
+It copies the corpus and installs the freshly built VSIX into disposable directories, opens
+each unique `target.systemsketch` and `generated.systemsketch` path, verifies the canvas and
+Block toolbar with no embed error, closes the editor, and proves that opening changed no
+bytes. If Cursor's first-run sign-in wall prevents Quick Open, the result is explicitly
+`blocked`; it is never reported as a corpus pass.
 
 ## How it works
 

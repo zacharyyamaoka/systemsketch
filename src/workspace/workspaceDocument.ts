@@ -3,6 +3,7 @@ import {
   decodeSystemSketchDocument,
   SYSTEMSKETCH_FORMAT_VERSION,
 } from './systemSketchFile'
+import { parseLegacyPyblocksSystemSketch } from '../import/legacyPyblocksSystemSketch'
 
 /**
  * Inspect workspace bytes before they are allowed anywhere near persistence.
@@ -19,6 +20,8 @@ export function inspectWorkspaceDocumentSource(
   if (source.trim().length === 0) return { kind: 'blank' } as const
 
   const { core, manifest } = decodeSystemSketchDocument(source)
+  const legacy = parseLegacyPyblocksSystemSketch(core)
+  if (legacy) return { kind: 'legacy-pyblocks', document: legacy } as const
   const parsed = parseTldrawJsonFile({ json: core, schema })
   if (!parsed.ok) {
     return {
