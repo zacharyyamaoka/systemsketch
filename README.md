@@ -184,6 +184,8 @@ The [V1 Figma-toolbar implementation-plan comparison](docs/figma-toolbar-impleme
 
 The [Figma toolbar P1 implementation gallery](docs/figma-toolbar-p1-implementation-2026-08-31.html) shows the shipped seven-slot toolbar, family recall, repeated-A arrow cycle, searchable library, capability-gated Comment slot, public tldraw extension boundary, real-browser evidence, and the shell-only P2 escape hatch if stock toolbar DOM becomes constraining.
 
+The [whole-tile family menu implementation gallery](docs/toolbar-family-menu-hitbox-2026-09-02.html) replaces each grouped tool's 15×15 corner chevron target with one 43×40 Miro-style trigger: clicking anywhere on System, Shape, or Draw opens its native tldraw picker, choosing a row arms the tool, and B / R / D remain the direct keyboard path. The report includes the interactive before/after target, 17-check browser proof, and the ready-to-drive review board.
+
 The [file-management proposal](docs/file-management-proposals-2026-08-31.html) compares portable-copy, named-local-file, and full-workspace directions. The full local-workspace direction was selected.
 
 The [local-workspace implementation report](docs/local-workspace-implementation-2026-08-31.html) shows the shipped result and real-app evidence: stock File-menu integration, a local document browser and MRU reopen, debounced autosave, atomic `.tldr` writes, rename/reveal/recoverable Trash, desktop file association, clean external reloads, explicit digest-fenced conflict resolution, and a version-checked Stable → Preview controller handoff.

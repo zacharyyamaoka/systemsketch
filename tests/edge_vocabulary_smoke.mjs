@@ -275,7 +275,7 @@ async function main() {
       { temporal: 'delayed', delayValue: '1.0', pillPosition: 0.5, pill: 'z⁻¹ = 1.0', segments: ['all'] })
 
     // 8 · A delayed cable into a Branch arm still obeys the active-path rule.
-    await clickTestId(page, 'systemsketch-tool-system-menu')
+    await clickTestId(page, 'systemsketch-tool-system')
     await waitFor(page, `Array.from(document.querySelectorAll('.systemsketch-tool-menu__item')).some((n) => n.textContent.includes('Branch'))`, 'system menu')
     const branchItem = JSON.parse(await evaluate(page, `(() => {
       const item = Array.from(document.querySelectorAll('.systemsketch-tool-menu__item')).find((n) => n.textContent.includes('Branch'))

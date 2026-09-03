@@ -183,60 +183,44 @@ function FamilyToolSlot({
   icon,
   label,
   active,
-  onActivate,
   children,
 }: {
   family: 'shape' | 'draw' | 'system'
   icon: string | TLUiIconJsx
   label: string
   active: boolean
-  onActivate(): void
   children: ReactNode
 }) {
   const menuId = `systemsketch-${family}-${useId()}`
   return (
     <TldrawUiDropdownMenuRoot id={menuId}>
-      <div
-        className="systemsketch-family-tool"
-        data-family={family}
-        data-value={`systemsketch-${family}`}
-        data-isactive={active}
-        aria-pressed={active}
-        role="group"
-        aria-label={`${label} family`}
-      >
+      <TldrawUiDropdownMenuTrigger>
         <TldrawUiToolbarButton
           type="tool"
-          className="systemsketch-family-tool__main"
-          title={label}
+          className="systemsketch-family-tool"
+          title={`${label} · Open ${family} tools`}
+          data-family={family}
+          data-value={`systemsketch-${family}`}
           aria-pressed={active}
           isActive={active}
           data-testid={`systemsketch-tool-${family}`}
-          onClick={onActivate}
         >
           <TldrawUiButtonIcon icon={icon} />
-        </TldrawUiToolbarButton>
-        <TldrawUiDropdownMenuTrigger>
-          <TldrawUiToolbarButton
-            type="icon"
-            className="systemsketch-family-tool__menu"
-            title={`More ${family} tools`}
-            data-testid={`systemsketch-tool-${family}-menu`}
-          >
+          <span className="systemsketch-family-tool__chevron" aria-hidden="true">
             <TldrawUiButtonIcon icon="chevron-down" small />
-          </TldrawUiToolbarButton>
-        </TldrawUiDropdownMenuTrigger>
-        <TldrawUiDropdownMenuContent
-          side="top"
-          align="center"
-          sideOffset={11}
-          alignOffset={0}
-          collisionPadding={12}
-          className="systemsketch-tool-menu"
-        >
-          {children}
-        </TldrawUiDropdownMenuContent>
-      </div>
+          </span>
+        </TldrawUiToolbarButton>
+      </TldrawUiDropdownMenuTrigger>
+      <TldrawUiDropdownMenuContent
+        side="top"
+        align="center"
+        sideOffset={11}
+        alignOffset={0}
+        collisionPadding={12}
+        className="systemsketch-tool-menu"
+      >
+        {children}
+      </TldrawUiDropdownMenuContent>
     </TldrawUiDropdownMenuRoot>
   )
 }
@@ -257,7 +241,6 @@ function ShapeFamilySlot({ activeToolId, geo }: { activeToolId: string; geo?: st
       icon={currentItem.icon}
       label={`${currentItem.label} · R O L A`}
       active={isActive}
-      onActivate={() => selectShapeFamilyTool(tools, current)}
     >
       <div className="systemsketch-tool-menu__heading">Shapes</div>
       {GEO_MENU_ITEMS.map((item) => (
@@ -303,7 +286,6 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
       icon={currentItem.icon}
       label={currentItem.shortcut ? `${currentItem.label} · ${currentItem.shortcut}` : currentItem.label}
       active={isActive}
-      onActivate={() => selectSystemFamilyTool(tools, current)}
     >
       <div className="systemsketch-tool-menu__heading">System design</div>
       {SYSTEM_MENU_ITEMS.map((item) => (
@@ -333,7 +315,6 @@ function DrawFamilySlot({ activeToolId }: { activeToolId: string }) {
       icon={currentItem.icon}
       label={`${currentItem.label} · ${currentItem.shortcut}`}
       active={isActive}
-      onActivate={() => selectDrawFamilyTool(tools, current)}
     >
       <div className="systemsketch-tool-menu__heading">Drawing</div>
       {DRAW_MENU_ITEMS.map((item) => (

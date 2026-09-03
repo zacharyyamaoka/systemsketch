@@ -140,7 +140,7 @@ async function selectArrowTool(page, presses = 1) {
  * did, on the first run of this file. The menu names the preset it sets.
  */
 async function pickArrowPreset(page, label, { shotName } = {}) {
-  const trigger = await elementBox(page, '[data-testid="systemsketch-tool-shape-menu"]')
+  const trigger = await elementBox(page, '[data-testid="systemsketch-tool-shape"]')
   await clickAt(page, trigger.x + trigger.width / 2, trigger.y + trigger.height / 2)
   await delay(320)
   const locate = `(() => {
