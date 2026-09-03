@@ -111,14 +111,14 @@
       <div class="outcome" id="outcome" data-state="pass">
         <div class="outcome-card"><small>Verified standalone candidate</small><strong>Stable advances first</strong></div>
         <div class="arrow">→</div>
-        <div class="outcome-card next"><small id="next-label">Host artifacts complete</small><strong id="next-value">Stable = eaec63f4</strong></div>
+        <div class="outcome-card next"><small id="next-label">Host artifacts complete</small><strong id="next-value">Stable = 78830a40</strong></div>
       </div>
     </div>
   </section>
 
   <section>
     <div class="section-head"><div><div class="eyebrow">Real application proof</div><h2>The newly generated files work in disposable hosts</h2></div>
-      <p>These are real VS Code and Obsidian journeys against build <code>eaec63f4</code>—not component renders or a dev iframe.</p></div>
+      <p>These are real VS Code and Obsidian journeys against build <code>78830a40</code>—not component renders or a dev iframe.</p></div>
     <div class="grid host-grid">
       <div class="viewer">
         <div class="viewer-bar"><div class="viewer-tabs">
@@ -137,14 +137,14 @@
   </section>
 
   <section>
-    <div class="section-head"><div><div class="eyebrow">Immutable output</div><h2>Proof build eaec63f426bc17e1</h2></div>
-      <p>One manifest ties each accepted byte to the app build and source commit <code>978f5deae4b6</code>.</p></div>
+    <div class="section-head"><div><div class="eyebrow">Immutable output</div><h2>Proof build 78830a404a33e9d9</h2></div>
+      <p>One manifest ties each accepted byte to the app build and source commit <code>9d6da2b095e0</code>.</p></div>
     <table class="ledger">
       <thead><tr><th>Host</th><th>Artifact</th><th>Bytes</th><th>SHA-256</th></tr></thead>
       <tbody>
-        <tr><td>VS Code</td><td class="mono">vscode/systemsketch-vscode-0.1.0.vsix</td><td>2,983,727</td><td class="mono">b919e699a9d06ad674423a0b5962e700c92d0f1651dc48bf2f71067bcb369a1f</td></tr>
-        <tr><td>Cursor</td><td>Shares the exact VSIX above</td><td>2,983,727</td><td class="mono">b919e699a9d06ad674423a0b5962e700c92d0f1651dc48bf2f71067bcb369a1f</td></tr>
-        <tr><td>Obsidian</td><td class="mono">obsidian/main.js + styles.css + manifest.json + bundle.json</td><td>7,766,803 main.js</td><td class="mono">main.js 7fc05e15fbbf3c5d9f36c4b3c062f711b6588ce5739c9065c09ae5aff90089ad</td></tr>
+        <tr><td>VS Code</td><td class="mono">vscode/systemsketch-vscode-0.1.0.vsix</td><td>2,983,442</td><td class="mono">d9d4779455d1d60b6c748618c36ad7a2ba75287e7da4fa12d58ecedce6b86272</td></tr>
+        <tr><td>Cursor</td><td>Shares the exact VSIX above</td><td>2,983,442</td><td class="mono">d9d4779455d1d60b6c748618c36ad7a2ba75287e7da4fa12d58ecedce6b86272</td></tr>
+        <tr><td>Obsidian</td><td class="mono">obsidian/main.js + styles.css + manifest.json + bundle.json</td><td>7,766,131 main.js</td><td class="mono">main.js bee5ef0cad1c635b71234c9e11528e3cf52cd4f9b2b94ab871f3b962810afc8e</td></tr>
       </tbody>
     </table>
     <p style="margin-top:12px">Durable location: <code>~/.local/share/systemsketch/runtime/host-releases/&lt;build&gt;/</code>. Working-tree <code>dist/</code> copies remain convenient for explicit installation.</p>
@@ -155,7 +155,7 @@
       <p>The installed directories were measured before launching isolated copies of those exact installations.</p></div>
     <div class="grid scar-grid">
       <article class="scar"><h3>VS Code + Cursor kept 17d050b4</h3><p>After a newer host build existed, both installed extensions still contained <code>17d050b467a08871</code>. Real clean-profile launches copied those installed directories: VS Code passed 10/10 and Cursor 8/8 reachable checks while still reporting the old build.</p></article>
-      <article class="scar"><h3>Obsidian needs the new plugin installed</h3><p>The built plugin is <code>systemsketch-obsidian</code> and build <code>eaec63f4</code> passed 8/8 in an isolated vault. The enabled live-vault directory is the legacy <code>systemsketch</code> plugin, so reloading cannot discover the new bundle by itself.</p></article>
+      <article class="scar"><h3>Obsidian needs the new plugin installed</h3><p>The built plugin is <code>systemsketch-obsidian</code> and build <code>78830a40</code> passed 8/8 in an isolated vault. The enabled live-vault directory is the legacy <code>systemsketch</code> plugin, so reloading cannot discover the new bundle by itself.</p></article>
     </div>
   </section>
 
@@ -183,7 +183,7 @@
     const ok = kind === 'pass'; pass.setAttribute('aria-pressed', String(ok)); fail.setAttribute('aria-pressed', String(!ok))
     outcome.dataset.state = kind
     nextLabel.textContent = ok ? 'Host artifacts complete' : 'Host artifacts need attention'
-    nextValue.textContent = 'Stable = eaec63f4'
+    nextValue.textContent = 'Stable = 78830a40'
   }
   pass.onclick = () => state('pass'); fail.onclick = () => state('fail')
   const shots = {

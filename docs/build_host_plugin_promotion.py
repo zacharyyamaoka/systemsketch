@@ -22,10 +22,10 @@ def esc(value: str) -> str:
     return html.escape(value)
 
 
-BUILD = "eaec63f426bc17e1"
-COMMIT = "978f5deae4b6c4d25187217ddcafdf5282ad92a4"
-VSIX_SHA = "b919e699a9d06ad674423a0b5962e700c92d0f1651dc48bf2f71067bcb369a1f"
-OBSIDIAN_SHA = "7fc05e15fbbf3c5d9f36c4b3c062f711b6588ce5739c9065c09ae5aff90089ad"
+BUILD = "78830a404a33e9d9"
+COMMIT = "9d6da2b095e07432d15404b7fbee79162f204f8d"
+VSIX_SHA = "d9d4779455d1d60b6c748618c36ad7a2ba75287e7da4fa12d58ecedce6b86272"
+OBSIDIAN_SHA = "bee5ef0cad1c635b71234c9e11528e3cf52cd4f9b2b94ab871f3b962810afc8e"
 INSTALLED_BUILD = "17d050b467a08871"
 
 
@@ -177,9 +177,9 @@ def main() -> None:
     <table class="ledger">
       <thead><tr><th>Host</th><th>Artifact</th><th>Bytes</th><th>SHA-256</th></tr></thead>
       <tbody>
-        <tr><td>VS Code</td><td class="mono">vscode/systemsketch-vscode-0.1.0.vsix</td><td>2,983,727</td><td class="mono">{VSIX_SHA}</td></tr>
-        <tr><td>Cursor</td><td>Shares the exact VSIX above</td><td>2,983,727</td><td class="mono">{VSIX_SHA}</td></tr>
-        <tr><td>Obsidian</td><td class="mono">obsidian/main.js + styles.css + manifest.json + bundle.json</td><td>7,766,803 main.js</td><td class="mono">main.js {OBSIDIAN_SHA}</td></tr>
+        <tr><td>VS Code</td><td class="mono">vscode/systemsketch-vscode-0.1.0.vsix</td><td>2,983,442</td><td class="mono">{VSIX_SHA}</td></tr>
+        <tr><td>Cursor</td><td>Shares the exact VSIX above</td><td>2,983,442</td><td class="mono">{VSIX_SHA}</td></tr>
+        <tr><td>Obsidian</td><td class="mono">obsidian/main.js + styles.css + manifest.json + bundle.json</td><td>7,766,131 main.js</td><td class="mono">main.js {OBSIDIAN_SHA}</td></tr>
       </tbody>
     </table>
     <p style="margin-top:12px">Durable location: <code>~/.local/share/systemsketch/runtime/host-releases/&lt;build&gt;/</code>. Working-tree <code>dist/</code> copies remain convenient for explicit installation.</p>
