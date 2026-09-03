@@ -597,6 +597,7 @@ async function main() {
       await cp(INSTALLED_EXTENSION, isolatedExtension, { recursive: true })
       bundledApp = JSON.parse(await readFile(join(isolatedExtension, 'dist', 'app', 'app.json'), 'utf8'))
     } else {
+      bundledApp = JSON.parse(await readFile(join(EXTENSION_ROOT, 'dist', 'app', 'app.json'), 'utf8'))
       await run(hostPath, [
         '--user-data-dir', userData,
         '--extensions-dir', extensions,

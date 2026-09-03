@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the visual report for atomic host-plugin Stable promotion."""
+"""Build the visual report for best-effort host-plugin Stable promotion."""
 
 from __future__ import annotations
 
@@ -22,10 +22,11 @@ def esc(value: str) -> str:
     return html.escape(value)
 
 
-BUILD = "d81b3e72f33e55f1"
-COMMIT = "aa95f55b33cdc8ac71aded3d4b842d95e70ec1fc"
-VSIX_SHA = "059e543a61b816fce4cad877f4340587f396f0c9e0532b25d83d5581dfd0d0cf"
-OBSIDIAN_SHA = "3ea8d5b17328a545dfd04645f76c2941a7e78270d4f07ee0649fce0e11819c47"
+BUILD = "2588272a20c24712"
+COMMIT = "3470f275e1f062c9a58ea42d83165168d0596c0f"
+VSIX_SHA = "349f3384ad81997fd2a54a3bac639073cf3db5b88803545a8e64273510110b6e"
+OBSIDIAN_SHA = "63ef03d0c7bad49647f22e14f192569b28ea14cf32d9908604d644ddbd449f29"
+INSTALLED_BUILD = "17d050b467a08871"
 
 
 def main() -> None:
@@ -37,7 +38,7 @@ def main() -> None:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Stable promotion now builds every host</title>
+<title>Stable promotion keeps the app independent</title>
 <style>
   :root {{ color-scheme: dark; --bg:#0d1012; --panel:#151a1e; --panel2:#1b2227;
     --ink:#f3f1e8; --muted:#a8b0ad; --line:#344047; --green:#8ee0a1;
@@ -116,42 +117,43 @@ def main() -> None:
 <body>
 <main>
   <div class="eyebrow">SystemSketch · implementation report · 02 Sep 2026</div>
-  <h1>Stable now means the app <em>and</em> every host.</h1>
-  <p class="lede">Confirming <strong>Make Preview Stable</strong> builds the browser release, VS Code/Cursor VSIX,
-  and Obsidian bundle as one gated transaction. If any host fails, the Stable pointer does not move.</p>
-  <div class="verdict"><span class="dot"></span> Implemented and exercised in all three desktop hosts</div>
+  <h1>The app ships first. Hosts follow <em>without holding it hostage.</em></h1>
+  <p class="lede">Confirming <strong>Make Preview Stable</strong> verifies and publishes the standalone app,
+  then attempts the VS Code/Cursor and Obsidian builds. A host failure is visible, but cannot undo or
+  interrupt the new Stable app.</p>
+  <div class="verdict"><span class="dot"></span> Decoupled promotion and reload boundary exercised in real hosts</div>
 
   <section>
-    <div class="section-head"><div><div class="eyebrow">One source, one acceptance point</div>
-      <h2>The promotion path</h2></div><p>The host packages are not separate canvases. Both consume the same candidate source before it is permitted to become Stable.</p></div>
+    <div class="section-head"><div><div class="eyebrow">One source, two outcomes</div>
+      <h2>The promotion path</h2></div><p>The app has a hard verification gate. Host packages consume that same accepted source afterward, as independent best-effort outputs.</p></div>
     <div class="grid pipeline">
       <article class="step"><b>01</b><strong>Preview source</strong><small>The working tree Zach just tested.</small></article>
       <article class="step"><b>02</b><strong>Check + app build</strong><small>TypeScript, Vitest, Python, Vite.</small></article>
-      <article class="step"><b>03</b><strong>VS Code / Cursor</strong><small>Stage exact candidate, typecheck, bundle, VSIX.</small></article>
-      <article class="step"><b>04</b><strong>Obsidian</strong><small>Typecheck, bundle, provenance check.</small></article>
-      <article class="step"><b>05</b><strong>Advance Stable</strong><small>Only after every prior step succeeds.</small></article>
+      <article class="step"><b>03</b><strong>Advance Stable</strong><small>The standalone release is now available.</small></article>
+      <article class="step"><b>04</b><strong>VS Code / Cursor</strong><small>Attempt exact-source VSIX; report failure independently.</small></article>
+      <article class="step"><b>05</b><strong>Obsidian</strong><small>Attempt guarded bundle; never roll the app back.</small></article>
     </div>
   </section>
 
   <section>
-    <div class="section-head"><div><div class="eyebrow">Failure semantics</div><h2>The old Stable is the fallback</h2></div>
-      <p>The host builds happen before <code>promote_candidate()</code>. Explore the two outcomes.</p></div>
+    <div class="section-head"><div><div class="eyebrow">Failure semantics</div><h2>Host failure is not app failure</h2></div>
+      <p><code>promote_candidate()</code> now happens before the host-build attempt. Explore the two outcomes.</p></div>
     <div class="gate">
       <div class="gate-controls">
-        <button id="pass" aria-pressed="true">All host builds pass</button>
-        <button id="fail" aria-pressed="false">A host build fails</button>
+        <button id="pass" aria-pressed="true">Host builds pass</button>
+        <button id="fail" aria-pressed="false">Host build fails</button>
       </div>
       <div class="outcome" id="outcome" data-state="pass">
-        <div class="outcome-card"><small>Before confirmation</small><strong>Stable = previous verified build</strong></div>
+        <div class="outcome-card"><small>Verified standalone candidate</small><strong>Stable advances first</strong></div>
         <div class="arrow">→</div>
-        <div class="outcome-card next"><small id="next-label">After verified host artifacts</small><strong id="next-value">Stable = {BUILD[:8]}</strong></div>
+        <div class="outcome-card next"><small id="next-label">Host artifacts complete</small><strong id="next-value">Stable = {BUILD[:8]}</strong></div>
       </div>
     </div>
   </section>
 
   <section>
-    <div class="section-head"><div><div class="eyebrow">Real application proof</div><h2>The generated files were installed into disposable hosts</h2></div>
-      <p>These are host journeys against the package produced by the transaction—not component renders or a dev iframe.</p></div>
+    <div class="section-head"><div><div class="eyebrow">Real application proof</div><h2>The newly generated files work in disposable hosts</h2></div>
+      <p>These are real VS Code and Obsidian journeys against build <code>{BUILD[:8]}</code>—not component renders or a dev iframe.</p></div>
     <div class="grid host-grid">
       <div class="viewer">
         <div class="viewer-bar"><div class="viewer-tabs">
@@ -164,7 +166,7 @@ def main() -> None:
         <article class="proof"><div class="count">10 / 10</div><h3>VS Code</h3><p>Open, edit, dirty state, save, reopen, `.tldr`, and external reload.</p></article>
         <article class="proof"><div class="count">8 / 8 reachable</div><h3>Cursor</h3><p>Same VSIX. The fresh-profile sign-in wall blocks the final two checks; the suite names them instead of guessing.</p></article>
         <article class="proof"><div class="count">8 / 8</div><h3>Obsidian</h3><p>Autosave, external reload, `.tldr`, embeds, and both host themes.</p></article>
-        <article class="proof"><div class="count">671 + 72</div><h3>Regression suites</h3><p>Vitest and Python release tests remained green.</p></article>
+        <article class="proof"><div class="count">673 + 72</div><h3>Regression suites</h3><p>Vitest and Python release tests remained green, including a forced host-build failure after Stable advanced.</p></article>
       </div>
     </div>
   </section>
@@ -175,34 +177,35 @@ def main() -> None:
     <table class="ledger">
       <thead><tr><th>Host</th><th>Artifact</th><th>Bytes</th><th>SHA-256</th></tr></thead>
       <tbody>
-        <tr><td>VS Code</td><td class="mono">vscode/systemsketch-vscode-0.1.0.vsix</td><td>2,976,266</td><td class="mono">{VSIX_SHA}</td></tr>
-        <tr><td>Cursor</td><td>Shares the exact VSIX above</td><td>2,976,266</td><td class="mono">{VSIX_SHA}</td></tr>
-        <tr><td>Obsidian</td><td class="mono">obsidian/main.js + styles.css + manifest.json + bundle.json</td><td>7,995,719</td><td class="mono">main.js {OBSIDIAN_SHA}</td></tr>
+        <tr><td>VS Code</td><td class="mono">vscode/systemsketch-vscode-0.1.0.vsix</td><td>2,979,484</td><td class="mono">{VSIX_SHA}</td></tr>
+        <tr><td>Cursor</td><td>Shares the exact VSIX above</td><td>2,979,484</td><td class="mono">{VSIX_SHA}</td></tr>
+        <tr><td>Obsidian</td><td class="mono">obsidian/main.js + styles.css + manifest.json + bundle.json</td><td>7,754,183 main.js</td><td class="mono">main.js {OBSIDIAN_SHA}</td></tr>
       </tbody>
     </table>
     <p style="margin-top:12px">Durable location: <code>~/.local/share/systemsketch/runtime/host-releases/&lt;build&gt;/</code>. Working-tree <code>dist/</code> copies remain convenient for explicit installation.</p>
   </section>
 
   <section>
-    <div class="section-head"><div><div class="eyebrow">Physical-run findings</div><h2>Two bugs only appeared when the package was real</h2></div></div>
+    <div class="section-head"><div><div class="eyebrow">Reload test</div><h2>A rebuild is not an update mechanism</h2></div>
+      <p>The installed directories were measured before launching isolated copies of those exact installations.</p></div>
     <div class="grid scar-grid">
-      <article class="scar"><h3>Hidden interactive prompt</h3><p><code>vsce</code> paused to ask about the missing LICENSE. The automated path now passes <code>--skip-license</code>, so promotion is noninteractive.</p></article>
-      <article class="scar"><h3>Correct artifact, wrong install path</h3><p>The first immutable VSIX existed but the real-host test could not find the conventional <code>dist/</code> copy. Packaging now writes there first, then copies those exact bytes into the release store.</p></article>
+      <article class="scar"><h3>VS Code + Cursor kept {INSTALLED_BUILD[:8]}</h3><p>After a newer host build existed, both installed extensions still contained <code>{INSTALLED_BUILD}</code>. Real clean-profile launches copied those installed directories: VS Code passed 10/10 and Cursor 8/8 reachable checks while still reporting the old build.</p></article>
+      <article class="scar"><h3>Obsidian needs the new plugin installed</h3><p>The built plugin is <code>systemsketch-obsidian</code> and build <code>{BUILD[:8]}</code> passed 8/8 in an isolated vault. The enabled live-vault directory is the legacy <code>systemsketch</code> plugin, so reloading cannot discover the new bundle by itself.</p></article>
     </div>
   </section>
 
   <section>
     <div class="section-head"><div><div class="eyebrow">Ownership map</div><h2>Small seams, no second canvas</h2></div></div>
     <div class="grid code-map">
-      <article class="code-card"><code>scripts/release.py</code><p>Owns the host-build gate, manifest, checksums, and ordering before Stable moves.</p></article>
-      <article class="code-card"><code>scripts/release_lib.py</code><p>Adds host sources to the release identity and dirty/newer-source boundary.</p></article>
-      <article class="code-card"><code>vscode-systemsketch/scripts/stage_app.mjs</code><p>Stages one named immutable candidate before it becomes the Stable pointer.</p></article>
+      <article class="code-card"><code>scripts/release.py</code><p>Publishes standalone Stable, then catches and reports host-build errors without reversing it.</p></article>
+      <article class="code-card"><code>scripts/server.py</code><p>Reports whether the current Stable build has host artifacts, so Preview can distinguish success from follow-up attention.</p></article>
+      <article class="code-card"><code>tests/*_e2e.mjs</code><p>Can now launch copies of installed host directories and record the bundle identity that actually ran.</p></article>
     </div>
   </section>
 
   <section class="gate">
     <div class="eyebrow">Deliberate boundary</div><h2>Build automatically; install explicitly.</h2>
-    <p>Promotion never replaces a running extension or reloads VS Code, Cursor, or Obsidian behind Zach’s back. The accepted artifacts are ready immediately; choosing when to install/reload them stays a user action.</p>
+    <p>Promotion never replaces a running extension or vault plugin. Reloading only reopens the files already installed. To make reload pick up a release, a separate best-effort deploy step must first run <code>code/cursor --install-extension --force</code> and copy the Obsidian bundle into an explicitly registered vault.</p>
   </section>
 
   <footer>Generated by <code>docs/build_host_plugin_promotion.py</code> from repository-owned evidence. The implementation and ordinary regression tests remain the living specification.</footer>
@@ -214,8 +217,8 @@ def main() -> None:
   function state(kind) {{
     const ok = kind === 'pass'; pass.setAttribute('aria-pressed', String(ok)); fail.setAttribute('aria-pressed', String(!ok))
     outcome.dataset.state = kind
-    nextLabel.textContent = ok ? 'After verified host artifacts' : 'After the build error'
-    nextValue.textContent = ok ? 'Stable = {BUILD[:8]}' : 'Stable = unchanged'
+    nextLabel.textContent = ok ? 'Host artifacts complete' : 'Host artifacts need attention'
+    nextValue.textContent = 'Stable = {BUILD[:8]}'
   }}
   pass.onclick = () => state('pass'); fail.onclick = () => state('fail')
   const shots = {{

@@ -217,8 +217,8 @@ one checksum manifest naming the shared VS Code/Cursor package and every Obsidia
 The working-tree `dist/` folders are left on the same build for convenient manual installation.
 Rebuilding does not update the already-installed copies, so merely reloading VS Code, Cursor, or
 Obsidian still uses the old plugin until the new artifact is installed or copied into that host.
-The [atomic host-plugin promotion report](docs/host-plugin-promotion-2026-09-02.html) shows the
-transaction, artifact ledger, failure behavior, and real VS Code/Cursor/Obsidian proof.
+The [host-plugin promotion report](docs/host-plugin-promotion-2026-09-02.html) shows the decoupled
+failure behavior, artifact ledger, reload boundary, and real VS Code/Cursor/Obsidian proof.
 
 The Obsidian host lives beside it in [`obsidian-systemsketch/`](obsidian-systemsketch/README.md).
 It opens and autosaves both document suffixes through `TextFileView`, follows the host's light
