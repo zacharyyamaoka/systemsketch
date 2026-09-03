@@ -500,19 +500,24 @@ function WasNow({ diff }: { diff: FieldDiff }) {
       // The complete former value, always, however little of it is drawn.
       title={`was ${diff.before}`}
     >
+      {/*
+        Absent when nothing was taken away. A purely additive change —
+        `Estimator` → `PoseEstimator` — has no former value worth a chip, and
+        drawing a red one would claim a loss that never happened.
+      */}
       {former.length > 0 ? (
         <>
-      <span className="BlockNode-wasNowWas" data-testid={`was-${path}`}>
-        <WasNowTokens tokens={former} side="was" />
-      </span>
-      {/*
-        A real sibling rather than a `::after` on the former value. This bit was
-        a round-1 bug worth not reintroducing: `text-decoration` propagates into
-        inline descendants and a child cannot switch it off, so an arrow drawn
-        inside the struck span is itself struck and `callee → callable` renders
-        as `callee ⇒`.
-      */}
-      <span className="BlockNode-wasNowArrow" aria-hidden="true">→</span>
+          <span className="BlockNode-wasNowWas" data-testid={`was-${path}`}>
+            <WasNowTokens tokens={former} side="was" />
+          </span>
+          {/*
+            A real sibling rather than a `::after` on the former value. This was
+            a round-1 bug worth not reintroducing: `text-decoration` propagates
+            into inline descendants and a child cannot switch it off, so an
+            arrow drawn inside the struck span is itself struck, and
+            `callee → callable` renders as `callee ⇒`.
+          */}
+          <span className="BlockNode-wasNowArrow" aria-hidden="true">→</span>
         </>
       ) : null}
       <span className="BlockNode-wasNowNow" data-testid={`now-${path}`}>

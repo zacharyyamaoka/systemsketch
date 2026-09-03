@@ -1,0 +1,1386 @@
+{
+  "systemSketch": {
+    "formatVersion": 2,
+    "application": "SystemSketch",
+    "shapes": {
+      "geo": 6,
+      "connection": 1,
+      "block": 4,
+      "arrow": 5
+    },
+    "bindings": {
+      "arrow": 10,
+      "connection": 2
+    }
+  },
+  "tldrawFileFormatVersion": 1,
+  "schema": {
+    "schemaVersion": 2,
+    "sequences": {
+      "com.tldraw.store": 5,
+      "com.tldraw.asset": 1,
+      "com.tldraw.camera": 1,
+      "com.tldraw.document": 2,
+      "com.tldraw.instance": 26,
+      "com.tldraw.instance_page_state": 5,
+      "com.tldraw.page": 1,
+      "com.tldraw.instance_presence": 6,
+      "com.tldraw.pointer": 1,
+      "com.tldraw.shape": 4,
+      "com.tldraw.user": 1,
+      "com.tldraw.asset.image": 6,
+      "com.tldraw.asset.video": 5,
+      "com.tldraw.asset.bookmark": 2,
+      "com.tldraw.shape.group": 0,
+      "com.tldraw.shape.bookmark": 2,
+      "com.tldraw.shape.draw": 5,
+      "com.tldraw.shape.note": 13,
+      "com.tldraw.shape.frame": 1,
+      "com.tldraw.shape.highlight": 4,
+      "com.tldraw.shape.embed": 4,
+      "com.tldraw.shape.image": 5,
+      "com.tldraw.shape.video": 4,
+      "com.tldraw.shape.geo": 12,
+      "com.tldraw.shape.arrow": 8,
+      "com.tldraw.shape.text": 4,
+      "com.tldraw.shape.line": 5,
+      "com.tldraw.shape.block": 6,
+      "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.branch-arm": 0,
+      "com.tldraw.shape.connection": 6,
+      "com.tldraw.binding.arrow": 1,
+      "com.tldraw.binding.connection": 1,
+      "com.tldraw.comment-thread": 3,
+      "com.tldraw.comment": 1,
+      "com.tldraw.comment-reaction": 1
+    }
+  },
+  "records": [
+    {
+      "x": 0,
+      "y": 0,
+      "lastActivityTimestamp": 0,
+      "meta": {},
+      "id": "pointer:pointer",
+      "typeName": "pointer"
+    },
+    {
+      "x": 1000,
+      "y": 90,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-3",
+      "type": "geo",
+      "props": {
+        "w": 380,
+        "h": 190,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "3 · Crossed on purpose"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "These ports sit in the opposite order to"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "their arguments, so the tethers cross."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aKHGQ",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#F2555A",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:a5VZNuMHSIr7zMjg64DkY",
+      "typeName": "user"
+    },
+    {
+      "x": 100,
+      "y": 900,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-4",
+      "type": "geo",
+      "props": {
+        "w": 380,
+        "h": 190,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "blue",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "4 · Returns a value AND mutates"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "pop() has a real output on the right and"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "an effect port on top, at once."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aMOB6",
+      "typeName": "shape"
+    },
+    {
+      "x": 560,
+      "y": 620,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-5",
+      "type": "geo",
+      "props": {
+        "w": 380,
+        "h": 190,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "blue",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "5 · Not clickable, Port view only"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Clicking a tether must do nothing."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Expanded view must show none of them."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aOBvE",
+      "typeName": "shape"
+    },
+    {
+      "x": 1000,
+      "y": 620,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-pass",
+      "type": "geo",
+      "props": {
+        "w": 380,
+        "h": 230,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 12,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "PASS WHEN"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Every effect port has one tether to its hook,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "no tether crosses a name or a type,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "all right angles, none clickable,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "and Expanded shows none."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aQ38n",
+      "typeName": "shape"
+    },
+    {
+      "x": 162.79687211119193,
+      "y": 301.9665013551513,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    {
+      "x": 149.87220451356148,
+      "y": 313.8559386490722,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:UtSN9UC92zStUx7EzmfTF",
+      "type": "connection",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -230.009290907118,
+          "y": 77.59353551645142
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [
+          {
+            "index": 1,
+            "axis": "x",
+            "t": -1.1248403891509144,
+            "offset": 0
+          }
+        ],
+        "elbowRoute": null,
+        "routeMode": "authored",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "parentId": "page:page",
+      "index": "aBxIr",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#39B178",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:-ZPL7U-4UyH_sD3Brneod",
+      "typeName": "user"
+    },
+    {
+      "name": "",
+      "color": "#BD54C6",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:1oqvJUuC1Uy056P95u3bE",
+      "typeName": "user"
+    },
+    {
+      "name": "",
+      "color": "#F04F88",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:E7YDPUy6yPkNtHH06guJT",
+      "typeName": "user"
+    },
+    {
+      "editingShapeId": null,
+      "croppingShapeId": null,
+      "selectedShapeIds": [
+        "shape:append"
+      ],
+      "hoveredShapeId": "shape:reconcile",
+      "erasingShapeIds": [],
+      "hintingShapeIds": [],
+      "focusedGroupId": null,
+      "meta": {},
+      "id": "instance_page_state:page:page",
+      "pageId": "page:page",
+      "typeName": "instance_page_state"
+    },
+    {
+      "name": "",
+      "color": "#11B3A3",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:ejX3Fuif7bpA1qQTAeCL3",
+      "typeName": "user"
+    },
+    {
+      "x": 1000,
+      "y": 290,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:swap",
+      "type": "block",
+      "props": {
+        "w": 300,
+        "h": 190,
+        "title": "swap()",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "fplz4Y-LEck5vQJwZEw8_",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "a",
+            "type": "list",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "b",
+            "type": "list",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "a",
+            "type": "list",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.78
+          },
+          {
+            "id": "effect:in_2",
+            "name": "b",
+            "type": "list",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.22
+          }
+        ],
+        "definitionKey": "swap"
+      },
+      "parentId": "page:page",
+      "index": "aEVnn",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-1-arrow",
+      "toId": "shape:append",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-2-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-2-arrow",
+      "toId": "shape:reconcile",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-3-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-3-arrow",
+      "toId": "shape:swap",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-4-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-4-arrow",
+      "toId": "shape:pop",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-5-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-5-arrow",
+      "toId": "shape:reconcile",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": -46.974601002550514,
+      "y": 341.5612726454291,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:append",
+      "type": "block",
+      "props": {
+        "w": 420,
+        "h": 259,
+        "title": "poses.append()",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 420,
+            "h": 259
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "2Quw3mJbfi_9oV3gFL_GG",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          },
+          {
+            "id": "out_1",
+            "name": "out_1",
+            "type": "",
+            "visible": true
+          },
+          {
+            "id": "out_2",
+            "name": "out_2",
+            "type": "",
+            "visible": true
+          }
+        ],
+        "definitionKey": "poses_append"
+      },
+      "parentId": "page:page",
+      "index": "aCYxU",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-1-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-1-arrow",
+      "toId": "shape:cue-1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-2-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-2-arrow",
+      "toId": "shape:cue-2",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 560,
+      "y": 290,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:reconcile",
+      "type": "block",
+      "props": {
+        "w": 340,
+        "h": 230,
+        "title": "reconcile()",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "nn9KXDD4qPrOFEY4dQy0X",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "primary",
+            "type": "Cache",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "backup",
+            "type": "Cache",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_3",
+            "name": "preview",
+            "type": "Image",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "primary",
+            "type": "Cache",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.25
+          },
+          {
+            "id": "effect:in_2",
+            "name": "backup",
+            "type": "Cache",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          },
+          {
+            "id": "effect:in_3",
+            "name": "preview",
+            "type": "Image",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.75
+          }
+        ],
+        "definitionKey": "reconcile"
+      },
+      "parentId": "page:page",
+      "index": "aDalf",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-3-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-3-arrow",
+      "toId": "shape:cue-3",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-4-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-4-arrow",
+      "toId": "shape:cue-4",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-5-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-5-arrow",
+      "toId": "shape:cue-5",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 120,
+      "y": 660,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pop",
+      "type": "block",
+      "props": {
+        "w": 320,
+        "h": 190,
+        "title": "poses.pop()",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "KUaGGlFUq99P5Z4fJzz1R",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "item",
+            "type": "Pose",
+            "visible": true
+          },
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "poses_pop"
+      },
+      "parentId": "page:page",
+      "index": "aFYer",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:D49-VILw8AzMHtSu3PRnS",
+      "type": "connection",
+      "fromId": "shape:UtSN9UC92zStUx7EzmfTF",
+      "toId": "shape:append",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "page:page",
+      "name": "Page 1",
+      "index": "a1",
+      "typeName": "page"
+    },
+    {
+      "gridSize": 10,
+      "name": "",
+      "meta": {},
+      "id": "document:document",
+      "typeName": "document"
+    },
+    {
+      "followingUserId": null,
+      "opacityForNextShape": 1,
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
+      "brush": null,
+      "scribbles": [],
+      "cursor": {
+        "type": "default",
+        "rotation": 0
+      },
+      "isFocusMode": false,
+      "exportBackground": true,
+      "isDebugMode": false,
+      "isToolLocked": false,
+      "screenBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 1954.54541015625,
+        "h": 1597.272705078125
+      },
+      "insets": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "zoomBrush": null,
+      "isGridMode": false,
+      "isPenMode": false,
+      "chatMessage": "",
+      "isChatting": false,
+      "highlightedUserIds": [],
+      "isFocused": true,
+      "devicePixelRatio": 1.100000023841858,
+      "isCoarsePointer": false,
+      "isHoveringCanvas": true,
+      "openMenus": [],
+      "isChangingStyle": false,
+      "isReadonly": false,
+      "meta": {},
+      "duplicateProps": null,
+      "cameraState": "idle",
+      "id": "instance:instance",
+      "currentPageId": "page:page",
+      "typeName": "instance"
+    },
+    {
+      "x": 290,
+      "y": 280,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-1-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -10,
+          "y": 20
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aHVLn",
+      "typeName": "shape"
+    },
+    {
+      "x": 750,
+      "y": 250,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-2-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -20,
+          "y": 40
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aJwSE",
+      "typeName": "shape"
+    },
+    {
+      "x": 1190,
+      "y": 280,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-3-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -40,
+          "y": 10
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aLrhE",
+      "typeName": "shape"
+    },
+    {
+      "x": 290,
+      "y": 900,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-4-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -10,
+          "y": -50
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aN6sb",
+      "typeName": "shape"
+    },
+    {
+      "x": 750,
+      "y": 620,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-5-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -20,
+          "y": -100
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aPHcz",
+      "typeName": "shape"
+    },
+    {
+      "x": 83.37282710750554,
+      "y": -36.08941381541973,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-1",
+      "type": "geo",
+      "props": {
+        "w": 380,
+        "h": 190,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 · One mutated argument"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "A dashed tether runs from the hook to its"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "effect port. It must touch no text."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aGUDN",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:RlzUvz9Jkyc9JtAs4Kk6_",
+      "type": "connection",
+      "fromId": "shape:UtSN9UC92zStUx7EzmfTF",
+      "toId": "shape:append",
+      "props": {
+        "portId": "effect:in_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 560,
+      "y": 60,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-2",
+      "type": "geo",
+      "props": {
+        "w": 380,
+        "h": 190,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "2 · Three mutated arguments"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Three tethers, in argument order."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "They should not cross here."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aIfVE",
+      "typeName": "shape"
+    }
+  ]
+}

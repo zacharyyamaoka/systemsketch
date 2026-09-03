@@ -1,0 +1,274 @@
+{
+  "feature": "Effect port tether",
+  "viewport": {
+    "width": 1560,
+    "height": 1140
+  },
+  "shapes": [
+    {
+      "id": "append",
+      "type": "block",
+      "x": 120,
+      "y": 300,
+      "props": {
+        "title": "poses.append()",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 190,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "reconcile",
+      "type": "block",
+      "x": 560,
+      "y": 290,
+      "props": {
+        "title": "reconcile()",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 340,
+        "h": 230,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "primary",
+            "type": "Cache",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "backup",
+            "type": "Cache",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_3",
+            "name": "preview",
+            "type": "Image",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "primary",
+            "type": "Cache",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.25
+          },
+          {
+            "id": "effect:in_2",
+            "name": "backup",
+            "type": "Cache",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          },
+          {
+            "id": "effect:in_3",
+            "name": "preview",
+            "type": "Image",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.75
+          }
+        ]
+      }
+    },
+    {
+      "id": "swap",
+      "type": "block",
+      "x": 1000,
+      "y": 290,
+      "props": {
+        "title": "swap()",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 190,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "a",
+            "type": "list",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "b",
+            "type": "list",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "a",
+            "type": "list",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.78
+          },
+          {
+            "id": "effect:in_2",
+            "name": "b",
+            "type": "list",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.22
+          }
+        ]
+      }
+    },
+    {
+      "id": "pop",
+      "type": "block",
+      "x": 120,
+      "y": 660,
+      "props": {
+        "title": "poses.pop()",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 190,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "item",
+            "type": "Pose",
+            "visible": true
+          },
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "1",
+      "kind": "step",
+      "x": 100,
+      "y": 90,
+      "w": 380,
+      "h": 190,
+      "text": "1 \u00b7 One mutated argument\nA dashed tether runs from the hook to its\neffect port. It must touch no text.",
+      "target": {
+        "shapeId": "append",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "2",
+      "kind": "step",
+      "x": 560,
+      "y": 60,
+      "w": 380,
+      "h": 190,
+      "text": "2 \u00b7 Three mutated arguments\nThree tethers, in argument order.\nThey should not cross here.",
+      "target": {
+        "shapeId": "reconcile",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "3",
+      "kind": "step",
+      "x": 1000,
+      "y": 90,
+      "w": 380,
+      "h": 190,
+      "text": "3 \u00b7 Crossed on purpose\nThese ports sit in the opposite order to\ntheir arguments, so the tethers cross.",
+      "target": {
+        "shapeId": "swap",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "4",
+      "kind": "note",
+      "x": 100,
+      "y": 900,
+      "w": 380,
+      "h": 190,
+      "text": "4 \u00b7 Returns a value AND mutates\npop() has a real output on the right and\nan effect port on top, at once.",
+      "target": {
+        "shapeId": "pop",
+        "anchor": "bottom"
+      }
+    },
+    {
+      "id": "5",
+      "kind": "note",
+      "x": 560,
+      "y": 620,
+      "w": 380,
+      "h": 190,
+      "text": "5 \u00b7 Not clickable, Port view only\nClicking a tether must do nothing.\nExpanded view must show none of them.",
+      "target": {
+        "shapeId": "reconcile",
+        "anchor": "bottom"
+      }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "x": 1000,
+      "y": 620,
+      "w": 380,
+      "h": 230,
+      "text": "PASS WHEN\nEvery effect port has one tether to its hook,\nno tether crosses a name or a type,\nall right angles, none clickable,\nand Expanded shows none."
+    }
+  ]
+}

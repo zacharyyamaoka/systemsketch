@@ -1443,24 +1443,88 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   opacity: calc(1 - var(--diff-blend, 1));
 }
 
-/* A heading is deliberately oversized; a pair in one is not. Two values at
-   title size cannot fit a 300px card at any elision, so the pair steps down to
-   body scale while the surviving value keeps the heading's weight. */
+/* ---- where the pair is allowed to take its room from ------------------
+ *
+ * Measured on a real board rather than assumed: at 300–320px a card cannot
+ * fit two values on a title row at any elision — the first capture produced
+ * `…in… → ru…`, which is worse than showing nothing. But the constraint is not
+ * the same in both places, and pretending it is would cost the title its pair.
+ *
+ * A HEADING has vertical room it is not using: one line of oversized type in a
+ * band tall enough for two small ones. So a title pair stacks, and both values
+ * stay whole and highlighted.
+ *
+ * A PORT ROW has no vertical room at all — the lane is fixed pitch and the dots
+ * are centred on it — so there the pair stays inline and takes its room
+ * horizontally, from the former value first.
+ */
 .systemsketch-block-canvas .BlockNode-headingTitle .BlockNode-wasNow,
 .systemsketch-block-canvas .BlockNode-simpleTitleText .BlockNode-wasNow {
-  font-size: 0.6em;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  vertical-align: middle;
+  font-size: 0.46em;
+  line-height: 1.18;
+  min-width: 0;
+  max-width: 100%;
 }
 
-/* Belt and braces behind the elision: whatever the values, the CURRENT one
-   keeps most of the row. The former value is context and yields first. */
-.systemsketch-block-canvas .BlockNode-wasNowWas {
-  display: inline-block;
-  max-width: 46%;
+.systemsketch-block-canvas .BlockNode-headingTitle .BlockNode-wasNowArrow,
+.systemsketch-block-canvas .BlockNode-simpleTitleText .BlockNode-wasNowArrow {
+  display: none;
+}
+
+.systemsketch-block-canvas .BlockNode-headingTitle .BlockNode-wasNowWas,
+.systemsketch-block-canvas .BlockNode-headingTitle .BlockNode-wasNowNow,
+.systemsketch-block-canvas .BlockNode-simpleTitleText .BlockNode-wasNowWas,
+.systemsketch-block-canvas .BlockNode-simpleTitleText .BlockNode-wasNowNow {
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
-  vertical-align: bottom;
 }
 
-.systemsketch-block-canvas[data-diff-variant='stacked'] .BlockNode-wasNowWas {
+/* Inline, everywhere else. The one invariant that matters: the CURRENT value
+   is the truth and never yields, so it is the former value — context, and
+   recoverable from the tooltip — that gives up room when the row runs out. */
+.systemsketch-block-canvas .BlockNode-portLabel .BlockNode-wasNow,
+.systemsketch-block-canvas .BlockNode-description .BlockNode-wasNow,
+.systemsketch-block-canvas .BlockNode-headingType .BlockNode-wasNow,
+.systemsketch-block-canvas .BlockNode-simpleType .BlockNode-wasNow {
+  display: inline-flex;
+  align-items: baseline;
+  min-width: 0;
   max-width: 100%;
+}
+
+.systemsketch-block-canvas .BlockNode-portLabel .BlockNode-wasNowWas,
+.systemsketch-block-canvas .BlockNode-description .BlockNode-wasNowWas,
+.systemsketch-block-canvas .BlockNode-headingType .BlockNode-wasNowWas,
+.systemsketch-block-canvas .BlockNode-simpleType .BlockNode-wasNowWas {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.systemsketch-block-canvas .BlockNode-portLabel .BlockNode-wasNowNow,
+.systemsketch-block-canvas .BlockNode-description .BlockNode-wasNowNow,
+.systemsketch-block-canvas .BlockNode-headingType .BlockNode-wasNowNow,
+.systemsketch-block-canvas .BlockNode-simpleType .BlockNode-wasNowNow {
+  flex: 0 0 auto;
+}
+
+.systemsketch-block-canvas .BlockNode-portLabel .BlockNode-wasNowArrow,
+.systemsketch-block-canvas .BlockNode-headingType .BlockNode-wasNowArrow {
+  flex: 0 0 auto;
+}
+
+/* `stacked` prints both values whole, which is its whole thesis and its whole
+   cost: on a narrow port row the second line runs out of room. It degrades to
+   the app's ordinary ellipsis rather than to a hard cut. */
+.systemsketch-block-canvas[data-diff-variant='stacked'] .BlockNode-wasNowWas,
+.systemsketch-block-canvas[data-diff-variant='stacked'] .BlockNode-wasNowNow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
