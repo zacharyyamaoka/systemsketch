@@ -1,0 +1,6 @@
+BEFORE inspect: {"headerDisplay":"none","closeButtons":1,"text":"Select a Block to inspect it."}
+BEFORE palette: {"focusedRole":"tab","outline":"none 3px","focusVisible":true,"scrollbarWidth":"auto","tabIndexes":[0,0],"ariaControls":[null,null],"tabPanel":false}
+BEFORE pill: [{"text":"Ssimple","title":null,"label":"Show simple view"},{"text":"Pport","title":null,"label":"Show port view"},{"text":"Eexpanded","title":null,"label":"Show expanded view"},{"text":"Inspect","title":null,"label":null}]
+BEFORE popover: {"x":0,"right":455,"width":455,"viewport":520,"radioCount":28,"hasMenuAncestor":false}
+BEFORE avatar: {"title":"Profile placeholder","label":"Profile placeholder","hasOnClick":false}
+CONSOLE: []

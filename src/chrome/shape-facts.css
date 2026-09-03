@@ -1,0 +1,102 @@
+/* Every colour here is a token from src/theme/tokens.css. The dock this sits
+ * in is 280px wide, so the two-column facts grid is sized for that. */
+
+.systemsketch-shape-facts {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 14px 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  color: var(--ss-text);
+  font-size: 12px;
+}
+
+.systemsketch-shape-facts__header {
+  padding: 4px 0 6px;
+}
+
+.systemsketch-shape-facts__header h2 {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.15;
+}
+
+.systemsketch-shape-facts__group h3 {
+  margin: 10px 0 6px;
+  color: var(--ss-text-muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.systemsketch-shape-facts__group dl {
+  display: flex;
+  margin: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.systemsketch-shape-facts__group dl > div {
+  display: grid;
+  min-height: 28px;
+  grid-template-columns: 84px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 0 9px;
+  border-radius: 7px;
+  background: var(--ss-surface-sunken);
+}
+
+.systemsketch-shape-facts__group dt {
+  color: var(--ss-text-muted);
+  font-size: 11px;
+}
+
+.systemsketch-shape-facts__group dd {
+  margin: 0;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-shape-facts__hint {
+  margin: 12px 0 0;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.systemsketch-shape-facts__actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.systemsketch-shape-facts__actions button {
+  min-height: 30px;
+  flex: 1;
+  padding: 0 10px;
+  border: 1px solid var(--ss-border);
+  border-radius: 8px;
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.systemsketch-shape-facts__actions button:hover {
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-shape-facts__actions button:focus-visible {
+  outline: 2px solid var(--ss-accent);
+  outline-offset: 2px;
+}

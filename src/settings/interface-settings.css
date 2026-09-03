@@ -110,6 +110,29 @@
   opacity: 1;
 }
 
+/* A category that is not built yet stays focusable (see the `aria-disabled`
+ * note in InterfaceSettings.tsx) and says so on the row, so the reason is
+ * visible rather than hidden in a `title` no disabled button renders. */
+.systemsketch-settings__nav button[data-disabled] {
+  color: var(--ss-text-faint);
+}
+
+.systemsketch-settings__nav button[data-disabled] em {
+  margin-left: auto;
+  padding: 1px 6px;
+  border: 1px solid var(--ss-border);
+  border-radius: 999px;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.systemsketch-settings__nav button[data-disabled]:hover {
+  background: transparent;
+}
+
 .systemsketch-settings__nav button.is-active {
   color: var(--ss-text);
   background: var(--ss-accent-soft);

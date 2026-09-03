@@ -6,7 +6,15 @@ import {
   type TLUiDialogProps,
 } from 'tldraw'
 import { Settings } from 'lucide-react'
-import { useRef, useState, type ChangeEvent, type ComponentProps, type CSSProperties, type ReactNode } from 'react'
+import {
+  useRef,
+  useState,
+  type ChangeEvent,
+  type ComponentProps,
+  type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
+} from 'react'
 import {
   DEFAULT_INTERFACE_SCALE,
   INTERFACE_SCALE_PRESETS,
@@ -109,13 +117,21 @@ export function SystemSketchSettingsDialog({ category: initial }: SystemSketchSe
                 type="button"
                 className={active ? 'is-active' : undefined}
                 aria-current={active ? 'page' : undefined}
-                disabled={!open}
+                /* `aria-disabled` rather than `disabled`: a `disabled` button
+                   is unfocusable, and most browsers never render its `title`
+                   — so the only explanation for why the row is dead was
+                   invisible to a pointer and silent to a screen reader. It
+                   stays reachable and stays inert; the click is refused
+                   below. */
+                aria-disabled={!open || undefined}
+                data-disabled={!open || undefined}
                 title={open ? undefined : `${item.label} settings are coming later`}
                 data-testid={`systemsketch-settings-category-${item.id}`}
-                onClick={() => setCategory(item.id)}
+                onClick={() => { if (open) setCategory(item.id) }}
               >
                 {item.icon}
                 <span>{item.label}</span>
+                {open ? null : <em>Later</em>}
               </button>
             )
           })}
@@ -234,7 +250,28 @@ function AppearancePanel() {
   const options = themeOptions(BUILT_IN_PALETTES, imported)
   const palettes = [...BUILT_IN_PALETTES, ...imported]
   const fileInput = useRef<HTMLInputElement | null>(null)
+  const themeRefs = useRef<Array<HTMLButtonElement | null>>([])
   const [importMessage, setImportMessage] = useState<{ kind: 'error' | 'note'; text: string } | null>(null)
+  const activeIndex = options.findIndex((option) => sameChoice(option.choice, choice))
+
+  /**
+   * Arrow keys walk the theme list and choose as they go, which is what
+   * `role="radiogroup"` promises. Home/End jump to the ends; every other key
+   * falls through so the dialog's own handling is untouched.
+   */
+  const onThemeKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    const from = activeIndex === -1 ? 0 : activeIndex
+    let next = from
+    if (event.key === 'ArrowDown' || event.key === 'ArrowRight') next = (from + 1) % options.length
+    else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') next = (from - 1 + options.length) % options.length
+    else if (event.key === 'Home') next = 0
+    else if (event.key === 'End') next = options.length - 1
+    else return
+    event.preventDefault()
+    event.stopPropagation()
+    updateThemeChoice(options[next].choice)
+    queueMicrotask(() => themeRefs.current[next]?.focus())
+  }
 
   const onImportFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const input = event.currentTarget
@@ -275,8 +312,14 @@ function AppearancePanel() {
         </div>
       </div>
 
-      <div className="systemsketch-theme-list" role="radiogroup" aria-label="Color theme" data-testid="systemsketch-theme-list">
-        {options.map((option) => {
+      <div
+        className="systemsketch-theme-list"
+        role="radiogroup"
+        aria-label="Color theme"
+        data-testid="systemsketch-theme-list"
+        onKeyDown={onThemeKeyDown}
+      >
+        {options.map((option, index) => {
           const active = sameChoice(option.choice, choice)
           return (
             <div key={option.id} className={`systemsketch-theme-option${active ? ' is-active' : ''}`}>
@@ -284,6 +327,13 @@ function AppearancePanel() {
                 type="button"
                 role="radio"
                 aria-checked={active}
+                /* A radiogroup is one tab stop; the arrows move inside it.
+                   Every radio used to be tabbable, so reaching the control
+                   below meant Tab past however many themes are installed —
+                   and the arrow keys, which is how a radiogroup is actually
+                   operated, did nothing at all. */
+                tabIndex={active || (activeIndex === -1 && index === 0) ? 0 : -1}
+                ref={(element) => { themeRefs.current[index] = element }}
                 data-testid={`systemsketch-theme-option-${option.id}`}
                 onClick={() => updateThemeChoice(option.choice)}
               >

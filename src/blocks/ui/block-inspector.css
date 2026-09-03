@@ -23,7 +23,14 @@
   animation: none;
 }
 
-.systemsketch-popout--right[data-surface='inspector'] > .systemsketch-popout__header {
+/* The dock's own header is hidden only for the panels that draw their own —
+ * the Block inspector's tab strip, the batch header, the Branch header. A
+ * cable, an ordinary shape and an empty selection keep it, because it carries
+ * the only pointer way to close the column. `SystemSketchChrome` stamps which
+ * case applies from `inspectorSubjectOwnsHeader`, so this list lives in one
+ * place instead of two. */
+.systemsketch-popout--right[data-surface='inspector'][data-inspector-header='body']
+  > .systemsketch-popout__header {
   display: none;
 }
 
@@ -756,8 +763,7 @@
   background: var(--ss-surface-inverse-hover);
 }
 
-.block-mini-menu__step-in,
-.block-mini-menu__inspect {
+.block-mini-menu__step-in {
   border-left: 1px solid var(--ss-border-inverse) !important;
   border-radius: 0 !important;
 }

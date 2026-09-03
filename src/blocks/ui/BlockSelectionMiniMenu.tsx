@@ -21,18 +21,31 @@ export interface BlockSelectionMiniMenuProps {
    */
   view: SharedStyle<BlockView>
   onSetView(view: BlockPresentationView): void
-  onOpenInspector(): void
   depthAction?: {
     direction: 'in' | 'out'
     onSelect(): void
   }
 }
 
+/**
+ * What each view letter means, in words.
+ *
+ * The pill shows one capital per view because three full names would be wider
+ * than the pill; measured, that left `S` `P` `E` with no `title` at all, so
+ * hovering the control taught nothing and only a screen reader ever heard the
+ * `aria-label`. The hint is the same sentence the inspector's VIEW row uses,
+ * so the two surfaces agree about what the choice does.
+ */
+const VIEW_HINTS: Record<BlockPresentationView, string> = {
+  simple: 'Simple view — the title alone',
+  port: 'Port view — the title with its port rows',
+  expanded: 'Expanded view — a frame you can step into',
+}
+
 /** Content only; the shared shell supplies TldrawUiContextualToolbar positioning. */
 export function BlockSelectionMiniMenu({
   view,
   onSetView,
-  onOpenInspector,
   depthAction,
 }: BlockSelectionMiniMenuProps) {
   // Keep this presentation component safe when it is mounted independently of
@@ -52,6 +65,7 @@ export function BlockSelectionMiniMenu({
             key={candidate}
             type="button"
             aria-label={`Show ${candidate} view`}
+            title={VIEW_HINTS[candidate]}
             aria-pressed={view.type === 'shared' && view.value === candidate}
             data-testid={`block-pill-view-${candidate}`}
             onClick={() => onSetView(candidate)}
@@ -66,14 +80,14 @@ export function BlockSelectionMiniMenu({
           type="button"
           className="block-mini-menu__step-in"
           data-depth-action={depthAction.direction}
+          title={depthAction.direction === 'out'
+            ? 'Step out to the parent scope'
+            : "Step into this Block's own canvas"}
           onClick={depthAction.onSelect}
         >
           {depthAction.direction === 'out' ? 'Step out' : 'Step in'}
         </button>
       ) : null}
-      <button type="button" className="block-mini-menu__inspect" onClick={onOpenInspector}>
-        Inspect
-      </button>
     </div>
   )
 }
@@ -86,13 +100,7 @@ export function BlockSelectionMiniMenu({
  * shapes — drive the same buttons through `setStyleForSelectedShapes`, so the
  * batch gesture is the stock one rather than a loop written here.
  */
-export function EditorBlockSelectionMiniMenu({
-  editor,
-  onOpenInspector,
-}: {
-  editor: Editor
-  onOpenInspector(): void
-}) {
+export function EditorBlockSelectionMiniMenu({ editor }: { editor: Editor }) {
   const block = useValue(
     'SystemSketch selected Block mini menu',
     () => getOnlySelectedBlock(editor),
@@ -125,7 +133,6 @@ export function EditorBlockSelectionMiniMenu({
               onSelect: () => void toggleDepthScope(editor, block.id),
             }
           : undefined}
-        onOpenInspector={onOpenInspector}
       />
     )
   }
@@ -136,7 +143,6 @@ export function EditorBlockSelectionMiniMenu({
     <BlockSelectionMiniMenu
       view={styles.view}
       onSetView={(view) => void setBlockViewForSelection(editor, view)}
-      onOpenInspector={onOpenInspector}
     />
   )
 }

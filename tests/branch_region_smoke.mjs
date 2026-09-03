@@ -244,10 +244,10 @@ async function main() {
         stored: JSON.parse(localStorage.getItem('systemsketch.toolbar-preferences.v1') || '{}').lastSystemTool ?? null,
       })`)), { icon: true, stored: 'branch' })
     await waitFor(page, `document.querySelector('[data-testid="branch-pill-add-control"]')`, 'Branch pill')
-    check('BR-7', 'the selection pill reads Branch · + port · + arm · E · C · ◎ · Inspect',
+    check('BR-7', 'the selection pill reads Branch · + port · + arm · E · C · ◎',
       JSON.parse(await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('.branch-mini-menu > *, .branch-mini-menu button')).map((b) => b.dataset.testid ?? b.className.split(' ')[0]).filter(Boolean))`)),
       ['block-mini-menu__subject', 'block-mini-menu__views', 'branch-pill-add-control', 'branch-pill-add-arm',
-        'block-mini-menu__views', 'branch-pill-view-expanded', 'branch-pill-view-case', 'branch-pill-active', 'block-mini-menu__inspect'])
+        'block-mini-menu__views', 'branch-pill-view-expanded', 'branch-pill-view-case', 'branch-pill-active'])
 
     // 3 · Control ports: the band "+" then the inspector "+", each with a name.
     await clickTestId(page, 'branch-add-control')

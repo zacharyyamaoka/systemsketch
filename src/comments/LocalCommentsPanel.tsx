@@ -14,6 +14,7 @@ import {
   type LocalCommentAuthor,
   type LocalCommentThreadView,
 } from './commentModel'
+import { useConfirm } from '../chrome/ConfirmDialog'
 import './comments.css'
 
 export interface LocalCommentsPanelProps {
@@ -33,11 +34,13 @@ function CommentThreadCard({
   thread,
   readOnly,
   author,
+  onRequestDelete,
 }: {
   editor: Editor
   thread: LocalCommentThreadView
   readOnly: boolean
   author: LocalCommentAuthor
+  onRequestDelete(thread: LocalCommentThreadView): void
 }) {
   const [reply, setReply] = useState('')
   const [copied, setCopied] = useState(false)
@@ -151,11 +154,7 @@ function CommentThreadCard({
           <button
             type="button"
             className="systemsketch-comments__delete"
-            onClick={() => {
-              if (window.confirm('Delete this comment thread?')) {
-                deleteLocalCommentThread(editor, thread.record.id)
-              }
-            }}
+            onClick={() => onRequestDelete(thread)}
           >
             Delete
           </button>
@@ -173,6 +172,7 @@ export function LocalCommentsPanel({
   const [body, setBody] = useState('')
   const [sourceInput, setSourceInput] = useState('')
   const [showResolved, setShowResolved] = useState(false)
+  const confirm = useConfirm()
   const bodyId = useId()
   const sourceId = useId()
   const bodyRef = useRef<HTMLTextAreaElement>(null)
@@ -196,6 +196,24 @@ export function LocalCommentsPanel({
     : model.anchor.type === 'point'
       ? 'Anchored to the centre of the current view'
       : 'Anchored to the board'
+
+  /**
+   * Deleting a thread is the one irreversible action in this panel, and it used
+   * to ask with `window.confirm` — an OS modal that takes focus off the canvas
+   * and that an embedded host may refuse to show at all. It asks through the
+   * app's own dialog now; the answer arrives on the same promise either way.
+   */
+  const requestDelete = (thread: LocalCommentThreadView) => {
+    void confirm({
+      title: 'Delete this comment thread?',
+      body: thread.comments.length > 1
+        ? `${thread.comments.length} messages on ${thread.anchorLabel} will be removed. This cannot be undone from here.`
+        : `The message on ${thread.anchorLabel} will be removed. This cannot be undone from here.`,
+      confirmLabel: 'Delete thread',
+    }).then((confirmed) => {
+      if (confirmed) deleteLocalCommentThread(editor, thread.record.id)
+    })
+  }
 
   function submitThread(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -268,6 +286,7 @@ export function LocalCommentsPanel({
             thread={thread}
             readOnly={isReadOnly}
             author={author}
+            onRequestDelete={requestDelete}
           />
         ))}
         {visibleThreads.length === 0 ? (

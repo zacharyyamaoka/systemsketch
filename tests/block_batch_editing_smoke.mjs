@@ -299,7 +299,8 @@ async function main() {
     pass('shift-click builds the same count-free batch, and a disagreeing pair reports as mixed with nothing pressed')
 
     // --- The inspector stays open and shows only the shared controls ------
-    await clickElement(page, '.block-mini-menu__inspect')
+    // No click: the pill's Inspect button is gone and the dock follows the
+    // selection, so a batch selection already has its panel open.
     await waitFor(page,
       `document.querySelector('.block-inspector--batch')`,
       'the batch inspector')

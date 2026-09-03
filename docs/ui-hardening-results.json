@@ -1,0 +1,192 @@
+{
+  "checks": [
+    "every app panel paints a thin themed scrollbar instead of the OS one",
+    "the palette mode switch is one tab stop that controls a real tabpanel",
+    "the palette tablist says which tab is on through one mark, not a ring competing with a chip",
+    "arrow keys walk the palette tablist and selection follows focus",
+    "every palette control that is not a tab still paints a ring",
+    "selecting an ordinary shape opens its real facts panel, with no Inspect button in the pill",
+    "the facts panel Fit to view action really moves the camera",
+    "the dock header close button closes a headerless-subject panel",
+    "closing the dock sticks for that run of selections and releases on an empty selection",
+    "every Block mini-menu control carries a tooltip and an accessible name",
+    "the appearance palette keeps the app-wide 12px clear of the window edge",
+    "a keyboard-focused appearance swatch paints a ring on the inverse panel",
+    "the profile badge opens the real Settings dialog on the theme panel",
+    "the theme radiogroup is one tab stop the arrow keys operate",
+    "an unbuilt Settings category is reachable, announced, visibly explained, and inert",
+    "a keyboard-focused comments control paints a visible ring",
+    "destructive actions ask through the app dialog, cancel safely, and really delete",
+    "the physical journey produced zero local console errors"
+  ],
+  "measured": {
+    "scrollbars": {
+      "palette": {
+        "scrollbarWidth": "thin",
+        "scrollbarColor": "color(srgb 0.18 0.18 0.18 / 0.55) rgba(0, 0, 0, 0)"
+      },
+      "overflowing": true
+    },
+    "tabs": {
+      "count": 2,
+      "tabIndexes": [
+        0,
+        -1
+      ],
+      "controls": [
+        "_r_14_",
+        "_r_14_"
+      ],
+      "panelId": "_r_14_",
+      "panelLabelledBy": "_r_14_-tab-commands"
+    },
+    "tabRing": {
+      "focused": "BUTTON.",
+      "role": "tab",
+      "matchesFocusVisible": true,
+      "outlineStyle": "none",
+      "outlineWidth": 3,
+      "outlineColor": "rgb(46, 46, 46)"
+    },
+    "tabStates": {
+      "on": {
+        "background": "rgb(252, 252, 252)",
+        "color": "rgb(46, 46, 46)",
+        "shadow": true
+      },
+      "off": {
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "color(srgb 0.40176 0.420768 0.43344)",
+        "shadow": false
+      }
+    },
+    "afterArrow": {
+      "mode": "find-replace",
+      "heading": "Find & replace",
+      "focusIsSelectedTab": true
+    },
+    "closeRing": {
+      "outlineStyle": "solid",
+      "outlineWidth": 2
+    },
+    "dock": {
+      "subject": "shape",
+      "headerOwner": "frame",
+      "headerDisplay": "flex",
+      "closeVisible": true,
+      "title": "Selection",
+      "factsTitle": "Rectangle",
+      "rows": [
+        "Position",
+        "Size",
+        "Colour",
+        "Fill",
+        "Dash",
+        "Size",
+        "Font"
+      ],
+      "text": "Rectangle\nGEOMETRY\nPosition\n300, 600\nSize\n220 × 120\nAPPEARANCE\nColour\nBlack\nFill\nNone\nDash\nDraw\nSize\nM\nFont\nDraw\n\nColour, fill and text are edited on the selection pill over the shape.\n\nFit to view"
+    },
+    "camera": {
+      "before": {
+        "x": 0,
+        "y": 0,
+        "z": 1
+      },
+      "after": {
+        "x": -289.2682926829268,
+        "y": -579.5121951219512,
+        "z": 5.963636363636364
+      }
+    },
+    "dismissal": {
+      "autoOpened": true,
+      "afterClose": "false",
+      "afterNextSelect": "false",
+      "afterReset": "true"
+    },
+    "miniMenu": [
+      {
+        "text": "Ssimple",
+        "title": "Simple view — the title alone",
+        "label": "Show simple view"
+      },
+      {
+        "text": "Pport",
+        "title": "Port view — the title with its port rows",
+        "label": "Show port view"
+      },
+      {
+        "text": "Eexpanded",
+        "title": "Expanded view — a frame you can step into",
+        "label": "Show expanded view"
+      }
+    ],
+    "popover": {
+      "trigger": {
+        "x": 87,
+        "width": 54
+      },
+      "x": 12,
+      "right": 467,
+      "width": 455,
+      "viewport": 520,
+      "radioCount": 28,
+      "hasMenuAncestor": true,
+      "menuLabel": "Color",
+      "centredX": -113
+    },
+    "swatchRing": {
+      "focused": "BUTTON.systemsketch-appearance__option",
+      "role": "menuitemradio",
+      "matchesFocusVisible": true,
+      "outlineStyle": "solid",
+      "outlineWidth": 2,
+      "outlineColor": "rgb(255, 255, 255)"
+    },
+    "avatar": {
+      "title": "Settings — theme and interface scale",
+      "label": "Open settings",
+      "category": "appearance"
+    },
+    "theme": {
+      "before": {
+        "count": 6,
+        "tabbable": 1,
+        "checkedIndex": 0
+      },
+      "after": {
+        "checkedIndex": 1,
+        "focusMoved": true
+      }
+    },
+    "category": {
+      "focusable": true,
+      "ariaDisabled": "true",
+      "nativelyDisabled": false,
+      "badge": "Later",
+      "before": "appearance",
+      "after": "appearance"
+    },
+    "commentsRing": {
+      "focused": "BUTTON.systemsketch-comments__anchor",
+      "role": null,
+      "matchesFocusVisible": true,
+      "outlineStyle": "solid",
+      "outlineWidth": 2,
+      "outlineColor": "rgb(67, 135, 244)"
+    },
+    "confirm": {
+      "tone": "danger",
+      "title": "Delete this comment thread?",
+      "body": "The message on Canvas point will be removed. This cannot be undone from here.",
+      "focusIsCancel": true,
+      "nativeConfirmCalls": 0
+    },
+    "threads": {
+      "before": 1,
+      "afterCancel": 1,
+      "afterDelete": 0
+    }
+  }
+}

@@ -1,5 +1,5 @@
 /**
- * The selection pill for a Branch: `Branch · + port · + arm · E · C · ◎ · Inspect`.
+ * The selection pill for a Branch: `Branch · + port · + arm · E · C · ◎`.
  *
  * Same shell and stylesheet as the Block's mini menu; every button is one of
  * the Branch commands, so the pill and the inspector cannot disagree.
@@ -17,13 +17,7 @@ import { requestBranchInlineEdit } from '../branchInlineEditing'
 import '../../blocks/ui/block-inspector.css'
 import './branch-inspector.css'
 
-export function EditorBranchSelectionMiniMenu({
-	editor,
-	onOpenInspector,
-}: {
-	editor: Editor
-	onOpenInspector(): void
-}) {
+export function EditorBranchSelectionMiniMenu({ editor }: { editor: Editor }) {
 	const branch = useValue('SystemSketch selected Branch mini menu', () => getOnlySelectedBranch(editor), [editor])
 	if (!branch) return null
 	const { view, activeArmId } = branch.props
@@ -82,9 +76,6 @@ export function EditorBranchSelectionMiniMenu({
 					◎<span>active</span>
 				</button>
 			</div>
-			<button type="button" className="block-mini-menu__inspect" onClick={onOpenInspector}>
-				Inspect
-			</button>
 		</div>
 	)
 }

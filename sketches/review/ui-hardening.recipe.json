@@ -1,0 +1,151 @@
+{
+  "feature": "UI hardening \u2014 inspector dock, focus rings, honest chrome",
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "shapes": [
+    {
+      "id": "estimate",
+      "type": "block",
+      "x": 640,
+      "y": 300,
+      "props": {
+        "title": "estimate()",
+        "description": "The dock's Block subject",
+        "blockType": "Function",
+        "view": "port",
+        "w": 340,
+        "h": 198,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "frame",
+            "type": "Image",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "encode",
+      "type": "block",
+      "x": 1030,
+      "y": 300,
+      "props": {
+        "title": "encode()",
+        "description": "The second selection",
+        "blockType": "Function",
+        "view": "port",
+        "w": 340,
+        "h": 198,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "bytes",
+            "type": "Bytes",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "plain",
+      "type": "geo",
+      "x": 740,
+      "y": 620,
+      "props": {
+        "geo": "rectangle",
+        "w": 260,
+        "h": 150
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 \u00b7 Click this Block. The dock opens by itself. Close it with the \u00d7 in its header.",
+      "x": 40,
+      "y": 180,
+      "w": 460,
+      "h": 150,
+      "target": {
+        "shapeId": "estimate",
+        "anchor": "left",
+        "dy": -60
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 \u00b7 Now click this Block. The dock must STAY closed \u2014 a close used to be undone by the very next selection. Click empty canvas, then a Block again: it returns.",
+      "x": 1520,
+      "y": 180,
+      "w": 460,
+      "h": 170,
+      "target": {
+        "shapeId": "encode",
+        "anchor": "right",
+        "dy": -90
+      }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 \u00b7 Click this plain rectangle. The dock should arrive on its own, name it \"Rectangle\" and list Position, Size and its stock styles \u2014 and the pill above it carries no Inspect button any more.",
+      "x": 40,
+      "y": 380,
+      "w": 460,
+      "h": 170,
+      "target": {
+        "shapeId": "plain",
+        "anchor": "left"
+      }
+    },
+    {
+      "id": "step-4",
+      "kind": "note",
+      "text": "4 \u00b7 Press Ctrl+P, then Tab. The Commands chip alone should say which tab is on \u2014 no focus ring competing with it \u2014 and ArrowRight must move to Find. The results scrollbar should be thin and themed.",
+      "x": 40,
+      "y": 600,
+      "w": 460,
+      "h": 170
+    },
+    {
+      "id": "step-5",
+      "kind": "note",
+      "text": "5 \u00b7 Click the round Z badge, top right. It used to be titled \"Profile placeholder\" and do nothing; it should now open Settings on the theme panel, whose list answers the arrow keys.",
+      "x": 1520,
+      "y": 400,
+      "w": 460,
+      "h": 170
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN \u00b7 Selecting anything opens the right panel for it, the dock always has a visible \u00d7, closing it survives the next selection until you deselect, the tab switch reads with one mark, and the Z badge opens Settings.",
+      "x": 1520,
+      "y": 620,
+      "w": 460,
+      "h": 200
+    }
+  ]
+}
