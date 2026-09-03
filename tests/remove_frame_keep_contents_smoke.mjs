@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Physical proof that Remove frame preserves every contained subtree. */
+/** Physical proof that Delete frame, leave children preserves every contained subtree. */
 import assert from 'node:assert/strict'
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -130,10 +130,10 @@ async function main() {
     await clickAt(page, frameBox.x + frameBox.width / 2, frameBox.y + 16, 'right')
     await waitFor(page,
       `document.querySelector('[data-testid="context-menu.frame-remove-keep-contents"]')`,
-      'Remove frame context command')
-    check('M1', 'right-clicking one unlocked Frame offers Remove frame', await evaluate(page,
+      'Delete frame, leave children context command')
+    check('M1', 'right-clicking one unlocked Frame offers Delete frame, leave children', await evaluate(page,
       `document.querySelector('[data-testid="context-menu.frame-remove-keep-contents"]').textContent.trim()`),
-    'Remove frame')
+    'Delete frame, leave children')
 
     await clickElement(page, '[data-testid="context-menu.frame-remove-keep-contents"]')
     await waitFor(page, `!window.__systemsketch.editor.getShape(${JSON.stringify(OUTER)})`, 'Frame removal')

@@ -68,7 +68,7 @@
     {
       "id": "step-1",
       "kind": "step",
-      "text": "1 · Right-click the ‘Remove this frame’ heading, then choose Remove frame.",
+      "text": "1 · Right-click the ‘Remove this frame’ heading, then choose Delete frame, leave children.",
       "x": 500,
       "y": 30,
       "w": 620,
