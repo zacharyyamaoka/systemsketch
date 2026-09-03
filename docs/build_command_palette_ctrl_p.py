@@ -6,7 +6,6 @@ from __future__ import annotations
 import base64
 import html
 import json
-import subprocess
 from pathlib import Path
 
 
@@ -17,10 +16,6 @@ COMMANDS_SHOT = ROOT / "docs" / "assets" / "command-palette-commands-2026-09-02.
 FIXTURE_SHOT = ROOT / "sketches" / "review" / "command-palette-ctrl-p.png"
 FIXTURE = ROOT / "sketches" / "review" / "command-palette-ctrl-p.systemsketch"
 SOURCE = ROOT / "src" / "chrome" / "SystemSketchChrome.tsx"
-
-
-def git(*args: str) -> str:
-    return subprocess.check_output(["git", *args], cwd=ROOT, text=True).strip()
 
 
 def data_uri(path: Path) -> str:
@@ -57,8 +52,6 @@ def main() -> None:
     browser_checks = "".join(
         f'<li><span>✓</span>{html.escape(item["label"])}</li>' for item in results
     )
-    head = git("rev-parse", "--short=12", "HEAD")
-    branch = git("branch", "--show-current")
     document = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ctrl+P command palette · SystemSketch</title>
@@ -87,7 +80,7 @@ pre{{overflow:auto;padding:20px;border-radius:14px;background:#20242b;color:#e8e
 </div></section>
 <section><h2>{passing}/{len(results)} command-palette checks pass</h2><div class="card"><ul>{browser_checks}</ul></div></section>
 <section><h2>The routing seam stayed narrow</h2><pre>{html.escape(source_excerpt())}</pre></section>
-<p class="meta">Built from <code>{html.escape(branch)}</code> at <code>{head}</code>, based on main <code>7d7d76d</code>. Review URL: <a href="http://127.0.0.1:4340/?board=%2Fhome%2Fbam%2Fsystemsketch-track-command-palette-ctrl-p%2Fsketches%2Freview%2Fcommand-palette-ctrl-p.systemsketch">open the live Ctrl+P fixture</a>.</p>
+<p class="meta">Implementation commit <code>7da54c4</code>, based on main <code>7d7d76d</code>. Review URL: <a href="http://127.0.0.1:4322/?board=%2Fhome%2Fbam%2Fsystemsketch%2Fsketches%2Freview%2Fcommand-palette-ctrl-p.systemsketch">open the live Ctrl+P fixture</a>.</p>
 </main></body></html>"""
     OUT.write_text(document, encoding="utf-8")
     print(f"wrote {OUT.relative_to(ROOT)} ({OUT.stat().st_size} bytes)")
