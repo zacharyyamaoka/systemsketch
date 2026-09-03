@@ -3,7 +3,9 @@ import {
 	blockPortLayout,
 	blockPortSections,
 	expandedSectionWeights,
+	isEffectPort,
 	portDefaultValue,
+	portEdgeT,
 	portInHeader,
 	type BlockPort,
 	type BlockShapeProps,
@@ -69,6 +71,25 @@ const SIMPLE_PAD_X = 16
 const SIMPLE_TITLE_MAX_LINES = 2
 const DESCRIPTION_LINE_HEIGHT_PX = 16
 
+/**
+ * Where a port sits when it is placed on an edge by a fraction rather than by a
+ * row. Shared on purpose: an effect port is the first caller, but a group
+ * boundary port, a region tunnel entry and a collapsed-group crossing badge all
+ * need exactly this, and `src/blocks/elbow/boundaryCrossing.ts` is what turns a
+ * routed cable into the fraction to pass in.
+ */
+export function edgePortPoint(
+	edge: 'left' | 'right' | 'top' | 'bottom',
+	t: number,
+	width: number,
+	height: number,
+): { x: number; y: number } {
+	const clamped = Math.min(1, Math.max(0, Number.isFinite(t) ? t : 0.5))
+	if (edge === 'top') return { x: clamped * width, y: 0 }
+	if (edge === 'bottom') return { x: clamped * width, y: height }
+	return { x: edge === 'left' ? 0 : width, y: clamped * height }
+}
+
 export interface BlockRect {
 	x: number
 	y: number
@@ -79,6 +100,12 @@ export interface BlockRect {
 export interface LaidOutBlockPort {
 	port: BlockPort
 	side: 'input' | 'output'
+	/**
+	 * Which edge the dot sits on. Inputs are always `left` and named outputs
+	 * always `right`; an effect output is on `top`, which is the only edge the
+	 * grammar had not already spent.
+	 */
+	edge: 'left' | 'right' | 'top'
 	/** Dot centre in Block-local coordinates; always on the outside edge. */
 	x: number
 	y: number
@@ -550,7 +577,15 @@ export function layoutBlock(props: BlockShapeProps): BlockLayout {
 	return layout
 }
 
-function computeBlockLayout(props: BlockShapeProps): BlockLayout {
+function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
+	// An effect port is an output that leaves by the *top* edge, because the call
+	// gave its value no name to leave by. Keep it out of the right-hand lane
+	// entirely — it must not take a body slot or the rows would space around a
+	// port that is not there — and place it along the top once the box is known.
+	const effectPorts = rawProps.outputs.filter(isEffectPort)
+	const props = effectPorts.length > 0
+		? { ...rawProps, outputs: rawProps.outputs.filter((port) => !isEffectPort(port)) }
+		: rawProps
 	const width = finiteDimension(props.w)
 	const height = finiteDimension(props.h)
 	const bounds = { x: 0, y: 0, w: width, h: height }
@@ -575,10 +610,14 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 		// or read or both, so both rims carry a dot.
 		const midpoint = height / 2
 		for (const port of props.inputs.filter((candidate) => candidate.visible)) {
-			placed.push({ port, side: 'input', x: 0, y: midpoint, label: null, labelContent: null, subtle: false, lifted: false })
+			placed.push({ port, side: 'input', edge: 'left', x: 0, y: midpoint, label: null, labelContent: null, subtle: false, lifted: false })
 		}
 		for (const port of props.outputs.filter((candidate) => candidate.visible)) {
-			placed.push({ port, side: 'output', x: width, y: midpoint, label: null, labelContent: null, subtle: false, lifted: false })
+			placed.push({ port, side: 'output', edge: 'right', x: width, y: midpoint, label: null, labelContent: null, subtle: false, lifted: false })
+		}
+		for (const port of effectPorts.filter((candidate) => candidate.visible)) {
+			const point = edgePortPoint('top', portEdgeT(port), width, height)
+			placed.push({ port, side: 'output', edge: 'top', x: point.x, y: point.y, label: null, labelContent: null, subtle: false, lifted: false })
 		}
 		return {
 			view,
@@ -691,6 +730,7 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 			placed.push({
 				port,
 				side: 'input',
+				edge: 'left',
 				x: 0,
 				y: midpoint,
 				label: null,
@@ -703,8 +743,23 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 			placed.push({
 				port,
 				side: 'output',
+				edge: 'right',
 				x: width,
 				y: midpoint,
+				label: null,
+				labelContent: null,
+				subtle: true,
+				lifted: false,
+			})
+		}
+		for (const port of effectPorts.filter((candidate) => candidate.visible)) {
+			const point = edgePortPoint('top', portEdgeT(port), width, height)
+			placed.push({
+				port,
+				side: 'output',
+				edge: 'top',
+				x: point.x,
+				y: point.y,
 				label: null,
 				labelContent: null,
 				subtle: true,
@@ -755,6 +810,7 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 		placed.push({
 			port,
 			side: 'input',
+			edge: 'left',
 			x: 0,
 			y,
 			label: null,
@@ -783,7 +839,7 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 				h: PORT_LABEL_HEIGHT_PX,
 			}
 			const labelContent = portLabelContentBox(port, side, label)
-			placed.push({ port, side, x, y, label, labelContent, subtle: false, lifted: true })
+			placed.push({ port, side, edge: side === 'input' ? 'left' : 'right', x, y, label, labelContent, subtle: false, lifted: true })
 		}
 		placeExpandedBody(props, width, bodyTop, bodyBottom, place, dividers, sections)
 	} else {
@@ -833,7 +889,7 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 					h: PORT_LABEL_HEIGHT_PX,
 				}
 				const labelContent = portLabelContentBox(port, side, label)
-				placed.push({ port, side, x, y, label, labelContent, subtle: false, lifted: false })
+				placed.push({ port, side, edge: side === 'input' ? 'left' : 'right', x, y, label, labelContent, subtle: false, lifted: false })
 			}
 		}
 
@@ -888,6 +944,25 @@ function computeBlockLayout(props: BlockShapeProps): BlockLayout {
 			w: Math.max(0, width - PORT_LABEL_INSET_PX * 2),
 			h: Math.max(0, Math.min(DESCRIPTION_LINE_HEIGHT_PX, footerTop - 4 - top)),
 		}
+	}
+
+	// The top edge, last: the box is only now known, and an effect port is placed
+	// by its `edgeT` fraction along it — the port has no slot, so a cable dragged
+	// somewhere else moves the fraction and the dot follows.
+	for (const port of effectPorts) {
+		if (!port.visible) continue
+		const point = edgePortPoint('top', portEdgeT(port), width, height)
+		placed.push({
+			port,
+			side: 'output',
+			edge: 'top',
+			x: point.x,
+			y: point.y,
+			label: null,
+			labelContent: null,
+			subtle: false,
+			lifted: false,
+		})
 	}
 
 	return {

@@ -91,8 +91,60 @@ export const BlockPort = T.object({
 	 * divides. Absent means the first arm.
 	 */
 	branch: T.number.optional(),
+	/**
+	 * Inputs only: the call writes this argument in place, so the caller's own
+	 * object changes. Read off the signature, not off the wiring, which is why
+	 * the hook shows in Port view before any cable exists.
+	 */
+	mutates: T.boolean.optional(),
+	/**
+	 * Outputs only: this value leaves by the *top* edge because the call gave it
+	 * no name to leave by — `list.append(self, object, /) -> None` has no return
+	 * channel, so the mutation is the only way the new value reaches anyone.
+	 */
+	effect: T.boolean.optional(),
+	/**
+	 * Effect outputs only: where along the top edge the port sits, `0` at the
+	 * left corner and `1` at the right. The port has no slot — it is placed by
+	 * the cable, so this follows wherever the cable crosses the boundary.
+	 */
+	edgeT: T.number.optional(),
 })
 export type BlockPort = T.TypeOf<typeof BlockPort>
+
+/** An effect output's id is derived from the input it writes back to. */
+export const EFFECT_PORT_PREFIX = 'effect:'
+
+export function effectPortId(inputId: string): string {
+	return `${EFFECT_PORT_PREFIX}${inputId}`
+}
+
+/** The input an effect output writes back to, or null if it is not derived. */
+export function mutatedInputId(port: BlockPort): string | null {
+	return port.id.startsWith(EFFECT_PORT_PREFIX) ? port.id.slice(EFFECT_PORT_PREFIX.length) : null
+}
+
+export function isEffectPort(port: BlockPort): boolean {
+	return port.effect === true
+}
+
+export function portMutates(port: BlockPort): boolean {
+	return port.mutates === true
+}
+
+/** Where an effect port sits along the top edge. Centred until a cable moves it. */
+export const EFFECT_EDGE_T_DEFAULT = 0.5
+export const EFFECT_EDGE_T_MIN = 0.06
+export const EFFECT_EDGE_T_MAX = 0.94
+
+export function clampEdgeT(t: number): number {
+	if (!Number.isFinite(t)) return EFFECT_EDGE_T_DEFAULT
+	return Math.min(EFFECT_EDGE_T_MAX, Math.max(EFFECT_EDGE_T_MIN, t))
+}
+
+export function portEdgeT(port: BlockPort): number {
+	return clampEdgeT(port.edgeT ?? EFFECT_EDGE_T_DEFAULT)
+}
 
 /** The heading band is the row every input may be lifted into. */
 export const HEADER_ROW = 0
@@ -502,6 +554,95 @@ export function appendBlockPortToProps(
 		props: appended,
 		port: appended[side].find((candidate) => candidate.id === id) ?? port,
 	}
+}
+
+/**
+ * Keep the effect outputs in step with the inputs that are marked as mutated.
+ *
+ * The port is derived, not authored: you cannot add or delete one, you mark an
+ * argument as written-in-place and the port appears. Marking is what changes;
+ * everything else — its position along the top edge, the cables hanging off it
+ * — is preserved across the reconcile so a re-render never moves a person's
+ * work.
+ */
+export function reconcileEffectPorts(props: BlockShapeProps): BlockShapeProps {
+	const wanted = props.inputs.filter(portMutates)
+	const existing = new Map(props.outputs.filter(isEffectPort).map((port) => [port.id, port]))
+	const kept = props.outputs.filter((port) => {
+		if (!isEffectPort(port)) return true
+		const source = mutatedInputId(port)
+		return source !== null && wanted.some((input) => input.id === source)
+	})
+	const added: BlockPort[] = []
+	wanted.forEach((input, index) => {
+		const id = effectPortId(input.id)
+		if (existing.has(id)) return
+		added.push({
+			id,
+			name: input.name,
+			type: input.type,
+			visible: true,
+			effect: true,
+			// Spread the slots across the top edge in the arguments' own order, so
+			// the topmost mutated argument starts leftmost and two of them are
+			// never born on the same point. A *default*, not an invariant: the
+			// port is still placed by wherever its cable crosses the boundary, and
+			// a reconcile never moves one that has already been put somewhere.
+			// One mutated argument still lands dead centre, as before.
+			edgeT: clampEdgeT((index + 1) / (wanted.length + 1)),
+		})
+	})
+	// An effect port's name tracks the argument it writes back to: they are the
+	// same value, and a stale name would be the board telling a small lie.
+	const renamed = kept.map((port) => {
+		const source = mutatedInputId(port)
+		if (!isEffectPort(port) || source === null) return port
+		const input = wanted.find((candidate) => candidate.id === source)
+		if (!input || (port.name === input.name && port.type === input.type)) return port
+		return { ...port, name: input.name, type: input.type }
+	})
+	const outputs = [...renamed, ...added]
+	if (outputs.length === props.outputs.length
+		&& outputs.every((port, index) => port === props.outputs[index])) {
+		return props
+	}
+	return { ...props, outputs }
+}
+
+/** Mark an argument as written in place, or stop. The effect port follows. */
+export function setBlockPortMutates(
+	props: BlockShapeProps,
+	portId: string,
+	mutates: boolean,
+): BlockShapeProps {
+	let changed = false
+	const inputs = props.inputs.map((port) => {
+		if (port.id !== portId || portMutates(port) === mutates) return port
+		changed = true
+		if (!mutates) {
+			const { mutates: _dropped, ...rest } = port
+			return rest
+		}
+		return { ...port, mutates: true }
+	})
+	if (!changed) return props
+	return reconcileEffectPorts({ ...props, inputs })
+}
+
+/** Slide an effect port along the top edge — what a dragged cable does to it. */
+export function setEffectPortEdgeT(
+	props: BlockShapeProps,
+	portId: string,
+	t: number,
+): BlockShapeProps {
+	const next = clampEdgeT(t)
+	let changed = false
+	const outputs = props.outputs.map((port) => {
+		if (port.id !== portId || !isEffectPort(port) || portEdgeT(port) === next) return port
+		changed = true
+		return { ...port, edgeT: next }
+	})
+	return changed ? { ...props, outputs } : props
 }
 
 /**

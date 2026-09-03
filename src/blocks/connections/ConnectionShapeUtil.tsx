@@ -37,6 +37,8 @@ import { clearPortDragState, updatePortState } from '../ports/portState'
 import {
 	BLOCK_SHAPE_TYPE,
 	getDefaultBlockProps,
+	isBlockShape,
+	isEffectPort,
 	type BlockShape,
 } from '../blockModel'
 import {
@@ -115,7 +117,14 @@ import {
 	pinElbowSegment,
 	type ElbowPin,
 	type ElbowRoute,
+	type ElbowSide,
 } from '../elbow'
+import {
+	EFFECT_CABLE_INK,
+	EFFECT_CABLE_WIDTH,
+	EFFECT_PILL_LABEL,
+	isEffectCable,
+} from './effectCable'
 
 declare module 'tldraw' {
 	export interface TLGlobalShapePropsMap {
@@ -787,7 +796,20 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		() => (delayed ? delayPillGeometry(editor, connection) : null),
 		[editor, connection, delayed],
 	)
-	const stroke = 'var(--tl-color-text-3, #475569)'
+	// A cable leaving an effect port carries a value the call gave no name to, so
+	// it is the only channel there is. Drawn warm and a shade heavier than a data
+	// cable, and never in the near-black that control cables own.
+	const effect = useValue(
+		'effect cable',
+		() => isEffectCable(editor, connection),
+		[editor, connection.id],
+	)
+	const stroke = effect ? EFFECT_CABLE_INK : 'var(--tl-color-text-3, #475569)'
+	const effectPill = useValue(
+		'effect pill geometry',
+		() => (effect && !delayed ? delayPillGeometry(editor, connection) : null),
+		[editor, connection, effect, delayed],
+	)
 	const tunnelState = useValue(
 		'connection tunnel display',
 		() => {
@@ -826,9 +848,26 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 			<SVGContainer
 				style={{ opacity }}
 				data-temporal={connection.props.temporal}
+				data-channel={effect ? 'effect' : 'return'}
 				data-tunnel={paintedTunnelState}
 			>
-				<DataCablePath path={path} length={length} temporal={connection.props.temporal} stroke={stroke} tunnel={hiddenTunnel} />
+				<DataCablePath
+					path={path}
+					length={length}
+					temporal={connection.props.temporal}
+					stroke={stroke}
+					strokeWidth={effect ? EFFECT_CABLE_WIDTH : undefined}
+					tunnel={hiddenTunnel}
+				/>
+				{effectPill && !hiddenTunnel ? (
+					<DelayPill
+						pill={effectPill}
+						label={EFFECT_PILL_LABEL}
+						stroke={EFFECT_CABLE_INK}
+						fill="var(--ss-surface, #ffffff)"
+						ink={EFFECT_CABLE_INK}
+					/>
+				) : null}
 				{tunnelMouths ? <TunnelVias tunnel={tunnelMouths} stroke={stroke} fill="var(--ss-surface, #ffffff)" /> : null}
 			</SVGContainer>
 		)
@@ -1149,9 +1188,20 @@ function getConnectionElbowBoxes(
 		const topLeft = Mat.applyToPoint(inverse, { x: bounds.minX, y: bounds.minY })
 		return { x: topLeft.x, y: topLeft.y, w: bounds.width, h: bounds.height }
 	}
+	// Which edge each terminal sits on. Only an effect port leaves the top today,
+	// so the model answers it directly and no layout pass is needed.
+	const sideOf = (binding: ConnectionBinding | undefined, fallback: ElbowSide): ElbowSide => {
+		if (!binding || binding.props.face === 'inner') return fallback
+		const shape = editor.getShape(binding.toId)
+		if (!isBlockShape(shape)) return fallback
+		const port = shape.props.outputs.find((candidate) => candidate.id === binding.props.portId)
+		return port && isEffectPort(port) ? 'top' : fallback
+	}
 	return {
 		start: toLocalBox(bindings[direction.sourceTerminal]),
 		end: toLocalBox(bindings[direction.sinkTerminal]),
+		startSide: sideOf(bindings[direction.sourceTerminal], 'right'),
+		endSide: sideOf(bindings[direction.sinkTerminal], 'left'),
 	}
 }
 
