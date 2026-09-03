@@ -24,6 +24,7 @@ import {
 	resolveAuthoredRoute,
 	type ConnectionElbowRouteModel,
 } from './blocks/connections/elbowAuthoredRoute'
+import { showConnectorInteriorControls } from './connectorControlVisibility'
 
 /**
  * A versioned, namespaced enhancement carried by an otherwise stock arrow.
@@ -256,11 +257,13 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 	}
 
 	override getHandles(shape: TLArrowShape): TLHandle[] {
-		if (shape.props.kind !== 'elbow') return super.getHandles(shape)
-		const route = this.route(shape)
-		if (!route) return super.getHandles(shape)
-		const terminals = super.getHandles(shape)
+		const stockHandles = super.getHandles(shape)
+		const terminals = stockHandles
 			.filter((handle) => handle.id === 'start' || handle.id === 'end')
+		if (!showConnectorInteriorControls(this.editor, shape.id)) return terminals
+		if (shape.props.kind !== 'elbow') return stockHandles
+		const route = this.route(shape)
+		if (!route) return stockHandles
 		return [...terminals, ...routeHandles(shape, route.points)]
 	}
 

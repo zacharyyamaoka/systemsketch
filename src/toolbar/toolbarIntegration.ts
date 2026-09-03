@@ -26,6 +26,12 @@ import {
 
 export const CURVE_ARROW_BEND = 32
 
+/** Read the three visible routing choices from stock arrow props. */
+export function arrowPresetForShape(shape: TLArrowShape): ArrowPreset {
+  if (shape.props.kind === 'elbow') return 'elbow'
+  return Math.abs(shape.props.bend) < 0.001 ? 'straight' : 'curve'
+}
+
 const ARROW_TOOL_IDS: Record<ArrowPreset, string> = {
   straight: 'systemsketch-arrow-straight',
   curve: 'systemsketch-arrow-curve',
@@ -75,6 +81,42 @@ export function applyArrowPreset(editor: Editor, preset: ArrowPreset): void {
   if (hasConnectionShape(editor)) {
     editor.setStyleForNextShapes(ConnectionRoutingStyle, connectionRoutingForArrowPreset(preset))
   }
+}
+
+/**
+ * Apply a FigJam routing choice to selected stock arrows and to the shared
+ * next-connector preset.
+ *
+ * tldraw stores both Straight and Curved as `kind: arc`; `bend: 0` is the
+ * straight state. Keeping that translation here lets the appearance menu
+ * expose all three choices without adding a custom shape prop or replacing
+ * any stock arrow interaction.
+ */
+export function applyArrowPresetToSelection(editor: Editor, preset: ArrowPreset): void {
+  const arrows = editor.getSelectedShapes()
+    .filter((shape): shape is TLArrowShape => shape.type === 'arrow')
+  if (arrows.length > 0) {
+    editor.updateShapes(arrows.map((shape) => {
+      const bend = preset === 'straight'
+        ? 0
+        : preset === 'curve' && Math.abs(shape.props.bend) < 0.001
+          ? CURVE_ARROW_BEND
+          : shape.props.bend
+      return {
+        id: shape.id,
+        type: 'arrow' as const,
+        props: {
+          kind: preset === 'elbow' ? 'elbow' as const : 'arc' as const,
+          bend,
+        },
+      }
+    }))
+  }
+  updateToolbarPreferences({
+    lastArrowPreset: preset,
+    lastShapeTool: shapeToolForArrowPreset(preset),
+  })
+  applyArrowPreset(editor, preset)
 }
 
 /**

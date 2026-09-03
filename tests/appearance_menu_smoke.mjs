@@ -46,6 +46,7 @@ const FRAMES = {
   fontSize: join(ROOT, 'docs', 'appearance-menu-7-font-size-2026-09-01.png'),
   chips: join(ROOT, 'docs', 'appearance-menu-8-shape-line-style-2026-09-01.png'),
   mixed: join(ROOT, 'docs', 'appearance-menu-9-mixed-selection-2026-09-01.png'),
+  arrowRouting: join(ROOT, 'docs', 'assets', 'arrow-routing-three-options.png'),
 }
 
 /**
@@ -476,12 +477,27 @@ async function main() {
     await closeControl(page, 'lineStyle')
     pass('a connector\'s Line style holds weight beside dash in one 44px popover, and both write through')
 
-    // 15. The line shape must sit between the two ends, and an endpoint applies.
+    // 15. The line shape must sit between the two ends. Stock tldraw stores a
+    //     straight arrow as an arc with zero bend; this control exposes that
+    //     third visual state and translates it at the UI seam.
     assert.ok(
       connector.controls.indexOf('arrowheadStart') < connector.controls.indexOf('arrowKind') &&
         connector.controls.indexOf('arrowKind') < connector.controls.indexOf('arrowheadEnd'),
       'line shape belongs between start and end',
     )
+    const routing = await openControl(page, 'arrowKind')
+    assert.deepEqual(routing.panel.options.map((o) => o.value), ['elbow', 'curve', 'straight'])
+    await frame(page, 'arrowRouting')
+    await pickOption(page, 'arrowKind', 'straight')
+    const straightArrow = JSON.parse(await evaluate(page, `(() => {
+      const arrow = window.__systemsketch?.editor?.getOnlySelectedShape()
+      return JSON.stringify({ type: arrow?.type, kind: arrow?.props?.kind, bend: arrow?.props?.bend })
+    })()`))
+    assert.deepEqual(straightArrow, { type: 'arrow', kind: 'arc', bend: 0 })
+    assert.equal((await readMenu(page)).labels.arrowKind, 'Line shape, straight')
+    await closeControl(page, 'arrowKind')
+    pass('an arrow offers Elbowed, Curved, and Straight; Straight round-trips through stock arc plus zero bend')
+
     const ends = await openControl(page, 'arrowheadEnd')
     assert.ok(ends.panel.options.find((o) => o.value === 'triangle'))
     assert.ok(ends.panel.options.every((c) => c.w === FIGJAM.cell && c.radius === FIGJAM.cellRadius))

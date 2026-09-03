@@ -73,6 +73,7 @@ import '../app.css'
 import './embed.css'
 import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from '../stockPrimitiveVisuals'
 import { SYSTEMSKETCH_ARROW_SHAPE_UTILS } from '../systemSketchArrow'
+import { installConnectorControlVisibility } from '../installConnectorControlVisibility'
 import {
   importLegacyPyblocksSystemSketch,
   parseLegacyPyblocksSystemSketch,
@@ -216,6 +217,7 @@ function EmbeddedSurface({
 
     enablePasteAtCursor(editor)
     const stopBlockConnections = installBlockConnections(editor)
+    const stopConnectorControlVisibility = installConnectorControlVisibility(editor)
     const stopInstantTextEditing = installInstantTextEditing(editor)
     const stopBlockClickToEdit = installBlockClickToEdit(editor)
     const stopBranchClickToEdit = installBranchClickToEdit(editor)
@@ -315,6 +317,7 @@ function EmbeddedSurface({
       stopBranchClickToEdit()
       stopBlockClickToEdit()
       stopInstantTextEditing()
+      stopConnectorControlVisibility()
       stopBlockConnections()
     }
   }, [openDocument, onCanvasCheckpoint, onCanvasText, onCompatibilityCopyAvailable, onLoadError])

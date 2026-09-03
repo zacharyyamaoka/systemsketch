@@ -67,6 +67,7 @@ import { SYSTEMSKETCH_THEMES } from './appearance/figjamPalette'
 import { createSystemSketchStore } from './store/createSystemSketchStore'
 import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from './stockPrimitiveVisuals'
 import { SYSTEMSKETCH_ARROW_SHAPE_UTILS } from './systemSketchArrow'
+import { installConnectorControlVisibility } from './installConnectorControlVisibility'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
@@ -127,6 +128,7 @@ function SystemSketchCanvas() {
     const stopWorkspace = attach(editor)
     const stopBoardTheme = installBoardTheme(editor)
     const stopBlockConnections = installBlockConnections(editor)
+    const stopConnectorControlVisibility = installConnectorControlVisibility(editor)
     const stopDevelopmentSeam = installDevelopmentSeam(editor)
     const stopInstantTextEditing = installInstantTextEditing(editor)
     const stopArrowClickToPlace = installArrowClickToPlace(editor)
@@ -148,6 +150,7 @@ function SystemSketchCanvas() {
       stopArrowClickToPlace()
       stopInstantTextEditing()
       stopDevelopmentSeam()
+      stopConnectorControlVisibility()
       stopBlockConnections()
       stopBoardTheme()
       stopWorkspace()
@@ -194,6 +197,7 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
     const stopBlockConnections = isBlockDevelopment
       ? installBlockConnections(editor)
       : () => undefined
+    const stopConnectorControlVisibility = installConnectorControlVisibility(editor)
     const stopInstantTextEditing = isBlockDevelopment
       ? installInstantTextEditing(editor)
       : () => undefined
@@ -219,6 +223,7 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
       stopBranchClickToEdit()
       stopBlockClickToEdit()
       stopInstantTextEditing()
+      stopConnectorControlVisibility()
       stopBlockConnections()
       stopBoardTheme()
     }

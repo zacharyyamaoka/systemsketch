@@ -49,6 +49,7 @@ export const FIGJAM_EYEDROPPER_ICON = 'picker/Eyedropper'
 const LINE_SHAPE: ValueToIcon = {
   elbow: 'line-shape/Elbowed',
   curved: 'line-shape/Curved',
+  curve: 'line-shape/Curved',
   arc: 'line-shape/Curved',
   cubic: 'line-shape/Curved',
   straight: 'line-shape/Straight',
