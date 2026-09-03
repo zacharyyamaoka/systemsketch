@@ -27,7 +27,6 @@ import {
 } from '../branch'
 import {
   blockConnectionBindingUtils,
-  blockConnectionOverlayUtils,
   blockConnectionShapeUtils,
   installBlockConnections,
 } from '../blocks/connections'
@@ -73,6 +72,7 @@ import '../theme/tokens.css'
 import '../app.css'
 import './embed.css'
 import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from '../stockPrimitiveVisuals'
+import { SYSTEMSKETCH_ARROW_SHAPE_UTILS } from '../systemSketchArrow'
 import {
   importLegacyPyblocksSystemSketch,
   parseLegacyPyblocksSystemSketch,
@@ -103,13 +103,13 @@ const EMBEDDED_COMPONENTS = {
 }
 const EMBEDDED_SHAPE_UTILS = [
   ...EXCALIDRAW_SHAPE_UTILS,
+  ...SYSTEMSKETCH_ARROW_SHAPE_UTILS,
   ...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
   BlockShapeUtil,
   BranchShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const EMBEDDED_BINDING_UTILS = [...blockConnectionBindingUtils]
-const EMBEDDED_OVERLAY_UTILS = [...blockConnectionOverlayUtils]
 const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool]
 
 /** Long enough that a drag is one write, short enough that a pause is saved. */
@@ -338,7 +338,6 @@ function EmbeddedSurface({
         getShapeVisibility={getBlockShapeVisibility}
         licenseKey={TLDRAW_LICENSE_KEY}
         onMount={onMount}
-        overlayUtils={EMBEDDED_OVERLAY_UTILS}
         overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
         shapeUtils={EMBEDDED_SHAPE_UTILS}
         store={store}

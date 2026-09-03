@@ -4,7 +4,6 @@ import { CONNECTION_SHAPE_TYPE } from './connectionModel'
 import { cleanupStaleConnections } from './ConnectionBindingUtil'
 import { PointingBlockPort, type PointingBlockPortInfo } from './PointingBlockPort'
 import { BLOCK_PORT_DRAG_STATE_ID, DraggingBlockPort } from '../ports/portInteraction'
-import { installConnectionProximity } from './connectionProximity'
 import { keepConnectionsAtBottom } from './keepConnectionsAtBottom'
 
 /**
@@ -117,9 +116,7 @@ export function installBlockConnections(editor: Editor): () => void {
 	cleanupStaleConnections(editor)
 	keepConnectionsAtBottom(editor)
 	const stopInteraction = installBlockConnectionInteraction(editor)
-	const stopProximity = installConnectionProximity(editor)
 	return () => {
-		stopProximity()
 		stopInteraction()
 	}
 }

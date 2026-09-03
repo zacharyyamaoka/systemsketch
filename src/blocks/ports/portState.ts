@@ -109,17 +109,3 @@ export function getEligiblePorts(editor: Editor): EligiblePorts {
 		))
 		.get()
 }
-
-/**
- * The selected cable the pointer is currently near.
- *
- * Figma's rule: a selected edge shows its control points only while the mouse
- * is close to it, so a selection does not sprinkle handles across the board.
- * This is an atom rather than a read of `editor.inputs` inside `getHandles`
- * because it flips at a threshold — the handle list then recomputes when the
- * answer changes, not on every pointer move.
- */
-export const nearbyConnection = new EditorAtom<TLShapeId | null>(
-	'nearby connection',
-	() => null,
-)
