@@ -457,6 +457,33 @@ async function main() {
     const errors = localConsoleErrors(page)
     if (errors.length) throw new Error(`browser console errors: ${errors.join('; ')}`)
 
+    // Fit the camera again, on the cold-reopened board, immediately before the
+    // capture.
+    //
+    // The fit above happens on the authoring pass, and `guardedReload` then
+    // reopens the file with whatever camera the reopen lands on — 100% in
+    // practice. Any board wider or taller than the viewport was therefore
+    // cropped in the PNG, silently: the review step that says "inspect the
+    // generated PNG yourself" was inspecting a picture that could omit whole
+    // cue cards. The camera is instance state and `documentBytes` was already
+    // read, so this cannot change the saved fixture.
+    const framed = JSON.parse(await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      editor.selectNone()
+      editor.zoomToFit({ animation: { duration: 0 } })
+      const content = editor.getCurrentPageBounds()
+      const viewport = editor.getViewportPageBounds()
+      return JSON.stringify({
+        zoom: Number(editor.getZoomLevel().toFixed(3)),
+        covered: Boolean(content && viewport.contains(content)),
+      })
+    })()`))
+    if (!framed.covered) {
+      throw new Error(`the capture camera does not cover the whole board (zoom ${framed.zoom})`)
+    }
+    await delay(250)
+    process.stdout.write(`review fixture · capture framed at ${Math.round(framed.zoom * 100)}%\n`)
+
     const capture = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
     await atomicWrite(outputPath, documentBytes)
     await atomicWrite(screenshotPath, Buffer.from(capture.data, 'base64'))

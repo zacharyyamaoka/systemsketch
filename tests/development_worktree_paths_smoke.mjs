@@ -50,9 +50,35 @@ async function captureIfRequested() {
   await writeFile(target, Buffer.from(shot.data, 'base64'))
 }
 
+async function captureInvalidBoardUrlIfRequested() {
+  const target = process.env.SYSTEMSKETCH_INVALID_BOARD_URL_SCREENSHOT
+  if (!target) return
+  const shot = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
+  await writeFile(target, Buffer.from(shot.data, 'base64'))
+}
+
 try {
   await page.send('Network.enable')
   await writeFile(futureBoard, futureSource)
+  // A browser that percent-encodes the equals sign turns `board` into an
+  // unrelated key. Never silently replace the requested board with Untitled.
+  await openApp(page, port, `?board%3D${encodeURIComponent(linkedBoard)}`)
+  await waitFor(
+    page,
+    "document.querySelector('[data-testid=\"workspace-invalid-board-url\"]')",
+    'the malformed board-link warning',
+  )
+  await captureInvalidBoardUrlIfRequested()
+  assert.match(
+    await evaluate(page, "document.querySelector('[data-testid=\"workspace-invalid-board-url\"]').parentElement.innerText"),
+    /leave = unescaped/i,
+  )
+  assert.equal(
+    await evaluate(page, 'Boolean(window.__systemsketch?.editor)'),
+    false,
+    'a malformed board link fell back to an editable blank canvas',
+  )
+
   await openApp(page, port, `?board=${encodeURIComponent(linkedBoard)}`)
   await waitFor(page, 'window.__systemsketch?.editor', 'the linked worktree board')
   await evaluate(page, `(() => {
@@ -184,6 +210,7 @@ try {
 
   const errors = localConsoleErrors(page)
   if (errors.length) throw new Error(`browser console errors: ${errors.join('; ')}`)
+  process.stdout.write('PASS malformed board URL reports its escaping error instead of opening Untitled\n')
   process.stdout.write('PASS source-worktree URL opened, autosaved, and cold-reopened\n')
   process.stdout.write('PASS source-worktree Save As and New fell back to the primary workspace\n')
   process.stdout.write('PASS future worktree Create editable copy and New Folder stayed in the primary workspace\n')

@@ -94,7 +94,7 @@ describe('scopes', () => {
 		expect(pairBlockFaces(editor, run, encode)).toEqual({ a: 'outer', b: 'outer', scopeId: PAGE })
 		expect(pairBlockFaces(editor, run, decode)).toEqual({ a: 'inner', b: 'outer', scopeId: run.id })
 		expect(pairBlockFaces(editor, decode, run)).toEqual({ a: 'outer', b: 'inner', scopeId: run.id })
-		expect(pairBlockFaces(editor, run, run)).toEqual({ a: 'inner', b: 'inner', scopeId: run.id })
+		expect(pairBlockFaces(editor, run, run)).toEqual({ a: 'outer', b: 'outer', scopeId: PAGE })
 		// A grandchild shares no scope with the outer boundary.
 		expect(pairBlockFaces(editor, run, deep)).toBeNull()
 		// A collapsed Block has no live inside to wire...
@@ -165,14 +165,14 @@ describe('judgeConnection — siblings and the same Block', () => {
 			.toBe('same-polarity')
 	})
 
-	it('lets an Expanded Block pass its inlet straight through to its outlet', () => {
+	it('routes a Block self-loop through its outer input and output faces', () => {
 		expect(describeVerdict(judgeConnection(editor, dot(encode, 'in_1'), dot(encode, 'out_1'))))
-			.toBe('encode.in_1(inside) -> encode.out_1(inside)')
+			.toBe('encode.out_1 -> encode.in_1')
 	})
 
-	it('refuses a leaf Block feeding itself', () => {
+	it('allows a leaf Block to connect its output back to its input', () => {
 		expect(describeVerdict(judgeConnection(editor, dot(leaf, 'out_1'), dot(leaf, 'in_1'))))
-			.toBe('same-block')
+			.toBe('leaf.out_1 -> leaf.in_1')
 	})
 
 	it('refuses ports that do not exist or are hidden — unless the cable already exists', () => {
@@ -202,11 +202,20 @@ describe('judgeConnection — siblings and the same Block', () => {
 		))).toBe('run.in_1(inside) -> child.in_1')
 	})
 
+	it('allows a same-Block loop despite its ordinary outer cycle exclusion', () => {
+		expect(describeVerdict(judgeConnection(
+			editor,
+			dot(encode, 'out_1'),
+			dot(encode, 'in_1'),
+			{ excludeBlocks: new Set([encode.id]) },
+		))).toBe('encode.out_1 -> encode.in_1')
+	})
+
 	it('names the scope a legal cable lives in', () => {
 		const verdict = judgeConnection(editor, dot(encode, 'out_1'), dot(merge, 'in_1'))
 		expect(verdict.ok && verdict.scopeId).toBe(PAGE)
 		const inside = judgeConnection(editor, dot(encode, 'in_1'), dot(encode, 'out_1'))
-		expect(inside.ok && inside.scopeId).toBe(encode.id)
+		expect(inside.ok && inside.scopeId).toBe(PAGE)
 	})
 })
 

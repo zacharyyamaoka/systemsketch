@@ -1,0 +1,102 @@
+{
+  "capturedFor": "docs/build_reference_learnings.py",
+  "shots": [
+    {
+      "name": "ref-enso-reshape",
+      "bytes": 294524,
+      "source": "https://enso.org/",
+      "note": "Clean and reshape. Ensure data quality."
+    },
+    {
+      "name": "ref-enso-blend",
+      "bytes": 212487,
+      "source": "https://enso.org/",
+      "note": "Blend and process data in-database and in-memory."
+    },
+    {
+      "name": "ref-enso-live",
+      "bytes": 657804,
+      "source": "https://enso.org/",
+      "note": "Live, interactive data processing — visualization under the node."
+    },
+    {
+      "name": "ref-enso-custom",
+      "bytes": 269143,
+      "source": "https://enso.org/",
+      "note": "Build and share custom components."
+    },
+    {
+      "name": "ref-enso-dual",
+      "bytes": 271070,
+      "source": "https://enso.org/",
+      "note": "No-code or full-code — the same workflow as graph and as text."
+    },
+    {
+      "name": "ref-neva-0",
+      "bytes": 111996
+    },
+    {
+      "name": "ref-neva-1",
+      "bytes": 111996
+    },
+    {
+      "name": "ref-neva-2",
+      "bytes": 111996
+    },
+    {
+      "name": "ref-unit-gestures",
+      "bytes": 1421179
+    },
+    {
+      "name": "ref-unit-02",
+      "bytes": 38461,
+      "frameSelection": "best-of-6"
+    },
+    {
+      "name": "ref-unit-17",
+      "bytes": 260235,
+      "frameSelection": "best-of-6"
+    },
+    {
+      "name": "ref-unit-31",
+      "bytes": 166827,
+      "frameSelection": "best-of-6"
+    },
+    {
+      "name": "ref-unit-33",
+      "bytes": 149654,
+      "frameSelection": "best-of-6"
+    },
+    {
+      "name": "ref-unit-42",
+      "bytes": 232503,
+      "frameSelection": "best-of-6"
+    },
+    {
+      "name": "ref-unit-34",
+      "bytes": 260938,
+      "frameSelection": "best-of-6"
+    },
+    {
+      "name": "ref-unit-35",
+      "bytes": 218221,
+      "frameSelection": "best-of-6"
+    },
+    {
+      "name": "ref-unit-26",
+      "bytes": 273338,
+      "frameSelection": "best-of-6"
+    },
+    {
+      "name": "ref-unit-25",
+      "bytes": 275023,
+      "frameSelection": "best-of-6"
+    },
+    {
+      "name": "ref-unit-55",
+      "bytes": 2141964,
+      "frameSelection": "best-of-6"
+    }
+  ],
+  "unitRecordingsLoaded": 9
+}

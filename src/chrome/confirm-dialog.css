@@ -1,0 +1,25 @@
+/* Every colour here is a token from src/theme/tokens.css. The dialog frame,
+ * backdrop and stacking are tldraw's; this is only its content. */
+
+.systemsketch-confirm {
+  width: min(400px, calc(100vw - 32px));
+}
+
+.systemsketch-confirm__body {
+  padding: 4px 16px 16px;
+  color: var(--ss-text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.systemsketch-confirm__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 16px 16px;
+}
+
+.systemsketch-confirm__footer .tlui-button:focus-visible {
+  outline: 2px solid var(--ss-accent);
+  outline-offset: 2px;
+}

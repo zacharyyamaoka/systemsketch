@@ -81,6 +81,15 @@ async function describeCable(page, dots) {
   }
 }
 
+function pathCrossesCardInterior(points, card, inset = 2) {
+  return points.some((point) => (
+    point.x > card.x + inset
+    && point.x < card.x + card.w - inset
+    && point.y > card.y + inset
+    && point.y < card.y + card.h - inset
+  ))
+}
+
 /** The index of the painted cable whose path starts on a given dot. */
 async function cableIndexFrom(page, dots, label) {
   const count = await cables(page)
@@ -194,11 +203,17 @@ async function main() {
     const through = await dragFrom(page, dots['encode.in'], dots['encode.out'], {
       shotName: 'polarity-passthrough-drag.png',
     })
-    check('PASSTHROUGH-1', 'an Expanded Block passes its inlet straight through to its outlet',
+    check('SELF-LOOP-1', 'a Block connects its output back to its own input',
       through.count, 1)
-    check('PASSTHROUGH-1-DIR', 'drawn from the inlet\'s inside to the outlet\'s inside',
+    check('SELF-LOOP-1-DIR', 'drawn from the output around to the input',
       await describeCable(page, dots),
-      { from: 'encode.in', to: 'encode.out', leavesRight: true, arrivesRight: true })
+      { from: 'encode.out', to: 'encode.in', leavesRight: true, arrivesRight: true })
+    const encodeCard = await box(page, `[data-shape-id="${encode}"] .systemsketch-block-canvas`)
+    const selfLoopPoints = await cableSamples(page, 240)
+    check('SELF-LOOP-1-ROUTE', 'the self-loop never crosses the Block body',
+      pathCrossesCardInterior(selfLoopPoints, encodeCard), false)
+    check('SELF-LOOP-1-LOWER', 'the self-loop consistently wraps below the Block',
+      Math.max(...selfLoopPoints.map((point) => point.y)) > encodeCard.y + encodeCard.h + 4, true)
     await shot(page, 'polarity-passthrough-drop.png')
     await clearCables(page, restA)
 
@@ -343,7 +358,7 @@ async function main() {
     check('NESTED-4', 'the outlet acting as a source for the inside is refused', nest4.count, 0)
     await clearCables(page, restB)
     const self = await dragFrom(page, nested['decode.out'], nested['decode.in'])
-    check('NESTED-5', 'a collapsed Block feeding its own input is refused', self.count, 0)
+    check('NESTED-5', 'a child Block may connect its output back to its own input', self.count, 1)
     await clearCables(page, restB)
 
     // ============================================================= SCOPE ===

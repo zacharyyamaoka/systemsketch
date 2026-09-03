@@ -23,6 +23,13 @@
   box-shadow: var(--ss-shadow-2);
 }
 
+/* The tabs' panel. `display: contents` so adding the ARIA wrapper changed the
+ * accessibility tree and nothing about the layout: the search field, replace
+ * row, summary and results stay direct flex children of the dialog. */
+.systemsketch-command-palette__panel {
+  display: contents;
+}
+
 .systemsketch-command-palette__header {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -281,6 +288,21 @@
 
 .systemsketch-command-palette__footer kbd + kbd {
   margin-left: 3px;
+}
+
+/* A result row fills its list, so an outside ring would be clipped by the
+ * scroller. Inset instead, and paired with the accent bar the active row
+ * already carries. */
+.systemsketch-command-palette__results li > button:focus-visible {
+  outline-offset: -2px;
+}
+
+/* A disabled command was only faint before, which reads as low emphasis rather
+ * than unavailable. Strike the reason into the row: no hover, no pointer, and
+ * the same faint ink on a struck-through label. */
+.systemsketch-command-palette__results li > button:disabled .systemsketch-command-palette__label strong {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
 }
 
 .systemsketch-command-palette__visually-hidden {

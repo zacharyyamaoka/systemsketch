@@ -119,22 +119,23 @@ async function main() {
           '.systemsketch-selection-count, .block-mini-menu__count, .block-mini-menu__scope',
         )),
         controls: Array.from(bar?.querySelectorAll(
-          '.block-mini-menu__views button, .block-mini-menu__inspect',
+          '.block-mini-menu__views button',
         ) ?? []).map((button) => button.innerText.trim().split(/\s+/)[0]),
       })
     })()`))
     assert.equal(menu.obsoleteSummary, false)
     assert.doesNotMatch(menu.text, /\b3 selected\b|\b3 Blocks\b|\b1 Block\b/)
     assert.deepEqual(menu.controls.slice(0, 3).map((control) => control.at(0)), ['S', 'P', 'E'])
-    assert.ok(menu.controls.at(-1).startsWith('In'))
+    // The pill used to end in an Inspect button. It carries only the controls
+    // that change the Blocks now; the dock follows the selection by itself.
+    assert.equal(menu.controls.length, 3)
     const menuCapture = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
     await writeFile(FRAME, Buffer.from(menuCapture.data, 'base64'))
     pass('the three-Block pill starts with S / P / E and has no selected-count summary')
 
-    await clickSelector(page, '.block-mini-menu__inspect')
     await waitFor(page, `document.querySelector('.block-inspector__batch-title')?.textContent === 'Batch edit'`,
       'the count-free batch inspector heading')
-    pass('Inspect names the state “Batch edit”, not a selected total')
+    pass('the dock follows the batch selection and names the state “Batch edit”, not a selected total')
 
     assert.deepEqual(localConsoleErrors(page), [])
     pass('the saved fixture journey produces zero local console errors')

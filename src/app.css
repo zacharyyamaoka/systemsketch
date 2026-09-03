@@ -32,6 +32,149 @@ button {
   background: var(--ss-surface);
 }
 
+/* -------------------------------------------------------------------------
+ * One keyboard focus ring for every surface SystemSketch owns.
+ *
+ * Measured before this existed: a real Tab into the command palette left
+ * `outline: none` on the focused button — `:focus-visible` matched, and no
+ * stylesheet had a rule for it. The same held for the comments panel, the
+ * appearance pill and its palettes, the workspace dialogs and the library.
+ * Five stylesheets each growing their own copy is how that drifts back, so the
+ * ring lives once, here, and every new panel inherits it by being listed.
+ *
+ * Scoped to app-owned roots on purpose: tldraw's own controls carry tldraw's
+ * focus treatment, and a bare `:focus-visible` would fight it.
+ *
+ * `outline` rather than `box-shadow`, so the ring survives `overflow: hidden`
+ * on the panel around it, and `outline-offset` keeps it clear of the control's
+ * own border. Roots that already had a ring keep theirs; this is the floor.
+ * ---------------------------------------------------------------------- */
+.systemsketch-command-palette :focus-visible,
+.systemsketch-comments :focus-visible,
+.systemsketch-appearance :focus-visible,
+.systemsketch-appearance__panel :focus-visible,
+.systemsketch-appearance__picker :focus-visible,
+.systemsketch-workspace-dialog :focus-visible,
+.systemsketch-library-browser :focus-visible,
+.systemsketch-settings :focus-visible,
+.systemsketch-share-menu :focus-visible,
+.block-mini-menu :focus-visible,
+.tunnel-layer-bar :focus-visible {
+  outline: 2px solid var(--ss-accent);
+  outline-offset: 2px;
+}
+
+/* The selection pill and every appearance surface hanging off it are the
+ * board's opposite polarity, and a mid-luminance accent on that near-black
+ * reads as a smudge. Those surfaces ring in their own ink, inset so the ring
+ * stays inside a control butted against its neighbour. */
+.block-mini-menu :focus-visible,
+.systemsketch-appearance :focus-visible,
+.systemsketch-appearance__panel :focus-visible,
+.systemsketch-appearance__picker :focus-visible {
+  outline-color: var(--ss-text-inverse);
+  outline-offset: -2px;
+}
+
+/* A segmented tab is the one control here that does NOT take the ring.
+ *
+ * Selection follows focus in this tablist, so the focused tab is always the
+ * selected tab — a ring would be a second mark for a fact the selected state
+ * already carries, and two marks competing on one 30px chip is worse than one.
+ * The selected chip is the whole language: full-contrast ink on a raised
+ * surface, against muted ink on nothing. Every other control in the dialog
+ * keeps its ring, because for those, focus and selection are different things. */
+.systemsketch-command-palette [role='tab']:focus-visible {
+  outline: none;
+}
+
+/* An input already signals focus with its border and `--ss-focus-ring`; the
+ * outline on top of that reads as a double frame. */
+.systemsketch-command-palette input:focus-visible,
+.systemsketch-comments input:focus-visible,
+.systemsketch-comments textarea:focus-visible,
+.systemsketch-workspace-dialog input:focus-visible,
+.systemsketch-library-browser input:focus-visible {
+  outline: none;
+}
+
+/* -------------------------------------------------------------------------
+ * Panel scrollbars.
+ *
+ * Every app panel scrolls its own body, and each one was drawing the OS
+ * scrollbar — a wide grey trough against a 18px-radius designed panel. Thin
+ * and themed instead, from the same two tokens the panel is painted with.
+ * Firefox takes `scrollbar-*`; WebKit/Blink take the pseudo-elements, so both
+ * are declared rather than one being assumed.
+ * ---------------------------------------------------------------------- */
+.systemsketch-popout,
+.systemsketch-command-palette,
+.systemsketch-comments,
+.systemsketch-library-browser,
+.systemsketch-settings,
+.systemsketch-workspace-dialog,
+.block-inspector {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ss-border-strong) transparent;
+}
+
+.systemsketch-popout ::-webkit-scrollbar,
+.systemsketch-command-palette ::-webkit-scrollbar,
+.systemsketch-comments ::-webkit-scrollbar,
+.systemsketch-library-browser ::-webkit-scrollbar,
+.systemsketch-settings ::-webkit-scrollbar,
+.systemsketch-workspace-dialog ::-webkit-scrollbar,
+.block-inspector ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.systemsketch-popout ::-webkit-scrollbar-track,
+.systemsketch-command-palette ::-webkit-scrollbar-track,
+.systemsketch-comments ::-webkit-scrollbar-track,
+.systemsketch-library-browser ::-webkit-scrollbar-track,
+.systemsketch-settings ::-webkit-scrollbar-track,
+.systemsketch-workspace-dialog ::-webkit-scrollbar-track,
+.block-inspector ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.systemsketch-popout ::-webkit-scrollbar-thumb,
+.systemsketch-command-palette ::-webkit-scrollbar-thumb,
+.systemsketch-comments ::-webkit-scrollbar-thumb,
+.systemsketch-library-browser ::-webkit-scrollbar-thumb,
+.systemsketch-settings ::-webkit-scrollbar-thumb,
+.systemsketch-workspace-dialog ::-webkit-scrollbar-thumb,
+.block-inspector ::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  /* `background-clip: content-box` is what turns the 10px track into a 4px
+   * thumb without a second element to inset it. */
+  background: var(--ss-border-strong);
+  background-clip: content-box;
+}
+
+.systemsketch-popout ::-webkit-scrollbar-thumb:hover,
+.systemsketch-command-palette ::-webkit-scrollbar-thumb:hover,
+.systemsketch-comments ::-webkit-scrollbar-thumb:hover,
+.systemsketch-library-browser ::-webkit-scrollbar-thumb:hover,
+.systemsketch-settings ::-webkit-scrollbar-thumb:hover,
+.systemsketch-workspace-dialog ::-webkit-scrollbar-thumb:hover,
+.block-inspector ::-webkit-scrollbar-thumb:hover {
+  background: var(--ss-text-muted);
+  background-clip: content-box;
+}
+
+.systemsketch-popout ::-webkit-scrollbar-corner,
+.systemsketch-command-palette ::-webkit-scrollbar-corner,
+.systemsketch-comments ::-webkit-scrollbar-corner,
+.systemsketch-library-browser ::-webkit-scrollbar-corner,
+.systemsketch-settings ::-webkit-scrollbar-corner,
+.systemsketch-workspace-dialog ::-webkit-scrollbar-corner,
+.block-inspector ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 /* Stock text protects labels that cross other shapes with a canvas-coloured
  * halo. A detached Block label sits on its own opaque card, just like the DOM
  * label it replaced, so that halo only makes the glyph falsely bold. Keep the

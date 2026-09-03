@@ -30,6 +30,7 @@
     "test:windows": "node tests/desktop_windows_smoke.mjs",
     "test:arrow-sync": "node tests/edge_arrow_sync_smoke.mjs",
     "test:pill": "node tests/literal_pill_smoke.mjs",
+    "test:ui-hardening": "node tests/ui_hardening_smoke.mjs",
     "test:recorder": "node tests/recorder_smoke.mjs",
     "plugin:build": "npm --prefix vscode-systemsketch run build",
     "plugin:package": "npm --prefix vscode-systemsketch run package",

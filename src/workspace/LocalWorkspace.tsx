@@ -76,6 +76,7 @@ import { hydrateCustomColors } from '../appearance/customColors'
 import { SettingsGearIcon, SystemSketchSettingsDialog } from '../settings/InterfaceSettings'
 import { importLegacyPyblocksSystemSketch } from '../import/legacyPyblocksSystemSketch'
 import { emitRecorderDiagnostic } from '../recorder/recorderEvents'
+import { useConfirm } from '../chrome/ConfirmDialog'
 import { consolidateDocumentToSinglePage } from '../singlePageDocument'
 
 const SAVE_DEBOUNCE_MS = 600
@@ -85,6 +86,7 @@ const NOTICE_TIMEOUT_MS = 6000
 
 export type WorkspaceStatus =
   | { kind: 'loading' }
+  | { kind: 'invalid-url'; message: string }
   | { kind: 'clean'; at: number | null }
   | { kind: 'dirty' }
   | { kind: 'saving' }
@@ -118,6 +120,13 @@ export interface LocalWorkspaceController {
   saveAs(path: string, force?: boolean): Promise<void>
   exportTldraw(destination: string, force?: boolean): Promise<void>
   rename(path: string): Promise<void>
+  /**
+   * Moves the open board to Trash unconditionally.
+   *
+   * The confirmation deliberately lives at the call site rather than in here:
+   * this provider is mounted *above* `<Tldraw>`, so it has no dialog stack of
+   * its own, and asking from here is what forced the old `window.confirm`.
+   */
   trash(): Promise<void>
   reveal(): Promise<void>
   takeDisk(): Promise<void>
@@ -167,6 +176,15 @@ function currentDialogLauncher(): HTMLElement | null {
   }
   if (active && active !== document.body) return active
   return document.querySelector<HTMLElement>('[data-testid="main-menu.button"]')
+}
+
+function invalidBoardUrlMessage(query: URLSearchParams, explicitPath: string | null): string | null {
+  if (explicitPath) return null
+  if (query.has('board')) return 'The board link has no file path. Add a path after “?board=”.'
+  if ([...query.keys()].some((key) => key.startsWith('board='))) {
+    return 'Use ?board=/path/to/file.systemsketch; leave = unescaped.'
+  }
+  return null
 }
 
 function fingerprint(document: { mtime?: number; size?: number; digest?: string }): DocumentFingerprint | null {
@@ -304,10 +322,15 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     const controller = new AbortController()
     void (async () => {
       try {
-        const options = { signal: controller.signal }
-        const listing = await listWorkspace(undefined, options)
         const query = new URLSearchParams(window.location.search)
         const explicitPath = query.get('board')?.trim() || null
+        const invalidBoardUrl = invalidBoardUrlMessage(query, explicitPath)
+        if (invalidBoardUrl) {
+          if (!cancelled) setStatus({ kind: 'invalid-url', message: invalidBoardUrl })
+          return
+        }
+        const options = { signal: controller.signal }
+        const listing = await listWorkspace(undefined, options)
         const isIndependentDevelopmentBoard = query.has('previewClone') || query.has('preset')
         let selectedPath: string
         let document: Awaited<ReturnType<typeof readWorkspaceDocument>>
@@ -873,7 +896,6 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     }
     await waitForSave()
     if (!digestRef.current) throw new Error('The current file revision is not available yet.')
-    if (!window.confirm(`Move “${documentTitle(boardPath)}” to Trash?`)) return
     await trashWorkspaceDocument({ path: boardPath, baseDigest: digestRef.current })
     updateRecents(forgetDocumentPath(boardPath))
     window.location.assign(documentHref(await reserveUntitledPath()))
@@ -1117,11 +1139,15 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
 }
 
 function WorkspaceLoading({ status, onRetry }: { status: WorkspaceStatus; onRetry(): void }) {
+  const invalidUrl = status.kind === 'invalid-url'
+  const failed = invalidUrl || status.kind === 'error'
   return (
     <main className="systemsketch-workspace-loading">
       <div className="systemsketch-workspace-loading__mark">S</div>
-      <strong>{status.kind === 'error' ? 'Could not open the local workspace' : 'Opening workspace…'}</strong>
-      {status.kind === 'error' ? <p>{status.message}</p> : null}
+      <strong data-testid={invalidUrl ? 'workspace-invalid-board-url' : undefined}>
+        {invalidUrl ? 'Board link is invalid' : failed ? 'Could not open the local workspace' : 'Opening workspace…'}
+      </strong>
+      {failed ? <p>{status.message}</p> : null}
       {status.kind === 'error' ? (
         <button type="button" data-testid="workspace-retry-bootstrap" onClick={onRetry}>Try again</button>
       ) : null}
@@ -1229,6 +1255,17 @@ function WorkspaceNotice() {
 export function SystemSketchMainMenu() {
   const workspace = useLocalWorkspace()
   const { addDialog } = useDialogs()
+  const confirm = useConfirm()
+
+  /** The ask, in the app's own dialog rather than the browser's. */
+  const requestTrash = async () => {
+    const confirmed = await confirm({
+      title: `Move “${workspace.title}” to Trash?`,
+      body: 'The board leaves this folder and a new untitled board opens in its place. Your file manager can restore it from Trash.',
+      confirmLabel: 'Move to Trash',
+    })
+    if (confirmed) await workspace.trash()
+  }
   const statusLabel = workspace.status.kind === 'clean'
     ? 'Saved'
     : workspace.status.kind === 'saving'
@@ -1281,7 +1318,12 @@ export function SystemSketchMainMenu() {
               </TldrawUiMenuGroup>
               <TldrawUiMenuGroup id="file-location">
                 <TldrawUiMenuItem id="reveal-document" label="Show in Files" onSelect={() => workspace.runAction(workspace.reveal)} />
-                <TldrawUiMenuItem id="trash-document" label="Move to Trash…" disabled={!workspace.isPersisted} onSelect={() => workspace.runAction(workspace.trash)} />
+                <TldrawUiMenuItem
+                  id="trash-document"
+                  label="Move to Trash…"
+                  disabled={!workspace.isPersisted}
+                  onSelect={() => void requestTrash()}
+                />
               </TldrawUiMenuGroup>
             </TldrawUiMenuSubmenu>
           </TldrawUiMenuGroup>
