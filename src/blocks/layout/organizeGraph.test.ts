@@ -46,6 +46,21 @@ describe('organizeGraph', () => {
 		expect(Math.min(...result.nodes.map((node) => node.y))).toBe(880)
 	})
 
+	it('separates disconnected nodes, so a container body does not need cables to be organizable', async () => {
+		const nodes = [
+			{ id: 'first', x: 120, y: 180, width: 160, height: 100 },
+			{ id: 'second', x: 135, y: 188, width: 160, height: 100 },
+			{ id: 'third', x: 142, y: 174, width: 160, height: 100 },
+		]
+		const result = await organizeGraph(nodes, [])
+
+		for (let i = 0; i < result.nodes.length; i += 1) {
+			for (let j = i + 1; j < result.nodes.length; j += 1) {
+				expect(overlaps(result.nodes[i], result.nodes[j])).toBe(false)
+			}
+		}
+	})
+
 	it('is pure and deterministic', async () => {
 		const nodes = Array.from({ length: 8 }, (_, index) => ({
 			id: `n${index}`,

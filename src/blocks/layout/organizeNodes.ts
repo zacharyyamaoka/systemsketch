@@ -3,9 +3,10 @@
  *
  * Ordinary selections retain the original contract: two or more selected
  * Blocks move and only their internal connections inform ELK. A lone Expanded
- * Block is the deliberate container exception. Its immediate child Blocks
- * move as one scope, its boundary ports become virtual layout rails, and its
- * nested Expanded Blocks remain atomic.
+ * Block or Loop is the deliberate container exception. Its immediate child
+ * Blocks move as one scope; Expanded Blocks expose boundary ports as virtual
+ * layout rails, while Loops keep their header operator out of the left/right
+ * graph and arrange the body from its own child-to-child wiring.
  */
 import type { Editor, TLShape, TLShapeId } from 'tldraw'
 
@@ -16,9 +17,12 @@ import { CONNECTION_SHAPE_TYPE } from '../connections/connectionModel'
 import {
 	expandedScopeHasBoundaryConnection,
 	getSelectedExpandedBlockLayoutScope,
+	getSelectedLoopLayoutScope,
 	type ExpandedBlockLayoutScope,
+	type LoopLayoutScope,
 } from '../expandedBlockLayoutScope'
 import { layoutBlock } from '../layoutBlock'
+import { loopLayout, type LoopShape } from '../../loop/loopModel'
 import {
 	organizeGraph,
 	type OrganizeGraphEdge,
@@ -26,7 +30,7 @@ import {
 	type OrganizeGraphPort,
 } from './organizeGraph'
 
-export type OrganizeNodesScope = 'selection' | 'expanded-block'
+export type OrganizeNodesScope = 'selection' | 'expanded-block' | 'loop'
 
 export interface OrganizeNodesOutcome {
 	moved: number
@@ -44,13 +48,19 @@ export const EMPTY_ORGANIZE_NODES_OUTCOME: OrganizeNodesOutcome = {
 }
 
 export function describeOrganizeNodesOutcome(outcome: OrganizeNodesOutcome): string {
-	if (outcome.reason === 'insufficient-space') return 'Not enough room inside this Block'
-	if (outcome.moved === 0) {
-		return outcome.scope === 'expanded-block'
-			? 'Nodes are already organized inside the Block'
-			: 'Nodes are already organized'
+	if (outcome.reason === 'insufficient-space') {
+		return outcome.scope === 'loop' ? 'Not enough room inside this Loop' : 'Not enough room inside this Block'
 	}
-	const where = outcome.scope === 'expanded-block' ? ' inside the Block' : ' in the selection'
+	if (outcome.moved === 0) {
+		if (outcome.scope === 'expanded-block') return 'Nodes are already organized inside the Block'
+		if (outcome.scope === 'loop') return 'Nodes are already organized inside the Loop'
+		return 'Nodes are already organized'
+	}
+	const where = outcome.scope === 'expanded-block'
+		? ' inside the Block'
+		: outcome.scope === 'loop'
+			? ' inside the Loop'
+			: ' in the selection'
 	return `Organized ${outcome.moved} node${outcome.moved === 1 ? '' : 's'}${where}`
 }
 
@@ -58,6 +68,7 @@ interface OrganizeNodesTarget {
 	scope: OrganizeNodesScope
 	nodes: BlockShape[]
 	expanded?: ExpandedBlockLayoutScope
+	loop?: LoopLayoutScope
 }
 
 /** Shared applicability rule for toolbar, context menu, and command palette. */
@@ -72,6 +83,12 @@ function getOrganizeNodesTarget(editor: Editor): OrganizeNodesTarget | null {
 			|| expandedScopeHasBoundaryConnection(editor, expanded)
 		return eligible
 			? { scope: 'expanded-block', nodes: expanded.childBlocks, expanded }
+			: null
+	}
+	const loop = getSelectedLoopLayoutScope(editor)
+	if (loop) {
+		return loop.childBlocks.length >= 2
+			? { scope: 'loop', nodes: loop.childBlocks, loop }
 			: null
 	}
 
@@ -111,6 +128,10 @@ export async function organizeNodes(
 		const graph = collectExpandedOrganizeGraph(editor, target.expanded, interior)
 		graphNodes = [...graphNodes, ...graph.rails]
 		edges = graph.edges
+	} else if (target.loop) {
+		interior = loopInteriorInPage(editor, target.loop.parent)
+		if (!interior) return { ...EMPTY_ORGANIZE_NODES_OUTCOME, scope: target.scope }
+		edges = collectSelectedOrganizeEdges(editor, new Set(target.nodes.map((shape) => shape.id)))
 	} else {
 		edges = collectSelectedOrganizeEdges(editor, new Set(target.nodes.map((shape) => shape.id)))
 	}
@@ -263,6 +284,20 @@ function expandedInteriorInPage(editor: Editor, parent: BlockShape): PageRect | 
 	const transform = editor.getShapePageTransform(parent.id)
 	const a = transform.applyToPoint({ x: frame.x, y: frame.y })
 	const b = transform.applyToPoint({ x: frame.x + frame.w, y: frame.y + frame.h })
+	const minX = Math.min(a.x, b.x)
+	const minY = Math.min(a.y, b.y)
+	const maxX = Math.max(a.x, b.x)
+	const maxY = Math.max(a.y, b.y)
+	return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY }
+}
+
+/** The open body below a Loop's header and above its optional footer. */
+function loopInteriorInPage(editor: Editor, parent: LoopShape): PageRect | null {
+	const body = loopLayout(parent.props).body
+	if (body.w <= 0 || body.h <= 0) return null
+	const transform = editor.getShapePageTransform(parent.id)
+	const a = transform.applyToPoint({ x: body.x, y: body.y })
+	const b = transform.applyToPoint({ x: body.x + body.w, y: body.y + body.h })
 	const minX = Math.min(a.x, b.x)
 	const minY = Math.min(a.y, b.y)
 	const maxX = Math.max(a.x, b.x)

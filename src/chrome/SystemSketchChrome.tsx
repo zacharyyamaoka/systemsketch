@@ -5,21 +5,25 @@ import {
   useDialogs,
   useEditor,
   usePassThroughWheelEvents,
+  useRelevantStyles,
   useTldrawUiComponents,
   useToasts,
   useValue,
   type Editor,
 } from 'tldraw'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { AppearanceControls } from '../appearance/AppearanceControls'
+import { AppearanceControls, hasAppearanceControls } from '../appearance/AppearanceControls'
 import { WrapSelectionControl } from '../frames/WrapSelectionControl'
+import { canWrapSelection } from '../frames/wrapSelection'
 import { BLOCK_TOOL_ID, PILL_TOOL_ID, getBlockInspectorContext, selectionHasBlockStyles } from '../blocks'
+import { addTextTarget, selectionHasVisibleText } from '../appearance/textPresence'
 import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
 import { clearDiffStates } from '../diff/clearDiffStates'
 import { describeOrganizeNodesOutcome, organizeNodes } from '../blocks/layout'
 import {
   EditorBlockInspector,
   EditorBlockSelectionMiniMenu,
+  canShowBlockSelectionMiniMenu,
   EditorConnectionInspector,
   getConnectionInspectorContext,
   HitAreaOverlay,
@@ -259,6 +263,7 @@ function InspectorEmptyState() {
 function SelectionMiniMenu() {
   const editor = useEditor()
   const { addToast } = useToasts()
+  const relevantStyles = useRelevantStyles()
   const canShow = useValue(
     'systemsketch selection mini menu',
     () => (
@@ -283,6 +288,11 @@ function SelectionMiniMenu() {
     () => selectionHasBlockStyles(editor),
     [editor],
   )
+  const hasBlockMiniMenu = useValue(
+    'systemsketch selection has Block mini menu',
+    () => canShowBlockSelectionMiniMenu(editor),
+    [editor],
+  )
   const hasBranch = useValue(
     'systemsketch selection is one Branch',
     () => getOnlySelectedBranch(editor) !== null,
@@ -293,6 +303,20 @@ function SelectionMiniMenu() {
     () => getSelectionLayoutActionAvailability(editor),
     [editor],
   )
+  const hasAppearance = useValue(
+    'systemsketch selection has appearance actions',
+    () => hasAppearanceControls(
+      relevantStyles,
+      selectionHasVisibleText(editor),
+      addTextTarget(editor),
+    ),
+    [editor, relevantStyles],
+  )
+  const canWrap = useValue(
+    'systemsketch selection can wrap',
+    () => canWrapSelection(editor),
+    [editor],
+  )
   const runTidyEdges = () => {
     const outcome = tidyEdges(editor)
     addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
@@ -301,7 +325,13 @@ function SelectionMiniMenu() {
     const outcome = await organizeNodes(editor)
     addToast({ title: describeOrganizeNodesOutcome(outcome), severity: 'info' })
   }
-  if (!canShow) return null
+  const hasVisibleActions = hasBranch
+    || hasBlockMiniMenu
+    || hasAppearance
+    || canWrap
+    || layoutActions.tidyEdges
+    || layoutActions.organizeNodes
+  if (!canShow || !hasVisibleActions) return null
 
   if (hasBranch) {
     return (

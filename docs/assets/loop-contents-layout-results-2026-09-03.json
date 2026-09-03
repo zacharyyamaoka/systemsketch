@@ -1,0 +1,22 @@
+[
+  {
+    "label": "a selected Loop with three direct Blocks exposes Tidy edges and Organize nodes",
+    "ok": true
+  },
+  {
+    "label": "Tidy edges stays inside the selected Loop and preserves its cable ownership",
+    "ok": true
+  },
+  {
+    "label": "Organize nodes reflows only direct Loop children, keeps them in the open body, and leaves exterior content unchanged",
+    "ok": true
+  },
+  {
+    "label": "a selected Loop with no applicable actions has no contextual menu instead of an empty pill",
+    "ok": true
+  },
+  {
+    "label": "the Loop layout journey produces zero local console errors",
+    "ok": true
+  }
+]

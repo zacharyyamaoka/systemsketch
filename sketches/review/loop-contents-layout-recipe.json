@@ -1,0 +1,133 @@
+{
+  "feature": "Loop contents layout",
+  "viewport": { "width": 2400, "height": 1220 },
+  "pages": [{ "id": "review", "name": "Loop contents layout" }],
+  "shapes": [
+    {
+      "id": "loop",
+      "type": "loop",
+      "x": 450,
+      "y": 300,
+      "props": {
+        "w": 1300,
+        "h": 600,
+        "title": "For each pose",
+        "iterable": { "id": "iterable", "type": "Poses" },
+        "item": { "id": "item", "type": "Pose" },
+        "turn": ""
+      }
+    },
+    {
+      "id": "decode",
+      "type": "block",
+      "parentId": "loop",
+      "x": 480,
+      "y": 310,
+      "props": {
+        "title": "decode()",
+        "view": "port",
+        "w": 220,
+        "h": 148,
+        "inputs": [{ "id": "in", "name": "pose", "type": "Pose", "visible": true }],
+        "outputs": [{ "id": "out", "name": "frame", "type": "Frame", "visible": true }]
+      }
+    },
+    {
+      "id": "merge",
+      "type": "block",
+      "parentId": "loop",
+      "x": 84,
+      "y": 326,
+      "props": {
+        "title": "merge()",
+        "view": "port",
+        "w": 220,
+        "h": 148,
+        "inputs": [{ "id": "in", "name": "frame", "type": "Frame", "visible": true }],
+        "outputs": [{ "id": "out", "name": "pose", "type": "Pose", "visible": true }]
+      }
+    },
+    {
+      "id": "encode",
+      "type": "block",
+      "parentId": "loop",
+      "x": 394,
+      "y": 106,
+      "props": {
+        "title": "encode()",
+        "view": "port",
+        "w": 220,
+        "h": 148,
+        "inputs": [{ "id": "in", "name": "pose", "type": "Pose", "visible": true }],
+        "outputs": [{ "id": "out", "name": "bytes", "type": "Bytes", "visible": true }]
+      }
+    },
+    {
+      "id": "decode-merge",
+      "type": "connection",
+      "parentId": "loop",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    },
+    {
+      "id": "merge-encode",
+      "type": "connection",
+      "parentId": "loop",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    }
+  ],
+  "bindings": [
+    { "type": "connection", "fromId": "decode-merge", "toId": "decode", "props": { "terminal": "start", "portId": "out", "face": "outer" } },
+    { "type": "connection", "fromId": "decode-merge", "toId": "merge", "props": { "terminal": "end", "portId": "in", "face": "outer" } },
+    { "type": "connection", "fromId": "merge-encode", "toId": "merge", "props": { "terminal": "start", "portId": "out", "face": "outer" } },
+    { "type": "connection", "fromId": "merge-encode", "toId": "encode", "props": { "terminal": "end", "portId": "in", "face": "outer" } }
+  ],
+  "callouts": [
+    {
+      "id": "select-loop",
+      "kind": "step",
+      "text": "1 · Select this For each pose Loop",
+      "x": 840,
+      "y": 72,
+      "w": 520,
+      "h": 110,
+      "target": { "shapeId": "loop", "anchor": "top", "dx": 0 }
+    },
+    {
+      "id": "organize-body",
+      "kind": "step",
+      "text": "2 · Click Organize nodes in its black contextual menu",
+      "x": 1900,
+      "y": 430,
+      "w": 390,
+      "h": 130,
+      "target": { "shapeId": "loop", "anchor": "right", "dy": 110 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · decode(), merge(), and encode() become a clear flow inside the Loop; nothing outside moves.",
+      "x": 600,
+      "y": 1010,
+      "w": 560,
+      "h": 130
+    }
+  ]
+}

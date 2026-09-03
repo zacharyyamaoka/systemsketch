@@ -7,15 +7,15 @@
  * move; authored routes remain immovable constraints; curved and straight
  * connections are ignored.
  * Scope is always explicit: selected edges plus edges incident to any selected
- * Block. The one-container exception treats a lone Expanded Block as its
- * immediate interior scope. An empty selection never sweeps the page.
+ * Block. The one-container exception treats a lone Expanded Block or Loop as
+ * its immediate interior scope. An empty selection never sweeps the page.
  */
 import { Mat, type Editor, type TLShapeId } from 'tldraw'
 
 import { branchAncestry } from '../../branch/branchScope'
 import { isBranchShape } from '../../branch/branchModel'
 import { isBlockShape } from '../blockModel'
-import { getSelectedExpandedBlockLayoutScope } from '../expandedBlockLayoutScope'
+import { getSelectedContainerLayoutScope } from '../expandedBlockLayoutScope'
 import {
 	type ElbowRoute,
 	type ElbowRouteInput,
@@ -265,9 +265,9 @@ export function getTidyEdgesSelection(
 ): ConnectionShape[] {
 	const selected = new Set(editor.getSelectedShapeIds())
 	if (selected.size === 0) return []
-	const expandedScope = getSelectedExpandedBlockLayoutScope(editor)
-	if (expandedScope) {
-		const scoped = new Set(expandedScope.connections.map((connection) => connection.id))
+	const containerScope = getSelectedContainerLayoutScope(editor)
+	if (containerScope) {
+		const scoped = new Set(containerScope.connections.map((connection) => connection.id))
 		return connections.filter((connection) => scoped.has(connection.id))
 	}
 	const selectedShapes = editor.getSelectedShapes()
