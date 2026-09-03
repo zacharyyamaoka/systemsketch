@@ -209,6 +209,8 @@ The accepted copies live under `~/.local/share/systemsketch/runtime/host-release
 one checksum manifest naming the shared VS Code/Cursor package and every Obsidian plugin file.
 The working-tree `dist/` folders are left on the same build for convenient manual installation;
 publishing does not install or reload either host behind your back.
+The [atomic host-plugin promotion report](docs/host-plugin-promotion-2026-09-02.html) shows the
+transaction, artifact ledger, failure behavior, and real VS Code/Cursor/Obsidian proof.
 
 The Obsidian host lives beside it in [`obsidian-systemsketch/`](obsidian-systemsketch/README.md).
 It opens and autosaves both document suffixes through `TextFileView`, follows the host's light
