@@ -20,6 +20,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { Dialog } from 'radix-ui'
 import {
   WorkspaceConflict,
   isRetryableWorkspaceFailure,
@@ -159,20 +160,6 @@ function currentDialogLauncher(): HTMLElement | null {
   return document.querySelector<HTMLElement>('[data-testid="main-menu.button"]')
 }
 
-const DIALOG_FOCUSABLE = [
-  'button:not([disabled])',
-  'input:not([disabled])',
-  'select:not([disabled])',
-  'textarea:not([disabled])',
-  '[href]',
-  '[tabindex]:not([tabindex="-1"])',
-].join(',')
-
-function dialogFocusableElements(dialog: HTMLElement): HTMLElement[] {
-  return Array.from(dialog.querySelectorAll<HTMLElement>(DIALOG_FOCUSABLE))
-    .filter((element) => element.getClientRects().length > 0 && element.getAttribute('aria-hidden') !== 'true')
-}
-
 function fingerprint(document: { mtime?: number; size?: number; digest?: string }): DocumentFingerprint | null {
   return document.mtime === undefined || document.size === undefined
     ? null
@@ -261,6 +248,8 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   statusRef.current = status
 
   const updateRecents = useCallback((next: string[]) => setRecents(next), [])
+  // WHY: tldraw menu callbacks are fire-and-forget. Converting both immediate
+  // throws and rejected file-operation promises here prevents a silent action.
   const runAction = useCallback((action: () => Promise<unknown>) => {
     try {
       void action().catch((cause) => setNotice(errorMessage(cause)))
@@ -476,6 +465,8 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       if (cause instanceof WorkspaceConflict) {
         enterConflict()
       } else if (delayMs !== null) {
+        // WHY: a transient controller failure must resume saving without making
+        // the person edit again; semantic failures and conflicts still stop here.
         autosaveRetryCountRef.current += 1
         retry = { delayMs, attempt: autosaveRetryCountRef.current }
       }
@@ -606,7 +597,13 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     }
   }, [updateRecents])
 
-  /** Write a stock-readable `.tldr` from an isolated cloned editor. */
+  /**
+   * Write a stock-readable `.tldr` from an isolated cloned editor.
+   *
+   * WHY: export must not mutate the live board, its undo history, dirty state,
+   * autosave, collaboration, or host bridge. A normal export is create-only;
+   * `force` is reachable only after the dialog's explicit Replace confirmation.
+   */
   const exportTldraw = useCallback(async (destination: string, force = false) => {
     const editor = editorRef.current
     if (!editor) throw new Error('The document is not ready to export yet.')
@@ -683,6 +680,8 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     const editor = editorRef.current
     const boardPath = pathRef.current
     if (!editor || !boardPath) return
+    // WHY: the read below yields. Capture both local identities first so a slow
+    // disk response cannot overwrite an edit or save that arrives meanwhile.
     const requestedChangeEpoch = changeEpochRef.current
     const requestedBaseDigest = digestRef.current
     if (dirtyRef.current && !discardRequestedEdits) {
@@ -828,6 +827,8 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   useEffect(() => {
     if (!path) return
     let cancelled = false
+    // WHY: setInterval does not wait for its async callback. Keep the watcher
+    // single-flight so a stalled stat/read cannot build an unbounded request queue.
     let polling = false
     let pollController: AbortController | null = null
     const poll = async () => {
@@ -1004,6 +1005,8 @@ function WorkspaceAlert() {
     && status.kind !== 'quarantined'
     && status.kind !== 'error'
   ) return null
+  // WHY: these states can lose work or strand a document, so they stay visible
+  // beside named recovery actions instead of disappearing like a transient toast.
   return (
     <aside
       className={`systemsketch-workspace-alert is-${status.kind}`}
@@ -1194,7 +1197,6 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
   const [busy, setBusy] = useState(false)
   const [creatingFolder, setCreatingFolder] = useState(false)
   const [folderName, setFolderName] = useState('')
-  const dialogRef = useRef<HTMLElement | null>(null)
   const nameInputRef = useRef<HTMLInputElement | null>(null)
   const filterInputRef = useRef<HTMLInputElement | null>(null)
   const loadAbortRef = useRef<AbortController | null>(null)
@@ -1347,35 +1349,6 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Tab') {
-        const dialog = dialogRef.current
-        if (!dialog) return
-        const focusable = dialogFocusableElements(dialog)
-        const first = focusable[0]
-        const last = focusable.at(-1)
-        const active = document.activeElement instanceof HTMLElement
-          ? document.activeElement
-          : null
-        const activeCanCycle = active !== null && focusable.includes(active)
-        if (!first || !last) {
-          event.preventDefault()
-          return
-        }
-        if (event.shiftKey && (active === first || !activeCanCycle)) {
-          event.preventDefault()
-          last.focus()
-        } else if (!event.shiftKey && (active === last || !activeCanCycle)) {
-          event.preventDefault()
-          first.focus()
-        }
-        return
-      }
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        event.stopPropagation()
-        workspace.closeDialog()
-        return
-      }
       if (isRename) return
       const target = event.target
       const typing = target instanceof HTMLElement
@@ -1417,30 +1390,47 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
     : []
 
   return (
-    <div className="systemsketch-workspace-dialog-backdrop" role="presentation" onMouseDown={(event) => {
-      if (event.target === event.currentTarget) workspace.closeDialog()
-    }}>
-      <section
-        ref={dialogRef}
-        className="systemsketch-workspace-dialog"
-        data-testid="workspace-dialog"
-        data-mode={mode}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="workspace-dialog-title"
-      >
+    // WHY: Radix is already SystemSketch's dialog dependency and the primitive
+    // tldraw uses. Let it own focus trapping, Escape, outside dismissal, and
+    // screen-reader modal isolation instead of maintaining a second version.
+    <Dialog.Root open onOpenChange={(open) => { if (!open) workspace.closeDialog() }}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="systemsketch-workspace-dialog-backdrop">
+          <Dialog.Content
+            asChild
+            aria-describedby={undefined}
+            onEscapeKeyDown={(event) => {
+              if (!creatingFolder) return
+              // WHY: the inline folder form is one level below the file browser;
+              // its first Escape cancels that substate without dismissing the modal.
+              event.preventDefault()
+              setCreatingFolder(false)
+              setFolderName('')
+              setError(null)
+            }}
+          >
+            <section
+              className="systemsketch-workspace-dialog"
+              data-testid="workspace-dialog"
+              data-mode={mode}
+              aria-labelledby="workspace-dialog-title"
+            >
         <header>
           <div>
             <span>Local workspace</span>
-            <h2 id="workspace-dialog-title">
-              {mode === 'open'
-                ? 'Open a document'
-                : mode === 'saveAs'
-                  ? 'Save a copy'
-                  : mode === 'exportTldraw' ? 'Export to tldraw' : 'Rename document'}
-            </h2>
+            <Dialog.Title asChild>
+              <h2 id="workspace-dialog-title">
+                {mode === 'open'
+                  ? 'Open a document'
+                  : mode === 'saveAs'
+                    ? 'Save a copy'
+                    : mode === 'exportTldraw' ? 'Export to tldraw' : 'Rename document'}
+              </h2>
+            </Dialog.Title>
           </div>
-          <button type="button" aria-label="Close" onClick={workspace.closeDialog}>×</button>
+          <Dialog.Close asChild>
+            <button type="button" aria-label="Close">×</button>
+          </Dialog.Close>
         </header>
 
         {isRename ? (
@@ -1666,7 +1656,10 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
             </button>
           </div>
         </footer>
-      </section>
-    </div>
+            </section>
+          </Dialog.Content>
+        </Dialog.Overlay>
+      </Dialog.Portal>
+    </Dialog.Root>
   )
 }

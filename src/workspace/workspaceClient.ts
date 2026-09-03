@@ -137,6 +137,12 @@ async function expectOk(response: Response): Promise<Record<string, unknown>> {
   return payload
 }
 
+/**
+ * WHY: a loopback controller can stall or restart just like a remote service;
+ * without a deadline, Loading or Saving can remain unresolved forever. This
+ * combines caller cancellation with per-operation budgets while preserving the
+ * distinction between an intentional abort and a retryable timeout.
+ */
 async function requestPayload(
   path: string,
   init: RequestInit,

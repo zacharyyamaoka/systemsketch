@@ -164,6 +164,8 @@ export function sameFingerprint(
   right: DocumentFingerprint | null,
 ): boolean {
   if (left === null || right === null) return left === right
+  // WHY: a rapid same-length rewrite can preserve both mtime and byte count;
+  // when both sides have an exact-byte digest, it is the authoritative identity.
   if (left.digest !== null && right.digest !== null) return left.digest === right.digest
   return Math.abs(left.mtime - right.mtime) <= 1e-6 && left.size === right.size
 }

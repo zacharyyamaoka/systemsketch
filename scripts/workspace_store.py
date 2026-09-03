@@ -158,7 +158,7 @@ def _document_lock_path(lock_root: Path, path: Path) -> Path:
 def document_locks(lock_root: Path, *paths: Path) -> Iterator[None]:
     """Hold process-wide advisory locks for canonical paths in deadlock-safe order.
 
-    Stable and Preview are independent ``ThreadingHTTPServer`` processes, so a
+    WHY: Stable and Preview are independent ``ThreadingHTTPServer`` processes, so a
     Python ``threading.Lock`` cannot make the digest check and replacement one
     transaction. The controller gives both processes the same runtime lock
     root. Hashing canonical paths keeps persistent lock files out of the user's
