@@ -21,6 +21,7 @@ import {
 	type ElbowRect,
 	type ElbowRoute,
 	type ElbowRouteInput,
+	type ElbowSide,
 } from '../elbow'
 import type { ConnectionRoutingKind } from './connectionModel'
 
@@ -92,12 +93,23 @@ export function getBentCurveCubicControlPoints(
 export interface ConnectionElbowBoxes {
 	start?: ElbowRect | null
 	end?: ElbowRect | null
+	/** Which way the cable leaves the source port. Defaults to `right`. */
+	startSide?: ElbowSide
+	/** Which way the cable enters the sink port. Defaults to `left`. */
+	endSide?: ElbowSide
 }
 
 /**
- * A cable always leaves an output rightward and enters an input leftward — that
- * is the ports' own geometry in this model, and it is what keeps an elbow's
- * final segment perpendicular to the Block face it meets.
+ * A cable leaves its source and meets its sink PERPENDICULAR to the face it is
+ * on, which is what keeps an elbow's final segment square to that face.
+ *
+ * For a Block that is always rightward out and leftward in, because a Block's
+ * ports live on its left and right edges — and for a long time the model simply
+ * said so. A region's header ports broke it: the Loop's item outlet sits on the
+ * header's bottom edge facing DOWN into the body, and a rightward dongle sent a
+ * 120px run on a lap around the whole region. The direction now travels with
+ * the port (`BlockConnectionPort.elbowSide`), and these defaults are what a
+ * Block's ports still resolve to.
  */
 export function getElbowRouteInput(
 	start: VecLike,
@@ -106,8 +118,16 @@ export function getElbowRouteInput(
 	pins: readonly ElbowPin[],
 ): ElbowRouteInput {
 	return {
-		start: { point: { x: start.x, y: start.y }, side: 'right', box: boxes.start ?? null },
-		end: { point: { x: end.x, y: end.y }, side: 'left', box: boxes.end ?? null },
+		start: {
+			point: { x: start.x, y: start.y },
+			side: boxes.startSide ?? 'right',
+			box: boxes.start ?? null,
+		},
+		end: {
+			point: { x: end.x, y: end.y },
+			side: boxes.endSide ?? 'left',
+			box: boxes.end ?? null,
+		},
 		pins,
 	}
 }

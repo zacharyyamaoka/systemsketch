@@ -11,6 +11,7 @@ import { layoutBlock } from '../layoutBlock'
 import { BRANCH_SHAPE_TYPE, branchLayout, isBranchShape, type BranchShape } from '../../branch/branchModel'
 import { branchFoldAttachPoint } from '../../branch/branchScope'
 import { LOOP_SHAPE_TYPE, isLoopShape, loopLayout, type LoopShape } from '../../loop/loopModel'
+import type { ElbowSide } from '../elbow'
 import { portSnapPageUnits } from './connectionHit'
 import {
 	CONNECTION_BINDING_TYPE,
@@ -49,6 +50,22 @@ export interface BlockConnectionPort {
 	anchor: { x: number; y: number }
 	/** Simple-view ports keep their geometry but use a quiet affordance. */
 	subtle: boolean
+	/**
+	 * The direction a cable leaves this port in, when it is not the model's
+	 * default of "an output leaves rightward, an input is entered leftward".
+	 *
+	 * A Block's ports live on its left and right edges, so the default is the
+	 * whole truth for them. A region's header ports do not: the Loop's item
+	 * outlet sits on the header's BOTTOM edge and faces down into the body, and
+	 * a rightward dongle sent a 120px run on a lap around the whole region.
+	 */
+	elbowSide?: ElbowSide
+	/**
+	 * True when this face looks INTO its own host — the item outlet again. Such
+	 * a face contributes no obstacle box, for the same reason an inner face does
+	 * not: the cable starts inside the thing it would otherwise route around.
+	 */
+	facesInward?: boolean
 }
 
 /**
@@ -155,7 +172,9 @@ export function getLoopConnectionPorts(loop: LoopShape): BlockConnectionPort[] {
 	const layout = loopLayout(loop.props)
 	return [layout.iterable, layout.item].map((placed) => ({
 		id: placed.port.id,
-		name: placed.port.name,
+		// A header port has no name — only a type. `name` is what the connection
+		// layer prints, so the type IS the label here.
+		name: placed.port.type,
 		type: placed.port.type,
 		side: placed.side,
 		hidden: false,
@@ -163,6 +182,8 @@ export function getLoopConnectionPorts(loop: LoopShape): BlockConnectionPort[] {
 		y: placed.y,
 		anchor: { x: placed.x / layout.w, y: placed.y / layout.h },
 		subtle: false,
+		elbowSide: placed.elbowSide,
+		facesInward: placed.facesInward,
 	}))
 }
 

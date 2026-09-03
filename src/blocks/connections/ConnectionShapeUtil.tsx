@@ -23,7 +23,12 @@ import {
 	useValue,
 	vecModelValidator,
 } from 'tldraw'
-import { PORT_HOST_SHAPE_TYPES, getBlockPortConnections, getBlockPortDotAtPoint } from './blockPorts'
+import {
+	PORT_HOST_SHAPE_TYPES,
+	getBlockPortConnections,
+	getBlockPortDotAtPoint,
+	getPortHostPort,
+} from './blockPorts'
 import {
 	HitPaddedCubicBezier2d,
 	HitPaddedEdge2d,
@@ -1142,16 +1147,27 @@ function getConnectionElbowBoxes(
 	const bindings = getConnectionBindings(editor, connection)
 	const direction = getConnectionDirection(editor, connection)
 	const inverse = Mat.Inverse(editor.getShapePageTransform(connection))
+	const portFor = (binding: ConnectionBinding | undefined) => (
+		binding ? getPortHostPort(editor, binding.toId, binding.props.portId) : null
+	)
 	const toLocalBox = (binding: ConnectionBinding | undefined) => {
 		if (!binding || binding.props.face === 'inner') return null
+		// A face that looks into its own host contributes no box, for exactly the
+		// reason an inner face does not: the cable starts inside the thing it
+		// would otherwise be routed around. The Loop's item outlet is such a face.
+		if (portFor(binding)?.facesInward) return null
 		const bounds = editor.getShapePageBounds(binding.toId)
 		if (!bounds) return null
 		const topLeft = Mat.applyToPoint(inverse, { x: bounds.minX, y: bounds.minY })
 		return { x: topLeft.x, y: topLeft.y, w: bounds.width, h: bounds.height }
 	}
+	const source = bindings[direction.sourceTerminal]
+	const sink = bindings[direction.sinkTerminal]
 	return {
-		start: toLocalBox(bindings[direction.sourceTerminal]),
-		end: toLocalBox(bindings[direction.sinkTerminal]),
+		start: toLocalBox(source),
+		end: toLocalBox(sink),
+		startSide: portFor(source)?.elbowSide,
+		endSide: portFor(sink)?.elbowSide,
 	}
 }
 

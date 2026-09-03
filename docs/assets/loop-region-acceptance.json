@@ -9,30 +9,36 @@
     },
     {
       "id": "L2",
-      "label": "one Loop region, titled, with both header ports authored",
+      "label": "one Loop region, titled, both header ports typed and unnamed",
       "observed": [
         1,
         "For Loop",
         "Iterable",
-        "Iter"
+        "Iter",
+        false,
+        false
       ],
       "desired": [
         1,
         "For Loop",
         "Iterable",
-        "Iter"
+        "Iter",
+        false,
+        false
       ],
       "ok": true
     },
     {
       "id": "L3",
-      "label": "the collection port is an input on the wall, the item port an output",
+      "label": "the inlet is on the wall; the item port is inside it, on the header edge",
       "observed": [
+        true,
         true,
         true,
         true
       ],
       "desired": [
+        true,
         true,
         true,
         true
@@ -78,6 +84,19 @@
         [
           "start"
         ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "L5b",
+      "label": "the item cable leaves the header edge straight down",
+      "observed": [
+        true,
+        true
+      ],
+      "desired": [
+        true,
+        true
       ],
       "ok": true
     },

@@ -99,7 +99,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "aKvs8l",
+      "index": "aKbSw",
       "typeName": "shape"
     },
     {
@@ -151,7 +151,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "aLnqVV",
+      "index": "aLzabG",
       "typeName": "shape"
     },
     {
@@ -192,7 +192,7 @@
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
-        "definitionId": "PzI11npAKAkf3xlVmMGja",
+        "definitionId": "4RqNPtfNyu7TnMPo-zP8V",
         "inputs": [],
         "outputs": [
           {
@@ -205,7 +205,7 @@
         "definitionKey": "estimate"
       },
       "parentId": "page:page",
-      "index": "aFgEI",
+      "index": "aF1pr",
       "typeName": "shape"
     },
     {
@@ -250,7 +250,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aJcIQ",
+      "index": "aJqzi",
       "typeName": "shape"
     },
     {
@@ -295,7 +295,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aMzFc",
+      "index": "aMCWE",
       "typeName": "shape"
     },
     {
@@ -340,13 +340,21 @@
         }
       },
       "parentId": "page:page",
-      "index": "aKqp2",
+      "index": "aK1Tv",
       "typeName": "shape"
     },
     {
-      "x": 0,
-      "y": 0,
-      "z": 1,
+      "name": "",
+      "color": "#11B3A3",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:qpOZnyeiQsKNITtHgxtdr",
+      "typeName": "user"
+    },
+    {
+      "x": 566.4864864864865,
+      "y": 325.8108108108108,
+      "z": 0.74,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -381,7 +389,7 @@
         "tunnelLayer": ""
       },
       "parentId": "page:page",
-      "index": "aAkzc",
+      "index": "aA5qz",
       "typeName": "shape"
     },
     {
@@ -426,7 +434,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aLKAA",
+      "index": "aLiM6",
       "typeName": "shape"
     },
     {
@@ -467,7 +475,7 @@
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
-        "definitionId": "nwMRwStsND92zOiz8vvxy",
+        "definitionId": "A-v8t4KKTOkFde89v-jXz",
         "inputs": [
           {
             "id": "in_1",
@@ -487,7 +495,7 @@
         "definitionKey": "smooth"
       },
       "parentId": "page:page",
-      "index": "aH6Cf",
+      "index": "aHVcE",
       "typeName": "shape"
     },
     {
@@ -519,7 +527,7 @@
       "type": "geo",
       "props": {
         "w": 900,
-        "h": 160,
+        "h": 130,
         "geo": "rectangle",
         "dash": "draw",
         "growY": 0,
@@ -542,7 +550,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "KNOWN: the item cable's elbow route takes a lap around the region before entering the body. The binding is right and the line style is right; only the path is ugly. The live router asks every port to 'leave rightward and escape its shape's box', and a region's box is the whole region."
+                  "text": "The header's ports carry a TYPE and no name: `Iterable` in, `Iter` out. The element's cable leaves the header edge perpendicular — straight down into the body."
                 }
               ]
             }
@@ -550,7 +558,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aNmII",
+      "index": "aN5ib",
       "typeName": "shape"
     },
     {
@@ -601,7 +609,7 @@
         "tunnelLayer": ""
       },
       "parentId": "page:page",
-      "index": "aBNQ2",
+      "index": "aBNTb",
       "typeName": "shape"
     },
     {
@@ -636,14 +644,6 @@
       "typeName": "instance_page_state"
     },
     {
-      "name": "",
-      "color": "#39B178",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:T_tZwdOJ4Dc1Vf1XKeC2q",
-      "typeName": "user"
-    },
-    {
       "x": 0,
       "y": 0,
       "rotation": 0,
@@ -673,7 +673,7 @@
         "tunnelLayer": ""
       },
       "parentId": "page:page",
-      "index": "aCs2A",
+      "index": "aC0yr",
       "typeName": "shape"
     },
     {
@@ -714,7 +714,7 @@
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
-        "definitionId": "02VG6dRBpuHAnR4A23OSD",
+        "definitionId": "nChV7etsUKNjuq1fDRTKj",
         "inputs": [
           {
             "id": "in_1",
@@ -727,7 +727,7 @@
         "definitionKey": "encode"
       },
       "parentId": "page:page",
-      "index": "aIG3z",
+      "index": "aIl32",
       "typeName": "shape"
     },
     {
@@ -822,7 +822,7 @@
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
-        "definitionId": "gebzZnhE10McBI_KBstTV",
+        "definitionId": "sdRxgUx8rVLDyUUgdM2y_",
         "inputs": [],
         "outputs": [
           {
@@ -835,7 +835,7 @@
         "definitionKey": "run"
       },
       "parentId": "page:page",
-      "index": "aEwSA",
+      "index": "aEclA",
       "typeName": "shape"
     },
     {
@@ -868,7 +868,7 @@
         "tunnelLayer": ""
       },
       "parentId": "page:page",
-      "index": "a9fAM",
+      "index": "a9RAQ",
       "typeName": "shape"
     },
     {
@@ -901,7 +901,7 @@
         "tunnelLayer": ""
       },
       "parentId": "page:page",
-      "index": "a7H26",
+      "index": "a72Rj",
       "typeName": "shape"
     },
     {
@@ -934,7 +934,7 @@
         "tunnelLayer": ""
       },
       "parentId": "page:page",
-      "index": "a8A6r",
+      "index": "a8f3Q",
       "typeName": "shape"
     },
     {
@@ -1132,18 +1132,16 @@
         "title": "For Loop",
         "iterable": {
           "id": "iterable",
-          "name": "others",
-          "type": "Poses"
+          "type": "Iterable"
         },
         "item": {
           "id": "item",
-          "name": "other",
-          "type": "Pose"
+          "type": "Iter"
         },
         "turn": "iteration 3 of 7"
       },
       "parentId": "page:page",
-      "index": "aDleU",
+      "index": "aDfeM",
       "typeName": "shape"
     },
     {
@@ -1213,7 +1211,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "aJpUxG",
+      "index": "aJzCnO",
       "typeName": "shape"
     },
     {
@@ -1254,7 +1252,7 @@
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
-        "definitionId": "c_222K6tm5KUc0nm94d70",
+        "definitionId": "4SiCa24PBD2WoomQ7RiCS",
         "inputs": [
           {
             "id": "in_1",
@@ -1280,7 +1278,7 @@
         "definitionKey": "merge"
       },
       "parentId": "page:page",
-      "index": "aG2Kb",
+      "index": "aGLoU",
       "typeName": "shape"
     },
     {

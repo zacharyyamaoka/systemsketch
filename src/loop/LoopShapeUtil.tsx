@@ -48,7 +48,7 @@ function LoopExportSvg({ shape }: { shape: LoopShape }) {
 				<g key={placed.port.id}>
 					<circle cx={placed.x} cy={placed.y} r={LOOP_PORT_RADIUS} fill="#fff" stroke="#c08520" strokeWidth={2} />
 					<text x={placed.label.x} y={placed.label.y} dominantBaseline="middle" fill={muted} fontFamily="ui-sans-serif, system-ui" fontSize={12.5}>
-						{placed.port.name}
+						{placed.port.type}
 					</text>
 				</g>
 			))}
@@ -94,7 +94,7 @@ export class LoopShapeUtil extends BaseFrameLikeShapeUtil<LoopShape> {
 	}
 
 	override getAriaDescriptor(shape: LoopShape): string {
-		return `${shape.props.title || 'Loop'}, iterates ${shape.props.iterable.name}, emits ${shape.props.item.name}`
+		return `${shape.props.title || 'Loop'}, iterates ${shape.props.iterable.type}, emits ${shape.props.item.type}`
 	}
 
 	override getText(shape: LoopShape): string {

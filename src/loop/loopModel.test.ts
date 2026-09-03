@@ -35,12 +35,13 @@ describe('loop layout', () => {
 		expect(layout.item.y).toBe(LOOP_HEADER_HEIGHT)
 		expect(layout.item.x).toBe(LOOP_ITEM_PORT_INSET)
 		expect(layout.item.side).toBe('output')
-		// On the wall, so the router's "an output leaves rightward" invariant is
-		// true and the run into the body is short.
-		expect(layout.item.x).toBe(0)
-		// The label clears the dot's row, so the first cable drawn from it does
-		// not strike the word through.
-		expect(layout.item.label.y).toBeGreaterThan(layout.item.y + 8)
+		// ON the header's bottom edge, inside the wall — not on the wall itself.
+		expect(layout.item.x).toBeGreaterThan(0)
+		// And its cable leaves PERPENDICULAR to that edge: straight down.
+		expect(layout.item.elbowSide).toBe('bottom')
+		expect(layout.item.facesInward).toBe(true)
+		// The label clears the dot's row, so the drop does not strike it through.
+		expect(layout.item.label.y).toBeLessThan(layout.item.y - 8)
 	})
 
 	it('centres the title, and keeps it clear of the iterable label', () => {
@@ -98,14 +99,23 @@ describe('loop ports, as the connection layer sees them', () => {
 		}
 	})
 
-	it('carries the authored names and types through unchanged', () => {
-		const props = {
-			...getDefaultLoopProps(),
-			iterable: { id: 'iterable', name: 'others', type: 'Poses' },
-			item: { id: 'item', name: 'other', type: 'Pose' },
-		}
-		expect(getLoopConnectionPorts(shape(props)).map((port) => [port.name, port.type]))
-			.toEqual([['others', 'Poses'], ['other', 'Pose']])
+	it('labels a header port with its TYPE, because it has no name', () => {
+		// You do not name these ports: the collection's name lives on whatever
+		// produces it, and the element has no name until a Block's port gives it
+		// one. What the header can say is what kind of thing crosses it.
+		const ports = getLoopConnectionPorts(shape())
+		expect(ports.map((port) => port.type)).toEqual(['Iterable', 'Iter'])
+		expect(ports.map((port) => port.name)).toEqual(ports.map((port) => port.type))
+	})
+
+	it('hands the router a perpendicular exit for the item outlet only', () => {
+		const [iterable, item] = getLoopConnectionPorts(shape())
+		expect(item.elbowSide).toBe('bottom')
+		expect(item.facesInward).toBe(true)
+		// The inlet is met from outside like any other input, so it keeps the
+		// model's default and contributes its box as an obstacle.
+		expect(iterable.elbowSide).toBe('left')
+		expect(iterable.facesInward).toBe(false)
 	})
 
 	it('recognises only a loop record', () => {

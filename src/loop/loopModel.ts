@@ -38,26 +38,28 @@ export const LOOP_MIN_HEIGHT = 180
 export const LOOP_CORNER_RADIUS = 6
 export const LOOP_PORT_RADIUS = 6
 /**
- * The item outlet sits ON the wall at the header's bottom corner, directly
- * under the `Iterable` inlet — which is where Zach drew it, and which is also
- * the only place the shipped router can serve.
+ * How far inside the wall the item outlet sits on the header's bottom edge.
  *
- * `getElbowRouteInput` states the model's invariant plainly: "a cable always
- * leaves an output rightward and enters an input leftward". A port on the
- * header's TOP edge breaks it — measured on the first review board, an item
- * cable to a Block 120px below and to the right took a 900px detour out past
- * the region's right wall and back. Putting the port on the wall makes
- * "rightward" true again, so the run into the body is short and straight with
- * no change to the routing layer.
+ * It is ON that edge, not on the wall, and its cable leaves it PERPENDICULAR —
+ * straight down into the body. Both facts are carried into the router by the
+ * port's `elbowSide`, because the model's old invariant ("an output leaves
+ * rightward") is only true of a Block, whose ports live on its left and right
+ * edges. A region's header ports face down.
  */
-export const LOOP_ITEM_PORT_INSET = 0
+export const LOOP_ITEM_PORT_INSET = 16
 /** Left padding for a port's label, matching the Branch's control labels. */
 export const LOOP_LABEL_INSET = 14
 
-/** One of the header's two ports. Authored, never derived from the title. */
+/**
+ * One of the header's two ports.
+ *
+ * A type and nothing else. You do not NAME these — the collection's name lives
+ * on whatever produces it, and the element has no name until a Block's port
+ * gives it one. What the header can say is what KIND of thing crosses it, so
+ * the inlet reads `Iterable` and the outlet reads `Iter`.
+ */
 export const LoopPort = T.object({
 	id: T.string,
-	name: T.string,
 	type: T.string,
 })
 export type LoopPort = T.TypeOf<typeof LoopPort>
@@ -102,8 +104,8 @@ export function getDefaultLoopProps(): LoopShapeProps {
 		w: 520,
 		h: 320,
 		title: 'For Loop',
-		iterable: { id: LOOP_ITERABLE_PORT_ID, name: 'Iterable', type: 'Iterable' },
-		item: { id: LOOP_ITEM_PORT_ID, name: 'Iter', type: 'Item' },
+		iterable: { id: LOOP_ITERABLE_PORT_ID, type: 'Iterable' },
+		item: { id: LOOP_ITEM_PORT_ID, type: 'Iter' },
 		turn: '',
 	}
 }
@@ -115,6 +117,10 @@ export interface LoopPortLayout {
 	x: number
 	y: number
 	label: { x: number; y: number; anchor: 'start' }
+	/** Which way a cable leaves this port. The item outlet faces DOWN. */
+	elbowSide: 'top' | 'right' | 'bottom' | 'left'
+	/** True when the face looks into the region's own body. */
+	facesInward: boolean
 }
 
 export interface LoopLayout {
@@ -148,10 +154,12 @@ export function loopLayout(props: LoopShapeProps): LoopLayout {
 		x: 0,
 		y: iterableY,
 		label: { x: LOOP_LABEL_INSET, y: iterableY, anchor: 'start' },
+		elbowSide: 'left',
+		facesInward: false,
 	}
-	// The element leaves the header at its bottom corner. Its label sits BELOW
-	// the dot: the cable leaves rightward along that exact row, and a label on
-	// the row would be struck through by the first cable anyone draws — which
+	// The element leaves the header's bottom edge. Its label sits ABOVE the dot,
+	// inside the header: the cable drops straight down from here, so a label
+	// under it would be struck through by the first cable anyone draws — which
 	// is what the first acceptance screenshot showed.
 	const itemX = Math.min(LOOP_ITEM_PORT_INSET, w / 2)
 	const item: LoopPortLayout = {
@@ -159,7 +167,9 @@ export function loopLayout(props: LoopShapeProps): LoopLayout {
 		side: 'output',
 		x: itemX,
 		y: headerH,
-		label: { x: itemX + LOOP_LABEL_INSET, y: headerH + 13, anchor: 'start' },
+		label: { x: itemX + LOOP_LABEL_INSET, y: Math.max(12, headerH - 12), anchor: 'start' },
+		elbowSide: 'bottom',
+		facesInward: true,
 	}
 
 	const turnText = props.turn.trim()
@@ -167,7 +177,7 @@ export function loopLayout(props: LoopShapeProps): LoopLayout {
 	const turn = turnText ? { x: w - 14 - turnW, y: iterableY - 11, w: turnW, h: 22 } : null
 
 	// The title is centred, but never under the iterable label or the turn chip.
-	const leftGuard = LOOP_LABEL_INSET + labelWidth(props.iterable.name) + 12
+	const leftGuard = LOOP_LABEL_INSET + labelWidth(props.iterable.type) + 12
 	const rightGuard = turn ? w - turn.x + 12 : 14
 	const centre = w / 2
 	const title = {

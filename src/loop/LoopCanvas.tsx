@@ -102,7 +102,7 @@ export function LoopCanvas({ shape }: { shape: LoopShape }) {
 							style={{ left: placed.label.x, top: placed.label.y }}
 							data-testid={`loop-port-label-${placed.port.id}`}
 						>
-							{placed.port.name}
+							{placed.port.type}
 						</div>
 					))}
 					{layout.footer ? (

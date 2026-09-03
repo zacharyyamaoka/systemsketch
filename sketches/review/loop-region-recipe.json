@@ -22,13 +22,11 @@
     "title": "For Loop",
     "iterable": {
      "id": "iterable",
-     "name": "others",
-     "type": "Poses"
+     "type": "Iterable"
     },
     "item": {
      "id": "item",
-     "name": "other",
-     "type": "Pose"
+     "type": "Iter"
     },
     "turn": "iteration 3 of 7"
    }
@@ -490,11 +488,11 @@
   {
    "id": "note-1",
    "kind": "note",
-   "text": "KNOWN: the item cable's elbow route takes a lap around the region before entering the body. The binding is right and the line style is right; only the path is ugly. The live router asks every port to 'leave rightward and escape its shape's box', and a region's box is the whole region.",
+   "text": "The header's ports carry a TYPE and no name: `Iterable` in, `Iter` out. The element's cable leaves the header edge perpendicular \u2014 straight down into the body.",
    "x": 460,
    "y": 720,
    "w": 900,
-   "h": 160
+   "h": 130
   }
  ]
 }

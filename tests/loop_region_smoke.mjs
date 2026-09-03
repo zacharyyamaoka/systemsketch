@@ -110,17 +110,20 @@ async function run() {
     await delay(520)
     await deselect(page)
     let state = await loopState(page)
-    check('L2', 'one Loop region, titled, with both header ports authored',
-      [state.loops, state.title, state.iterable?.name, state.item?.name],
-      [1, 'For Loop', 'Iterable', 'Iter'])
+    check('L2', 'one Loop region, titled, both header ports typed and unnamed',
+      [state.loops, state.title, state.iterable?.type, state.item?.type,
+        'name' in (state.iterable ?? {}), 'name' in (state.item ?? {})],
+      [1, 'For Loop', 'Iterable', 'Iter', false, false])
 
     // 3 — both header ports are painted, and they carry opposite polarity.
     const loopId = await editorEval(page, `
       return editor.getCurrentPageShapes().find((s) => s.type === 'loop').id`)
     const iterableDot = await box(page, portDot(loopId, 'input', 'iterable'))
     const itemDot = await box(page, portDot(loopId, 'output', 'item'))
-    check('L3', 'the collection port is an input on the wall, the item port an output',
-      [iterableDot.w > 0, itemDot.w > 0, itemDot.cy > iterableDot.cy], [true, true, true])
+    check('L3', 'the inlet is on the wall; the item port is inside it, on the header edge',
+      [iterableDot.w > 0, itemDot.w > 0, itemDot.cy > iterableDot.cy,
+        itemDot.cx > iterableDot.cx],
+      [true, true, true, true])
 
     // 4 — a Block drawn inside the region is adopted by it.
     await drawBlock(page, { x: 560, y: 380 }, { x: 860, y: 520 }, 'merge()')
@@ -149,6 +152,22 @@ async function run() {
     check('L5', 'the item port welds an ordinary SOLID cable — data, never delayed',
       [state.cables, state.temporal, state.orphans, state.fromLoopItem],
       [1, ['data'], 0, ['start']])
+
+    // 5b — and it leaves PERPENDICULAR: the run's first segment drops straight
+    // down out of the header rather than setting off sideways around the region.
+    const firstLeg = JSON.parse(await evaluate(page, `(() => {
+      const path = document.querySelector('[data-shape-type="connection"] path')
+      const matrix = path.getScreenCTM()
+      const at = (length) => {
+        const point = path.getPointAtLength(length).matrixTransform(matrix)
+        return { x: point.x, y: point.y }
+      }
+      const a = at(0)
+      const b = at(Math.min(24, path.getTotalLength() / 3))
+      return JSON.stringify({ dx: Math.abs(b.x - a.x), dy: b.y - a.y })
+    })()`))
+    check('L5b', 'the item cable leaves the header edge straight down',
+      [firstLeg.dy > 8, firstLeg.dx < 3], [true, true])
 
     // 6 — the collection lands ON the header: an outside Block feeds the inlet.
     await drawBlock(page, { x: 80, y: 200 }, { x: 300, y: 320 }, 'source()')

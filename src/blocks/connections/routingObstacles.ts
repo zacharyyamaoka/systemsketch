@@ -22,6 +22,7 @@ import {
 	getConnectionDirection,
 	type ConnectionBinding,
 } from './ConnectionBindingUtil'
+import { getPortHostPort } from './blockPorts'
 import { blockScopeId } from './connectionScope'
 import { getConnectionEndpoints, type ConnectionShape } from './ConnectionShapeUtil'
 
@@ -86,7 +87,13 @@ function pageBoundsRect(editor: Editor, shapeId: TLShapeId): ElbowRect | null {
 function endpointBox(editor: Editor, binding: ConnectionBinding | undefined): ElbowRect | null {
 	if (!binding || binding.props.face === 'inner') return null
 	if (outermostFoldedLevel(editor, binding.toId)) return null
+	// A face that looks into its own host has nothing to route around.
+	if (portFor(editor, binding)?.facesInward) return null
 	return pageBoundsRect(editor, binding.toId)
+}
+
+function portFor(editor: Editor, binding: ConnectionBinding | undefined) {
+	return binding ? getPortHostPort(editor, binding.toId, binding.props.portId) : null
 }
 
 function branchAccessForEndpoints(
@@ -159,12 +166,12 @@ export function collectConnectionRoutingScene(
 	const obstacles = collectConnectionRoutingObstacles(editor, connection)
 	const start: ElbowEndpoint = {
 		point: transform.applyToPoint(local.source),
-		side: 'right',
+		side: portFor(editor, sourceBinding)?.elbowSide ?? 'right',
 		box: endpointBox(editor, sourceBinding),
 	}
 	const end: ElbowEndpoint = {
 		point: transform.applyToPoint(local.sink),
-		side: 'left',
+		side: portFor(editor, sinkBinding)?.elbowSide ?? 'left',
 		box: endpointBox(editor, sinkBinding),
 	}
 	return { input: { start, end, obstacles }, obstacles }
