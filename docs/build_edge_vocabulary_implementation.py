@@ -53,7 +53,7 @@ def figure(name: str, box: tuple[int, int, int, int], caption: str, width: int =
 # ---------------------------------------------------------------- measured
 HEAD = git("rev-parse", "--short", "HEAD")
 BRANCH = git("rev-parse", "--abbrev-ref", "HEAD")
-BASE_SHA = "e4ec5da8b5903e143504ce95d57a922dd3beafbb"
+BASE_SHA = "d47b0d85932e914811725a22c0f0231659282a30"
 COMMITS = [line for line in git("log", "--oneline", f"{BASE_SHA}..HEAD").splitlines() if line]
 STAT = git("diff", "--stat", f"{BASE_SHA}..HEAD", "--", "src", "tests", "package.json")
 MODEL = (REPO / "src/blocks/connections/connectionModel.ts").read_text(encoding="utf-8")
