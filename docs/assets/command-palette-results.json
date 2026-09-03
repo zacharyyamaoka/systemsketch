@@ -1,5 +1,9 @@
 [
   {
+    "label": "the portaled modal backdrop covers Preview and every top-level chrome region",
+    "ok": true
+  },
+  {
     "label": "Ctrl+P opens the command palette with its search input focused and real actions listed",
     "ok": true
   },

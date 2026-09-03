@@ -18,6 +18,8 @@ The [contextual tidy-controls implementation gallery](docs/contextual-tidy-contr
 
 The [Ctrl+P command-palette implementation gallery](docs/command-palette-ctrl-p-2026-09-02.html) shows the editor-style shortcut opening the real Commands dialog with search focused while suppressing the browser print action. Ctrl+K remains a compatibility alias, Ctrl+F still opens board Find & replace, and the linked review board is ready to drive on the current Preview.
 
+The [modal-layer contract gallery](docs/modal-layer-contract-2026-09-02.html) shows why a large child z-index could not dim Preview or the surrounding application chrome, compares the portaled fix with the failure, and records the layer audit and reusable rule for future full-surface UI.
+
 [Open the rendered foundation report](docs/systemsketch-foundation-2026-08-30.html)
 
 ## The starting point
