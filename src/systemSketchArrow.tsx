@@ -66,6 +66,16 @@ interface ExactArrowPath {
 	strokeWidth: number
 }
 
+const EXACT_ARROW_TERMINAL_EPSILON = 0.01
+
+function terminalFrameChanged(
+	captured: SystemSketchArrowPathSnapshot['frame'],
+	current: SystemSketchArrowPathSnapshot['frame'],
+): boolean {
+	return Vec.Dist(captured.start, current.start) > EXACT_ARROW_TERMINAL_EPSILON
+		|| Vec.Dist(captured.end, current.end) > EXACT_ARROW_TERMINAL_EPSILON
+}
+
 function multiplyAffine(left: AffineTransform, right: AffineTransform): AffineTransform {
 	return {
 		a: left.a * right.a + left.c * right.b,
@@ -141,6 +151,12 @@ function exactArrowPath(editor: Editor, shape: TLArrowShape): ExactArrowPath | n
 	// itself, so this fidelity path intentionally resolves the public binding's
 	// authored anchor without that stock anti-degeneracy inset.
 	const terminals = { start: exactTerminal('start'), end: exactTerminal('end') }
+	// The exact snapshot bridges the instant of detachment; it is not a second
+	// arrow router. Once either bound target changes the arrow's local terminal
+	// frame, hand the body and geometry back to tldraw's stock arrow so curves
+	// and elbows reflow through their normal resize behaviour. Translating both
+	// targets together leaves this local frame unchanged and keeps the snapshot.
+	if (terminalFrameChanged(style.path.frame, terminals)) return null
 	const carry = frameTransform(style.path.frame, terminals)
 	const transform = multiplyAffine(carry, style.path.transform)
 	return {

@@ -1,0 +1,40 @@
+{
+  "detached": [
+    {
+      "id": "shape:r2C4ASeOjDrKiCE-NBLH3",
+      "kind": "arc",
+      "exactBody": true,
+      "bindings": 2,
+      "rememberedRouting": "curved"
+    },
+    {
+      "id": "shape:eZJ9p1D1x-PSoHTaHtiG2",
+      "kind": "elbow",
+      "exactBody": true,
+      "bindings": 2,
+      "rememberedRouting": "elbow"
+    }
+  ],
+  "moved": [
+    {
+      "id": "shape:r2C4ASeOjDrKiCE-NBLH3",
+      "kind": "arc",
+      "exactBody": false,
+      "bindings": 2,
+      "rememberedRouting": "curved"
+    },
+    {
+      "id": "shape:eZJ9p1D1x-PSoHTaHtiG2",
+      "kind": "elbow",
+      "exactBody": false,
+      "bindings": 2,
+      "rememberedRouting": "elbow"
+    }
+  ],
+  "checks": {
+    "curvedUsesStockReflow": true,
+    "elbowUsesStockReflow": true,
+    "bindingsRemainLive": true,
+    "movementHasNoConsoleErrors": true
+  }
+}
