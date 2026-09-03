@@ -1,0 +1,35 @@
+{
+  "snapshot": {
+    "baseline": "2964abb",
+    "integratedMain": "8f6d1b5",
+    "blocks": 48,
+    "cables": 68,
+    "shapes": 116
+  },
+  "selectAllDrag": {
+    "busyMsBefore": 947,
+    "busyMsAfter": 767,
+    "busyReductionPercent": 19.0,
+    "sourceInclusiveMsBefore": 73,
+    "sourceInclusiveMsAfter": 47,
+    "maxFrameGapMsBefore": 66.6,
+    "maxFrameGapMsAfter": 50
+  },
+  "cableDrag": {
+    "sourceInclusiveMsBefore": 31,
+    "sourceInclusiveMsAfter": 19,
+    "maxFrameGapMsAfter": 66.7,
+    "longTaskMsAfter": 62
+  },
+  "verification": {
+    "reviewBoardsParsed": 80,
+    "vitestTests": 1066,
+    "pythonTests": 94,
+    "browserChecks": 69
+  },
+  "missingJourneys": [
+    "tests/block_diff_states_smoke.mjs",
+    "tests/block_diff_vocabulary_smoke.mjs",
+    "tests/block_diff_round2_smoke.mjs"
+  ]
+}

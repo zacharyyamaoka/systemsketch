@@ -129,17 +129,18 @@
     ],
     "popover": {
       "trigger": {
-        "x": 87,
+        "x": 327,
         "width": 54
       },
-      "x": 12,
-      "right": 467,
+      "x": 53,
+      "right": 508,
       "width": 455,
       "viewport": 520,
       "radioCount": 28,
       "hasMenuAncestor": true,
       "menuLabel": "Color",
-      "centredX": -113
+      "centredX": 127,
+      "centredRight": 582
     },
     "swatchRing": {
       "focused": "BUTTON.systemsketch-appearance__option",

@@ -1,0 +1,91 @@
+{
+  "feature": "Preview regression audit",
+  "viewport": { "width": 1700, "height": 1150 },
+  "pages": [{ "id": "review", "name": "Preview audit" }],
+  "shapes": [
+    {
+      "id": "ingest", "type": "block", "x": 420, "y": 300,
+      "props": {
+        "title": "ingest()", "description": "Reads the source", "blockType": "Function",
+        "view": "port", "w": 300, "h": 190,
+        "inputs": [{ "id": "in", "name": "source", "type": "Path", "visible": true, "defaultValue": "./input" }],
+        "outputs": [{ "id": "out", "name": "bytes", "type": "bytes", "visible": true }]
+      }
+    },
+    {
+      "id": "decode", "type": "block", "x": 820, "y": 300,
+      "props": {
+        "title": "decode()", "description": "Drag this wired Block", "blockType": "Transform",
+        "view": "port", "w": 300, "h": 190,
+        "inputs": [{ "id": "in", "name": "bytes", "type": "bytes", "visible": true }],
+        "outputs": [{ "id": "out", "name": "frame", "type": "Frame", "visible": true }]
+      }
+    },
+    {
+      "id": "normalize", "type": "block", "x": 1220, "y": 300,
+      "props": {
+        "title": "norm()", "description": "Keeps the route live", "blockType": "Transform",
+        "view": "port", "w": 300, "h": 190,
+        "inputs": [{ "id": "in", "name": "frame", "type": "Frame", "visible": true }],
+        "outputs": [{ "id": "out", "name": "tensor", "type": "Tensor", "visible": true }]
+      }
+    },
+    {
+      "id": "score", "type": "block", "x": 1220, "y": 650,
+      "props": {
+        "title": "score()", "description": "Second pipeline row", "blockType": "Model",
+        "view": "port", "w": 300, "h": 190,
+        "inputs": [{ "id": "in", "name": "tensor", "type": "Tensor", "visible": true }],
+        "outputs": [{ "id": "out", "name": "scores", "type": "number", "visible": true }]
+      }
+    },
+    {
+      "id": "filter", "type": "block", "x": 820, "y": 650,
+      "props": {
+        "title": "filter()", "description": "Connected downstream", "blockType": "Transform",
+        "view": "port", "w": 300, "h": 190,
+        "inputs": [{ "id": "in", "name": "scores", "type": "number", "visible": true }],
+        "outputs": [{ "id": "out", "name": "result", "type": "Result", "visible": true }]
+      }
+    },
+    {
+      "id": "publish", "type": "block", "x": 420, "y": 650,
+      "props": {
+        "title": "publish()", "description": "Pipeline sink", "blockType": "Effect",
+        "view": "port", "w": 300, "h": 190,
+        "inputs": [{ "id": "in", "name": "result", "type": "Result", "visible": true }],
+        "outputs": []
+      }
+    },
+    { "id": "c1", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 100, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "routeMode": "automatic", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "" } },
+    { "id": "c2", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 100, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "routeMode": "automatic", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "" } },
+    { "id": "c3", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 100, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "routeMode": "automatic", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "" } },
+    { "id": "c4", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 100, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "routeMode": "automatic", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "" } },
+    { "id": "c5", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 100, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "routeMode": "automatic", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "" } }
+  ],
+  "bindings": [
+    { "id": "c1-start", "type": "connection", "fromId": "c1", "toId": "ingest", "props": { "terminal": "start", "portId": "out", "face": "outer" } },
+    { "id": "c1-end", "type": "connection", "fromId": "c1", "toId": "decode", "props": { "terminal": "end", "portId": "in", "face": "outer" } },
+    { "id": "c2-start", "type": "connection", "fromId": "c2", "toId": "decode", "props": { "terminal": "start", "portId": "out", "face": "outer" } },
+    { "id": "c2-end", "type": "connection", "fromId": "c2", "toId": "normalize", "props": { "terminal": "end", "portId": "in", "face": "outer" } },
+    { "id": "c3-start", "type": "connection", "fromId": "c3", "toId": "normalize", "props": { "terminal": "start", "portId": "out", "face": "outer" } },
+    { "id": "c3-end", "type": "connection", "fromId": "c3", "toId": "score", "props": { "terminal": "end", "portId": "in", "face": "outer" } },
+    { "id": "c4-start", "type": "connection", "fromId": "c4", "toId": "score", "props": { "terminal": "start", "portId": "out", "face": "outer" } },
+    { "id": "c4-end", "type": "connection", "fromId": "c4", "toId": "filter", "props": { "terminal": "end", "portId": "in", "face": "outer" } },
+    { "id": "c5-start", "type": "connection", "fromId": "c5", "toId": "filter", "props": { "terminal": "start", "portId": "out", "face": "outer" } },
+    { "id": "c5-end", "type": "connection", "fromId": "c5", "toId": "publish", "props": { "terminal": "end", "portId": "in", "face": "outer" } }
+  ],
+  "callouts": [
+    {
+      "id": "drag", "kind": "step",
+      "text": "1 · Drag decode() 100 px down, then undo",
+      "x": 755, "y": 40, "w": 430, "h": 120,
+      "target": { "shapeId": "decode", "anchor": "top" }
+    },
+    {
+      "id": "pass", "kind": "pass",
+      "text": "PASS WHEN · Both connected cables follow smoothly, the Problems count stays stable, and undo restores the pipeline",
+      "x": 625, "y": 920, "w": 750, "h": 120
+    }
+  ]
+}

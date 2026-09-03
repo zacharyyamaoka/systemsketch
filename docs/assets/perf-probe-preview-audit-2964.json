@@ -1,0 +1,2628 @@
+{
+  "label": "preview-audit-2964",
+  "blocks": 48,
+  "at": "2026-09-03T22:17:09.901Z",
+  "scenarios": [
+    {
+      "name": "idle",
+      "wallMs": 3001,
+      "frames": {
+        "frames": 183,
+        "spanMs": 3133,
+        "meanGapMs": 17.2,
+        "p95GapMs": 16.8,
+        "maxGapMs": 116.6,
+        "longTasks": 0,
+        "longTaskMs": 0
+      },
+      "cpu": {
+        "totalMs": 3133,
+        "busyMs": 147,
+        "buckets": {
+          "src": 0,
+          "tldraw": 2,
+          "react": 0,
+          "other": 0,
+          "native": 1,
+          "idle": 2987,
+          "program": 143,
+          "gc": 0
+        },
+        "topSelf": [
+          {
+            "fn": "requestAnimationFrame  (native):0",
+            "ms": 1.3
+          },
+          {
+            "fn": "transaction  dep:tldraw.js:7024",
+            "ms": 0.5
+          },
+          {
+            "fn": "handleEvent  dep:tldraw.js:29952",
+            "ms": 0.5
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:37053",
+            "ms": 0.5
+          },
+          {
+            "fn": "updatePointerVelocity  dep:tldraw.js:27060",
+            "ms": 0.3
+          },
+          {
+            "fn": "tick  dep:tldraw.js:29557",
+            "ms": 0.3
+          },
+          {
+            "fn": "tick  dep:tldraw.js:6178",
+            "ms": 0.2
+          }
+        ],
+        "topInclusive": [
+          {
+            "fn": "tick  dep:tldraw.js:29557",
+            "ms": 3.5
+          },
+          {
+            "fn": "flush  dep:tldraw.js:6174",
+            "ms": 3.5
+          },
+          {
+            "fn": "tick  dep:tldraw.js:6178",
+            "ms": 3.5
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:6182",
+            "ms": 3.5
+          },
+          {
+            "fn": "emit  dep:tldraw.js:21757",
+            "ms": 1.7
+          },
+          {
+            "fn": "throttleToNextFrame  dep:tldraw.js:6247",
+            "ms": 1.5
+          },
+          {
+            "fn": "throttleToNextFrame  dep:tldraw.js:6266",
+            "ms": 1.5
+          },
+          {
+            "fn": "transaction  dep:tldraw.js:7024",
+            "ms": 1.5
+          },
+          {
+            "fn": "transact  dep:tldraw.js:7044",
+            "ms": 1.5
+          },
+          {
+            "fn": "batch  dep:tldraw.js:26383",
+            "ms": 1.5
+          },
+          {
+            "fn": "run  dep:tldraw.js:30997",
+            "ms": 1.5
+          },
+          {
+            "fn": "_flushEventsForTick  dep:tldraw.js:37052",
+            "ms": 1.5
+          },
+          {
+            "fn": "requestAnimationFrame  (native):0",
+            "ms": 1.3
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:37053",
+            "ms": 1
+          },
+          {
+            "fn": "handleEvent  dep:tldraw.js:29952",
+            "ms": 0.5
+          },
+          {
+            "fn": "updatePointerVelocity  dep:tldraw.js:27060",
+            "ms": 0.3
+          },
+          {
+            "fn": "_onFrame  dep:tldraw.js:26661",
+            "ms": 0.3
+          }
+        ],
+        "srcInclusive": []
+      }
+    },
+    {
+      "name": "window-blur",
+      "wallMs": 701,
+      "frames": {
+        "frames": 88,
+        "spanMs": 733,
+        "meanGapMs": 8.4,
+        "p95GapMs": 16.7,
+        "maxGapMs": 33.4,
+        "longTasks": 0,
+        "longTaskMs": 0
+      },
+      "cpu": {
+        "totalMs": 747,
+        "busyMs": 48,
+        "buckets": {
+          "src": 0,
+          "tldraw": 1,
+          "react": 0,
+          "other": 0,
+          "native": 0,
+          "idle": 698,
+          "program": 47,
+          "gc": 0
+        },
+        "topSelf": [
+          {
+            "fn": "tick  dep:tldraw.js:29557",
+            "ms": 0.5
+          },
+          {
+            "fn": "throttleToNextFrame  dep:tldraw.js:6247",
+            "ms": 0.3
+          },
+          {
+            "fn": "requestAnimationFrame  (native):0",
+            "ms": 0.3
+          },
+          {
+            "fn": "_flushEventsForTick  dep:tldraw.js:37052",
+            "ms": 0.3
+          },
+          {
+            "fn": "tick  dep:tldraw.js:6178",
+            "ms": 0.3
+          },
+          {
+            "fn": "(anonymous)  (native):0",
+            "ms": 0.2
+          }
+        ],
+        "topInclusive": [
+          {
+            "fn": "tick  dep:tldraw.js:6178",
+            "ms": 1.5
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:6182",
+            "ms": 1.5
+          },
+          {
+            "fn": "tick  dep:tldraw.js:29557",
+            "ms": 1.3
+          },
+          {
+            "fn": "flush  dep:tldraw.js:6174",
+            "ms": 1.3
+          },
+          {
+            "fn": "throttleToNextFrame  dep:tldraw.js:6247",
+            "ms": 0.5
+          },
+          {
+            "fn": "throttleToNextFrame  dep:tldraw.js:6266",
+            "ms": 0.5
+          },
+          {
+            "fn": "requestAnimationFrame  (native):0",
+            "ms": 0.3
+          },
+          {
+            "fn": "_flushEventsForTick  dep:tldraw.js:37052",
+            "ms": 0.3
+          },
+          {
+            "fn": "emit  dep:tldraw.js:21757",
+            "ms": 0.3
+          },
+          {
+            "fn": "(anonymous)  (native):0",
+            "ms": 0.2
+          }
+        ],
+        "srcInclusive": []
+      }
+    },
+    {
+      "name": "pan",
+      "wallMs": 1798,
+      "frames": {
+        "frames": 330,
+        "spanMs": 1833,
+        "meanGapMs": 5.6,
+        "p95GapMs": 16.7,
+        "maxGapMs": 33.3,
+        "longTasks": 0,
+        "longTaskMs": 0
+      },
+      "cpu": {
+        "totalMs": 1841,
+        "busyMs": 221,
+        "buckets": {
+          "src": 1,
+          "tldraw": 45,
+          "react": 2,
+          "other": 3,
+          "native": 3,
+          "idle": 1620,
+          "program": 168,
+          "gc": 0
+        },
+        "topSelf": [
+          {
+            "fn": "visit  dep:tldraw.js:6592",
+            "ms": 7.8
+          },
+          {
+            "fn": "get isEmpty  dep:tldraw.js:6505",
+            "ms": 6
+          },
+          {
+            "fn": "haveParentsChanged  dep:tldraw.js:6471",
+            "ms": 5.2
+          },
+          {
+            "fn": "traverseChild  dep:tldraw.js:6977",
+            "ms": 2.3
+          },
+          {
+            "fn": "maybeScheduleEffect  dep:tldraw.js:7449",
+            "ms": 2
+          },
+          {
+            "fn": "__unsafe__getWithoutCapture  dep:tldraw.js:7264",
+            "ms": 2
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:6182",
+            "ms": 1
+          },
+          {
+            "fn": "requestAnimationFrame  (native):0",
+            "ms": 0.8
+          },
+          {
+            "fn": "exports.jsx  dep:react_jsx-runtime.js:191",
+            "ms": 0.7
+          },
+          {
+            "fn": "get  dep:tldraw.js:8083",
+            "ms": 0.7
+          },
+          {
+            "fn": "setProperty  (native):0",
+            "ms": 0.7
+          },
+          {
+            "fn": "handleEvent  dep:tldraw.js:29952",
+            "ms": 0.6
+          },
+          {
+            "fn": "_flushEventForTick  dep:tldraw.js:37067",
+            "ms": 0.5
+          },
+          {
+            "fn": "devFreeze  dep:tldraw.js:8810",
+            "ms": 0.5
+          },
+          {
+            "fn": "update  src/installConnectorControlVisibility.ts:44",
+            "ms": 0.5
+          },
+          {
+            "fn": "exports.jsxDEV  dep:react_jsx-dev-runtime.js:191",
+            "ms": 0.5
+          },
+          {
+            "fn": "(anonymous)  dep:dist-BHT0RLew.js:189",
+            "ms": 0.5
+          },
+          {
+            "fn": "tick  dep:tldraw.js:29557",
+            "ms": 0.5
+          },
+          {
+            "fn": "flushChanges  dep:tldraw.js:6987",
+            "ms": 0.5
+          },
+          {
+            "fn": "_onFrame  dep:tldraw.js:26661",
+            "ms": 0.5
+          },
+          {
+            "fn": "getOverlays  dep:tldraw.js:84189",
+            "ms": 0.5
+          },
+          {
+            "fn": "positionCollaboratorsWhenCameraMoves  dep:tldraw.js:18565",
+            "ms": 0.5
+          },
+          {
+            "fn": "validate  dep:tldraw.js:9394",
+            "ms": 0.5
+          },
+          {
+            "fn": "validateUsingKnownGoodVersion  dep:tldraw.js:11669",
+            "ms": 0.5
+          },
+          {
+            "fn": "attach  dep:tldraw.js:6482",
+            "ms": 0.3
+          },
+          {
+            "fn": "handleBeforeChange  dep:tldraw.js:9956",
+            "ms": 0.3
+          },
+          {
+            "fn": "_setCamera  dep:tldraw.js:32163",
+            "ms": 0.3
+          },
+          {
+            "fn": "isActive  dep:tldraw.js:84625",
+            "ms": 0.3
+          },
+          {
+            "fn": "squashHistoryEntries  dep:tldraw.js:10997",
+            "ms": 0.3
+          },
+          {
+            "fn": "handleOperationComplete  dep:tldraw.js:10017",
+            "ms": 0.3
+          }
+        ],
+        "topInclusive": [
+          {
+            "fn": "(anonymous)  dep:tldraw.js:6182",
+            "ms": 46.3
+          },
+          {
+            "fn": "flush  dep:tldraw.js:6174",
+            "ms": 45.3
+          },
+          {
+            "fn": "tick  dep:tldraw.js:6178",
+            "ms": 45.3
+          },
+          {
+            "fn": "tick  dep:tldraw.js:29557",
+            "ms": 43
+          },
+          {
+            "fn": "emit  dep:tldraw.js:21757",
+            "ms": 42.3
+          },
+          {
+            "fn": "transact  dep:tldraw.js:7044",
+            "ms": 41
+          },
+          {
+            "fn": "batch  dep:tldraw.js:26383",
+            "ms": 41
+          },
+          {
+            "fn": "run  dep:tldraw.js:30997",
+            "ms": 41
+          },
+          {
+            "fn": "transaction  dep:tldraw.js:7024",
+            "ms": 40.7
+          },
+          {
+            "fn": "_flushEventsForTick  dep:tldraw.js:37052",
+            "ms": 40
+          },
+          {
+            "fn": "commit  dep:tldraw.js:6939",
+            "ms": 29.7
+          },
+          {
+            "fn": "flushChanges  dep:tldraw.js:6987",
+            "ms": 29.4
+          },
+          {
+            "fn": "maybeScheduleEffect  dep:tldraw.js:7449",
+            "ms": 18.6
+          },
+          {
+            "fn": "haveParentsChanged  dep:tldraw.js:6471",
+            "ms": 16.3
+          },
+          {
+            "fn": "__unsafe__getWithoutCapture  dep:tldraw.js:7264",
+            "ms": 16
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:37053",
+            "ms": 10.5
+          },
+          {
+            "fn": "traverse  dep:tldraw.js:6983",
+            "ms": 10.3
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:6995",
+            "ms": 10.3
+          },
+          {
+            "fn": "visit  dep:tldraw.js:6592",
+            "ms": 10.3
+          },
+          {
+            "fn": "_flushEventForTick  dep:tldraw.js:37067",
+            "ms": 10.3
+          },
+          {
+            "fn": "traverseChild  dep:tldraw.js:6977",
+            "ms": 10.1
+          },
+          {
+            "fn": "_setCamera  dep:tldraw.js:32163",
+            "ms": 9.1
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:32167",
+            "ms": 8.8
+          },
+          {
+            "fn": "updatePointer  dep:tldraw.js:36599",
+            "ms": 6.1
+          },
+          {
+            "fn": "get isActivelyListening  dep:tldraw.js:7256",
+            "ms": 6.1
+          },
+          {
+            "fn": "get isEmpty  dep:tldraw.js:6505",
+            "ms": 6
+          },
+          {
+            "fn": "execute  dep:tldraw.js:7493",
+            "ms": 5.6
+          },
+          {
+            "fn": "handleEvent  dep:tldraw.js:29952",
+            "ms": 5.5
+          },
+          {
+            "fn": "onPointerMove  dep:tldraw.js:95366",
+            "ms": 5
+          },
+          {
+            "fn": "descriptor.value  dep:tldraw.js:7322",
+            "ms": 4.8
+          },
+          {
+            "fn": "scheduleEffect  dep:tldraw.js:7459",
+            "ms": 4.1
+          },
+          {
+            "fn": "run  (native):0",
+            "ms": 3.6
+          },
+          {
+            "fn": "runWithFiberInDEV  dep:client-CvxstDij.js:847",
+            "ms": 3.5
+          },
+          {
+            "fn": "performUnitOfWork  dep:client-CvxstDij.js:8427",
+            "ms": 3.5
+          },
+          {
+            "fn": "workLoopSync  dep:client-CvxstDij.js:8324",
+            "ms": 3.5
+          },
+          {
+            "fn": "renderRootSync  dep:client-CvxstDij.js:8268",
+            "ms": 3.5
+          },
+          {
+            "fn": "performWorkOnRoot  dep:client-CvxstDij.js:7940",
+            "ms": 3.5
+          }
+        ],
+        "srcInclusive": [
+          {
+            "fn": "SystemSketchNavigationPanel  src/SystemSketchUtilities.tsx:134",
+            "ms": 0.8
+          },
+          {
+            "fn": "update  src/installConnectorControlVisibility.ts:44",
+            "ms": 0.5
+          },
+          {
+            "fn": "distanceToPoint  src/blocks/connections/connectionHit.ts:140",
+            "ms": 0.3
+          },
+          {
+            "fn": "ProblemsIcon  src/SystemSketchUtilities.tsx:58",
+            "ms": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "name": "zoom",
+      "wallMs": 1453,
+      "frames": {
+        "frames": 90,
+        "spanMs": 1500,
+        "meanGapMs": 16.9,
+        "p95GapMs": 16.8,
+        "maxGapMs": 33.4,
+        "longTasks": 0,
+        "longTaskMs": 0
+      },
+      "cpu": {
+        "totalMs": 1501,
+        "busyMs": 197,
+        "buckets": {
+          "src": 0,
+          "tldraw": 28,
+          "react": 10,
+          "other": 12,
+          "native": 5,
+          "idle": 1304,
+          "program": 130,
+          "gc": 12
+        },
+        "topSelf": [
+          {
+            "fn": "exports.jsx  dep:react_jsx-runtime.js:191",
+            "ms": 7.5
+          },
+          {
+            "fn": "haveParentsChanged  dep:tldraw.js:6471",
+            "ms": 4.5
+          },
+          {
+            "fn": "get isEmpty  dep:tldraw.js:6505",
+            "ms": 4.5
+          },
+          {
+            "fn": "visit  dep:tldraw.js:6592",
+            "ms": 4.3
+          },
+          {
+            "fn": "traverseChild  dep:tldraw.js:6977",
+            "ms": 1.7
+          },
+          {
+            "fn": "ReactElement  dep:react_jsx-runtime.js:104",
+            "ms": 1.3
+          },
+          {
+            "fn": "run  (native):0",
+            "ms": 1
+          },
+          {
+            "fn": "get  dep:tldraw.js:8083",
+            "ms": 1
+          },
+          {
+            "fn": "maybeScheduleEffect  dep:tldraw.js:7449",
+            "ms": 1
+          },
+          {
+            "fn": "react_stack_bottom_frame  dep:client-CvxstDij.js:12862",
+            "ms": 1
+          },
+          {
+            "fn": "now  (native):0",
+            "ms": 1
+          },
+          {
+            "fn": "checkIfContextChanged  dep:client-CvxstDij.js:3188",
+            "ms": 0.8
+          },
+          {
+            "fn": "createWorkInProgress  dep:client-CvxstDij.js:2728",
+            "ms": 0.7
+          },
+          {
+            "fn": "__unsafe__getWithoutCapture  dep:tldraw.js:7264",
+            "ms": 0.7
+          },
+          {
+            "fn": "updatedAncestorInfoDev  dep:client-CvxstDij.js:1643",
+            "ms": 0.5
+          },
+          {
+            "fn": "requestAnimationFrame  (native):0",
+            "ms": 0.5
+          },
+          {
+            "fn": "updateProperties  dep:client-CvxstDij.js:9926",
+            "ms": 0.5
+          },
+          {
+            "fn": "setAttribute  (native):0",
+            "ms": 0.5
+          },
+          {
+            "fn": "attemptEarlyBailoutIfNoScheduledUpdate  dep:client-CvxstDij.js:6025",
+            "ms": 0.5
+          },
+          {
+            "fn": "descriptor.value  dep:tldraw.js:7322",
+            "ms": 0.5
+          },
+          {
+            "fn": "devFreeze  dep:tldraw.js:8810",
+            "ms": 0.5
+          },
+          {
+            "fn": "performWorkUntilDeadline  dep:client-CvxstDij.js:16",
+            "ms": 0.5
+          },
+          {
+            "fn": "transaction  dep:tldraw.js:7024",
+            "ms": 0.5
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:25656",
+            "ms": 0.5
+          },
+          {
+            "fn": "measure  (native):0",
+            "ms": 0.5
+          },
+          {
+            "fn": "_flushEventForTick  dep:tldraw.js:37067",
+            "ms": 0.5
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:37053",
+            "ms": 0.5
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:67283",
+            "ms": 0.5
+          },
+          {
+            "fn": "onWheel  dep:tldraw.js:17977",
+            "ms": 0.5
+          },
+          {
+            "fn": "setProperty  (native):0",
+            "ms": 0.3
+          }
+        ],
+        "topInclusive": [
+          {
+            "fn": "(anonymous)  dep:tldraw.js:6182",
+            "ms": 27.1
+          },
+          {
+            "fn": "flush  dep:tldraw.js:6174",
+            "ms": 26.8
+          },
+          {
+            "fn": "tick  dep:tldraw.js:6178",
+            "ms": 26.8
+          },
+          {
+            "fn": "tick  dep:tldraw.js:29557",
+            "ms": 25.8
+          },
+          {
+            "fn": "emit  dep:tldraw.js:21757",
+            "ms": 25.3
+          },
+          {
+            "fn": "transact  dep:tldraw.js:7044",
+            "ms": 24.8
+          },
+          {
+            "fn": "batch  dep:tldraw.js:26383",
+            "ms": 24.8
+          },
+          {
+            "fn": "run  dep:tldraw.js:30997",
+            "ms": 24.8
+          },
+          {
+            "fn": "transaction  dep:tldraw.js:7024",
+            "ms": 24.6
+          },
+          {
+            "fn": "performWorkOnRoot  dep:client-CvxstDij.js:7940",
+            "ms": 23.8
+          },
+          {
+            "fn": "_flushEventsForTick  dep:tldraw.js:37052",
+            "ms": 22.8
+          },
+          {
+            "fn": "performSyncWorkOnRoot  dep:client-CvxstDij.js:9063",
+            "ms": 22.5
+          },
+          {
+            "fn": "flushSyncWorkAcrossRoots_impl  dep:client-CvxstDij.js:8968",
+            "ms": 22.5
+          },
+          {
+            "fn": "processRootScheduleInMicrotask  dep:client-CvxstDij.js:8995",
+            "ms": 22.5
+          },
+          {
+            "fn": "(anonymous)  dep:client-CvxstDij.js:9077",
+            "ms": 22.5
+          },
+          {
+            "fn": "run  (native):0",
+            "ms": 21.1
+          },
+          {
+            "fn": "runWithFiberInDEV  dep:client-CvxstDij.js:847",
+            "ms": 20.5
+          },
+          {
+            "fn": "renderRootSync  dep:client-CvxstDij.js:8268",
+            "ms": 20.2
+          },
+          {
+            "fn": "workLoopSync  dep:client-CvxstDij.js:8324",
+            "ms": 19.7
+          },
+          {
+            "fn": "performUnitOfWork  dep:client-CvxstDij.js:8427",
+            "ms": 19.4
+          },
+          {
+            "fn": "flushChanges  dep:tldraw.js:6987",
+            "ms": 19.1
+          },
+          {
+            "fn": "commit  dep:tldraw.js:6939",
+            "ms": 19.1
+          },
+          {
+            "fn": "beginWork  dep:client-CvxstDij.js:6081",
+            "ms": 17.5
+          },
+          {
+            "fn": "renderWithHooks  dep:client-CvxstDij.js:4201",
+            "ms": 13.9
+          },
+          {
+            "fn": "react_stack_bottom_frame  dep:client-CvxstDij.js:12862",
+            "ms": 13.5
+          },
+          {
+            "fn": "maybeScheduleEffect  dep:tldraw.js:7449",
+            "ms": 13
+          },
+          {
+            "fn": "haveParentsChanged  dep:tldraw.js:6471",
+            "ms": 12
+          },
+          {
+            "fn": "(garbage collector)  (native):0",
+            "ms": 11.7
+          },
+          {
+            "fn": "updateForwardRef  dep:client-CvxstDij.js:5388",
+            "ms": 11.7
+          },
+          {
+            "fn": "__unsafe__getWithoutCapture  dep:tldraw.js:7264",
+            "ms": 11.5
+          },
+          {
+            "fn": "exports.jsx  dep:react_jsx-runtime.js:191",
+            "ms": 9.2
+          },
+          {
+            "fn": "traverseChild  dep:tldraw.js:6977",
+            "ms": 6.1
+          },
+          {
+            "fn": "traverse  dep:tldraw.js:6983",
+            "ms": 6.1
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:6995",
+            "ms": 6.1
+          },
+          {
+            "fn": "visit  dep:tldraw.js:6592",
+            "ms": 6.1
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:37053",
+            "ms": 5
+          },
+          {
+            "fn": "get isEmpty  dep:tldraw.js:6505",
+            "ms": 4.5
+          }
+        ],
+        "srcInclusive": []
+      }
+    },
+    {
+      "name": "block-drag",
+      "wallMs": 1463,
+      "frames": {
+        "frames": 89,
+        "spanMs": 1517,
+        "meanGapMs": 17.2,
+        "p95GapMs": 16.8,
+        "maxGapMs": 33.4,
+        "longTasks": 0,
+        "longTaskMs": 0
+      },
+      "cpu": {
+        "totalMs": 1506,
+        "busyMs": 552,
+        "buckets": {
+          "src": 38,
+          "tldraw": 105,
+          "react": 114,
+          "other": 43,
+          "native": 27,
+          "idle": 954,
+          "program": 218,
+          "gc": 6
+        },
+        "topSelf": [
+          {
+            "fn": "exports.jsx  dep:react_jsx-runtime.js:191",
+            "ms": 70.8
+          },
+          {
+            "fn": "exports.jsxDEV  dep:react_jsx-dev-runtime.js:191",
+            "ms": 26
+          },
+          {
+            "fn": "getBoundingClientRect  (native):0",
+            "ms": 14.5
+          },
+          {
+            "fn": "haveParentsChanged  dep:tldraw.js:6471",
+            "ms": 9.3
+          },
+          {
+            "fn": "visit  dep:tldraw.js:6592",
+            "ms": 7.3
+          },
+          {
+            "fn": "get  dep:tldraw.js:8083",
+            "ms": 7
+          },
+          {
+            "fn": "get isEmpty  dep:tldraw.js:6505",
+            "ms": 6.3
+          },
+          {
+            "fn": "addBlockDiagnostics  src/diagnostics/diagnosticsModel.ts:103",
+            "ms": 5.6
+          },
+          {
+            "fn": "ReactElement  dep:react_jsx-runtime.js:104",
+            "ms": 5.3
+          },
+          {
+            "fn": "traverseChild  dep:tldraw.js:6977",
+            "ms": 5.2
+          },
+          {
+            "fn": "__unsafe__getWithoutCapture  dep:tldraw.js:7264",
+            "ms": 4.5
+          },
+          {
+            "fn": "add  dep:tldraw.js:6523",
+            "ms": 3.5
+          },
+          {
+            "fn": "run  (native):0",
+            "ms": 3.3
+          },
+          {
+            "fn": "checkIfContextChanged  dep:client-CvxstDij.js:3188",
+            "ms": 3
+          },
+          {
+            "fn": "measure  (native):0",
+            "ms": 2.3
+          },
+          {
+            "fn": "createTask  (native):0",
+            "ms": 2.2
+          },
+          {
+            "fn": "ReactElement  dep:react_jsx-dev-runtime.js:104",
+            "ms": 2.2
+          },
+          {
+            "fn": "(anonymous)  dep:client-CvxstDij.js:9240",
+            "ms": 2
+          },
+          {
+            "fn": "has  dep:tldraw.js:6645",
+            "ms": 2
+          },
+          {
+            "fn": "defineKeyPropWarningGetter  dep:react_jsx-runtime.js:88",
+            "ms": 2
+          },
+          {
+            "fn": "propagateParentContextChanges  dep:client-CvxstDij.js:3163",
+            "ms": 2
+          },
+          {
+            "fn": "getBoardDiagnosticsModel  src/diagnostics/diagnosticsModel.ts:309",
+            "ms": 2
+          },
+          {
+            "fn": "shallowEqual  dep:client-CvxstDij.js:2225",
+            "ms": 1.8
+          },
+          {
+            "fn": "validateProperty  dep:client-CvxstDij.js:1875",
+            "ms": 1.7
+          },
+          {
+            "fn": "maybeScheduleEffect  dep:tldraw.js:7449",
+            "ms": 1.5
+          },
+          {
+            "fn": "getSortedChildIdsForParent  dep:tldraw.js:34162",
+            "ms": 1.5
+          },
+          {
+            "fn": "execute  dep:tldraw.js:7493",
+            "ms": 1.5
+          },
+          {
+            "fn": "jsxDEVImpl  dep:react_jsx-runtime.js:148",
+            "ms": 1.5
+          },
+          {
+            "fn": "flushChanges  dep:tldraw.js:6987",
+            "ms": 1.5
+          },
+          {
+            "fn": "now  (native):0",
+            "ms": 1.5
+          }
+        ],
+        "topInclusive": [
+          {
+            "fn": "performWorkOnRoot  dep:client-CvxstDij.js:7940",
+            "ms": 180.7
+          },
+          {
+            "fn": "performSyncWorkOnRoot  dep:client-CvxstDij.js:9063",
+            "ms": 180.7
+          },
+          {
+            "fn": "flushSyncWorkAcrossRoots_impl  dep:client-CvxstDij.js:8968",
+            "ms": 180.7
+          },
+          {
+            "fn": "processRootScheduleInMicrotask  dep:client-CvxstDij.js:8995",
+            "ms": 180.7
+          },
+          {
+            "fn": "(anonymous)  dep:client-CvxstDij.js:9077",
+            "ms": 180.7
+          },
+          {
+            "fn": "run  (native):0",
+            "ms": 179.2
+          },
+          {
+            "fn": "runWithFiberInDEV  dep:client-CvxstDij.js:847",
+            "ms": 177.2
+          },
+          {
+            "fn": "renderRootSync  dep:client-CvxstDij.js:8268",
+            "ms": 155.5
+          },
+          {
+            "fn": "workLoopSync  dep:client-CvxstDij.js:8324",
+            "ms": 154.1
+          },
+          {
+            "fn": "performUnitOfWork  dep:client-CvxstDij.js:8427",
+            "ms": 153.8
+          },
+          {
+            "fn": "beginWork  dep:client-CvxstDij.js:6081",
+            "ms": 145.9
+          },
+          {
+            "fn": "react_stack_bottom_frame  dep:client-CvxstDij.js:12862",
+            "ms": 128.7
+          },
+          {
+            "fn": "renderWithHooks  dep:client-CvxstDij.js:4201",
+            "ms": 128.7
+          },
+          {
+            "fn": "batch  dep:tldraw.js:26383",
+            "ms": 127.9
+          },
+          {
+            "fn": "run  dep:tldraw.js:30997",
+            "ms": 127.9
+          },
+          {
+            "fn": "transaction  dep:tldraw.js:7024",
+            "ms": 127.6
+          },
+          {
+            "fn": "transact  dep:tldraw.js:7044",
+            "ms": 127.6
+          },
+          {
+            "fn": "_flushEventsForTick  dep:tldraw.js:37052",
+            "ms": 126.1
+          },
+          {
+            "fn": "updateFunctionComponent  dep:client-CvxstDij.js:5561",
+            "ms": 123.2
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:6182",
+            "ms": 122.7
+          },
+          {
+            "fn": "tick  dep:tldraw.js:6178",
+            "ms": 121.7
+          },
+          {
+            "fn": "flush  dep:tldraw.js:6174",
+            "ms": 121.2
+          },
+          {
+            "fn": "tick  dep:tldraw.js:29557",
+            "ms": 117.9
+          },
+          {
+            "fn": "emit  dep:tldraw.js:21757",
+            "ms": 117.9
+          },
+          {
+            "fn": "flushChanges  dep:tldraw.js:6987",
+            "ms": 112
+          },
+          {
+            "fn": "commit  dep:tldraw.js:6939",
+            "ms": 112
+          },
+          {
+            "fn": "maybeScheduleEffect  dep:tldraw.js:7449",
+            "ms": 98
+          },
+          {
+            "fn": "haveParentsChanged  dep:tldraw.js:6471",
+            "ms": 88
+          },
+          {
+            "fn": "__unsafe__getWithoutCapture  dep:tldraw.js:7264",
+            "ms": 88
+          },
+          {
+            "fn": "exports.jsx  dep:react_jsx-runtime.js:191",
+            "ms": 83.1
+          },
+          {
+            "fn": "ShapesLayer  dep:tldraw.js:20570",
+            "ms": 69.8
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:20575",
+            "ms": 68.3
+          },
+          {
+            "fn": "renderWithHooksAgain  dep:client-CvxstDij.js:4248",
+            "ms": 58.5
+          },
+          {
+            "fn": "(anonymous)  src/SystemSketchUtilities.tsx:162",
+            "ms": 39.5
+          },
+          {
+            "fn": "getBoardDiagnosticsModel  src/diagnostics/diagnosticsModel.ts:309",
+            "ms": 39
+          },
+          {
+            "fn": "exports.jsxDEV  dep:react_jsx-dev-runtime.js:191",
+            "ms": 31.2
+          },
+          {
+            "fn": "commitRootWhenReady  dep:client-CvxstDij.js:8059",
+            "ms": 24.9
+          }
+        ],
+        "srcInclusive": [
+          {
+            "fn": "(anonymous)  src/SystemSketchUtilities.tsx:162",
+            "ms": 39.5
+          },
+          {
+            "fn": "getBoardDiagnosticsModel  src/diagnostics/diagnosticsModel.ts:309",
+            "ms": 39
+          },
+          {
+            "fn": "inspectConnection  src/diagnostics/diagnosticsModel.ts:66",
+            "ms": 15.3
+          },
+          {
+            "fn": "(anonymous)  src/chrome/SelectionContextualMenu.tsx:93",
+            "ms": 14
+          },
+          {
+            "fn": "ConnectionShapeComponent  src/blocks/connections/ConnectionShapeUtil.tsx:671",
+            "ms": 9.5
+          },
+          {
+            "fn": "addBlockDiagnostics  src/diagnostics/diagnosticsModel.ts:103",
+            "ms": 8.4
+          },
+          {
+            "fn": "getConnectionShapePath  src/blocks/connections/ConnectionShapeUtil.tsx:1648",
+            "ms": 7.3
+          },
+          {
+            "fn": "(anonymous)  src/blocks/connections/ConnectionShapeUtil.tsx:674",
+            "ms": 7.3
+          },
+          {
+            "fn": "getConnectionBindings  src/blocks/connections/ConnectionBindingUtil.ts:114",
+            "ms": 6.4
+          },
+          {
+            "fn": "resolveEndpoint  src/diagnostics/diagnosticsModel.ts:49",
+            "ms": 6.3
+          },
+          {
+            "fn": "connectionBindingsForTerminal  src/blocks/connections/ConnectionBindingUtil.ts:110",
+            "ms": 6.2
+          },
+          {
+            "fn": "(anonymous)  src/blocks/connections/ConnectionShapeUtil.tsx:1525",
+            "ms": 5.6
+          },
+          {
+            "fn": "getConnectionElbowRoute  src/blocks/connections/ConnectionShapeUtil.tsx:1512",
+            "ms": 5.6
+          },
+          {
+            "fn": "computeConnectionElbowRoute  src/blocks/connections/ConnectionShapeUtil.tsx:1516",
+            "ms": 5.4
+          },
+          {
+            "fn": "SelectionMiniMenu  src/chrome/SystemSketchChrome.tsx:404",
+            "ms": 5
+          },
+          {
+            "fn": "connectionEndpointsAreValid  src/blocks/connections/ConnectionBindingUtil.ts:43",
+            "ms": 4.2
+          },
+          {
+            "fn": "getPortHostPort  src/blocks/connections/blockPorts.ts:167",
+            "ms": 4.1
+          },
+          {
+            "fn": "addCycleDiagnostics  src/diagnostics/diagnosticsModel.ts:272",
+            "ms": 3.9
+          },
+          {
+            "fn": "routeElbow  src/blocks/elbow/elbowRouter.ts:694",
+            "ms": 3.9
+          },
+          {
+            "fn": "getElbowConnectionRoute  src/blocks/connections/connectionRouting.ts:89",
+            "ms": 3.9
+          },
+          {
+            "fn": "attemptRoute  src/blocks/elbow/elbowRouter.ts:497",
+            "ms": 3.4
+          },
+          {
+            "fn": "autoPoints  src/blocks/elbow/elbowRouter.ts:576",
+            "ms": 3.4
+          },
+          {
+            "fn": "connectionBindingIsValid  src/blocks/connections/ConnectionBindingUtil.ts:29",
+            "ms": 3.3
+          },
+          {
+            "fn": "getLiveBlockPorts  src/blocks/connections/blockPorts.ts:160",
+            "ms": 3
+          },
+          {
+            "fn": "getConnectionEndpoints  src/blocks/connections/ConnectionShapeUtil.tsx:1638",
+            "ms": 3
+          },
+          {
+            "fn": "PortSection  src/blocks/ui/BlockInspector.tsx:654",
+            "ms": 2.8
+          },
+          {
+            "fn": "getConnectionTerminals  src/blocks/connections/ConnectionShapeUtil.tsx:1612",
+            "ms": 2.7
+          },
+          {
+            "fn": "getConnectionDirection  src/blocks/connections/ConnectionBindingUtil.ts:142",
+            "ms": 2.5
+          },
+          {
+            "fn": "DataCablePath  src/blocks/connections/ConnectionShapeUtil.tsx:987",
+            "ms": 2.3
+          },
+          {
+            "fn": "getBlockConnectionPortPagePoint  src/blocks/connections/blockPorts.ts:175",
+            "ms": 2
+          },
+          {
+            "fn": "getConnectionBindingPositionInPageSpace  src/blocks/connections/ConnectionBindingUtil.ts:124",
+            "ms": 2
+          },
+          {
+            "fn": "getSelectionLayoutActionAvailability  src/chrome/SelectionLayoutActions.tsx:10",
+            "ms": 1.8
+          },
+          {
+            "fn": "(anonymous)  src/chrome/SystemSketchChrome.tsx:417",
+            "ms": 1.8
+          },
+          {
+            "fn": "blockScopeId  src/blocks/connections/connectionScope.ts:15",
+            "ms": 1.8
+          },
+          {
+            "fn": "pairBlockFaces  src/blocks/connections/connectionScope.ts:40",
+            "ms": 1.8
+          },
+          {
+            "fn": "addDuplicateConnectionDiagnostics  src/diagnostics/diagnosticsModel.ts:196",
+            "ms": 1.7
+          },
+          {
+            "fn": "(anonymous)  src/blocks/ui/BlockInspector.tsx:133",
+            "ms": 1.6
+          },
+          {
+            "fn": "GripIcon  src/blocks/ui/BlockInspector.tsx:123",
+            "ms": 1.6
+          },
+          {
+            "fn": "(anonymous)  src/blocks/connections/tidyEdges.ts:141",
+            "ms": 1.5
+          },
+          {
+            "fn": "getTidyEdgesSelection  src/blocks/connections/tidyEdges.ts:130",
+            "ms": 1.5
+          }
+        ]
+      }
+    },
+    {
+      "name": "cable-drag",
+      "wallMs": 1573,
+      "frames": {
+        "frames": 96,
+        "spanMs": 1650,
+        "meanGapMs": 17.4,
+        "p95GapMs": 16.8,
+        "maxGapMs": 50,
+        "longTasks": 1,
+        "longTaskMs": 61
+      },
+      "cpu": {
+        "totalMs": 1640,
+        "busyMs": 552,
+        "buckets": {
+          "src": 31,
+          "tldraw": 105,
+          "react": 97,
+          "other": 48,
+          "native": 24,
+          "idle": 1088,
+          "program": 231,
+          "gc": 18
+        },
+        "topSelf": [
+          {
+            "fn": "exports.jsx  dep:react_jsx-runtime.js:191",
+            "ms": 57.8
+          },
+          {
+            "fn": "exports.jsxDEV  dep:react_jsx-dev-runtime.js:191",
+            "ms": 22.1
+          },
+          {
+            "fn": "haveParentsChanged  dep:tldraw.js:6471",
+            "ms": 14.7
+          },
+          {
+            "fn": "getBoundingClientRect  (native):0",
+            "ms": 11
+          },
+          {
+            "fn": "get isEmpty  dep:tldraw.js:6505",
+            "ms": 9.4
+          },
+          {
+            "fn": "visit  dep:tldraw.js:6592",
+            "ms": 8.7
+          },
+          {
+            "fn": "ReactElement  dep:react_jsx-runtime.js:104",
+            "ms": 8.3
+          },
+          {
+            "fn": "get  dep:tldraw.js:8083",
+            "ms": 7.9
+          },
+          {
+            "fn": "traverseChild  dep:tldraw.js:6977",
+            "ms": 5
+          },
+          {
+            "fn": "__unsafe__getWithoutCapture  dep:tldraw.js:7264",
+            "ms": 4.5
+          },
+          {
+            "fn": "run  (native):0",
+            "ms": 3.8
+          },
+          {
+            "fn": "add  dep:tldraw.js:6523",
+            "ms": 3.5
+          },
+          {
+            "fn": "exports.jsxs  dep:react_jsx-runtime.js:195",
+            "ms": 3.3
+          },
+          {
+            "fn": "addBlockDiagnostics  src/diagnostics/diagnosticsModel.ts:103",
+            "ms": 3.3
+          },
+          {
+            "fn": "checkIfContextChanged  dep:client-CvxstDij.js:3188",
+            "ms": 3
+          },
+          {
+            "fn": "propagateParentContextChanges  dep:client-CvxstDij.js:3163",
+            "ms": 2.8
+          },
+          {
+            "fn": "shallowEqual  dep:client-CvxstDij.js:2225",
+            "ms": 2.5
+          },
+          {
+            "fn": "getBoardDiagnosticsModel  src/diagnostics/diagnosticsModel.ts:309",
+            "ms": 2.5
+          },
+          {
+            "fn": "clear  dep:tldraw.js:6662",
+            "ms": 2.3
+          },
+          {
+            "fn": "runWithFiberInDEV  dep:client-CvxstDij.js:847",
+            "ms": 2.3
+          },
+          {
+            "fn": "createTask  (native):0",
+            "ms": 2.3
+          },
+          {
+            "fn": "now  (native):0",
+            "ms": 2.2
+          },
+          {
+            "fn": "maybeScheduleEffect  dep:tldraw.js:7449",
+            "ms": 2
+          },
+          {
+            "fn": "descriptor.value  dep:tldraw.js:7322",
+            "ms": 1.9
+          },
+          {
+            "fn": "getPortHostPort  src/blocks/connections/blockPorts.ts:167",
+            "ms": 1.7
+          },
+          {
+            "fn": "addObjectDiffToProperties  dep:client-CvxstDij.js:2409",
+            "ms": 1.5
+          },
+          {
+            "fn": "processIncrementalUpdate  dep:tldraw.js:29025",
+            "ms": 1.5
+          },
+          {
+            "fn": "performWorkUntilDeadline  dep:client-CvxstDij.js:16",
+            "ms": 1.5
+          },
+          {
+            "fn": "renderWithHooks  dep:client-CvxstDij.js:4201",
+            "ms": 1.5
+          },
+          {
+            "fn": "addDuplicateConnectionDiagnostics  src/diagnostics/diagnosticsModel.ts:196",
+            "ms": 1.4
+          }
+        ],
+        "topInclusive": [
+          {
+            "fn": "performSyncWorkOnRoot  dep:client-CvxstDij.js:9063",
+            "ms": 154
+          },
+          {
+            "fn": "flushSyncWorkAcrossRoots_impl  dep:client-CvxstDij.js:8968",
+            "ms": 154
+          },
+          {
+            "fn": "processRootScheduleInMicrotask  dep:client-CvxstDij.js:8995",
+            "ms": 154
+          },
+          {
+            "fn": "(anonymous)  dep:client-CvxstDij.js:9077",
+            "ms": 154
+          },
+          {
+            "fn": "performWorkOnRoot  dep:client-CvxstDij.js:7940",
+            "ms": 153.5
+          },
+          {
+            "fn": "runWithFiberInDEV  dep:client-CvxstDij.js:847",
+            "ms": 145.1
+          },
+          {
+            "fn": "run  (native):0",
+            "ms": 142.1
+          },
+          {
+            "fn": "renderRootSync  dep:client-CvxstDij.js:8268",
+            "ms": 138.4
+          },
+          {
+            "fn": "performUnitOfWork  dep:client-CvxstDij.js:8427",
+            "ms": 136.4
+          },
+          {
+            "fn": "workLoopSync  dep:client-CvxstDij.js:8324",
+            "ms": 136.4
+          },
+          {
+            "fn": "beginWork  dep:client-CvxstDij.js:6081",
+            "ms": 126.4
+          },
+          {
+            "fn": "_flushEventsForTick  dep:tldraw.js:37052",
+            "ms": 125.7
+          },
+          {
+            "fn": "run  dep:tldraw.js:30997",
+            "ms": 125.2
+          },
+          {
+            "fn": "transaction  dep:tldraw.js:7024",
+            "ms": 124.9
+          },
+          {
+            "fn": "transact  dep:tldraw.js:7044",
+            "ms": 124.9
+          },
+          {
+            "fn": "batch  dep:tldraw.js:26383",
+            "ms": 124.9
+          },
+          {
+            "fn": "flush  dep:tldraw.js:6174",
+            "ms": 123.2
+          },
+          {
+            "fn": "tick  dep:tldraw.js:29557",
+            "ms": 121.7
+          },
+          {
+            "fn": "emit  dep:tldraw.js:21757",
+            "ms": 121.2
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:6182",
+            "ms": 119.3
+          },
+          {
+            "fn": "tick  dep:tldraw.js:6178",
+            "ms": 119.1
+          },
+          {
+            "fn": "renderWithHooks  dep:client-CvxstDij.js:4201",
+            "ms": 109.6
+          },
+          {
+            "fn": "updateFunctionComponent  dep:client-CvxstDij.js:5561",
+            "ms": 108.1
+          },
+          {
+            "fn": "react_stack_bottom_frame  dep:client-CvxstDij.js:12862",
+            "ms": 107.9
+          },
+          {
+            "fn": "flushChanges  dep:tldraw.js:6987",
+            "ms": 95.2
+          },
+          {
+            "fn": "commit  dep:tldraw.js:6939",
+            "ms": 94.8
+          },
+          {
+            "fn": "__unsafe__getWithoutCapture  dep:tldraw.js:7264",
+            "ms": 81.9
+          },
+          {
+            "fn": "haveParentsChanged  dep:tldraw.js:6471",
+            "ms": 81.5
+          },
+          {
+            "fn": "maybeScheduleEffect  dep:tldraw.js:7449",
+            "ms": 80.5
+          },
+          {
+            "fn": "exports.jsx  dep:react_jsx-runtime.js:191",
+            "ms": 70.4
+          },
+          {
+            "fn": "ShapesLayer  dep:tldraw.js:20570",
+            "ms": 64.4
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:20575",
+            "ms": 61.8
+          },
+          {
+            "fn": "renderWithHooksAgain  dep:client-CvxstDij.js:4248",
+            "ms": 53.8
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:37053",
+            "ms": 29.3
+          },
+          {
+            "fn": "get  dep:tldraw.js:7304",
+            "ms": 29.1
+          },
+          {
+            "fn": "handleEvent  dep:tldraw.js:29952",
+            "ms": 29
+          },
+          {
+            "fn": "_flushEventForTick  dep:tldraw.js:37067",
+            "ms": 29
+          }
+        ],
+        "srcInclusive": [
+          {
+            "fn": "(anonymous)  src/SystemSketchUtilities.tsx:162",
+            "ms": 28.6
+          },
+          {
+            "fn": "getBoardDiagnosticsModel  src/diagnostics/diagnosticsModel.ts:309",
+            "ms": 28.1
+          },
+          {
+            "fn": "onHandleDrag  src/blocks/connections/ConnectionShapeUtil.tsx:361",
+            "ms": 18.4
+          },
+          {
+            "fn": "dragTerminal  src/blocks/connections/ConnectionShapeUtil.tsx:462",
+            "ms": 17.7
+          },
+          {
+            "fn": "inspectConnection  src/diagnostics/diagnosticsModel.ts:66",
+            "ms": 13.8
+          },
+          {
+            "fn": "update  src/installConnectorControlVisibility.ts:44",
+            "ms": 12.6
+          },
+          {
+            "fn": "isWithinCanvasViewport  src/installConnectorControlVisibility.ts:6",
+            "ms": 11
+          },
+          {
+            "fn": "findConnectionTarget  src/blocks/connections/connectionRules.ts:140",
+            "ms": 9.1
+          },
+          {
+            "fn": "getBlockPortDotsNear  src/blocks/connections/blockPorts.ts:272",
+            "ms": 8.9
+          },
+          {
+            "fn": "ConnectionShapeComponent  src/blocks/connections/ConnectionShapeUtil.tsx:671",
+            "ms": 7.5
+          },
+          {
+            "fn": "getConnectionBindings  src/blocks/connections/ConnectionBindingUtil.ts:114",
+            "ms": 7.3
+          },
+          {
+            "fn": "connectionBindingsForTerminal  src/blocks/connections/ConnectionBindingUtil.ts:110",
+            "ms": 6.8
+          },
+          {
+            "fn": "onPointerMove  src/blocks/connections/PointingBlockPort.ts:94",
+            "ms": 6.7
+          },
+          {
+            "fn": "resolveEndpoint  src/diagnostics/diagnosticsModel.ts:49",
+            "ms": 6.2
+          },
+          {
+            "fn": "getPortHostPort  src/blocks/connections/blockPorts.ts:167",
+            "ms": 5.8
+          },
+          {
+            "fn": "PortDot  src/blocks/ui/PortDot.tsx:87",
+            "ms": 5.8
+          },
+          {
+            "fn": "BlockPortDot  src/blocks/ui/BlockCanvas.tsx:62",
+            "ms": 5.3
+          },
+          {
+            "fn": "addBlockDiagnostics  src/diagnostics/diagnosticsModel.ts:103",
+            "ms": 5.1
+          },
+          {
+            "fn": "dropScopeAt  src/blocks/connections/connectionRules.ts:166",
+            "ms": 4.8
+          },
+          {
+            "fn": "getGeometry  src/blocks/connections/ConnectionShapeUtil.tsx:245",
+            "ms": 4.8
+          },
+          {
+            "fn": "connectionEndpointsAreValid  src/blocks/connections/ConnectionBindingUtil.ts:43",
+            "ms": 4.2
+          },
+          {
+            "fn": "getConnectionElbowRoute  src/blocks/connections/ConnectionShapeUtil.tsx:1512",
+            "ms": 3.5
+          },
+          {
+            "fn": "computeConnectionElbowRoute  src/blocks/connections/ConnectionShapeUtil.tsx:1516",
+            "ms": 3.3
+          },
+          {
+            "fn": "(anonymous)  src/blocks/connections/ConnectionShapeUtil.tsx:1525",
+            "ms": 3.3
+          },
+          {
+            "fn": "getConnectionEndpoints  src/blocks/connections/ConnectionShapeUtil.tsx:1638",
+            "ms": 3.1
+          },
+          {
+            "fn": "getLiveBlockPorts  src/blocks/connections/blockPorts.ts:160",
+            "ms": 3.1
+          },
+          {
+            "fn": "connectionBindingIsValid  src/blocks/connections/ConnectionBindingUtil.ts:29",
+            "ms": 2.9
+          },
+          {
+            "fn": "SelectionMiniMenu  src/chrome/SystemSketchChrome.tsx:404",
+            "ms": 2.7
+          },
+          {
+            "fn": "getConnectionTerminals  src/blocks/connections/ConnectionShapeUtil.tsx:1612",
+            "ms": 2.3
+          },
+          {
+            "fn": "getConnectionDirection  src/blocks/connections/ConnectionBindingUtil.ts:142",
+            "ms": 2.2
+          },
+          {
+            "fn": "createConnectionFromPort  src/blocks/connections/PointingBlockPort.ts:18",
+            "ms": 2.1
+          },
+          {
+            "fn": "addCycleDiagnostics  src/diagnostics/diagnosticsModel.ts:272",
+            "ms": 2
+          },
+          {
+            "fn": "component  src/blocks/connections/ConnectionShapeUtil.tsx:580",
+            "ms": 2
+          },
+          {
+            "fn": "addDuplicateConnectionDiagnostics  src/diagnostics/diagnosticsModel.ts:196",
+            "ms": 2
+          },
+          {
+            "fn": "blocksThatWouldCycle  src/blocks/connections/connectionRules.ts:128",
+            "ms": 1.8
+          },
+          {
+            "fn": "connectedBlocksByPolarity  src/blocks/connections/connectionRules.ts:104",
+            "ms": 1.8
+          },
+          {
+            "fn": "getBlockPortConnections  src/blocks/connections/blockPorts.ts:246",
+            "ms": 1.8
+          },
+          {
+            "fn": "pairBlockFaces  src/blocks/connections/connectionScope.ts:40",
+            "ms": 1.8
+          },
+          {
+            "fn": "getConnectionInspectorContext  src/blocks/ui/ConnectionInspector.tsx:48",
+            "ms": 1.8
+          },
+          {
+            "fn": "(anonymous)  src/chrome/SystemSketchChrome.tsx:538",
+            "ms": 1.7
+          }
+        ]
+      }
+    },
+    {
+      "name": "select-all-drag",
+      "wallMs": 1474,
+      "frames": {
+        "frames": 82,
+        "spanMs": 1550,
+        "meanGapMs": 19.1,
+        "p95GapMs": 33.3,
+        "maxGapMs": 66.6,
+        "longTasks": 1,
+        "longTaskMs": 56
+      },
+      "cpu": {
+        "totalMs": 1537,
+        "busyMs": 947,
+        "buckets": {
+          "src": 73,
+          "tldraw": 237,
+          "react": 172,
+          "other": 118,
+          "native": 68,
+          "idle": 590,
+          "program": 251,
+          "gc": 28
+        },
+        "topSelf": [
+          {
+            "fn": "exports.jsx  dep:react_jsx-runtime.js:191",
+            "ms": 74.9
+          },
+          {
+            "fn": "ReactElement  dep:react_jsx-runtime.js:104",
+            "ms": 30.1
+          },
+          {
+            "fn": "get  dep:tldraw.js:8083",
+            "ms": 27.7
+          },
+          {
+            "fn": "exports.jsxs  dep:react_jsx-runtime.js:195",
+            "ms": 25.3
+          },
+          {
+            "fn": "run  (native):0",
+            "ms": 24.1
+          },
+          {
+            "fn": "exports.jsxDEV  dep:react_jsx-dev-runtime.js:191",
+            "ms": 22.8
+          },
+          {
+            "fn": "visit  dep:tldraw.js:6592",
+            "ms": 18.8
+          },
+          {
+            "fn": "add  dep:tldraw.js:6523",
+            "ms": 12.5
+          },
+          {
+            "fn": "getBoundingClientRect  (native):0",
+            "ms": 12.5
+          },
+          {
+            "fn": "get isEmpty  dep:tldraw.js:6505",
+            "ms": 12.5
+          },
+          {
+            "fn": "haveParentsChanged  dep:tldraw.js:6471",
+            "ms": 12
+          },
+          {
+            "fn": "measure  (native):0",
+            "ms": 11.2
+          },
+          {
+            "fn": "ReactElement  dep:react_jsx-dev-runtime.js:104",
+            "ms": 7.5
+          },
+          {
+            "fn": "get  dep:tldraw.js:7834",
+            "ms": 7.3
+          },
+          {
+            "fn": "sameJson  src/blocks/definitions/definitionLinking.ts:48",
+            "ms": 7
+          },
+          {
+            "fn": "maybeCaptureParent  dep:tldraw.js:6741",
+            "ms": 6.6
+          },
+          {
+            "fn": "ReactStrictModeWarnings.recordLegacyContextWarning  dep:client-CvxstDij.js:12833",
+            "ms": 6.5
+          },
+          {
+            "fn": "addObjectDiffToProperties  dep:client-CvxstDij.js:2409",
+            "ms": 6.5
+          },
+          {
+            "fn": "now  (native):0",
+            "ms": 6.5
+          },
+          {
+            "fn": "validateProperty  dep:client-CvxstDij.js:1875",
+            "ms": 6.2
+          },
+          {
+            "fn": "get  dep:tldraw.js:7304",
+            "ms": 6.1
+          },
+          {
+            "fn": "__unsafe__getWithoutCapture  dep:tldraw.js:7264",
+            "ms": 5.7
+          },
+          {
+            "fn": "traverseChild  dep:tldraw.js:6977",
+            "ms": 5.2
+          },
+          {
+            "fn": "setProperty  (native):0",
+            "ms": 5.2
+          },
+          {
+            "fn": "logComponentRender  dep:client-CvxstDij.js:2461",
+            "ms": 5.2
+          },
+          {
+            "fn": "getBindingsFromShape  dep:tldraw.js:34266",
+            "ms": 5
+          },
+          {
+            "fn": "createWorkInProgress  dep:client-CvxstDij.js:2728",
+            "ms": 5
+          },
+          {
+            "fn": "Shape2  dep:tldraw.js:19497",
+            "ms": 4.6
+          },
+          {
+            "fn": "createTask  (native):0",
+            "ms": 4.5
+          },
+          {
+            "fn": "runWithFiberInDEV  dep:client-CvxstDij.js:847",
+            "ms": 4.5
+          }
+        ],
+        "topInclusive": [
+          {
+            "fn": "performWorkOnRoot  dep:client-CvxstDij.js:7940",
+            "ms": 358.5
+          },
+          {
+            "fn": "processRootScheduleInMicrotask  dep:client-CvxstDij.js:8995",
+            "ms": 357.5
+          },
+          {
+            "fn": "(anonymous)  dep:client-CvxstDij.js:9077",
+            "ms": 357.5
+          },
+          {
+            "fn": "performSyncWorkOnRoot  dep:client-CvxstDij.js:9063",
+            "ms": 357.2
+          },
+          {
+            "fn": "flushSyncWorkAcrossRoots_impl  dep:client-CvxstDij.js:8968",
+            "ms": 357.2
+          },
+          {
+            "fn": "run  (native):0",
+            "ms": 325.8
+          },
+          {
+            "fn": "runWithFiberInDEV  dep:client-CvxstDij.js:847",
+            "ms": 303.7
+          },
+          {
+            "fn": "renderRootSync  dep:client-CvxstDij.js:8268",
+            "ms": 278.2
+          },
+          {
+            "fn": "workLoopSync  dep:client-CvxstDij.js:8324",
+            "ms": 275.2
+          },
+          {
+            "fn": "performUnitOfWork  dep:client-CvxstDij.js:8427",
+            "ms": 274.9
+          },
+          {
+            "fn": "run  dep:tldraw.js:30997",
+            "ms": 270.1
+          },
+          {
+            "fn": "_flushEventsForTick  dep:tldraw.js:37052",
+            "ms": 270.1
+          },
+          {
+            "fn": "transaction  dep:tldraw.js:7024",
+            "ms": 269.9
+          },
+          {
+            "fn": "transact  dep:tldraw.js:7044",
+            "ms": 269.9
+          },
+          {
+            "fn": "batch  dep:tldraw.js:26383",
+            "ms": 269.9
+          },
+          {
+            "fn": "flush  dep:tldraw.js:6174",
+            "ms": 269.7
+          },
+          {
+            "fn": "tick  dep:tldraw.js:29557",
+            "ms": 263.2
+          },
+          {
+            "fn": "emit  dep:tldraw.js:21757",
+            "ms": 262.7
+          },
+          {
+            "fn": "beginWork  dep:client-CvxstDij.js:6081",
+            "ms": 254.9
+          },
+          {
+            "fn": "commit  dep:tldraw.js:6939",
+            "ms": 229.2
+          },
+          {
+            "fn": "flushChanges  dep:tldraw.js:6987",
+            "ms": 228.9
+          },
+          {
+            "fn": "renderWithHooks  dep:client-CvxstDij.js:4201",
+            "ms": 221.6
+          },
+          {
+            "fn": "react_stack_bottom_frame  dep:client-CvxstDij.js:12862",
+            "ms": 219.3
+          },
+          {
+            "fn": "tick  dep:tldraw.js:6178",
+            "ms": 214.4
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:6182",
+            "ms": 214.4
+          },
+          {
+            "fn": "updateFunctionComponent  dep:client-CvxstDij.js:5561",
+            "ms": 208.5
+          },
+          {
+            "fn": "maybeScheduleEffect  dep:tldraw.js:7449",
+            "ms": 202.3
+          },
+          {
+            "fn": "__unsafe__getWithoutCapture  dep:tldraw.js:7264",
+            "ms": 184.7
+          },
+          {
+            "fn": "haveParentsChanged  dep:tldraw.js:6471",
+            "ms": 178.4
+          },
+          {
+            "fn": "get  dep:tldraw.js:10890",
+            "ms": 112
+          },
+          {
+            "fn": "exports.jsx  dep:react_jsx-runtime.js:191",
+            "ms": 106.3
+          },
+          {
+            "fn": "get  dep:tldraw.js:7304",
+            "ms": 104.4
+          },
+          {
+            "fn": "renderWithHooksAgain  dep:client-CvxstDij.js:4248",
+            "ms": 98.8
+          },
+          {
+            "fn": "updateSimpleMemoComponent  dep:client-CvxstDij.js:5426",
+            "ms": 98.3
+          },
+          {
+            "fn": "Shape2  dep:tldraw.js:19497",
+            "ms": 88.2
+          },
+          {
+            "fn": "commitRootWhenReady  dep:client-CvxstDij.js:8059",
+            "ms": 80.3
+          },
+          {
+            "fn": "commitRoot  dep:client-CvxstDij.js:8532",
+            "ms": 80.1
+          }
+        ],
+        "srcInclusive": [
+          {
+            "fn": "getGeometry  src/blocks/connections/ConnectionShapeUtil.tsx:245",
+            "ms": 47.1
+          },
+          {
+            "fn": "getConnectionEndpoints  src/blocks/connections/ConnectionShapeUtil.tsx:1638",
+            "ms": 45.1
+          },
+          {
+            "fn": "getConnectionElbowRoute  src/blocks/connections/ConnectionShapeUtil.tsx:1512",
+            "ms": 42.1
+          },
+          {
+            "fn": "getConnectionTerminals  src/blocks/connections/ConnectionShapeUtil.tsx:1612",
+            "ms": 38.6
+          },
+          {
+            "fn": "computeConnectionElbowRoute  src/blocks/connections/ConnectionShapeUtil.tsx:1516",
+            "ms": 37.1
+          },
+          {
+            "fn": "(anonymous)  src/blocks/connections/ConnectionShapeUtil.tsx:1525",
+            "ms": 37.1
+          },
+          {
+            "fn": "ConnectionShapeComponent  src/blocks/connections/ConnectionShapeUtil.tsx:671",
+            "ms": 36.4
+          },
+          {
+            "fn": "(anonymous)  src/SystemSketchUtilities.tsx:162",
+            "ms": 31.7
+          },
+          {
+            "fn": "getBoardDiagnosticsModel  src/diagnostics/diagnosticsModel.ts:309",
+            "ms": 31.5
+          },
+          {
+            "fn": "getConnectionBindings  src/blocks/connections/ConnectionBindingUtil.ts:114",
+            "ms": 27.8
+          },
+          {
+            "fn": "connectionBindingsForTerminal  src/blocks/connections/ConnectionBindingUtil.ts:110",
+            "ms": 27.3
+          },
+          {
+            "fn": "sampleConnectionPoints  src/blocks/connections/ConnectionShapeUtil.tsx:1591",
+            "ms": 26.7
+          },
+          {
+            "fn": "update  src/installConnectorControlVisibility.ts:44",
+            "ms": 23.5
+          },
+          {
+            "fn": "getConnectionBindingPositionInPageSpace  src/blocks/connections/ConnectionBindingUtil.ts:124",
+            "ms": 23.4
+          },
+          {
+            "fn": "getBlockConnectionPortPagePoint  src/blocks/connections/blockPorts.ts:175",
+            "ms": 23.1
+          },
+          {
+            "fn": "getConnectorControlBounds  src/installConnectorControlVisibility.ts:16",
+            "ms": 22.5
+          },
+          {
+            "fn": "remember  src/installConnectorControlVisibility.ts:66",
+            "ms": 21.2
+          },
+          {
+            "fn": "getConnectionShapeGeometryPoints  src/blocks/connections/ConnectionShapeUtil.tsx:1579",
+            "ms": 18.4
+          },
+          {
+            "fn": "(anonymous)  src/blocks/connections/ConnectionShapeUtil.tsx:676",
+            "ms": 16
+          },
+          {
+            "fn": "connectionBranchFade  src/blocks/connections/ConnectionShapeUtil.tsx:1470",
+            "ms": 15.3
+          },
+          {
+            "fn": "getElbowConnectionRoute  src/blocks/connections/connectionRouting.ts:89",
+            "ms": 15.1
+          },
+          {
+            "fn": "routeElbow  src/blocks/elbow/elbowRouter.ts:694",
+            "ms": 14.8
+          },
+          {
+            "fn": "autoPoints  src/blocks/elbow/elbowRouter.ts:576",
+            "ms": 14.1
+          },
+          {
+            "fn": "attemptRoute  src/blocks/elbow/elbowRouter.ts:497",
+            "ms": 13.9
+          },
+          {
+            "fn": "(anonymous)  src/chrome/SelectionContextualMenu.tsx:93",
+            "ms": 13.5
+          },
+          {
+            "fn": "getLiveBlockPorts  src/blocks/connections/blockPorts.ts:160",
+            "ms": 13.3
+          },
+          {
+            "fn": "getConnectionElbowBoxes  src/blocks/connections/ConnectionShapeUtil.tsx:1535",
+            "ms": 13
+          },
+          {
+            "fn": "getBlockPortConnections  src/blocks/connections/blockPorts.ts:246",
+            "ms": 11
+          },
+          {
+            "fn": "inspectConnection  src/diagnostics/diagnosticsModel.ts:66",
+            "ms": 10.8
+          },
+          {
+            "fn": "getConnectionShapePath  src/blocks/connections/ConnectionShapeUtil.tsx:1648",
+            "ms": 10.3
+          },
+          {
+            "fn": "(anonymous)  src/blocks/connections/ConnectionShapeUtil.tsx:674",
+            "ms": 10.3
+          },
+          {
+            "fn": "DataCablePath  src/blocks/connections/ConnectionShapeUtil.tsx:987",
+            "ms": 10
+          },
+          {
+            "fn": "toLocalBox  src/blocks/connections/ConnectionShapeUtil.tsx:1540",
+            "ms": 9.9
+          },
+          {
+            "fn": "getConnectionRenderPoints  src/blocks/connections/ConnectionShapeUtil.tsx:1588",
+            "ms": 9
+          },
+          {
+            "fn": "(anonymous)  src/blocks/connections/ConnectionShapeUtil.tsx:725",
+            "ms": 9
+          },
+          {
+            "fn": "createComputedCache.areResultsEqual  src/blocks/connections/blockPorts.ts:216",
+            "ms": 8.8
+          },
+          {
+            "fn": "getConnectionDirection  src/blocks/connections/ConnectionBindingUtil.ts:142",
+            "ms": 8
+          },
+          {
+            "fn": "getPortHostPort  src/blocks/connections/blockPorts.ts:167",
+            "ms": 7.9
+          },
+          {
+            "fn": "sameJson  src/blocks/definitions/definitionLinking.ts:48",
+            "ms": 7
+          },
+          {
+            "fn": "(anonymous)  src/blocks/definitions/definitionLinking.ts:517",
+            "ms": 7
+          }
+        ]
+      }
+    },
+    {
+      "name": "hover-sweep",
+      "wallMs": 1322,
+      "frames": {
+        "frames": 82,
+        "spanMs": 1400,
+        "meanGapMs": 17.3,
+        "p95GapMs": 16.8,
+        "maxGapMs": 66.8,
+        "longTasks": 0,
+        "longTaskMs": 0
+      },
+      "cpu": {
+        "totalMs": 1399,
+        "busyMs": 176,
+        "buckets": {
+          "src": 3,
+          "tldraw": 25,
+          "react": 3,
+          "other": 11,
+          "native": 3,
+          "idle": 1223,
+          "program": 131,
+          "gc": 0
+        },
+        "topSelf": [
+          {
+            "fn": "haveParentsChanged  dep:tldraw.js:6471",
+            "ms": 4.8
+          },
+          {
+            "fn": "visit  dep:tldraw.js:6592",
+            "ms": 2.8
+          },
+          {
+            "fn": "get isEmpty  dep:tldraw.js:6505",
+            "ms": 2.5
+          },
+          {
+            "fn": "traverseChild  dep:tldraw.js:6977",
+            "ms": 2.3
+          },
+          {
+            "fn": "ReactElement  dep:react_jsx-runtime.js:104",
+            "ms": 1.7
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:78048",
+            "ms": 1.4
+          },
+          {
+            "fn": "propagateParentContextChanges  dep:client-CvxstDij.js:3163",
+            "ms": 1.3
+          },
+          {
+            "fn": "maybeScheduleEffect  dep:tldraw.js:7449",
+            "ms": 1.3
+          },
+          {
+            "fn": "(anonymous)  dep:client-CvxstDij.js:9240",
+            "ms": 1
+          },
+          {
+            "fn": "SyntheticBaseEvent  dep:client-CvxstDij.js:2099",
+            "ms": 0.8
+          },
+          {
+            "fn": "batchedUpdates$1  dep:client-CvxstDij.js:2040",
+            "ms": 0.8
+          },
+          {
+            "fn": "fetch  (native):0",
+            "ms": 0.8
+          },
+          {
+            "fn": "getListener  dep:client-CvxstDij.js:2051",
+            "ms": 0.8
+          },
+          {
+            "fn": "createWorkInProgress  dep:client-CvxstDij.js:2728",
+            "ms": 0.8
+          },
+          {
+            "fn": "measure  (native):0",
+            "ms": 0.7
+          },
+          {
+            "fn": "areHookInputsEqual  dep:client-CvxstDij.js:4194",
+            "ms": 0.7
+          },
+          {
+            "fn": "getEventTarget  dep:client-CvxstDij.js:2005",
+            "ms": 0.5
+          },
+          {
+            "fn": "isFrameLike  src/blocks/BlockShapeUtil.tsx:624",
+            "ms": 0.5
+          },
+          {
+            "fn": "flushChanges  dep:tldraw.js:6987",
+            "ms": 0.5
+          },
+          {
+            "fn": "reconcileChildFibersImpl  dep:client-CvxstDij.js:3777",
+            "ms": 0.5
+          },
+          {
+            "fn": "attach  dep:tldraw.js:6482",
+            "ms": 0.5
+          },
+          {
+            "fn": "run  (native):0",
+            "ms": 0.5
+          },
+          {
+            "fn": "ReactElement  dep:react.js:132",
+            "ms": 0.5
+          },
+          {
+            "fn": "now  (native):0",
+            "ms": 0.5
+          },
+          {
+            "fn": "serializeTldrawJson  dep:tldraw.js:100094",
+            "ms": 0.5
+          },
+          {
+            "fn": "add  dep:tldraw.js:6523",
+            "ms": 0.5
+          },
+          {
+            "fn": "getActiveOverlayEntries  dep:tldraw.js:29746",
+            "ms": 0.5
+          },
+          {
+            "fn": "addObjectDiffToProperties  dep:client-CvxstDij.js:2409",
+            "ms": 0.5
+          },
+          {
+            "fn": "descriptor.value  dep:tldraw.js:7322",
+            "ms": 0.4
+          },
+          {
+            "fn": "requestAnimationFrame  (native):0",
+            "ms": 0.3
+          }
+        ],
+        "topInclusive": [
+          {
+            "fn": "flush  dep:tldraw.js:6174",
+            "ms": 21.4
+          },
+          {
+            "fn": "tick  dep:tldraw.js:6178",
+            "ms": 21.4
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:6182",
+            "ms": 21.4
+          },
+          {
+            "fn": "run  dep:tldraw.js:30997",
+            "ms": 20.6
+          },
+          {
+            "fn": "transaction  dep:tldraw.js:7024",
+            "ms": 20.4
+          },
+          {
+            "fn": "transact  dep:tldraw.js:7044",
+            "ms": 20.4
+          },
+          {
+            "fn": "batch  dep:tldraw.js:26383",
+            "ms": 20.4
+          },
+          {
+            "fn": "tick  dep:tldraw.js:29557",
+            "ms": 20.1
+          },
+          {
+            "fn": "_flushEventsForTick  dep:tldraw.js:37052",
+            "ms": 19.8
+          },
+          {
+            "fn": "emit  dep:tldraw.js:21757",
+            "ms": 19.8
+          },
+          {
+            "fn": "flushChanges  dep:tldraw.js:6987",
+            "ms": 14.5
+          },
+          {
+            "fn": "commit  dep:tldraw.js:6939",
+            "ms": 14.5
+          },
+          {
+            "fn": "performWorkUntilDeadline  dep:client-CvxstDij.js:16",
+            "ms": 14.1
+          },
+          {
+            "fn": "run  (native):0",
+            "ms": 13.7
+          },
+          {
+            "fn": "performWorkOnRoot  dep:client-CvxstDij.js:7940",
+            "ms": 13.1
+          },
+          {
+            "fn": "performWorkOnRootViaSchedulerTask  dep:client-CvxstDij.js:9049",
+            "ms": 13.1
+          },
+          {
+            "fn": "runWithFiberInDEV  dep:client-CvxstDij.js:847",
+            "ms": 12.4
+          },
+          {
+            "fn": "haveParentsChanged  dep:tldraw.js:6471",
+            "ms": 10.2
+          },
+          {
+            "fn": "performUnitOfWork  dep:client-CvxstDij.js:8427",
+            "ms": 9.5
+          },
+          {
+            "fn": "workLoopSync  dep:client-CvxstDij.js:8324",
+            "ms": 9.5
+          },
+          {
+            "fn": "renderRootSync  dep:client-CvxstDij.js:8268",
+            "ms": 9.5
+          },
+          {
+            "fn": "__unsafe__getWithoutCapture  dep:tldraw.js:7264",
+            "ms": 9.5
+          },
+          {
+            "fn": "maybeScheduleEffect  dep:tldraw.js:7449",
+            "ms": 8.9
+          },
+          {
+            "fn": "beginWork  dep:client-CvxstDij.js:6081",
+            "ms": 8.7
+          },
+          {
+            "fn": "renderWithHooks  dep:client-CvxstDij.js:4201",
+            "ms": 6
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:37053",
+            "ms": 5.9
+          },
+          {
+            "fn": "react_stack_bottom_frame  dep:client-CvxstDij.js:12862",
+            "ms": 5.7
+          },
+          {
+            "fn": "_flushEventForTick  dep:tldraw.js:37067",
+            "ms": 5.6
+          },
+          {
+            "fn": "handleEvent  dep:tldraw.js:29952",
+            "ms": 5.6
+          },
+          {
+            "fn": "dispatchContinuousEvent  dep:client-CvxstDij.js:11306",
+            "ms": 5.5
+          },
+          {
+            "fn": "onPointerMove  dep:tldraw.js:95366",
+            "ms": 5.4
+          },
+          {
+            "fn": "dispatchEvent  dep:client-CvxstDij.js:11316",
+            "ms": 5.2
+          },
+          {
+            "fn": "traverseChild  dep:tldraw.js:6977",
+            "ms": 5.1
+          },
+          {
+            "fn": "traverse  dep:tldraw.js:6983",
+            "ms": 5.1
+          },
+          {
+            "fn": "(anonymous)  dep:tldraw.js:6995",
+            "ms": 5.1
+          },
+          {
+            "fn": "visit  dep:tldraw.js:6592",
+            "ms": 5.1
+          },
+          {
+            "fn": "batchedUpdates$1  dep:client-CvxstDij.js:2040",
+            "ms": 4.4
+          }
+        ],
+        "srcInclusive": [
+          {
+            "fn": "(anonymous)  src/workspace/LocalWorkspace.tsx:344",
+            "ms": 2.5
+          },
+          {
+            "fn": "(anonymous)  src/blocks/connections/ConnectionShapeUtil.tsx:707",
+            "ms": 1.9
+          },
+          {
+            "fn": "writeWorkspaceDocument  src/workspace/workspaceClient.ts:165",
+            "ms": 1.3
+          },
+          {
+            "fn": "update  src/installConnectorControlVisibility.ts:44",
+            "ms": 1
+          },
+          {
+            "fn": "requestPayload  src/workspace/workspaceClient.ts:66",
+            "ms": 0.8
+          },
+          {
+            "fn": "post  src/workspace/workspaceClient.ts:150",
+            "ms": 0.8
+          },
+          {
+            "fn": "(anonymous)  src/workspace/workspaceClient.ts:171",
+            "ms": 0.8
+          },
+          {
+            "fn": "traceWorkspace  src/workspace/workspaceClient.ts:94",
+            "ms": 0.8
+          },
+          {
+            "fn": "remember  src/installConnectorControlVisibility.ts:66",
+            "ms": 0.7
+          },
+          {
+            "fn": "connectionBindingsForTerminal  src/blocks/connections/ConnectionBindingUtil.ts:110",
+            "ms": 0.7
+          },
+          {
+            "fn": "getConnectionBindings  src/blocks/connections/ConnectionBindingUtil.ts:114",
+            "ms": 0.7
+          },
+          {
+            "fn": "(anonymous)  src/workspace/LocalWorkspace.tsx:292",
+            "ms": 0.7
+          },
+          {
+            "fn": "isFrameLike  src/blocks/BlockShapeUtil.tsx:624",
+            "ms": 0.5
+          },
+          {
+            "fn": "getFocusedTunnelLayer  src/blocks/connections/tunnelLayers.ts:13",
+            "ms": 0.5
+          },
+          {
+            "fn": "onBeforeEvent  src/instantTextEditing.ts:75",
+            "ms": 0.3
+          },
+          {
+            "fn": "isWithinCanvasViewport  src/installConnectorControlVisibility.ts:6",
+            "ms": 0.3
+          },
+          {
+            "fn": "encodeSystemSketchDocument  src/workspace/systemSketchFile.ts:63",
+            "ms": 0.3
+          },
+          {
+            "fn": "encodeDocumentForPath  src/workspace/workspaceModel.ts:34",
+            "ms": 0.3
+          },
+          {
+            "fn": "ReliableContextMenu  src/blocks/ui/ReliableContextMenu.tsx:19",
+            "ms": 0.2
+          },
+          {
+            "fn": "(anonymous)  src/workspace/LocalWorkspace.tsx:972",
+            "ms": 0.2
+          },
+          {
+            "fn": "SystemSketchWorkspaceProvider  src/workspace/LocalWorkspace.tsx:127",
+            "ms": 0.2
+          },
+          {
+            "fn": "SystemSketchMenuPanel  src/chrome/SystemSketchChrome.tsx:109",
+            "ms": 0.2
+          }
+        ]
+      }
+    }
+  ],
+  "loadMs": 856,
+  "seed": {
+    "blocks": 48,
+    "cables": 68,
+    "seedMs": 34,
+    "zoom": 0.3412633305988515,
+    "shapesOnPage": 116
+  }
+}
