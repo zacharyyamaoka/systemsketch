@@ -5,6 +5,7 @@ import {
 	portDefaultValue,
 	type BlockPort,
 	type BlockShape,
+	type BlockState,
 } from '../blocks/blockModel'
 import {
 	getPortHostPort,
@@ -39,6 +40,27 @@ export const BOARD_DIAGNOSTIC_CODES = {
 export type BoardDiagnosticCode =
 	(typeof BOARD_DIAGNOSTIC_CODES)[keyof typeof BOARD_DIAGNOSTIC_CODES]
 export type BoardDiagnosticSeverity = 'error' | 'warning' | 'info'
+
+/**
+ * The linter's severity, said in the primitives' own state vocabulary.
+ *
+ * The board diff contract's seventh rule is that a diff mark and a lint mark
+ * are the same visual object with different producers — "one state vocabulary
+ * on the primitives, two producers". This is the lint lane's half of that map,
+ * and it is the reason `BLOCK_STATES` carries `error` and `warning` at all.
+ *
+ * `info` deliberately flattens to `normal`: a note is not a mark, and painting
+ * every informational finding is how a board loses the ability to look calm.
+ *
+ * WHY here rather than in `src/diff/`: the diff lane must not depend on the
+ * lint lane's internals, so the mapping is owned by the producer that knows
+ * what a severity means. `src/diff/diffState.test.ts` pins every case.
+ */
+export function diagnosticSeverityState(severity: BoardDiagnosticSeverity): BlockState {
+	if (severity === 'error') return 'error'
+	if (severity === 'warning') return 'warning'
+	return 'normal'
+}
 
 /**
  * A future analyzer may point at a Python span as well as a canvas shape.
