@@ -188,7 +188,7 @@ REVIEW_ITEMS = [
         "evidence": (
             "The green browser run remains in error—not conflict—after the watcher interval, then reaches clean only "
             "after exact B/A replay and C/B both complete. It verifies every final record on disk and fails on unexpected "
-            "console errors. The full check is also green: 99 files / 871 TypeScript tests plus 92 Python tests."
+            "console errors. The full check is also green: 99 files / 875 TypeScript tests plus 92 Python tests."
         ),
         "links": [("browser journey", "../tests/drawio_persistence_alignment_smoke.mjs"), ("npm entry", "../package.json")],
     },
@@ -504,7 +504,7 @@ def build() -> str:
       <span>Adapt the proven failure-handling rules. Preserve digest CAS, cross-process locking, and atomic publication.</span>
     </div>
     <div class="meta-row">
-      <span>13 independently reviewable decisions</span><span>9 implemented/proof items</span><span>2 intentional divergences</span><span>2 bounded deferrals</span><span>99 files · 871 TS + 92 Python tests green</span><span>browser journey green</span><span>file:// ready</span>
+      <span>13 independently reviewable decisions</span><span>9 implemented/proof items</span><span>2 intentional divergences</span><span>2 bounded deferrals</span><span>99 files · 875 TS + 92 Python tests green</span><span>browser journey green</span><span>file:// ready</span>
     </div>
   </header>
 
