@@ -524,7 +524,7 @@ function DetachedArrowPaint({
 				<ConnectionDelayedCablePaths
 					path={visual.d}
 					pill={pill}
-					dashAfterPill={presentation.dashAfterPill}
+					solidBeforePill={presentation.solidBeforePill ?? presentation.dashAfterPill ?? false}
 					stroke={visual.strokeColor}
 					strokeWidth={visual.strokeWidth}
 					vectorEffect="non-scaling-stroke"

@@ -63,7 +63,7 @@ code{{background:#eef3fa;border-radius:6px;padding:2px 6px;color:#31526f}} foote
 <body><main>
 <div class="eyebrow">SystemSketch · verified 2026-09-02</div>
 <h1>Detach the arrow, not its visual language.</h1>
-<p class="lede">A connection can now become a stock tldraw arrow on its own. Async cadence, delayed dots, pill position, and <code>z⁻¹ = value</code> survive the transfer—and continue to follow stock routing when endpoints move.</p>
+<p class="lede">A connection can now become a stock tldraw arrow on its own. Async cadence, the delayed cable's solid-before/dotted-after split, pill position, and <code>z⁻¹ = value</code> survive the transfer—and continue to follow stock routing when endpoints move.</p>
 <div class="metrics">
   <div class="metric"><strong>{minimum_edge * 100:.2f}%</strong><span>worst edge-map similarity</span></div>
   <div class="metric"><strong>3 / 3</strong><span>direct + Block-triggered visual cases</span></div>

@@ -5,10 +5,13 @@
       "rebuildWithBlocks": true,
       "temporal": "async",
       "delayValue": "",
+      "solidBeforePill": true,
       "exact": true,
       "presentationBody": true,
       "dash": "56 4 10 4",
       "cap": "butt",
+      "delaySegments": [],
+      "delayDashes": [],
       "pill": null,
       "bindings": 2
     },
@@ -17,10 +20,13 @@
       "rebuildWithBlocks": false,
       "temporal": "async",
       "delayValue": "",
+      "solidBeforePill": true,
       "exact": true,
       "presentationBody": true,
       "dash": "56 4 10 4",
       "cap": "butt",
+      "delaySegments": [],
+      "delayDashes": [],
       "pill": null,
       "bindings": 2
     },
@@ -29,10 +35,19 @@
       "rebuildWithBlocks": true,
       "temporal": "delayed",
       "delayValue": "11",
+      "solidBeforePill": true,
       "exact": true,
       "presentationBody": true,
-      "dash": "0.1 6",
+      "dash": "580 1000",
       "cap": "round",
+      "delaySegments": [
+        "before",
+        "after"
+      ],
+      "delayDashes": [
+        "580 1000",
+        "0 580 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0 1000"
+      ],
       "pill": "z⁻¹ = 11",
       "bindings": 2
     }
@@ -43,10 +58,13 @@
       "rebuildWithBlocks": true,
       "temporal": "async",
       "delayValue": "",
+      "solidBeforePill": true,
       "exact": false,
       "presentationBody": true,
       "dash": "56 4 10 4",
       "cap": "butt",
+      "delaySegments": [],
+      "delayDashes": [],
       "pill": null,
       "bindings": 2
     },
@@ -55,10 +73,13 @@
       "rebuildWithBlocks": false,
       "temporal": "async",
       "delayValue": "",
+      "solidBeforePill": true,
       "exact": false,
       "presentationBody": true,
       "dash": "56 4 10 4",
       "cap": "butt",
+      "delaySegments": [],
+      "delayDashes": [],
       "pill": null,
       "bindings": 2
     },
@@ -67,10 +88,19 @@
       "rebuildWithBlocks": true,
       "temporal": "delayed",
       "delayValue": "11",
+      "solidBeforePill": true,
       "exact": false,
       "presentationBody": true,
-      "dash": "0.1 6",
+      "dash": "580 1000",
       "cap": "round",
+      "delaySegments": [
+        "before",
+        "after"
+      ],
+      "delayDashes": [
+        "580 1000",
+        "0 580 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0 1000"
+      ],
       "pill": "z⁻¹ = 11",
       "bindings": 2
     }
@@ -81,10 +111,13 @@
       "rebuildWithBlocks": true,
       "temporal": "async",
       "delayValue": "",
+      "solidBeforePill": true,
       "exact": false,
       "presentationBody": true,
       "dash": "56 4 10 4",
       "cap": "butt",
+      "delaySegments": [],
+      "delayDashes": [],
       "pill": null,
       "bindings": 2
     },
@@ -93,10 +126,13 @@
       "rebuildWithBlocks": false,
       "temporal": "async",
       "delayValue": "",
+      "solidBeforePill": true,
       "exact": false,
       "presentationBody": true,
       "dash": "56 4 10 4",
       "cap": "butt",
+      "delaySegments": [],
+      "delayDashes": [],
       "pill": null,
       "bindings": 2
     },
@@ -105,10 +141,19 @@
       "rebuildWithBlocks": true,
       "temporal": "delayed",
       "delayValue": "11",
+      "solidBeforePill": true,
       "exact": false,
       "presentationBody": true,
-      "dash": "0.1 6",
+      "dash": "580 1000",
       "cap": "round",
+      "delaySegments": [
+        "before",
+        "after"
+      ],
+      "delayDashes": [
+        "580 1000",
+        "0 580 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0 1000"
+      ],
       "pill": "z⁻¹ = 11",
       "bindings": 2
     }
@@ -124,7 +169,14 @@
         "cap": "butt"
       }
     ],
-    "delayedDash": "0.1 6",
+    "delayedSegments": [
+      "before",
+      "after"
+    ],
+    "delayedDashes": [
+      "580 1000",
+      "0 580 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0 1000"
+    ],
     "pill": "z⁻¹ = 11"
   },
   "crops": [
@@ -135,7 +187,7 @@
         "wholeSimilarity": 1,
         "foregroundSimilarity": 1,
         "edgeSimilarity": 1,
-        "foregroundPixels": 832,
+        "foregroundPixels": 1079,
         "totalPixels": 16660
       }
     },
@@ -168,7 +220,7 @@
     "standaloneStaysIndependent": true,
     "exactFrameUsesPresentationRenderer": true,
     "asyncCadenceAndCapsMatch": true,
-    "delayedDotsAndTextMatch": true,
+    "delayedSplitAndTextMatch": true,
     "svgExportKeepsPresentation": true,
     "edgeCropsAtLeast99Percent": true,
     "movementHandsGeometryToStock": true,

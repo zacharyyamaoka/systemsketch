@@ -99,7 +99,7 @@ async function arrowStates(page) {
         const root = document.querySelector('[data-shape-id="' + shape.id + '"]')
         const style = shape.meta.systemSketchPrimitiveStyle
         const asyncPath = root?.querySelector('[data-detached-edge-type="async"] path')
-        const delayPath = root?.querySelector('[data-detached-delay-segment] path[data-delay-segment]')
+        const delayPaths = Array.from(root?.querySelectorAll('[data-detached-delay-segment] path[data-delay-segment]') ?? [])
         const pill = root?.querySelector('[data-testid="connection-delay-pill"]')
         return {
           id: shape.id,
@@ -107,10 +107,13 @@ async function arrowStates(page) {
           rebuildWithBlocks: shape.meta.systemSketch.rebuildWithBlocks,
           temporal: style?.presentation?.temporal ?? null,
           delayValue: style?.presentation?.delayValue ?? null,
+          solidBeforePill: style?.presentation?.solidBeforePill ?? null,
           exact: Boolean(root?.querySelector('[data-systemsketch-detached-edge="exact"]')),
           presentationBody: Boolean(root?.querySelector('.systemsketch-detached-arrow-presentation__body')),
-          dash: asyncPath?.getAttribute('stroke-dasharray') ?? delayPath?.getAttribute('stroke-dasharray') ?? null,
-          cap: asyncPath?.getAttribute('stroke-linecap') ?? delayPath?.getAttribute('stroke-linecap') ?? null,
+          dash: asyncPath?.getAttribute('stroke-dasharray') ?? delayPaths[0]?.getAttribute('stroke-dasharray') ?? null,
+          cap: asyncPath?.getAttribute('stroke-linecap') ?? delayPaths[0]?.getAttribute('stroke-linecap') ?? null,
+          delaySegments: delayPaths.map((path) => path.getAttribute('data-delay-segment')),
+          delayDashes: delayPaths.map((path) => path.getAttribute('stroke-dasharray')),
           pill: pill?.querySelector('text')?.textContent ?? null,
           bindings: editor.getBindingsFromShape(shape.id, 'arrow').length,
         }
@@ -146,6 +149,9 @@ async function main() {
     const board = join(filesRoot, 'SystemSketch', 'detached-connection-presentation.systemsketch')
     await openApp(page, port, `?board=${encodeURIComponent(board)}`)
     await waitFor(page, 'window.__systemsketch?.editor', 'editor')
+    await evaluate(page, `localStorage.setItem('systemsketch.cable-presentation.v1', JSON.stringify({ solidBeforePill: true })); true`)
+    await openApp(page, port, `?board=${encodeURIComponent(board)}`)
+    await waitFor(page, 'window.__systemsketch?.editor', 'editor with split delayed presentation')
     await delay(450)
 
     await evaluate(page, `(() => {
@@ -228,7 +234,8 @@ async function main() {
           dash: path.getAttribute('stroke-dasharray'),
           cap: path.getAttribute('stroke-linecap'),
         })),
-        delayedDash: svg.querySelector('[data-detached-delay-segment] path[data-delay-segment]')?.getAttribute('stroke-dasharray') ?? null,
+        delayedSegments: Array.from(svg.querySelectorAll('[data-detached-delay-segment] path[data-delay-segment]')).map((path) => path.getAttribute('data-delay-segment')),
+        delayedDashes: Array.from(svg.querySelectorAll('[data-detached-delay-segment] path[data-delay-segment]')).map((path) => path.getAttribute('stroke-dasharray')),
         pill: svg.querySelector('[data-testid="connection-delay-pill"] text')?.textContent ?? null,
       })
     })()`))
@@ -266,18 +273,26 @@ async function main() {
       exactFrameUsesPresentationRenderer: immediate.every((arrow) => arrow.presentationBody),
       asyncCadenceAndCapsMatch: asyncArrows.length === 2
         && asyncArrows.every((arrow) => arrow.dash === '56 4 10 4' && arrow.cap === 'butt'),
-      delayedDotsAndTextMatch: delayedArrow?.dash === '0.1 6'
+      delayedSplitAndTextMatch: delayedArrow?.solidBeforePill === true
+        && JSON.stringify(delayedArrow.delaySegments) === JSON.stringify(['before', 'after'])
+        && delayedArrow.delayDashes[0] === '580 1000'
+        && delayedArrow.delayDashes[1]?.startsWith('0 580 ')
         && delayedArrow.cap === 'round' && delayedArrow.pill === 'z⁻¹ = 11',
       svgExportKeepsPresentation: exported.async.length === 2
         && exported.async.every((path) => path.dash === '56 4 10 4' && path.cap === 'butt')
-        && exported.delayedDash === '0.1 6' && exported.pill === 'z⁻¹ = 11',
+        && JSON.stringify(exported.delayedSegments) === JSON.stringify(['before', 'after'])
+        && exported.delayedDashes[0] === '580 1000'
+        && exported.delayedDashes[1]?.startsWith('0 580 ')
+        && exported.pill === 'z⁻¹ = 11',
       edgeCropsAtLeast99Percent: crops.every((item) => item.score.edgeSimilarity >= 0.99),
       movementHandsGeometryToStock: moved.length === 3 && moved.every((arrow) => !arrow.exact),
       movementKeepsPresentation: moved.filter((arrow) => arrow.temporal === 'async').every((arrow) => arrow.dash === '56 4 10 4')
+        && moved.find((arrow) => arrow.temporal === 'delayed')?.solidBeforePill === true
         && moved.find((arrow) => arrow.temporal === 'delayed')?.pill === 'z⁻¹ = 11',
       bindingsRemainLive: moved.every((arrow) => arrow.bindings === 2),
       reloadKeepsPresentation: reloaded.length === 3
         && reloaded.filter((arrow) => arrow.temporal === 'async').every((arrow) => arrow.dash === '56 4 10 4')
+        && reloaded.find((arrow) => arrow.temporal === 'delayed')?.solidBeforePill === true
         && reloaded.find((arrow) => arrow.temporal === 'delayed')?.pill === 'z⁻¹ = 11',
       noConsoleErrors: localConsoleErrors(page).length === 0,
     }

@@ -388,7 +388,7 @@ function detachedCablePrimitiveStyle(
 			temporal: connection.props.temporal,
 			delayValue: connection.props.delayValue,
 			pillPosition: connection.props.pillPosition,
-			dashAfterPill: cablePresentation.get().dashAfterPill,
+			solidBeforePill: cablePresentation.get().solidBeforePill,
 		},
 		path: {
 			d: getConnectionShapePath(editor, connection),
