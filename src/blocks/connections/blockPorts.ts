@@ -126,6 +126,13 @@ function projectBlockConnectionPorts(props: BlockShapeProps): BlockConnectionPor
 					y: point.y / layout.bounds.h,
 				},
 				subtle: point.subtle,
+				// `layoutBlock` already knows which edge it put the dot on, and an
+				// effect output goes on the TOP. Passing that through here is what
+				// lets the routing layer stay a single rule: the port states its
+				// own edge, and nothing downstream special-cases a port kind.
+				elbowSide: placed && placed.edge !== (side === 'input' ? 'left' : 'right')
+					? placed.edge
+					: undefined,
 			}
 		})
 	})

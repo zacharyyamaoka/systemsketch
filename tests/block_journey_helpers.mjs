@@ -18,6 +18,7 @@ import {
   mouse,
   waitFor,
 } from './browser_harness.mjs'
+import { elementBox as box } from './cdp_kit.mjs'
 
 export const SHOTS = join(ROOT, 'docs', 'assets')
 
@@ -26,17 +27,15 @@ export async function shot(page, name) {
   await writeFile(join(SHOTS, name), Buffer.from(capture.data, 'base64'))
 }
 
-export async function box(page, selector) {
-  const value = await evaluate(page, `(() => {
-    const element = document.querySelector(${JSON.stringify(selector)})
-    if (!element) return null
-    const rect = element.getBoundingClientRect()
-    return JSON.stringify({ x: rect.x, y: rect.y, w: rect.width, h: rect.height })
-  })()`)
-  if (!value) throw new Error(`Missing element ${selector}`)
-  const rect = JSON.parse(value)
-  return { ...rect, cx: rect.x + rect.w / 2, cy: rect.y + rect.h / 2 }
-}
+/**
+ * One element's rect. This used to be a second copy of `elementBox` from
+ * `browser_harness.mjs` with different property names — the same body twice, in
+ * the two files that were each meant to be the shared one. The kit's version now
+ * returns both vocabularies, so this is the same function under its other name.
+ */
+// Imported, not just re-exported: this module's own helpers call `box`, and a
+// bare `export ... from` creates no local binding for them.
+export { box }
 
 export const scope = (shapeId) => `[data-shape-id="${shapeId}"]`
 export const portDot = (shapeId, side, portId) =>

@@ -93,23 +93,28 @@ export function getBentCurveCubicControlPoints(
 export interface ConnectionElbowBoxes {
 	start?: ElbowRect | null
 	end?: ElbowRect | null
-	/** Which way the cable leaves the source port. Defaults to `right`. */
+	/**
+	 * The edge each terminal actually sits on, when it is not the usual one.
+	 * Omitted means the historical default: out of the right, into the left.
+	 */
 	startSide?: ElbowSide
-	/** Which way the cable enters the sink port. Defaults to `left`. */
 	endSide?: ElbowSide
 }
 
 /**
- * A cable leaves its source and meets its sink PERPENDICULAR to the face it is
- * on, which is what keeps an elbow's final segment square to that face.
+ * A cable leaves the edge its port sits on, perpendicular to that edge.
  *
- * For a Block that is always rightward out and leftward in, because a Block's
- * ports live on its left and right edges — and for a long time the model simply
- * said so. A region's header ports broke it: the Loop's item outlet sits on the
- * header's bottom edge facing DOWN into the body, and a rightward dongle sent a
- * 120px run on a lap around the whole region. The direction now travels with
- * the port (`BlockConnectionPort.elbowSide`), and these defaults are what a
- * Block's ports still resolve to.
+ * For the two ordinary lanes that is out of the right and into the left, which
+ * is why those are the defaults. Two ports break it, and they arrived from two
+ * directions in the same afternoon: an **effect port sits on the top edge** —
+ * the call gave its value no name and so no right-hand port to leave by — and
+ * a **Loop's item outlet sits on its header's bottom edge**, facing down into
+ * the body, where a rightward dongle sent a 120px run on a lap around the whole
+ * region. Passing the side through is what keeps the first segment
+ * perpendicular to the face the cable actually meets, and the side travels with
+ * the port (`BlockConnectionPort.elbowSide`) so nothing here has to know which
+ * kind of port it is looking at.
+
  */
 export function getElbowRouteInput(
 	start: VecLike,

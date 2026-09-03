@@ -37,6 +37,19 @@ export {
   rectOfBounds,
 } from './geometry'
 
+export type {
+  BoundaryCrossing,
+  BoundaryCrossingOptions,
+  CrossingDirection,
+} from './boundaryCrossing'
+export {
+  boundaryCrossings,
+  firstExit,
+  firstExitPerBox,
+  lastEntry,
+  prefersSide,
+} from './boundaryCrossing'
+
 export type { ElbowPin } from './elbowPins'
 export {
   PIN_SPAN_FLOOR,
