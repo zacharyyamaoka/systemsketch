@@ -74,41 +74,41 @@
   flex: 0 0 auto;
 }
 
-.systemsketch-family-tool__main {
-  position: absolute !important;
-  inset: 0;
-}
-
-.systemsketch-family-tool__menu {
+.systemsketch-family-tool__chevron {
   position: absolute !important;
   z-index: 4;
-  right: 1px;
-  bottom: 1px;
+  right: 2px;
+  bottom: 2px;
   display: grid;
-  width: 15px !important;
-  min-width: 15px !important;
-  height: 15px !important;
-  min-height: 15px !important;
+  width: 13px;
+  height: 13px;
   place-items: center;
-  padding: 0 !important;
-  border-radius: 4px !important;
+  pointer-events: none;
   color: var(--ss-text-muted);
-  background: transparent;
 }
 
-.systemsketch-family-tool__menu:hover,
-.systemsketch-family-tool__menu[data-state='open'] {
+.systemsketch-family-tool:hover .systemsketch-family-tool__chevron,
+.systemsketch-family-tool[data-state='open'] .systemsketch-family-tool__chevron {
   color: var(--ss-text);
-  background: color-mix(in srgb, var(--ss-surface-raised) 72%, transparent);
 }
 
-.systemsketch-family-tool[data-isactive='true'] .systemsketch-family-tool__menu {
+.systemsketch-family-tool[data-isactive='true'] .systemsketch-family-tool__chevron {
   color: color-mix(in srgb, var(--ss-accent-text) 78%, transparent);
 }
 
-.systemsketch-family-tool__menu .tlui-icon {
+.systemsketch-family-tool__chevron .tlui-icon {
   width: 9px !important;
   height: 9px !important;
+}
+
+/* Stock tldraw deliberately makes the first canvas click after opening any
+ * menu dismiss-only. A family tile is different: its opening press has already
+ * armed the displayed drawing tool, so let the next canvas gesture reach that
+ * tool while Radix's outside-pointer listener dismisses the picker. Scope this
+ * to our three family menus; context menus and every other stock menu retain
+ * tldraw's click-capture layer. */
+.systemsketch-app:has(.systemsketch-family-tool[data-state='open']) .tlui-menu-click-capture {
+  pointer-events: none;
 }
 
 .systemsketch-tool-menu {

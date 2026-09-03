@@ -209,11 +209,11 @@ async function main() {
     await delay(800)
 
     // 1 · The Branch tool lives in the system-design submenu under the Block slot.
-    check('BR-1', 'the Block slot is a family with a submenu, not a bare button',
-      await evaluate(page, `Boolean(document.querySelector('[data-testid="systemsketch-tool-system-menu"]'))`), true)
+    check('BR-1', 'the whole Block family slot is the submenu trigger, not a split target',
+      await evaluate(page, `document.querySelector('[data-testid="systemsketch-tool-system"]')?.getAttribute('aria-haspopup') ?? null`), 'menu')
     check('BR-2', 'Branch is not a top-level toolbar slot',
       await evaluate(page, `Boolean(document.querySelector('[data-testid="systemsketch-tool-branch"]'))`), false)
-    await clickTestId(page, 'systemsketch-tool-system-menu')
+    await clickTestId(page, 'systemsketch-tool-system')
     await waitFor(page, `Array.from(document.querySelectorAll('.systemsketch-tool-menu__item')).some((n) => n.textContent.includes('Branch'))`, 'system menu')
     const items = JSON.parse(await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('.systemsketch-tool-menu__item .tlui-button__label')).map((n) => n.textContent.trim()))`))
     check('BR-3', 'the submenu lists Block, Branch and Pill under one heading', items, ['Block', 'Branch', 'Pill'])

@@ -198,7 +198,7 @@ async function armArrow(page, advance) {
 
 /** What the toolbar's arrow rows say, top to bottom. */
 async function arrowMenuRows(page) {
-  const trigger = await box(page, '[data-testid="systemsketch-tool-shape-menu"]')
+  const trigger = await box(page, '[data-testid="systemsketch-tool-shape"]')
   await clickAt(page, trigger.cx, trigger.cy)
   await waitFor(page,
     `Array.from(document.querySelectorAll('.systemsketch-tool-menu__item'))
