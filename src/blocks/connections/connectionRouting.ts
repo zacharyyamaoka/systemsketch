@@ -21,6 +21,7 @@ import {
 	type ElbowRect,
 	type ElbowRoute,
 	type ElbowRouteInput,
+	type ElbowSide,
 } from '../elbow'
 import type { ConnectionRoutingKind } from './connectionModel'
 
@@ -92,12 +93,23 @@ export function getBentCurveCubicControlPoints(
 export interface ConnectionElbowBoxes {
 	start?: ElbowRect | null
 	end?: ElbowRect | null
+	/**
+	 * The edge each terminal actually sits on, when it is not the usual one.
+	 * Omitted means the historical default: out of the right, into the left.
+	 */
+	startSide?: ElbowSide
+	endSide?: ElbowSide
 }
 
 /**
- * A cable always leaves an output rightward and enters an input leftward — that
- * is the ports' own geometry in this model, and it is what keeps an elbow's
- * final segment perpendicular to the Block face it meets.
+ * A cable leaves the edge its port sits on, perpendicular to that edge.
+ *
+ * For the two ordinary lanes that is out of the right and into the left, which
+ * is why those are the defaults. An **effect port sits on the top edge** — the
+ * call gave its value no name and so no right-hand port to leave by — and a
+ * cable off one has to climb *out* of the top before it turns, or it reads as
+ * though it came out of the side. Passing the side through is what keeps the
+ * first segment perpendicular to the face the cable actually meets.
  */
 export function getElbowRouteInput(
 	start: VecLike,
@@ -106,8 +118,16 @@ export function getElbowRouteInput(
 	pins: readonly ElbowPin[],
 ): ElbowRouteInput {
 	return {
-		start: { point: { x: start.x, y: start.y }, side: 'right', box: boxes.start ?? null },
-		end: { point: { x: end.x, y: end.y }, side: 'left', box: boxes.end ?? null },
+		start: {
+			point: { x: start.x, y: start.y },
+			side: boxes.startSide ?? 'right',
+			box: boxes.start ?? null,
+		},
+		end: {
+			point: { x: end.x, y: end.y },
+			side: boxes.endSide ?? 'left',
+			box: boxes.end ?? null,
+		},
 		pins,
 	}
 }

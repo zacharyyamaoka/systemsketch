@@ -21,7 +21,10 @@ import {
   type BlockShapeProps,
   type BlockPresentationView,
   blockPortSections,
+  isEffectPort,
+  mutatedInputId,
   portInHeader,
+  portMutates,
   setBlockViewProps,
 } from '../blockModel'
 import { commitBlockDefinitionName, definitionBadge } from '../definitions/definitionLinking'
@@ -737,6 +740,26 @@ function PortSection({
         </li>
       )
     }
+    // A derived port is not authored: it exists because an argument is marked as
+    // written in place, its name is that argument's, and deleting it would only
+    // have the next reconcile put it back. Show it, say why, and edit neither.
+    if (isEffectPort(port)) {
+      const source = mutatedInputId(port)
+      return (
+        <li
+          key={port.id}
+          className="block-inspector__port-row block-inspector__port-row--derived"
+          {...shared}
+          data-testid={`inspector-port-derived-${port.id}`}
+        >
+          <span className="block-inspector__derived-mark" aria-hidden="true">mut</span>
+          <span className="block-inspector__derived-name">{port.name || port.id}</span>
+          <span className="block-inspector__derived-note">
+            {source ? `derived — ${source} is written in place` : 'derived'}
+          </span>
+        </li>
+      )
+    }
     return (
       <li
         key={port.id}
@@ -774,6 +797,25 @@ function PortSection({
             onWrite={(defaultValue) =>
               actions?.updatePort(side, port.id, { defaultValue }, { continuous: true })}
           />
+        ) : null}
+        {side === 'inputs' ? (
+          <button
+            type="button"
+            className="block-inspector__port-mutates"
+            disabled={!actions}
+            aria-pressed={portMutates(port)}
+            data-testid={`inspector-port-mutates-${port.id}`}
+            title={portMutates(port)
+              ? `${port.name || port.id} is written in place; its new value leaves by the effect port`
+              : `Mark ${port.name || port.id} as written in place`}
+            aria-label={`${portMutates(port) ? 'Stop marking' : 'Mark'} ${port.name || port.id} as written in place`}
+            onClick={() => {
+              actions?.beginEdit?.('mark port as mutated')
+              actions?.updatePort(side, port.id, { mutates: !portMutates(port) })
+            }}
+          >
+            mut
+          </button>
         ) : null}
         <button
           type="button"

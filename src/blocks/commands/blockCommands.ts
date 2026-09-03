@@ -14,6 +14,7 @@ import {
   getDefaultBlockProps,
   isBlockShape,
   normalizeBlockPortRows,
+  reconcileEffectPorts,
   portBranch,
   portInHeader,
   portRow,
@@ -373,9 +374,11 @@ export function patchBlockPortProps(
       ? port
       : next
   })
-  return ports.every((port, index) => port === props[side][index])
-    ? props
-    : { ...props, [side]: ports }
+  if (ports.every((port, index) => port === props[side][index])) return props
+  // Marking an argument as written in place is what creates its effect port, so
+  // the reconcile belongs here rather than at each caller: the inspector, the
+  // context menu and a tool draft all patch ports through this one function.
+  return reconcileEffectPorts({ ...props, [side]: ports })
 }
 
 /**
