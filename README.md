@@ -280,6 +280,9 @@ Install the resulting `dist/systemsketch-vscode-0.1.0.vsix` from the Extensions 
 
 **Make Preview Stable** publishes the standalone app first, then attempts to rebuild this VSIX and
 the Obsidian bundle. A plugin failure leaves the new standalone Stable available.
+The [Preview promotion provenance gallery](docs/preview-promotion-dirty-2026-09-03.html) records
+the two-click dirty-working-copy path: the user-visible confirmation, manifest audit marker, and
+isolated browser proof.
 The accepted copies live under `~/.local/share/systemsketch/runtime/host-releases/<build>/`, with
 one checksum manifest naming the shared VS Code/Cursor package and every Obsidian plugin file.
 The working-tree `dist/` folders are left on the same build for convenient manual installation.
