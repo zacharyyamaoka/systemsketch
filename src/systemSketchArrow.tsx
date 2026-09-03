@@ -1,13 +1,17 @@
 import {
 	ArrowShapeUtil,
 	Group2d,
+	Mat,
 	PathBuilder,
 	Polyline2d,
 	SVGContainer,
 	Vec,
+	getArrowBindings,
 	getArrowInfo,
 	getDisplayValues,
 	useColorMode,
+	useEditor,
+	useValue,
 	type IndexKey,
 	type Editor,
 	type JsonObject,
@@ -24,6 +28,12 @@ import {
 	resolveAuthoredRoute,
 	type ConnectionElbowRouteModel,
 } from './blocks/connections/elbowAuthoredRoute'
+import {
+	readSystemSketchPrimitiveStyle,
+	systemSketchPrimitiveMeta,
+	type AffineTransform,
+	type SystemSketchArrowPathSnapshot,
+} from './stockPrimitiveVisuals'
 
 /**
  * A versioned, namespaced enhancement carried by an otherwise stock arrow.
@@ -46,6 +56,104 @@ interface StoredArrowRoute {
 interface ResolvedArrowRoute {
 	points: { x: number; y: number }[]
 	model: ConnectionElbowRouteModel | null
+}
+
+interface ExactArrowPath {
+	d: string
+	transform: AffineTransform
+	points: { x: number; y: number }[]
+	strokeColor: string
+	strokeWidth: number
+}
+
+function multiplyAffine(left: AffineTransform, right: AffineTransform): AffineTransform {
+	return {
+		a: left.a * right.a + left.c * right.b,
+		b: left.b * right.a + left.d * right.b,
+		c: left.a * right.c + left.c * right.d,
+		d: left.b * right.c + left.d * right.d,
+		e: left.a * right.e + left.c * right.f + left.e,
+		f: left.b * right.e + left.d * right.f + left.f,
+	}
+}
+
+function applyAffine(transform: AffineTransform, point: { x: number; y: number }) {
+	return {
+		x: transform.a * point.x + transform.c * point.y + transform.e,
+		y: transform.b * point.x + transform.d * point.y + transform.f,
+	}
+}
+
+/** Similarity transform that carries the captured terminal pair to the live one. */
+function frameTransform(
+	from: SystemSketchArrowPathSnapshot['frame'],
+	to: SystemSketchArrowPathSnapshot['frame'],
+): AffineTransform {
+	const baseX = from.end.x - from.start.x
+	const baseY = from.end.y - from.start.y
+	const liveX = to.end.x - to.start.x
+	const liveY = to.end.y - to.start.y
+	const baseLengthSquared = baseX * baseX + baseY * baseY
+	if (baseLengthSquared <= 1e-9) {
+		return {
+			a: 1,
+			b: 0,
+			c: 0,
+			d: 1,
+			e: to.start.x - from.start.x,
+			f: to.start.y - from.start.y,
+		}
+	}
+	const a = (liveX * baseX + liveY * baseY) / baseLengthSquared
+	const b = (liveY * baseX - liveX * baseY) / baseLengthSquared
+	return {
+		a,
+		b,
+		c: -b,
+		d: a,
+		e: to.start.x - a * from.start.x + b * from.start.y,
+		f: to.start.y - b * from.start.x - a * from.start.y,
+	}
+}
+
+function exactArrowPath(editor: Editor, shape: TLArrowShape): ExactArrowPath | null {
+	const style = readSystemSketchPrimitiveStyle(shape)
+	if (style?.kind !== 'arrow' || !style.path) return null
+	const bindings = getArrowBindings(editor, shape)
+	const arrowPageTransform = editor.getShapePageTransform(shape)
+	const pageToArrow = Mat.Inverse(arrowPageTransform)
+	const exactTerminal = (terminal: 'start' | 'end') => {
+		const binding = bindings[terminal]
+		if (!binding) return shape.props[terminal]
+		const target = editor.getShape(binding.toId)
+		if (!target) return shape.props[terminal]
+		const bounds = editor.getShapeGeometry(target).bounds
+		const anchor = binding.props.normalizedAnchor
+		const local = {
+			x: bounds.x + anchor.x * bounds.width,
+			y: bounds.y + anchor.y * bounds.height,
+		}
+		const page = editor.getShapePageTransform(target).applyToPoint(local)
+		return Mat.applyToPoint(pageToArrow, page)
+	}
+	// tldraw clamps exact normalized anchors a thousandth of the way inside a
+	// target before drawing a stock arrow. A cable terminates on the port centre
+	// itself, so this fidelity path intentionally resolves the public binding's
+	// authored anchor without that stock anti-degeneracy inset.
+	const terminals = { start: exactTerminal('start'), end: exactTerminal('end') }
+	const carry = frameTransform(style.path.frame, terminals)
+	const transform = multiplyAffine(carry, style.path.transform)
+	return {
+		d: style.path.d,
+		transform,
+		points: style.path.samples.map((point) => applyAffine(transform, point)),
+		strokeColor: style.strokeColor,
+		strokeWidth: style.strokeWidth * shape.props.scale,
+	}
+}
+
+function transformAttribute(transform: AffineTransform): string {
+	return `matrix(${transform.a} ${transform.b} ${transform.c} ${transform.d} ${transform.e} ${transform.f})`
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -189,6 +297,28 @@ function AuthoredArrowBody({
 	)
 }
 
+function ExactArrowBody({ exact }: { exact: ExactArrowPath }) {
+	return (
+		<SVGContainer
+			className="systemsketch-detached-arrow__body"
+			style={{ minWidth: 50, minHeight: 50 }}
+		>
+			<path
+				data-systemsketch-detached-edge="exact"
+				d={exact.d}
+				transform={transformAttribute(exact.transform)}
+				fill="none"
+				stroke={exact.strokeColor}
+				strokeWidth={exact.strokeWidth}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				vectorEffect="non-scaling-stroke"
+				pointerEvents="none"
+			/>
+		</SVGContainer>
+	)
+}
+
 function StockArrow({ util, shape }: { util: SystemSketchArrowShapeUtil; shape: TLArrowShape }) {
 	return util.renderStockComponent(shape)
 }
@@ -202,6 +332,13 @@ function SystemSketchArrow({
 	shape: TLArrowShape
 	points: readonly { x: number; y: number }[] | null
 }) {
+	const editor = useEditor()
+	const exact = useValue(
+		`exact detached arrow ${shape.id}`,
+		() => exactArrowPath(editor, shape),
+		[editor, shape],
+	)
+	if (exact) return <ExactArrowBody exact={exact} />
 	if (!points) return <StockArrow util={util} shape={shape} />
 	return (
 		<>
@@ -214,12 +351,13 @@ function SystemSketchArrow({
 }
 
 /**
- * Stock tldraw arrow plus the one degree of freedom its schema omits.
+ * Stock tldraw arrow plus the narrow visual degrees of freedom its schema omits.
  *
  * The stock tool, bindings, terminal drag, styles, labels, arrowheads and the
- * un-authored renderer remain `ArrowShapeUtil`. SystemSketch replaces only an
- * authored elbow body and its segment handles, using the same pure route model
- * as semantic data edges and tldraw's normal `select.dragging_handle` state.
+ * un-authored renderer remain `ArrowShapeUtil`. SystemSketch replaces an
+ * authored elbow body and its segment handles, or the initial body of a cable
+ * that was just detached. Both are namespaced metadata enhancements on a valid
+ * stock arrow record.
  */
 export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 	private activeRouteDrag: {
@@ -237,12 +375,45 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 		const routingContractChanged = previous.props.kind !== next.props.kind
 			|| previous.props.arrowheadStart !== next.props.arrowheadStart
 			|| previous.props.arrowheadEnd !== next.props.arrowheadEnd
-		if (!routingContractChanged) return
-		if (!(SYSTEMSKETCH_ARROW_ROUTE_META_KEY in next.meta)) return
-		return { ...next, meta: metaWithoutArrowRoute(next.meta) }
+		let meta = next.meta
+		let changed = false
+		if (routingContractChanged && SYSTEMSKETCH_ARROW_ROUTE_META_KEY in meta) {
+			meta = metaWithoutArrowRoute(meta)
+			changed = true
+		}
+
+		const style = readSystemSketchPrimitiveStyle(previous)
+		const exactGeometryChanged = style?.kind === 'arrow' && style.path
+			&& (routingContractChanged
+				|| previous.props.bend !== next.props.bend
+				|| previous.props.scale !== next.props.scale
+				|| previous.props.start.x !== next.props.start.x
+				|| previous.props.start.y !== next.props.start.y
+				|| previous.props.end.x !== next.props.end.x
+				|| previous.props.end.y !== next.props.end.y
+				|| previous.props.richText !== next.props.richText)
+		if (exactGeometryChanged && style?.kind === 'arrow') {
+			meta = systemSketchPrimitiveMeta({
+				kind: 'arrow',
+				strokeColor: style.strokeColor,
+				strokeWidth: style.strokeWidth,
+			}, meta)
+			changed = true
+		}
+		return changed ? { ...next, meta } : undefined
 	}
 
 	override getGeometry(shape: TLArrowShape) {
+		const exact = exactArrowPath(this.editor, shape)
+		if (exact && exact.points.length >= 2) {
+			const stock = super.getGeometry(shape)
+			return new Group2d({
+				children: [
+					new Polyline2d({ points: exact.points.map((point) => Vec.From(point)) }),
+					...stock.children.slice(1),
+				],
+			})
+		}
 		const route = this.route(shape)
 		if (!route?.model) return super.getGeometry(shape)
 		const stock = super.getGeometry(shape)
@@ -333,6 +504,20 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 	}
 
 	override getIndicatorPath(shape: TLArrowShape) {
+		const exact = exactArrowPath(this.editor, shape)
+		if (exact) {
+			const path = new Path2D(exact.d)
+			const transformed = new Path2D()
+			transformed.addPath(path, new DOMMatrix([
+				exact.transform.a,
+				exact.transform.b,
+				exact.transform.c,
+				exact.transform.d,
+				exact.transform.e,
+				exact.transform.f,
+			]))
+			return transformed
+		}
 		const route = this.route(shape)
 		if (!route?.model) return super.getIndicatorPath(shape)
 		return authoredArrowPath(route.points).toPath2D({
@@ -348,6 +533,21 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 	 * compatibility rule instead of producing a headless partial arrow.
 	 */
 	override toSvg(shape: TLArrowShape, ctx: SvgExportContext) {
+		const exact = exactArrowPath(this.editor, shape)
+		if (exact) {
+			return (
+				<path
+					d={exact.d}
+					transform={transformAttribute(exact.transform)}
+					fill="none"
+					stroke={exact.strokeColor}
+					strokeWidth={exact.strokeWidth}
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					vectorEffect="non-scaling-stroke"
+				/>
+			)
+		}
 		return super.toSvg(shape, ctx)
 	}
 }

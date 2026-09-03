@@ -1,11 +1,11 @@
 /**
  * Exact visual options for stock shapes created by SystemSketch composites.
  *
- * The records remain ordinary tldraw `geo`, `line`, and `text` shapes. Their
- * metadata only supplies display values that the public `ShapeUtil.configure`
- * seam deliberately exposes. Plain tldraw ignores the metadata and still
- * opens the shapes; SystemSketch can reproduce the composite's token colours,
- * one-pixel rules, and typography without forking any engine primitive.
+ * The records remain ordinary tldraw `geo`, `line`, `text`, and `arrow`
+ * shapes. Their metadata supplies exact display values through tldraw's public
+ * ShapeUtil seams. Plain tldraw ignores the metadata and still opens the
+ * shapes; SystemSketch can reproduce a composite's token colours, one-pixel
+ * rules, typography, and cable path without forking any engine primitive.
  */
 import {
 	LineShapeUtil,
@@ -16,6 +16,7 @@ import {
 	type TLLineShape,
 	type TLShape,
 	type TLTextShape,
+	type VecModel,
 } from 'tldraw'
 import { createElement } from 'react'
 import type { CSSProperties } from 'react'
@@ -47,10 +48,42 @@ export interface SystemSketchGeoPrimitiveStyle {
 	cornerRadius?: number
 }
 
+export interface AffineTransform {
+	a: number
+	b: number
+	c: number
+	d: number
+	e: number
+	f: number
+}
+
+/**
+ * The semantic cable's exact SVG route, captured in its own local space.
+ *
+ * `transform` places that route into the replacement arrow's coordinates.
+ * `frame` records where the stock arrow's start/end terminals were at capture
+ * time, so moving either bound Block can carry the whole route with it.
+ * Samples are geometry-only: the SVG remains the visual source of truth.
+ */
+export interface SystemSketchArrowPathSnapshot {
+	d: string
+	transform: AffineTransform
+	frame: { start: VecModel; end: VecModel }
+	samples: VecModel[]
+}
+
+export interface SystemSketchArrowPrimitiveStyle {
+	kind: 'arrow'
+	strokeColor: string
+	strokeWidth: number
+	path?: SystemSketchArrowPathSnapshot
+}
+
 export type SystemSketchPrimitiveStyle =
 	| SystemSketchTextPrimitiveStyle
 	| SystemSketchLinePrimitiveStyle
 	| SystemSketchGeoPrimitiveStyle
+	| SystemSketchArrowPrimitiveStyle
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null
