@@ -185,6 +185,17 @@ async function badgeText(page, block, portId) {
   })()`)
 }
 
+async function badgeClearsInputWire(page, block, portId) {
+  return evaluate(page, `(() => {
+    const badge = document.querySelector('${scope(block)} [data-testid="port-count-${portId}"]')
+    const port = badge?.closest('.Port')
+    if (!badge || !port) return null
+    const badgeBounds = badge.getBoundingClientRect()
+    const portBounds = port.getBoundingClientRect()
+    return badgeBounds.bottom < portBounds.top + portBounds.height / 2
+  })()`)
+}
+
 async function selectBranch(page) {
   const band = await box(page, '.systemsketch-branch-canvas .Branch-band')
   await clickAt(page, band.x + band.w - 6, band.cy)
@@ -350,6 +361,8 @@ async function main() {
     check('BR-18b', 'a port with two producers wears a count badge; single-producer ports do not',
       { publish: await badgeText(page, publish, 'in_1'), estimate: await badgeText(page, estimate, 'in_1') },
       { publish: '2', estimate: null })
+    check('BR-18c', 'an input count badge clears the input wire above its port',
+      await badgeClearsInputWire(page, publish, 'in_1'), true)
     await shot(page, 'branch-region-3-wired.png')
 
     // 6 · Fold: the cable into the folded arm attaches at the header row edge.
