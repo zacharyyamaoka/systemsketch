@@ -1,0 +1,136 @@
+{
+  "checks": [
+    {
+      "id": "S1",
+      "label": "the root-scope action starts as Step in",
+      "observed": "Step in",
+      "desired": "Step in",
+      "ok": true
+    },
+    {
+      "id": "S2",
+      "label": "the active scope action changes to Step out",
+      "observed": "Step out",
+      "desired": "Step out",
+      "ok": true
+    },
+    {
+      "id": "P1",
+      "label": "the pointer reaches the stock resize overlay",
+      "observed": "selection_fg:bottom_left",
+      "desired": "selection_fg:bottom_left",
+      "ok": true
+    },
+    {
+      "id": "P2",
+      "label": "pointer-down enters the stock resize state",
+      "observed": "select.pointing_resize_handle",
+      "desired": "select.pointing_resize_handle",
+      "ok": true
+    },
+    {
+      "id": "P3",
+      "label": "pointer movement enters active stock resizing",
+      "observed": "select.resizing",
+      "desired": "select.resizing",
+      "ok": true
+    },
+    {
+      "id": "R1",
+      "label": "the physical resize grows the active Block (520 → 589)",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "R2",
+      "label": "the active Block relocates from the raw resize landing position",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "R3",
+      "label": "the fixed sibling does not move",
+      "observed": {
+        "x": 0,
+        "y": 260,
+        "parentId": "page:page"
+      },
+      "desired": {
+        "x": 0,
+        "y": 260,
+        "parentId": "page:page"
+      },
+      "ok": true
+    },
+    {
+      "id": "R4",
+      "label": "the relocated Block has a visible clearance from the fixed sibling",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "R5",
+      "label": "resize overlap never reparents the fixed sibling",
+      "observed": false,
+      "desired": false,
+      "ok": true
+    },
+    {
+      "id": "R6",
+      "label": "the active Block and its child keep their original parent chain",
+      "observed": [
+        "page:page",
+        "shape:active-scope"
+      ],
+      "desired": [
+        "page:page",
+        "shape:active-scope"
+      ],
+      "ok": true
+    },
+    {
+      "id": "R7",
+      "label": "the child travels by exactly the active Block relocation",
+      "observed": {
+        "dx": -8,
+        "dy": 0
+      },
+      "desired": {
+        "dx": -8,
+        "dy": 0
+      },
+      "ok": true
+    },
+    {
+      "id": "R8",
+      "label": "the sibling remains truly hidden until Step out",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "S3",
+      "label": "clicking Step out returns to Board depth zero",
+      "observed": "0",
+      "desired": "0",
+      "ok": true
+    },
+    {
+      "id": "S4",
+      "label": "the fixed sibling is visible after Step out",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "Q1",
+      "label": "the resize, relocation, and Step out journey emits no console errors",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    }
+  ]
+}

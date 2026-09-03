@@ -72,12 +72,16 @@ import {
   requestBlockInlineEdit,
   type BlockInlineField,
 } from '../inlineBlockEditing'
-import { stepIntoDepthScope } from '../../depth/depthNavigation'
+import {
+  getActiveDepthScopeId,
+  toggleDepthScope,
+} from '../../depth/depthNavigation'
 import {
   duplicateBlockUnlinked,
   linkedBlockOccurrences,
   unlinkBlockDefinition,
 } from '../definitions/definitionLinking'
+import { getOnlySelectedFrame, removeFrameKeepContents } from '../../frames/removeFrame'
 
 function onlySelectedBlock(editor: ReturnType<typeof useEditor>): BlockShape | null {
   const selected = editor.getSelectedShapes()
@@ -129,11 +133,21 @@ function BlockContextMenuItems() {
     () => selectedDetachedGroupIds(editor).length,
     [editor],
   )
-  // Structural commands (Add, Step into) still need one unambiguous Block:
+  // Structural commands (Add, depth navigation) still need one unambiguous Block:
   // they create identity and open an inline editor on it.
   const selectedBlock = useValue(
     'context-menu selected Block',
     () => onlySelectedBlock(editor),
+    [editor],
+  )
+  const activeDepthScopeId = useValue(
+    'context-menu active depth scope',
+    () => getActiveDepthScopeId(editor),
+    [editor],
+  )
+  const selectedFrame = useValue(
+    'context-menu selected Frame',
+    () => getOnlySelectedFrame(editor),
     [editor],
   )
   const linkedOccurrenceCount = useValue(
@@ -428,9 +442,9 @@ function BlockContextMenuItems() {
             <TldrawUiMenuSubmenu id="block-advanced" label="Advanced">
               <TldrawUiMenuGroup id="block-advanced-depth">
                 <TldrawUiMenuItem
-                  id="block-step-into"
-                  label="Step into"
-                  onSelect={() => selectedBlock && void stepIntoDepthScope(editor, selectedBlock.id)}
+                  id={activeDepthScopeId === selectedBlock.id ? 'block-step-out' : 'block-step-into'}
+                  label={activeDepthScopeId === selectedBlock.id ? 'Step out' : 'Step into'}
+                  onSelect={() => selectedBlock && void toggleDepthScope(editor, selectedBlock.id)}
                 />
               </TldrawUiMenuGroup>
             </TldrawUiMenuSubmenu>
@@ -539,6 +553,16 @@ function BlockContextMenuItems() {
             label="Organize nodes"
             disabled={!layoutSelection.organizeNodes}
             onSelect={() => void runOrganizeNodes()}
+          />
+        </TldrawUiMenuGroup>
+      ) : null}
+
+      {selectedFrame ? (
+        <TldrawUiMenuGroup id="systemsketch-frame">
+          <TldrawUiMenuItem
+            id="frame-remove-keep-contents"
+            label="Remove frame"
+            onSelect={() => void removeFrameKeepContents(editor, selectedFrame.id)}
           />
         </TldrawUiMenuGroup>
       ) : null}

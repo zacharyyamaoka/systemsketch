@@ -1,0 +1,88 @@
+{
+  "feature": "Remove a Frame while keeping its contents",
+  "viewport": { "width": 1600, "height": 1000 },
+  "pages": [
+    { "id": "review", "name": "Review" }
+  ],
+  "shapes": [
+    {
+      "id": "removable-frame",
+      "type": "frame",
+      "x": 430,
+      "y": 220,
+      "props": {
+        "name": "Remove this frame",
+        "w": 760,
+        "h": 520
+      }
+    },
+    {
+      "id": "direct-child",
+      "type": "block",
+      "parentId": "removable-frame",
+      "x": 80,
+      "y": 145,
+      "props": {
+        "title": "api()",
+        "description": "Direct child must survive",
+        "blockType": "Service",
+        "view": "simple",
+        "w": 270,
+        "h": 170,
+        "inputs": [],
+        "outputs": []
+      }
+    },
+    {
+      "id": "nested-frame",
+      "type": "frame",
+      "parentId": "removable-frame",
+      "x": 420,
+      "y": 105,
+      "props": {
+        "name": "Nested boundary",
+        "w": 280,
+        "h": 290
+      }
+    },
+    {
+      "id": "nested-child",
+      "type": "block",
+      "parentId": "nested-frame",
+      "x": 35,
+      "y": 80,
+      "props": {
+        "title": "job()",
+        "description": "Must stay inside Nested boundary",
+        "blockType": "Worker",
+        "view": "simple",
+        "w": 210,
+        "h": 145,
+        "inputs": [],
+        "outputs": []
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Right-click the ‘Remove this frame’ heading, then choose Remove frame.",
+      "x": 500,
+      "y": 30,
+      "w": 620,
+      "h": 110,
+      "target": { "shapeId": "removable-frame", "anchor": "top", "dx": 0 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · the outer frame disappears; api() and Nested boundary stay exactly in place; job() remains inside Nested boundary. One Undo restores the outer frame.",
+      "x": 390,
+      "y": 830,
+      "w": 840,
+      "h": 120
+    }
+  ]
+}

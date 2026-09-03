@@ -20,6 +20,7 @@ import {
   stepIntoDepthScope,
   stepOutOfDepthScope,
   stepToDepthAncestor,
+  toggleDepthScope,
 } from './depthNavigation'
 
 const TEST_PAGE_ID = 'page:page' as TLPageId
@@ -151,5 +152,16 @@ describe('Depth Stack navigation', () => {
       rootCamera,
       expect.objectContaining({ animation: expect.any(Object) }),
     )
+  })
+
+  it('uses the same Block action to enter and leave the active scope', () => {
+    const outer = block('Outer', TEST_PAGE_ID)
+    const inner = block('Inner', outer.id)
+    const { editor } = fakeEditor([outer, inner])
+
+    expect(toggleDepthScope(editor, outer.id)).toBe(true)
+    expect(getDepthNavigationSnapshot(editor).scopeId).toBe(outer.id)
+    expect(toggleDepthScope(editor, outer.id)).toBe(true)
+    expect(getDepthNavigationSnapshot(editor).scopeId).toBeNull()
   })
 })
