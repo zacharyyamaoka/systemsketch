@@ -109,9 +109,19 @@ const WORKSPACE_RENAME_PROBES = [
 ]
 
 const WORKSPACE_BROWSER_PROBES = [
+  { label: 'workspace sidebar section heading', selector: '.systemsketch-workspace-browser > aside > strong', kind: 'text' },
+  { label: 'workspace place label', selector: '[data-testid="workspace-place"] span', kind: 'text' },
+  { label: 'workspace place path', selector: '[data-testid="workspace-place"] small', kind: 'text' },
+  { label: 'workspace recent label', selector: '[data-testid="workspace-recent"] span', kind: 'text' },
+  { label: 'workspace recent path', selector: '[data-testid="workspace-recent"] small', kind: 'text' },
+  { label: 'workspace parent-folder icon', selector: '[data-testid="workspace-parent"]', kind: 'icon' },
+  { label: 'workspace breadcrumb link', selector: '.systemsketch-workspace-crumbs button:not(:disabled)', kind: 'text' },
+  { label: 'workspace current breadcrumb', selector: '.systemsketch-workspace-crumbs button:disabled', kind: 'text' },
   { label: 'workspace filter text', selector: '.systemsketch-workspace-search', kind: 'text' },
   { label: 'workspace filter placeholder', selector: '.systemsketch-workspace-search', kind: 'text', foregroundPseudo: '::placeholder' },
   { label: 'workspace filter boundary', selector: '.systemsketch-workspace-search', kind: 'boundary' },
+  { label: 'workspace empty-state text', selector: '.systemsketch-workspace-file-list__empty', kind: 'text' },
+  { label: 'workspace footer action', selector: '.systemsketch-workspace-dialog > footer > button', kind: 'text' },
 ]
 
 const COMMAND_PROBES = [

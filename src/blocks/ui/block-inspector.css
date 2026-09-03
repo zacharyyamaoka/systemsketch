@@ -834,3 +834,14 @@
   font-weight: 600;
   white-space: nowrap;
 }
+.block-inspector__definition-badge {
+  display: inline-flex;
+  width: max-content;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border: 1px solid color-mix(in srgb, var(--ss-warning) 45%, var(--ss-border));
+  border-radius: 999px;
+  color: color-mix(in srgb, var(--ss-warning) 72%, var(--ss-text));
+  font-size: 11px;
+  font-weight: 650;
+}

@@ -63,6 +63,7 @@ import { BlockIconGlyph } from './blockIcons'
 import { stepIntoDepthScope } from '../../depth/depthNavigation'
 import { branchFadeOpacity } from '../../branch/branchScope'
 import { portColor } from './portPalette'
+import { definitionBadge } from '../definitions/definitionLinking'
 import './block-canvas.css'
 
 const SIMPLE_ICON_PX = 40
@@ -442,6 +443,15 @@ function SimpleFace({ shape }: { shape: BlockShape }) {
   )
 }
 
+function DefinitionBadge({ shape }: { shape: BlockShape }) {
+  const badge = definitionBadge(shape.props)
+  return badge ? (
+    <span className="BlockNode-definitionBadge" data-testid="block-definition-badge">
+      {badge}
+    </span>
+  ) : null
+}
+
 function BlockHeading({ shape, height }: { shape: BlockShape; height: number }) {
   const icon = blockIcon(shape.props)
   return (
@@ -461,6 +471,7 @@ function BlockHeading({ shape, height }: { shape: BlockShape; height: number }) 
         >
           {shape.props.title}
         </span>
+        <DefinitionBadge shape={shape} />
         {shape.props.blockType !== '' ? (
           <span
             className="BlockNode-headingType"
@@ -743,6 +754,9 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
     <HTMLContainer
       className={`NodeShape systemsketch-block-canvas${simple ? ' NodeShape_plain' : ''}${value ? ' NodeShape_value' : ''}`}
       data-block-view={layout.view}
+      data-definition-id={shape.props.definitionId || undefined}
+      data-definition-key={shape.props.definitionKey || undefined}
+      data-draft-ordinal={shape.props.draftOrdinal}
       style={fade < 1 ? { opacity: fade } : undefined}
       onPointerDownCapture={(event) => {
         // The painted element is the most exact answer available, and it is only
@@ -764,6 +778,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
           : value
             ? <ValueFace shape={shape} connectedIds={connectedIds} />
             : <BlockHeading shape={shape} height={layout.headerHeight} />}
+        {simple ? <DefinitionBadge shape={shape} /> : null}
 
         {!plain ? (
           <>

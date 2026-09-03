@@ -11,6 +11,7 @@ import {
   getBlockShapeVisibility,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
+  installDefinitionLinking,
 } from './blocks'
 import { BlockContextMenu } from './blocks/ui'
 import {
@@ -21,7 +22,6 @@ import {
 } from './branch'
 import {
   blockConnectionBindingUtils,
-  blockConnectionOverlayUtils,
   blockConnectionShapeUtils,
   installBlockConnections,
 } from './blocks/connections'
@@ -67,6 +67,7 @@ import './app.css'
 import { SYSTEMSKETCH_THEMES } from './appearance/figjamPalette'
 import { createSystemSketchStore } from './store/createSystemSketchStore'
 import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from './stockPrimitiveVisuals'
+import { SYSTEMSKETCH_ARROW_SHAPE_UTILS } from './systemSketchArrow'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
@@ -82,18 +83,13 @@ const SYSTEMSKETCH_COMPONENTS = {
 }
 const SYSTEMSKETCH_SHAPE_UTILS = [
   ...EXCALIDRAW_SHAPE_UTILS,
+  ...SYSTEMSKETCH_ARROW_SHAPE_UTILS,
   ...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
   BlockShapeUtil,
   BranchShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
-/**
- * Added to tldraw's own overlays, not replacing them: this one paints a halo
- * under a revealed control point so it is big enough to see and aim at, while
- * tldraw keeps painting and hit-testing the handle itself.
- */
-const SYSTEMSKETCH_OVERLAY_UTILS = [...blockConnectionOverlayUtils]
 const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, PillTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: DevelopmentPreviewChrome,
@@ -105,6 +101,7 @@ const BLOCK_DEVELOPMENT_COMPONENTS = {
 }
 const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   ...EXCALIDRAW_SHAPE_UTILS,
+  ...SYSTEMSKETCH_ARROW_SHAPE_UTILS,
   ...SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS,
   BlockShapeUtil,
   BranchShapeUtil,
@@ -112,7 +109,6 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
 ]
 const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, PillTool]
 const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
-const BLOCK_DEVELOPMENT_OVERLAY_UTILS = [...blockConnectionOverlayUtils]
 
 /**
  * The product datum: stock tldraw with deliberately narrow product seams.
@@ -129,6 +125,7 @@ function SystemSketchCanvas() {
   useEffect(() => () => store.dispose(), [store])
   const onMount = useCallback((editor: Editor) => {
     enablePasteAtCursor(editor)
+    const stopDefinitionLinking = installDefinitionLinking(editor)
     const stopWorkspace = attach(editor)
     const stopBoardTheme = installBoardTheme(editor)
     const stopBlockConnections = installBlockConnections(editor)
@@ -154,6 +151,7 @@ function SystemSketchCanvas() {
       stopInstantTextEditing()
       stopDevelopmentSeam()
       stopBlockConnections()
+      stopDefinitionLinking()
       stopBoardTheme()
       stopWorkspace()
     }
@@ -176,7 +174,6 @@ function SystemSketchCanvas() {
         getShapeVisibility={getBlockShapeVisibility}
         licenseKey={TLDRAW_LICENSE_KEY}
         onMount={onMount}
-        overlayUtils={SYSTEMSKETCH_OVERLAY_UTILS}
         overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
         shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}
         store={store}
@@ -199,6 +196,9 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
     const stopBoardTheme = installBoardTheme(editor)
     const stopBlockConnections = isBlockDevelopment
       ? installBlockConnections(editor)
+      : () => undefined
+    const stopDefinitionLinking = isBlockDevelopment
+      ? installDefinitionLinking(editor)
       : () => undefined
     const stopInstantTextEditing = isBlockDevelopment
       ? installInstantTextEditing(editor)
@@ -226,6 +226,7 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopBlockConnections()
+      stopDefinitionLinking()
       stopBoardTheme()
     }
   }, [isBlockDevelopment])
@@ -243,7 +244,6 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
         getShapeVisibility={isBlockDevelopment ? getBlockShapeVisibility : undefined}
         licenseKey={TLDRAW_LICENSE_KEY}
         onMount={onMount}
-        overlayUtils={isBlockDevelopment ? BLOCK_DEVELOPMENT_OVERLAY_UTILS : undefined}
         overrides={isBlockDevelopment ? BLOCK_DEVELOPMENT_OVERRIDES : undefined}
         persistenceKey={developmentPersistenceKey(profile)}
         shapeUtils={isBlockDevelopment ? BLOCK_DEVELOPMENT_SHAPE_UTILS : undefined}

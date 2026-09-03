@@ -1,0 +1,65 @@
+[
+  {
+    "id": "EDGE-SELECT",
+    "label": "data-edge controls exist before any post-selection pointer move",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "EDGE-STABLE",
+    "label": "moving away does not hide the selected data-edge controls",
+    "observed": [
+      "end",
+      "grow:first",
+      "start"
+    ],
+    "desired": [
+      "end",
+      "grow:first",
+      "start"
+    ],
+    "ok": true
+  },
+  {
+    "id": "ARROW-SELECT",
+    "label": "the elbow arrow exposes its editable segment controls immediately",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "ARROW-GROW-1",
+    "label": "one segment drag authors a route with more controls",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "ARROW-GROW-2",
+    "label": "dragging the endpoint segment again adds another elbow rail",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "ARROW-BODY",
+    "label": "the authored body replaces the stock one while stock heads remain owned by tldraw",
+    "observed": [
+      true,
+      "hidden"
+    ],
+    "desired": [
+      true,
+      "hidden"
+    ],
+    "ok": true
+  },
+  {
+    "id": "CLEAN",
+    "label": "the journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

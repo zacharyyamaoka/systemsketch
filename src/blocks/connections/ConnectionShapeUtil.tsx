@@ -33,7 +33,7 @@ import {
 } from './connectionHit'
 import { blockPresetProps, openBlockPicker } from './blockPicker'
 import { requestBlockInlineEdit } from '../inlineBlockEditing'
-import { clearPortDragState, nearbyConnection, updatePortState } from '../ports/portState'
+import { clearPortDragState, updatePortState } from '../ports/portState'
 import {
 	BLOCK_SHAPE_TYPE,
 	getDefaultBlockProps,
@@ -355,7 +355,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 	/**
 	 * Two terminals, plus whatever control points this routing offers.
 	 *
-	 * A `curved` or `straight` cable gets one: a `create` handle sitting inert on
+	 * A `curved` or `straight` cable gets one: a `virtual` handle sitting on
 	 * the midpoint until it is dragged, at which point it activates into a bend
 	 * and becomes a `vertex`. An `elbow` cable gets one per user-draggable
 	 * segment — Excalidraw's model. On an auto route the two END segments grow a
@@ -380,11 +380,6 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			handles.push({ id: 'pill', type: 'virtual', index: 'a1V' as IndexKey, x: pill.x, y: pill.y })
 		}
 
-		// Figma's rule: a selected edge offers its control points only while the
-		// pointer is near it. Without this, selecting a cable sprinkles handles
-		// across the board and every one of them is a thing you can knock.
-		if (nearbyConnection.get(this.editor) !== connection.id) return handles
-
 		if (connection.props.routing === 'elbow') {
 			const route = getConnectionElbowRoute(this.editor, connection)
 			const authored = connection.props.elbowRoute !== null
@@ -407,7 +402,10 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 						: `segment:${segment.index}`
 				handles.push({
 					id,
-					type: 'virtual',
+					// Elbow arrows use vertex handles for their draggable rails. A
+					// data edge does too: selecting either connector now produces the
+					// same always-visible control rather than a second hover-gated UI.
+					type: 'vertex',
 					index: `a${handleIndex++}` as IndexKey,
 					x: segment.midpoint.x,
 					y: segment.midpoint.y,
@@ -422,7 +420,10 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		})
 		handles.push({
 			id: 'bend',
-			type: connection.props.curve ? 'vertex' : 'create',
+			// Stock curved arrows keep their midpoint visible on selection. A
+			// straight / curved data edge follows that same interaction pattern;
+			// dragging this virtual point activates it into a persistent vertex.
+			type: connection.props.curve ? 'vertex' : 'virtual',
 			index: 'a2' as IndexKey,
 			x: center.x,
 			y: center.y,

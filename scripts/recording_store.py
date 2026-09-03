@@ -246,11 +246,13 @@ def build_packet(header: dict, rows: list[dict], frames: list[dict], folder: Pat
     if note:
         lines.append("Note from the person recording:")
         lines.append(f"  {note}")
-    else:
-        lines.append("No note was typed.")
-    for mark in marks:
-        lines.append(f"  +{_seconds(mark.get('t'))}s  ✎ {mark.get('text')}")
-    lines.append("")
+    if marks:
+        if not note:
+            lines.append("Marks during the recording:")
+        for mark in marks:
+            lines.append(f"  +{_seconds(mark.get('t'))}s  ✎ {mark.get('text')}")
+    if note or marks:
+        lines.append("")
     if errors:
         lines.append(f"Errors during the window ({len(errors)}):")
         for row in errors[:12]:

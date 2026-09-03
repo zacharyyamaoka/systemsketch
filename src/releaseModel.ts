@@ -35,9 +35,9 @@ export function freshnessLabel(status: ReleaseStatus): string {
 /**
  * The Preview → Stable transition, as one explicit state.
  *
- * `armed` is the deliberate second click: promoting runs the full check suite
- * and a production build before it moves the Stable pointer, so a stray click
- * on a always-visible control must not start it.
+ * `armed` is the deliberate second click: promoting runs the full check suite,
+ * builds the app and all host plugins, then moves the Stable pointer. A stray
+ * click on an always-visible control must not start that transaction.
  */
 export type MakeStablePhase = 'unavailable' | 'idle' | 'armed' | 'working' | 'published'
 
@@ -62,9 +62,9 @@ export function makeStableLabel(phase: MakeStablePhase): string {
 }
 
 export function previewDetailLabel(phase: MakeStablePhase): string {
-  if (phase === 'armed') return 'Checks, builds, then points Stable at this working tree.'
-  if (phase === 'working') return 'Running checks and building — this takes a minute.'
-  if (phase === 'published') return 'Stable now points here · return to launch it.'
+  if (phase === 'armed') return 'Checks and builds app + host plugins, then points Stable here.'
+  if (phase === 'working') return 'Building the app and host plugins — this takes a few minutes.'
+  if (phase === 'published') return 'Stable now points here · host plugins ready · return to launch it.'
   return 'Live working copy · Stable stays unchanged'
 }
 
