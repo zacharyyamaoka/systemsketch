@@ -73,6 +73,17 @@ export interface ElbowEndpoint {
   box?: ElbowRect | null
 }
 
+/**
+ * One axis-aligned routing keep-out.
+ *
+ * Most obstacles inherit the route's normal padding. Small painted details
+ * such as port labels may ask for a tighter clearance without weakening the
+ * clearance around structural Blocks and Branch regions.
+ */
+export interface ElbowRoutingObstacle extends ElbowRect {
+  clearance?: number
+}
+
 export interface ElbowRouteOptions {
   /** Clearance kept around every box. */
   padding: number
@@ -99,7 +110,7 @@ export interface ElbowRouteInput {
   start: ElbowEndpoint
   end: ElbowEndpoint
   /** Boxes to steer around, in addition to the two endpoints' own boxes. */
-  obstacles?: readonly ElbowRect[]
+  obstacles?: readonly ElbowRoutingObstacle[]
   /** User-dragged bends. Indices address the *auto* route's segments. */
   pins?: readonly ElbowPin[]
   options?: Partial<ElbowRouteOptions>
@@ -761,24 +772,48 @@ function attemptRoute(
 }
 
 /**
- * Two regimes, tried in order.
+ * Two routing regimes.
  *
  * The `midline` pass is Excalidraw's: both keep-outs grow until they meet, so
  * the dongles share a rail and a plain two-block cable comes out as the clean Z
  * everyone draws by hand. It has one blind spot — that shared rail is exactly
  * where a third box in the gap sits — so when the result actually hits an
- * obstacle we retry with `tight` keep-outs, which leave the whole gap navigable
- * at the cost of a slightly less canonical-looking route.
+ * obstacle we also consider `tight` keep-outs, which leave the whole gap
+ * navigable. When both candidates use the same number of bends, the shorter
+ * one wins; this prevents a legal midline route from taking a long trip around
+ * the top of a frame while a nearby channel between Blocks is open.
  *
  * With no obstacles the second pass never runs, which is the common case.
  */
+function routeQuality(points: readonly ElbowPoint[]): { bends: number; length: number } {
+  const simplified = dropCollinear(dedupe(points))
+  return {
+    bends: Math.max(0, simplified.length - 2),
+    length: simplified.slice(1).reduce(
+      (total, point, index) => total + manhattan(simplified[index], point),
+      0,
+    ),
+  }
+}
+
+function betterRoute(first: ElbowPoint[], second: ElbowPoint[]): ElbowPoint[] {
+  const firstQuality = routeQuality(first)
+  const secondQuality = routeQuality(second)
+  if (secondQuality.bends < firstQuality.bends) return second
+  if (secondQuality.bends > firstQuality.bends) return first
+  return secondQuality.length + 1e-6 < firstQuality.length ? second : first
+}
+
 function autoPoints(
   start: ElbowEndpoint,
   end: ElbowEndpoint,
-  obstacles: readonly ElbowRect[],
+  obstacles: readonly ElbowRoutingObstacle[],
   options: ElbowRouteOptions,
 ): { points: ElbowPoint[]; fallback: boolean } {
-  const obstacleBounds = obstacles.map((rect) => expandBounds(boundsOfRect(rect), options.padding))
+  const obstacleBounds = obstacles.map((rect) => expandBounds(
+    boundsOfRect(rect),
+    Math.max(0, rect.clearance ?? options.padding),
+  ))
 
   // An output returning to its own input is a feedback loop, not a shortest
   // path problem. The two endpoint boxes are exactly equal, so A* has two
@@ -790,14 +825,22 @@ function autoPoints(
   }
 
   const midline = attemptRoute(start, end, obstacleBounds, options, 'midline')
-  if (midline.points && !polylineHits(midline.points, obstacleBounds)) {
-    return { points: midline.points, fallback: false }
+  const clearMidline = midline.points && !polylineHits(midline.points, obstacleBounds)
+    ? midline.points
+    : null
+  if (clearMidline && obstacleBounds.length === 0) {
+    return { points: clearMidline, fallback: false }
   }
 
   const tight = attemptRoute(start, end, obstacleBounds, options, 'tight')
-  if (tight.points && !polylineHits(tight.points, obstacleBounds)) {
-    return { points: tight.points, fallback: false }
+  const clearTight = tight.points && !polylineHits(tight.points, obstacleBounds)
+    ? tight.points
+    : null
+  if (clearMidline && clearTight) {
+    return { points: betterRoute(clearMidline, clearTight), fallback: false }
   }
+  if (clearMidline) return { points: clearMidline, fallback: false }
+  if (clearTight) return { points: clearTight, fallback: false }
   // Nothing clears everything. Prefer a real route over a stub, but say so.
   const best = tight.points ?? midline.points
   if (best) return { points: best, fallback: true }

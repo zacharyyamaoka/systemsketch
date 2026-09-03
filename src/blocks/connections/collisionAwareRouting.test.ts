@@ -102,6 +102,51 @@ describe('single-edge collision planning — independent of nudging', () => {
 			{ x: 120, y: 40 }, { x: 460, y: 40 }, { x: 460, y: 140 }, { x: 800, y: 140 },
 		])
 	})
+
+	it('uses a tight text clearance for an early turn, then plans multiple elbows around a Block', () => {
+		const label = { x: 12, y: -12, w: 170, h: 24, clearance: 4 }
+		const blocker = { x: 250, y: -170, w: 100, h: 100 }
+		const input = {
+			start: { point: { x: 0, y: 0 }, side: 'right' as const },
+			end: { point: { x: 500, y: -120 }, side: 'left' as const },
+			obstacles: [label, blocker],
+		}
+		const planned = planOrthogonalRoute(input)
+
+		expect(planned.fallback).toBe(false)
+		expect(routeClearsInput(planned, input)).toBe(true)
+		expect(planned.points[1]).toEqual({ x: 8, y: 0 })
+		expect(planned.segments.map((segment) => segment.axis)).toEqual(['x', 'y', 'x', 'y', 'x'])
+	})
+
+	it('prefers the shorter equal-bend channel between Blocks over the frame perimeter', () => {
+		const planned = planOrthogonalRoute({
+			start: { point: { x: 0, y: 315 }, side: 'right' },
+			end: {
+				point: { x: 930, y: 146 },
+				side: 'left',
+				box: { x: 930, y: 80, w: 260, h: 130 },
+			},
+			obstacles: [
+				// This is the cable's own boundary-port label: its painted box is
+				// forbidden, but the terminal-specific extra halo is zero.
+				{ x: 12, y: 289, w: 170, h: 24, clearance: 0 },
+				{ x: 100, y: 50, w: 250, h: 130 },
+				{ x: 320, y: 80, w: 250, h: 150 },
+				{ x: 500, y: 170, w: 300, h: 130 },
+				{ x: 480, y: 390, w: 260, h: 120 },
+			],
+		})
+
+		expect(planned.points).toEqual([
+			{ x: 0, y: 315 },
+			{ x: 476, y: 315 },
+			{ x: 476, y: 324 },
+			{ x: 906, y: 324 },
+			{ x: 906, y: 146 },
+			{ x: 930, y: 146 },
+		])
+	})
 })
 
 describe('collision-safe bundle nudging — independent of pathfinding', () => {

@@ -173,6 +173,8 @@ const elbowPinValidator = T.object({
 const elbowRouteValidator = T.object({
 	startAxis: T.literalEnum('x', 'y'),
 	corners: T.arrayOf(T.object({ tx: T.number, ox: T.number, ty: T.number, oy: T.number })),
+	startLeg: T.number.optional(),
+	endLeg: T.number.optional(),
 })
 
 export const connectionShapeProps: RecordProps<ConnectionShape> = {
@@ -520,14 +522,14 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		// legs, never touching the ports themselves.
 		if (handle.id.startsWith('route:') || handle.id.startsWith('grow:')) {
 			const { source, sink } = getConnectionEndpoints(this.editor, connection)
-			const dongles = dongleEndpoints(source, sink)
 			if (
 				this.activeRailDrag?.connectionId !== connection.id
 				|| this.activeRailDrag?.handleId !== handle.id
 			) {
 				const resolved = getConnectionElbowRoute(this.editor, connection)
+				const initialDongles = dongleEndpoints(source, sink, connection.props.elbowRoute ?? {})
 				const model = connection.props.elbowRoute
-					?? captureResolvedRoute(resolved.points, dongles.start, dongles.end)
+					?? captureResolvedRoute(resolved.points, initialDongles.start, initialDongles.end)
 				// `route:` ids carry the RENDERED polyline position; the inner route
 				// between the dongles sits one segment earlier.
 				const segmentIndex = handle.id.startsWith('route:')
@@ -544,6 +546,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 				}
 			}
 			const base = this.activeRailDrag
+			const dongles = dongleEndpoints(source, sink, base.model)
 			const moved = moveAuthoredSegment(
 				dongles.start,
 				dongles.end,
@@ -555,7 +558,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 				id: connection.id,
 				type: CONNECTION_SHAPE_TYPE,
 				props: {
-					elbowRoute: captureAuthoredRoute(moved, dongles.start, dongles.end),
+					elbowRoute: captureAuthoredRoute(moved, dongles.start, dongles.end, base.model),
 					routeMode: 'authored' as const,
 				},
 			}

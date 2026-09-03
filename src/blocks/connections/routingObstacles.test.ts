@@ -3,11 +3,15 @@ import { describe, expect, it } from 'vitest'
 
 import { getDefaultBranchProps, type BranchShape } from '../../branch/branchModel'
 import { getDefaultBlockProps, type BlockShape } from '../blockModel'
+import { layoutBlock } from '../layoutBlock'
 import type { ConnectionBinding } from './ConnectionBindingUtil'
 import type { ConnectionShape } from './ConnectionShapeUtil'
 import {
 	branchRoutingForbiddenRects,
 	collectConnectionRoutingObstacles,
+	collectConnectionRoutingTextObstacles,
+	PORT_LABEL_ROUTING_CLEARANCE_PX,
+	TERMINAL_PORT_LABEL_ROUTING_CLEARANCE_PX,
 } from './routingObstacles'
 
 const PAGE = 'page:page' as TLPageId
@@ -38,11 +42,17 @@ function connection(id: string): ConnectionShape {
 	}
 }
 
-function binding(edge: ConnectionShape, host: BlockShape, terminal: 'start' | 'end'): ConnectionBinding {
+function binding(
+	edge: ConnectionShape,
+	host: BlockShape,
+	terminal: 'start' | 'end',
+	portId = terminal === 'start' ? 'out_1' : 'in_1',
+	face: ConnectionBinding['props']['face'] = 'outer',
+): ConnectionBinding {
 	return {
 		id: `binding:${edge.id}:${terminal}` as ConnectionBinding['id'],
 		typeName: 'binding', type: 'connection', fromId: edge.id, toId: host.id, meta: {},
-		props: { portId: terminal === 'start' ? 'out_1' : 'in_1', terminal, face: 'outer' },
+		props: { portId, terminal, face },
 	}
 }
 
@@ -152,5 +162,50 @@ describe('editor obstacle collection — independent of routing and persistence'
 		})
 		expect(obstacles).toContainEqual({ x: region.x, y: region.y, w: region.props.w, h: 40 })
 		expect(obstacles).toContainEqual({ x: region.x, y: region.y + 72, w: region.props.w, h: 180 })
+	})
+
+	it('removes only the bound terminal label halo in an Expanded scope', () => {
+		const frame = block('frame', 100, 60)
+		frame.props = {
+			...frame.props,
+			view: 'expanded',
+			w: 720,
+			h: 480,
+			title: 'run()',
+			inputs: [
+				{ id: 'poses', name: 'poses', type: 'list[Pose]', visible: true },
+				{ id: 'gain', name: 'gain', type: 'Float', visible: true },
+			],
+		}
+		const target = block('target', 520, 180, frame.id)
+		const edge = connection('edge')
+		edge.parentId = frame.id
+		const editor = obstacleEditor(
+			[frame, target, edge],
+			[binding(edge, frame, 'start', 'poses', 'inner'), binding(edge, target, 'end')],
+		)
+
+		expect(collectConnectionRoutingObstacles(editor, edge)).toEqual([])
+		const text = collectConnectionRoutingTextObstacles(editor, edge)
+		const placed = layoutBlock(frame.props).ports
+		const poses = placed.find((candidate) => candidate.port.id === 'poses')
+		const gain = placed.find((candidate) => candidate.port.id === 'gain')
+		expect(poses?.labelContent).not.toBeNull()
+		expect(gain?.labelContent).not.toBeNull()
+		expect(text).toContainEqual({
+			x: frame.x + poses!.labelContent!.x,
+			y: frame.y + poses!.labelContent!.y,
+			w: poses!.labelContent!.w,
+			h: poses!.labelContent!.h,
+			clearance: TERMINAL_PORT_LABEL_ROUTING_CLEARANCE_PX,
+		})
+		expect(text).toContainEqual({
+			x: frame.x + gain!.labelContent!.x,
+			y: frame.y + gain!.labelContent!.y,
+			w: gain!.labelContent!.w,
+			h: gain!.labelContent!.h,
+			clearance: PORT_LABEL_ROUTING_CLEARANCE_PX,
+		})
+		expect(text).toHaveLength(2)
 	})
 })

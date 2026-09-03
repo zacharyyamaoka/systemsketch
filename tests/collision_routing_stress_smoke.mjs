@@ -19,7 +19,15 @@ import {
 
 const ASSETS = join(ROOT, 'docs', 'assets')
 const RESULTS = join(ASSETS, 'collision-routing-stress-results.json')
-const REPRESENTATIVE = new Set([0, 9, 19, 29, 39, 40, 45, 49])
+// Twenty rendered examples back the visual atlas while all fifty remain in the
+// collision/idempotence ledger. The selection progresses from simple Block
+// fields through dense fields, endpoint squeezes, and semantic Branch routes.
+const REPRESENTATIVE = new Set([
+  0, 1, 2, 3, 4,
+  6, 9, 14, 19, 24,
+  29, 30, 32, 34, 35,
+  37, 39, 40, 45, 49,
+])
 
 function blockScenario(index) {
   const source = { x: 40, y: 260, w: 240, h: 170 }
