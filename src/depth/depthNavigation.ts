@@ -202,6 +202,13 @@ export function stepOutOfDepthScope(editor: Editor): boolean {
     : returnToDepthRoot(editor)
 }
 
+/** The shared Step in / Step out action used by every Block command surface. */
+export function toggleDepthScope(editor: Editor, shapeId: TLShapeId): boolean {
+  return getActiveDepthScopeId(editor) === shapeId
+    ? stepOutOfDepthScope(editor)
+    : stepIntoDepthScope(editor, shapeId)
+}
+
 /** Restore the camera that existed before the first step-in on this page. */
 export function returnToDepthRoot(editor: Editor): boolean {
   const store = storeFor(editor)

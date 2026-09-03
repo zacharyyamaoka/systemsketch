@@ -1,0 +1,104 @@
+{
+  "feature": "Step In collision-free expansion and Step out toggle",
+  "viewport": { "width": 1920, "height": 1080 },
+  "pages": [
+    { "id": "review", "name": "Review" }
+  ],
+  "shapes": [
+    {
+      "id": "active-scope",
+      "type": "block",
+      "x": 700,
+      "y": 280,
+      "props": {
+        "title": "run()",
+        "description": "Resize this Block while stepped in",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 520,
+        "h": 380,
+        "inputs": [
+          { "id": "request", "name": "request", "type": "Request", "visible": true }
+        ],
+        "outputs": [
+          { "id": "result", "name": "result", "type": "Result", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "inside-decoder",
+      "type": "block",
+      "parentId": "active-scope",
+      "x": 130,
+      "y": 130,
+      "props": {
+        "title": "decode()",
+        "description": "Moves with run()",
+        "blockType": "Function",
+        "view": "simple",
+        "w": 260,
+        "h": 150,
+        "inputs": [],
+        "outputs": []
+      }
+    },
+    {
+      "id": "fixed-sibling",
+      "type": "block",
+      "x": 380,
+      "y": 330,
+      "props": {
+        "title": "receive()",
+        "description": "This node must stay fixed and remain a sibling",
+        "blockType": "Function",
+        "view": "simple",
+        "w": 260,
+        "h": 180,
+        "inputs": [],
+        "outputs": []
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Select run() and click Step in.",
+      "x": 680,
+      "y": 50,
+      "w": 560,
+      "h": 110,
+      "target": { "shapeId": "active-scope", "anchor": "top", "dx": 0 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Drag run()'s bottom-left corner about 150 px left. receive() is hidden in this view, but must not be covered at Board depth.",
+      "x": 100,
+      "y": 760,
+      "w": 500,
+      "h": 130,
+      "target": { "shapeId": "active-scope", "anchor": "bottom", "dx": -160 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · The selection pill now says Step out. Click it to return to Board.",
+      "x": 1350,
+      "y": 300,
+      "w": 470,
+      "h": 120,
+      "target": { "shapeId": "active-scope", "anchor": "right", "dy": -70 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · run() moved to the nearest clear place; receive() did not move or become a child; decode() moved with run(); all three nodes are visible with a gap.",
+      "x": 880,
+      "y": 850,
+      "w": 900,
+      "h": 130
+    }
+  ]
+}

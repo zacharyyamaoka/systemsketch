@@ -60,7 +60,7 @@ import {
   type BlockPortDragState,
 } from '../ports'
 import { BlockIconGlyph } from './blockIcons'
-import { stepIntoDepthScope } from '../../depth/depthNavigation'
+import { getActiveDepthScopeId, toggleDepthScope } from '../../depth/depthNavigation'
 import { branchFadeOpacity } from '../../branch/branchScope'
 import { portColor } from './portPalette'
 import { definitionBadge } from '../definitions/definitionLinking'
@@ -288,6 +288,11 @@ function ExpandedDividerHandle({
 
 function BlockFooterMenu({ shape }: { shape: BlockShape }) {
   const editor = useEditor()
+  const activeDepthScopeId = useValue(
+    'SystemSketch Block footer depth action',
+    () => getActiveDepthScopeId(editor),
+    [editor],
+  )
   const duplicate = useCallback(() => {
     editor.markHistoryStoppingPoint('duplicate block')
     editor.duplicateShapes([shape.id])
@@ -315,9 +320,11 @@ function BlockFooterMenu({ shape }: { shape: BlockShape }) {
               <TldrawUiDropdownMenuItem>
                 <TldrawUiButton
                   type="menu"
-                  onClick={() => void stepIntoDepthScope(editor, shape.id)}
+                  onClick={() => void toggleDepthScope(editor, shape.id)}
                 >
-                  <TldrawUiButtonLabel>Step into</TldrawUiButtonLabel>
+                  <TldrawUiButtonLabel>
+                    {activeDepthScopeId === shape.id ? 'Step out' : 'Step into'}
+                  </TldrawUiButtonLabel>
                 </TldrawUiButton>
               </TldrawUiDropdownMenuItem>
             ) : null}
