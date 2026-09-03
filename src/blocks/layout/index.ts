@@ -8,6 +8,7 @@ export { ORGANIZE_LAYOUT_OPTIONS, organizeGraph } from './organizeGraph'
 export type { OrganizeNodesOutcome } from './organizeNodes'
 export {
 	EMPTY_ORGANIZE_NODES_OUTCOME,
+	canOrganizeNodes,
 	describeOrganizeNodesOutcome,
 	organizeNodes,
 } from './organizeNodes'
