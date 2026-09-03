@@ -1,24 +1,24 @@
 {
   "format": "systemsketch-recording-v2",
   "clock": "milliseconds since header.startedAtWall",
-  "durationMs": 5717.9,
+  "durationMs": 5968.4,
   "moments": 5,
   "captureHealth": {
     "id": 3,
     "ok": true,
-    "captured": 170,
-    "droppedForDensity": 127,
+    "captured": 177,
+    "droppedForDensity": 134,
     "requestedKeyframes": 68,
     "keyframesMatched": 68,
-    "largestRawGapMs": 97,
-    "target": "http://127.0.0.1:41025/?board=%2Ftmp%2Frecorder-smoke-files-Yi1w1a%2FSystemSketch%2Frecorder-proof.systemsketch",
-    "targetId": "F7CCDC4AE2915C28CAB0DC989EF8642B",
+    "largestRawGapMs": 81,
+    "target": "http://127.0.0.1:35199/?board=%2Ftmp%2Frecorder-smoke-files-a35Nlx%2FSystemSketch%2Frecorder-proof.systemsketch",
+    "targetId": "8B7152BAD47265DF86BB1D78559A2CDE",
     "targets": 1,
-    "cdpPort": 38375,
+    "cdpPort": 43157,
     "source": "screencast",
     "framesKept": 43,
-    "largestKeptGapMs": 333,
-    "durationMs": 5717.9
+    "largestKeptGapMs": 334,
+    "durationMs": 5968.4
   },
   "privacy": {
     "networkBodies": "not captured",
@@ -29,12 +29,12 @@
   "artifacts": [
     {
       "file": "README.md",
-      "bytes": 5065,
+      "bytes": 5063,
       "description": "compact handoff packet"
     },
     {
       "file": "actions.jsonl",
-      "bytes": 538,
+      "bytes": 544,
       "description": "semantic app command detail",
       "rows": 4
     },
@@ -56,30 +56,30 @@
     },
     {
       "file": "frames.jsonl",
-      "bytes": 4711,
+      "bytes": 4749,
       "description": "frame timestamps and capture reasons",
       "rows": 43
     },
     {
       "file": "header.json",
-      "bytes": 3407,
+      "bytes": 6315,
       "description": "recording and environment identity"
     },
     {
       "file": "host.jsonl",
-      "bytes": 1669,
+      "bytes": 1670,
       "description": "bounded local controller request log",
       "rows": 9
     },
     {
       "file": "moments.json",
-      "bytes": 1018,
+      "bytes": 1020,
       "description": "high-signal seek index paired with frames",
       "rows": 5
     },
     {
       "file": "network.jsonl",
-      "bytes": 3542,
+      "bytes": 3550,
       "description": "request timing and failures without bodies",
       "rows": 8
     },
@@ -91,7 +91,7 @@
     },
     {
       "file": "playback.html",
-      "bytes": 119132,
+      "bytes": 119340,
       "description": "self-contained synchronized viewer"
     },
     {
@@ -106,25 +106,25 @@
     },
     {
       "file": "store.full.jsonl",
-      "bytes": 72812,
+      "bytes": 74620,
       "description": "lossless replay diffs with complete records",
-      "rows": 40
+      "rows": 41
     },
     {
       "file": "timeline.jsonl",
-      "bytes": 34061,
+      "bytes": 34247,
       "description": "compact causal index on the recording clock",
-      "rows": 204
+      "rows": 205
     },
     {
       "file": "ui-hits.jsonl",
-      "bytes": 56876,
+      "bytes": 56881,
       "description": "focus, target geometry, and hit-test stacks",
       "rows": 36
     },
     {
       "file": "workspace.jsonl",
-      "bytes": 6135,
+      "bytes": 6136,
       "description": "workspace and autosave lifecycle detail",
       "rows": 23
     }

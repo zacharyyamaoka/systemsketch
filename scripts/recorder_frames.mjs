@@ -33,7 +33,11 @@ const QUALITY = Number(args.quality ?? 70)
 // frame count is the lever. Every second repaint halves it and still gives
 // more frames than a save keeps.
 const EVERY_NTH = Number(args['every-nth'] ?? 2)
-const MAX_WIDTH = Number(args['max-width'] ?? 0)
+// These are physical-pixel limits for Chrome's compositor capture, not CSS
+// layout dimensions. A tall desktop Preview can otherwise read back a 4M+
+// pixel surface for every frame even when the saved diagnostic needs far less.
+const MAX_WIDTH = Number(args['max-width'] ?? 1440)
+const MAX_HEIGHT = Number(args['max-height'] ?? 1440)
 const DISCOVER_MS = 1500
 
 if (!Number.isFinite(CDP_PORT) || !URL_PREFIX) {
@@ -81,7 +85,8 @@ async function startCast(target) {
   if (target.casting) return
   target.casting = true
   const params = { format: 'jpeg', quality: QUALITY, everyNthFrame: EVERY_NTH }
-  if (MAX_WIDTH > 0) { params.maxWidth = MAX_WIDTH; params.maxHeight = Math.round(MAX_WIDTH * 2 / 3) }
+  if (MAX_WIDTH > 0) params.maxWidth = MAX_WIDTH
+  if (MAX_HEIGHT > 0) params.maxHeight = MAX_HEIGHT
   try { await send(target, 'Page.startScreencast', params) } catch (error) { target.casting = false; log('startScreencast failed', error.message) }
 }
 

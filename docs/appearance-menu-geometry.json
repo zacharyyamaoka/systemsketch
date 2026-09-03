@@ -519,6 +519,72 @@
    }
   ]
  },
+ "arrowRouting": {
+  "file": "docs/assets/arrow-routing-three-options.png",
+  "pill": {
+   "x": 490,
+   "y": 359,
+   "w": 479.9,
+   "h": 40
+  },
+  "panel": {
+   "x": 772,
+   "y": 311,
+   "w": 104,
+   "h": 40
+  },
+  "picker": null,
+  "triggers": [
+   {
+    "control": "color",
+    "kind": "value",
+    "x": 555.9,
+    "y": 359,
+    "w": 54,
+    "h": 40
+   },
+   {
+    "control": "lineStyle",
+    "kind": "icon",
+    "x": 609.9,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "font",
+    "kind": "icon",
+    "x": 674.9,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowheadStart",
+    "kind": "value",
+    "x": 739.9,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowKind",
+    "kind": "value",
+    "x": 795.9,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   },
+   {
+    "control": "arrowheadEnd",
+    "kind": "value",
+    "x": 851.9,
+    "y": 359,
+    "w": 56,
+    "h": 40
+   }
+  ]
+ },
  "connector": {
   "file": "docs/appearance-menu-3-connector-2026-09-01.png",
   "pill": {
@@ -583,9 +649,9 @@
  "mixed": {
   "file": "docs/appearance-menu-9-mixed-selection-2026-09-01.png",
   "pill": {
-   "x": 358,
+   "x": 341,
    "y": 299,
-   "w": 784.1,
+   "w": 817.1,
    "h": 40
   },
   "panel": null,
@@ -594,7 +660,7 @@
    {
     "control": "geo",
     "kind": "value",
-    "x": 635.1,
+    "x": 651.1,
     "y": 299,
     "w": 56,
     "h": 40
@@ -602,7 +668,7 @@
    {
     "control": "color",
     "kind": "value",
-    "x": 700.1,
+    "x": 716.1,
     "y": 299,
     "w": 54,
     "h": 40
@@ -610,7 +676,7 @@
    {
     "control": "dash",
     "kind": "icon",
-    "x": 754.1,
+    "x": 770.1,
     "y": 299,
     "w": 56,
     "h": 40
@@ -618,7 +684,7 @@
    {
     "control": "font",
     "kind": "icon",
-    "x": 819.1,
+    "x": 835.1,
     "y": 299,
     "w": 56,
     "h": 40
@@ -626,7 +692,7 @@
    {
     "control": "size",
     "kind": "text",
-    "x": 875.1,
+    "x": 891.1,
     "y": 299,
     "w": 144,
     "h": 40
@@ -634,7 +700,7 @@
    {
     "control": "align",
     "kind": "value",
-    "x": 1028.1,
+    "x": 1044.1,
     "y": 299,
     "w": 56,
     "h": 40
@@ -642,7 +708,7 @@
    {
     "control": "verticalAlign",
     "kind": "value",
-    "x": 1084.1,
+    "x": 1100.1,
     "y": 299,
     "w": 56,
     "h": 40

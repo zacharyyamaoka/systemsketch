@@ -16,6 +16,7 @@ export interface ReleaseStatus {
   canPreview: boolean
   canPromote: boolean
   canRollback: boolean
+  hostArtifactsReady?: boolean
   launchUrl?: string
   message?: string
 }

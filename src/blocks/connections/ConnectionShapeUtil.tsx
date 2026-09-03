@@ -108,6 +108,7 @@ import {
 	resolveAuthoredRoute,
 	type ConnectionElbowRouteModel,
 } from './elbowAuthoredRoute'
+import { showConnectorInteriorControls } from '../../connectorControlVisibility'
 import {
 	pinElbowSegment,
 	type ElbowPin,
@@ -381,6 +382,11 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			)
 			handles.push({ id: 'pill', type: 'virtual', index: 'a1V' as IndexKey, x: pill.x, y: pill.y })
 		}
+
+		// Terminals (and the visible delay pill) stay available for the entire
+		// selection. Only controls between the terminals follow the shared FigJam
+		// route-rectangle reveal policy.
+		if (!showConnectorInteriorControls(this.editor, connection.id)) return handles
 
 		if (connection.props.routing === 'elbow') {
 			const route = getConnectionElbowRoute(this.editor, connection)

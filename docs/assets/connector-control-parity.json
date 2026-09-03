@@ -1,29 +1,54 @@
 [
   {
     "id": "EDGE-SELECT",
-    "label": "data-edge controls exist before any post-selection pointer move",
+    "label": "data-edge interior controls exist on the selection click itself",
     "observed": true,
     "desired": true,
     "ok": true
   },
   {
-    "id": "EDGE-STABLE",
-    "label": "moving away does not hide the selected data-edge controls",
+    "id": "EDGE-TERMINALS",
+    "label": "outside the rectangle, only data-edge terminals remain",
     "observed": [
       "end",
-      "grow:first",
       "start"
     ],
     "desired": [
       "end",
-      "grow:first",
       "start"
     ],
     "ok": true
   },
   {
+    "id": "EDGE-BOUNDS",
+    "label": "inside the route rectangle, data-edge interior controls return",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
     "id": "ARROW-SELECT",
-    "label": "the elbow arrow exposes its editable segment controls immediately",
+    "label": "the arrow exposes interior controls on its selection event",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "ARROW-TERMINALS",
+    "label": "outside the rectangle, only arrow terminals remain",
+    "observed": [
+      "end",
+      "start"
+    ],
+    "desired": [
+      "end",
+      "start"
+    ],
+    "ok": true
+  },
+  {
+    "id": "ARROW-BOUNDS",
+    "label": "inside the route rectangle, arrow interior controls return",
     "observed": true,
     "desired": true,
     "ok": true

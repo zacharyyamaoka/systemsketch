@@ -1,0 +1,209 @@
+{
+  "feature": "Expanded Block layout scope",
+  "viewport": { "width": 2000, "height": 1000 },
+  "shapes": [
+    {
+      "id": "scope-parent",
+      "type": "block",
+      "x": 500,
+      "y": 240,
+      "props": {
+        "title": "run() · select this Expanded Block",
+        "description": "Its direct children and direct-scope cables are the layout target",
+        "blockType": "Pipeline",
+        "view": "expanded",
+        "w": 1050,
+        "h": 520,
+        "inputs": [
+          { "id": "raw", "name": "raw bytes", "type": "bytes", "visible": true }
+        ],
+        "outputs": [
+          { "id": "encoded", "name": "encoded bytes", "type": "bytes", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "decode",
+      "type": "block",
+      "parentId": "scope-parent",
+      "x": 250,
+      "y": 270,
+      "props": {
+        "title": "decode()",
+        "view": "port",
+        "w": 250,
+        "h": 165,
+        "inputs": [
+          { "id": "in", "name": "raw", "type": "bytes", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out", "name": "frame", "type": "Frame", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "encode",
+      "type": "block",
+      "parentId": "scope-parent",
+      "x": 650,
+      "y": 150,
+      "props": {
+        "title": "encode()",
+        "view": "port",
+        "w": 275,
+        "h": 180,
+        "inputs": [
+          { "id": "in", "name": "frame", "type": "Frame", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out", "name": "bytes", "type": "bytes", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "boundary-in",
+      "type": "connection",
+      "parentId": "scope-parent",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    },
+    {
+      "id": "parallel-1",
+      "type": "connection",
+      "parentId": "scope-parent",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    },
+    {
+      "id": "parallel-2",
+      "type": "connection",
+      "parentId": "scope-parent",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    },
+    {
+      "id": "parallel-3",
+      "type": "connection",
+      "parentId": "scope-parent",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    },
+    {
+      "id": "parallel-4",
+      "type": "connection",
+      "parentId": "scope-parent",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    },
+    {
+      "id": "boundary-out",
+      "type": "connection",
+      "parentId": "scope-parent",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    }
+  ],
+  "bindings": [
+    { "type": "connection", "fromId": "boundary-in", "toId": "scope-parent", "props": { "portId": "raw", "terminal": "start", "face": "inner" } },
+    { "type": "connection", "fromId": "boundary-in", "toId": "decode", "props": { "portId": "in", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "parallel-1", "toId": "decode", "props": { "portId": "out", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "parallel-1", "toId": "encode", "props": { "portId": "in", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "parallel-2", "toId": "decode", "props": { "portId": "out", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "parallel-2", "toId": "encode", "props": { "portId": "in", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "parallel-3", "toId": "decode", "props": { "portId": "out", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "parallel-3", "toId": "encode", "props": { "portId": "in", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "parallel-4", "toId": "decode", "props": { "portId": "out", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "parallel-4", "toId": "encode", "props": { "portId": "in", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "boundary-out", "toId": "encode", "props": { "portId": "out", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "boundary-out", "toId": "scope-parent", "props": { "portId": "encoded", "terminal": "end", "face": "inner" } }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Click the expanded Block header so only run() is selected",
+      "x": 20,
+      "y": 260,
+      "w": 345,
+      "h": 135,
+      "target": { "shapeId": "scope-parent", "anchor": "left", "dy": -180 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Click Tidy edges (the bent-cables icon) in the floating toolbar",
+      "x": 20,
+      "y": 520,
+      "w": 400,
+      "h": 135,
+      "target": { "shapeId": "scope-parent", "anchor": "left", "dy": 150 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Click Organize nodes (the 3×3 grid icon) without selecting the children",
+      "x": 1630,
+      "y": 350,
+      "w": 350,
+      "h": 140,
+      "target": { "shapeId": "scope-parent", "anchor": "right", "dy": -80 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Decode and Encode spread left-to-right between the parent ports, the four cables separate, and run() itself does not move or resize",
+      "x": 635,
+      "y": 855,
+      "w": 780,
+      "h": 110
+    }
+  ]
+}

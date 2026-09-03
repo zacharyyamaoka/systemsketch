@@ -18,7 +18,7 @@ Everything below is verifiable from the tree; nothing here needs the author.
   identity, and event-adjacent frames. The dedicated gallery is
   `docs/recorder-deep-capture-2026-09-02.html`.
 - **Gate:** `npm run check` and `npm run test:recorder` are the required gates.
-  The latter is 31/31 in a real Chrome and covers idle/unarmed, Start, manual Stop,
+  The latter is 33/33 in a real Chrome and covers idle/unarmed, Start, manual Stop,
   a saved packet with screencast frames, collision-free top notices, and the exact
   one-minute cancel-without-save boundary.
 - **Reports:** `docs/state-recorder-design-2026-09-01.html` (the design review,
@@ -51,7 +51,7 @@ Everything below is verifiable from the tree; nothing here needs the author.
 | Launcher | `scripts/launch_systemsketch.py` | `--remote-debugging-port=<4324 preview | 4325 stable>` on the desktop Chrome (env `SYSTEMSKETCH_PREVIEW_CDP_PORT` / `SYSTEMSKETCH_STABLE_CDP_PORT`), passed to the host as `--cdp-port` for both channels. |
 | Release | `scripts/release_lib.py` | `recording_store.py` and `recorder_frames.mjs` are in `CONTROLLER_RUNTIME_FILES`, copied into a release's `runtime/`, and part of the controller fingerprint (so Preview's host restarts on next launch). |
 | Harness | `tests/browser_harness.mjs` | `startApp({ cdpToApi: true })` starts Chrome first and passes its DevTools port to the host as `--cdp-port`. Chrome now always starts before the servers. |
-| Proof | `tests/recorder_smoke.mjs`, `tests/test_recording_store.py`, `tests/test_release_system.py`, `src/recorder/flightRecorder.test.ts` | The 31-check journey writes accepted sample packet, manifest, moments, compact timeline, lossless store, and five captures only after real Chrome, folder, clipboard, standalone playback, and exact non-pointer store reconstruction all pass. Unit tests cover full-record linkage, semantic details, build fingerprints, host-log rebasing, manifest privacy, and packet order. |
+| Proof | `tests/recorder_smoke.mjs`, `tests/test_recording_store.py`, `tests/test_release_system.py`, `src/recorder/flightRecorder.test.ts` | The 33-check journey writes accepted sample packet, manifest, moments, compact timeline, lossless store, and five captures only after real Chrome, folder, clipboard, standalone playback, and exact non-pointer store reconstruction all pass. Unit tests cover full-record linkage, semantic details, build fingerprints, host-log rebasing, manifest privacy, and packet order. |
 | Measurement | `docs/recorder_screencast_cost.mjs` → `docs/assets/recorder-spike/screencast-cost.json` | Headless, GPU disabled: ~17 ms Chrome CPU per delivered frame, nothing at rest, page frame timing unchanged. |
 
 ## Contracts to keep

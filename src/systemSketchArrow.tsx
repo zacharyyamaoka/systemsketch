@@ -28,6 +28,7 @@ import {
 	resolveAuthoredRoute,
 	type ConnectionElbowRouteModel,
 } from './blocks/connections/elbowAuthoredRoute'
+import { showConnectorInteriorControls } from './connectorControlVisibility'
 import {
 	readSystemSketchPrimitiveStyle,
 	systemSketchPrimitiveMeta,
@@ -64,6 +65,16 @@ interface ExactArrowPath {
 	points: { x: number; y: number }[]
 	strokeColor: string
 	strokeWidth: number
+}
+
+const EXACT_ARROW_TERMINAL_EPSILON = 0.01
+
+function terminalFrameChanged(
+	captured: SystemSketchArrowPathSnapshot['frame'],
+	current: SystemSketchArrowPathSnapshot['frame'],
+): boolean {
+	return Vec.Dist(captured.start, current.start) > EXACT_ARROW_TERMINAL_EPSILON
+		|| Vec.Dist(captured.end, current.end) > EXACT_ARROW_TERMINAL_EPSILON
 }
 
 function multiplyAffine(left: AffineTransform, right: AffineTransform): AffineTransform {
@@ -141,6 +152,12 @@ function exactArrowPath(editor: Editor, shape: TLArrowShape): ExactArrowPath | n
 	// itself, so this fidelity path intentionally resolves the public binding's
 	// authored anchor without that stock anti-degeneracy inset.
 	const terminals = { start: exactTerminal('start'), end: exactTerminal('end') }
+	// The exact snapshot bridges the instant of detachment; it is not a second
+	// arrow router. Once either bound target changes the arrow's local terminal
+	// frame, hand the body and geometry back to tldraw's stock arrow so curves
+	// and elbows reflow through their normal resize behaviour. Translating both
+	// targets together leaves this local frame unchanged and keeps the snapshot.
+	if (terminalFrameChanged(style.path.frame, terminals)) return null
 	const carry = frameTransform(style.path.frame, terminals)
 	const transform = multiplyAffine(carry, style.path.transform)
 	return {
@@ -427,11 +444,13 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 	}
 
 	override getHandles(shape: TLArrowShape): TLHandle[] {
-		if (shape.props.kind !== 'elbow') return super.getHandles(shape)
-		const route = this.route(shape)
-		if (!route) return super.getHandles(shape)
-		const terminals = super.getHandles(shape)
+		const stockHandles = super.getHandles(shape)
+		const terminals = stockHandles
 			.filter((handle) => handle.id === 'start' || handle.id === 'end')
+		if (!showConnectorInteriorControls(this.editor, shape.id)) return terminals
+		if (shape.props.kind !== 'elbow') return stockHandles
+		const route = this.route(shape)
+		if (!route) return stockHandles
 		return [...terminals, ...routeHandles(shape, route.points)]
 	}
 

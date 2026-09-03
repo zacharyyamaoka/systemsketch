@@ -255,6 +255,9 @@ async function main() {
     await copyFile(join(ROOT, 'sketches', 'review', 'collision-aware-routing.systemsketch'), reviewFixture)
     await openApp(app.page, app.port, `?board=${encodeURIComponent(reviewFixture)}`)
     await waitFor(app.page, `window.__systemsketch?.editor?.getShape('shape:source')`, 'collision review fixture', 30_000)
+    await waitFor(app.page,
+      `document.querySelector('[data-shape-id="shape:source"] .systemsketch-block-canvas')`,
+      'painted collision review fixture', 30_000)
     await delay(500)
 
     const sourceBeforeDrag = await elementRect(app.page, '[data-shape-id="shape:source"] .systemsketch-block-canvas')

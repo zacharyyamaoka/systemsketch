@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { getDefaultBlockProps, type BlockShape } from '../blockModel'
 import type { ConnectionShape } from './ConnectionShapeUtil'
 import { describeTidyEdgesOutcome, getTidyEdgesSelection, tidyEdgeRole } from './tidyEdges'
 
@@ -81,6 +82,32 @@ describe('tidy edges command contract', () => {
 			getBindingsFromShape: () => [{ toId: 'shape:note' }],
 		} as never
 		expect(getTidyEdgesSelection(editor)).toEqual([])
+	})
+
+	it('treats one Expanded Block as exactly its owned interior cable scope', () => {
+		const parent = {
+			id: 'shape:parent',
+			type: 'block',
+			parentId: 'page:page',
+			props: { ...getDefaultBlockProps(), view: 'expanded' },
+		} as BlockShape
+		const direct = { ...connection('elbow'), id: 'shape:direct', parentId: parent.id }
+		const nested = { ...connection('elbow'), id: 'shape:nested', parentId: 'shape:child' }
+		const exterior = { ...connection('elbow'), id: 'shape:exterior', parentId: 'page:page' }
+		const editor = {
+			getCurrentPageShapes: () => [parent, direct, nested, exterior],
+			getSelectedShapeIds: () => [parent.id],
+			getSelectedShapes: () => [parent],
+			// The exterior edge is incident to the parent, but direct scope
+			// ownership wins for the one-container exception.
+			getBindingsFromShape: (shape: ConnectionShape | string) => (
+				(typeof shape === 'string' ? shape : shape.id) === exterior.id
+					? [{ toId: parent.id }]
+					: []
+			),
+		} as never
+
+		expect(getTidyEdgesSelection(editor).map((edge) => edge.id)).toEqual([direct.id])
 	})
 
 	it('moves only automatic elbows and treats authored geometry as locked', () => {

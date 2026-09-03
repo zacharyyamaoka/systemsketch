@@ -1,6 +1,7 @@
 import type { Editor } from 'tldraw'
 
 import { getTidyEdgesSelection } from '../blocks/connections/tidyEdges'
+import { canOrganizeNodes } from '../blocks/layout'
 
 export interface SelectionLayoutActionAvailability {
   tidyEdges: boolean
@@ -17,7 +18,7 @@ export function getSelectionLayoutActionAvailability(
 ): SelectionLayoutActionAvailability {
   return {
     tidyEdges: getTidyEdgesSelection(editor).length > 0,
-    organizeNodes: editor.getSelectedShapes().filter((shape) => shape.type === 'block').length >= 2,
+    organizeNodes: canOrganizeNodes(editor),
   }
 }
 

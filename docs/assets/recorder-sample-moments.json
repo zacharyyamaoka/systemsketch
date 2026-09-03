@@ -1,47 +1,47 @@
 [
   {
-    "t": 762.5,
+    "t": 1029.8,
     "severity": "info",
     "kind": "app-action",
     "lane": "action",
     "summary": "opened inspector",
-    "detail": "chrome-right-000010",
-    "frame": "frames/f-000792.jpg"
+    "detail": "chrome-right-000011",
+    "frame": "frames/f-001074.jpg"
   },
   {
-    "t": 909.6,
+    "t": 1182.4,
     "severity": "info",
     "kind": "app-action",
     "lane": "action",
     "summary": "opened inspector",
-    "detail": "chrome-right-000015",
-    "frame": "frames/f-000924.jpg"
+    "detail": "chrome-right-000016",
+    "frame": "frames/f-001208.jpg"
   },
   {
-    "t": 2408,
+    "t": 2655.1,
     "severity": "info",
     "kind": "app-action",
     "lane": "action",
     "summary": "opened inspector",
     "detail": "chrome-right-000050",
-    "frame": "frames/f-002425.jpg"
+    "frame": "frames/f-002676.jpg"
   },
   {
-    "t": 4189,
+    "t": 4439.2,
     "severity": "info",
     "kind": "app-action",
     "lane": "action",
     "summary": "opened inspector",
-    "detail": "chrome-right-000084",
-    "frame": "frames/f-004222.jpg"
+    "detail": "chrome-right-000085",
+    "frame": "frames/f-004441.jpg"
   },
   {
-    "t": 5210.6,
+    "t": 5471.3,
     "severity": "info",
     "kind": "app-action",
     "lane": "action",
     "summary": "closed latest app surface",
     "detail": null,
-    "frame": "frames/f-005240.jpg"
+    "frame": "frames/f-005473.jpg"
   }
 ]

@@ -56,6 +56,10 @@
   "ok": true
  },
  {
+  "label": "an arrow offers Elbowed, Curved, and Straight; Straight round-trips through stock arc plus zero bend",
+  "ok": true
+ },
+ {
   "label": "a connector gets routing and endpoints, and an endpoint applies",
   "ok": true
  },
