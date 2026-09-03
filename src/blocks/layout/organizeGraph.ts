@@ -14,6 +14,7 @@ interface ElkNode {
 	height?: number
 	x?: number
 	y?: number
+	ports?: ElkNode[]
 	children?: ElkNode[]
 	edges?: { id: string; sources: string[]; targets: string[] }[]
 	layoutOptions?: Record<string, string>
@@ -54,12 +55,27 @@ export interface OrganizeGraphNode {
 	y: number
 	width: number
 	height: number
+	/** Fixed Block-local port centres. IDs must be unique across the graph. */
+	ports?: OrganizeGraphPort[]
+	/** Evidence/debug label; ELK behavior comes from the actual port coordinates. */
+	portLayout?: 'aligned' | 'offset'
+}
+
+export interface OrganizeGraphPort {
+	id: string
+	side: 'left' | 'right'
+	x: number
+	y: number
+	width?: number
+	height?: number
 }
 
 export interface OrganizeGraphEdge {
 	id: string
 	source: string
 	target: string
+	sourcePort?: string
+	targetPort?: string
 }
 
 export interface OrganizedGraph {
@@ -79,6 +95,7 @@ export async function organizeGraph(
 
 	const ids = new Set(nodes.map((node) => node.id))
 	const includedEdges = edges.filter((edge) => ids.has(edge.source) && ids.has(edge.target))
+	const ports = new Set(nodes.flatMap((node) => node.ports?.map((port) => port.id) ?? []))
 	const ordered = [...nodes].sort(
 		(a, b) => a.y - b.y || a.x - b.x || a.id.localeCompare(b.id),
 	)
@@ -89,11 +106,24 @@ export async function organizeGraph(
 			id: node.id,
 			width: node.width,
 			height: node.height,
+			layoutOptions: node.ports?.length
+				? { 'elk.portConstraints': 'FIXED_POS' }
+				: undefined,
+			ports: node.ports?.map((port) => ({
+				id: port.id,
+				x: port.x - (port.width ?? 0) / 2,
+				y: port.y - (port.height ?? 0) / 2,
+				width: port.width ?? 0,
+				height: port.height ?? 0,
+				layoutOptions: {
+					'elk.port.side': port.side === 'left' ? 'WEST' : 'EAST',
+				},
+			})),
 		})),
 		edges: includedEdges.map((edge) => ({
 			id: edge.id,
-			sources: [edge.source],
-			targets: [edge.target],
+			sources: [edge.sourcePort && ports.has(edge.sourcePort) ? edge.sourcePort : edge.source],
+			targets: [edge.targetPort && ports.has(edge.targetPort) ? edge.targetPort : edge.target],
 		})),
 	}
 

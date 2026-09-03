@@ -68,17 +68,17 @@
     {
       "id": "step-1",
       "kind": "step",
-      "text": "1 · Press Ctrl+K to open the command palette",
+      "text": "1 · Click the Source Block to select its five incident edges",
       "x": 40,
       "y": 40,
       "w": 500,
       "h": 110,
-      "target": { "x": 730, "y": 380 }
+      "target": { "shapeId": "source", "anchor": "top", "dx": -60 }
     },
     {
       "id": "step-2",
       "kind": "step",
-      "text": "2 · Type “Tidy edges” and press Enter",
+      "text": "2 · Press Ctrl+K, type “Tidy edges”, then press Enter",
       "x": 1100,
       "y": 40,
       "w": 460,
@@ -88,7 +88,7 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · The five elbow channels separate evenly while both Blocks and every endpoint stay fixed",
+      "text": "PASS WHEN · The five selected/incident elbow channels separate evenly while both Blocks and every endpoint stay fixed",
       "x": 730,
       "y": 700,
       "w": 650,

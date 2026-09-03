@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { ElbowRect } from './geometry'
 import { routeElbow } from './elbowRouter'
-import { coincidentOverlap, countCrossings, nudgeRoutes } from './nudge'
+import { channelSpacingDefects, coincidentOverlap, countCrossings, nudgeRoutes } from './nudge'
 
 const A: ElbowRect = { x: 0, y: 0, w: 320, h: 260 }
 const B: ElbowRect = { x: 600, y: -80, w: 320, h: 200 }
@@ -204,6 +204,12 @@ describe('multi-segment routes (an obstacle between the pair)', () => {
 describe('locked cables (the ones the user authored)', () => {
   const three = () => [cable(150, 0), cable(185, 35), cable(220, 70)]
 
+  const channelGaps = (routes: ReturnType<typeof cable>[]) => {
+    const channels = [...new Set(routes.map((route) => route.points[1].x))]
+      .sort((a, b) => a - b)
+    return channels.slice(1).map((channel, index) => channel - channels[index])
+  }
+
   it('never moves a locked cable', () => {
     const before = three()
     const frozen = JSON.stringify(before[1].points)
@@ -221,6 +227,50 @@ describe('locked cables (the ones the user authored)', () => {
     // ...and the ordering still holds around it.
     expect([...channels].sort((a, b) => a - b)).toEqual(channels)
     expect(countCrossings(report.routes)).toBe(0)
+  })
+
+  it('keeps an even 14-unit cadence when a locked rail falls between the half-step slots', () => {
+    const routes = [cable(150, 0), cable(185, 35), cable(220, 70), cable(255, 105)]
+    const locked = [false, false, true, false]
+    const frozen = JSON.stringify(routes[2].points)
+    const report = nudgeRoutes(routes, {}, locked)
+
+    expect(JSON.stringify(report.routes[2].points)).toBe(frozen)
+    expect(channelGaps(report.routes)).toEqual([14, 14, 14])
+    expect(channelSpacingDefects(routes, routes, locked).length).toBeGreaterThan(0)
+    expect(report.spacingDefects).toEqual([])
+  })
+
+  it('never stacks two free rails when coincident authored rails make their order impossible', () => {
+    const routes = Array.from({ length: 7 }, (_, index) => cable(58 + index * 30, -48 + index * 30))
+    const locked = [false, true, false, false, false, true, false]
+    const frozen = locked.map((isLocked, index) => isLocked ? JSON.stringify(routes[index].points) : null)
+    const report = nudgeRoutes(routes, {}, locked)
+
+    locked.forEach((isLocked, index) => {
+      if (isLocked) expect(JSON.stringify(report.routes[index].points)).toBe(frozen[index])
+    })
+    expect(channelGaps(report.routes)).toEqual([14, 14, 14, 14, 14])
+  })
+
+  it('anchors every obstacle channel to the authored route instead of leaving 7/21-unit gaps', () => {
+    const left: ElbowRect = { x: 0, y: 210, w: 220, h: 210 }
+    const right: ElbowRect = { x: 760, y: 0, w: 220, h: 210 }
+    const wall: ElbowRect = { x: 390, y: 65, w: 130, h: 390 }
+    const routes = Array.from({ length: 5 }, (_, index) => routeElbow({
+      start: { point: { x: 220, y: 260 + index * 32 }, side: 'right', box: left },
+      end: { point: { x: 760, y: 55 + index * 32 }, side: 'left', box: right },
+      obstacles: [wall],
+    }))
+    const frozen = JSON.stringify(routes[2].points)
+    const report = nudgeRoutes(routes, {}, [false, false, true, false, false])
+
+    expect(JSON.stringify(report.routes[2].points)).toBe(frozen)
+    // First vertical, shared horizontal, and final vertical all use the same
+    // 14-unit cadence around the authored route where their spans overlap.
+    expect(report.routes.map((route) => route.points[1].x)).toEqual([338, 352, 366, 380, 394])
+    expect(report.routes.slice(0, 4).map((route) => route.points[2].y)).toEqual([13, 27, 41, 55])
+    expect(report.routes.slice(0, 4).map((route) => route.points[3].y)).toEqual([13, 27, 41, 55])
   })
 
   it('is a no-op when every cable is locked', () => {

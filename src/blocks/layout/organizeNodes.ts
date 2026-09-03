@@ -1,29 +1,35 @@
 /**
  * Organize nodes — choose Block positions with ELK as a one-shot command.
  *
- * The command follows the mature PyBlocks contract: two or more selected
- * Blocks make the selection the scope; otherwise the whole page is organized.
- * Only connections wholly inside that scope inform ELK. The result is placed
+ * The command follows the safer review contract: only selected Blocks move,
+ * and fewer than two selected Blocks is a no-op. Only connections wholly
+ * inside that scope inform ELK. The result is placed
  * back at the input bounds' top-left, leaving the board's chosen region stable.
  */
 import type { Editor, TLShape, TLShapeId } from 'tldraw'
 
-import { BLOCK_SHAPE_TYPE, isBlockShape, type BlockShape } from '../blockModel'
+import { BLOCK_SHAPE_TYPE, blockPortLayout, isBlockShape, type BlockShape } from '../blockModel'
+import { getBlockConnectionPorts } from '../connections/blockPorts'
+import type { ConnectionBinding } from '../connections/ConnectionBindingUtil'
 import { CONNECTION_SHAPE_TYPE } from '../connections/connectionModel'
-import { organizeGraph, type OrganizeGraphEdge } from './organizeGraph'
+import {
+	organizeGraph,
+	type OrganizeGraphEdge,
+	type OrganizeGraphPort,
+} from './organizeGraph'
 
 export interface OrganizeNodesOutcome {
 	moved: number
 	unchanged: number
 	edges: number
-	scope: 'all' | 'selection'
+	scope: 'selection'
 }
 
 export const EMPTY_ORGANIZE_NODES_OUTCOME: OrganizeNodesOutcome = {
 	moved: 0,
 	unchanged: 0,
 	edges: 0,
-	scope: 'all',
+	scope: 'selection',
 }
 
 export function describeOrganizeNodesOutcome(outcome: OrganizeNodesOutcome): string {
@@ -32,19 +38,14 @@ export function describeOrganizeNodesOutcome(outcome: OrganizeNodesOutcome): str
 	return `Organized ${outcome.moved} node${outcome.moved === 1 ? '' : 's'}${where}`
 }
 
-export interface OrganizeNodesOptions {
-	scope?: 'all' | 'selection'
-}
-
 export async function organizeNodes(
 	editor: Editor,
-	options: OrganizeNodesOptions = {},
 ): Promise<OrganizeNodesOutcome> {
 	const allNodes = editor.getCurrentPageShapes().filter(isBlockShape)
 	const selectedIds = new Set(editor.getSelectedShapeIds())
 	const selectedNodes = allNodes.filter((shape) => selectedIds.has(shape.id))
-	const scope = options.scope ?? (selectedNodes.length >= 2 ? 'selection' : 'all')
-	const nodes = scope === 'selection' ? selectedNodes : allNodes
+	const scope = 'selection' as const
+	const nodes = selectedNodes
 	if (nodes.length < 2) return { ...EMPTY_ORGANIZE_NODES_OUTCOME, scope }
 
 	const bounds = nodes.map((shape) => ({ shape, box: editor.getShapePageBounds(shape.id) }))
@@ -58,6 +59,8 @@ export async function organizeNodes(
 			y: box!.minY,
 			width: box!.width,
 			height: box!.height,
+			ports: organizePorts(shape),
+			portLayout: blockPortLayout(shape.props) === 'inline' ? 'aligned' : 'offset',
 		})),
 		edges,
 	)
@@ -88,15 +91,30 @@ function collectOrganizeEdges(editor: Editor, ids: Set<TLShapeId>): OrganizeGrap
 	const edges: OrganizeGraphEdge[] = []
 	for (const shape of editor.getCurrentPageShapes()) {
 		if (shape.type !== CONNECTION_SHAPE_TYPE) continue
-		const bindings = editor.getBindingsFromShape(shape as TLShape, 'connection')
-		const start = bindings.find((binding) => (
-			binding.props as { terminal?: string }
-		).terminal === 'start')
-		const end = bindings.find((binding) => (
-			binding.props as { terminal?: string }
-		).terminal === 'end')
+		const bindings = editor.getBindingsFromShape<ConnectionBinding>(shape as TLShape, 'connection')
+		const start = bindings.find((binding) => binding.props.terminal === 'start')
+		const end = bindings.find((binding) => binding.props.terminal === 'end')
 		if (!start || !end || !ids.has(start.toId) || !ids.has(end.toId)) continue
-		edges.push({ id: shape.id, source: start.toId, target: end.toId })
+		edges.push({
+			id: shape.id,
+			source: start.toId,
+			target: end.toId,
+			sourcePort: organizePortId(start.toId, start.props.portId),
+			targetPort: organizePortId(end.toId, end.props.portId),
+		})
 	}
 	return edges
+}
+
+function organizePortId(shapeId: TLShapeId, portId: string): string {
+	return `${shapeId}::${portId}`
+}
+
+function organizePorts(shape: BlockShape): OrganizeGraphPort[] {
+	return getBlockConnectionPorts(shape.props, { includeHidden: true }).map((port) => ({
+		id: organizePortId(shape.id, port.id),
+		side: port.side === 'input' ? 'left' : 'right',
+		x: port.x,
+		y: port.y,
+	}))
 }

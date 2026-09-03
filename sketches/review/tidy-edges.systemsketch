@@ -9,7 +9,7 @@
       "block": 2
     },
     "bindings": {
-      "arrow": 2,
+      "arrow": 3,
       "connection": 10
     }
   },
@@ -96,7 +96,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "aByRjt",
+      "index": "aBtGsV",
       "typeName": "shape"
     },
     {
@@ -141,7 +141,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "1 · Press Ctrl+K to open the command palette"
+                  "text": "1 · Click the Source Block to select its five incident edges"
                 }
               ]
             }
@@ -149,7 +149,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aA1Xb",
+      "index": "aAGbj",
       "typeName": "shape"
     },
     {
@@ -166,7 +166,7 @@
         "h": 120,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 0,
+        "growY": 2,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -186,7 +186,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · The five elbow channels separate evenly while both Blocks and every endpoint stay fixed"
+                  "text": "PASS WHEN · The five selected/incident elbow channels separate evenly while both Blocks and every endpoint stay fixed"
                 }
               ]
             }
@@ -194,7 +194,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aCL5j",
+      "index": "aChKM",
       "typeName": "shape"
     },
     {
@@ -231,7 +231,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "2 · Type “Tidy edges” and press Enter"
+                  "text": "2 · Press Ctrl+K, type “Tidy edges”, then press Enter"
                 }
               ]
             }
@@ -239,12 +239,20 @@
         }
       },
       "parentId": "page:page",
-      "index": "aBrpr",
+      "index": "aBWuj",
       "typeName": "shape"
     },
     {
+      "name": "",
+      "color": "#9D5BD2",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:jKCZAeUN021jneeNOo4Cs",
+      "typeName": "user"
+    },
+    {
       "x": 26.086956521739125,
-      "y": 34.673913043478265,
+      "y": 33.673913043478265,
       "z": 0.968421052631579,
       "meta": {},
       "id": "camera:page:page",
@@ -277,8 +285,26 @@
         "pillPosition": 0.5
       },
       "parentId": "page:page",
-      "index": "a3Ck6",
+      "index": "a38Mf",
       "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:source",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.3125,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
     },
     {
       "x": 0,
@@ -307,7 +333,7 @@
         "pillPosition": 0.5
       },
       "parentId": "page:page",
-      "index": "a4G9M",
+      "index": "a4sq6",
       "typeName": "shape"
     },
     {
@@ -383,7 +409,7 @@
         "outputs": []
       },
       "parentId": "page:page",
-      "index": "a9mgv",
+      "index": "a9Gsv",
       "typeName": "shape"
     },
     {
@@ -413,7 +439,7 @@
         "pillPosition": 0.5
       },
       "parentId": "page:page",
-      "index": "a58UzV",
+      "index": "a5Kab",
       "typeName": "shape"
     },
     {
@@ -456,7 +482,7 @@
         "pillPosition": 0.5
       },
       "parentId": "page:page",
-      "index": "a6Zav",
+      "index": "a61En",
       "typeName": "shape"
     },
     {
@@ -486,7 +512,7 @@
         "pillPosition": 0.5
       },
       "parentId": "page:page",
-      "index": "a7UW3",
+      "index": "a7psz",
       "typeName": "shape"
     },
     {
@@ -499,8 +525,8 @@
         "isPrecise": true,
         "isExact": false,
         "normalizedAnchor": {
-          "x": 1,
-          "y": 0.5
+          "x": 0.5,
+          "y": 1
         },
         "snap": "edge-point",
         "terminal": "start"
@@ -637,7 +663,7 @@
         ]
       },
       "parentId": "page:page",
-      "index": "a8QTj",
+      "index": "a81II",
       "typeName": "shape"
     },
     {
@@ -652,14 +678,6 @@
         "face": "outer"
       },
       "typeName": "binding"
-    },
-    {
-      "name": "",
-      "color": "#E34BA9",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:ZKKKTObEvvBpv8eDnA0MR",
-      "typeName": "user"
     },
     {
       "meta": {},
@@ -803,8 +821,8 @@
       "typeName": "binding"
     },
     {
-      "x": 540,
-      "y": 95,
+      "x": 290,
+      "y": 150,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -825,8 +843,8 @@
           "y": 0
         },
         "end": {
-          "x": 190,
-          "y": 285
+          "x": 20,
+          "y": 180
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -843,7 +861,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "aAxW5",
+      "index": "aAyPkV",
       "typeName": "shape"
     }
   ]
