@@ -24,7 +24,7 @@
  */
 import { readFile, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 
 import {
   ROOT,
@@ -35,6 +35,7 @@ import {
   key,
   localConsoleErrors,
   openApp,
+  shortcut,
   startApp,
   waitFor,
 } from './browser_harness.mjs'
@@ -49,7 +50,7 @@ const BUILT_IN_PALETTES = [OBSIDIAN_LIGHT_PALETTE, OBSIDIAN_DARK_PALETTE, DARK_M
 
 /** Where captures and the verdict land; a mutation run points this elsewhere. */
 const SHOTS = process.env.SYSTEMSKETCH_THEME_CAPTURE_DIR ?? join(ROOT, 'docs', 'assets')
-const RESULTS = join(SHOTS, 'theme-contrast.json')
+const RESULTS = process.env.SYSTEMSKETCH_THEME_RESULTS_PATH ?? join(SHOTS, 'theme-contrast.json')
 /** A light VS Code theme, so the import proves a scheme the shipped palette does not. */
 const IMPORT_CANDIDATES = [
   '/usr/share/cursor/resources/app/extensions/theme-defaults/themes/light_modern.json',
@@ -85,6 +86,7 @@ const PROBES = [
 
 const DIALOG_PROBES = [
   { label: 'main menu item (tldraw menu)', selector: '[data-testid="main-menu.settings"]', kind: 'text', phase: 'menu' },
+  { label: 'Settings outline icon', selector: '[data-testid="main-menu.settings"] svg', kind: 'icon', phase: 'menu' },
   { label: 'settings heading', selector: '.systemsketch-settings__intro h2', kind: 'text' },
   { label: 'settings body copy', selector: '.systemsketch-settings__intro p', kind: 'text' },
   { label: 'settings active category', selector: '.systemsketch-settings__nav button.is-active', kind: 'text' },
@@ -96,6 +98,25 @@ const DIALOG_PROBES = [
   { label: 'zoom-buttons preference detail', selector: '.systemsketch-settings__toggle-row small', kind: 'text' },
   { label: 'Import button', selector: '.systemsketch-settings__import', kind: 'text' },
   { label: 'dialog close button icon', selector: '.systemsketch-settings__header .tlui-button', kind: 'icon' },
+]
+
+const WORKSPACE_RENAME_PROBES = [
+  { label: 'rename field label', selector: '.systemsketch-workspace-dialog__rename label', kind: 'text' },
+  { label: 'rename field text', selector: '.systemsketch-workspace-name-field input', kind: 'text' },
+  { label: 'rename field boundary', selector: '.systemsketch-workspace-name-field', kind: 'boundary' },
+  { label: 'rename file suffix', selector: '.systemsketch-workspace-name-field span', kind: 'text' },
+  { label: 'rename parent path', selector: '.systemsketch-workspace-dialog__rename p', kind: 'text' },
+]
+
+const WORKSPACE_BROWSER_PROBES = [
+  { label: 'workspace filter text', selector: '.systemsketch-workspace-search', kind: 'text' },
+  { label: 'workspace filter placeholder', selector: '.systemsketch-workspace-search', kind: 'text', foregroundPseudo: '::placeholder' },
+  { label: 'workspace filter boundary', selector: '.systemsketch-workspace-search', kind: 'boundary' },
+]
+
+const COMMAND_PROBES = [
+  { label: 'command-palette search text', selector: '.systemsketch-command-palette__search input', kind: 'text' },
+  { label: 'command-palette search boundary', selector: '.systemsketch-command-palette__search', kind: 'boundary' },
 ]
 
 const THEMES = [
@@ -172,16 +193,17 @@ const CONTRAST_SCRIPT = `
     const rect = element.getBoundingClientRect()
     return rect.width > 0 && rect.height > 0 && getComputedStyle(element).visibility !== 'hidden'
   }
-  const probe = ({ selector, kind, pseudo }) => {
+  const probe = ({ selector, kind, pseudo, foregroundPseudo }) => {
     const element = [...document.querySelectorAll(selector)].find(visible)
     if (!element) return { found: false }
-    const style = getComputedStyle(element)
+    const style = getComputedStyle(element, foregroundPseudo)
     const fg = parseColor(kind === 'boundary' ? style.borderTopColor : style.color)
     if (!fg) return { found: true, error: 'unparseable colour ' + (kind === 'boundary' ? style.borderTopColor : style.color) }
     const bg = kind === 'boundary'
       ? effectiveBackground(element)
       : effectiveBackground(element, pseudo)
-    return { found: true, fg: hex(fg), bg: hex(bg), ratio: Math.round(ratio(fg, bg) * 100) / 100, text: (element.textContent || '').trim().slice(0, 40) }
+    const content = 'value' in element && element.value ? element.value : (element.textContent || '')
+    return { found: true, fg: hex(fg), bg: hex(bg), ratio: Math.round(ratio(fg, bg) * 100) / 100, text: content.trim().slice(0, 40) }
   }
 `
 
@@ -264,8 +286,37 @@ async function closeDialog(page) {
   await delay(150)
 }
 
+async function openRenameDialog(page) {
+  const title = await box(page, '.systemsketch-file-title')
+  await clickAt(page, title.cx, title.cy)
+  await waitFor(page, `document.querySelector('[data-testid="workspace-dialog"][data-mode="rename"]')`, 'the rename dialog')
+  await delay(150)
+}
+
+async function openWorkspaceBrowser(page) {
+  await shortcut(page, 'o', 'KeyO', 2)
+  await waitFor(page, `document.querySelector('[data-testid="workspace-filter"]')`, 'the workspace filter')
+  await page.send('Input.insertText', { text: 'visible' })
+  await waitFor(page, `document.querySelector('[data-testid="workspace-filter"]')?.value === 'visible'`, 'typed workspace filter text')
+  await delay(100)
+}
+
+async function closeWorkspaceDialog(page) {
+  const cancel = await box(page, '.systemsketch-workspace-dialog > footer > button:first-child')
+  await clickAt(page, cancel.cx, cancel.cy)
+  await waitFor(page, `!document.querySelector('[data-testid="workspace-dialog"]')`, 'the workspace dialog to close')
+  await delay(120)
+}
+
+async function openCommandPalette(page) {
+  await shortcut(page, 'p', 'KeyP', 2)
+  await waitFor(page, `document.querySelector('[data-testid="systemsketch-command-palette"]')`, 'the command palette')
+  await delay(120)
+}
+
 async function main() {
   await ensureDir(SHOTS)
+  await ensureDir(dirname(RESULTS))
   const app = await startApp({ label: 'theme-contrast', build: 'theme-contrast-smoke' })
   const { page, port } = app
   let failed = false
@@ -362,12 +413,53 @@ async function main() {
 
       await openSettings(page)
       const menu = await measure(page, DIALOG_PROBES.filter((item) => item.phase === 'menu'))
+      const gearPaint = JSON.parse(await evaluate(page, `(() => {
+        const icon = document.querySelector('[data-testid="main-menu.settings"] svg')
+        if (!icon) return 'null'
+        const style = getComputedStyle(icon)
+        return JSON.stringify({ fill: style.fill, stroke: style.stroke, strokeWidth: style.strokeWidth })
+      })()`))
       await chooseSettingsItem(page)
       const dialog = await measure(page, DIALOG_PROBES.filter((item) => item.phase !== 'menu'))
       entry.screenshots.push(await shot(page, `theme-${theme.id.replace(':', '-')}-settings.png`))
       await closeDialog(page)
 
-      for (const probe of [...probes, ...menu, ...dialog]) {
+      await openRenameDialog(page)
+      const rename = await measure(page, WORKSPACE_RENAME_PROBES)
+      const renameInputStyle = JSON.parse(await evaluate(page, `(() => {
+        const input = document.querySelector('.systemsketch-workspace-name-field input')
+        if (!input) return 'null'
+        const style = getComputedStyle(input)
+        return JSON.stringify({ color: style.color, caret: style.caretColor, fontFamily: style.fontFamily })
+      })()`))
+      entry.screenshots.push(await shot(page, `theme-${theme.id.replace(':', '-')}-rename.png`))
+      await closeWorkspaceDialog(page)
+
+      await openWorkspaceBrowser(page)
+      const workspaceBrowser = await measure(page, WORKSPACE_BROWSER_PROBES)
+      if (theme.id === 'systemsketch:light') {
+        entry.screenshots.push(await shot(page, 'theme-systemsketch-light-workspace-filter.png'))
+      }
+      await closeWorkspaceDialog(page)
+
+      await openCommandPalette(page)
+      const commandPalette = await measure(page, COMMAND_PROBES)
+      await key(page, 'Escape', 'Escape')
+      await waitFor(page, `!document.querySelector('[data-testid="systemsketch-command-palette"]')`, 'the command palette to close')
+
+      entry.gearPaint = gearPaint
+      entry.renameInputStyle = renameInputStyle
+      const outlinedGear = gearPaint && gearPaint.fill === 'none' && gearPaint.stroke !== 'none'
+        && Number.parseFloat(gearPaint.strokeWidth) > 0
+      if (outlinedGear) pass(`${theme.label}: Settings uses a stroked outline gear (${gearPaint.strokeWidth})`)
+      else fail(`${theme.label}: Settings uses a stroked outline gear`, JSON.stringify(gearPaint))
+      if (renameInputStyle?.color === renameInputStyle?.caret && renameInputStyle?.fontFamily.includes('Inter')) {
+        pass(`${theme.label}: workspace text and caret share theme ink in the app typeface`)
+      } else {
+        fail(`${theme.label}: workspace text and caret share theme ink in the app typeface`, JSON.stringify(renameInputStyle))
+      }
+
+      for (const probe of [...probes, ...menu, ...dialog, ...rename, ...workspaceBrowser, ...commandPalette]) {
         const threshold = THRESHOLDS[probe.kind]
         const record = { label: probe.label, selector: probe.selector, kind: probe.kind, threshold, ...probe }
         delete record.phase

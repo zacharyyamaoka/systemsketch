@@ -17,6 +17,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SRC = PROJECT_ROOT / "src"
 TOKENS_CSS = SRC / "theme" / "tokens.css"
 THEME_MODEL = SRC / "theme" / "themeModel.ts"
+WORKSPACE_CSS = SRC / "workspace" / "local-workspace.css"
 
 
 def tldraw_css() -> Path:
@@ -249,6 +250,31 @@ class RootStampTests(unittest.TestCase):
         # The board follows the host, not a pinned light.
         self.assertIn("updateUserPreferences({ colorScheme })", embedded)
         self.assertNotIn("updateUserPreferences({ colorScheme: 'light' })", embedded)
+
+
+class NativeTextControlTests(unittest.TestCase):
+    def test_workspace_text_inputs_own_their_theme_ink_and_typeface(self) -> None:
+        """Native form ink follows the browser/OS unless the app claims it.
+
+        The grouped rule is deliberately checked through its last selector: if
+        Rename, Save As, Export, or Filter ever fall out of that workspace-wide
+        boundary, the five-theme browser sweep is no longer the first alarm.
+        """
+        css = WORKSPACE_CSS.read_text(encoding="utf-8")
+        block = declarations_in_block(
+            css,
+            r"\.systemsketch-workspace-dialog input\[type='search'\]",
+        )
+        self.assertEqual(block.get("color"), "var(--ss-text)")
+        self.assertEqual(block.get("caret-color"), "var(--ss-text)")
+        self.assertEqual(block.get("font-family"), "inherit")
+
+        placeholder = declarations_in_block(
+            css,
+            r"\.systemsketch-workspace-dialog input::placeholder",
+        )
+        self.assertEqual(placeholder.get("color"), "var(--ss-text-muted)")
+        self.assertEqual(placeholder.get("opacity"), "1")
 
 
 if __name__ == "__main__":
