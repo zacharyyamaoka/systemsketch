@@ -41,6 +41,7 @@ import {
   EditorBlockInspector,
   EditorConnectionInspector,
   getConnectionInspectorContext,
+  TunnelLayerBar,
   HitAreaOverlay,
   OnCanvasBlockPicker,
 } from '../blocks/ui'
@@ -161,6 +162,7 @@ export function BlockDevelopmentPreviewChrome() {
     <>
       <DevelopmentPreviewChrome />
       <DepthStackNavigator placement="floating" />
+      <TunnelLayerBar />
       <OnCanvasBlockPicker />
       <HitAreaOverlay />
       {showInspector || showConnectionInspector ? (

@@ -21,6 +21,7 @@ import {
   getConnectionInspectorContext,
   HitAreaOverlay,
   OnCanvasBlockPicker,
+  TunnelLayerBar,
 } from '../blocks/ui'
 import {
   BRANCH_TOOL_ID,
@@ -482,6 +483,7 @@ export function SystemSketchSurfaceHost() {
   return (
     <div className="systemsketch-surface-host" data-testid="systemsketch-surface-host">
       <RecorderIndicator />
+      <TunnelLayerBar />
       <OnCanvasBlockPicker />
       <HitAreaOverlay />
       {leftSurface ? (

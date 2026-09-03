@@ -1,0 +1,42 @@
+[
+  {
+    "label": "the selected edge inspector enables Tunnel and creates a reusable named layer",
+    "ok": true
+  },
+  {
+    "label": "an idle long tunnel leaves two 34-unit endpoint stubs and exactly two outlined vias",
+    "ok": true
+  },
+  {
+    "label": "hovering the hidden route restores the full cable without changing its model",
+    "ok": true
+  },
+  {
+    "label": "selecting either endpoint Block restores the full route",
+    "ok": true
+  },
+  {
+    "label": "the persistent Diagnostics layer chip reveals every tunnel assigned to that layer",
+    "ok": true
+  },
+  {
+    "label": "clicking the active layer again returns the cable underground",
+    "ok": true
+  },
+  {
+    "label": "a delayed edge hides its z⁻¹ pill underground and restores it with the full route",
+    "ok": true
+  },
+  {
+    "label": "tunnel mode and layer persist through the ordinary .systemsketch autosave",
+    "ok": true
+  },
+  {
+    "label": "the saved review fixture was opened and driven through hover, layer, and endpoint focus",
+    "ok": true
+  },
+  {
+    "label": "the complete journey produced zero local console errors",
+    "ok": true
+  }
+]

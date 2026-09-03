@@ -1,0 +1,116 @@
+{
+  "feature": "Edge tunnel",
+  "viewport": { "width": 1600, "height": 900 },
+  "pages": [{ "id": "review", "name": "Edge tunnel review" }],
+  "shapes": [
+    {
+      "id": "decode",
+      "type": "block",
+      "x": 460,
+      "y": 360,
+      "props": {
+        "title": "decode()",
+        "description": "Turns raw bytes into one Frame.",
+        "blockType": "Function",
+        "view": "port",
+        "w": 340,
+        "h": 190,
+        "inputs": [{ "id": "in_raw", "name": "raw", "type": "bytes", "visible": true }],
+        "outputs": [{ "id": "out_frame", "name": "frame", "type": "Frame", "visible": true }]
+      }
+    },
+    {
+      "id": "estimate",
+      "type": "block",
+      "x": 1000,
+      "y": 360,
+      "props": {
+        "title": "estimate()",
+        "description": "Estimates a Pose from a Frame.",
+        "blockType": "Function",
+        "view": "port",
+        "w": 340,
+        "h": 190,
+        "inputs": [{ "id": "in_frame", "name": "frame", "type": "Frame", "visible": true }],
+        "outputs": [{ "id": "out_pose", "name": "pose", "type": "Pose", "visible": true }]
+      }
+    },
+    {
+      "id": "tunnel",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 100, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": true,
+        "tunnelLayer": "Diagnostics"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "tunnel-start",
+      "type": "connection",
+      "fromId": "tunnel",
+      "toId": "decode",
+      "props": { "terminal": "start", "portId": "out_frame", "face": "outer" }
+    },
+    {
+      "id": "tunnel-end",
+      "type": "connection",
+      "fromId": "tunnel",
+      "toId": "estimate",
+      "props": { "terminal": "end", "portId": "in_frame", "face": "outer" }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "endpoint",
+      "kind": "step",
+      "text": "2 · Click decode() to focus an endpoint Block.",
+      "x": 20,
+      "y": 400,
+      "w": 360,
+      "h": 110,
+      "target": { "shapeId": "decode", "anchor": "left", "dy": 0 }
+    },
+    {
+      "id": "hover-run",
+      "kind": "step",
+      "text": "1 · Hover the empty run between the two outlined vias.",
+      "x": 680,
+      "y": 120,
+      "w": 430,
+      "h": 110,
+      "target": { "x": 895, "y": 455 }
+    },
+    {
+      "id": "layer",
+      "kind": "step",
+      "text": "3 · Click Diagnostics in the Layers bar above the canvas.",
+      "x": 1160,
+      "y": 120,
+      "w": 380,
+      "h": 110,
+      "target": { "shapeId": "estimate", "anchor": "top", "dx": 0 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN the full cable returns for each focus, then becomes two short stubs again when focus leaves.",
+      "x": 600,
+      "y": 690,
+      "w": 600,
+      "h": 120
+    }
+  ]
+}

@@ -87,6 +87,8 @@ import {
 	polylineLength,
 	splitDashArrays,
 } from './connectionPresentation'
+import { tunnelRouteIsRevealed, tunnelVisualForPoints, type TunnelVisual } from './tunnelEdge'
+import { getFocusedTunnelLayer } from './tunnelLayers'
 import { BRANCH_FADE_OPACITY } from '../../branch/branchModel'
 import { branchAncestry, branchFadeOpacity } from '../../branch/branchScope'
 import {
@@ -142,6 +144,10 @@ declare module 'tldraw' {
 			delayValue: string
 			/** Where the z⁻¹ pill sits, as a fraction of the cable's arc length. */
 			pillPosition: number
+			/** Hide the long run until this cable's context is focused. */
+			tunnel: boolean
+			/** Reusable layer name whose focus reveals this tunnel cable. */
+			tunnelLayer: string
 		}
 	}
 }
@@ -171,12 +177,15 @@ export const connectionShapeProps: RecordProps<ConnectionShape> = {
 	temporal: ConnectionTemporalStyle,
 	delayValue: T.string,
 	pillPosition: T.number,
+	tunnel: T.boolean,
+	tunnelLayer: T.string,
 }
 
 const connectionVersions = createShapePropsMigrationIds(CONNECTION_SHAPE_TYPE, {
 	AddAuthoredRoutingGeometry: 1,
 	AddTemporalQualifier: 2,
 	AddRouteOwnership: 3,
+	AddTunnelVisibility: 4,
 })
 
 const connectionShapeMigrations = createShapePropsMigrationSequence({
@@ -223,6 +232,16 @@ const connectionShapeMigrations = createShapePropsMigrationSequence({
 		down(props) {
 			delete props.routeMode
 		},
+	}, {
+		id: connectionVersions.AddTunnelVisibility,
+		up(props) {
+			if (props.tunnel === undefined) props.tunnel = false
+			if (props.tunnelLayer === undefined) props.tunnelLayer = ''
+		},
+		down(props) {
+			delete props.tunnel
+			delete props.tunnelLayer
+		},
 	}],
 })
 
@@ -246,6 +265,8 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			temporal: 'data',
 			delayValue: '',
 			pillPosition: PILL_POSITION_DEFAULT,
+			tunnel: false,
+			tunnelLayer: '',
 		}
 	}
 
@@ -698,8 +719,24 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 
 	override toSvg(connection: ConnectionShape) {
 		const path = getConnectionShapePath(this.editor, connection)
+		const points = getConnectionRenderPoints(this.editor, connection)
+		const tunnel = connection.props.tunnel ? tunnelVisualForPoints(points, false) : null
+		if (tunnel) {
+			return (
+				<g>
+					<DataCablePath
+						path={path}
+						length={polylineLength(points)}
+						temporal={connection.props.temporal}
+						stroke="#475569"
+						tunnel={tunnel}
+					/>
+					<TunnelVias tunnel={tunnel} stroke="#475569" fill="#ffffff" />
+				</g>
+			)
+		}
 		if (connection.props.temporal !== 'delayed') {
-			const length = polylineLength(getConnectionRenderPoints(this.editor, connection))
+			const length = polylineLength(points)
 			return <DataCablePath path={path} length={length} temporal={connection.props.temporal} stroke="#475569" />
 		}
 		const pill = delayPillGeometry(this.editor, connection)
@@ -751,16 +788,61 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		[editor, connection, delayed],
 	)
 	const stroke = 'var(--tl-color-text-3, #475569)'
+	const tunnelRevealed = useValue(
+		'connection tunnel reveal',
+		() => {
+			const bindings = getConnectionBindings(editor, connection)
+			const selected = new Set(editor.getSelectedShapeIds())
+			const hovered = editor.getHoveredShapeId()
+			const endpointIds = [bindings.start?.toId, bindings.end?.toId]
+				.filter((id): id is TLShapeId => id !== undefined)
+			const edgeFocused = selected.has(connection.id) || hovered === connection.id
+			return tunnelRouteIsRevealed({
+				enabled: connection.props.tunnel,
+				layerFocused: connection.props.tunnelLayer !== ''
+					&& getFocusedTunnelLayer(editor) === connection.props.tunnelLayer,
+				edgeFocused,
+				endpointFocused: endpointIds.some((id) => selected.has(id) || hovered === id),
+				reattaching: edgeFocused && editor.isIn('select.dragging_handle'),
+			})
+		},
+		[editor, connection.id, connection.props.tunnel, connection.props.tunnelLayer],
+	)
+	const renderPoints = useValue(
+		'block connection render points',
+		() => getConnectionRenderPoints(editor, connection),
+		[editor, connection],
+	)
+	const tunnel = connection.props.tunnel
+		? tunnelVisualForPoints(renderPoints, tunnelRevealed)
+		: null
 	if (!delayed || !pill) {
-		const length = polylineLength(getConnectionRenderPoints(editor, connection))
+		const length = polylineLength(renderPoints)
 		return (
-			<SVGContainer style={{ opacity }} data-temporal={connection.props.temporal}>
-				<DataCablePath path={path} length={length} temporal={connection.props.temporal} stroke={stroke} />
+			<SVGContainer
+				style={{ opacity }}
+				data-temporal={connection.props.temporal}
+				data-tunnel={connection.props.tunnel ? (tunnel ? 'hidden' : 'revealed') : 'off'}
+			>
+				<DataCablePath path={path} length={length} temporal={connection.props.temporal} stroke={stroke} tunnel={tunnel} />
+				{tunnel ? <TunnelVias tunnel={tunnel} stroke={stroke} fill="var(--ss-surface, #ffffff)" /> : null}
+			</SVGContainer>
+		)
+	}
+	if (tunnel) {
+		return (
+			<SVGContainer style={{ opacity }} data-temporal="delayed" data-tunnel="hidden">
+				<DataCablePath path={path} length={polylineLength(renderPoints)} temporal="delayed" stroke={stroke} tunnel={tunnel} />
+				<TunnelVias tunnel={tunnel} stroke={stroke} fill="var(--ss-surface, #ffffff)" />
 			</SVGContainer>
 		)
 	}
 	return (
-		<SVGContainer style={{ opacity }} data-temporal="delayed">
+		<SVGContainer
+			style={{ opacity }}
+			data-temporal="delayed"
+			data-tunnel={connection.props.tunnel ? 'revealed' : 'off'}
+		>
 			<DelayedCablePaths path={path} pill={pill} solidBeforePill={solidBeforePill} stroke={stroke} />
 			<DelayPill
 				pill={pill}
@@ -784,6 +866,7 @@ export function DataCablePath({
 	stroke,
 	strokeWidth = 2,
 	vectorEffect,
+	tunnel,
 }: {
 	path: string
 	length: number
@@ -791,8 +874,9 @@ export function DataCablePath({
 	stroke: string
 	strokeWidth?: number
 	vectorEffect?: 'non-scaling-stroke'
+	tunnel?: TunnelVisual | null
 }) {
-	const async = temporal === 'async'
+	const async = temporal === 'async' && !tunnel
 	return (
 		<path
 			d={path}
@@ -801,11 +885,28 @@ export function DataCablePath({
 			strokeLinecap={async ? 'butt' : 'round'}
 			strokeLinejoin="round"
 			strokeWidth={strokeWidth}
-			strokeDasharray={async ? ASYNC_PACKET_DASHARRAY : undefined}
+			strokeDasharray={tunnel?.dashArray ?? (async ? ASYNC_PACKET_DASHARRAY : undefined)}
 			strokeDashoffset={async ? asyncDashOffsetForLength(length) : undefined}
 			vectorEffect={vectorEffect}
 			data-edge-type={temporal}
 		/>
+	)
+}
+
+function TunnelVias({
+	tunnel,
+	stroke,
+	fill,
+}: {
+	tunnel: TunnelVisual
+	stroke: string
+	fill: string
+}) {
+	return (
+		<g className="ConnectionShape-tunnelVias" data-testid="connection-tunnel-vias">
+			<circle cx={tunnel.startVia.x} cy={tunnel.startVia.y} r={4} fill={fill} stroke={stroke} strokeWidth={2} />
+			<circle cx={tunnel.endVia.x} cy={tunnel.endVia.y} r={4} fill={fill} stroke={stroke} strokeWidth={2} />
+		</g>
 	)
 }
 

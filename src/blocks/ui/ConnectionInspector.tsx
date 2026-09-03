@@ -25,8 +25,10 @@ import {
 } from '../connections/connectionModel'
 import {
 	centreConnectionPill,
+	canonicalTunnelLayer,
 	getConnectionBindings,
 	getConnectionDirection,
+	getTunnelLayers,
 	setConnectionDelayValue,
 	type ConnectionBinding,
 	type ConnectionShape,
@@ -53,12 +55,28 @@ export interface ConnectionInspectorContext {
 	authored: boolean
 	/** The single selected cable, for the per-cable delay controls. */
 	only: { id: TLShapeId; delayValue: string; pillCentred: boolean } | null
+	/** Shared tunnel state; null means mixed across a multi-selection. */
+	tunnelEnabled: boolean | null
+	/** Shared layer name; null means mixed across a multi-selection. */
+	tunnelLayer: string | null
+	/** Reusable tunnel layer names already present on this canvas. */
+	tunnelLayers: string[]
 }
 
 const label = (value: string) => value[0].toUpperCase() + value.slice(1)
 
 const temporalLabel = (temporal: ConnectionTemporalKind) =>
 	temporal === 'delayed' ? 'Delayed (z⁻¹)' : label(temporal)
+
+function selectedConnections(editor: Editor): ConnectionShape[] {
+	return editor.getSelectedShapes()
+		.filter((shape) => shape.type === CONNECTION_SHAPE_TYPE) as ConnectionShape[]
+}
+
+function sharedValue<T>(values: readonly T[]): T | null {
+	if (values.length === 0) return null
+	return values.every((value) => value === values[0]) ? values[0] : null
+}
 
 function describeEndpoint(editor: Editor, binding: ConnectionBinding | undefined) {
 	if (!binding) return '—'
@@ -76,8 +94,7 @@ function describeEndpoint(editor: Editor, binding: ConnectionBinding | undefined
 
 /** Resolve what the dock should show for the current selection. */
 export function getConnectionInspectorContext(editor: Editor): ConnectionInspectorContext | null {
-	const selected = editor.getSelectedShapes()
-		.filter((shape) => shape.type === CONNECTION_SHAPE_TYPE) as ConnectionShape[]
+	const selected = selectedConnections(editor)
 	if (selected.length === 0) return null
 
 	const only = selected.length === 1 ? selected[0] : null
@@ -101,6 +118,9 @@ export function getConnectionInspectorContext(editor: Editor): ConnectionInspect
 			}
 			: null,
 		authored: only ? only.props.routeMode === 'authored' : false,
+		tunnelEnabled: sharedValue(selected.map((connection) => connection.props.tunnel)),
+		tunnelLayer: sharedValue(selected.map((connection) => connection.props.tunnelLayer)),
+		tunnelLayers: getTunnelLayers(editor),
 	}
 }
 
@@ -116,6 +136,10 @@ function sameConnectionInspectorContext(
 		&& before.authored === next.authored
 		&& sameSharedStyle(before.routing, next.routing)
 		&& sameSharedStyle(before.temporal, next.temporal)
+		&& before.tunnelEnabled === next.tunnelEnabled
+		&& before.tunnelLayer === next.tunnelLayer
+		&& before.tunnelLayers.length === next.tunnelLayers.length
+		&& before.tunnelLayers.every((layer, index) => layer === next.tunnelLayers[index])
 		&& (before.only === next.only || (
 			before.only !== null && next.only !== null
 			&& before.only.id === next.only.id
@@ -130,6 +154,8 @@ function sameConnectionInspectorContext(
 }
 
 export function EditorConnectionInspector({ editor }: { editor: Editor }) {
+	const [addingLayer, setAddingLayer] = useState(false)
+	const [newLayerName, setNewLayerName] = useState('')
 	// Re-resolved whenever a selected cable's record changes — every frame it
 	// is dragged — but kept when the panel would read the same thing.
 	const context = useValue(
@@ -149,8 +175,7 @@ export function EditorConnectionInspector({ editor }: { editor: Editor }) {
 		[editor],
 	)
 	const clearAuthored = useCallback(() => {
-		const selected = editor.getSelectedShapes()
-			.filter((shape) => shape.type === CONNECTION_SHAPE_TYPE) as ConnectionShape[]
+		const selected = selectedConnections(editor)
 		if (selected.length === 0) return
 		editor.markHistoryStoppingPoint('reset connection route')
 		editor.updateShapes(selected.map((connection) => ({
@@ -159,9 +184,42 @@ export function EditorConnectionInspector({ editor }: { editor: Editor }) {
 			props: { curve: null, pins: [], elbowRoute: null, routeMode: 'automatic' },
 		})))
 	}, [editor])
+	const setTunnel = useCallback((enabled: boolean) => {
+		const selected = selectedConnections(editor)
+		if (selected.length === 0) return
+		const firstLayer = getTunnelLayers(editor)[0] ?? ''
+		editor.markHistoryStoppingPoint('change tunnel mode')
+		editor.updateShapes(selected.map((connection) => ({
+			id: connection.id,
+			type: CONNECTION_SHAPE_TYPE,
+			props: {
+				tunnel: enabled,
+				...(enabled && connection.props.tunnelLayer === '' && firstLayer
+					? { tunnelLayer: firstLayer }
+					: null),
+			},
+		})))
+	}, [editor])
+	const setTunnelLayer = useCallback((layer: string) => {
+		const selected = selectedConnections(editor)
+		if (selected.length === 0) return
+		editor.markHistoryStoppingPoint('set tunnel layer')
+		editor.updateShapes(selected.map((connection) => ({
+			id: connection.id,
+			type: CONNECTION_SHAPE_TYPE,
+			props: { tunnelLayer: layer },
+		})))
+	}, [editor])
 
 	if (!context) return null
 	const many = context.count > 1
+	const createLayer = () => {
+		const layer = canonicalTunnelLayer(editor, newLayerName)
+		if (!layer) return
+		setTunnelLayer(layer)
+		setNewLayerName('')
+		setAddingLayer(false)
+	}
 
 	return (
 		<section
@@ -256,6 +314,74 @@ export function EditorConnectionInspector({ editor }: { editor: Editor }) {
 							? 'This cable carries a route you authored.'
 							: 'Automatic — the router owns this cable.'}
 					</p>
+				</section>
+
+				<section className="block-inspector__section" data-inspector-section="Visibility">
+					<div className="block-inspector__section-title">Visibility</div>
+					<div className="connection-inspector__toggle-row">
+						<div>
+							<strong>Tunnel</strong>
+							<span>Hide the long run until it is relevant.</span>
+						</div>
+						<button
+							type="button"
+							role="switch"
+							className="connection-inspector__switch"
+							aria-checked={context.tunnelEnabled ?? 'mixed'}
+							aria-label="Tunnel edge"
+							data-testid="tunnel-toggle"
+							onClick={() => setTunnel(context.tunnelEnabled !== true)}
+						>
+							<span />
+						</button>
+					</div>
+
+					{context.tunnelEnabled ? (
+						<div className="connection-inspector__tunnel-fields">
+							<label className="block-inspector__field">
+								<span>Layer</span>
+								<select
+									value={context.tunnelLayer ?? ''}
+									data-testid="tunnel-layer"
+									onChange={(event) => setTunnelLayer(event.target.value)}
+								>
+									<option value="">Choose layer…</option>
+									{context.tunnelLayers.map((layer) => (
+										<option key={layer} value={layer}>{layer}</option>
+									))}
+								</select>
+							</label>
+							{addingLayer ? (
+								<div className="connection-inspector__new-layer">
+									<input
+										autoFocus
+										value={newLayerName}
+										placeholder="Layer name…"
+										aria-label="New tunnel layer name"
+										data-testid="new-tunnel-layer-name"
+										onChange={(event) => setNewLayerName(event.target.value)}
+										onKeyDown={(event) => {
+											if (event.key === 'Enter') createLayer()
+											else if (event.key === 'Escape') setAddingLayer(false)
+										}}
+									/>
+									<button type="button" data-testid="add-tunnel-layer" onClick={createLayer}>Add</button>
+								</div>
+							) : (
+								<button
+									type="button"
+									className="block-inspector__count-pill connection-inspector__add-layer"
+									data-testid="new-tunnel-layer"
+									onClick={() => setAddingLayer(true)}
+								>
+									+ New layer
+								</button>
+							)}
+							<p className="block-inspector__hint">
+								Reveals with its layer, edge, endpoint Block, or port reattachment focus.
+							</p>
+						</div>
+					) : null}
 				</section>
 			</div>
 		</section>

@@ -76,6 +76,8 @@ A partial Block lets the current `BlockShapeUtil` fill every omitted default:
 
 For an Expanded Block, set `view`, `w`, and `h`, then make child shapes use the Block's shorthand id as `parentId`. For a semantic cable, create a `connection` shape plus its two `connection` bindings with the exact current props from the feature source or an existing acceptance test. Do not imitate a semantic cable with a stock arrow.
 
+For an edge-tunnel review, set `tunnel: true` and give `tunnelLayer` a readable name such as `Diagnostics` on the real `connection` shape. The live app derives its reusable Layers chip from those persisted connection props; do not seed a fake layer card or a second metadata record. Leave the cable idle in the saved fixture so its two endpoint stubs and outlined vias are visible before the first gesture.
+
 SystemSketch documents have one canvas. When a fixture needs to demonstrate a legacy multi-page import, seed named stock Frames such as `Architecture` and `Runtime` side by side and parent each former page's objects to its Frame. The product migration itself must be proven by an automated test that opens a real multi-page `.tldr`; do not make the review helper create forbidden product pages.
 
 For a Branch, seed only the semantic `branch` and its ordinary direct children, stamping each child with `meta.branchArm`. The live editor projects those children into internal `branch-arm` frames when the board loads. Never put `branch-arm` records in a recipe: they are derived implementation details that the current document format persists automatically, while older boards are upgraded on load.
