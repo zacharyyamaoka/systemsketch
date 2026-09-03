@@ -57,10 +57,10 @@
       "borderRadius": "999px"
     },
     ".Port": {
-      "x": 321.125,
-      "y": 279.125,
-      "w": 18,
-      "h": 18,
+      "x": 324.125,
+      "y": 282.125,
+      "w": 12,
+      "h": 12,
       "fontFamily": "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
       "fontSize": "12px",
       "lineHeight": "normal",
@@ -70,12 +70,16 @@
   "detached": {
     "blockGroups": 1,
     "rowGroups": 4,
-    "circles": 4,
-    "circleWidths": [
+    "outerCircles": 4,
+    "innerCircles": 1,
+    "outerCircleWidths": [
       18,
       18,
       18,
       18
+    ],
+    "innerCircleWidths": [
+      12
     ],
     "pills": 1,
     "functionText": {
@@ -97,16 +101,23 @@
     },
     "textLayout": [
       {
-        "text": "int",
-        "clientWidth": 43,
-        "scrollWidth": 43,
+        "text": "= 5",
+        "clientWidth": 34,
+        "scrollWidth": 34,
+        "clientHeight": 18,
+        "scrollHeight": 18
+      },
+      {
+        "text": "bool",
+        "clientWidth": 54,
+        "scrollWidth": 54,
         "clientHeight": 24,
         "scrollHeight": 24
       },
       {
-        "text": "result",
-        "clientWidth": 59,
-        "scrollWidth": 59,
+        "text": "float",
+        "clientWidth": 65,
+        "scrollWidth": 65,
         "clientHeight": 24,
         "scrollHeight": 24
       },
@@ -118,9 +129,16 @@
         "scrollHeight": 24
       },
       {
-        "text": "status",
-        "clientWidth": 62,
-        "scrollWidth": 62,
+        "text": "image",
+        "clientWidth": 65,
+        "scrollWidth": 65,
+        "clientHeight": 24,
+        "scrollHeight": 24
+      },
+      {
+        "text": "int",
+        "clientWidth": 43,
+        "scrollWidth": 43,
         "clientHeight": 24,
         "scrollHeight": 24
       },
@@ -132,39 +150,11 @@
         "scrollHeight": 16
       },
       {
-        "text": "float",
-        "clientWidth": 65,
-        "scrollWidth": 65,
-        "clientHeight": 24,
-        "scrollHeight": 24
-      },
-      {
         "text": "normalize",
         "clientWidth": 329,
         "scrollWidth": 329,
         "clientHeight": 40,
         "scrollHeight": 40
-      },
-      {
-        "text": "image",
-        "clientWidth": 65,
-        "scrollWidth": 65,
-        "clientHeight": 24,
-        "scrollHeight": 24
-      },
-      {
-        "text": "window",
-        "clientWidth": 76,
-        "scrollWidth": 76,
-        "clientHeight": 24,
-        "scrollHeight": 24
-      },
-      {
-        "text": "= 5",
-        "clientWidth": 34,
-        "scrollWidth": 34,
-        "clientHeight": 18,
-        "scrollHeight": 18
       },
       {
         "text": "payload",
@@ -174,24 +164,38 @@
         "scrollHeight": 24
       },
       {
-        "text": "bool",
-        "clientWidth": 54,
-        "scrollWidth": 54,
+        "text": "result",
+        "clientWidth": 59,
+        "scrollWidth": 59,
+        "clientHeight": 24,
+        "scrollHeight": 24
+      },
+      {
+        "text": "status",
+        "clientWidth": 62,
+        "scrollWidth": 62,
+        "clientHeight": 24,
+        "scrollHeight": 24
+      },
+      {
+        "text": "window",
+        "clientWidth": 76,
+        "scrollWidth": 76,
         "clientHeight": 24,
         "scrollHeight": 24
       }
     ]
   },
   "score": {
-    "score": 0.948014,
-    "wholeSimilarity": 0.993385,
-    "foregroundSimilarity": 0.935741,
-    "edgeSimilarity": 0.938716,
-    "foregroundPixels": 15605,
+    "score": 0.947731,
+    "wholeSimilarity": 0.993353,
+    "foregroundSimilarity": 0.935358,
+    "edgeSimilarity": 0.938456,
+    "foregroundPixels": 15585,
     "totalPixels": 151632
   },
   "checks": {
-    "oneOuterSizedCirclePerPort": true,
+    "layeredPortVisualsMatchLiveBlock": true,
     "nestedPortRows": true,
     "defaultPillPresent": true,
     "functionStaysSingleLine": true,

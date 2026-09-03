@@ -66,10 +66,13 @@
     "test:worktree-paths": "node tests/development_worktree_paths_smoke.mjs",
     "test:theme": "node --experimental-strip-types tests/theme_contrast_smoke.mjs",
     "test:zoom-controls": "node tests/zoom_controls_preference_smoke.mjs",
+    "test:layout-commands": "node tests/layout_commands_smoke.mjs",
     "theme:import": "node --experimental-strip-types scripts/import_vscode_theme.mjs",
-    "theme:obsidian": "python3 scripts/extract_obsidian_palette.py"
+    "theme:obsidian": "python3 scripts/extract_obsidian_palette.py",
+    "test:export": "node tests/tldraw_export_smoke.mjs"
   },
   "dependencies": {
+    "elkjs": "0.12.0",
     "lucide-react": "1.33.0",
     "radix-ui": "1.6.7",
     "react": "19.2.8",

@@ -1,6 +1,6 @@
 [
   {
-    "label": "Ctrl+K opens the command palette with its search input focused and real actions listed",
+    "label": "Ctrl+P opens the command palette with its search input focused and real actions listed",
     "ok": true
   },
   {

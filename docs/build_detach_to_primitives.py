@@ -59,6 +59,9 @@ AFTER_ONE = ASSETS / "detach-after-one.png"
 AFTER_BOTH = ASSETS / "detach-after-both.png"
 REBUILT = ASSETS / "detach-rebuilt.png"
 FIXTURE = REPO / "sketches" / "review" / "detach-to-primitives.png"
+EXPORT_DIALOG = ASSETS / "export-dialog.png"
+EXPORT_INTACT = ASSETS / "export-document-intact.png"
+EXPORT_ROUND_TRIP = ASSETS / "export-round-trip.png"
 
 # (source, crop box, output width) — boxes are in the 1440x960 capture frame.
 CROPS = {
@@ -67,6 +70,9 @@ CROPS = {
     "__ONE__": (AFTER_ONE, (280, 210, 1180, 480), 1100),
     "__REBUILT__": (REBUILT, (280, 210, 1180, 690), 1100),
     "__FIXTURE__": (FIXTURE, (0, 40, 1440, 900), 1240),
+    "__EXPORT_DIALOG__": (EXPORT_DIALOG, (330, 150, 1110, 660), 1080),
+    "__EXPORT_INTACT__": (EXPORT_INTACT, (280, 210, 1180, 470), 1080),
+    "__EXPORT_ROUND_TRIP__": (EXPORT_ROUND_TRIP, (280, 210, 1180, 470), 1080),
 }
 
 
@@ -103,6 +109,10 @@ def main() -> None:
     build = sys.argv[1] if len(sys.argv) > 1 else "track-detach-to-primitives"
     journey = REPO / "tests" / "block_detach_smoke.mjs"
     verdicts = journey_results(ASSETS / "detach-acceptance.json", journey, REPO / "src")
+    export_journey = REPO / "tests" / "tldraw_export_smoke.mjs"
+    export_verdicts = journey_results(
+        ASSETS / "export-acceptance.json", export_journey, REPO / "src"
+    )
 
     model = REPO / "src" / "blocks" / "detach" / "detachModel.ts"
     command = REPO / "src" / "blocks" / "detach" / "detachBlock.ts"
@@ -112,6 +122,16 @@ def main() -> None:
         "__JOURNEY_TOTAL__": str(len(verdicts)),
         "__JOURNEY_PASSED__": str(sum(1 for row in verdicts if row["ok"])),
         "__JOURNEY_ROWS__": verdict_rows(verdicts),
+        "__EXPORT_TOTAL__": str(len(export_verdicts)),
+        "__EXPORT_PASSED__": str(sum(1 for row in export_verdicts if row["ok"])),
+        "__EXPORT_ROWS__": verdict_rows(export_verdicts),
+        "__EXPORT_SRC__": html.escape(
+            quote_source(
+                REPO / "src" / "workspace" / "LocalWorkspace.tsx",
+                "  const exportTldraw = useCallback",
+                "\n  const rename = useCallback",
+            )
+        ),
         "__MODEL_TESTS__": str(unit_test_count("src/blocks/detach/detachModel.test.ts")),
         "__PRIMITIVE_TESTS__": str(unit_test_count("src/blocks/detach/blockPrimitives.test.ts")),
         "__MODEL_LINES__": str(line_count("src/blocks/detach/detachModel.ts")),
@@ -201,7 +221,7 @@ TEMPLATE = r'''<!doctype html>
     <div class="stat"><b>__JOURNEY_PASSED__/__JOURNEY_TOTAL__</b><span>real-browser checks</span></div>
     <div class="stat"><b>__MODEL_TESTS__ + __PRIMITIVE_TESTS__</b><span>unit tests on the pure halves</span></div>
     <div class="stat"><b>__MODEL_LINES__</b><span>lines in the whole envelope</span></div>
-    <div class="stat"><b>1</b><span>Ctrl+Z to undo a detach</span></div>
+    <div class="stat"><b>__EXPORT_PASSED__/__EXPORT_TOTAL__</b><span>checks on the .tldr export</span></div>
   </div>
 
   <section>
@@ -216,11 +236,11 @@ TEMPLATE = r'''<!doctype html>
       </div>
       <div class="card">
         <h3><span class="tag warn">GIVES UP</span></h3>
-        <p>Block behaviour, live layout, semantic port identity on the canvas, and two declared
-        approximations: stock-palette port colours (tldraw cannot reach <code>#c08520</code>) and
-        square corners where a 9px radius or a lucide glyph has no primitive equivalent. Ungrouping
-        with <code>Ctrl+Shift+G</code> discards the record too — that is the honest meaning of taking
-        it apart by hand.</p>
+        <p>Block behaviour, live layout, and semantic port identity on the canvas. Exact colours,
+        one-pixel strokes, rounded cards and value pills now travel through supported stock-shape
+        display seams; lucide icons remain outline-primitive approximations. Ungrouping with
+        <code>Ctrl+Shift+G</code> discards the record too — that is the honest meaning of taking it
+        apart by hand.</p>
       </div>
     </div>
   </section>
@@ -328,7 +348,52 @@ TEMPLATE = r'''<!doctype html>
   </section>
 
   <section>
-    <h2 class="section-title">8 · Where it came from, and what is next</h2>
+    <h2 class="section-title">8 · What it was for: <code>File → Export to tldraw…</code></h2>
+    <p class="section-copy">The FR's own recipe, now a menu item: run detach over
+    <b>everything</b>, so the whole board reduces to groups of stock shapes whose <code>meta</code>
+    carries what it would take to rebuild them, and write that as a plain <code>.tldr</code>.
+    <code>.systemsketch</code> → <code>.tldr</code> → Blocks again, on the same records.</p>
+
+    <div class="grid2">
+      <figure>
+        <img alt="The export dialog, offering a .tldr name" src="data:image/png;base64,__EXPORT_DIALOG__" />
+        <figcaption><b>One destination, one format</b>The suffix is <code>.tldr</code> and not
+        negotiable — an export written under <code>.systemsketch</code> would promise semantics it
+        does not carry, which is the exact confusion two file types exist to prevent.</figcaption>
+      </figure>
+      <figure>
+        <img alt="The board still holding real Blocks after the export" src="data:image/png;base64,__EXPORT_INTACT__" />
+        <figcaption><b>The document is untouched</b>Not just on screen — the journey re-reads the
+        <code>.systemsketch</code> off disk after the export and finds <code>block</code> and
+        <code>connection</code> records, and no detached group.</figcaption>
+      </figure>
+    </div>
+
+    <p class="section-copy" style="margin-top:22px">The export <b>borrows the live document</b>
+    rather than building a second one. Running the real command is the only way the exported file is
+    guaranteed to match what the canvas would have produced — a second code path that assembles group
+    records by hand would be a second thing to keep in step. Two things make borrowing safe: autosave
+    is held off for the whole window, and the bail is in a <code>finally</code>, so a failed write
+    cannot leave someone staring at a board that silently came apart. Removing that one line turns
+    both <code>DOCUMENT-SURVIVES</code> checks red.</p>
+    <div class="card" style="margin-top:14px"><pre>__EXPORT_SRC__</pre></div>
+
+    <figure style="margin-top:22px">
+      <img alt="Blocks rebuilt out of the exported tldraw file" src="data:image/png;base64,__EXPORT_ROUND_TRIP__" />
+      <figcaption><b>All the way back</b>The exported <code>.tldr</code> reopened, selected, and
+      rebuilt: two Blocks and the semantic cable, out of a file with no SystemSketch shape type in
+      it.</figcaption>
+    </figure>
+
+    <table style="margin-top:22px">
+      <thead><tr><th>Check</th><th>Claim</th><th></th><th>Observed</th></tr></thead>
+      <tbody>__EXPORT_ROWS__</tbody>
+    </table>
+    <pre style="margin-top:18px">npm run test:export</pre>
+  </section>
+
+  <section>
+    <h2 class="section-title">9 · Where it came from</h2>
     <div class="grid3">
       <div class="card">
         <h3><span class="tag info">DONOR</span> pyblocks</h3>
@@ -343,10 +408,9 @@ TEMPLATE = r'''<!doctype html>
         reversible instead of terminal.</p>
       </div>
       <div class="card">
-        <h3><span class="tag info">NEXT</span> Export to <code>.tldr</code></h3>
-        <p>Now a small step: detach every Block on the page, then save. The reader already exists —
-        this is the same <code>meta</code> a <code>.tldr</code> reopened in SystemSketch turns back
-        into Blocks.</p>
+        <h3><span class="tag ok">SHIPPED</span> Export to <code>.tldr</code></h3>
+        <p>§8. Detach everything, then save — and put the board straight back. The reader was already
+        there, which is what made the export small.</p>
       </div>
     </div>
     <table style="margin-top:22px">
@@ -355,9 +419,11 @@ TEMPLATE = r'''<!doctype html>
         <tr><td class="mono">src/blocks/detach/detachModel.ts</td><td>The record and its reader. Pure; no editor, no tldraw runtime.</td><td class="mono">__MODEL_LINES__</td></tr>
         <tr><td class="mono">src/blocks/detach/blockPrimitives.ts</td><td>The look as a value — asserted without an editor.</td><td class="mono">__PRIMITIVE_LINES__</td></tr>
         <tr><td class="mono">src/blocks/detach/detachBlock.ts</td><td>Both commands, and everything that touches the editor.</td><td class="mono">__COMMAND_LINES__</td></tr>
-        <tr><td class="mono">src/blocks/ui/portPalette.ts</td><td>One table for a port's colour, so the live hex and the stock approximation cannot drift.</td><td class="mono">—</td></tr>
+        <tr><td class="mono">src/blocks/ui/portPalette.ts</td><td>One table for a port's exact live colour and its portable stock fallback.</td><td class="mono">—</td></tr>
         <tr><td class="mono">src/blocks/ui/BlockContextMenu.tsx</td><td>Both menu items, counted for a multi-selection.</td><td class="mono">—</td></tr>
+        <tr><td class="mono">src/workspace/LocalWorkspace.tsx</td><td>The export: borrow, serialize, bail, and hold autosave off across it.</td><td class="mono">—</td></tr>
         <tr><td class="mono">tests/block_detach_smoke.mjs</td><td>The journey behind §6.</td><td class="mono">—</td></tr>
+        <tr><td class="mono">tests/tldraw_export_smoke.mjs</td><td>The journey behind §8.</td><td class="mono">—</td></tr>
       </tbody>
     </table>
   </section>

@@ -16,6 +16,7 @@ export * from './PointingBlockPort'
 export * from './installConnections'
 export * from './connectionCommands'
 export * from './connectionPresentation'
+export * from './tidyEdges'
 
 import { ConnectionBindingUtil } from './ConnectionBindingUtil'
 import { ConnectionControlPointOverlayUtil } from './ConnectionControlPointOverlayUtil'

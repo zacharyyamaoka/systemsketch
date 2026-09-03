@@ -109,6 +109,23 @@ async function detachedTree(page) {
   })()`).then(JSON.parse)
 }
 
+/** The concentric stock ellipses held by each detached port-row group. */
+async function detachedPortLayers(page, blockGroupId) {
+  return evaluate(page, `(() => {
+    const editor = window.__systemsketch?.editor
+    if (!editor) return '[]'
+    const rows = editor.getSortedChildIdsForParent(${JSON.stringify(blockGroupId)})
+      .map((id) => editor.getShape(id))
+      .filter((shape) => shape?.type === 'group')
+    return JSON.stringify(rows.map((row) => editor.getSortedChildIdsForParent(row.id)
+      .map((id) => editor.getShape(id))
+      .filter((shape) => shape?.type === 'geo' && shape.props.geo === 'ellipse'
+        && (shape.props.w === 18 || shape.props.w === 12))
+      .map((shape) => shape.props.w)
+      .sort((a, b) => b - a)))
+  })()`).then(JSON.parse)
+}
+
 /** A shape's page bounds projected into client coordinates. */
 async function shapeBox(page, shapeId) {
   const value = await evaluate(page, `(() => {
@@ -203,6 +220,10 @@ async function main() {
         portRowGroups: afterOneTree.rows.length,
       },
       { blocks: 1, geo: true, text: true, blockGroups: 1, portRowGroups: 1 })
+    check('CONNECTED-PORT-LAYERS',
+      'the connected port becomes an 18px outer ring plus its centred 12px filled core',
+      await detachedPortLayers(page, afterOneTree.blocks[0]),
+      [[18, 12]])
     check('CABLE-BECOMES-ARROW', 'the semantic cable becomes a stock arrow, and no cable is left',
       { cables: await cables(page), arrows: afterOne.arrow ?? 0 },
       { cables: 0, arrows: 1 })

@@ -35,6 +35,7 @@ import {
 } from './workspaceClient'
 import {
   SYSTEMSKETCH_SUFFIX,
+  TLDRAW_SUFFIX,
   breadcrumbTrail,
   browserRows,
   claimUntitledPath,
@@ -62,6 +63,7 @@ import {
 import { inspectWorkspaceDocumentSource } from './workspaceDocument'
 import { installWorkspaceLifecycleProtection } from './workspaceLifecycle'
 import { decodeSystemSketchDocument } from './systemSketchFile'
+import { detachAllBlocks } from '../blocks/detach'
 import './local-workspace.css'
 import { hydrateCustomColors } from '../appearance/customColors'
 import { SettingsGearIcon, SystemSketchSettingsDialog } from '../settings/InterfaceSettings'
@@ -81,7 +83,7 @@ export type WorkspaceStatus =
   | { kind: 'quarantined'; message: string }
   | { kind: 'error'; message: string }
 
-type WorkspaceDialogMode = 'open' | 'saveAs' | 'rename' | null
+type WorkspaceDialogMode = 'open' | 'saveAs' | 'exportTldraw' | 'rename' | null
 
 export interface LocalWorkspaceController {
   path: string | null
@@ -96,6 +98,7 @@ export interface LocalWorkspaceController {
   newDocument(): Promise<void>
   save(force?: boolean): Promise<void>
   saveAs(path: string, force?: boolean): Promise<void>
+  exportTldraw(destination: string): Promise<void>
   rename(path: string): Promise<void>
   trash(): Promise<void>
   reveal(): Promise<void>
@@ -132,6 +135,19 @@ function newWindowFeatures(): string {
     `left=${(window.screenX || 0) + 48}`,
     `top=${(window.screenY || 0) + 48}`,
   ].join(',')
+}
+
+/**
+ * Force an export destination to `.tldr`.
+ *
+ * The chooser is asked for `.tldr` and appends it when nothing is typed, but a
+ * person can still type `Board.systemsketch` into a save dialog. An export that
+ * honoured that would write stock primitives under the extension that promises
+ * semantics — the exact confusion the two file types exist to prevent.
+ */
+function exportedTldrawPath(path: string): string {
+  const suffix = documentSuffix(path)
+  return suffix === TLDRAW_SUFFIX ? path : `${suffix ? path.slice(0, -suffix.length) : path}${TLDRAW_SUFFIX}`
 }
 
 function errorMessage(cause: unknown): string {
@@ -199,6 +215,8 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   const savingRef = useRef(false)
   /** True for unreadable recovery and parseable future-format documents alike. */
   const protectedRef = useRef(false)
+  // Held while an export is borrowing the live document. See `exportTldraw`.
+  const exportingRef = useRef(false)
   const queuedSourceRef = useRef<Promise<string> | null>(null)
   // Counts document changes, so a save knows whether more arrived while it ran.
   const changeEpochRef = useRef(0)
@@ -307,6 +325,10 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       setNotice('This file is protected. Create a separate editable copy to keep the original untouched.')
       return
     }
+    // An export detaches every Block in the live document and puts it straight
+    // back. Persisting mid-export would write that borrowed state to the file
+    // the user is actually editing.
+    if (exportingRef.current) return
     if (savingRef.current) {
       if (dirtyRef.current) scheduleSave()
       return
@@ -452,6 +474,44 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       savingRef.current = false
     }
   }, [updateRecents])
+
+  /**
+   * Write the board as a plain `.tldr` that stock tldraw can open.
+   *
+   * The FR's own recipe: run detach-to-primitives over everything, so every
+   * Block and cable reduces to a group of stock shapes, and let each group's
+   * `meta` carry what it would take to rebuild it. Going back the other way is
+   * then Rebuild Block from primitives, on the same records.
+   *
+   * The export borrows the LIVE document rather than building a second one:
+   * detach is already one atomic, undoable operation, and running the real
+   * command is the only way the exported file is guaranteed to match what the
+   * canvas would have produced. Two things make borrowing safe — autosave is
+   * held off for the whole window, and the bail is in a `finally`, so a failed
+   * write cannot leave the user looking at a detached board.
+   */
+  const exportTldraw = useCallback(async (destination: string) => {
+    const editor = editorRef.current
+    if (!editor) throw new Error('The document is not ready to export yet.')
+    await waitForSave()
+
+    exportingRef.current = true
+    setStatus({ kind: 'saving' })
+    const mark = editor.markHistoryStoppingPoint('export to .tldr')
+    try {
+      detachAllBlocks(editor)
+      const source = await serializeTldrawJson(editor)
+      await writeWorkspaceDocument({ path: destination, source, baseDigest: null, force: true })
+    } finally {
+      editor.bailToMark(mark)
+      // The bail restored the document, so nothing is pending for it; anything
+      // the detach queued describes a board that no longer exists.
+      queuedSourceRef.current = null
+      dirtyRef.current = false
+      exportingRef.current = false
+      setStatus({ kind: 'clean', at: Date.now() })
+    }
+  }, [waitForSave])
 
   const rename = useCallback(async (nextPath: string) => {
     const currentPath = pathRef.current
@@ -696,6 +756,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     newDocument,
     save: persist,
     saveAs,
+    exportTldraw,
     rename,
     trash,
     reveal,
@@ -718,6 +779,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     path,
     persist,
     recents,
+    exportTldraw,
     reloadFromDisk,
     rename,
     reveal,
@@ -869,6 +931,11 @@ export function SystemSketchMainMenu() {
               <TldrawUiMenuGroup id="file-save">
                 <TldrawUiMenuItem id="save-document" label="Save" kbd="cmd+s" disabled={workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'} onSelect={() => void workspace.save()} />
                 <TldrawUiMenuItem id="save-as-document" label="Save As…" kbd="cmd+shift+s" onSelect={() => workspace.showDialog('saveAs')} />
+                <TldrawUiMenuItem
+                  id="export-tldraw"
+                  label="Export to tldraw…"
+                  onSelect={() => workspace.showDialog('exportTldraw')}
+                />
                 <TldrawUiMenuItem id="rename-document" label="Rename…" disabled={workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'} onSelect={() => workspace.showDialog('rename')} />
               </TldrawUiMenuGroup>
               <TldrawUiMenuGroup id="file-location">
@@ -944,10 +1011,13 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
   const listRef = useRef<HTMLDivElement | null>(null)
   const crumbsRef = useRef<HTMLElement | null>(null)
   const isRename = mode === 'rename'
+  const isExport = mode === 'exportTldraw'
   // Rename never changes a document's type, so it shows the suffix the file
-  // already has. Everything else is making a new file, which is .systemsketch.
-  const suffix = (isRename && workspace.path ? documentSuffix(workspace.path) : null)
-    ?? SYSTEMSKETCH_SUFFIX
+  // already has. An export always writes `.tldr` — that is the whole point of
+  // it. Everything else is making a new file, which is `.systemsketch`.
+  const suffix = isExport
+    ? TLDRAW_SUFFIX
+    : (isRename && workspace.path ? documentSuffix(workspace.path) : null) ?? SYSTEMSKETCH_SUFFIX
 
   const load = useCallback(async (directory?: string) => {
     setBusy(true)
@@ -1016,13 +1086,18 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
         if (!selectedRow) throw new Error('Choose a document to open.')
         await activate(selectedRow)
         if (selectedRow.kind === 'folder') setBusy(false)
-      } else if (mode === 'saveAs') {
+      } else if (mode === 'saveAs' || mode === 'exportTldraw') {
         const nextPath = force && replacePath
           ? replacePath
-          : listing ? documentPathFor(listing.dir, name) : null
+          : listing ? documentPathFor(listing.dir, name, suffix) : null
         if (!nextPath) throw new Error('Enter a file name.')
         attemptedPath = nextPath
-        await workspace.saveAs(nextPath, force)
+        if (mode === 'exportTldraw') {
+          await workspace.exportTldraw(nextPath)
+          workspace.closeDialog()
+        } else {
+          await workspace.saveAs(nextPath, force)
+        }
       } else {
         const nextPath = workspace.path ? renamedDocumentPath(workspace.path, name) : null
         if (!nextPath) throw new Error('Enter a file name.')
@@ -1039,7 +1114,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
       }
       setBusy(false)
     }
-  }, [activate, listing, mode, name, replacePath, selectedRow, workspace])
+  }, [activate, listing, mode, name, replacePath, selectedRow, suffix, workspace])
 
   const openInNewWindow = useCallback(async () => {
     if (!selectedRow || selectedRow.kind !== 'document') return
@@ -1109,7 +1184,11 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
           <div>
             <span>Local workspace</span>
             <h2 id="workspace-dialog-title">
-              {mode === 'open' ? 'Open a document' : mode === 'saveAs' ? 'Save a copy' : 'Rename document'}
+              {mode === 'open'
+                ? 'Open a document'
+                : mode === 'saveAs'
+                  ? 'Save a copy'
+                  : mode === 'exportTldraw' ? 'Export to tldraw' : 'Rename document'}
             </h2>
           </div>
           <button type="button" aria-label="Close" onClick={workspace.closeDialog}>×</button>
@@ -1260,7 +1339,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                     onClick={() => {
                       setSelectedPath(row.path)
                       if (row.kind === 'folder') void load(row.path)
-                      else if (mode === 'saveAs') {
+                      else if (mode === 'saveAs' || mode === 'exportTldraw') {
                         setName(row.title)
                         setReplacePath(null)
                         setError(null)
@@ -1285,7 +1364,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                   </p>
                 ) : null}
               </div>
-              {mode === 'saveAs' ? (
+              {mode === 'saveAs' || mode === 'exportTldraw' ? (
                 <div className="systemsketch-workspace-name-field is-save-as">
                   <input autoFocus value={name} aria-label="File name" onChange={(event) => {
                     setName(event.target.value)
@@ -1330,7 +1409,9 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                 ? 'Working…'
                 : mode === 'open'
                   ? selectedRow?.kind === 'folder' ? 'Open folder' : 'Open'
-                  : replacePath ? 'Replace' : mode === 'saveAs' ? 'Save' : 'Rename'}
+                  : replacePath
+                    ? 'Replace'
+                    : mode === 'saveAs' ? 'Save' : mode === 'exportTldraw' ? 'Export' : 'Rename'}
             </button>
           </div>
         </footer>

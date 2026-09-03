@@ -69,13 +69,13 @@ ul.clean{{list-style:none;padding:0;margin:0;columns:2}} ul.clean li{{padding:5p
 <body><main>
 <div class="eyebrow">SystemSketch · implementation evidence · 2026-09-02</div>
 <h1>Detach now preserves the Block’s visual grammar.</h1>
-<p class="lede">The detached result uses editable stock tldraw geo, line, and text records, but keeps the live Block’s one-circle ports, typography, rounded value chip, 9 px card radius, one-pixel rules, and resting shadow. Every port row is a nested group.</p>
+<p class="lede">The detached result uses editable stock tldraw geo, line, and text records, but keeps the live Block’s layered ports, typography, rounded value chip, 9 px card radius, one-pixel rules, and resting shadow. Every port row is a nested group.</p>
 
 <section class="kpis">
   <div class="kpi"><b>{score['score'] * 100:.2f}%</b><span>weighted visual similarity</span></div>
   <div class="kpi"><b>{score['wholeSimilarity'] * 100:.2f}%</b><span>whole-frame pixel similarity</span></div>
   <div class="kpi"><b>{detached['rowGroups']}</b><span>nested port-row groups in proof</span></div>
-  <div class="kpi"><b>18 px</b><span>single live + detached port footprint</span></div>
+  <div class="kpi"><b>18 / 12</b><span>outer ring / optional filled core, in pixels</span></div>
 </section>
 
 <section class="card">
@@ -106,10 +106,11 @@ ul.clean{{list-style:none;padding:0;margin:0;columns:2}} ul.clean li{{padding:5p
 <section class="card">
   <h2>The iteration loop was allowed to reject a better-looking number</h2>
   <table><thead><tr><th>Pass</th><th>Score</th><th>Visual judgment</th><th>Decision</th></tr></thead><tbody>
-    <tr><td>Baseline exact styles</td><td>88.07%</td><td>Two-circle port and typography drift removed, but the stock text outline made glyphs too heavy.</td><td>iterate</td></tr>
+    <tr><td>Baseline exact styles</td><td>88.07%</td><td>Typography and primitive paint still drifted; the stock text outline made glyphs too heavy.</td><td>iterate</td></tr>
     <tr><td>Width experiment</td><td>92.90%</td><td>Score rose because final glyphs wrapped below fixed-height boxes and disappeared.</td><td class="rejected">rejected</td></tr>
     <tr><td>Measured text + integrity gates</td><td>93.14%</td><td>Every expected label present; horizontal and vertical overflow both zero; repeat run byte-identical.</td><td>iterate</td></tr>
-    <tr><td>Exact letter spacing + card shadow</td><td>{score['score'] * 100:.2f}%</td><td>Single-line Function, complete labels, live rounded pill and port footprints, remaining delta localized to text rasterization.</td><td class="accepted">accepted ≥ 94.5%</td></tr>
+    <tr><td>Exact letter spacing + card shadow</td><td>94.80%</td><td>Single-line Function, complete labels, rounded pill, and matching card geometry.</td><td>preserved</td></tr>
+    <tr><td>Layered port restoration</td><td>{score['score'] * 100:.2f}%</td><td>Every port keeps the 18 px ring; connected/default ports add the centred 12 px core seen in the live Block.</td><td class="accepted">accepted ≥ 94.5%</td></tr>
   </tbody></table>
   <p class="callout">The scalar score is never trusted alone: text completeness and both scroll dimensions are independent gates, and the generated heatmap is inspected after each pass.</p>
 </section>
@@ -118,7 +119,8 @@ ul.clean{{list-style:none;padding:0;margin:0;columns:2}} ul.clean li{{padding:5p
   <article class="card"><h2>Editable hierarchy</h2><div class="tree">detached Block group
 ├── card + header/footer primitives
 ├── input row group
-│   ├── one 18 px circle
+│   ├── 18 px outer-ring ellipse
+│   ├── optional 12 px filled-core ellipse
 │   ├── name text
 │   ├── type text
 │   ├── rounded default-value geo

@@ -286,22 +286,22 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   text-underline-offset: 3px;
 }
 
-/* One 18px circle is the whole painted port in both a live Block and its
- * detached primitive form. The old 12px core plus two CSS shadow rings could
- * only detach as either two circles or a visibly smaller single circle. The
- * pseudo element keeps the same 40px hit target, so interaction geometry does
- * not get less forgiving when the paint is simplified. */
+/* The 12px pyblocks dot: hollow while unwired, neutral-filled when it owns a
+ * default, type-filled once a cable lands. The surface gap and type-coloured
+ * outer ring bring the full visual footprint to 18px. Detach reproduces those
+ * same two layers as stock ellipse primitives. */
 .systemsketch-block-canvas .Port {
   position: absolute;
   z-index: 4;
-  width: 18px;
-  height: 18px;
+  width: 12px;
+  height: 12px;
   box-sizing: border-box;
-  border: 1px solid var(--port-color, var(--ss-border-strong));
   border-radius: 50%;
   pointer-events: none;
   background: var(--ss-surface-raised);
-  box-shadow: none;
+  box-shadow:
+    0 0 0 2px var(--ss-surface-raised),
+    0 0 0 3px var(--port-color, var(--ss-border-strong));
   transform: translate(-50%, -50%);
   transition: transform 50ms ease-in-out;
 }
@@ -309,7 +309,7 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
 .systemsketch-block-canvas .Port::before {
   content: '';
   position: absolute;
-  inset: -11px;
+  inset: -14px;
   border-radius: 50%;
 }
 
@@ -334,14 +334,19 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
  * port, and its inner face is a second identity at the same anchor. */
 .systemsketch-block-canvas .Port.Port_eligible {
   opacity: 1;
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--port-color, var(--ss-accent)) 26%, transparent);
+  box-shadow:
+    0 0 0 2px var(--ss-surface-raised),
+    0 0 0 3px var(--port-color, var(--ss-border-strong)),
+    0 0 0 7px color-mix(in srgb, var(--port-color, var(--ss-accent)) 26%, transparent);
 }
 
 .systemsketch-block-canvas .Port.Port_hinting {
   opacity: 1;
   background: var(--port-color, var(--ss-text-muted));
-  border-width: 2px;
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--port-color, var(--ss-accent)) 38%, transparent);
+  box-shadow:
+    0 0 0 2px var(--ss-surface-raised),
+    0 0 0 4px var(--port-color, var(--ss-border-strong)),
+    0 0 0 9px color-mix(in srgb, var(--port-color, var(--ss-accent)) 38%, transparent);
   transform: translate(-50%, -50%) scale(1.18);
 }
 
@@ -427,7 +432,10 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
  * of the in-flight feedback. */
 .systemsketch-block-canvas .Port.Port_dragging {
   z-index: 7;
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--ss-accent) 30%, transparent);
+  box-shadow:
+    0 0 0 2px var(--ss-surface-raised),
+    0 0 0 3px var(--port-color, var(--ss-border-strong)),
+    0 0 0 7px color-mix(in srgb, var(--ss-accent) 30%, transparent);
 }
 
 /* The held row is a card in flight. It has to be opaque: it passes straight

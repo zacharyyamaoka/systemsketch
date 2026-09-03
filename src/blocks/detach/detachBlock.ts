@@ -358,9 +358,36 @@ export function selectedBlockIds(editor: Editor): TLShapeId[] {
 	return [...new Set(found)]
 }
 
+/**
+ * Every Block on the current page, nesting included.
+ *
+ * What the `.tldr` export sweeps. Parent before child for the same reason the
+ * selection sweep does: an Expanded frame detaches first, reparenting its
+ * survivors out, and each child then detaches as itself.
+ */
+export function allBlockIds(editor: Editor): TLShapeId[] {
+	const found: TLShapeId[] = []
+	const visit = (ids: readonly TLShapeId[]) => {
+		for (const id of ids) {
+			if (editor.getShape(id)?.type === BLOCK_SHAPE_TYPE) found.push(id)
+			visit(editor.getSortedChildIdsForParent(id))
+		}
+	}
+	visit(editor.getSortedChildIdsForParent(editor.getCurrentPageId()))
+	return [...new Set(found)]
+}
+
+/** Detach every Block on the page in one undoable step. */
+export function detachAllBlocks(editor: Editor): DetachResult[] {
+	return detachBlocks(editor, allBlockIds(editor))
+}
+
 /** Detach every selected Block in one undoable step. */
 export function detachSelectedBlocks(editor: Editor): DetachResult[] {
-	const ids = selectedBlockIds(editor)
+	return detachBlocks(editor, selectedBlockIds(editor))
+}
+
+function detachBlocks(editor: Editor, ids: readonly TLShapeId[]): DetachResult[] {
 	if (ids.length === 0) return []
 	// One mark for the whole sweep, and none inside it: a second stopping point
 	// in the middle would split the undo into "some of the Blocks came back".

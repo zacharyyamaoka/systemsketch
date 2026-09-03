@@ -29,8 +29,10 @@ import {
 	systemSketchPrimitiveMeta,
 } from '../../stockPrimitiveVisuals'
 
-/** The one detached port circle keeps the live indicator's full footprint. */
+/** The outer ring keeps the live indicator's full 18px footprint. */
 export const PORT_INDICATOR_RADIUS = BLOCK_PORT_RADIUS + 3
+/** Connected/default ports add the live 12px filled core inside that ring. */
+export const PORT_CORE_RADIUS = BLOCK_PORT_RADIUS
 
 const SANS_FONT = 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
 const MONO_FONT = 'ui-monospace, "SF Mono", Menlo, Consolas, monospace'
@@ -480,20 +482,36 @@ export function primitivesForBlock(
 		const stockColor = portTldrawColor(placed.port.type)
 		const connected = connectedPortIds.has(placed.port.id)
 		const hasDefault = placed.side === 'input' && portDefaultValue(placed.port) !== ''
+		// The live DOM dot is a 12px core with a 2px surface gap and a 1px
+		// type-coloured ring. Keep the ring as the stable outer primitive, then
+		// add the core only when the live port paints one (wired or defaulted).
 		pushPortPart(placed, ellipseAt({
 			x: origin.x + placed.x - PORT_INDICATOR_RADIUS,
 			y: origin.y + placed.y - PORT_INDICATOR_RADIUS,
 			w: PORT_INDICATOR_RADIUS * 2,
 			h: PORT_INDICATOR_RADIUS * 2,
 		}, {
-			fillColor: connected
-				? exactColor
-				: hasDefault ? 'var(--ss-text-muted)' : 'var(--ss-surface-raised)',
+			fillColor: 'var(--ss-surface-raised)',
 			strokeColor: exactColor,
 			strokeWidth: 1,
 			stockColor,
-			stockFill: connected ? 'fill' : hasDefault ? 'solid' : 'semi',
+			stockFill: 'semi',
 		}))
+		if (connected || hasDefault) {
+			const coreColor = connected ? exactColor : 'var(--ss-text-muted)'
+			pushPortPart(placed, ellipseAt({
+				x: origin.x + placed.x - PORT_CORE_RADIUS,
+				y: origin.y + placed.y - PORT_CORE_RADIUS,
+				w: PORT_CORE_RADIUS * 2,
+				h: PORT_CORE_RADIUS * 2,
+			}, {
+				fillColor: coreColor,
+				strokeColor: coreColor,
+				strokeWidth: 0,
+				stockColor: connected ? stockColor : 'grey',
+				stockFill: 'solid',
+			}))
+		}
 	}
 
 	return {
