@@ -54,6 +54,10 @@ export interface AuthoredElbowCorner {
 export interface ConnectionElbowRouteModel {
 	startAxis: AuthoredAxis
 	corners: AuthoredElbowCorner[]
+	/** A shortened automatic exit leg, omitted for the normal 20px authored leg. */
+	startLeg?: number
+	/** A shortened automatic entry leg, omitted for the normal 20px authored leg. */
+	endLeg?: number
 }
 
 const EPSILON = 0.001
@@ -69,10 +73,25 @@ export const AUTHORED_PORT_LEG = 20
  * start port (side `right`) and a leg short of the end port (side `left`).
  * Also the frame the authored corners persist in.
  */
-export function dongleEndpoints(start: Point, end: Point): { start: Point; end: Point } {
+export interface ElbowTerminalLegs {
+	startLeg?: number
+	endLeg?: number
+}
+
+function terminalLeg(value: number | undefined): number {
+	return typeof value === 'number' && Number.isFinite(value)
+		? Math.max(0, value)
+		: AUTHORED_PORT_LEG
+}
+
+export function dongleEndpoints(
+	start: Point,
+	end: Point,
+	legs: ElbowTerminalLegs = {},
+): { start: Point; end: Point } {
 	return {
-		start: { x: start.x + AUTHORED_PORT_LEG, y: start.y },
-		end: { x: end.x - AUTHORED_PORT_LEG, y: end.y },
+		start: { x: start.x + terminalLeg(legs.startLeg), y: start.y },
+		end: { x: end.x - terminalLeg(legs.endLeg), y: end.y },
 	}
 }
 
@@ -267,7 +286,8 @@ function resolveCoordinate(t: number, o: number, from: number, to: number): numb
 export function captureAuthoredRoute(
 	route: AuthoredElbowRoute,
 	start: Point,
-	end: Point
+	end: Point,
+	legs: ElbowTerminalLegs = {},
 ): ConnectionElbowRouteModel {
 	return {
 		startAxis: route.startAxis,
@@ -276,6 +296,8 @@ export function captureAuthoredRoute(
 			const y = captureCoordinate(point.y, start.y, end.y)
 			return { tx: x.t, ox: x.o, ty: y.t, oy: y.o }
 		}),
+		...(legs.startLeg === undefined ? {} : { startLeg: terminalLeg(legs.startLeg) }),
+		...(legs.endLeg === undefined ? {} : { endLeg: terminalLeg(legs.endLeg) }),
 	}
 }
 
@@ -329,7 +351,7 @@ export function authoredElbowRoute(
 	start: Point,
 	end: Point
 ): ElbowRoute {
-	const dongles = dongleEndpoints(start, end)
+	const dongles = dongleEndpoints(start, end, model)
 	let normalized = resolveAuthoredRoute(model, dongles.start, dongles.end)
 	if (normalized.points.length === 0) {
 		// No surviving corners — synthesize the canonical mid-rail Z between
@@ -363,13 +385,15 @@ export function authoredElbowRoute(
 export function captureResolvedRoute(
 	routePoints: readonly Point[],
 	start: Point,
-	end: Point
+	end: Point,
+	legs: ElbowTerminalLegs = {},
 ): ConnectionElbowRouteModel {
 	const startAxis =
 		routePoints.length > 1 ? segmentAxisOf(routePoints[0], routePoints[1], 'x') : 'x'
 	return captureAuthoredRoute(
 		{ startAxis, points: routePoints.slice(1, -1).map((point) => ({ ...point })) },
 		start,
-		end
+		end,
+		legs,
 	)
 }

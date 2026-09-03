@@ -146,4 +146,28 @@ describe('capturing a resolved auto route', () => {
 			false,
 		])
 	})
+
+	it('preserves a shortened label-avoidance leg without reversing through the text', () => {
+		const legs = { startLeg: 8 }
+		const shortDongles = dongleEndpoints(START, END, legs)
+		const polyline = [
+			START,
+			shortDongles.start,
+			{ x: shortDongles.start.x, y: 160 },
+			{ x: shortDongles.end.x, y: 160 },
+			shortDongles.end,
+			END,
+		]
+		const model = captureResolvedRoute(
+			polyline,
+			shortDongles.start,
+			shortDongles.end,
+			legs,
+		)
+		const route = authoredElbowRoute(model, START, END)
+
+		expect(model.startLeg).toBe(8)
+		expect(route.points).toEqual(polyline)
+		expect(route.segments.map((segment) => segment.axis)).toEqual(['x', 'y', 'x', 'y', 'x'])
+	})
 })

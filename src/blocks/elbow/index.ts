@@ -64,6 +64,7 @@ export {
 
 export type {
   ElbowEndpoint,
+  ElbowRoutingObstacle,
   ElbowRoute,
   ElbowRouteInput,
   ElbowRouteOptions,

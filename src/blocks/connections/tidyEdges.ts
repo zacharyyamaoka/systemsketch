@@ -32,7 +32,13 @@ import {
 	routesHaveSamePoints,
 	stabilizeOrthogonalRoute,
 } from './collisionAwareRouting'
-import { captureResolvedRoute, dongleEndpoints, type ConnectionElbowRouteModel } from './elbowAuthoredRoute'
+import {
+	AUTHORED_PORT_LEG,
+	captureResolvedRoute,
+	dongleEndpoints,
+	type ConnectionElbowRouteModel,
+	type ElbowTerminalLegs,
+} from './elbowAuthoredRoute'
 import { CONNECTION_SHAPE_TYPE } from './connectionModel'
 import { collectConnectionRoutingScene } from './routingObstacles'
 
@@ -235,6 +241,14 @@ export function automaticRouteModel(
 	const inverse = Mat.Inverse(editor.getShapePageTransform(connection))
 	const { source, sink } = getConnectionEndpoints(editor, connection)
 	const localPoints = route.points.map((point) => Mat.applyToPoint(inverse, point))
-	const dongles = dongleEndpoints(source, sink)
-	return captureResolvedRoute(localPoints, dongles.start, dongles.end)
+	const startPoint = localPoints[1] ?? source
+	const endPoint = localPoints.at(-2) ?? sink
+	const startDistance = Math.abs(startPoint.x - source.x) + Math.abs(startPoint.y - source.y)
+	const endDistance = Math.abs(endPoint.x - sink.x) + Math.abs(endPoint.y - sink.y)
+	const legs: ElbowTerminalLegs = {
+		...(startDistance < AUTHORED_PORT_LEG ? { startLeg: startDistance } : {}),
+		...(endDistance < AUTHORED_PORT_LEG ? { endLeg: endDistance } : {}),
+	}
+	const dongles = dongleEndpoints(source, sink, legs)
+	return captureResolvedRoute(localPoints, dongles.start, dongles.end, legs)
 }

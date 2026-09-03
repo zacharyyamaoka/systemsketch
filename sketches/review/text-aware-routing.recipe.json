@@ -1,0 +1,148 @@
+{
+  "feature": "Text-aware multi-elbow routing",
+  "viewport": { "width": 2200, "height": 1180 },
+  "pages": [{ "id": "review", "name": "Text-aware routing" }],
+  "shapes": [
+    {
+      "id": "text-route-frame",
+      "type": "block",
+      "pageId": "review",
+      "x": 300,
+      "y": 300,
+      "props": {
+        "title": "run()",
+        "view": "expanded",
+        "w": 1400,
+        "h": 600,
+        "inputs": [{ "id": "poses", "name": "poses", "type": "list[Pose]", "visible": true }],
+        "outputs": []
+      }
+    },
+    {
+      "id": "text-route-decode",
+      "type": "block",
+      "parentId": "text-route-frame",
+      "x": 100,
+      "y": 50,
+      "props": {
+        "title": "decode()", "view": "port", "w": 250, "h": 130,
+        "inputs": [{ "id": "raws", "name": "raws", "type": "bytes", "visible": true }],
+        "outputs": [{ "id": "frame", "name": "", "type": "Frame", "visible": true }]
+      }
+    },
+    {
+      "id": "text-route-estimate",
+      "type": "block",
+      "parentId": "text-route-frame",
+      "x": 330,
+      "y": 70,
+      "props": {
+        "title": "estimate()", "view": "port", "w": 250, "h": 150,
+        "inputs": [{ "id": "frame", "name": "frame", "type": "Frame", "visible": true }],
+        "outputs": [{ "id": "pose", "name": "", "type": "Pose", "visible": true }]
+      }
+    },
+    {
+      "id": "text-route-append",
+      "type": "block",
+      "parentId": "text-route-frame",
+      "x": 560,
+      "y": 160,
+      "props": {
+        "title": "poses.append()", "view": "port", "w": 300, "h": 130,
+        "inputs": [
+          { "id": "poses", "name": "poses", "type": "", "visible": true },
+          { "id": "pose", "name": "pose", "type": "", "visible": true }
+        ],
+        "outputs": [{ "id": "out", "name": "", "type": "list[Pose]", "visible": true }]
+      }
+    },
+    {
+      "id": "text-route-random",
+      "type": "block",
+      "parentId": "text-route-frame",
+      "x": 540,
+      "y": 380,
+      "props": {
+        "title": "random_func", "view": "port", "w": 260, "h": 120,
+        "inputs": [{ "id": "items", "name": "", "type": "list[Pose]", "visible": true }],
+        "outputs": [{ "id": "out", "name": "", "type": "Pose", "visible": true }]
+      }
+    },
+    {
+      "id": "text-route-target",
+      "type": "block",
+      "parentId": "text-route-frame",
+      "x": 1050,
+      "y": 70,
+      "props": {
+        "title": "len()", "view": "port", "w": 260, "h": 130,
+        "inputs": [{ "id": "obj", "name": "obj", "type": "Sized", "visible": true }],
+        "outputs": [{ "id": "out", "name": "", "type": "int", "visible": true }]
+      }
+    },
+    {
+      "id": "text-route-edge",
+      "type": "connection",
+      "parentId": "text-route-frame",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 100, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "text-route-start",
+      "type": "connection",
+      "fromId": "text-route-edge",
+      "toId": "text-route-frame",
+      "props": { "portId": "poses", "terminal": "start", "face": "inner" }
+    },
+    {
+      "id": "text-route-end",
+      "type": "connection",
+      "fromId": "text-route-edge",
+      "toId": "text-route-target",
+      "props": { "portId": "obj", "terminal": "end", "face": "outer" }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Click the run() frame heading to select its interior routing scope",
+      "x": 500,
+      "y": 80,
+      "w": 520,
+      "h": 110,
+      "target": { "shapeId": "text-route-frame", "anchor": "top", "dx": -310 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Click Tidy edges in the floating selection menu",
+      "x": 1800,
+      "y": 340,
+      "w": 360,
+      "h": 130,
+      "target": { "shapeId": "text-route-frame", "anchor": "right", "dy": -180 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The cable makes a tiny turn below poses list[Pose], runs between poses.append() and random_func, then rises into len() without crossing any Block or port text",
+      "x": 430,
+      "y": 1000,
+      "w": 920,
+      "h": 130
+    }
+  ]
+}

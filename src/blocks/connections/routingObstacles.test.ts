@@ -3,11 +3,14 @@ import { describe, expect, it } from 'vitest'
 
 import { getDefaultBranchProps, type BranchShape } from '../../branch/branchModel'
 import { getDefaultBlockProps, type BlockShape } from '../blockModel'
+import { layoutBlock } from '../layoutBlock'
 import type { ConnectionBinding } from './ConnectionBindingUtil'
 import type { ConnectionShape } from './ConnectionShapeUtil'
 import {
 	branchRoutingForbiddenRects,
 	collectConnectionRoutingObstacles,
+	collectConnectionRoutingTextObstacles,
+	PORT_LABEL_ROUTING_CLEARANCE_PX,
 } from './routingObstacles'
 
 const PAGE = 'page:page' as TLPageId
@@ -152,5 +155,36 @@ describe('editor obstacle collection — independent of routing and persistence'
 		})
 		expect(obstacles).toContainEqual({ x: region.x, y: region.y, w: region.props.w, h: 40 })
 		expect(obstacles).toContainEqual({ x: region.x, y: region.y + 72, w: region.props.w, h: 180 })
+	})
+
+	it('collects an Expanded scope boundary label independently of solid shapes', () => {
+		const frame = block('frame', 100, 60)
+		frame.props = {
+			...frame.props,
+			view: 'expanded',
+			w: 720,
+			h: 480,
+			title: 'run()',
+			inputs: [{ id: 'poses', name: 'poses', type: 'list[Pose]', visible: true }],
+		}
+		const target = block('target', 520, 180, frame.id)
+		const edge = connection('edge')
+		edge.parentId = frame.id
+		const editor = obstacleEditor(
+			[frame, target, edge],
+			[binding(edge, frame, 'start'), binding(edge, target, 'end')],
+		)
+
+		expect(collectConnectionRoutingObstacles(editor, edge)).toEqual([])
+		const text = collectConnectionRoutingTextObstacles(editor, edge)
+		const local = layoutBlock(frame.props).ports.find((placed) => placed.port.id === 'poses')
+		expect(local?.labelContent).not.toBeNull()
+		expect(text).toEqual([{
+			x: frame.x + local!.labelContent!.x,
+			y: frame.y + local!.labelContent!.y,
+			w: local!.labelContent!.w,
+			h: local!.labelContent!.h,
+			clearance: PORT_LABEL_ROUTING_CLEARANCE_PX,
+		}])
 	})
 })
