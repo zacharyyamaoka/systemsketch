@@ -11,6 +11,8 @@ export interface ChromeState {
   leftSurface: LeftSurface | null
   rightSurface: RightSurface | null
   toolbarSurface: ToolbarSurface | null
+  /** Narrow canvases have room for one side sheet, not two overlapping ones. */
+  compactSidePanels: boolean
   openOrder: ChromeSurfaceId[]
 }
 
@@ -18,6 +20,7 @@ export const INITIAL_CHROME_STATE: ChromeState = {
   leftSurface: null,
   rightSurface: null,
   toolbarSurface: null,
+  compactSidePanels: false,
   openOrder: [],
 }
 
@@ -25,6 +28,7 @@ export type ChromeAction =
   | { type: 'set-left'; surface: LeftSurface | null }
   | { type: 'set-right'; surface: RightSurface | null }
   | { type: 'set-toolbar'; surface: ToolbarSurface | null }
+  | { type: 'set-compact-side-panels'; compact: boolean }
   | { type: 'close-latest' }
   | { type: 'close-all' }
 
@@ -41,9 +45,26 @@ function activate(
   return surface ? [...next, surface] : next
 }
 
+function latestSideZone(openOrder: ChromeSurfaceId[]): 'left' | 'right' | null {
+  for (let index = openOrder.length - 1; index >= 0; index -= 1) {
+    const surface = openOrder[index]
+    if (surface.startsWith('left:')) return 'left'
+    if (surface.startsWith('right:')) return 'right'
+  }
+  return null
+}
+
 export function reduceChromeState(state: ChromeState, action: ChromeAction): ChromeState {
   switch (action.type) {
     case 'set-left':
+      if (state.compactSidePanels && action.surface) {
+        return {
+          ...state,
+          leftSurface: action.surface,
+          rightSurface: null,
+          openOrder: activate(withoutZone(state.openOrder, 'right'), 'left', `left:${action.surface}`),
+        }
+      }
       return {
         ...state,
         leftSurface: action.surface,
@@ -54,6 +75,14 @@ export function reduceChromeState(state: ChromeState, action: ChromeAction): Chr
         ),
       }
     case 'set-right':
+      if (state.compactSidePanels && action.surface) {
+        return {
+          ...state,
+          leftSurface: null,
+          rightSurface: action.surface,
+          openOrder: activate(withoutZone(state.openOrder, 'left'), 'right', `right:${action.surface}`),
+        }
+      }
       return {
         ...state,
         rightSurface: action.surface,
@@ -73,6 +102,21 @@ export function reduceChromeState(state: ChromeState, action: ChromeAction): Chr
           action.surface ? `toolbar:${action.surface}` : null,
         ),
       }
+    case 'set-compact-side-panels': {
+      if (action.compact === state.compactSidePanels) return state
+      if (!action.compact || !state.leftSurface || !state.rightSurface) {
+        return { ...state, compactSidePanels: action.compact }
+      }
+      const keep = latestSideZone(state.openOrder) ?? 'right'
+      const discard = keep === 'left' ? 'right' : 'left'
+      return {
+        ...state,
+        leftSurface: keep === 'left' ? state.leftSurface : null,
+        rightSurface: keep === 'right' ? state.rightSurface : null,
+        compactSidePanels: true,
+        openOrder: withoutZone(state.openOrder, discard),
+      }
+    }
     case 'close-latest': {
       const latest = state.openOrder.at(-1)
       if (!latest) return state
@@ -86,6 +130,6 @@ export function reduceChromeState(state: ChromeState, action: ChromeAction): Chr
       }
     }
     case 'close-all':
-      return INITIAL_CHROME_STATE
+      return { ...INITIAL_CHROME_STATE, compactSidePanels: state.compactSidePanels }
   }
 }

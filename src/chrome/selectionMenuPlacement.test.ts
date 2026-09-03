@@ -5,6 +5,8 @@ import {
   SELECTION_MENU_MARGIN,
   isSelectionOnScreen,
   placeSelectionMenu,
+  selectionMenuLayoutWidth,
+  selectionMenuSafeWidth,
 } from './selectionMenuPlacement'
 
 /**
@@ -99,6 +101,24 @@ describe('selection menu placement', () => {
     })
 
     expect(x).toBe(SELECTION_MENU_MARGIN)
+  })
+
+  it('reserves both margins for overflow at narrow widths and every interface scale', () => {
+    const narrow = { w: 320, h: 720 }
+
+    expect(selectionMenuSafeWidth(narrow)).toBe(280)
+    expect(selectionMenuLayoutWidth(narrow, 1)).toBe(280)
+    expect(selectionMenuLayoutWidth(narrow, 1.6)).toBe(175)
+    expect(selectionMenuLayoutWidth(narrow, 1.6) * 1.6).toBe(280)
+
+    const { x } = placeSelectionMenu({
+      selection: { x: 100, y: 300, w: 120, h: 100 },
+      menu: { w: selectionMenuSafeWidth(narrow), h: 40 },
+      viewport: narrow,
+      overlayInset: 0,
+    })
+    expect(x).toBe(SELECTION_MENU_MARGIN)
+    expect(x + selectionMenuSafeWidth(narrow)).toBe(narrow.w - SELECTION_MENU_MARGIN)
   })
 
   it('rounds to whole pixels so the menu never lands on a half pixel', () => {

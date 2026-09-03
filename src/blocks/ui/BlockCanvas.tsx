@@ -7,6 +7,7 @@ import {
   useCallback,
   useMemo,
   type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import {
@@ -93,6 +94,50 @@ export function countProducers(connections: readonly { ownPortId: string; ownPol
     counts.set(connection.ownPortId, (counts.get(connection.ownPortId) ?? 0) + 1)
   }
   return counts
+}
+
+type ExpandedDividerAdjust = NonNullable<BlockDivider['adjust']>
+
+/** The divider's legal travel in Block-local coordinates. */
+export function expandedDividerLimits(adjust: ExpandedDividerAdjust): { min: number; max: number } {
+  return {
+    min: adjust.rangeTop + adjust.prevMin,
+    max: adjust.rangeBottom - adjust.nextMin,
+  }
+}
+
+/**
+ * Translate one keyboard gesture into the same y-coordinate consumed by the
+ * pointer path. Four canvas units is a useful fine step; Shift makes it four
+ * times coarser without changing the stored weight grammar.
+ */
+export function expandedDividerKeyboardTarget(
+  adjust: ExpandedDividerAdjust,
+  currentY: number,
+  key: string,
+  coarse = false,
+): number | null {
+  const { min, max } = expandedDividerLimits(adjust)
+  if (max <= min) return null
+  if (key === 'Home') return min
+  if (key === 'End') return max
+  if (key !== 'ArrowUp' && key !== 'ArrowDown') return null
+  const step = coarse ? 16 : 4
+  return Math.min(max, Math.max(min, currentY + (key === 'ArrowDown' ? step : -step)))
+}
+
+/** Redistribute the adjacent pair exactly as the pointer divider does. */
+export function expandedDividerWeightsAt(
+  adjust: ExpandedDividerAdjust,
+  requestedY: number,
+): { previous: number; next: number; y: number } | null {
+  const pairWeight = adjust.prevWeight + adjust.nextWeight
+  const range = adjust.rangeBottom - adjust.rangeTop
+  const { min, max } = expandedDividerLimits(adjust)
+  if (range <= adjust.prevMin + adjust.nextMin || pairWeight <= 0 || max <= min) return null
+  const y = Math.min(max, Math.max(min, requestedY))
+  const previous = (pairWeight * (y - adjust.rangeTop)) / range
+  return { previous, next: pairWeight - previous, y }
 }
 
 /** Draw coincident Simple anchors once while retaining their union of states. */
@@ -215,20 +260,45 @@ export function PortCountBadge({ portId, count }: { portId: string; count: numbe
 function ExpandedDividerHandle({
   shape,
   divider,
+  keyboardEnabled,
 }: {
   shape: BlockShape
   divider: BlockDivider
+  keyboardEnabled: boolean
 }) {
   const editor = useEditor()
   const adjust = divider.adjust
   if (!adjust) return null
 
+  const limits = expandedDividerLimits(adjust)
+  const adjustable = limits.max > limits.min
+  const currentY = Math.min(limits.max, Math.max(limits.min, divider.y))
+  const position = adjustable
+    ? Math.round(((currentY - limits.min) / (limits.max - limits.min)) * 100)
+    : 0
+
+  const updateAt = (requestedY: number) => {
+    const weights = expandedDividerWeightsAt(adjust, requestedY)
+    if (!weights) return
+    const fresh = editor.getShape(shape.id)
+    if (!isBlockShape(fresh)) return
+    editor.updateShape<BlockShape>({
+      id: fresh.id,
+      type: fresh.type,
+      props: {
+        expandedWeights: {
+          ...expandedSectionWeights(fresh.props),
+          [adjust.prevKey]: weights.previous,
+          [adjust.nextKey]: weights.next,
+        },
+      },
+    })
+  }
+
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     event.stopPropagation()
     event.preventDefault()
     const {
-      prevKey,
-      nextKey,
       prevWeight,
       nextWeight,
       rangeTop,
@@ -236,9 +306,8 @@ function ExpandedDividerHandle({
       prevMin,
       nextMin,
     } = adjust
-    const pairWeight = prevWeight + nextWeight
     const range = rangeBottom - rangeTop
-    if (range <= prevMin + nextMin || pairWeight <= 0) return
+    if (range <= prevMin + nextMin || prevWeight + nextWeight <= 0) return
 
     editor.markHistoryStoppingPoint('adjust expanded section')
     const zoom = editor.getZoomLevel()
@@ -247,24 +316,7 @@ function ExpandedDividerHandle({
     const ownerDocument = event.currentTarget.ownerDocument
 
     const onMove = (move: PointerEvent) => {
-      const y = Math.min(
-        rangeBottom - nextMin,
-        Math.max(rangeTop + prevMin, startY + (move.clientY - startClientY) / zoom),
-      )
-      const previous = (pairWeight * (y - rangeTop)) / range
-      const fresh = editor.getShape(shape.id)
-      if (!isBlockShape(fresh)) return
-      editor.updateShape<BlockShape>({
-        id: fresh.id,
-        type: fresh.type,
-        props: {
-          expandedWeights: {
-            ...expandedSectionWeights(fresh.props),
-            [prevKey]: previous,
-            [nextKey]: pairWeight - previous,
-          },
-        },
-      })
+      updateAt(startY + (move.clientY - startClientY) / zoom)
     }
 
     const onUp = () => {
@@ -277,12 +329,85 @@ function ExpandedDividerHandle({
     ownerDocument.addEventListener('pointercancel', onUp)
   }
 
+  const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    const nextY = expandedDividerKeyboardTarget(adjust, divider.y, event.key, event.shiftKey)
+    if (nextY === null) return
+    event.preventDefault()
+    event.stopPropagation()
+    if (nextY === currentY) return
+    // One held-key gesture is one undo step, matching one pointer drag.
+    if (!event.repeat) editor.markHistoryStoppingPoint('adjust expanded section')
+    updateAt(nextY)
+  }
+
   return (
     <div
       className="BlockNode-dividerHandle"
+      data-testid="block-expanded-divider"
+      data-divider-kind={divider.kind}
       style={{ left: divider.x, top: divider.y - 4.5, width: divider.w }}
+      role="separator"
+      aria-orientation="horizontal"
+      aria-label={`Resize adjacent sections in ${shape.props.title.trim() || 'this Block'}`}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={position}
+      aria-valuetext={`${position}% of the adjustable space is above the divider`}
+      aria-disabled={!adjustable || undefined}
+      tabIndex={keyboardEnabled && adjustable ? 0 : -1}
       onPointerDown={onPointerDown}
+      onKeyDownCapture={(event) => editor.markEventAsHandled(event)}
+      onKeyDown={onKeyDown}
     />
+  )
+}
+
+export interface BlockPortAddButtonProps {
+  label: string
+  title: string
+  testId: string
+  style: CSSProperties
+  onAdd(): void
+  onKeyEvent?(event: ReactKeyboardEvent<HTMLButtonElement>): void
+}
+
+/**
+ * A native button keeps pointer activation unchanged while giving the painted
+ * bead Enter/Space behavior for free. The event guards keep those keystrokes
+ * and clicks out of tldraw's canvas shortcut and selection machinery.
+ */
+export function BlockPortAddButton({
+  label,
+  title,
+  testId,
+  style,
+  onAdd,
+  onKeyEvent,
+}: BlockPortAddButtonProps) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={title}
+      className="BlockNode-portAddBead"
+      data-testid={testId}
+      style={style}
+      onPointerDown={(event) => event.stopPropagation()}
+      onKeyDownCapture={onKeyEvent}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') event.stopPropagation()
+      }}
+      onClick={(event) => {
+        event.stopPropagation()
+        onAdd()
+      }}
+    >
+      <svg viewBox="0 0 12 12" aria-hidden="true">
+        {/* 2px matches the selection line that lands on the vertical stroke,
+            so the crossing reads as one continuous stroke, not a seam. */}
+        <path d="M6 2.4v7.2M2.4 6h7.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    </button>
   )
 }
 
@@ -616,7 +741,10 @@ function PortAddAffordance({
   }, [editor, header, shape.id, side])
 
   return (
-    <div className={`BlockNode-portAdd BlockNode-portAdd--${header ? 'header' : lane}`}>
+    <div
+      className={`BlockNode-portAdd BlockNode-portAdd--${header ? 'header' : lane}`}
+      onPointerDownCapture={(event) => editor.markEventAsHandled(event)}
+    >
       <div
         className="BlockNode-portAddZone"
         data-testid={`block-port-add-zone-${where}`}
@@ -627,22 +755,14 @@ function PortAddAffordance({
         its own "Add output port" button, and two live controls answering to one
         accessible name read as the same control repeated on a screen reader.
       */}
-      <div
-        role="button"
-        aria-label={`Add ${header ? 'header' : lane} port to ${shape.props.title.trim() || 'this Block'} on canvas`}
+      <BlockPortAddButton
+        label={`Add ${header ? 'header' : lane} port to ${shape.props.title.trim() || 'this Block'} on canvas`}
         title={header ? 'Add header port' : `Add ${lane} port`}
-        className="BlockNode-portAddBead"
-        data-testid={`block-port-add-${where}`}
+        testId={`block-port-add-${where}`}
         style={{ left: affordance.x, top: affordance.y }}
-        onPointerDown={(event) => event.stopPropagation()}
-        onClick={addPort}
-      >
-        <svg viewBox="0 0 12 12" aria-hidden="true">
-          {/* 2px matches the selection line that lands on the vertical stroke,
-              so the crossing reads as one continuous stroke, not a seam. */}
-          <path d="M6 2.4v7.2M2.4 6h7.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      </div>
+        onAdd={addPort}
+        onKeyEvent={(event) => editor.markEventAsHandled(event)}
+      />
     </div>
   )
 }
@@ -804,6 +924,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
                     key={`divider-handle-${index}`}
                     shape={shape}
                     divider={divider}
+                    keyboardEnabled={isSelected && !isEditing && !heldPort}
                   />
                 ) : null)
               : null}

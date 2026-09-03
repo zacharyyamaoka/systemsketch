@@ -16,6 +16,7 @@ import {
   type ToolbarSurface,
 } from './chromeState'
 import { emitRecorderDiagnostic } from '../recorder/recorderEvents'
+import { normalizeInterfaceScale, useInterfaceScale } from '../settings/interfaceScale'
 
 interface ChromeController extends ChromeState {
   setLeft(surface: LeftSurface | null): void
@@ -29,9 +30,32 @@ interface ChromeController extends ChromeState {
 }
 
 const ChromeContext = createContext<ChromeController | null>(null)
+const COMPACT_SIDE_PANELS_BASE_WIDTH = 820
+
+/**
+ * CSS `zoom` makes a panel consume more physical viewport pixels without
+ * changing media-query coordinates. Scale the breakpoint by the same factor
+ * so the one-sheet rule still protects users who enlarge the interface.
+ */
+export function compactSidePanelsQuery(interfaceScale: number): string {
+  const scaledWidth = Math.round(
+    COMPACT_SIDE_PANELS_BASE_WIDTH * normalizeInterfaceScale(interfaceScale) / 100,
+  )
+  return `(max-width: ${scaledWidth}px)`
+}
 
 export function ChromeProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reduceChromeState, INITIAL_CHROME_STATE)
+  const interfaceScale = useInterfaceScale()
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return
+    const media = window.matchMedia(compactSidePanelsQuery(interfaceScale))
+    const sync = () => dispatch({ type: 'set-compact-side-panels', compact: media.matches })
+    sync()
+    media.addEventListener('change', sync)
+    return () => media.removeEventListener('change', sync)
+  }, [interfaceScale])
 
   const setLeft = useCallback((surface: LeftSurface | null) => {
     emitRecorderDiagnostic({ lane: 'action', name: 'chrome-left', summary: surface ? `opened ${surface}` : 'closed left panel', detail: { zone: 'left', surface } })

@@ -11,6 +11,7 @@ import {
 import {
   isSelectionOnScreen,
   placeSelectionMenu,
+  selectionMenuLayoutWidth,
   type SelectionMenuSide,
 } from './selectionMenuPlacement'
 import { useInterfaceScale } from '../settings/interfaceScale'
@@ -137,6 +138,16 @@ function PositionedSelectionMenu({ label, className, children }: SelectionContex
       }
       const viewport = { w: viewportBounds.w, h: viewportBounds.h }
 
+      // This surface cancels the scaled UI layer, then scales its own paint.
+      // Constrain the pre-transform width so the painted pill still fits
+      // between FigJam's two measured 20px viewport margins.
+      const scale = interfaceScale / 100
+      const safeLayoutWidth = selectionMenuLayoutWidth(viewport, scale)
+      element.style.setProperty(
+        '--systemsketch-selection-menu-max-width',
+        `${Math.max(0, safeLayoutWidth)}px`,
+      )
+
       if (!isSelectionOnScreen(selection, viewport)) {
         element.dataset.visible = 'false'
         return
@@ -166,7 +177,7 @@ function PositionedSelectionMenu({ label, className, children }: SelectionContex
       element.dataset.side = placement.side satisfies SelectionMenuSide
       element.dataset.visible = 'true'
     },
-    [editor, sizeEpoch],
+    [editor, interfaceScale, sizeEpoch],
   )
 
   return (
@@ -176,6 +187,11 @@ function PositionedSelectionMenu({ label, className, children }: SelectionContex
       data-testid="systemsketch-selection-menu"
       data-visible="false"
       onPointerDown={editor.markEventAsHandled}
+      onFocusCapture={(event) => {
+        if (event.target instanceof HTMLElement) {
+          event.target.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+        }
+      }}
     >
       <TldrawUiToolbar
         className="systemsketch-selection-menu__bar"
