@@ -5,10 +5,11 @@ Everything below is verifiable from the tree; nothing here needs the author.
 
 ## Where things stand
 
-- **Current follow-up:** `track/recorder-start-stop` in
-  `/home/bam/systemsketch-track-recorder-start-stop`, based on committed `main` and
-  reconciled again before integration. The final handoff records the exact commit
-  and cleanup state.
+- **Current follow-up:** the explicit Start/Stop work was reconciled with committed
+  `main`, fast-forwarded into `main` through `9147e6f`, and verified there. Its
+  temporary `/home/bam/systemsketch-track-recorder-start-stop` worktree and
+  `track/recorder-start-stop` branch were removed after Git confirmed the branch
+  was fully merged.
 - **Gate:** `npm run check` and `npm run test:recorder` are the required gates.
   The latter is 28/28 in a real Chrome and covers idle/unarmed, Start, manual Stop,
   a saved packet with screencast frames, collision-free top notices, and the exact
@@ -68,8 +69,8 @@ because a peer had uncommitted work in six of the same files (README.md,
 package.json, scripts/server.py, scripts/launch_systemsketch.py,
 tests/browser_harness.mjs, tests/test_release_system.py). That work was left alone.
 That original recorder branch later landed on `main`. The explicit Start/Stop
-follow-up is isolated in the current track named above and is reconciled with the
-latest committed `main` before integration. A review board is committed at
+follow-up was then reconciled with the latest committed `main`, verified, and
+fast-forwarded into `main` through `9147e6f`. A review board is committed at
 `sketches/review/flight-recorder.systemsketch` (recipe and PNG beside it); note that
 the fixture helper on `main` does not bind cue arrows at either end, in this board
 or in the peers' boards, so a moved target leaves the orange arrow behind.
@@ -114,5 +115,6 @@ cd ~/systemsketch/docs && python3 build_recorder_implementation.py
 ```
 
 The track tool assigns private ports and a scratch files root without touching the
-real Stable/Preview (4321–4323). For the current track they are Vite 4340 and API
-4341; use `./serve.sh`, and stop only the PIDs owned by its `.track/` directory.
+real Stable/Preview (4321–4323). The completed Start/Stop track used Vite 4340 and
+API 4341; create a fresh track for any new implementation unit and stop only the
+PIDs owned by its `.track/` directory.
