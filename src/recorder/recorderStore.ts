@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import type { Editor } from 'tldraw'
+import { Box, type Editor } from 'tldraw'
 import {
   DEFAULT_WINDOW_MS,
   FlightRecorder,
@@ -12,8 +12,10 @@ import {
   saveRecording,
   type CanvasFrame,
   type FramesSource,
+  type RecorderHostStatus,
   type SavedRecording,
 } from './recorderClient'
+import { canvasFrameScale } from './frameFallback'
 
 /**
  * One recorder per page, and one small external store the UI reads.
@@ -71,6 +73,8 @@ let editorRef: Editor | null = null
 let channelInfo: RecorderChannelInfo = { channel: 'unknown', build: 'unknown', version: '' }
 let takeTimer: ReturnType<typeof setTimeout> | null = null
 let takeStartCanvasFrame: CanvasFrame | null = null
+let takeStartCanvasFramePromise: Promise<CanvasFrame | null> | null = null
+let takeHostStatus: Promise<RecorderHostStatus> | null = null
 let hostSyncGeneration = 0
 const listeners = new Set<() => void>()
 
@@ -123,15 +127,18 @@ function persist(key: string, value: string): void {
 }
 
 /** Tell the host whether this page wants frames; remember what it can offer. */
-async function syncHost(enabled: boolean): Promise<void> {
+async function syncHost(enabled: boolean): Promise<RecorderHostStatus> {
   const generation = ++hostSyncGeneration
   try {
     const status = await armRecorder(enabled, window.location.href)
-    if (generation !== hostSyncGeneration) return
-    emit({ framesSource: status.screencast ? 'screencast' : 'canvas', framesReason: status.reason })
+    if (generation === hostSyncGeneration) {
+      emit({ framesSource: status.screencast ? 'screencast' : 'canvas', framesReason: status.reason })
+    }
+    return status
   } catch (cause) {
-    if (generation !== hostSyncGeneration) return
-    emit({ framesSource: 'canvas', framesReason: cause instanceof Error ? cause.message : String(cause) })
+    const fallback = { screencast: false, reason: cause instanceof Error ? cause.message : String(cause) }
+    if (generation === hostSyncGeneration) emit({ framesSource: 'canvas', framesReason: fallback.reason })
+    return fallback
   }
 }
 
@@ -146,6 +153,9 @@ function stopRecorder(): void {
   clearTakeTimer()
   recorder?.stop()
   recorder = null
+  takeHostStatus = null
+  takeStartCanvasFramePromise = null
+  takeStartCanvasFrame = null
   emit({ mode: 'idle', takeStartedAt: null })
 }
 
@@ -208,13 +218,26 @@ export function setRecorderWindowMs(windowMs: number): void {
   }
 }
 
-/** The shapes-only fallback frame, when no screencast can see the page. */
+/** The bounded shapes-only fallback frame, when no screencast can see the page. */
 async function canvasFrame(t: number): Promise<CanvasFrame | null> {
   if (!editorRef) return null
   try {
     const ids = [...editorRef.getCurrentPageShapeIds()]
     if (ids.length === 0) return null
-    const { blob } = await editorRef.toImage(ids, { format: 'png', scale: 0.5, background: true })
+    const shapeBounds = ids.flatMap((id) => {
+      const bounds = editorRef?.getShapePageBounds(id)
+      return bounds ? [bounds] : []
+    })
+    const bounds = Box.Common(shapeBounds)
+    if (!bounds) return null
+    const { blob } = await editorRef.toImage(ids, {
+      format: 'png',
+      bounds,
+      padding: 0,
+      scale: canvasFrameScale(bounds.width, bounds.height),
+      pixelRatio: 1,
+      background: true,
+    })
     const buffer = new Uint8Array(await blob.arrayBuffer())
     let binary = ''
     for (let index = 0; index < buffer.length; index += 1) binary += String.fromCharCode(buffer[index])
@@ -230,6 +253,7 @@ export async function startTake(): Promise<void> {
   if (!recorder?.running) return
   recorder.beginTake()
   takeStartCanvasFrame = null
+  takeStartCanvasFramePromise = null
   emit({
     mode: 'take',
     takeStartedAt: Date.now(),
@@ -238,11 +262,15 @@ export async function startTake(): Promise<void> {
     notice: null,
     clipboard: null,
   })
-  void syncHost(true)
-  // Always prepare a cheap shapes-only first frame. It is used only when the
-  // host cannot provide a screencast, but does not race the visible Start.
-  void canvasFrame(0).then((frame) => {
-    if (state.mode === 'take' && recorder?.isTaking) takeStartCanvasFrame = frame
+  takeHostStatus = syncHost(true)
+  // Do not compete with an available screencast. The canvas path mounts an
+  // export tree and rasterises every page shape, so it is fallback-only.
+  void takeHostStatus.then((status) => {
+    if (status.screencast || state.mode !== 'take' || !recorder?.isTaking) return
+    takeStartCanvasFramePromise = canvasFrame(0)
+    void takeStartCanvasFramePromise.then((frame) => {
+      if (state.mode === 'take' && recorder?.isTaking) takeStartCanvasFrame = frame
+    })
   })
   clearTakeTimer()
   takeTimer = setTimeout(cancelTake, EXPLICIT_RECORDING_LIMIT_MS)
@@ -258,6 +286,8 @@ export function cancelTake(): void {
   if (state.mode !== 'take') return
   clearTakeTimer()
   takeStartCanvasFrame = null
+  takeStartCanvasFramePromise = null
+  takeHostStatus = null
   recorder?.stop()
   recorder = null
   void syncHost(false)
@@ -289,14 +319,15 @@ async function saveNow(mode: RecorderMode, note: string): Promise<SavedRecording
   emit({ saving: true, error: null, notice: null, clipboard: null })
   try {
     const payload = recorder.collect(mode, note)
-    // The host's availability probe only proves that a debugging port exists;
-    // Chrome may still have zero attached targets or deliver no frames before
-    // a very short take stops. Always send the two cheap shapes-only frames and
-    // let the writer prefer screencast frames when its dump is non-empty.
+    const hostStatus = mode === 'take' && takeHostStatus ? await takeHostStatus : null
+    const needsCanvasFallback = hostStatus?.screencast !== true
     const canvasFrames: CanvasFrame[] = []
-    if (mode === 'take' && takeStartCanvasFrame) canvasFrames.push(takeStartCanvasFrame)
-    const end = await canvasFrame(payload.header.durationMs)
-    if (end) canvasFrames.push(end)
+    if (needsCanvasFallback) {
+      if (mode === 'take' && takeStartCanvasFramePromise) await takeStartCanvasFramePromise
+      if (mode === 'take' && takeStartCanvasFrame) canvasFrames.push(takeStartCanvasFrame)
+      const end = await canvasFrame(payload.header.durationMs)
+      if (end) canvasFrames.push(end)
+    }
     takeStartCanvasFrame = null
     const saved = await saveRecording(payload, { ...channelInfo, canvasFrames })
     stopRecorder()
