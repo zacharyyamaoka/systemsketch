@@ -25,6 +25,7 @@ const STYLE_PROP_KEYS: Record<string, Record<string, string>> = {
   },
   [CONNECTION_SHAPE_TYPE]: {
     'systemsketch:connectionRouting': 'routing',
+    'systemsketch:connectionTemporal': 'temporal',
   },
 }
 
@@ -48,12 +49,16 @@ export function fakeBlock(
   }
 }
 
-export function fakeConnection(id: string, routing: 'curved' | 'straight' = 'curved'): FakeShape {
+export function fakeConnection(
+  id: string,
+  routing: 'curved' | 'straight' = 'curved',
+  temporal: 'data' | 'async' | 'delayed' = 'data',
+): FakeShape {
   return {
     id: `shape:${id}` as TLShapeId,
     type: CONNECTION_SHAPE_TYPE,
     parentId: 'page:page',
-    props: { start: { x: 0, y: 0 }, end: { x: 1, y: 0 }, routing },
+    props: { start: { x: 0, y: 0 }, end: { x: 1, y: 0 }, routing, temporal },
   }
 }
 

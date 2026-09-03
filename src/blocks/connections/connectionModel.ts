@@ -26,15 +26,16 @@ export const ConnectionRoutingStyle = StyleProp.defineEnum('systemsketch:connect
 	values: CONNECTION_ROUTING_KINDS,
 })
 
-export const CONNECTION_TEMPORAL_KINDS = ['data', 'delayed'] as const
+export const CONNECTION_TEMPORAL_KINDS = ['data', 'async', 'delayed'] as const
 export type ConnectionTemporalKind = (typeof CONNECTION_TEMPORAL_KINDS)[number]
 
 /**
- * When a cable's value is read: `data` on this pass, `delayed` one iteration
- * later — a loop's back edge. A style for the same reason routing is: marking
- * a bundle of cables delayed is one write, and the shared-style machinery
- * already reports whether a selection agrees. `delayed` draws the cable dotted
- * and gives it a z⁻¹ pill; see `connectionPresentation.ts`.
+ * What kind of delivery a cable represents: plain `data`, intermittently
+ * delivered `async` packets, or `delayed` by one iteration — a loop's back
+ * edge. A style for the same reason routing is: marking a bundle of cables is
+ * one write, and the shared-style machinery already reports whether a
+ * selection agrees. The distinct paint for each kind lives in
+ * `connectionPresentation.ts` and `ConnectionShapeUtil.tsx`.
  */
 export const ConnectionTemporalStyle = StyleProp.defineEnum('systemsketch:connectionTemporal', {
 	defaultValue: 'data',
