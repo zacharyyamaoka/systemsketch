@@ -1,29 +1,27 @@
-SystemSketch interaction recording — 2026-09-03T00:58:09.853Z · 5.7 s · an explicit take
-channel preview · build recorder-smoke · http://127.0.0.1:41819/?board=%2Ftmp%2Frecorder-smoke-files-gZ6120%2FSystemSketch%2Frecorder-proof.systemsketch
+SystemSketch interaction recording — 2026-09-03T02:16:12.999Z · 5.7 s · an explicit take
+channel preview · build recorder-smoke · http://127.0.0.1:37323/?board=%2Ftmp%2Frecorder-smoke-files-xilZ3a%2FSystemSketch%2Frecorder-proof.systemsketch
 viewport 1440×960 @1x · state path select.idle → select.idle · 3 shapes at the end
 
-No note was typed.
-
 State-chart transitions (19):
-  +   0.58s  select.idle  →  select.pointing_canvas   (pointer_down)
-  +   0.59s  select.pointing_canvas  →  select.idle   (pointer_up)
-  +   0.78s  select.idle  →  block.idle   (store)
-  +   0.87s  block.idle  →  block.pointing   (pointer_down)
-  +   0.89s  block.pointing  →  select.resizing   (pointer_move)
-  +   1.09s  select.resizing  →  select.idle   (pointer_up)
-  +   1.11s  select.idle  →  select.editing_shape   (store)
-  +   1.13s  select.editing_shape  →  select.idle   (complete)
-  +   2.24s  select.idle  →  block.idle   (store)
-  +   2.33s  block.idle  →  block.pointing   (pointer_down)
-  +   2.35s  block.pointing  →  select.resizing   (pointer_move)
-  +   2.54s  select.resizing  →  select.idle   (pointer_up)
-  +   2.56s  select.idle  →  select.editing_shape   (store)
-  +   2.57s  select.editing_shape  →  select.idle   (complete)
-  +   3.67s  select.idle  →  select.pointing_canvas   (pointer_down)
-  +   3.67s  select.pointing_canvas  →  select.idle   (pointer_up)
-  +   4.10s  select.idle  →  select.pointing_block_port   (pointer_down)
-  +   4.12s  select.pointing_block_port  →  select.dragging_handle   (pointer_move)
-  +   4.51s  select.dragging_handle  →  select.idle   (pointer_up)
+  +   0.59s  select.idle  →  select.pointing_canvas   (pointer_down)
+  +   0.60s  select.pointing_canvas  →  select.idle   (pointer_up)
+  +   0.80s  select.idle  →  block.idle   (store)
+  +   0.88s  block.idle  →  block.pointing   (pointer_down)
+  +   0.90s  block.pointing  →  select.resizing   (pointer_move)
+  +   1.11s  select.resizing  →  select.idle   (pointer_up)
+  +   1.13s  select.idle  →  select.editing_shape   (store)
+  +   1.15s  select.editing_shape  →  select.idle   (complete)
+  +   2.28s  select.idle  →  block.idle   (store)
+  +   2.37s  block.idle  →  block.pointing   (pointer_down)
+  +   2.38s  block.pointing  →  select.resizing   (pointer_move)
+  +   2.59s  select.resizing  →  select.idle   (pointer_up)
+  +   2.61s  select.idle  →  select.editing_shape   (store)
+  +   2.62s  select.editing_shape  →  select.idle   (complete)
+  +   3.75s  select.idle  →  select.pointing_canvas   (pointer_down)
+  +   3.76s  select.pointing_canvas  →  select.idle   (pointer_up)
+  +   4.18s  select.idle  →  select.pointing_block_port   (pointer_down)
+  +   4.20s  select.pointing_block_port  →  select.dragging_handle   (pointer_move)
+  +   4.59s  select.dragging_handle  →  select.idle   (pointer_up)
 
 Totals: 49 input events (32 moves, 5 presses, 1 key downs) · 18 DOM events · 40 store diffs · 0 menu changes · 0 console rows · 19 frames
 
@@ -39,10 +37,10 @@ States seen, and the file that defines each:
   dragging_handle              node_modules/tldraw/dist-esm/lib/tools/SelectTool/childStates/DraggingHandle.mjs
 
 Read these files, in this order:
-1. /tmp/recorder-smoke-files-gZ6120/SystemSketch/recordings/2026-09-02_17-58-09-take/README.md  — this summary
-2. /tmp/recorder-smoke-files-gZ6120/SystemSketch/recordings/2026-09-02_17-58-09-take/timeline.jsonl  — every event, one JSON object per line. `t` is ms since the start. Lanes: input (what tldraw's state chart received), dom (raw keydown/keyup/pointerdown on the window, with the UI element hit), state (state-chart path changes), menu (open menus), store (record diffs: add/update/remove with the changed keys), console (console calls and uncaught errors), mark (notes).
-3. /tmp/recorder-smoke-files-gZ6120/SystemSketch/recordings/2026-09-02_17-58-09-take/frames/  — 19 screenshots named by ms since the start (f-000411.jpg = +0.41 s). To see what the screen showed after an event at t, open the first frame with a larger number. Chrome screencast frames: what the window actually showed, UI chrome included, no mouse pointer (the input lane has it).
-4. /tmp/recorder-smoke-files-gZ6120/SystemSketch/recordings/2026-09-02_17-58-09-take/start.snapshot.json  — the tldraw store (document + session records) at t=0; /tmp/recorder-smoke-files-gZ6120/SystemSketch/recordings/2026-09-02_17-58-09-take/end.snapshot.json is the store at save time. `editor.store.loadStoreSnapshot(start)` then replaying the store lane reproduces every instant.
-5. /tmp/recorder-smoke-files-gZ6120/SystemSketch/recordings/2026-09-02_17-58-09-take/playback.html  — open in a browser: slow frames, fast lanes, one scrubber; #t=<ms> deep-links a moment.
+1. /tmp/recorder-smoke-files-xilZ3a/SystemSketch/recordings/2026-09-02_19-16-12-take/README.md  — this summary
+2. /tmp/recorder-smoke-files-xilZ3a/SystemSketch/recordings/2026-09-02_19-16-12-take/timeline.jsonl  — every event, one JSON object per line. `t` is ms since the start. Lanes: input (what tldraw's state chart received), dom (raw keydown/keyup/pointerdown on the window, with the UI element hit), state (state-chart path changes), menu (open menus), store (record diffs: add/update/remove with the changed keys), console (console calls and uncaught errors), mark (notes).
+3. /tmp/recorder-smoke-files-xilZ3a/SystemSketch/recordings/2026-09-02_19-16-12-take/frames/  — 19 screenshots named by ms since the start (f-000415.jpg = +0.41 s). To see what the screen showed after an event at t, open the first frame with a larger number. Chrome screencast frames: what the window actually showed, UI chrome included, no mouse pointer (the input lane has it).
+4. /tmp/recorder-smoke-files-xilZ3a/SystemSketch/recordings/2026-09-02_19-16-12-take/start.snapshot.json  — the tldraw store (document + session records) at t=0; /tmp/recorder-smoke-files-xilZ3a/SystemSketch/recordings/2026-09-02_19-16-12-take/end.snapshot.json is the store at save time. `editor.store.loadStoreSnapshot(start)` then replaying the store lane reproduces every instant.
+5. /tmp/recorder-smoke-files-xilZ3a/SystemSketch/recordings/2026-09-02_19-16-12-take/playback.html  — open in a browser: slow frames, fast lanes, one scrubber; #t=<ms> deep-links a moment.
 
-Recorder cost inside the page: 4.1 ms over 5.65 s of uptime.
+Recorder cost inside the page: 3.9 ms over 5.73 s of uptime.

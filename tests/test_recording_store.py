@@ -193,6 +193,15 @@ class RecordingStoreTests(unittest.TestCase):
         order = [text.index(marker) for marker in ("1. /tmp/rec/README.md", "2. /tmp/rec/timeline.jsonl", "3. /tmp/rec/frames/", "4. /tmp/rec/start.snapshot.json", "5. /tmp/rec/playback.html")]
         self.assertEqual(order, sorted(order))
         self.assertIn("pointing_block_port          src/blocks/ports/PointingBlockPort.ts", text)
+        self.assertNotIn("No note was typed.", text)
+        minimal = build_packet(
+            {**data["header"], "framesSource": "none", "channel": "preview", "build": "b"},
+            [],
+            [],
+            Path("/tmp/rec"),
+            {},
+        )
+        self.assertIn("2 shapes at the end\n\nState-chart transitions", minimal)
 
     def test_the_sidecar_reports_why_frames_are_unavailable(self) -> None:
         sidecar = FrameSidecar(PROJECT_ROOT / "scripts" / "recorder_frames.mjs", cdp_port=None)
