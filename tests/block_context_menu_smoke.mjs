@@ -174,11 +174,6 @@ async function main() {
     await openSubmenu(page, 'block-view')
     await clickMenuCheckbox(page, 'block-view', 'Expanded')
     await waitFor(page, `document.querySelector('.systemsketch-block-canvas[data-block-view="expanded"]')`, 'Expanded view')
-    await openBlockMenu(page)
-    await openSubmenu(page, 'block-advanced')
-    await clickElement(page, '[data-testid="context-menu.block-step-into"]')
-    await waitFor(page, `document.querySelector('[data-testid="systemsketch-depth-navigator"]')`, 'Depth Stack')
-    pass('Expanded Block Advanced menu enters the existing structural depth scope')
 
     // Repeat the essential gesture in the full product composition—the exact
     // component registry that becomes Stable—not only in the isolated lab.
@@ -222,6 +217,20 @@ async function main() {
     assert.ok(await evaluate(page,
       `document.querySelector('[data-testid="context-menu-group.systemsketch-block-authoring"]').innerText.includes('Add')`))
     pass('window blur cannot strand the menu before the next two right-clicks')
+
+    // The Depth Stack belongs to the full product chrome, not the intentionally
+    // stripped Block Dev harness. Exercise the same Advanced command where its
+    // visible navigation result is actually mounted.
+    await key(page, 'Escape', 'Escape')
+    await openBlockMenu(page)
+    await openSubmenu(page, 'block-view')
+    await clickMenuCheckbox(page, 'block-view', 'Expanded')
+    await waitFor(page, `document.querySelector('.systemsketch-block-canvas[data-block-view="expanded"]')`, 'product Expanded view')
+    await openBlockMenu(page)
+    await openSubmenu(page, 'block-advanced')
+    await clickElement(page, '[data-testid="context-menu.block-step-into"]')
+    await waitFor(page, `document.querySelector('[data-testid="systemsketch-depth-navigator"]')`, 'Depth Stack')
+    pass('Expanded Block Advanced menu enters the existing structural depth scope in the product')
 
     const capture = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
     await writeFile(SHOT, Buffer.from(capture.data, 'base64'))

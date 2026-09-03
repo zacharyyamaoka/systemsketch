@@ -105,8 +105,11 @@ async function drawAndSelectRect(page, from, to) {
   await drag(page, from, to)
   await delay(200)
   await key(page, 'Escape', 'Escape')
+  // The product's Preview controller occupies the very top of the viewport.
+  // Keep this real marquee on the canvas: it still encloses a top-edge shape,
+  // but does not cross non-canvas chrome on its way down.
   await drag(page,
-    { x: Math.min(from.x, to.x) - 60, y: Math.min(from.y, to.y) - 60 },
+    { x: Math.min(from.x, to.x) - 60, y: Math.max(Math.min(from.y, to.y) - 60, 64) },
     { x: Math.max(from.x, to.x) + 60, y: Math.max(from.y, to.y) + 60 })
   await waitFor(page,
     `document.querySelector('[data-testid="systemsketch-selection-menu"]')`,
@@ -226,7 +229,13 @@ async function main() {
 
     // 3. No room above: flip below rather than clamp down onto the shape.
     await clearBoard(page)
-    await drawAndSelectRect(page, { x: 560, y: 70 }, { x: 860, y: 210 })
+    // The product's Preview controller owns the top edge, so create just
+    // below it and use the normal canvas drag to bring the selection up.
+    await drawAndSelectRect(page, { x: 560, y: 150 }, { x: 860, y: 290 })
+    await drag(page, { x: 710, y: 220 }, { x: 710, y: 140 })
+    await waitFor(page,
+      `document.querySelector('[data-testid="systemsketch-selection-menu"]')?.dataset.visible === 'true'`,
+      'the selection menu after the top-edge move')
     const flipped = await readMenu(page)
     assert.equal(flipped.side, 'below', 'a selection near the top must flip the menu below it')
     assert.ok(flipped.menu.y >= flipped.shape.y + flipped.shape.h,

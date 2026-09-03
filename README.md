@@ -4,6 +4,8 @@ SystemSketch starts from one deliberately boring datum: the stock tldraw whitebo
 
 ## Current improvement review
 
+The [Expanded Block view-glyph repair gallery](docs/expanded-view-glyph-fix-2026-09-02.html) fixes the duplicated **E** in the floating Block selection menu without dropping the intentional fourth literal-value view: the shared view order is now visibly **S / P / E / V**. It records the narrow source repair, a product-wide contextual-menu audit, and a companion [`expanded-view-glyph.systemsketch`](sketches/review/expanded-view-glyph.systemsketch) board with the exact selection gesture pre-cued for human verification.
+
 The [for-loop visual grammar Babble + Prune gallery](docs/for-loop-visual-grammar-babble-2026-09-02.html) compares ten genuinely different ways to expose iteration, loop-carried state, and completion without turning the body back into code. Its top three—Paired Gates, Header Lanes, and State Pills—are each exercised against the same five Python loops from a stateless map through nested early exit, yielding fifteen matched examples on the companion [`for-loop-visual-grammar.systemsketch`](sketches/review/for-loop-visual-grammar.systemsketch) board.
 
 The [Delete frame, leave children gallery](docs/remove-frame-keep-contents-2026-09-02.html) proves the descriptive stock-Frame right-click command: direct children are lifted through tldraw’s reparent seam before the now-empty Frame is deleted, preserving exact page positions and nested hierarchies as one undoable operation. The companion [`remove-frame-keep-contents.systemsketch`](sketches/review/remove-frame-keep-contents.systemsketch) board is ready for direct verification.
