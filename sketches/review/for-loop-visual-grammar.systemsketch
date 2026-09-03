@@ -1,0 +1,7575 @@
+{
+  "systemSketch": {
+    "formatVersion": 2,
+    "application": "SystemSketch",
+    "shapes": {
+      "arrow": 57,
+      "geo": 58,
+      "frame": 15,
+      "block": 15
+    },
+    "bindings": {
+      "arrow": 4
+    }
+  },
+  "tldrawFileFormatVersion": 1,
+  "schema": {
+    "schemaVersion": 2,
+    "sequences": {
+      "com.tldraw.store": 5,
+      "com.tldraw.asset": 1,
+      "com.tldraw.camera": 1,
+      "com.tldraw.document": 2,
+      "com.tldraw.instance": 26,
+      "com.tldraw.instance_page_state": 5,
+      "com.tldraw.page": 1,
+      "com.tldraw.instance_presence": 6,
+      "com.tldraw.pointer": 1,
+      "com.tldraw.shape": 4,
+      "com.tldraw.user": 1,
+      "com.tldraw.asset.image": 6,
+      "com.tldraw.asset.video": 5,
+      "com.tldraw.asset.bookmark": 2,
+      "com.tldraw.shape.group": 0,
+      "com.tldraw.shape.bookmark": 2,
+      "com.tldraw.shape.draw": 5,
+      "com.tldraw.shape.note": 13,
+      "com.tldraw.shape.frame": 1,
+      "com.tldraw.shape.highlight": 4,
+      "com.tldraw.shape.embed": 4,
+      "com.tldraw.shape.image": 5,
+      "com.tldraw.shape.video": 4,
+      "com.tldraw.shape.geo": 12,
+      "com.tldraw.shape.arrow": 8,
+      "com.tldraw.shape.text": 4,
+      "com.tldraw.shape.line": 5,
+      "com.tldraw.shape.block": 4,
+      "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.branch-arm": 0,
+      "com.tldraw.shape.connection": 3,
+      "com.tldraw.binding.arrow": 1,
+      "com.tldraw.binding.connection": 1,
+      "com.tldraw.comment-thread": 3,
+      "com.tldraw.comment": 1,
+      "com.tldraw.comment-reaction": 1
+    }
+  },
+  "records": [
+    {
+      "x": 1570,
+      "y": 210,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 250,
+          "y": 170
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aHprPV",
+      "typeName": "shape"
+    },
+    {
+      "x": 248,
+      "y": 312,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s5-a1",
+      "type": "arrow",
+      "parentId": "shape:paired-s5",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 116,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a2yz1",
+      "typeName": "shape"
+    },
+    {
+      "x": 24,
+      "y": 34,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s2-code",
+      "type": "geo",
+      "parentId": "shape:paired-s2",
+      "props": {
+        "w": 932,
+        "h": 128,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "pose = estimate(frame, gain)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "for other in others:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    pose = merge(pose, other)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "return encode(pose)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a1SSb",
+      "typeName": "shape"
+    },
+    {
+      "x": 1150,
+      "y": 2462,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s4",
+      "type": "frame",
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V3 · Header Lanes · 4 · Hard · Zip + two carries + conditional update",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "a9Sor",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "lastActivityTimestamp": 0,
+      "meta": {},
+      "id": "pointer:pointer",
+      "typeName": "pointer"
+    },
+    {
+      "x": 72,
+      "y": 492,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s5-key",
+      "type": "geo",
+      "parentId": "shape:pills-s5",
+      "props": {
+        "w": 360,
+        "h": 58,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 22,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "write pill now · read it next turn"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a9QR2",
+      "typeName": "shape"
+    },
+    {
+      "x": 354,
+      "y": 282,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s4-item",
+      "type": "arrow",
+      "parentId": "shape:lanes-s4",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 60
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a2Nlz",
+      "typeName": "shape"
+    },
+    {
+      "x": 354,
+      "y": 318,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s1-state",
+      "type": "arrow",
+      "parentId": "shape:lanes-s1",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 96
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a3u6f",
+      "typeName": "shape"
+    },
+    {
+      "x": 24,
+      "y": 34,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s1-code",
+      "type": "geo",
+      "parentId": "shape:paired-s1",
+      "props": {
+        "w": 932,
+        "h": 128,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "for image in images:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    thumb = resize(image)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    save(thumb)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a1Iwj",
+      "typeName": "shape"
+    },
+    {
+      "x": 248,
+      "y": 312,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s4-a1",
+      "type": "arrow",
+      "parentId": "shape:paired-s4",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 116,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a2dfv",
+      "typeName": "shape"
+    },
+    {
+      "x": 674,
+      "y": 312,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s5-a2",
+      "type": "arrow",
+      "parentId": "shape:paired-s5",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 76,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a3oIn",
+      "typeName": "shape"
+    },
+    {
+      "x": 1150,
+      "y": 3156,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s5",
+      "type": "frame",
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V3 · Header Lanes · 5 · Very hard · Nested loops + early exit",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "aAWzs",
+      "typeName": "shape"
+    },
+    {
+      "x": 442,
+      "y": 324,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s5-body",
+      "type": "block",
+      "parentId": "shape:pills-s5",
+      "props": {
+        "w": 310,
+        "h": 176,
+        "title": "evaluate → threshold? → break()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "Bmt9xceNwpnq0kQ-Z-fZ7",
+        "inputs": [
+          {
+            "id": "item",
+            "name": "batch ⊃ candidate",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "best ⊃ score",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "best",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "definitionKey": "evaluate_threshold_break"
+      },
+      "index": "a8HMb",
+      "typeName": "shape"
+    },
+    {
+      "x": 354,
+      "y": 282,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s3-item",
+      "type": "arrow",
+      "parentId": "shape:lanes-s3",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 60
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a2BCv",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 360,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s5-done",
+      "type": "arrow",
+      "parentId": "shape:pills-s5",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a5e1M",
+      "typeName": "shape"
+    },
+    {
+      "x": 248,
+      "y": 312,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s3-a1",
+      "type": "arrow",
+      "parentId": "shape:paired-s3",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 116,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a20AI",
+      "typeName": "shape"
+    },
+    {
+      "x": 674,
+      "y": 312,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s4-a2",
+      "type": "arrow",
+      "parentId": "shape:paired-s4",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 76,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a3szR",
+      "typeName": "shape"
+    },
+    {
+      "x": 442,
+      "y": 324,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s4-body",
+      "type": "block",
+      "parentId": "shape:pills-s4",
+      "props": {
+        "w": 310,
+        "h": 176,
+        "title": "error → valid? → update()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "T0mk0nCNcosqqHDkBy9eR",
+        "inputs": [
+          {
+            "id": "item",
+            "name": "pred, target",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "loss, kept",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "loss, kept",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "definitionKey": "error_valid_update"
+      },
+      "index": "a8qSM",
+      "typeName": "shape"
+    },
+    {
+      "x": 354,
+      "y": 282,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s2-item",
+      "type": "arrow",
+      "parentId": "shape:lanes-s2",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 60
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a2UvH",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 360,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s4-done",
+      "type": "arrow",
+      "parentId": "shape:pills-s4",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a55kI",
+      "typeName": "shape"
+    },
+    {
+      "x": 354,
+      "y": 318,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s2-state",
+      "type": "arrow",
+      "parentId": "shape:lanes-s2",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 96
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a3MNj",
+      "typeName": "shape"
+    },
+    {
+      "x": 674,
+      "y": 312,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s3-a2",
+      "type": "arrow",
+      "parentId": "shape:paired-s3",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 76,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a3KOr",
+      "typeName": "shape"
+    },
+    {
+      "x": 442,
+      "y": 324,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s3-body",
+      "type": "block",
+      "parentId": "shape:pills-s3",
+      "props": {
+        "w": 310,
+        "h": 176,
+        "title": "lookup → scale → add()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "6oCpl5qqhvG8S-IZfhWZf",
+        "inputs": [
+          {
+            "id": "item",
+            "name": "i, sample",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "total",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "total",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "definitionKey": "lookup_scale_add"
+      },
+      "index": "a8ppE",
+      "typeName": "shape"
+    },
+    {
+      "x": 354,
+      "y": 282,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s1-item",
+      "type": "arrow",
+      "parentId": "shape:lanes-s1",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 60
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a2gzD",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 360,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s3-done",
+      "type": "arrow",
+      "parentId": "shape:pills-s3",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a5fSA",
+      "typeName": "shape"
+    },
+    {
+      "x": 354,
+      "y": 318,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s3-state",
+      "type": "arrow",
+      "parentId": "shape:lanes-s3",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 96
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a3hwM",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 408,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s5-loop",
+      "type": "arrow",
+      "parentId": "shape:pills-s5",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -564,
+          "y": 58
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a4HEE",
+      "typeName": "shape"
+    },
+    {
+      "x": 248,
+      "y": 312,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s2-a1",
+      "type": "arrow",
+      "parentId": "shape:paired-s2",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 116,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a2Wm2",
+      "typeName": "shape"
+    },
+    {
+      "x": 80,
+      "y": 100,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1",
+      "type": "geo",
+      "props": {
+        "w": 820,
+        "h": 110,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 · Compare down a column: one grammar from pure map to nested break"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aGmPj",
+      "typeName": "shape"
+    },
+    {
+      "x": 442,
+      "y": 324,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s2-body",
+      "type": "block",
+      "parentId": "shape:pills-s2",
+      "props": {
+        "w": 310,
+        "h": 176,
+        "title": "merge()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "QeoExs2ht1lvIvCpJsRZB",
+        "inputs": [
+          {
+            "id": "item",
+            "name": "other",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "pose",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "pose",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "definitionKey": "merge"
+      },
+      "index": "a83Of",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 360,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s2-done",
+      "type": "arrow",
+      "parentId": "shape:pills-s2",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a58KQ",
+      "typeName": "shape"
+    },
+    {
+      "x": 354,
+      "y": 318,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s4-state",
+      "type": "arrow",
+      "parentId": "shape:lanes-s4",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 96
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a3hzw",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 408,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s4-loop",
+      "type": "arrow",
+      "parentId": "shape:pills-s4",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -564,
+          "y": 58
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a48sf",
+      "typeName": "shape"
+    },
+    {
+      "x": 2240,
+      "y": 100,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-pass",
+      "type": "geo",
+      "props": {
+        "w": 960,
+        "h": 110,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "PASS WHEN · one grammar stays understandable from easy to hard, and dotted lines mean only next-iteration availability"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aIwyU",
+      "typeName": "shape"
+    },
+    {
+      "x": 248,
+      "y": 312,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s1-a1",
+      "type": "arrow",
+      "parentId": "shape:paired-s1",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 116,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a2tuj",
+      "typeName": "shape"
+    },
+    {
+      "x": 674,
+      "y": 312,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s2-a2",
+      "type": "arrow",
+      "parentId": "shape:paired-s2",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 76,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a3xWr",
+      "typeName": "shape"
+    },
+    {
+      "x": 1120,
+      "y": 100,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2",
+      "type": "geo",
+      "props": {
+        "w": 900,
+        "h": 110,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "2 · Compare across a row: the same Python loop through all three finalists"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aHTGb",
+      "typeName": "shape"
+    },
+    {
+      "x": 354,
+      "y": 318,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s5-state",
+      "type": "arrow",
+      "parentId": "shape:lanes-s5",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 96
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a3Fzk",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 360,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s1-done",
+      "type": "arrow",
+      "parentId": "shape:pills-s1",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a5vmQ",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 408,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s3-loop",
+      "type": "arrow",
+      "parentId": "shape:pills-s3",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -564,
+          "y": 58
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a4mwE",
+      "typeName": "shape"
+    },
+    {
+      "x": 12.22693531283123,
+      "y": -37.79851537645834,
+      "z": 1.0289143480632843,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    {
+      "x": 442,
+      "y": 324,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s1-body",
+      "type": "block",
+      "parentId": "shape:pills-s1",
+      "props": {
+        "w": 310,
+        "h": 176,
+        "title": "resize → save()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "ydWMZd5tnSn7d8wkjQRap",
+        "inputs": [
+          {
+            "id": "item",
+            "name": "image",
+            "type": "item",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "done",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "definitionKey": "resize_save"
+      },
+      "index": "a8fHb",
+      "typeName": "shape"
+    },
+    {
+      "x": 674,
+      "y": 312,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s1-a2",
+      "type": "arrow",
+      "parentId": "shape:paired-s1",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 76,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a3BFE",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 408,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s2-loop",
+      "type": "arrow",
+      "parentId": "shape:pills-s2",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -564,
+          "y": 58
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a4Gnz",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 236,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s1-iterate",
+      "type": "geo",
+      "parentId": "shape:paired-s1",
+      "props": {
+        "w": 176,
+        "h": 170,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "ITERATE"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "item · image"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "state · —"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a5PMv",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 408,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s1-loop",
+      "type": "arrow",
+      "parentId": "shape:pills-s1",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -564,
+          "y": 58
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a4ZKr",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 236,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s2-iterate",
+      "type": "geo",
+      "parentId": "shape:paired-s2",
+      "props": {
+        "w": 176,
+        "h": 170,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "ITERATE"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "item · other"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "state · pose"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a5Nuv",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 236,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s3-iterate",
+      "type": "geo",
+      "parentId": "shape:paired-s3",
+      "props": {
+        "w": 176,
+        "h": 170,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "ITERATE"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "item · i, sample"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "state · total"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a5Nkn",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 236,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s4-iterate",
+      "type": "geo",
+      "parentId": "shape:paired-s4",
+      "props": {
+        "w": 176,
+        "h": 170,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "ITERATE"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "item · pred, target"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "state · loss, kept"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a5lYv",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:paired-s1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.23469387755102042,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 72,
+      "y": 236,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s5-iterate",
+      "type": "geo",
+      "parentId": "shape:paired-s5",
+      "props": {
+        "w": 176,
+        "h": 170,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "ITERATE"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "item · batch ⊃ candidate"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "state · best ⊃ score"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a5Esz",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:lanes-s1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.6836734693877551,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 2220,
+      "y": 380,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s1",
+      "type": "frame",
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V5 · State Pills · 1 · Easy · Pure map · item only",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "aBUFc",
+      "typeName": "shape"
+    },
+    {
+      "editingShapeId": null,
+      "croppingShapeId": null,
+      "selectedShapeIds": [],
+      "hoveredShapeId": null,
+      "erasingShapeIds": [],
+      "hintingShapeIds": [],
+      "focusedGroupId": null,
+      "meta": {},
+      "id": "instance_page_state:page:page",
+      "pageId": "page:page",
+      "typeName": "instance_page_state"
+    },
+    {
+      "x": 350,
+      "y": 456,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s1-key",
+      "type": "geo",
+      "parentId": "shape:paired-s1",
+      "props": {
+        "w": 350,
+        "h": 78,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 2,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "solid = this invocation"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "dotted = next iteration"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a8Zo2",
+      "typeName": "shape"
+    },
+    {
+      "x": 2220,
+      "y": 1074,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s2",
+      "type": "frame",
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V5 · State Pills · 2 · Baseline · Single accumulator · original",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "aCwiz",
+      "typeName": "shape"
+    },
+    {
+      "x": 350,
+      "y": 456,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s2-key",
+      "type": "geo",
+      "parentId": "shape:paired-s2",
+      "props": {
+        "w": 350,
+        "h": 78,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 2,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "solid = this invocation"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "dotted = next iteration"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a8eDj",
+      "typeName": "shape"
+    },
+    {
+      "x": 2220,
+      "y": 1768,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s3",
+      "type": "frame",
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V5 · State Pills · 3 · Medium · Enumerate + indexed side input",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "aDpqX",
+      "typeName": "shape"
+    },
+    {
+      "x": 24,
+      "y": 34,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s5-code",
+      "type": "geo",
+      "parentId": "shape:pills-s5",
+      "props": {
+        "w": 932,
+        "h": 128,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 120,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "best = None"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "for batch in batches:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    score = 0"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    for candidate in batch:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "        score += evaluate(candidate)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "        if score >= threshold: break"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    if score >= threshold:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "        best = candidate; break"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "return best"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a1ZWU",
+      "typeName": "shape"
+    },
+    {
+      "x": 350,
+      "y": 456,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s3-key",
+      "type": "geo",
+      "parentId": "shape:paired-s3",
+      "props": {
+        "w": 350,
+        "h": 78,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 2,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "solid = this invocation"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "dotted = next iteration"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a8i1U",
+      "typeName": "shape"
+    },
+    {
+      "x": 24,
+      "y": 34,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s4-code",
+      "type": "geo",
+      "parentId": "shape:pills-s4",
+      "props": {
+        "w": 932,
+        "h": 128,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 48,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "loss, kept = 0.0, []"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "for pred, target in zip(preds, targets):"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    err = error(pred, target)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    if valid(err):"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "        loss += err; kept.append(pred)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "return loss, kept"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a1lwf",
+      "typeName": "shape"
+    },
+    {
+      "x": 2220,
+      "y": 2462,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s4",
+      "type": "frame",
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V5 · State Pills · 4 · Hard · Zip + two carries + conditional update",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "aExQj",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 430,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s5-done",
+      "type": "arrow",
+      "parentId": "shape:lanes-s5",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a5mrf",
+      "typeName": "shape"
+    },
+    {
+      "x": 24,
+      "y": 34,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s3-code",
+      "type": "geo",
+      "parentId": "shape:pills-s3",
+      "props": {
+        "w": 932,
+        "h": 128,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 24,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "total = 0.0"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "for i, sample in enumerate(samples):"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    weighted = scale(sample, weights[i])"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    total = add(total, weighted)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "return total"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a1cmM",
+      "typeName": "shape"
+    },
+    {
+      "x": 2220,
+      "y": 3156,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s5",
+      "type": "frame",
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V5 · State Pills · 5 · Very hard · Nested loops + early exit",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "aFSNr",
+      "typeName": "shape"
+    },
+    {
+      "x": 442,
+      "y": 354,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s5-body",
+      "type": "block",
+      "parentId": "shape:lanes-s5",
+      "props": {
+        "w": 310,
+        "h": 176,
+        "title": "evaluate → threshold? → break()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "Bmt9xceNwpnq0kQ-Z-fZ7",
+        "inputs": [
+          {
+            "id": "item",
+            "name": "batch ⊃ candidate",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "best ⊃ score",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "best",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "definitionKey": "evaluate_threshold_break"
+      },
+      "index": "a7F0n",
+      "typeName": "shape"
+    },
+    {
+      "x": 266,
+      "y": 414,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s1-state",
+      "type": "arrow",
+      "parentId": "shape:pills-s1",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a3TWQ",
+      "typeName": "shape"
+    },
+    {
+      "x": 350,
+      "y": 456,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s4-key",
+      "type": "geo",
+      "parentId": "shape:paired-s4",
+      "props": {
+        "w": 350,
+        "h": 78,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 2,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "solid = this invocation"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "dotted = next iteration"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a8TzN",
+      "typeName": "shape"
+    },
+    {
+      "x": 24,
+      "y": 34,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s2-code",
+      "type": "geo",
+      "parentId": "shape:pills-s2",
+      "props": {
+        "w": 932,
+        "h": 128,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "pose = estimate(frame, gain)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "for other in others:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    pose = merge(pose, other)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "return encode(pose)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a1YTI",
+      "typeName": "shape"
+    },
+    {
+      "x": 442,
+      "y": 354,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s4-body",
+      "type": "block",
+      "parentId": "shape:lanes-s4",
+      "props": {
+        "w": 310,
+        "h": 176,
+        "title": "error → valid? → update()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "T0mk0nCNcosqqHDkBy9eR",
+        "inputs": [
+          {
+            "id": "item",
+            "name": "pred, target",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "loss, kept",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "loss, kept",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "definitionKey": "error_valid_update"
+      },
+      "index": "a7uhv",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 454,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s1-key",
+      "type": "geo",
+      "parentId": "shape:lanes-s1",
+      "props": {
+        "w": 310,
+        "h": 78,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 26,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "short drops into body"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "one dotted return to header"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a8zjP",
+      "typeName": "shape"
+    },
+    {
+      "x": 266,
+      "y": 414,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s2-state",
+      "type": "arrow",
+      "parentId": "shape:pills-s2",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a3Fze",
+      "typeName": "shape"
+    },
+    {
+      "x": 350,
+      "y": 456,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s5-key",
+      "type": "geo",
+      "parentId": "shape:paired-s5",
+      "props": {
+        "w": 350,
+        "h": 78,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 2,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "solid = this invocation"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "dotted = next iteration"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a8a3Q",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 430,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s4-done",
+      "type": "arrow",
+      "parentId": "shape:lanes-s4",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a5slv",
+      "typeName": "shape"
+    },
+    {
+      "x": 442,
+      "y": 354,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s3-body",
+      "type": "block",
+      "parentId": "shape:lanes-s3",
+      "props": {
+        "w": 310,
+        "h": 176,
+        "title": "lookup → scale → add()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "6oCpl5qqhvG8S-IZfhWZf",
+        "inputs": [
+          {
+            "id": "item",
+            "name": "i, sample",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "total",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "total",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "definitionKey": "lookup_scale_add"
+      },
+      "index": "a74zW",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 454,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s2-key",
+      "type": "geo",
+      "parentId": "shape:lanes-s2",
+      "props": {
+        "w": 310,
+        "h": 78,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 26,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "short drops into body"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "one dotted return to header"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a8yIA",
+      "typeName": "shape"
+    },
+    {
+      "x": 266,
+      "y": 414,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s3-state",
+      "type": "arrow",
+      "parentId": "shape:pills-s3",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a3NqE",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 430,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s3-done",
+      "type": "arrow",
+      "parentId": "shape:lanes-s3",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a5kqA",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:cue-step-1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 752,
+      "y": 396,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s5-loop",
+      "type": "arrow",
+      "parentId": "shape:lanes-s5",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -340,
+          "y": -78
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a4LzD",
+      "typeName": "shape"
+    },
+    {
+      "x": 24,
+      "y": 34,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s1-code",
+      "type": "geo",
+      "parentId": "shape:pills-s1",
+      "props": {
+        "w": 932,
+        "h": 128,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "for image in images:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    thumb = resize(image)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    save(thumb)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a1UTB",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 254,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s1-item-pill",
+      "type": "geo",
+      "parentId": "shape:pills-s1",
+      "props": {
+        "w": 194,
+        "h": 76,
+        "geo": "ellipse",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "image = ⋯"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a6zFL",
+      "typeName": "shape"
+    },
+    {
+      "x": 442,
+      "y": 354,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s2-body",
+      "type": "block",
+      "parentId": "shape:lanes-s2",
+      "props": {
+        "w": 310,
+        "h": 176,
+        "title": "merge()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "QeoExs2ht1lvIvCpJsRZB",
+        "inputs": [
+          {
+            "id": "item",
+            "name": "other",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "pose",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "pose",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "definitionKey": "merge"
+      },
+      "index": "a7x1j",
+      "typeName": "shape"
+    },
+    {
+      "x": 266,
+      "y": 414,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s4-state",
+      "type": "arrow",
+      "parentId": "shape:pills-s4",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a3FAI",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 454,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s3-key",
+      "type": "geo",
+      "parentId": "shape:lanes-s3",
+      "props": {
+        "w": 310,
+        "h": 78,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 26,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "short drops into body"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "one dotted return to header"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a8lDb",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:cue-step-2",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 72,
+      "y": 254,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s2-item-pill",
+      "type": "geo",
+      "parentId": "shape:pills-s2",
+      "props": {
+        "w": 194,
+        "h": 76,
+        "geo": "ellipse",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "other = ⋯"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a6GZM",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 430,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s2-done",
+      "type": "arrow",
+      "parentId": "shape:lanes-s2",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a5oxU",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 396,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s4-loop",
+      "type": "arrow",
+      "parentId": "shape:lanes-s4",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -340,
+          "y": -78
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a43ff",
+      "typeName": "shape"
+    },
+    {
+      "x": 442,
+      "y": 354,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s1-body",
+      "type": "block",
+      "parentId": "shape:lanes-s1",
+      "props": {
+        "w": 310,
+        "h": 176,
+        "title": "resize → save()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "ydWMZd5tnSn7d8wkjQRap",
+        "inputs": [
+          {
+            "id": "item",
+            "name": "image",
+            "type": "item",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "done",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "definitionKey": "resize_save"
+      },
+      "index": "a7n0I",
+      "typeName": "shape"
+    },
+    {
+      "x": 266,
+      "y": 414,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s5-state",
+      "type": "arrow",
+      "parentId": "shape:pills-s5",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a3zdc",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 454,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s4-key",
+      "type": "geo",
+      "parentId": "shape:lanes-s4",
+      "props": {
+        "w": 310,
+        "h": 78,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 26,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "short drops into body"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "one dotted return to header"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a848X",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 254,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s3-item-pill",
+      "type": "geo",
+      "parentId": "shape:pills-s3",
+      "props": {
+        "w": 194,
+        "h": 76,
+        "geo": "ellipse",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "i, sample = ⋯"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a6UVL",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 430,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s1-done",
+      "type": "arrow",
+      "parentId": "shape:lanes-s1",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a5EK6",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 396,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s3-loop",
+      "type": "arrow",
+      "parentId": "shape:lanes-s3",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -340,
+          "y": -78
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a4dpQ",
+      "typeName": "shape"
+    },
+    {
+      "x": 364,
+      "y": 226,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s5-body",
+      "type": "block",
+      "parentId": "shape:paired-s5",
+      "props": {
+        "w": 310,
+        "h": 176,
+        "title": "evaluate → threshold? → break()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "Bmt9xceNwpnq0kQ-Z-fZ7",
+        "inputs": [
+          {
+            "id": "item",
+            "name": "batch ⊃ candidate",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "best ⊃ score",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "best",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "definitionKey": "evaluate_threshold_break"
+      },
+      "index": "a6YhU",
+      "typeName": "shape"
+    },
+    {
+      "x": 266,
+      "y": 292,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s5-item",
+      "type": "arrow",
+      "parentId": "shape:pills-s5",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 46
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a2HGf",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 254,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s4-item-pill",
+      "type": "geo",
+      "parentId": "shape:pills-s4",
+      "props": {
+        "w": 194,
+        "h": 76,
+        "geo": "ellipse",
+        "dash": "solid",
+        "growY": 4,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "pred, target = ⋯"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a6enE",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 396,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s2-loop",
+      "type": "arrow",
+      "parentId": "shape:lanes-s2",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -340,
+          "y": -78
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a4sf2",
+      "typeName": "shape"
+    },
+    {
+      "x": 364,
+      "y": 226,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s4-body",
+      "type": "block",
+      "parentId": "shape:paired-s4",
+      "props": {
+        "w": 310,
+        "h": 176,
+        "title": "error → valid? → update()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "T0mk0nCNcosqqHDkBy9eR",
+        "inputs": [
+          {
+            "id": "item",
+            "name": "pred, target",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "loss, kept",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "loss, kept",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "definitionKey": "error_valid_update"
+      },
+      "index": "a672b",
+      "typeName": "shape"
+    },
+    {
+      "x": 266,
+      "y": 292,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s4-item",
+      "type": "arrow",
+      "parentId": "shape:pills-s4",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 46
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a2gKn",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 454,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s5-key",
+      "type": "geo",
+      "parentId": "shape:lanes-s5",
+      "props": {
+        "w": 310,
+        "h": 78,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 26,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "short drops into body"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "one dotted return to header"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a8BRj",
+      "typeName": "shape"
+    },
+    {
+      "x": 752,
+      "y": 396,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s1-loop",
+      "type": "arrow",
+      "parentId": "shape:lanes-s1",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -340,
+          "y": -78
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a4oAj",
+      "typeName": "shape"
+    },
+    {
+      "x": 364,
+      "y": 226,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s3-body",
+      "type": "block",
+      "parentId": "shape:paired-s3",
+      "props": {
+        "w": 310,
+        "h": 176,
+        "title": "lookup → scale → add()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "6oCpl5qqhvG8S-IZfhWZf",
+        "inputs": [
+          {
+            "id": "item",
+            "name": "i, sample",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "total",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "total",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "definitionKey": "lookup_scale_add"
+      },
+      "index": "a6NGE",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 376,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s5-state-pill",
+      "type": "geo",
+      "parentId": "shape:pills-s5",
+      "props": {
+        "w": 194,
+        "h": 76,
+        "geo": "ellipse",
+        "dash": "solid",
+        "growY": 4,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "violet",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "best ⊃ score = ⋯"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a7BWr",
+      "typeName": "shape"
+    },
+    {
+      "x": 266,
+      "y": 292,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s3-item",
+      "type": "arrow",
+      "parentId": "shape:pills-s3",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 46
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a21Yz",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 254,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s5-item-pill",
+      "type": "geo",
+      "parentId": "shape:pills-s5",
+      "props": {
+        "w": 194,
+        "h": 76,
+        "geo": "ellipse",
+        "dash": "solid",
+        "growY": 4,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "batch ⊃ candidate = ⋯"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a6BVM",
+      "typeName": "shape"
+    },
+    {
+      "x": 808,
+      "y": 420,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s5-loop",
+      "type": "arrow",
+      "parentId": "shape:paired-s5",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -610,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a4IZE",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 376,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s4-state-pill",
+      "type": "geo",
+      "parentId": "shape:pills-s4",
+      "props": {
+        "w": 194,
+        "h": 76,
+        "geo": "ellipse",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "violet",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "loss, kept = ⋯"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a7SGE",
+      "typeName": "shape"
+    },
+    {
+      "x": 364,
+      "y": 226,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s2-body",
+      "type": "block",
+      "parentId": "shape:paired-s2",
+      "props": {
+        "w": 310,
+        "h": 176,
+        "title": "merge()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "QeoExs2ht1lvIvCpJsRZB",
+        "inputs": [
+          {
+            "id": "item",
+            "name": "other",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "pose",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "pose",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "definitionKey": "merge"
+      },
+      "index": "a6J2b",
+      "typeName": "shape"
+    },
+    {
+      "x": 266,
+      "y": 292,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s2-item",
+      "type": "arrow",
+      "parentId": "shape:pills-s2",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 46
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a2n0E",
+      "typeName": "shape"
+    },
+    {
+      "x": 808,
+      "y": 420,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s4-loop",
+      "type": "arrow",
+      "parentId": "shape:paired-s4",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -610,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a4jpr",
+      "typeName": "shape"
+    },
+    {
+      "x": 364,
+      "y": 226,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s1-body",
+      "type": "block",
+      "parentId": "shape:paired-s1",
+      "props": {
+        "w": 310,
+        "h": 176,
+        "title": "resize → save()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "ydWMZd5tnSn7d8wkjQRap",
+        "inputs": [
+          {
+            "id": "item",
+            "name": "image",
+            "type": "item",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "done",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "definitionKey": "resize_save"
+      },
+      "index": "a64nI",
+      "typeName": "shape"
+    },
+    {
+      "x": 266,
+      "y": 292,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s1-item",
+      "type": "arrow",
+      "parentId": "shape:pills-s1",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 46
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a2FM6",
+      "typeName": "shape"
+    },
+    {
+      "x": 808,
+      "y": 420,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s3-loop",
+      "type": "arrow",
+      "parentId": "shape:paired-s3",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -610,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a4rYn",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 376,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s3-state-pill",
+      "type": "geo",
+      "parentId": "shape:pills-s3",
+      "props": {
+        "w": 194,
+        "h": 76,
+        "geo": "ellipse",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "violet",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "total = ⋯"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a7ytr",
+      "typeName": "shape"
+    },
+    {
+      "x": 808,
+      "y": 420,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s2-loop",
+      "type": "arrow",
+      "parentId": "shape:paired-s2",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -610,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a4kRU",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 376,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s2-state-pill",
+      "type": "geo",
+      "parentId": "shape:pills-s2",
+      "props": {
+        "w": 194,
+        "h": 76,
+        "geo": "ellipse",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "violet",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "pose = ⋯"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a7uSI",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 376,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s1-state-pill",
+      "type": "geo",
+      "parentId": "shape:pills-s1",
+      "props": {
+        "w": 194,
+        "h": 76,
+        "geo": "ellipse",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "violet",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "— = ⋯"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a7Imn",
+      "typeName": "shape"
+    },
+    {
+      "x": 808,
+      "y": 420,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s1-loop",
+      "type": "arrow",
+      "parentId": "shape:paired-s1",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -610,
+          "y": 0
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a40cU",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 208,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s5-header",
+      "type": "geo",
+      "parentId": "shape:lanes-s5",
+      "props": {
+        "w": 836,
+        "h": 126,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "EACH     batch ⊃ candidate ← iterable[i]"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "CARRY    best ⊃ score ← seed | z⁻¹"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "DONE     best"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a6iAE",
+      "typeName": "shape"
+    },
+    {
+      "x": 80,
+      "y": 380,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s1",
+      "type": "frame",
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V1 · Paired Gates · 1 · Easy · Pure map · item only",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "a1VtM",
+      "typeName": "shape"
+    },
+    {
+      "x": 24,
+      "y": 34,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s5-code",
+      "type": "geo",
+      "parentId": "shape:lanes-s5",
+      "props": {
+        "w": 932,
+        "h": 128,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 120,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "best = None"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "for batch in batches:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    score = 0"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    for candidate in batch:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "        score += evaluate(candidate)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "        if score >= threshold: break"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    if score >= threshold:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "        best = candidate; break"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "return best"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a1zQL",
+      "typeName": "shape"
+    },
+    {
+      "x": 750,
+      "y": 236,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s1-yield",
+      "type": "geo",
+      "parentId": "shape:paired-s1",
+      "props": {
+        "w": 158,
+        "h": 170,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "YIELD"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "next · —"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "done · done"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a7fSf",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#7B66DC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:RWUJRKAFj5prWRRLEBquC",
+      "typeName": "user"
+    },
+    {
+      "meta": {},
+      "id": "page:page",
+      "name": "For-loop grammar",
+      "index": "a1",
+      "typeName": "page"
+    },
+    {
+      "gridSize": 10,
+      "name": "",
+      "meta": {},
+      "id": "document:document",
+      "typeName": "document"
+    },
+    {
+      "followingUserId": null,
+      "opacityForNextShape": 1,
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
+      "brush": null,
+      "scribbles": [],
+      "cursor": {
+        "type": "default",
+        "rotation": 0
+      },
+      "isFocusMode": false,
+      "exportBackground": true,
+      "isDebugMode": false,
+      "isToolLocked": false,
+      "screenBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 3400,
+        "h": 3900
+      },
+      "insets": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "zoomBrush": null,
+      "isGridMode": false,
+      "isPenMode": false,
+      "chatMessage": "",
+      "isChatting": false,
+      "highlightedUserIds": [],
+      "isFocused": true,
+      "devicePixelRatio": 1,
+      "isCoarsePointer": false,
+      "isHoveringCanvas": null,
+      "openMenus": [],
+      "isChangingStyle": false,
+      "isReadonly": false,
+      "meta": {},
+      "duplicateProps": null,
+      "cameraState": "idle",
+      "id": "instance:instance",
+      "currentPageId": "page:page",
+      "typeName": "instance"
+    },
+    {
+      "x": 24,
+      "y": 34,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s4-code",
+      "type": "geo",
+      "parentId": "shape:lanes-s4",
+      "props": {
+        "w": 932,
+        "h": 128,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 48,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "loss, kept = 0.0, []"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "for pred, target in zip(preds, targets):"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    err = error(pred, target)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    if valid(err):"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "        loss += err; kept.append(pred)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "return loss, kept"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a1f0A",
+      "typeName": "shape"
+    },
+    {
+      "x": 750,
+      "y": 236,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s2-yield",
+      "type": "geo",
+      "parentId": "shape:paired-s2",
+      "props": {
+        "w": 158,
+        "h": 170,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "YIELD"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "next · pose"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "done · pose"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a74Az",
+      "typeName": "shape"
+    },
+    {
+      "x": 80,
+      "y": 1074,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s2",
+      "type": "frame",
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V1 · Paired Gates · 2 · Baseline · Single accumulator · original",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "a2Uwk",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 208,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s4-header",
+      "type": "geo",
+      "parentId": "shape:lanes-s4",
+      "props": {
+        "w": 836,
+        "h": 126,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "EACH     pred, target ← iterable[i]"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "CARRY    loss, kept ← seed | z⁻¹"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "DONE     loss, kept"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a6eDE",
+      "typeName": "shape"
+    },
+    {
+      "x": 24,
+      "y": 34,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s3-code",
+      "type": "geo",
+      "parentId": "shape:lanes-s3",
+      "props": {
+        "w": 932,
+        "h": 128,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 24,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "total = 0.0"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "for i, sample in enumerate(samples):"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    weighted = scale(sample, weights[i])"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    total = add(total, weighted)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "return total"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a1gkf",
+      "typeName": "shape"
+    },
+    {
+      "x": 750,
+      "y": 236,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s3-yield",
+      "type": "geo",
+      "parentId": "shape:paired-s3",
+      "props": {
+        "w": 158,
+        "h": 170,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "YIELD"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "next · total"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "done · total"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a7qsb",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 208,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s3-header",
+      "type": "geo",
+      "parentId": "shape:lanes-s3",
+      "props": {
+        "w": 836,
+        "h": 126,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "EACH     i, sample ← iterable[i]"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "CARRY    total ← seed | z⁻¹"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "DONE     total"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a6jNv",
+      "typeName": "shape"
+    },
+    {
+      "x": 80,
+      "y": 1768,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s3",
+      "type": "frame",
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V1 · Paired Gates · 3 · Medium · Enumerate + indexed side input",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "a3Acj",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 492,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s1-key",
+      "type": "geo",
+      "parentId": "shape:pills-s1",
+      "props": {
+        "w": 360,
+        "h": 58,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 22,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "write pill now · read it next turn"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a9fMM",
+      "typeName": "shape"
+    },
+    {
+      "x": 24,
+      "y": 34,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s2-code",
+      "type": "geo",
+      "parentId": "shape:lanes-s2",
+      "props": {
+        "w": 932,
+        "h": 128,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "pose = estimate(frame, gain)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "for other in others:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    pose = merge(pose, other)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "return encode(pose)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a1j36",
+      "typeName": "shape"
+    },
+    {
+      "x": 750,
+      "y": 236,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s4-yield",
+      "type": "geo",
+      "parentId": "shape:paired-s4",
+      "props": {
+        "w": 158,
+        "h": 170,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "YIELD"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "next · loss, kept"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "done · loss, kept"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a7ANz",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 208,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s2-header",
+      "type": "geo",
+      "parentId": "shape:lanes-s2",
+      "props": {
+        "w": 836,
+        "h": 126,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "EACH     other ← iterable[i]"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "CARRY    pose ← seed | z⁻¹"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "DONE     pose"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a6thM",
+      "typeName": "shape"
+    },
+    {
+      "x": 80,
+      "y": 2462,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s4",
+      "type": "frame",
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V1 · Paired Gates · 4 · Hard · Zip + two carries + conditional update",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "a4btv",
+      "typeName": "shape"
+    },
+    {
+      "x": 24,
+      "y": 34,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s1-code",
+      "type": "geo",
+      "parentId": "shape:lanes-s1",
+      "props": {
+        "w": 932,
+        "h": 128,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "for image in images:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    thumb = resize(image)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    save(thumb)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a1CXA",
+      "typeName": "shape"
+    },
+    {
+      "x": 750,
+      "y": 236,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s5-yield",
+      "type": "geo",
+      "parentId": "shape:paired-s5",
+      "props": {
+        "w": 158,
+        "h": 170,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "YIELD"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "next · best ⊃ score"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "done · best"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a7mfz",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 208,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s1-header",
+      "type": "geo",
+      "parentId": "shape:lanes-s1",
+      "props": {
+        "w": 836,
+        "h": 126,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "EACH     image ← iterable[i]"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "CARRY    — ← seed | z⁻¹"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "DONE     done"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a6pLU",
+      "typeName": "shape"
+    },
+    {
+      "x": 1150,
+      "y": 380,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s1",
+      "type": "frame",
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V3 · Header Lanes · 1 · Easy · Pure map · item only",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "a6hSr",
+      "typeName": "shape"
+    },
+    {
+      "x": 24,
+      "y": 34,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s5-code",
+      "type": "geo",
+      "parentId": "shape:paired-s5",
+      "props": {
+        "w": 932,
+        "h": 128,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 120,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "best = None"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "for batch in batches:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    score = 0"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    for candidate in batch:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "        score += evaluate(candidate)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "        if score >= threshold: break"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    if score >= threshold:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "        best = candidate; break"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "return best"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a19w6",
+      "typeName": "shape"
+    },
+    {
+      "x": 80,
+      "y": 3156,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s5",
+      "type": "frame",
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V1 · Paired Gates · 5 · Very hard · Nested loops + early exit",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "a5a8E",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 492,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s2-key",
+      "type": "geo",
+      "parentId": "shape:pills-s2",
+      "props": {
+        "w": 360,
+        "h": 58,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 22,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "write pill now · read it next turn"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a9KXn",
+      "typeName": "shape"
+    },
+    {
+      "x": 1150,
+      "y": 1074,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s2",
+      "type": "frame",
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V3 · Header Lanes · 2 · Baseline · Single accumulator · original",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "a7cov",
+      "typeName": "shape"
+    },
+    {
+      "x": 24,
+      "y": 34,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s4-code",
+      "type": "geo",
+      "parentId": "shape:paired-s4",
+      "props": {
+        "w": 932,
+        "h": 128,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 48,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "loss, kept = 0.0, []"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "for pred, target in zip(preds, targets):"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    err = error(pred, target)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    if valid(err):"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "        loss += err; kept.append(pred)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "return loss, kept"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a1uHf",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 492,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s3-key",
+      "type": "geo",
+      "parentId": "shape:pills-s3",
+      "props": {
+        "w": 360,
+        "h": 58,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 22,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "write pill now · read it next turn"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a97sE",
+      "typeName": "shape"
+    },
+    {
+      "x": 1150,
+      "y": 1768,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s3",
+      "type": "frame",
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V3 · Header Lanes · 3 · Medium · Enumerate + indexed side input",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "a837z",
+      "typeName": "shape"
+    },
+    {
+      "x": 490,
+      "y": 210,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -180,
+          "y": 170
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aGtlBG",
+      "typeName": "shape"
+    },
+    {
+      "x": 24,
+      "y": 34,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:paired-s3-code",
+      "type": "geo",
+      "parentId": "shape:paired-s3",
+      "props": {
+        "w": 932,
+        "h": 128,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 24,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "total = 0.0"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "for i, sample in enumerate(samples):"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    weighted = scale(sample, weights[i])"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "    total = add(total, weighted)"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "return total"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a1cY6",
+      "typeName": "shape"
+    },
+    {
+      "x": 72,
+      "y": 492,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:pills-s4-key",
+      "type": "geo",
+      "parentId": "shape:pills-s4",
+      "props": {
+        "w": 360,
+        "h": 58,
+        "geo": "rectangle",
+        "dash": "solid",
+        "growY": 22,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "write pill now · read it next turn"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a9T5X",
+      "typeName": "shape"
+    },
+    {
+      "x": 354,
+      "y": 282,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:lanes-s5-item",
+      "type": "arrow",
+      "parentId": "shape:lanes-s5",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 60
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "index": "a262n",
+      "typeName": "shape"
+    }
+  ]
+}
