@@ -78,6 +78,7 @@ const NOTICE_TIMEOUT_MS = 6000
 
 export type WorkspaceStatus =
   | { kind: 'loading' }
+  | { kind: 'invalid-url'; message: string }
   | { kind: 'clean'; at: number | null }
   | { kind: 'dirty' }
   | { kind: 'saving' }
@@ -163,6 +164,15 @@ function exportedTldrawPath(path: string): string {
 
 function errorMessage(cause: unknown): string {
   return cause instanceof Error ? cause.message : String(cause)
+}
+
+function invalidBoardUrlMessage(query: URLSearchParams, explicitPath: string | null): string | null {
+  if (explicitPath) return null
+  if (query.has('board')) return 'The board link has no file path. Add a path after “?board=”.'
+  if ([...query.keys()].some((key) => key.startsWith('board='))) {
+    return 'Use ?board=/path/to/file.systemsketch; leave = unescaped.'
+  }
+  return null
 }
 
 function fingerprint(document: { mtime?: number; size?: number }): DocumentFingerprint | null {
@@ -253,9 +263,14 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     let cancelled = false
     void (async () => {
       try {
-        const listing = await listWorkspace()
         const query = new URLSearchParams(window.location.search)
         const explicitPath = query.get('board')?.trim() || null
+        const invalidBoardUrl = invalidBoardUrlMessage(query, explicitPath)
+        if (invalidBoardUrl) {
+          if (!cancelled) setStatus({ kind: 'invalid-url', message: invalidBoardUrl })
+          return
+        }
+        const listing = await listWorkspace()
         const isIndependentDevelopmentBoard = query.has('previewClone') || query.has('preset')
         let selectedPath: string
         let document: Awaited<ReturnType<typeof readWorkspaceDocument>>
@@ -867,11 +882,15 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
 }
 
 function WorkspaceLoading({ status }: { status: WorkspaceStatus }) {
+  const invalidUrl = status.kind === 'invalid-url'
+  const failed = invalidUrl || status.kind === 'error'
   return (
     <main className="systemsketch-workspace-loading">
       <div className="systemsketch-workspace-loading__mark">S</div>
-      <strong>{status.kind === 'error' ? 'Could not open the local workspace' : 'Opening workspace…'}</strong>
-      {status.kind === 'error' ? <p>{status.message}</p> : null}
+      <strong data-testid={invalidUrl ? 'workspace-invalid-board-url' : undefined}>
+        {invalidUrl ? 'Board link is invalid' : failed ? 'Could not open the local workspace' : 'Opening workspace…'}
+      </strong>
+      {failed ? <p>{status.message}</p> : null}
     </main>
   )
 }

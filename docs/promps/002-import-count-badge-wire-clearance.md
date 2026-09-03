@@ -19,3 +19,11 @@ edge is above its input port's wire centreline.
 
 `sketches/review/input-count-badge.systemsketch` provides an expanded
 `pose()` Block with two real incoming cables and a visible count badge.
+
+## Follow-up: malformed board links
+
+A link whose equals sign is encoded (`?board%3D…`) previously looked like an
+unknown query and silently opened Untitled. The workspace now stops on an
+explicit “Board link is invalid” screen that explains the correct `?board=…`
+form and that `=` must remain unescaped, with browser coverage for that exact
+case.
