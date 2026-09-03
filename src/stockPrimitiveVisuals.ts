@@ -87,7 +87,9 @@ export interface SystemSketchArrowPrimitiveStyle {
 		temporal: 'data' | 'async' | 'delayed'
 		delayValue: string
 		pillPosition: number
-		dashAfterPill: boolean
+		solidBeforePill?: boolean
+		/** V1 compatibility: an enabled old alternative becomes the corrected alternative. */
+		dashAfterPill?: boolean
 	}
 }
 

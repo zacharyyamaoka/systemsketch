@@ -52,6 +52,7 @@
     "test:branch": "node tests/branch_region_smoke.mjs",
     "test:branch-frames": "node tests/branch_arm_frames_smoke.mjs",
     "test:edge-vocabulary": "node tests/edge_vocabulary_smoke.mjs",
+    "test:tunnel": "node tests/edge_tunnel_smoke.mjs",
     "test:async-edge-style": "node tests/async_edge_style_smoke.mjs",
     "test:file-type-stable": "node tests/stable_file_type_probe.mjs",
     "test:detach": "node tests/block_detach_smoke.mjs",

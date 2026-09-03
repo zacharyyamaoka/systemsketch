@@ -52,6 +52,8 @@ describe('connection shape migrations', () => {
 				temporal: 'data',
 				delayValue: '',
 				pillPosition: 0.5,
+				tunnel: false,
+				tunnelLayer: '',
 			},
 		})
 	})

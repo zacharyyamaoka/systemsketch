@@ -78,22 +78,21 @@ describe('split dash arrays', () => {
 		expect(asyncDashOffsetForLength(18)).toBe(56)
 	})
 
-	it('dot up to the pill, dash after it, each pattern outlasting the path', () => {
+	it('paints solid up to the pill and dots after it, with both patterns bounded', () => {
 		const { before, after } = splitDashArrays(500, 0.5)
 		const b = before.split(' ').map(Number)
 		const a = after.split(' ').map(Number)
 		// Even counts: SVG doubles an odd pattern, which would shift every gap.
 		expect(b.length % 2).toBe(0)
 		expect(a.length % 2).toBe(0)
-		// The dotted run covers exactly up to the pill, then a full-path gap.
-		const dotted = b.slice(0, -2).reduce((sum, value) => sum + value, 0)
-		expect(dotted).toBeGreaterThanOrEqual(PATH_LENGTH_UNITS * 0.5)
-		expect(b.slice(-2)).toEqual([0, PATH_LENGTH_UNITS])
-		// The dashed run starts with a gap to the pill.
+		// The solid run ends exactly at the pill and cannot repeat.
+		expect(b).toEqual([PATH_LENGTH_UNITS * 0.5, PATH_LENGTH_UNITS])
+		// The dotted run starts with a gap to the pill.
 		expect(a.slice(0, 2)).toEqual([0, PATH_LENGTH_UNITS * 0.5])
 		expect(a.slice(-2)).toEqual([0, PATH_LENGTH_UNITS])
-		// 8px dashes on a 500px path are 16 path units.
-		expect(a[2]).toBeCloseTo(16, 3)
+		// 0.1px dots on a 500px path are 0.2 path units.
+		expect(a[2]).toBeCloseTo(0.2, 3)
+		expect(a[3]).toBeCloseTo(12, 3)
 	})
 
 	it('clamps the split fraction like the pill itself', () => {
@@ -123,8 +122,10 @@ describe('cable presentation preference', () => {
 			setItem: (key: string, value: string) => void store.set(key, value),
 		}
 		expect(readCablePresentation(storage)).toEqual(DEFAULT_CABLE_PRESENTATION)
-		writeCablePresentation({ dashAfterPill: true }, storage)
-		expect(readCablePresentation(storage)).toEqual({ dashAfterPill: true })
+		writeCablePresentation({ solidBeforePill: true }, storage)
+		expect(readCablePresentation(storage)).toEqual({ solidBeforePill: true })
+		store.set('systemsketch.cable-presentation.v1', JSON.stringify({ dashAfterPill: true }))
+		expect(readCablePresentation(storage)).toEqual({ solidBeforePill: true })
 		store.set('systemsketch.cable-presentation.v1', '{not json')
 		expect(readCablePresentation(storage)).toEqual(DEFAULT_CABLE_PRESENTATION)
 		expect(readCablePresentation(null)).toEqual(DEFAULT_CABLE_PRESENTATION)

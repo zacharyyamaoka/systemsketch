@@ -29,6 +29,8 @@ function connection(): ConnectionShape {
       temporal: 'data',
       delayValue: '',
       pillPosition: 0.5,
+      tunnel: false,
+      tunnelLayer: '',
     },
   }
 }

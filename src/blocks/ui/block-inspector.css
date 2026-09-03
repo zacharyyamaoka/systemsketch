@@ -58,6 +58,7 @@
 
 .block-inspector button,
 .block-inspector input,
+.block-inspector select,
 .block-inspector textarea,
 .block-mini-menu button {
   font: inherit;
@@ -183,6 +184,7 @@
 }
 
 .block-inspector input,
+.block-inspector select,
 .block-inspector textarea {
   min-width: 0;
   flex: 1 1 auto;
@@ -201,6 +203,7 @@
 }
 
 .block-inspector input:focus,
+.block-inspector select:focus,
 .block-inspector textarea:focus,
 .block-inspector button:focus-visible {
   outline: 2px solid var(--ss-accent);
@@ -831,4 +834,115 @@
   color: color-mix(in srgb, var(--ss-warning) 72%, var(--ss-text));
   font-size: 11px;
   font-weight: 650;
+}
+
+/* Connection tunnel controls ------------------------------------------- */
+
+.connection-inspector__toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.connection-inspector__toggle-row > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.connection-inspector__toggle-row strong {
+  color: var(--ss-text);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.connection-inspector__toggle-row div span {
+  color: var(--ss-text-muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.connection-inspector__switch {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ss-border-strong);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.connection-inspector__switch span {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-1);
+  transition: transform 120ms ease;
+}
+
+.connection-inspector__switch[aria-checked='true'] {
+  background: var(--ss-accent);
+}
+
+.connection-inspector__switch[aria-checked='true'] span {
+  transform: translateX(14px);
+}
+
+.connection-inspector__switch[aria-checked='mixed'] {
+  background: color-mix(in srgb, var(--ss-accent) 48%, var(--ss-border-strong));
+}
+
+.connection-inspector__switch:focus-visible {
+  outline: 2px solid var(--ss-accent);
+  outline-offset: 2px;
+}
+
+.connection-inspector__tunnel-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px solid var(--ss-border);
+}
+
+.connection-inspector__tunnel-fields .block-inspector__field {
+  margin: 0;
+}
+
+.connection-inspector__tunnel-fields select {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.connection-inspector__new-layer {
+  display: flex;
+  gap: 5px;
+}
+
+.connection-inspector__new-layer input {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.connection-inspector__new-layer button {
+  min-width: 44px;
+  border: 1px solid var(--ss-accent);
+  border-radius: 6px;
+  color: var(--ss-accent-text);
+  background: var(--ss-accent);
+  cursor: pointer;
+}
+
+.connection-inspector__add-layer {
+  align-self: flex-start;
 }

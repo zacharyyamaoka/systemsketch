@@ -1,0 +1,42 @@
+[
+  {
+    "label": "the selected edge inspector enables Tunnel and creates a reusable named layer",
+    "ok": true
+  },
+  {
+    "label": "an idle long tunnel leaves two 34-unit endpoint stubs and exactly two outlined vias",
+    "ok": true
+  },
+  {
+    "label": "hover restores the full cable while both outlined tunnel mouths remain visible",
+    "ok": true
+  },
+  {
+    "label": "endpoint focus previews the complete route without removing its tunnel mouths",
+    "ok": true
+  },
+  {
+    "label": "layer focus removes its members’ mouths and tunnels every edge outside the layer",
+    "ok": true
+  },
+  {
+    "label": "clearing layer focus restores ordinary visibility and the configured tunnel baseline",
+    "ok": true
+  },
+  {
+    "label": "a delayed edge hides its z⁻¹ pill underground and restores it with the full mouth-marked preview",
+    "ok": true
+  },
+  {
+    "label": "tunnel mode and layer persist through the ordinary .systemsketch autosave",
+    "ok": true
+  },
+  {
+    "label": "the saved review fixture was driven through hover preview and layer isolation",
+    "ok": true
+  },
+  {
+    "label": "the complete journey produced zero local console errors",
+    "ok": true
+  }
+]

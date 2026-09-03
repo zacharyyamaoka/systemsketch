@@ -42,7 +42,7 @@ import { setRecorderChannel, useRecorderState } from './recorder/recorderStore'
 import { useChrome } from './chrome/ChromeProvider'
 import { useTopNoticePlacement } from './chrome/topNoticePlacement'
 import { startReleaseRefresh } from './releaseRefresh'
-import { cablePresentation, setDashAfterPill } from './blocks/connections/connectionPresentation'
+import { cablePresentation, setSolidBeforePill } from './blocks/connections/connectionPresentation'
 import { useAppearancePreferences } from './settings/appearancePreferences'
 import './systemsketch-utilities.css'
 import { getBoardDiagnosticsModel } from './diagnostics'
@@ -148,7 +148,7 @@ export function SystemSketchNavigationPanel() {
   const [helpOpen, setHelpOpen] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [recentIds, setRecentIds] = useState<DevelopmentPresetId[]>(readRecentDevelopmentPresets)
-  const dashAfterPill = useValue('dash after pill', () => cablePresentation.get().dashAfterPill, [])
+  const solidBeforePill = useValue('solid before pill', () => cablePresentation.get().solidBeforePill, [])
   const [busy, setBusy] = useState<BusyKey | null>(null)
   const [armed, setArmed] = useState(false)
   const [published, setPublished] = useState(false)
@@ -449,13 +449,13 @@ export function SystemSketchNavigationPanel() {
           <label className="systemsketch-dev-toggle">
             <input
               type="checkbox"
-              data-testid="systemsketch-dev-dash-after-pill"
-              checked={dashAfterPill}
-              onChange={(event) => setDashAfterPill(event.target.checked)}
+              data-testid="systemsketch-dev-solid-before-pill"
+              checked={solidBeforePill}
+              onChange={(event) => setSolidBeforePill(event.target.checked)}
             />
             <span>
-              <b>Dash after the z⁻¹ pill</b>
-              <small>Delayed cables: dotted up to the pill, dashed after it</small>
+              <b>Solid before the z⁻¹ pill</b>
+              <small>Delayed cables: solid up to the pill, dotted after it</small>
             </span>
           </label>
 

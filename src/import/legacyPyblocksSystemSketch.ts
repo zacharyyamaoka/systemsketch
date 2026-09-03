@@ -420,6 +420,8 @@ export function importLegacyPyblocksSystemSketch(
 					temporal: 'data',
 					delayValue: '',
 					pillPosition: 0.5,
+					tunnel: false,
+					tunnelLayer: '',
 				},
 			})
 			createOrUpdateConnectionBinding(editor, connection.shapeId, connection.sourceShapeId, {

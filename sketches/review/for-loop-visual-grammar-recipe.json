@@ -1,0 +1,3232 @@
+{
+  "feature": "For-loop visual grammar stress atlas",
+  "viewport": {
+    "width": 3400,
+    "height": 3900
+  },
+  "pages": [
+    {
+      "id": "review",
+      "name": "For-loop grammar"
+    }
+  ],
+  "shapes": [
+    {
+      "id": "paired-s1",
+      "type": "frame",
+      "x": 80,
+      "y": 380,
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V1 · Paired Gates · 1 · Easy · Pure map · item only"
+      }
+    },
+    {
+      "id": "paired-s1-code",
+      "type": "geo",
+      "parentId": "paired-s1",
+      "x": 24,
+      "y": 34,
+      "text": "for image in images:\n    thumb = resize(image)\n    save(thumb)",
+      "props": {
+        "geo": "rectangle",
+        "w": 932,
+        "h": 128,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s1-a1",
+      "type": "arrow",
+      "parentId": "paired-s1",
+      "x": 248,
+      "y": 312,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 116,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "paired-s1-a2",
+      "type": "arrow",
+      "parentId": "paired-s1",
+      "x": 674,
+      "y": 312,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 76,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "paired-s1-loop",
+      "type": "arrow",
+      "parentId": "paired-s1",
+      "x": 808,
+      "y": 420,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -610,
+          "y": 0
+        },
+        "color": "orange",
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "paired-s1-iterate",
+      "type": "geo",
+      "parentId": "paired-s1",
+      "x": 72,
+      "y": 236,
+      "text": "ITERATE\nitem · image\nstate · —",
+      "props": {
+        "geo": "rectangle",
+        "w": 176,
+        "h": 170,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s1-body",
+      "type": "block",
+      "parentId": "paired-s1",
+      "x": 364,
+      "y": 226,
+      "props": {
+        "title": "resize → save()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "view": "port",
+        "w": 310,
+        "h": 176,
+        "inputs": [
+          {
+            "id": "item",
+            "name": "image",
+            "type": "item",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "done",
+            "type": "state",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "paired-s1-yield",
+      "type": "geo",
+      "parentId": "paired-s1",
+      "x": 750,
+      "y": 236,
+      "text": "YIELD\nnext · —\ndone · done",
+      "props": {
+        "geo": "rectangle",
+        "w": 158,
+        "h": 170,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s1-key",
+      "type": "geo",
+      "parentId": "paired-s1",
+      "x": 350,
+      "y": 456,
+      "text": "solid = this invocation\ndotted = next iteration",
+      "props": {
+        "geo": "rectangle",
+        "w": 350,
+        "h": 78,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s2",
+      "type": "frame",
+      "x": 80,
+      "y": 1074,
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V1 · Paired Gates · 2 · Baseline · Single accumulator · original"
+      }
+    },
+    {
+      "id": "paired-s2-code",
+      "type": "geo",
+      "parentId": "paired-s2",
+      "x": 24,
+      "y": 34,
+      "text": "pose = estimate(frame, gain)\nfor other in others:\n    pose = merge(pose, other)\nreturn encode(pose)",
+      "props": {
+        "geo": "rectangle",
+        "w": 932,
+        "h": 128,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s2-a1",
+      "type": "arrow",
+      "parentId": "paired-s2",
+      "x": 248,
+      "y": 312,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 116,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "paired-s2-a2",
+      "type": "arrow",
+      "parentId": "paired-s2",
+      "x": 674,
+      "y": 312,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 76,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "paired-s2-loop",
+      "type": "arrow",
+      "parentId": "paired-s2",
+      "x": 808,
+      "y": 420,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -610,
+          "y": 0
+        },
+        "color": "orange",
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "paired-s2-iterate",
+      "type": "geo",
+      "parentId": "paired-s2",
+      "x": 72,
+      "y": 236,
+      "text": "ITERATE\nitem · other\nstate · pose",
+      "props": {
+        "geo": "rectangle",
+        "w": 176,
+        "h": 170,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s2-body",
+      "type": "block",
+      "parentId": "paired-s2",
+      "x": 364,
+      "y": 226,
+      "props": {
+        "title": "merge()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "view": "port",
+        "w": 310,
+        "h": 176,
+        "inputs": [
+          {
+            "id": "item",
+            "name": "other",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "pose",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "pose",
+            "type": "state",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "paired-s2-yield",
+      "type": "geo",
+      "parentId": "paired-s2",
+      "x": 750,
+      "y": 236,
+      "text": "YIELD\nnext · pose\ndone · pose",
+      "props": {
+        "geo": "rectangle",
+        "w": 158,
+        "h": 170,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s2-key",
+      "type": "geo",
+      "parentId": "paired-s2",
+      "x": 350,
+      "y": 456,
+      "text": "solid = this invocation\ndotted = next iteration",
+      "props": {
+        "geo": "rectangle",
+        "w": 350,
+        "h": 78,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s3",
+      "type": "frame",
+      "x": 80,
+      "y": 1768,
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V1 · Paired Gates · 3 · Medium · Enumerate + indexed side input"
+      }
+    },
+    {
+      "id": "paired-s3-code",
+      "type": "geo",
+      "parentId": "paired-s3",
+      "x": 24,
+      "y": 34,
+      "text": "total = 0.0\nfor i, sample in enumerate(samples):\n    weighted = scale(sample, weights[i])\n    total = add(total, weighted)\nreturn total",
+      "props": {
+        "geo": "rectangle",
+        "w": 932,
+        "h": 128,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s3-a1",
+      "type": "arrow",
+      "parentId": "paired-s3",
+      "x": 248,
+      "y": 312,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 116,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "paired-s3-a2",
+      "type": "arrow",
+      "parentId": "paired-s3",
+      "x": 674,
+      "y": 312,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 76,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "paired-s3-loop",
+      "type": "arrow",
+      "parentId": "paired-s3",
+      "x": 808,
+      "y": 420,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -610,
+          "y": 0
+        },
+        "color": "orange",
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "paired-s3-iterate",
+      "type": "geo",
+      "parentId": "paired-s3",
+      "x": 72,
+      "y": 236,
+      "text": "ITERATE\nitem · i, sample\nstate · total",
+      "props": {
+        "geo": "rectangle",
+        "w": 176,
+        "h": 170,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s3-body",
+      "type": "block",
+      "parentId": "paired-s3",
+      "x": 364,
+      "y": 226,
+      "props": {
+        "title": "lookup → scale → add()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "view": "port",
+        "w": 310,
+        "h": 176,
+        "inputs": [
+          {
+            "id": "item",
+            "name": "i, sample",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "total",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "total",
+            "type": "state",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "paired-s3-yield",
+      "type": "geo",
+      "parentId": "paired-s3",
+      "x": 750,
+      "y": 236,
+      "text": "YIELD\nnext · total\ndone · total",
+      "props": {
+        "geo": "rectangle",
+        "w": 158,
+        "h": 170,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s3-key",
+      "type": "geo",
+      "parentId": "paired-s3",
+      "x": 350,
+      "y": 456,
+      "text": "solid = this invocation\ndotted = next iteration",
+      "props": {
+        "geo": "rectangle",
+        "w": 350,
+        "h": 78,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s4",
+      "type": "frame",
+      "x": 80,
+      "y": 2462,
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V1 · Paired Gates · 4 · Hard · Zip + two carries + conditional update"
+      }
+    },
+    {
+      "id": "paired-s4-code",
+      "type": "geo",
+      "parentId": "paired-s4",
+      "x": 24,
+      "y": 34,
+      "text": "loss, kept = 0.0, []\nfor pred, target in zip(preds, targets):\n    err = error(pred, target)\n    if valid(err):\n        loss += err; kept.append(pred)\nreturn loss, kept",
+      "props": {
+        "geo": "rectangle",
+        "w": 932,
+        "h": 128,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s4-a1",
+      "type": "arrow",
+      "parentId": "paired-s4",
+      "x": 248,
+      "y": 312,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 116,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "paired-s4-a2",
+      "type": "arrow",
+      "parentId": "paired-s4",
+      "x": 674,
+      "y": 312,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 76,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "paired-s4-loop",
+      "type": "arrow",
+      "parentId": "paired-s4",
+      "x": 808,
+      "y": 420,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -610,
+          "y": 0
+        },
+        "color": "orange",
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "paired-s4-iterate",
+      "type": "geo",
+      "parentId": "paired-s4",
+      "x": 72,
+      "y": 236,
+      "text": "ITERATE\nitem · pred, target\nstate · loss, kept",
+      "props": {
+        "geo": "rectangle",
+        "w": 176,
+        "h": 170,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s4-body",
+      "type": "block",
+      "parentId": "paired-s4",
+      "x": 364,
+      "y": 226,
+      "props": {
+        "title": "error → valid? → update()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "view": "port",
+        "w": 310,
+        "h": 176,
+        "inputs": [
+          {
+            "id": "item",
+            "name": "pred, target",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "loss, kept",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "loss, kept",
+            "type": "state",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "paired-s4-yield",
+      "type": "geo",
+      "parentId": "paired-s4",
+      "x": 750,
+      "y": 236,
+      "text": "YIELD\nnext · loss, kept\ndone · loss, kept",
+      "props": {
+        "geo": "rectangle",
+        "w": 158,
+        "h": 170,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s4-key",
+      "type": "geo",
+      "parentId": "paired-s4",
+      "x": 350,
+      "y": 456,
+      "text": "solid = this invocation\ndotted = next iteration",
+      "props": {
+        "geo": "rectangle",
+        "w": 350,
+        "h": 78,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s5",
+      "type": "frame",
+      "x": 80,
+      "y": 3156,
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V1 · Paired Gates · 5 · Very hard · Nested loops + early exit"
+      }
+    },
+    {
+      "id": "paired-s5-code",
+      "type": "geo",
+      "parentId": "paired-s5",
+      "x": 24,
+      "y": 34,
+      "text": "best = None\nfor batch in batches:\n    score = 0\n    for candidate in batch:\n        score += evaluate(candidate)\n        if score >= threshold: break\n    if score >= threshold:\n        best = candidate; break\nreturn best",
+      "props": {
+        "geo": "rectangle",
+        "w": 932,
+        "h": 128,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s5-a1",
+      "type": "arrow",
+      "parentId": "paired-s5",
+      "x": 248,
+      "y": 312,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 116,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "paired-s5-a2",
+      "type": "arrow",
+      "parentId": "paired-s5",
+      "x": 674,
+      "y": 312,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 76,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "paired-s5-loop",
+      "type": "arrow",
+      "parentId": "paired-s5",
+      "x": 808,
+      "y": 420,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -610,
+          "y": 0
+        },
+        "color": "orange",
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "paired-s5-iterate",
+      "type": "geo",
+      "parentId": "paired-s5",
+      "x": 72,
+      "y": 236,
+      "text": "ITERATE\nitem · batch ⊃ candidate\nstate · best ⊃ score",
+      "props": {
+        "geo": "rectangle",
+        "w": 176,
+        "h": 170,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s5-body",
+      "type": "block",
+      "parentId": "paired-s5",
+      "x": 364,
+      "y": 226,
+      "props": {
+        "title": "evaluate → threshold? → break()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "view": "port",
+        "w": 310,
+        "h": 176,
+        "inputs": [
+          {
+            "id": "item",
+            "name": "batch ⊃ candidate",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "best ⊃ score",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "best",
+            "type": "state",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "paired-s5-yield",
+      "type": "geo",
+      "parentId": "paired-s5",
+      "x": 750,
+      "y": 236,
+      "text": "YIELD\nnext · best ⊃ score\ndone · best",
+      "props": {
+        "geo": "rectangle",
+        "w": 158,
+        "h": 170,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "paired-s5-key",
+      "type": "geo",
+      "parentId": "paired-s5",
+      "x": 350,
+      "y": 456,
+      "text": "solid = this invocation\ndotted = next iteration",
+      "props": {
+        "geo": "rectangle",
+        "w": 350,
+        "h": 78,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "lanes-s1",
+      "type": "frame",
+      "x": 1150,
+      "y": 380,
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V3 · Header Lanes · 1 · Easy · Pure map · item only"
+      }
+    },
+    {
+      "id": "lanes-s1-code",
+      "type": "geo",
+      "parentId": "lanes-s1",
+      "x": 24,
+      "y": 34,
+      "text": "for image in images:\n    thumb = resize(image)\n    save(thumb)",
+      "props": {
+        "geo": "rectangle",
+        "w": 932,
+        "h": 128,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "lanes-s1-item",
+      "type": "arrow",
+      "parentId": "lanes-s1",
+      "x": 354,
+      "y": 282,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 60
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s1-state",
+      "type": "arrow",
+      "parentId": "lanes-s1",
+      "x": 354,
+      "y": 318,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 96
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s1-loop",
+      "type": "arrow",
+      "parentId": "lanes-s1",
+      "x": 752,
+      "y": 396,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -340,
+          "y": -78
+        },
+        "color": "orange",
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s1-done",
+      "type": "arrow",
+      "parentId": "lanes-s1",
+      "x": 752,
+      "y": 430,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s1-header",
+      "type": "geo",
+      "parentId": "lanes-s1",
+      "x": 72,
+      "y": 208,
+      "text": "EACH     image ← iterable[i]\nCARRY    — ← seed | z⁻¹\nDONE     done",
+      "props": {
+        "geo": "rectangle",
+        "w": 836,
+        "h": 126,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "lanes-s1-body",
+      "type": "block",
+      "parentId": "lanes-s1",
+      "x": 442,
+      "y": 354,
+      "props": {
+        "title": "resize → save()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "view": "port",
+        "w": 310,
+        "h": 176,
+        "inputs": [
+          {
+            "id": "item",
+            "name": "image",
+            "type": "item",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "done",
+            "type": "state",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "lanes-s1-key",
+      "type": "geo",
+      "parentId": "lanes-s1",
+      "x": 72,
+      "y": 454,
+      "text": "short drops into body\none dotted return to header",
+      "props": {
+        "geo": "rectangle",
+        "w": 310,
+        "h": 78,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "lanes-s2",
+      "type": "frame",
+      "x": 1150,
+      "y": 1074,
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V3 · Header Lanes · 2 · Baseline · Single accumulator · original"
+      }
+    },
+    {
+      "id": "lanes-s2-code",
+      "type": "geo",
+      "parentId": "lanes-s2",
+      "x": 24,
+      "y": 34,
+      "text": "pose = estimate(frame, gain)\nfor other in others:\n    pose = merge(pose, other)\nreturn encode(pose)",
+      "props": {
+        "geo": "rectangle",
+        "w": 932,
+        "h": 128,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "lanes-s2-item",
+      "type": "arrow",
+      "parentId": "lanes-s2",
+      "x": 354,
+      "y": 282,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 60
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s2-state",
+      "type": "arrow",
+      "parentId": "lanes-s2",
+      "x": 354,
+      "y": 318,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 96
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s2-loop",
+      "type": "arrow",
+      "parentId": "lanes-s2",
+      "x": 752,
+      "y": 396,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -340,
+          "y": -78
+        },
+        "color": "orange",
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s2-done",
+      "type": "arrow",
+      "parentId": "lanes-s2",
+      "x": 752,
+      "y": 430,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s2-header",
+      "type": "geo",
+      "parentId": "lanes-s2",
+      "x": 72,
+      "y": 208,
+      "text": "EACH     other ← iterable[i]\nCARRY    pose ← seed | z⁻¹\nDONE     pose",
+      "props": {
+        "geo": "rectangle",
+        "w": 836,
+        "h": 126,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "lanes-s2-body",
+      "type": "block",
+      "parentId": "lanes-s2",
+      "x": 442,
+      "y": 354,
+      "props": {
+        "title": "merge()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "view": "port",
+        "w": 310,
+        "h": 176,
+        "inputs": [
+          {
+            "id": "item",
+            "name": "other",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "pose",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "pose",
+            "type": "state",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "lanes-s2-key",
+      "type": "geo",
+      "parentId": "lanes-s2",
+      "x": 72,
+      "y": 454,
+      "text": "short drops into body\none dotted return to header",
+      "props": {
+        "geo": "rectangle",
+        "w": 310,
+        "h": 78,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "lanes-s3",
+      "type": "frame",
+      "x": 1150,
+      "y": 1768,
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V3 · Header Lanes · 3 · Medium · Enumerate + indexed side input"
+      }
+    },
+    {
+      "id": "lanes-s3-code",
+      "type": "geo",
+      "parentId": "lanes-s3",
+      "x": 24,
+      "y": 34,
+      "text": "total = 0.0\nfor i, sample in enumerate(samples):\n    weighted = scale(sample, weights[i])\n    total = add(total, weighted)\nreturn total",
+      "props": {
+        "geo": "rectangle",
+        "w": 932,
+        "h": 128,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "lanes-s3-item",
+      "type": "arrow",
+      "parentId": "lanes-s3",
+      "x": 354,
+      "y": 282,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 60
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s3-state",
+      "type": "arrow",
+      "parentId": "lanes-s3",
+      "x": 354,
+      "y": 318,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 96
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s3-loop",
+      "type": "arrow",
+      "parentId": "lanes-s3",
+      "x": 752,
+      "y": 396,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -340,
+          "y": -78
+        },
+        "color": "orange",
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s3-done",
+      "type": "arrow",
+      "parentId": "lanes-s3",
+      "x": 752,
+      "y": 430,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s3-header",
+      "type": "geo",
+      "parentId": "lanes-s3",
+      "x": 72,
+      "y": 208,
+      "text": "EACH     i, sample ← iterable[i]\nCARRY    total ← seed | z⁻¹\nDONE     total",
+      "props": {
+        "geo": "rectangle",
+        "w": 836,
+        "h": 126,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "lanes-s3-body",
+      "type": "block",
+      "parentId": "lanes-s3",
+      "x": 442,
+      "y": 354,
+      "props": {
+        "title": "lookup → scale → add()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "view": "port",
+        "w": 310,
+        "h": 176,
+        "inputs": [
+          {
+            "id": "item",
+            "name": "i, sample",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "total",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "total",
+            "type": "state",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "lanes-s3-key",
+      "type": "geo",
+      "parentId": "lanes-s3",
+      "x": 72,
+      "y": 454,
+      "text": "short drops into body\none dotted return to header",
+      "props": {
+        "geo": "rectangle",
+        "w": 310,
+        "h": 78,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "lanes-s4",
+      "type": "frame",
+      "x": 1150,
+      "y": 2462,
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V3 · Header Lanes · 4 · Hard · Zip + two carries + conditional update"
+      }
+    },
+    {
+      "id": "lanes-s4-code",
+      "type": "geo",
+      "parentId": "lanes-s4",
+      "x": 24,
+      "y": 34,
+      "text": "loss, kept = 0.0, []\nfor pred, target in zip(preds, targets):\n    err = error(pred, target)\n    if valid(err):\n        loss += err; kept.append(pred)\nreturn loss, kept",
+      "props": {
+        "geo": "rectangle",
+        "w": 932,
+        "h": 128,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "lanes-s4-item",
+      "type": "arrow",
+      "parentId": "lanes-s4",
+      "x": 354,
+      "y": 282,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 60
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s4-state",
+      "type": "arrow",
+      "parentId": "lanes-s4",
+      "x": 354,
+      "y": 318,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 96
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s4-loop",
+      "type": "arrow",
+      "parentId": "lanes-s4",
+      "x": 752,
+      "y": 396,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -340,
+          "y": -78
+        },
+        "color": "orange",
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s4-done",
+      "type": "arrow",
+      "parentId": "lanes-s4",
+      "x": 752,
+      "y": 430,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s4-header",
+      "type": "geo",
+      "parentId": "lanes-s4",
+      "x": 72,
+      "y": 208,
+      "text": "EACH     pred, target ← iterable[i]\nCARRY    loss, kept ← seed | z⁻¹\nDONE     loss, kept",
+      "props": {
+        "geo": "rectangle",
+        "w": 836,
+        "h": 126,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "lanes-s4-body",
+      "type": "block",
+      "parentId": "lanes-s4",
+      "x": 442,
+      "y": 354,
+      "props": {
+        "title": "error → valid? → update()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "view": "port",
+        "w": 310,
+        "h": 176,
+        "inputs": [
+          {
+            "id": "item",
+            "name": "pred, target",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "loss, kept",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "loss, kept",
+            "type": "state",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "lanes-s4-key",
+      "type": "geo",
+      "parentId": "lanes-s4",
+      "x": 72,
+      "y": 454,
+      "text": "short drops into body\none dotted return to header",
+      "props": {
+        "geo": "rectangle",
+        "w": 310,
+        "h": 78,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "lanes-s5",
+      "type": "frame",
+      "x": 1150,
+      "y": 3156,
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V3 · Header Lanes · 5 · Very hard · Nested loops + early exit"
+      }
+    },
+    {
+      "id": "lanes-s5-code",
+      "type": "geo",
+      "parentId": "lanes-s5",
+      "x": 24,
+      "y": 34,
+      "text": "best = None\nfor batch in batches:\n    score = 0\n    for candidate in batch:\n        score += evaluate(candidate)\n        if score >= threshold: break\n    if score >= threshold:\n        best = candidate; break\nreturn best",
+      "props": {
+        "geo": "rectangle",
+        "w": 932,
+        "h": 128,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "lanes-s5-item",
+      "type": "arrow",
+      "parentId": "lanes-s5",
+      "x": 354,
+      "y": 282,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 60
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s5-state",
+      "type": "arrow",
+      "parentId": "lanes-s5",
+      "x": 354,
+      "y": 318,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 88,
+          "y": 96
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s5-loop",
+      "type": "arrow",
+      "parentId": "lanes-s5",
+      "x": 752,
+      "y": 396,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -340,
+          "y": -78
+        },
+        "color": "orange",
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s5-done",
+      "type": "arrow",
+      "parentId": "lanes-s5",
+      "x": 752,
+      "y": 430,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "lanes-s5-header",
+      "type": "geo",
+      "parentId": "lanes-s5",
+      "x": 72,
+      "y": 208,
+      "text": "EACH     batch ⊃ candidate ← iterable[i]\nCARRY    best ⊃ score ← seed | z⁻¹\nDONE     best",
+      "props": {
+        "geo": "rectangle",
+        "w": 836,
+        "h": 126,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "lanes-s5-body",
+      "type": "block",
+      "parentId": "lanes-s5",
+      "x": 442,
+      "y": 354,
+      "props": {
+        "title": "evaluate → threshold? → break()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "view": "port",
+        "w": 310,
+        "h": 176,
+        "inputs": [
+          {
+            "id": "item",
+            "name": "batch ⊃ candidate",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "best ⊃ score",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "best",
+            "type": "state",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "lanes-s5-key",
+      "type": "geo",
+      "parentId": "lanes-s5",
+      "x": 72,
+      "y": 454,
+      "text": "short drops into body\none dotted return to header",
+      "props": {
+        "geo": "rectangle",
+        "w": 310,
+        "h": 78,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s1",
+      "type": "frame",
+      "x": 2220,
+      "y": 380,
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V5 · State Pills · 1 · Easy · Pure map · item only"
+      }
+    },
+    {
+      "id": "pills-s1-code",
+      "type": "geo",
+      "parentId": "pills-s1",
+      "x": 24,
+      "y": 34,
+      "text": "for image in images:\n    thumb = resize(image)\n    save(thumb)",
+      "props": {
+        "geo": "rectangle",
+        "w": 932,
+        "h": 128,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s1-item",
+      "type": "arrow",
+      "parentId": "pills-s1",
+      "x": 266,
+      "y": 292,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 46
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s1-state",
+      "type": "arrow",
+      "parentId": "pills-s1",
+      "x": 266,
+      "y": 414,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s1-loop",
+      "type": "arrow",
+      "parentId": "pills-s1",
+      "x": 752,
+      "y": 408,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -564,
+          "y": 58
+        },
+        "color": "orange",
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s1-done",
+      "type": "arrow",
+      "parentId": "pills-s1",
+      "x": 752,
+      "y": 360,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s1-item-pill",
+      "type": "geo",
+      "parentId": "pills-s1",
+      "x": 72,
+      "y": 254,
+      "text": "image = ⋯",
+      "props": {
+        "geo": "ellipse",
+        "w": 194,
+        "h": 76,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s1-state-pill",
+      "type": "geo",
+      "parentId": "pills-s1",
+      "x": 72,
+      "y": 376,
+      "text": "— = ⋯",
+      "props": {
+        "geo": "ellipse",
+        "w": 194,
+        "h": 76,
+        "color": "violet",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s1-body",
+      "type": "block",
+      "parentId": "pills-s1",
+      "x": 442,
+      "y": 324,
+      "props": {
+        "title": "resize → save()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "view": "port",
+        "w": 310,
+        "h": 176,
+        "inputs": [
+          {
+            "id": "item",
+            "name": "image",
+            "type": "item",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "done",
+            "type": "state",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "pills-s1-key",
+      "type": "geo",
+      "parentId": "pills-s1",
+      "x": 72,
+      "y": 492,
+      "text": "write pill now · read it next turn",
+      "props": {
+        "geo": "rectangle",
+        "w": 360,
+        "h": 58,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s2",
+      "type": "frame",
+      "x": 2220,
+      "y": 1074,
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V5 · State Pills · 2 · Baseline · Single accumulator · original"
+      }
+    },
+    {
+      "id": "pills-s2-code",
+      "type": "geo",
+      "parentId": "pills-s2",
+      "x": 24,
+      "y": 34,
+      "text": "pose = estimate(frame, gain)\nfor other in others:\n    pose = merge(pose, other)\nreturn encode(pose)",
+      "props": {
+        "geo": "rectangle",
+        "w": 932,
+        "h": 128,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s2-item",
+      "type": "arrow",
+      "parentId": "pills-s2",
+      "x": 266,
+      "y": 292,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 46
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s2-state",
+      "type": "arrow",
+      "parentId": "pills-s2",
+      "x": 266,
+      "y": 414,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s2-loop",
+      "type": "arrow",
+      "parentId": "pills-s2",
+      "x": 752,
+      "y": 408,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -564,
+          "y": 58
+        },
+        "color": "orange",
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s2-done",
+      "type": "arrow",
+      "parentId": "pills-s2",
+      "x": 752,
+      "y": 360,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s2-item-pill",
+      "type": "geo",
+      "parentId": "pills-s2",
+      "x": 72,
+      "y": 254,
+      "text": "other = ⋯",
+      "props": {
+        "geo": "ellipse",
+        "w": 194,
+        "h": 76,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s2-state-pill",
+      "type": "geo",
+      "parentId": "pills-s2",
+      "x": 72,
+      "y": 376,
+      "text": "pose = ⋯",
+      "props": {
+        "geo": "ellipse",
+        "w": 194,
+        "h": 76,
+        "color": "violet",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s2-body",
+      "type": "block",
+      "parentId": "pills-s2",
+      "x": 442,
+      "y": 324,
+      "props": {
+        "title": "merge()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "view": "port",
+        "w": 310,
+        "h": 176,
+        "inputs": [
+          {
+            "id": "item",
+            "name": "other",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "pose",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "pose",
+            "type": "state",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "pills-s2-key",
+      "type": "geo",
+      "parentId": "pills-s2",
+      "x": 72,
+      "y": 492,
+      "text": "write pill now · read it next turn",
+      "props": {
+        "geo": "rectangle",
+        "w": 360,
+        "h": 58,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s3",
+      "type": "frame",
+      "x": 2220,
+      "y": 1768,
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V5 · State Pills · 3 · Medium · Enumerate + indexed side input"
+      }
+    },
+    {
+      "id": "pills-s3-code",
+      "type": "geo",
+      "parentId": "pills-s3",
+      "x": 24,
+      "y": 34,
+      "text": "total = 0.0\nfor i, sample in enumerate(samples):\n    weighted = scale(sample, weights[i])\n    total = add(total, weighted)\nreturn total",
+      "props": {
+        "geo": "rectangle",
+        "w": 932,
+        "h": 128,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s3-item",
+      "type": "arrow",
+      "parentId": "pills-s3",
+      "x": 266,
+      "y": 292,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 46
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s3-state",
+      "type": "arrow",
+      "parentId": "pills-s3",
+      "x": 266,
+      "y": 414,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s3-loop",
+      "type": "arrow",
+      "parentId": "pills-s3",
+      "x": 752,
+      "y": 408,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -564,
+          "y": 58
+        },
+        "color": "orange",
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s3-done",
+      "type": "arrow",
+      "parentId": "pills-s3",
+      "x": 752,
+      "y": 360,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s3-item-pill",
+      "type": "geo",
+      "parentId": "pills-s3",
+      "x": 72,
+      "y": 254,
+      "text": "i, sample = ⋯",
+      "props": {
+        "geo": "ellipse",
+        "w": 194,
+        "h": 76,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s3-state-pill",
+      "type": "geo",
+      "parentId": "pills-s3",
+      "x": 72,
+      "y": 376,
+      "text": "total = ⋯",
+      "props": {
+        "geo": "ellipse",
+        "w": 194,
+        "h": 76,
+        "color": "violet",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s3-body",
+      "type": "block",
+      "parentId": "pills-s3",
+      "x": 442,
+      "y": 324,
+      "props": {
+        "title": "lookup → scale → add()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "view": "port",
+        "w": 310,
+        "h": 176,
+        "inputs": [
+          {
+            "id": "item",
+            "name": "i, sample",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "total",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "total",
+            "type": "state",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "pills-s3-key",
+      "type": "geo",
+      "parentId": "pills-s3",
+      "x": 72,
+      "y": 492,
+      "text": "write pill now · read it next turn",
+      "props": {
+        "geo": "rectangle",
+        "w": 360,
+        "h": 58,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s4",
+      "type": "frame",
+      "x": 2220,
+      "y": 2462,
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V5 · State Pills · 4 · Hard · Zip + two carries + conditional update"
+      }
+    },
+    {
+      "id": "pills-s4-code",
+      "type": "geo",
+      "parentId": "pills-s4",
+      "x": 24,
+      "y": 34,
+      "text": "loss, kept = 0.0, []\nfor pred, target in zip(preds, targets):\n    err = error(pred, target)\n    if valid(err):\n        loss += err; kept.append(pred)\nreturn loss, kept",
+      "props": {
+        "geo": "rectangle",
+        "w": 932,
+        "h": 128,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s4-item",
+      "type": "arrow",
+      "parentId": "pills-s4",
+      "x": 266,
+      "y": 292,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 46
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s4-state",
+      "type": "arrow",
+      "parentId": "pills-s4",
+      "x": 266,
+      "y": 414,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s4-loop",
+      "type": "arrow",
+      "parentId": "pills-s4",
+      "x": 752,
+      "y": 408,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -564,
+          "y": 58
+        },
+        "color": "orange",
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s4-done",
+      "type": "arrow",
+      "parentId": "pills-s4",
+      "x": 752,
+      "y": 360,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s4-item-pill",
+      "type": "geo",
+      "parentId": "pills-s4",
+      "x": 72,
+      "y": 254,
+      "text": "pred, target = ⋯",
+      "props": {
+        "geo": "ellipse",
+        "w": 194,
+        "h": 76,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s4-state-pill",
+      "type": "geo",
+      "parentId": "pills-s4",
+      "x": 72,
+      "y": 376,
+      "text": "loss, kept = ⋯",
+      "props": {
+        "geo": "ellipse",
+        "w": 194,
+        "h": 76,
+        "color": "violet",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s4-body",
+      "type": "block",
+      "parentId": "pills-s4",
+      "x": 442,
+      "y": 324,
+      "props": {
+        "title": "error → valid? → update()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "view": "port",
+        "w": 310,
+        "h": 176,
+        "inputs": [
+          {
+            "id": "item",
+            "name": "pred, target",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "loss, kept",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "loss, kept",
+            "type": "state",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "pills-s4-key",
+      "type": "geo",
+      "parentId": "pills-s4",
+      "x": 72,
+      "y": 492,
+      "text": "write pill now · read it next turn",
+      "props": {
+        "geo": "rectangle",
+        "w": 360,
+        "h": 58,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s5",
+      "type": "frame",
+      "x": 2220,
+      "y": 3156,
+      "props": {
+        "w": 980,
+        "h": 610,
+        "name": "V5 · State Pills · 5 · Very hard · Nested loops + early exit"
+      }
+    },
+    {
+      "id": "pills-s5-code",
+      "type": "geo",
+      "parentId": "pills-s5",
+      "x": 24,
+      "y": 34,
+      "text": "best = None\nfor batch in batches:\n    score = 0\n    for candidate in batch:\n        score += evaluate(candidate)\n        if score >= threshold: break\n    if score >= threshold:\n        best = candidate; break\nreturn best",
+      "props": {
+        "geo": "rectangle",
+        "w": 932,
+        "h": 128,
+        "color": "grey",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s5-item",
+      "type": "arrow",
+      "parentId": "pills-s5",
+      "x": 266,
+      "y": 292,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 46
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s5-state",
+      "type": "arrow",
+      "parentId": "pills-s5",
+      "x": 266,
+      "y": 414,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 176,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s5-loop",
+      "type": "arrow",
+      "parentId": "pills-s5",
+      "x": 752,
+      "y": 408,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -564,
+          "y": 58
+        },
+        "color": "orange",
+        "dash": "dotted",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s5-done",
+      "type": "arrow",
+      "parentId": "pills-s5",
+      "x": 752,
+      "y": 360,
+      "props": {
+        "kind": "elbow",
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 154,
+          "y": 0
+        },
+        "color": "black",
+        "dash": "solid",
+        "size": "m",
+        "fill": "none",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    },
+    {
+      "id": "pills-s5-item-pill",
+      "type": "geo",
+      "parentId": "pills-s5",
+      "x": 72,
+      "y": 254,
+      "text": "batch ⊃ candidate = ⋯",
+      "props": {
+        "geo": "ellipse",
+        "w": 194,
+        "h": 76,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s5-state-pill",
+      "type": "geo",
+      "parentId": "pills-s5",
+      "x": 72,
+      "y": 376,
+      "text": "best ⊃ score = ⋯",
+      "props": {
+        "geo": "ellipse",
+        "w": 194,
+        "h": 76,
+        "color": "violet",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "pills-s5-body",
+      "type": "block",
+      "parentId": "pills-s5",
+      "x": 442,
+      "y": 324,
+      "props": {
+        "title": "evaluate → threshold? → break()",
+        "description": "ordinary same-turn body graph",
+        "blockType": "Loop body",
+        "view": "port",
+        "w": 310,
+        "h": 176,
+        "inputs": [
+          {
+            "id": "item",
+            "name": "batch ⊃ candidate",
+            "type": "item",
+            "visible": true
+          },
+          {
+            "id": "state",
+            "name": "best ⊃ score",
+            "type": "state",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "next",
+            "name": "best",
+            "type": "state",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "pills-s5-key",
+      "type": "geo",
+      "parentId": "pills-s5",
+      "x": 72,
+      "y": 492,
+      "text": "write pill now · read it next turn",
+      "props": {
+        "geo": "rectangle",
+        "w": 360,
+        "h": 58,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "solid",
+        "size": "s",
+        "font": "mono",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Compare down a column: one grammar from pure map to nested break",
+      "x": 80,
+      "y": 100,
+      "w": 820,
+      "h": 110,
+      "target": {
+        "shapeId": "paired-s1",
+        "anchor": "top",
+        "dx": -260
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Compare across a row: the same Python loop through all three finalists",
+      "x": 1120,
+      "y": 100,
+      "w": 900,
+      "h": 110,
+      "target": {
+        "shapeId": "lanes-s1",
+        "anchor": "top",
+        "dx": 180
+      }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · one grammar stays understandable from easy to hard, and dotted lines mean only next-iteration availability",
+      "x": 2240,
+      "y": 100,
+      "w": 960,
+      "h": 110
+    }
+  ]
+}

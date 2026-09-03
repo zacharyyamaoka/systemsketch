@@ -1,0 +1,59 @@
+.tunnel-layer-bar {
+  position: absolute;
+  z-index: 260;
+  top: calc(52px * var(--systemsketch-interface-scale-inverse, 1));
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--ss-border);
+  border-radius: 10px;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-2);
+  font: 10px/1.2 Inter, system-ui, sans-serif;
+  pointer-events: auto;
+  transform: translateX(-50%);
+}
+
+.tunnel-layer-bar > span {
+  padding: 0 5px;
+  font-weight: 650;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.tunnel-layer-bar button {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--ss-text);
+  background: transparent;
+  cursor: pointer;
+}
+
+.tunnel-layer-bar button:hover {
+  background: var(--ss-surface-hover);
+}
+
+.tunnel-layer-bar button[aria-pressed='true'] {
+  border-color: color-mix(in srgb, var(--ss-accent) 45%, transparent);
+  color: var(--ss-accent-text);
+  background: var(--ss-accent-soft);
+}
+
+.tunnel-layer-bar button i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ss-text-faint);
+}
+
+.tunnel-layer-bar button[aria-pressed='true'] i {
+  background: var(--ss-accent);
+}

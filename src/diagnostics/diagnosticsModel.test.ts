@@ -121,6 +121,8 @@ function connection(id: string, pageId: TLPageId = PAGE_A, index = 'a8'): Connec
 			temporal: 'data',
 			delayValue: '',
 			pillPosition: 0.5,
+			tunnel: false,
+			tunnelLayer: '',
 		},
 	}
 }
