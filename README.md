@@ -4,6 +4,8 @@ SystemSketch starts from one deliberately boring datum: the stock tldraw whitebo
 
 ## Current improvement review
 
+The [overnight 30-item deep dive and top-ten review](docs/overnight-top-ten-review-2026-09-03.html) ranks the current repository with a frozen, confidence-adjusted rubric, implements the ten strongest bounded changes, and gives every shipped change and remaining candidate its own persistent checkbox and review note. The companion [`overnight-top-ten.systemsketch`](sketches/review/overnight-top-ten.systemsketch) board turns the Block keyboard checks into a short numbered human review journey; the report's browser evidence covers the responsive chrome checks.
+
 The [Block presentation / Value-pill boundary gallery](docs/expanded-view-glyph-fix-2026-09-02.html) fixes the duplicated **E** in the floating Block selection menu by restoring its real scope: ordinary Blocks offer only **S / P / E**, while Value remains a separate literal-pill representation created through its own flows. It records the contextual-menu audit and a companion [`expanded-view-glyph.systemsketch`](sketches/review/expanded-view-glyph.systemsketch) board with both representations prepared for direct human verification.
 
 The [for-loop visual grammar Babble + Prune gallery](docs/for-loop-visual-grammar-babble-2026-09-02.html) compares ten genuinely different ways to expose iteration, loop-carried state, and completion without turning the body back into code. Its top three—Paired Gates, Header Lanes, and State Pills—are each exercised against the same five Python loops from a stateless map through nested early exit, yielding fifteen matched examples on the companion [`for-loop-visual-grammar.systemsketch`](sketches/review/for-loop-visual-grammar.systemsketch) board.
