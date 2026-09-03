@@ -414,7 +414,7 @@ async function main() {
 
     const tidyFixture = join(app.filesRoot, 'SystemSketch', 'tidy-edges-review.systemsketch')
     const organizeFixture = join(app.filesRoot, 'SystemSketch', 'organize-nodes-port-layout-review.systemsketch')
-    await copyFile(join(ROOT, 'sketches', 'review', 'tidy-edges.systemsketch'), tidyFixture)
+    await copyFile(join(ROOT, 'sketches', 'review', 'tidy-edges-selection.systemsketch'), tidyFixture)
     await copyFile(join(ROOT, 'sketches', 'review', 'organize-nodes-port-layout.systemsketch'), organizeFixture)
     fixturePage = await newPage(app.cdpPort)
     await fixturePage.send('Page.enable')
