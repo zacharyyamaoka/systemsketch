@@ -518,7 +518,6 @@
  */
 .systemsketch-selection-menu {
   --systemsketch-selection-menu-height: 40px;
-  --systemsketch-selection-menu-max-width: calc(100vw - 40px);
   --systemsketch-selection-menu-x: 0px;
   --systemsketch-selection-menu-y: 0px;
 
@@ -526,8 +525,6 @@
   z-index: var(--tl-layer-menus, 400);
   top: 0;
   left: 0;
-  width: max-content;
-  max-width: var(--systemsketch-selection-menu-max-width);
   /* Placed in real viewport pixels, then scaled about that exact point, so the
    * interface setting makes the menu bigger without moving it off the
    * selection. The origin has to be the top-left corner because the placement
@@ -563,33 +560,13 @@
  * tooltip does. */
 .systemsketch-selection-menu__bar {
   display: flex;
-  width: max-content;
-  max-width: var(--systemsketch-selection-menu-max-width);
   height: var(--systemsketch-selection-menu-height);
   align-items: stretch;
-  flex-wrap: nowrap;
   padding: 0 4px;
-  overflow-x: auto;
-  overflow-y: hidden;
   border-radius: 13px;
   color: var(--ss-text-inverse);
   background: var(--ss-surface-inverse);
   box-shadow: var(--ss-shadow-2);
-  overscroll-behavior-inline: contain;
-  scroll-padding-inline: 4px;
-  scrollbar-width: none;
-  touch-action: pan-x;
-}
-
-.systemsketch-selection-menu__bar::-webkit-scrollbar {
-  display: none;
-}
-
-.systemsketch-selection-menu__bar > *,
-.systemsketch-selection-menu__bar .block-mini-menu,
-.systemsketch-selection-menu__bar .systemsketch-appearance,
-.systemsketch-selection-menu__bar .systemsketch-selection-layout-actions {
-  flex: 0 0 auto;
 }
 
 /* The Block menu supplies its own surface when it stands alone; nested in the

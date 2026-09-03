@@ -74,16 +74,6 @@ export interface SelectionMenuPlacement {
   side: SelectionMenuSide
 }
 
-/** Width left after reserving FigJam's measured margin on both sides. */
-export function selectionMenuSafeWidth(viewport: Size): number {
-  return Math.max(0, viewport.w - SELECTION_MENU_MARGIN * 2)
-}
-
-/** Layout width required to produce that safe painted width after CSS scale. */
-export function selectionMenuLayoutWidth(viewport: Size, paintScale = 1): number {
-  return paintScale > 0 ? selectionMenuSafeWidth(viewport) / paintScale : 0
-}
-
 function clamp(value: number, min: number, max: number): number {
   // A menu wider or taller than its safe area would invert the range; pinning
   // to `min` keeps it on screen instead of flinging it off the far edge.
