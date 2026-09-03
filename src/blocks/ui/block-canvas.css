@@ -632,13 +632,6 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   font-weight: 500;
 }
 
-/* A pill fed by a cable keeps its literal visible, but mutes it: the inlet
- * cable wins at runtime while the stored fallback remains truthful on canvas. */
-.systemsketch-block-canvas .BlockNode-valueText--fed {
-  color: var(--ss-text-faint);
-  opacity: 0.78;
-}
-
 /* Many-to-one: a port with two or more producers wears a count beside its dot. */
 .systemsketch-block-canvas .Port .Port-count {
   position: absolute;

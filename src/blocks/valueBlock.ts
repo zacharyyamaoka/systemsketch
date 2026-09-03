@@ -9,14 +9,14 @@
  * and batch-style controls.
  *
  * A pill is a variable, so it can be fed as well as read: it always has one
- * inlet on its left rim and one outlet on its right, and what is wired decides
- * whether it is a source (`gain = 2.0` feeding a call), a sink (`payload =`
- * the result of one) or both (`pose = estimate(…)` passed on to `encode`).
+ * inlet on its left rim and one outlet on its right, so it can be a source
+ * (`gain = 2.0` feeding a call), a sink, or both (`pose = estimate(…)`
+ * passed on to `encode`). A cable remains a visible relationship; it never
+ * replaces the words someone has written on the pill.
  * Three facts of the Block carry it:
  *
  * - `title` is the literal itself (`2.0`, `{"quat": True, …}`), the value the
- *   pill has while its inlet is unwired — a cable on the inlet supplies the
- *   value instead, and the literal waits for the day it is unwired;
+ *   pill has. An inlet cable does not hide or replace this literal;
  * - the ports' `name` is the variable name, one name mirrored on both rims —
  *   empty means the literal is passed inline, so the name is the whole
  *   difference between `estimate(frame, 2.0)` and
@@ -113,9 +113,9 @@ export function valueBlockExactText(label: ValueBlockLabel): string {
 }
 
 /**
- * A capsule is as wide as its text and never taller than one line. The fit
- * uses the literal that is actually shown. A cable may mute that literal to
- * communicate precedence, but never substitutes a different character for it.
+ * A capsule is as wide as its text and never taller than one line.
+ * Its fit uses the literal that is actually shown; a cable never substitutes
+ * a different rendered value.
  */
 export function valueBlockSize(label: ValueBlockLabel): BlockViewSize {
 	const textWidth = measureBlockText(valueBlockText(label), VALUE_FONT_PX, 500, 'mono')

@@ -15,7 +15,15 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { AppearanceControls, hasAppearanceControls } from '../appearance/AppearanceControls'
 import { WrapSelectionControl } from '../frames/WrapSelectionControl'
 import { canWrapSelection } from '../frames/wrapSelection'
-import { BLOCK_TOOL_ID, PILL_TOOL_ID, getBlockInspectorContext, selectionHasBlockStyles } from '../blocks'
+import {
+  BLOCK_TOOL_ID,
+  PILL_TOOL_ID,
+  adoptConnectedPillType,
+  canAdoptConnectedPillType,
+  getBlockInspectorContext,
+  getOnlySelectedBlock,
+  selectionHasBlockStyles,
+} from '../blocks'
 import { addTextTarget, selectionHasVisibleText } from '../appearance/textPresence'
 import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
 import { clearDiffStates } from '../diff/clearDiffStates'
@@ -557,6 +565,23 @@ export function SystemSketchSurfaceHost() {
         run: () => {
           const outcome = tidyEdges(editor)
           addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
+        },
+      },
+      {
+        id: 'adopt-pill-cable-type',
+        label: 'Adopt connected pill type',
+        description: 'Explicitly copy the selected pill’s inlet-cable type; wiring remains manual by default',
+        keywords: ['pill', 'value', 'calculate', 'derive', 'wire', 'manual'],
+        icon: '⇢',
+        disabled: () => {
+          const selected = getOnlySelectedBlock(editor)
+          return selected === null || !canAdoptConnectedPillType(editor, selected.id)
+        },
+        run: () => {
+          const selected = getOnlySelectedBlock(editor)
+          if (!selected) return
+          const result = adoptConnectedPillType(editor, selected.id)
+          if (result.ok) addToast({ title: `Adopted ${result.type} from inlet cable`, severity: 'info' })
         },
       },
       {

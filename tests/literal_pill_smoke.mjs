@@ -286,11 +286,11 @@ async function main() {
     const resultIn = await box(page, portDot(result.id, 'input', 'in_1'))
     const fedDrop = await dragFrom(page, poseOut, resultIn)
     check('FEED-1', "estimate's pose lands on the pill's inlet", fedDrop.count, 3)
-    check('FEED-2', 'a fed pill keeps its stored literal characters visible and only mutes their ink',
-      await evaluate(page, `(() => {
-        const text = document.querySelector('[data-shape-id="${result.id}"] [data-testid="block-value-text"]')
-        return { text: text?.textContent ?? null, muted: text?.classList.contains('BlockNode-valueText--fed') ?? false }
-      })()`), { text: 'fallback', muted: true })
+    check('FEED-2', 'a wired pill keeps its authored literal face instead of deriving a value',
+      await evaluate(page, `JSON.stringify({
+        text: document.querySelector('[data-shape-id="${result.id}"] [data-testid="block-value-text"]')?.textContent ?? null,
+        muted: document.querySelector('[data-shape-id="${result.id}"] [data-testid="block-value-text"]')?.classList.contains('BlockNode-valueText--fed') ?? false,
+      })`), JSON.stringify({ text: 'fallback', muted: false }))
     await deselect(page, { x: 1000, y: 800 })
     const resultFace = await box(page, `[data-shape-id="${result.id}"] .BlockNode-valueEquals`)
     await clickAt(page, resultFace.cx, resultFace.cy)
@@ -306,21 +306,31 @@ async function main() {
       { inlet: named2.inputs[0].name, outlet: named2.outputs[0].name, face: await valueText(page, result.id) },
       { inlet: 'pose', outlet: 'pose', face: 'pose = fallback' })
     check('FEED-4', 'the inspector says what feeds the pill',
-      (await evaluate(page, `document.querySelector('[data-testid="pill-wiring"]')?.textContent ?? ''`)).includes('Fed by estimate() · pose'), true)
-    check('FEED-5', 'the Value field is read-only while a cable feeds the pill',
-      await evaluate(page, `document.querySelector('[data-inspector-section="Pill"] input[aria-label="Literal value"]')?.disabled ?? null`), true)
-    check('FEED-6', "a fed pill with no type of its own takes the cable's, in the panel and in the record",
+      (await evaluate(page, `document.querySelector('[data-testid="pill-wiring"]')?.textContent ?? ''`)).includes('Connected from estimate() · pose'), true)
+    check('FEED-5', 'the Value field stays editable while a cable reaches the pill',
+      await evaluate(page, `document.querySelector('[data-inspector-section="Pill"] input[aria-label="Literal value"]')?.disabled ?? null`), false)
+    check('FEED-6', 'a cable leaves an empty type empty until its author requests adoption',
       {
         field: await evaluate(page, `document.querySelector('[data-inspector-section="Pill"] input[aria-label="Variable type"]')?.value ?? null`),
         record: { inlet: named2.inputs[0].type, outlet: named2.outputs[0].type },
       },
-      { field: 'Pose', record: { inlet: 'Pose', outlet: 'Pose' } })
+      { field: '', record: { inlet: '', outlet: '' } })
+    const adoptType = await box(page, '[data-testid="pill-adopt-cable-type"]')
+    await clickAt(page, adoptType.cx, adoptType.cy)
+    await delay(300)
+    const adopted = (await blocks(page)).find((block) => block.id === result.id)
+    check('FEED-7', 'Adopt cable type is an explicit, reversible calculation',
+      {
+        record: { inlet: adopted?.inputs[0]?.type ?? null, outlet: adopted?.outputs[0]?.type ?? null },
+        face: await valueText(page, result.id),
+      },
+      { record: { inlet: 'Pose', outlet: 'Pose' }, face: 'pose = fallback' })
     await shot(page, 'literal-pill-fed-inspector.png')
     await deselect(page, { x: 1000, y: 800 })
     const resultOut = await box(page, portDot(result.id, 'output', 'out_1'))
     const encodePose = await box(page, portDot(ENCODE, 'input', 'in_1'))
     const onward = await dragFrom(page, resultOut, encodePose)
-    check('FEED-7', 'the same pill feeds encode: one variable, written and read', onward.count, 4)
+    check('FEED-8', 'the same pill feeds encode: one variable, written and read', onward.count, 4)
     await deselect(page, { x: 1000, y: 800 })
     await shot(page, 'literal-pill-fed.png')
 

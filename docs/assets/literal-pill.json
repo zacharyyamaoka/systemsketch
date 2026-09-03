@@ -86,7 +86,7 @@
       },
       {
         "terminal": "start",
-        "to": "shape:FOEJmds_LQB9MKWa3v3-z",
+        "to": "shape:8ksfj_rjwPTdx6KR9xK5o",
         "port": "out_1"
       }
     ],
@@ -98,7 +98,7 @@
       },
       {
         "terminal": "start",
-        "to": "shape:FOEJmds_LQB9MKWa3v3-z",
+        "to": "shape:8ksfj_rjwPTdx6KR9xK5o",
         "port": "out_1"
       }
     ],
@@ -249,15 +249,9 @@
   },
   {
     "id": "FEED-2",
-    "label": "a fed pill keeps its stored literal characters visible and only mutes their ink",
-    "observed": {
-      "text": "fallback",
-      "muted": true
-    },
-    "desired": {
-      "text": "fallback",
-      "muted": true
-    },
+    "label": "a wired pill keeps its authored literal face instead of deriving a value",
+    "observed": "{\"text\":\"fallback\",\"muted\":false}",
+    "desired": "{\"text\":\"fallback\",\"muted\":false}",
     "ok": true
   },
   {
@@ -284,32 +278,51 @@
   },
   {
     "id": "FEED-5",
-    "label": "the Value field is read-only while a cable feeds the pill",
-    "observed": true,
-    "desired": true,
+    "label": "the Value field stays editable while a cable reaches the pill",
+    "observed": false,
+    "desired": false,
     "ok": true
   },
   {
     "id": "FEED-6",
-    "label": "a fed pill with no type of its own takes the cable's, in the panel and in the record",
+    "label": "a cable leaves an empty type empty until its author requests adoption",
     "observed": {
-      "field": "Pose",
+      "field": "",
       "record": {
-        "inlet": "Pose",
-        "outlet": "Pose"
+        "inlet": "",
+        "outlet": ""
       }
     },
     "desired": {
-      "field": "Pose",
+      "field": "",
       "record": {
-        "inlet": "Pose",
-        "outlet": "Pose"
+        "inlet": "",
+        "outlet": ""
       }
     },
     "ok": true
   },
   {
     "id": "FEED-7",
+    "label": "Adopt cable type is an explicit, reversible calculation",
+    "observed": {
+      "record": {
+        "inlet": "Pose",
+        "outlet": "Pose"
+      },
+      "face": "pose = fallback"
+    },
+    "desired": {
+      "record": {
+        "inlet": "Pose",
+        "outlet": "Pose"
+      },
+      "face": "pose = fallback"
+    },
+    "ok": true
+  },
+  {
+    "id": "FEED-8",
     "label": "the same pill feeds encode: one variable, written and read",
     "observed": 4,
     "desired": 4,

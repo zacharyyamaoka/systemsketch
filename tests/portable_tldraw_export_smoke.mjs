@@ -254,7 +254,7 @@ async function main() {
     check('a literal Pill becomes a stock oval with its complete variable expression',
       childrenOf(literalPill).some((record) => record.type === 'geo' && record.props?.geo === 'oval')
         && richTextWithin(literalPill).includes('gain = 2.0'))
-    check('a fed Pill freezes its exact stored fallback literal',
+    check('a wired Pill preserves its manually authored literal in the portable face',
       childrenOf(fedPill).some((record) => record.type === 'geo' && record.props?.geo === 'oval')
         && richTextWithin(fedPill).includes('chosen = fallback')
         && fedPill?.meta?.systemSketch?.props?.title === 'fallback')
