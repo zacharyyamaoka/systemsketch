@@ -13,13 +13,13 @@ import { type Editor, useValue } from 'tldraw'
 import { LiveTextArea, LiveTextInput, useLiveField } from '../../fields'
 
 import {
-  BLOCK_VIEWS,
+  BLOCK_PRESENTATION_VIEWS,
   isBlockShape,
   HEADER_ROW,
   type BlockPort,
   type BlockPortSide,
   type BlockShapeProps,
-  type BlockView,
+  type BlockPresentationView,
   blockPortSections,
   portInHeader,
   setBlockViewProps,
@@ -71,7 +71,7 @@ export interface BlockEditOptions {
 
 export interface BlockInspectorActions {
   updateDetails(patch: BlockDetailsPatch, options?: BlockEditOptions): void
-  setView(view: BlockView): void
+  setView(view: BlockPresentationView): void
   addPort(side: BlockPortSide): void
   updatePort(
     side: BlockPortSide,
@@ -1020,59 +1020,59 @@ export function BlockInspectorContent({
             </>
           )}
 
-          <section className="block-inspector__section" data-inspector-section="View">
-            <div className="block-inspector__section-title">View</div>
-            <div className="block-inspector__choices" role="group" aria-label="Block view">
-              {BLOCK_VIEWS.map((view) => (
-                <button
-                  key={view}
-                  type="button"
-                  disabled={readOnly}
-                  aria-pressed={props.view === view}
-                  onClick={() => actions?.setView(view)}
-                >
-                  {view}
-                </button>
-              ))}
-            </div>
-            <p className="block-inspector__hint">
-              Each view keeps its own size — {props.view} is {Math.round(props.w)}×{Math.round(props.h)}.
-            </p>
-          </section>
-
           {props.view !== 'value' ? (
             <>
-          <PortSection side="inputs" props={props} actions={actions} />
-          <PortSection side="outputs" props={props} actions={actions} />
+              <section className="block-inspector__section" data-inspector-section="View">
+                <div className="block-inspector__section-title">View</div>
+                <div className="block-inspector__choices" role="group" aria-label="Block view">
+                  {BLOCK_PRESENTATION_VIEWS.map((view) => (
+                    <button
+                      key={view}
+                      type="button"
+                      disabled={readOnly}
+                      aria-pressed={props.view === view}
+                      onClick={() => actions?.setView(view)}
+                    >
+                      {view}
+                    </button>
+                  ))}
+                </div>
+                <p className="block-inspector__hint">
+                  Each view keeps its own size — {props.view} is {Math.round(props.w)}×{Math.round(props.h)}.
+                </p>
+              </section>
 
-          <section className="block-inspector__section" data-inspector-section="Ports">
-            <div className="block-inspector__section-title">Ports</div>
-            <div
-              className="block-inspector__choices"
-              role="group"
-              aria-label="Port layout"
-            >
-              <button
-                type="button"
-                disabled={readOnly}
-                aria-pressed={(props.portLayout ?? 'inline') === 'offset'}
-                onClick={() => actions?.updateDetails({ portLayout: 'offset' })}
-              >
-                offset
-              </button>
-              <button
-                type="button"
-                disabled={readOnly}
-                aria-pressed={(props.portLayout ?? 'inline') === 'inline'}
-                onClick={() => actions?.updateDetails({ portLayout: 'inline' })}
-              >
-                aligned
-              </button>
-            </div>
-            <p className="block-inspector__hint">
-              Aligned shares rows between inputs and outputs; offset stacks the outputs below the inputs.
-            </p>
-          </section>
+              <PortSection side="inputs" props={props} actions={actions} />
+              <PortSection side="outputs" props={props} actions={actions} />
+
+              <section className="block-inspector__section" data-inspector-section="Ports">
+                <div className="block-inspector__section-title">Ports</div>
+                <div
+                  className="block-inspector__choices"
+                  role="group"
+                  aria-label="Port layout"
+                >
+                  <button
+                    type="button"
+                    disabled={readOnly}
+                    aria-pressed={(props.portLayout ?? 'inline') === 'offset'}
+                    onClick={() => actions?.updateDetails({ portLayout: 'offset' })}
+                  >
+                    offset
+                  </button>
+                  <button
+                    type="button"
+                    disabled={readOnly}
+                    aria-pressed={(props.portLayout ?? 'inline') === 'inline'}
+                    onClick={() => actions?.updateDetails({ portLayout: 'inline' })}
+                  >
+                    aligned
+                  </button>
+                </div>
+                <p className="block-inspector__hint">
+                  Aligned shares rows between inputs and outputs; offset stacks the outputs below the inputs.
+                </p>
+              </section>
             </>
           ) : null}
         </div>

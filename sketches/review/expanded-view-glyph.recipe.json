@@ -1,5 +1,5 @@
 {
-  "feature": "Expanded Block value-view glyph",
+  "feature": "Block presentation and Value-pill boundary",
   "viewport": { "width": 1600, "height": 960 },
   "pages": [
     { "id": "review", "name": "Expanded view glyph review" }
@@ -24,6 +24,16 @@
           { "id": "out_1", "name": "result", "type": "Result", "visible": true }
         ]
       }
+    },
+    {
+      "id": "literal",
+      "type": "block",
+      "x": 980,
+      "y": 735,
+      "props": {
+        "title": "2.0",
+        "view": "value"
+      }
     }
   ],
   "bindings": [],
@@ -41,7 +51,7 @@
     {
       "id": "step-read",
       "kind": "step",
-      "text": "2 · Read the selection pill above it: S · P · E · V. Each glyph appears once.",
+      "text": "2 · The selection pill is S · P · E only. Value is the separate 2.0 capsule below.",
       "x": 1210,
       "y": 450,
       "w": 340,
@@ -51,7 +61,7 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · The fourth view is V (value), so Expanded has one E and no duplicate glyph.",
+      "text": "PASS WHEN · The Block pill is S · P · E. The 2.0 Value capsule remains separate.",
       "x": 80,
       "y": 650,
       "w": 420,

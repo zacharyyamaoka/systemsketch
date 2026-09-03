@@ -9,7 +9,7 @@ import {
   type BlockPortSide,
   type BlockShape,
   type BlockShapeProps,
-  type BlockView,
+  type BlockPresentationView,
   blockPortSections,
   getDefaultBlockProps,
   isBlockShape,
@@ -28,6 +28,7 @@ import {
 } from '../ports/portAffordances'
 import {
   getBlockSelectionStyles,
+  getSelectedBlocks,
   sameBlockSelectionStyles,
   type BlockSelectionStyles,
 } from './blockStyleCommands'
@@ -91,6 +92,12 @@ export function getBlockInspectorContext(editor: Editor): BlockInspectorContext 
   const selected = getOnlySelectedBlock(editor)
   if (selected) return { kind: 'selected', shape: selected, props: selected.props }
   const styles = getBlockSelectionStyles(editor)
+  // A literal Value is a separate representation, not one member of a batch
+  // of ordinary Blocks. Do not offer shared Block controls that could convert
+  // it (or its neighbours) when it is part of the selection.
+  if (getSelectedBlocks(editor).some((block) => block.props.view === 'value')) {
+    return { kind: 'empty' }
+  }
   if (styles.blockCount > 0) return { kind: 'multi', styles }
   if (editor.getCurrentToolId() === BLOCK_TOOL_ID) {
     return { kind: 'tool', props: getDefaultBlockProps() }
@@ -182,7 +189,7 @@ export function patchBlockDetailsProps(
 export function setBlockView(
   editor: Editor,
   shapeId: TLShapeId,
-  view: BlockView,
+  view: BlockPresentationView,
   options: BlockCommandOptions = {},
 ): BlockCommandResult {
   return updateBlockProps(

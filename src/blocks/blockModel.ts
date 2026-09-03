@@ -2,16 +2,26 @@ import { StyleProp, T, createShapeId, type TLShape } from 'tldraw'
 
 export const BLOCK_SHAPE_TYPE = 'block' as const
 export const BLOCK_TOOL_ID = 'block' as const
-/** P draws a Block already wearing its `value` view — the literal-argument pill. */
+/** P creates the separate `value` literal-pill representation. */
 export const PILL_TOOL_ID = 'pill' as const
 
 /**
- * `value` is the fourth view: a literal argument drawn as a capsule. It is the
- * same Block, so cables, the polarity judge, click-to-edit, the inspector and
- * the file format all apply to it unchanged; see `valueBlock.ts`.
+ * `value` stores a literal argument drawn as a capsule. It shares the Block
+ * primitive's cable, persistence, and editing seams, but it is a distinct
+ * representation—not an ordinary Block presentation or conversion target;
+ * see `valueBlock.ts`.
  */
 export const BLOCK_VIEWS = ['simple', 'port', 'expanded', 'value'] as const
 export type BlockView = (typeof BLOCK_VIEWS)[number]
+
+/**
+ * The structural presentations an ordinary Block may switch between. `value`
+ * is deliberately absent: it is the separate literal-pill representation,
+ * created by the Pill tool or the connection-drop picker, never a conversion
+ * target for an existing Block.
+ */
+export const BLOCK_PRESENTATION_VIEWS = ['simple', 'port', 'expanded'] as const satisfies readonly BlockView[]
+export type BlockPresentationView = (typeof BLOCK_PRESENTATION_VIEWS)[number]
 
 /**
  * How the two visible port lanes share body rows.

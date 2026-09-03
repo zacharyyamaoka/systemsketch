@@ -1,9 +1,14 @@
 import { type Editor, type SharedStyle, useValue } from 'tldraw'
 
-import { BLOCK_VIEWS, type BlockView } from '../blockModel'
+import {
+  BLOCK_PRESENTATION_VIEWS,
+  type BlockPresentationView,
+  type BlockView,
+} from '../blockModel'
 import { getOnlySelectedBlock, setBlockView } from '../commands/blockCommands'
 import {
   getBlockSelectionStyles,
+  getSelectedBlocks,
   setBlockViewForSelection,
 } from '../commands/blockStyleCommands'
 import { getActiveDepthScopeId, toggleDepthScope } from '../../depth/depthNavigation'
@@ -15,7 +20,7 @@ export interface BlockSelectionMiniMenuProps {
    * unpressed, exactly as the stock style panel does for a mixed colour.
    */
   view: SharedStyle<BlockView>
-  onSetView(view: BlockView): void
+  onSetView(view: BlockPresentationView): void
   onOpenInspector(): void
   depthAction?: {
     direction: 'in' | 'out'
@@ -30,6 +35,10 @@ export function BlockSelectionMiniMenu({
   onOpenInspector,
   depthAction,
 }: BlockSelectionMiniMenuProps) {
+  // Keep this presentation component safe when it is mounted independently of
+  // the editor adapter: a Value capsule never receives ordinary Block controls.
+  if (view.type === 'shared' && view.value === 'value') return null
+
   return (
     <div
       className="block-mini-menu"
@@ -38,7 +47,7 @@ export function BlockSelectionMiniMenu({
       data-view={view.type === 'mixed' ? 'mixed' : view.value}
     >
       <div className="block-mini-menu__views" role="group" aria-label="Block view">
-        {BLOCK_VIEWS.map((candidate) => (
+        {BLOCK_PRESENTATION_VIEWS.map((candidate) => (
           <button
             key={candidate}
             type="button"
@@ -94,12 +103,18 @@ export function EditorBlockSelectionMiniMenu({
     () => getBlockSelectionStyles(editor),
     [editor],
   )
+  const hasValueRepresentation = useValue(
+    'SystemSketch Value representation in selection',
+    () => getSelectedBlocks(editor).some((candidate) => candidate.props.view === 'value'),
+    [editor],
+  )
   const activeDepthScopeId = useValue(
     'SystemSketch selected Block depth action',
     () => getActiveDepthScopeId(editor),
     [editor],
   )
   if (block) {
+    if (block.props.view === 'value') return null
     return (
       <BlockSelectionMiniMenu
         view={{ type: 'shared', value: block.props.view }}
@@ -115,7 +130,7 @@ export function EditorBlockSelectionMiniMenu({
     )
   }
 
-  if (!styles.view) return null
+  if (hasValueRepresentation || !styles.view) return null
 
   return (
     <BlockSelectionMiniMenu

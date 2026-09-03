@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
 	appendBlockPortToProps,
 	blockIcon,
+	BLOCK_PRESENTATION_VIEWS,
 	blockNotes,
 	blockPortLayout,
 	canReparentDraggedShapesIntoBlock,
@@ -43,6 +44,10 @@ function blockShape(id: string, view: BlockShape['props']['view'], parentId = 'p
 }
 
 describe('Block model', () => {
+	it('keeps the literal Value representation out of ordinary Block presentation controls', () => {
+		expect(BLOCK_PRESENTATION_VIEWS).toEqual(['simple', 'port', 'expanded'])
+	})
+
 	it('restores the mature pyblocks empty primitive and remembered boxes', () => {
 		const props = getDefaultBlockProps()
 		expect(props).toMatchObject({

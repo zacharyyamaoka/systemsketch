@@ -20,6 +20,7 @@ import {
   BlockViewStyle,
   isBlockShape,
   type BlockShape,
+  type BlockPresentationView,
   type BlockView,
   type PortLayout,
 } from '../blockModel'
@@ -115,7 +116,7 @@ export function setStyleForSelection<T>(
   return { ok: true, style: style.id, count }
 }
 
-export function setBlockViewForSelection(editor: Editor, view: BlockView): BlockStyleResult {
+export function setBlockViewForSelection(editor: Editor, view: BlockPresentationView): BlockStyleResult {
   return setStyleForSelection(editor, BlockViewStyle, view, `show blocks as ${view}`)
 }
 

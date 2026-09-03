@@ -26,7 +26,7 @@ function releaseShortcut(tools: TLUiToolsContextType, shortcut: string): TLUiToo
 
 /**
  * Add Block and Pill to tldraw's UI-tool registry with the donor's shortcuts:
- * B draws a Block, P draws a pill (a Block already in its `value` view).
+ * B draws a Block; P creates the separate literal-pill representation.
  *
  * The drawing state nodes are registered separately through Tldraw's `tools`
  * prop. This helper is the shared presentation seam used by Stable and the
