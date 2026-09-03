@@ -26,6 +26,7 @@ const BEFORE = join(ASSETS, 'text-aware-routing-before-2026-09-03.png')
 const AFTER = join(ASSETS, 'text-aware-routing-after-2026-09-03.png')
 const RESULTS = join(ASSETS, 'text-aware-routing-results-2026-09-03.json')
 const GALLERY = join(ASSETS, 'text-aware-routing-gallery-2026-09-03.png')
+const ATLAS = join(ASSETS, 'text-aware-routing-atlas-2026-09-03.png')
 const TEXT_CLEARANCE = 4
 const { checks, pass } = makeChecklist()
 
@@ -96,7 +97,11 @@ const SEED = `(() => {
   })
   const frame = block(
     'shape:text-route-frame', 'page:page', 80, 100, 'run()',
-    [port('poses', 'poses', 'list[Pose]')], [], 1300, 620, 'expanded',
+    [
+      port('raws', 'raws', 'bytes'),
+      port('gain', 'gain', 'float'),
+      port('poses', 'poses', 'list[Pose]'),
+    ], [], 1300, 620, 'expanded',
   )
   const decode = block(
     'shape:text-route-decode', frame.id, 100, 50, 'decode()',
@@ -162,10 +167,12 @@ async function main() {
     assert.equal(await evaluate(app.page, SEED), true)
     await delay(700)
 
-    const sourceName = await elementRect(
+    const frameNames = await elementRects(
       app.page,
       '[data-shape-id="shape:text-route-frame"] .BlockNode-portName',
     )
+    const sourceName = frameNames.find((rect) => rect.text?.trim() === 'poses')
+    assert.ok(sourceName, 'missing poses boundary-port name')
     const beforePath = await paintedPathSamples(app.page, 'shape:text-route-edge')
     assert.equal(pathHitsRect(beforePath, expanded(sourceName, TEXT_CLEARANCE)), true)
     await capture(app.page, BEFORE)
@@ -182,9 +189,13 @@ async function main() {
       app.page,
       '.BlockNode-portName,.BlockNode-portType,.BlockNode-portDefault',
     )
-    const textCollisions = textRects.filter((rect) => pathHitsRect(afterPath, expanded(rect, TEXT_CLEARANCE)))
-    assert.deepEqual(textCollisions, [])
-    pass('the painted Tidy result clears every rendered port name, type, and default-chip halo')
+    const ownTerminalText = textRects.filter((rect) => rect.shapeId === 'shape:text-route-frame'
+      && ['poses', 'list[Pose]'].includes(rect.text?.trim()))
+    const otherText = textRects.filter((rect) => !ownTerminalText.includes(rect))
+    assert.equal(ownTerminalText.length, 2)
+    assert.equal(ownTerminalText.some((rect) => pathHitsRect(afterPath, rect)), false)
+    assert.equal(otherText.some((rect) => pathHitsRect(afterPath, expanded(rect, TEXT_CLEARANCE))), false)
+    pass('the cable clears its own painted terminal text while every unrelated label keeps a 4px halo')
 
     const blockerRects = await Promise.all(
       ['decode', 'estimate', 'append', 'random'].map((name) => elementRect(
@@ -198,9 +209,9 @@ async function main() {
     const model = JSON.parse(await evaluate(app.page,
       `JSON.stringify(window.__systemsketch.editor.getShape('shape:text-route-edge').props.elbowRoute)`))
     assert.equal(model.startAxis, 'x')
-    assert.equal(model.startLeg, 8)
+    assert.equal(model.startLeg, undefined)
     assert.ok(model.corners.length >= 4, `expected at least four persisted corners, got ${model.corners.length}`)
-    pass('the persisted automatic route keeps its 8px label escape and at least four elbows')
+    pass('the persisted automatic route keeps the normal straight terminal leg and at least four elbows')
 
     assert.deepEqual(JSON.parse(await evaluate(app.page, `JSON.stringify(
       [window.__textRouteIds.frame, window.__textRouteIds.target, ...window.__textRouteIds.blockers]
@@ -222,14 +233,18 @@ async function main() {
     })
     await openApp(reportPage, app.port, 'docs/text-aware-routing-2026-09-03.html')
     await waitFor(reportPage, `document.querySelector('h1')?.textContent.includes('the words')`, 'text-aware routing gallery')
+    assert.equal(await evaluate(reportPage, `document.querySelectorAll('.atlas-card').length`), 20)
     const afterImage = await evaluate(reportPage, `document.querySelector('#proof').src`)
     await clickElement(reportPage, '[data-show="before"]')
     const beforeImage = await evaluate(reportPage, `document.querySelector('#proof').src`)
     assert.notEqual(beforeImage, afterImage)
     await capture(reportPage, GALLERY)
+    await evaluate(reportPage, `document.querySelector('.atlas').scrollIntoView({ block: 'start' })`)
+    await delay(250)
+    await capture(reportPage, ATLAS)
     assert.deepEqual(localConsoleErrors(reportPage), [])
     reportPage.close()
-    pass('the self-contained gallery renders and its before/after control changes the evidence frame')
+    pass('the self-contained gallery renders 20 examples and its before/after control changes the evidence frame')
 
     const fixtureBoard = join(app.filesRoot, 'SystemSketch', 'text-aware-routing-review.systemsketch')
     await copyFile(join(ROOT, 'sketches', 'review', 'text-aware-routing.systemsketch'), fixtureBoard)
@@ -251,7 +266,11 @@ async function main() {
       fixturePage,
       '.BlockNode-portName,.BlockNode-portType,.BlockNode-portDefault',
     )
-    assert.equal(fixtureText.some((rect) => pathHitsRect(fixturePath, expanded(rect, TEXT_CLEARANCE))), false)
+    const fixtureTerminalText = fixtureText.filter((rect) => rect.shapeId === 'shape:text-route-frame'
+      && ['poses', 'list[Pose]'].includes(rect.text?.trim()))
+    assert.equal(fixtureTerminalText.some((rect) => pathHitsRect(fixturePath, rect)), false)
+    assert.equal(fixtureText.filter((rect) => !fixtureTerminalText.includes(rect))
+      .some((rect) => pathHitsRect(fixturePath, expanded(rect, TEXT_CLEARANCE))), false)
     assert.deepEqual(localConsoleErrors(fixturePage), [])
     fixturePage.close()
     pass('the cold-reopened review fixture completes its visible select-frame then Tidy interaction')
@@ -261,12 +280,13 @@ async function main() {
       sourceName,
       textRectCount: textRects.length,
       persistedCorners: model.corners.length,
-      startLeg: model.startLeg,
-      screenshots: [BEFORE, AFTER, GALLERY],
+      storedStartLeg: model.startLeg ?? null,
+      effectiveStartLeg: model.startLeg ?? 20,
+      screenshots: [BEFORE, AFTER, GALLERY, ATLAS],
     }
     await writeFile(RESULTS, `${JSON.stringify(results, null, 2)}\n`)
     process.stdout.write(`\n  ${checks.length}/${checks.length} browser checks passed\n`)
-    process.stdout.write(`  ${RESULTS}\n  ${BEFORE}\n  ${AFTER}\n  ${GALLERY}\n`)
+    process.stdout.write(`  ${RESULTS}\n  ${BEFORE}\n  ${AFTER}\n  ${GALLERY}\n  ${ATLAS}\n`)
   } finally {
     app.close()
   }

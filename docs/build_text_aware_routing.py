@@ -25,8 +25,33 @@ def esc(value: object) -> str:
 def main() -> None:
     evidence = json.loads((ASSETS / "text-aware-routing-results-2026-09-03.json").read_text())
     assert len(evidence["checks"]) == 8
-    assert evidence["startLeg"] == 8
+    assert evidence["storedStartLeg"] is None
+    assert evidence["effectiveStartLeg"] == 20
     assert evidence["persistedCorners"] >= 4
+
+    stress = json.loads((ASSETS / "collision-routing-stress-results.json").read_text())
+    stress_by_number = {item["number"]: item for item in stress["results"]}
+    atlas_groups = [
+        ("Easy", [1, 2, 3, 4, 5]),
+        ("Medium", [7, 10, 15, 20, 25]),
+        ("Hard", [30, 31, 33, 35, 36]),
+        ("Very hard", [38, 40, 41, 46, 50]),
+    ]
+    atlas_cards = []
+    for difficulty, numbers in atlas_groups:
+        for number in numbers:
+            item = stress_by_number[number]
+            assert item["status"] == "PASS"
+            screenshot = image_uri(
+                ASSETS / f"collision-routing-stress-{number:02d}-after.png"
+            )
+            atlas_cards.append(f"""
+              <article class="atlas-card">
+                <div class="atlas-head"><span>{esc(difficulty)} · {number:02d}</span><b>{esc(item['name'])}</b></div>
+                <img alt="{esc(item['name'])} after Tidy" src="{screenshot}">
+                <div class="atlas-facts"><span>{item['obstacleCount']} forbidden regions</span><span>{item['cornerCount']} corners</span><span>PASS</span></div>
+              </article>""")
+    assert len(atlas_cards) == 20
 
     before = image_uri(ASSETS / "text-aware-routing-before-2026-09-03.png")
     after = image_uri(ASSETS / "text-aware-routing-after-2026-09-03.png")
@@ -60,26 +85,38 @@ def main() -> None:
   .stage i {{ display:block;color:var(--orange);font-style:normal;font-size:11px;font-weight:900;letter-spacing:.12em }} .stage strong {{ display:block;margin:7px 0 }} .stage small {{ color:var(--muted) }}
   .route {{ display:grid;grid-template-columns:1fr 1.1fr;gap:20px;align-items:center }} .route svg {{ width:100%;height:auto;border:1px solid var(--line);border-radius:13px;background:#10161b }}
   code {{ color:#bcd6ff }} ul {{ display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;padding:0;margin:18px 0 0;list-style:none }} li {{ color:#d7dee2 }} li span {{ margin-right:9px;color:var(--green);font-weight:900 }}
+  .why-grid {{ display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px }} .why {{ padding:19px;border:1px solid var(--line);border-radius:13px;background:var(--panel2) }}
+  .why b {{ display:block;margin-bottom:7px;color:var(--orange) }} .why strong {{ color:var(--green) }}
+  .atlas {{ display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:20px }} .atlas-card {{ overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--panel2) }}
+  .atlas-head {{ display:flex;gap:12px;align-items:baseline;padding:14px 16px }} .atlas-head span {{ flex:none;color:var(--orange);font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase }}
+  .atlas-card img {{ display:block;width:100%;aspect-ratio:15/9;object-fit:cover;object-position:left top;background:#f7f7f7;border-block:1px solid var(--line) }}
+  .atlas-facts {{ display:flex;gap:14px;padding:10px 16px;color:var(--muted);font-size:12px }} .atlas-facts span:last-child {{ margin-left:auto;color:var(--green);font-weight:900 }}
   .boundary {{ border-color:#66533c;background:#1e1913 }} footer {{ margin-top:25px;color:#7e8b93 }}
-  @media(max-width:900px) {{ .metrics,.callouts,.pipeline,.route,ul {{ grid-template-columns:1fr }} .compare-head {{ display:block }} .switch {{ margin-top:13px }} }}
+  @media(max-width:900px) {{ .metrics,.callouts,.pipeline,.route,ul,.why-grid,.atlas {{ grid-template-columns:1fr }} .compare-head {{ display:block }} .switch {{ margin-top:13px }} }}
 </style></head><body><main>
   <div class="eyebrow">SystemSketch · implementation evidence · 03 Sep 2026</div>
   <h1>Elbows now make room for <em>the words.</em></h1>
-  <p class="lede">Tidy edges treats painted port names, types, and default chips as first-class keep-outs. In the supplied shape, the route makes a tiny escape beside <code>poses list[Pose]</code>, takes the short channel between Blocks, and rises into <code>len()</code> with four elbows.</p>
-  <div class="verdict"><span class="dot"></span>Rendered path clears every glyph halo and every Block; the track remains unmerged</div>
+  <p class="lede">The supplied case is now reproduced with all three boundary ports: <code>raws bytes</code>, <code>gain float</code>, and <code>poses list[Pose]</code>. Tidy leaves the source dot on a straight line, avoids painted text, then takes a four-elbow route into <code>len()</code>.</p>
+  <div class="verdict"><span class="dot"></span>Own terminal text stays forbidden without the extra halo; every other label retains 4px</div>
   <div class="metrics">
-    <div class="metric"><strong>4 px</strong><span>port-text clearance</span></div>
+    <div class="metric"><strong>0 / 4 px</strong><span>own terminal / other label halo</span></div>
     <div class="metric"><strong>{evidence['persistedCorners']}</strong><span>persisted elbows</span></div>
-    <div class="metric"><strong>50 / 50</strong><span>prior stress cases still pass</span></div>
-    <div class="metric"><strong>0</strong><span>painted collisions after Tidy</span></div>
+    <div class="metric"><strong>20</strong><span>rendered examples below</span></div>
+    <div class="metric"><strong>50 / 50</strong><span>stress cases still pass</span></div>
   </div>
 
   <section><div class="compare-head"><div><div class="eyebrow">Real canvas</div><h2>The shorter open corridor wins</h2><p>Toggle the exact browser frames produced by the acceptance test.</p></div>
     <div class="switch"><button class="active" data-show="after">After Tidy</button><button data-show="before">Before</button></div></div>
     <div class="frame"><img id="proof" alt="SystemSketch text-aware routing proof" src="{after}" data-before="{before}" data-after="{after}"></div>
-    <div class="callouts"><div class="callout"><b>1 · Text escape</b><p>The first leg is shortened to 8px, so the turn happens before the port words and their 4px halo.</p></div>
+    <div class="callouts"><div class="callout"><b>1 · Straight terminal</b><p>The cable's own label uses its painted box with zero extra halo. The line can leave <code>poses</code> straight and postpones its first bend until the next Block.</p></div>
       <div class="callout"><b>2 · Open channel</b><p>Equal-bend candidates are compared by length, avoiding the old detour around the top of the frame.</p></div>
       <div class="callout"><b>3 · Multiple elbows</b><p>The H–V–H–V–H route persists as one automatic route and repaints without reversal.</p></div></div>
+  </section>
+
+  <section><div class="eyebrow">Why it hugs the upper Block</div><h2>Safety chooses the rails; length chooses one side</h2>
+    <p>The placement is decided in the planner, before SVG rendering or corner rounding. In this exact fixture, <code>poses.append()</code> ends at y=300 and <code>random_func</code> begins at y=390. Their visual midpoint is y=345, but the shortest legal grid rail is the upper Block's 24px keep-out boundary at <strong>y=324</strong>.</p>
+    <div class="why-grid"><div class="why"><b>Implemented ordering</b><p><strong>1.</strong> Minimize bends with A*'s bend penalty. <strong>2.</strong> Among equal-bend candidates, minimize Manhattan length. Candidate rows come from obstacle keep-out edges and endpoint/midpoint rails. The result is safe and short, but it can hug a wall.</p></div>
+      <div class="why"><b>Separate possible policy</b><p>Add free-corridor center rails, then use distance balance as a tertiary score after bend count and before or alongside path length. That would move this segment toward y=345 without weakening the 24px collision guarantee. This centering policy is <strong>not silently enabled</strong> in this track.</p></div></div>
   </section>
 
   <section><div class="route"><div><div class="eyebrow">Route grammar</div><h2>Five segments, four bends</h2><p>The shape is not a special case. The existing non-uniform-grid A* already supports arbitrary orthogonal paths; this change supplies accurate text keep-outs and chooses the shorter candidate when bend count ties.</p></div>
@@ -96,8 +133,13 @@ def main() -> None:
     <div class="stage"><i>02</i><strong>Collect obstacles</strong><small>Structural and text collectors remain separate and return page-space geometry.</small></div>
     <div class="stage"><i>03</i><strong>Plan + choose</strong><small>A* finds both regimes; bend count then path length select the route.</small></div>
     <div class="stage"><i>04</i><strong>Stabilize + nudge</strong><small>Existing independent guards reject any collision reintroduced later.</small></div>
-    <div class="stage"><i>05</i><strong>Persist</strong><small>Short terminal legs are stored so repaint cannot double back through a label.</small></div>
+    <div class="stage"><i>05</i><strong>Persist</strong><small>The normal terminal leg and arbitrary corner list repaint without reversal.</small></div>
   </div></section>
+
+  <section><div class="eyebrow">20 real-app examples · easy → hard</div><h2>See where the current objective succeeds—and where it hugs</h2>
+    <p>Every card is an actual post-Tidy canvas from the deterministic 50-case browser run. The set progresses from one-Block fields to dense fields, squeezed endpoint legs, and Branch-aware routes; all were tidied twice and remained collision-free and byte-stable.</p>
+    <div class="atlas">{''.join(atlas_cards)}</div>
+  </section>
 
   <section><div class="eyebrow">Executable evidence</div><h2>Browser and unit oracles agree</h2><ul>{checks}</ul></section>
   <section class="boundary"><div class="eyebrow">Review boundary</div><h2>New worktree; no merge.</h2><p>Implementation and evidence are on <code>track/text-aware-routing</code>, based on <code>main@cf86800</code>. Main remains unchanged until Zach explicitly asks to merge.</p></section>

@@ -128,7 +128,9 @@ describe('single-edge collision planning — independent of nudging', () => {
 				box: { x: 930, y: 80, w: 260, h: 130 },
 			},
 			obstacles: [
-				{ x: 12, y: 289, w: 170, h: 24, clearance: 4 },
+				// This is the cable's own boundary-port label: its painted box is
+				// forbidden, but the terminal-specific extra halo is zero.
+				{ x: 12, y: 289, w: 170, h: 24, clearance: 0 },
 				{ x: 100, y: 50, w: 250, h: 130 },
 				{ x: 320, y: 80, w: 250, h: 150 },
 				{ x: 500, y: 170, w: 300, h: 130 },
@@ -138,8 +140,8 @@ describe('single-edge collision planning — independent of nudging', () => {
 
 		expect(planned.points).toEqual([
 			{ x: 0, y: 315 },
-			{ x: 8, y: 315 },
-			{ x: 8, y: 324 },
+			{ x: 476, y: 315 },
+			{ x: 476, y: 324 },
 			{ x: 906, y: 324 },
 			{ x: 906, y: 146 },
 			{ x: 930, y: 146 },

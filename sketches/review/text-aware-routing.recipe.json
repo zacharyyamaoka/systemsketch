@@ -14,7 +14,11 @@
         "view": "expanded",
         "w": 1400,
         "h": 600,
-        "inputs": [{ "id": "poses", "name": "poses", "type": "list[Pose]", "visible": true }],
+        "inputs": [
+          { "id": "raws", "name": "raws", "type": "bytes", "visible": true },
+          { "id": "gain", "name": "gain", "type": "float", "visible": true },
+          { "id": "poses", "name": "poses", "type": "list[Pose]", "visible": true }
+        ],
         "outputs": []
       }
     },
@@ -138,7 +142,7 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · The cable makes a tiny turn below poses list[Pose], runs between poses.append() and random_func, then rises into len() without crossing any Block or port text",
+      "text": "PASS WHEN · The cable leaves poses list[Pose] in a straight line, bends only before poses.append(), uses the open channel, then rises into len() without crossing any Block or port text",
       "x": 430,
       "y": 1000,
       "w": 920,

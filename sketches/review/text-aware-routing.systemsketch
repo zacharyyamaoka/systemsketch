@@ -97,7 +97,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3zU6t",
+      "index": "a3z5Nl",
       "typeName": "shape"
     },
     {
@@ -147,8 +147,20 @@
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
-        "definitionId": "7JLEGnrqmzDQPFh4H1Czk",
+        "definitionId": "7rbN1gKLR_aokSaMv8TtD",
         "inputs": [
+          {
+            "id": "raws",
+            "name": "raws",
+            "type": "bytes",
+            "visible": true
+          },
+          {
+            "id": "gain",
+            "name": "gain",
+            "type": "float",
+            "visible": true
+          },
           {
             "id": "poses",
             "name": "poses",
@@ -159,7 +171,7 @@
         "outputs": [],
         "definitionKey": "run"
       },
-      "index": "a1BQz",
+      "index": "a1LUF",
       "typeName": "shape"
     },
     {
@@ -204,7 +216,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a20qj",
+      "index": "a2x1M",
       "typeName": "shape"
     },
     {
@@ -241,7 +253,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · The cable makes a tiny turn below poses list[Pose], runs between poses.append() and random_func, then rises into len() without crossing any Block or port text"
+                  "text": "PASS WHEN · The cable leaves poses list[Pose] in a straight line, bends only before poses.append(), uses the open channel, then rises into len() without crossing any Block or port text"
                 }
               ]
             }
@@ -249,7 +261,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4FEQ",
+      "index": "a4dRb",
       "typeName": "shape"
     },
     {
@@ -294,16 +306,8 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3bgf",
+      "index": "a3atI",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#9D5BD2",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:czXpAoyLRVKDrPjVDmlqY",
-      "typeName": "user"
     },
     {
       "x": 560,
@@ -344,7 +348,7 @@
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
-        "definitionId": "XM4K_6GQ2FZESUXCXnr_H",
+        "definitionId": "w_ZmRh_IKky2HcIEWC6zq",
         "inputs": [
           {
             "id": "poses",
@@ -369,7 +373,7 @@
         ],
         "definitionKey": "poses_append"
       },
-      "index": "a92vE",
+      "index": "a97dI",
       "typeName": "shape"
     },
     {
@@ -379,6 +383,14 @@
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
+    },
+    {
+      "name": "",
+      "color": "#E34BA9",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:pCq9l2t4PbQsCIquG_P1n",
+      "typeName": "user"
     },
     {
       "x": 0,
@@ -410,7 +422,7 @@
         "tunnel": false,
         "tunnelLayer": ""
       },
-      "index": "a6cz1",
+      "index": "a6h4f",
       "typeName": "shape"
     },
     {
@@ -514,7 +526,7 @@
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
-        "definitionId": "SakiSRjc95vZxBPwCn5Ry",
+        "definitionId": "Y3I6ruutLjH81REenoEU4",
         "inputs": [
           {
             "id": "items",
@@ -533,7 +545,7 @@
         ],
         "definitionKey": "random_func"
       },
-      "index": "aA4za",
+      "index": "aAOnA",
       "typeName": "shape"
     },
     {
@@ -611,7 +623,7 @@
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
-        "definitionId": "053PaRDLZPNaBf8ngpQya",
+        "definitionId": "4AOXNywULQBGo_i45ccCy",
         "inputs": [
           {
             "id": "frame",
@@ -630,7 +642,7 @@
         ],
         "definitionKey": "estimate"
       },
-      "index": "a8jqz",
+      "index": "a8vpQ",
       "typeName": "shape"
     },
     {
@@ -685,7 +697,7 @@
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
-        "definitionId": "t0z-T134EIIRJtTrrVUNy",
+        "definitionId": "5f6JAxsHyC7B4iKn9c-Fv",
         "inputs": [
           {
             "id": "raws",
@@ -704,7 +716,7 @@
         ],
         "definitionKey": "decode"
       },
-      "index": "a7LSj",
+      "index": "a7yNA",
       "typeName": "shape"
     },
     {
@@ -809,7 +821,7 @@
         "showDescription": true,
         "notes": "",
         "portLayout": "inline",
-        "definitionId": "Tu0TiWuiS8mJgksa4uxrX",
+        "definitionId": "RyTXMmaahrfReJOCSZa_H",
         "inputs": [
           {
             "id": "obj",
@@ -828,7 +840,7 @@
         ],
         "definitionKey": "len"
       },
-      "index": "aBAAU",
+      "index": "aBkPX",
       "typeName": "shape"
     },
     {
@@ -872,7 +884,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a2uFa",
+      "index": "a2zLan",
       "typeName": "shape"
     }
   ]

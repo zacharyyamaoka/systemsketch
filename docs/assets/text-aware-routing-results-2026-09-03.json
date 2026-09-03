@@ -1,26 +1,30 @@
 {
   "checks": [
     "the initial painted cable enters the visible 4px clearance around the boundary port name",
-    "the painted Tidy result clears every rendered port name, type, and default-chip halo",
+    "the cable clears its own painted terminal text while every unrelated label keeps a 4px halo",
     "the same painted path still clears every structural Block obstacle",
-    "the persisted automatic route keeps its 8px label escape and at least four elbows",
+    "the persisted automatic route keeps the normal straight terminal leg and at least four elbows",
     "Tidy changes only edge geometry; the frame and all five child Blocks remain fixed",
     "the real canvas journey produces no local console errors",
-    "the self-contained gallery renders and its before/after control changes the evidence frame",
+    "the self-contained gallery renders 20 examples and its before/after control changes the evidence frame",
     "the cold-reopened review fixture completes its visible select-frame then Tidy interaction"
   ],
   "sourceName": {
     "x": 80.37357330322266,
-    "y": 461.39862060546875,
+    "y": 637.9201049804688,
     "w": 67.2817611694336,
-    "h": 32.71441650390625
+    "h": 32.71435546875,
+    "text": "poses",
+    "shapeId": "shape:text-route-frame"
   },
-  "textRectCount": 22,
+  "textRectCount": 26,
   "persistedCorners": 4,
-  "startLeg": 8,
+  "storedStartLeg": null,
+  "effectiveStartLeg": 20,
   "screenshots": [
     "/home/bam/systemsketch-track-text-aware-routing/docs/assets/text-aware-routing-before-2026-09-03.png",
     "/home/bam/systemsketch-track-text-aware-routing/docs/assets/text-aware-routing-after-2026-09-03.png",
-    "/home/bam/systemsketch-track-text-aware-routing/docs/assets/text-aware-routing-gallery-2026-09-03.png"
+    "/home/bam/systemsketch-track-text-aware-routing/docs/assets/text-aware-routing-gallery-2026-09-03.png",
+    "/home/bam/systemsketch-track-text-aware-routing/docs/assets/text-aware-routing-atlas-2026-09-03.png"
   ]
 }

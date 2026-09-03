@@ -44,6 +44,12 @@ export interface ConnectionRoutingScene {
 export const PORT_LABEL_ROUTING_CLEARANCE_PX = 4
 
 /**
+ * A cable may use the gap between its own port rail and painted label exactly.
+ * The label's content rectangle is still forbidden; only its extra halo is removed.
+ */
+export const TERMINAL_PORT_LABEL_ROUTING_CLEARANCE_PX = 0
+
+/**
  * Branch-local forbidden zones for one cable.
  *
  * An unrelated cable sees the whole Branch as solid. A cable with an endpoint
@@ -184,6 +190,14 @@ export function collectConnectionRoutingTextObstacles(
 	editor: Editor,
 	connection: ConnectionShape,
 ): ElbowRoutingObstacle[] {
+	const bindings = getConnectionBindings(editor, connection)
+	const terminalPorts = new Map<TLShapeId, Set<string>>()
+	for (const binding of [bindings.start, bindings.end]) {
+		if (!binding) continue
+		const portIds = terminalPorts.get(binding.toId) ?? new Set<string>()
+		portIds.add(binding.props.portId)
+		terminalPorts.set(binding.toId, portIds)
+	}
 	const obstacles: ElbowRoutingObstacle[] = []
 	for (const shape of editor.getCurrentPageShapes()) {
 		if (!isBlockShape(shape)) continue
@@ -196,7 +210,9 @@ export function collectConnectionRoutingTextObstacles(
 			if (!placed.labelContent || placed.labelContent.w <= 0 || placed.labelContent.h <= 0) continue
 			obstacles.push({
 				...localRectInPage(editor, shape.id, placed.labelContent),
-				clearance: PORT_LABEL_ROUTING_CLEARANCE_PX,
+				clearance: terminalPorts.get(shape.id)?.has(placed.port.id)
+					? TERMINAL_PORT_LABEL_ROUTING_CLEARANCE_PX
+					: PORT_LABEL_ROUTING_CLEARANCE_PX,
 			})
 		}
 	}
