@@ -6,10 +6,11 @@ import {
 	type TLShapeId,
 	type VecLike,
 } from 'tldraw'
-import { isBlockShape, type BlockShape, type BlockShapeProps } from '../blockModel'
+import { BLOCK_SHAPE_TYPE, isBlockShape, type BlockShape, type BlockShapeProps } from '../blockModel'
 import { layoutBlock } from '../layoutBlock'
-import { branchLayout, isBranchShape, type BranchShape } from '../../branch/branchModel'
+import { BRANCH_SHAPE_TYPE, branchLayout, isBranchShape, type BranchShape } from '../../branch/branchModel'
 import { branchFoldAttachPoint } from '../../branch/branchScope'
+import { LOOP_SHAPE_TYPE, isLoopShape, loopLayout, type LoopShape } from '../../loop/loopModel'
 import { portSnapPageUnits } from './connectionHit'
 import {
 	CONNECTION_BINDING_TYPE,
@@ -121,10 +122,48 @@ function projectBlockConnectionPorts(props: BlockShapeProps): BlockConnectionPor
  * welds to a control port with the same binding, rules and paint as a Block's
  * input — the Branch is only a second kind of host, not a second edge model.
  */
-export type PortHostShape = BlockShape | BranchShape
+export type PortHostShape = BlockShape | BranchShape | LoopShape
+
+/**
+ * The one list of shape types a cable may weld to.
+ *
+ * `ConnectionShapeUtil.canBind` reads it too. Before that it spelled the same
+ * set out by hand, so adding the Loop region as a host silently produced a
+ * cable tldraw would not bind — the drag simply died with no error. One list,
+ * two readers, and a new host can only be forgotten in one place.
+ */
+export const PORT_HOST_SHAPE_TYPES: readonly string[] = [
+	BLOCK_SHAPE_TYPE,
+	BRANCH_SHAPE_TYPE,
+	LOOP_SHAPE_TYPE,
+]
 
 export function isPortHostShape(shape: TLShape | null | undefined): shape is PortHostShape {
-	return isBlockShape(shape) || isBranchShape(shape)
+	return isBlockShape(shape) || isBranchShape(shape) || isLoopShape(shape)
+}
+
+/**
+ * A Loop's header ports as the connection layer sees them.
+ *
+ * Two, and only two: the collection lands on the header (`input`) and the
+ * element leaves it (`output`). The header is an operator, so nothing passes
+ * through the region on its way to a Block inside — and because the item port
+ * is an ordinary output, the cable it carries is an ordinary SOLID connection.
+ * That is the whole of "B solid drop": no new cable kind, just a real port.
+ */
+export function getLoopConnectionPorts(loop: LoopShape): BlockConnectionPort[] {
+	const layout = loopLayout(loop.props)
+	return [layout.iterable, layout.item].map((placed) => ({
+		id: placed.port.id,
+		name: placed.port.name,
+		type: placed.port.type,
+		side: placed.side,
+		hidden: false,
+		x: placed.x,
+		y: placed.y,
+		anchor: { x: placed.x / layout.w, y: placed.y / layout.h },
+		subtle: false,
+	}))
 }
 
 /** A Branch's control ports as the connection layer sees them: inputs on the band. */
@@ -144,9 +183,9 @@ export function getBranchConnectionPorts(branch: BranchShape): BlockConnectionPo
 }
 
 function projectHostPorts(host: PortHostShape): BlockConnectionPort[] {
-	return isBranchShape(host)
-		? getBranchConnectionPorts(host)
-		: getBlockConnectionPorts(host.props, { includeHidden: true })
+	if (isBranchShape(host)) return getBranchConnectionPorts(host)
+	if (isLoopShape(host)) return getLoopConnectionPorts(host)
+	return getBlockConnectionPorts(host.props, { includeHidden: true })
 }
 
 /**

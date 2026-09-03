@@ -1,0 +1,149 @@
+{
+  "results": [
+    {
+      "id": "L1",
+      "label": "Loop sits in the system family menu beside Block and Branch",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "L2",
+      "label": "one Loop region, titled, with both header ports authored",
+      "observed": [
+        1,
+        "For Loop",
+        "Iterable",
+        "Iter"
+      ],
+      "desired": [
+        1,
+        "For Loop",
+        "Iterable",
+        "Iter"
+      ],
+      "ok": true
+    },
+    {
+      "id": "L3",
+      "label": "the collection port is an input on the wall, the item port an output",
+      "observed": [
+        true,
+        true,
+        true
+      ],
+      "desired": [
+        true,
+        true,
+        true
+      ],
+      "ok": true
+    },
+    {
+      "id": "L4",
+      "label": "a Block drawn inside the region becomes its child",
+      "observed": [
+        1,
+        [
+          "block"
+        ]
+      ],
+      "desired": [
+        1,
+        [
+          "block"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "L5",
+      "label": "the item port welds an ordinary SOLID cable — data, never delayed",
+      "observed": [
+        1,
+        [
+          "data"
+        ],
+        0,
+        [
+          "start"
+        ]
+      ],
+      "desired": [
+        1,
+        [
+          "data"
+        ],
+        0,
+        [
+          "start"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "L6",
+      "label": "the collection lands on the header, welded to the Iterable inlet",
+      "observed": [
+        2,
+        0,
+        [
+          "end"
+        ]
+      ],
+      "desired": [
+        2,
+        0,
+        [
+          "end"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "L7",
+      "label": "a delayed cable paints dashes; a data cable paints none",
+      "observed": [
+        true,
+        true
+      ],
+      "desired": [
+        true,
+        true
+      ],
+      "ok": true
+    },
+    {
+      "id": "L8",
+      "label": "the region, its child and both cables survive a reload",
+      "observed": [
+        1,
+        2,
+        [
+          "data",
+          "data"
+        ],
+        0,
+        1
+      ],
+      "desired": [
+        1,
+        2,
+        [
+          "data",
+          "data"
+        ],
+        0,
+        1
+      ],
+      "ok": true
+    },
+    {
+      "id": "L9",
+      "label": "no local console errors",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    }
+  ]
+}

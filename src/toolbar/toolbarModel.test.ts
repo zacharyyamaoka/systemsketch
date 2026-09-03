@@ -75,7 +75,7 @@ describe('toolbar preference parsing', () => {
       lastShapeTool: 'arrow-curve',
       lastArrowPreset: 'sideways',
       lastDrawTool: 'highlight',
-      lastSystemTool: 'loop',
+      lastSystemTool: 'trapezoid',
     })).toEqual({
       version: 1,
       lastShapeTool: 'arrow-curve',
@@ -84,6 +84,8 @@ describe('toolbar preference parsing', () => {
       lastSystemTool: DEFAULT_TOOLBAR_PREFERENCES.lastSystemTool,
     })
     expect(parseToolbarPreferences({ lastSystemTool: 'branch' }).lastSystemTool).toBe('branch')
+    // The Loop joined the system family on 2026-09-03 and is now a valid value.
+    expect(parseToolbarPreferences({ lastSystemTool: 'loop' }).lastSystemTool).toBe('loop')
   })
 
   it('falls back safely for corrupt storage values', () => {

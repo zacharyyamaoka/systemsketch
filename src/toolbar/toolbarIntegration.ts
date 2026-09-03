@@ -254,7 +254,7 @@ function overrideTools(
  */
 function rememberSystemTools(tools: TLUiToolsContextType): TLUiToolsContextType {
   const next: TLUiToolsContextType = { ...tools }
-  for (const id of ['block', 'branch', 'pill'] as const satisfies readonly SystemFamilyTool[]) {
+  for (const id of ['block', 'branch', 'loop', 'pill'] as const satisfies readonly SystemFamilyTool[]) {
     const wrapped = wrapTool(tools[id], () => updateToolbarPreferences({ lastSystemTool: id }))
     if (wrapped) next[id] = wrapped
   }

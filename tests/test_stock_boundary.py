@@ -35,7 +35,9 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("BlockShapeUtil", source)
         self.assertIn("BlockTool", source)
         self.assertIn("PillTool", source)
-        self.assertIn("const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, PillTool]", source)
+        self.assertIn(
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool]", source
+        )
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS", source)
         self.assertIn("...blockConnectionShapeUtils", source)
         self.assertIn("const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]", source)
@@ -70,17 +72,25 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn('family="system"', toolbar_source)
         self.assertIn("label: 'Block', icon: <BlockIcon />", toolbar_source)
         self.assertIn("label: 'Branch', icon: <BranchIcon />", toolbar_source)
+        # The Loop region joins the same family slot as Block and Branch, one
+        # click deeper. It must not become a top-level toolbar slot of its own.
+        self.assertIn("label: 'Loop', icon: <LoopIcon />", toolbar_source)
+        self.assertNotIn('title="Loop"', toolbar_source)
         self.assertNotIn('title="Branch"', toolbar_source)
         self.assertNotIn('title="Comment"', toolbar_source)
         self.assertIn("BranchShapeUtil,", source)
         self.assertIn("BranchArmShapeUtil,", source)
-        self.assertIn("const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, PillTool]", source)
+        self.assertIn("LoopShapeUtil,", source)
+        self.assertIn(
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool]", source
+        )
         self.assertIn("const stopBranchRegions = installBranchRegions(editor)", product_source)
         self.assertIn("const stopBranchClickToEdit = installBranchClickToEdit(editor)", product_source)
         # The Branch is created from the toolbar; the right-click menu must not
         # grow an "Add > Branch region" row (the muscle memory Zach refused).
         context_menu = (PROJECT_ROOT / "src" / "blocks" / "ui" / "BlockContextMenu.tsx").read_text(encoding="utf-8")
         self.assertNotIn("Branch region", context_menu)
+        self.assertNotIn("Loop region", context_menu)
 
     def test_the_embedded_lane_is_the_same_engine_with_the_file_surfaces_removed(self) -> None:
         """An IDE host must reach tldraw through the same seams the app does.

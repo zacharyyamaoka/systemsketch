@@ -23,6 +23,7 @@ import { BLOCK_TOOL_ID, PILL_TOOL_ID } from '../blocks'
 import { PillIcon } from '../blocks/PillIcon'
 import { BlockIcon } from '../blocks/BlockIcon'
 import { BRANCH_TOOL_ID, BranchIcon } from '../branch'
+import { LOOP_TOOL_ID, LoopIcon } from '../loop'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
 import {
   selectDrawFamilyTool,
@@ -107,6 +108,10 @@ const SYSTEM_MENU_ITEMS: ReadonlyArray<{
 }> = [
   { id: BLOCK_TOOL_ID, label: 'Block', icon: <BlockIcon />, shortcut: 'B' },
   { id: BRANCH_TOOL_ID, label: 'Branch', icon: <BranchIcon /> },
+  // A loop is the same kind of region as a Branch, one click deeper for the
+  // same reason: it is used less often than a Block and the toolbar, not the
+  // right-click menu, is where the muscle memory forms.
+  { id: LOOP_TOOL_ID, label: 'Loop', icon: <LoopIcon /> },
   // A pill is a variable: a literal argument, a named result, or both. P.
   { id: PILL_TOOL_ID, label: 'Pill', icon: <PillIcon />, shortcut: 'P' },
 ]
@@ -281,14 +286,17 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
   const preferences = useToolbarPreferences()
   const current: SystemFamilyTool = activeToolId === BRANCH_TOOL_ID
     ? BRANCH_TOOL_ID
-    : activeToolId === BLOCK_TOOL_ID
-      ? BLOCK_TOOL_ID
-      : activeToolId === PILL_TOOL_ID
-        ? PILL_TOOL_ID
-        : preferences.lastSystemTool
+    : activeToolId === LOOP_TOOL_ID
+      ? LOOP_TOOL_ID
+      : activeToolId === BLOCK_TOOL_ID
+        ? BLOCK_TOOL_ID
+        : activeToolId === PILL_TOOL_ID
+          ? PILL_TOOL_ID
+          : preferences.lastSystemTool
   const currentItem = SYSTEM_MENU_ITEMS.find((item) => item.id === current) ?? SYSTEM_MENU_ITEMS[0]
   const isActive = activeToolId === BLOCK_TOOL_ID
     || activeToolId === BRANCH_TOOL_ID
+    || activeToolId === LOOP_TOOL_ID
     || activeToolId === PILL_TOOL_ID
 
   return (

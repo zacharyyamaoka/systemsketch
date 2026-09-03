@@ -1,0 +1,89 @@
+/*
+ * The Loop region's face. A container, not a card: no fill behind the body, so
+ * the cables that live in the Loop's scope stay visible through it. Only the
+ * header and footer carry a surface. Geometry comes from `loopLayout`, as the
+ * Block's does from `layoutBlock`, so paint and hit testing cannot drift.
+ */
+
+.systemsketch-loop-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: 0 0 0 1.2px var(--ss-border-strong);
+  color: var(--ss-text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  overflow: visible;
+}
+
+.systemsketch-loop-canvas .Loop-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: inherit;
+}
+
+/* The header: an operator. The collection lands on it; the element leaves it. */
+.systemsketch-loop-canvas .Loop-header {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--ss-border-strong);
+  border-radius: 6px 6px 0 0;
+  background: color-mix(in srgb, var(--ss-surface-raised) 92%, transparent);
+}
+
+.systemsketch-loop-canvas .Loop-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+  border-top: 1px solid var(--ss-border);
+  border-radius: 0 0 6px 6px;
+  background: color-mix(in srgb, var(--ss-surface-raised) 92%, transparent);
+}
+
+/* Centred, because an operator's name belongs over the middle of it. */
+.systemsketch-loop-canvas .Loop-title {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 18px;
+  color: var(--ss-text);
+}
+
+.systemsketch-loop-canvas .Loop-portLabel {
+  position: absolute;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-size: 12.5px;
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-loop-canvas .Loop-turn {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-radius: 11px;
+  border: 1px solid var(--ss-accent);
+  background: var(--ss-accent-soft);
+  color: var(--ss-text);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.systemsketch-loop-canvas .Loop-menuDot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  color: var(--ss-text-faint);
+  font-size: 13px;
+}

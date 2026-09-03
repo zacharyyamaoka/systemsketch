@@ -23,7 +23,7 @@ import {
 	useValue,
 	vecModelValidator,
 } from 'tldraw'
-import { getBlockPortConnections, getBlockPortDotAtPoint } from './blockPorts'
+import { PORT_HOST_SHAPE_TYPES, getBlockPortConnections, getBlockPortDotAtPoint } from './blockPorts'
 import {
 	HitPaddedCubicBezier2d,
 	HitPaddedEdge2d,
@@ -291,7 +291,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 	override canBind({ bindingType, fromShapeType, toShapeType }: Parameters<ShapeUtil['canBind']>[0]): boolean {
 		return bindingType === 'connection'
 			&& fromShapeType === CONNECTION_SHAPE_TYPE
-			&& (toShapeType === 'block' || toShapeType === 'branch')
+			&& PORT_HOST_SHAPE_TYPES.includes(toShapeType)
 	}
 
 	override canEdit(_shape: ConnectionShape): boolean {
