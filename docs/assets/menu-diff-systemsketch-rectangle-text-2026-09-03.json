@@ -1,0 +1,38 @@
+{
+ "subject": "rectangle-text",
+ "appearance": [
+  {
+   "control": "geo",
+   "label": "Shape, rectangle"
+  },
+  {
+   "control": "color",
+   "label": "Color, black"
+  },
+  {
+   "control": "dash",
+   "label": "Line style, draw"
+  },
+  {
+   "control": "font",
+   "label": "Typeface, scribbled"
+  },
+  {
+   "control": "size",
+   "label": "Font size, medium"
+  },
+  {
+   "control": "align",
+   "label": "Text alignment, center"
+  },
+  {
+   "control": "verticalAlign",
+   "label": "Vertical alignment, middle"
+  }
+ ],
+ "hasBlockMiniMenu": false,
+ "blockButtons": [],
+ "extraButtons": [
+  "Inspect"
+ ]
+}

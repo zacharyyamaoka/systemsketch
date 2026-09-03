@@ -1,5 +1,6 @@
 import { Fragment } from 'react'
 import {
+  startEditingShapeWithRichText,
   TldrawUiPopover,
   TldrawUiPopoverContent,
   TldrawUiPopoverTrigger,
@@ -9,6 +10,7 @@ import {
   type Editor,
   type StyleProp,
   type TLArrowShape,
+  type TLShape,
 } from 'tldraw'
 
 import {
@@ -31,6 +33,7 @@ import {
   POPOVER_GAP,
   SWATCH_SIZE,
 } from './figjamTokens'
+import { addTextTarget, selectionHasVisibleText } from './textPresence'
 import './appearance.css'
 import {
   applyArrowPresetToSelection,
@@ -59,6 +62,8 @@ const GROUP_STARTS = new Set(['color', 'font', 'align', 'arrowheadStart'])
 export function AppearanceControls() {
   const editor = useEditor()
   const styles = useRelevantStyles()
+  const hasText = useValue('systemsketch selection has text', () => selectionHasVisibleText(editor), [editor])
+  const addTextShape = useValue('systemsketch add text target', () => addTextTarget(editor), [editor])
   const selectedArrowRouting = useValue(
     'selected arrow routing',
     () => {
@@ -72,7 +77,7 @@ export function AppearanceControls() {
     },
     [editor],
   )
-  const controls = buildAppearanceControls(styles).map((control) => {
+  const controls = buildAppearanceControls(styles, hasText).map((control) => {
     if (control.id !== 'arrowKind' || selectedArrowRouting === null) return control
     return {
       ...control,
@@ -82,7 +87,7 @@ export function AppearanceControls() {
     }
   })
 
-  if (controls.length === 0) return null
+  if (controls.length === 0 && !addTextShape) return null
 
   return (
     <div className="systemsketch-appearance" data-testid="systemsketch-appearance">
@@ -92,9 +97,33 @@ export function AppearanceControls() {
             ? <span className="systemsketch-appearance__separator" aria-hidden="true" />
             : null}
           <AppearanceTrigger editor={editor} control={control} />
+          {/* FigJam's connector-only "Add text": no style to hold, so it
+              can't be a value in the model above. Sits right after Line
+              style, the way FigJam's own capture shows it. */}
+          {control.id === 'lineStyle' && addTextShape
+            ? <AddTextButton editor={editor} shape={addTextShape} />
+            : null}
         </Fragment>
       ))}
     </div>
+  )
+}
+
+function AddTextButton({ editor, shape }: { editor: Editor; shape: TLShape }) {
+  return (
+    <button
+      type="button"
+      className="systemsketch-appearance__trigger"
+      data-control="addText"
+      aria-label="Add text"
+      title="Add text"
+      onClick={() => {
+        editor.markHistoryStoppingPoint('add text')
+        startEditingShapeWithRichText(editor, shape, { selectAll: true })
+      }}
+    >
+      <FigjamGlyph name="trigger/Add text" />
+    </button>
   )
 }
 

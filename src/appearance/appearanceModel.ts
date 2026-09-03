@@ -238,9 +238,11 @@ interface Definition {
 }
 
 const DEFINITIONS: Readonly<Record<Exclude<AppearanceControlId, 'fill' | 'lineStyle'>, Definition>> = {
+  // FigJam's trigger is a fixed circle-and-square glyph, the same whichever
+  // geo is actually selected — not a preview of the current shape.
   geo: {
     id: 'geo', label: 'Shape', style: GeoShapeGeoStyle as StyleProp<string>,
-    options: GEO_OPTIONS, layout: 'library', trigger: 'value',
+    options: GEO_OPTIONS, layout: 'library', trigger: 'icon',
   },
   color: {
     id: 'color', label: 'Color', style: DefaultColorStyle as StyleProp<string>,
@@ -302,6 +304,8 @@ const DEFINITIONS: Readonly<Record<Exclude<AppearanceControlId, 'fill' | 'lineSt
  * A shape's pill, in FigJam's order: what it is, how it is painted, its text.
  * Captured as `Shape | Change color, Line style | Typeface, Font size | ... |
  * Text alignment` — Font size sits after Typeface, not beside Line style.
+ * The typography group (`font size align verticalAlign`) only ever renders
+ * once the shape actually has text; see `TYPOGRAPHY_IDS` below.
  */
 const SHAPE_ORDER: readonly AppearanceControlId[] = [
   'geo', 'color', 'dash', 'font', 'size', 'align', 'verticalAlign',
@@ -312,11 +316,30 @@ const SHAPE_ORDER: readonly AppearanceControlId[] = [
  * Line shape | End point`. Its Line style holds both weight and dash, so
  * neither appears on its own; the ends and the shape between them read the
  * way the arrow does — where it leaves, how it travels, where it lands.
+ *
+ * `font`/`align`/`verticalAlign` still sit in this order — a Text shape
+ * selected beside a cable (no dash of its own) legitimately needs its own
+ * typography — but `buildAppearanceControls` suppresses all three whenever
+ * the selection is a genuine dash-bearing connector, labelled or not:
+ * FigJam's own labelled-connector capture
+ * (`docs/assets/menu-diff-figjam-arrow-text-2026-09-03.json`) carries no
+ * Typeface or Font size control at all — a connector's label typography is
+ * fixed, not user-editable, unlike a shape's. `AppearanceControls` renders
+ * the "Add text" button itself, beside `lineStyle`, for the one case this
+ * order can't express: a control with no style to hold.
  */
 const CONNECTOR_ORDER: readonly AppearanceControlId[] = [
   'geo', 'color', 'lineStyle', 'font', 'align', 'verticalAlign',
   'arrowheadStart', 'connectionRouting', 'arrowKind', 'spline', 'arrowheadEnd',
 ]
+
+/**
+ * Typography controls a shape only earns once it has visible text — FigJam's
+ * rectangle-with-no-text pill is `Shape · Change color · Line style`, full
+ * stop; Typeface/Font size/alignment appear the moment a label exists. A
+ * genuine connector never earns them at all; see `CONNECTOR_ORDER` above.
+ */
+const TYPOGRAPHY_IDS = new Set<AppearanceControlId>(['font', 'size', 'align', 'verticalAlign'])
 
 /** The styles that only a connector or a line carries. */
 const CONNECTOR_STYLES = [
@@ -377,26 +400,36 @@ function lineStyleControl(styles: ReadonlySharedStyleMap): AppearanceControl | u
  * Build the control list for the current selection.
  *
  * A control exists only when tldraw reports the style as relevant, which is why
- * a connector shows routing and endpoints while a shape shows fill and why both
- * grow the typography group the moment they carry text — the same
+ * a connector shows routing and endpoints while a shape shows fill and why a
+ * shape grows the typography group the moment it carries text — the same
  * driven-by-what-the-selection-has rule FigJam uses. Which of FigJam's two
  * pills is copied depends on the same map: a connector anywhere in the
  * selection merges weight and dash into one Line style, as FigJam does.
+ *
+ * `hasText` gates `TYPOGRAPHY_IDS` for a shape. A connector suppresses the
+ * same ids outright, but only once it is confirmed genuine — carrying its
+ * own dash — so a Text shape selected beside a dash-less cable keeps its
+ * typography.
  */
 export function buildAppearanceControls(
   styles: ReadonlySharedStyleMap | null,
+  hasText: boolean,
 ): AppearanceControl[] {
   if (!styles) return []
   const connector = isConnectorSelection(styles)
+  const lineStyle = connector ? lineStyleControl(styles) : undefined
+  const suppressTypography = connector ? Boolean(lineStyle) : !hasText
   const controls: AppearanceControl[] = []
   for (const id of connector ? CONNECTOR_ORDER : SHAPE_ORDER) {
+    if (suppressTypography && TYPOGRAPHY_IDS.has(id)) continue
     if (id === 'lineStyle') {
-      const lineStyle = lineStyleControl(styles)
       if (lineStyle) {
         controls.push(lineStyle)
         continue
       }
-      // A selection with a size but no dash (text beside a cable) keeps Font size.
+      // A selection with a size but no dash (text beside a cable) keeps Font
+      // size — this is a Text object's own control, not a connector's, so it
+      // is not gated by `hasText` the way a shape's typography is.
       const size = styles.get(DEFINITIONS.size.style)
       if (size) controls.push({ ...DEFINITIONS.size, value: size })
       continue
