@@ -171,7 +171,11 @@ async function main() {
     process.stdout.write('  PASS  the recovered board returns through tldraw’s official stock-readable serializer\n')
 
     await shortcut(page, 'a', 'KeyA', 2)
-    await waitFor(page, `document.body.textContent.includes('2 selected')`, 'both recovered shapes selected')
+    await waitFor(page,
+      `document.querySelector('[data-testid="systemsketch-selection-menu"]')?.dataset.visible === 'true'`,
+      'both recovered shapes selected')
+    assert.equal(await evaluate(page, `document.body.textContent.includes('2 selected')`), false,
+      'the selection menu does not narrate the selected count')
     const capture = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
     await writeFile(SCREENSHOT, Buffer.from(capture.data, 'base64'))
     assert.deepEqual(localConsoleErrors(page), [])

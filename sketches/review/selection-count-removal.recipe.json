@@ -1,0 +1,86 @@
+{
+  "feature": "Count-free multi-selection menu",
+  "viewport": { "width": 1800, "height": 900 },
+  "shapes": [
+    {
+      "id": "source",
+      "type": "block",
+      "x": 540,
+      "y": 300,
+      "props": {
+        "title": "read()",
+        "description": "First Block in the review selection",
+        "blockType": "Function",
+        "view": "port",
+        "w": 220,
+        "h": 200,
+        "inputs": [{ "id": "in_1", "name": "request", "type": "Request", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "record", "type": "Record", "visible": true }]
+      }
+    },
+    {
+      "id": "transform",
+      "type": "block",
+      "x": 830,
+      "y": 300,
+      "props": {
+        "title": "normalize()",
+        "description": "Second Block in the review selection",
+        "blockType": "Function",
+        "view": "port",
+        "w": 220,
+        "h": 200,
+        "inputs": [{ "id": "in_1", "name": "record", "type": "Record", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "clean", "type": "Record", "visible": true }]
+      }
+    },
+    {
+      "id": "sink",
+      "type": "block",
+      "x": 1120,
+      "y": 300,
+      "props": {
+        "title": "publish()",
+        "description": "Third Block in the review selection",
+        "blockType": "Function",
+        "view": "port",
+        "w": 220,
+        "h": 200,
+        "inputs": [{ "id": "in_1", "name": "clean", "type": "Record", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "event", "type": "Event", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Drag a marquee from empty canvas around all three Blocks.",
+      "x": 80,
+      "y": 360,
+      "w": 360,
+      "h": 110,
+      "target": { "shapeId": "source", "anchor": "left" }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Read the floating menu above the selection. Its first controls are S, P and E — no selection total precedes them.",
+      "x": 1430,
+      "y": 340,
+      "w": 350,
+      "h": 140,
+      "target": { "shapeId": "sink", "anchor": "right" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · the three-Block selection keeps S / P / E and Inspect, but shows neither “3 selected” nor “3 Blocks”. Open Inspect: its heading is “Batch edit”, not a count.",
+      "x": 560,
+      "y": 670,
+      "w": 760,
+      "h": 110
+    }
+  ]
+}

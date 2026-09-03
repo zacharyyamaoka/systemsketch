@@ -17,7 +17,8 @@ describe('Block batch inspector', () => {
     )
 
     expect(html).toContain('aria-label="Block inspector"')
-    expect(html).toContain('9 Blocks selected')
+    expect(html).toContain('Batch edit')
+    expect(html).not.toContain('9 Blocks selected')
     expect(html).toContain('data-block-count="9"')
     expect(html).not.toContain('Select a Block to inspect it')
 
@@ -42,7 +43,8 @@ describe('Block batch inspector', () => {
       />,
     )
 
-    expect(html).toContain('3 Blocks selected')
+    expect(html).toContain('Batch edit')
+    expect(html).not.toContain('3 Blocks selected')
     expect(html.match(/Mixed/g)).toHaveLength(3)
     expect(html).not.toContain('aria-pressed="true"')
   })
@@ -68,18 +70,17 @@ describe('Block batch inspector', () => {
 })
 
 describe('Block selection mini menu under multi-selection', () => {
-  it('names the batch and keeps the shared view pressed', () => {
+  it('keeps the shared view pressed without a selected-count summary', () => {
     const html = renderToStaticMarkup(
       <BlockSelectionMiniMenu
         view={{ type: 'shared', value: 'port' }}
-        selectionLabel="9 Blocks"
         onSetView={() => {}}
         onOpenInspector={() => {}}
       />,
     )
 
-    expect(html).toContain('Selected Block actions (batch)')
-    expect(html).toContain('9 Blocks')
+    expect(html).toContain('aria-label="Selected Block actions"')
+    expect(html).not.toContain('9 Blocks')
     expect(html).toContain('data-view="port"')
     expect(html).toContain('aria-pressed="true"')
     expect(html).toContain('Inspect')
@@ -93,7 +94,6 @@ describe('Block selection mini menu under multi-selection', () => {
     const html = renderToStaticMarkup(
       <BlockSelectionMiniMenu
         view={{ type: 'mixed' }}
-        selectionLabel="4 Blocks"
         onSetView={() => {}}
         onOpenInspector={() => {}}
       />,
