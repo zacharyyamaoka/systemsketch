@@ -2,13 +2,13 @@
  "color": {
   "file": "docs/appearance-menu-1-color-2026-09-01.png",
   "pill": {
-   "x": 414,
+   "x": 446,
    "y": 319,
-   "w": 632.9,
+   "w": 569,
    "h": 40
   },
   "panel": {
-   "x": 345,
+   "x": 313,
    "y": 182,
    "w": 454.6,
    "h": 129
@@ -17,8 +17,8 @@
   "triggers": [
    {
     "control": "geo",
-    "kind": "value",
-    "x": 479.9,
+    "kind": "icon",
+    "x": 448,
     "y": 319,
     "w": 56,
     "h": 40
@@ -26,7 +26,7 @@
    {
     "control": "color",
     "kind": "value",
-    "x": 544.9,
+    "x": 513,
     "y": 319,
     "w": 54,
     "h": 40
@@ -34,7 +34,7 @@
    {
     "control": "dash",
     "kind": "icon",
-    "x": 598.9,
+    "x": 567,
     "y": 319,
     "w": 56,
     "h": 40
@@ -42,7 +42,7 @@
    {
     "control": "font",
     "kind": "icon",
-    "x": 663.9,
+    "x": 632,
     "y": 319,
     "w": 56,
     "h": 40
@@ -50,7 +50,7 @@
    {
     "control": "size",
     "kind": "text",
-    "x": 719.9,
+    "x": 688,
     "y": 319,
     "w": 144,
     "h": 40
@@ -58,7 +58,7 @@
    {
     "control": "align",
     "kind": "value",
-    "x": 872.9,
+    "x": 841,
     "y": 319,
     "w": 56,
     "h": 40
@@ -66,7 +66,7 @@
    {
     "control": "verticalAlign",
     "kind": "value",
-    "x": 928.9,
+    "x": 897,
     "y": 319,
     "w": 56,
     "h": 40
@@ -76,19 +76,19 @@
  "picker": {
   "file": "docs/appearance-menu-4-custom-picker-2026-09-01.png",
   "pill": {
-   "x": 414,
+   "x": 446,
    "y": 319,
-   "w": 632.9,
+   "w": 569,
    "h": 40
   },
   "panel": {
-   "x": 345,
+   "x": 313,
    "y": 182,
    "w": 454.6,
    "h": 129
   },
   "picker": {
-   "x": 597,
+   "x": 565,
    "y": 311,
    "w": 184,
    "h": 310
@@ -96,8 +96,8 @@
   "triggers": [
    {
     "control": "geo",
-    "kind": "value",
-    "x": 479.9,
+    "kind": "icon",
+    "x": 448,
     "y": 319,
     "w": 56,
     "h": 40
@@ -105,7 +105,7 @@
    {
     "control": "color",
     "kind": "value",
-    "x": 544.9,
+    "x": 513,
     "y": 319,
     "w": 54,
     "h": 40
@@ -113,7 +113,7 @@
    {
     "control": "dash",
     "kind": "icon",
-    "x": 598.9,
+    "x": 567,
     "y": 319,
     "w": 56,
     "h": 40
@@ -121,7 +121,7 @@
    {
     "control": "font",
     "kind": "icon",
-    "x": 663.9,
+    "x": 632,
     "y": 319,
     "w": 56,
     "h": 40
@@ -129,7 +129,7 @@
    {
     "control": "size",
     "kind": "text",
-    "x": 719.9,
+    "x": 688,
     "y": 319,
     "w": 144,
     "h": 40
@@ -137,7 +137,7 @@
    {
     "control": "align",
     "kind": "value",
-    "x": 872.9,
+    "x": 841,
     "y": 319,
     "w": 56,
     "h": 40
@@ -145,7 +145,7 @@
    {
     "control": "verticalAlign",
     "kind": "value",
-    "x": 928.9,
+    "x": 897,
     "y": 319,
     "w": 56,
     "h": 40
@@ -155,19 +155,19 @@
  "custom": {
   "file": "docs/appearance-menu-5-custom-applied-2026-09-01.png",
   "pill": {
-   "x": 414,
+   "x": 446,
    "y": 319,
-   "w": 632.9,
+   "w": 569,
    "h": 40
   },
   "panel": {
-   "x": 345,
+   "x": 313,
    "y": 182,
    "w": 454.6,
    "h": 129
   },
   "picker": {
-   "x": 597,
+   "x": 565,
    "y": 311,
    "w": 184,
    "h": 310
@@ -175,8 +175,8 @@
   "triggers": [
    {
     "control": "geo",
-    "kind": "value",
-    "x": 479.9,
+    "kind": "icon",
+    "x": 448,
     "y": 319,
     "w": 56,
     "h": 40
@@ -184,7 +184,7 @@
    {
     "control": "color",
     "kind": "value",
-    "x": 544.9,
+    "x": 513,
     "y": 319,
     "w": 54,
     "h": 40
@@ -192,7 +192,7 @@
    {
     "control": "dash",
     "kind": "icon",
-    "x": 598.9,
+    "x": 567,
     "y": 319,
     "w": 56,
     "h": 40
@@ -200,7 +200,7 @@
    {
     "control": "font",
     "kind": "icon",
-    "x": 663.9,
+    "x": 632,
     "y": 319,
     "w": 56,
     "h": 40
@@ -208,7 +208,7 @@
    {
     "control": "size",
     "kind": "text",
-    "x": 719.9,
+    "x": 688,
     "y": 319,
     "w": 144,
     "h": 40
@@ -216,7 +216,7 @@
    {
     "control": "align",
     "kind": "value",
-    "x": 872.9,
+    "x": 841,
     "y": 319,
     "w": 56,
     "h": 40
@@ -224,7 +224,7 @@
    {
     "control": "verticalAlign",
     "kind": "value",
-    "x": 928.9,
+    "x": 897,
     "y": 319,
     "w": 56,
     "h": 40
@@ -234,13 +234,13 @@
  "chips": {
   "file": "docs/appearance-menu-8-shape-line-style-2026-09-01.png",
   "pill": {
-   "x": 414,
+   "x": 446,
    "y": 319,
-   "w": 632.9,
+   "w": 569,
    "h": 40
   },
   "panel": {
-   "x": 431,
+   "x": 399,
    "y": 263,
    "w": 391.2,
    "h": 48
@@ -249,8 +249,8 @@
   "triggers": [
    {
     "control": "geo",
-    "kind": "value",
-    "x": 479.9,
+    "kind": "icon",
+    "x": 448,
     "y": 319,
     "w": 56,
     "h": 40
@@ -258,7 +258,7 @@
    {
     "control": "color",
     "kind": "value",
-    "x": 544.9,
+    "x": 513,
     "y": 319,
     "w": 54,
     "h": 40
@@ -266,7 +266,7 @@
    {
     "control": "dash",
     "kind": "icon",
-    "x": 598.9,
+    "x": 567,
     "y": 319,
     "w": 56,
     "h": 40
@@ -274,7 +274,7 @@
    {
     "control": "font",
     "kind": "icon",
-    "x": 663.9,
+    "x": 632,
     "y": 319,
     "w": 56,
     "h": 40
@@ -282,7 +282,7 @@
    {
     "control": "size",
     "kind": "text",
-    "x": 719.9,
+    "x": 688,
     "y": 319,
     "w": 144,
     "h": 40
@@ -290,7 +290,7 @@
    {
     "control": "align",
     "kind": "value",
-    "x": 872.9,
+    "x": 841,
     "y": 319,
     "w": 56,
     "h": 40
@@ -298,7 +298,7 @@
    {
     "control": "verticalAlign",
     "kind": "value",
-    "x": 928.9,
+    "x": 897,
     "y": 319,
     "w": 56,
     "h": 40
@@ -308,13 +308,13 @@
  "fontSize": {
   "file": "docs/appearance-menu-7-font-size-2026-09-01.png",
   "pill": {
-   "x": 414,
+   "x": 446,
    "y": 319,
-   "w": 632.9,
+   "w": 569,
    "h": 40
   },
   "panel": {
-   "x": 727,
+   "x": 696,
    "y": 175,
    "w": 129,
    "h": 136
@@ -323,8 +323,8 @@
   "triggers": [
    {
     "control": "geo",
-    "kind": "value",
-    "x": 479.9,
+    "kind": "icon",
+    "x": 448,
     "y": 319,
     "w": 56,
     "h": 40
@@ -332,7 +332,7 @@
    {
     "control": "color",
     "kind": "value",
-    "x": 544.9,
+    "x": 513,
     "y": 319,
     "w": 54,
     "h": 40
@@ -340,7 +340,7 @@
    {
     "control": "dash",
     "kind": "icon",
-    "x": 598.9,
+    "x": 567,
     "y": 319,
     "w": 56,
     "h": 40
@@ -348,7 +348,7 @@
    {
     "control": "font",
     "kind": "icon",
-    "x": 663.9,
+    "x": 632,
     "y": 319,
     "w": 56,
     "h": 40
@@ -356,7 +356,7 @@
    {
     "control": "size",
     "kind": "text",
-    "x": 719.9,
+    "x": 688,
     "y": 319,
     "w": 144,
     "h": 40
@@ -364,7 +364,7 @@
    {
     "control": "align",
     "kind": "value",
-    "x": 872.9,
+    "x": 841,
     "y": 319,
     "w": 56,
     "h": 40
@@ -372,7 +372,7 @@
    {
     "control": "verticalAlign",
     "kind": "value",
-    "x": 928.9,
+    "x": 897,
     "y": 319,
     "w": 56,
     "h": 40
@@ -382,13 +382,13 @@
  "shape": {
   "file": "docs/appearance-menu-2-shape-2026-09-01.png",
   "pill": {
-   "x": 414,
+   "x": 446,
    "y": 319,
-   "w": 632.9,
+   "w": 569,
    "h": 40
   },
   "panel": {
-   "x": 222,
+   "x": 190,
    "y": 161,
    "w": 571.4,
    "h": 150
@@ -397,8 +397,8 @@
   "triggers": [
    {
     "control": "geo",
-    "kind": "value",
-    "x": 479.9,
+    "kind": "icon",
+    "x": 448,
     "y": 319,
     "w": 56,
     "h": 40
@@ -406,7 +406,7 @@
    {
     "control": "color",
     "kind": "value",
-    "x": 544.9,
+    "x": 513,
     "y": 319,
     "w": 54,
     "h": 40
@@ -414,7 +414,7 @@
    {
     "control": "dash",
     "kind": "icon",
-    "x": 598.9,
+    "x": 567,
     "y": 319,
     "w": 56,
     "h": 40
@@ -422,7 +422,7 @@
    {
     "control": "font",
     "kind": "icon",
-    "x": 663.9,
+    "x": 632,
     "y": 319,
     "w": 56,
     "h": 40
@@ -430,7 +430,7 @@
    {
     "control": "size",
     "kind": "text",
-    "x": 719.9,
+    "x": 688,
     "y": 319,
     "w": 144,
     "h": 40
@@ -438,7 +438,7 @@
    {
     "control": "align",
     "kind": "value",
-    "x": 872.9,
+    "x": 841,
     "y": 319,
     "w": 56,
     "h": 40
@@ -446,7 +446,7 @@
    {
     "control": "verticalAlign",
     "kind": "value",
-    "x": 928.9,
+    "x": 897,
     "y": 319,
     "w": 56,
     "h": 40
@@ -456,13 +456,13 @@
  "lineStyle": {
   "file": "docs/appearance-menu-6-line-style-2026-09-01.png",
   "pill": {
-   "x": 490,
+   "x": 535,
    "y": 359,
-   "w": 479.9,
+   "w": 391,
    "h": 40
   },
   "panel": {
-   "x": 485,
+   "x": 467,
    "y": 307,
    "w": 305,
    "h": 44
@@ -472,7 +472,7 @@
    {
     "control": "color",
     "kind": "value",
-    "x": 555.9,
+    "x": 537,
     "y": 359,
     "w": 54,
     "h": 40
@@ -480,23 +480,22 @@
    {
     "control": "lineStyle",
     "kind": "icon",
-    "x": 609.9,
+    "x": 591,
     "y": 359,
     "w": 56,
     "h": 40
    },
    {
-    "control": "font",
-    "kind": "icon",
-    "x": 674.9,
+    "control": "addText",
+    "x": 647,
     "y": 359,
-    "w": 56,
+    "w": 40,
     "h": 40
    },
    {
     "control": "arrowheadStart",
     "kind": "value",
-    "x": 739.9,
+    "x": 696,
     "y": 359,
     "w": 56,
     "h": 40
@@ -504,7 +503,7 @@
    {
     "control": "arrowKind",
     "kind": "value",
-    "x": 795.9,
+    "x": 752,
     "y": 359,
     "w": 56,
     "h": 40
@@ -512,7 +511,7 @@
    {
     "control": "arrowheadEnd",
     "kind": "value",
-    "x": 851.9,
+    "x": 808,
     "y": 359,
     "w": 56,
     "h": 40
@@ -522,13 +521,13 @@
  "arrowRouting": {
   "file": "docs/assets/arrow-routing-three-options.png",
   "pill": {
-   "x": 490,
+   "x": 535,
    "y": 359,
-   "w": 479.9,
+   "w": 391,
    "h": 40
   },
   "panel": {
-   "x": 772,
+   "x": 728,
    "y": 311,
    "w": 104,
    "h": 40
@@ -538,7 +537,7 @@
    {
     "control": "color",
     "kind": "value",
-    "x": 555.9,
+    "x": 537,
     "y": 359,
     "w": 54,
     "h": 40
@@ -546,23 +545,22 @@
    {
     "control": "lineStyle",
     "kind": "icon",
-    "x": 609.9,
+    "x": 591,
     "y": 359,
     "w": 56,
     "h": 40
    },
    {
-    "control": "font",
-    "kind": "icon",
-    "x": 674.9,
+    "control": "addText",
+    "x": 647,
     "y": 359,
-    "w": 56,
+    "w": 40,
     "h": 40
    },
    {
     "control": "arrowheadStart",
     "kind": "value",
-    "x": 739.9,
+    "x": 696,
     "y": 359,
     "w": 56,
     "h": 40
@@ -570,7 +568,7 @@
    {
     "control": "arrowKind",
     "kind": "value",
-    "x": 795.9,
+    "x": 752,
     "y": 359,
     "w": 56,
     "h": 40
@@ -578,7 +576,7 @@
    {
     "control": "arrowheadEnd",
     "kind": "value",
-    "x": 851.9,
+    "x": 808,
     "y": 359,
     "w": 56,
     "h": 40
@@ -588,9 +586,9 @@
  "connector": {
   "file": "docs/appearance-menu-3-connector-2026-09-01.png",
   "pill": {
-   "x": 490,
+   "x": 535,
    "y": 359,
-   "w": 479.9,
+   "w": 391,
    "h": 40
   },
   "panel": null,
@@ -599,7 +597,7 @@
    {
     "control": "color",
     "kind": "value",
-    "x": 555.9,
+    "x": 537,
     "y": 359,
     "w": 54,
     "h": 40
@@ -607,23 +605,22 @@
    {
     "control": "lineStyle",
     "kind": "icon",
-    "x": 609.9,
+    "x": 591,
     "y": 359,
     "w": 56,
     "h": 40
    },
    {
-    "control": "font",
-    "kind": "icon",
-    "x": 674.9,
+    "control": "addText",
+    "x": 647,
     "y": 359,
-    "w": 56,
+    "w": 40,
     "h": 40
    },
    {
     "control": "arrowheadStart",
     "kind": "value",
-    "x": 739.9,
+    "x": 696,
     "y": 359,
     "w": 56,
     "h": 40
@@ -631,7 +628,7 @@
    {
     "control": "arrowKind",
     "kind": "value",
-    "x": 795.9,
+    "x": 752,
     "y": 359,
     "w": 56,
     "h": 40
@@ -639,7 +636,7 @@
    {
     "control": "arrowheadEnd",
     "kind": "value",
-    "x": 851.9,
+    "x": 808,
     "y": 359,
     "w": 56,
     "h": 40
@@ -649,9 +646,9 @@
  "mixed": {
   "file": "docs/appearance-menu-9-mixed-selection-2026-09-01.png",
   "pill": {
-   "x": 341,
+   "x": 584,
    "y": 299,
-   "w": 817.1,
+   "w": 331.6,
    "h": 40
   },
   "panel": null,
@@ -659,8 +656,8 @@
   "triggers": [
    {
     "control": "geo",
-    "kind": "value",
-    "x": 651.1,
+    "kind": "icon",
+    "x": 738.6,
     "y": 299,
     "w": 56,
     "h": 40
@@ -668,7 +665,7 @@
    {
     "control": "color",
     "kind": "value",
-    "x": 716.1,
+    "x": 803.6,
     "y": 299,
     "w": 54,
     "h": 40
@@ -676,39 +673,7 @@
    {
     "control": "dash",
     "kind": "icon",
-    "x": 770.1,
-    "y": 299,
-    "w": 56,
-    "h": 40
-   },
-   {
-    "control": "font",
-    "kind": "icon",
-    "x": 835.1,
-    "y": 299,
-    "w": 56,
-    "h": 40
-   },
-   {
-    "control": "size",
-    "kind": "text",
-    "x": 891.1,
-    "y": 299,
-    "w": 144,
-    "h": 40
-   },
-   {
-    "control": "align",
-    "kind": "value",
-    "x": 1044.1,
-    "y": 299,
-    "w": 56,
-    "h": 40
-   },
-   {
-    "control": "verticalAlign",
-    "kind": "value",
-    "x": 1100.1,
+    "x": 857.6,
     "y": 299,
     "w": 56,
     "h": 40

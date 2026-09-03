@@ -86,6 +86,9 @@ def chrome_icons() -> dict[str, tuple[str, list[dict]]]:
     trigger_icon("connector", "Line style", "trigger/Line style")
     trigger_icon("shape-text", "Typeface", "trigger/Typeface")
     trigger_icon("connector", "Add text", "trigger/Add text")
+    # FigJam's Shape trigger: fixed regardless of which shape is selected —
+    # a circle overlapping a square, not the current shape's own outline.
+    trigger_icon("shape-text", "Shape", "trigger/Shape")
 
     picker = [p for p in chrome["shape-text"]["picker"] if p["w"] < 200]
     if not picker:

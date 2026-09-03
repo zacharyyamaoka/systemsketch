@@ -52,7 +52,6 @@ async function capture(page, path) {
 async function seedScratchProblems(page) {
   await evaluate(page, `(() => {
     const editor = window.__systemsketch.editor
-    editor.updatePage({ id: editor.getCurrentPageId(), name: 'Diagnostics Review' })
     editor.createShapes([
       {
         id: 'shape:diagnostics-untitled',
@@ -130,8 +129,8 @@ async function main() {
       return JSON.stringify({
         surface: popout?.dataset.surface,
         title: popout?.querySelector('.systemsketch-popout__header h2')?.textContent,
-        pageGroup: panel?.querySelector('.systemsketch-diagnostics__page h3 span')?.textContent,
-        pageListLabel: panel?.querySelector('ul')?.getAttribute('aria-label'),
+        boardGroup: panel?.querySelector('.systemsketch-diagnostics__page h3 span')?.textContent,
+        boardListLabel: panel?.querySelector('ul')?.getAttribute('aria-label'),
         rows: Array.from(panel?.querySelectorAll('[data-diagnostic-code]') ?? [])
           .map((row) => row.dataset.diagnosticCode),
         warnings: panel?.querySelector('[aria-label="2 warnings"]')?.textContent,
@@ -142,11 +141,14 @@ async function main() {
     assert.deepEqual(initial.rows, ['block-title.blank', 'input.unresolved'])
     assert.equal(initial.surface, 'diagnostics')
     assert.equal(initial.title, 'Problems')
-    assert.equal(initial.pageGroup, 'Diagnostics Review')
-    assert.equal(initial.pageListLabel, 'Diagnostics Review problems')
+    // A SystemSketch document is a single canvas (`maxPages: 1`), and 49d8113 removed
+    // every surface that named a tldraw page — the PageMenu is gone and Board Overview
+    // hardcodes the same word. So Problems groups under the literal 'Board', not a name.
+    assert.equal(initial.boardGroup, 'Board')
+    assert.equal(initial.boardListLabel, 'Board problems')
     assert.match(initial.warnings, /2/)
     assert.equal(initial.triggerExpanded, 'true')
-    pass('Problems groups deterministic warning rows under the board page with honest counts')
+    pass('Problems groups deterministic warning rows under the single board with honest counts')
     await capture(app.page, PROBLEMS_SCREENSHOT)
 
     await clickElement(app.page, '[data-diagnostic-code="block-title.blank"]')

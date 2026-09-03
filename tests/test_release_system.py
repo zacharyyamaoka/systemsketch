@@ -5,6 +5,7 @@ import io
 import subprocess
 import tempfile
 import unittest
+from http import HTTPStatus
 from pathlib import Path
 from unittest.mock import patch
 from urllib.parse import parse_qs, urlparse
@@ -33,7 +34,18 @@ import launch_systemsketch as launcher  # noqa: E402
 import release as release_cli  # noqa: E402
 import install_desktop as installer  # noqa: E402
 import new_track as track_builder  # noqa: E402
-from server import HostEventLog, SystemSketchServer, source_build_identity  # noqa: E402
+from server import (  # noqa: E402
+    HostEventLog,
+    SystemSketchServer,
+    _post_failure_status,
+    source_build_identity,
+)
+from workspace_store import (  # noqa: E402
+    WorkspaceConflictError,
+    WorkspaceFormatError,
+    WorkspacePathError,
+    WorkspaceStorageError,
+)
 
 
 def git(root: Path, *arguments: str) -> str:
@@ -97,6 +109,26 @@ class ReleaseSystemTests(unittest.TestCase):
             {"wall": 1400.0, "summary": "after"},
         ])
         self.assertEqual(log.between(1000, 1300), [{"wall": 1100.0, "summary": "inside", "t": 100.0}])
+
+    def test_post_failures_make_only_storage_and_os_errors_retryable(self) -> None:
+        self.assertEqual(
+            _post_failure_status(WorkspaceStorageError("disk temporarily unavailable")),
+            HTTPStatus.SERVICE_UNAVAILABLE,
+        )
+        self.assertEqual(
+            _post_failure_status(OSError("filesystem busy")),
+            HTTPStatus.SERVICE_UNAVAILABLE,
+        )
+        for semantic_error in (
+            WorkspaceConflictError("stale base", None, None),
+            WorkspacePathError("outside workspace"),
+            WorkspaceFormatError("invalid document"),
+            ValueError("invalid payload"),
+        ):
+            with self.subTest(error=type(semantic_error).__name__):
+                self.assertEqual(
+                    _post_failure_status(semantic_error), HTTPStatus.CONFLICT
+                )
 
     def test_candidate_promote_and_rollback_keep_immutable_builds(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

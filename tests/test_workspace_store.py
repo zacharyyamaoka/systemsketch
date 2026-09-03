@@ -1,9 +1,16 @@
 from __future__ import annotations
 
 import json
+import multiprocessing
+import os
+import stat as stat_module
 import tempfile
+import threading
+import time
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import sys
@@ -12,14 +19,18 @@ import sys
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
+import workspace_store  # noqa: E402
+
 from workspace_store import (  # noqa: E402
     SYSTEMSKETCH_FORMAT_VERSION,
     WorkspaceConflictError,
     WorkspaceFormatError,
     WorkspacePathError,
+    WorkspaceStorageError,
     create_directory,
     default_document_path,
     document_digest,
+    document_locks,
     list_documents,
     load_document,
     rename_document,
@@ -54,10 +65,23 @@ def document_source(marker: int = 1, *, format_version: int = SYSTEMSKETCH_FORMA
     return json.dumps(document)
 
 
+def acquire_document_lock_in_child(
+    lock_root: str,
+    path: str,
+    started: multiprocessing.synchronize.Event,
+    acquired: multiprocessing.synchronize.Event,
+) -> None:
+    """Spawn-safe probe proving the runtime lock crosses process boundaries."""
+    started.set()
+    with document_locks(Path(lock_root), Path(path)):
+        acquired.set()
+
+
 class WorkspaceStoreTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
         self.root = Path(self.temporary.name)
+        self.lock_root = self.root / "runtime" / "locks" / "workspace"
         self.path = self.root / "SystemSketch" / "Architecture.systemsketch"
         self.legacy = self.root / "SystemSketch" / "Legacy.tldr"
 
@@ -65,14 +89,19 @@ class WorkspaceStoreTests(unittest.TestCase):
         self.temporary.cleanup()
 
     def test_atomic_save_read_stat_and_listing_carry_both_document_types(self) -> None:
-        saved = save_document(str(self.path), document_source(), self.root)
-        save_document(str(self.legacy), tldraw_source(), self.root)
+        saved = save_document(
+            str(self.path), document_source(), self.root, lock_root=self.lock_root
+        )
+        save_document(
+            str(self.legacy), tldraw_source(), self.root, lock_root=self.lock_root
+        )
         loaded = load_document(str(self.path), self.root)
         stat = stat_document(str(self.path), self.root)
         listing = list_documents(None, self.root)
 
         self.assertEqual(saved["digest"], loaded["digest"])
         self.assertEqual(stat["size"], saved["size"])
+        self.assertEqual(stat["digest"], saved["digest"])
         self.assertEqual(
             [(item["title"], item["kind"]) for item in listing["documents"]],
             [("Architecture", "systemsketch"), ("Legacy", "tldraw")],
@@ -83,12 +112,349 @@ class WorkspaceStoreTests(unittest.TestCase):
         )
         self.assertTrue(self.path.read_text(encoding="utf-8").endswith("\n"))
 
+    def test_staged_save_retries_two_mismatched_readbacks_then_publishes(self) -> None:
+        staged_paths: list[Path] = []
+
+        def readback(staged_path: Path) -> bytes:
+            staged_paths.append(staged_path)
+            exact = staged_path.read_bytes()
+            return exact + b"mismatch" if len(staged_paths) < 3 else exact
+
+        with patch("workspace_store._read_staged_bytes", side_effect=readback):
+            saved = save_document(
+                str(self.path), document_source(1), self.root, lock_root=self.lock_root
+            )
+
+        self.assertEqual(len(staged_paths), 3)
+        self.assertEqual(len(set(staged_paths)), 3, "each retry must use a fresh inode")
+        self.assertEqual(saved["digest"], stat_document(str(self.path), self.root)["digest"])
+        self.assertEqual(list(self.path.parent.glob(f".{self.path.stem}.*.tmp")), [])
+
+    def test_all_staged_readback_mismatches_preserve_canonical_and_clean_temps(self) -> None:
+        base = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+        original = self.path.read_bytes()
+        staged_paths: list[Path] = []
+
+        def mismatched_readback(staged_path: Path) -> bytes:
+            staged_paths.append(staged_path)
+            return staged_path.read_bytes() + b"mismatch"
+
+        with patch("workspace_store._read_staged_bytes", side_effect=mismatched_readback):
+            with self.assertRaisesRegex(WorkspaceStorageError, "after 3 attempts"):
+                save_document(
+                    str(self.path),
+                    document_source(2),
+                    self.root,
+                    base_digest=base["digest"],
+                    lock_root=self.lock_root,
+                )
+
+        self.assertEqual(len(staged_paths), 3)
+        self.assertEqual(len(set(staged_paths)), 3, "a mismatched inode must not be reused")
+        self.assertEqual(self.path.read_bytes(), original)
+        self.assertEqual(list(self.path.parent.glob(f".{self.path.stem}.*.tmp")), [])
+
+    def test_save_returns_metadata_from_the_confirmed_canonical_readback(self) -> None:
+        base = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+
+        with patch(
+            "workspace_store._read_identity", wraps=workspace_store._read_identity
+        ) as read_identity:
+            saved = save_document(
+                str(self.path),
+                document_source(2),
+                self.root,
+                base_digest=base["digest"],
+                lock_root=self.lock_root,
+            )
+
+        self.assertEqual(
+            read_identity.call_count,
+            2,
+            "an update must read once for CAS and once after atomic publication",
+        )
+        self.assertEqual(saved, stat_document(str(self.path), self.root))
+
+    def test_atomic_replace_preserves_existing_mode_but_new_files_stay_private(self) -> None:
+        base = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+        self.path.chmod(0o640)
+
+        save_document(
+            str(self.path),
+            document_source(2),
+            self.root,
+            base_digest=base["digest"],
+            lock_root=self.lock_root,
+        )
+
+        self.assertEqual(stat_module.S_IMODE(self.path.stat().st_mode), 0o640)
+        fresh = self.path.with_name("Fresh.systemsketch")
+        save_document(str(fresh), document_source(3), self.root, lock_root=self.lock_root)
+        self.assertEqual(stat_module.S_IMODE(fresh.stat().st_mode), 0o600)
+
+        privileged = self.path.with_name("Privileged.systemsketch")
+        privileged_base = save_document(
+            str(privileged), document_source(1), self.root, lock_root=self.lock_root
+        )
+        privileged.chmod(0o6755)
+        save_document(
+            str(privileged),
+            document_source(2),
+            self.root,
+            base_digest=privileged_base["digest"],
+            lock_root=self.lock_root,
+        )
+        self.assertEqual(stat_module.S_IMODE(privileged.stat().st_mode), 0o755)
+
+    def test_atomic_replace_preserves_an_existing_alternate_group_for_0660(self) -> None:
+        base = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+        original_gid = self.path.stat().st_gid
+        alternate_gid = next(
+            (gid for gid in os.getgroups() if gid != original_gid),
+            None,
+        )
+        if alternate_gid is None:
+            self.skipTest("the test account has no alternate supplementary group")
+        try:
+            os.chown(self.path, -1, alternate_gid)
+        except OSError as error:
+            self.skipTest(f"the test account cannot select its supplementary group: {error}")
+        self.path.chmod(0o660)
+
+        save_document(
+            str(self.path),
+            document_source(2),
+            self.root,
+            base_digest=base["digest"],
+            lock_root=self.lock_root,
+        )
+
+        saved_stat = self.path.stat()
+        self.assertEqual(saved_stat.st_gid, alternate_gid)
+        self.assertEqual(stat_module.S_IMODE(saved_stat.st_mode), 0o660)
+
+    def test_permission_preservation_sets_alternate_gid_before_0660_mode(self) -> None:
+        staged = self.root / "staged.tmp"
+        staged.write_bytes(b"candidate")
+        initial_gid = staged.stat().st_gid
+        target_gid = initial_gid + 1
+        disk_stat = SimpleNamespace(st_mode=0o660, st_gid=target_gid)
+        operations: list[tuple[object, ...]] = []
+        real_fchmod = os.fchmod
+
+        def record_fchown(descriptor: int, uid: int, gid: int) -> None:
+            operations.append(("gid", uid, gid))
+
+        def record_fchmod(descriptor: int, mode: int) -> None:
+            operations.append(("mode", mode))
+            real_fchmod(descriptor, mode)
+
+        with (
+            patch(
+                "workspace_store.os.fstat",
+                side_effect=[
+                    SimpleNamespace(st_gid=initial_gid),
+                    SimpleNamespace(st_gid=target_gid),
+                ],
+            ),
+            patch("workspace_store.os.fchown", side_effect=record_fchown),
+            patch("workspace_store.os.fchmod", side_effect=record_fchmod),
+        ):
+            workspace_store._preserve_existing_mode(staged, disk_stat)
+
+        self.assertEqual(
+            operations,
+            [("gid", -1, target_gid), ("mode", 0o660)],
+            "the replacement must establish its group before granting group access",
+        )
+        self.assertEqual(stat_module.S_IMODE(staged.stat().st_mode), 0o660)
+
+    def test_permission_fallback_never_grants_group_bits_to_the_wrong_gid(self) -> None:
+        staged = self.root / "staged.tmp"
+        staged.write_bytes(b"candidate")
+        staged_gid = staged.stat().st_gid
+        disk_stat = SimpleNamespace(st_mode=0o660, st_gid=staged_gid + 1)
+
+        with patch(
+            "workspace_store.os.fchown",
+            side_effect=PermissionError("group cannot be preserved"),
+        ):
+            workspace_store._preserve_existing_mode(staged, disk_stat)
+
+        saved_stat = staged.stat()
+        self.assertEqual(saved_stat.st_gid, staged_gid)
+        self.assertEqual(stat_module.S_IMODE(saved_stat.st_mode), 0o600)
+
+    def test_replayed_save_after_a_lost_http_response_is_idempotent(self) -> None:
+        base = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+        committed = save_document(
+            str(self.path),
+            document_source(2),
+            self.root,
+            base_digest=base["digest"],
+            lock_root=self.lock_root,
+        )
+        committed_stat = self.path.stat()
+
+        replayed = save_document(
+            str(self.path),
+            document_source(2),
+            self.root,
+            base_digest=base["digest"],
+            lock_root=self.lock_root,
+        )
+        replayed_stat = self.path.stat()
+
+        self.assertEqual(replayed, committed)
+        self.assertEqual(replayed_stat.st_ino, committed_stat.st_ino)
+        self.assertEqual(replayed_stat.st_mtime_ns, committed_stat.st_mtime_ns)
+        self.assertEqual(list(self.path.parent.glob(f".{self.path.stem}.*.tmp")), [])
+
+    def test_same_bytes_do_not_bypass_create_only_no_clobber(self) -> None:
+        save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+        original_stat = self.path.stat()
+
+        with self.assertRaisesRegex(WorkspaceConflictError, "already exists"):
+            save_document(
+                str(self.path), document_source(1), self.root, lock_root=self.lock_root
+            )
+
+        current_stat = self.path.stat()
+        self.assertEqual(current_stat.st_ino, original_stat.st_ino)
+        self.assertEqual(current_stat.st_mtime_ns, original_stat.st_mtime_ns)
+
+    def test_replayed_save_retries_directory_durability_before_acknowledging(self) -> None:
+        base = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+        committed = save_document(
+            str(self.path),
+            document_source(2),
+            self.root,
+            base_digest=base["digest"],
+            lock_root=self.lock_root,
+        )
+
+        with patch(
+            "workspace_store._fsync_directory",
+            wraps=workspace_store._fsync_directory,
+        ) as sync_directory:
+            replayed = save_document(
+                str(self.path),
+                document_source(2),
+                self.root,
+                base_digest=base["digest"],
+                lock_root=self.lock_root,
+            )
+
+        self.assertEqual(replayed, committed)
+        sync_directory.assert_called_once_with(self.path.parent)
+
+    def test_external_replace_after_publication_is_reported_without_blind_retry(self) -> None:
+        base = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+        external = workspace_store.normalize_document_source(
+            document_source(9), suffix=".systemsketch"
+        )
+
+        def external_write(_directory: Path) -> None:
+            self.path.write_text(external, encoding="utf-8")
+
+        with patch("workspace_store._fsync_directory", side_effect=external_write):
+            with self.assertRaisesRegex(
+                WorkspaceConflictError, "changed before the save could be confirmed"
+            ):
+                save_document(
+                    str(self.path),
+                    document_source(2),
+                    self.root,
+                    base_digest=base["digest"],
+                    lock_root=self.lock_root,
+                )
+
+        self.assertEqual(self.path.read_text(encoding="utf-8"), external)
+
+    def test_stat_digest_hashes_exact_bytes_before_newline_decoding(self) -> None:
+        self.path.parent.mkdir(parents=True)
+        first = b"alpha\r\nbeta\ngamma\n"
+        second = b"alpha\nbeta\r\ngamma\n"
+        self.assertEqual(len(first), len(second))
+        fixed_ns = 1_700_000_000_123_456_789
+
+        self.path.write_bytes(first)
+        os.utime(self.path, ns=(fixed_ns, fixed_ns))
+        before = stat_document(str(self.path), self.root)
+
+        self.path.write_bytes(second)
+        os.utime(self.path, ns=(fixed_ns, fixed_ns))
+        after = stat_document(str(self.path), self.root)
+
+        self.assertEqual(before["size"], after["size"])
+        self.assertEqual(before["mtime"], after["mtime"])
+        self.assertNotEqual(before["digest"], after["digest"])
+        self.assertEqual(before["digest"], document_digest(first.decode("utf-8")))
+        self.assertEqual(after["digest"], document_digest(second.decode("utf-8")))
+
+    def test_stat_refuses_to_poll_beyond_the_document_size_limit(self) -> None:
+        self.path.parent.mkdir(parents=True)
+        self.path.write_bytes(b"123456789")
+
+        with patch("workspace_store.MAX_DOCUMENT_BYTES", 8):
+            with self.assertRaisesRegex(WorkspacePathError, "too large"):
+                stat_document(str(self.path), self.root)
+            with self.assertRaisesRegex(WorkspacePathError, "too large"):
+                load_document(str(self.path), self.root)
+
+    def test_document_lock_is_shared_across_processes_and_kept_out_of_the_workspace(self) -> None:
+        context = multiprocessing.get_context("spawn")
+        started = context.Event()
+        acquired = context.Event()
+        process = context.Process(
+            target=acquire_document_lock_in_child,
+            args=(str(self.lock_root), str(self.path), started, acquired),
+        )
+        try:
+            with document_locks(self.lock_root, self.path):
+                process.start()
+                self.assertTrue(started.wait(3), "child never attempted the document lock")
+                self.assertFalse(
+                    acquired.wait(0.2),
+                    "a second process acquired a canonical path that was already locked",
+                )
+            self.assertTrue(acquired.wait(3), "child did not acquire the released document lock")
+            process.join(3)
+            self.assertEqual(process.exitcode, 0)
+        finally:
+            if process.is_alive():
+                process.terminate()
+                process.join(3)
+
+        self.assertEqual(list(self.path.parent.glob("*.lock")), [])
+        self.assertEqual(len(list(self.lock_root.glob("*.lock"))), 1)
+
     def test_the_suffix_decides_the_encoding_in_both_directions(self) -> None:
         """A `.systemsketch` must carry the envelope; a `.tldr` must not."""
         with self.assertRaisesRegex(WorkspaceFormatError, "must carry a systemSketch envelope"):
-            save_document(str(self.path), tldraw_source(), self.root)
+            save_document(
+                str(self.path), tldraw_source(), self.root, lock_root=self.lock_root
+            )
         with self.assertRaisesRegex(WorkspaceFormatError, "must stay a plain tldraw file"):
-            save_document(str(self.legacy), document_source(), self.root)
+            save_document(
+                str(self.legacy), document_source(), self.root, lock_root=self.lock_root
+            )
 
         # Reading is the lenient direction: a hand-renamed file still opens.
         renamed_by_hand = self.root / "SystemSketch" / "ByHand.systemsketch"
@@ -110,7 +476,13 @@ class WorkspaceStoreTests(unittest.TestCase):
 
         self.assertEqual(load_document(str(legacy), self.root)["source"], source)
         with self.assertRaisesRegex(WorkspaceFormatError, "tldrawFileFormatVersion"):
-            save_document(str(legacy), source, self.root, base_digest=document_digest(source))
+            save_document(
+                str(legacy),
+                source,
+                self.root,
+                base_digest=document_digest(source),
+                lock_root=self.lock_root,
+            )
 
     def test_a_document_from_a_newer_systemsketch_loads_exactly_but_cannot_be_overwritten(self) -> None:
         future = self.root / "SystemSketch" / "Future.systemsketch"
@@ -121,7 +493,11 @@ class WorkspaceStoreTests(unittest.TestCase):
         self.assertEqual(loaded["source"], source)
         with self.assertRaisesRegex(WorkspaceFormatError, "written by a newer SystemSketch"):
             save_document(
-                str(future), source, self.root, base_digest=loaded["digest"]
+                str(future),
+                source,
+                self.root,
+                base_digest=loaded["digest"],
+                lock_root=self.lock_root,
             )
 
     def test_create_directory_is_visible_nested_and_preserves_unicode(self) -> None:
@@ -180,7 +556,11 @@ class WorkspaceStoreTests(unittest.TestCase):
                 self.assertEqual(loaded["digest"], document_digest(""))
 
                 saved = save_document(
-                    str(path), first_revision, self.root, base_digest=loaded["digest"]
+                    str(path),
+                    first_revision,
+                    self.root,
+                    base_digest=loaded["digest"],
+                    lock_root=self.lock_root,
                 )
                 self.assertGreater(saved["size"], 0)
                 self.assertEqual(load_document(str(path), self.root)["digest"], saved["digest"])
@@ -198,9 +578,16 @@ class WorkspaceStoreTests(unittest.TestCase):
     def test_paths_are_confined_to_the_configured_root(self) -> None:
         outside = self.root.parent / "outside.systemsketch"
         with self.assertRaisesRegex(WorkspacePathError, "stay under"):
-            save_document(str(outside), document_source(), self.root)
+            save_document(
+                str(outside), document_source(), self.root, lock_root=self.lock_root
+            )
         with self.assertRaisesRegex(WorkspacePathError, "end with .systemsketch or .tldr"):
-            save_document(str(self.root / "board.json"), document_source(), self.root)
+            save_document(
+                str(self.root / "board.json"),
+                document_source(),
+                self.root,
+                lock_root=self.lock_root,
+            )
 
     def test_an_explicit_additional_root_allows_a_worktree_board_only(self) -> None:
         with (
@@ -214,6 +601,7 @@ class WorkspaceStoreTests(unittest.TestCase):
                 document_source(),
                 self.root,
                 additional_roots=(development_root,),
+                lock_root=self.lock_root,
             )
             loaded = load_document(
                 str(review),
@@ -247,34 +635,159 @@ class WorkspaceStoreTests(unittest.TestCase):
                 )
 
     def test_digest_fence_refuses_external_edits_and_missing_updates(self) -> None:
-        first = save_document(str(self.path), document_source(1), self.root)
+        first = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
         self.path.write_text(document_source(2), encoding="utf-8")
         with self.assertRaisesRegex(WorkspaceConflictError, "changed on disk"):
             save_document(
-                str(self.path), document_source(3), self.root, base_digest=first["digest"]
+                str(self.path),
+                document_source(3),
+                self.root,
+                base_digest=first["digest"],
+                lock_root=self.lock_root,
             )
 
         latest = load_document(str(self.path), self.root)
         self.path.unlink()
         with self.assertRaisesRegex(WorkspaceConflictError, "removed from disk"):
             save_document(
-                str(self.path), document_source(4), self.root, base_digest=latest["digest"]
+                str(self.path),
+                document_source(4),
+                self.root,
+                base_digest=latest["digest"],
+                lock_root=self.lock_root,
             )
 
+    def test_two_concurrent_same_base_saves_have_one_winner_and_one_conflict(self) -> None:
+        base = save_document(
+            str(self.path), document_source(0), self.root, lock_root=self.lock_root
+        )
+        start = threading.Barrier(3)
+
+        def attempt(marker: int) -> dict[str, object]:
+            start.wait(timeout=3)
+            try:
+                saved = save_document(
+                    str(self.path),
+                    document_source(marker),
+                    self.root,
+                    base_digest=base["digest"],
+                    lock_root=self.lock_root,
+                )
+            except WorkspaceConflictError as error:
+                return {
+                    "kind": "conflict",
+                    "marker": marker,
+                    "disk_digest": error.disk_digest,
+                }
+            return {"kind": "saved", "marker": marker, "digest": saved["digest"]}
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            # Queue both writers behind the same already-held path lock. Once it
+            # opens, the first writer replaces the base and the second must make
+            # its digest decision against that winner rather than the old file.
+            with document_locks(self.lock_root, self.path):
+                futures = [pool.submit(attempt, marker) for marker in (1, 2)]
+                start.wait(timeout=3)
+                time.sleep(0.05)
+                self.assertFalse(any(future.done() for future in futures))
+            outcomes = [future.result(timeout=3) for future in futures]
+
+        saved = [outcome for outcome in outcomes if outcome["kind"] == "saved"]
+        conflicts = [outcome for outcome in outcomes if outcome["kind"] == "conflict"]
+        self.assertEqual(len(saved), 1, outcomes)
+        self.assertEqual(len(conflicts), 1, outcomes)
+        final_source = self.path.read_text(encoding="utf-8")
+        self.assertEqual(document_digest(final_source), saved[0]["digest"])
+        self.assertEqual(conflicts[0]["disk_digest"], saved[0]["digest"])
+        self.assertIn(
+            f'shape:{saved[0]["marker"]}',
+            final_source,
+            "the disk document is not the successful writer's revision",
+        )
+
+    def test_save_and_rename_from_one_base_resolve_to_one_sequential_result(self) -> None:
+        base = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+        destination = self.path.with_name("Renamed.systemsketch")
+        start = threading.Barrier(3)
+
+        def attempt_save() -> str:
+            start.wait(timeout=3)
+            try:
+                save_document(
+                    str(self.path),
+                    document_source(2),
+                    self.root,
+                    base_digest=base["digest"],
+                    lock_root=self.lock_root,
+                )
+            except WorkspaceConflictError:
+                return "save-conflict"
+            return "save"
+
+        def attempt_rename() -> str:
+            start.wait(timeout=3)
+            try:
+                rename_document(
+                    str(self.path),
+                    str(destination),
+                    self.root,
+                    base_digest=base["digest"],
+                    lock_root=self.lock_root,
+                )
+            except (FileNotFoundError, WorkspaceConflictError):
+                return "rename-conflict"
+            return "rename"
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            # Holding both paths also proves reverse-sized lock sets share the
+            # same sorted acquisition order rather than deadlocking.
+            with document_locks(self.lock_root, destination, self.path):
+                futures = [pool.submit(attempt_save), pool.submit(attempt_rename)]
+                start.wait(timeout=3)
+                time.sleep(0.05)
+                self.assertFalse(any(future.done() for future in futures))
+            outcomes = {future.result(timeout=3) for future in futures}
+
+        self.assertIn(outcomes, ({"save", "rename-conflict"}, {"rename", "save-conflict"}))
+        if "save" in outcomes:
+            self.assertTrue(self.path.is_file())
+            self.assertFalse(destination.exists())
+            self.assertIn("shape:2", self.path.read_text(encoding="utf-8"))
+        else:
+            self.assertFalse(self.path.exists())
+            self.assertTrue(destination.is_file())
+            self.assertIn("shape:1", destination.read_text(encoding="utf-8"))
+
     def test_rename_is_no_clobber_revision_checked_and_type_preserving(self) -> None:
-        first = save_document(str(self.path), document_source(1), self.root)
+        first = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
         destination = self.path.with_name("Renamed.systemsketch")
         renamed = rename_document(
-            str(self.path), str(destination), self.root, base_digest=first["digest"]
+            str(self.path),
+            str(destination),
+            self.root,
+            base_digest=first["digest"],
+            lock_root=self.lock_root,
         )
         self.assertFalse(self.path.exists())
         self.assertEqual(renamed["path"], str(destination))
 
         occupied = self.path.with_name("Occupied.systemsketch")
-        save_document(str(occupied), document_source(2), self.root)
+        save_document(
+            str(occupied), document_source(2), self.root, lock_root=self.lock_root
+        )
         with self.assertRaisesRegex(WorkspaceConflictError, "already exists"):
             rename_document(
-                str(destination), str(occupied), self.root, base_digest=renamed["digest"]
+                str(destination),
+                str(occupied),
+                self.root,
+                base_digest=renamed["digest"],
+                lock_root=self.lock_root,
             )
 
         # A rename that changed the extension would relabel the bytes without
@@ -285,15 +798,44 @@ class WorkspaceStoreTests(unittest.TestCase):
                 str(destination.with_name("Renamed.tldr")),
                 self.root,
                 base_digest=renamed["digest"],
+                lock_root=self.lock_root,
             )
 
+    def test_rename_cannot_expand_into_a_cross_directory_move(self) -> None:
+        saved = save_document(
+            str(self.path), document_source(1), self.root, lock_root=self.lock_root
+        )
+        destination = self.root / "Archive" / "Architecture.systemsketch"
+        destination.parent.mkdir()
+
+        with patch("workspace_store._fsync_directory") as fsync_directory:
+            with self.assertRaisesRegex(WorkspacePathError, "current folder"):
+                rename_document(
+                    str(self.path),
+                    str(destination),
+                    self.root,
+                    base_digest=saved["digest"],
+                    lock_root=self.lock_root,
+                )
+
+        self.assertTrue(self.path.is_file())
+        self.assertFalse(destination.exists())
+        fsync_directory.assert_not_called()
+
     def test_delete_moves_the_exact_loaded_revision_to_desktop_trash(self) -> None:
-        saved = save_document(str(self.path), document_source(), self.root)
+        saved = save_document(
+            str(self.path), document_source(), self.root, lock_root=self.lock_root
+        )
         completed = type("Completed", (), {"returncode": 0, "stdout": "", "stderr": ""})()
         with patch("workspace_store.shutil.which", return_value="/usr/bin/gio"), patch(
             "workspace_store.subprocess.run", return_value=completed
         ) as run:
-            trash_document(str(self.path), self.root, base_digest=saved["digest"])
+            trash_document(
+                str(self.path),
+                self.root,
+                base_digest=saved["digest"],
+                lock_root=self.lock_root,
+            )
         self.assertEqual(run.call_args.args[0], ["/usr/bin/gio", "trash", str(self.path)])
 
     def test_the_host_never_shells_out_to_a_desktop_file_chooser(self) -> None:

@@ -1,0 +1,412 @@
+#!/usr/bin/env python3
+"""Build the self-contained filesystem-robustness reference and decision review."""
+
+from __future__ import annotations
+
+import html
+import json
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+OUTPUT = ROOT / "docs" / "workspace-robustness-reference-review-2026-09-03.html"
+
+
+REFERENCES = [
+    {
+        "name": "draw.io Desktop 31.4.2",
+        "role": "Strongest direct analogue",
+        "tone": "direct",
+        "summary": (
+            "A mature desktop whiteboard with a real local-file watcher, save conflicts, "
+            "backups, synchronous writes, read-back verification, bounded higher-level saves, "
+            "and explicit Copy / Merge / Overwrite / Cancel recovery choices."
+        ),
+        "limits": (
+            "Its primary save still truncates in place, checks mtime rather than a content "
+            "revision, and has no cross-process lock. SystemSketch's transaction is narrower "
+            "but stronger because Stable and Preview are separate writers."
+        ),
+        "links": [
+            (
+                "save precondition + fsync + read-back retry",
+                "https://github.com/jgraph/drawio-desktop/blob/0bf60042665fba90f35de8c883ad2753ecd43e0c/src/main/electron.js#L3435-L3579",
+            ),
+            (
+                "watcher + semantic checksum",
+                "https://github.com/jgraph/drawio/blob/074a2ea4f2be105b1fe7cae9a26ecc15761dcef6/src/main/webapp/js/diagramly/ElectronApp.js#L1025-L1152",
+            ),
+            (
+                "save while edits continue",
+                "https://github.com/jgraph/drawio/blob/074a2ea4f2be105b1fe7cae9a26ecc15761dcef6/src/main/webapp/js/diagramly/ElectronApp.js#L1760-L1875",
+            ),
+            (
+                "bounded sync + late-result rejection",
+                "https://github.com/jgraph/drawio/blob/074a2ea4f2be105b1fe7cae9a26ecc15761dcef6/src/main/webapp/js/diagramly/DrawioFile.js#L236-L311",
+            ),
+            (
+                "named conflict recovery",
+                "https://github.com/jgraph/drawio/blob/074a2ea4f2be105b1fe7cae9a26ecc15761dcef6/src/main/webapp/js/diagramly/DrawioFile.js#L2244-L2380",
+            ),
+            (
+                "maintainer discussion: synced-folder corruption",
+                "https://github.com/jgraph/drawio-desktop/issues/1366",
+            ),
+        ],
+    },
+    {
+        "name": "tldraw (current local sync)",
+        "role": "Best persistence-loop precedent",
+        "tone": "direct",
+        "summary": (
+            "Its IndexedDB client keeps writes single-flight, lets new diffs accumulate while a "
+            "persist is running, and turns a failed incremental write into a later full snapshot."
+        ),
+        "limits": (
+            "This is browser-local IndexedDB, not an OS-file protocol. It validates the queue and "
+            "retry shape, but it cannot supply the path lock or disk conflict contract."
+        ),
+        "links": [
+            (
+                "single-flight queue + full-write recovery",
+                "https://github.com/tldraw/tldraw/blob/main/packages/editor/src/lib/utils/sync/TLLocalSyncClient.ts#L330-L417",
+            ),
+            (
+                "the exact Radix modal used by tldraw 5.3.2",
+                "https://github.com/tldraw/tldraw/blob/v5.3.2/packages/tldraw/src/lib/ui/components/Dialogs.tsx#L1-L66",
+            ),
+        ],
+    },
+    {
+        "name": "tldraw-offline · pre-internal",
+        "role": "Useful desktop prior art, not the gold standard",
+        "tone": "mixed",
+        "summary": (
+            "The supplied 17-commit branch centralizes renderer diffs, writes per-document recovery "
+            "JSON every second with temp-then-rename, bounds renderer serialization at 30 seconds, "
+            "and gives concrete choices after external deletion."
+        ),
+        "limits": (
+            "Canonical .tldr saves are direct writeFile calls, dirty state is cleared before the "
+            "write, failed recovery writes are not requeued, and same-path content edits are ignored. "
+            "It has no digest, CAS, lock, bounded file read, or portable export path."
+        ),
+        "links": [
+            (
+                "exact supplied snapshot",
+                "https://github.com/zacharyyamaoka/tldraw-offline/tree/5d86e6ffa41c376ecf6215001b0eb6b100d3d9eb",
+            ),
+            (
+                "per-document recovery + atomic helper",
+                "https://github.com/zacharyyamaoka/tldraw-offline/blob/5d86e6ffa41c376ecf6215001b0eb6b100d3d9eb/src/main/StoreManager.ts#L113-L188",
+            ),
+            (
+                "30-second renderer request budget",
+                "https://github.com/zacharyyamaoka/tldraw-offline/blob/5d86e6ffa41c376ecf6215001b0eb6b100d3d9eb/src/main/EventManager.ts#L112-L138",
+            ),
+            (
+                "direct canonical-file write",
+                "https://github.com/zacharyyamaoka/tldraw-offline/blob/5d86e6ffa41c376ecf6215001b0eb6b100d3d9eb/src/main/ActionManager.ts#L334-L423",
+            ),
+        ],
+    },
+    {
+        "name": "Excalidraw",
+        "role": "Deliberately thin local-file comparison",
+        "tone": "mixed",
+        "summary": (
+            "Its direct disk path delegates to browser-fs-access. The stronger concurrency ideas "
+            "live in collaboration: clone before an async save, transact against current remote "
+            "state, and protect elements being actively edited during reconciliation."
+        ),
+        "limits": (
+            "The local path has no mtime/digest watcher, lock, or no-clobber layer; a local attachment "
+            "failure explicitly does not retry. This is evidence to keep SystemSketch's policy small, "
+            "not evidence that a desktop multi-writer file protocol is unnecessary."
+        ),
+        "links": [
+            (
+                "thin local-file adapter",
+                "https://github.com/excalidraw/excalidraw/blob/e1bb9ff8f8931e783c11d104abb8967ac6605c9a/packages/excalidraw/data/filesystem.ts#L1-L72",
+            ),
+            (
+                "clone before async collaborative save",
+                "https://github.com/excalidraw/excalidraw/blob/e1bb9ff8f8931e783c11d104abb8967ac6605c9a/excalidraw-app/collab/Collab.tsx#L323-L361",
+            ),
+            (
+                "transactional reconcile-before-write",
+                "https://github.com/excalidraw/excalidraw/blob/e1bb9ff8f8931e783c11d104abb8967ac6605c9a/excalidraw-app/data/firebase.ts#L187-L246",
+            ),
+            (
+                "active-edit reconciliation fence",
+                "https://github.com/excalidraw/excalidraw/blob/e1bb9ff8f8931e783c11d104abb8967ac6605c9a/packages/excalidraw/data/reconcile.ts#L23-L117",
+            ),
+        ],
+    },
+]
+
+
+ACCEPTED = [
+    {
+        "rank": 1,
+        "title": "Cross-process revision transaction",
+        "kind": "system",
+        "verdict": "Keep — concrete SystemSketch race",
+        "reason": (
+            "Stable and Preview are independent threaded server processes. Without one OS lock around "
+            "check + replace, two windows can validate the same digest and silently last-write-wins."
+        ),
+        "precedent": (
+            "draw.io checks the prior mtime and rejects overlapping saves; Excalidraw uses a true "
+            "transaction for concurrent cloud writers. Neither provides the local multi-process primitive."
+        ),
+        "code": "scripts/workspace_store.py · document_locks / save_document",
+        "href": "../scripts/workspace_store.py",
+        "comment": "WHY: Stable and Preview are independent processes; a threading.Lock cannot make digest-check + replace one transaction.",
+        "proof": "Python contention tests: exactly one same-base winner; save/rename/trash remain serializable.",
+    },
+    {
+        "rank": 2,
+        "title": "Non-destructive, no-clobber portable export",
+        "kind": "invariant",
+        "verdict": "Keep — product invariant",
+        "reason": (
+            "Export previously mutated the live editor and forced destination replacement. The existing "
+            "portable clone now owns conversion; a target changes only after an explicit Replace choice."
+        ),
+        "precedent": (
+            "tldraw-offline delegates image export to stock tldraw; Excalidraw keeps export single-flight. "
+            "The exact clone/no-clobber guarantee is SystemSketch-specific and is retained because it is tested."
+        ),
+        "code": "src/workspace/LocalWorkspace.tsx + src/export/portableTldraw.ts",
+        "href": "../src/workspace/LocalWorkspace.tsx",
+        "comment": "WHY: export must not mutate the live board, undo history, dirty state, autosave, collaboration, or host bridge.",
+        "proof": "Browser export journey compares live snapshot/source bytes and requires Replace for an occupied target.",
+    },
+    {
+        "rank": 3,
+        "title": "Edit-fenced automatic reload",
+        "kind": "analogue",
+        "verdict": "Keep — smallest local equivalent",
+        "reason": (
+            "The stat → read sequence yields twice. A canvas edit or completed save arriving between those "
+            "requests must invalidate the old result before it can replace editor state."
+        ),
+        "precedent": (
+            "draw.io preserves edits made while Save is pending and rejects late sync results; Excalidraw "
+            "protects actively edited elements during remote reconciliation."
+        ),
+        "code": "src/workspace/LocalWorkspace.tsx + workspaceModel.ts · canApplyExternalReload",
+        "href": "../src/workspace/workspaceModel.ts",
+        "comment": "WHY: capture both local identities before awaiting disk so a slow read cannot overwrite an intervening edit or save.",
+        "proof": "Predicate regressions reject changed edit epoch, base digest, or loaded disk digest.",
+    },
+    {
+        "rank": 4,
+        "title": "Exact-byte digest identity",
+        "kind": "system",
+        "verdict": "Keep — stronger, narrowly scoped identity",
+        "reason": (
+            "mtime and size can both collide after a rapid same-length rewrite. SHA-256 is used only as "
+            "revision identity; reads are raw, bounded, and decoded after hashing."
+        ),
+        "precedent": (
+            "draw.io combines mtime with a semantic page checksum; Excalidraw combines per-element version "
+            "and nonce. SystemSketch uses a raw digest because its unit of concurrency is one disk file."
+        ),
+        "code": "scripts/workspace_store.py · _read_identity; src/workspace/workspaceModel.ts · sameFingerprint",
+        "href": "../scripts/workspace_store.py",
+        "comment": "WHY: a rapid same-length rewrite can preserve both mtime and byte count; the exact-byte digest is authoritative.",
+        "proof": "Same-size/same-mtime and CRLF/LF regressions prove changed bytes produce a changed revision.",
+    },
+    {
+        "rank": 5,
+        "title": "Bounded requests + single-flight polling",
+        "kind": "direct",
+        "verdict": "Keep — mature direct precedent",
+        "reason": (
+            "A loopback process can hang or restart. Requests need operation-specific budgets, while a "
+            "1.5-second interval must not stack behind a slow stat/read."
+        ),
+        "precedent": (
+            "tldraw-offline bounds renderer serialization at 30 seconds. draw.io rejects concurrent saves "
+            "and bounds its higher-level synchronization even though raw IPC is unbounded."
+        ),
+        "code": "src/workspace/workspaceClient.ts · requestPayload; LocalWorkspace.tsx · watch effect",
+        "href": "../src/workspace/workspaceClient.ts",
+        "comment": "WHY: even loopback calls can stall; combine caller cancellation with deadlines, and never stack stat polls.",
+        "proof": "Controlled fetch tests classify timeouts/aborts; browser journey finishes without transport or console errors.",
+    },
+    {
+        "rank": 6,
+        "title": "Bounded transient autosave retry",
+        "kind": "direct",
+        "verdict": "Keep — constrained retry, not a framework",
+        "reason": (
+            "A failed save may follow the person's last edit. If retry waits for another edit, the board can "
+            "remain dirty forever. Only transient transport/server failures retry; conflicts never do."
+        ),
+        "precedent": (
+            "Current tldraw schedules a full snapshot after failed incremental persistence. draw.io retries "
+            "failed read-back verification and exposes retry for other failures. Excalidraw local attachments do not."
+        ),
+        "code": "src/workspace/LocalWorkspace.tsx · persist; workspaceModel.ts · autosaveRetryDelay",
+        "href": "../src/workspace/LocalWorkspace.tsx",
+        "comment": "WHY: transient failure must resume saving without another edit; semantic failures and revision conflicts wait for a person.",
+        "proof": "1s / 3s / 8s policy tests; retry classification excludes conflicts, validation errors, and forced writes.",
+    },
+    {
+        "rank": 7,
+        "title": "Visible, named recovery actions",
+        "kind": "direct",
+        "verdict": "Keep — clearest mature precedent",
+        "reason": (
+            "Discarded File-menu promises made failures invisible; bootstrap errors stranded the app. Persistent "
+            "document alerts now name the next safe action, while short action failures become visible notices."
+        ),
+        "precedent": (
+            "draw.io offers Make Copy / Merge / Overwrite / Cancel and explicit backup recovery. Excalidraw "
+            "surfaces local-quota and collaboration failures instead of silently continuing."
+        ),
+        "code": "src/workspace/LocalWorkspace.tsx · runAction / WorkspaceLoading / WorkspaceAlert",
+        "href": "../src/workspace/LocalWorkspace.tsx",
+        "comment": "WHY: states that can lose work stay visible beside named recovery actions instead of disappearing like a toast.",
+        "proof": "All launched actions have a rejection boundary; initial load exposes a real Try again route.",
+    },
+    {
+        "rank": 8,
+        "title": "Real keyboard modal",
+        "kind": "reuse",
+        "verdict": "Keep behavior; replace custom machinery",
+        "reason": (
+            "The file browser still needs modal focus, Escape, outside dismissal, and focus restoration—but "
+            "SystemSketch does not need to implement those primitives itself."
+        ),
+        "precedent": (
+            "tldraw 5.3.2 implements its own dialogs with Radix Dialog. SystemSketch now imports the same "
+            "already-pinned dependency and retains only its app-specific browser content."
+        ),
+        "code": "src/workspace/LocalWorkspace.tsx · WorkspaceDialog",
+        "href": "../src/workspace/LocalWorkspace.tsx",
+        "comment": "WHY: Radix is already SystemSketch's dialog dependency and the primitive tldraw uses; let it own modal semantics.",
+        "proof": "The unchanged 11-check browser journey proves initial focus, both Tab-loop ends, Escape, return focus, and zero errors.",
+    },
+]
+
+
+MATRIX = [
+    ("Concurrent save precondition", "partial", "none", "cloud", "exact"),
+    ("Atomic canonical-file replacement", "none", "none", "delegate", "exact"),
+    ("External-content detection", "checksum", "delete only", "none", "digest"),
+    ("Edit-during-I/O protection", "exact", "partial", "cloud", "exact"),
+    ("Bounded operation", "higher layer", "30 sec", "abort", "per operation"),
+    ("Single-flight persistence", "save", "main hub", "export", "save + poll"),
+    ("Automatic failed-write retry", "verify only", "none", "none", "transient only"),
+    ("Named recovery choices", "exact", "delete only", "partial", "exact"),
+]
+
+
+PARKED = [
+    "#11 large-board immediate-close checkpoint",
+    "#12 Obsidian close acknowledgement",
+    "#13 embedded-document quarantine",
+    "#14 conflict-copy preservation",
+    "#15 release-transition serialization",
+    "#16 loopback cross-origin protection",
+    "#17 HTTP/document size alignment",
+    "#18–24 remaining keyboard semantics",
+    "#25–26 chrome honesty and first-run guidance",
+    "#27–30 build, promotion, harness, and worktree follow-ups",
+]
+
+
+def esc(value: object) -> str:
+    return html.escape(str(value), quote=True)
+
+
+def source_links(reference: dict[str, object]) -> str:
+    links = reference["links"]
+    assert isinstance(links, list)
+    return "".join(
+        f'<a href="{esc(url)}" target="_blank" rel="noreferrer">{esc(label)} ↗</a>'
+        for label, url in links
+    )
+
+
+def reference_card(reference: dict[str, object]) -> str:
+    return f"""<article class="reference {esc(reference['tone'])}">
+<div class="reference-top"><span>{esc(reference['role'])}</span><h3>{esc(reference['name'])}</h3></div>
+<p>{esc(reference['summary'])}</p><div class="limit"><b>Do not overclaim</b>{esc(reference['limits'])}</div>
+<div class="source-links">{source_links(reference)}</div></article>"""
+
+
+def accepted_card(item: dict[str, object]) -> str:
+    rank = int(item["rank"])
+    return f"""<article class="measure" id="measure-{rank}" data-kind="{esc(item['kind'])}">
+<header><div class="number">{rank:02d}</div><div><span class="verdict">{esc(item['verdict'])}</span><h3>{esc(item['title'])}</h3></div><label class="confirm"><input type="checkbox" checked data-rank="{rank}"><span>Accepted</span></label></header>
+<div class="measure-grid"><section><b>Why it exists here</b><p>{esc(item['reason'])}</p></section><section><b>What the references actually support</b><p>{esc(item['precedent'])}</p></section></div>
+<div class="code"><a href="{esc(item['href'])}">{esc(item['code'])}</a><code>{esc(item['comment'])}</code></div>
+<footer><span>Executable evidence</span>{esc(item['proof'])}</footer>
+<label class="note"><span>Optional review note</span><textarea data-note="{rank}" placeholder="Anything to adjust later…"></textarea></label></article>"""
+
+
+def matrix_rows() -> str:
+    cells = []
+    for measure, drawio, offline, excalidraw, systemsketch in MATRIX:
+        cells.append(
+            "<tr>"
+            f"<th>{esc(measure)}</th>"
+            f"<td>{esc(drawio)}</td><td>{esc(offline)}</td>"
+            f"<td>{esc(excalidraw)}</td><td class=ours>{esc(systemsketch)}</td>"
+            "</tr>"
+        )
+    return "".join(cells)
+
+
+def main() -> None:
+    references = "".join(reference_card(reference) for reference in REFERENCES)
+    measures = "".join(accepted_card(item) for item in ACCEPTED)
+    parked = "".join(f"<li>{esc(item)}</li>" for item in PARKED)
+    initial = json.dumps({str(item["rank"]): True for item in ACCEPTED})
+
+    page = f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SystemSketch · file robustness reference review · 2026-09-03</title>
+<style>
+:root{{--paper:#f3f1eb;--card:#fffefb;--ink:#17191e;--muted:#676b74;--line:#d9d7cf;--purple:#5b50e6;--green:#13784a;--orange:#e66b2e;--red:#a73b32;--blue:#2269a8;--shadow:0 16px 50px #22242b11}}*{{box-sizing:border-box}}html{{scroll-behavior:smooth}}body{{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}}button,input,textarea{{font:inherit}}a{{color:#4339d8;font-weight:760}}main{{max-width:1320px;margin:auto;padding:42px 26px 100px}}.eyebrow{{font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:900;color:var(--purple)}}h1{{max-width:1050px;margin:9px 0 18px;font-size:clamp(44px,7vw,84px);line-height:.94;letter-spacing:-.058em}}h2{{font-size:31px;letter-spacing:-.035em;margin:0 0 9px}}h3{{font-size:21px;line-height:1.15;letter-spacing:-.02em;margin:5px 0}}p{{color:var(--muted)}}.lead{{font-size:20px;max-width:900px}}.hero{{display:grid;grid-template-columns:1.08fr .92fr;min-height:440px;background:#17191e;border-radius:27px;overflow:hidden;box-shadow:var(--shadow);margin:30px 0}}.hero-copy{{padding:34px;color:#f8f8f4;display:flex;flex-direction:column;justify-content:space-between}}.hero-copy p{{color:#b8bfcc;max-width:640px}}.metrics{{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}}.metric{{border:1px solid #3b3f49;border-radius:14px;padding:14px}}.metric b{{font-size:29px;display:block}}.metric span{{color:#aeb6c5;font-size:11px}}.flow{{padding:34px;background:linear-gradient(145deg,#282b34,#20232a);display:grid;align-content:center;gap:13px}}.flow-row{{display:grid;grid-template-columns:1fr 40px 1fr;align-items:center}}.flow-box{{padding:16px;border:1px solid #464b58;border-radius:15px;color:#eef0f4;background:#ffffff08}}.flow-box b{{display:block}}.flow-box small{{color:#aeb6c5}}.arrow{{text-align:center;color:#f08a4b;font-size:23px}}.guard{{border-color:#6f66ef;background:#5b50e620}}.outcome{{border-color:#35a56f;background:#13784a20}}.decision-strip{{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 46px}}.decision{{padding:18px;background:var(--card);border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow)}}.decision b{{display:block;font-size:28px}}.decision span{{color:var(--muted)}}.decision.keep b{{color:var(--green)}}.decision.swap b{{color:var(--purple)}}.decision.drop b{{color:var(--red)}}.section-head{{display:flex;justify-content:space-between;align-items:end;gap:24px;margin:52px 0 17px}}.section-head p{{max-width:680px;margin:0}}.references{{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}}.reference{{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--blue);border-radius:19px;padding:22px;box-shadow:var(--shadow)}}.reference.mixed{{border-top-color:var(--orange)}}.reference-top span{{font-size:11px;color:var(--blue);font-weight:900;text-transform:uppercase}}.reference.mixed .reference-top span{{color:#a84d1d}}.limit{{padding:12px 14px;border-radius:12px;background:#f7f1e8;color:#6e5848}}.limit b{{display:block;color:#8d451f;font-size:11px;text-transform:uppercase}}.source-links{{display:flex;flex-wrap:wrap;gap:7px;margin-top:15px}}.source-links a{{font-size:12px;text-decoration:none;border:1px solid var(--line);border-radius:99px;padding:5px 9px;background:white}}.matrix-wrap{{overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:19px;box-shadow:var(--shadow)}}table{{border-collapse:collapse;width:100%;min-width:820px}}th,td{{padding:13px 15px;border-bottom:1px solid var(--line);text-align:left}}thead th{{font-size:11px;text-transform:uppercase;color:var(--muted);background:#faf9f5}}tbody th{{width:28%}}.ours{{font-weight:850;color:var(--green);background:#f0f9f3}}.controls{{position:sticky;top:9px;z-index:10;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:11px 13px;margin:20px 0;background:#fffffff0;border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow);backdrop-filter:blur(14px)}}.controls button{{border:1px solid var(--line);border-radius:9px;padding:8px 11px;background:white;cursor:pointer;font-weight:750}}.controls .primary{{background:var(--ink);color:white;border-color:var(--ink)}}.controls output{{margin-left:auto;color:var(--muted);font-size:12px}}.measure{{background:var(--card);border:1px solid var(--line);border-radius:21px;box-shadow:var(--shadow);overflow:hidden;margin:0 0 16px}}.measure>header{{display:grid;grid-template-columns:55px 1fr auto;gap:15px;align-items:center;padding:20px 22px}}.number{{font-size:29px;font-weight:900;color:#b0b1b7}}.verdict{{font-size:11px;color:var(--green);font-weight:900;text-transform:uppercase}}.confirm{{display:flex;align-items:center;gap:8px;font-weight:850;color:var(--green)}}.confirm input{{width:20px;height:20px;accent-color:var(--green)}}.measure-grid{{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}}.measure-grid section{{padding:17px 21px;border-right:1px solid var(--line)}}.measure-grid section:last-child{{border:0}}.measure-grid b,.measure>footer span,.note span{{display:block;font-size:11px;color:var(--muted);font-weight:900;text-transform:uppercase}}.measure-grid p{{margin:5px 0 0}}.code{{display:grid;grid-template-columns:minmax(230px,.65fr) 1.35fr;gap:12px;padding:15px 21px;background:#20232a;color:#e7eaf0;align-items:start}}.code a{{color:#aaa5ff;font-size:12px}}.code code{{white-space:normal;color:#cdd4df;font:12px/1.55 ui-monospace,SFMono-Regular,monospace}}.measure>footer{{padding:14px 21px;border-top:1px solid var(--line)}}.note{{display:block;padding:12px 21px;background:#faf9f5;border-top:1px solid var(--line)}}textarea{{width:100%;min-height:52px;margin-top:5px;resize:vertical;padding:9px;border:1px solid var(--line);border-radius:9px;background:white}}.retired{{display:grid;grid-template-columns:1fr 1fr;gap:15px}}.retired article{{padding:21px;background:var(--card);border:1px solid var(--line);border-radius:18px}}.removed{{border-left:5px solid var(--red)!important}}.parked{{border-left:5px solid #8a8790!important}}.parked ul{{columns:2;margin-bottom:0;color:var(--muted)}}.principle{{margin-top:18px;padding:22px;border-radius:18px;background:#181a20;color:white}}.principle p{{color:#bac1cc;margin-bottom:0}}footer.page{{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted)}}.unchecked{{opacity:.58}}@media(max-width:850px){{main{{padding:26px 14px 70px}}.hero,.references,.retired{{grid-template-columns:1fr}}.decision-strip{{grid-template-columns:1fr 1fr}}.measure-grid,.code{{grid-template-columns:1fr}}.measure-grid section{{border-right:0;border-bottom:1px solid var(--line)}}.metrics{{grid-template-columns:1fr 1fr}}.controls output{{width:100%;margin:0}}}}@media(max-width:520px){{h1{{font-size:44px}}.decision-strip{{grid-template-columns:1fr}}.measure>header{{grid-template-columns:40px 1fr}}.confirm{{grid-column:2}}.parked ul{{columns:1}}}}
+</style></head><body><main>
+<div class="eyebrow">SystemSketch · reference audit · feedback applied</div><h1>Keep the eight protections. Remove the wheel reinvention.</h1>
+<p class="lead">This is the narrower answer after comparing the accepted work with draw.io Desktop, current tldraw, the supplied pre-internal tldraw-offline snapshot, and Excalidraw. No new filesystem feature was added in this pass.</p>
+<section class="hero"><div class="hero-copy"><div><div class="eyebrow">2026-09-03 · static report</div><h2>Not “robustness” in the abstract.</h2><p>Each retained measure must name the exact SystemSketch failure it prevents. Mature references establish the pattern; SystemSketch's two-process local-file architecture decides whether the stronger form is necessary.</p></div><div class="metrics"><div class="metric"><b>8</b><span>accepted + retained</span></div><div class="metric"><b>1</b><span>custom primitive replaced</span></div><div class="metric"><b>2</b><span>changes removed</span></div><div class="metric"><b>20</b><span>ideas not queued</span></div></div></div><div class="flow" aria-label="Revision-fenced save flow"><div class="flow-row"><div class="flow-box"><b>Window A</b><small>Stable or Preview</small></div><div class="arrow">→</div><div class="flow-box guard"><b>Exact base digest</b><small>Which bytes did it open?</small></div></div><div class="flow-row"><div class="flow-box"><b>Window B</b><small>Independent process</small></div><div class="arrow">→</div><div class="flow-box guard"><b>One OS path lock</b><small>Check + replace together</small></div></div><div class="flow-row"><div class="flow-box"><b>Disk</b><small>External editors still possible</small></div><div class="arrow">→</div><div class="flow-box outcome"><b>Save or named conflict</b><small>Never two silent winners</small></div></div></div></section>
+<div class="decision-strip"><div class="decision keep"><b>Keep 01–08</b><span>Your checked decisions are the current scope.</span></div><div class="decision swap"><b>Reuse for 08</b><span>Radix now owns modal mechanics, as it does in tldraw.</span></div><div class="decision drop"><b>Remove 09–10</b><span>Keyboard Block controls and compact chrome were reverted.</span></div><div class="decision"><b>Park 11–30</b><span>They are findings, not a work queue.</span></div></div>
+
+<div class="section-head"><div><div class="eyebrow">Reference quality first</div><h2>What the mature projects actually do</h2></div><p>The supplied branch is included prominently, but its absences matter as much as its ideas. draw.io is the closest mature local-file comparison.</p></div>
+<section class="references">{references}</section>
+
+<div class="section-head"><div><div class="eyebrow">Coverage matrix</div><h2>No reference has this exact architecture</h2></div><p>“Exact” means direct precedent. “Cloud” or “partial” is only an analogy; it is not permission to copy a mechanism wholesale.</p></div>
+<div class="matrix-wrap"><table><thead><tr><th>Measure</th><th>draw.io</th><th>tldraw-offline</th><th>Excalidraw</th><th>SystemSketch</th></tr></thead><tbody>{matrix_rows()}</tbody></table></div>
+
+<div class="section-head"><div><div class="eyebrow">Accepted scope · code-adjacent reasons</div><h2>Eight changes, eight concrete “why” comments</h2></div><p>Checkboxes start from your review. You can revise any one and copy a compact Markdown reply; notes stay in this browser only.</p></div>
+<nav class="controls" aria-label="Decision controls"><button type="button" class="primary" id="copy">Copy confirmation Markdown</button><button type="button" id="reset">Reset to your 8 accepted</button><output id="status">Static file; no report server required.</output></nav>
+<section>{measures}</section>
+
+<div class="section-head"><div><div class="eyebrow">Feedback boundary</div><h2>What is deliberately not in this tranche</h2></div><p>The audit remains useful evidence, but an unchecked idea is not a roadmap item.</p></div>
+<section class="retired"><article class="removed"><h3>Removed now</h3><p><b>#09</b> Block keyboard creation / section resizing and <b>#10</b> narrow-canvas transient chrome were reverted together. Their obsolete human fixture is not the acceptance surface for this branch.</p></article><article class="parked"><h3>Not queued</h3><ul>{parked}</ul></article></section>
+<div class="principle"><div class="eyebrow">Rule carried forward</div><h2>Comments explain the product failure, not “best practice.”</h2><p>Use stock tldraw or an installed primitive when it owns the behavior. Use small browser/POSIX mechanisms only where SystemSketch's local-file boundary has a failure those primitives cannot represent. Keep tests as executable evidence; do not grow a second filesystem framework.</p></div>
+<footer class="page">Built by <a href="build_workspace_robustness_reference_review.py">build_workspace_robustness_reference_review.py</a>. The report is self-contained and works from <code>file://</code>; external source links open the exact audited revisions. Code and ordinary regression tests remain the living specification.</footer>
+</main><script>
+const defaults={initial};const prefix='systemsketch-robustness-reference-v1:';const status=document.querySelector('#status');
+for(const box of document.querySelectorAll('[data-rank]')){{const key=prefix+'decision-'+box.dataset.rank;const saved=localStorage.getItem(key);box.checked=saved===null?defaults[box.dataset.rank]:saved==='true';box.closest('.measure').classList.toggle('unchecked',!box.checked);box.addEventListener('change',()=>{{localStorage.setItem(key,String(box.checked));box.closest('.measure').classList.toggle('unchecked',!box.checked);status.value='Decision saved locally.'}})}}
+for(const note of document.querySelectorAll('[data-note]')){{const key=prefix+'note-'+note.dataset.note;note.value=localStorage.getItem(key)||'';note.addEventListener('input',()=>{{localStorage.setItem(key,note.value);status.value='Note saved locally.'}})}}
+function markdown(){{const lines=['# SystemSketch robustness confirmation',''];for(const card of document.querySelectorAll('.measure')){{const box=card.querySelector('[data-rank]'),title=card.querySelector('h3').textContent.trim(),note=card.querySelector('[data-note]').value.trim();lines.push(`- [${{box.checked?'x':' '}}] #${{String(box.dataset.rank).padStart(2,'0')}} Keep this change — ${{title}}${{note?'\\n  - '+note:''}}`)}}lines.push('','- [ ] #09 Keep this change — Block keyboard creation and section resizing (removed)','- [ ] #10 Keep this change — Narrow-canvas transient chrome (removed)','- #11–#30 remain not queued.');return lines.join('\\n')}}
+async function copyText(value){{try{{await navigator.clipboard.writeText(value);return true}}catch{{const area=document.createElement('textarea');area.value=value;area.style.position='fixed';area.style.left='-9999px';document.body.append(area);area.select();const ok=document.execCommand('copy');area.remove();return ok}}}}
+document.querySelector('#copy').addEventListener('click',async()=>{{status.value=await copyText(markdown())?'Copied confirmation Markdown.':'Clipboard blocked; notes are still saved locally.'}});
+document.querySelector('#reset').addEventListener('click',()=>{{for(const box of document.querySelectorAll('[data-rank]')){{box.checked=true;box.closest('.measure').classList.remove('unchecked');localStorage.removeItem(prefix+'decision-'+box.dataset.rank)}}for(const note of document.querySelectorAll('[data-note]')){{note.value='';localStorage.removeItem(prefix+'note-'+note.dataset.note)}}status.value='Reset to the accepted eight.'}});
+</script></body></html>"""
+
+    OUTPUT.write_text(page, encoding="utf-8")
+    print(OUTPUT)
+
+
+if __name__ == "__main__":
+    main()

@@ -16,6 +16,7 @@ import {
 	routeElbow,
 	type ElbowPoint,
 	type ElbowRect,
+	type ElbowRoutingObstacle,
 	type ElbowRoute,
 	type ElbowRouteInput,
 	type NudgeOptions,
@@ -75,13 +76,18 @@ function segmentHitsRect(from: ElbowPoint, to: ElbowPoint, rect: ElbowRect): boo
 
 export function routeClearsObstacles(
 	route: ElbowRoute,
-	obstacles: readonly ElbowRect[],
+	obstacles: readonly ElbowRoutingObstacle[],
 	clearance = DEFAULT_ELBOW_OPTIONS.padding,
 ): boolean {
 	if (!routeIsOrthogonal(route)) return false
 	for (let index = 0; index + 1 < route.points.length; index += 1) {
 		for (const obstacle of obstacles) {
-			if (segmentHitsRect(route.points[index], route.points[index + 1], expanded(obstacle, clearance))) {
+			const obstacleClearance = Math.max(0, obstacle.clearance ?? clearance)
+			if (segmentHitsRect(
+				route.points[index],
+				route.points[index + 1],
+				expanded(obstacle, obstacleClearance),
+			)) {
 				return false
 			}
 		}

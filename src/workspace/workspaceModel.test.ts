@@ -8,6 +8,10 @@ import {
   documentSuffix,
   documentTitle,
   encodeDocumentForPath,
+  exportedTldrawPath,
+  autosaveSchedule,
+  autosaveRetryDelay,
+  canApplyExternalReload,
   nextSyncAction,
   moveBrowserSelection,
   nextUntitledDocumentPath,
@@ -70,6 +74,12 @@ describe('local workspace model', () => {
     expect(wrapped.records).toHaveLength(3)
   })
 
+  it('forces export destinations to the stock .tldr contract', () => {
+    expect(exportedTldrawPath('/boards/Map')).toBe('/boards/Map.tldr')
+    expect(exportedTldrawPath('/boards/Map.systemsketch')).toBe('/boards/Map.tldr')
+    expect(exportedTldrawPath('/boards/Map.TLDR')).toBe('/boards/Map.TLDR')
+  })
+
   it('allocates the next untitled document by title, across both extensions', () => {
     expect(nextUntitledDocumentPath('/boards', ['/boards/Untitled.tldr'])).toBe(
       '/boards/Untitled 2.systemsketch',
@@ -108,11 +118,80 @@ describe('local workspace model', () => {
   })
 
   it('reloads clean external edits and protects dirty ones', () => {
-    const base = { mtime: 1, size: 20 }
+    const base = { mtime: 1, size: 20, digest: 'base' }
     expect(nextSyncAction({ disk: base, base, hasUnsavedEdits: false }).kind).toBe('idle')
-    expect(nextSyncAction({ disk: { mtime: 2, size: 20 }, base, hasUnsavedEdits: false }).kind).toBe('reload')
-    expect(nextSyncAction({ disk: { mtime: 2, size: 20 }, base, hasUnsavedEdits: true }).kind).toBe('conflict')
+    expect(nextSyncAction({ disk: { mtime: 2, size: 20, digest: 'changed' }, base, hasUnsavedEdits: false }).kind).toBe('reload')
+    expect(nextSyncAction({ disk: { mtime: 2, size: 20, digest: 'changed' }, base, hasUnsavedEdits: true }).kind).toBe('conflict')
     expect(nextSyncAction({ disk: null, base, hasUnsavedEdits: false }).kind).toBe('missing')
+  })
+
+  it('uses the digest to catch same-size, same-mtime rewrites', () => {
+    const base = { mtime: 10, size: 100, digest: 'before' }
+    expect(nextSyncAction({
+      disk: { mtime: 10, size: 100, digest: 'after' },
+      base,
+      hasUnsavedEdits: false,
+    }).kind).toBe('reload')
+    // A metadata-only touch does not reload bytes that are already current.
+    expect(nextSyncAction({
+      disk: { mtime: 11, size: 100, digest: 'before' },
+      base,
+      hasUnsavedEdits: false,
+    }).kind).toBe('idle')
+  })
+
+  it('fences a clean reload against edits and revision changes while read is in flight', () => {
+    const request = {
+      requestedChangeEpoch: 4,
+      currentChangeEpoch: 4,
+      requestedBaseDigest: 'base',
+      currentBaseDigest: 'base',
+      expectedDiskDigest: 'external',
+      loadedDiskDigest: 'external',
+      hasUnsavedEdits: false,
+      discardRequestedEdits: false,
+    }
+    expect(canApplyExternalReload(request)).toBe(true)
+    expect(canApplyExternalReload({
+      ...request,
+      currentChangeEpoch: 5,
+      hasUnsavedEdits: true,
+    })).toBe(false)
+    expect(canApplyExternalReload({
+      ...request,
+      currentBaseDigest: 'saved-while-reading',
+    })).toBe(false)
+    expect(canApplyExternalReload({
+      ...request,
+      loadedDiskDigest: 'newer-external-revision',
+    })).toBe(false)
+    expect(canApplyExternalReload({
+      ...request,
+      hasUnsavedEdits: true,
+      discardRequestedEdits: true,
+    })).toBe(true)
+  })
+
+  it('bounds transient autosave retries', () => {
+    expect([0, 1, 2, 3].map((attempt) => autosaveRetryDelay(attempt)))
+      .toEqual([1_000, 3_000, 8_000, null])
+    expect(autosaveRetryDelay(0, { conflict: true })).toBeNull()
+    expect(autosaveRetryDelay(0, { force: true })).toBeNull()
+  })
+
+  it('debounces ordinary edits but never pushes a save past the burst deadline', () => {
+    expect(autosaveSchedule(1_000, null, 600, 30_000)).toEqual({
+      pendingSince: 1_000,
+      delayMs: 600,
+    })
+    expect(autosaveSchedule(30_500, 1_000, 600, 30_000)).toEqual({
+      pendingSince: 1_000,
+      delayMs: 500,
+    })
+    expect(autosaveSchedule(31_100, 1_000, 600, 30_000)).toEqual({
+      pendingSince: 1_000,
+      delayMs: 0,
+    })
   })
 
   it('keeps a bounded, de-duplicated MRU list', () => {

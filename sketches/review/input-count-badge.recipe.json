@@ -1,0 +1,113 @@
+{
+  "feature": "Input count badge wire clearance",
+  "viewport": { "width": 1480, "height": 860 },
+  "shapes": [
+    {
+      "id": "camera",
+      "type": "block",
+      "x": 420,
+      "y": 315,
+      "props": {
+        "title": "camera()",
+        "view": "port",
+        "w": 240,
+        "h": 135,
+        "inputs": [],
+        "outputs": [
+          { "id": "out", "name": "pose", "type": "Pose", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "cache",
+      "type": "block",
+      "x": 420,
+      "y": 505,
+      "props": {
+        "title": "cache()",
+        "view": "port",
+        "w": 240,
+        "h": 135,
+        "inputs": [],
+        "outputs": [
+          { "id": "out", "name": "pose", "type": "Pose", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "target",
+      "type": "block",
+      "x": 780,
+      "y": 360,
+      "props": {
+        "title": "pose()",
+        "description": "Two incoming pose values",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 430,
+        "h": 260,
+        "inputs": [
+          { "id": "pose", "name": "pose", "type": "Pose", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out", "name": "result", "type": "Pose", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "camera-wire",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    },
+    {
+      "id": "cache-wire",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    }
+  ],
+  "bindings": [
+    { "type": "connection", "fromId": "camera-wire", "toId": "camera", "props": { "portId": "out", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "camera-wire", "toId": "target", "props": { "portId": "pose", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "cache-wire", "toId": "cache", "props": { "portId": "out", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "cache-wire", "toId": "target", "props": { "portId": "pose", "terminal": "end", "face": "outer" } }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Inspect pose(). The 2 badge sits just above its two incoming wires.",
+      "x": 740,
+      "y": 70,
+      "w": 480,
+      "h": 105,
+      "target": { "shapeId": "target", "anchor": "top", "dx": -145 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The count is legible, clears the wire, and aligns with the expanded port-name row.",
+      "x": 40,
+      "y": 700,
+      "w": 610,
+      "h": 110
+    }
+  ]
+}

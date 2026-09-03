@@ -266,6 +266,15 @@ export const SYSTEMSKETCH_TOOLBAR_OVERRIDES: TLUiOverrides = {
   tools: (editor, tools) =>
     rememberSystemTools(withLoopTool(editor,
       withBranchTool(editor, withBlockTool(editor, overrideTools(editor, tools))))),
+  translations: {
+    en: {
+      // Stock `Remove frame` keeps its children — it reparents them out before
+      // deleting the frame (`utils/frames/frames.ts`). The bare label reads as
+      // if it might take them with it, which is why this repo had grown a
+      // second, Frame-only command saying so. One command, said plainly.
+      'action.remove-frame': 'Remove frame, leave children',
+    },
+  },
 }
 
 export function selectSystemFamilyTool(

@@ -1,0 +1,22 @@
+{
+ "subject": "line",
+ "appearance": [
+  {
+   "control": "color",
+   "label": "Color, black"
+  },
+  {
+   "control": "lineStyle",
+   "label": "Line style, draw"
+  },
+  {
+   "control": "spline",
+   "label": "Line shape, straight"
+  }
+ ],
+ "hasBlockMiniMenu": false,
+ "blockButtons": [],
+ "extraButtons": [
+  "Inspect"
+ ]
+}

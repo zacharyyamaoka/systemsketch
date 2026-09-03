@@ -43,6 +43,13 @@ export const SEPARATOR_MARGIN = 4
 /** Popovers open this far above the pill. */
 export const POPOVER_GAP = 8
 export const POPOVER_PADDING = 8
+/**
+ * How close a popover may come to the window edge before Radix stops sliding
+ * it. Not a FigJam measurement — it is the same 12px the rest of the app's
+ * popovers already pass, and without it the 455px colour palette opened flush
+ * at x=0 with its first swatch column cut in half.
+ */
+export const POPOVER_COLLISION_PADDING = 12
 
 /** Control icons: filled paths on a 24x24 viewBox, not stroked outlines. */
 export const ICON_VIEWBOX = '0 0 24 24'

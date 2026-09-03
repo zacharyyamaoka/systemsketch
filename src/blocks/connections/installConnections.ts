@@ -4,6 +4,7 @@ import { CONNECTION_SHAPE_TYPE } from './connectionModel'
 import { cleanupStaleConnections } from './ConnectionBindingUtil'
 import { PointingBlockPort, type PointingBlockPortInfo } from './PointingBlockPort'
 import { BLOCK_PORT_DRAG_STATE_ID, DraggingBlockPort } from '../ports/portInteraction'
+import { installEffectPortFollow } from './installEffectPortFollow'
 import { keepConnectionsAtBottom } from './keepConnectionsAtBottom'
 
 /**
@@ -115,6 +116,8 @@ export function installBlockConnectionInteraction(editor: Editor): () => void {
 export function installBlockConnections(editor: Editor): () => void {
 	cleanupStaleConnections(editor)
 	keepConnectionsAtBottom(editor)
+	// An enclosing block's effect port rides the cable that leaves it.
+	installEffectPortFollow(editor)
 	const stopInteraction = installBlockConnectionInteraction(editor)
 	return () => {
 		stopInteraction()

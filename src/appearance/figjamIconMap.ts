@@ -31,12 +31,15 @@ const DASH: ValueToIcon = {
 /**
  * The icons a trigger shows regardless of its value. FigJam's Line style
  * trigger is three bars — a line, then two outlined bars — on both a shape and
- * a connector; its Typeface trigger is `Aa`. Both are read off the pill itself.
+ * a connector; its Typeface trigger is `Aa`; its Shape trigger is a circle
+ * overlapping a square, the same icon whichever geo is actually selected. All
+ * three are read off the pill itself.
  */
 export const FIGJAM_TRIGGER_ICON: Partial<Record<AppearanceControlId, string>> = {
   dash: 'trigger/Line style',
   lineStyle: 'trigger/Line style',
   font: 'trigger/Typeface',
+  geo: 'trigger/Shape',
 }
 
 /** FigJam's menu check, beside the chosen row of Typeface and Font size. */

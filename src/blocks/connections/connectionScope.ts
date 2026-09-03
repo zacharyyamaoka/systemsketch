@@ -57,13 +57,15 @@ export interface FacePair {
  *   siblings            outer ↔ outer   in their shared scope
  *   B inside A          A inner ↔ B outer   in A
  *   A inside B          A outer ↔ B inner   in B
- *   the same Block      inner ↔ inner   a pass-through wire across its inside
+ *   the same Block      outer ↔ outer   a self-loop around its card
  *
- * Anything else — a grandchild, a cousin in another frame — shares no scope
- * and gets no pair. `requireLive` additionally demands that an inner face be
- * on screen (the Block is Expanded), which a new cable needs and an existing
- * one must not: a wire welded to an inner face survives Simple ↔ Port ↔
- * Expanded, or collapsing a Block would destroy its internal wiring.
+ * A same-Block loop belongs to the Block's outer scope: it must leave the
+ * input and output ports before turning, never travel through the Block's
+ * body. Anything else — a grandchild, a cousin in another frame — shares no
+ * scope and gets no pair. `requireLive` additionally demands that an inner
+ * face be on screen (the Block is Expanded), which a new cable needs and an
+ * existing one must not: a wire welded to an inner face survives Simple ↔ Port
+ * ↔ Expanded, or collapsing a Block would destroy its internal wiring.
  */
 export function pairBlockFaces(
 	editor: ScopeReader,
@@ -74,7 +76,7 @@ export function pairBlockFaces(
 	const live = (host: ScopeHost) => (
 		!(options.requireLive ?? true) ? isBlockShape(host) : hostIsLiveScope(host)
 	)
-	if (a.id === b.id) return live(a) ? { a: 'inner', b: 'inner', scopeId: a.id } : null
+	if (a.id === b.id) return { a: 'outer', b: 'outer', scopeId: blockScopeId(editor, a.id) }
 	const scopeA = blockScopeId(editor, a.id)
 	const scopeB = blockScopeId(editor, b.id)
 	if (scopeA === scopeB) return { a: 'outer', b: 'outer', scopeId: scopeA }

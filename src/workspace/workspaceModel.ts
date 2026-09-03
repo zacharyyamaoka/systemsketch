@@ -18,6 +18,17 @@ export const MAX_RECENT_DOCUMENTS = 12
 export interface DocumentFingerprint {
   mtime: number
   size: number
+  /** Digest of the exact UTF-8 file bytes; authoritative when both sides have one. */
+  digest: string | null
+}
+
+export const AUTOSAVE_RETRY_DELAYS_MS = [1_000, 3_000, 8_000] as const
+
+export interface AutosaveSchedule {
+  /** The first edit in the still-unpersisted burst. */
+  pendingSince: number
+  /** Delay from `now` until the next save attempt. */
+  delayMs: number
 }
 
 export type SyncAction =
@@ -147,12 +158,79 @@ export function documentHref(path: string): string {
   return `${url.pathname}${url.search}${url.hash}`
 }
 
+/** Export always means a stock `.tldr`, even when a known different suffix was typed. */
+export function exportedTldrawPath(path: string): string {
+  const suffix = documentSuffix(path)
+  return suffix === TLDRAW_SUFFIX
+    ? path
+    : `${suffix ? path.slice(0, -suffix.length) : path}${TLDRAW_SUFFIX}`
+}
+
 export function sameFingerprint(
   left: DocumentFingerprint | null,
   right: DocumentFingerprint | null,
 ): boolean {
   if (left === null || right === null) return left === right
+  // WHY: a rapid same-length rewrite can preserve both mtime and byte count;
+  // when both sides have an exact-byte digest, it is the authoritative identity.
+  if (left.digest !== null && right.digest !== null) return left.digest === right.digest
   return Math.abs(left.mtime - right.mtime) <= 1e-6 && left.size === right.size
+}
+
+/** The next bounded retry delay; forced writes and digest conflicts always require a person. */
+export function autosaveRetryDelay(
+  failedAttempts: number,
+  options: { conflict?: boolean; force?: boolean } = {},
+): number | null {
+  if (options.conflict || options.force) return null
+  return AUTOSAVE_RETRY_DELAYS_MS[failedAttempts] ?? null
+}
+
+/**
+ * Debounce nearby edits without allowing a continuous gesture to defer its
+ * first save forever.
+ *
+ * WHY: draw.io 31.4.2 gives its local recovery draft both an idle delay and a
+ * 30-second ceiling (DrawioFile.js L2216-L2238). Keeping the original start
+ * time gives SystemSketch the same bounded-loss window while retaining its
+ * shorter normal debounce. Retry backoff is intentionally handled separately.
+ */
+export function autosaveSchedule(
+  now: number,
+  pendingSince: number | null,
+  debounceMs: number,
+  maxDelayMs: number,
+): AutosaveSchedule {
+  const startedAt = pendingSince ?? now
+  const remainingBeforeDeadline = Math.max(0, maxDelayMs - (now - startedAt))
+  return {
+    pendingSince: startedAt,
+    delayMs: Math.min(debounceMs, remainingBeforeDeadline),
+  }
+}
+
+/**
+ * A clean external reload spans two requests (`stat`, then `read`). Refuse to
+ * apply its result if the user edited, a save advanced the base revision, or a
+ * newer disk revision replaced the one that caused the reload.
+ */
+export function canApplyExternalReload(input: {
+  requestedChangeEpoch: number
+  currentChangeEpoch: number
+  requestedBaseDigest: string | null
+  currentBaseDigest: string | null
+  expectedDiskDigest: string | null
+  loadedDiskDigest: string | null
+  hasUnsavedEdits: boolean
+  discardRequestedEdits: boolean
+}): boolean {
+  return input.requestedChangeEpoch === input.currentChangeEpoch
+    && input.requestedBaseDigest === input.currentBaseDigest
+    && (!input.hasUnsavedEdits || input.discardRequestedEdits)
+    && (
+      input.expectedDiskDigest === null
+      || input.loadedDiskDigest === input.expectedDiskDigest
+    )
 }
 
 export function nextSyncAction(input: {

@@ -117,6 +117,17 @@ describe('routeElbow — layouts', () => {
     expect(crosses(route, behind)).toBe(false)
   })
 
+  it('loops outside when an output returns to its own Block input', () => {
+    const input: ElbowRouteInput = { start: outPort(SOURCE), end: inPort(SOURCE) }
+    const route = routeElbow(input)
+    expectOrthogonal(route)
+    expectEndpoints(route, input)
+    expect(route.fallback).toBe(false)
+    expect(route.segments[0].end.x).toBeGreaterThan(input.start.point.x)
+    expect(crosses(route, SOURCE)).toBe(false)
+    expect(Math.max(...route.points.map((point) => point.y))).toBeGreaterThan(SOURCE.y + SOURCE.h)
+  })
+
   it('never crosses either bound block, across a sweep of target positions', () => {
     let checked = 0
     for (let dx = -600; dx <= 600; dx += 60) {

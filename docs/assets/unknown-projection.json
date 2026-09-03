@@ -1,0 +1,254 @@
+[
+  {
+    "id": "SEED-1",
+    "label": "encode() feeds client.send()",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "MARK-1",
+    "label": "the type line carries the opacity once, for the whole call",
+    "observed": "unresolved",
+    "desired": "unresolved",
+    "ok": true
+  },
+  {
+    "id": "MARK-2",
+    "label": "a signature that cannot be stated is not drawn as a table",
+    "observed": "simple",
+    "desired": "simple",
+    "ok": true
+  },
+  {
+    "id": "MARK-3",
+    "label": "a slot the call site proves is left alone; only what has nothing to say is marked",
+    "observed": [
+      "self|Client",
+      "|?",
+      "|?"
+    ],
+    "desired": [
+      "self|Client",
+      "|?",
+      "|?"
+    ],
+    "ok": true
+  },
+  {
+    "id": "MARK-4",
+    "label": "the title still names the callee",
+    "observed": "client.send()",
+    "desired": "client.send()",
+    "ok": true
+  },
+  {
+    "id": "MARK-5",
+    "label": "nothing is inferred from the cable that lands on it",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "MARK-6",
+    "label": "the cable survives — the ports kept their identities",
+    "observed": 1,
+    "desired": 1,
+    "ok": true
+  },
+  {
+    "id": "UNDO-1",
+    "label": "one mark is one undo step, and it restores the whole signature",
+    "observed": {
+      "blockType": "call",
+      "view": "port",
+      "first": "self:Client"
+    },
+    "desired": {
+      "blockType": "call",
+      "view": "port",
+      "first": "self:Client"
+    },
+    "ok": true
+  },
+  {
+    "id": "PORT-MARK",
+    "label": "a row that DOES state a type goes unknown only when someone says so — and keeps its name",
+    "observed": "self|?",
+    "desired": "self|?",
+    "ok": true
+  },
+  {
+    "id": "PORT-MARK-2",
+    "label": "and that is its own undo step",
+    "observed": "Client",
+    "desired": "Client",
+    "ok": true
+  },
+  {
+    "id": "PORT-1",
+    "label": "the known row survives, and each unknown row carries exactly one `?`",
+    "observed": [
+      "self Client",
+      "?",
+      "?"
+    ],
+    "desired": [
+      "self Client",
+      "?",
+      "?"
+    ],
+    "ok": true
+  },
+  {
+    "id": "PORT-2",
+    "label": "the `?` rows are painted as absences; the known row is not",
+    "observed": [
+      false,
+      true,
+      true
+    ],
+    "desired": [
+      false,
+      true,
+      true
+    ],
+    "ok": true
+  },
+  {
+    "id": "PORT-3",
+    "label": "the generated default puts one `?` per row",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  },
+  {
+    "id": "PORT-4",
+    "label": "a fully resolved Block paints no unknown mark at all",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "PICK-1",
+    "label": "a cable dropped on nothing asks what should take it",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "PICK-1B",
+    "label": "a self-titled projection asks for the MEMBER, not for a name",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "PICK-2",
+    "label": "Split makes a projection, titled by the type that arrived",
+    "observed": {
+      "blockType": "projection",
+      "title": "ObjectRecord"
+    },
+    "desired": {
+      "blockType": "projection",
+      "title": "ObjectRecord"
+    },
+    "ok": true
+  },
+  {
+    "id": "PICK-3",
+    "label": "the inlet is the type itself and carries no variable name",
+    "observed": {
+      "name": "",
+      "type": "ObjectRecord"
+    },
+    "desired": {
+      "name": "",
+      "type": "ObjectRecord"
+    },
+    "ok": true
+  },
+  {
+    "id": "PICK-4",
+    "label": "its first row is an accessor, and carries no `?` — a member is assumed to decompose",
+    "observed": {
+      "name": ".",
+      "type": ""
+    },
+    "desired": {
+      "name": ".",
+      "type": ""
+    },
+    "ok": true
+  },
+  {
+    "id": "ACC-1",
+    "label": "Add → Accessor is offered on a projection and starts an editable row",
+    "observed": 2,
+    "desired": 2,
+    "ok": true
+  },
+  {
+    "id": "ACC-2",
+    "label": "a member typed without a dot gains one",
+    "observed": ".object_id",
+    "desired": ".object_id",
+    "ok": true
+  },
+  {
+    "id": "ACC-3",
+    "label": "a fresh accessor carries no `?`: nothing here was looked at and missed",
+    "observed": "",
+    "desired": "",
+    "ok": true
+  },
+  {
+    "id": "ACC-4",
+    "label": "a nested member stays ONE row: `.var.foo.bar`, not a Block per link",
+    "observed": ".pose.translation.x",
+    "desired": ".pose.translation.x",
+    "ok": true
+  },
+  {
+    "id": "ACC-5",
+    "label": "the rows read as accessors, with no variable name and no `?`",
+    "observed": [
+      ".object_id",
+      ".pose.translation.x"
+    ],
+    "desired": [
+      ".object_id",
+      ".pose.translation.x"
+    ],
+    "ok": true
+  },
+  {
+    "id": "ACC-6",
+    "label": "no accessor is marked unknown — the projection is assumed to decompose",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "HACK-1",
+    "label": "a `?` typed into a NAME is kept — one per row is a convention, not a rule",
+    "observed": "?|Client",
+    "desired": "?|Client",
+    "ok": true
+  },
+  {
+    "id": "HACK-2",
+    "label": "and it paints as an absence there too",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "CLEAN",
+    "label": "the journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

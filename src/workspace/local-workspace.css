@@ -464,8 +464,10 @@
   background: var(--ss-surface-inverse);
 }
 
-.systemsketch-workspace-dialog > footer button.is-danger {
+.systemsketch-workspace-dialog > footer button.is-danger,
+.systemsketch-workspace-alert button.is-danger {
   border-color: var(--ss-danger);
+  color: var(--ss-text-inverse);
   background: var(--ss-danger);
 }
 
@@ -510,6 +512,8 @@
 .systemsketch-workspace-alert__actions {
   display: flex;
   flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 7px;
 }
 

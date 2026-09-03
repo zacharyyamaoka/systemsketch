@@ -8,11 +8,15 @@
   "ok": true
  },
  {
+  "label": "the dialog focuses its useful field, Escape closes it, and focus returns to its launcher",
+  "ok": true
+ },
+ {
   "label": "File offers New window beside New and Open… (File, Settings, Edit, View)",
   "ok": true
  },
  {
-  "label": "Ctrl+O lists this folder, naming each document’s own type",
+  "label": "Ctrl+O focuses Filter, traps Tab inside the modal, and names each document’s type",
   "ok": true
  },
  {

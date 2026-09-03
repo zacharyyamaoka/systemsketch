@@ -26,6 +26,20 @@
     "ok": true
   },
   {
+    "id": "EXPORT-NO-IMPLICIT-OVERWRITE",
+    "label": "the first export attempt preserves an occupied destination byte-for-byte",
+    "observed": "occupied export destination — preserve until Replace\n",
+    "desired": "occupied export destination — preserve until Replace\n",
+    "ok": true
+  },
+  {
+    "id": "EXPORT-OFFERS-REPLACE",
+    "label": "the collision names the destructive follow-up instead of silently replacing",
+    "observed": "Replace",
+    "desired": "Replace",
+    "ok": true
+  },
+  {
     "id": "EXPORTS-A-PLAIN-TLDRAW-FILE",
     "label": "the exported file holds only stock shapes, and carries no SystemSketch envelope",
     "observed": {
@@ -80,7 +94,7 @@
   },
   {
     "id": "DOCUMENT-SURVIVES-ON-DISK",
-    "label": "and so is the .systemsketch on disk — the export borrowed it and put it back",
+    "label": "and so is the .systemsketch on disk — export transformed only its clone",
     "observed": {
       "types": [
         "block",
@@ -129,7 +143,7 @@
   },
   {
     "id": "CLEAN",
-    "label": "the journey raised no local console errors",
+    "label": "the journey raised no unexpected local console errors (the exercised collision reports its expected 409)",
     "observed": [],
     "desired": [],
     "ok": true

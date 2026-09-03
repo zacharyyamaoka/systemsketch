@@ -162,6 +162,23 @@ async function main() {
         const hitKept = Number.parseFloat(before.inset) <= -10
         return same && hitKept
       })()`) === true)
+    add('EP-6c a tether runs from the hook to its port, render-only, right-angled',
+      await evaluate(page, `(() => {
+        const layer = document.querySelector('.BlockNode-tethers')
+        if (!layer) return false
+        if (getComputedStyle(layer).pointerEvents !== 'none') return false
+        const paths = layer.querySelectorAll('.BlockNode-tether')
+        if (paths.length !== 1) return false
+        const nums = (paths[0].getAttribute('d').match(/-?\\d+(?:\\.\\d+)?/g) || []).map(Number)
+        const pts = []
+        for (let i = 0; i < nums.length; i += 2) pts.push([nums[i], nums[i + 1]])
+        if (pts.length < 3) return false
+        // every segment axis-aligned, and it turns at least twice
+        for (let i = 0; i < pts.length - 1; i += 1) {
+          if (pts[i][0] !== pts[i + 1][0] && pts[i][1] !== pts[i + 1][1]) return false
+        }
+        return true
+      })()`) === true)
     const named = marked.ports.filter((candidate) => candidate.edge === 'right')
     add('EP-7 named outputs keep the right edge to themselves',
       named.every((candidate) => candidate.edge === 'right'))
@@ -235,6 +252,8 @@ async function main() {
     await clickAt(page, off.cx, off.cy)
     await delay(420)
     const cleared = await portsOf(page, append)
+    add('EP-13b unmarking takes the tether with it',
+      await evaluate(page, `document.querySelectorAll('.BlockNode-tether').length`) === 0)
     add('EP-12 unmarking takes the port away again', effectPort(cleared) === null)
     add('EP-13 and takes the hook off the input',
       cleared.ports.find((candidate) => candidate.id === 'in_1')?.mutates !== true)

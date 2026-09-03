@@ -176,6 +176,41 @@ export function findTextOccurrences(
   return occurrences
 }
 
+/**
+ * Where a shape sits in the board's reading order, as a path of indices.
+ *
+ * A fractional index only orders SIBLINGS. `getPageShapeIds` returns a flat set
+ * that mixes page-level shapes with the children of every Frame and Block on
+ * it, so comparing two raw indices out of that set compares numbers that were
+ * never on the same scale. Measured on the palette journey's own board: a
+ * page-level Block indexed `a1THA` against a Frame child indexed `a1JsX`, which
+ * sorted the Frame's child *above* a shape it visually sits inside. The low
+ * digits of a tldraw index are randomised, so which way that landed changed
+ * from run to run and the result list had no stable order at all.
+ *
+ * The ancestor chain puts every shape on one scale: a Frame's children sort
+ * after that Frame and before its next sibling, which is how the board reads.
+ */
+function shapeOrderPath(editor: Editor, shape: TLShape): string[] {
+  return [...editor.getShapeAncestors(shape), shape].map((step) => String(step.index))
+}
+
+/**
+ * Compare two such paths, shallowest difference first.
+ *
+ * Plain `<` rather than `localeCompare`: a fractional index is defined by
+ * ordinal comparison of its characters, and a locale-aware collation can order
+ * them differently (it ignores case and punctuation weight by default), which
+ * would silently disagree with tldraw's own ordering.
+ */
+function compareOrderPaths(a: string[], b: string[]): number {
+  for (let step = 0; step < Math.min(a.length, b.length); step += 1) {
+    if (a[step] === b[step]) continue
+    return a[step] < b[step] ? -1 : 1
+  }
+  return a.length - b.length
+}
+
 /** A live, cross-page projection of text exposed through public ShapeUtil seams. */
 export function searchBoard(
   editor: Editor,
@@ -192,9 +227,11 @@ export function searchBoard(
     const shapes = [...editor.getPageShapeIds(page)]
       .map((id) => editor.getShape(id))
       .filter((shape): shape is TLShape => Boolean(shape) && !editor.isShapeHidden(shape!))
+      .map((shape) => ({ shape, order: shapeOrderPath(editor, shape) }))
       .sort((a, b) =>
-        String(a.index).localeCompare(String(b.index)) || String(a.id).localeCompare(String(b.id)),
+        compareOrderPaths(a.order, b.order) || (a.shape.id < b.shape.id ? -1 : 1),
       )
+      .map((entry) => entry.shape)
 
     for (const shape of shapes) {
       const source = textSourceForShape(editor, shape)

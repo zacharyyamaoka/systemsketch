@@ -1,0 +1,17 @@
+{
+ "subject": "line",
+ "menu": {
+  "x": 648,
+  "y": 381,
+  "w": 336,
+  "h": 40
+ },
+ "controls": [
+  "Change color",
+  "Line style",
+  "Add text",
+  "Start point, none",
+  "Line shape, elbowed",
+  "End point, none"
+ ]
+}

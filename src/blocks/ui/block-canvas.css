@@ -306,6 +306,23 @@ html[data-pb-defaultmark='off'] .systemsketch-block-canvas .BlockNode-portDefaul
   display: none;
 }
 
+/*
+ * `?` is not a name and not a type — it is the absence of one, and it has to
+ * read that way. Same ink as a muted type, italic, and never bold, so a row of
+ * question marks is visibly quieter than the resolved rows around it.
+ */
+.systemsketch-block-canvas .BlockNode-portName--unknown,
+.systemsketch-block-canvas .BlockNode-portType--unknown {
+  color: var(--ss-text-muted);
+  font-style: italic;
+  opacity: 0.75;
+}
+
+/* An accessor is a member of the incoming type, so it reads as one token. */
+.systemsketch-block-canvas .BlockNode-portName--accessor {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
 html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portName--default {
   text-decoration: underline dotted var(--ss-text-muted) 1.5px;
   text-underline-offset: 3px;
@@ -622,7 +639,9 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
 /* Many-to-one: a port with two or more producers wears a count beside its dot. */
 .systemsketch-block-canvas .Port .Port-count {
   position: absolute;
-  top: 50%;
+  /* Float over the incoming wire instead of covering it, aligned with the
+   * expanded port-name text above the dot. */
+  top: calc(50% - 10px);
   box-sizing: border-box;
   min-width: 16px;
   height: 16px;
@@ -681,11 +700,831 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
 }
 
 .Port_effect {
-  --port-color: var(--ss-warning);
+  /* The ink itself is set inline in BlockCanvas: an inline custom property
+   * beats a class rule, and this port's colour must not be its type's. */
   background: var(--ss-surface-raised);
   border-color: var(--ss-warning);
 }
 
 .Port_effect.Port_connected {
   background: var(--ss-warning);
+}
+
+/* ======================= the diff / lint lens ==========================
+ *
+ * `state` is a lens somebody put on the document, never a fact about it: a
+ * conformance diff saying what this generated board gained and lost against
+ * its target, or the board linter saying what it judges wrong. One vocabulary
+ * for both — `added removed changed error warning` — so a reader learns the
+ * marks once.
+ *
+ * Two rules shape everything below.
+ *
+ * The calm case must be calm. A board with no lens on it writes no
+ * `data-diff-state` at all, so not one selector here can match it. A
+ * conformance case that passes is therefore pixel-identical to an ordinary
+ * board, which is the thing the rejected composite view failed hardest.
+ *
+ * A missing port is drawn in the row it is missing from. That is why a port
+ * carries a state rather than earning a floating annotation: the ghost row
+ * keeps its slot, its dot and its label, so a missing cable has somewhere real
+ * to land and seven changes stay seven legible marks instead of one.
+ *
+ * The paint is a variant (`src/diff/diffPresentation.ts`) because legibility
+ * across a board and legibility inside a row pull opposite ways. Colour never
+ * carries a state on its own: strike, dash, weight and a glyph each say it too.
+ */
+
+.systemsketch-block-canvas [data-diff-state],
+.systemsketch-block-canvas[data-diff-state] {
+  --diff-ink: var(--ss-text-muted);
+  --diff-soft: transparent;
+}
+
+.systemsketch-block-canvas [data-diff-state='added'],
+.systemsketch-block-canvas[data-diff-state='added'] {
+  --diff-ink: var(--ss-success);
+  --diff-soft: var(--ss-success-soft);
+}
+
+.systemsketch-block-canvas [data-diff-state='removed'],
+.systemsketch-block-canvas[data-diff-state='removed'],
+.systemsketch-block-canvas [data-diff-state='error'],
+.systemsketch-block-canvas[data-diff-state='error'] {
+  --diff-ink: var(--ss-danger);
+  --diff-soft: var(--ss-danger-soft);
+}
+
+.systemsketch-block-canvas [data-diff-state='changed'],
+.systemsketch-block-canvas[data-diff-state='changed'],
+.systemsketch-block-canvas [data-diff-state='warning'],
+.systemsketch-block-canvas[data-diff-state='warning'] {
+  --diff-ink: var(--ss-warning);
+  --diff-soft: var(--ss-warning-soft);
+}
+
+/* The monochrome variant answers the same vocabulary in greys, so a
+ * colour-blind reader and a black-and-white print keep every distinction. */
+.systemsketch-block-canvas[data-diff-variant='ghost-weight'] [data-diff-state],
+.systemsketch-block-canvas[data-diff-variant='ghost-weight'][data-diff-state] {
+  --diff-ink: var(--ss-text);
+  --diff-soft: transparent;
+}
+
+.systemsketch-block-canvas[data-diff-variant='ghost-weight'] [data-diff-state='removed'],
+.systemsketch-block-canvas[data-diff-variant='ghost-weight'][data-diff-state='removed'] {
+  --diff-ink: var(--ss-text-faint);
+}
+
+/* --------------------------- the row itself --------------------------- */
+
+/* A removed row is still a row. It keeps its slot so the reader's eye finds
+ * the gap where the gap is, and the strike says the board does not have it. */
+.systemsketch-block-canvas .BlockNode-portLabel[data-diff-state='removed'] .BlockNode-portName,
+.systemsketch-block-canvas .BlockNode-portLabel[data-diff-state='removed'] .BlockNode-portType {
+  color: var(--ss-text-faint);
+  text-decoration: line-through;
+  text-decoration-color: var(--diff-ink);
+  text-decoration-thickness: 1.5px;
+}
+
+.systemsketch-block-canvas .BlockNode-portLabel[data-diff-state='added'] .BlockNode-portName {
+  color: color-mix(in srgb, var(--diff-ink) 62%, var(--ss-text));
+  font-weight: 600;
+}
+
+/* A rename is one row, not a removal beside an addition: what it used to say,
+ * struck, then an arrow, then what it says now. */
+.systemsketch-block-canvas .BlockNode-portWas {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  /* The arrow used to live INSIDE this box as an `::after`, so it was paid for
+   * out of this cap. It is a sibling now (an `::after` inherits the strike and
+   * cannot refuse it), which moves its width outside — so the cap gives back
+   * exactly what the arrow costs and a rename row is no wider than before. */
+  max-width: 80px;
+  overflow: hidden;
+  color: var(--ss-text-faint);
+  font-size: 16px;
+  line-height: 24px;
+  text-decoration: line-through;
+  text-decoration-color: var(--diff-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * The arrow between the two names is a SIBLING of the struck span, never a
+ * `::after` inside it.
+ *
+ * `text-decoration` is inherited by an element's inline descendants and a
+ * descendant cannot switch it off — `text-decoration: none` on a child of a
+ * struck box does nothing. An arrow drawn inside the struck former name is
+ * therefore struck as well, and `callee → callable` reads as `callee ⇒`.
+ */
+.systemsketch-block-canvas .BlockNode-portWasArrow {
+  flex: 0 0 auto;
+  margin: 0 4px 0 2px;
+  color: var(--ss-text-faint);
+  font-size: 16px;
+  line-height: 24px;
+  text-decoration: none;
+}
+
+/*
+ * In a stated row the names are the payload and the type is context.
+ *
+ * A diff row carries more than an ordinary one — a gutter glyph, the former
+ * name, an arrow — so something has to give when the row runs out of width.
+ * Left alone, flex shrinks whatever it reaches first and a NAME loses
+ * characters, which is the one thing a rename row exists to show. These two
+ * rules make the type the thing that ellipsises instead. Scoped to stated rows,
+ * so an ordinary board's layout is untouched.
+ */
+.systemsketch-block-canvas .BlockNode-portLabel[data-diff-state] .BlockNode-portName,
+.systemsketch-block-canvas .BlockNode-portLabel[data-diff-state] .BlockNode-portWas {
+  flex: 0 0 auto;
+}
+
+.systemsketch-block-canvas .BlockNode-portLabel[data-diff-state] .BlockNode-portType {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+/* The gutter glyph an editor's change bar uses. Off unless a variant asks. */
+.systemsketch-block-canvas .BlockNode-portGutter {
+  display: none;
+  flex: 0 0 auto;
+  width: 12px;
+  color: var(--diff-ink);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 24px;
+  text-align: center;
+}
+
+/* ------------------------------ the dot ------------------------------- */
+
+/* A ghost dot is hollow, smaller and drawn in the lens ink: something that
+ * would be here. It keeps its anchor, so a ghost cable lands on it exactly
+ * where the real cable would have. */
+.systemsketch-block-canvas .Port[data-diff-state='removed'] {
+  background: transparent;
+  box-shadow:
+    0 0 0 2px var(--ss-surface-raised),
+    0 0 0 3px var(--diff-ink);
+  opacity: 0.72;
+  transform: translate(-50%, -50%) scale(0.78);
+}
+
+.systemsketch-block-canvas .Port[data-diff-state='added'] {
+  box-shadow:
+    0 0 0 2px var(--ss-surface-raised),
+    0 0 0 3px var(--diff-ink),
+    0 0 0 6px color-mix(in srgb, var(--diff-ink) 22%, transparent);
+}
+
+.systemsketch-block-canvas .Port[data-diff-state='changed'] {
+  box-shadow:
+    0 0 0 2px var(--ss-surface-raised),
+    0 0 0 3px var(--diff-ink);
+}
+
+/* ----------------------------- the badge ------------------------------ */
+
+/* `+2 −1` in the heading, so the count is at block altitude. Never a count of
+ * storage records: a reader asks how many ports and cables moved. */
+.systemsketch-block-canvas .BlockNode-diffBadge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 22px;
+  padding: 1px 8px;
+  border: 1px solid color-mix(in srgb, var(--diff-ink) 45%, var(--ss-border));
+  border-radius: 999px;
+  background: var(--diff-soft);
+  color: color-mix(in srgb, var(--diff-ink) 72%, var(--ss-text));
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 18px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.systemsketch-block-canvas.NodeShape_plain .BlockNode-diffBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+}
+
+/* ============================ V1 tinted-card ===========================
+ * The default. The card carries a faint status wash and a status bar down its
+ * leading edge, so a changed Block is findable from across the board; the rows
+ * carry the detail. Colour reinforces what strike and weight already say.
+ */
+.systemsketch-block-canvas[data-diff-variant='tinted-card'][data-diff-state] {
+  background: color-mix(in srgb, var(--diff-ink) 6%, var(--ss-surface-raised));
+  box-shadow:
+    inset 4px 0 0 0 var(--diff-ink),
+    0 0 0 1px color-mix(in srgb, var(--diff-ink) 40%, var(--ss-border)),
+    var(--ss-shadow-1);
+}
+
+/* ============================ V2 diff-gutter ===========================
+ * Nothing tints. Every changed row shows the glyph an editor's change bar
+ * shows, in the same column, which is the idiom a reader of `git diff` already
+ * owns. The card itself is left alone.
+ */
+.systemsketch-block-canvas[data-diff-variant='diff-gutter'] .BlockNode-portGutter {
+  display: inline-block;
+}
+
+.systemsketch-block-canvas[data-diff-variant='diff-gutter'][data-diff-state] {
+  box-shadow:
+    inset 3px 0 0 0 var(--diff-ink),
+    var(--node-shadow-border);
+}
+
+.systemsketch-block-canvas[data-diff-variant='diff-gutter'] .BlockNode-portLabel[data-diff-state='added'] .BlockNode-portName {
+  color: var(--ss-text);
+  font-weight: 500;
+}
+
+/* =========================== V3 ghost-weight ==========================
+ * No hue. Removed falls back in weight and gains a dashed underline; added
+ * gains a solid one; changed a dotted one. The only variant that survives a
+ * monochrome print, and the reason the vocabulary never leans on colour alone.
+ */
+.systemsketch-block-canvas[data-diff-variant='ghost-weight'][data-diff-state] {
+  background: var(--ss-surface-raised);
+  box-shadow: var(--node-shadow-border);
+}
+
+.systemsketch-block-canvas[data-diff-variant='ghost-weight'] .BlockNode-portLabel[data-diff-state='removed'] {
+  opacity: 0.55;
+}
+
+.systemsketch-block-canvas[data-diff-variant='ghost-weight'] .BlockNode-portLabel[data-diff-state='added'] .BlockNode-portName {
+  color: var(--ss-text);
+  font-weight: 700;
+  text-decoration: underline solid var(--ss-text) 2px;
+  text-underline-offset: 4px;
+}
+
+.systemsketch-block-canvas[data-diff-variant='ghost-weight'] .BlockNode-portLabel[data-diff-state='changed'] .BlockNode-portName {
+  text-decoration: underline dotted var(--ss-text) 2px;
+  text-underline-offset: 4px;
+}
+
+/* ============================ V4 badge-only ===========================
+ * The card is untouched except for one badge in its heading; a stated row
+ * keeps its ordinary ink and shows only a tick against its dot. Quietest at
+ * board zoom, and the one that most needs a rail beside it.
+ */
+.systemsketch-block-canvas[data-diff-variant='badge-only'][data-diff-state] {
+  background: var(--ss-surface-raised);
+  box-shadow: var(--node-shadow-border);
+}
+
+.systemsketch-block-canvas[data-diff-variant='badge-only'] .BlockNode-portLabel[data-diff-state] .BlockNode-portName,
+.systemsketch-block-canvas[data-diff-variant='badge-only'] .BlockNode-portLabel[data-diff-state] .BlockNode-portType {
+  color: var(--ss-text);
+  font-weight: 400;
+  text-decoration: none;
+}
+
+.systemsketch-block-canvas[data-diff-variant='badge-only'] .BlockNode-portLabel[data-diff-state='removed'] {
+  opacity: 0.62;
+}
+
+/* =========================== V5 status-fill ===========================
+ * The 24 August demo, reproduced honestly: a saturated status fill over the
+ * whole card and a status border. It finds a changed Block instantly and it is
+ * the hardest variant to keep calm, because every neighbouring unchanged Block
+ * now reads as deliberately un-tinted rather than as ordinary.
+ */
+.systemsketch-block-canvas[data-diff-variant='status-fill'][data-diff-state] {
+  background: color-mix(in srgb, var(--diff-ink) 20%, var(--ss-surface-raised));
+  box-shadow:
+    0 0 0 2px var(--diff-ink),
+    var(--ss-shadow-1);
+}
+
+.systemsketch-block-canvas[data-diff-variant='status-fill'] .NodeShape-heading {
+  background: color-mix(in srgb, var(--diff-ink) 12%, var(--ss-surface-raised));
+}
+
+.systemsketch-block-canvas[data-diff-variant='status-fill'] .BlockNode-portLabel[data-diff-state] {
+  background: color-mix(in srgb, var(--diff-ink) 16%, transparent);
+  border-radius: 4px;
+}
+
+/* ============================= V6 edge-rail ===========================
+ * The card's face is never touched. A rail down its leading edge carries one
+ * segment per changed row, at that row's own y — an editor's change bar, drawn
+ * inside the Block rather than beside it.
+ *
+ * The property that matters is not the look, it is the scaling. Every other
+ * variant spends ink proportional to the AREA of a changed card, so six changed
+ * Blocks colour half the board and the reader loses the ability to say which
+ * ones matter. The rail spends ink proportional to the number of changed ROWS:
+ * six changes are six 3px marks whatever the cards are sized.
+ */
+.systemsketch-block-canvas .BlockNode-diffRail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  display: none;
+  overflow: hidden;
+  border-radius: 3px 0 0 3px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.systemsketch-block-canvas .BlockNode-diffRailMark {
+  position: absolute;
+  left: 0;
+  width: 3px;
+  min-height: 8px;
+  border-radius: 3px;
+  background: var(--diff-ink);
+}
+
+.systemsketch-block-canvas[data-diff-variant='edge-rail'] .BlockNode-diffRail {
+  display: block;
+}
+
+/* The card keeps exactly the chrome an unchanged Block has, so a board of
+ * thirty changes still reads as a board of Blocks rather than a colour field. */
+.systemsketch-block-canvas[data-diff-variant='edge-rail'][data-diff-state] {
+  background: var(--ss-surface-raised);
+  box-shadow: var(--node-shadow-border);
+}
+
+/* ============================== V7 blend ==============================
+ * Onshape's Compare, on one document.
+ *
+ * The scrub crossfades the before board into the after board in place: at `0`
+ * the ghosts are solid and the additions are not yet there, at `1` the reverse.
+ * Everything present on both sides never moves, which is what a reader is
+ * actually comparing. No second document, no second renderer, no crossfade of
+ * two rasterised boards — the diff board already holds both sides, so the blend
+ * is an opacity ramp over states that already exist.
+ */
+.systemsketch-block-canvas[data-diff-variant='blend'] {
+  --diff-blend: 1;
+}
+
+.systemsketch-block-canvas[data-diff-variant='blend'][data-diff-state] {
+  background: var(--ss-surface-raised);
+  box-shadow: var(--node-shadow-border);
+}
+
+.systemsketch-block-canvas[data-diff-variant='blend'] .BlockNode-portLabel[data-diff-state='removed'],
+.systemsketch-block-canvas[data-diff-variant='blend'] .Port[data-diff-state='removed'] {
+  opacity: calc(1 - var(--diff-blend));
+}
+
+.systemsketch-block-canvas[data-diff-variant='blend'] .BlockNode-portLabel[data-diff-state='added'],
+.systemsketch-block-canvas[data-diff-variant='blend'] .Port[data-diff-state='added'] {
+  opacity: var(--diff-blend);
+}
+
+/* A row being scrubbed away is not a row being struck out: the scrub already
+ * says it is leaving, and a strike on top of a fade says it twice. */
+.systemsketch-block-canvas[data-diff-variant='blend'] .BlockNode-portLabel[data-diff-state='removed'] .BlockNode-portName,
+.systemsketch-block-canvas[data-diff-variant='blend'] .BlockNode-portLabel[data-diff-state='removed'] .BlockNode-portType {
+  text-decoration: none;
+}
+
+/* ============================ V8 moved-ghost ==========================
+ * The only variant that draws `moved`, and the evidence for not drawing it.
+ *
+ * A removed Block becomes an empty dashed outline instead of a tinted card, so
+ * a Block that moved reads as outline-at-the-old-place plus solid-at-the-new.
+ * It works — and it is exactly the noise that made the rejected composite
+ * unreadable on a case that PASSED, because a generator relaying out a board
+ * moves everything. Ship the mark; leave `moved` at severity null.
+ */
+.systemsketch-block-canvas[data-diff-variant='moved-ghost'][data-diff-state='removed'] {
+  background: transparent;
+  box-shadow: none;
+  border: 1.5px dashed var(--diff-ink);
+  border-radius: 10px;
+  opacity: 0.62;
+}
+
+.systemsketch-block-canvas[data-diff-variant='moved-ghost'][data-diff-state='removed'] .NodeShape-heading {
+  background: transparent;
+}
+
+.systemsketch-block-canvas[data-diff-variant='moved-ghost'][data-diff-state='added'] {
+  background: var(--ss-surface-raised);
+  box-shadow:
+    0 0 0 2px var(--diff-ink),
+    var(--ss-shadow-1);
+}
+
+.systemsketch-block-canvas[data-diff-variant='moved-ghost'][data-diff-state='changed'],
+.systemsketch-block-canvas[data-diff-variant='moved-ghost'][data-diff-state='warning'],
+.systemsketch-block-canvas[data-diff-variant='moved-ghost'][data-diff-state='error'] {
+  background: var(--ss-surface-raised);
+  box-shadow:
+    inset 4px 0 0 0 var(--diff-ink),
+    var(--node-shadow-border);
+}
+
+/*
+ * The tether: which argument an effect port belongs to, said once as geometry.
+ *
+ * Render only. `pointer-events: none` on the layer, not just the path, so no
+ * part of it can take a click meant for a port, a label or the block — the
+ * correspondence is a cue, never an affordance. It sits under the dots.
+ */
+.systemsketch-block-canvas .BlockNode-tethers {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  /* Above the card's paint, below the port dots. Underneath it instead, the
+   * heading band's own background swallows the segment that crosses it, and the
+   * tether stops short of the port it is explaining — the correspondence broken
+   * exactly where it matters. Visible and faint beats complete-but-hidden; a
+   * long title is crossed rather than struck, at 45%. */
+  z-index: 3;
+}
+
+.systemsketch-block-canvas .BlockNode-tether {
+  fill: none;
+  stroke: var(--ss-warning);
+  stroke-width: 1.3;
+  stroke-dasharray: 3 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  opacity: 0.45;
+}
+
+/* ==================== round 2 · the was/now vocabulary ==================
+ *
+ * The reviewer's instruction, near enough verbatim: "if you rename a title,
+ * then you have the old title there that is then highlighted in red, and then
+ * you put the new title basically in the same bar in green" — and, separately,
+ * "right now you're using a lot of crossouts, but I think it would be better
+ * to highlight things instead".
+ *
+ * So colour FILL is the primary channel and the strike drops to a hairline
+ * reinforcement. The ladder is GitHub's, and it is chosen for a reason beyond
+ * familiarity: a chip washed at 12% carries ordinary ink at full contrast,
+ * while accent-coloured text on an accent tint measures 2.6–4.3:1 in every one
+ * of this app's palettes. Two strengths of the same tint, both under normal
+ * ink, is the only way to say "this run in particular" and stay readable.
+ *
+ * One markup, six paints. Every variant below is a repaint of the same DOM,
+ * which is what stops two of them quietly disagreeing about which runs differ.
+ */
+.systemsketch-block-canvas .BlockNode-wasNow {
+  display: inline;
+  white-space: nowrap;
+  /* The pair is wider than either value alone; in a fixed-pitch port row the
+     type has always yielded first, and the pair yields with it. */
+  font-size: 0.94em;
+}
+
+.systemsketch-block-canvas .BlockNode-wasNowWas,
+.systemsketch-block-canvas .BlockNode-wasNowNow {
+  border-radius: 3px;
+  padding: 0 3px;
+  color: var(--ss-text);
+}
+
+.systemsketch-block-canvas .BlockNode-wasNowWas {
+  background: color-mix(in srgb, var(--ss-danger) 12%, var(--ss-surface-raised));
+  /* Reinforcement, not the message. Thin enough that the fill reads first. */
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--ss-danger) 55%, transparent);
+}
+
+.systemsketch-block-canvas .BlockNode-wasNowNow {
+  background: color-mix(in srgb, var(--ss-success) 14%, var(--ss-surface-raised));
+}
+
+/* The changed runs. This is the whole reason the values are tokenized: filling
+   the entire former value says every character of it was wrong. */
+.systemsketch-block-canvas .BlockNode-wasNowTok[data-tok='removed'] {
+  background: color-mix(in srgb, var(--ss-danger) 34%, var(--ss-surface-raised));
+  border-radius: 2px;
+  font-weight: 600;
+}
+
+.systemsketch-block-canvas .BlockNode-wasNowTok[data-tok='added'] {
+  background: color-mix(in srgb, var(--ss-success) 36%, var(--ss-surface-raised));
+  border-radius: 2px;
+  font-weight: 600;
+}
+
+.systemsketch-block-canvas .BlockNode-wasNowArrow {
+  padding: 0 3px;
+  color: var(--ss-text-muted);
+  /* The arrow is a sibling of the struck chip, never inside it:
+     `text-decoration` propagates into inline descendants and a child cannot
+     cancel it, so an arrow drawn within would render `callee ⇒`. */
+  text-decoration: none;
+}
+
+/* ---- R2 `stacked` · the unified-diff hunk ------------------------------
+ * Old above, new below, the shape of a `git diff`. It buys familiarity and
+ * pays for it in height: a port lane is fixed pitch, so rather than telling
+ * the layout engine about a taller row — which would move every dot on the
+ * card and break the cables landing on them — the two lines shrink to fit.
+ * That is the honest cost of this variant and the reason it is not default.
+ */
+.systemsketch-block-canvas[data-diff-variant='stacked'] .BlockNode-wasNow {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  vertical-align: middle;
+  font-size: 0.72em;
+  line-height: 1.22;
+}
+
+.systemsketch-block-canvas[data-diff-variant='stacked'] .BlockNode-wasNowArrow {
+  display: none;
+}
+
+.systemsketch-block-canvas[data-diff-variant='stacked'] .BlockNode-wasNowWas::before {
+  content: '−\00a0';
+  opacity: 0.75;
+}
+
+.systemsketch-block-canvas[data-diff-variant='stacked'] .BlockNode-wasNowNow::before {
+  content: '+\00a0';
+  opacity: 0.75;
+}
+
+.systemsketch-block-canvas[data-diff-variant='stacked'] .BlockNode-wasNowWas,
+.systemsketch-block-canvas[data-diff-variant='stacked'] .BlockNode-wasNowNow {
+  display: block;
+  width: 100%;
+}
+
+/* ---- R3 `token-only` · no furniture ------------------------------------
+ * Only the runs that differ carry ink. The least drawing that still shows
+ * both values, and the least legible when a name is replaced outright rather
+ * than edited — at which point every token is marked and the restraint buys
+ * nothing.
+ */
+.systemsketch-block-canvas[data-diff-variant='token-only'] .BlockNode-wasNowWas,
+.systemsketch-block-canvas[data-diff-variant='token-only'] .BlockNode-wasNowNow {
+  background: none;
+  padding: 0;
+  text-decoration: none;
+}
+
+.systemsketch-block-canvas[data-diff-variant='token-only'] .BlockNode-wasNowArrow {
+  padding: 0 2px;
+  opacity: 0.5;
+}
+
+/* ---- R4 `delta-badge` · the face is never touched ----------------------
+ * The former value is not on the card at all; the badge carries the counts and
+ * the pose delta. Quietest at board zoom, and the only variant that cannot
+ * answer "what did it become" without a click.
+ */
+.systemsketch-block-canvas[data-diff-variant='delta-badge'] .BlockNode-wasNowWas,
+.systemsketch-block-canvas[data-diff-variant='delta-badge'] .BlockNode-wasNowArrow {
+  display: none;
+}
+
+.systemsketch-block-canvas[data-diff-variant='delta-badge'] .BlockNode-wasNowNow {
+  background: none;
+  padding: 0;
+}
+
+.systemsketch-block-canvas[data-diff-variant='delta-badge'] .BlockNode-wasNowTok[data-tok] {
+  background: none;
+  font-weight: inherit;
+}
+
+/* ---- R5 `ghost-weight` · no hue anywhere -------------------------------
+ * Weight, strike and underline only. The one variant that survives a
+ * colour-blind reader and a black-and-white print, which is the single thing
+ * every other entry in this list needs colour for.
+ */
+.systemsketch-block-canvas[data-diff-variant='ghost-weight'] .BlockNode-wasNowWas {
+  background: none;
+  padding: 0;
+  color: var(--ss-text-faint);
+  text-decoration-color: var(--ss-text-faint);
+}
+
+.systemsketch-block-canvas[data-diff-variant='ghost-weight'] .BlockNode-wasNowNow {
+  background: none;
+  padding: 0;
+  color: var(--ss-text);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+.systemsketch-block-canvas[data-diff-variant='ghost-weight'] .BlockNode-wasNowTok[data-tok] {
+  background: none;
+  font-weight: 700;
+}
+
+/* ---- R6 `blend` · the Figma / Onshape scrub ----------------------------
+ * The former value fades out as the scrub runs forward and the new one fades
+ * in, in place. Small movement is easiest to see under a crossfade, which is
+ * what this variant exists to test against a static ghost.
+ */
+.systemsketch-block-canvas[data-diff-variant='blend'] .BlockNode-wasNowWas {
+  opacity: calc(1 - var(--diff-blend, 1));
+}
+
+.systemsketch-block-canvas[data-diff-variant='blend'] .BlockNode-wasNowArrow {
+  opacity: calc(1 - var(--diff-blend, 1));
+}
+
+/* ======================= position and size ==============================
+ *
+ * The two dimensions the code-diff paradigm has no answer for — there is no
+ * text to tokenize — and where draw.io, Miro and Lucidchart ship no convention
+ * to borrow. Drawn from the geometry instead, so the reading falls out of the
+ * picture rather than out of a legend:
+ *
+ *   moved   · a congruent outline somewhere else, joined by a leader
+ *   resized · an outline of a different size in about the same place, no
+ *             leader, and the edges that actually moved drawn heavier
+ *
+ * Ink is one thin rectangle per changed Block rather than a wash over a card,
+ * and it sits outside the face, so a Block that moved AND was renamed shows
+ * both without the two marks fighting over the same pixels.
+ */
+.systemsketch-block-canvas .BlockNode-poseGhost {
+  position: absolute;
+  pointer-events: none;
+}
+
+.systemsketch-block-canvas .BlockNode-poseOutline {
+  fill: none;
+  stroke: var(--ss-danger);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+  opacity: 0.7;
+}
+
+.systemsketch-block-canvas .BlockNode-poseLeader {
+  stroke: var(--ss-danger);
+  stroke-width: 1.25;
+  stroke-dasharray: 2 3;
+  opacity: 0.55;
+}
+
+/* Only the edges that moved differently from the card's own travel: a pure
+   translation moves all four and says nothing at all about extent. */
+.systemsketch-block-canvas .BlockNode-poseEdge {
+  stroke: var(--ss-warning);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.9;
+}
+
+.systemsketch-block-canvas .BlockNode-poseBadge {
+  position: absolute;
+  transform: translateY(-120%);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--ss-text);
+  background: color-mix(in srgb, var(--ss-danger) 12%, var(--ss-surface-raised));
+  border: 1px solid color-mix(in srgb, var(--ss-danger) 38%, var(--ss-border));
+}
+
+/* `token-only` gives up geometry entirely — its thesis is that only text is
+   worth marking, and it is in the set to test exactly that claim. */
+.systemsketch-block-canvas[data-diff-variant='token-only'] .BlockNode-poseGhost {
+  display: none;
+}
+
+/* `delta-badge` keeps the number and drops the drawing. */
+.systemsketch-block-canvas[data-diff-variant='delta-badge'] .BlockNode-poseGhost svg {
+  display: none;
+}
+
+.systemsketch-block-canvas[data-diff-variant='ghost-weight'] .BlockNode-poseOutline,
+.systemsketch-block-canvas[data-diff-variant='ghost-weight'] .BlockNode-poseLeader {
+  stroke: var(--ss-text-faint);
+}
+
+.systemsketch-block-canvas[data-diff-variant='ghost-weight'] .BlockNode-poseEdge {
+  stroke: var(--ss-text);
+}
+
+.systemsketch-block-canvas[data-diff-variant='ghost-weight'] .BlockNode-poseBadge {
+  background: var(--ss-surface-raised);
+  border-color: var(--ss-border);
+  color: var(--ss-text-muted);
+}
+
+/* Under the scrub the former pose is present exactly as much as the former
+   values are, so a Block that moved reads as travelling between its two
+   positions rather than as two separate facts. */
+.systemsketch-block-canvas[data-diff-variant='blend'] .BlockNode-poseGhost {
+  opacity: calc(1 - var(--diff-blend, 1));
+}
+
+/* ---- where the pair is allowed to take its room from ------------------
+ *
+ * Measured on a real board rather than assumed: at 300–320px a card cannot
+ * fit two values on a title row at any elision — the first capture produced
+ * `…in… → ru…`, which is worse than showing nothing. But the constraint is not
+ * the same in both places, and pretending it is would cost the title its pair.
+ *
+ * A HEADING has vertical room it is not using: one line of oversized type in a
+ * band tall enough for two small ones. So a title pair stacks, and both values
+ * stay whole and highlighted.
+ *
+ * A PORT ROW has no vertical room at all — the lane is fixed pitch and the dots
+ * are centred on it — so there the pair stays inline and takes its room
+ * horizontally, from the former value first.
+ */
+.systemsketch-block-canvas .BlockNode-headingTitle .BlockNode-wasNow,
+.systemsketch-block-canvas .BlockNode-simpleTitleText .BlockNode-wasNow {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  vertical-align: middle;
+  font-size: 0.46em;
+  line-height: 1.18;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.systemsketch-block-canvas .BlockNode-headingTitle .BlockNode-wasNowArrow,
+.systemsketch-block-canvas .BlockNode-simpleTitleText .BlockNode-wasNowArrow {
+  display: none;
+}
+
+.systemsketch-block-canvas .BlockNode-headingTitle .BlockNode-wasNowWas,
+.systemsketch-block-canvas .BlockNode-headingTitle .BlockNode-wasNowNow,
+.systemsketch-block-canvas .BlockNode-simpleTitleText .BlockNode-wasNowWas,
+.systemsketch-block-canvas .BlockNode-simpleTitleText .BlockNode-wasNowNow {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Inline, everywhere else. The one invariant that matters: the CURRENT value
+   is the truth and never yields, so it is the former value — context, and
+   recoverable from the tooltip — that gives up room when the row runs out. */
+.systemsketch-block-canvas .BlockNode-portLabel .BlockNode-wasNow,
+.systemsketch-block-canvas .BlockNode-description .BlockNode-wasNow,
+.systemsketch-block-canvas .BlockNode-headingType .BlockNode-wasNow,
+.systemsketch-block-canvas .BlockNode-simpleType .BlockNode-wasNow {
+  display: inline-flex;
+  align-items: baseline;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.systemsketch-block-canvas .BlockNode-portLabel .BlockNode-wasNowWas,
+.systemsketch-block-canvas .BlockNode-description .BlockNode-wasNowWas,
+.systemsketch-block-canvas .BlockNode-headingType .BlockNode-wasNowWas,
+.systemsketch-block-canvas .BlockNode-simpleType .BlockNode-wasNowWas {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.systemsketch-block-canvas .BlockNode-portLabel .BlockNode-wasNowNow,
+.systemsketch-block-canvas .BlockNode-description .BlockNode-wasNowNow,
+.systemsketch-block-canvas .BlockNode-headingType .BlockNode-wasNowNow,
+.systemsketch-block-canvas .BlockNode-simpleType .BlockNode-wasNowNow {
+  flex: 0 0 auto;
+}
+
+.systemsketch-block-canvas .BlockNode-portLabel .BlockNode-wasNowArrow,
+.systemsketch-block-canvas .BlockNode-headingType .BlockNode-wasNowArrow {
+  flex: 0 0 auto;
+}
+
+/* `stacked` prints both values whole, which is its whole thesis and its whole
+   cost: on a narrow port row the second line runs out of room. It degrades to
+   the app's ordinary ellipsis rather than to a hard cut. */
+.systemsketch-block-canvas[data-diff-variant='stacked'] .BlockNode-wasNowWas,
+.systemsketch-block-canvas[data-diff-variant='stacked'] .BlockNode-wasNowNow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

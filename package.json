@@ -30,6 +30,8 @@
     "test:windows": "node tests/desktop_windows_smoke.mjs",
     "test:arrow-sync": "node tests/edge_arrow_sync_smoke.mjs",
     "test:pill": "node tests/literal_pill_smoke.mjs",
+    "test:unknown": "node tests/unknown_projection_smoke.mjs",
+    "test:ui-hardening": "node tests/ui_hardening_smoke.mjs",
     "test:recorder": "node tests/recorder_smoke.mjs",
     "plugin:build": "npm --prefix vscode-systemsketch run build",
     "plugin:package": "npm --prefix vscode-systemsketch run package",
@@ -63,6 +65,7 @@
     "test:repo-ui": "node tests/library_overview_smoke.mjs",
     "test:review": "node tests/review_gallery_smoke.mjs",
     "test:workspace-safety": "node tests/workspace_safety_smoke.mjs",
+    "test:drawio-alignment": "node tests/drawio_persistence_alignment_smoke.mjs",
     "test:comments": "node tests/local_comments_smoke.mjs",
     "test:commands": "node tests/command_palette_smoke.mjs",
     "test:diagnostics": "node tests/board_diagnostics_smoke.mjs",
@@ -82,6 +85,7 @@
     "test:collision-routing-stress": "node tests/collision_routing_stress_smoke.mjs",
     "test:collision-routing-stress-report": "node tests/collision_routing_stress_report_smoke.mjs",
     "test:collision-routing-endpoint-fixture": "node tests/collision_routing_endpoint_fixture_smoke.mjs",
+    "test:text-aware-routing": "node tests/text_aware_routing_smoke.mjs",
     "test:contextual-layout": "node tests/contextual_layout_actions_smoke.mjs",
     "theme:import": "node --experimental-strip-types scripts/import_vscode_theme.mjs",
     "theme:obsidian": "python3 scripts/extract_obsidian_palette.py",
@@ -91,7 +95,11 @@
     "test:effect-ports": "node tests/effect_ports_smoke.mjs",
     "report:shot": "node tests/render_report.mjs",
     "test:loop": "node tests/loop_region_smoke.mjs",
-    "test:loop-qa": "node tests/loop_region_qa.mjs"
+    "test:loop-qa": "node tests/loop_region_qa.mjs",
+    "test:diff-states": "node tests/block_diff_states_smoke.mjs",
+    "test:diff-vocabulary": "node tests/block_diff_vocabulary_smoke.mjs",
+    "test:diff-round2": "node tests/block_diff_round2_smoke.mjs",
+    "test:effect-follow": "node tests/effect_port_follow_smoke.mjs"
   },
   "dependencies": {
     "elkjs": "0.12.0",

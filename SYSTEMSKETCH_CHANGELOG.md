@@ -6,6 +6,18 @@
   standalone app first, then builds one VSIX shared by VS Code/Cursor plus the guarded Obsidian
   bundle. A host failure cannot interrupt or roll back Stable; successful artifacts are checksummed
   under the same build identity, while installation remains explicit.
+- Hardened the chrome against a 30-candidate UI/UX audit measured in the running app. Keyboard focus
+  is now visible on every surface SystemSketch owns, except a palette tab, where selection follows
+  focus and the raised chip is the single mark. The right dock follows the selection instead of
+  waiting for an `Inspect` button, which both pills have lost; an ordinary shape reports the facts
+  tldraw holds instead of a Block placeholder; the dock always carries a header you can close it
+  with, and closing it survives the next selection until you deselect. Both `window.confirm` asks
+  became one themed dialog; the Block view switcher, the palette tablist, the appearance palette and
+  the theme radiogroup became the widgets they claimed to be; popovers keep clear of the window edge;
+  panels paint thin themed scrollbars; and the inert profile badge now opens Settings.
+- Fixed board search ordering: matches were sorted by comparing fractional indices across different
+  parents, so a Frame's child could sort above the page-level shape it sits inside, and the same board
+  listed its matches differently from one run to the next.
 - Started from the stock tldraw 5.3.2 whiteboard and default interface.
 - Added a bottom-right utility strip for board overview, zoom, and Help-hosted release controls.
 - Added a green Help indicator only when newer Preview work is available.

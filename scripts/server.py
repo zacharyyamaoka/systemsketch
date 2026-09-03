@@ -45,6 +45,7 @@ from workspace_store import (
     WorkspaceConflictError,
     WorkspaceFormatError,
     WorkspacePathError,
+    WorkspaceStorageError,
     create_directory,
     list_documents,
     load_document,
@@ -63,6 +64,16 @@ PREVIEW_PRESETS = {
     "block-dev": "Block Dev",
     "stock": "Stock tldraw",
 }
+
+
+def _post_failure_status(cause: BaseException) -> HTTPStatus:
+    """Classify operational POST failures without making validation retryable."""
+    # WHY: workspaceClient retries 5xx save failures but correctly stops on
+    # semantic 4xx responses. Returning every filesystem fault as 409 made the
+    # accepted transient-autosave retry path impossible to reach.
+    if isinstance(cause, (WorkspaceStorageError, OSError)):
+        return HTTPStatus.SERVICE_UNAVAILABLE
+    return HTTPStatus.CONFLICT
 
 
 class HostEventLog:
@@ -311,6 +322,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                         additional_roots=self.app.additional_document_roots,
                         base_digest=base_digest,
                         force=payload.get("force") is True,
+                        lock_root=self.app.workspace_lock_root,
                     )
                 )
                 return
@@ -334,6 +346,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                         self.app.files_root,
                         additional_roots=self.app.additional_document_roots,
                         base_digest=base_digest,
+                        lock_root=self.app.workspace_lock_root,
                     )
                 )
                 return
@@ -344,6 +357,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                         self.app.files_root,
                         additional_roots=self.app.additional_document_roots,
                         base_digest=base_digest,
+                        lock_root=self.app.workspace_lock_root,
                     )
                 )
                 return
@@ -369,10 +383,11 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
             RecordingError,
             WorkspacePathError,
             WorkspaceFormatError,
+            WorkspaceStorageError,
             subprocess.SubprocessError,
         ) as cause:
             self._record_exception(cause)
-            self._json({"error": str(cause)}, HTTPStatus.CONFLICT)
+            self._json({"error": str(cause)}, _post_failure_status(cause))
 
 
 class SystemSketchServer(ThreadingHTTPServer):
@@ -395,6 +410,10 @@ class SystemSketchServer(ThreadingHTTPServer):
         self.channel = channel
         self.build = build
         self.release_home = release_home.resolve()
+        # Stable and Preview are separate threaded processes. Keeping document
+        # locks under their shared release home makes one digest fence govern
+        # both without putting lock artifacts beside a person's boards.
+        self.workspace_lock_root = self.release_home / "locks" / "workspace"
         self.source_root = source_root.resolve()
         self.files_root = (files_root or Path.home()).expanduser().resolve()
         if allow_source_root and channel != "preview":

@@ -2,6 +2,7 @@ import { useEffect, useRef, type CSSProperties, type KeyboardEvent } from 'react
 import { useEditor, useValue } from 'tldraw'
 
 import { isBlockShape, type BlockShape, type BlockShapeProps } from './blockModel'
+import { patchBlockPortProps } from './commands/blockCommands'
 import {
 	blockInlineEditorPlacement,
 	getBlockInlineField,
@@ -65,13 +66,11 @@ function updateField(
 				return props.description === value ? props : { ...props, description: value }
 			case 'portName':
 			case 'portType': {
+				// Through the shared patch, not a private one: an accessor typed on
+				// the canvas has to be spelled the way the inspector and the menu
+				// spell it, and that rule lives in patchBlockPortProps.
 				const key = field.kind === 'portName' ? 'name' : 'type'
-				const ports = props[field.side]
-				const index = ports.findIndex((candidate) => candidate.id === field.portId)
-				if (index < 0 || ports[index][key] === value) return props
-				const next = [...ports]
-				next[index] = { ...next[index], [key]: value }
-				return { ...props, [field.side]: next }
+				return patchBlockPortProps(props, field.side, field.portId, { [key]: value })
 			}
 		}
 	})

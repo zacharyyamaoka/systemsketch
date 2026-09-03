@@ -16,7 +16,13 @@ import {
 } from '../../branch/branchModel'
 import { branchAncestry, outermostFoldedLevel } from '../../branch/branchScope'
 import { isBlockShape } from '../blockModel'
-import type { ElbowEndpoint, ElbowRect, ElbowRouteInput } from '../elbow'
+import { layoutBlock, type BlockRect } from '../layoutBlock'
+import type {
+	ElbowEndpoint,
+	ElbowRect,
+	ElbowRouteInput,
+	ElbowRoutingObstacle,
+} from '../elbow'
 import {
 	getConnectionBindings,
 	getConnectionDirection,
@@ -29,9 +35,20 @@ import { getConnectionEndpoints, type ConnectionShape } from './ConnectionShapeU
 /** The semantic inputs for a single pure pathfinding call. */
 export interface ConnectionRoutingScene {
 	input: ElbowRouteInput
-	/** Raw solid rectangles. The router applies its own clearance padding. */
-	obstacles: ElbowRect[]
+	/** Structural cards and semantic regions, kept separate for independent tests. */
+	structuralObstacles: ElbowRect[]
+	/** Painted port-label content with its own tight text clearance. */
+	textObstacles: ElbowRoutingObstacle[]
 }
+
+/** A small visible gap around glyphs, independent of the 24px Block clearance. */
+export const PORT_LABEL_ROUTING_CLEARANCE_PX = 4
+
+/**
+ * A cable may use the gap between its own port rail and painted label exactly.
+ * The label's content rectangle is still forbidden; only its extra halo is removed.
+ */
+export const TERMINAL_PORT_LABEL_ROUTING_CLEARANCE_PX = 0
 
 /**
  * Branch-local forbidden zones for one cable.
@@ -63,6 +80,22 @@ export function branchRoutingForbiddenRects(
 /** Axis-aligned page rectangle enclosing a local Branch rectangle. */
 function branchRectInPage(editor: Editor, branch: BranchShape, rect: BranchRect): ElbowRect {
 	const transform = editor.getShapePageTransform(branch.id)
+	const corners = [
+		transform.applyToPoint({ x: rect.x, y: rect.y }),
+		transform.applyToPoint({ x: rect.x + rect.w, y: rect.y }),
+		transform.applyToPoint({ x: rect.x + rect.w, y: rect.y + rect.h }),
+		transform.applyToPoint({ x: rect.x, y: rect.y + rect.h }),
+	]
+	const xs = corners.map((point) => point.x)
+	const ys = corners.map((point) => point.y)
+	const minX = Math.min(...xs)
+	const minY = Math.min(...ys)
+	return { x: minX, y: minY, w: Math.max(...xs) - minX, h: Math.max(...ys) - minY }
+}
+
+/** Axis-aligned page rectangle enclosing any local rectangle on a shape. */
+function localRectInPage(editor: Editor, shapeId: TLShapeId, rect: BlockRect): ElbowRect {
+	const transform = editor.getShapePageTransform(shapeId)
 	const corners = [
 		transform.applyToPoint({ x: rect.x, y: rect.y }),
 		transform.applyToPoint({ x: rect.x + rect.w, y: rect.y }),
@@ -155,6 +188,47 @@ export function collectConnectionRoutingObstacles(
 	return obstacles
 }
 
+/**
+ * Collect painted port-label content independently of structural obstacles.
+ *
+ * Layout geometry is the source of truth rather than DOM measurement, so Tidy
+ * is deterministic when a Block is offscreen and in non-browser consumers.
+ * The connection's Expanded parent is included explicitly: its boundary labels
+ * live in the cable's scope even though the frame itself lives one scope out.
+ */
+export function collectConnectionRoutingTextObstacles(
+	editor: Editor,
+	connection: ConnectionShape,
+): ElbowRoutingObstacle[] {
+	const bindings = getConnectionBindings(editor, connection)
+	const terminalPorts = new Map<TLShapeId, Set<string>>()
+	for (const binding of [bindings.start, bindings.end]) {
+		if (!binding) continue
+		const portIds = terminalPorts.get(binding.toId) ?? new Set<string>()
+		portIds.add(binding.props.portId)
+		terminalPorts.set(binding.toId, portIds)
+	}
+	const obstacles: ElbowRoutingObstacle[] = []
+	for (const shape of editor.getCurrentPageShapes()) {
+		if (!isBlockShape(shape)) continue
+		const inCableScope = shape.id === connection.parentId
+			|| blockScopeId(editor, shape.id) === connection.parentId
+		if (!inCableScope) continue
+		// Folded descendants have remembered geometry but no painted labels.
+		if (branchAncestry(editor, shape.id).some((level) => level.arm && !level.arm.open)) continue
+		for (const placed of layoutBlock(shape.props).ports) {
+			if (!placed.labelContent || placed.labelContent.w <= 0 || placed.labelContent.h <= 0) continue
+			obstacles.push({
+				...localRectInPage(editor, shape.id, placed.labelContent),
+				clearance: terminalPorts.get(shape.id)?.has(placed.port.id)
+					? TERMINAL_PORT_LABEL_ROUTING_CLEARANCE_PX
+					: PORT_LABEL_ROUTING_CLEARANCE_PX,
+			})
+		}
+	}
+	return obstacles
+}
+
 /** Build one pure-router input from the editor without doing any pathfinding. */
 export function collectConnectionRoutingScene(
 	editor: Editor,
@@ -166,7 +240,9 @@ export function collectConnectionRoutingScene(
 	const direction = getConnectionDirection(editor, connection)
 	const sourceBinding = bindings[direction.sourceTerminal]
 	const sinkBinding = bindings[direction.sinkTerminal]
-	const obstacles = collectConnectionRoutingObstacles(editor, connection)
+	const structuralObstacles = collectConnectionRoutingObstacles(editor, connection)
+	const textObstacles = collectConnectionRoutingTextObstacles(editor, connection)
+	const obstacles = [...structuralObstacles, ...textObstacles]
 	const start: ElbowEndpoint = {
 		point: transform.applyToPoint(local.source),
 		side: portFor(editor, sourceBinding)?.elbowSide ?? 'right',
@@ -177,5 +253,9 @@ export function collectConnectionRoutingScene(
 		side: portFor(editor, sinkBinding)?.elbowSide ?? 'left',
 		box: endpointBox(editor, sinkBinding),
 	}
-	return { input: { start, end, obstacles }, obstacles }
+	return {
+		input: { start, end, obstacles },
+		structuralObstacles,
+		textObstacles,
+	}
 }

@@ -9,10 +9,10 @@
  *   1. The exported file is a plain tldraw file — no `block` or `connection`
  *      shape type, no `systemSketch` envelope. tldraw.com can open it.
  *   2. It still remembers: `group:block` records carry the Block props.
- *   3. The OPEN DOCUMENT IS UNTOUCHED. The export borrows the live board and
- *      puts it back, so the `.systemsketch` on disk must still hold real Blocks
- *      afterwards. Getting this wrong would destroy the user's document.
- *   4. Opening the exported `.tldr` and rebuilding gives the Blocks back —
+ *   3. The OPEN DOCUMENT IS UNTOUCHED. Export transforms an isolated cloned
+ *      editor, so the `.systemsketch` on disk must still hold real Blocks.
+ *   4. An occupied destination remains byte-exact until Replace is explicit.
+ *   5. Opening the exported `.tldr` and rebuilding gives the Blocks back —
  *      `.systemsketch` → `.tldr` → `.systemsketch`, which is the whole arc.
  */
 import { readFile, writeFile } from 'node:fs/promises'
@@ -112,6 +112,7 @@ async function main() {
   try {
     const boardPath = join(filesRoot, 'SystemSketch', 'Pipeline.systemsketch')
     const exportPath = join(filesRoot, 'SystemSketch', 'Pipeline.tldr')
+    const occupiedExport = 'occupied export destination — preserve until Replace\n'
     await openApp(page, port, `?board=${encodeURIComponent(boardPath)}`)
     await waitFor(page, `document.querySelector('[data-testid="systemsketch-app"] .tl-container')`,
       'the SystemSketch product canvas')
@@ -119,6 +120,7 @@ async function main() {
 
     await authorBoard(page)
     await saved(page)
+    await writeFile(exportPath, occupiedExport)
     check('AUTHORED', 'a real board: two Blocks and one semantic cable',
       { blocks: (await blockIds(page)).length, cables: await cables(page) },
       { blocks: 2, cables: 1 })
@@ -138,6 +140,17 @@ async function main() {
 
     const confirm = await box(page, '.systemsketch-workspace-dialog footer button.primary')
     await clickAt(page, confirm.cx, confirm.cy)
+    await waitFor(page, `document.querySelector('[data-testid="workspace-replace"]')`,
+      'the explicit export replacement choice', 20000)
+    check('EXPORT-NO-IMPLICIT-OVERWRITE',
+      'the first export attempt preserves an occupied destination byte-for-byte',
+      await readFile(exportPath, 'utf8'), occupiedExport)
+    check('EXPORT-OFFERS-REPLACE',
+      'the collision names the destructive follow-up instead of silently replacing',
+      await evaluate(page, `document.querySelector('[data-testid="workspace-replace"]').textContent.trim()`),
+      'Replace')
+    const replace = await box(page, '[data-testid="workspace-replace"]')
+    await clickAt(page, replace.cx, replace.cy)
     await waitFor(page, `!document.querySelector('.systemsketch-workspace-dialog')`,
       'the export to finish and the dialog to close', 20000)
     await delay(400)
@@ -161,7 +174,7 @@ async function main() {
     await saved(page)
     const original = JSON.parse(await readFile(boardPath, 'utf8'))
     check('DOCUMENT-SURVIVES-ON-DISK',
-      'and so is the .systemsketch on disk — the export borrowed it and put it back',
+      'and so is the .systemsketch on disk — export transformed only its clone',
       {
         types: shapeTypes(original),
         envelope: Object.hasOwn(original, 'systemSketch'),
@@ -200,7 +213,15 @@ async function main() {
       { blocks: 2, cables: 1, titles: ['decode', 'sink'] })
     await shot(page, 'export-round-trip.png')
 
-    check('CLEAN', 'the journey raised no local console errors', localConsoleErrors(page), [])
+    const unexpectedConsoleErrors = localConsoleErrors(page).filter(
+      (message) => message !== 'Failed to load resource: the server responded with a status of 409 (Conflict)',
+    )
+    check(
+      'CLEAN',
+      'the journey raised no unexpected local console errors (the exercised collision reports its expected 409)',
+      unexpectedConsoleErrors,
+      [],
+    )
 
     const failed = results.filter((result) => !result.ok)
     process.stdout.write(`\n${results.length - failed.length}/${results.length} checks passed\n`)

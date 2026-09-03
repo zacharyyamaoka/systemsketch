@@ -1,0 +1,14 @@
+{
+ "subject": "rectangle",
+ "menu": {
+  "x": 668.5,
+  "y": 253,
+  "w": 183,
+  "h": 40
+ },
+ "controls": [
+  "Shape, square",
+  "Change color",
+  "Line style"
+ ]
+}

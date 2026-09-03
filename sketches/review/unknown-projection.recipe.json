@@ -1,0 +1,211 @@
+{
+  "feature": "The `?` unknown token and the projection Block",
+  "viewport": {
+    "width": 1600,
+    "height": 1010
+  },
+  "shapes": [
+    {
+      "id": "encode",
+      "type": "block",
+      "x": 60,
+      "y": 330,
+      "props": {
+        "title": "encode()",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 160,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "payload",
+            "type": "bytes",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "send",
+      "type": "block",
+      "x": 560,
+      "y": 300,
+      "props": {
+        "title": "client.send()",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 420,
+        "h": 220,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "self",
+            "type": "Client",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "",
+            "type": "",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "",
+            "type": "",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "record",
+      "type": "block",
+      "x": 60,
+      "y": 620,
+      "props": {
+        "title": "to_object_spec()",
+        "description": "",
+        "blockType": "boundary",
+        "view": "port",
+        "w": 420,
+        "h": 160,
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "self",
+            "type": "ObjectRecord",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "c1",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "b1",
+      "type": "connection",
+      "fromId": "c1",
+      "toId": "encode",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b2",
+      "type": "connection",
+      "fromId": "c1",
+      "toId": "send",
+      "props": {
+        "portId": "in_2",
+        "terminal": "end",
+        "face": "outer"
+      }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 \u00b7 Right-click client.send() \u2192 Mark unresolved. It should drop to Simple view with `unresolved` under the title.",
+      "x": 540,
+      "y": 110,
+      "w": 520,
+      "h": 106,
+      "target": {
+        "shapeId": "send",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 \u00b7 Right-click it again \u2192 Block view \u2192 Port. `self Client` must survive \u2014 the call site proves it. The two empty rows each get ONE `?`, never two.",
+      "x": 1080,
+      "y": 260,
+      "w": 470,
+      "h": 130,
+      "target": {
+        "shapeId": "send",
+        "anchor": "right",
+        "dy": -30
+      }
+    },
+    {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 \u00b7 Right-click the `self Client` dot \u2192 Mark unknown. A row that DOES say something goes unknown only by decision. Ctrl+Z to put it back.",
+      "x": 1080,
+      "y": 440,
+      "w": 470,
+      "h": 130,
+      "target": {
+        "shapeId": "send",
+        "anchor": "right",
+        "dy": 60
+      }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 \u00b7 Drag to_object_spec()'s ObjectRecord dot into empty canvas and pick Split. Type `object_id`, Enter. Then right-click the projection \u2192 Add \u2192 Accessor and type `pose.translation.x`.",
+      "x": 560,
+      "y": 620,
+      "w": 500,
+      "h": 154,
+      "target": {
+        "shapeId": "record",
+        "anchor": "right",
+        "dy": 0
+      }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN \u00b7 the unresolved call keeps `self Client` and shows one `?` on each empty row, and the projection titles itself ObjectRecord with rows `.object_id` and `.pose.translation.x` \u2014 no `?` anywhere on it, and one row for the chain.",
+      "x": 1120,
+      "y": 640,
+      "w": 460,
+      "h": 202
+    }
+  ]
+}

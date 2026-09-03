@@ -36,7 +36,6 @@ import { isImportedPageFrame } from '../../singlePageDocument'
 export type ConnectionRefusal =
 	| 'missing-port'
 	| 'hidden-port'
-	| 'same-block'
 	| 'no-shared-scope'
 	| 'same-polarity'
 	| 'type-mismatch'
@@ -108,7 +107,7 @@ export function judgeConnection(
 
 	const faces = pairBlockFaces(editor, shapeA, shapeB, { requireLive: !options.existing })
 	if (!faces) {
-		return { ok: false, reason: shapeA.id === shapeB.id ? 'same-block' : 'no-shared-scope' }
+		return { ok: false, reason: 'no-shared-scope' }
 	}
 
 	const endpointA: JudgedEndpoint = {
@@ -136,7 +135,8 @@ export function judgeConnection(
 		return { ok: false, reason: 'type-mismatch' }
 	}
 	if (
-		faces.a === 'outer' && faces.b === 'outer'
+		shapeA.id !== shapeB.id
+		&& faces.a === 'outer' && faces.b === 'outer'
 		&& options.excludeBlocks?.has(shapeB.id)
 	) {
 		return { ok: false, reason: 'cycle' }

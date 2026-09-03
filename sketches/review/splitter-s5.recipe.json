@@ -1,0 +1,413 @@
+{
+  "feature": "Splitter \u00b7 s5",
+  "viewport": {
+    "width": 1600,
+    "height": 1010
+  },
+  "shapes": [
+    {
+      "id": "record",
+      "type": "block",
+      "x": 40,
+      "y": 430,
+      "props": {
+        "title": "to_object_spec()",
+        "description": "",
+        "blockType": "boundary",
+        "view": "port",
+        "w": 480,
+        "h": 150,
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "self",
+            "type": "ObjectRecord",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "spec",
+      "type": "block",
+      "x": 1070,
+      "y": 370,
+      "props": {
+        "title": "ObjectSpec()",
+        "description": "",
+        "blockType": "constructor",
+        "view": "port",
+        "w": 420,
+        "h": 250,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "name",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "type_name",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "in_3",
+            "name": "shape",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "in_4",
+            "name": "size",
+            "type": "Vec3",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "spec",
+            "type": "ObjectSpec",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "split",
+      "type": "block",
+      "x": 520,
+      "y": 290,
+      "props": {
+        "title": "split ObjectRecord",
+        "description": "",
+        "blockType": "library \u00b7 all fields",
+        "view": "port",
+        "w": 520,
+        "h": 430,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "record",
+            "type": "ObjectRecord",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": ".object_id",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "out_2",
+            "name": ".name",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "out_3",
+            "name": ".slug",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "out_4",
+            "name": ".category",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "out_5",
+            "name": ".subcategory",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "out_6",
+            "name": ".material",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "out_7",
+            "name": ".shape",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "out_8",
+            "name": ".size_m",
+            "type": "Vec3",
+            "visible": true
+          }
+        ],
+        "icon": "Package"
+      }
+    },
+    {
+      "id": "c0",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "c1",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "c2",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "c3",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "c4",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "c0-a",
+      "type": "connection",
+      "fromId": "c0",
+      "toId": "record",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c0-b",
+      "type": "connection",
+      "fromId": "c0",
+      "toId": "split",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c1-a",
+      "type": "connection",
+      "fromId": "c1",
+      "toId": "split",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c1-b",
+      "type": "connection",
+      "fromId": "c1",
+      "toId": "spec",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c2-a",
+      "type": "connection",
+      "fromId": "c2",
+      "toId": "split",
+      "props": {
+        "portId": "out_5",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c2-b",
+      "type": "connection",
+      "fromId": "c2",
+      "toId": "spec",
+      "props": {
+        "portId": "in_2",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c3-a",
+      "type": "connection",
+      "fromId": "c3",
+      "toId": "split",
+      "props": {
+        "portId": "out_7",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c3-b",
+      "type": "connection",
+      "fromId": "c3",
+      "toId": "spec",
+      "props": {
+        "portId": "in_3",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c4-a",
+      "type": "connection",
+      "fromId": "c4",
+      "toId": "split",
+      "props": {
+        "portId": "out_8",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c4-b",
+      "type": "connection",
+      "fromId": "c4",
+      "toId": "spec",
+      "props": {
+        "portId": "in_4",
+        "terminal": "end",
+        "face": "outer"
+      }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 \u00b7 The splitter is a definition in the library, so it carries every field the type declares. Count the unwired rows.",
+      "x": 470,
+      "y": 120,
+      "w": 520,
+      "h": 106,
+      "target": {
+        "shapeId": "split",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "note-src",
+      "kind": "note",
+      "text": "golden 33 \u00b7 shape = self.shape \u00b7 size_m = self.size_m\nObjectSpec(name=self.object_id, type_name=self.subcategory, \u2026)\nObjectRecord declares 20 fields. to_object_spec reads 7. Four reach ObjectSpec().",
+      "x": 60,
+      "y": 720,
+      "w": 480,
+      "h": 202
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN \u00b7 the block is reusable at every call site \u2014 and you see the cost: rows for members this body never reads, frozen at authoring time.",
+      "x": 990,
+      "y": 720,
+      "w": 510,
+      "h": 130
+    }
+  ]
+}

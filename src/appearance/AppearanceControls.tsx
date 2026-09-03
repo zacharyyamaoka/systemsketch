@@ -1,5 +1,6 @@
 import { Fragment } from 'react'
 import {
+  startEditingShapeWithRichText,
   TldrawUiPopover,
   TldrawUiPopoverContent,
   TldrawUiPopoverTrigger,
@@ -9,6 +10,7 @@ import {
   type Editor,
   type StyleProp,
   type TLArrowShape,
+  type TLShape,
 } from 'tldraw'
 
 import {
@@ -28,9 +30,11 @@ import {
   CHEVRON_PATH,
   CHEVRON_VIEWBOX,
   FONT_SIZE_LADDER,
+  POPOVER_COLLISION_PADDING,
   POPOVER_GAP,
   SWATCH_SIZE,
 } from './figjamTokens'
+import { addTextTarget, selectionHasVisibleText } from './textPresence'
 import './appearance.css'
 import {
   applyArrowPresetToSelection,
@@ -59,6 +63,8 @@ const GROUP_STARTS = new Set(['color', 'font', 'align', 'arrowheadStart'])
 export function AppearanceControls() {
   const editor = useEditor()
   const styles = useRelevantStyles()
+  const hasText = useValue('systemsketch selection has text', () => selectionHasVisibleText(editor), [editor])
+  const addTextShape = useValue('systemsketch add text target', () => addTextTarget(editor), [editor])
   const selectedArrowRouting = useValue(
     'selected arrow routing',
     () => {
@@ -72,7 +78,7 @@ export function AppearanceControls() {
     },
     [editor],
   )
-  const controls = buildAppearanceControls(styles).map((control) => {
+  const controls = buildAppearanceControls(styles, hasText).map((control) => {
     if (control.id !== 'arrowKind' || selectedArrowRouting === null) return control
     return {
       ...control,
@@ -82,7 +88,7 @@ export function AppearanceControls() {
     }
   })
 
-  if (controls.length === 0) return null
+  if (controls.length === 0 && !addTextShape) return null
 
   return (
     <div className="systemsketch-appearance" data-testid="systemsketch-appearance">
@@ -92,9 +98,33 @@ export function AppearanceControls() {
             ? <span className="systemsketch-appearance__separator" aria-hidden="true" />
             : null}
           <AppearanceTrigger editor={editor} control={control} />
+          {/* FigJam's connector-only "Add text": no style to hold, so it
+              can't be a value in the model above. Sits right after Line
+              style, the way FigJam's own capture shows it. */}
+          {control.id === 'lineStyle' && addTextShape
+            ? <AddTextButton editor={editor} shape={addTextShape} />
+            : null}
         </Fragment>
       ))}
     </div>
+  )
+}
+
+function AddTextButton({ editor, shape }: { editor: Editor; shape: TLShape }) {
+  return (
+    <button
+      type="button"
+      className="systemsketch-appearance__trigger"
+      data-control="addText"
+      aria-label="Add text"
+      title="Add text"
+      onClick={() => {
+        editor.markHistoryStoppingPoint('add text')
+        startEditingShapeWithRichText(editor, shape, { selectAll: true })
+      }}
+    >
+      <FigjamGlyph name="trigger/Add text" />
+    </button>
   )
 }
 
@@ -151,8 +181,17 @@ function AppearanceTrigger({ editor, control }: { editor: Editor; control: Appea
         </button>
       </TldrawUiPopoverTrigger>
       {/* The trigger fills the pill's height, so Radix's offset from the
-          trigger is the same 8px FigJam leaves above the pill. */}
-      <TldrawUiPopoverContent side="top" align="center" sideOffset={POPOVER_GAP}>
+          trigger is the same 8px FigJam leaves above the pill. `collisionPadding`
+          is what stops a wide palette from being clamped flush to the window:
+          measured at 1440, the 455px colour panel opened at x=0 against a
+          trigger at x=183, cutting the first swatch column in half. Every other
+          popover in the app already keeps the same 12px. */}
+      <TldrawUiPopoverContent
+        side="top"
+        align="center"
+        sideOffset={POPOVER_GAP}
+        collisionPadding={POPOVER_COLLISION_PADDING}
+      >
         <AppearancePanel control={control} editor={editor} />
       </TldrawUiPopoverContent>
     </TldrawUiPopover>
@@ -163,8 +202,15 @@ function AppearancePanel({ control, editor }: { control: AppearanceControl; edit
   const mode = control.modeControl
   const beside = mode && control.modePlacement === 'beside'
   return (
+    // `role="menu"` is load-bearing, not decoration: every option below is a
+    // `menuitemradio`, and that role is only defined inside a menu. Measured
+    // before this, the 28 swatches sat in `role="group"` under a plain div, so
+    // the whole panel was an ARIA structure no assistive technology could read
+    // as a set of choices.
     <div
       className="systemsketch-appearance__panel"
+      role="menu"
+      aria-label={control.label}
       data-layout={control.layout}
       data-mode={mode ? control.modePlacement : undefined}
       data-testid={`systemsketch-appearance-panel-${control.id}`}
@@ -296,7 +342,13 @@ function CustomColorCell({ control, editor }: { control: AppearanceControl; edit
           </span>
         </button>
       </TldrawUiPopoverTrigger>
-      <TldrawUiPopoverContent side="bottom" align="center" sideOffset={POPOVER_GAP} autoFocusFirstButton={false}>
+      <TldrawUiPopoverContent
+        side="bottom"
+        align="center"
+        sideOffset={POPOVER_GAP}
+        collisionPadding={POPOVER_COLLISION_PADDING}
+        autoFocusFirstButton={false}
+      >
         <CustomColorPicker editor={editor} control={control} />
       </TldrawUiPopoverContent>
     </TldrawUiPopover>

@@ -578,21 +578,6 @@
   box-shadow: none;
 }
 
-.systemsketch-selection-menu .systemsketch-selection-action {
-  width: auto;
-  min-width: 64px;
-  height: 36px;
-  padding: 0 10px;
-  border-radius: 0;
-  color: var(--ss-text-inverse);
-  font-size: 9px;
-  font-weight: 750;
-}
-
-.systemsketch-selection-menu .systemsketch-selection-action:hover {
-  background: var(--ss-surface-inverse-hover);
-}
-
 .systemsketch-selection-layout-actions {
   display: flex;
   align-items: center;
@@ -637,9 +622,10 @@
   stroke: none;
 }
 
-.systemsketch-popout--right[data-surface='inspector']:has(.block-inspector__header) > .systemsketch-popout__header {
-  display: none;
-}
+/* The rule that used to sit here keyed on `.block-inspector__header`, a class
+ * that exists nowhere in src — so it never matched, and the real hide lived
+ * unconditionally in block-inspector.css. Both are now one attribute rule
+ * there, driven by `inspectorSubjectOwnsHeader`. */
 
 .systemsketch-popout button:focus-visible,
 .systemsketch-top-left-shell button:focus-visible,

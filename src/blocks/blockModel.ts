@@ -60,6 +60,57 @@ export const BlockShowDescriptionStyle = StyleProp.define('systemsketch:blockSho
 	type: T.boolean,
 })
 
+/**
+ * What a primitive is currently being *said about* — never what it is.
+ *
+ * `normal` is the whole document in ordinary use. The other five are a lens
+ * somebody put on it: a conformance diff painting what the generated board
+ * gained and lost against its target, or the board linter painting what it
+ * judges wrong. One vocabulary for both, because a diff projector and a linter
+ * both want to say "this port is wrong" and there is no reason for a reader to
+ * learn two spellings of it.
+ *
+ * This is a `StyleProp` and not a plain field for the same reason `view` is:
+ * a lens paints many primitives at once, `editor.setStyleForSelectedShapes`
+ * writes a whole selection in one go, and `getSharedStyles` reports whether a
+ * selection agrees — so clearing the lens is one write, not a walk.
+ *
+ * The one rule: a state is a lens, not a design decision. It is written into a
+ * derived, disposable diff document, never into the file a person then edits.
+ * `clearDiffStates` is the escape hatch for a board that got one anyway.
+ */
+export const BLOCK_STATES = ['normal', 'added', 'removed', 'changed', 'error', 'warning'] as const
+export type BlockState = (typeof BLOCK_STATES)[number]
+
+export const BlockStateStyle = StyleProp.defineEnum('systemsketch:state', {
+	defaultValue: 'normal',
+	values: BLOCK_STATES,
+})
+
+/**
+ * One field's before/after pair, carried in the board diff contract's own
+ * shape so a projector can hand `Change.fields` straight through.
+ *
+ * This is what lets a rename read as `callee → callable` on *any* field rather
+ * than only on a port's name: the enum above says a thing changed, this says
+ * what it used to be. Absent on every ordinary board.
+ */
+export const BlockFieldDiff = T.object({
+	path: T.string,
+	before: T.string,
+	after: T.string,
+})
+export type BlockFieldDiff = T.TypeOf<typeof BlockFieldDiff>
+
+/** Where a Block sat and how big it was on the before board. */
+export const BlockPriorPose = T.object({
+	x: T.number,
+	y: T.number,
+	w: T.number,
+	h: T.number,
+})
+export type BlockPriorPose = T.TypeOf<typeof BlockPriorPose>
+
 export const BlockViewSize = T.object({
 	w: T.number,
 	h: T.number,
@@ -109,6 +160,32 @@ export const BlockPort = T.object({
 	 * the cable, so this follows wherever the cable crosses the boundary.
 	 */
 	edgeT: T.number.optional(),
+	/**
+	 * The lens's verdict on this row — see `BlockStateStyle`. Absent is
+	 * `normal`, so every port ever written stays exactly what it was.
+	 *
+	 * A port is not a shape, so this cannot be a `StyleProp`; it is the same
+	 * vocabulary carried as a field. That is what makes a missing port
+	 * renderable *in the row it is missing from*, which free-floating
+	 * annotation cannot do.
+	 */
+	state: T.literalEnum(...BLOCK_STATES).optional(),
+	/**
+	 * What this row used to say, when `state` is `changed`. A rename is the
+	 * common real case — the target asserts `callee` and the generator produced
+	 * `out` — and it reads as one row saying `callee → out`, not as a removal
+	 * beside an addition.
+	 *
+	 * Superseded by `fieldDiffs`, and still read: boards already written carry
+	 * one of these, and migrating it away would blank those renames.
+	 */
+	stateBefore: T.string.optional(),
+	/**
+	 * Every changed field of this row as a before/after pair — `name` and
+	 * `type`. `stateBefore` could only ever speak for the name, which is why a
+	 * port whose *type* changed had nothing to show but a strike.
+	 */
+	fieldDiffs: T.arrayOf(BlockFieldDiff).optional(),
 })
 export type BlockPort = T.TypeOf<typeof BlockPort>
 
@@ -175,6 +252,23 @@ export const BLOCK_SHAPE_PROPS = {
 	 * to decide whether a selection is shared or mixed.
 	 */
 	portLayout: BlockPortLayoutStyle,
+	/**
+	 * The lens's verdict on this Block. `normal` in every ordinary document;
+	 * a style prop cannot be optional, so the migration makes it explicit.
+	 */
+	state: BlockStateStyle,
+	/**
+	 * Every changed heading field as a before/after pair — `title`,
+	 * `description`, `blockType`. Absent on every ordinary board.
+	 */
+	fieldDiffs: T.arrayOf(BlockFieldDiff).optional(),
+	/**
+	 * Where this Block sat and how big it was on the before board, when a lens
+	 * says it moved or resized. Geometry is not in `fieldDiffs` on purpose: its
+	 * mark is an outline, not a word-diff, and stringifying a coordinate into
+	 * the text channel would misreport what kind of thing it is.
+	 */
+	priorPose: BlockPriorPose.optional(),
 	/** Manual expanded-section weights keyed by `g:<id>` / `b:<id>`. */
 	expandedWeights: T.dict(T.string, T.number).optional(),
 	/** Opaque identity shared by every occurrence of one callable definition. */
@@ -206,6 +300,9 @@ declare module 'tldraw' {
 			showDescription: boolean
 			notes?: string
 			portLayout: PortLayout
+			state: BlockState
+			fieldDiffs?: BlockFieldDiff[]
+			priorPose?: BlockPriorPose
 			expandedWeights?: Record<string, number>
 			definitionId?: string
 			definitionKey?: string
@@ -245,6 +342,7 @@ export function getDefaultBlockProps(): BlockShapeProps {
 		showDescription: true,
 		notes: '',
 		portLayout: 'inline',
+		state: 'normal',
 		definitionId: createShapeId().slice('shape:'.length),
 		inputs: [],
 		outputs: [],
@@ -277,8 +375,209 @@ export function expandedSectionWeights(props: BlockShapeProps): Record<string, n
 	return props.expandedWeights ?? {}
 }
 
+/** The one reader for a Block's lens state. */
+export function blockDiffState(props: Pick<BlockShapeProps, 'state'>): BlockState {
+	return props.state ?? 'normal'
+}
+
+/**
+ * The one reader for a port's lens state.
+ *
+ * Named `portDiffState` and not `portState` because `ports/portState.ts`
+ * already owns that name for the live hinting/drag atoms, and one of the two
+ * would have had to be aliased at every call site.
+ */
+export function portDiffState(port: BlockPort): BlockState {
+	return port.state ?? 'normal'
+}
+
+/** A port drawn in place but no longer there: the ghost row. */
+export function isGhostPort(port: BlockPort): boolean {
+	return portDiffState(port) === 'removed'
+}
+
+/** What a `changed` row used to say — empty when it says nothing. */
+export function portStateBefore(port: BlockPort): string {
+	return port.stateBefore ?? ''
+}
+
+export interface BlockStateCounts {
+	added: number
+	removed: number
+	changed: number
+	error: number
+	warning: number
+}
+
+const EMPTY_STATE_COUNTS: BlockStateCounts = {
+	added: 0, removed: 0, changed: 0, error: 0, warning: 0,
+}
+
+/**
+ * What one Block's rows are saying, as the counts its badge shows.
+ *
+ * The headline counts ports and cables, never storage records — `2 ports
+ * missing`, not `27 raw records changed`. This is the per-Block half of that
+ * rule; the board headline sums these.
+ */
+export function blockPortStateCounts(
+	props: Pick<BlockShapeProps, 'inputs' | 'outputs'>,
+): BlockStateCounts {
+	const counts = { ...EMPTY_STATE_COUNTS }
+	for (const port of [...props.inputs, ...props.outputs]) {
+		const state = portDiffState(port)
+		if (state !== 'normal') counts[state] += 1
+	}
+	return counts
+}
+
+export function hasAnyBlockState(props: BlockShapeProps): boolean {
+	if (blockDiffState(props) !== 'normal') return true
+	// A pose ghost and a before/after pair are as much a lens as a state enum
+	// is. Leaving them out here is how `clear diff marks` would leave a board
+	// still saying `callee → callable` with nothing coloured to explain it.
+	if (props.priorPose !== undefined) return true
+	if ((props.fieldDiffs?.length ?? 0) > 0) return true
+	return [...props.inputs, ...props.outputs].some((port) =>
+		portDiffState(port) !== 'normal' || (port.fieldDiffs?.length ?? 0) > 0)
+}
+
+/**
+ * Strip the lens off one Block's props: the state, the ports' states, and the
+ * ghost rows a projector inserted. Returns the same object when there was no
+ * lens on it, so a caller can use identity to know whether a write is needed.
+ */
+export function clearBlockStateProps(props: BlockShapeProps): BlockShapeProps {
+	if (!hasAnyBlockState(props)) return props
+	const strip = (ports: readonly BlockPort[]) => ports
+		.filter((port) => !isGhostPort(port))
+		.map((port) => {
+			if (port.state === undefined && port.stateBefore === undefined && port.fieldDiffs === undefined) {
+				return port
+			}
+			const { state: _state, stateBefore: _before, fieldDiffs: _fields, ...rest } = port
+			return rest
+		})
+	// Deleted rather than emptied: an absent key is what an ordinary board has,
+	// and `fieldDiffs: []` would be a lens that renders as nothing but still
+	// makes every equality check say the document differs from a clean one.
+	const { fieldDiffs: _fieldDiffs, priorPose: _priorPose, ...rest } = props
+	return {
+		...rest,
+		state: 'normal',
+		inputs: strip(props.inputs),
+		outputs: strip(props.outputs),
+	}
+}
+
 export function portDefaultValue(port: BlockPort): string {
 	return port.defaultValue ?? ''
+}
+
+/**
+ * The one token for "we looked, and we cannot tell".
+ *
+ * Deliberately not the empty string. Blank already means *nobody annotated
+ * this* — it is how roughly half the ports in the pyblocks golden corpus spell
+ * a missing type — and a callee the analyzer failed to resolve is a different
+ * fact. It is deliberately not `Any` either: `Any` is a real Python type a
+ * program can declare (golden 12's own `Client = Any` does), so writing it for
+ * an unresolved slot makes the board claim the callee accepts anything.
+ *
+ * `?` says only what is actually known: that a port is there.
+ */
+export const UNKNOWN_TOKEN = '?'
+
+/** True when a name or type slot has been explicitly marked unknown. */
+export function isUnknownText(text: string | undefined): boolean {
+	return (text ?? '').trim() === UNKNOWN_TOKEN
+}
+
+/** A port whose name or type the analyzer could not resolve. */
+export function isUnknownPort(port: BlockPort): boolean {
+	return isUnknownText(port.name) || isUnknownText(port.type)
+}
+
+/**
+ * The `blockType` that marks a callee nothing in scope defines.
+ *
+ * The opacity is a fact about the *call*, so it rides the type line once
+ * rather than being repeated on every row, and the Block's default
+ * presentation is Simple: a signature that cannot be stated has no business
+ * showing a signature table. Switching to Port view still shows the rows,
+ * every slot reading `?`.
+ */
+export const UNRESOLVED_BLOCK_TYPE = 'unresolved'
+
+export function isUnresolvedBlock(props: BlockShapeProps): boolean {
+	return props.blockType.trim().toLowerCase() === UNRESOLVED_BLOCK_TYPE
+}
+
+/**
+ * The `blockType` that marks a projection: one composite value in, one member
+ * out per row.
+ *
+ * A dot is function application — `record.shape` is `getattr(record, 'shape')`,
+ * which may be a field, a property or a descriptor — so a member read is a
+ * call, and gets the same primitive every other call gets. The rows are facts
+ * about the incoming *type*, never about the variable that happened to arrive,
+ * so one projection reads the same at every call site.
+ */
+export const PROJECTION_BLOCK_TYPE = 'projection'
+
+export function isProjectionBlock(props: BlockShapeProps): boolean {
+	return props.blockType.trim().toLowerCase() === PROJECTION_BLOCK_TYPE
+}
+
+/**
+ * Fill a projection's empty title and inlet type from the type that arrived.
+ *
+ * The rows are facts about that type, not about the variable that happened to
+ * carry it, which is what lets one projection read the same at every call site.
+ *
+ * It only ever fills what is EMPTY. The canvas may carry across a fact the
+ * cable already states, but it does not get to correct the drawing: a title or
+ * a port name someone typed survives a rewire. Nothing here refuses a
+ * connection or marks one wrong — that judgement belongs to the Python side.
+ */
+export function makeProjectionProps(props: BlockShapeProps, incoming: string): BlockShapeProps {
+	const type = incoming.trim()
+	if (type === '') return props
+	const inlet = props.inputs[0]
+	const takesType = inlet !== undefined && inlet.type === ''
+	const takesTitle = props.title === ''
+	const already = isProjectionBlock(props)
+	if (!takesType && !takesTitle && already) return props
+	return {
+		...props,
+		title: takesTitle ? type : props.title,
+		blockType: already ? props.blockType : PROJECTION_BLOCK_TYPE,
+		inputs: takesType
+			? props.inputs.map((port, index) => (index === 0 ? { ...port, type } : port))
+			: props.inputs,
+	}
+}
+
+/**
+ * Normalize an accessor row's name.
+ *
+ * A projection's output name is an attribute path, so it leads with a dot.
+ * Chains stay one row — `.pose.translation.x` is a single read of a single
+ * member of a member — which is what keeps a nested projection from spawning a
+ * Block per link. An index (`[0]`) is the tuple form of the same thing and
+ * keeps its own spelling; `?` stays `?`.
+ */
+export function normalizeAccessorName(name: string): string {
+	const text = name.trim()
+	if (text === '' || text === UNKNOWN_TOKEN) return text
+	if (text.startsWith('.') || text.startsWith('[')) return text
+	return `.${text}`
+}
+
+/** True for a row that reads a member off the incoming value. */
+export function isAccessorName(name: string): boolean {
+	const text = name.trim()
+	return text.length > 1 && (text.startsWith('.') || text.startsWith('['))
 }
 
 /** The one reader for a port's row. */

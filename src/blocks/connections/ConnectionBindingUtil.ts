@@ -13,7 +13,14 @@ import {
 	type TLBinding,
 	type TLShapeId,
 } from 'tldraw'
-import { BLOCK_SHAPE_TYPE, isBlockShape, type BlockShape } from '../blockModel'
+import {
+	BLOCK_SHAPE_TYPE,
+	isBlockShape,
+	isProjectionBlock,
+	isUnknownText,
+	makeProjectionProps,
+	type BlockShape,
+} from '../blockModel'
 import { getBlockConnectionPortPagePoint, getPortHostPort, isPortHostShape } from './blockPorts'
 import {
 	CONNECTION_BINDING_TYPE,
@@ -332,6 +339,43 @@ export function adoptCableTypeIntoPills(editor: Editor, connection: ConnectionSh
 				outputs: pill.shape.props.outputs.map((port) => ({ ...port, type: other.type })),
 			},
 		})
+	}
+}
+
+/**
+ * A projection's inlet takes the type that lands on it, and the Block takes
+ * that type as its title.
+ *
+ * This is the honest half of "the ports are derived from the type": the app
+ * knows what type arrived because a cable told it. Which *members* that type
+ * has is a question for whatever produced the board — the title is what makes
+ * the rows readable as facts about a type rather than about a variable.
+ */
+export function adoptCableTypeIntoProjection(
+	editor: Editor,
+	connection: ConnectionShape | TLShapeId,
+): void {
+	const connectionId = typeof connection === 'string' ? connection : connection.id
+	const bindings = getConnectionBindings(editor, connectionId)
+	if (!bindings.start || !bindings.end) return
+	const ends = [bindings.start, bindings.end].map((binding) => {
+		const shape = editor.getShape(binding.toId)
+		if (!isBlockShape(shape)) return null
+		const port = [...shape.props.inputs, ...shape.props.outputs]
+			.find((candidate) => candidate.id === binding.props.portId)
+		return { shape, portId: binding.props.portId, type: port?.type ?? '' }
+	})
+	const [a, b] = ends
+	if (!a || !b) return
+	for (const [target, other] of [[a, b], [b, a]] as const) {
+		if (!isProjectionBlock(target.shape.props)) continue
+		// Only the inlet decides the projection's type; a member row landing on
+		// something else says nothing about what arrives.
+		if (target.shape.props.inputs[0]?.id !== target.portId) continue
+		if (other.type === '' || isUnknownText(other.type)) continue
+		const props = makeProjectionProps(target.shape.props, other.type)
+		if (props === target.shape.props) continue
+		editor.updateShape<BlockShape>({ id: target.shape.id, type: BLOCK_SHAPE_TYPE, props })
 	}
 }
 

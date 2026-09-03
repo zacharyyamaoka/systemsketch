@@ -75,7 +75,6 @@ describe('Block selection mini menu under multi-selection', () => {
       <BlockSelectionMiniMenu
         view={{ type: 'shared', value: 'port' }}
         onSetView={() => {}}
-        onOpenInspector={() => {}}
       />,
     )
 
@@ -83,7 +82,7 @@ describe('Block selection mini menu under multi-selection', () => {
     expect(html).not.toContain('9 Blocks')
     expect(html).toContain('data-view="port"')
     expect(html).toContain('aria-pressed="true"')
-    expect(html).toContain('Inspect')
+    expect(html).not.toContain('Inspect')
     expect(html).not.toContain('Step in')
     // FigJam and Excalidraw both keep Delete out of the floating pill; the key
     // and the right-click menu are the delete paths.
@@ -95,7 +94,6 @@ describe('Block selection mini menu under multi-selection', () => {
       <BlockSelectionMiniMenu
         view={{ type: 'mixed' }}
         onSetView={() => {}}
-        onOpenInspector={() => {}}
       />,
     )
 

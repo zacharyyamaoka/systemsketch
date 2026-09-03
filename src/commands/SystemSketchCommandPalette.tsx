@@ -38,6 +38,12 @@ export interface SystemSketchCommandPaletteProps {
   onError?(error: unknown): void
 }
 
+/** The tabs, in the order the arrow keys walk them. */
+const PALETTE_MODES: ReadonlyArray<{ mode: CommandPaletteMode; label: string }> = [
+  { mode: 'commands', label: 'Commands' },
+  { mode: 'find-replace', label: 'Find' },
+]
+
 function focusableElements(root: HTMLElement): HTMLElement[] {
   return [...root.querySelectorAll<HTMLElement>(
     'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
@@ -88,6 +94,8 @@ export function SystemSketchCommandPalette({
   onCloseRef.current = onClose
   const listboxId = useId()
   const headingId = useId()
+  const panelId = useId()
+  const modeRefs = useRef<Partial<Record<CommandPaletteMode, HTMLButtonElement | null>>>({})
 
   const filteredActions = useMemo(
     () => filterCommandPaletteActions(actions, commandQuery),
@@ -136,7 +144,16 @@ export function SystemSketchCommandPalette({
     setMode(initialMode)
     setActiveIndex(0)
     setStatus('')
-    queueMicrotask(() => queryRef.current?.focus())
+    queueMicrotask(() => {
+      // The host's mode prop changes for two reasons: it opened the palette in
+      // a mode, or the palette told it the mode moved. In the first case the
+      // query field should take focus; in the second, focus is already
+      // somewhere deliberate — on the tab the arrow keys are walking — and
+      // yanking it into the input is what broke keyboard operation of the
+      // tablist.
+      if (document.activeElement?.closest('[role="tablist"]')) return
+      queryRef.current?.focus()
+    })
   }, [initialMode])
 
   useEffect(() => {
@@ -145,6 +162,31 @@ export function SystemSketchCommandPalette({
       return Math.max(0, Math.min(current, visibleItems.length - 1))
     })
   }, [visibleItems.length, mode, commandQuery, findQuery])
+
+  /**
+   * Left/Right (and Home/End) walk the tablist, which is what an ARIA tablist
+   * promises and what this one did not do. Selection follows focus, the
+   * pattern for a two-tab group whose panels are cheap to render.
+   */
+  const onModeKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    const index = PALETTE_MODES.findIndex((candidate) => candidate.mode === mode)
+    let next = index
+    if (event.key === 'ArrowLeft') next = (index - 1 + PALETTE_MODES.length) % PALETTE_MODES.length
+    else if (event.key === 'ArrowRight') next = (index + 1) % PALETTE_MODES.length
+    else if (event.key === 'Home') next = 0
+    else if (event.key === 'End') next = PALETTE_MODES.length - 1
+    else return
+    event.preventDefault()
+    event.stopPropagation()
+    const target = PALETTE_MODES[next].mode
+    setMode(target)
+    setActiveIndex(0)
+    setStatus('')
+    onModeChange?.(target)
+    // Focus stays on the tablist so the arrows keep working; the query input
+    // is reached with Tab, unlike a click, which is a deliberate reach for it.
+    queueMicrotask(() => modeRefs.current[target]?.focus())
+  }
 
   const switchMode = (next: CommandPaletteMode) => {
     setMode(next)
@@ -273,23 +315,39 @@ export function SystemSketchCommandPalette({
       >
         <header className="systemsketch-command-palette__header">
           <h2 id={headingId}>{mode === 'commands' ? 'Commands' : 'Find & replace'}</h2>
-          <div className="systemsketch-command-palette__modes" role="tablist" aria-label="Palette mode">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === 'commands'}
-              onClick={() => switchMode('commands')}
-            >Commands</button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === 'find-replace'}
-              onClick={() => switchMode('find-replace')}
-            >Find</button>
+          <div
+            className="systemsketch-command-palette__modes"
+            role="tablist"
+            aria-label="Palette mode"
+            onKeyDown={onModeKeyDown}
+          >
+            {PALETTE_MODES.map((candidate) => (
+              <button
+                key={candidate.mode}
+                type="button"
+                role="tab"
+                id={`${panelId}-tab-${candidate.mode}`}
+                aria-selected={mode === candidate.mode}
+                aria-controls={panelId}
+                /* Roving tabindex: a tablist is ONE tab stop, and the arrow
+                   keys move within it. Both tabs used to be `tabIndex={0}`,
+                   so Tab walked into the group and the arrows did nothing. */
+                tabIndex={mode === candidate.mode ? 0 : -1}
+                data-mode={candidate.mode}
+                ref={(element) => { modeRefs.current[candidate.mode] = element }}
+                onClick={() => switchMode(candidate.mode)}
+              >{candidate.label}</button>
+            ))}
           </div>
           <button type="button" className="systemsketch-command-palette__close" aria-label="Close command palette" onClick={onClose}>×</button>
         </header>
 
+        <div
+          id={panelId}
+          role="tabpanel"
+          aria-labelledby={`${panelId}-tab-${mode}`}
+          className="systemsketch-command-palette__panel"
+        >
         <label className="systemsketch-command-palette__search">
           <span aria-hidden="true">⌕</span>
           <span className="systemsketch-command-palette__visually-hidden">
@@ -432,6 +490,8 @@ export function SystemSketchCommandPalette({
             <span>{query ? 'Try a shorter or less specific search.' : 'Results include text from the whole board.'}</span>
           </div>
         ) : null}
+
+        </div>
 
         <footer className="systemsketch-command-palette__footer">
           <span role="status" aria-live="polite">{status}</span>

@@ -22,16 +22,21 @@ import {
   PORT_LAYOUTS,
   blockIcon,
   isBlockShape,
+  isProjectionBlock,
+  isUnresolvedBlock,
   portInHeader,
   portRow,
   type BlockPortSide,
   type BlockShape,
 } from '../blockModel'
 import {
+  appendAccessorPort,
   appendBlockPortForInlineEditing,
   blockPortIndex,
   blockPortRowCount,
   insertBlockPortForInlineEditing,
+  markBlockUnresolved,
+  markPortUnknown,
   moveBlockPort,
   moveBlockPortToSection,
   removeBlockPort,
@@ -82,7 +87,8 @@ import {
   linkedBlockOccurrences,
   unlinkBlockDefinition,
 } from '../definitions/definitionLinking'
-import { getOnlySelectedFrame, removeFrameKeepContents } from '../../frames/removeFrame'
+import { canWrapSelection, WRAP_TARGET_DESCRIPTORS } from '../../frames/wrapSelection'
+import { useRunWrap } from '../../frames/WrapSelectionControl'
 
 function onlySelectedBlock(editor: ReturnType<typeof useEditor>): BlockShape | null {
   const selected = editor.getSelectedShapes()
@@ -146,11 +152,12 @@ function BlockContextMenuItems() {
     () => getActiveDepthScopeId(editor),
     [editor],
   )
-  const selectedFrame = useValue(
-    'context-menu selected Frame',
-    () => getOnlySelectedFrame(editor),
+  const canWrap = useValue(
+    'SystemSketch selection can be wrapped',
+    () => canWrapSelection(editor),
     [editor],
   )
+  const runWrap = useRunWrap('context-menu')
   const linkedOccurrenceCount = useValue(
     'selected Block linked occurrence count',
     () => selectedBlock ? linkedBlockOccurrences(editor, selectedBlock).length : 0,
@@ -251,6 +258,21 @@ function BlockContextMenuItems() {
 
   // The new port joins its subject's row and arm, so "add below" a header
   // port is another header port.
+  // A projection's rows are accessors, so adding one starts from the dot and
+  // opens the editor on it: the next thing anyone does is type the member.
+  const addAccessor = () => {
+    if (!selectedBlock) return
+    const result = appendAccessorPort(editor, selectedBlock.id, '')
+    if (!result.ok) return
+    const port = result.props.outputs[result.props.outputs.length - 1]
+    if (!port) return
+    requestBlockInlineEdit(editor, selectedBlock.id, {
+      kind: 'portName',
+      side: 'outputs',
+      portId: port.id,
+    })
+  }
+
   const addPortAt = (target: BlockPortRef, offset: 0 | 1) => {
     const index = blockPortIndexOf(editor, target) + offset
     const result = insertBlockPortForInlineEditing(editor, target.shapeId, target.side, index, {
@@ -356,6 +378,16 @@ function BlockContextMenuItems() {
             </TldrawUiMenuGroup>
           </TldrawUiMenuSubmenu>
           <TldrawUiMenuItem
+            id="block-port-unknown"
+            label="Mark unknown"
+            onSelect={() => void markPortUnknown(
+              editor,
+              portTarget.target.shapeId,
+              portTarget.target.side,
+              portTarget.target.portId,
+            )}
+          />
+          <TldrawUiMenuItem
             id="block-port-delete"
             label="Delete port"
             onSelect={() => void removeBlockPort(
@@ -390,6 +422,13 @@ function BlockContextMenuItems() {
           {selectedBlock ? (
           <TldrawUiMenuSubmenu id="block-add" label="Add">
             <TldrawUiMenuGroup id="block-add-ports">
+              {isProjectionBlock(selectedBlock.props) ? (
+                <TldrawUiMenuItem
+                  id="block-add-accessor"
+                  label="Accessor"
+                  onSelect={() => addAccessor()}
+                />
+              ) : null}
               <TldrawUiMenuItem
                 id="block-add-input-port"
                 label="Input port"
@@ -443,6 +482,14 @@ function BlockContextMenuItems() {
               ))}
             </TldrawUiMenuGroup>
           </TldrawUiMenuSubmenu>
+
+          {selectedBlock && !isUnresolvedBlock(selectedBlock.props) ? (
+            <TldrawUiMenuItem
+              id="block-mark-unresolved"
+              label="Mark unresolved"
+              onSelect={() => selectedBlock && void markBlockUnresolved(editor, selectedBlock.id)}
+            />
+          ) : null}
 
           {selectedBlock?.props.view === 'expanded' ? (
             <TldrawUiMenuSubmenu id="block-advanced" label="Advanced">
@@ -563,13 +610,28 @@ function BlockContextMenuItems() {
         </TldrawUiMenuGroup>
       ) : null}
 
-      {selectedFrame ? (
-        <TldrawUiMenuGroup id="systemsketch-frame">
-          <TldrawUiMenuItem
-            id="frame-remove-keep-contents"
-            label="Delete frame, leave children"
-            onSelect={() => void removeFrameKeepContents(editor, selectedFrame.id)}
-          />
+      {/* The second way in. The tile on the selection menu is the one you find
+          at the moment of intent; this is the one you find when you already
+          right-clicked. Both read the same target list and run the same
+          commands, so they cannot drift apart.
+
+          The old `Delete frame, leave children` item used to sit here. It has
+          been removed rather than renamed: stock `Remove frame` — now labelled
+          `Remove frame, leave children` — does the same thing for any
+          frame-like shape, which is a superset of the Frame-only command it
+          replaces. */}
+      {canWrap ? (
+        <TldrawUiMenuGroup id="systemsketch-wrap">
+          <TldrawUiMenuSubmenu id="turn-into" label="Turn into">
+            {WRAP_TARGET_DESCRIPTORS.map((descriptor) => (
+              <TldrawUiMenuItem
+                key={descriptor.target}
+                id={`turn-into-${descriptor.target}`}
+                label={descriptor.label}
+                onSelect={() => runWrap(descriptor)}
+              />
+            ))}
+          </TldrawUiMenuSubmenu>
         </TldrawUiMenuGroup>
       ) : null}
 

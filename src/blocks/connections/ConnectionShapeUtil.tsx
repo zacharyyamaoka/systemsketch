@@ -25,9 +25,11 @@ import {
 } from 'tldraw'
 import {
 	PORT_HOST_SHAPE_TYPES,
+	getBlockConnectionPortPagePoint,
 	getBlockPortConnections,
 	getBlockPortDotAtPoint,
 	getPortHostPort,
+	isPortHostShape,
 } from './blockPorts'
 import {
 	HitPaddedCubicBezier2d,
@@ -41,13 +43,18 @@ import { requestBlockInlineEdit } from '../inlineBlockEditing'
 import { clearPortDragState, updatePortState } from '../ports/portState'
 import {
 	BLOCK_SHAPE_TYPE,
+	BlockFieldDiff,
+	BlockStateStyle,
 	getDefaultBlockProps,
 	isBlockShape,
 	isEffectPort,
+	isProjectionBlock,
 	type BlockShape,
+	type BlockState,
 } from '../blockModel'
 import {
 	adoptCableTypeIntoPills,
+	adoptCableTypeIntoProjection,
 	connectionBindingPolarity,
 	connectionHasBothTerminals,
 	createOrUpdateConnectionBinding,
@@ -130,6 +137,17 @@ import {
 	EFFECT_PILL_LABEL,
 	isEffectCable,
 } from './effectCable'
+import {
+	cableMarkKind,
+	diffCableDashArray,
+	diffCableInk,
+	diffCableOpacity,
+	diffPresentation,
+	diffVariantTraits,
+	rewiredTerminals,
+} from '../../diff/diffPresentation'
+import { findFieldDiff } from '../../diff/fieldDiff'
+import { wordDiff, type DiffToken } from '../../diff/wordDiff'
 
 declare module 'tldraw' {
 	export interface TLGlobalShapePropsMap {
@@ -162,6 +180,15 @@ declare module 'tldraw' {
 			tunnel: boolean
 			/** Reusable layer name whose focus reveals this tunnel cable. */
 			tunnelLayer: string
+			/** The lens's verdict on this cable — see `BlockStateStyle`. */
+			state: BlockState
+			/**
+			 * Every changed field as a before/after pair. `temporal`, `routing`
+			 * and `delayValue` are the cable's own text; `start` and `end` carry
+			 * the port ids a REWIRED terminal moved between, which is what makes
+			 * rewired a different mark from a removal beside an addition.
+			 */
+			fieldDiffs?: BlockFieldDiff[]
 		}
 	}
 }
@@ -178,6 +205,8 @@ const elbowPinValidator = T.object({
 const elbowRouteValidator = T.object({
 	startAxis: T.literalEnum('x', 'y'),
 	corners: T.arrayOf(T.object({ tx: T.number, ox: T.number, ty: T.number, oy: T.number })),
+	startLeg: T.number.optional(),
+	endLeg: T.number.optional(),
 })
 
 export const connectionShapeProps: RecordProps<ConnectionShape> = {
@@ -193,6 +222,8 @@ export const connectionShapeProps: RecordProps<ConnectionShape> = {
 	pillPosition: T.number,
 	tunnel: T.boolean,
 	tunnelLayer: T.string,
+	state: BlockStateStyle,
+	fieldDiffs: T.arrayOf(BlockFieldDiff).optional(),
 }
 
 const connectionVersions = createShapePropsMigrationIds(CONNECTION_SHAPE_TYPE, {
@@ -200,6 +231,8 @@ const connectionVersions = createShapePropsMigrationIds(CONNECTION_SHAPE_TYPE, {
 	AddTemporalQualifier: 2,
 	AddRouteOwnership: 3,
 	AddTunnelVisibility: 4,
+	AddDiffState: 5,
+	AddFieldDiffs: 6,
 })
 
 const connectionShapeMigrations = createShapePropsMigrationSequence({
@@ -256,6 +289,29 @@ const connectionShapeMigrations = createShapePropsMigrationSequence({
 			delete props.tunnel
 			delete props.tunnelLayer
 		},
+	}, {
+		id: connectionVersions.AddDiffState,
+		up(props) {
+			// The other half of the Block's DiffState migration: one vocabulary,
+			// so a diff projector marks a cable exactly the way it marks a port.
+			// A StyleProp cannot be optional, so every stored cable needs the
+			// ordinary `normal` written in.
+			if (props.state === undefined) props.state = 'normal'
+		},
+		down(props) {
+			delete props.state
+		},
+	}, {
+		id: connectionVersions.AddFieldDiffs,
+		up() {
+			// An ordinary optional prop: absent already means no lens.
+		},
+		down(props) {
+			// Without the vocabulary a rewired cable would render as an ordinary
+			// one landing on its new port, with no sign it used to land
+			// somewhere else. Drop the lens rather than half-report it.
+			delete props.fieldDiffs
+		},
 	}],
 })
 
@@ -281,6 +337,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			pillPosition: PILL_POSITION_DEFAULT,
 			tunnel: false,
 			tunnelLayer: '',
+			state: 'normal',
 		}
 	}
 
@@ -525,14 +582,14 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		// legs, never touching the ports themselves.
 		if (handle.id.startsWith('route:') || handle.id.startsWith('grow:')) {
 			const { source, sink } = getConnectionEndpoints(this.editor, connection)
-			const dongles = dongleEndpoints(source, sink)
 			if (
 				this.activeRailDrag?.connectionId !== connection.id
 				|| this.activeRailDrag?.handleId !== handle.id
 			) {
 				const resolved = getConnectionElbowRoute(this.editor, connection)
+				const initialDongles = dongleEndpoints(source, sink, connection.props.elbowRoute ?? {})
 				const model = connection.props.elbowRoute
-					?? captureResolvedRoute(resolved.points, dongles.start, dongles.end)
+					?? captureResolvedRoute(resolved.points, initialDongles.start, initialDongles.end)
 				// `route:` ids carry the RENDERED polyline position; the inner route
 				// between the dongles sits one segment earlier.
 				const segmentIndex = handle.id.startsWith('route:')
@@ -549,6 +606,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 				}
 			}
 			const base = this.activeRailDrag
+			const dongles = dongleEndpoints(source, sink, base.model)
 			const moved = moveAuthoredSegment(
 				dongles.start,
 				dongles.end,
@@ -560,7 +618,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 				id: connection.id,
 				type: CONNECTION_SHAPE_TYPE,
 				props: {
-					elbowRoute: captureAuthoredRoute(moved, dongles.start, dongles.end),
+					elbowRoute: captureAuthoredRoute(moved, dongles.start, dongles.end, base.model),
 					routeMode: 'authored' as const,
 				},
 			}
@@ -689,6 +747,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			// pill take the type of the port it just met.
 			normalizeConnectionDirection(this.editor, connection.id)
 			adoptCableTypeIntoPills(this.editor, connection.id)
+			adoptCableTypeIntoProjection(this.editor, connection.id)
 			// A cable you just DREW is not left selected. Its terminal handles sit
 			// exactly on the dots it joins, and a selected cable's handle wins the
 			// next press on that dot — so leaving it selected would turn "wire this
@@ -809,7 +868,24 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		() => isEffectCable(editor, connection),
 		[editor, connection.id],
 	)
-	const stroke = effect ? EFFECT_CABLE_INK : 'var(--tl-color-text-3, #475569)'
+	// A lens somebody put on this document. A ghost cable — one the target
+	// asserts and this board does not have — is the mark that makes a missing
+	// connection legible where it is missing, rather than as an annotation
+	// floating beside two Blocks.
+	const diffState = connection.props.state ?? 'normal'
+	const diffVariant = useValue('diff variant', () => diffPresentation.get().variant, [])
+	const diffTraits = diffVariantTraits(diffVariant)
+	// Which of the four findings this cable is. `fieldDiffs` is what makes
+	// `rewired` reachable at all — the state enum alone cannot tell a moved
+	// terminal from any other edit.
+	const cableMark = cableMarkKind(diffState, connection.props.fieldDiffs)
+	const stroke = diffCableInk(
+		diffState,
+		diffVariant,
+		effect ? EFFECT_CABLE_INK : 'var(--tl-color-text-3, #475569)',
+		cableMark,
+	)
+	const diffDash = diffCableDashArray(diffState)
 	const effectPill = useValue(
 		'effect pill geometry',
 		() => (effect && !delayed ? delayPillGeometry(editor, connection) : null),
@@ -847,14 +923,57 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 	const paintedTunnelState = tunnelMouths || tunnelState === 'off'
 		? tunnelState
 		: 'revealed'
+	// A MODIFIED cable's was→now chip. Only built when the variant actually
+	// draws a chip for it — `diffCableInk` above has already left the line's
+	// own ink untouched for exactly this mark, so recolouring it here as well
+	// would say the same thing twice and say nothing about *what* changed.
+	const cableMarkChip = useValue(
+		'cable mark chip',
+		() => {
+			if (cableMark !== 'modified' || diffTraits.cable !== 'chip') return null
+			const fieldDiff = primaryCableFieldDiff(connection.props.fieldDiffs)
+			if (!fieldDiff) return null
+			// z⁻¹ already owns the cable's midpoint by default; a was→now chip
+			// stacked on it there would be unreadable, so a delayed cable's chip
+			// rides a quarter of the way along the run instead.
+			const fraction = delayed ? CABLE_MARK_CHIP_FRACTION_DELAYED : CABLE_MARK_CHIP_FRACTION
+			return { geometry: cableMarkChipGeometry(editor, connection, fraction), fieldDiff }
+		},
+		[editor, connection, cableMark, diffTraits.cable, delayed, connection.props.fieldDiffs],
+	)
+	// A REWIRED cable's terminal rings: a hollow ring at the port the terminal
+	// used to be bound to, a filled one at where it lands now. Resolution can
+	// fail — the old port's Block may itself be gone — and a terminal that
+	// cannot be placed is skipped rather than guessed at.
+	const cableRewireMarks = useValue(
+		'cable rewire marks',
+		() => {
+			if (cableMark !== 'rewired') return []
+			const marks: { terminal: ConnectionTerminal; oldAnchor: Vec; liveAnchor: Vec }[] = []
+			for (const terminal of rewiredTerminals(connection.props.fieldDiffs)) {
+				const fieldDiff = findFieldDiff(connection.props.fieldDiffs, terminal)
+				if (!fieldDiff) continue
+				const oldAnchor = resolveRewiredOldAnchor(editor, connection, terminal, fieldDiff.before)
+				if (!oldAnchor) continue
+				const points = getConnectionRenderPoints(editor, connection)
+				const liveAnchor = terminal === 'start' ? points[0] : points[points.length - 1]
+				if (!liveAnchor) continue
+				marks.push({ terminal, oldAnchor, liveAnchor })
+			}
+			return marks
+		},
+		[editor, connection, cableMark, connection.props.fieldDiffs],
+	)
 	if (!delayed || !pill) {
 		const length = polylineLength(renderPoints)
 		return (
 			<SVGContainer
-				style={{ opacity }}
+				style={{ opacity: opacity * diffCableOpacity(diffState) }}
 				data-temporal={connection.props.temporal}
 				data-channel={effect ? 'effect' : 'return'}
 				data-tunnel={paintedTunnelState}
+				data-diff-state={diffState === 'normal' ? undefined : diffState}
+				data-cable-mark={cableMark === 'none' ? undefined : cableMark}
 			>
 				<DataCablePath
 					path={path}
@@ -863,7 +982,9 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 					stroke={stroke}
 					strokeWidth={effect ? EFFECT_CABLE_WIDTH : undefined}
 					tunnel={hiddenTunnel}
+					dashArray={diffDash}
 				/>
+				{tunnelMouths ? <TunnelVias tunnel={tunnelMouths} stroke={stroke} fill="var(--ss-surface, #ffffff)" /> : null}
 				{effectPill && !hiddenTunnel ? (
 					<DelayPill
 						pill={effectPill}
@@ -873,23 +994,45 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 						ink={EFFECT_CABLE_INK}
 					/>
 				) : null}
-				{tunnelMouths ? <TunnelVias tunnel={tunnelMouths} stroke={stroke} fill="var(--ss-surface, #ffffff)" /> : null}
+				{cableMarkChip ? (
+					<CableWasNowChip
+						pill={cableMarkChip.geometry}
+						before={cableMarkChip.fieldDiff.before}
+						after={cableMarkChip.fieldDiff.after}
+						connectionId={connection.id}
+						monochrome={diffTraits.monochrome}
+					/>
+				) : null}
+				{cableMark === 'modified' && diffTraits.cable === 'endpoints' ? (
+					<CableModifiedEndpointMarks points={renderPoints} connectionId={connection.id} monochrome={diffTraits.monochrome} />
+				) : null}
+				{cableRewireMarks.length > 0 ? (
+					<CableRewireRings marks={cableRewireMarks} connectionId={connection.id} monochrome={diffTraits.monochrome} />
+				) : null}
 			</SVGContainer>
 		)
 	}
 	if (hiddenTunnel) {
 		return (
-			<SVGContainer style={{ opacity }} data-temporal="delayed" data-tunnel="hidden">
-				<DataCablePath path={path} length={polylineLength(renderPoints)} temporal="delayed" stroke={stroke} tunnel={hiddenTunnel} />
+			<SVGContainer
+				style={{ opacity: opacity * diffCableOpacity(diffState) }}
+				data-temporal="delayed"
+				data-tunnel="hidden"
+				data-diff-state={diffState === 'normal' ? undefined : diffState}
+				data-cable-mark={cableMark === 'none' ? undefined : cableMark}
+			>
+				<DataCablePath path={path} length={polylineLength(renderPoints)} temporal="delayed" stroke={stroke} tunnel={hiddenTunnel} dashArray={diffDash} />
 				<TunnelVias tunnel={hiddenTunnel} stroke={stroke} fill="var(--ss-surface, #ffffff)" />
 			</SVGContainer>
 		)
 	}
 	return (
 		<SVGContainer
-			style={{ opacity }}
+			style={{ opacity: opacity * diffCableOpacity(diffState) }}
 			data-temporal="delayed"
 			data-tunnel={paintedTunnelState}
+			data-diff-state={diffState === 'normal' ? undefined : diffState}
+			data-cable-mark={cableMark === 'none' ? undefined : cableMark}
 		>
 			<DelayedCablePaths path={path} pill={pill} solidBeforePill={solidBeforePill} stroke={stroke} />
 			{tunnelMouths ? <TunnelVias tunnel={tunnelMouths} stroke={stroke} fill="var(--ss-surface, #ffffff)" /> : null}
@@ -900,6 +1043,21 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 				fill="var(--ss-surface, #ffffff)"
 				ink="var(--ss-text, #1d2230)"
 			/>
+			{cableMarkChip ? (
+				<CableWasNowChip
+					pill={cableMarkChip.geometry}
+					before={cableMarkChip.fieldDiff.before}
+					after={cableMarkChip.fieldDiff.after}
+					connectionId={connection.id}
+					monochrome={diffTraits.monochrome}
+				/>
+			) : null}
+			{cableMark === 'modified' && diffTraits.cable === 'endpoints' ? (
+				<CableModifiedEndpointMarks points={renderPoints} connectionId={connection.id} monochrome={diffTraits.monochrome} />
+			) : null}
+			{cableRewireMarks.length > 0 ? (
+				<CableRewireRings marks={cableRewireMarks} connectionId={connection.id} monochrome={diffTraits.monochrome} />
+			) : null}
 		</SVGContainer>
 	)
 }
@@ -916,6 +1074,7 @@ export function DataCablePath({
 	strokeWidth = 2,
 	vectorEffect,
 	tunnel,
+	dashArray,
 }: {
 	path: string
 	length: number
@@ -924,6 +1083,8 @@ export function DataCablePath({
 	strokeWidth?: number
 	vectorEffect?: 'non-scaling-stroke'
 	tunnel?: TunnelVisual | null
+	/** A lens's dash, which outranks the cadence the cable's own kind draws. */
+	dashArray?: string
 }) {
 	const async = temporal === 'async' && !tunnel
 	return (
@@ -931,11 +1092,11 @@ export function DataCablePath({
 			d={path}
 			fill="none"
 			stroke={stroke}
-			strokeLinecap={async ? 'butt' : 'round'}
+			strokeLinecap={async && !dashArray ? 'butt' : 'round'}
 			strokeLinejoin="round"
 			strokeWidth={strokeWidth}
-			strokeDasharray={tunnel?.dashArray ?? (async ? ASYNC_PACKET_DASHARRAY : undefined)}
-			strokeDashoffset={async ? asyncDashOffsetForLength(length) : undefined}
+			strokeDasharray={dashArray ?? tunnel?.dashArray ?? (async ? ASYNC_PACKET_DASHARRAY : undefined)}
+			strokeDashoffset={async && !dashArray ? asyncDashOffsetForLength(length) : undefined}
 			vectorEffect={vectorEffect}
 			data-edge-type={temporal}
 		/>
@@ -974,6 +1135,77 @@ export function delayPillGeometry(editor: Editor, connection: ConnectionShape): 
 	const at = pointAtFraction(points, t)
 	const length = polylineLength(points)
 	return { x: at.x, y: at.y, length, dash: splitDashArrays(length, t) }
+}
+
+/* ------------------------------ round-2 marks ----------------------------- */
+
+/** Arc fraction for a MODIFIED cable's was→now chip on a plain or async cable. */
+const CABLE_MARK_CHIP_FRACTION = 0.5
+/**
+ * z⁻¹ owns the midpoint by default (`PILL_POSITION_DEFAULT`), and a user may
+ * have dragged it anywhere else along the run. A fixed quarter-point keeps the
+ * chip clear of the common case without chasing the pill's live position.
+ */
+const CABLE_MARK_CHIP_FRACTION_DELAYED = 0.25
+/** Radius of a REWIRED terminal's hollow-old / filled-live ring. */
+const CABLE_MARK_RING_RADIUS = 6
+/**
+ * The three text fields a cable can be MODIFIED in. `start`/`end` are not
+ * here — a terminal that moved is `rewired`, a more specific finding than
+ * `modified`, and is read through `rewiredTerminals` instead.
+ */
+const CABLE_MODIFIED_FIELD_PATHS = ['temporal', 'delayValue', 'routing'] as const
+
+/** The one field diff a modified cable's chip shows, in that priority order. */
+function primaryCableFieldDiff(
+	fieldDiffs: readonly BlockFieldDiff[] | undefined,
+): BlockFieldDiff | undefined {
+	for (const path of CABLE_MODIFIED_FIELD_PATHS) {
+		const found = findFieldDiff(fieldDiffs, path)
+		if (found) return found
+	}
+	return undefined
+}
+
+/**
+ * The was→now chip's geometry, at an arbitrary arc fraction rather than the
+ * z⁻¹ pill's own draggable `pillPosition` — the two marks answer different
+ * questions and must be free to sit at different points on the same cable.
+ */
+function cableMarkChipGeometry(editor: Editor, connection: ConnectionShape, fraction: number): DelayPillGeometry {
+	const points = getConnectionRenderPoints(editor, connection)
+	const at = pointAtFraction(points, fraction)
+	const length = polylineLength(points)
+	return { x: at.x, y: at.y, length, dash: splitDashArrays(length, fraction) }
+}
+
+/**
+ * Where a REWIRED terminal's old port sat, from nothing but its bare id.
+ *
+ * The terminal's current binding is tried first — a rewire that only moved
+ * within the same Block is the common case. Failing that, every port-hosting
+ * shape on the page is searched, because a rewire can retarget to a different
+ * Block entirely and the id alone carries no host. Finding none is answered by
+ * `null`, never a guess: the board diff contract forbids inventing a position.
+ */
+function resolveRewiredOldAnchor(
+	editor: Editor,
+	connection: ConnectionShape,
+	terminal: ConnectionTerminal,
+	portId: string,
+): Vec | null {
+	const bindings = getConnectionBindings(editor, connection)
+	const currentBinding = terminal === 'start' ? bindings.start : bindings.end
+	if (currentBinding) {
+		const atCurrentHost = getBlockConnectionPortPagePoint(editor, currentBinding.toId, portId)
+		if (atCurrentHost) return atCurrentHost
+	}
+	for (const shape of editor.getCurrentPageShapes()) {
+		if (!isPortHostShape(shape)) continue
+		const point = getBlockConnectionPortPagePoint(editor, shape, portId)
+		if (point) return point
+	}
+	return null
 }
 
 /**
@@ -1081,6 +1313,199 @@ export function DelayPill({
 			>
 				{label}
 			</text>
+		</g>
+	)
+}
+
+/**
+ * A run of a word-diff token, drawn as its own tspan so only the runs that
+ * actually differ carry a bolder, solid-coloured fill — the rest of the
+ * chip's label stays in the ordinary text ink. This is the `was-now` variant's
+ * own rule (see `diffPresentation.ts`), applied to a cable instead of a field.
+ */
+function CableChipRuns({
+	tokens,
+	changedFill,
+	monochrome,
+}: {
+	tokens: readonly DiffToken[]
+	changedFill: string
+	monochrome: boolean
+}) {
+	return (
+		<>
+			{tokens.map((token, index) => {
+				const changed = token.kind !== 'same'
+				return (
+					<tspan
+						key={index}
+						fill={changed ? changedFill : 'var(--ss-text)'}
+						fontWeight={changed ? 800 : 400}
+						textDecoration={monochrome && changed && token.kind === 'removed' ? 'line-through' : undefined}
+					>
+						{token.text}
+					</tspan>
+				)
+			})}
+		</>
+	)
+}
+
+/**
+ * The MODIFIED cable's was→now chip: the two chip halves `diff-gutter`'s
+ * doc comment describes, at the cable's midpoint instead of a Block's row.
+ * The line itself keeps its own ink (`diffCableInk` already leaves it alone
+ * for this mark) — recolouring the whole run would make a renamed delay
+ * indistinguishable from a rewire, which is the entire reason this mark
+ * exists as its own chip rather than as another stroke colour.
+ */
+function CableWasNowChip({
+	pill,
+	before,
+	after,
+	connectionId,
+	monochrome,
+}: {
+	pill: DelayPillGeometry
+	before: string
+	after: string
+	connectionId: string
+	monochrome: boolean
+}) {
+	const diff = wordDiff(before, after)
+	if (!diff.changed) return null
+	const beforeWidth = delayPillWidth(before)
+	const afterWidth = delayPillWidth(after)
+	const arrowWidth = 14
+	const totalWidth = beforeWidth + afterWidth + arrowWidth
+	const beforeX = -totalWidth / 2
+	const arrowX = beforeX + beforeWidth + arrowWidth / 2
+	const afterX = beforeX + beforeWidth + arrowWidth
+	// No hue in `ghost-weight`: the former value keeps a fainter, dashed
+	// outline and no wash; the current one gets the ordinary ink and a solid
+	// outline. Unreachable today (`ghost-weight`'s cable trait is `line`, not
+	// `chip`), kept so a future monochrome+chip variant is not silently wrong.
+	const wasStroke = monochrome ? 'var(--ss-text-faint)' : 'var(--ss-danger)'
+	const nowStroke = monochrome ? 'var(--ss-text)' : 'var(--ss-success)'
+	const wasFill = monochrome ? 'none' : 'var(--ss-danger)'
+	const nowFill = monochrome ? 'none' : 'var(--ss-success)'
+	const textProps = {
+		y: 4,
+		textAnchor: 'middle' as const,
+		fontSize: 11,
+		fontFamily: "'JetBrains Mono', ui-monospace, Menlo, monospace",
+		style: { userSelect: 'none' as const },
+	}
+	return (
+		<g
+			transform={`translate(${pill.x} ${pill.y})`}
+			data-testid={`cable-mark-modified-${connectionId.replace('shape:', '')}`}
+		>
+			<rect
+				x={beforeX}
+				y={-DELAY_PILL_HEIGHT / 2}
+				width={beforeWidth}
+				height={DELAY_PILL_HEIGHT}
+				rx={DELAY_PILL_HEIGHT / 2}
+				fill={wasFill}
+				fillOpacity={monochrome ? undefined : 0.16}
+				stroke={wasStroke}
+				strokeWidth={1.3}
+				strokeDasharray={monochrome ? '3 3' : undefined}
+			/>
+			<text {...textProps} x={beforeX + beforeWidth / 2}>
+				<CableChipRuns tokens={diff.before} changedFill={wasStroke} monochrome={monochrome} />
+			</text>
+			<text {...textProps} x={arrowX} fill="var(--ss-text)">→</text>
+			<rect
+				x={afterX}
+				y={-DELAY_PILL_HEIGHT / 2}
+				width={afterWidth}
+				height={DELAY_PILL_HEIGHT}
+				rx={DELAY_PILL_HEIGHT / 2}
+				fill={nowFill}
+				fillOpacity={monochrome ? undefined : 0.16}
+				stroke={nowStroke}
+				strokeWidth={1.3}
+			/>
+			<text {...textProps} x={afterX + afterWidth / 2}>
+				<CableChipRuns tokens={diff.after} changedFill={nowStroke} monochrome={monochrome} />
+			</text>
+		</g>
+	)
+}
+
+/**
+ * The `delta-badge` reading of a MODIFIED cable: no chip, no recoloured line —
+ * just a small dot at each terminal saying "this cable changed", the same
+ * quietness the Block face keeps at board zoom in that variant.
+ */
+function CableModifiedEndpointMarks({
+	points,
+	connectionId,
+	monochrome,
+}: {
+	points: readonly Vec[]
+	connectionId: string
+	monochrome: boolean
+}) {
+	if (points.length === 0) return null
+	const start = points[0]
+	const end = points[points.length - 1]
+	const ink = monochrome ? 'var(--ss-text)' : 'var(--ss-warning)'
+	return (
+		<g data-testid={`cable-mark-modified-${connectionId.replace('shape:', '')}`}>
+			<circle cx={start.x} cy={start.y} r={3} fill={ink} />
+			<circle cx={end.x} cy={end.y} r={3} fill={ink} />
+		</g>
+	)
+}
+
+/**
+ * A REWIRED cable's terminal rings: hollow at the port a terminal used to
+ * land on, filled at the one it lands on now. Drawn only for the terminal(s)
+ * `rewiredTerminals` actually names, so a cable rewired at one end never marks
+ * the end that never moved.
+ */
+function CableRewireRings({
+	marks,
+	connectionId,
+	monochrome,
+}: {
+	marks: readonly { terminal: ConnectionTerminal; oldAnchor: Vec; liveAnchor: Vec }[]
+	connectionId: string
+	monochrome: boolean
+}) {
+	if (marks.length === 0) return null
+	const oldInk = monochrome ? 'var(--ss-text-faint)' : 'var(--ss-danger)'
+	const liveInk = monochrome ? 'var(--ss-text)' : 'var(--ss-success)'
+	return (
+		<g data-testid={`cable-mark-rewired-${connectionId.replace('shape:', '')}`}>
+			{marks.map((mark) => (
+				<g key={mark.terminal}>
+					<circle
+						cx={mark.oldAnchor.x}
+						cy={mark.oldAnchor.y}
+						r={CABLE_MARK_RING_RADIUS}
+						fill="none"
+						stroke={oldInk}
+						strokeWidth={2}
+						strokeDasharray={monochrome ? '3 3' : undefined}
+						data-rewire-terminal={mark.terminal}
+						data-rewire-anchor="old"
+					/>
+					<circle
+						cx={mark.liveAnchor.x}
+						cy={mark.liveAnchor.y}
+						r={CABLE_MARK_RING_RADIUS}
+						fill={liveInk}
+						stroke={liveInk}
+						strokeWidth={2}
+						data-rewire-terminal={mark.terminal}
+						data-rewire-anchor="live"
+					/>
+				</g>
+			))}
 		</g>
 	)
 }
@@ -1412,11 +1837,27 @@ export function offerBlockForLooseTerminal(
 				}
 				normalizeConnectionDirection(editor, connectionId)
 				adoptCableTypeIntoPills(editor, connectionId)
+				adoptCableTypeIntoProjection(editor, connectionId)
 				editor.select(blockId)
 			})
 			// The Block arrives unnamed, and naming it is the next thing anyone
 			// does — the same rule the Block tool already follows after a draw.
-			if (editor.getShape(blockId)) requestBlockInlineEdit(editor, blockId, { kind: 'title' })
+			// A projection is the exception: it named itself from the type on the
+			// cable, so asking for a title would invite overwriting a derived fact.
+			// What it wants typed is the member, so its first row gets the caret.
+			const placed = editor.getShape<BlockShape>(blockId)
+			if (!placed) return
+			const derived = isProjectionBlock(placed.props) && placed.props.title !== ''
+			const firstRow = placed.props.outputs[0]
+			if (derived && firstRow) {
+				requestBlockInlineEdit(editor, blockId, {
+					kind: 'portName',
+					side: 'outputs',
+					portId: firstRow.id,
+				})
+			} else {
+				requestBlockInlineEdit(editor, blockId, { kind: 'title' })
+			}
 		},
 	})
 	return true

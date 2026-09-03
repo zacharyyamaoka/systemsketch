@@ -1,0 +1,21 @@
+{
+ "subject": "rectangle-text",
+ "menu": {
+  "x": 458.5,
+  "y": 253,
+  "w": 603,
+  "h": 40
+ },
+ "controls": [
+  "Shape, square",
+  "Change color",
+  "Line style",
+  "Typeface, simple",
+  "Font size, small",
+  "Bold",
+  "Strikethrough",
+  "Create link",
+  "Bulleted list",
+  "Text alignment, text align center"
+ ]
+}
