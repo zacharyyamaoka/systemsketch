@@ -68,7 +68,6 @@ async function arrowState(page) {
     const editor = window.__systemsketch.editor
     const arrows = editor.getCurrentPageShapes().filter((shape) => shape.type === 'arrow')
       .map((shape) => ({
-        id: shape.id,
         kind: shape.props.kind,
         exactBody: Boolean(document.querySelector(
           '[data-shape-id="' + shape.id + '"] [data-systemsketch-detached-edge="exact"]')),
