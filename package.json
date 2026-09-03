@@ -99,7 +99,8 @@
     "test:diff-states": "node tests/block_diff_states_smoke.mjs",
     "test:diff-vocabulary": "node tests/block_diff_vocabulary_smoke.mjs",
     "test:diff-round2": "node tests/block_diff_round2_smoke.mjs",
-    "test:effect-follow": "node tests/effect_port_follow_smoke.mjs"
+    "test:effect-follow": "node tests/effect_port_follow_smoke.mjs",
+    "test:compare": "node tests/compare_modal_smoke.mjs"
   },
   "dependencies": {
     "elkjs": "0.12.0",

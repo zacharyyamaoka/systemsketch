@@ -71,6 +71,7 @@ import { createSystemSketchStore } from './store/createSystemSketchStore'
 import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from './stockPrimitiveVisuals'
 import { SYSTEMSKETCH_ARROW_SHAPE_UTILS } from './systemSketchArrow'
 import { installConnectorControlVisibility } from './installConnectorControlVisibility'
+import { CompareLauncher } from './compare'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
@@ -127,12 +128,14 @@ const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
  * through the SDK's public component, tool, shape, override, and mount APIs.
  */
 function SystemSketchCanvas() {
-  const { attach } = useLocalWorkspace()
+  const { attach, path } = useLocalWorkspace()
   const interfaceScale = useInterfaceScale()
   const scaleCss = interfaceScaleCssValues(interfaceScale)
   const [store] = useState(createSystemSketchStore)
+  const [mountedEditor, setMountedEditor] = useState<Editor | null>(null)
   useEffect(() => () => store.dispose(), [store])
   const onMount = useCallback((editor: Editor) => {
+    setMountedEditor(editor)
     enablePasteAtCursor(editor)
     const stopDefinitionLinking = installDefinitionLinking(editor)
     const stopWorkspace = attach(editor)
@@ -165,6 +168,7 @@ function SystemSketchCanvas() {
       stopDefinitionLinking()
       stopBoardTheme()
       stopWorkspace()
+      setMountedEditor(null)
     }
   }, [attach])
 
@@ -192,6 +196,13 @@ function SystemSketchCanvas() {
         themes={SYSTEMSKETCH_THEMES}
         tools={SYSTEMSKETCH_TOOLS}
       />
+      {/*
+        The Compare entry point sits beside the canvas rather than inside a
+        tldraw component seam on purpose: the modal it opens covers the whole
+        app, including tldraw's own chrome, so its trigger must not live in a
+        subtree the modal is meant to sit above.
+      */}
+      <CompareLauncher editor={mountedEditor} currentPath={path} />
     </main>
   )
 }

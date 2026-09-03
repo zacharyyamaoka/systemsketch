@@ -1,0 +1,667 @@
+/*
+ * Compare modal.
+ *
+ * Colour reuses the vocabulary `src/diff/diffPresentation.ts` already ships —
+ * success for an insertion, danger for a deletion, warning for a modification.
+ * Simulink's own legend is the same three-way split (Insertion · Deletion ·
+ * Modification), so nothing here is invented.
+ *
+ * The token file's standing rule is obeyed throughout: a `--ss-*-soft` value is
+ * a SURFACE, and copy sitting on it is `--ss-text`, never the accent itself. A
+ * mid-luminance colour on a tint of itself measures 2.6–4.3:1 in every palette
+ * here, so every state reads by an ink bar plus a tint, never by coloured text.
+ */
+
+.systemsketch-compare__scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--ss-overlay);
+  backdrop-filter: blur(2px);
+  z-index: 500;
+}
+
+.systemsketch-compare {
+  position: fixed;
+  inset: 3vh 3vw;
+  z-index: 501;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
+  border: 1px solid var(--ss-border);
+  border-radius: 12px;
+  box-shadow: var(--ss-shadow-2);
+  font-family: inherit;
+}
+
+/* ---- title bar --------------------------------------------------------- */
+
+.systemsketch-compare__titlebar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.systemsketch-compare__titlebar h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.systemsketch-compare__summary {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+}
+
+.systemsketch-compare__close {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--ss-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.systemsketch-compare__close:hover {
+  color: var(--ss-text);
+  background: var(--ss-surface-hover);
+}
+
+/* ---- three columns ----------------------------------------------------- */
+
+.systemsketch-compare__body {
+  display: grid;
+  grid-template-columns: 228px minmax(0, 1fr) minmax(392px, 31%);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.systemsketch-compare__history,
+.systemsketch-compare__detail {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.systemsketch-compare__history {
+  border-right: 1px solid var(--ss-border);
+}
+
+.systemsketch-compare__detail {
+  border-left: 1px solid var(--ss-border);
+}
+
+.systemsketch-compare__history h3 {
+  margin: 0;
+  padding: 12px 14px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-compare__history ul {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0 8px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.systemsketch-compare__history button {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+  width: 100%;
+  margin-bottom: 4px;
+  padding: 8px 10px;
+  text-align: left;
+  color: var(--ss-text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.systemsketch-compare__history button:hover:not(:disabled) {
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-compare__history button[data-selected] {
+  background: var(--ss-accent-soft);
+  border-color: var(--ss-accent);
+}
+
+.systemsketch-compare__history button[data-current] {
+  cursor: default;
+  opacity: 0.9;
+  border-style: dashed;
+  border-color: var(--ss-border-strong, var(--ss-border));
+}
+
+.systemsketch-compare__history-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.systemsketch-compare__history-note {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  color: var(--ss-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.systemsketch-compare__history-pin {
+  align-self: start;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+  border-radius: 999px;
+}
+
+.systemsketch-compare__history-foot {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--ss-text-muted);
+  border-top: 1px solid var(--ss-border);
+}
+
+/* ---- the two board renders --------------------------------------------- */
+
+.systemsketch-compare__stage {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--ss-surface);
+}
+
+.systemsketch-compare__panes {
+  position: relative;
+  display: grid;
+  flex: 1 1 auto;
+  gap: 1px;
+  min-height: 0;
+  background: var(--ss-border);
+}
+
+.systemsketch-compare__panes[data-mode='side-by-side'] {
+  grid-template-columns: 1fr 1fr;
+}
+
+/*
+ * Overlay stacks the two panes in one cell so the slider crossfades them.
+ * Figma's Overlay is opt-in and slider-controlled for a reason: the sweep found
+ * no mature tool that makes a full translucent composite its default view.
+ */
+.systemsketch-compare__panes[data-mode='overlay'] {
+  grid-template-columns: 1fr;
+}
+
+.systemsketch-compare__panes[data-mode='overlay'] .systemsketch-compare__pane {
+  grid-area: 1 / 1;
+}
+
+.systemsketch-compare__panes[data-mode='overlay'] .systemsketch-compare__pane[data-side='after'] {
+  /* The top layer is what the slider fades; the bottom one always paints. */
+  z-index: 2;
+}
+
+.systemsketch-compare__pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  background: var(--ss-surface);
+}
+
+.systemsketch-compare__pane figcaption {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-raised);
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.systemsketch-compare__panes[data-mode='overlay']
+  .systemsketch-compare__pane[data-side='before']
+  figcaption {
+  visibility: hidden;
+}
+
+.systemsketch-compare__canvas {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.systemsketch-compare__canvas .tl-container {
+  inset: 0;
+  position: absolute;
+}
+
+.systemsketch-compare__empty,
+.systemsketch-compare__none,
+.systemsketch-compare__problem {
+  margin: 0;
+  padding: 16px;
+  font-size: 12px;
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-compare__problem {
+  color: var(--ss-text);
+  background: var(--ss-warning-soft);
+  border-left: 3px solid var(--ss-warning);
+}
+
+/* The selection outline on a render — Simulink's plain box, nothing more. */
+.systemsketch-compare__mark {
+  border: 2px solid var(--ss-warning);
+  border-radius: 6px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ss-warning) 24%, transparent);
+}
+
+.systemsketch-compare__mark[data-kind='added'] {
+  border-color: var(--ss-success);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ss-success) 24%, transparent);
+}
+
+.systemsketch-compare__mark[data-kind='removed'] {
+  border-color: var(--ss-danger);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ss-danger) 24%, transparent);
+}
+
+/* ---- the bar under the renders ----------------------------------------- */
+
+.systemsketch-compare__stagebar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  border-top: 1px solid var(--ss-border);
+  background: var(--ss-surface-raised);
+}
+
+.systemsketch-compare__segmented {
+  display: inline-flex;
+  padding: 2px;
+  background: var(--ss-surface-sunken);
+  border-radius: 8px;
+}
+
+.systemsketch-compare__segmented button {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ss-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.systemsketch-compare__segmented button[data-selected] {
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-1);
+}
+
+.systemsketch-compare__blend {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-compare__blend input {
+  width: 200px;
+  accent-color: var(--ss-accent);
+}
+
+.systemsketch-compare__blend output {
+  min-width: 38px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ss-text);
+}
+
+/* ---- Code / Properties -------------------------------------------------- */
+
+.systemsketch-compare__tabs {
+  display: flex;
+  gap: 4px;
+  flex: 0 0 auto;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.systemsketch-compare__tabs button {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ss-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.systemsketch-compare__tabs button[data-selected] {
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+}
+
+.systemsketch-compare__detail-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* ---- the property table ------------------------------------------------- */
+
+.systemsketch-compare__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  /*
+   * Fixed layout so the two value columns keep a predictable share of a narrow
+   * rail. Left to itself the browser gives the Layer column whatever its
+   * longest name wants, and the pair a reader is actually comparing gets
+   * squeezed into the remainder.
+   */
+  table-layout: fixed;
+}
+
+.systemsketch-compare__table col.systemsketch-compare__col-layer { width: 32%; }
+.systemsketch-compare__table col.systemsketch-compare__col-value { width: 34%; }
+
+.systemsketch-compare__table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-raised);
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.systemsketch-compare__group th {
+  padding: 10px 10px 4px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-compare__group-note {
+  margin-left: 8px;
+  font-weight: 400;
+  font-style: italic;
+  opacity: 0.75;
+}
+
+.systemsketch-compare__row {
+  cursor: pointer;
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.systemsketch-compare__row:hover {
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-compare__row[data-selected] {
+  background: var(--ss-accent-soft);
+  outline: 1px solid var(--ss-accent);
+  outline-offset: -1px;
+}
+
+.systemsketch-compare__layer,
+.systemsketch-compare__cell {
+  padding: 7px 10px;
+  text-align: left;
+  font-weight: 400;
+  vertical-align: top;
+}
+
+/* The state reads by an ink bar down the row, not by coloured copy. */
+.systemsketch-compare__layer {
+  border-left: 3px solid transparent;
+}
+
+.systemsketch-compare__row[data-kind='added'] .systemsketch-compare__layer {
+  border-left-color: var(--ss-success);
+}
+
+.systemsketch-compare__row[data-kind='removed'] .systemsketch-compare__layer {
+  border-left-color: var(--ss-danger);
+}
+
+.systemsketch-compare__row[data-kind='modified'] .systemsketch-compare__layer {
+  border-left-color: var(--ss-warning);
+}
+
+.systemsketch-compare__name {
+  display: block;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.systemsketch-compare__path {
+  display: block;
+  font-size: 11px;
+  color: var(--ss-text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.systemsketch-compare__badge {
+  display: inline-block;
+  padding: 1px 7px;
+  margin-bottom: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+  border-radius: 999px;
+}
+
+.systemsketch-compare__badge[data-kind='added'] {
+  background: var(--ss-success-soft);
+  box-shadow: inset 0 0 0 1px var(--ss-success);
+}
+
+.systemsketch-compare__badge[data-kind='removed'] {
+  background: var(--ss-danger-soft);
+  box-shadow: inset 0 0 0 1px var(--ss-danger);
+}
+
+.systemsketch-compare__badge[data-kind='modified'] {
+  background: var(--ss-warning-soft);
+  box-shadow: inset 0 0 0 1px var(--ss-warning);
+}
+
+/* ---- values, and the word-level ink ------------------------------------- */
+
+.systemsketch-compare__value {
+  display: inline-block;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+  /*
+   * `max-width` is the load-bearing half. The chip is inline-block so it sizes
+   * to its content, and without a ceiling a long identifier walks straight out
+   * of a fixed-layout cell and puts a horizontal scrollbar under the whole
+   * rail — measured, and worse than any wrap. With the ceiling in place
+   * `anywhere` is what actually lets it break.
+   */
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/*
+ * The wash says "this is the old / the new side of a pair". The fill inside it
+ * says "these are the characters that actually differ". GitHub layers exactly
+ * these two, and it is additive — no strikethrough anywhere.
+ */
+.systemsketch-compare__row[data-kind='modified'] .systemsketch-compare__value[data-side='before'] {
+  background: color-mix(in srgb, var(--ss-danger) 10%, transparent);
+}
+
+.systemsketch-compare__row[data-kind='modified'] .systemsketch-compare__value[data-side='after'] {
+  background: color-mix(in srgb, var(--ss-success) 10%, transparent);
+}
+
+.systemsketch-compare__run[data-kind='removed'] {
+  padding: 1px 0;
+  background: color-mix(in srgb, var(--ss-danger) 38%, transparent);
+  border-radius: 2px;
+}
+
+.systemsketch-compare__run[data-kind='added'] {
+  padding: 1px 0;
+  background: color-mix(in srgb, var(--ss-success) 38%, transparent);
+  border-radius: 2px;
+}
+
+.systemsketch-compare__absent {
+  color: var(--ss-text-faint);
+  font-size: 14px;
+}
+
+/* ---- the Code tab ------------------------------------------------------- */
+
+.systemsketch-compare__code {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.systemsketch-compare__code-head {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.systemsketch-compare__code-head .systemsketch-compare__name,
+.systemsketch-compare__code-head .systemsketch-compare__path {
+  display: inline;
+}
+
+.systemsketch-compare__code-body {
+  margin: 0;
+  padding: 8px 0;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+
+.systemsketch-compare__code-line {
+  display: flex;
+  gap: 0;
+  white-space: pre;
+}
+
+.systemsketch-compare__code-line[data-kind='removed'] {
+  background: var(--ss-danger-soft);
+}
+
+.systemsketch-compare__code-line[data-kind='added'] {
+  background: var(--ss-success-soft);
+}
+
+.systemsketch-compare__gutter {
+  flex: 0 0 auto;
+  width: 34px;
+  padding-right: 6px;
+  text-align: right;
+  color: var(--ss-text-faint);
+  user-select: none;
+}
+
+.systemsketch-compare__sigil {
+  flex: 0 0 auto;
+  width: 16px;
+  text-align: center;
+  color: var(--ss-text-muted);
+  user-select: none;
+}
+
+.systemsketch-compare__code-text {
+  flex: 1 1 auto;
+  padding-right: 12px;
+  color: var(--ss-text);
+}
+
+/* ---- the toolbar entry point -------------------------------------------- */
+
+.systemsketch-compare-trigger {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
+  border: 1px solid var(--ss-border);
+  border-radius: 8px;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.systemsketch-compare-trigger:hover {
+  background: var(--ss-surface-hover);
+}
+
+/*
+ * Below the share zone, not beside it.
+ *
+ * At `top: 8px` this sat on top of tldraw's own share panel — still clickable,
+ * because it is a later sibling, but covering the avatar and the channel
+ * button. The share zone measures 40px tall from y=17 in the product chrome,
+ * so 64px clears it with room for the interface-scale settings that grow it.
+ */
+.systemsketch-compare-trigger-slot {
+  position: absolute;
+  top: 64px;
+  right: 8px;
+  z-index: 400;
+  pointer-events: none;
+}
