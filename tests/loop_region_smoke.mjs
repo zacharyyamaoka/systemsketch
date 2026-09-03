@@ -107,22 +107,29 @@ async function run() {
     await waitFor(page, 'window.__systemsketch?.editor', 'editor')
     await delay(700)
 
-    // 1 — the Loop lives in the system family slot, one click deeper, and it
-    // is reachable by the same gesture that reaches Block and Branch.
+    // 1 — the gesture a person actually makes: open the system family slot,
+    // CLICK Loop, and get the loop tool. Asserting only that the menu lists the
+    // item is what let a dead menu entry ship — `selectSystemFamilyTool` calls
+    // `tools[id]?.onSelect()`, and an id with no registry entry no-ops.
     const slot = await box(page, '[data-testid="systemsketch-tool-system"]')
     await clickAt(page, slot.cx, slot.cy)
+    await delay(460)
+    const item = JSON.parse(await evaluate(page, `(() => {
+      const node = Array.from(document.querySelectorAll('.systemsketch-tool-menu__item'))
+        .find((candidate) => candidate.textContent.includes('Loop'))
+      if (!node) return JSON.stringify(null)
+      const rect = node.getBoundingClientRect()
+      return JSON.stringify({ cx: rect.x + rect.width / 2, cy: rect.y + rect.height / 2 })
+    })()`))
+    check('L1', 'the system family menu offers Loop beside Block and Branch',
+      item !== null, true)
+    await clickAt(page, item.cx, item.cy)
     await delay(420)
-    const menuLabels = JSON.parse(await evaluate(page, `(() => JSON.stringify(
-      Array.from(document.querySelectorAll('.systemsketch-tool-menu button, .systemsketch-tool-menu [role="menuitem"]'))
-        .map((node) => node.textContent.trim()).filter(Boolean)))()`))
-    check('L1', 'Loop sits in the system family menu beside Block and Branch',
-      menuLabels.includes('Loop'), true)
-    await key(page, 'Escape', 'Escape')
-    await delay(400)
+    check('L1b', 'clicking it actually activates the loop tool',
+      await editorEval(page, 'return editor.getCurrentToolId()'), 'loop')
 
-    // 2 — draw the region with the real box gesture.
-    await editorEval(page, `editor.setCurrentTool('loop'); return ''`)
-    await delay(200)
+    // 2 — draw the region with the real box gesture, using the tool the click
+    // above left active. No `setCurrentTool` anywhere in this journey.
     await mouse(page, 'mouseMoved', 360, 220)
     await mouse(page, 'mousePressed', 360, 220, { buttons: 1 })
     for (let step = 1; step <= 8; step += 1) {

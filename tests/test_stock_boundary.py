@@ -76,6 +76,15 @@ class StockBoundaryTests(unittest.TestCase):
         # click deeper. It must not become a top-level toolbar slot of its own.
         self.assertIn("label: 'Loop', icon: <LoopIcon />", toolbar_source)
         self.assertNotIn('title="Loop"', toolbar_source)
+        # Listing a tool in that submenu is not enough to make it selectable:
+        # `selectSystemFamilyTool` calls `tools[id]?.onSelect(...)`, so an id
+        # with no entry in tldraw's UI-tool registry is a silent no-op. Shipped
+        # exactly that once — the menu showed Loop and clicking it did nothing.
+        integration = (
+            PROJECT_ROOT / "src" / "toolbar" / "toolbarIntegration.ts"
+        ).read_text(encoding="utf-8")
+        for factory in ("withBlockTool", "withBranchTool", "withLoopTool"):
+            self.assertIn(factory, integration)
         self.assertNotIn('title="Branch"', toolbar_source)
         self.assertNotIn('title="Comment"', toolbar_source)
         self.assertIn("BranchShapeUtil,", source)

@@ -11,6 +11,7 @@ import {
 import { isDrawingArrowWithArrowTool } from '../arrowClickToPlace'
 import { withBlockTool } from '../blocks/blockToolUi'
 import { withBranchTool } from '../branch/branchToolUi'
+import { withLoopTool } from '../loop/loopToolUi'
 import { CONNECTION_SHAPE_TYPE, ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
 import {
   arrowPresetForActivation,
@@ -263,7 +264,8 @@ function rememberSystemTools(tools: TLUiToolsContextType): TLUiToolsContextType 
 
 export const SYSTEMSKETCH_TOOLBAR_OVERRIDES: TLUiOverrides = {
   tools: (editor, tools) =>
-    rememberSystemTools(withBranchTool(editor, withBlockTool(editor, overrideTools(editor, tools)))),
+    rememberSystemTools(withLoopTool(editor,
+      withBranchTool(editor, withBlockTool(editor, overrideTools(editor, tools))))),
 }
 
 export function selectSystemFamilyTool(

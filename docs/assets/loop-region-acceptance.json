@@ -2,9 +2,16 @@
   "results": [
     {
       "id": "L1",
-      "label": "Loop sits in the system family menu beside Block and Branch",
+      "label": "the system family menu offers Loop beside Block and Branch",
       "observed": true,
       "desired": true,
+      "ok": true
+    },
+    {
+      "id": "L1b",
+      "label": "clicking it actually activates the loop tool",
+      "observed": "loop",
+      "desired": "loop",
       "ok": true
     },
     {
