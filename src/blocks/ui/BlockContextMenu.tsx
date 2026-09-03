@@ -38,7 +38,14 @@ import {
   startBlockPortSection,
   updateBlockDetails,
 } from '../commands/blockCommands'
-import { detachSelectedBlocks, rebuildSelectedBlocks, selectedBlockIds, selectedDetachedGroupIds } from '../detach'
+import {
+  detachSelectedBlocks,
+  detachSelectedConnections,
+  rebuildSelectedBlocks,
+  selectedBlockIds,
+  selectedConnectionIds,
+  selectedDetachedGroupIds,
+} from '../detach'
 import { getBlockPortMenuTarget, type BlockPortRef } from '../ports'
 import {
   getBlockSelectionStyles,
@@ -110,6 +117,11 @@ function BlockContextMenuItems() {
   const detachableCount = useValue(
     'context-menu detachable Blocks',
     () => selectedBlockIds(editor).length,
+    [editor],
+  )
+  const detachableConnectionCount = useValue(
+    'context-menu detachable connections',
+    () => selectedConnectionIds(editor).length,
     [editor],
   )
   const rebuildableCount = useValue(
@@ -459,6 +471,16 @@ function BlockContextMenuItems() {
               onSelect={() => void rebuildSelectedBlocks(editor)}
             />
           ) : null}
+        </TldrawUiMenuGroup>
+      ) : null}
+
+      {detachableConnectionCount > 0 ? (
+        <TldrawUiMenuGroup id="systemsketch-connection-detach">
+          <TldrawUiMenuItem
+            id="connection-detach-to-arrow"
+            label={detachableConnectionCount === 1 ? 'Detach arrow' : 'Detach arrows'}
+            onSelect={() => void detachSelectedConnections(editor)}
+          />
         </TldrawUiMenuGroup>
       ) : null}
 

@@ -41,6 +41,10 @@
       "kind": "connection",
       "version": 1,
       "routing": "curved",
+      "temporal": "data",
+      "delayValue": "",
+      "pillPosition": 0.5,
+      "rebuildWithBlocks": true,
       "ends": {
         "start": {
           "portId": "out_1",

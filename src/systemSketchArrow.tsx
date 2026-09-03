@@ -15,6 +15,7 @@ import {
 	type IndexKey,
 	type Editor,
 	type JsonObject,
+	type TLArrowInfo,
 	type TLArrowShape,
 	type TLHandle,
 	type TLHandleDragInfo,
@@ -35,6 +36,20 @@ import {
 	type AffineTransform,
 	type SystemSketchArrowPathSnapshot,
 } from './stockPrimitiveVisuals'
+import {
+	delayPillLabel,
+	pointAtFraction,
+	polylineLength,
+	splitDashArrays,
+} from './blocks/connections/connectionPresentation'
+import { clampPillPosition } from './blocks/connections/connectionModel'
+import type { SystemSketchArrowPrimitiveStyle } from './stockPrimitiveVisuals'
+import {
+	DataCablePath as ConnectionDataCablePath,
+	DelayedCablePaths as ConnectionDelayedCablePaths,
+	DelayPill as ConnectionDelayPill,
+	type DelayPillGeometry,
+} from './blocks/connections/ConnectionShapeUtil'
 
 /**
  * A versioned, namespaced enhancement carried by an otherwise stock arrow.
@@ -63,6 +78,18 @@ interface ExactArrowPath {
 	d: string
 	transform: AffineTransform
 	points: { x: number; y: number }[]
+	strokeColor: string
+	strokeWidth: number
+}
+
+type DetachedArrowPresentation = NonNullable<SystemSketchArrowPrimitiveStyle['presentation']>
+
+interface DetachedArrowVisual {
+	exact: boolean
+	d: string
+	transform?: AffineTransform
+	points: { x: number; y: number }[]
+	length: number
 	strokeColor: string
 	strokeWidth: number
 }
@@ -171,6 +198,108 @@ function exactArrowPath(editor: Editor, shape: TLArrowShape): ExactArrowPath | n
 
 function transformAttribute(transform: AffineTransform): string {
 	return `matrix(${transform.a} ${transform.b} ${transform.c} ${transform.d} ${transform.e} ${transform.f})`
+}
+
+/**
+ * The body path from stock arrow geometry, expressed through the public
+ * `getArrowInfo` result and public `PathBuilder`. tldraw still owns binding,
+ * routing and endpoint reflow; detached presentation only paints that result.
+ */
+function stockArrowBodyPath(info: TLArrowInfo): PathBuilder {
+	if (info.type === 'straight') {
+		return new PathBuilder()
+			.moveTo(info.start.point.x, info.start.point.y, { offset: 0, roundness: 0 })
+			.lineTo(info.end.point.x, info.end.point.y, { offset: 0, roundness: 0 })
+	}
+	if (info.type === 'arc') {
+		return new PathBuilder()
+			.moveTo(info.start.point.x, info.start.point.y, { offset: 0, roundness: 0 })
+			.circularArcTo(
+				info.bodyArc.radius,
+				Boolean(info.bodyArc.largeArcFlag),
+				Boolean(info.bodyArc.sweepFlag),
+				info.end.point.x,
+				info.end.point.y,
+				{ offset: 0, roundness: 0 },
+			)
+	}
+	const path = new PathBuilder().moveTo(info.start.point.x, info.start.point.y, { offset: 0 })
+	for (let index = 1; index < info.route.points.length; index += 1) {
+		const point = info.route.points[index]
+		if (info.route.skipPointsWhenDrawing.has(point)) continue
+		path.lineTo(point.x, point.y, {
+			offset: index === info.route.points.length - 1 ? 0 : undefined,
+		})
+	}
+	return path
+}
+
+function stockArrowPoints(info: TLArrowInfo): { x: number; y: number }[] {
+	if (info.type === 'straight') return [
+		{ x: info.start.point.x, y: info.start.point.y },
+		{ x: info.end.point.x, y: info.end.point.y },
+	]
+	if (info.type === 'elbow') {
+		return info.route.points
+			.filter((point) => !info.route.skipPointsWhenDrawing.has(point))
+			.map((point) => ({ x: point.x, y: point.y }))
+	}
+	const arc = info.bodyArc
+	const startAngle = Math.atan2(
+		info.start.point.y - arc.center.y,
+		info.start.point.x - arc.center.x,
+	)
+	const span = arc.radius > 0 ? Math.abs(arc.length / arc.radius) : 0
+	const direction = arc.sweepFlag ? 1 : -1
+	const steps = Math.max(16, Math.ceil(span * 24))
+	return Array.from({ length: steps + 1 }, (_, index) => {
+		const angle = startAngle + direction * span * (index / steps)
+		return {
+			x: arc.center.x + Math.cos(angle) * arc.radius,
+			y: arc.center.y + Math.sin(angle) * arc.radius,
+		}
+	})
+}
+
+function detachedArrowVisual(
+	editor: Editor,
+	shape: TLArrowShape,
+	exact: ExactArrowPath | null,
+	authoredPoints: readonly { x: number; y: number }[] | null,
+): DetachedArrowVisual | null {
+	const style = readSystemSketchPrimitiveStyle(shape)
+	if (style?.kind !== 'arrow') return null
+	if (exact) return {
+		exact: true,
+		d: exact.d,
+		transform: exact.transform,
+		points: exact.points,
+		length: polylineLength(exact.points),
+		strokeColor: exact.strokeColor,
+		strokeWidth: exact.strokeWidth,
+	}
+	if (authoredPoints) {
+		const points = authoredPoints.map((point) => ({ x: point.x, y: point.y }))
+		return {
+			exact: false,
+			d: authoredArrowPath(points).toD(),
+			points,
+			length: polylineLength(points),
+			strokeColor: style.strokeColor,
+			strokeWidth: style.strokeWidth * shape.props.scale,
+		}
+	}
+	const info = getArrowInfo(editor, shape)
+	if (!info?.isValid) return null
+	const points = stockArrowPoints(info)
+	return {
+		exact: false,
+		d: stockArrowBodyPath(info).toD(),
+		points,
+		length: polylineLength(points),
+		strokeColor: style.strokeColor,
+		strokeWidth: style.strokeWidth * shape.props.scale,
+	}
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -336,6 +465,95 @@ function ExactArrowBody({ exact }: { exact: ExactArrowPath }) {
 	)
 }
 
+function DetachedDelayPill({
+	visual,
+	presentation,
+}: {
+	visual: DetachedArrowVisual
+	presentation: DetachedArrowPresentation
+}) {
+	const label = delayPillLabel(presentation.delayValue)
+	const point = pointAtFraction(visual.points, clampPillPosition(presentation.pillPosition))
+	const pill: DelayPillGeometry = {
+		x: point.x,
+		y: point.y,
+		length: visual.length,
+		dash: splitDashArrays(visual.length, presentation.pillPosition),
+	}
+	return <ConnectionDelayPill
+		pill={pill}
+		label={label}
+		stroke={visual.strokeColor}
+		fill="var(--ss-surface, #ffffff)"
+		ink="var(--ss-text, #1d2230)"
+	/>
+}
+
+function DetachedArrowPaint({
+	visual,
+	presentation,
+}: {
+	visual: DetachedArrowVisual
+	presentation: DetachedArrowPresentation
+}) {
+	const transform = visual.transform ? transformAttribute(visual.transform) : undefined
+	if (presentation.temporal === 'async') {
+		return (
+			<g transform={transform} data-detached-edge-type="async">
+				<ConnectionDataCablePath
+					path={visual.d}
+					length={visual.length}
+					temporal="async"
+					stroke={visual.strokeColor}
+					strokeWidth={visual.strokeWidth}
+					vectorEffect="non-scaling-stroke"
+				/>
+			</g>
+		)
+	}
+	const point = pointAtFraction(visual.points, clampPillPosition(presentation.pillPosition))
+	const pill: DelayPillGeometry = {
+		x: point.x,
+		y: point.y,
+		length: visual.length,
+		dash: splitDashArrays(visual.length, presentation.pillPosition),
+	}
+	return (
+		<>
+			<g transform={transform} data-detached-delay-segment="presentation">
+				<ConnectionDelayedCablePaths
+					path={visual.d}
+					pill={pill}
+					dashAfterPill={presentation.dashAfterPill}
+					stroke={visual.strokeColor}
+					strokeWidth={visual.strokeWidth}
+					vectorEffect="non-scaling-stroke"
+				/>
+			</g>
+			<DetachedDelayPill visual={visual} presentation={presentation} />
+		</>
+	)
+}
+
+function DetachedArrowPresentationBody({
+	visual,
+	presentation,
+}: {
+	visual: DetachedArrowVisual
+	presentation: DetachedArrowPresentation
+}) {
+	return (
+		<SVGContainer
+			className="systemsketch-detached-arrow-presentation__body"
+			style={{ minWidth: 50, minHeight: 50 }}
+			data-temporal={presentation.temporal}
+			data-systemsketch-detached-edge={visual.exact ? 'exact' : undefined}
+		>
+			<DetachedArrowPaint visual={visual} presentation={presentation} />
+		</SVGContainer>
+	)
+}
+
 function StockArrow({ util, shape }: { util: SystemSketchArrowShapeUtil; shape: TLArrowShape }) {
 	return util.renderStockComponent(shape)
 }
@@ -355,6 +573,23 @@ function SystemSketchArrow({
 		() => exactArrowPath(editor, shape),
 		[editor, shape],
 	)
+	const style = readSystemSketchPrimitiveStyle(shape)
+	const presentation = style?.kind === 'arrow' ? style.presentation : undefined
+	const visual = useValue(
+		`detached arrow presentation ${shape.id}`,
+		() => detachedArrowVisual(editor, shape, exact, points),
+		[editor, shape, exact, points],
+	)
+	if (presentation && presentation.temporal !== 'data' && visual) {
+		return (
+			<>
+				<div className="systemsketch-authored-arrow__stock">
+					<StockArrow util={util} shape={shape} />
+				</div>
+				<DetachedArrowPresentationBody visual={visual} presentation={presentation} />
+			</>
+		)
+	}
 	if (exact) return <ExactArrowBody exact={exact} />
 	if (!points) return <StockArrow util={util} shape={shape} />
 	return (
@@ -414,6 +649,7 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 				kind: 'arrow',
 				strokeColor: style.strokeColor,
 				strokeWidth: style.strokeWidth,
+				presentation: style.presentation,
 			}, meta)
 			changed = true
 		}
@@ -553,6 +789,22 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 	 */
 	override toSvg(shape: TLArrowShape, ctx: SvgExportContext) {
 		const exact = exactArrowPath(this.editor, shape)
+		const style = readSystemSketchPrimitiveStyle(shape)
+		const presentation = style?.kind === 'arrow' ? style.presentation : undefined
+		if (presentation && presentation.temporal !== 'data') {
+			const route = this.route(shape)
+			const visual = detachedArrowVisual(
+				this.editor,
+				shape,
+				exact,
+				route?.model ? route.points : null,
+			)
+			if (visual) return (
+				<g data-temporal={presentation.temporal}>
+					<DetachedArrowPaint visual={visual} presentation={presentation} />
+				</g>
+			)
+		}
 		if (exact) {
 			return (
 				<path
