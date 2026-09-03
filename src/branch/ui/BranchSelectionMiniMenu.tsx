@@ -30,7 +30,7 @@ export function EditorBranchSelectionMiniMenu({
 
 	return (
 		<div className="block-mini-menu branch-mini-menu" role="toolbar" aria-label="Selected Branch actions" data-view={view}>
-			<span className="block-mini-menu__count">Branch</span>
+			<span className="block-mini-menu__subject">Branch</span>
 			<div className="block-mini-menu__views" role="group" aria-label="Branch edits">
 				<button
 					type="button"

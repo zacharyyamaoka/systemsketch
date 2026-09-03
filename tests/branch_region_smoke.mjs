@@ -246,7 +246,7 @@ async function main() {
     await waitFor(page, `document.querySelector('[data-testid="branch-pill-add-control"]')`, 'Branch pill')
     check('BR-7', 'the selection pill reads Branch · + port · + arm · E · C · ◎ · Inspect',
       JSON.parse(await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('.branch-mini-menu > *, .branch-mini-menu button')).map((b) => b.dataset.testid ?? b.className.split(' ')[0]).filter(Boolean))`)),
-      ['block-mini-menu__count', 'block-mini-menu__views', 'branch-pill-add-control', 'branch-pill-add-arm',
+      ['block-mini-menu__subject', 'block-mini-menu__views', 'branch-pill-add-control', 'branch-pill-add-arm',
         'block-mini-menu__views', 'branch-pill-view-expanded', 'branch-pill-view-case', 'branch-pill-active', 'block-mini-menu__inspect'])
 
     // 3 · Control ports: the band "+" then the inspector "+", each with a name.

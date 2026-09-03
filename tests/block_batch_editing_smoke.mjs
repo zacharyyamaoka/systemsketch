@@ -55,7 +55,7 @@ async function miniMenuState(page) {
     const menu = document.querySelector('.block-mini-menu')
     if (!menu) return JSON.stringify(null)
     return JSON.stringify({
-      label: menu.querySelector('.block-mini-menu__count')?.textContent ?? null,
+      selectionSummary: menu.querySelector('.block-mini-menu__count, .block-mini-menu__scope')?.textContent ?? null,
       view: menu.dataset.view,
       pressed: Array.from(menu.querySelectorAll('[aria-pressed="true"] span')).map((s) => s.textContent),
     })
@@ -225,10 +225,10 @@ async function main() {
     await marqueeAll(page)
     let menu = await miniMenuState(page)
     assert.ok(menu, 'the Block mini menu is present for a multi-selection')
-    assert.equal(menu.label, '3 Blocks')
+    assert.equal(menu.selectionSummary, null)
     assert.equal(menu.view, 'port')
     assert.deepEqual(menu.pressed, ['port'])
-    pass('a marquee over three Blocks keeps the Block mini menu, naming the batch and its shared view')
+    pass('a marquee over three Blocks keeps the Block mini menu and its shared view without a count summary')
 
     // --- The headline gesture: Port -> Expanded, all at once --------------
     await clickMiniMenuView(page, 'expanded')
@@ -284,10 +284,10 @@ async function main() {
     await delay(220)
 
     menu = await miniMenuState(page)
-    assert.equal(menu.label, '2 Blocks')
+    assert.equal(menu.selectionSummary, null)
     assert.equal(menu.view, 'mixed')
     assert.deepEqual(menu.pressed, [])
-    pass('shift-click builds the same batch, and a disagreeing pair reports as mixed with nothing pressed')
+    pass('shift-click builds the same count-free batch, and a disagreeing pair reports as mixed with nothing pressed')
 
     // --- The inspector stays open and shows only the shared controls ------
     await clickElement(page, '.block-mini-menu__inspect')
@@ -298,7 +298,7 @@ async function main() {
       const panel = document.querySelector('.block-inspector--batch')
       return JSON.stringify({
         count: panel.dataset.blockCount,
-        heading: panel.querySelector('.block-inspector__batch-count').textContent,
+        heading: panel.querySelector('.block-inspector__batch-title').textContent,
         mixed: panel.querySelectorAll('.block-inspector__mixed-chip').length,
         sections: Array.from(panel.querySelectorAll('[data-inspector-section]'))
           .map((node) => node.getAttribute('data-inspector-section')),
@@ -307,7 +307,8 @@ async function main() {
       })
     })()`))
     assert.equal(inspector.count, '2')
-    assert.equal(inspector.heading, '2 Blocks selected')
+    assert.equal(inspector.heading, 'Batch edit')
+    assert.ok(!inspector.text.includes('2 Blocks selected'))
     assert.equal(inspector.mixed, 1, 'only View disagrees')
     assert.deepEqual(inspector.sections, ['View', 'Ports', 'Display', 'Per-Block'])
     assert.ok(!inspector.text.includes('Select a Block to inspect it'))
@@ -392,7 +393,7 @@ async function main() {
       `document.querySelector('[data-testid="block-development-inspector"] .block-inspector--batch')`,
       'the lab batch inspector')
     assert.equal(await evaluate(page,
-      `document.querySelector('.block-inspector__batch-count').textContent`), '2 Blocks selected')
+      `document.querySelector('.block-inspector__batch-title').textContent`), 'Batch edit')
     // One right-click here, and the result is read from the *inspector*: two
     // independent surfaces have to agree about the same batch write.
     await openSelectionMenu(page)

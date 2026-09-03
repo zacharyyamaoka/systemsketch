@@ -107,8 +107,9 @@ async function readMenu(page) {
       opacity: shape ? getComputedStyle(shape).opacity : null,
       shapeType: shape ? shape.getAttribute('data-shape-type') : null,
       pill: box(pill),
-      count: document.querySelector('.block-mini-menu__count')?.textContent ?? null,
-      scope: document.querySelector('.block-mini-menu__scope')?.textContent ?? null,
+      selectionSummary: document.querySelector(
+        '.systemsketch-selection-count, .block-mini-menu__count, .block-mini-menu__scope',
+      )?.textContent ?? null,
       panel: panel ? {
         control: panel.dataset.testid.replace('systemsketch-appearance-panel-', ''),
         layout: panel.dataset.layout,
@@ -525,7 +526,7 @@ async function main() {
     const blockOnly = await readMenu(page)
     assert.deepEqual(blockOnly.controls, [],
       'a Block has no tldraw styles, so it contributes no appearance controls')
-    assert.equal(blockOnly.count, null, 'one Block on its own is not a batch')
+    assert.equal(blockOnly.selectionSummary, null, 'a Block selection has no count summary')
 
     await key(page, 'Escape', 'Escape')
     await key(page, 'r', 'KeyR')
@@ -538,14 +539,14 @@ async function main() {
     const mixedKinds = await readMenu(page)
     assert.ok(mixedKinds.controls.includes('color'),
       'the rectangle\'s colour must stay reachable while a Block is also selected')
-    assert.equal(mixedKinds.count, '2 selected', 'the count is the whole selection')
-    assert.equal(mixedKinds.scope, '1 Block', 'the S / P / E group is marked as the Block\'s')
+    assert.equal(mixedKinds.selectionSummary, null,
+      'a mixed selection has no count summary in the contextual menu')
     await frame(page, 'mixed')
     await openControl(page, 'color')
     await pickOption(page, 'color', 'violet')
     assert.equal((await readMenu(page)).labels.color, 'Color, violet')
     await closeControl(page, 'color')
-    pass('a Block selected beside a shape keeps the shape\'s appearance reachable, and the pill counts the whole selection')
+    pass('a Block selected beside a shape keeps the shape\'s appearance reachable without a count summary')
 
     const capture = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
     await writeFile(SHOT, Buffer.from(capture.data, 'base64'))

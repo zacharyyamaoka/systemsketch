@@ -78,7 +78,6 @@ const PROBES = [
   { label: 'inspector field label', selector: '.block-inspector__field > span', kind: 'text' },
   { label: 'inspector input text', selector: '.block-inspector__section input:not([disabled])', kind: 'text' },
   { label: 'inspector input boundary', selector: '.block-inspector__section input:not([disabled])', kind: 'boundary' },
-  { label: 'selection pill count', selector: '.systemsketch-selection-menu[data-visible="true"] .systemsketch-selection-count, .systemsketch-selection-menu[data-visible="true"] .block-mini-menu__count', kind: 'text', optional: true },
   { label: 'selection pill button', selector: '.systemsketch-selection-menu[data-visible="true"] .block-mini-menu button, .systemsketch-selection-menu[data-visible="true"] .systemsketch-selection-action', kind: 'text' },
   { label: 'Block heading on the canvas', selector: '.systemsketch-block-canvas .BlockNode-headingTitle, .systemsketch-block-canvas .BlockNode-simpleTitleText', kind: 'text' },
   { label: 'left popout header', selector: '.systemsketch-popout--left .systemsketch-popout__header h2', kind: 'text', optional: true },
