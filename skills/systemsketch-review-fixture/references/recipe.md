@@ -74,7 +74,11 @@ A partial Block lets the current `BlockShapeUtil` fill every omitted default:
 }
 ```
 
-For an Expanded Block, set `view`, `w`, and `h`, then make child shapes use the Block's shorthand id as `parentId`. For a semantic cable, create a `connection` shape plus its two `connection` bindings with the exact current props from the feature source or an existing acceptance test. Do not imitate a semantic cable with a stock arrow.
+For an Expanded Block, set `view`, `w`, and `h`, then make child shapes use the Block's shorthand id as `parentId`.
+
+**`parentId` is the only thing that makes a child a child.** `Editor.createShapes` does not adopt by geometry, so a shape merely placed inside a Frame, an Expanded Block, a Branch or a Loop is a sibling that overlaps: drag the container and it is left behind, and only a manual nudge makes tldraw's frame drop claim it. Once a shape has a `parentId`, its `x`/`y` are **parent-local** — subtract the container's position when converting. The helper fails the build if a shape's bounds sit inside a container that is not one of its ancestors.
+
+For a Loop region, the Blocks of the loop body take the Loop's shorthand id as `parentId`; the producers and consumers outside it stay on the page. For a semantic cable, create a `connection` shape plus its two `connection` bindings with the exact current props from the feature source or an existing acceptance test. Do not imitate a semantic cable with a stock arrow.
 
 For an edge-tunnel review, set `tunnel: true` and give `tunnelLayer` a readable name such as `Diagnostics` on the real `connection` shape. The live app derives its reusable Layers chip from those persisted connection props; do not seed a fake layer card or a second metadata record. Also seed at least one other long semantic connection outside that layer. Leave the named cable idle so its endpoint stubs and outlined mouths are visible before the first gesture. Hover must restore its complete run while keeping both mouths visible; focusing the layer must remove the mouths from its member edge and tunnel every other long connection.
 

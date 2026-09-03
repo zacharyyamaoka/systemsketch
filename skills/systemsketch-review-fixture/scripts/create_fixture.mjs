@@ -379,6 +379,46 @@ async function main() {
     await delay(350)
     process.stdout.write('review fixture · cold reopen verified\n')
 
+    // Containment is a TREE fact, not a geometric one.
+    //
+    // `Editor.createShapes` performs no frame adoption — that only happens on an
+    // interactive drop, or in a region tool's enclosure sweep at create time. So
+    // a recipe that merely places a Block inside a Frame, an Expanded Block, a
+    // Branch or a Loop produces a board that LOOKS right and is not: drag the
+    // container and the children stay behind. Everything above this line —
+    // shape counts, autosave, a cold reopen — passes on such a board, which is
+    // exactly how one shipped on 2026-09-03.
+    const orphans = JSON.parse(await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const shapes = editor.getCurrentPageShapes()
+      const containers = shapes.filter((shape) => editor.getShapeUtil(shape).isFrameLike?.(shape))
+      const bad = []
+      for (const shape of shapes) {
+        if (shape.type === 'connection' || shape.type === 'arrow') continue
+        const bounds = editor.getShapePageBounds(shape)
+        if (!bounds) continue
+        for (const container of containers) {
+          if (container.id === shape.id) continue
+          const box = editor.getShapePageBounds(container)
+          if (!box || !box.contains(bounds)) continue
+          const ancestors = editor.getShapeAncestors(shape).map((a) => a.id)
+          if (!ancestors.includes(container.id)) {
+            bad.push({ shape: shape.id, type: shape.type, container: container.id })
+          }
+        }
+      }
+      return JSON.stringify(bad)
+    })()`))
+    if (orphans.length > 0) {
+      const lines = orphans.map((entry) => `  ${entry.type} ${entry.shape} sits inside ${entry.container} but is not its child`)
+      throw new Error(
+        `${orphans.length} shape(s) are inside a container without belonging to it:\n${lines.join('\n')}\n`
+        + 'Give each one `parentId` in the recipe (its x/y then become parent-local), '
+        + 'or move it clear of the container.',
+      )
+    }
+    process.stdout.write('review fixture · containment is real\n')
+
     const motionProbe = recipe.callouts.find((callout) => typeof callout.target?.shapeId === 'string')
     if (motionProbe) {
       const followed = await evaluate(page, `(() => {
