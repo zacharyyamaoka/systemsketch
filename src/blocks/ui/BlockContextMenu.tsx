@@ -82,7 +82,8 @@ import {
   linkedBlockOccurrences,
   unlinkBlockDefinition,
 } from '../definitions/definitionLinking'
-import { getOnlySelectedFrame, removeFrameKeepContents } from '../../frames/removeFrame'
+import { canWrapSelection, WRAP_TARGET_DESCRIPTORS } from '../../frames/wrapSelection'
+import { useRunWrap } from '../../frames/WrapSelectionControl'
 
 function onlySelectedBlock(editor: ReturnType<typeof useEditor>): BlockShape | null {
   const selected = editor.getSelectedShapes()
@@ -146,11 +147,12 @@ function BlockContextMenuItems() {
     () => getActiveDepthScopeId(editor),
     [editor],
   )
-  const selectedFrame = useValue(
-    'context-menu selected Frame',
-    () => getOnlySelectedFrame(editor),
+  const canWrap = useValue(
+    'SystemSketch selection can be wrapped',
+    () => canWrapSelection(editor),
     [editor],
   )
+  const runWrap = useRunWrap('context-menu')
   const linkedOccurrenceCount = useValue(
     'selected Block linked occurrence count',
     () => selectedBlock ? linkedBlockOccurrences(editor, selectedBlock).length : 0,
@@ -563,13 +565,28 @@ function BlockContextMenuItems() {
         </TldrawUiMenuGroup>
       ) : null}
 
-      {selectedFrame ? (
-        <TldrawUiMenuGroup id="systemsketch-frame">
-          <TldrawUiMenuItem
-            id="frame-remove-keep-contents"
-            label="Delete frame, leave children"
-            onSelect={() => void removeFrameKeepContents(editor, selectedFrame.id)}
-          />
+      {/* The second way in. The tile on the selection menu is the one you find
+          at the moment of intent; this is the one you find when you already
+          right-clicked. Both read the same target list and run the same
+          commands, so they cannot drift apart.
+
+          The old `Delete frame, leave children` item used to sit here. It has
+          been removed rather than renamed: stock `Remove frame` — now labelled
+          `Remove frame, leave children` — does the same thing for any
+          frame-like shape, which is a superset of the Frame-only command it
+          replaces. */}
+      {canWrap ? (
+        <TldrawUiMenuGroup id="systemsketch-wrap">
+          <TldrawUiMenuSubmenu id="turn-into" label="Turn into">
+            {WRAP_TARGET_DESCRIPTORS.map((descriptor) => (
+              <TldrawUiMenuItem
+                key={descriptor.target}
+                id={`turn-into-${descriptor.target}`}
+                label={descriptor.label}
+                onSelect={() => runWrap(descriptor)}
+              />
+            ))}
+          </TldrawUiMenuSubmenu>
         </TldrawUiMenuGroup>
       ) : null}
 

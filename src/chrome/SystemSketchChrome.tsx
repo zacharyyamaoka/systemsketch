@@ -12,6 +12,7 @@ import {
 } from 'tldraw'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { AppearanceControls } from '../appearance/AppearanceControls'
+import { WrapSelectionControl } from '../frames/WrapSelectionControl'
 import { BLOCK_TOOL_ID, PILL_TOOL_ID, getBlockInspectorContext, selectionHasBlockStyles } from '../blocks'
 import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
 import { describeOrganizeNodesOutcome, organizeNodes } from '../blocks/layout'
@@ -324,6 +325,7 @@ function SelectionMiniMenu() {
         <>
           <EditorBlockSelectionMiniMenu key={selectionKey} editor={editor} />
           <AppearanceControls />
+          <WrapSelectionControl />
           <SelectionLayoutActions
             {...layoutActions}
             onTidyEdges={runTidyEdges}
@@ -337,6 +339,7 @@ function SelectionMiniMenu() {
               dock follows the selection, so the pill only carries the things
               that change the shape. */}
           <AppearanceControls />
+          <WrapSelectionControl />
           <SelectionLayoutActions
             {...layoutActions}
             onTidyEdges={runTidyEdges}
