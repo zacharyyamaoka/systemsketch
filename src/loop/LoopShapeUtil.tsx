@@ -1,13 +1,12 @@
 import {
-	BaseFrameLikeShapeUtil,
 	Rectangle2d,
 	createShapePropsMigrationSequence,
 	type RecordProps,
-	type TLDragShapesInInfo,
 	type TLResizeInfo,
 	type TLShape,
 } from 'tldraw'
 import { containerHitGeometry } from '../blocks/containerGeometry'
+import { RegionShapeUtil } from '../blocks/RegionShapeUtil'
 
 import { LoopCanvas } from './LoopCanvas'
 import {
@@ -63,7 +62,7 @@ function LoopExportSvg({ shape }: { shape: LoopShape }) {
  * apply. It adds only: a header that hit-tests like a frame heading, two port
  * circles that hit-test like a Block's dots, and a floor under `w`/`h`.
  */
-export class LoopShapeUtil extends BaseFrameLikeShapeUtil<LoopShape> {
+export class LoopShapeUtil extends RegionShapeUtil<LoopShape> {
 	static override type = LOOP_SHAPE_TYPE
 	static override props: RecordProps<LoopShape> = LOOP_SHAPE_PROPS
 	static override migrations = createShapePropsMigrationSequence({ sequence: [] })
@@ -131,24 +130,9 @@ export class LoopShapeUtil extends BaseFrameLikeShapeUtil<LoopShape> {
 		return path
 	}
 
-	override isFrameLike(_shape: LoopShape): boolean {
-		return true
-	}
-
 	/** Cables cross the region freely; they live in the scope outside it. */
 	override shouldClipChild(child: TLShape): boolean {
 		return child.type !== 'connection' && super.shouldClipChild(child)
-	}
-
-	override isExportBoundsContainer(_shape: LoopShape): boolean {
-		return true
-	}
-
-	override onDragShapesIn(shape: LoopShape, draggingShapes: TLShape[], info: TLDragShapesInInfo): void {
-		if (shape.isLocked) return
-		// Never adopt a drag that contains the region itself.
-		if (draggingShapes.some((dragging) => dragging.id === shape.id)) return
-		super.onDragShapesIn(shape, draggingShapes, info)
 	}
 
 	override onResize(shape: LoopShape, info: TLResizeInfo<LoopShape>) {

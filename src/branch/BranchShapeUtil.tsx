@@ -1,14 +1,12 @@
 import {
-	BaseFrameLikeShapeUtil,
 	Rectangle2d,
 	createShapePropsMigrationSequence,
 	type RecordProps,
-	type TLDragShapesInInfo,
-	type TLDragShapesOutInfo,
 	type TLResizeInfo,
 	type TLShape,
 } from 'tldraw'
 import { containerHitGeometry } from '../blocks/containerGeometry'
+import { RegionShapeUtil } from '../blocks/RegionShapeUtil'
 
 import { BranchCanvas } from './BranchCanvas'
 import { isBranchArmShape } from './BranchArmShapeUtil'
@@ -72,7 +70,7 @@ function BranchExportSvg({ shape }: { shape: BranchShape }) {
  * hit-test like a Block's dots, arm header rows that select the region, and
  * the reconciliation that keeps `h` and the arms in step.
  */
-export class BranchShapeUtil extends BaseFrameLikeShapeUtil<BranchShape> {
+export class BranchShapeUtil extends RegionShapeUtil<BranchShape> {
 	static override type = BRANCH_SHAPE_TYPE
 	static override props: RecordProps<BranchShape> = BRANCH_SHAPE_PROPS
 	static override migrations = createShapePropsMigrationSequence({ sequence: [] })
@@ -171,10 +169,6 @@ export class BranchShapeUtil extends BaseFrameLikeShapeUtil<BranchShape> {
 		return path
 	}
 
-	override isFrameLike(_shape: BranchShape): boolean {
-		return true
-	}
-
 	/** Cables cross the region freely; they live in the scope outside it. */
 	override shouldClipChild(child: TLShape): boolean {
 		// A framed arm supplies the tighter mask. Applying the Branch's coincident
@@ -182,21 +176,6 @@ export class BranchShapeUtil extends BaseFrameLikeShapeUtil<BranchShape> {
 		// degeneracies when the two frames share their left and right edges.
 		if (this.editor.getShapeAncestors(child).some(isBranchArmShape)) return false
 		return child.type !== 'connection' && super.shouldClipChild(child)
-	}
-
-	override isExportBoundsContainer(_shape: BranchShape): boolean {
-		return true
-	}
-
-	override onDragShapesIn(shape: BranchShape, draggingShapes: TLShape[], info: TLDragShapesInInfo): void {
-		if (shape.isLocked) return
-		// Never adopt a drag that contains the region itself.
-		if (draggingShapes.some((dragging) => dragging.id === shape.id)) return
-		super.onDragShapesIn(shape, draggingShapes, info)
-	}
-
-	override onDragShapesOut(shape: BranchShape, draggingShapes: TLShape[], info: TLDragShapesOutInfo): void {
-		super.onDragShapesOut(shape, draggingShapes, info)
 	}
 
 	override onResize(shape: BranchShape, info: TLResizeInfo<BranchShape>) {

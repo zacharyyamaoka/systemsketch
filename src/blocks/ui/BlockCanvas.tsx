@@ -37,7 +37,6 @@ import {
 import { BlockInlineEditor } from '../BlockInlineEditor'
 import { VALUE_FED_MARK, valueBlockInlet, valueBlockLabel, valueBlockOutlet } from '../valueBlock'
 import { getBlockPortConnections } from '../connections/blockPorts'
-import { judgeConnection } from '../connections/connectionRules'
 import {
   blockInlineFieldAttribute,
   parseBlockInlineFieldAttribute,
@@ -55,15 +54,13 @@ import {
   blockHeaderPortAddAffordance,
   blockPortAddAffordance,
   getBlockPortDrag,
-  getEligiblePorts,
-  portState,
   type BlockPortAddAffordance,
   type BlockPortDragState,
 } from '../ports'
 import { BlockIconGlyph } from './blockIcons'
 import { getActiveDepthScopeId, toggleDepthScope } from '../../depth/depthNavigation'
 import { branchFadeOpacity } from '../../branch/branchScope'
-import { portColor } from './portPalette'
+import { countProducers, PortDot, usePortHintEligibility } from './PortDot'
 import { definitionBadge } from '../definitions/definitionLinking'
 import './block-canvas.css'
 
@@ -84,16 +81,6 @@ interface DrawnPort {
   hasDefault: boolean
   /** Cables landing on this port as a sink — two or more earn a count badge. */
   producers: number
-}
-
-/** How many cables land on each port as a sink: the count a many-to-one port shows. */
-export function countProducers(connections: readonly { ownPortId: string; ownPolarity: string }[]): Map<string, number> {
-  const counts = new Map<string, number>()
-  for (const connection of connections) {
-    if (connection.ownPolarity !== 'sink') continue
-    counts.set(connection.ownPortId, (counts.get(connection.ownPortId) ?? 0) + 1)
-  }
-  return counts
 }
 
 /** Draw coincident Simple anchors once while retaining their union of states. */
@@ -129,36 +116,9 @@ function BlockPortDot({
   port: DrawnPort
   dragOffset: number | null
 }) {
-  const editor = useEditor()
   const { placed, connected, hasDefault, producers } = port
   const portId = placed.port.id
-
-  const isHinting = useValue(
-    'port hinting',
-    () => {
-      const { hintingPort } = portState.get(editor)
-      return hintingPort?.shapeId === shape.id && hintingPort.portId === portId
-    },
-    [editor, shape.id, portId],
-  )
-
-  // The dot asks the same rules the drop will: may a cable from the anchored
-  // end land here? Either face of this dot may be the answer, and the rules
-  // pick the one the two Blocks' places in the tree allow.
-  const isEligible = useValue(
-    'port eligible',
-    () => {
-      const eligiblePorts = getEligiblePorts(editor)
-      if (!eligiblePorts) return false
-      return judgeConnection(
-        editor,
-        eligiblePorts.anchor,
-        { shapeId: shape.id, portId },
-        { excludeBlocks: eligiblePorts.excludeBlocks, connectionId: eligiblePorts.connectionId },
-      ).ok
-    },
-    [editor, shape.id, portId],
-  )
+  const { hinting, eligible } = usePortHintEligibility(shape.id, portId)
 
   // No pointer handler here on purpose. The capture listener in
   // `installConnections.ts` is the ONE authority for a press on a dot: it lets
@@ -166,14 +126,10 @@ function BlockPortDot({
   // sits exactly on this dot — becomes a handle drag, and only a press tldraw
   // did not claim becomes a new cable. A synchronous transition from this
   // element would run before tldraw's own handler and take that choice away.
-  const classes = [
-    'Port',
-    placed.side === 'input' ? 'Port_end' : 'Port_start',
+  const extraClasses = [
     placed.subtle ? 'Port_subtle' : '',
     hasDefault ? 'Port_default' : '',
-    connected ? 'Port_connected' : '',
     dragOffset !== null ? 'Port_dragging' : '',
-    isHinting ? 'Port_hinting' : isEligible ? 'Port_eligible' : '',
     // The hook is read off the signature, so it shows before any cable exists.
     portMutates(placed.port) ? 'Port_mutates' : '',
     // An effect output leaves by the top edge: the call gave its value no name,
@@ -184,38 +140,27 @@ function BlockPortDot({
   // A header dot carries no label, so its name rides the tooltip instead.
   const inHeader = placed.side === 'input' && portInHeader(placed.port)
   return (
-    <div
-      className={classes}
-      data-block-port-id={portId}
-      data-block-port-side={placed.side}
-      data-block-port-edge={placed.edge}
-      data-block-port-row={portRow(placed.port)}
-      data-block-port-mutates={portMutates(placed.port) ? 'true' : undefined}
+    <PortDot
+      portId={portId}
+      side={placed.side}
+      connected={connected}
+      producers={producers}
+      portType={placed.port.type}
+      x={placed.x}
+      y={placed.y}
+      hinting={hinting}
+      eligible={eligible}
+      className={extraClasses}
       title={inHeader && !placed.subtle ? placed.port.name || undefined : undefined}
-      style={{
-        '--port-color': portColor(placed.port.type),
-        left: placed.x,
-        top: placed.y,
-        ...(dragOffset !== null
-          ? { transform: `translate(-50%, -50%) translateY(${dragOffset}px)` }
-          : null),
-      } as CSSProperties}
-    >
-      {producers >= 2 ? <PortCountBadge portId={portId} count={producers} /> : null}
-    </div>
-  )
-}
-
-/**
- * Many-to-one, shown as a count. A port with two or more producers wears a
- * muted pill beside its dot — the inspector's count-chip idiom — and nothing
- * else: which producer is live is the Branch fade's job, not the cable's.
- */
-export function PortCountBadge({ portId, count }: { portId: string; count: number }) {
-  return (
-    <span className="Port-count" data-testid={`port-count-${portId}`} aria-label={`${count} cables into this port`}>
-      {count}
-    </span>
+      attrs={{
+        'data-block-port-edge': placed.edge,
+        'data-block-port-row': String(portRow(placed.port)),
+        'data-block-port-mutates': portMutates(placed.port) ? 'true' : undefined,
+      }}
+      style={dragOffset !== null
+        ? { transform: `translate(-50%, -50%) translateY(${dragOffset}px)` }
+        : undefined}
+    />
   )
 }
 
