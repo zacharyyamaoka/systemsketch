@@ -11,7 +11,7 @@
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
 import { once } from 'node:events'
-import { access, cp, mkdir, mkdtemp, readFile, readdir, rm } from 'node:fs/promises'
+import { access, cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { constants as fsConstants } from 'node:fs'
 import net from 'node:net'
 import { tmpdir } from 'node:os'
@@ -28,6 +28,12 @@ const WEBVIEW_DOCUMENT = `(document.getElementById('active-frame')?.contentDocum
 const APP_SELECTOR = '[data-testid="systemsketch-embedded-app"]'
 const ERROR_SELECTOR = '[data-testid="systemsketch-embed-error"]'
 const BLOCK_TOOL_SELECTOR = '[data-testid="systemsketch-tool-system"] .systemsketch-block-icon'
+const CAPTURE_RELATIVE_PATH = process.env.SYSTEMSKETCH_CORPUS_CAPTURE
+  ? process.env.SYSTEMSKETCH_CORPUS_CAPTURE.replaceAll('\\', '/')
+  : null
+const CAPTURE_OUTPUT = process.env.SYSTEMSKETCH_CORPUS_SCREENSHOT
+  ? resolve(process.env.SYSTEMSKETCH_CORPUS_SCREENSHOT)
+  : null
 
 function delay(milliseconds) {
   return new Promise((resolveDelay) => setTimeout(resolveDelay, milliseconds))
@@ -376,6 +382,14 @@ async function main() {
         assert.equal(rendered.canvas, true, 'the tldraw canvas did not mount')
         assert.equal(rendered.blockTool, true, 'the SystemSketch Block toolbar control is absent')
         assert.equal(rendered.error, null, `the canvas reported: ${rendered.error}`)
+        if (
+          CAPTURE_RELATIVE_PATH === normalizedRelativePath(relativePath)
+          && CAPTURE_OUTPUT
+        ) {
+          const capture = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
+          await mkdir(dirname(CAPTURE_OUTPUT), { recursive: true })
+          await writeFile(CAPTURE_OUTPUT, Buffer.from(capture.data, 'base64'))
+        }
         passed.push(normalizedRelativePath(relativePath))
         process.stdout.write(`PASS ${index + 1}/${relativePaths.length} ${normalizedRelativePath(relativePath)}\n`)
       } catch (error) {
@@ -424,6 +438,7 @@ async function main() {
       failures,
       bytesUnchanged: changed.length === 0,
       capabilityWall,
+      capture: CAPTURE_OUTPUT,
       status: capabilityWall ? 'blocked' : failures.length === 0 ? 'passed' : 'failed',
     }
     console.log(JSON.stringify(report, null, 2))

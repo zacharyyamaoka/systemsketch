@@ -67,6 +67,7 @@ import { detachAllBlocks } from '../blocks/detach'
 import './local-workspace.css'
 import { hydrateCustomColors } from '../appearance/customColors'
 import { SettingsGearIcon, SystemSketchSettingsDialog } from '../settings/InterfaceSettings'
+import { importLegacyPyblocksSystemSketch } from '../import/legacyPyblocksSystemSketch'
 
 const SAVE_DEBOUNCE_MS = 600
 const WATCH_INTERVAL_MS = 1500
@@ -172,7 +173,9 @@ function loadDocumentSource(editor: Editor, source: string) {
   // from the text first, or the parse below would reject the document.
   hydrateCustomColors(core, editor)
   const inspected = inspectWorkspaceDocumentSource(source, editor.store.schema)
-  if (inspected.kind === 'ready' || inspected.kind === 'future') {
+  if (inspected.kind === 'legacy-pyblocks') {
+    importLegacyPyblocksSystemSketch(editor, inspected.document)
+  } else if (inspected.kind === 'ready' || inspected.kind === 'future') {
     editor.store.mergeRemoteChanges(() => {
       loadSnapshot(editor.store, inspected.snapshot)
     })

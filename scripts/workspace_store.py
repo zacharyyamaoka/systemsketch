@@ -176,6 +176,24 @@ def _parse_document(source: object, *, allow_future: bool = False) -> dict[str, 
     return document
 
 
+def _is_legacy_pyblocks_document(source: str) -> bool:
+    """Whether ``source`` is the retired PyBlocks nodes/edges envelope.
+
+    This is a read-only compatibility gate. Every save still passes through
+    :func:`normalize_document_source` and therefore must be a current tldraw
+    document with the suffix-appropriate envelope.
+    """
+    try:
+        document = json.loads(source)
+    except json.JSONDecodeError:
+        return False
+    return (
+        isinstance(document, dict)
+        and isinstance(document.get("nodes"), list)
+        and isinstance(document.get("edges"), list)
+    )
+
+
 def create_directory(raw_parent: object, raw_name: object, files_root: Path) -> dict[str, str]:
     """Create one visible workspace folder without guessing at the requested name."""
     parent = resolve_directory(raw_parent, files_root)
@@ -314,7 +332,10 @@ def load_document(
     # must give that exact representation the same meaning: an intentional
     # blank canvas whose first user edit becomes a normal encoded document.
     # Non-blank bytes keep the existing host validation before reaching tldraw.
-    if source.strip():
+    if source.strip() and not (
+        document_suffix(path.name) == SYSTEMSKETCH_SUFFIX
+        and _is_legacy_pyblocks_document(source)
+    ):
         # Reads may return a structurally valid future envelope byte-for-byte so
         # the browser can offer an explicit compatibility copy. Every write path
         # still calls normalize_document_source(), which refuses a downgrade.

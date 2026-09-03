@@ -22,6 +22,18 @@ describe('standalone workspace document inspection', () => {
     expect(result.kind === 'ready' && result.snapshot.store).toBeDefined()
   })
 
+  it('recognizes the retired PyBlocks golden envelope before tldraw rejects it', () => {
+    const legacy = {
+      version: 1,
+      nodes: [],
+      edges: [],
+      viewport: { x: 0, y: 0, zoom: 1 },
+      metadata: { 'pyblocks.golden': { version: 1 } },
+    }
+    const result = inspectWorkspaceDocumentSource(JSON.stringify(legacy), schema)
+    expect(result).toEqual({ kind: 'legacy-pyblocks', document: legacy })
+  })
+
   it('turns tldraw parser refusal into an explicit quarantine result', () => {
     // The standalone host accepts this portable envelope shape and deliberately
     // leaves detailed schema authority to tldraw, whose parser refuses it.
