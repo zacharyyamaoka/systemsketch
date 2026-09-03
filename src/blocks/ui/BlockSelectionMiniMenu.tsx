@@ -6,7 +6,7 @@ import {
   getBlockSelectionStyles,
   setBlockViewForSelection,
 } from '../commands/blockStyleCommands'
-import { stepIntoDepthScope } from '../../depth/depthNavigation'
+import { getActiveDepthScopeId, toggleDepthScope } from '../../depth/depthNavigation'
 import './block-inspector.css'
 
 export interface BlockSelectionMiniMenuProps {
@@ -17,7 +17,10 @@ export interface BlockSelectionMiniMenuProps {
   view: SharedStyle<BlockView>
   onSetView(view: BlockView): void
   onOpenInspector(): void
-  onStepInto?: () => void
+  depthAction?: {
+    direction: 'in' | 'out'
+    onSelect(): void
+  }
 }
 
 /** Content only; the shared shell supplies TldrawUiContextualToolbar positioning. */
@@ -25,7 +28,7 @@ export function BlockSelectionMiniMenu({
   view,
   onSetView,
   onOpenInspector,
-  onStepInto,
+  depthAction,
 }: BlockSelectionMiniMenuProps) {
   return (
     <div
@@ -47,9 +50,14 @@ export function BlockSelectionMiniMenu({
           </button>
         ))}
       </div>
-      {onStepInto ? (
-        <button type="button" className="block-mini-menu__step-in" onClick={onStepInto}>
-          Step in
+      {depthAction ? (
+        <button
+          type="button"
+          className="block-mini-menu__step-in"
+          data-depth-action={depthAction.direction}
+          onClick={depthAction.onSelect}
+        >
+          {depthAction.direction === 'out' ? 'Step out' : 'Step in'}
         </button>
       ) : null}
       <button type="button" className="block-mini-menu__inspect" onClick={onOpenInspector}>
@@ -62,7 +70,7 @@ export function BlockSelectionMiniMenu({
 /**
  * One reactive adapter for both shapes of Block selection.
  *
- * A single Block keeps the per-shape command and Step in. Several Blocks —
+ * A single Block keeps the per-shape command and depth action. Several Blocks —
  * including Blocks reached through a group, or selected alongside plain tldraw
  * shapes — drive the same buttons through `setStyleForSelectedShapes`, so the
  * batch gesture is the stock one rather than a loop written here.
@@ -84,13 +92,21 @@ export function EditorBlockSelectionMiniMenu({
     () => getBlockSelectionStyles(editor),
     [editor],
   )
+  const activeDepthScopeId = useValue(
+    'SystemSketch selected Block depth action',
+    () => getActiveDepthScopeId(editor),
+    [editor],
+  )
   if (block) {
     return (
       <BlockSelectionMiniMenu
         view={{ type: 'shared', value: block.props.view }}
         onSetView={(view) => void setBlockView(editor, block.id, view)}
-        onStepInto={block.props.view === 'expanded'
-          ? () => void stepIntoDepthScope(editor, block.id)
+        depthAction={block.props.view === 'expanded'
+          ? {
+              direction: activeDepthScopeId === block.id ? 'out' : 'in',
+              onSelect: () => void toggleDepthScope(editor, block.id),
+            }
           : undefined}
         onOpenInspector={onOpenInspector}
       />

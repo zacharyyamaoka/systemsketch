@@ -80,7 +80,7 @@ describe('Block inspector content', () => {
         view={{ type: 'shared', value: 'expanded' }}
         onSetView={() => {}}
         onOpenInspector={() => {}}
-        onStepInto={() => {}}
+        depthAction={{ direction: 'in', onSelect() {} }}
       />,
     )
     expect(html).toContain('role="toolbar"')
@@ -103,12 +103,27 @@ describe('Block inspector content', () => {
         view={{ type: 'shared', value: 'expanded' }}
         onSetView={() => {}}
         onOpenInspector={() => {}}
-        onStepInto={() => {}}
+        depthAction={{ direction: 'in', onSelect() {} }}
       />,
     )
 
     expect(port).not.toContain('Step in')
     expect(expanded).toContain('Step in')
+  })
+
+  it('turns the active scope action into Step out', () => {
+    const html = renderToStaticMarkup(
+      <BlockSelectionMiniMenu
+        view={{ type: 'shared', value: 'expanded' }}
+        onSetView={() => {}}
+        onOpenInspector={() => {}}
+        depthAction={{ direction: 'out', onSelect() {} }}
+      />,
+    )
+
+    expect(html).toContain('data-depth-action="out"')
+    expect(html).toContain('Step out')
+    expect(html).not.toContain('Step in')
   })
 })
 

@@ -61,8 +61,9 @@ export interface AffineTransform {
  * The semantic cable's exact SVG route, captured in its own local space.
  *
  * `transform` places that route into the replacement arrow's coordinates.
- * `frame` records where the stock arrow's start/end terminals were at capture
- * time, so moving either bound Block can carry the whole route with it.
+ * `frame` records the stock arrow's terminal pair at capture time. The exact
+ * route is used only while that local frame is unchanged; endpoint movement
+ * hands geometry back to the stock arrow router.
  * Samples are geometry-only: the SVG remains the visual source of truth.
  */
 export interface SystemSketchArrowPathSnapshot {
@@ -77,6 +78,17 @@ export interface SystemSketchArrowPrimitiveStyle {
 	strokeColor: string
 	strokeWidth: number
 	path?: SystemSketchArrowPathSnapshot
+	/**
+	 * Semantic paint frozen onto the otherwise stock arrow at detach time.
+	 * Geometry remains tldraw's; this is only the finite visual vocabulary its
+	 * stock dash enum cannot express (packet cadence and the delayed-value pill).
+	 */
+	presentation?: {
+		temporal: 'data' | 'async' | 'delayed'
+		delayValue: string
+		pillPosition: number
+		dashAfterPill: boolean
+	}
 }
 
 export type SystemSketchPrimitiveStyle =

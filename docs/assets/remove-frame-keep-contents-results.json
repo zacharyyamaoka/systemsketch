@@ -1,0 +1,194 @@
+{
+  "checks": [
+    {
+      "id": "M1",
+      "label": "right-clicking one unlocked Frame offers Remove frame",
+      "observed": "Remove frame",
+      "desired": "Remove frame",
+      "ok": true
+    },
+    {
+      "id": "R1",
+      "label": "only the selected Frame is deleted",
+      "observed": null,
+      "desired": null,
+      "ok": true
+    },
+    {
+      "id": "R2",
+      "label": "the direct child keeps its exact page bounds",
+      "observed": {
+        "minX": 570,
+        "minY": 330,
+        "maxX": 840,
+        "maxY": 500
+      },
+      "desired": {
+        "minX": 570,
+        "minY": 330,
+        "maxX": 840,
+        "maxY": 500
+      },
+      "ok": true
+    },
+    {
+      "id": "R3",
+      "label": "the nested Frame keeps its exact page bounds",
+      "observed": {
+        "minX": 910,
+        "minY": 290,
+        "maxX": 1180,
+        "maxY": 580
+      },
+      "desired": {
+        "minX": 910,
+        "minY": 290,
+        "maxX": 1180,
+        "maxY": 580
+      },
+      "ok": true
+    },
+    {
+      "id": "R4",
+      "label": "the grandchild keeps its exact page bounds",
+      "observed": {
+        "minX": 945,
+        "minY": 370,
+        "maxX": 1145,
+        "maxY": 515
+      },
+      "desired": {
+        "minX": 945,
+        "minY": 370,
+        "maxX": 1145,
+        "maxY": 515
+      },
+      "ok": true
+    },
+    {
+      "id": "R5",
+      "label": "direct children are lifted to the removed Frame parent",
+      "observed": [
+        "page:page",
+        "page:page"
+      ],
+      "desired": [
+        "page:page",
+        "page:page"
+      ],
+      "ok": true
+    },
+    {
+      "id": "R6",
+      "label": "nested descendants keep their existing hierarchy",
+      "observed": "shape:nested-frame",
+      "desired": "shape:nested-frame",
+      "ok": true
+    },
+    {
+      "id": "R7",
+      "label": "unrelated shapes remain byte-for-byte positioned",
+      "observed": {
+        "id": "shape:outside-block",
+        "parentId": "page:page",
+        "bounds": {
+          "minX": 80,
+          "minY": 360,
+          "maxX": 350,
+          "maxY": 530
+        }
+      },
+      "desired": {
+        "id": "shape:outside-block",
+        "parentId": "page:page",
+        "bounds": {
+          "minX": 80,
+          "minY": 360,
+          "maxX": 350,
+          "maxY": 530
+        }
+      },
+      "ok": true
+    },
+    {
+      "id": "R8",
+      "label": "the surviving direct children become the selection",
+      "observed": [
+        "shape:direct-child",
+        "shape:nested-frame"
+      ],
+      "desired": [
+        "shape:direct-child",
+        "shape:nested-frame"
+      ],
+      "ok": true
+    },
+    {
+      "id": "U1",
+      "label": "one undo restores the Frame and original parent chain",
+      "observed": [
+        "shape:removable-frame",
+        "shape:removable-frame",
+        "shape:nested-frame"
+      ],
+      "desired": [
+        "shape:removable-frame",
+        "shape:removable-frame",
+        "shape:nested-frame"
+      ],
+      "ok": true
+    },
+    {
+      "id": "U2",
+      "label": "undo also restores every page-space position",
+      "observed": [
+        {
+          "minX": 570,
+          "minY": 330,
+          "maxX": 840,
+          "maxY": 500
+        },
+        {
+          "minX": 910,
+          "minY": 290,
+          "maxX": 1180,
+          "maxY": 580
+        },
+        {
+          "minX": 945,
+          "minY": 370,
+          "maxX": 1145,
+          "maxY": 515
+        }
+      ],
+      "desired": [
+        {
+          "minX": 570,
+          "minY": 330,
+          "maxX": 840,
+          "maxY": 500
+        },
+        {
+          "minX": 910,
+          "minY": 290,
+          "maxX": 1180,
+          "maxY": 580
+        },
+        {
+          "minX": 945,
+          "minY": 370,
+          "maxX": 1145,
+          "maxY": 515
+        }
+      ],
+      "ok": true
+    },
+    {
+      "id": "Q1",
+      "label": "the full remove, undo, and redo journey emits no console errors",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    }
+  ]
+}

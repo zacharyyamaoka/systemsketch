@@ -51,6 +51,7 @@ import {
 } from './layoutBlock'
 import { BlockCanvas } from './ui/BlockCanvas'
 import { stepIntoDepthScope } from '../depth/depthNavigation'
+import { steppedInResizeRelocation } from './avoidSiblingOcclusion'
 import {
 	BranchArmShapeUtil,
 	isBranchArmShape,
@@ -622,6 +623,16 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 		return {
 			...resized,
 			props: mergeBlockResizeProps(shape.props, resized.props ?? {}),
+		}
+	}
+
+	override onResizeEnd(_initial: BlockShape, current: BlockShape) {
+		const relocation = steppedInResizeRelocation(this.editor, current)
+		if (!relocation) return
+		return {
+			id: current.id,
+			type: current.type,
+			...relocation,
 		}
 	}
 }
