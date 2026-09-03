@@ -53,9 +53,9 @@ def figure(name: str, box: tuple[int, int, int, int], caption: str, width: int =
 # ---------------------------------------------------------------- measured
 HEAD = git("rev-parse", "--short", "HEAD")
 BRANCH = git("rev-parse", "--abbrev-ref", "HEAD")
-COMMITS = [line for line in git("log", "--oneline", "main..HEAD").splitlines() if line]
-EDGE_COMMITS = [line for line in git("log", "--oneline", "track/branch-region..HEAD").splitlines() if line]
-STAT = git("diff", "--stat", "track/branch-region..HEAD", "--", "src", "tests", "package.json")
+BASE_SHA = "98ca19376f1974d0bb605f75923d16590955170a"
+COMMITS = [line for line in git("log", "--oneline", f"{BASE_SHA}..HEAD").splitlines() if line]
+STAT = git("diff", "--stat", f"{BASE_SHA}..HEAD", "--", "src", "tests", "package.json")
 MODEL = (REPO / "src/blocks/connections/connectionModel.ts").read_text(encoding="utf-8")
 SHAPE = (REPO / "src/blocks/connections/ConnectionShapeUtil.tsx").read_text(encoding="utf-8")
 PRESENTATION = (REPO / "src/blocks/connections/connectionPresentation.ts").read_text(encoding="utf-8")
@@ -122,7 +122,7 @@ def build() -> str:
         f"<li><span class='{'tick' if c.get('ok') else 'cross'}'>{'✓' if c.get('ok') else '✗'}</span> <b>{html.escape(c['id'])}</b> {html.escape(c['label'])}</li>"
         for c in checks
     )
-    commits = "".join(f"<li><code>{html.escape(line)}</code></li>" for line in EDGE_COMMITS)
+    commits = "".join(f"<li><code>{html.escape(line)}</code></li>" for line in COMMITS)
     canvas = (60, 100, 1500, 720)
     wide = (60, 100, 1800, 960)
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -179,4 +179,4 @@ def build() -> str:
 if __name__ == "__main__":
     OUTPUT.write_text(build(), encoding="utf-8")
     print(OUTPUT)
-    print(json.dumps({"head": HEAD, "checks": f"{PASSED}/{len(checks)}", "units": UNIT_TESTS, "commits": len(EDGE_COMMITS)}))
+    print(json.dumps({"head": HEAD, "checks": f"{PASSED}/{len(checks)}", "units": UNIT_TESTS, "commits": len(COMMITS)}))

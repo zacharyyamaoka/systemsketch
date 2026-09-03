@@ -21,7 +21,7 @@ ul.checks{list-style:none;padding:0;columns:2;column-gap:28px}ul.checks li{break
 footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
 @media(max-width:900px){.facts,.pair,.decision{grid-template-columns:1fr}ul.checks{columns:1}}
 </style></head><body><main>
-<div class="eyebrow">SystemSketch · track/delayed-edge-solid-before-dots-after · 98ca193</div>
+<div class="eyebrow">SystemSketch · track/delayed-edge-solid-before-dots-after · 6701324</div>
 <h1>A cable can now be read one iteration late.</h1>
 <p class="lede">Mark a cable <b>delayed</b> and it draws dotted with a <b>z⁻¹ pill</b> riding it: centred by default, slid along the cable by its own handle, and naming the initial value in the port-default grammar (<code>z⁻¹ = 1.0</code>). Solid stays the plain data cable; dashed stays reserved for the async rail. A switch in the Dev Hub makes the run before the pill solid while leaving the run after it dotted, so the line reads as current value → z⁻¹ → delayed value. Proven in a real browser.</p>
 <div class="facts">
@@ -50,7 +50,12 @@ footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);color:v
 <h2>3 · The record and the seam</h2>
 <svg viewBox="0 0 1100 200" class="seam" role="img" aria-label="The seam"><rect x="20" y="40" width="240" height="120" rx="10" fill="#fff" stroke="#d3d6dd" stroke-width="1.2"/><text x="36" y="72" font-size="16" font-family="ui-monospace,Menlo,monospace" fill="#1d2230">connection record</text><text x="36" y="98" font-size="12" font-family="Inter,system-ui,sans-serif" fill="#1d2230">temporal · delayValue · pillPosition</text><text x="36" y="122" font-size="11" font-family="Inter,system-ui,sans-serif" font-style="italic" fill="#6b7686">StyleProp + two props, migration v2</text><path d="M260,100 H288" stroke="#15181f" stroke-width="2"/><path d="M282,94 L290,100 L282,106" fill="none" stroke="#15181f" stroke-width="2"/><rect x="290" y="40" width="240" height="120" rx="10" fill="#fff" stroke="#d3d6dd" stroke-width="1.2"/><text x="306" y="72" font-size="16" font-family="ui-monospace,Menlo,monospace" fill="#1d2230">shared styles</text><text x="306" y="98" font-size="12" font-family="Inter,system-ui,sans-serif" fill="#1d2230">inspector · right-click · batch</text><text x="306" y="122" font-size="11" font-family="Inter,system-ui,sans-serif" font-style="italic" fill="#6b7686">one write per selection</text><path d="M530,100 H558" stroke="#15181f" stroke-width="2"/><path d="M552,94 L560,100 L552,106" fill="none" stroke="#15181f" stroke-width="2"/><rect x="560" y="40" width="240" height="120" rx="10" fill="#fff" stroke="#d3d6dd" stroke-width="1.2"/><text x="576" y="72" font-size="16" font-family="ui-monospace,Menlo,monospace" fill="#1d2230">ConnectionShapeUtil</text><text x="576" y="98" font-size="12" font-family="Inter,system-ui,sans-serif" fill="#1d2230">dotted path · pill · handle</text><text x="576" y="122" font-size="11" font-family="Inter,system-ui,sans-serif" font-style="italic" fill="#6b7686">arc length on the routed polyline</text><path d="M800,100 H828" stroke="#15181f" stroke-width="2"/><path d="M822,94 L830,100 L822,106" fill="none" stroke="#15181f" stroke-width="2"/><rect x="830" y="40" width="240" height="120" rx="10" fill="#fff" stroke="#d3d6dd" stroke-width="1.2"/><text x="846" y="72" font-size="16" font-family="ui-monospace,Menlo,monospace" fill="#1d2230">Dev Hub switch</text><text x="846" y="98" font-size="12" font-family="Inter,system-ui,sans-serif" fill="#1d2230">solid before the pill</text><text x="846" y="122" font-size="11" font-family="Inter,system-ui,sans-serif" font-style="italic" fill="#6b7686">an atom, remembered per browser</text></svg>
 <p>Three props on the connection: <code>temporal: 'data' | 'delayed'</code> is a tldraw <code>StyleProp</code>, so the inspector, the right-click menu and a batch selection share one write and one shared-or-mixed report, exactly as routing does; <code>delayValue</code> is the text after <code>=</code>; <code>pillPosition</code> is a fraction of the routed arc length. The shape util samples the routed path (exact for elbow and straight, 64 samples for a curve), places the pill by arc length, offers a <code>pill</code> handle that projects the pointer back onto the path, and paints either one dotted path or two copies of the same smooth path with complementary solid-before and dotted-after arrays normalised to <code>pathLength</code>. The switch is an atom read by every delayed cable and remembered under <code>systemsketch.cable-presentation.v1</code>; the old <code>dashAfterPill</code> preference migrates to the corrected alternative.</p>
-<pre><code></code></pre>
+<pre><code>src/SystemSketchUtilities.tsx                      | 14 +++----
+ src/blocks/connections/ConnectionShapeUtil.tsx     | 16 ++++----
+ .../connections/connectionPresentation.test.ts     | 21 +++++-----
+ src/blocks/connections/connectionPresentation.ts   | 46 ++++++++++------------
+ tests/edge_vocabulary_smoke.mjs                    | 39 +++++++++++-------
+ 5 files changed, 70 insertions(+), 66 deletions(-)</code></pre>
 
 <h2>4 · Browser proof</h2>
 <p>The journey drives the product composition with real mouse events and reads the record and the painted DOM after each gesture.</p>
@@ -65,6 +70,6 @@ footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);color:v
 </div>
 
 <h2>6 · Commits on this track</h2>
-<ul></ul>
-<footer>Built by <code>docs/build_edge_vocabulary_implementation.py</code> at 98ca193 on track/delayed-edge-solid-before-dots-after · numbers measured from the tree · frames from the real browser · Claude Code (Fable 5.1), 2026-09-02.</footer>
+<ul><li><code>6701324 Correct delayed edge split style</code></li></ul>
+<footer>Built by <code>docs/build_edge_vocabulary_implementation.py</code> at 6701324 on track/delayed-edge-solid-before-dots-after · numbers measured from the tree · frames from the real browser · Claude Code (Fable 5.1), 2026-09-02.</footer>
 </main></body></html>
