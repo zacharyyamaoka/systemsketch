@@ -1,0 +1,59 @@
+{
+  "checks": 8,
+  "host": "Obsidian",
+  "drivable": true,
+  "autosaveModifyEvents": 1,
+  "targetBlocks": 1,
+  "tldrBlocks": 1,
+  "contrastByScheme": {
+    "light": [
+      {
+        "selector": ".block-inspector__section-title",
+        "found": true,
+        "ratio": 6.19
+      },
+      {
+        "selector": ".block-inspector__field > span",
+        "found": true,
+        "ratio": 6.19
+      },
+      {
+        "selector": ".block-inspector__tabs > [role=tab].is-active",
+        "found": true,
+        "ratio": 15.91
+      }
+    ],
+    "dark": [
+      {
+        "selector": ".block-inspector__section-title",
+        "found": true,
+        "ratio": 7.22
+      },
+      {
+        "selector": ".block-inspector__field > span",
+        "found": true,
+        "ratio": 7.22
+      },
+      {
+        "selector": ".block-inspector__tabs > [role=tab].is-active",
+        "found": true,
+        "ratio": 10.27
+      }
+    ]
+  },
+  "captures": [
+    "docs/assets/obsidian-systemsketch-light.png",
+    "docs/assets/obsidian-systemsketch-dark.png",
+    "docs/assets/obsidian-systemsketch-embed.png"
+  ],
+  "proved": [
+    "Obsidian claims both .systemsketch and .tldr with a TextFileView",
+    "a blank .systemsketch opens the real embedded canvas without duplicate file chrome",
+    "the existing obsidian theme reaches tldraw in real light and dark host states",
+    "one settled canvas edit produces one Obsidian autosave and a valid SystemSketch envelope",
+    "live Obsidian chrome contrast is ≥4.5:1 in light and dark; a same-color mutation fails the gate",
+    ".tldr opens, edits, and autosaves without the SystemSketch envelope",
+    "setViewData distinguishes an external file change and reloads without remounting the host view",
+    "![[target.systemsketch]] renders as an inert read-only inline canvas"
+  ]
+}
