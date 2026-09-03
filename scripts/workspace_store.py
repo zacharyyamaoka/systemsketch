@@ -18,12 +18,15 @@ roots, and provides atomic digest-fenced file operations.
 
 from __future__ import annotations
 
+import fcntl
 import hashlib
 import json
 import os
 import shutil
 import subprocess
 import tempfile
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -140,6 +143,64 @@ def document_digest(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def _document_bytes_digest(source: bytes) -> str:
+    """Revision identity for the exact bytes on disk, before text translation."""
+    return hashlib.sha256(source).hexdigest()
+
+
+def _document_lock_path(lock_root: Path, path: Path) -> Path:
+    """The private runtime lock representing one canonical document path."""
+    identity = hashlib.sha256(os.fsencode(str(path.resolve()))).hexdigest()
+    return lock_root / f"{identity}.lock"
+
+
+@contextmanager
+def document_locks(lock_root: Path, *paths: Path) -> Iterator[None]:
+    """Hold process-wide advisory locks for canonical paths in deadlock-safe order.
+
+    Stable and Preview are independent ``ThreadingHTTPServer`` processes, so a
+    Python ``threading.Lock`` cannot make the digest check and replacement one
+    transaction. The controller gives both processes the same runtime lock
+    root. Hashing canonical paths keeps persistent lock files out of the user's
+    workspace and avoids exposing board names in runtime state.
+
+    Lock files deliberately remain after use. Removing one while another
+    process is waiting on its inode could split future callers across two lock
+    identities and defeat the exclusion this function provides.
+    """
+    canonical = sorted({path.resolve() for path in paths}, key=lambda path: str(path))
+    directory = lock_root.expanduser().resolve()
+    directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+    descriptors: list[int] = []
+    try:
+        for path in canonical:
+            flags = os.O_CREAT | os.O_RDWR | getattr(os, "O_CLOEXEC", 0)
+            descriptor = os.open(_document_lock_path(directory, path), flags, 0o600)
+            try:
+                fcntl.flock(descriptor, fcntl.LOCK_EX)
+            except BaseException:
+                os.close(descriptor)
+                raise
+            descriptors.append(descriptor)
+        yield
+    finally:
+        for descriptor in reversed(descriptors):
+            try:
+                fcntl.flock(descriptor, fcntl.LOCK_UN)
+            finally:
+                os.close(descriptor)
+
+
+def _fsync_directory(directory: Path) -> None:
+    """Make a completed directory-entry mutation durable before reporting success."""
+    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_CLOEXEC", 0)
+    descriptor = os.open(directory, flags)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
 def _parse_document(source: object, *, allow_future: bool = False) -> dict[str, Any]:
     """Validate the portable tldraw envelope both document types share."""
     if not isinstance(source, str) or not source.strip():
@@ -249,12 +310,18 @@ def normalize_document_source(source: object, *, suffix: str | None = None) -> s
     return json.dumps(document, ensure_ascii=False, indent=2) + "\n"
 
 
-def _metadata(path: Path, source: str, stat: os.stat_result | None = None) -> dict[str, Any]:
+def _metadata(
+    path: Path,
+    source: str,
+    stat: os.stat_result | None = None,
+    *,
+    digest: str | None = None,
+) -> dict[str, Any]:
     current_stat = stat or path.stat()
     return {
         "path": str(path),
         "title": document_title(path),
-        "digest": document_digest(source),
+        "digest": digest if digest is not None else document_digest(source),
         "mtime": current_stat.st_mtime,
         "size": current_stat.st_size,
     }
@@ -319,15 +386,7 @@ def load_document(
         files_root,
         additional_roots=additional_roots,
     )
-    try:
-        stat = path.stat()
-        if stat.st_size > MAX_DOCUMENT_BYTES:
-            raise WorkspacePathError(f"{path.name} is too large to open")
-        source = path.read_text(encoding="utf-8")
-    except FileNotFoundError:
-        raise
-    except (OSError, UnicodeDecodeError) as error:
-        raise WorkspacePathError(f"could not read {path}: {error}") from error
+    source, stat, digest = _read_identity(path)
     # IDE hosts seed a new custom-editor target as a zero-byte file. Standalone
     # must give that exact representation the same meaning: an intentional
     # blank canvas whose first user edit becomes a normal encoded document.
@@ -340,7 +399,7 @@ def load_document(
         # the browser can offer an explicit compatibility copy. Every write path
         # still calls normalize_document_source(), which refuses a downgrade.
         _parse_document(source, allow_future=True)
-    return {**_metadata(path, source, stat), "source": source}
+    return {**_metadata(path, source, stat, digest=digest), "source": source}
 
 
 def stat_document(
@@ -354,29 +413,29 @@ def stat_document(
         files_root,
         additional_roots=additional_roots,
     )
-    try:
-        stat = path.stat()
-    except FileNotFoundError:
-        raise
-    except OSError as error:
-        raise WorkspacePathError(f"could not inspect {path}: {error}") from error
-    return {
-        "path": str(path),
-        "title": document_title(path),
-        "mtime": stat.st_mtime,
-        "size": stat.st_size,
-    }
+    source, stat, digest = _read_identity(path)
+    return _metadata(path, source, stat, digest=digest)
 
 
-def _read_identity(path: Path) -> tuple[str, os.stat_result]:
+def _read_identity(path: Path) -> tuple[str, os.stat_result, str]:
     try:
-        source = path.read_text(encoding="utf-8")
-        stat = path.stat()
+        # Read bounded raw bytes and metadata through one open file description.
+        # An atomic external replacement may move the pathname while this is
+        # running, but digest, text, and stat still describe the same inode.
+        # Decoding only after hashing keeps CRLF/CR/LF rewrites distinct.
+        with path.open("rb") as source_file:
+            stat = os.fstat(source_file.fileno())
+            if stat.st_size > MAX_DOCUMENT_BYTES:
+                raise WorkspacePathError(f"{path.name} is too large to open")
+            raw_source = source_file.read(MAX_DOCUMENT_BYTES + 1)
+            if len(raw_source) > MAX_DOCUMENT_BYTES:
+                raise WorkspacePathError(f"{path.name} is too large to open")
+        source = raw_source.decode("utf-8")
     except FileNotFoundError:
         raise
     except (OSError, UnicodeDecodeError) as error:
         raise WorkspacePathError(f"could not read {path}: {error}") from error
-    return source, stat
+    return source, stat, _document_bytes_digest(raw_source)
 
 
 def save_document(
@@ -387,6 +446,7 @@ def save_document(
     additional_roots: tuple[Path, ...] = (),
     base_digest: str | None = None,
     force: bool = False,
+    lock_root: Path,
 ) -> dict[str, Any]:
     path = resolve_document_path(
         raw_path,
@@ -394,20 +454,6 @@ def save_document(
         additional_roots=additional_roots,
     )
     rendered = normalize_document_source(source, suffix=document_suffix(path.name))
-
-    if path.exists() and not force:
-        disk_source, disk_stat = _read_identity(path)
-        disk_digest = document_digest(disk_source)
-        if base_digest is None:
-            raise WorkspaceConflictError(f"{path.name} already exists", disk_stat.st_mtime, disk_digest)
-        if disk_digest != base_digest:
-            raise WorkspaceConflictError(
-                f"{path.name} changed on disk since it was opened",
-                disk_stat.st_mtime,
-                disk_digest,
-            )
-    elif not path.exists() and base_digest is not None and not force:
-        raise WorkspaceConflictError(f"{path.name} was removed from disk", None, None)
 
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -422,14 +468,37 @@ def save_document(
             output.write(rendered)
             output.flush()
             os.fsync(output.fileno())
-        os.replace(temporary_name, path)
-    except BaseException:
+        # Staging before the lock keeps unrelated preparation out of the
+        # transaction and narrows the window in which an external, non-locking
+        # writer could race the final compare-and-replace.
+        with document_locks(lock_root, path):
+            if not force:
+                try:
+                    _disk_source, disk_stat, disk_digest = _read_identity(path)
+                except FileNotFoundError:
+                    if base_digest is not None:
+                        raise WorkspaceConflictError(
+                            f"{path.name} was removed from disk", None, None
+                        )
+                else:
+                    if base_digest is None:
+                        raise WorkspaceConflictError(
+                            f"{path.name} already exists", disk_stat.st_mtime, disk_digest
+                        )
+                    if disk_digest != base_digest:
+                        raise WorkspaceConflictError(
+                            f"{path.name} changed on disk since it was opened",
+                            disk_stat.st_mtime,
+                            disk_digest,
+                        )
+            os.replace(temporary_name, path)
+            _fsync_directory(path.parent)
+            return _metadata(path, rendered)
+    finally:
         try:
             os.unlink(temporary_name)
         except OSError:
             pass
-        raise
-    return _metadata(path, rendered)
 
 
 def rename_document(
@@ -439,6 +508,7 @@ def rename_document(
     *,
     additional_roots: tuple[Path, ...] = (),
     base_digest: str,
+    lock_root: Path,
 ) -> dict[str, Any]:
     path = resolve_document_path(
         raw_path,
@@ -456,40 +526,43 @@ def rename_document(
         raise WorkspacePathError(
             "rename cannot change a document's type; use Save As to write the other format"
         )
-    source, stat = _read_identity(path)
-    digest = document_digest(source)
-    if digest != base_digest:
-        raise WorkspaceConflictError(
-            f"{path.name} changed on disk since it was opened", stat.st_mtime, digest
-        )
-    if destination == path:
-        return _metadata(path, source, stat)
-    if destination.exists():
-        destination_source, destination_stat = _read_identity(destination)
-        raise WorkspaceConflictError(
-            f"{destination.name} already exists",
-            destination_stat.st_mtime,
-            document_digest(destination_source),
-        )
+    with document_locks(lock_root, path, destination):
+        source, stat, digest = _read_identity(path)
+        if digest != base_digest:
+            raise WorkspaceConflictError(
+                f"{path.name} changed on disk since it was opened", stat.st_mtime, digest
+            )
+        if destination == path:
+            return _metadata(path, source, stat)
+        if destination.exists():
+            _destination_source, destination_stat, destination_digest = _read_identity(destination)
+            raise WorkspaceConflictError(
+                f"{destination.name} already exists",
+                destination_stat.st_mtime,
+                destination_digest,
+            )
 
-    try:
-        os.link(path, destination)
-    except FileExistsError:
-        destination_source, destination_stat = _read_identity(destination)
-        raise WorkspaceConflictError(
-            f"{destination.name} already exists",
-            destination_stat.st_mtime,
-            document_digest(destination_source),
-        )
-    except OSError as error:
-        raise WorkspacePathError(f"could not create {destination}: {error}") from error
-    try:
-        path.unlink()
-    except OSError as error:
-        raise WorkspacePathError(
-            f"the new name was created, but the old one could not be removed: {error}"
-        ) from error
-    return _metadata(destination, source)
+        try:
+            os.link(path, destination)
+        except FileExistsError:
+            _destination_source, destination_stat, destination_digest = _read_identity(destination)
+            raise WorkspaceConflictError(
+                f"{destination.name} already exists",
+                destination_stat.st_mtime,
+                destination_digest,
+            )
+        except OSError as error:
+            raise WorkspacePathError(f"could not create {destination}: {error}") from error
+        try:
+            path.unlink()
+        except OSError as error:
+            raise WorkspacePathError(
+                f"the new name was created, but the old one could not be removed: {error}"
+            ) from error
+        # The link and unlink mutate two entries in the same directory. Persist
+        # that directory before reporting the rename as complete.
+        _fsync_directory(path.parent)
+        return _metadata(destination, source)
 
 
 def trash_document(
@@ -498,6 +571,7 @@ def trash_document(
     *,
     additional_roots: tuple[Path, ...] = (),
     base_digest: str,
+    lock_root: Path,
 ) -> dict[str, object]:
     """Move a document to the desktop trash after checking its exact revision."""
     path = resolve_document_path(
@@ -505,19 +579,20 @@ def trash_document(
         files_root,
         additional_roots=additional_roots,
     )
-    source, stat = _read_identity(path)
-    digest = document_digest(source)
-    if digest != base_digest:
-        raise WorkspaceConflictError(
-            f"{path.name} changed on disk since it was opened", stat.st_mtime, digest
+    with document_locks(lock_root, path):
+        _source, stat, digest = _read_identity(path)
+        if digest != base_digest:
+            raise WorkspaceConflictError(
+                f"{path.name} changed on disk since it was opened", stat.st_mtime, digest
+            )
+        gio = shutil.which("gio")
+        if gio is None:
+            raise WorkspacePathError("the desktop trash service is unavailable")
+        completed = subprocess.run(
+            [gio, "trash", str(path)], check=False, capture_output=True, text=True, timeout=30
         )
-    gio = shutil.which("gio")
-    if gio is None:
-        raise WorkspacePathError("the desktop trash service is unavailable")
-    completed = subprocess.run(
-        [gio, "trash", str(path)], check=False, capture_output=True, text=True, timeout=30
-    )
-    if completed.returncode != 0:
-        message = completed.stderr.strip() or completed.stdout.strip() or "could not move the document to Trash"
-        raise WorkspacePathError(message)
-    return {"path": str(path), "trashed": True}
+        if completed.returncode != 0:
+            message = completed.stderr.strip() or completed.stdout.strip() or "could not move the document to Trash"
+            raise WorkspacePathError(message)
+        _fsync_directory(path.parent)
+        return {"path": str(path), "trashed": True}

@@ -311,6 +311,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                         additional_roots=self.app.additional_document_roots,
                         base_digest=base_digest,
                         force=payload.get("force") is True,
+                        lock_root=self.app.workspace_lock_root,
                     )
                 )
                 return
@@ -334,6 +335,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                         self.app.files_root,
                         additional_roots=self.app.additional_document_roots,
                         base_digest=base_digest,
+                        lock_root=self.app.workspace_lock_root,
                     )
                 )
                 return
@@ -344,6 +346,7 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                         self.app.files_root,
                         additional_roots=self.app.additional_document_roots,
                         base_digest=base_digest,
+                        lock_root=self.app.workspace_lock_root,
                     )
                 )
                 return
@@ -395,6 +398,10 @@ class SystemSketchServer(ThreadingHTTPServer):
         self.channel = channel
         self.build = build
         self.release_home = release_home.resolve()
+        # Stable and Preview are separate threaded processes. Keeping document
+        # locks under their shared release home makes one digest fence govern
+        # both without putting lock artifacts beside a person's boards.
+        self.workspace_lock_root = self.release_home / "locks" / "workspace"
         self.source_root = source_root.resolve()
         self.files_root = (files_root or Path.home()).expanduser().resolve()
         if allow_source_root and channel != "preview":
