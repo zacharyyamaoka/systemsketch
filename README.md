@@ -4,6 +4,8 @@ SystemSketch starts from one deliberately boring datum: the stock tldraw whitebo
 
 ## Current improvement review
 
+The [for-loop visual grammar Babble + Prune gallery](docs/for-loop-visual-grammar-babble-2026-09-02.html) compares ten genuinely different ways to expose iteration, loop-carried state, and completion without turning the body back into code. Its top three—Paired Gates, Header Lanes, and State Pills—are each exercised against the same five Python loops from a stateless map through nested early exit, yielding fifteen matched examples on the companion [`for-loop-visual-grammar.systemsketch`](sketches/review/for-loop-visual-grammar.systemsketch) board.
+
 The [Remove frame, keep contents gallery](docs/remove-frame-keep-contents-2026-09-02.html) proves the new stock-Frame right-click command: direct children are lifted through tldraw’s reparent seam before the now-empty Frame is deleted, preserving exact page positions and nested hierarchies as one undoable operation. The companion [`remove-frame-keep-contents.systemsketch`](sketches/review/remove-frame-keep-contents.systemsketch) board is ready for direct verification.
 
 The [Step In overlap-relocation gallery](docs/step-in-overlap-relocation-2026-09-02.html) proves the no-hidden-nodes rule: if a resize inside an isolated scope would cover a sibling, the active Expanded Block and its existing descendants move to the nearest clear position while sibling coordinates and every parent chain remain unchanged. The selected active scope now says **Step out** across the mini-menu, context menu, and Block footer. The companion [`step-in-overlap-relocation.systemsketch`](sketches/review/step-in-overlap-relocation.systemsketch) board is ready for direct verification.

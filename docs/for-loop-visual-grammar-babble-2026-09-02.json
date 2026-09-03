@@ -1,0 +1,1170 @@
+{
+  "schemaVersion": 3,
+  "title": "Ten other ways to draw a Python for-loop",
+  "kicker": "SystemSketch visual grammar · Babble 10",
+  "brief": "Represent `for other in others` as dataflow while keeping the collection, current element, loop-carried pose, and final pose temporally honest. Zach’s dotted header-spine proposal is the fixed reference; these are ten structural alternatives, not color variants.",
+  "count": 10,
+  "defaultId": "v1",
+  "defaultWhy": "Paired Gates leads at 95.2/100: it gives collection unpacking, carried values, recurrence, completion, break, and nesting distinct homes while leaving the body as ordinary dataflow.",
+  "decisionHinge": "The result hinges on how much grammar should live in the frame. Move 10 points from semantic completeness to SystemSketch fit and 5 from hard-loop scalability to visual calm: Paired Gates and Header Lanes tie at 92.2. If the common case is one accumulator and shallow nesting, prefer Header Lanes; if break, multiple carries, or nesting are normal, keep Paired Gates.",
+  "invariants": [
+    "Zach’s latest dotted header-spine sketch remains the external reference and is not counted among the ten alternatives.",
+    "Solid cable means usable in the current invocation; amber dotted cable means available only after an iteration boundary.",
+    "Every direction uses the same `others` + seed `pose` + `merge()` fixture.",
+    "The internal body remains an ordinary SystemSketch dataflow graph."
+  ],
+  "boundary": "These are editable visual-grammar prototypes and an authored `.systemsketch` stress board. They do not add a loop shape, execution semantics, parser rule, or Python round-trip implementation to the product.",
+  "axes": [
+    {
+      "name": "Iteration owner",
+      "values": [
+        "paired gates",
+        "micro-nodes",
+        "header",
+        "boundary",
+        "variables",
+        "macro",
+        "space",
+        "tokens",
+        "trace",
+        "switch"
+      ]
+    },
+    {
+      "name": "Primary object",
+      "values": [
+        "region boundary",
+        "iterator/φ",
+        "lanes",
+        "portal",
+        "pill",
+        "fold",
+        "iteration",
+        "token",
+        "table",
+        "scheduler"
+      ]
+    },
+    {
+      "name": "Temporal encoding",
+      "values": [
+        "gate return",
+        "backedge",
+        "carry lane",
+        "boundary return",
+        "pill writeback",
+        "hidden fold",
+        "unrolling",
+        "clock tokens",
+        "columns",
+        "next/done"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "fr1",
+      "name": "Semantic completeness",
+      "weight": 32,
+      "why": "The notation must expose the collection, current element, initial state, recurrence, and final value without relying on remembered code.",
+      "passCondition": "A reader can point to each role and explain when it is available.",
+      "anchors": {
+        "1": "One or more loop roles are absent or conflated.",
+        "3": "All roles are inferable, but at least one depends on convention or prose.",
+        "5": "Every role has a distinct visible home and timing."
+      }
+    },
+    {
+      "id": "fr2",
+      "name": "Turn clarity at a glance",
+      "weight": 24,
+      "why": "The core ambiguity is whether a value is usable now or only after an iteration boundary.",
+      "passCondition": "Solid same-turn flow and cross-turn recurrence cannot be mistaken for one another.",
+      "anchors": {
+        "1": "The diagram plausibly implies an impossible same-turn read.",
+        "3": "Timing is marked but needs careful tracing.",
+        "5": "The temporal boundary is immediate and local."
+      }
+    },
+    {
+      "id": "fr3",
+      "name": "Hard-loop scalability",
+      "weight": 20,
+      "why": "The grammar should survive destructuring, multiple carried values, conditional updates, early exit, and nesting.",
+      "passCondition": "The five stress programs extend the same rule instead of inventing a new notation.",
+      "anchors": {
+        "1": "Only the single-accumulator example fits.",
+        "3": "Two hard cases fit with crowding or special cases.",
+        "5": "All five fit through repetition of the same primitives."
+      }
+    },
+    {
+      "id": "fr4",
+      "name": "Visual calm",
+      "weight": 14,
+      "why": "Loop marks should not overwhelm the body graph or turn one carried value into a bundle of crossing arrows.",
+      "passCondition": "The loop reads in one scan with few long or overlapping cables.",
+      "anchors": {
+        "1": "The control notation dominates or crosses the body.",
+        "3": "Readable at normal scale with some route management.",
+        "5": "Compact, local, and visually subordinate to the body."
+      }
+    },
+    {
+      "id": "fr5",
+      "name": "SystemSketch fit",
+      "weight": 10,
+      "why": "A strong direction should reuse Blocks, ports, Pills, regions, and delayed/dotted edges rather than introduce a second visual language.",
+      "passCondition": "The idea can be built as a narrow extension of the current canvas vocabulary.",
+      "anchors": {
+        "1": "Requires a foreign editor or a parallel graph model.",
+        "3": "Needs one substantial new primitive.",
+        "5": "Composes existing SystemSketch objects and edge semantics."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "g1",
+      "name": "Collection ≠ current element",
+      "why": "The whole iterable and the item available this iteration must never share one undifferentiated cable."
+    },
+    {
+      "id": "g2",
+      "name": "Seed / next / final are distinct",
+      "why": "A carried value has three temporal roles and the representation must not collapse them."
+    },
+    {
+      "id": "g3",
+      "name": "No impossible same-turn read",
+      "why": "A returned value may feed the next iteration or the final exit, not the current invocation that produced it."
+    },
+    {
+      "id": "g4",
+      "name": "Body remains dataflow",
+      "why": "The loop notation should schedule an ordinary internal dataflow graph rather than replace it with prose."
+    }
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "Paired Gates",
+      "thesis": "Put iteration on a paired Input/Yield boundary: one gate exposes current items and state; the other receives next state and owns completion.",
+      "accent": "#22845d",
+      "bestWhen": "Structured loops with carried values, completion, break, or nesting.",
+      "losesWhen": "A tiny single-use loop where two extra boundary nodes feel heavier than the body.",
+      "decisions": [
+        {
+          "label": "Iteration owner",
+          "value": "Put iteration on a paired Input/Yield boundary"
+        },
+        {
+          "label": "Cross-turn mark",
+          "value": "Only next-iteration paths use the amber dotted cadence."
+        },
+        {
+          "label": "Final value",
+          "value": "Completion has its own visible route rather than sharing the recurrence blindly."
+        }
+      ],
+      "keepParts": [
+        "paired Input/Yield gates",
+        "done outlet",
+        "boundary-owned feedback"
+      ],
+      "proof": [
+        "The hero advances between two iterations through the live control.",
+        "The same original merge fixture is used across all ten directions."
+      ],
+      "previewLabel": "interactive loop trace",
+      "preview": "\n    <div style=\"min-height:330px;border:1px solid #d8dddf;border-radius:16px;background:#fbfcfc;padding:12px;display:grid;gap:8px\">\n      <svg viewBox=\"0 0 720 300\" role=\"img\" aria-label=\"For-loop representation\" style=\"width:100%;height:auto;display:block\">\n        <defs>\n          <marker id=\"arr\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#263238\" stroke-width=\"1.8\"/></marker>\n          <marker id=\"arr-amber\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"1.8\"/></marker>\n        </defs>\n        <rect x=\"8\" y=\"8\" width=\"704\" height=\"284\" rx=\"14\" fill=\"#fff\" stroke=\"#d7dcde\"/>\n        <rect x=\"116\" y=\"52\" width=\"486\" height=\"214\" rx=\"12\" fill=\"#f9fbfb\" stroke=\"#8d989e\" stroke-width=\"1.7\"/><text x=\"130\" y=\"76\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"15\" font-weight=\"700\" fill=\"#263238\" class=\"\">for other in others</text>\n      <g>\n        <rect x=\"132\" y=\"104\" width=\"120\" height=\"116\" rx=\"10\" fill=\"#fff\" stroke=\"#c97808\" stroke-width=\"2\"/>\n        <rect x=\"132\" y=\"104\" width=\"120\" height=\"8\" rx=\"4\" fill=\"#c97808\"/>\n        <text x=\"144\" y=\"135\" font-family=\"ui-monospace,monospace\" font-size=\"16\" font-weight=\"700\" fill=\"#263238\">ITERATE</text>\n        <text x=\"144\" y=\"156\" font-size=\"11\" fill=\"#66737b\">other · pose</text>\n      </g>\n      <g>\n        <rect x=\"316\" y=\"122\" width=\"128\" height=\"78\" rx=\"10\" fill=\"#fff\" stroke=\"#2878a8\" stroke-width=\"2\"/>\n        <rect x=\"316\" y=\"122\" width=\"128\" height=\"8\" rx=\"4\" fill=\"#2878a8\"/>\n        <text x=\"328\" y=\"153\" font-family=\"ui-monospace,monospace\" font-size=\"16\" font-weight=\"700\" fill=\"#263238\">merge()</text>\n        <text x=\"328\" y=\"174\" font-size=\"11\" fill=\"#66737b\">pose, other</text>\n      </g>\n      <g>\n        <rect x=\"492\" y=\"104\" width=\"96\" height=\"116\" rx=\"10\" fill=\"#fff\" stroke=\"#22845d\" stroke-width=\"2\"/>\n        <rect x=\"492\" y=\"104\" width=\"96\" height=\"8\" rx=\"4\" fill=\"#22845d\"/>\n        <text x=\"504\" y=\"135\" font-family=\"ui-monospace,monospace\" font-size=\"16\" font-weight=\"700\" fill=\"#263238\">YIELD</text>\n        <text x=\"504\" y=\"156\" font-size=\"11\" fill=\"#66737b\">next · done</text>\n      </g><path d=\"M36 126 H132\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"38\" y=\"116\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">others</text><path d=\"M36 190 H132\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"38\" y=\"180\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">pose₀</text><path d=\"M252 136 H316\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"277\" y=\"128\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#66737b\" class=\"\">other</text><path d=\"M252 184 H316\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"277\" y=\"176\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#66737b\" class=\"\">poseᵢ</text><path d=\"M444 160 H492\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"468\" y=\"151\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#66737b\" class=\"\">poseᵢ₊₁</text><path d=\"M540 220 V248 H190 V220\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"3 7\" marker-end=\"url(#arr-amber)\"/><path d=\"M588 160 H684\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"682\" y=\"150\" text-anchor=\"end\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#66737b\" class=\"\">final pose</text><text x=\"352\" y=\"236\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#c97808\" class=\"\">paired boundary owns recurrence</text>\n        <g transform=\"translate(592 20)\">\n          <rect width=\"98\" height=\"27\" rx=\"13\" fill=\"#fff7e6\" stroke=\"#c97808\"/>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-base-only\">iteration i</text>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-alt-only\">iteration i+1</text>\n        </g>\n      </svg>\n      <div style=\"display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 8px 4px\">\n        <small style=\"color:#66737b\">Only the gate-to-gate return is cross-iteration; body wires remain ordinary data.</small>\n        <button class=\"demo-button\" data-demo-toggle data-base-label=\"Advance one iteration\" data-alt-label=\"Return to iteration i\">Advance one iteration</button>\n      </div>\n    </div>",
+      "story": {
+        "title": "Read one iteration boundary",
+        "steps": [
+          {
+            "label": "Read iteration i",
+            "caption": "Locate the current item, current carried value, body result, and completion route.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Advance to i+1",
+            "caption": "Only the dotted amber route crosses the iteration boundary; solid body wires remain same-turn.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Reading key",
+          "caption": "Paired Gates keeps ordinary body flow solid and reserves amber dots for values unavailable until the next turn.",
+          "html": "<div style=\"min-height:110px;border:1px solid #d9dfe1;border-radius:12px;padding:18px;background:#fff;display:grid;gap:16px\"><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#263238\" stroke-width=\"3\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2\"/></svg><b>same invocation</b></div><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#c97808\" stroke-width=\"3\" stroke-dasharray=\"3 7\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2\"/></svg><b>next iteration</b></div></div>"
+        }
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "Paired Gates visibly separates the iterable, current item, seed, recurrence, and final result to the degree shown in the hero.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "The iteration toggle exposes how Paired Gates distinguishes iteration i from i+1 without changing the body graph.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "The stress atlas applies Paired Gates to map, accumulate, destructure, dual-state conditional, and nested-break cases.",
+          "confidence": "medium"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "The hero shows the number and length of loop-specific routes Paired Gates adds around one merge body.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "The proposed parts can be compared directly with current Blocks, Pills, regions, and dotted/delayed edges.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The Paired Gates hero gives this role an explicit label, path, or boundary."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The Paired Gates hero gives this role an explicit label, path, or boundary."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The Paired Gates hero gives this role an explicit label, path, or boundary."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The Paired Gates hero gives this role an explicit label, path, or boundary."
+        }
+      }
+    },
+    {
+      "id": "v2",
+      "name": "Φ + Iterator",
+      "thesis": "Make the two hidden operations explicit: an iterator chooses the current element and a φ node chooses seed versus loop-back state.",
+      "accent": "#7b62a8",
+      "bestWhen": "Compiler-faithful graphs and debugging exact seed/backedge behavior.",
+      "losesWhen": "A sketch must stay calm for non-compiler readers or carries many values.",
+      "decisions": [
+        {
+          "label": "Iteration owner",
+          "value": "Make the two hidden operations explicit"
+        },
+        {
+          "label": "Cross-turn mark",
+          "value": "Only next-iteration paths use the amber dotted cadence."
+        },
+        {
+          "label": "Final value",
+          "value": "Completion has its own visible route rather than sharing the recurrence blindly."
+        }
+      ],
+      "keepParts": [
+        "iterator micro-node",
+        "φ join",
+        "single dotted backedge"
+      ],
+      "proof": [
+        "The hero advances between two iterations through the live control.",
+        "The same original merge fixture is used across all ten directions."
+      ],
+      "previewLabel": "interactive loop trace",
+      "preview": "\n    <div style=\"min-height:330px;border:1px solid #d8dddf;border-radius:16px;background:#fbfcfc;padding:12px;display:grid;gap:8px\">\n      <svg viewBox=\"0 0 720 300\" role=\"img\" aria-label=\"For-loop representation\" style=\"width:100%;height:auto;display:block\">\n        <defs>\n          <marker id=\"arr\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#263238\" stroke-width=\"1.8\"/></marker>\n          <marker id=\"arr-amber\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"1.8\"/></marker>\n        </defs>\n        <rect x=\"8\" y=\"8\" width=\"704\" height=\"284\" rx=\"14\" fill=\"#fff\" stroke=\"#d7dcde\"/>\n        <rect x=\"116\" y=\"52\" width=\"486\" height=\"214\" rx=\"12\" fill=\"#f9fbfb\" stroke=\"#8d989e\" stroke-width=\"1.7\"/><text x=\"130\" y=\"76\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"15\" font-weight=\"700\" fill=\"#263238\" class=\"\">for other in others</text>\n      <g>\n        <rect x=\"148\" y=\"112\" width=\"110\" height=\"78\" rx=\"10\" fill=\"#fff\" stroke=\"#c97808\" stroke-width=\"2\"/>\n        <rect x=\"148\" y=\"112\" width=\"110\" height=\"8\" rx=\"4\" fill=\"#c97808\"/>\n        <text x=\"160\" y=\"143\" font-family=\"ui-monospace,monospace\" font-size=\"16\" font-weight=\"700\" fill=\"#263238\">next()</text>\n        <text x=\"160\" y=\"164\" font-size=\"11\" fill=\"#66737b\">others → other</text>\n      </g>\n      <g>\n        <rect x=\"300\" y=\"112\" width=\"100\" height=\"78\" rx=\"10\" fill=\"#fff\" stroke=\"#7b62a8\" stroke-width=\"2\"/>\n        <rect x=\"300\" y=\"112\" width=\"100\" height=\"8\" rx=\"4\" fill=\"#7b62a8\"/>\n        <text x=\"312\" y=\"143\" font-family=\"ui-monospace,monospace\" font-size=\"16\" font-weight=\"700\" fill=\"#263238\">φ pose</text>\n        <text x=\"312\" y=\"164\" font-size=\"11\" fill=\"#66737b\">seed | back</text>\n      </g>\n      <g>\n        <rect x=\"462\" y=\"112\" width=\"112\" height=\"78\" rx=\"10\" fill=\"#fff\" stroke=\"#2878a8\" stroke-width=\"2\"/>\n        <rect x=\"462\" y=\"112\" width=\"112\" height=\"8\" rx=\"4\" fill=\"#2878a8\"/>\n        <text x=\"474\" y=\"143\" font-family=\"ui-monospace,monospace\" font-size=\"16\" font-weight=\"700\" fill=\"#263238\">merge()</text>\n        <text x=\"474\" y=\"164\" font-size=\"11\" fill=\"#66737b\">pose, other</text>\n      </g><path d=\"M36 128 H148\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"38\" y=\"118\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">others</text><path d=\"M36 190 H300\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"38\" y=\"181\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">pose₀</text><path d=\"M258 148 H462\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"278\" y=\"139\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#66737b\" class=\"\">other</text><path d=\"M400 176 H462\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"423\" y=\"168\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#66737b\" class=\"\">poseᵢ</text><path d=\"M574 150 H684\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"682\" y=\"141\" text-anchor=\"end\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#66737b\" class=\"\">final pose</text><path d=\"M574 176 V238 H350 V190\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"3 7\" marker-end=\"url(#arr-amber)\"/><text x=\"459\" y=\"231\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#c97808\" class=\"\">backedge</text>\n        <g transform=\"translate(592 20)\">\n          <rect width=\"98\" height=\"27\" rx=\"13\" fill=\"#fff7e6\" stroke=\"#c97808\"/>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-base-only\">iteration i</text>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-alt-only\">iteration i+1</text>\n        </g>\n      </svg>\n      <div style=\"display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 8px 4px\">\n        <small style=\"color:#66737b\">Two explicit compiler objects answer the two hard questions: item selection and carried state.</small>\n        <button class=\"demo-button\" data-demo-toggle data-base-label=\"Advance one iteration\" data-alt-label=\"Return to iteration i\">Advance one iteration</button>\n      </div>\n    </div>",
+      "story": {
+        "title": "Read one iteration boundary",
+        "steps": [
+          {
+            "label": "Read iteration i",
+            "caption": "Locate the current item, current carried value, body result, and completion route.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Advance to i+1",
+            "caption": "Only the dotted amber route crosses the iteration boundary; solid body wires remain same-turn.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Reading key",
+          "caption": "Φ + Iterator keeps ordinary body flow solid and reserves amber dots for values unavailable until the next turn.",
+          "html": "<div style=\"min-height:110px;border:1px solid #d9dfe1;border-radius:12px;padding:18px;background:#fff;display:grid;gap:16px\"><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#263238\" stroke-width=\"3\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2\"/></svg><b>same invocation</b></div><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#c97808\" stroke-width=\"3\" stroke-dasharray=\"3 7\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2\"/></svg><b>next iteration</b></div></div>"
+        }
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "Φ + Iterator visibly separates the iterable, current item, seed, recurrence, and final result to the degree shown in the hero.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 4,
+          "evidence": "The iteration toggle exposes how Φ + Iterator distinguishes iteration i from i+1 without changing the body graph.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "The stress atlas applies Φ + Iterator to map, accumulate, destructure, dual-state conditional, and nested-break cases.",
+          "confidence": "medium"
+        },
+        "fr4": {
+          "score": 3,
+          "evidence": "The hero shows the number and length of loop-specific routes Φ + Iterator adds around one merge body.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "The proposed parts can be compared directly with current Blocks, Pills, regions, and dotted/delayed edges.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The Φ + Iterator hero gives this role an explicit label, path, or boundary."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The Φ + Iterator hero gives this role an explicit label, path, or boundary."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The Φ + Iterator hero gives this role an explicit label, path, or boundary."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The Φ + Iterator hero gives this role an explicit label, path, or boundary."
+        }
+      }
+    },
+    {
+      "id": "v3",
+      "name": "Header Lanes",
+      "thesis": "Turn the loop header into two typed lanes—each and carry—then drop short local wires into the body.",
+      "accent": "#c97808",
+      "bestWhen": "The loop body is visually primary and the header can carry several named values.",
+      "losesWhen": "Nested loops or many carries make the header dense and text-dependent.",
+      "decisions": [
+        {
+          "label": "Iteration owner",
+          "value": "Turn the loop header into two typed lanes—each and carry—then drop short local wires into the body."
+        },
+        {
+          "label": "Cross-turn mark",
+          "value": "Only next-iteration paths use the amber dotted cadence."
+        },
+        {
+          "label": "Final value",
+          "value": "Completion has its own visible route rather than sharing the recurrence blindly."
+        }
+      ],
+      "keepParts": [
+        "each lane",
+        "carry lane",
+        "done outlet"
+      ],
+      "proof": [
+        "The hero advances between two iterations through the live control.",
+        "The same original merge fixture is used across all ten directions."
+      ],
+      "previewLabel": "interactive loop trace",
+      "preview": "\n    <div style=\"min-height:330px;border:1px solid #d8dddf;border-radius:16px;background:#fbfcfc;padding:12px;display:grid;gap:8px\">\n      <svg viewBox=\"0 0 720 300\" role=\"img\" aria-label=\"For-loop representation\" style=\"width:100%;height:auto;display:block\">\n        <defs>\n          <marker id=\"arr\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#263238\" stroke-width=\"1.8\"/></marker>\n          <marker id=\"arr-amber\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"1.8\"/></marker>\n        </defs>\n        <rect x=\"8\" y=\"8\" width=\"704\" height=\"284\" rx=\"14\" fill=\"#fff\" stroke=\"#d7dcde\"/>\n        <rect x=\"116\" y=\"52\" width=\"486\" height=\"214\" rx=\"12\" fill=\"#f9fbfb\" stroke=\"#8d989e\" stroke-width=\"1.7\"/><text x=\"130\" y=\"76\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"15\" font-weight=\"700\" fill=\"#263238\" class=\"\">for other in others</text><rect x=\"132\" y=\"92\" width=\"454\" height=\"68\" rx=\"8\" fill=\"#fff\" stroke=\"#8d989e\"/><text x=\"148\" y=\"118\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"700\" fill=\"#c97808\" class=\"\">each</text><text x=\"210\" y=\"118\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">other ← others[i]</text><text x=\"148\" y=\"145\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"700\" fill=\"#7b62a8\" class=\"\">carry</text><text x=\"210\" y=\"145\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">pose ← pose₀ | z⁻¹</text>\n      <g>\n        <rect x=\"300\" y=\"184\" width=\"132\" height=\"64\" rx=\"10\" fill=\"#fff\" stroke=\"#2878a8\" stroke-width=\"2\"/>\n        <rect x=\"300\" y=\"184\" width=\"132\" height=\"8\" rx=\"4\" fill=\"#2878a8\"/>\n        <text x=\"312\" y=\"215\" font-family=\"ui-monospace,monospace\" font-size=\"16\" font-weight=\"700\" fill=\"#263238\">merge()</text>\n        <text x=\"312\" y=\"236\" font-size=\"11\" fill=\"#66737b\">pose, other</text>\n      </g><path d=\"M250 118 H278 V204 H300\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><path d=\"M250 145 H268 V226 H300\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><path d=\"M432 216 H492 V145 H462\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"3 7\" marker-end=\"url(#arr-amber)\"/><path d=\"M432 232 H684\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"682\" y=\"224\" text-anchor=\"end\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#66737b\" class=\"\">done → pose</text><text x=\"542\" y=\"139\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#c97808\" class=\"\">loop-carried lane</text>\n        <g transform=\"translate(592 20)\">\n          <rect width=\"98\" height=\"27\" rx=\"13\" fill=\"#fff7e6\" stroke=\"#c97808\"/>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-base-only\">iteration i</text>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-alt-only\">iteration i+1</text>\n        </g>\n      </svg>\n      <div style=\"display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 8px 4px\">\n        <small style=\"color:#66737b\">Iteration meaning is written once in the header; the body receives short, local drops.</small>\n        <button class=\"demo-button\" data-demo-toggle data-base-label=\"Advance one iteration\" data-alt-label=\"Return to iteration i\">Advance one iteration</button>\n      </div>\n    </div>",
+      "story": {
+        "title": "Read one iteration boundary",
+        "steps": [
+          {
+            "label": "Read iteration i",
+            "caption": "Locate the current item, current carried value, body result, and completion route.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Advance to i+1",
+            "caption": "Only the dotted amber route crosses the iteration boundary; solid body wires remain same-turn.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Reading key",
+          "caption": "Header Lanes keeps ordinary body flow solid and reserves amber dots for values unavailable until the next turn.",
+          "html": "<div style=\"min-height:110px;border:1px solid #d9dfe1;border-radius:12px;padding:18px;background:#fff;display:grid;gap:16px\"><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#263238\" stroke-width=\"3\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2\"/></svg><b>same invocation</b></div><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#c97808\" stroke-width=\"3\" stroke-dasharray=\"3 7\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2\"/></svg><b>next iteration</b></div></div>"
+        }
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "Header Lanes visibly separates the iterable, current item, seed, recurrence, and final result to the degree shown in the hero.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 4,
+          "evidence": "The iteration toggle exposes how Header Lanes distinguishes iteration i from i+1 without changing the body graph.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "The stress atlas applies Header Lanes to map, accumulate, destructure, dual-state conditional, and nested-break cases.",
+          "confidence": "medium"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "The hero shows the number and length of loop-specific routes Header Lanes adds around one merge body.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "The proposed parts can be compared directly with current Blocks, Pills, regions, and dotted/delayed edges.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The Header Lanes hero gives this role an explicit label, path, or boundary."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The Header Lanes hero gives this role an explicit label, path, or boundary."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The Header Lanes hero gives this role an explicit label, path, or boundary."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The Header Lanes hero gives this role an explicit label, path, or boundary."
+        }
+      }
+    },
+    {
+      "id": "v4",
+      "name": "Boundary Portals",
+      "thesis": "Let boundary ports perform the transformation from collection→item and seed→current state.",
+      "accent": "#2878a8",
+      "bestWhen": "A region should feel like one semantic object with little internal chrome.",
+      "losesWhen": "Readers need to inspect compact portal labels or the frame has many values.",
+      "decisions": [
+        {
+          "label": "Iteration owner",
+          "value": "Let boundary ports perform the transformation from collection→item and seed→current state."
+        },
+        {
+          "label": "Cross-turn mark",
+          "value": "Only next-iteration paths use the amber dotted cadence."
+        },
+        {
+          "label": "Final value",
+          "value": "Completion has its own visible route rather than sharing the recurrence blindly."
+        }
+      ],
+      "keepParts": [
+        "transforming portals",
+        "edge-local labels",
+        "quiet body"
+      ],
+      "proof": [
+        "The hero advances between two iterations through the live control.",
+        "The same original merge fixture is used across all ten directions."
+      ],
+      "previewLabel": "interactive loop trace",
+      "preview": "\n    <div style=\"min-height:330px;border:1px solid #d8dddf;border-radius:16px;background:#fbfcfc;padding:12px;display:grid;gap:8px\">\n      <svg viewBox=\"0 0 720 300\" role=\"img\" aria-label=\"For-loop representation\" style=\"width:100%;height:auto;display:block\">\n        <defs>\n          <marker id=\"arr\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#263238\" stroke-width=\"1.8\"/></marker>\n          <marker id=\"arr-amber\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"1.8\"/></marker>\n        </defs>\n        <rect x=\"8\" y=\"8\" width=\"704\" height=\"284\" rx=\"14\" fill=\"#fff\" stroke=\"#d7dcde\"/>\n        <rect x=\"116\" y=\"52\" width=\"486\" height=\"214\" rx=\"12\" fill=\"#f9fbfb\" stroke=\"#8d989e\" stroke-width=\"1.7\"/><text x=\"130\" y=\"76\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"15\" font-weight=\"700\" fill=\"#263238\" class=\"\">for loop</text><rect x=\"104\" y=\"108\" width=\"156\" height=\"42\" rx=\"21\" fill=\"#fff\" stroke=\"#c97808\" stroke-width=\"2\"/><text x=\"182\" y=\"134\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"11\" font-weight=\"700\" fill=\"#263238\" class=\"\">others ▷ other</text><rect x=\"104\" y=\"176\" width=\"156\" height=\"42\" rx=\"21\" fill=\"#fff\" stroke=\"#7b62a8\" stroke-width=\"2\"/><text x=\"182\" y=\"202\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"11\" font-weight=\"700\" fill=\"#263238\" class=\"\">pose₀ ▷ poseᵢ</text>\n      <g>\n        <rect x=\"346\" y=\"132\" width=\"132\" height=\"80\" rx=\"10\" fill=\"#fff\" stroke=\"#2878a8\" stroke-width=\"2\"/>\n        <rect x=\"346\" y=\"132\" width=\"132\" height=\"8\" rx=\"4\" fill=\"#2878a8\"/>\n        <text x=\"358\" y=\"163\" font-family=\"ui-monospace,monospace\" font-size=\"16\" font-weight=\"700\" fill=\"#263238\">merge()</text>\n        <text x=\"358\" y=\"184\" font-size=\"11\" fill=\"#66737b\">body</text>\n      </g><rect x=\"548\" y=\"150\" width=\"82\" height=\"42\" rx=\"21\" fill=\"#fff\" stroke=\"#22845d\" stroke-width=\"2\"/><text x=\"589\" y=\"176\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"11\" font-weight=\"700\" fill=\"#263238\" class=\"\">done</text><path d=\"M260 129 H346\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><path d=\"M260 197 H320 V184 H346\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><path d=\"M478 172 H548\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><path d=\"M478 198 V238 H182 V218\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"3 7\" marker-end=\"url(#arr-amber)\"/><path d=\"M630 171 H684\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"361\" y=\"236\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#c97808\" class=\"\">the boundary transforms values</text>\n        <g transform=\"translate(592 20)\">\n          <rect width=\"98\" height=\"27\" rx=\"13\" fill=\"#fff7e6\" stroke=\"#c97808\"/>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-base-only\">iteration i</text>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-alt-only\">iteration i+1</text>\n        </g>\n      </svg>\n      <div style=\"display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 8px 4px\">\n        <small style=\"color:#66737b\">The frame edge itself is the operator: collection becomes item; seed becomes current state.</small>\n        <button class=\"demo-button\" data-demo-toggle data-base-label=\"Advance one iteration\" data-alt-label=\"Return to iteration i\">Advance one iteration</button>\n      </div>\n    </div>",
+      "story": {
+        "title": "Read one iteration boundary",
+        "steps": [
+          {
+            "label": "Read iteration i",
+            "caption": "Locate the current item, current carried value, body result, and completion route.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Advance to i+1",
+            "caption": "Only the dotted amber route crosses the iteration boundary; solid body wires remain same-turn.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Reading key",
+          "caption": "Boundary Portals keeps ordinary body flow solid and reserves amber dots for values unavailable until the next turn.",
+          "html": "<div style=\"min-height:110px;border:1px solid #d9dfe1;border-radius:12px;padding:18px;background:#fff;display:grid;gap:16px\"><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#263238\" stroke-width=\"3\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2\"/></svg><b>same invocation</b></div><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#c97808\" stroke-width=\"3\" stroke-dasharray=\"3 7\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2\"/></svg><b>next iteration</b></div></div>"
+        }
+      ],
+      "scores": {
+        "fr1": {
+          "score": 4,
+          "evidence": "Boundary Portals visibly separates the iterable, current item, seed, recurrence, and final result to the degree shown in the hero.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 4,
+          "evidence": "The iteration toggle exposes how Boundary Portals distinguishes iteration i from i+1 without changing the body graph.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "The stress atlas applies Boundary Portals to map, accumulate, destructure, dual-state conditional, and nested-break cases.",
+          "confidence": "medium"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "The hero shows the number and length of loop-specific routes Boundary Portals adds around one merge body.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "The proposed parts can be compared directly with current Blocks, Pills, regions, and dotted/delayed edges.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The Boundary Portals hero gives this role an explicit label, path, or boundary."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The Boundary Portals hero gives this role an explicit label, path, or boundary."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The Boundary Portals hero gives this role an explicit label, path, or boundary."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The Boundary Portals hero gives this role an explicit label, path, or boundary."
+        }
+      }
+    },
+    {
+      "id": "v5",
+      "name": "State Pills",
+      "thesis": "Represent current element and carried variables as ordinary source/sink Pills whose dotted writeback applies on the next iteration.",
+      "accent": "#b05a93",
+      "bestWhen": "Variables should remain tangible, editable, and reusable with the current Pill vocabulary.",
+      "losesWhen": "Unpacked tuples or many carried values turn the body into a shelf of Pills.",
+      "decisions": [
+        {
+          "label": "Iteration owner",
+          "value": "Represent current element and carried variables as ordinary source/sink Pills whose dotted writeback applies on the next iteration."
+        },
+        {
+          "label": "Cross-turn mark",
+          "value": "Only next-iteration paths use the amber dotted cadence."
+        },
+        {
+          "label": "Final value",
+          "value": "Completion has its own visible route rather than sharing the recurrence blindly."
+        }
+      ],
+      "keepParts": [
+        "current-item Pill",
+        "carried-state Pill",
+        "write-now/read-next rule"
+      ],
+      "proof": [
+        "The hero advances between two iterations through the live control.",
+        "The same original merge fixture is used across all ten directions."
+      ],
+      "previewLabel": "interactive loop trace",
+      "preview": "\n    <div style=\"min-height:330px;border:1px solid #d8dddf;border-radius:16px;background:#fbfcfc;padding:12px;display:grid;gap:8px\">\n      <svg viewBox=\"0 0 720 300\" role=\"img\" aria-label=\"For-loop representation\" style=\"width:100%;height:auto;display:block\">\n        <defs>\n          <marker id=\"arr\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#263238\" stroke-width=\"1.8\"/></marker>\n          <marker id=\"arr-amber\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"1.8\"/></marker>\n        </defs>\n        <rect x=\"8\" y=\"8\" width=\"704\" height=\"284\" rx=\"14\" fill=\"#fff\" stroke=\"#d7dcde\"/>\n        <rect x=\"116\" y=\"52\" width=\"486\" height=\"214\" rx=\"12\" fill=\"#f9fbfb\" stroke=\"#8d989e\" stroke-width=\"1.7\"/><text x=\"130\" y=\"76\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"15\" font-weight=\"700\" fill=\"#263238\" class=\"\">for other in others</text><rect x=\"168\" y=\"110\" width=\"126\" height=\"44\" rx=\"22\" fill=\"#fff\" stroke=\"#c97808\" stroke-width=\"2\"/><text x=\"231\" y=\"138\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"700\" fill=\"#263238\" class=\"\">other = ⋯</text><rect x=\"168\" y=\"184\" width=\"126\" height=\"44\" rx=\"22\" fill=\"#fff\" stroke=\"#7b62a8\" stroke-width=\"2\"/><text x=\"231\" y=\"212\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"700\" fill=\"#263238\" class=\"\">pose = ⋯</text>\n      <g>\n        <rect x=\"410\" y=\"134\" width=\"134\" height=\"82\" rx=\"10\" fill=\"#fff\" stroke=\"#2878a8\" stroke-width=\"2\"/>\n        <rect x=\"410\" y=\"134\" width=\"134\" height=\"8\" rx=\"4\" fill=\"#2878a8\"/>\n        <text x=\"422\" y=\"165\" font-family=\"ui-monospace,monospace\" font-size=\"16\" font-weight=\"700\" fill=\"#263238\">merge()</text>\n        <text x=\"422\" y=\"186\" font-size=\"11\" fill=\"#66737b\">pose, other</text>\n      </g><path d=\"M36 132 H168\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"38\" y=\"121\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">others</text><path d=\"M36 207 H168\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"38\" y=\"196\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">pose₀</text><path d=\"M294 132 H380 V158 H410\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><path d=\"M294 206 H410\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><path d=\"M544 176 H684\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"682\" y=\"166\" text-anchor=\"end\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#66737b\" class=\"\">final pose</text><path d=\"M544 198 V246 H231 V228\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"3 7\" marker-end=\"url(#arr-amber)\"/><text x=\"390\" y=\"239\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#c97808\" class=\"\">write pill now · read pill next</text>\n        <g transform=\"translate(592 20)\">\n          <rect width=\"98\" height=\"27\" rx=\"13\" fill=\"#fff7e6\" stroke=\"#c97808\"/>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-base-only\">iteration i</text>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-alt-only\">iteration i+1</text>\n        </g>\n      </svg>\n      <div style=\"display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 8px 4px\">\n        <small style=\"color:#66737b\">Existing source/sink Pills make both iteration variables tangible and directly nameable.</small>\n        <button class=\"demo-button\" data-demo-toggle data-base-label=\"Advance one iteration\" data-alt-label=\"Return to iteration i\">Advance one iteration</button>\n      </div>\n    </div>",
+      "story": {
+        "title": "Read one iteration boundary",
+        "steps": [
+          {
+            "label": "Read iteration i",
+            "caption": "Locate the current item, current carried value, body result, and completion route.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Advance to i+1",
+            "caption": "Only the dotted amber route crosses the iteration boundary; solid body wires remain same-turn.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Reading key",
+          "caption": "State Pills keeps ordinary body flow solid and reserves amber dots for values unavailable until the next turn.",
+          "html": "<div style=\"min-height:110px;border:1px solid #d9dfe1;border-radius:12px;padding:18px;background:#fff;display:grid;gap:16px\"><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#263238\" stroke-width=\"3\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2\"/></svg><b>same invocation</b></div><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#c97808\" stroke-width=\"3\" stroke-dasharray=\"3 7\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2\"/></svg><b>next iteration</b></div></div>"
+        }
+      ],
+      "scores": {
+        "fr1": {
+          "score": 4,
+          "evidence": "State Pills visibly separates the iterable, current item, seed, recurrence, and final result to the degree shown in the hero.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "The iteration toggle exposes how State Pills distinguishes iteration i from i+1 without changing the body graph.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "The stress atlas applies State Pills to map, accumulate, destructure, dual-state conditional, and nested-break cases.",
+          "confidence": "medium"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "The hero shows the number and length of loop-specific routes State Pills adds around one merge body.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "The proposed parts can be compared directly with current Blocks, Pills, regions, and dotted/delayed edges.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The State Pills hero gives this role an explicit label, path, or boundary."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The State Pills hero gives this role an explicit label, path, or boundary."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The State Pills hero gives this role an explicit label, path, or boundary."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The State Pills hero gives this role an explicit label, path, or boundary."
+        }
+      }
+    },
+    {
+      "id": "v6",
+      "name": "Fold Lens",
+      "thesis": "Treat the whole loop as a fold transform with seed, collection, step, and result; expand the step body only on demand.",
+      "accent": "#52646d",
+      "bestWhen": "The author wants the algorithmic summary far more often than the internal schedule.",
+      "losesWhen": "Break, continue, side effects, or nesting no longer fit the fold abstraction cleanly.",
+      "decisions": [
+        {
+          "label": "Iteration owner",
+          "value": "Treat the whole loop as a fold transform with seed, collection, step, and result; expand the step body only on demand."
+        },
+        {
+          "label": "Cross-turn mark",
+          "value": "Only next-iteration paths use the amber dotted cadence."
+        },
+        {
+          "label": "Final value",
+          "value": "Completion has its own visible route rather than sharing the recurrence blindly."
+        }
+      ],
+      "keepParts": [
+        "fold macro",
+        "expandable step",
+        "seed/result ports"
+      ],
+      "proof": [
+        "The hero advances between two iterations through the live control.",
+        "The same original merge fixture is used across all ten directions."
+      ],
+      "previewLabel": "interactive loop trace",
+      "preview": "\n    <div style=\"min-height:330px;border:1px solid #d8dddf;border-radius:16px;background:#fbfcfc;padding:12px;display:grid;gap:8px\">\n      <svg viewBox=\"0 0 720 300\" role=\"img\" aria-label=\"For-loop representation\" style=\"width:100%;height:auto;display:block\">\n        <defs>\n          <marker id=\"arr\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#263238\" stroke-width=\"1.8\"/></marker>\n          <marker id=\"arr-amber\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"1.8\"/></marker>\n        </defs>\n        <rect x=\"8\" y=\"8\" width=\"704\" height=\"284\" rx=\"14\" fill=\"#fff\" stroke=\"#d7dcde\"/>\n        <text x=\"72\" y=\"52\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"11\" font-weight=\"700\" fill=\"#66737b\" class=\"\">compact</text><rect x=\"72\" y=\"72\" width=\"576\" height=\"142\" rx=\"18\" fill=\"#f9fbfb\" stroke=\"#2878a8\" stroke-width=\"2.4\"/><text x=\"98\" y=\"105\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"18\" font-weight=\"700\" fill=\"#263238\" class=\"\">fold others into pose</text><text x=\"98\" y=\"136\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">seed: pose₀</text><text x=\"98\" y=\"160\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">step: merge(pose, other)</text><path d=\"M22 112 H72\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"22\" y=\"101\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">others</text><path d=\"M22 178 H72\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"22\" y=\"168\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">pose₀</text><path d=\"M648 143 H698\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"697\" y=\"132\" text-anchor=\"end\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#66737b\" class=\"\">pose</text><g class=\"demo-alt-only\"><rect x=\"322\" y=\"112\" width=\"258\" height=\"76\" rx=\"10\" fill=\"#fff\" stroke=\"#c97808\"/><text x=\"338\" y=\"139\" font-family=\"ui-monospace,monospace\" font-size=\"13\" font-weight=\"700\" fill=\"#263238\">expanded step</text><text x=\"338\" y=\"164\" font-size=\"11\" fill=\"#66737b\">otherᵢ + poseᵢ → merge → poseᵢ₊₁</text></g>\n        <g transform=\"translate(592 20)\">\n          <rect width=\"98\" height=\"27\" rx=\"13\" fill=\"#fff7e6\" stroke=\"#c97808\"/>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-base-only\">iteration i</text>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-alt-only\">iteration i+1</text>\n        </g>\n      </svg>\n      <div style=\"display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 8px 4px\">\n        <small style=\"color:#66737b\">The loop is a higher-order transform; expand only when the step body matters.</small>\n        <button class=\"demo-button\" data-demo-toggle data-base-label=\"Advance one iteration\" data-alt-label=\"Return to iteration i\">Advance one iteration</button>\n      </div>\n    </div>",
+      "story": {
+        "title": "Read one iteration boundary",
+        "steps": [
+          {
+            "label": "Read iteration i",
+            "caption": "Locate the current item, current carried value, body result, and completion route.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Advance to i+1",
+            "caption": "Only the dotted amber route crosses the iteration boundary; solid body wires remain same-turn.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Reading key",
+          "caption": "Fold Lens keeps ordinary body flow solid and reserves amber dots for values unavailable until the next turn.",
+          "html": "<div style=\"min-height:110px;border:1px solid #d9dfe1;border-radius:12px;padding:18px;background:#fff;display:grid;gap:16px\"><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#263238\" stroke-width=\"3\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2\"/></svg><b>same invocation</b></div><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#c97808\" stroke-width=\"3\" stroke-dasharray=\"3 7\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2\"/></svg><b>next iteration</b></div></div>"
+        }
+      ],
+      "scores": {
+        "fr1": {
+          "score": 4,
+          "evidence": "Fold Lens visibly separates the iterable, current item, seed, recurrence, and final result to the degree shown in the hero.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "The iteration toggle exposes how Fold Lens distinguishes iteration i from i+1 without changing the body graph.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 2,
+          "evidence": "The stress atlas applies Fold Lens to map, accumulate, destructure, dual-state conditional, and nested-break cases.",
+          "confidence": "medium"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "The hero shows the number and length of loop-specific routes Fold Lens adds around one merge body.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "The proposed parts can be compared directly with current Blocks, Pills, regions, and dotted/delayed edges.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The Fold Lens hero gives this role an explicit label, path, or boundary."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The Fold Lens hero gives this role an explicit label, path, or boundary."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The Fold Lens hero gives this role an explicit label, path, or boundary."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The Fold Lens hero gives this role an explicit label, path, or boundary."
+        }
+      }
+    },
+    {
+      "id": "v7",
+      "name": "First · Middle · Last",
+      "thesis": "Unroll representative iterations so the first seed, repeated recurrence, and final result are spatially undeniable.",
+      "accent": "#52646d",
+      "bestWhen": "Teaching, review, or a short fixed loop where temporal truth beats density.",
+      "losesWhen": "Real programs, nested loops, or more than one carried value need too much space.",
+      "decisions": [
+        {
+          "label": "Iteration owner",
+          "value": "Unroll representative iterations so the first seed, repeated recurrence, and final result are spatially undeniable."
+        },
+        {
+          "label": "Cross-turn mark",
+          "value": "Only next-iteration paths use the amber dotted cadence."
+        },
+        {
+          "label": "Final value",
+          "value": "Completion has its own visible route rather than sharing the recurrence blindly."
+        }
+      ],
+      "keepParts": [
+        "first iteration",
+        "ellipsis",
+        "last iteration"
+      ],
+      "proof": [
+        "The hero advances between two iterations through the live control.",
+        "The same original merge fixture is used across all ten directions."
+      ],
+      "previewLabel": "interactive loop trace",
+      "preview": "\n    <div style=\"min-height:330px;border:1px solid #d8dddf;border-radius:16px;background:#fbfcfc;padding:12px;display:grid;gap:8px\">\n      <svg viewBox=\"0 0 720 300\" role=\"img\" aria-label=\"For-loop representation\" style=\"width:100%;height:auto;display:block\">\n        <defs>\n          <marker id=\"arr\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#263238\" stroke-width=\"1.8\"/></marker>\n          <marker id=\"arr-amber\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"1.8\"/></marker>\n        </defs>\n        <rect x=\"8\" y=\"8\" width=\"704\" height=\"284\" rx=\"14\" fill=\"#fff\" stroke=\"#d7dcde\"/>\n        <rect x=\"116\" y=\"52\" width=\"486\" height=\"214\" rx=\"12\" fill=\"#f9fbfb\" stroke=\"#8d989e\" stroke-width=\"1.7\"/><text x=\"130\" y=\"76\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"15\" font-weight=\"700\" fill=\"#263238\" class=\"\">first · middle · last</text>\n      <g>\n        <rect x=\"142\" y=\"124\" width=\"116\" height=\"74\" rx=\"10\" fill=\"#fff\" stroke=\"#2878a8\" stroke-width=\"2\"/>\n        <rect x=\"142\" y=\"124\" width=\"116\" height=\"8\" rx=\"4\" fill=\"#2878a8\"/>\n        <text x=\"154\" y=\"155\" font-family=\"ui-monospace,monospace\" font-size=\"16\" font-weight=\"700\" fill=\"#263238\">merge₀</text>\n        <text x=\"154\" y=\"176\" font-size=\"11\" fill=\"#66737b\">pose₀, other₀</text>\n      </g>\n      <g>\n        <rect x=\"306\" y=\"124\" width=\"116\" height=\"74\" rx=\"10\" fill=\"#fff\" stroke=\"#2878a8\" stroke-width=\"2\"/>\n        <rect x=\"306\" y=\"124\" width=\"116\" height=\"8\" rx=\"4\" fill=\"#2878a8\"/>\n        <text x=\"318\" y=\"155\" font-family=\"ui-monospace,monospace\" font-size=\"16\" font-weight=\"700\" fill=\"#263238\">mergeᵢ</text>\n        <text x=\"318\" y=\"176\" font-size=\"11\" fill=\"#66737b\">poseᵢ, otherᵢ</text>\n      </g>\n      <g>\n        <rect x=\"470\" y=\"124\" width=\"116\" height=\"74\" rx=\"10\" fill=\"#fff\" stroke=\"#2878a8\" stroke-width=\"2\"/>\n        <rect x=\"470\" y=\"124\" width=\"116\" height=\"8\" rx=\"4\" fill=\"#2878a8\"/>\n        <text x=\"482\" y=\"155\" font-family=\"ui-monospace,monospace\" font-size=\"16\" font-weight=\"700\" fill=\"#263238\">mergeₙ</text>\n        <text x=\"482\" y=\"176\" font-size=\"11\" fill=\"#66737b\">poseₙ, otherₙ</text>\n      </g><path d=\"M34 161 H142\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"36\" y=\"150\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">pose₀</text><path d=\"M258 161 H306\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"3 7\" marker-end=\"url(#arr-amber)\"/><path d=\"M422 161 H470\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"3 7\" marker-end=\"url(#arr-amber)\"/><path d=\"M586 161 H684\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"682\" y=\"150\" text-anchor=\"end\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#66737b\" class=\"\">final</text><text x=\"281\" y=\"224\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"26\" font-weight=\"500\" fill=\"#66737b\" class=\"\">⋯</text><text x=\"445\" y=\"224\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"26\" font-weight=\"500\" fill=\"#66737b\" class=\"\">⋯</text><text x=\"364\" y=\"246\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#c97808\" class=\"\">space is traded for temporal certainty</text>\n        <g transform=\"translate(592 20)\">\n          <rect width=\"98\" height=\"27\" rx=\"13\" fill=\"#fff7e6\" stroke=\"#c97808\"/>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-base-only\">iteration i</text>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-alt-only\">iteration i+1</text>\n        </g>\n      </svg>\n      <div style=\"display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 8px 4px\">\n        <small style=\"color:#66737b\">Representative iterations are duplicated so seed, recurrence, and completion cannot be confused.</small>\n        <button class=\"demo-button\" data-demo-toggle data-base-label=\"Advance one iteration\" data-alt-label=\"Return to iteration i\">Advance one iteration</button>\n      </div>\n    </div>",
+      "story": {
+        "title": "Read one iteration boundary",
+        "steps": [
+          {
+            "label": "Read iteration i",
+            "caption": "Locate the current item, current carried value, body result, and completion route.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Advance to i+1",
+            "caption": "Only the dotted amber route crosses the iteration boundary; solid body wires remain same-turn.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Reading key",
+          "caption": "First · Middle · Last keeps ordinary body flow solid and reserves amber dots for values unavailable until the next turn.",
+          "html": "<div style=\"min-height:110px;border:1px solid #d9dfe1;border-radius:12px;padding:18px;background:#fff;display:grid;gap:16px\"><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#263238\" stroke-width=\"3\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2\"/></svg><b>same invocation</b></div><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#c97808\" stroke-width=\"3\" stroke-dasharray=\"3 7\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2\"/></svg><b>next iteration</b></div></div>"
+        }
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "First · Middle · Last visibly separates the iterable, current item, seed, recurrence, and final result to the degree shown in the hero.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "The iteration toggle exposes how First · Middle · Last distinguishes iteration i from i+1 without changing the body graph.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 2,
+          "evidence": "The stress atlas applies First · Middle · Last to map, accumulate, destructure, dual-state conditional, and nested-break cases.",
+          "confidence": "medium"
+        },
+        "fr4": {
+          "score": 1,
+          "evidence": "The hero shows the number and length of loop-specific routes First · Middle · Last adds around one merge body.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 3,
+          "evidence": "The proposed parts can be compared directly with current Blocks, Pills, regions, and dotted/delayed edges.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The First · Middle · Last hero gives this role an explicit label, path, or boundary."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The First · Middle · Last hero gives this role an explicit label, path, or boundary."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The First · Middle · Last hero gives this role an explicit label, path, or boundary."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The First · Middle · Last hero gives this role an explicit label, path, or boundary."
+        }
+      }
+    },
+    {
+      "id": "v8",
+      "name": "Token Conveyor",
+      "thesis": "Draw the iterable as a stream of iteration tokens; each token clocks one body evaluation while state returns on a separate dotted rail.",
+      "accent": "#52646d",
+      "bestWhen": "Streaming or eventful systems where per-item firing is the dominant mental model.",
+      "losesWhen": "A synchronous Python loop could be mistaken for asynchronous scheduling.",
+      "decisions": [
+        {
+          "label": "Iteration owner",
+          "value": "Draw the iterable as a stream of iteration tokens; each token clocks one body evaluation while state returns on a separate dotted rail."
+        },
+        {
+          "label": "Cross-turn mark",
+          "value": "Only next-iteration paths use the amber dotted cadence."
+        },
+        {
+          "label": "Final value",
+          "value": "Completion has its own visible route rather than sharing the recurrence blindly."
+        }
+      ],
+      "keepParts": [
+        "iteration tokens",
+        "enable drop",
+        "state return rail"
+      ],
+      "proof": [
+        "The hero advances between two iterations through the live control.",
+        "The same original merge fixture is used across all ten directions."
+      ],
+      "previewLabel": "interactive loop trace",
+      "preview": "\n    <div style=\"min-height:330px;border:1px solid #d8dddf;border-radius:16px;background:#fbfcfc;padding:12px;display:grid;gap:8px\">\n      <svg viewBox=\"0 0 720 300\" role=\"img\" aria-label=\"For-loop representation\" style=\"width:100%;height:auto;display:block\">\n        <defs>\n          <marker id=\"arr\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#263238\" stroke-width=\"1.8\"/></marker>\n          <marker id=\"arr-amber\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"1.8\"/></marker>\n        </defs>\n        <rect x=\"8\" y=\"8\" width=\"704\" height=\"284\" rx=\"14\" fill=\"#fff\" stroke=\"#d7dcde\"/>\n        <rect x=\"116\" y=\"52\" width=\"486\" height=\"214\" rx=\"12\" fill=\"#f9fbfb\" stroke=\"#8d989e\" stroke-width=\"1.7\"/><text x=\"130\" y=\"76\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"15\" font-weight=\"700\" fill=\"#263238\" class=\"\">token conveyor</text><path d=\"M156 118 H554\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr-amber)\"/><circle cx=\"182\" cy=\"118\" r=\"15\" fill=\"#fff\" stroke=\"#c97808\" stroke-width=\"2\"/><circle cx=\"280\" cy=\"118\" r=\"15\" fill=\"#fff\" stroke=\"#c97808\" stroke-width=\"2\"/><circle cx=\"378\" cy=\"118\" r=\"15\" fill=\"#fff\" stroke=\"#c97808\" stroke-width=\"2\"/><circle cx=\"476\" cy=\"118\" r=\"15\" fill=\"#fff\" stroke=\"#c97808\" stroke-width=\"2\"/><text x=\"182\" y=\"122\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"700\" fill=\"#c97808\" class=\"\">0</text><text x=\"280\" y=\"122\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"700\" fill=\"#c97808\" class=\"\">1</text><text x=\"378\" y=\"122\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"700\" fill=\"#c97808\" class=\"\">i</text><text x=\"476\" y=\"122\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"700\" fill=\"#c97808\" class=\"\">n</text>\n      <g>\n        <rect x=\"302\" y=\"174\" width=\"126\" height=\"64\" rx=\"10\" fill=\"#fff\" stroke=\"#2878a8\" stroke-width=\"2\"/>\n        <rect x=\"302\" y=\"174\" width=\"126\" height=\"8\" rx=\"4\" fill=\"#2878a8\"/>\n        <text x=\"314\" y=\"205\" font-family=\"ui-monospace,monospace\" font-size=\"16\" font-weight=\"700\" fill=\"#263238\">merge()</text>\n        <text x=\"314\" y=\"226\" font-size=\"11\" fill=\"#66737b\">current token</text>\n      </g><path d=\"M378 133 V174\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><path d=\"M428 210 H558 V248 H180 V210 H302\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"3 7\" marker-end=\"url(#arr-amber)\"/><text x=\"364\" y=\"265\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#c97808\" class=\"\">each token clocks one body firing</text>\n        <g transform=\"translate(592 20)\">\n          <rect width=\"98\" height=\"27\" rx=\"13\" fill=\"#fff7e6\" stroke=\"#c97808\"/>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-base-only\">iteration i</text>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-alt-only\">iteration i+1</text>\n        </g>\n      </svg>\n      <div style=\"display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 8px 4px\">\n        <small style=\"color:#66737b\">Iteration is a stream of tokens; one token enables one body evaluation.</small>\n        <button class=\"demo-button\" data-demo-toggle data-base-label=\"Advance one iteration\" data-alt-label=\"Return to iteration i\">Advance one iteration</button>\n      </div>\n    </div>",
+      "story": {
+        "title": "Read one iteration boundary",
+        "steps": [
+          {
+            "label": "Read iteration i",
+            "caption": "Locate the current item, current carried value, body result, and completion route.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Advance to i+1",
+            "caption": "Only the dotted amber route crosses the iteration boundary; solid body wires remain same-turn.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Reading key",
+          "caption": "Token Conveyor keeps ordinary body flow solid and reserves amber dots for values unavailable until the next turn.",
+          "html": "<div style=\"min-height:110px;border:1px solid #d9dfe1;border-radius:12px;padding:18px;background:#fff;display:grid;gap:16px\"><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#263238\" stroke-width=\"3\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2\"/></svg><b>same invocation</b></div><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#c97808\" stroke-width=\"3\" stroke-dasharray=\"3 7\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2\"/></svg><b>next iteration</b></div></div>"
+        }
+      ],
+      "scores": {
+        "fr1": {
+          "score": 3,
+          "evidence": "Token Conveyor visibly separates the iterable, current item, seed, recurrence, and final result to the degree shown in the hero.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 4,
+          "evidence": "The iteration toggle exposes how Token Conveyor distinguishes iteration i from i+1 without changing the body graph.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 3,
+          "evidence": "The stress atlas applies Token Conveyor to map, accumulate, destructure, dual-state conditional, and nested-break cases.",
+          "confidence": "medium"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "The hero shows the number and length of loop-specific routes Token Conveyor adds around one merge body.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 3,
+          "evidence": "The proposed parts can be compared directly with current Blocks, Pills, regions, and dotted/delayed edges.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The Token Conveyor hero gives this role an explicit label, path, or boundary."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The Token Conveyor hero gives this role an explicit label, path, or boundary."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The Token Conveyor hero gives this role an explicit label, path, or boundary."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The Token Conveyor hero gives this role an explicit label, path, or boundary."
+        }
+      }
+    },
+    {
+      "id": "v9",
+      "name": "Iteration Table",
+      "thesis": "Show a small execution table where columns are iterations and rows are item, state-in, and state-out.",
+      "accent": "#52646d",
+      "bestWhen": "Explaining or debugging a concrete trace with exact values.",
+      "losesWhen": "Authoring a reusable program—the surface reads as evidence, not structure.",
+      "decisions": [
+        {
+          "label": "Iteration owner",
+          "value": "Show a small execution table where columns are iterations and rows are item, state-in, and state-out."
+        },
+        {
+          "label": "Cross-turn mark",
+          "value": "Only next-iteration paths use the amber dotted cadence."
+        },
+        {
+          "label": "Final value",
+          "value": "Completion has its own visible route rather than sharing the recurrence blindly."
+        }
+      ],
+      "keepParts": [
+        "iteration columns",
+        "value rows",
+        "trace highlight"
+      ],
+      "proof": [
+        "The hero advances between two iterations through the live control.",
+        "The same original merge fixture is used across all ten directions."
+      ],
+      "previewLabel": "interactive loop trace",
+      "preview": "\n    <div style=\"min-height:330px;border:1px solid #d8dddf;border-radius:16px;background:#fbfcfc;padding:12px;display:grid;gap:8px\">\n      <svg viewBox=\"0 0 720 300\" role=\"img\" aria-label=\"For-loop representation\" style=\"width:100%;height:auto;display:block\">\n        <defs>\n          <marker id=\"arr\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#263238\" stroke-width=\"1.8\"/></marker>\n          <marker id=\"arr-amber\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"1.8\"/></marker>\n        </defs>\n        <rect x=\"8\" y=\"8\" width=\"704\" height=\"284\" rx=\"14\" fill=\"#fff\" stroke=\"#d7dcde\"/>\n        <text x=\"92\" y=\"52\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"15\" font-weight=\"700\" fill=\"#263238\" class=\"\">iteration trace</text><rect x=\"92\" y=\"72\" width=\"536\" height=\"176\" rx=\"10\" fill=\"#fff\" stroke=\"#8d989e\"/><path d=\"M208 72 V248\" fill=\"none\" stroke=\"#263238\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M344 72 V248\" fill=\"none\" stroke=\"#263238\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M480 72 V248\" fill=\"none\" stroke=\"#263238\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M92 112 H628\" fill=\"none\" stroke=\"#263238\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M92 156 H628\" fill=\"none\" stroke=\"#263238\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M92 200 H628\" fill=\"none\" stroke=\"#263238\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><text x=\"150\" y=\"98\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"700\" fill=\"#66737b\" class=\"\">value</text><text x=\"276\" y=\"98\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"700\" fill=\"#66737b\" class=\"\">i=0</text><text x=\"412\" y=\"98\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"700\" fill=\"#66737b\" class=\"\">i=1</text><text x=\"548\" y=\"98\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"700\" fill=\"#66737b\" class=\"\">… i=n</text><text x=\"112\" y=\"140\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">other</text><text x=\"112\" y=\"184\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">pose in</text><text x=\"112\" y=\"228\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">pose out</text><text x=\"276\" y=\"140\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">others[0]</text><text x=\"412\" y=\"140\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">others[1]</text><text x=\"548\" y=\"140\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">others[n]</text><text x=\"276\" y=\"184\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">seed</text><text x=\"412\" y=\"184\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">prev out</text><text x=\"548\" y=\"184\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">prev out</text><text x=\"276\" y=\"228\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">merge₀</text><text x=\"412\" y=\"228\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">merge₁</text><text x=\"548\" y=\"228\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">final</text><g class=\"demo-alt-only\"><rect x=\"346\" y=\"114\" width=\"132\" height=\"130\" rx=\"8\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"3\"/></g>\n        <g transform=\"translate(592 20)\">\n          <rect width=\"98\" height=\"27\" rx=\"13\" fill=\"#fff7e6\" stroke=\"#c97808\"/>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-base-only\">iteration i</text>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-alt-only\">iteration i+1</text>\n        </g>\n      </svg>\n      <div style=\"display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 8px 4px\">\n        <small style=\"color:#66737b\">A trace table is maximally explicit about time, but reads as execution evidence rather than a program.</small>\n        <button class=\"demo-button\" data-demo-toggle data-base-label=\"Advance one iteration\" data-alt-label=\"Return to iteration i\">Advance one iteration</button>\n      </div>\n    </div>",
+      "story": {
+        "title": "Read one iteration boundary",
+        "steps": [
+          {
+            "label": "Read iteration i",
+            "caption": "Locate the current item, current carried value, body result, and completion route.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Advance to i+1",
+            "caption": "Only the dotted amber route crosses the iteration boundary; solid body wires remain same-turn.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Reading key",
+          "caption": "Iteration Table keeps ordinary body flow solid and reserves amber dots for values unavailable until the next turn.",
+          "html": "<div style=\"min-height:110px;border:1px solid #d9dfe1;border-radius:12px;padding:18px;background:#fff;display:grid;gap:16px\"><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#263238\" stroke-width=\"3\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2\"/></svg><b>same invocation</b></div><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#c97808\" stroke-width=\"3\" stroke-dasharray=\"3 7\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2\"/></svg><b>next iteration</b></div></div>"
+        }
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "Iteration Table visibly separates the iterable, current item, seed, recurrence, and final result to the degree shown in the hero.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 4,
+          "evidence": "The iteration toggle exposes how Iteration Table distinguishes iteration i from i+1 without changing the body graph.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "The stress atlas applies Iteration Table to map, accumulate, destructure, dual-state conditional, and nested-break cases.",
+          "confidence": "medium"
+        },
+        "fr4": {
+          "score": 2,
+          "evidence": "The hero shows the number and length of loop-specific routes Iteration Table adds around one merge body.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 2,
+          "evidence": "The proposed parts can be compared directly with current Blocks, Pills, regions, and dotted/delayed edges.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The Iteration Table hero gives this role an explicit label, path, or boundary."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The Iteration Table hero gives this role an explicit label, path, or boundary."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The Iteration Table hero gives this role an explicit label, path, or boundary."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The Iteration Table hero gives this role an explicit label, path, or boundary."
+        }
+      }
+    },
+    {
+      "id": "v10",
+      "name": "Next / Done Switch",
+      "thesis": "Route each body result through a tiny scheduler switch with explicit next and done exits.",
+      "accent": "#52646d",
+      "bestWhen": "Final-value clarity and early exit matter more than minimizing scheduler chrome.",
+      "losesWhen": "The switch can look like a runtime condition the Python source never wrote.",
+      "decisions": [
+        {
+          "label": "Iteration owner",
+          "value": "Route each body result through a tiny scheduler switch with explicit next and done exits."
+        },
+        {
+          "label": "Cross-turn mark",
+          "value": "Only next-iteration paths use the amber dotted cadence."
+        },
+        {
+          "label": "Final value",
+          "value": "Completion has its own visible route rather than sharing the recurrence blindly."
+        }
+      ],
+      "keepParts": [
+        "next exit",
+        "done exit",
+        "single scheduler gate"
+      ],
+      "proof": [
+        "The hero advances between two iterations through the live control.",
+        "The same original merge fixture is used across all ten directions."
+      ],
+      "previewLabel": "interactive loop trace",
+      "preview": "\n    <div style=\"min-height:330px;border:1px solid #d8dddf;border-radius:16px;background:#fbfcfc;padding:12px;display:grid;gap:8px\">\n      <svg viewBox=\"0 0 720 300\" role=\"img\" aria-label=\"For-loop representation\" style=\"width:100%;height:auto;display:block\">\n        <defs>\n          <marker id=\"arr\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#263238\" stroke-width=\"1.8\"/></marker>\n          <marker id=\"arr-amber\" viewBox=\"0 0 10 10\" refX=\"8\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"1.8\"/></marker>\n        </defs>\n        <rect x=\"8\" y=\"8\" width=\"704\" height=\"284\" rx=\"14\" fill=\"#fff\" stroke=\"#d7dcde\"/>\n        <rect x=\"116\" y=\"52\" width=\"486\" height=\"214\" rx=\"12\" fill=\"#f9fbfb\" stroke=\"#8d989e\" stroke-width=\"1.7\"/><text x=\"130\" y=\"76\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"15\" font-weight=\"700\" fill=\"#263238\" class=\"\">for other in others</text>\n      <g>\n        <rect x=\"202\" y=\"122\" width=\"132\" height=\"80\" rx=\"10\" fill=\"#fff\" stroke=\"#2878a8\" stroke-width=\"2\"/>\n        <rect x=\"202\" y=\"122\" width=\"132\" height=\"8\" rx=\"4\" fill=\"#2878a8\"/>\n        <text x=\"214\" y=\"153\" font-family=\"ui-monospace,monospace\" font-size=\"16\" font-weight=\"700\" fill=\"#263238\">merge()</text>\n        <text x=\"214\" y=\"174\" font-size=\"11\" fill=\"#66737b\">pose, other</text>\n      </g><path d=\"M450 112 L518 160 L450 208 L382 160 Z\" fill=\"#fff\" stroke=\"#22845d\" stroke-width=\"2\"/><text x=\"450\" y=\"157\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"700\" fill=\"#263238\" class=\"\">more?</text><text x=\"450\" y=\"176\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#66737b\" class=\"\">next / done</text><path d=\"M36 142 H202\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"38\" y=\"132\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">otherᵢ</text><path d=\"M36 188 H202\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"38\" y=\"178\" text-anchor=\"start\" font-family=\"ui-monospace,monospace\" font-size=\"12\" font-weight=\"500\" fill=\"#66737b\" class=\"\">poseᵢ</text><path d=\"M334 160 H382\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><path d=\"M450 208 V246 H156 V188\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"3 7\" marker-end=\"url(#arr-amber)\"/><path d=\"M518 160 H684\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" marker-end=\"url(#arr)\"/><text x=\"682\" y=\"150\" text-anchor=\"end\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#66737b\" class=\"\">done → pose</text><text x=\"348\" y=\"240\" text-anchor=\"middle\" font-family=\"ui-monospace,monospace\" font-size=\"10\" font-weight=\"500\" fill=\"#c97808\" class=\"\">next and final are two explicit exits</text>\n        <g transform=\"translate(592 20)\">\n          <rect width=\"98\" height=\"27\" rx=\"13\" fill=\"#fff7e6\" stroke=\"#c97808\"/>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-base-only\">iteration i</text>\n          <text x=\"49\" y=\"18\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"700\" fill=\"#c97808\" class=\"demo-alt-only\">iteration i+1</text>\n        </g>\n      </svg>\n      <div style=\"display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 8px 4px\">\n        <small style=\"color:#66737b\">A small scheduler switch makes the final value impossible to mistake for the next value.</small>\n        <button class=\"demo-button\" data-demo-toggle data-base-label=\"Advance one iteration\" data-alt-label=\"Return to iteration i\">Advance one iteration</button>\n      </div>\n    </div>",
+      "story": {
+        "title": "Read one iteration boundary",
+        "steps": [
+          {
+            "label": "Read iteration i",
+            "caption": "Locate the current item, current carried value, body result, and completion route.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Advance to i+1",
+            "caption": "Only the dotted amber route crosses the iteration boundary; solid body wires remain same-turn.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "media": [
+        {
+          "label": "Reading key",
+          "caption": "Next / Done Switch keeps ordinary body flow solid and reserves amber dots for values unavailable until the next turn.",
+          "html": "<div style=\"min-height:110px;border:1px solid #d9dfe1;border-radius:12px;padding:18px;background:#fff;display:grid;gap:16px\"><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#263238\" stroke-width=\"3\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#263238\" stroke-width=\"2\"/></svg><b>same invocation</b></div><div style=\"display:flex;align-items:center;gap:12px\"><svg width=\"130\" height=\"18\"><path d=\"M4 9H122\" stroke=\"#c97808\" stroke-width=\"3\" stroke-dasharray=\"3 7\"/><path d=\"M114 3l8 6-8 6\" fill=\"none\" stroke=\"#c97808\" stroke-width=\"2\"/></svg><b>next iteration</b></div></div>"
+        }
+      ],
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "Next / Done Switch visibly separates the iterable, current item, seed, recurrence, and final result to the degree shown in the hero.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 4,
+          "evidence": "The iteration toggle exposes how Next / Done Switch distinguishes iteration i from i+1 without changing the body graph.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "The stress atlas applies Next / Done Switch to map, accumulate, destructure, dual-state conditional, and nested-break cases.",
+          "confidence": "medium"
+        },
+        "fr4": {
+          "score": 3,
+          "evidence": "The hero shows the number and length of loop-specific routes Next / Done Switch adds around one merge body.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "The proposed parts can be compared directly with current Blocks, Pills, regions, and dotted/delayed edges.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The Next / Done Switch hero gives this role an explicit label, path, or boundary."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "The Next / Done Switch hero gives this role an explicit label, path, or boundary."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "The Next / Done Switch hero gives this role an explicit label, path, or boundary."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The Next / Done Switch hero gives this role an explicit label, path, or boundary."
+        }
+      }
+    }
+  ]
+}
