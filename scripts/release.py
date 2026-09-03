@@ -121,8 +121,9 @@ def build_host_artifacts(
             vscode_version = vscode_package["version"]
         except (OSError, ValueError, KeyError) as cause:
             raise ReleaseError(f"could not read the VS Code plugin version: {cause}") from cause
-        vscode_output = staging / "vscode" / f"systemsketch-vscode-{vscode_version}.vsix"
-        vscode_output.parent.mkdir()
+        vscode_dist_output = (
+            vscode_root / "dist" / f"systemsketch-vscode-{vscode_version}.vsix"
+        )
         subprocess.run(
             [
                 str(vscode_root / "node_modules" / ".bin" / "vsce"),
@@ -130,14 +131,17 @@ def build_host_artifacts(
                 "--allow-missing-repository",
                 "--skip-license",
                 "--out",
-                str(vscode_output),
+                str(vscode_dist_output),
             ],
             cwd=vscode_root,
             check=True,
             env=environment,
         )
-        if not vscode_output.is_file():
+        if not vscode_dist_output.is_file():
             raise ReleaseError("VS Code packaging produced no VSIX")
+        vscode_output = staging / "vscode" / vscode_dist_output.name
+        vscode_output.parent.mkdir()
+        shutil.copy2(vscode_dist_output, vscode_output)
 
         subprocess.run(["npm", "run", "typecheck"], cwd=obsidian_root, check=True, env=environment)
         subprocess.run(["node", "esbuild.config.mjs"], cwd=obsidian_root, check=True, env=environment)
