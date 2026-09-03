@@ -37,7 +37,7 @@ function connection(id: string): ConnectionShape {
 		props: {
 			start: { x: 0, y: 0 }, end: { x: 100, y: 0 }, routing: 'elbow', curve: null,
 			pins: [], elbowRoute: null, routeMode: 'automatic', temporal: 'data', delayValue: '', pillPosition: 0.5,
-			tunnel: false, tunnelLayer: '',
+			tunnel: false, tunnelLayer: '', state: 'normal',
 		},
 	}
 }

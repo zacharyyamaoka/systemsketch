@@ -31,6 +31,7 @@ function connection(): ConnectionShape {
       pillPosition: 0.5,
       tunnel: false,
       tunnelLayer: '',
+      state: 'normal',
     },
   }
 }

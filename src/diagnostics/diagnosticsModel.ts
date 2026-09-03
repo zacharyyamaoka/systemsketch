@@ -2,9 +2,11 @@ import type { Editor, TLPageId, TLShape, TLShapeId } from 'tldraw'
 
 import {
 	isBlockShape,
+	isGhostPort,
 	portDefaultValue,
 	type BlockPort,
 	type BlockShape,
+	type BlockState,
 } from '../blocks/blockModel'
 import {
 	getPortHostPort,
@@ -295,6 +297,10 @@ function addBlockDiagnostics(
 	}
 
 	for (const port of block.props.inputs) {
+		// A ghost row is a mark, not a port: it is the diff lens saying this
+		// board does NOT have this input. Reporting it as unresolved would let a
+		// lens manufacture findings about the board it is describing.
+		if (isGhostPort(port)) continue
 		// A Value-view Block is a literal/variable Pill. Its inlet is optional:
 		// unconnected means the Pill's own literal is the source, while a cable
 		// turns it into a named pass-through value. The title/literal validation
@@ -526,6 +532,47 @@ export function getBoardDiagnosticsModel(editor: Editor): BoardDiagnosticsModel 
 	}
 
 	return { diagnostics, pages: groupedPages, counts }
+}
+
+/**
+ * The second consumer of the diff lens's vocabulary.
+ *
+ * The linter and the conformance-diff projector both want to say "this thing
+ * is wrong", and there is no reason for a reader to learn two spellings of it.
+ * So a severity maps onto the same `state` enum a Block, a port and a cable
+ * already carry, and the paint in `block-canvas.css` serves both.
+ *
+ * `info` deliberately gets `normal`: a note is not a mark. Painting every
+ * informational finding onto the canvas is how a diff view stops being able to
+ * show a calm board.
+ */
+export function diagnosticSeverityState(severity: BoardDiagnosticSeverity): BlockState {
+	if (severity === 'error') return 'error'
+	if (severity === 'warning') return 'warning'
+	return 'normal'
+}
+
+/**
+ * The linter's findings as a state per shape — an in-memory overlay, never a
+ * write. The loudest finding on a shape wins, because a shape with an error and
+ * a warning on it is an error.
+ *
+ * Nothing paints from this yet; the Problems panel is still the linter's
+ * surface. It exists so the two producers cannot drift into two vocabularies
+ * while the diff lane is the only one using the enum.
+ */
+export function boardDiagnosticStateOverlay(
+	model: BoardDiagnosticsModel,
+): Map<TLShapeId, BlockState> {
+	const overlay = new Map<TLShapeId, BlockState>()
+	for (const diagnostic of model.diagnostics) {
+		const state = diagnosticSeverityState(diagnostic.severity)
+		if (state === 'normal') continue
+		for (const id of uniqueShapeIds([diagnostic.primaryShapeId, ...diagnostic.affectedIds])) {
+			if (state === 'error' || overlay.get(id) === undefined) overlay.set(id, state)
+		}
+	}
+	return overlay
 }
 
 const CAMERA_ANIMATION = { duration: 220 }
