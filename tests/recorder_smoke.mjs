@@ -256,9 +256,9 @@ async function main() {
     check('packet-first-line', 'the packet opens with the recording headline', first.packet.startsWith('SystemSketch interaction recording'), true)
     check('packet-without-ui-note', 'saving without a UI note produces a complete, path-bearing packet', {
       emptyHeaderNote: first.header.note === '',
-      saysNoNote: first.packet.includes('No note was typed.'),
+      omitsLegacyNoNote: !first.packet.includes('No note was typed.'),
       hasTimelinePath: first.packet.includes(`${folders[0]}/timeline.jsonl`),
-    }, { emptyHeaderNote: true, saysNoNote: true, hasTimelinePath: true })
+    }, { emptyHeaderNote: true, omitsLegacyNoNote: true, hasTimelinePath: true })
     check('packet-paths', 'the packet points at the folder by absolute path', first.packet.includes(`${folders[0]}/timeline.jsonl`), true)
     check('packet-on-clipboard', 'the clipboard holds the packet verbatim', typeof clipboard === 'string' && clipboard === first.packet, true)
     check('header-mode', 'the saved recording is an explicit take on Preview', { mode: first.header.mode, channel: first.header.channel, framesSource: first.header.framesSource }, { mode: 'take', channel: 'preview', framesSource: 'screencast' })
