@@ -52,6 +52,16 @@ import {
 	type ConnectionTerminal,
 } from '../connections/connectionModel'
 import type { ConnectionBinding } from '../connections/ConnectionBindingUtil'
+import {
+	getConnectionRenderPoints,
+	getConnectionShapePath,
+	getConnectionTerminals,
+	type ConnectionShape,
+} from '../connections/ConnectionShapeUtil'
+import {
+	systemSketchPrimitiveMeta,
+	type SystemSketchArrowPrimitiveStyle,
+} from '../../stockPrimitiveVisuals'
 import { primitivesForBlock } from './blockPrimitives'
 import {
 	DETACH_FORMAT_VERSION,
@@ -274,6 +284,11 @@ function rebuildCableAsArrow(
 
 	const routing = (cable.connection.props as { routing?: ConnectionRoutingKind }).routing ?? 'elbow'
 	const arrowId = createShapeId()
+	const primitiveStyle = detachedCablePrimitiveStyle(
+		editor,
+		cable.connection as ConnectionShape,
+		start,
+	)
 	editor.createShape({
 		id: arrowId,
 		type: 'arrow',
@@ -294,12 +309,12 @@ function rebuildCableAsArrow(
 			arrowheadStart: 'none',
 			arrowheadEnd: 'none',
 		},
-		meta: detachMeta({
+		meta: systemSketchPrimitiveMeta(primitiveStyle, detachMeta({
 			kind: 'connection',
 			version: DETACH_FORMAT_VERSION,
 			routing,
 			ends,
-		}),
+		})),
 	})
 	editor.createBinding<TLArrowBinding>({
 		type: 'arrow',
@@ -332,6 +347,42 @@ function rebuildCableAsArrow(
 
 	editor.deleteShape(cable.connection.id)
 	return 1
+}
+
+/** Capture the exact semantic cable body in the replacement arrow's space. */
+function detachedCablePrimitiveStyle(
+	editor: Editor,
+	connection: ConnectionShape,
+	arrowOriginPage: { x: number; y: number },
+): SystemSketchArrowPrimitiveStyle {
+	const pageTransform = editor.getShapePageTransform(connection)
+	const origin = pageTransform.applyToPoint({ x: 0, y: 0 })
+	const basisX = pageTransform.applyToPoint({ x: 1, y: 0 })
+	const basisY = pageTransform.applyToPoint({ x: 0, y: 1 })
+	const transform = {
+		a: basisX.x - origin.x,
+		b: basisX.y - origin.y,
+		c: basisY.x - origin.x,
+		d: basisY.y - origin.y,
+		e: origin.x - arrowOriginPage.x,
+		f: origin.y - arrowOriginPage.y,
+	}
+	const place = (point: { x: number; y: number }) => ({
+		x: transform.a * point.x + transform.c * point.y + transform.e,
+		y: transform.b * point.x + transform.d * point.y + transform.f,
+	})
+	const terminals = getConnectionTerminals(editor, connection)
+	return {
+		kind: 'arrow',
+		strokeColor: 'var(--tl-color-text-3, #475569)',
+		strokeWidth: 2,
+		path: {
+			d: getConnectionShapePath(editor, connection),
+			transform,
+			frame: { start: place(terminals.start), end: place(terminals.end) },
+			samples: getConnectionRenderPoints(editor, connection).map((point) => point.toJson()),
+		},
+	}
 }
 
 /**
