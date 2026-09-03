@@ -219,12 +219,12 @@ async function main() {
     const initialCopySource = await waitForFile(
       copyPath,
       (source) => {
-        try { return JSON.parse(source).systemSketch?.formatVersion === 1 } catch { return false }
+        try { return JSON.parse(source).systemSketch?.formatVersion === 2 } catch { return false }
       },
       'current-format compatibility copy',
     )
     const initialCopy = JSON.parse(initialCopySource)
-    assert.equal(initialCopy.systemSketch.formatVersion, 1)
+    assert.equal(initialCopy.systemSketch.formatVersion, 2)
     assert.equal(initialCopy.systemSketch.futureOnly, undefined)
     assert.equal(await readFile(futurePath, 'utf8'), futureSource)
     assert.equal(await evaluate(page, 'window.__systemsketch.editor.getInstanceState().isReadonly'), false)

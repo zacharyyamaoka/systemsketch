@@ -12,6 +12,7 @@ import {
 } from 'tldraw'
 
 import { BranchCanvas } from './BranchCanvas'
+import { isBranchArmShape } from './BranchArmShapeUtil'
 import {
 	branchInlineFieldAtPoint,
 	branchInlineFieldFromClientPoint,
@@ -199,6 +200,10 @@ export class BranchShapeUtil extends BaseFrameLikeShapeUtil<BranchShape> {
 
 	/** Cables cross the region freely; they live in the scope outside it. */
 	override shouldClipChild(child: TLShape): boolean {
+		// A framed arm supplies the tighter mask. Applying the Branch's coincident
+		// outer rectangle as well is redundant and exposes polygon-intersection
+		// degeneracies when the two frames share their left and right edges.
+		if (this.editor.getShapeAncestors(child).some(isBranchArmShape)) return false
 		return child.type !== 'connection' && super.shouldClipChild(child)
 	}
 

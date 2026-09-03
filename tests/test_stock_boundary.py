@@ -69,6 +69,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertNotIn('title="Branch"', toolbar_source)
         self.assertNotIn('title="Comment"', toolbar_source)
         self.assertIn("BranchShapeUtil,", source)
+        self.assertIn("BranchArmShapeUtil,", source)
         self.assertIn("const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, PillTool]", source)
         self.assertIn("const stopBranchRegions = installBranchRegions(editor)", product_source)
         self.assertIn("const stopBranchClickToEdit = installBranchClickToEdit(editor)", product_source)
@@ -108,6 +109,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("tools={EMBEDDED_TOOLS}", embedded)
         self.assertIn("BlockShapeUtil,", embedded)
         self.assertIn("BranchShapeUtil,", embedded)
+        self.assertIn("BranchArmShapeUtil,", embedded)
         self.assertIn("PillTool,", embedded)
         self.assertIn("...blockConnectionShapeUtils,", embedded)
         self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool]", embedded)
@@ -132,12 +134,15 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("createTLStore({", store_factory)
         self.assertIn("records: SYSTEMSKETCH_COMMENT_RECORDS", store_factory)
         self.assertIn("BranchShapeUtil", store_factory)
+        self.assertIn("BranchArmShapeUtil", store_factory)
         self.assertIn("SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS", store_factory)
 
         portable_export = (
             PROJECT_ROOT / "src" / "export" / "portableTldraw.ts"
         ).read_text(encoding="utf-8")
         self.assertIn("BranchShapeUtil", portable_export)
+        self.assertIn("BranchArmShapeUtil", portable_export)
+        self.assertIn("unwrapBranchArmFrames", portable_export)
         self.assertIn("record.type === BRANCH_SHAPE_TYPE", portable_export)
         self.assertIn("SYSTEMSKETCH_ROUNDED_RECT_GEO", portable_export)
         self.assertIn("portableValuePillText", portable_export)

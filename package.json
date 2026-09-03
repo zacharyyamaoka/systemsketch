@@ -48,6 +48,7 @@
     "test:case-view": "node tests/branch_case_view_smoke.mjs",
     "test:authoring": "node tests/branch_authoring_smoke.mjs",
     "test:branch": "node tests/branch_region_smoke.mjs",
+    "test:branch-frames": "node tests/branch_arm_frames_smoke.mjs",
     "test:edge-vocabulary": "node tests/edge_vocabulary_smoke.mjs",
     "test:file-type-stable": "node tests/stable_file_type_probe.mjs",
     "test:detach": "node tests/block_detach_smoke.mjs",

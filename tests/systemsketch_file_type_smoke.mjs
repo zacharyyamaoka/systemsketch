@@ -152,7 +152,7 @@ async function main() {
         blocks: written.systemSketch?.shapes?.block ?? 0,
         connections: written.systemSketch?.bindings?.connection ?? 0,
       },
-      { application: 'SystemSketch', formatVersion: 1, blocks: 2, connections: 2 })
+      { application: 'SystemSketch', formatVersion: 2, blocks: 2, connections: 2 })
     check('STILL-A-TLDRAW-FILE', 'the rest of the document is an unchanged tldraw file',
       {
         version: written.tldrawFileFormatVersion,
