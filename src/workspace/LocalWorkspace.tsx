@@ -1233,7 +1233,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
               ))}
               <strong>Recent</strong>
               {workspace.recents.length ? workspace.recents.map((path) => (
-                <button key={path} type="button" title={path} onClick={() => {
+                <button key={path} type="button" title={path} data-testid="workspace-recent" onClick={() => {
                   if (mode === 'open') void workspace.open(path)
                   else void load(parentDirectory(path))
                 }}>

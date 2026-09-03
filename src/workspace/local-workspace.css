@@ -129,6 +129,14 @@
   background: var(--ss-accent);
 }
 
+/* Buttons are native controls too, and do not reliably inherit `color` from
+ * the dialog. Claim the default ink once; component rules below still
+ * override muted, accent, inverse, and danger states deliberately. */
+.systemsketch-workspace-dialog button {
+  color: var(--ss-text);
+  font-family: inherit;
+}
+
 .systemsketch-workspace-dialog > header,
 .systemsketch-workspace-dialog > footer {
   display: flex;
@@ -536,6 +544,10 @@
 .systemsketch-workspace-browser > aside button.is-current {
   background: var(--ss-surface-active);
   box-shadow: inset 0 0 0 1px var(--ss-border);
+}
+
+.systemsketch-workspace-browser > aside button.is-current small {
+  color: var(--ss-text);
 }
 
 .systemsketch-workspace-crumbs {
