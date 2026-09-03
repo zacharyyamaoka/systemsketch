@@ -1,0 +1,150 @@
+{
+  "feature": "Turn a selection into a container",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "shapes": [
+    {
+      "id": "read",
+      "type": "block",
+      "x": 340,
+      "y": 310,
+      "props": {
+        "title": "read()",
+        "description": "Grabs one frame",
+        "blockType": "Function",
+        "view": "port",
+        "w": 280,
+        "h": 150,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "cam",
+            "type": "Camera",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "frame",
+            "type": "Image",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "detect",
+      "type": "block",
+      "x": 650,
+      "y": 310,
+      "props": {
+        "title": "detect()",
+        "description": "Finds objects",
+        "blockType": "Function",
+        "view": "port",
+        "w": 280,
+        "h": 150,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "frame",
+            "type": "Image",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "boxes",
+            "type": "Boxes",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "draw",
+      "type": "block",
+      "x": 960,
+      "y": 310,
+      "props": {
+        "title": "draw()",
+        "description": "Draws the boxes",
+        "blockType": "Function",
+        "view": "port",
+        "w": 280,
+        "h": 150,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "boxes",
+            "type": "Boxes",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "out",
+            "type": "Image",
+            "visible": true
+          }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 \u00b7 Drag a box around all three Blocks. A Wrap tile appears only once two or more are selected.",
+      "x": 310,
+      "y": 100,
+      "w": 370,
+      "h": 130,
+      "target": {
+        "shapeId": "read",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 \u00b7 Select all three again, right-click, and use Turn into \u25b8 Branch region \u2014 same list, second way in.",
+      "x": 860,
+      "y": 100,
+      "w": 390,
+      "h": 130,
+      "target": {
+        "shapeId": "draw",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 \u00b7 Click Wrap, choose Block. Then press Ctrl+Z \u2014 one undo unwraps it whole.",
+      "x": 620,
+      "y": 540,
+      "w": 440,
+      "h": 120,
+      "target": {
+        "shapeId": "detect",
+        "anchor": "bottom"
+      }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN \u00b7 Both routes wrap the three into one container, one undo unwraps it, and a Frame's menu says \u201cRemove frame, leave children\u201d once.",
+      "x": 120,
+      "y": 540,
+      "w": 440,
+      "h": 140
+    }
+  ]
+}

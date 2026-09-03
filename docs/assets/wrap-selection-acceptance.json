@@ -1,0 +1,132 @@
+[
+  {
+    "id": "gate-none",
+    "label": "no Wrap tile with nothing selected",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "gate-one",
+    "label": "no Wrap tile for a single object",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "gate-two",
+    "label": "Wrap tile appears at two objects",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "tile-options",
+    "label": "the tile offers all four containers",
+    "observed": [
+      "wrap-into-frame",
+      "wrap-into-block",
+      "wrap-into-branch",
+      "wrap-into-group"
+    ],
+    "desired": [
+      "wrap-into-frame",
+      "wrap-into-block",
+      "wrap-into-branch",
+      "wrap-into-group"
+    ],
+    "ok": true
+  },
+  {
+    "id": "tile-block",
+    "label": "wrapping in a Block adds one Block",
+    "observed": [
+      "block",
+      "geo",
+      "geo"
+    ],
+    "desired": [
+      "block",
+      "geo",
+      "geo"
+    ],
+    "ok": true
+  },
+  {
+    "id": "tile-block-adopted",
+    "label": "both rectangles are inside it",
+    "observed": 2,
+    "desired": 2,
+    "ok": true
+  },
+  {
+    "id": "tile-block-view",
+    "label": "the Block is Expanded, the only view that holds children",
+    "observed": "expanded",
+    "desired": "expanded",
+    "ok": true
+  },
+  {
+    "id": "tile-unmounts",
+    "label": "the tile leaves once one container is selected",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "tile-undo",
+    "label": "one undo unwraps it whole",
+    "observed": [
+      "geo",
+      "geo"
+    ],
+    "desired": [
+      "geo",
+      "geo"
+    ],
+    "ok": true
+  },
+  {
+    "id": "menu-turn-into",
+    "label": "the right-click menu offers Turn into",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "menu-no-duplicate",
+    "label": "the old Frame-only duplicate is gone",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "frame-wrapped",
+    "label": "the stock frame action wraps them",
+    "observed": [
+      "frame",
+      "geo",
+      "geo"
+    ],
+    "desired": [
+      "frame",
+      "geo",
+      "geo"
+    ],
+    "ok": true
+  },
+  {
+    "id": "remove-frame-renamed",
+    "label": "stock Remove frame now says what it keeps",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "console",
+    "label": "no browser errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

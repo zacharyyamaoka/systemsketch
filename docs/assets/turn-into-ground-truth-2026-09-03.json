@@ -1,0 +1,196 @@
+{
+  "frameLike": [
+    {
+      "type": "frame",
+      "frameLike": true,
+      "acceptsGeoChild": true
+    },
+    {
+      "type": "group",
+      "frameLike": false,
+      "acceptsGeoChild": false
+    },
+    {
+      "type": "geo",
+      "frameLike": false,
+      "acceptsGeoChild": false
+    },
+    {
+      "type": "block",
+      "frameLike": false,
+      "acceptsGeoChild": false
+    },
+    {
+      "type": "branch",
+      "frameLike": true,
+      "acceptsGeoChild": true
+    }
+  ],
+  "blockViews": [
+    {
+      "view": "simple",
+      "frameLike": false,
+      "acceptsGeoChild": false
+    },
+    {
+      "view": "port",
+      "frameLike": false,
+      "acceptsGeoChild": false
+    },
+    {
+      "view": "expanded",
+      "frameLike": true,
+      "acceptsGeoChild": true
+    },
+    {
+      "view": "value",
+      "frameLike": false,
+      "acceptsGeoChild": false
+    }
+  ],
+  "before": {
+    "selected": 4,
+    "shapesOnPage": 4,
+    "types": [
+      "geo"
+    ]
+  },
+  "contextMenuTop": [
+    "Edit",
+    "Arrange",
+    "Reorder",
+    "CutCtrl+X",
+    "CopyCtrl+C",
+    "PasteCtrl+V",
+    "DuplicateCtrl+D",
+    "Delete\u232b",
+    "Copy as",
+    "Export as",
+    "Select allCtrl+A"
+  ],
+  "openedEdit": "clicked",
+  "editSubmenu": [
+    "Edit",
+    "Arrange",
+    "Reorder",
+    "CutCtrl+X",
+    "CopyCtrl+C",
+    "PasteCtrl+V",
+    "DuplicateCtrl+D",
+    "Delete\u232b",
+    "Copy as",
+    "Export as",
+    "Select allCtrl+A",
+    "GroupCtrl+G",
+    "Flatten\u21e7+F",
+    "Frame selectionCtrl+Alt+G",
+    "Toggle locked\u21e7+L"
+  ],
+  "clickedFrameSelection": "clicked",
+  "afterWrap": {
+    "frameCount": 1,
+    "frameName": "",
+    "children": 4,
+    "childTypes": [
+      "geo"
+    ],
+    "selected": 1,
+    "selectedType": "frame",
+    "frameW": 820,
+    "frameH": 306
+  },
+  "editSubmenuOnFrame": [
+    "Delete frame, leave children",
+    "Edit",
+    "Reorder",
+    "CutCtrl+X",
+    "CopyCtrl+C",
+    "PasteCtrl+V",
+    "DuplicateCtrl+D",
+    "Delete\u232b",
+    "Copy as",
+    "Export as",
+    "Select allCtrl+A",
+    "Flatten\u21e7+F",
+    "Fit to content",
+    "Remove frame",
+    "Toggle locked\u21e7+L"
+  ],
+  "clickedRemoveFrame": "clicked",
+  "afterUnwrap": {
+    "frameCount": 0,
+    "loose": 4,
+    "selected": 4,
+    "allOnPage": [
+      "geo",
+      "geo",
+      "geo",
+      "geo"
+    ]
+  },
+  "shortcuts": {
+    "note": "Driven in the running product with the tl-container focused; each row is the observed document change.",
+    "ctrl+g": {
+      "label": "ctrl+g",
+      "observed": "groups 0 -> 1",
+      "fires": true
+    },
+    "ctrl+shift+g": {
+      "label": "ctrl+shift+g",
+      "observed": "groups 1 -> 0",
+      "fires": true
+    },
+    "ctrl+alt+g": {
+      "label": "ctrl+alt+g",
+      "observed": "frames 0 -> 0",
+      "fires": false
+    },
+    "meta+alt+g": {
+      "label": "meta+alt+g",
+      "observed": "frames 0 -> 1",
+      "fires": true
+    },
+    "inverse": {
+      "label": "meta+alt+g (again)",
+      "observed": "frames 1 -> 0",
+      "fires": true
+    }
+  },
+  "selectionMenu": {
+    "present": true,
+    "buttons": [
+      {
+        "testid": null,
+        "title": "Shape, rectangle"
+      },
+      {
+        "testid": null,
+        "title": "Color, black"
+      },
+      {
+        "testid": null,
+        "title": "Line style, draw"
+      },
+      {
+        "testid": null,
+        "title": "Typeface, scribbled"
+      },
+      {
+        "testid": null,
+        "title": "Font size, medium"
+      },
+      {
+        "testid": null,
+        "title": "Text alignment, center"
+      },
+      {
+        "testid": null,
+        "title": "Vertical alignment, middle"
+      },
+      {
+        "testid": null,
+        "title": "Open inspector"
+      }
+    ]
+  }
+}
