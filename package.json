@@ -72,7 +72,8 @@
     "test:contextual-layout": "node tests/contextual_layout_actions_smoke.mjs",
     "theme:import": "node --experimental-strip-types scripts/import_vscode_theme.mjs",
     "theme:obsidian": "python3 scripts/extract_obsidian_palette.py",
-    "test:export": "node tests/tldraw_export_smoke.mjs"
+    "test:export": "node tests/tldraw_export_smoke.mjs",
+    "test:definitions": "node tests/definition_linking_smoke.mjs"
   },
   "dependencies": {
     "elkjs": "0.12.0",

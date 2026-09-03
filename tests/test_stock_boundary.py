@@ -44,17 +44,20 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("enablePasteAtCursor(editor)", development_source)
         self.assertIn("const stopWorkspace = attach(editor)", product_source)
         self.assertIn("const stopBlockConnections = installBlockConnections(editor)", product_source)
+        self.assertIn("const stopDefinitionLinking = installDefinitionLinking(editor)", product_source)
         self.assertIn("const stopInstantTextEditing = installInstantTextEditing(editor)", product_source)
         self.assertIn("stopInstantTextEditing()", product_source)
         self.assertIn("const stopArrowClickToPlace = installArrowClickToPlace(editor)", product_source)
         self.assertIn("stopArrowClickToPlace()", product_source)
         self.assertIn("stopBlockConnections()", product_source)
+        self.assertIn("stopDefinitionLinking()", product_source)
         self.assertIn("<SystemSketchWorkspaceProvider>", source)
         self.assertIn("<ChromeProvider>", source)
         self.assertNotIn("persistenceKey=", product_source)
         self.assertIn("persistenceKey={developmentPersistenceKey(profile)}", development_source)
         self.assertIn("if (profile !== 'product')", source)
         self.assertIn("isBlockDevelopment\n      ? installInstantTextEditing(editor)", development_source)
+        self.assertIn("isBlockDevelopment\n      ? installDefinitionLinking(editor)", development_source)
         self.assertNotIn("<UpdatePill", source)
         self.assertFalse((PROJECT_ROOT / "src" / "UpdatePill.tsx").exists())
 
@@ -126,6 +129,8 @@ class StockBoundaryTests(unittest.TestCase):
         # would quietly compete with the file the host opened.
         self.assertNotIn("persistenceKey", embedded)
         self.assertNotIn("installFlightRecorder", embedded)
+        self.assertIn("const stopDefinitionLinking = installDefinitionLinking(editor)", embedded)
+        self.assertIn("stopDefinitionLinking()", embedded)
 
         store_factory = (
             PROJECT_ROOT / "src" / "store" / "createSystemSketchStore.ts"

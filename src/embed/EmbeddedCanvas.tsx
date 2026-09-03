@@ -17,6 +17,7 @@ import {
   getBlockShapeVisibility,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
+  installDefinitionLinking,
 } from '../blocks'
 import { BlockContextMenu } from '../blocks/ui'
 import {
@@ -215,6 +216,7 @@ function EmbeddedSurface({
     }
 
     enablePasteAtCursor(editor)
+    const stopDefinitionLinking = installDefinitionLinking(editor)
     const stopBlockConnections = installBlockConnections(editor)
     const stopInstantTextEditing = installInstantTextEditing(editor)
     const stopBlockClickToEdit = installBlockClickToEdit(editor)
@@ -316,6 +318,7 @@ function EmbeddedSurface({
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopBlockConnections()
+      stopDefinitionLinking()
     }
   }, [openDocument, onCanvasCheckpoint, onCanvasText, onCompatibilityCopyAvailable, onLoadError])
 
