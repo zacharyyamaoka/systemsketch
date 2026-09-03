@@ -18,7 +18,11 @@ export const MAX_RECENT_DOCUMENTS = 12
 export interface DocumentFingerprint {
   mtime: number
   size: number
+  /** Digest of the exact UTF-8 file bytes; authoritative when both sides have one. */
+  digest: string | null
 }
+
+export const AUTOSAVE_RETRY_DELAYS_MS = [1_000, 3_000, 8_000] as const
 
 export type SyncAction =
   | { kind: 'idle' }
@@ -147,12 +151,54 @@ export function documentHref(path: string): string {
   return `${url.pathname}${url.search}${url.hash}`
 }
 
+/** Export always means a stock `.tldr`, even when a known different suffix was typed. */
+export function exportedTldrawPath(path: string): string {
+  const suffix = documentSuffix(path)
+  return suffix === TLDRAW_SUFFIX
+    ? path
+    : `${suffix ? path.slice(0, -suffix.length) : path}${TLDRAW_SUFFIX}`
+}
+
 export function sameFingerprint(
   left: DocumentFingerprint | null,
   right: DocumentFingerprint | null,
 ): boolean {
   if (left === null || right === null) return left === right
+  if (left.digest !== null && right.digest !== null) return left.digest === right.digest
   return Math.abs(left.mtime - right.mtime) <= 1e-6 && left.size === right.size
+}
+
+/** The next bounded retry delay; forced writes and digest conflicts always require a person. */
+export function autosaveRetryDelay(
+  failedAttempts: number,
+  options: { conflict?: boolean; force?: boolean } = {},
+): number | null {
+  if (options.conflict || options.force) return null
+  return AUTOSAVE_RETRY_DELAYS_MS[failedAttempts] ?? null
+}
+
+/**
+ * A clean external reload spans two requests (`stat`, then `read`). Refuse to
+ * apply its result if the user edited, a save advanced the base revision, or a
+ * newer disk revision replaced the one that caused the reload.
+ */
+export function canApplyExternalReload(input: {
+  requestedChangeEpoch: number
+  currentChangeEpoch: number
+  requestedBaseDigest: string | null
+  currentBaseDigest: string | null
+  expectedDiskDigest: string | null
+  loadedDiskDigest: string | null
+  hasUnsavedEdits: boolean
+  discardRequestedEdits: boolean
+}): boolean {
+  return input.requestedChangeEpoch === input.currentChangeEpoch
+    && input.requestedBaseDigest === input.currentBaseDigest
+    && (!input.hasUnsavedEdits || input.discardRequestedEdits)
+    && (
+      input.expectedDiskDigest === null
+      || input.loadedDiskDigest === input.expectedDiskDigest
+    )
 }
 
 export function nextSyncAction(input: {

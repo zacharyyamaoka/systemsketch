@@ -142,6 +142,18 @@ async function main() {
     assert.equal(await evaluate(page, 'document.title'), 'Arm — SystemSketch')
     pass('the window title names the open board, so many windows stay tellable apart')
 
+    // The filename is a stable launcher, so it proves both initial focus and
+    // restoration after the dialog closes via the keyboard.
+    await clickElement(page, '.systemsketch-file-title')
+    await waitFor(page, `document.querySelector('[data-mode="rename"]')`, 'the rename dialog')
+    assert.equal(await evaluate(page, `document.querySelector('#workspace-dialog-title')?.textContent`), 'Rename document')
+    assert.equal(await evaluate(page, 'document.activeElement?.id'), 'workspace-document-name')
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('[data-testid="workspace-dialog"]')`, 'Escape to close the dialog')
+    assert.equal(await evaluate(page,
+      `document.activeElement?.classList.contains('systemsketch-file-title')`), true)
+    pass('the dialog focuses its useful field, Escape closes it, and focus returns to its launcher')
+
     // 2. The File menu offers the window, next to the board it already made.
     await clickElement(page, '[data-testid="main-menu.button"]')
     await clickElement(page, '[data-testid="main-menu-sub.file-button"]')
@@ -159,6 +171,8 @@ async function main() {
     // 3. Ctrl+O opens the app's own browser — no second process involved.
     await key(page, 'o', 'KeyO', 2)
     await waitFor(page, `document.querySelector('[data-testid="workspace-dialog"]')`, 'the file browser')
+    assert.equal(await evaluate(page, `document.querySelector('#workspace-dialog-title')?.textContent`), 'Open a document')
+    assert.equal(await evaluate(page, 'document.activeElement?.dataset.testid'), 'workspace-filter')
     assert.deepEqual(JSON.parse(await rowTitles(page)), [
       'folder:Robotics', 'document:Arm', 'document:Gripper', 'document:Legacy',
     ])
@@ -166,8 +180,19 @@ async function main() {
       'folder', 'systemsketch', 'systemsketch', 'tldraw',
     ])
     assert.deepEqual(JSON.parse(await crumbs(page)).slice(-1), ['SystemSketch'])
+    await evaluate(page, `(() => {
+      const focusable = Array.from(document.querySelectorAll(
+        '[data-testid="workspace-dialog"] button:not([disabled]), [data-testid="workspace-dialog"] input:not([disabled])'
+      )).filter((element) => element.getClientRects().length)
+      focusable.at(-1).focus()
+    })()`)
+    await key(page, 'Tab', 'Tab')
+    assert.equal(await evaluate(page, `document.activeElement?.getAttribute('aria-label')`), 'Close')
+    await key(page, 'Tab', 'Tab', 8)
+    assert.equal(await evaluate(page, 'document.activeElement?.dataset.testid'), 'workspace-confirm')
+    await clickElement(page, '[data-testid="workspace-filter"]')
     await shoot(page, SHOT_BROWSER)
-    pass('Ctrl+O lists this folder, naming each document\u2019s own type')
+    pass('Ctrl+O focuses Filter, traps Tab inside the modal, and names each document\u2019s type')
 
     // 4. Typing filters the folder; arrow keys and Enter never touch the mouse.
     await clickElement(page, '[data-testid="workspace-filter"]')

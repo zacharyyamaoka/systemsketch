@@ -22,6 +22,7 @@ import {
 } from 'react'
 import {
   WorkspaceConflict,
+  isRetryableWorkspaceFailure,
   createWorkspaceDirectory,
   flushWorkspaceDocument,
   listWorkspace,
@@ -32,18 +33,22 @@ import {
   trashWorkspaceDocument,
   writeWorkspaceDocument,
   type WorkspaceListing,
+  type WorkspaceRequestOptions,
 } from './workspaceClient'
 import {
   SYSTEMSKETCH_SUFFIX,
   TLDRAW_SUFFIX,
   breadcrumbTrail,
   browserRows,
+  autosaveRetryDelay,
+  canApplyExternalReload,
   claimUntitledPath,
   documentHref,
   documentPathFor,
   documentSuffix,
   documentTitle,
   encodeDocumentForPath,
+  exportedTldrawPath,
   forgetDocumentPath,
   moveBrowserSelection,
   nextSyncAction,
@@ -63,7 +68,7 @@ import {
 import { inspectWorkspaceDocumentSource } from './workspaceDocument'
 import { installWorkspaceLifecycleProtection } from './workspaceLifecycle'
 import { decodeSystemSketchDocument } from './systemSketchFile'
-import { detachAllPrimitives } from '../blocks/detach'
+import { exportPortableTldraw } from '../export/portableTldraw'
 import './local-workspace.css'
 import { hydrateCustomColors } from '../appearance/customColors'
 import { SettingsGearIcon, SystemSketchSettingsDialog } from '../settings/InterfaceSettings'
@@ -101,13 +106,14 @@ export interface LocalWorkspaceController {
   newDocument(): Promise<void>
   save(force?: boolean): Promise<void>
   saveAs(path: string, force?: boolean): Promise<void>
-  exportTldraw(destination: string): Promise<void>
+  exportTldraw(destination: string, force?: boolean): Promise<void>
   rename(path: string): Promise<void>
   trash(): Promise<void>
   reveal(): Promise<void>
   takeDisk(): Promise<void>
   openWindow(path?: string): Promise<void>
   newWindow(): Promise<void>
+  runAction(action: () => Promise<unknown>): void
   showDialog(mode: Exclude<WorkspaceDialogMode, null>): void
   closeDialog(): void
   notice: string | null
@@ -140,27 +146,37 @@ function newWindowFeatures(): string {
   ].join(',')
 }
 
-/**
- * Force an export destination to `.tldr`.
- *
- * The chooser is asked for `.tldr` and appends it when nothing is typed, but a
- * person can still type `Board.systemsketch` into a save dialog. An export that
- * honoured that would write stock primitives under the extension that promises
- * semantics — the exact confusion the two file types exist to prevent.
- */
-function exportedTldrawPath(path: string): string {
-  const suffix = documentSuffix(path)
-  return suffix === TLDRAW_SUFFIX ? path : `${suffix ? path.slice(0, -suffix.length) : path}${TLDRAW_SUFFIX}`
-}
-
 function errorMessage(cause: unknown): string {
   return cause instanceof Error ? cause.message : String(cause)
 }
 
-function fingerprint(document: { mtime?: number; size?: number }): DocumentFingerprint | null {
+function currentDialogLauncher(): HTMLElement | null {
+  const active = document.activeElement instanceof HTMLElement ? document.activeElement : null
+  if (active?.closest('[role="menu"]')) {
+    return document.querySelector<HTMLElement>('[data-testid="main-menu.button"]')
+  }
+  if (active && active !== document.body) return active
+  return document.querySelector<HTMLElement>('[data-testid="main-menu.button"]')
+}
+
+const DIALOG_FOCUSABLE = [
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[href]',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',')
+
+function dialogFocusableElements(dialog: HTMLElement): HTMLElement[] {
+  return Array.from(dialog.querySelectorAll<HTMLElement>(DIALOG_FOCUSABLE))
+    .filter((element) => element.getClientRects().length > 0 && element.getAttribute('aria-hidden') !== 'true')
+}
+
+function fingerprint(document: { mtime?: number; size?: number; digest?: string }): DocumentFingerprint | null {
   return document.mtime === undefined || document.size === undefined
     ? null
-    : { mtime: document.mtime, size: document.size }
+    : { mtime: document.mtime, size: document.size, digest: document.digest ?? null }
 }
 
 /**
@@ -191,16 +207,17 @@ function loadDocumentSource(editor: Editor, source: string) {
   return { ...inspected, singlePageMigration }
 }
 
-async function firstReadableRecent(paths: string[]): Promise<{
+async function firstReadableRecent(paths: string[], options: WorkspaceRequestOptions = {}): Promise<{
   path: string
   document: Awaited<ReturnType<typeof readWorkspaceDocument>>
 } | null> {
   for (const path of paths) {
     try {
-      const document = await readWorkspaceDocument(path)
+      const document = await readWorkspaceDocument(path, options)
       if (document.source !== null) return { path, document }
       forgetDocumentPath(path)
-    } catch {
+    } catch (cause) {
+      if (options.signal?.aborted) throw cause
       forgetDocumentPath(path)
     }
   }
@@ -215,6 +232,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   const [recents, setRecents] = useState<string[]>(() => readRecentDocumentPaths())
   const [dialog, setDialog] = useState<WorkspaceDialogMode>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const [bootstrapAttempt, setBootstrapAttempt] = useState(0)
 
   const editorRef = useRef<Editor | null>(null)
   const browserHomeRef = useRef<{ root: string; directory: string } | null>(null)
@@ -226,26 +244,66 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   const savingRef = useRef(false)
   /** True for unreadable recovery and parseable future-format documents alike. */
   const protectedRef = useRef(false)
-  // Held while an export is borrowing the live document. See `exportTldraw`.
-  const exportingRef = useRef(false)
+  // Once a digest conflict is known, automatic saves stay paused until the
+  // person explicitly keeps their version or accepts the disk revision.
+  const conflictRef = useRef(false)
   const queuedSourceRef = useRef<Promise<string> | null>(null)
   // Counts document changes, so a save knows whether more arrived while it ran.
   const changeEpochRef = useRef(0)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const autosaveRetryCountRef = useRef(0)
   const autosaveStopRef = useRef<(() => void) | null>(null)
   const startAutosaveRef = useRef<() => void>(() => {})
   const persistRef = useRef<(force?: boolean) => Promise<void>>(async () => {})
   const finalFlushRef = useRef<() => void>(() => {})
   const statusRef = useRef(status)
+  const dialogLauncherRef = useRef<HTMLElement | null>(null)
   statusRef.current = status
 
   const updateRecents = useCallback((next: string[]) => setRecents(next), [])
+  const runAction = useCallback((action: () => Promise<unknown>) => {
+    try {
+      void action().catch((cause) => setNotice(errorMessage(cause)))
+    } catch (cause) {
+      setNotice(errorMessage(cause))
+    }
+  }, [])
+  const showDialog = useCallback((mode: Exclude<WorkspaceDialogMode, null>) => {
+    dialogLauncherRef.current = currentDialogLauncher()
+    setDialog(mode)
+  }, [])
+  const closeDialog = useCallback(() => {
+    const launcher = dialogLauncherRef.current
+    dialogLauncherRef.current = null
+    setDialog(null)
+    window.requestAnimationFrame(() => {
+      const target = launcher?.isConnected
+        ? launcher
+        : document.querySelector<HTMLElement>('[data-testid="main-menu.button"]')
+      target?.focus()
+    })
+  }, [])
+  const retryBootstrap = useCallback(() => {
+    setStatus({ kind: 'loading' })
+    setBootstrapAttempt((current) => current + 1)
+  }, [])
+  const enterConflict = useCallback(() => {
+    conflictRef.current = true
+    autosaveRetryCountRef.current = 0
+    if (saveTimerRef.current !== null) {
+      window.clearTimeout(saveTimerRef.current)
+      saveTimerRef.current = null
+    }
+    setStatus({ kind: 'conflict' })
+  }, [])
 
   useEffect(() => {
     let cancelled = false
+    const controller = new AbortController()
     void (async () => {
       try {
-        const listing = await listWorkspace()
+        const options = { signal: controller.signal }
+        const listing = await listWorkspace(undefined, options)
         const query = new URLSearchParams(window.location.search)
         const explicitPath = query.get('board')?.trim() || null
         const isIndependentDevelopmentBoard = query.has('previewClone') || query.has('preset')
@@ -254,9 +312,9 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
 
         if (explicitPath) {
           selectedPath = explicitPath
-          document = await readWorkspaceDocument(selectedPath)
+          document = await readWorkspaceDocument(selectedPath, options)
         } else if (!isIndependentDevelopmentBoard) {
-          const recent = await firstReadableRecent(readRecentDocumentPaths())
+          const recent = await firstReadableRecent(readRecentDocumentPaths(), options)
           if (recent) {
             selectedPath = recent.path
             document = recent.document
@@ -269,7 +327,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
                 listing.dir,
                 listing.documents.map((candidate) => candidate.path),
               )
-            document = await readWorkspaceDocument(selectedPath)
+            document = await readWorkspaceDocument(selectedPath, options)
           }
         } else {
           selectedPath = nextUntitledDocumentPath(
@@ -297,20 +355,27 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     })()
     return () => {
       cancelled = true
+      controller.abort()
     }
-  }, [updateRecents])
+  }, [bootstrapAttempt, updateRecents])
 
-  const scheduleSave = useCallback(() => {
+  const scheduleSave = useCallback((
+    delayMs = SAVE_DEBOUNCE_MS,
+    retryAttempt?: number,
+  ) => {
+    if (conflictRef.current) return
+    if (retryAttempt === undefined) autosaveRetryCountRef.current = 0
     const rescheduled = saveTimerRef.current !== null
     if (saveTimerRef.current !== null) window.clearTimeout(saveTimerRef.current)
     saveTimerRef.current = window.setTimeout(() => {
       saveTimerRef.current = null
       void persistRef.current()
-    }, SAVE_DEBOUNCE_MS)
+    }, delayMs)
     if (!rescheduled) {
       emitRecorderDiagnostic({
-        lane: 'workspace', name: 'autosave-scheduled', summary: 'autosave scheduled',
-        detail: { path: pathRef.current, delayMs: SAVE_DEBOUNCE_MS, changeEpoch: changeEpochRef.current },
+        lane: 'workspace', name: 'autosave-scheduled',
+        summary: retryAttempt === undefined ? 'autosave scheduled' : 'autosave retry scheduled',
+        detail: { path: pathRef.current, delayMs, retryAttempt, changeEpoch: changeEpochRef.current },
       })
     }
   }, [])
@@ -336,7 +401,9 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     autosaveStopRef.current?.()
     autosaveStopRef.current = null
     protectedRef.current = true
+    conflictRef.current = false
     dirtyRef.current = false
+    autosaveRetryCountRef.current = 0
     queuedSourceRef.current = null
     editor.updateInstanceState({ isReadonly: true })
     setStatus(protection)
@@ -351,10 +418,6 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       setNotice('This file is protected. Create a separate editable copy to keep the original untouched.')
       return
     }
-    // An export detaches every Block in the live document and puts it straight
-    // back. Persisting mid-export would write that borrowed state to the file
-    // the user is actually editing.
-    if (exportingRef.current) return
     if (savingRef.current) {
       if (dirtyRef.current) scheduleSave()
       return
@@ -370,6 +433,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     })
     const sourcePromise = queuedSource ?? serializeTldrawJson(editor!)
     let savedSuccessfully = false
+    let retry: { delayMs: number; attempt: number } | null = null
     try {
       const source = encodeDocumentForPath(boardPath, await sourcePromise)
       const saved = await writeWorkspaceDocument({
@@ -379,9 +443,11 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
         force,
       })
       digestRef.current = saved.digest
-      fingerprintRef.current = { mtime: saved.mtime, size: saved.size }
+      fingerprintRef.current = { mtime: saved.mtime, size: saved.size, digest: saved.digest }
       sourceRef.current = source
       savedSuccessfully = true
+      conflictRef.current = false
+      autosaveRetryCountRef.current = 0
       setIsPersisted(true)
       updateRecents(rememberDocumentPath(boardPath))
       if (queuedSourceRef.current === sourcePromise) queuedSourceRef.current = null
@@ -404,11 +470,18 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       })
     } catch (cause) {
       dirtyRef.current = true
-      setStatus(
-        cause instanceof WorkspaceConflict
-          ? { kind: 'conflict' }
-          : { kind: 'error', message: errorMessage(cause) },
-      )
+      const delayMs = isRetryableWorkspaceFailure(cause)
+        ? autosaveRetryDelay(autosaveRetryCountRef.current, { force })
+        : null
+      if (cause instanceof WorkspaceConflict) {
+        enterConflict()
+      } else if (delayMs !== null) {
+        autosaveRetryCountRef.current += 1
+        retry = { delayMs, attempt: autosaveRetryCountRef.current }
+      }
+      if (!(cause instanceof WorkspaceConflict)) {
+        setStatus({ kind: 'error', message: errorMessage(cause) })
+      }
       emitRecorderDiagnostic({
         lane: 'workspace', name: 'autosave-error', summary: cause instanceof WorkspaceConflict ? 'autosave conflict' : 'autosave failed', level: 'error',
         detail: {
@@ -424,8 +497,9 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     } finally {
       savingRef.current = false
       if (dirtyRef.current && savedSuccessfully) scheduleSave()
+      else if (dirtyRef.current && retry) scheduleSave(retry.delayMs, retry.attempt)
     }
-  }, [scheduleSave, updateRecents])
+  }, [enterConflict, scheduleSave, updateRecents])
   persistRef.current = persist
 
   const finalFlush = useCallback(() => {
@@ -532,43 +606,32 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     }
   }, [updateRecents])
 
-  /**
-   * Write the board as a plain `.tldr` that stock tldraw can open.
-   *
-   * The FR's own recipe: run detach-to-primitives over everything, so every
-   * Block and cable reduces to a group of stock shapes, and let each group's
-   * `meta` carry what it would take to rebuild it. Going back the other way is
-   * then Rebuild Block from primitives, on the same records.
-   *
-   * The export borrows the LIVE document rather than building a second one:
-   * detach is already one atomic, undoable operation, and running the real
-   * command is the only way the exported file is guaranteed to match what the
-   * canvas would have produced. Two things make borrowing safe — autosave is
-   * held off for the whole window, and the bail is in a `finally`, so a failed
-   * write cannot leave the user looking at a detached board.
-   */
-  const exportTldraw = useCallback(async (destination: string) => {
+  /** Write a stock-readable `.tldr` from an isolated cloned editor. */
+  const exportTldraw = useCallback(async (destination: string, force = false) => {
     const editor = editorRef.current
     if (!editor) throw new Error('The document is not ready to export yet.')
     await waitForSave()
 
-    exportingRef.current = true
+    savingRef.current = true
     setStatus({ kind: 'saving' })
-    const mark = editor.markHistoryStoppingPoint('export to .tldr')
     try {
-      detachAllPrimitives(editor)
-      const source = await serializeTldrawJson(editor)
-      await writeWorkspaceDocument({ path: destination, source, baseDigest: null, force: true })
+      const source = await exportPortableTldraw(editor)
+      await writeWorkspaceDocument({
+        path: exportedTldrawPath(destination),
+        source,
+        baseDigest: null,
+        force,
+      })
     } finally {
-      editor.bailToMark(mark)
-      // The bail restored the document, so nothing is pending for it; anything
-      // the detach queued describes a board that no longer exists.
-      queuedSourceRef.current = null
-      dirtyRef.current = false
-      exportingRef.current = false
-      setStatus({ kind: 'clean', at: Date.now() })
+      savingRef.current = false
+      if (dirtyRef.current) {
+        setStatus({ kind: 'dirty' })
+        scheduleSave()
+      } else {
+        setStatus({ kind: 'clean', at: Date.now() })
+      }
     }
-  }, [waitForSave])
+  }, [scheduleSave, waitForSave])
 
   const rename = useCallback(async (nextPath: string) => {
     const currentPath = pathRef.current
@@ -589,30 +652,68 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       })
       pathRef.current = nextPath
       digestRef.current = renamed.digest
-      fingerprintRef.current = { mtime: renamed.mtime, size: renamed.size }
+      fingerprintRef.current = { mtime: renamed.mtime, size: renamed.size, digest: renamed.digest }
       setPath(nextPath)
       setIsPersisted(true)
       updateRecents(replaceRememberedDocumentPath(currentPath, nextPath))
       window.history.replaceState(null, '', documentHref(nextPath))
+      conflictRef.current = false
       setStatus({ kind: 'clean', at: Date.now() })
     } catch (cause) {
-      setStatus(
-        cause instanceof WorkspaceConflict && !cause.message.includes('already exists')
-          ? { kind: 'conflict' }
-          : { kind: 'clean', at: null },
-      )
+      if (cause instanceof WorkspaceConflict && !cause.message.includes('already exists')) {
+        enterConflict()
+      } else {
+        setStatus({ kind: 'clean', at: null })
+      }
       throw cause
     } finally {
       savingRef.current = false
     }
-  }, [saveAs, updateRecents, waitForSave])
+  }, [enterConflict, saveAs, updateRecents, waitForSave])
 
-  const reloadFromDisk = useCallback(async () => {
+  const reloadFromDisk = useCallback(async ({
+    expectedDiskDigest = null,
+    discardRequestedEdits = false,
+    signal,
+  }: {
+    expectedDiskDigest?: string | null
+    discardRequestedEdits?: boolean
+    signal?: AbortSignal
+  } = {}) => {
     const editor = editorRef.current
     const boardPath = pathRef.current
     if (!editor || !boardPath) return
+    const requestedChangeEpoch = changeEpochRef.current
+    const requestedBaseDigest = digestRef.current
+    if (dirtyRef.current && !discardRequestedEdits) {
+      enterConflict()
+      return
+    }
     try {
-      const document = await readWorkspaceDocument(boardPath)
+      const document = await readWorkspaceDocument(boardPath, { signal })
+      if (signal?.aborted) return
+      const loadedDiskDigest = document.digest ?? null
+      const canApply = editorRef.current === editor
+        && pathRef.current === boardPath
+        && !savingRef.current
+        && canApplyExternalReload({
+          requestedChangeEpoch,
+          currentChangeEpoch: changeEpochRef.current,
+          requestedBaseDigest,
+          currentBaseDigest: digestRef.current,
+          expectedDiskDigest,
+          loadedDiskDigest,
+          hasUnsavedEdits: dirtyRef.current,
+          discardRequestedEdits,
+        })
+      if (!canApply) {
+        if (
+          dirtyRef.current
+          && loadedDiskDigest !== null
+          && loadedDiskDigest !== digestRef.current
+        ) enterConflict()
+        return
+      }
       if (document.source === null) {
         setStatus({ kind: 'missing' })
         return
@@ -627,6 +728,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
         return
       }
       protectedRef.current = false
+      conflictRef.current = false
       editor.updateInstanceState({ isReadonly: false })
       startAutosaveRef.current()
       sourceRef.current = document.source
@@ -639,9 +741,12 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       setStatus({ kind: 'clean', at: Date.now() })
       if (inspected.singlePageMigration.changed) scheduleSinglePageMigrationSave()
     } catch (cause) {
+      if (signal?.aborted) return
       setStatus({ kind: 'error', message: errorMessage(cause) })
     }
-  }, [protectDocument, scheduleSinglePageMigrationSave, updateRecents])
+  }, [enterConflict, protectDocument, scheduleSinglePageMigrationSave, updateRecents])
+
+  const takeDisk = useCallback(() => reloadFromDisk({ discardRequestedEdits: true }), [reloadFromDisk])
 
   const trash = useCallback(async () => {
     const boardPath = pathRef.current
@@ -723,31 +828,44 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
   useEffect(() => {
     if (!path) return
     let cancelled = false
-    const timer = window.setInterval(() => {
-      void (async () => {
-        if (cancelled || savingRef.current || !editorRef.current) return
-        try {
-          const disk = await statWorkspaceDocument(path)
-          const action = nextSyncAction({
-            disk: disk.mtime === null || disk.size === undefined
-              ? null
-              : { mtime: disk.mtime, size: disk.size },
-            base: fingerprintRef.current,
-            hasUnsavedEdits: dirtyRef.current,
+    let polling = false
+    let pollController: AbortController | null = null
+    const poll = async () => {
+      if (cancelled || polling || savingRef.current || !editorRef.current) return
+      polling = true
+      const controller = new AbortController()
+      pollController = controller
+      try {
+        const disk = await statWorkspaceDocument(path, { signal: controller.signal })
+        if (cancelled || savingRef.current || !editorRef.current || pathRef.current !== path) return
+        const action = nextSyncAction({
+          disk: disk.mtime === null || disk.size === undefined
+            ? null
+            : { mtime: disk.mtime, size: disk.size, digest: disk.digest ?? null },
+          base: fingerprintRef.current,
+          hasUnsavedEdits: dirtyRef.current,
+        })
+        if (action.kind === 'reload') {
+          await reloadFromDisk({
+            expectedDiskDigest: disk.digest ?? null,
+            signal: controller.signal,
           })
-          if (action.kind === 'reload') await reloadFromDisk()
-          else if (action.kind === 'conflict') setStatus({ kind: 'conflict' })
-          else if (action.kind === 'missing') setStatus({ kind: 'missing' })
-        } catch {
-          // A transient failed poll should not interrupt drawing; the next poll retries.
-        }
-      })()
-    }, WATCH_INTERVAL_MS)
+        } else if (action.kind === 'conflict') enterConflict()
+        else if (action.kind === 'missing') setStatus({ kind: 'missing' })
+      } catch {
+        // A transient failed poll should not interrupt drawing; the next poll retries.
+      } finally {
+        if (pollController === controller) pollController = null
+        polling = false
+      }
+    }
+    const timer = window.setInterval(() => { void poll() }, WATCH_INTERVAL_MS)
     return () => {
       cancelled = true
+      pollController?.abort()
       window.clearInterval(timer)
     }
-  }, [path, reloadFromDisk])
+  }, [enterConflict, path, reloadFromDisk])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -760,20 +878,20 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       const key = event.key.toLowerCase()
       if (key === 's') {
         event.preventDefault()
-        if (event.shiftKey) setDialog('saveAs')
-        else void persistRef.current()
+        if (event.shiftKey) showDialog('saveAs')
+        else runAction(() => persistRef.current())
       } else if (key === 'o') {
         event.preventDefault()
-        setDialog('open')
+        showDialog('open')
       } else if (key === 'n') {
         event.preventDefault()
-        if (event.shiftKey) void newWindow()
-        else void newDocument()
+        if (event.shiftKey) runAction(newWindow)
+        else runAction(newDocument)
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [newDocument, newWindow])
+  }, [newDocument, newWindow, runAction, showDialog])
 
   useEffect(() => {
     document.title = path ? `${documentTitle(path)} — SystemSketch` : 'SystemSketch'
@@ -821,11 +939,12 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     rename,
     trash,
     reveal,
-    takeDisk: reloadFromDisk,
+    takeDisk,
     openWindow,
     newWindow,
-    showDialog: setDialog,
-    closeDialog: () => setDialog(null),
+    runAction,
+    showDialog,
+    closeDialog,
     notice,
     dismissNotice: () => setNotice(null),
   }), [
@@ -841,30 +960,36 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     persist,
     recents,
     exportTldraw,
-    reloadFromDisk,
+    runAction,
+    takeDisk,
     rename,
     reveal,
     saveAs,
+    showDialog,
     status,
     trash,
+    closeDialog,
   ])
 
   return (
     <LocalWorkspaceContext.Provider value={controller}>
-      {path ? children : <WorkspaceLoading status={status} />}
+      {path ? children : <WorkspaceLoading status={status} onRetry={retryBootstrap} />}
       {dialog ? <WorkspaceDialog mode={dialog} /> : null}
-      <WorkspaceAlert />
+      {path ? <WorkspaceAlert /> : null}
       <WorkspaceNotice />
     </LocalWorkspaceContext.Provider>
   )
 }
 
-function WorkspaceLoading({ status }: { status: WorkspaceStatus }) {
+function WorkspaceLoading({ status, onRetry }: { status: WorkspaceStatus; onRetry(): void }) {
   return (
     <main className="systemsketch-workspace-loading">
       <div className="systemsketch-workspace-loading__mark">S</div>
       <strong>{status.kind === 'error' ? 'Could not open the local workspace' : 'Opening workspace…'}</strong>
       {status.kind === 'error' ? <p>{status.message}</p> : null}
+      {status.kind === 'error' ? (
+        <button type="button" data-testid="workspace-retry-bootstrap" onClick={onRetry}>Try again</button>
+      ) : null}
     </main>
   )
 }
@@ -912,8 +1037,8 @@ function WorkspaceAlert() {
       <div className="systemsketch-workspace-alert__actions">
         {status.kind === 'conflict' ? (
           <>
-            <button type="button" onClick={() => void workspace.takeDisk()}>Use disk version</button>
-            <button type="button" className="primary" onClick={() => void workspace.save(true)}>Keep my version</button>
+            <button type="button" onClick={() => workspace.runAction(workspace.takeDisk)}>Use disk version</button>
+            <button type="button" className="primary" onClick={() => workspace.runAction(() => workspace.save(true))}>Keep my version</button>
           </>
         ) : status.kind === 'future' ? (
           <>
@@ -973,8 +1098,8 @@ export function SystemSketchMainMenu() {
           <TldrawUiMenuGroup id="systemsketch-file">
             <TldrawUiMenuSubmenu id="file" label="File">
               <TldrawUiMenuGroup id="file-new-open">
-                <TldrawUiMenuItem id="new-document" label="New" kbd="cmd+n" onSelect={() => void workspace.newDocument()} />
-                <TldrawUiMenuItem id="new-window" label="New window" kbd="cmd+shift+n" onSelect={() => void workspace.newWindow()} />
+                <TldrawUiMenuItem id="new-document" label="New" kbd="cmd+n" onSelect={() => workspace.runAction(workspace.newDocument)} />
+                <TldrawUiMenuItem id="new-window" label="New window" kbd="cmd+shift+n" onSelect={() => workspace.runAction(workspace.newWindow)} />
                 <TldrawUiMenuItem id="open-document" label="Open…" kbd="cmd+o" onSelect={() => workspace.showDialog('open')} />
                 <TldrawUiMenuSubmenu id="open-recent" label="Open recent" disabled={!workspace.recents.length}>
                   <TldrawUiMenuGroup id="recent-documents">
@@ -983,14 +1108,14 @@ export function SystemSketchMainMenu() {
                         id={`recent-${path}`}
                         key={path}
                         label={documentTitle(path)}
-                        onSelect={() => void workspace.open(path)}
+                        onSelect={() => workspace.runAction(() => workspace.open(path))}
                       />
                     ))}
                   </TldrawUiMenuGroup>
                 </TldrawUiMenuSubmenu>
               </TldrawUiMenuGroup>
               <TldrawUiMenuGroup id="file-save">
-                <TldrawUiMenuItem id="save-document" label="Save" kbd="cmd+s" disabled={workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'} onSelect={() => void workspace.save()} />
+                <TldrawUiMenuItem id="save-document" label="Save" kbd="cmd+s" disabled={workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'} onSelect={() => workspace.runAction(workspace.save)} />
                 <TldrawUiMenuItem id="save-as-document" label="Save As…" kbd="cmd+shift+s" onSelect={() => workspace.showDialog('saveAs')} />
                 <TldrawUiMenuItem
                   id="export-tldraw"
@@ -1000,8 +1125,8 @@ export function SystemSketchMainMenu() {
                 <TldrawUiMenuItem id="rename-document" label="Rename…" disabled={workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'} onSelect={() => workspace.showDialog('rename')} />
               </TldrawUiMenuGroup>
               <TldrawUiMenuGroup id="file-location">
-                <TldrawUiMenuItem id="reveal-document" label="Show in Files" onSelect={() => void workspace.reveal()} />
-                <TldrawUiMenuItem id="trash-document" label="Move to Trash…" disabled={!workspace.isPersisted} onSelect={() => void workspace.trash()} />
+                <TldrawUiMenuItem id="reveal-document" label="Show in Files" onSelect={() => workspace.runAction(workspace.reveal)} />
+                <TldrawUiMenuItem id="trash-document" label="Move to Trash…" disabled={!workspace.isPersisted} onSelect={() => workspace.runAction(workspace.trash)} />
               </TldrawUiMenuGroup>
             </TldrawUiMenuSubmenu>
           </TldrawUiMenuGroup>
@@ -1069,6 +1194,10 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
   const [busy, setBusy] = useState(false)
   const [creatingFolder, setCreatingFolder] = useState(false)
   const [folderName, setFolderName] = useState('')
+  const dialogRef = useRef<HTMLElement | null>(null)
+  const nameInputRef = useRef<HTMLInputElement | null>(null)
+  const filterInputRef = useRef<HTMLInputElement | null>(null)
+  const loadAbortRef = useRef<AbortController | null>(null)
   const listRef = useRef<HTMLDivElement | null>(null)
   const crumbsRef = useRef<HTMLElement | null>(null)
   const isRename = mode === 'rename'
@@ -1081,25 +1210,46 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
     : (isRename && workspace.path ? documentSuffix(workspace.path) : null) ?? SYSTEMSKETCH_SUFFIX
 
   const load = useCallback(async (directory?: string) => {
+    loadAbortRef.current?.abort()
+    const controller = new AbortController()
+    loadAbortRef.current = controller
     setBusy(true)
     setError(null)
     try {
-      const next = await listWorkspace(directory)
+      const next = await listWorkspace(directory, { signal: controller.signal })
+      if (controller.signal.aborted) return
       setListing(next)
       setSelectedPath(null)
       setQuery('')
       setReplacePath(null)
     } catch (cause) {
+      if (controller.signal.aborted) return
       setError(errorMessage(cause))
     } finally {
-      setBusy(false)
+      if (loadAbortRef.current === controller) {
+        loadAbortRef.current = null
+        setBusy(false)
+      }
     }
   }, [])
+
+  useEffect(() => () => loadAbortRef.current?.abort(), [])
 
   useEffect(() => {
     if (isRename) return
     void load(workspace.browserDirectory ?? undefined)
   }, [isRename, load, workspace.browserDirectory])
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const target = isRename || mode === 'saveAs' || mode === 'exportTldraw'
+        ? nameInputRef.current
+        : filterInputRef.current
+      target?.focus()
+      if (target === nameInputRef.current) target?.select()
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [isRename, mode])
 
   const rows = useMemo(() => browserRows(listing, query), [listing, query])
   const selectedRow = rows.find((row) => row.path === selectedPath) ?? null
@@ -1148,13 +1298,16 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
         await activate(selectedRow)
         if (selectedRow.kind === 'folder') setBusy(false)
       } else if (mode === 'saveAs' || mode === 'exportTldraw') {
-        const nextPath = force && replacePath
+        const proposedPath = force && replacePath
           ? replacePath
           : listing ? documentPathFor(listing.dir, name, suffix) : null
+        const nextPath = proposedPath && mode === 'exportTldraw'
+          ? exportedTldrawPath(proposedPath)
+          : proposedPath
         if (!nextPath) throw new Error('Enter a file name.')
         attemptedPath = nextPath
         if (mode === 'exportTldraw') {
-          await workspace.exportTldraw(nextPath)
+          await workspace.exportTldraw(nextPath, force)
           workspace.closeDialog()
         } else {
           await workspace.saveAs(nextPath, force)
@@ -1166,9 +1319,18 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
         workspace.closeDialog()
       }
     } catch (cause) {
-      if (mode === 'saveAs' && !force && attemptedPath && cause instanceof WorkspaceConflict) {
+      if (
+        (mode === 'saveAs' || mode === 'exportTldraw')
+        && !force
+        && attemptedPath
+        && cause instanceof WorkspaceConflict
+      ) {
         setReplacePath(attemptedPath)
-        setError(`“${documentTitle(attemptedPath)}” already exists. Replace it with this document?`)
+        setError(
+          `“${documentTitle(attemptedPath)}” already exists. Replace it with ${
+            mode === 'exportTldraw' ? 'this export' : 'this document'
+          }?`,
+        )
       } else {
         setReplacePath(null)
         setError(errorMessage(cause))
@@ -1185,7 +1347,32 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Tab') {
+        const dialog = dialogRef.current
+        if (!dialog) return
+        const focusable = dialogFocusableElements(dialog)
+        const first = focusable[0]
+        const last = focusable.at(-1)
+        const active = document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null
+        const activeCanCycle = active !== null && focusable.includes(active)
+        if (!first || !last) {
+          event.preventDefault()
+          return
+        }
+        if (event.shiftKey && (active === first || !activeCanCycle)) {
+          event.preventDefault()
+          last.focus()
+        } else if (!event.shiftKey && (active === last || !activeCanCycle)) {
+          event.preventDefault()
+          first.focus()
+        }
+        return
+      }
       if (event.key === 'Escape') {
+        event.preventDefault()
+        event.stopPropagation()
         workspace.closeDialog()
         return
       }
@@ -1234,6 +1421,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
       if (event.target === event.currentTarget) workspace.closeDialog()
     }}>
       <section
+        ref={dialogRef}
         className="systemsketch-workspace-dialog"
         data-testid="workspace-dialog"
         data-mode={mode}
@@ -1260,6 +1448,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
             <label htmlFor="workspace-document-name">Name</label>
             <div className="systemsketch-workspace-name-field">
               <input
+                ref={nameInputRef}
                 id="workspace-document-name"
                 autoFocus
                 value={name}
@@ -1292,7 +1481,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
               <strong>Recent</strong>
               {workspace.recents.length ? workspace.recents.map((path) => (
                 <button key={path} type="button" title={path} data-testid="workspace-recent" onClick={() => {
-                  if (mode === 'open') void workspace.open(path)
+                  if (mode === 'open') workspace.runAction(() => workspace.open(path))
                   else void load(parentDirectory(path))
                 }}>
                   <span>{documentTitle(path)}</span>
@@ -1334,6 +1523,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                   }}
                 >+ Folder</button>
                 <input
+                  ref={filterInputRef}
                   className="systemsketch-workspace-search"
                   data-testid="workspace-filter"
                   type="search"
@@ -1406,7 +1596,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                         setError(null)
                       }
                     }}
-                    onDoubleClick={() => void activate(row)}
+                    onDoubleClick={() => workspace.runAction(() => activate(row))}
                   >
                     <span aria-hidden="true">{row.kind === 'folder' ? '▰' : '◇'}</span>
                     <b>{row.title}</b>
@@ -1427,7 +1617,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
               </div>
               {mode === 'saveAs' || mode === 'exportTldraw' ? (
                 <div className="systemsketch-workspace-name-field is-save-as">
-                  <input autoFocus value={name} aria-label="File name" onChange={(event) => {
+                  <input ref={nameInputRef} autoFocus value={name} aria-label="File name" onChange={(event) => {
                     setName(event.target.value)
                     setReplacePath(null)
                     setError(null)
@@ -1454,7 +1644,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                 type="button"
                 data-testid="workspace-open-in-new-window"
                 disabled={busy || selectedRow?.kind !== 'document'}
-                onClick={() => void openInNewWindow()}
+                onClick={() => workspace.runAction(openInNewWindow)}
               >
                 Open in new window
               </button>
