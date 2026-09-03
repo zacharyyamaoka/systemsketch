@@ -75,6 +75,10 @@ def main() -> None:
     box-shadow:0 14px 32px #26364c24; transform:translateX(-50%); font-size:12px }} .menu.show {{ display:block }}
   .menu b,.menu span {{ display:block; padding:7px 8px; border-radius:6px }} .menu b {{ color:var(--muted);
     font-size:9px; letter-spacing:.1em; text-transform:uppercase }} .menu span:first-of-type {{ background:var(--blue-soft) }}
+  .next {{ position:absolute; left:24px; bottom:104px; display:grid; width:138px; height:68px; place-items:center;
+    border:2px dashed #aeb8c5; border-radius:10px; color:var(--muted); background:#fff; font-size:11px; cursor:pointer }}
+  .new[data-armed='true'] .next {{ border-color:var(--blue); color:#245d9d; background:var(--blue-soft) }}
+  .new[data-drawn='true'] .next {{ border-style:solid; color:white; background:var(--blue) }}
   .live {{ display:block; width:100%; border:1px solid var(--line); border-radius:16px }} .caption {{ margin:11px 3px 0;
     color:var(--muted); font-size:12px }} .flow {{ display:grid; grid-template-columns:repeat(4,1fr); gap:11px }}
   .flow article {{ position:relative; padding:18px; border:1px solid var(--line); border-radius:14px; background:#fafbfd }}
@@ -106,43 +110,43 @@ def main() -> None:
   <header class="hero">
     <div class="eyebrow">Implemented · Toolbar interaction</div>
     <h1>The icon is the menu.</h1>
-    <p class="lead">System, Shape, and Draw no longer hide their picker behind a 15 × 15 px corner target. Any click in the remembered 43 × 40 px family tile opens the native menu; choosing a row arms the tool, while B, R, and D remain direct.</p>
-    <div class="chips"><span class="chip">whole-tile trigger</span><span class="chip">{ratio:.1f}× target area</span><span class="chip">native tldraw menu</span><span class="chip">shortcuts stay direct</span><span class="chip">no board-format change</span></div>
+    <p class="lead">System, Shape, and Draw no longer hide their picker behind a 15 × 15 px corner target. Any click in the remembered 43 × 40 px family tile both opens the native menu and arms the displayed tool, so the very next canvas click or drag draws.</p>
+    <div class="chips"><span class="chip">whole-tile trigger</span><span class="chip">tool arms immediately</span><span class="chip">first canvas gesture draws</span><span class="chip">{ratio:.1f}× target area</span><span class="chip">B / R / D stay direct</span></div>
   </header>
 
   <section>
     <div class="head"><h2>One target instead of a split target</h2><p>Click each prototype. The old model makes only the outlined corner actionable; the shipped model gives the same action to the entire family tile.</p></div>
     <div class="compare">
       <article class="demo old"><span class="badge">15 × 15</span><h3>Before · precision corner</h3><p>The icon recalled the last tool; the tiny chevron opened its family.</p><div class="menu"><b>System design</b><span>Block</span><span>Branch</span><span>Pill</span></div><div class="dock"><button class="tile" aria-label="Old Block split button">▧<span class="corner">⌄</span></button><i class="hit"></i></div></article>
-      <article class="demo new"><span class="badge">43 × 40</span><h3>Now · Miro-style tile</h3><p>The remembered icon is status; every point in the tile opens the family.</p><div class="menu"><b>System design</b><span>Block</span><span>Branch</span><span>Pill</span></div><div class="dock"><button class="tile" aria-label="Open System tools">▧<span class="corner">⌄</span></button><i class="hit"></i></div></article>
+      <article class="demo new"><span class="badge">43 × 40</span><h3>Now · Miro-style tile</h3><p>The remembered icon opens its family and becomes the live drawing tool.</p><button class="next" type="button"><span>Click canvas next</span></button><div class="menu"><b>System design</b><span>Block</span><span>Branch</span><span>Pill</span></div><div class="dock"><button class="tile" aria-label="Open System tools and arm Block">▧<span class="corner">⌄</span></button><i class="hit"></i></div></article>
     </div>
   </section>
 
   <section>
-    <div class="head"><h2>Live product evidence</h2><p>The Draw picker is open from the center of its tile while Rectangle remains the actually armed tool in blue. Opening a picker and activating a tool are intentionally separate states.</p></div>
+    <div class="head"><h2>Live product evidence</h2><p>The Draw picker is open from the center of its tile and Pen is already armed in blue. The next canvas drag dismisses this picker and starts the stroke in the same gesture.</p></div>
     <img class="live" src="{live}" alt="SystemSketch review fixture with the Draw family picker open above the bottom toolbar">
     <p class="caption">Captured by the focused CDP journey from the real product composition and the delivered review board.</p>
   </section>
 
   <section>
-    <div class="head"><h2>Stock machinery, simpler choice</h2><p>The change removes one owned overlay button. It does not replace dropdown, focus, Escape, tool selection, keyboard routing, or responsive overflow behavior.</p></div>
+    <div class="head"><h2>Stock machinery, one purposeful exception</h2><p>The dropdown, focus, tool commands, keyboard routing, and responsive overflow stay on tldraw's public UI seams. Only the family pickers release tldraw's dismiss-only canvas layer.</p></div>
     <div class="flow">
       <article><b>Pointer anywhere</b><span>One 43 × 40 <code>TldrawUiToolbarButton</code>.</span></article>
-      <article><b>Native trigger</b><span><code>TldrawUiDropdownMenuTrigger</code> owns open, focus, and dismissal.</span></article>
-      <article><b>Choose a row</b><span>The existing family command remembers and selects that tool.</span></article>
-      <article><b>Keyboard fast path</b><span>B / R / D bypass the menu and arm the stock/custom tool directly.</span></article>
+      <article><b>Arm what is shown</b><span>The existing family command selects the remembered tool immediately.</span></article>
+      <article><b>Native picker</b><span><code>TldrawUiDropdownMenuTrigger</code> still owns opening and row selection.</span></article>
+      <article><b>Draw next</b><span>The outside pointer dismisses the picker and reaches the armed canvas tool.</span></article>
     </div>
   </section>
 
   <section>
-    <div class="head"><h2>Measured proof</h2><p>The run cold-opened the delivered fixture, sampled three points in every family button, exercised both pointer and keyboard paths, and checked the board stayed untouched.</p></div>
+    <div class="head"><h2>Measured proof</h2><p>The run cold-opened the delivered fixture, sampled three points in every family button, and proved the first outside click or drag creates Block, Rectangle, and Pen output without an extra dismissal click.</p></div>
     <div class="metrics"><div class="metric"><strong>{passed}/{len(checks)}</strong><span>focused browser checks</span></div><div class="metric"><strong>{geometry[0]['width']} × {geometry[0]['height']}</strong><span>live family-button pixels</span></div><div class="metric"><strong>{ratio:.1f}×</strong><span>area versus old chevron</span></div><div class="metric"><strong>0</strong><span>local console errors</span></div></div>
     <div class="checks">{''.join(f'<div class="check">{html.escape(item["label"])}</div>' for item in checks)}</div>
   </section>
 
   <section>
-    <div class="head"><h2>Ready-to-drive review board</h2><p>The disposable board points at the real bottom toolbar, includes the shortcut loop, and has a bound cue whose attachment survived a cold reopen and movement probe.</p></div>
-    <div class="fixture"><img src="{fixture}" alt="Toolbar family menu review board with numbered orange cues and green pass condition"><div class="fixture-copy"><div class="eyebrow">Human verification</div><h2>Click the icon centers</h2><p>Open System, Shape, and Pen from their broad faces. Then press B, R, and D and confirm each arms its tool directly. The real Block is the untouched safety target.</p><a href="../sketches/review/toolbar-family-menu.systemsketch">Open the fixture file</a></div></div>
+    <div class="head"><h2>Ready-to-drive review board</h2><p>The disposable board points at the real bottom toolbar and the empty canvas gesture, and has a bound cue whose attachment survived a cold reopen and movement probe.</p></div>
+    <div class="fixture"><img src="{fixture}" alt="Toolbar family menu review board with numbered orange cues and green pass condition"><div class="fixture-copy"><div class="eyebrow">Human verification</div><h2>Open, then draw once</h2><p>Click a family tile's broad face, leave its picker open, and click or drag the canvas once. The displayed tool should draw immediately. Undo the disposable result and repeat for System, Shape, and Pen.</p><a href="../sketches/review/toolbar-family-menu.systemsketch">Open the fixture file</a></div></div>
     <details><summary>See the fixture recipe</summary><pre>{recipe}</pre></details>
   </section>
 
@@ -153,7 +157,11 @@ def main() -> None:
     const button = demo.querySelector('.tile'); const menu = demo.querySelector('.menu');
     const toggle = () => {{ button.classList.toggle('open'); menu.classList.toggle('show'); }};
     if (demo.classList.contains('old')) demo.querySelector('.corner').addEventListener('click', (event) => {{ event.stopPropagation(); toggle(); }});
-    else button.addEventListener('click', toggle);
+    else {{
+      const next = demo.querySelector('.next'); const badge = demo.querySelector('.badge');
+      button.addEventListener('click', () => {{ demo.dataset.armed = 'true'; demo.dataset.drawn = 'false'; badge.textContent = 'Block armed'; toggle(); next.querySelector('span').textContent = 'Click canvas next'; }});
+      next.addEventListener('click', () => {{ if (demo.dataset.armed !== 'true') return; demo.dataset.drawn = 'true'; menu.classList.remove('show'); button.classList.remove('open'); next.querySelector('span').textContent = 'Block created'; }});
+    }}
   }});
 </script>
 </body></html>"""

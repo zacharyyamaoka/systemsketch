@@ -4,9 +4,9 @@
  *
  * Each remembered family icon is one 43 x 40 menu trigger. There is no tiny
  * second button in its corner: clicks near the left edge, in the centre, and
- * over the chevron all open the same stock tldraw/Radix dropdown. Menu rows
- * still activate the remembered tool, while keyboard shortcuts remain the
- * direct path to drawing.
+ * over the chevron all open the same stock tldraw/Radix dropdown and arm the
+ * displayed tool. The very next canvas gesture therefore draws, while menu
+ * rows still switch the remembered tool and keyboard shortcuts stay direct.
  */
 import { copyFile, mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -15,9 +15,9 @@ import {
   ROOT,
   clickAt,
   delay,
+  drag,
   elementBox,
   evaluate,
-  key,
   localConsoleErrors,
   openApp,
   shortcut,
@@ -56,8 +56,10 @@ async function openFamilyAt(page, family, fx, fy) {
   return box
 }
 
-async function closeMenu(page) {
-  await key(page, 'Escape', 'Escape')
+async function closeMenu(page, family) {
+  const selector = `[data-testid="systemsketch-tool-${family}"]`
+  const box = await elementBox(page, selector)
+  await clickAt(page, box.x + box.width / 2, box.y + box.height / 2)
   await waitFor(page, `!document.querySelector('.systemsketch-tool-menu')`, 'family menu to close')
 }
 
@@ -73,6 +75,23 @@ async function chooseRow(page, label) {
   const row = JSON.parse(await evaluate(page, locate))
   await clickAt(page, row.cx, row.cy)
   await waitFor(page, `!document.querySelector('.systemsketch-tool-menu')`, `${label} choice to close the menu`)
+}
+
+async function emptyCanvasPoint(page) {
+  const point = await evaluate(page, `(() => {
+    const editor = window.__systemsketch.editor
+    for (let y = 100; y <= 520; y += 70) {
+      for (let x = 100; x <= 1340; x += 80) {
+        const target = document.elementFromPoint(x, y)
+        const pagePoint = editor.screenToPage({ x, y })
+        if (target?.closest('.tl-canvas') && !editor.getShapeAtPoint(pagePoint, { hitInside: true })) {
+          return JSON.stringify({ x, y })
+        }
+      }
+    }
+    return null
+  })()`)
+  return point ? JSON.parse(point) : null
 }
 
 async function main() {
@@ -97,7 +116,7 @@ async function main() {
       const editor = window.__systemsketch.editor
       const target = editor.getShape('shape:subject')
       const endpoint = () => {
-        const arrow = editor.getShape('shape:cue-step-3-arrow')
+        const arrow = editor.getShape('shape:cue-step-2-arrow')
         const handle = editor.getShapeHandles(arrow)?.find((item) => item.id === 'end')
         return editor.getShapePageTransform(arrow.id).applyToPoint(handle)
       }
@@ -140,15 +159,28 @@ async function main() {
     check('HIT-3', 'there is no separate precision chevron button',
       await evaluate(page, `document.querySelectorAll('.systemsketch-family-tool__menu').length`), 0)
 
-    const before = await currentTool(page)
     for (const [index, point] of [[0.15, 0.15], [0.5, 0.5], [0.84, 0.79]].entries()) {
+      await evaluate(page, `(() => { window.__systemsketch.editor.setCurrentTool('select'); return true })()`)
       await openFamilyAt(page, 'system', point[0], point[1])
       check(`OPEN-${index + 1}`, `the ${['left edge', 'centre', 'chevron corner'][index]} opens the System menu`,
         await evaluate(page, `document.querySelector('.systemsketch-tool-menu__heading')?.textContent ?? null`),
         'System design')
-      check(`QUIET-${index + 1}`, 'opening the family does not arm a drawing tool', await currentTool(page), before)
-      await closeMenu(page)
+      check(`ARM-${index + 1}`, 'opening the family also arms its displayed Block tool', await currentTool(page), 'block')
+      await closeMenu(page, 'system')
     }
+
+    await evaluate(page, `(() => { window.__systemsketch.editor.setCurrentTool('select'); return true })()`)
+    const blocksBefore = await evaluate(page,
+      `window.__systemsketch.editor.getCurrentPageShapes().filter((shape) => shape.type === 'block').length`)
+    await openFamilyAt(page, 'system', 0.5, 0.5)
+    const blockPoint = await emptyCanvasPoint(page)
+    check('BLOCK-TARGET', 'the journey found an empty visible point for Block creation', blockPoint !== null, true)
+    await clickAt(page, blockPoint.x, blockPoint.y)
+    await delay(400)
+    check('BLOCK-DRAW', 'the next canvas click creates the displayed Block',
+      await evaluate(page,
+        `window.__systemsketch.editor.getCurrentPageShapes().filter((shape) => shape.type === 'block').length`),
+      blocksBefore + 1)
 
     await openFamilyAt(page, 'shape', 0.5, 0.5)
     await chooseRow(page, 'Rectangle')
@@ -157,9 +189,47 @@ async function main() {
       await evaluate(page, `document.querySelector('[data-testid="systemsketch-tool-shape"]')?.getAttribute('aria-pressed') ?? null`),
       'true')
 
+    await evaluate(page, `(() => { window.__systemsketch.editor.setCurrentTool('select'); return true })()`)
+    const geoBefore = await evaluate(page,
+      `window.__systemsketch.editor.getCurrentPageShapes().filter((shape) => shape.type === 'geo').length`)
+    await openFamilyAt(page, 'shape', 0.5, 0.5)
+    check('DRAW-1', 'clicking the Shape tile arms the displayed Rectangle', await currentTool(page), 'geo')
+    const canvasPassThrough = JSON.parse(await evaluate(page, `(() => {
+      const capture = document.querySelector('.tlui-menu-click-capture')
+      return JSON.stringify({
+        capturePointerEvents: capture ? getComputedStyle(capture).pointerEvents : null,
+        triggerState: document.querySelector('[data-testid="systemsketch-tool-shape"]')?.getAttribute('data-state') ?? null,
+      })
+    })()`))
+    check('DRAW-LAYER', 'the family picker releases tldraw\'s dismiss-only canvas layer',
+      canvasPassThrough.capturePointerEvents, 'none')
+    const shapePoint = await emptyCanvasPoint(page)
+    check('DRAW-TARGET', 'the journey found an empty visible canvas point',
+      shapePoint !== null, true)
+    await clickAt(page, shapePoint.x, shapePoint.y)
+    await delay(400)
+    check('DRAW-2', 'the next canvas click creates a Rectangle',
+      await evaluate(page,
+        `window.__systemsketch.editor.getCurrentPageShapes().filter((shape) => shape.type === 'geo').length`),
+      geoBefore + 1)
+    check('DRAW-3', 'the drawing click also dismisses the open family menu',
+      await evaluate(page, `document.querySelector('.systemsketch-tool-menu') === null`), true)
+
+    await evaluate(page, `(() => { window.__systemsketch.editor.setCurrentTool('select'); return true })()`)
+    const drawsBefore = await evaluate(page,
+      `window.__systemsketch.editor.getCurrentPageShapes().filter((shape) => shape.type === 'draw').length`)
     await openFamilyAt(page, 'draw', 0.5, 0.5)
     await shot(page, 'toolbar-family-menu-open.png')
-    await closeMenu(page)
+    check('ARM-DRAW', 'clicking the Draw tile arms its displayed Pen', await currentTool(page), 'draw')
+    const drawPoint = await emptyCanvasPoint(page)
+    check('PEN-TARGET', 'the journey found an empty visible stroke area', drawPoint !== null, true)
+    await drag(page, drawPoint, { x: drawPoint.x + 80, y: drawPoint.y + 35 })
+    check('PEN-DRAW', 'the next canvas drag creates a Pen stroke',
+      await evaluate(page,
+        `window.__systemsketch.editor.getCurrentPageShapes().filter((shape) => shape.type === 'draw').length`),
+      drawsBefore + 1)
+    check('PEN-CLOSE', 'the drawing drag dismisses the family menu',
+      await evaluate(page, `document.querySelector('.systemsketch-tool-menu') === null`), true)
 
     await shortcut(page, 'b', 'KeyB')
     check('KEY-1', 'B remains the direct path to Block', await currentTool(page), 'block')

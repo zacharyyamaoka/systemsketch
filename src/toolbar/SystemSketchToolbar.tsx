@@ -183,12 +183,14 @@ function FamilyToolSlot({
   icon,
   label,
   active,
+  onSelect,
   children,
 }: {
   family: 'shape' | 'draw' | 'system'
   icon: string | TLUiIconJsx
   label: string
   active: boolean
+  onSelect(): void
   children: ReactNode
 }) {
   const menuId = `systemsketch-${family}-${useId()}`
@@ -204,6 +206,14 @@ function FamilyToolSlot({
           aria-pressed={active}
           isActive={active}
           data-testid={`systemsketch-tool-${family}`}
+          onPointerDown={(event) => {
+            if (event.button === 0) onSelect()
+          }}
+          onClick={(event) => {
+            // Pointer activation already happened before Radix opened the menu,
+            // which lets the menu keep focus and preserve one-press Escape.
+            if (event.detail === 0) onSelect()
+          }}
         >
           <TldrawUiButtonIcon icon={icon} />
           <span className="systemsketch-family-tool__chevron" aria-hidden="true">
@@ -241,6 +251,7 @@ function ShapeFamilySlot({ activeToolId, geo }: { activeToolId: string; geo?: st
       icon={currentItem.icon}
       label={`${currentItem.label} · R O L A`}
       active={isActive}
+      onSelect={() => selectShapeFamilyTool(tools, current)}
     >
       <div className="systemsketch-tool-menu__heading">Shapes</div>
       {GEO_MENU_ITEMS.map((item) => (
@@ -286,6 +297,7 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
       icon={currentItem.icon}
       label={currentItem.shortcut ? `${currentItem.label} · ${currentItem.shortcut}` : currentItem.label}
       active={isActive}
+      onSelect={() => selectSystemFamilyTool(tools, current)}
     >
       <div className="systemsketch-tool-menu__heading">System design</div>
       {SYSTEM_MENU_ITEMS.map((item) => (
@@ -315,6 +327,7 @@ function DrawFamilySlot({ activeToolId }: { activeToolId: string }) {
       icon={currentItem.icon}
       label={`${currentItem.label} · ${currentItem.shortcut}`}
       active={isActive}
+      onSelect={() => selectDrawFamilyTool(tools, current)}
     >
       <div className="systemsketch-tool-menu__heading">Drawing</div>
       {DRAW_MENU_ITEMS.map((item) => (

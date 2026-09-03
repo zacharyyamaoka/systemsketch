@@ -142,10 +142,10 @@
       "ok": true
     },
     {
-      "id": "QUIET-1",
-      "label": "opening the family does not arm a drawing tool",
-      "observed": "select",
-      "desired": "select",
+      "id": "ARM-1",
+      "label": "opening the family also arms its displayed Block tool",
+      "observed": "block",
+      "desired": "block",
       "ok": true
     },
     {
@@ -156,10 +156,10 @@
       "ok": true
     },
     {
-      "id": "QUIET-2",
-      "label": "opening the family does not arm a drawing tool",
-      "observed": "select",
-      "desired": "select",
+      "id": "ARM-2",
+      "label": "opening the family also arms its displayed Block tool",
+      "observed": "block",
+      "desired": "block",
       "ok": true
     },
     {
@@ -170,10 +170,24 @@
       "ok": true
     },
     {
-      "id": "QUIET-3",
-      "label": "opening the family does not arm a drawing tool",
-      "observed": "select",
-      "desired": "select",
+      "id": "ARM-3",
+      "label": "opening the family also arms its displayed Block tool",
+      "observed": "block",
+      "desired": "block",
+      "ok": true
+    },
+    {
+      "id": "BLOCK-TARGET",
+      "label": "the journey found an empty visible point for Block creation",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "BLOCK-DRAW",
+      "label": "the next canvas click creates the displayed Block",
+      "observed": 2,
+      "desired": 2,
       "ok": true
     },
     {
@@ -188,6 +202,69 @@
       "label": "the selected family remains visibly active",
       "observed": "true",
       "desired": "true",
+      "ok": true
+    },
+    {
+      "id": "DRAW-1",
+      "label": "clicking the Shape tile arms the displayed Rectangle",
+      "observed": "geo",
+      "desired": "geo",
+      "ok": true
+    },
+    {
+      "id": "DRAW-LAYER",
+      "label": "the family picker releases tldraw's dismiss-only canvas layer",
+      "observed": "none",
+      "desired": "none",
+      "ok": true
+    },
+    {
+      "id": "DRAW-TARGET",
+      "label": "the journey found an empty visible canvas point",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "DRAW-2",
+      "label": "the next canvas click creates a Rectangle",
+      "observed": 5,
+      "desired": 5,
+      "ok": true
+    },
+    {
+      "id": "DRAW-3",
+      "label": "the drawing click also dismisses the open family menu",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "ARM-DRAW",
+      "label": "clicking the Draw tile arms its displayed Pen",
+      "observed": "draw",
+      "desired": "draw",
+      "ok": true
+    },
+    {
+      "id": "PEN-TARGET",
+      "label": "the journey found an empty visible stroke area",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "PEN-DRAW",
+      "label": "the next canvas drag creates a Pen stroke",
+      "observed": 1,
+      "desired": 1,
+      "ok": true
+    },
+    {
+      "id": "PEN-CLOSE",
+      "label": "the drawing drag dismisses the family menu",
+      "observed": true,
+      "desired": true,
       "ok": true
     },
     {
@@ -214,8 +291,8 @@
     {
       "id": "FIXTURE-2",
       "label": "menu and shortcut gestures leave the review Block unchanged",
-      "observed": "{\"x\":820,\"y\":180,\"props\":{\"w\":340,\"h\":198,\"title\":\"menus()\",\"description\":\"Board data stays unchanged.\",\"blockType\":\"Function\",\"icon\":\"\",\"view\":\"port\",\"views\":{\"simple\":{\"w\":320,\"h\":206},\"port\":{\"w\":340,\"h\":198},\"expanded\":{\"w\":560,\"h\":380},\"value\":{\"w\":168,\"h\":56}},\"showDescription\":true,\"notes\":\"\",\"portLayout\":\"inline\",\"inputs\":[{\"id\":\"in_1\",\"name\":\"pointer\",\"type\":\"Gesture\",\"visible\":true}],\"outputs\":[{\"id\":\"out_1\",\"name\":\"picker\",\"type\":\"Menu\",\"visible\":true}]}}",
-      "desired": "{\"x\":820,\"y\":180,\"props\":{\"w\":340,\"h\":198,\"title\":\"menus()\",\"description\":\"Board data stays unchanged.\",\"blockType\":\"Function\",\"icon\":\"\",\"view\":\"port\",\"views\":{\"simple\":{\"w\":320,\"h\":206},\"port\":{\"w\":340,\"h\":198},\"expanded\":{\"w\":560,\"h\":380},\"value\":{\"w\":168,\"h\":56}},\"showDescription\":true,\"notes\":\"\",\"portLayout\":\"inline\",\"inputs\":[{\"id\":\"in_1\",\"name\":\"pointer\",\"type\":\"Gesture\",\"visible\":true}],\"outputs\":[{\"id\":\"out_1\",\"name\":\"picker\",\"type\":\"Menu\",\"visible\":true}]}}",
+      "observed": "{\"x\":820,\"y\":180,\"props\":{\"w\":340,\"h\":198,\"title\":\"menus()\",\"description\":\"Control object: leave this unchanged.\",\"blockType\":\"Function\",\"icon\":\"\",\"view\":\"port\",\"views\":{\"simple\":{\"w\":320,\"h\":206},\"port\":{\"w\":340,\"h\":198},\"expanded\":{\"w\":560,\"h\":380},\"value\":{\"w\":168,\"h\":56}},\"showDescription\":true,\"notes\":\"\",\"portLayout\":\"inline\",\"definitionId\":\"FEqWx55X7a-VRo80iUCn4\",\"inputs\":[{\"id\":\"in_1\",\"name\":\"pointer\",\"type\":\"Gesture\",\"visible\":true}],\"outputs\":[{\"id\":\"out_1\",\"name\":\"picker\",\"type\":\"Menu\",\"visible\":true}],\"definitionKey\":\"menus\"}}",
+      "desired": "{\"x\":820,\"y\":180,\"props\":{\"w\":340,\"h\":198,\"title\":\"menus()\",\"description\":\"Control object: leave this unchanged.\",\"blockType\":\"Function\",\"icon\":\"\",\"view\":\"port\",\"views\":{\"simple\":{\"w\":320,\"h\":206},\"port\":{\"w\":340,\"h\":198},\"expanded\":{\"w\":560,\"h\":380},\"value\":{\"w\":168,\"h\":56}},\"showDescription\":true,\"notes\":\"\",\"portLayout\":\"inline\",\"definitionId\":\"FEqWx55X7a-VRo80iUCn4\",\"inputs\":[{\"id\":\"in_1\",\"name\":\"pointer\",\"type\":\"Gesture\",\"visible\":true}],\"outputs\":[{\"id\":\"out_1\",\"name\":\"picker\",\"type\":\"Menu\",\"visible\":true}],\"definitionKey\":\"menus\"}}",
       "ok": true
     },
     {
