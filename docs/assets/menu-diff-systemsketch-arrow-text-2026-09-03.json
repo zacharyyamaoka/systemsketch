@@ -1,0 +1,30 @@
+{
+ "subject": "arrow-text",
+ "appearance": [
+  {
+   "control": "color",
+   "label": "Color, black"
+  },
+  {
+   "control": "lineStyle",
+   "label": "Line style, draw"
+  },
+  {
+   "control": "arrowheadStart",
+   "label": "Start point, none"
+  },
+  {
+   "control": "arrowKind",
+   "label": "Line shape, elbowed"
+  },
+  {
+   "control": "arrowheadEnd",
+   "label": "End point, arrow"
+  }
+ ],
+ "hasBlockMiniMenu": false,
+ "blockButtons": [],
+ "extraButtons": [
+  "Inspect"
+ ]
+}

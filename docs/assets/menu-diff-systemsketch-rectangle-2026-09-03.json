@@ -1,0 +1,22 @@
+{
+ "subject": "rectangle",
+ "appearance": [
+  {
+   "control": "geo",
+   "label": "Shape, rectangle"
+  },
+  {
+   "control": "color",
+   "label": "Color, black"
+  },
+  {
+   "control": "dash",
+   "label": "Line style, draw"
+  }
+ ],
+ "hasBlockMiniMenu": false,
+ "blockButtons": [],
+ "extraButtons": [
+  "Inspect"
+ ]
+}

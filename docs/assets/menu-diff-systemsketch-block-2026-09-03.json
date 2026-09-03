@@ -1,0 +1,12 @@
+{
+ "subject": "block",
+ "appearance": [],
+ "hasBlockMiniMenu": true,
+ "blockButtons": [
+  "Show simple view",
+  "Show port view",
+  "Show expanded view",
+  "Inspect"
+ ],
+ "extraButtons": []
+}

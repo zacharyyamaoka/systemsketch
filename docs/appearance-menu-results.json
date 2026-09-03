@@ -1,5 +1,9 @@
 [
  {
+  "label": "a fresh shape with no text hides Typeface/Font size/alignment, and its Shape trigger is fixed",
+  "ok": true
+ },
+ {
   "label": "a selected shape gets shape, paint and typography controls, in FigJam order and at FigJam's widths",
   "ok": true
  },

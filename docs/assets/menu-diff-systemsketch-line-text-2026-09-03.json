@@ -1,0 +1,22 @@
+{
+ "subject": "line-text",
+ "appearance": [
+  {
+   "control": "color",
+   "label": "Color, black"
+  },
+  {
+   "control": "font",
+   "label": "Typeface, scribbled"
+  },
+  {
+   "control": "size",
+   "label": "Font size, medium"
+  }
+ ],
+ "hasBlockMiniMenu": false,
+ "blockButtons": [],
+ "extraButtons": [
+  "Inspect"
+ ]
+}

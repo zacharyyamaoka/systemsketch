@@ -61,7 +61,9 @@ const SHAPE_CONTROLS = ['geo', 'color', 'dash', 'font', 'size', 'align', 'vertic
  * | Line shape | End point`: one Line style holding weight and dash, then the
  * ends and the shape between them, the way the arrow itself reads.
  */
-const CONNECTOR_CONTROLS = ['color', 'lineStyle', 'font', 'arrowheadStart', 'arrowKind', 'arrowheadEnd']
+// FigJam's connector pill never shows typography, labelled or not; 'addText'
+// is a real button, not a style-backed control (see AppearanceControls.tsx).
+const CONNECTOR_CONTROLS = ['color', 'lineStyle', 'addText', 'arrowheadStart', 'arrowKind', 'arrowheadEnd']
 
 /** Read out of FigJam's DOM; see figjamTokens.ts for where each came from. */
 const FIGJAM = {
@@ -239,8 +241,29 @@ async function main() {
       'full SystemSketch product canvas')
     await delay(800)
 
-    // 1. A shape gets what a shape can have, in FigJam's order, at FigJam's sizes.
+    // 1a. A fresh shape with no text yet gets only what it is and how it's
+    // painted — FigJam's rectangle-with-no-text pill is Shape/Change
+    // color/Line style, full stop, and so is this one now.
     await drawAndSelect(page, { x: 560, y: 380 }, { x: 900, y: 540 }, 'r')
+    const freshShape = await readMenu(page)
+    assert.deepEqual(freshShape.controls, ['geo', 'color', 'dash'])
+    assert.equal(freshShape.triggers.find((t) => t.control === 'geo').icon, 'trigger/Shape',
+      'the Shape trigger shows FigJam\'s fixed glyph, not a preview of the current geo')
+    pass('a fresh shape with no text hides Typeface/Font size/alignment, and its Shape trigger is fixed')
+
+    // 1b. Typing a label grows the same pill into what a shape can have,
+    // in FigJam's order, at FigJam's sizes.
+    await mouse(page, 'mouseMoved', 730, 460)
+    for (const clickCount of [1, 2]) {
+      await mouse(page, 'mousePressed', 730, 460, { buttons: 1, clickCount })
+      await mouse(page, 'mouseReleased', 730, 460, { clickCount })
+      await delay(30)
+    }
+    await delay(300)
+    await page.send('Input.insertText', { text: 'Test' })
+    await delay(200)
+    await key(page, 'Escape', 'Escape')
+    await delay(200)
     const shape = await readMenu(page)
     assert.deepEqual(shape.controls, SHAPE_CONTROLS)
     assert.equal(shape.labels.geo, 'Shape, rectangle')
