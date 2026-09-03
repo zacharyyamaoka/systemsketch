@@ -110,7 +110,7 @@
       <div class="outcome" id="outcome" data-state="pass">
         <div class="outcome-card"><small>Before confirmation</small><strong>Stable = previous verified build</strong></div>
         <div class="arrow">→</div>
-        <div class="outcome-card next"><small id="next-label">After verified host artifacts</small><strong id="next-value">Stable = 6f497990</strong></div>
+        <div class="outcome-card next"><small id="next-label">After verified host artifacts</small><strong id="next-value">Stable = ab3102c5</strong></div>
       </div>
     </div>
   </section>
@@ -136,14 +136,14 @@
   </section>
 
   <section>
-    <div class="section-head"><div><div class="eyebrow">Immutable output</div><h2>Proof build 6f4979902e420a18</h2></div>
-      <p>One manifest ties each accepted byte to the app build and source commit <code>c97f5237a0a9</code>.</p></div>
+    <div class="section-head"><div><div class="eyebrow">Immutable output</div><h2>Proof build ab3102c597f58392</h2></div>
+      <p>One manifest ties each accepted byte to the app build and source commit <code>f8c0221b7e2d</code>.</p></div>
     <table class="ledger">
       <thead><tr><th>Host</th><th>Artifact</th><th>Bytes</th><th>SHA-256</th></tr></thead>
       <tbody>
-        <tr><td>VS Code</td><td class="mono">vscode/systemsketch-vscode-0.1.0.vsix</td><td>2,975,772</td><td class="mono">a9fcd1c2e8c20143040cb2b4ca80513ec9eb1bda6792c347a43c82438242880f</td></tr>
-        <tr><td>Cursor</td><td>Shares the exact VSIX above</td><td>2,975,772</td><td class="mono">a9fcd1c2e8c20143040cb2b4ca80513ec9eb1bda6792c347a43c82438242880f</td></tr>
-        <tr><td>Obsidian</td><td class="mono">obsidian/main.js + styles.css + manifest.json + bundle.json</td><td>7,992,978</td><td class="mono">main.js bcc5ea18720422caf656fe8cb5f00a25b5332046503340f4082778207fbbd041</td></tr>
+        <tr><td>VS Code</td><td class="mono">vscode/systemsketch-vscode-0.1.0.vsix</td><td>2,975,771</td><td class="mono">8c281403acce958a00b7e0a299090aa1bc20fe453f3055ebaf861d03f856499e</td></tr>
+        <tr><td>Cursor</td><td>Shares the exact VSIX above</td><td>2,975,771</td><td class="mono">8c281403acce958a00b7e0a299090aa1bc20fe453f3055ebaf861d03f856499e</td></tr>
+        <tr><td>Obsidian</td><td class="mono">obsidian/main.js + styles.css + manifest.json + bundle.json</td><td>7,992,978</td><td class="mono">main.js 4fb8a87724d046f5ef822b1890666ed6ce1ec4e0e56a4121522a82125dd47afa</td></tr>
       </tbody>
     </table>
     <p style="margin-top:12px">Durable location: <code>~/.local/share/systemsketch/runtime/host-releases/&lt;build&gt;/</code>. Working-tree <code>dist/</code> copies remain convenient for explicit installation.</p>
@@ -181,7 +181,7 @@
     const ok = kind === 'pass'; pass.setAttribute('aria-pressed', String(ok)); fail.setAttribute('aria-pressed', String(!ok))
     outcome.dataset.state = kind
     nextLabel.textContent = ok ? 'After verified host artifacts' : 'After the build error'
-    nextValue.textContent = ok ? 'Stable = 6f497990' : 'Stable = unchanged'
+    nextValue.textContent = ok ? 'Stable = ab3102c5' : 'Stable = unchanged'
   }
   pass.onclick = () => state('pass'); fail.onclick = () => state('fail')
   const shots = {

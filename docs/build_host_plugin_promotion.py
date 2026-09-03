@@ -22,10 +22,10 @@ def esc(value: str) -> str:
     return html.escape(value)
 
 
-BUILD = "6f4979902e420a18"
-COMMIT = "c97f5237a0a9e9533fb78feda7803c88fa2aa602"
-VSIX_SHA = "a9fcd1c2e8c20143040cb2b4ca80513ec9eb1bda6792c347a43c82438242880f"
-OBSIDIAN_SHA = "bcc5ea18720422caf656fe8cb5f00a25b5332046503340f4082778207fbbd041"
+BUILD = "ab3102c597f58392"
+COMMIT = "f8c0221b7e2d1c40724fde7106f4b9ebbf88ada1"
+VSIX_SHA = "8c281403acce958a00b7e0a299090aa1bc20fe453f3055ebaf861d03f856499e"
+OBSIDIAN_SHA = "4fb8a87724d046f5ef822b1890666ed6ce1ec4e0e56a4121522a82125dd47afa"
 
 
 def main() -> None:
@@ -175,8 +175,8 @@ def main() -> None:
     <table class="ledger">
       <thead><tr><th>Host</th><th>Artifact</th><th>Bytes</th><th>SHA-256</th></tr></thead>
       <tbody>
-        <tr><td>VS Code</td><td class="mono">vscode/systemsketch-vscode-0.1.0.vsix</td><td>2,975,772</td><td class="mono">{VSIX_SHA}</td></tr>
-        <tr><td>Cursor</td><td>Shares the exact VSIX above</td><td>2,975,772</td><td class="mono">{VSIX_SHA}</td></tr>
+        <tr><td>VS Code</td><td class="mono">vscode/systemsketch-vscode-0.1.0.vsix</td><td>2,975,771</td><td class="mono">{VSIX_SHA}</td></tr>
+        <tr><td>Cursor</td><td>Shares the exact VSIX above</td><td>2,975,771</td><td class="mono">{VSIX_SHA}</td></tr>
         <tr><td>Obsidian</td><td class="mono">obsidian/main.js + styles.css + manifest.json + bundle.json</td><td>7,992,978</td><td class="mono">main.js {OBSIDIAN_SHA}</td></tr>
       </tbody>
     </table>
