@@ -135,6 +135,31 @@
   white-space: nowrap;
 }
 
+.systemsketch-block-canvas .BlockNode-definitionBadge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 1px 8px;
+  border: 1px solid color-mix(in srgb, var(--ss-warning) 45%, var(--ss-border));
+  border-radius: 999px;
+  background: var(--ss-warning-soft);
+  color: color-mix(in srgb, var(--ss-warning) 72%, var(--ss-text));
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 18px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.systemsketch-block-canvas.NodeShape_plain .BlockNode-definitionBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+}
+
 /* Simple is the old IcePanel face: icon and XL title form one centred group,
  * with description below and the semantic type in the card's lower band. */
 .systemsketch-block-canvas .BlockNode-simpleTitle {

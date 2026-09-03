@@ -604,6 +604,50 @@
   background: var(--ss-surface-inverse-hover);
 }
 
+.systemsketch-selection-layout-actions {
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  border-left: 1px solid var(--ss-border-inverse);
+}
+
+.systemsketch-selection-layout-action {
+  display: grid;
+  width: 33px;
+  height: 32px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  color: var(--ss-text-inverse);
+  background: transparent;
+}
+
+.systemsketch-selection-layout-action:hover {
+  background: var(--ss-surface-inverse-hover);
+}
+
+.systemsketch-selection-layout-action:focus-visible {
+  outline: 2px solid var(--ss-accent);
+  outline-offset: -2px;
+}
+
+.systemsketch-selection-layout-action svg {
+  width: 18px;
+  height: 18px;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.45;
+}
+
+.systemsketch-selection-layout-action circle {
+  fill: currentColor;
+  stroke: none;
+}
+
 .systemsketch-popout--right[data-surface='inspector']:has(.block-inspector__header) > .systemsketch-popout__header {
   display: none;
 }
