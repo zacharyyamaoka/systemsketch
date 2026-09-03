@@ -70,6 +70,7 @@ import { SettingsGearIcon, SystemSketchSettingsDialog } from '../settings/Interf
 import { importLegacyPyblocksSystemSketch } from '../import/legacyPyblocksSystemSketch'
 import { emitRecorderDiagnostic } from '../recorder/recorderEvents'
 import { consolidateDocumentToSinglePage } from '../singlePageDocument'
+import { settleConnectionParents } from '../blocks/connections/ConnectionBindingUtil'
 
 const SAVE_DEBOUNCE_MS = 600
 const WATCH_INTERVAL_MS = 1500
@@ -188,6 +189,11 @@ function loadDocumentSource(editor: Editor, source: string) {
   )
     ? consolidateDocumentToSinglePage(editor)
     : { changed: false, pageCountBefore: 0, frameIds: [] }
+  // A cable's parent is its container, and a region drawn over a page-level
+  // cable swallows every click on it, so re-settle what the file brought in.
+  // After the page merge, not before: this reads the current page, and a
+  // legacy multi-page import has not finished becoming one page until here.
+  settleConnectionParents(editor)
   return { ...inspected, singlePageMigration }
 }
 

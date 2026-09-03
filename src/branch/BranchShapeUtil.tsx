@@ -1,7 +1,5 @@
 import {
 	BaseFrameLikeShapeUtil,
-	Circle2d,
-	Group2d,
 	Rectangle2d,
 	createShapePropsMigrationSequence,
 	type RecordProps,
@@ -10,6 +8,7 @@ import {
 	type TLResizeInfo,
 	type TLShape,
 } from 'tldraw'
+import { containerHitGeometry } from '../blocks/containerGeometry'
 
 import { BranchCanvas } from './BranchCanvas'
 import { isBranchArmShape } from './BranchArmShapeUtil'
@@ -142,37 +141,15 @@ export class BranchShapeUtil extends BaseFrameLikeShapeUtil<BranchShape> {
 
 	override getGeometry(shape: BranchShape) {
 		const layout = branchLayout(shape.props)
-		// The record, not the layout: during a drag-create the base box tool
-		// holds a 1×1 placeholder and scales props by new-bounds / initial-bounds,
-		// so bounds taller than the record would shrink every arm to its floor.
-		const body = new Rectangle2d({ width: shape.props.w, height: shape.props.h, isFilled: false })
-		// The labels sit inside the body, so they add nothing to the bounds —
-		// and during the 1×1 placeholder they must not widen them to the layout.
-		const band = new Rectangle2d({
-			width: layout.band.w,
-			height: layout.band.h,
-			isFilled: true,
-			isLabel: true,
-			excludeFromShapeBounds: true,
+		return containerHitGeometry({
+			// The record, not the layout: during a drag-create the base box tool
+			// holds a 1x1 placeholder and scales props by new-bounds / initial-bounds,
+			// so bounds taller than the record would shrink every arm to its floor.
+			body: new Rectangle2d({ width: shape.props.w, height: shape.props.h, isFilled: false }),
+			chrome: [layout.band, ...layout.arms.map((row) => row.header)],
+			dots: layout.controls
+				.map((control) => ({ x: control.x, y: control.y, radius: BRANCH_PORT_RADIUS })),
 		})
-		const headers = layout.arms.map((row) => new Rectangle2d({
-			x: row.header.x,
-			y: row.header.y,
-			width: row.header.w,
-			height: row.header.h,
-			isFilled: true,
-			isLabel: true,
-			excludeFromShapeBounds: true,
-		}))
-		const dots = layout.controls.map((control) => new Circle2d({
-			x: control.x - BRANCH_PORT_RADIUS,
-			y: control.y - BRANCH_PORT_RADIUS,
-			radius: BRANCH_PORT_RADIUS,
-			isFilled: true,
-			isLabel: true,
-			excludeFromShapeBounds: true,
-		}))
-		return new Group2d({ children: [body, band, ...headers, ...dots] })
 	}
 
 	override component(shape: BranchShape) {

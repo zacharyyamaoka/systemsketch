@@ -23,7 +23,7 @@ import {
 	type PortFace,
 	type PortPolarity,
 } from './connectionModel'
-import { pairBlockFaces } from './connectionScope'
+import { cableCompositingParent, pairBlockFaces } from './connectionScope'
 import type { ConnectionShape } from './ConnectionShapeUtil'
 
 /**
@@ -389,10 +389,14 @@ export function removeConnectionBinding(
 }
 
 /**
- * Keep a complete cable in the scope its two faces look into: an Expanded
- * Block for anything wired inside it, otherwise the frame or page the two
- * Blocks share. That is what composites internal wiring above the Block's
- * card and below its children (`keepConnectionsAtBottom` runs per parent).
+ * Settle a complete cable into the container it paints in: an Expanded Block
+ * for anything wired inside it, a Loop or Branch region for anything wired
+ * inside one of those, otherwise the frame or page the two Blocks share. That
+ * is what composites internal wiring above the container's card and below its
+ * children (`keepConnectionsAtBottom` runs per parent) — and what keeps the
+ * cable clickable, since tldraw hit-tests no further than a frame-like face.
+ * The cable's SCOPE is unchanged either way: `blockScopeId` reads through a
+ * region to the same answer.
  */
 export function reparentConnectionToScope(editor: Editor, connectionId: TLShapeId): void {
 	const connection = editor.getShape(connectionId)
@@ -403,8 +407,9 @@ export function reparentConnectionToScope(editor: Editor, connectionId: TLShapeI
 	if (!isPortHostShape(startBlock) || !isPortHostShape(endBlock)) return
 	const faces = pairBlockFaces(editor, startBlock, endBlock, { requireLive: false })
 	if (!faces) return
-	if (faces.scopeId !== connection.parentId) {
-		editor.reparentShapes([connectionId], faces.scopeId)
+	const parentId = cableCompositingParent(editor, startBlock, endBlock, faces.scopeId)
+	if (parentId !== connection.parentId) {
+		editor.reparentShapes([connectionId], parentId)
 	}
 }
 
@@ -415,6 +420,24 @@ function settleConnection(editor: Editor, connectionId: TLShapeId): void {
 		return
 	}
 	reparentConnectionToScope(editor, connectionId)
+}
+
+/**
+ * Re-settle every cable already in the document into the container it paints
+ * in. A board saved before regions took their own cables still parents them to
+ * the page, where a Loop or a Branch drawn over them makes them unclickable —
+ * so this runs on install and on every board load, not only when a binding
+ * changes.
+ */
+export function settleConnectionParents(editor: Editor): number {
+	let reparented = 0
+	for (const shape of editor.getCurrentPageShapes()) {
+		if (shape.type !== CONNECTION_SHAPE_TYPE) continue
+		const before = shape.parentId
+		reparentConnectionToScope(editor, shape.id)
+		if (editor.getShape(shape.id)?.parentId !== before) reparented += 1
+	}
+	return reparented
 }
 
 export interface ConnectionCleanupResult {
@@ -464,6 +487,8 @@ export function cleanupStaleConnections(editor: Editor): ConnectionCleanupResult
 		}
 		if (normalizeConnectionDirection(editor, connection.id)) connectionsNormalized += 1
 	}
+
+	settleConnectionParents(editor)
 
 	return { bindingsRemoved, connectionsRemoved, connectionsNormalized }
 }

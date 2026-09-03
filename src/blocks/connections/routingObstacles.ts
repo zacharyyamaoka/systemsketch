@@ -126,9 +126,12 @@ export function collectConnectionRoutingObstacles(
 		[bindings.start?.toId, bindings.end?.toId].filter((id): id is TLShapeId => id !== undefined),
 	)
 	const obstacles: ElbowRect[] = []
+	// The cable's parent is its container, which inside a Loop or a Branch is
+	// the region rather than the scope. Obstacles are a scope question.
+	const scopeId = blockScopeId(editor, connection.id)
 
 	for (const shape of editor.getCurrentPageShapes()) {
-		if (shape.id === connection.id || blockScopeId(editor, shape.id) !== connection.parentId) continue
+		if (shape.id === connection.id || blockScopeId(editor, shape.id) !== scopeId) continue
 
 		if (isBlockShape(shape)) {
 			if (endpointShapeIds.has(shape.id)) continue

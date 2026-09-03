@@ -1,6 +1,7 @@
-import type { Editor } from 'tldraw'
+import { isShapeId, type Editor, type TLShape, type TLShapeId } from 'tldraw'
 
 import { isExpandedBlockShape, isBlockShape, type BlockShape } from './blockModel'
+import { isRegionShape } from './connections/connectionScope'
 import { getConnectionBindings } from './connections/ConnectionBindingUtil'
 import {
 	CONNECTION_SHAPE_TYPE,
@@ -20,6 +21,28 @@ export interface ExpandedBlockLayoutScope {
 	connections: ConnectionShape[]
 }
 
+/**
+ * A cable is this Block's interior wiring when nothing but regions stands
+ * between them. A cable wired inside a Loop or a Branch nested in the Block
+ * parents to that region rather than to the Block itself, so a plain
+ * `parentId` test used to lose it — and with it the boundary rail that tells
+ * ELK where the Block's own children belong.
+ */
+function ownedByBlock(
+	shape: TLShape,
+	blockId: TLShapeId,
+	byId: ReadonlyMap<string, TLShape>,
+): boolean {
+	let current: TLShape | undefined = shape
+	while (current && isShapeId(current.parentId)) {
+		if (current.parentId === blockId) return true
+		const parent = byId.get(current.parentId)
+		if (!isRegionShape(parent)) return false
+		current = parent
+	}
+	return false
+}
+
 /** Resolve the deliberate one-selected-container exception to layout commands. */
 export function getSelectedExpandedBlockLayoutScope(
 	editor: Editor,
@@ -29,6 +52,7 @@ export function getSelectedExpandedBlockLayoutScope(
 
 	const parent = selected[0]
 	const shapes = editor.getCurrentPageShapes()
+	const byId = new Map(shapes.map((shape) => [shape.id as string, shape]))
 	return {
 		parent,
 		childBlocks: shapes.filter(
@@ -36,7 +60,7 @@ export function getSelectedExpandedBlockLayoutScope(
 		),
 		connections: shapes.filter(
 			(shape): shape is ConnectionShape => (
-				shape.type === CONNECTION_SHAPE_TYPE && shape.parentId === parent.id
+				shape.type === CONNECTION_SHAPE_TYPE && ownedByBlock(shape, parent.id, byId)
 			),
 		),
 	}

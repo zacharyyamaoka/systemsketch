@@ -1,9 +1,7 @@
 import {
 	BaseFrameLikeShapeUtil,
-	Circle2d,
 	createShapePropsMigrationIds,
 	createShapePropsMigrationSequence,
-	Group2d,
 	Rectangle2d,
 	Stadium2d,
 	type RecordProps,
@@ -40,6 +38,7 @@ import {
 	rememberBlockInlineField,
 } from './inlineBlockEditing'
 import { commitBlockDefinitionName } from './definitions/definitionLinking'
+import { containerHitGeometry } from './containerGeometry'
 import {
 	BLOCK_CORNER_RADIUS,
 	BLOCK_PORT_RADIUS,
@@ -47,7 +46,6 @@ import {
 	layoutBlock,
 	portLabelHitArea,
 	type BlockLayout,
-	type BlockRect,
 } from './layoutBlock'
 import { BlockCanvas } from './ui/BlockCanvas'
 import { stepIntoDepthScope } from '../depth/depthNavigation'
@@ -456,52 +454,28 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	override getGeometry(shape: BlockShape) {
 		const layout = layoutBlock(shape.props)
 		const isContainer = canBlockContainChildren(shape.props.view)
-		const body = shape.props.view === 'value'
-			? new Stadium2d({
-					width: layout.bounds.w,
-					height: layout.bounds.h,
-					isFilled: true,
-				})
-			: new Rectangle2d({
-					width: layout.bounds.w,
-					height: layout.bounds.h,
-					isFilled: !isContainer,
-				})
-		const header = isContainer && layout.header
-			? new Rectangle2d({
-					width: layout.header.w,
-					height: layout.header.h,
-					isFilled: true,
-					isLabel: true,
-				})
-			: null
-		const chrome = isContainer
-			? [
-					...layout.ports.map((placed) => portLabelHitArea(placed, layout.width)),
-					layout.footer,
-				]
-				.filter((rect): rect is BlockRect => rect !== null && rect.w > 0 && rect.h > 0)
-				.map((rect) => new Rectangle2d({
-					x: rect.x,
-					y: rect.y,
-					width: rect.w,
-					height: rect.h,
-					isFilled: true,
-					isLabel: true,
-				}))
-			: []
-		const portGeometry = layout.ports
-			.filter((port) => !port.subtle)
-			.map((port) => new Circle2d({
-				x: port.x - BLOCK_PORT_RADIUS,
-				y: port.y - BLOCK_PORT_RADIUS,
-				radius: BLOCK_PORT_RADIUS,
-				isFilled: true,
-				isLabel: true,
-				excludeFromShapeBounds: true,
-			}))
-		return new Group2d({
-			children: [body, ...(header ? [header] : []), ...chrome, ...portGeometry],
+		return containerHitGeometry({
+			body: shape.props.view === 'value'
+				? new Stadium2d({
+						width: layout.bounds.w,
+						height: layout.bounds.h,
+						isFilled: true,
+					})
+				: new Rectangle2d({
+						width: layout.bounds.w,
+						height: layout.bounds.h,
+						isFilled: !isContainer,
+					}),
+			chrome: isContainer
+				? [
+						layout.header,
+						...layout.ports.map((placed) => portLabelHitArea(placed, layout.width)),
+						layout.footer,
+					]
+				: [],
+			dots: layout.ports
+				.filter((port) => !port.subtle)
+				.map((port) => ({ x: port.x, y: port.y, radius: BLOCK_PORT_RADIUS })),
 		})
 	}
 

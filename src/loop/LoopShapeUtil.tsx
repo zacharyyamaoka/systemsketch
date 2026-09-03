@@ -1,7 +1,5 @@
 import {
 	BaseFrameLikeShapeUtil,
-	Circle2d,
-	Group2d,
 	Rectangle2d,
 	createShapePropsMigrationSequence,
 	type RecordProps,
@@ -9,6 +7,7 @@ import {
 	type TLResizeInfo,
 	type TLShape,
 } from 'tldraw'
+import { containerHitGeometry } from '../blocks/containerGeometry'
 
 import { LoopCanvas } from './LoopCanvas'
 import {
@@ -103,25 +102,14 @@ export class LoopShapeUtil extends BaseFrameLikeShapeUtil<LoopShape> {
 
 	override getGeometry(shape: LoopShape) {
 		const layout = loopLayout(shape.props)
-		// The record, not the layout: during a drag-create the base box tool
-		// holds a 1×1 placeholder and scales props by new-bounds / initial-bounds.
-		const body = new Rectangle2d({ width: shape.props.w, height: shape.props.h, isFilled: false })
-		const header = new Rectangle2d({
-			width: layout.header.w,
-			height: layout.header.h,
-			isFilled: true,
-			isLabel: true,
-			excludeFromShapeBounds: true,
+		return containerHitGeometry({
+			// The record, not the layout: during a drag-create the base box tool
+			// holds a 1x1 placeholder and scales props by new-bounds / initial-bounds.
+			body: new Rectangle2d({ width: shape.props.w, height: shape.props.h, isFilled: false }),
+			chrome: [layout.header, layout.footer, layout.turn],
+			dots: [layout.iterable, layout.item]
+				.map((placed) => ({ x: placed.x, y: placed.y, radius: LOOP_PORT_RADIUS })),
 		})
-		const dots = [layout.iterable, layout.item].map((placed) => new Circle2d({
-			x: placed.x - LOOP_PORT_RADIUS,
-			y: placed.y - LOOP_PORT_RADIUS,
-			radius: LOOP_PORT_RADIUS,
-			isFilled: true,
-			isLabel: true,
-			excludeFromShapeBounds: true,
-		}))
-		return new Group2d({ children: [body, header, ...dots] })
 	}
 
 	override component(shape: LoopShape) {

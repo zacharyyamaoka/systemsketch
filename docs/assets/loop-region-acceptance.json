@@ -150,7 +150,11 @@
           "data"
         ],
         0,
-        1
+        [
+          "block",
+          "connection",
+          "connection"
+        ]
       ],
       "desired": [
         1,
@@ -160,7 +164,11 @@
           "data"
         ],
         0,
-        1
+        [
+          "block",
+          "connection",
+          "connection"
+        ]
       ],
       "ok": true
     },
@@ -216,6 +224,51 @@
         2,
         0
       ],
+      "ok": true
+    },
+    {
+      "id": "L12",
+      "label": "clicking any cable painted over the region selects that cable",
+      "observed": [
+        true,
+        [
+          "connection",
+          "connection"
+        ]
+      ],
+      "desired": [
+        true,
+        [
+          "connection",
+          "connection"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "L13",
+      "label": "the header AND the footer grab the region",
+      "observed": [
+        "loop",
+        "loop"
+      ],
+      "desired": [
+        "loop",
+        "loop"
+      ],
+      "ok": true
+    },
+    {
+      "id": "L14",
+      "label": "the region owns its cables, and they still paint under its Blocks",
+      "observed": {
+        "cables": 2,
+        "cablesUnderBlocks": true
+      },
+      "desired": {
+        "cables": 2,
+        "cablesUnderBlocks": true
+      },
       "ok": true
     },
     {

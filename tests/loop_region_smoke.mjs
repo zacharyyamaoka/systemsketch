@@ -247,9 +247,11 @@ async function run() {
     await waitFor(page, 'window.__systemsketch?.editor', 'editor after reload')
     await delay(1400)
     state = await loopState(page)
+    // The region owns its Block AND both cables — a cable inside a region is
+    // that region's child, which is what keeps it clickable (L12).
     check('L8', 'the region, its child and both cables survive a reload',
-      [state.loops, state.cables, state.temporal, state.orphans, state.children],
-      [1, 2, ['data', 'data'], 0, 1])
+      [state.loops, state.cables, state.temporal, state.orphans, state.childTypes],
+      [1, 2, ['data', 'data'], 0, ['block', 'connection', 'connection']])
 
     // 9 — the two header types are authored, not baked in. You said a header
     // port carries a type you can define; until now there was nowhere to
@@ -291,6 +293,78 @@ async function run() {
     check('L10', 'retyping repaints the header and keeps both cables welded',
       [state.iterable?.type, state.item?.type, painted, state.cables, state.orphans],
       ['Poses', 'Pose', ['Poses', 'Pose'], 2, 0])
+
+    // 12 — every cable you can SEE inside the region is a cable you can click.
+    // tldraw stops hit-testing at a frame-like shape's hollow face and answers
+    // nothing, so a cable left in the page beneath the Loop was unselectable
+    // wherever it crossed it — while the same cable inside an Expanded Block
+    // worked, purely because being that Block's child sorted it above the
+    // frame. Clicking is the only honest proof: geometry alone hid this.
+    await editorEval(page, 'editor.selectNone(); return \'\'')
+    const cableTargets = JSON.parse(await editorEval(page, `
+      const out = []
+      document.querySelectorAll('[data-shape-type="connection"]').forEach((node) => {
+        const path = node.querySelector('path')
+        if (!path) return
+        const point = path.getPointAtLength(path.getTotalLength() / 2)
+          .matrixTransform(path.getScreenCTM())
+        out.push({ id: node.dataset.shapeId, x: point.x, y: point.y })
+      })
+      return JSON.stringify(out)`))
+    const cableClicks = []
+    for (const target of cableTargets) {
+      await clickAt(page, target.x, target.y)
+      await delay(200)
+      const selected = await editorEval(page, `
+        const ids = editor.getSelectedShapeIds()
+        return ids.length === 1 ? editor.getShape(ids[0]).type : String(ids.length)`)
+      cableClicks.push(selected)
+      await editorEval(page, 'editor.selectNone(); return \'\'')
+      await delay(120)
+    }
+    check('L12', 'clicking any cable painted over the region selects that cable',
+      [cableTargets.length > 0, cableClicks],
+      [true, cableTargets.map(() => 'connection')])
+
+    // 13 — the footer is chrome, the open body is not. The footer shipped with
+    // no hit geometry at all, so the one band Zach reached for did nothing.
+    const bands = await editorEval(page, `
+      const loop = editor.getCurrentPageShapes().find((s) => s.type === 'loop')
+      const b = editor.getShapePageBounds(loop.id)
+      return JSON.stringify({
+        footer: editor.screenToPage
+          ? editor.pageToScreen({ x: b.x + b.w / 2, y: b.y + b.h - 15 })
+          : null,
+        header: editor.pageToScreen({ x: b.x + b.w / 2, y: b.y + 18 }),
+      })`)
+    const { footer, header } = JSON.parse(bands)
+    const grab = async (point) => {
+      await clickAt(page, point.x, point.y)
+      await delay(200)
+      const hit = await editorEval(page, `
+        const ids = editor.getSelectedShapeIds()
+        return ids.length === 1 ? editor.getShape(ids[0]).type : 'none'`)
+      await editorEval(page, 'editor.selectNone(); return \'\'')
+      await delay(120)
+      return hit
+    }
+    check('L13', 'the header AND the footer grab the region',
+      [await grab(header), await grab(footer)], ['loop', 'loop'])
+
+    // 14 — and the cables sit under the region's own Blocks, where the paint
+    // rule puts them. Being clickable must not have raised them over the cards.
+    const stacking = await editorEval(page, `
+      const loop = editor.getCurrentPageShapes().find((s) => s.type === 'loop')
+      const kinds = editor.getSortedChildIdsForParent(loop.id)
+        .map((id) => editor.getShape(id).type)
+      const lastCable = kinds.lastIndexOf('connection')
+      const firstBlock = kinds.indexOf('block')
+      return JSON.stringify({
+        cables: kinds.filter((k) => k === 'connection').length,
+        cablesUnderBlocks: firstBlock === -1 || lastCable < firstBlock,
+      })`)
+    check('L14', 'the region owns its cables, and they still paint under its Blocks',
+      JSON.parse(stacking), { cables: 2, cablesUnderBlocks: true })
 
     await ensureDir(SHOTS)
     const shot = await page.send('Page.captureScreenshot', { format: 'png' })
