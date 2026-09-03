@@ -29,6 +29,7 @@ import {
   isBlockShape,
   portDefaultValue,
   portInHeader,
+  portMutates,
   portRow,
   type BlockPortSide,
   type BlockShape,
@@ -173,6 +174,11 @@ function BlockPortDot({
     connected ? 'Port_connected' : '',
     dragOffset !== null ? 'Port_dragging' : '',
     isHinting ? 'Port_hinting' : isEligible ? 'Port_eligible' : '',
+    // The hook is read off the signature, so it shows before any cable exists.
+    portMutates(placed.port) ? 'Port_mutates' : '',
+    // An effect output leaves by the top edge: the call gave its value no name,
+    // so there is no right-hand port for it to use.
+    placed.edge === 'top' ? 'Port_effect' : '',
   ].filter(Boolean).join(' ')
 
   // A header dot carries no label, so its name rides the tooltip instead.
@@ -182,7 +188,9 @@ function BlockPortDot({
       className={classes}
       data-block-port-id={portId}
       data-block-port-side={placed.side}
+      data-block-port-edge={placed.edge}
       data-block-port-row={portRow(placed.port)}
+      data-block-port-mutates={portMutates(placed.port) ? 'true' : undefined}
       title={inHeader && !placed.subtle ? placed.port.name || undefined : undefined}
       style={{
         '--port-color': portColor(placed.port.type),
