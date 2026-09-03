@@ -53,7 +53,7 @@ def figure(name: str, box: tuple[int, int, int, int], caption: str, width: int =
 # ---------------------------------------------------------------- measured
 HEAD = git("rev-parse", "--short", "HEAD")
 BRANCH = git("rev-parse", "--abbrev-ref", "HEAD")
-BASE_SHA = "98ca19376f1974d0bb605f75923d16590955170a"
+BASE_SHA = "e4ec5da8b5903e143504ce95d57a922dd3beafbb"
 COMMITS = [line for line in git("log", "--oneline", f"{BASE_SHA}..HEAD").splitlines() if line]
 STAT = git("diff", "--stat", f"{BASE_SHA}..HEAD", "--", "src", "tests", "package.json")
 MODEL = (REPO / "src/blocks/connections/connectionModel.ts").read_text(encoding="utf-8")
@@ -164,8 +164,8 @@ def build() -> str:
 
 <h2>5 · Decision surface</h2>
 <div class="decision">
-<div><h4>Done and proved</h4><ul><li>Delayed mark, dotted line, z⁻¹ pill with initial value, pill handle drag, centre command, right-click toggle, inspector section, corrected solid-before/dotted-after Dev Hub alternative, migration, persistence.</li><li>{PASSED}/{len(checks)} browser checks; <code>npm run check</code> green (tsc, vitest, Python incl. the stock-boundary test).</li><li>Review fixture on the track server: <a href="{html.escape(FIXTURE_URL)}">{html.escape(FIXTURE_URL)}</a></li></ul></div>
-<div><h4>Left</h4><ul><li>The appearance pill (FigJam-style) does not yet carry a z⁻¹ toggle; the selection pill's Inspect and the right-click menu do.</li><li>Inline double-click editing of the value on the pill; the inspector field is the editor today.</li><li>No Loop region yet: the fixture draws the back edge between two Blocks by hand and says so.</li><li>Export (<code>toSvg</code>) draws the pill and dots, but was not driven.</li></ul></div>
+<div><h4>Done and proved</h4><ul><li>Delayed mark, dotted line, z⁻¹ pill with initial value, pill handle drag, centre command, right-click toggle, inspector section, corrected solid-before/dotted-after Dev Hub alternative, migration, persistence.</li><li>{PASSED}/{len(checks)} delayed-edge browser checks plus 13/13 detached-presentation gates; <code>npm run check</code> green (tsc, vitest, Python incl. the stock-boundary test).</li><li>The split survives conversion to a stock arrow, endpoint movement, SVG export, and reload.</li><li>Review fixture on the track server: <a href="{html.escape(FIXTURE_URL)}">{html.escape(FIXTURE_URL)}</a></li></ul></div>
+<div><h4>Left</h4><ul><li>The appearance pill (FigJam-style) does not yet carry a z⁻¹ toggle; the selection pill's Inspect and the right-click menu do.</li><li>Inline double-click editing of the value on the pill; the inspector field is the editor today.</li><li>No Loop region yet: the fixture draws the back edge between two Blocks by hand and says so.</li></ul></div>
 <div><h4>Needs you</h4><ul><li><b>Which line style</b> after a few real diagrams: dotted whole cable, or solid-before/dotted-after. Default if silent: dotted whole cable; the switch stays in the Dev Hub.</li><li><b>Pill text</b>: <code>z⁻¹</code> as shipped, or the word <code>next</code>? Default: <code>z⁻¹</code>.</li></ul></div>
 <div><h4>Deliberately not done</h4><ul><li>No landing glyph (M4 was rejected). No colour schemes for wires (noted for later). No async rail.</li><li>No new shape: the pill is part of the cable, so nothing else has to know it exists.</li></ul></div>
 </div>
