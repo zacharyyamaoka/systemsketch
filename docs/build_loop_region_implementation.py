@@ -54,6 +54,8 @@ QA_FRAMES = [
                 "worth a design decision before anyone draws this for real."),
     ("tap-port", "A tap now offers a Block, and it opens BELOW the port — the direction the "
                  "cable points."),
+    ("inspector", "Selecting the region opens its panel. Three sections, two types, and no "
+                  "name field anywhere — because a header port has no name."),
 ]
 
 
@@ -251,6 +253,26 @@ than no rig.</p>
 horizontal runs — the bundle of parallel arrows this whole thread started by rejecting. It is
 correct and it is ugly, and it wants a decision before anyone draws it for real.</p>
 
+<h2>The types are authorable now</h2>
+<p>You said a header port carries a type <em>you can define</em>. It did not: the two types
+were baked into the shape's defaults and reachable only from code. There is now a Loop
+inspector in the same idiom as the Block's and the Branch's — <strong>Loop</strong> (title),
+<strong>Header ports</strong> (the two types, each with its colour chip), and
+<strong>Turn</strong> (what the chip reads, empty to hide it). No name field appears anywhere,
+because a header port has no name.</p>
+<p class="note warn"><strong>The panel existed but nothing could reach it.</strong> The
+inspector dock auto-opens when its subject key changes, and that key knew about Blocks,
+Branches and cables — not regions. So a selected Loop opened nothing, and the generic
+selection pill's <em>Inspect</em> button was not rendering either. Selecting a Loop now opens
+its panel exactly as selecting a Block does. <strong>This is the third time in this track
+that a hand-maintained list of subjects left the Loop out</strong> — after
+<code>canBind</code> and <code>anchorFaceForScope</code>. Worth watching for a fourth.</p>
+<p class="note good"><strong>The load-bearing test.</strong> A cable is welded to a port by
+ID, so retyping a port must not disturb the ID. The journey retypes both header ports through
+the inspector with real clicks and keystrokes and then asserts the painted labels changed,
+both cables are still attached, and there are zero orphaned bindings. That is check L10, and
+it is why <code>setLoopPortType</code> writes the type and nothing else.</p>
+
 <h2>Known, and deliberately left</h2>
 <p class="note warn"><strong>The item cable's elbow route laps the region.</strong> The
 binding is right and the line style is right; only the path is ugly. The live paint asks
@@ -258,10 +280,15 @@ every port to leave rightward and escape its shape's box, and a region's box is 
 region. Fixing it means changing box construction shared with every Block cable, which
 belongs in its own slice behind the routing corpus rather than bolted onto this one. A card
 on the review board says so.</p>
-<p><strong>Not built, and not pretended:</strong> the faded zero-iterations arm (it needs the
-analyzer's last/zero φ, not just a shape); a live iteration counter (<code>turn</code> is a
-plain string prop today, so the chip renders whatever it is given); authoring the port names
-from the inspector; <code>break</code>, <code>else</code>, and nested loops.</p>
+<p><strong>Not built, and not pretended:</strong> the faded zero-iterations arm — you called
+for it and it is right, but the fade has to be authored state on the region rather than
+something the canvas derives, and choosing that state is a design decision I will not invent;
+a live iteration counter (<code>turn</code> is a plain string prop, so the chip renders
+whatever it is given); <code>break</code>, <code>else</code>, and nested loops.</p>
+<p class="note"><strong>A UX question the QA sweep raised.</strong> A selected Loop takes the
+chrome's <em>generic</em> selection pill — appearance controls it has no styles for, plus
+Tidy/Organize, plus Inspect — while a Branch gets a mini-menu of its own. What belongs on a
+Loop's pill is a decision, not a defect, so it is unchanged.</p>
 
 <h2>The track</h2>
 <table>

@@ -29,6 +29,28 @@ import {
 } from './browser_harness.mjs'
 import { box, deselect, dragFrom, drawBlock, portDot } from './block_journey_helpers.mjs'
 
+async function clickSelector(page, selector) {
+  await waitFor(page, `document.querySelector(${JSON.stringify(selector)})`, selector, 8000)
+  const target = await box(page, selector)
+  await clickAt(page, target.cx, target.cy)
+  await delay(280)
+}
+
+/** Focus a live inspector field by its accessible name, replace it, commit. */
+async function retype(page, ariaLabel, text) {
+  const field = await box(page, `input[aria-label="${ariaLabel}"]`)
+  // Triple-click selects the whole value. Ctrl+A did not: it left the caret
+  // where it was, so the new text was inserted into the old and the check read
+  // `IterablPosese`.
+  await mouse(page, 'mouseMoved', field.cx, field.cy)
+  await mouse(page, 'mousePressed', field.cx, field.cy, { buttons: 1, clickCount: 3 })
+  await mouse(page, 'mouseReleased', field.cx, field.cy, { buttons: 1, clickCount: 3 })
+  await delay(160)
+  await page.send('Input.insertText', { text })
+  await key(page, 'Enter', 'Enter')
+  await delay(320)
+}
+
 const SHOTS = join(ROOT, 'docs', 'assets')
 const SHOT = join(SHOTS, 'loop-region-acceptance.png')
 const OUT = join(SHOTS, 'loop-region-acceptance.json')
@@ -222,11 +244,52 @@ async function run() {
       [state.loops, state.cables, state.temporal, state.orphans, state.children],
       [1, 2, ['data', 'data'], 0, 1])
 
+    // 9 — the two header types are authored, not baked in. You said a header
+    // port carries a type you can define; until now there was nowhere to
+    // define it.
+    // The reload above minted new shape ids, so re-resolve rather than reusing
+    // the pre-reload handle.
+    await editorEval(page, `
+      const loop = editor.getCurrentPageShapes().find((s) => s.type === 'loop')
+      editor.select(loop.id)
+      return ''`)
+    await delay(420)
+    // Selecting the region opens its panel, the way selecting a Block or a
+    // Branch does. No extra click.
+    await waitFor(page, `document.querySelector('[data-testid="loop-inspector"]')`, 'loop inspector')
+    const fields = JSON.parse(await evaluate(page, `(() => {
+      const panel = document.querySelector('[data-testid="loop-inspector"]')
+      return JSON.stringify({
+        sections: Array.from(panel.querySelectorAll('[data-inspector-section]'))
+          .map((n) => n.dataset.inspectorSection),
+        types: Array.from(panel.querySelectorAll('input[aria-label$="type"]'))
+          .map((n) => n.value),
+        // A header port has no name, so the panel must not offer one.
+        nameFields: panel.querySelectorAll('input[aria-label$="name"]').length,
+      })
+    })()`))
+    check('L9', 'the Loop inspector offers both types and no name field',
+      [fields.sections, fields.types, fields.nameFields],
+      [['Loop', 'Header ports', 'Turn'], ['Iterable', 'Iter'], 0])
+
+    // 10 — THE CLAIM of this slice: retyping a header port must not disturb the
+    // cable welded to it, because a cable is welded by port ID.
+    await retype(page, 'Iterable in type', 'Poses')
+    await retype(page, 'Element out type', 'Pose')
+    await delay(420)
+    state = await loopState(page)
+    const painted = JSON.parse(await evaluate(page, `(() => JSON.stringify(
+      ['iterable', 'item'].map((id) => document
+        .querySelector('[data-testid="loop-port-label-' + id + '"]')?.textContent.trim() ?? null)))()`))
+    check('L10', 'retyping repaints the header and keeps both cables welded',
+      [state.iterable?.type, state.item?.type, painted, state.cables, state.orphans],
+      ['Poses', 'Pose', ['Poses', 'Pose'], 2, 0])
+
     await ensureDir(SHOTS)
     const shot = await page.send('Page.captureScreenshot', { format: 'png' })
     await writeFile(SHOT, Buffer.from(shot.data, 'base64'))
 
-    check('L9', 'no local console errors', localConsoleErrors(page), [])
+    check('L11', 'no local console errors', localConsoleErrors(page), [])
   } finally {
     app.close()
   }

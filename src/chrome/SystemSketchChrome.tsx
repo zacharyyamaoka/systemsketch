@@ -29,6 +29,7 @@ import {
   EditorBranchSelectionMiniMenu,
   getOnlySelectedBranch,
 } from '../branch'
+import { EditorLoopInspector, getOnlySelectedLoop } from '../loop'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
 import { PortableShareButton } from '../export/PortableShareButton'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
@@ -181,6 +182,7 @@ function InspectorDock({ editor, onClose }: { editor: Editor; onClose(): void })
     'systemsketch inspector subject',
     () => {
       if (getOnlySelectedBranch(editor)) return 'branch'
+      if (getOnlySelectedLoop(editor)) return 'loop'
       if (getBlockInspectorContext(editor).kind === 'empty'
         && getConnectionInspectorContext(editor) !== null) return 'connection'
       return 'block'
@@ -188,6 +190,7 @@ function InspectorDock({ editor, onClose }: { editor: Editor; onClose(): void })
     [editor],
   )
   if (subject === 'branch') return <EditorBranchInspector editor={editor} onRequestClose={onClose} />
+  if (subject === 'loop') return <EditorLoopInspector editor={editor} onRequestClose={onClose} />
   if (subject === 'connection') return <EditorConnectionInspector editor={editor} />
   return <EditorBlockInspector editor={editor} onRequestClose={onClose} />
 }
@@ -316,6 +319,12 @@ export function SystemSketchSurfaceHost() {
     () => {
       const branch = getOnlySelectedBranch(editor)
       if (branch) return `branch:${branch.id}`
+      // A region is a subject of this dock exactly as a Branch is. Without
+      // this line the Loop's panel existed but no ordinary gesture reached it:
+      // the dock only auto-opens when this key changes, and a Loop selection
+      // never changed it.
+      const loop = getOnlySelectedLoop(editor)
+      if (loop) return `loop:${loop.id}`
       const context = getBlockInspectorContext(editor)
       if (context.kind === 'selected') return context.shape.id
       if (context.kind === 'multi') return `multi:${context.styles.blockCount}`

@@ -1,6 +1,406 @@
 {
   "observations": [
     {
+      "case": "baseline",
+      "note": "title/turn/labels clear: true",
+      "loop": {
+        "w": 640,
+        "h": 380
+      },
+      "rect": {
+        "x": 430.125,
+        "y": 280.125,
+        "w": 640,
+        "h": 380
+      },
+      "title": {
+        "x": 652.1171875,
+        "y": 293.625,
+        "w": 254.390625,
+        "h": 21,
+        "text": "For Loop"
+      },
+      "turn": {
+        "x": 922.515625,
+        "y": 293.125,
+        "w": 133.59375,
+        "h": 22,
+        "text": "iteration 3 of 7"
+      },
+      "iterable": {
+        "x": 444.125,
+        "y": 295.625,
+        "w": 45.703125,
+        "h": 17,
+        "text": "Iterable"
+      },
+      "item": {
+        "x": 460.125,
+        "y": 316.625,
+        "w": 20.96875,
+        "h": 17,
+        "text": "Iter"
+      },
+      "titleOverTurn": false,
+      "titleOverIterable": false,
+      "titleOverItem": false,
+      "iterableOverItem": false,
+      "turnInsideRegion": false,
+      "footer": true,
+      "ports": 2
+    },
+    {
+      "case": "wide",
+      "note": "footer=true titleOverTurn=false",
+      "loop": {
+        "w": 1180,
+        "h": 200
+      },
+      "rect": {
+        "x": 454.7221984863281,
+        "y": 419.7221984863281,
+        "w": 590,
+        "h": 99.99996948242188
+      },
+      "title": {
+        "x": 579.71826171875,
+        "y": 426.4721984863281,
+        "w": 383.1953125,
+        "h": 10.5,
+        "text": "For Loop"
+      },
+      "turn": {
+        "x": 970.91748046875,
+        "y": 426.2221984863281,
+        "w": 66.796875,
+        "h": 11,
+        "text": "iteration 3 of 7"
+      },
+      "iterable": {
+        "x": 461.7221984863281,
+        "y": 427.4721984863281,
+        "w": 22.8515625,
+        "h": 8.5,
+        "text": "Iterable"
+      },
+      "item": {
+        "x": 469.7221984863281,
+        "y": 437.9721984863281,
+        "w": 10.484375,
+        "h": 8.5,
+        "text": "Iter"
+      },
+      "titleOverTurn": false,
+      "titleOverIterable": false,
+      "titleOverItem": false,
+      "iterableOverItem": false,
+      "turnInsideRegion": false,
+      "footer": true,
+      "ports": 2
+    },
+    {
+      "case": "narrow",
+      "note": "titleOverTurn=false titleOverIterable=false",
+      "loop": {
+        "w": 300,
+        "h": 420
+      },
+      "rect": {
+        "x": 600.125,
+        "y": 260.125,
+        "w": 300,
+        "h": 420
+      },
+      "title": {
+        "x": 720.125,
+        "y": 273.625,
+        "w": 150,
+        "h": 21,
+        "text": "For Loop"
+      },
+      "turn": null,
+      "iterable": {
+        "x": 614.125,
+        "y": 275.625,
+        "w": 45.703125,
+        "h": 17,
+        "text": "Iterable"
+      },
+      "item": {
+        "x": 630.125,
+        "y": 296.625,
+        "w": 20.96875,
+        "h": 17,
+        "text": "Iter"
+      },
+      "titleOverTurn": false,
+      "titleOverIterable": false,
+      "titleOverItem": false,
+      "iterableOverItem": false,
+      "turnInsideRegion": false,
+      "footer": true,
+      "ports": 2
+    },
+    {
+      "case": "floor",
+      "note": "h=180 footer=true ports=2",
+      "loop": {
+        "w": 300,
+        "h": 180
+      },
+      "rect": {
+        "x": 449.8572082519531,
+        "y": 289.8572082519531,
+        "w": 600,
+        "h": 359.9999694824219
+      },
+      "title": {
+        "x": 689.857177734375,
+        "y": 316.8572082519531,
+        "w": 300,
+        "h": 42,
+        "text": "For Loop"
+      },
+      "turn": null,
+      "iterable": {
+        "x": 477.8572082519531,
+        "y": 320.8572082519531,
+        "w": 91.40621948242188,
+        "h": 34,
+        "text": "Iterable"
+      },
+      "item": {
+        "x": 509.8572082519531,
+        "y": 362.8572082519531,
+        "w": 41.937469482421875,
+        "h": 34,
+        "text": "Iter"
+      },
+      "titleOverTurn": false,
+      "titleOverIterable": false,
+      "titleOverItem": false,
+      "iterableOverItem": false,
+      "turnInsideRegion": false,
+      "footer": true,
+      "ports": 2
+    },
+    {
+      "case": "turn",
+      "note": "chip right edge is 14px inside the region · overTitle=false",
+      "loop": {
+        "w": 640,
+        "h": 380
+      },
+      "rect": {
+        "x": 430.125,
+        "y": 280.125,
+        "w": 640,
+        "h": 380
+      },
+      "title": {
+        "x": 652.125,
+        "y": 293.625,
+        "w": 183.1875,
+        "h": 21,
+        "text": "For Loop"
+      },
+      "turn": {
+        "x": 851.3125,
+        "y": 293.125,
+        "w": 204.796875,
+        "h": 22,
+        "text": "iteration 128 of 4096 · 31 ms/turn"
+      },
+      "iterable": {
+        "x": 444.125,
+        "y": 295.625,
+        "w": 45.703125,
+        "h": 17,
+        "text": "Iterable"
+      },
+      "item": {
+        "x": 460.125,
+        "y": 316.625,
+        "w": 20.96875,
+        "h": 17,
+        "text": "Iter"
+      },
+      "titleOverTurn": false,
+      "titleOverIterable": false,
+      "titleOverItem": false,
+      "iterableOverItem": false,
+      "turnInsideRegion": false,
+      "footer": true,
+      "ports": 2
+    },
+    {
+      "case": "long-types",
+      "note": "titleOverIterable=false iterableOverItem=false",
+      "loop": {
+        "w": 520,
+        "h": 380
+      },
+      "rect": {
+        "x": 490.125,
+        "y": 280.125,
+        "w": 520,
+        "h": 380
+      },
+      "title": {
+        "x": 676.1171875,
+        "y": 293.625,
+        "w": 170.390625,
+        "h": 21,
+        "text": "For Loop"
+      },
+      "turn": {
+        "x": 862.515625,
+        "y": 293.125,
+        "w": 133.59375,
+        "h": 22,
+        "text": "iteration 3 of 7"
+      },
+      "iterable": {
+        "x": 504.125,
+        "y": 295.625,
+        "w": 156,
+        "h": 17,
+        "text": "Sequence[Mapping[str, Pose]]"
+      },
+      "item": {
+        "x": 520.125,
+        "y": 316.625,
+        "w": 109.015625,
+        "h": 17,
+        "text": "Mapping[str, Pose]"
+      },
+      "titleOverTurn": false,
+      "titleOverIterable": false,
+      "titleOverItem": false,
+      "iterableOverItem": false,
+      "turnInsideRegion": false,
+      "footer": true,
+      "ports": 2
+    },
+    {
+      "case": "selected",
+      "note": "stock selection chrome over the header ports"
+    },
+    {
+      "case": "untitled",
+      "note": "title text=\"\"",
+      "loop": {
+        "w": 640,
+        "h": 380
+      },
+      "rect": {
+        "x": 430.125,
+        "y": 280.125,
+        "w": 640,
+        "h": 380
+      },
+      "title": {
+        "x": 652.1171875,
+        "y": 304.125,
+        "w": 254.390625,
+        "h": 0,
+        "text": ""
+      },
+      "turn": {
+        "x": 922.515625,
+        "y": 293.125,
+        "w": 133.59375,
+        "h": 22,
+        "text": "iteration 3 of 7"
+      },
+      "iterable": {
+        "x": 444.125,
+        "y": 295.625,
+        "w": 45.703125,
+        "h": 17,
+        "text": "Iterable"
+      },
+      "item": {
+        "x": 460.125,
+        "y": 316.625,
+        "w": 20.96875,
+        "h": 17,
+        "text": "Iter"
+      },
+      "titleOverTurn": false,
+      "titleOverIterable": false,
+      "titleOverItem": false,
+      "iterableOverItem": false,
+      "turnInsideRegion": false,
+      "footer": true,
+      "ports": 2
+    },
+    {
+      "case": "zoomed-out",
+      "note": "painted w=32px ports=2",
+      "loop": {
+        "w": 640,
+        "h": 380
+      },
+      "rect": {
+        "x": 734.375,
+        "y": 460.875,
+        "w": 32,
+        "h": 19
+      },
+      "title": {
+        "x": 745.474609375,
+        "y": 461.54998779296875,
+        "w": 12.71954345703125,
+        "h": 1.050018310546875,
+        "text": "For Loop"
+      },
+      "turn": {
+        "x": 758.9945068359375,
+        "y": 461.5249938964844,
+        "w": 6.6796875,
+        "h": 1.100006103515625,
+        "text": "iteration 3 of 7"
+      },
+      "iterable": {
+        "x": 735.0750122070312,
+        "y": 461.6499938964844,
+        "w": 2.28515625,
+        "h": 0.850006103515625,
+        "text": "Iterable"
+      },
+      "item": {
+        "x": 735.875,
+        "y": 462.70001220703125,
+        "w": 1.0484619140625,
+        "h": 0.8499755859375,
+        "text": "Iter"
+      },
+      "titleOverTurn": false,
+      "titleOverIterable": false,
+      "titleOverItem": false,
+      "iterableOverItem": false,
+      "turnInsideRegion": false,
+      "footer": true,
+      "ports": 2
+    },
+    {
+      "case": "dark",
+      "note": "region chrome in dark theme"
+    },
+    {
+      "case": "fan-out",
+      "note": "cables=3 orphans=0",
+      "cables": 3,
+      "orphans": 0
+    },
+    {
+      "case": "nested",
+      "note": "inner parent=shape:qa-loop outer children=1",
+      "parent": "shape:qa-loop",
+      "children": 1
+    },
+    {
       "case": "tap-port",
       "note": "picker on a Loop port=1, on a Block port=1 · opens 65px below",
       "picker": 1,
@@ -9,6 +409,32 @@
         "dy": 65,
         "dx": 6
       }
+    },
+    {
+      "case": "inspector",
+      "note": "sections=3 fields=4 clipped=false",
+      "sections": [
+        "Loop",
+        "Header ports",
+        "Turn"
+      ],
+      "fields": [
+        "Loop title",
+        "Iterable in type",
+        "Element out type",
+        "Loop turn"
+      ],
+      "clipped": false
+    },
+    {
+      "case": "export",
+      "note": "loop title=true types=2 turn=true · BRANCH control=true · 2713B",
+      "hasSvg": true,
+      "bytes": 2713,
+      "title": true,
+      "types": 2,
+      "turn": true,
+      "branchTitleControl": true
     },
     {
       "case": "console",

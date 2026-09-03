@@ -1,0 +1,24 @@
+/*
+ * Only what the Loop adds to the Block inspector's sheet: a colour chip beside
+ * a header port's type, and a row that has a label instead of a name field —
+ * because a header port has no name to edit.
+ */
+.loop-inspector .block-inspector__port-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 16px;
+  gap: 8px;
+  align-items: center;
+}
+
+.loop-inspector .block-inspector__port-name {
+  color: var(--ss-text-muted);
+  font-size: 12.5px;
+  padding-left: 2px;
+}
+
+.loop-inspector .block-inspector__port-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 12%);
+}

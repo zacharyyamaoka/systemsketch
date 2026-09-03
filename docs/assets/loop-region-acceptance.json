@@ -159,6 +159,60 @@
     },
     {
       "id": "L9",
+      "label": "the Loop inspector offers both types and no name field",
+      "observed": [
+        [
+          "Loop",
+          "Header ports",
+          "Turn"
+        ],
+        [
+          "Iterable",
+          "Iter"
+        ],
+        0
+      ],
+      "desired": [
+        [
+          "Loop",
+          "Header ports",
+          "Turn"
+        ],
+        [
+          "Iterable",
+          "Iter"
+        ],
+        0
+      ],
+      "ok": true
+    },
+    {
+      "id": "L10",
+      "label": "retyping repaints the header and keeps both cables welded",
+      "observed": [
+        "Poses",
+        "Pose",
+        [
+          "Poses",
+          "Pose"
+        ],
+        2,
+        0
+      ],
+      "desired": [
+        "Poses",
+        "Pose",
+        [
+          "Poses",
+          "Pose"
+        ],
+        2,
+        0
+      ],
+      "ok": true
+    },
+    {
+      "id": "L11",
       "label": "no local console errors",
       "observed": [],
       "desired": [],

@@ -1,4 +1,6 @@
 export * from './loopModel'
 export * from './LoopShapeUtil'
 export * from './LoopTool'
+export * from './loopCommands'
+export { EditorLoopInspector, LoopInspectorContent } from './ui/LoopInspector'
 export { LoopIcon } from './LoopIcon'

@@ -307,6 +307,29 @@ const CASES = {
     await delay(300)
   },
 
+  /** The inspector: three sections, two types, and no name field anywhere. */
+  async inspector(page) {
+    await seedLoop(page, { turn: 'iteration 3 of 7' })
+    await ed(page, `editor.select('shape:qa-loop'); return ''`)
+    await waitFor(page, `document.querySelector('[data-testid="loop-inspector"]')`,
+      'loop inspector', 8000)
+    await delay(520)
+    const panel = JSON.parse(await evaluate(page, `(() => {
+      const node = document.querySelector('[data-testid="loop-inspector"]')
+      const rect = node.getBoundingClientRect()
+      return JSON.stringify({
+        sections: Array.from(node.querySelectorAll('[data-inspector-section]'))
+          .map((n) => n.dataset.inspectorSection),
+        fields: Array.from(node.querySelectorAll('input')).map((n) => n.getAttribute('aria-label')),
+        clipped: node.scrollHeight > Math.ceil(rect.height) + 1,
+      })
+    })()`))
+    observe('inspector',
+      `sections=${panel.sections.length} fields=${panel.fields.length} clipped=${panel.clipped}`,
+      panel)
+    await shot(page, 'inspector')
+  },
+
   /** SVG export: the region's chrome without the browser's HTML. */
   async exported(page) {
     await seedLoop(page, { turn: 'iteration 3 of 7' })
