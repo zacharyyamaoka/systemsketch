@@ -1,0 +1,684 @@
+{
+  "systemSketch": {
+    "formatVersion": 2,
+    "application": "SystemSketch",
+    "shapes": {
+      "block": 3,
+      "geo": 3,
+      "connection": 2,
+      "arrow": 1
+    },
+    "bindings": {
+      "arrow": 2,
+      "connection": 4
+    }
+  },
+  "tldrawFileFormatVersion": 1,
+  "schema": {
+    "schemaVersion": 2,
+    "sequences": {
+      "com.tldraw.store": 5,
+      "com.tldraw.asset": 1,
+      "com.tldraw.camera": 1,
+      "com.tldraw.document": 2,
+      "com.tldraw.instance": 26,
+      "com.tldraw.instance_page_state": 5,
+      "com.tldraw.page": 1,
+      "com.tldraw.instance_presence": 6,
+      "com.tldraw.pointer": 1,
+      "com.tldraw.shape": 4,
+      "com.tldraw.user": 1,
+      "com.tldraw.asset.image": 6,
+      "com.tldraw.asset.video": 5,
+      "com.tldraw.asset.bookmark": 2,
+      "com.tldraw.shape.group": 0,
+      "com.tldraw.shape.bookmark": 2,
+      "com.tldraw.shape.draw": 5,
+      "com.tldraw.shape.note": 13,
+      "com.tldraw.shape.frame": 1,
+      "com.tldraw.shape.highlight": 4,
+      "com.tldraw.shape.embed": 4,
+      "com.tldraw.shape.image": 5,
+      "com.tldraw.shape.video": 4,
+      "com.tldraw.shape.geo": 12,
+      "com.tldraw.shape.arrow": 8,
+      "com.tldraw.shape.text": 4,
+      "com.tldraw.shape.line": 5,
+      "com.tldraw.shape.block": 4,
+      "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.branch-arm": 0,
+      "com.tldraw.shape.connection": 4,
+      "com.tldraw.binding.arrow": 1,
+      "com.tldraw.binding.connection": 1,
+      "com.tldraw.comment-thread": 3,
+      "com.tldraw.comment": 1,
+      "com.tldraw.comment-reaction": 1
+    }
+  },
+  "records": [
+    {
+      "x": 0,
+      "y": 0,
+      "lastActivityTimestamp": 0,
+      "meta": {},
+      "id": "pointer:pointer",
+      "typeName": "pointer"
+    },
+    {
+      "x": 540,
+      "y": 400,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:send",
+      "type": "block",
+      "props": {
+        "w": 520,
+        "h": 200,
+        "title": "client.send()",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "htUSbYf1vX_URjzrU-XmW",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "self",
+            "type": "Client",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "payload",
+            "type": "",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "response",
+            "type": "",
+            "visible": true
+          }
+        ],
+        "definitionKey": "client_send"
+      },
+      "parentId": "page:page",
+      "index": "a7ioj",
+      "typeName": "shape"
+    },
+    {
+      "x": 520,
+      "y": 130,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1",
+      "type": "geo",
+      "props": {
+        "w": 520,
+        "h": 100,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 · Two rows carry no type at all. Compare them with `pose Pose` on encode() to the left."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a9UjJ",
+      "typeName": "shape"
+    },
+    {
+      "x": 1000,
+      "y": 750,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-pass",
+      "type": "geo",
+      "props": {
+        "w": 500,
+        "h": 106,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 16,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "PASS WHEN · nothing on the Block claims a type it does not have, and the unresolved rows cost no ink."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aBHFb",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c1",
+      "type": "connection",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": ""
+      },
+      "parentId": "page:page",
+      "index": "a44Zv",
+      "typeName": "shape"
+    },
+    {
+      "x": 1180,
+      "y": 460,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ret",
+      "type": "block",
+      "props": {
+        "w": 300,
+        "h": 130,
+        "title": "run() ↦",
+        "description": "",
+        "blockType": "boundary",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "Qwh5qfaGy6iqIdXmTCa39",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "receipt",
+            "type": "str",
+            "visible": true
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "run"
+      },
+      "parentId": "page:page",
+      "index": "a8khA",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c2",
+      "type": "connection",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": ""
+      },
+      "parentId": "page:page",
+      "index": "a5nBQ",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:send",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "editingShapeId": null,
+      "croppingShapeId": null,
+      "selectedShapeIds": [],
+      "hoveredShapeId": null,
+      "erasingShapeIds": [],
+      "hintingShapeIds": [],
+      "focusedGroupId": null,
+      "meta": {},
+      "id": "instance_page_state:page:page",
+      "pageId": "page:page",
+      "typeName": "instance_page_state"
+    },
+    {
+      "x": 110,
+      "y": 440,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:encode",
+      "type": "block",
+      "props": {
+        "w": 300,
+        "h": 150,
+        "title": "encode()",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "definitionId": "U-JLJItHBXmZ1X4ptK2iL",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "payload",
+            "type": "bytes",
+            "visible": true
+          }
+        ],
+        "definitionKey": "encode"
+      },
+      "parentId": "page:page",
+      "index": "a6Tof",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:cue-step-1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:c1-a",
+      "type": "connection",
+      "fromId": "shape:c1",
+      "toId": "shape:encode",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:c2-a",
+      "type": "connection",
+      "fromId": "shape:c2",
+      "toId": "shape:send",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:c1-b",
+      "type": "connection",
+      "fromId": "shape:c1",
+      "toId": "shape:send",
+      "props": {
+        "portId": "in_2",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:c2-b",
+      "type": "connection",
+      "fromId": "shape:c2",
+      "toId": "shape:ret",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "page:page",
+      "name": "Page 1",
+      "index": "a1",
+      "typeName": "page"
+    },
+    {
+      "gridSize": 10,
+      "name": "",
+      "meta": {},
+      "id": "document:document",
+      "typeName": "document"
+    },
+    {
+      "followingUserId": null,
+      "opacityForNextShape": 1,
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
+      "brush": null,
+      "scribbles": [],
+      "cursor": {
+        "type": "default",
+        "rotation": 0
+      },
+      "isFocusMode": false,
+      "exportBackground": true,
+      "isDebugMode": false,
+      "isToolLocked": false,
+      "screenBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 1600,
+        "h": 1010
+      },
+      "insets": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "zoomBrush": null,
+      "isGridMode": false,
+      "isPenMode": false,
+      "chatMessage": "",
+      "isChatting": false,
+      "highlightedUserIds": [],
+      "isFocused": true,
+      "devicePixelRatio": 1,
+      "isCoarsePointer": false,
+      "isHoveringCanvas": null,
+      "openMenus": [],
+      "isChangingStyle": false,
+      "isReadonly": false,
+      "meta": {},
+      "duplicateProps": null,
+      "cameraState": "idle",
+      "id": "instance:instance",
+      "currentPageId": "page:page",
+      "typeName": "instance"
+    },
+    {
+      "name": "",
+      "color": "#EC5E41",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:-2ZNPFl9qKJ1TmdK-8Aa3",
+      "typeName": "user"
+    },
+    {
+      "x": 80,
+      "y": 750,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-note-src",
+      "type": "geo",
+      "props": {
+        "w": 440,
+        "h": 130,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 22,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "blue",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "golden 12 · response = client.send(payload) · receipt = response.id"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Client = Any, so `send` never resolves."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aAQcX",
+      "typeName": "shape"
+    },
+    {
+      "x": 780,
+      "y": 230,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 20,
+          "y": 170
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a9slhV",
+      "typeName": "shape"
+    }
+  ]
+}

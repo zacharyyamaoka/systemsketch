@@ -1,0 +1,223 @@
+{
+  "feature": "Symbol opacity \u00b7 v7",
+  "viewport": {
+    "width": 1600,
+    "height": 1010
+  },
+  "shapes": [
+    {
+      "id": "encode",
+      "type": "block",
+      "x": 110,
+      "y": 440,
+      "props": {
+        "title": "encode()",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 150,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "payload",
+            "type": "bytes",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "send",
+      "type": "block",
+      "x": 540,
+      "y": 400,
+      "props": {
+        "title": "client.send()",
+        "description": "",
+        "blockType": "unresolved \u00b7 1 arg",
+        "view": "port",
+        "w": 520,
+        "h": 200,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "self",
+            "type": "Client",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "arg 1",
+            "type": "bytes",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "\u2192 1",
+            "type": "",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "ret",
+      "type": "block",
+      "x": 1180,
+      "y": 460,
+      "props": {
+        "title": "run() \u21a6",
+        "description": "",
+        "blockType": "boundary",
+        "view": "port",
+        "w": 300,
+        "h": 130,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "receipt",
+            "type": "str",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "c1",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "c2",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "c1-a",
+      "type": "connection",
+      "fromId": "c1",
+      "toId": "encode",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c1-b",
+      "type": "connection",
+      "fromId": "c1",
+      "toId": "send",
+      "props": {
+        "portId": "in_2",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c2-a",
+      "type": "connection",
+      "fromId": "c2",
+      "toId": "send",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c2-b",
+      "type": "connection",
+      "fromId": "c2",
+      "toId": "ret",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 \u00b7 `arg 1` is a true statement \u2014 one positional argument was passed. Compare it with `pose Pose` on encode().",
+      "x": 520,
+      "y": 130,
+      "w": 520,
+      "h": 106,
+      "target": {
+        "shapeId": "send",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "note-src",
+      "kind": "note",
+      "text": "golden 12 \u00b7 response = client.send(payload) \u00b7 receipt = response.id\nClient = Any, so `send` never resolves.",
+      "x": 80,
+      "y": 750,
+      "w": 440,
+      "h": 130
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN \u00b7 no invented name appears, and you judge whether a positional label helps a reader or just fills a slot.",
+      "x": 1000,
+      "y": 750,
+      "w": 500,
+      "h": 106
+    }
+  ]
+}

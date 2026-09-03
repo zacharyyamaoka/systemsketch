@@ -30,6 +30,7 @@
     "test:windows": "node tests/desktop_windows_smoke.mjs",
     "test:arrow-sync": "node tests/edge_arrow_sync_smoke.mjs",
     "test:pill": "node tests/literal_pill_smoke.mjs",
+    "test:unknown": "node tests/unknown_projection_smoke.mjs",
     "test:ui-hardening": "node tests/ui_hardening_smoke.mjs",
     "test:recorder": "node tests/recorder_smoke.mjs",
     "plugin:build": "npm --prefix vscode-systemsketch run build",
@@ -92,7 +93,11 @@
     "test:definitions": "node tests/definition_linking_smoke.mjs",
     "test:expanded-layout-scope": "node tests/expanded_block_layout_scope_smoke.mjs",
     "test:effect-ports": "node tests/effect_ports_smoke.mjs",
-    "report:shot": "node tests/render_report.mjs"
+    "report:shot": "node tests/render_report.mjs",
+    "test:diff-states": "node tests/block_diff_states_smoke.mjs",
+    "test:diff-vocabulary": "node tests/block_diff_vocabulary_smoke.mjs",
+    "test:diff-round2": "node tests/block_diff_round2_smoke.mjs",
+    "test:effect-follow": "node tests/effect_port_follow_smoke.mjs"
   },
   "dependencies": {
     "elkjs": "0.12.0",

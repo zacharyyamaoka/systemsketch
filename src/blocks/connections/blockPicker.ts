@@ -1,6 +1,10 @@
 import { Vec, type Editor, type TLParentId, type TLShapeId, type VecLike } from 'tldraw'
 import { EditorAtom } from '../ports/portState'
-import type { BlockShapeProps, BlockView } from '../blockModel'
+import {
+	PROJECTION_BLOCK_TYPE,
+	type BlockShapeProps,
+	type BlockView,
+} from '../blockModel'
 import type { ConnectionTerminal } from './connectionModel'
 
 /**
@@ -34,6 +38,10 @@ export const BLOCK_PICKER_PRESETS: readonly BlockPickerPreset[] = [
 	// A variable: the capsule, with an inlet and an outlet. A cable wanting a
 	// producer gets a literal to type; one wanting a consumer gets a named result.
 	{ id: 'value', label: 'Value', icon: 'Braces', blockType: 'literal', view: 'value', inputs: 1, outputs: 1 },
+	// Reading a member is function application, so a projection is an ordinary
+	// Block. Its rows are accessors on the type that arrives, which is why it is
+	// worth a preset: the cable already knows that type.
+	{ id: 'projection', label: 'Split', icon: 'Shuffle', blockType: PROJECTION_BLOCK_TYPE, view: 'port', inputs: 1, outputs: 1 },
 	{ id: 'group', label: 'Expanded group', icon: 'Boxes', blockType: 'group', view: 'expanded', inputs: 1, outputs: 1 },
 ]
 
@@ -98,9 +106,12 @@ export function blockPresetProps(
 	preset: BlockPickerPreset,
 	base: BlockShapeProps,
 ): BlockShapeProps {
+	const projection = preset.blockType === PROJECTION_BLOCK_TYPE
 	const inputs = Array.from({ length: preset.inputs }, (_, index) => ({
 		id: `in_${index + 1}`,
-		name: preset.view === 'value' ? '' : `in_${index + 1}`,
+		// A projection's inlet is the type itself, so it carries no name of its
+		// own; the type arrives from the cable that opened the picker.
+		name: (preset.view === 'value' || projection) ? '' : `in_${index + 1}`,
 		type: '',
 		visible: true,
 	}))
@@ -108,7 +119,9 @@ export function blockPresetProps(
 		id: `out_${index + 1}`,
 		// A capsule's outlet name IS the variable name, and a fresh literal has
 		// none: it is passed inline until someone names it.
-		name: preset.view === 'value' ? '' : `out_${index + 1}`,
+		name: preset.view === 'value' ? '' : projection ? '.' : `out_${index + 1}`,
+		// An accessor is assumed to decompose properly, so its type is simply not
+		// filled in yet. `?` is reserved for what was looked at and could not be told.
 		type: '',
 		visible: true,
 	}))

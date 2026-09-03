@@ -1,0 +1,295 @@
+{
+  "feature": "Splitter \u00b7 s4",
+  "viewport": {
+    "width": 1600,
+    "height": 1010
+  },
+  "shapes": [
+    {
+      "id": "record",
+      "type": "block",
+      "x": 40,
+      "y": 430,
+      "props": {
+        "title": "to_object_spec()",
+        "description": "",
+        "blockType": "boundary",
+        "view": "port",
+        "w": 480,
+        "h": 150,
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "self",
+            "type": "ObjectRecord",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "spec",
+      "type": "block",
+      "x": 900,
+      "y": 370,
+      "props": {
+        "title": "ObjectSpec()",
+        "description": "",
+        "blockType": "constructor",
+        "view": "port",
+        "w": 620,
+        "h": 250,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "name \u2190 .object_id",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "type_name \u2190 .subcategory",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "in_3",
+            "name": "shape \u2190 .shape",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "in_4",
+            "name": "size \u2190 .size_m",
+            "type": "Vec3",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "spec",
+            "type": "ObjectSpec",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "c0",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "c1",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "c2",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "c3",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "c0-a",
+      "type": "connection",
+      "fromId": "c0",
+      "toId": "record",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c0-b",
+      "type": "connection",
+      "fromId": "c0",
+      "toId": "spec",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c1-a",
+      "type": "connection",
+      "fromId": "c1",
+      "toId": "record",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c1-b",
+      "type": "connection",
+      "fromId": "c1",
+      "toId": "spec",
+      "props": {
+        "portId": "in_2",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c2-a",
+      "type": "connection",
+      "fromId": "c2",
+      "toId": "record",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c2-b",
+      "type": "connection",
+      "fromId": "c2",
+      "toId": "spec",
+      "props": {
+        "portId": "in_3",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c3-a",
+      "type": "connection",
+      "fromId": "c3",
+      "toId": "record",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "c3-b",
+      "type": "connection",
+      "fromId": "c3",
+      "toId": "spec",
+      "props": {
+        "portId": "in_4",
+        "terminal": "end",
+        "face": "outer"
+      }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 \u00b7 Four cables leave one output port; the accessor is written where each one lands. Nothing sits between the two Blocks.",
+      "x": 470,
+      "y": 120,
+      "w": 520,
+      "h": 106,
+      "target": {
+        "shapeId": "spec",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "note-src",
+      "kind": "note",
+      "text": "golden 33 \u00b7 shape = self.shape \u00b7 size_m = self.size_m\nObjectSpec(name=self.object_id, type_name=self.subcategory, \u2026)\nObjectRecord declares 20 fields. to_object_spec reads 7. Four reach ObjectSpec().",
+      "x": 60,
+      "y": 720,
+      "w": 480,
+      "h": 202
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN \u00b7 the fan-out is legal because every cable carries ObjectRecord \u2014 and you judge whether the consumer should own the accessor.",
+      "x": 990,
+      "y": 720,
+      "w": 510,
+      "h": 106
+    }
+  ]
+}

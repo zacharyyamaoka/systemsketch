@@ -1,0 +1,595 @@
+{
+  "feature": "Splitter \u00b7 s2",
+  "viewport": {
+    "width": 1600,
+    "height": 1010
+  },
+  "shapes": [
+    {
+      "id": "record",
+      "type": "block",
+      "x": 40,
+      "y": 430,
+      "props": {
+        "title": "to_object_spec()",
+        "description": "",
+        "blockType": "boundary",
+        "view": "port",
+        "w": 480,
+        "h": 150,
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "self",
+            "type": "ObjectRecord",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "spec",
+      "type": "block",
+      "x": 1070,
+      "y": 370,
+      "props": {
+        "title": "ObjectSpec()",
+        "description": "",
+        "blockType": "constructor",
+        "view": "port",
+        "w": 420,
+        "h": 250,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "name",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "type_name",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "in_3",
+            "name": "shape",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "in_4",
+            "name": "size",
+            "type": "Vec3",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "spec",
+            "type": "ObjectSpec",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "p0",
+      "type": "block",
+      "x": 620,
+      "y": 340,
+      "props": {
+        "title": ".object_id",
+        "description": "",
+        "blockType": "",
+        "view": "value",
+        "w": 200,
+        "h": 56,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": ".object_id",
+            "type": "str",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": ".object_id",
+            "type": "str",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "a0",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "b0",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "p1",
+      "type": "block",
+      "x": 620,
+      "y": 430,
+      "props": {
+        "title": ".subcategory",
+        "description": "",
+        "blockType": "",
+        "view": "value",
+        "w": 200,
+        "h": 56,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": ".subcategory",
+            "type": "str",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": ".subcategory",
+            "type": "str",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "a1",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "b1",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "p2",
+      "type": "block",
+      "x": 620,
+      "y": 520,
+      "props": {
+        "title": ".shape",
+        "description": "",
+        "blockType": "",
+        "view": "value",
+        "w": 200,
+        "h": 56,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": ".shape",
+            "type": "str",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": ".shape",
+            "type": "str",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "a2",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "b2",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "p3",
+      "type": "block",
+      "x": 620,
+      "y": 610,
+      "props": {
+        "title": ".size_m",
+        "description": "",
+        "blockType": "",
+        "view": "value",
+        "w": 200,
+        "h": 56,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": ".size_m",
+            "type": "Vec3",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": ".size_m",
+            "type": "Vec3",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "a3",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "b3",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "a0-a",
+      "type": "connection",
+      "fromId": "a0",
+      "toId": "record",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "a0-b",
+      "type": "connection",
+      "fromId": "a0",
+      "toId": "p0",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b0-a",
+      "type": "connection",
+      "fromId": "b0",
+      "toId": "p0",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b0-b",
+      "type": "connection",
+      "fromId": "b0",
+      "toId": "spec",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "a1-a",
+      "type": "connection",
+      "fromId": "a1",
+      "toId": "record",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "a1-b",
+      "type": "connection",
+      "fromId": "a1",
+      "toId": "p1",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b1-a",
+      "type": "connection",
+      "fromId": "b1",
+      "toId": "p1",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b1-b",
+      "type": "connection",
+      "fromId": "b1",
+      "toId": "spec",
+      "props": {
+        "portId": "in_2",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "a2-a",
+      "type": "connection",
+      "fromId": "a2",
+      "toId": "record",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "a2-b",
+      "type": "connection",
+      "fromId": "a2",
+      "toId": "p2",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b2-a",
+      "type": "connection",
+      "fromId": "b2",
+      "toId": "p2",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b2-b",
+      "type": "connection",
+      "fromId": "b2",
+      "toId": "spec",
+      "props": {
+        "portId": "in_3",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "a3-a",
+      "type": "connection",
+      "fromId": "a3",
+      "toId": "record",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "a3-b",
+      "type": "connection",
+      "fromId": "a3",
+      "toId": "p3",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b3-a",
+      "type": "connection",
+      "fromId": "b3",
+      "toId": "p3",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "b3-b",
+      "type": "connection",
+      "fromId": "b3",
+      "toId": "spec",
+      "props": {
+        "portId": "in_4",
+        "terminal": "end",
+        "face": "outer"
+      }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 \u00b7 Four capsules on the wire, each one an accessor. Click one and read its inspector \u2014 it is the literal Pill, reused.",
+      "x": 470,
+      "y": 120,
+      "w": 520,
+      "h": 106,
+      "target": {
+        "shapeId": "p0",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "note-src",
+      "kind": "note",
+      "text": "golden 33 \u00b7 shape = self.shape \u00b7 size_m = self.size_m\nObjectSpec(name=self.object_id, type_name=self.subcategory, \u2026)\nObjectRecord declares 20 fields. to_object_spec reads 7. Four reach ObjectSpec().",
+      "x": 60,
+      "y": 720,
+      "w": 480,
+      "h": 202
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN \u00b7 the projection sits on the edge with no new object type \u2014 and you judge whether a Pill meaning `.object_id` still reads as a literal.",
+      "x": 990,
+      "y": 720,
+      "w": 510,
+      "h": 130
+    }
+  ]
+}

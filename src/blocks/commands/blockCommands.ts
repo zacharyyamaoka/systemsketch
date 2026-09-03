@@ -4,6 +4,8 @@ import {
   BLOCK_TOOL_ID,
   FIRST_BODY_ROW,
   HEADER_ROW,
+  UNKNOWN_TOKEN,
+  UNRESOLVED_BLOCK_TYPE,
   type BlockPort,
   type BlockPortSection,
   type BlockPortSide,
@@ -13,6 +15,9 @@ import {
   blockPortSections,
   getDefaultBlockProps,
   isBlockShape,
+  isProjectionBlock,
+  isUnknownText,
+  normalizeAccessorName,
   normalizeBlockPortRows,
   reconcileEffectPorts,
   portBranch,
@@ -201,6 +206,134 @@ export function setBlockView(
   )
 }
 
+/**
+ * Put a `?` in a port's type slot, leaving everything else alone.
+ *
+ * The canvas does not police where a `?` may go: type one into a name and it
+ * stays there and paints as an absence, the same as in a type. A board is a
+ * drawing, and a half-finished one has to stay legal.
+ *
+ * One `?` per row is a *generator* convention, not a rule this layer enforces —
+ * saying the name and the type are both unknown says the same thing twice, so
+ * the pyblocks projection writes only the type slot. The commands here follow
+ * that convention because it is the better default, and nothing stops you
+ * hand-editing your way out of it.
+ *
+ * See `pyblocks/docs/unknown-slot-convention.md`.
+ */
+export function unknownPort(port: BlockPort): BlockPort {
+  return isUnknownText(port.type) ? port : { ...port, type: UNKNOWN_TOKEN }
+}
+
+/**
+ * Say, on the Block, that nothing in scope defines this callee.
+ *
+ * The type line carries the opacity once for the whole call, and the Block
+ * drops to Simple view because a signature that cannot be stated should not be
+ * drawn as a table. Port view still works and still shows the rows.
+ *
+ * It fills only the type slots that are EMPTY. A slot the call site already
+ * proves is a fact, and an unresolved callee does not make it stop being one:
+ * `client.send()` never resolves, and `self: Client` is still exactly right,
+ * because the receiver is annotated where the call is written. Erasing it
+ * would lose information to make a point. Names are never touched at all.
+ *
+ * Types are also never inferred INTO a slot here. A type carried by the cable
+ * that lands is a fact about the cable; putting it in the callee's slot would
+ * claim a signature nobody read.
+ */
+export function markBlockUnresolvedProps(props: BlockShapeProps): BlockShapeProps {
+  const fill = (ports: readonly BlockPort[]) => ports.map(
+    (port) => (port.type.trim() === '' ? unknownPort(port) : port),
+  )
+  const inputs = fill(props.inputs)
+  const outputs = fill(props.outputs)
+  const marked: BlockShapeProps = {
+    ...props,
+    blockType: UNRESOLVED_BLOCK_TYPE,
+    inputs,
+    outputs,
+  }
+  const next = marked.view === 'simple' ? marked : setBlockViewProps(marked, 'simple')
+  const unchanged = props.blockType === next.blockType
+    && props.view === next.view
+    && inputs.every((port, index) => port === props.inputs[index])
+    && outputs.every((port, index) => port === props.outputs[index])
+  return unchanged ? props : next
+}
+
+export function markBlockUnresolved(
+  editor: Editor,
+  shapeId: TLShapeId,
+  options: BlockCommandOptions = {},
+): BlockCommandResult {
+  return updateBlockProps(
+    editor,
+    shapeId,
+    markBlockUnresolvedProps,
+    { historyLabel: options.historyLabel ?? 'mark block unresolved' },
+  )
+}
+
+/**
+ * Say it about one port, explicitly.
+ *
+ * The Block-level command only fills what is empty, so this is how a row that
+ * already states a type becomes unknown: because someone decided it. It still
+ * leaves the name alone — the decision is about the type, and nothing here
+ * removes what the drawing already says.
+ */
+export function markPortUnknownProps(
+  props: BlockShapeProps,
+  side: BlockPortSide,
+  portId: string,
+): BlockShapeProps {
+  const ports = props[side].map((port) => (port.id === portId ? unknownPort(port) : port))
+  return ports.every((port, index) => port === props[side][index])
+    ? props
+    : { ...props, [side]: ports }
+}
+
+export function markPortUnknown(
+  editor: Editor,
+  shapeId: TLShapeId,
+  side: BlockPortSide,
+  portId: string,
+  options: BlockCommandOptions = {},
+): BlockCommandResult {
+  return updateBlockProps(
+    editor,
+    shapeId,
+    (props) => markPortUnknownProps(props, side, portId),
+    { historyLabel: options.historyLabel ?? 'mark port unknown' },
+  )
+}
+
+/**
+ * Add one accessor row.
+ *
+ * Its type is left blank rather than marked unknown: a member read off a known
+ * type is assumed to decompose properly, so there is nothing here the analyzer
+ * failed at. `?` is for what was looked at and could not be told.
+ */
+export function appendAccessorPort(
+  editor: Editor,
+  shapeId: TLShapeId,
+  accessor: string,
+  type: string = '',
+  options: BlockCommandOptions = {},
+): BlockCommandResult {
+  return updateBlockProps(
+    editor,
+    shapeId,
+    (props) => growBlockPortViewToFit(appendBlockPortProps(props, 'outputs', {
+      name: normalizeAccessorName(accessor),
+      type,
+    })),
+    { historyLabel: options.historyLabel ?? 'add accessor' },
+  )
+}
+
 function nextPortId(ports: readonly BlockPort[], side: BlockPortSide): string {
   const prefix = side === 'inputs' ? 'in' : 'out'
   const highest = ports.reduce((best, port) => {
@@ -364,10 +497,15 @@ export function patchBlockPortProps(
   portId: string,
   patch: Partial<Omit<BlockPort, 'id'>>,
 ): BlockShapeProps {
+  // One central place, so an accessor typed into the canvas, the inspector or
+  // the context menu all end up spelled the same way.
+  const applied = (side === 'outputs' && isProjectionBlock(props) && patch.name !== undefined)
+    ? { ...patch, name: normalizeAccessorName(patch.name) }
+    : patch
   const ports = props[side].map((port) => {
     if (port.id !== portId) return port
-    const next = { ...port, ...patch, id: port.id }
-    return Object.keys(patch).every((key) => {
+    const next = { ...port, ...applied, id: port.id }
+    return Object.keys(applied).every((key) => {
       const detail = key as keyof Omit<BlockPort, 'id'>
       return port[detail] === next[detail]
     })

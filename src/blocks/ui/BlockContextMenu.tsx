@@ -22,16 +22,21 @@ import {
   PORT_LAYOUTS,
   blockIcon,
   isBlockShape,
+  isProjectionBlock,
+  isUnresolvedBlock,
   portInHeader,
   portRow,
   type BlockPortSide,
   type BlockShape,
 } from '../blockModel'
 import {
+  appendAccessorPort,
   appendBlockPortForInlineEditing,
   blockPortIndex,
   blockPortRowCount,
   insertBlockPortForInlineEditing,
+  markBlockUnresolved,
+  markPortUnknown,
   moveBlockPort,
   moveBlockPortToSection,
   removeBlockPort,
@@ -253,6 +258,21 @@ function BlockContextMenuItems() {
 
   // The new port joins its subject's row and arm, so "add below" a header
   // port is another header port.
+  // A projection's rows are accessors, so adding one starts from the dot and
+  // opens the editor on it: the next thing anyone does is type the member.
+  const addAccessor = () => {
+    if (!selectedBlock) return
+    const result = appendAccessorPort(editor, selectedBlock.id, '')
+    if (!result.ok) return
+    const port = result.props.outputs[result.props.outputs.length - 1]
+    if (!port) return
+    requestBlockInlineEdit(editor, selectedBlock.id, {
+      kind: 'portName',
+      side: 'outputs',
+      portId: port.id,
+    })
+  }
+
   const addPortAt = (target: BlockPortRef, offset: 0 | 1) => {
     const index = blockPortIndexOf(editor, target) + offset
     const result = insertBlockPortForInlineEditing(editor, target.shapeId, target.side, index, {
@@ -358,6 +378,16 @@ function BlockContextMenuItems() {
             </TldrawUiMenuGroup>
           </TldrawUiMenuSubmenu>
           <TldrawUiMenuItem
+            id="block-port-unknown"
+            label="Mark unknown"
+            onSelect={() => void markPortUnknown(
+              editor,
+              portTarget.target.shapeId,
+              portTarget.target.side,
+              portTarget.target.portId,
+            )}
+          />
+          <TldrawUiMenuItem
             id="block-port-delete"
             label="Delete port"
             onSelect={() => void removeBlockPort(
@@ -392,6 +422,13 @@ function BlockContextMenuItems() {
           {selectedBlock ? (
           <TldrawUiMenuSubmenu id="block-add" label="Add">
             <TldrawUiMenuGroup id="block-add-ports">
+              {isProjectionBlock(selectedBlock.props) ? (
+                <TldrawUiMenuItem
+                  id="block-add-accessor"
+                  label="Accessor"
+                  onSelect={() => addAccessor()}
+                />
+              ) : null}
               <TldrawUiMenuItem
                 id="block-add-input-port"
                 label="Input port"
@@ -445,6 +482,14 @@ function BlockContextMenuItems() {
               ))}
             </TldrawUiMenuGroup>
           </TldrawUiMenuSubmenu>
+
+          {selectedBlock && !isUnresolvedBlock(selectedBlock.props) ? (
+            <TldrawUiMenuItem
+              id="block-mark-unresolved"
+              label="Mark unresolved"
+              onSelect={() => selectedBlock && void markBlockUnresolved(editor, selectedBlock.id)}
+            />
+          ) : null}
 
           {selectedBlock?.props.view === 'expanded' ? (
             <TldrawUiMenuSubmenu id="block-advanced" label="Advanced">
