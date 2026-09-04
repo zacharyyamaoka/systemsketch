@@ -117,7 +117,7 @@ export function SystemSketchMenuPanel() {
       <DepthStackNavigator placement="menu" />
       <TldrawUiButton
         type="icon"
-        className="systemsketch-shell-icon-button"
+        className="systemsketch-shell-icon-button systemsketch-shapes-button"
         title="Shapes library"
         aria-expanded={leftSurface === 'shapes'}
         aria-controls={leftSurface === 'shapes' ? 'systemsketch-left-popout' : undefined}
@@ -127,7 +127,7 @@ export function SystemSketchMenuPanel() {
       </TldrawUiButton>
       <TldrawUiButton
         type="icon"
-        className="systemsketch-shell-icon-button"
+        className="systemsketch-shell-icon-button systemsketch-command-button"
         title="Search and commands (Ctrl+P)"
         aria-label="Search and commands"
         aria-keyshortcuts="Control+P Meta+P"

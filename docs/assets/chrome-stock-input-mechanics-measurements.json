@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-03",
+  "baseCommit": "f91c14e73d9f257bbc4ea4712f9692a7620980c5",
+  "branch": "track/chrome-stock-inputs",
+  "applicationChanges": [
+    "src/chrome/SystemSketchUiInput.tsx",
+    "src/workspace/LocalWorkspace.tsx",
+    "src/workspace/local-workspace.css",
+    "AGENTS.md"
+  ],
+  "stockFields": [
+    "Shape-library search (already stock)",
+    "Header filename",
+    "Workspace Filter",
+    "Rename / Save As / Export filenames",
+    "New folder name"
+  ],
+  "intentionalExceptions": [
+    "Canvas Block and Branch editors",
+    "Live inspector fields",
+    "Command palette",
+    "Multiline prose"
+  ],
+  "focusedBrowserChecks": {
+    "inlineDocumentRename": "6/6",
+    "workspaceBrowser": "12/12",
+    "workspaceFollowup": "9/9",
+    "workspaceSafety": "6/6",
+    "fileType": "13/13",
+    "tldrawExport": "11/11",
+    "total": "57/57"
+  },
+  "fullCheck": "114 Vitest files / 1,130 tests plus 109 Python tests"
+}

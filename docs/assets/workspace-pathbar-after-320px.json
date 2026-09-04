@@ -1,0 +1,62 @@
+{
+  "beforeFix": false,
+  "evidence": "/home/bam/systemsketch-track-chrome-input-visual-polish/docs/assets/workspace-pathbar-after-320px.png",
+  "geometry": {
+    "viewport": {
+      "width": 320,
+      "height": 720
+    },
+    "dialog": {
+      "left": 10,
+      "right": 312,
+      "top": 36,
+      "bottom": 684,
+      "width": 302,
+      "height": 648
+    },
+    "pathbar": {
+      "left": 11,
+      "right": 311,
+      "top": 118,
+      "bottom": 165,
+      "width": 300,
+      "height": 47,
+      "clientWidth": 300,
+      "scrollWidth": 300
+    },
+    "filter": {
+      "left": 175,
+      "right": 303,
+      "top": 127,
+      "bottom": 155,
+      "width": 128,
+      "height": 28,
+      "computed": {
+        "width": "128px",
+        "minWidth": "0px",
+        "boxSizing": "border-box"
+      }
+    },
+    "filterWrapper": {
+      "left": 175,
+      "right": 303,
+      "top": 127,
+      "bottom": 155,
+      "width": 128,
+      "height": 28,
+      "computed": {
+        "width": "128px",
+        "minWidth": "0px",
+        "boxSizing": "content-box"
+      }
+    },
+    "folder": {
+      "left": 90.1,
+      "right": 169,
+      "top": 126,
+      "bottom": 156,
+      "width": 78.9,
+      "height": 30
+    }
+  }
+}

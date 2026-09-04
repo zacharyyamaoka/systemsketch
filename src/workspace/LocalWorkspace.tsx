@@ -80,6 +80,7 @@ import { useConfirm } from '../chrome/ConfirmDialog'
 import { consolidateDocumentToSinglePage } from '../singlePageDocument'
 import { settleConnectionParents } from '../blocks/connections/ConnectionBindingUtil'
 import { useThemePortalContainer } from '../theme/ThemePortal'
+import { SystemSketchUiInput } from '../chrome/SystemSketchUiInput'
 
 const SAVE_DEBOUNCE_MS = 600
 const MAX_AUTOSAVE_DELAY_MS = 30_000
@@ -1302,6 +1303,18 @@ export function SystemSketchMainMenu() {
   const workspace = useLocalWorkspace()
   const { addDialog } = useDialogs()
   const confirm = useConfirm()
+  const [isRenamingInline, setIsRenamingInline] = useState(false)
+  const [renameDraft, setRenameDraft] = useState('')
+  const [renameError, setRenameError] = useState<string | null>(null)
+  const [renameBusy, setRenameBusy] = useState(false)
+  const titleInputRef = useRef<HTMLInputElement | null>(null)
+  const renameInFlightRef = useRef(false)
+
+  const restoreTitleFocus = useCallback(() => {
+    window.requestAnimationFrame(() => {
+      document.querySelector<HTMLElement>('[data-testid="systemsketch-file-title"]')?.focus()
+    })
+  }, [])
 
   /** The ask, in the app's own dialog rather than the browser's. */
   const requestTrash = async () => {
@@ -1329,6 +1342,74 @@ export function SystemSketchMainMenu() {
             : workspace.status.kind === 'error'
               ? 'Error'
               : 'Opening'
+  const renameNeedsCopy = workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'
+
+  /**
+   * A document name is one small, reversible choice. Keep it in the shell
+   * where people already look, rather than moving their attention into a
+   * modal. The workspace still owns the actual rename, including its digest
+   * fence and file-type preservation.
+   */
+  const beginInlineRename = useCallback(() => {
+    if (renameNeedsCopy) {
+      workspace.showDialog('saveAs')
+      return
+    }
+    setRenameDraft(workspace.title)
+    setRenameError(null)
+    setIsRenamingInline(true)
+  }, [renameNeedsCopy, workspace])
+
+  const cancelInlineRename = useCallback(() => {
+    setRenameDraft(workspace.title)
+    setRenameError(null)
+    setIsRenamingInline(false)
+    restoreTitleFocus()
+  }, [restoreTitleFocus, workspace.title])
+
+  const commitInlineRename = useCallback(async (nextTitle = renameDraft) => {
+    if (renameInFlightRef.current || renameNeedsCopy) return
+    const nextPath = workspace.path ? renamedDocumentPath(workspace.path, nextTitle) : null
+    if (!nextPath) {
+      setRenameError('Give this board a name.')
+      window.requestAnimationFrame(() => titleInputRef.current?.focus())
+      return
+    }
+    if (nextPath === workspace.path) {
+      cancelInlineRename()
+      return
+    }
+
+    renameInFlightRef.current = true
+    setRenameBusy(true)
+    setRenameError(null)
+    try {
+      await workspace.rename(nextPath)
+      setIsRenamingInline(false)
+    } catch (cause) {
+      setRenameError(errorMessage(cause))
+      window.requestAnimationFrame(() => titleInputRef.current?.focus())
+    } finally {
+      renameInFlightRef.current = false
+      setRenameBusy(false)
+    }
+  }, [cancelInlineRename, renameDraft, renameNeedsCopy, workspace])
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'F2' || event.defaultPrevented || isRenamingInline) return
+      const target = event.target
+      if (
+        target instanceof HTMLElement
+        && (target.matches('input, textarea, select') || target.isContentEditable)
+      ) return
+      event.preventDefault()
+      beginInlineRename()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [beginInlineRename, isRenamingInline])
+
   return (
     <div className="systemsketch-file-identity">
       <DefaultMainMenu>
@@ -1369,7 +1450,7 @@ export function SystemSketchMainMenu() {
                     workspace.status.kind === 'future' ? 'portableCopy' : 'exportTldraw',
                   )}
                 />
-                <TldrawUiMenuItem id="rename-document" label="Rename…" disabled={workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'} onSelect={() => workspace.showDialog('rename')} />
+                <TldrawUiMenuItem id="rename-document" label="Rename" kbd="f2" onSelect={beginInlineRename} />
               </TldrawUiMenuGroup>
               <TldrawUiMenuGroup id="file-location">
                 <TldrawUiMenuItem id="reveal-document" label="Show in Files" onSelect={() => workspace.runAction(workspace.reveal)} />
@@ -1395,20 +1476,47 @@ export function SystemSketchMainMenu() {
           <DefaultMainMenuContent />
         </>
       </DefaultMainMenu>
-      <TldrawUiButton
-        type="low"
-        className="systemsketch-file-title"
-        aria-label={`${workspace.title} ${statusLabel}`}
-        title={`${workspace.path ?? ''} · ${statusLabel}`}
-        onClick={() => workspace.showDialog(
-          workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'
-            ? workspace.status.kind === 'future' ? 'portableCopy' : 'open'
-            : 'rename',
-        )}
-      >
-        <span>{workspace.title}</span>
-        <i data-state={workspace.status.kind} aria-label={statusLabel} />
-      </TldrawUiButton>
+      {isRenamingInline ? (
+        <div
+          className="systemsketch-file-title-editor"
+          data-testid="systemsketch-inline-rename"
+          data-error={renameError ? 'true' : undefined}
+        >
+          <SystemSketchUiInput
+            ref={titleInputRef}
+            className="systemsketch-file-title-input"
+            aria-label="Rename document"
+            aria-describedby="systemsketch-inline-rename-help"
+            aria-invalid={renameError ? true : undefined}
+            value={renameDraft}
+            disabled={renameBusy}
+            autoFocus
+            autoSelect
+            onValueChange={(nextTitle) => {
+              setRenameDraft(nextTitle)
+              setRenameError(null)
+            }}
+            onCommit={(nextTitle) => void commitInlineRename(nextTitle)}
+            onCancel={() => cancelInlineRename()}
+          />
+          <span id="systemsketch-inline-rename-help" className="systemsketch-file-title-help">
+            {renameError ?? 'Press Enter to rename, Escape to cancel'}
+          </span>
+          <i data-state={workspace.status.kind} aria-label={statusLabel} />
+        </div>
+      ) : (
+        <TldrawUiButton
+          type="low"
+          className="systemsketch-file-title"
+          data-testid="systemsketch-file-title"
+          aria-label={`${workspace.title} ${statusLabel}. Click to ${renameNeedsCopy ? 'save a copy' : 'rename'}.`}
+          title={`${workspace.path ?? ''} · ${statusLabel}`}
+          onClick={beginInlineRename}
+        >
+          <span>{workspace.title}</span>
+          <i data-state={workspace.status.kind} aria-label={statusLabel} />
+        </TldrawUiButton>
+      )}
     </div>
   )
 }
@@ -1495,17 +1603,6 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
     if (isRename) return
     void load(workspace.browserDirectory ?? undefined)
   }, [isRename, load, workspace.browserDirectory])
-
-  useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      const target = isRename || mode === 'saveAs' || writesTldraw
-        ? nameInputRef.current
-        : filterInputRef.current
-      target?.focus()
-      if (target === nameInputRef.current) target?.select()
-    })
-    return () => window.cancelAnimationFrame(frame)
-  }, [isRename, mode])
 
   const rows = useMemo(() => browserRows(listing, query), [listing, query])
   const selectedRow = rows.find((row) => row.path === selectedPath) ?? null
@@ -1660,13 +1757,21 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
             asChild
             aria-describedby={undefined}
             onEscapeKeyDown={(event) => {
-              if (!creatingFolder) return
-              // WHY: the inline folder form is one level below the file browser;
-              // its first Escape cancels that substate without dismissing the modal.
-              event.preventDefault()
-              setCreatingFolder(false)
-              setFolderName('')
-              setError(null)
+              if (creatingFolder) {
+                // WHY: the inline folder form is one level below the file browser;
+                // its first Escape cancels that substate without dismissing the modal.
+                event.preventDefault()
+                setCreatingFolder(false)
+                setFolderName('')
+                setError(null)
+                return
+              }
+              if (document.activeElement === filterInputRef.current || document.activeElement === nameInputRef.current) {
+                // WHY: Radix observes Escape at the dialog boundary before an
+                // input's own capture handler. Keep the dialog open so stock
+                // TldrawUiInput can reset its draft and blur as designed.
+                event.preventDefault()
+              }
             }}
           >
             <section
@@ -1709,17 +1814,17 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
 
         {isRename ? (
           <div className="systemsketch-workspace-dialog__rename">
-            <label htmlFor="workspace-document-name">Name</label>
+            <label>Name</label>
             <div className="systemsketch-workspace-name-field">
-              <input
+              <SystemSketchUiInput
                 ref={nameInputRef}
-                id="workspace-document-name"
                 autoFocus
+                autoSelect
                 value={name}
-                onChange={(event) => setName(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') void submit()
-                }}
+                aria-label="File name"
+                onValueChange={setName}
+                onComplete={() => void submit()}
+                onCancel={setName}
               />
               <span>{suffix}</span>
             </div>
@@ -1786,16 +1891,21 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                     setError(null)
                   }}
                 >+ Folder</button>
-                <input
+                <SystemSketchUiInput
                   ref={filterInputRef}
                   className="systemsketch-workspace-search"
                   data-testid="workspace-filter"
-                  type="search"
                   autoFocus={mode === 'open'}
+                  autoSelect={mode === 'open'}
                   placeholder="Filter"
                   aria-label="Filter this folder"
                   value={query}
-                  onChange={(event) => setQuery(event.target.value)}
+                  onValueChange={setQuery}
+                  onCancel={setQuery}
+                  // Stock inputs stop Enter after completing their edit. The
+                  // open browser deliberately treats that completed query as
+                  // "open the selected match", so retain that action here.
+                  onComplete={mode === 'open' ? () => void submit() : undefined}
                 />
               </div>
               {creatingFolder ? (
@@ -1803,25 +1913,16 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                   event.preventDefault()
                   void createFolder()
                 }}>
-                  <label htmlFor="workspace-new-folder-name">New folder</label>
-                  <input
-                    id="workspace-new-folder-name"
+                  <label>New folder</label>
+                  <SystemSketchUiInput
                     data-testid="workspace-new-folder-name"
                     autoFocus
+                    autoSelect
                     value={folderName}
-                    onChange={(event) => setFolderName(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter') {
-                        // Submit exactly once, and do not also let the dialog's
-                        // window-level Enter shortcut open the selected row.
-                        event.preventDefault()
-                        event.stopPropagation()
-                        void createFolder()
-                        return
-                      }
-                      if (event.key !== 'Escape') return
-                      event.preventDefault()
-                      event.stopPropagation()
+                    aria-label="New folder name"
+                    onValueChange={setFolderName}
+                    onComplete={() => void createFolder()}
+                    onCancel={() => {
                       setCreatingFolder(false)
                       setFolderName('')
                       setError(null)
@@ -1881,13 +1982,11 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
               </div>
               {mode === 'saveAs' || writesTldraw ? (
                 <div className="systemsketch-workspace-name-field is-save-as">
-                  <input ref={nameInputRef} autoFocus value={name} aria-label="File name" onChange={(event) => {
-                    setName(event.target.value)
+                  <SystemSketchUiInput ref={nameInputRef} autoFocus autoSelect value={name} aria-label="File name" onValueChange={(nextName) => {
+                    setName(nextName)
                     setReplacePath(null)
                     setError(null)
-                  }} onKeyDown={(event) => {
-                    if (event.key === 'Enter') void submit()
-                  }} />
+                  }} onComplete={() => void submit()} onCancel={setName} />
                   <span>{suffix}</span>
                 </div>
               ) : null}

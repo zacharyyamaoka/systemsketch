@@ -121,9 +121,17 @@
   },
   {
     "id": "RENAME-KEEPS-THE-TYPE",
-    "label": "renaming a .systemsketch offers .systemsketch, not .tldr",
-    "observed": ".systemsketch",
-    "desired": ".systemsketch",
+    "label": "renaming starts inline while the current .systemsketch identity remains visible in the board URL",
+    "observed": {
+      "modal": false,
+      "value": "Pipeline",
+      "path": "/tmp/systemsketch-file-type-files-39sVSk/SystemSketch/Pipeline.systemsketch"
+    },
+    "desired": {
+      "modal": false,
+      "value": "Pipeline",
+      "path": "/tmp/systemsketch-file-type-files-39sVSk/SystemSketch/Pipeline.systemsketch"
+    },
     "ok": true
   },
   {

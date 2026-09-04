@@ -62,6 +62,19 @@ npm run dev
   `CODE_PATH=/usr/bin/cursor npm --prefix vscode-systemsketch run test:corpus` and
   `CODE_PATH=/usr/bin/code npm --prefix vscode-systemsketch run test:corpus`.
 
+## Chrome text fields
+
+- Default ordinary, single-line product chrome to `src/chrome/SystemSketchUiInput.tsx`, the
+  thin domain adapter around stock `TldrawUiInput`. It supplies tldraw's focus, select-on-entry,
+  IME, Enter, Escape, and blur mechanics without duplicating them in every shell surface.
+- Choose the field contract before wiring it: identity edits select all and commit/cancel through
+  their domain transaction; searches reset their query; action dialogs retain action-specific
+  Enter behavior. Do not use the adapter for canvas shape editors, live document-backed inspector
+  fields, command execution, or multiline prose—those own different transactions and undo/key
+  semantics.
+- Keep the domain seam outside the input. In particular, a document filename still delegates to
+  the workspace rename transaction so its digest fence and immutable file type remain authoritative.
+
 ## Proof and reports
 
 - Run `npm run check` before handoff. For UI work, also drive a real CDP journey from

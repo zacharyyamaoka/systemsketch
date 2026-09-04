@@ -1,0 +1,62 @@
+{
+  "feature": "Inline document rename",
+  "viewport": { "width": 1440, "height": 800 },
+  "shapes": [
+    {
+      "id": "rename-case",
+      "type": "block",
+      "x": 560,
+      "y": 350,
+      "props": {
+        "title": "Rename this board",
+        "description": "The interaction target is the document name in the top-left application header.",
+        "blockType": "Review case",
+        "view": "simple",
+        "w": 360,
+        "h": 200
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "click-title",
+      "kind": "step",
+      "text": "1 · Click the filename in the top-left app header. It should become a field here — no modal.",
+      "x": 60,
+      "y": 390,
+      "w": 400,
+      "h": 120,
+      "target": { "shapeId": "rename-case", "anchor": "left" }
+    },
+    {
+      "id": "type-name",
+      "kind": "step",
+      "text": "2 · Type series_a_pose_pipeline. The old name should already be selected; the suffix stays protected.",
+      "x": 40,
+      "y": 80,
+      "w": 360,
+      "h": 180,
+      "target": { "shapeId": "rename-case", "anchor": "top" }
+    },
+    {
+      "id": "finish-name",
+      "kind": "step",
+      "text": "3 · Press Enter to save. Also try F2 → Escape, then click away after editing to commit.",
+      "x": 1020,
+      "y": 390,
+      "w": 360,
+      "h": 120,
+      "target": { "shapeId": "rename-case", "anchor": "right" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The name changes in the header, the green save dot stays beside it, and no Rename document modal appears.",
+      "x": 1010,
+      "y": 580,
+      "w": 380,
+      "h": 150
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-03",
+  "baseCommit": "09a80c141651433a8a5d44ed57854dce78a21056",
+  "branch": "track/text-field-stock-audit",
+  "scope": "Rendered UI and text-surface source audit; no application behavior changed.",
+  "realAppJourney": [
+    "Created stock canvas text in an isolated scratch board.",
+    "Opened shape library and verified stock search focus.",
+    "Clicked document title and verified full selected basename.",
+    "Created a custom Block and inspected its inline editor plus its inspector field."
+  ],
+  "surfaceCount": 6,
+  "recommendations": {
+    "adopt": 3,
+    "needsFocusedProof": 1,
+    "applicationChanges": 0
+  },
+  "sourceSeams": {
+    "stockSearch": "src/library/ShapeLibraryBrowser.tsx",
+    "filename": "src/workspace/LocalWorkspace.tsx",
+    "canvasEditors": [
+      "src/blocks/BlockInlineEditor.tsx",
+      "src/branch/BranchInlineEditor.tsx"
+    ],
+    "liveFields": "src/fields/LiveTextField.tsx"
+  }
+}

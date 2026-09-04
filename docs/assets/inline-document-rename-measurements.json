@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-03",
+  "baseCommit": "2964abba4b4658ca9ca03ac28e49beb1feb0a9c4",
+  "branch": "track/ux-frictionless",
+  "isolation": "throwaway browser profile, API root, and document files; fixture under this track only",
+  "findings": {
+    "open": 0,
+    "fixedAndVerified": 10,
+    "unconfirmed": 0,
+    "tooling": 0
+  },
+  "browserChecks": {
+    "inlineRename": "6/6",
+    "workspaceBrowser": "11/11",
+    "fileType": "13/13",
+    "themeContrast": "240/240"
+  },
+  "responsiveViewports": [
+    900,
+    500
+  ],
+  "fixture": {
+    "shapes": 8,
+    "bindings": 6,
+    "coldReopen": true,
+    "boundMotion": true
+  }
+}
