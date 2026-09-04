@@ -234,6 +234,24 @@
   gap: 9px;
 }
 
+/* Promote is a single request, so show activity rather than a made-up percent. */
+.systemsketch-preview-mode__progress {
+  height: 3px;
+  margin: 0 2px 1px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ss-accent) 20%, transparent);
+}
+
+.systemsketch-preview-mode__progress span {
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ss-accent);
+  animation: systemsketch-release-progress 1.15s ease-in-out infinite;
+}
+
 .systemsketch-preview-mode__error {
   margin: 1px 6px 4px 0;
   color: var(--ss-danger);
@@ -244,6 +262,19 @@
 @keyframes systemsketch-preview-mode-enter {
   from { opacity: 0; transform: translate(-50%, -5px); }
   to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes systemsketch-release-progress {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(270%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .systemsketch-preview-mode__progress span {
+    width: 100%;
+    opacity: .7;
+    animation: none;
+  }
 }
 
 .systemsketch-preview-mode__badge {
