@@ -325,6 +325,179 @@
   overscroll-behavior: contain;
 }
 
+/* Saved camera landmarks -------------------------------------------------- */
+
+.systemsketch-named-landmarks {
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid var(--ss-border);
+  border-radius: 11px;
+  background: var(--ss-surface-sunken);
+}
+
+.systemsketch-named-landmarks > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.systemsketch-named-landmarks > header span {
+  display: block;
+  color: var(--ss-text-muted);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.systemsketch-named-landmarks h3 {
+  margin: 2px 0 0;
+  color: var(--ss-text);
+  font-size: 13px;
+}
+
+.systemsketch-named-landmarks > header small {
+  display: grid;
+  min-width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 6px;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-raised);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.systemsketch-named-landmarks__intro,
+.systemsketch-named-landmarks__empty {
+  margin: 6px 0 0;
+  color: var(--ss-text-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.systemsketch-named-landmarks__save {
+  margin-top: 10px;
+}
+
+.systemsketch-named-landmarks__save > label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ss-text-muted);
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.systemsketch-named-landmarks__save > div {
+  display: flex;
+  gap: 5px;
+}
+
+.systemsketch-named-landmarks input {
+  min-width: 0;
+  border: 1px solid var(--ss-border-strong);
+  border-radius: 7px;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
+  font: inherit;
+}
+
+.systemsketch-named-landmarks__save input {
+  width: 100%;
+  min-height: 29px;
+  padding: 0 8px;
+  font-size: 10px;
+}
+
+.systemsketch-named-landmarks button {
+  border: 0;
+  color: var(--ss-text);
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.systemsketch-named-landmarks__save button {
+  min-width: 45px;
+  border-radius: 7px;
+  color: var(--ss-text-inverse);
+  background: var(--ss-accent);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.systemsketch-named-landmarks__save button:hover {
+  filter: brightness(1.08);
+}
+
+.systemsketch-named-landmarks__save p,
+.systemsketch-named-landmarks__row p {
+  margin: 4px 0 0;
+  color: var(--ss-danger);
+  font-size: 9px;
+}
+
+.systemsketch-named-landmarks ul {
+  display: grid;
+  gap: 5px;
+  margin: 9px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.systemsketch-named-landmarks__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 4px;
+}
+
+.systemsketch-named-landmarks__jump {
+  display: flex;
+  min-width: 0;
+  min-height: 29px;
+  align-items: center;
+  gap: 5px;
+  padding: 0 6px;
+  border-radius: 7px !important;
+  color: var(--ss-text-muted) !important;
+  font-size: 10px !important;
+  text-align: left;
+}
+
+.systemsketch-named-landmarks__jump:hover,
+.systemsketch-named-landmarks__jump:focus-visible {
+  color: var(--ss-accent) !important;
+  background: var(--ss-accent-soft) !important;
+}
+
+.systemsketch-named-landmarks__jump span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-named-landmarks__row input {
+  min-height: 27px;
+  padding: 0 6px;
+  font-size: 10px;
+}
+
+.systemsketch-named-landmarks__remove {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px !important;
+  color: var(--ss-text-faint) !important;
+  font-size: 16px !important;
+  line-height: 1;
+}
+
+.systemsketch-named-landmarks__remove:hover,
+.systemsketch-named-landmarks__remove:focus-visible {
+  color: var(--ss-text) !important;
+  background: var(--ss-surface-hover) !important;
+}
+
 .systemsketch-board-overview__page {
   padding: 5px;
   border: 1px solid var(--ss-border);

@@ -5,6 +5,7 @@ import {
   type BoardOverviewTarget,
   type BoardOverviewTargetKind,
 } from './boardOverviewModel'
+import { NamedLandmarks } from '../landmarks/NamedLandmarks'
 
 const GROUPS: Array<{ kind: BoardOverviewTargetKind; label: string; icon: string }> = [
   { kind: 'frame', label: 'Frames', icon: '▣' },
@@ -41,6 +42,7 @@ export function BoardOverview() {
 
   return (
     <div className="systemsketch-board-overview" data-testid="systemsketch-board-overview">
+      <NamedLandmarks />
       <nav aria-label="Board landmarks">
         {model.pages.map((page) => (
           <section key={page.id} className="systemsketch-board-overview__page">
