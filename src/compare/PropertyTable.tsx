@@ -1,202 +1,111 @@
 /**
- * The property comparison table — the centerpiece of the panel.
+ * The property comparison table — ported from the omnibox variant.
  *
- * Three columns, `Layer · Previous · Current`, and three states. Simulink's
- * Comparison Tool prints its legend at the bottom of the window in exactly
- * these terms — *Insertion · Deletion · Modification*, three colours, not two —
- * and it is the closest domain match in the whole prior-art sweep: it compares
- * boxes with named ports joined by signal lines, which is what a board is.
+ * `TokenRun`, `ValueCell` and the `<table>` below are that variant's
+ * `src/review/DiffReviewModal.tsx` verbatim, down to the class names, because
+ * this is the table Zach picked when he compared the five: *"I like the
+ * property table in omnibox."* What changed on the way over is the data behind
+ * it (`propertyRows.ts` adapts this tree's real `CompareChange` into omnibox's
+ * `PropertyRow`, so the rows are read off real boards rather than a fixture)
+ * and two things Zach asked for:
  *
- * Two rules are load-bearing and both come from `compareModel`:
+ *  - **Modified is blue**, not amber. See `review-table.css`.
+ *  - **A toggle for the git-style intra-value highlighting**, because Figma's
+ *    property panel does not word-diff and is usually clear enough. It is a
+ *    pure presentation switch: the same rows, the same `<mark>` elements, one
+ *    `data-git-highlight` stamp on the table deciding whether they carry ink.
  *
- * 1. A port row nests under its Block *whether or not the Block itself changed*.
- *    A Block that only gained a port shows no row of its own — just its name as
- *    a group header, with an `Added` port beneath. That is the visible form of
- *    "an insertion is not a modification of the thing that gained it".
+ * Two rules survive the port unchanged, and both are load-bearing:
  *
- * 2. Word-level ink appears only inside a `Modified` row's two cells. An
- *    `Added` row has no previous value and a `Removed` row has no current one,
- *    so there is nothing to align; the cell says so with an em dash instead of
- *    pretending to a comparison. `canWordDiff` is the guard.
- *
- * The ink itself is GitHub's: the cell carries a light wash saying "this side
- * of the pair", and only the runs that actually differ take the stronger fill.
- * Additive, never a strikethrough — `run_inference` → `run_predict` inks
- * `inference` and `predict` and leaves `run_` alone.
+ *  1. Word-level ink fires only on a `modified` row. An `added` row has no
+ *     previous value and a `removed` row has no current one, so there is
+ *     nothing to align; the cell asserts the absence with an em dash on a
+ *     hatched ground instead of going blank, because an empty cell reads as
+ *     "unknown" and absence is the entire claim the row is making.
+ *  2. The highlight is additive — `run_inference` → `run_predict` inks
+ *     `inference` and `predict` and leaves `run_` alone. Never a strikethrough.
  */
 
-import { Fragment, useMemo } from 'react'
-
 import { wordDiff, type DiffToken } from '../diff/wordDiff'
-import { canWordDiff, type ChangeKind, type CompareChange, type FieldChange } from './compareModel'
+import type { CompareChange } from './compareModel'
+import {
+	orderChanges,
+	propertyRowsOf,
+	rowCurrent,
+	rowPrevious,
+	rowSupportsWordDiff,
+	STATE_LABEL,
+	type PropertyRow,
+} from './propertyRows'
+import './review-table.css'
 
-const KIND_LABEL: Record<ChangeKind, string> = {
-	added: 'Added',
-	removed: 'Removed',
-	modified: 'Modified',
-}
-
-/** A run of text, washed by the side it is on and filled where it differs. */
-function InkedValue({ tokens, side }: { tokens: readonly DiffToken[]; side: 'before' | 'after' }) {
+function TokenRun({ tokens }: { tokens: readonly DiffToken[] }) {
 	return (
-		<span className="systemsketch-compare__value" data-side={side}>
+		<>
 			{tokens.map((token, index) => (
-				<span
-					key={index}
-					className="systemsketch-compare__run"
-					data-kind={token.kind}
-					// A `same` run is deliberately unmarked: GitHub touches
-					// nothing outside the tokens that actually differ.
-				>
-					{token.text}
-				</span>
+				token.kind === 'same'
+					? <span key={index}>{token.text}</span>
+					: <mark key={index} data-token={token.kind}>{token.text}</mark>
 			))}
-		</span>
+		</>
 	)
 }
 
-/** The cell for a side that has no value at all, which is not the same as ''. */
-function AbsentValue({ label }: { label: string }) {
-	return (
-		<span className="systemsketch-compare__absent" aria-label={label} title={label}>
-			—
-		</span>
-	)
-}
-
-interface RowProps {
-	change: CompareChange
-	field: FieldChange | null
-	selected: boolean
-	onSelect: (changeId: string) => void
-}
-
-function ValueRow({ change, field, selected, onSelect }: RowProps) {
-	const inked = useMemo(() => {
-		if (!field) return null
-		if (!canWordDiff(change)) return null
-		return wordDiff(field.before, field.after)
-	}, [change, field])
-
-	const label = field
-		? field.path
-		: change.subject === 'port'
-			? 'port'
-			: change.subject === 'cable'
-				? 'cable'
-				: change.subject
-
-	return (
-		<tr
-			className="systemsketch-compare__row"
-			data-kind={change.kind}
-			data-subject={change.subject}
-			data-change-id={change.id}
-			data-selected={selected || undefined}
-			data-testid={`compare-row-${change.id}${field ? `-${field.path}` : ''}`}
-			onClick={() => onSelect(change.id)}
-			tabIndex={0}
-			onKeyDown={(event) => {
-				if (event.key !== 'Enter' && event.key !== ' ') return
-				event.preventDefault()
-				onSelect(change.id)
-			}}
-		>
-			<th scope="row" className="systemsketch-compare__layer">
-				<span className="systemsketch-compare__badge" data-kind={change.kind}>
-					{KIND_LABEL[change.kind]}
-				</span>
-				<span className="systemsketch-compare__name">{change.name}</span>
-				<span className="systemsketch-compare__path">{label}</span>
-			</th>
-			<td className="systemsketch-compare__cell" data-side="before">
-				{change.kind === 'added' ? (
-					<AbsentValue label="did not exist before" />
-				) : inked ? (
-					<InkedValue tokens={inked.before} side="before" />
-				) : (
-					<span className="systemsketch-compare__value" data-side="before">
-						{describeWhole(change, 'before')}
-					</span>
-				)}
+/**
+ * One cell of the Previous/Current pair.
+ *
+ * Word-level highlight fires only where both sides exist — a `modified` row.
+ * On an `added` or `removed` row the other side is genuinely absent, and the
+ * cell says so with an explicit absence mark rather than going blank: empty
+ * reads as "unknown", and absence is the entire claim the row is making.
+ */
+function ValueCell({
+	row,
+	side,
+}: {
+	row: PropertyRow
+	side: 'previous' | 'current'
+}) {
+	const value = side === 'previous' ? rowPrevious(row) : rowCurrent(row)
+	if (value === null) {
+		return (
+			<td className="systemsketch-review__value" data-absent="true">
+				<span className="systemsketch-review__absent" aria-label="not present">—</span>
 			</td>
-			<td className="systemsketch-compare__cell" data-side="after">
-				{change.kind === 'removed' ? (
-					<AbsentValue label="does not exist now" />
-				) : inked ? (
-					<InkedValue tokens={inked.after} side="after" />
-				) : (
-					<span className="systemsketch-compare__value" data-side="after">
-						{describeWhole(change, 'after')}
-					</span>
-				)}
-			</td>
-		</tr>
-	)
-}
-
-/** What a whole-object insertion or deletion says in its one populated cell. */
-function describeWhole(change: CompareChange, side: 'before' | 'after'): string {
-	const record = side === 'before' ? change.recordBefore : change.recordAfter
-	if (!record || typeof record !== 'object') return ''
-	const props = (record as { props?: Record<string, unknown> }).props ?? record
-	const bag = props as Record<string, unknown>
-	const parts: string[] = []
-	for (const key of ['name', 'title', 'type', 'blockType', 'defaultValue']) {
-		const value = bag[key]
-		if (typeof value !== 'string' || value === '') continue
-		parts.push(key === 'defaultValue' ? `= ${value}` : value)
+		)
 	}
-	return parts.join(' · ') || change.name
+	if (rowSupportsWordDiff(row)) {
+		const diff = wordDiff(row.previous, row.current)
+		return (
+			<td className="systemsketch-review__value" data-side={side}>
+				<code><TokenRun tokens={side === 'previous' ? diff.before : diff.after} /></code>
+			</td>
+		)
+	}
+	return (
+		<td className="systemsketch-review__value" data-side={side}>
+			<code>{value}</code>
+		</td>
+	)
 }
 
 export interface PropertyTableProps {
 	changes: readonly CompareChange[]
 	selectedId: string | null
 	onSelect: (changeId: string) => void
+	/** Whether the two-layer git-style ink is painted. See `review-table.css`. */
+	gitHighlight: boolean
 }
 
-export function PropertyTable({ changes, selectedId, onSelect }: PropertyTableProps) {
-	// Group children under their parent so an inserted port reads as belonging
-	// to a Block that did not itself change.
-	const groups = useMemo(() => {
-		const roots: Array<{ key: string; header: string | null; rows: CompareChange[] }> = []
-		const byParent = new Map<string, CompareChange[]>()
-		for (const change of changes) {
-			if (!change.parentId) continue
-			const list = byParent.get(change.parentId) ?? []
-			list.push(change)
-			byParent.set(change.parentId, list)
-		}
-		const seen = new Set<string>()
-		for (const change of changes) {
-			if (change.parentId) continue
-			seen.add(change.id)
-			roots.push({ key: change.id, header: null, rows: [change, ...(byParent.get(change.id) ?? [])] })
-		}
-		// A Block that produced no row of its own still heads its port rows.
-		for (const [parentId, rows] of byParent) {
-			if (seen.has(parentId)) continue
-			roots.push({ key: parentId, header: rows[0]?.name.split('.')[0] ?? parentId, rows })
-		}
-		return roots
-	}, [changes])
-
-	if (changes.length === 0) {
-		return (
-			<p className="systemsketch-compare__none" data-testid="compare-no-changes">
-				No differences between these two versions.
-			</p>
-		)
-	}
+export function PropertyTable({ changes, selectedId, onSelect, gitHighlight }: PropertyTableProps) {
+	const ordered = orderChanges(changes)
 
 	return (
-		<table className="systemsketch-compare__table" data-testid="compare-property-table">
-			<colgroup>
-				<col className="systemsketch-compare__col-layer" />
-				<col className="systemsketch-compare__col-value" />
-				<col className="systemsketch-compare__col-value" />
-			</colgroup>
+		<table
+			className="systemsketch-review__table"
+			data-testid="compare-property-table"
+			data-git-highlight={gitHighlight ? 'on' : 'off'}
+		>
 			<thead>
 				<tr>
 					<th scope="col">Layer</th>
@@ -205,39 +114,40 @@ export function PropertyTable({ changes, selectedId, onSelect }: PropertyTablePr
 				</tr>
 			</thead>
 			<tbody>
-				{groups.map((group) => (
-					<Fragment key={group.key}>
-						{group.header ? (
-							<tr className="systemsketch-compare__group">
-								<th scope="rowgroup" colSpan={3}>
-									{group.header}
-									<span className="systemsketch-compare__group-note">unchanged itself</span>
-								</th>
-							</tr>
-						) : null}
-						{group.rows.map((change) =>
-							change.fields.length === 0 ? (
-								<ValueRow
-									key={change.id}
-									change={change}
-									field={null}
-									selected={selectedId === change.id}
-									onSelect={onSelect}
-								/>
-							) : (
-								change.fields.map((field) => (
-									<ValueRow
-										key={`${change.id}:${field.path}`}
-										change={change}
-										field={field}
-										selected={selectedId === change.id}
-										onSelect={onSelect}
-									/>
-								))
-							),
-						)}
-					</Fragment>
-				))}
+				{ordered.flatMap((change) =>
+					propertyRowsOf(change).map((row) => (
+						<tr
+							key={row.key}
+							data-state={row.state}
+							data-testid={`compare-row-${row.key}`}
+							data-change-id={change.id}
+							data-selected={change.id === selectedId || undefined}
+							tabIndex={0}
+							role="button"
+							aria-label={`${STATE_LABEL[row.state]} · ${row.layer}`}
+							onClick={() => onSelect(change.id)}
+							onKeyDown={(event) => {
+								if (event.key !== 'Enter' && event.key !== ' ') return
+								event.preventDefault()
+								onSelect(change.id)
+							}}
+						>
+							<th scope="row" className="systemsketch-review__layer">
+								<span className="systemsketch-review__state" data-state={row.state}>
+									{STATE_LABEL[row.state]}
+								</span>
+								<span className="systemsketch-review__layer-name">{row.layer}</span>
+							</th>
+							<ValueCell row={row} side="previous" />
+							<ValueCell row={row} side="current" />
+						</tr>
+					)),
+				)}
+				{changes.length === 0 ? (
+					<tr><td colSpan={3} className="systemsketch-review__empty" data-testid="compare-no-changes">
+						These two versions are identical.
+					</td></tr>
+				) : null}
 			</tbody>
 		</table>
 	)

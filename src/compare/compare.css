@@ -1,10 +1,20 @@
 /*
  * Compare modal.
  *
- * Colour reuses the vocabulary `src/diff/diffPresentation.ts` already ships —
- * success for an insertion, danger for a deletion, warning for a modification.
+ * Colour is the vocabulary `src/diff/diffPresentation.ts` ships — success for
+ * an insertion, danger for a deletion — with ONE deliberate departure: a
+ * modification is `--ss-accent` BLUE here, not the amber that module uses for
+ * a cable mark. Red, green and blue are the orthogonal axes, so blue is the
+ * only third hue that cannot be misread as a weak red; amber could, and was.
  * Simulink's own legend is the same three-way split (Insertion · Deletion ·
- * Modification), so nothing here is invented.
+ * Modification), so the three-state model is not invented — only the third hue.
+ *
+ * The departure is scoped to what this review feature paints, on purpose.
+ * `diffPresentation.diffCableInk` still returns amber for a `rewired` cable on
+ * the live board, and `block-canvas.css` still shares one rule between the
+ * `changed` and `warning` diff states — recolouring those would repaint every
+ * other consumer of a shared module to settle a question asked about this
+ * table, and would turn genuine warnings blue along with it.
  *
  * The token file's standing rule is obeyed throughout: a `--ss-*-soft` value is
  * a SURFACE, and copy sitting on it is `--ss-text`, never the accent itself. A
@@ -279,10 +289,16 @@
 }
 
 /* The selection outline on a render — Simulink's plain box, nothing more. */
+/*
+ * The mark's default is the MODIFIED state, so it is blue like every other
+ * surface that paints one. Not amber: red, green and blue are the orthogonal
+ * axes, and amber sat close enough to red to read as a weak deletion at the
+ * distance a reviewer actually looks at a board.
+ */
 .systemsketch-compare__mark {
-  border: 2px solid var(--ss-warning);
+  border: 2px solid var(--ss-accent);
   border-radius: 6px;
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ss-warning) 24%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ss-accent) 24%, transparent);
 }
 
 .systemsketch-compare__mark[data-kind='added'] {
@@ -382,93 +398,15 @@
   overflow: auto;
 }
 
-/* ---- the property table ------------------------------------------------- */
+/* ---- the header summary badge ------------------------------------------- */
 
-.systemsketch-compare__table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-  /*
-   * Fixed layout so the two value columns keep a predictable share of a narrow
-   * rail. Left to itself the browser gives the Layer column whatever its
-   * longest name wants, and the pair a reader is actually comparing gets
-   * squeezed into the remainder.
-   */
-  table-layout: fixed;
-}
-
-.systemsketch-compare__table col.systemsketch-compare__col-layer { width: 32%; }
-.systemsketch-compare__table col.systemsketch-compare__col-value { width: 34%; }
-
-.systemsketch-compare__table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  padding: 8px 10px;
-  text-align: left;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ss-text-muted);
-  background: var(--ss-surface-raised);
-  border-bottom: 1px solid var(--ss-border);
-}
-
-.systemsketch-compare__group th {
-  padding: 10px 10px 4px;
-  text-align: left;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ss-text-muted);
-}
-
-.systemsketch-compare__group-note {
-  margin-left: 8px;
-  font-weight: 400;
-  font-style: italic;
-  opacity: 0.75;
-}
-
-.systemsketch-compare__row {
-  cursor: pointer;
-  border-bottom: 1px solid var(--ss-border);
-}
-
-.systemsketch-compare__row:hover {
-  background: var(--ss-surface-hover);
-}
-
-.systemsketch-compare__row[data-selected] {
-  background: var(--ss-accent-soft);
-  outline: 1px solid var(--ss-accent);
-  outline-offset: -1px;
-}
-
-.systemsketch-compare__layer,
-.systemsketch-compare__cell {
-  padding: 7px 10px;
-  text-align: left;
-  font-weight: 400;
-  vertical-align: top;
-}
-
-/* The state reads by an ink bar down the row, not by coloured copy. */
-.systemsketch-compare__layer {
-  border-left: 3px solid transparent;
-}
-
-.systemsketch-compare__row[data-kind='added'] .systemsketch-compare__layer {
-  border-left-color: var(--ss-success);
-}
-
-.systemsketch-compare__row[data-kind='removed'] .systemsketch-compare__layer {
-  border-left-color: var(--ss-danger);
-}
-
-.systemsketch-compare__row[data-kind='modified'] .systemsketch-compare__layer {
-  border-left-color: var(--ss-warning);
-}
+/*
+ * The property table itself now lives in `review-table.css`, ported from the
+ * omnibox variant under its own `.systemsketch-review__*` names. What survives
+ * here is the header's count badge and the two spans the Code tab head reuses;
+ * every rule that painted the old in-house table was deleted with it, so no
+ * stylesheet in this feature still claims that Modified is amber.
+ */
 
 .systemsketch-compare__name {
   display: block;
@@ -506,58 +444,8 @@
 }
 
 .systemsketch-compare__badge[data-kind='modified'] {
-  background: var(--ss-warning-soft);
-  box-shadow: inset 0 0 0 1px var(--ss-warning);
-}
-
-/* ---- values, and the word-level ink ------------------------------------- */
-
-.systemsketch-compare__value {
-  display: inline-block;
-  padding: 2px 4px;
-  border-radius: 4px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11.5px;
-  line-height: 1.5;
-  /*
-   * `max-width` is the load-bearing half. The chip is inline-block so it sizes
-   * to its content, and without a ceiling a long identifier walks straight out
-   * of a fixed-layout cell and puts a horizontal scrollbar under the whole
-   * rail — measured, and worse than any wrap. With the ceiling in place
-   * `anywhere` is what actually lets it break.
-   */
-  max-width: 100%;
-  overflow-wrap: anywhere;
-}
-
-/*
- * The wash says "this is the old / the new side of a pair". The fill inside it
- * says "these are the characters that actually differ". GitHub layers exactly
- * these two, and it is additive — no strikethrough anywhere.
- */
-.systemsketch-compare__row[data-kind='modified'] .systemsketch-compare__value[data-side='before'] {
-  background: color-mix(in srgb, var(--ss-danger) 10%, transparent);
-}
-
-.systemsketch-compare__row[data-kind='modified'] .systemsketch-compare__value[data-side='after'] {
-  background: color-mix(in srgb, var(--ss-success) 10%, transparent);
-}
-
-.systemsketch-compare__run[data-kind='removed'] {
-  padding: 1px 0;
-  background: color-mix(in srgb, var(--ss-danger) 38%, transparent);
-  border-radius: 2px;
-}
-
-.systemsketch-compare__run[data-kind='added'] {
-  padding: 1px 0;
-  background: color-mix(in srgb, var(--ss-success) 38%, transparent);
-  border-radius: 2px;
-}
-
-.systemsketch-compare__absent {
-  color: var(--ss-text-faint);
-  font-size: 14px;
+  background: var(--ss-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--ss-accent);
 }
 
 /* ---- the Code tab ------------------------------------------------------- */
@@ -664,4 +552,169 @@
   right: 8px;
   z-index: 400;
   pointer-events: none;
+}
+
+/* ---- the persistent bar, and fullscreen -------------------------------- */
+
+/*
+ * The bar is one element that appears in both modes, and that is the whole
+ * design of this variant.
+ *
+ * The tempting alternative — and the one three of the five earlier variants
+ * effectively took — is to treat the modal and the immersive canvas as two
+ * screens with a transition between them. That is what makes going fullscreen
+ * feel like losing your place: the controls that told you *which* change you
+ * were on lived in the chrome that just went away, so the only way back to your
+ * bearings is out. Here the chrome recedes and the bar does not move.
+ *
+ * It is also why nothing below saves or restores anything. Fullscreen is a
+ * `data-fullscreen` stamp on the same mounted tree; React state and both tldraw
+ * cameras are simply never torn down, so "returns exactly where you left off"
+ * is a property of the structure rather than a feature someone has to maintain.
+ */
+.systemsketch-compare__bar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ss-border);
+  background: var(--ss-surface-raised);
+}
+
+.systemsketch-compare__bar-mode {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  padding: 0 11px;
+  border: 1px solid var(--ss-border-strong);
+  border-radius: 7px;
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.systemsketch-compare__bar-mode:hover {
+  border-color: var(--ss-accent);
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-compare__bar-vs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.systemsketch-compare__bar-vs select {
+  padding: 3px 6px;
+  border: 1px solid var(--ss-border);
+  border-radius: 6px;
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+  font: inherit;
+  font-size: 11px;
+}
+
+.systemsketch-compare__stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.systemsketch-compare__stepper button {
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--ss-border);
+  border-radius: 6px;
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+  cursor: pointer;
+  font-size: 13px;
+  place-items: center;
+}
+
+.systemsketch-compare__stepper button:hover:not(:disabled) {
+  border-color: var(--ss-accent);
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-compare__stepper button:disabled { cursor: default; opacity: .4; }
+
+.systemsketch-compare__stepper-count {
+  min-width: 96px;
+  color: var(--ss-text);
+  font-size: 11px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* The crossfade sits at the far end so the bar reads left-to-right as
+ * "where am I going · against what · which change · how much of each". */
+.systemsketch-compare__bar .systemsketch-compare__blend { margin-left: auto; }
+
+/* ---- fullscreen --------------------------------------------------------- */
+
+/*
+ * Fullscreen subtracts; it never rebuilds. Every rule here either removes a
+ * piece of chrome or gives the stage the space that chrome was using — there is
+ * no second layout, which is what keeps the two modes from drifting apart.
+ */
+.systemsketch-compare[data-fullscreen] {
+  inset: 0;
+  border-radius: 0;
+}
+
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__titlebar,
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__history,
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__detail,
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__stagebar {
+  display: none;
+}
+
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__body {
+  grid-template-columns: 1fr;
+}
+
+/* Floating over the boards rather than sitting above them: fullscreen is meant
+ * to give the whiteboard the whole screen, and a bar that reserved a strip
+ * would be taking back the thing the reviewer went fullscreen to get. */
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__bar {
+  position: absolute;
+  z-index: 3;
+  top: 10px;
+  right: 10px;
+  left: 10px;
+  border: 1px solid var(--ss-border-strong);
+  border-radius: 10px;
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-2);
+}
+
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__stage {
+  position: relative;
+}
+
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__panes {
+  padding: 0;
+  gap: 0;
+}
+
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__pane {
+  border: 0;
+  border-radius: 0;
+}
+
+/* Both panes are stacked in one cell in overlay, so their captions would
+ * overprint into soup — and the crossfade in the bar is already labelled with
+ * both endpoint names, which makes it the caption. */
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__pane figcaption {
+  display: none;
 }

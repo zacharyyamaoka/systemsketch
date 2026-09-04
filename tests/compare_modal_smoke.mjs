@@ -45,13 +45,12 @@ async function capture(page, name) {
   await writeFile(join(SHOT_DIR, name), Buffer.from(shot.data, 'base64'))
 }
 
-/** Read every property-table row as `{id, kind, subject}`. */
+/** Read every property-table row as `{id, kind}`. */
 const READ_ROWS = `(() => Array.from(
-  document.querySelectorAll('[data-testid="compare-property-table"] .systemsketch-compare__row'),
-).map((row) => ({
+  document.querySelectorAll('[data-testid="compare-property-table"] tbody tr'),
+).filter((row) => row.dataset.changeId !== undefined).map((row) => ({
   id: row.dataset.changeId,
-  kind: row.dataset.kind,
-  subject: row.dataset.subject,
+  kind: row.dataset.state,
   selected: row.dataset.selected === 'true',
 })))()`
 
@@ -127,9 +126,9 @@ async function main() {
     const ink = await evaluate(app.page, `(() => {
       const row = document.querySelector('[data-change-id="block:shape:predict"]')
       const read = (side) => Array.from(
-        row.querySelectorAll('.systemsketch-compare__value[data-side="' + side + '"] .systemsketch-compare__run'),
-      ).map((run) => [run.dataset.kind, run.textContent])
-      return { before: read('before'), after: read('after') }
+        row.querySelector('.systemsketch-review__value[data-side="' + side + '"] code').children,
+      ).map((node) => [node.tagName === 'MARK' ? node.dataset.token : 'same', node.textContent])
+      return { before: read('previous'), after: read('current') }
     })()`)
     assert.deepEqual(ink.before, [['same', 'run_'], ['removed', 'inference']])
     assert.deepEqual(ink.after, [['same', 'run_'], ['added', 'predict']])
@@ -138,9 +137,9 @@ async function main() {
     // Ink must never appear where there is nothing to compare against.
     const inkOnWholeRows = await evaluate(app.page, `(() => {
       const rows = document.querySelectorAll(
-        '.systemsketch-compare__row[data-kind="added"], .systemsketch-compare__row[data-kind="removed"]',
+        '[data-testid="compare-property-table"] tbody tr[data-state="added"], [data-testid="compare-property-table"] tbody tr[data-state="removed"]',
       )
-      return Array.from(rows).some((row) => row.querySelector('.systemsketch-compare__run[data-kind="removed"], .systemsketch-compare__run[data-kind="added"]'))
+      return Array.from(rows).some((row) => row.querySelector('mark[data-token]'))
     })()`)
     assert.equal(inkOnWholeRows, false, 'no word ink on added/removed rows')
     pass('Added and Removed rows carry no word-level ink — there is no pair to align')
@@ -148,7 +147,7 @@ async function main() {
     await capture(app.page, 'compare-modal-side-by-side.png')
 
     // ---- table → canvas ---------------------------------------------------
-    await clickElement(app.page, '[data-testid="compare-row-block:shape:predict-title"]')
+    await clickElement(app.page, '[data-testid="compare-row-block:shape:predict:title"]')
     await waitFor(
       app.page,
       `document.querySelectorAll('[data-testid="compare-highlight-mark"]').length === 2`,
@@ -241,7 +240,7 @@ async function main() {
     pass('the view toggles back to Side by side')
 
     // ---- Code tab ---------------------------------------------------------
-    await clickElement(app.page, '[data-testid="compare-row-block:shape:predict-title"]')
+    await clickElement(app.page, '[data-testid="compare-row-block:shape:predict:title"]')
     await clickElement(app.page, '[data-testid="compare-tab-code"]')
     await waitFor(app.page, `!!document.querySelector('[data-testid="compare-code-view"]')`, 'code')
     const codeLines = await evaluate(app.page, `(() => {
