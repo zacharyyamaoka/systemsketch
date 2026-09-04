@@ -27,6 +27,7 @@ async function selectBlock(page, id) {
 }
 
 async function pickPreset(page, sourceId, side, portId, preset, target) {
+	const before = JSON.parse(await evaluate(page, `JSON.stringify(window.__systemsketch.editor.getCurrentPageShapes().map((shape) => shape.id))`))
   await dragFrom(page, await box(page, portDot(sourceId, side, portId)), target)
   const selector = `[data-testid="block-picker-${preset}"]`
   await waitFor(page, `document.querySelector(${JSON.stringify(selector)})`, `${preset} in actual picker`)
@@ -36,7 +37,7 @@ async function pickPreset(page, sourceId, side, portId, preset, target) {
 	await key(page, 'Escape', 'Escape')
 	await delay(160)
   const id = await evaluate(page, `window.__systemsketch.editor.getCurrentPageShapes()
-    .filter((shape) => shape.type === 'block' && shape.props.blockType === ${JSON.stringify(preset)}).at(-1)?.id ?? null`)
+    .find((shape) => shape.type === 'block' && shape.props.blockType === ${JSON.stringify(preset)} && !${JSON.stringify(before)}.includes(shape.id))?.id ?? null`)
   assert.ok(id, `picker did not create ${preset}`)
   return id
 }
@@ -99,6 +100,15 @@ async function main() {
 
     await selectBlock(page, clockId)
     await waitFor(page, `document.querySelector('[aria-label="Clock trigger rate in hertz"]')`, 'Clock configuration')
+		const source = await box(page, '[aria-label="Clock trigger source"]')
+		await clickAt(page, source.cx, source.cy); await key(page, 'ArrowDown', 'ArrowDown'); await key(page, 'Enter', 'Enter')
+		await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(clockId)})?.props.stockConfig?.triggerSource === 'external'`, 'external trigger source edit')
+		check('CLOCK-SOURCE', 'editing source paints External trigger and still makes no runtime claim',
+			await evaluate(page, `JSON.stringify({ label: document.querySelector('[data-shape-id=${JSON.stringify(clockId)}] .BlockNode-description')?.textContent.trim(),
+				status: document.querySelector('[data-testid="clock-trigger-runtime-status"]')?.textContent.trim() })`),
+			JSON.stringify({ label: 'External trigger · prototype declares intent; does not schedule.', status: 'External trigger. This prototype declares intent and does not schedule.' }))
+		await clickAt(page, source.cx, source.cy); await key(page, 'ArrowUp', 'ArrowUp'); await key(page, 'Enter', 'Enter')
+		await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(clockId)})?.props.stockConfig?.triggerSource === 'clock'`, 'clock source edit')
     const rate = await box(page, '[aria-label="Clock trigger rate in hertz"]')
     await clickAt(page, rate.cx, rate.cy); await shortcut(page, 'a', 'KeyA', 2); await page.send('Input.insertText', { text: '24' }); await key(page, 'Enter', 'Enter')
     await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(clockId)})?.props.stockConfig?.rateHz === 24`, 'positive rate edit')
@@ -124,6 +134,25 @@ async function main() {
     check('UNDO-1', 'undo restores the linked declaration normally',
       await evaluate(page, `JSON.stringify(${JSON.stringify(clockIds)}.map((id) => window.__systemsketch.editor.getShape(id)?.props.stockConfig))`),
       JSON.stringify([{ triggerSource: 'clock', rateHz: 24 }, { triggerSource: 'clock', rateHz: 24 }]))
+
+		const differentClock = 'shape:different-clock'
+		await evaluate(page, `(() => {
+			const editor = window.__systemsketch.editor
+			const base = editor.getShapeUtil('block').getDefaultProps()
+			editor.createShapes([{ id: ${JSON.stringify(differentClock)}, type: 'block', x: 1050, y: 700, props: {
+				...base, title: 'Clock', blockType: 'clock-trigger', icon: 'Timer', view: 'port',
+				w: base.views.port.w, h: base.views.port.h,
+				outputs: [{ id: 'trigger', name: 'trigger', type: 'Trigger', visible: true, row: 0 }],
+				stockConfig: { triggerSource: 'clock', rateHz: 10 }, definitionId: 'different-clock', definitionKey: 'clock',
+			} }])
+			return true
+		})()`)
+		await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(differentClock)})?.props.definitionId !== window.__systemsketch.editor.getShape(${JSON.stringify(clockId)})?.props.definitionId`, 'distinct Clock definition for distinct config')
+		check('LINK-2', 'different Clock configurations do not reconcile as one canonical definition',
+			await evaluate(page, `JSON.stringify({ sameDefinition: window.__systemsketch.editor.getShape(${JSON.stringify(differentClock)}).props.definitionId === window.__systemsketch.editor.getShape(${JSON.stringify(clockId)}).props.definitionId,
+				config: window.__systemsketch.editor.getShape(${JSON.stringify(differentClock)}).props.stockConfig })`),
+			JSON.stringify({ sameDefinition: false, config: { triggerSource: 'clock', rateHz: 10 } }))
+		await evaluate(page, `(() => { window.__systemsketch.editor.deleteShapes([${JSON.stringify(differentClock)}]); return true })()`)
 
     await page.send('Page.reload', { ignoreCache: true })
     await waitFor(page, 'Boolean(window.__systemsketch?.editor)', 'reopened persisted development board')
