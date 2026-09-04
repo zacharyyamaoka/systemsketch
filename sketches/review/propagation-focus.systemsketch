@@ -106,7 +106,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "aFdz8V",
+      "index": "aFphIV",
       "typeName": "shape"
     },
     {
@@ -140,7 +140,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "a63kE",
+      "index": "a6JJA",
       "typeName": "shape"
     },
     {
@@ -182,7 +182,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "-iBSiIyvRxzj0pKpCEcvj",
+        "definitionId": "pLyqH9VWSKSkuFpttpSe6",
         "inputs": [
           {
             "id": "in",
@@ -202,7 +202,7 @@
         "definitionKey": "join"
       },
       "parentId": "page:page",
-      "index": "aAyjj",
+      "index": "aABRQ",
       "typeName": "shape"
     },
     {
@@ -247,7 +247,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aHU3c",
+      "index": "aHW1f",
       "typeName": "shape"
     },
     {
@@ -292,7 +292,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aF8qU",
+      "index": "aFeBn",
       "typeName": "shape"
     },
     {
@@ -302,6 +302,14 @@
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
+    },
+    {
+      "name": "",
+      "color": "#02B1CC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:cQkhpx88rJ5NLtsSECki_",
+      "typeName": "user"
     },
     {
       "meta": {},
@@ -323,7 +331,7 @@
     },
     {
       "x": 890,
-      "y": 188,
+      "y": 194,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -345,7 +353,7 @@
         },
         "end": {
           "x": 25,
-          "y": 232
+          "y": 226
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -362,7 +370,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "aEzo4l",
+      "index": "aEwxTV",
       "typeName": "shape"
     },
     {
@@ -417,7 +425,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "hoZkS-zmlSNHknMQuTqpt",
+        "definitionId": "9kaorzwaWUGeb-k4dX6Ch",
         "inputs": [
           {
             "id": "in",
@@ -437,7 +445,7 @@
         "definitionKey": "render"
       },
       "parentId": "page:page",
-      "index": "aB5rI",
+      "index": "aBuC2",
       "typeName": "shape"
     },
     {
@@ -497,7 +505,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "6FLZtnE9_6rTRVAk5wEWx",
+        "definitionId": "PPCtYcb_i58lhi10c3Jg1",
         "inputs": [
           {
             "id": "in",
@@ -510,12 +518,12 @@
         "definitionKey": "archive"
       },
       "parentId": "page:page",
-      "index": "aCCYQ",
+      "index": "aCkrE",
       "typeName": "shape"
     },
     {
-      "x": 700,
-      "y": 80,
+      "x": 670,
+      "y": 70,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -523,8 +531,8 @@
       "id": "shape:cue-select",
       "type": "geo",
       "props": {
-        "w": 380,
-        "h": 108,
+        "w": 440,
+        "h": 124,
         "geo": "rectangle",
         "dash": "draw",
         "growY": 0,
@@ -547,7 +555,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "1 · Select join(). Its context bar offers Focus flow."
+                  "text": "1 · Select join(). Focus flow appears only for a settled real cable or a Block."
                 }
               ]
             }
@@ -555,7 +563,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aEVXQ",
+      "index": "aESjQ",
       "typeName": "shape"
     },
     {
@@ -615,7 +623,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "al6Py70SclrESTpeCNyuZ",
+        "definitionId": "lgNZg5xEf4SiLRxpEcrL1",
         "inputs": [],
         "outputs": [
           {
@@ -628,7 +636,7 @@
         "definitionKey": "source"
       },
       "parentId": "page:page",
-      "index": "a9dNE",
+      "index": "a9vN2",
       "typeName": "shape"
     },
     {
@@ -690,7 +698,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "aGveHl",
+      "index": "aGsnZV",
       "typeName": "shape"
     },
     {
@@ -724,7 +732,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "a7QVn",
+      "index": "a7eHz",
       "typeName": "shape"
     },
     {
@@ -771,16 +779,8 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "a800U",
+      "index": "a8iSj",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#55B467",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:D9lNqXlfYYZUT8mNjtVA4",
-      "typeName": "user"
     },
     {
       "meta": {},
@@ -834,13 +834,13 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "AOfpARud8FCiFcVtCUnkC",
+        "definitionId": "cE3sY9v9KGGsp_uV494ip",
         "inputs": [],
         "outputs": [],
         "definitionKey": "unrelated"
       },
       "parentId": "page:page",
-      "index": "aDfDf",
+      "index": "aDJrb",
       "typeName": "shape"
     },
     {
@@ -912,7 +912,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aGnNn",
+      "index": "aGhRv",
       "typeName": "shape"
     },
     {

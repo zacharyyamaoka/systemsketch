@@ -65,7 +65,14 @@ async function main() {
     // compares the board around the lens gesture, not a browser session's
     // one-time user record initialization.
     await delay(800)
-    const before = await readFile(board)
+    const relationBeforeUnrelatedEdit = JSON.parse(await evaluate(app.page, `JSON.stringify(window.__systemsketch.propagationRelationMetrics())`))
+    await evaluate(app.page, `void window.__systemsketch.editor.updateShape({
+      id: 'shape:unrelated', type: 'block', props: { description: 'must fade; index regression sentinel' },
+    })`)
+    await delay(150)
+    const relationAfterUnrelatedEdit = JSON.parse(await evaluate(app.page, `JSON.stringify(window.__systemsketch.propagationRelationMetrics())`))
+    assert.deepEqual(relationAfterUnrelatedEdit, relationBeforeUnrelatedEdit)
+    assert.equal(relationAfterUnrelatedEdit.pageShapeReads, 0)
     await focus(app.page)
     const initial = JSON.parse(await evaluate(app.page, `(() => JSON.stringify({
       active: document.querySelector('.tl-container')?.hasAttribute('data-propagation-focus-active'),
@@ -83,12 +90,34 @@ async function main() {
     assert.equal(initial.unrelated, null)
     assert.equal(initial.opacity, '0.42')
     assert.ok(initial.filter.includes('opacity'), `unrelated shape was not filtered: ${JSON.stringify(initial)}`)
+    // Simulate tldraw virtualizing a distant host then mounting a replacement:
+    // the narrow child-list observer must mark the new included canvas host.
+    await evaluate(app.page, `(() => {
+      const oldHost = document.querySelector('.tl-shape[data-shape-id="shape:source"]')
+      const remounted = oldHost.cloneNode(true)
+      delete remounted.dataset.propagationFocus
+      oldHost.replaceWith(remounted)
+    })()`)
+    await waitFor(app.page, `document.querySelector('.tl-shape[data-shape-id="shape:source"]')?.dataset.propagationFocus === 'included'`, 'remounted included source marker')
     await screenshot(app.page, shot)
     pass('a selected Block lights real upstream/fan-out Blocks and cables while unrelated shapes only fade')
 
+    await clickElement(app.page, '[data-testid="propagation-focus-clear"]')
+    await evaluate(app.page, `(() => {
+      const template = window.__systemsketch.editor.getShape('shape:source-join')
+      window.__systemsketch.editor.createShapes([{
+        id: 'shape:half-bound', type: 'connection', x: 120, y: 940,
+        props: { ...template.props },
+      }])
+      window.__systemsketch.editor.select('shape:half-bound')
+    })()`)
+    await waitFor(app.page, `window.__systemsketch.editor.getSelectedShapeIds().includes('shape:half-bound')`, 'selected half-bound cable')
+    assert.equal(await evaluate(app.page, `Boolean(document.querySelector('[data-testid="propagation-focus-start"]'))`), false)
+    assert.equal(await evaluate(app.page, `document.querySelector('.tl-container')?.hasAttribute('data-propagation-focus-active')`), false)
+    pass('a selected half-bound cable has neither Focus flow controls nor a singleton lens')
+
     // 2. Stock keybindings retain priority: bare F selects tldraw's Frame
     // tool, and Escape is not captured/prevented by this presentation lens.
-    await clickElement(app.page, '[data-testid="propagation-focus-clear"]')
     await key(app.page, 'f', 'KeyF')
     await waitFor(app.page, `window.__systemsketch.editor.getCurrentToolId() === 'frame'`, 'stock Frame shortcut')
     const escapeWasNotCancelled = await evaluate(app.page, `document.dispatchEvent(new KeyboardEvent('keydown', {
@@ -129,6 +158,8 @@ async function main() {
     pass('bounded controls normalize via the model and update only changed included canvas hosts')
 
     // 4. Clear must be a pure display reset; the saved fixture bytes remain exact.
+    await delay(250)
+    const before = await readFile(board)
     await clickElement(app.page, '[data-testid="propagation-focus-clear"]')
     await waitFor(app.page, `!document.querySelector('.tl-container')?.hasAttribute('data-propagation-focus-active')`, 'cleared propagation lens')
     await delay(450)

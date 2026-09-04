@@ -1,28 +1,22 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react'
 import { useEditor, useValue } from 'tldraw'
-import { getPortHostPort, isPortHostShape } from '../blocks/connections'
 import {
   MAX_PROPAGATION_STEPS,
   clearPropagationFocus,
+  getPropagationRelationEpoch,
   propagationSeedFromSelection,
   reconcilePropagationFocus,
   setPropagationFocusSteps,
   startPropagationFocus,
+  subscribePropagationRelations,
   usePropagationFocus,
 } from './propagationFocus'
 import './propagation-focus.css'
 
-/** Read just the ancestry that scope validation can observe, never page-wide records. */
-function scopeTrail(editor: ReturnType<typeof useEditor>, id: string): string {
-  const seen = new Set<string>()
-  const trail: string[] = []
-  let current = editor.getShape(id as never)
-  while (current && !seen.has(current.id)) {
-    seen.add(current.id)
-    trail.push(`${current.id}:${current.parentId}:${current.type}`)
-    current = editor.getShapeParent(current.id)
-  }
-  return trail.join('>')
+function usePropagationRelationEpoch(editor: ReturnType<typeof useEditor>): number {
+  const subscribe = useCallback((listener: () => void) => subscribePropagationRelations(editor, listener), [editor])
+  const getSnapshot = useCallback(() => getPropagationRelationEpoch(editor), [editor])
+  return useSyncExternalStore(subscribe, getSnapshot, () => 0)
 }
 
 /** The small selection lens: one explicit seed, separately bounded directions. */
@@ -103,32 +97,7 @@ export function PropagationFocusDomLens() {
     () => [...editor.getSelectedShapeIds()].sort().join(','),
     [editor],
   )
-  // Observe only graph-bearing records. Reading every props object (or all
-  // records) made a cosmetic text edit churn the entire canvas host tree.
-  const relationEpoch = useValue(
-    'propagation focus live relation epoch',
-    () => editor.getCurrentPageShapes()
-      .filter((shape) => shape.type === 'connection')
-      .map((connection) => {
-        const terminals = ['start', 'end'] as const
-        const bindings = terminals.flatMap((terminal) => (
-          editor.getBindingsFromShape(connection.id, 'connection')
-            .filter((binding) => binding.props.terminal === terminal)
-            .map((binding) => {
-              const host = editor.getShape(binding.toId)
-              // Read only semantic facts that can admit/reject this cable:
-              // endpoint identity/face, its port polarity, and scope ancestry.
-              const side = host && isPortHostShape(host)
-                ? getPortHostPort(editor, host, binding.props.portId)?.side ?? 'missing-port'
-                : 'missing-host'
-              return `${terminal}:${binding.id}:${binding.toId}:${binding.props.portId}:${binding.props.face}`
-                + `:${side}:${scopeTrail(editor, binding.toId)}`
-            })
-        ))
-        return `${connection.id}|${bindings.join('|')}`
-      }).join('\n'),
-    [editor],
-  )
+  const relationEpoch = usePropagationRelationEpoch(editor)
   useEffect(() => {
     reconcilePropagationFocus(editor)
   }, [editor, relationEpoch, selectionKey])
@@ -153,6 +122,28 @@ export function PropagationFocusDomLens() {
       element.dataset.propagationFocus = 'included'
       markedHosts.current.set(id, element)
     }
+    if (!focus.seedId) return
+    // tldraw may unmount off-screen shapes while panning. Watch only the
+    // canvas host list and only inspect added subtrees, then mark an added
+    // host if it is already part of this focus result.
+    const markAddedHost = (element: HTMLElement) => {
+      if (!element.matches('.tl-shape[data-shape-id]')) return
+      const id = element.dataset.shapeId
+      if (!id || !nextIds.has(id)) return
+      const previous = markedHosts.current.get(id)
+      if (previous && previous !== element) delete previous.dataset.propagationFocus
+      element.dataset.propagationFocus = 'included'
+      markedHosts.current.set(id, element)
+    }
+    const observer = new MutationObserver((records) => {
+      for (const record of records) for (const node of record.addedNodes) {
+        if (!(node instanceof HTMLElement)) continue
+        markAddedHost(node)
+        for (const host of node.querySelectorAll<HTMLElement>('.tl-shape[data-shape-id]')) markAddedHost(host)
+      }
+    })
+    observer.observe(container.querySelector('.tl-shapes') ?? container, { childList: true, subtree: true })
+    return () => observer.disconnect()
   }, [editor, focus])
   useEffect(() => () => {
     const container = editor.getContainer()

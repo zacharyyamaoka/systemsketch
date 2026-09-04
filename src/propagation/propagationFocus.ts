@@ -1,5 +1,5 @@
 import { useCallback, useSyncExternalStore } from 'react'
-import type { Editor, TLShapeId } from 'tldraw'
+import type { Editor, RecordsDiff, TLRecord, TLShapeId } from 'tldraw'
 import {
   CONNECTION_SHAPE_TYPE,
   connectionBindingsForTerminal,
@@ -40,6 +40,150 @@ const EMPTY_SNAPSHOT: PropagationFocusSnapshot = {
 }
 const stores = new WeakMap<Editor, PropagationFocusStore>()
 
+interface PropagationRelationStore {
+  connectionIds: Set<TLShapeId>
+  watchedByConnection: Map<TLShapeId, Set<TLShapeId>>
+  watchedByShape: Map<TLShapeId, Set<TLShapeId>>
+  listeners: Set<() => void>
+  stop: () => void
+  epoch: number
+  /** Regression metric: this lane must never enumerate page shapes. */
+  pageShapeReads: number
+  publishes: number
+}
+
+const relationStores = new WeakMap<Editor, PropagationRelationStore>()
+
+function isConnectionRecord(record: TLRecord): boolean {
+  return record.typeName === 'shape' && 'type' in record && record.type === CONNECTION_SHAPE_TYPE
+}
+
+function isConnectionBindingRecord(record: TLRecord): boolean {
+  return record.typeName === 'binding' && 'type' in record && record.type === 'connection'
+}
+
+function watchedShapeIds(editor: Editor, connectionId: TLShapeId): Set<TLShapeId> {
+  const watched = new Set<TLShapeId>()
+  for (const terminal of ['start', 'end'] as const) {
+    for (const binding of connectionBindingsForTerminal(editor, connectionId, terminal)) {
+      let current = editor.getShape(binding.toId)
+      while (current && !watched.has(current.id)) {
+        watched.add(current.id)
+        current = editor.getShapeParent(current.id)
+      }
+    }
+  }
+  return watched
+}
+
+function refreshConnectionWatches(editor: Editor, store: PropagationRelationStore, connectionId: TLShapeId): void {
+  for (const shapeId of store.watchedByConnection.get(connectionId) ?? []) {
+    const connections = store.watchedByShape.get(shapeId)
+    connections?.delete(connectionId)
+    if (connections?.size === 0) store.watchedByShape.delete(shapeId)
+  }
+  store.watchedByConnection.delete(connectionId)
+  const connection = editor.getShape(connectionId)
+  if (connection?.type !== CONNECTION_SHAPE_TYPE) {
+    store.connectionIds.delete(connectionId)
+    return
+  }
+  store.connectionIds.add(connectionId)
+  const watched = watchedShapeIds(editor, connectionId)
+  store.watchedByConnection.set(connectionId, watched)
+  for (const shapeId of watched) {
+    const connections = store.watchedByShape.get(shapeId) ?? new Set<TLShapeId>()
+    connections.add(connectionId)
+    store.watchedByShape.set(shapeId, connections)
+  }
+}
+
+function relationChangeMayMatter(changes: RecordsDiff<TLRecord>, store: PropagationRelationStore): Set<TLShapeId> {
+  const affected = new Set<TLShapeId>()
+  const addRecord = (record: TLRecord) => {
+    if (isConnectionRecord(record)) affected.add(record.id as TLShapeId)
+    if (isConnectionBindingRecord(record)) affected.add((record as { fromId: TLShapeId }).fromId)
+    if (record.typeName === 'shape') for (const id of store.watchedByShape.get(record.id as TLShapeId) ?? []) affected.add(id)
+  }
+  for (const record of Object.values(changes.added)) addRecord(record)
+  for (const record of Object.values(changes.removed)) addRecord(record)
+  for (const [before, after] of Object.values(changes.updated)) {
+    if (isConnectionRecord(before) || isConnectionRecord(after)) {
+      if (!isConnectionRecord(before) || !isConnectionRecord(after)
+        || (before as { parentId: unknown }).parentId !== (after as { parentId: unknown }).parentId) addRecord(after)
+      continue
+    }
+    if (isConnectionBindingRecord(before) || isConnectionBindingRecord(after)) {
+      addRecord(before)
+      addRecord(after)
+      continue
+    }
+    if (before.typeName === 'shape' && after.typeName === 'shape'
+      && store.watchedByShape.has(after.id as TLShapeId)
+      && (before.parentId !== after.parentId || before.type !== after.type || before.props !== after.props)) addRecord(after)
+  }
+  return affected
+}
+
+function relationStoreFor(editor: Editor): PropagationRelationStore | null {
+  if (!editor.store) return null
+  let store = relationStores.get(editor)
+  if (store) return store
+  const connectionIds = new Set<TLShapeId>()
+  store = {
+    connectionIds,
+    watchedByConnection: new Map(),
+    watchedByShape: new Map(),
+    listeners: new Set(),
+    stop: () => undefined,
+    epoch: 0,
+    pageShapeReads: 0,
+    publishes: 0,
+  }
+  // One document-index pass at attachment time; all later updates are driven
+  // by store diffs and touch only connection records plus their dependencies.
+  for (const record of editor.store.allRecords()) if (isConnectionRecord(record)) connectionIds.add(record.id as TLShapeId)
+  for (const id of connectionIds) refreshConnectionWatches(editor, store, id)
+  store.stop = editor.store.listen((entry) => {
+    const affected = relationChangeMayMatter(entry.changes, store!)
+    if (affected.size === 0) return
+    for (const id of affected) refreshConnectionWatches(editor, store!, id)
+    store!.epoch += 1
+    store!.publishes += 1
+    for (const listener of store!.listeners) listener()
+  }, { scope: 'document' })
+  relationStores.set(editor, store)
+  return store
+}
+
+function connectionIdsFor(editor: Editor): Iterable<TLShapeId> {
+  const store = relationStoreFor(editor)
+  if (store) return store.connectionIds
+  // Test doubles have no document store. This fallback still reads ids only.
+  return [...editor.getCurrentPageShapeIds()].filter((id) => editor.getShape(id)?.type === CONNECTION_SHAPE_TYPE)
+}
+
+export function subscribePropagationRelations(editor: Editor, listener: () => void): () => void {
+  const store = relationStoreFor(editor)
+  if (!store) return () => undefined
+  store.listeners.add(listener)
+  return () => store.listeners.delete(listener)
+}
+
+export function getPropagationRelationEpoch(editor: Editor): number {
+  return relationStoreFor(editor)?.epoch ?? 0
+}
+
+/** Development-only proof seam for the no-page-scan regression test. */
+export function getPropagationRelationMetrics(editor: Editor) {
+  const store = relationStoreFor(editor)
+  return {
+    connections: store?.connectionIds.size ?? 0,
+    pageShapeReads: store?.pageShapeReads ?? 0,
+    publishes: store?.publishes ?? 0,
+  }
+}
+
 function storeFor(editor: Editor): PropagationFocusStore {
   let store = stores.get(editor)
   if (!store) {
@@ -65,12 +209,13 @@ export function subscribePropagationFocus(editor: Editor, listener: () => void):
   return () => store.listeners.delete(listener)
 }
 
-/** A selected Block/value host or settled cable can anchor a graph reading. */
+/** A selected Block/value host or canonically admitted cable can anchor a graph reading. */
 export function propagationSeedFromSelection(editor: Editor): TLShapeId | null {
   const selected = editor.getSelectedShapes()
   if (selected.length !== 1) return null
   const shape = selected[0]
-  if (shape.type === CONNECTION_SHAPE_TYPE || isPortHostShape(shape)) return shape.id
+  if (isPortHostShape(shape)) return shape.id
+  if (shape.type === CONNECTION_SHAPE_TYPE && livePropagationEdges(editor).some((edge) => edge.edgeId === shape.id)) return shape.id
   return null
 }
 
@@ -83,8 +228,10 @@ export function propagationSeedFromSelection(editor: Editor): TLShapeId | null {
  */
 export function livePropagationEdges(editor: Editor): DirectedPropagationEdge[] {
   const edges: DirectedPropagationEdge[] = []
-  for (const candidate of editor.getCurrentPageShapes()) {
-    if (candidate.type !== CONNECTION_SHAPE_TYPE) continue
+  const currentPageId = editor.getCurrentPageId()
+  for (const connectionId of connectionIdsFor(editor)) {
+    const candidate = editor.getShape(connectionId)
+    if (candidate?.type !== CONNECTION_SHAPE_TYPE || editor.getAncestorPageId(connectionId) !== currentPageId) continue
     const connection = candidate as ConnectionShape
     // `getConnectionBindings` deliberately picks a representative for legacy
     // callers. The graph may not: every terminal must have exactly one weld.
@@ -114,6 +261,7 @@ function snapshotFor(
   const selectedEdge = seed.type === CONNECTION_SHAPE_TYPE
     ? edges.find((edge) => edge.edgeId === seedId)
     : undefined
+  if (seed.type === CONNECTION_SHAPE_TYPE && !selectedEdge) return EMPTY_SNAPSHOT
   if (seed.type !== CONNECTION_SHAPE_TYPE && !isPortHostShape(seed)) return EMPTY_SNAPSHOT
   // A selected cable begins with its two concrete endpoints lit. Its controls
   // then expand past either end; selecting it never fabricates a "node" for a
@@ -152,12 +300,14 @@ export function startPropagationFocus(
   downstreamSteps = 1,
 ): boolean {
   if (!seedId || !editor.getShape(seedId)) return false
-  publish(editor, snapshotFor(
+  const snapshot = snapshotFor(
     editor,
     seedId,
     normalizePropagationSteps(upstreamSteps),
     normalizePropagationSteps(downstreamSteps),
-  ))
+  )
+  if (!snapshot.seedId) return false
+  publish(editor, snapshot)
   return true
 }
 
@@ -194,7 +344,7 @@ export function reconcilePropagationFocus(editor: Editor): void {
     clearPropagationFocus(editor)
     return
   }
-  startPropagationFocus(editor, current.seedId, current.upstreamSteps, current.downstreamSteps)
+  if (!startPropagationFocus(editor, current.seedId, current.upstreamSteps, current.downstreamSteps)) clearPropagationFocus(editor)
 }
 
 export function usePropagationFocus(editor: Editor): PropagationFocusSnapshot {

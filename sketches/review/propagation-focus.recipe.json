@@ -20,7 +20,7 @@
     { "type": "connection", "fromId": "join-b", "toId": "fan-b", "props": { "portId": "in", "terminal": "end", "face": "outer" } }
   ],
   "callouts": [
-    { "id": "select", "kind": "step", "text": "1 · Select join(). Its context bar offers Focus flow.", "x": 700, "y": 80, "w": 380, "h": 108, "target": { "shapeId": "join", "anchor": "top" } },
+    { "id": "select", "kind": "step", "text": "1 · Select join(). Focus flow appears only for a settled real cable or a Block.", "x": 670, "y": 70, "w": 440, "h": 124, "target": { "shapeId": "join", "anchor": "top" } },
     { "id": "focus", "kind": "step", "text": "2 · Click Focus flow, then change the two bounded step counts. The two fan-out cables stay real and bright.", "x": 1220, "y": 70, "w": 480, "h": 125, "target": { "shapeId": "fan-a", "anchor": "top" } },
     { "id": "clear", "kind": "step", "text": "3 · Click Clear. The unrelated card returns exactly as it was; no board object was edited.", "x": 80, "y": 740, "w": 480, "h": 120, "target": { "shapeId": "unrelated", "anchor": "left" } },
     { "id": "pass", "kind": "pass", "text": "PASS WHEN · Only the traversed Blocks and their actual cables stay bright. The async cable participates normally, and Clear restores the untouched board.", "x": 1200, "y": 750, "w": 500, "h": 155 }

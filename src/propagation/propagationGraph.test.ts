@@ -3,7 +3,13 @@ import { createShapeId, type Editor } from 'tldraw'
 import { getDefaultBlockProps, setBlockViewProps, type BlockShape } from '../blocks/blockModel'
 import type { ConnectionBinding } from '../blocks/connections'
 import { CONNECTION_SHAPE_TYPE } from '../blocks/connections'
-import { livePropagationEdges, normalizePropagationSteps } from './propagationFocus'
+import {
+  getPropagationFocusSnapshot,
+  livePropagationEdges,
+  normalizePropagationSteps,
+  propagationSeedFromSelection,
+  startPropagationFocus,
+} from './propagationFocus'
 import { walkPropagationGraph } from './propagationGraph'
 
 const chain = [
@@ -108,6 +114,8 @@ function graphEditor(shapes: BlockShape[], bindings: ConnectionBinding[], edge =
   const all = new Map([...shapes, connection].map((shape) => [shape.id, shape]))
   return {
     getCurrentPageShapes: () => [...all.values()],
+    getCurrentPageShapeIds: () => new Set(all.keys()),
+    getCurrentPageId: () => 'page:page',
     getShape: (id: string) => all.get(id as never),
     getBindingsFromShape: (id: string) => bindings.filter((candidate) => candidate.fromId === id),
     getShapeParent: (id: string) => {
@@ -156,5 +164,31 @@ describe('propagation graph admission', () => {
     const halfBound = graphEditor([source], [binding('half', 'start', 'source', 'out')], 'half')
     expect(livePropagationEdges(duplicate)).toEqual([])
     expect(livePropagationEdges(halfBound)).toEqual([])
+  })
+
+  it('never offers or activates a malformed selected cable as a singleton lens', () => {
+    const source = block('source', 'page:page', { outputs: ['out'] })
+    const sink = block('sink', 'page:page', { inputs: ['in'], outputs: ['out'] })
+    const left = block('left', 'page:page', { outputs: ['out'] })
+    const right = block('right', 'page:page', { inputs: ['in'] })
+    const leftChild = block('left-child', 'shape:left', { outputs: ['out'] })
+    const rightChild = block('right-child', 'shape:right', { inputs: ['in'] })
+    const cases = [
+      graphEditor([source], [binding('half', 'start', 'source', 'out')], 'half'),
+      graphEditor([source, sink], [binding('duplicate', 'start', 'source', 'out'), binding('duplicate', 'start', 'source', 'out'), binding('duplicate', 'end', 'sink', 'in')], 'duplicate'),
+      graphEditor([source, sink], [binding('polarity', 'start', 'source', 'out'), binding('polarity', 'end', 'sink', 'out')], 'polarity'),
+      graphEditor([source, sink], [binding('face', 'start', 'source', 'out', 'inner'), binding('face', 'end', 'sink', 'in')], 'face'),
+      graphEditor([left, right, leftChild, rightChild], [binding('scope', 'start', 'left-child', 'out'), binding('scope', 'end', 'right-child', 'in')], 'scope'),
+    ]
+    for (const [index, editor] of cases.entries()) {
+      const edgeId = ['half', 'duplicate', 'polarity', 'face', 'scope'][index]
+      Object.assign(editor, {
+        getSelectedShapes: () => [editor.getShape(createShapeId(edgeId))],
+        getSelectedShapeIds: () => [createShapeId(edgeId)],
+      })
+      expect(propagationSeedFromSelection(editor)).toBeNull()
+      expect(startPropagationFocus(editor)).toBe(false)
+      expect(getPropagationFocusSnapshot(editor).seedId).toBeNull()
+    }
   })
 })
