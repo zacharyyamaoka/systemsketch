@@ -6,6 +6,7 @@ import socket
 import sys
 import tempfile
 import unittest
+from contextlib import nullcontext
 from pathlib import Path
 from unittest.mock import patch
 from urllib.parse import quote
@@ -112,6 +113,21 @@ class ReviewRuntimeTests(unittest.TestCase):
                 runtime, "review_health", return_value=None
             ):
                 self.assertEqual(runtime.review_state(review), "unhealthy")
+
+    def test_down_all_stops_every_lease_without_removing_any_review(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            first = self.review(Path(directory) / "first")
+            second = self.review(Path(directory) / "second")
+            second.name = "loop-ports"
+            saved: dict[str, runtime.Review] = {}
+            with patch.object(runtime, "registry_lock", return_value=nullcontext()), patch.object(
+                runtime, "load_reviews", return_value={first.name: first, second.name: second}
+            ), patch.object(runtime, "stop", side_effect=lambda review: review) as stop, patch.object(
+                runtime, "write_reviews", side_effect=lambda reviews: saved.update(reviews)
+            ), patch.object(sys, "argv", ["review_runtime.py", "down", "--all"]):
+                self.assertEqual(runtime.main(), 0)
+            self.assertEqual(stop.call_count, 2)
+            self.assertEqual(set(saved), {"pill-entry", "loop-ports"})
 
     def test_sweeper_calls_a_review_lease_out_by_name(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
