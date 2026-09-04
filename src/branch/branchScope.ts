@@ -37,6 +37,13 @@ export interface BranchAncestryLevel {
  * The stamped meta wins when it names a live arm — it survives a fold, when
  * the child's row has no body to be inside of. Geometry answers otherwise:
  * the arm whose row holds the child's top edge.
+ *
+ * WHY: tldraw's own frame nesting (the invisible per-arm `BranchArmShape`)
+ * is a projection rebuilt from `Branch.props.arms[]` and geometry, not the
+ * semantic record — folding an arm collapses its row to a header with no
+ * body, so a geometry-only read would re-home the child into whatever open
+ * arm's row now overlaps its old top edge. The stamp is what survives that
+ * collapse — see docs/peps/0002-branch-region-port-host.md.
  */
 export function branchArmIdOfChild(branch: BranchShape, child: TLShape): string | null {
 	if (

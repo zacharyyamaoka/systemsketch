@@ -100,6 +100,8 @@ The [review-fixture implementation gallery](docs/systemsketch-review-fixture-202
 
 The [review-fixture legibility loop](docs/review-fixture-legibility-2026-09-02.html) corrects the handoff surface after visual review: cue arrows are stock elbow arrows bound to both the card and the named target edge, cards and same-edge arrow lanes have enforced breathing room, dense text is rejected early, and two reproducible six-board seeds make visual critique part of maintaining the skill rather than a one-off check.
 
+A hard-won decision from that loop outlives the diff in [`docs/peps/`](docs/peps/README.md) — a numbered, dated record (context, decision, rejected alternatives, consequences) written once the change merges to `main`, linked from a `WHY:` comment at the code site. The dated HTML galleries above stay what they've always been, temporary review surfaces; a PEP is the part meant to survive after one goes stale.
+
 The [development worktree document-link report](docs/development-worktree-paths-2026-09-02.html) makes those direct review URLs work on isolated track servers: Preview explicitly authorizes its own source worktree in addition to `.track/boards`, while Stable, the File browser root, neighboring worktrees, and arbitrary machine paths remain confined. The report opens the reported branch-region fixture in the real branch UI and carries the open → autosave → cold-reopen browser proof.
 
 The [independent feature-labs architecture](docs/independent-feature-labs-2026-08-31.html) recommends one production entry point plus development-only stock-tldraw composition profiles, so each feature can be built and proven without importing volatile product chrome or unrelated features. That boundary is now implemented by the Dev Hub below.

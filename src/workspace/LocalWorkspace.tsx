@@ -396,6 +396,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
       // WHY: draw.io 31.4.2 bounds a continuously postponed local save at
       // 30 seconds. A long drag therefore cannot keep the only new revision in
       // memory forever; nearby edits still coalesce behind the 600 ms debounce.
+      // — see docs/peps/0001-workspace-persistence-alignment.md
       const schedule = autosaveSchedule(
         performance.now(),
         autosavePendingSinceRef.current,
