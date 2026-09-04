@@ -2,7 +2,8 @@ import { useCallback, useSyncExternalStore } from 'react'
 import type { Editor, TLShapeId } from 'tldraw'
 import {
   CONNECTION_SHAPE_TYPE,
-  connectionBindingIsValid,
+  connectionBindingsForTerminal,
+  connectionEndpointsAreValid,
   getConnectionBindings,
   getConnectionDirection,
   isPortHostShape,
@@ -11,6 +12,12 @@ import {
 import { walkPropagationGraph, type DirectedPropagationEdge } from './propagationGraph'
 
 export const MAX_PROPAGATION_STEPS = 5
+
+/** Browser number inputs can yield blanks, decimals, and NaN while being edited. */
+export function normalizePropagationSteps(value: number): number {
+  if (!Number.isFinite(value)) return 0
+  return Math.min(MAX_PROPAGATION_STEPS, Math.max(0, Math.trunc(value)))
+}
 
 export interface PropagationFocusSnapshot {
   seedId: TLShapeId | null
@@ -67,17 +74,25 @@ export function propagationSeedFromSelection(editor: Editor): TLShapeId | null {
   return null
 }
 
-function liveDirectedEdges(editor: Editor): DirectedPropagationEdge[] {
+/**
+ * Read only settled, canonical cables as dataflow.
+ *
+ * WHY: the canvas deliberately permits an in-progress or even malformed cable
+ * while someone is sketching. A reading lens must not turn that geometry into
+ * a made-up dependency, so its admission test is stricter than rendering.
+ */
+export function livePropagationEdges(editor: Editor): DirectedPropagationEdge[] {
   const edges: DirectedPropagationEdge[] = []
   for (const candidate of editor.getCurrentPageShapes()) {
     if (candidate.type !== CONNECTION_SHAPE_TYPE) continue
     const connection = candidate as ConnectionShape
+    // `getConnectionBindings` deliberately picks a representative for legacy
+    // callers. The graph may not: every terminal must have exactly one weld.
+    if (connectionBindingsForTerminal(editor, connection, 'start').length !== 1
+      || connectionBindingsForTerminal(editor, connection, 'end').length !== 1
+      || !connectionEndpointsAreValid(editor, connection)) continue
     const bindings = getConnectionBindings(editor, connection)
-    // A half-drag, deleted port, or malformed binding is visual geometry, not
-    // trustworthy dataflow. The lens skips it instead of guessing a relation.
-    if (!bindings.start || !bindings.end
-      || !connectionBindingIsValid(editor, bindings.start)
-      || !connectionBindingIsValid(editor, bindings.end)) continue
+    if (!bindings.start || !bindings.end) continue
     const direction = getConnectionDirection(editor, connection)
     const source = bindings[direction.sourceTerminal]
     const sink = bindings[direction.sinkTerminal]
@@ -95,7 +110,7 @@ function snapshotFor(
 ): PropagationFocusSnapshot {
   const seed = editor.getShape(seedId)
   if (!seed) return EMPTY_SNAPSHOT
-  const edges = liveDirectedEdges(editor)
+  const edges = livePropagationEdges(editor)
   const selectedEdge = seed.type === CONNECTION_SHAPE_TYPE
     ? edges.find((edge) => edge.edgeId === seedId)
     : undefined
@@ -140,8 +155,8 @@ export function startPropagationFocus(
   publish(editor, snapshotFor(
     editor,
     seedId,
-    Math.min(MAX_PROPAGATION_STEPS, Math.max(0, upstreamSteps)),
-    Math.min(MAX_PROPAGATION_STEPS, Math.max(0, downstreamSteps)),
+    normalizePropagationSteps(upstreamSteps),
+    normalizePropagationSteps(downstreamSteps),
   ))
   return true
 }

@@ -1,9 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useEditor, useValue } from 'tldraw'
+import { getPortHostPort, isPortHostShape } from '../blocks/connections'
 import {
   MAX_PROPAGATION_STEPS,
   clearPropagationFocus,
-  getPropagationFocusSnapshot,
   propagationSeedFromSelection,
   reconcilePropagationFocus,
   setPropagationFocusSteps,
@@ -11,6 +11,19 @@ import {
   usePropagationFocus,
 } from './propagationFocus'
 import './propagation-focus.css'
+
+/** Read just the ancestry that scope validation can observe, never page-wide records. */
+function scopeTrail(editor: ReturnType<typeof useEditor>, id: string): string {
+  const seen = new Set<string>()
+  const trail: string[] = []
+  let current = editor.getShape(id as never)
+  while (current && !seen.has(current.id)) {
+    seen.add(current.id)
+    trail.push(`${current.id}:${current.parentId}:${current.type}`)
+    current = editor.getShapeParent(current.id)
+  }
+  return trail.join('>')
+}
 
 /** The small selection lens: one explicit seed, separately bounded directions. */
 export function PropagationFocusControls() {
@@ -32,8 +45,7 @@ export function PropagationFocusControls() {
         <button
           type="button"
           data-testid="propagation-focus-start"
-          title="Highlight one upstream and downstream graph step (F)"
-          aria-keyshortcuts="F"
+          title="Highlight one upstream and downstream graph step"
           onClick={() => startPropagationFocus(editor)}
         >
           Focus flow
@@ -48,6 +60,7 @@ export function PropagationFocusControls() {
               type="number"
               min={0}
               max={MAX_PROPAGATION_STEPS}
+              step={1}
               value={focus.upstreamSteps}
               onChange={(event) => setPropagationFocusSteps(editor, 'upstream', Number(event.currentTarget.value))}
             />
@@ -60,6 +73,7 @@ export function PropagationFocusControls() {
               type="number"
               min={0}
               max={MAX_PROPAGATION_STEPS}
+              step={1}
               value={focus.downstreamSteps}
               onChange={(event) => setPropagationFocusSteps(editor, 'downstream', Number(event.currentTarget.value))}
             />
@@ -68,8 +82,7 @@ export function PropagationFocusControls() {
           <button
             type="button"
             data-testid="propagation-focus-clear"
-            title="Clear propagation focus (Escape)"
-            aria-keyshortcuts="Escape"
+            title="Clear propagation focus"
             onClick={() => clearPropagationFocus(editor)}
           >
             Clear
@@ -84,22 +97,36 @@ export function PropagationFocusControls() {
 export function PropagationFocusDomLens() {
   const editor = useEditor()
   const focus = usePropagationFocus(editor)
+  const markedHosts = useRef(new Map<string, HTMLElement>())
   const selectionKey = useValue(
     'propagation focus selection reconciliation',
     () => [...editor.getSelectedShapeIds()].sort().join(','),
     [editor],
   )
-  // Reading shape and connection-binding ids through tldraw's reactive query
-  // makes a lens recalculate when a cable is retargeted or removed, without
-  // adding a second persisted "graph" record just to observe the board.
+  // Observe only graph-bearing records. Reading every props object (or all
+  // records) made a cosmetic text edit churn the entire canvas host tree.
   const relationEpoch = useValue(
     'propagation focus live relation epoch',
-    () => [
-      ...editor.getCurrentPageShapes().map((shape) => `${shape.id}:${shape.type}:${JSON.stringify(shape.props)}`),
-      ...editor.store.allRecords()
-        .filter((record) => record.typeName === 'binding' && record.type === 'connection')
-        .map((record) => `${record.id}:${record.fromId}:${record.toId}:${JSON.stringify(record.props)}`),
-    ].join('|'),
+    () => editor.getCurrentPageShapes()
+      .filter((shape) => shape.type === 'connection')
+      .map((connection) => {
+        const terminals = ['start', 'end'] as const
+        const bindings = terminals.flatMap((terminal) => (
+          editor.getBindingsFromShape(connection.id, 'connection')
+            .filter((binding) => binding.props.terminal === terminal)
+            .map((binding) => {
+              const host = editor.getShape(binding.toId)
+              // Read only semantic facts that can admit/reject this cable:
+              // endpoint identity/face, its port polarity, and scope ancestry.
+              const side = host && isPortHostShape(host)
+                ? getPortHostPort(editor, host, binding.props.portId)?.side ?? 'missing-port'
+                : 'missing-host'
+              return `${terminal}:${binding.id}:${binding.toId}:${binding.props.portId}:${binding.props.face}`
+                + `:${side}:${scopeTrail(editor, binding.toId)}`
+            })
+        ))
+        return `${connection.id}|${bindings.join('|')}`
+      }).join('\n'),
     [editor],
   )
   useEffect(() => {
@@ -109,32 +136,29 @@ export function PropagationFocusDomLens() {
     const container = editor.getContainer()
     const included = focus.includedShapeIds
     container.toggleAttribute('data-propagation-focus-active', focus.seedId !== null)
-    for (const element of container.querySelectorAll<HTMLElement>('[data-shape-id]')) {
-      const id = element.dataset.shapeId
-      if (id && included.has(id as never)) element.dataset.propagationFocus = 'included'
-      else delete element.dataset.propagationFocus
+    const nextIds = new Set([...included].map(String))
+    for (const [id, element] of markedHosts.current) {
+      if (nextIds.has(id) && element.isConnected) continue
+      delete element.dataset.propagationFocus
+      markedHosts.current.delete(id)
     }
-    return () => {
-      container.removeAttribute('data-propagation-focus-active')
-      for (const element of container.querySelectorAll<HTMLElement>('[data-shape-id]')) delete element.dataset.propagationFocus
+    // Only included, actual canvas hosts are touched. CSS dims every other
+    // shape host from the container attribute, so unrelated DOM is never
+    // enumerated or rewritten on a graph update.
+    for (const id of nextIds) {
+      const previous = markedHosts.current.get(id)
+      if (previous?.isConnected) continue
+      const element = container.querySelector<HTMLElement>(`.tl-shape[data-shape-id="${CSS.escape(id)}"]`)
+      if (!element) continue
+      element.dataset.propagationFocus = 'included'
+      markedHosts.current.set(id, element)
     }
   }, [editor, focus])
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return
-      const target = event.target
-      if (target instanceof HTMLElement && (target.matches('input, textarea, select') || target.isContentEditable)) return
-      if (event.key === 'Escape' && getPropagationFocusSnapshot(editor).seedId) {
-        event.preventDefault()
-        clearPropagationFocus(editor)
-      }
-      if (event.key.toLowerCase() === 'f' && propagationSeedFromSelection(editor) && !getPropagationFocusSnapshot(editor).seedId) {
-        event.preventDefault()
-        startPropagationFocus(editor)
-      }
-    }
-    window.addEventListener('keydown', onKeyDown, true)
-    return () => window.removeEventListener('keydown', onKeyDown, true)
+  useEffect(() => () => {
+    const container = editor.getContainer()
+    container.removeAttribute('data-propagation-focus-active')
+    for (const element of markedHosts.current.values()) delete element.dataset.propagationFocus
+    markedHosts.current.clear()
   }, [editor])
   return null
 }

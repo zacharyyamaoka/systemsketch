@@ -106,7 +106,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "aFgSIV",
+      "index": "aFdz8V",
       "typeName": "shape"
     },
     {
@@ -140,7 +140,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "a6s6v",
+      "index": "a63kE",
       "typeName": "shape"
     },
     {
@@ -182,7 +182,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "KzkvUGdmKlIdna-jW9iAy",
+        "definitionId": "-iBSiIyvRxzj0pKpCEcvj",
         "inputs": [
           {
             "id": "in",
@@ -202,7 +202,7 @@
         "definitionKey": "join"
       },
       "parentId": "page:page",
-      "index": "aAQUg",
+      "index": "aAyjj",
       "typeName": "shape"
     },
     {
@@ -247,7 +247,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aH1hf",
+      "index": "aHU3c",
       "typeName": "shape"
     },
     {
@@ -292,13 +292,13 @@
         }
       },
       "parentId": "page:page",
-      "index": "aFA0I",
+      "index": "aF8qU",
       "typeName": "shape"
     },
     {
-      "x": 0,
-      "y": 0,
-      "z": 1,
+      "x": -7.957746478873332,
+      "y": -7.276995305164384,
+      "z": 1.0203592814371258,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -320,14 +320,6 @@
         "terminal": "end"
       },
       "typeName": "binding"
-    },
-    {
-      "name": "",
-      "color": "#F04F88",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:Asii0IyBpZO1gDlPH5Mng",
-      "typeName": "user"
     },
     {
       "x": 890,
@@ -370,7 +362,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "aEzu7Z",
+      "index": "aEzo4l",
       "typeName": "shape"
     },
     {
@@ -425,7 +417,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "PZd0EQfCdFc7R0OClRJRu",
+        "definitionId": "hoZkS-zmlSNHknMQuTqpt",
         "inputs": [
           {
             "id": "in",
@@ -445,7 +437,7 @@
         "definitionKey": "render"
       },
       "parentId": "page:page",
-      "index": "aBltr",
+      "index": "aB5rI",
       "typeName": "shape"
     },
     {
@@ -505,7 +497,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "WxLG8XJXplkVDglD-RpdV",
+        "definitionId": "6FLZtnE9_6rTRVAk5wEWx",
         "inputs": [
           {
             "id": "in",
@@ -518,7 +510,7 @@
         "definitionKey": "archive"
       },
       "parentId": "page:page",
-      "index": "aC3gA",
+      "index": "aCCYQ",
       "typeName": "shape"
     },
     {
@@ -563,7 +555,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aEv22",
+      "index": "aEVXQ",
       "typeName": "shape"
     },
     {
@@ -623,7 +615,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "hAhn7XU2TJB9lFFtU_HDw",
+        "definitionId": "al6Py70SclrESTpeCNyuZ",
         "inputs": [],
         "outputs": [
           {
@@ -636,7 +628,7 @@
         "definitionKey": "source"
       },
       "parentId": "page:page",
-      "index": "a9oW2",
+      "index": "a9dNE",
       "typeName": "shape"
     },
     {
@@ -698,7 +690,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "aGgyy",
+      "index": "aGveHl",
       "typeName": "shape"
     },
     {
@@ -732,7 +724,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "a7B02",
+      "index": "a7QVn",
       "typeName": "shape"
     },
     {
@@ -779,8 +771,16 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "a86Fn",
+      "index": "a800U",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#55B467",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:D9lNqXlfYYZUT8mNjtVA4",
+      "typeName": "user"
     },
     {
       "meta": {},
@@ -794,14 +794,6 @@
         "face": "outer"
       },
       "typeName": "binding"
-    },
-    {
-      "name": "",
-      "color": "#9D5BD2",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:UWWuozVh4MNmms0N8nj4A",
-      "typeName": "user"
     },
     {
       "x": 780,
@@ -842,13 +834,13 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "WeOY3zNDvUaAKBWJ1OjDI",
+        "definitionId": "AOfpARud8FCiFcVtCUnkC",
         "inputs": [],
         "outputs": [],
         "definitionKey": "unrelated"
       },
       "parentId": "page:page",
-      "index": "aDcAX",
+      "index": "aDfDf",
       "typeName": "shape"
     },
     {
@@ -912,7 +904,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "3 · Press Escape or Clear. The unrelated card returns exactly as it was; no board object was edited."
+                  "text": "3 · Click Clear. The unrelated card returns exactly as it was; no board object was edited."
                 }
               ]
             }
@@ -920,7 +912,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aGMSX",
+      "index": "aGnNn",
       "typeName": "shape"
     },
     {
@@ -943,8 +935,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1280,
-        "h": 720
+        "w": 1800,
+        "h": 980
       },
       "insets": [
         false,

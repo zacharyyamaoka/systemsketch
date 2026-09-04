@@ -2,7 +2,7 @@
 
 SystemSketch starts from one deliberately boring datum: the stock tldraw whiteboard. Its engine, drawing tools, and shortcuts stay stock while narrow supported seams add local files, board overview, zoom, Help, and the Stable/Preview workflow.
 
-The [bounded propagation-focus implementation gallery](docs/propagation-focus-implementation-2026-09-04.html) adds a temporary reading lens over existing dataflow: select a real Block/value or cable, independently bound upstream and downstream graph steps, then Clear/Escape back to the untouched board. Its [`propagation-focus.systemsketch`](sketches/review/propagation-focus.systemsketch) fixture has a source, a join, real fan-out (including an async cable), and an unrelated sentinel ready for review.
+The [bounded propagation-focus implementation gallery](docs/propagation-focus-implementation-2026-09-04.html) adds a temporary reading lens over existing dataflow: select a real Block/value or cable, independently bound upstream and downstream graph steps, then Clear back to the untouched board. Its [`propagation-focus.systemsketch`](sketches/review/propagation-focus.systemsketch) fixture has a source, a join, real fan-out (including an async cable), and an unrelated sentinel ready for review.
 
 The [control-icon placement implementation gallery](docs/control-icon-placement-implementation-2026-09-03.html) records the deliberately offline Python pass for <code>break</code>/<code>continue</code>: explicit source-owner maps write persistent Loop / Branch-arm metadata, and the canvas only paints those lists in a fixed right-aligned header lane. Its six-case [`control-icon-placement.systemsketch`](sketches/review/control-icon-placement.systemsketch) fixture is ready to review.
 

@@ -1,14 +1,14 @@
 /* A presentation-only lens: class/attribute changes leave document records alone. */
-.tl-container[data-propagation-focus-active] [data-shape-id]:not([data-propagation-focus='included']) {
-  /* tldraw paints each host's saved opacity inline. This transient lens must
-     win only while its parent attribute exists, never write that saved prop. */
-  opacity: .17 !important;
-  transition: opacity 120ms ease-out;
+.tl-container[data-propagation-focus-active] .tl-shape[data-shape-id]:not([data-propagation-focus='included']) {
+  /* Filter composes with each shape's saved opacity. Do not flatten authored
+     opacity, diff roles, or stock selection paint into a lens-specific value. */
+  filter: opacity(.17);
+  transition: filter 120ms ease-out;
 }
 
-.tl-container[data-propagation-focus-active] [data-shape-id][data-propagation-focus='included'] {
-  opacity: 1 !important;
-  transition: opacity 120ms ease-out;
+.tl-container[data-propagation-focus-active] .tl-shape[data-shape-id][data-propagation-focus='included'] {
+  filter: none;
+  transition: filter 120ms ease-out;
 }
 
 .systemsketch-propagation-focus {
