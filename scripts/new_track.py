@@ -159,6 +159,19 @@ files anywhere inside this track worktree, including `sketches/review/`. The
 File browser remains rooted at `.track/boards/`, and neighboring worktrees or
 arbitrary machine paths remain outside the server's allowed roots.
 
+For a human review that must remain reachable after this implementation track
+ends, do not leave `serve.sh` running. After committing the review board and
+report, create an explicit retained review:
+
+```bash
+python3 scripts/review_runtime.py up my-review --ref HEAD \\
+  --board sketches/review/example.systemsketch --report docs/example.html
+```
+
+It pins the reviewed commit in its own worktree, waits for the public URL to be
+healthy, and survives the agent shell. It remains running until
+`review_runtime.py down my-review` or `review_runtime.py down --all` is called.
+
 ## Before you hand anything back
 
 ```bash

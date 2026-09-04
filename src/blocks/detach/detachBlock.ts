@@ -61,6 +61,8 @@ import {
 } from '../connections/ConnectionShapeUtil'
 import { detachBranchToPrimitives } from '../../branch/detachBranch'
 import { isBranchShape } from '../../branch/branchModel'
+import { detachLoopToPrimitives } from '../../loop/detachLoop'
+import { isLoopShape } from '../../loop/loopModel'
 import { primitivesForBlock } from './blockPrimitives'
 import {
 	DETACH_FORMAT_VERSION,
@@ -662,8 +664,9 @@ export function selectedBlockIds(editor: Editor): TLShapeId[] {
 
 /**
  * Every custom visual selected through the current tree. Ordering is imposed
- * by `detachPrimitives`; discovery only needs to include Branches, Blocks, and
- * loose semantic connections nested anywhere below the selection.
+ * by `detachPrimitives`; discovery only needs to include every custom visual
+ * a person can author — Blocks, Branches, Loops, and loose semantic
+ * connections nested anywhere below the selection.
  */
 export function selectedDetachableIds(editor: Editor): TLShapeId[] {
 	const found: TLShapeId[] = []
@@ -671,7 +674,7 @@ export function selectedDetachableIds(editor: Editor): TLShapeId[] {
 		for (const id of ids) {
 			const shape = editor.getShape(id)
 			if (!shape) continue
-			if (isBranchShape(shape) || isBlockShape(shape) || shape.type === CONNECTION_SHAPE_TYPE) found.push(id)
+			if (isBranchShape(shape) || isLoopShape(shape) || isBlockShape(shape) || shape.type === CONNECTION_SHAPE_TYPE) found.push(id)
 			visit(editor.getSortedChildIdsForParent(id))
 		}
 	}
@@ -705,7 +708,7 @@ export function allDetachableIds(editor: Editor): TLShapeId[] {
 		for (const id of ids) {
 			const shape = editor.getShape(id)
 			if (!shape) continue
-			if (isBranchShape(shape) || isBlockShape(shape) || shape.type === CONNECTION_SHAPE_TYPE) found.push(id)
+			if (isBranchShape(shape) || isLoopShape(shape) || isBlockShape(shape) || shape.type === CONNECTION_SHAPE_TYPE) found.push(id)
 			visit(editor.getSortedChildIdsForParent(id))
 		}
 	}
@@ -754,26 +757,88 @@ function detachPrimitives(editor: Editor, ids: readonly TLShapeId[]): DetachResu
 	editor.markHistoryStoppingPoint('detach to primitives')
 	const results: DetachResult[] = []
 	editor.run(() => {
-		// Parent containers release their helpers first, then Blocks convert their
-		// bound cables, and finally any surviving loose cable becomes a stock arrow.
-		// Keeping connections last prevents an explicitly selected cable from
-		// losing the reversible Block-detach metadata path.
-		for (const id of ids) {
+		const replacementSelection = new Set<TLShapeId>()
+		const containerIds = new Set(ids.filter((id) => {
 			const shape = editor.getShape(id)
-			if (isBranchShape(shape)) {
-				detachBranchToPrimitives(editor, id)
-			}
-		}
+			return isBranchShape(shape) || isLoopShape(shape)
+		}))
+		// Blocks go first. Their own cable lowerer preserves a reversible arrow
+		// record, even when the other endpoint is one of the containers below.
+		// Container-only wires are lowered after that while their ports still
+		// exist, then the Branch / Loop records become stock Frames. Keeping this
+		// order prevents a Loop-only detach from losing its header wires and keeps
+		// a mixed Block + Loop selection rebuildable at the Block end.
 		for (const id of ids) {
 			const shape = editor.getShape(id)
 			if (!isBlockShape(shape)) continue
 			const result = detachBlockToPrimitives(editor, id, { mark: false })
-			if (result !== null) results.push(result)
+			if (result !== null) {
+				results.push(result)
+				replacementSelection.add(result.groupId ?? result.cardId)
+			}
+		}
+		const containerConnectionIds = new Set<TLShapeId>()
+		// Read the semantic wiring before its Connection records become arrows.
+		// The resulting stock Frame has no port identity, but a live wired port
+		// visibly has a filled 12px core and the chrome materialiser can retain
+		// that evidence while it still knows each port id.
+		const containerConnectedPortIds = new Map<TLShapeId, ReadonlySet<string>>()
+		for (const id of containerIds) {
+			const shape = editor.getShape(id)
+			if (!shape) continue
+			const wiring = getBlockPortConnections(editor, shape.id)
+			containerConnectedPortIds.set(id, new Set(wiring.map((entry) => entry.ownPortId)))
+			for (const entry of wiring) {
+				containerConnectionIds.add(entry.connectionId)
+			}
+		}
+		for (const connectionId of containerConnectionIds) {
+			const connection = editor.getShape(connectionId)
+			if (connection?.type === CONNECTION_SHAPE_TYPE) {
+				detachConnectionToArrow(editor, connection as ConnectionShape)
+			}
+		}
+		const loweredContainerIds = new Set<TLShapeId>()
+		for (const id of containerIds) {
+			const shape = editor.getShape(id)
+			const frameId = isBranchShape(shape)
+				? detachBranchToPrimitives(editor, id, containerConnectedPortIds.get(id))
+				: isLoopShape(shape)
+					? detachLoopToPrimitives(editor, id, containerConnectedPortIds.get(id))
+					: null
+			if (frameId) {
+				loweredContainerIds.add(frameId)
+				replacementSelection.add(frameId)
+			}
+		}
+		// A Block arrow normally remembers enough to rebuild when every endpoint
+		// is a Block again. A selected Branch or Loop has just become a stock
+		// Frame, so an arrow anchored to it can no longer become a semantic cable.
+		// Keep the stock arrow, but clear the misleading rebuild promise.
+		for (const containerId of loweredContainerIds) {
+			for (const binding of editor.getBindingsToShape<TLArrowBinding>(containerId, 'arrow')) {
+				const arrow = editor.getShape(binding.fromId)
+				if (!arrow || arrow.type !== 'arrow') continue
+				const record = readDetachedConnection(arrow.meta)
+				if (!record || !record.rebuildWithBlocks) continue
+				editor.updateShape({
+					id: arrow.id,
+					type: 'arrow',
+					meta: detachMeta({ ...record, rebuildWithBlocks: false }),
+				})
+			}
 		}
 		for (const id of ids) {
 			const shape = editor.getShape(id)
-			if (shape?.type === CONNECTION_SHAPE_TYPE) detachConnectionToArrow(editor, shape as ConnectionShape)
+			if (shape?.type === CONNECTION_SHAPE_TYPE) {
+				const arrowId = detachConnectionToArrow(editor, shape as ConnectionShape)
+				if (arrowId) replacementSelection.add(detachedEdgeGroupId(editor, arrowId) ?? arrowId)
+			}
 		}
+		// A semantic selection should stay a selection after its primitives take
+		// over; otherwise right-clicking Detach makes the result unexpectedly
+		// disappear from the user's active context.
+		if (replacementSelection.size > 0) editor.setSelectedShapes([...replacementSelection])
 	})
 	return results
 }

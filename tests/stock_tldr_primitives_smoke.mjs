@@ -74,13 +74,24 @@ async function main() {
           props: { title: 'inside branch', view: 'simple', inputs: [], outputs: [] } },
         { id: 'shape:nested-edge', type: 'connection', parentId: 'shape:branch', x: 80, y: 220,
           props: { start: { x: 0, y: 0 }, end: { x: 320, y: 0 }, routing: 'straight', temporal: 'delayed', delayValue: 'nested', pillPosition: 0.55, curve: null, pins: [], elbowRoute: null } },
+        { id: 'shape:loop', type: 'loop', x: 780, y: 650, props: {
+          w: 480, h: 220, title: 'For every detection',
+          iterable: { id: 'iterable', type: 'Detections' },
+          item: { id: 'item', type: 'Detection' }, turn: 'turn 3 / 8',
+        } },
+        { id: 'shape:loop-child', type: 'block', parentId: 'shape:loop', x: 100, y: 92,
+          props: { title: 'inspect()', view: 'port', inputs, outputs: [] } },
+        { id: 'shape:loop-item-edge', type: 'connection', parentId: 'shape:loop', x: 0, y: 0,
+          props: { start: { x: 0, y: 0 }, end: { x: 100, y: 100 }, routing: 'elbow', temporal: 'data', curve: null, pins: [], elbowRoute: null } },
+        { id: 'shape:loop-in-edge', type: 'connection', x: 0, y: 0,
+          props: { start: { x: 0, y: 0 }, end: { x: 100, y: 100 }, routing: 'elbow', temporal: 'data', curve: null, pins: [], elbowRoute: null } },
         { id: 'shape:data-edge', type: 'connection', x: 0, y: 0, props: { start: { x: 0, y: 0 }, end: { x: 100, y: 0 }, routing: 'elbow', temporal: 'data', curve: null, pins: [], elbowRoute: null } },
         { id: 'shape:async-edge', type: 'connection', x: 0, y: 0, props: { start: { x: 0, y: 0 }, end: { x: 100, y: 0 }, routing: 'straight', temporal: 'async', curve: null, pins: [], elbowRoute: null } },
         { id: 'shape:delay-edge', type: 'connection', x: 0, y: 0, props: { start: { x: 0, y: 0 }, end: { x: 100, y: 0 }, routing: 'curved', temporal: 'delayed', delayValue: '11', pillPosition: 0.6, curve: null, pins: [], elbowRoute: null } },
         // Exercise the separately exposed “Detach arrow” command too: no
         // Block participates in this delayed cable, so the pill must still
         // become a stock group when the command starts from a connection.
-        { id: 'shape:direct-edge', type: 'connection', x: 900, y: 740, props: { start: { x: 0, y: 0 }, end: { x: 340, y: 0 }, routing: 'straight', temporal: 'delayed', delayValue: 'direct', pillPosition: 0.55, curve: null, pins: [], elbowRoute: null } },
+        { id: 'shape:direct-edge', type: 'connection', x: 100, y: 780, props: { start: { x: 0, y: 0 }, end: { x: 340, y: 0 }, routing: 'straight', temporal: 'delayed', delayValue: 'direct', pillPosition: 0.55, curve: null, pins: [], elbowRoute: null } },
       ])
       const bind = (edge, from, to) => [
         { type: 'connection', fromId: edge, toId: from, props: { portId: 'out', terminal: 'start', face: 'outer' } },
@@ -90,11 +101,69 @@ async function main() {
         ...bind('shape:data-edge', 'shape:data-a', 'shape:data-b'),
         ...bind('shape:async-edge', 'shape:async-a', 'shape:async-b'),
         ...bind('shape:delay-edge', 'shape:delay-a', 'shape:delay-b'),
+        { type: 'connection', fromId: 'shape:loop-item-edge', toId: 'shape:loop', props: { portId: 'item', terminal: 'start', face: 'outer' } },
+        { type: 'connection', fromId: 'shape:loop-item-edge', toId: 'shape:loop-child', props: { portId: 'in', terminal: 'end', face: 'outer' } },
+        { type: 'connection', fromId: 'shape:loop-in-edge', toId: 'shape:delay-a', props: { portId: 'out', terminal: 'start', face: 'outer' } },
+        { type: 'connection', fromId: 'shape:loop-in-edge', toId: 'shape:loop', props: { portId: 'iterable', terminal: 'end', face: 'outer' } },
       ])
       editor.setSelectedShapes(['shape:data-a', 'shape:data-b', 'shape:async-a', 'shape:async-b', 'shape:delay-a', 'shape:delay-b', 'shape:branch'])
       return true
     })()`)
     await delay(700)
+    // The user-reported gap: a Loop used to be absent from the selectable
+    // detach family, so its own right-click menu could never offer the action.
+    // It carries both an internal item cable and an outside iterable cable to
+    // prove that its primitive lowering runs while those ports still exist.
+    const loopHeader = JSON.parse(await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      editor.setSelectedShapes(['shape:loop'])
+      const loop = editor.getShape('shape:loop')
+      return JSON.stringify(editor.pageToScreen({ x: loop.x + loop.props.w / 2, y: loop.y + 24 }))
+    })()`))
+    await detachEverything(page, loopHeader)
+    await waitFor(page, `(() => {
+      const editor = window.__systemsketch.editor
+      return editor.getCurrentPageShapes().some((shape) => shape.type === 'frame'
+        && shape.meta?.systemSketch?.kind === 'loop')
+        && !editor.getShape('shape:loop-item-edge')
+        && !editor.getShape('shape:loop-in-edge')
+    })()`, 'a Loop-only selection to lower through its own context menu')
+    const loopDetach = JSON.parse(await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const frame = editor.getCurrentPageShapes().find((shape) => shape.type === 'frame'
+        && shape.meta?.systemSketch?.kind === 'loop')
+      const children = frame ? editor.getSortedChildIdsForParent(frame.id).map((id) => editor.getShape(id)) : []
+		const exteriorPortDots = frame ? editor.getCurrentPageShapes().filter((shape) => shape.type === 'geo'
+			&& shape.parentId === frame.parentId && shape.props.geo === 'ellipse' && shape.props.w <= 18) : []
+      const arrowBindings = frame ? editor.getBindingsToShape(frame.id, 'arrow') : []
+      return JSON.stringify({
+        frame: frame?.type,
+        remembered: frame?.meta?.systemSketch?.kind,
+        loopShapes: editor.getCurrentPageShapes().filter((shape) => shape.type === 'loop').length,
+        loopConnectionsRemain: ['shape:loop-item-edge', 'shape:loop-in-edge']
+          .some((id) => editor.getShape(id) !== undefined),
+        liveBlocksInside: children.filter((shape) => shape?.type === 'block').length,
+		// The port rims are Frame siblings so their full footprint is not clipped
+		// at the wall; the rules and text remain ordinary Frame children.
+        headerRules: children.filter((shape) => shape?.type === 'line').length,
+        portDots: exteriorPortDots.length,
+		wiredPortCores: exteriorPortDots.filter((shape) => shape?.type === 'geo'
+			&& shape.props.geo === 'ellipse' && shape.props.w === 12 && shape.props.fill === 'solid').length,
+        arrowBindings: arrowBindings.length,
+      })
+    })()`))
+    assert.deepEqual(loopDetach, {
+      frame: 'frame',
+      remembered: 'loop',
+      loopShapes: 0,
+      loopConnectionsRemain: false,
+      liveBlocksInside: 0,
+      headerRules: 2,
+		// Two 18px rings and the wired iterable port's 12px core.
+      portDots: 3,
+		wiredPortCores: 1,
+      arrowBindings: 2,
+    })
     const nestedEdgeBefore = JSON.parse(await evaluate(page, `JSON.stringify(
       window.__systemsketch.editor.getShapePageBounds('shape:nested-edge').center
     )`))
@@ -142,7 +211,7 @@ async function main() {
     await detachEverything(page, first)
     await waitFor(page, `(() => {
       const shapes = window.__systemsketch.editor.getCurrentPageShapes()
-      return !shapes.some((shape) => ['block', 'branch', 'branch-arm', 'connection'].includes(shape.type))
+      return !shapes.some((shape) => ['block', 'branch', 'branch-arm', 'loop', 'connection'].includes(shape.type))
     })()`, 'every selected custom composite to lower')
     await delay(350)
 
@@ -153,6 +222,12 @@ async function main() {
       const bindings = editor.store.allRecords().filter((record) => record.typeName === 'binding')
       const temporal = Object.fromEntries(shapes.filter((shape) => shape.type === 'arrow')
         .map((shape) => [shape.meta?.systemSketch?.temporal, shape.props.dash]))
+		const textWith = (needle) => shapes.find((shape) => shape.type === 'text'
+			&& JSON.stringify(shape.props.richText).includes(needle))
+		const curvedArrow = shapes.find((shape) => shape.type === 'arrow'
+			&& shape.meta?.systemSketch?.routing === 'curved')
+		const elbowArrow = shapes.find((shape) => shape.type === 'arrow'
+			&& shape.meta?.systemSketch?.routing === 'elbow')
       const nestedArrow = shapes.find((shape) => shape.type === 'arrow'
         && shape.meta?.systemSketch?.delayValue === 'nested')
       const nestedEdgeGroup = nestedArrow && editor.getShape(nestedArrow.parentId)
@@ -167,15 +242,23 @@ async function main() {
         shapeTypes: [...new Set(shapes.map((shape) => shape.type))].sort(),
         bindingTypes: [...new Set(bindings.map((binding) => binding.type))].sort(),
         temporal,
+		// These are real stock records from the live detach run, then rendered
+		// again through the isolated stock tldr SVG path below.
+		textSizing: {
+			blockHeading: textWith('data source')?.props.size === 'l' && textWith('data source')?.props.scale === 1,
+			branchTitle: textWith('Loop / branch')?.props.size === 's' && textWith('Loop / branch')?.props.scale === 1,
+			activeLabel: textWith('active')?.props.size === 's' && Math.abs((textWith('active')?.props.scale ?? 0) - 11 / 18) < 0.0001,
+		},
+		arrowKinds: { curved: curvedArrow?.props.kind, curvedBend: curvedArrow?.props.bend, elbow: elbowArrow?.props.kind },
         delayPillGroups: shapes.filter((shape) => shape.type === 'group' && shape.meta?.systemSketch?.kind === 'connection-delay-pill').length,
         delayPillText: shapes.filter((shape) => shape.type === 'text').some((shape) => JSON.stringify(shape.props.richText).includes('z⁻¹ = 11')),
         directArrow: shapes.find((shape) => shape.type === 'arrow' && shape.meta?.systemSketch?.delayValue === 'direct')?.props.dash,
         directPillGroup: shapes.some((shape) => shape.type === 'group' && shape.meta?.systemSketch?.kind === 'connection-delay-pill'
           && shape.meta?.systemSketch?.arrowId && shapes.some((arrow) => arrow.id === shape.meta.systemSketch.arrowId && arrow.meta?.systemSketch?.delayValue === 'direct')),
-        // A detached connection is a loose stock primitive. Leaving this
-        // delayed arrow below a Branch frame would clip it before ordinary
-        // tldraw z-order can bring it back into view.
-        nestedEdgeEscapedFrame: nestedEdgeGroup?.parentId === editor.getCurrentPageId(),
+		// A detached connection cannot remain under a clipping Frame. It may sit
+		// under an ordinary stock group, but never beneath a frame-like parent.
+		nestedEdgeEscapedFrame: Boolean(nestedEdgeGroup
+			&& !editor.isShapeFrameLike(editor.getShape(nestedEdgeGroup.parentId))),
         nestedEdgeKeptPosition: Boolean(nestedCenter
           && Math.abs(nestedCenter.x - ${JSON.stringify(nestedEdgeBefore.x)}) < 0.01
           && Math.abs(nestedCenter.y - ${JSON.stringify(nestedEdgeBefore.y)}) < 0.01),
@@ -195,6 +278,10 @@ async function main() {
     assert.equal(result.temporal.data, 'solid')
     assert.equal(result.temporal.async, 'dashed')
     assert.equal(result.temporal.delayed, 'dotted')
+		assert.deepEqual(result.textSizing, { blockHeading: true, branchTitle: true, activeLabel: true })
+		assert.equal(result.arrowKinds.curved, 'arc')
+		assert.notEqual(result.arrowKinds.curvedBend, 0)
+		assert.equal(result.arrowKinds.elbow, 'elbow')
     assert.equal(result.delayPillGroups, 3)
     assert.equal(result.delayPillText, true)
     assert.equal(result.directArrow, 'dotted')

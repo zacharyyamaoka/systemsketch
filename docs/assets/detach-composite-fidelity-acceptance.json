@@ -1,0 +1,146 @@
+{
+  "results": [
+    {
+      "name": "block",
+      "clip": {
+        "x": 56,
+        "y": 92,
+        "width": 398,
+        "height": 276
+      },
+      "before": "detach-composite-block-before.png",
+      "after": "detach-composite-block-after.png",
+      "diff": "detach-composite-block-diff.png",
+      "score": {
+        "score": 0.904581,
+        "wholeSimilarity": 0.956525,
+        "foregroundSimilarity": 0.939266,
+        "edgeSimilarity": 0.786718,
+        "foregroundPixels": 78461,
+        "totalPixels": 109848
+      }
+    },
+    {
+      "name": "branch",
+      "clip": {
+        "x": 536,
+        "y": 92,
+        "width": 408,
+        "height": 316
+      },
+      "before": "detach-composite-branch-before.png",
+      "after": "detach-composite-branch-after.png",
+      "diff": "detach-composite-branch-diff.png",
+      "score": {
+        "score": 0.935596,
+        "wholeSimilarity": 0.975177,
+        "foregroundSimilarity": 0.97439,
+        "edgeSimilarity": 0.818583,
+        "foregroundPixels": 124966,
+        "totalPixels": 128928
+      }
+    },
+    {
+      "name": "loop",
+      "clip": {
+        "x": 1006,
+        "y": 92,
+        "width": 408,
+        "height": 316
+      },
+      "before": "detach-composite-loop-before.png",
+      "after": "detach-composite-loop-after.png",
+      "diff": "detach-composite-loop-diff.png",
+      "score": {
+        "score": 0.932341,
+        "wholeSimilarity": 0.97494,
+        "foregroundSimilarity": 0.974937,
+        "edgeSimilarity": 0.80455,
+        "foregroundPixels": 128911,
+        "totalPixels": 128928
+      }
+    },
+    {
+      "name": "connection",
+      "clip": {
+        "x": 396,
+        "y": 663,
+        "width": 348,
+        "height": 56
+      },
+      "before": "detach-composite-connection-before.png",
+      "after": "detach-composite-connection-after.png",
+      "diff": "detach-composite-connection-diff.png",
+      "score": {
+        "score": 0.918179,
+        "wholeSimilarity": 0.990423,
+        "foregroundSimilarity": 0.890084,
+        "edgeSimilarity": 0.922195,
+        "foregroundPixels": 1698,
+        "totalPixels": 19488
+      }
+    }
+  ],
+  "checks": {
+    "allFourContextMenuWorkflowsRan": true,
+    "allSubjectsLowered": true,
+    "everySameCameraScoreIsMeasured": true,
+    "noConsoleErrors": true
+  },
+  "subjects": [
+    null,
+    null,
+    null,
+    null
+  ],
+  "replacements": [
+    "frame",
+    "frame"
+  ],
+  "shapes": [
+    "block",
+    "block",
+    "geo",
+    "line",
+    "text",
+    "text",
+    "line",
+    "geo",
+    "geo",
+    "geo",
+    "text",
+    "text",
+    "text",
+    "text",
+    "text",
+    "geo",
+    "geo",
+    "group",
+    "group",
+    "group",
+    "frame",
+    "line",
+    "text",
+    "text",
+    "text",
+    "text",
+    "geo",
+    "geo",
+    "text",
+    "line",
+    "text",
+    "text",
+    "geo",
+    "frame",
+    "line",
+    "line",
+    "text",
+    "text",
+    "text",
+    "geo",
+    "text",
+    "geo",
+    "geo",
+    "arrow"
+  ]
+}

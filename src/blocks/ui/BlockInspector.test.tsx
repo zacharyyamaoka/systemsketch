@@ -60,6 +60,48 @@ describe('Block inspector content', () => {
     expect(html).not.toContain('New block')
   })
 
+  it('names blank inspector fields by role instead of supplying legacy sample content', () => {
+    const block = renderToStaticMarkup(
+      <BlockInspectorContent
+        props={{
+          ...getDefaultBlockProps(),
+          inputs: [{ id: 'in_1', name: '', type: '', visible: true }],
+        }}
+        status="selected"
+        actions={noopActions}
+      />,
+    )
+    const pill = renderToStaticMarkup(
+      <BlockInspectorContent
+        props={createValueBlockProps(getDefaultBlockProps(), '')}
+        status="selected"
+        actions={noopActions}
+        pill={{ fedBy: null, fedType: null, feeds: [] }}
+      />,
+    )
+    const notes = renderToStaticMarkup(
+      <BlockInspectorContent
+        props={getDefaultBlockProps()}
+        status="selected"
+        actions={noopActions}
+        initialTab="notes"
+      />,
+    )
+
+    for (const role of ['Display description', 'Title', 'Type', 'Name', 'Default']) {
+      expect(block).toContain(`placeholder="${role}"`)
+    }
+    expect(notes).toContain('placeholder="Notes"')
+    for (const role of ['Name', 'Value', 'Type']) {
+      expect(pill).toContain(`placeholder="${role}"`)
+    }
+    for (const legacyExample of ['build_report', 'call', 'gain', '2.0', 'float']) {
+      expect(block).not.toContain(`placeholder="${legacyExample}"`)
+      expect(pill).not.toContain(`placeholder="${legacyExample}"`)
+      expect(notes).not.toContain(`placeholder="${legacyExample}"`)
+    }
+  })
+
   it('renders the donor Notes editing surface from Block data', () => {
     const html = renderToStaticMarkup(
       <BlockInspectorContent

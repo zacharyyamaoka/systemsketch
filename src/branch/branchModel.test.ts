@@ -60,6 +60,7 @@ describe('branch layout', () => {
 		])
 		expect(two.controls[1].name).toBe('mode')
 		expect(two.controls.map((c) => c.id)).toEqual(['ctrl_1', 'ctrl_2'])
+		expect(one.controls[0].name).toBe('')
 	})
 
 	it('assigns a child to the arm whose row holds its top edge', () => {
@@ -86,6 +87,7 @@ describe('branch state rules', () => {
 		// A new arm in Case view arrives folded, unless nothing is open.
 		expect(appendBranchArmProps(opened).arm.open).toBe(false)
 		expect(appendBranchArmProps(none).arm.open).toBe(true)
+		expect(appendBranchArmProps(props()).arm.title).toBe('')
 	})
 
 	it('expanded view leaves the arms as they are when leaving case view', () => {

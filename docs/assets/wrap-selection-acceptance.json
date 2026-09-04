@@ -117,7 +117,7 @@
   },
   {
     "id": "remove-frame-renamed",
-    "label": "stock Remove frame now says what it keeps",
+    "label": "stock Remove frame says what it keeps without mistaking every container for a Frame",
     "observed": true,
     "desired": true,
     "ok": true

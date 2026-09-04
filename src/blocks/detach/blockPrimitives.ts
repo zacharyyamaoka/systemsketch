@@ -7,7 +7,13 @@
  * metadata is ignored and no SystemSketch shape utility is registered.
  */
 import { createShapeId, toRichText } from 'tldraw'
-import type { TLDefaultColorStyle, TLGeoShape, TLShapeId, TLShapePartial } from 'tldraw'
+import type {
+	TLDefaultColorStyle,
+	TLDefaultSizeStyle,
+	TLGeoShape,
+	TLShapeId,
+	TLShapePartial,
+} from 'tldraw'
 
 import { portDefaultValue, type BlockShapeProps } from '../blockModel'
 import {
@@ -98,7 +104,50 @@ function fontFamily(font: 'sans' | 'mono'): string {
 	return font === 'mono' ? MONO_FONT : SANS_FONT
 }
 
+/**
+ * The four stock text sizes are 18, 24, 36, and 44 canvas px in this pinned
+ * tldraw build. `scale` is a stock, serialised text prop, so it lets a
+ * primitive retain the authored 11px, 13px, or 16px rhythm rather than
+ * snapping every label to the 18px `s` preset.
+ */
+const STOCK_TEXT_BASES: ReadonlyArray<{ size: TLDefaultSizeStyle; px: number }> = [
+	{ size: 's', px: 18 },
+	{ size: 'm', px: 24 },
+	{ size: 'l', px: 36 },
+	{ size: 'xl', px: 44 },
+]
+
+function stockTextStyle(px: number): { size: TLDefaultSizeStyle; scale: number } {
+	const base = STOCK_TEXT_BASES.find((candidate) => px <= candidate.px)
+		?? STOCK_TEXT_BASES[STOCK_TEXT_BASES.length - 1]
+	return { size: base.size, scale: px / base.px }
+}
+
+type RichTextNode = {
+	type: string
+	text?: string
+	marks?: Array<{ type: string }>
+	content?: RichTextNode[]
+	[key: string]: unknown
+}
+
+/** Apply the stock rich-text bold mark when the authored label is semibold. */
+function richTextForWeight(text: string, weight: number) {
+	const richText = toRichText(text)
+	if (weight < 600) return richText
+	return {
+		...richText,
+		content: (richText.content as RichTextNode[]).map((paragraph) => ({
+			...paragraph,
+			content: paragraph.content?.map((leaf) => leaf.type === 'text'
+				? { ...leaf, marks: [...(leaf.marks ?? []), { type: 'bold' }] }
+				: leaf),
+		})),
+	}
+}
+
 function textAt(options: TextOptions): TLShapePartial {
+	const stock = stockTextStyle(options.px)
 	const naturalWidth = options.naturalWidth
 		?? measureText(options.text, options.px, fontFamily(options.font), options.weight)
 	// TextShapeUtil floors a fixed width before it measures. The live DOM does
@@ -118,13 +167,14 @@ function textAt(options: TextOptions): TLShapePartial {
 		x: options.origin.x + x,
 		y: options.origin.y + options.box.y + (options.box.h - options.lineHeight) / 2,
 		props: {
-			richText: toRichText(options.text),
+			richText: richTextForWeight(options.text, options.weight),
 			color: options.stockColor,
-			size: 's',
+			size: stock.size,
 			font: options.font,
-			scale: 1,
+			scale: stock.scale,
 			autoSize: false,
-			w: width,
+			// Width lives in the text shape's unscaled coordinate system.
+			w: width / stock.scale,
 			textAlign: options.align,
 		},
 	}

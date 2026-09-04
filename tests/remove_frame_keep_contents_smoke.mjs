@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Physical proof that Delete frame, leave children preserves every contained subtree. */
+/** Physical proof that Delete container, leave children preserves every contained subtree. */
 import assert from 'node:assert/strict'
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -128,14 +128,21 @@ async function main() {
     const before = await boardState(page)
     const frameBox = await elementBox(page, `[data-shape-id="${OUTER}"]`)
     await clickAt(page, frameBox.x + frameBox.width / 2, frameBox.y + 16, 'right')
+    await waitFor(page, `document.querySelector('[data-testid="context-menu-sub.edit-button"]')`, 'Edit submenu')
+    await evaluate(page, `(() => {
+      const edit = document.querySelector('[data-testid="context-menu-sub.edit-button"]')
+      edit?.dispatchEvent(new PointerEvent('pointermove', { bubbles: true }))
+      edit?.click()
+      return true
+    })()`)
     await waitFor(page,
-      `document.querySelector('[data-testid="context-menu.frame-remove-keep-contents"]')`,
-      'Delete frame, leave children context command')
-    check('M1', 'right-clicking one unlocked Frame offers Delete frame, leave children', await evaluate(page,
-      `document.querySelector('[data-testid="context-menu.frame-remove-keep-contents"]').textContent.trim()`),
-    'Delete frame, leave children')
+      `document.querySelector('[data-testid="context-menu.remove-frame"]')`,
+      'Delete container, leave children context command')
+    check('M1', 'right-clicking one unlocked Frame offers Delete container, leave children', await evaluate(page,
+      `document.querySelector('[data-testid="context-menu.remove-frame"]').textContent.trim()`),
+    'Delete container, leave children')
 
-    await clickElement(page, '[data-testid="context-menu.frame-remove-keep-contents"]')
+    await clickElement(page, '[data-testid="context-menu.remove-frame"]')
     await waitFor(page, `!window.__systemsketch.editor.getShape(${JSON.stringify(OUTER)})`, 'Frame removal')
     await delay(250)
     const after = await boardState(page)

@@ -1,0 +1,165 @@
+{
+  "feature": "Detach every authored composite",
+  "viewport": { "width": 1500, "height": 1000 },
+  "pages": [{ "id": "review", "name": "Detach primitives review" }],
+  "shapes": [
+    {
+      "id": "feed",
+      "type": "block",
+      "x": 150,
+      "y": 330,
+      "props": {
+        "title": "detections()",
+        "description": "Real iterable source",
+        "blockType": "Function",
+        "view": "port",
+        "w": 360,
+        "h": 160,
+        "inputs": [],
+        "outputs": [{ "id": "out", "name": "detections", "type": "Detections", "visible": true }]
+      }
+    },
+    {
+      "id": "loop",
+      "type": "loop",
+      "x": 580,
+      "y": 260,
+      "props": {
+        "w": 460,
+        "h": 270,
+        "title": "For every detection",
+        "iterable": { "id": "iterable", "type": "Detections" },
+        "item": { "id": "item", "type": "Detection" },
+        "turn": "turn 3 / 8"
+      }
+    },
+    {
+      "id": "loop-body",
+      "type": "block",
+      "parentId": "loop",
+        "x": 80,
+      "y": 98,
+      "props": {
+        "title": "classify",
+        "blockType": "Function",
+        "view": "port",
+        "w": 300,
+        "h": 130,
+        "inputs": [{ "id": "in", "name": "item", "type": "Detection", "visible": true }],
+        "outputs": []
+      }
+    },
+    {
+      "id": "loop-wire",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 100, "y": 0 },
+        "routing": "elbow",
+        "temporal": "data",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null
+      }
+    },
+    {
+      "id": "branch",
+      "type": "branch",
+      "x": 560,
+      "y": 650,
+      "props": {
+        "w": 460,
+        "h": 260,
+        "title": "Choose route",
+        "view": "expanded",
+        "activeArmId": "yes",
+        "controls": [{ "id": "predicate", "name": "is valid", "type": "bool" }],
+        "arms": [
+          { "id": "yes", "title": "yes", "open": true, "h": 90 },
+          { "id": "no", "title": "no", "open": false, "h": 62 }
+        ]
+      }
+    },
+    {
+      "id": "branch-child",
+      "type": "block",
+      "parentId": "branch",
+        "x": 80,
+      "y": 92,
+      "meta": { "branchArm": "yes" },
+      "props": {
+        "title": "accept()",
+        "description": "A direct Branch child",
+        "blockType": "Function",
+        "view": "simple",
+        "w": 300,
+        "h": 120,
+        "inputs": [],
+        "outputs": []
+      }
+    },
+    {
+      "id": "block",
+      "type": "block",
+      "x": 1100,
+      "y": 650,
+      "props": {
+        "title": "normalize()",
+        "description": "An ordinary authored Block",
+        "blockType": "Function",
+        "view": "port",
+        "w": 360,
+        "h": 180,
+        "inputs": [{ "id": "in", "name": "image", "type": "Image", "visible": true }],
+        "outputs": [{ "id": "out", "name": "result", "type": "Image", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [
+    { "type": "connection", "fromId": "loop-wire", "toId": "feed", "props": { "portId": "out", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "loop-wire", "toId": "loop", "props": { "portId": "iterable", "terminal": "end", "face": "outer" } }
+  ],
+  "callouts": [
+    {
+      "id": "step-loop",
+      "kind": "step",
+      "text": "1 · Select the For Loop, right-click its header, then choose Detach to primitives. Undo to repeat.",
+      "y": 20,
+      "x": 600,
+      "w": 420,
+      "h": 130,
+      "target": { "shapeId": "loop", "anchor": "top" }
+    },
+    {
+      "id": "step-branch",
+      "kind": "step",
+      "text": "2 · Right-click this Branch and choose Detach to primitives. Its child remains inside the stock container.",
+      "x": 70,
+      "y": 650,
+      "w": 420,
+      "h": 130,
+      "target": { "shapeId": "branch", "anchor": "left", "dy": 80 }
+    },
+    {
+      "id": "step-block",
+      "kind": "step",
+      "text": "3 · Right-click this Block and choose Detach to primitives. Its parts become ordinary editable shapes.",
+      "x": 1080,
+      "y": 410,
+      "w": 390,
+      "h": 150,
+      "target": { "shapeId": "block", "anchor": "top", "dx": 110 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Loop, Branch, and Block lower cleanly. The Loop wire becomes a stock arrow; containers offer Delete container, leave children.",
+      "x": 80,
+      "y": 20,
+      "w": 390,
+      "h": 190
+    }
+  ]
+}
