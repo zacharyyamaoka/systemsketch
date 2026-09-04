@@ -579,10 +579,13 @@ export function isUnresolvedBlock(props: BlockShapeProps): boolean {
  * about the incoming *type*, never about the variable that happened to arrive,
  * so one projection reads the same at every call site.
  */
-export const PROJECTION_BLOCK_TYPE = 'projection'
+// Compatibility export: old documents named this primitive `projection`.
+// Fresh Blocks persist the clearer data-wire vocabulary, `unbundle`.
+export const PROJECTION_BLOCK_TYPE = 'unbundle'
+export const LEGACY_PROJECTION_BLOCK_TYPES = new Set(['projection', 'split', 'unbundle'])
 
 export function isProjectionBlock(props: BlockShapeProps): boolean {
-	return props.blockType.trim().toLowerCase() === PROJECTION_BLOCK_TYPE
+	return LEGACY_PROJECTION_BLOCK_TYPES.has(props.blockType.trim().toLowerCase())
 }
 
 /**
@@ -607,7 +610,7 @@ export function makeProjectionProps(props: BlockShapeProps, incoming: string): B
 	return {
 		...props,
 		title: takesTitle ? type : props.title,
-		blockType: already ? props.blockType : PROJECTION_BLOCK_TYPE,
+		blockType: PROJECTION_BLOCK_TYPE,
 		inputs: takesType
 			? props.inputs.map((port, index) => (index === 0 ? { ...port, type } : port))
 			: props.inputs,

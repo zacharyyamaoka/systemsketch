@@ -29,6 +29,8 @@ export interface BlockPickerPreset {
 	outputs: number
 	/** A curated semantic Block whose full rows/config are authored by its factory. */
 	stockPreset?: StockBlockPresetId
+	/** Edge-local data vocabulary comes first because it answers the cable immediately. */
+	group?: 'quick'
 }
 
 export const BLOCK_PICKER_PRESETS: readonly BlockPickerPreset[] = [
@@ -44,7 +46,11 @@ export const BLOCK_PICKER_PRESETS: readonly BlockPickerPreset[] = [
 	// Reading a member is function application, so a projection is an ordinary
 	// Block. Its rows are accessors on the type that arrives, which is why it is
 	// worth a preset: the cable already knows that type.
-	{ id: 'projection', label: 'Split', icon: 'Shuffle', blockType: PROJECTION_BLOCK_TYPE, view: 'port', inputs: 1, outputs: 1 },
+	// Keep this old id for saved fixtures and picker automation; newly created
+	// instances use the canonical Unbundle block type.
+	{ id: 'projection', label: 'Unbundle', icon: 'Shuffle', blockType: PROJECTION_BLOCK_TYPE, view: 'port', inputs: 1, outputs: 1, stockPreset: 'unbundle', group: 'quick' },
+	{ id: 'bundle', label: 'Bundle', icon: 'PackagePlus', blockType: 'bundle', view: 'port', inputs: 2, outputs: 1, stockPreset: 'bundle', group: 'quick' },
+	{ id: 'copy', label: 'Copy', icon: 'Copy', blockType: 'copy', view: 'port', inputs: 1, outputs: 1, stockPreset: 'copy', group: 'quick' },
 	{ id: 'set-attributes', label: 'Set attributes', icon: 'Settings', blockType: 'set-attributes', view: 'port', inputs: 2, outputs: 1, stockPreset: 'set-attributes' },
 	{ id: 'select', label: 'Select', icon: 'GitBranch', blockType: 'select', view: 'port', inputs: 3, outputs: 1, stockPreset: 'select' },
 	{ id: 'clock-trigger', label: 'Clock / Trigger', icon: 'Timer', blockType: 'clock-trigger', view: 'port', inputs: 0, outputs: 1, stockPreset: 'clock-trigger' },

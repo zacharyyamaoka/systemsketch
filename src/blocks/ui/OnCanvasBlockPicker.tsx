@@ -62,6 +62,8 @@ export function OnCanvasBlockPicker() {
 	)
 
 	const close = useCallback(() => closeBlockPicker(editor), [editor])
+	const quickPresets = presets.filter((preset) => preset.group === 'quick')
+	const ordinaryPresets = presets.filter((preset) => preset.group !== 'quick')
 
 	// Track the cable's live terminal rather than the point it was opened at:
 	// the board can be panned or zoomed while the picker is up.
@@ -179,7 +181,8 @@ export function OnCanvasBlockPicker() {
 			onPointerDown={stopEventPropagation}
 		>
 			<div className="OnCanvasBlockPicker-title">Insert a Block</div>
-			{presets.map((preset) => (
+			{quickPresets.length > 0 && <div className="OnCanvasBlockPicker-group" data-testid="block-picker-quick-insert">Quick insert</div>}
+			{quickPresets.map((preset) => (
 				<button
 					key={preset.id}
 					type="button"
@@ -197,6 +200,12 @@ export function OnCanvasBlockPicker() {
 						{preset.outputs}
 						{' out'}
 					</small>
+				</button>
+			))}
+			{quickPresets.length > 0 && ordinaryPresets.length > 0 && <div className="OnCanvasBlockPicker-group">Other Blocks</div>}
+			{ordinaryPresets.map((preset) => (
+				<button key={preset.id} type="button" role="menuitem" className="OnCanvasBlockPicker-item" data-testid={`block-picker-${preset.id}`} onPointerDown={stopEventPropagation} onClick={() => pick(preset)}>
+					<BlockIconGlyph name={preset.icon} size={16} /><span>{preset.label}</span><small>{preset.inputs}{' in · '}{preset.outputs}{' out'}</small>
 				</button>
 			))}
 		</div>

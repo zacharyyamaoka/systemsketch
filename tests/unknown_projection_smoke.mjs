@@ -242,27 +242,27 @@ async function main() {
     await deselect(page, { x: 1100, y: 820 })
     await shot(page, 'unknown-projection-marked-port.png')
 
-    // ---- a cable dropped on nothing offers Split -----------------------------
+    // ---- a cable dropped on nothing offers Unbundle -------------------------
     const recordOut = await box(page, portDot(RECORD, 'output', 'out_1'))
     const asked = await dragFrom(page, recordOut,
       { x: recordOut.cx + 420, y: recordOut.cy + 60 },
       { shotName: 'unknown-projection-picker-drag.png' })
     check('PICK-1', 'a cable dropped on nothing asks what should take it', asked.offered, true)
     await waitFor(page, `document.querySelector('[data-testid="block-picker-projection"]')`,
-      'Split in the offer')
+      'Unbundle in Quick insert')
     await shot(page, 'unknown-projection-picker-open.png')
-    const split = await box(page, '[data-testid="block-picker-projection"]')
-    await clickAt(page, split.cx, split.cy)
+    const unbundle = await box(page, '[data-testid="block-picker-projection"]')
+    await clickAt(page, unbundle.cx, unbundle.cy)
     await delay(700)
     check('PICK-1B', 'a self-titled projection asks for the MEMBER, not for a name',
       await evaluate(page, `Boolean(document.querySelector('[data-testid^="block-inline-port-name-outputs-"]'))`),
       true)
     await key(page, 'Escape', 'Escape')
     await delay(300)
-    const projection = (await blocks(page)).find((block) => block.blockType === 'projection') ?? null
-    check('PICK-2', 'Split makes a projection, titled by the type that arrived',
+    const projection = (await blocks(page)).find((block) => block.blockType === 'unbundle') ?? null
+    check('PICK-2', 'Unbundle makes a canonical projection, titled by the type that arrived',
       projection ? { blockType: projection.blockType, title: projection.title } : null,
-      { blockType: 'projection', title: 'ObjectRecord' })
+      { blockType: 'unbundle', title: 'ObjectRecord' })
     check('PICK-3', 'the inlet is the type itself and carries no variable name',
       projection ? { name: projection.inputs[0].name, type: projection.inputs[0].type } : null,
       { name: '', type: 'ObjectRecord' })

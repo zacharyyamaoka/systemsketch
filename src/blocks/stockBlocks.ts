@@ -12,8 +12,17 @@ import type { TLStoreSnapshot } from 'tldraw'
 export const SET_ATTRIBUTES_BLOCK_TYPE = 'set-attributes'
 export const SELECT_BLOCK_TYPE = 'select'
 export const CLOCK_TRIGGER_BLOCK_TYPE = 'clock-trigger'
+export const BUNDLE_BLOCK_TYPE = 'bundle'
+export const UNBUNDLE_BLOCK_TYPE = 'unbundle'
+export const COPY_BLOCK_TYPE = 'copy'
 
-export type StockBlockPresetId = 'set-attributes' | 'select' | 'clock-trigger'
+export type StockBlockPresetId =
+	| 'set-attributes'
+	| 'select'
+	| 'clock-trigger'
+	| 'bundle'
+	| 'unbundle'
+	| 'copy'
 export type ClockTriggerSource = 'clock' | 'external' | 'manual'
 
 export const DEFAULT_CLOCK_RATE_HZ = 10
@@ -28,6 +37,16 @@ export function isSelectBlock(props: Pick<BlockShapeProps, 'blockType'>): boolea
 
 export function isClockTriggerBlock(props: Pick<BlockShapeProps, 'blockType'>): boolean {
 	return props.blockType.trim().toLowerCase() === CLOCK_TRIGGER_BLOCK_TYPE
+}
+
+/** Legacy `merge` records remain readable, but Set attributes stays its own partial-update concept. */
+export function isBundleBlock(props: Pick<BlockShapeProps, 'blockType'>): boolean {
+	return [BUNDLE_BLOCK_TYPE, 'merge'].includes(props.blockType.trim().toLowerCase())
+}
+
+/** Legacy projection/split records mean the same field-reading operation as Unbundle. */
+export function isUnbundleBlock(props: Pick<BlockShapeProps, 'blockType'>): boolean {
+	return [UNBUNDLE_BLOCK_TYPE, 'projection', 'split'].includes(props.blockType.trim().toLowerCase())
 }
 
 function withPortView(props: BlockShapeProps): BlockShapeProps {
@@ -102,6 +121,48 @@ export function createClockTriggerProps(base = getDefaultBlockProps()): BlockSha
 	})
 }
 
+/** Build one aggregate value from named member inputs without a hidden mutation effect. */
+export function createBundleProps(base = getDefaultBlockProps()): BlockShapeProps {
+	return withPortView(normalizeBlockPortRows({
+		...base,
+		title: 'Bundle',
+		description: 'Return a retained record with named member updates; does not mutate the input.',
+		blockType: BUNDLE_BLOCK_TYPE,
+		icon: 'PackagePlus',
+		inputs: [
+			{ id: 'record', name: 'record', type: 'Record', visible: true, row: HEADER_ROW },
+			{ id: 'member_1', name: '.field', type: '', visible: true, row: FIRST_BODY_ROW },
+		],
+		outputs: [{ id: 'record_out', name: 'record', type: 'Record', visible: true, row: HEADER_ROW }],
+	}))
+}
+
+/** Read named values from an aggregate; its intentionally blank title keeps the wire's type primary. */
+export function createUnbundleProps(base = getDefaultBlockProps()): BlockShapeProps {
+	return withPortView(normalizeBlockPortRows({
+		...base,
+		title: '',
+		description: 'Project named members from one aggregate; this does not execute the value.',
+		blockType: UNBUNDLE_BLOCK_TYPE,
+		icon: 'Shuffle',
+		inputs: [{ id: 'record', name: '', type: '', visible: true, row: HEADER_ROW }],
+		outputs: [{ id: 'out_1', name: '.', type: '', visible: true, row: FIRST_BODY_ROW }],
+	}))
+}
+
+/** Make non-mutating intent explicit while remaining honest about Python's shallow-copy boundary. */
+export function createCopyProps(base = getDefaultBlockProps()): BlockShapeProps {
+	return withPortView(normalizeBlockPortRows({
+		...base,
+		title: 'Copy',
+		description: 'Shallow copy — Python copy.copy(value); nested mutable members may remain shared.',
+		blockType: COPY_BLOCK_TYPE,
+		icon: 'Copy',
+		inputs: [{ id: 'value', name: 'value', type: '', visible: true, row: HEADER_ROW }],
+		outputs: [{ id: 'value_out', name: 'value', type: '', visible: true, row: HEADER_ROW }],
+	}))
+}
+
 /** The one normalization boundary for a persisted Clock/Trigger declaration. */
 export function normalizeClockTriggerConfig(config: BlockShapeProps['stockConfig']): NonNullable<BlockShapeProps['stockConfig']> {
 	const source: ClockTriggerSource = config?.triggerSource === 'external' || config?.triggerSource === 'manual'
@@ -172,6 +233,9 @@ export function stockBlockPresetProps(
 		case 'set-attributes': return createSetAttributesProps(base)
 		case 'select': return createSelectProps(base)
 		case 'clock-trigger': return createClockTriggerProps(base)
+		case 'bundle': return createBundleProps(base)
+		case 'unbundle': return createUnbundleProps(base)
+		case 'copy': return createCopyProps(base)
 	}
 }
 
@@ -205,6 +269,19 @@ export function appendSetAttributesMemberProps(props: BlockShapeProps): BlockSha
 			type: '',
 			visible: true,
 			row,
+		}],
+	})
+}
+
+/** Bundle rows share the stable `member_N` identity strategy, without making their editable spelling identity. */
+export function appendBundleMemberProps(props: BlockShapeProps): BlockShapeProps {
+	if (!isBundleBlock(props)) return props
+	const members = setAttributesMemberPorts(props)
+	const row = members.reduce((last, port) => Math.max(last, port.row ?? FIRST_BODY_ROW - 1), FIRST_BODY_ROW - 1) + 1
+	return normalizeBlockPortRows({
+		...props,
+		inputs: [...props.inputs, {
+			id: nextMemberId(props.inputs), name: '.field', type: '', visible: true, row,
 		}],
 	})
 }

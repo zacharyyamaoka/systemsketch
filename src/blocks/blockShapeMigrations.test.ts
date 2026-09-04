@@ -74,6 +74,11 @@ function markerBlock(): Omit<BlockShape, 'props'> & { props: Record<string, unkn
 }
 
 describe('Block shape migrations', () => {
+	it('canonicalizes legacy data-wire spellings without changing authored ports or prose', () => {
+		const legacy = { blockType: 'set-attributes', description: 'keep this', inputs: [{ id: 'member_4', name: '.limit' }], outputs: [{ id: 'record_out' }], w: 413 }
+		expect(upgradeBlockPropsV6ToV7(legacy)).toEqual({ ...legacy, blockType: 'bundle' })
+		expect(upgradeBlockPropsV6ToV7({ ...legacy, blockType: 'split' })).toEqual({ ...legacy, blockType: 'unbundle' })
+	})
 	it('threads one immutable props record through the named version steps', () => {
 		const v0: BlockMigrationProps = {
 			view: 'port',

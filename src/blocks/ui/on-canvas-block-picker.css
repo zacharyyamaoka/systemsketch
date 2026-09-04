@@ -56,6 +56,15 @@
   text-transform: uppercase;
 }
 
+.OnCanvasBlockPicker-group {
+  margin: 4px 9px 2px;
+  color: var(--ss-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
 .OnCanvasBlockPicker-item {
   display: flex;
   gap: 9px;
