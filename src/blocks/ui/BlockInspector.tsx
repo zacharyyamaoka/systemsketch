@@ -43,6 +43,7 @@ import {
   moveBlockPortToSectionProps,
   patchBlockDetailsProps,
   patchBlockPortProps,
+  adoptConnectedPillType,
   removeBlockPort,
   removeBlockPortProps,
   setBlockView,
@@ -88,6 +89,8 @@ export interface BlockInspectorActions {
   movePort(side: BlockPortSide, portId: string, delta: -1 | 1): void
   /** Put the port in a row (and arm), before a neighbour or at the end. */
   movePortToSection(side: BlockPortSide, portId: string, target: BlockPortSectionTarget): void
+  /** Explicitly copy a selected pill's inlet type; wiring never does this itself. */
+  adoptConnectedType?(): void
   /** Open one undo step for a typing gesture. Absent for an unplaced draft. */
   beginEdit?(label: string): void
   /** Resolve a same-name collision only when the title gesture is complete. */
@@ -339,8 +342,8 @@ function DescriptionEditor({
 /**
  * A pill is a variable, so its inspector speaks that language: a name, a
  * value, a type, and what it is wired to. Name and type are the ports' (one
- * name mirrored on both rims), the value is the Block's title, and the value
- * is read-only while a cable on the inlet supplies it.
+ * name mirrored on both rims), the value is the Block's title, and every
+ * field stays editable even when a cable reaches the inlet.
  */
 function PillSection({
   props,
@@ -357,8 +360,7 @@ function PillSection({
   const ownType = outlet?.type ?? valueBlockInlet(props)?.type ?? ''
   const fedBy = pill?.fedBy ?? null
   const feeds = pill?.feeds ?? []
-  // A fed pill with no type of its own is whatever feeds it; typing here overrides.
-  const type = ownType !== '' ? ownType : (pill?.fedType ?? '')
+  const type = ownType
   const patchOutlet = (patch: Partial<Omit<BlockPort, 'id'>>) => {
     if (outlet) actions?.updatePort('outputs', outlet.id, patch, { continuous: true })
   }
@@ -383,8 +385,8 @@ function PillSection({
         <span>Value</span>
         <LiveTextInput
           value={props.title}
-          disabled={readOnly || fedBy !== null}
-          placeholder={fedBy ? '' : EMPTY_FIELD_GUIDANCE.pill.value}
+          disabled={readOnly}
+          placeholder={EMPTY_FIELD_GUIDANCE.pill.value}
           ariaLabel="Literal value"
           beginEdit={() => actions?.beginEdit?.('edit pill value')}
           onWrite={(title) => actions?.updateDetails({ title }, { continuous: true })}
@@ -396,7 +398,7 @@ function PillSection({
         <LiveTextInput
           value={type}
           disabled={readOnly || !outlet}
-          placeholder={fedBy ? '' : EMPTY_FIELD_GUIDANCE.pill.type}
+          placeholder={EMPTY_FIELD_GUIDANCE.pill.type}
           ariaLabel="Variable type"
           beginEdit={() => actions?.beginEdit?.('retype pill')}
           onWrite={(next) => patchOutlet({ type: next })}
@@ -405,17 +407,29 @@ function PillSection({
 
       <p className="block-inspector__hint" data-testid="pill-wiring">
         {fedBy
-          ? `Fed by ${fedBy}${ownType === '' && pill?.fedType ? ` (${pill.fedType})` : ''} — the value comes down the cable; the literal is kept for when it is unwired.`
+          ? `Connected from ${fedBy}${pill?.fedType ? ` (${pill.fedType})` : ''} — the cable does not replace this pill's literal or type.`
           : 'Inlet unwired — the literal is the value.'}
         {' '}
         {feeds.length > 0 ? `Feeds ${feeds.join(', ')}.` : 'Outlet unwired.'}
       </p>
+      <button
+        type="button"
+        className="block-inspector__tag-ghost"
+        data-testid="pill-adopt-cable-type"
+        disabled={readOnly || fedBy === null}
+        title="Explicitly copy the inlet cable's type"
+        onClick={() => actions?.adoptConnectedType?.()}
+      >
+        Adopt cable type
+      </button>
       <p className="block-inspector__hint">
         {name === ''
           ? 'Unnamed: passed inline where it is used.'
           : `Named: ${name} = … is hoisted before its first use.`}
         {' '}
-        The type follows the literal; edit it to override.
+        Canvas entry understands <code>name: Type = value</code>; these inspector
+        fields stay literal for direct control. Wiring never derives them automatically;
+        use “Adopt cable type” only when that calculation is wanted.
       </p>
     </section>
   )
@@ -1200,6 +1214,7 @@ export function EditorBlockInspector({
         movePort: (side, portId, delta) => void moveBlockPort(editor, id, side, portId, delta),
         movePortToSection: (side, portId, target) =>
           void moveBlockPortToSection(editor, id, side, portId, target),
+        adoptConnectedType: () => void adoptConnectedPillType(editor, id),
         beginEdit: (label) => void editor.markHistoryStoppingPoint(label),
         commitTitle: () => commitBlockDefinitionName(editor, id),
       }

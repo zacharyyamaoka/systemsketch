@@ -203,14 +203,14 @@ describe('the Pill section', () => {
     expect(html).toContain('aria-label="Variable name"')
     expect(html).toContain('aria-label="Literal value"')
     expect(html).toContain('aria-label="Variable type"')
-    expect(html).toContain('Fed by estimate() · pose')
+    expect(html).toContain('Connected from estimate() · pose')
     expect(html).toContain('Feeds encode() · pose')
     for (const section of ['Block', 'Tags', 'View', 'Inputs', 'Outputs', 'Ports']) {
       expect(html).not.toContain(`data-inspector-section="${section}"`)
     }
   })
 
-  it('reads the literal as the value and disables it only while a cable feeds the inlet', () => {
+  it('keeps the literal editable when a cable feeds the inlet and exposes explicit adoption', () => {
     const pill = createValueBlockProps(getDefaultBlockProps(), '2.0', 'gain')
     const unfed = renderToStaticMarkup(
       <BlockInspectorContent props={pill} status="selected" actions={noopActions} pill={{ fedBy: null, fedType: null, feeds: [] }} />,
@@ -221,7 +221,8 @@ describe('the Pill section', () => {
     const fed = renderToStaticMarkup(
       <BlockInspectorContent props={pill} status="selected" actions={noopActions} pill={{ fedBy: 'decode() · frame', fedType: 'Frame', feeds: [] }} />,
     )
-    expect(fed).toContain('disabled="" aria-label="Literal value"')
-    expect(fed).toContain('Fed by decode() · frame')
+    expect(fed).not.toContain('disabled="" aria-label="Literal value"')
+    expect(fed).toContain('Connected from decode() · frame')
+    expect(fed).toContain('Adopt cable type')
   })
 })

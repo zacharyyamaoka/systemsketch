@@ -248,9 +248,9 @@ export async function exportPortableTldraw(editor: Editor): Promise<string> {
 			const blocks = exportEditor.getCurrentPageShapes()
 				.filter(isBlockShape)
 				.sort((left, right) => blockDepth(exportEditor, left) - blockDepth(exportEditor, right))
-			// Capture pill text before the first detach mutates shapes. A fed inlet
-			// affects the live value, not the truth of the stored literal, so the
-			// portable pill freezes the same authored text as the source board.
+			// WHY: a portable board must preserve the same authored literal as its
+			// source. A cable is a relationship, not permission to derive a second
+			// pill label while detaching semantic edges to stock arrows.
 			const valuePillLabels = new Map(blocks.map((block) => [
 				block.id,
 				portableValuePillText(block),

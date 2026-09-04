@@ -1,0 +1,118 @@
+{
+  "feature": "Manual pill derivation",
+  "viewport": { "width": 1280, "height": 760 },
+  "shapes": [
+    {
+      "id": "decode",
+      "type": "block",
+      "x": 390,
+      "y": 300,
+      "props": {
+        "title": "decode()",
+        "description": "A typed source; its connection must not rewrite the pill by itself.",
+        "blockType": "call",
+        "view": "port",
+        "w": 330,
+        "h": 190,
+        "showDescription": false,
+        "inputs": [{ "id": "in_1", "name": "frame", "type": "Frame", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "pose", "type": "Pose", "visible": true }]
+      }
+    },
+    {
+      "id": "pill",
+      "type": "block",
+      "x": 800,
+      "y": 360,
+      "props": {
+        "title": "0.8",
+        "description": "",
+        "blockType": "literal",
+        "view": "value",
+        "w": 250,
+        "h": 56,
+        "showDescription": false,
+        "inputs": [{ "id": "in_1", "name": "quality", "type": "float", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "quality", "type": "float", "visible": true }]
+      }
+    },
+    {
+      "id": "source-to-pill",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 100, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "source-to-pill-start",
+      "type": "connection",
+      "fromId": "source-to-pill",
+      "toId": "decode",
+      "props": { "portId": "out_1", "terminal": "start", "face": "outer" }
+    },
+    {
+      "id": "source-to-pill-end",
+      "type": "connection",
+      "fromId": "source-to-pill",
+      "toId": "pill",
+      "props": { "portId": "in_1", "terminal": "end", "face": "outer" }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Click the connected pill. It must still read quality = 0.8.",
+      "x": 700,
+      "y": 145,
+      "w": 440,
+      "h": 110,
+      "target": { "shapeId": "pill", "anchor": "top", "dx": 0 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · In the Pill inspector, edit Value or Type. The cable remains attached and neither field is locked.",
+      "x": 680,
+      "y": 570,
+      "w": 480,
+      "h": 110,
+      "target": { "shapeId": "pill", "anchor": "bottom", "dx": 0 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Select the pill, press Ctrl+P, search Adopt connected pill type, and run it when you want that calculation.",
+      "x": 30,
+      "y": 145,
+      "w": 470,
+      "h": 120,
+      "target": { "shapeId": "decode", "anchor": "top", "dx": 0 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The Pose wire leaves quality = 0.8 visible and editable. Only the explicit command changes Type to Pose in the inspector.",
+      "x": 30,
+      "y": 590,
+      "w": 520,
+      "h": 110
+    }
+  ]
+}

@@ -335,8 +335,8 @@ function BlockFooterMenu({ shape }: { shape: BlockShape }) {
  * title and the name is its ports' name, so both are ordinary inline fields.
  * While unnamed, the `=` itself carries the name field — that is the click
  * that names a literal — and a folded literal keeps its full text in the
- * capsule's tooltip. A cable on the inlet changes the literal's ink to say it
- * is overridden, but the stored characters remain painted in place.
+ * capsule's tooltip. A cable on the inlet is deliberately only a relationship:
+ * the face remains editable and keeps showing what its author wrote.
  */
 function ValueFace({
   shape,
@@ -349,20 +349,19 @@ function ValueFace({
   const label = valueBlockLabel(shape.props)
   const outlet = valueBlockOutlet(shape.props)
   const inlet = valueBlockInlet(shape.props)
-  const fed = inlet !== null && connectedIds.has(inlet.id)
+  const inletConnected = inlet !== null && connectedIds.has(inlet.id)
   const nameField = outlet
     ? blockInlineFieldAttribute({ kind: 'portName', side: 'outputs', portId: outlet.id })
     : undefined
   const tooltip = [valueBlockExactText(label)]
   if (label.folded) tooltip.push('The capsule abbreviates this literal as …')
-  if (fed) tooltip.push('The inlet cable supplies the live value; this stored literal is retained.')
+  if (inletConnected) tooltip.push('Connected on the inlet — this pill remains manual.')
   return layout.title ? (
     <div
       className="BlockNode-value"
       style={boxStyle(layout.title)}
       title={tooltip.join('\n')}
       data-testid="block-value"
-      data-fed={fed ? 'true' : undefined}
     >
       {label.name !== '' ? (
         <span
@@ -381,7 +380,7 @@ function ValueFace({
         =
       </span>
       <span
-        className={fed ? 'BlockNode-valueText BlockNode-valueText--fed' : 'BlockNode-valueText'}
+        className="BlockNode-valueText"
         data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
         data-testid="block-value-text"
       >

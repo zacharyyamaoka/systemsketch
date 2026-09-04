@@ -43,3 +43,13 @@ one to a semantic role.
 
 **Why:** people should be free to arrange a board for understanding without accidentally changing
 what the represented program means.
+
+## Whiteboard hackability
+
+Prefer editable, literal board records over automatic derivation. Helpful calculations should be
+explicit commands, never a silent side effect of drawing a cable; a board may intentionally be
+incomplete, inconsistent, or ahead of the rules.
+
+**Why:** a whiteboard is useful before it is a correct program. A cable can state a relationship
+without authorizing the editor to replace adjacent words; an explicit command makes any requested
+derivation visible, reversible, and safe to decline.
