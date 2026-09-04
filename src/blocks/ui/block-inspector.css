@@ -81,12 +81,28 @@
   cursor: default;
 }
 
+/*
+ * The strip is a full-width BAR that contains a content-width PILL GROUP.
+ *
+ * Those are two different jobs and it matters which element does which. The bar
+ * has to stay full width: it carries the bottom border, the sticky background,
+ * and `.block-inspector__dock-close`, which is a child positioned against this
+ * element's right edge — shrink the bar and the close button walks inward with
+ * it. The TABS are what hug their content.
+ *
+ * It used to be `grid-template-columns: 1fr 1fr`, which stretched two tabs
+ * across the whole panel however short their labels were. A tab strip that
+ * grows with the panel instead of with its labels reads as a segmented control
+ * for the entire panel rather than a small switch between two views. Fixed here
+ * rather than in any one caller, so the Block, Branch, Loop and Compare strips
+ * all get it — one tab component was the point.
+ */
 .block-inspector__tabs {
   position: sticky;
   z-index: 8;
   top: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  align-items: center;
   flex: 0 0 auto;
   gap: 3px;
   padding: 8px 10px;
@@ -97,6 +113,7 @@
 .block-inspector__tabs > [role='tab'] {
   position: relative;
   display: inline-flex;
+  flex: 0 0 auto;
   min-height: 30px;
   align-items: center;
   justify-content: center;

@@ -90,9 +90,18 @@
 
 /* ---- three columns ----------------------------------------------------- */
 
+/*
+ * The detail column's floor went up when the by-element layout landed.
+ *
+ * That layout spends its first ~140px on the element list, and whatever is left
+ * is split three ways between Property, Previous and Current. At the old 392px
+ * floor the value columns fell under ~85px, which is narrower than
+ * `run_inference` at 11px monospace — so identifiers broke mid-word into
+ * `run_infere / nce`. Measured on the review fixture, not guessed.
+ */
 .systemsketch-compare__body {
   display: grid;
-  grid-template-columns: 228px minmax(0, 1fr) minmax(392px, 31%);
+  grid-template-columns: 228px minmax(0, 1fr) minmax(470px, 34%);
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -294,6 +303,12 @@
  * surface that paints one. Not amber: red, green and blue are the orthogonal
  * axes, and amber sat close enough to red to read as a weak deletion at the
  * distance a reviewer actually looks at a board.
+ *
+ * A cable does NOT use these rules. It routes as an elbow, so a box around
+ * its bounds is a big rectangle that says nothing about which line is meant,
+ * and several cables routed close together make that ambiguous. Cables get a
+ * `filter: drop-shadow(...)` under their own stroke instead, built inline in
+ * `BoardRender.tsx`'s `HighlightMark`, not a class here.
  */
 .systemsketch-compare__mark {
   border: 2px solid var(--ss-accent);
@@ -313,15 +328,35 @@
 
 /* ---- the bar under the renders ----------------------------------------- */
 
+/*
+ * The one bottom row, in both modes.
+ *
+ * A three-column grid rather than flex with `margin-left: auto`, because the
+ * centre slot has to be centred on the ROW and not on whatever space the outer
+ * two happen to leave. In fullscreen the centre slot holds the change stepper,
+ * which is the thing a reviewer's eye returns to between jumps; letting it
+ * drift as the version name gets longer would make it feel unanchored.
+ */
 .systemsketch-compare__stagebar {
-  display: flex;
+  display: grid;
   gap: 16px;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   flex: 0 0 auto;
   padding: 10px 14px;
   border-top: 1px solid var(--ss-border);
   background: var(--ss-surface-raised);
 }
+
+.systemsketch-compare__bar-slot {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.systemsketch-compare__bar-slot[data-slot='center'] { justify-content: center; }
+.systemsketch-compare__bar-slot[data-slot='right'] { justify-content: flex-end; }
 
 .systemsketch-compare__segmented {
   display: inline-flex;
@@ -554,37 +589,12 @@
   pointer-events: none;
 }
 
-/* ---- the persistent bar, and fullscreen -------------------------------- */
-
-/*
- * The bar is one element that appears in both modes, and that is the whole
- * design of this variant.
- *
- * The tempting alternative — and the one three of the five earlier variants
- * effectively took — is to treat the modal and the immersive canvas as two
- * screens with a transition between them. That is what makes going fullscreen
- * feel like losing your place: the controls that told you *which* change you
- * were on lived in the chrome that just went away, so the only way back to your
- * bearings is out. Here the chrome recedes and the bar does not move.
- *
- * It is also why nothing below saves or restores anything. Fullscreen is a
- * `data-fullscreen` stamp on the same mounted tree; React state and both tldraw
- * cameras are simply never torn down, so "returns exactly where you left off"
- * is a property of the structure rather than a feature someone has to maintain.
- */
-.systemsketch-compare__bar {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 14px;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--ss-border);
-  background: var(--ss-surface-raised);
-}
+/* ---- the bar's own controls -------------------------------------------- */
 
 .systemsketch-compare__bar-mode {
   display: inline-flex;
   min-height: 28px;
+  flex: 0 0 auto;
   align-items: center;
   padding: 0 11px;
   border: 1px solid var(--ss-border-strong);
@@ -648,7 +658,7 @@
 .systemsketch-compare__stepper button:disabled { cursor: default; opacity: .4; }
 
 .systemsketch-compare__stepper-count {
-  min-width: 96px;
+  min-width: 104px;
   color: var(--ss-text);
   font-size: 11px;
   font-weight: 650;
@@ -656,16 +666,16 @@
   text-align: center;
 }
 
-/* The crossfade sits at the far end so the bar reads left-to-right as
- * "where am I going · against what · which change · how much of each". */
-.systemsketch-compare__bar .systemsketch-compare__blend { margin-left: auto; }
-
 /* ---- fullscreen --------------------------------------------------------- */
 
 /*
  * Fullscreen subtracts; it never rebuilds. Every rule here either removes a
  * piece of chrome or gives the stage the space that chrome was using — there is
  * no second layout, which is what keeps the two modes from drifting apart.
+ *
+ * The bottom row is deliberately NOT among the things it removes. That row is
+ * the one place a reviewer's hand already goes, so it stays exactly where it
+ * was and changes what it carries.
  */
 .systemsketch-compare[data-fullscreen] {
   inset: 0;
@@ -674,32 +684,12 @@
 
 .systemsketch-compare[data-fullscreen] .systemsketch-compare__titlebar,
 .systemsketch-compare[data-fullscreen] .systemsketch-compare__history,
-.systemsketch-compare[data-fullscreen] .systemsketch-compare__detail,
-.systemsketch-compare[data-fullscreen] .systemsketch-compare__stagebar {
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__detail {
   display: none;
 }
 
 .systemsketch-compare[data-fullscreen] .systemsketch-compare__body {
   grid-template-columns: 1fr;
-}
-
-/* Floating over the boards rather than sitting above them: fullscreen is meant
- * to give the whiteboard the whole screen, and a bar that reserved a strip
- * would be taking back the thing the reviewer went fullscreen to get. */
-.systemsketch-compare[data-fullscreen] .systemsketch-compare__bar {
-  position: absolute;
-  z-index: 3;
-  top: 10px;
-  right: 10px;
-  left: 10px;
-  border: 1px solid var(--ss-border-strong);
-  border-radius: 10px;
-  background: var(--ss-surface-raised);
-  box-shadow: var(--ss-shadow-2);
-}
-
-.systemsketch-compare[data-fullscreen] .systemsketch-compare__stage {
-  position: relative;
 }
 
 .systemsketch-compare[data-fullscreen] .systemsketch-compare__panes {
@@ -713,8 +703,27 @@
 }
 
 /* Both panes are stacked in one cell in overlay, so their captions would
- * overprint into soup — and the crossfade in the bar is already labelled with
- * both endpoint names, which makes it the caption. */
+ * overprint into soup — and the crossfade is labelled with both endpoint
+ * names, which makes it the caption. */
 .systemsketch-compare[data-fullscreen] .systemsketch-compare__pane figcaption {
   display: none;
 }
+
+/* ---- the Properties options row ---------------------------------------- */
+
+.systemsketch-review__options {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.systemsketch-review__options .systemsketch-review__highlight-toggle {
+  padding: 0;
+  border-bottom: 0;
+}
+
+.systemsketch-review__options .systemsketch-compare__segmented { margin-left: auto; }

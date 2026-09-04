@@ -244,3 +244,142 @@
   font-size: 10px;
   font-weight: 500;
 }
+
+/* ---- Element · Property columns ---------------------------------------- */
+
+/*
+ * The Property cell stays a REAL table cell — no `display: flex` on a `<td>`.
+ *
+ * Flex was the obvious way to stack the badge over the name, and it silently
+ * took the cell out of the table's column layout: the browser wraps a
+ * non-table-cell child in an anonymous cell, and the property text dropped onto
+ * its own line underneath the Element column instead of sitting under its own
+ * header. Every assertion still passed, because the text was present and
+ * correct — it was simply in the wrong column. Stacking is done with
+ * block-level children instead, which the table layout understands.
+ */
+.systemsketch-review__property-name {
+  display: block;
+  color: var(--ss-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.systemsketch-review__property .systemsketch-review__state {
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+/* ---- Figma's layout ----------------------------------------------------- */
+
+/*
+ * A list of elements, and the properties of exactly one of them. The split is
+ * fixed rather than proportional: the element list is an index and stops being
+ * readable when it is wider than its longest name, while the value columns are
+ * the thing a reviewer actually reads and should take every pixel that is left.
+ */
+.systemsketch-review__figma {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: minmax(112px, 148px) minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.systemsketch-review__elements {
+  margin: 0;
+  padding: 6px;
+  border-right: 1px solid var(--ss-border);
+  overflow-y: auto;
+  background: var(--ss-surface-sunken);
+  list-style: none;
+}
+
+.systemsketch-review__elements > li { margin-bottom: 3px; }
+
+.systemsketch-review__elements button {
+  display: grid;
+  width: 100%;
+  gap: 4px;
+  grid-template-areas: 'status count' 'name name';
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 6px 7px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--ss-text);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  text-align: left;
+}
+
+.systemsketch-review__elements button:hover { background: var(--ss-surface-hover); }
+
+.systemsketch-review__elements button[data-selected] {
+  border-color: var(--ss-accent);
+  background: var(--ss-accent-soft);
+}
+
+.systemsketch-review__element-name {
+  overflow: hidden;
+  grid-area: name;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-review__element-count {
+  grid-area: count;
+  color: var(--ss-text-faint);
+  font-variant-numeric: tabular-nums;
+  font-size: 10px;
+}
+
+/*
+ * Added · Edited · Removed — Figma's vocabulary, in the same chip the property
+ * rows use for their own three states, so one visual language covers both
+ * altitudes. Stacked above the name rather than inline: the column is an index
+ * about 180px wide, and a chip beside a name squeezes the name to nothing.
+ */
+.systemsketch-review__element-status {
+  grid-area: status;
+  justify-self: start;
+  padding: 2px 6px;
+  border: 1px solid var(--ss-border);
+  border-radius: 5px;
+  color: var(--ss-text);
+  font: 700 9px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.systemsketch-review__element-status[data-status='added'] {
+  border-color: var(--review-added);
+  background: var(--review-added-soft);
+}
+
+.systemsketch-review__element-status[data-status='removed'] {
+  border-color: var(--review-removed);
+  background: var(--review-removed-soft);
+}
+
+.systemsketch-review__element-status[data-status='edited'] {
+  border-color: var(--review-modified);
+  background: var(--review-modified-soft);
+}
+
+/* Figma's own sentence, not a paraphrase — this view exists to be judged
+ * against the tool it came from. */
+.systemsketch-review__figma-empty {
+  display: grid;
+  margin: 0;
+  padding: 24px;
+  align-content: center;
+  justify-items: center;
+  color: var(--ss-text-muted);
+  font-size: 12px;
+  text-align: center;
+}

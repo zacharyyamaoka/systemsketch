@@ -60,6 +60,13 @@ const COMPARE_BINDING_UTILS = [...blockConnectionBindingUtils]
 export interface HighlightTarget {
 	readonly shapeId: string | null
 	readonly kind: ChangeKind | null
+	/**
+	 * The change's subject ('block' | 'port' | 'cable' | 'shape'), optional so
+	 * the existing `CompareDialog` call sites that build a `HighlightTarget`
+	 * without it keep compiling untouched. Only `HighlightMark` reads it, to
+	 * pick the cable-only shadow treatment below instead of the box.
+	 */
+	readonly subject?: string | null
 }
 
 /**
@@ -74,8 +81,13 @@ export interface HighlightTarget {
  * Rendered through the `OnTheCanvas` seam so it lives in page space and the
  * camera transform carries it for free — no camera subscription, no
  * re-projection on every pan.
+ *
+ * The one exception is a cable: it routes as an elbow, so a bounding box
+ * would be a big rectangle that says nothing about which line is meant. That
+ * subject gets a drop-shadow under its own stroke instead — see the branch
+ * inside `HighlightMark`.
  */
-const NO_HIGHLIGHT: HighlightTarget = { shapeId: null, kind: null }
+const NO_HIGHLIGHT: HighlightTarget = { shapeId: null, kind: null, subject: null }
 
 /**
  * The highlight reaches the mark through context, not through `components`.
@@ -90,6 +102,8 @@ const HighlightContext = createContext<HighlightTarget>(NO_HIGHLIGHT)
 function HighlightMark() {
 	const target = useContext(HighlightContext)
 	const editor = useEditor()
+	// Unconditional and at the top regardless of which branch below fires —
+	// the cable branch doesn't need the box, but a hook can't be skipped.
 	const box = useValue(
 		'compare-highlight',
 		() => {
@@ -100,6 +114,24 @@ function HighlightMark() {
 		},
 		[editor, target.shapeId],
 	)
+	if (!target.shapeId) return null
+
+	if (target.subject === 'cable') {
+		// A cable routes as an elbow, so its bounding box is a big rectangle
+		// that says nothing about which line is meant — with several cables
+		// routed close together it's ambiguous which one changed. tldraw
+		// already renders the connection as a real SVG <path>, so a CSS
+		// drop-shadow on its `.tl-shape` wrapper follows the routed stroke
+		// exactly, dash pattern included, with no geometry re-derived here.
+		// The ids are internal, never user text, but the rule is still
+		// string-built — refuse rather than risk breaking out of the selector.
+		const shapeId = target.shapeId
+		if (shapeId.includes('"') || shapeId.includes('\\')) return null
+		return (
+			<style>{`.systemsketch-compare__canvas .tl-shape[data-shape-id="${shapeId}"] { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--ss-accent) 75%, transparent)) drop-shadow(0 0 7px color-mix(in srgb, var(--ss-accent) 45%, transparent)); }`}</style>
+		)
+	}
+
 	if (!box) return null
 	const pad = 8
 	return (

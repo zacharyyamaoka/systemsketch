@@ -29,20 +29,27 @@ export type PropertyRow =
 	| {
 		readonly key: string
 		readonly state: 'added'
-		/** The `Layer` column — the noun, qualified enough to be found. */
-		readonly layer: string
+		/** The element this row belongs to — a Block or a cable, never a port. */
+		readonly element: string
+		readonly elementId: string
+		/** What changed inside that element: a port, a field, or `port · field`. */
+		readonly property: string
 		readonly current: string
 	}
 	| {
 		readonly key: string
 		readonly state: 'removed'
-		readonly layer: string
+		readonly element: string
+		readonly elementId: string
+		readonly property: string
 		readonly previous: string
 	}
 	| {
 		readonly key: string
 		readonly state: 'modified'
-		readonly layer: string
+		readonly element: string
+		readonly elementId: string
+		readonly property: string
 		readonly previous: string
 		readonly current: string
 	}
@@ -102,22 +109,43 @@ function describeWhole(change: CompareChange, side: 'before' | 'after'): string 
 }
 
 /**
- * A change's `Layer` label — the noun, qualified enough to be found on a board.
+ * What a port change is called INSIDE its element.
  *
- * `run() · window` rather than bare `window`, which is omnibox's own idiom: a
- * port name alone is ambiguous across a board with forty Blocks on it.
+ * Sliced by the element's own length rather than split on the first `.`, so a
+ * Block legitimately named `run.predict` still yields its port name and not the
+ * tail of its own title.
  */
-function layerOf(change: CompareChange, path: string | null): string {
-	return path ? `${change.name} · ${path}` : change.name
+function withinElement(change: CompareChange): string | null {
+	if (change.subject !== 'port') return null
+	const prefix = `${change.element}.`
+	return change.name.startsWith(prefix) ? change.name.slice(prefix.length) : change.name
+}
+
+/**
+ * The `Property` column — what changed inside the element.
+ *
+ * A port and a field are different depths of the same address, so they compose:
+ * a retitled Block is `title`, a renamed port is `image`, and a port whose type
+ * changed is `image · type`. A whole-object insertion has no property under it
+ * at all, and says so with the noun rather than inventing a field name.
+ */
+function propertyOf(change: CompareChange, path: string | null): string {
+	const within = withinElement(change)
+	if (path && within) return `${within} · ${path}`
+	if (path) return path
+	if (within) return within
+	return change.subject
 }
 
 /** Every row one change contributes, in the omnibox row shape. */
 export function propertyRowsOf(change: CompareChange): PropertyRow[] {
+	const at = { element: change.element, elementId: change.elementId }
 	if (change.kind === 'added') {
 		return [{
 			key: change.id,
 			state: 'added',
-			layer: layerOf(change, null),
+			...at,
+			property: propertyOf(change, null),
 			current: describeWhole(change, 'after'),
 		}]
 	}
@@ -125,7 +153,8 @@ export function propertyRowsOf(change: CompareChange): PropertyRow[] {
 		return [{
 			key: change.id,
 			state: 'removed',
-			layer: layerOf(change, null),
+			...at,
+			property: propertyOf(change, null),
 			previous: describeWhole(change, 'before'),
 		}]
 	}
@@ -136,7 +165,8 @@ export function propertyRowsOf(change: CompareChange): PropertyRow[] {
 		return [{
 			key: change.id,
 			state: 'modified',
-			layer: layerOf(change, null),
+			...at,
+			property: propertyOf(change, null),
 			previous: describeWhole(change, 'before'),
 			current: describeWhole(change, 'after'),
 		}]
@@ -144,10 +174,69 @@ export function propertyRowsOf(change: CompareChange): PropertyRow[] {
 	return change.fields.map((field) => ({
 		key: `${change.id}:${field.path}`,
 		state: 'modified' as const,
-		layer: layerOf(change, field.path),
+		...at,
+		property: propertyOf(change, field.path),
 		previous: field.before,
 		current: field.after,
 	}))
+}
+
+/**
+ * One entry in the Figma-style element list.
+ *
+ * `status` is deliberately Figma's vocabulary — Added · Edited · Removed — and
+ * NOT the table's Added/Removed/Modified. They are different claims at
+ * different altitudes: a Block that only gained a port was not itself modified,
+ * but it WAS edited, and "Edited" is the word that covers "something under this
+ * changed" without asserting the element's own fields moved. The property rows
+ * underneath keep the precise three-state vocabulary.
+ */
+export interface ElementSummary {
+	readonly id: string
+	readonly name: string
+	readonly subject: CompareChange['subject']
+	readonly status: 'added' | 'edited' | 'removed'
+	readonly changes: readonly CompareChange[]
+	readonly rowCount: number
+}
+
+export const ELEMENT_STATUS_LABEL: Readonly<Record<ElementSummary['status'], string>> = {
+	added: 'Added',
+	edited: 'Edited',
+	removed: 'Removed',
+}
+
+/**
+ * Aggregate the flat change list into the elements a person actually points at.
+ *
+ * Insertion order follows `orderChanges`, so the list reads added → removed →
+ * edited the same way the flat table does; an element is placed by the first
+ * change that mentions it.
+ */
+export function elementSummaries(changes: readonly CompareChange[]): ElementSummary[] {
+	const byElement = new Map<string, CompareChange[]>()
+	for (const change of orderChanges(changes)) {
+		const list = byElement.get(change.elementId) ?? []
+		list.push(change)
+		byElement.set(change.elementId, list)
+	}
+	const summaries: ElementSummary[] = []
+	for (const [id, group] of byElement) {
+		// The element's OWN change, if it has one. A Block that only gained a
+		// port contributes no such change, and is `edited` by its children.
+		const own = group.find((change) => change.id === id)
+		const status: ElementSummary['status'] =
+			own?.kind === 'added' ? 'added' : own?.kind === 'removed' ? 'removed' : 'edited'
+		summaries.push({
+			id,
+			name: group[0].element,
+			subject: own?.subject ?? group[0].subject,
+			status,
+			changes: group,
+			rowCount: group.reduce((total, change) => total + propertyRowsOf(change).length, 0),
+		})
+	}
+	return summaries
 }
 
 /** The changes, ordered the way the ported table lists them. */

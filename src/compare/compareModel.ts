@@ -65,6 +65,14 @@ export interface CompareChange {
 	readonly kind: ChangeKind
 	/** What a person calls this thing. */
 	readonly name: string
+	/**
+	 * The element this change belongs to — a Block or a cable, NEVER a port.
+	 * A port's element is its host Block, so `run_predict.threshold` has
+	 * `element: 'run_predict'`. This is what the table groups by.
+	 */
+	readonly element: string
+	/** Stable id of that element, for grouping. */
+	readonly elementId: string
 	/** The change id of the Block this hangs under, for a nested table. */
 	readonly parentId: string | null
 	/** Where to draw on the before board. Null when the thing is not there. */
@@ -257,9 +265,31 @@ export function compareBoards(before: RecordMap, after: RecordMap): BoardCompare
 	const changes: CompareChange[] = []
 	const tally = emptyTally()
 
-	const push = (change: CompareChange) => {
-		changes.push(change)
-		tally[change.subject][change.kind] += 1
+	/**
+	 * Every change names the ELEMENT it belongs to — a Block or a cable, never
+	 * a port.
+	 *
+	 * This is the grouping altitude Figma's Layers list and Simulink's
+	 * comparison tree both use, and it is derived here rather than recovered
+	 * downstream by splitting a dotted name: a Block called `run.predict` would
+	 * make that split ambiguous, and the display would silently group under the
+	 * wrong element. `parentId` is set on a port change and on nothing else, so
+	 * it already IS the rule — a port's element is its host Block.
+	 *
+	 * `element` defaults to the change's own name, which is right for a Block, a
+	 * cable and a shape and WRONG for a port — so every port push must pass it.
+	 * One of the three once did not, and grouped a modified port under its own
+	 * dotted path; `compareModel.test.ts` now covers all three operations at
+	 * once so a single forgetful site cannot pass again.
+	 */
+	const push = (change: Omit<CompareChange, 'element' | 'elementId'> & { element?: string }) => {
+		const full: CompareChange = {
+			...change,
+			elementId: change.parentId ?? change.id,
+			element: change.element ?? change.name,
+		}
+		changes.push(full)
+		tally[full.subject][full.kind] += 1
 	}
 
 	// ---- Blocks, and the ports that hang off them -------------------------
@@ -321,7 +351,7 @@ export function compareBoards(before: RecordMap, after: RecordMap): BoardCompare
 			if (!portBefore && portAfter) {
 				push({
 					id: portChangeId, subject: 'port', kind: 'added',
-					name: `${name}.${portName}`, parentId,
+					name: `${name}.${portName}`, parentId, element: name,
 					anchorBefore: null, anchorAfter: blockId, portId, fields: [],
 					recordBefore: null, recordAfter: portAfter,
 				})
@@ -330,7 +360,7 @@ export function compareBoards(before: RecordMap, after: RecordMap): BoardCompare
 			if (portBefore && !portAfter) {
 				push({
 					id: portChangeId, subject: 'port', kind: 'removed',
-					name: `${name}.${portBefore.name || portId}`, parentId,
+					name: `${name}.${portBefore.name || portId}`, parentId, element: name,
 					// A removed port has no row on the after board to point at,
 					// so it anchors on the before board only. The display must
 					// not invent a position for it.
@@ -351,7 +381,7 @@ export function compareBoards(before: RecordMap, after: RecordMap): BoardCompare
 			if (portFields.length === 0) continue
 			push({
 				id: portChangeId, subject: 'port', kind: 'modified',
-				name: `${name}.${portName}`, parentId,
+				name: `${name}.${portName}`, parentId, element: name,
 				anchorBefore: blockId, anchorAfter: blockId, portId, fields: portFields,
 				recordBefore: portBefore, recordAfter: portAfter,
 			})

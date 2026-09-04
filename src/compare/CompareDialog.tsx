@@ -27,7 +27,7 @@ import { Box, type Editor, type TLShapeId, type TLStoreSnapshot } from 'tldraw'
 
 import { BoardRender, useLinkedCameras, type HighlightTarget } from './BoardRender'
 import { CodeView } from './CodeView'
-import { PropertyTable } from './PropertyTable'
+import { PropertyTable, type TableLayout } from './PropertyTable'
 import { compareBoards, recordsOfSnapshot, type CompareChange } from './compareModel'
 import { orderChanges } from './propertyRows'
 import { discoverHistory, loadEntrySnapshot, type HistoryEntry } from './compareSource'
@@ -87,6 +87,14 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 	 * identifier with one segment changed — which is the minority case.
 	 */
 	const [gitHighlight, setGitHighlight] = useState(false)
+	/**
+	 * Which grouping to show. Both are real views over the same rows, so this is
+	 * a genuine A/B a reviewer can flip in the running app rather than two
+	 * builds to compare from memory. `figma` is the default because it is the
+	 * layout Zach said he prefers; `columns` is one click away.
+	 */
+	const [layout, setLayout] = useState<TableLayout>('figma')
+	const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
 
 	useLinkedCameras(afterEditor, beforeEditor)
 
@@ -142,12 +150,22 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 		return comparison.changes.find((change) => change.id === selectedId) ?? null
 	}, [comparison, selectedId])
 
+	// `subject` is what lets the render pick its mark: a cable gets a shadow
+	// under its own stroke, everything else keeps Simulink's plain rectangle.
 	const highlightBefore: HighlightTarget = useMemo(
-		() => ({ shapeId: selected?.anchorBefore ?? null, kind: selected?.kind ?? null }),
+		() => ({
+			shapeId: selected?.anchorBefore ?? null,
+			kind: selected?.kind ?? null,
+			subject: selected?.subject ?? null,
+		}),
 		[selected],
 	)
 	const highlightAfter: HighlightTarget = useMemo(
-		() => ({ shapeId: selected?.anchorAfter ?? null, kind: selected?.kind ?? null }),
+		() => ({
+			shapeId: selected?.anchorAfter ?? null,
+			kind: selected?.kind ?? null,
+			subject: selected?.subject ?? null,
+		}),
 		[selected],
 	)
 
@@ -297,6 +315,37 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 		[comparison],
 	)
 
+	/**
+	 * Picking an element picks its first change too, so the boards move.
+	 *
+	 * Without this the left list would be a filter on a table and nothing else —
+	 * you would select `run_predict` and the canvas would keep showing whatever
+	 * was framed before. Figma's Layers list selects the layer on the canvas;
+	 * this does the same thing, and `jumpTo` then frames it.
+	 */
+	const pickElement = useCallback(
+		(elementId: string | null) => {
+			setSelectedElementId(elementId)
+			// Deselecting has to clear the change as well, or the sync effect
+			// below would immediately re-derive the element it just cleared.
+			if (!elementId) {
+				setSelectedId(null)
+				return
+			}
+			const first = ordered.find((change) => change.elementId === elementId)
+			if (first) setSelectedId(first.id)
+		},
+		[ordered],
+	)
+
+	// The stepper walks CHANGES, and a change belongs to an element — so
+	// stepping past an element boundary has to move the element list with it,
+	// or the two layouts would disagree about what is on screen.
+	useEffect(() => {
+		if (!selected) return
+		setSelectedElementId(selected.elementId)
+	}, [selected])
+
 	const beforeEntry = history.find((entry) => entry.id === beforeId) ?? null
 	const tally = comparison?.tally
 	/*
@@ -308,6 +357,92 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 	 */
 	const stageMode: CompareMode = fullscreen ? 'overlay' : mode
 	const priorVersions = history.filter((entry) => !entry.isCurrent)
+
+	/*
+	 * Three controls built once and placed into different slots per mode.
+	 *
+	 * Defining them here rather than inline in both branches is what keeps the
+	 * two modes from drifting: a slider that gained a step size in one branch
+	 * and not the other would be a bug nobody would see until they scrubbed in
+	 * the wrong mode.
+	 */
+	const blendControl = (
+		<label className="systemsketch-compare__blend">
+			<span>Previous</span>
+			<input
+				type="range"
+				min={0}
+				max={100}
+				step={1}
+				value={blend}
+				data-testid="compare-blend"
+				aria-label="Crossfade previous to current"
+				onChange={(event) => setBlend(Number(event.target.value))}
+			/>
+			<span>Current</span>
+			<output data-testid="compare-blend-value">{blend}%</output>
+		</label>
+	)
+
+	const stepper = (
+		<div
+			className="systemsketch-compare__stepper"
+			role="group"
+			aria-label="Step through the changes"
+		>
+			<button
+				type="button"
+				data-testid="compare-step-prev"
+				aria-label="Previous change"
+				disabled={ordered.length === 0}
+				onClick={() => step(-1)}
+			>
+				‹
+			</button>
+			<span className="systemsketch-compare__stepper-count" data-testid="compare-step-count">
+				{ordered.length === 0
+					? 'no changes'
+					: selectedIndex < 0
+						? `${ordered.length} changes`
+						: `${selectedIndex + 1} of ${ordered.length} changes`}
+			</span>
+			<button
+				type="button"
+				data-testid="compare-step-next"
+				aria-label="Next change"
+				disabled={ordered.length === 0}
+				onClick={() => step(1)}
+			>
+				›
+			</button>
+		</div>
+	)
+
+	/*
+	 * The history control, and the duplication it used to cause.
+	 *
+	 * The last round had this picker on a bar that was visible in BOTH modes,
+	 * beside a History rail showing the same state — two controls for one fact.
+	 * Zach then said the rail's click-through is the part he likes, which settles
+	 * it: the RAIL owns picking a version in the modal, and this picker exists
+	 * only in fullscreen, where the rail is hidden and something still has to
+	 * answer "against what". One control visible at a time, never two.
+	 */
+	const versionPicker = (
+		<label className="systemsketch-compare__bar-vs">
+			<span>vs</span>
+			<select
+				data-testid="compare-bar-version"
+				value={beforeId ?? ''}
+				onChange={(event) => setBeforeId(event.target.value)}
+			>
+				{priorVersions.length === 0 ? <option value="">no prior version</option> : null}
+				{priorVersions.map((entry) => (
+					<option key={entry.id} value={entry.id}>{entry.label}</option>
+				))}
+			</select>
+		</label>
+	)
 
 	return (
 		<Dialog.Root
@@ -402,109 +537,6 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 							</aside>
 
 							<div className="systemsketch-compare__stage" data-mode={stageMode}>
-								{/*
-								  * The persistent bar.
-								  *
-								  * It is the same element in both modes — that is the whole
-								  * idea. The modal and the immersive canvas are not two
-								  * screens with a jump between them; they are one screen
-								  * whose chrome recedes, and this bar is what stays put
-								  * while it does. Everything needed to answer "which change
-								  * am I looking at, against which version" lives here, so
-								  * going fullscreen never costs the reviewer their bearings.
-								  */}
-								<div className="systemsketch-compare__bar" data-testid="compare-bar">
-									<button
-										type="button"
-										className="systemsketch-compare__bar-mode"
-										data-testid={fullscreen ? 'compare-collapse' : 'compare-expand'}
-										onClick={() => setFullscreen(!fullscreen)}
-										title={
-											fullscreen
-												? 'Back to the review panel (Esc)'
-												: 'Expand the boards to the whole screen'
-										}
-									>
-										{fullscreen ? '↙ Back to modal' : '⤢ Fullscreen'}
-									</button>
-
-									{/* Which two versions — the question the bar must always
-									  * be able to answer, so it is a control and not a caption. */}
-									<label className="systemsketch-compare__bar-vs">
-										<span>vs</span>
-										<select
-											data-testid="compare-bar-version"
-											value={beforeId ?? ''}
-											onChange={(event) => setBeforeId(event.target.value)}
-										>
-											{priorVersions.length === 0 ? (
-												<option value="">no prior version</option>
-											) : null}
-											{priorVersions.map((entry) => (
-												<option key={entry.id} value={entry.id}>
-													{entry.label}
-												</option>
-											))}
-										</select>
-									</label>
-
-									<div
-										className="systemsketch-compare__stepper"
-										role="group"
-										aria-label="Step through the changes"
-									>
-										<button
-											type="button"
-											data-testid="compare-step-prev"
-											aria-label="Previous change"
-											disabled={ordered.length === 0}
-											onClick={() => step(-1)}
-										>
-											‹
-										</button>
-										<span
-											className="systemsketch-compare__stepper-count"
-											data-testid="compare-step-count"
-										>
-											{ordered.length === 0
-												? 'no changes'
-												: selectedIndex < 0
-													? `${ordered.length} changes`
-													: `${selectedIndex + 1} of ${ordered.length} changes`}
-										</span>
-										<button
-											type="button"
-											data-testid="compare-step-next"
-											aria-label="Next change"
-											disabled={ordered.length === 0}
-											onClick={() => step(1)}
-										>
-											›
-										</button>
-									</div>
-
-									{/* The crossfade Zach singled out from canvas-first. It rides
-									  * the bar rather than the panel below the boards, which is
-									  * the only way it survives into fullscreen at all. */}
-									{stageMode === 'overlay' ? (
-										<label className="systemsketch-compare__blend">
-											<span>Previous</span>
-											<input
-												type="range"
-												min={0}
-												max={100}
-												step={1}
-												value={blend}
-												data-testid="compare-blend"
-												aria-label="Crossfade previous to current"
-												onChange={(event) => setBlend(Number(event.target.value))}
-											/>
-											<span>Current</span>
-											<output data-testid="compare-blend-value">{blend}%</output>
-										</label>
-									) : null}
-								</div>
-
 								<div className="systemsketch-compare__panes" data-mode={stageMode}>
 									<figure className="systemsketch-compare__pane" data-side="before">
 										<figcaption>{beforeEntry?.label ?? 'Previous version'}</figcaption>
@@ -532,25 +564,91 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 									</figure>
 								</div>
 
-								<div className="systemsketch-compare__stagebar">
-									<div className="systemsketch-compare__segmented" role="group" aria-label="View">
-										<button
-											type="button"
-											data-testid="compare-mode-side-by-side"
-											data-selected={mode === 'side-by-side' || undefined}
-											onClick={() => setMode('side-by-side')}
-										>
-											Side by side
-										</button>
-										<button
-											type="button"
-											data-testid="compare-mode-overlay"
-											data-selected={mode === 'overlay' || undefined}
-											onClick={() => setMode('overlay')}
-										>
-											Overlay
-										</button>
-									</div>
+								{/*
+								  * ONE bottom row, serving both modes.
+								  *
+								  * The earlier design floated a bar across the top in both
+								  * modes. Zach's correction is better and it is about
+								  * MUSCLE MEMORY, not decoration: the modal already has a
+								  * row at the bottom for switching how the boards are shown,
+								  * so that is where a reviewer's hand already goes. Putting
+								  * the fullscreen controls anywhere else asks them to learn
+								  * a second place for the same kind of control. The position
+								  * is what persists across the transition; the contents are
+								  * what change.
+								  */}
+								<div
+									className="systemsketch-compare__stagebar"
+									data-testid="compare-bar"
+									data-mode={fullscreen ? 'fullscreen' : 'modal'}
+								>
+									{fullscreen ? (
+										<>
+											{/* The rail that normally answers "against what" is
+											  * hidden here, so the picker takes over that job. */}
+											<div className="systemsketch-compare__bar-slot" data-slot="left">
+												{versionPicker}
+											</div>
+											<div className="systemsketch-compare__bar-slot" data-slot="center">
+												{stepper}
+											</div>
+											<div className="systemsketch-compare__bar-slot" data-slot="right">
+												{blendControl}
+												<button
+													type="button"
+													className="systemsketch-compare__bar-mode"
+													data-testid="compare-collapse"
+													onClick={() => setFullscreen(false)}
+													title="Back to the review panel (Esc)"
+												>
+													Return to modal
+												</button>
+											</div>
+										</>
+									) : (
+										<>
+											<div className="systemsketch-compare__bar-slot" data-slot="left">
+												<div
+													className="systemsketch-compare__segmented"
+													role="group"
+													aria-label="View"
+												>
+													<button
+														type="button"
+														data-testid="compare-mode-side-by-side"
+														data-selected={mode === 'side-by-side' || undefined}
+														onClick={() => setMode('side-by-side')}
+													>
+														Side by side
+													</button>
+													<button
+														type="button"
+														data-testid="compare-mode-overlay"
+														data-selected={mode === 'overlay' || undefined}
+														onClick={() => setMode('overlay')}
+													>
+														Overlay
+													</button>
+												</div>
+											</div>
+											{/* Side by side has two boards in two cells and nothing
+											  * to blend, so the slider is absent rather than inert. */}
+											<div className="systemsketch-compare__bar-slot" data-slot="center">
+												{mode === 'overlay' ? blendControl : null}
+											</div>
+											<div className="systemsketch-compare__bar-slot" data-slot="right">
+												<button
+													type="button"
+													className="systemsketch-compare__bar-mode"
+													data-testid="compare-expand"
+													onClick={() => setFullscreen(true)}
+													title="Give the boards the whole screen"
+												>
+													Fullscreen
+												</button>
+											</div>
+										</>
+									)}
 								</div>
 							</div>
 
@@ -597,24 +695,54 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 									) : null}
 									{tab === 'properties' ? (
 										<>
-											<label
-												className="systemsketch-review__highlight-toggle"
-												data-testid="compare-highlight-toggle"
-											>
-												<input
-													type="checkbox"
-													checked={gitHighlight}
-													data-testid="compare-highlight-checkbox"
-													onChange={(event) => setGitHighlight(event.target.checked)}
-												/>
-												Word-level diff highlighting
-												<small>{gitHighlight ? 'on' : 'off · like Figma'}</small>
-											</label>
+											<div className="systemsketch-review__options">
+												<label
+													className="systemsketch-review__highlight-toggle"
+													data-testid="compare-highlight-toggle"
+												>
+													<input
+														type="checkbox"
+														checked={gitHighlight}
+														data-testid="compare-highlight-checkbox"
+														onChange={(event) => setGitHighlight(event.target.checked)}
+													/>
+													Word-level diff highlighting
+													<small>{gitHighlight ? 'on' : 'off · like Figma'}</small>
+												</label>
+												{/* Two real layouts over the same rows, switchable in
+												  * place — the point is to be able to judge them
+												  * against each other without leaving the board. */}
+												<div
+													className="systemsketch-compare__segmented"
+													role="group"
+													aria-label="Table layout"
+												>
+													<button
+														type="button"
+														data-testid="compare-layout-figma"
+														data-selected={layout === 'figma' || undefined}
+														onClick={() => setLayout('figma')}
+													>
+														By element
+													</button>
+													<button
+														type="button"
+														data-testid="compare-layout-columns"
+														data-selected={layout === 'columns' || undefined}
+														onClick={() => setLayout('columns')}
+													>
+														Flat table
+													</button>
+												</div>
+											</div>
 											<PropertyTable
 												changes={comparison?.changes ?? []}
 												selectedId={selectedId}
 												onSelect={setSelectedId}
 												gitHighlight={gitHighlight}
+												layout={layout}
+												selectedElementId={selectedElementId}
+												onSelectElement={pickElement}
 											/>
 										</>
 									) : (

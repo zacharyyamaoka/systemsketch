@@ -104,6 +104,16 @@ async function main() {
     assert.ok(renderedBlocks.every((count) => count >= 8), `panes drew shapes: ${renderedBlocks}`)
     pass(`both panes render real shapes through the product renderer (${renderedBlocks.join(' / ')})`)
 
+    // The Properties tab now opens in Figma's by-element layout, where the
+    // right side is empty until an element is picked. This journey is the
+    // regression proof for the FLAT table, so it switches to it explicitly.
+    await clickElement(app.page, '[data-testid="compare-layout-columns"]')
+    await waitFor(
+      app.page,
+      `document.querySelector('[data-testid="compare-property-table"]')?.dataset.layout === 'columns'`,
+      'flat table layout',
+    )
+
     // ---- the three-state table -------------------------------------------
     const rows = await evaluate(app.page, READ_ROWS)
     const kinds = new Set(rows.map((row) => row.kind))

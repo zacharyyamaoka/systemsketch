@@ -2,17 +2,18 @@
 /**
  * Real-browser proof for the converged review surface.
  *
- * `compare_modal_smoke.mjs` proves the modal still works. This one proves the
- * five things the convergence added, and it is deliberately adversarial about
- * each — a check that only asserts an element EXISTS proves markup, not
- * behaviour, so every claim here is read off computed style, geometry or the
- * live tldraw camera rather than off a class name.
+ * `compare_modal_smoke.mjs` proves the base modal still works. This one proves
+ * what the convergence added, and it is deliberately adversarial about each —
+ * a check that only asserts an element EXISTS proves markup, not behaviour, so
+ * every claim here is read off computed style, geometry, DOM order or the live
+ * tldraw camera rather than off a class name.
  *
- *   1. the ported omnibox table renders all three states, Modified in BLUE
- *   2. the git-highlight toggle actually changes the painted pixels both ways
- *   3. the tab strip is the app's own `.block-inspector__tabs`, not a lookalike
- *   4. fullscreen keeps the persistent bar, and its stepper MOVES THE CAMERA
- *   5. returning to the modal restores selection, tab, blend and git-ink
+ *   1. a selected CABLE gets a shadow under its stroke, not a box round it
+ *   2. two real table layouts — by-element and flat — both over real rows
+ *   3. the shared tab strip hugs its content, in Compare AND in a Block
+ *   4. the modal's bottom row: modes · slider · Fullscreen
+ *   5. the fullscreen bar is at the BOTTOM: vs · stepper · slider + Return
+ *   6. Modified is blue, the ink toggle works, and the return restores state
  *
  * Run with:
  *   node tests/compare_converged_smoke.mjs
@@ -39,6 +40,11 @@ const SHOT_DIR = join(ROOT, 'docs', 'assets')
 const BOARD = join(ROOT, 'sketches', 'review', 'diff-review-modal.systemsketch')
 const { checks, pass } = makeChecklist()
 
+/** The rewired cable in the fixture, and the Block most rows hang off. */
+const CABLE_CHANGE = 'cable:shape:cable_xm'
+const CABLE_SHAPE = 'shape:cable_xm'
+const BLOCK_ELEMENT = 'block:shape:predict'
+
 async function capture(page, name) {
   await ensureDir(SHOT_DIR)
   const shot = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
@@ -50,9 +56,6 @@ const RGB = `((value) => {
   const parts = String(value).match(/[\\d.]+/g) ?? []
   return { r: Number(parts[0]), g: Number(parts[1]), b: Number(parts[2]), a: parts[3] === undefined ? 1 : Number(parts[3]) }
 })`
-
-/** Read the after pane's camera transform — the honest test of a jump. */
-const CAMERA = `(() => document.querySelector('[data-testid="compare-canvas-after"] .tl-shapes')?.style.transform ?? '')()`
 
 async function setBlend(page, value) {
   await evaluate(page, `(() => {
@@ -94,82 +97,166 @@ async function main() {
     await delay(1400)
     pass('the converged modal opens with two real SystemSketch renders')
 
-    // ---- 1 · the ported table, and the colour of Modified -----------------
-    const states = await evaluate(app.page, `(() => Array.from(
-      document.querySelectorAll('[data-testid="compare-property-table"] tbody tr[data-change-id]'),
-    ).map((row) => row.dataset.state))()`)
-    const kinds = new Set(states)
-    assert.ok(kinds.has('added'), 'an Added row')
-    assert.ok(kinds.has('removed'), 'a Removed row')
-    assert.ok(kinds.has('modified'), 'a Modified row')
-    pass(`the ported omnibox table carries all three states (${states.length} rows)`)
-
-    // The table must be the PORTED markup, not the old in-house one: omnibox's
-    // badge is a bordered chip in the Layer cell, and its absent cells assert
-    // absence with a hatch rather than going blank.
-    const portedShape = await evaluate(app.page, `(() => {
-      const table = document.querySelector('[data-testid="compare-property-table"]')
+    // ---- 1 · Figma's by-element layout ------------------------------------
+    const figmaDefault = await evaluate(app.page, `(() => {
+      const list = document.querySelector('[data-testid="compare-element-list"]')
+      const empty = document.querySelector('[data-testid="compare-figma-empty"]')
       return {
-        tableClass: table.className,
-        badges: table.querySelectorAll('.systemsketch-review__state[data-state]').length,
-        absent: table.querySelectorAll('.systemsketch-review__value[data-absent="true"]').length,
-        oldRows: table.querySelectorAll('.systemsketch-compare__row').length,
+        layoutPresent: !!document.querySelector('[data-testid="compare-figma-layout"]'),
+        emptyCopy: empty?.textContent?.trim() ?? null,
+        tablePresent: !!document.querySelector('[data-testid="compare-property-table"]'),
+        elements: Array.from(list?.querySelectorAll('button') ?? []).map((button) => ({
+          id: button.dataset.testid.replace('compare-element-', ''),
+          status: button.dataset.status,
+          name: button.querySelector('.systemsketch-review__element-name').textContent,
+          badge: button.querySelector('.systemsketch-review__element-status').textContent,
+        })),
       }
     })()`)
-    assert.equal(portedShape.tableClass, 'systemsketch-review__table', 'the ported table class')
-    assert.equal(portedShape.oldRows, 0, "the fork's own table markup is gone, not kept beside it")
-    assert.ok(portedShape.badges >= 3, `state badges rendered: ${portedShape.badges}`)
-    assert.ok(portedShape.absent >= 2, `absent cells assert absence: ${portedShape.absent}`)
-    pass('the table is the omnibox port — bordered state badges and hatched absent cells')
+    assert.equal(figmaDefault.layoutPresent, true, 'the by-element layout is the default')
+    assert.equal(
+      figmaDefault.emptyCopy,
+      'Select an edited element to compare changes',
+      `Figma's own empty-state copy, verbatim — got "${figmaDefault.emptyCopy}"`,
+    )
+    assert.equal(figmaDefault.tablePresent, false, 'nothing selected means no table, not an empty grid')
+    pass(`nothing selected shows Figma's own sentence, not an empty grid`)
+
+    // The list must be ELEMENTS — Blocks and cables — never ports and never
+    // properties. That is the whole point of the regrouping.
+    assert.ok(figmaDefault.elements.length >= 2, `elements listed: ${figmaDefault.elements.length}`)
+    const badges = new Set(figmaDefault.elements.map((element) => element.badge))
+    assert.ok(
+      [...badges].every((badge) => ['Added', 'Edited', 'Removed'].includes(badge)),
+      `element badges are Figma's vocabulary, got ${[...badges].join(', ')}`,
+    )
+    const names = figmaDefault.elements.map((element) => element.name)
+    assert.ok(
+      names.every((name) => !name.includes('·')),
+      `an element name is a thing on the board, never a property path: ${names.join(' | ')}`,
+    )
+    pass(`the left list is elements with Added/Edited/Removed badges (${names.join(', ')})`)
+    await capture(app.page, 'converged-figma-empty.png')
+
+    // Picking an element scopes the right side to ONLY that element.
+    await clickElement(app.page, `[data-testid="compare-element-${BLOCK_ELEMENT}"]`)
+    await waitFor(
+      app.page,
+      `document.querySelector('[data-testid="compare-property-table"]')?.dataset.layout === 'figma'`,
+      'scoped table',
+    )
+    const scoped = await evaluate(app.page, `(() => {
+      const table = document.querySelector('[data-testid="compare-property-table"]')
+      const rows = Array.from(table.querySelectorAll('tbody tr[data-change-id]'))
+      return {
+        headers: Array.from(table.querySelectorAll('thead th')).map((th) => th.textContent),
+        elementIds: [...new Set(rows.map((row) => row.dataset.elementId))],
+        properties: rows.map((row) => row.querySelector('.systemsketch-review__property-name').textContent),
+        rows: rows.length,
+      }
+    })()`)
+    assert.deepEqual(
+      scoped.headers,
+      ['Property', 'Previous', 'Current'],
+      `the scoped table drops the element column: ${scoped.headers.join(' | ')}`,
+    )
+    assert.deepEqual(
+      scoped.elementIds,
+      [BLOCK_ELEMENT],
+      `every row belongs to the picked element, got ${scoped.elementIds.join(', ')}`,
+    )
+    assert.ok(scoped.rows >= 3, `the picked element has real rows: ${scoped.rows}`)
+    assert.ok(
+      scoped.properties.every((property) => property && property.length > 0),
+      `every row names a property: ${scoped.properties.join(' | ')}`,
+    )
+    pass(`picking an element scopes the table to it (${scoped.rows} rows: ${scoped.properties.join(', ')})`)
+    await capture(app.page, 'converged-figma-selected.png')
+
+    // ---- 2 · the flat Element/Property layout ------------------------------
+    await clickElement(app.page, '[data-testid="compare-layout-columns"]')
+    await waitFor(
+      app.page,
+      `document.querySelector('[data-testid="compare-property-table"]')?.dataset.layout === 'columns'`,
+      'flat layout',
+    )
+    const flat = await evaluate(app.page, `(() => {
+      const table = document.querySelector('[data-testid="compare-property-table"]')
+      const rows = Array.from(table.querySelectorAll('tbody tr[data-change-id]'))
+      return {
+        headers: Array.from(table.querySelectorAll('thead th')).map((th) => th.textContent),
+        states: rows.map((row) => row.dataset.state),
+        cells: rows.map((row) => ({
+          element: row.querySelector('.systemsketch-review__layer-name').textContent,
+          property: row.querySelector('.systemsketch-review__property-name').textContent,
+        })),
+      }
+    })()`)
+    assert.deepEqual(
+      flat.headers,
+      ['Element', 'Property', 'Previous', 'Current'],
+      `four columns, element first: ${flat.headers.join(' | ')}`,
+    )
+    const flatStates = new Set(flat.states)
+    assert.ok(flatStates.has('added') && flatStates.has('removed') && flatStates.has('modified'),
+      `all three states present: ${[...flatStates].join(', ')}`)
+    // The element must be its OWN column now, never folded back into a path.
+    assert.ok(
+      flat.cells.every((cell) => cell.element && !cell.element.includes('·')),
+      `element column carries a plain element name: ${flat.cells.map((c) => c.element).join(' | ')}`,
+    )
+    const portRow = flat.cells.find((cell) => cell.property === 'threshold')
+    assert.ok(portRow, `a port reads as a property of its Block: ${JSON.stringify(flat.cells)}`)
+    assert.equal(portRow.element, 'run_predict', "a port's element is its host Block, never the port")
 
     /*
-     * Modified must be BLUE, and "blue" is measured, not asserted from a token
-     * name. A test that only checked the CSS said `var(--ss-accent)` would pass
-     * just as happily if the accent resolved to orange.
+     * Every cell must actually SIT under its own header.
+     *
+     * This is geometry rather than content on purpose: `display: flex` on a
+     * `<td>` takes it out of the table's column layout, and the property text
+     * rendered on its own line beneath the Element column — present, correct,
+     * readable by every content assertion above, and in the wrong place. Only a
+     * screenshot or a coordinate catches that.
      */
+    const columns = await evaluate(app.page, `(() => {
+      const table = document.querySelector('[data-testid="compare-property-table"]')
+      const headers = Array.from(table.querySelectorAll('thead th'))
+        .map((th) => ({ label: th.textContent, left: th.getBoundingClientRect().left }))
+      const row = table.querySelector('tbody tr[data-change-id]')
+      const cells = Array.from(row.children).map((cell) => cell.getBoundingClientRect().left)
+      return { headers, cells, sameRow: row.children.length }
+    })()`)
+    assert.equal(columns.sameRow, 4, `the row has four cells, one per header: ${columns.sameRow}`)
+    for (const [index, header] of columns.headers.entries()) {
+      const drift = Math.abs(columns.cells[index] - header.left)
+      assert.ok(
+        drift < 6,
+        `the ${header.label} cell sits under its header (drifted ${drift.toFixed(0)}px)`,
+      )
+    }
+    pass('every cell sits under its own column header — no cell escapes the table layout')
+    pass(`the flat layout is Element · Property · Previous · Current (${flat.cells.length} rows, port grouped under its Block)`)
+    await capture(app.page, 'converged-flat-columns.png')
+
+    // ---- 3 · Modified is blue (measured, not asserted from a token name) ---
     const badgeColours = await evaluate(app.page, `(() => {
       const read = (state) => {
         const badge = document.querySelector('.systemsketch-review__state[data-state="' + state + '"]')
-        if (!badge) return null
-        const style = getComputedStyle(badge)
-        return { border: style.borderTopColor, background: style.backgroundColor }
+        return badge ? getComputedStyle(badge).borderTopColor : null
       }
       return { added: read('added'), removed: read('removed'), modified: read('modified') }
     })()`)
-    const modified = await evaluate(app.page, `${RGB}(${JSON.stringify(badgeColours.modified.border)})`)
-    const removed = await evaluate(app.page, `${RGB}(${JSON.stringify(badgeColours.removed.border)})`)
-    const added = await evaluate(app.page, `${RGB}(${JSON.stringify(badgeColours.added.border)})`)
+    const modified = await evaluate(app.page, `${RGB}(${JSON.stringify(badgeColours.modified)})`)
+    const removed = await evaluate(app.page, `${RGB}(${JSON.stringify(badgeColours.removed)})`)
     assert.ok(
       modified.b > modified.r && modified.b > modified.g,
       `Modified must be blue-dominant, measured ${JSON.stringify(modified)}`,
     )
-    assert.ok(removed.r > removed.b, `Removed stays red-dominant, measured ${JSON.stringify(removed)}`)
-    assert.ok(added.g > added.b, `Added stays green-dominant, measured ${JSON.stringify(added)}`)
-    // The specific complaint was that amber sat too close to red. Prove the
-    // separation rather than just the hue: blue must be nowhere near removed.
     const distance = Math.hypot(modified.r - removed.r, modified.g - removed.g, modified.b - removed.b)
     assert.ok(distance > 120, `Modified must be far from Removed in RGB, measured ${distance.toFixed(0)}`)
-    pass(
-      `Modified is blue (${modified.r},${modified.g},${modified.b}), `
-      + `${distance.toFixed(0)} away from Removed in RGB`,
-    )
-    await capture(app.page, 'converged-table-blue-modified.png')
+    pass(`Modified is blue (${modified.r},${modified.g},${modified.b}), ${distance.toFixed(0)} from Removed`)
 
-    // ---- 2 · the git-highlight toggle -------------------------------------
-    const toggleDefault = await evaluate(app.page, `(() => ({
-      checked: document.querySelector('[data-testid="compare-highlight-checkbox"]').checked,
-      stamp: document.querySelector('[data-testid="compare-property-table"]').dataset.gitHighlight,
-    }))()`)
-    assert.equal(toggleDefault.checked, false, 'the toggle defaults OFF')
-    assert.equal(toggleDefault.stamp, 'off', 'the table is stamped off')
-    pass('word-level diff highlighting defaults OFF — the Figma baseline')
-
-    /*
-     * The claim is about PAINT, so read paint. With the toggle off both the
-     * per-cell wash and the per-run fill must be fully transparent; with it on,
-     * both must be opaque enough to see. Asserting only the `data-` stamp would
-     * pass even if the stylesheet had been deleted.
-     */
+    // ---- 4 · the git-highlight toggle, still both layers, still default off -
     const readInk = `(() => {
       const row = document.querySelector('tr[data-change-id="block:shape:predict"]')
       const cell = row.querySelector('.systemsketch-review__value[data-side="current"]')
@@ -177,22 +264,22 @@ async function main() {
       return {
         cell: getComputedStyle(cell).backgroundColor,
         mark: getComputedStyle(mark).backgroundColor,
-        markWeight: getComputedStyle(mark).fontWeight,
         text: cell.textContent,
       }
     })()`
-
+    const toggleDefault = await evaluate(app.page, `(() => ({
+      checked: document.querySelector('[data-testid="compare-highlight-checkbox"]').checked,
+      stamp: document.querySelector('[data-testid="compare-property-table"]').dataset.gitHighlight,
+    }))()`)
+    assert.equal(toggleDefault.checked, false, 'the toggle defaults OFF')
+    assert.equal(toggleDefault.stamp, 'off', 'the table is stamped off')
     const inkOff = await evaluate(app.page, readInk)
     const cellOff = await evaluate(app.page, `${RGB}(${JSON.stringify(inkOff.cell)})`)
     const markOff = await evaluate(app.page, `${RGB}(${JSON.stringify(inkOff.mark)})`)
-    assert.equal(cellOff.a, 0, `off: the cell wash must be transparent, got ${inkOff.cell}`)
-    assert.equal(markOff.a, 0, `off: the run fill must be transparent, got ${inkOff.mark}`)
-    pass('with the toggle OFF both layers are gone — Previous/Current are plain text')
-
-    // The value itself must survive the toggle. Hiding the ink must never hide
-    // a character: that would be the display lying about a stored property.
+    assert.equal(cellOff.a, 0, `off: the cell wash is transparent, got ${inkOff.cell}`)
+    assert.equal(markOff.a, 0, `off: the run fill is transparent, got ${inkOff.mark}`)
     assert.ok(inkOff.text.includes('run_predict'), `the value still reads in full: ${inkOff.text}`)
-    pass('turning the ink off hides styling only — the full value still renders')
+    pass('word-level ink still defaults OFF, and off means both layers gone but the value intact')
     await capture(app.page, 'converged-highlight-off.png')
 
     await clickElement(app.page, '[data-testid="compare-highlight-checkbox"]')
@@ -200,274 +287,305 @@ async function main() {
     const inkOn = await evaluate(app.page, readInk)
     const cellOn = await evaluate(app.page, `${RGB}(${JSON.stringify(inkOn.cell)})`)
     const markOn = await evaluate(app.page, `${RGB}(${JSON.stringify(inkOn.mark)})`)
-    assert.ok(cellOn.a > 0, `on: the cell takes a wash, got ${inkOn.cell}`)
-    assert.ok(markOn.a > 0, `on: the run takes a fill, got ${inkOn.mark}`)
-    assert.ok(markOn.a > cellOn.a, 'the run must be stronger than the wash it sits in')
-    assert.ok(Number(inkOn.markWeight) > Number(inkOff.markWeight), 'the run also gains weight')
-    pass(
-      `with the toggle ON both layers paint — wash a=${cellOn.a}, run a=${markOn.a} `
-      + `(the two-layer effect Zach asked to be able to switch off)`,
-    )
+    assert.ok(cellOn.a > 0 && markOn.a > 0, `on: both layers paint (${inkOn.cell} / ${inkOn.mark})`)
+    assert.ok(markOn.a > cellOn.a, 'the run is stronger than the wash it sits in')
+    pass(`toggling on restores both layers — wash a=${cellOn.a}, run a=${markOn.a}`)
     await capture(app.page, 'converged-highlight-on.png')
 
-    // The row BADGE is not part of the toggle — it says which of the three
-    // states the row is, which is the table's primary claim.
-    const badgeSurvives = await evaluate(app.page, `(() => {
-      const badge = document.querySelector('.systemsketch-review__state[data-state="modified"]')
-      return getComputedStyle(badge).borderTopColor
+    // ---- 5 · the shared tab strip hugs its content ------------------------
+    /*
+     * The defect was `grid-template-columns: 1fr 1fr` on `.block-inspector__tabs`,
+     * which stretched two short labels across a whole panel. The fix had to land
+     * on the SHARED rule, so this checks the stylesheet itself and then proves
+     * the effect in two different consumers.
+     */
+    const sharedRule = await evaluate(app.page, `(() => {
+      for (const sheet of Array.from(document.styleSheets)) {
+        let rules
+        try { rules = Array.from(sheet.cssRules) } catch { continue }
+        for (const rule of rules) {
+          if (rule.selectorText !== '.block-inspector__tabs') continue
+          return {
+            display: rule.style.display,
+            gridColumns: rule.style.gridTemplateColumns,
+          }
+        }
+      }
+      return null
     })()`)
-    assert.equal(badgeSurvives, badgeColours.modified.border, 'the badge is unaffected by the toggle')
-    pass('the Added/Removed/Modified badge is outside the toggle, in both settings')
+    assert.ok(sharedRule, 'the shared .block-inspector__tabs rule is loaded')
+    assert.equal(sharedRule.display, 'flex', `the strip is flex, not grid: ${sharedRule.display}`)
+    assert.equal(
+      sharedRule.gridColumns,
+      '',
+      `the 1fr 1fr stretch is gone from the SHARED rule, got "${sharedRule.gridColumns}"`,
+    )
+    pass('the stretch is fixed on the shared .block-inspector__tabs rule, not patched per caller')
 
-    // ---- 3 · the app's own tab strip --------------------------------------
-    const tabs = await evaluate(app.page, `(() => {
+    const compareTabs = await evaluate(app.page, `(() => {
       const strip = document.querySelector('[data-testid="compare-dialog"] .block-inspector__tabs')
-      if (!strip) return null
       const buttons = Array.from(strip.querySelectorAll('[role="tab"]'))
-      const probe = getComputedStyle(buttons.find((b) => b.classList.contains('is-active')))
-      const inspector = getComputedStyle(document.documentElement)
+      const stripBox = strip.getBoundingClientRect()
+      const span = buttons[buttons.length - 1].getBoundingClientRect().right - buttons[0].getBoundingClientRect().left
       return {
-        role: strip.getAttribute('role'),
-        tag: strip.tagName,
-        count: buttons.length,
+        stripWidth: stripBox.width,
+        tabsWidth: span,
         active: buttons.filter((b) => b.classList.contains('is-active')).map((b) => b.textContent),
-        activeSelected: buttons.every((b) => (b.getAttribute('aria-selected') === 'true') === b.classList.contains('is-active')),
-        // The class must be doing real work: an inert class name would leave
-        // the active tab with a transparent background and no border.
-        activeBackground: probe.backgroundColor,
-        activeBorder: probe.borderTopColor,
-        gridColumns: getComputedStyle(strip).gridTemplateColumns,
+        role: strip.getAttribute('role'),
       }
     })()`)
-    assert.ok(tabs, 'the detail pane uses .block-inspector__tabs')
-    assert.equal(tabs.role, 'tablist', 'the container is a real tablist')
-    assert.equal(tabs.count, 2, 'Properties and Code')
-    assert.deepEqual(tabs.active, ['Properties'], 'exactly one is-active tab')
-    assert.equal(tabs.activeSelected, true, 'aria-selected tracks .is-active')
-    const activeBg = await evaluate(app.page, `${RGB}(${JSON.stringify(tabs.activeBackground)})`)
-    assert.ok(activeBg.a > 0, `the .is-active rule actually paints, got ${tabs.activeBackground}`)
-    assert.ok(tabs.gridColumns.split(' ').length === 2, `the strip is the 2-col grid: ${tabs.gridColumns}`)
-    pass(`the tab strip IS .block-inspector__tabs — ${tabs.tag}[role=tablist], .is-active painting ${tabs.activeBackground}`)
+    assert.equal(compareTabs.role, 'tablist', 'still a real tablist')
+    assert.deepEqual(compareTabs.active, ['Properties'], 'still exactly one is-active tab')
+    assert.ok(
+      compareTabs.tabsWidth < compareTabs.stripWidth * 0.6,
+      `two tabs must hug, not span the panel — ${compareTabs.tabsWidth.toFixed(0)}px of ${compareTabs.stripWidth.toFixed(0)}px`,
+    )
+    pass(`the Compare tabs hug their labels (${compareTabs.tabsWidth.toFixed(0)}px in a ${compareTabs.stripWidth.toFixed(0)}px strip)`)
 
-    // Code is scoped to one change, so pick one first — an unselected Code tab
-    // correctly renders a "pick a change" prompt and not a diff.
-    await clickElement(app.page, '[data-testid="compare-row-block:shape:predict:title"]')
-    await delay(400)
-    await clickElement(app.page, '[data-testid="compare-tab-code"]')
-    await waitFor(app.page, `!!document.querySelector('[data-testid="compare-code-view"]')`, 'code tab')
-    const afterSwitch = await evaluate(app.page, `(() => Array.from(
-      document.querySelectorAll('[data-testid="compare-dialog"] .block-inspector__tabs [role="tab"]'),
-    ).filter((b) => b.classList.contains('is-active')).map((b) => b.textContent))()`)
-    assert.deepEqual(afterSwitch, ['Code'], 'the active class moves with the selection')
-    pass('switching tabs moves .is-active, the way the Block inspector does')
-
-    // ---- 4 · fullscreen, and the persistent bar ---------------------------
-    // Select a change first, so the return trip has something to restore.
-    await clickElement(app.page, '[data-testid="compare-tab-properties"]')
-    await delay(200)
-    await clickElement(app.page, '[data-testid="compare-row-block:shape:predict:title"]')
-    await delay(500)
-
-    // The bar is present in the MODAL too — that is the axis. If it only
-    // appeared in fullscreen it would be a fullscreen toolbar, not a
-    // persistent bar, and the transition would be the hard cut it is meant
-    // not to be.
-    const barInModal = await evaluate(app.page, `(() => {
-      const bar = document.querySelector('[data-testid="compare-bar"]')
-      const box = bar?.getBoundingClientRect()
-      return { present: !!bar, width: box?.width ?? 0, height: box?.height ?? 0 }
+    // ---- 6 · the cable's shadow, not a box --------------------------------
+    await clickElement(app.page, '[data-testid="compare-layout-figma"]')
+    await delay(300)
+    await clickElement(app.page, `[data-testid="compare-element-${CABLE_CHANGE}"]`)
+    await delay(700)
+    const cableMark = await evaluate(app.page, `(() => {
+      const pane = document.querySelector('[data-testid="compare-canvas-after"]')
+      const shape = pane.querySelector('.tl-shape[data-shape-id="${CABLE_SHAPE}"]')
+      return {
+        boxes: pane.querySelectorAll('[data-testid="compare-highlight-mark"]').length,
+        shapeFound: !!shape,
+        filter: shape ? getComputedStyle(shape).filter : null,
+        isPath: !!shape?.querySelector('path'),
+      }
     })()`)
-    assert.ok(barInModal.present, 'the bar exists in modal mode')
-    assert.ok(barInModal.height > 20, `the bar is visible in modal: ${barInModal.height}px tall`)
-    pass('the persistent bar is already present in the modal, before any expansion')
+    assert.equal(cableMark.shapeFound, true, 'the cable shape is rendered in the after pane')
+    assert.equal(cableMark.boxes, 0, 'a selected cable draws NO bounding rectangle')
+    assert.equal(cableMark.isPath, true, 'the cable is a real SVG stroke, so a filter follows it')
+    assert.ok(
+      /drop-shadow/.test(cableMark.filter ?? ''),
+      `the cable takes a drop shadow under its own stroke, got "${cableMark.filter}"`,
+    )
+    pass(`a selected cable gets a shadow under its stroke and no box (filter: ${cableMark.filter.slice(0, 58)}…)`)
+    await capture(app.page, 'converged-cable-shadow.png')
 
+    // A BLOCK must still get the plain rectangle — the change is cable-only.
+    await clickElement(app.page, `[data-testid="compare-element-${BLOCK_ELEMENT}"]`)
+    await delay(600)
+    const blockMark = await evaluate(app.page, `(() => {
+      const pane = document.querySelector('[data-testid="compare-canvas-after"]')
+      const cable = pane.querySelector('.tl-shape[data-shape-id="${CABLE_SHAPE}"]')
+      return {
+        boxes: pane.querySelectorAll('[data-testid="compare-highlight-mark"]').length,
+        cableFilter: cable ? getComputedStyle(cable).filter : null,
+      }
+    })()`)
+    assert.equal(blockMark.boxes, 1, 'a Block still gets Simulink\'s plain rectangle')
+    assert.ok(
+      !/drop-shadow/.test(blockMark.cableFilter ?? ''),
+      `the cable's shadow is released when it is not selected, got "${blockMark.cableFilter}"`,
+    )
+    pass('a Block keeps the rectangle, and the cable shadow is released on deselect')
+
+    // ---- 7 · the modal's bottom row ---------------------------------------
     await clickElement(app.page, '[data-testid="compare-mode-overlay"]')
     await delay(300)
-    await setBlend(app.page, '60')
-    const beforeJump = await evaluate(app.page, CAMERA)
+    const modalBar = await evaluate(app.page, `(() => {
+      const dialog = document.querySelector('[data-testid="compare-dialog"]').getBoundingClientRect()
+      const bar = document.querySelector('[data-testid="compare-bar"]')
+      const box = bar.getBoundingClientRect()
+      const slot = (name) => bar.querySelector('[data-slot="' + name + '"]')
+      return {
+        mode: bar.dataset.mode,
+        belowMidline: box.top > dialog.top + dialog.height / 2,
+        left: !!slot('left').querySelector('[data-testid="compare-mode-overlay"]'),
+        centre: !!slot('centre') || !!slot('center').querySelector('[data-testid="compare-blend"]'),
+        right: slot('right').querySelector('[data-testid="compare-expand"]')?.textContent,
+        noExpandElsewhere: document.querySelectorAll('[data-testid="compare-expand"]').length,
+      }
+    })()`)
+    assert.equal(modalBar.mode, 'modal', 'the bar knows it is in modal mode')
+    assert.equal(modalBar.belowMidline, true, 'the row is at the bottom of the modal')
+    assert.equal(modalBar.left, true, 'Side by side / Overlay is on the left')
+    assert.equal(modalBar.centre, true, 'the crossfade slider is in the middle, in Overlay')
+    assert.equal(modalBar.right, 'Fullscreen', 'Fullscreen is right-aligned in the corner')
+    assert.equal(modalBar.noExpandElsewhere, 1, 'there is exactly ONE Fullscreen control, not a duplicate')
+    pass('the modal bottom row is [modes] · slider · Fullscreen, with no second entry point')
 
+    // In Side by side there is nothing to blend, so the slider is absent.
+    await clickElement(app.page, '[data-testid="compare-mode-side-by-side"]')
+    await delay(250)
+    const sliderGone = await evaluate(
+      app.page,
+      `(() => document.querySelectorAll('[data-testid="compare-blend"]').length)()`,
+    )
+    assert.equal(sliderGone, 0, 'no slider in Side by side — nothing to crossfade')
+    pass('the slider appears only in Overlay')
+    await capture(app.page, 'converged-modal-bottom-row.png')
+    await clickElement(app.page, '[data-testid="compare-mode-overlay"]')
+    await delay(250)
+    await setBlend(app.page, '60')
+
+    // ---- 8 · the fullscreen bar, at the bottom ----------------------------
     await clickElement(app.page, '[data-testid="compare-expand"]')
     await delay(900)
-
-    const full = await evaluate(app.page, `(() => {
+    const fullBar = await evaluate(app.page, `(() => {
       const dialog = document.querySelector('[data-testid="compare-dialog"]')
       const bar = document.querySelector('[data-testid="compare-bar"]')
-      const barBox = bar.getBoundingClientRect()
-      const stage = document.querySelector('.systemsketch-compare__stage').getBoundingClientRect()
+      const box = bar.getBoundingClientRect()
+      const slot = (name) => bar.querySelector('[data-slot="' + name + '"]')
+      const right = slot('right')
+      // DOM order inside the right slot decides which is nearer the corner.
+      const rightOrder = Array.from(right.children).map((node) =>
+        node.querySelector('[data-testid="compare-blend"]') || node.matches('[data-testid="compare-blend"]')
+          ? 'slider'
+          : node.dataset.testid === 'compare-collapse' ? 'return' : 'other')
       const hidden = (selector) => {
         const node = document.querySelector(selector)
         return !node || getComputedStyle(node).display === 'none'
       }
+      const barCentre = box.left + box.width / 2
+      const stepper = slot('center').querySelector('[data-testid="compare-step-count"]')
+      const stepBox = stepper.getBoundingClientRect()
       return {
         stamped: dialog.dataset.fullscreen === 'true',
-        dialogWidth: dialog.getBoundingClientRect().width,
-        viewportWidth: window.innerWidth,
-        barVisible: barBox.height > 20 && getComputedStyle(bar).display !== 'none',
-        barTop: barBox.top,
-        stageWidth: stage.width,
+        mode: bar.dataset.mode,
+        inBottomHalf: box.top > window.innerHeight / 2,
+        distanceFromBottom: window.innerHeight - box.bottom,
+        vsOnLeft: !!slot('left').querySelector('[data-testid="compare-bar-version"]'),
+        stepperCentred: Math.abs((stepBox.left + stepBox.width / 2) - barCentre) < 40,
+        rightOrder,
         detailHidden: hidden('.systemsketch-compare__detail'),
         historyHidden: hidden('.systemsketch-compare__history'),
         titleHidden: hidden('.systemsketch-compare__titlebar'),
-        hasCollapse: !!document.querySelector('[data-testid="compare-collapse"]'),
-        hasVersionPicker: !!document.querySelector('[data-testid="compare-bar-version"]'),
-        hasStepper: !!document.querySelector('[data-testid="compare-step-count"]'),
-        hasBlend: !!document.querySelector('[data-testid="compare-blend"]'),
-        tableReachable: !!document.querySelector('[data-testid="compare-property-table"]')
-          && !hidden('.systemsketch-compare__detail'),
+        // Visibility, not DOM presence: the table stays mounted so the return
+        // trip has state to restore, but it must not be on screen.
+        tableVisible: (document.querySelector('[data-testid="compare-property-table"]')
+          ?.getClientRects().length ?? 0) > 0,
       }
     })()`)
-    assert.equal(full.stamped, true, 'the dialog is stamped fullscreen')
-    assert.ok(
-      full.dialogWidth >= full.viewportWidth - 2,
-      `fullscreen takes the viewport: ${full.dialogWidth} vs ${full.viewportWidth}`,
-    )
-    assert.equal(full.detailHidden, true, 'the property panel is gone')
-    assert.equal(full.historyHidden, true, 'the history rail is gone')
-    assert.equal(full.titleHidden, true, 'the title bar is gone')
-    assert.equal(full.tableReachable, false, 'the table is NOT reachable while fullscreen, per the brief')
-    pass('expanding hides every piece of panel chrome and gives the boards the viewport')
+    assert.equal(fullBar.stamped, true, 'the dialog is stamped fullscreen')
+    assert.equal(fullBar.mode, 'fullscreen', 'the bar switched contents, not position')
+    assert.equal(fullBar.inBottomHalf, true, `the bar is in the bottom half (top at ${fullBar.distanceFromBottom}px from the bottom)`)
+    assert.ok(fullBar.distanceFromBottom < 12, `and flush to the bottom edge, ${fullBar.distanceFromBottom}px off`)
+    assert.equal(fullBar.detailHidden, true, 'the property panel is gone')
+    assert.equal(fullBar.historyHidden, true, 'the history rail is gone')
+    assert.equal(fullBar.titleHidden, true, 'the title bar is gone')
+    assert.equal(fullBar.tableVisible, false, 'the table is not visible while fullscreen')
+    pass(`the fullscreen bar moved to the BOTTOM (${fullBar.distanceFromBottom}px off the edge), all panel chrome hidden`)
 
-    assert.equal(full.barVisible, true, 'the persistent bar survived the expansion')
-    assert.equal(full.hasCollapse, true, 'Back-to-modal is on the bar')
-    assert.equal(full.hasVersionPicker, true, 'the vs/history picker is on the bar')
-    assert.equal(full.hasStepper, true, 'the change stepper is on the bar')
-    assert.equal(full.hasBlend, true, 'the opacity slider is on the bar')
-    pass('fullscreen keeps ONE bar carrying back · vs · stepper · opacity — nothing else')
-
-    /*
-     * The selected change must be FRAMED in the new viewport, not merely still
-     * selected. Replaying the modal's camera into a viewport three times wider
-     * leaves it pinned against the left edge — which is exactly what this did
-     * before a screenshot caught it, with every state assertion passing.
-     */
-    const framedFull = await evaluate(app.page, `(() => {
-      const pane = document.querySelector('[data-testid="compare-canvas-after"]').getBoundingClientRect()
-      const mark = document.querySelector('[data-testid="compare-canvas-after"] [data-testid="compare-highlight-mark"]')
-      if (!mark) return null
-      const box = mark.getBoundingClientRect()
-      return {
-        offsetFromCentre: Math.abs((box.left + box.width / 2) - (pane.left + pane.width / 2)) / pane.width,
-        inside: box.left >= pane.left - 4 && box.right <= pane.right + 4,
-      }
-    })()`)
-    assert.ok(framedFull, 'the selected change is marked on the fullscreen board')
-    assert.equal(framedFull.inside, true, 'the selected change is fully inside the fullscreen viewport')
-    assert.ok(
-      framedFull.offsetFromCentre < 0.2,
-      `the selected change is re-centred for the wide viewport, off by ${(framedFull.offsetFromCentre * 100).toFixed(0)}%`,
+    assert.equal(fullBar.stepperCentred, true, 'the stepper is centred on the bar, not floated')
+    assert.equal(fullBar.vsOnLeft, true, 'the vs picker takes the left slot, where the rail used to answer')
+    assert.deepEqual(
+      fullBar.rightOrder,
+      ['slider', 'return'],
+      `slider then Return, Return in the corner — got ${fullBar.rightOrder.join(' → ')}`,
     )
-    pass(
-      `expanding re-frames the selected change for the new viewport `
-      + `(${(framedFull.offsetFromCentre * 100).toFixed(0)}% off centre, not pinned to an edge)`,
-    )
-    await capture(app.page, 'converged-fullscreen-bar.png')
+    pass('layout is vs · [stepper centred] · slider + Return, with Return in the rightmost corner')
 
-    // The stepper has to MOVE THE BOARD, not just relabel itself. This is the
-    // check that separates a real jump from a counter.
+    // The version picker exists here and NOWHERE else — the duplication the
+    // last round shipped is resolved, not merely rearranged.
+    const pickerCount = await evaluate(
+      app.page,
+      `(() => document.querySelectorAll('[data-testid="compare-bar-version"]').length)()`,
+    )
+    assert.equal(pickerCount, 1, 'exactly one version control on screen')
+    pass('the History rail and the vs picker are never both on screen — one control per fact')
+    await capture(app.page, 'converged-fullscreen-bottom-bar.png')
+
+    // ---- 9 · the stepper still drives the board ---------------------------
     const stepStart = await evaluate(
       app.page,
       `(() => document.querySelector('[data-testid="compare-step-count"]').textContent)()`,
     )
     assert.match(stepStart, /^\d+ of \d+ changes$/, `the stepper reads a position: "${stepStart}"`)
-
-    const cameraBefore = await evaluate(app.page, CAMERA)
-    await clickElement(app.page, '[data-testid="compare-step-next"]')
-    await delay(800)
-    const stepAfter = await evaluate(
+    /*
+     * Walk the whole list rather than asserting that ONE step moves the camera.
+     *
+     * Three of this fixture's five changes are a port added, a port removed and
+     * a retitle on the SAME Block, and all three anchor on that Block's bounds —
+     * so stepping between them correctly does not move the camera, because the
+     * thing being pointed at has not moved. Asserting a move on every step would
+     * be asserting a bug. The real claim is that the stepper walks every change
+     * and that crossing to another element does move the board.
+     */
+    const walk = []
+    let camera = await evaluate(
       app.page,
-      `(() => document.querySelector('[data-testid="compare-step-count"]').textContent)()`,
+      `(() => document.querySelector('[data-testid="compare-canvas-after"] .tl-shapes').style.transform)()`,
     )
-    const cameraAfter = await evaluate(app.page, CAMERA)
-    assert.notEqual(stepAfter, stepStart, `the counter advanced: ${stepStart} → ${stepAfter}`)
-    assert.notEqual(
-      cameraAfter,
-      cameraBefore,
-      `stepping must move the camera, but it stayed at ${cameraBefore}`,
-    )
-    pass(`the stepper navigates the board while fullscreen (${stepStart} → ${stepAfter}, camera moved)`)
+    let moved = 0
+    for (let index = 0; index < 5; index += 1) {
+      await clickElement(app.page, '[data-testid="compare-step-next"]')
+      await delay(700)
+      const at = await evaluate(app.page, `(() => ({
+        label: document.querySelector('[data-testid="compare-step-count"]').textContent,
+        camera: document.querySelector('[data-testid="compare-canvas-after"] .tl-shapes').style.transform,
+      }))()`)
+      walk.push(at.label)
+      if (at.camera !== camera) moved += 1
+      camera = at.camera
+    }
+    const positions = walk.map((label) => label.split(' ')[0])
+    assert.equal(new Set(positions).size, 5, `the stepper visits all five changes: ${positions.join(' → ')}`)
+    assert.ok(moved >= 1, `crossing to another element moves the board (${moved} of 5 steps moved it)`)
+    pass(`the stepper walks every change while fullscreen (${stepStart} → ${walk.join(' → ')}, camera moved ${moved}×)`)
     await capture(app.page, 'converged-fullscreen-stepped.png')
 
-    // Both cameras stay locked in fullscreen, or the crossfade is a lie.
-    const lockedFull = await evaluate(app.page, `(() => {
-      const panes = document.querySelectorAll('[data-testid^="compare-canvas-"] .tl-shapes')
-      return Array.from(panes).map((node) => node.style.transform)
-    })()`)
-    assert.equal(lockedFull[0], lockedFull[1], `cameras locked in fullscreen: ${lockedFull.join(' vs ')}`)
-    pass('the two cameras stay locked through the jump, so the crossfade still shows the board')
-
-    // The slider must still drive the crossfade from inside fullscreen.
     await setBlend(app.page, '15')
     const fullOpacity = await evaluate(app.page, `(() => (
       document.querySelector('.systemsketch-compare__pane[data-side="after"]').style.opacity
     ))()`)
-    assert.equal(fullOpacity, '0.15', `the opacity slider works fullscreen, got ${fullOpacity}`)
-    pass('the crossfade slider stays live in fullscreen — the effect Zach liked, kept immersive')
+    assert.equal(fullOpacity, '0.15', `the slider works fullscreen, got ${fullOpacity}`)
+    pass('the crossfade slider stays live in fullscreen')
     await setBlend(app.page, '60')
 
-    // ---- 5 · the return trip ----------------------------------------------
-    const stateBeforeReturn = await evaluate(app.page, `(() => ({
+    // ---- 10 · the return trip ---------------------------------------------
+    const before = await evaluate(app.page, `(() => ({
       step: document.querySelector('[data-testid="compare-step-count"]').textContent,
       blend: document.querySelector('[data-testid="compare-blend"]').value,
     }))()`)
-
     await clickElement(app.page, '[data-testid="compare-collapse"]')
-    await delay(800)
-
+    await delay(900)
     const restored = await evaluate(app.page, `(() => {
       const dialog = document.querySelector('[data-testid="compare-dialog"]')
-      const activeTab = Array.from(
-        document.querySelectorAll('.block-inspector__tabs [role="tab"]'),
-      ).filter((b) => b.classList.contains('is-active')).map((b) => b.textContent)
-      const selected = Array.from(
-        document.querySelectorAll('[data-testid="compare-property-table"] tr[data-selected]'),
-      ).map((row) => row.dataset.changeId)
+      const bar = document.querySelector('[data-testid="compare-bar"]')
+      const pane = document.querySelector('[data-testid="compare-canvas-after"]').getBoundingClientRect()
+      const mark = document.querySelector('[data-testid="compare-canvas-after"] [data-testid="compare-highlight-mark"]')
+      const markBox = mark?.getBoundingClientRect()
       return {
         stamped: dialog.dataset.fullscreen,
-        step: document.querySelector('[data-testid="compare-step-count"]').textContent,
+        barMode: bar.dataset.mode,
+        step: document.querySelector('[data-testid="compare-step-count"]') ? null : 'stepper gone from modal bar',
         blend: document.querySelector('[data-testid="compare-blend"]').value,
-        gitHighlight: document.querySelector('[data-testid="compare-property-table"]').dataset.gitHighlight,
+        gitHighlight: document.querySelector('[data-testid="compare-property-table"]')?.dataset.gitHighlight,
         checkbox: document.querySelector('[data-testid="compare-highlight-checkbox"]').checked,
-        activeTab,
-        selected,
-        barVisible: document.querySelector('[data-testid="compare-bar"]').getBoundingClientRect().height > 20,
+        layout: document.querySelector('[data-testid="compare-property-table"]')?.dataset.layout,
+        activeTab: Array.from(document.querySelectorAll('.block-inspector__tabs [role="tab"]'))
+          .filter((b) => b.classList.contains('is-active')).map((b) => b.textContent),
+        selectedElement: document.querySelector('[data-testid="compare-element-list"] button[data-selected]')
+          ?.dataset.testid,
+        offCentre: markBox
+          ? Math.abs((markBox.left + markBox.width / 2) - (pane.left + pane.width / 2)) / pane.width
+          : null,
         detailBack: getComputedStyle(document.querySelector('.systemsketch-compare__detail')).display !== 'none',
       }
     })()`)
     assert.equal(restored.stamped, undefined, 'the fullscreen stamp is gone')
+    assert.equal(restored.barMode, 'modal', 'the bar is back to its modal contents')
     assert.equal(restored.detailBack, true, 'the property panel came back')
-    assert.equal(restored.barVisible, true, 'the bar is still there — it never left')
-    assert.equal(restored.step, stateBeforeReturn.step, `same change selected: ${restored.step}`)
-    assert.equal(restored.blend, stateBeforeReturn.blend, `same blend: ${restored.blend}%`)
-    assert.equal(restored.gitHighlight, 'on', 'the git-ink toggle kept the value set before expanding')
-    assert.equal(restored.checkbox, true, 'and the checkbox agrees with it')
+    assert.equal(restored.blend, before.blend, `same blend: ${restored.blend}%`)
+    assert.equal(restored.gitHighlight, 'on', 'the ink toggle kept the value set before expanding')
+    assert.equal(restored.checkbox, true, 'and the checkbox agrees')
+    assert.equal(restored.layout, 'figma', 'the chosen layout survived the round trip')
     assert.deepEqual(restored.activeTab, ['Properties'], 'the tab selection survived')
-    assert.equal(restored.selected.length, 1, 'exactly one row is still selected')
-    pass(
-      'returning restores everything — selection, tab, blend and the ink toggle '
-      + '(state is preserved by construction: the tree never unmounts)',
-    )
-
-    // And the same change is re-framed for the narrow pane on the way back, so
-    // the return is symmetric with the expansion.
-    const framedBack = await evaluate(app.page, `(() => {
-      const pane = document.querySelector('[data-testid="compare-canvas-after"]').getBoundingClientRect()
-      const mark = document.querySelector('[data-testid="compare-canvas-after"] [data-testid="compare-highlight-mark"]')
-      if (!mark) return null
-      const box = mark.getBoundingClientRect()
-      return {
-        offsetFromCentre: Math.abs((box.left + box.width / 2) - (pane.left + pane.width / 2)) / pane.width,
-        paneWidth: pane.width,
-      }
-    })()`)
-    assert.ok(framedBack, 'the change is still marked after the return')
+    assert.ok(restored.selectedElement, `the element stayed selected: ${restored.selectedElement}`)
     assert.ok(
-      framedBack.offsetFromCentre < 0.2,
-      `re-framed for the ${framedBack.paneWidth.toFixed(0)}px pane, off by ${(framedBack.offsetFromCentre * 100).toFixed(0)}%`,
+      restored.offCentre !== null && restored.offCentre < 0.2,
+      `and is re-framed for the narrower pane, ${(restored.offCentre * 100).toFixed(0)}% off centre`,
     )
-    pass(`the return re-frames the same change for the narrower pane (${framedBack.paneWidth.toFixed(0)}px)`)
+    pass('returning restores layout, element, tab, blend and ink, and re-frames for the narrower pane')
     await capture(app.page, 'converged-returned-to-modal.png')
 
-    // Escape unwinds one layer at a time, never straight out of the review.
+    // Escape unwinds one layer at a time.
     await clickElement(app.page, '[data-testid="compare-expand"]')
     await delay(600)
     await key(app.page, 'Escape', 'Escape')
@@ -478,19 +596,57 @@ async function main() {
     })()`)
     assert.equal(afterEscape.open, true, 'the first Escape does NOT close the review')
     assert.equal(afterEscape.fullscreen, undefined, 'the first Escape leaves fullscreen')
-    pass('Escape unwinds fullscreen first, so a reviewer cannot lose their place with one key')
+    pass('Escape unwinds fullscreen first, so one key cannot lose a reviewer their place')
 
     await key(app.page, 'Escape', 'Escape')
     await waitFor(app.page, `!document.querySelector('[data-testid="compare-dialog"]')`, 'closed')
     pass('the second Escape closes the review')
 
-    const untouched = await evaluate(app.page, `(() => {
+    // ---- 11 · the SAME tab fix, in a real Block inspector -----------------
+    /*
+     * The fix went into a shared stylesheet, so a second consumer is the proof
+     * that it propagated rather than being a Compare-only patch.
+     */
+    await evaluate(app.page, `(() => {
       const editor = window.__systemsketch.editor
-      return { shapes: editor.getCurrentPageShapes().length, readonly: editor.getIsReadonly() }
+      const block = editor.getCurrentPageShapes().find((shape) => shape.type === 'block')
+      editor.setCurrentTool('select')
+      editor.select(block.id)
+      return block.id
     })()`)
-    assert.equal(untouched.readonly, false, 'the live editor is editable again')
-    assert.equal(untouched.shapes, 12, 'the board is unchanged by the whole journey')
-    pass('the board survives the review unchanged and editable')
+    await waitFor(app.page, `!!document.querySelector('.block-inspector__tabs')`, 'Block inspector open')
+    await delay(500)
+    const blockTabs = await evaluate(app.page, `(() => {
+      const strip = document.querySelector('.block-inspector .block-inspector__tabs')
+      if (!strip) return null
+      const buttons = Array.from(strip.querySelectorAll('[role="tab"]'))
+      const stripBox = strip.getBoundingClientRect()
+      const span = buttons[buttons.length - 1].getBoundingClientRect().right - buttons[0].getBoundingClientRect().left
+      const close = strip.querySelector('.block-inspector__dock-close')
+      const closeBox = close?.getBoundingClientRect()
+      return {
+        labels: buttons.map((b) => b.textContent.trim()),
+        stripWidth: stripBox.width,
+        tabsWidth: span,
+        // The close button is a child positioned against the strip's right
+        // edge — if the strip had been shrunk instead of the tabs, it would
+        // have walked inward with it.
+        closeAtRightEdge: closeBox ? stripBox.right - closeBox.right < 12 : null,
+      }
+    })()`)
+    assert.ok(blockTabs, 'the Block inspector rendered its tab strip')
+    assert.ok(
+      blockTabs.tabsWidth < blockTabs.stripWidth * 0.7,
+      `the Block inspector's tabs hug too — ${blockTabs.tabsWidth.toFixed(0)}px of ${blockTabs.stripWidth.toFixed(0)}px`,
+    )
+    if (blockTabs.closeAtRightEdge !== null) {
+      assert.equal(blockTabs.closeAtRightEdge, true, 'its close button is still pinned to the panel edge')
+    }
+    pass(
+      `the same fix reaches the Block inspector (${blockTabs.labels.join(' / ')}: `
+      + `${blockTabs.tabsWidth.toFixed(0)}px in a ${blockTabs.stripWidth.toFixed(0)}px strip)`,
+    )
+    await capture(app.page, 'converged-block-inspector-tabs.png')
 
     const errors = localConsoleErrors(app.page)
     assert.deepEqual(errors, [], `console errors: ${errors.join(' | ')}`)

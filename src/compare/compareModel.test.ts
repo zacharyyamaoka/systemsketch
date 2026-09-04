@@ -209,4 +209,39 @@ describe('a rewired cable is an endpoint fact, not a coordinate one', () => {
 			{ path: 'endpoint.start', before: 'load.frames', after: 'predict.boxes' },
 		])
 	})
+
+	/**
+	 * The grouping invariant, checked on ALL THREE port operations at once.
+	 *
+	 * This exists because it broke: `element` defaults to the change's own name
+	 * when a call site forgets to pass it, and exactly one of the three port
+	 * pushes did forget — so a MODIFIED port grouped under `draw_overlay.image`
+	 * as if the port were itself an element, while an added and a removed port
+	 * grouped correctly. A per-operation test would have been green on two of
+	 * three; the fix is a test that cannot pass unless every operation obeys.
+	 */
+	it('groups every port under its host Block, whatever the operation', () => {
+		const before = board([
+			block('shape:a', {
+				title: 'draw_overlay',
+				inputs: [port('in-keep', 'image', 'RGB'), port('in-gone', 'model')],
+			}),
+		])
+		const after = board([
+			block('shape:a', {
+				title: 'draw_overlay',
+				inputs: [port('in-keep', 'image', 'RGBA'), port('in-new', 'threshold')],
+			}),
+		])
+
+		const ports = compareBoards(before, after).changes.filter((c) => c.subject === 'port')
+		expect(ports.map((c) => c.kind).sort()).toEqual(['added', 'modified', 'removed'])
+		for (const change of ports) {
+			// A port's element is its host Block — never the port, and never the
+			// dotted path that names the port.
+			expect(change.element).toBe('draw_overlay')
+			expect(change.elementId).toBe('block:shape:a')
+			expect(change.element).not.toBe(change.name)
+		}
+	})
 })
