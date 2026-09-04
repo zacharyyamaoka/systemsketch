@@ -97,7 +97,7 @@ export type WorkspaceStatus =
   | { kind: 'quarantined'; message: string }
   | { kind: 'error'; message: string }
 
-type WorkspaceDialogMode = 'open' | 'saveAs' | 'exportTldraw' | 'rename' | null
+type WorkspaceDialogMode = 'open' | 'saveAs' | 'exportTldraw' | 'portableCopy' | 'rename' | null
 
 interface WorkspaceSaveAttempt {
   path: string
@@ -120,6 +120,11 @@ export interface LocalWorkspaceController {
   save(force?: boolean): Promise<void>
   saveAs(path: string, force?: boolean): Promise<void>
   exportTldraw(destination: string, force?: boolean): Promise<void>
+  /**
+   * Creates and opens a separate stock `.tldr` for a newer protected board.
+   * The source is never rewritten or downgraded in place.
+   */
+  makePortableCopy(destination: string, force?: boolean): Promise<void>
   rename(path: string): Promise<void>
   /**
    * Moves the open board to Trash unconditionally.
@@ -773,6 +778,35 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     }
   }, [resumeDirtyAutosave, waitForSave])
 
+  /**
+   * The deliberate reverse-compatibility route. We cannot know which custom
+   * shape support an older app has, so the conservative target is stock
+   * tldraw: every feature this build can read becomes editable primitives.
+   *
+   * Unlike File → Export, this action opens the duplicate afterwards. It is a
+   * regression workflow, not merely a download, and the protected source is
+   * left byte-for-byte as it was.
+   */
+  const makePortableCopy = useCallback(async (destination: string, force = false) => {
+    const editor = editorRef.current
+    if (!editor || savingRef.current) throw new Error('The document is not ready to make a compatible copy yet.')
+    const previousStatus = statusRef.current
+    const target = exportedTldrawPath(destination)
+    savingRef.current = true
+    setStatus({ kind: 'saving' })
+    try {
+      const source = await exportPortableTldraw(editor)
+      await writeWorkspaceDocument({ path: target, source, baseDigest: null, force })
+      updateRecents(rememberDocumentPath(target))
+      window.location.assign(documentHref(target))
+    } catch (cause) {
+      setStatus(previousStatus)
+      throw cause
+    } finally {
+      savingRef.current = false
+    }
+  }, [updateRecents])
+
   const rename = useCallback(async (nextPath: string) => {
     const currentPath = pathRef.current
     if (!currentPath || nextPath === currentPath) return
@@ -1099,6 +1133,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     save: persist,
     saveAs,
     exportTldraw,
+    makePortableCopy,
     rename,
     trash,
     reveal,
@@ -1123,6 +1158,7 @@ export function SystemSketchWorkspaceProvider({ children }: { children: ReactNod
     persist,
     recents,
     exportTldraw,
+    makePortableCopy,
     runAction,
     takeDisk,
     rename,
@@ -1190,16 +1226,16 @@ function WorkspaceAlert() {
             : status.kind === 'missing'
               ? 'This file was moved or deleted'
               : status.kind === 'future'
-                ? 'A newer-format original is protected'
+                ? 'This board is newer than this app'
                 : status.kind === 'quarantined'
-                  ? 'This file is open read-only for safety'
+                  ? 'This file could not be opened safely'
                 : 'The file could not be saved'}
         </strong>
         <span>
           {status.kind === 'future'
-            ? `${status.message} Create an editable current-format copy; the original remains byte-for-byte untouched and newer-only metadata may be omitted.`
+            ? `${status.message} It is visible read-only. A compatible copy creates and opens a separate stock .tldr made of editable primitives; the original remains byte-for-byte untouched.`
             : status.kind === 'quarantined'
-            ? `${status.message}. The original file has not been changed.`
+            ? `${status.message}. The original file has not been changed. No board content was loaded, so there is nothing here to recover or make compatible.`
             : status.kind === 'error' ? status.message : workspace.path}
         </span>
       </div>
@@ -1230,15 +1266,17 @@ function WorkspaceAlert() {
         ) : status.kind === 'future' ? (
           <>
             <button type="button" onClick={() => workspace.showDialog('open')}>Open another…</button>
-            <button type="button" className="primary" onClick={() => workspace.showDialog('saveAs')}>
-              Create editable copy…
+            <button
+              type="button"
+              className="primary"
+              data-testid="workspace-make-compatible-copy"
+              onClick={() => workspace.showDialog('portableCopy')}
+            >
+              Make compatible copy…
             </button>
           </>
         ) : status.kind === 'quarantined' ? (
-          <>
-            <button type="button" onClick={() => workspace.showDialog('open')}>Open another…</button>
-            <button type="button" className="primary" onClick={() => workspace.showDialog('saveAs')}>Save recovery as…</button>
-          </>
+          <button type="button" onClick={() => workspace.showDialog('open')}>Open another…</button>
         ) : (
           <button type="button" onClick={() => workspace.showDialog('saveAs')}>Save As…</button>
         )}
@@ -1283,7 +1321,7 @@ export function SystemSketchMainMenu() {
           : workspace.status.kind === 'missing'
             ? 'Missing'
             : workspace.status.kind === 'quarantined'
-              ? 'Read-only recovery'
+                  ? 'Unreadable · protected'
             : workspace.status.kind === 'future'
               ? 'Newer format · protected'
             : workspace.status.kind === 'error'
@@ -1314,11 +1352,20 @@ export function SystemSketchMainMenu() {
               </TldrawUiMenuGroup>
               <TldrawUiMenuGroup id="file-save">
                 <TldrawUiMenuItem id="save-document" label="Save" kbd="cmd+s" disabled={workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'} onSelect={() => workspace.runAction(workspace.save)} />
-                <TldrawUiMenuItem id="save-as-document" label="Save As…" kbd="cmd+shift+s" onSelect={() => workspace.showDialog('saveAs')} />
+                <TldrawUiMenuItem
+                  id="save-as-document"
+                  label={workspace.status.kind === 'future' ? 'Make current-format copy…' : 'Save As…'}
+                  kbd="cmd+shift+s"
+                  disabled={workspace.status.kind === 'quarantined'}
+                  onSelect={() => workspace.showDialog('saveAs')}
+                />
                 <TldrawUiMenuItem
                   id="export-tldraw"
-                  label="Export to tldraw…"
-                  onSelect={() => workspace.showDialog('exportTldraw')}
+                  label={workspace.status.kind === 'future' ? 'Make compatible copy…' : 'Export to tldraw…'}
+                  disabled={workspace.status.kind === 'quarantined'}
+                  onSelect={() => workspace.showDialog(
+                    workspace.status.kind === 'future' ? 'portableCopy' : 'exportTldraw',
+                  )}
                 />
                 <TldrawUiMenuItem id="rename-document" label="Rename…" disabled={workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'} onSelect={() => workspace.showDialog('rename')} />
               </TldrawUiMenuGroup>
@@ -1353,7 +1400,7 @@ export function SystemSketchMainMenu() {
         title={`${workspace.path ?? ''} · ${statusLabel}`}
         onClick={() => workspace.showDialog(
           workspace.status.kind === 'quarantined' || workspace.status.kind === 'future'
-            ? 'saveAs'
+            ? workspace.status.kind === 'future' ? 'portableCopy' : 'open'
             : 'rename',
         )}
       >
@@ -1382,17 +1429,20 @@ function relativeDay(mtime: number): string {
  */
 function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> }) {
   const workspace = useLocalWorkspace()
+  // Radix otherwise attaches to `body`, outside ThemeRoot's token inheritance.
+  // Keep the modal in the themed tree while retaining Radix's focus handling.
+  const portalContainer = typeof document === 'undefined'
+    ? undefined
+    : document.querySelector<HTMLElement>('.systemsketch-theme-root') ?? undefined
   const [listing, setListing] = useState<WorkspaceListing | null>(null)
   const [selectedPath, setSelectedPath] = useState<string | null>(null)
   const [query, setQuery] = useState('')
-  const recoveryMode = useRef(workspace.status.kind === 'quarantined').current
-  const compatibilityMode = useRef(workspace.status.kind === 'future').current
+  const portableCopyMode = mode === 'portableCopy'
+  const currentFormatCopyMode = mode === 'saveAs' && workspace.status.kind === 'future'
   const conflictCopyMode = useRef(mode === 'saveAs' && workspace.status.kind === 'conflict').current
   const [name, setName] = useState(() => (
-    recoveryMode
-      ? `${workspace.title} recovery`
-      : compatibilityMode
-        ? `${workspace.title} compatible copy`
+    portableCopyMode || currentFormatCopyMode
+      ? `${workspace.title} compatible copy`
         // WHY: draw.io's safe conflict action creates a separately named copy.
         // Default away from the contested path so Enter cannot overwrite it.
         : conflictCopyMode ? `${workspace.title} local copy` : workspace.title
@@ -1409,10 +1459,11 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
   const crumbsRef = useRef<HTMLElement | null>(null)
   const isRename = mode === 'rename'
   const isExport = mode === 'exportTldraw'
+  const writesTldraw = isExport || portableCopyMode
   // Rename never changes a document's type, so it shows the suffix the file
   // already has. An export always writes `.tldr` — that is the whole point of
   // it. Everything else is making a new file, which is `.systemsketch`.
-  const suffix = isExport
+  const suffix = writesTldraw
     ? TLDRAW_SUFFIX
     : (isRename && workspace.path ? documentSuffix(workspace.path) : null) ?? SYSTEMSKETCH_SUFFIX
 
@@ -1449,7 +1500,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
-      const target = isRename || mode === 'saveAs' || mode === 'exportTldraw'
+      const target = isRename || mode === 'saveAs' || writesTldraw
         ? nameInputRef.current
         : filterInputRef.current
       target?.focus()
@@ -1504,11 +1555,11 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
         if (!selectedRow) throw new Error('Choose a document to open.')
         await activate(selectedRow)
         if (selectedRow.kind === 'folder') setBusy(false)
-      } else if (mode === 'saveAs' || mode === 'exportTldraw') {
+      } else if (mode === 'saveAs' || mode === 'exportTldraw' || portableCopyMode) {
         const proposedPath = force && replacePath
           ? replacePath
           : listing ? documentPathFor(listing.dir, name, suffix) : null
-        const nextPath = proposedPath && mode === 'exportTldraw'
+        const nextPath = proposedPath && writesTldraw
           ? exportedTldrawPath(proposedPath)
           : proposedPath
         if (!nextPath) throw new Error('Enter a file name.')
@@ -1516,6 +1567,8 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
         if (mode === 'exportTldraw') {
           await workspace.exportTldraw(nextPath, force)
           workspace.closeDialog()
+        } else if (portableCopyMode) {
+          await workspace.makePortableCopy(nextPath, force)
         } else {
           await workspace.saveAs(nextPath, force)
         }
@@ -1527,7 +1580,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
       }
     } catch (cause) {
       if (
-        (mode === 'saveAs' || mode === 'exportTldraw')
+        (mode === 'saveAs' || mode === 'exportTldraw' || portableCopyMode)
         && !force
         && attemptedPath
         && cause instanceof WorkspaceConflict
@@ -1535,7 +1588,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
         setReplacePath(attemptedPath)
         setError(
           `“${documentTitle(attemptedPath)}” already exists. Replace it with ${
-            mode === 'exportTldraw' ? 'this export' : 'this document'
+            mode === 'exportTldraw' ? 'this export' : portableCopyMode ? 'this compatible copy' : 'this document'
           }?`,
         )
       } else {
@@ -1599,7 +1652,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
     // tldraw uses. Let it own focus trapping, Escape, outside dismissal, and
     // screen-reader modal isolation instead of maintaining a second version.
     <Dialog.Root open onOpenChange={(open) => { if (!open) workspace.closeDialog() }}>
-      <Dialog.Portal>
+      <Dialog.Portal container={portalContainer}>
         <Dialog.Overlay className="systemsketch-workspace-dialog-backdrop">
           <Dialog.Content
             asChild
@@ -1628,8 +1681,12 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                 {mode === 'open'
                   ? 'Open a document'
                   : mode === 'saveAs'
-                    ? conflictCopyMode ? 'Preserve your version' : 'Save a copy'
-                    : mode === 'exportTldraw' ? 'Export to tldraw' : 'Rename document'}
+                    ? conflictCopyMode
+                      ? 'Preserve your version'
+                      : currentFormatCopyMode ? 'Make current-format copy' : 'Save a copy'
+                    : mode === 'exportTldraw'
+                      ? 'Export to tldraw'
+                      : portableCopyMode ? 'Make compatible copy' : 'Rename document'}
               </h2>
             </Dialog.Title>
           </div>
@@ -1637,6 +1694,16 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
             <button type="button" aria-label="Close">×</button>
           </Dialog.Close>
         </header>
+
+        {portableCopyMode ? (
+          <p className="systemsketch-workspace-dialog__context" data-testid="workspace-compatible-copy-explanation">
+            This creates and opens a separate <code>.tldr</code>. Every SystemSketch feature this build can read becomes editable stock tldraw primitives; the original stays byte-for-byte untouched. Data this build cannot read cannot be recovered or converted here.
+          </p>
+        ) : currentFormatCopyMode ? (
+          <p className="systemsketch-workspace-dialog__context">
+            This creates a separate current-format SystemSketch board. Newer-only metadata may be omitted; use “Make compatible copy” to lower the visible board to stock primitives instead.
+          </p>
+        ) : null}
 
         {isRename ? (
           <div className="systemsketch-workspace-dialog__rename">
@@ -1785,7 +1852,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                     onClick={() => {
                       setSelectedPath(row.path)
                       if (row.kind === 'folder') void load(row.path)
-                      else if (mode === 'saveAs' || mode === 'exportTldraw') {
+                      else if (mode === 'saveAs' || writesTldraw) {
                         setName(row.title)
                         setReplacePath(null)
                         setError(null)
@@ -1810,7 +1877,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                   </p>
                 ) : null}
               </div>
-              {mode === 'saveAs' || mode === 'exportTldraw' ? (
+              {mode === 'saveAs' || writesTldraw ? (
                 <div className="systemsketch-workspace-name-field is-save-as">
                   <input ref={nameInputRef} autoFocus value={name} aria-label="File name" onChange={(event) => {
                     setName(event.target.value)
@@ -1857,7 +1924,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                   ? selectedRow?.kind === 'folder' ? 'Open folder' : 'Open'
                   : replacePath
                     ? 'Replace'
-                    : mode === 'saveAs' ? 'Save' : mode === 'exportTldraw' ? 'Export' : 'Rename'}
+                    : mode === 'saveAs' ? 'Save' : mode === 'exportTldraw' ? 'Export' : portableCopyMode ? 'Make copy' : 'Rename'}
             </button>
           </div>
         </footer>

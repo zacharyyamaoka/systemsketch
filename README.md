@@ -4,6 +4,8 @@ SystemSketch starts from one deliberately boring datum: the stock tldraw whitebo
 
 The [Preview board-recovery gallery](docs/preview-board-recovery-2026-09-03.html) records the safe reopen path for an old, multi-page SystemSketch board: a required Block style property is migrated before validation, Branch arm repair waits until the loading transaction finishes, and the recovered Series A board opens with all 598 shapes intact instead of being replaced by an empty canvas.
 
+The [reverse-compatibility gallery](docs/reverse-compatibility-2026-09-03.html) makes rollback explicit: a parseable board from a newer SystemSketch version stays read-only and byte-exact, then **Make compatible copy…** creates and opens a separate stock `.tldr` whose readable Blocks, regions, and semantic edges are editable primitives. An unreadable board has no fake “recovery” copy—the original is untouched and the UI says that no board data was loaded. The gallery carries the real modal, both safety states, the 9-check future-format journey, the 6-check unreadable-file journey, and a ready-to-drive review board. [PEP 0001](docs/pep-0001-reverse-compatible-portable-copies.md) is the durable compatibility policy behind that behavior.
+
 ## Current improvement review
 
 The [linked Definition cable-drag repair gallery](docs/linked-definition-port-drag-2026-09-03.html) records the exact recovered-pipeline crash and its fix: a real port drag now exits tldraw’s atomic pointer update before Definition-body propagation mirrors the cable. The companion [`linked-definition-port-drag.systemsketch`](sketches/review/linked-definition-port-drag.systemsketch) is ready to review on this track.

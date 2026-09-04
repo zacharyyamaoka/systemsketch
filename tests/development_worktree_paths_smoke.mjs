@@ -29,7 +29,7 @@ const { page, port, apiPort, filesRoot } = app
 const primaryWorkspace = join(filesRoot, 'SystemSketch')
 const savedCopy = join(primaryWorkspace, 'Linked.systemsketch')
 const futureCopyFolder = join(primaryWorkspace, 'Review copies')
-const futureCopy = join(futureCopyFolder, 'Future compatible copy.systemsketch')
+const futureCopy = join(futureCopyFolder, 'Future compatible copy.tldr')
 const futureSource = JSON.stringify({
   systemSketch: {
     formatVersion: 7,
@@ -154,17 +154,17 @@ try {
     'a primary-workspace Untitled board',
   )
 
-  // The protected-document action shares Save As. Exercise it independently,
+  // The protected-document action makes a portable duplicate. Exercise it independently,
   // then create a folder through the dialog: both browsing and directory
   // creation must stay in the primary root while the future original remains
   // untouched in the worktree.
   await openApp(page, port, `?board=${encodeURIComponent(futureBoard)}`)
   await waitFor(page, `document.querySelector('[data-testid="workspace-future-format"]')`, 'future worktree protection')
-  await clickElement(page, '[data-testid="workspace-future-format"] button.primary')
+  await clickElement(page, '[data-testid="workspace-make-compatible-copy"]')
   await waitFor(
     page,
-    `document.querySelector('[data-testid="workspace-dialog"][data-mode="saveAs"]')`,
-    'Create editable copy from the future worktree board',
+    `document.querySelector('[data-testid="workspace-dialog"][data-mode="portableCopy"]')`,
+    'Make compatible copy from the future worktree board',
   )
   assert.equal(
     await evaluate(page, `Array.from(document.querySelectorAll('.systemsketch-workspace-crumbs button')).at(-1)?.textContent`),
@@ -183,10 +183,10 @@ try {
   await waitFor(
     page,
     `new URLSearchParams(location.search).get('board') === ${JSON.stringify(futureCopy)}`,
-    'the primary-workspace editable copy',
+    'the primary-workspace compatible copy',
   )
   assert.equal(await readFile(futureBoard, 'utf8'), futureSource)
-  assert.equal(JSON.parse(await readFile(futureCopy, 'utf8')).systemSketch.formatVersion, 2)
+  assert.equal(JSON.parse(await readFile(futureCopy, 'utf8')).systemSketch, undefined)
 
   const listedWorktree = await fetch(
     `http://127.0.0.1:${apiPort}/api/workspace/list?dir=${encodeURIComponent(linkedDirectory)}`,
@@ -213,7 +213,7 @@ try {
   process.stdout.write('PASS malformed board URL reports its escaping error instead of opening Untitled\n')
   process.stdout.write('PASS source-worktree URL opened, autosaved, and cold-reopened\n')
   process.stdout.write('PASS source-worktree Save As and New fell back to the primary workspace\n')
-  process.stdout.write('PASS future worktree Create editable copy and New Folder stayed in the primary workspace\n')
+  process.stdout.write('PASS future worktree Make compatible copy and New Folder stayed in the primary workspace\n')
   process.stdout.write('PASS worktree directory listing and creation remained rejected\n')
   process.stdout.write('PASS unrelated machine path remained rejected\n')
 } finally {

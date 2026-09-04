@@ -481,11 +481,11 @@
   z-index: 9000;
   top: 12px;
   left: 50%;
-  display: flex;
-  width: min(620px, calc(100vw - 32px));
+  display: grid;
+  width: min(760px, calc(100vw - 32px));
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 18px;
+  gap: 16px;
   padding: 11px 12px 11px 15px;
   border: 1px solid color-mix(in srgb, var(--ss-danger) 40%, transparent);
   border-radius: 11px;
@@ -502,11 +502,10 @@
 }
 
 .systemsketch-workspace-alert span {
-  overflow: hidden;
   color: var(--ss-text-muted);
-  font-size: 10px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 11px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .systemsketch-workspace-alert__actions {
@@ -515,6 +514,18 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 7px;
+}
+
+/* A development Preview owns the top-center slot. Safety information must not
+ * make its release controls unreadable—or be hidden beneath them. */
+body:has(.systemsketch-development-preview) .systemsketch-workspace-alert {
+  top: 64px;
+}
+
+/* The release Preview notice is the same shared top-center surface in the
+ * regular product composition. Leave one notice-height of breathing room. */
+body:has(.systemsketch-preview-mode) .systemsketch-workspace-alert {
+  top: calc(var(--systemsketch-chrome-inset) + var(--systemsketch-top-height) + 58px);
 }
 
 @media (max-width: 640px) {
@@ -541,8 +552,31 @@
 
   .systemsketch-workspace-alert {
     align-items: stretch;
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
+
+  .systemsketch-workspace-alert__actions {
+    justify-content: flex-start;
+  }
+}
+
+.systemsketch-workspace-dialog__context {
+  margin: 0;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--ss-border);
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-sunken);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.systemsketch-workspace-dialog__context code {
+  padding: 1px 4px;
+  border-radius: 4px;
+  color: var(--ss-text);
+  background: var(--ss-surface-hover);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .92em;
 }
 
 .systemsketch-workspace-browser > aside button.is-current {

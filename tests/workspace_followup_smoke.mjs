@@ -32,6 +32,7 @@ const ASSETS = join(ROOT, 'docs', 'assets')
 const SHOT_FOLDER_ERROR = join(ASSETS, 'workspace-followup-folder-validation-2026-09-02.png')
 const SHOT_FOLDER_CREATED = join(ASSETS, 'workspace-followup-folder-created-2026-09-02.png')
 const SHOT_FUTURE = join(ASSETS, 'workspace-followup-future-protected-2026-09-02.png')
+const SHOT_COMPATIBLE_DIALOG = join(ASSETS, 'reverse-compatibility-copy-dialog-2026-09-03.png')
 const SHOT_COPY = join(ASSETS, 'workspace-followup-compatible-copy-2026-09-02.png')
 
 const validCore = {
@@ -121,18 +122,15 @@ async function main() {
   const workspace = join(filesRoot, 'SystemSketch')
   const currentPath = join(workspace, 'Current.systemsketch')
   const futurePath = join(workspace, 'Future.systemsketch')
-  const copyPath = join(workspace, 'Future compatible copy.systemsketch')
+  const copyPath = join(workspace, 'Future compatible copy.tldr')
   const collisionPath = join(workspace, 'Existing')
   const nestedPath = join(workspace, 'Projects', 'Sprint')
-  const futureSource = systemSketchDocument(7, {
-    futureOnly: { retainedByOriginal: true },
-  })
+  let futureSource = ''
 
   await ensureDir(workspace)
   await ensureDir(ASSETS)
   await mkdir(collisionPath)
   await writeFile(currentPath, systemSketchDocument())
-  await writeFile(futurePath, futureSource)
 
   try {
     await page.send('Network.enable')
@@ -186,7 +184,38 @@ async function main() {
     assert.equal(await evaluate(page, `Boolean(document.querySelector('[data-testid="workspace-dialog"]'))`), true)
     pass('Escape does not create the partially entered folder')
 
-    // Now open an otherwise stock-readable document with a future envelope.
+    // Seed a real SystemSketch Block, then turn only its envelope into a newer
+    // version. The regression path must lower this visible custom shape into
+    // stock records, not merely relabel the outer wrapper.
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `!document.querySelector('[data-testid="workspace-dialog"]')`, 'the workspace dialog to close')
+    await drawBlock(page, { x: 340, y: 270 }, { x: 650, y: 440 }, 'future source')
+    const seededSource = await waitForFile(
+      currentPath,
+      (source) => {
+        try {
+          return JSON.parse(source).records?.some((record) => (
+            record.typeName === 'shape' && record.type === 'block' && record.props?.title === 'future source'
+          ))
+        } catch {
+          return false
+        }
+      },
+      'the source Block to autosave',
+    )
+    const seededDocument = JSON.parse(seededSource)
+    futureSource = JSON.stringify({
+      ...seededDocument,
+      systemSketch: {
+        ...seededDocument.systemSketch,
+        formatVersion: 7,
+        futureOnly: { retainedByOriginal: true },
+      },
+    }, null, 2)
+    await writeFile(futurePath, futureSource)
+
+    // Now open a parseable newer document. Its source bytes are protected
+    // while the visible board is available for the compatible-copy transform.
     await openApp(page, port, `?board=${encodeURIComponent(futurePath)}`)
     await waitFor(page, `document.querySelector('[data-testid="workspace-future-format"]')`, 'future-format protection')
     assert.equal(await evaluate(page, 'window.__systemsketch.editor.getInstanceState().isReadonly'), true)
@@ -201,35 +230,51 @@ async function main() {
     await key(page, 'b', 'KeyB')
     await drag(page, { x: 320, y: 250 }, { x: 610, y: 420 })
     await delay(900)
-    assert.equal(await evaluate(page, 'window.__systemsketch.editor.getCurrentPageShapes().length'), 0)
+    assert.equal(await evaluate(page, 'window.__systemsketch.editor.getCurrentPageShapes().filter((shape) => shape.type === "block").length'), 1)
     assert.equal(await readFile(futurePath, 'utf8'), futureSource)
     await capture(page, SHOT_FUTURE)
     pass('a valid future-format document opens for inspection while its original remains read-only and byte-exact')
 
-    await clickElement(page, '[data-testid="workspace-future-format"] button.primary')
-    await waitFor(page, `document.querySelector('[data-testid="workspace-dialog"][data-mode="saveAs"]')`, 'compatibility-copy dialog')
+    await clickElement(page, '[data-testid="workspace-make-compatible-copy"]')
+    await waitFor(page, `document.querySelector('[data-testid="workspace-dialog"][data-mode="portableCopy"]')`, 'compatibility-copy dialog')
+    assert.equal(
+      await evaluate(page, `document.querySelector('#workspace-dialog-title')?.textContent`),
+      'Make compatible copy',
+    )
+    assert.match(
+      await evaluate(page, `document.querySelector('[data-testid="workspace-compatible-copy-explanation"]')?.textContent`),
+      /editable stock tldraw primitives/i,
+    )
     assert.equal(
       await evaluate(page, `document.querySelector('input[aria-label="File name"]').value`),
       'Future compatible copy',
     )
+    await capture(page, SHOT_COMPATIBLE_DIALOG)
     await clickElement(page, '[data-testid="workspace-confirm"]')
-    await waitFor(page, `new URLSearchParams(location.search).get('board')?.endsWith('Future compatible copy.systemsketch')`, 'compatibility copy')
+    await waitFor(page, `new URLSearchParams(location.search).get('board')?.endsWith('Future compatible copy.tldr')`, 'compatibility copy')
     await waitFor(page, 'window.__systemsketch?.editor', 'editable compatibility-copy board')
 
     const initialCopySource = await waitForFile(
       copyPath,
       (source) => {
-        try { return JSON.parse(source).systemSketch?.formatVersion === 2 } catch { return false }
+        try {
+          const parsed = JSON.parse(source)
+          return parsed.systemSketch === undefined
+            && parsed.records?.some((record) => record.typeName === 'shape' && record.type === 'group')
+        } catch {
+          return false
+        }
       },
-      'current-format compatibility copy',
+      'portable compatibility copy',
     )
     const initialCopy = JSON.parse(initialCopySource)
-    assert.equal(initialCopy.systemSketch.formatVersion, 2)
-    assert.equal(initialCopy.systemSketch.futureOnly, undefined)
+    assert.equal(initialCopy.systemSketch, undefined)
+    assert.equal(initialCopy.records.some((record) => record.typeName === 'shape' && record.type === 'block'), false)
+    assert.equal(initialCopy.records.some((record) => record.typeName === 'shape' && record.type === 'group'), true)
     assert.equal(await readFile(futurePath, 'utf8'), futureSource)
     assert.equal(await evaluate(page, 'window.__systemsketch.editor.getInstanceState().isReadonly'), false)
     assert.equal(await evaluate(page, `Boolean(document.querySelector('[data-testid="workspace-future-format"]'))`), false)
-    pass('Create editable copy writes a separate current-format document and does not overwrite the original')
+    pass('Make compatible copy opens a separate stock .tldr of primitives and does not overwrite the original')
 
     await drawBlock(page, { x: 340, y: 270 }, { x: 650, y: 440 }, 'editable compatibility copy')
     await waitFor(page, `document.querySelector('.systemsketch-file-title i')?.dataset.state === 'clean'`, 'copy autosave')
@@ -251,7 +296,8 @@ async function main() {
     assert.notEqual(editedCopySource, initialCopySource)
     assert.equal(await readFile(futurePath, 'utf8'), futureSource)
     await capture(page, SHOT_COPY)
-    pass('the compatibility copy accepts a real Block edit and saves normally while the future original stays untouched')
+    assert.equal(JSON.parse(editedCopySource).systemSketch, undefined)
+    pass('the portable compatibility copy accepts a real Block edit and saves normally while the future original stays untouched')
 
     const handledDirectoryFailures = page.events.filter((event) => (
       event.method === 'Network.responseReceived'
