@@ -16,7 +16,7 @@ partial-update operation to **Bundle** and the shipped **Split** projection to
 loose-terminal drop picker. The completed independent
 track is `track/bundle-unbundle-copy-quick-insert`, pinned locally to
 `7e8673b1265521b6922dd77406ff7e88565d3596`
-(base [`363792db43f0bf31c74ba7968759776aa3807401`](https://github.com/zacharyyamaoka/systemsketch/commit/363792db43f0bf31c74ba7968759776aa3807401)).
+(base `363792db43f0bf31c74ba7968759776aa3807401`).
 The product branch is deliberately unmerged and has not been published to `origin`; the
 identifiers above are review coordinates in Zach's local repository, not public links.
 
