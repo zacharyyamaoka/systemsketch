@@ -7,6 +7,7 @@ import {
 	inferLiteralType,
 	isFoldedLiteral,
 	normalizeValueBlockProps,
+	valueBlockExactText,
 	valueBlockLabel,
 	valueBlockSize,
 	valueBlockText,
@@ -59,6 +60,15 @@ describe('folding', () => {
 		const folded = createValueBlockProps(getDefaultBlockProps(), DICT, 'opts')
 		expect(valueBlockLabel(folded)).toMatchObject({ display: '…', folded: true, literal: DICT })
 		expect(valueBlockText(valueBlockLabel(folded))).toBe('opts = …')
+	})
+
+	it('preserves authored punctuation and whitespace unless it explicitly abbreviates', () => {
+		const literal = '  _gain_copy_  '
+		const props = createValueBlockProps(getDefaultBlockProps(), literal, 'gain_copy')
+		const label = valueBlockLabel(props)
+		expect(label).toMatchObject({ literal, display: literal, folded: false })
+		expect(valueBlockText(label)).toBe('gain_copy =   _gain_copy_  ')
+		expect(valueBlockExactText(label)).toBe('gain_copy =   _gain_copy_  ')
 	})
 })
 
@@ -113,6 +123,18 @@ describe('normalizeValueBlockProps', () => {
 		const next = normalizeValueBlockProps(props)
 		expect(next.inputs).toEqual([{ id: 'in_3', name: 'gain', type: 'float', visible: true }])
 		expect(next.outputs).toEqual([{ id: 'out_7', name: 'gain', type: 'float', visible: true }])
+	})
+
+	it('strips callable-Definition metadata so copied pills are always independent', () => {
+		const props = valueBlock({
+			definitionId: 'shared-callable-definition',
+			definitionKey: 'shared_callable',
+			draftOrdinal: 2,
+		})
+		const normalised = normalizeValueBlockProps(props)
+		expect(normalised.definitionId).toBeUndefined()
+		expect(normalised.definitionKey).toBeUndefined()
+		expect(normalised.draftOrdinal).toBeUndefined()
 	})
 
 	it('honours a rename through either rim', () => {

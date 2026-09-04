@@ -70,7 +70,7 @@ describe('getShapeFactsModel', () => {
       shapes: [rectangle],
       bounds: { [rectangle.id]: { x: 120.4, y: 40.6, w: 200, h: 100 } },
     }))
-    expect(model?.title).toBe('Rectangle')
+    expect(model?.title).toBe('rectangle')
     expect(model?.shapeId).toBe(rectangle.id)
   })
 
@@ -123,10 +123,15 @@ describe('getShapeFactsModel', () => {
     ])
     const model = getShapeFactsModel(editor({ shapes: [shape('a', 'geo', { geo: 'rectangle' })], styles }))
     expect(model?.styles).toEqual([
-      { label: 'Colour', value: 'Light blue' },
+      { label: 'Colour', value: 'light-blue' },
       { label: 'Fill', value: 'Mixed' },
     ])
   })
+
+	 it('preserves separator characters in a stock property token', () => {
+		const custom = shape('custom', 'geo', { geo: 'custom_shape' })
+		expect(getShapeFactsModel(editor({ shapes: [custom] }))?.title).toBe('custom_shape')
+	})
 
   it('omits a style the selection does not carry at all', () => {
     const styles = new Map<StyleProp<unknown>, SharedStyle<unknown>>([

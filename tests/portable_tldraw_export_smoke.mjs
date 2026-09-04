@@ -194,9 +194,9 @@ async function main() {
       editor.zoomToFit({ animation: { duration: 0 } })
       return JSON.stringify({ firstPage })
     })()`))
-    // Branch arm records materialize on the first layout pass. Wait for that
-    // one-time migration before taking the immutable-export baseline.
     await delay(400)
+    // Branch arm records materialize on the first layout pass; let that and
+    // ordinary shape normalization settle before the immutable-export baseline.
     const before = await evaluate(page, `JSON.stringify(window.__systemsketch.editor.getSnapshot())`)
 
     await clickElement(page, '[data-testid="systemsketch-share-button"]')
@@ -254,9 +254,9 @@ async function main() {
     check('a literal Pill becomes a stock oval with its complete variable expression',
       childrenOf(literalPill).some((record) => record.type === 'geo' && record.props?.geo === 'oval')
         && richTextWithin(literalPill).includes('gain = 2.0'))
-    check('a fed Pill freezes the visible supplied-value mark but remembers its fallback literal',
+    check('a fed Pill freezes its exact stored fallback literal',
       childrenOf(fedPill).some((record) => record.type === 'geo' && record.props?.geo === 'oval')
-        && richTextWithin(fedPill).includes('chosen = ⋯')
+        && richTextWithin(fedPill).includes('chosen = fallback')
         && fedPill?.meta?.systemSketch?.props?.title === 'fallback')
     check('each portable Pill keeps both stock rim dots',
       [literalPill, fedPill].every((pill) => childrenOf(pill)

@@ -43,7 +43,7 @@ import {
 } from '../blockModel'
 import { effectTethers } from '../effectTether'
 import { BlockInlineEditor } from '../BlockInlineEditor'
-import { VALUE_FED_MARK, valueBlockInlet, valueBlockLabel, valueBlockOutlet } from '../valueBlock'
+import { valueBlockExactText, valueBlockInlet, valueBlockLabel, valueBlockOutlet } from '../valueBlock'
 import { getBlockPortConnections } from '../connections/blockPorts'
 import {
   blockInlineFieldAttribute,
@@ -335,8 +335,8 @@ function BlockFooterMenu({ shape }: { shape: BlockShape }) {
  * title and the name is its ports' name, so both are ordinary inline fields.
  * While unnamed, the `=` itself carries the name field — that is the click
  * that names a literal — and a folded literal keeps its full text in the
- * capsule's tooltip. A cable on the inlet supplies the value instead: the
- * face then shows `⋯` where the literal was, and the literal waits.
+ * capsule's tooltip. A cable on the inlet changes the literal's ink to say it
+ * is overridden, but the stored characters remain painted in place.
  */
 function ValueFace({
   shape,
@@ -353,14 +353,14 @@ function ValueFace({
   const nameField = outlet
     ? blockInlineFieldAttribute({ kind: 'portName', side: 'outputs', portId: outlet.id })
     : undefined
-  const tooltip = fed
-    ? `Fed by the cable on its inlet${label.literal.trim() !== '' ? ` · the literal ${label.literal} is kept for when it is unwired` : ''}`
-    : label.folded ? label.literal : undefined
+  const tooltip = [valueBlockExactText(label)]
+  if (label.folded) tooltip.push('The capsule abbreviates this literal as …')
+  if (fed) tooltip.push('The inlet cable supplies the live value; this stored literal is retained.')
   return layout.title ? (
     <div
       className="BlockNode-value"
       style={boxStyle(layout.title)}
-      title={tooltip}
+      title={tooltip.join('\n')}
       data-testid="block-value"
       data-fed={fed ? 'true' : undefined}
     >
@@ -383,9 +383,9 @@ function ValueFace({
       <span
         className={fed ? 'BlockNode-valueText BlockNode-valueText--fed' : 'BlockNode-valueText'}
         data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
-        data-testid={fed ? 'block-value-fed' : 'block-value-text'}
+        data-testid="block-value-text"
       >
-        {fed ? VALUE_FED_MARK : label.display}
+        {label.display}
       </span>
     </div>
   ) : null
@@ -443,8 +443,9 @@ function WasNow({ diff }: { diff: FieldDiff }) {
       className="BlockNode-wasNow"
       data-diff-field={path}
       data-testid={`was-now-${path}`}
-      // The complete former value, always, however little of it is drawn.
-      title={`was ${diff.before}`}
+      // Both complete values remain available when the compact comparison
+      // abbreviates its former side for geometry.
+      title={`was ${diff.before}\nnow ${diff.after}`}
     >
       {/*
         Absent when nothing was taken away. A purely additive change —
@@ -631,6 +632,7 @@ function SimpleFace({ shape }: { shape: BlockShape }) {
           <span
             className="BlockNode-simpleTitleText"
             data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
+            title={shape.props.title}
           >
             <FieldValue diffs={shape.props.fieldDiffs} path="title" value={shape.props.title} />
           </span>
@@ -641,6 +643,7 @@ function SimpleFace({ shape }: { shape: BlockShape }) {
           className="BlockNode-simpleDescription"
           style={boxStyle(layout.description)}
           data-pb-inline-field={blockInlineFieldAttribute({ kind: 'description' })}
+          title={shape.props.description}
         >
           <FieldValue diffs={shape.props.fieldDiffs} path="description" value={shape.props.description} />
         </div>
@@ -650,6 +653,7 @@ function SimpleFace({ shape }: { shape: BlockShape }) {
           className="BlockNode-simpleType"
           style={boxStyle(layout.typeLabel)}
           data-pb-inline-field={blockInlineFieldAttribute({ kind: 'blockType' })}
+          title={shape.props.blockType}
         >
           <FieldValue diffs={shape.props.fieldDiffs} path="blockType" value={shape.props.blockType} />
         </div>
@@ -748,6 +752,7 @@ function BlockHeading({ shape, height }: { shape: BlockShape; height: number }) 
         <span
           className="BlockNode-headingTitle"
           data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
+          title={shape.props.title}
         >
           <FieldValue diffs={shape.props.fieldDiffs} path="title" value={shape.props.title} />
         </span>
@@ -757,6 +762,7 @@ function BlockHeading({ shape, height }: { shape: BlockShape; height: number }) 
           <span
             className="BlockNode-headingType"
             data-pb-inline-field={blockInlineFieldAttribute({ kind: 'blockType' })}
+            title={shape.props.blockType}
           >
             <FieldValue diffs={shape.props.fieldDiffs} path="blockType" value={shape.props.blockType} />
           </span>
@@ -808,7 +814,9 @@ function PortLabels({
         const name = (
           <span
             className={nameClasses}
-            title={defaultValue !== '' ? `= ${defaultValue}` : undefined}
+            title={defaultValue !== ''
+              ? `${placed.port.name}\ndefault = ${defaultValue}`
+              : placed.port.name || undefined}
             data-pb-inline-field={blockInlineFieldAttribute({
               kind: 'portName',
               side: placed.side === 'input' ? 'inputs' : 'outputs',
@@ -823,6 +831,7 @@ function PortLabels({
             className={isUnknownText(placed.port.type)
               ? 'BlockNode-portType BlockNode-portType--unknown'
               : 'BlockNode-portType'}
+            title={placed.port.type}
             data-pb-inline-field={blockInlineFieldAttribute({
               kind: 'portType',
               side: placed.side === 'input' ? 'inputs' : 'outputs',
@@ -934,7 +943,7 @@ function PortAddAffordance({
       */}
       <div
         role="button"
-        aria-label={`Add ${header ? 'header' : lane} port to ${shape.props.title.trim() || 'this Block'} on canvas`}
+		aria-label={`Add ${header ? 'header' : lane} port to ${shape.props.title === '' ? 'this Block' : shape.props.title} on canvas`}
         title={header ? 'Add header port' : `Add ${lane} port`}
         className="BlockNode-portAddBead"
         data-testid={`block-port-add-${where}`}
@@ -1083,9 +1092,9 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
       data-block-view={layout.view}
       data-diff-state={diffState === 'normal' ? undefined : diffState}
       data-diff-variant={stated ? diffVariant : undefined}
-      data-definition-id={shape.props.definitionId || undefined}
-      data-definition-key={shape.props.definitionKey || undefined}
-      data-draft-ordinal={shape.props.draftOrdinal}
+		data-definition-id={value ? undefined : shape.props.definitionId || undefined}
+		data-definition-key={value ? undefined : shape.props.definitionKey || undefined}
+		data-draft-ordinal={value ? undefined : shape.props.draftOrdinal}
       style={{
         ...(fade < 1 ? { opacity: fade } : null),
         ...(stated && diffVariant === 'blend'
@@ -1145,6 +1154,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
                 className="BlockNode-description"
                 style={boxStyle(layout.description)}
                 data-pb-inline-field={blockInlineFieldAttribute({ kind: 'description' })}
+                title={shape.props.description}
               >
                 <FieldValue
                   diffs={shape.props.fieldDiffs}

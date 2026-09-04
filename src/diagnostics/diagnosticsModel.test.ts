@@ -230,6 +230,19 @@ describe('board diagnostics model', () => {
 		expect(getBoardDiagnosticsModel(editor).diagnostics).toEqual([])
 	})
 
+	it('keeps every nonempty input-name character in an unresolved-input message', () => {
+		const sink = block('sink', {
+			title: 'receiver',
+			inputs: [port('in_1', '  gain_copy_2  ')],
+		})
+		const { editor } = diagnosticEditor([sink])
+
+		expect(getBoardDiagnosticsModel(editor).diagnostics).toMatchObject([{
+			code: BOARD_DIAGNOSTIC_CODES.unsatisfiedInput,
+			message: 'receiver ·   gain_copy_2   has no value',
+		}])
+	})
+
 	it('reports Block identity, lane ambiguity, and unresolved inputs deterministically', () => {
 		const malformed = block('malformed', {
 			title: ' ',

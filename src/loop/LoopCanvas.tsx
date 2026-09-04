@@ -73,6 +73,7 @@ export function LoopCanvas({ shape }: { shape: LoopShape }) {
 							className="Loop-turn"
 							style={{ left: layout.turn.x, top: layout.turn.y, width: layout.turn.w, height: layout.turn.h }}
 							data-testid="loop-turn"
+							title={shape.props.turn}
 						>
 							{shape.props.turn}
 						</div>

@@ -7,6 +7,7 @@ import {
   type TLShape,
   type TLShapeId,
 } from 'tldraw'
+import { storedTextOr } from './textFidelity'
 
 const FRAME_PADDING = 64
 const FRAME_GAP = 160
@@ -173,7 +174,7 @@ export function consolidateDocumentToSinglePage(editor: Editor): SinglePageConso
             props: {
               w: plan.w,
               h: plan.h,
-              name: plan.page.name.trim() || 'Untitled',
+              name: storedTextOr(plan.page.name, 'Untitled'),
               color: 'black',
             },
             meta: {

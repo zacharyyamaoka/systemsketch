@@ -505,8 +505,8 @@ function BlockContextMenuItems() {
         </TldrawUiMenuGroup>
       ) : null}
 
-      {selectedBlock ? (
-        <TldrawUiMenuGroup id="systemsketch-block-definition">
+		{selectedBlock && selectedBlock.props.view !== 'value' ? (
+			<TldrawUiMenuGroup id="systemsketch-block-definition">
           <TldrawUiMenuItem
             id="block-duplicate-unlinked"
             label="Duplicate unlinked"

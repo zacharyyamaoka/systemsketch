@@ -16,6 +16,7 @@ import {
   stepToDepthAncestor,
   subscribeDepthNavigation,
 } from './depthNavigation'
+import { storedTextOr } from '../textFidelity'
 import './depth-stack-navigator.css'
 
 function StackGlyph() {
@@ -81,7 +82,7 @@ export function DepthStackNavigator({ placement = 'floating' }: {
 
   if (!model || (placement === 'floating' && !model.current)) return null
   const parentName = model.parent?.name ?? model.pageName
-  const currentName = model.current?.props.title.trim() || model.pageName
+  const currentName = model.current ? storedTextOr(model.current.props.title, model.pageName) : model.pageName
 
   return (
       <div
@@ -113,7 +114,7 @@ export function DepthStackNavigator({ placement = 'floating' }: {
             onClick={() => setOpen((current) => !current)}
           >
             <span className="systemsketch-depth-pill__glyph"><StackGlyph /></span>
-            <span className="systemsketch-depth-pill__name">{currentName}</span>
+            <span className="systemsketch-depth-pill__name" title={currentName}>{currentName}</span>
             <span className="systemsketch-depth-pill__count" aria-label={`Depth ${model.depth}`}>{model.depth}</span>
             <span className="systemsketch-depth-pill__chevron" aria-hidden="true">⌄</span>
           </button>
@@ -139,7 +140,7 @@ export function DepthStackNavigator({ placement = 'floating' }: {
                   onClick={() => void returnToDepthRoot(editor)}
                 >
                   <i aria-hidden="true" />
-                  <span><b>{model.pageName}</b><small>root canvas</small></span>
+                  <span><b title={model.pageName}>{model.pageName}</b><small>root canvas</small></span>
                   <em>0</em>
                 </button>
               ) : (
@@ -165,7 +166,7 @@ export function DepthStackNavigator({ placement = 'floating' }: {
                   className="systemsketch-depth-row is-current"
                 >
                   <i aria-hidden="true" />
-                  <span><b>{entry.name}</b><small>current scope</small></span>
+                  <span><b title={entry.name}>{entry.name}</b><small>current scope</small></span>
                   <em>{entry.depth}</em>
                 </div>
               ) : (

@@ -27,7 +27,7 @@ function FactList({ label, facts }: { label: string; facts: ShapeFact[] }) {
         {facts.map((fact) => (
           <div key={fact.label}>
             <dt>{fact.label}</dt>
-            <dd>{fact.value}</dd>
+            <dd title={fact.value}>{fact.value}</dd>
           </div>
         ))}
       </dl>

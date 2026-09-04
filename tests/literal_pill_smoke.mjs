@@ -62,6 +62,9 @@ const blocks = (page) => evaluate(page, `JSON.stringify(
       id: shape.id, view: shape.props.view, title: shape.props.title,
       w: shape.props.w, h: shape.props.h,
       inputs: shape.props.inputs, outputs: shape.props.outputs,
+      definitionId: shape.props.definitionId ?? null,
+      definitionKey: shape.props.definitionKey ?? null,
+      draftOrdinal: shape.props.draftOrdinal ?? null,
     })))`).then(JSON.parse)
 
 /** What the capsule paints, span by span: "= 2.0" or "gain = 2.0". */
@@ -187,10 +190,67 @@ async function main() {
     await deselect(page, { x: 1000, y: 800 })
     await shot(page, 'literal-pill-named.png')
 
+    // ---- copied pills remain independent variables -------------------------
+    const copiedId = JSON.parse(await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      editor.select(${JSON.stringify(pill.id)})
+      editor.duplicateShapes([${JSON.stringify(pill.id)}], { x: 250, y: 0 })
+      const copy = editor.getSelectedShapes().find((shape) => shape.type === 'block' && shape.id !== ${JSON.stringify(pill.id)})
+      return JSON.stringify(copy?.id ?? null)
+    })()`))
+    await waitFor(page, `document.querySelector('[data-inspector-section="Pill"] input[aria-label="Variable name"]')?.value === 'gain'`, 'copied pill inspector')
+    const copiedNameField = await box(page, '[data-inspector-section="Pill"] input[aria-label="Variable name"]')
+    await clickAt(page, copiedNameField.cx, copiedNameField.cy)
+    await page.send('Input.insertText', { text: '_copy' })
+    await key(page, 'Enter', 'Enter')
+    await waitFor(page, `(() => {
+      const editor = window.__systemsketch.editor
+      return editor.getShape(${JSON.stringify(pill.id)})?.props.outputs[0]?.name === 'gain'
+        && editor.getShape(${JSON.stringify(copiedId)})?.props.outputs[0]?.name === 'gain_copy'
+    })()`, 'copied pill rename to stay local')
+    const originalAfterCopy = (await blocks(page)).find((block) => block.id === pill.id)
+    const copiedAfterRename = (await blocks(page)).find((block) => block.id === copiedId)
+    check('COPY-1', 'a duplicated pill has no Definition identity to share',
+      copiedAfterRename ? [copiedAfterRename.definitionId, copiedAfterRename.definitionKey, copiedAfterRename.draftOrdinal] : null,
+      [null, null, null])
+    check('COPY-2', 'renaming the copied pill leaves its source name and face untouched',
+      {
+        source: originalAfterCopy?.outputs[0]?.name,
+        copy: copiedAfterRename?.outputs[0]?.name,
+        sourceFace: await valueText(page, pill.id),
+        copyFace: copiedId ? await valueText(page, copiedId) : null,
+      },
+      { source: 'gain', copy: 'gain_copy', sourceFace: 'gain = 2.0', copyFace: 'gain_copy = 2.0' })
+    check('COPY-3', 'the underscore is a complete visible glyph, not a clipped descender',
+      await evaluate(page, `(() => {
+        const root = document.querySelector('[data-shape-id="${copiedId}"] [data-testid="block-value"]')
+        const name = root?.querySelector('[data-testid="block-value-name"]')
+        const text = name?.firstChild
+        const offset = text?.textContent?.indexOf('_') ?? -1
+        if (!root || !name || !text || offset < 0) return null
+        const range = document.createRange()
+        range.setStart(text, offset)
+        range.setEnd(text, offset + 1)
+        const glyph = range.getBoundingClientRect()
+        const face = root.getBoundingClientRect()
+        return {
+          text: name.textContent,
+          raw: root.getAttribute('title')?.split('\\n')[0] ?? null,
+          lineHeight: getComputedStyle(name).lineHeight,
+          insideFace: glyph.top >= face.top && glyph.bottom <= face.bottom,
+          verticallyClipped: name.scrollHeight > name.clientHeight,
+        }
+      })()`),
+      { text: 'gain_copy', raw: 'gain_copy = 2.0', lineHeight: '30px', insideFace: true, verticallyClipped: false })
+    await deselect(page, { x: 1000, y: 800 })
+    await shot(page, 'literal-pill-copy-independent.png')
+
     // ---- a long literal folds ----------------------------------------------
     const long = (await drawPill(page, { x: 760, y: 520 }, DICT)).pill
     check('LONG-1', 'a long literal folds to "= …"', long ? await valueText(page, long.id) : null, '= …')
-    check('LONG-2', 'the full literal rides the tooltip', long ? await valueTooltip(page, long.id) : null, DICT)
+    check('LONG-2', 'the full literal rides the tooltip beside its explicit ellipsis',
+      long ? await valueTooltip(page, long.id) : null,
+      `= ${DICT}\nThe capsule abbreviates this literal as …`)
     check('LONG-3', 'its outlet is typed dict', long?.outputs[0]?.type ?? null, 'dict')
     await deselect(page, { x: 1000, y: 800 })
     await shot(page, 'literal-pill-folded.png')
@@ -221,13 +281,16 @@ async function main() {
     await shot(page, 'literal-pill-picked.png')
 
     // ---- a pill can be fed: a variable holding a call's result ---------------
-    const result = (await drawPill(page, { x: 1060, y: 520 }, '')).pill
+    const result = (await drawPill(page, { x: 1060, y: 520 }, 'fallback')).pill
     const poseOut = await box(page, portDot(ESTIMATE, 'output', 'out_1'))
     const resultIn = await box(page, portDot(result.id, 'input', 'in_1'))
     const fedDrop = await dragFrom(page, poseOut, resultIn)
     check('FEED-1', "estimate's pose lands on the pill's inlet", fedDrop.count, 3)
-    check('FEED-2', 'a fed pill shows ⋯ where its literal would be',
-      await evaluate(page, `document.querySelector('[data-shape-id="${result.id}"] [data-testid="block-value-fed"]')?.textContent ?? null`), '⋯')
+    check('FEED-2', 'a fed pill keeps its stored literal characters visible and only mutes their ink',
+      await evaluate(page, `(() => {
+        const text = document.querySelector('[data-shape-id="${result.id}"] [data-testid="block-value-text"]')
+        return { text: text?.textContent ?? null, muted: text?.classList.contains('BlockNode-valueText--fed') ?? false }
+      })()`), { text: 'fallback', muted: true })
     await deselect(page, { x: 1000, y: 800 })
     const resultFace = await box(page, `[data-shape-id="${result.id}"] .BlockNode-valueEquals`)
     await clickAt(page, resultFace.cx, resultFace.cy)
@@ -241,7 +304,7 @@ async function main() {
     const named2 = (await blocks(page)).find((block) => block.id === result.id)
     check('FEED-3', 'naming through the inspector names both rims',
       { inlet: named2.inputs[0].name, outlet: named2.outputs[0].name, face: await valueText(page, result.id) },
-      { inlet: 'pose', outlet: 'pose', face: 'pose = ⋯' })
+      { inlet: 'pose', outlet: 'pose', face: 'pose = fallback' })
     check('FEED-4', 'the inspector says what feeds the pill',
       (await evaluate(page, `document.querySelector('[data-testid="pill-wiring"]')?.textContent ?? ''`)).includes('Fed by estimate() · pose'), true)
     check('FEED-5', 'the Value field is read-only while a cable feeds the pill',
@@ -283,6 +346,8 @@ async function main() {
     await waitFor(page, `document.querySelector('[data-testid="context-menu"]')`, 'the Value context menu')
     check('VIEW-4', 'the Value context menu does not offer ordinary Block authoring or view conversion',
       await evaluate(page, `Boolean(document.querySelector('[data-testid="context-menu-sub.block-view-button"]'))`), false)
+    check('VIEW-5', 'the Value context menu does not offer Definition-linking actions',
+      await evaluate(page, `Boolean(document.querySelector('[data-testid="context-menu.block-duplicate-unlinked"]'))`), false)
     await key(page, 'Escape', 'Escape')
     await shot(page, 'literal-pill-inspector.png')
     await deselect(page, { x: 1000, y: 800 })

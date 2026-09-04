@@ -61,9 +61,8 @@ function shapeKind(shape: TLShape): string {
   return shape.type
 }
 
-function humanise(kind: string): string {
-  const spaced = kind.replace(/[-_]/g, ' ')
-  return spaced.charAt(0).toUpperCase() + spaced.slice(1)
+function verbatimToken(kind: string): string {
+	return kind
 }
 
 /** Board units, rounded — a fraction of a unit is noise in a facts list. */
@@ -72,10 +71,10 @@ function round(value: number): string {
 }
 
 function titleFor(shapes: TLShape[]): string {
-  if (shapes.length === 1) return humanise(shapeKind(shapes[0]))
+	if (shapes.length === 1) return verbatimToken(shapeKind(shapes[0]))
   const kinds = new Set(shapes.map(shapeKind))
   if (kinds.size === 1) {
-    const kind = humanise([...kinds][0]).toLowerCase()
+		const kind = verbatimToken([...kinds][0])
     return `${shapes.length} ${kind}s`
   }
   return `${shapes.length} shapes`
@@ -117,7 +116,7 @@ export function getShapeFactsModel(editor: Editor): ShapeFactsModel | null {
     if (!shared) continue
     styles.push({
       label,
-      value: shared.type === 'shared' ? humanise(String(shared.value)) : 'Mixed',
+		value: shared.type === 'shared' ? verbatimToken(String(shared.value)) : 'Mixed',
     })
   }
 

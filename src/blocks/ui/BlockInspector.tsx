@@ -717,8 +717,8 @@ function PortSection({
           >
             <EyeIcon visible={port.visible} />
           </button>
-          <span className="block-inspector__managed-name">{port.name || port.id}</span>
-          <span className="block-inspector__managed-type">{port.type || 'type'}</span>
+          <span className="block-inspector__managed-name" title={port.name || port.id}>{port.name || port.id}</span>
+          <span className="block-inspector__managed-type" title={port.type || 'type'}>{port.type || 'type'}</span>
           <span className="block-inspector__move-controls">
             <button
               type="button"

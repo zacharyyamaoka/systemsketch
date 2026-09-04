@@ -8,7 +8,7 @@
   },
   {
     "id": "PILL-1",
-    "label": "a click with the pill tool makes a Block in the value view",
+    "label": "a click with the pill tool creates the separate Value capsule",
     "observed": "value",
     "desired": "value",
     "ok": true
@@ -86,7 +86,7 @@
       },
       {
         "terminal": "start",
-        "to": "shape:lhUJ1LQgSKxIvtODGblV5",
+        "to": "shape:OslyughrolyRCzaGFhYO7",
         "port": "out_1"
       }
     ],
@@ -98,7 +98,7 @@
       },
       {
         "terminal": "start",
-        "to": "shape:lhUJ1LQgSKxIvtODGblV5",
+        "to": "shape:OslyughrolyRCzaGFhYO7",
         "port": "out_1"
       }
     ],
@@ -133,6 +133,57 @@
     "ok": true
   },
   {
+    "id": "COPY-1",
+    "label": "a duplicated pill has no Definition identity to share",
+    "observed": [
+      null,
+      null,
+      null
+    ],
+    "desired": [
+      null,
+      null,
+      null
+    ],
+    "ok": true
+  },
+  {
+    "id": "COPY-2",
+    "label": "renaming the copied pill leaves its source name and face untouched",
+    "observed": {
+      "source": "gain",
+      "copy": "gain_copy",
+      "sourceFace": "gain = 2.0",
+      "copyFace": "gain_copy = 2.0"
+    },
+    "desired": {
+      "source": "gain",
+      "copy": "gain_copy",
+      "sourceFace": "gain = 2.0",
+      "copyFace": "gain_copy = 2.0"
+    },
+    "ok": true
+  },
+  {
+    "id": "COPY-3",
+    "label": "the underscore is a complete visible glyph, not a clipped descender",
+    "observed": {
+      "text": "gain_copy",
+      "raw": "gain_copy = 2.0",
+      "lineHeight": "30px",
+      "insideFace": true,
+      "verticallyClipped": false
+    },
+    "desired": {
+      "text": "gain_copy",
+      "raw": "gain_copy = 2.0",
+      "lineHeight": "30px",
+      "insideFace": true,
+      "verticallyClipped": false
+    },
+    "ok": true
+  },
+  {
     "id": "LONG-1",
     "label": "a long literal folds to \"= …\"",
     "observed": "= …",
@@ -141,9 +192,9 @@
   },
   {
     "id": "LONG-2",
-    "label": "the full literal rides the tooltip",
-    "observed": "{\"quat\": True, \"units\": \"m\", \"frame_id\": \"base_link\"}",
-    "desired": "{\"quat\": True, \"units\": \"m\", \"frame_id\": \"base_link\"}",
+    "label": "the full literal rides the tooltip beside its explicit ellipsis",
+    "observed": "= {\"quat\": True, \"units\": \"m\", \"frame_id\": \"base_link\"}\nThe capsule abbreviates this literal as …",
+    "desired": "= {\"quat\": True, \"units\": \"m\", \"frame_id\": \"base_link\"}\nThe capsule abbreviates this literal as …",
     "ok": true
   },
   {
@@ -198,9 +249,15 @@
   },
   {
     "id": "FEED-2",
-    "label": "a fed pill shows ⋯ where its literal would be",
-    "observed": "⋯",
-    "desired": "⋯",
+    "label": "a fed pill keeps its stored literal characters visible and only mutes their ink",
+    "observed": {
+      "text": "fallback",
+      "muted": true
+    },
+    "desired": {
+      "text": "fallback",
+      "muted": true
+    },
     "ok": true
   },
   {
@@ -209,12 +266,12 @@
     "observed": {
       "inlet": "pose",
       "outlet": "pose",
-      "face": "pose = ⋯"
+      "face": "pose = fallback"
     },
     "desired": {
       "inlet": "pose",
       "outlet": "pose",
-      "face": "pose = ⋯"
+      "face": "pose = fallback"
     },
     "ok": true
   },
@@ -259,17 +316,24 @@
     "ok": true
   },
   {
+    "id": "VIEW-0",
+    "label": "selecting a Value capsule does not show the ordinary Block selection pill",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
     "id": "VIEW-1",
-    "label": "the inspector offers value beside simple, port and expanded",
-    "observed": "[\"simple\",\"port\",\"expanded\",\"value\"]",
-    "desired": "[\"simple\",\"port\",\"expanded\",\"value\"]",
+    "label": "the pill inspector does not offer Block-view conversion controls",
+    "observed": "[]",
+    "desired": "[]",
     "ok": true
   },
   {
     "id": "VIEW-2",
     "label": "the inspector shows a Pill section in place of the Block sections",
-    "observed": "[true,false,false,false,false,false]",
-    "desired": "[true,false,false,false,false,false]",
+    "observed": "[true,false,false,false,false,false,false]",
+    "desired": "[true,false,false,false,false,false,false]",
     "ok": true
   },
   {
@@ -277,6 +341,20 @@
     "label": "the Pill section reads the literal as the value and the ports' name as the name",
     "observed": "[\"gain\",\"2.0\",\"float\"]",
     "desired": "[\"gain\",\"2.0\",\"float\"]",
+    "ok": true
+  },
+  {
+    "id": "VIEW-4",
+    "label": "the Value context menu does not offer ordinary Block authoring or view conversion",
+    "observed": false,
+    "desired": false,
+    "ok": true
+  },
+  {
+    "id": "VIEW-5",
+    "label": "the Value context menu does not offer Definition-linking actions",
+    "observed": false,
+    "desired": false,
     "ok": true
   },
   {

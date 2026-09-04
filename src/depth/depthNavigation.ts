@@ -5,6 +5,7 @@ import {
   isExpandedBlockShape,
   type BlockShape,
 } from '../blocks/blockModel'
+import { storedTextOr } from '../textFidelity'
 
 const CAMERA_INSET = 84
 const CAMERA_DURATION_MS = 260
@@ -64,7 +65,7 @@ function publish(editor: Editor, scopeId: TLShapeId | null): void {
 }
 
 function blockName(block: BlockShape): string {
-  return block.props.title.trim() || 'Untitled Block'
+  return storedTextOr(block.props.title, 'Untitled Block')
 }
 
 function blockPath(editor: Editor, scopeId: TLShapeId): BlockShape[] | null {

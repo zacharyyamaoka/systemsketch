@@ -66,8 +66,8 @@ def measure() -> dict[str, object]:
     value = read("src/blocks/valueBlock.ts")
     fold = int(re.search(r"VALUE_FOLD_LENGTH = (\d+)", value).group(1))
     type_rules = len(re.findall(r"\n\tif \(.*\) return '", value))
-    util = read("src/blocks/BlockShapeUtil.tsx")
-    migration = re.search(r"ValueView: (\d+)", util).group(1)
+    migrations = read("src/blocks/blockShapeMigrations.ts")
+    migration = re.search(r"ValueView: (\d+)", migrations).group(1)
     tool_ui = read("src/blocks/blockToolUi.tsx")
     kbd = re.search(r"\[PILL_TOOL_ID\]: \{[^}]*kbd: '([a-z])'", tool_ui, re.S).group(1)
     picker = read("src/blocks/connections/blockPicker.ts")
@@ -177,7 +177,7 @@ def anatomy_svg(m: dict[str, object]) -> str:
     <line x1="388" y1="48" x2="358" y2="62" stroke="#6e6a63" marker-end="url(#arr)"/>
     <line x1="388" y1="92" x2="370" y2="88" stroke="#6e6a63" marker-end="url(#arr)"/>
     <text x="14" y="26">inlet = fed by a cable</text>
-    <text x="14" y="42" fill="#6e6a63">the face shows ⋯ and the literal waits</text>
+    <text x="14" y="42" fill="#6e6a63">the face keeps the literal, muted while fed</text>
     <line x1="40" y1="48" x2="56" y2="80" stroke="#6e6a63" marker-end="url(#arr)"/>
   </g>
 </svg>
@@ -254,7 +254,7 @@ Every claim below was driven in the real app by <code>npm run test:pill</code>.<
 {figure("literal-pill-picked.png", "<b>Value makes a capsule already wired into <code>opts</code>,</b> its literal open for typing, exactly as a picked Call opens its title.")}
 </div>
 <div class="pair">
-{figure("literal-pill-fed.png", "<b>A pill can be fed.</b> <code>estimate</code>'s <code>pose</code> lands on a pill's inlet; the face shows <code>⋯</code> where its literal would be, and the same pill's outlet feeds <code>encode</code> — one variable, written and read.")}
+{figure("literal-pill-fed.png", "<b>A pill can be fed.</b> <code>estimate</code>'s <code>pose</code> lands on a pill's inlet; the stored fallback stays visible in muted ink, and the same pill's outlet feeds <code>encode</code> — one variable, written and read.")}
 {figure("literal-pill-fed-inspector.png", "<b>The Pill section for a fed pill.</b> Name (both rims), Value read-only while the cable supplies it, Type read from the cable when the pill has none of its own, and a line saying what feeds it.")}
 </div>
 <div class="pair">

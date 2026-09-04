@@ -9,6 +9,7 @@ import {
 } from 'tldraw'
 
 import { isBlockShape } from '../blocks/blockModel'
+import { storedTextOr } from '../textFidelity'
 
 export type BoardSearchField = 'block-title' | 'frame-name' | 'rich-text' | 'shape-text'
 
@@ -244,7 +245,7 @@ export function searchBoard(
         matches.push({
           id: `${page.id}|${shape.id}|${source.field}|${start}`,
           pageId: page.id,
-          pageName: page.name.trim() || 'Untitled page',
+          pageName: storedTextOr(page.name, 'Untitled page'),
           shapeId: shape.id,
           shapeType: shape.type,
           field: source.field,

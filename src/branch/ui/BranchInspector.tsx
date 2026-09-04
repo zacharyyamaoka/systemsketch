@@ -214,7 +214,7 @@ function ArmsSection({ props, actions }: { props: BranchShapeProps; actions?: Br
 			</div>
 			<ul className="block-inspector__ports branch-inspector__arms" ref={listRef}>
 				{props.arms.map((arm, index) => {
-					const label = arm.title.trim() || arm.id
+					const label = arm.title === '' ? arm.id : arm.title
 					const active = props.activeArmId === arm.id
 					return (
 						<li

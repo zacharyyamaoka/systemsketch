@@ -29,7 +29,6 @@ import {
 import { ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
 import { isCustomColor } from './customColors'
 import {
-  FIGJAM_COLOR_LABELS,
   FIGJAM_COLOR_NAMES,
   FIGJAM_PALETTE_COLUMNS,
 } from './figjamPalette'
@@ -355,12 +354,9 @@ export function isConnectorSelection(styles: ReadonlySharedStyleMap): boolean {
   return CONNECTOR_STYLES.some((style) => styles.get(style) !== undefined)
 }
 
-/** FigJam's own name for a colour, falling back to a readable slug. */
+/** The stored style token, presented without rewriting any of its characters. */
 export function colorLabel(value: string): string {
-  const figjam = FIGJAM_COLOR_LABELS[value]
-  if (figjam) return figjam
-  const words = value.replace(/-/g, ' ')
-  return words.charAt(0).toUpperCase() + words.slice(1)
+	return value
 }
 
 /** The `fill` control, when the selection has one, for the colour popover's mode row. */

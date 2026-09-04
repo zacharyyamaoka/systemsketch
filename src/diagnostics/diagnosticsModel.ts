@@ -28,6 +28,7 @@ import {
 	type PortFace,
 } from '../blocks/connections/connectionModel'
 import type { ConnectionShape } from '../blocks/connections/ConnectionShapeUtil'
+import { storedTextOr } from '../textFidelity'
 
 export const BOARD_DIAGNOSTIC_CODES = {
 	blankBlockTitle: 'block-title.blank',
@@ -151,17 +152,17 @@ function uniqueShapeIds(ids: Iterable<TLShapeId>): TLShapeId[] {
 }
 
 function blockLabel(block: BlockShape): string {
-	return block.props.title.trim() || 'Untitled Block'
+	return storedTextOr(block.props.title, 'Untitled Block')
 }
 
 function portHostLabel(host: PortHostShape): string {
 	return isBlockShape(host)
 		? blockLabel(host)
-		: host.props.title.trim() || 'Untitled Branch'
+		: storedTextOr(host.props.title, 'Untitled Branch')
 }
 
 function endpointLabel(endpoint: BoundEndpoint): string {
-	return `${portHostLabel(endpoint.host)} · ${endpoint.port.name.trim() || endpoint.port.id}`
+	return `${portHostLabel(endpoint.host)} · ${storedTextOr(endpoint.port.name, endpoint.port.id)}`
 }
 
 function resolveEndpoint(
@@ -316,7 +317,7 @@ function addBlockDiagnostics(
 			id: diagnosticId(BOARD_DIAGNOSTIC_CODES.unsatisfiedInput, block.id, port.id),
 			code: BOARD_DIAGNOSTIC_CODES.unsatisfiedInput,
 			severity: 'warning',
-			message: `${label} · ${port.name.trim() || port.id || 'unnamed input'} has no value`,
+			message: `${label} · ${storedTextOr(port.name, port.id || 'unnamed input')} has no value`,
 			detail: 'Connect an incoming source or give this input a default value.',
 			pageId,
 			primaryShapeId: block.id,
@@ -462,7 +463,7 @@ function addCycleDiagnostics(
 export function getBoardDiagnosticsModel(editor: Editor): BoardDiagnosticsModel {
 	const pages = editor.getPages()
 	const pageOrder = new Map(pages.map((page, index) => [page.id, index]))
-	const pageName = new Map(pages.map((page) => [page.id, page.name.trim() || 'Untitled page']))
+	const pageName = new Map(pages.map((page) => [page.id, storedTextOr(page.name, 'Untitled page')]))
 	const shapesByPage = new Map<TLPageId, TLShape[]>()
 	for (const page of pages) {
 		const shapes = [...editor.getPageShapeIds(page)]

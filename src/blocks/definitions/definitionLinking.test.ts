@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { getDefaultBlockProps } from '../blockModel'
 import {
+	blockDefinitionId,
 	definitionBadge,
 	definitionKeyFor,
 	normalizedDefinitionName,
@@ -20,5 +21,17 @@ describe('Definition naming', () => {
 		expect(props.title).toBe('run()')
 		expect(definitionBadge(props)).toBe('Draft 3')
 		expect(definitionBadge({ ...props, draftOrdinal: undefined })).toBeNull()
+	})
+
+	it('does not treat a value pill as a callable Definition, including legacy records', () => {
+		const pill = {
+			...getDefaultBlockProps(),
+			view: 'value' as const,
+			definitionId: 'legacy-shared-id',
+			definitionKey: 'legacy_shared',
+			draftOrdinal: 1,
+		}
+		expect(blockDefinitionId(pill)).toBe('')
+		expect(definitionBadge(pill)).toBeNull()
 	})
 })

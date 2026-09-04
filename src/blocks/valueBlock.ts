@@ -39,7 +39,7 @@ import {
 	measureBlockText,
 } from './layoutBlock'
 
-/** Literals longer than this, or spanning lines, fold to `…` on the capsule. */
+/** Literals longer than this, or spanning lines, abbreviate to `…` on the capsule. */
 export const VALUE_FOLD_LENGTH = 18
 
 /**
@@ -62,7 +62,7 @@ export function inferLiteralType(literal: string): string {
 }
 
 export function isFoldedLiteral(literal: string): boolean {
-	return literal.includes('\n') || literal.trim().length > VALUE_FOLD_LENGTH
+	return literal.includes('\n') || literal.length > VALUE_FOLD_LENGTH
 }
 
 export interface ValueBlockLabel {
@@ -70,7 +70,7 @@ export interface ValueBlockLabel {
 	name: string
 	/** The literal exactly as typed. */
 	literal: string
-	/** What the capsule paints after `=`: the literal, or `…` when folded. */
+	/** What the capsule paints after `=`: the literal, or an explicit `…` abbreviation. */
 	display: string
 	folded: boolean
 }
@@ -94,7 +94,10 @@ export function valueBlockLabel(props: BlockShapeProps): ValueBlockLabel {
 	return {
 		name: valueBlockName(props),
 		literal,
-		display: folded ? '…' : literal.trim(),
+		// A pill is a direct rendering of its stored literal. Do not trim
+		// punctuation or whitespace away just because it is subtle in a compact
+		// capsule. Folding is the one explicit abbreviation.
+		display: folded ? '…' : literal,
 		folded,
 	}
 }
@@ -104,17 +107,18 @@ export function valueBlockText(label: ValueBlockLabel): string {
 	return label.name === '' ? `= ${label.display}` : `${label.name} = ${label.display}`
 }
 
-/** What a fed pill paints where its literal would be. */
-export const VALUE_FED_MARK = '⋯'
+/** The entire stored pill label, before a visible `…` abbreviation is applied. */
+export function valueBlockExactText(label: ValueBlockLabel): string {
+	return valueBlockText({ ...label, display: label.literal })
+}
 
 /**
  * A capsule is as wide as its text and never taller than one line. The fit
- * reserves room for the fed mark, so a pill with no literal does not squeeze
- * its name the moment a cable lands on its inlet.
+ * uses the literal that is actually shown. A cable may mute that literal to
+ * communicate precedence, but never substitutes a different character for it.
  */
 export function valueBlockSize(label: ValueBlockLabel): BlockViewSize {
-	const measured = { ...label, display: label.display === '' ? VALUE_FED_MARK : label.display }
-	const textWidth = measureBlockText(valueBlockText(measured), VALUE_FONT_PX, 500, 'mono')
+	const textWidth = measureBlockText(valueBlockText(label), VALUE_FONT_PX, 500, 'mono')
 	const w = Math.round(
 		Math.min(VALUE_MAX_WIDTH_PX, Math.max(VALUE_MIN_WIDTH_PX, textWidth + VALUE_PAD_X * 2)),
 	)
@@ -162,6 +166,21 @@ export function normalizeValueBlockProps(
 ): BlockShapeProps {
 	if (props.view !== 'value') return props
 
+	// Definition identity belongs to callable Blocks. A value capsule is one
+	// variable occurrence, so stock duplicate / copy-and-paste must leave the
+	// new capsule independently editable. Older capsules can carry these fields
+	// because every Block once received them by default; clear that stale data
+	// the first time a pill is normalised as well.
+	const hasDefinitionMetadata = props.definitionId !== undefined
+		|| props.definitionKey !== undefined
+		|| props.draftOrdinal !== undefined
+	const {
+		definitionId: _definitionId,
+		definitionKey: _definitionKey,
+		draftOrdinal: _draftOrdinal,
+		...unlinkedProps
+	} = props
+
 	const outletExisting = props.outputs[0]
 	const inletExisting = props.inputs[0]
 	const previousOutlet = previous?.view === 'value' ? previous.outputs[0] : undefined
@@ -184,7 +203,7 @@ export function normalizeValueBlockProps(
 	const outlet: BlockPort = { id: outletExisting?.id ?? 'out_1', name, type, visible: true }
 	const inlet: BlockPort = { id: inletExisting?.id ?? 'in_1', name, type, visible: true }
 
-	const size = valueBlockSize(valueBlockLabel({ ...props, outputs: [outlet] }))
+	const size = valueBlockSize(valueBlockLabel({ ...unlinkedProps, outputs: [outlet] }))
 	const unchanged = props.inputs.length === 1
 		&& props.outputs.length === 1
 		&& samePort(inletExisting, inlet)
@@ -193,10 +212,11 @@ export function normalizeValueBlockProps(
 		&& props.h === size.h
 		&& props.views.value.w === size.w
 		&& props.views.value.h === size.h
+		&& !hasDefinitionMetadata
 	if (unchanged) return props
 
 	return {
-		...props,
+		...unlinkedProps,
 		inputs: [inlet],
 		outputs: [outlet],
 		w: size.w,

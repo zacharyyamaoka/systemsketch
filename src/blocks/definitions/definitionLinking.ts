@@ -36,7 +36,10 @@ function freshId(): string {
 }
 
 export function blockDefinitionId(props: BlockShapeProps): string {
-	return props.definitionId ?? ''
+	// Value pills are variables, not reusable callable definitions. Treat a
+	// stale legacy identity as absent too, so reopening an older board cannot
+	// revive the old copy-links-together behaviour before its next edit.
+	return props.view === 'value' ? '' : props.definitionId ?? ''
 }
 
 export function normalizedDefinitionName(title: string): string {
@@ -74,7 +77,7 @@ function availableDefinitionKey(
 }
 
 export function definitionBadge(props: BlockShapeProps): string | null {
-	return props.draftOrdinal === undefined ? null : `Draft ${props.draftOrdinal}`
+	return props.view === 'value' || props.draftOrdinal === undefined ? null : `Draft ${props.draftOrdinal}`
 }
 
 function semanticProps(props: BlockShapeProps): SemanticBlockProps {
@@ -118,7 +121,7 @@ function applySemanticProps(target: BlockShapeProps, source: BlockShapeProps): B
 export function allBlocks(editor: Editor): BlockShape[] {
 	return editor.getPages().flatMap((page) => Array.from(editor.getPageShapeIds(page.id)).flatMap((id) => {
 		const shape = editor.getShape(id)
-		return isBlockShape(shape) ? [shape] : []
+		return isBlockShape(shape) && shape.props.view !== 'value' ? [shape] : []
 	}))
 }
 
@@ -128,6 +131,7 @@ export function linkedBlockOccurrences(editor: Editor, shape: BlockShape): Block
 }
 
 function ensureBlockIdentity(editor: Editor, block: BlockShape): BlockShape {
+	if (block.props.view === 'value') return block
 	const titled = normalizedDefinitionName(block.props.title) !== ''
 	if (block.props.definitionId && (titled ? Boolean(block.props.definitionKey) : block.props.definitionKey !== undefined)) return block
 	const props = {
@@ -369,7 +373,7 @@ function updateDefinitionGroup(
 /** Finalize a title gesture: join matching content, or quietly allocate Draft N. */
 export function commitBlockDefinitionName(editor: Editor, shapeId: TLShapeId): void {
 	const raw = editor.getShape(shapeId)
-	if (!isBlockShape(raw)) return
+	if (!isBlockShape(raw) || raw.props.view === 'value') return
 	const source = ensureBlockIdentity(editor, raw)
 	const name = normalizedDefinitionName(source.props.title)
 	const group = linkedBlockOccurrences(editor, source)
@@ -515,7 +519,7 @@ export function unlinkBlockDefinition(
 	options: { markHistory?: boolean } = {},
 ): BlockShape | null {
 	const current = editor.getShape(shapeId)
-	if (!isBlockShape(current)) return null
+	if (!isBlockShape(current) || current.props.view === 'value') return null
 	const title = uniqueTitle(editor, current.props.title)
 	const definitionId = freshId()
 	if (options.markHistory !== false) editor.markHistoryStoppingPoint('unlink block definition')
@@ -546,6 +550,15 @@ export function unlinkBlockDefinition(
 export function duplicateBlockUnlinked(editor: Editor, shapeId: TLShapeId): BlockShape | null {
 	const source = editor.getShape(shapeId)
 	if (!isBlockShape(source)) return null
+	// A value pill is already independent under stock duplication. Do not send
+	// it through Definition unlinking, which would rename the variable.
+	if (source.props.view === 'value') {
+		editor.markHistoryStoppingPoint('duplicate pill')
+		editor.duplicateShapes([source.id], { x: 32, y: 32 })
+		return editor.getSelectedShapes().find((shape): shape is BlockShape => (
+			isBlockShape(shape) && shape.id !== source.id && shape.props.view === 'value'
+		)) ?? null
+	}
 	const before = new Set(editor.getCurrentPageShapeIds())
 	editor.markHistoryStoppingPoint('duplicate block unlinked')
 	editor.duplicateShapes([source.id], { x: 32, y: 32 })
@@ -583,7 +596,7 @@ export function installDefinitionLinking(editor: Editor): () => void {
 	})
 
 	const stopBeforeCreate = editor.sideEffects.registerBeforeCreateHandler('shape', (shape) => {
-		if (!isBlockShape(shape)) return shape
+		if (!isBlockShape(shape) || shape.props.view === 'value') return shape
 		return {
 			...shape,
 			props: {
@@ -599,7 +612,7 @@ export function installDefinitionLinking(editor: Editor): () => void {
 	})
 	const stopAfterCreate = editor.sideEffects.registerAfterCreateHandler('shape', (shape) => {
 		if (syncing) return
-		if (isBlockShape(shape)) {
+		if (isBlockShape(shape) && shape.props.view !== 'value') {
 			syncLinkedProps(editor, shape)
 			needsCollisionSweep = true
 		}
@@ -607,7 +620,8 @@ export function installDefinitionLinking(editor: Editor): () => void {
 	})
 	const stopAfterChange = editor.sideEffects.registerAfterChangeHandler('shape', (before, after) => {
 		if (syncing) return
-		if (isBlockShape(after) && !sameJson(semanticProps(before.props as BlockShapeProps), semanticProps(after.props))) {
+		if (isBlockShape(after) && after.props.view !== 'value'
+			&& !sameJson(semanticProps(before.props as BlockShapeProps), semanticProps(after.props))) {
 			run(() => syncLinkedProps(editor, after))
 		}
 		markOwner(before)

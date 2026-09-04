@@ -7,6 +7,7 @@ import {
 } from 'tldraw'
 import { isExpandedBlockShape } from '../blocks'
 import { isBranchShape } from '../branch/branchModel'
+import { storedTextOr } from '../textFidelity'
 
 export type BoardOverviewTargetKind = 'frame' | 'branch' | 'expanded-block'
 
@@ -41,7 +42,7 @@ function targetForShape(
       id: frame.id,
       pageId,
       kind: 'frame',
-      label: frame.props.name.trim() || 'Untitled frame',
+      label: storedTextOr(frame.props.name, 'Untitled frame'),
       selected: selectedIds.has(frame.id),
     }
   }
@@ -50,7 +51,7 @@ function targetForShape(
       id: shape.id,
       pageId,
       kind: 'branch',
-      label: shape.props.title.trim() || 'Untitled Branch',
+      label: storedTextOr(shape.props.title, 'Untitled Branch'),
       selected: selectedIds.has(shape.id),
     }
   }
@@ -59,7 +60,7 @@ function targetForShape(
       id: shape.id,
       pageId,
       kind: 'expanded-block',
-      label: shape.props.title.trim() || 'Untitled Block',
+      label: storedTextOr(shape.props.title, 'Untitled Block'),
       selected: selectedIds.has(shape.id),
     }
   }
@@ -82,7 +83,7 @@ export function getBoardOverviewModel(editor: Editor): BoardOverviewModel {
     targetCount += targets.length
     return {
       id: page.id,
-      name: page.name.trim() || 'Untitled page',
+      name: storedTextOr(page.name, 'Untitled page'),
       current: page.id === currentPageId,
       targets,
     }

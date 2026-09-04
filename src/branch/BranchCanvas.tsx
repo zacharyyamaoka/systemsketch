@@ -91,7 +91,7 @@ function ArmHeader({ shape, row, isActive, faded, selected, editing }: {
 	const arm = row.arm
 	const fold = useCallback(() => void toggleBranchArmOpen(editor, shape.id, arm.id), [editor, shape.id, arm.id])
 	const activate = useCallback(() => void toggleBranchActiveArm(editor, shape.id, arm.id), [editor, shape.id, arm.id])
-	const label = arm.title.trim() || 'this arm'
+	const label = arm.title === '' ? 'this arm' : arm.title
 	return (
 		<div
 			className="Branch-armHeader"
@@ -118,6 +118,7 @@ function ArmHeader({ shape, row, isActive, faded, selected, editing }: {
 				style={boxStyle({ ...row.title, y: row.title.y - row.rowTop })}
 				data-branch-field={branchInlineFieldAttribute({ kind: 'armTitle', armId: arm.id })}
 				data-testid={`branch-arm-title-${arm.id}`}
+				title={arm.title}
 			>
 				{arm.title}
 			</span>
@@ -187,6 +188,7 @@ export function BranchCanvas({ shape }: { shape: BranchShape }) {
 						style={boxStyle(layout.title)}
 						data-branch-field={branchInlineFieldAttribute({ kind: 'title' })}
 						data-testid="branch-title"
+						title={shape.props.title}
 					>
 						{shape.props.title}
 					</span>
@@ -195,8 +197,9 @@ export function BranchCanvas({ shape }: { shape: BranchShape }) {
 							key={`label:${control.port.id}`}
 							className="Branch-controlName"
 							style={boxStyle(control.label)}
-							data-branch-field={branchInlineFieldAttribute({ kind: 'controlName', portId: control.port.id })}
-							data-testid={`branch-control-name-${control.port.id}`}
+						data-branch-field={branchInlineFieldAttribute({ kind: 'controlName', portId: control.port.id })}
+						data-testid={`branch-control-name-${control.port.id}`}
+						title={control.port.name}
 						>
 							{control.port.name}
 						</span>
@@ -236,7 +239,7 @@ export function BranchCanvas({ shape }: { shape: BranchShape }) {
 							className="Branch-addControl"
 							style={{ left: layout.addControl.x, top: layout.addControl.y }}
 							title="add control port"
-							aria-label={`Add control port to ${shape.props.title.trim() || 'this Branch'}`}
+							aria-label={`Add control port to ${shape.props.title === '' ? 'this Branch' : shape.props.title}`}
 							data-testid="branch-add-control"
 							onPointerDown={(event) => event.stopPropagation()}
 							onClick={addControl}
@@ -249,7 +252,7 @@ export function BranchCanvas({ shape }: { shape: BranchShape }) {
 							type="button"
 							className="Branch-addArm"
 							style={boxStyle(layout.addArmRow)}
-							aria-label={`Add arm to ${shape.props.title.trim() || 'this Branch'}`}
+							aria-label={`Add arm to ${shape.props.title === '' ? 'this Branch' : shape.props.title}`}
 							data-testid="branch-add-arm"
 							onPointerDown={(event) => event.stopPropagation()}
 							onClick={addArm}

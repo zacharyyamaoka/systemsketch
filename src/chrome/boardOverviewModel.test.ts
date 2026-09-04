@@ -47,7 +47,7 @@ function overviewEditor() {
     shape('collapsed', 'block', PAGE_A, { view: 'simple', title: 'Collapsed' }, 'a1'),
     shape('frame', 'frame', PAGE_A, { name: 'Pipeline Frame' }, 'a2'),
     shape('expanded', 'block', PAGE_A, { view: 'expanded', title: 'Scheduler' }, 'a3'),
-    shape('blank-frame', 'frame', PAGE_B, { name: ' ' }, 'a1'),
+    shape('verbatim-frame', 'frame', PAGE_B, { name: ' frame_name ' }, 'a1'),
     shape('blank-block', 'block', PAGE_B, { view: 'expanded', title: '' }, 'a2'),
     shape('decision', 'branch', PAGE_B, { title: 'Retry policy' }, 'a3'),
     shape('rectangle', 'geo', PAGE_B, { geo: 'rectangle' }, 'a4'),
@@ -91,7 +91,7 @@ describe('live board overview', () => {
         ['expanded-block', 'Scheduler', true],
       ])
     expect(model.pages[1].targets.map((target) => target.label))
-      .toEqual(['Untitled frame', 'Untitled Block', 'Retry policy'])
+      .toEqual([' frame_name ', 'Untitled Block', 'Retry policy'])
   })
 
   it('selects and camera-fits a target after switching to its page', () => {

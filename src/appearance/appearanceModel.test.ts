@@ -268,7 +268,7 @@ describe('appearance controls', () => {
   it('reports the applied option, and nothing when the selection disagrees', () => {
     const controls = buildAppearanceControls(SHAPE_WITH_TEXT, true)
     const color = controls.find((c) => c.id === 'color')!
-    expect(selectedOption(color)?.label).toBe('Blue')
+    expect(selectedOption(color)?.label).toBe('blue')
 
     const mixedControls = buildAppearanceControls(styleMap([[DefaultColorStyle, mixed]]), true)
     expect(selectedOption(mixedControls[0])).toBeUndefined()
@@ -295,8 +295,8 @@ describe('appearance controls', () => {
     }
   })
 
-  it('names each colour the way FigJam names it', () => {
-    expect(colorLabel('dark-gray')).toBe('Dark gray')
-    expect(colorLabel('light-teal')).toBe('Light teal')
+  it('presents each stored colour token without changing its characters', () => {
+    expect(colorLabel('dark-gray')).toBe('dark-gray')
+    expect(colorLabel('light-teal')).toBe('light-teal')
   })
 })

@@ -1,0 +1,64 @@
+{
+  "feature": "Value pill copy independence",
+  "viewport": { "width": 1440, "height": 840 },
+  "shapes": [
+    {
+      "id": "source-pill",
+      "type": "block",
+      "x": 500,
+      "y": 370,
+      "props": {
+        "view": "value",
+        "title": "2.0",
+        "blockType": "literal",
+        "inputs": [{ "id": "in_1", "name": "gain", "type": "float", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "gain", "type": "float", "visible": true }]
+      }
+    },
+    {
+      "id": "copied-pill",
+      "type": "block",
+      "x": 830,
+      "y": 370,
+      "props": {
+        "view": "value",
+        "title": "2.0",
+        "blockType": "literal",
+        "inputs": [{ "id": "in_1", "name": "gain", "type": "float", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "gain", "type": "float", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "rename-copy",
+      "kind": "step",
+      "text": "1 · The right pill is a copy. Select it, then change Name in the Inspector to gain_copy.",
+      "x": 790,
+      "y": 100,
+      "w": 470,
+      "h": 110,
+      "target": { "shapeId": "copied-pill", "anchor": "top", "dx": 36 }
+    },
+    {
+      "id": "check-source",
+      "kind": "step",
+      "text": "2 · Confirm the left source still says gain = 2.0. Its name must not follow the copy.",
+      "x": 40,
+      "y": 330,
+      "w": 370,
+      "h": 110,
+      "target": { "shapeId": "source-pill", "anchor": "left", "dy": 0 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · source = gain = 2.0 and copy = gain_copy = 2.0; each remains editable on its own.",
+      "x": 480,
+      "y": 610,
+      "w": 640,
+      "h": 110
+    }
+  ]
+}

@@ -21,9 +21,7 @@ import { EXCALIDRAW_ROUNDED_RECT_GEO, EXCALIDRAW_SHAPE_UTILS } from '../excalidr
 import { SYSTEMSKETCH_THEMES } from '../appearance/figjamPalette'
 import {
 	BlockShapeUtil,
-	VALUE_FED_MARK,
 	isBlockShape,
-	valueBlockInlet,
 	valueBlockLabel,
 	valueBlockText,
 	type BlockShape,
@@ -37,7 +35,6 @@ import {
 	CONNECTION_SHAPE_TYPE,
 	blockConnectionBindingUtils,
 	blockConnectionShapeUtils,
-	getBlockPortConnections,
 } from '../blocks/connections'
 import { detachBlockToPrimitives, detachConnectionToArrow, type DetachResult } from '../blocks/detach'
 import { detachBranchToPrimitives } from '../branch/detachBranch'
@@ -96,13 +93,9 @@ function blockDepth(editor: Editor, shape: TLShape): number {
 }
 
 /** The text actually painted by a Value-view Block before the clone mutates. */
-function portableValuePillText(editor: Editor, block: BlockShape): string | null {
+function portableValuePillText(block: BlockShape): string | null {
 	if (block.props.view !== 'value') return null
-	const inlet = valueBlockInlet(block.props)
-	const fed = inlet !== null && getBlockPortConnections(editor, block.id)
-		.some((connection) => connection.ownPortId === inlet.id)
-	const label = valueBlockLabel(block.props)
-	return valueBlockText({ ...label, display: fed ? VALUE_FED_MARK : label.display })
+	return valueBlockText(valueBlockLabel(block.props))
 }
 
 /**
@@ -253,12 +246,12 @@ export async function exportPortableTldraw(editor: Editor): Promise<string> {
 			const blocks = exportEditor.getCurrentPageShapes()
 				.filter(isBlockShape)
 				.sort((left, right) => blockDepth(exportEditor, left) - blockDepth(exportEditor, right))
-			// Capture fed-pill presentation before the first detach starts replacing
-			// semantic cables with arrows; a later Pill must still freeze what the
-			// live board painted, even when its feeder was detached first.
+			// Capture pill text before the first detach mutates shapes. A fed inlet
+			// affects the live value, not the truth of the stored literal, so the
+			// portable pill freezes the same authored text as the source board.
 			const valuePillLabels = new Map(blocks.map((block) => [
 				block.id,
-				portableValuePillText(exportEditor, block),
+				portableValuePillText(block),
 			]))
 			for (const block of blocks) {
 				const result = detachBlockToPrimitives(exportEditor, block.id, { mark: false })
