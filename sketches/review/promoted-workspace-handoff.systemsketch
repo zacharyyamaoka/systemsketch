@@ -42,7 +42,7 @@
       "com.tldraw.shape.arrow": 8,
       "com.tldraw.shape.text": 4,
       "com.tldraw.shape.line": 5,
-      "com.tldraw.shape.block": 4,
+      "com.tldraw.shape.block": 6,
       "com.tldraw.shape.branch": 0,
       "com.tldraw.shape.loop": 0,
       "com.tldraw.shape.branch-arm": 0,
@@ -243,9 +243,9 @@
       "typeName": "shape"
     },
     {
-      "x": 0,
-      "y": 0,
-      "z": 1,
+      "x": -443.5647703943192,
+      "y": 283.7010349813618,
+      "z": 0.6561000000000001,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -289,8 +289,10 @@
     {
       "editingShapeId": null,
       "croppingShapeId": null,
-      "selectedShapeIds": [],
-      "hoveredShapeId": null,
+      "selectedShapeIds": [
+        "shape:active-board"
+      ],
+      "hoveredShapeId": "shape:active-board",
       "erasingShapeIds": [],
       "hintingShapeIds": [],
       "focusedGroupId": null,
@@ -337,6 +339,14 @@
     },
     {
       "name": "",
+      "color": "#F2555A",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:5CKwdFbstN-Kv4kZdOOFv",
+      "typeName": "user"
+    },
+    {
+      "name": "",
       "color": "#39B178",
       "imageUrl": "",
       "meta": {},
@@ -352,8 +362,8 @@
       "typeName": "user"
     },
     {
-      "x": 720,
-      "y": 300,
+      "x": 689.5168419448256,
+      "y": 134.51999025942968,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -481,8 +491,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1280,
-        "h": 720
+        "w": 991.4285888671875,
+        "h": 979.2857666015625
       },
       "insets": [
         false,
@@ -497,9 +507,9 @@
       "isChatting": false,
       "highlightedUserIds": [],
       "isFocused": true,
-      "devicePixelRatio": 1,
+      "devicePixelRatio": 1.399999976158142,
       "isCoarsePointer": false,
-      "isHoveringCanvas": null,
+      "isHoveringCanvas": true,
       "openMenus": [],
       "isChangingStyle": false,
       "isReadonly": false,
