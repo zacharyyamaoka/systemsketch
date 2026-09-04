@@ -159,7 +159,7 @@ describe('a Block as stock primitives', () => {
 		})
 		const built = primitivesForBlock(props, { x: 30, y: 50 })
 		expect((built.shapes[0].props as { geo?: string }).geo).toBe('oval')
-		expect(textOf(built.shapes).join()).toContain('gain = 2.0')
+  expect(textOf(built.shapes).join()).toContain('gain: float = 2.0')
 		expect(built.shapes.filter((shape) =>
 			(shape.props as { geo?: string; w?: number }).geo === 'ellipse'
 			&& (shape.props as { w?: number }).w === PORT_INDICATOR_RADIUS * 2,

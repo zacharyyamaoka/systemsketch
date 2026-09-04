@@ -117,7 +117,7 @@ async function drawBlock(page, from, to, title) {
 }
 
 /** Hover a lane's gutter, then click the bead it reveals and name the port. */
-async function addPortFromGutter(page, side, name) {
+async function addPortFromGutter(page, side, name, paintedName = name) {
   const zone = await box(page, `[data-testid="block-port-add-zone-${side}"]`)
   await mouse(page, 'mouseMoved', zone.cx, zone.cy)
   await delay(220)
@@ -134,7 +134,7 @@ async function addPortFromGutter(page, side, name) {
   await page.send('Input.insertText', { text: name })
   await key(page, 'Enter', 'Enter')
   await waitFor(page,
-    `Array.from(document.querySelectorAll('.BlockNode-portName')).some((node) => node.textContent === ${JSON.stringify(name)})`,
+    `Array.from(document.querySelectorAll('.BlockNode-portName')).some((node) => node.textContent === ${JSON.stringify(paintedName)})`,
     `authored ${side} label ${name}`)
 }
 
@@ -202,7 +202,7 @@ async function main() {
     await waitFor(page, `document.querySelector('[data-testid="block-port-add-zone-inputs"]')`, 'input gutter')
 
     const beforeAdd = await blockState(page, refine)
-    await addPortFromGutter(page, 'inputs', 'pose')
+    await addPortFromGutter(page, 'inputs', 'pose: Pose = 2', 'pose')
     await addPortFromGutter(page, 'outputs', 'result')
     // Capture the affordance in the state the user sees it in: revealed.
     const gutter = await box(page, '[data-testid="block-port-add-zone-inputs"]')
@@ -215,8 +215,19 @@ async function main() {
     assert.deepEqual(afterTwo.inputs, ['in_1'])
     assert.deepEqual(afterTwo.outputs, ['out_1'])
     assert.deepEqual(afterTwo.inputNames, ['pose'])
+    assert.deepEqual(JSON.parse(await evaluate(page, `JSON.stringify((() => {
+      const shape = window.__systemsketch.editor.getShape(${JSON.stringify(refine)})
+      const port = shape?.props.inputs.find((candidate) => candidate.id === 'in_1')
+      return port ? { name: port.name, type: port.type, defaultValue: port.defaultValue } : null
+    })())`)), { name: 'pose', type: 'Pose', defaultValue: '2' })
+    assert.equal(await evaluate(page,
+      `document.querySelector('[data-shape-id="${refine}"] .BlockNode-portType')?.textContent ?? null`),
+      'Pose')
+    assert.equal(await evaluate(page,
+      `document.querySelector('[data-shape-id="${refine}"] .BlockNode-portDefault')?.textContent?.trim() ?? null`),
+      '= 2')
     assert.equal(afterTwo.h, beforeAdd.h, 'a Block with room does not grow')
-    pass('hovering a lane gutter offers a bead that creates the port and opens its name')
+    pass('hovering a lane gutter offers a bead that parses a Python-shaped port declaration')
 
     // Keep adding until the next row no longer fits at the full pitch.
     let grown = afterTwo

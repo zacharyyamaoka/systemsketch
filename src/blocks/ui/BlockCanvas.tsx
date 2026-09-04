@@ -346,9 +346,11 @@ function BlockFooterMenu({ shape }: { shape: BlockShape }) {
 function ValueFace({
   shape,
   connectedIds,
+  editing,
 }: {
   shape: BlockShape
   connectedIds: ReadonlySet<string>
+  editing: boolean
 }) {
   const layout = layoutBlock(shape.props)
   const label = valueBlockLabel(shape.props)
@@ -357,6 +359,9 @@ function ValueFace({
   const inletConnected = inlet !== null && connectedIds.has(inlet.id)
   const nameField = outlet
     ? blockInlineFieldAttribute({ kind: 'portName', side: 'outputs', portId: outlet.id })
+    : undefined
+  const typeField = outlet
+    ? blockInlineFieldAttribute({ kind: 'portType', side: 'outputs', portId: outlet.id })
     : undefined
   const tooltip = [valueBlockExactText(label)]
   if (label.folded) tooltip.push('The capsule abbreviates this literal as …')
@@ -367,14 +372,29 @@ function ValueFace({
       style={boxStyle(layout.title)}
       title={tooltip.join('\n')}
       data-testid="block-value"
+      data-inline-editing={editing ? 'true' : undefined}
     >
       {label.name !== '' ? (
-        <span
-          className="BlockNode-valueName"
-          data-pb-inline-field={nameField}
-          data-testid="block-value-name"
-        >
-          {label.name}
+        <span className="BlockNode-valueDeclaration">
+          <span
+            className="BlockNode-valueName"
+            data-pb-inline-field={nameField}
+            data-testid="block-value-name"
+          >
+            {label.name}
+          </span>
+          {label.type !== '' ? (
+            <>
+              <span className="BlockNode-valueColon" data-pb-inline-field={nameField}>:</span>{' '}
+              <span
+                className="BlockNode-valueType"
+                data-pb-inline-field={typeField}
+                data-testid="block-value-type"
+              >
+                {label.type}
+              </span>
+            </>
+          ) : null}
         </span>
       ) : null}
       <span
@@ -1173,7 +1193,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
         {simple
           ? <SimpleFace shape={shape} />
           : value
-            ? <ValueFace shape={shape} connectedIds={connectedIds} />
+            ? <ValueFace shape={shape} connectedIds={connectedIds} editing={isEditing} />
             : <BlockHeading shape={shape} height={layout.headerHeight} />}
         {simple ? <DefinitionBadge shape={shape} /> : null}
         {simple ? <BlockDiffBadge shape={shape} /> : null}

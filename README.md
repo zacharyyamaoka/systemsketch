@@ -48,6 +48,9 @@ generic field-role guidance—never fabricated example content.
 The [inspector field-guidance gallery](docs/inspector-field-guidance-2026-09-03.html)
 shows the shared vocabulary, the captured running inspector, and the real-browser
 evidence behind this change.
+The [canvas Python-signature pill gallery](docs/canvas-python-pill-entry-2026-09-03.html) makes a fresh pill start where a code line starts: its name. Type `pose: Pose = 2` on the canvas and it separates into a variable name, its type annotation, and the literal in one gesture; a bare `2.0` remains the concise unnamed literal. The face now visibly reads `pose: Pose = 2`, while the inspector stays a raw Name / Value / Type editor with no auto-formatting. New input ports accept that same canvas declaration and take the right-hand side as their default.
+
+The [pill inline-draft gallery](docs/pill-inline-draft-2026-09-03.html) fixes the moment before that commit: while entering a declaration, the pill has one left-aligned input and its underlying canvas glyphs pause rather than doubling behind it. The capsule continues to widen rightward, and a fresh [`pill-inline-draft.systemsketch`](sketches/review/pill-inline-draft.systemsketch) board starts at the exact review gesture.
 
 The [Loop region implementation gallery](docs/loop-region-implementation-2026-09-03.html) builds golden 10's `for` as a frame-like region whose header is an operator, with the element leaving through a real port on an ordinary solid cable. It also records the container hit-zone contract every region now shares: an `isLabel` band is solid chrome, a frame-like face stops tldraw's hit search, and — because the same predicate resolves a drop target — a cable inside a region has to be that region's child to stay clickable. The companion [`loop-region.systemsketch`](sketches/review/loop-region.systemsketch) board is ready for direct human verification.
 

@@ -687,12 +687,40 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   white-space: nowrap;
 }
 
+/* WHY: Canvas entry is a one-line, code-like gesture. The live shape still
+ * normalizes and grows with every keystroke, but its painted declaration waits
+ * until commit so one edit is never shown twice—once in the input and once
+ * behind it. */
+.systemsketch-block-canvas .BlockNode-value[data-inline-editing='true'] > * {
+  visibility: hidden;
+}
+
 .systemsketch-block-canvas .BlockNode-valueName,
 .systemsketch-block-canvas .BlockNode-valueText {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: inherit;
+}
+
+/* A named pill reads like its Python declaration: `pose: Pose = 2`. The
+ * annotation is quieter than the variable but remains independently editable. */
+.systemsketch-block-canvas .BlockNode-valueDeclaration {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.systemsketch-block-canvas .BlockNode-valueColon {
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-block-canvas .BlockNode-valueType {
+  min-width: 0;
+  margin-left: 5px;
+  overflow: hidden;
+  color: var(--ss-text-muted);
+  text-overflow: ellipsis;
 }
 
 .systemsketch-block-canvas .BlockNode-valueEquals {
