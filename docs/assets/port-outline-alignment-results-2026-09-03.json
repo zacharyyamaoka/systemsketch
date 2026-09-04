@@ -1,0 +1,872 @@
+[
+  {
+    "label": "port view input/left in0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.51px tolerance=1px"
+  },
+  {
+    "label": "port view input/left in0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view input/left in1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.48px tolerance=1px"
+  },
+  {
+    "label": "port view input/left in1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view input/left in2 indicator centred",
+    "ok": true,
+    "detail": "delta=0.50px tolerance=1px"
+  },
+  {
+    "label": "port view input/left in2 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view output/right out0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.51px tolerance=1px"
+  },
+  {
+    "label": "port view output/right out0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view output/right out1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.48px tolerance=1px"
+  },
+  {
+    "label": "port view output/right out1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view output/right out2 indicator centred",
+    "ok": true,
+    "detail": "delta=0.49px tolerance=1px"
+  },
+  {
+    "label": "port view output/right out2 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "simple view input/left in0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.43px tolerance=3px"
+  },
+  {
+    "label": "simple view input/left in0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "simple view output/right out0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.43px tolerance=3px"
+  },
+  {
+    "label": "simple view output/right out0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "value view input/left in0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.43px tolerance=1px"
+  },
+  {
+    "label": "value view input/left in0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "value view output/right out_1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.43px tolerance=1px"
+  },
+  {
+    "label": "value view output/right out_1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "expanded view input/left in0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.18px tolerance=1px"
+  },
+  {
+    "label": "expanded view input/left in0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "expanded view input/left in1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.18px tolerance=1px"
+  },
+  {
+    "label": "expanded view input/left in1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "expanded view output/right out0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.18px tolerance=1px"
+  },
+  {
+    "label": "expanded view output/right out0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "many ports input/left in0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.09px tolerance=1px"
+  },
+  {
+    "label": "many ports input/left in0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "many ports input/left in1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.09px tolerance=1px"
+  },
+  {
+    "label": "many ports input/left in1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "many ports input/left in2 indicator centred",
+    "ok": true,
+    "detail": "delta=0.09px tolerance=1px"
+  },
+  {
+    "label": "many ports input/left in2 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "many ports input/left in3 indicator centred",
+    "ok": true,
+    "detail": "delta=0.09px tolerance=1px"
+  },
+  {
+    "label": "many ports input/left in3 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "many ports input/left in4 indicator centred",
+    "ok": true,
+    "detail": "delta=0.09px tolerance=1px"
+  },
+  {
+    "label": "many ports input/left in4 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "many ports input/left in5 indicator centred",
+    "ok": true,
+    "detail": "delta=0.09px tolerance=1px"
+  },
+  {
+    "label": "many ports input/left in5 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "many ports output/right out0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.09px tolerance=1px"
+  },
+  {
+    "label": "many ports output/right out0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "many ports output/right out1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.09px tolerance=1px"
+  },
+  {
+    "label": "many ports output/right out1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "many ports output/right out2 indicator centred",
+    "ok": true,
+    "detail": "delta=0.09px tolerance=1px"
+  },
+  {
+    "label": "many ports output/right out2 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "many ports output/right out3 indicator centred",
+    "ok": true,
+    "detail": "delta=0.09px tolerance=1px"
+  },
+  {
+    "label": "many ports output/right out3 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "many ports output/right out4 indicator centred",
+    "ok": true,
+    "detail": "delta=0.09px tolerance=1px"
+  },
+  {
+    "label": "many ports output/right out4 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "many ports output/right out5 indicator centred",
+    "ok": true,
+    "detail": "delta=0.09px tolerance=1px"
+  },
+  {
+    "label": "many ports output/right out5 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "branch region input/left ctl0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.17px tolerance=1px"
+  },
+  {
+    "label": "branch region input/left ctl0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "branch region input/left ctl1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.17px tolerance=1px"
+  },
+  {
+    "label": "branch region input/left ctl1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "connected sink input/left in0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.50px tolerance=1px"
+  },
+  {
+    "label": "connected sink input/left in0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "default value input/left in0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.43px tolerance=1px"
+  },
+  {
+    "label": "default value input/left in0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "loop region input/left iterable indicator centred",
+    "ok": true,
+    "detail": "delta=0.20px tolerance=1px"
+  },
+  {
+    "label": "loop region input/left iterable socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "loop region output/bottom item indicator centred",
+    "ok": true,
+    "detail": "delta=0.20px tolerance=1px"
+  },
+  {
+    "label": "loop region output/bottom item socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view @0.5x input/left in0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.40px tolerance=1px"
+  },
+  {
+    "label": "port view @0.5x input/left in0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view @0.5x input/left in1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.39px tolerance=1px"
+  },
+  {
+    "label": "port view @0.5x input/left in1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view @0.5x input/left in2 indicator centred",
+    "ok": true,
+    "detail": "delta=0.39px tolerance=1px"
+  },
+  {
+    "label": "port view @0.5x input/left in2 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view @0.5x output/right out0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.40px tolerance=1px"
+  },
+  {
+    "label": "port view @0.5x output/right out0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view @0.5x output/right out1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.39px tolerance=1px"
+  },
+  {
+    "label": "port view @0.5x output/right out1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view @0.5x output/right out2 indicator centred",
+    "ok": true,
+    "detail": "delta=0.39px tolerance=1px"
+  },
+  {
+    "label": "port view @0.5x output/right out2 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view @2.5x input/left in0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.35px tolerance=1px"
+  },
+  {
+    "label": "port view @2.5x input/left in0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view @2.5x input/left in1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.33px tolerance=1px"
+  },
+  {
+    "label": "port view @2.5x input/left in1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view @2.5x input/left in2 indicator centred",
+    "ok": true,
+    "detail": "delta=0.34px tolerance=1px"
+  },
+  {
+    "label": "port view @2.5x input/left in2 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view @2.5x output/right out0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.35px tolerance=1px"
+  },
+  {
+    "label": "port view @2.5x output/right out0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view @2.5x output/right out1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.33px tolerance=1px"
+  },
+  {
+    "label": "port view @2.5x output/right out1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "port view @2.5x output/right out2 indicator centred",
+    "ok": true,
+    "detail": "delta=0.34px tolerance=1px"
+  },
+  {
+    "label": "port view @2.5x output/right out2 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe tiny (140x100) input/left in0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.20px tolerance=1px"
+  },
+  {
+    "label": "resize probe tiny (140x100) input/left in0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe tiny (140x100) output/right out0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.20px tolerance=1px"
+  },
+  {
+    "label": "resize probe tiny (140x100) output/right out0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe small (220x160) input/left in0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.21px tolerance=1px"
+  },
+  {
+    "label": "resize probe small (220x160) input/left in0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe small (220x160) input/left in1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.20px tolerance=1px"
+  },
+  {
+    "label": "resize probe small (220x160) input/left in1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe small (220x160) input/left in2 indicator centred",
+    "ok": true,
+    "detail": "delta=0.22px tolerance=1px"
+  },
+  {
+    "label": "resize probe small (220x160) input/left in2 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe small (220x160) output/right out0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.21px tolerance=1px"
+  },
+  {
+    "label": "resize probe small (220x160) output/right out0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe small (220x160) output/right out1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.20px tolerance=1px"
+  },
+  {
+    "label": "resize probe small (220x160) output/right out1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe large (700x560) input/left in0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.03px tolerance=1px"
+  },
+  {
+    "label": "resize probe large (700x560) input/left in0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe large (700x560) input/left in1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.03px tolerance=1px"
+  },
+  {
+    "label": "resize probe large (700x560) input/left in1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe large (700x560) input/left in2 indicator centred",
+    "ok": true,
+    "detail": "delta=0.03px tolerance=1px"
+  },
+  {
+    "label": "resize probe large (700x560) input/left in2 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe large (700x560) output/right out0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.02px tolerance=1px"
+  },
+  {
+    "label": "resize probe large (700x560) output/right out0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe large (700x560) output/right out1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.02px tolerance=1px"
+  },
+  {
+    "label": "resize probe large (700x560) output/right out1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe very-wide (1000x160) input/left in0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.02px tolerance=1px"
+  },
+  {
+    "label": "resize probe very-wide (1000x160) input/left in0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe very-wide (1000x160) input/left in1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.02px tolerance=1px"
+  },
+  {
+    "label": "resize probe very-wide (1000x160) input/left in1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe very-wide (1000x160) input/left in2 indicator centred",
+    "ok": true,
+    "detail": "delta=0.02px tolerance=1px"
+  },
+  {
+    "label": "resize probe very-wide (1000x160) input/left in2 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe very-wide (1000x160) output/right out0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.02px tolerance=1px"
+  },
+  {
+    "label": "resize probe very-wide (1000x160) output/right out0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe very-wide (1000x160) output/right out1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.02px tolerance=1px"
+  },
+  {
+    "label": "resize probe very-wide (1000x160) output/right out1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe very-tall (200x780) input/left in0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.11px tolerance=1px"
+  },
+  {
+    "label": "resize probe very-tall (200x780) input/left in0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe very-tall (200x780) input/left in1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.11px tolerance=1px"
+  },
+  {
+    "label": "resize probe very-tall (200x780) input/left in1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe very-tall (200x780) input/left in2 indicator centred",
+    "ok": true,
+    "detail": "delta=0.11px tolerance=1px"
+  },
+  {
+    "label": "resize probe very-tall (200x780) input/left in2 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe very-tall (200x780) output/right out0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.11px tolerance=1px"
+  },
+  {
+    "label": "resize probe very-tall (200x780) output/right out0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe very-tall (200x780) output/right out1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.11px tolerance=1px"
+  },
+  {
+    "label": "resize probe very-tall (200x780) output/right out1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe square (420x420) input/left in0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.20px tolerance=1px"
+  },
+  {
+    "label": "resize probe square (420x420) input/left in0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe square (420x420) input/left in1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.20px tolerance=1px"
+  },
+  {
+    "label": "resize probe square (420x420) input/left in1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe square (420x420) input/left in2 indicator centred",
+    "ok": true,
+    "detail": "delta=0.20px tolerance=1px"
+  },
+  {
+    "label": "resize probe square (420x420) input/left in2 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe square (420x420) output/right out0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.20px tolerance=1px"
+  },
+  {
+    "label": "resize probe square (420x420) output/right out0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe square (420x420) output/right out1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.20px tolerance=1px"
+  },
+  {
+    "label": "resize probe square (420x420) output/right out1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize branch tiny (240x210) input/left ctl0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.04px tolerance=1px"
+  },
+  {
+    "label": "resize branch tiny (240x210) input/left ctl0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize branch tiny (240x210) input/left ctl1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.04px tolerance=1px"
+  },
+  {
+    "label": "resize branch tiny (240x210) input/left ctl1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize branch large (900x700) input/left ctl0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.08px tolerance=1px"
+  },
+  {
+    "label": "resize branch large (900x700) input/left ctl0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize branch large (900x700) input/left ctl1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.08px tolerance=1px"
+  },
+  {
+    "label": "resize branch large (900x700) input/left ctl1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize branch very-wide (1100x210) input/left ctl0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.08px tolerance=1px"
+  },
+  {
+    "label": "resize branch very-wide (1100x210) input/left ctl0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize branch very-wide (1100x210) input/left ctl1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.08px tolerance=1px"
+  },
+  {
+    "label": "resize branch very-wide (1100x210) input/left ctl1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize loop tiny (300x180) input/left iterable indicator centred",
+    "ok": true,
+    "detail": "delta=0.03px tolerance=1px"
+  },
+  {
+    "label": "resize loop tiny (300x180) input/left iterable socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize loop tiny (300x180) output/bottom item indicator centred",
+    "ok": true,
+    "detail": "delta=0.03px tolerance=1px"
+  },
+  {
+    "label": "resize loop tiny (300x180) output/bottom item socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize loop large (900x600) input/left iterable indicator centred",
+    "ok": true,
+    "detail": "delta=0.00px tolerance=1px"
+  },
+  {
+    "label": "resize loop large (900x600) input/left iterable socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize loop large (900x600) output/bottom item indicator centred",
+    "ok": true,
+    "detail": "delta=0.01px tolerance=1px"
+  },
+  {
+    "label": "resize loop large (900x600) output/bottom item socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize loop very-wide (1100x190) input/left iterable indicator centred",
+    "ok": true,
+    "detail": "delta=0.08px tolerance=1px"
+  },
+  {
+    "label": "resize loop very-wide (1100x190) input/left iterable socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize loop very-wide (1100x190) output/bottom item indicator centred",
+    "ok": true,
+    "detail": "delta=0.09px tolerance=1px"
+  },
+  {
+    "label": "resize loop very-wide (1100x190) output/bottom item socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe dragged by hand input/left in0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.03px tolerance=1px"
+  },
+  {
+    "label": "resize probe dragged by hand input/left in0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe dragged by hand input/left in1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.03px tolerance=1px"
+  },
+  {
+    "label": "resize probe dragged by hand input/left in1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe dragged by hand input/left in2 indicator centred",
+    "ok": true,
+    "detail": "delta=0.03px tolerance=1px"
+  },
+  {
+    "label": "resize probe dragged by hand input/left in2 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe dragged by hand output/right out0 indicator centred",
+    "ok": true,
+    "detail": "delta=0.03px tolerance=1px"
+  },
+  {
+    "label": "resize probe dragged by hand output/right out0 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  },
+  {
+    "label": "resize probe dragged by hand output/right out1 indicator centred",
+    "ok": true,
+    "detail": "delta=0.03px tolerance=1px"
+  },
+  {
+    "label": "resize probe dragged by hand output/right out1 socket painted (not a straight edge through the dot)",
+    "ok": true,
+    "detail": "ink found outward of the dot"
+  }
+]

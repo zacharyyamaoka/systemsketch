@@ -48,6 +48,7 @@ import {
 	type BlockLayout,
 } from './layoutBlock'
 import { BlockCanvas } from './ui/BlockCanvas'
+import { PORT_INDICATOR_RADIUS } from './detach/blockPrimitives'
 import { stepIntoDepthScope } from '../depth/depthNavigation'
 import { steppedInResizeRelocation } from './avoidSiblingOcclusion'
 import {
@@ -396,13 +397,16 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 		const path = new Path2D()
 		path.roundRect(0, 0, w, h, shape.props.view === 'value' ? h / 2 : BLOCK_CORNER_RADIUS)
 		const drawn = new Set<string>()
+		// `subtle` only fades the painted dot on canvas hover (Simple's ports are
+		// invisible until then) — the outline still owns the same socket the whole
+		// time, or a Simple Block's selection edge draws straight through the dot
+		// the moment hover reveals it.
 		for (const port of layoutBlock(shape.props).ports) {
-			if (port.subtle) continue
 			const key = `${Math.round(port.x)}:${Math.round(port.y)}`
 			if (drawn.has(key)) continue
 			drawn.add(key)
-			path.moveTo(port.x + 9, port.y)
-			path.arc(port.x, port.y, 9, 0, Math.PI * 2)
+			path.moveTo(port.x + PORT_INDICATOR_RADIUS, port.y)
+			path.arc(port.x, port.y, PORT_INDICATOR_RADIUS, 0, Math.PI * 2)
 		}
 		return path
 	}
