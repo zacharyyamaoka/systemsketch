@@ -14,6 +14,7 @@ never regenerated in place.
 3. [R3 — editor-chrome expansion (`3caa496`)](r3-editor-chrome-3caa496.html) · [Markdown](r3-editor-chrome-3caa496.md)
 4. [Zach's review feedback, decisions, and supplied crops](feedback-2026-09-04.md)
 5. [Current incorporated report](../../labview-blueprint-simulink-vocabulary-controls-gap-analysis-2026-09-03.html) · [Markdown](../../labview-blueprint-simulink-vocabulary-controls-gap-analysis-2026-09-03.md)
+6. [Post-report vocabulary addendum — Bundle / Unbundle / Copy](post-report-vocabulary-addendum-2026-09-04.md)
 
 The current report preserves the dictionary format and primary-source evidence
 while correcting classifications and recording which ideas were approved,
