@@ -14,6 +14,7 @@ import { HTMLContainer, useEditor, useValue } from 'tldraw'
 
 import { getBlockPortConnections } from '../blocks/connections/blockPorts'
 import { countProducers, PortDot, usePortHintEligibility } from '../blocks/ui/PortDot'
+import { ControlIconBadges } from '../controlIcons'
 import { loopLayout, type LoopPortLayout, type LoopShape } from './loopModel'
 import './loop-canvas.css'
 
@@ -77,6 +78,18 @@ export function LoopCanvas({ shape }: { shape: LoopShape }) {
 						>
 							{shape.props.turn}
 						</div>
+					) : null}
+					{layout.controlIcons ? (
+						<ControlIconBadges
+							icons={shape.props.controlIcons}
+							testId={`loop-control-icons-${shape.id.replace('shape:', '')}`}
+							style={{
+								left: layout.controlIcons.x,
+								top: layout.controlIcons.y,
+								width: layout.controlIcons.w,
+								height: layout.controlIcons.h,
+							}}
+						/>
 					) : null}
 					{[layout.iterable, layout.item].map((placed) => (
 						<div

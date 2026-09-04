@@ -1,0 +1,48 @@
+/*
+ * Red is the shared ink for control, not data. The shapes deliberately differ:
+ * an octagon stops (`break`), while the rounded pill advances (`continue`).
+ */
+.systemsketch-controlIcons {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+  color: var(--ss-danger);
+  pointer-events: none;
+}
+
+.systemsketch-controlIcon {
+  display: block;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+.systemsketch-controlIcon[data-control-kind='break'] {
+  width: 20px;
+}
+
+.systemsketch-controlIcon[data-control-kind='continue'] {
+  width: 28px;
+}
+
+.systemsketch-controlIcon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.systemsketch-controlIcon polygon,
+.systemsketch-controlIcon rect {
+  fill: var(--ss-surface-raised);
+  stroke: currentColor;
+  stroke-width: 1.7;
+}
+
+.systemsketch-controlIcon text {
+  fill: currentColor;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+}

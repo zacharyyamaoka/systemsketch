@@ -27,6 +27,8 @@
  */
 import { T, type TLShape } from 'tldraw'
 
+import { ControlIcon, controlIconRowWidth, type ControlIcon as ControlIconType } from '../controlIconModel'
+
 export const LOOP_SHAPE_TYPE = 'loop' as const
 export const LOOP_TOOL_ID = 'loop' as const
 
@@ -74,6 +76,8 @@ export const LOOP_SHAPE_PROPS = {
 	item: LoopPort,
 	/** What the turn chip reads. Empty hides the chip. */
 	turn: T.string,
+	/** Offline Python analysis writes exits here; the canvas only draws them. */
+	controlIcons: T.arrayOf(ControlIcon).optional(),
 } as const
 
 declare module 'tldraw' {
@@ -85,6 +89,7 @@ declare module 'tldraw' {
 			iterable: LoopPort
 			item: LoopPort
 			turn: string
+			controlIcons?: ControlIconType[]
 		}
 	}
 }
@@ -131,6 +136,8 @@ export interface LoopLayout {
 	/** Centre point AND the band it may fill, so it can truncate rather than collide. */
 	title: { x: number; y: number; w: number }
 	turn: { x: number; y: number; w: number; h: number } | null
+	/** Right-aligned exits share the turn chip's header lane. */
+	controlIcons: { x: number; y: number; w: number; h: number } | null
 	iterable: LoopPortLayout
 	item: LoopPortLayout
 	/** How wide a port's type label may be before it truncates. */
@@ -192,17 +199,23 @@ export function loopLayout(props: LoopShapeProps): LoopLayout {
 	}
 
 	const turnText = props.turn.trim()
+	const iconW = controlIconRowWidth(props.controlIcons)
+	const iconGap = iconW ? 6 : 0
+	const icons = iconW
+		? { x: w - 14 - iconW, y: iterableY - 10, w: iconW, h: 20 }
+		: null
+	const headerRight = w - 14 - iconW - iconGap
 	let turnW = turnText ? Math.min(w * 0.32, labelWidth(turnText) + 20) : 0
-	let bandEnd = (turnW ? w - 14 - turnW : w - 14) - 16
+	let bandEnd = (turnW ? headerRight - turnW : headerRight) - 16
 	const bandStart = LOOP_LABEL_INSET + labelMax + 16
 	// The chip yields first when the row runs out: it reports a live state, and
 	// the title is what identifies the region.
 	if (turnW && bandEnd - bandStart < 60) {
 		turnW = 0
-		bandEnd = w - 14 - 16
+		bandEnd = headerRight - 16
 	}
 	const turn = turnW
-		? { x: w - 14 - turnW, y: iterableY - 11, w: turnW, h: 22 }
+		? { x: headerRight - turnW, y: iterableY - 11, w: turnW, h: 22 }
 		: null
 	const bandW = Math.max(0, bandEnd - bandStart)
 	// At the floor width, a long operator name needs the lane to the right of
@@ -223,6 +236,7 @@ export function loopLayout(props: LoopShapeProps): LoopLayout {
 		footer: footerH ? { x: 0, y: h - footerH, w, h: footerH } : null,
 		title,
 		turn,
+		controlIcons: icons,
 		iterable,
 		item,
 		labelMax,

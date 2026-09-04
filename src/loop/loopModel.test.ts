@@ -104,6 +104,20 @@ describe('loop layout', () => {
 		expect(layout.turn === null || layout.title.w >= 60).toBe(true)
 	})
 
+	it('reserves the turn-chip lane for a right-aligned control-icon family', () => {
+		const layout = loopLayout({
+			...getDefaultLoopProps(),
+			turn: 'iteration 3 of 7',
+			controlIcons: [{ kind: 'break', line: 5 }, { kind: 'continue', line: 7 }],
+		})
+		expect(layout.controlIcons).not.toBeNull()
+		expect(layout.controlIcons!.w).toBe(51)
+		expect(layout.controlIcons!.x + layout.controlIcons!.w).toBeLessThanOrEqual(layout.w - 14)
+		expect(layout.turn!.x + layout.turn!.w).toBeLessThanOrEqual(layout.controlIcons!.x - 6)
+		const titleEnd = layout.title.x + layout.title.w / 2
+		expect(titleEnd).toBeLessThanOrEqual(layout.turn!.x)
+	})
+
 	it('keeps the two type labels on separate rows', () => {
 		const layout = loopLayout(getDefaultLoopProps())
 		expect(layout.item.label.y - layout.iterable.label.y).toBeGreaterThanOrEqual(18)

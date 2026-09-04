@@ -108,6 +108,7 @@
     "test:loop": "node tests/loop_region_smoke.mjs",
     "test:loop-contents-layout": "node tests/loop_contents_layout_smoke.mjs",
     "test:loop-qa": "node tests/loop_region_qa.mjs",
+    "test:control-icons": "node tests/control_icon_placement_smoke.mjs",
     "test:diff-states": "node tests/block_diff_states_smoke.mjs",
     "test:diff-vocabulary": "node tests/block_diff_vocabulary_smoke.mjs",
     "test:diff-round2": "node tests/block_diff_round2_smoke.mjs",
