@@ -69,8 +69,8 @@ measurements = {
         "longTaskMsAfter": after_cable["frames"]["longTaskMs"],
     },
     "verification": {
-        "reviewBoardsParsed": 80,
-        "vitestTests": 1069,
+        "reviewBoardsParsed": 81,
+        "vitestTests": 1070,
         "pythonTests": 94,
         "browserChecks": 69,
     },
@@ -239,7 +239,7 @@ page = f'''<!doctype html>
 <section class="metrics">
  <div class="metric"><strong>{implemented}</strong><span>implemented + verified</span></div>
  <div class="metric"><strong>{measurements['selectAllDrag']['busyReductionPercent']}%</strong><span>select-all busy-time reduction</span></div>
- <div class="metric"><strong>80 / 80</strong><span>review boards parse</span></div>
+ <div class="metric"><strong>81 / 81</strong><span>review boards parse</span></div>
  <div class="metric"><strong>{open_count} + {unconfirmed}</strong><span>open + unconfirmed</span></div>
 </section>
 <div class="note"><strong>Scope boundary.</strong> The live Preview checkout contains extensive user/peer edits and untracked diff journeys. This audit used committed source plus current committed main, never Zach's real board, and did not copy or overwrite peer-owned work.</div>
