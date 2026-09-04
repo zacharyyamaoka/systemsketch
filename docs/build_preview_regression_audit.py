@@ -70,7 +70,7 @@ measurements = {
     },
     "verification": {
         "reviewBoardsParsed": 80,
-        "vitestTests": 1066,
+        "vitestTests": 1069,
         "pythonTests": 94,
         "browserChecks": 69,
     },
@@ -86,7 +86,7 @@ ISSUES = [
         "kind": "Product bug",
         "status": "Implemented",
         "title": "Pre-diff saved boards were quarantined on open",
-        "summary": "The diff merge made Block state required without advancing the Block migration sequence. A valid version-4 board therefore failed current validation before it could render.",
+        "summary": "The recent diff-state schema change made Block state required without advancing the Block migration sequence. A valid version-4 board therefore failed current validation before it could render.",
         "images": [
             ("docs/assets/repo-improvements-workspace-quarantine.png", "The product's read-only quarantine surface—the state the tunnel fixture entered before the migration repair."),
             ("docs/assets/edge-tunnel-hidden-live-2026-09-02.png", "After repair, the same committed two-edge review board cold-opens and its tunnel interaction is driveable."),
@@ -94,9 +94,9 @@ ISSUES = [
         "actual": "Opening sketches/review/edge-tunnel.systemsketch produced invalidRecords, an empty editor, and the read-only safety alert.",
         "expected": "A board written before diff state existed migrates to state: normal and remains editable.",
         "repro": "npm run test:tunnel on baseline 2964abb; wait for the saved review fixture.",
-        "proof": "Added Block migration versions 5 and 6, a version-4 regression, and a sweep that parses every committed review board. The tunnel journey now passes 10/10.",
-        "seam": "src/blocks/BlockShapeUtil.tsx · src/blocks/blockShapeMigrations.test.ts · src/workspace/reviewFixtures.test.ts",
-        "acceptance": "All committed .systemsketch review boards parse as ready; the tunnel fixture cold-opens and completes hover/layer interactions.",
+        "proof": "All six Block versions now live in one data-only module as named pure vN-to-vN+1 transformations. Direct composition and downgrade tests pass, every committed review board parses, and the tunnel journey passes 10/10.",
+        "seam": "src/blocks/blockShapeMigrations.ts · src/blocks/blockShapeMigrations.test.ts · src/workspace/reviewFixtures.test.ts",
+        "acceptance": "Each stored Block change adds one pure version step; all committed review boards parse; cold-open and tunnel browser journeys remain green.",
     },
     {
         "id": "diagnostics-hot-path",

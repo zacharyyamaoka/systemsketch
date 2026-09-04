@@ -10,8 +10,31 @@ import {
 	type BlockShape,
 } from './blockModel'
 import { BlockShapeUtil } from './BlockShapeUtil'
+import {
+	downgradeBlockPropsV1ToV0,
+	downgradeBlockPropsV4ToV3,
+	downgradeBlockPropsV5ToV4,
+	downgradeBlockPropsV6ToV5,
+	upgradeBlockPropsV0ToV1,
+	upgradeBlockPropsV1ToV2,
+	upgradeBlockPropsV2ToV3,
+	upgradeBlockPropsV3ToV4,
+	upgradeBlockPropsV4ToV5,
+	upgradeBlockPropsV5ToV6,
+	type BlockMigrationProps,
+} from './blockShapeMigrations'
 
 const BLOCK_MIGRATION_SEQUENCE = `com.tldraw.shape.${BLOCK_SHAPE_TYPE}`
+
+function throughPureStep(
+	props: BlockMigrationProps,
+	step: (input: BlockMigrationProps) => BlockMigrationProps,
+): BlockMigrationProps {
+	const before = structuredClone(props)
+	const next = step(props)
+	expect(props).toEqual(before)
+	return next
+}
 
 /** A Block saved when rows were markers on the port that started them. */
 function markerBlock(): Omit<BlockShape, 'props'> & { props: Record<string, unknown> } {
@@ -49,6 +72,105 @@ function markerBlock(): Omit<BlockShape, 'props'> & { props: Record<string, unkn
 }
 
 describe('Block shape migrations', () => {
+	it('threads one immutable props record through the named version steps', () => {
+		const v0: BlockMigrationProps = {
+			view: 'port',
+			w: 360,
+			h: 230,
+			views: {
+				simple: { w: 240, h: 148 },
+				port: { w: 360, h: 230 },
+				expanded: { w: 640, h: 430 },
+			},
+			inputs: [
+				{ id: 'cond', header: true },
+				{ id: 'left' },
+				{ id: 'right', groupStart: true },
+			],
+			outputs: [
+				{ id: 'first' },
+				{ id: 'second', branchStart: true },
+			],
+		}
+
+		const v1 = throughPureStep(v0, upgradeBlockPropsV0ToV1)
+		expect(v1).toMatchObject({ w: 340, h: 198 })
+		expect(v1.views).toMatchObject({
+			simple: { w: 320, h: 206 },
+			port: { w: 340, h: 198 },
+			expanded: { w: 560, h: 380 },
+		})
+
+		const v2 = throughPureStep(v1, upgradeBlockPropsV1ToV2)
+		expect(v2.portLayout).toBe('inline')
+
+		const v3 = throughPureStep(v2, upgradeBlockPropsV2ToV3)
+		expect(v3.inputs).toEqual([
+			{ id: 'cond', row: 0 },
+			{ id: 'left' },
+			{ id: 'right', row: 2 },
+		])
+		expect(v3.outputs).toEqual([
+			{ id: 'first' },
+			{ id: 'second', branch: 1 },
+		])
+
+		const v4 = throughPureStep(v3, upgradeBlockPropsV3ToV4)
+		expect(v4.views).toMatchObject({ value: { w: 168, h: 56 } })
+
+		const v5 = throughPureStep(v4, upgradeBlockPropsV4ToV5)
+		expect(v5.state).toBe('normal')
+
+		const v6 = throughPureStep(v5, upgradeBlockPropsV5ToV6)
+		expect(v6).toEqual(v5)
+
+		const restoredV0 = throughPureStep(v1, downgradeBlockPropsV1ToV0)
+		expect(restoredV0).toMatchObject({ w: 360, h: 230, views: v0.views })
+	})
+
+	it('downgrades disposable diff data without mutating the current record', () => {
+		const v6: BlockMigrationProps = {
+			view: 'value',
+			w: 200,
+			h: 56,
+			views: {
+				simple: { w: 320, h: 206 },
+				port: { w: 340, h: 198 },
+				expanded: { w: 560, h: 380 },
+				value: { w: 200, h: 56 },
+			},
+			state: 'changed',
+			fieldDiffs: [{ path: 'title', before: 'old', after: 'new' }],
+			priorPose: { x: 10, y: 20, w: 300, h: 200 },
+			inputs: [
+				{
+					id: 'kept',
+					state: 'changed',
+					stateBefore: 'before',
+					fieldDiffs: [{ path: 'name', before: 'before', after: 'after' }],
+				},
+				{ id: 'ghost', state: 'removed' },
+			],
+			outputs: [],
+		}
+
+		const v5 = throughPureStep(v6, downgradeBlockPropsV6ToV5)
+		expect(v5).not.toHaveProperty('fieldDiffs')
+		expect(v5).not.toHaveProperty('priorPose')
+		expect(v5.inputs).toEqual([
+			{ id: 'kept', state: 'changed', stateBefore: 'before' },
+			{ id: 'ghost', state: 'removed' },
+		])
+
+		const v4 = throughPureStep(v5, downgradeBlockPropsV5ToV4)
+		expect(v4).not.toHaveProperty('state')
+		expect(v4.inputs).toEqual([{ id: 'kept' }])
+
+		const v3 = throughPureStep(v4, downgradeBlockPropsV4ToV3)
+		expect(v3).toMatchObject({ view: 'simple', w: 320, h: 206 })
+		expect(v3.views).not.toHaveProperty('value')
+	})
+
 	it('gives pre-diff Blocks the required ordinary state', () => {
 		const store = createTLStore({ shapeUtils: [BlockShapeUtil], bindingUtils: [] })
 		const currentSchema = store.schema.serialize()

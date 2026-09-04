@@ -1,7 +1,5 @@
 import {
 	BaseFrameLikeShapeUtil,
-	createShapePropsMigrationIds,
-	createShapePropsMigrationSequence,
 	Rectangle2d,
 	Stadium2d,
 	type RecordProps,
@@ -13,7 +11,6 @@ import {
 import {
 	BLOCK_SHAPE_PROPS,
 	BLOCK_SHAPE_TYPE,
-	DEFAULT_BLOCK_VIEW_SIZES,
 	PILL_TOOL_ID,
 	canReparentDraggedShapesIntoBlock,
 	canBlockContainChildren,
@@ -22,6 +19,7 @@ import {
 	resizeBlockProps,
 	type BlockShape,
 } from './blockModel'
+import { blockShapeMigrations } from './blockShapeMigrations'
 import {
 	createValueBlockProps,
 	isBlankBlockProps,
@@ -55,27 +53,6 @@ import {
 	isBranchArmShape,
 	type BranchArmShape,
 } from '../branch/BranchArmShapeUtil'
-
-const blockVersions = createShapePropsMigrationIds(BLOCK_SHAPE_TYPE, {
-	RestorePyblocksUi: 1,
-	PortLayoutStyle: 2,
-	PortRows: 3,
-	ValueView: 4,
-	DiffState: 5,
-	FieldDiffs: 6,
-})
-
-const LEGACY_VIEW_SIZES = {
-	simple: { w: 240, h: 148 },
-	port: { w: 360, h: 230 },
-	expanded: { w: 640, h: 430 },
-} as const
-
-const RESTORED_VIEW_SIZES = {
-	simple: { w: 320, h: 206 },
-	port: { w: 340, h: 198 },
-	expanded: { w: 560, h: 380 },
-} as const
 
 function exportPortColor(type: string): string {
 	const normalized = type.trim().toLowerCase()
@@ -195,160 +172,7 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	static override type = BLOCK_SHAPE_TYPE
 	static override props: RecordProps<BlockShape> = BLOCK_SHAPE_PROPS
-	static override migrations = createShapePropsMigrationSequence({
-		sequence: [{
-			id: blockVersions.RestorePyblocksUi,
-			up(props) {
-				const view = props.view as keyof typeof LEGACY_VIEW_SIZES
-				const views = props.views as Record<string, { w?: number; h?: number }> | undefined
-				if (!views || !(view in LEGACY_VIEW_SIZES)) return
-				const nextViews = { ...views }
-				for (const key of Object.keys(LEGACY_VIEW_SIZES) as (keyof typeof LEGACY_VIEW_SIZES)[]) {
-					const box = views[key]
-					const legacy = LEGACY_VIEW_SIZES[key]
-					if (box?.w === legacy.w && box?.h === legacy.h) {
-						nextViews[key] = { ...RESTORED_VIEW_SIZES[key] }
-					}
-				}
-				const activeLegacy = LEGACY_VIEW_SIZES[view]
-				if (props.w === activeLegacy.w && props.h === activeLegacy.h) {
-					props.w = nextViews[view]?.w ?? props.w
-					props.h = nextViews[view]?.h ?? props.h
-				}
-				props.views = nextViews
-			},
-			down(props) {
-				const view = props.view as keyof typeof RESTORED_VIEW_SIZES
-				const views = props.views as Record<string, { w?: number; h?: number }> | undefined
-				if (!views || !(view in RESTORED_VIEW_SIZES)) return
-				const nextViews = { ...views }
-				for (const key of Object.keys(RESTORED_VIEW_SIZES) as (keyof typeof RESTORED_VIEW_SIZES)[]) {
-					const box = views[key]
-					const restored = RESTORED_VIEW_SIZES[key]
-					if (box?.w === restored.w && box?.h === restored.h) {
-						nextViews[key] = { ...LEGACY_VIEW_SIZES[key] }
-					}
-				}
-				const activeRestored = RESTORED_VIEW_SIZES[view]
-				if (props.w === activeRestored.w && props.h === activeRestored.h) {
-					props.w = nextViews[view]?.w ?? props.w
-					props.h = nextViews[view]?.h ?? props.h
-				}
-				props.views = nextViews
-			},
-		}, {
-			id: blockVersions.PortLayoutStyle,
-			up(props) {
-				// portLayout became a tldraw StyleProp so that a multi-selection can
-				// switch Aligned/Offset in one write. A style prop cannot be optional,
-				// so every stored Block needs the donor default made explicit.
-				if (props.portLayout === undefined) props.portLayout = 'inline'
-			},
-			// The pre-style validator accepted a present portLayout, so stepping
-			// back down needs no change to the record.
-			down: 'none',
-		}, {
-			id: blockVersions.PortRows,
-			up(props) {
-				// A row used to be a marker on the port that started it (`groupStart`),
-				// an arm likewise (`branchStart`), and the heading a flag (`header`).
-				// Now every port names its row and arm, so a row can hold a port from
-				// either side, or be empty on one side, and a port can move between
-				// rows without dragging a boundary along. Replay the old split rule to
-				// number each port, then drop the markers.
-				for (const side of ['inputs', 'outputs'] as const) {
-					const ports = props[side]
-					if (!Array.isArray(ports)) continue
-					let row = 1
-					let branch = 0
-					let inGroup = 0
-					props[side] = ports.map((port: Record<string, unknown>) => {
-						const { groupStart, branchStart, header, ...rest } = port
-						if (side === 'inputs' && header === true) return { ...rest, row: 0 }
-						if (inGroup > 0 && groupStart === true) {
-							row += 1
-							branch = 0
-							inGroup = 0
-						} else if (side === 'outputs' && inGroup > 0 && branchStart === true) {
-							branch += 1
-						}
-						inGroup += 1
-						const next: Record<string, unknown> = { ...rest }
-						if (row !== 1) next.row = row
-						if (branch !== 0) next.branch = branch
-						return next
-					})
-				}
-			},
-			down: 'none',
-		}, {
-			id: blockVersions.ValueView,
-			up(props) {
-				// The Block gained a fourth view, `value` — the capsule a literal
-				// argument wears. Every Block remembers a box per view, so records
-				// written before the view existed need its box filled in.
-				const views = props.views as Record<string, { w: number; h: number }> | undefined
-				if (views && !views.value) {
-					props.views = { ...views, value: { ...DEFAULT_BLOCK_VIEW_SIZES.value } }
-				}
-			},
-			down(props) {
-				const views = props.views as Record<string, { w: number; h: number }> | undefined
-				if (views?.value) {
-					const { value: _value, ...rest } = views
-					props.views = rest
-				}
-				if (props.view === 'value') {
-					// An older reader has no capsule; the Simple card is the honest fallback.
-					props.view = 'simple'
-					const box = (props.views as Record<string, { w: number; h: number }> | undefined)?.simple
-					if (box) {
-						props.w = box.w
-						props.h = box.h
-					}
-				}
-			},
-		}, {
-			id: blockVersions.DiffState,
-			up(props) {
-				// `state` became a StyleProp with the shared diff/linter vocabulary.
-				// Style props are required, so boards written before the diff feature
-				// need the ordinary state made explicit before validation runs.
-				if (props.state === undefined) props.state = 'normal'
-			},
-			down(props) {
-				delete props.state
-				for (const side of ['inputs', 'outputs'] as const) {
-					const ports = props[side]
-					if (!Array.isArray(ports)) continue
-					props[side] = ports
-						.filter((port: Record<string, unknown>) => port.state !== 'removed')
-						.map((port: Record<string, unknown>) => {
-							const { state: _state, stateBefore: _before, ...rest } = port
-							return rest
-						})
-				}
-			},
-		}, {
-			id: blockVersions.FieldDiffs,
-			up() {
-				// Optional diff metadata needs no forward default. Advancing the
-				// sequence still records the reader contract for its downgrade path.
-			},
-			down(props) {
-				delete props.fieldDiffs
-				delete props.priorPose
-				for (const side of ['inputs', 'outputs'] as const) {
-					const ports = props[side]
-					if (!Array.isArray(ports)) continue
-					props[side] = ports.map((port: Record<string, unknown>) => {
-						const { fieldDiffs: _fields, ...rest } = port
-						return rest
-					})
-				}
-			},
-		}],
-	})
+	static override migrations = blockShapeMigrations
 
 	/**
 	 * The capsule's invariants (no inputs, one typed outlet, a box that fits
