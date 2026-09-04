@@ -37,7 +37,12 @@ function validName(value: unknown): string | null {
   const name = value.trim()
   return name.length > 0 && name.length <= MAX_LANDMARK_NAME_LENGTH ? name : null
 }
-function normalizedName(name: string): string { return name.trim().toLocaleLowerCase() }
+/**
+ * A board file must mean the same thing regardless of the browser locale that
+ * happens to open it.  Locale-sensitive casing would make, for example, the
+ * Turkish dotted/dotless-I namespace vary between collaborators.
+ */
+function normalizedName(name: string): string { return name.trim().toLowerCase() }
 function validId(value: unknown): string | null { return typeof value === 'string' && value.trim().length > 0 ? value : null }
 
 function readLandmark(value: unknown): BoardLandmark | null {
@@ -167,18 +172,36 @@ function stableImportedId(ids: Set<string>, pageId: string, original: string): s
 }
 function stableImportedName(names: Set<string>, sourcePageName: string, original: string): string {
   if (!names.has(normalizedName(original))) return original
-  const prefix = `${sourcePageName || 'Imported board'} · ${original}`
-  let candidate = prefix
-  for (let ordinal = 2; names.has(normalizedName(candidate)); ordinal += 1) candidate = `${prefix} (${ordinal})`
+  const source = sourcePageName.trim() || 'Imported board'
+  const joiner = ' · '
+  const truncate = (value: string, length: number) => (
+    value.length <= length ? value : `${value.slice(0, Math.max(0, length - 1))}…`
+  )
+  const candidateFor = (ordinal?: number) => {
+    const suffix = ordinal ? ` (${ordinal})` : ''
+    const full = `${source}${joiner}${original}${suffix}`
+    if (full.length <= MAX_LANDMARK_NAME_LENGTH) return full
+    // WHY: imported landmarks must remain writable after a collision. Reserve
+    // the ordinal first, then keep enough source identity to distinguish
+    // parallel pages while giving the original landmark most of the title.
+    const coreLength = MAX_LANDMARK_NAME_LENGTH - suffix.length
+    const sourceLength = Math.min(24, Math.max(1, Math.floor((coreLength - joiner.length) / 2)))
+    const clippedSource = truncate(source, sourceLength)
+    const originalLength = coreLength - joiner.length - clippedSource.length
+    return `${clippedSource}${joiner}${truncate(original, originalLength)}${suffix}`
+  }
+  let candidate = candidateFor()
+  for (let ordinal = 2; names.has(normalizedName(candidate)); ordinal += 1) candidate = candidateFor(ordinal)
   return candidate
 }
 
 /**
  * Merge readable camera views when a legacy multi-page board becomes one canvas.
  *
- * A tldraw camera is a screen translation. If a page's content moves by `d`
- * page units, preserving that view moves the translation by `-d * zoom`.
- * This inverse is the same displacement fact as the imported Frame movement.
+ * A tldraw camera stores its x/y translation in page space. If a page's
+ * content moves by `d` page units, preserving that view moves the translation
+ * by `-d`, independently of zoom. This is the same displacement fact as the
+ * imported Frame movement; scaling it by `z` would visibly land off-target.
  * Unknown/malformed root metadata returns `null`, preserving it untouched.
  */
 export function mergeImportedPageLandmarks(rootPage: TLPage, imported: readonly ImportedLandmarkPage[]): TLPage['meta'] | null {
@@ -195,8 +218,8 @@ export function mergeImportedPageLandmarks(rootPage: TLPage, imported: readonly 
       const id = stableImportedId(ids, source.page.id, original.id)
       const name = stableImportedName(names, source.page.name, original.name)
       const landmark = { id, name, camera: {
-        x: original.camera.x - source.displacement.x * original.camera.z,
-        y: original.camera.y - source.displacement.y * original.camera.z,
+        x: original.camera.x - source.displacement.x,
+        y: original.camera.y - source.displacement.y,
         z: original.camera.z,
       } }
       ids.add(id); names.add(normalizedName(name)); landmarks.push(landmark)

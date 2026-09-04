@@ -92,6 +92,10 @@
         [
           "page-legacy-runtime:overview",
           "Runtime · Overview"
+        ],
+        [
+          "worker-detail",
+          "Worker detail"
         ]
       ],
       "desired": [
@@ -102,6 +106,10 @@
         [
           "page-legacy-runtime:overview",
           "Runtime · Overview"
+        ],
+        [
+          "worker-detail",
+          "Worker detail"
         ]
       ],
       "ok": true
@@ -117,6 +125,70 @@
         "architecture",
         "runtime"
       ],
+      "ok": true
+    },
+    {
+      "id": "M12",
+      "label": "zoomed out migrated landmark jumps to its page-space translated camera",
+      "observed": {
+        "x": -975,
+        "y": 25,
+        "z": 0.5
+      },
+      "desired": {
+        "x": -975,
+        "y": 25,
+        "z": 0.5
+      },
+      "ok": true
+    },
+    {
+      "id": "M13",
+      "label": "zoomed out jump physically frames the former runtime content at its translated viewport",
+      "observed": {
+        "x": 975,
+        "y": -25,
+        "w": 3200,
+        "h": 2000
+      },
+      "desired": {
+        "x": 975,
+        "y": -25,
+        "w": 3200,
+        "h": 2000
+      },
+      "ok": true
+    },
+    {
+      "id": "M14",
+      "label": "zoomed in migrated landmark jumps to its page-space translated camera",
+      "observed": {
+        "x": -1195,
+        "y": 195,
+        "z": 2
+      },
+      "desired": {
+        "x": -1195,
+        "y": 195,
+        "z": 2
+      },
+      "ok": true
+    },
+    {
+      "id": "M15",
+      "label": "zoomed in jump physically frames the former runtime content at its translated viewport",
+      "observed": {
+        "x": 1195,
+        "y": -195,
+        "w": 800,
+        "h": 500
+      },
+      "desired": {
+        "x": 1195,
+        "y": -195,
+        "w": 800,
+        "h": 500
+      },
       "ok": true
     },
     {

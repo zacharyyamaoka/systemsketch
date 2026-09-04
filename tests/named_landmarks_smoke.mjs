@@ -8,7 +8,7 @@
  * covered by the pure model test.
  */
 import assert from 'node:assert/strict'
-import { copyFile, writeFile } from 'node:fs/promises'
+import { copyFile, stat, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import {
@@ -27,7 +27,6 @@ import {
   waitFor,
 } from './browser_harness.mjs'
 
-const SCREENSHOT = join(ROOT, 'docs', 'assets', 'named-landmarks-panel-2026-09-04.png')
 const REVIEW_FIXTURE = join(ROOT, 'sketches', 'review', 'named-landmarks.systemsketch')
 const { checks, pass } = makeChecklist()
 
@@ -37,7 +36,6 @@ async function capture(page, path) {
 }
 
 async function main() {
-  await ensureDir(join(ROOT, 'docs', 'assets'))
   const app = await startApp({
     label: 'systemsketch-named-landmarks',
     build: 'named-landmarks-smoke',
@@ -45,6 +43,10 @@ async function main() {
     height: 920,
   })
   const board = join(app.filesRoot, 'SystemSketch', 'named-landmarks.systemsketch')
+  // Keep the gallery's committed evidence stable. Browser acceptance captures
+  // a fresh proof into its disposable profile instead of rewriting a tracked
+  // PNG with compositor-timing-dependent bytes on every test run.
+  const screenshot = join(app.filesRoot, 'named-landmarks-panel.png')
 
   try {
     await ensureDir(join(app.filesRoot, 'SystemSketch'))
@@ -98,7 +100,8 @@ async function main() {
       return true
     })()`)
     await waitFor(app.page, 'document.querySelector(\'[data-testid="systemsketch-right-popout"][data-surface="board-overview"]\')', 'Board overview after camera fit')
-    await capture(app.page, SCREENSHOT)
+    await capture(app.page, screenshot)
+    assert.ok((await stat(screenshot)).size > 0)
 
     await evaluate(app.page, `(() => {
       window.__systemsketch.editor.setCamera({ x: 110, y: 90, z: 1.4 })

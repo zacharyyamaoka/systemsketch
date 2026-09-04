@@ -109,7 +109,7 @@ describe('named board landmarks', () => {
     expect(untouched.depth).toBe('shape:expanded')
   })
 
-  it('merges secondary-page landmarks through the same frame displacement while retaining root metadata', () => {
+  it('merges secondary-page landmarks through the same page-space frame displacement at every zoom', () => {
     const root = page(PAGE, 'Architecture', { keep: { root: true }, ...landmarkMeta([entry('shared', 'Overview', 10, 20, 1)]) })
     const runtime = page('page:runtime' as TLPageId, 'Runtime', {
       keep: { secondary: true },
@@ -119,9 +119,44 @@ describe('named board landmarks', () => {
     expect(merged.keep).toEqual({ root: true })
     expect((merged[BOARD_LANDMARKS_META_KEY] as unknown as { landmarks: BoardLandmark[] }).landmarks).toEqual([
       entry('shared', 'Overview', 10, 20, 1),
-      entry('page-runtime:shared', 'Runtime · Overview', -382, 88, 0.5),
-      entry('runtime', 'Worker', -1698, 112, 2),
+      entry('page-runtime:shared', 'Runtime · Overview', -814, 106, 0.5),
+      entry('runtime', 'Worker', -834, 76, 2),
     ])
+  })
+
+  it('keeps collision-generated imported names writable at 80 characters, including repeated collisions', () => {
+    const name = 'L'.repeat(80)
+    const root = page(PAGE, 'Architecture', landmarkMeta([entry('root', name)]))
+    const imported = [
+      page('page:one' as TLPageId, 'P'.repeat(80), landmarkMeta([entry('one', name)])),
+      page('page:two' as TLPageId, 'P'.repeat(80), landmarkMeta([entry('two', name)])),
+    ]
+    const merged = mergeImportedPageLandmarks(root, imported.map((source, index) => ({
+      page: source,
+      displacement: { x: index + 1, y: 0 },
+    })))!
+    const landmarks = (merged[BOARD_LANDMARKS_META_KEY] as unknown as { landmarks: BoardLandmark[] }).landmarks
+    expect(landmarks.map((landmark) => landmark.name.length)).toEqual([80, 80, 80])
+    expect(landmarks.map((landmark) => landmark.name)).toEqual([
+      name,
+      expect.stringContaining(' · '),
+      expect.stringMatching(/ \(2\)$/),
+    ])
+    expect(getBoardLandmarkState(harness(merged).editor)).toMatchObject({ kind: 'ready' })
+  })
+
+  it('uses a locale-independent Unicode namespace for duplicate names', () => {
+    const { editor } = harness(landmarkMeta([
+      entry('capital-i', 'I'),
+      entry('dotless-i', 'ı'),
+      entry('dotted-capital-i', 'İ'),
+    ]))
+    expect(getBoardLandmarkState(editor)).toMatchObject({ kind: 'ready' })
+    // Fixed Unicode lowercasing makes ASCII I/i a collision everywhere, while
+    // Turkish dotless I and dotted capital I retain their distinct codepoints.
+    expect(addBoardLandmark(editor, 'i', 'ascii-i')).toEqual({ ok: false, reason: 'duplicate-name' })
+    expect(addBoardLandmark(editor, 'ı', 'another-dotless')).toEqual({ ok: false, reason: 'duplicate-name' })
+    expect(addBoardLandmark(editor, 'İ', 'another-dotted')).toEqual({ ok: false, reason: 'duplicate-name' })
   })
 
   it('does not merge secondary data into an unknown root envelope and names the next view predictably', () => {

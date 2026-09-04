@@ -38,6 +38,15 @@ function check(id, label, observed, desired = true) {
   )
 }
 
+function checkNear(id, label, observed, desired, tolerance = 0.001) {
+  const ok = Object.keys(desired).every((key) => Math.abs(observed[key] - desired[key]) <= tolerance)
+  results.push({ id, label, observed, desired, ok })
+  process.stdout.write(
+    `  ${ok ? 'PASS' : 'FAIL'}  ${id}  ${label}\n`
+      + (ok ? '' : `        observed=${JSON.stringify(observed)} desired=${JSON.stringify(desired)}\n`),
+  )
+}
+
 async function screenshot(page, path) {
   const capture = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
   await writeFile(path, Buffer.from(capture.data, 'base64'))
@@ -103,14 +112,31 @@ async function main() {
         owner: { team: 'runtime' },
         systemSketchLandmarks: { version: 1, landmarks: [{
           id: 'overview', name: 'Overview', camera: { x: 80, y: 90, z: 0.5 },
+        }, {
+          id: 'worker-detail', name: 'Worker detail', camera: { x: -140, y: 260, z: 2 },
         }] },
       } })
       editor.createShape({
         id: 'shape:runtime-worker', type: 'geo', x: 80, y: 100,
         props: { geo: 'ellipse', w: 210, h: 150, color: 'orange' },
       })
-      editor.setCurrentPage(first)
+      editor.setCurrentPage(editor.getPages().find((entry) => entry.name === 'Architecture').id)
       return true
+    })()`)
+    const sourceRuntimeViews = await json(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const sourcePage = 'page:legacy-runtime'
+      const views = [
+        { name: 'Runtime · Overview', camera: { x: 80, y: 90, z: 0.5 } },
+        { name: 'Worker detail', camera: { x: -140, y: 260, z: 2 } },
+      ].map((view) => {
+        editor.setCurrentPage(sourcePage)
+        editor.setCamera(view.camera, { animation: { duration: 0 } })
+        const viewport = editor.getViewportPageBounds()
+        return { ...view, viewport: { x: viewport.x, y: viewport.y, w: viewport.w, h: viewport.h } }
+      })
+      editor.setCurrentPage(editor.getPages().find((entry) => entry.name === 'Architecture').id)
+      return views
     })()`)
     const legacySource = await evaluate(page, `JSON.stringify({
       tldrawFileFormatVersion: 1,
@@ -150,6 +176,7 @@ async function main() {
         depthInMenu: Boolean(document.querySelector('.systemsketch-top-left-shell .systemsketch-depth-navigator--menu')),
         stockPageTrigger: Boolean(document.querySelector('.tlui-page-menu__trigger')),
         landmarks: editor.getCurrentPage().meta?.systemSketchLandmarks?.landmarks ?? [],
+        runtimeWorkerBounds: editor.getShapePageBounds('shape:runtime-worker'),
         sourceMetadata: frames.map((frame) => frame.meta?.systemSketch?.sourcePageMeta?.owner?.team),
       }
     })()`)
@@ -179,9 +206,46 @@ async function main() {
     2)
     check('M10', 'secondary page camera landmarks merge into the one board with stable collision names',
       migration.landmarks.map((entry) => [entry.id, entry.name]),
-      [['overview', 'Overview'], ['page-legacy-runtime:overview', 'Runtime · Overview']])
+      [
+        ['overview', 'Overview'],
+        ['page-legacy-runtime:overview', 'Runtime · Overview'],
+        ['worker-detail', 'Worker detail'],
+      ])
     check('M11', 'every removed page keeps unrelated metadata on its replacement Frame', migration.sourceMetadata,
       ['architecture', 'runtime'])
+    const runtimeDisplacement = {
+      x: migration.runtimeWorkerBounds.x - 80,
+      y: migration.runtimeWorkerBounds.y - 100,
+    }
+    await clickElement(page, '[data-testid="systemsketch-board-overview-trigger"]')
+    await waitFor(page, `document.querySelector('[data-testid="systemsketch-named-landmarks-list"]')`, 'migrated saved-view list')
+    for (const [index, source] of sourceRuntimeViews.entries()) {
+      const id = migration.landmarks.find((landmark) => landmark.name === source.name)?.id
+      assert.ok(id, `migrated landmark id for ${source.name}`)
+      await clickElement(page, `[data-testid="systemsketch-landmark-jump-${id}"]`)
+      await delay(360)
+      const jumped = await json(page, `(() => {
+        const editor = window.__systemsketch.editor
+        const camera = editor.getCamera()
+        const viewport = editor.getViewportPageBounds()
+        return {
+          camera: { x: camera.x, y: camera.y, z: camera.z },
+          viewport: { x: viewport.x, y: viewport.y, w: viewport.w, h: viewport.h },
+        }
+      })()`)
+      const suffix = index === 0 ? 'zoomed out' : 'zoomed in'
+      checkNear(`M${12 + index * 2}`, `${suffix} migrated landmark jumps to its page-space translated camera`, jumped.camera, {
+        x: source.camera.x - runtimeDisplacement.x,
+        y: source.camera.y - runtimeDisplacement.y,
+        z: source.camera.z,
+      })
+      checkNear(`M${13 + index * 2}`, `${suffix} jump physically frames the former runtime content at its translated viewport`, jumped.viewport, {
+        x: source.viewport.x + runtimeDisplacement.x,
+        y: source.viewport.y + runtimeDisplacement.y,
+        w: source.viewport.w,
+        h: source.viewport.h,
+      })
+    }
     await evaluate(page, `window.__systemsketch.editor.zoomToFit({ animation: { duration: 0 } }); true`)
     await delay(300)
     await screenshot(page, MIGRATION_SHOT)
