@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-09-04T06:45:57.963Z",
+  "ranAt": "2026-09-04T06:49:11.203Z",
   "themes": [
     {
       "id": "systemsketch:light",
@@ -404,7 +404,7 @@
           "fg": "#2e2e2e",
           "bg": "#d5d8da",
           "ratio": 9.49,
-          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
+          "text": "/tmp/theme-contrast-files-ZhI404/SystemS",
           "ok": true
         },
         {
@@ -428,7 +428,7 @@
           "fg": "#676c6f",
           "bg": "#edf0f2",
           "ratio": 4.64,
-          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
+          "text": "/tmp/theme-contrast-files-ZhI404/SystemS",
           "ok": true
         },
         {
@@ -452,7 +452,7 @@
           "fg": "#676c6f",
           "bg": "#fcfcfc",
           "ratio": 5.18,
-          "text": "theme-contrast-files-Z4yLBh",
+          "text": "theme-contrast-files-ZhI404",
           "ok": true
         },
         {
@@ -973,7 +973,7 @@
           "fg": "#d9d9d9",
           "bg": "#313133",
           "ratio": 9.21,
-          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
+          "text": "/tmp/theme-contrast-files-ZhI404/SystemS",
           "ok": true
         },
         {
@@ -997,7 +997,7 @@
           "fg": "#bdc0c2",
           "bg": "#1a1a1c",
           "ratio": 9.5,
-          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
+          "text": "/tmp/theme-contrast-files-ZhI404/SystemS",
           "ok": true
         },
         {
@@ -1021,7 +1021,7 @@
           "fg": "#bdc0c2",
           "bg": "#202025",
           "ratio": 8.87,
-          "text": "theme-contrast-files-Z4yLBh",
+          "text": "theme-contrast-files-ZhI404",
           "ok": true
         },
         {
@@ -1541,7 +1541,7 @@
           "fg": "#222222",
           "bg": "#f5f1fe",
           "ratio": 14.31,
-          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
+          "text": "/tmp/theme-contrast-files-ZhI404/SystemS",
           "ok": true
         },
         {
@@ -1565,7 +1565,7 @@
           "fg": "#5c5c5c",
           "bg": "#ffffff",
           "ratio": 6.69,
-          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
+          "text": "/tmp/theme-contrast-files-ZhI404/SystemS",
           "ok": true
         },
         {
@@ -1589,7 +1589,7 @@
           "fg": "#5c5c5c",
           "bg": "#f6f6f6",
           "ratio": 6.19,
-          "text": "theme-contrast-files-Z4yLBh",
+          "text": "theme-contrast-files-ZhI404",
           "ok": true
         },
         {
@@ -2109,7 +2109,7 @@
           "fg": "#dadada",
           "bg": "#373342",
           "ratio": 8.79,
-          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
+          "text": "/tmp/theme-contrast-files-ZhI404/SystemS",
           "ok": true
         },
         {
@@ -2133,7 +2133,7 @@
           "fg": "#b3b3b3",
           "bg": "#2e2e2e",
           "ratio": 6.48,
-          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
+          "text": "/tmp/theme-contrast-files-ZhI404/SystemS",
           "ok": true
         },
         {
@@ -2157,7 +2157,7 @@
           "fg": "#b3b3b3",
           "bg": "#282828",
           "ratio": 7.03,
-          "text": "theme-contrast-files-Z4yLBh",
+          "text": "theme-contrast-files-ZhI404",
           "ok": true
         },
         {
@@ -2677,7 +2677,7 @@
           "fg": "#cccccc",
           "bg": "#414242",
           "ratio": 6.31,
-          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
+          "text": "/tmp/theme-contrast-files-ZhI404/SystemS",
           "ok": true
         },
         {
@@ -2701,7 +2701,7 @@
           "fg": "#9d9d9d",
           "bg": "#313131",
           "ratio": 4.8,
-          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
+          "text": "/tmp/theme-contrast-files-ZhI404/SystemS",
           "ok": true
         },
         {
@@ -2725,7 +2725,7 @@
           "fg": "#9d9d9d",
           "bg": "#202020",
           "ratio": 6.01,
-          "text": "theme-contrast-files-Z4yLBh",
+          "text": "theme-contrast-files-ZhI404",
           "ok": true
         },
         {
@@ -2870,6 +2870,10 @@
     },
     {
       "label": "Light: workspace text and caret share theme ink in the app typeface",
+      "ok": true
+    },
+    {
+      "label": "Light: Open workspace remains inside the active theme portal host",
       "ok": true
     },
     {
@@ -3061,6 +3065,10 @@
       "ok": true
     },
     {
+      "label": "Dark: Open workspace remains inside the active theme portal host",
+      "ok": true
+    },
+    {
       "label": "Dark: file title, top-left shell 11.54:1 (≥ 4.5) #d9d9d9 on #1f2024",
       "ok": true
     },
@@ -3246,6 +3254,10 @@
     },
     {
       "label": "Obsidian Light: workspace text and caret share theme ink in the app typeface",
+      "ok": true
+    },
+    {
+      "label": "Obsidian Light: Open workspace remains inside the active theme portal host",
       "ok": true
     },
     {
@@ -3437,6 +3449,10 @@
       "ok": true
     },
     {
+      "label": "Obsidian Dark: Open workspace remains inside the active theme portal host",
+      "ok": true
+    },
+    {
       "label": "Obsidian Dark: file title, top-left shell 10.61:1 (≥ 4.5) #dadada on #282828",
       "ok": true
     },
@@ -3622,6 +3638,10 @@
     },
     {
       "label": "Dark Modern: workspace text and caret share theme ink in the app typeface",
+      "ok": true
+    },
+    {
+      "label": "Dark Modern: Open workspace remains inside the active theme portal host",
       "ok": true
     },
     {
@@ -3826,6 +3846,6 @@
     "ratio": 13.24,
     "text": "Settings"
   },
-  "passed": 240,
+  "passed": 245,
   "failed": 0
 }

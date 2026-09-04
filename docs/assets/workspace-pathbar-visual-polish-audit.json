@@ -2,7 +2,7 @@
   "date": "2026-09-03",
   "auditTarget": {
     "branch": "track/chrome-input-visual-polish",
-    "commit": "31d60997600b03beff59b73ba52cb166a41944b1"
+    "commit": "e49bb7f6925a77a9a1a638b130d6ebfff6c5e9fd"
   },
   "narrowViewport": {
     "width": 320,
