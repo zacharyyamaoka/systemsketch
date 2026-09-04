@@ -85,11 +85,64 @@ async function sweep(page, url, prefix, { settle = 6000, stops = [0, 700, 1400, 
   return written
 }
 
-// These are the smallest set of first-party screenshots that let the vocabulary
-// report point at a concrete visual contract rather than paraphrasing a tool's
-// documentation. Keep the report's citation (the document URL) distinct from
-// the image URL: vendor CDNs move images more often than documentation routes.
+// These are primary-source screenshots for the vocabulary-and-controls
+// dictionary.  The report intentionally captures a reference image per tool
+// when a concept genuinely converges across tools: a tiny icon is still more
+// honest than a redrawn stand-in, but prefer an actual block-diagram example.
+// Keep the citation (the document URL) distinct from the image URL: vendor CDNs
+// move more often than documentation routes.
 const GAP_ANALYSIS_SOURCES = [
+  {
+    name: 'gap-labview-unbundle-by-name-2026-09-03',
+    label: 'LabVIEW Unbundle By Name and named cluster elements',
+    sourceDocument: 'https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/unbundle-by-name.html',
+    imageUrl: 'https://ni.scene7.com/is/image/ni/bigPictureCluster?scl=1',
+  },
+  {
+    name: 'gap-blueprint-split-struct-2026-09-03',
+    label: 'Blueprint Split Struct Pin',
+    sourceDocument: 'https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27',
+    imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/6b12cf1c-5501-4e7b-acda-519023752226/splitstructpin.png',
+  },
+  {
+    name: 'gap-simulink-bus-selector-2026-09-03',
+    label: 'Simulink Bus Selector exposing named bus elements',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/busselector.html',
+    imageUrl: 'https://www.mathworks.com/help/examples/simulink/win64/SelectElementsFromBusExample_01.png',
+  },
+  {
+    name: 'gap-labview-bundle-by-name-2026-09-03',
+    label: 'LabVIEW Bundle By Name named cluster update',
+    sourceDocument: 'https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/bundle-by-name.html',
+    imageUrl: 'https://ni.scene7.com/is/image/ni/bundleByNameBD?scl=1',
+  },
+  {
+    name: 'gap-blueprint-set-members-2026-09-03',
+    label: 'Blueprint Set Members in Struct',
+    sourceDocument: 'https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27',
+    imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/7d61691d-620e-4269-9aa5-b1da2533eb15/setmembersinstruct.png',
+  },
+  {
+    name: 'gap-simulink-bus-assignment-2026-09-03',
+    label: 'Simulink Bus Assignment partial field update',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/busassignment.html',
+    imageUrl: 'https://www.mathworks.com/help/examples/simulink/win64/AssignSignalValuesToABusExample_01.png',
+  },
+  {
+    name: 'gap-labview-select-2026-09-03',
+    label: 'LabVIEW Select function',
+    sourceDocument: 'https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/select.html',
+    imageUrl: 'https://docs-be.ni.com/bundle/labview-api-ref/page/functions/select.png?_LANG=enus',
+  },
+  {
+    name: 'gap-simulink-switch-2026-09-03',
+    label: 'Simulink Switch conditional value selection',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/switch.html',
+    // The published direct asset changes with each release. Capture the image
+    // in its documented MathWorks context instead of hard-coding a guessed URL.
+    imageUrl: 'https://www.mathworks.com/help/simulink/slref/switch.html',
+    documentImageSelector: 'img[alt="Switch Block with a Boolean Control Port Example"]',
+  },
   {
     name: 'gap-labview-error-wire-2026-09-03',
     label: 'LabVIEW error-cluster wire',
@@ -103,10 +156,64 @@ const GAP_ANALYSIS_SOURCES = [
     imageUrl: 'https://docs-be.ni.com/bundle/labview/page/GUID-4937B8CB-9D2E-42FF-800F-F48C82D6798D-a5.png?_LANG=enus',
   },
   {
+    name: 'gap-simulink-function-call-2026-09-03',
+    label: 'Simulink function-call event',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/trigger.html',
+    imageUrl: 'https://www.mathworks.com/help/examples/simulink_features/win64/ModelReferenceFunctionCallExample_01.png',
+  },
+  {
+    name: 'gap-labview-event-structure-2026-09-03',
+    label: 'LabVIEW user-event Event Structure',
+    sourceDocument: 'https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/structures/event-structure.html',
+    imageUrl: 'https://docs-be.ni.com/bundle/labview/page/GUID-E80F75F1-9148-490F-8ECA-E24358FA3E89-a5.png?_LANG=enus',
+  },
+  {
+    name: 'gap-blueprint-bind-dispatcher-2026-09-03',
+    label: 'Blueprint Bind Event dispatcher node',
+    sourceDocument: 'https://dev.epicgames.com/documentation/en-us/unreal-engine/binding-and-unbinding-events-in-unreal-engine?lang=en-US',
+    imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/e26bd094-b429-4c21-bdbf-00e617f2dfa4/bind_node.png',
+  },
+  {
+    name: 'gap-stateflow-event-2026-09-03',
+    label: 'Stateflow events triggering transitions',
+    sourceDocument: 'https://www.mathworks.com/help/stateflow/ug/control-state-execution-by-using-events.html',
+    imageUrl: 'https://www.mathworks.com/help/stateflow/ug/event_example.png',
+  },
+  {
+    name: 'gap-stateflow-modes-2026-09-03',
+    label: 'Stateflow state hierarchy for operating modes',
+    sourceDocument: 'https://www.mathworks.com/help/stateflow/ug/states.html',
+    imageUrl: 'https://www.mathworks.com/help/stateflow/ug/sf_aircontrol-chart.png',
+  },
+  {
+    name: 'gap-labview-connector-contract-2026-09-03',
+    label: 'LabVIEW connector pane terminal categories',
+    sourceDocument: 'https://www.ni.com/docs/en-US/bundle/labview/page/setting-required-recommended-and-optional-inputs-and-outputs.html',
+    imageUrl: 'https://knowledge.ni.com/servlet/rtaImage?eid=ka0VU000000MjGD&feoid=00N3q00000HUsuI&refid=0EMVU00000LBXz3',
+  },
+  {
+    name: 'gap-blueprint-function-call-2026-09-03',
+    label: 'Blueprint function call with generated pins',
+    sourceDocument: 'https://dev.epicgames.com/documentation/en-us/unreal-engine/functions?application_version=4.27',
+    imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/e27b21de-0f1b-4417-8812-03ab857bcc59/function_call_with_pins.png',
+  },
+  {
+    name: 'gap-simulink-function-caller-2026-09-03',
+    label: 'Simulink Function Caller interface',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/functioncaller.html',
+    imageUrl: 'https://www.mathworks.com/help/simulink/slref/simulink_function_timestwo_model.png',
+  },
+  {
     name: 'gap-blueprint-struct-pins-2026-09-03',
     label: 'Blueprint hidden struct member pins',
     sourceDocument: 'https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27',
     imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/8011c704-700f-4540-a226-af85aa1b30e1/hideunconnectedpins.png',
+  },
+  {
+    name: 'gap-blueprint-hidden-pins-2026-09-03',
+    label: 'Blueprint Hide Unconnected Pins result',
+    sourceDocument: 'https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27',
+    imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/7e8c6375-0777-48e4-94c3-1456bb8dbfce/hiddenpins.png',
   },
   {
     name: 'gap-blueprint-cast-failure-2026-09-03',
@@ -124,6 +231,12 @@ const GAP_ANALYSIS_SOURCES = [
     // that the primary image is inaccessible.
     documentImageSelector: 'img[src$="gearlogic-animation.gif"]',
     settle: 1800,
+  },
+  {
+    name: 'gap-simulink-mask-dialog-2026-09-03',
+    label: 'Simulink dynamic mask dialog',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/ug/create-dynamic-mask-dialog-boxes.html',
+    imageUrl: 'https://www.mathworks.com/help/examples/simulink_masking/win64/DynamicMaskDialogBoxExample_01.png',
   },
 ]
 

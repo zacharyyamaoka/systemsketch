@@ -1,17 +1,153 @@
 {
   "schemaVersion": 1,
   "capturedFor": "docs/build_labview_blueprint_simulink_gap_analysis.py",
-  "generatedAt": "2026-09-04T06:30:09.792Z",
+  "generatedAt": "2026-09-04T06:57:28.519Z",
   "captures": [
+    {
+      "file": "gap-labview-unbundle-by-name-2026-09-03.png",
+      "bytes": 416113,
+      "label": "LabVIEW Unbundle By Name and named cluster elements",
+      "sourceDocument": "https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/unbundle-by-name.html",
+      "sourceImage": "https://ni.scene7.com/is/image/ni/bigPictureCluster?scl=1",
+      "capturedAt": "2026-09-04T06:57:29.126Z",
+      "startedAt": "2026-09-04T06:57:28.720Z",
+      "durationMs": 406,
+      "image": {
+        "naturalWidth": 612,
+        "naturalHeight": 229,
+        "capturedWidth": 612,
+        "capturedHeight": 229
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-blueprint-split-struct-2026-09-03.png",
+      "bytes": 167211,
+      "label": "Blueprint Split Struct Pin",
+      "sourceDocument": "https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27",
+      "sourceImage": "https://d1iv7db44yhgxn.cloudfront.net/documentation/images/6b12cf1c-5501-4e7b-acda-519023752226/splitstructpin.png",
+      "capturedAt": "2026-09-04T06:57:29.321Z",
+      "startedAt": "2026-09-04T06:57:29.126Z",
+      "durationMs": 195,
+      "image": {
+        "naturalWidth": 389,
+        "naturalHeight": 201,
+        "capturedWidth": 389,
+        "capturedHeight": 201
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-simulink-bus-selector-2026-09-03.png",
+      "bytes": 161929,
+      "label": "Simulink Bus Selector exposing named bus elements",
+      "sourceDocument": "https://www.mathworks.com/help/simulink/slref/busselector.html",
+      "sourceImage": "https://www.mathworks.com/help/examples/simulink/win64/SelectElementsFromBusExample_01.png",
+      "capturedAt": "2026-09-04T06:57:29.535Z",
+      "startedAt": "2026-09-04T06:57:29.321Z",
+      "durationMs": 214,
+      "image": {
+        "naturalWidth": 497,
+        "naturalHeight": 339,
+        "capturedWidth": 497,
+        "capturedHeight": 339
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-labview-bundle-by-name-2026-09-03.png",
+      "bytes": 126607,
+      "label": "LabVIEW Bundle By Name named cluster update",
+      "sourceDocument": "https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/bundle-by-name.html",
+      "sourceImage": "https://ni.scene7.com/is/image/ni/bundleByNameBD?scl=1",
+      "capturedAt": "2026-09-04T06:57:29.731Z",
+      "startedAt": "2026-09-04T06:57:29.535Z",
+      "durationMs": 196,
+      "image": {
+        "naturalWidth": 347,
+        "naturalHeight": 197,
+        "capturedWidth": 347,
+        "capturedHeight": 197
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-blueprint-set-members-2026-09-03.png",
+      "bytes": 376441,
+      "label": "Blueprint Set Members in Struct",
+      "sourceDocument": "https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27",
+      "sourceImage": "https://d1iv7db44yhgxn.cloudfront.net/documentation/images/7d61691d-620e-4269-9aa5-b1da2533eb15/setmembersinstruct.png",
+      "capturedAt": "2026-09-04T06:57:30.041Z",
+      "startedAt": "2026-09-04T06:57:29.731Z",
+      "durationMs": 310,
+      "image": {
+        "naturalWidth": 906,
+        "naturalHeight": 275,
+        "capturedWidth": 906,
+        "capturedHeight": 275
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-simulink-bus-assignment-2026-09-03.png",
+      "bytes": 52832,
+      "label": "Simulink Bus Assignment partial field update",
+      "sourceDocument": "https://www.mathworks.com/help/simulink/slref/busassignment.html",
+      "sourceImage": "https://www.mathworks.com/help/examples/simulink/win64/AssignSignalValuesToABusExample_01.png",
+      "capturedAt": "2026-09-04T06:57:30.239Z",
+      "startedAt": "2026-09-04T06:57:30.043Z",
+      "durationMs": 196,
+      "image": {
+        "naturalWidth": 462,
+        "naturalHeight": 206,
+        "capturedWidth": 462,
+        "capturedHeight": 206
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-labview-select-2026-09-03.png",
+      "bytes": 12837,
+      "label": "LabVIEW Select function",
+      "sourceDocument": "https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/select.html",
+      "sourceImage": "https://docs-be.ni.com/bundle/labview-api-ref/page/functions/select.png?_LANG=enus",
+      "capturedAt": "2026-09-04T06:57:30.550Z",
+      "startedAt": "2026-09-04T06:57:30.239Z",
+      "durationMs": 311,
+      "image": {
+        "naturalWidth": 148,
+        "naturalHeight": 57,
+        "capturedWidth": 148,
+        "capturedHeight": 57
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-simulink-switch-2026-09-03.png",
+      "bytes": 80273,
+      "label": "Simulink Switch conditional value selection",
+      "sourceDocument": "https://www.mathworks.com/help/simulink/slref/switch.html",
+      "sourceImage": "https://www.mathworks.com/help/simulink/slref/switch.html",
+      "capturedAt": "2026-09-04T06:57:31.413Z",
+      "startedAt": "2026-09-04T06:57:30.550Z",
+      "durationMs": 863,
+      "image": {
+        "naturalWidth": 892,
+        "naturalHeight": 487,
+        "capturedWidth": 259.984375,
+        "capturedHeight": 141.9453125
+      },
+      "status": "captured"
+    },
     {
       "file": "gap-labview-error-wire-2026-09-03.png",
       "bytes": 56258,
       "label": "LabVIEW error-cluster wire",
       "sourceDocument": "https://www.ni.com/docs/en-US/bundle/labview/page/handling-errors.html",
       "sourceImage": "https://docs-be.ni.com/bundle/labview/page/GUID-669CBB90-7118-40DA-9112-D33367A09DDD-a5.png?_LANG=enus",
-      "capturedAt": "2026-09-04T06:30:10.287Z",
-      "startedAt": "2026-09-04T06:30:09.965Z",
-      "durationMs": 322,
+      "capturedAt": "2026-09-04T06:57:31.738Z",
+      "startedAt": "2026-09-04T06:57:31.413Z",
+      "durationMs": 325,
       "image": {
         "naturalWidth": 415,
         "naturalHeight": 216,
@@ -26,9 +162,9 @@
       "label": "LabVIEW asynchronous channel wire",
       "sourceDocument": "https://www.ni.com/docs/en-US/bundle/labview/page/using-wires-to-link-block-diagram-objects.html",
       "sourceImage": "https://docs-be.ni.com/bundle/labview/page/GUID-4937B8CB-9D2E-42FF-800F-F48C82D6798D-a5.png?_LANG=enus",
-      "capturedAt": "2026-09-04T06:30:10.581Z",
-      "startedAt": "2026-09-04T06:30:10.287Z",
-      "durationMs": 294,
+      "capturedAt": "2026-09-04T06:57:32.049Z",
+      "startedAt": "2026-09-04T06:57:31.738Z",
+      "durationMs": 311,
       "image": {
         "naturalWidth": 297,
         "naturalHeight": 148,
@@ -38,14 +174,150 @@
       "status": "captured"
     },
     {
+      "file": "gap-simulink-function-call-2026-09-03.png",
+      "bytes": 356723,
+      "label": "Simulink function-call event",
+      "sourceDocument": "https://www.mathworks.com/help/simulink/slref/trigger.html",
+      "sourceImage": "https://www.mathworks.com/help/examples/simulink_features/win64/ModelReferenceFunctionCallExample_01.png",
+      "capturedAt": "2026-09-04T06:57:32.336Z",
+      "startedAt": "2026-09-04T06:57:32.049Z",
+      "durationMs": 287,
+      "image": {
+        "naturalWidth": 726,
+        "naturalHeight": 462,
+        "capturedWidth": 726,
+        "capturedHeight": 462
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-labview-event-structure-2026-09-03.png",
+      "bytes": 23115,
+      "label": "LabVIEW user-event Event Structure",
+      "sourceDocument": "https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/structures/event-structure.html",
+      "sourceImage": "https://docs-be.ni.com/bundle/labview/page/GUID-E80F75F1-9148-490F-8ECA-E24358FA3E89-a5.png?_LANG=enus",
+      "capturedAt": "2026-09-04T06:57:32.633Z",
+      "startedAt": "2026-09-04T06:57:32.336Z",
+      "durationMs": 297,
+      "image": {
+        "naturalWidth": 130,
+        "naturalHeight": 57,
+        "capturedWidth": 130,
+        "capturedHeight": 57
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-blueprint-bind-dispatcher-2026-09-03.png",
+      "bytes": 96201,
+      "label": "Blueprint Bind Event dispatcher node",
+      "sourceDocument": "https://dev.epicgames.com/documentation/en-us/unreal-engine/binding-and-unbinding-events-in-unreal-engine?lang=en-US",
+      "sourceImage": "https://d1iv7db44yhgxn.cloudfront.net/documentation/images/e26bd094-b429-4c21-bdbf-00e617f2dfa4/bind_node.png",
+      "capturedAt": "2026-09-04T06:57:32.832Z",
+      "startedAt": "2026-09-04T06:57:32.633Z",
+      "durationMs": 199,
+      "image": {
+        "naturalWidth": 275,
+        "naturalHeight": 165,
+        "capturedWidth": 275,
+        "capturedHeight": 165
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-stateflow-event-2026-09-03.png",
+      "bytes": 312156,
+      "label": "Stateflow events triggering transitions",
+      "sourceDocument": "https://www.mathworks.com/help/stateflow/ug/control-state-execution-by-using-events.html",
+      "sourceImage": "https://www.mathworks.com/help/stateflow/ug/event_example.png",
+      "capturedAt": "2026-09-04T06:57:33.119Z",
+      "startedAt": "2026-09-04T06:57:32.832Z",
+      "durationMs": 287,
+      "image": {
+        "naturalWidth": 885,
+        "naturalHeight": 386,
+        "capturedWidth": 885,
+        "capturedHeight": 386
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-stateflow-modes-2026-09-03.png",
+      "bytes": 373033,
+      "label": "Stateflow state hierarchy for operating modes",
+      "sourceDocument": "https://www.mathworks.com/help/stateflow/ug/states.html",
+      "sourceImage": "https://www.mathworks.com/help/stateflow/ug/sf_aircontrol-chart.png",
+      "capturedAt": "2026-09-04T06:57:33.367Z",
+      "startedAt": "2026-09-04T06:57:33.119Z",
+      "durationMs": 248,
+      "image": {
+        "naturalWidth": 521,
+        "naturalHeight": 398,
+        "capturedWidth": 521,
+        "capturedHeight": 398
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-labview-connector-contract-2026-09-03.png",
+      "bytes": 269614,
+      "label": "LabVIEW connector pane terminal categories",
+      "sourceDocument": "https://www.ni.com/docs/en-US/bundle/labview/page/setting-required-recommended-and-optional-inputs-and-outputs.html",
+      "sourceImage": "https://knowledge.ni.com/servlet/rtaImage?eid=ka0VU000000MjGD&feoid=00N3q00000HUsuI&refid=0EMVU00000LBXz3",
+      "capturedAt": "2026-09-04T06:57:33.731Z",
+      "startedAt": "2026-09-04T06:57:33.367Z",
+      "durationMs": 364,
+      "image": {
+        "naturalWidth": 526,
+        "naturalHeight": 338,
+        "capturedWidth": 526,
+        "capturedHeight": 338
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-blueprint-function-call-2026-09-03.png",
+      "bytes": 170198,
+      "label": "Blueprint function call with generated pins",
+      "sourceDocument": "https://dev.epicgames.com/documentation/en-us/unreal-engine/functions?application_version=4.27",
+      "sourceImage": "https://d1iv7db44yhgxn.cloudfront.net/documentation/images/e27b21de-0f1b-4417-8812-03ab857bcc59/function_call_with_pins.png",
+      "capturedAt": "2026-09-04T06:57:33.940Z",
+      "startedAt": "2026-09-04T06:57:33.731Z",
+      "durationMs": 209,
+      "image": {
+        "naturalWidth": 298,
+        "naturalHeight": 227,
+        "capturedWidth": 298,
+        "capturedHeight": 227
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-simulink-function-caller-2026-09-03.png",
+      "bytes": 88586,
+      "label": "Simulink Function Caller interface",
+      "sourceDocument": "https://www.mathworks.com/help/simulink/slref/functioncaller.html",
+      "sourceImage": "https://www.mathworks.com/help/simulink/slref/simulink_function_timestwo_model.png",
+      "capturedAt": "2026-09-04T06:57:34.122Z",
+      "startedAt": "2026-09-04T06:57:33.940Z",
+      "durationMs": 182,
+      "image": {
+        "naturalWidth": 300,
+        "naturalHeight": 180,
+        "capturedWidth": 300,
+        "capturedHeight": 180
+      },
+      "status": "captured"
+    },
+    {
       "file": "gap-blueprint-struct-pins-2026-09-03.png",
       "bytes": 537547,
       "label": "Blueprint hidden struct member pins",
       "sourceDocument": "https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27",
       "sourceImage": "https://d1iv7db44yhgxn.cloudfront.net/documentation/images/8011c704-700f-4540-a226-af85aa1b30e1/hideunconnectedpins.png",
-      "capturedAt": "2026-09-04T06:30:10.959Z",
-      "startedAt": "2026-09-04T06:30:10.581Z",
-      "durationMs": 378,
+      "capturedAt": "2026-09-04T06:57:34.533Z",
+      "startedAt": "2026-09-04T06:57:34.122Z",
+      "durationMs": 411,
       "image": {
         "naturalWidth": 1052,
         "naturalHeight": 466,
@@ -55,14 +327,31 @@
       "status": "captured"
     },
     {
+      "file": "gap-blueprint-hidden-pins-2026-09-03.png",
+      "bytes": 276445,
+      "label": "Blueprint Hide Unconnected Pins result",
+      "sourceDocument": "https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27",
+      "sourceImage": "https://d1iv7db44yhgxn.cloudfront.net/documentation/images/7e8c6375-0777-48e4-94c3-1456bb8dbfce/hiddenpins.png",
+      "capturedAt": "2026-09-04T06:57:34.762Z",
+      "startedAt": "2026-09-04T06:57:34.533Z",
+      "durationMs": 229,
+      "image": {
+        "naturalWidth": 577,
+        "naturalHeight": 232,
+        "capturedWidth": 577,
+        "capturedHeight": 232
+      },
+      "status": "captured"
+    },
+    {
       "file": "gap-blueprint-cast-failure-2026-09-03.png",
       "bytes": 1090049,
       "label": "Blueprint Cast To node with success and Cast Failed paths",
       "sourceDocument": "https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-communications-in-unreal-engine",
       "sourceImage": "https://d1iv7db44yhgxn.cloudfront.net/documentation/images/aeac57a9-b724-400c-a843-c790a2fe9d08/othercasting.png",
-      "capturedAt": "2026-09-04T06:30:11.426Z",
-      "startedAt": "2026-09-04T06:30:10.959Z",
-      "durationMs": 467,
+      "capturedAt": "2026-09-04T06:57:35.224Z",
+      "startedAt": "2026-09-04T06:57:34.762Z",
+      "durationMs": 462,
       "image": {
         "naturalWidth": 804,
         "naturalHeight": 706,
@@ -77,14 +366,31 @@
       "label": "Stateflow states and transitions",
       "sourceDocument": "https://www.mathworks.com/help/stateflow/gs/get-started-introduction.html",
       "sourceImage": "https://www.mathworks.com/help/stateflow/gs/gearlogic-animation.gif",
-      "capturedAt": "2026-09-04T06:30:13.863Z",
-      "startedAt": "2026-09-04T06:30:11.426Z",
-      "durationMs": 2437,
+      "capturedAt": "2026-09-04T06:57:37.393Z",
+      "startedAt": "2026-09-04T06:57:35.224Z",
+      "durationMs": 2169,
       "image": {
         "naturalWidth": 680,
         "naturalHeight": 96,
         "capturedWidth": 680,
         "capturedHeight": 96
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-simulink-mask-dialog-2026-09-03.png",
+      "bytes": 385813,
+      "label": "Simulink dynamic mask dialog",
+      "sourceDocument": "https://www.mathworks.com/help/simulink/ug/create-dynamic-mask-dialog-boxes.html",
+      "sourceImage": "https://www.mathworks.com/help/examples/simulink_masking/win64/DynamicMaskDialogBoxExample_01.png",
+      "capturedAt": "2026-09-04T06:57:37.671Z",
+      "startedAt": "2026-09-04T06:57:37.393Z",
+      "durationMs": 278,
+      "image": {
+        "naturalWidth": 442,
+        "naturalHeight": 478,
+        "capturedWidth": 442,
+        "capturedHeight": 478
       },
       "status": "captured"
     }
