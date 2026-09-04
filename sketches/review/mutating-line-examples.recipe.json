@@ -1,82 +1,41 @@
 {
-  "feature": "The mutating line - 20 examples",
+  "feature": "The mutating line - 20 examples (relaid out per 2026-09-03 layout audit)",
   "viewport": {
-    "width": 2000,
-    "height": 1600
+    "width": 2400,
+    "height": 1500
   },
   "shapes": [
     {
-      "id": "t-title",
-      "type": "text",
-      "x": 80,
-      "y": 40,
-      "text": "The mutating line - 20 examples, easy to hard",
+      "id": "tier-easy-single",
+      "type": "frame",
+      "x": 0,
+      "y": 550,
       "props": {
-        "size": "xl",
-        "color": "black",
-        "font": "sans"
-      }
-    },
-    {
-      "id": "t-row-0",
-      "type": "text",
-      "x": 80,
-      "y": 206,
-      "text": "EASY - single argument, no return  [1-4]",
-      "props": {
-        "size": "m",
-        "color": "black",
-        "font": "sans"
-      }
-    },
-    {
-      "id": "t-row-1",
-      "type": "text",
-      "x": 80,
-      "y": 686,
-      "text": "EASY - in-place reordering  [5-8]",
-      "props": {
-        "size": "m",
-        "color": "black",
-        "font": "sans"
-      }
-    },
-    {
-      "id": "t-row-2",
-      "type": "text",
-      "x": 80,
-      "y": 1166,
-      "text": "MEDIUM - returns a value AND mutates  [9-12]",
-      "props": {
-        "size": "m",
-        "color": "black",
-        "font": "sans"
-      }
-    },
-    {
-      "id": "t-row-3",
-      "type": "text",
-      "x": 80,
-      "y": 1646,
-      "text": "MEDIUM/HARD - multiple mutated arguments, and the receiver  [13-16]",
-      "props": {
-        "size": "m",
-        "color": "black",
-        "font": "sans"
+        "name": "EASY \u2014 single argument, no return (1\u20134)",
+        "w": 1847,
+        "h": 596
+      },
+      "meta": {
+        "systemSketch": {
+          "kind": "imported-page",
+          "sourcePageId": "tier-easy-single",
+          "sourcePageName": "EASY \u2014 single argument, no return (1\u20134)",
+          "sourcePageIndex": "0"
+        }
       }
     },
     {
       "id": "r0c0",
       "type": "block",
-      "x": 80,
-      "y": 240,
+      "x": 40,
+      "y": 74,
       "props": {
         "title": "poses.append",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 320,
-        "h": 170,
+        "w": 374,
+        "h": 202,
         "inputs": [
           {
             "id": "in_1",
@@ -102,20 +61,21 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-easy-single"
     },
     {
       "id": "r0c1",
       "type": "block",
-      "x": 520,
-      "y": 240,
+      "x": 534,
+      "y": 74,
       "props": {
         "title": "cache.update",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 320,
-        "h": 170,
+        "w": 339,
+        "h": 202,
         "inputs": [
           {
             "id": "in_1",
@@ -141,20 +101,21 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-easy-single"
     },
     {
       "id": "r0c2",
       "type": "block",
-      "x": 960,
-      "y": 240,
+      "x": 993,
+      "y": 74,
       "props": {
         "title": "seen.add",
         "description": "",
         "blockType": "call",
         "view": "port",
         "w": 320,
-        "h": 170,
+        "h": 202,
         "inputs": [
           {
             "id": "in_1",
@@ -180,20 +141,21 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-easy-single"
     },
     {
       "id": "r0c3",
       "type": "block",
-      "x": 1400,
-      "y": 240,
+      "x": 1433,
+      "y": 74,
       "props": {
         "title": "buffer.extend",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 320,
-        "h": 170,
+        "w": 374,
+        "h": 202,
         "inputs": [
           {
             "id": "in_1",
@@ -219,20 +181,86 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
+      "id": "ord-r0c0",
+      "type": "text",
+      "x": 40,
+      "y": 40,
+      "text": "01",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
+      "id": "ord-r0c1",
+      "type": "text",
+      "x": 534,
+      "y": 40,
+      "text": "02",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
+      "id": "ord-r0c2",
+      "type": "text",
+      "x": 993,
+      "y": 40,
+      "text": "03",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
+      "id": "ord-r0c3",
+      "type": "text",
+      "x": 1433,
+      "y": 40,
+      "text": "04",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
+      "id": "note-r0c0",
+      "type": "text",
+      "x": 40,
+      "y": 308,
+      "text": "1 - the base case: a hook, an\neffect port, one tether.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-single"
     },
     {
       "id": "len_consumer",
       "type": "block",
-      "x": 100,
-      "y": 500,
+      "x": 40,
+      "y": 398,
       "props": {
-        "title": "len",
+        "title": "len(poses)",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 190,
-        "h": 120,
+        "w": 374,
+        "h": 158,
         "inputs": [
           {
             "id": "in_1",
@@ -249,13 +277,53 @@
             "visible": true
           }
         ]
-      }
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
+      "id": "note-r0c1",
+      "type": "text",
+      "x": 534,
+      "y": 308,
+      "text": "2 - same shape, a dict this time.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
+      "id": "note-r0c2",
+      "type": "text",
+      "x": 993,
+      "y": 308,
+      "text": "3 - a set. adding still mutates\nwith no return.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
+      "id": "note-r0c3",
+      "type": "text",
+      "x": 1433,
+      "y": 308,
+      "text": "4 - extend copies elements in; the\nargument still just mutates.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-single"
     },
     {
       "id": "wire-1",
       "type": "connection",
-      "x": 0,
-      "y": 0,
+      "x": 40,
+      "y": 74,
       "props": {
         "start": {
           "x": 0,
@@ -276,32 +344,40 @@
         "tunnelLayer": "",
         "routeMode": "automatic",
         "state": "normal"
-      }
+      },
+      "parentId": "tier-easy-single"
     },
     {
-      "id": "note-1",
-      "type": "text",
-      "x": 320,
-      "y": 510,
-      "text": "1 - the base case: a hook,\nan effect port, one tether.",
+      "id": "tier-easy-reorder",
+      "type": "frame",
+      "x": 0,
+      "y": 1286,
       "props": {
-        "size": "s",
-        "color": "black",
-        "font": "sans"
+        "name": "EASY \u2014 in-place reordering (5\u20138)",
+        "w": 1832,
+        "h": 450
+      },
+      "meta": {
+        "systemSketch": {
+          "kind": "imported-page",
+          "sourcePageId": "tier-easy-reorder",
+          "sourcePageName": "EASY \u2014 in-place reordering (5\u20138)",
+          "sourcePageIndex": "0"
+        }
       }
     },
     {
       "id": "r1c0",
       "type": "block",
-      "x": 80,
-      "y": 720,
+      "x": 40,
+      "y": 162,
       "props": {
         "title": "items.sort",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 320,
-        "h": 150,
+        "w": 353,
+        "h": 158,
         "inputs": [
           {
             "id": "in_1",
@@ -321,20 +397,21 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-easy-reorder"
     },
     {
       "id": "r1c1",
       "type": "block",
-      "x": 520,
-      "y": 720,
+      "x": 513,
+      "y": 162,
       "props": {
         "title": "items.reverse",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 320,
-        "h": 150,
+        "w": 360,
+        "h": 158,
         "inputs": [
           {
             "id": "in_1",
@@ -354,20 +431,21 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-easy-reorder"
     },
     {
       "id": "r1c2",
       "type": "block",
-      "x": 960,
-      "y": 720,
+      "x": 993,
+      "y": 74,
       "props": {
         "title": "stack.insert",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 320,
-        "h": 190,
+        "w": 339,
+        "h": 246,
         "inputs": [
           {
             "id": "in_1",
@@ -399,20 +477,21 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-easy-reorder"
     },
     {
       "id": "r1c3",
       "type": "block",
-      "x": 1400,
-      "y": 720,
+      "x": 1452,
+      "y": 162,
       "props": {
         "title": "queue.clear",
         "description": "",
         "blockType": "call",
         "view": "port",
         "w": 320,
-        "h": 150,
+        "h": 158,
         "inputs": [
           {
             "id": "in_1",
@@ -432,20 +511,144 @@
             "edgeT": 0.5
           }
         ]
+      },
+      "parentId": "tier-easy-reorder"
+    },
+    {
+      "id": "ord-r1c0",
+      "type": "text",
+      "x": 40,
+      "y": 128,
+      "text": "05",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-reorder"
+    },
+    {
+      "id": "ord-r1c1",
+      "type": "text",
+      "x": 513,
+      "y": 128,
+      "text": "06",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-reorder"
+    },
+    {
+      "id": "ord-r1c2",
+      "type": "text",
+      "x": 993,
+      "y": 40,
+      "text": "07",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-reorder"
+    },
+    {
+      "id": "ord-r1c3",
+      "type": "text",
+      "x": 1452,
+      "y": 128,
+      "text": "08",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-reorder"
+    },
+    {
+      "id": "note-r1c0",
+      "type": "text",
+      "x": 40,
+      "y": 352,
+      "text": "5 - in-place reordering: no new\nlist, no return, just the hook.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-reorder"
+    },
+    {
+      "id": "note-r1c1",
+      "type": "text",
+      "x": 513,
+      "y": 352,
+      "text": "6 - same idea, cheaper: reverses\nthe list in place.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-reorder"
+    },
+    {
+      "id": "note-r1c2",
+      "type": "text",
+      "x": 993,
+      "y": 352,
+      "text": "7 - two ordinary args plus the one\nthat mutates.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-reorder"
+    },
+    {
+      "id": "note-r1c3",
+      "type": "text",
+      "x": 1452,
+      "y": 352,
+      "text": "8 - the extreme case: every\nelement leaves, none return.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-reorder"
+    },
+    {
+      "id": "tier-medium-dual",
+      "type": "frame",
+      "x": 0,
+      "y": 1876,
+      "props": {
+        "name": "MEDIUM \u2014 returns a value AND mutates (9\u201312)",
+        "w": 1862,
+        "h": 854
+      },
+      "meta": {
+        "systemSketch": {
+          "kind": "imported-page",
+          "sourcePageId": "tier-medium-dual",
+          "sourcePageName": "MEDIUM \u2014 returns a value AND mutates (9\u201312)",
+          "sourcePageIndex": "0"
+        }
       }
     },
     {
       "id": "r2c0",
       "type": "block",
-      "x": 80,
-      "y": 1200,
+      "x": 40,
+      "y": 162,
       "props": {
         "title": "pending.pop",
         "description": "",
         "blockType": "call",
         "view": "port",
         "w": 320,
-        "h": 170,
+        "h": 158,
         "inputs": [
           {
             "id": "in_1",
@@ -471,20 +674,21 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-medium-dual"
     },
     {
       "id": "r2c1",
       "type": "block",
-      "x": 520,
-      "y": 1200,
+      "x": 480,
+      "y": 118,
       "props": {
         "title": "table.pop",
         "description": "",
         "blockType": "call",
         "view": "port",
         "w": 320,
-        "h": 190,
+        "h": 202,
         "inputs": [
           {
             "id": "in_1",
@@ -516,20 +720,21 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-medium-dual"
     },
     {
       "id": "r2c2",
       "type": "block",
-      "x": 960,
-      "y": 1200,
+      "x": 920,
+      "y": 74,
       "props": {
         "title": "table.setdefault",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 320,
-        "h": 210,
+        "w": 422,
+        "h": 246,
         "inputs": [
           {
             "id": "in_1",
@@ -567,20 +772,21 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-medium-dual"
     },
     {
       "id": "r2c3",
       "type": "block",
-      "x": 1400,
-      "y": 1200,
+      "x": 1462,
+      "y": 162,
       "props": {
         "title": "queue.popleft",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 320,
-        "h": 170,
+        "w": 360,
+        "h": 158,
         "inputs": [
           {
             "id": "in_1",
@@ -606,20 +812,86 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "ord-r2c0",
+      "type": "text",
+      "x": 40,
+      "y": 128,
+      "text": "09",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "ord-r2c1",
+      "type": "text",
+      "x": 480,
+      "y": 84,
+      "text": "10",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "ord-r2c2",
+      "type": "text",
+      "x": 920,
+      "y": 40,
+      "text": "11",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "ord-r2c3",
+      "type": "text",
+      "x": 1462,
+      "y": 128,
+      "text": "12",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "note-r2c0",
+      "type": "text",
+      "x": 40,
+      "y": 352,
+      "text": "9 - a real output AND an effect\nport, wired to two different\nconsumers.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-dual"
     },
     {
       "id": "use_item",
       "type": "block",
-      "x": 100,
-      "y": 1460,
+      "x": 40,
+      "y": 466,
       "props": {
         "title": "use",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 170,
-        "h": 110,
+        "w": 280,
+        "h": 158,
         "inputs": [
           {
             "id": "in_1",
@@ -629,20 +901,21 @@
           }
         ],
         "outputs": []
-      }
+      },
+      "parentId": "tier-medium-dual"
     },
     {
       "id": "len_after_pop",
       "type": "block",
-      "x": 310,
-      "y": 1460,
+      "x": 40,
+      "y": 656,
       "props": {
-        "title": "len",
+        "title": "len(pending)",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 170,
-        "h": 110,
+        "w": 339,
+        "h": 158,
         "inputs": [
           {
             "id": "in_1",
@@ -659,86 +932,135 @@
             "visible": true
           }
         ]
-      }
+      },
+      "parentId": "tier-medium-dual"
     },
     {
-      "id": "wire-9a",
-      "type": "connection",
-      "x": 0,
-      "y": 0,
-      "props": {
-        "start": {
-          "x": 0,
-          "y": 0
-        },
-        "end": {
-          "x": 100,
-          "y": 0
-        },
-        "routing": "elbow",
-        "curve": null,
-        "pins": [],
-        "elbowRoute": null,
-        "temporal": "data",
-        "delayValue": "",
-        "pillPosition": 0.5,
-        "tunnel": false,
-        "tunnelLayer": "",
-        "routeMode": "automatic",
-        "state": "normal"
-      }
-    },
-    {
-      "id": "wire-9b",
-      "type": "connection",
-      "x": 0,
-      "y": 0,
-      "props": {
-        "start": {
-          "x": 0,
-          "y": 0
-        },
-        "end": {
-          "x": 100,
-          "y": 0
-        },
-        "routing": "elbow",
-        "curve": null,
-        "pins": [],
-        "elbowRoute": null,
-        "temporal": "data",
-        "delayValue": "",
-        "pillPosition": 0.5,
-        "tunnel": false,
-        "tunnelLayer": "",
-        "routeMode": "automatic",
-        "state": "normal"
-      }
-    },
-    {
-      "id": "note-9",
+      "id": "note-r2c1",
       "type": "text",
-      "x": 520,
-      "y": 1470,
-      "text": "9 - a real output AND\nan effect port, wired\nto two different consumers.",
+      "x": 480,
+      "y": 352,
+      "text": "10 - same split as pop() above,\nkeyed by name instead of position.",
       "props": {
         "size": "s",
         "color": "black",
         "font": "sans"
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "note-r2c2",
+      "type": "text",
+      "x": 920,
+      "y": 352,
+      "text": "11 - three inputs, a real return,\nand an effect port: the busiest\nheader here.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "note-r2c3",
+      "type": "text",
+      "x": 1462,
+      "y": 352,
+      "text": "12 - a deque's own pop: value and\neffect, front instead of back.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "wire-9a",
+      "type": "connection",
+      "x": 40,
+      "y": 74,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "wire-9b",
+      "type": "connection",
+      "x": 40,
+      "y": 74,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "tier-medium-hard-receiver",
+      "type": "frame",
+      "x": 2022,
+      "y": 550,
+      "props": {
+        "name": "MEDIUM/HARD \u2014 multiple mutated arguments, and the receiver (13\u201316)",
+        "w": 1842,
+        "h": 878
+      },
+      "meta": {
+        "systemSketch": {
+          "kind": "imported-page",
+          "sourcePageId": "tier-medium-hard-receiver",
+          "sourcePageName": "MEDIUM/HARD \u2014 multiple mutated arguments, and the receiver (13\u201316)",
+          "sourcePageIndex": "0"
+        }
       }
     },
     {
       "id": "r3c0",
       "type": "block",
-      "x": 80,
-      "y": 1680,
+      "x": 40,
+      "y": 118,
       "props": {
         "title": "swap",
         "description": "",
         "blockType": "call",
         "view": "port",
         "w": 320,
-        "h": 190,
+        "h": 202,
         "inputs": [
           {
             "id": "in_1",
@@ -773,20 +1095,21 @@
             "edgeT": 0.18
           }
         ]
-      }
+      },
+      "parentId": "tier-medium-hard-receiver"
     },
     {
       "id": "r3c1",
       "type": "block",
-      "x": 520,
-      "y": 1680,
+      "x": 480,
+      "y": 74,
       "props": {
         "title": "reconcile",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 340,
-        "h": 230,
+        "w": 320,
+        "h": 246,
         "inputs": [
           {
             "id": "in_1",
@@ -836,20 +1159,21 @@
             "edgeT": 0.75
           }
         ]
-      }
+      },
+      "parentId": "tier-medium-hard-receiver"
     },
     {
       "id": "r3c2",
       "type": "block",
-      "x": 960,
-      "y": 1680,
+      "x": 920,
+      "y": 118,
       "props": {
         "title": "counter.update",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 320,
-        "h": 190,
+        "w": 381,
+        "h": 202,
         "inputs": [
           {
             "id": "in_self",
@@ -876,20 +1200,21 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-medium-hard-receiver"
     },
     {
       "id": "r3c3",
       "type": "block",
-      "x": 1400,
-      "y": 1680,
+      "x": 1421,
+      "y": 118,
       "props": {
         "title": "tracker.record",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 320,
-        "h": 170,
+        "w": 381,
+        "h": 202,
         "inputs": [
           {
             "id": "in_self",
@@ -916,20 +1241,86 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
+      "id": "ord-r3c0",
+      "type": "text",
+      "x": 40,
+      "y": 84,
+      "text": "13",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
+      "id": "ord-r3c1",
+      "type": "text",
+      "x": 480,
+      "y": 40,
+      "text": "14",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
+      "id": "ord-r3c2",
+      "type": "text",
+      "x": 920,
+      "y": 84,
+      "text": "15",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
+      "id": "ord-r3c3",
+      "type": "text",
+      "x": 1421,
+      "y": 84,
+      "text": "16",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
+      "id": "note-r3c0",
+      "type": "text",
+      "x": 40,
+      "y": 352,
+      "text": "13 - a's port sits right, b's sits\nleft, reversed from argument\norder, so the cables cross on\npurpose.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-hard-receiver"
     },
     {
       "id": "show_a",
       "type": "block",
-      "x": 90,
-      "y": 1940,
+      "x": 40,
+      "y": 490,
       "props": {
-        "title": "show",
+        "title": "show(a)",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 150,
-        "h": 110,
+        "w": 280,
+        "h": 158,
         "inputs": [
           {
             "id": "in_1",
@@ -939,20 +1330,21 @@
           }
         ],
         "outputs": []
-      }
+      },
+      "parentId": "tier-medium-hard-receiver"
     },
     {
       "id": "show_b",
       "type": "block",
-      "x": 280,
-      "y": 1940,
+      "x": 40,
+      "y": 680,
       "props": {
-        "title": "show",
+        "title": "show(b)",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 150,
-        "h": 110,
+        "w": 280,
+        "h": 158,
         "inputs": [
           {
             "id": "in_1",
@@ -962,13 +1354,53 @@
           }
         ],
         "outputs": []
-      }
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
+      "id": "note-r3c1",
+      "type": "text",
+      "x": 480,
+      "y": 352,
+      "text": "14 - three mutated arguments,\nthree effect ports on one top\nedge.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
+      "id": "note-r3c2",
+      "type": "text",
+      "x": 920,
+      "y": 352,
+      "text": "15 - self mutates like any other\nargument; the receiver isn't\nspecial.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
+      "id": "note-r3c3",
+      "type": "text",
+      "x": 1421,
+      "y": 352,
+      "text": "16 - same receiver pattern, a\ndifferent shape of state.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-hard-receiver"
     },
     {
       "id": "wire-13a",
       "type": "connection",
-      "x": 0,
-      "y": 0,
+      "x": 40,
+      "y": 74,
       "props": {
         "start": {
           "x": 0,
@@ -989,13 +1421,14 @@
         "tunnelLayer": "",
         "routeMode": "automatic",
         "state": "normal"
-      }
+      },
+      "parentId": "tier-medium-hard-receiver"
     },
     {
       "id": "wire-13b",
       "type": "connection",
-      "x": 0,
-      "y": 0,
+      "x": 40,
+      "y": 74,
       "props": {
         "start": {
           "x": 0,
@@ -1016,44 +1449,40 @@
         "tunnelLayer": "",
         "routeMode": "automatic",
         "state": "normal"
-      }
+      },
+      "parentId": "tier-medium-hard-receiver"
     },
     {
-      "id": "note-13",
-      "type": "text",
-      "x": 480,
-      "y": 1950,
-      "text": "13 - a's port sits right,\nb's sits left: reversed\nfrom argument order, so\nthe cables cross on purpose.",
+      "id": "tier-hard-nesting",
+      "type": "frame",
+      "x": 2022,
+      "y": 1568,
       "props": {
-        "size": "s",
-        "color": "black",
-        "font": "sans"
-      }
-    },
-    {
-      "id": "t-hard",
-      "type": "text",
-      "x": 80,
-      "y": 2160,
-      "text": "HARD - nesting, the combined pill, and a Simple-view check  [17-20]",
-      "props": {
-        "size": "s",
-        "color": "black",
-        "font": "sans"
+        "name": "HARD \u2014 nesting, the combined pill, and a Simple-view check (17\u201320)",
+        "w": 2157,
+        "h": 1180
+      },
+      "meta": {
+        "systemSketch": {
+          "kind": "imported-page",
+          "sourcePageId": "tier-hard-nesting",
+          "sourcePageName": "HARD \u2014 nesting, the combined pill, and a Simple-view check (17\u201320)",
+          "sourcePageIndex": "0"
+        }
       }
     },
     {
       "id": "run_outer",
       "type": "block",
-      "x": 80,
-      "y": 2200,
+      "x": 40,
+      "y": 40,
       "props": {
-        "title": "run",
+        "title": "run() \u2014 expanded",
         "description": "",
         "blockType": "call",
         "view": "expanded",
-        "w": 460,
-        "h": 360,
+        "w": 477,
+        "h": 362,
         "inputs": [
           {
             "id": "in_1",
@@ -1073,20 +1502,21 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-hard-nesting"
     },
     {
       "id": "append_inner",
       "type": "block",
-      "x": 70,
-      "y": 140,
+      "x": 48,
+      "y": 110,
       "props": {
-        "title": "poses.append",
+        "title": "append (inner)",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 300,
-        "h": 170,
+        "w": 381,
+        "h": 202,
         "inputs": [
           {
             "id": "in_1",
@@ -1118,15 +1548,15 @@
     {
       "id": "run_collapsed",
       "type": "block",
-      "x": 380,
-      "y": 2200,
+      "x": 637,
+      "y": 244,
       "props": {
-        "title": "run",
+        "title": "run() \u2014 collapsed",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 220,
-        "h": 170,
+        "w": 443,
+        "h": 158,
         "inputs": [
           {
             "id": "in_1",
@@ -1146,44 +1576,47 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-hard-nesting"
     },
     {
       "id": "note-17b",
       "type": "text",
-      "x": 380,
-      "y": 2390,
-      "text": "same run(), Port view:\nthe outside, collapsed.",
+      "x": 637,
+      "y": 434,
+      "text": "same run(), Port view: the\noutside, collapsed.",
       "props": {
         "size": "s",
         "color": "black",
         "font": "sans"
-      }
+      },
+      "parentId": "tier-hard-nesting"
     },
     {
       "id": "note-17",
       "type": "text",
-      "x": 80,
-      "y": 2580,
-      "text": "17 - two levels, hand-marked at each:\ncheck the interior tether AND the\nouter's own collapsed Port view (right).",
+      "x": 40,
+      "y": 434,
+      "text": "17 - two levels, hand-marked at\neach: check the interior tether\nAND\nthe outer's own collapsed Port\nview (right).",
       "props": {
         "size": "s",
         "color": "black",
         "font": "sans"
-      }
+      },
+      "parentId": "tier-hard-nesting"
     },
     {
       "id": "nest_outer",
       "type": "block",
-      "x": 620,
-      "y": 2200,
+      "x": 1200,
+      "y": 40,
       "props": {
         "title": "outer",
         "description": "",
         "blockType": "call",
         "view": "expanded",
-        "w": 640,
-        "h": 520,
+        "w": 566,
+        "h": 522,
         "inputs": [
           {
             "id": "in_1",
@@ -1203,20 +1636,21 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-hard-nesting"
     },
     {
       "id": "nest_mid",
       "type": "block",
-      "x": 60,
-      "y": 140,
+      "x": 48,
+      "y": 110,
       "props": {
-        "title": "run",
+        "title": "run() \u2014 nested",
         "description": "",
         "blockType": "call",
         "view": "expanded",
-        "w": 520,
-        "h": 340,
+        "w": 470,
+        "h": 362,
         "inputs": [
           {
             "id": "in_1",
@@ -1242,15 +1676,15 @@
     {
       "id": "nest_inner",
       "type": "block",
-      "x": 60,
-      "y": 140,
+      "x": 48,
+      "y": 110,
       "props": {
         "title": "add_pose",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 300,
-        "h": 170,
+        "w": 374,
+        "h": 202,
         "inputs": [
           {
             "id": "in_1",
@@ -1282,27 +1716,56 @@
     {
       "id": "note-18",
       "type": "text",
-      "x": 620,
-      "y": 2740,
-      "text": "18 - three levels. Each is independently\nmarked; auto-follow across a frame\nboundary is not wired yet.",
+      "x": 1200,
+      "y": 434,
+      "text": "18 - three levels. Each is\nindependently marked; auto-follow\nacross a frame boundary is not\nwired yet.",
       "props": {
         "size": "s",
         "color": "black",
         "font": "sans"
-      }
+      },
+      "parentId": "tier-hard-nesting"
+    },
+    {
+      "id": "wire-19",
+      "type": "connection",
+      "x": 40,
+      "y": 40,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "delayed",
+        "delayValue": "1.0",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      },
+      "parentId": "tier-hard-nesting"
     },
     {
       "id": "append_delayed",
       "type": "block",
-      "x": 80,
-      "y": 2840,
+      "x": 40,
+      "y": 800,
       "props": {
-        "title": "poses.append",
+        "title": "append (delayed)",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 300,
-        "h": 170,
+        "w": 422,
+        "h": 202,
         "inputs": [
           {
             "id": "in_1",
@@ -1328,25 +1791,26 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-hard-nesting"
     },
     {
       "id": "len_delayed",
       "type": "block",
-      "x": 460,
-      "y": 2880,
+      "x": 582,
+      "y": 844,
       "props": {
-        "title": "len",
+        "title": "len (delayed)",
         "description": "",
         "blockType": "call",
         "view": "port",
-        "w": 190,
-        "h": 120,
+        "w": 360,
+        "h": 158,
         "inputs": [
           {
             "id": "in_1",
             "name": "poses",
-            "type": "list[Pose]",
+            "type": "list",
             "visible": true
           }
         ],
@@ -1358,58 +1822,59 @@
             "visible": true
           }
         ]
-      }
-    },
-    {
-      "id": "wire-19",
-      "type": "connection",
-      "x": 0,
-      "y": 0,
-      "props": {
-        "start": {
-          "x": 0,
-          "y": 0
-        },
-        "end": {
-          "x": 100,
-          "y": 0
-        },
-        "routing": "elbow",
-        "curve": null,
-        "pins": [],
-        "elbowRoute": null,
-        "temporal": "delayed",
-        "delayValue": "1.0",
-        "pillPosition": 0.5,
-        "tunnel": false,
-        "tunnelLayer": "",
-        "routeMode": "automatic",
-        "state": "normal"
-      }
+      },
+      "parentId": "tier-hard-nesting"
     },
     {
       "id": "note-19",
       "type": "text",
-      "x": 80,
-      "y": 3040,
-      "text": "19 - one cable, both marks: mut z-1 = 1.0.\nDrag the pill - it should move like any pill.",
+      "x": 40,
+      "y": 1034,
+      "text": "19 - one cable, both marks: mut\nz\u207b\u00b9 = 1.0.\nDrag the pill - it should move\nlike any pill.",
       "props": {
         "size": "s",
         "color": "black",
         "font": "sans"
-      }
+      },
+      "parentId": "tier-hard-nesting"
+    },
+    {
+      "id": "label-simple",
+      "type": "text",
+      "x": 1062,
+      "y": 736,
+      "text": "Simple view",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-hard-nesting"
+    },
+    {
+      "id": "label-port",
+      "type": "text",
+      "x": 1653,
+      "y": 736,
+      "text": "Port view",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-hard-nesting"
     },
     {
       "id": "append_simple",
       "type": "block",
-      "x": 780,
-      "y": 2840,
+      "x": 1062,
+      "y": 800,
       "props": {
-        "title": "poses.append",
+        "title": "append (simple)",
         "description": "",
         "blockType": "call",
         "view": "simple",
-        "w": 320,
+        "w": 471,
         "h": 206,
         "inputs": [
           {
@@ -1436,38 +1901,409 @@
             "edgeT": 0.5
           }
         ]
-      }
+      },
+      "parentId": "tier-hard-nesting"
+    },
+    {
+      "id": "append_simple_portview",
+      "type": "block",
+      "x": 1653,
+      "y": 804,
+      "props": {
+        "title": "append (port view)",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 464,
+        "h": 202,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      },
+      "parentId": "tier-hard-nesting"
     },
     {
       "id": "note-20",
       "type": "text",
-      "x": 780,
-      "y": 3070,
-      "text": "20 - Simple view: the hook and the\neffect port both hide until hover,\nlike every subtle port does.",
+      "x": 1062,
+      "y": 1038,
+      "text": "20 - Simple view: the hook and the\neffect port both hide\nuntil hover, like every subtle\nport does.",
       "props": {
         "size": "s",
         "color": "black",
         "font": "sans"
+      },
+      "parentId": "tier-hard-nesting"
+    },
+    {
+      "id": "ord-run_outer",
+      "type": "text",
+      "x": 40,
+      "y": 6,
+      "text": "17",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-hard-nesting"
+    },
+    {
+      "id": "ord-nest_outer",
+      "type": "text",
+      "x": 1200,
+      "y": 6,
+      "text": "18",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-hard-nesting"
+    },
+    {
+      "id": "ord-append_delayed",
+      "type": "text",
+      "x": 40,
+      "y": 766,
+      "text": "19",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-hard-nesting"
+    },
+    {
+      "id": "ord-append_simple",
+      "type": "text",
+      "x": 1062,
+      "y": 766,
+      "text": "20",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-hard-nesting"
+    },
+    {
+      "id": "tier-legend",
+      "type": "frame",
+      "x": 4339,
+      "y": 550,
+      "props": {
+        "name": "Legend \u2014 what each mark means",
+        "w": 1257,
+        "h": 784
+      },
+      "meta": {
+        "systemSketch": {
+          "kind": "imported-page",
+          "sourcePageId": "tier-legend",
+          "sourcePageName": "Legend \u2014 what each mark means",
+          "sourcePageIndex": "0"
+        }
       }
     },
     {
-      "id": "pass-card",
-      "type": "geo",
-      "x": 80,
-      "y": 3160,
-      "text": "PASS WHEN\nEvery mutated argument shows a hook.\nEvery effect port sits on the top edge.\nTethers are right-angled, and may cross when ports do.\nNesting shows independently at each level.\nThe combined pill reads mut z-1.\nSimple view reveals the hook and the port on hover.",
+      "id": "legend_src",
+      "type": "block",
+      "x": 40,
+      "y": 40,
       "props": {
-        "geo": "rectangle",
-        "w": 900,
-        "h": 260,
-        "color": "green",
-        "labelColor": "black",
-        "fill": "semi",
-        "dash": "draw",
-        "size": "m",
-        "font": "sans",
-        "align": "start",
-        "verticalAlign": "middle"
+        "title": "mutates(obj)",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 339,
+        "h": 158,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "obj",
+            "type": "Any",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "obj",
+            "type": "Any",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      },
+      "parentId": "tier-legend"
+    },
+    {
+      "id": "legend_now",
+      "type": "block",
+      "x": 499,
+      "y": 40,
+      "props": {
+        "title": "reads now",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 280,
+        "h": 158,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "obj",
+            "type": "Any",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      },
+      "parentId": "tier-legend"
+    },
+    {
+      "id": "legend_later",
+      "type": "block",
+      "x": 899,
+      "y": 40,
+      "props": {
+        "title": "reads later",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 318,
+        "h": 158,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "obj",
+            "type": "Any",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      },
+      "parentId": "tier-legend"
+    },
+    {
+      "id": "wire-legend-a",
+      "type": "connection",
+      "x": 40,
+      "y": 40,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      },
+      "parentId": "tier-legend"
+    },
+    {
+      "id": "wire-legend-b",
+      "type": "connection",
+      "x": 40,
+      "y": 40,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "delayed",
+        "delayValue": "1.0",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      },
+      "parentId": "tier-legend"
+    },
+    {
+      "id": "legend-caption-1",
+      "type": "text",
+      "x": 40,
+      "y": 230,
+      "text": "hook (orange, opens left) = this\ncall rewrites its\nargument in place. Port on the top\nedge = the only\nway the mutated value leaves (no\nreturn channel).",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-legend"
+    },
+    {
+      "id": "legend-caption-2",
+      "type": "text",
+      "x": 499,
+      "y": 230,
+      "text": "solid orange cable, 'mut' pill:\nthis value exists only because of\nthe mutation.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-legend"
+    },
+    {
+      "id": "legend-caption-3",
+      "type": "text",
+      "x": 899,
+      "y": 230,
+      "text": "dotted orange cable, 'mut z\u207b\u00b9 =\n1.0' pill:\nsame, but read one iteration late.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-legend"
+    },
+    {
+      "id": "legend_producer",
+      "type": "block",
+      "x": 40,
+      "y": 448,
+      "props": {
+        "title": "producer",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 280,
+        "h": 158,
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "value",
+            "type": "int",
+            "visible": true
+          }
+        ]
+      },
+      "parentId": "tier-legend"
+    },
+    {
+      "id": "legend_consumer",
+      "type": "block",
+      "x": 440,
+      "y": 448,
+      "props": {
+        "title": "consumer",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 280,
+        "h": 158,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "value",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      },
+      "parentId": "tier-legend"
+    },
+    {
+      "id": "wire-legend-c",
+      "type": "connection",
+      "x": 40,
+      "y": 40,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      },
+      "parentId": "tier-legend"
+    },
+    {
+      "id": "legend-caption-4",
+      "type": "text",
+      "x": 40,
+      "y": 638,
+      "text": "plain cable, no pill: an ordinary\nreturn value, for contrast\n(the board's other 'grey cable'\nlook).",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      },
+      "parentId": "tier-legend"
+    },
+    {
+      "id": "t-title",
+      "type": "text",
+      "x": 0,
+      "y": 90,
+      "text": "The mutating line - 20 examples, easy to hard",
+      "props": {
+        "size": "xl",
+        "color": "black",
+        "font": "sans"
       }
     }
   ],
@@ -1591,17 +2427,77 @@
         "terminal": "end",
         "face": "outer"
       }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-legend-a",
+      "toId": "legend_src",
+      "props": {
+        "portId": "effect:in_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-legend-a",
+      "toId": "legend_now",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-legend-b",
+      "toId": "legend_src",
+      "props": {
+        "portId": "effect:in_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-legend-b",
+      "toId": "legend_later",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-legend-c",
+      "toId": "legend_producer",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-legend-c",
+      "toId": "legend_consumer",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
     }
   ],
   "callouts": [
     {
-      "id": "1",
+      "id": "orientation",
       "kind": "step",
-      "x": 80,
-      "y": 90,
-      "w": 380,
-      "h": 120,
-      "text": "Start here.\n20 real mutating calls, laid\nout easy to hard, top to bottom.",
+      "x": 0,
+      "y": 210,
+      "w": 480,
+      "h": 280,
+      "text": "Start here. 20 real mutating calls, laid out easy to hard.\nEach tier below is its own labeled frame; every example is\nnumbered 1-20 in orange. See the Legend frame (bottom) for\nwhat every hook, port, and cable style means.",
       "target": {
         "shapeId": "r0c0",
         "anchor": "top"
@@ -1610,11 +2506,11 @@
     {
       "id": "pass",
       "kind": "pass",
-      "x": 508,
-      "y": 90,
-      "w": 420,
-      "h": 150,
-      "text": "PASS WHEN - full list on the\ngreen card near the board's\nbottom. See it for the complete condition."
+      "x": 560,
+      "y": 210,
+      "w": 640,
+      "h": 240,
+      "text": "PASS WHEN\nEvery mutated argument shows a hook.\nEvery effect port sits on the top edge.\nTethers are right-angled, and may cross when ports do.\nNesting shows independently at each level.\nThe combined pill reads mut z\u207b\u00b9 = 1.0.\nSimple view reveals the hook and the port on hover."
     }
   ]
 }

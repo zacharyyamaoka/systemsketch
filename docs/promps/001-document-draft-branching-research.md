@@ -346,3 +346,38 @@ the rail.
 
 Report is the deliverable. No extra servers. Stable/Preview (4321/4322/4323)
 untouched. The three live tracks were left running as reference only.
+
+## Quiet IcePanel — 2026-09-03 (this track)
+
+Zach rejected the loud inverse/black DRAFT bar and the ongoing hazard stripe.
+Keep IcePanel *layout* (full-width top row while a Draft is active: Exit, name,
+N changes, Merge). Change the *paint* to app chrome tokens only.
+
+Implemented in a fresh worktree from current `main` (`11f7e5b`), not in the
+dirty checkout:
+
+| | |
+|---|---|
+| worktree | `/home/bam/systemsketch-track-draft-icepanel-quiet` |
+| branch | `track/draft-icepanel-quiet` |
+| ports | **4680** / 4681 |
+| board | http://127.0.0.1:4680/?board=%2Fhome%2Fbam%2Fsystemsketch-track-draft-icepanel-quiet%2Fsketches%2Freview%2Fdraft-icepanel-quiet.systemsketch |
+
+What shipped:
+
+- Drafts chip (Lucide `GitBranch`) in the retired page-selector slot. Popover:
+  Main, existing drafts, New draft.
+- Quiet top bar: `--ss-surface-raised` / `--ss-text` / `--ss-border`. Merge on
+  `--ss-accent`. No inverse bar, no stripe, no giant DRAFT word. Presence of
+  the extra row is the draft signal.
+- New draft snapshots Main, autosave hold so draft edits never write the real
+  `.systemsketch`. Exit restores Main. Resume keeps draft edits. Merge updates
+  Main, pins a Version, leaves draft mode.
+- `N changes` is a quiet list vs the draft base. Conflict uses shape-level
+  diffs, not byte-identity of a re-serialize.
+
+Dropped vs the earlier tracks / V2 journey HTML: black inverse bar, hazard
+stripe, shouting DRAFT mark, VS Code Keep/Discard review bar (simple Merge
+instead — it works), inspector History tab (nice-to-have, not blocking).
+
+`npm run check` green. CDP `tests/draft_branching_smoke.mjs` 25/25.
