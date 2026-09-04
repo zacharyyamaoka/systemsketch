@@ -123,9 +123,12 @@ export class LoopShapeUtil extends RegionShapeUtil<LoopShape> {
 		const layout = loopLayout(shape.props)
 		const path = new Path2D()
 		path.roundRect(0, 0, layout.w, layout.h, LOOP_CORNER_RADIUS)
+		// Matches the live dot's ring: LOOP_PORT_RADIUS core plus the 3px surface
+		// gap, same halo `.Port`'s box-shadow paints in block-canvas.css.
+		const portIndicatorRadius = LOOP_PORT_RADIUS + 3
 		for (const placed of [layout.iterable, layout.item]) {
-			path.moveTo(placed.x + 9, placed.y)
-			path.arc(placed.x, placed.y, 9, 0, Math.PI * 2)
+			path.moveTo(placed.x + portIndicatorRadius, placed.y)
+			path.arc(placed.x, placed.y, portIndicatorRadius, 0, Math.PI * 2)
 		}
 		return path
 	}

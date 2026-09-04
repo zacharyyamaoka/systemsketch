@@ -162,9 +162,12 @@ export class BranchShapeUtil extends RegionShapeUtil<BranchShape> {
 		const layout = branchLayout(shape.props)
 		const path = new Path2D()
 		path.roundRect(0, 0, layout.w, layout.h, BRANCH_CORNER_RADIUS)
+		// Matches the live dot's ring: BRANCH_PORT_RADIUS core plus the 3px
+		// surface gap, same halo `.Port`'s box-shadow paints in block-canvas.css.
+		const controlIndicatorRadius = BRANCH_PORT_RADIUS + 3
 		for (const control of layout.controls) {
-			path.moveTo(control.x + 9, control.y)
-			path.arc(control.x, control.y, 9, 0, Math.PI * 2)
+			path.moveTo(control.x + controlIndicatorRadius, control.y)
+			path.arc(control.x, control.y, controlIndicatorRadius, 0, Math.PI * 2)
 		}
 		return path
 	}

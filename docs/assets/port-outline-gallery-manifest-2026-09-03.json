@@ -1,0 +1,47 @@
+[
+  {
+    "label": "port view",
+    "slug": "port-view",
+    "file": "port-outline-gallery-port-view-2026-09-03.png"
+  },
+  {
+    "label": "simple view",
+    "slug": "simple-view",
+    "file": "port-outline-gallery-simple-view-2026-09-03.png"
+  },
+  {
+    "label": "value view",
+    "slug": "value-view",
+    "file": "port-outline-gallery-value-view-2026-09-03.png"
+  },
+  {
+    "label": "expanded view",
+    "slug": "expanded-view",
+    "file": "port-outline-gallery-expanded-view-2026-09-03.png"
+  },
+  {
+    "label": "many ports",
+    "slug": "many-ports",
+    "file": "port-outline-gallery-many-ports-2026-09-03.png"
+  },
+  {
+    "label": "branch region",
+    "slug": "branch-region",
+    "file": "port-outline-gallery-branch-region-2026-09-03.png"
+  },
+  {
+    "label": "connected sink",
+    "slug": "connected-sink",
+    "file": "port-outline-gallery-connected-sink-2026-09-03.png"
+  },
+  {
+    "label": "default value",
+    "slug": "default-value",
+    "file": "port-outline-gallery-default-value-2026-09-03.png"
+  },
+  {
+    "label": "loop region",
+    "slug": "loop-region",
+    "file": "port-outline-gallery-loop-region-2026-09-03.png"
+  }
+]

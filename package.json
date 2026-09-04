@@ -15,6 +15,7 @@
     "test:field-guidance": "node tests/inspector_field_guidance_smoke.mjs",
     "test:batch": "node tests/block_batch_editing_smoke.mjs",
     "test:ports": "node tests/block_port_in_window_smoke.mjs",
+    "test:port-alignment": "node tests/port_outline_alignment_smoke.mjs",
     "test:rows": "node tests/block_port_rows_smoke.mjs",
     "test:release-ui": "node tests/release_channel_controls_smoke.mjs",
     "test:promotion-handoff": "node tests/promoted_workspace_restore_smoke.mjs",
