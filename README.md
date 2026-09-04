@@ -29,6 +29,14 @@ The [Preview regression and performance audit](docs/preview-regression-audit-202
 
 The [Loop contents-layout gallery](docs/loop-contents-layout-2026-09-03.html) extends the existing container-layout contract to For Loops: select a Loop with two or more direct child Blocks and its contextual pill now offers **Organize nodes** (plus **Tidy edges** when its interior cables apply). The Loop header remains an operator rather than being pretended into a left/right port rail; the body is the bounded layout area, and an empty selection pill is no longer mounted. The companion [`loop-contents-layout.systemsketch`](sketches/review/loop-contents-layout.systemsketch) board is live on this track for direct review.
 
+The [UI and visual-language PEP](docs/pep-ui-visual-language.md) establishes
+the maintained rule for blank authored fields: permanent labels plus short,
+generic field-role guidance—never fabricated example content.
+
+The [inspector field-guidance gallery](docs/inspector-field-guidance-2026-09-03.html)
+shows the shared vocabulary, the captured running inspector, and the real-browser
+evidence behind this change.
+
 The [Loop region implementation gallery](docs/loop-region-implementation-2026-09-03.html) builds golden 10's `for` as a frame-like region whose header is an operator, with the element leaving through a real port on an ordinary solid cable. It also records the container hit-zone contract every region now shares: an `isLabel` band is solid chrome, a frame-like face stops tldraw's hit search, and — because the same predicate resolves a drop target — a cable inside a region has to be that region's child to stay clickable. The companion [`loop-region.systemsketch`](sketches/review/loop-region.systemsketch) board is ready for direct human verification.
 
 The [Loop header-centering gallery](docs/loop-header-centering-2026-09-03.html) documents the responsive title rule: long operator names use the safe header lane while compact, then move to the Loop's true midpoint as soon as their complete text fits there. Its focused [`loop-header-centering.systemsketch`](sketches/review/loop-header-centering.systemsketch) review board starts compact and gives the exact resize gesture and visible pass condition.

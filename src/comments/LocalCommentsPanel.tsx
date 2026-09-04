@@ -15,6 +15,7 @@ import {
   type LocalCommentThreadView,
 } from './commentModel'
 import { useConfirm } from '../chrome/ConfirmDialog'
+import { EMPTY_FIELD_GUIDANCE } from '../fields/emptyFieldGuidance'
 import './comments.css'
 
 export interface LocalCommentsPanelProps {
@@ -267,7 +268,7 @@ export function LocalCommentsPanel({
           <input
             id={sourceId}
             value={sourceInput}
-            placeholder="src/pipeline.py:24-31#build"
+            placeholder={EMPTY_FIELD_GUIDANCE.comment.sourceReference}
             spellCheck={false}
             onChange={(event) => setSourceInput(event.currentTarget.value)}
           />

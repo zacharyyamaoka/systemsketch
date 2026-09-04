@@ -10,6 +10,7 @@ import {
 } from './inlineBlockEditing'
 import { VALUE_FONT_PX } from './layoutBlock'
 import { BLOCK_ICONS } from './ui/blockIcons'
+import { EMPTY_FIELD_GUIDANCE } from '../fields/emptyFieldGuidance'
 
 const DISPLAY_DESCRIPTION_LIMIT = 120
 
@@ -112,14 +113,18 @@ function editorStyle(
 
 /** What an empty field promises: on a capsule the title is the literal and the outlet is its name. */
 function placeholderFor(props: BlockShapeProps, field: BlockInlineField): string {
-	if (props.view === 'value') return field.kind === 'title' ? 'value' : 'name'
+	if (props.view === 'value') {
+		return field.kind === 'title'
+			? EMPTY_FIELD_GUIDANCE.pill.value
+			: EMPTY_FIELD_GUIDANCE.pill.name
+	}
 	return field.kind === 'title'
-		? 'Title'
+		? EMPTY_FIELD_GUIDANCE.block.title
 		: field.kind === 'blockType'
-			? 'Type'
+			? EMPTY_FIELD_GUIDANCE.block.type
 			: field.kind === 'portName'
-				? 'Port name'
-				: 'Port type'
+				? EMPTY_FIELD_GUIDANCE.block.portName
+				: EMPTY_FIELD_GUIDANCE.block.portType
 }
 
 function testIdFor(field: BlockInlineField): string {
@@ -225,7 +230,7 @@ export function BlockInlineEditor({ shape }: { shape: BlockShape }) {
 				aria-label="Edit display description"
 				rows={2}
 				maxLength={DISPLAY_DESCRIPTION_LIMIT}
-				placeholder="Display description"
+				placeholder={EMPTY_FIELD_GUIDANCE.block.displayDescription}
 				onChange={(event) => writeField(event.target.value)}
 			/>
 		)

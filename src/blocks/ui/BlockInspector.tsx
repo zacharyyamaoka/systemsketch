@@ -11,6 +11,7 @@ import {
 import { type Editor, useValue } from 'tldraw'
 
 import { LiveTextArea, LiveTextInput, useLiveField } from '../../fields'
+import { EMPTY_FIELD_GUIDANCE } from '../../fields/emptyFieldGuidance'
 
 import {
   BLOCK_PRESENTATION_VIEWS,
@@ -268,7 +269,7 @@ function NotesEditor({
       value={value}
       disabled={disabled}
       ariaLabel="Detailed block notes"
-      placeholder="Implementation notes, context, caveats, links…"
+      placeholder={EMPTY_FIELD_GUIDANCE.block.notes}
       beginEdit={() => actions?.beginEdit?.('edit block notes')}
       onWrite={(notes) => actions?.updateDetails({ notes }, { continuous: true })}
     />
@@ -326,7 +327,7 @@ function DescriptionEditor({
         rows={3}
         maxLength={DISPLAY_DESCRIPTION_LIMIT}
         disabled={disabled}
-        placeholder="A short summary shown on the block"
+        placeholder={EMPTY_FIELD_GUIDANCE.block.displayDescription}
       />
       <p className="block-inspector__field-help">
         Shown at a glance · keep implementation detail in Notes.
@@ -371,7 +372,7 @@ function PillSection({
         <LiveTextInput
           value={name}
           disabled={readOnly || !outlet}
-          placeholder="gain"
+          placeholder={EMPTY_FIELD_GUIDANCE.pill.name}
           ariaLabel="Variable name"
           beginEdit={() => actions?.beginEdit?.('name pill')}
           onWrite={(next) => patchOutlet({ name: next })}
@@ -383,7 +384,7 @@ function PillSection({
         <LiveTextInput
           value={props.title}
           disabled={readOnly || fedBy !== null}
-          placeholder={fedBy ? '' : '2.0'}
+          placeholder={fedBy ? '' : EMPTY_FIELD_GUIDANCE.pill.value}
           ariaLabel="Literal value"
           beginEdit={() => actions?.beginEdit?.('edit pill value')}
           onWrite={(title) => actions?.updateDetails({ title }, { continuous: true })}
@@ -395,7 +396,7 @@ function PillSection({
         <LiveTextInput
           value={type}
           disabled={readOnly || !outlet}
-          placeholder={fedBy ? '' : 'float'}
+          placeholder={fedBy ? '' : EMPTY_FIELD_GUIDANCE.pill.type}
           ariaLabel="Variable type"
           beginEdit={() => actions?.beginEdit?.('retype pill')}
           onWrite={(next) => patchOutlet({ type: next })}
@@ -772,7 +773,7 @@ function PortSection({
           className="block-inspector__port-name"
           value={port.name}
           disabled={!actions}
-          placeholder="name"
+          placeholder={EMPTY_FIELD_GUIDANCE.block.portName}
           ariaLabel={`${side} ${port.id} name`}
           beginEdit={() => actions?.beginEdit?.('rename block port')}
           onWrite={(name) => actions?.updatePort(side, port.id, { name }, { continuous: true })}
@@ -781,7 +782,7 @@ function PortSection({
           className="block-inspector__port-type"
           value={port.type}
           disabled={!actions}
-          placeholder="type"
+          placeholder={EMPTY_FIELD_GUIDANCE.block.portType}
           ariaLabel={`${side} ${port.id} type`}
           beginEdit={() => actions?.beginEdit?.('retype block port')}
           onWrite={(type) => actions?.updatePort(side, port.id, { type }, { continuous: true })}
@@ -791,7 +792,7 @@ function PortSection({
             className="block-inspector__port-default"
             value={port.defaultValue ?? ''}
             disabled={!actions}
-            placeholder="="
+            placeholder={EMPTY_FIELD_GUIDANCE.block.defaultValue}
             ariaLabel={`Default value for ${port.name || port.id}`}
             beginEdit={() => actions?.beginEdit?.('edit port default')}
             onWrite={(defaultValue) =>
@@ -1006,7 +1007,7 @@ export function BlockInspectorContent({
               <LiveTextInput
                 value={props.title}
                 disabled={readOnly}
-                placeholder="build_report"
+                placeholder={EMPTY_FIELD_GUIDANCE.block.title}
                 ariaLabel="Block title"
                 beginEdit={() => actions?.beginEdit?.('rename block')}
                 onWrite={(title) => actions?.updateDetails({ title }, { continuous: true })}
@@ -1027,7 +1028,7 @@ export function BlockInspectorContent({
               <LiveTextInput
                 value={props.blockType}
                 disabled={readOnly}
-                placeholder="call"
+                placeholder={EMPTY_FIELD_GUIDANCE.block.type}
                 ariaLabel="Block type"
                 beginEdit={() => actions?.beginEdit?.('retype block')}
                 onWrite={(blockType) => actions?.updateDetails({ blockType }, { continuous: true })}

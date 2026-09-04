@@ -156,7 +156,7 @@ describe('block command integration surface', () => {
     expect(result).toMatchObject({ ok: true, port: { id: 'out_1' } })
     expect(fixture.current().props).toMatchObject({ view: 'port', w: 360, h: 250 })
     expect(fixture.current().props.outputs).toEqual([
-      { id: 'out_1', name: 'out_1', type: '', visible: true },
+      { id: 'out_1', name: '', type: '', visible: true },
     ])
     expect(fixture.history).toEqual(['add block output'])
   })

@@ -8,6 +8,7 @@ import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type
 import { type Editor, useValue } from 'tldraw'
 
 import { LiveTextInput } from '../../fields'
+import { EMPTY_FIELD_GUIDANCE } from '../../fields/emptyFieldGuidance'
 import { portColor } from '../../blocks/ui/portPalette'
 import {
 	addBranchArm,
@@ -120,7 +121,7 @@ function ControlPortsSection({ props, actions }: { props: BranchShapeProps; acti
 								className="block-inspector__port-name"
 								value={port.name}
 								disabled={!actions}
-								placeholder="name"
+								placeholder={EMPTY_FIELD_GUIDANCE.branch.controlName}
 								ariaLabel={`Control port ${port.id} name`}
 								beginEdit={() => actions?.beginEdit('rename branch control port')}
 								onWrite={(name) => actions?.updateControl(port.id, { name })}
@@ -129,7 +130,7 @@ function ControlPortsSection({ props, actions }: { props: BranchShapeProps; acti
 								className="block-inspector__port-type"
 								value={port.type}
 								disabled={!actions}
-								placeholder="type"
+								placeholder={EMPTY_FIELD_GUIDANCE.branch.controlType}
 								ariaLabel={`Control port ${port.id} type`}
 								beginEdit={() => actions?.beginEdit('retype branch control port')}
 								onWrite={(type) => actions?.updateControl(port.id, { type })}
@@ -239,7 +240,7 @@ function ArmsSection({ props, actions }: { props: BranchShapeProps; actions?: Br
 								className="block-inspector__port-name branch-inspector__arm-title"
 								value={arm.title}
 								disabled={!actions}
-								placeholder="case"
+								placeholder={EMPTY_FIELD_GUIDANCE.branch.armTitle}
 								ariaLabel={`Arm ${arm.id} title`}
 								beginEdit={() => actions?.beginEdit('rename branch arm')}
 								onWrite={(title) => actions?.renameArm(arm.id, title)}
@@ -315,7 +316,7 @@ export function BranchInspectorContent({
 						<LiveTextInput
 							value={props.title}
 							disabled={readOnly}
-							placeholder="Branch"
+							placeholder={EMPTY_FIELD_GUIDANCE.branch.title}
 							ariaLabel="Branch title"
 							beginEdit={() => actions?.beginEdit('rename branch')}
 							onWrite={(title) => actions?.setTitle(title)}

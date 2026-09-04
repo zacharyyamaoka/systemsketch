@@ -358,7 +358,10 @@ export function appendBlockPortProps(
   const id = nextPortId(props[side], side)
   const port = withBlockPortSection({
     id,
-    name: initial.name ?? id,
+    // The record id is stable plumbing, not an authored label. Leaving the
+    // editable name empty lets the inspector and on-canvas field state its
+    // role instead of presenting `in_1` as content the user should keep.
+    name: initial.name ?? '',
     type: initial.type ?? '',
     visible: initial.visible ?? true,
   }, {
@@ -405,7 +408,7 @@ export function insertBlockPortProps(
     ? portSection(reference)
     : { row: FIRST_BODY_ROW, branch: 0 }
   const id = nextPortId(lane, side)
-  const port = withBlockPortSection({ id, name: id, type: '', visible: true }, section)
+  const port = withBlockPortSection({ id, name: '', type: '', visible: true }, section)
   const ports = [...lane]
   ports.splice(at, 0, port)
   const next = normalizeBlockPortRows({ ...props, [side]: ports })

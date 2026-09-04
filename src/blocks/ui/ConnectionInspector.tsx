@@ -44,6 +44,7 @@ import { sameSharedStyle } from '../commands/blockStyleCommands'
 import { CONNECTION_SHAPE_TYPE } from '../connections/connectionModel'
 import { cablePillLabel } from '../connections/connectionPresentation'
 import { isEffectCable } from '../connections/effectCable'
+import { EMPTY_FIELD_GUIDANCE } from '../../fields/emptyFieldGuidance'
 import './block-inspector.css'
 
 export interface ConnectionInspectorContext {
@@ -367,7 +368,7 @@ export function EditorConnectionInspector({ editor }: { editor: Editor }) {
 									<input
 										autoFocus
 										value={newLayerName}
-										placeholder="Layer name…"
+										placeholder={EMPTY_FIELD_GUIDANCE.connection.layerName}
 										aria-label="New tunnel layer name"
 										data-testid="new-tunnel-layer-name"
 										onChange={(event) => setNewLayerName(event.target.value)}
@@ -431,7 +432,7 @@ function DelayValueField({
 					type="text"
 					data-testid="connection-delay-value"
 					aria-label="Initial value"
-					placeholder="1.0"
+					placeholder={EMPTY_FIELD_GUIDANCE.connection.initialValue}
 					value={draft}
 					onChange={(event) => setDraft(event.target.value)}
 					onBlur={commit}
