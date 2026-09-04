@@ -3,9 +3,12 @@ import { describe, expect, it } from 'vitest'
 import { getDefaultBlockProps, type BlockShape } from './blockModel'
 import type { ConnectionBinding } from './connections/ConnectionBindingUtil'
 import type { ConnectionShape } from './connections/ConnectionShapeUtil'
+import { getDefaultLoopProps, type LoopShape } from '../loop/loopModel'
 import {
 	expandedScopeHasBoundaryConnection,
+	getSelectedContainerLayoutScope,
 	getSelectedExpandedBlockLayoutScope,
+	getSelectedLoopLayoutScope,
 } from './expandedBlockLayoutScope'
 import { canOrganizeNodes } from './layout'
 
@@ -55,6 +58,23 @@ function connection(id: string, parentId: string): ConnectionShape {
 			pillPosition: 0.5,
 		},
 	} as unknown as ConnectionShape
+}
+
+function loop(id: string, parentId = 'page:page'): LoopShape {
+	return {
+		id: `shape:${id}`,
+		typeName: 'shape',
+		type: 'loop',
+		x: 0,
+		y: 0,
+		rotation: 0,
+		index: 'a1',
+		parentId,
+		isLocked: false,
+		opacity: 1,
+		meta: {},
+		props: getDefaultLoopProps(),
+	} as LoopShape
 }
 
 function binding(
@@ -140,5 +160,27 @@ describe('expanded Block layout scope', () => {
 
 		expect(canOrganizeNodes(scopedEditor)).toBe(true)
 		expect(canOrganizeNodes(selectionEditor)).toBe(true)
+	})
+
+	it('gives a selected Loop its direct Blocks and painted cables without entering nested containers', () => {
+		const parent = loop('loop')
+		const first = block('first', parent.id)
+		const nested = block('nested', parent.id, 'expanded')
+		const grandchild = block('grandchild', nested.id)
+		const interior = connection('interior', parent.id)
+		const nestedInterior = connection('nested-interior', nested.id)
+		const exterior = connection('exterior', 'page:page')
+		const shapes = [parent, first, nested, grandchild, interior, nestedInterior, exterior]
+		const editor = {
+			getSelectedShapeIds: () => [parent.id],
+			getSelectedShapes: () => [parent],
+			getCurrentPageShapes: () => shapes,
+		} as never
+
+		const scope = getSelectedLoopLayoutScope(editor)
+		expect(scope?.childBlocks.map((shape) => shape.id)).toEqual([first.id, nested.id])
+		expect(scope?.connections.map((shape) => shape.id)).toEqual([interior.id])
+		expect(getSelectedContainerLayoutScope(editor)?.parent.id).toBe(parent.id)
+		expect(canOrganizeNodes(editor)).toBe(true)
 	})
 })

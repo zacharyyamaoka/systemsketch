@@ -27,6 +27,15 @@ export interface BlockSelectionMiniMenuProps {
   }
 }
 
+/** Whether the Block adapter will contribute controls to the selection pill. */
+export function canShowBlockSelectionMiniMenu(editor: Editor): boolean {
+  const block = getOnlySelectedBlock(editor)
+  if (block) return block.props.view !== 'value'
+  const styles = getBlockSelectionStyles(editor)
+  return !getSelectedBlocks(editor).some((candidate) => candidate.props.view === 'value')
+    && Boolean(styles.view)
+}
+
 /**
  * What each view letter means, in words.
  *

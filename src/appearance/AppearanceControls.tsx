@@ -8,6 +8,7 @@ import {
   useRelevantStyles,
   useValue,
   type Editor,
+  type ReadonlySharedStyleMap,
   type StyleProp,
   type TLArrowShape,
   type TLShape,
@@ -88,7 +89,7 @@ export function AppearanceControls() {
     }
   })
 
-  if (controls.length === 0 && !addTextShape) return null
+  if (!hasAppearanceControls(styles, hasText, addTextShape)) return null
 
   return (
     <div className="systemsketch-appearance" data-testid="systemsketch-appearance">
@@ -108,6 +109,15 @@ export function AppearanceControls() {
       ))}
     </div>
   )
+}
+
+/** The shared predicate prevents the selection shell from mounting an empty pill. */
+export function hasAppearanceControls(
+  styles: ReadonlySharedStyleMap | null,
+  hasText: boolean,
+  addTextShape: TLShape | null,
+): boolean {
+  return buildAppearanceControls(styles, hasText).length > 0 || addTextShape !== null
 }
 
 function AddTextButton({ editor, shape }: { editor: Editor; shape: TLShape }) {
