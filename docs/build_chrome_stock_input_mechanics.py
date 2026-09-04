@@ -48,7 +48,7 @@ SURFACES = [
     Surface("Shape-library search", "Already stock `TldrawUiInput`", "Transient query: selected on initial open; Escape restores/clears the query.", "Existing stock primitive retained."),
     Surface("Header filename", "Moved to `SystemSketchUiInput`", "Identity: select all, Enter or blur commits once, Escape cancels; the workspace owns the rename.", "6/6 inline rename browser checks."),
     Surface("Workspace Filter", "Moved to `SystemSketchUiInput`", "Search/action: stock selection and Escape reset; Enter opens the selected result only in Open mode.", "12/12 workspace-browser checks."),
-    Surface("Rename / Save As / Export filename", "Moved to `SystemSketchUiInput`", "Dialog action: selected on entry; Enter performs the existing dialog action; Escape restores the input draft.", "9/9 safety checks and 11/11 export checks."),
+    Surface("Rename / Save As / Export filename", "Moved to `SystemSketchUiInput`", "Dialog action: selected on entry; Enter performs the existing dialog action; Escape restores the input draft.", "6/6 safety checks and 11/11 export checks."),
     Surface("New folder name", "Moved to `SystemSketchUiInput`", "Dialog action: selected on entry; Enter creates once; Escape removes only the inline folder form.", "9/9 workspace follow-up checks."),
     Surface("Block, Branch, inspector, command, prose", "Intentionally unchanged", "Canvas editors and live inspectors own tldraw editing/undo; commands own Enter; prose owns newlines.", "Kept out of the adapter by the documented contract."),
 ]
@@ -139,12 +139,12 @@ def main() -> None:
             "inlineDocumentRename": "6/6",
             "workspaceBrowser": "12/12",
             "workspaceFollowup": "9/9",
-            "workspaceSafety": "9/9",
+            "workspaceSafety": "6/6",
             "fileType": "13/13",
             "tldrawExport": "11/11",
-            "total": "60/60",
+            "total": "57/57",
         },
-        "fullCheck": "107 Vitest files / 981 tests plus 94 Python tests",
+        "fullCheck": "114 Vitest files / 1,130 tests plus 109 Python tests",
     }
     MEASUREMENTS.write_text(json.dumps(measurements, indent=2) + "\n", encoding="utf-8")
     cards = "\n".join(result_card(item, images) for item in RESULTS)
@@ -157,7 +157,7 @@ def main() -> None:
 <h1>One stock text-field path for ordinary chrome.</h1>
 <p class="lead">Filename naming, workspace searching, dialog names, and folder creation now lean on tldraw's proven single-line input mechanics. Their domain operations remain where they belong: in workspace transactions, not in an input widget.</p>
 <section class="thesis"><span class="mark">→</span><p><b>What changed:</b> <code>SystemSketchUiInput</code> is a thin adapter around stock <code>TldrawUiInput</code>. It converts tldraw's complete/cancel/blur signals into the field's declared contract without reimplementing selection, composition, or keyboard plumbing.</p></section>
-<section class="metrics"><div class="metric"><b>5</b><span>Chrome fields on stock path</span></div><div class="metric"><b>1</b><span>Reusable adapter</span></div><div class="metric"><b>60/60</b><span>Focused browser checks</span></div><div class="metric"><b>0</b><span>Browser console errors</span></div></section>
+<section class="metrics"><div class="metric"><b>5</b><span>Chrome fields on stock path</span></div><div class="metric"><b>1</b><span>Reusable adapter</span></div><div class="metric"><b>57/57</b><span>Focused browser checks</span></div><div class="metric"><b>0</b><span>Browser console errors</span></div></section>
 <h2>Exact field inventory</h2><p class="subhead">This is the future-facing answer to “should this field use tldraw?”: use stock mechanics for an ordinary single-line shell field; preserve a specialized primitive when it owns another transaction.</p><div class="matrix"><table><thead><tr><th>Surface</th><th>Current path</th><th>Interaction contract</th><th>Proof</th></tr></thead><tbody>{surface_rows()}</tbody></table></div>
 <h2>Implemented seams</h2><p class="subhead">The cards below are reviewable independently. Checkboxes and notes persist locally in this browser; Copy review exports your choices as Markdown.</p>{cards}
 <div class="actions"><span class="copy-state" aria-live="polite"></span><button id="reset" type="button">Reset review</button><button id="copy" class="primary" type="button">Copy review</button></div>

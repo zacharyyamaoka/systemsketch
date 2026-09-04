@@ -1,6 +1,6 @@
 {
   "date": "2026-09-03",
-  "baseCommit": "954f519cc075ed010eed7f13532cd50426af692a",
+  "baseCommit": "f91c14e73d9f257bbc4ea4712f9692a7620980c5",
   "branch": "track/chrome-stock-inputs",
   "applicationChanges": [
     "src/chrome/SystemSketchUiInput.tsx",
@@ -25,10 +25,10 @@
     "inlineDocumentRename": "6/6",
     "workspaceBrowser": "12/12",
     "workspaceFollowup": "9/9",
-    "workspaceSafety": "9/9",
+    "workspaceSafety": "6/6",
     "fileType": "13/13",
     "tldrawExport": "11/11",
-    "total": "60/60"
+    "total": "57/57"
   },
-  "fullCheck": "107 Vitest files / 981 tests plus 94 Python tests"
+  "fullCheck": "114 Vitest files / 1,130 tests plus 109 Python tests"
 }
