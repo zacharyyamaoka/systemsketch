@@ -435,9 +435,13 @@ function frozenElbowPolyline(
 ): Point[] | null {
 	if (connection.props.routing !== 'elbow') return null
 	const route = getConnectionElbowRoute(editor, connection)
+	// WHY: an automatic router can temporarily draw several orthogonal rails
+	// around nearby geometry, but that is still a normal elbow as far as the
+	// user is concerned. Preserve the editable stock Arrow in that case. A Line
+	// is reserved for route data the user actually authored—explicit corners or
+	// pins—which a one-midpoint stock Arrow cannot store faithfully.
 	const mustFreeze = connection.props.elbowRoute !== null
 		|| connection.props.pins.length > 0
-		|| route.points.length > 3
 	if (!mustFreeze || route.points.length < 2) return null
 	const transform = editor.getShapePageTransform(connection)
 	return route.points.map((point) => pointInPrimitiveParentSpace(editor, parentId, transform.applyToPoint(point)))

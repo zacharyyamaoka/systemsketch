@@ -1,0 +1,79 @@
+{
+  "valid": {
+    "mounted": true,
+    "error": null,
+    "text": [
+      {
+        "id": "shape:probe-11",
+        "size": "s",
+        "scale": 0.6111111111111112,
+        "font": "sans"
+      },
+      {
+        "id": "shape:probe-17",
+        "size": "s",
+        "scale": 0.9444444444444444,
+        "font": "serif"
+      },
+      {
+        "id": "shape:probe-29",
+        "size": "m",
+        "scale": 1.2083333333333333,
+        "font": "mono"
+      }
+    ],
+    "colors": [
+      {
+        "id": "shape:probe-red",
+        "color": "red",
+        "fill": "semi"
+      },
+      {
+        "id": "shape:probe-blue",
+        "color": "blue",
+        "fill": "solid"
+      },
+      {
+        "id": "shape:probe-violet",
+        "color": "violet",
+        "fill": "semi"
+      }
+    ],
+    "richText": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Stock rich text: bold",
+              "marks": [
+                {
+                  "type": "bold"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "cssProps": {}
+  },
+  "hex": {
+    "mounted": false,
+    "error": "Stock tldraw rejected the document: invalidRecords"
+  },
+  "css": {
+    "mounted": false,
+    "error": "Stock tldraw rejected the document: invalidRecords"
+  },
+  "cssVisualScore": null,
+  "checks": {
+    "namedStockPaletteRenders": true,
+    "arbitraryScaleBasedTextSizesRender": true,
+    "richTextMarkRenders": true,
+    "arbitraryHexColourIsRejected": true,
+    "arbitraryCssTextPropertiesAreRejected": true
+  }
+}

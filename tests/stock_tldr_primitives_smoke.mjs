@@ -235,6 +235,11 @@ async function main() {
 			&& shape.meta?.systemSketch?.routing === 'curved')
 		const elbowArrow = shapes.find((shape) => shape.type === 'arrow'
 			&& shape.meta?.systemSketch?.routing === 'elbow')
+		const normalElbows = shapes.filter((shape) => shape.type === 'arrow'
+			&& shape.meta?.systemSketch?.routing === 'elbow')
+		const frozenLineFor = (arrowId) => shapes.some((shape) => shape.type === 'line'
+			&& shape.meta?.systemSketch?.kind === 'connection-polyline'
+			&& shape.meta.systemSketch.ownerArrowId === arrowId)
       const nestedArrow = shapes.find((shape) => shape.type === 'arrow'
         && shape.meta?.systemSketch?.delayValue === 'nested')
       const nestedEdgeGroup = nestedArrow && editor.getShape(nestedArrow.parentId)
@@ -256,7 +261,22 @@ async function main() {
 			branchTitle: textWith('Loop / branch')?.props.size === 's' && textWith('Loop / branch')?.props.scale === 1,
 			activeLabel: textWith('active')?.props.size === 's' && Math.abs((textWith('active')?.props.scale ?? 0) - 11 / 18) < 0.0001,
 		},
-		arrowKinds: { curved: curvedArrow?.props.kind, curvedBend: curvedArrow?.props.bend, elbow: elbowArrow?.props.kind },
+		arrowKinds: {
+			curved: curvedArrow?.props.kind,
+			curvedBend: curvedArrow?.props.bend,
+			elbow: elbowArrow?.props.kind,
+			// WHY: an ordinary elbow keeps stock tldraw's live Arrow behaviour.
+			// Only a stored multi-corner route may freeze to a Line, because one
+			// Arrow elbow midpoint cannot encode those authored turns.
+			normalElbowsStayVisibleArrows: normalElbows.length >= 2
+				&& normalElbows.every((arrow) => arrow.props.kind === 'elbow'
+					&& arrow.opacity !== 0 && !frozenLineFor(arrow.id)),
+			normalElbowStates: normalElbows.map((arrow) => ({
+				kind: arrow.props.kind,
+				opacity: arrow.opacity,
+				hasFrozenLine: frozenLineFor(arrow.id),
+			})),
+		},
         delayPillGroups: shapes.filter((shape) => shape.type === 'group' && shape.meta?.systemSketch?.kind === 'connection-delay-pill').length,
         delayPillText: shapes.filter((shape) => shape.type === 'text').some((shape) => JSON.stringify(shape.props.richText).includes('z⁻¹ = 11')),
         directArrow: shapes.find((shape) => shape.type === 'arrow' && shape.meta?.systemSketch?.delayValue === 'direct')?.props.dash,
@@ -289,6 +309,7 @@ async function main() {
 		assert.equal(result.arrowKinds.curved, 'arc')
 		assert.notEqual(result.arrowKinds.curvedBend, 0)
 		assert.equal(result.arrowKinds.elbow, 'elbow')
+		assert.equal(result.arrowKinds.normalElbowsStayVisibleArrows, true, JSON.stringify(result.arrowKinds))
     assert.equal(result.delayPillGroups, 3)
     assert.equal(result.delayPillText, true)
     assert.equal(result.directArrow, 'dotted')

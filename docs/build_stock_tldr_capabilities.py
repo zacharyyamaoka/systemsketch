@@ -1,19 +1,36 @@
 """Build a self-contained, test-backed stock-tldr capability report."""
 from __future__ import annotations
 
+import base64
+import json
 from pathlib import Path
 
 
 HERE = Path(__file__).resolve().parent
 OUTPUT = HERE / "stock-tldr-capabilities-2026-09-03.html"
+ASSETS = HERE / "assets"
+RICHNESS_PROOF = ASSETS / "stock-tldr-richness-acceptance.json"
+RICHNESS_SCREENSHOT = ASSETS / "stock-tldr-richness-probe.png"
+
+
+def image_uri(path: Path) -> str:
+    return "data:image/png;base64," + base64.b64encode(path.read_bytes()).decode("ascii")
 
 
 def main() -> None:
-    OUTPUT.write_text("""<!doctype html>
+    richness_proof = json.loads(RICHNESS_PROOF.read_text(encoding="utf-8"))
+    if not all(richness_proof["checks"].values()):
+        raise SystemExit(f"cannot publish failing richness proof: {richness_proof['checks']}")
+    richness = f"""
+<h2>What the bare renderer actually accepted</h2>
+<div class="grid"><section class="card yes"><span class="chip">RENDERED</span><h3>Named palette + real numeric scale</h3><p>The default viewer accepted stock <code>red</code>, <code>blue</code>, and <code>violet</code> geo styles, plus three non-preset effective text sizes: 11px (<code>s × 11/18</code>), 17px (<code>s × 17/18</code>), and 29px (<code>m × 29/24</code>). It also retained the ordinary rich-text <code>bold</code> mark.</p></section><section class="card limit"><span class="chip no">REJECTED</span><h3>Arbitrary CSS-like values</h3><p>Changing a stock colour to <code>#d14e74</code> made default <code>createTLSchema</code> reject the file as <code>invalidRecords</code>. A second probe adding <code>fontFamily</code>, <code>fontSize</code>, <code>letterSpacing</code>, and <code>lineHeight</code> was rejected the same way. These are not silently painted by the stock viewer.</p></section></div>
+<figure class="probe"><img alt="Named stock colours and non-preset scaled text rendered by the bare stock tldraw viewer" src="{image_uri(RICHNESS_SCREENSHOT)}"><figcaption>Actual bare viewer capture: stock colours, fills, font families, rich-text bold, and numeric text scale are all native record properties.</figcaption></figure>
+"""
+    source = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>What stock tldraw can represent · SystemSketch</title>
 <style>
-:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#152033;background:#f4f7fb;color-scheme:light}*{box-sizing:border-box}body{margin:0}main{max-width:1180px;margin:auto;padding:46px 28px 72px}.eyebrow{font-size:12px;font-weight:800;color:#3869d8;letter-spacing:.09em;text-transform:uppercase}h1{font-size:clamp(34px,6vw,62px);line-height:.96;letter-spacing:-.052em;margin:10px 0 16px}h2{margin:42px 0 12px;letter-spacing:-.025em}p,li{line-height:1.58}.lede{max-width:850px;font-size:18px;color:#536275}.callout{border-left:4px solid #316ae8;background:#eaf0ff;padding:16px 18px;border-radius:8px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:#fff;border:1px solid #dce4ef;border-radius:15px;padding:20px}.yes{border-top:4px solid #20a06d}.limit{border-top:4px solid #d98125}.chip{display:inline-block;padding:4px 8px;border-radius:999px;background:#ecf8f1;color:#16704b;font:700 11px ui-monospace,monospace}.no{background:#fff4e9;color:#a85712}table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid #dce4ef;border-radius:14px;overflow:hidden}th,td{padding:14px 16px;text-align:left;vertical-align:top;border-bottom:1px solid #e7edf5}tr:last-child>*{border-bottom:0}thead{background:#f0f4fa}code{font:600 .92em ui-monospace,SFMono-Regular,Menlo,monospace}.diagram{display:block;width:100%;height:auto;margin:14px 0;border-radius:12px;background:#111a2c}.small{color:#617187;font-size:14px}.links a{margin-right:16px}@media(max-width:720px){main{padding:30px 16px}.grid{grid-template-columns:1fr}table{font-size:13px}th,td{padding:10px}}
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#152033;background:#f4f7fb;color-scheme:light}*{box-sizing:border-box}body{margin:0}main{max-width:1180px;margin:auto;padding:46px 28px 72px}.eyebrow{font-size:12px;font-weight:800;color:#3869d8;letter-spacing:.09em;text-transform:uppercase}h1{font-size:clamp(34px,6vw,62px);line-height:.96;letter-spacing:-.052em;margin:10px 0 16px}h2{margin:42px 0 12px;letter-spacing:-.025em}p,li{line-height:1.58}.lede{max-width:850px;font-size:18px;color:#536275}.callout{border-left:4px solid #316ae8;background:#eaf0ff;padding:16px 18px;border-radius:8px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:#fff;border:1px solid #dce4ef;border-radius:15px;padding:20px}.yes{border-top:4px solid #20a06d}.limit{border-top:4px solid #d98125}.chip{display:inline-block;padding:4px 8px;border-radius:999px;background:#ecf8f1;color:#16704b;font:700 11px ui-monospace,monospace}.no{background:#fff4e9;color:#a85712}table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid #dce4ef;border-radius:14px;overflow:hidden}th,td{padding:14px 16px;text-align:left;vertical-align:top;border-bottom:1px solid #e7edf5}tr:last-child>*{border-bottom:0}thead{background:#f0f4fa}code{font:600 .92em ui-monospace,SFMono-Regular,Menlo,monospace}.diagram{display:block;width:100%;height:auto;margin:14px 0;border-radius:12px;background:#111a2c}.probe{margin:16px 0;border:1px solid #dce4ef;border-radius:14px;overflow:hidden;background:#fff}.probe img{display:block;width:100%;max-height:620px;object-fit:contain;background:#fff}.probe figcaption{padding:11px 15px;color:#536275;font-size:14px}.small{color:#617187;font-size:14px}.links a{margin-right:16px}@media(max-width:720px){main{padding:30px 16px}.grid{grid-template-columns:1fr}table{font-size:13px}th,td{padding:10px}}
 </style></head><body><main>
 <div class="eyebrow">SystemSketch · stock portability audit · 3 September 2026</div>
 <h1>“Stock only” is not “only four font sizes.”</h1>
@@ -30,6 +47,8 @@ def main() -> None:
 <section class="card yes"><span class="chip">SUPPORTED</span><h3>Port and target geometry</h3><p>Stock <code>geo: 'ellipse'</code> represents the 18px port rim, a 12px wired core, and the active target’s 11px blue disk plus 3.6px raised-surface disk. Branch and Loop lower to a stock Group plus a stock rectangle, so every header-edge dot is an ordinary grouped child—there is no Frame clipping wall.</p></section>
 </div>
 
+%%STOCK_RICHNESS%%
+
 <h2>Real limits of a plain stock file</h2>
 <table><thead><tr><th>Authored feature</th><th>Why it cannot be literal in bare stock tldraw</th><th>Detach treatment</th></tr></thead><tbody>
 <tr><th>Exact Inter / JetBrains Mono face, CSS 500/600, tracking and line-height</th><td>A bare stock text record chooses a named stock font family and rich-text marks; it has no per-record arbitrary CSS family, numeric weight, letter-spacing, or line-height property.</td><td>Use stock sans/mono, actual effective font sizes, and bold where it carries meaning. The remaining glyph/spacing residual is visible in the heat maps rather than hidden behind custom paint.</td></tr>
@@ -44,7 +63,8 @@ def main() -> None:
 <p>The composite comparison uses the same camera before and after a real right-click command. The stress gallery expands that to 50 cases: ten each for Block views, Branch states, Loop states, multi-elbows, and nesting. It publishes every before/after/difference heat map and does not call the result pixel-identical. The requested <code>/llm-judge</code> command is not installed in this repository or this session; bare stock rendering plus the visual measurements are the available evidence.</p>
 <p class="links"><a href="detach-composite-fidelity-2026-09-03.html">Open composite heat-map gallery</a><a href="detach-primitives-stress-2026-09-03.html">Open 50-case stock-viewer gallery</a><a href="../tests/detach_primitives_stress_smoke.mjs">Open bare-stock proof</a><a href="../node_modules/@tldraw/tlschema/src/shapes/TLLineShape.ts">Line schema</a><a href="../node_modules/@tldraw/tlschema/src/shapes/TLArrowShape.ts">Arrow schema</a></p>
 <p class="small">Built by <code>docs/build_stock_tldr_capabilities.py</code>. Sources checked: pinned tldraw text and arrow schemas, stock size constants, and the real-browser proof above.</p>
-</main></body></html>""", encoding="utf-8")
+</main></body></html>"""
+    OUTPUT.write_text(source.replace("%%STOCK_RICHNESS%%", richness), encoding="utf-8")
     print(OUTPUT)
 
 
