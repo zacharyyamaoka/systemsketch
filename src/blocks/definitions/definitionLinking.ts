@@ -28,6 +28,7 @@ interface SharedDefinitionProps {
 	outputs: BlockShapeProps['outputs']
 	expandedWeights: BlockShapeProps['expandedWeights']
 	expandedSize: BlockShapeProps['views']['expanded']
+	stockConfig: BlockShapeProps['stockConfig']
 }
 
 function freshId(): string {
@@ -89,6 +90,7 @@ function sharedDefinitionProps(props: BlockShapeProps): SharedDefinitionProps {
 		outputs: props.outputs,
 		expandedWeights: props.expandedWeights,
 		expandedSize: props.views.expanded,
+		stockConfig: props.stockConfig,
 	}
 }
 
@@ -107,6 +109,7 @@ function applySharedDefinitionProps(target: BlockShapeProps, source: BlockShapeP
 		inputs: source.inputs.map((port) => ({ ...port })),
 		outputs: source.outputs.map((port) => ({ ...port })),
 		expandedWeights: source.expandedWeights ? { ...source.expandedWeights } : undefined,
+		stockConfig: source.stockConfig ? { ...source.stockConfig } : undefined,
 		views: { ...target.views, expanded },
 		...(target.view === 'expanded' ? { w: expanded.w, h: expanded.h } : {}),
 		definitionId: source.definitionId,

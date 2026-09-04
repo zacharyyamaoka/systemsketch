@@ -13,6 +13,9 @@ export const SELECT_BLOCK_TYPE = 'select'
 export const CLOCK_TRIGGER_BLOCK_TYPE = 'clock-trigger'
 
 export type StockBlockPresetId = 'set-attributes' | 'select' | 'clock-trigger'
+export type ClockTriggerSource = 'clock' | 'external' | 'manual'
+
+export const DEFAULT_CLOCK_RATE_HZ = 10
 
 export function isSetAttributesBlock(props: Pick<BlockShapeProps, 'blockType'>): boolean {
 	return props.blockType.trim().toLowerCase() === SET_ATTRIBUTES_BLOCK_TYPE
@@ -77,21 +80,57 @@ export function createSelectProps(base = getDefaultBlockProps()): BlockShapeProp
 /**
  * A visible source declaration, rather than an untruthful embedded scheduler.
  *
- * The author can state intent (rate and source) now. An execution adapter must
- * change `runtimeAdapter` in a future supported contract before this Block can
- * mean that ticks are actually being emitted.
+ * The author can state source/rate intent now; this prototype does not schedule.
  */
 export function createClockTriggerProps(base = getDefaultBlockProps()): BlockShapeProps {
 	return withPortView({
 		...base,
 		title: 'Clock',
-		description: '10 Hz authoring source · runtime adapter unavailable.',
+		description: 'Clock declaration · does not schedule.',
 		blockType: CLOCK_TRIGGER_BLOCK_TYPE,
 		icon: 'Timer',
 		inputs: [],
 		outputs: [{ id: 'trigger', name: 'trigger', type: 'Trigger', visible: true, row: HEADER_ROW }],
-		stockConfig: { triggerSource: 'clock', rateHz: 10, runtimeAdapter: 'unavailable' },
+		stockConfig: { triggerSource: 'clock', rateHz: DEFAULT_CLOCK_RATE_HZ },
 	})
+}
+
+/** The one normalization boundary for a persisted Clock/Trigger declaration. */
+export function normalizeClockTriggerConfig(config: BlockShapeProps['stockConfig']): NonNullable<BlockShapeProps['stockConfig']> {
+	const source: ClockTriggerSource = config?.triggerSource === 'external' || config?.triggerSource === 'manual'
+		? config.triggerSource
+		: 'clock'
+	const rateHz = config?.rateHz
+	const validRate = typeof rateHz === 'number' && Number.isFinite(rateHz) && rateHz > 0
+	return source === 'clock'
+		? { triggerSource: source, rateHz: validRate ? rateHz : DEFAULT_CLOCK_RATE_HZ }
+		: { triggerSource: source }
+}
+
+/** The visible declaration is derived at read time so stale saved prose cannot lie. */
+export function clockTriggerLabel(config: BlockShapeProps['stockConfig']): string {
+	const normalized = normalizeClockTriggerConfig(config)
+	if (normalized.triggerSource === 'external') return 'External trigger'
+	if (normalized.triggerSource === 'manual') return 'Manual trigger'
+	return `Clock · ${normalized.rateHz} Hz`
+}
+
+/**
+ * WHY: a Clock's editable generic description is not its semantic label.
+ * Read configuration here instead of rewriting prose on every edit, so a
+ * whiteboard annotation remains hackable while reopening never paints stale Hz.
+ */
+export function stockBlockVisibleDescription(props: BlockShapeProps): string {
+	return isClockTriggerBlock(props)
+		? `${clockTriggerLabel(props.stockConfig)} · prototype declares intent; does not schedule.`
+		: props.description
+}
+
+/** Normalize only the curated contract; ordinary Blocks remain fully literal. */
+export function normalizeStockBlockProps(props: BlockShapeProps): BlockShapeProps {
+	if (!isClockTriggerBlock(props)) return props
+	const stockConfig = normalizeClockTriggerConfig(props.stockConfig)
+	return JSON.stringify(stockConfig) === JSON.stringify(props.stockConfig) ? props : { ...props, stockConfig }
 }
 
 export function stockBlockPresetProps(
@@ -148,14 +187,5 @@ export function appendSetAttributesMemberProps(props: BlockShapeProps): BlockSha
  */
 export function stockBlockSourceProjection(props: BlockShapeProps): string | null {
 	if (isSelectBlock(props)) return 'true_value if condition else false_value'
-	if (isSetAttributesBlock(props)) {
-		const members = setAttributesMemberPorts(props)
-		const updates = members.map((port) => `${port.name.trim().replace(/^\./, '') || 'field'}=…`).join(', ')
-		// WHY: Zach calls this primitive a batched `setattr`, while the still-open
-		// value-vs-reference decision must not be silently answered by spelling it
-		// as `dataclasses.replace`. Keep the preview faithful to the authored node
-		// vocabulary until a source adapter can choose concrete Python semantics.
-		return `setattr(record, ${updates || 'field=…'})`
-	}
 	return null
 }

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import { getDefaultBlockProps } from '../blockModel'
 import { createValueBlockProps } from '../valueBlock'
-import { createClockTriggerProps, createSetAttributesProps } from '../stockBlocks'
+import { createClockTriggerProps, createSelectProps, createSetAttributesProps } from '../stockBlocks'
 import { BlockInspectorContent, type BlockInspectorActions } from './BlockInspector'
 import { BlockSelectionMiniMenu } from './BlockSelectionMiniMenu'
 
@@ -15,13 +15,19 @@ describe('Block inspector content', () => {
 		expect(setAttributes).toContain('data-inspector-section="Set attributes"')
 		expect(setAttributes).toContain('data-testid="set-attributes-add-member"')
 		expect(setAttributes).toContain('preserve every member not listed')
+		expect(setAttributes).toContain('Source update semantics unresolved')
+
+		const select = renderToStaticMarkup(
+			<BlockInspectorContent props={createSelectProps()} status="selected" actions={noopActions} />,
+		)
+		expect(select).toContain('true_value if condition else false_value')
 
 		const clock = renderToStaticMarkup(
 			<BlockInspectorContent props={createClockTriggerProps()} status="selected" actions={noopActions} />,
 		)
 		expect(clock).toContain('data-inspector-section="Clock trigger"')
 		expect(clock).toContain('aria-label="Clock trigger rate in hertz"')
-		expect(clock).toContain('Runtime adapter unavailable')
+		expect(clock).toContain('Clock · 10 Hz. This prototype declares intent and does not schedule.')
 	})
 
   it('renders the donor information architecture without the old selected header or Connections tab', () => {

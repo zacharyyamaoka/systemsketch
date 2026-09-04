@@ -55,7 +55,7 @@ describe('block picker presets', () => {
 			blockType: 'select', inputs: expect.arrayContaining([expect.objectContaining({ id: 'condition', type: 'bool' })]),
 		})
 		expect(blockPresetProps(clock, getDefaultBlockProps())).toMatchObject({
-			blockType: 'clock-trigger', stockConfig: { runtimeAdapter: 'unavailable' },
+			blockType: 'clock-trigger', stockConfig: { triggerSource: 'clock', rateHz: 10 },
 		})
 		expect(blockPickerPresetsFor(true).map((preset) => preset.id)).toContain('clock-trigger')
 	})

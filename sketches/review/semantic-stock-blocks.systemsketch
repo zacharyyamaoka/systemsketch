@@ -42,7 +42,7 @@
       "com.tldraw.shape.arrow": 8,
       "com.tldraw.shape.text": 4,
       "com.tldraw.shape.line": 5,
-      "com.tldraw.shape.block": 6,
+      "com.tldraw.shape.block": 7,
       "com.tldraw.shape.branch": 0,
       "com.tldraw.shape.loop": 0,
       "com.tldraw.shape.branch-arm": 0,
@@ -57,7 +57,7 @@
   "records": [
     {
       "x": 490,
-      "y": 730,
+      "y": 745,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -79,7 +79,7 @@
         },
         "end": {
           "x": 80,
-          "y": 65
+          "y": 50
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -96,7 +96,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5sacV",
+      "index": "a5t8zG",
       "typeName": "shape"
     },
     {
@@ -109,7 +109,7 @@
     },
     {
       "x": 1300,
-      "y": 230,
+      "y": 260,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -131,7 +131,7 @@
         },
         "end": {
           "x": 70,
-          "y": 240
+          "y": 210
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -148,7 +148,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a6uecG",
+      "index": "a6x5jV",
       "typeName": "shape"
     },
     {
@@ -193,7 +193,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4AEj",
+      "index": "a4d7E",
       "typeName": "shape"
     },
     {
@@ -230,7 +230,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · all three are ordinary Blocks: record data returns normally, Select has no execution pins, and Clock declares intent without claiming it runs."
+                  "text": "PASS WHEN · all three are ordinary Blocks: Set update semantics stay unresolved, Select shows a value conditional, and Clock declares intent without scheduling."
                 }
               ]
             }
@@ -238,7 +238,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a7tgQ",
+      "index": "a7UzBV",
       "typeName": "shape"
     },
     {
@@ -252,10 +252,10 @@
       "type": "geo",
       "props": {
         "w": 420,
-        "h": 120,
+        "h": 150,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 2,
+        "growY": 0,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -283,21 +283,21 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5Laj",
+      "index": "a5T2U",
       "typeName": "shape"
     },
     {
       "name": "",
-      "color": "#11B3A3",
+      "color": "#E34BA9",
       "imageUrl": "",
       "meta": {},
-      "id": "user:uLLjBMvActke1RLPN7l7c",
+      "id": "user:Ge0X4Ea_XL7b191yspghV",
       "typeName": "user"
     },
     {
-      "x": 0,
-      "y": 0,
-      "z": 1,
+      "x": -6.956521739130437,
+      "y": -18.47282608695653,
+      "z": 1.0151724137931035,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -313,7 +313,7 @@
       "type": "geo",
       "props": {
         "w": 440,
-        "h": 120,
+        "h": 150,
         "geo": "rectangle",
         "dash": "draw",
         "growY": 2,
@@ -336,7 +336,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "3 · Select Clock. In the inspector change source or rate; Runtime adapter unavailable must remain explicit."
+                  "text": "3 · Select Clock. Change source or rate; its label must follow Clock 10 Hz, External trigger, or Manual trigger. It does not schedule."
                 }
               ]
             }
@@ -344,7 +344,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6fqA",
+      "index": "a6bVj",
       "typeName": "shape"
     },
     {
@@ -404,9 +404,7 @@
     {
       "editingShapeId": null,
       "croppingShapeId": null,
-      "selectedShapeIds": [
-        "shape:set-attributes"
-      ],
+      "selectedShapeIds": [],
       "hoveredShapeId": null,
       "erasingShapeIds": [],
       "hintingShapeIds": [],
@@ -433,14 +431,6 @@
         "terminal": "start"
       },
       "typeName": "binding"
-    },
-    {
-      "name": "",
-      "color": "#BD54C6",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:MsX2DTOll3zhqSxyAaA37",
-      "typeName": "user"
     },
     {
       "meta": {},
@@ -517,7 +507,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "YfLOK6ndpAWQuoediQYiw",
+        "definitionId": "h-poM9zlOTifi3AmSe_Cz",
         "inputs": [
           {
             "id": "condition",
@@ -553,7 +543,7 @@
         "definitionKey": "Select"
       },
       "parentId": "page:page",
-      "index": "a2yZU",
+      "index": "a2y16",
       "typeName": "shape"
     },
     {
@@ -569,7 +559,7 @@
         "w": 340,
         "h": 198,
         "title": "Clock",
-        "description": "10 Hz authoring source · runtime adapter unavailable.",
+        "description": "Clock declaration · does not schedule.",
         "blockType": "clock-trigger",
         "icon": "Timer",
         "view": "port",
@@ -595,7 +585,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "EpPfMZUIp6u83eTXHO6PW",
+        "definitionId": "9JGMQBCwSpKLLrp33v7Jl",
         "inputs": [],
         "outputs": [
           {
@@ -608,13 +598,12 @@
         ],
         "stockConfig": {
           "triggerSource": "clock",
-          "rateHz": 10,
-          "runtimeAdapter": "unavailable"
+          "rateHz": 10
         },
         "definitionKey": "Clock"
       },
       "parentId": "page:page",
-      "index": "a3HEQ",
+      "index": "a3L9f",
       "typeName": "shape"
     },
     {
@@ -634,7 +623,10 @@
     {
       "followingUserId": null,
       "opacityForNextShape": 1,
-      "stylesForNextShape": {},
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
       "brush": null,
       "scribbles": [],
       "cursor": {
@@ -648,8 +640,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1280,
-        "h": 720
+        "w": 1600,
+        "h": 1000
       },
       "insets": [
         false,
@@ -716,7 +708,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "eycC0h8xzSh1FZ5A9sU6T",
+        "definitionId": "OVASHRxQ6ASS8e2S0d2jA",
         "inputs": [
           {
             "id": "record",
@@ -752,7 +744,7 @@
         "definitionKey": "Set_attributes"
       },
       "parentId": "page:page",
-      "index": "a19ur",
+      "index": "a1OVX",
       "typeName": "shape"
     },
     {
@@ -796,7 +788,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a4yHzV",
+      "index": "a4xjaG",
       "typeName": "shape"
     }
   ]

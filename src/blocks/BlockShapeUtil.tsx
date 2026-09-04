@@ -20,6 +20,7 @@ import {
 	type BlockShape,
 } from './blockModel'
 import { blockShapeMigrations } from './blockShapeMigrations'
+import { normalizeStockBlockProps, stockBlockVisibleDescription } from './stockBlocks'
 import {
 	createValueBlockProps,
 	isBlankBlockProps,
@@ -136,7 +137,7 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 					fontFamily="ui-sans-serif, system-ui"
 					fontSize={layout.view === 'simple' ? 18 : 11}
 				>
-					{shape.props.description}
+					{stockBlockVisibleDescription(shape.props)}
 				</text>
 			) : null}
 
@@ -213,9 +214,10 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 				kind: 'portName', side: 'outputs', portId: 'out_1',
 			})
 		}
-		const props = drawnAsPill
+		const valueProps = drawnAsPill
 			? createValueBlockProps(next.props)
 			: normalizeValueBlockProps(next.props)
+		const props = normalizeStockBlockProps(valueProps)
 		return props === next.props ? undefined : { ...next, props }
 	}
 
@@ -229,6 +231,8 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	}
 
 	override onBeforeUpdate(previous: BlockShape, next: BlockShape): BlockShape | void {
+		const normalizedStock = normalizeStockBlockProps(next.props)
+		if (normalizedStock !== next.props) return { ...next, props: normalizedStock }
 		if (next.props.view === 'value') {
 			const props = normalizeValueBlockProps(next.props, previous.props)
 			return props === next.props ? undefined : { ...next, props }

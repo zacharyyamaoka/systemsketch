@@ -3,11 +3,14 @@ import { describe, expect, it } from 'vitest'
 import { getDefaultBlockProps } from './blockModel'
 import {
 	appendSetAttributesMemberProps,
+	clockTriggerLabel,
 	createClockTriggerProps,
 	createSelectProps,
 	createSetAttributesProps,
+	normalizeClockTriggerConfig,
 	setAttributesMemberPorts,
 	stockBlockSourceProjection,
+	stockBlockVisibleDescription,
 } from './stockBlocks'
 
 describe('stock semantic Blocks', () => {
@@ -32,7 +35,7 @@ describe('stock semantic Blocks', () => {
 			['member_1', '.quota'],
 			['member_2', '.field'],
 		])
-		expect(stockBlockSourceProjection(twice)).toBe('setattr(record, quota=…, field=…)')
+		expect(stockBlockSourceProjection(twice)).toBeNull()
 	})
 
 	it('creates a true value Select rather than a Branch', () => {
@@ -51,11 +54,26 @@ describe('stock semantic Blocks', () => {
 	it('persists Clock intent but never turns it into an implied runtime', () => {
 		const props = createClockTriggerProps()
 		expect(props.outputs).toEqual([expect.objectContaining({ id: 'trigger', type: 'Trigger' })])
-		expect(props.stockConfig).toEqual({ triggerSource: 'clock', rateHz: 10, runtimeAdapter: 'unavailable' })
+		expect(props.stockConfig).toEqual({ triggerSource: 'clock', rateHz: 10 })
 		expect(stockBlockSourceProjection(props)).toBeNull()
 		// Its configuration is data in ordinary Block props, so document JSON
 		// carries it without a side channel or a scheduler record.
 		const restored = JSON.parse(JSON.stringify({ ...getDefaultBlockProps(), ...props }))
 		expect(restored.stockConfig).toEqual(props.stockConfig)
+	})
+
+	it('normalizes every non-positive or non-finite clock rate before it can be read as a clock', () => {
+		for (const rateHz of [0, -1, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+			expect(normalizeClockTriggerConfig({ triggerSource: 'clock', rateHz })).toEqual({ triggerSource: 'clock', rateHz: 10 })
+		}
+		expect(normalizeClockTriggerConfig({ triggerSource: 'clock', rateHz: 2.5 })).toEqual({ triggerSource: 'clock', rateHz: 2.5 })
+	})
+
+	it('derives the only Clock/Trigger canvas label from normalized configuration', () => {
+		expect(clockTriggerLabel({ triggerSource: 'clock', rateHz: 24 })).toBe('Clock · 24 Hz')
+		expect(clockTriggerLabel({ triggerSource: 'external', rateHz: 24 })).toBe('External trigger')
+		expect(clockTriggerLabel({ triggerSource: 'manual', rateHz: 24 })).toBe('Manual trigger')
+		expect(stockBlockVisibleDescription({ ...createClockTriggerProps(), description: '10 Hz authoring source', stockConfig: { triggerSource: 'clock', rateHz: -3 } }))
+			.toContain('Clock · 10 Hz')
 	})
 })

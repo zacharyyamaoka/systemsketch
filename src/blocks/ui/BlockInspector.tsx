@@ -37,8 +37,12 @@ import { getBlockPortConnections, type BlockPortConnection } from '../connection
 import { valueBlockInlet, valueBlockName, valueBlockOutlet } from '../valueBlock'
 import {
 	appendSetAttributesMemberProps,
+	clockTriggerLabel,
 	isClockTriggerBlock,
+	isSelectBlock,
 	isSetAttributesBlock,
+	normalizeClockTriggerConfig,
+	stockBlockSourceProjection,
 } from '../stockBlocks'
 import {
   appendBlockPort,
@@ -465,6 +469,9 @@ function StockBlockSection({
 				<p className="block-inspector__hint">
 					The record inlet and outlet remain ordinary data. Add only members that this update writes; all unnamed members pass through unchanged.
 				</p>
+				<p className="block-inspector__hint" data-testid="set-attributes-source-status">
+					Source update semantics unresolved: direct mutation, immutable replacement, or an opaque helper.
+				</p>
 				<button
 					type="button"
 					className="block-inspector__tag-ghost"
@@ -478,9 +485,22 @@ function StockBlockSection({
 			</section>
 		)
 	}
+	if (isSelectBlock(props)) {
+		const source = stockBlockSourceProjection(props)
+		return (
+			<section className="block-inspector__section" data-inspector-section="Select source">
+				<div className="block-inspector__section-title">Select source notation</div>
+				<p className="block-inspector__hint" data-testid="select-source-notation">
+					<code>{source}</code>
+				</p>
+			</section>
+		)
+	}
 	if (!isClockTriggerBlock(props)) return null
-	const config = props.stockConfig ?? { triggerSource: 'clock' as const, rateHz: 10, runtimeAdapter: 'unavailable' as const }
-	const setConfig = (patch: Partial<typeof config>) => actions?.updateDetails({ stockConfig: { ...config, ...patch } })
+	const config = normalizeClockTriggerConfig(props.stockConfig)
+	const setConfig = (patch: Partial<typeof config>) => actions?.updateDetails({
+		stockConfig: normalizeClockTriggerConfig({ ...config, ...patch }),
+	})
 	return (
 		<section className="block-inspector__section" data-inspector-section="Clock trigger">
 			<div className="block-inspector__section-title">Clock / Trigger</div>
@@ -489,7 +509,7 @@ function StockBlockSection({
 				<select
 					aria-label="Clock trigger source"
 					disabled={!actions}
-					value={config.triggerSource ?? 'clock'}
+					value={config.triggerSource}
 					onChange={(event) => setConfig({ triggerSource: event.currentTarget.value as 'clock' | 'external' | 'manual' })}
 				>
 					<option value="clock">clock</option>
@@ -501,19 +521,19 @@ function StockBlockSection({
 				<span>Rate (Hz)</span>
 				<input
 					type="number"
-					min="0"
+					min="0.000001"
 					step="any"
 					aria-label="Clock trigger rate in hertz"
 					disabled={!actions || config.triggerSource !== 'clock'}
-					value={config.rateHz ?? 10}
+					value={config.rateHz ?? ''}
 					onChange={(event) => {
 						const rateHz = Number(event.currentTarget.value)
-						if (Number.isFinite(rateHz) && rateHz >= 0) setConfig({ rateHz })
+						if (Number.isFinite(rateHz) && rateHz > 0) setConfig({ rateHz })
 					}}
 				/>
 			</label>
 			<p className="block-inspector__hint" data-testid="clock-trigger-runtime-status">
-				Runtime adapter unavailable — this records authoring intent and does not start a scheduler.
+				{clockTriggerLabel(config)}. This prototype declares intent and does not schedule.
 			</p>
 		</section>
 	)
@@ -1434,6 +1454,11 @@ export function EditorBlockInspector({
   )
   const [localDraft, setLocalDraft] = useState<BlockShapeProps | null>(null)
   const draft = toolDraft ?? localDraft ?? (context.kind === 'tool' ? context.props : null)
+	const isReadonly = useValue(
+		'SystemSketch Block inspector read-only state',
+		() => editor.getIsReadonly(),
+		[editor],
+	)
 
   // What the selected pill is wired to, in words: read from the same cable
   // table the dots read, so the panel and the canvas cannot disagree.
@@ -1470,6 +1495,7 @@ export function EditorBlockInspector({
 
   const actions = useMemo<BlockInspectorActions | undefined>(() => {
     if (context.kind === 'selected') {
+			if (isReadonly) return undefined
       const id = context.shape.id
       // A continuous field writes on every keystroke, so it must not also stamp
       // a history mark per keystroke; `beginEdit` marks once for the gesture.
@@ -1515,7 +1541,7 @@ export function EditorBlockInspector({
       movePortToSection: (side, portId, target) =>
         changeDraft((props) => moveBlockPortToSectionProps(props, side, portId, target)),
     }
-  }, [context, editor, localDraft, onToolDraftChange, toolDraft])
+  }, [context, editor, isReadonly, localDraft, onToolDraftChange, toolDraft])
 
   if (context.kind === 'multi') {
     return (

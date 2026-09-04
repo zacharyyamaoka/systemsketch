@@ -73,6 +73,7 @@ import { getActiveDepthScopeId, toggleDepthScope } from '../../depth/depthNaviga
 import { branchFadeOpacity } from '../../branch/branchScope'
 import { countProducers, PortDot, usePortHintEligibility } from './PortDot'
 import { definitionBadge } from '../definitions/definitionLinking'
+import { stockBlockVisibleDescription } from '../stockBlocks'
 import {
   describeDiffCounts,
   diffGutterGlyph,
@@ -683,9 +684,9 @@ function SimpleFace({ shape }: { shape: BlockShape }) {
           className="BlockNode-simpleDescription"
           style={boxStyle(layout.description)}
           data-pb-inline-field={blockInlineFieldAttribute({ kind: 'description' })}
-          title={shape.props.description}
+          title={stockBlockVisibleDescription(shape.props)}
         >
-          <FieldValue diffs={shape.props.fieldDiffs} path="description" value={shape.props.description} />
+          <FieldValue diffs={shape.props.fieldDiffs} path="description" value={stockBlockVisibleDescription(shape.props)} />
         </div>
       ) : null}
       {layout.typeLabel ? (
@@ -1274,12 +1275,12 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
                 className="BlockNode-description"
                 style={boxStyle(layout.description)}
                 data-pb-inline-field={blockInlineFieldAttribute({ kind: 'description' })}
-                title={shape.props.description}
+                title={stockBlockVisibleDescription(shape.props)}
               >
                 <FieldValue
                   diffs={shape.props.fieldDiffs}
                   path="description"
-                  value={shape.props.description}
+                  value={stockBlockVisibleDescription(shape.props)}
                 />
               </div>
             ) : null}

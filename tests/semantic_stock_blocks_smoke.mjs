@@ -1,72 +1,44 @@
-/**
- * Curated semantic Blocks in the real Block development composition.
- *
- * The dev seam only arranges the three persisted props records. Every product
- * assertion is then read from painted DOM/inspector controls after actual
- * selection and clicks, including the Set attributes add-member command.
- */
-import {
-  clickAt,
-  delay,
-  evaluate,
-  localConsoleErrors,
-  openApp,
-  startApp,
-  waitFor,
-} from './browser_harness.mjs'
-import { box } from './block_journey_helpers.mjs'
+#!/usr/bin/env node
+/** Real-browser acceptance for the curated semantic Block presets. */
+import assert from 'node:assert/strict'
+
+import { clickAt, delay, evaluate, key, localConsoleErrors, openApp, shortcut, startApp, waitFor } from './browser_harness.mjs'
+import { box, dragFrom, portDot } from './block_journey_helpers.mjs'
 
 const results = []
-const check = (id, label, observed, desired) => {
-  const ok = JSON.stringify(observed) === JSON.stringify(desired)
-  results.push({ id, label, observed, desired, ok })
+const check = (id, label, actual, expected = true) => {
+  const ok = JSON.stringify(actual) === JSON.stringify(expected)
+  results.push({ id, label, actual, expected, ok })
   process.stdout.write(`  ${ok ? 'PASS' : 'FAIL'}  ${id}  ${label}\n`)
-  return ok
 }
 
-const views = (w, h) => ({
-  simple: { w: 320, h: 206 }, port: { w, h }, expanded: { w: 560, h: 380 }, value: { w: 168, h: 56 },
-})
-const port = (id, name, type, row) => ({ id, name, type, visible: true, row })
-
-async function seed(page) {
-  await evaluate(page, `(() => {
+async function canvasPoint(page, shapeId) {
+  return JSON.parse(await evaluate(page, `(() => {
     const editor = window.__systemsketch.editor
-    editor.deleteShapes([...editor.getCurrentPageShapeIds()])
-    const block = (id, x, y, title, blockType, inputs, outputs, stockConfig, description) => ({
-      id, type: 'block', x, y,
-      props: {
-        title, blockType, description, icon: '', view: 'port', w: 340, h: 250,
-        views: ${JSON.stringify(views(340, 250))}, showDescription: true,
-        portLayout: 'inline', state: 'normal', inputs, outputs, stockConfig,
-      },
-    })
-    editor.createShapes([
-      block('shape:set', 160, 170, 'Set attributes', 'set-attributes',
-        [${JSON.stringify(port('record', 'record', 'Record', 0))}, ${JSON.stringify(port('member_1', '.quota', 'int', 1))}],
-        [${JSON.stringify(port('record_out', 'record', 'Record', 0))}], undefined,
-        'Update named members; preserve every member not listed.'),
-      block('shape:select', 610, 170, 'Select', 'select',
-        [${JSON.stringify(port('condition', 'condition', 'bool', 0))}, ${JSON.stringify(port('true_value', 'true', 'str', 1))}, ${JSON.stringify(port('false_value', 'false', 'str', 2))}],
-        [${JSON.stringify(port('result', 'result', 'str', 1))}], undefined,
-        'Choose one value; this is not a Branch region.'),
-      // Keep this source clear of the inspector's right overlay so the proof
-      // selects it with a real canvas click rather than the development seam.
-      block('shape:clock', 920, 170, 'Clock', 'clock-trigger', [],
-        [${JSON.stringify(port('trigger', 'trigger', 'Trigger', 0))}],
-        { triggerSource: 'clock', rateHz: 10, runtimeAdapter: 'unavailable' },
-        '10 Hz authoring source · runtime adapter unavailable.'),
-    ])
-    editor.selectNone()
-    editor.setCamera({ x: 10, y: 40, z: 1 })
-  })()`)
-  await delay(350)
+    const bounds = editor.getShapePageBounds(${JSON.stringify(shapeId)})
+    return JSON.stringify(editor.pageToViewport({ x: bounds.x + bounds.w / 2, y: bounds.y + 26 }))
+  })()`))
 }
 
-async function clickBlock(page, id) {
-  const target = await box(page, `[data-shape-id="${id}"]`)
-  await clickAt(page, target.cx, target.y + 24)
-  await delay(260)
+async function selectBlock(page, id) {
+  const point = await canvasPoint(page, id)
+  await clickAt(page, point.x, point.y)
+  await delay(220)
+}
+
+async function pickPreset(page, sourceId, side, portId, preset, target) {
+  await dragFrom(page, await box(page, portDot(sourceId, side, portId)), target)
+  const selector = `[data-testid="block-picker-${preset}"]`
+  await waitFor(page, `document.querySelector(${JSON.stringify(selector)})`, `${preset} in actual picker`)
+  const entry = await box(page, selector)
+  await clickAt(page, entry.cx, entry.cy)
+  await delay(400)
+	await key(page, 'Escape', 'Escape')
+	await delay(160)
+  const id = await evaluate(page, `window.__systemsketch.editor.getCurrentPageShapes()
+    .filter((shape) => shape.type === 'block' && shape.props.blockType === ${JSON.stringify(preset)}).at(-1)?.id ?? null`)
+  assert.ok(id, `picker did not create ${preset}`)
+  return id
 }
 
 async function main() {
@@ -74,50 +46,102 @@ async function main() {
   try {
     const { page } = app
     await openApp(page, app.port, '?preset=block-dev')
-    await waitFor(page, `Boolean(window.__systemsketch?.editor)`, 'Block dev seam')
-    await seed(page)
+    await waitFor(page, 'Boolean(window.__systemsketch?.editor)', 'Block development canvas')
+    // This is only a producer. The three curated subjects are created through
+    // the rendered picker by real port drags, never raw seeded props.
+    await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const { definitionId: _definitionId, definitionKey: _definitionKey, ...base } = editor.getShapeUtil('block').getDefaultProps()
+      editor.createShapes([{ id: 'shape:producer', type: 'block', x: 80, y: 350, props: {
+        ...base, title: 'source()', blockType: 'source', view: 'port', w: 300, h: 198,
+        views: { ...base.views, port: { w: 300, h: 198 } },
+        outputs: [{ id: 'out_1', name: 'value', type: 'Record', visible: true, row: 0 }],
+      } }, { id: 'shape:consumer', type: 'block', x: 80, y: 620, props: {
+				...base, title: 'sink()', blockType: 'sink', view: 'port', w: 300, h: 198,
+				views: { ...base.views, port: { w: 300, h: 198 } },
+				inputs: [{ id: 'in_1', name: 'trigger', type: 'Trigger', visible: true, row: 0 }],
+      } }, { id: 'shape:producer-2', type: 'block', x: 80, y: 80, props: {
+        ...base, title: 'source_two()', blockType: 'source', view: 'port', w: 300, h: 198,
+        views: { ...base.views, port: { w: 300, h: 198 } },
+        outputs: [{ id: 'out_1', name: 'choice', type: 'Record', visible: true, row: 0 }],
+      } }])
+      editor.setCamera({ x: 0, y: 0, z: 1 })
+    })()`)
+    await waitFor(page, `window.__systemsketch.editor.getShape('shape:producer')`, 'producer Block record')
+    await waitFor(page, `document.querySelector(${JSON.stringify(portDot('shape:producer', 'output', 'out_1'))})`, 'producer output port')
 
-    await clickBlock(page, 'shape:set')
-    await waitFor(page, `document.querySelector('[data-testid="set-attributes-add-member"]')`, 'Set attributes inspector')
-    check('SET-1', 'Set attributes exposes ordinary Record in/out and its member update action',
-      await evaluate(page, `JSON.stringify({
-        inlet: window.__systemsketch.editor.getShape('shape:set').props.inputs[0],
-        outlet: window.__systemsketch.editor.getShape('shape:set').props.outputs[0],
-        action: Boolean(document.querySelector('[data-testid="set-attributes-add-member"]')),
-      })`),
-      JSON.stringify({
-        inlet: { id: 'record', name: 'record', type: 'Record', visible: true, row: 0 },
-        outlet: { id: 'record_out', name: 'record', type: 'Record', visible: true, row: 0 }, action: true,
-      }))
-    const add = await box(page, '[data-testid="set-attributes-add-member"]')
-    await clickAt(page, add.cx, add.cy)
-    await waitFor(page, `document.querySelector('[data-testid="inspector-port-inputs-member_2"]')`, 'stable member_2 row')
-    check('SET-2', 'the inspector adds a stable member id rather than a generic input slot',
-      await evaluate(page, `window.__systemsketch.editor.getShape('shape:set').props.inputs.at(-1).id`), 'member_2')
+    const setId = await pickPreset(page, 'shape:producer', 'output', 'out_1', 'set-attributes', { x: 500, y: 240 })
+    const selectId = await pickPreset(page, 'shape:producer-2', 'output', 'out_1', 'select', { x: 530, y: 530 })
+    const clockId = await pickPreset(page, 'shape:consumer', 'input', 'in_1', 'clock-trigger', { x: 950, y: 360 })
+    check('PICKER-1', 'the actual picker creates each curated preset',
+      await evaluate(page, `JSON.stringify([${JSON.stringify(setId)}, ${JSON.stringify(selectId)}, ${JSON.stringify(clockId)}]
+        .map((id) => window.__systemsketch.editor.getShape(id)?.props.blockType))`),
+      JSON.stringify(['set-attributes', 'select', 'clock-trigger']))
 
-    await clickBlock(page, 'shape:select')
-    check('SELECT-1', 'Select paints one bool control and two candidate values on an ordinary Block',
-      await evaluate(page, `JSON.stringify(window.__systemsketch.editor.getShape('shape:select').props.inputs.map((port) => [port.id, port.type]))`),
-      JSON.stringify([['condition', 'bool'], ['true_value', 'str'], ['false_value', 'str']]))
-    check('SELECT-2', 'Select has no Branch region or execution pin representation',
-      await evaluate(page, `document.querySelector('[data-shape-id="shape:select"]')?.dataset.shapeType === 'block'`), true)
+    await selectBlock(page, setId)
+    await waitFor(page, `document.querySelector('[data-testid="set-attributes-add-member"]')`, 'Set inspector')
+    await clickAt(page, (await box(page, '[data-testid="set-attributes-add-member"]')).cx, (await box(page, '[data-testid="set-attributes-add-member"]')).cy)
+    await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(setId)}).props.inputs.some((p) => p.id === 'member_2')`, 'stable member row')
+    const member = await box(page, '[data-testid="inspector-port-inputs-member_2"] input')
+    await clickAt(page, member.cx, member.cy); await shortcut(page, 'a', 'KeyA', 2); await page.send('Input.insertText', { text: '.limit' }); await key(page, 'Enter', 'Enter')
+    check('SET-1', 'Set keeps stable member identity through rename and does not claim Python update semantics',
+      await evaluate(page, `JSON.stringify({ id: window.__systemsketch.editor.getShape(${JSON.stringify(setId)}).props.inputs.at(-1).id,
+        name: window.__systemsketch.editor.getShape(${JSON.stringify(setId)}).props.inputs.at(-1).name,
+        honest: document.querySelector('[data-testid="set-attributes-source-status"]')?.textContent.includes('unresolved') })`),
+      JSON.stringify({ id: 'member_2', name: '.limit', honest: true }))
 
-    await clickBlock(page, 'shape:clock')
-    await waitFor(page, `document.querySelector('[data-inspector-section="Clock trigger"]')`, 'Clock configuration')
-    check('CLOCK-1', 'Clock exposes persisted source/rate intent and the unavailable adapter boundary',
-      await evaluate(page, `JSON.stringify({
-        source: document.querySelector('[aria-label="Clock trigger source"]')?.value,
-        rate: document.querySelector('[aria-label="Clock trigger rate in hertz"]')?.value,
-        unavailable: document.querySelector('[data-testid="clock-trigger-runtime-status"]')?.textContent?.includes('unavailable'),
-        output: window.__systemsketch.editor.getShape('shape:clock').props.outputs[0].type,
-      })`),
-      JSON.stringify({ source: 'clock', rate: '10', unavailable: true, output: 'Trigger' }))
+    await selectBlock(page, selectId)
+    check('SELECT-1', 'Select is an ordinary Block with visible valid conditional notation',
+      await evaluate(page, `JSON.stringify({ type: document.querySelector('[data-shape-id=${JSON.stringify(selectId)}]')?.dataset.shapeType,
+        source: document.querySelector('[data-testid="select-source-notation"]')?.textContent.trim(),
+        rows: window.__systemsketch.editor.getShape(${JSON.stringify(selectId)}).props.inputs.map((p) => p.id) })`),
+      JSON.stringify({ type: 'block', source: 'true_value if condition else false_value', rows: ['condition', 'true_value', 'false_value'] }))
 
-    const errors = await localConsoleErrors(page)
-    check('CONSOLE', 'the real browser reports no console errors', errors, [])
-  } finally {
-    await app.close()
-  }
+    await selectBlock(page, clockId)
+    await waitFor(page, `document.querySelector('[aria-label="Clock trigger rate in hertz"]')`, 'Clock configuration')
+    const rate = await box(page, '[aria-label="Clock trigger rate in hertz"]')
+    await clickAt(page, rate.cx, rate.cy); await shortcut(page, 'a', 'KeyA', 2); await page.send('Input.insertText', { text: '24' }); await key(page, 'Enter', 'Enter')
+    await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(clockId)})?.props.stockConfig?.rateHz === 24`, 'positive rate edit')
+    check('CLOCK-1', 'Clock label, config, and no-scheduler statement derive from the edited rate',
+      await evaluate(page, `JSON.stringify({ config: window.__systemsketch.editor.getShape(${JSON.stringify(clockId)}).props.stockConfig,
+        label: document.querySelector('[data-shape-id=${JSON.stringify(clockId)}] .BlockNode-description')?.textContent.trim(),
+        status: document.querySelector('[data-testid="clock-trigger-runtime-status"]')?.textContent.trim() })`),
+      JSON.stringify({ config: { triggerSource: 'clock', rateHz: 24 }, label: 'Clock · 24 Hz · prototype declares intent; does not schedule.', status: 'Clock · 24 Hz. This prototype declares intent and does not schedule.' }))
+
+    // A stock duplicate is a linked occurrence. stockConfig must participate in
+    // content comparison and sync just like the rest of its canonical body.
+    await evaluate(page, `(() => { const e = window.__systemsketch.editor; e.select(${JSON.stringify(clockId)}).duplicateShapes([${JSON.stringify(clockId)}], { x: 0, y: 260 }) })()`)
+    await waitFor(page, `window.__systemsketch.editor.getCurrentPageShapes().filter((s) => s.type === 'block' && s.props.definitionId === window.__systemsketch.editor.getShape(${JSON.stringify(clockId)}).props.definitionId).length === 2`, 'linked Clock occurrence')
+    const clockIds = JSON.parse(await evaluate(page, `JSON.stringify(window.__systemsketch.editor.getCurrentPageShapes().filter((s) => s.type === 'block' && s.props.definitionId === window.__systemsketch.editor.getShape(${JSON.stringify(clockId)}).props.definitionId).map((s) => s.id))`))
+    await evaluate(page, `(() => { const e = window.__systemsketch.editor, s = e.getShape(${JSON.stringify(clockId)}); e.markHistoryStoppingPoint('edit Clock config'); e.updateShape({ id: s.id, type: s.type, props: { stockConfig: { triggerSource: 'manual' } } }) })()`)
+    await waitFor(page, `JSON.stringify(${JSON.stringify(clockIds)}.map((id) => window.__systemsketch.editor.getShape(id)?.props.stockConfig)) === JSON.stringify([{triggerSource:'manual'},{triggerSource:'manual'}])`, 'linked config propagation')
+    check('LINK-1', 'linked Clock configs converge and distinct configs remain distinct content',
+      await evaluate(page, `JSON.stringify({ configs: ${JSON.stringify(clockIds)}.map((id) => window.__systemsketch.editor.getShape(id).props.stockConfig),
+        distinct: JSON.stringify({triggerSource:'manual'}) !== JSON.stringify({triggerSource:'clock',rateHz:24}) })`),
+      JSON.stringify({ configs: [{ triggerSource: 'manual' }, { triggerSource: 'manual' }], distinct: true }))
+    await shortcut(page, 'z', 'KeyZ', 2)
+    await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(clockId)})?.props.stockConfig?.rateHz === 24`, 'undo linked config')
+    check('UNDO-1', 'undo restores the linked declaration normally',
+      await evaluate(page, `JSON.stringify(${JSON.stringify(clockIds)}.map((id) => window.__systemsketch.editor.getShape(id)?.props.stockConfig))`),
+      JSON.stringify([{ triggerSource: 'clock', rateHz: 24 }, { triggerSource: 'clock', rateHz: 24 }]))
+
+    await page.send('Page.reload', { ignoreCache: true })
+    await waitFor(page, 'Boolean(window.__systemsketch?.editor)', 'reopened persisted development board')
+    await waitFor(page, `Array.from(document.querySelectorAll('.BlockNode-description')).some((n) => n.textContent.includes('Clock · 24 Hz'))`, 'reopened current Clock label')
+    check('REOPEN-1', 'reopening retains source/rate and never paints stale 10 Hz prose',
+      await evaluate(page, `Array.from(document.querySelectorAll('.BlockNode-description')).some((n) => n.textContent.includes('10 Hz'))`), false)
+
+    const reopenedClock = await evaluate(page, `window.__systemsketch.editor.getCurrentPageShapes().find((s) => s.type === 'block' && s.props.blockType === 'clock-trigger')?.id`)
+    await evaluate(page, `(() => { window.__systemsketch.editor.updateInstanceState({ isReadonly: true }); return true })()`)
+    await selectBlock(page, reopenedClock)
+    check('READONLY-1', 'read-only keeps Clock intent visible and disables edits',
+      await evaluate(page, `JSON.stringify({ source: document.querySelector('[aria-label="Clock trigger source"]')?.disabled,
+        rate: document.querySelector('[aria-label="Clock trigger rate in hertz"]')?.disabled,
+        status: document.querySelector('[data-testid="clock-trigger-runtime-status"]')?.textContent.includes('does not schedule') })`),
+      JSON.stringify({ source: true, rate: true, status: true }))
+    await evaluate(page, `(() => { window.__systemsketch.editor.updateInstanceState({ isReadonly: false }); return true })()`)
+    check('CONSOLE', 'the twice-run disposable journey is console-clean', await localConsoleErrors(page), [])
+  } finally { await app.close() }
   if (results.some((result) => !result.ok)) process.exitCode = 1
 }
 

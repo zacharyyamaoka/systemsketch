@@ -234,13 +234,12 @@ export type BlockPort = T.TypeOf<typeof BlockPort>
  *
  * This is deliberately optional. A Block remains an open canvas primitive and
  * a newer curated preset must not make older hand-authored Blocks unreadable.
- * `runtimeAdapter: unavailable` is an honest capability boundary, not a
- * scheduler request hiding in a presentation prop.
+ * Runtime availability is deliberately not document state: an adapter owns
+ * that live capability separately from a board's authoring declaration.
  */
 export const StockBlockConfig = T.object({
 	triggerSource: T.literalEnum('clock', 'external', 'manual').optional(),
 	rateHz: T.number.optional(),
-	runtimeAdapter: T.literalEnum('unavailable').optional(),
 })
 export type StockBlockConfig = T.TypeOf<typeof StockBlockConfig>
 

@@ -45,7 +45,7 @@ const blockVersions = createShapePropsMigrationIds(BLOCK_SHAPE_TYPE, {
 	ValueView: 4,
 	DiffState: 5,
 	FieldDiffs: 6,
-	SemanticPortRoles: 7,
+	SemanticRolesAndStockConfig: 7,
 })
 
 function storedViews(props: BlockMigrationProps): StoredViews | undefined {
@@ -238,9 +238,28 @@ export function downgradeBlockPropsV6ToV5(props: BlockMigrationProps): BlockMigr
 	return next
 }
 
-/** v6 → v7: optional claims need no stored default; absent means implicit Data. */
+/**
+ * v6 → v7: reserve one persisted vocabulary seam. Role claims need no default;
+ * curated stock config is normalized when legacy experiments supplied one.
+ *
+ * Earlier experimental records may carry a UI-only `runtimeAdapter` flag or
+ * an unusable numeric rate. A board can truthfully preserve source/rate intent
+ * but it must not serialize a live adapter capability or paint an invalid rate.
+ */
 export function upgradeBlockPropsV6ToV7(props: BlockMigrationProps): BlockMigrationProps {
-	return props
+	const raw = props.stockConfig
+	if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return props
+	const config = raw as BlockMigrationProps
+	const source = config.triggerSource === 'external' || config.triggerSource === 'manual'
+		? config.triggerSource
+		: 'clock'
+	const rate = typeof config.rateHz === 'number' && Number.isFinite(config.rateHz) && config.rateHz > 0
+		? config.rateHz
+		: 10
+	const stockConfig = source === 'clock'
+		? { triggerSource: source, rateHz: rate }
+		: { triggerSource: source }
+	return JSON.stringify(stockConfig) === JSON.stringify(raw) ? props : { ...props, stockConfig }
 }
 
 function withoutSemanticRoleClaims(port: unknown): BlockMigrationProps {
@@ -248,9 +267,10 @@ function withoutSemanticRoleClaims(port: unknown): BlockMigrationProps {
 	return rest
 }
 
-/** v7 → v6: a prior reader cannot retain claims it cannot validate. */
+/** v7 → v6: older readers cannot interpret either vocabulary addition. */
 export function downgradeBlockPropsV7ToV6(props: BlockMigrationProps): BlockMigrationProps {
-	let next = props
+	const { stockConfig: _stockConfig, ...rest } = props
+	let next = _stockConfig === undefined ? props : rest
 	for (const side of ['inputs', 'outputs'] as const) {
 		const ports = props[side]
 		if (Array.isArray(ports)) next = { ...next, [side]: ports.map(withoutSemanticRoleClaims) }
@@ -305,7 +325,7 @@ export const blockShapeMigrations = createShapePropsMigrationSequence({
 		up: (props) => applyPureMigration(props, upgradeBlockPropsV5ToV6),
 		down: (props) => applyPureMigration(props, downgradeBlockPropsV6ToV5),
 	}, {
-		id: blockVersions.SemanticPortRoles,
+		id: blockVersions.SemanticRolesAndStockConfig,
 		up: (props) => applyPureMigration(props, upgradeBlockPropsV6ToV7),
 		down: (props) => applyPureMigration(props, downgradeBlockPropsV7ToV6),
 	}],

@@ -125,13 +125,23 @@ describe('Block shape migrations', () => {
 
 		const v6 = throughPureStep(v5, upgradeBlockPropsV5ToV6)
 		expect(v6).toEqual(v5)
-		expect(throughPureStep(v6, upgradeBlockPropsV6ToV7)).toEqual(v6)
+		const v7 = throughPureStep(v6, upgradeBlockPropsV6ToV7)
+		expect(v7).toEqual(v6)
 
 		const restoredV0 = throughPureStep(v1, downgradeBlockPropsV1ToV0)
 		expect(restoredV0).toMatchObject({ w: 360, h: 230, views: v0.views })
 	})
 
-	it('strips role claims only when intentionally loading into a prior schema', () => {
+	it('normalizes StockConfig and strips vocabulary that prior schemas cannot validate', () => {
+		const configV6: BlockMigrationProps = {
+			...getDefaultBlockProps(),
+			blockType: 'clock-trigger',
+			stockConfig: { triggerSource: 'clock', rateHz: Number.NaN, runtimeAdapter: 'unavailable' },
+		}
+		const configV7 = throughPureStep(configV6, upgradeBlockPropsV6ToV7)
+		expect(configV7.stockConfig).toEqual({ triggerSource: 'clock', rateHz: 10 })
+		expect(configV7.stockConfig).not.toHaveProperty('runtimeAdapter')
+
 		const v7: BlockMigrationProps = {
 			inputs: [{ id: 'in', semanticRoleDerived: { role: 'configuration', source: 'parser' }, semanticRoleAuthored: { role: 'data' } }],
 			outputs: [{ id: 'out', semanticRoleAuthored: { role: 'event' } }],
@@ -139,6 +149,37 @@ describe('Block shape migrations', () => {
 		const v6 = throughPureStep(v7, downgradeBlockPropsV7ToV6)
 		expect(v6.inputs).toEqual([{ id: 'in' }])
 		expect(v6.outputs).toEqual([{ id: 'out' }])
+		expect(throughPureStep(configV7, downgradeBlockPropsV7ToV6)).not.toHaveProperty('stockConfig')
+	})
+
+	it('round-trips a V6 saved Block through the registered schema and validates the V7 record', () => {
+		const store = createTLStore({ shapeUtils: [BlockShapeUtil], bindingUtils: [] })
+		const currentSchema = store.schema.serialize()
+		const legacy = markerBlock()
+		legacy.props.blockType = 'clock-trigger'
+		legacy.props.inputs = []
+		legacy.props.outputs = [{ id: 'trigger', name: 'trigger', type: 'Trigger', visible: true, row: 0 }]
+		legacy.props.stockConfig = { triggerSource: 'clock', rateHz: 0, runtimeAdapter: 'unavailable' }
+		const snapshot = {
+			schema: {
+				...currentSchema,
+				sequences: { ...currentSchema.sequences, [BLOCK_MIGRATION_SEQUENCE]: 6 },
+			},
+			store: { [legacy.id]: legacy },
+		} as unknown as TLStoreSnapshot
+
+		expect(() => store.loadStoreSnapshot(snapshot)).not.toThrow()
+		const migrated = store.get(legacy.id) as BlockShape
+		expect(migrated.props.stockConfig).toEqual({ triggerSource: 'clock', rateHz: 10 })
+		expect(store.schema.serialize().sequences[BLOCK_MIGRATION_SEQUENCE]).toBe(7)
+
+		const sequence = store.schema.sortedMigrations
+			.filter((migration) => migration.id.startsWith(`${BLOCK_MIGRATION_SEQUENCE}/`))
+		const step = sequence.find((migration) => migration.id.endsWith('/7'))
+		expect(step, 'the named semantic roles and StockConfig migration').toBeDefined()
+		const record = { ...legacy, props: structuredClone(migrated.props) }
+		;(step as { down: (record: unknown) => void }).down(record)
+		expect((record.props as Record<string, unknown>)).not.toHaveProperty('stockConfig')
 	})
 
 	it('downgrades disposable diff data without mutating the current record', () => {

@@ -52,7 +52,7 @@
       "y": 470,
       "props": {
         "title": "Clock",
-        "description": "10 Hz authoring source · runtime adapter unavailable.",
+        "description": "Clock declaration · does not schedule.",
         "blockType": "clock-trigger",
         "icon": "Timer",
         "view": "port",
@@ -60,7 +60,7 @@
         "h": 198,
         "inputs": [],
         "outputs": [{ "id": "trigger", "name": "trigger", "type": "Trigger", "visible": true, "row": 0 }],
-        "stockConfig": { "triggerSource": "clock", "rateHz": 10, "runtimeAdapter": "unavailable" }
+        "stockConfig": { "triggerSource": "clock", "rateHz": 10 }
       }
     }
   ],
@@ -83,23 +83,23 @@
       "x": 70,
       "y": 670,
       "w": 420,
-      "h": 120,
+      "h": 150,
       "target": { "shapeId": "select", "anchor": "left", "dy": 25 }
     },
     {
       "id": "step-3",
       "kind": "step",
-      "text": "3 · Select Clock. In the inspector change source or rate; Runtime adapter unavailable must remain explicit.",
+      "text": "3 · Select Clock. Change source or rate; its label must follow Clock 10 Hz, External trigger, or Manual trigger. It does not schedule.",
       "x": 1080,
       "y": 110,
       "w": 440,
-      "h": 120,
+      "h": 150,
       "target": { "shapeId": "clock", "anchor": "top", "dx": 90 }
     },
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · all three are ordinary Blocks: record data returns normally, Select has no execution pins, and Clock declares intent without claiming it runs.",
+      "text": "PASS WHEN · all three are ordinary Blocks: Set update semantics stay unresolved, Select shows a value conditional, and Clock declares intent without scheduling.",
       "x": 1020,
       "y": 760,
       "w": 470,
