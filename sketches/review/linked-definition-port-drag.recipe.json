@@ -1,0 +1,115 @@
+{
+  "feature": "Linked Definition port drag",
+  "viewport": { "width": 1440, "height": 720 },
+  "pages": [{ "id": "review", "name": "Linked cable review" }],
+  "shapes": [
+    {
+      "id": "assignment-primary",
+      "type": "block",
+      "x": 500,
+      "y": 250,
+      "props": {
+        "title": "assignment",
+        "description": "Linked Definition occurrence",
+        "view": "expanded",
+        "w": 370,
+        "h": 270,
+        "definitionId": "review-assignment-definition",
+        "definitionKey": "assignment",
+        "inputs": [
+          { "id": "in_1", "name": "self", "type": "Class", "visible": true, "defaultValue": "self" },
+          { "id": "in_2", "name": ".attr_1", "type": "type", "visible": true, "defaultValue": "zach" }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "literal-primary",
+      "type": "block",
+      "parentId": "assignment-primary",
+      "x": 110,
+      "y": 120,
+      "meta": {
+        "systemSketchDefinitionMember": {
+          "definitionId": "review-assignment-definition",
+          "memberId": "assignment-attr-1-literal",
+          "occurrenceId": "shape:assignment-primary"
+        }
+      },
+      "props": {
+        "title": "self.attr_1 =",
+        "blockType": "literal",
+        "view": "value",
+        "w": 240,
+        "h": 56,
+        "inputs": [{ "id": "in_1", "name": "", "type": "", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "", "type": "", "visible": true }]
+      }
+    },
+    {
+      "id": "assignment-linked",
+      "type": "block",
+      "x": 930,
+      "y": 250,
+      "props": {
+        "title": "assignment",
+        "description": "Linked Definition occurrence",
+        "view": "expanded",
+        "w": 370,
+        "h": 270,
+        "definitionId": "review-assignment-definition",
+        "definitionKey": "assignment",
+        "inputs": [
+          { "id": "in_1", "name": "self", "type": "Class", "visible": true, "defaultValue": "self" },
+          { "id": "in_2", "name": ".attr_1", "type": "type", "visible": true, "defaultValue": "zach" }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "literal-linked",
+      "type": "block",
+      "parentId": "assignment-linked",
+      "x": 110,
+      "y": 120,
+      "meta": {
+        "systemSketchDefinitionMember": {
+          "definitionId": "review-assignment-definition",
+          "memberId": "assignment-attr-1-literal",
+          "occurrenceId": "shape:assignment-linked"
+        }
+      },
+      "props": {
+        "title": "self.attr_1 =",
+        "blockType": "literal",
+        "view": "value",
+        "w": 240,
+        "h": 56,
+        "inputs": [{ "id": "in_1", "name": "", "type": "", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "", "type": "", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "drag-input",
+      "kind": "step",
+      "text": "1 · Drag this assignment’s lower-left port into the literal’s left port.",
+      "x": 40,
+      "y": 260,
+      "w": 360,
+      "h": 110,
+      "target": { "shapeId": "assignment-primary", "anchor": "left", "dy": 38 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Both linked assignments show the new cable and the editor stays responsive.",
+      "x": 40,
+      "y": 610,
+      "w": 430,
+      "h": 110
+    }
+  ]
+}

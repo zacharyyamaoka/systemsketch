@@ -561,16 +561,18 @@ export function duplicateBlockUnlinked(editor: Editor, shapeId: TLShapeId): Bloc
  */
 export function installDefinitionLinking(editor: Editor): () => void {
 	let syncing = false
+	let disposed = false
+	let syncQueued = false
 	let dirtyBodies = new Set<TLShapeId>()
 	let needsCollisionSweep = false
 	const markOwner = (shape: TLShape) => {
 		const owner = rootOccurrenceForShape(editor, shape)
 		if (owner) dirtyBodies.add(owner.id)
 	}
-	const run = (work: () => void) => {
+	const run = (work: () => void, options?: { history?: 'ignore' }) => {
 		if (syncing) return
 		syncing = true
-		try { editor.run(work) } finally { syncing = false }
+		try { editor.run(work, options) } finally { syncing = false }
 	}
 
 	run(() => {
@@ -629,19 +631,31 @@ export function installDefinitionLinking(editor: Editor): () => void {
 	const stopBindingDelete = editor.sideEffects.registerBeforeDeleteHandler('binding', (binding) => {
 		if (!syncing) markBinding(binding)
 	})
-	const stopComplete = editor.sideEffects.registerOperationCompleteHandler(() => {
-		if (syncing || (dirtyBodies.size === 0 && !needsCollisionSweep)) return
-		const pending = dirtyBodies
-		dirtyBodies = new Set()
-		const sweep = needsCollisionSweep
-		needsCollisionSweep = false
-		run(() => {
-			for (const sourceId of pending) syncLinkedBody(editor, sourceId)
-			if (sweep) reconcileExistingDefinitionNames(editor)
+	const scheduleLinkedBodySync = () => {
+		if (syncing || syncQueued || (dirtyBodies.size === 0 && !needsCollisionSweep)) return
+		// `operation_complete` is still inside tldraw's store transaction. Writing
+		// a materialized Definition body from that callback queues another operation
+		// before the first one has flushed; a port drag can then recurse until the
+		// store's depth guard trips. Coalesce the work onto the next microtask, where
+		// it is one derived, history-ignored reconciliation instead.
+		syncQueued = true
+		queueMicrotask(() => {
+			syncQueued = false
+			if (disposed || syncing || (dirtyBodies.size === 0 && !needsCollisionSweep)) return
+			const pending = dirtyBodies
+			dirtyBodies = new Set()
+			const sweep = needsCollisionSweep
+			needsCollisionSweep = false
+			run(() => {
+				for (const sourceId of pending) syncLinkedBody(editor, sourceId)
+				if (sweep) reconcileExistingDefinitionNames(editor)
+			}, { history: 'ignore' })
 		})
-	})
+	}
+	const stopComplete = editor.sideEffects.registerOperationCompleteHandler(scheduleLinkedBodySync)
 
 	return () => {
+		disposed = true
 		stopComplete()
 		stopBindingDelete()
 		stopBindingChange()
