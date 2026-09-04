@@ -15,6 +15,7 @@
  * report makes claims about.
  *
  * Run:  node tools/capture_reference_screens.mjs
+ * Gap-analysis sources only: node tools/capture_reference_screens.mjs --gap-analysis
  */
 import { spawn } from 'node:child_process'
 import { mkdtemp, mkdir, writeFile, readFile } from 'node:fs/promises'
@@ -84,6 +85,160 @@ async function sweep(page, url, prefix, { settle = 6000, stops = [0, 700, 1400, 
   return written
 }
 
+// These are the smallest set of first-party screenshots that let the vocabulary
+// report point at a concrete visual contract rather than paraphrasing a tool's
+// documentation. Keep the report's citation (the document URL) distinct from
+// the image URL: vendor CDNs move images more often than documentation routes.
+const GAP_ANALYSIS_SOURCES = [
+  {
+    name: 'gap-labview-error-wire-2026-09-03',
+    label: 'LabVIEW error-cluster wire',
+    sourceDocument: 'https://www.ni.com/docs/en-US/bundle/labview/page/handling-errors.html',
+    imageUrl: 'https://docs-be.ni.com/bundle/labview/page/GUID-669CBB90-7118-40DA-9112-D33367A09DDD-a5.png?_LANG=enus',
+  },
+  {
+    name: 'gap-labview-async-channel-2026-09-03',
+    label: 'LabVIEW asynchronous channel wire',
+    sourceDocument: 'https://www.ni.com/docs/en-US/bundle/labview/page/using-wires-to-link-block-diagram-objects.html',
+    imageUrl: 'https://docs-be.ni.com/bundle/labview/page/GUID-4937B8CB-9D2E-42FF-800F-F48C82D6798D-a5.png?_LANG=enus',
+  },
+  {
+    name: 'gap-blueprint-struct-pins-2026-09-03',
+    label: 'Blueprint hidden struct member pins',
+    sourceDocument: 'https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27',
+    imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/8011c704-700f-4540-a226-af85aa1b30e1/hideunconnectedpins.png',
+  },
+  {
+    name: 'gap-blueprint-cast-failure-2026-09-03',
+    label: 'Blueprint Cast To node with success and Cast Failed paths',
+    sourceDocument: 'https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-communications-in-unreal-engine',
+    imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/aeac57a9-b724-400c-a843-c790a2fe9d08/othercasting.png',
+  },
+  {
+    name: 'gap-stateflow-state-transition-2026-09-03',
+    label: 'Stateflow states and transitions',
+    sourceDocument: 'https://www.mathworks.com/help/stateflow/gs/get-started-introduction.html',
+    imageUrl: 'https://www.mathworks.com/help/stateflow/gs/gearlogic-animation.gif',
+    // MathWorks varies this asset by Origin, so preserve its same-origin
+    // document context rather than treating a blocked data-URL embed as proof
+    // that the primary image is inaccessible.
+    documentImageSelector: 'img[src$="gearlogic-animation.gif"]',
+    settle: 1800,
+  },
+]
+
+function sourceImagePage(entry) {
+  // The raw assets are intentionally put on an otherwise-empty page. Capturing
+  // the image element (not the browser chrome or a documentation page) gives
+  // the report a sharp, portable PNG while retaining a URL-rich manifest.
+  const html = `<!doctype html><meta charset="utf-8"><style>
+    html,body{margin:0;padding:0;background:#fff}
+    #source{display:block;max-width:1520px;height:auto}
+  </style><img id="source" src="${entry.imageUrl}" alt="${entry.label}">`
+  return `data:text/html;base64,${Buffer.from(html, 'utf8').toString('base64')}`
+}
+
+async function loadedImageBox(page, label, selector = '#source', timeoutMs = 20000) {
+  const deadline = Date.now() + timeoutMs
+  let lastState = 'not evaluated'
+  while (Date.now() < deadline) {
+    const raw = await evaluate(page, `JSON.stringify((() => {
+      const image = document.querySelector(${JSON.stringify(selector)})
+      if (!image) return { state: 'missing image element' }
+      const rect = image.getBoundingClientRect()
+      return {
+        state: image.complete ? 'complete' : 'loading',
+        naturalWidth: image.naturalWidth,
+        naturalHeight: image.naturalHeight,
+        x: rect.x + window.scrollX,
+        y: rect.y + window.scrollY,
+        width: rect.width,
+        height: rect.height,
+      }
+    })())`)
+    const state = JSON.parse(raw)
+    lastState = JSON.stringify(state)
+    if (state.naturalWidth > 0 && state.naturalHeight > 0 && state.width > 0 && state.height > 0) {
+      return state
+    }
+    await delay(120)
+  }
+  throw new Error(`Timed out loading ${label}: ${lastState}`)
+}
+
+async function captureGapSource(page, entry) {
+  const startedAt = new Date().toISOString()
+  const startedMs = Date.now()
+  const isSameOriginCapture = Boolean(entry.documentImageSelector)
+  await page.send('Page.navigate', { url: isSameOriginCapture ? entry.sourceDocument : sourceImagePage(entry) })
+  const box = await loadedImageBox(page, entry.label, entry.documentImageSelector)
+  if (entry.settle) await delay(entry.settle)
+  const shot = await shoot(page, entry.name, box)
+  return {
+    file: `${entry.name}.png`,
+    bytes: shot.bytes,
+    label: entry.label,
+    sourceDocument: entry.sourceDocument,
+    sourceImage: entry.imageUrl,
+    capturedAt: new Date().toISOString(),
+    startedAt,
+    durationMs: Date.now() - startedMs,
+    image: {
+      naturalWidth: box.naturalWidth,
+      naturalHeight: box.naturalHeight,
+      capturedWidth: box.width,
+      capturedHeight: box.height,
+    },
+    status: 'captured',
+  }
+}
+
+async function captureGapAnalysisSources() {
+  await mkdir(ASSETS, { recursive: true })
+  const manifest = {
+    schemaVersion: 1,
+    capturedFor: 'docs/build_labview_blueprint_simulink_gap_analysis.py',
+    generatedAt: new Date().toISOString(),
+    captures: [],
+  }
+  const { proc, page } = await launch({ width: 1600, height: 1200 })
+  try {
+    // MathWorks serves its public documentation to a normal Chrome identity but
+    // replies with an Access Denied page to the literal HeadlessChrome token.
+    // We still use the same disposable headless/CDP session; this only makes
+    // the request look like the browser that a reader would actually use.
+    await page.send('Emulation.setUserAgentOverride', {
+      userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+    })
+    for (const entry of GAP_ANALYSIS_SOURCES) {
+      console.log(`→ ${entry.label}`)
+      try {
+        manifest.captures.push(await captureGapSource(page, entry))
+      } catch (error) {
+        // A missing image must be visible to the report author. Do not replace
+        // it with a generic web screenshot that appears to be primary evidence.
+        manifest.captures.push({
+          file: `${entry.name}.png`,
+          label: entry.label,
+          sourceDocument: entry.sourceDocument,
+          sourceImage: entry.imageUrl,
+          capturedAt: new Date().toISOString(),
+          status: 'failed',
+          error: error instanceof Error ? error.message : String(error),
+        })
+      }
+    }
+  } finally {
+    proc.kill('SIGKILL')
+  }
+  await writeFile(join(ASSETS, 'gap-reference-captures-2026-09-03.json'), `${JSON.stringify(manifest, null, 2)}\n`)
+  const failures = manifest.captures.filter((capture) => capture.status === 'failed')
+  console.log(`\n${manifest.captures.length - failures.length}/${manifest.captures.length} gap-analysis captures written to docs/assets/`)
+  if (failures.length) {
+    throw new Error(`Gap-analysis capture failures: ${failures.map(({ label }) => label).join(', ')}`)
+  }
+}
+
 /** unit's own documented interaction recordings, on one page the browser renders. */
 const UNIT_GIFS = [
   ['17', 'Connect — drop a node onto a compatible node'],
@@ -126,6 +281,10 @@ async function unitContactSheet(page) {
 }
 
 async function main() {
+  if (process.argv.includes('--gap-analysis')) {
+    await captureGapAnalysisSources()
+    return
+  }
   await mkdir(ASSETS, { recursive: true })
   const manifest = { capturedFor: 'docs/build_reference_learnings.py', shots: [] }
 

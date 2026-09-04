@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "capturedFor": "docs/build_labview_blueprint_simulink_gap_analysis.py",
+  "generatedAt": "2026-09-04T06:30:09.792Z",
+  "captures": [
+    {
+      "file": "gap-labview-error-wire-2026-09-03.png",
+      "bytes": 56258,
+      "label": "LabVIEW error-cluster wire",
+      "sourceDocument": "https://www.ni.com/docs/en-US/bundle/labview/page/handling-errors.html",
+      "sourceImage": "https://docs-be.ni.com/bundle/labview/page/GUID-669CBB90-7118-40DA-9112-D33367A09DDD-a5.png?_LANG=enus",
+      "capturedAt": "2026-09-04T06:30:10.287Z",
+      "startedAt": "2026-09-04T06:30:09.965Z",
+      "durationMs": 322,
+      "image": {
+        "naturalWidth": 415,
+        "naturalHeight": 216,
+        "capturedWidth": 415,
+        "capturedHeight": 216
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-labview-async-channel-2026-09-03.png",
+      "bytes": 96735,
+      "label": "LabVIEW asynchronous channel wire",
+      "sourceDocument": "https://www.ni.com/docs/en-US/bundle/labview/page/using-wires-to-link-block-diagram-objects.html",
+      "sourceImage": "https://docs-be.ni.com/bundle/labview/page/GUID-4937B8CB-9D2E-42FF-800F-F48C82D6798D-a5.png?_LANG=enus",
+      "capturedAt": "2026-09-04T06:30:10.581Z",
+      "startedAt": "2026-09-04T06:30:10.287Z",
+      "durationMs": 294,
+      "image": {
+        "naturalWidth": 297,
+        "naturalHeight": 148,
+        "capturedWidth": 297,
+        "capturedHeight": 148
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-blueprint-struct-pins-2026-09-03.png",
+      "bytes": 537547,
+      "label": "Blueprint hidden struct member pins",
+      "sourceDocument": "https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27",
+      "sourceImage": "https://d1iv7db44yhgxn.cloudfront.net/documentation/images/8011c704-700f-4540-a226-af85aa1b30e1/hideunconnectedpins.png",
+      "capturedAt": "2026-09-04T06:30:10.959Z",
+      "startedAt": "2026-09-04T06:30:10.581Z",
+      "durationMs": 378,
+      "image": {
+        "naturalWidth": 1052,
+        "naturalHeight": 466,
+        "capturedWidth": 1052,
+        "capturedHeight": 466
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-blueprint-cast-failure-2026-09-03.png",
+      "bytes": 1090049,
+      "label": "Blueprint Cast To node with success and Cast Failed paths",
+      "sourceDocument": "https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-communications-in-unreal-engine",
+      "sourceImage": "https://d1iv7db44yhgxn.cloudfront.net/documentation/images/aeac57a9-b724-400c-a843-c790a2fe9d08/othercasting.png",
+      "capturedAt": "2026-09-04T06:30:11.426Z",
+      "startedAt": "2026-09-04T06:30:10.959Z",
+      "durationMs": 467,
+      "image": {
+        "naturalWidth": 804,
+        "naturalHeight": 706,
+        "capturedWidth": 804,
+        "capturedHeight": 706
+      },
+      "status": "captured"
+    },
+    {
+      "file": "gap-stateflow-state-transition-2026-09-03.png",
+      "bytes": 234420,
+      "label": "Stateflow states and transitions",
+      "sourceDocument": "https://www.mathworks.com/help/stateflow/gs/get-started-introduction.html",
+      "sourceImage": "https://www.mathworks.com/help/stateflow/gs/gearlogic-animation.gif",
+      "capturedAt": "2026-09-04T06:30:13.863Z",
+      "startedAt": "2026-09-04T06:30:11.426Z",
+      "durationMs": 2437,
+      "image": {
+        "naturalWidth": 680,
+        "naturalHeight": 96,
+        "capturedWidth": 680,
+        "capturedHeight": 96
+      },
+      "status": "captured"
+    }
+  ]
+}
