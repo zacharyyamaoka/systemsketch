@@ -59,6 +59,7 @@
     "test:async-edge-style": "node tests/async_edge_style_smoke.mjs",
     "test:file-type-stable": "node tests/stable_file_type_probe.mjs",
     "test:detach": "node tests/block_detach_smoke.mjs",
+    "test:detach-loose-primitives": "node tests/detached_block_loose_primitives_smoke.mjs",
     "test:selectable": "node tests/block_footer_drag_smoke.mjs",
     "test:embed-lifecycle": "node tests/embed_lifecycle_smoke.mjs",
     "test:portable": "node tests/portable_tldraw_export_smoke.mjs",

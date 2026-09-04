@@ -172,7 +172,10 @@ async function main() {
         directArrow: shapes.find((shape) => shape.type === 'arrow' && shape.meta?.systemSketch?.delayValue === 'direct')?.props.dash,
         directPillGroup: shapes.some((shape) => shape.type === 'group' && shape.meta?.systemSketch?.kind === 'connection-delay-pill'
           && shape.meta?.systemSketch?.arrowId && shapes.some((arrow) => arrow.id === shape.meta.systemSketch.arrowId && arrow.meta?.systemSketch?.delayValue === 'direct')),
-        nestedEdgeStayedInFrame: nestedEdgeGroup?.parentId === 'shape:branch',
+        // A detached connection is a loose stock primitive. Leaving this
+        // delayed arrow below a Branch frame would clip it before ordinary
+        // tldraw z-order can bring it back into view.
+        nestedEdgeEscapedFrame: nestedEdgeGroup?.parentId === editor.getCurrentPageId(),
         nestedEdgeKeptPosition: Boolean(nestedCenter
           && Math.abs(nestedCenter.x - ${JSON.stringify(nestedEdgeBefore.x)}) < 0.01
           && Math.abs(nestedCenter.y - ${JSON.stringify(nestedEdgeBefore.y)}) < 0.01),
@@ -196,7 +199,7 @@ async function main() {
     assert.equal(result.delayPillText, true)
     assert.equal(result.directArrow, 'dotted')
     assert.equal(result.directPillGroup, true)
-    assert.equal(result.nestedEdgeStayedInFrame, true)
+    assert.equal(result.nestedEdgeEscapedFrame, true)
     assert.equal(result.nestedEdgeKeptPosition, true)
     assert.equal(result.customPrimitiveStyle, false)
     assert.equal(result.customGeo, false)

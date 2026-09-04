@@ -1,0 +1,63 @@
+[
+  {
+    "id": "AUTHORED-PARENTAGE",
+    "label": "the target is a real child that extends beyond the Expanded Block",
+    "observed": {
+      "childParent": "shape:npznWHUwGEb0wXZ1Hr4eu",
+      "childEscapesBottom": true
+    },
+    "desired": {
+      "childParent": "shape:npznWHUwGEb0wXZ1Hr4eu",
+      "childEscapesBottom": true
+    },
+    "ok": true
+  },
+  {
+    "id": "AUTHORED-CABLE-PARENT",
+    "label": "the live data edge enters through the Expanded Block",
+    "observed": "shape:npznWHUwGEb0wXZ1Hr4eu",
+    "desired": "shape:npznWHUwGEb0wXZ1Hr4eu",
+    "ok": true
+  },
+  {
+    "id": "LOOSE-NOT-FRAME",
+    "label": "the replacement is a normal stock group and rectangle",
+    "observed": {
+      "groupParent": "page:page",
+      "groupFrameLike": false,
+      "cardFrameLike": false
+    },
+    "desired": {
+      "groupParent": "page:page",
+      "groupFrameLike": false,
+      "cardFrameLike": false
+    },
+    "ok": true
+  },
+  {
+    "id": "EDGE-ESCAPES-FRAME",
+    "label": "the converted data edge is a page-level stock arrow above the container",
+    "observed": {
+      "arrowParent": "page:page",
+      "semanticConnections": 0,
+      "paintedArrow": true,
+      "escapesContainerBottom": true,
+      "arrowAboveContainer": true
+    },
+    "desired": {
+      "arrowParent": "page:page",
+      "semanticConnections": 0,
+      "paintedArrow": true,
+      "escapesContainerBottom": true,
+      "arrowAboveContainer": true
+    },
+    "ok": true
+  },
+  {
+    "id": "CLEAN",
+    "label": "the real canvas journey raised no console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

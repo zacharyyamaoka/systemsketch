@@ -192,10 +192,12 @@ async function main() {
       editor.setCurrentPage(firstPage)
       editor.selectNone()
       editor.zoomToFit({ animation: { duration: 0 } })
-      return JSON.stringify({ firstPage, snapshot: JSON.stringify(editor.getSnapshot()) })
+      return JSON.stringify({ firstPage })
     })()`))
-    const before = setup.snapshot
+    // Branch arm records materialize on the first layout pass. Wait for that
+    // one-time migration before taking the immutable-export baseline.
     await delay(400)
+    const before = await evaluate(page, `JSON.stringify(window.__systemsketch.editor.getSnapshot())`)
 
     await clickElement(page, '[data-testid="systemsketch-share-button"]')
     await waitFor(page, `document.querySelector('[data-testid="systemsketch-share-menu"]')`, 'Share and export menu')

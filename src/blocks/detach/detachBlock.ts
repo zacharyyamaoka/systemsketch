@@ -10,7 +10,7 @@
  *
  * The contract, which is also what the menu item promises:
  *
- *   keeps    the look, the position, the parent, and the cables as arrows
+ *   keeps    the look, the page position, and the cables as arrows
  *   gives up Block behaviour, semantic port identity, and live layout
  *
  * What this adds over the pyblocks donor is the second half of the sentence in
@@ -107,7 +107,14 @@ export function detachBlockToPrimitives(
 	// Which dots detach filled: the ports a cable is welded to right now.
 	const wiring = getBlockPortConnections(editor, block.id)
 	const connectedPortIds = new Set(wiring.map((entry) => entry.ownPortId))
-	const { shapes, cardId, portRows } = primitivesWithMeta(block, connectedPortIds)
+	// A detached Block is a loose stock rectangle and a stock group, not a
+	// frame child. Keeping it beneath an Expanded Block / region would let that
+	// ancestor clip its card and arrows before its ordinary z-order can help.
+	// Walk every ancestor because a group may sit between the Block and a frame.
+	const primitiveParentId = unframedPrimitiveParentId(editor, block.parentId)
+	const blockPageOrigin = editor.getShapePageTransform(block).applyToPoint({ x: 0, y: 0 })
+	const origin = pointInParentSpace(editor, primitiveParentId, blockPageOrigin)
+	const { shapes, cardId, portRows } = primitivesWithMeta(block, connectedPortIds, origin)
 	const shapeIds = shapes.map((partial) => partial.id as TLShapeId)
 
 	// Everything a cable needs to come back, read while the cable still exists.
@@ -132,16 +139,15 @@ export function detachBlockToPrimitives(
 	let groupId: TLShapeId | null = null
 	const portGroupIds: TLShapeId[] = []
 	editor.run(() => {
-		// A Block can be a child of an Expanded frame, and `primitivesForBlock`
-		// positions everything in the Block's own coordinates — parent-local.
-		// Creating the primitives under the same parent keeps those coordinates
-		// meaning what they meant; at page level this changes nothing.
-		editor.createShapes(shapes.map((partial) => ({ ...partial, parentId: block.parentId })))
+		// Stock primitives leave every frame-like ancestor. Their coordinates were
+		// projected into `primitiveParentId` above, so their page pose is unchanged
+		// while they become normal, independently stackable tldraw shapes.
+		editor.createShapes(shapes.map((partial) => ({ ...partial, parentId: primitiveParentId })))
 
 		for (const cable of cables) {
 			if (!cable.connection || !cable.ownPoint) continue
 			detachedConnections += rebuildCableAsArrow(editor, {
-				block, cardId, cable,
+				block, cardId, cable, parentId: primitiveParentId,
 			})
 		}
 
@@ -163,9 +169,9 @@ export function detachBlockToPrimitives(
 
 		// An Expanded frame's children are real shapes, not part of its look, and
 		// deleting the Block deletes every descendant. Hand the survivors to the
-		// frame's own parent first; page positions are preserved.
+		// ordinary primitive parent first; page positions are preserved.
 		const childIds = editor.getSortedChildIdsForParent(block.id)
-		if (childIds.length > 0) editor.reparentShapes([...childIds], block.parentId)
+		if (childIds.length > 0) editor.reparentShapes([...childIds], primitiveParentId)
 
 		editor.deleteShape(block.id)
 
@@ -228,8 +234,12 @@ export function detachBlockToPrimitives(
 	return { groupId, portGroupIds, cardId, shapeIds, detachedConnections }
 }
 
-function primitivesWithMeta(block: BlockShape, connectedPortIds: ReadonlySet<string>) {
-	const built = primitivesForBlock(block.props, { x: block.x, y: block.y }, connectedPortIds)
+function primitivesWithMeta(
+	block: BlockShape,
+	connectedPortIds: ReadonlySet<string>,
+	origin: { x: number; y: number },
+) {
+	const built = primitivesForBlock(block.props, origin, connectedPortIds)
 	// The card is marked so a rebuild can find the anchor inside the group
 	// without storing an id — ids are re-minted by copy, paste and duplicate,
 	// and `meta` is not.
@@ -249,6 +259,7 @@ function rebuildCableAsArrow(
 	input: {
 		block: BlockShape
 		cardId: TLShapeId
+		parentId: TLShape['parentId']
 		cable: {
 			entry: ReturnType<typeof getBlockPortConnections>[number]
 			connection: TLShape | undefined
@@ -257,7 +268,7 @@ function rebuildCableAsArrow(
 		}
 	},
 ): number {
-	const { block, cardId, cable } = input
+	const { block, cardId, cable, parentId } = input
 	if (!cable.connection || !cable.ownPoint) return 0
 	const layout = layoutBlock(block.props)
 	const ownPort = getBlockConnectionPorts(block.props, { includeHidden: true })
@@ -284,13 +295,13 @@ function rebuildCableAsArrow(
 	}
 
 	const routing = (cable.connection.props as { routing?: ConnectionRoutingKind }).routing ?? 'elbow'
-	const localStart = pointInParentSpace(editor, cable.connection.parentId, start)
-	const localEnd = pointInParentSpace(editor, cable.connection.parentId, end)
+	const localStart = pointInParentSpace(editor, parentId, start)
+	const localEnd = pointInParentSpace(editor, parentId, end)
 	const arrowId = createShapeId()
 	editor.createShape({
 		id: arrowId,
 		type: 'arrow',
-		parentId: cable.connection.parentId,
+		parentId,
 		x: localStart.x,
 		y: localStart.y,
 		props: {
@@ -321,6 +332,7 @@ function rebuildCableAsArrow(
 	})
 	const pillGroupId = createDetachedDelayPill(editor, {
 		arrowId,
+		parentId,
 		connection: cable.connection as ConnectionShape,
 		start: localStart,
 		end: localEnd,
@@ -376,6 +388,27 @@ function pointInParentSpace(
 }
 
 /**
+ * Return the closest normal parent outside every frame-like ancestor.
+ *
+ * Detached shapes are explicitly not children of Frames, Expanded Blocks,
+ * Branches, Loops, or nested frame/group combinations: frames clip descendants
+ * before z-order is considered. A normal group remains a valid parent unless
+ * it itself sits beneath one of those frame-like containers.
+ */
+function unframedPrimitiveParentId(
+	editor: Editor,
+	parentId: TLShape['parentId'],
+): TLShape['parentId'] {
+	let result = parentId
+	let parent = editor.getShape(parentId)
+	while (parent) {
+		if (editor.isShapeFrameLike(parent)) result = parent.parentId
+		parent = editor.getShape(parent.parentId)
+	}
+	return result
+}
+
+/**
  * Stock tldraw has no inline delay pill. Lower it to the most literal stock
  * composition instead: an independent oval and text label beside a dotted
  * arrow. Both still render in a viewer that ignores every metadata key.
@@ -384,12 +417,13 @@ function createDetachedDelayPill(
 	editor: Editor,
 	input: {
 		arrowId: TLShapeId
+		parentId: TLShape['parentId']
 		connection: ConnectionShape
 		start: { x: number; y: number }
 		end: { x: number; y: number }
 	},
 ): TLShapeId | null {
-	const { arrowId, connection, start, end } = input
+	const { arrowId, parentId, connection, start, end } = input
 	if (connection.props.temporal !== 'delayed') return null
 	const label = `z⁻¹${connection.props.delayValue ? ` = ${connection.props.delayValue}` : ''}`
 	const fraction = Math.min(0.9, Math.max(0.1, connection.props.pillPosition))
@@ -405,7 +439,7 @@ function createDetachedDelayPill(
 		{
 			id: pillId,
 			type: 'geo',
-			parentId: connection.parentId,
+			parentId,
 			x: point.x - width / 2,
 			y: point.y - height - 10,
 			props: { geo: 'oval', w: width, h: height, color: 'grey', fill: 'semi', dash: 'solid', size: 's' },
@@ -413,7 +447,7 @@ function createDetachedDelayPill(
 		{
 			id: labelId,
 			type: 'text',
-			parentId: connection.parentId,
+			parentId,
 			x: point.x - width / 2 + 8,
 			y: point.y - height - 4,
 			props: {
@@ -530,14 +564,15 @@ export function detachConnectionToArrow(
 
 	const arrowId = createShapeId()
 	const routing = connection.props.routing
+	const primitiveParentId = unframedPrimitiveParentId(editor, connection.parentId)
 	const localPoints = {
-		start: pointInParentSpace(editor, connection.parentId, pagePoints.start),
-		end: pointInParentSpace(editor, connection.parentId, pagePoints.end),
+		start: pointInParentSpace(editor, primitiveParentId, pagePoints.start),
+		end: pointInParentSpace(editor, primitiveParentId, pagePoints.end),
 	}
 	editor.createShape({
 		id: arrowId,
 		type: 'arrow',
-		parentId: connection.parentId,
+		parentId: primitiveParentId,
 		x: localPoints.start.x,
 		y: localPoints.start.y,
 		props: {
@@ -567,6 +602,7 @@ export function detachConnectionToArrow(
 	})
 	const pillGroupId = createDetachedDelayPill(editor, {
 		arrowId,
+		parentId: primitiveParentId,
 		connection,
 		start: localPoints.start,
 		end: localPoints.end,
