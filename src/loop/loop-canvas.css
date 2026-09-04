@@ -49,10 +49,10 @@
 }
 
 /*
- * Centred, because an operator's name belongs over the middle of it — and
- * bounded, because the header's three tenants share one row. Every one of them
- * truncates rather than crossing a neighbour; the full string stays available
- * as a tooltip.
+ * Centred whenever its full text has a protected lane around the Loop's true
+ * midpoint. In a compact Loop the layout moves it into the remaining lane so
+ * the header's three tenants never cross; the full string remains available as
+ * a tooltip there.
  */
 .systemsketch-loop-canvas .Loop-title {
   position: absolute;
