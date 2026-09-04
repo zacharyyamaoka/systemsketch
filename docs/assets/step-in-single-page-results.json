@@ -82,6 +82,44 @@
       "ok": true
     },
     {
+      "id": "M10",
+      "label": "secondary page camera landmarks merge into the one board with stable collision names",
+      "observed": [
+        [
+          "overview",
+          "Overview"
+        ],
+        [
+          "page-legacy-runtime:overview",
+          "Runtime · Overview"
+        ]
+      ],
+      "desired": [
+        [
+          "overview",
+          "Overview"
+        ],
+        [
+          "page-legacy-runtime:overview",
+          "Runtime · Overview"
+        ]
+      ],
+      "ok": true
+    },
+    {
+      "id": "M11",
+      "label": "every removed page keeps unrelated metadata on its replacement Frame",
+      "observed": [
+        "architecture",
+        "runtime"
+      ],
+      "desired": [
+        "architecture",
+        "runtime"
+      ],
+      "ok": true
+    },
+    {
       "id": "I1",
       "label": "Step In removes unrelated shapes from the rendered board",
       "observed": true,

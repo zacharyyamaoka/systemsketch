@@ -85,6 +85,11 @@ async function main() {
     assert.equal(saved.entry.name, 'Runtime focus')
     assert.equal(saved.selected, 'shape:ingest')
     pass('Save captures the current board camera in board metadata without clearing selection')
+    await evaluate(app.page, `(() => { window.__systemsketch.editor.undo(); return true })()`)
+    await waitFor(app.page, 'document.querySelectorAll(\'[data-testid^="systemsketch-landmark-jump-"]\').length === 0', 'undo to remove the saved view')
+    await evaluate(app.page, `(() => { window.__systemsketch.editor.redo(); return true })()`)
+    await waitFor(app.page, 'document.querySelectorAll(\'[data-testid^="systemsketch-landmark-jump-"]\').length === 1', 'redo to restore the saved view')
+    pass('Save is one ordinary tldraw undo/redo step, independent of the fixture canvas')
     await evaluate(app.page, `(() => { window.__systemsketch.editor.zoomToFit({ animation: { duration: 0 } }); return true })()`)
     await evaluate(app.page, `(() => {
       if (!document.querySelector('[data-testid="systemsketch-right-popout"][data-surface="board-overview"]')) {
@@ -129,6 +134,31 @@ async function main() {
     await waitFor(app.page, 'document.querySelector(\'[data-testid="systemsketch-named-landmarks-empty"]\')', 'the empty panel after deletion')
     assert.equal(await evaluate(app.page, `window.__systemsketch.editor.getCurrentPage().meta.systemSketchLandmarks.landmarks.length`), 0)
     pass('The same panel renames and explicitly deletes the board-owned landmark')
+
+    await evaluate(app.page, `(() => {
+      const editor = window.__systemsketch.editor
+      editor.updatePage({ id: editor.getCurrentPageId(), meta: { systemSketchLandmarks: { version: 9, landmarks: [{ opaque: true }] } } })
+      return true
+    })()`)
+    await waitFor(app.page, `document.querySelector('.systemsketch-named-landmarks__status')?.textContent.includes('unknown format')
+      && document.querySelector('[data-testid="systemsketch-landmark-save"]')?.disabled`, 'the protected future-format message')
+    await clickElement(app.page, '[data-testid="systemsketch-landmark-name"]')
+    await shortcut(app.page, 'a', 'KeyA', 2)
+    await typeSlowly(app.page, 'Keep this name')
+    await key(app.page, 'Enter', 'Enter')
+    assert.equal(await evaluate(app.page, `document.querySelector('[data-testid="systemsketch-landmark-name"]').value`), 'Keep this name')
+    assert.equal(await evaluate(app.page, `window.__systemsketch.editor.getCurrentPage().meta.systemSketchLandmarks.version`), 9)
+    pass('Unknown saved-view metadata disables writes, explains why, and preserves entered text')
+
+    await evaluate(app.page, `(() => {
+      const editor = window.__systemsketch.editor
+      editor.updatePage({ id: editor.getCurrentPageId(), meta: { systemSketchLandmarks: { version: 1, landmarks: [] } } })
+      editor.updateInstanceState({ isReadonly: true })
+      return true
+    })()`)
+    await waitFor(app.page, `document.querySelector('.systemsketch-named-landmarks__status')?.textContent.includes('read-only')
+      && document.querySelector('[data-testid="systemsketch-landmark-save"]')?.disabled`, 'the read-only saved-view message')
+    pass('Read-only documents visibly prevent landmark writes rather than claiming a save')
 
     assert.deepEqual(localConsoleErrors(app.page), [])
     pass('The saved-view journey has no browser console errors')

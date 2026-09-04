@@ -87,13 +87,24 @@ async function main() {
     await evaluate(page, `(() => {
       const editor = window.__systemsketch.editor
       const first = editor.getCurrentPageId()
-      editor.updatePage({ id: first, name: 'Architecture' })
+      editor.updatePage({ id: first, name: 'Architecture', meta: {
+        owner: { team: 'architecture' },
+        systemSketchLandmarks: { version: 1, landmarks: [{
+          id: 'overview', name: 'Overview', camera: { x: 40, y: 50, z: 1 },
+        }] },
+      } })
       editor.createShape({
         id: 'shape:architecture-service', type: 'geo', x: 120, y: 120,
         props: { geo: 'rectangle', w: 240, h: 140, color: 'blue' },
       })
       editor.createPage({ id: 'page:legacy-runtime', name: 'Runtime' })
       editor.setCurrentPage('page:legacy-runtime')
+      editor.updatePage({ id: 'page:legacy-runtime', name: 'Runtime', meta: {
+        owner: { team: 'runtime' },
+        systemSketchLandmarks: { version: 1, landmarks: [{
+          id: 'overview', name: 'Overview', camera: { x: 80, y: 90, z: 0.5 },
+        }] },
+      } })
       editor.createShape({
         id: 'shape:runtime-worker', type: 'geo', x: 80, y: 100,
         props: { geo: 'ellipse', w: 210, h: 150, color: 'orange' },
@@ -138,6 +149,8 @@ async function main() {
         })),
         depthInMenu: Boolean(document.querySelector('.systemsketch-top-left-shell .systemsketch-depth-navigator--menu')),
         stockPageTrigger: Boolean(document.querySelector('.tlui-page-menu__trigger')),
+        landmarks: editor.getCurrentPage().meta?.systemSketchLandmarks?.landmarks ?? [],
+        sourceMetadata: frames.map((frame) => frame.meta?.systemSketch?.sourcePageMeta?.owner?.team),
       }
     })()`)
     check('M2', 'the product exposes exactly one durable canvas', migration.pageCount, 1)
@@ -164,6 +177,11 @@ async function main() {
         && record.type === 'frame'
         && record.meta?.systemSketch?.kind === 'imported-page').length,
     2)
+    check('M10', 'secondary page camera landmarks merge into the one board with stable collision names',
+      migration.landmarks.map((entry) => [entry.id, entry.name]),
+      [['overview', 'Overview'], ['page-legacy-runtime:overview', 'Runtime · Overview']])
+    check('M11', 'every removed page keeps unrelated metadata on its replacement Frame', migration.sourceMetadata,
+      ['architecture', 'runtime'])
     await evaluate(page, `window.__systemsketch.editor.zoomToFit({ animation: { duration: 0 } }); true`)
     await delay(300)
     await screenshot(page, MIGRATION_SHOT)

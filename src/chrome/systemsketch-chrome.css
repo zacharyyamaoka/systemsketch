@@ -376,6 +376,16 @@
   line-height: 1.45;
 }
 
+.systemsketch-named-landmarks__status {
+  margin: 7px 0 0;
+  padding: 6px 7px;
+  border-radius: 7px;
+  color: var(--ss-warning);
+  background: var(--ss-warning-soft);
+  font-size: 9px;
+  line-height: 1.4;
+}
+
 .systemsketch-named-landmarks__save {
   margin-top: 10px;
 }
@@ -428,6 +438,12 @@
 
 .systemsketch-named-landmarks__save button:hover {
   filter: brightness(1.08);
+}
+
+.systemsketch-named-landmarks button:disabled,
+.systemsketch-named-landmarks input:disabled {
+  cursor: not-allowed;
+  opacity: .52;
 }
 
 .systemsketch-named-landmarks__save p,

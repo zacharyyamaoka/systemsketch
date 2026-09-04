@@ -4,6 +4,7 @@ import {
   addBoardLandmark,
   focusBoardLandmark,
   getBoardLandmarks,
+  getBoardLandmarkState,
   removeBoardLandmark,
   renameBoardLandmark,
   suggestedLandmarkName,
@@ -14,10 +15,14 @@ function failureMessage(result: LandmarkMutation): string | null {
   if (result.ok) return null
   if (result.reason === 'duplicate-name') return 'Choose a distinct landmark name.'
   if (result.reason === 'invalid-name') return 'Enter a name (up to 80 characters).'
+  if (result.reason === 'unsupported-version') return 'Saved views use a newer format. They were not changed.'
+  if (result.reason === 'malformed') return 'Saved-view metadata needs repair before it can be changed.'
+  if (result.reason === 'readonly') return 'This document is read-only. Saved views were not changed.'
+  if (result.reason === 'unchanged') return null
   return 'That landmark no longer exists.'
 }
 
-function SaveCurrentView() {
+function SaveCurrentView({ locked }: { locked: boolean }) {
   const editor = useEditor()
   const landmarks = useValue(
     'named landmark suggestions',
@@ -32,6 +37,10 @@ function SaveCurrentView() {
   }, [landmarks, name])
 
   const save = () => {
+    if (locked) {
+      setMessage('Saved views cannot be changed in this document state.')
+      return
+    }
     const result = addBoardLandmark(editor, name)
     if (!result.ok) {
       setMessage(failureMessage(result))
@@ -56,14 +65,14 @@ function SaveCurrentView() {
           placeholder="Landmark name"
           onChange={(event) => { setName(event.currentTarget.value); setMessage(null) }}
         />
-        <button type="submit" data-testid="systemsketch-landmark-save">Save</button>
+        <button type="submit" data-testid="systemsketch-landmark-save" disabled={locked}>Save</button>
       </div>
       {message ? <p role="alert">{message}</p> : null}
     </form>
   )
 }
 
-function LandmarkRow({ id, name }: { id: string; name: string }) {
+function LandmarkRow({ id, name, locked }: { id: string; name: string; locked: boolean }) {
   const editor = useEditor()
   const [draft, setDraft] = useState(name)
   const [message, setMessage] = useState<string | null>(null)
@@ -74,7 +83,7 @@ function LandmarkRow({ id, name }: { id: string; name: string }) {
     const result = renameBoardLandmark(editor, id, draft)
     if (!result.ok) {
       setMessage(failureMessage(result))
-      setDraft(name)
+      if (result.reason !== 'unchanged') setDraft(name)
       return
     }
     setMessage(null)
@@ -96,6 +105,7 @@ function LandmarkRow({ id, name }: { id: string; name: string }) {
         aria-label={`Rename ${name}`}
         data-testid={`systemsketch-landmark-rename-${id}`}
         maxLength={80}
+        disabled={locked}
         value={draft}
         onBlur={rename}
         onChange={(event) => { setDraft(event.currentTarget.value); setMessage(null) }}
@@ -114,7 +124,11 @@ function LandmarkRow({ id, name }: { id: string; name: string }) {
         data-testid={`systemsketch-landmark-remove-${id}`}
         aria-label={`Delete ${name}`}
         title={`Delete ${name}`}
-        onClick={() => removeBoardLandmark(editor, id)}
+        disabled={locked}
+        onClick={() => {
+          const result = removeBoardLandmark(editor, id)
+          if (!result.ok) setMessage(failureMessage(result))
+        }}
       >×</button>
       {message ? <p role="alert">{message}</p> : null}
     </li>
@@ -135,6 +149,24 @@ export function NamedLandmarks() {
     () => getBoardLandmarks(editor),
     [editor],
   )
+  const state = useValue(
+    'named board landmark status',
+    () => getBoardLandmarkState(editor),
+    [editor],
+  )
+  const readonly = useValue(
+    'named board landmark readonly',
+    () => editor.getIsReadonly(),
+    [editor],
+  )
+  const locked = readonly || state.kind !== 'ready'
+  const status = readonly
+    ? 'This document is read-only. Saved views cannot be changed.'
+    : state.kind === 'unsupported-version'
+      ? 'Saved views use an unknown format. This panel will not overwrite them.'
+      : state.kind === 'malformed'
+        ? 'Saved-view metadata is malformed. This panel will not overwrite it.'
+        : null
 
   return (
     <section className="systemsketch-named-landmarks" aria-labelledby="systemsketch-named-landmarks-heading">
@@ -148,10 +180,11 @@ export function NamedLandmarks() {
       <p className="systemsketch-named-landmarks__intro">
         Named camera views travel with this board. They do not create pages or hierarchy.
       </p>
-      <SaveCurrentView />
+      {status ? <p className="systemsketch-named-landmarks__status" role="status">{status}</p> : null}
+      <SaveCurrentView locked={locked} />
       {landmarks.length ? (
         <ul data-testid="systemsketch-named-landmarks-list">
-          {landmarks.map((landmark) => <LandmarkRow key={landmark.id} {...landmark} />)}
+          {landmarks.map((landmark) => <LandmarkRow key={landmark.id} locked={locked} {...landmark} />)}
         </ul>
       ) : (
         <p className="systemsketch-named-landmarks__empty" data-testid="systemsketch-named-landmarks-empty">

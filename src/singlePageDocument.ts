@@ -8,6 +8,7 @@ import {
   type TLShapeId,
 } from 'tldraw'
 import { storedTextOr } from './textFidelity'
+import { mergeImportedPageLandmarks } from './landmarks/boardLandmarks'
 
 const FRAME_PADDING = 64
 const FRAME_GAP = 160
@@ -183,6 +184,11 @@ export function consolidateDocumentToSinglePage(editor: Editor): SinglePageConso
                 sourcePageId: plan.page.id,
                 sourcePageName: plan.page.name,
                 sourcePageIndex: String(plan.page.index),
+                // A removed tldraw page has nowhere else to carry arbitrary
+                // metadata. Keep it on the Frame that now represents that
+                // page, even when one known feature (named landmarks) is
+                // lifted into the root board list below.
+                sourcePageMeta: plan.page.meta,
               },
             },
           })
@@ -197,6 +203,14 @@ export function consolidateDocumentToSinglePage(editor: Editor): SinglePageConso
           })
         }
         relocatePageRecords(editor, plans, rootPage.id)
+        const mergedLandmarkMeta = mergeImportedPageLandmarks(rootPage, plans.map((plan) => ({
+          page: plan.page,
+          displacement: {
+            x: plan.destination.x - plan.initial.x,
+            y: plan.destination.y - plan.initial.y,
+          },
+        })))
+        if (mergedLandmarkMeta) editor.updatePage({ id: rootPage.id, meta: mergedLandmarkMeta })
         for (const page of pages.slice(1)) editor.deletePage(page.id)
         editor.setCurrentPage(rootPage.id)
         editor.selectNone()
