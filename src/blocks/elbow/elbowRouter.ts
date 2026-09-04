@@ -34,6 +34,14 @@
  */
 
 import { BinaryHeap } from './binaryHeap'
+import {
+	hasElbowSoftClearancePreference,
+	resolveElbowSoftClearanceOptions,
+	softClearanceCost,
+	softClearanceGuideLines,
+	type ElbowSoftClearanceOptions,
+	type ElbowSoftRoute,
+} from './softClearance'
 import type {
   ElbowAxis,
   ElbowBounds,
@@ -99,6 +107,16 @@ export interface ElbowRouteOptions {
   cornerRadius: number
 }
 
+/**
+ * Local, non-blocking cable references for an automatic route. This only
+ * participates when supplied by an explicit caller such as Tidy edges; normal
+ * live routing remains the legacy one-edge planner.
+ */
+export interface ElbowRouteSoftClearance {
+	routes: readonly ElbowSoftRoute[]
+	options?: Partial<ElbowSoftClearanceOptions>
+}
+
 export const DEFAULT_ELBOW_OPTIONS: ElbowRouteOptions = {
   padding: 24,
   legLength: 20,
@@ -111,9 +129,11 @@ export interface ElbowRouteInput {
   end: ElbowEndpoint
   /** Boxes to steer around, in addition to the two endpoints' own boxes. */
   obstacles?: readonly ElbowRoutingObstacle[]
-  /** User-dragged bends. Indices address the *auto* route's segments. */
-  pins?: readonly ElbowPin[]
-  options?: Partial<ElbowRouteOptions>
+	/** User-dragged bends. Indices address the *auto* route's segments. */
+	pins?: readonly ElbowPin[]
+	options?: Partial<ElbowRouteOptions>
+	/** Optional local preference for clearing nearby automatic cables. */
+	softClearance?: ElbowRouteSoftClearance
 }
 
 export interface ElbowSegment {
@@ -348,12 +368,17 @@ function search(
   end: GridNode,
   grid: Grid,
   startSide: ElbowSide,
-  endSide: ElbowSide,
-  keepOuts: readonly ElbowBounds[],
+	endSide: ElbowSide,
+	keepOuts: readonly ElbowBounds[],
+	softClearance: ElbowRouteSoftClearance | undefined,
 ): GridNode[] | null {
   const bendPenalty = manhattan(start.pos, end.pos)
   const open = new BinaryHeap<GridNode>((node) => node.f)
   open.push(start)
+  const softOptions = softClearance
+    ? resolveElbowSoftClearanceOptions(softClearance.options)
+    : null
+  const softEnabled = softOptions !== null && hasElbowSoftClearancePreference(softOptions)
 
   while (open.size > 0) {
     const current = open.pop()
@@ -385,10 +410,17 @@ function search(
       const throughEnd = neighbour === end && side === endSide
       if (reversing || backIntoStart || throughEnd) continue
 
-      const turned = previousSide !== side
-      const gScore = current.g
-        + manhattan(neighbour.pos, current.pos)
-        + (turned ? bendPenalty ** 3 : 0)
+			const turned = previousSide !== side
+			const softCost = softEnabled
+				? softClearanceCost([current.pos, neighbour.pos], softClearance!.routes, softOptions!)
+				: 0
+			const gScore = current.g
+				+ manhattan(neighbour.pos, current.pos)
+				+ (turned ? bendPenalty ** 3 : 0)
+				// Soft policy is expressed in bend-equivalents. Scaling it by this
+				// route's own bend cost makes the same knobs meaningful on both a
+				// compact card pair and a wide expanded Block.
+				+ softCost * bendPenalty ** 3
 
       if (neighbour.visited && gScore >= neighbour.g) continue
 
@@ -701,8 +733,9 @@ function attemptRoute(
   start: ElbowEndpoint,
   end: ElbowEndpoint,
   obstacleBounds: readonly ElbowBounds[],
-  options: ElbowRouteOptions,
-  reach: 'midline' | 'tight',
+	options: ElbowRouteOptions,
+	reach: 'midline' | 'tight',
+	softClearance: ElbowRouteSoftClearance | undefined,
 ): Attempt {
   // Keep-outs are built from the *raw* boxes. Inflating first and clamping
   // afterwards looks equivalent and is not: two blocks 30px apart, each already
@@ -742,16 +775,22 @@ function attemptRoute(
   const midXs = [(startElement[2] + endElement[0]) / 2, (startElement[0] + endElement[2]) / 2]
   const midYs = [(startElement[3] + endElement[1]) / 2, (startElement[1] + endElement[3]) / 2]
 
-  const grid = buildGrid(
+	const softGuides = softClearance
+		? softClearanceGuideLines(
+			softClearance.routes,
+			resolveElbowSoftClearanceOptions(softClearance.options),
+		)
+		: { xs: [], ys: [] }
+	const grid = buildGrid(
     keepOuts,
     startDongle,
     start.side,
     endDongle,
     end.side,
-    outer,
-    options.gridSnap,
-    midXs,
-    midYs,
+		outer,
+		options.gridSnap,
+		[...midXs, ...softGuides.xs],
+		[...midYs, ...softGuides.ys],
   )
   const startNode = gridNodeForPoint(startDongle, grid)
   const endNode = gridNodeForPoint(endDongle, grid)
@@ -766,7 +805,7 @@ function attemptRoute(
     || pointInsideBounds(endDongle, startKeepOut)
   const searchKeepOuts = swallowed ? live : keepOuts
 
-  const path = search(startNode, endNode, grid, start.side, end.side, searchKeepOuts)
+	const path = search(startNode, endNode, grid, start.side, end.side, searchKeepOuts, softClearance)
   if (!path) return { points: null }
   return { points: [start.point, ...path.map((node) => ({ ...node.pos })), end.point] }
 }
@@ -796,19 +835,33 @@ function routeQuality(points: readonly ElbowPoint[]): { bends: number; length: n
   }
 }
 
-function betterRoute(first: ElbowPoint[], second: ElbowPoint[]): ElbowPoint[] {
-  const firstQuality = routeQuality(first)
-  const secondQuality = routeQuality(second)
-  if (secondQuality.bends < firstQuality.bends) return second
-  if (secondQuality.bends > firstQuality.bends) return first
-  return secondQuality.length + 1e-6 < firstQuality.length ? second : first
+function betterRoute(
+	first: ElbowPoint[],
+	second: ElbowPoint[],
+	softClearance: ElbowRouteSoftClearance | undefined,
+): ElbowPoint[] {
+	const firstQuality = routeQuality(first)
+	const secondQuality = routeQuality(second)
+	if (softClearance) {
+		const options = resolveElbowSoftClearanceOptions(softClearance.options)
+		const firstSoftCost = softClearanceCost(first, softClearance.routes, options)
+		const secondSoftCost = softClearanceCost(second, softClearance.routes, options)
+		const firstScore = firstQuality.bends + firstSoftCost
+		const secondScore = secondQuality.bends + secondSoftCost
+		if (secondScore + 1e-6 < firstScore) return second
+		if (firstScore + 1e-6 < secondScore) return first
+	}
+	if (secondQuality.bends < firstQuality.bends) return second
+	if (secondQuality.bends > firstQuality.bends) return first
+	return secondQuality.length + 1e-6 < firstQuality.length ? second : first
 }
 
 function autoPoints(
   start: ElbowEndpoint,
   end: ElbowEndpoint,
-  obstacles: readonly ElbowRoutingObstacle[],
-  options: ElbowRouteOptions,
+	obstacles: readonly ElbowRoutingObstacle[],
+	options: ElbowRouteOptions,
+	softClearance: ElbowRouteSoftClearance | undefined,
 ): { points: ElbowPoint[]; fallback: boolean } {
   const obstacleBounds = obstacles.map((rect) => expandBounds(
     boundsOfRect(rect),
@@ -824,20 +877,22 @@ function autoPoints(
     return { points: selfLoop, fallback: false }
   }
 
-  const midline = attemptRoute(start, end, obstacleBounds, options, 'midline')
+	const midline = attemptRoute(start, end, obstacleBounds, options, 'midline', softClearance)
   const clearMidline = midline.points && !polylineHits(midline.points, obstacleBounds)
     ? midline.points
     : null
-  if (clearMidline && obstacleBounds.length === 0) {
-    return { points: clearMidline, fallback: false }
-  }
+	const hasSoftPreference = softClearance
+		&& hasElbowSoftClearancePreference(resolveElbowSoftClearanceOptions(softClearance.options))
+	if (clearMidline && obstacleBounds.length === 0 && !hasSoftPreference) {
+		return { points: clearMidline, fallback: false }
+	}
 
-  const tight = attemptRoute(start, end, obstacleBounds, options, 'tight')
+	const tight = attemptRoute(start, end, obstacleBounds, options, 'tight', softClearance)
   const clearTight = tight.points && !polylineHits(tight.points, obstacleBounds)
     ? tight.points
     : null
-  if (clearMidline && clearTight) {
-    return { points: betterRoute(clearMidline, clearTight), fallback: false }
+	if (clearMidline && clearTight) {
+		return { points: betterRoute(clearMidline, clearTight, softClearance), fallback: false }
   }
   if (clearMidline) return { points: clearMidline, fallback: false }
   if (clearTight) return { points: clearTight, fallback: false }
@@ -924,7 +979,7 @@ export function routeElbow(input: ElbowRouteInput): ElbowRoute {
     return degenerate(start.point)
   }
 
-  const auto = autoPoints(start, end, input.obstacles ?? [], options)
+	const auto = autoPoints(start, end, input.obstacles ?? [], options, input.softClearance)
   const basePoints = dropCollinear(dedupe(auto.points))
 
   const pins = input.pins ?? []

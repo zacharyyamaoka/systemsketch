@@ -1,0 +1,59 @@
+{
+  "feature": "Tidy soft cable clearance",
+  "viewport": { "width": 2048, "height": 1040 },
+  "pages": [{ "id": "review", "name": "Tidy soft clearance" }],
+  "shapes": [
+    {
+      "id": "call", "type": "block", "pageId": "review", "x": 90, "y": 92,
+      "props": {
+        "title": "call()", "description": "Lowered add() cable-clearance review", "blockType": "Function", "view": "expanded", "w": 1360, "h": 600,
+        "inputs": [
+          { "id": "self", "name": "self", "type": "Self", "visible": true },
+          { "id": "frame", "name": "frame", "type": "Frame", "visible": true },
+          { "id": "gain", "name": "gain", "type": "Float", "visible": true }
+        ],
+        "outputs": [{ "id": "pose", "name": "pose", "type": "Pose", "visible": true }]
+      }
+    },
+    {
+      "id": "splitter", "type": "block", "parentId": "call", "x": 170, "y": 84,
+      "props": { "title": "splitter", "view": "port", "w": 210, "h": 140,
+        "inputs": [{ "id": "in_1", "name": "in_1", "type": "Self", "visible": true }],
+        "outputs": [{ "id": "quality", "name": "quality", "type": "Float", "visible": true }]
+      }
+    },
+    {
+      "id": "add", "type": "block", "parentId": "call", "x": 470, "y": 170,
+      "props": { "title": "add", "view": "port", "w": 220, "h": 150,
+        "inputs": [{ "id": "in_1", "name": "in_1", "type": "Float", "visible": true }, { "id": "in_2", "name": "in_2", "type": "Float", "visible": true }],
+        "outputs": [{ "id": "out", "name": "out", "type": "Float", "visible": true }]
+      }
+    },
+    {
+      "id": "adjust", "type": "block", "parentId": "call", "x": 820, "y": 135,
+      "props": { "title": "adjust", "view": "port", "w": 230, "h": 165,
+        "inputs": [{ "id": "in_1", "name": "in_1", "type": "Float", "visible": true }, { "id": "in_2", "name": "in_2", "type": "Frame", "visible": true }],
+        "outputs": [{ "id": "out", "name": "out", "type": "Pose", "visible": true }]
+      }
+    },
+    { "id": "self-edge", "type": "connection", "parentId": "call", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "routeMode": "automatic" } },
+    { "id": "quality-edge", "type": "connection", "parentId": "call", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "routeMode": "automatic" } },
+    { "id": "gain-edge", "type": "connection", "parentId": "call", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "routeMode": "automatic" } },
+    { "id": "frame-edge", "type": "connection", "parentId": "call", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "routeMode": "automatic" } },
+    { "id": "add-out-edge", "type": "connection", "parentId": "call", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "routeMode": "automatic" } },
+    { "id": "pose-edge", "type": "connection", "parentId": "call", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "routeMode": "automatic" } }
+  ],
+  "bindings": [
+    { "type": "connection", "fromId": "self-edge", "toId": "call", "props": { "portId": "self", "terminal": "start", "face": "inner" } }, { "type": "connection", "fromId": "self-edge", "toId": "splitter", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "quality-edge", "toId": "splitter", "props": { "portId": "quality", "terminal": "start", "face": "outer" } }, { "type": "connection", "fromId": "quality-edge", "toId": "add", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "gain-edge", "toId": "call", "props": { "portId": "gain", "terminal": "start", "face": "inner" } }, { "type": "connection", "fromId": "gain-edge", "toId": "add", "props": { "portId": "in_2", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "frame-edge", "toId": "call", "props": { "portId": "frame", "terminal": "start", "face": "inner" } }, { "type": "connection", "fromId": "frame-edge", "toId": "adjust", "props": { "portId": "in_2", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "add-out-edge", "toId": "add", "props": { "portId": "out", "terminal": "start", "face": "outer" } }, { "type": "connection", "fromId": "add-out-edge", "toId": "adjust", "props": { "portId": "in_1", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "pose-edge", "toId": "adjust", "props": { "portId": "out", "terminal": "start", "face": "outer" } }, { "type": "connection", "fromId": "pose-edge", "toId": "call", "props": { "portId": "pose", "terminal": "end", "face": "inner" } }
+  ],
+  "callouts": [
+    { "id": "step-1", "kind": "step", "text": "1 · Click call() to select its direct interior edge scope.", "x": 1510, "y": 120, "w": 430, "h": 110, "target": { "shapeId": "call", "anchor": "right", "dy": -120 } },
+    { "id": "step-2", "kind": "step", "text": "2 · Press Ctrl+K, choose Tidy edges, then press Enter.", "x": 1510, "y": 300, "w": 430, "h": 110, "target": { "shapeId": "call", "anchor": "right", "dy": 30 } },
+    { "id": "pass", "kind": "pass", "text": "PASS WHEN · frame → adjust.in_2 clears gain → add.in_2 while add() stays lowered and every Block stays fixed.", "x": 1510, "y": 520, "w": 430, "h": 125 }
+  ]
+}

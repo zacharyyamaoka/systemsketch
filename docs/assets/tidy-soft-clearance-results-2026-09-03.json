@@ -1,0 +1,12 @@
+{
+  "beforeGap": 0.5597843517589844,
+  "afterGap": 100.0622219104178,
+  "beforeCrossing": true,
+  "afterCrossing": false,
+  "checks": [
+    "the lowered add() case removes the frame/gain crossing and improves its screen gap from 0.5597843517589844px to 100.0622219104178px without moving add()",
+    "the real canvas journey has no local console errors",
+    "the cold-reopened review fixture completes its visible select-call then Tidy interaction",
+    "the self-contained gallery renders the before/after proof and tuning controls in a real browser"
+  ]
+}

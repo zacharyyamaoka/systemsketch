@@ -5,6 +5,11 @@ import { boundsOfRect, boundsOverlap, pointInsideBounds } from './geometry'
 import type { ElbowEndpoint, ElbowRoute, ElbowRouteInput } from './elbowRouter'
 import { routeElbow, pinElbowSegment } from './elbowRouter'
 import { createPin, resolvePin } from './elbowPins'
+import {
+	resolveElbowSoftClearanceOptions,
+	softClearanceCost,
+	type ElbowSoftRoute,
+} from './softClearance'
 
 // --- fixtures ---------------------------------------------------------------
 
@@ -196,6 +201,51 @@ describe('routeElbow — obstacles', () => {
     expectOrthogonal(route)
     for (const obstacle of obstacles) expect(crosses(route, obstacle)).toBe(false)
   })
+})
+
+describe('routeElbow — soft cable clearance', () => {
+	it('prefers a clear equivalent rail, while zero weights reproduce the legacy route', () => {
+		const input: ElbowRouteInput = {
+			start: outPort(SOURCE),
+			end: inPort(translate(TARGET, 0, 160)),
+		}
+		const reference: ElbowSoftRoute = {
+			// This horizontal run intersects the unweighted mid-gap vertical rail.
+			points: [{ x: 160, y: 140 }, { x: 260, y: 140 }, { x: 260, y: 260 }, { x: 480, y: 260 }],
+		}
+		const baseline = routeElbow(input)
+		const weighted = resolveElbowSoftClearanceOptions({
+			clearance: 32,
+			nearMissWeight: 160,
+			crossingWeight: 640,
+		})
+		const soft = routeElbow({
+			...input,
+			softClearance: { routes: [reference], options: weighted },
+		})
+		const disabled = routeElbow({
+			...input,
+			softClearance: {
+				routes: [reference],
+				options: { clearance: 0, nearMissWeight: 0, crossingWeight: 0 },
+			},
+		})
+
+		expect(softClearanceCost(baseline.points, [reference], weighted)).toBeGreaterThan(0)
+		expect(softClearanceCost(soft.points, [reference], weighted)).toBeLessThan(
+			softClearanceCost(baseline.points, [reference], weighted),
+		)
+		expect(disabled.points).toEqual(baseline.points)
+		expectOrthogonal(soft)
+		expectEndpoints(soft, input)
+	})
+
+	it('never charges a shared terminal as a cable crossing', () => {
+		const options = resolveElbowSoftClearanceOptions({ clearance: 32, nearMissWeight: 160, crossingWeight: 640 })
+		const first = [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 80 }]
+		const second: ElbowSoftRoute = { points: [{ x: 100, y: 80 }, { x: 180, y: 80 }] }
+		expect(softClearanceCost(first, [second], options)).toBe(0)
+	})
 })
 
 describe('routeElbow — degenerate input', () => {

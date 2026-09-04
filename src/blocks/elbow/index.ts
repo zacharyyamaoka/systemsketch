@@ -64,6 +64,7 @@ export {
 
 export type {
   ElbowEndpoint,
+	ElbowRouteSoftClearance,
   ElbowRoutingObstacle,
   ElbowRoute,
   ElbowRouteInput,
@@ -71,6 +72,14 @@ export type {
   ElbowSegment,
 } from './elbowRouter'
 export { DEFAULT_ELBOW_OPTIONS, pinElbowSegment, routeElbow } from './elbowRouter'
+
+export type { ElbowSoftClearanceOptions, ElbowSoftRoute } from './softClearance'
+export {
+  DEFAULT_ELBOW_SOFT_CLEARANCE_OPTIONS,
+  hasElbowSoftClearancePreference,
+  resolveElbowSoftClearanceOptions,
+  softClearanceCost,
+} from './softClearance'
 
 export type { ElbowPathOptions } from './elbowPath'
 export { elbowPath, elbowPointAt, elbowRouteLength } from './elbowPath'

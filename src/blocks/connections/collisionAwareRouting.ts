@@ -14,6 +14,8 @@ import {
 	ELBOW_SIDE_DELTA,
 	nudgeRoutes,
 	routeElbow,
+	resolveElbowSoftClearanceOptions,
+	softClearanceCost,
 	type ElbowPoint,
 	type ElbowRect,
 	type ElbowRoutingObstacle,
@@ -163,6 +165,14 @@ export function stabilizeOrthogonalRoute(
 		&& Math.abs(previousEndsAt.x - plannedEndsAt.x) <= EPSILON
 		&& Math.abs(previousEndsAt.y - plannedEndsAt.y) <= EPSILON
 	if (!endpointsMatch || !routeClearsInput(previous, input)) return planned
+	if (input.softClearance) {
+		const softOptions = resolveElbowSoftClearanceOptions(input.softClearance.options)
+		const previousCost = softClearanceCost(previous.points, input.softClearance.routes, softOptions)
+		const plannedCost = softClearanceCost(planned.points, input.softClearance.routes, softOptions)
+		// Preserve the old automatic corridor only when it is not visibly worse.
+		// With both weights at zero these costs tie, preserving legacy stability.
+		if (previousCost > plannedCost + EPSILON) return planned
+	}
 	return {
 		...previous,
 		points: previous.points.map((point) => ({ ...point })),

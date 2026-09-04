@@ -19,6 +19,12 @@ import { getSelectedExpandedBlockLayoutScope } from '../expandedBlockLayoutScope
 import {
 	type ElbowRoute,
 	type ElbowRouteInput,
+	DEFAULT_ELBOW_SOFT_CLEARANCE_OPTIONS,
+	hasElbowSoftClearancePreference,
+	resolveElbowSoftClearanceOptions,
+	softClearanceCost,
+	type ElbowSoftClearanceOptions,
+	type ElbowSoftRoute,
 } from '../elbow'
 import {
 	getConnectionElbowRoute,
@@ -99,7 +105,15 @@ export function tidyEdgeRole(connection: ConnectionShape): TidyEdgeRole {
 
 export interface TidyEdgesOptions {
 	spacing?: number
+	/**
+	 * Local, non-blocking cable separation. Both weights are zeroable, which
+	 * restores the prior hard-obstacle-only Tidy planner exactly.
+	 */
+	softClearance?: Partial<ElbowSoftClearanceOptions>
 }
+
+/** Default preference used only by Tidy edges; ordinary live routing is unchanged. */
+export const DEFAULT_TIDY_SOFT_CLEARANCE_OPTIONS = DEFAULT_ELBOW_SOFT_CLEARANCE_OPTIONS
 
 export function tidyEdges(
 	editor: Editor,
@@ -131,28 +145,78 @@ export function tidyEdges(
 	const participants = connections.filter((connection) =>
 		movable.has(connection.id) || connection.props.routing === 'elbow')
 	const currentRoutes = participants.map((connection) => routeInPage(editor, connection))
-	const inputsByRoute: (ElbowRouteInput | undefined)[] = participants.map(() => undefined)
+	const scenesByRoute = participants.map((connection) => (
+		movable.has(connection.id) ? collectConnectionRoutingScene(editor, connection) : undefined
+	))
+	const inputsByRoute: (ElbowRouteInput | undefined)[] = scenesByRoute.map((scene) => scene?.input)
 	const lockedFlags = participants.map((connection) => !movable.has(connection.id))
 	let unresolved = 0
-	const plannedRoutes = participants.map((connection, index) => {
-		if (lockedFlags[index]) return currentRoutes[index]
-		const scene = collectConnectionRoutingScene(editor, connection)
-		inputsByRoute[index] = scene.input
-		const planned = planOrthogonalRoute(scene.input)
-		const stable = stabilizeOrthogonalRoute(currentRoutes[index], planned, scene.input)
+	// Establish an unweighted baseline first. The soft pass then compares only
+	// routes that actually enter the desired gap, keeping the local grid compact
+	// on dense boards and keeping the policy deterministic.
+	const baselineRoutes = participants.map((_, index) => (
+		lockedFlags[index] || !scenesByRoute[index]
+			? currentRoutes[index]
+			: planOrthogonalRoute(scenesByRoute[index]!.input)
+	))
+	const softOptions = resolveElbowSoftClearanceOptions(options.softClearance)
+	const softEnabled = hasElbowSoftClearancePreference(softOptions)
+	const plannedRoutes = baselineRoutes.map((route) => route)
+	// Soft avoidance has a deterministic priority rather than a mutual rewrite:
+	// authored/unselected routes are anchors, then automatic participants yield
+	// in stable page order. That gives the local solve a repeatable tie-break.
+	for (let index = 0; index < participants.length; index += 1) {
+		const scene = scenesByRoute[index]
+		if (lockedFlags[index] || !scene) continue
+		const references: ElbowSoftRoute[] = softEnabled
+			? plannedRoutes
+				.filter((_, referenceIndex) => referenceIndex !== index && (
+					lockedFlags[referenceIndex] || referenceIndex < index
+				))
+				.filter((route) => softClearanceCost(
+					baselineRoutes[index].points,
+					[route],
+					softOptions,
+				) > 1e-6 || softClearanceCost(
+					currentRoutes[index].points,
+					[route],
+					softOptions,
+				) > 1e-6)
+				.map((route) => ({ points: route.points }))
+			: []
+		const input = references.length > 0
+			? { ...scene.input, softClearance: { routes: references, options: softOptions } }
+			: scene.input
+		const planned = references.length > 0 ? planOrthogonalRoute(input) : baselineRoutes[index]
+		const stable = stabilizeOrthogonalRoute(currentRoutes[index], planned, input)
 		if (!routeClearsInput(stable, scene.input)) {
 			lockedFlags[index] = true
 			unresolved += 1
-			return currentRoutes[index]
+			plannedRoutes[index] = currentRoutes[index]
+			continue
 		}
-		return stable
-	})
+		plannedRoutes[index] = stable
+	}
 	const report = nudgeRoutesWithoutObstacleCollisions(
 		plannedRoutes,
 		inputsByRoute,
 		lockedFlags,
 		options.spacing === undefined ? {} : { spacing: options.spacing },
 	)
+	// Channel spreading is deliberately independent from path planning. Keep
+	// that useful parallel-rail pass, but reject any nudge that would undo the
+	// selected route's soft-clearance win against its deterministic predecessors.
+	const routes = report.routes.map((route, index) => {
+		if (!softEnabled || lockedFlags[index] || routesHaveSamePoints(route, plannedRoutes[index])) return route
+		const references = plannedRoutes
+			.filter((_, referenceIndex) => referenceIndex !== index && (
+				lockedFlags[referenceIndex] || referenceIndex < index
+			))
+			.map((reference) => ({ points: reference.points }))
+		const beforeCost = softClearanceCost(plannedRoutes[index].points, references, softOptions)
+		const afterCost = softClearanceCost(route.points, references, softOptions)
+		return afterCost > beforeCost + 1e-6 ? plannedRoutes[index] : route
+	})
 
 	const edits: {
 		id: TLShapeId
@@ -165,13 +229,13 @@ export function tidyEdges(
 	}[] = []
 	participants.forEach((connection, index) => {
 		if (!movable.has(connection.id) || lockedFlags[index]) return
-		if (routesHaveSamePoints(currentRoutes[index], report.routes[index])) return
+		if (routesHaveSamePoints(currentRoutes[index], routes[index])) return
 		edits.push({
 			id: connection.id,
 			type: CONNECTION_SHAPE_TYPE,
 			props: {
 				pins: [],
-				elbowRoute: automaticRouteModel(editor, connection, report.routes[index]),
+				elbowRoute: automaticRouteModel(editor, connection, routes[index]),
 				routeMode: 'automatic',
 			},
 		})
