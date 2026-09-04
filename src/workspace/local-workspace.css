@@ -89,6 +89,21 @@
   outline: none;
 }
 
+/* TldrawUiInput deliberately brings a wrapper so labels and icons can share
+ * its focus/IME behavior. In the compact file chrome, retain the exact
+ * footprint of the non-editing title launcher. */
+.systemsketch-file-title-editor > .tlui-input__wrapper {
+  min-width: 0;
+  height: 28px;
+  flex: 1;
+  gap: 0;
+}
+
+.systemsketch-file-title-editor .tlui-input {
+  height: 28px;
+  max-height: none;
+}
+
 .systemsketch-file-title-input:focus {
   border-color: var(--ss-accent);
   box-shadow: var(--ss-focus-ring);
@@ -369,6 +384,18 @@
   background: var(--ss-surface-raised);
 }
 
+.systemsketch-workspace-new-folder > .tlui-input__wrapper {
+  min-width: 90px;
+  height: 28px;
+  flex: 1;
+  gap: 0;
+}
+
+.systemsketch-workspace-new-folder .tlui-input {
+  height: 28px;
+  max-height: none;
+}
+
 .systemsketch-workspace-new-folder input:focus {
   border-color: var(--ss-accent);
   outline: none;
@@ -473,6 +500,18 @@
   outline: 0;
   background: transparent;
   font-size: 13px;
+}
+
+.systemsketch-workspace-name-field > .tlui-input__wrapper {
+  min-width: 0;
+  height: 38px;
+  flex: 1;
+  gap: 0;
+}
+
+.systemsketch-workspace-name-field .tlui-input {
+  height: 38px;
+  max-height: none;
 }
 
 .systemsketch-workspace-name-field span {
@@ -728,6 +767,18 @@ body:has(.systemsketch-preview-mode) .systemsketch-workspace-alert {
   border-radius: 7px;
   background: var(--ss-surface-sunken);
   font-size: 12px;
+}
+
+.systemsketch-workspace-pathbar > .tlui-input__wrapper {
+  width: 132px;
+  height: 28px;
+  flex: none;
+  gap: 0;
+}
+
+.systemsketch-workspace-search.tlui-input {
+  height: 28px;
+  max-height: none;
 }
 
 .systemsketch-workspace-search:focus {

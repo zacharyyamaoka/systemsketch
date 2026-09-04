@@ -24,6 +24,10 @@
   "ok": true
  },
  {
+  "label": "Escape resets the stock filter input without dismissing its workspace dialog",
+  "ok": true
+ },
+ {
   "label": "Enter opens the filtered document, and the title follows it",
   "ok": true
  },

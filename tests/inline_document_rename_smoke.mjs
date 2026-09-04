@@ -74,7 +74,8 @@ async function main() {
       value: document.activeElement?.value,
     })`).then((value) => value))
     assert.equal(editState.dialog, false, 'the old rename modal opened')
-    assert.equal(editState.active, 'systemsketch-file-title-input')
+    assert.match(editState.active, /\btlui-input\b/, 'the title uses the stock tldraw input primitive')
+    assert.match(editState.active, /\bsystemsketch-file-title-input\b/)
     assert.deepEqual(editState.selection, [0, 5])
     assert.equal(editState.value, 'Draft')
     await shot(page, 'inline-document-rename-editing.png')

@@ -1,0 +1,65 @@
+{
+  "feature": "Stock tldraw chrome input mechanics",
+  "viewport": { "width": 1280, "height": 720 },
+  "pages": [{ "id": "review", "name": "Chrome input review" }],
+  "shapes": [
+    {
+      "id": "workspace-inputs",
+      "type": "block",
+      "x": 450,
+      "y": 340,
+      "props": {
+        "title": "Workspace input contracts",
+        "description": "Identity · search/action · dialog action",
+        "blockType": "Interaction seam",
+        "view": "port",
+        "w": 340,
+        "h": 198,
+        "inputs": [{ "id": "in_1", "name": "stock TldrawUiInput", "type": "Text", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "domain transaction", "type": "Action", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-title",
+      "kind": "step",
+      "text": "1 · Click the header filename. It opens with the whole name selected. Type a draft, then press Escape.",
+      "x": 20,
+      "y": 330,
+      "w": 340,
+      "h": 160,
+      "target": { "shapeId": "workspace-inputs", "anchor": "left" }
+    },
+    {
+      "id": "step-filter",
+      "kind": "step",
+      "text": "2 · Press Cmd/Ctrl+O. Type in Filter, then press Enter to open the selected match. Escape resets the query.",
+      "x": 900,
+      "y": 190,
+      "w": 340,
+      "h": 148,
+      "target": { "shapeId": "workspace-inputs", "anchor": "right", "dy": -60 }
+    },
+    {
+      "id": "step-folder",
+      "kind": "step",
+      "text": "3 · Click + Folder. Its name field is ready immediately; Escape removes only the inline form.",
+      "x": 900,
+      "y": 450,
+      "w": 340,
+      "h": 140,
+      "target": { "shapeId": "workspace-inputs", "anchor": "right", "dy": 60 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Identity fields select, commit once, and cancel. Search/actions keep their own Enter behavior.",
+      "x": 0,
+      "y": 570,
+      "w": 360,
+      "h": 140
+    }
+  ]
+}
