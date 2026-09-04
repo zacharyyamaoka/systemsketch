@@ -79,6 +79,23 @@ describe('loop layout', () => {
 		}
 	})
 
+	it('centres the operator title once expansion gives its complete text a safe lane', () => {
+		const props = {
+			...getDefaultLoopProps(),
+			title: 'For each pose',
+			iterable: { id: 'iterable', type: 'Poses' },
+			item: { id: 'item', type: 'Pose' },
+		}
+		const compact = loopLayout({ ...props, w: LOOP_MIN_WIDTH })
+		// This width keeps the full title out of the labels' protected lane.
+		expect(compact.title.x).not.toBe(LOOP_MIN_WIDTH / 2)
+
+		const expanded = loopLayout({ ...props, w: 520, turn: 'iteration 3 of 7' })
+		expect(expanded.title.x).toBe(260)
+		// The threshold is the whole title, not a conveniently ellipsized part.
+		expect(expanded.title.w).toBeGreaterThanOrEqual('For each pose'.length * 10.8)
+	})
+
 	it('drops the turn chip rather than squeezing the title out', () => {
 		const props = { ...getDefaultLoopProps(), w: LOOP_MIN_WIDTH, turn: 'iteration 3 of 7' }
 		// At the floor width there is no room for both, and the chip is the one

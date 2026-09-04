@@ -227,6 +227,19 @@
       "ok": true
     },
     {
+      "id": "L10b",
+      "label": "an expanded Loop centres the complete operator title",
+      "observed": [
+        "For each pose",
+        true
+      ],
+      "desired": [
+        "For each pose",
+        true
+      ],
+      "ok": true
+    },
+    {
       "id": "L12",
       "label": "clicking any cable painted over the region selects that cable",
       "observed": [
