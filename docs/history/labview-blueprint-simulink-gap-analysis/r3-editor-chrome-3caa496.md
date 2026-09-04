@@ -14,21 +14,18 @@ scope: Python-source renderer, not an authoring-first node palette
 
 SystemSketch should borrow the mature tools' *reading constraints*, never their
 graph-authoring authority. The stock Split block already covers named record
-projection. Zach has approved three further stock directions: a batched named
-partial-record update, a three-input conditional Select, and a visible
-Clock/Trigger source. The positive vocabulary work is deliberately narrow:
-port-owned semantic roles inherited by ordinary arrows, plus a source-proven
-dashed async arrow. The positive editor-chrome work is similarly narrow:
-composable depth breadcrumbs and visit history, bounded propagation focus,
-source-aware inspection/navigation once pyblocks supplies real facts, and—only
-after a real adapter—run and trace lenses.
+projection. Zach has approved two further stock blocks: a batched named
+partial-record update and a three-input conditional Select. The positive
+vocabulary work is deliberately narrow: semantic roles on ordinary data ports
+and arrows, a source-proven dashed async arrow, and a visible Clock/Trigger
+source. The positive editor-chrome work is similarly narrow: source-aware
+inspection, navigation, search, diagnostics, and—only after a real adapter—run
+and trace lenses.
 
 Errors, events, state, configuration, control, and ordinary data do **not**
 need different transport systems. They are values moving on the same ordinary
 arrow/data-wire grammar. `Data` is the default semantic role; `Event`,
-`Configuration`, `State`, `Control`, and `Error` are accepted preset roles. A
-role is authored or derived once on its port and every connected wire inherits
-it live; the wire does not store a duplicate setting.
+`Configuration`, `State`, `Control`, and `Error` are accepted preset roles.
 An Error value may travel through an ordinary tunnel or common bus. An Event is
 ordinary emitted data, not a dispatcher relation. Async is a direct dashed
 ordinary data arrow—not a queue diamond, junction, ownership hub, or
@@ -40,15 +37,6 @@ screenshot(s), original SystemSketch drawing description, then lift. The HTML
 companion embeds the actual official captures alongside its original SVG
 projections. This Markdown is the canonical source report here because this
 repository is the permitted scope for the work.
-
-## Research lineage
-
-The report history is intentionally durable. The [original narrative report](history/labview-blueprint-simulink-gap-analysis/r1-original-01f2f30.html),
-the [first dictionary](history/labview-blueprint-simulink-gap-analysis/r2-dictionary-acc1663.html),
-the [editor-chrome revision Zach reviewed](history/labview-blueprint-simulink-gap-analysis/r3-editor-chrome-3caa496.html),
-and [Zach's feedback and supplied crops](history/labview-blueprint-simulink-gap-analysis/feedback-2026-09-04.md)
-remain available unchanged. The [history hub](history/labview-blueprint-simulink-gap-analysis/index.html)
-links the complete sequence and this current incorporated revision.
 
 ## Reading key
 
@@ -78,7 +66,7 @@ Within each track, the buckets have a strict meaning:
 | Stock Split projection/accessor rows | `docs/assets/unknown-projection-picker-open.png`, `docs/assets/unknown-projection-accessors.png` | `src/blocks/connections/blockPicker.ts`, `src/blocks/unknownAndProjection.test.ts` |
 | Ordinary edges and tunnels | `docs/assets/edge-tunnel-inspector-live-2026-09-02.png` | `src/blocks/connections/connectionModel.ts` |
 | Derived mutation-effect exit | `docs/assets/effect-ports-3-wired-2026-09-03.png` | `src/blocks/effectPorts.ts` |
-| Reversible Simple/Port/Expanded density, focused interface, and port placement | `docs/assets/block-collapse-port-2026-09-01.png`, `docs/assets/block-collapse-expanded-2026-09-01.png`, `docs/assets/header-port-rows-product-2026-09-01.png` | `src/blocks/blockVisibility.ts`, `src/blocks/blockModel.ts` |
+| Reversible density and port placement | `docs/assets/block-collapse-expanded-2026-09-01.png`, `docs/assets/header-port-rows-product-2026-09-01.png` | `src/blocks/blockVisibility.ts`, `src/blocks/blockModel.ts` |
 | Default pill and wired override | `docs/assets/literal-pill-product.png`, `docs/assets/literal-pill-wired.png` | `src/blocks/blockModel.ts`, `src/blocks/connections/connectionModel.ts` |
 | Variadic groups | `docs/assets/variadic-port-v5-inspector-live.png` | `src/blocks/variadicPorts.ts` |
 | Menu, file lifecycle, and share | `docs/assets/workspace-file-menu.png` | `src/workspace/LocalWorkspace.tsx` |
@@ -502,27 +490,15 @@ analyzer fact needed before a dashed edge truthfully carries semantic meaning.
 shows the current styling; `src/blocks/connections/connectionModel.ts` is the
 seam. Calibration: [NI Using Wires][7].
 
-### Focused component-interface lens
-
-**Text description.** SystemSketch's existing Port view already hides Block
-internals while preserving its input/output boundary, and Expanded view reveals
-the underlying dataflow when needed. That reversible presentation is the useful
-component-interface lens; a second canonical-interface panel would duplicate it.
-
-**Current SystemSketch evidence.** `docs/assets/block-collapse-port-2026-09-01.png`
-shows Port view retaining the public boundary while hiding internals;
-`src/blocks/blockVisibility.ts` is the seam. Calibration: [MathWorks Component
-Interface View][53], [NI Icon and Connector Panes][63], and [Epic Functions][20].
-
 ## Missing, would be useful
 
 ### Preset semantic role tags on ordinary ports and wires
 
-**Text description.** Author a role once on a port and let every connected wire
-inherit it live. The accepted set is `Data` (implicit default), `Event`,
-`Configuration`, `State`, `Control`, and `Error`. These labels explain the same
-ordinary dataflow; they never create an exception rail, event dispatcher, state
-machine, or second transport.
+**Text description.** Activate the existing disabled Tags affordance with the
+accepted set: `Data` by default, then `Event`, `Configuration`, `State`,
+`Control`, and `Error`. These are labels on ordinary dataflow. An Error value can
+use an ordinary tunnel bus; an Event can carry type/time/payload/timeout; no
+tag changes routing or invents execution semantics.
 
 **Real screenshot(s).** `docs/assets/gap-labview-error-wire-2026-09-03.png` is
 from [NI Handling Errors][5]; `docs/assets/gap-blueprint-cast-failure-2026-09-03.png`
@@ -532,25 +508,24 @@ Reference Function-Call][38]. They establish why visible outcome and control
 meaning help readers. SystemSketch takes only the shared semantic-label idea,
 not their special wire shapes or dispatcher mechanisms.
 
-**Original SystemSketch drawing description.** Each Inspector port row owns an
-optional role claim; Data stays quiet while non-Data roles receive a redundant
-text chip and accessible name. A connected wire derives that effective role and
-its Inspector says, for example, `Inherited from publisher.saved`. An authored
-claim may override a source/analyzer claim without deleting its provenance. If
-explicit endpoints disagree, the cable remains legal and shows the mismatch.
+**Original SystemSketch drawing description.** A port and its ordinary arrow
+show a small, stable role chip in the same place at any block or region boundary.
+Data is unmarked or quietly labeled; Error, Event, Configuration, State, and
+Control receive a redundant textual marker and accessible name. Inspecting a tag
+reveals source proof and known unknowns; no dropdown can create a new relation.
 
-**Lift.** **Medium.** Add per-port authored and derived claims with retained
-provenance; derive wire presentation rather than copying it. Source wins over
-sink when both are explicit, but a mismatch becomes a warning. Role remains
-orthogonal to type colour, async/delayed style, mutation, routing, and execution.
+**Lift.** **Small to medium.** `src/blocks/ui/BlockInspector.tsx` already has a
+disabled Tags affordance. Add stable role data, accessible redundant cues,
+conservative analyzer defaults, migration, and tests—without changing topology
+or execution behavior.
 
 ### Contextual source / provenance lens
 
 **Text description.** LabVIEW Context Help, Blueprint Details, and Simulink
-Property Inspector keep explanation near the current selection. Zach approved a
-nearby, read-only Source section: projection kind, declaration/span, canonical
-definition, occurrences/uses, documentation, default provenance, and the
-meaning/proof of any semantic role.
+Property Inspector keep explanation near the current selection. Extend the
+existing Inspector with a read-only Source section: projection kind,
+declaration/span, canonical definition, occurrences, docstring, default
+provenance, and the meaning/proof of any semantic tag.
 
 **Real screenshot(s).** `docs/assets/gap-ui-labview-context-help-2026-09-04.png`
 is from [NI Context Help guidance][14];
@@ -565,17 +540,17 @@ definition identity, docstring, tag evidence, and navigation actions. It is
 read-only explanatory chrome over an existing selection, never a Simulink mask
 or property-editor program.
 
-**Lift.** **Medium, pyblocks phase.** The panel reuses shipped Inspector chrome,
-but trustworthy analyzer provenance, definition linking, source-open plumbing,
-and safe unknown/stale-span states must arrive with real Python integration.
+**Lift.** **Medium.** The panel reuses shipped Inspector chrome, but needs
+trustworthy analyzer provenance, definition linking, source-open plumbing, and
+safe unknown/stale-span states.
 
 ### Source project, definition, and occurrence navigator
 
 **Text description.** LabVIEW Project Explorer, My Blueprint, and Model Browser
 converge on a searchable hierarchy outside the canvas. Board Overview already
-covers board structure; the missing sibling becomes useful when pyblocks is
-connected to a real Python project: a Python-owned, read-only tree from
-files/modules to definitions, callers/occurrences, and current projections.
+covers board structure; the missing sibling is a Python-owned, read-only tree
+from files/modules to definitions, callers/occurrences, and their current
+projections.
 
 **Real screenshot(s).** `docs/assets/gap-ui-labview-project-explorer-2026-09-04.png`
 is from [NI Project Explorer guidance][15];
@@ -591,17 +566,17 @@ the existing Block or source span; selecting a definition reveals linked
 occurrences. The tree cannot create files, definitions, targets, or source
 control changes.
 
-**Lift.** **Medium to high, pyblocks phase.** Requires a stable source/symbol
-index and durable occurrence identity, plus sensible scope and stale-index
-behavior. It must remain read-only and not become a parallel project model.
+**Lift.** **Medium to high.** Requires a stable source/symbol index and durable
+occurrence identity, plus sensible scope and stale-index behavior. It must remain
+read-only and not become a parallel project model.
 
 ### Semantic symbol and Find References search
 
 **Text description.** Shipped Ctrl+F finds editable board text. This adds
-identity-aware filters/results for definitions, linked occurrences, ports,
-types, defaults, roles, and references. Zach considers it reasonable but not
-urgent. Same spelling is not enough: the result must name the semantic object
-and let a reader select/fit an occurrence or reveal its source span.
+identity-aware results for definitions, linked occurrences, ports, types,
+defaults, and references. Same spelling is not enough: the result must name the
+semantic object and let a reader select/fit an occurrence or reveal its source
+span.
 
 **Real screenshot(s).** `docs/assets/gap-ui-labview-quick-drop-2026-09-04.png`
 is from [NI Quick Drop][13]; `docs/assets/gap-ui-blueprint-find-results-2026-09-04.png`
@@ -615,15 +590,15 @@ source span, and board occurrence count, with compact scope pills for current
 depth, board, and workspace. Choosing a row focuses an existing object instead
 of manufacturing a new graph tab.
 
-**Lift.** **Medium to high, pyblocks phase.** The result UI can reuse Ctrl+P,
-but reliable semantic/projection indexing and scope rules are prerequisite.
+**Lift.** **Medium to high.** The result UI can reuse Ctrl+P, but reliable
+semantic/projection indexing and scope rules are prerequisite.
 
 ### Source-linked Problems actions
 
 **Text description.** SystemSketch already models optional source path, symbol,
-and line spans in diagnostics but does not surface them. Zach approved Canvas
-and Source destinations once pyblocks supplies real spans. Missing or stale
-facts must hide the source action rather than manufacture a link.
+and line spans in diagnostics but does not surface them. When a real analyzer
+supplies the fields, each finding should offer both current canvas focus and
+source navigation while retaining code, severity, and explanation.
 
 **Real screenshot(s).** `docs/assets/gap-ui-labview-error-list-2026-09-04.png`
 is from [NI Debugging Techniques][16];
@@ -637,18 +612,16 @@ existing severity and stable code, then exposes two honest actions: `Canvas` to
 focus the projected object and `Source` to open the supplied source span. A
 missing or stale span hides the source action rather than creating a false link.
 
-**Lift.** **Small to medium, pyblocks phase.**
-`src/diagnostics/diagnosticsModel.ts` already reserves source path/symbol/span
-fields. Add guarded rendering, source-open behavior, and tests for missing,
-stale, and valid spans.
+**Lift.** **Small to medium.** `src/diagnostics/diagnosticsModel.ts` already
+reserves source path/symbol/span fields. Add guarded rendering, source-open
+behavior, and tests for missing, stale, and valid spans.
 
 ### Stable right-dock tabs
 
 **Text description.** SystemSketch owns Inspector, Problems, Comments, and Board
-Overview surfaces. Blueprint and Simulink show why sibling panes can be
-discoverable, but Zach is comfortable with the current FigJam-inspired
-transient presentation for now. A compact tab row is later UI experimentation,
-not a semantic prerequisite.
+Overview surfaces, but separate commands make them replace one another. Blueprint
+and Simulink make sibling panes/tabs visible. A compact stable tab row preserves
+context without importing arbitrary IDE docking.
 
 **Real screenshot(s).** `docs/assets/gap-ui-blueprint-graph-editor-2026-09-04.png`
 is from [Epic Graph Editor][30], and
@@ -661,9 +634,9 @@ tab strip—`Inspect`, `Problems`, `Comments`, `Overview`, then future
 source-oriented tabs. The current Inspector continues to follow selection; the
 rest retain their existing content and collapse responsively.
 
-**Lift.** **Medium, deferred UI.** If prototyped, consolidate current surfaces
-behind one tab model while preserving keyboard order, dismiss semantics,
-responsive behavior, and selection-following Inspector behavior.
+**Lift.** **Medium.** Consolidate current surfaces behind one tab model while
+preserving keyboard order, dismiss semantics, responsive behavior, and
+selection-following Inspector behavior.
 
 ### Named local review landmarks / saved views
 
@@ -689,55 +662,96 @@ of shared source truth.
 
 ### Back / Forward navigation history and scope breadcrumb
 
-**Text description.** Zach strongly approved prototyping an always-legible
-depth breadcrumb with selectable ancestors and the top-level system name. It
-composes with existing Step In/Out rather than replacing isolation: crumbs and
-Up navigate structural ancestry, while session-local Back/Forward replay
-chronological visits after depth, overview, search, source, or landmark jumps.
+**Text description.** Depth Stack already jumps to ancestors. Blueprint and
+Simulink also remember navigation jumps and show the current nested path. Add
+session-local Back/Forward around reference search, outline, source, landmark,
+and depth jumps, with a breadcrumb tied to actual source/canvas scope rather than
+permanent arbitrary graph tabs.
 
 **Real screenshot(s).** `docs/assets/gap-ui-blueprint-graph-editor-2026-09-04.png`
 is from [Epic Graph Editor][30], and
 `docs/assets/gap-ui-simulink-editor-2026-09-04.png` is from [MathWorks Simulink
 Editor][44]. These distinguish transient navigation history from a document model.
 
-**Original SystemSketch drawing description.** One compact row reads
-`← → ↑  top-level system › ancestor › current`. Root and current remain visible;
-only middle crumbs collapse into overflow at narrow widths. Step In still owns
-isolation. Up/crumb buttons choose structure; Back/Forward replay visits and
-restore a safe camera/selection snapshot.
+**Original SystemSketch drawing description.** A compact left/right pair sits
+above a breadcrumb such as `workspace › pipeline.py › decode_packet › board
+scope`. History entries restore target/camera safely; breadcrumbs identify the
+current source and depth position even when an old target has disappeared.
 
-**Lift.** **Small to medium; approved prototype.** Replace only the collapsed
-Depth Stack presentation, preserve shared Step In behavior, route Board Overview
-through the same depth-aware history transaction, and skip deleted targets. The
-Simulink **SIMULATE** Step Back/Forward controls are runtime evidence, not editor
-navigation precedent.
+**Lift.** **Small to medium.** Centralise focus/fit/depth jumps, record bounded
+personal history, and restore selection/camera safely after deletion or reload.
 
-### Bounded forward / backward propagation focus
+### Focused component-interface lens
 
-**Text description.** A reader can select a cable, port, or value and ask
-SystemSketch to emphasize its real upstream or downstream propagation for a
-chosen number of graph steps. Simulink source/destination tracing is useful
-precedent, but this is a temporary focus mode over existing edges—not a compiled
-signal browser, data table, or simulation.
+**Text description.** A reader sometimes needs only a component's public
+boundary. Simulink Component Interface View is strong precedent: show selected
+canonical inputs/outputs and trace a chosen port's use while leaving the
+source-derived Block and Python signature untouched.
+
+**Real screenshot(s).** `docs/assets/gap-labview-connector-contract-2026-09-03.png`
+is from [NI Icon and Connector Panes][63];
+`docs/assets/gap-blueprint-function-call-2026-09-03.png` is from [Epic
+Functions][20]; and `docs/assets/gap-ui-simulink-component-interface-2026-09-04.png`
+is from [MathWorks Component Interface View][53]. They demonstrate a compact
+public boundary, not an authorable interface schema.
+
+**Original SystemSketch drawing description.** Selecting a resolved component
+opens an `Interface` lens that lists source-derived inputs and outputs, the
+canonical definition, and trace links to known sources/destinations. Its ports
+are read-only occurrences; no `+ pin`, reorder, or schema-editor affordance
+appears.
+
+**Lift.** **Medium to high.** Resolve one canonical definition and occurrences,
+then provide a read-only port list and trace. Dynamic/imported signatures must
+show unknown honestly.
+
+### Structured cable hierarchy and static source/destination trace
+
+**Text description.** Simulink Signal Hierarchy Viewer follows a selected
+compound signal, exposes its member tree, and traces a member to sources and
+destinations. Extend the existing Connection Inspector with analyzer-known record
+fields and endpoint navigation: static graph facts, not compiled dimensions or
+runtime values.
 
 **Real screenshot(s).** `docs/assets/gap-ui-simulink-signal-hierarchy-2026-09-04.png`
 is from [MathWorks Signal Hierarchy Viewer][54]. Its structural reader need
 converges with SystemSketch Split; Simulink's simulation analysis does not.
 
-**Original SystemSketch drawing description.** A compact focus shelf appears
-for the selected subject with `← 2 steps` and `3 steps →`. The real paths inside
-that bound remain vivid while unrelated shapes fade. Clearing focus restores the
-untouched board; no highlighted line is authored or persisted.
+**Original SystemSketch drawing description.** Selecting a cable opens a compact
+tree such as `Message › id: int › payload: bytes`, with explicit `source` and
+`destinations` actions. Known nested fields come from the analyzer; unresolved
+or dynamic mappings are visibly unknown rather than editable schema rows.
 
-**Lift.** **Medium; approved prototype.** Reuse resolved connection identity,
-walk the real graph in either direction with cycle protection and a visible step
-bound, and keep unknown dynamic relations outside the highlight.
+**Lift.** **Medium.** Reuse connection identity and Split facts, add a stable
+nested-type view, endpoint navigation, and an honest unresolved state.
+
+### Board-wide semantic data table
+
+**Text description.** The Inspector is selection-scoped; a large board can also
+benefit from one filterable table of canonical Blocks, ports, connections, types,
+defaults, and semantic roles. Simulink Model Data Editor supplies the
+outside-canvas precedent, but the SystemSketch version stays read-only and
+source-linked rather than becoming a MATLAB workspace or schema editor.
+
+**Real screenshot(s).** `docs/assets/gap-ui-simulink-model-data-editor-2026-09-04.png`
+is captured from [MathWorks Model Data Editor][62]. Its filterable data surface
+is useful evidence for a board-wide reading lens; no vendor-style parameter
+editing, workspace state, or schema authority transfers.
+
+**Original SystemSketch drawing description.** A stable dock tab presents a
+filterable, virtualised table of existing canonical identities: Block, port,
+cable, type, visible default provenance, and semantic role. Every row has
+`Canvas` and `Source` actions; cells are labels and links, never editable values.
+
+**Lift.** **Medium.** Build a virtualised index over existing canonical
+identities, share filters with semantic search, and guarantee every row focuses
+canvas or source. No cell edit may create a competing source of truth.
 
 ### Run / Pause / Stop strip for an explicit runtime adapter
 
-**Text description.** Zach approved the mature-tools pattern: name a run target,
+**Text description.** LabVIEW, Blueprint, and Simulink all name a run target,
 expose state-dependent Run/Pause/Stop controls, and report state outside the
-canvas. SystemSketch should adopt it only when an explicit Python/test/ROS
+canvas. SystemSketch should adopt this only when an explicit Python/test/ROS
 adapter exists; drawing alone must never execute code.
 
 **Real screenshot(s).** `docs/assets/gap-ui-labview-toolbar-2026-09-04.png` is
@@ -752,16 +766,16 @@ named adapter/target, revision identity, current state, and Run/Pause/Stop only
 when a concrete adapter reports capability. It lives outside the board and
 renders no fake execution cables or controls when no adapter is connected.
 
-**Lift.** **Very high and conditional; approved direction.** First define sandboxing, target
+**Lift.** **Very high and conditional.** First define sandboxing, target
 discovery, lifecycle, cancellation, stdout/errors, and board/source revision
 identity. Do not ship inert play chrome.
 
 ### Recorded-trace playback and execution highlighting
 
-**Text description.** Zach approved record/trace/playback as a useful execution
-lens. Step and highlight controls are defensible without making the board a
-simulator when they replay an explicit recorded trace. The active Block/cable is
-temporary and playback acts on evidence, never on source or layout.
+**Text description.** Step and highlight controls are defensible without making
+the board a simulator when they replay an explicit recorded trace. The active
+Block/cable is a temporary lens with a known trace position; playback acts on
+evidence, never on source or layout.
 
 **Real screenshot(s).** `docs/assets/gap-ui-labview-debug-window-2026-09-04.png`
 is from [NI Debugging Techniques][16];
@@ -781,11 +795,10 @@ Live stepping remains later runtime-adapter work.
 
 ### Read-only live or recorded value probes
 
-**Text description.** Zach approved read-only live or recorded probes. LabVIEW
-Probe Watch, Blueprint watched pins, and Simulink Data Inspector expose values
-produced during a run. A SystemSketch probe may decorate an existing port/cable
-only when an explicit run or imported trace supplies it; it is never an editable
-literal or canonical board state.
+**Text description.** LabVIEW Probe Watch, Blueprint watched pins, and Simulink
+Data Inspector expose values produced during a run. A SystemSketch probe may
+decorate an existing port/cable only when an explicit run or imported trace
+supplies it; it is never an editable literal or canonical board state.
 
 **Real screenshot(s).** `docs/assets/gap-ui-labview-probe-watch-2026-09-04.png`
 is from [NI Debugging Techniques][16];
@@ -804,14 +817,6 @@ serialization/redaction, source-revision mapping, history limits, and strict
 separation from authorable values.
 
 ## Missing, would not be useful
-
-### Board-wide semantic data table
-
-A global table of every Block, port, cable, type, default, and semantic role
-would create a parallel inventory and is likely to be more confusing than
-contextual inspection and bounded propagation focus. Skip it for now; a concrete
-batch-update need can reopen the question later. See [MathWorks Model Data
-Editor][62].
 
 ### Standalone keyword-only or recommended-terminal badges
 
@@ -939,32 +944,24 @@ and [MathWorks Simulink Editor][44].
    helpers.
 4. **Select is a compact value primitive, not a branch.** Its settled shape is
    two value inputs plus one control input and one ordinary output.
-5. **Tag once at the semantic owner.** Data/Event/Configuration/State/Control/
-   Error are port meanings and connected wires inherit them live. An authored
-   claim can override a retained derived claim. Errors remain railway data and
-   events remain ordinary emitted data; no copied wire setting, special rail,
-   top-edge exception effect, or dispatcher relation is warranted.
+5. **Semantic roles are labels, not transports.** Data/Event/Configuration/
+   State/Control/Error are normal port/wire meanings. Errors remain normal
+   railway data; events remain ordinary emitted data; no special rail, top-edge
+   exception effect, or dispatcher relation is warranted.
 6. **Async gets no invented topology.** A source-proven dashed direct
    arrow can communicate a handoff or await boundary, but it says nothing about
    queues, ownership, ordering, or a global timeline.
 7. **Clock/Trigger is a source concept, not a scheduler UI.** It can show an
    explicit time/control/event value, while rates, solvers, playback, and
    hardware policies stay outside static source rendering.
-8. **Structure and visit history are two axes.** Step In remains the isolation
-   operation; crumbs and Up navigate ancestry, while Back/Forward replay where
-   the reader travelled. Board Overview remains a flat index and participates
-   in the same history.
-9. **Bounded propagation focus beats a parallel inventory.** Highlighting a
-   selected value upstream or downstream for N steps helps answer how data
-   flows. A global semantic table duplicates the board and is skipped for now.
-10. **External chrome should deepen source truth, not mimic an IDE.** The rich
-   vendor surfaces make the best case for read-only provenance, definition
-   navigation, semantic Find, source-linked diagnostics, and landmarks once
-   pyblocks supplies real identities—not mutable projects or palettes.
-11. **Runtime visuals need a real evidence contract.** Run/Pause/Stop, execution
+8. **External chrome should deepen source truth, not mimic an IDE.** The rich
+   LabVIEW, Blueprint, and Simulink surfaces make the best case for read-only
+   provenance, definition navigation, semantic Find, source-linked diagnostics,
+   tabs, landmarks, and navigation history—not mutable projects or palettes.
+9. **Runtime visuals need a real evidence contract.** Run/Pause/Stop, execution
    highlight, and probes are useful only after an explicit adapter or recorded
    trace can name their target, revision, lifecycle, and values.
-12. **Statecharts and behavior trees remain separate research.** Current state
+10. **Statecharts and behavior trees remain separate research.** Current state
     configuration/dataflow is sufficient; no derived state overlay or tree
     renderer belongs in this work order.
 
@@ -986,45 +983,39 @@ and [MathWorks Simulink Editor][44].
   Select, semantic roles on ordinary wires, direct dashed async arrow,
   Clock/Trigger source, no event dispatcher relation, no bespoke exception rail,
   and no derived statechart overlay.
-- Froze the exact original, first dictionary, and editor-chrome revisions, then
-  linked this incorporated report to Zach's complete feedback record and crops.
-- Reclassified the component-interface lens as already covered by Port view and
-  the board-wide semantic table as skipped for now.
 
 ## Left
 
 - Implement analyzer facts and renderer tests for approved Set attributes and
   Select, preserving shipped Split as the named-projection baseline.
-- Activate port-owned semantic roles with accessible cues, retained provenance,
-  live wire inheritance, and visible endpoint conflicts; unresolved cases remain
-  implicit Data.
+- Activate stable semantic-role tags with accessible cues, source proof, and
+  conservative defaults; unresolved/dynamic cases remain Data.
 - Define narrow source predicates for async and Clock/Trigger without fabricating
   queues, ownership, dispatch, scheduler, or simulation semantics.
-- Implement selectable depth breadcrumbs with composable session history and a
-  bounded upstream/downstream propagation focus.
 - Stage source/provenance/navigation/search/Problems improvements behind a
-  trustworthy pyblocks source-symbol index.
+  trustworthy source-symbol index.
 - Treat runtime strip, trace playback, and probes as a later adapter/trace
   program with explicit target, sandbox, revision, and redaction contracts.
 
 ## Needs Zach
 
-Review each isolated implementation track and choose whether to integrate it.
-After the navigation prototypes, decide whether named landmarks still add value
-beside breadcrumbs and Board Overview. Later, decide whether stable right tabs
-improve on the current FigJam-inspired transient surfaces, and whether imported
-trace playback or a live adapter should become the first runtime evidence source.
+Before an implementation track starts, decide whether the right-side surfaces
+become explicit tabs; whether source/project navigation starts at one board or
+the whole workspace; whether imported trace playback should precede live Run
+controls; and whether semantic-role tags are analyzer-owned, user-chosen
+presentation, or both with provenance. Also choose the exact first Python
+fixtures/framework adapters and final display spelling for the accepted role
+presets. A behavior-tree inquiry, if wanted, should begin as a separate research
+work order.
 
 ## Deliberately not done
 
 - No draggable LabVIEW, Blueprint, or Simulink palette.
-- No product code change on this research branch; implementations live on
-  independently reviewable branches.
+- No code, schema, analyzer, or canvas behavior change; this remains research.
 - No universal Error port, special outcome rail, top-edge exception effect,
   event-dispatch relation, queue junction, ownership hub, or global async
   timeline.
 - No derived statechart overlay or behavior-tree renderer.
-- No board-wide semantic data table in this phase.
 - No masks, callbacks, class-default editors, GUI type/schema editors, mutable
   project/deployment manager, recommended-terminal enforcement, or canvas-side
   Python contract editing.
