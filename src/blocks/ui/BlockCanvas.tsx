@@ -346,9 +346,11 @@ function BlockFooterMenu({ shape }: { shape: BlockShape }) {
 function ValueFace({
   shape,
   connectedIds,
+  editing,
 }: {
   shape: BlockShape
   connectedIds: ReadonlySet<string>
+  editing: boolean
 }) {
   const layout = layoutBlock(shape.props)
   const label = valueBlockLabel(shape.props)
@@ -370,6 +372,7 @@ function ValueFace({
       style={boxStyle(layout.title)}
       title={tooltip.join('\n')}
       data-testid="block-value"
+      data-inline-editing={editing ? 'true' : undefined}
     >
       {label.name !== '' ? (
         <span className="BlockNode-valueDeclaration">
@@ -1190,7 +1193,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
         {simple
           ? <SimpleFace shape={shape} />
           : value
-            ? <ValueFace shape={shape} connectedIds={connectedIds} />
+            ? <ValueFace shape={shape} connectedIds={connectedIds} editing={isEditing} />
             : <BlockHeading shape={shape} height={layout.headerHeight} />}
         {simple ? <DefinitionBadge shape={shape} /> : null}
         {simple ? <BlockDiffBadge shape={shape} /> : null}

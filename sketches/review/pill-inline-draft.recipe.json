@@ -1,0 +1,55 @@
+{
+  "feature": "Pill inline draft without duplicate paint",
+  "viewport": { "width": 1280, "height": 760 },
+  "shapes": [
+    {
+      "id": "pill",
+      "type": "block",
+      "x": 610,
+      "y": 348,
+      "props": {
+        "title": "",
+        "description": "",
+        "blockType": "literal",
+        "view": "value",
+        "w": 96,
+        "h": 56,
+        "showDescription": false,
+        "inputs": [{ "id": "in_1", "name": "", "type": "", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "", "type": "", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Click the blank pill’s =, then type pose: Pose = 2. Keep the editor open long enough to watch the typing state.",
+      "x": 360,
+      "y": 150,
+      "w": 520,
+      "h": 112,
+      "target": { "shapeId": "pill", "anchor": "top", "dx": 0 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Press Enter. The one input resolves into the styled name, type, and value declaration.",
+      "x": 760,
+      "y": 535,
+      "w": 410,
+      "h": 130,
+      "target": { "shapeId": "pill", "anchor": "bottom", "dx": 48 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · While typing, only one left-aligned text field is visible and the capsule expands rightward. After Enter it reads pose: Pose = 2.",
+      "x": 80,
+      "y": 560,
+      "w": 560,
+      "h": 112
+    }
+  ]
+}

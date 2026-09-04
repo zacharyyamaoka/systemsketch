@@ -61,7 +61,7 @@ const blocks = (page) => evaluate(page, `JSON.stringify(
     .filter((shape) => shape.type === 'block')
     .map((shape) => ({
       id: shape.id, view: shape.props.view, title: shape.props.title,
-      w: shape.props.w, h: shape.props.h,
+      x: shape.x, w: shape.props.w, h: shape.props.h,
       inputs: shape.props.inputs, outputs: shape.props.outputs,
       definitionId: shape.props.definitionId ?? null,
       definitionKey: shape.props.definitionKey ?? null,
@@ -132,6 +132,35 @@ async function drawPill(page, at, source) {
   return { tool, pill }
 }
 
+/** Start the same P gesture, but leave its declaration editor open for draft-state checks. */
+async function beginPillDraft(page, at) {
+  const before = new Set((await blocks(page)).map((block) => block.id))
+  await key(page, 'p', 'KeyP')
+  await delay(120)
+  const tool = await evaluate(page, `window.__systemsketch.editor.getCurrentToolId()`)
+  await clickAt(page, at.x, at.y)
+  await waitFor(page, `document.querySelector('[data-testid="block-inline-port-name-outputs-out_1"]')`, 'pill declaration editor')
+  const pill = (await blocks(page)).find((block) => !before.has(block.id)) ?? null
+  return { tool, pill }
+}
+
+/** Facts which are only true while the one-line declaration editor is open. */
+const pillDraftSurface = (page, id) => evaluate(page, `JSON.stringify((() => {
+  const shape = document.querySelector('[data-shape-id="${id}"]')
+  const input = shape?.querySelector('[data-testid="block-inline-port-name-outputs-out_1"]')
+  const face = shape?.querySelector('[data-testid="block-value"]')
+  if (!shape || !input || !face) return null
+  const shapeRect = shape.getBoundingClientRect()
+  const inputRect = input.getBoundingClientRect()
+  return {
+    input: input.value,
+    textAlign: getComputedStyle(input).textAlign,
+    inputInset: Math.round((inputRect.left - shapeRect.left) * 10) / 10,
+    paintPaused: face.dataset.inlineEditing === 'true'
+      && Array.from(face.children).every((child) => getComputedStyle(child).visibility === 'hidden'),
+  }
+})())`).then(JSON.parse)
+
 async function main() {
   const app = await startApp({ label: 'literal-pill', width: 1440, height: 960 })
   try {
@@ -158,7 +187,32 @@ async function main() {
     await deselect(page, { x: 1000, y: 800 })
     await shot(page, 'literal-pill-typed.png')
 
-    const declared = (await drawPill(page, { x: 1040, y: 700 }, 'pose: Pose = 2')).pill
+    // ---- A Python declaration stays a single draft line while it is typed --
+    const declarationStart = await beginPillDraft(page, { x: 780, y: 700 })
+    check('DRAFT-1', 'P begins a Python-shaped declaration in the pill editor', declarationStart.tool, 'pill')
+    const declaredBefore = declarationStart.pill
+    const draftBefore = declaredBefore ? await pillDraftSurface(page, declaredBefore.id) : null
+    await page.send('Input.insertText', { text: 'pose: Pose = 2' })
+    await delay(180)
+    const declaredLive = declaredBefore
+      ? (await blocks(page)).find((block) => block.id === declaredBefore.id) ?? null
+      : null
+    const draftLive = declaredBefore ? await pillDraftSurface(page, declaredBefore.id) : null
+    check('DRAFT-2', 'the editor is the only visible declaration while the model updates live',
+      draftLive ? { input: draftLive.input, paintPaused: draftLive.paintPaused } : null,
+      { input: 'pose: Pose = 2', paintPaused: true })
+    check('DRAFT-3', 'the capsule grows rightward from its stable left-anchored editor',
+      declaredBefore && declaredLive && draftBefore && draftLive ? {
+        growsRightward: declaredLive.x === declaredBefore.x && declaredLive.w > declaredBefore.w,
+        leftAnchored: draftLive.textAlign === 'left' && draftLive.inputInset === draftBefore.inputInset,
+      } : null,
+      { growsRightward: true, leftAnchored: true })
+    await shot(page, 'literal-pill-inline-draft.png')
+    await key(page, 'Enter', 'Enter')
+    await delay(320)
+    const declared = declaredBefore
+      ? (await blocks(page)).find((block) => block.id === declaredBefore.id) ?? null
+      : null
     check('PARSER-1', 'a Python-shaped canvas declaration fills name, value, and explicit type',
       declared ? {
         name: declared.outputs[0]?.name, value: declared.title,

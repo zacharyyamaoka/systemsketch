@@ -687,6 +687,14 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   white-space: nowrap;
 }
 
+/* WHY: Canvas entry is a one-line, code-like gesture. The live shape still
+ * normalizes and grows with every keystroke, but its painted declaration waits
+ * until commit so one edit is never shown twice—once in the input and once
+ * behind it. */
+.systemsketch-block-canvas .BlockNode-value[data-inline-editing='true'] > * {
+  visibility: hidden;
+}
+
 .systemsketch-block-canvas .BlockNode-valueName,
 .systemsketch-block-canvas .BlockNode-valueText {
   min-width: 0;
