@@ -167,7 +167,7 @@ async function main() {
     await waitFor(page, 'window.__systemsketch?.editor', 'the real SystemSketch editor')
     process.stdout.write('review fixture · editor ready\n')
 
-    const created = await evaluate(page, `(() => {
+    const created = await evaluate(page, `(async () => {
       const recipe = ${JSON.stringify(recipe)}
       const editor = window.__systemsketch.editor
       const shapeId = (id) => id.startsWith('shape:') ? id : \`shape:\${id}\`
@@ -345,6 +345,11 @@ async function main() {
       if (arrowIds.length) editor.sendToBack(arrowIds)
       editor.selectNone()
       editor.zoomToFit({ animation: { duration: 0 } })
+      // Branch arm frames are a derived editor projection. The branch-region
+      // installer intentionally schedules that remote repair after the current
+      // store transaction, so let its queued microtask settle before asserting
+      // this editor-authored fixture's complete structural inventory.
+      await Promise.resolve()
       return {
         count: editor.store.allRecords().filter((record) => record.typeName === 'shape').length,
         ids: editor.store.allRecords().filter((record) => record.typeName === 'shape').map((shape) => shape.id).sort(),
