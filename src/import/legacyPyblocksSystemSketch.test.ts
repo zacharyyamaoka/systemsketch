@@ -165,4 +165,27 @@ describe('legacy PyBlocks SystemSketch import', () => {
     })
     expect(plan.viewport).toEqual({ x: 12, y: -8, zoom: 0.75 })
   })
+
+  it('keeps PyBlocks V5 variadic membership on each concrete input slot', () => {
+    const variadic = structuredClone(legacy)
+    const inputs = variadic.nodes[1].data.extension.pyblocksBlock.content.inputs as Array<Record<string, unknown>>
+    inputs.splice(0, inputs.length,
+      { id: 'overlay_2', name: 'overlay_2', type: 'Layer', variadic: {
+        groupId: 'positional:overlays', label: '*overlays', kind: 'positional', bundled: false,
+      } },
+      { id: 'overlay_spread', name: 'overlay_spread', type: 'Layer', variadic: {
+        groupId: 'positional:overlays', label: '*overlays', kind: 'positional', bundled: true,
+      } },
+      { id: 'option_opacity', name: 'opacity', type: 'float', variadic: {
+        groupId: 'keyword:options', label: '**options', kind: 'keyword', bundled: false,
+      } },
+    )
+
+    const block = planLegacyPyblocksSystemSketch(variadic).blocks.find((candidate) => candidate.legacyId === 'call:decode')!
+    expect(block.props.inputs.map((port) => [port.id, port.variadic])).toEqual([
+      ['overlay_2', { groupId: 'positional:overlays', label: '*overlays', kind: 'positional', bundled: false }],
+      ['overlay_spread', { groupId: 'positional:overlays', label: '*overlays', kind: 'positional', bundled: true }],
+      ['option_opacity', { groupId: 'keyword:options', label: '**options', kind: 'keyword', bundled: false }],
+    ])
+  })
 })

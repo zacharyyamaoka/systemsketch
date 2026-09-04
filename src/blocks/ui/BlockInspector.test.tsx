@@ -51,6 +51,28 @@ describe('Block inspector content', () => {
     }
   })
 
+  it('keeps rare variadic-slot authoring in an inspector disclosure', () => {
+    const html = renderToStaticMarkup(
+      <BlockInspectorContent
+        props={{
+          ...getDefaultBlockProps(),
+          inputs: [{
+            id: 'overlay-boxes', name: 'overlay_box', type: 'Layer', visible: true,
+            variadic: { groupId: 'positional:overlays', label: '*overlays', kind: 'positional', bundled: false },
+          }],
+        }}
+        status="selected"
+        actions={noopActions}
+      />,
+    )
+    expect(html).toContain('data-testid="inspector-variadic-overlay-boxes"')
+    expect(html).toContain('Variadic · *overlays')
+    expect(html).toContain('aria-label="Variadic role for overlay_box"')
+    expect(html).toContain('<option value="positional" selected="">*args</option>')
+    expect(html).toContain('aria-label="Variadic group label for overlay_box"')
+    expect(html).toContain('title="A bundled spread is one unknown-cardinality *iterable or **mapping expression"')
+  })
+
   it('keeps an unplaced tool state honest and read-only without adding a New block header', () => {
     const html = renderToStaticMarkup(
       <BlockInspectorContent props={getDefaultBlockProps()} status="new" />,

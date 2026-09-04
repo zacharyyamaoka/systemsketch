@@ -14,6 +14,23 @@ export const PILL_TOOL_ID = 'pill' as const
 export const BLOCK_VIEWS = ['simple', 'port', 'expanded', 'value'] as const
 export type BlockView = (typeof BLOCK_VIEWS)[number]
 
+/** The source grammar of a call expression's variadic contribution. */
+export const BLOCK_VARIADIC_KINDS = ['positional', 'keyword'] as const
+export type BlockVariadicKind = (typeof BLOCK_VARIADIC_KINDS)[number]
+
+/**
+ * One ordinary cable endpoint belonging to a DEF-owned `*args` / `**kwargs`
+ * run. The port remains independently connectable; this only preserves the
+ * group the renderer explains with a label, micro-bracket, and collar.
+ */
+export const BlockVariadicPort = T.object({
+	groupId: T.string,
+	label: T.string,
+	kind: T.literalEnum(...BLOCK_VARIADIC_KINDS),
+	bundled: T.boolean,
+})
+export type BlockVariadicPort = T.TypeOf<typeof BlockVariadicPort>
+
 /**
  * The structural presentations an ordinary Block may switch between. `value`
  * is deliberately absent: it is the separate literal-pill representation,
@@ -186,6 +203,8 @@ export const BlockPort = T.object({
 	 * port whose *type* changed had nothing to show but a strike.
 	 */
 	fieldDiffs: T.arrayOf(BlockFieldDiff).optional(),
+	/** Optional V5 membership; never changes the port's stable identity. */
+	variadic: BlockVariadicPort.optional(),
 })
 export type BlockPort = T.TypeOf<typeof BlockPort>
 
