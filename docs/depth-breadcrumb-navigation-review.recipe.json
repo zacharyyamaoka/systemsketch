@@ -1,0 +1,79 @@
+{
+  "feature": "Depth breadcrumbs and navigation history",
+  "viewport": { "width": 1800, "height": 1040 },
+  "pages": [{ "id": "review", "name": "Review" }],
+  "shapes": [
+    {
+      "id": "system",
+      "type": "block",
+      "x": 640,
+      "y": 260,
+      "props": { "title": "System", "description": "Top-level system boundary", "blockType": "Function", "view": "expanded", "w": 760, "h": 560 }
+    },
+    {
+      "id": "scheduler",
+      "type": "block",
+      "parentId": "system",
+      "x": 110,
+      "y": 120,
+      "props": { "title": "Scheduler", "description": "Nested structural level", "blockType": "Function", "view": "expanded", "w": 540, "h": 370 }
+    },
+    {
+      "id": "dispatch",
+      "type": "block",
+      "parentId": "scheduler",
+      "x": 100,
+      "y": 90,
+      "props": { "title": "Dispatch", "description": "Deepest review scope", "blockType": "Function", "view": "expanded", "w": 320, "h": 210 }
+    },
+    {
+      "id": "landmark",
+      "type": "frame",
+      "x": 1510,
+      "y": 420,
+      "props": { "name": "Overview landmark", "w": 180, "h": 120 }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Select System, then choose Step in from its Block menu.",
+      "x": 90,
+      "y": 250,
+      "w": 420,
+      "h": 112,
+      "target": { "shapeId": "system", "anchor": "left", "dy": -130 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Repeat for Scheduler and Dispatch. The chrome keeps Board and the current scope visible.",
+      "x": 90,
+      "y": 430,
+      "w": 420,
+      "h": 128,
+      "target": { "shapeId": "scheduler", "anchor": "left", "dy": 25 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Try Back, Forward, Up, and the path menu. Up changes ancestry; Back follows visit order.",
+      "x": 90,
+      "y": 650,
+      "w": 420,
+      "h": 128,
+      "target": { "shapeId": "dispatch", "anchor": "left", "dy": 20 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · root/current crumbs are readable, middle ancestry is selectable in the path menu, and Back/Forward restore the last depth view without changing the structure.",
+      "x": 760,
+      "y": 885,
+      "w": 700,
+      "h": 112
+    }
+  ]
+}

@@ -47,79 +47,104 @@
   cursor: pointer;
 }
 
-.systemsketch-depth-pill button:hover,
+.systemsketch-depth-pill button:hover:not(:disabled),
 .systemsketch-depth-pill button[aria-expanded='true'] {
   color: var(--ss-text);
   background: var(--ss-accent-soft);
 }
 
-.systemsketch-depth-pill__up {
-  display: grid;
-  width: 42px;
-  min-width: 42px;
-  place-items: center;
-  border-right: 1px solid var(--ss-border) !important;
-  font-size: 18px;
-  font-weight: 800;
+.systemsketch-depth-pill button:disabled {
+  color: var(--ss-text-faint);
+  cursor: default;
 }
 
-.systemsketch-depth-pill__trigger {
+.systemsketch-depth-history {
   display: flex;
-  min-width: 0;
-  max-width: min(320px, 34vw);
-  align-items: center;
-  gap: 8px;
-  padding: 0 10px;
+  align-items: stretch;
+  border-right: 1px solid var(--ss-border);
 }
 
-.systemsketch-depth-pill__glyph {
+/* A disabled Forward has no useful action. Giving its slot back to the active
+   crumb keeps the current system name readable in the narrow menu lane. */
+.systemsketch-depth-history button[aria-label='Forward']:disabled {
+  display: none;
+}
+
+.systemsketch-depth-history button,
+.systemsketch-depth-pill__up,
+.systemsketch-depth-pill__path-menu {
   display: grid;
-  width: 24px;
-  height: 24px;
-  flex: 0 0 auto;
+  width: 32px;
+  min-width: 32px;
   place-items: center;
-  border-radius: 7px;
-  color: var(--ss-text);
-  background: var(--ss-accent-soft);
 }
 
-.systemsketch-depth-pill__glyph svg {
-  width: 15px;
-  height: 15px;
+.systemsketch-depth-history button + button {
+  border-left: 1px solid color-mix(in srgb, var(--ss-border) 72%, transparent) !important;
+}
+
+.systemsketch-depth-history svg,
+.systemsketch-depth-pill__up svg {
+  width: 16px;
+  height: 16px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 1.45;
+  stroke-width: 1.7;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-.systemsketch-depth-pill__name {
+.systemsketch-depth-pill__up {
+  border-right: 1px solid var(--ss-border) !important;
+}
+
+.systemsketch-depth-breadcrumbs {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  max-width: min(430px, 47vw);
+  overflow: hidden;
+  padding: 0 6px;
+}
+
+.systemsketch-depth-crumb {
   min-width: 0;
   overflow: hidden;
+  padding: 5px 6px;
+  border: 0;
+  border-radius: 7px;
+  color: var(--ss-text-muted);
+  background: transparent;
   font-size: 11px;
   font-weight: 800;
+  line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.systemsketch-depth-pill__count {
-  display: grid;
-  min-width: 22px;
-  height: 21px;
-  flex: 0 0 auto;
-  place-items: center;
-  padding: 0 6px;
-  border-radius: 7px;
+.systemsketch-depth-crumb.is-current {
+  flex: 1 1 auto;
+  padding-inline: 2px;
   color: var(--ss-text);
-  background: var(--ss-accent-soft);
-  font-size: 9px;
   font-weight: 850;
 }
 
-.systemsketch-depth-pill__chevron {
+.systemsketch-depth-breadcrumbs > .systemsketch-depth-crumb:first-child {
   flex: 0 0 auto;
+}
+
+.systemsketch-depth-separator {
+  flex: 0 0 auto;
+  color: var(--ss-text-faint);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.systemsketch-depth-pill__path-menu {
+  width: 28px;
+  min-width: 28px;
   color: var(--ss-text-muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .systemsketch-depth-popover {
@@ -281,18 +306,18 @@
     top: calc(var(--systemsketch-chrome-inset) + var(--systemsketch-top-height) + 8px);
   }
 
-  .systemsketch-depth-pill__trigger {
-    max-width: min(260px, 60vw);
+  .systemsketch-depth-breadcrumbs {
+    max-width: min(310px, 48vw);
   }
 }
 
 @media (max-width: 560px) {
-  .systemsketch-depth-pill__glyph,
-  .systemsketch-depth-pill__chevron {
+  .systemsketch-depth-history button[aria-label='Forward'],
+  .systemsketch-depth-pill__path-menu {
     display: none;
   }
 
-  .systemsketch-depth-pill__trigger {
-    max-width: 58vw;
+  .systemsketch-depth-breadcrumbs {
+    max-width: 54vw;
   }
 }

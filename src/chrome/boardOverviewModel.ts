@@ -8,6 +8,7 @@ import {
 import { isExpandedBlockShape } from '../blocks'
 import { isBranchShape } from '../branch/branchModel'
 import { storedTextOr } from '../textFidelity'
+import { focusDepthOverviewTarget } from '../depth/depthNavigation'
 
 export type BoardOverviewTargetKind = 'frame' | 'branch' | 'expanded-block'
 
@@ -103,12 +104,8 @@ export function focusBoardOverviewPage(editor: Editor, pageId: TLPageId): boolea
 }
 
 export function focusBoardOverviewTarget(editor: Editor, target: BoardOverviewTarget): boolean {
-  if (!editor.getPage(target.pageId) || !editor.getShape(target.id)) return false
-  editor.setCurrentPage(target.pageId)
-  editor.setCurrentTool('select')
-  editor.select(target.id)
-  const bounds = editor.getShapePageBounds(target.id)
-  if (!bounds) return false
-  editor.zoomToBounds(bounds, { inset: 72, animation: CAMERA_ANIMATION })
-  return true
+  // WHY: Overview is a flat landmark index, but its jumps must respect the
+  // current isolation boundary. The shared transaction makes an outside
+  // target visible and keeps Back/Forward coherent instead of bypassing depth.
+  return focusDepthOverviewTarget(editor, target)
 }

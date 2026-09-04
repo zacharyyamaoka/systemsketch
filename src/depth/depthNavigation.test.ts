@@ -16,6 +16,9 @@ import {
 import {
   getDepthNavigationModel,
   getDepthNavigationSnapshot,
+  focusDepthOverviewTarget,
+  goBackInDepthHistory,
+  goForwardInDepthHistory,
   returnToDepthRoot,
   stepIntoDepthScope,
   stepOutOfDepthScope,
@@ -51,6 +54,7 @@ function block(
 
 function fakeEditor(shapes: BlockShape[]) {
   const page = { id: TEST_PAGE_ID, name: 'Robot sorter' }
+  let selected: TLShape['id'][] = []
   const byId = new Map<TLShape['id'], TLShape>(shapes.map((shape) => [shape.id, shape]))
   let camera: TLCamera = {
     id: 'camera:page:page' as TLCamera['id'],
@@ -70,20 +74,23 @@ function fakeEditor(shapes: BlockShape[]) {
     return result.reverse()
   }
   const editor = {
-    getShape: (id: TLShape['id']) => byId.get(id),
+    getShape: vi.fn((id: TLShape['id']) => byId.get(id)),
     getShapeAncestors: (shape: TLShape | TLShape['id']) => ancestors(
       typeof shape === 'string' ? byId.get(shape)! : shape,
     ),
     getAncestorPageId: () => page.id,
     getCurrentPageId: () => page.id,
     getCurrentPage: () => page,
+    getPage: (id: TLPageId) => id === page.id ? page : undefined,
     getShapePageBounds: () => ({ x: 10, y: 20, w: 560, h: 380 }),
     getCamera: () => camera,
     setCamera: vi.fn((next: TLCamera) => { camera = next }),
     zoomToBounds: vi.fn(),
     zoomToFit: vi.fn(),
     setCurrentTool: vi.fn(),
-    selectNone: vi.fn(),
+    getSelectedShapeIds: () => selected,
+    select: vi.fn((...ids: TLShape['id'][]) => { selected = ids }),
+    selectNone: vi.fn(() => { selected = [] }),
   } as unknown as Editor
   return { editor, camera: () => camera }
 }
@@ -163,5 +170,58 @@ describe('Depth Stack navigation', () => {
     expect(getDepthNavigationSnapshot(editor).scopeId).toBe(outer.id)
     expect(toggleDepthScope(editor, outer.id)).toBe(true)
     expect(getDepthNavigationSnapshot(editor).scopeId).toBeNull()
+  })
+
+  it('keeps structural Up separate from chronological Back and clears Forward on divergence', () => {
+    const outer = block('Outer', TEST_PAGE_ID)
+    const middle = block('Middle', outer.id)
+    const inner = block('Inner', middle.id)
+    const { editor } = fakeEditor([outer, middle, inner])
+
+    expect(stepIntoDepthScope(editor, outer.id)).toBe(true)
+    expect(stepIntoDepthScope(editor, middle.id)).toBe(true)
+    expect(stepIntoDepthScope(editor, inner.id)).toBe(true)
+    expect(stepOutOfDepthScope(editor)).toBe(true)
+    expect(getDepthNavigationSnapshot(editor).scopeId).toBe(middle.id)
+    expect(goBackInDepthHistory(editor)).toBe(true)
+    expect(getDepthNavigationSnapshot(editor).scopeId).toBe(inner.id)
+    expect(goBackInDepthHistory(editor)).toBe(true)
+    expect(getDepthNavigationSnapshot(editor).scopeId).toBe(middle.id)
+    expect(getDepthNavigationSnapshot(editor).canGoForward).toBe(true)
+    expect(stepToDepthAncestor(editor, outer.id)).toBe(true)
+    expect(getDepthNavigationSnapshot(editor).scopeId).toBe(outer.id)
+    expect(getDepthNavigationSnapshot(editor).canGoForward).toBe(false)
+    expect(goForwardInDepthHistory(editor)).toBe(false)
+  })
+
+  it('skips a deleted history target and preserves the root camera snapshot', () => {
+    const outer = block('Outer', TEST_PAGE_ID)
+    const inner = block('Inner', outer.id)
+    const { editor } = fakeEditor([outer, inner])
+    const rootCamera = { ...editor.getCamera() }
+
+    expect(stepIntoDepthScope(editor, outer.id)).toBe(true)
+    expect(stepIntoDepthScope(editor, inner.id)).toBe(true)
+    expect(goBackInDepthHistory(editor)).toBe(true)
+    expect(getDepthNavigationSnapshot(editor).scopeId).toBe(outer.id)
+    ;(editor.getShape as ReturnType<typeof vi.fn>).mockImplementation((id: TLShape['id']) => id === inner.id ? undefined : outer)
+    expect(goForwardInDepthHistory(editor)).toBe(false)
+    expect(goBackInDepthHistory(editor)).toBe(true)
+    expect(getDepthNavigationSnapshot(editor).scopeId).toBeNull()
+    expect(editor.setCamera).toHaveBeenCalledWith(rootCamera, expect.any(Object))
+  })
+
+  it('routes an Overview target outside an isolation scope through one history hop', () => {
+    const outer = block('Outer', TEST_PAGE_ID)
+    const inner = block('Inner', outer.id)
+    const landmark = block('Landmark', TEST_PAGE_ID, 'simple')
+    const { editor } = fakeEditor([outer, inner, landmark])
+
+    expect(stepIntoDepthScope(editor, outer.id)).toBe(true)
+    expect(stepIntoDepthScope(editor, inner.id)).toBe(true)
+    expect(focusDepthOverviewTarget(editor, { id: landmark.id, pageId: TEST_PAGE_ID, kind: 'branch' })).toBe(true)
+    expect(getDepthNavigationSnapshot(editor).scopeId).toBeNull()
+    expect(goBackInDepthHistory(editor)).toBe(true)
+    expect(getDepthNavigationSnapshot(editor).scopeId).toBe(inner.id)
   })
 })
