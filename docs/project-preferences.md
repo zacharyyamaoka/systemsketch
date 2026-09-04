@@ -1,0 +1,45 @@
+# SystemSketch project preferences
+
+These are durable design preferences, not a second requirements system. They guide choices when
+several technically valid implementations are available.
+
+## One definition, many occurrences
+
+Give a semantic definition one stable identity and one canonical body. Any visual occurrence of
+that definition should link to it instead of copying a separately editable version of its meaning.
+Creating independent content is an explicit new definition or draft, never an accidental fork.
+
+**Why:** a reader and a future source projection need one place to find what a thing means.
+Linked occurrences can still serve different layouts and views without drifting into competing
+definitions.
+
+## Dataflow first
+
+Prefer representations that make values, transformations, and dependencies visible. Let a
+connection mean that a value reaches a consumer; let a Block or region explain the transformation
+or scope that happens along that path. Add visual structure only when it clarifies that flow or a
+real Python semantic, not merely to decorate the canvas.
+
+**Why:** dataflow is the organizing model SystemSketch is trying to expose. It gives the diagram a
+natural reading direction and keeps the useful question close at hand: *where did this value come
+from, and what happens to it next?*
+
+## Let the Python model lead
+
+When SystemSketch represents code, start from Python's own semantic units and syntax: definitions,
+bindings, calls, arguments, returned values, attribute/subscript access, and control scope. A
+visual abstraction is welcome when it improves comprehension, but it should remain explainable as
+a projection of those units rather than becoming a competing programming language.
+
+**Why:** staying close to the code model makes the canvas easier to read beside Python today and
+easier to project from—or eventually write back to—without inventing unnecessary translation
+rules.
+
+## Separate meaning from presentation
+
+Treat identity, source provenance, data dependencies, and scope as semantic facts. Treat position,
+size, routing, color, and visual grouping as presentation unless the product explicitly promotes
+one to a semantic role.
+
+**Why:** people should be free to arrange a board for understanding without accidentally changing
+what the represented program means.
