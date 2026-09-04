@@ -771,20 +771,38 @@ body:has(.systemsketch-preview-mode) .systemsketch-workspace-alert {
 
 .systemsketch-workspace-pathbar > .tlui-input__wrapper {
   width: 132px;
+  min-width: 0;
   height: 28px;
   flex: none;
   gap: 0;
 }
 
 .systemsketch-workspace-search.tlui-input {
+  width: 100%;
+  min-width: 0;
   height: 28px;
   max-height: none;
+  box-sizing: border-box;
 }
 
 .systemsketch-workspace-search:focus {
   border-color: var(--ss-accent);
   outline: none;
   background: var(--ss-surface-raised);
+}
+
+@media (max-width: 380px) {
+  /* WHY: stock TldrawUiInput keeps an intrinsic text width. At phone widths,
+   * let its wrapper, rather than the dialog boundary, be the constraint so
+   * the filter retains a deliberate right inset and its focus ring is whole. */
+  .systemsketch-workspace-pathbar {
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .systemsketch-workspace-pathbar > .tlui-input__wrapper {
+    width: min(132px, 40vw);
+  }
 }
 
 .systemsketch-workspace-dialog__confirm {

@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-09-03T22:32:22.158Z",
+  "ranAt": "2026-09-04T06:45:57.963Z",
   "themes": [
     {
       "id": "systemsketch:light",
@@ -377,9 +377,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#676c6f",
+          "bg": "#edf0f2",
+          "ratio": 4.64,
           "text": "Places",
           "ok": true
         },
@@ -389,9 +389,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#2e2e2e",
+          "bg": "#d5d8da",
+          "ratio": 9.49,
           "text": "SystemSketch",
           "ok": true
         },
@@ -401,10 +401,10 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
-          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "fg": "#2e2e2e",
+          "bg": "#d5d8da",
+          "ratio": 9.49,
+          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
           "ok": true
         },
         {
@@ -413,9 +413,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#2e2e2e",
+          "bg": "#edf0f2",
+          "ratio": 11.86,
           "text": "theme-contrast",
           "ok": true
         },
@@ -425,10 +425,10 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
-          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "fg": "#676c6f",
+          "bg": "#edf0f2",
+          "ratio": 4.64,
+          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
           "ok": true
         },
         {
@@ -437,9 +437,9 @@
           "kind": "icon",
           "threshold": 3,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#2e2e2e",
+          "bg": "#edf0f2",
+          "ratio": 11.86,
           "text": "←",
           "ok": true
         },
@@ -449,10 +449,10 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
-          "text": "theme-contrast-files-IcITta",
+          "fg": "#676c6f",
+          "bg": "#fcfcfc",
+          "ratio": 5.18,
+          "text": "theme-contrast-files-Z4yLBh",
           "ok": true
         },
         {
@@ -461,9 +461,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.24,
           "text": "SystemSketch",
           "ok": true
         },
@@ -473,9 +473,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.24,
           "text": "visible",
           "ok": true
         },
@@ -486,9 +486,9 @@
           "threshold": 4.5,
           "foregroundPseudo": "::placeholder",
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#676c6f",
+          "bg": "#fcfcfc",
+          "ratio": 5.18,
           "text": "visible",
           "ok": true
         },
@@ -498,9 +498,9 @@
           "kind": "boundary",
           "threshold": 3,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#3182ed",
+          "bg": "#fcfcfc",
+          "ratio": 3.69,
           "text": "visible",
           "ok": true
         },
@@ -510,9 +510,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#676c6f",
+          "bg": "#fcfcfc",
+          "ratio": 5.18,
           "text": "Nothing here matches “visible”.",
           "ok": true
         },
@@ -522,9 +522,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#2e2e2e",
+          "bg": "#fcfcfc",
+          "ratio": 13.24,
           "text": "Cancel",
           "ok": true
         },
@@ -946,9 +946,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#bdc0c2",
+          "bg": "#1a1a1c",
+          "ratio": 9.5,
           "text": "Places",
           "ok": true
         },
@@ -958,9 +958,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#d9d9d9",
+          "bg": "#313133",
+          "ratio": 9.21,
           "text": "SystemSketch",
           "ok": true
         },
@@ -970,10 +970,10 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
-          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "fg": "#d9d9d9",
+          "bg": "#313133",
+          "ratio": 9.21,
+          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
           "ok": true
         },
         {
@@ -982,9 +982,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#d9d9d9",
+          "bg": "#1a1a1c",
+          "ratio": 12.31,
           "text": "theme-contrast",
           "ok": true
         },
@@ -994,10 +994,10 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
-          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "fg": "#bdc0c2",
+          "bg": "#1a1a1c",
+          "ratio": 9.5,
+          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
           "ok": true
         },
         {
@@ -1006,9 +1006,9 @@
           "kind": "icon",
           "threshold": 3,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#d9d9d9",
+          "bg": "#1a1a1c",
+          "ratio": 12.31,
           "text": "←",
           "ok": true
         },
@@ -1018,10 +1018,10 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
-          "text": "theme-contrast-files-IcITta",
+          "fg": "#bdc0c2",
+          "bg": "#202025",
+          "ratio": 8.87,
+          "text": "theme-contrast-files-Z4yLBh",
           "ok": true
         },
         {
@@ -1030,9 +1030,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#d9d9d9",
+          "bg": "#202025",
+          "ratio": 11.49,
           "text": "SystemSketch",
           "ok": true
         },
@@ -1042,9 +1042,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#d9d9d9",
+          "bg": "#202025",
+          "ratio": 11.49,
           "text": "visible",
           "ok": true
         },
@@ -1055,9 +1055,9 @@
           "threshold": 4.5,
           "foregroundPseudo": "::placeholder",
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#bdc0c2",
+          "bg": "#202025",
+          "ratio": 8.87,
           "text": "visible",
           "ok": true
         },
@@ -1067,9 +1067,9 @@
           "kind": "boundary",
           "threshold": 3,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#4387f4",
+          "bg": "#202025",
+          "ratio": 4.64,
           "text": "visible",
           "ok": true
         },
@@ -1079,9 +1079,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#bdc0c2",
+          "bg": "#202025",
+          "ratio": 8.87,
           "text": "Nothing here matches “visible”.",
           "ok": true
         },
@@ -1091,9 +1091,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#d9d9d9",
+          "bg": "#202025",
+          "ratio": 11.49,
           "text": "Cancel",
           "ok": true
         },
@@ -1514,9 +1514,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
+          "fg": "#5c5c5c",
           "bg": "#ffffff",
-          "ratio": 21,
+          "ratio": 6.69,
           "text": "Places",
           "ok": true
         },
@@ -1526,9 +1526,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#222222",
+          "bg": "#f5f1fe",
+          "ratio": 14.31,
           "text": "SystemSketch",
           "ok": true
         },
@@ -1538,10 +1538,10 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
-          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "fg": "#222222",
+          "bg": "#f5f1fe",
+          "ratio": 14.31,
+          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
           "ok": true
         },
         {
@@ -1550,9 +1550,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
+          "fg": "#222222",
           "bg": "#ffffff",
-          "ratio": 21,
+          "ratio": 15.91,
           "text": "theme-contrast",
           "ok": true
         },
@@ -1562,10 +1562,10 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
+          "fg": "#5c5c5c",
           "bg": "#ffffff",
-          "ratio": 21,
-          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "ratio": 6.69,
+          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
           "ok": true
         },
         {
@@ -1574,9 +1574,9 @@
           "kind": "icon",
           "threshold": 3,
           "found": true,
-          "fg": "#000000",
+          "fg": "#222222",
           "bg": "#ffffff",
-          "ratio": 21,
+          "ratio": 15.91,
           "text": "←",
           "ok": true
         },
@@ -1586,10 +1586,10 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
-          "text": "theme-contrast-files-IcITta",
+          "fg": "#5c5c5c",
+          "bg": "#f6f6f6",
+          "ratio": 6.19,
+          "text": "theme-contrast-files-Z4yLBh",
           "ok": true
         },
         {
@@ -1598,9 +1598,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.72,
           "text": "SystemSketch",
           "ok": true
         },
@@ -1610,9 +1610,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.72,
           "text": "visible",
           "ok": true
         },
@@ -1623,9 +1623,9 @@
           "threshold": 4.5,
           "foregroundPseudo": "::placeholder",
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#5c5c5c",
+          "bg": "#f6f6f6",
+          "ratio": 6.19,
           "text": "visible",
           "ok": true
         },
@@ -1635,9 +1635,9 @@
           "kind": "boundary",
           "threshold": 3,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#9873f7",
+          "bg": "#f6f6f6",
+          "ratio": 3.17,
           "text": "visible",
           "ok": true
         },
@@ -1647,9 +1647,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#5c5c5c",
+          "bg": "#f6f6f6",
+          "ratio": 6.19,
           "text": "Nothing here matches “visible”.",
           "ok": true
         },
@@ -1659,9 +1659,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#222222",
+          "bg": "#f6f6f6",
+          "ratio": 14.72,
           "text": "Cancel",
           "ok": true
         },
@@ -2082,9 +2082,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#b3b3b3",
+          "bg": "#2e2e2e",
+          "ratio": 6.48,
           "text": "Places",
           "ok": true
         },
@@ -2094,9 +2094,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#dadada",
+          "bg": "#373342",
+          "ratio": 8.79,
           "text": "SystemSketch",
           "ok": true
         },
@@ -2106,10 +2106,10 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
-          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "fg": "#dadada",
+          "bg": "#373342",
+          "ratio": 8.79,
+          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
           "ok": true
         },
         {
@@ -2118,9 +2118,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#dadada",
+          "bg": "#2e2e2e",
+          "ratio": 9.71,
           "text": "theme-contrast",
           "ok": true
         },
@@ -2130,10 +2130,10 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
-          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "fg": "#b3b3b3",
+          "bg": "#2e2e2e",
+          "ratio": 6.48,
+          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
           "ok": true
         },
         {
@@ -2142,9 +2142,9 @@
           "kind": "icon",
           "threshold": 3,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#dadada",
+          "bg": "#2e2e2e",
+          "ratio": 9.71,
           "text": "←",
           "ok": true
         },
@@ -2154,10 +2154,10 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
-          "text": "theme-contrast-files-IcITta",
+          "fg": "#b3b3b3",
+          "bg": "#282828",
+          "ratio": 7.03,
+          "text": "theme-contrast-files-Z4yLBh",
           "ok": true
         },
         {
@@ -2166,9 +2166,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.55,
           "text": "SystemSketch",
           "ok": true
         },
@@ -2178,9 +2178,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.55,
           "text": "visible",
           "ok": true
         },
@@ -2191,9 +2191,9 @@
           "threshold": 4.5,
           "foregroundPseudo": "::placeholder",
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#b3b3b3",
+          "bg": "#282828",
+          "ratio": 7.03,
           "text": "visible",
           "ok": true
         },
@@ -2203,9 +2203,9 @@
           "kind": "boundary",
           "threshold": 3,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#8a5cf5",
+          "bg": "#282828",
+          "ratio": 3.46,
           "text": "visible",
           "ok": true
         },
@@ -2215,9 +2215,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#b3b3b3",
+          "bg": "#282828",
+          "ratio": 7.03,
           "text": "Nothing here matches “visible”.",
           "ok": true
         },
@@ -2227,9 +2227,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#dadada",
+          "bg": "#282828",
+          "ratio": 10.55,
           "text": "Cancel",
           "ok": true
         },
@@ -2650,9 +2650,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#9d9d9d",
+          "bg": "#313131",
+          "ratio": 4.8,
           "text": "Places",
           "ok": true
         },
@@ -2662,9 +2662,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#cccccc",
+          "bg": "#414242",
+          "ratio": 6.31,
           "text": "SystemSketch",
           "ok": true
         },
@@ -2674,10 +2674,10 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
-          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "fg": "#cccccc",
+          "bg": "#414242",
+          "ratio": 6.31,
+          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
           "ok": true
         },
         {
@@ -2686,9 +2686,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#cccccc",
+          "bg": "#313131",
+          "ratio": 8.1,
           "text": "theme-contrast",
           "ok": true
         },
@@ -2698,10 +2698,10 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
-          "text": "/tmp/theme-contrast-files-IcITta/SystemS",
+          "fg": "#9d9d9d",
+          "bg": "#313131",
+          "ratio": 4.8,
+          "text": "/tmp/theme-contrast-files-Z4yLBh/SystemS",
           "ok": true
         },
         {
@@ -2710,9 +2710,9 @@
           "kind": "icon",
           "threshold": 3,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#cccccc",
+          "bg": "#313131",
+          "ratio": 8.1,
           "text": "←",
           "ok": true
         },
@@ -2722,10 +2722,10 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
-          "text": "theme-contrast-files-IcITta",
+          "fg": "#9d9d9d",
+          "bg": "#202020",
+          "ratio": 6.01,
+          "text": "theme-contrast-files-Z4yLBh",
           "ok": true
         },
         {
@@ -2734,9 +2734,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
           "text": "SystemSketch",
           "ok": true
         },
@@ -2746,9 +2746,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
           "text": "visible",
           "ok": true
         },
@@ -2759,9 +2759,9 @@
           "threshold": 4.5,
           "foregroundPseudo": "::placeholder",
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#9d9d9d",
+          "bg": "#202020",
+          "ratio": 6.01,
           "text": "visible",
           "ok": true
         },
@@ -2771,9 +2771,9 @@
           "kind": "boundary",
           "threshold": 3,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#0078d4",
+          "bg": "#202020",
+          "ratio": 3.6,
           "text": "visible",
           "ok": true
         },
@@ -2783,9 +2783,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#9d9d9d",
+          "bg": "#202020",
+          "ratio": 6.01,
           "text": "Nothing here matches “visible”.",
           "ok": true
         },
@@ -2795,9 +2795,9 @@
           "kind": "text",
           "threshold": 4.5,
           "found": true,
-          "fg": "#000000",
-          "bg": "#ffffff",
-          "ratio": 21,
+          "fg": "#cccccc",
+          "bg": "#202020",
+          "ratio": 10.15,
           "text": "Cancel",
           "ok": true
         },
@@ -2989,55 +2989,55 @@
       "ok": true
     },
     {
-      "label": "Light: workspace sidebar section heading 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Light: workspace sidebar section heading 4.64:1 (≥ 4.5) #676c6f on #edf0f2",
       "ok": true
     },
     {
-      "label": "Light: workspace place label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Light: workspace place label 9.49:1 (≥ 4.5) #2e2e2e on #d5d8da",
       "ok": true
     },
     {
-      "label": "Light: workspace place path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Light: workspace place path 9.49:1 (≥ 4.5) #2e2e2e on #d5d8da",
       "ok": true
     },
     {
-      "label": "Light: workspace recent label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Light: workspace recent label 11.86:1 (≥ 4.5) #2e2e2e on #edf0f2",
       "ok": true
     },
     {
-      "label": "Light: workspace recent path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Light: workspace recent path 4.64:1 (≥ 4.5) #676c6f on #edf0f2",
       "ok": true
     },
     {
-      "label": "Light: workspace parent-folder icon 21:1 (≥ 3) #000000 on #ffffff",
+      "label": "Light: workspace parent-folder icon 11.86:1 (≥ 3) #2e2e2e on #edf0f2",
       "ok": true
     },
     {
-      "label": "Light: workspace breadcrumb link 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Light: workspace breadcrumb link 5.18:1 (≥ 4.5) #676c6f on #fcfcfc",
       "ok": true
     },
     {
-      "label": "Light: workspace current breadcrumb 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Light: workspace current breadcrumb 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc",
       "ok": true
     },
     {
-      "label": "Light: workspace filter text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Light: workspace filter text 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc",
       "ok": true
     },
     {
-      "label": "Light: workspace filter placeholder 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Light: workspace filter placeholder 5.18:1 (≥ 4.5) #676c6f on #fcfcfc",
       "ok": true
     },
     {
-      "label": "Light: workspace filter boundary 21:1 (≥ 3) #000000 on #ffffff",
+      "label": "Light: workspace filter boundary 3.69:1 (≥ 3) #3182ed on #fcfcfc",
       "ok": true
     },
     {
-      "label": "Light: workspace empty-state text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Light: workspace empty-state text 5.18:1 (≥ 4.5) #676c6f on #fcfcfc",
       "ok": true
     },
     {
-      "label": "Light: workspace footer action 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Light: workspace footer action 13.24:1 (≥ 4.5) #2e2e2e on #fcfcfc",
       "ok": true
     },
     {
@@ -3177,55 +3177,55 @@
       "ok": true
     },
     {
-      "label": "Dark: workspace sidebar section heading 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark: workspace sidebar section heading 9.5:1 (≥ 4.5) #bdc0c2 on #1a1a1c",
       "ok": true
     },
     {
-      "label": "Dark: workspace place label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark: workspace place label 9.21:1 (≥ 4.5) #d9d9d9 on #313133",
       "ok": true
     },
     {
-      "label": "Dark: workspace place path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark: workspace place path 9.21:1 (≥ 4.5) #d9d9d9 on #313133",
       "ok": true
     },
     {
-      "label": "Dark: workspace recent label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark: workspace recent label 12.31:1 (≥ 4.5) #d9d9d9 on #1a1a1c",
       "ok": true
     },
     {
-      "label": "Dark: workspace recent path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark: workspace recent path 9.5:1 (≥ 4.5) #bdc0c2 on #1a1a1c",
       "ok": true
     },
     {
-      "label": "Dark: workspace parent-folder icon 21:1 (≥ 3) #000000 on #ffffff",
+      "label": "Dark: workspace parent-folder icon 12.31:1 (≥ 3) #d9d9d9 on #1a1a1c",
       "ok": true
     },
     {
-      "label": "Dark: workspace breadcrumb link 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark: workspace breadcrumb link 8.87:1 (≥ 4.5) #bdc0c2 on #202025",
       "ok": true
     },
     {
-      "label": "Dark: workspace current breadcrumb 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark: workspace current breadcrumb 11.49:1 (≥ 4.5) #d9d9d9 on #202025",
       "ok": true
     },
     {
-      "label": "Dark: workspace filter text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark: workspace filter text 11.49:1 (≥ 4.5) #d9d9d9 on #202025",
       "ok": true
     },
     {
-      "label": "Dark: workspace filter placeholder 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark: workspace filter placeholder 8.87:1 (≥ 4.5) #bdc0c2 on #202025",
       "ok": true
     },
     {
-      "label": "Dark: workspace filter boundary 21:1 (≥ 3) #000000 on #ffffff",
+      "label": "Dark: workspace filter boundary 4.64:1 (≥ 3) #4387f4 on #202025",
       "ok": true
     },
     {
-      "label": "Dark: workspace empty-state text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark: workspace empty-state text 8.87:1 (≥ 4.5) #bdc0c2 on #202025",
       "ok": true
     },
     {
-      "label": "Dark: workspace footer action 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark: workspace footer action 11.49:1 (≥ 4.5) #d9d9d9 on #202025",
       "ok": true
     },
     {
@@ -3365,55 +3365,55 @@
       "ok": true
     },
     {
-      "label": "Obsidian Light: workspace sidebar section heading 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Light: workspace sidebar section heading 6.69:1 (≥ 4.5) #5c5c5c on #ffffff",
       "ok": true
     },
     {
-      "label": "Obsidian Light: workspace place label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Light: workspace place label 14.31:1 (≥ 4.5) #222222 on #f5f1fe",
       "ok": true
     },
     {
-      "label": "Obsidian Light: workspace place path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Light: workspace place path 14.31:1 (≥ 4.5) #222222 on #f5f1fe",
       "ok": true
     },
     {
-      "label": "Obsidian Light: workspace recent label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Light: workspace recent label 15.91:1 (≥ 4.5) #222222 on #ffffff",
       "ok": true
     },
     {
-      "label": "Obsidian Light: workspace recent path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Light: workspace recent path 6.69:1 (≥ 4.5) #5c5c5c on #ffffff",
       "ok": true
     },
     {
-      "label": "Obsidian Light: workspace parent-folder icon 21:1 (≥ 3) #000000 on #ffffff",
+      "label": "Obsidian Light: workspace parent-folder icon 15.91:1 (≥ 3) #222222 on #ffffff",
       "ok": true
     },
     {
-      "label": "Obsidian Light: workspace breadcrumb link 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Light: workspace breadcrumb link 6.19:1 (≥ 4.5) #5c5c5c on #f6f6f6",
       "ok": true
     },
     {
-      "label": "Obsidian Light: workspace current breadcrumb 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Light: workspace current breadcrumb 14.72:1 (≥ 4.5) #222222 on #f6f6f6",
       "ok": true
     },
     {
-      "label": "Obsidian Light: workspace filter text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Light: workspace filter text 14.72:1 (≥ 4.5) #222222 on #f6f6f6",
       "ok": true
     },
     {
-      "label": "Obsidian Light: workspace filter placeholder 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Light: workspace filter placeholder 6.19:1 (≥ 4.5) #5c5c5c on #f6f6f6",
       "ok": true
     },
     {
-      "label": "Obsidian Light: workspace filter boundary 21:1 (≥ 3) #000000 on #ffffff",
+      "label": "Obsidian Light: workspace filter boundary 3.17:1 (≥ 3) #9873f7 on #f6f6f6",
       "ok": true
     },
     {
-      "label": "Obsidian Light: workspace empty-state text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Light: workspace empty-state text 6.19:1 (≥ 4.5) #5c5c5c on #f6f6f6",
       "ok": true
     },
     {
-      "label": "Obsidian Light: workspace footer action 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Light: workspace footer action 14.72:1 (≥ 4.5) #222222 on #f6f6f6",
       "ok": true
     },
     {
@@ -3553,55 +3553,55 @@
       "ok": true
     },
     {
-      "label": "Obsidian Dark: workspace sidebar section heading 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Dark: workspace sidebar section heading 6.48:1 (≥ 4.5) #b3b3b3 on #2e2e2e",
       "ok": true
     },
     {
-      "label": "Obsidian Dark: workspace place label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Dark: workspace place label 8.79:1 (≥ 4.5) #dadada on #373342",
       "ok": true
     },
     {
-      "label": "Obsidian Dark: workspace place path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Dark: workspace place path 8.79:1 (≥ 4.5) #dadada on #373342",
       "ok": true
     },
     {
-      "label": "Obsidian Dark: workspace recent label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Dark: workspace recent label 9.71:1 (≥ 4.5) #dadada on #2e2e2e",
       "ok": true
     },
     {
-      "label": "Obsidian Dark: workspace recent path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Dark: workspace recent path 6.48:1 (≥ 4.5) #b3b3b3 on #2e2e2e",
       "ok": true
     },
     {
-      "label": "Obsidian Dark: workspace parent-folder icon 21:1 (≥ 3) #000000 on #ffffff",
+      "label": "Obsidian Dark: workspace parent-folder icon 9.71:1 (≥ 3) #dadada on #2e2e2e",
       "ok": true
     },
     {
-      "label": "Obsidian Dark: workspace breadcrumb link 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Dark: workspace breadcrumb link 7.03:1 (≥ 4.5) #b3b3b3 on #282828",
       "ok": true
     },
     {
-      "label": "Obsidian Dark: workspace current breadcrumb 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Dark: workspace current breadcrumb 10.55:1 (≥ 4.5) #dadada on #282828",
       "ok": true
     },
     {
-      "label": "Obsidian Dark: workspace filter text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Dark: workspace filter text 10.55:1 (≥ 4.5) #dadada on #282828",
       "ok": true
     },
     {
-      "label": "Obsidian Dark: workspace filter placeholder 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Dark: workspace filter placeholder 7.03:1 (≥ 4.5) #b3b3b3 on #282828",
       "ok": true
     },
     {
-      "label": "Obsidian Dark: workspace filter boundary 21:1 (≥ 3) #000000 on #ffffff",
+      "label": "Obsidian Dark: workspace filter boundary 3.46:1 (≥ 3) #8a5cf5 on #282828",
       "ok": true
     },
     {
-      "label": "Obsidian Dark: workspace empty-state text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Dark: workspace empty-state text 7.03:1 (≥ 4.5) #b3b3b3 on #282828",
       "ok": true
     },
     {
-      "label": "Obsidian Dark: workspace footer action 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Obsidian Dark: workspace footer action 10.55:1 (≥ 4.5) #dadada on #282828",
       "ok": true
     },
     {
@@ -3741,55 +3741,55 @@
       "ok": true
     },
     {
-      "label": "Dark Modern: workspace sidebar section heading 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark Modern: workspace sidebar section heading 4.8:1 (≥ 4.5) #9d9d9d on #313131",
       "ok": true
     },
     {
-      "label": "Dark Modern: workspace place label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark Modern: workspace place label 6.31:1 (≥ 4.5) #cccccc on #414242",
       "ok": true
     },
     {
-      "label": "Dark Modern: workspace place path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark Modern: workspace place path 6.31:1 (≥ 4.5) #cccccc on #414242",
       "ok": true
     },
     {
-      "label": "Dark Modern: workspace recent label 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark Modern: workspace recent label 8.1:1 (≥ 4.5) #cccccc on #313131",
       "ok": true
     },
     {
-      "label": "Dark Modern: workspace recent path 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark Modern: workspace recent path 4.8:1 (≥ 4.5) #9d9d9d on #313131",
       "ok": true
     },
     {
-      "label": "Dark Modern: workspace parent-folder icon 21:1 (≥ 3) #000000 on #ffffff",
+      "label": "Dark Modern: workspace parent-folder icon 8.1:1 (≥ 3) #cccccc on #313131",
       "ok": true
     },
     {
-      "label": "Dark Modern: workspace breadcrumb link 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark Modern: workspace breadcrumb link 6.01:1 (≥ 4.5) #9d9d9d on #202020",
       "ok": true
     },
     {
-      "label": "Dark Modern: workspace current breadcrumb 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark Modern: workspace current breadcrumb 10.15:1 (≥ 4.5) #cccccc on #202020",
       "ok": true
     },
     {
-      "label": "Dark Modern: workspace filter text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark Modern: workspace filter text 10.15:1 (≥ 4.5) #cccccc on #202020",
       "ok": true
     },
     {
-      "label": "Dark Modern: workspace filter placeholder 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark Modern: workspace filter placeholder 6.01:1 (≥ 4.5) #9d9d9d on #202020",
       "ok": true
     },
     {
-      "label": "Dark Modern: workspace filter boundary 21:1 (≥ 3) #000000 on #ffffff",
+      "label": "Dark Modern: workspace filter boundary 3.6:1 (≥ 3) #0078d4 on #202020",
       "ok": true
     },
     {
-      "label": "Dark Modern: workspace empty-state text 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark Modern: workspace empty-state text 6.01:1 (≥ 4.5) #9d9d9d on #202020",
       "ok": true
     },
     {
-      "label": "Dark Modern: workspace footer action 21:1 (≥ 4.5) #000000 on #ffffff",
+      "label": "Dark Modern: workspace footer action 10.15:1 (≥ 4.5) #cccccc on #202020",
       "ok": true
     },
     {

@@ -1,0 +1,7 @@
+{
+  "viewport": { "width": 320, "height": 720 },
+  "dialog": { "left": 10, "right": 312, "top": 36, "bottom": 684, "width": 302, "height": 648 },
+  "pathbar": { "left": 1, "right": 301, "top": 118, "bottom": 169, "width": 300, "height": 51, "clientWidth": 300, "scrollWidth": 310 },
+  "filter": { "left": 157, "right": 311, "top": 128, "bottom": 158, "width": 154, "height": 30, "computed": { "width": "132px", "minWidth": "0px", "boxSizing": "content-box" } },
+  "folder": { "left": 70.1, "right": 149, "top": 128, "bottom": 158, "width": 78.9, "height": 30 }
+}
