@@ -1,0 +1,73 @@
+{
+  "feature": "Preview-to-Stable build progress",
+  "viewport": { "width": 1280, "height": 720 },
+  "pages": [{ "id": "review", "name": "Build progress review" }],
+  "shapes": [
+    {
+      "id": "live-preview",
+      "pageId": "review",
+      "type": "block",
+      "x": 530,
+      "y": 270,
+      "props": {
+        "title": "Live Preview",
+        "description": "The working copy that becomes Stable after confirmation.",
+        "blockType": "Process",
+        "view": "port",
+        "w": 330,
+        "h": 198,
+        "inputs": [{ "id": "source", "name": "working copy", "type": "Source", "visible": true }],
+        "outputs": [{ "id": "candidate", "name": "candidate", "type": "Release", "visible": true }]
+      }
+    },
+    {
+      "id": "stable-release",
+      "pageId": "review",
+      "type": "block",
+      "x": 920,
+      "y": 270,
+      "props": {
+        "title": "Stable release",
+        "description": "The immutable result published after verification.",
+        "blockType": "Process",
+        "view": "port",
+        "w": 300,
+        "h": 198,
+        "inputs": [{ "id": "candidate", "name": "candidate", "type": "Release", "visible": true }],
+        "outputs": [{ "id": "stable", "name": "Stable", "type": "Release", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · In the Preview banner, click Make Preview Stable.",
+      "x": 50,
+      "y": 270,
+      "w": 400,
+      "h": 110,
+      "target": { "shapeId": "live-preview", "anchor": "left" }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Click Confirm · replaces Stable.",
+      "x": 890,
+      "y": 155,
+      "w": 340,
+      "h": 105,
+      "target": { "x": 850, "y": 96 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · An animated blue bar appears below the locked banner controls while Stable builds, then clears when Stable updated appears.",
+      "x": 440,
+      "y": 570,
+      "w": 680,
+      "h": 110
+    }
+  ]
+}

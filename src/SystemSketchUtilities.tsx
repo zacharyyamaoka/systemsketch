@@ -137,6 +137,26 @@ function ChannelActions({
   )
 }
 
+/**
+ * A release does not expose reliable per-step completion, so this stays
+ * deliberately indeterminate. It is only rendered while the promote request
+ * is actually in flight; a percentage here would imply progress we cannot
+ * honestly measure.
+ */
+function BuildProgress() {
+  return (
+    <div
+      className="systemsketch-preview-mode__progress"
+      data-testid="systemsketch-build-progress"
+      role="progressbar"
+      aria-label="Building Stable release"
+      aria-valuetext="Build in progress"
+    >
+      <span aria-hidden="true" />
+    </div>
+  )
+}
+
 export function SystemSketchNavigationPanel() {
   const editor = useEditor()
   const actions = useActions()
@@ -370,6 +390,7 @@ export function SystemSketchNavigationPanel() {
             </span>
             {channelActions('systemsketch-preview-mode__actions')}
           </div>
+          {makeStable === 'working' ? <BuildProgress /> : null}
           {error ? (
             <p className="systemsketch-preview-mode__error" role="alert">{error}</p>
           ) : null}
