@@ -12,6 +12,13 @@ const isConnector = (shape: TLShape): boolean => (
 	shape.type === 'arrow' || shape.type === CONNECTION_SHAPE_TYPE
 )
 
+const CONNECTOR_MANIPULATION_STATES = [
+	'select.translating',
+	'select.resizing',
+	'select.rotating',
+	'select.dragging_handle',
+]
+
 function isWithinCanvasViewport(
 	container: HTMLElement,
 	clientX: number,
@@ -69,6 +76,11 @@ export function installConnectorControlVisibility(editor: Editor): () => void {
 	}
 
 	const update = () => {
+		// tldraw removes selection handles for the whole manipulation. Measuring
+		// every selected connector while none of those controls can paint turns a
+		// large select-all drag into one route walk per cable per pointer frame.
+		// Pointer-up already schedules a fresh measurement after the tool settles.
+		if (CONNECTOR_MANIPULATION_STATES.some((path) => editor.isIn(path))) return
 		if (!lastPointer || !isWithinCanvasViewport(
 			container,
 			lastPointer.clientX,

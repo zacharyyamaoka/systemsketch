@@ -140,7 +140,12 @@ function aggregate(profile) {
 const SEED = (blocks) => `(() => {
   const editor = window.__systemsketch.editor
   const N = ${blocks}, COLS = ${COLS}
-  const views = { simple: { w: 320, h: 206 }, port: { w: 340, h: 198 }, expanded: { w: 560, h: 380 } }
+  const views = {
+    simple: { w: 320, h: 206 },
+    port: { w: 340, h: 198 },
+    expanded: { w: 560, h: 380 },
+    value: { w: 168, h: 56 },
+  }
   const ids = []
   const shapes = []
   for (let i = 0; i < N; i += 1) {

@@ -1,0 +1,31 @@
+{
+  "snapshot": {
+    "baseline": "2964abb",
+    "integratedMain": "8f6d1b5",
+    "blocks": 48,
+    "cables": 68,
+    "shapes": 116
+  },
+  "selectAllDrag": {
+    "busyMsBefore": 947,
+    "busyMsAfter": 767,
+    "busyReductionPercent": 19.0,
+    "sourceInclusiveMsBefore": 73,
+    "sourceInclusiveMsAfter": 47,
+    "maxFrameGapMsBefore": 66.6,
+    "maxFrameGapMsAfter": 50
+  },
+  "cableDrag": {
+    "sourceInclusiveMsBefore": 31,
+    "sourceInclusiveMsAfter": 19,
+    "maxFrameGapMsAfter": 66.7,
+    "longTaskMsAfter": 62
+  },
+  "verification": {
+    "reviewBoardsParsed": 95,
+    "vitestTests": 1096,
+    "pythonTests": 94,
+    "browserChecks": 97
+  },
+  "missingJourneys": []
+}

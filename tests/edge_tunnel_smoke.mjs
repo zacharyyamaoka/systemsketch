@@ -229,7 +229,18 @@ async function main() {
         width: 1600, height: 900, deviceScaleFactor: 1, mobile: false,
       })
       await openApp(fixturePage, app.port, `?board=${encodeURIComponent(reviewBoard)}`)
-      await waitFor(fixturePage, `window.__systemsketch?.editor?.getShape('shape:tunnel')?.props?.tunnel === true`, 'saved review fixture', 20_000)
+      try {
+        await waitFor(fixturePage, `window.__systemsketch?.editor?.getShape('shape:tunnel')?.props?.tunnel === true`, 'saved review fixture', 20_000)
+      } catch (error) {
+        const state = await evaluate(fixturePage, `(() => JSON.stringify({
+          href: location.href,
+          title: document.title,
+          body: document.body.innerText.slice(0, 1200),
+          editorReady: Boolean(window.__systemsketch?.editor),
+          shapeIds: window.__systemsketch?.editor?.getCurrentPageShapes()?.map((shape) => shape.id) ?? [],
+        }))()`)
+        throw new Error(`${error.message}\nFixture page state: ${state}\nConsole errors: ${JSON.stringify(localConsoleErrors(fixturePage))}`)
+      }
       process.stdout.write('  … driving fixture hover preview\n')
       await moveAway(fixturePage)
       await waitFor(fixturePage, `document.querySelector('[data-shape-id="shape:tunnel"] [data-tunnel="hidden"]')`, 'fixture idle tunnel')

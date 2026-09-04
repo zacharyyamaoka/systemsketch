@@ -10,8 +10,31 @@ import {
 	type BlockShape,
 } from './blockModel'
 import { BlockShapeUtil } from './BlockShapeUtil'
+import {
+	downgradeBlockPropsV1ToV0,
+	downgradeBlockPropsV4ToV3,
+	downgradeBlockPropsV5ToV4,
+	downgradeBlockPropsV6ToV5,
+	upgradeBlockPropsV0ToV1,
+	upgradeBlockPropsV1ToV2,
+	upgradeBlockPropsV2ToV3,
+	upgradeBlockPropsV3ToV4,
+	upgradeBlockPropsV4ToV5,
+	upgradeBlockPropsV5ToV6,
+	type BlockMigrationProps,
+} from './blockShapeMigrations'
 
 const BLOCK_MIGRATION_SEQUENCE = `com.tldraw.shape.${BLOCK_SHAPE_TYPE}`
+
+function throughPureStep(
+	props: BlockMigrationProps,
+	step: (input: BlockMigrationProps) => BlockMigrationProps,
+): BlockMigrationProps {
+	const before = structuredClone(props)
+	const next = step(props)
+	expect(props).toEqual(before)
+	return next
+}
 
 /** A Block saved when rows were markers on the port that started them. */
 function markerBlock(): Omit<BlockShape, 'props'> & { props: Record<string, unknown> } {
@@ -49,6 +72,124 @@ function markerBlock(): Omit<BlockShape, 'props'> & { props: Record<string, unkn
 }
 
 describe('Block shape migrations', () => {
+	it('threads one immutable props record through the named version steps', () => {
+		const v0: BlockMigrationProps = {
+			view: 'port',
+			w: 360,
+			h: 230,
+			views: {
+				simple: { w: 240, h: 148 },
+				port: { w: 360, h: 230 },
+				expanded: { w: 640, h: 430 },
+			},
+			inputs: [
+				{ id: 'cond', header: true },
+				{ id: 'left' },
+				{ id: 'right', groupStart: true },
+			],
+			outputs: [
+				{ id: 'first' },
+				{ id: 'second', branchStart: true },
+			],
+		}
+
+		const v1 = throughPureStep(v0, upgradeBlockPropsV0ToV1)
+		expect(v1).toMatchObject({ w: 340, h: 198 })
+		expect(v1.views).toMatchObject({
+			simple: { w: 320, h: 206 },
+			port: { w: 340, h: 198 },
+			expanded: { w: 560, h: 380 },
+		})
+
+		const v2 = throughPureStep(v1, upgradeBlockPropsV1ToV2)
+		expect(v2.portLayout).toBe('inline')
+
+		const v3 = throughPureStep(v2, upgradeBlockPropsV2ToV3)
+		expect(v3.inputs).toEqual([
+			{ id: 'cond', row: 0 },
+			{ id: 'left' },
+			{ id: 'right', row: 2 },
+		])
+		expect(v3.outputs).toEqual([
+			{ id: 'first' },
+			{ id: 'second', branch: 1 },
+		])
+
+		const v4 = throughPureStep(v3, upgradeBlockPropsV3ToV4)
+		expect(v4.views).toMatchObject({ value: { w: 168, h: 56 } })
+
+		const v5 = throughPureStep(v4, upgradeBlockPropsV4ToV5)
+		expect(v5.state).toBe('normal')
+
+		const v6 = throughPureStep(v5, upgradeBlockPropsV5ToV6)
+		expect(v6).toEqual(v5)
+
+		const restoredV0 = throughPureStep(v1, downgradeBlockPropsV1ToV0)
+		expect(restoredV0).toMatchObject({ w: 360, h: 230, views: v0.views })
+	})
+
+	it('downgrades disposable diff data without mutating the current record', () => {
+		const v6: BlockMigrationProps = {
+			view: 'value',
+			w: 200,
+			h: 56,
+			views: {
+				simple: { w: 320, h: 206 },
+				port: { w: 340, h: 198 },
+				expanded: { w: 560, h: 380 },
+				value: { w: 200, h: 56 },
+			},
+			state: 'changed',
+			fieldDiffs: [{ path: 'title', before: 'old', after: 'new' }],
+			priorPose: { x: 10, y: 20, w: 300, h: 200 },
+			inputs: [
+				{
+					id: 'kept',
+					state: 'changed',
+					stateBefore: 'before',
+					fieldDiffs: [{ path: 'name', before: 'before', after: 'after' }],
+				},
+				{ id: 'ghost', state: 'removed' },
+			],
+			outputs: [],
+		}
+
+		const v5 = throughPureStep(v6, downgradeBlockPropsV6ToV5)
+		expect(v5).not.toHaveProperty('fieldDiffs')
+		expect(v5).not.toHaveProperty('priorPose')
+		expect(v5.inputs).toEqual([
+			{ id: 'kept', state: 'changed', stateBefore: 'before' },
+			{ id: 'ghost', state: 'removed' },
+		])
+
+		const v4 = throughPureStep(v5, downgradeBlockPropsV5ToV4)
+		expect(v4).not.toHaveProperty('state')
+		expect(v4.inputs).toEqual([{ id: 'kept' }])
+
+		const v3 = throughPureStep(v4, downgradeBlockPropsV4ToV3)
+		expect(v3).toMatchObject({ view: 'simple', w: 320, h: 206 })
+		expect(v3.views).not.toHaveProperty('value')
+	})
+
+	it('gives pre-diff Blocks the required ordinary state', () => {
+		const store = createTLStore({ shapeUtils: [BlockShapeUtil], bindingUtils: [] })
+		const currentSchema = store.schema.serialize()
+		const legacy = markerBlock()
+		legacy.props.inputs = []
+		legacy.props.outputs = []
+		delete legacy.props.state
+		const snapshot = {
+			schema: {
+				...currentSchema,
+				sequences: { ...currentSchema.sequences, [BLOCK_MIGRATION_SEQUENCE]: 4 },
+			},
+			store: { [legacy.id]: legacy },
+		} as unknown as TLStoreSnapshot
+
+		expect(() => store.loadStoreSnapshot(snapshot)).not.toThrow()
+		expect((store.get(legacy.id) as BlockShape).props.state).toBe('normal')
+	})
+
 	it('turns row and arm markers into the row and arm every port now names', () => {
 		const store = createTLStore({ shapeUtils: [BlockShapeUtil], bindingUtils: [] })
 		const currentSchema = store.schema.serialize()
@@ -120,12 +261,13 @@ describe('Block shape migrations', () => {
 		}
 		const record = { ...markerBlock(), props }
 		;(step as { down: (record: unknown) => void }).down(record)
-		expect(props).not.toHaveProperty('state')
+		const downgraded = record.props as Record<string, unknown>
+		expect(downgraded).not.toHaveProperty('state')
 		// A reader without the vocabulary would draw a ghost row as an ordinary
 		// port, which is the board telling a lie.
-		expect((props.inputs as { id: string }[]).map((port) => port.id)).toEqual(['in_1'])
-		expect(props.inputs).toEqual([{ id: 'in_1', name: 'out', type: '', visible: true }])
-		expect(props.outputs).toEqual([{ id: 'out_1', name: 'pose', type: '', visible: true }])
+		expect((downgraded.inputs as { id: string }[]).map((port) => port.id)).toEqual(['in_1'])
+		expect(downgraded.inputs).toEqual([{ id: 'in_1', name: 'out', type: '', visible: true }])
+		expect(downgraded.outputs).toEqual([{ id: 'out_1', name: 'pose', type: '', visible: true }])
 	})
 
 	it('takes the round-2 pairs and the pose ghost off on the way down too', () => {
@@ -147,16 +289,17 @@ describe('Block shape migrations', () => {
 		}
 		const record = { ...markerBlock(), props }
 		;(step as { down: (record: unknown) => void }).down(record)
+		const downgraded = record.props as Record<string, unknown>
 		// The whole point of this migration. A reader without round 2's
 		// vocabulary would draw the Block under its NEW title with no sign that
 		// it was renamed, and at its new pose with no sign that it moved —
 		// silently correct, and silently missing the finding.
-		expect(props).not.toHaveProperty('fieldDiffs')
-		expect(props).not.toHaveProperty('priorPose')
-		expect(props.inputs).toEqual([
+		expect(downgraded).not.toHaveProperty('fieldDiffs')
+		expect(downgraded).not.toHaveProperty('priorPose')
+		expect(downgraded.inputs).toEqual([
 			{ id: 'in_1', name: 'callable', type: 'PoseEstimator', visible: true },
 		])
 		// The value itself is the current one and survives: only the lens comes off.
-		expect(props.title).toBe('run_predict')
+		expect(downgraded.title).toBe('run_predict')
 	})
 })

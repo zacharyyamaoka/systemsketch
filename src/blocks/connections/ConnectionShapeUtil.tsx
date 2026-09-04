@@ -913,6 +913,11 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 	const tunnelState = useValue(
 		'connection tunnel display',
 		() => {
+			const focusedLayer = getFocusedTunnelLayer(editor)
+			// The ordinary case is neither tunneled nor under a layer lens. Avoid
+			// collecting bindings and cloning the selection set for every plain cable
+			// on every frame its endpoint moves.
+			if (!connection.props.tunnel && !focusedLayer) return 'off'
 			const bindings = getConnectionBindings(editor, connection)
 			const selected = new Set(editor.getSelectedShapeIds())
 			const hovered = editor.getHoveredShapeId()
@@ -922,7 +927,7 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 			return tunnelDisplayState({
 				enabled: connection.props.tunnel,
 				layer: connection.props.tunnelLayer,
-				focusedLayer: getFocusedTunnelLayer(editor),
+				focusedLayer,
 				contextFocused: edgeFocused
 					|| endpointIds.some((id) => selected.has(id) || hovered === id)
 					|| (edgeFocused && editor.isIn('select.dragging_handle')),
@@ -930,10 +935,13 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		},
 		[editor, connection.id, connection.props.tunnel, connection.props.tunnelLayer],
 	)
+	const needsRenderPoints = connection.props.temporal === 'async'
+		|| tunnelState !== 'off'
+		|| (cableMark === 'modified' && diffTraits.cable === 'endpoints')
 	const renderPoints = useValue(
 		'block connection render points',
-		() => getConnectionRenderPoints(editor, connection),
-		[editor, connection],
+		() => (needsRenderPoints ? getConnectionRenderPoints(editor, connection) : []),
+		[editor, connection, needsRenderPoints],
 	)
 	const tunnelMouths = tunnelState === 'hidden' || tunnelState === 'preview'
 		? tunnelVisualForPoints(renderPoints, false)
