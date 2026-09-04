@@ -12,59 +12,75 @@ scope: Python-source renderer, not an authoring-first node palette
 
 ## Bottom line
 
-SystemSketch should borrow mature tools' reading grammar, not their editable node
-palettes. The strongest gaps are source-recognized outcome paths, named
-record-field access and update, narrowly proven async/event relations, explicit
-state/mode regions, and a read-only Python call contract. Everything else is
-either already represented by the current renderer or belongs to an environment
-that authors a program graph rather than projects Python.
+SystemSketch should borrow the mature tools' *reading constraints*, never their
+graph-authoring authority. The stock Split block already covers named record
+projection. Zach has approved two further stock blocks: a batched named
+partial-record update and a three-input conditional Select. The positive
+vocabulary work is deliberately narrow: semantic roles on ordinary data ports
+and arrows, a source-proven dashed async arrow, and a visible Clock/Trigger
+source. The positive editor-chrome work is similarly narrow: source-aware
+inspection, navigation, search, diagnostics, and—only after a real adapter—run
+and trace lenses.
 
-This is an evidence-first dictionary. It replaces a research narrative with one
-concept per entry. The rendered HTML companion is the visual reading surface; this
-Markdown is its canonical source and source-index record. It stays in this
-repository because this implementation worktree is allowed to write here, while
-the Obsidian vault is a read-only knowledge source from this context.
+Errors, events, state, configuration, control, and ordinary data do **not**
+need different transport systems. They are values moving on the same ordinary
+arrow/data-wire grammar. `Data` is the default semantic role; `Event`,
+`Configuration`, `State`, `Control`, and `Error` are accepted preset roles.
+An Error value may travel through an ordinary tunnel or common bus. An Event is
+ordinary emitted data, not a dispatcher relation. Async is a direct dashed
+ordinary data arrow—not a queue diamond, junction, ownership hub, or
+invented execution topology.
 
-## How to read the dictionary
+This is an evidence-first dictionary, not prose arranged around open questions.
+Every useful entry is ordered as: text description, real official-tool
+screenshot(s), original SystemSketch drawing description, then lift. The HTML
+companion embeds the actual official captures alongside its original SVG
+projections. This Markdown is the canonical source report here because this
+repository is the permitted scope for the work.
 
-The two tracks are intentionally independent:
+## Reading key
 
-- **Track A — vocabulary** asks whether a source-recognizable Python semantic
-  deserves a block, region, port family, or relation grammar.
-- **Track B — controls** asks how an existing or future projection should expose,
-  collapse, annotate, or inspect facts without making the canvas authoritative.
+The dictionaries intentionally split two decisions:
 
-Each entry belongs to one bucket:
+- **Track A — vocabulary** asks whether a source-recognisable Python fact needs
+  a Block, region, source, port, or cable treatment.
+- **Track B — controls and chrome** asks whether a surrounding UI surface helps
+  reveal source truth without turning the canvas into an IDE, simulator, or
+  second program.
 
-- **Already have** contains a short description and a real current SystemSketch
-  capture with its code seam. It has no hypothetical drawing.
-- **Missing, would be useful** always follows one order: text description,
-  official-documentation screenshot evidence, original SystemSketch projection,
-  and honest lift.
-- **Missing, would not be useful** is text only. These ideas are excluded because
-  screenshots or invented art would falsely signal product interest.
+Within each track, the buckets have a strict meaning:
 
-The original drawing requested by the work order is deliberately not an icon
-redraw. It answers, “if this were rendered by SystemSketch, how would its
-Block/port/cable grammar communicate the Python fact?” The HTML companion embeds
-the real official image and cites its source URL directly below it.
+- **Already have**: a brief description plus a real current-SystemSketch
+  capture and a code seam. No hypothetical drawing is needed.
+- **Missing, would be useful**: the complete four-part evidence row, in the
+  fixed order above.
+- **Missing, would not be useful**: text only. These are deliberate exclusions,
+  so a vendor screenshot or an attractive proposal drawing would be misleading.
 
 ## Current SystemSketch baseline
 
-| Current reading primitive | Real current-editor capture | Primary seam |
+| Existing reading primitive or chrome surface | Current SystemSketch capture | Primary seam |
 | --- | --- | --- |
-| Exclusive paths and a join | docs/assets/branch-region-3-wired.png | src/branch/branchModel.ts |
-| Loop-carried previous value | docs/assets/loop-region-acceptance.png | src/loop/loopModel.ts |
-| Mutating input and top-edge effect exit | docs/assets/effect-ports-3-wired-2026-09-03.png | src/blocks/blockModel.ts |
-| Simple / Port / Expanded density | docs/assets/block-collapse-simple-2026-09-01.png, block-collapse-port-2026-09-01.png, block-collapse-expanded-2026-09-01.png | src/blocks/blockVisibility.ts |
-| Port placement and explicit visibility | docs/assets/header-port-rows-product-2026-09-01.png | src/blocks/blockModel.ts and src/blocks/ui/BlockInspector.tsx |
-| Unwired literal/default pill | docs/assets/literal-pill-product.png | src/blocks/blockModel.ts |
-| Temporal/async edge treatment | docs/assets/async-edge-style-acceptance.png | src/blocks/connections/connectionModel.ts |
-| Anchored comment with source reference | docs/assets/repo-improvements-local-comments.png | src/comments/commentModel.ts |
+| Exclusive paths and visible join | `docs/assets/branch-region-3-wired.png` | `src/branch/branchModel.ts` |
+| Loop-carried previous value | `docs/assets/loop-region-acceptance.png` | `src/loop/loopModel.ts` |
+| Stock Split projection/accessor rows | `docs/assets/unknown-projection-picker-open.png`, `docs/assets/unknown-projection-accessors.png` | `src/blocks/connections/blockPicker.ts`, `src/blocks/unknownAndProjection.test.ts` |
+| Ordinary edges and tunnels | `docs/assets/edge-tunnel-inspector-live-2026-09-02.png` | `src/blocks/connections/connectionModel.ts` |
+| Derived mutation-effect exit | `docs/assets/effect-ports-3-wired-2026-09-03.png` | `src/blocks/effectPorts.ts` |
+| Reversible density and port placement | `docs/assets/block-collapse-expanded-2026-09-01.png`, `docs/assets/header-port-rows-product-2026-09-01.png` | `src/blocks/blockVisibility.ts`, `src/blocks/blockModel.ts` |
+| Default pill and wired override | `docs/assets/literal-pill-product.png`, `docs/assets/literal-pill-wired.png` | `src/blocks/blockModel.ts`, `src/blocks/connections/connectionModel.ts` |
+| Variadic groups | `docs/assets/variadic-port-v5-inspector-live.png` | `src/blocks/variadicPorts.ts` |
+| Menu, file lifecycle, and share | `docs/assets/workspace-file-menu.png` | `src/workspace/LocalWorkspace.tsx` |
+| Semantic toolbar and layout actions | `docs/assets/toolbar-family-menu-open.png`, `docs/assets/layout-commands-live-organized-2026-09-02.png` | `src/toolbar/SystemSketchToolbar.tsx`, `src/chrome/SelectionLayoutActions.tsx` |
+| Command palette and text Find/Replace | `docs/assets/command-palette-commands-2026-09-02.png`, `docs/assets/command-palette-find-replace-2026-09-02.png` | `src/commands/SystemSketchCommandPalette.tsx`, `src/commands/boardSearch.ts` |
+| Searchable library and semantic Block picker | `docs/assets/library-overview-library-2026-09-02.png`, `docs/assets/unknown-projection-picker-open.png` | `src/library/ShapeLibraryBrowser.tsx`, `src/blocks/connections/blockPicker.ts` |
+| Inspector, Problems, comments, overview, depth, zoom | `docs/assets/inspector-field-guidance-2026-09-03.png`, `docs/assets/board-diagnostics-problems-2026-09-02.png`, `docs/assets/library-overview-panel-2026-09-02.png`, `docs/assets/zoom-controls-shown.png` | `src/blocks/ui/BlockInspector.tsx`, `src/diagnostics/BoardDiagnosticsPanel.tsx`, `src/chrome/BoardOverview.tsx`, `src/SystemSketchUtilities.tsx` |
+| Preview diff states and inline value changes | `docs/assets/diff-states-marked.png` | `src/blocks/diffState.ts` |
 
-The audit corrects an important premise from the work order: SystemSketch already
-has an effect exit derived from a mutated input. It is a top-edge port, not yet a
-general exception/outcome grammar or a portless mutation endpoint.
+The audit corrects two prior overstatements. Split is already a shipped stock
+preset, with source/type propagation coverage. Likewise, required input, visible
+default, wired override, and resolved variadic parameter groups already have
+working UI. The useful work is not to recreate those controls, but to make their
+semantic facts more inspectable where a real source index supports it.
 
 ---
 
@@ -72,744 +88,1123 @@ general exception/outcome grammar or a portless mutation endpoint.
 
 ## Already have
 
-### Branch, case, and source-visible join
+### Exclusive branch / case / φ join
 
-**Text description.** LabVIEW Case Structures, Blueprint Branch/Switch nodes, and
-Simulink If/Action plus Merge all make mutually exclusive paths readable. A Python
-if or match has the same reader need, and SystemSketch's Branch region already
-shows the exclusive scope and reconvergence without pretending the user authored
-an execution graph.
+**Text description.** Python `if` and `match` already read as an exclusive
+Branch region with a join. LabVIEW Case, Blueprint Branch/Switch, and Simulink
+If/Merge confirm the reading need; they do not justify a new palette node or an
+execution-wire language.
 
-**Current SystemSketch evidence.** The companion uses
-docs/assets/branch-region-3-wired.png from the real editor and names
-src/branch/branchModel.ts as the seam. Reference calibration is NI's [Case
-Structure documentation](https://www.ni.com/docs/en-US/bundle/labview/page/case-structures-executing-a-section-of-code-based-on-input-values.html),
-Epic's [Flow Control reference](https://dev.epicgames.com/documentation/en-us/unreal-engine/flow-control-in-unreal-engine),
-and MathWorks' [If block reference](https://www.mathworks.com/help/simulink/slref/if.html).
+**Current SystemSketch evidence.** `docs/assets/branch-region-3-wired.png`
+shows the live Branch region and `src/branch/branchModel.ts` owns the seam.
+Calibration sources: [NI Case Structures][1], [Epic Flow Control][19], and
+[MathWorks If][41].
 
-### Loop-carried value and previous-iteration read
+### Loop-carried previous value / delayed edge
 
-**Text description.** LabVIEW's Feedback Node and Simulink's Unit Delay make the
-previous value visibly different from an ordinary same-iteration wire. The
-existing loop region and z⁻¹ treatment already carry that distinction; they
-remain a semantic delay, not decorative loop wiring.
+**Text description.** A loop-carried value already has a distinct `z⁻¹`
+treatment, so a prior iteration does not read like same-iteration data.
+LabVIEW Feedback and Simulink Unit Delay corroborate the reader constraint while
+their simulation-time behavior stays outside ordinary Python.
 
-**Current SystemSketch evidence.** The companion uses
-docs/assets/loop-region-acceptance.png from the real editor and names
-src/loop/loopModel.ts as the seam. The official calibration sources are NI's
-[Feedback Node](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/feedback-node.html)
-and MathWorks' [Unit Delay](https://www.mathworks.com/help/simulink/slref/unitdelay.html).
+**Current SystemSketch evidence.** `docs/assets/loop-region-acceptance.png`
+shows the live loop treatment; `src/loop/loopModel.ts` is the seam. Calibration:
+[NI Feedback Node][2] and [MathWorks Unit Delay][60].
 
-### Ordinary value flow versus an in-place-looking effect
+### Named record-field projection / Split
 
-**Text description.** A normal return value and a source-recognized mutation
-should not visually imply the same thing. SystemSketch already derives a top-edge
-effect exit for a mutating input while retaining ordinary data ports, which is the
-useful part of structured-update precedent without adopting a library-sized node
-palette.
+**Text description.** The stock **Split** preset already projects a resolved
+record into name-stable accessor rows. This is the existing SystemSketch
+equivalent of Unbundle By Name, Split Struct Pin, and Bus Selector; the earlier
+report incorrectly called it a draft direction.
 
-**Current SystemSketch evidence.** The companion uses
-docs/assets/effect-ports-3-wired-2026-09-03.png from the real editor and names
-src/blocks/blockModel.ts as the seam. LabVIEW's [Bundle By
-Name](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/bundle-by-name.html)
-and Blueprint's [Struct Variables guide](https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27)
-are calibration for the reader need, not proof of feature parity.
+**Current SystemSketch evidence.** `docs/assets/unknown-projection-picker-open.png`
+shows the stock Split preset and
+`docs/assets/unknown-projection-accessors.png` shows named accessor rows with
+propagated types. The preset is in `src/blocks/connections/blockPicker.ts`; the
+accessor/type behavior is covered in `src/blocks/unknownAndProjection.test.ts`.
+Calibration: [NI Unbundle By Name][3], [Epic Struct Variables][18], and
+[MathWorks Bus Selector][58].
 
-### Generic block ports for source expressions and calls
+### Ordinary data paths for Event, Error, State, and Configuration values
 
-**Text description.** Python arithmetic, collection operations, construction, and
-calls are already represented as source-derived blocks and ports. That generic
-grammar is the right starting point; it keeps a reader close to the expression
-rather than replacing every familiar Python operation with a branded reference
-tool glyph.
+**Text description.** These meanings do not require another transport. A typed
+value already travels through an ordinary arrow or tunnel to a handler, bus, or
+component. What remains useful is a small semantic role label on that same
+path—not a bespoke event dispatcher, state wire, or exception rail.
 
-**Current SystemSketch evidence.** The companion uses
-docs/assets/header-port-rows-product-2026-09-01.png from the real editor and
-names src/blocks/blockModel.ts as the seam. NI's [Formula
-Node](https://www.ni.com/docs/en-US/bundle/labview/page/formula-node.html) and
-MathWorks' [MATLAB Function block](https://www.mathworks.com/help/simulink/slref/matlabfunction.html)
-are negative evidence: authoring tools need a text escape hatch, while
-SystemSketch begins with Python source.
+**Current SystemSketch evidence.** `docs/assets/edge-tunnel-inspector-live-2026-09-02.png`
+shows the existing ordinary edge/tunnel grammar; the seam is
+`src/blocks/connections/connectionModel.ts`. Reference calibration: [NI
+Handling Errors][5] and [MathWorks Signal Types][40].
 
-### Presentation-only temporal and async cable styling
+### Normal return versus derived mutation effect
 
-**Text description.** SystemSketch can already style a data edge as temporal,
-asynchronous, or delayed. That is a useful presentation primitive, but it does
-not yet mean the analyzer has proved an async contract; the semantic relation is a
-separate missing vocabulary entry below.
+**Text description.** A port declared mutating already derives a top-edge effect
+exit, keeping an in-place-looking write from reading like an ordinary returned
+value. This is a mutation reading aid only: it must not be repurposed as an
+exception, outcome, event, or Error transport.
 
-**Current SystemSketch evidence.** The companion uses
-docs/assets/async-edge-style-acceptance.png from the real editor and names
-src/blocks/connections/connectionModel.ts as the seam. NI's [wire
-reference](https://www.ni.com/docs/en-US/bundle/labview/page/using-wires-to-link-block-diagram-objects.html)
-is visual calibration only.
+**Current SystemSketch evidence.** `docs/assets/effect-ports-3-wired-2026-09-03.png`
+shows the live top-edge effect exit; `src/blocks/effectPorts.ts` is the seam.
+The useful precedent is Blueprint's pure/impure distinction in [Epic
+Functions][20], not an execution-cable import.
 
 ## Missing, would be useful
 
-### Named record-field projection
+### Named partial record update / Set attributes
 
-**Text description.** A reader should be able to recognize a source-derived
-record boundary and see the named members that are actually projected: a
-dataclass attribute, TypedDict key, named tuple field, or a well-resolved
-destructuring operation. The semantic is name-stable field access, not a generic
-“struct node.”
+**Text description.** Bundle By Name, Set Members in Struct, and Bus Assignment
+converge on one readable operation: update selected named members while retaining
+the rest. Zach approved shipping the already-designed batched `setattr` form as a
+stock Block with ordinary record data in and out; it must distinguish a direct
+update, an immutable replacement, and an opaque helper call rather than pretend
+they are one operation.
 
-**Official screenshot evidence.** The companion places three real captures
-side-by-side: docs/assets/gap-labview-unbundle-by-name-2026-09-03.png from NI's
-[Unbundle By Name](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/unbundle-by-name.html);
-docs/assets/gap-blueprint-split-struct-2026-09-03.png from Epic's [Struct
-Variables](https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27);
-and docs/assets/gap-simulink-bus-selector-2026-09-03.png from MathWorks' [Bus
-Selector](https://www.mathworks.com/help/simulink/slref/busselector.html). NI
-explicitly says Unbundle By Name selects cluster elements by name rather than
-element order; Blueprint's split pin and Simulink's selected bus elements provide
-independent visual convergence.
+**Real screenshot(s).** `docs/assets/gap-labview-bundle-by-name-2026-09-03.png`
+is captured from [NI Bundle By Name][4];
+`docs/assets/gap-blueprint-set-members-2026-09-03.png` is from [Epic Struct
+Variables][18]; and `docs/assets/gap-simulink-bus-assignment-2026-09-03.png` is
+from [MathWorks Bus Assignment][59]. The three official tools all retain an
+aggregate while exposing exactly which named members are changed.
 
-**Original SystemSketch projection.** Draw the resolved record as a normal
-source-backed block or boundary with named field ports on the relevant side.
-Connected fields are solid data ports; source-known but collapsed fields remain
-inside a labelled field group. The canvas must not invent fields, reorder a source
-contract, or turn an unresolved arbitrary mapping lookup into a false record
-schema.
+**Original SystemSketch drawing description.** A stock `Set attributes` Block
+has one normal record input and one normal record output. Its body lists only
+source-proven named writes such as `.quota = 9`; a small mutation cue may explain
+a known in-place write, but every record value remains on the ordinary data
+plane. It is a source projection, not an editable struct schema.
 
-**Lift.** Medium-to-high. It needs analyzer facts for record identity and field
-resolution, a compact group/port treatment, and conservative fallbacks for
-dynamic attributes. It is a strong candidate because all three tools make named
-aggregate boundaries legible.
+**Lift.** **Medium.** The visual design and product direction exist; shipping
+needs a stock preset, named-row rendering, conservative direct-syntax and helper
+recognition, and regression coverage for batched writes and preserved members.
 
-### Named partial record update
+### Conditional value selection / Select
 
-**Text description.** A partial update such as setting one dataclass attribute,
-returning a changed immutable record, or applying a resolved field assignment
-should make both the preserved aggregate and the changed named member legible.
-This is more specific than generic mutation: the reader needs to see which field
-changed without mistaking it for a newly authored data schema.
+**Text description.** LabVIEW Select and Simulink Switch make a value choice
+read differently from an effectful branch. Zach approved a stock Select Block
+for Python `true_value if condition else false_value`: exactly two value inputs,
+one control input, and one ordinary value output.
 
-**Official screenshot evidence.** The companion pairs
-docs/assets/gap-labview-bundle-by-name-2026-09-03.png from NI's [Bundle By
-Name](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/bundle-by-name.html);
-docs/assets/gap-blueprint-set-members-2026-09-03.png from Epic's [Struct
-Variables](https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27);
-and docs/assets/gap-simulink-bus-assignment-2026-09-03.png from MathWorks' [Bus
-Assignment](https://www.mathworks.com/help/simulink/slref/busassignment.html).
-The tools converge on a retained aggregate plus explicitly chosen member updates,
-even though their execution models differ.
+**Real screenshot(s).** `docs/assets/gap-labview-select-2026-09-03.png` is from
+[NI Select][6], and `docs/assets/gap-simulink-switch-2026-09-03.png` is from
+[MathWorks Switch][37]. [Epic Make Select][64] documents the same `Condition`,
+`If True`, and `If False` contract, but that official API page does not publish
+a graph screenshot; this entry does not substitute a documentation table for
+actual tool UI. The evidence supports compact value selection, not a second
+execution wire.
 
-**Original SystemSketch projection.** Keep the aggregate on a normal data route,
-place the changed field name beside the source-derived update row, and retain the
-existing top-edge effect exit only when the analyzer proves an in-place write.
-For immutable replacement, show a new aggregate value instead. The diagram must
-not collapse Python assignment, property setter behavior, and arbitrary helper
-calls into one misleading mutation icon.
+**Original SystemSketch drawing description.** A compact `Select` Block shows
+`true`, `false`, and `condition` rows on the left, one normal result port on the
+right, and a small Control tag on the condition port. The source spelling stays
+visible under the title. It has no execution pins, join region, or authorable
+switch cases.
 
-**Lift.** High. The renderer needs a reliable distinction among attribute
-assignment, map update, dataclass replacement, setter calls, and unresolvable
-side effects. Start with direct syntax and explicit immutable helpers rather than
-guessing at library behavior.
+**Lift.** **Low to medium.** Add the stock preset and source projection, test
+that it remains distinct from a Branch region, and fall back honestly for
+conditional expressions that cannot be resolved.
 
-### Conditional value selection
+### Analyzer-recognised asynchronous data path
 
-**Text description.** A conditional expression chooses one value without being an
-effectful branch. Python conditional expressions are compact,
-source-identifiable topology that can be rendered as a three-input Select form
-when that reads more clearly than an expression block.
+**Text description.** An async queue handoff or `await` boundary can deserve a
+redundant cable cue only when source proves it. SystemSketch should use the
+existing dashed treatment on a direct ordinary data arrow, with no queue
+box, junction, ownership topology, buffering claim, or global timeline.
 
-**Official screenshot evidence.** The companion shows
-docs/assets/gap-labview-select-2026-09-03.png from NI's [Select
-function](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/select.html)
-beside docs/assets/gap-simulink-switch-2026-09-03.png from MathWorks' [Switch
-block](https://www.mathworks.com/help/simulink/slref/switch.html). Epic's [Flow
-Control reference](https://dev.epicgames.com/documentation/en-us/unreal-engine/flow-control-in-unreal-engine)
-is the Blueprint source for the related Select/branch vocabulary. The useful
-convergence is value choice, not an execution wire.
+**Real screenshot(s).** `docs/assets/gap-labview-async-channel-2026-09-03.png`
+is captured from [NI Using Wires][7].
+`docs/assets/gap-simulink-function-call-2026-09-03.png` is captured from
+[MathWorks Model Reference Function-Call][38]. In that MathWorks example, E1 and
+E2 are periodic function-call control signals and E3 is driven by an
+asynchronous interrupt; it is not evidence that every async payload is a
+function-call cable.
 
-**Original SystemSketch projection.** Use one compact block with two value inputs
-and one condition input, a single value output, and a source label preserving the
-conditional expression. Do not add execution pins, join regions, or a new
-authoring control.
+**Original SystemSketch drawing description.** Keep the same source Blocks and
+ordinary endpoint ports. Draw one direct dashed normal arrow between them and
+apply `Data` unless a separately proven semantic role says `Event` or `Control`.
+The Inspector can say which source pattern earned the cue and explicitly leave
+ordering, cancellation, and ownership unknown.
 
-**Lift.** Low-to-medium. It is already a V4 Select candidate and is easier than
-the region proposals, but it has lower explanatory urgency. It should not
-leapfrog exception or interface evidence merely because the icon is simple.
+**Lift.** **Medium to high.** The rendering already exists. The hard part is a
+conservative analyzer fact for one initial idiom—such as a direct `asyncio.Queue`
+pair or explicit await—and truthful inspection rather than broad thread or
+callback inference.
 
-### Explicit exception and outcome region
+### Clock / Trigger stock source
 
-**Text description.** A Python try/except/else/finally or raise is a real
-alternative outcome path. A region should show normal value continuation and an
-exceptional route into a named handler without inserting an artificial error port
-on every ordinary call.
+**Text description.** A visible Clock or Trigger source makes a real periodic or
+external activation legible without hiding scheduling inside a downstream Block.
+It emits an ordinary typed value: time remains `Data`; an activation can be
+`Control` or `Event`. A visual source alone must not imply a scheduler, solver,
+or runtime exists.
 
-**Official screenshot evidence.** The companion places
-docs/assets/gap-labview-error-wire-2026-09-03.png from NI's [Handling
-Errors](https://www.ni.com/docs/en-US/bundle/labview/page/handling-errors.html)
-beside docs/assets/gap-blueprint-cast-failure-2026-09-03.png from Epic's
-[Blueprint Communications](https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-communications-in-unreal-engine).
-LabVIEW's error cluster carries status, code, and source through dataflow; the
-Blueprint cast has an explicit success path and Cast Failed path. Their shared
-reader need is visible non-normal outcome, not a shared failure mechanism.
+**Real screenshot(s).** `docs/assets/gap-labview-timed-loop-2026-09-04.png` is
+from [NI Timing and Synchronization][8].
+`docs/assets/gap-simulink-function-call-2026-09-03.png` is from [MathWorks Model
+Reference Function-Call][38], with [MathWorks Function-Call Generator][39] as
+the dedicated source reference. The screenshots calibrate visible source/timing
+intent; their host schedulers do not transfer.
 
-**Original SystemSketch projection.** Draw the try body as a bounded source
-region. Its ordinary result remains a normal cable; a labelled exception rail
-reaches the matching handler and a re-raise leaves the region through an explicit
-outcome endpoint. Handler names and exception types come from source. There is no
-red error terminal on calls outside an explicit source boundary.
+**Original SystemSketch drawing description.** A source Block labeled `Clock`,
+`Tick`, or a resolved external trigger has one ordinary output. A Clock uses the
+default `Data` tag and an explicit time/rate label; a trigger gets `Control` or
+`Event`. Any dashed edge remains a direct source-proven async path, never a
+timer-junction or periodic execution timeline.
 
-**Lift.** Medium-to-high. It needs analyzer facts, nesting and re-raise rules,
-tests for else/finally, and a layout that does not obscure ordinary dataflow. This
-is the first proposed semantic experiment, not an already-approved feature.
-
-### Proven asynchronous handoff
-
-**Text description.** A queue handoff or await boundary can be a meaningful
-relationship when the analyzer recognizes the producer, transport, consumer, and
-continuation from source. It should communicate a specific contract such as an
-asyncio Queue put/get pair, not claim to visualize all concurrency or a global
-timeline.
-
-**Official screenshot evidence.** The companion shows
-docs/assets/gap-labview-async-channel-2026-09-03.png from NI's [Using Wires to
-Link Block Diagram Objects](https://www.ni.com/docs/en-US/bundle/labview/page/using-wires-to-link-block-diagram-objects.html)
-beside docs/assets/gap-simulink-function-call-2026-09-03.png from MathWorks'
-[Trigger reference](https://www.mathworks.com/help/simulink/slref/trigger.html).
-NI distinguishes asynchronous channel wires; Simulink's function-call event is a
-comparison for a non-value trigger relationship, not evidence that the runtimes
-are equivalent.
-
-**Original SystemSketch projection.** Use a visibly secondary named relation:
-producer → source-recognized queue/await boundary → consumer/continuation. A
-dashed packet-like cable can reuse current edge styling only after it carries the
-source relation's actual name and kind. It must never imply ordering beyond what
-the recognized source contract guarantees.
-
-**Lift.** High. Cross-function identity, event-loop ownership, cancellation,
-exceptions, and layout constraints are semantic design work. Begin with one idiom
-such as a direct asyncio Queue pair rather than broad thread, task, or callback
-inference.
-
-### Named event publication and subscription
-
-**Text description.** A named event relationship is distinct from a queued value:
-it identifies a publisher, the event name, and one or more source-visible
-subscribers or handlers. It is useful only when registration and dispatch are
-explicit enough that a reader can trace both ends back to Python.
-
-**Official screenshot evidence.** The companion places
-docs/assets/gap-labview-event-structure-2026-09-03.png from NI's [Event
-Structure](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/structures/event-structure.html);
-docs/assets/gap-blueprint-bind-dispatcher-2026-09-03.png from Epic's [Binding
-and Unbinding Events](https://dev.epicgames.com/documentation/en-us/unreal-engine/binding-and-unbinding-events-in-unreal-engine?lang=en-US);
-and docs/assets/gap-stateflow-event-2026-09-03.png from MathWorks' [Control
-State Execution by Using Events](https://www.mathworks.com/help/stateflow/ug/control-state-execution-by-using-events.html).
-All three show named event/control relationships instead of ordinary value wires,
-while exposing radically different authoring and runtime rules.
-
-**Original SystemSketch projection.** Use a labelled relation that leaves a
-source-visible publish or dispatch block and terminates at labelled handlers. The
-event name is the diagram label; subscription can be a small anchor or badge
-rather than an invented control-flow cable. Hidden framework registration,
-reflection, and wildcard routing remain ordinary calls.
-
-**Lift.** High. It needs source recognition for a deliberately small callback or
-event API, identity across definitions, and a clear policy for multiple
-subscribers. It should follow the queue experiment, not be combined with it.
-
-### Explicit state and mode region
-
-**Text description.** A state/mode region can make exclusive named modes,
-event/guard transitions, and state-local behavior legible when Python source
-explicitly encodes a state-machine protocol. It is not a decoration for an enum,
-a boolean flag, or an ordinary if-chain.
-
-**Official screenshot evidence.** The companion shows
-docs/assets/gap-stateflow-modes-2026-09-03.png from MathWorks' [States
-reference](https://www.mathworks.com/help/stateflow/ug/states.html) and
-docs/assets/gap-stateflow-state-transition-2026-09-03.png from [Get Started with
-Stateflow](https://www.mathworks.com/help/stateflow/gs/get-started-introduction.html).
-Stateflow is intentionally treated as a single-tool visual lead, not cross-tool
-proof.
-
-**Original SystemSketch projection.** Draw a bounded region containing named mode
-cells. Source-derived event or guard labels decorate arrows between cells; entry,
-during, and exit behavior stays tied to source blocks inside the relevant mode.
-The region appears only after a narrow analyzer rule, an explicit framework
-adapter, or a source annotation chosen by Zach.
-
-**Lift.** High and deliberately deferred. A false-positive statechart would
-misstate Python more severely than no statechart at all. It needs a source-level
-contract before any UI work starts.
+**Lift.** **Medium.** Define stock source fields and an explicit runtime-adapter
+contract, then recognise only clear source forms. Do not claim that drawing
+`10 Hz` creates a scheduler.
 
 ## Missing, would not be useful
 
-### Arithmetic, Boolean, comparison, and numeric palettes
+### Explicit exception / Cast Failed / railway outcome rail
 
-Python operators, comparisons, comprehensions, and numeric calls are already
-source expressions. Special LabVIEW/Blueprint/Simulink math glyphs would create
-an authoring palette without adding a stable semantic boundary.
+Exceptions, narrowing failures such as Blueprint `Cast Failed`, and
+railway-style outcomes are ordinary data in SystemSketch. Route an Error-tagged
+value through ordinary arrows or tunnels to a handler or common bus; do not
+reuse the mutation-effect exit or add a special failure pin to every call. See
+[NI Handling Errors][5], [Epic Blueprint Communications][23], and [Epic Cast To
+GameInstance][66].
 
-### Collection-operation and signal-routing palettes
+### Bespoke event-dispatch relation
 
-Index, build, replace, map, set, mux, demux, and routing utilities are ordinary
-Python expression or collection semantics. Preserve generic value flow and loop
-grammar rather than adding a distinct block for each library operation.
+An Event is a value—often carrying type, time, payload, or timeout—and follows
+ordinary dataflow. A preset Event tag explains that meaning without dispatcher
+nodes, registration cables, or a second execution model. The excluded
+tool-specific mechanisms are documented by [NI Event Structure][65], [Epic Bind
+and Unbind Events][67], and [MathWorks Stateflow Events][72].
 
-### Sequence chains and generic execution wires
+### Derived state-machine or statechart overlay
 
-LabVIEW Flat Sequence and Blueprint Sequence make order explicit in tools whose
-graph is the program. Python source order plus data and effect analysis are the
-truth here; a generic sequence node would overstate a new dependency.
+State/configuration values and their actual dataflow already express the useful
+model. Do not infer a Stateflow-style chart from enum-and-conditional code;
+statechart overlay research is explicitly out of scope now ([MathWorks Stateflow
+States][71]).
 
-### Runtime latches, gates, and multi-fire nodes
+### Arithmetic, comparisons, collections, and signal-routing palettes
 
-Blueprint DoOnce, DoN, FlipFlop, Gate, and MultiGate encode hidden mutable runtime
-state. If a Python protocol has explicit state, it belongs behind a future
-source-proven state region, not a palette of opaque execution gadgets.
+LabVIEW numeric/Boolean, Blueprint Array/Map/Set, and Simulink routing palettes
+are authoring conveniences. Python already states operators, calls, indexing,
+unpacking, and construction; special glyph libraries would add a second language.
+See [NI Block Diagram Explained][11], [Epic Blueprint Palette][26], and
+[MathWorks Library Browser][46].
 
-### Timers, waits, tick rates, and simulator scheduling
+### Implicit Sequence, Gate, DoOnce, Delay, and scheduler controls
 
-Timed Loops, Delay nodes, sample time, Rate Transition, solver settings, and
-integrators describe runtime or simulation policy. A static Python renderer should
-not claim scheduler semantics without separate live-execution evidence.
+These encode tool-specific pulses, latches, wall-clock policy, or simulator
+scheduling without a source-owned value. Preserve explicit Python order; this
+exclusion does not apply to the visible source-proven Clock/Trigger above. See
+[Epic Flow Control][19].
 
-### Property, Invoke, Variant, hardware, actor-spawn, and framework palettes
+### Formula/MATLAB Function, macros, and authorable interface subgraphs
 
-These are host API surfaces. Attribute access, construction, reflection, and
-framework calls should stay named Python calls rather than be recast as a foreign
-glyph library.
+These are text escape hatches or reusable graph-authoring systems. Python and
+linked definitions are already the canonical source and presentation seam. See
+[MathWorks MATLAB Function][74], [Epic Blueprint Macros][75], and [MathWorks
+Subsystem][42].
 
-### Visual macro, subgraph, and interface authoring
+### Property/Invoke, variants, construction/spawn, hardware, and runtime palettes
 
-Blueprint macros, authored interfaces, and visual subVIs solve reuse in a graph
-authoring language. Python definitions, decorators, Protocols, ABCs, and existing
-definition linking remain the one canonical definition surface.
+Framework APIs, Unreal lifecycle nodes, LabVIEW hardware controls, and Simulink
+time/sample-rate configuration belong to their hosts. They are ordinary Python
+calls or deliberately outside a static Python renderer. The host surfaces are
+visible in [NI Block Diagram Explained][11], [Epic Blueprint Class Editor User
+Interface][22], and [MathWorks Simulink Editor][44].
+
+### State history junctions and visual variant pickers
+
+History restoration and variant activation have specialised runtime contracts but
+no dependable generic Python syntax. Do not infer hidden statechart memory or add
+a canvas-side configuration picker. See [MathWorks History Junctions][76] and
+[MathWorks Variant Manager][77].
 
 ---
 
-# Track B — UI controls dictionary
+# Track B — UI controls and editor-chrome dictionary
 
 ## Already have
 
-### Three density levels without deleting relationships
+### Simple / Port / Expanded presentation
 
-**Text description.** Compact reading should hide detail without destroying a
-source-derived interface. Simple, Port, and Expanded views already provide that
-continuum and preserve the ability to recover ports and internal context.
+**Text description.** Compactness is already reversible presentation: Simple,
+Port, and Expanded views change density without deleting source-derived
+relationships. Vendor icon/collapse/subsystem treatments are convergence
+evidence, not a license for new nested graph semantics.
 
-**Current SystemSketch evidence.** The companion shows
-docs/assets/block-collapse-simple-2026-09-01.png,
-docs/assets/block-collapse-port-2026-09-01.png, and
-docs/assets/block-collapse-expanded-2026-09-01.png from the real editor. The
-seam is src/blocks/blockVisibility.ts. NI's [View As Icon
-reference](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/properties-and-methods/vi-server/generic/gobject/node/subvi/viewasicon.html)
-is a visual precedent, not a reason to copy VI authoring.
+**Current SystemSketch evidence.** `docs/assets/block-collapse-simple-2026-09-01.png`,
+`docs/assets/block-collapse-port-2026-09-01.png`, and
+`docs/assets/block-collapse-expanded-2026-09-01.png` show the current views.
+The seam is `src/blocks/blockVisibility.ts`; calibration: [NI View As Icon][10],
+[Epic Collapsing Graphs][21], and [MathWorks Subsystem][42].
 
-### Explicit port visibility and row placement
+### Manual port visibility and row placement
 
-**Text description.** A block can already place a port in header, body, or hidden
-presentation and can toggle its visibility. This is a presentation choice over a
-source-derived port; it does not change a Python callable signature.
+**Text description.** A port can already live in a header row, body row, or
+hidden state. This changes readability without changing Python's callable
+interface—the useful analogue of source-derived pin exposure, not visual
+signature authoring.
 
-**Current SystemSketch evidence.** The companion uses
-docs/assets/header-port-rows-product-2026-09-01.png and
-docs/assets/inspector-field-guidance-2026-09-03.png from the real editor. The
-seams are src/blocks/blockModel.ts and src/blocks/ui/BlockInspector.tsx.
-Blueprint's [Struct Variables guide](https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27)
-is calibration for exposed versus hidden member pins.
+**Current SystemSketch evidence.** `docs/assets/header-port-rows-product-2026-09-01.png`
+shows the current treatment; `src/blocks/blockModel.ts` owns it. The associated
+Inspector UI is in `src/blocks/ui/BlockInspector.tsx`. Calibration: [Epic Struct
+Variables][18] and [MathWorks Connect Subsystems][43].
 
-### Literal/default value pill
+### Required input, visible default, and wired override
 
-**Text description.** An unwired value is meaningful information rather than a
-broken edge. SystemSketch already shows a literal/default pill on an unconnected
-port, preserving the distinction between a source/default value and a connected
-override.
+**Text description.** An empty input already reads as required, a literal/default
+pill shows the value that will be used, and a connected cable visibly overrides
+it. A standalone keyword-only or recommended-terminal badge would add little to
+this existing contract.
 
-**Current SystemSketch evidence.** The companion uses
-docs/assets/literal-pill-product.png from the real editor and names
-src/blocks/blockModel.ts as the seam. NI's [Creating and Editing User-Defined
-Constants](https://www.ni.com/docs/en-AS/bundle/labview/page/creating-and-editing-user-defined-constants.html)
-is reference calibration only.
+**Current SystemSketch evidence.** `docs/assets/literal-pill-product.png` shows
+the unwired pill and `docs/assets/literal-pill-wired.png` shows the cable
+override. Seams: `src/blocks/blockModel.ts` and
+`src/blocks/connections/connectionModel.ts`. [NI terminal categories][9] and
+[Epic Functions][20] are calibration, not a new policy.
 
-### Inspector-backed generic presentation settings
+### Variadic parameter groups
 
-**Text description.** The inspector already owns generic presentation settings
-such as port visibility, defaults, and mutation metadata. That is the right place
-for a renderer setting because it does not pretend to be a LabVIEW Property Node,
-Blueprint Details panel, or Simulink mask program.
+**Text description.** Resolved `*args` and `**kwargs` already ship as real,
+cableable parameter groups with Inspector support. The earlier variadic proposal
+is obsolete; SystemSketch does not need Blueprint's authoring-time Add Pin
+control.
 
-**Current SystemSketch evidence.** The companion uses
-docs/assets/inspector-field-guidance-2026-09-03.png from the real editor and
-names src/blocks/ui/BlockInspector.tsx as the seam. The reference tools'
-property and details surfaces are context, not a feature checklist.
+**Current SystemSketch evidence.** `docs/assets/variadic-port-v5-inspector-live.png`
+shows the live UI and `src/blocks/variadicPorts.ts` owns the seam. [Epic
+Functions][20] is interface calibration only.
+
+### Main menu, local files, autosave, and share
+
+**Text description.** SystemSketch already has the ordinary application commands
+that editor chrome needs: new/open/open recent/save-copy, local workspace
+lifecycle, autosave, portable share, and stock undo/redo. A second File/Edit/View
+menu bar would duplicate the existing surface.
+
+**Current SystemSketch evidence.** `docs/assets/workspace-file-menu.png` shows
+the current menu; `src/workspace/LocalWorkspace.tsx` is the seam. Reference
+calibration: [Epic Blueprint Editor Menu][22] and [MathWorks Simulink
+Editor][44].
+
+### Semantic toolbar and contextual layout actions
+
+**Text description.** The bottom toolbar groups stock drawing tools with Block,
+Branch, Loop, and Pill creation. Selection-scoped menus already expose
+appearance, port/view controls, Tidy edges, Organize nodes, wrapping, alignment,
+and distribution behavior; a permanent LabVIEW/Simulink formatting ribbon is not
+a gap.
+
+**Current SystemSketch evidence.** `docs/assets/toolbar-family-menu-open.png`
+and `docs/assets/layout-commands-live-organized-2026-09-02.png` show the live
+surfaces. Seams: `src/toolbar/SystemSketchToolbar.tsx` and
+`src/chrome/SelectionLayoutActions.tsx`. Calibration: [NI Block Diagram
+Explained][11] and [MathWorks Simulink Editor][44].
+
+### Command palette and board Find / Replace
+
+**Text description.** Ctrl+P already searches commands and Ctrl+F already finds
+and replaces editable board text. This covers the useful core of LabVIEW Quick
+Drop and generic action search; identity-aware references are a separate gap.
+
+**Current SystemSketch evidence.** `docs/assets/command-palette-commands-2026-09-02.png`
+and `docs/assets/command-palette-find-replace-2026-09-02.png` show the current
+surfaces. Seams: `src/commands/SystemSketchCommandPalette.tsx` and
+`src/commands/boardSearch.ts`. Calibration: [NI Quick Drop][13], [Epic Blueprint
+Search][25], and [MathWorks action search][45].
+
+### Searchable shapes and insertion library
+
+**Text description.** The Shapes library is categorised, searchable, and
+recent-aware; the on-canvas picker supplies semantic stock Block presets.
+SystemSketch does not need a duplicate Functions, Blueprint Palette, or Simulink
+Library Browser catalog.
+
+**Current SystemSketch evidence.** `docs/assets/library-overview-library-2026-09-02.png`
+and `docs/assets/unknown-projection-picker-open.png` show the live library and
+picker. Seams: `src/library/ShapeLibraryBrowser.tsx` and
+`src/blocks/connections/blockPicker.ts`. Calibration: [NI Block Diagram
+Explained][11], [Epic Blueprint Palette][26], and [MathWorks Library Browser][46].
+
+### Selection-following Inspector with Details / Notes
+
+**Text description.** The right Inspector already follows Blocks, Branches,
+Loops, connections, ordinary shapes, and batch selections. Block inspection
+already has Details and Notes; the useful delta is source provenance and clearer
+sibling dock tabs, not a second property system.
+
+**Current SystemSketch evidence.** `docs/assets/inspector-field-guidance-2026-09-03.png`
+shows the live Inspector; `src/blocks/ui/BlockInspector.tsx` is the seam.
+Calibration: [Epic Details Panel][27] and [MathWorks Property Inspector][47].
+
+### Problems panel with severity, codes, and canvas focus
+
+**Text description.** The Problems dock already counts and filters errors and
+warnings, gives each finding a stable code, and focuses the affected board
+object. Source-span navigation is the narrow missing delta—not a clone of
+Compiler Results or Diagnostic Viewer.
+
+**Current SystemSketch evidence.** `docs/assets/board-diagnostics-problems-2026-09-02.png`
+shows the current dock; `src/diagnostics/BoardDiagnosticsPanel.tsx` is the seam.
+Calibration: [Epic Compiler Results][28] and [MathWorks Diagnostic Viewer][48].
+
+### Board Overview, depth navigation, and zoom
+
+**Text description.** Board Overview lists Frames, Branches, and Expanded Blocks
+and can focus them; the depth stack jumps to ancestors and steps out; stock
+zoom/fit/minimap controls cover camera navigation. This already answers the
+generic Model Browser or Navigation Window need for the current board.
+
+**Current SystemSketch evidence.** `docs/assets/library-overview-panel-2026-09-02.png`
+and `docs/assets/zoom-controls-shown.png` show the relevant UI. Seams:
+`src/chrome/BoardOverview.tsx`, `src/depth/DepthStackNavigator.tsx`, and
+`src/SystemSketchUtilities.tsx`. Calibration: [Epic Graph Editor][30] and
+[MathWorks Simulink Editor][44].
 
 ### Anchored comments and source references
 
-**Text description.** Comments can follow a shape, point, region, or page and can
-retain an optional Python source reference. That identity model is already more
-durable than a loose visual grouping comment and should remain separate from
-semantic vocabulary.
+**Text description.** Local comments already anchor to a block, point, region, or
+page and can retain a source reference. They preserve durable identity beyond a
+loose visual comment box without inventing a semantic node.
 
-**Current SystemSketch evidence.** The companion uses
-docs/assets/repo-improvements-local-comments.png from the real editor and names
-src/comments/commentModel.ts as the seam. Epic's [Comments
-reference](https://dev.epicgames.com/documentation/en-us/unreal-engine/comments-in-unreal-engine?lang=en-US)
-is calibration for the reader need, not a model to clone.
+**Current SystemSketch evidence.** `docs/assets/repo-improvements-local-comments.png`
+shows the current surface; `src/comments/commentModel.ts` owns it. Calibration:
+[Epic Comments][31] and [MathWorks Block Comments][49].
 
-### Edge type is already visually distinguishable
+### Preview diff states and intra-value changes
 
-**Text description.** A reader can distinguish a temporal or async-styled edge
-from ordinary value flow today. The shipped control is presentation-only, which
-is appropriate until the analyzer can attach a real relation contract.
+**Text description.** SystemSketch already marks added, removed, and changed
+Block/port/cable facts and can show inline before→after value changes under the
+Preview/Stable review controls. Simulink Model Comparison confirms the reader
+need; selecting arbitrary saved versions is a separate workflow question, not a
+missing visual vocabulary.
 
-**Current SystemSketch evidence.** The companion uses
-docs/assets/async-edge-style-acceptance.png from the real editor and names
-src/blocks/connections/connectionModel.ts as the seam. A semantic async badge or
-relation inspector belongs in the useful bucket only after Track A recognition
-exists.
+**Current SystemSketch evidence.** `docs/assets/diff-states-marked.png` shows
+the live review state and inline value change; `src/blocks/diffState.ts` is the
+seam. Calibration: [MathWorks Model Comparison][61].
+
+### Async edge styling as presentation vocabulary
+
+**Text description.** The current async edge treatment is a useful visual
+distinction but is presentation-only today. Track A identifies the missing
+analyzer fact needed before a dashed edge truthfully carries semantic meaning.
+
+**Current SystemSketch evidence.** `docs/assets/async-edge-style-acceptance.png`
+shows the current styling; `src/blocks/connections/connectionModel.ts` is the
+seam. Calibration: [NI Using Wires][7].
 
 ## Missing, would be useful
 
-### Source-derived Python call contract
+### Preset semantic role tags on ordinary ports and wires
 
-**Text description.** A rendered function definition or call should let a reader
-scan which arguments are required, which have source defaults, which are
-keyword-only, and which are variadic when analysis is reliable. This is an
-information display, not a wire-validity rule or a canvas editor for the
-signature.
+**Text description.** Activate the existing disabled Tags affordance with the
+accepted set: `Data` by default, then `Event`, `Configuration`, `State`,
+`Control`, and `Error`. These are labels on ordinary dataflow. An Error value can
+use an ordinary tunnel bus; an Event can carry type/time/payload/timeout; no
+tag changes routing or invents execution semantics.
 
-**Official screenshot evidence.** The companion puts
-docs/assets/gap-labview-connector-contract-2026-09-03.png from NI's [Required,
-Recommended, and Optional Inputs and Outputs](https://www.ni.com/docs/en-US/bundle/labview/page/setting-required-recommended-and-optional-inputs-and-outputs.html)
-beside docs/assets/gap-blueprint-function-call-2026-09-03.png from Epic's
-[Functions documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/functions?application_version=4.27)
-and docs/assets/gap-simulink-function-caller-2026-09-03.png from MathWorks'
-[Function Caller](https://www.mathworks.com/help/simulink/slref/functioncaller.html).
-The convergence is visible call interface; only LabVIEW's connector pane adds a
-required/recommended/optional wiring policy.
+**Real screenshot(s).** `docs/assets/gap-labview-error-wire-2026-09-03.png` is
+from [NI Handling Errors][5]; `docs/assets/gap-blueprint-cast-failure-2026-09-03.png`
+is from [Epic Blueprint Communications][23]; and
+`docs/assets/gap-simulink-function-call-2026-09-03.png` is from [MathWorks Model
+Reference Function-Call][38]. They establish why visible outcome and control
+meaning help readers. SystemSketch takes only the shared semantic-label idea,
+not their special wire shapes or dispatcher mechanisms.
 
-**Original SystemSketch projection.** Render small, source-derived row badges or
-groups: required, defaulted, keyword-only, positional-only when useful, and
-variadic. Keep the source spelling nearby and leave all values/cables optional as
-Python permits. There is intentionally no recommended class, because Python has
-no corresponding semantic fact.
+**Original SystemSketch drawing description.** A port and its ordinary arrow
+show a small, stable role chip in the same place at any block or region boundary.
+Data is unmarked or quietly labeled; Error, Event, Configuration, State, and
+Control receive a redundant textual marker and accessible name. Inspecting a tag
+reveals source proof and known unknowns; no dropdown can create a new relation.
 
-**Lift.** Medium. It needs analyzer signature facts and density testing, but no
-new program semantics. A first prototype can target resolved local definitions
-before imports, overloads, decorators, and dynamically generated callables.
+**Lift.** **Small to medium.** `src/blocks/ui/BlockInspector.tsx` already has a
+disabled Tags affordance. Add stable role data, accessible redundant cues,
+conservative analyzer defaults, migration, and tests—without changing topology
+or execution behavior.
 
-### Source-derived variadic parameter summary
+### Contextual source / provenance lens
 
-**Text description.** A Python function that declares variadic positional or
-keyword capture parameters already states that fact in source. A compact,
-expandable summary can make the open-ended portion of the interface legible
-without giving the canvas a plus-pin command or implying that an occurrence may
-change the function signature.
+**Text description.** LabVIEW Context Help, Blueprint Details, and Simulink
+Property Inspector keep explanation near the current selection. Extend the
+existing Inspector with a read-only Source section: projection kind,
+declaration/span, canonical definition, occurrences, docstring, default
+provenance, and the meaning/proof of any semantic tag.
 
-**Official screenshot evidence.** The companion uses the existing official
-capture docs/assets/gap-blueprint-function-call-2026-09-03.png from Epic's
-[Functions documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/functions?application_version=4.27).
-Epic's [Add Pin interface reference](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Editor/BlueprintGraph/IK2Node_AddPinInterface?lang=en-US)
-explains why an authoring graph exposes a pin-add control; the SystemSketch
-translation must be read-only because Python has already declared the variadic
-boundary.
+**Real screenshot(s).** `docs/assets/gap-ui-labview-context-help-2026-09-04.png`
+is from [NI Context Help guidance][14];
+`docs/assets/gap-ui-blueprint-details-2026-09-04.png` is from [Epic Details
+Panel][27]; and `docs/assets/gap-ui-simulink-property-inspector-2026-09-04.png`
+is from [MathWorks Property Inspector][47]. All are official examples of
+selection-following explanation; none author Python source.
 
-**Original SystemSketch projection.** Keep named fixed parameters as ordinary
-rows, then show one grouped variadic row with the source spelling and an expand
-affordance. Expansion reveals a source fact or call-site summary; it never adds,
-removes, or rewrites a port. The group remains visibly distinct from a list of
-ordinary optional parameters.
+**Original SystemSketch drawing description.** Add a `Source` tab beside Details
+and Notes. Its compact card lists the projection name, source file/span,
+definition identity, docstring, tag evidence, and navigation actions. It is
+read-only explanatory chrome over an existing selection, never a Simulink mask
+or property-editor program.
 
-**Lift.** Low-to-medium after call-contract facts exist. The analyzer must publish
-reliable variadic metadata and the UI must preserve row identity across
-collapse/expand, but no new semantic relation or editable node interface is
-needed.
+**Lift.** **Medium.** The panel reuses shipped Inspector chrome, but needs
+trustworthy analyzer provenance, definition linking, source-open plumbing, and
+safe unknown/stale-span states.
 
-### Source-derived field exposure control
+### Source project, definition, and occurrence navigator
 
-**Text description.** A reader should be able to collapse or expand named,
-source-known fields without losing the truth that a record has a broader
-interface. This is a control over the record projection from Track A, not a way
-to create or remove fields on the canvas.
+**Text description.** LabVIEW Project Explorer, My Blueprint, and Model Browser
+converge on a searchable hierarchy outside the canvas. Board Overview already
+covers board structure; the missing sibling is a Python-owned, read-only tree
+from files/modules to definitions, callers/occurrences, and their current
+projections.
 
-**Official screenshot evidence.** The companion places
-docs/assets/gap-labview-unbundle-by-name-2026-09-03.png from NI's [Unbundle By
-Name](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/unbundle-by-name.html);
-docs/assets/gap-blueprint-hidden-pins-2026-09-03.png from Epic's [Struct
-Variables](https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27);
-and docs/assets/gap-simulink-bus-selector-2026-09-03.png from MathWorks' [Bus
-Selector](https://www.mathworks.com/help/simulink/slref/busselector.html). The
-references show selective interface exposure, but SystemSketch must derive field
-identity from source rather than treat wire connection as authority.
+**Real screenshot(s).** `docs/assets/gap-ui-labview-project-explorer-2026-09-04.png`
+is from [NI Project Explorer guidance][15];
+`docs/assets/gap-ui-blueprint-my-blueprint-2026-09-04.png` is from [Epic My
+Blueprint Panel][29]; and `docs/assets/gap-ui-simulink-model-browser-2026-09-04.png`
+is from [MathWorks Model Browser][50]. The common insight is navigation through
+named identity; the host tools' mutable project/deployment semantics do not
+transfer.
 
-**Original SystemSketch projection.** Add a compact field-group affordance:
-expanded named rows, a summary count when collapsed, and an inspector list that
-can only choose among analyzer-known fields. A required function parameter cannot
-be hidden in a way that makes the callable look smaller; collapsed means
-summarized, not absent.
+**Original SystemSketch drawing description.** A right-dock `Source` tree groups
+workspace → module → definition → occurrence. Selecting an occurrence focuses
+the existing Block or source span; selecting a definition reveals linked
+occurrences. The tree cannot create files, definitions, targets, or source
+control changes.
 
-**Lift.** Medium-to-high. It depends on Track A field resolution, stable identity
-across source changes, and layout behavior when different occurrences choose
-different exposure levels.
+**Lift.** **Medium to high.** Requires a stable source/symbol index and durable
+occurrence identity, plus sensible scope and stale-index behavior. It must remain
+read-only and not become a parallel project model.
 
-### Default provenance and override visibility
+### Semantic symbol and Find References search
 
-**Text description.** A call site needs to distinguish a source signature default
-from a literal supplied at the call and from a connected upstream value. The
-current pill covers the local visual primitive; source-derived provenance makes
-the reading contract explicit for resolved calls.
+**Text description.** Shipped Ctrl+F finds editable board text. This adds
+identity-aware results for definitions, linked occurrences, ports, types,
+defaults, and references. Same spelling is not enough: the result must name the
+semantic object and let a reader select/fit an occurrence or reveal its source
+span.
 
-**Official screenshot evidence.** The companion uses NI's
-docs/assets/gap-labview-connector-contract-2026-09-03.png from [Required,
-Recommended, and Optional Inputs and Outputs](https://www.ni.com/docs/en-US/bundle/labview/page/setting-required-recommended-and-optional-inputs-and-outputs.html)
-and Epic's docs/assets/gap-blueprint-function-call-2026-09-03.png from
-[Functions documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/functions?application_version=4.27).
-They are evidence that interface/default status is worth showing, not permission
-to copy editor-specific default-setting controls.
+**Real screenshot(s).** `docs/assets/gap-ui-labview-quick-drop-2026-09-04.png`
+is from [NI Quick Drop][13]; `docs/assets/gap-ui-blueprint-find-results-2026-09-04.png`
+is from [Epic Find Result Panel][24]; and `docs/assets/gap-ui-simulink-finder-2026-09-04.png`
+is from [MathWorks Finder][51]. The vendor UI demonstrates rapid named search;
+SystemSketch's added constraint is a Python-owned symbol identity.
 
-**Original SystemSketch projection.** Keep the existing value pill but add a
-small provenance label on a resolved input: signature default, call literal, or
-wired override. Tooltip/source navigation can reveal the definition location.
-Never let a board control mutate the canonical default.
+**Original SystemSketch drawing description.** Reuse the command-palette shell
+with a `References` result mode. Each row identifies kind, definition path,
+source span, and board occurrence count, with compact scope pills for current
+depth, board, and workspace. Choosing a row focuses an existing object instead
+of manufacturing a new graph tab.
 
-**Lift.** Medium. It relies on the same call-resolution facts as the contract
-display and should be designed with it, but it can be deferred if visual density
-becomes too high.
+**Lift.** **Medium to high.** The result UI can reuse Ctrl+P, but reliable
+semantic/projection indexing and scope rules are prerequisite.
 
-### Generated, source-linked configuration lens
+### Source-linked Problems actions
 
-**Text description.** Readers sometimes need an interface-oriented view of a
-constructor or function: resolved annotations, source defaults, and the
-definition location. The useful residue of mask and Details-panel precedent is a
-generated, read-only source lens beside the existing inspector—not a dialog that
-becomes another program.
+**Text description.** SystemSketch already models optional source path, symbol,
+and line spans in diagnostics but does not surface them. When a real analyzer
+supplies the fields, each finding should offer both current canvas focus and
+source navigation while retaining code, severity, and explanation.
 
-**Official screenshot evidence.** The companion pairs the existing official
-capture docs/assets/gap-simulink-mask-dialog-2026-09-03.png from MathWorks'
-[Create Dynamic Mask Dialog Boxes](https://www.mathworks.com/help/simulink/ug/create-dynamic-mask-dialog-boxes.html)
-with docs/assets/gap-blueprint-function-call-2026-09-03.png from Epic's
-[Functions documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/functions?application_version=4.27).
-The first makes the boundary clear: Simulink masks can be authored and can run
-callbacks, while SystemSketch may only explain a Python-owned configuration
-contract.
+**Real screenshot(s).** `docs/assets/gap-ui-labview-error-list-2026-09-04.png`
+is from [NI Debugging Techniques][16];
+`docs/assets/gap-ui-blueprint-compiler-results-2026-09-04.png` is from [Epic
+Compiler Results][28]; and `docs/assets/gap-ui-simulink-diagnostic-viewer-2026-09-04.png`
+is from [MathWorks Diagnostic Viewer][48]. These demonstrate a diagnostic's
+useful destinations, not their host compilers.
 
-**Original SystemSketch projection.** Selecting a resolved call or constructor
-opens a compact Source lens card with a source path, annotations, default
-provenance, and a navigation link to Python. Its controls are inspection and
-presentation only. It has no user-authored fields, callbacks, dynamic visibility
-rules, or save action that would mutate source outside the normal source editor.
+**Original SystemSketch drawing description.** Each Problems row retains the
+existing severity and stable code, then exposes two honest actions: `Canvas` to
+focus the projected object and `Source` to open the supplied source span. A
+missing or stale span hides the source action rather than creating a false link.
 
-**Lift.** Medium-to-high. It becomes useful only after robust definition links,
-annotation/default resolution, and a clear read-only contract exist. It belongs
-beside the inspector and should be prototyped after the call-contract display,
-not as a generalized mask system.
+**Lift.** **Small to medium.** `src/diagnostics/diagnosticsModel.ts` already
+reserves source path/symbol/span fields. Add guarded rendering, source-open
+behavior, and tests for missing, stale, and valid spans.
 
-### Semantic relation inspection
+### Stable right-dock tabs
 
-**Text description.** When a future outcome, queue, event, or state relation is
-recognized, visual style alone will not explain its proof boundary. The reader
-needs a read-only inspector summary of the source pattern, participants, and
-known limitations.
+**Text description.** SystemSketch owns Inspector, Problems, Comments, and Board
+Overview surfaces, but separate commands make them replace one another. Blueprint
+and Simulink make sibling panes/tabs visible. A compact stable tab row preserves
+context without importing arbitrary IDE docking.
 
-**Official screenshot evidence.** The companion reuses the official event and
-outcome captures from Track A: NI Event Structure, Epic Bind Event, Stateflow
-event, NI error handling, and Blueprint Cast Failed. Their tool-specific controls
-are intentionally not copied; they establish that non-value relations benefit
-from explicit labels and inspectable identity.
+**Real screenshot(s).** `docs/assets/gap-ui-blueprint-graph-editor-2026-09-04.png`
+is from [Epic Graph Editor][30], and
+`docs/assets/gap-ui-simulink-property-inspector-2026-09-04.png` is from
+[MathWorks Property Inspector][47]. They are evidence for discoverable sibling
+surfaces, not for reproducing an entire host layout manager.
 
-**Original SystemSketch projection.** Select a relation to reveal a terse,
-source-linked inspector: relation kind, source expression(s), endpoints, and
-what is deliberately unknown such as ordering or cancellation. The board stays a
-view; no dropdown can change a callback graph or exception behavior.
+**Original SystemSketch drawing description.** One right dock has a restrained
+tab strip—`Inspect`, `Problems`, `Comments`, `Overview`, then future
+source-oriented tabs. The current Inspector continues to follow selection; the
+rest retain their existing content and collapse responsively.
 
-**Lift.** Medium after, and only after, the corresponding Track A grammar exists.
-It is not a standalone UI project.
+**Lift.** **Medium.** Consolidate current surfaces behind one tab model while
+preserving keyboard order, dismiss semantics, responsive behavior, and
+selection-following Inspector behavior.
+
+### Named local review landmarks / saved views
+
+**Text description.** Blueprint bookmarks and Simulink viewmarks preserve a
+graph/hierarchy location, camera position, and zoom. Named personal review points
+near Board Overview would help a large board be revisited without abusing
+comments or duplicating boards.
+
+**Real screenshot(s).** `docs/assets/gap-ui-blueprint-bookmarks-2026-09-04.png`
+is from [Epic Blueprint Bookmarks][32], and
+`docs/assets/gap-ui-simulink-viewmarks-2026-09-04.png` is from [MathWorks
+Bookmark Your Place][52]. Both establish the navigation idea, not a source
+semantic.
+
+**Original SystemSketch drawing description.** A small `Landmarks` list names
+camera/depth targets such as “Retry loop” or “Output adapters.” Activating one
+fits the existing target without changing selection; a `Save current view` action
+stores presentation state only.
+
+**Lift.** **Low to medium.** Persist board identity, depth scope, camera, and an
+optional target shape locally; define stale-target fallback and keep landmarks out
+of shared source truth.
+
+### Back / Forward navigation history and scope breadcrumb
+
+**Text description.** Depth Stack already jumps to ancestors. Blueprint and
+Simulink also remember navigation jumps and show the current nested path. Add
+session-local Back/Forward around reference search, outline, source, landmark,
+and depth jumps, with a breadcrumb tied to actual source/canvas scope rather than
+permanent arbitrary graph tabs.
+
+**Real screenshot(s).** `docs/assets/gap-ui-blueprint-graph-editor-2026-09-04.png`
+is from [Epic Graph Editor][30], and
+`docs/assets/gap-ui-simulink-editor-2026-09-04.png` is from [MathWorks Simulink
+Editor][44]. These distinguish transient navigation history from a document model.
+
+**Original SystemSketch drawing description.** A compact left/right pair sits
+above a breadcrumb such as `workspace › pipeline.py › decode_packet › board
+scope`. History entries restore target/camera safely; breadcrumbs identify the
+current source and depth position even when an old target has disappeared.
+
+**Lift.** **Small to medium.** Centralise focus/fit/depth jumps, record bounded
+personal history, and restore selection/camera safely after deletion or reload.
+
+### Focused component-interface lens
+
+**Text description.** A reader sometimes needs only a component's public
+boundary. Simulink Component Interface View is strong precedent: show selected
+canonical inputs/outputs and trace a chosen port's use while leaving the
+source-derived Block and Python signature untouched.
+
+**Real screenshot(s).** `docs/assets/gap-labview-connector-contract-2026-09-03.png`
+is from [NI Icon and Connector Panes][63];
+`docs/assets/gap-blueprint-function-call-2026-09-03.png` is from [Epic
+Functions][20]; and `docs/assets/gap-ui-simulink-component-interface-2026-09-04.png`
+is from [MathWorks Component Interface View][53]. They demonstrate a compact
+public boundary, not an authorable interface schema.
+
+**Original SystemSketch drawing description.** Selecting a resolved component
+opens an `Interface` lens that lists source-derived inputs and outputs, the
+canonical definition, and trace links to known sources/destinations. Its ports
+are read-only occurrences; no `+ pin`, reorder, or schema-editor affordance
+appears.
+
+**Lift.** **Medium to high.** Resolve one canonical definition and occurrences,
+then provide a read-only port list and trace. Dynamic/imported signatures must
+show unknown honestly.
+
+### Structured cable hierarchy and static source/destination trace
+
+**Text description.** Simulink Signal Hierarchy Viewer follows a selected
+compound signal, exposes its member tree, and traces a member to sources and
+destinations. Extend the existing Connection Inspector with analyzer-known record
+fields and endpoint navigation: static graph facts, not compiled dimensions or
+runtime values.
+
+**Real screenshot(s).** `docs/assets/gap-ui-simulink-signal-hierarchy-2026-09-04.png`
+is from [MathWorks Signal Hierarchy Viewer][54]. Its structural reader need
+converges with SystemSketch Split; Simulink's simulation analysis does not.
+
+**Original SystemSketch drawing description.** Selecting a cable opens a compact
+tree such as `Message › id: int › payload: bytes`, with explicit `source` and
+`destinations` actions. Known nested fields come from the analyzer; unresolved
+or dynamic mappings are visibly unknown rather than editable schema rows.
+
+**Lift.** **Medium.** Reuse connection identity and Split facts, add a stable
+nested-type view, endpoint navigation, and an honest unresolved state.
+
+### Board-wide semantic data table
+
+**Text description.** The Inspector is selection-scoped; a large board can also
+benefit from one filterable table of canonical Blocks, ports, connections, types,
+defaults, and semantic roles. Simulink Model Data Editor supplies the
+outside-canvas precedent, but the SystemSketch version stays read-only and
+source-linked rather than becoming a MATLAB workspace or schema editor.
+
+**Real screenshot(s).** `docs/assets/gap-ui-simulink-model-data-editor-2026-09-04.png`
+is captured from [MathWorks Model Data Editor][62]. Its filterable data surface
+is useful evidence for a board-wide reading lens; no vendor-style parameter
+editing, workspace state, or schema authority transfers.
+
+**Original SystemSketch drawing description.** A stable dock tab presents a
+filterable, virtualised table of existing canonical identities: Block, port,
+cable, type, visible default provenance, and semantic role. Every row has
+`Canvas` and `Source` actions; cells are labels and links, never editable values.
+
+**Lift.** **Medium.** Build a virtualised index over existing canonical
+identities, share filters with semantic search, and guarantee every row focuses
+canvas or source. No cell edit may create a competing source of truth.
+
+### Run / Pause / Stop strip for an explicit runtime adapter
+
+**Text description.** LabVIEW, Blueprint, and Simulink all name a run target,
+expose state-dependent Run/Pause/Stop controls, and report state outside the
+canvas. SystemSketch should adopt this only when an explicit Python/test/ROS
+adapter exists; drawing alone must never execute code.
+
+**Real screenshot(s).** `docs/assets/gap-ui-labview-toolbar-2026-09-04.png` is
+from [NI Block Diagram Explained][11];
+`docs/assets/gap-ui-blueprint-toolbar-2026-09-04.png` is from [Epic Blueprint
+Toolbar][33]; and `docs/assets/gap-ui-simulink-editor-2026-09-04.png` is
+from [MathWorks Simulink Editor][44]. The captures prove this is editor
+chrome, not a static Python fact.
+
+**Original SystemSketch drawing description.** A restrained strip shows the
+named adapter/target, revision identity, current state, and Run/Pause/Stop only
+when a concrete adapter reports capability. It lives outside the board and
+renders no fake execution cables or controls when no adapter is connected.
+
+**Lift.** **Very high and conditional.** First define sandboxing, target
+discovery, lifecycle, cancellation, stdout/errors, and board/source revision
+identity. Do not ship inert play chrome.
+
+### Recorded-trace playback and execution highlighting
+
+**Text description.** Step and highlight controls are defensible without making
+the board a simulator when they replay an explicit recorded trace. The active
+Block/cable is a temporary lens with a known trace position; playback acts on
+evidence, never on source or layout.
+
+**Real screenshot(s).** `docs/assets/gap-ui-labview-debug-window-2026-09-04.png`
+is from [NI Debugging Techniques][16];
+`docs/assets/gap-ui-blueprint-debugger-2026-09-04.png` is from [Epic Blueprint
+Debugger][34]; and `docs/assets/gap-ui-simulink-breakpoints-2026-09-04.png` is
+from [MathWorks Breakpoints List][56]. They show why execution context can be
+useful, but their live debugger authority does not transfer.
+
+**Original SystemSketch drawing description.** A trace shelf exposes trace name,
+event number, play/step controls, and a temporary highlight on mapped existing
+Blocks/cables. The highlight disappears with the trace session and is visually
+separate from source-derived semantic roles.
+
+**Lift.** **High.** Specify trace-event schema, source-revision matching,
+occurrence mapping, temporal controls, and a nonpersistent highlight layer.
+Live stepping remains later runtime-adapter work.
+
+### Read-only live or recorded value probes
+
+**Text description.** LabVIEW Probe Watch, Blueprint watched pins, and Simulink
+Data Inspector expose values produced during a run. A SystemSketch probe may
+decorate an existing port/cable only when an explicit run or imported trace
+supplies it; it is never an editable literal or canonical board state.
+
+**Real screenshot(s).** `docs/assets/gap-ui-labview-probe-watch-2026-09-04.png`
+is from [NI Debugging Techniques][16];
+`docs/assets/gap-ui-blueprint-watch-2026-09-04.png` is from [Epic Blueprint
+Debugger][34]; and `docs/assets/gap-ui-simulink-data-inspector-2026-09-04.png`
+is from [MathWorks Create a Simple Model][55]. They establish the reader benefit of
+observed values, not a mandate for a full analysis workbench.
+
+**Original SystemSketch drawing description.** A small non-editable callout on
+an existing port/cable shows a captured value, frame/time, and `pin probe` action.
+History opens only as trace evidence and is plainly distinct from the existing
+literal/default pill.
+
+**Lift.** **High after trace/run work.** Needs value capture, safe
+serialization/redaction, source-revision mapping, history limits, and strict
+separation from authorable values.
 
 ## Missing, would not be useful
 
-### Simulink masks and dynamic parameter-dialog authoring
+### Standalone keyword-only or recommended-terminal badges
 
-Masked subsystems let an author program a separate dialog that can show, hide,
-enable, or disable controls. That is a second user-authored language surface and
-conflicts with Python as the canonical definition.
+Empty versus defaulted/wired inputs are already readable, and keyword-only is
+not valuable as an isolated UI tier. Python has no LabVIEW recommended-wiring
+legality; retain source spelling in the Inspector instead of adding badges. See
+[NI terminal categories][9] and [Epic Functions][20].
 
-### LabVIEW recommended-terminal policy
+### Authorable masks, callbacks, class defaults, or GUI type/schema editors
 
-Python can state required/defaulted/keyword-only facts but has no semantic
-equivalent of a recommended wire. A synthetic middle tier would make the renderer
-assert a validation rule the source language does not own.
+Simulink masks and Type Editor, Blueprint Class Defaults, and LabVIEW property
+systems are parallel programming/configuration authorities. SystemSketch may
+explain source facts but must not author them in a second UI. See [MathWorks
+Dynamic Mask Dialog][73], [MathWorks Type Editor][78], [Epic Blueprint
+Defaults][79], and [NI VI Properties][80].
 
-### Automatic hide-unconnected behavior
+### Wire-driven hiding or canvas-created signature ports
 
-Hiding an interface solely because a cable is absent makes accidental board layout
-look like callable truth. Keep explicit presentation choices and source-derived
-summaries; do not let a wire's current presence redefine a signature.
+Blueprint can hide unconnected pins and Simulink can add/reposition subsystem
+ports because their graphs own the program. Current wiring must not redefine a
+Python signature, field schema, or default. See [Epic Struct Variables][18] and
+[MathWorks Connect Subsystems][43].
 
-### Per-library Property, Invoke, Details, and hardware configuration panels
+### Second node/function palette
 
-These controls belong to their reference tools' runtimes and frameworks. Generic
-inspection is already available; library-specific configuration widgets would
-recreate a foreign palette inside a Python renderer.
+LabVIEW Functions, Blueprint Palette, and Simulink Library Browser are authoring
+catalogs. SystemSketch already has a Shapes library and semantic stock Block
+picker; Python calls/operators stay source-derived rather than draggable nodes.
+See [NI Block Diagram Explained][11], [Epic Blueprint Palette][26], and
+[MathWorks Library Browser][46].
 
-### Canvas-based signature, field-schema, or default editing
+### Mutable project, asset, deployment, and source-control manager
 
-The canvas may reveal Python-derived contracts but must not become a second way to
-change them. Editing a signature, adding a field, or changing a default belongs in
-Python source and should flow back through analysis.
+LabVIEW targets/build specifications, Unreal Content Browser/source control, and
+Simulink project/dependency controls belong to host ecosystems. The useful source
+navigator is intentionally read-only. See [NI Project Explorer guidance][15],
+[Epic Blueprint Editor Menu][36], and [MathWorks Referenced Files Pane][81].
 
-### Runtime playback, scheduler, solver, and simulation controls
+### Large workflow ribbon, arbitrary docking, and layout reset system
 
-Playback, execution rate, numerical solver, and live hardware controls require
-runtime authority. They are out of scope for a static source renderer even when a
-future live-execution view may expose measured state.
+Simulink's broad toolstrip and Unreal's freely dockable shell serve large host
+suites. SystemSketch should expose compact contextual commands and a stable dock,
+not recreate an IDE shell. See [Epic Blueprint Class Editor User Interface][22]
+and [MathWorks Simulink Editor][44].
+
+### Solver, pacing, simulation modes, hardware targets, and deployment
+
+These controls configure numerical simulators or target hardware. Even if an
+explicit Run adapter arrives, SystemSketch should not imply solver semantics,
+hardware execution, or Blueprint play modes for ordinary Python. See [MathWorks
+Simulation Execution][82], [NI Block Diagram Explained][11], and [Epic Blueprint
+Toolbar][33].
+
+### Compile / Update Diagram button without a real compiler contract
+
+Blueprint Compile, LabVIEW Broken Run, and Simulink Update Diagram report
+tool-owned compilation states. The existing Problems panel should remain
+analyzer-driven; an inert Compile button would claim authority it does not have.
+See [Epic Blueprint Toolbar][33], [NI Block Diagram Explained][11], and
+[MathWorks Simulink Editor][44].
+
+### Full live-instance debugger, breakpoint manager, and debug-object picker
+
+The recorded-trace lens above is intentionally narrower. Per-instance stacks,
+breakpoint mutation, possess/eject, scheduler control, and debug-target discovery
+require an execution host and should not be imitated as decorative chrome. See
+[NI Debugging Techniques][16], [Epic Blueprint Debugger][34], and [MathWorks
+Breakpoints List][56].
+
+### Unreal Components, Viewport, Construction Script, and Class modes
+
+These panels author Actor composition, 3D transforms, and lifecycle scripts.
+They do not expose generic Python/dataflow facts; Board Overview and Inspector
+already supply the transferable hierarchy/selection patterns ([Epic Blueprint
+Class Editor User Interface][22]).
+
+### Full time-series analysis and signal-logging workbench
+
+Simulink Data Inspector plots, compares, aligns, and exports simulator runs. A
+small read-only probe may be useful, but a numerical analysis suite is a separate
+product surface ([MathWorks Simulation Data Inspector][83]).
+
+### Diagnostic suppression, auto-fix, runtime-stage comparison, and global logs
+
+The focused Problems dock is the correct boundary. Toolchain fix buttons,
+suppression policies, baseline comparison, compile logs, and runtime consoles
+require authority outside the board. See [NI Debugging Techniques][16], [Epic
+Compiler Results][28], and [MathWorks Diagnostic Viewer][48].
+
+### Permanent arbitrary graph tabs
+
+Blueprint and Simulink tabs reflect documents owned by those editors. Session
+Back/Forward plus source/depth breadcrumbs solve the navigation problem without
+introducing a second document model inside a board. See [Epic Graph Editor][30]
+and [MathWorks Simulink Editor][44].
 
 ---
 
-# Convergence map
+# Convergence cross-check
 
-| Reader question | Independent reference answer | Translation that survives Python source authority |
+| Reader question | Converging reference pattern | SystemSketch translation that preserves Python authority |
 | --- | --- | --- |
-| How do mutually exclusive paths and a join read? | LabVIEW Case; Blueprint Branch/Switch; Simulink If/Action + Merge | Existing Branch region and source-derived join |
-| How does a previous iteration read? | LabVIEW Feedback; Simulink Unit Delay | Existing loop z⁻¹ treatment |
-| How do named aggregate members read? | LabVIEW Unbundle/Bundle By Name; Blueprint split/set members; Simulink Bus Selector/Assignment | Source-derived field projection and partial update, not an editable struct palette |
-| How does a conditional value differ from a branch? | LabVIEW Select; Blueprint Select; Simulink Switch | Compact source-derived Select candidate |
-| How does a non-normal outcome read? | LabVIEW error wires; Blueprint Cast Failed | Explicit Python exception/outcome region, never universal error plumbing |
-| How does an asynchronous or event relation read? | LabVIEW channel/Event Structure; Blueprint dispatcher; Simulink function-call/Stateflow event | Named, analyzer-proven relation with stated limits |
-| How does explicit mode behavior read? | Stateflow states and transitions | High-bar source-recognized state region only |
-| How does a callable interface scan? | LabVIEW connector pane; Blueprint function pins; Simulink Function Caller | Read-only required/defaulted/keyword-only contract |
-| How should an interface get dense? | Blueprint pin exposure; LabVIEW compact icon; Simulink port/mask conventions | Existing views plus source-derived field summary, not wire-driven hiding |
+| How do exclusive paths and a join read? | Case, Branch/Switch, If/Merge | Existing Branch region and source-derived join |
+| How does a previous iteration read? | Feedback Node, Unit Delay | Existing loop `z⁻¹` treatment |
+| How do named aggregate members read? | Unbundle/Bundle, Struct Split/Set, Bus Selector/Assignment | Shipped Split plus approved stock Set attributes; never an editable struct palette |
+| How does a conditional value differ from a branch? | Select, Switch | Approved stock Select with two values and one control input |
+| How do errors/events/state/configuration read? | Error dataflow, function-call/event/control contexts | Ordinary arrows/ports with semantic role tags; no rail or dispatcher relation |
+| How does asynchronous delivery read? | Channel wire; dash-dot function-call controls | Direct dashed ordinary arrow, never queue topology |
+| How do time/trigger sources read? | Timed Loop, Function-Call Generator | Source-proven normal Data/Control/Event output, never scheduler UI |
+| How should surrounding editor chrome work? | Context Help/Details/Property Inspector; Explorer/Outline/Browser; Find/Diagnostics | Read-only source/provenance/navigation/search extensions over shipped Inspector, Overview, palette, and Problems seams |
+| When can runtime UI transfer? | LabVIEW/Blueprint/Simulink run/debug/probe chrome | Only an explicit adapter and recorded trace earn a narrow non-authoring lens |
 
 # Your thinking, sharpened
 
-1. **Convergence identifies a reader constraint, not a permission to clone an
-   authoring UI.** Case joins, previous values, field names, and call contracts
-   recur because readers need those facts; palettes and runtime widgets recur
-   because their hosts author programs visually.
-2. **The Unbundle By Name lesson is stable field identity.** NI's order-independent
-   named selection is stronger precedent than a generic cluster icon. It points
-   to source-resolved dataclass/TypedDict/destructuring facts, not a user-authored
-   record schema.
-3. **The Bundle By Name lesson is retained aggregate plus named change.** It is a
-   useful reading aid only when Python analysis can distinguish direct field
-   mutation from immutable replacement and opaque side effects.
-4. **An error wire is not the answer to Python exceptions.** The transferable
-   insight is visible abnormal outcome. Python's try/except/raise grammar provides
-   a more honest boundary than red pins everywhere.
-5. **Async is the pressure test for the DAG claim.** A good first step is a
-   narrow source-recognized queue, await, or event relation with known endpoints,
-   not a fabricated global execution timeline.
-6. **State is a semantic commitment, not a prettier if-chain.** Stateflow offers
-   excellent visual grammar, but a false-positive statechart would be worse than
-   no statechart. It needs an explicit source contract.
-7. **A control is safe when it exposes a source fact.** Required/defaulted/
-   keyword-only badges, field summaries, and provenance labels preserve source
-   truth. Recommended wiring, masks, and canvas-first editing create a second
-   authority.
-8. **Current SystemSketch is farther along than the work order assumed.** Branch,
-   loop feedback, effect exit, density, visibility, literals, styled edges, and
-   anchored comments are useful primitives. The next work is semantic recognition
-   and narrower projection, not wholesale UI replacement.
+1. **Convergence identifies a reader constraint, not permission to clone an
+   authoring UI.** Named fields, joins, prior values, source navigation, and
+   visible diagnostics recur because readers need them; palette, compile, and
+   deployment controls recur because those hosts own a program graph.
+2. **Unbundle By Name lands on a shipped Split block.** Its order-independent
+   named access is already represented by Split's source-derived accessor rows
+   and type propagation—not by a new schema editor.
+3. **Bundle By Name supports the approved Set attributes stock block.** The
+   valuable reader fact is retained aggregate plus named change; the renderer
+   must remain honest about direct update, immutable replacement, and opaque
+   helpers.
+4. **Select is a compact value primitive, not a branch.** Its settled shape is
+   two value inputs plus one control input and one ordinary output.
+5. **Semantic roles are labels, not transports.** Data/Event/Configuration/
+   State/Control/Error are normal port/wire meanings. Errors remain normal
+   railway data; events remain ordinary emitted data; no special rail, top-edge
+   exception effect, or dispatcher relation is warranted.
+6. **Async gets no invented topology.** A source-proven dashed direct
+   arrow can communicate a handoff or await boundary, but it says nothing about
+   queues, ownership, ordering, or a global timeline.
+7. **Clock/Trigger is a source concept, not a scheduler UI.** It can show an
+   explicit time/control/event value, while rates, solvers, playback, and
+   hardware policies stay outside static source rendering.
+8. **External chrome should deepen source truth, not mimic an IDE.** The rich
+   LabVIEW, Blueprint, and Simulink surfaces make the best case for read-only
+   provenance, definition navigation, semantic Find, source-linked diagnostics,
+   tabs, landmarks, and navigation history—not mutable projects or palettes.
+9. **Runtime visuals need a real evidence contract.** Run/Pause/Stop, execution
+   highlight, and probes are useful only after an explicit adapter or recorded
+   trace can name their target, revision, lifecycle, and values.
+10. **Statecharts and behavior trees remain separate research.** Current state
+    configuration/dataflow is sufficient; no derived state overlay or tree
+    renderer belongs in this work order.
 
 # Decision surface
 
 ## Done
 
-- Rebuilt the research source as an evidence-first Track A/Track B dictionary,
-  one concept per heading.
-- Audited current SystemSketch grammar against live code seams and attached a real
-  current-editor capture to every already-have concept.
-- Captured and indexed official NI, Epic, and MathWorks evidence for positive
-  gaps, including the requested NI Unbundle By Name reference.
-- Kept every positive proposal in description → official screenshot(s) → original
-  SystemSketch projection → lift order for the rendered companion.
-- Separated field projection, partial update, Select, exception outcome, async
-  handoff, events, state modes, call contract, field exposure, provenance, and
-  relation inspection rather than hiding them in a broad nodes category.
+- Rebuilt the research as extensive Track A and Track B dictionaries with one
+  concept per heading and a strict evidence-first useful-entry order.
+- Corrected the baseline: Split is shipped; required/default/override and
+  variadic groups are shipped; current SystemSketch already has broad menu,
+  toolbar, palette/search, Inspector, Problems, overview, depth, zoom, layout,
+  comments, and async-style coverage.
+- Added official NI, Epic, and MathWorks capture/source evidence for the external
+  editor chrome: run/debug/probe surfaces, project/navigation panels, context
+  help/property inspectors, search, diagnostics, tabs, bookmarks, interfaces,
+  signal hierarchy, and toolbars.
+- Recorded Zach's settled vocabulary decisions: stock Set attributes, stock
+  Select, semantic roles on ordinary wires, direct dashed async arrow,
+  Clock/Trigger source, no event dispatcher relation, no bespoke exception rail,
+  and no derived statechart overlay.
 
 ## Left
 
-- Build no product feature from this research until one candidate is selected.
-- Prototype the exception/outcome region with only explicit Python syntax first;
-  do not infer failures from ordinary calls.
-- Choose one async idiom and one event idiom independently if either is pursued;
-  do not ship a broad async cable whose meaning cannot be stated.
-- Resolve analyzer facts for records, dataclasses, TypedDicts, destructuring, and
-  direct updates before designing field groups.
-- Run density studies on call-contract badges, field summaries, and default
-  provenance before treating any one as default-visible.
+- Implement analyzer facts and renderer tests for approved Set attributes and
+  Select, preserving shipped Split as the named-projection baseline.
+- Activate stable semantic-role tags with accessible cues, source proof, and
+  conservative defaults; unresolved/dynamic cases remain Data.
+- Define narrow source predicates for async and Clock/Trigger without fabricating
+  queues, ownership, dispatch, scheduler, or simulation semantics.
+- Stage source/provenance/navigation/search/Problems improvements behind a
+  trustworthy source-symbol index.
+- Treat runtime strip, trace playback, and probes as a later adapter/trace
+  program with explicit target, sandbox, revision, and redaction contracts.
 
 ## Needs Zach
 
-- Which concrete Python exception patterns belong in a first outcome experiment:
-  syntax only, or one explicit result-like protocol as well?
-- Which source idiom is valuable enough to earn the first async relation: direct
-  asyncio Queue, an await continuation, or a named callback pair?
-- Is there an existing source-level state-machine convention or annotation that
-  makes a high-confidence state region legitimate?
-- At what density should a normal call show signature detail: always, on hover,
-  in Port/Expanded only, or inspector-first?
-- Which record families are worth supporting first: dataclasses, TypedDicts,
-  named tuples, explicit pattern matching, or a narrower subset?
+Before an implementation track starts, decide whether the right-side surfaces
+become explicit tabs; whether source/project navigation starts at one board or
+the whole workspace; whether imported trace playback should precede live Run
+controls; and whether semantic-role tags are analyzer-owned, user-chosen
+presentation, or both with provenance. Also choose the exact first Python
+fixtures/framework adapters and final display spelling for the accepted role
+presets. A behavior-tree inquiry, if wanted, should begin as a separate research
+work order.
 
 ## Deliberately not done
 
 - No draggable LabVIEW, Blueprint, or Simulink palette.
-- No code, schema, analyzer, or canvas behavior change; this is research only.
-- No universal error port, no global async timeline, no inferred statechart, and
-  no library-specific node glyph collection.
-- No Simulink mask authoring, LabVIEW recommended-terminal enforcement, automatic
-  hide-unconnected semantics, or canvas editing of Python contracts.
-- No vault write from this repository worktree.
+- No code, schema, analyzer, or canvas behavior change; this remains research.
+- No universal Error port, special outcome rail, top-edge exception effect,
+  event-dispatch relation, queue junction, ownership hub, or global async
+  timeline.
+- No derived statechart overlay or behavior-tree renderer.
+- No masks, callbacks, class-default editors, GUI type/schema editors, mutable
+  project/deployment manager, recommended-terminal enforcement, or canvas-side
+  Python contract editing.
+- No inert Compile, Run, Pause, Stop, breakpoint, or probe chrome without an
+  explicit execution/trace contract.
 
-# Primary-source index
+# Numbered primary-source index
 
 ## NI LabVIEW
 
-1. NI, [Unbundle By Name](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/unbundle-by-name.html) — selects named cluster elements without tracking their order; primary evidence for source-derived named field projection.
-2. NI, [Bundle By Name](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/bundle-by-name.html) — updates selected named cluster elements; primary evidence for named partial record update.
-3. NI, [Select function](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/select.html) — conditional value selection.
-4. NI, [Handling Errors](https://www.ni.com/docs/en-US/bundle/labview/page/handling-errors.html) — error cluster and propagation behavior.
-5. NI, [Using Wires to Link Block Diagram Objects](https://www.ni.com/docs/en-US/bundle/labview/page/using-wires-to-link-block-diagram-objects.html) — normal wires and asynchronous channel-wire grammar.
-6. NI, [Event Structure](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/structures/event-structure.html) — event cases and event-driven control.
-7. NI, [Case Structures: Executing a Section of Code Based on Input Values](https://www.ni.com/docs/en-US/bundle/labview/page/case-structures-executing-a-section-of-code-based-on-input-values.html) — selected case execution.
-8. NI, [Feedback Node](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/feedback-node.html) — previous-iteration dataflow precedent.
-9. NI, [Required, Recommended, and Optional Inputs and Outputs](https://www.ni.com/docs/en-US/bundle/labview/page/setting-required-recommended-and-optional-inputs-and-outputs.html) — connector-pane terminal categories.
-10. NI, [Formula Node](https://www.ni.com/docs/en-US/bundle/labview/page/formula-node.html) — text escape hatch inside an authoring graph.
-11. NI, [View As Icon](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/properties-and-methods/vi-server/generic/gobject/node/subvi/viewasicon.html) — compact node display.
-12. NI, [Creating and Editing User-Defined Constants](https://www.ni.com/docs/en-AS/bundle/labview/page/creating-and-editing-user-defined-constants.html) — readable constant/default precedent.
-13. NI, [LabVIEW Arrays and Clusters Explained](https://www.ni.com/en/support/documentation/supplemental/08/labview-arrays-and-clusters-explained.html) — cluster vocabulary and background context.
+1. NI, [Case Structures: Executing a Section of Code Based on Input Values](https://www.ni.com/docs/en-US/bundle/labview/page/case-structures-executing-a-section-of-code-based-on-input-values.html) — selected case execution.
+2. NI, [Feedback Node](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/feedback-node.html) — previous-iteration dataflow.
+3. NI, [Unbundle By Name](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/unbundle-by-name.html) — selects labelled cluster members without field-order dependence.
+4. NI, [Bundle By Name](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/bundle-by-name.html) — selectively replaces named cluster elements.
+5. NI, [Handling Errors](https://www.ni.com/docs/en-US/bundle/labview/page/handling-errors.html) — error-cluster dataflow and propagation.
+6. NI, [Select](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/select.html) — conditional value selection.
+7. NI, [Using Wires to Link Block Diagram Objects](https://www.ni.com/docs/en-US/bundle/labview/page/using-wires-to-link-block-diagram-objects.html) — ordinary and asynchronous channel-wire grammar.
+8. NI, [Timing and Synchronization in NI LabVIEW](https://www.ni.com/en/shop/labview/timing-and-synchronization-in-ni-labview.html) — timing source and Timed Loop context.
+9. NI, [Setting Required, Recommended, and Optional Inputs and Outputs](https://www.ni.com/docs/en-US/bundle/labview/page/setting-required-recommended-and-optional-inputs-and-outputs.html) — connector-pane categories.
+10. NI, [View As Icon](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/properties-and-methods/vi-server/generic/gobject/node/subvi/viewasicon.html) — compact node display.
+11. NI, [LabVIEW Block Diagram Explained](https://www.ni.com/en/support/documentation/supplemental/08/labview-block-diagram-explained.html) — functions palette, run/abort/pause/highlight/step controls, tools, alignment, and diagram chrome.
+12. NI, [LabVIEW Front Panel Explained](https://www.ni.com/en/support/documentation/supplemental/08/labview-front-panel-explained.html) — front-panel and formatting controls.
+13. NI, [Boost LabVIEW Productivity with Quick Drop](https://www.ni.com/en/support/documentation/supplemental/08/boost-labview-productivity-with-quick-drop.html) — Quick Drop search and insertion.
+14. NI, [Driver and VI Library Development Guidelines](https://www.ni.com/en/support/documentation/supplemental/21/driver-and-vi-library-development-guidelines.html) — Context Help guidance and screenshot.
+15. NI, [Best Practices for Managing NI LabVIEW Applications Using the Project Explorer](https://www.ni.com/en/support/documentation/supplemental/08/best-practices-for-managing-ni-labview-applications-using-the-pr.html) — Project Explorer hierarchy.
+16. NI, [Debugging Techniques in LabVIEW](https://www.ni.com/en/support/documentation/supplemental/12/debugging-techniques-in-labview.html) — Error List, probes, breakpoints, and Debug Window.
+17. NI, [LabVIEW Keyboard Shortcuts](https://www.ni.com/docs/en-US/bundle/labview/page/keyboard-shortcuts.html) — Find, Quick Drop, Context Help, and layout/navigation shortcuts.
 
 ## Epic Unreal Blueprint
 
-14. Epic Games, [Struct Variables in Blueprints](https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27) — Split Struct Pin, Set Members, As Pin, and Hide Unconnected Pins.
-15. Epic Games, [Flow Control in Unreal Engine](https://dev.epicgames.com/documentation/en-us/unreal-engine/flow-control-in-unreal-engine) — Branch, Select/Switch, Sequence, Gate, DoOnce, and related execution vocabulary.
-16. Epic Games, [Blueprint Communications](https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-communications-in-unreal-engine) — cast example with a distinct Cast Failed execution path.
-17. Epic Games, [Binding and Unbinding Events](https://dev.epicgames.com/documentation/en-us/unreal-engine/binding-and-unbinding-events-in-unreal-engine?lang=en-US) — dispatcher binding relationship.
-18. Epic Games, [Creating Dispatcher Events](https://dev.epicgames.com/documentation/en-us/unreal-engine/creating-dispatcher-events-in-unreal-engine) — dispatcher/event behavior.
-19. Epic Games, [Custom Events](https://dev.epicgames.com/documentation/en-us/unreal-engine/custom-events-in-unreal-engine) — named events and parameters.
-20. Epic Games, [Functions](https://dev.epicgames.com/documentation/en-us/unreal-engine/functions?application_version=4.27) — function-call pins and interface reading.
-21. Epic Games, [Macros](https://dev.epicgames.com/documentation/en-us/unreal-engine/macros-in-unreal-engine?lang=en-US) — graph-authoring reuse mechanism that does not transfer.
-22. Epic Games, [Implementing Blueprint Interfaces](https://dev.epicgames.com/documentation/en-us/unreal-engine/implementing-blueprint-interfaces-in-unreal-engine?lang=en-US) — visual-interface authoring precedent that does not transfer.
-23. Epic Games, [Comments](https://dev.epicgames.com/documentation/en-us/unreal-engine/comments-in-unreal-engine?lang=en-US) — comments and visual grouping context.
-24. Epic Games, [Nodes](https://dev.epicgames.com/documentation/en-us/unreal-engine/nodes-in-unreal-engine) — collapsed-graph boundary/tunnel context.
+18. Epic Games, [Struct Variables in Blueprints](https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27) — Split Struct Pin, Set Members in Struct, and pin exposure.
+19. Epic Games, [Flow Control in Unreal Engine](https://dev.epicgames.com/documentation/en-us/unreal-engine/flow-control-in-unreal-engine) — Branch, Select/Switch, Sequence, Gate, and related execution vocabulary.
+20. Epic Games, [Functions](https://dev.epicgames.com/documentation/en-us/unreal-engine/functions?application_version=4.27) — generated function-call interfaces and pure/impure context.
+21. Epic Games, [Collapsing Graphs](https://dev.epicgames.com/documentation/en-us/unreal-engine/collapsing-graphs-in-unreal-engine) — compact graph presentation.
+22. Epic Games, [Blueprint Class Editor User Interface](https://dev.epicgames.com/documentation/unreal-engine/blueprints-visual-scripting-user-interface-for-blueprint-classes-in-unreal-engine) — panels, tabs, toolbar, and class-editor chrome.
+23. Epic Games, [Blueprint Communications](https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-communications-in-unreal-engine) — explicit cast failure path.
+24. Epic Games, [Find Result Panel](https://dev.epicgames.com/documentation/unreal-engine/find-result-panel?application_version=4.27) — identity-aware Blueprint find results.
+25. Epic Games, [Blueprint Search](https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-search?application_version=4.27) — searchable Blueprint surface.
+26. Epic Games, [Palette in the Blueprints Visual Scripting Editor](https://dev.epicgames.com/documentation/unreal-engine/palette-in-the-bleprints-visual-scripting-editor-for-unreal-engine?lang=en-US) — authoring node catalog, used as contrast.
+27. Epic Games, [Details Panel](https://dev.epicgames.com/documentation/en-us/unreal-engine/details-panel-in-the-blueprints-visual-scriting-editor-for-unreal-engine) — context-sensitive inspector.
+28. Epic Games, [Compiler Results](https://dev.epicgames.com/documentation/unreal-engine/compiler-results?application_version=4.27) — diagnostic results surface.
+29. Epic Games, [My Blueprint Panel](https://dev.epicgames.com/documentation/unreal-engine/my-blueprint-panel-in-the-blueprints-visual-scripting-editor-for-unreal-engine?lang=en-US) — semantic outline/navigation.
+30. Epic Games, [Graph Editor](https://dev.epicgames.com/documentation/en-us/unreal-engine/graph-editor-for-the-blueprints-visual-scripting-editor-in-unreal-engine) — tabs, history, and breadcrumbs.
+31. Epic Games, [Comments](https://dev.epicgames.com/documentation/en-us/unreal-engine/comments-in-unreal-engine?lang=en-US) — comments and visual grouping.
+32. Epic Games, [Working with Bookmarks for Blueprint Graphs](https://dev.epicgames.com/documentation/en-us/unreal-engine/working-with-bookmarks-for-blueprint-graphs-in-unreal-engine) — named navigation landmarks.
+33. Epic Games, [Blueprint Toolbar](https://dev.epicgames.com/documentation/en-us/unreal-engine/toolbar-in-the-blueprints-visual-scripting-editor-for-unreal-engine) — compile/search/play/debug toolbar.
+34. Epic Games, [Blueprint Debugger](https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-debugger-in-unreal-engine) — debugger controls and execution context.
+35. Epic Games, [Blueprint Debugging Example](https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-debugging-example-in-unreal-engine) — worked debugging flow and runtime observations.
+36. Epic Games, [Blueprint Editor Menu](https://dev.epicgames.com/documentation/unreal-engine/menu-for-the-blueprints-visual-scripting-editor-in-unreal-engine?lang=en-US) — editor menu surface.
 
 ## MathWorks Simulink and Stateflow
 
-25. MathWorks, [If](https://www.mathworks.com/help/simulink/slref/if.html) — conditional subsystem activation.
-26. MathWorks, [Unit Delay](https://www.mathworks.com/help/simulink/slref/unitdelay.html) — delayed/previous-value precedent.
-27. MathWorks, [Bus Selector](https://www.mathworks.com/help/simulink/slref/busselector.html) — selected named bus elements.
-28. MathWorks, [Bus Assignment](https://www.mathworks.com/help/simulink/slref/busassignment.html) — partial bus-element update.
-29. MathWorks, [Switch](https://www.mathworks.com/help/simulink/slref/switch.html) — conditional value selection.
-30. MathWorks, [Function Caller](https://www.mathworks.com/help/simulink/slref/functioncaller.html) — function interface visualization.
-31. MathWorks, [Trigger](https://www.mathworks.com/help/simulink/slref/trigger.html) — function-call/triggered relationship comparison.
-32. MathWorks, [MATLAB Function](https://www.mathworks.com/help/simulink/slref/matlabfunction.html) — ports generated from function source.
-33. MathWorks, [Get Started with Stateflow](https://www.mathworks.com/help/stateflow/gs/get-started-introduction.html) — statechart, event, and transition overview.
-34. MathWorks, [States](https://www.mathworks.com/help/stateflow/ug/states.html) — named state hierarchy and behavior.
-35. MathWorks, [Control State Execution by Using Events](https://www.mathworks.com/help/stateflow/ug/control-state-execution-by-using-events.html) — event-triggered state transitions.
-36. MathWorks, [Create Dynamic Mask Dialog Boxes](https://www.mathworks.com/help/simulink/ug/create-dynamic-mask-dialog-boxes.html) — dynamic mask authoring, deliberately excluded.
-37. Epic Games, [Add Pin Interface](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Editor/BlueprintGraph/IK2Node_AddPinInterface?lang=en-US) — authoring-side pin addition, used as contrast for a read-only Python variadic summary.
+37. MathWorks, [Switch](https://www.mathworks.com/help/simulink/slref/switch.html) — conditional value selection.
+38. MathWorks, [Model Reference Function-Call](https://www.mathworks.com/help/simulink/slref/model-reference-function-call.html) — dash-dot function-call controls; E1/E2 periodic and E3 interrupt-driven in the captured example.
+39. MathWorks, [Function-Call Generator](https://www.mathworks.com/help/simulink/slref/functioncallgenerator.html) — function-call source.
+40. MathWorks, [Signal Types](https://www.mathworks.com/help/simulink/ug/signal-types.html) — signal/control semantics.
+41. MathWorks, [If](https://www.mathworks.com/help/simulink/slref/if.html) — conditional subsystem activation.
+42. MathWorks, [Subsystem](https://www.mathworks.com/help/simulink/slref/subsystem.html) — subsystem presentation.
+43. MathWorks, [Connect Subsystems](https://www.mathworks.com/help/simulink/ug/connect-subsystems.html) — interface/port connection context.
+44. MathWorks, [Simulink Editor](https://www.mathworks.com/help/simulink/slref/simulinkeditor.html) — editor menus, navigation, and toolstrip context.
+45. MathWorks, [Keyword Search for Actions](https://www.mathworks.com/help/simulink/ug/keyword-search-for-actions.html) — action search.
+46. MathWorks, [Library Browser](https://www.mathworks.com/help/simulink/slref/librarybrowser.html) — authoring library catalog, used as contrast.
+47. MathWorks, [Property Inspector](https://www.mathworks.com/help/simulink/slref/propertyinspector.html) — selection-following property UI.
+48. MathWorks, [Diagnostic Viewer](https://www.mathworks.com/help/simulink/slref/diagnosticviewer.html) — diagnostics surface.
+49. MathWorks, [Collaborate by Adding Comments to Blocks](https://www.mathworks.com/help/simulink/ug/collaborate-by-adding-comments-to-blocks.html) — attached comments.
+50. MathWorks, [Model Browser](https://www.mathworks.com/help/simulink/ug/model-browser.html) — hierarchy navigation.
+51. MathWorks, [Finder](https://www.mathworks.com/help/simulink/slref/finder.html) — semantic search/find interface.
+52. MathWorks, [Bookmark Your Place in Models](https://www.mathworks.com/help/simulink/ug/bookmark-your-place-in-models.html) — saved viewmarks.
+53. MathWorks, [Component Interface View](https://www.mathworks.com/help/simulink/slref/componentinterfaceview.html) — compact component boundary lens.
+54. MathWorks, [Signal Hierarchy Viewer](https://www.mathworks.com/help/simulink/slref/signalhierarchyviewer.html) — structured signal member inspection and trace.
+55. MathWorks, [Create a Simple Model](https://www.mathworks.com/help/simulink/gs/create-a-simple-model.html) — run/pause/stop editor controls.
+56. MathWorks, [Breakpoints List](https://www.mathworks.com/help/simulink/slref/breakpointslist.html) — debug/breakpoint surface.
+57. MathWorks, [Simulink Data Inspector](https://www.mathworks.com/help/simulink/ug/signal-logging-and-data-inspector.html) — recorded signal/value inspection.
+58. MathWorks, [Bus Selector](https://www.mathworks.com/help/simulink/slref/busselector.html) — selected named bus members.
+59. MathWorks, [Bus Assignment](https://www.mathworks.com/help/simulink/slref/busassignment.html) — selective bus-member update.
+60. MathWorks, [Unit Delay](https://www.mathworks.com/help/simulink/slref/unitdelay.html) — prior-iteration/delay precedent.
+61. MathWorks, [Understand Model Comparison Results](https://www.mathworks.com/help/simulink/ug/understand-model-comparison-results.html) — compare-state and inline-difference navigation precedent.
+62. MathWorks, [Model Data Editor](https://www.mathworks.com/help/simulink/slref/modeldataeditor.html) — filterable model-wide data table.
+63. NI, [Icon and Connector Panes](https://www.ni.com/en/support/downloads/instrument-drivers/tools-resources/instrument-driver-guidelines/icon-and-connector-panes.html) — aligned connector-pane boundary.
+64. Epic Games, [Make Select](https://dev.epicgames.com/documentation/en-us/unreal-engine/BlueprintAPI/Utilities/Struct/MakeSelect) — Condition, If True, and If False value-selection contract; the page has no graph screenshot.
+65. NI, [Event Structure](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/structures/event-structure.html) — event-case and timeout handling.
+66. Epic Games, [Cast To GameInstance](https://dev.epicgames.com/documentation/en-us/unreal-engine/BlueprintAPI/Utilities/Casting/CastToGameInstance) — typed success and Cast Failed outputs.
+67. Epic Games, [Binding and Unbinding Events](https://dev.epicgames.com/documentation/en-us/unreal-engine/binding-and-unbinding-events-in-unreal-engine?lang=en-US) — dispatcher registration mechanics used as an exclusion boundary.
+68. Epic Games, [IK2Node Add Pin Interface](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Editor/BlueprintGraph/IK2Node_AddPinInterface?lang=en-US) — authoring-time Add Pin contract.
+69. MathWorks, [Trigger](https://www.mathworks.com/help/simulink/slref/trigger.html) — trigger-port semantics.
+70. MathWorks, [Function Caller](https://www.mathworks.com/help/simulink/slref/functioncaller.html) — callable-function control interface.
+71. MathWorks, [Stateflow States](https://www.mathworks.com/help/stateflow/ug/states.html) — explicit state-chart semantics.
+72. MathWorks, [Control State Execution by Using Events](https://www.mathworks.com/help/stateflow/ug/control-state-execution-by-using-events.html) — Stateflow event semantics.
+73. MathWorks, [Create Dynamic Mask Dialog Boxes](https://www.mathworks.com/help/simulink/ug/create-dynamic-mask-dialog-boxes.html) — authorable parameter-dialog logic.
+74. MathWorks, [MATLAB Function](https://www.mathworks.com/help/simulink/slref/matlabfunction.html) — text function embedded in a model.
+75. Epic Games, [Blueprint Macros](https://dev.epicgames.com/documentation/en-us/unreal-engine/macros-in-unreal-engine) — reusable graph-authoring surface.
+76. MathWorks, [History Junctions](https://www.mathworks.com/help/stateflow/ug/history-junctions.html) — state-history restoration.
+77. MathWorks, [Variant Manager](https://www.mathworks.com/help/simulink/gui/variant-manager-overview.html) — authorable variant activation and configuration.
+78. MathWorks, [Type Editor](https://www.mathworks.com/help/simulink/slref/typeeditor.html) — GUI-managed type definitions.
+79. Epic Games, [Blueprint Editor Defaults](https://dev.epicgames.com/documentation/unreal-engine/blueprint-editor-defaults-tab) — class-default authoring surface.
+80. NI, [Execution Page: VI Properties](https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/dialog-boxes/execution-page-vi-properties-dialog-box.html) — VI execution-property authoring.
+81. MathWorks, [Referenced Files Pane](https://www.mathworks.com/help/simulink/slref/referencedfilespane.html) — model/project dependency surface.
+82. MathWorks, [Control Simulation Execution](https://www.mathworks.com/help/simulink/ug/controlling-execution-of-a-simulation.html) — simulation pacing and execution controls.
+83. MathWorks, [Simulation Data Inspector](https://www.mathworks.com/help/simulink/slref/simulationdatainspector.html) — full time-series inspection workbench.
 
 # Research limits
 
-Reference documentation is evidence for each source tool's own model. A proposed
-SystemSketch translation is an inference filtered through Python source authority
-and the current renderer audit; it is not a specification or an implementation
-commitment. Vendor screenshots make the visual claim inspectable, but only a
-future source-level decision can authorize a product change.
+Reference documentation is evidence for each vendor tool's own execution and
+authoring model. Every SystemSketch translation above is an inference filtered
+through Python-source authority and the current renderer audit; it is not a
+product specification or implementation commitment. The vendor captures make a
+visual claim inspectable. Only a later source/analyzer decision can authorise a
+product change.
+
+[1]: https://www.ni.com/docs/en-US/bundle/labview/page/case-structures-executing-a-section-of-code-based-on-input-values.html
+[2]: https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/feedback-node.html
+[3]: https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/unbundle-by-name.html
+[4]: https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/bundle-by-name.html
+[5]: https://www.ni.com/docs/en-US/bundle/labview/page/handling-errors.html
+[6]: https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/functions/select.html
+[7]: https://www.ni.com/docs/en-US/bundle/labview/page/using-wires-to-link-block-diagram-objects.html
+[8]: https://www.ni.com/en/shop/labview/timing-and-synchronization-in-ni-labview.html
+[9]: https://www.ni.com/docs/en-US/bundle/labview/page/setting-required-recommended-and-optional-inputs-and-outputs.html
+[10]: https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/properties-and-methods/vi-server/generic/gobject/node/subvi/viewasicon.html
+[11]: https://www.ni.com/en/support/documentation/supplemental/08/labview-block-diagram-explained.html
+[12]: https://www.ni.com/en/support/documentation/supplemental/08/labview-front-panel-explained.html
+[13]: https://www.ni.com/en/support/documentation/supplemental/08/boost-labview-productivity-with-quick-drop.html
+[14]: https://www.ni.com/en/support/documentation/supplemental/21/driver-and-vi-library-development-guidelines.html
+[15]: https://www.ni.com/en/support/documentation/supplemental/08/best-practices-for-managing-ni-labview-applications-using-the-pr.html
+[16]: https://www.ni.com/en/support/documentation/supplemental/12/debugging-techniques-in-labview.html
+[17]: https://www.ni.com/docs/en-US/bundle/labview/page/keyboard-shortcuts.html
+[18]: https://dev.epicgames.com/documentation/en-us/unreal-engine/struct-variables-in-blueprints?application_version=4.27
+[19]: https://dev.epicgames.com/documentation/en-us/unreal-engine/flow-control-in-unreal-engine
+[20]: https://dev.epicgames.com/documentation/en-us/unreal-engine/functions?application_version=4.27
+[21]: https://dev.epicgames.com/documentation/en-us/unreal-engine/collapsing-graphs-in-unreal-engine
+[22]: https://dev.epicgames.com/documentation/unreal-engine/blueprints-visual-scripting-user-interface-for-blueprint-classes-in-unreal-engine
+[23]: https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-communications-in-unreal-engine
+[24]: https://dev.epicgames.com/documentation/unreal-engine/find-result-panel?application_version=4.27
+[25]: https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-search?application_version=4.27
+[26]: https://dev.epicgames.com/documentation/unreal-engine/palette-in-the-bleprints-visual-scripting-editor-for-unreal-engine?lang=en-US
+[27]: https://dev.epicgames.com/documentation/en-us/unreal-engine/details-panel-in-the-blueprints-visual-scriting-editor-for-unreal-engine
+[28]: https://dev.epicgames.com/documentation/unreal-engine/compiler-results?application_version=4.27
+[29]: https://dev.epicgames.com/documentation/unreal-engine/my-blueprint-panel-in-the-blueprints-visual-scripting-editor-for-unreal-engine?lang=en-US
+[30]: https://dev.epicgames.com/documentation/en-us/unreal-engine/graph-editor-for-the-blueprints-visual-scripting-editor-in-unreal-engine
+[31]: https://dev.epicgames.com/documentation/en-us/unreal-engine/comments-in-unreal-engine?lang=en-US
+[32]: https://dev.epicgames.com/documentation/en-us/unreal-engine/working-with-bookmarks-for-blueprint-graphs-in-unreal-engine
+[33]: https://dev.epicgames.com/documentation/en-us/unreal-engine/toolbar-in-the-blueprints-visual-scripting-editor-for-unreal-engine
+[34]: https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-debugger-in-unreal-engine
+[35]: https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-debugging-example-in-unreal-engine
+[36]: https://dev.epicgames.com/documentation/unreal-engine/menu-for-the-blueprints-visual-scripting-editor-in-unreal-engine?lang=en-US
+[37]: https://www.mathworks.com/help/simulink/slref/switch.html
+[38]: https://www.mathworks.com/help/simulink/slref/model-reference-function-call.html
+[39]: https://www.mathworks.com/help/simulink/slref/functioncallgenerator.html
+[40]: https://www.mathworks.com/help/simulink/ug/signal-types.html
+[41]: https://www.mathworks.com/help/simulink/slref/if.html
+[42]: https://www.mathworks.com/help/simulink/slref/subsystem.html
+[43]: https://www.mathworks.com/help/simulink/ug/connect-subsystems.html
+[44]: https://www.mathworks.com/help/simulink/slref/simulinkeditor.html
+[45]: https://www.mathworks.com/help/simulink/ug/keyword-search-for-actions.html
+[46]: https://www.mathworks.com/help/simulink/slref/librarybrowser.html
+[47]: https://www.mathworks.com/help/simulink/slref/propertyinspector.html
+[48]: https://www.mathworks.com/help/simulink/slref/diagnosticviewer.html
+[49]: https://www.mathworks.com/help/simulink/ug/collaborate-by-adding-comments-to-blocks.html
+[50]: https://www.mathworks.com/help/simulink/ug/model-browser.html
+[51]: https://www.mathworks.com/help/simulink/slref/finder.html
+[52]: https://www.mathworks.com/help/simulink/ug/bookmark-your-place-in-models.html
+[53]: https://www.mathworks.com/help/simulink/slref/componentinterfaceview.html
+[54]: https://www.mathworks.com/help/simulink/slref/signalhierarchyviewer.html
+[55]: https://www.mathworks.com/help/simulink/gs/create-a-simple-model.html
+[56]: https://www.mathworks.com/help/simulink/slref/breakpointslist.html
+[57]: https://www.mathworks.com/help/simulink/ug/signal-logging-and-data-inspector.html
+[58]: https://www.mathworks.com/help/simulink/slref/busselector.html
+[59]: https://www.mathworks.com/help/simulink/slref/busassignment.html
+[60]: https://www.mathworks.com/help/simulink/slref/unitdelay.html
+[61]: https://www.mathworks.com/help/simulink/ug/understand-model-comparison-results.html
+[62]: https://www.mathworks.com/help/simulink/slref/modeldataeditor.html
+[63]: https://www.ni.com/en/support/downloads/instrument-drivers/tools-resources/instrument-driver-guidelines/icon-and-connector-panes.html
+[64]: https://dev.epicgames.com/documentation/en-us/unreal-engine/BlueprintAPI/Utilities/Struct/MakeSelect
+[65]: https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/structures/event-structure.html
+[66]: https://dev.epicgames.com/documentation/en-us/unreal-engine/BlueprintAPI/Utilities/Casting/CastToGameInstance
+[67]: https://dev.epicgames.com/documentation/en-us/unreal-engine/binding-and-unbinding-events-in-unreal-engine?lang=en-US
+[68]: https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Editor/BlueprintGraph/IK2Node_AddPinInterface?lang=en-US
+[69]: https://www.mathworks.com/help/simulink/slref/trigger.html
+[70]: https://www.mathworks.com/help/simulink/slref/functioncaller.html
+[71]: https://www.mathworks.com/help/stateflow/ug/states.html
+[72]: https://www.mathworks.com/help/stateflow/ug/control-state-execution-by-using-events.html
+[73]: https://www.mathworks.com/help/simulink/ug/create-dynamic-mask-dialog-boxes.html
+[74]: https://www.mathworks.com/help/simulink/slref/matlabfunction.html
+[75]: https://dev.epicgames.com/documentation/en-us/unreal-engine/macros-in-unreal-engine
+[76]: https://www.mathworks.com/help/stateflow/ug/history-junctions.html
+[77]: https://www.mathworks.com/help/simulink/gui/variant-manager-overview.html
+[78]: https://www.mathworks.com/help/simulink/slref/typeeditor.html
+[79]: https://dev.epicgames.com/documentation/unreal-engine/blueprint-editor-defaults-tab
+[80]: https://www.ni.com/docs/en-US/bundle/labview-api-ref/page/dialog-boxes/execution-page-vi-properties-dialog-box.html
+[81]: https://www.mathworks.com/help/simulink/slref/referencedfilespane.html
+[82]: https://www.mathworks.com/help/simulink/ug/controlling-execution-of-a-simulation.html
+[83]: https://www.mathworks.com/help/simulink/slref/simulationdatainspector.html

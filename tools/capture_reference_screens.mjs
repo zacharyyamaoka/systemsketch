@@ -157,9 +157,15 @@ const GAP_ANALYSIS_SOURCES = [
   },
   {
     name: 'gap-simulink-function-call-2026-09-03',
-    label: 'Simulink function-call event',
-    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/trigger.html',
+    label: 'Simulink Model Reference function-call control events',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/model-reference-function-call.html',
     imageUrl: 'https://www.mathworks.com/help/examples/simulink_features/win64/ModelReferenceFunctionCallExample_01.png',
+  },
+  {
+    name: 'gap-labview-timed-loop-2026-09-04',
+    label: 'LabVIEW Timed Loop with explicit timing terminals',
+    sourceDocument: 'https://www.ni.com/en/shop/labview/timing-and-synchronization-in-ni-labview.html',
+    imageUrl: 'https://ni.scene7.com/is/image/ni/TimedLoop?scl=1',
   },
   {
     name: 'gap-labview-event-structure-2026-09-03',
@@ -187,9 +193,9 @@ const GAP_ANALYSIS_SOURCES = [
   },
   {
     name: 'gap-labview-connector-contract-2026-09-03',
-    label: 'LabVIEW connector pane terminal categories',
-    sourceDocument: 'https://www.ni.com/docs/en-US/bundle/labview/page/setting-required-recommended-and-optional-inputs-and-outputs.html',
-    imageUrl: 'https://knowledge.ni.com/servlet/rtaImage?eid=ka0VU000000MjGD&feoid=00N3q00000HUsuI&refid=0EMVU00000LBXz3',
+    label: 'LabVIEW aligned connector-pane interface wiring',
+    sourceDocument: 'https://www.ni.com/en/support/downloads/instrument-drivers/tools-resources/instrument-driver-guidelines/icon-and-connector-panes.html',
+    imageUrl: 'https://ni.scene7.com/is/image/ni/icon_good_aligned_wiring_between_225x54?scl=1',
   },
   {
     name: 'gap-blueprint-function-call-2026-09-03',
@@ -237,6 +243,186 @@ const GAP_ANALYSIS_SOURCES = [
     label: 'Simulink dynamic mask dialog',
     sourceDocument: 'https://www.mathworks.com/help/simulink/ug/create-dynamic-mask-dialog-boxes.html',
     imageUrl: 'https://www.mathworks.com/help/examples/simulink_masking/win64/DynamicMaskDialogBoxExample_01.png',
+  },
+  {
+    name: 'gap-ui-labview-toolbar-2026-09-04',
+    label: 'LabVIEW block-diagram toolbar with run and debugging controls',
+    sourceDocument: 'https://www.ni.com/en/support/documentation/supplemental/08/labview-block-diagram-explained.html',
+    imageUrl: 'https://ni.scene7.com/is/image/ni/block-diagram-bar?scl=1',
+    // Keep the run/debug cluster readable in the report instead of shrinking
+    // the complete 33:1 toolbar down to a decorative hairline.
+    captureWidth: 350,
+  },
+  {
+    name: 'gap-ui-labview-context-help-2026-09-04',
+    label: 'LabVIEW Context Help window for a selected VI',
+    sourceDocument: 'https://www.ni.com/en/support/documentation/supplemental/21/driver-and-vi-library-development-guidelines.html',
+    imageUrl: 'https://ni.scene7.com/is/image/ni/fig-2-Context-Help-6395?scl=1',
+  },
+  {
+    name: 'gap-ui-labview-project-explorer-2026-09-04',
+    label: 'LabVIEW Project Explorer hierarchy',
+    sourceDocument: 'https://www.ni.com/en/support/documentation/supplemental/08/best-practices-for-managing-ni-labview-applications-using-the-pr.html',
+    imageUrl: 'https://ni.scene7.com/is/image/ni/proj?scl=1',
+  },
+  {
+    name: 'gap-ui-labview-error-list-2026-09-04',
+    label: 'LabVIEW Error List diagnostics window',
+    sourceDocument: 'https://www.ni.com/en/support/documentation/supplemental/12/debugging-techniques-in-labview.html',
+    imageUrl: 'https://ni.scene7.com/is/image/ni/Error%20List%20Dialog%20Box?scl=1',
+  },
+  {
+    name: 'gap-ui-labview-debug-window-2026-09-04',
+    label: 'LabVIEW Debug Window with probes and breakpoints',
+    sourceDocument: 'https://www.ni.com/en/support/documentation/supplemental/12/debugging-techniques-in-labview.html',
+    imageUrl: 'https://ni.scene7.com/is/image/ni/Debug_Window_ss?scl=1',
+  },
+  {
+    name: 'gap-ui-labview-probe-watch-2026-09-04',
+    label: 'LabVIEW Probe Watch window',
+    sourceDocument: 'https://www.ni.com/en/support/documentation/supplemental/12/debugging-techniques-in-labview.html',
+    imageUrl: 'https://ni.scene7.com/is/image/ni/Probe%20Watch%20Window?scl=1',
+  },
+  {
+    name: 'gap-ui-labview-quick-drop-2026-09-04',
+    label: 'LabVIEW Quick Drop command search',
+    sourceDocument: 'https://www.ni.com/en/support/documentation/supplemental/08/boost-labview-productivity-with-quick-drop.html',
+    imageUrl: 'https://ni.scene7.com/is/image/ni/fig%203%20quick%20drop%20search?scl=1',
+  },
+  {
+    name: 'gap-ui-blueprint-toolbar-2026-09-04',
+    label: 'Blueprint Editor toolbar with compile, search, play, and debug target controls',
+    sourceDocument: 'https://dev.epicgames.com/documentation/en-us/unreal-engine/toolbar-in-the-blueprints-visual-scripting-editor-for-unreal-engine',
+    imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/1eb2fd31-cd4e-490e-a505-f2841a144e32/toolbarbp.png',
+  },
+  {
+    name: 'gap-ui-blueprint-find-results-2026-09-04',
+    label: 'Blueprint semantic Find Results panel',
+    sourceDocument: 'https://dev.epicgames.com/documentation/unreal-engine/find-result-panel?application_version=4.27',
+    imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/9f3e32c3-ef14-4967-b81f-2d3bfdb1222d/findresults.png',
+  },
+  {
+    name: 'gap-ui-blueprint-my-blueprint-2026-09-04',
+    label: 'My Blueprint semantic outline panel',
+    sourceDocument: 'https://dev.epicgames.com/documentation/unreal-engine/my-blueprint-panel-in-the-blueprints-visual-scripting-editor-for-unreal-engine?lang=en-US',
+    imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/671e9734-93a1-4af0-9e47-fd06ffdb9cb0/myblueprintpane.png',
+  },
+  {
+    name: 'gap-ui-blueprint-graph-editor-2026-09-04',
+    label: 'Blueprint Graph Editor tabs, history, and breadcrumbs',
+    sourceDocument: 'https://dev.epicgames.com/documentation/en-us/unreal-engine/graph-editor-for-the-blueprints-visual-scripting-editor-in-unreal-engine',
+    imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/21cc21c0-522c-48da-943d-d48385cca894/grapheditor.png',
+  },
+  {
+    name: 'gap-ui-blueprint-details-2026-09-04',
+    label: 'Blueprint context-sensitive Details panel',
+    sourceDocument: 'https://dev.epicgames.com/documentation/en-us/unreal-engine/details-panel-in-the-blueprints-visual-scriting-editor-for-unreal-engine',
+    imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/789bcfe1-9faa-49d9-9603-6ba57afa681e/blueprintdetails2.png',
+  },
+  {
+    name: 'gap-ui-blueprint-compiler-results-2026-09-04',
+    label: 'Blueprint Compiler Results with jump-to-source messages',
+    sourceDocument: 'https://dev.epicgames.com/documentation/unreal-engine/compiler-results?application_version=4.27',
+    imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/c8c2c371-5aa5-49b9-8e41-45589c87f54b/compileresultsui.png',
+  },
+  {
+    name: 'gap-ui-blueprint-bookmarks-2026-09-04',
+    label: 'Blueprint graph bookmark menu',
+    sourceDocument: 'https://dev.epicgames.com/documentation/en-us/unreal-engine/working-with-bookmarks-for-blueprint-graphs-in-unreal-engine',
+    imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/90849468-0ffe-4057-bb9c-237387fa151b/blueprintbookmarks_using_02.png',
+  },
+  {
+    name: 'gap-ui-blueprint-debugger-2026-09-04',
+    label: 'Blueprint Debugger with trace and breakpoint surfaces',
+    sourceDocument: 'https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-debugger-in-unreal-engine',
+    imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/0054e46c-a09a-405a-aade-5eb5086583b5/blueprint_debugger.png',
+  },
+  {
+    name: 'gap-ui-blueprint-watch-2026-09-04',
+    label: 'Blueprint watched pin value',
+    sourceDocument: 'https://dev.epicgames.com/documentation/en-us/unreal-engine/blueprint-debugger-in-unreal-engine',
+    imageUrl: 'https://d1iv7db44yhgxn.cloudfront.net/documentation/images/0c4529bc-765c-4137-afd7-1a85a655ca46/watchpin.png',
+  },
+  {
+    name: 'gap-ui-simulink-editor-2026-09-04',
+    label: 'Simulink Editor application chrome',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/simulinkeditor.html',
+    imageUrl: 'https://www.mathworks.com/help/simulink/slref/tool_simulink_editor.png',
+  },
+  {
+    name: 'gap-ui-simulink-toolstrip-2026-09-04',
+    label: 'Simulink workflow toolstrip tabs',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/simulinkeditor.html',
+    imageUrl: 'https://www.mathworks.com/help/simulink/slref/19b_simulink_toolstrip.png',
+  },
+  {
+    name: 'gap-ui-simulink-run-controls-2026-09-04',
+    label: 'Simulink Simulation tab and stop-time control',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/gs/create-a-simple-model.html',
+    imageUrl: 'https://www.mathworks.com/help/simulink/gs/toolbar_stoptime.png',
+  },
+  {
+    name: 'gap-ui-simulink-property-inspector-2026-09-04',
+    label: 'Simulink selection-following Property Inspector',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/propertyinspector.html',
+    imageUrl: 'https://www.mathworks.com/help/simulink/slref/property_inspector.png',
+  },
+  {
+    name: 'gap-ui-simulink-model-browser-2026-09-04',
+    label: 'Simulink Model Browser hierarchy pane',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/simulinkeditor.html',
+    imageUrl: 'https://www.mathworks.com/help/simulink/slref/model_browser.png',
+    // The published asset includes a tall empty dock below the hierarchy.
+    // Crop only that empty tail; preserve the complete visible tree and tools.
+    captureHeight: 180,
+  },
+  {
+    name: 'gap-ui-simulink-diagnostic-viewer-2026-09-04',
+    label: 'Simulink Diagnostic Viewer',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/diagnosticviewer.html',
+    imageUrl: 'https://www.mathworks.com/help/simulink/slref/diagnostic-viewer.png',
+  },
+  {
+    name: 'gap-ui-simulink-data-inspector-2026-09-04',
+    label: 'Simulink Simulation Data Inspector',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/gs/create-a-simple-model.html',
+    imageUrl: 'https://www.mathworks.com/help/simulink/gs/sdi_car_position.png',
+  },
+  {
+    name: 'gap-ui-simulink-viewmarks-2026-09-04',
+    label: 'Simulink Viewmark Manager',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/ug/bookmark-your-place-in-models.html',
+    imageUrl: 'https://www.mathworks.com/help/simulink/ug/viewmark_manager.png',
+  },
+  {
+    name: 'gap-ui-simulink-component-interface-2026-09-04',
+    label: 'Simulink Component Interface View',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/componentinterfaceview.html',
+    imageUrl: 'https://www.mathworks.com/help/simulink/slref/interface-view.png',
+  },
+  {
+    name: 'gap-ui-simulink-signal-hierarchy-2026-09-04',
+    label: 'Simulink Signal Hierarchy Viewer',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/signalhierarchyviewer.html',
+    imageUrl: 'https://www.mathworks.com/help/simulink/slref/signal_hierarchy_viewer_dialog.png',
+  },
+  {
+    name: 'gap-ui-simulink-finder-2026-09-04',
+    label: 'Simulink Finder structured results',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/finder.html',
+    imageUrl: 'https://www.mathworks.com/help/simulink/slref/tool_finder.png',
+  },
+  {
+    name: 'gap-ui-simulink-model-data-editor-2026-09-04',
+    label: 'Simulink Model Data Editor with column filtering',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/modeldataeditor.html',
+    imageUrl: 'https://www.mathworks.com/help/simulink/slref/mde_column_filter.png',
+  },
+  {
+    name: 'gap-ui-simulink-breakpoints-2026-09-04',
+    label: 'Simulink and Stateflow Breakpoints List',
+    sourceDocument: 'https://www.mathworks.com/help/simulink/slref/breakpointslist.html',
+    imageUrl: 'https://www.mathworks.com/help/simulink/slref/breakpoints-list-debug-simulink-stateflow.png',
   },
 ]
 
@@ -286,7 +472,12 @@ async function captureGapSource(page, entry) {
   await page.send('Page.navigate', { url: isSameOriginCapture ? entry.sourceDocument : sourceImagePage(entry) })
   const box = await loadedImageBox(page, entry.label, entry.documentImageSelector)
   if (entry.settle) await delay(entry.settle)
-  const shot = await shoot(page, entry.name, box)
+  const clip = {
+    ...box,
+    width: Math.min(entry.captureWidth ?? box.width, box.width),
+    height: Math.min(entry.captureHeight ?? box.height, box.height),
+  }
+  const shot = await shoot(page, entry.name, clip)
   return {
     file: `${entry.name}.png`,
     bytes: shot.bytes,
@@ -299,8 +490,8 @@ async function captureGapSource(page, entry) {
     image: {
       naturalWidth: box.naturalWidth,
       naturalHeight: box.naturalHeight,
-      capturedWidth: box.width,
-      capturedHeight: box.height,
+      capturedWidth: clip.width,
+      capturedHeight: clip.height,
     },
     status: 'captured',
   }
