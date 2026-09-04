@@ -151,7 +151,11 @@ export function stockBlockSourceProjection(props: BlockShapeProps): string | nul
 	if (isSetAttributesBlock(props)) {
 		const members = setAttributesMemberPorts(props)
 		const updates = members.map((port) => `${port.name.trim().replace(/^\./, '') || 'field'}=…`).join(', ')
-		return `replace(record, ${updates || 'field=…'})`
+		// WHY: Zach calls this primitive a batched `setattr`, while the still-open
+		// value-vs-reference decision must not be silently answered by spelling it
+		// as `dataclasses.replace`. Keep the preview faithful to the authored node
+		// vocabulary until a source adapter can choose concrete Python semantics.
+		return `setattr(record, ${updates || 'field=…'})`
 	}
 	return null
 }

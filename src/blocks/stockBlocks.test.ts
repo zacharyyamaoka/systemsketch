@@ -32,7 +32,7 @@ describe('stock semantic Blocks', () => {
 			['member_1', '.quota'],
 			['member_2', '.field'],
 		])
-		expect(stockBlockSourceProjection(twice)).toBe('replace(record, quota=…, field=…)')
+		expect(stockBlockSourceProjection(twice)).toBe('setattr(record, quota=…, field=…)')
 	})
 
 	it('creates a true value Select rather than a Branch', () => {
