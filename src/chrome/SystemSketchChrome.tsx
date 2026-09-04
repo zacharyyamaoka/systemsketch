@@ -46,6 +46,7 @@ import {
 } from '../branch'
 import { EditorLoopInspector, getOnlySelectedLoop } from '../loop'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
+import { PropagationFocusControls, PropagationFocusDomLens, propagationSeedFromSelection } from '../propagation'
 import { PortableShareButton } from '../export/PortableShareButton'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
 import { BoardOverview } from './BoardOverview'
@@ -325,6 +326,11 @@ function SelectionMiniMenu() {
     () => canWrapSelection(editor),
     [editor],
   )
+  const propagationSeed = useValue(
+    'systemsketch propagation focus seed',
+    () => propagationSeedFromSelection(editor),
+    [editor],
+  )
   const runTidyEdges = () => {
     const outcome = tidyEdges(editor)
     addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
@@ -337,6 +343,7 @@ function SelectionMiniMenu() {
     || hasBlockMiniMenu
     || hasAppearance
     || canWrap
+    || propagationSeed !== null
     || layoutActions.tidyEdges
     || layoutActions.organizeNodes
   if (!canShow || !hasVisibleActions) return null
@@ -372,6 +379,7 @@ function SelectionMiniMenu() {
             onTidyEdges={runTidyEdges}
             onOrganizeNodes={() => void runOrganizeNodes()}
           />
+          <PropagationFocusControls />
         </>
       ) : (
         <>
@@ -386,6 +394,7 @@ function SelectionMiniMenu() {
             onTidyEdges={runTidyEdges}
             onOrganizeNodes={() => void runOrganizeNodes()}
           />
+          <PropagationFocusControls />
         </>
       )}
     </SelectionContextualMenu>
@@ -668,6 +677,7 @@ export function SystemSketchSurfaceHost() {
 
   return (
     <div className="systemsketch-surface-host" data-testid="systemsketch-surface-host">
+      <PropagationFocusDomLens />
       <RecorderIndicator />
       <TunnelLayerBar />
       <OnCanvasBlockPicker />

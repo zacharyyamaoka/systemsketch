@@ -1,0 +1,57 @@
+/* A presentation-only lens: class/attribute changes leave document records alone. */
+.tl-container[data-propagation-focus-active] [data-shape-id]:not([data-propagation-focus='included']) {
+  /* tldraw paints each host's saved opacity inline. This transient lens must
+     win only while its parent attribute exists, never write that saved prop. */
+  opacity: .17 !important;
+  transition: opacity 120ms ease-out;
+}
+
+.tl-container[data-propagation-focus-active] [data-shape-id][data-propagation-focus='included'] {
+  opacity: 1 !important;
+  transition: opacity 120ms ease-out;
+}
+
+.systemsketch-propagation-focus {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 5px;
+  border-left: 1px solid color-mix(in srgb, var(--ss-text-inverse) 22%, transparent);
+}
+
+.systemsketch-propagation-focus button,
+.systemsketch-propagation-focus input {
+  min-height: 24px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--ss-text-inverse);
+  background: transparent;
+}
+
+.systemsketch-propagation-focus button {
+  padding: 3px 6px;
+  cursor: pointer;
+}
+
+.systemsketch-propagation-focus button:hover {
+  background: color-mix(in srgb, var(--ss-text-inverse) 15%, transparent);
+}
+
+.systemsketch-propagation-focus label {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.systemsketch-propagation-focus input {
+  width: 28px;
+  padding: 0 2px;
+  text-align: center;
+  background: color-mix(in srgb, var(--ss-text-inverse) 14%, transparent);
+}
+
+.systemsketch-propagation-focus__label {
+  color: color-mix(in srgb, var(--ss-text-inverse) 75%, transparent);
+  font-size: 10px;
+}

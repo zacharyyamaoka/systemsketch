@@ -20,6 +20,7 @@
     "test:release-ui": "node tests/release_channel_controls_smoke.mjs",
     "test:promotion-handoff": "node tests/promoted_workspace_restore_smoke.mjs",
     "test:selection-menu": "node tests/selection_menu_smoke.mjs",
+    "test:propagation-focus": "node tests/propagation_focus_smoke.mjs",
     "test:selection-count": "node tests/selection_count_removal_smoke.mjs",
     "test:appearance": "node tests/appearance_menu_smoke.mjs",
     "test:arrows": "node tests/arrow_drawing_smoke.mjs",
