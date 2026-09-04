@@ -140,9 +140,11 @@ function relationStoreFor(editor: Editor): PropagationRelationStore | null {
     pageShapeReads: 0,
     publishes: 0,
   }
-  // One document-index pass at attachment time; all later updates are driven
-  // by store diffs and touch only connection records plus their dependencies.
-  for (const record of editor.store.allRecords()) if (isConnectionRecord(record)) connectionIds.add(record.id as TLShapeId)
+  // A typed store query gives this lens only connection records at attachment;
+  // all later updates are driven by diffs and touch only their dependencies.
+  for (const record of editor.store.query.records('shape', () => ({
+    type: { eq: CONNECTION_SHAPE_TYPE },
+  })).get()) connectionIds.add(record.id as TLShapeId)
   for (const id of connectionIds) refreshConnectionWatches(editor, store, id)
   store.stop = editor.store.listen((entry) => {
     const affected = relationChangeMayMatter(entry.changes, store!)
