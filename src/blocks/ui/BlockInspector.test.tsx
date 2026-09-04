@@ -28,6 +28,9 @@ describe('Block inspector content', () => {
 		expect(clock).toContain('data-inspector-section="Clock trigger"')
 		expect(clock).toContain('aria-label="Clock trigger rate in hertz"')
 		expect(clock).toContain('Clock · 10 Hz. This prototype declares intent and does not schedule.')
+		expect(clock).toContain('Clock annotation')
+		expect(clock).toContain('derived Clock source/rate declaration stays visible')
+		expect(clock).not.toContain('Shown at a glance')
 	})
 
   it('renders the donor information architecture without the old selected header or Connections tab', () => {

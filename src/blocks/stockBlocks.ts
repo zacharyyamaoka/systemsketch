@@ -6,6 +6,7 @@ import {
 	type BlockPort,
 	type BlockShapeProps,
 } from './blockModel'
+import type { TLStoreSnapshot } from 'tldraw'
 
 /** Stable discriminants for the small set of curated, source-shaped Blocks. */
 export const SET_ATTRIBUTES_BLOCK_TYPE = 'set-attributes'
@@ -67,12 +68,15 @@ export function createSelectProps(base = getDefaultBlockProps()): BlockShapeProp
 		blockType: SELECT_BLOCK_TYPE,
 		icon: 'GitBranch',
 		inputs: [
-			{ id: 'condition', name: 'condition', type: 'bool', visible: true, row: HEADER_ROW },
-			{ id: 'true_value', name: 'true', type: '', visible: true, row: FIRST_BODY_ROW },
-			{ id: 'false_value', name: 'false', type: '', visible: true, row: FIRST_BODY_ROW + 1 },
+			// A predicate is a first-class value input, not header chrome. Keeping it
+			// in the first body row makes `condition` legible on the canvas and still
+			// leaves the result outlet as ordinary value dataflow.
+			{ id: 'condition', name: 'condition', type: 'bool', visible: true, row: FIRST_BODY_ROW },
+			{ id: 'true_value', name: 'true', type: '', visible: true, row: FIRST_BODY_ROW + 1 },
+			{ id: 'false_value', name: 'false', type: '', visible: true, row: FIRST_BODY_ROW + 2 },
 		],
 		outputs: [
-			{ id: 'result', name: 'result', type: '', visible: true, row: FIRST_BODY_ROW },
+			{ id: 'result', name: 'result', type: '', visible: true, row: FIRST_BODY_ROW + 1 },
 		],
 	}))
 }
@@ -86,7 +90,10 @@ export function createClockTriggerProps(base = getDefaultBlockProps()): BlockSha
 	return withPortView({
 		...base,
 		title: 'Clock',
-		description: 'Clock declaration · does not schedule.',
+		// The semantic declaration below is always painted. `description` is only
+		// the optional author annotation, so an empty annotation cannot hide or
+		// contradict the Clock's source/rate boundary.
+		description: '',
 		blockType: CLOCK_TRIGGER_BLOCK_TYPE,
 		icon: 'Timer',
 		inputs: [],
@@ -121,9 +128,10 @@ export function clockTriggerLabel(config: BlockShapeProps['stockConfig']): strin
  * whiteboard annotation remains hackable while reopening never paints stale Hz.
  */
 export function stockBlockVisibleDescription(props: BlockShapeProps): string {
-	return isClockTriggerBlock(props)
-		? `${clockTriggerLabel(props.stockConfig)} · prototype declares intent; does not schedule.`
-		: props.description
+	if (!isClockTriggerBlock(props)) return props.showDescription ? props.description : ''
+	const declaration = `${clockTriggerLabel(props.stockConfig)} · prototype declares intent; does not schedule.`
+	const annotation = props.showDescription ? props.description.trim() : ''
+	return annotation ? `${declaration}\n${annotation}` : declaration
 }
 
 /** Normalize only the curated contract; ordinary Blocks remain fully literal. */
@@ -131,6 +139,29 @@ export function normalizeStockBlockProps(props: BlockShapeProps): BlockShapeProp
 	if (!isClockTriggerBlock(props)) return props
 	const stockConfig = normalizeClockTriggerConfig(props.stockConfig)
 	return JSON.stringify(stockConfig) === JSON.stringify(props.stockConfig) ? props : { ...props, stockConfig }
+}
+
+/**
+ * Repair a current-schema import before it enters an Editor store.
+ *
+ * Shape migrations only run when their version changes, so a malformed V7
+ * record (for example `rateHz: 0`) would otherwise paint as 10 Hz while
+ * serializing its old fact. This is deliberately a pure snapshot transform:
+ * loading does not enqueue store writes or create a persistence feedback loop.
+ */
+export function normalizeStockBlockSnapshot(snapshot: TLStoreSnapshot): TLStoreSnapshot {
+	let changed = false
+	const store = Object.fromEntries(Object.entries(snapshot.store).map(([id, record]) => {
+		if (!record || typeof record !== 'object') return [id, record]
+		const candidate = record as { type?: unknown; props?: unknown }
+		if (candidate.type !== 'block' || !candidate.props || typeof candidate.props !== 'object') return [id, record]
+		const props = candidate.props as BlockShapeProps
+		const normalized = normalizeStockBlockProps(props)
+		if (normalized === props) return [id, record]
+		changed = true
+		return [id, { ...candidate, props: normalized }]
+	}))
+	return changed ? { ...snapshot, store } as TLStoreSnapshot : snapshot
 }
 
 export function stockBlockPresetProps(

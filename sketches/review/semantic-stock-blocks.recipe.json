@@ -38,9 +38,9 @@
         "w": 340,
         "h": 240,
         "inputs": [
-          { "id": "condition", "name": "condition", "type": "bool", "visible": true, "row": 0 },
-          { "id": "true_value", "name": "true", "type": "str", "visible": true, "row": 1 },
-          { "id": "false_value", "name": "false", "type": "str", "visible": true, "row": 2 }
+          { "id": "condition", "name": "condition", "type": "bool", "visible": true, "row": 1 },
+          { "id": "true_value", "name": "true", "type": "str", "visible": true, "row": 2 },
+          { "id": "false_value", "name": "false", "type": "str", "visible": true, "row": 3 }
         ],
         "outputs": [{ "id": "result", "name": "result", "type": "str", "visible": true, "row": 1 }]
       }
@@ -52,7 +52,7 @@
       "y": 470,
       "props": {
         "title": "Clock",
-        "description": "Clock declaration · does not schedule.",
+        "description": "",
         "blockType": "clock-trigger",
         "icon": "Timer",
         "view": "port",
@@ -79,21 +79,21 @@
     {
       "id": "step-2",
       "kind": "step",
-      "text": "2 · Select Select. Read its three input rows as values plus a bool control, not a Branch region.",
+      "text": "2 · Select Select. Its visible condition bool row and true/false rows are values, not a Branch region.",
       "x": 70,
       "y": 670,
       "w": 420,
-      "h": 150,
+      "h": 180,
       "target": { "shapeId": "select", "anchor": "left", "dy": 25 }
     },
     {
       "id": "step-3",
       "kind": "step",
-      "text": "3 · Select Clock. Change source or rate; its label must follow Clock 10 Hz, External trigger, or Manual trigger. It does not schedule.",
+      "text": "3 · Select Clock. Its derived source/rate declaration stays visible even with no annotation: Clock · 10 Hz, External trigger, or Manual trigger. It does not schedule.",
       "x": 1080,
       "y": 110,
       "w": 440,
-      "h": 150,
+      "h": 180,
       "target": { "shapeId": "clock", "anchor": "top", "dx": 90 }
     },
     {

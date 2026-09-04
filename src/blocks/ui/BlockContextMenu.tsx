@@ -63,6 +63,7 @@ import {
   setConnectionRoutingForSelection,
   setConnectionTemporalForSelection,
 } from '../commands/blockStyleCommands'
+import { isClockTriggerBlock } from '../stockBlocks'
 import {
   CONNECTION_ROUTING_KINDS,
   CONNECTION_TEMPORAL_KINDS,
@@ -462,7 +463,7 @@ function BlockContextMenuItems() {
               {selectedBlock.props.description.trim() === '' ? (
                 <TldrawUiMenuItem
                   id="block-add-description"
-                  label="Description…"
+                  label={isClockTriggerBlock(selectedBlock.props) ? 'Clock annotation…' : 'Description…'}
                   onSelect={() => editField({ kind: 'description' }, { showDescription: true })}
                 />
               ) : null}

@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
+import { renderToStaticMarkup } from 'react-dom/server'
+import type { Editor } from 'tldraw'
 
-import { getDefaultBlockProps } from './blockModel'
+import { BLOCK_SHAPE_TYPE, getDefaultBlockProps, type BlockShape } from './blockModel'
+import { BlockShapeUtil } from './BlockShapeUtil'
+import { layoutBlock } from './layoutBlock'
 import {
 	appendSetAttributesMemberProps,
 	clockTriggerLabel,
@@ -46,6 +50,9 @@ describe('stock semantic Blocks', () => {
 			['true_value', 'true', ''],
 			['false_value', 'false', ''],
 		])
+		// `normalizeBlockPortRows` leaves the first body row implicit, but the
+		// layout must give that predicate a legible row label rather than header-only chrome.
+		expect(layoutBlock(props).ports.find((port) => port.port.id === 'condition')?.label).not.toBeNull()
 		expect(props.outputs).toEqual([expect.objectContaining({ id: 'result' })])
 		expect(props.outputs[0].effect).not.toBe(true)
 		expect(stockBlockSourceProjection(props)).toBe('true_value if condition else false_value')
@@ -75,5 +82,24 @@ describe('stock semantic Blocks', () => {
 		expect(clockTriggerLabel({ triggerSource: 'manual', rateHz: 24 })).toBe('Manual trigger')
 		expect(stockBlockVisibleDescription({ ...createClockTriggerProps(), description: '10 Hz authoring source', stockConfig: { triggerSource: 'clock', rateHz: -3 } }))
 			.toContain('Clock · 10 Hz')
+	})
+
+	it('keeps the derived Clock boundary visible and only appends a displayed annotation', () => {
+		const base = createClockTriggerProps()
+		expect(stockBlockVisibleDescription({ ...base, showDescription: false, description: 'hidden note' }))
+			.toBe('Clock · 10 Hz · prototype declares intent; does not schedule.')
+		expect(stockBlockVisibleDescription({ ...base, showDescription: true, description: 'author note' }))
+			.toBe('Clock · 10 Hz · prototype declares intent; does not schedule.\nauthor note')
+	})
+
+	it('exports the same Clock declaration that the live canvas and detached primitives read', () => {
+		const props = { ...createClockTriggerProps(), showDescription: true, description: 'author note' }
+		const shape = {
+			id: 'shape:clock-export', typeName: 'shape', type: BLOCK_SHAPE_TYPE,
+			x: 0, y: 0, rotation: 0, index: 'a1', parentId: 'page:page', isLocked: false, opacity: 1, meta: {}, props,
+		} as BlockShape
+		const svg = renderToStaticMarkup(new BlockShapeUtil(null as unknown as Editor).toSvg(shape))
+		expect(svg).toContain('Clock · 10 Hz · prototype declares intent; does not schedule.')
+		expect(svg).toContain('author note')
 	})
 })

@@ -301,12 +301,14 @@ function NotesEditor({
 function DescriptionEditor({
   value,
   visible,
+  clockAnnotation = false,
   disabled,
   actions,
   onToggle,
 }: {
   value: string
   visible: boolean
+  clockAnnotation?: boolean
   disabled: boolean
   actions?: BlockInspectorActions
   onToggle(): void
@@ -324,7 +326,7 @@ function DescriptionEditor({
   return (
     <div className="block-inspector__display-description">
       <div className="block-inspector__field-header">
-        <label htmlFor={descriptionId}>Display description</label>
+        <label htmlFor={descriptionId}>{clockAnnotation ? 'Clock annotation' : 'Display description'}</label>
         <span
           className="block-inspector__character-count"
           data-over-limit={draft.length > DISPLAY_DESCRIPTION_LIMIT || undefined}
@@ -336,7 +338,7 @@ function DescriptionEditor({
           className="block-inspector__visibility-button"
           disabled={disabled}
           aria-pressed={visible}
-          aria-label={`${visible ? 'Hide' : 'Show'} display description on block`}
+          aria-label={`${visible ? 'Hide' : 'Show'} ${clockAnnotation ? 'Clock annotation' : 'display description'} on block`}
           title={`${visible ? 'Hide' : 'Show'} on block`}
           onClick={onToggle}
         >
@@ -352,7 +354,9 @@ function DescriptionEditor({
         placeholder={EMPTY_FIELD_GUIDANCE.block.displayDescription}
       />
       <p className="block-inspector__field-help">
-        Shown at a glance · keep implementation detail in Notes.
+        {clockAnnotation
+          ? 'Optional canvas annotation. The derived Clock source/rate declaration stays visible.'
+          : 'Shown at a glance · keep implementation detail in Notes.'}
       </p>
     </div>
   )
@@ -1354,6 +1358,7 @@ export function BlockInspectorContent({
             <DescriptionEditor
               value={props.description}
               visible={props.showDescription}
+              clockAnnotation={isClockTriggerBlock(props)}
               disabled={readOnly}
               actions={actions}
               onToggle={() => actions?.updateDetails({ showDescription: !props.showDescription })}

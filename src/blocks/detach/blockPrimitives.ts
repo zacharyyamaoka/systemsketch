@@ -30,6 +30,7 @@ import {
 } from '../layoutBlock'
 import { portColor, portTldrawColor } from '../ui/portPalette'
 import { valueBlockLabel, valueBlockText } from '../valueBlock'
+import { stockBlockVisibleDescription } from '../stockBlocks'
 
 /** The outer ring keeps the live indicator's full 18px footprint. */
 export const PORT_INDICATOR_RADIUS = BLOCK_PORT_RADIUS + 3
@@ -502,9 +503,9 @@ export function primitivesForBlock(
 			stockColor: 'black', align: layout.icon ? 'start' : 'middle',
 		}))
 	}
-	if (layout.description && props.showDescription && props.description !== '') {
+	if (layout.description) {
 		parts.push(textAt({
-			text: props.description,
+			text: stockBlockVisibleDescription(props),
 			px: chromeless ? SIMPLE_TEXT_FONT_PX : 11,
 			lineHeight: chromeless ? 24 : 16,
 			weight: 400,

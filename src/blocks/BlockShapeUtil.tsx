@@ -76,6 +76,7 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 	const ink = '#27272a'
 	const muted = '#a1a1aa'
 	const divider = '#e4e4e7'
+	const description = layout.description
 
 	if (layout.view === 'value') {
 		return (
@@ -127,17 +128,19 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 				</>
 			)}
 
-			{layout.description ? (
+			{description ? (
 				<text
-					x={layout.view === 'simple' ? w / 2 : layout.description.x}
-					y={layout.description.y + layout.description.h / 2}
+					x={layout.view === 'simple' ? w / 2 : description.x}
+					y={description.y + (layout.view === 'simple' ? description.h / 2 : 11)}
 					textAnchor={layout.view === 'simple' ? 'middle' : 'start'}
-					dominantBaseline="middle"
+					dominantBaseline={layout.view === 'simple' ? 'middle' : undefined}
 					fill={muted}
 					fontFamily="ui-sans-serif, system-ui"
 					fontSize={layout.view === 'simple' ? 18 : 11}
 				>
-					{stockBlockVisibleDescription(shape.props)}
+					{stockBlockVisibleDescription(shape.props).split('\n').map((line, index) => (
+						<tspan key={`${index}:${line}`} x={layout.view === 'simple' ? w / 2 : description.x} dy={index === 0 ? 0 : (layout.view === 'simple' ? 24 : 16)}>{line}</tspan>
+					))}
 				</text>
 			) : null}
 

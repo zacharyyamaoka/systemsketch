@@ -73,7 +73,7 @@ import { getActiveDepthScopeId, toggleDepthScope } from '../../depth/depthNaviga
 import { branchFadeOpacity } from '../../branch/branchScope'
 import { countProducers, PortDot, usePortHintEligibility } from './PortDot'
 import { definitionBadge } from '../definitions/definitionLinking'
-import { stockBlockVisibleDescription } from '../stockBlocks'
+import { isClockTriggerBlock, stockBlockVisibleDescription } from '../stockBlocks'
 import {
   describeDiffCounts,
   diffGutterGlyph,
@@ -683,7 +683,7 @@ function SimpleFace({ shape }: { shape: BlockShape }) {
         <div
           className="BlockNode-simpleDescription"
           style={boxStyle(layout.description)}
-          data-pb-inline-field={blockInlineFieldAttribute({ kind: 'description' })}
+          data-pb-inline-field={isClockTriggerBlock(shape.props) ? undefined : blockInlineFieldAttribute({ kind: 'description' })}
           title={stockBlockVisibleDescription(shape.props)}
         >
           <FieldValue diffs={shape.props.fieldDiffs} path="description" value={stockBlockVisibleDescription(shape.props)} />
@@ -1274,7 +1274,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
               <div
                 className="BlockNode-description"
                 style={boxStyle(layout.description)}
-                data-pb-inline-field={blockInlineFieldAttribute({ kind: 'description' })}
+                data-pb-inline-field={isClockTriggerBlock(shape.props) ? undefined : blockInlineFieldAttribute({ kind: 'description' })}
                 title={stockBlockVisibleDescription(shape.props)}
               >
                 <FieldValue

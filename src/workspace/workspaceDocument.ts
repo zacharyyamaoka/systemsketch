@@ -4,6 +4,7 @@ import {
   SYSTEMSKETCH_FORMAT_VERSION,
 } from './systemSketchFile'
 import { parseLegacyPyblocksSystemSketch } from '../import/legacyPyblocksSystemSketch'
+import { normalizeStockBlockSnapshot } from '../blocks/stockBlocks'
 
 /**
  * Inspect workspace bytes before they are allowed anywhere near persistence.
@@ -40,5 +41,5 @@ export function inspectWorkspaceDocumentSource(
     } as const
   }
 
-  return { kind: 'ready', snapshot: parsed.value.getStoreSnapshot() } as const
+  return { kind: 'ready', snapshot: normalizeStockBlockSnapshot(parsed.value.getStoreSnapshot()) } as const
 }

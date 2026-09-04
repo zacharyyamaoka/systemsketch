@@ -95,8 +95,9 @@ async function main() {
     check('SELECT-1', 'Select is an ordinary Block with visible valid conditional notation',
       await evaluate(page, `JSON.stringify({ type: document.querySelector('[data-shape-id=${JSON.stringify(selectId)}]')?.dataset.shapeType,
         source: document.querySelector('[data-testid="select-source-notation"]')?.textContent.trim(),
+        conditionVisible: Array.from(document.querySelectorAll('[data-shape-id=${JSON.stringify(selectId)}] .BlockNode-portLabel')).some((node) => node.textContent.includes('condition')),
         rows: window.__systemsketch.editor.getShape(${JSON.stringify(selectId)}).props.inputs.map((p) => p.id) })`),
-      JSON.stringify({ type: 'block', source: 'true_value if condition else false_value', rows: ['condition', 'true_value', 'false_value'] }))
+      JSON.stringify({ type: 'block', source: 'true_value if condition else false_value', conditionVisible: true, rows: ['condition', 'true_value', 'false_value'] }))
 
     await selectBlock(page, clockId)
     await waitFor(page, `document.querySelector('[aria-label="Clock trigger rate in hertz"]')`, 'Clock configuration')
@@ -135,30 +136,61 @@ async function main() {
       await evaluate(page, `JSON.stringify(${JSON.stringify(clockIds)}.map((id) => window.__systemsketch.editor.getShape(id)?.props.stockConfig))`),
       JSON.stringify([{ triggerSource: 'clock', rateHz: 24 }, { triggerSource: 'clock', rateHz: 24 }]))
 
-		const differentClock = 'shape:different-clock'
-		await evaluate(page, `(() => {
-			const editor = window.__systemsketch.editor
-			const base = editor.getShapeUtil('block').getDefaultProps()
-			editor.createShapes([{ id: ${JSON.stringify(differentClock)}, type: 'block', x: 1050, y: 700, props: {
-				...base, title: 'Clock', blockType: 'clock-trigger', icon: 'Timer', view: 'port',
-				w: base.views.port.w, h: base.views.port.h,
-				outputs: [{ id: 'trigger', name: 'trigger', type: 'Trigger', visible: true, row: 0 }],
-				stockConfig: { triggerSource: 'clock', rateHz: 10 }, definitionId: 'different-clock', definitionKey: 'clock',
-			} }])
-			return true
-		})()`)
-		await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(differentClock)})?.props.definitionId !== window.__systemsketch.editor.getShape(${JSON.stringify(clockId)})?.props.definitionId`, 'distinct Clock definition for distinct config')
-		check('LINK-2', 'different Clock configurations do not reconcile as one canonical definition',
-			await evaluate(page, `JSON.stringify({ sameDefinition: window.__systemsketch.editor.getShape(${JSON.stringify(differentClock)}).props.definitionId === window.__systemsketch.editor.getShape(${JSON.stringify(clockId)}).props.definitionId,
-				config: window.__systemsketch.editor.getShape(${JSON.stringify(differentClock)}).props.stockConfig })`),
-			JSON.stringify({ sameDefinition: false, config: { triggerSource: 'clock', rateHz: 10 } }))
-		await evaluate(page, `(() => { window.__systemsketch.editor.deleteShapes([${JSON.stringify(differentClock)}]); return true })()`)
+
+    // Exercise the actual context-menu duplicate and title-commit collision
+    // path. An equal config must really join its canonical Clock definition.
+    await selectBlock(page, clockId)
+    const equalSource = await canvasPoint(page, clockId)
+    await clickAt(page, equalSource.x, equalSource.y, 'right')
+    await waitFor(page, `document.querySelector('[data-testid="context-menu.block-duplicate-unlinked"]')`, 'equal-config duplicate menu item')
+    const equalMenu = await box(page, '[data-testid="context-menu.block-duplicate-unlinked"]')
+    await clickAt(page, equalMenu.cx, equalMenu.cy)
+    await waitFor(page, `window.__systemsketch.editor.getSelectedShapes().some((s) => s.type === 'block' && s.id !== ${JSON.stringify(clockId)})`, 'equal-config duplicate selection')
+    const equalClock = await evaluate(page, `window.__systemsketch.editor.getSelectedShapes().find((s) => s.type === 'block' && s.id !== ${JSON.stringify(clockId)})?.id`)
+    const equalTitle = await box(page, '[aria-label="Block title"]')
+    await clickAt(page, equalTitle.cx, equalTitle.cy); await shortcut(page, 'a', 'KeyA', 2); await page.send('Input.insertText', { text: 'Clock' }); await key(page, 'Enter', 'Enter')
+    await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(equalClock)})?.props.definitionId === window.__systemsketch.editor.getShape(${JSON.stringify(clockId)})?.props.definitionId`, 'equal-config title collision reconciliation')
+    check('LINK-2', 'equal-config collision converges through the real duplicate and commit path',
+      await evaluate(page, `JSON.stringify({ sameDefinition: window.__systemsketch.editor.getShape(${JSON.stringify(equalClock)}).props.definitionId === window.__systemsketch.editor.getShape(${JSON.stringify(clockId)}).props.definitionId,
+        key: window.__systemsketch.editor.getShape(${JSON.stringify(equalClock)}).props.definitionKey,
+        draft: window.__systemsketch.editor.getShape(${JSON.stringify(equalClock)}).props.draftOrdinal ?? null })`),
+      JSON.stringify({ sameDefinition: true, key: 'Clock', draft: null }))
+
+    // A second real duplicate changes its authoring config before that same
+    // title commit. It must remain a distinct Draft rather than silently merge.
+    await selectBlock(page, clockId)
+    const differentSource = await canvasPoint(page, clockId)
+    await clickAt(page, differentSource.x, differentSource.y, 'right')
+    await waitFor(page, `document.querySelector('[data-testid="context-menu.block-duplicate-unlinked"]')`, 'different-config duplicate menu item')
+    const differentMenu = await box(page, '[data-testid="context-menu.block-duplicate-unlinked"]')
+    await clickAt(page, differentMenu.cx, differentMenu.cy)
+    await waitFor(page, `window.__systemsketch.editor.getSelectedShapes().some((s) => s.type === 'block' && s.id !== ${JSON.stringify(clockId)})`, 'different-config duplicate selection')
+    const differentClock = await evaluate(page, `window.__systemsketch.editor.getSelectedShapes().find((s) => s.type === 'block' && s.id !== ${JSON.stringify(clockId)})?.id`)
+    const draftRate = await box(page, '[aria-label="Clock trigger rate in hertz"]')
+    await clickAt(page, draftRate.cx, draftRate.cy); await shortcut(page, 'a', 'KeyA', 2); await page.send('Input.insertText', { text: '10' }); await key(page, 'Enter', 'Enter')
+    await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(differentClock)})?.props.stockConfig?.rateHz === 10`, 'different Clock rate')
+    const draftTitle = await box(page, '[aria-label="Block title"]')
+    await clickAt(page, draftTitle.cx, draftTitle.cy); await shortcut(page, 'a', 'KeyA', 2); await page.send('Input.insertText', { text: 'Clock' }); await key(page, 'Enter', 'Enter')
+    await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(differentClock)})?.props.draftOrdinal === 1`, 'different-config draft title collision')
+    check('LINK-3', 'different-config same-name collision remains a visibly distinct Draft',
+      await evaluate(page, `JSON.stringify({ sameDefinition: window.__systemsketch.editor.getShape(${JSON.stringify(differentClock)}).props.definitionId === window.__systemsketch.editor.getShape(${JSON.stringify(clockId)}).props.definitionId,
+        config: window.__systemsketch.editor.getShape(${JSON.stringify(differentClock)}).props.stockConfig,
+        key: window.__systemsketch.editor.getShape(${JSON.stringify(differentClock)}).props.definitionKey,
+        badge: document.querySelector('[data-shape-id=${JSON.stringify(differentClock)}] .BlockNode-definitionBadge')?.textContent.trim() })`),
+      JSON.stringify({ sameDefinition: false, config: { triggerSource: 'clock', rateHz: 10 }, key: 'Clock_draft_1', badge: 'Draft 1' }))
 
     await page.send('Page.reload', { ignoreCache: true })
     await waitFor(page, 'Boolean(window.__systemsketch?.editor)', 'reopened persisted development board')
     await waitFor(page, `Array.from(document.querySelectorAll('.BlockNode-description')).some((n) => n.textContent.includes('Clock · 24 Hz'))`, 'reopened current Clock label')
     check('REOPEN-1', 'reopening retains source/rate and never paints stale 10 Hz prose',
-      await evaluate(page, `Array.from(document.querySelectorAll('.BlockNode-description')).some((n) => n.textContent.includes('10 Hz'))`), false)
+      await evaluate(page, `(() => {
+        const editor = window.__systemsketch.editor
+        const canonical = editor.getShape(${JSON.stringify(clockId)})
+        return editor.getCurrentPageShapes()
+          .filter((shape) => shape.type === 'block' && shape.props.definitionId === canonical?.props.definitionId)
+          .every((shape) => shape.props.stockConfig?.rateHz === 24
+            && document.querySelector('[data-shape-id=' + CSS.escape(shape.id) + '] .BlockNode-description')?.textContent.includes('Clock · 24 Hz'))
+      })()`), true)
 
     const reopenedClock = await evaluate(page, `window.__systemsketch.editor.getCurrentPageShapes().find((s) => s.type === 'block' && s.props.blockType === 'clock-trigger')?.id`)
     await evaluate(page, `(() => { window.__systemsketch.editor.updateInstanceState({ isReadonly: true }); return true })()`)

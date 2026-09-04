@@ -57,7 +57,7 @@
   "records": [
     {
       "x": 490,
-      "y": 745,
+      "y": 760,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -79,7 +79,7 @@
         },
         "end": {
           "x": 80,
-          "y": 50
+          "y": 35
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -96,7 +96,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5t8zG",
+      "index": "a5z8Yl",
       "typeName": "shape"
     },
     {
@@ -109,7 +109,7 @@
     },
     {
       "x": 1300,
-      "y": 260,
+      "y": 290,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -131,7 +131,7 @@
         },
         "end": {
           "x": 70,
-          "y": 210
+          "y": 180
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -148,8 +148,16 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a6x5jV",
+      "index": "a6pZ0V",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#F2555A",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:nnjdKtGAnhe5dW0X81Ui_",
+      "typeName": "user"
     },
     {
       "x": 70,
@@ -193,7 +201,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4d7E",
+      "index": "a4vVz",
       "typeName": "shape"
     },
     {
@@ -238,7 +246,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a7UzBV",
+      "index": "a7wur",
       "typeName": "shape"
     },
     {
@@ -252,7 +260,7 @@
       "type": "geo",
       "props": {
         "w": 420,
-        "h": 150,
+        "h": 180,
         "geo": "rectangle",
         "dash": "draw",
         "growY": 0,
@@ -275,7 +283,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "2 · Select Select. Read its three input rows as values plus a bool control, not a Branch region."
+                  "text": "2 · Select Select. Its visible condition bool row and true/false rows are values, not a Branch region."
                 }
               ]
             }
@@ -283,16 +291,8 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5T2U",
+      "index": "a5c1A",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#E34BA9",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:Ge0X4Ea_XL7b191yspghV",
-      "typeName": "user"
     },
     {
       "x": -6.956521739130437,
@@ -313,7 +313,7 @@
       "type": "geo",
       "props": {
         "w": 440,
-        "h": 150,
+        "h": 180,
         "geo": "rectangle",
         "dash": "draw",
         "growY": 2,
@@ -336,7 +336,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "3 · Select Clock. Change source or rate; its label must follow Clock 10 Hz, External trigger, or Manual trigger. It does not schedule."
+                  "text": "3 · Select Clock. Its derived source/rate declaration stays visible even with no annotation: Clock · 10 Hz, External trigger, or Manual trigger. It does not schedule."
                 }
               ]
             }
@@ -344,7 +344,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6bVj",
+      "index": "a6PAn",
       "typeName": "shape"
     },
     {
@@ -507,28 +507,28 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "h-poM9zlOTifi3AmSe_Cz",
+        "definitionId": "OVjkLuuTXqqMCl6Mgmcmt",
         "inputs": [
           {
             "id": "condition",
             "name": "condition",
             "type": "bool",
             "visible": true,
-            "row": 0
+            "row": 1
           },
           {
             "id": "true_value",
             "name": "true",
             "type": "str",
             "visible": true,
-            "row": 1
+            "row": 2
           },
           {
             "id": "false_value",
             "name": "false",
             "type": "str",
             "visible": true,
-            "row": 2
+            "row": 3
           }
         ],
         "outputs": [
@@ -543,7 +543,7 @@
         "definitionKey": "Select"
       },
       "parentId": "page:page",
-      "index": "a2y16",
+      "index": "a2FMz",
       "typeName": "shape"
     },
     {
@@ -559,7 +559,7 @@
         "w": 340,
         "h": 198,
         "title": "Clock",
-        "description": "Clock declaration · does not schedule.",
+        "description": "",
         "blockType": "clock-trigger",
         "icon": "Timer",
         "view": "port",
@@ -585,7 +585,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "9JGMQBCwSpKLLrp33v7Jl",
+        "definitionId": "BBytfVHrYaH-uW4gorKlR",
         "inputs": [],
         "outputs": [
           {
@@ -603,7 +603,7 @@
         "definitionKey": "Clock"
       },
       "parentId": "page:page",
-      "index": "a3L9f",
+      "index": "a3uxn",
       "typeName": "shape"
     },
     {
@@ -708,7 +708,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "OVASHRxQ6ASS8e2S0d2jA",
+        "definitionId": "wn3XqkFk8G3IUk2SO8Kc-",
         "inputs": [
           {
             "id": "record",
@@ -744,7 +744,7 @@
         "definitionKey": "Set_attributes"
       },
       "parentId": "page:page",
-      "index": "a1OVX",
+      "index": "a1tzc",
       "typeName": "shape"
     },
     {
@@ -788,7 +788,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a4xjaG",
+      "index": "a4ztTx",
       "typeName": "shape"
     }
   ]
