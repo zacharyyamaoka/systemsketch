@@ -37,10 +37,12 @@ import {
   type MakeStablePhase,
 } from './releaseModel'
 import { getPortablePreviewSnapshot, loadPreviewCloneFromCurrentUrl } from './previewClone'
+import { capturePromotedWorkspaceState } from './promotedWorkspaceState'
 import { RecorderControls } from './recorder/RecorderControls'
 import { setRecorderChannel, useRecorderState } from './recorder/recorderStore'
 import { useChrome } from './chrome/ChromeProvider'
 import { useTopNoticePlacement } from './chrome/topNoticePlacement'
+import { useLocalWorkspace } from './workspace/LocalWorkspace'
 import { startReleaseRefresh } from './releaseRefresh'
 import { cablePresentation, setSolidBeforePill } from './blocks/connections/connectionPresentation'
 import { useAppearancePreferences } from './settings/appearancePreferences'
@@ -159,6 +161,7 @@ function BuildProgress() {
 
 export function SystemSketchNavigationPanel() {
   const editor = useEditor()
+  const workspace = useLocalWorkspace()
   const actions = useActions()
   const { showZoomButtons } = useAppearancePreferences()
   const { addDialog } = useDialogs()
@@ -284,7 +287,11 @@ export function SystemSketchNavigationPanel() {
       const snapshot = action === 'preview' && preset === 'product'
         ? await getPortablePreviewSnapshot(editor)
         : undefined
-      const next = await runReleaseAction(action, snapshot, preset)
+      if (action === 'promote') await workspace.save()
+      const promotedWorkspace = action === 'promote'
+        ? capturePromotedWorkspaceState(workspace.path, workspace.recents)
+        : undefined
+      const next = await runReleaseAction(action, snapshot, preset, promotedWorkspace)
       setStatus(next)
       setNotice(next.message ?? null)
       if (action === 'promote') setPublished(true)
