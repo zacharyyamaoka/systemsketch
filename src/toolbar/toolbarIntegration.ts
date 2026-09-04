@@ -268,11 +268,12 @@ export const SYSTEMSKETCH_TOOLBAR_OVERRIDES: TLUiOverrides = {
       withBranchTool(editor, withBlockTool(editor, overrideTools(editor, tools))))),
   translations: {
     en: {
-      // Stock `Remove frame` keeps its children — it reparents them out before
-      // deleting the frame (`utils/frames/frames.ts`). The bare label reads as
-      // if it might take them with it, which is why this repo had grown a
-      // second, Frame-only command saying so. One command, said plainly.
-      'action.remove-frame': 'Remove frame, leave children',
+      // Stock frame removal reparents children out before deleting the
+      // container (`utils/frames/frames.ts`). This action also appears on our
+      // frame-like Branches and Loops, so naming the implementation detail
+      // "frame" there is misleading. One shared command, said for the object
+      // class people actually see.
+      'action.remove-frame': 'Delete container, leave children',
     },
   },
 }

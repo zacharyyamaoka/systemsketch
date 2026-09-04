@@ -615,9 +615,9 @@ function BlockContextMenuItems() {
           right-clicked. Both read the same target list and run the same
           commands, so they cannot drift apart.
 
-          The old `Delete frame, leave children` item used to sit here. It has
-          been removed rather than renamed: stock `Remove frame` — now labelled
-          `Remove frame, leave children` — does the same thing for any
+	  The old `Delete frame, leave children` item used to sit here. It has
+	  been removed rather than renamed: stock `Remove frame` — now labelled
+	  `Delete container, leave children` — does the same thing for any
           frame-like shape, which is a superset of the Frame-only command it
           replaces. */}
       {canWrap ? (

@@ -9,7 +9,7 @@
  * they agree by wrapping through each of them in turn.
  *
  * It also proves the two things that came out of reading the engine: the stock
- * remove-frame command now reads "Remove frame, leave children", and the
+ * remove-frame command now reads "Delete container, leave children", and the
  * Frame-only duplicate that used to sit beside it is gone.
  *
  * Run:  node tests/wrap_selection_smoke.mjs
@@ -203,8 +203,8 @@ async function main() {
     })()`)
     await delay(400)
     const frameLabels = JSON.parse(await menuLabels(page))
-    check('remove-frame-renamed', 'stock Remove frame now says what it keeps',
-      frameLabels.some((label) => label.includes('Remove frame, leave children')), true)
+    check('remove-frame-renamed', 'stock Remove frame says what it keeps without mistaking every container for a Frame',
+      frameLabels.some((label) => label.includes('Delete container, leave children')), true)
     await shot(page, 'wrap-selection-remove-frame.png')
     await key(page, 'Escape', 'Escape')
     await delay(200)

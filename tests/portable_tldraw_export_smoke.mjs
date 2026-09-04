@@ -307,11 +307,13 @@ async function main() {
     const portableShapes = new Map(portable.records
       .filter((record) => record.typeName === 'shape')
       .map((record) => [record.id, record]))
-    const outerBranch = portableShapes.get('shape:portable-outer-branch')
-    const innerBranch = portableShapes.get('shape:portable-inner-branch')
-    check('Branch regions become same-id stock frames with their visible box and title',
+    const branchFrames = [...portableShapes.values()]
+      .filter((shape) => shape.type === 'frame' && shape.meta?.systemSketch?.kind === 'branch')
+    const outerBranch = branchFrames.find((shape) => shape.meta.systemSketch.props?.title === 'Choose transport')
+    const innerBranch = branchFrames.find((shape) => shape.meta.systemSketch.props?.title === 'Retry policy')
+    check('Branch regions become fresh stock frames with their visible box and title metadata',
       outerBranch?.type === 'frame'
-        && outerBranch.props?.name === 'Choose transport'
+        && outerBranch.props?.name === '\u2060'
         && outerBranch.props?.w === 620
         && outerBranch.props?.h === 414)
     check('portable Branch metadata remembers controls, arms and active state',

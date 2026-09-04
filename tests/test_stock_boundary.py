@@ -181,6 +181,11 @@ class StockBoundaryTests(unittest.TestCase):
         # cannot grow a second, subtly different custom-record conversion.
         self.assertIn("detachBranchToPrimitives", portable_export)
         self.assertIn("isBranchShape", portable_export)
+        # Loops share that exact portable lowering contract; an export may not
+        # retain a custom Loop record merely because the live menu does not.
+        self.assertIn("LoopShapeUtil", portable_export)
+        self.assertIn("detachLoopToPrimitives", portable_export)
+        self.assertIn("isLoopShape", portable_export)
         self.assertIn("SYSTEMSKETCH_ROUNDED_RECT_GEO", portable_export)
         self.assertIn("portableValuePillText", portable_export)
         self.assertIn("freezeDetachedValuePill", portable_export)
