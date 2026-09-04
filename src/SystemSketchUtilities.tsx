@@ -26,6 +26,7 @@ import {
 } from './releaseClient'
 import {
   channelLabel,
+  estimatedBuildProgressPercent,
   freshnessLabel,
   hasNewPreview,
   makeStableLabel,
@@ -139,22 +140,32 @@ function ChannelActions({
   )
 }
 
-/**
- * A release does not expose reliable per-step completion, so this stays
- * deliberately indeterminate. It is only rendered while the promote request
- * is actually in flight; a percentage here would imply progress we cannot
- * honestly measure.
- */
+/** A visible estimate makes the opaque release wait feel alive without claiming telemetry. */
 function BuildProgress() {
+  const [elapsedMs, setElapsedMs] = useState(0)
+  useEffect(() => {
+    const startedAt = performance.now()
+    const refresh = () => setElapsedMs(performance.now() - startedAt)
+    refresh()
+    const timer = window.setInterval(refresh, 500)
+    return () => window.clearInterval(timer)
+  }, [])
+  const percent = estimatedBuildProgressPercent(elapsedMs)
   return (
     <div
       className="systemsketch-preview-mode__progress"
       data-testid="systemsketch-build-progress"
       role="progressbar"
-      aria-label="Building Stable release"
-      aria-valuetext="Build in progress"
+      aria-label="Estimated Stable build progress"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={percent}
+      aria-valuetext={`Estimated progress, ${percent}% complete`}
     >
-      <span aria-hidden="true" />
+      <span className="systemsketch-preview-mode__progress-track" aria-hidden="true">
+        <span className="systemsketch-preview-mode__progress-fill" style={{ width: `${percent}%` }} />
+      </span>
+      <span className="systemsketch-preview-mode__progress-label" aria-hidden="true">Estimate · {percent}%</span>
     </div>
   )
 }

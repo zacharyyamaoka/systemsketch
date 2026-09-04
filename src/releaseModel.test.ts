@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { ReleaseStatus } from './releaseClient'
 import {
+  estimatedBuildProgressPercent,
   freshnessLabel,
   hasNewPreview,
   makeStableLabel,
@@ -98,5 +99,13 @@ describe('making Preview the Stable build', () => {
     expect(returnToStableLabel('idle', false)).toBe('Return to Stable')
     expect(returnToStableLabel('published', false)).toBe('Open new Stable')
     expect(returnToStableLabel('published', true)).toBe('Returning…')
+  })
+
+  it('uses a clearly bounded estimate while the opaque release command runs', () => {
+    expect(estimatedBuildProgressPercent(-1)).toBe(8)
+    expect(estimatedBuildProgressPercent(0)).toBe(8)
+    expect(estimatedBuildProgressPercent(5_000)).toBeGreaterThan(8)
+    expect(estimatedBuildProgressPercent(20_000)).toBeGreaterThan(estimatedBuildProgressPercent(5_000))
+    expect(estimatedBuildProgressPercent(1_000_000)).toBe(94)
   })
 })

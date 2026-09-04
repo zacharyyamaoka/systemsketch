@@ -28,9 +28,10 @@ def main() -> None:
     smoke = (ROOT / "tests" / "release_channel_controls_smoke.mjs").read_text(encoding="utf-8")
     facts = [
         ("Indicator is present only while the promote request is in flight", "makeStable === 'working'" in utilities),
-        ("Screen readers receive an indeterminate progressbar and status", 'role="progressbar"' in utilities and 'aria-valuetext="Build in progress"' in utilities),
-        ("Reduced-motion users get a steady full bar", "prefers-reduced-motion: reduce" in stylesheet),
-        ("The real browser proof asserts appearance and cleanup", "progress indicator clears" in smoke),
+        ("The label and accessible text call the number an estimate", 'aria-label="Estimated Stable build progress"' in utilities and "Estimated progress," in utilities),
+        ("The estimate starts at 8% and is capped below completion", "estimatedBuildProgressPercent" in utilities and "Math.min(94" in (ROOT / "src" / "releaseModel.ts").read_text(encoding="utf-8")),
+        ("Reduced-motion users retain the static numeric estimate", "prefers-reduced-motion: reduce" in stylesheet),
+        ("The real browser proof asserts that the estimate rises and then clears", "laterPercent > progress.valueNow" in smoke and "progress indicator clears" in smoke),
     ]
     cards = "".join(
         f"<li><b>{checkmark(ok)}</b>{html.escape(label)}</li>" for label, ok in facts
@@ -61,7 +62,7 @@ def main() -> None:
 <body>
 <p class="lede">SystemSketch release experience · 3 September 2026</p>
 <h1>Preview now makes a long Stable build feel alive.</h1>
-<p class="lede">While the confirmed Preview-to-Stable request is genuinely in flight, the banner gains a compact animated blue progress bar. It intentionally does not claim a percentage: the release backend reports one long transaction, not reliable per-step completion. The indicator clears as soon as the build resolves.</p>
+<p class="lede">While the confirmed Preview-to-Stable request is genuinely in flight, the banner gains a compact blue <b>Estimate · N%</b> bar. The backend reports one opaque transaction rather than reliable per-step completion, so the number is explicitly labeled as an estimate. It starts at 8%, eases toward 94%, and never reaches 100% before the build actually resolves.</p>
 <section class="flow" aria-label="build indicator flow">
   <div class="step"><b>1 · Ready</b>Preview is live</div><span class="arrow">→</span>
   <div class="step"><b>2 · Building</b>Controls lock; progress moves</div><span class="arrow">→</span>
@@ -71,10 +72,10 @@ def main() -> None:
 <h2>Real browser journey</h2>
 <div class="shots">
   <figure><img src="{idle}" alt="Preview banner before making Stable"><figcaption><b>Before.</b> Preview presents the deliberate, two-click promotion control.</figcaption></figure>
-  <figure><img src="{building}" alt="Preview banner during a Stable build showing a blue progress bar"><figcaption><b>During the real build.</b> The compact blue bar animates below the locked controls without pretending to know a percentage.</figcaption></figure>
+  <figure><img src="{building}" alt="Preview banner during a Stable build showing an estimated percentage"><figcaption><b>During the real build.</b> The compact blue bar and <b>Estimate · N%</b> label advance below the locked controls—visibly active without posing as build telemetry.</figcaption></figure>
   <figure><img src="{done}" alt="Preview banner after Stable has been updated"><figcaption><b>After.</b> The progress indicator is gone and the next action is clear.</figcaption></figure>
 </div>
-<footer>Evidence: <code>npm run check</code> (981 Vitest assertions; 94 Python tests) and <code>SYSTEMSKETCH_PUBLISH_PROOF=1 npm run test:release-ui</code> (23 browser checks). The publish proof uses an isolated release home; it does not change the machine’s Stable channel.</footer>
+<footer>Evidence: <code>npm run check</code> (1,103 Vitest assertions; 96 Python tests) and <code>SYSTEMSKETCH_PUBLISH_PROOF=1 npm run test:release-ui</code> (24 browser checks). The publish proof uses an isolated release home; it does not change the machine’s Stable channel.</footer>
 </body></html>\n""",
         encoding="utf-8",
     )

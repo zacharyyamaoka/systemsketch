@@ -75,6 +75,19 @@ export function previewDetailLabel(phase: MakeStablePhase, hostArtifactsReady?: 
   return 'Live working copy · Stable stays unchanged'
 }
 
+/**
+ * A friendly, deliberately non-telemetry estimate for the long promotion.
+ *
+ * The release command remains one opaque request, so this must never reach
+ * 100% before the server confirms completion. It moves quickly enough to make
+ * the wait feel responsive, then eases toward 94% and holds there honestly.
+ */
+export function estimatedBuildProgressPercent(elapsedMs: number): number {
+  const elapsed = Number.isFinite(elapsedMs) ? Math.max(0, elapsedMs) : 0
+  const estimate = 8 + 87 * (1 - Math.exp(-elapsed / 18_000))
+  return Math.min(94, Math.floor(estimate))
+}
+
 /** Returning is the follow-through once Preview has become Stable. */
 export function returnToStableLabel(phase: MakeStablePhase, returning: boolean): string {
   if (returning) return 'Returning…'

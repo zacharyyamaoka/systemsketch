@@ -301,16 +301,25 @@ async function publishFlow() {
         role: indicator.getAttribute('role'),
         label: indicator.getAttribute('aria-label'),
         valueText: indicator.getAttribute('aria-valuetext'),
-        animated: getComputedStyle(indicator.firstElementChild).animationName,
+        valueNow: Number(indicator.getAttribute('aria-valuenow')),
+        fillWidth: indicator.querySelector('.systemsketch-preview-mode__progress-fill')?.style.width,
+        transition: getComputedStyle(indicator.querySelector('.systemsketch-preview-mode__progress-fill')).transitionProperty,
       })
     })()`))
-    assert.deepEqual(progress, {
+    const { valueNow, fillWidth, ...progressSemantics } = progress
+    assert.deepEqual(progressSemantics, {
       role: 'progressbar',
-      label: 'Building Stable release',
-      valueText: 'Build in progress',
-      animated: 'systemsketch-release-progress',
+      label: 'Estimated Stable build progress',
+      valueText: `Estimated progress, ${progress.valueNow}% complete`,
+      transition: 'width',
     })
-    pass('the live banner shows an honest indeterminate progress indicator while Stable builds')
+    assert.ok(progress.valueNow >= 8 && progress.valueNow < 94)
+    assert.equal(progress.fillWidth, `${progress.valueNow}%`)
+    await delay(1_100)
+    const laterPercent = Number(await evaluate(page,
+      `document.querySelector('${BANNER} [data-testid="systemsketch-build-progress"]')?.getAttribute('aria-valuenow')`))
+    assert.ok(laterPercent > progress.valueNow)
+    pass('the live banner advances a visibly labeled estimate while Stable builds')
     await screenshot(page, SHOT_BUILDING)
 
     await waitFor(page,

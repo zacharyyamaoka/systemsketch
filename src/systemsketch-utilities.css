@@ -234,22 +234,38 @@
   gap: 9px;
 }
 
-/* Promote is a single request, so show activity rather than a made-up percent. */
+/* The percentage is a visible estimate, never release telemetry. */
 .systemsketch-preview-mode__progress {
-  height: 3px;
-  margin: 0 2px 1px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 1px 3px 1px 2px;
+  min-height: 12px;
+}
+
+.systemsketch-preview-mode__progress-track {
+  display: block;
+  flex: 1;
+  height: 4px;
   overflow: hidden;
   border-radius: 999px;
   background: color-mix(in srgb, var(--ss-accent) 20%, transparent);
 }
 
-.systemsketch-preview-mode__progress span {
+.systemsketch-preview-mode__progress-fill {
   display: block;
-  width: 42%;
   height: 100%;
   border-radius: inherit;
   background: var(--ss-accent);
-  animation: systemsketch-release-progress 1.15s ease-in-out infinite;
+  transition: width 460ms ease-out;
+}
+
+.systemsketch-preview-mode__progress-label {
+  flex: none;
+  color: var(--ss-text-muted);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
 .systemsketch-preview-mode__error {
@@ -264,16 +280,9 @@
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-@keyframes systemsketch-release-progress {
-  from { transform: translateX(-110%); }
-  to { transform: translateX(270%); }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .systemsketch-preview-mode__progress span {
-    width: 100%;
-    opacity: .7;
-    animation: none;
+  .systemsketch-preview-mode__progress-fill {
+    transition: none;
   }
 }
 
