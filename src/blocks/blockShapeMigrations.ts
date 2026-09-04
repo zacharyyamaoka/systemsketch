@@ -238,35 +238,50 @@ export function downgradeBlockPropsV6ToV5(props: BlockMigrationProps): BlockMigr
 }
 
 /**
+ * tldraw's migration sequence invokes each step for its side effect; it does
+ * not consume a replacement props object. Keep the exported steps pure for
+ * direct testing, then apply their result to the loader-owned record here.
+ */
+function applyPureMigration(
+	props: BlockMigrationProps,
+	migration: (props: BlockMigrationProps) => BlockMigrationProps,
+): void {
+	const next = migration(props)
+	if (next === props) return
+	for (const key of Object.keys(props)) delete props[key]
+	Object.assign(props, next)
+}
+
+/**
  * The only adapter from the pure version steps above to tldraw's file loader.
  * tldraw composes the required slice based on the schema version in the file.
  */
 export const blockShapeMigrations = createShapePropsMigrationSequence({
 	sequence: [{
 		id: blockVersions.RestorePyblocksUi,
-		up: upgradeBlockPropsV0ToV1,
-		down: downgradeBlockPropsV1ToV0,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV0ToV1),
+		down: (props) => applyPureMigration(props, downgradeBlockPropsV1ToV0),
 	}, {
 		id: blockVersions.PortLayoutStyle,
-		up: upgradeBlockPropsV1ToV2,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV1ToV2),
 		// The v1 validator accepted a present portLayout, so no data is removed.
 		down: 'none',
 	}, {
 		id: blockVersions.PortRows,
-		up: upgradeBlockPropsV2ToV3,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV2ToV3),
 		// Explicit rows cannot be represented faithfully as the old marker grammar.
 		down: 'none',
 	}, {
 		id: blockVersions.ValueView,
-		up: upgradeBlockPropsV3ToV4,
-		down: downgradeBlockPropsV4ToV3,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV3ToV4),
+		down: (props) => applyPureMigration(props, downgradeBlockPropsV4ToV3),
 	}, {
 		id: blockVersions.DiffState,
-		up: upgradeBlockPropsV4ToV5,
-		down: downgradeBlockPropsV5ToV4,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV4ToV5),
+		down: (props) => applyPureMigration(props, downgradeBlockPropsV5ToV4),
 	}, {
 		id: blockVersions.FieldDiffs,
-		up: upgradeBlockPropsV5ToV6,
-		down: downgradeBlockPropsV6ToV5,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV5ToV6),
+		down: (props) => applyPureMigration(props, downgradeBlockPropsV6ToV5),
 	}],
 })
