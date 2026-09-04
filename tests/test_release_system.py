@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import io
+import json
 import subprocess
 import tempfile
 import unittest
@@ -295,6 +296,110 @@ class ReleaseSystemTests(unittest.TestCase):
                 self.assertLess(command.index("--allow-dirty"), command.index("promote"))
                 self.assertTrue(run.call_args.kwargs["capture_output"])
                 self.assertTrue(run.call_args.kwargs["text"])
+            finally:
+                server.server_close()
+
+    def test_promotion_persists_a_build_keyed_shared_workspace_handoff(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            release_home = root / "runtime"
+            files_root = root / "files"
+            board = files_root / "SystemSketch" / "handoff.systemsketch"
+            board.parent.mkdir(parents=True)
+            board.write_text("{}\n", encoding="utf-8")
+
+            first, _ = stage_candidate(PROJECT_ROOT, release_home, self.make_dist(root, "first"))
+            promote_candidate(release_home)
+            second, _ = stage_candidate(PROJECT_ROOT, release_home, self.make_dist(root, "second"))
+            server = SystemSketchServer(
+                ("127.0.0.1", 0),
+                dist=root / "dist",
+                channel="preview",
+                build="working-tree",
+                release_home=release_home,
+                source_root=PROJECT_ROOT,
+                files_root=files_root,
+            )
+            workspace = {
+                "version": 1,
+                "activePath": str(board),
+                "recents": [str(board)],
+                "preferences": {
+                    "systemsketch.interface-scale.v1": '{"percent":125}',
+                    "unreviewed.browser.data": '{"must":"not transfer"}',
+                },
+            }
+            try:
+                def complete_promotion(*_args, **_kwargs):
+                    promote_candidate(release_home)
+                    return subprocess.CompletedProcess([], 0, "", "")
+
+                with patch("server.subprocess.run", side_effect=complete_promotion):
+                    server.run_action("promote", promoted_workspace=workspace)
+
+                state_path = release_home / "state" / "promoted-workspace.json"
+                handoff = json.loads(state_path.read_text(encoding="utf-8"))
+                self.assertEqual(handoff["build"], second)
+                self.assertEqual(handoff["workspace"]["activePath"], str(board))
+                self.assertEqual(handoff["workspace"]["recents"], [str(board)])
+                self.assertEqual(
+                    handoff["workspace"]["preferences"],
+                    {"systemsketch.interface-scale.v1": '{"percent":125}'},
+                )
+                self.assertEqual(state_path.stat().st_mode & 0o777, 0o600)
+
+                stable = SystemSketchServer(
+                    ("127.0.0.1", 0),
+                    dist=root / "dist",
+                    channel="stable",
+                    build=second,
+                    release_home=release_home,
+                    source_root=PROJECT_ROOT,
+                    files_root=files_root,
+                )
+                try:
+                    self.assertEqual(stable.promoted_workspace_for_current_stable(), {
+                        "build": second,
+                        "workspace": {
+                            "version": 1,
+                            "activePath": str(board),
+                            "recents": [str(board)],
+                            "preferences": {"systemsketch.interface-scale.v1": '{"percent":125}'},
+                        },
+                    })
+                finally:
+                    stable.server_close()
+            finally:
+                server.server_close()
+
+    def test_promotion_rejects_an_unshared_handoff_before_running_release(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project = self.make_git_project(root / "project")
+            files_root = root / "files"
+            files_root.mkdir()
+            outside = root / "outside.tldr"
+            outside.write_text("{}\n", encoding="utf-8")
+            server = SystemSketchServer(
+                ("127.0.0.1", 0),
+                dist=root / "dist",
+                channel="preview",
+                build="working-tree",
+                release_home=root / "runtime",
+                source_root=project,
+                files_root=files_root,
+            )
+            try:
+                with patch("server.subprocess.run") as run:
+                    with self.assertRaisesRegex(ReleaseError, "outside the shared"):
+                        server.run_action("promote", promoted_workspace={
+                            "version": 1,
+                            "activePath": str(outside),
+                            "recents": [],
+                            "preferences": {},
+                        })
+                run.assert_not_called()
+                self.assertFalse((root / "runtime" / "state" / "promoted-workspace.json").exists())
             finally:
                 server.server_close()
 

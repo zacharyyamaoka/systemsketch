@@ -58,6 +58,19 @@ from workspace_store import (
 
 
 MAX_API_REQUEST_BYTES = 64 * 1024 * 1024
+PROMOTED_WORKSPACE_VERSION = 1
+PROMOTED_WORKSPACE_MAX_PATHS = 12
+PROMOTED_WORKSPACE_MAX_PATH_LENGTH = 4096
+PROMOTED_WORKSPACE_MAX_PREFERENCE_BYTES = 16 * 1024
+PROMOTED_WORKSPACE_PREFERENCE_KEYS = frozenset({
+    "systemsketch.interface-scale.v1",
+    "systemsketch.appearance.v1",
+    "systemsketch.theme.v1",
+    "systemsketch.imported-themes.v1",
+    "systemsketch.toolbar-preferences.v1",
+    "systemsketch.cable-presentation.v1",
+    "systemsketch.diff-presentation.v1",
+})
 PREVIEW_CLONE_TOKEN = re.compile(r"^[A-Za-z0-9_-]{24,128}$")
 PREVIEW_PRESETS = {
     "product": "Latest Preview",
@@ -74,6 +87,63 @@ def _post_failure_status(cause: BaseException) -> HTTPStatus:
     if isinstance(cause, (WorkspaceStorageError, OSError)):
         return HTTPStatus.SERVICE_UNAVAILABLE
     return HTTPStatus.CONFLICT
+
+
+def _validated_promoted_workspace(payload: object, files_root: Path) -> dict:
+    """Keep promotion handoff data small, portable, and inside the shared workspace."""
+    if not isinstance(payload, dict) or payload.get("version") != PROMOTED_WORKSPACE_VERSION:
+        raise ReleaseError("the promoted workspace handoff is invalid")
+    raw_active = payload.get("activePath")
+    if not isinstance(raw_active, str) or not raw_active.strip() or len(raw_active) > PROMOTED_WORKSPACE_MAX_PATH_LENGTH:
+        raise ReleaseError("the promoted workspace needs a valid active board path")
+    try:
+        active_path = resolve_document_path(raw_active, files_root)
+    except WorkspacePathError as cause:
+        raise ReleaseError(
+            "the current Preview board is outside the shared SystemSketch workspace; save a shared copy before making Stable"
+        ) from cause
+    if not active_path.is_file():
+        raise ReleaseError("save the current Preview board before making Stable")
+
+    raw_recents = payload.get("recents")
+    if not isinstance(raw_recents, list) or len(raw_recents) > PROMOTED_WORKSPACE_MAX_PATHS:
+        raise ReleaseError("the promoted workspace recents are invalid")
+    recents = [str(active_path)]
+    for raw_path in raw_recents:
+        if not isinstance(raw_path, str) or len(raw_path) > PROMOTED_WORKSPACE_MAX_PATH_LENGTH:
+            continue
+        try:
+            resolved_path = resolve_document_path(raw_path, files_root)
+        except WorkspacePathError:
+            continue
+        if not resolved_path.is_file():
+            continue
+        path = str(resolved_path)
+        if path not in recents:
+            recents.append(path)
+        if len(recents) == PROMOTED_WORKSPACE_MAX_PATHS:
+            break
+
+    raw_preferences = payload.get("preferences")
+    if not isinstance(raw_preferences, dict):
+        raise ReleaseError("the promoted workspace preferences are invalid")
+    preferences = {}
+    for key, value in raw_preferences.items():
+        if key not in PROMOTED_WORKSPACE_PREFERENCE_KEYS or not isinstance(value, str):
+            continue
+        if len(value.encode("utf-8")) > PROMOTED_WORKSPACE_MAX_PREFERENCE_BYTES:
+            continue
+        try:
+            json.loads(value)
+        except ValueError:
+            continue
+        preferences[key] = value
+    return {
+        "version": PROMOTED_WORKSPACE_VERSION,
+        "activePath": str(active_path),
+        "recents": recents,
+        "preferences": preferences,
+    }
 
 
 class HostEventLog:
@@ -208,6 +278,9 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                 self._record_exception(cause)
                 self._json({"error": str(cause)}, HTTPStatus.CONFLICT)
             return
+        if path == "/api/promoted-workspace":
+            self._json({"promotedWorkspace": self.app.promoted_workspace_for_current_stable()})
+            return
         if path == "/api/preview-clone":
             try:
                 token = parse_qs(parsed.query).get("token", [""])[0]
@@ -302,7 +375,15 @@ class SystemSketchHandler(SimpleHTTPRequestHandler):
                     raise ReleaseError("unknown release action")
                 snapshot = payload.get("snapshot") if action == "preview" else None
                 preset = payload.get("preset", "product") if action == "preview" else "product"
-                self._json(self.app.run_action(action, snapshot=snapshot, preset=preset))
+                promoted_workspace = payload.get("promotedWorkspace") if action == "promote" else None
+                self._json(
+                    self.app.run_action(
+                        action,
+                        snapshot=snapshot,
+                        preset=preset,
+                        promoted_workspace=promoted_workspace,
+                    )
+                )
                 return
             if path == "/api/recordings/arm":
                 self._json(self.app.frames.arm(payload.get("enabled") is True, str(payload.get("url", ""))))
@@ -544,6 +625,47 @@ class SystemSketchServer(ThreadingHTTPServer):
     def preview_clones_dir(self) -> Path:
         return self.release_home / "preview-clones"
 
+    def promoted_workspace_path(self) -> Path:
+        return self.release_home / "state" / "promoted-workspace.json"
+
+    def write_promoted_workspace(self, workspace: dict, build: str) -> None:
+        """Atomically remember only this confirmed promotion's shared app state."""
+        destination = self.promoted_workspace_path()
+        destination.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+        payload = {
+            "version": PROMOTED_WORKSPACE_VERSION,
+            "build": build,
+            "capturedAt": int(time.time() * 1000),
+            "workspace": workspace,
+        }
+        encoded = (json.dumps(payload, ensure_ascii=False) + "\n").encode("utf-8")
+        descriptor, temporary_name = tempfile.mkstemp(prefix=".promoted-workspace.", dir=destination.parent)
+        temporary = Path(temporary_name)
+        try:
+            with os.fdopen(descriptor, "wb") as output:
+                output.write(encoded)
+                output.flush()
+                os.fsync(output.fileno())
+            os.chmod(temporary, 0o600)
+            os.replace(temporary, destination)
+        finally:
+            if temporary.exists():
+                temporary.unlink()
+
+    def promoted_workspace_for_current_stable(self) -> dict | None:
+        if self.channel != "stable":
+            return None
+        try:
+            payload = json.loads(self.promoted_workspace_path().read_text(encoding="utf-8"))
+            build = payload.get("build") if isinstance(payload, dict) else None
+            channels = read_channels(self.release_home)
+            if build != self.build or channels.stable != self.build:
+                return None
+            workspace = _validated_promoted_workspace(payload.get("workspace"), self.files_root)
+        except (OSError, ValueError, ReleaseError):
+            return None
+        return {"build": self.build, "workspace": workspace}
+
     def create_preview_clone(self, snapshot: object) -> str:
         if not isinstance(snapshot, dict):
             raise ReleaseError("Open Live Preview requires a board snapshot")
@@ -619,6 +741,7 @@ class SystemSketchServer(ThreadingHTTPServer):
         *,
         snapshot: object | None = None,
         preset: object = "product",
+        promoted_workspace: object | None = None,
     ) -> dict:
         if action == "preview":
             if not isinstance(preset, str) or preset not in PREVIEW_PRESETS:
@@ -660,6 +783,11 @@ class SystemSketchServer(ThreadingHTTPServer):
         if action == "promote":
             if self.channel != "preview":
                 raise ReleaseError("publishing is only available from live Preview")
+            workspace = (
+                _validated_promoted_workspace(promoted_workspace, self.files_root)
+                if promoted_workspace is not None
+                else None
+            )
             # Preview is deliberately served from its live worktree, not an
             # already-staged immutable release. The UI's second confirmation
             # is therefore the explicit acknowledgement that it may publish
@@ -695,6 +823,15 @@ class SystemSketchServer(ThreadingHTTPServer):
                 message = output or "Preview could not be published; the release command exited unsuccessfully."
                 raise ReleaseError(message) from cause
             stable = read_channels(self.release_home).stable
+            handoff_written = True
+            if workspace is not None and stable is not None:
+                try:
+                    self.write_promoted_workspace(workspace, stable)
+                except OSError:
+                    # The release itself has already succeeded; do not present
+                    # that irreversible result as a failed build merely because
+                    # its optional convenience handoff could not be persisted.
+                    handoff_written = False
             host_ready = bool(
                 stable
                 and (self.release_home / "host-releases" / stable / "manifest.json").is_file()
@@ -704,7 +841,7 @@ class SystemSketchServer(ThreadingHTTPServer):
                     "Standalone Preview published; host plugins also rebuilt."
                     if host_ready
                     else "Standalone Preview published; the host-plugin rebuild needs attention."
-                )
+                ) + ("" if handoff_written else " Workspace state could not be handed off.")
             )
         rollback_stable(self.release_home)
         return self.release_payload(message="Previous verified build selected for the next Stable launch.")

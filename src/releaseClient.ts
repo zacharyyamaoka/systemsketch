@@ -1,3 +1,5 @@
+import type { PromotionWorkspaceState } from './promotedWorkspaceState'
+
 export type ReleaseChannel = 'stable' | 'preview'
 export type ReleaseAction = 'preview' | 'stable' | 'promote' | 'rollback'
 
@@ -49,10 +51,12 @@ export async function runReleaseAction(
   action: ReleaseAction,
   snapshot?: unknown,
   preset: 'product' | 'block-dev' | 'stock' = 'product',
+  promotedWorkspace?: PromotionWorkspaceState,
 ): Promise<ReleaseStatus> {
   const body: Record<string, unknown> = { action }
   if (snapshot !== undefined) body.snapshot = snapshot
   if (action === 'preview') body.preset = preset
+  if (action === 'promote' && promotedWorkspace !== undefined) body.promotedWorkspace = promotedWorkspace
   return readResponse(await fetch('/api/release', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

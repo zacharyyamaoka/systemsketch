@@ -11,7 +11,7 @@
  *      it: in Preview it is inert state, in Stable it is still the offer.
  */
 import assert from 'node:assert/strict'
-import { readFile, utimes } from 'node:fs/promises'
+import { readFile, unlink, utimes, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
 import {
@@ -267,11 +267,21 @@ async function stableChannel() {
 async function publishFlow() {
   const app = await startApp({ label: 'systemsketch-channel-publish', build: 'channel-publish-smoke' })
   const { page, port, filesRoot, releaseHome } = app
+  // The test must make this fact explicit instead of depending on whichever
+  // incidental edits happen to be in the checkout running it. It is not an
+  // application source file, so Vite and the product build ignore it; Git and
+  // the release provenance correctly treat it as a dirty Preview worktree.
+  const dirtyMarker = join(ROOT, 'src', '.channel-publish-dirty-proof')
 
   try {
+    await writeFile(dirtyMarker, 'isolated dirty Preview proof\n')
     const board = join(filesRoot, 'SystemSketch', 'channel-publish.tldr')
     await openApp(page, port, `?board=${encodeURIComponent(board)}`)
     await waitFor(page, `document.querySelector('${BANNER}')`, 'Preview banner')
+    await evaluate(page, `localStorage.setItem(
+      'systemsketch.interface-scale.v1',
+      JSON.stringify({ version: 1, percent: 125 }),
+    )`)
 
     await clickElement(page, `${BANNER} [data-action="make-stable"]`)
     await clickElement(page, `${BANNER} [data-action="make-stable"]`)
@@ -334,10 +344,22 @@ async function publishFlow() {
     assert.equal(manifest.sourceDirty, true)
     pass('the live Preview working copy is explicitly marked dirty in the Stable manifest')
 
+    const handoff = JSON.parse(await readFile(join(releaseHome, 'state', 'promoted-workspace.json'), 'utf8'))
+    assert.equal(handoff.build, channels.stable)
+    assert.equal(handoff.workspace.activePath, board)
+    assert.equal(handoff.workspace.recents[0], board)
+    assert.equal(
+      handoff.workspace.preferences['systemsketch.interface-scale.v1'],
+      JSON.stringify({ version: 1, percent: 125 }),
+    )
+    assert.equal(handoff.workspace.preferences['unreviewed.browser.data'], undefined)
+    pass('the confirmed promotion writes only its saved shared board and reviewed app preference handoff')
+
     const errors = localConsoleErrors(page)
     assert.deepEqual(errors, [], `console errors: ${errors.join(' | ')}`)
     pass('no console errors across the full publish')
   } finally {
+    await unlink(dirtyMarker).catch(() => {})
     app.close()
   }
 }
