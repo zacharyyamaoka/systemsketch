@@ -31,6 +31,7 @@ import {
 const SHOT_PREVIEW = join(ROOT, 'docs', 'release-channel-preview-live-2026-09-01.png')
 const SHOT_ARMED = join(ROOT, 'docs', 'release-channel-armed-live-2026-09-01.png')
 const SHOT_STABLE = join(ROOT, 'docs', 'release-channel-stable-live-2026-09-01.png')
+const SHOT_BUILDING = join(ROOT, 'docs', 'release-channel-building-live-2026-09-03.png')
 const SHOT_PUBLISHED = join(ROOT, 'docs', 'release-channel-published-live-2026-09-01.png')
 
 const BANNER = '[data-testid="systemsketch-preview-mode"]'
@@ -283,6 +284,25 @@ async function publishFlow() {
     assert.equal(banner[0].disabled, true)
     pass('the second click starts the real build and locks both exits while it runs')
 
+    const progress = JSON.parse(await evaluate(page, `(() => {
+      const indicator = document.querySelector('${BANNER} [data-testid="systemsketch-build-progress"]')
+      if (!indicator) return 'null'
+      return JSON.stringify({
+        role: indicator.getAttribute('role'),
+        label: indicator.getAttribute('aria-label'),
+        valueText: indicator.getAttribute('aria-valuetext'),
+        animated: getComputedStyle(indicator.firstElementChild).animationName,
+      })
+    })()`))
+    assert.deepEqual(progress, {
+      role: 'progressbar',
+      label: 'Building Stable release',
+      valueText: 'Build in progress',
+      animated: 'systemsketch-release-progress',
+    })
+    pass('the live banner shows an honest indeterminate progress indicator while Stable builds')
+    await screenshot(page, SHOT_BUILDING)
+
     await waitFor(page,
       `document.querySelector('${BANNER} [data-action="make-stable"]').dataset.phase === 'published'`,
       'the promote finishing', 420_000)
@@ -292,6 +312,10 @@ async function publishFlow() {
     assert.equal(banner[0].label, 'Open new Stable')
     assert.equal(banner[0].emphasis, 'primary')
     pass('a finished promote reports Stable updated and turns Return into the follow-through')
+    assert.equal(
+      await evaluate(page, `Boolean(document.querySelector('${BANNER} [data-testid="systemsketch-build-progress"]'))`),
+      false)
+    pass('the progress indicator clears once the build has finished')
 
     assert.match(
       await evaluate(page, `document.querySelector('${BANNER} .systemsketch-preview-mode__detail').textContent`),
@@ -325,6 +349,7 @@ async function main() {
   const shots = [SHOT_PREVIEW, SHOT_ARMED, SHOT_STABLE]
   if (process.env.SYSTEMSKETCH_PUBLISH_PROOF) {
     await publishFlow()
+    shots.push(SHOT_BUILDING)
     shots.push(SHOT_PUBLISHED)
   } else {
     process.stdout.write('  SKIP  full publish (set SYSTEMSKETCH_PUBLISH_PROOF=1 — runs a real check + build)\n')
