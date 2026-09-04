@@ -22,6 +22,7 @@ import {
   installBranchRegions,
 } from './branch'
 import { LoopShapeUtil, LoopTool } from './loop'
+import { FloatingPortShapeUtil, FloatingPortTool } from './floatingPort'
 import {
   blockConnectionBindingUtils,
   blockConnectionShapeUtils,
@@ -95,10 +96,11 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   BranchShapeUtil,
   BranchArmShapeUtil,
   LoopShapeUtil,
+  FloatingPortShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
-const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool]
+const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool, FloatingPortTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: DevelopmentPreviewChrome,
 }
@@ -115,9 +117,10 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   BranchShapeUtil,
   BranchArmShapeUtil,
   LoopShapeUtil,
+  FloatingPortShapeUtil,
   ...blockConnectionShapeUtils,
 ]
-const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool]
+const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool, FloatingPortTool]
 const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
 
 /**

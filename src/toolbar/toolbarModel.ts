@@ -16,8 +16,8 @@ export type ShapeFamilyTool =
 
 export type DrawFamilyTool = 'draw' | 'highlight'
 
-/** The system-design family under the Block slot: Block, Branch, Pill, and room for Loop. */
-export type SystemFamilyTool = 'block' | 'branch' | 'loop' | 'pill'
+/** The system-design family under the Block slot: nodes, regions, values, and free ports. */
+export type SystemFamilyTool = 'block' | 'branch' | 'loop' | 'pill' | 'floating-port'
 
 export interface ToolbarPreferences {
   version: 1
@@ -55,7 +55,7 @@ const SHAPE_TOOLS: readonly ShapeFamilyTool[] = [
   'arrow-elbow',
 ]
 const DRAW_TOOLS: readonly DrawFamilyTool[] = ['draw', 'highlight']
-const SYSTEM_TOOLS: readonly SystemFamilyTool[] = ['block', 'branch', 'loop', 'pill']
+const SYSTEM_TOOLS: readonly SystemFamilyTool[] = ['block', 'branch', 'loop', 'pill', 'floating-port']
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -191,4 +191,3 @@ function subscribe(listener: () => void): () => void {
 export function useToolbarPreferences(): ToolbarPreferences {
   return useSyncExternalStore(subscribe, getToolbarPreferences, () => DEFAULT_TOOLBAR_PREFERENCES)
 }
-

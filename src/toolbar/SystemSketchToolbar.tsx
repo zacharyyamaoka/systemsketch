@@ -24,6 +24,7 @@ import { PillIcon } from '../blocks/PillIcon'
 import { BlockIcon } from '../blocks/BlockIcon'
 import { BRANCH_TOOL_ID, BranchIcon } from '../branch'
 import { LOOP_TOOL_ID, LoopIcon } from '../loop'
+import { FLOATING_PORT_TOOL_ID, FloatingPortIcon } from '../floatingPort'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
 import {
   selectDrawFamilyTool,
@@ -114,6 +115,7 @@ const SYSTEM_MENU_ITEMS: ReadonlyArray<{
   { id: LOOP_TOOL_ID, label: 'Loop', icon: <LoopIcon /> },
   // A pill is a variable: a literal argument, a named result, or both. P.
   { id: PILL_TOOL_ID, label: 'Pill', icon: <PillIcon />, shortcut: 'P' },
+  { id: FLOATING_PORT_TOOL_ID, label: 'Port', icon: <FloatingPortIcon /> },
 ]
 
 function isSupportedShapeTool(value: string | undefined): value is ShapeFamilyTool {
@@ -290,14 +292,17 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
       ? LOOP_TOOL_ID
       : activeToolId === BLOCK_TOOL_ID
         ? BLOCK_TOOL_ID
-        : activeToolId === PILL_TOOL_ID
+      : activeToolId === PILL_TOOL_ID
           ? PILL_TOOL_ID
-          : preferences.lastSystemTool
+          : activeToolId === FLOATING_PORT_TOOL_ID
+            ? FLOATING_PORT_TOOL_ID
+            : preferences.lastSystemTool
   const currentItem = SYSTEM_MENU_ITEMS.find((item) => item.id === current) ?? SYSTEM_MENU_ITEMS[0]
   const isActive = activeToolId === BLOCK_TOOL_ID
     || activeToolId === BRANCH_TOOL_ID
     || activeToolId === LOOP_TOOL_ID
     || activeToolId === PILL_TOOL_ID
+    || activeToolId === FLOATING_PORT_TOOL_ID
 
   return (
     <FamilyToolSlot

@@ -28,6 +28,7 @@ import {
 	type PortFace,
 } from '../blocks/connections/connectionModel'
 import type { ConnectionShape } from '../blocks/connections/ConnectionShapeUtil'
+import { isFloatingPortShape } from '../floatingPort/floatingPortModel'
 import { storedTextOr } from '../textFidelity'
 
 export const BOARD_DIAGNOSTIC_CODES = {
@@ -158,7 +159,9 @@ function blockLabel(block: BlockShape): string {
 function portHostLabel(host: PortHostShape): string {
 	return isBlockShape(host)
 		? blockLabel(host)
-		: storedTextOr(host.props.title, 'Untitled Branch')
+		: isFloatingPortShape(host)
+			? storedTextOr(host.props.name, 'Untitled Port')
+			: storedTextOr(host.props.title, 'Untitled Region')
 }
 
 function endpointLabel(endpoint: BoundEndpoint): string {

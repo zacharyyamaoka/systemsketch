@@ -2,6 +2,8 @@
 
 SystemSketch starts from one deliberately boring datum: the stock tldraw whiteboard. Its engine, drawing tools, and shortcuts stay stock while narrow supported seams add local files, board overview, zoom, Help, and the Stable/Preview workflow.
 
+The [floating Port primitive implementation gallery](docs/floating-port-primitive-2026-09-04.html) makes one named, typed, optionally valued wire endpoint composable on its own: place it freely, aim it left or right, choose inline or lifted text, and let Auto fill follow real cables (or override that paint deliberately). Its guided [`floating-port.systemsketch`](sketches/review/floating-port.systemsketch) review board starts with a `Port → Block → Port` chain ready to inspect.
+
 The [Behavior Tree representation research gallery](docs/behavior-tree-representations-research-2026-09-04.html) separates AICA's reactive application graph, MoveIt Studio Pro's classic BehaviorTree.CPP canvas, and Intrinsic Flowstate's process projection into a proposed SystemSketch grammar: one canonical behavior tree, three focused views, top-to-bottom control, and left-to-right dataflow revealed only where it earns its complexity.
 
 The [MoveIt Studio Pro · BehaviorTree.CPP · Groot2 prior-art atlas](docs/behavior-tree-moveit-groot-prior-art-2026-09-04.html) is the detailed follow-on: 28 visual dictionary entries cover every useful canvas node family plus the editor, navigation, inspector, runtime, replay, and testing controls around it. Each useful entry pairs a primary-source vendor capture with an original SystemSketch proposal, and it makes the central boundary explicit: copy the control grammar and observability, not a hidden global Blackboard or robotics workbench.

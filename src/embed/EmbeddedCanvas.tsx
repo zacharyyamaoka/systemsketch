@@ -19,6 +19,7 @@ import {
   installBlockPortMenuTarget,
   installDefinitionLinking,
 } from '../blocks'
+import { FloatingPortShapeUtil, FloatingPortTool } from '../floatingPort'
 import { BlockContextMenu } from '../blocks/ui'
 import {
   BranchArmShapeUtil,
@@ -123,10 +124,11 @@ const EMBEDDED_SHAPE_UTILS = [
   BlockShapeUtil,
   BranchShapeUtil,
   BranchArmShapeUtil,
+  FloatingPortShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const EMBEDDED_BINDING_UTILS = [...blockConnectionBindingUtils]
-const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool]
+const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool, FloatingPortTool]
 
 /** Long enough that a drag is one write, short enough that a pause is saved. */
 const CHANGE_DEBOUNCE_MS = 250
