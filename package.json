@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 4322 --strictPort",
+    "review": "python3 scripts/review_runtime.py",
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "test:python": "python3 -m unittest discover -s tests -v",

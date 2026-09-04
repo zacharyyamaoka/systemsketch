@@ -2,7 +2,7 @@
 
 SystemSketch starts from one deliberately boring datum: the stock tldraw whiteboard. Its engine, drawing tools, and shortcuts stay stock while narrow supported seams add local files, board overview, zoom, Help, and the Stable/Preview workflow.
 
-The [review-server lifecycle investigation](docs/server-lifecycle-investigation-2026-09-03.html) shows why a live review URL often disappears after its chat ends: track `serve.sh` processes are deliberately task-owned and clean themselves up, while a retained review needs a detached, commit-pinned runtime. All endpoints sampled were healthy; the retained-runtime solution exists but has not been merged onto current `main`.
+The [review-server lifecycle investigation](docs/server-lifecycle-investigation-2026-09-03.html) explains why a track URL disappears after its chat ends: `serve.sh` is deliberately task-owned. The [retained-review runtime gallery](docs/review-runtime-persistence-2026-09-03.html) records the shipped alternative: `npm run review -- up …` pins a committed board/report in its own worktree, waits for its public health check, supervises the pair, and stays live until `down NAME` or `down --all` is explicitly requested.
 
 The [Preview board-recovery gallery](docs/preview-board-recovery-2026-09-03.html) records the safe reopen path for an old, multi-page SystemSketch board: a required Block style property is migrated before validation, Branch arm repair waits until the loading transaction finishes, and the recovered Series A board opens with all 598 shapes intact instead of being replaced by an empty canvas.
 

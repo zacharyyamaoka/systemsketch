@@ -87,6 +87,21 @@ Use the real-editor/autosave helper instead of hand-editing tldraw schema JSON, 
 generated PNG, and drive the fixture once in the real app. It supplements tests and never
 targets `~/SystemSketch`.
 
+## Persistent human review URLs
+
+- A track's `serve.sh` is an agent-owned development process. Never describe its URL as a
+  later-review link: it intentionally exits with the agent shell.
+- When a handoff includes a board or report Zach should be able to open later, first commit the
+  exact review artifacts, then run `python3 scripts/review_runtime.py up <review-name> --ref HEAD
+  --board <relative-board> --report <relative-report>`. It creates a detached, commit-pinned
+  review worktree and prints a URL only after its public health check passes.
+- Retained reviews stay live until an explicit `python3 scripts/review_runtime.py down
+  <review-name>` or `python3 scripts/review_runtime.py down --all`. Do not use a chat/session-end
+  hook as a proxy for archiving: it also fires after a short inactivity window, which defeats
+  delayed human review.
+- `remove <review-name>` is the explicit destructive retirement that also deletes the retained
+  worktree. The normal worktree sweeper recognizes the review lease and leaves it alone.
+
 ## Concurrent edits
 
 - This tree normally has several active sessions. Check mtime before rewriting; a recently

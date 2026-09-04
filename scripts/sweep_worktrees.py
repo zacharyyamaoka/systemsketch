@@ -32,6 +32,7 @@ Only the standard library is used.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
@@ -159,6 +160,19 @@ def size_of(path: Path) -> str:
     return f"{total / 1024 / 1024:.0f}M"
 
 
+def review_lease(path: Path) -> str | None:
+    """A retained human review is intentionally not disposable track residue."""
+    manifest = path / ".review-runtime" / "lease.json"
+    if not manifest.is_file():
+        return None
+    try:
+        payload = json.loads(manifest.read_text(encoding="utf-8"))
+        name = payload.get("name")
+        return name if isinstance(name, str) else "unnamed"
+    except (OSError, ValueError, TypeError):
+        return "unreadable"
+
+
 def verdict(tree: dict, self_path: Path) -> tuple[bool, str]:
     """May this worktree be removed, and if not, what is holding it?"""
     path = tree["path"]
@@ -166,6 +180,8 @@ def verdict(tree: dict, self_path: Path) -> tuple[bool, str]:
         return False, "the main checkout"
     if path == self_path:
         return False, "you are standing in it"
+    if lease := review_lease(path):
+        return False, f"retained review lease {lease!r}; retire it through review_runtime.py"
     if not is_merged(tree["head"]):
         return False, "has commits main does not"
     lost, _ = leftovers(path)
