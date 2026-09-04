@@ -30,7 +30,13 @@ import { CodeView } from './CodeView'
 import { PropertyTable, type TableLayout } from './PropertyTable'
 import { compareBoards, recordsOfSnapshot, type CompareChange } from './compareModel'
 import { orderChanges } from './propertyRows'
-import { discoverHistory, loadEntrySnapshot, type HistoryEntry } from './compareSource'
+import {
+	HistoryList,
+	boardHistoryRecords,
+	buildVersionChain,
+	discoverVersions,
+	type VersionStep,
+} from '../history'
 // The tab strip below is the app's own `.block-inspector__tabs`, not a
 // lookalike. Imported explicitly rather than leaned on transitively, so the
 // rule set travels with the component that depends on it.
@@ -39,6 +45,8 @@ import './compare.css'
 
 export type CompareMode = 'side-by-side' | 'overlay'
 export type CompareTab = 'properties' | 'code'
+/** Where the Properties/Code panel is docked. Figma offers both; so does this. */
+export type CompareDock = 'right' | 'bottom'
 
 const KIND_ORDER = ['added', 'removed', 'modified'] as const
 
@@ -49,9 +57,8 @@ export interface CompareDialogProps {
 }
 
 export function CompareDialog({ editor, currentPath, onClose }: CompareDialogProps) {
-	const [history, setHistory] = useState<HistoryEntry[]>([])
+	const [steps, setSteps] = useState<VersionStep[]>([])
 	const [beforeId, setBeforeId] = useState<string | null>(null)
-	const [beforeSnapshot, setBeforeSnapshot] = useState<TLStoreSnapshot | null>(null)
 	const [afterSnapshot, setAfterSnapshot] = useState<TLStoreSnapshot | null>(null)
 	const [mode, setMode] = useState<CompareMode>('side-by-side')
 	const [tab, setTab] = useState<CompareTab>('properties')
@@ -95,6 +102,22 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 	 */
 	const [layout, setLayout] = useState<TableLayout>('figma')
 	const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
+	/**
+	 * Where the Properties/Code panel lives — the right rail, or Figma's bottom.
+	 *
+	 * Zach asked for the switch without asserting which is better: *"I am not
+	 * sure what is best but it will be nice to be able to switch between the
+	 * two."* So this is a real A/B he can flip while looking at his own board,
+	 * not a build to compare from memory.
+	 *
+	 * It is a STAMP, exactly like `fullscreen` above, and for exactly the same
+	 * reason: the panel's subtree never unmounts, it is re-placed by CSS grid. So
+	 * the selected row, the active tab, the ink toggle and the table layout
+	 * survive the move BY CONSTRUCTION. The tempting alternative — rendering a
+	 * second panel in the bottom slot and handing it the state — is how "the mode
+	 * change lost my place" gets reintroduced one prop at a time.
+	 */
+	const [dock, setDock] = useState<CompareDock>('right')
 
 	useLinkedCameras(afterEditor, beforeEditor)
 
@@ -103,42 +126,45 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 		setAfterSnapshot(editor.store.getStoreSnapshot())
 	}, [editor])
 
+	/*
+	 * The whole version chain, loaded once, with each step diffed against the one
+	 * before it.
+	 *
+	 * The rail used to say "Version 1" and "Version 2" — true, and silent about
+	 * the only thing a reviewer opens a history to learn. Building the chain here
+	 * is what lets every row carry a MEASURED title ("Edited run_predict") and a
+	 * real mtime, and it is the same chain the Block inspector's History tab
+	 * filters, so the two panels cannot disagree about what happened.
+	 */
 	useEffect(() => {
 		let cancelled = false
-		discoverHistory(currentPath).then((entries) => {
-			if (cancelled) return
-			setHistory(entries)
-			const firstPrior = entries.find((entry) => !entry.isCurrent)
-			setBeforeId(firstPrior?.id ?? null)
-			if (!firstPrior) {
-				setProblem(
-					'No prior versions found beside this board. Save a `<name>.v1.systemsketch` next to it to compare against.',
-				)
-			}
-		})
+		discoverVersions(currentPath)
+			.then((files) => buildVersionChain(files, editor))
+			.then((chain) => {
+				if (cancelled) return
+				setSteps(chain)
+				const firstPrior = chain.find((step) => !step.file.isCurrent)
+				setBeforeId(firstPrior?.file.id ?? null)
+				if (!firstPrior) {
+					setProblem(
+						'No prior versions found beside this board. Save a `<name>.v1.systemsketch` next to it to compare against.',
+					)
+				} else if (!firstPrior.snapshot) {
+					setProblem(`Could not read ${firstPrior.file.label}.`)
+				}
+			})
 		return () => {
 			cancelled = true
 		}
-	}, [currentPath])
+	}, [currentPath, editor])
 
+	// Picking a version is now a lookup, not a fetch — the chain already holds
+	// every snapshot, so the boards swap without a round trip.
+	const beforeStep = steps.find((step) => step.file.id === beforeId) ?? null
+	const beforeSnapshot = beforeStep?.snapshot ?? null
 	useEffect(() => {
-		const entry = history.find((candidate) => candidate.id === beforeId)
-		if (!entry) return
-		let cancelled = false
-		loadEntrySnapshot(entry, editor).then((snapshot) => {
-			if (cancelled) return
-			if (!snapshot) {
-				setProblem(`Could not read ${entry.note}.`)
-				return
-			}
-			setProblem(null)
-			setBeforeSnapshot(snapshot)
-			setSelectedId(null)
-		})
-		return () => {
-			cancelled = true
-		}
-	}, [beforeId, history, editor])
+		setSelectedId(null)
+	}, [beforeId])
 
 	const comparison = useMemo(() => {
 		if (!beforeSnapshot || !afterSnapshot) return null
@@ -252,19 +278,39 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 		else afterEditor?.zoomToFit({ animation: { duration: 0 } })
 	}
 
-	const framedMode = useRef(fullscreen)
+	/*
+	 * Re-frame on ANY change to the stage's shape — fullscreen or dock.
+	 *
+	 * This used to key on `fullscreen` alone, and docking the panel to the bottom
+	 * showed exactly why that was too narrow: the boards gained 500px of width
+	 * and lost a third of their height, and the camera kept framing for the tall
+	 * narrow pane it no longer had, so the bottom of the board was simply cut
+	 * off. Caught in a screenshot, not by any assertion. The key is therefore the
+	 * stage's shape rather than one named mode, so a third placement cannot
+	 * reintroduce this by forgetting to add itself here.
+	 */
+	const stageShape = `${fullscreen}:${dock}`
+	const framedMode = useRef(stageShape)
 	useEffect(() => {
 		if (!afterEditor) return
-		// Guarded on an actual mode flip: this must not fire on mount, where it
-		// would race the initial "frame on everything that changed" pass below.
-		if (framedMode.current === fullscreen) return
-		framedMode.current = fullscreen
+		// Guarded on an actual flip: this must not fire on mount, where it would
+		// race the initial "frame on everything that changed" pass below.
+		if (framedMode.current === stageShape) return
+		framedMode.current = stageShape
 		// tldraw learns its new size from a resize observer, so the re-frame has
 		// to land after that lands — zooming first would compute against the
-		// viewport the stage just stopped having.
-		const timer = window.setTimeout(() => reframe.current(), 140)
-		return () => window.clearTimeout(timer)
-	}, [fullscreen, afterEditor])
+		// viewport the stage just stopped having. CSS Grid also settles a second
+		// time in some hosts after the dock's formerly-right column becomes a
+		// bottom row, so repeat once after that final layout pass. WHY: retaining
+		// the selected change is useful only if it remains visible; an early
+		// one-shot frame can otherwise leave its mark clipped at the new edge.
+		const firstFrame = window.setTimeout(() => reframe.current(), 140)
+		const settledFrame = window.setTimeout(() => reframe.current(), 420)
+		return () => {
+			window.clearTimeout(firstFrame)
+			window.clearTimeout(settledFrame)
+		}
+	}, [stageShape, afterEditor])
 
 	/**
 	 * Open already framed on what changed.
@@ -346,8 +392,17 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 		setSelectedElementId(selected.elementId)
 	}, [selected])
 
-	const beforeEntry = history.find((entry) => entry.id === beforeId) ?? null
+	const beforeEntry = beforeStep?.file ?? null
 	const tally = comparison?.tally
+	/*
+	 * The rail's rows, newest first — Figma's order.
+	 *
+	 * Figma lists the most recent change at the top, because the question a
+	 * history answers most often is "what just happened", not "what happened
+	 * first". The chain is built oldest-first because that is the order a diff
+	 * has to walk; `boardHistoryRecords` reverses it for reading.
+	 */
+	const historyRecords = useMemo(() => boardHistoryRecords(steps), [steps])
 	/*
 	 * Fullscreen is inherently a crossfade: there is one viewport and two
 	 * versions to put in it. Entering from Side by side would otherwise leave
@@ -356,7 +411,7 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 	 * `mode` itself is untouched, which is what restores Side by side on return.
 	 */
 	const stageMode: CompareMode = fullscreen ? 'overlay' : mode
-	const priorVersions = history.filter((entry) => !entry.isCurrent)
+	const priorVersions = steps.filter((step) => !step.file.isCurrent).map((step) => step.file)
 
 	/*
 	 * Three controls built once and placed into different slots per mode.
@@ -503,36 +558,42 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 							</Dialog.Close>
 						</header>
 
-						<div className="systemsketch-compare__body">
-							<aside className="systemsketch-compare__history" data-testid="compare-history">
+						<div className="systemsketch-compare__body" data-dock={dock}>
+							{/* The PANEL and the LIST inside it need separate ids — one
+							  * testid on both made `querySelector` return whichever came
+							  * first in the DOM, which is how a check for the list silently
+							  * measured its container instead. */}
+							<aside className="systemsketch-compare__history" data-testid="compare-history-panel">
 								<h3>History</h3>
-								<ul>
-									{history.map((entry) => (
-										<li key={entry.id}>
-											<button
-												type="button"
-												data-testid={`compare-history-${entry.id}`}
-												data-selected={
-													(entry.isCurrent ? false : entry.id === beforeId) || undefined
-												}
-												data-current={entry.isCurrent || undefined}
-												disabled={entry.isCurrent}
-												onClick={() => setBeforeId(entry.id)}
-											>
-												<span className="systemsketch-compare__history-label">{entry.label}</span>
-												<span className="systemsketch-compare__history-note">{entry.note}</span>
-												{entry.isCurrent ? (
-													<span className="systemsketch-compare__history-pin">after</span>
-												) : entry.id === beforeId ? (
-													<span className="systemsketch-compare__history-pin">before</span>
-												) : null}
-											</button>
-										</li>
-									))}
-								</ul>
+								{/*
+								  * Figma's own history list, not a rail that merely lists files.
+								  *
+								  * These rows are `src/history/HistoryList` — the SAME component the
+								  * Block inspector's History tab mounts, at a different density. That
+								  * is the point Zach made: *"you only have to understand the
+								  * interaction pattern once."* Two lists that merely looked alike
+								  * would satisfy the screenshot and break the promise the first time
+								  * either one changed.
+								  */}
+								<HistoryList
+									records={historyRecords}
+									selectedId={beforeId}
+									onSelect={setBeforeId}
+									density="comfortable"
+									testidPrefix="compare-history"
+									emptyCopy="No versions found beside this board."
+									// The live board is the fixed `after` endpoint, so it is a label
+									// here rather than a choice — picking it would ask the panel to
+									// diff the board against itself.
+									isDisabled={(record) => record.isCurrent}
+									pinOf={(record) =>
+										record.isCurrent ? 'after' : record.id === beforeId ? 'before' : null
+									}
+								/>
 								<p className="systemsketch-compare__history-foot">
 									Selecting an entry sets it as <strong>before</strong>. The current board is always{' '}
-									<strong>after</strong>.
+									<strong>after</strong>. Titles are measured by diffing the files;
+									SystemSketch records no author.
 								</p>
 							</aside>
 
@@ -686,6 +747,34 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 									>
 										Code
 									</button>
+									{/*
+									  * The dock switch, on the strip it moves.
+									  *
+									  * Zach asked for it "small, findable, not intrusive". It rides
+									  * the panel's own tab strip rather than the bottom bar, which is
+									  * what makes it findable without a label: a control that moves a
+									  * panel belongs ON that panel, the way a window's own chrome
+									  * carries its own dock and close. The bottom bar already owns
+									  * how the BOARDS are shown; adding a second unrelated job to it
+									  * is how a bar becomes a junk drawer.
+									  *
+									  * It is an icon, and it is the only unlabelled control here, so
+									  * it carries both `title` and `aria-label` naming the
+									  * destination rather than the current state — "Dock to the
+									  * bottom" is actionable, "Docked right" is a status nobody
+									  * asked for.
+									  */}
+									<button
+										type="button"
+										className="systemsketch-compare__dock-toggle"
+										data-testid="compare-dock-toggle"
+										data-dock={dock}
+										aria-label={dock === 'right' ? 'Dock panel to the bottom' : 'Dock panel to the right'}
+										title={dock === 'right' ? 'Dock to the bottom (like Figma)' : 'Dock to the right'}
+										onClick={() => setDock(dock === 'right' ? 'bottom' : 'right')}
+									>
+										<DockIcon dock={dock} />
+									</button>
 								</nav>
 								<div className="systemsketch-compare__detail-body">
 									{problem ? (
@@ -755,6 +844,37 @@ export function CompareDialog({ editor, currentPath, onClose }: CompareDialogPro
 				</Dialog.Content>
 			</Dialog.Portal>
 		</Dialog.Root>
+	)
+}
+
+/**
+ * A pane with one edge filled — the destination, not the current state.
+ *
+ * Drawn to match the dock glyphs in VS Code's and Figma's own panel controls: a
+ * rounded outline for the frame, a solid band on the edge the panel would move
+ * to. Showing the DESTINATION is what makes a single unlabelled button legible;
+ * an icon showing where the panel already is would leave the reader to work out
+ * whether pressing it confirms or changes that.
+ */
+function DockIcon({ dock }: { dock: CompareDock }) {
+	return (
+		<svg viewBox="0 0 16 16" aria-hidden="true">
+			<rect
+				x="1.75"
+				y="2.75"
+				width="12.5"
+				height="10.5"
+				rx="2"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="1.3"
+			/>
+			{dock === 'right' ? (
+				<rect x="3" y="9.6" width="10" height="2.55" rx="0.9" fill="currentColor" />
+			) : (
+				<rect x="9.6" y="4" width="3.15" height="8" rx="0.9" fill="currentColor" />
+			)}
+		</svg>
 	)
 }
 

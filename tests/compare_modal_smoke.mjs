@@ -283,7 +283,9 @@ async function main() {
     pass('the Code / Properties switch returns to the table')
 
     // ---- history ----------------------------------------------------------
-    await clickElement(app.page, '[data-testid="compare-history-v2"]')
+    // The rail is now the shared `HistoryList`, whose row control is
+    // `<prefix>-pick-<id>`; the old bare `<prefix>-<id>` button is gone.
+    await clickElement(app.page, '[data-testid="compare-history-pick-v2"]')
     await delay(900)
     const nearRows = await evaluate(app.page, READ_ROWS)
     assert.ok(
@@ -295,7 +297,7 @@ async function main() {
     pass(`selecting Version 2 re-diffs against a nearer version (${nearRows.length} rows)`)
     await capture(app.page, 'compare-modal-history-v2.png')
 
-    await clickElement(app.page, '[data-testid="compare-history-v1"]')
+    await clickElement(app.page, '[data-testid="compare-history-pick-v1"]')
     await delay(900)
 
     // ---- close ------------------------------------------------------------

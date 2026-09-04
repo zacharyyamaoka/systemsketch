@@ -55,11 +55,12 @@ import {
   setBlockShowDescriptionForSelection,
   setBlockViewForSelection,
 } from '../commands/blockStyleCommands'
+import { ElementHistoryPanel } from '../../history/ElementHistoryPanel'
 import { BlockBatchInspectorContent } from './BlockBatchInspector'
 import { BLOCK_ICONS, BlockIconGlyph } from './blockIcons'
 import './block-inspector.css'
 
-type InspectorTab = 'details' | 'notes'
+type InspectorTab = 'details' | 'notes' | 'history'
 
 const DISPLAY_DESCRIPTION_LIMIT = 120
 
@@ -110,6 +111,18 @@ export interface BlockInspectorContentProps {
   initialTab?: InspectorTab
   onRequestClose?: () => void
   pill?: PillInspectorFacts
+  /**
+   * The element's own history panel, injected rather than built here.
+   *
+   * WHY: this component is presentational and is mounted in chromes that have no
+   * workspace provider at all (the development profiles) and in unit tests that
+   * have neither a provider nor a server. Resolving a file history inside it
+   * would make every one of those callers carry a fetch they never asked for. As
+   * a slot, the tab simply does not exist where nobody supplied one — and where
+   * one is supplied, the panel mounts only when the tab is opened, which is what
+   * keeps the read lazy without a second `enabled` flag to keep in sync.
+   */
+  historyPanel?: ReactNode
 }
 
 function TinyIcon({ children }: { children: ReactNode }) {
@@ -124,6 +137,16 @@ function FileTextIcon() {
   return (
     <TinyIcon>
       <path d="M4 2.25h5l3 3v8.5H4zM9 2.25v3h3M6 8h4M6 10.5h4" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+    </TinyIcon>
+  )
+}
+
+/* A clock with a hand, the same glyph Figma and Onshape both use for history. */
+function ClockIcon() {
+  return (
+    <TinyIcon>
+      <circle cx="8" cy="8" r="5.75" stroke="currentColor" strokeWidth="1.25" />
+      <path d="M8 4.75V8l2.25 1.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
     </TinyIcon>
   )
 }
@@ -941,6 +964,7 @@ export function BlockInspectorContent({
   initialTab = 'details',
   onRequestClose,
   pill,
+  historyPanel,
 }: BlockInspectorContentProps) {
   const [tab, setTab] = useState<InspectorTab>(initialTab)
   const readOnly = !actions
@@ -963,11 +987,30 @@ export function BlockInspectorContent({
           role="tab"
           className={tab === 'notes' ? 'is-active' : ''}
           aria-selected={tab === 'notes'}
+          data-testid="block-inspector-tab-notes"
           onClick={() => setTab('notes')}
         >
           <FileTextIcon />
           Notes
         </button>
+        {/*
+          * History joins the strip only where a panel was supplied — see
+          * `historyPanel`. A tab that rendered an apology for having no data
+          * source would be a permanent piece of chrome advertising a gap.
+          */}
+        {historyPanel ? (
+          <button
+            type="button"
+            role="tab"
+            className={tab === 'history' ? 'is-active' : ''}
+            aria-selected={tab === 'history'}
+            data-testid="block-inspector-tab-history"
+            onClick={() => setTab('history')}
+          >
+            <ClockIcon />
+            History
+          </button>
+        ) : null}
         {onRequestClose ? (
           <button
             type="button"
@@ -984,7 +1027,9 @@ export function BlockInspectorContent({
         <p className="block-inspector__notice">Place a Block to edit these defaults.</p>
       ) : null}
 
-      {tab === 'notes' ? (
+      {tab === 'history' && historyPanel ? (
+        historyPanel
+      ) : tab === 'notes' ? (
         <section className="block-inspector__notes" role="tabpanel" aria-label="Detailed notes">
           <header>
             <span className="block-inspector__section-title">Detailed notes</span>
@@ -1253,13 +1298,34 @@ export function EditorBlockInspector({
     )
   }
 
+  const shown = context.kind === 'selected' ? context.props : (draft ?? context.props)
+
   return (
     <BlockInspectorContent
-      props={context.kind === 'selected' ? context.props : (draft ?? context.props)}
+      props={shown}
       status={context.kind === 'selected' ? 'selected' : 'new'}
       actions={actions}
       pill={pillFacts}
       onRequestClose={onRequestClose}
+      /*
+       * History only for a Block that is actually ON the board.
+       *
+       * WHY: a tool draft has no shape id and therefore nothing a version file
+       * could ever be diffed against — offering the tab there would promise a
+       * history for something that has not happened yet. `block:` prefixes the
+       * shape id because that is `compareModel`'s element vocabulary, and both
+       * panels have to key on the same string or the shared chain cannot serve
+       * them both.
+       */
+      historyPanel={
+        context.kind === 'selected' ? (
+          <ElementHistoryPanel
+            editor={editor}
+            elementId={`block:${context.shape.id}`}
+            elementName={shown.title}
+          />
+        ) : undefined
+      }
     />
   )
 }

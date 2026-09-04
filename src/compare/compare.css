@@ -101,7 +101,17 @@
  */
 .systemsketch-compare__body {
   display: grid;
-  grid-template-columns: 228px minmax(0, 1fr) minmax(470px, 34%);
+  /*
+   * The rail is 252px, not 228px.
+   *
+   * A Figma-language row spends its width on a 22px circle, a gap, an optional
+   * BEFORE/AFTER pin and a disclosure chevron before the title gets any — and at
+   * 228px "Earliest recorded version" truncated to "Earliest record…". The rail
+   * grew rather than the row shrinking, because every part it would have had to
+   * drop is load-bearing: the circle is the version, the pin is which endpoint
+   * this is, the chevron is the only way to the description.
+   */
+  grid-template-columns: 252px minmax(0, 1fr) minmax(470px, 34%);
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -123,6 +133,78 @@
   border-left: 1px solid var(--ss-border);
 }
 
+/* ---- the two dock placements -------------------------------------------
+ *
+ * Right is the default and is the three-column grid above. Bottom is Figma's:
+ * the panel becomes a full-width strip beneath the boards, and the boards take
+ * the width back.
+ *
+ * This is a GRID re-placement of the same DOM, never a second panel. The subtree
+ * does not unmount, so the selected row, the active tab, the ink toggle and the
+ * table layout survive the move without a single line of save/restore — the same
+ * discipline `fullscreen` uses, for the same reason.
+ *
+ * The History rail keeps its full height in both. It is navigation, not detail:
+ * folding it into the bottom strip would put "which version" and "what changed
+ * in it" in one box and cost the reader the thing the rail is for.
+ */
+.systemsketch-compare__body[data-dock='bottom'] {
+  grid-template-columns: 252px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(200px, 38%);
+}
+
+.systemsketch-compare__body[data-dock='bottom'] .systemsketch-compare__history {
+  grid-row: 1 / span 2;
+}
+
+.systemsketch-compare__body[data-dock='bottom'] .systemsketch-compare__detail {
+  grid-column: 2;
+  grid-row: 2;
+  border-top: 1px solid var(--ss-border);
+  border-left: 0;
+}
+
+/*
+ * Docked at the bottom, the table is wide and short — so it scrolls in its own
+ * box rather than pushing the tab strip off the top. `min-height: 0` on the
+ * body is what actually lets a grid child scroll instead of growing.
+ */
+.systemsketch-compare__body[data-dock='bottom'] .systemsketch-compare__detail-body {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.systemsketch-compare__dock-toggle {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  /* Pushed to the strip's far end, away from the tabs it is not one of. */
+  margin-left: auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ss-text-muted);
+  cursor: pointer;
+}
+
+.systemsketch-compare__dock-toggle:hover {
+  border-color: var(--ss-border);
+  color: var(--ss-text);
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-compare__dock-toggle:focus-visible {
+  outline: 2px solid var(--ss-focus-ring);
+  outline-offset: -2px;
+}
+
+.systemsketch-compare__dock-toggle svg {
+  width: 15px;
+  height: 15px;
+}
+
 .systemsketch-compare__history h3 {
   margin: 0;
   padding: 12px 14px 8px;
@@ -133,66 +215,25 @@
   color: var(--ss-text-muted);
 }
 
-.systemsketch-compare__history ul {
+/*
+ * The rail is now a CONTAINER, and the rows are not its business.
+ *
+ * What used to live here was a full row implementation — a two-column grid on
+ * `.systemsketch-compare__history button`, a label, a note, a pin. It is deleted
+ * rather than left in place, and the deletion is the load-bearing part: that
+ * `button` descendant selector matched EVERY button inside the rail, so once the
+ * shared `HistoryList` moved in, it silently re-gridded the row's pick button
+ * and its disclosure chevron and pulled the anatomy apart. Two implementations
+ * of one row cannot coexist even when only one of them is being rendered.
+ *
+ * The rows now come from `src/history/history.css`, which is the same file the
+ * Block inspector's History tab is styled by. This rule set owns the scroll box
+ * and nothing else.
+ */
+.systemsketch-compare__history .ss-history {
   flex: 1 1 auto;
-  margin: 0;
-  padding: 0 8px;
+  padding: 0 8px 8px;
   overflow-y: auto;
-  list-style: none;
-}
-
-.systemsketch-compare__history button {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2px 8px;
-  width: 100%;
-  margin-bottom: 4px;
-  padding: 8px 10px;
-  text-align: left;
-  color: var(--ss-text);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.systemsketch-compare__history button:hover:not(:disabled) {
-  background: var(--ss-surface-hover);
-}
-
-.systemsketch-compare__history button[data-selected] {
-  background: var(--ss-accent-soft);
-  border-color: var(--ss-accent);
-}
-
-.systemsketch-compare__history button[data-current] {
-  cursor: default;
-  opacity: 0.9;
-  border-style: dashed;
-  border-color: var(--ss-border-strong, var(--ss-border));
-}
-
-.systemsketch-compare__history-label {
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.systemsketch-compare__history-note {
-  grid-column: 1 / -1;
-  font-size: 11px;
-  color: var(--ss-text-muted);
-  overflow-wrap: anywhere;
-}
-
-.systemsketch-compare__history-pin {
-  align-self: start;
-  padding: 1px 6px;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: var(--ss-text);
-  background: var(--ss-surface-sunken);
-  border-radius: 999px;
 }
 
 .systemsketch-compare__history-foot {
@@ -551,43 +592,30 @@
   color: var(--ss-text);
 }
 
-/* ---- the toolbar entry point -------------------------------------------- */
+/* ---- the toolbar entry point --------------------------------------------
+ *
+ * The button now lives IN the top-right shell, so it takes that shell's
+ * `.systemsketch-shell-icon-button` styling and this class adds almost nothing.
+ * What used to be here was a self-contained pill with its own height, padding,
+ * border and background — a complete second button style, which is precisely why
+ * it looked like it belonged to nothing. The absolutely-positioned
+ * `.systemsketch-compare-trigger-slot` that held it is deleted with it; leaving
+ * an unused `position: absolute` rule behind is how a floating element comes
+ * back.
+ */
 
-.systemsketch-compare-trigger {
-  display: inline-flex;
-  gap: 6px;
-  align-items: center;
-  height: 32px;
-  padding: 0 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ss-text);
-  background: var(--ss-surface-raised);
-  border: 1px solid var(--ss-border);
-  border-radius: 8px;
-  cursor: pointer;
-  pointer-events: all;
-}
-
-.systemsketch-compare-trigger:hover {
-  background: var(--ss-surface-hover);
+.systemsketch-compare-trigger svg {
+  display: block;
 }
 
 /*
- * Below the share zone, not beside it.
- *
- * At `top: 8px` this sat on top of tldraw's own share panel — still clickable,
- * because it is a later sibling, but covering the avatar and the channel
- * button. The share zone measures 40px tall from y=17 in the product chrome,
- * so 64px clears it with room for the interface-scale settings that grow it.
+ * The rule that used to be here read: "Below the share zone, not beside it" —
+ * `top: 64px` chosen to clear tldraw's share panel, which the button at
+ * `top: 8px` had been covering. That comment was the diagnosis all along. A
+ * control that has to be nudged out of the way of the chrome is a control that
+ * should have been IN the chrome, and it is now: `CompareTrigger` renders inside
+ * `SystemSketchSharePanel`, so there is no zone left to dodge.
  */
-.systemsketch-compare-trigger-slot {
-  position: absolute;
-  top: 64px;
-  right: 8px;
-  z-index: 400;
-  pointer-events: none;
-}
 
 /* ---- the bar's own controls -------------------------------------------- */
 

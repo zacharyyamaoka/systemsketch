@@ -1,0 +1,278 @@
+/*
+ * Figma's history row, in SystemSketch's tokens.
+ *
+ * Every colour is a `--ss-*` token so the list follows the SystemSketch, VS Code
+ * and Obsidian themes for free. Nothing here is a literal hex: a hard-coded
+ * "Figma dark grey" would be faithful to the screenshot and wrong in every theme
+ * but the one it was sampled from.
+ *
+ * The two densities are the SAME rules with different metrics, expressed as
+ * custom properties on the list. A second rule block per density is how two
+ * lists that were meant to be one component start to drift.
+ */
+
+.ss-history {
+  /* Local layout metrics, not theme vocabulary. */
+  --history-pad-y: 7px;
+  --history-pad-x: 9px;
+  --history-avatar: 22px;
+  --history-gap: 9px;
+  --history-title: 12px;
+  --history-meta: 11px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * Compact is for the inspector's narrower panel: the row loses height and the
+ * circle loses 4px, and NOTHING loses its place. Anatomy is what makes the two
+ * lists recognisably one component, so the avatar, the title, the meta line and
+ * the disclosure all survive the squeeze — only the metrics move.
+ */
+.ss-history[data-density='compact'] {
+  --history-pad-y: 5px;
+  --history-pad-x: 7px;
+  --history-avatar: 18px;
+  --history-gap: 7px;
+  --history-title: 11.5px;
+  --history-meta: 10.5px;
+}
+
+.ss-history__item {
+  display: flex;
+  flex-direction: column;
+}
+
+.ss-history__row {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  border-radius: 6px;
+}
+
+.ss-history__row:hover {
+  background: var(--ss-surface-hover);
+}
+
+/*
+ * The selected row: a soft tint, and INK on it.
+ *
+ * Figma tints the active entry rather than outlining it, so the tint is the
+ * right replication. The text on top of it is `--ss-text`, never `--ss-accent`:
+ * accent-on-accent-soft measures 2.6–4.3:1 in every palette this app ships,
+ * which is below the floor for body text. The accent survives as the left bar,
+ * where it is a mark rather than something anyone has to read.
+ */
+.ss-history__row[data-selected] {
+  background: var(--ss-accent-soft);
+}
+
+.ss-history__row[data-selected]:hover {
+  background: var(--ss-accent-soft-hover);
+}
+
+.ss-history__row[data-selected]::before {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+  width: 2px;
+  border-radius: 0 2px 2px 0;
+  background: var(--ss-accent);
+  content: '';
+}
+
+.ss-history__pick {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--history-gap);
+  padding: var(--history-pad-y) var(--history-pad-x);
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.ss-history__pick:disabled {
+  cursor: default;
+}
+
+.ss-history__pick:focus-visible {
+  outline: 2px solid var(--ss-focus-ring);
+  outline-offset: -2px;
+}
+
+/* ---- the circular slot ---------------------------------------------------
+ *
+ * Figma puts the author's avatar here. This app has no author to put in it (see
+ * historyModel.ts), so it carries the version instead — same circle, same
+ * diameter, same left rail. `data-kind="author"` is the branch that takes over
+ * the day an identity exists.
+ */
+.ss-history__avatar {
+  display: inline-flex;
+  width: var(--history-avatar);
+  height: var(--history-avatar);
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ss-border);
+  border-radius: 50%;
+  background: var(--ss-surface-sunken);
+  color: var(--ss-text-muted);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.ss-history__avatar[data-kind='author'] {
+  border-color: transparent;
+  background: var(--ss-accent);
+  color: var(--ss-accent-text);
+  font-size: 11px;
+}
+
+/* The tone says what KIND of change the version introduced, at a glance —
+   the same vocabulary the review table uses, so one legend serves both. */
+.ss-history__avatar[data-tone='added'] {
+  border-color: var(--ss-success);
+  color: var(--ss-success);
+}
+
+.ss-history__avatar[data-tone='removed'] {
+  border-color: var(--ss-danger);
+  color: var(--ss-danger);
+}
+
+.ss-history__avatar[data-tone='modified'],
+.ss-history__avatar[data-tone='mixed'] {
+  border-color: var(--ss-accent);
+  color: var(--ss-accent);
+}
+
+/* The live board is not a version — a filled dot reads as "you are here". */
+.ss-history__avatar[data-tone='current'] {
+  border-color: transparent;
+  background: var(--ss-accent);
+  color: var(--ss-accent-text);
+}
+
+.ss-history__text {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ss-history__title {
+  overflow: hidden;
+  color: var(--ss-text);
+  font-size: var(--history-title);
+  font-weight: 600;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * The secondary line is muted and one line, like Figma's. It clips with a real
+ * ellipsis rather than a hard cut: the full value stays reachable in the
+ * `title` attribute, which carries the absolute timestamp the relative phrase
+ * abbreviates.
+ */
+.ss-history__meta {
+  overflow: hidden;
+  color: var(--ss-text-muted);
+  font-size: var(--history-meta);
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Tight on purpose: the pin competes with the title for the rail's width, and
+   the title is the thing a reader is scanning for. */
+.ss-history__pin {
+  flex: 0 0 auto;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: var(--ss-surface-sunken);
+  color: var(--ss-text-muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.ss-history__row[data-selected] .ss-history__pin {
+  background: var(--ss-accent);
+  color: var(--ss-accent-text);
+}
+
+/* ---- the description disclosure ------------------------------------------ */
+
+.ss-history__disclose {
+  display: inline-flex;
+  width: 24px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ss-text-muted);
+  cursor: pointer;
+}
+
+.ss-history__disclose:hover {
+  color: var(--ss-text);
+  background: var(--ss-surface-active);
+}
+
+.ss-history__disclose:focus-visible {
+  outline: 2px solid var(--ss-focus-ring);
+  outline-offset: -2px;
+}
+
+.ss-history__disclose svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 120ms ease;
+}
+
+.ss-history__disclose svg[data-open] {
+  transform: rotate(180deg);
+}
+
+/*
+ * The description is indented to the title's left edge, not the row's.
+ *
+ * Lining it up under the TITLE rather than under the avatar is what makes it
+ * read as belonging to that row's text column instead of starting a new one.
+ */
+.ss-history__description {
+  margin: 0 0 4px;
+  padding: 0 var(--history-pad-x) 0
+    calc(var(--history-pad-x) + var(--history-avatar) + var(--history-gap));
+  color: var(--ss-text-muted);
+  font-size: var(--history-meta);
+  line-height: 1.45;
+}
+
+.ss-history__empty {
+  margin: 0;
+  padding: 10px var(--history-pad-x, 9px);
+  color: var(--ss-text-muted);
+  font-size: 11.5px;
+  line-height: 1.45;
+}

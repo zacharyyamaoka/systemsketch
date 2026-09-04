@@ -149,6 +149,22 @@ export function useLocalWorkspace(): LocalWorkspaceController {
 }
 
 /**
+ * The same controller, or null outside the provider — for panels that render in
+ * BOTH the product and the development profiles.
+ *
+ * WHY: the Block inspector is one component mounted in two chromes, and only
+ * `SystemSketchChrome` sits inside the workspace provider — `DevelopmentPreviewChrome`
+ * does not. A panel that needs the open file's path therefore cannot call
+ * `useLocalWorkspace`, because throwing is right for a control that edits the
+ * workspace and wrong for a read-only view that can simply say it has no file.
+ * Asking is the honest shape; the throwing hook stays for the callers that
+ * genuinely cannot proceed without one.
+ */
+export function useOptionalLocalWorkspace(): LocalWorkspaceController | null {
+  return useContext(LocalWorkspaceContext)
+}
+
+/**
  * A real second OS window, not a tab: `popup` is what makes Chrome open a
  * separate window, and the desktop app runs in `--app` mode where that window
  * inherits the same chromeless frame the first one has.

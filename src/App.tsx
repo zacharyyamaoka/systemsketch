@@ -71,7 +71,7 @@ import { createSystemSketchStore } from './store/createSystemSketchStore'
 import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from './stockPrimitiveVisuals'
 import { SYSTEMSKETCH_ARROW_SHAPE_UTILS } from './systemSketchArrow'
 import { installConnectorControlVisibility } from './installConnectorControlVisibility'
-import { CompareLauncher } from './compare'
+import { CompareProvider } from './compare'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
@@ -182,27 +182,32 @@ function SystemSketchCanvas() {
         '--systemsketch-interface-scale-inverse': scaleCss.inverse,
       } as CSSProperties}
     >
-      <Tldraw
-        assetUrls={ASSET_URLS}
-        bindingUtils={SYSTEMSKETCH_BINDING_UTILS}
-        components={SYSTEMSKETCH_COMPONENTS}
-        getShapeVisibility={getBlockShapeVisibility}
-        licenseKey={TLDRAW_LICENSE_KEY}
-        onMount={onMount}
-        options={SYSTEMSKETCH_EDITOR_OPTIONS}
-        overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
-        shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}
-        store={store}
-        themes={SYSTEMSKETCH_THEMES}
-        tools={SYSTEMSKETCH_TOOLS}
-      />
       {/*
-        The Compare entry point sits beside the canvas rather than inside a
-        tldraw component seam on purpose: the modal it opens covers the whole
-        app, including tldraw's own chrome, so its trigger must not live in a
-        subtree the modal is meant to sit above.
+        The provider is ABOVE <Tldraw>, and the trigger is inside it.
+
+        The dialog belongs to the app so its lifetime cannot be cut short by a
+        tldraw chrome component remounting underneath it; the button belongs to
+        the top-right shell so it is attached to real chrome instead of floating
+        over the canvas (see CompareLauncher.tsx). Context carries the open state
+        between them, which is what lets the two live at different depths without
+        either one owning the other.
       */}
-      <CompareLauncher editor={mountedEditor} currentPath={path} />
+      <CompareProvider editor={mountedEditor} currentPath={path}>
+        <Tldraw
+          assetUrls={ASSET_URLS}
+          bindingUtils={SYSTEMSKETCH_BINDING_UTILS}
+          components={SYSTEMSKETCH_COMPONENTS}
+          getShapeVisibility={getBlockShapeVisibility}
+          licenseKey={TLDRAW_LICENSE_KEY}
+          onMount={onMount}
+          options={SYSTEMSKETCH_EDITOR_OPTIONS}
+          overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
+          shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}
+          store={store}
+          themes={SYSTEMSKETCH_THEMES}
+          tools={SYSTEMSKETCH_TOOLS}
+        />
+      </CompareProvider>
     </main>
   )
 }
