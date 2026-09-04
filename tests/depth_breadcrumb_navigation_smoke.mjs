@@ -93,11 +93,35 @@ async function main() {
       return {
         hasMenuRole: popover?.getAttribute('role'),
         hasMenuItems: popover?.querySelectorAll('[role="menuitem"]').length,
-        listRows: popover?.querySelectorAll('[role="listitem"]').length,
         triggerHasPopup: trigger?.getAttribute('aria-haspopup'),
+        listTag: popover?.querySelector('.systemsketch-depth-popover__path')?.tagName,
+        listName: popover?.querySelector('.systemsketch-depth-popover__path')?.getAttribute('aria-label'),
+        rows: Array.from(popover?.querySelectorAll('.systemsketch-depth-popover__path > li') ?? []).map((row) => ({
+          tag: row.tagName,
+          name: row.getAttribute('aria-label'),
+          current: row.querySelector('[aria-current]')?.getAttribute('aria-current') ?? null,
+          button: row.querySelector('button')?.getAttribute('aria-label') ?? null,
+        })),
       }
     })())`))
-    assert.deepEqual(ordinaryPathSemantics, { hasMenuRole: null, hasMenuItems: 0, listRows: 1, triggerHasPopup: null })
+    assert.deepEqual(ordinaryPathSemantics, {
+      hasMenuRole: null,
+      hasMenuItems: 0,
+      triggerHasPopup: null,
+      listTag: 'OL',
+      listName: 'Structural path levels',
+      rows: [
+        { tag: 'LI', name: 'Board root', current: null, button: 'Return to Board root' },
+        { tag: 'LI', name: 'System, ancestor', current: null, button: 'Jump to System' },
+        { tag: 'LI', name: 'Scheduler, current scope', current: 'page', button: null },
+      ],
+    })
+    const rootButtonFocused = await evaluate(app.page, `(() => {
+      const button = document.querySelector('.systemsketch-depth-popover__path > li button')
+      button?.focus()
+      return document.activeElement === button
+    })()`)
+    assert.equal(rootButtonFocused, true, 'ordinary root button remains focusable')
     await evaluate(app.page, `(() => {
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
       return true

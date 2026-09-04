@@ -97,10 +97,16 @@ export function DepthStackNavigator({ placement = 'floating' }: { placement?: 'm
       {open ? (
         <aside id="systemsketch-depth-stack" className="systemsketch-depth-popover" aria-label="Structural path">
           <header><span>Structural path</span><b>{model.depth} {model.depth === 1 ? 'level' : 'levels'}</b></header>
-          <div className="systemsketch-depth-popover__path" role="list">
-            {model.current ? <button type="button" className="systemsketch-depth-row systemsketch-depth-row--root" onClick={() => void returnToDepthRoot(editor)}><i aria-hidden="true" /><span><b>{model.pageName}</b><small>root canvas</small></span><em>0</em></button> : <div role="listitem" aria-current="page" className="systemsketch-depth-row systemsketch-depth-row--root is-current"><i aria-hidden="true" /><span><b>{model.pageName}</b><small>root canvas</small></span><em>0</em></div>}
-            {entries.map((entry) => entry.isCurrent ? <div key={entry.id} role="listitem" aria-current="page" className="systemsketch-depth-row is-current"><i aria-hidden="true" /><span><b title={entry.name}>{entry.name}</b><small>current scope</small></span><em>{entry.depth}</em></div> : <button key={entry.id} type="button" className="systemsketch-depth-row" disabled={!entry.canFocus} title={entry.canFocus ? `Jump to ${entry.name}` : `${entry.name} is not Expanded`} onClick={() => void stepToDepthAncestor(editor, entry.id)}><i aria-hidden="true" /><span><b>{entry.name}</b><small>ancestor</small></span><em>{entry.depth}</em></button>)}
-          </div>
+          <ol className="systemsketch-depth-popover__path" aria-label="Structural path levels">
+            <li className="systemsketch-depth-path-item" aria-label="Board root">
+              {model.current ? <button type="button" aria-label="Return to Board root" className="systemsketch-depth-row systemsketch-depth-row--root" onClick={() => void returnToDepthRoot(editor)}><i aria-hidden="true" /><span><b>{model.pageName}</b><small>root canvas</small></span><em>0</em></button> : <div aria-current="page" className="systemsketch-depth-row systemsketch-depth-row--root is-current"><i aria-hidden="true" /><span><b>{model.pageName}</b><small>root canvas</small></span><em>0</em></div>}
+            </li>
+            {entries.map((entry) => (
+              <li key={entry.id} className="systemsketch-depth-path-item" aria-label={`${entry.name}, ${entry.isCurrent ? 'current scope' : 'ancestor'}`}>
+                {entry.isCurrent ? <div aria-current="page" className="systemsketch-depth-row is-current"><i aria-hidden="true" /><span><b title={entry.name}>{entry.name}</b><small>current scope</small></span><em>{entry.depth}</em></div> : <button type="button" aria-label={`Jump to ${entry.name}`} className="systemsketch-depth-row" disabled={!entry.canFocus} title={entry.canFocus ? `Jump to ${entry.name}` : `${entry.name} is not Expanded`} onClick={() => void stepToDepthAncestor(editor, entry.id)}><i aria-hidden="true" /><span><b>{entry.name}</b><small>ancestor</small></span><em>{entry.depth}</em></button>}
+              </li>
+            ))}
+          </ol>
         </aside>
       ) : null}
       <span className="systemsketch-depth-status" aria-live="polite">Current scope: {currentName}, depth {model.depth}</span>

@@ -186,6 +186,29 @@
 .systemsketch-depth-popover__path {
   display: grid;
   gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.systemsketch-depth-path-item {
+  position: relative;
+  list-style: none;
+}
+
+.systemsketch-depth-path-item::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: -9px;
+  bottom: 25px;
+  left: 17px;
+  width: 1px;
+  background: var(--ss-border);
+}
+
+.systemsketch-depth-path-item:first-child::before {
+  display: none;
 }
 
 .systemsketch-depth-row {
@@ -203,20 +226,6 @@
   background: transparent;
   cursor: pointer;
   text-align: left;
-}
-
-.systemsketch-depth-row::before {
-  content: '';
-  position: absolute;
-  top: -9px;
-  bottom: 25px;
-  left: 17px;
-  width: 1px;
-  background: var(--ss-border);
-}
-
-.systemsketch-depth-row:first-child::before {
-  display: none;
 }
 
 .systemsketch-depth-row:hover:not(:disabled),
