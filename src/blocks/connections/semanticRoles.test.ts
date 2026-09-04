@@ -8,6 +8,7 @@ import {
 	resolveBlockPortSemanticRole,
 	resolveConnectionSemanticRole,
 	resolveHostPortSemanticRole,
+	resolveLivePortSemanticRole,
 } from './semanticRoles'
 
 function block(id: string, inputs: BlockShape['props']['inputs'], outputs: BlockShape['props']['outputs']): BlockShape {
@@ -18,13 +19,13 @@ function block(id: string, inputs: BlockShape['props']['inputs'], outputs: Block
 	}
 }
 
-function connectionFixture(source: BlockShape, sink: BlockShape) {
+function connectionFixture(source: BlockShape, sink: BlockShape, bindingsOverride?: object[]) {
 	const cable = {
 		id: 'shape:cable' as TLShapeId, typeName: 'shape', type: CONNECTION_SHAPE_TYPE,
 		x: 0, y: 0, rotation: 0, index: 'a2', parentId: 'page:page', isLocked: false, opacity: 1, meta: {},
 		props: { start: { x: 0, y: 0 }, end: { x: 10, y: 0 }, routing: 'elbow', curve: null, pins: [], elbowRoute: null, routeMode: 'automatic', temporal: 'data', delayValue: '', pillPosition: .5, tunnel: false, tunnelLayer: '', state: 'normal' },
 	} as unknown as ConnectionShape
-	const bindings = [
+	const bindings = bindingsOverride ?? [
 		{ id: 'binding:source', typeName: 'binding', type: CONNECTION_BINDING_TYPE, fromId: cable.id, toId: source.id, props: { portId: 'out', terminal: 'start', face: 'outer' }, meta: {} },
 		{ id: 'binding:sink', typeName: 'binding', type: CONNECTION_BINDING_TYPE, fromId: cable.id, toId: sink.id, props: { portId: 'in', terminal: 'end', face: 'outer' }, meta: {} },
 	]
@@ -63,5 +64,46 @@ describe('semantic port roles', () => {
 		expect(resolveBlockPortSemanticRole({ id: 'x', name: '', type: '', visible: true })).toMatchObject({ role: 'data', origin: 'implicit' })
 		const branch = { type: 'branch', props: { controls: [{ id: 'when', name: 'when', type: 'bool' }] } } as never
 		expect(resolveHostPortSemanticRole(branch, 'when')).toMatchObject({ role: 'control', origin: 'derived' })
+	})
+
+	it('never converts missing hosts, missing ports, or duplicate terminal records into implicit Data', () => {
+		const source = block('source', [], [{ id: 'out', name: 'tick', type: 'Tick', visible: true, semanticRoleAuthored: { role: 'event' } }])
+		const sink = block('sink', [{ id: 'in', name: 'gate', type: 'Tick', visible: true, semanticRoleDerived: { role: 'control' } }], [])
+		const invalid = (toId: TLShapeId, portId: string) => [
+			{ id: 'binding:source', typeName: 'binding', type: CONNECTION_BINDING_TYPE, fromId: 'shape:cable', toId, props: { portId, terminal: 'start', face: 'outer' }, meta: {} },
+			{ id: 'binding:sink', typeName: 'binding', type: CONNECTION_BINDING_TYPE, fromId: 'shape:cable', toId: sink.id, props: { portId: 'in', terminal: 'end', face: 'outer' }, meta: {} },
+		]
+
+		for (const bindings of [invalid('shape:gone' as TLShapeId, 'out'), invalid(source.id, 'gone')]) {
+			const { editor, cable } = connectionFixture(source, sink, bindings)
+			expect(resolveConnectionSemanticRole(editor, cable)).toMatchObject({
+				effective: null, halfBound: true, malformed: true, label: 'Malformed connection',
+			})
+		}
+
+		const duplicate = [
+			...invalid(source.id, 'out'),
+			{ id: 'binding:duplicate-start', typeName: 'binding', type: CONNECTION_BINDING_TYPE, fromId: 'shape:cable', toId: source.id, props: { portId: 'out', terminal: 'start', face: 'outer' }, meta: {} },
+		]
+		const { editor, cable } = connectionFixture(source, sink, duplicate)
+		expect(resolveConnectionSemanticRole(editor, cable)).toMatchObject({
+			effective: null, halfBound: true, malformed: true, label: 'Malformed connection',
+		})
+		expect(resolveLivePortSemanticRole(editor, source.id, 'gone')).toBeNull()
+	})
+
+	it('uses the live inner-face direction when terminal order is reversed', () => {
+		const source = block('source', [], [{ id: 'out', name: 'tick', type: 'Tick', visible: true, semanticRoleAuthored: { role: 'event' } }])
+		const sink = block('sink', [{ id: 'in', name: 'gate', type: 'Tick', visible: true, semanticRoleDerived: { role: 'control' } }], [])
+		const reversed = [
+			// An input on the inner face emits into its containing scope.
+			{ id: 'binding:start', typeName: 'binding', type: CONNECTION_BINDING_TYPE, fromId: 'shape:cable', toId: sink.id, props: { portId: 'in', terminal: 'start', face: 'inner' }, meta: {} },
+			{ id: 'binding:end', typeName: 'binding', type: CONNECTION_BINDING_TYPE, fromId: 'shape:cable', toId: source.id, props: { portId: 'out', terminal: 'end', face: 'inner' }, meta: {} },
+		]
+		const { editor, cable } = connectionFixture(source, sink, reversed)
+		expect(resolveConnectionSemanticRole(editor, cable)).toMatchObject({
+			effective: { role: 'control', origin: 'derived' }, source: { role: 'control' }, sink: { role: 'event' }, conflict: true,
+			label: 'Control → Event', malformed: false,
+		})
 	})
 })

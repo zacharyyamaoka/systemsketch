@@ -17,8 +17,8 @@ import {
 } from '../blockModel'
 import { isBranchShape } from '../../branch/branchModel'
 import { isLoopShape } from '../../loop/loopModel'
+import { connectionBindingsForTerminal, getConnectionDirection } from './ConnectionBindingUtil'
 import { getPortHostPort, isPortHostShape, type PortHostShape } from './blockPorts'
-import { getConnectionBindings, getConnectionDirection } from './ConnectionBindingUtil'
 import type { ConnectionBinding } from './ConnectionBindingUtil'
 import type { ConnectionShape } from './ConnectionShapeUtil'
 
@@ -72,19 +72,22 @@ export function resolveLivePortSemanticRole(
 	editor: Editor,
 	hostId: TLShapeId,
 	portId: string,
-): ResolvedSemanticRole {
+): ResolvedSemanticRole | null {
 	const host = editor.getShape(hostId)
 	return isPortHostShape(host) && getPortHostPort(editor, host, portId)
 		? resolveHostPortSemanticRole(host, portId)
-		: IMPLICIT_DATA_ROLE
+		: null
 }
 
 export interface ConnectionSemanticRole {
-	effective: ResolvedSemanticRole
+	/** Null means a terminal is absent, duplicated, or no longer names a live port. */
+	effective: ResolvedSemanticRole | null
 	source: ResolvedSemanticRole | null
 	sink: ResolvedSemanticRole | null
-	/** Half-bound cables intentionally have no invented endpoint claim. */
+	/** A terminal is absent, duplicated, or points at no live host/port. */
 	halfBound: boolean
+	/** Invalid binding records are never softened into an implicit Data claim. */
+	malformed: boolean
 	/** Both explicit endpoint claims disagree; legal, readable, and non-mutating. */
 	conflict: boolean
 	label: string
@@ -106,25 +109,42 @@ function explicit(role: ResolvedSemanticRole | null): role is ResolvedSemanticRo
  * make an exploratory board less honest than the code it is sketching.
  */
 export function resolveConnectionSemanticRole(editor: Editor, connection: ConnectionShape): ConnectionSemanticRole {
-	const bindings = getConnectionBindings(editor, connection)
+	const startBindings = connectionBindingsForTerminal(editor, connection, 'start')
+	const endBindings = connectionBindingsForTerminal(editor, connection, 'end')
+	const bindings = { start: startBindings[0], end: endBindings[0] }
 	const direction = getConnectionDirection(editor, connection)
 	const source = roleForBinding(editor, bindings[direction.sourceTerminal])
 	const sink = roleForBinding(editor, bindings[direction.sinkTerminal])
+	const malformed = startBindings.length > 1
+		|| endBindings.length > 1
+		|| (bindings.start !== undefined && roleForBinding(editor, bindings.start) === null)
+		|| (bindings.end !== undefined && roleForBinding(editor, bindings.end) === null)
+	const halfBound = malformed || startBindings.length !== 1 || endBindings.length !== 1
 	const sourceExplicit = explicit(source)
 	const sinkExplicit = explicit(sink)
-	const effective = sourceExplicit ? source : sinkExplicit ? sink : IMPLICIT_DATA_ROLE
+	// An incomplete cable is a gesture or damaged record, not a Data assertion.
+	const effective = halfBound ? null : sourceExplicit ? source : sinkExplicit ? sink : IMPLICIT_DATA_ROLE
 	const conflict = sourceExplicit && sinkExplicit && source.role !== sink.role
-	const label = conflict && source && sink
+	const label = malformed
+		? 'Malformed connection'
+		: halfBound
+			? 'Half-bound connection'
+			: conflict && source && sink
 		? `${roleLabel(source.role)} → ${roleLabel(sink.role)}`
-		: roleLabel(effective.role)
+		: roleLabel(effective!.role)
 	return {
 		effective,
 		source,
 		sink,
-		halfBound: !bindings.start || !bindings.end,
+		halfBound,
+		malformed,
 		conflict,
 		label,
-		warning: conflict
+		warning: malformed
+			? 'Malformed connection: a terminal is duplicated or no longer names a live port. No semantic role was inferred.'
+			: halfBound
+				? 'Half-bound connection: no semantic role was inferred until both endpoints are live.'
+			: conflict
 			? `Semantic-role mismatch: source is ${roleLabel(source!.role)} while sink is ${roleLabel(sink!.role)}. The cable remains legal.`
 			: null,
 	}

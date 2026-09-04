@@ -16,6 +16,31 @@ async function centre(page, selector) {
   })()`))
 }
 
+/** Reload through the app's ordinary autosave/dirty-document guard. */
+async function guardedReload(page, timeoutMs = 20_000) {
+  const firstEvent = page.events.length
+  let settled = false
+  let failure
+  const reload = page.send('Page.reload', { ignoreCache: true })
+    .catch((cause) => { failure = cause })
+    .finally(() => { settled = true })
+  const deadline = Date.now() + timeoutMs
+  let handledDialog = false
+  let loadSeen = false
+  while ((!settled || !loadSeen) && Date.now() < deadline) {
+    const events = page.events.slice(firstEvent)
+    if (!handledDialog && events.some((event) => event.method === 'Page.javascriptDialogOpening')) {
+      handledDialog = true
+      await page.send('Page.handleJavaScriptDialog', { accept: true })
+    }
+    loadSeen = events.some((event) => event.method === 'Page.loadEventFired')
+    await delay(40)
+  }
+  if (!settled || !loadSeen) throw new Error('timed out reloading the semantic-role board')
+  await reload
+  if (failure) throw failure
+}
+
 async function main() {
   const app = await startApp({ label: 'semantic-role-inheritance', width: 1440, height: 900 })
   const { page, port, filesRoot } = app
@@ -25,6 +50,7 @@ async function main() {
     await copyFile(FIXTURE, scratch)
     await openApp(page, port, `?board=${encodeURIComponent(scratch)}`)
     await waitFor(page, `document.querySelector('[data-shape-id="shape:emitter"] .Port[data-semantic-role="event"]')`, 'Event source port cue')
+		await waitFor(page, `document.querySelector('[data-shape-id="shape:consumer"] .Port[data-semantic-role="control"][aria-label="Control port"]')?.textContent === 'Control'`, 'visible and accessible Branch Control cue')
 
 		const emitter = await centre(page, '[data-shape-id="shape:emitter"]')
 		await clickAt(page, emitter.x, emitter.y)
@@ -39,13 +65,20 @@ async function main() {
 		// Native select keyboard handling differs under headless CDP after the
 		// first commit. Dispatch the same bubbling `change` React receives; the
 		// earlier Data transition above remains the pointer+keyboard UI proof.
-		await evaluate(page, `(() => {
+	await evaluate(page, `(() => {
 			const element = document.querySelector('select[aria-label="Semantic role for outputs tick"]')
 			const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set
 			setter.call(element, 'event')
 			element.dispatchEvent(new Event('change', { bubbles: true }))
-		})()`)
+	})()`)
     await waitFor(page, `document.querySelector('select[aria-label="Semantic role for outputs tick"]')?.value === 'event'`, 'Event restoration')
+
+		// Selector changes are ordinary history writes; the live role follows undo
+		// and redo without a derived copy on the cable to repair.
+		await evaluate(page, `(() => { window.__systemsketch.editor.undo(); return true })()`)
+		await waitFor(page, `document.querySelector('select[aria-label="Semantic role for outputs tick"]')?.value === 'data'`, 'semantic role undo')
+		await evaluate(page, `(() => { window.__systemsketch.editor.redo(); return true })()`)
+		await waitFor(page, `document.querySelector('select[aria-label="Semantic role for outputs tick"]')?.value === 'event'`, 'semantic role redo')
 
 		// Selection is already tldraw's public state seam; select the thin cable
 		// directly so the assertion is not hostage to its hit padding at this
@@ -59,7 +92,11 @@ async function main() {
     })`))
     assert.match(facts.role, /Event → Control/)
     assert.match(facts.warning, /remains legal/)
+		assert.match(await evaluate(page, `document.querySelector('[data-testid="connection-endpoints"]')?.textContent ?? ''`), /choose_tick\(\)\.when tick/)
     assert.equal(facts.temporal, 'data', 'role authoring does not change delivery mode')
+		await guardedReload(page)
+		await waitFor(page, `window.__systemsketch?.editor?.getShape('shape:emitter')?.props.outputs[0].semanticRoleAuthored?.role === 'event'`, 'autosaved semantic role after reload')
+		await waitFor(page, `document.querySelector('[data-shape-id="shape:consumer"] .Port[aria-label="Control port"]')?.textContent === 'Control'`, 'Control cue after reload')
     const capture = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
     await writeFile(SHOT, Buffer.from(capture.data, 'base64'))
     process.stdout.write(`semantic roles real-app proof passed\n${SHOT}\n`)

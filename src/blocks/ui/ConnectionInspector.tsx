@@ -40,6 +40,9 @@ import {
 	setConnectionTemporalForSelection,
 } from '../commands'
 import { isBlockShape } from '../blockModel'
+import { isBranchShape } from '../../branch/branchModel'
+import { isLoopShape } from '../../loop/loopModel'
+import { getPortHostPort, isPortHostShape } from '../connections/blockPorts'
 import { sameSharedStyle } from '../commands/blockStyleCommands'
 import { CONNECTION_SHAPE_TYPE } from '../connections/connectionModel'
 import { cablePillLabel } from '../connections/connectionPresentation'
@@ -87,13 +90,14 @@ function sharedValue<T>(values: readonly T[]): T | null {
 function describeEndpoint(editor: Editor, binding: ConnectionBinding | undefined) {
 	if (!binding) return '—'
 	const shape = editor.getShape(binding.toId)
-	if (!isBlockShape(shape)) return '—'
-	const port = [...shape.props.inputs, ...shape.props.outputs]
-		.find((candidate) => candidate.id === binding.props.portId)
+	if (!isPortHostShape(shape)) return 'Missing host'
+	const port = getPortHostPort(editor, shape, binding.props.portId)
+	if (!port) return 'Missing port'
 	// An unnamed Block still has a type; "transform.in_1" reads far better than
 	// "Block.in_1" for one the picker just made. An inner face says so: a cable
 	// on the inside of a boundary port is a different wire from one outside it.
-	const name = shape.props.title || shape.props.blockType || 'Block'
+	const kind = isBranchShape(shape) ? 'Branch' : isLoopShape(shape) ? 'Loop' : 'Block'
+	const name = shape.props.title || (isBlockShape(shape) ? shape.props.blockType : '') || kind
 	const face = binding.props.face === 'inner' ? ' (inside)' : ''
 	return `${name}.${port?.name || port?.id || binding.props.portId}${face}`
 }
@@ -139,7 +143,18 @@ export function getConnectionInspectorContext(editor: Editor): ConnectionInspect
 }
 
 /** Same panel, same words: the previous context is kept, so nothing re-renders. */
-function sameConnectionInspectorContext(
+function sameSemanticClaim(
+	previous: ConnectionSemanticRole['source'],
+	next: ConnectionSemanticRole['source'],
+): boolean {
+	return previous?.role === next?.role
+		&& previous?.origin === next?.origin
+		&& previous?.claim?.role === next?.claim?.role
+		&& previous?.claim?.source === next?.claim?.source
+		&& previous?.claim?.analyzer === next?.claim?.analyzer
+}
+
+export function sameConnectionInspectorContext(
 	previous: unknown,
 	next: ConnectionInspectorContext | null,
 ): previous is ConnectionInspectorContext | null {
@@ -158,10 +173,12 @@ function sameConnectionInspectorContext(
 			before.semantic !== null && next.semantic !== null
 			&& before.semantic.label === next.semantic.label
 			&& before.semantic.warning === next.semantic.warning
-			&& before.semantic.source?.origin === next.semantic.source?.origin
-			&& before.semantic.sink?.origin === next.semantic.sink?.origin
-			&& before.semantic.source?.role === next.semantic.source?.role
-			&& before.semantic.sink?.role === next.semantic.sink?.role
+			&& before.semantic.halfBound === next.semantic.halfBound
+			&& before.semantic.malformed === next.semantic.malformed
+			&& before.semantic.conflict === next.semantic.conflict
+			&& sameSemanticClaim(before.semantic.effective, next.semantic.effective)
+			&& sameSemanticClaim(before.semantic.source, next.semantic.source)
+			&& sameSemanticClaim(before.semantic.sink, next.semantic.sink)
 		))
 		&& (before.only === next.only || (
 			before.only !== null && next.only !== null

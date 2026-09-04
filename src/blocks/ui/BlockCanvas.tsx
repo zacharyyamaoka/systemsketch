@@ -41,7 +41,7 @@ import {
   type BlockShape,
   type BlockState,
 } from '../blockModel'
-import { resolveBlockPortSemanticRole } from '../connections/semanticRoles'
+import { resolveBlockPortSemanticRole, roleLabel } from '../connections/semanticRoles'
 import { effectTethers } from '../effectTether'
 import { BlockInlineEditor } from '../BlockInlineEditor'
 import { valueBlockExactText, valueBlockInlet, valueBlockLabel, valueBlockOutlet } from '../valueBlock'
@@ -185,6 +185,7 @@ function BlockPortDot({
       y={placed.y}
       hinting={hinting}
       eligible={eligible}
+		semanticLabel={semanticRole.role !== 'data' ? roleLabel(semanticRole.role) : undefined}
       className={extraClasses}
 		title={[
 			inHeader && !placed.subtle ? placed.port.name : '',

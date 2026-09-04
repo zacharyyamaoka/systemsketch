@@ -67,6 +67,8 @@ function ControlPortDot({ shape, control, connected, producers }: {
 			hinting={hinting}
 			eligible={eligible}
 			testId={`branch-control-dot-${portId}`}
+			semanticLabel="Control"
+			attrs={{ 'data-semantic-role': 'control' }}
 		/>
 	)
 }

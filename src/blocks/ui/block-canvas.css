@@ -1381,8 +1381,7 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
 
 /* Data is intentionally the absence of decoration. A non-Data role earns a
    tiny, accessible mark without borrowing colour from the Python type palette. */
-.systemsketch-block-canvas .Port[data-semantic-role]::after {
-  content: attr(data-semantic-role);
+.systemsketch-block-canvas .Port-semanticCue {
   position: absolute;
   top: -13px;
   left: 50%;
