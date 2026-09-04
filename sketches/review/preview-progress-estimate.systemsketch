@@ -302,6 +302,14 @@
       "typeName": "binding"
     },
     {
+      "name": "",
+      "color": "#55B467",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:vI0dGdgqmRtt-GqpXzXF3",
+      "typeName": "user"
+    },
+    {
       "editingShapeId": null,
       "croppingShapeId": null,
       "selectedShapeIds": [],
@@ -446,10 +454,7 @@
     {
       "followingUserId": null,
       "opacityForNextShape": 1,
-      "stylesForNextShape": {
-        "tldraw:arrowKind": "elbow",
-        "systemsketch:connectionRouting": "elbow"
-      },
+      "stylesForNextShape": {},
       "brush": null,
       "scribbles": [],
       "cursor": {
