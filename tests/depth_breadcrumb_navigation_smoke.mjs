@@ -8,6 +8,7 @@ import { ROOT, clickElement, delay, evaluate, localConsoleErrors, openApp, start
 
 const ASSETS = join(ROOT, 'docs', 'assets')
 const SHOT = join(ASSETS, 'depth-breadcrumb-navigation-2026-09-04.png')
+const REFRESH_SCREENSHOT = process.env.SYSTEMSKETCH_REFRESH_DEPTH_SCREENSHOTS === '1'
 
 async function screenshot(page, path) {
   const capture = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
@@ -28,9 +29,9 @@ async function enterSelected(page, id, expectedDepth) {
 }
 
 async function main() {
-  await mkdir(ASSETS, { recursive: true })
   const app = await startApp({ label: 'systemsketch-depth-breadcrumbs', build: 'depth-breadcrumbs', width: 1500, height: 980 })
   const board = join(app.filesRoot, 'SystemSketch', 'depth-breadcrumbs.systemsketch')
+  const screenshotPath = REFRESH_SCREENSHOT ? SHOT : join(app.filesRoot, 'depth-breadcrumb-navigation.png')
   try {
     await mkdir(join(app.filesRoot, 'SystemSketch'), { recursive: true })
     await openApp(app.page, app.port, `?board=${encodeURIComponent(board)}`)
@@ -43,11 +44,26 @@ async function main() {
         { id: 'shape:inner', type: 'block', parentId: 'shape:middle', x: 90, y: 90, props: { title: 'Dispatch', view: 'expanded', w: 360, h: 230 } },
         { id: 'shape:landmark', type: 'geo', x: 1190, y: 230, props: { geo: 'rectangle', w: 220, h: 140, color: 'orange' } },
       ])
-      editor.zoomToFit({ animation: { duration: 0 } })
+      editor.setCamera({ x: 37, y: -23, z: 1.13 }, { animation: { duration: 0 } })
       return true
     })()`)
     await enterSelected(app.page, 'shape:outer', 1)
+    await delay(120)
+    const outerCamera = JSON.parse(await evaluate(app.page, `JSON.stringify(window.__systemsketch.editor.getCamera())`))
     await enterSelected(app.page, 'shape:middle', 2)
+    // Back arrives while the preceding visual tween is still live. History
+    // must restore the settled outer target, never the tween's sampled camera.
+    await clickElement(app.page, '[aria-label="Back"]')
+    await waitFor(app.page, `document.querySelector('.systemsketch-depth-navigator--menu')?.dataset.depth === '1'`, 'rapid Back depth')
+    await delay(300)
+    const restoredOuterCamera = JSON.parse(await evaluate(app.page, `JSON.stringify(window.__systemsketch.editor.getCamera())`))
+    assert.deepEqual(
+      ['x', 'y', 'z'].map((key) => restoredOuterCamera[key]),
+      ['x', 'y', 'z'].map((key) => outerCamera[key]),
+      'rapid Back restores the exact settled outer x/y/z target',
+    )
+    await clickElement(app.page, '[aria-label="Forward"]')
+    await waitFor(app.page, `document.querySelector('.systemsketch-depth-navigator--menu')?.dataset.depth === '2'`, 'rapid Forward depth')
     await enterSelected(app.page, 'shape:inner', 3)
     const chrome = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
       const nav = document.querySelector('.systemsketch-depth-navigator--menu')
@@ -71,9 +87,28 @@ async function main() {
     await waitFor(app.page, `document.querySelector('#systemsketch-depth-stack')`, 'path popover')
     const popover = await evaluate(app.page, `document.querySelector('#systemsketch-depth-stack')?.textContent?.replace(/\\s+/g, ' ').trim()`)
     assert.ok(popover.includes('Board') && popover.includes('System') && popover.includes('Scheduler'))
-    await screenshot(app.page, SHOT)
+    const ordinaryPathSemantics = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
+      const trigger = document.querySelector('.systemsketch-depth-pill__trigger')
+      const popover = document.querySelector('#systemsketch-depth-stack')
+      return {
+        hasMenuRole: popover?.getAttribute('role'),
+        hasMenuItems: popover?.querySelectorAll('[role="menuitem"]').length,
+        listRows: popover?.querySelectorAll('[role="listitem"]').length,
+        triggerHasPopup: trigger?.getAttribute('aria-haspopup'),
+      }
+    })())`))
+    assert.deepEqual(ordinaryPathSemantics, { hasMenuRole: null, hasMenuItems: 0, listRows: 1, triggerHasPopup: null })
+    await evaluate(app.page, `(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+      return true
+    })()`)
+    await waitFor(app.page, `!document.querySelector('#systemsketch-depth-stack')`, 'Escape closes ordinary path disclosure')
+    // Screenshots are proof artifacts only when deliberately refreshed. Normal
+    // CI runs keep the working tree clean and write into the disposable lab.
+    if (REFRESH_SCREENSHOT) await mkdir(ASSETS, { recursive: true })
+    await screenshot(app.page, screenshotPath)
     assert.deepEqual(localConsoleErrors(app.page), [])
-    process.stdout.write(`PASS breadcrumbs/history real-browser journey\n${SHOT}\n`)
+    process.stdout.write(`PASS breadcrumbs/history real-browser journey\n${screenshotPath}\n`)
   } finally {
     app.close()
   }

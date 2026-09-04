@@ -8,7 +8,7 @@ import {
 import { isExpandedBlockShape } from '../blocks'
 import { isBranchShape } from '../branch/branchModel'
 import { storedTextOr } from '../textFidelity'
-import { focusDepthOverviewTarget } from '../depth/depthNavigation'
+import { focusDepthOverviewPage, focusDepthOverviewTarget } from '../depth/depthNavigation'
 
 export type BoardOverviewTargetKind = 'frame' | 'branch' | 'expanded-block'
 
@@ -92,15 +92,8 @@ export function getBoardOverviewModel(editor: Editor): BoardOverviewModel {
   return { pages, targetCount }
 }
 
-const CAMERA_ANIMATION = { duration: 220 }
-
 export function focusBoardOverviewPage(editor: Editor, pageId: TLPageId): boolean {
-  if (!editor.getPage(pageId)) return false
-  editor.setCurrentPage(pageId)
-  editor.setCurrentTool('select')
-  editor.selectNone()
-  editor.zoomToFit({ animation: CAMERA_ANIMATION })
-  return true
+  return focusDepthOverviewPage(editor, pageId)
 }
 
 export function focusBoardOverviewTarget(editor: Editor, target: BoardOverviewTarget): boolean {

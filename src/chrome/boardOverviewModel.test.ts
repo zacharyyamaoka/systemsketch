@@ -119,6 +119,6 @@ describe('live board overview', () => {
     expect(focusBoardOverviewPage(editor, PAGE_B)).toBe(true)
     expect(editor.setCurrentPage).toHaveBeenCalledWith(PAGE_B)
     expect(editor.selectNone).toHaveBeenCalledOnce()
-    expect(editor.zoomToFit).toHaveBeenCalledWith({ animation: { duration: 220 } })
+    expect(editor.zoomToFit).toHaveBeenCalledWith({ animation: { duration: 260 } })
   })
 })

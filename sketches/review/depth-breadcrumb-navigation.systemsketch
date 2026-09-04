@@ -97,7 +97,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a4xwfl",
+      "index": "a4qZgV",
       "typeName": "shape"
     },
     {
@@ -149,7 +149,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5zzzkzd",
+      "index": "a5udEV",
       "typeName": "shape"
     },
     {
@@ -192,12 +192,12 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "htUZuXNLrr7oE4Rqrhz3S",
+        "definitionId": "9NMcXQc0NCD56q3VnAmeE",
         "inputs": [],
         "outputs": [],
         "definitionKey": "Scheduler"
       },
-      "index": "a1nGv",
+      "index": "a1tYv",
       "typeName": "shape"
     },
     {
@@ -242,7 +242,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3Aib",
+      "index": "a3Fv2",
       "typeName": "shape"
     },
     {
@@ -279,7 +279,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · root/current crumbs are readable, middle ancestry is selectable in the path menu, and Back/Forward restore the last depth view without changing the structure."
+                  "text": "PASS WHEN · crumbs are readable, ancestry is selectable, and Back/Forward restores the exact view. Collapse System: stale depth never leaks through."
                 }
               ]
             }
@@ -287,7 +287,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6arj",
+      "index": "a6PyI",
       "typeName": "shape"
     },
     {
@@ -332,7 +332,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4eU5",
+      "index": "a4aDj",
       "typeName": "shape"
     },
     {
@@ -377,7 +377,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "3 · Try Back, Forward, Up, and the path menu. Up changes ancestry; Back follows visit order."
+                  "text": "3 · Try Back, Forward, Up, and the path list. Up changes ancestry; Back restores the exact view you visited."
                 }
               ]
             }
@@ -385,7 +385,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5zzYV",
+      "index": "a5FJr",
       "typeName": "shape"
     },
     {
@@ -427,13 +427,13 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "x1nrQ_RlBKniD5k-1paCB",
+        "definitionId": "oJnMeFBEnIPAVfNPRMBWl",
         "inputs": [],
         "outputs": [],
         "definitionKey": "System"
       },
       "parentId": "page:page",
-      "index": "a1Kan",
+      "index": "a1UpW",
       "typeName": "shape"
     },
     {
@@ -512,6 +512,14 @@
       "typeName": "user"
     },
     {
+      "name": "",
+      "color": "#55B467",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:n8Ukz7jLnJrkWDfJ71QYd",
+      "typeName": "user"
+    },
+    {
       "meta": {},
       "id": "binding:cue-step-1-arrow-start",
       "type": "arrow",
@@ -563,7 +571,7 @@
         "color": "black"
       },
       "parentId": "page:page",
-      "index": "a2c2I",
+      "index": "a2wlf",
       "typeName": "shape"
     },
     {
@@ -624,21 +632,13 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "M4P-S9mXhjmE-LPUVG3mT",
+        "definitionId": "mBC6dKi02HAUUZjJoaotM",
         "inputs": [],
         "outputs": [],
         "definitionKey": "Dispatch"
       },
-      "index": "a121z",
+      "index": "a1DUa",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#EC5E41",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:maCri8ebUGlkxH1kdgKpx",
-      "typeName": "user"
     },
     {
       "meta": {},
@@ -744,7 +744,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3sY3",
+      "index": "a3e0g",
       "typeName": "shape"
     }
   ]

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from '
 import { useEditor, useValue } from 'tldraw'
 
 import {
-  discardDepthScope,
   getDepthNavigationModel,
   getDepthNavigationSnapshot,
   goBackInDepthHistory,
@@ -44,10 +43,6 @@ export function DepthStackNavigator({ placement = 'floating' }: { placement?: 'm
   const getSnapshot = useCallback(() => getDepthNavigationSnapshot(editor), [editor])
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
   const model = useValue('SystemSketch depth navigation model', () => getDepthNavigationModel(editor, snapshot.scopeId), [editor, snapshot.scopeId])
-  const currentPageId = useValue('SystemSketch depth navigation page', () => editor.getCurrentPageId(), [editor])
-  useEffect(() => {
-    if (snapshot.scopeId && (!model || model.pageId !== currentPageId)) discardDepthScope(editor)
-  }, [currentPageId, editor, model, snapshot.scopeId])
   useEffect(() => setOpen(false), [snapshot.scopeId])
   useEffect(() => {
     if (!open) return
@@ -97,14 +92,14 @@ export function DepthStackNavigator({ placement = 'floating' }: { placement?: 'm
           {entries.length > 0 ? <span className="systemsketch-depth-separator" aria-hidden="true">›</span> : null}
           {entries.length > 0 ? <Crumb current title={currentName}>{currentName}</Crumb> : null}
         </div>
-        <button type="button" className="systemsketch-depth-pill__path-menu systemsketch-depth-pill__trigger" aria-label="Show structural path" aria-haspopup="menu" aria-expanded={open} aria-controls="systemsketch-depth-stack" onClick={() => setOpen((value) => !value)}>⌄</button>
+        <button type="button" className="systemsketch-depth-pill__path-menu systemsketch-depth-pill__trigger" aria-label="Show structural path" aria-expanded={open} aria-controls="systemsketch-depth-stack" onClick={() => setOpen((value) => !value)}>⌄</button>
       </nav>
       {open ? (
-        <aside id="systemsketch-depth-stack" className="systemsketch-depth-popover" role="menu" aria-label="Structural path">
+        <aside id="systemsketch-depth-stack" className="systemsketch-depth-popover" aria-label="Structural path">
           <header><span>Structural path</span><b>{model.depth} {model.depth === 1 ? 'level' : 'levels'}</b></header>
-          <div className="systemsketch-depth-popover__path">
-            {model.current ? <button type="button" role="menuitem" className="systemsketch-depth-row systemsketch-depth-row--root" onClick={() => void returnToDepthRoot(editor)}><i aria-hidden="true" /><span><b>{model.pageName}</b><small>root canvas</small></span><em>0</em></button> : <div role="menuitem" tabIndex={-1} aria-disabled="true" aria-current="page" className="systemsketch-depth-row systemsketch-depth-row--root is-current"><i aria-hidden="true" /><span><b>{model.pageName}</b><small>root canvas</small></span><em>0</em></div>}
-            {entries.map((entry) => entry.isCurrent ? <div key={entry.id} role="menuitem" tabIndex={-1} aria-disabled="true" aria-current="page" className="systemsketch-depth-row is-current"><i aria-hidden="true" /><span><b title={entry.name}>{entry.name}</b><small>current scope</small></span><em>{entry.depth}</em></div> : <button key={entry.id} type="button" role="menuitem" className="systemsketch-depth-row" disabled={!entry.canFocus} title={entry.canFocus ? `Jump to ${entry.name}` : `${entry.name} is not Expanded`} onClick={() => void stepToDepthAncestor(editor, entry.id)}><i aria-hidden="true" /><span><b>{entry.name}</b><small>ancestor</small></span><em>{entry.depth}</em></button>)}
+          <div className="systemsketch-depth-popover__path" role="list">
+            {model.current ? <button type="button" className="systemsketch-depth-row systemsketch-depth-row--root" onClick={() => void returnToDepthRoot(editor)}><i aria-hidden="true" /><span><b>{model.pageName}</b><small>root canvas</small></span><em>0</em></button> : <div role="listitem" aria-current="page" className="systemsketch-depth-row systemsketch-depth-row--root is-current"><i aria-hidden="true" /><span><b>{model.pageName}</b><small>root canvas</small></span><em>0</em></div>}
+            {entries.map((entry) => entry.isCurrent ? <div key={entry.id} role="listitem" aria-current="page" className="systemsketch-depth-row is-current"><i aria-hidden="true" /><span><b title={entry.name}>{entry.name}</b><small>current scope</small></span><em>{entry.depth}</em></div> : <button key={entry.id} type="button" className="systemsketch-depth-row" disabled={!entry.canFocus} title={entry.canFocus ? `Jump to ${entry.name}` : `${entry.name} is not Expanded`} onClick={() => void stepToDepthAncestor(editor, entry.id)}><i aria-hidden="true" /><span><b>{entry.name}</b><small>ancestor</small></span><em>{entry.depth}</em></button>)}
           </div>
         </aside>
       ) : null}

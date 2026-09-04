@@ -26,6 +26,7 @@ const ASSETS = join(ROOT, 'docs', 'assets')
 const MIGRATION_SHOT = join(ASSETS, 'step-in-single-page-migration-2026-09-02.png')
 const ISOLATION_SHOT = join(ASSETS, 'step-in-single-page-isolation-2026-09-02.png')
 const RESULTS = join(ASSETS, 'step-in-single-page-results.json')
+const REFRESH_SCREENSHOTS = process.env.SYSTEMSKETCH_REFRESH_STEP_IN_SCREENSHOTS === '1'
 
 const results = []
 
@@ -63,7 +64,6 @@ async function waitForDisk(path, accept, label, timeoutMs = 30_000) {
 }
 
 async function main() {
-  await ensureDir(ASSETS)
   const app = await startApp({
     label: 'systemsketch-step-in-single-page',
     build: 'step-in-single-page',
@@ -71,6 +71,8 @@ async function main() {
     height: 1000,
   })
   const { page, port, filesRoot } = app
+  const migrationShot = REFRESH_SCREENSHOTS ? MIGRATION_SHOT : join(filesRoot, 'step-in-single-page-migration.png')
+  const isolationShot = REFRESH_SCREENSHOTS ? ISOLATION_SHOT : join(filesRoot, 'step-in-single-page-isolation.png')
   const legacyPath = join(filesRoot, 'SystemSketch', 'legacy-two-page.tldr')
   const scopePath = join(filesRoot, 'SystemSketch', 'step-in-scope.systemsketch')
 
@@ -166,7 +168,8 @@ async function main() {
     2)
     await evaluate(page, `window.__systemsketch.editor.zoomToFit({ animation: { duration: 0 } }); true`)
     await delay(300)
-    await screenshot(page, MIGRATION_SHOT)
+    if (REFRESH_SCREENSHOTS) await ensureDir(ASSETS)
+    await screenshot(page, migrationShot)
 
     // A fresh one-canvas board for the physical Step In proof.
     await openApp(page, port, `?board=${encodeURIComponent(scopePath)}`)
@@ -310,7 +313,7 @@ async function main() {
       `document.querySelector('#systemsketch-depth-stack').textContent.replace(/\\s+/g, ' ').trim()`)
     check('D1', 'the in-slot Depth Stack exposes root and current scope',
       depthText.includes('root canvas') && depthText.includes('run()') && depthText.includes('current scope'), true)
-    await screenshot(page, ISOLATION_SHOT)
+    await screenshot(page, isolationShot)
 
     const consoleErrors = localConsoleErrors(page)
     check('Q1', 'the physical migration and resize journey emits no local console errors', consoleErrors, [])
@@ -318,7 +321,7 @@ async function main() {
     await writeFile(RESULTS, `${JSON.stringify({ checks: results }, null, 2)}\n`)
     assert.ok(results.every((entry) => entry.ok), 'one or more Step In / single-page checks failed')
     process.stdout.write(`\n  ${results.length}/${results.length} browser checks passed\n`)
-    process.stdout.write(`  ${MIGRATION_SHOT}\n  ${ISOLATION_SHOT}\n`)
+    process.stdout.write(`  ${migrationShot}\n  ${isolationShot}\n`)
   } finally {
     app.close()
   }

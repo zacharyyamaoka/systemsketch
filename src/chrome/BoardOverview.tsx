@@ -1,5 +1,6 @@
 import { useEditor, useValue } from 'tldraw'
 import {
+  focusBoardOverviewPage,
   focusBoardOverviewTarget,
   getBoardOverviewModel,
   type BoardOverviewTarget,
@@ -44,13 +45,18 @@ export function BoardOverview() {
       <nav aria-label="Board landmarks">
         {model.pages.map((page) => (
           <section key={page.id} className="systemsketch-board-overview__page">
-            <div
+            <button
+              type="button"
               className="systemsketch-board-overview__page-row"
+              data-overview-page={page.id}
+              data-current={page.current || undefined}
+              title="Show this board root"
+              onClick={() => focusBoardOverviewPage(editor, page.id)}
             >
               <span className="systemsketch-board-overview__glyph" aria-hidden="true">◫</span>
               <strong>Board</strong>
               <span>{page.targets.length}</span>
-            </div>
+            </button>
             {GROUPS.map((group) => {
               const targets = page.targets.filter((target) => target.kind === group.kind)
               if (targets.length === 0) return null

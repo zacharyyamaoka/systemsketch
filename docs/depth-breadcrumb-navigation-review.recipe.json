@@ -1,5 +1,5 @@
 {
-  "feature": "Depth breadcrumbs and navigation history",
+  "feature": "Depth breadcrumbs, exact history, and root overview",
   "viewport": { "width": 1800, "height": 1040 },
   "pages": [{ "id": "review", "name": "Review" }],
   "shapes": [
@@ -59,7 +59,7 @@
     {
       "id": "step-3",
       "kind": "step",
-      "text": "3 · Try Back, Forward, Up, and the path menu. Up changes ancestry; Back follows visit order.",
+      "text": "3 · Try Back, Forward, Up, and the path list. Up changes ancestry; Back restores the exact view you visited.",
       "x": 90,
       "y": 650,
       "w": 420,
@@ -69,7 +69,7 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · root/current crumbs are readable, middle ancestry is selectable in the path menu, and Back/Forward restore the last depth view without changing the structure.",
+      "text": "PASS WHEN · crumbs are readable, ancestry is selectable, and Back/Forward restores the exact view. Collapse System: stale depth never leaks through.",
       "x": 760,
       "y": 885,
       "w": 700,
