@@ -9,14 +9,14 @@
  * and batch-style controls.
  *
  * A pill is a variable, so it can be fed as well as read: it always has one
- * inlet on its left rim and one outlet on its right, and what is wired decides
- * whether it is a source (`gain = 2.0` feeding a call), a sink (`payload =`
- * the result of one) or both (`pose = estimate(…)` passed on to `encode`).
+ * inlet on its left rim and one outlet on its right, so it can be a source
+ * (`gain = 2.0` feeding a call), a sink, or both (`pose = estimate(…)`
+ * passed on to `encode`). A cable remains a visible relationship; it never
+ * replaces the words someone has written on the pill.
  * Three facts of the Block carry it:
  *
  * - `title` is the literal itself (`2.0`, `{"quat": True, …}`), the value the
- *   pill has while its inlet is unwired — a cable on the inlet supplies the
- *   value instead, and the literal waits for the day it is unwired;
+ *   pill has. An inlet cable does not hide or replace this literal;
  * - the ports' `name` is the variable name, one name mirrored on both rims —
  *   empty means the literal is passed inline, so the name is the whole
  *   difference between `estimate(frame, 2.0)` and
@@ -68,6 +68,8 @@ export function isFoldedLiteral(literal: string): boolean {
 export interface ValueBlockLabel {
 	/** The variable name; '' when the literal is passed inline. */
 	name: string
+	/** The Python annotation carried by the mirrored ports. */
+	type: string
 	/** The literal exactly as typed. */
 	literal: string
 	/** What the capsule paints after `=`: the literal, or an explicit `…` abbreviation. */
@@ -88,11 +90,17 @@ export function valueBlockName(props: BlockShapeProps): string {
 	return valueBlockOutlet(props)?.name ?? valueBlockInlet(props)?.name ?? ''
 }
 
+/** The variable annotation: the outlet wins, as it does for the name. */
+export function valueBlockType(props: BlockShapeProps): string {
+	return valueBlockOutlet(props)?.type ?? valueBlockInlet(props)?.type ?? ''
+}
+
 export function valueBlockLabel(props: BlockShapeProps): ValueBlockLabel {
 	const literal = props.title
 	const folded = isFoldedLiteral(literal)
 	return {
 		name: valueBlockName(props),
+		type: valueBlockType(props),
 		literal,
 		// A pill is a direct rendering of its stored literal. Do not trim
 		// punctuation or whitespace away just because it is subtle in a compact
@@ -104,7 +112,9 @@ export function valueBlockLabel(props: BlockShapeProps): ValueBlockLabel {
 
 /** The text the capsule paints, name and all. */
 export function valueBlockText(label: ValueBlockLabel): string {
-	return label.name === '' ? `= ${label.display}` : `${label.name} = ${label.display}`
+	if (label.name === '') return `= ${label.display}`
+	const annotation = label.type === '' ? label.name : `${label.name}: ${label.type}`
+	return `${annotation} = ${label.display}`
 }
 
 /** The entire stored pill label, before a visible `…` abbreviation is applied. */
@@ -113,9 +123,9 @@ export function valueBlockExactText(label: ValueBlockLabel): string {
 }
 
 /**
- * A capsule is as wide as its text and never taller than one line. The fit
- * uses the literal that is actually shown. A cable may mute that literal to
- * communicate precedence, but never substitutes a different character for it.
+ * A capsule is as wide as its text and never taller than one line.
+ * Its fit uses the literal that is actually shown; a cable never substitutes
+ * a different rendered value.
  */
 export function valueBlockSize(label: ValueBlockLabel): BlockViewSize {
 	const textWidth = measureBlockText(valueBlockText(label), VALUE_FONT_PX, 500, 'mono')
@@ -196,8 +206,14 @@ export function normalizeValueBlockProps(
 	const kept = mirrored(
 		outletExisting?.type, inletExisting?.type, previousOutlet?.type, previousInlet?.type,
 	)
+	const explicitTypeChanged = previous !== undefined
+		&& previous.view === 'value'
+		&& kept !== (previousOutlet?.type ?? previousInlet?.type ?? '')
+	// A title-only write follows Python's literal spelling. A canvas signature
+	// writes title and annotation together, though, and its explicit annotation
+	// must win over the inferred spelling (`pose: Pose = 2`, not `pose: int`).
 	const type = literalChanged
-		? (inferred !== '' ? inferred : kept)
+		? (explicitTypeChanged && kept !== '' ? kept : (inferred !== '' ? inferred : kept))
 		: (kept !== '' ? kept : inferred)
 
 	const outlet: BlockPort = { id: outletExisting?.id ?? 'out_1', name, type, visible: true }

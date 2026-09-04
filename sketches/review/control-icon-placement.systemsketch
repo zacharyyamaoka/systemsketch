@@ -1,0 +1,1136 @@
+{
+  "systemSketch": {
+    "formatVersion": 2,
+    "application": "SystemSketch",
+    "shapes": {
+      "arrow": 2,
+      "branch-arm": 12,
+      "geo": 3,
+      "loop": 7,
+      "branch": 5
+    },
+    "bindings": {
+      "arrow": 4
+    }
+  },
+  "tldrawFileFormatVersion": 1,
+  "schema": {
+    "schemaVersion": 2,
+    "sequences": {
+      "com.tldraw.store": 5,
+      "com.tldraw.asset": 1,
+      "com.tldraw.camera": 1,
+      "com.tldraw.document": 2,
+      "com.tldraw.instance": 26,
+      "com.tldraw.instance_page_state": 5,
+      "com.tldraw.page": 1,
+      "com.tldraw.instance_presence": 6,
+      "com.tldraw.pointer": 1,
+      "com.tldraw.shape": 4,
+      "com.tldraw.user": 1,
+      "com.tldraw.asset.image": 6,
+      "com.tldraw.asset.video": 5,
+      "com.tldraw.asset.bookmark": 2,
+      "com.tldraw.shape.group": 0,
+      "com.tldraw.shape.bookmark": 2,
+      "com.tldraw.shape.draw": 5,
+      "com.tldraw.shape.note": 13,
+      "com.tldraw.shape.frame": 1,
+      "com.tldraw.shape.highlight": 4,
+      "com.tldraw.shape.embed": 4,
+      "com.tldraw.shape.image": 5,
+      "com.tldraw.shape.video": 4,
+      "com.tldraw.shape.geo": 12,
+      "com.tldraw.shape.arrow": 8,
+      "com.tldraw.shape.text": 4,
+      "com.tldraw.shape.line": 5,
+      "com.tldraw.shape.block": 6,
+      "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.loop": 0,
+      "com.tldraw.shape.branch-arm": 0,
+      "com.tldraw.shape.connection": 6,
+      "com.tldraw.binding.arrow": 1,
+      "com.tldraw.binding.connection": 1,
+      "com.tldraw.comment-thread": 3,
+      "com.tldraw.comment": 1,
+      "com.tldraw.comment-reaction": 1
+    }
+  },
+  "records": [
+    {
+      "x": 1600,
+      "y": 882,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -120,
+          "y": -11
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a8pC3V",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "lastActivityTimestamp": 0,
+      "meta": {},
+      "id": "pointer:pointer",
+      "typeName": "pointer"
+    },
+    {
+      "x": 0,
+      "y": 200,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "branchArm": "arm_3"
+      },
+      "id": "shape:Qc6vH2X8nnNxq5s8WwUMb",
+      "type": "branch-arm",
+      "parentId": "shape:c4-branch",
+      "props": {
+        "w": 360,
+        "h": 80,
+        "armId": "arm_3"
+      },
+      "index": "a3NVb",
+      "typeName": "shape"
+    },
+    {
+      "x": 500,
+      "y": 20,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1",
+      "type": "geo",
+      "props": {
+        "w": 400,
+        "h": 124,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 · c1's transparent try / except exits share one Loop header: Continue then Break."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a7t6X",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 200,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "branchArm": "arm_3"
+      },
+      "id": "shape:DbgoN-mQuE9fpl-5dNtnk",
+      "type": "branch-arm",
+      "parentId": "shape:c3-branch",
+      "props": {
+        "w": 360,
+        "h": 80,
+        "armId": "arm_3"
+      },
+      "index": "a3aNn",
+      "typeName": "shape"
+    },
+    {
+      "x": 1640,
+      "y": 1160,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-pass",
+      "type": "geo",
+      "props": {
+        "w": 460,
+        "h": 124,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "PASS WHEN · c1 has two Loop badges; c2–c4 land in only their named arms; c5 lands only in the inner arm; c6 has none."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a9m2E",
+      "typeName": "shape"
+    },
+    {
+      "x": 1600,
+      "y": 820,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2",
+      "type": "geo",
+      "props": {
+        "w": 440,
+        "h": 124,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "2 · Fold then reopen c4's arms. Each red badge stays on its owning arm header, never a sibling."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a8Lfb",
+      "typeName": "shape"
+    },
+    {
+      "x": 1100,
+      "y": 1100,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c6-loop",
+      "type": "loop",
+      "props": {
+        "w": 400,
+        "h": 360,
+        "title": "c6 · outer Loop stays empty",
+        "iterable": {
+          "id": "iterable",
+          "type": "Iterable"
+        },
+        "item": {
+          "id": "item",
+          "type": "Iter"
+        },
+        "turn": "",
+        "controlIcons": []
+      },
+      "parentId": "page:page",
+      "index": "a6tAr",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 120,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "branchArm": "arm_2"
+      },
+      "id": "shape:SFk1w9EDuuGwGCiy0WTJq",
+      "type": "branch-arm",
+      "parentId": "shape:c3-branch",
+      "props": {
+        "w": 360,
+        "h": 80,
+        "armId": "arm_2"
+      },
+      "index": "a2W0I",
+      "typeName": "shape"
+    },
+    {
+      "x": 20,
+      "y": 76,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c4-branch",
+      "type": "branch",
+      "parentId": "shape:c4-loop",
+      "props": {
+        "w": 360,
+        "h": 290,
+        "title": "if / elif / else",
+        "view": "expanded",
+        "activeArmId": null,
+        "controls": [],
+        "arms": [
+          {
+            "id": "arm_1",
+            "title": "if error > big",
+            "open": true,
+            "h": 48,
+            "controlIcons": [
+              {
+                "kind": "break",
+                "line": 5
+              }
+            ]
+          },
+          {
+            "id": "arm_2",
+            "title": "elif drift > tol",
+            "open": true,
+            "h": 48,
+            "controlIcons": [
+              {
+                "kind": "continue",
+                "line": 7
+              }
+            ]
+          },
+          {
+            "id": "arm_3",
+            "title": "else",
+            "open": true,
+            "h": 48,
+            "controlIcons": []
+          }
+        ]
+      },
+      "index": "a1aqj",
+      "typeName": "shape"
+    },
+    {
+      "x": -149.18478260869563,
+      "y": 46.95652173913044,
+      "z": 0.9558441558441559,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    {
+      "x": 500,
+      "y": 1100,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c5-loop",
+      "type": "loop",
+      "props": {
+        "w": 400,
+        "h": 460,
+        "title": "c5 · innermost Branch owns Break",
+        "iterable": {
+          "id": "iterable",
+          "type": "Iterable"
+        },
+        "item": {
+          "id": "item",
+          "type": "Iter"
+        },
+        "turn": "",
+        "controlIcons": []
+      },
+      "parentId": "page:page",
+      "index": "a5n1Q",
+      "typeName": "shape"
+    },
+    {
+      "x": 20,
+      "y": 76,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c3-branch",
+      "type": "branch",
+      "parentId": "shape:c3-loop",
+      "props": {
+        "w": 360,
+        "h": 290,
+        "title": "if / elif / else",
+        "view": "expanded",
+        "activeArmId": null,
+        "controls": [],
+        "arms": [
+          {
+            "id": "arm_1",
+            "title": "if error > big",
+            "open": true,
+            "h": 48,
+            "controlIcons": []
+          },
+          {
+            "id": "arm_2",
+            "title": "elif drift > tol",
+            "open": true,
+            "h": 48,
+            "controlIcons": [
+              {
+                "kind": "continue",
+                "line": 7
+              }
+            ]
+          },
+          {
+            "id": "arm_3",
+            "title": "else",
+            "open": true,
+            "h": 48,
+            "controlIcons": []
+          }
+        ]
+      },
+      "index": "a1V7E",
+      "typeName": "shape"
+    },
+    {
+      "x": 20,
+      "y": 76,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c2-branch",
+      "type": "branch",
+      "parentId": "shape:c2-loop",
+      "props": {
+        "w": 360,
+        "h": 290,
+        "title": "if / elif / else",
+        "view": "expanded",
+        "activeArmId": null,
+        "controls": [],
+        "arms": [
+          {
+            "id": "arm_1",
+            "title": "if error > big",
+            "open": true,
+            "h": 48,
+            "controlIcons": [
+              {
+                "kind": "break",
+                "line": 5
+              }
+            ]
+          },
+          {
+            "id": "arm_2",
+            "title": "elif drift > tol",
+            "open": true,
+            "h": 48,
+            "controlIcons": []
+          },
+          {
+            "id": "arm_3",
+            "title": "else",
+            "open": true,
+            "h": 48,
+            "controlIcons": []
+          }
+        ]
+      },
+      "index": "a1TU5",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 120,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "branchArm": "arm_2"
+      },
+      "id": "shape:O11S1Z8d9dxA4EYTUnMo4",
+      "type": "branch-arm",
+      "parentId": "shape:c4-branch",
+      "props": {
+        "w": 360,
+        "h": 80,
+        "armId": "arm_2"
+      },
+      "index": "a2ro2",
+      "typeName": "shape"
+    },
+    {
+      "x": 1100,
+      "y": 650,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c4-loop",
+      "type": "loop",
+      "props": {
+        "w": 400,
+        "h": 420,
+        "title": "c4 · separate arm owners",
+        "iterable": {
+          "id": "iterable",
+          "type": "Iterable"
+        },
+        "item": {
+          "id": "item",
+          "type": "Iter"
+        },
+        "turn": "",
+        "controlIcons": []
+      },
+      "parentId": "page:page",
+      "index": "a4c0M",
+      "typeName": "shape"
+    },
+    {
+      "x": 500,
+      "y": 650,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c3-loop",
+      "type": "loop",
+      "props": {
+        "w": 400,
+        "h": 420,
+        "title": "c3 · one Continue arm",
+        "iterable": {
+          "id": "iterable",
+          "type": "Iterable"
+        },
+        "item": {
+          "id": "item",
+          "type": "Iter"
+        },
+        "turn": "",
+        "controlIcons": []
+      },
+      "parentId": "page:page",
+      "index": "a3dy6",
+      "typeName": "shape"
+    },
+    {
+      "x": 1100,
+      "y": 200,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c2-loop",
+      "type": "loop",
+      "props": {
+        "w": 400,
+        "h": 420,
+        "title": "c2 · one Break arm",
+        "iterable": {
+          "id": "iterable",
+          "type": "Iterable"
+        },
+        "item": {
+          "id": "item",
+          "type": "Iter"
+        },
+        "turn": "",
+        "controlIcons": []
+      },
+      "parentId": "page:page",
+      "index": "a2bTv",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:c1-loop",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:c4-branch",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 500,
+      "y": 224,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c1-loop",
+      "type": "loop",
+      "props": {
+        "w": 400,
+        "h": 280,
+        "title": "c1 · try / except shares Loop header",
+        "iterable": {
+          "id": "iterable",
+          "type": "Iterable"
+        },
+        "item": {
+          "id": "item",
+          "type": "Iter"
+        },
+        "turn": "",
+        "controlIcons": [
+          {
+            "kind": "continue",
+            "line": 7
+          },
+          {
+            "kind": "break",
+            "line": 9
+          }
+        ]
+      },
+      "parentId": "page:page",
+      "index": "a1Vej",
+      "typeName": "shape"
+    },
+    {
+      "editingShapeId": null,
+      "croppingShapeId": null,
+      "selectedShapeIds": [],
+      "hoveredShapeId": null,
+      "erasingShapeIds": [],
+      "hintingShapeIds": [],
+      "focusedGroupId": null,
+      "meta": {},
+      "id": "instance_page_state:page:page",
+      "pageId": "page:page",
+      "typeName": "instance_page_state"
+    },
+    {
+      "x": 0,
+      "y": 120,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "branchArm": "arm_2"
+      },
+      "id": "shape:hrBRVdGM2HVh1Hwo8-DLh",
+      "type": "branch-arm",
+      "parentId": "shape:c5-inner-branch",
+      "props": {
+        "w": 328,
+        "h": 80,
+        "armId": "arm_2"
+      },
+      "index": "a2Hcn",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "branchArm": "arm_1"
+      },
+      "id": "shape:Jk5URljNpcQFguM3p339l",
+      "type": "branch-arm",
+      "parentId": "shape:c4-branch",
+      "props": {
+        "w": 360,
+        "h": 80,
+        "armId": "arm_1"
+      },
+      "index": "a1cfz",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:cue-step-1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:cue-step-2",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "name": "",
+      "color": "#E34BA9",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:_H4lB60ZKPv73aonlPO9b",
+      "typeName": "user"
+    },
+    {
+      "x": 0,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "branchArm": "arm_1"
+      },
+      "id": "shape:-yDepmf6xNMD5av5mPZM4",
+      "type": "branch-arm",
+      "parentId": "shape:c3-branch",
+      "props": {
+        "w": 360,
+        "h": 80,
+        "armId": "arm_1"
+      },
+      "index": "a1it2",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "branchArm": "arm_1"
+      },
+      "id": "shape:cPrTmifKpypcx0_SPJh-D",
+      "type": "branch-arm",
+      "parentId": "shape:c5-outer-branch",
+      "props": {
+        "w": 360,
+        "h": 292,
+        "armId": "arm_1"
+      },
+      "index": "a2mWM",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#7B66DC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:Sg9LvKDz5-HZlzk9IsG3s",
+      "typeName": "user"
+    },
+    {
+      "x": 20,
+      "y": 70,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "branchArm": "arm_1"
+      },
+      "id": "shape:c5-outer-branch",
+      "type": "branch",
+      "parentId": "shape:c5-loop",
+      "props": {
+        "w": 360,
+        "h": 342,
+        "title": "if drift > tol",
+        "view": "expanded",
+        "activeArmId": null,
+        "controls": [],
+        "arms": [
+          {
+            "id": "arm_1",
+            "title": "if drift > tol",
+            "open": true,
+            "h": 260,
+            "controlIcons": []
+          }
+        ]
+      },
+      "index": "a1626",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "branchArm": "arm_1"
+      },
+      "id": "shape:e1fIokIWYTfQxje-H34Jj",
+      "type": "branch-arm",
+      "parentId": "shape:c5-inner-branch",
+      "props": {
+        "w": 328,
+        "h": 80,
+        "armId": "arm_1"
+      },
+      "index": "a1Rp6",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "page:page",
+      "name": "Control icon placement",
+      "index": "a1",
+      "typeName": "page"
+    },
+    {
+      "gridSize": 10,
+      "name": "",
+      "meta": {},
+      "id": "document:document",
+      "typeName": "document"
+    },
+    {
+      "followingUserId": null,
+      "opacityForNextShape": 1,
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
+      "brush": null,
+      "scribbles": [],
+      "cursor": {
+        "type": "default",
+        "rotation": 0
+      },
+      "isFocusMode": false,
+      "exportBackground": true,
+      "isDebugMode": false,
+      "isToolLocked": false,
+      "screenBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 2200,
+        "h": 1600
+      },
+      "insets": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "zoomBrush": null,
+      "isGridMode": false,
+      "isPenMode": false,
+      "chatMessage": "",
+      "isChatting": false,
+      "highlightedUserIds": [],
+      "isFocused": true,
+      "devicePixelRatio": 1,
+      "isCoarsePointer": false,
+      "isHoveringCanvas": true,
+      "openMenus": [],
+      "isChangingStyle": false,
+      "isReadonly": false,
+      "meta": {},
+      "duplicateProps": null,
+      "cameraState": "idle",
+      "id": "instance:instance",
+      "currentPageId": "page:page",
+      "typeName": "instance"
+    },
+    {
+      "x": 16,
+      "y": 52,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "branchArm": "arm_1"
+      },
+      "id": "shape:c5-inner-branch",
+      "type": "branch",
+      "parentId": "shape:cPrTmifKpypcx0_SPJh-D",
+      "props": {
+        "w": 328,
+        "h": 210,
+        "title": "if stale",
+        "view": "expanded",
+        "activeArmId": null,
+        "controls": [],
+        "arms": [
+          {
+            "id": "arm_1",
+            "title": "if stale",
+            "open": true,
+            "h": 48,
+            "controlIcons": [
+              {
+                "kind": "break",
+                "line": 6
+              }
+            ]
+          },
+          {
+            "id": "arm_2",
+            "title": "else",
+            "open": true,
+            "h": 48,
+            "controlIcons": []
+          }
+        ]
+      },
+      "index": "a1",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "branchArm": "arm_1"
+      },
+      "id": "shape:BzP0G5DOC0ClQzTAjEq1M",
+      "type": "branch-arm",
+      "parentId": "shape:c2-branch",
+      "props": {
+        "w": 360,
+        "h": 80,
+        "armId": "arm_1"
+      },
+      "index": "a1y8f",
+      "typeName": "shape"
+    },
+    {
+      "x": 20,
+      "y": 72,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:c6-inner-loop",
+      "type": "loop",
+      "parentId": "shape:c6-loop",
+      "props": {
+        "w": 360,
+        "h": 220,
+        "title": "nested for sample in window",
+        "iterable": {
+          "id": "iterable",
+          "type": "Iterable"
+        },
+        "item": {
+          "id": "item",
+          "type": "Iter"
+        },
+        "turn": ""
+      },
+      "index": "a1Itv",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 120,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "branchArm": "arm_2"
+      },
+      "id": "shape:YuophpVTINq0k4jWRqwnh",
+      "type": "branch-arm",
+      "parentId": "shape:c2-branch",
+      "props": {
+        "w": 360,
+        "h": 80,
+        "armId": "arm_2"
+      },
+      "index": "a2pSj",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 200,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "branchArm": "arm_3"
+      },
+      "id": "shape:Yb_8yWJ1RaCcDXhlylZnl",
+      "type": "branch-arm",
+      "parentId": "shape:c2-branch",
+      "props": {
+        "w": 360,
+        "h": 80,
+        "armId": "arm_3"
+      },
+      "index": "a3YVM",
+      "typeName": "shape"
+    },
+    {
+      "x": 700,
+      "y": 144,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 0,
+          "y": 80
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a7yYu8",
+      "typeName": "shape"
+    }
+  ]
+}

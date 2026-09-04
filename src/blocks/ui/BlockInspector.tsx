@@ -11,6 +11,7 @@ import {
 import { type Editor, useValue } from 'tldraw'
 
 import { LiveTextArea, LiveTextInput, useLiveField } from '../../fields'
+import { EMPTY_FIELD_GUIDANCE } from '../../fields/emptyFieldGuidance'
 
 import {
   BLOCK_PRESENTATION_VIEWS,
@@ -43,6 +44,7 @@ import {
   moveBlockPortToSectionProps,
   patchBlockDetailsProps,
   patchBlockPortProps,
+  adoptConnectedPillType,
   removeBlockPort,
   removeBlockPortProps,
   setBlockView,
@@ -88,6 +90,8 @@ export interface BlockInspectorActions {
   movePort(side: BlockPortSide, portId: string, delta: -1 | 1): void
   /** Put the port in a row (and arm), before a neighbour or at the end. */
   movePortToSection(side: BlockPortSide, portId: string, target: BlockPortSectionTarget): void
+  /** Explicitly copy a selected pill's inlet type; wiring never does this itself. */
+  adoptConnectedType?(): void
   /** Open one undo step for a typing gesture. Absent for an unplaced draft. */
   beginEdit?(label: string): void
   /** Resolve a same-name collision only when the title gesture is complete. */
@@ -269,7 +273,7 @@ function NotesEditor({
       value={value}
       disabled={disabled}
       ariaLabel="Detailed block notes"
-      placeholder="Implementation notes, context, caveats, links…"
+      placeholder={EMPTY_FIELD_GUIDANCE.block.notes}
       beginEdit={() => actions?.beginEdit?.('edit block notes')}
       onWrite={(notes) => actions?.updateDetails({ notes }, { continuous: true })}
     />
@@ -327,7 +331,7 @@ function DescriptionEditor({
         rows={3}
         maxLength={DISPLAY_DESCRIPTION_LIMIT}
         disabled={disabled}
-        placeholder="A short summary shown on the block"
+        placeholder={EMPTY_FIELD_GUIDANCE.block.displayDescription}
       />
       <p className="block-inspector__field-help">
         Shown at a glance · keep implementation detail in Notes.
@@ -339,8 +343,8 @@ function DescriptionEditor({
 /**
  * A pill is a variable, so its inspector speaks that language: a name, a
  * value, a type, and what it is wired to. Name and type are the ports' (one
- * name mirrored on both rims), the value is the Block's title, and the value
- * is read-only while a cable on the inlet supplies it.
+ * name mirrored on both rims), the value is the Block's title, and every
+ * field stays editable even when a cable reaches the inlet.
  */
 function PillSection({
   props,
@@ -357,8 +361,7 @@ function PillSection({
   const ownType = outlet?.type ?? valueBlockInlet(props)?.type ?? ''
   const fedBy = pill?.fedBy ?? null
   const feeds = pill?.feeds ?? []
-  // A fed pill with no type of its own is whatever feeds it; typing here overrides.
-  const type = ownType !== '' ? ownType : (pill?.fedType ?? '')
+  const type = ownType
   const patchOutlet = (patch: Partial<Omit<BlockPort, 'id'>>) => {
     if (outlet) actions?.updatePort('outputs', outlet.id, patch, { continuous: true })
   }
@@ -372,7 +375,7 @@ function PillSection({
         <LiveTextInput
           value={name}
           disabled={readOnly || !outlet}
-          placeholder="gain"
+          placeholder={EMPTY_FIELD_GUIDANCE.pill.name}
           ariaLabel="Variable name"
           beginEdit={() => actions?.beginEdit?.('name pill')}
           onWrite={(next) => patchOutlet({ name: next })}
@@ -383,8 +386,8 @@ function PillSection({
         <span>Value</span>
         <LiveTextInput
           value={props.title}
-          disabled={readOnly || fedBy !== null}
-          placeholder={fedBy ? '' : '2.0'}
+          disabled={readOnly}
+          placeholder={EMPTY_FIELD_GUIDANCE.pill.value}
           ariaLabel="Literal value"
           beginEdit={() => actions?.beginEdit?.('edit pill value')}
           onWrite={(title) => actions?.updateDetails({ title }, { continuous: true })}
@@ -396,7 +399,7 @@ function PillSection({
         <LiveTextInput
           value={type}
           disabled={readOnly || !outlet}
-          placeholder={fedBy ? '' : 'float'}
+          placeholder={EMPTY_FIELD_GUIDANCE.pill.type}
           ariaLabel="Variable type"
           beginEdit={() => actions?.beginEdit?.('retype pill')}
           onWrite={(next) => patchOutlet({ type: next })}
@@ -405,17 +408,29 @@ function PillSection({
 
       <p className="block-inspector__hint" data-testid="pill-wiring">
         {fedBy
-          ? `Fed by ${fedBy}${ownType === '' && pill?.fedType ? ` (${pill.fedType})` : ''} — the value comes down the cable; the literal is kept for when it is unwired.`
+          ? `Connected from ${fedBy}${pill?.fedType ? ` (${pill.fedType})` : ''} — the cable does not replace this pill's literal or type.`
           : 'Inlet unwired — the literal is the value.'}
         {' '}
         {feeds.length > 0 ? `Feeds ${feeds.join(', ')}.` : 'Outlet unwired.'}
       </p>
+      <button
+        type="button"
+        className="block-inspector__tag-ghost"
+        data-testid="pill-adopt-cable-type"
+        disabled={readOnly || fedBy === null}
+        title="Explicitly copy the inlet cable's type"
+        onClick={() => actions?.adoptConnectedType?.()}
+      >
+        Adopt cable type
+      </button>
       <p className="block-inspector__hint">
         {name === ''
           ? 'Unnamed: passed inline where it is used.'
           : `Named: ${name} = … is hoisted before its first use.`}
         {' '}
-        The type follows the literal; edit it to override.
+        Canvas entry understands <code>name: Type = value</code>; these inspector
+        fields stay literal for direct control. Wiring never derives them automatically;
+        use “Adopt cable type” only when that calculation is wanted.
       </p>
     </section>
   )
@@ -574,6 +589,92 @@ function EmptySection({
       {dragging ? (row === HEADER_ROW ? 'drop in header' : 'drop here') : null}
     </li>
   )
+}
+
+/**
+ * Rare signature metadata belongs in the inspector, not in a new canvas
+ * gesture. Imported PyBlocks boards populate it automatically; this panel is
+ * the manual escape hatch when somebody authors a Block directly.
+ */
+function VariadicPortSettings({
+	side,
+	port,
+	actions,
+}: {
+	side: BlockPortSide
+	port: BlockPort
+	actions?: BlockInspectorActions
+}) {
+	if (side !== 'inputs') return null
+	const variadic = port.variadic
+	const setKind = (kind: 'ordinary' | 'positional' | 'keyword') => {
+		if (kind === 'ordinary') {
+			actions?.updatePort(side, port.id, { variadic: undefined })
+			return
+		}
+		const name = port.name.trim() || (kind === 'positional' ? 'args' : 'kwargs')
+		actions?.updatePort(side, port.id, {
+			variadic: {
+				groupId: `${kind}:${name}`,
+				label: `${kind === 'positional' ? '*' : '**'}${name}`,
+				kind,
+				bundled: variadic?.bundled ?? false,
+			},
+		})
+	}
+	const setLabel = (raw: string) => {
+		if (!variadic) return
+		const prefix = variadic.kind === 'positional' ? '*' : '**'
+		const tail = raw.trim().replace(/^\*+/, '') || (variadic.kind === 'positional' ? 'args' : 'kwargs')
+		actions?.updatePort(side, port.id, {
+			variadic: { ...variadic, groupId: `${variadic.kind}:${tail}`, label: `${prefix}${tail}` },
+		}, { continuous: true })
+	}
+	return (
+		<details className="block-inspector__variadic" data-testid={`inspector-variadic-${port.id}`}>
+			<summary>{variadic ? `Variadic · ${variadic.label}` : 'Variadic slot'}</summary>
+			<div className="block-inspector__variadic-fields">
+				<label>
+					<span>Slot</span>
+					<select
+						value={variadic?.kind ?? 'ordinary'}
+						disabled={!actions}
+						aria-label={`Variadic role for ${port.name || port.id}`}
+						onChange={(event) => setKind(event.currentTarget.value as 'ordinary' | 'positional' | 'keyword')}
+					>
+						<option value="ordinary">ordinary</option>
+						<option value="positional">*args</option>
+						<option value="keyword">**kwargs</option>
+					</select>
+				</label>
+				{variadic ? (
+					<>
+						<LiveTextInput
+							className="block-inspector__variadic-label"
+							value={variadic.label}
+							disabled={!actions}
+							placeholder={variadic.kind === 'positional' ? '*args' : '**kwargs'}
+							ariaLabel={`Variadic group label for ${port.name || port.id}`}
+							beginEdit={() => actions?.beginEdit?.('edit variadic group label')}
+							onWrite={setLabel}
+						/>
+						<button
+							type="button"
+							className="block-inspector__variadic-bundle"
+							disabled={!actions}
+							aria-pressed={variadic.bundled}
+							title="A bundled spread is one unknown-cardinality *iterable or **mapping expression"
+							onClick={() => actions?.updatePort(side, port.id, {
+								variadic: { ...variadic, bundled: !variadic.bundled },
+							})}
+						>
+							bundle
+						</button>
+					</>
+				) : null}
+			</div>
+		</details>
+	)
 }
 
 function PortSection({
@@ -767,18 +868,21 @@ function PortSection({
         className="block-inspector__port-type"
         value={port.type}
         disabled={!actions}
-        placeholder="type"
+        placeholder={EMPTY_FIELD_GUIDANCE.block.portType}
         ariaLabel={`${side} ${port.id} type`}
         beginEdit={() => actions?.beginEdit?.('retype block port')}
         onWrite={(type) => actions?.updatePort(side, port.id, { type }, { continuous: true })}
       />
     )
+    // The guidance placeholder reads "Default", not the old literal '=' —
+    // it no longer duplicates the punctuated row's own '=' glyph, so unlike
+    // Name/Type it needs no punctuated-mode special-casing.
     const defaultField = side === 'inputs' ? (
       <LiveTextInput
         className="block-inspector__port-default"
         value={port.defaultValue ?? ''}
         disabled={!actions}
-        placeholder={punctuatedPortRow ? '' : '='}
+        placeholder={EMPTY_FIELD_GUIDANCE.block.defaultValue}
         ariaLabel={`Default value for ${port.name || port.id}`}
         beginEdit={() => actions?.beginEdit?.('edit port default')}
         onWrite={(defaultValue) =>
@@ -802,7 +906,7 @@ function PortSection({
           className="block-inspector__port-name"
           value={port.name}
           disabled={!actions}
-          placeholder="name"
+          placeholder={EMPTY_FIELD_GUIDANCE.block.portName}
           ariaLabel={`${side} ${port.id} name`}
           beginEdit={() => actions?.beginEdit?.('rename block port')}
           onWrite={(name) => actions?.updatePort(side, port.id, { name }, { continuous: true })}
@@ -840,6 +944,7 @@ function PortSection({
             mut
           </button>
         ) : null}
+			<VariadicPortSettings side={side} port={port} actions={actions} />
         <button
           type="button"
           className="block-inspector__icon-button block-inspector__delete"
@@ -1029,7 +1134,7 @@ export function BlockInspectorContent({
               <LiveTextInput
                 value={props.title}
                 disabled={readOnly}
-                placeholder="build_report"
+                placeholder={EMPTY_FIELD_GUIDANCE.block.title}
                 ariaLabel="Block title"
                 beginEdit={() => actions?.beginEdit?.('rename block')}
                 onWrite={(title) => actions?.updateDetails({ title }, { continuous: true })}
@@ -1050,7 +1155,7 @@ export function BlockInspectorContent({
               <LiveTextInput
                 value={props.blockType}
                 disabled={readOnly}
-                placeholder="call"
+                placeholder={EMPTY_FIELD_GUIDANCE.block.type}
                 ariaLabel="Block type"
                 beginEdit={() => actions?.beginEdit?.('retype block')}
                 onWrite={(blockType) => actions?.updateDetails({ blockType }, { continuous: true })}
@@ -1222,6 +1327,7 @@ export function EditorBlockInspector({
         movePort: (side, portId, delta) => void moveBlockPort(editor, id, side, portId, delta),
         movePortToSection: (side, portId, target) =>
           void moveBlockPortToSection(editor, id, side, portId, target),
+        adoptConnectedType: () => void adoptConnectedPillType(editor, id),
         beginEdit: (label) => void editor.markHistoryStoppingPoint(label),
         commitTitle: () => commitBlockDefinitionName(editor, id),
       }

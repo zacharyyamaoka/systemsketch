@@ -1,0 +1,201 @@
+[
+  {
+    "id": "CI-1",
+    "label": "the batch pass puts c1's transparent exits on its Loop record",
+    "observed": [
+      {
+        "kind": "continue",
+        "line": 7
+      },
+      {
+        "kind": "break",
+        "line": 9
+      }
+    ],
+    "desired": [
+      {
+        "kind": "continue",
+        "line": 7
+      },
+      {
+        "kind": "break",
+        "line": 9
+      }
+    ],
+    "ok": true
+  },
+  {
+    "id": "CI-2",
+    "label": "the nested-loop source writes an explicit empty outer Loop list",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  },
+  {
+    "id": "CI-3",
+    "label": "c1 shares Continue and Break on the Loop header",
+    "observed": [
+      "continue:7",
+      "break:9"
+    ],
+    "desired": [
+      "continue:7",
+      "break:9"
+    ],
+    "ok": true
+  },
+  {
+    "id": "CI-3b",
+    "label": "Loop and Branch badges occupy their right-aligned header lanes",
+    "observed": {
+      "loop": true,
+      "branch": true
+    },
+    "desired": {
+      "loop": true,
+      "branch": true
+    },
+    "ok": true
+  },
+  {
+    "id": "CI-4",
+    "label": "c2 places Break only on the if arm",
+    "observed": [
+      [
+        "break:5"
+      ],
+      [],
+      []
+    ],
+    "desired": [
+      [
+        "break:5"
+      ],
+      [],
+      []
+    ],
+    "ok": true
+  },
+  {
+    "id": "CI-5",
+    "label": "c3 places Continue only on the elif arm",
+    "observed": [
+      [],
+      [
+        "continue:7"
+      ],
+      []
+    ],
+    "desired": [
+      [],
+      [
+        "continue:7"
+      ],
+      []
+    ],
+    "ok": true
+  },
+  {
+    "id": "CI-6",
+    "label": "c4 keeps Break and Continue in separate sibling headers",
+    "observed": [
+      [
+        "break:5"
+      ],
+      [
+        "continue:7"
+      ],
+      []
+    ],
+    "desired": [
+      [
+        "break:5"
+      ],
+      [
+        "continue:7"
+      ],
+      []
+    ],
+    "ok": true
+  },
+  {
+    "id": "CI-7",
+    "label": "c5 gives Break only to the innermost Branch arm",
+    "observed": [
+      [],
+      [
+        "break:6"
+      ],
+      []
+    ],
+    "desired": [
+      [],
+      [
+        "break:6"
+      ],
+      []
+    ],
+    "ok": true
+  },
+  {
+    "id": "CI-8",
+    "label": "c6 paints neither the outer nor the nested Loop",
+    "observed": [
+      [],
+      []
+    ],
+    "desired": [
+      [],
+      []
+    ],
+    "ok": true
+  },
+  {
+    "id": "CI-9",
+    "label": "the whole six-case board has exactly the seven computed badges and no extras",
+    "observed": 7,
+    "desired": 7,
+    "ok": true
+  },
+  {
+    "id": "CI-10",
+    "label": "folding c4 keeps the Break badge on its compressed header",
+    "observed": [
+      [
+        "break:5"
+      ],
+      "false"
+    ],
+    "desired": [
+      [
+        "break:5"
+      ],
+      "false"
+    ],
+    "ok": true
+  },
+  {
+    "id": "CI-11",
+    "label": "reopening preserves that source-backed arm badge",
+    "observed": [
+      [
+        "break:5"
+      ],
+      "true"
+    ],
+    "desired": [
+      [
+        "break:5"
+      ],
+      "true"
+    ],
+    "ok": true
+  },
+  {
+    "id": "CI-12",
+    "label": "the rendered board has no browser console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]

@@ -27,6 +27,8 @@ import {
 	valueBlockLabel,
 	valueBlockText,
 } from './valueBlock'
+import { applyCanvasPillSignature, canvasPortSignaturePatch } from './canvasPython'
+import { patchBlockPortProps } from './commands/blockCommands'
 import {
 	blockInlineFieldAtPoint,
 	blockInlineFieldFromClientPoint,
@@ -46,6 +48,7 @@ import {
 	type BlockLayout,
 } from './layoutBlock'
 import { BlockCanvas } from './ui/BlockCanvas'
+import { PORT_INDICATOR_RADIUS } from './detach/blockPrimitives'
 import { stepIntoDepthScope } from '../depth/depthNavigation'
 import { steppedInResizeRelocation } from './avoidSiblingOcclusion'
 import {
@@ -187,6 +190,13 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 		// reads its size to centre it on the click.
 		const drawnAsPill = this.editor.getCurrentToolId() === PILL_TOOL_ID
 			&& isBlankBlockProps(next.props)
+		if (drawnAsPill) {
+			// A fresh capsule begins on its variable name, just like a new code
+			// line. `name: Type = value` is then expanded on edit completion.
+			rememberBlockInlineField(this.editor, next.id, {
+				kind: 'portName', side: 'outputs', portId: 'out_1',
+			})
+		}
 		const props = drawnAsPill
 			? createValueBlockProps(next.props)
 			: normalizeValueBlockProps(next.props)
@@ -307,10 +317,40 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 
 	override onEditStart(shape: BlockShape): void {
 		ensureBlockInlineField(this.editor, shape.id)
+		const field = getBlockInlineField(this.editor, shape.id)
+		// Stock's creation lifecycle can begin editing before `onBeforeCreate`
+		// records its preferred field. Resolve that race at the lifecycle seam
+		// too, but only for an actually blank new capsule — an existing value's
+		// title remains its value editor.
+		if (
+			shape.props.view === 'value'
+			&& shape.props.title === ''
+			&& shape.props.outputs[0]?.name === ''
+			&& field.kind === 'title'
+		) {
+			rememberBlockInlineField(this.editor, shape.id, {
+				kind: 'portName', side: 'outputs', portId: shape.props.outputs[0]?.id ?? 'out_1',
+			})
+		}
 	}
 
 	override onEditEnd(shape: BlockShape): void {
-		if (getBlockInlineField(this.editor, shape.id).kind === 'title') {
+		const field = getBlockInlineField(this.editor, shape.id)
+		if (field.kind === 'portName') {
+			const port = shape.props[field.side].find((candidate) => candidate.id === field.portId)
+			if (port) {
+				const props = shape.props.view === 'value'
+					? applyCanvasPillSignature(shape.props, port.name)
+					: (() => {
+						const patch = canvasPortSignaturePatch(port, field.side, port.name)
+						return patch ? patchBlockPortProps(shape.props, field.side, port.id, patch) : shape.props
+					})()
+				if (props !== shape.props) {
+					this.editor.updateShape<BlockShape>({ id: shape.id, type: shape.type, props })
+				}
+			}
+		}
+		if (field.kind === 'title') {
 			commitBlockDefinitionName(this.editor, shape.id)
 		}
 		clearBlockInlineField(this.editor, shape.id)
@@ -357,13 +397,16 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 		const path = new Path2D()
 		path.roundRect(0, 0, w, h, shape.props.view === 'value' ? h / 2 : BLOCK_CORNER_RADIUS)
 		const drawn = new Set<string>()
+		// `subtle` only fades the painted dot on canvas hover (Simple's ports are
+		// invisible until then) — the outline still owns the same socket the whole
+		// time, or a Simple Block's selection edge draws straight through the dot
+		// the moment hover reveals it.
 		for (const port of layoutBlock(shape.props).ports) {
-			if (port.subtle) continue
 			const key = `${Math.round(port.x)}:${Math.round(port.y)}`
 			if (drawn.has(key)) continue
 			drawn.add(key)
-			path.moveTo(port.x + 9, port.y)
-			path.arc(port.x, port.y, 9, 0, Math.PI * 2)
+			path.moveTo(port.x + PORT_INDICATOR_RADIUS, port.y)
+			path.arc(port.x, port.y, PORT_INDICATOR_RADIUS, 0, Math.PI * 2)
 		}
 		return path
 	}

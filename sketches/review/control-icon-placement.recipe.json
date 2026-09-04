@@ -1,0 +1,73 @@
+{
+  "feature": "Control icon placement",
+  "viewport": { "width": 2200, "height": 1600 },
+  "pages": [{ "id": "review", "name": "Control icon placement" }],
+  "shapes": [
+    { "id": "c1-loop", "type": "loop", "x": 500, "y": 224, "props": { "title": "c1 · try / except shares Loop header", "w": 400, "h": 280 } },
+
+    { "id": "c2-loop", "type": "loop", "x": 1100, "y": 200, "props": { "title": "c2 · one Break arm", "w": 400, "h": 420 } },
+    { "id": "c2-branch", "type": "branch", "parentId": "c2-loop", "x": 20, "y": 76, "props": { "title": "if / elif / else", "w": 360, "h": 290, "arms": [
+      { "id": "arm_1", "title": "if error > big", "open": true, "h": 48 },
+      { "id": "arm_2", "title": "elif drift > tol", "open": true, "h": 48 },
+      { "id": "arm_3", "title": "else", "open": true, "h": 48 }
+    ] } },
+
+    { "id": "c3-loop", "type": "loop", "x": 500, "y": 650, "props": { "title": "c3 · one Continue arm", "w": 400, "h": 420 } },
+    { "id": "c3-branch", "type": "branch", "parentId": "c3-loop", "x": 20, "y": 76, "props": { "title": "if / elif / else", "w": 360, "h": 290, "arms": [
+      { "id": "arm_1", "title": "if error > big", "open": true, "h": 48 },
+      { "id": "arm_2", "title": "elif drift > tol", "open": true, "h": 48 },
+      { "id": "arm_3", "title": "else", "open": true, "h": 48 }
+    ] } },
+
+    { "id": "c4-loop", "type": "loop", "x": 1100, "y": 650, "props": { "title": "c4 · separate arm owners", "w": 400, "h": 420 } },
+    { "id": "c4-branch", "type": "branch", "parentId": "c4-loop", "x": 20, "y": 76, "props": { "title": "if / elif / else", "w": 360, "h": 290, "arms": [
+      { "id": "arm_1", "title": "if error > big", "open": true, "h": 48 },
+      { "id": "arm_2", "title": "elif drift > tol", "open": true, "h": 48 },
+      { "id": "arm_3", "title": "else", "open": true, "h": 48 }
+    ] } },
+
+    { "id": "c5-loop", "type": "loop", "x": 500, "y": 1100, "props": { "title": "c5 · innermost Branch owns Break", "w": 400, "h": 460 } },
+    { "id": "c5-outer-branch", "type": "branch", "parentId": "c5-loop", "x": 20, "y": 70, "meta": { "branchArm": "arm_1" }, "props": { "title": "if drift > tol", "w": 360, "h": 342, "arms": [
+      { "id": "arm_1", "title": "if drift > tol", "open": true, "h": 260 }
+    ] } },
+    { "id": "c5-inner-branch", "type": "branch", "parentId": "c5-outer-branch", "x": 16, "y": 92, "meta": { "branchArm": "arm_1" }, "props": { "title": "if stale", "w": 328, "h": 210, "arms": [
+      { "id": "arm_1", "title": "if stale", "open": true, "h": 48 },
+      { "id": "arm_2", "title": "else", "open": true, "h": 48 }
+    ] } },
+
+    { "id": "c6-loop", "type": "loop", "x": 1100, "y": 1100, "props": { "title": "c6 · outer Loop stays empty", "w": 400, "h": 360 } },
+    { "id": "c6-inner-loop", "type": "loop", "parentId": "c6-loop", "x": 20, "y": 72, "props": { "title": "nested for sample in window", "w": 360, "h": 220 } }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · c1's transparent try / except exits share one Loop header: Continue then Break.",
+      "x": 500,
+      "y": 20,
+      "w": 400,
+      "h": 124,
+      "target": { "shapeId": "c1-loop", "anchor": "top" }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Fold then reopen c4's arms. Each red badge stays on its owning arm header, never a sibling.",
+      "x": 1600,
+      "y": 820,
+      "w": 440,
+      "h": 124,
+      "target": { "shapeId": "c4-branch", "anchor": "right" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · c1 has two Loop badges; c2–c4 land in only their named arms; c5 lands only in the inner arm; c6 has none.",
+      "x": 1640,
+      "y": 1160,
+      "w": 460,
+      "h": 124
+    }
+  ]
+}

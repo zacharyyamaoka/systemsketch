@@ -20,6 +20,7 @@ import {
 	BLOCK_SHAPE_TYPE,
 	getDefaultBlockProps,
 	type BlockPort,
+	type BlockVariadicPort,
 	type BlockShape,
 	type BlockView,
 } from '../blocks/blockModel'
@@ -47,6 +48,7 @@ interface LegacyPort {
 	type?: unknown
 	visible?: unknown
 	defaultValue?: unknown
+	variadic?: unknown
 }
 interface LegacyBlockExtension {
 	content?: {
@@ -191,12 +193,31 @@ function legacyView(extension: LegacyBlockExtension): BlockView {
 	return 'port'
 }
 
+/** Accept the exact V5 metadata PyBlocks emits; ignore malformed foreign data. */
+function readVariadic(value: unknown): BlockVariadicPort | undefined {
+	const candidate = record(value)
+	if (
+		!candidate
+		|| typeof candidate.groupId !== 'string' || candidate.groupId === ''
+		|| typeof candidate.label !== 'string' || candidate.label === ''
+		|| (candidate.kind !== 'positional' && candidate.kind !== 'keyword')
+		|| typeof candidate.bundled !== 'boolean'
+	) return undefined
+	return {
+		groupId: candidate.groupId,
+		label: candidate.label,
+		kind: candidate.kind,
+		bundled: candidate.bundled,
+	}
+}
+
 function readPorts(value: unknown, hidden: Set<string>): BlockPort[] {
 	if (!Array.isArray(value)) return []
 	return value.flatMap((candidate, index) => {
 		const port = record(candidate) as LegacyPort | null
 		if (!port) return []
 		const id = text(port.id, `port_${index + 1}`)
+		const variadic = readVariadic(port.variadic)
 		return [{
 			id,
 			name: text(port.name, id),
@@ -205,6 +226,7 @@ function readPorts(value: unknown, hidden: Set<string>): BlockPort[] {
 			...(typeof port.defaultValue === 'string' && port.defaultValue !== ''
 				? { defaultValue: port.defaultValue }
 				: {}),
+			...(variadic ? { variadic } : {}),
 		}]
 	})
 }

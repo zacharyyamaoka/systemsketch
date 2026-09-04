@@ -11,6 +11,7 @@ import { useMemo } from 'react'
 import { type Editor, useValue } from 'tldraw'
 
 import { LiveTextInput } from '../../fields'
+import { EMPTY_FIELD_GUIDANCE } from '../../fields/emptyFieldGuidance'
 import { portColor } from '../../blocks/ui/portPalette'
 import {
 	getOnlySelectedLoop,
@@ -71,7 +72,7 @@ export function LoopInspectorContent({ props, actions }: {
 					<LiveTextInput
 						value={props.title}
 						disabled={readOnly}
-						placeholder="For Loop"
+						placeholder={EMPTY_FIELD_GUIDANCE.loop.title}
 						ariaLabel="Loop title"
 						beginEdit={() => actions?.beginEdit('rename loop')}
 						onWrite={(title) => actions?.setTitle(title)}
@@ -93,7 +94,7 @@ export function LoopInspectorContent({ props, actions }: {
 								className="block-inspector__port-type"
 								value={props[port.key].type}
 								disabled={readOnly}
-								placeholder="type"
+								placeholder={EMPTY_FIELD_GUIDANCE.loop.portType}
 								ariaLabel={`${port.label} type`}
 								beginEdit={() => actions?.beginEdit('retype loop port')}
 								onWrite={(type) => actions?.setPortType(port.id, type)}
@@ -120,7 +121,7 @@ export function LoopInspectorContent({ props, actions }: {
 					<LiveTextInput
 						value={props.turn}
 						disabled={readOnly}
-						placeholder="iteration 3 of 7"
+						placeholder={EMPTY_FIELD_GUIDANCE.loop.turn}
 						ariaLabel="Loop turn"
 						beginEdit={() => actions?.beginEdit('set loop turn')}
 						onWrite={(turn) => actions?.setTurn(turn)}

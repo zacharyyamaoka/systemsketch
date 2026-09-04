@@ -1,0 +1,54 @@
+[
+  {
+    "label": "tiny",
+    "w": 140,
+    "h": 100,
+    "file": "port-outline-gallery-resize-tiny-2026-09-03.png"
+  },
+  {
+    "label": "small",
+    "w": 220,
+    "h": 160,
+    "file": "port-outline-gallery-resize-small-2026-09-03.png"
+  },
+  {
+    "label": "large",
+    "w": 700,
+    "h": 560,
+    "file": "port-outline-gallery-resize-large-2026-09-03.png"
+  },
+  {
+    "label": "very-wide",
+    "w": 1000,
+    "h": 160,
+    "file": "port-outline-gallery-resize-very-wide-2026-09-03.png"
+  },
+  {
+    "label": "very-tall",
+    "w": 200,
+    "h": 780,
+    "file": "port-outline-gallery-resize-very-tall-2026-09-03.png"
+  },
+  {
+    "label": "square",
+    "w": 420,
+    "h": 420,
+    "file": "port-outline-gallery-resize-square-2026-09-03.png"
+  },
+  {
+    "label": "branch-large",
+    "w": 900,
+    "h": 700,
+    "file": "port-outline-gallery-resize-branch-large-2026-09-03.png"
+  },
+  {
+    "label": "loop-large",
+    "w": 900,
+    "h": 600,
+    "file": "port-outline-gallery-resize-loop-large-2026-09-03.png"
+  },
+  {
+    "label": "dragged",
+    "file": "port-outline-gallery-resize-dragged-2026-09-03.png"
+  }
+]

@@ -113,6 +113,30 @@ the live repo** rather than hardcoding them, so a report cannot drift from the t
 describes. Render it headlessly and look at it before handing it over, then link it from
 `README.md`. Generated `docs/assets/crop-*.png` are build output and gitignored.
 
+## Decisions that outlive the diff go in `docs/peps/`
+
+This is for **architecture, not bugs**. A hard-won decision — a genuine fork where more than
+one approach was defensible, and code a future rewrite must not silently re-litigate — gets a
+durable record in `docs/peps/NNNN-slug.md`, built from `docs/peps/TEMPLATE.md`. Fixing a
+mistake or restoring behavior that should have worked all along is not a PEP, no matter how
+many files it touched. Full workflow, numbering, and status lifecycle: `docs/peps/README.md`.
+
+**Write it at merge time, not before, and stay sparing.** A PEP describes what actually
+landed on `main`, not a branch's or worktree's intermediate churn — don't create one for work
+that might still be reverted. Most decisions still just get a `WHY:` comment where they live
+(already a live convention in `src/workspace/*`); only promote one to a numbered PEP when the
+fork was real and it's cross-cutting or visual/comparative enough to deserve the rich-media
+treatment. High signal beats complete — a PEP nobody will ever need is noise.
+
+When a decision does get a PEP, leave the `WHY:` comment anyway and add one clause pointing at
+it: `// WHY: <one line> — see docs/peps/0001-slug.md`. `tests/test_pep_links.py` fails the
+build the moment that pointer goes stale (renamed file, colliding number) — it's part of
+`npm run check`, not optional housekeeping.
+
+**Say so when you write one.** One line in your handoff — "Per `docs/peps/README.md`, also
+wrote `docs/peps/0007-slug.md` and linked it at `file:line`." A PEP that lands silently in a
+diff is easy for Zach to miss; the sync test proves the link works, not that anyone noticed.
+
 ## Several agent sessions edit this tree at once
 
 Peers write here in real time — this is the normal case, not an edge case.

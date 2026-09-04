@@ -60,6 +60,7 @@ import {
 import { interfaceScaleCssValues, useInterfaceScale } from './settings/interfaceScale'
 import { installArrowClickToPlace } from './arrowClickToPlace'
 import { installBoardTheme, releasePrepaintTheme, useAppliedTheme } from './theme/themeStore'
+import { ThemePortalContext } from './theme/ThemePortal'
 import { installInstantTextEditing } from './instantTextEditing'
 import { installDevelopmentSeam } from './developmentSeam'
 import { installFlightRecorder } from './recorder/recorderStore'
@@ -278,20 +279,29 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
  */
 function ThemeRoot({ children }: { children: ReactNode }) {
   const theme = useAppliedTheme()
+  const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(null)
   // `index.html` painted the page in the stored theme before this bundle ran;
   // from here on this element owns the attributes, so the pre-paint copy goes
   // before the first frame is shown.
   useLayoutEffect(releasePrepaintTheme, [])
   return (
-    <div
-      className="systemsketch-theme-root"
-      data-testid="systemsketch-theme-root"
-      data-ss-theme={theme.theme}
-      data-ss-color-scheme={theme.scheme}
-      style={theme.style as CSSProperties | undefined}
-    >
-      {children}
-    </div>
+    <ThemePortalContext.Provider value={portalContainer}>
+      <div
+        className="systemsketch-theme-root"
+        data-testid="systemsketch-theme-root"
+        data-ss-theme={theme.theme}
+        data-ss-color-scheme={theme.scheme}
+        style={theme.style as CSSProperties | undefined}
+      >
+        {children}
+        {/* Portaled app UI inherits the same appearance as every sibling. */}
+        <div
+          ref={setPortalContainer}
+          className="systemsketch-theme-portal-root"
+          data-testid="systemsketch-theme-portal-root"
+        />
+      </div>
+    </ThemePortalContext.Provider>
   )
 }
 

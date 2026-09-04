@@ -25,7 +25,7 @@
  * group and its `meta` with it, which is the honest meaning of taking the
  * thing apart by hand.
  */
-import { createShapeId, toRichText } from 'tldraw'
+import { createShapeId, getIndexAbove, toRichText } from 'tldraw'
 import type {
 	Editor,
 	TLArrowBinding,
@@ -56,6 +56,7 @@ import {
 	type ConnectionBinding,
 } from '../connections/ConnectionBindingUtil'
 import {
+	getConnectionElbowRoute,
 	getConnectionTerminals,
 	type ConnectionShape,
 } from '../connections/ConnectionShapeUtil'
@@ -64,6 +65,10 @@ import { isBranchShape } from '../../branch/branchModel'
 import { detachLoopToPrimitives } from '../../loop/detachLoop'
 import { isLoopShape } from '../../loop/loopModel'
 import { primitivesForBlock } from './blockPrimitives'
+import {
+	pointInPrimitiveParentSpace,
+	unframedPrimitiveParentId,
+} from './primitiveSpace'
 import {
 	DETACH_FORMAT_VERSION,
 	detachMeta,
@@ -106,16 +111,23 @@ export function detachBlockToPrimitives(
 	const block = editor.getShape(blockId)
 	if (!isBlockShape(block)) return null
 
-	// Which dots detach filled: the ports a cable is welded to right now.
+	// Which dots detach filled: semantic cables and an Arrow created earlier in
+	// this same selection sweep both count. The first Block replaces the cable
+	// before the second Block is lowered, so reading only the semantic cache
+	// would erase the second endpoint's connected core and leave its port row
+	// ungrouped.
 	const wiring = getBlockPortConnections(editor, block.id)
-	const connectedPortIds = new Set(wiring.map((entry) => entry.ownPortId))
+	const connectedPortIds = new Set([
+		...wiring.map((entry) => entry.ownPortId),
+		...detachedArrowPortIds(editor, block.id),
+	])
 	// A detached Block is a loose stock rectangle and a stock group, not a
 	// frame child. Keeping it beneath an Expanded Block / region would let that
 	// ancestor clip its card and arrows before its ordinary z-order can help.
 	// Walk every ancestor because a group may sit between the Block and a frame.
 	const primitiveParentId = unframedPrimitiveParentId(editor, block.parentId)
 	const blockPageOrigin = editor.getShapePageTransform(block).applyToPoint({ x: 0, y: 0 })
-	const origin = pointInParentSpace(editor, primitiveParentId, blockPageOrigin)
+	const origin = pointInPrimitiveParentSpace(editor, primitiveParentId, blockPageOrigin)
 	const { shapes, cardId, portRows } = primitivesWithMeta(block, connectedPortIds, origin)
 	const shapeIds = shapes.map((partial) => partial.id as TLShapeId)
 
@@ -297,15 +309,17 @@ function rebuildCableAsArrow(
 	}
 
 	const routing = (cable.connection.props as { routing?: ConnectionRoutingKind }).routing ?? 'elbow'
-	const localStart = pointInParentSpace(editor, parentId, start)
-	const localEnd = pointInParentSpace(editor, parentId, end)
+	const localStart = pointInPrimitiveParentSpace(editor, parentId, start)
+	const localEnd = pointInPrimitiveParentSpace(editor, parentId, end)
 	const arrowId = createShapeId()
+	const frozenPath = frozenElbowPolyline(editor, cable.connection as ConnectionShape, parentId)
 	editor.createShape({
 		id: arrowId,
 		type: 'arrow',
 		parentId,
 		x: localStart.x,
 		y: localStart.y,
+		opacity: frozenPath ? 0 : 1,
 		props: {
 			start: { x: 0, y: 0 },
 			end: { x: localEnd.x - localStart.x, y: localEnd.y - localStart.y },
@@ -332,14 +346,23 @@ function rebuildCableAsArrow(
 			ends,
 		}),
 	})
+	const lineId = frozenPath
+		? createFrozenElbowLine(editor, {
+			parentId,
+			points: frozenPath,
+			connection: cable.connection as ConnectionShape,
+			ownerArrowId: arrowId,
+		})
+		: null
 	const pillGroupId = createDetachedDelayPill(editor, {
 		arrowId,
 		parentId,
 		connection: cable.connection as ConnectionShape,
 		start: localStart,
 		end: localEnd,
+		path: frozenPath ?? undefined,
 	})
-	groupDetachedEdgeWithPill(editor, arrowId, pillGroupId)
+	groupDetachedEdgeWithPill(editor, arrowId, pillGroupId, lineId ? [lineId] : [])
 	editor.createBinding<TLArrowBinding>({
 		type: 'arrow',
 		fromId: arrowId,
@@ -379,35 +402,111 @@ function dashForDetachedTemporal(temporal: ConnectionShape['props']['temporal'])
 	return 'solid'
 }
 
-/** Convert a page point to the coordinate space used by children of `parentId`. */
-function pointInParentSpace(
-	editor: Editor,
-	parentId: TLShape['parentId'],
-	point: { x: number; y: number },
-): { x: number; y: number } {
-	const parent = editor.getShape(parentId)
-	return parent ? editor.getPointInShapeSpace(parent, point) : point
+/**
+ * A preceding Block in a multi-selection has already turned the semantic
+ * cable into a stock Arrow. Its binding and detach record still say exactly
+ * which live Block port it reaches, and that is enough to preserve the visible
+ * filled port core while this endpoint is lowered a moment later.
+ */
+function detachedArrowPortIds(editor: Editor, shapeId: TLShapeId): string[] {
+	const portIds: string[] = []
+	for (const binding of editor.getBindingsToShape<TLArrowBinding>(shapeId, 'arrow')) {
+		const arrow = editor.getShape(binding.fromId)
+		if (!arrow || arrow.type !== 'arrow') continue
+		const record = readDetachedConnection(arrow.meta)
+		const end = record?.ends[binding.props.terminal]
+		if (end?.portId) portIds.push(end.portId)
+	}
+	return portIds
 }
 
+type Point = { x: number; y: number }
+
 /**
- * Return the closest normal parent outside every frame-like ancestor.
- *
- * Detached shapes are explicitly not children of Frames, Expanded Blocks,
- * Branches, Loops, or nested frame/group combinations: frames clip descendants
- * before z-order is considered. A normal group remains a valid parent unless
- * it itself sits beneath one of those frame-like containers.
+ * A stock Arrow stores one elbow scalar, while a stock Line stores every point
+ * of a polyline. Preserve the latter whenever the authored connection needs
+ * more than that one stock degree of freedom. The returned points are already
+ * in the eventual primitive parent's coordinate space.
  */
-function unframedPrimitiveParentId(
+function frozenElbowPolyline(
 	editor: Editor,
+	connection: ConnectionShape,
 	parentId: TLShape['parentId'],
-): TLShape['parentId'] {
-	let result = parentId
-	let parent = editor.getShape(parentId)
-	while (parent) {
-		if (editor.isShapeFrameLike(parent)) result = parent.parentId
-		parent = editor.getShape(parent.parentId)
+): Point[] | null {
+	if (connection.props.routing !== 'elbow') return null
+	const route = getConnectionElbowRoute(editor, connection)
+	// WHY: an automatic router can temporarily draw several orthogonal rails
+	// around nearby geometry, but that is still a normal elbow as far as the
+	// user is concerned. Preserve the editable stock Arrow in that case. A Line
+	// is reserved for route data the user actually authored—explicit corners or
+	// pins—which a one-midpoint stock Arrow cannot store faithfully.
+	const mustFreeze = connection.props.elbowRoute !== null
+		|| connection.props.pins.length > 0
+	if (!mustFreeze || route.points.length < 2) return null
+	const transform = editor.getShapePageTransform(connection)
+	return route.points.map((point) => pointInPrimitiveParentSpace(editor, parentId, transform.applyToPoint(point)))
+}
+
+/** Materialise an arbitrary orthogonal route as one native stock Line. */
+function createFrozenElbowLine(
+	editor: Editor,
+	input: {
+		parentId: TLShape['parentId']
+		points: readonly Point[]
+		connection: ConnectionShape
+		ownerArrowId: TLShapeId
+	},
+): TLShapeId {
+	const { parentId, points, connection, ownerArrowId } = input
+	const lineId = createShapeId()
+	const origin = points[0]
+	let pointIndex = 'a1' as never
+	const stockPoints: Record<string, { id: string; index: never; x: number; y: number }> = {}
+	for (const [ordinal, point] of points.entries()) {
+		const id = `p${ordinal + 1}`
+		stockPoints[id] = {
+			id,
+			index: pointIndex,
+			x: point.x - origin.x,
+			y: point.y - origin.y,
+		}
+		pointIndex = getIndexAbove(pointIndex) as never
 	}
-	return result
+	editor.createShape({
+		id: lineId,
+		type: 'line',
+		parentId,
+		x: origin.x,
+		y: origin.y,
+		props: {
+			points: stockPoints,
+			spline: 'line',
+			color: 'grey',
+			size: 's',
+			dash: dashForDetachedTemporal(connection.props.temporal),
+			scale: 1,
+		},
+		// This marker is only for SystemSketch cleanup if the invisible bound
+		// Arrow is rebuilt. Stock tldraw needs none of it to draw the path.
+		meta: {
+			systemSketch: {
+				kind: 'connection-polyline',
+				version: DETACH_FORMAT_VERSION,
+				ownerArrowId,
+			},
+		},
+	})
+	return lineId
+}
+
+function detachedPolylineOwnerArrowId(meta: unknown): TLShapeId | null {
+	if (!meta || typeof meta !== 'object') return null
+	const record = (meta as { systemSketch?: unknown }).systemSketch
+	if (!record || typeof record !== 'object') return null
+	const candidate = record as { kind?: unknown; ownerArrowId?: unknown }
+	return candidate.kind === 'connection-polyline' && typeof candidate.ownerArrowId === 'string'
+		? candidate.ownerArrowId as TLShapeId
+		: null
 }
 
 /**
@@ -423,16 +522,20 @@ function createDetachedDelayPill(
 		connection: ConnectionShape
 		start: { x: number; y: number }
 		end: { x: number; y: number }
+		/** Exact frozen polyline, when a stock Arrow cannot represent the route. */
+		path?: readonly Point[]
 	},
 ): TLShapeId | null {
-	const { arrowId, parentId, connection, start, end } = input
+	const { arrowId, parentId, connection, start, end, path } = input
 	if (connection.props.temporal !== 'delayed') return null
 	const label = `z⁻¹${connection.props.delayValue ? ` = ${connection.props.delayValue}` : ''}`
 	const fraction = Math.min(0.9, Math.max(0.1, connection.props.pillPosition))
-	const point = {
-		x: start.x + (end.x - start.x) * fraction,
-		y: start.y + (end.y - start.y) * fraction,
-	}
+	const point = path && path.length >= 2
+		? pointAtPolylineFraction(path, fraction)
+		: {
+			x: start.x + (end.x - start.x) * fraction,
+			y: start.y + (end.y - start.y) * fraction,
+		}
 	const width = Math.max(54, Math.min(180, 20 + label.length * 9))
 	const height = 26
 	const pillId = createShapeId()
@@ -469,6 +572,26 @@ function createDetachedDelayPill(
 	return null
 }
 
+function pointAtPolylineFraction(points: readonly Point[], fraction: number): Point {
+	const lengths = points.slice(1).map((point, index) => Math.hypot(
+		point.x - points[index].x,
+		point.y - points[index].y,
+	))
+	const total = lengths.reduce((sum, length) => sum + length, 0)
+	if (total <= 0) return points[0]
+	let remaining = total * fraction
+	for (let index = 0; index < lengths.length; index += 1) {
+		if (remaining <= lengths[index]) {
+			const start = points[index]
+			const end = points[index + 1]
+			const t = remaining / Math.max(lengths[index], 1)
+			return { x: start.x + (end.x - start.x) * t, y: start.y + (end.y - start.y) * t }
+		}
+		remaining -= lengths[index]
+	}
+	return points[points.length - 1]
+}
+
 /**
  * A delayed edge remains a stock group in its own right. The nested pill group
  * gives the `z⁻¹` oval and label their own edit/move unit; this outer group
@@ -479,10 +602,12 @@ function groupDetachedEdgeWithPill(
 	editor: Editor,
 	arrowId: TLShapeId,
 	pillGroupId: TLShapeId | null,
+	visualIds: readonly TLShapeId[] = [],
 ): TLShapeId | null {
-	if (!pillGroupId) return null
+	const members = [arrowId, ...visualIds, ...(pillGroupId ? [pillGroupId] : [])]
+	if (members.length < 2) return null
 	const groupId = createShapeId()
-	editor.groupShapes([arrowId, pillGroupId], { groupId, select: false })
+	editor.groupShapes(members, { groupId, select: false })
 	return editor.getShape(groupId) ? groupId : null
 }
 
@@ -492,9 +617,10 @@ function detachedEdgeGroupId(editor: Editor, arrowId: TLShapeId): TLShapeId | nu
 	if (!arrow) return null
 	const parent = editor.getShape(arrow.parentId)
 	if (!parent || parent.type !== 'group') return null
-	const hasPill = editor.getSortedChildIdsForParent(parent.id)
-		.some((childId) => detachedDelayPillArrowId(editor.getShape(childId)?.meta) === arrowId)
-	return hasPill ? parent.id : null
+	const childIds = editor.getSortedChildIdsForParent(parent.id)
+	const hasPill = childIds.some((childId) => detachedDelayPillArrowId(editor.getShape(childId)?.meta) === arrowId)
+	const hasFrozenPolyline = childIds.some((childId) => detachedPolylineOwnerArrowId(editor.getShape(childId)?.meta) === arrowId)
+	return hasPill || hasFrozenPolyline ? parent.id : null
 }
 
 /** Every selected semantic cable, including cables nested in selected groups. */
@@ -568,15 +694,17 @@ export function detachConnectionToArrow(
 	const routing = connection.props.routing
 	const primitiveParentId = unframedPrimitiveParentId(editor, connection.parentId)
 	const localPoints = {
-		start: pointInParentSpace(editor, primitiveParentId, pagePoints.start),
-		end: pointInParentSpace(editor, primitiveParentId, pagePoints.end),
+		start: pointInPrimitiveParentSpace(editor, primitiveParentId, pagePoints.start),
+		end: pointInPrimitiveParentSpace(editor, primitiveParentId, pagePoints.end),
 	}
+	const frozenPath = frozenElbowPolyline(editor, connection, primitiveParentId)
 	editor.createShape({
 		id: arrowId,
 		type: 'arrow',
 		parentId: primitiveParentId,
 		x: localPoints.start.x,
 		y: localPoints.start.y,
+		opacity: frozenPath ? 0 : 1,
 		props: {
 			start: { x: 0, y: 0 },
 			end: {
@@ -602,14 +730,22 @@ export function detachConnectionToArrow(
 			ends,
 		}),
 	})
+	// Call the router exactly once for the visual decision: pins, authored
+	// corners, and automatic routes with several bends become a native stock
+	// Line. The zero-opacity Arrow above remains solely as stock binding/rebuild
+	// data; the stock viewer paints the Line, not a degraded reroute.
+	const lineId = frozenPath
+		? createFrozenElbowLine(editor, { parentId: primitiveParentId, points: frozenPath, connection, ownerArrowId: arrowId })
+		: null
 	const pillGroupId = createDetachedDelayPill(editor, {
 		arrowId,
 		parentId: primitiveParentId,
 		connection,
 		start: localPoints.start,
 		end: localPoints.end,
+		path: frozenPath ?? undefined,
 	})
-	groupDetachedEdgeWithPill(editor, arrowId, pillGroupId)
+	groupDetachedEdgeWithPill(editor, arrowId, pillGroupId, lineId ? [lineId] : [])
 
 	for (const terminal of ['start', 'end'] as const) {
 		const binding = bindings[terminal]
@@ -765,7 +901,7 @@ function detachPrimitives(editor: Editor, ids: readonly TLShapeId[]): DetachResu
 		// Blocks go first. Their own cable lowerer preserves a reversible arrow
 		// record, even when the other endpoint is one of the containers below.
 		// Container-only wires are lowered after that while their ports still
-		// exist, then the Branch / Loop records become stock Frames. Keeping this
+		// exist, then the Branch / Loop records become stock Groups. Keeping this
 		// order prevents a Loop-only detach from losing its header wires and keeps
 		// a mixed Block + Loop selection rebuildable at the Block end.
 		for (const id of ids) {
@@ -779,7 +915,7 @@ function detachPrimitives(editor: Editor, ids: readonly TLShapeId[]): DetachResu
 		}
 		const containerConnectionIds = new Set<TLShapeId>()
 		// Read the semantic wiring before its Connection records become arrows.
-		// The resulting stock Frame has no port identity, but a live wired port
+		// The resulting stock rectangle has no port identity, but a live wired port
 		// visibly has a filled 12px core and the chrome materialiser can retain
 		// that evidence while it still knows each port id.
 		const containerConnectedPortIds = new Map<TLShapeId, ReadonlySet<string>>()
@@ -798,24 +934,24 @@ function detachPrimitives(editor: Editor, ids: readonly TLShapeId[]): DetachResu
 				detachConnectionToArrow(editor, connection as ConnectionShape)
 			}
 		}
-		const loweredContainerIds = new Set<TLShapeId>()
+		const loweredContainerCardIds = new Set<TLShapeId>()
 		for (const id of containerIds) {
 			const shape = editor.getShape(id)
-			const frameId = isBranchShape(shape)
+			const detached = isBranchShape(shape)
 				? detachBranchToPrimitives(editor, id, containerConnectedPortIds.get(id))
 				: isLoopShape(shape)
 					? detachLoopToPrimitives(editor, id, containerConnectedPortIds.get(id))
 					: null
-			if (frameId) {
-				loweredContainerIds.add(frameId)
-				replacementSelection.add(frameId)
+			if (detached) {
+				loweredContainerCardIds.add(detached.cardId)
+				replacementSelection.add(detached.groupId)
 			}
 		}
 		// A Block arrow normally remembers enough to rebuild when every endpoint
 		// is a Block again. A selected Branch or Loop has just become a stock
-		// Frame, so an arrow anchored to it can no longer become a semantic cable.
+		// Group/card, so an arrow anchored to it can no longer become a semantic cable.
 		// Keep the stock arrow, but clear the misleading rebuild promise.
-		for (const containerId of loweredContainerIds) {
+		for (const containerId of loweredContainerCardIds) {
 			for (const binding of editor.getBindingsToShape<TLArrowBinding>(containerId, 'arrow')) {
 				const arrow = editor.getShape(binding.fromId)
 				if (!arrow || arrow.type !== 'arrow') continue
@@ -988,9 +1124,9 @@ export function rebuildSelectedBlocks(editor: Editor): RebuildResult {
 					props: { portId: end.portId, terminal, face: end.face },
 				})
 				}
-				// The pill remains independently editable *inside* its stock edge
-				// group. Drop the containing group as one unit so no oval/text
-				// descendants survive when the semantic cable returns.
+				// The pill and an exact frozen Line remain independently editable
+				// inside the stock edge group. Drop the containing group as one unit
+				// so no visual survivors remain when the semantic cable returns.
 				editor.deleteShape(detachedEdgeGroupId(editor, arrow.id) ?? arrow.id)
 			rebuiltConnections += 1
 		}

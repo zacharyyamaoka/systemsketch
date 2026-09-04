@@ -53,7 +53,6 @@ import {
 	type BlockState,
 } from '../blockModel'
 import {
-	adoptCableTypeIntoPills,
 	adoptCableTypeIntoProjection,
 	connectionBindingPolarity,
 	connectionHasBothTerminals,
@@ -749,10 +748,10 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		const terminal = handle.id as ConnectionTerminal
 
 		if (getConnectionBindings(this.editor, connection.id)[terminal]) {
-			// Settled: make the document read source → sink, and let an untyped
-			// pill take the type of the port it just met.
+			// WHY: a whiteboard wire is a relationship, not permission to overwrite
+			// an intentionally contradictory pill. The explicit “Adopt cable type”
+			// command makes a requested derivation visible and undoable.
 			normalizeConnectionDirection(this.editor, connection.id)
-			adoptCableTypeIntoPills(this.editor, connection.id)
 			adoptCableTypeIntoProjection(this.editor, connection.id)
 			// A cable you just DREW is not left selected. Its terminal handles sit
 			// exactly on the dots it joins, and a selected cable's handle wins the
@@ -1862,8 +1861,9 @@ export function offerBlockForLooseTerminal(
 					editor.deleteShapes([connectionId, blockId])
 					return
 				}
+				// Keep a picker-created cable as manual as a hand-drawn one; the same
+				// explicit command is the only path that copies its type into a pill.
 				normalizeConnectionDirection(editor, connectionId)
-				adoptCableTypeIntoPills(editor, connectionId)
 				adoptCableTypeIntoProjection(editor, connectionId)
 				editor.select(blockId)
 			})

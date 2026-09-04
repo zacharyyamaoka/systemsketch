@@ -14,6 +14,7 @@ import { HTMLContainer, useEditor, useValue } from 'tldraw'
 
 import { getBlockPortConnections } from '../blocks/connections/blockPorts'
 import { countProducers, PortDot, usePortHintEligibility } from '../blocks/ui/PortDot'
+import { ControlIconBadges } from '../controlIcons'
 import { BranchInlineEditor } from './BranchInlineEditor'
 import {
 	addBranchArm,
@@ -122,8 +123,18 @@ function ArmHeader({ shape, row, isActive, faded, selected, editing }: {
 			>
 				{arm.title}
 			</span>
+			<ControlIconBadges
+				icons={arm.controlIcons}
+				testId={`branch-arm-control-icons-${arm.id}`}
+				style={boxStyle({ ...row.controlIcons, y: row.controlIcons.y - row.rowTop })}
+			/>
 			{isActive ? (
-				<span className="Branch-activeLabel" style={{ right: row.target.w + 16, top: 9 }}>active</span>
+				<span
+					className="Branch-activeLabel"
+					style={{ right: row.target.w + row.controlIcons.w + (row.controlIcons.w ? 22 : 16), top: 9 }}
+				>
+					active
+				</span>
 			) : null}
 			<button
 				type="button"

@@ -142,17 +142,18 @@ async function main() {
     assert.equal(await evaluate(page, 'document.title'), 'Arm — SystemSketch')
     pass('the window title names the open board, so many windows stay tellable apart')
 
-    // The filename is a stable launcher, so it proves both initial focus and
-    // restoration after the dialog closes via the keyboard.
+    // The filename is the editing surface itself: no modal tax for one short
+    // name, and Escape returns focus to the same stable launcher.
     await clickElement(page, '.systemsketch-file-title')
-    await waitFor(page, `document.querySelector('[data-mode="rename"]')`, 'the rename dialog')
-    assert.equal(await evaluate(page, `document.querySelector('#workspace-dialog-title')?.textContent`), 'Rename document')
-    assert.equal(await evaluate(page, 'document.activeElement?.id'), 'workspace-document-name')
+    await waitFor(page, `document.querySelector('[data-testid="systemsketch-inline-rename"]')`, 'the inline rename field')
+    assert.equal(await evaluate(page, `Boolean(document.querySelector('[data-testid="workspace-dialog"]'))`), false)
+    assert.equal(await evaluate(page, 'document.activeElement?.classList.contains("systemsketch-file-title-input")'), true)
+    assert.equal(await evaluate(page, 'document.activeElement?.classList.contains("tlui-input")'), true)
     await key(page, 'Escape', 'Escape')
-    await waitFor(page, `!document.querySelector('[data-testid="workspace-dialog"]')`, 'Escape to close the dialog')
+    await waitFor(page, `!document.querySelector('[data-testid="systemsketch-inline-rename"]')`, 'Escape to close inline rename')
     assert.equal(await evaluate(page,
       `document.activeElement?.classList.contains('systemsketch-file-title')`), true)
-    pass('the dialog focuses its useful field, Escape closes it, and focus returns to its launcher')
+    pass('the title focuses its useful inline field, Escape cancels it, and focus returns to its launcher')
 
     // 2. The File menu offers the window, next to the board it already made.
     await clickElement(page, '[data-testid="main-menu.button"]')
@@ -173,6 +174,7 @@ async function main() {
     await waitFor(page, `document.querySelector('[data-testid="workspace-dialog"]')`, 'the file browser')
     assert.equal(await evaluate(page, `document.querySelector('#workspace-dialog-title')?.textContent`), 'Open a document')
     assert.equal(await evaluate(page, 'document.activeElement?.dataset.testid'), 'workspace-filter')
+    assert.equal(await evaluate(page, 'document.activeElement?.classList.contains("tlui-input")'), true)
     assert.deepEqual(JSON.parse(await rowTitles(page)), [
       'folder:Robotics', 'document:Arm', 'document:Gripper', 'document:Legacy',
     ])
@@ -203,6 +205,13 @@ async function main() {
     await shoot(page, SHOT_FILTER)
     pass('the filter narrows the folder and pre-selects the match')
 
+    await key(page, 'Escape', 'Escape')
+    await waitFor(page, `document.querySelector('[data-testid="workspace-filter"]')?.value === ''`, 'stock Escape query reset')
+    assert.equal(await evaluate(page, `Boolean(document.querySelector('[data-testid="workspace-dialog"]'))`), true)
+    pass('Escape resets the stock filter input without dismissing its workspace dialog')
+
+    await page.send('Input.insertText', { text: 'grip' })
+    await waitFor(page, `document.querySelector('[data-testid="workspace-filter"]')?.value === 'grip'`, 'the restored filter query')
     await key(page, 'Enter', 'Enter')
     await waitFor(page, `location.search.includes('Gripper')`, 'the opened board')
     await waitFor(page, `document.querySelector('[data-testid="systemsketch-app"]')`, 'the reopened app')

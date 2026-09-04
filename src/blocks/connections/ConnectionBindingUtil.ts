@@ -310,16 +310,27 @@ export function normalizeConnectionDirection(
 	return true
 }
 
+export interface AdoptCableTypeIntoPillsOptions {
+	/** An explicit command may replace a manually written pill type. */
+	overwrite?: boolean
+	/** Limit an explicit command to the pill its author selected. */
+	onlyShapeId?: TLShapeId
+}
+
 /**
- * A pill with no type of its own takes the type of the port its cable meets,
- * on either rim: a result wired into `pose` becomes a `Pose`, an empty literal
- * wired into `gain: float` becomes a `float`. A pill that already has a type
- * keeps it; the type is written into the record so the file carries it.
+ * Copy the type carried by a cable into a Value pill. Wiring deliberately does
+ * not call this: a whiteboard cable is a relationship, not permission to
+ * rewrite its neighbouring labels. The explicit Pill command uses
+ * `overwrite` to make the requested calculation visible and undoable.
  */
-export function adoptCableTypeIntoPills(editor: Editor, connection: ConnectionShape | TLShapeId): void {
+export function adoptCableTypeIntoPills(
+	editor: Editor,
+	connection: ConnectionShape | TLShapeId,
+	options: AdoptCableTypeIntoPillsOptions = {},
+): boolean {
 	const connectionId = typeof connection === 'string' ? connection : connection.id
 	const bindings = getConnectionBindings(editor, connectionId)
-	if (!bindings.start || !bindings.end) return
+	if (!bindings.start || !bindings.end) return false
 	const ends = [bindings.start, bindings.end].map((binding) => {
 		const shape = editor.getShape(binding.toId)
 		if (!isBlockShape(shape)) return null
@@ -328,9 +339,15 @@ export function adoptCableTypeIntoPills(editor: Editor, connection: ConnectionSh
 		return { shape, type: port?.type ?? '' }
 	})
 	const [a, b] = ends
-	if (!a || !b) return
+	if (!a || !b) return false
+	let changed = false
 	for (const [pill, other] of [[a, b], [b, a]] as const) {
-		if (pill.shape.props.view !== 'value' || pill.type !== '' || other.type === '') continue
+		if (
+			pill.shape.props.view !== 'value'
+			|| (options.onlyShapeId !== undefined && pill.shape.id !== options.onlyShapeId)
+			|| (!options.overwrite && pill.type !== '')
+			|| other.type === ''
+		) continue
 		editor.updateShape<BlockShape>({
 			id: pill.shape.id,
 			type: BLOCK_SHAPE_TYPE,
@@ -339,7 +356,9 @@ export function adoptCableTypeIntoPills(editor: Editor, connection: ConnectionSh
 				outputs: pill.shape.props.outputs.map((port) => ({ ...port, type: other.type })),
 			},
 		})
+		changed = true
 	}
+	return changed
 }
 
 /**

@@ -55,6 +55,63 @@
     "ok": true
   },
   {
+    "id": "DRAFT-1",
+    "label": "P begins a Python-shaped declaration in the pill editor",
+    "observed": "pill",
+    "desired": "pill",
+    "ok": true
+  },
+  {
+    "id": "DRAFT-2",
+    "label": "the editor is the only visible declaration while the model updates live",
+    "observed": {
+      "input": "pose: Pose = 2",
+      "paintPaused": true
+    },
+    "desired": {
+      "input": "pose: Pose = 2",
+      "paintPaused": true
+    },
+    "ok": true
+  },
+  {
+    "id": "DRAFT-3",
+    "label": "the capsule grows rightward from its stable left-anchored editor",
+    "observed": {
+      "growsRightward": true,
+      "leftAnchored": true
+    },
+    "desired": {
+      "growsRightward": true,
+      "leftAnchored": true
+    },
+    "ok": true
+  },
+  {
+    "id": "PARSER-1",
+    "label": "a Python-shaped canvas declaration fills name, value, and explicit type",
+    "observed": {
+      "name": "pose",
+      "value": "2",
+      "inletType": "Pose",
+      "outletType": "Pose"
+    },
+    "desired": {
+      "name": "pose",
+      "value": "2",
+      "inletType": "Pose",
+      "outletType": "Pose"
+    },
+    "ok": true
+  },
+  {
+    "id": "PARSER-2",
+    "label": "the painted pill uses Python annotation order and separate semantic spans",
+    "observed": "{\"text\":\"pose: Pose = 2\",\"name\":\"pose\",\"type\":\"Pose\"}",
+    "desired": "{\"text\":\"pose: Pose = 2\",\"name\":\"pose\",\"type\":\"Pose\"}",
+    "ok": true
+  },
+  {
     "id": "WIRE-1",
     "label": "the outlet lands on gain",
     "observed": 1,
@@ -86,7 +143,7 @@
       },
       {
         "terminal": "start",
-        "to": "shape:FOEJmds_LQB9MKWa3v3-z",
+        "to": "shape:0bhMZrz5lMrHRhZoZNcnw",
         "port": "out_1"
       }
     ],
@@ -98,7 +155,7 @@
       },
       {
         "terminal": "start",
-        "to": "shape:FOEJmds_LQB9MKWa3v3-z",
+        "to": "shape:0bhMZrz5lMrHRhZoZNcnw",
         "port": "out_1"
       }
     ],
@@ -113,9 +170,9 @@
   },
   {
     "id": "NAME-2",
-    "label": "the face reads \"gain = 2.0\"",
-    "observed": "gain = 2.0",
-    "desired": "gain = 2.0",
+    "label": "the face reads \"gain: float = 2.0\"",
+    "observed": "gain: float = 2.0",
+    "desired": "gain: float = 2.0",
     "ok": true
   },
   {
@@ -153,14 +210,14 @@
     "observed": {
       "source": "gain",
       "copy": "gain_copy",
-      "sourceFace": "gain = 2.0",
-      "copyFace": "gain_copy = 2.0"
+      "sourceFace": "gain: float = 2.0",
+      "copyFace": "gain_copy: float = 2.0"
     },
     "desired": {
       "source": "gain",
       "copy": "gain_copy",
-      "sourceFace": "gain = 2.0",
-      "copyFace": "gain_copy = 2.0"
+      "sourceFace": "gain: float = 2.0",
+      "copyFace": "gain_copy: float = 2.0"
     },
     "ok": true
   },
@@ -169,14 +226,14 @@
     "label": "the underscore is a complete visible glyph, not a clipped descender",
     "observed": {
       "text": "gain_copy",
-      "raw": "gain_copy = 2.0",
+      "raw": "gain_copy: float = 2.0",
       "lineHeight": "30px",
       "insideFace": true,
       "verticallyClipped": false
     },
     "desired": {
       "text": "gain_copy",
-      "raw": "gain_copy = 2.0",
+      "raw": "gain_copy: float = 2.0",
       "lineHeight": "30px",
       "insideFace": true,
       "verticallyClipped": false
@@ -249,15 +306,9 @@
   },
   {
     "id": "FEED-2",
-    "label": "a fed pill keeps its stored literal characters visible and only mutes their ink",
-    "observed": {
-      "text": "fallback",
-      "muted": true
-    },
-    "desired": {
-      "text": "fallback",
-      "muted": true
-    },
+    "label": "a wired pill keeps its authored literal face instead of deriving a value",
+    "observed": "{\"text\":\"fallback\",\"muted\":false}",
+    "desired": "{\"text\":\"fallback\",\"muted\":false}",
     "ok": true
   },
   {
@@ -284,32 +335,51 @@
   },
   {
     "id": "FEED-5",
-    "label": "the Value field is read-only while a cable feeds the pill",
-    "observed": true,
-    "desired": true,
+    "label": "the Value field stays editable while a cable reaches the pill",
+    "observed": false,
+    "desired": false,
     "ok": true
   },
   {
     "id": "FEED-6",
-    "label": "a fed pill with no type of its own takes the cable's, in the panel and in the record",
+    "label": "a cable leaves an empty type empty until its author requests adoption",
     "observed": {
-      "field": "Pose",
+      "field": "",
       "record": {
-        "inlet": "Pose",
-        "outlet": "Pose"
+        "inlet": "",
+        "outlet": ""
       }
     },
     "desired": {
-      "field": "Pose",
+      "field": "",
       "record": {
-        "inlet": "Pose",
-        "outlet": "Pose"
+        "inlet": "",
+        "outlet": ""
       }
     },
     "ok": true
   },
   {
     "id": "FEED-7",
+    "label": "Adopt cable type is an explicit, reversible calculation",
+    "observed": {
+      "record": {
+        "inlet": "Pose",
+        "outlet": "Pose"
+      },
+      "face": "pose: Pose = fallback"
+    },
+    "desired": {
+      "record": {
+        "inlet": "Pose",
+        "outlet": "Pose"
+      },
+      "face": "pose: Pose = fallback"
+    },
+    "ok": true
+  },
+  {
+    "id": "FEED-8",
     "label": "the same pill feeds encode: one variable, written and read",
     "observed": 4,
     "desired": 4,
@@ -355,6 +425,21 @@
     "label": "the Value context menu does not offer Definition-linking actions",
     "observed": false,
     "desired": false,
+    "ok": true
+  },
+  {
+    "id": "INSPECTOR-RAW",
+    "label": "the inspector name is direct access, not canvas auto-formatting",
+    "observed": {
+      "name": "raw: bytes = 2.0",
+      "value": "2.0",
+      "type": "float"
+    },
+    "desired": {
+      "name": "raw: bytes = 2.0",
+      "value": "2.0",
+      "type": "float"
+    },
     "ok": true
   },
   {

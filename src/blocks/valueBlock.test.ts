@@ -56,10 +56,10 @@ describe('folding', () => {
 		const unnamed = createValueBlockProps(getDefaultBlockProps(), '2.0')
 		expect(valueBlockText(valueBlockLabel(unnamed))).toBe('= 2.0')
 		const named = createValueBlockProps(getDefaultBlockProps(), '2.0', 'gain')
-		expect(valueBlockText(valueBlockLabel(named))).toBe('gain = 2.0')
+		expect(valueBlockText(valueBlockLabel(named))).toBe('gain: float = 2.0')
 		const folded = createValueBlockProps(getDefaultBlockProps(), DICT, 'opts')
 		expect(valueBlockLabel(folded)).toMatchObject({ display: '…', folded: true, literal: DICT })
-		expect(valueBlockText(valueBlockLabel(folded))).toBe('opts = …')
+		expect(valueBlockText(valueBlockLabel(folded))).toBe('opts: dict = …')
 	})
 
 	it('preserves authored punctuation and whitespace unless it explicitly abbreviates', () => {
@@ -168,6 +168,18 @@ describe('normalizeValueBlockProps', () => {
 		// An expression the spelling cannot type keeps the type it had.
 		const opaque = normalizeValueBlockProps({ ...manual, title: 'math.pi' }, manual)
 		expect(opaque.outputs[0].type).toBe('Gain')
+	})
+
+	it('keeps an explicit annotation when canvas entry changes it with the literal', () => {
+		const previous = valueBlock()
+		const annotated = normalizeValueBlockProps({
+			...previous,
+			title: '2',
+			inputs: [{ ...previous.inputs[0], name: 'pose', type: 'Pose' }],
+			outputs: [{ ...previous.outputs[0], name: 'pose', type: 'Pose' }],
+		}, previous)
+		expect(annotated.outputs[0]).toMatchObject({ name: 'pose', type: 'Pose' })
+		expect(annotated.inputs[0]).toMatchObject({ name: 'pose', type: 'Pose' })
 	})
 
 	it('re-fits the box when the text changes, in the box and in the remembered view', () => {

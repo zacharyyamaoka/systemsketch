@@ -1,0 +1,80 @@
+{
+  "feature": "Workspace portal theme inheritance",
+  "viewport": { "width": 1280, "height": 900 },
+  "shapes": [
+    {
+      "id": "theme-root",
+      "type": "block",
+      "x": 470,
+      "y": 340,
+      "props": {
+        "title": "ThemeRoot",
+        "description": "The active Light, Dark, or palette appearance boundary",
+        "blockType": "Function",
+        "view": "port",
+        "w": 300,
+        "h": 180,
+        "inputs": [{ "id": "in_1", "name": "appearance", "type": "Theme", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "tokens", "type": "CSS vars", "visible": true }]
+      }
+    },
+    {
+      "id": "workspace-overlay",
+      "type": "block",
+      "x": 880,
+      "y": 340,
+      "props": {
+        "title": "Workspace overlay",
+        "description": "Rename · Open · Save As · Export · recorder notice",
+        "blockType": "Function",
+        "view": "port",
+        "w": 300,
+        "h": 180,
+        "inputs": [{ "id": "in_1", "name": "portal host", "type": "Theme scope", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "visible UI", "type": "Readable", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Open Settings → Appearance and choose Light or Dark.",
+      "x": 35,
+      "y": 375,
+      "w": 350,
+      "h": 110,
+      "target": { "shapeId": "theme-root", "anchor": "left" }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Click the title above the canvas for Rename. Then press Ctrl/Cmd+O for Open.",
+      "x": 840,
+      "y": 130,
+      "w": 390,
+      "h": 120,
+      "target": { "shapeId": "workspace-overlay", "anchor": "top", "dx": 44 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Repeat after switching appearance. Check dialog ink, panel, field boundary, and actions.",
+      "x": 410,
+      "y": 600,
+      "w": 390,
+      "h": 130,
+      "target": { "shapeId": "theme-root", "anchor": "bottom", "dx": -54 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · In Light and Dark, Rename and Open have opaque panels and readable controls.",
+      "x": 850,
+      "y": 600,
+      "w": 380,
+      "h": 130
+    }
+  ]
+}

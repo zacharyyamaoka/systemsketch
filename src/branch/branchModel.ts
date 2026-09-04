@@ -18,6 +18,8 @@
  */
 import { T, type TLShape } from 'tldraw'
 
+import { ControlIcon, controlIconRowWidth, type ControlIcon as ControlIconType } from '../controlIconModel'
+
 export const BRANCH_SHAPE_TYPE = 'branch' as const
 export const BRANCH_TOOL_ID = 'branch' as const
 
@@ -44,6 +46,8 @@ export const BranchArm = T.object({
 	open: T.boolean,
 	/** Body height while open; remembered while folded. */
 	h: T.number,
+	/** Offline Python analysis writes exits here; the canvas only draws them. */
+	controlIcons: T.arrayOf(ControlIcon).optional(),
 })
 export type BranchArm = T.TypeOf<typeof BranchArm>
 
@@ -114,6 +118,8 @@ export interface BranchArmLayout {
 	header: BranchRect
 	chevron: BranchRect
 	title: BranchRect
+	/** The fixed right-aligned control-exit column, before the active target. */
+	controlIcons: BranchRect
 	target: BranchRect
 	bodyTop: number
 	/** 0 while folded. */
@@ -139,6 +145,7 @@ export interface BranchLayout {
 const CHEVRON_W = 22
 const TARGET_W = 28
 const HEADER_PAD_X = 10
+const HEADER_RIGHT_GAP = 6
 
 export function branchHeightForArms(arms: readonly BranchArm[]): number {
 	return BRANCH_BAND_HEIGHT
@@ -169,6 +176,15 @@ export function branchLayout(props: BranchShapeProps): BranchLayout {
 		const rowTop = cursor
 		const bodyTop = rowTop + BRANCH_ARM_HEADER_HEIGHT
 		const bodyH = arm.open ? arm.h : 0
+		const iconW = controlIconRowWidth(arm.controlIcons)
+		const target = { x: w - HEADER_PAD_X - TARGET_W, y: rowTop + 2, w: TARGET_W, h: BRANCH_ARM_HEADER_HEIGHT - 4 }
+		const controlIcons = {
+			x: target.x - (iconW ? iconW + HEADER_RIGHT_GAP : 0),
+			y: rowTop + (BRANCH_ARM_HEADER_HEIGHT - 20) / 2,
+			w: iconW,
+			h: 20,
+		}
+		const titleRight = controlIcons.x - HEADER_RIGHT_GAP
 		arms.push({
 			arm,
 			index,
@@ -179,10 +195,11 @@ export function branchLayout(props: BranchShapeProps): BranchLayout {
 			title: {
 				x: HEADER_PAD_X + CHEVRON_W + 4,
 				y: rowTop + 4,
-				w: Math.max(40, w - (HEADER_PAD_X + CHEVRON_W + 4) - (TARGET_W + HEADER_PAD_X + 8)),
+				w: Math.max(40, titleRight - (HEADER_PAD_X + CHEVRON_W + 4)),
 				h: BRANCH_ARM_HEADER_HEIGHT - 8,
 			},
-			target: { x: w - HEADER_PAD_X - TARGET_W, y: rowTop + 2, w: TARGET_W, h: BRANCH_ARM_HEADER_HEIGHT - 4 },
+			controlIcons,
+			target,
 			bodyTop,
 			bodyH,
 			bottom: bodyTop + bodyH,
@@ -278,7 +295,9 @@ export function appendBranchControlProps(
 	initial: Partial<Pick<BranchControlPort, 'name' | 'type'>> = {},
 ): { props: BranchShapeProps; port: BranchControlPort } {
 	const id = nextControlId(props.controls)
-	const port: BranchControlPort = { id, name: initial.name ?? id, type: initial.type ?? '' }
+	// An implementation id is not a helpful starting value for a control name.
+	// Keep it stable in `id`; the blank label receives the inspector's guidance.
+	const port: BranchControlPort = { id, name: initial.name ?? '', type: initial.type ?? '' }
 	return { props: { ...props, controls: [...props.controls, port] }, port }
 }
 
@@ -311,7 +330,7 @@ export function appendBranchArmProps(
 	const open = props.view === 'expanded' || !props.arms.some((arm) => arm.open)
 	const arm: BranchArm = {
 		id,
-		title: initial.title ?? 'case',
+		title: initial.title ?? '',
 		open,
 		h: initial.h ?? BRANCH_DEFAULT_ARM_HEIGHT,
 	}
@@ -414,8 +433,18 @@ function sameArms(a: readonly BranchArm[], b: readonly BranchArm[]): boolean {
 	if (a.length !== b.length) return false
 	return a.every((arm, index) => {
 		const other = b[index]
-		return arm.id === other.id && arm.open === other.open && arm.h === other.h && arm.title === other.title
+		return arm.id === other.id
+			&& arm.open === other.open
+			&& arm.h === other.h
+			&& arm.title === other.title
+			&& sameControlIcons(arm.controlIcons, other.controlIcons)
 	})
+}
+
+function sameControlIcons(a: readonly ControlIconType[] | undefined, b: readonly ControlIconType[] | undefined): boolean {
+	if (a === b) return true
+	if (!a || !b || a.length !== b.length) return false
+	return a.every((icon, index) => icon.kind === b[index].kind && icon.line === b[index].line)
 }
 
 /**

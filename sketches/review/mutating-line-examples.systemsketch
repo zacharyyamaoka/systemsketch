@@ -3,15 +3,16 @@
     "formatVersion": 2,
     "application": "SystemSketch",
     "shapes": {
-      "text": 14,
-      "connection": 6,
-      "block": 30,
-      "geo": 3,
+      "text": 48,
+      "frame": 6,
+      "connection": 9,
+      "block": 36,
+      "geo": 2,
       "arrow": 1
     },
     "bindings": {
-      "arrow": 2,
-      "connection": 12
+      "connection": 18,
+      "arrow": 2
     }
   },
   "tldrawFileFormatVersion": 1,
@@ -67,22 +68,15 @@
       "typeName": "pointer"
     },
     {
-      "name": "",
-      "color": "#55B467",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:40KJ3ge2DE3PoQarB3I4x",
-      "typeName": "user"
-    },
-    {
-      "x": 780,
-      "y": 3070,
+      "x": 1062,
+      "y": 1038,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
       "meta": {},
       "id": "shape:note-20",
       "type": "text",
+      "parentId": "shape:tier-hard-nesting",
       "props": {
         "color": "black",
         "size": "s",
@@ -108,7 +102,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "effect port both hide until hover,"
+                  "text": "effect port both hide"
                 }
               ]
             },
@@ -117,26 +111,185 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "like every subtle port does."
+                  "text": "until hover, like every subtle"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "port does."
                 }
               ]
             }
           ]
         }
       },
+      "index": "aFOEA",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-17",
+      "type": "connection",
+      "fromId": "shape:wire-legend-c",
+      "toId": "shape:legend_producer",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-18",
+      "type": "connection",
+      "fromId": "shape:wire-legend-c",
+      "toId": "shape:legend_consumer",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 0,
+      "y": 550,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketch": {
+          "kind": "imported-page",
+          "sourcePageId": "tier-easy-single",
+          "sourcePageName": "EASY — single argument, no return (1–4)",
+          "sourcePageIndex": "0"
+        }
+      },
+      "id": "shape:tier-easy-single",
+      "type": "frame",
+      "props": {
+        "w": 1847,
+        "h": 596,
+        "name": "EASY — single argument, no return (1–4)",
+        "color": "black"
+      },
       "parentId": "page:page",
-      "index": "aljLI",
+      "index": "a17of",
       "typeName": "shape"
     },
     {
       "x": 0,
-      "y": 0,
+      "y": 1286,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketch": {
+          "kind": "imported-page",
+          "sourcePageId": "tier-easy-reorder",
+          "sourcePageName": "EASY — in-place reordering (5–8)",
+          "sourcePageIndex": "0"
+        }
+      },
+      "id": "shape:tier-easy-reorder",
+      "type": "frame",
+      "props": {
+        "w": 1832,
+        "h": 450,
+        "name": "EASY — in-place reordering (5–8)",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "a20Eb",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 6,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-run_outer",
+      "type": "text",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "17"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aGFdE",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 766,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-append_delayed",
+      "type": "text",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "19"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aIlPz",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 74,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
       "meta": {},
       "id": "shape:wire-1",
       "type": "connection",
+      "parentId": "shape:tier-easy-single",
       "props": {
         "start": {
           "x": 0,
@@ -158,30 +311,165 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "parentId": "page:page",
-      "index": "aBxZ2",
+      "index": "aErkn",
       "typeName": "shape"
     },
     {
-      "name": "",
-      "color": "#EC5E41",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:l8wmMeRMcXj54zlPKPRp4",
-      "typeName": "user"
+      "x": 0,
+      "y": 1876,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketch": {
+          "kind": "imported-page",
+          "sourcePageId": "tier-medium-dual",
+          "sourcePageName": "MEDIUM — returns a value AND mutates (9–12)",
+          "sourcePageIndex": "0"
+        }
+      },
+      "id": "shape:tier-medium-dual",
+      "type": "frame",
+      "props": {
+        "w": 1862,
+        "h": 854,
+        "name": "MEDIUM — returns a value AND mutates (9–12)",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "a3wiz",
+      "typeName": "shape"
     },
     {
-      "x": 100,
-      "y": 1460,
+      "x": 40,
+      "y": 230,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:legend-caption-1",
+      "type": "text",
+      "parentId": "shape:tier-legend",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "hook (orange, opens left) = this"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "call rewrites its"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "argument in place. Port on the top"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "edge = the only"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "way the mutated value leaves (no"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "return channel)."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aByilC",
+      "typeName": "shape"
+    },
+    {
+      "x": 1062,
+      "y": 736,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:label-simple",
+      "type": "text",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Simple view"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aBFtn",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 466,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
       "meta": {},
       "id": "shape:use_item",
       "type": "block",
+      "parentId": "shape:tier-medium-dual",
       "props": {
-        "w": 170,
-        "h": 110,
+        "w": 280,
+        "h": 158,
         "title": "use",
         "description": "",
         "blockType": "call",
@@ -209,7 +497,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "0q3-BtIosUjeNjHoNi4Oa",
+        "definitionId": "uACGrSLN-2OmZGbQaC9yV",
         "inputs": [
           {
             "id": "in_1",
@@ -221,22 +509,22 @@
         "outputs": [],
         "definitionKey": "use"
       },
-      "parentId": "page:page",
-      "index": "aj009n",
+      "index": "aQzE1",
       "typeName": "shape"
     },
     {
-      "x": 80,
-      "y": 240,
+      "x": 40,
+      "y": 74,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
       "meta": {},
       "id": "shape:r0c0",
       "type": "block",
+      "parentId": "shape:tier-easy-single",
       "props": {
-        "w": 320,
-        "h": 170,
+        "w": 374,
+        "h": 202,
         "title": "poses.append",
         "description": "",
         "blockType": "call",
@@ -264,7 +552,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "iaY4_v0UmHHpZfVkjJMW7",
+        "definitionId": "yo9-kzXNyNCO18p0hBsbb",
         "inputs": [
           {
             "id": "in_1",
@@ -292,19 +580,19 @@
         ],
         "definitionKey": "poses_append"
       },
-      "parentId": "page:page",
-      "index": "airafY",
+      "index": "aFU41",
       "typeName": "shape"
     },
     {
-      "x": 480,
-      "y": 1950,
+      "x": 499,
+      "y": 230,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
       "meta": {},
-      "id": "shape:note-13",
+      "id": "shape:legend-caption-2",
       "type": "text",
+      "parentId": "shape:tier-legend",
       "props": {
         "color": "black",
         "size": "s",
@@ -321,7 +609,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "13 - a's port sits right,"
+                  "text": "solid orange cable, 'mut' pill:"
                 }
               ]
             },
@@ -330,7 +618,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "b's sits left: reversed"
+                  "text": "this value exists only because of"
                 }
               ]
             },
@@ -339,29 +627,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "from argument order, so"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "the cables cross on purpose."
+                  "text": "the mutation."
                 }
               ]
             }
           ]
         }
       },
-      "parentId": "page:page",
-      "index": "ajEc8I",
+      "index": "aC2FUb",
       "typeName": "shape"
     },
     {
-      "x": 508,
-      "y": 90,
+      "x": 560,
+      "y": 210,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -369,2132 +647,11 @@
       "id": "shape:cue-pass",
       "type": "geo",
       "props": {
-        "w": 420,
-        "h": 150,
+        "w": 640,
+        "h": 240,
         "geo": "rectangle",
         "dash": "draw",
         "growY": 2,
-        "url": "",
-        "scale": 1,
-        "flipX": false,
-        "flipY": false,
-        "color": "green",
-        "labelColor": "black",
-        "fill": "semi",
-        "size": "m",
-        "font": "sans",
-        "align": "start",
-        "verticalAlign": "middle",
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "PASS WHEN - full list on the"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "green card near the board's"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "bottom. See it for the complete condition."
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "aon1A",
-      "typeName": "shape"
-    },
-    {
-      "x": 0,
-      "y": 0,
-      "z": 1,
-      "meta": {},
-      "id": "camera:page:page",
-      "typeName": "camera"
-    },
-    {
-      "x": 80,
-      "y": 720,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:r1c0",
-      "type": "block",
-      "props": {
-        "w": 320,
-        "h": 150,
-        "title": "items.sort",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "v_Eoon69qCcBsfUHwVTBd",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "items",
-            "type": "list[int]",
-            "visible": true,
-            "mutates": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_1",
-            "name": "items",
-            "type": "list[int]",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "items_sort"
-      },
-      "parentId": "page:page",
-      "index": "aivgCI",
-      "typeName": "shape"
-    },
-    {
-      "x": 520,
-      "y": 240,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:r0c1",
-      "type": "block",
-      "props": {
-        "w": 320,
-        "h": 170,
-        "title": "cache.update",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "orgr4AEGYOqQteGBV2myq",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "cache",
-            "type": "dict",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_2",
-            "name": "patch",
-            "type": "dict",
-            "visible": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_1",
-            "name": "cache",
-            "type": "dict",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "cache_update"
-      },
-      "parentId": "page:page",
-      "index": "aisGiv",
-      "typeName": "shape"
-    },
-    {
-      "x": 80,
-      "y": 40,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:t-title",
-      "type": "text",
-      "props": {
-        "color": "black",
-        "size": "xl",
-        "w": 8,
-        "font": "sans",
-        "textAlign": "start",
-        "autoSize": true,
-        "scale": 1,
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "The mutating line - 20 examples, easy to hard"
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "ainzUoO",
-      "typeName": "shape"
-    },
-    {
-      "x": 80,
-      "y": 1200,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:r2c0",
-      "type": "block",
-      "props": {
-        "w": 320,
-        "h": 170,
-        "title": "pending.pop",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "1jIRpuyGWamLrMhZOuZDo",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "pending",
-            "type": "list",
-            "visible": true,
-            "mutates": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "out_1",
-            "name": "item",
-            "type": "Any",
-            "visible": true
-          },
-          {
-            "id": "effect:in_1",
-            "name": "pending",
-            "type": "list",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "pending_pop"
-      },
-      "parentId": "page:page",
-      "index": "aixnu1",
-      "typeName": "shape"
-    },
-    {
-      "x": 520,
-      "y": 720,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:r1c1",
-      "type": "block",
-      "props": {
-        "w": 320,
-        "h": 150,
-        "title": "items.reverse",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "WbIl8WDViwQu3UBcI9gZy",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "items",
-            "type": "list[int]",
-            "visible": true,
-            "mutates": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_1",
-            "name": "items",
-            "type": "list[int]",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "items_reverse"
-      },
-      "parentId": "page:page",
-      "index": "aiw4km",
-      "typeName": "shape"
-    },
-    {
-      "x": 960,
-      "y": 240,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:r0c2",
-      "type": "block",
-      "props": {
-        "w": 320,
-        "h": 170,
-        "title": "seen.add",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "olvs0mRuiUaTUboEZRbIR",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "seen",
-            "type": "set",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_2",
-            "name": "item",
-            "type": "Any",
-            "visible": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_1",
-            "name": "seen",
-            "type": "set",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "seen_add"
-      },
-      "parentId": "page:page",
-      "index": "aitL95",
-      "typeName": "shape"
-    },
-    {
-      "x": 80,
-      "y": 1680,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:r3c0",
-      "type": "block",
-      "props": {
-        "w": 320,
-        "h": 190,
-        "title": "swap",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "iRZ9npGbN08oudDY3snZX",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "a",
-            "type": "list",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_2",
-            "name": "b",
-            "type": "list",
-            "visible": true,
-            "mutates": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_1",
-            "name": "a",
-            "type": "list",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.82
-          },
-          {
-            "id": "effect:in_2",
-            "name": "b",
-            "type": "list",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.18
-          }
-        ],
-        "definitionKey": "swap"
-      },
-      "parentId": "page:page",
-      "index": "aj5ySS",
-      "typeName": "shape"
-    },
-    {
-      "x": 520,
-      "y": 1200,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:r2c1",
-      "type": "block",
-      "props": {
-        "w": 320,
-        "h": 190,
-        "title": "table.pop",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "FLCNcPSopySeezTjlvY1V",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "table",
-            "type": "dict",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_2",
-            "name": "key",
-            "type": "str",
-            "visible": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "out_1",
-            "name": "value",
-            "type": "Any",
-            "visible": true
-          },
-          {
-            "id": "effect:in_1",
-            "name": "table",
-            "type": "dict",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "table_pop"
-      },
-      "parentId": "page:page",
-      "index": "aiyGUq",
-      "typeName": "shape"
-    },
-    {
-      "x": 960,
-      "y": 720,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:r1c2",
-      "type": "block",
-      "props": {
-        "w": 320,
-        "h": 190,
-        "title": "stack.insert",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "O4S1oigt_4CZjWBAr4lvl",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "stack",
-            "type": "list",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_2",
-            "name": "index",
-            "type": "int",
-            "visible": true
-          },
-          {
-            "id": "in_3",
-            "name": "item",
-            "type": "Any",
-            "visible": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_1",
-            "name": "stack",
-            "type": "list",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "stack_insert"
-      },
-      "parentId": "page:page",
-      "index": "aiwauD",
-      "typeName": "shape"
-    },
-    {
-      "x": 1400,
-      "y": 240,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:r0c3",
-      "type": "block",
-      "props": {
-        "w": 320,
-        "h": 170,
-        "title": "buffer.extend",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "1hk5Ukb115-hEnfNvuXcP",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "buffer",
-            "type": "list[int]",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_2",
-            "name": "chunk",
-            "type": "list[int]",
-            "visible": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_1",
-            "name": "buffer",
-            "type": "list[int]",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "buffer_extend"
-      },
-      "parentId": "page:page",
-      "index": "aited7",
-      "typeName": "shape"
-    },
-    {
-      "x": 520,
-      "y": 1680,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:r3c1",
-      "type": "block",
-      "props": {
-        "w": 340,
-        "h": 230,
-        "title": "reconcile",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "lUi9vZJgN3rDUDYMMLh0b",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "primary",
-            "type": "Cache",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_2",
-            "name": "backup",
-            "type": "Cache",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_3",
-            "name": "preview",
-            "type": "Image",
-            "visible": true,
-            "mutates": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_1",
-            "name": "primary",
-            "type": "Cache",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.25
-          },
-          {
-            "id": "effect:in_2",
-            "name": "backup",
-            "type": "Cache",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          },
-          {
-            "id": "effect:in_3",
-            "name": "preview",
-            "type": "Image",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.75
-          }
-        ],
-        "definitionKey": "reconcile"
-      },
-      "parentId": "page:page",
-      "index": "aj6GqK",
-      "typeName": "shape"
-    },
-    {
-      "x": 960,
-      "y": 1200,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:r2c2",
-      "type": "block",
-      "props": {
-        "w": 320,
-        "h": 210,
-        "title": "table.setdefault",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "FQaxfE0ak5K92gnAJNS0R",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "table",
-            "type": "dict",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_2",
-            "name": "key",
-            "type": "str",
-            "visible": true
-          },
-          {
-            "id": "in_3",
-            "name": "default",
-            "type": "Any",
-            "visible": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "out_1",
-            "name": "value",
-            "type": "Any",
-            "visible": true
-          },
-          {
-            "id": "effect:in_1",
-            "name": "table",
-            "type": "dict",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "table_setdefault"
-      },
-      "parentId": "page:page",
-      "index": "aizTiL",
-      "typeName": "shape"
-    },
-    {
-      "x": 1400,
-      "y": 720,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:r1c3",
-      "type": "block",
-      "props": {
-        "w": 320,
-        "h": 150,
-        "title": "queue.clear",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "VWfvQsFI2CSUZkMm2a9IT",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "queue",
-            "type": "list",
-            "visible": true,
-            "mutates": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_1",
-            "name": "queue",
-            "type": "list",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "queue_clear"
-      },
-      "parentId": "page:page",
-      "index": "aixMNy",
-      "typeName": "shape"
-    },
-    {
-      "x": 80,
-      "y": 2580,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:note-17",
-      "type": "text",
-      "props": {
-        "color": "black",
-        "size": "s",
-        "w": 8,
-        "font": "sans",
-        "textAlign": "start",
-        "autoSize": true,
-        "scale": 1,
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "17 - two levels, hand-marked at each:"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "check the interior tether AND the"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "outer's own collapsed Port view (right)."
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "ajMDDh",
-      "typeName": "shape"
-    },
-    {
-      "x": 60,
-      "y": 140,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:nest_inner",
-      "type": "block",
-      "parentId": "shape:nest_mid",
-      "props": {
-        "w": 300,
-        "h": 170,
-        "title": "add_pose",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "YN3JLJEvxdvLfOoy2n457",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "poses",
-            "type": "list[Pose]",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_2",
-            "name": "pose",
-            "type": "Pose",
-            "visible": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_1",
-            "name": "poses",
-            "type": "list[Pose]",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "add_pose"
-      },
-      "index": "a1bWr",
-      "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#02B1CC",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:tk39EDilpMB0rMxGOFkuM",
-      "typeName": "user"
-    },
-    {
-      "x": 960,
-      "y": 1680,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:r3c2",
-      "type": "block",
-      "props": {
-        "w": 320,
-        "h": 190,
-        "title": "counter.update",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "6CVr5nGYmUX71ZTMrdlHz",
-        "inputs": [
-          {
-            "id": "in_self",
-            "name": "self",
-            "type": "Counter",
-            "visible": true,
-            "mutates": true,
-            "row": 0
-          },
-          {
-            "id": "in_2",
-            "name": "other",
-            "type": "Counter",
-            "visible": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_self",
-            "name": "self",
-            "type": "Counter",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "counter_update"
-      },
-      "parentId": "page:page",
-      "index": "aj8ptM",
-      "typeName": "shape"
-    },
-    {
-      "x": 1400,
-      "y": 1200,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:r2c3",
-      "type": "block",
-      "props": {
-        "w": 320,
-        "h": 170,
-        "title": "queue.popleft",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "P0qhXAFYJynRvUU6lvLAA",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "queue",
-            "type": "deque",
-            "visible": true,
-            "mutates": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "out_1",
-            "name": "item",
-            "type": "Any",
-            "visible": true
-          },
-          {
-            "id": "effect:in_1",
-            "name": "queue",
-            "type": "deque",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "queue_popleft"
-      },
-      "parentId": "page:page",
-      "index": "aizXGe",
-      "typeName": "shape"
-    },
-    {
-      "x": 620,
-      "y": 2740,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:note-18",
-      "type": "text",
-      "props": {
-        "color": "black",
-        "size": "s",
-        "w": 8,
-        "font": "sans",
-        "textAlign": "start",
-        "autoSize": true,
-        "scale": 1,
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "18 - three levels. Each is independently"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "marked; auto-follow across a frame"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "boundary is not wired yet."
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "ajOPfb",
-      "typeName": "shape"
-    },
-    {
-      "x": 70,
-      "y": 140,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:append_inner",
-      "type": "block",
-      "parentId": "shape:run_outer",
-      "props": {
-        "w": 300,
-        "h": 170,
-        "title": "poses.append",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "iaY4_v0UmHHpZfVkjJMW7",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "poses",
-            "type": "list[Pose]",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_2",
-            "name": "pose",
-            "type": "Pose",
-            "visible": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_1",
-            "name": "poses",
-            "type": "list[Pose]",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "poses_append"
-      },
-      "index": "a1loX",
-      "typeName": "shape"
-    },
-    {
-      "x": 380,
-      "y": 2200,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:run_collapsed",
-      "type": "block",
-      "props": {
-        "w": 220,
-        "h": 170,
-        "title": "run",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "pj2UXbx7wGKXymiCmL2nf",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "poses",
-            "type": "list[Pose]",
-            "visible": true,
-            "mutates": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_1",
-            "name": "poses",
-            "type": "list[Pose]",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "run_draft_1",
-        "draftOrdinal": 1
-      },
-      "parentId": "page:page",
-      "index": "ajI18Z",
-      "typeName": "shape"
-    },
-    {
-      "x": 1400,
-      "y": 1680,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:r3c3",
-      "type": "block",
-      "props": {
-        "w": 320,
-        "h": 170,
-        "title": "tracker.record",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "pkVAT8ChZdRx5mNW1jXnY",
-        "inputs": [
-          {
-            "id": "in_self",
-            "name": "self",
-            "type": "Tracker",
-            "visible": true,
-            "mutates": true,
-            "row": 0
-          },
-          {
-            "id": "in_2",
-            "name": "event",
-            "type": "Event",
-            "visible": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_self",
-            "name": "self",
-            "type": "Tracker",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "tracker_record"
-      },
-      "parentId": "page:page",
-      "index": "aj9ijv",
-      "typeName": "shape"
-    },
-    {
-      "x": 80,
-      "y": 3040,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:note-19",
-      "type": "text",
-      "props": {
-        "color": "black",
-        "size": "s",
-        "w": 8,
-        "font": "sans",
-        "textAlign": "start",
-        "autoSize": true,
-        "scale": 1,
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "19 - one cable, both marks: mut z-1 = 1.0."
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "Drag the pill - it should move like any pill."
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "ajUP1",
-      "typeName": "shape"
-    },
-    {
-      "editingShapeId": null,
-      "croppingShapeId": null,
-      "selectedShapeIds": [],
-      "hoveredShapeId": null,
-      "erasingShapeIds": [],
-      "hintingShapeIds": [],
-      "focusedGroupId": null,
-      "meta": {},
-      "id": "instance_page_state:page:page",
-      "pageId": "page:page",
-      "typeName": "instance_page_state"
-    },
-    {
-      "x": 80,
-      "y": 206,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:t-row-0",
-      "type": "text",
-      "props": {
-        "color": "black",
-        "size": "m",
-        "w": 8,
-        "font": "sans",
-        "textAlign": "start",
-        "autoSize": true,
-        "scale": 1,
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "EASY - single argument, no return  [1-4]"
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "aioqLn",
-      "typeName": "shape"
-    },
-    {
-      "x": 310,
-      "y": 1460,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:len_after_pop",
-      "type": "block",
-      "props": {
-        "w": 170,
-        "h": 110,
-        "title": "len",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "Fyi2lZJhh_gj8jZue31_6",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "pending",
-            "type": "list",
-            "visible": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "out_1",
-            "name": "n",
-            "type": "int",
-            "visible": true
-          }
-        ],
-        "definitionKey": "len_draft_1",
-        "draftOrdinal": 1
-      },
-      "parentId": "page:page",
-      "index": "aj18Um",
-      "typeName": "shape"
-    },
-    {
-      "meta": {},
-      "id": "binding:cue-1-arrow-end",
-      "type": "arrow",
-      "fromId": "shape:cue-1-arrow",
-      "toId": "shape:r0c0",
-      "props": {
-        "isPrecise": true,
-        "isExact": false,
-        "normalizedAnchor": {
-          "x": 0.5,
-          "y": 0
-        },
-        "snap": "edge-point",
-        "terminal": "end"
-      },
-      "typeName": "binding"
-    },
-    {
-      "x": 80,
-      "y": 686,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:t-row-1",
-      "type": "text",
-      "props": {
-        "color": "black",
-        "size": "m",
-        "w": 8,
-        "font": "sans",
-        "textAlign": "start",
-        "autoSize": true,
-        "scale": 1,
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "EASY - in-place reordering  [5-8]"
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "aipSv2",
-      "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#F2555A",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:WvDk4jERS157avWY2Yn8m",
-      "typeName": "user"
-    },
-    {
-      "x": 620,
-      "y": 2200,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:nest_outer",
-      "type": "block",
-      "props": {
-        "w": 640,
-        "h": 520,
-        "title": "outer",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "expanded",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "H85wXwm_OBlDA0WIaUlRw",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "poses",
-            "type": "list[Pose]",
-            "visible": true,
-            "mutates": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_1",
-            "name": "poses",
-            "type": "list[Pose]",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "outer"
-      },
-      "parentId": "page:page",
-      "index": "ajN3kE",
-      "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#BD54C6",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:tPZepeIGn5WLKAFXPI5z8",
-      "typeName": "user"
-    },
-    {
-      "x": 80,
-      "y": 1166,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:t-row-2",
-      "type": "text",
-      "props": {
-        "color": "black",
-        "size": "m",
-        "w": 8,
-        "font": "sans",
-        "textAlign": "start",
-        "autoSize": true,
-        "scale": 1,
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "MEDIUM - returns a value AND mutates  [9-12]"
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "aiqyK6",
-      "typeName": "shape"
-    },
-    {
-      "x": 80,
-      "y": 2200,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:run_outer",
-      "type": "block",
-      "props": {
-        "w": 460,
-        "h": 360,
-        "title": "run",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "expanded",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "IA22oKxSJoq1cIWyTVuNJ",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "poses",
-            "type": "list[Pose]",
-            "visible": true,
-            "mutates": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_1",
-            "name": "poses",
-            "type": "list[Pose]",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "run"
-      },
-      "parentId": "page:page",
-      "index": "ajG8Jf",
-      "typeName": "shape"
-    },
-    {
-      "x": 80,
-      "y": 1646,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:t-row-3",
-      "type": "text",
-      "props": {
-        "color": "black",
-        "size": "m",
-        "w": 8,
-        "font": "sans",
-        "textAlign": "start",
-        "autoSize": true,
-        "scale": 1,
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "MEDIUM/HARD - multiple mutated arguments, and the receiver  [13-16]"
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "airQ4u",
-      "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#39B178",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:r8KncPcWpq5mrvYbjkJJO",
-      "typeName": "user"
-    },
-    {
-      "x": 320,
-      "y": 510,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:note-1",
-      "type": "text",
-      "props": {
-        "color": "black",
-        "size": "s",
-        "w": 8,
-        "font": "sans",
-        "textAlign": "start",
-        "autoSize": true,
-        "scale": 1,
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "1 - the base case: a hook,"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "an effect port, one tether."
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "aiugIP",
-      "typeName": "shape"
-    },
-    {
-      "x": 0,
-      "y": 0,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:wire-13a",
-      "type": "connection",
-      "props": {
-        "start": {
-          "x": 0,
-          "y": 0
-        },
-        "end": {
-          "x": 100,
-          "y": 0
-        },
-        "routing": "elbow",
-        "curve": null,
-        "pins": [],
-        "elbowRoute": null,
-        "routeMode": "automatic",
-        "temporal": "data",
-        "delayValue": "",
-        "pillPosition": 0.5,
-        "tunnel": false,
-        "tunnelLayer": "",
-        "state": "normal"
-      },
-      "parentId": "page:page",
-      "index": "aWzfN",
-      "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#F04F88",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:WOxO7URi5jxVRuqyNLPEu",
-      "typeName": "user"
-    },
-    {
-      "x": 0,
-      "y": 0,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:wire-13b",
-      "type": "connection",
-      "props": {
-        "start": {
-          "x": 0,
-          "y": 0
-        },
-        "end": {
-          "x": 100,
-          "y": 0
-        },
-        "routing": "elbow",
-        "curve": null,
-        "pins": [],
-        "elbowRoute": null,
-        "routeMode": "automatic",
-        "temporal": "data",
-        "delayValue": "",
-        "pillPosition": 0.5,
-        "tunnel": false,
-        "tunnelLayer": "",
-        "state": "normal"
-      },
-      "parentId": "page:page",
-      "index": "aXd5M",
-      "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#02B1CC",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:09I7C6tqydKVgrdqtNPPo",
-      "typeName": "user"
-    },
-    {
-      "meta": {},
-      "id": "binding:cue-1-arrow-start",
-      "type": "arrow",
-      "fromId": "shape:cue-1-arrow",
-      "toId": "shape:cue-1",
-      "props": {
-        "isPrecise": true,
-        "isExact": false,
-        "normalizedAnchor": {
-          "x": 0.5,
-          "y": 1
-        },
-        "snap": "edge-point",
-        "terminal": "start"
-      },
-      "typeName": "binding"
-    },
-    {
-      "x": 80,
-      "y": 3160,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:pass-card",
-      "type": "geo",
-      "props": {
-        "w": 900,
-        "h": 260,
-        "geo": "rectangle",
-        "dash": "draw",
-        "growY": 0,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -2559,7 +716,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "The combined pill reads mut z-1."
+                  "text": "The combined pill reads mut z⁻¹ = 1.0."
                 }
               ]
             },
@@ -2576,22 +733,31 @@
         }
       },
       "parentId": "page:page",
-      "index": "amQgU",
+      "index": "a9PS6",
       "typeName": "shape"
     },
     {
-      "x": 80,
-      "y": 2840,
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    {
+      "x": 40,
+      "y": 162,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
       "meta": {},
-      "id": "shape:append_delayed",
+      "id": "shape:r1c0",
       "type": "block",
+      "parentId": "shape:tier-easy-reorder",
       "props": {
-        "w": 300,
-        "h": 170,
-        "title": "poses.append",
+        "w": 353,
+        "h": 158,
+        "title": "items.sort",
         "description": "",
         "blockType": "call",
         "icon": "",
@@ -2618,7 +784,808 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "iaY4_v0UmHHpZfVkjJMW7",
+        "definitionId": "LP8lDg4O1e_lMcktqQMMk",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "items",
+            "type": "list[int]",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "items",
+            "type": "list[int]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "items_sort"
+      },
+      "index": "a1STX",
+      "typeName": "shape"
+    },
+    {
+      "x": 534,
+      "y": 74,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:r0c1",
+      "type": "block",
+      "parentId": "shape:tier-easy-single",
+      "props": {
+        "w": 339,
+        "h": 202,
+        "title": "cache.update",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "hrAcDSBv4EIrDontnFLh-",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "cache",
+            "type": "dict",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "patch",
+            "type": "dict",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "cache",
+            "type": "dict",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "cache_update"
+      },
+      "index": "aG9Rn",
+      "typeName": "shape"
+    },
+    {
+      "x": 899,
+      "y": 230,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:legend-caption-3",
+      "type": "text",
+      "parentId": "shape:tier-legend",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "dotted orange cable, 'mut z⁻¹ ="
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1.0' pill:"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "same, but read one iteration late."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aC3pGx",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 90,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:t-title",
+      "type": "text",
+      "props": {
+        "color": "black",
+        "size": "xl",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The mutating line - 20 examples, easy to hard"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a7OL6",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 162,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:r2c0",
+      "type": "block",
+      "parentId": "shape:tier-medium-dual",
+      "props": {
+        "w": 320,
+        "h": 158,
+        "title": "pending.pop",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "gZBMqhKtUDRRd0H_JR3-U",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pending",
+            "type": "list",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "item",
+            "type": "Any",
+            "visible": true
+          },
+          {
+            "id": "effect:in_1",
+            "name": "pending",
+            "type": "list",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "pending_pop"
+      },
+      "index": "aHDOQ",
+      "typeName": "shape"
+    },
+    {
+      "x": 513,
+      "y": 162,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:r1c1",
+      "type": "block",
+      "parentId": "shape:tier-easy-reorder",
+      "props": {
+        "w": 360,
+        "h": 158,
+        "title": "items.reverse",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "fDd1pAAzYC6fXC_I1I4uW",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "items",
+            "type": "list[int]",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "items",
+            "type": "list[int]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "items_reverse"
+      },
+      "index": "a2wgU",
+      "typeName": "shape"
+    },
+    {
+      "x": 993,
+      "y": 74,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:r0c2",
+      "type": "block",
+      "parentId": "shape:tier-easy-single",
+      "props": {
+        "w": 320,
+        "h": 202,
+        "title": "seen.add",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "ALpJuzIO4u0N5kKcg8Krp",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "seen",
+            "type": "set",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "item",
+            "type": "Any",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "seen",
+            "type": "set",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "seen_add"
+      },
+      "index": "aHuz5",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 638,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:legend-caption-4",
+      "type": "text",
+      "parentId": "shape:tier-legend",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "plain cable, no pill: an ordinary"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "return value, for contrast"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "(the board's other 'grey cable'"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "look)."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aCJB2",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 118,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:r3c0",
+      "type": "block",
+      "parentId": "shape:tier-medium-hard-receiver",
+      "props": {
+        "w": 320,
+        "h": 202,
+        "title": "swap",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "W28gCXA_flMaX-a0k-mU-",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "a",
+            "type": "list",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "b",
+            "type": "list",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "a",
+            "type": "list",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.82
+          },
+          {
+            "id": "effect:in_2",
+            "name": "b",
+            "type": "list",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.18
+          }
+        ],
+        "definitionKey": "swap"
+      },
+      "index": "aH0Jf",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 118,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:r2c1",
+      "type": "block",
+      "parentId": "shape:tier-medium-dual",
+      "props": {
+        "w": 320,
+        "h": 202,
+        "title": "table.pop",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "v0XHJADwz6YdLiX1IaKKv",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "table",
+            "type": "dict",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "key",
+            "type": "str",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "value",
+            "type": "Any",
+            "visible": true
+          },
+          {
+            "id": "effect:in_1",
+            "name": "table",
+            "type": "dict",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "table_pop"
+      },
+      "index": "aI0Ev",
+      "typeName": "shape"
+    },
+    {
+      "x": 993,
+      "y": 74,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:r1c2",
+      "type": "block",
+      "parentId": "shape:tier-easy-reorder",
+      "props": {
+        "w": 339,
+        "h": 246,
+        "title": "stack.insert",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "WAMj_Dpkng2yvZIEzRRHn",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "stack",
+            "type": "list",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "index",
+            "type": "int",
+            "visible": true
+          },
+          {
+            "id": "in_3",
+            "name": "item",
+            "type": "Any",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "stack",
+            "type": "list",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "stack_insert"
+      },
+      "index": "a3sKE",
+      "typeName": "shape"
+    },
+    {
+      "x": 1433,
+      "y": 74,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:r0c3",
+      "type": "block",
+      "parentId": "shape:tier-easy-single",
+      "props": {
+        "w": 374,
+        "h": 202,
+        "title": "buffer.extend",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "J3ELoYgaEyZs2nolXSuhG",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "buffer",
+            "type": "list[int]",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "chunk",
+            "type": "list[int]",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "buffer",
+            "type": "list[int]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "buffer_extend"
+      },
+      "index": "aItqE",
+      "typeName": "shape"
+    },
+    {
+      "x": 1653,
+      "y": 804,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:append_simple_portview",
+      "type": "block",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "w": 464,
+        "h": 202,
+        "title": "append (port view)",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "hJyJafkRZL3xg5rlnQA1m",
         "inputs": [
           {
             "id": "in_1",
@@ -2644,21 +1611,2147 @@
             "edgeT": 0.5
           }
         ],
-        "definitionKey": "poses_append"
+        "definitionKey": "append_port_view"
       },
-      "parentId": "page:page",
-      "index": "ajQtFC",
+      "index": "aER72",
       "typeName": "shape"
     },
     {
-      "x": 0,
-      "y": 0,
+      "x": 480,
+      "y": 74,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
       "meta": {},
-      "id": "shape:wire-19",
+      "id": "shape:r3c1",
+      "type": "block",
+      "parentId": "shape:tier-medium-hard-receiver",
+      "props": {
+        "w": 320,
+        "h": 246,
+        "title": "reconcile",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "9_V9PYOCd64oF7YbkPgZT",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "primary",
+            "type": "Cache",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "backup",
+            "type": "Cache",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_3",
+            "name": "preview",
+            "type": "Image",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "primary",
+            "type": "Cache",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.25
+          },
+          {
+            "id": "effect:in_2",
+            "name": "backup",
+            "type": "Cache",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          },
+          {
+            "id": "effect:in_3",
+            "name": "preview",
+            "type": "Image",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.75
+          }
+        ],
+        "definitionKey": "reconcile"
+      },
+      "index": "aIP2j",
+      "typeName": "shape"
+    },
+    {
+      "x": 920,
+      "y": 74,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:r2c2",
+      "type": "block",
+      "parentId": "shape:tier-medium-dual",
+      "props": {
+        "w": 422,
+        "h": 246,
+        "title": "table.setdefault",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "if0P-A43HESjyLv0tOr8B",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "table",
+            "type": "dict",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "key",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "in_3",
+            "name": "default",
+            "type": "Any",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "value",
+            "type": "Any",
+            "visible": true
+          },
+          {
+            "id": "effect:in_1",
+            "name": "table",
+            "type": "dict",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "table_setdefault"
+      },
+      "index": "aJD1r",
+      "typeName": "shape"
+    },
+    {
+      "x": 1452,
+      "y": 162,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:r1c3",
+      "type": "block",
+      "parentId": "shape:tier-easy-reorder",
+      "props": {
+        "w": 320,
+        "h": 158,
+        "title": "queue.clear",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "S4Br2HLEBJ9nDyEpXNKTa",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "queue",
+            "type": "list",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "queue",
+            "type": "list",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "queue_clear"
+      },
+      "index": "a4jur",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 434,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-17",
+      "type": "text",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "17 - two levels, hand-marked at"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "each: check the interior tether"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "AND"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "the outer's own collapsed Port"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "view (right)."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a820aG",
+      "typeName": "shape"
+    },
+    {
+      "x": 48,
+      "y": 110,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:nest_inner",
+      "type": "block",
+      "parentId": "shape:nest_mid",
+      "props": {
+        "w": 374,
+        "h": 202,
+        "title": "add_pose",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "eIx9iORAu_LUukqlOA3kN",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "add_pose"
+      },
+      "index": "a1pqr",
+      "typeName": "shape"
+    },
+    {
+      "x": 920,
+      "y": 118,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:r3c2",
+      "type": "block",
+      "parentId": "shape:tier-medium-hard-receiver",
+      "props": {
+        "w": 381,
+        "h": 202,
+        "title": "counter.update",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "s0y10NmII06OJED-S21Lq",
+        "inputs": [
+          {
+            "id": "in_self",
+            "name": "self",
+            "type": "Counter",
+            "visible": true,
+            "mutates": true,
+            "row": 0
+          },
+          {
+            "id": "in_2",
+            "name": "other",
+            "type": "Counter",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_self",
+            "name": "self",
+            "type": "Counter",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "counter_update"
+      },
+      "index": "aJ85z",
+      "typeName": "shape"
+    },
+    {
+      "x": 1462,
+      "y": 162,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:r2c3",
+      "type": "block",
+      "parentId": "shape:tier-medium-dual",
+      "props": {
+        "w": 360,
+        "h": 158,
+        "title": "queue.popleft",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "q1XtO8joQVl4sOcqX9ZHK",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "queue",
+            "type": "deque",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "item",
+            "type": "Any",
+            "visible": true
+          },
+          {
+            "id": "effect:in_1",
+            "name": "queue",
+            "type": "deque",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "queue_popleft"
+      },
+      "index": "aKzyc",
+      "typeName": "shape"
+    },
+    {
+      "x": 1200,
+      "y": 434,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-18",
+      "type": "text",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "18 - three levels. Each is"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "independently marked; auto-follow"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "across a frame boundary is not"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "wired yet."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a8Qh5l",
+      "typeName": "shape"
+    },
+    {
+      "x": 48,
+      "y": 110,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:append_inner",
+      "type": "block",
+      "parentId": "shape:run_outer",
+      "props": {
+        "w": 381,
+        "h": 202,
+        "title": "append (inner)",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "7h4RSTiDaWhkIu5uVQGH-",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "append_inner"
+      },
+      "index": "a19iv",
+      "typeName": "shape"
+    },
+    {
+      "x": 637,
+      "y": 244,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:run_collapsed",
+      "type": "block",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "w": 443,
+        "h": 158,
+        "title": "run() — collapsed",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "uwDnv80kGOQ2RZtiTVolp",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "run_collapsed"
+      },
+      "index": "a7gdxG",
+      "typeName": "shape"
+    },
+    {
+      "x": 1421,
+      "y": 118,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:r3c3",
+      "type": "block",
+      "parentId": "shape:tier-medium-hard-receiver",
+      "props": {
+        "w": 381,
+        "h": 202,
+        "title": "tracker.record",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "hbl_gBLRdwyUDMB08co2L",
+        "inputs": [
+          {
+            "id": "in_self",
+            "name": "self",
+            "type": "Tracker",
+            "visible": true,
+            "mutates": true,
+            "row": 0
+          },
+          {
+            "id": "in_2",
+            "name": "event",
+            "type": "Event",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_self",
+            "name": "self",
+            "type": "Tracker",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "tracker_record"
+      },
+      "index": "aKLib",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 1034,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-19",
+      "type": "text",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "19 - one cable, both marks: mut"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "z⁻¹ = 1.0."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Drag the pill - it should move"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "like any pill."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aAgJr",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:legend_src",
+      "type": "block",
+      "parentId": "shape:tier-legend",
+      "props": {
+        "w": 339,
+        "h": 158,
+        "title": "mutates(obj)",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "MXOO1lZToS_VZGqTCFo5W",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "obj",
+            "type": "Any",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "obj",
+            "type": "Any",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "mutates_obj"
+      },
+      "index": "aBrYY2",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-orientation-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-orientation-arrow",
+      "toId": "shape:r0c0",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "editingShapeId": null,
+      "croppingShapeId": null,
+      "selectedShapeIds": [],
+      "hoveredShapeId": null,
+      "erasingShapeIds": [],
+      "hintingShapeIds": [],
+      "focusedGroupId": null,
+      "meta": {},
+      "id": "instance_page_state:page:page",
+      "pageId": "page:page",
+      "typeName": "instance_page_state"
+    },
+    {
+      "x": 2022,
+      "y": 550,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketch": {
+          "kind": "imported-page",
+          "sourcePageId": "tier-medium-hard-receiver",
+          "sourcePageName": "MEDIUM/HARD — multiple mutated arguments, and the receiver (13–16)",
+          "sourcePageIndex": "0"
+        }
+      },
+      "id": "shape:tier-medium-hard-receiver",
+      "type": "frame",
+      "props": {
+        "w": 1842,
+        "h": 878,
+        "name": "MEDIUM/HARD — multiple mutated arguments, and the receiver (13–16)",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "a43iE",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 448,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:legend_producer",
+      "type": "block",
+      "parentId": "shape:tier-legend",
+      "props": {
+        "w": 280,
+        "h": 158,
+        "title": "producer",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "2qiZR79gK77fzfSGqNUEf",
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "value",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "definitionKey": "producer"
+      },
+      "index": "aC6z7O",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 656,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:len_after_pop",
+      "type": "block",
+      "parentId": "shape:tier-medium-dual",
+      "props": {
+        "w": 339,
+        "h": 158,
+        "title": "len(pending)",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "HmZwZljxqfdj00lx1Otmp",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pending",
+            "type": "list",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "n",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "definitionKey": "len_pending"
+      },
+      "index": "aRbfM",
+      "typeName": "shape"
+    },
+    {
+      "x": 1200,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:nest_outer",
+      "type": "block",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "w": 566,
+        "h": 522,
+        "title": "outer",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "expanded",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "ch7NiqOgh7S6QSaOedZmO",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "outer"
+      },
+      "index": "a8EBAl",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 308,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-r0c0",
+      "type": "text",
+      "parentId": "shape:tier-easy-single",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 - the base case: a hook, an"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "effect port, one tether."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aNqSv",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:run_outer",
+      "type": "block",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "w": 477,
+        "h": 362,
+        "title": "run() — expanded",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "expanded",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "-lN1AkijQGgAarsAcACFs",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "run_expanded"
+      },
+      "index": "a7X4hV",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 352,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-r1c0",
+      "type": "text",
+      "parentId": "shape:tier-easy-reorder",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "5 - in-place reordering: no new"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "list, no return, just the hook."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a9rIM",
+      "typeName": "shape"
+    },
+    {
+      "x": 534,
+      "y": 308,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-r0c1",
+      "type": "text",
+      "parentId": "shape:tier-easy-single",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "2 - same shape, a dict this time."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aPKaI",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#E34BA9",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:D5Cj5FsZ7HUwizj9bJYb2",
+      "typeName": "user"
+    },
+    {
+      "x": 440,
+      "y": 448,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:legend_consumer",
+      "type": "block",
+      "parentId": "shape:tier-legend",
+      "props": {
+        "w": 280,
+        "h": 158,
+        "title": "consumer",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "veWv-n0LzxzOPjKG4PHDv",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "value",
+            "type": "int",
+            "visible": true
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "consumer"
+      },
+      "index": "aCDvl8",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 352,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-r2c0",
+      "type": "text",
+      "parentId": "shape:tier-medium-dual",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "9 - a real output AND an effect"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "port, wired to two different"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "consumers."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aP6ff",
+      "typeName": "shape"
+    },
+    {
+      "x": 513,
+      "y": 352,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-r1c1",
+      "type": "text",
+      "parentId": "shape:tier-easy-reorder",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "6 - same idea, cheaper: reverses"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "the list in place."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aAQmf",
+      "typeName": "shape"
+    },
+    {
+      "x": 993,
+      "y": 308,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-r0c2",
+      "type": "text",
+      "parentId": "shape:tier-easy-single",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "3 - a set. adding still mutates"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "with no return."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aQrY6",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 74,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:wire-13a",
       "type": "connection",
+      "parentId": "shape:tier-medium-hard-receiver",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aFN8r",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-r0c0",
+      "type": "text",
+      "parentId": "shape:tier-easy-single",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "01"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aJHPn",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 352,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-r3c0",
+      "type": "text",
+      "parentId": "shape:tier-medium-hard-receiver",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "13 - a's port sits right, b's sits"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "left, reversed from argument"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "order, so the cables cross on"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "purpose."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aPBVX",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 352,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-r2c1",
+      "type": "text",
+      "parentId": "shape:tier-medium-dual",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "10 - same split as pop() above,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "keyed by name instead of position."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aSplv",
+      "typeName": "shape"
+    },
+    {
+      "x": 993,
+      "y": 352,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-r1c2",
+      "type": "text",
+      "parentId": "shape:tier-easy-reorder",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "7 - two ordinary args plus the one"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "that mutates."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aBZxA",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:wire-legend-a",
+      "type": "connection",
+      "parentId": "shape:tier-legend",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "a4w2X",
+      "typeName": "shape"
+    },
+    {
+      "x": 1433,
+      "y": 308,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-r0c3",
+      "type": "text",
+      "parentId": "shape:tier-easy-single",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "4 - extend copies elements in; the"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "argument still just mutates."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aRPcX",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 74,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:wire-13b",
+      "type": "connection",
+      "parentId": "shape:tier-medium-hard-receiver",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aGNQA",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 128,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-r1c0",
+      "type": "text",
+      "parentId": "shape:tier-easy-reorder",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "05"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a5oC6",
+      "typeName": "shape"
+    },
+    {
+      "x": 534,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-r0c1",
+      "type": "text",
+      "parentId": "shape:tier-easy-single",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "02"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aKJJX",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 352,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-r3c1",
+      "type": "text",
+      "parentId": "shape:tier-medium-hard-receiver",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "14 - three mutated arguments,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "three effect ports on one top"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "edge."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aSnnr",
+      "typeName": "shape"
+    },
+    {
+      "x": 920,
+      "y": 352,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-r2c2",
+      "type": "text",
+      "parentId": "shape:tier-medium-dual",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "11 - three inputs, a real return,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "and an effect port: the busiest"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "header here."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aTyK6",
+      "typeName": "shape"
+    },
+    {
+      "x": 1452,
+      "y": 352,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-r1c3",
+      "type": "text",
+      "parentId": "shape:tier-easy-reorder",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "8 - the extreme case: every"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "element leaves, none return."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aCUsH",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:wire-legend-b",
+      "type": "connection",
+      "parentId": "shape:tier-legend",
       "props": {
         "start": {
           "x": 0,
@@ -2680,53 +3773,189 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "parentId": "page:page",
-      "index": "aini2",
+      "index": "a5DnQ",
       "typeName": "shape"
     },
     {
-      "x": 0,
-      "y": 0,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
+      "name": "",
+      "color": "#02B1CC",
+      "imageUrl": "",
       "meta": {},
-      "id": "shape:wire-9a",
-      "type": "connection",
+      "id": "user:_sySAO3C_nAaYQnbFPhIr",
+      "typeName": "user"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-orientation-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-orientation-arrow",
+      "toId": "shape:cue-orientation",
       "props": {
-        "start": {
-          "x": 0,
-          "y": 0
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
         },
-        "end": {
-          "x": 100,
-          "y": 0
-        },
-        "routing": "elbow",
-        "curve": null,
-        "pins": [],
-        "elbowRoute": null,
-        "routeMode": "automatic",
-        "temporal": "data",
-        "delayValue": "",
-        "pillPosition": 0.5,
-        "tunnel": false,
-        "tunnelLayer": "",
-        "state": "normal"
+        "snap": "edge-point",
+        "terminal": "start"
       },
-      "parentId": "page:page",
-      "index": "aNF4f",
-      "typeName": "shape"
+      "typeName": "binding"
     },
     {
-      "x": 520,
-      "y": 1470,
+      "x": 1062,
+      "y": 766,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
       "meta": {},
-      "id": "shape:note-9",
+      "id": "shape:ord-append_simple",
       "type": "text",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "20"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aJbHX",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 128,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-r2c0",
+      "type": "text",
+      "parentId": "shape:tier-medium-dual",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "09"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aL7Y2",
+      "typeName": "shape"
+    },
+    {
+      "x": 513,
+      "y": 128,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-r1c1",
+      "type": "text",
+      "parentId": "shape:tier-easy-reorder",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "06"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a6tJv",
+      "typeName": "shape"
+    },
+    {
+      "x": 993,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-r0c2",
+      "type": "text",
+      "parentId": "shape:tier-easy-single",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "03"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aLEn6",
+      "typeName": "shape"
+    },
+    {
+      "x": 920,
+      "y": 352,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-r3c2",
+      "type": "text",
+      "parentId": "shape:tier-medium-hard-receiver",
       "props": {
         "color": "black",
         "size": "s",
@@ -2743,7 +3972,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "9 - a real output AND"
+                  "text": "15 - self mutates like any other"
                 }
               ]
             },
@@ -2752,7 +3981,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "an effect port, wired"
+                  "text": "argument; the receiver isn't"
                 }
               ]
             },
@@ -2761,94 +3990,71 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "to two different consumers."
+                  "text": "special."
                 }
               ]
             }
           ]
         }
       },
-      "parentId": "page:page",
-      "index": "aj2TUv",
+      "index": "aT7wn",
       "typeName": "shape"
     },
     {
-      "meta": {},
-      "id": "binding:connection-1",
-      "type": "connection",
-      "fromId": "shape:wire-1",
-      "toId": "shape:r0c0",
-      "props": {
-        "portId": "effect:in_1",
-        "terminal": "start",
-        "face": "outer"
-      },
-      "typeName": "binding"
-    },
-    {
-      "x": 90,
-      "y": 1940,
+      "x": 1462,
+      "y": 352,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
       "meta": {},
-      "id": "shape:show_a",
-      "type": "block",
+      "id": "shape:note-r2c3",
+      "type": "text",
+      "parentId": "shape:tier-medium-dual",
       "props": {
-        "w": 150,
-        "h": 110,
-        "title": "show",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "eaHp1L2SjHBaPSWp94ymL",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "a",
-            "type": "list",
-            "visible": true
-          }
-        ],
-        "outputs": [],
-        "definitionKey": "show"
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "12 - a deque's own pop: value and"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "effect, front instead of back."
+                }
+              ]
+            }
+          ]
+        }
       },
-      "parentId": "page:page",
-      "index": "ajBaaZ",
+      "index": "aUX02",
       "typeName": "shape"
     },
     {
-      "x": 0,
-      "y": 0,
+      "x": 40,
+      "y": 40,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
       "meta": {},
-      "id": "shape:wire-9b",
+      "id": "shape:wire-legend-c",
       "type": "connection",
+      "parentId": "shape:tier-legend",
       "props": {
         "start": {
           "x": 0,
@@ -2870,8 +4076,744 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "parentId": "page:page",
-      "index": "aOkYI",
+      "index": "aBpkQ",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 84,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-r3c0",
+      "type": "text",
+      "parentId": "shape:tier-medium-hard-receiver",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "13"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aLOQz",
+      "typeName": "shape"
+    },
+    {
+      "x": 1653,
+      "y": 736,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:label-port",
+      "type": "text",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Port view"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aClDn",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 84,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-r2c1",
+      "type": "text",
+      "parentId": "shape:tier-medium-dual",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "10"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aMG0X",
+      "typeName": "shape"
+    },
+    {
+      "x": 993,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-r1c2",
+      "type": "text",
+      "parentId": "shape:tier-easy-reorder",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "07"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a72ub",
+      "typeName": "shape"
+    },
+    {
+      "x": 1433,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-r0c3",
+      "type": "text",
+      "parentId": "shape:tier-easy-single",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "04"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aMCNn",
+      "typeName": "shape"
+    },
+    {
+      "x": 1421,
+      "y": 352,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:note-r3c3",
+      "type": "text",
+      "parentId": "shape:tier-medium-hard-receiver",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "16 - same receiver pattern, a"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "different shape of state."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aUjkM",
+      "typeName": "shape"
+    },
+    {
+      "x": 899,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:legend_later",
+      "type": "block",
+      "parentId": "shape:tier-legend",
+      "props": {
+        "w": 318,
+        "h": 158,
+        "title": "reads later",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "PQXzI-QTzKEXGTXnkZctN",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "obj",
+            "type": "Any",
+            "visible": true
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "reads_later"
+      },
+      "index": "aBwSl8",
+      "typeName": "shape"
+    },
+    {
+      "x": 480,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-r3c1",
+      "type": "text",
+      "parentId": "shape:tier-medium-hard-receiver",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "14"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aMNBA",
+      "typeName": "shape"
+    },
+    {
+      "x": 920,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-r2c2",
+      "type": "text",
+      "parentId": "shape:tier-medium-dual",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "11"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aNutM",
+      "typeName": "shape"
+    },
+    {
+      "x": 1452,
+      "y": 128,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-r1c3",
+      "type": "text",
+      "parentId": "shape:tier-easy-reorder",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "08"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "a8406",
+      "typeName": "shape"
+    },
+    {
+      "x": 920,
+      "y": 84,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-r3c2",
+      "type": "text",
+      "parentId": "shape:tier-medium-hard-receiver",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "15"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aNUti",
+      "typeName": "shape"
+    },
+    {
+      "x": 1462,
+      "y": 128,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-r2c3",
+      "type": "text",
+      "parentId": "shape:tier-medium-dual",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "12"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aOlpf",
+      "typeName": "shape"
+    },
+    {
+      "x": 1421,
+      "y": 84,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-r3c3",
+      "type": "text",
+      "parentId": "shape:tier-medium-hard-receiver",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "16"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aOoDE",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 800,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:append_delayed",
+      "type": "block",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "w": 422,
+        "h": 202,
+        "title": "append (delayed)",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "pVMRZoRV5FL9Kjnj0LyIK",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "append_delayed"
+      },
+      "index": "a8ZlA",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:wire-19",
+      "type": "connection",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "delayed",
+        "delayValue": "1.0",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "a7HNv",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 74,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:wire-9a",
+      "type": "connection",
+      "parentId": "shape:tier-medium-dual",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aFYGU",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-1",
+      "type": "connection",
+      "fromId": "shape:wire-1",
+      "toId": "shape:r0c0",
+      "props": {
+        "portId": "effect:in_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 40,
+      "y": 490,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:show_a",
+      "type": "block",
+      "parentId": "shape:tier-medium-hard-receiver",
+      "props": {
+        "w": 280,
+        "h": 158,
+        "title": "show(a)",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "ytZd-HWFd83qg5EpHFl5Z",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "a",
+            "type": "list",
+            "visible": true
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "show_a"
+      },
+      "index": "aQQfn",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 74,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:wire-9b",
+      "type": "connection",
+      "parentId": "shape:tier-medium-dual",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aGu2n",
       "typeName": "shape"
     },
     {
@@ -2888,18 +4830,19 @@
       "typeName": "binding"
     },
     {
-      "x": 280,
-      "y": 1940,
+      "x": 40,
+      "y": 680,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
       "meta": {},
       "id": "shape:show_b",
       "type": "block",
+      "parentId": "shape:tier-medium-hard-receiver",
       "props": {
-        "w": 150,
-        "h": 110,
-        "title": "show",
+        "w": 280,
+        "h": 158,
+        "title": "show(b)",
         "description": "",
         "blockType": "call",
         "icon": "",
@@ -2926,7 +4869,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "55FLfiy2BwGB-hAwzmWvO",
+        "definitionId": "lRX8C4br0KUn74NrMFLZN",
         "inputs": [
           {
             "id": "in_1",
@@ -2936,26 +4879,69 @@
           }
         ],
         "outputs": [],
-        "definitionKey": "show_draft_1",
-        "draftOrdinal": 1
+        "definitionKey": "show_b"
       },
-      "parentId": "page:page",
-      "index": "ajDcfh",
+      "index": "aRdtf",
       "typeName": "shape"
     },
     {
-      "x": 100,
-      "y": 500,
+      "x": 240,
+      "y": 490,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-orientation-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -13,
+          "y": 134
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a8sa0G",
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 398,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
       "meta": {},
       "id": "shape:len_consumer",
       "type": "block",
+      "parentId": "shape:tier-easy-single",
       "props": {
-        "w": 190,
-        "h": 120,
-        "title": "len",
+        "w": 374,
+        "h": 158,
+        "title": "len(poses)",
         "description": "",
         "blockType": "call",
         "icon": "",
@@ -2982,7 +4968,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "6YB5cnTre5HLfBIIemotd",
+        "definitionId": "XT8NwR5DxqiwZqRThEN14",
         "inputs": [
           {
             "id": "in_1",
@@ -2999,10 +4985,45 @@
             "visible": true
           }
         ],
-        "definitionKey": "len"
+        "definitionKey": "len_poses"
       },
-      "parentId": "page:page",
-      "index": "aiu2K1",
+      "index": "aOtgQ",
+      "typeName": "shape"
+    },
+    {
+      "x": 1200,
+      "y": 6,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:ord-nest_outer",
+      "type": "text",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "color": "orange",
+        "size": "m",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "18"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aHTSE",
       "typeName": "shape"
     },
     {
@@ -3065,8 +5086,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1600,
-        "h": 1000
+        "w": 1,
+        "h": 1
       },
       "insets": [
         false,
@@ -3095,22 +5116,41 @@
       "typeName": "instance"
     },
     {
-      "name": "",
-      "color": "#11B3A3",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:Nla1AJiIgZsp68wpkFiY6",
-      "typeName": "user"
+      "x": 2022,
+      "y": 1568,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketch": {
+          "kind": "imported-page",
+          "sourcePageId": "tier-hard-nesting",
+          "sourcePageName": "HARD — nesting, the combined pill, and a Simple-view check (17–20)",
+          "sourcePageIndex": "0"
+        }
+      },
+      "id": "shape:tier-hard-nesting",
+      "type": "frame",
+      "props": {
+        "w": 2157,
+        "h": 1180,
+        "name": "HARD — nesting, the combined pill, and a Simple-view check (17–20)",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "a5GIz",
+      "typeName": "shape"
     },
     {
-      "x": 380,
-      "y": 2390,
+      "x": 637,
+      "y": 434,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
       "meta": {},
       "id": "shape:note-17b",
       "type": "text",
+      "parentId": "shape:tier-hard-nesting",
       "props": {
         "color": "black",
         "size": "s",
@@ -3127,7 +5167,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "same run(), Port view:"
+                  "text": "same run(), Port view: the"
                 }
               ]
             },
@@ -3136,15 +5176,14 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "the outside, collapsed."
+                  "text": "outside, collapsed."
                 }
               ]
             }
           ]
         }
       },
-      "parentId": "page:page",
-      "index": "ajJZ6x",
+      "index": "a7vBzl",
       "typeName": "shape"
     },
     {
@@ -3161,52 +5200,8 @@
       "typeName": "binding"
     },
     {
-      "x": 270,
-      "y": 210,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:cue-1-arrow",
-      "type": "arrow",
-      "props": {
-        "kind": "elbow",
-        "elbowMidPoint": 0.5,
-        "dash": "draw",
-        "size": "m",
-        "fill": "none",
-        "color": "orange",
-        "labelColor": "black",
-        "bend": 0,
-        "start": {
-          "x": 0,
-          "y": 0
-        },
-        "end": {
-          "x": -30,
-          "y": 30
-        },
-        "arrowheadStart": "none",
-        "arrowheadEnd": "arrow",
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph"
-            }
-          ]
-        },
-        "labelPosition": 0.5,
-        "font": "draw",
-        "scale": 1
-      },
-      "parentId": "page:page",
-      "index": "antHll",
-      "typeName": "shape"
-    },
-    {
-      "x": 60,
-      "y": 140,
+      "x": 48,
+      "y": 110,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3215,9 +5210,9 @@
       "type": "block",
       "parentId": "shape:nest_outer",
       "props": {
-        "w": 520,
-        "h": 340,
-        "title": "run",
+        "w": 470,
+        "h": 362,
+        "title": "run() — nested",
         "description": "",
         "blockType": "call",
         "icon": "",
@@ -3244,7 +5239,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "wedwfI55Gm05IiVBMPaPW",
+        "definitionId": "T2m2MPKEZFKxAQvrCC5EU",
         "inputs": [
           {
             "id": "in_1",
@@ -3264,10 +5259,9 @@
             "edgeT": 0.5
           }
         ],
-        "definitionKey": "run_draft_2",
-        "draftOrdinal": 2
+        "definitionKey": "run_nested"
       },
-      "index": "a1zA1",
+      "index": "a1kEX",
       "typeName": "shape"
     },
     {
@@ -3310,12 +5304,17 @@
       "typeName": "binding"
     },
     {
-      "name": "",
-      "color": "#F04F88",
-      "imageUrl": "",
       "meta": {},
-      "id": "user:hG3SajiEcP3k2GJmna3aM",
-      "typeName": "user"
+      "id": "binding:connection-13",
+      "type": "connection",
+      "fromId": "shape:wire-legend-a",
+      "toId": "shape:legend_src",
+      "props": {
+        "portId": "effect:in_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
     },
     {
       "meta": {},
@@ -3331,222 +5330,19 @@
       "typeName": "binding"
     },
     {
-      "name": "",
-      "color": "#BD54C6",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:lLTdlfN7aEaxKVJ2H_usA",
-      "typeName": "user"
-    },
-    {
-      "x": 80,
-      "y": 2160,
+      "x": 499,
+      "y": 40,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
       "meta": {},
-      "id": "shape:t-hard",
-      "type": "text",
-      "props": {
-        "color": "black",
-        "size": "s",
-        "w": 8,
-        "font": "sans",
-        "textAlign": "start",
-        "autoSize": true,
-        "scale": 1,
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "HARD - nesting, the combined pill, and a Simple-view check  [17-20]"
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "ajFdaM",
-      "typeName": "shape"
-    },
-    {
-      "meta": {},
-      "id": "binding:connection-7",
-      "type": "connection",
-      "fromId": "shape:wire-13a",
-      "toId": "shape:r3c0",
-      "props": {
-        "portId": "effect:in_1",
-        "terminal": "start",
-        "face": "outer"
-      },
-      "typeName": "binding"
-    },
-    {
-      "x": 80,
-      "y": 90,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:cue-1",
-      "type": "geo",
-      "props": {
-        "w": 380,
-        "h": 120,
-        "geo": "rectangle",
-        "dash": "draw",
-        "growY": 2,
-        "url": "",
-        "scale": 1,
-        "flipX": false,
-        "flipY": false,
-        "color": "orange",
-        "labelColor": "black",
-        "fill": "semi",
-        "size": "m",
-        "font": "sans",
-        "align": "start",
-        "verticalAlign": "middle",
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "Start here."
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "20 real mutating calls, laid"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "out easy to hard, top to bottom."
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "anmrI",
-      "typeName": "shape"
-    },
-    {
-      "x": 780,
-      "y": 2840,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:append_simple",
+      "id": "shape:legend_now",
       "type": "block",
+      "parentId": "shape:tier-legend",
       "props": {
-        "w": 320,
-        "h": 206,
-        "title": "poses.append",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "simple",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "iaY4_v0UmHHpZfVkjJMW7",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "poses",
-            "type": "list[Pose]",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_2",
-            "name": "pose",
-            "type": "Pose",
-            "visible": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in_1",
-            "name": "poses",
-            "type": "list[Pose]",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          }
-        ],
-        "definitionKey": "poses_append"
-      },
-      "parentId": "page:page",
-      "index": "akm7n",
-      "typeName": "shape"
-    },
-    {
-      "meta": {},
-      "id": "binding:connection-8",
-      "type": "connection",
-      "fromId": "shape:wire-13a",
-      "toId": "shape:show_a",
-      "props": {
-        "portId": "in_1",
-        "terminal": "end",
-        "face": "outer"
-      },
-      "typeName": "binding"
-    },
-    {
-      "x": 460,
-      "y": 2880,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:len_delayed",
-      "type": "block",
-      "props": {
-        "w": 190,
-        "h": 120,
-        "title": "len",
+        "w": 280,
+        "h": 158,
+        "title": "reads now",
         "description": "",
         "blockType": "call",
         "icon": "",
@@ -3573,12 +5369,262 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "6YB5cnTre5HLfBIIemotd",
+        "definitionId": "9aCw-GqZU64Q5BlP7KKs5",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "obj",
+            "type": "Any",
+            "visible": true
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "reads_now"
+      },
+      "index": "aBufM4",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-14",
+      "type": "connection",
+      "fromId": "shape:wire-legend-a",
+      "toId": "shape:legend_now",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 0,
+      "y": 210,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-orientation",
+      "type": "geo",
+      "props": {
+        "w": 480,
+        "h": 280,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Start here. 20 real mutating calls, laid out easy to hard."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Each tier below is its own labeled frame; every example is"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "numbered 1-20 in orange. See the Legend frame (bottom) for"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "what every hook, port, and cable style means."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a8fM6",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-7",
+      "type": "connection",
+      "fromId": "shape:wire-13a",
+      "toId": "shape:r3c0",
+      "props": {
+        "portId": "effect:in_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 1062,
+      "y": 800,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:append_simple",
+      "type": "block",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "w": 471,
+        "h": 206,
+        "title": "append (simple)",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "simple",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "OIlb07hJC1Ct54td_MQio",
         "inputs": [
           {
             "id": "in_1",
             "name": "poses",
             "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ],
+        "definitionKey": "append_simple"
+      },
+      "index": "aDDyn",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-15",
+      "type": "connection",
+      "fromId": "shape:wire-legend-b",
+      "toId": "shape:legend_src",
+      "props": {
+        "portId": "effect:in_1",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-8",
+      "type": "connection",
+      "fromId": "shape:wire-13a",
+      "toId": "shape:show_a",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 582,
+      "y": 844,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:len_delayed",
+      "type": "block",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "w": 360,
+        "h": 158,
+        "title": "len (delayed)",
+        "description": "",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "d8zet_0zEobNLlwLSWow0",
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list",
             "visible": true
           }
         ],
@@ -3590,11 +5636,23 @@
             "visible": true
           }
         ],
-        "definitionKey": "len"
+        "definitionKey": "len_delayed"
       },
-      "parentId": "page:page",
-      "index": "ajSgE4",
+      "index": "a9yJX",
       "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-16",
+      "type": "connection",
+      "fromId": "shape:wire-legend-b",
+      "toId": "shape:legend_later",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
     },
     {
       "meta": {},
@@ -3608,6 +5666,32 @@
         "face": "outer"
       },
       "typeName": "binding"
+    },
+    {
+      "x": 4339,
+      "y": 550,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketch": {
+          "kind": "imported-page",
+          "sourcePageId": "tier-legend",
+          "sourcePageName": "Legend — what each mark means",
+          "sourcePageIndex": "0"
+        }
+      },
+      "id": "shape:tier-legend",
+      "type": "frame",
+      "props": {
+        "w": 1257,
+        "h": 784,
+        "name": "Legend — what each mark means",
+        "color": "black"
+      },
+      "parentId": "page:page",
+      "index": "a6jiQ",
+      "typeName": "shape"
     }
   ]
 }

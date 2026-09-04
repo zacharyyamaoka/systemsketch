@@ -113,17 +113,13 @@ export function blockInlineEditorPlacement(
 	const footerTop = layout.footerTop
 
 	if (props.view === 'value') {
-		// The capsule has two fields: the literal (its title) across the whole
-		// face, and the variable name (its outlet's name) at the left end.
+		// A capsule is entered as one left-to-right declaration. The parser can
+		// split it into its title and outlet name when the edit is committed.
 		if (field.kind === 'title') {
-			return layout.title ? { box: layout.title, align: 'center' } : null
+			return layout.title ? { box: layout.title, align: 'left' } : null
 		}
 		if (field.kind === 'portName' && field.side === 'outputs') {
-			const editorWidth = Math.max(84, Math.min(180, width / 2))
-			return {
-				box: { x: VALUE_PAD_X, y: (height - 30) / 2, w: editorWidth, h: 30 },
-				align: 'left',
-			}
+			return layout.title ? { box: layout.title, align: 'left' } : null
 		}
 		return null
 	}

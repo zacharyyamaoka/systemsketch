@@ -33,10 +33,19 @@
 }
 
 .systemsketch-top-left-shell .systemsketch-file-title {
+  width: min(30vw, 250px);
+  max-width: min(30vw, 250px);
+  height: 36px;
+  justify-content: flex-start;
+  border-right: 1px solid var(--ss-border);
+  border-radius: 0;
+}
+
+.systemsketch-top-left-shell .systemsketch-file-title-editor {
+  width: min(30vw, 250px);
   max-width: min(30vw, 250px);
   height: 36px;
   border-right: 1px solid var(--ss-border);
-  border-radius: 0;
 }
 
 .systemsketch-top-left-shell .tlui-button,
@@ -640,6 +649,12 @@
   }
 
   .systemsketch-top-left-shell .systemsketch-file-title {
+    width: 120px;
+    max-width: 120px;
+  }
+
+  .systemsketch-top-left-shell .systemsketch-file-title-editor {
+    width: 120px;
     max-width: 120px;
   }
 
@@ -650,6 +665,14 @@
   .systemsketch-popout--left,
   .systemsketch-popout--right {
     width: min(300px, calc(100vw - 16px));
+  }
+}
+
+/* At a narrow desktop width the bottom dock already carries Library. Reclaim
+ * that duplicate chrome before truncating the current board/depth label. */
+@media (max-width: 920px) {
+  .systemsketch-top-left-shell .systemsketch-shapes-button {
+    display: none;
   }
 }
 
@@ -666,7 +689,10 @@ body:has(.systemsketch-recorder-indicator[data-placement='below']) .systemsketch
     max-width: calc(100vw - 176px);
   }
 
-  .systemsketch-top-left-shell .systemsketch-file-title {
+  /* The board name is the one piece of chrome needed to orient and rename a
+   * mobile board. Keep it, and let the bottom tool dock carry the duplicate
+   * shape/command launchers on this tightly constrained row. */
+  .systemsketch-top-left-shell .systemsketch-shell-icon-button {
     display: none;
   }
 

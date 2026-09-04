@@ -160,6 +160,9 @@ function BlockPortDot({
     // An effect output leaves by the top edge: the call gave its value no name,
     // so there is no right-hand port for it to use.
     placed.edge === 'top' ? 'Port_effect' : '',
+		placed.port.variadic ? 'Port_variadic' : '',
+		placed.port.variadic ? `Port_variadic--${placed.port.variadic.kind}` : '',
+		placed.port.variadic?.bundled ? 'Port_variadic--bundled' : '',
   ].filter(Boolean).join(' ')
   // A ghost row is a port the target asserts and this board does not have. It
   // keeps its dot so a missing cable has somewhere to land, in the row it is
@@ -185,6 +188,8 @@ function BlockPortDot({
         'data-block-port-edge': placed.edge,
         'data-block-port-row': String(portRow(placed.port)),
         'data-block-port-mutates': portMutates(placed.port) ? 'true' : undefined,
+			'data-variadic-group': placed.port.variadic?.groupId,
+			'data-variadic-bundled': placed.port.variadic?.bundled ? 'true' : undefined,
         'data-diff-state': diffState === 'normal' ? undefined : diffState,
       }}
       style={{
@@ -335,42 +340,61 @@ function BlockFooterMenu({ shape }: { shape: BlockShape }) {
  * title and the name is its ports' name, so both are ordinary inline fields.
  * While unnamed, the `=` itself carries the name field — that is the click
  * that names a literal — and a folded literal keeps its full text in the
- * capsule's tooltip. A cable on the inlet changes the literal's ink to say it
- * is overridden, but the stored characters remain painted in place.
+ * capsule's tooltip. A cable on the inlet is deliberately only a relationship:
+ * the face remains editable and keeps showing what its author wrote.
  */
 function ValueFace({
   shape,
   connectedIds,
+  editing,
 }: {
   shape: BlockShape
   connectedIds: ReadonlySet<string>
+  editing: boolean
 }) {
   const layout = layoutBlock(shape.props)
   const label = valueBlockLabel(shape.props)
   const outlet = valueBlockOutlet(shape.props)
   const inlet = valueBlockInlet(shape.props)
-  const fed = inlet !== null && connectedIds.has(inlet.id)
+  const inletConnected = inlet !== null && connectedIds.has(inlet.id)
   const nameField = outlet
     ? blockInlineFieldAttribute({ kind: 'portName', side: 'outputs', portId: outlet.id })
     : undefined
+  const typeField = outlet
+    ? blockInlineFieldAttribute({ kind: 'portType', side: 'outputs', portId: outlet.id })
+    : undefined
   const tooltip = [valueBlockExactText(label)]
   if (label.folded) tooltip.push('The capsule abbreviates this literal as …')
-  if (fed) tooltip.push('The inlet cable supplies the live value; this stored literal is retained.')
+  if (inletConnected) tooltip.push('Connected on the inlet — this pill remains manual.')
   return layout.title ? (
     <div
       className="BlockNode-value"
       style={boxStyle(layout.title)}
       title={tooltip.join('\n')}
       data-testid="block-value"
-      data-fed={fed ? 'true' : undefined}
+      data-inline-editing={editing ? 'true' : undefined}
     >
       {label.name !== '' ? (
-        <span
-          className="BlockNode-valueName"
-          data-pb-inline-field={nameField}
-          data-testid="block-value-name"
-        >
-          {label.name}
+        <span className="BlockNode-valueDeclaration">
+          <span
+            className="BlockNode-valueName"
+            data-pb-inline-field={nameField}
+            data-testid="block-value-name"
+          >
+            {label.name}
+          </span>
+          {label.type !== '' ? (
+            <>
+              <span className="BlockNode-valueColon" data-pb-inline-field={nameField}>:</span>{' '}
+              <span
+                className="BlockNode-valueType"
+                data-pb-inline-field={typeField}
+                data-testid="block-value-type"
+              >
+                {label.type}
+              </span>
+            </>
+          ) : null}
         </span>
       ) : null}
       <span
@@ -381,7 +405,7 @@ function ValueFace({
         =
       </span>
       <span
-        className={fed ? 'BlockNode-valueText BlockNode-valueText--fed' : 'BlockNode-valueText'}
+        className="BlockNode-valueText"
         data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
         data-testid="block-value-text"
       >
@@ -727,6 +751,53 @@ function BlockDiffRail({ ports }: { ports: readonly LaidOutBlockPort[] }) {
   )
 }
 
+/**
+ * V5 decoration is deliberately derived from ordinary input ports. The model
+ * does not gain a collector, tray, or synthetic endpoint: each cable still
+ * lands on its own honest source expression, while this quiet rail says which
+ * ports share the callee's `*args` or `**kwargs` formal.
+ */
+function VariadicRuns({ ports }: { ports: readonly LaidOutBlockPort[] }) {
+	type Run = { groupId: string; members: LaidOutBlockPort[] }
+	const runs: Run[] = []
+	for (const placed of ports) {
+		if (placed.side !== 'input' || !placed.port.variadic || placed.subtle) continue
+		const previous = runs.at(-1)
+		if (previous?.groupId === placed.port.variadic.groupId) previous.members.push(placed)
+		else runs.push({ groupId: placed.port.variadic.groupId, members: [placed] })
+	}
+	return (
+		<>
+			{runs.map((run) => {
+				const first = run.members[0]
+				const variadic = first?.port.variadic
+				if (!first || !variadic) return null
+				const top = Math.min(...run.members.map((member) => member.y)) - 8
+				const bottom = Math.max(...run.members.map((member) => member.y)) + 8
+				const type = run.members.every((member) => member.port.type === first.port.type)
+					? first.port.type : ''
+				return (
+					<div
+						key={`${run.groupId}:${first.port.id}`}
+						className={`BlockNode-variadicRun BlockNode-variadicRun--${variadic.kind}`}
+						data-testid={`variadic-run-${first.port.id}`}
+						data-variadic-group={run.groupId}
+						data-variadic-members={run.members.length}
+						style={{ top, height: bottom - top }}
+						aria-label={`${variadic.label}: ${run.members.length} call expression${run.members.length === 1 ? '' : 's'}`}
+					>
+						<span className="BlockNode-variadicBracket" aria-hidden="true" />
+						<span className="BlockNode-variadicLabel">
+							{variadic.label}
+							{type !== '' ? <span className="BlockNode-variadicType">{type}</span> : null}
+						</span>
+					</div>
+				)
+			})}
+		</>
+	)
+}
+
 function DefinitionBadge({ shape }: { shape: BlockShape }) {
   const badge = definitionBadge(shape.props)
   return badge ? (
@@ -786,6 +857,9 @@ function PortLabels({
     <>
       {ports.map((placed) => {
         if (!placed.label) return null
+			// One DEF-owned label per run. The individual source expressions are
+			// still explicit as cable endpoints, just not redundantly named here.
+			if (placed.side === 'input' && placed.port.variadic) return null
         const held = Boolean(
           drag
           && drag.portId === placed.port.id
@@ -1119,7 +1193,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
         {simple
           ? <SimpleFace shape={shape} />
           : value
-            ? <ValueFace shape={shape} connectedIds={connectedIds} />
+            ? <ValueFace shape={shape} connectedIds={connectedIds} editing={isEditing} />
             : <BlockHeading shape={shape} height={layout.headerHeight} />}
         {simple ? <DefinitionBadge shape={shape} /> : null}
         {simple ? <BlockDiffBadge shape={shape} /> : null}
@@ -1148,7 +1222,8 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
                   />
                 ) : null)
               : null}
-            <PortLabels ports={layout.ports} drag={heldPort} connectedIds={connectedIds} />
+	            <PortLabels ports={layout.ports} drag={heldPort} connectedIds={connectedIds} />
+						<VariadicRuns ports={layout.ports} />
             {layout.description ? (
               <div
                 className="BlockNode-description"

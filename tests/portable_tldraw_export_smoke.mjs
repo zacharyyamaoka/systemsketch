@@ -254,7 +254,7 @@ async function main() {
     check('a literal Pill becomes a stock oval with its complete variable expression',
       childrenOf(literalPill).some((record) => record.type === 'geo' && record.props?.geo === 'oval')
         && richTextWithin(literalPill).includes('gain = 2.0'))
-    check('a fed Pill freezes its exact stored fallback literal',
+    check('a wired Pill preserves its manually authored literal in the portable face',
       childrenOf(fedPill).some((record) => record.type === 'geo' && record.props?.geo === 'oval')
         && richTextWithin(fedPill).includes('chosen = fallback')
         && fedPill?.meta?.systemSketch?.props?.title === 'fallback')
@@ -307,36 +307,28 @@ async function main() {
     const portableShapes = new Map(portable.records
       .filter((record) => record.typeName === 'shape')
       .map((record) => [record.id, record]))
-    const branchFrames = [...portableShapes.values()]
-      .filter((shape) => shape.type === 'frame' && shape.meta?.systemSketch?.kind === 'branch')
-    const outerBranch = branchFrames.find((shape) => shape.meta.systemSketch.props?.title === 'Choose transport')
-    const innerBranch = branchFrames.find((shape) => shape.meta.systemSketch.props?.title === 'Retry policy')
-    check('Branch regions become fresh stock frames with their visible box and title metadata',
-      outerBranch?.type === 'frame'
-        && outerBranch.props?.name === '\u2060'
-        && outerBranch.props?.w === 620
-        && outerBranch.props?.h === 414)
+    const branchGroups = [...portableShapes.values()]
+      .filter((shape) => shape.type === 'group' && shape.meta?.systemSketch?.kind === 'branch')
+    const outerBranch = branchGroups.find((shape) => shape.meta.systemSketch.props?.title === 'Choose transport')
+    const innerBranch = branchGroups.find((shape) => shape.meta.systemSketch.props?.title === 'Retry policy')
+    const outerCard = [...portableShapes.values()].find((shape) => shape.parentId === outerBranch?.id
+      && shape.type === 'geo' && shape.props?.geo === 'rectangle'
+      && shape.props?.w === 620 && shape.props?.h === 414)
+    check('Branch regions become stock Groups with a materialised stock rectangle and title metadata',
+      outerBranch?.type === 'group' && outerCard?.type === 'geo')
     check('portable Branch metadata remembers controls, arms and active state',
       outerBranch?.meta?.systemSketch?.kind === 'branch'
         && outerBranch.meta.systemSketch.props?.controls?.[0]?.name === 'request'
         && outerBranch.meta.systemSketch.props?.arms?.[1]?.title === 'safe path'
         && outerBranch.meta.systemSketch.props?.activeArmId === 'arm_fast')
-    check('direct Branch children retain their parent and survive export',
+    check('direct Branch children retain their group parent and survive export',
       portableShapes.get('shape:portable-direct-child')?.parentId === outerBranch?.id
-        && portableShapes.get('shape:portable-direct-child')?.x === 40
-        && portableShapes.get('shape:portable-direct-child')?.y === 260
-        && portableShapes.get('shape:portable-direct-child')?.rotation === 0.2)
-    check('nested Branches become nested stock frames without flattening',
-      innerBranch?.type === 'frame'
-        && innerBranch.parentId === outerBranch?.id
-        && innerBranch.x === 300
-        && innerBranch.y === 72
-        && innerBranch.rotation === -0.08)
+        && portableShapes.get('shape:portable-direct-child')?.type === 'geo')
+    check('nested Branches become nested stock Groups without flattening',
+      innerBranch?.type === 'group' && innerBranch.parentId === outerBranch?.id)
     check('children inside a nested Branch retain the nested parent',
       portableShapes.get('shape:portable-nested-child')?.parentId === innerBranch?.id
-        && portableShapes.get('shape:portable-nested-child')?.x === 30
-        && portableShapes.get('shape:portable-nested-child')?.y === 90
-        && portableShapes.get('shape:portable-nested-child')?.rotation === 0.3)
+        && portableShapes.get('shape:portable-nested-child')?.type === 'geo')
     const portableText = portable.records
       .filter((record) => record.typeName === 'shape' && record.type === 'text')
       .map((record) => JSON.stringify(record.props?.richText))

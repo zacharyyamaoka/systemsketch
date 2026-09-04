@@ -60,6 +60,7 @@ describe('branch layout', () => {
 		])
 		expect(two.controls[1].name).toBe('mode')
 		expect(two.controls.map((c) => c.id)).toEqual(['ctrl_1', 'ctrl_2'])
+		expect(one.controls[0].name).toBe('')
 	})
 
 	it('assigns a child to the arm whose row holds its top edge', () => {
@@ -70,6 +71,21 @@ describe('branch layout', () => {
 		// A folded arm has no body to be inside: the nearest open arm answers.
 		const folded = setBranchArmOpenProps(p, 'arm_1', false)
 		expect(branchArmIdForChildTop(folded, BRANCH_BAND_HEIGHT + 5)).toBe('arm_2')
+	})
+
+	it('reserves a fixed right-side control-exit lane without moving the active target', () => {
+		const withIcons = props({
+			arms: [
+				{ ...props().arms[0], controlIcons: [{ kind: 'break', line: 5 }, { kind: 'continue', line: 7 }] },
+				props().arms[1],
+			],
+		})
+		const plain = branchLayout(props()).arms[0]
+		const placed = branchLayout(withIcons).arms[0]
+		expect(placed.target).toEqual(plain.target)
+		expect(placed.controlIcons.w).toBe(51)
+		expect(placed.controlIcons.x + placed.controlIcons.w).toBeLessThan(placed.target.x)
+		expect(placed.title.x + placed.title.w).toBeLessThanOrEqual(placed.controlIcons.x - 6)
 	})
 })
 
@@ -86,6 +102,7 @@ describe('branch state rules', () => {
 		// A new arm in Case view arrives folded, unless nothing is open.
 		expect(appendBranchArmProps(opened).arm.open).toBe(false)
 		expect(appendBranchArmProps(none).arm.open).toBe(true)
+		expect(appendBranchArmProps(props()).arm.title).toBe('')
 	})
 
 	it('expanded view leaves the arms as they are when leaving case view', () => {
@@ -115,6 +132,19 @@ describe('reconciliation', () => {
 		const before = props()
 		const folded = { ...setBranchArmOpenProps(before, 'arm_1', false), h: before.h }
 		expect(reconcileBranchProps(before, folded).h).toBe(branchHeightForArms(folded.arms))
+	})
+
+	it('recognises a source pass replacing only an arm control-icon list', () => {
+		const before = props()
+		const next = {
+			...before,
+			arms: before.arms.map((arm, index) => index === 0
+				? { ...arm, controlIcons: [{ kind: 'break' as const, line: 5 }] }
+				: arm),
+		}
+		const reconciled = reconcileBranchProps(before, next)
+		expect(reconciled.arms[0].controlIcons).toEqual([{ kind: 'break', line: 5 }])
+		expect(reconciled.h).toBe(next.h)
 	})
 
 	it('shares a resize over the open arms and never below the floor', () => {

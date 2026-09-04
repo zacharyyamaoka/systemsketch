@@ -452,7 +452,7 @@
 }
 
 .block-inspector__port-row:has(.block-inspector__port-default) {
-  grid-template-columns: 14px minmax(0, 1fr) 56px 44px 34px 22px;
+  grid-template-columns: 14px minmax(0, 1fr) 54px 54px 30px 22px;
 }
 
 /* Code-style Inputs row (Settings → Appearance → "Code-style Inputs row"):
@@ -520,6 +520,73 @@
 .block-inspector__port-mutates:disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+/* The rare Python calling grammar lives behind a native disclosure, so normal
+ * port authoring stays a compact name/type table. Imported groups are still
+ * inspectable and this panel is the full manual escape hatch. */
+.block-inspector__variadic {
+  grid-column: 2 / -2;
+  min-width: 0;
+  color: var(--ss-text-muted);
+  font-size: 10px;
+}
+
+.block-inspector__variadic summary {
+  width: max-content;
+  max-width: 100%;
+  overflow: hidden;
+  cursor: pointer;
+  color: var(--ss-text-faint);
+  font-size: 10px;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.block-inspector__variadic[open] summary {
+  color: var(--ss-text-muted);
+}
+
+.block-inspector__variadic-fields {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 4px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.block-inspector__variadic-fields label {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.block-inspector__variadic-fields select,
+.block-inspector__variadic-bundle {
+  height: 22px;
+  border: 1px solid var(--ss-border);
+  border-radius: 5px;
+  background: var(--ss-surface-sunken);
+  color: var(--ss-text-muted);
+  font: 600 10px/1 ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+.block-inspector__variadic-label {
+  min-width: 0;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace !important;
+  font-size: 10px !important;
+}
+
+.block-inspector__variadic-bundle {
+  padding: 0 5px;
+  cursor: pointer;
+}
+
+.block-inspector__variadic-bundle[aria-pressed='true'] {
+  border-style: dotted;
+  border-color: var(--ss-warning);
+  color: var(--ss-warning);
 }
 
 /* The grip is the row's only handle: everything else on the row already means
@@ -642,6 +709,7 @@
 
 .block-inspector__port-row input {
   width: 100%;
+  padding-inline: 4px;
 }
 
 /* Type names and defaults are code, and read the code tokens so an imported

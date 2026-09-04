@@ -31,7 +31,8 @@
   white-space: nowrap;
 }
 
-.systemsketch-file-title i {
+.systemsketch-file-title i,
+.systemsketch-file-title-editor i {
   width: 6px;
   height: 6px;
   flex: 0 0 auto;
@@ -40,7 +41,9 @@
 }
 
 .systemsketch-file-title i[data-state='dirty'],
-.systemsketch-file-title i[data-state='saving'] {
+.systemsketch-file-title i[data-state='saving'],
+.systemsketch-file-title-editor i[data-state='dirty'],
+.systemsketch-file-title-editor i[data-state='saving'] {
   background: var(--ss-warning);
 }
 
@@ -48,8 +51,96 @@
 .systemsketch-file-title i[data-state='missing'],
 .systemsketch-file-title i[data-state='future'],
 .systemsketch-file-title i[data-state='quarantined'],
-.systemsketch-file-title i[data-state='error'] {
+.systemsketch-file-title i[data-state='error'],
+.systemsketch-file-title-editor i[data-state='conflict'],
+.systemsketch-file-title-editor i[data-state='missing'],
+.systemsketch-file-title-editor i[data-state='future'],
+.systemsketch-file-title-editor i[data-state='quarantined'],
+.systemsketch-file-title-editor i[data-state='error'] {
   background: var(--ss-danger);
+}
+
+/* The document identity is an inline control, not a tiny launcher for a
+ * modal. Keep the edit field in exactly the same footprint so the top chrome
+ * never jumps while someone is naming a board. */
+.systemsketch-file-title-editor {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  max-width: min(32vw, 280px);
+  height: 32px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 9px;
+}
+
+.systemsketch-file-title-input {
+  min-width: 0;
+  width: 100%;
+  height: 28px;
+  padding: 0 7px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--ss-text);
+  caret-color: var(--ss-text);
+  background: var(--ss-surface-raised);
+  font: inherit;
+  font-weight: 600;
+  outline: none;
+}
+
+/* TldrawUiInput deliberately brings a wrapper so labels and icons can share
+ * its focus/IME behavior. In the compact file chrome, retain the exact
+ * footprint of the non-editing title launcher. */
+.systemsketch-file-title-editor > .tlui-input__wrapper {
+  min-width: 0;
+  height: 28px;
+  flex: 1;
+  gap: 0;
+}
+
+.systemsketch-file-title-editor .tlui-input {
+  height: 28px;
+  max-height: none;
+}
+
+.systemsketch-file-title-input:focus {
+  border-color: var(--ss-accent);
+  box-shadow: var(--ss-focus-ring);
+}
+
+.systemsketch-file-title-input:disabled {
+  cursor: wait;
+  opacity: .72;
+}
+
+.systemsketch-file-title-help {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.systemsketch-file-title-editor[data-error='true'] .systemsketch-file-title-help {
+  z-index: calc(var(--tl-layer-panels) + 1);
+  top: calc(100% + 6px);
+  left: 0;
+  width: max-content;
+  max-width: min(300px, calc(100vw - 24px));
+  height: auto;
+  padding: 6px 8px;
+  overflow: visible;
+  clip: auto;
+  border: 1px solid color-mix(in srgb, var(--ss-danger) 55%, transparent);
+  border-radius: 7px;
+  color: var(--ss-text);
+  background: var(--ss-danger-soft);
+  box-shadow: var(--ss-shadow-1);
+  font-size: 10px;
+  line-height: 1.25;
+  white-space: normal;
 }
 
 .systemsketch-workspace-loading {
@@ -293,6 +384,18 @@
   background: var(--ss-surface-raised);
 }
 
+.systemsketch-workspace-new-folder > .tlui-input__wrapper {
+  min-width: 90px;
+  height: 28px;
+  flex: 1;
+  gap: 0;
+}
+
+.systemsketch-workspace-new-folder .tlui-input {
+  height: 28px;
+  max-height: none;
+}
+
 .systemsketch-workspace-new-folder input:focus {
   border-color: var(--ss-accent);
   outline: none;
@@ -397,6 +500,18 @@
   outline: 0;
   background: transparent;
   font-size: 13px;
+}
+
+.systemsketch-workspace-name-field > .tlui-input__wrapper {
+  min-width: 0;
+  height: 38px;
+  flex: 1;
+  gap: 0;
+}
+
+.systemsketch-workspace-name-field .tlui-input {
+  height: 38px;
+  max-height: none;
 }
 
 .systemsketch-workspace-name-field span {
@@ -533,6 +648,10 @@ body:has(.systemsketch-preview-mode) .systemsketch-workspace-alert {
     max-width: 32vw;
   }
 
+  .systemsketch-file-title-editor {
+    max-width: 32vw;
+  }
+
   .systemsketch-workspace-dialog-backdrop {
     padding: 10px;
   }
@@ -650,10 +769,40 @@ body:has(.systemsketch-preview-mode) .systemsketch-workspace-alert {
   font-size: 12px;
 }
 
+.systemsketch-workspace-pathbar > .tlui-input__wrapper {
+  width: 132px;
+  min-width: 0;
+  height: 28px;
+  flex: none;
+  gap: 0;
+}
+
+.systemsketch-workspace-search.tlui-input {
+  width: 100%;
+  min-width: 0;
+  height: 28px;
+  max-height: none;
+  box-sizing: border-box;
+}
+
 .systemsketch-workspace-search:focus {
   border-color: var(--ss-accent);
   outline: none;
   background: var(--ss-surface-raised);
+}
+
+@media (max-width: 380px) {
+  /* WHY: stock TldrawUiInput keeps an intrinsic text width. At phone widths,
+   * let its wrapper, rather than the dialog boundary, be the constraint so
+   * the filter retains a deliberate right inset and its focus ring is whole. */
+  .systemsketch-workspace-pathbar {
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .systemsketch-workspace-pathbar > .tlui-input__wrapper {
+    width: min(132px, 40vw);
+  }
 }
 
 .systemsketch-workspace-dialog__confirm {

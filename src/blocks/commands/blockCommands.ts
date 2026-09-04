@@ -33,6 +33,12 @@ import {
   type BlockPortSectionTarget,
 } from '../ports/portAffordances'
 import {
+  adoptCableTypeIntoPills,
+  getConnectionBindings,
+  type ConnectionBinding,
+} from '../connections/ConnectionBindingUtil'
+import { CONNECTION_BINDING_TYPE } from '../connections/connectionModel'
+import {
   getBlockSelectionStyles,
   getSelectedBlocks,
   sameBlockSelectionStyles,
@@ -48,6 +54,10 @@ export type BlockCommandResult =
 export type BlockPortCreationResult =
   | { ok: true; shapeId: TLShapeId; props: BlockShapeProps; port: BlockPort }
   | { ok: false; reason: BlockCommandFailure }
+
+export type PillCableTypeAdoptionResult =
+  | { ok: true; shapeId: TLShapeId; type: string }
+  | { ok: false; reason: 'missing-pill' | 'unwired-inlet' | 'untyped-cable' | 'unchanged' }
 
 export type BlockInspectorContext =
   | { kind: 'selected'; shape: BlockShape; props: BlockShapeProps }
@@ -85,6 +95,55 @@ export function getOnlySelectedBlock(editor: Editor): BlockShape | null {
   const selected = editor.getSelectedShapes()
   if (selected.length !== 1) return null
   return isBlockShape(selected[0]) ? selected[0] : null
+}
+
+/** True when a Value pill's inlet has a typed peer available to copy. */
+export function canAdoptConnectedPillType(editor: Editor, shapeId: TLShapeId): boolean {
+  const pill = editor.getShape(shapeId)
+  if (!isBlockShape(pill) || pill.props.view !== 'value') return false
+  const inletId = pill.props.inputs[0]?.id
+  if (!inletId) return false
+  const inletBinding = editor
+    .getBindingsToShape<ConnectionBinding>(pill.id, CONNECTION_BINDING_TYPE)
+    .find((binding) => binding.props.portId === inletId)
+  if (!inletBinding) return false
+  const bindings = getConnectionBindings(editor, inletBinding.fromId)
+  const peerBinding = inletBinding.props.terminal === 'start' ? bindings.end : bindings.start
+  const peer = peerBinding ? editor.getShape(peerBinding.toId) : null
+  if (!isBlockShape(peer) || !peerBinding) return false
+  const peerPort = [...peer.props.inputs, ...peer.props.outputs]
+    .find((port) => port.id === peerBinding.props.portId)
+  return (peerPort?.type.trim() ?? '') !== ''
+}
+
+/**
+ * Explicitly copy the type from the cable that lands on a pill's inlet.
+ * This is intentionally a command, not a cable-settlement side effect: the
+ * canvas remains hackable until its author asks to make the derivation.
+ */
+export function adoptConnectedPillType(
+  editor: Editor,
+  shapeId: TLShapeId,
+): PillCableTypeAdoptionResult {
+  const pill = editor.getShape(shapeId)
+  if (!isBlockShape(pill) || pill.props.view !== 'value') return { ok: false, reason: 'missing-pill' }
+  const inletId = pill.props.inputs[0]?.id
+  if (!inletId) return { ok: false, reason: 'unwired-inlet' }
+  const inletBinding = editor
+    .getBindingsToShape<ConnectionBinding>(pill.id, CONNECTION_BINDING_TYPE)
+    .find((binding) => binding.props.portId === inletId)
+  if (!inletBinding) return { ok: false, reason: 'unwired-inlet' }
+  if (!canAdoptConnectedPillType(editor, pill.id)) return { ok: false, reason: 'untyped-cable' }
+
+  editor.markHistoryStoppingPoint('adopt pill type from cable')
+  const changed = adoptCableTypeIntoPills(editor, inletBinding.fromId, {
+    overwrite: true,
+    onlyShapeId: pill.id,
+  })
+  const type = editor.getShape<BlockShape>(pill.id)?.props.outputs[0]?.type ?? ''
+  return changed
+    ? { ok: true, shapeId: pill.id, type }
+    : { ok: false, reason: 'unchanged' }
 }
 
 /**
@@ -358,7 +417,10 @@ export function appendBlockPortProps(
   const id = nextPortId(props[side], side)
   const port = withBlockPortSection({
     id,
-    name: initial.name ?? id,
+    // The record id is stable plumbing, not an authored label. Leaving the
+    // editable name empty lets the inspector and on-canvas field state its
+    // role instead of presenting `in_1` as content the user should keep.
+    name: initial.name ?? '',
     type: initial.type ?? '',
     visible: initial.visible ?? true,
   }, {
@@ -405,7 +467,7 @@ export function insertBlockPortProps(
     ? portSection(reference)
     : { row: FIRST_BODY_ROW, branch: 0 }
   const id = nextPortId(lane, side)
-  const port = withBlockPortSection({ id, name: id, type: '', visible: true }, section)
+  const port = withBlockPortSection({ id, name: '', type: '', visible: true }, section)
   const ports = [...lane]
   ports.splice(at, 0, port)
   const next = normalizeBlockPortRows({ ...props, [side]: ports })

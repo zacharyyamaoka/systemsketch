@@ -62,6 +62,19 @@ npm run dev
   `CODE_PATH=/usr/bin/cursor npm --prefix vscode-systemsketch run test:corpus` and
   `CODE_PATH=/usr/bin/code npm --prefix vscode-systemsketch run test:corpus`.
 
+## Chrome text fields
+
+- Default ordinary, single-line product chrome to `src/chrome/SystemSketchUiInput.tsx`, the
+  thin domain adapter around stock `TldrawUiInput`. It supplies tldraw's focus, select-on-entry,
+  IME, Enter, Escape, and blur mechanics without duplicating them in every shell surface.
+- Choose the field contract before wiring it: identity edits select all and commit/cancel through
+  their domain transaction; searches reset their query; action dialogs retain action-specific
+  Enter behavior. Do not use the adapter for canvas shape editors, live document-backed inspector
+  fields, command execution, or multiline prose—those own different transactions and undo/key
+  semantics.
+- Keep the domain seam outside the input. In particular, a document filename still delegates to
+  the workspace rename transaction so its digest fence and immutable file type remain authoritative.
+
 ## Proof and reports
 
 - Run `npm run check` before handoff. For UI work, also drive a real CDP journey from
@@ -86,6 +99,21 @@ binding, state, or gesture, update its narrow guidance/example before generating
 Use the real-editor/autosave helper instead of hand-editing tldraw schema JSON, inspect the
 generated PNG, and drive the fixture once in the real app. It supplements tests and never
 targets `~/SystemSketch`.
+
+## Persistent human review URLs
+
+- A track's `serve.sh` is an agent-owned development process. Never describe its URL as a
+  later-review link: it intentionally exits with the agent shell.
+- When a handoff includes a board or report Zach should be able to open later, first commit the
+  exact review artifacts, then run `python3 scripts/review_runtime.py up <review-name> --ref HEAD
+  --board <relative-board> --report <relative-report>`. It creates a detached, commit-pinned
+  review worktree and prints a URL only after its public health check passes.
+- Retained reviews stay live until an explicit `python3 scripts/review_runtime.py down
+  <review-name>` or `python3 scripts/review_runtime.py down --all`. Do not use a chat/session-end
+  hook as a proxy for archiving: it also fires after a short inactivity window, which defeats
+  delayed human review.
+- `remove <review-name>` is the explicit destructive retirement that also deletes the retained
+  worktree. The normal worktree sweeper recognizes the review lease and leaves it alone.
 
 ## Concurrent edits
 

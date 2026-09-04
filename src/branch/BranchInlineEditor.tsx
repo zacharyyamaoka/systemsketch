@@ -3,6 +3,7 @@ import { useEditor, useValue } from 'tldraw'
 
 import { isBranchShape, type BranchShape, type BranchShapeProps } from './branchModel'
 import { branchInlineEditorPlacement, getBranchInlineField, type BranchInlineField } from './branchInlineEditing'
+import { EMPTY_FIELD_GUIDANCE } from '../fields/emptyFieldGuidance'
 
 function valueFor(props: BranchShapeProps, field: BranchInlineField): string {
 	switch (field.kind) {
@@ -99,7 +100,11 @@ export function BranchInlineEditor({ shape }: { shape: BranchShape }) {
 			value={valueFor(shape.props, field)}
 			data-testid={branchInlineTestId(field)}
 			aria-label={field.kind === 'title' ? 'Edit branch title' : field.kind === 'armTitle' ? 'Edit arm title' : 'Edit control port name'}
-			placeholder={field.kind === 'title' ? 'Branch' : field.kind === 'armTitle' ? 'case' : 'name'}
+			placeholder={field.kind === 'title'
+				? EMPTY_FIELD_GUIDANCE.branch.title
+				: field.kind === 'armTitle'
+					? EMPTY_FIELD_GUIDANCE.branch.armTitle
+					: EMPTY_FIELD_GUIDANCE.branch.controlName}
 			onPointerDown={(event) => event.stopPropagation()}
 			onClick={(event) => event.stopPropagation()}
 			onDoubleClick={(event) => event.stopPropagation()}

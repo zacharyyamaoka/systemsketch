@@ -125,27 +125,27 @@
     {
       "id": "step-loop",
       "kind": "step",
-      "text": "1 · Select the For Loop, right-click its header, then choose Detach to primitives. Undo to repeat.",
+      "text": "1 · Select the For Loop, right-click its header, then choose Detach to primitives. It becomes a stock Group with whole header-port rings, not a clipped Frame. Undo to repeat.",
       "y": 20,
       "x": 600,
       "w": 420,
-      "h": 130,
+      "h": 160,
       "target": { "shapeId": "loop", "anchor": "top" }
     },
     {
       "id": "step-branch",
       "kind": "step",
-      "text": "2 · Right-click this Branch and choose Detach to primitives. Its child remains inside the stock container.",
-      "x": 70,
-      "y": 650,
+      "text": "2 · Right-click this Branch and choose Detach to primitives. Card and port chrome become one stock Group; the live child stays visually in place. Detach it too for an all-stock region.",
+      "x": 60,
+      "y": 620,
       "w": 420,
-      "h": 130,
+      "h": 180,
       "target": { "shapeId": "branch", "anchor": "left", "dy": 80 }
     },
     {
       "id": "step-block",
       "kind": "step",
-      "text": "3 · Right-click this Block and choose Detach to primitives. Its parts become ordinary editable shapes.",
+      "text": "3 · Right-click this Block and choose Detach to primitives. Its parts become ordinary editable stock shapes.",
       "x": 1080,
       "y": 410,
       "w": 390,
@@ -155,11 +155,11 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · Loop, Branch, and Block lower cleanly. The Loop wire becomes a stock arrow; containers offer Delete container, leave children.",
+      "text": "PASS WHEN · Loop, Branch, and Block lower cleanly. A simple loop wire becomes a stock Arrow; an authored multi-elbow becomes a stock Line with every corner. Containers say Delete container, leave children.",
       "x": 80,
       "y": 20,
       "w": 390,
-      "h": 190
+      "h": 230
     }
   ]
 }

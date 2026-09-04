@@ -51,6 +51,28 @@ describe('Block inspector content', () => {
     }
   })
 
+  it('keeps rare variadic-slot authoring in an inspector disclosure', () => {
+    const html = renderToStaticMarkup(
+      <BlockInspectorContent
+        props={{
+          ...getDefaultBlockProps(),
+          inputs: [{
+            id: 'overlay-boxes', name: 'overlay_box', type: 'Layer', visible: true,
+            variadic: { groupId: 'positional:overlays', label: '*overlays', kind: 'positional', bundled: false },
+          }],
+        }}
+        status="selected"
+        actions={noopActions}
+      />,
+    )
+    expect(html).toContain('data-testid="inspector-variadic-overlay-boxes"')
+    expect(html).toContain('Variadic · *overlays')
+    expect(html).toContain('aria-label="Variadic role for overlay_box"')
+    expect(html).toContain('<option value="positional" selected="">*args</option>')
+    expect(html).toContain('aria-label="Variadic group label for overlay_box"')
+    expect(html).toContain('title="A bundled spread is one unknown-cardinality *iterable or **mapping expression"')
+  })
+
   it('keeps an unplaced tool state honest and read-only without adding a New block header', () => {
     const html = renderToStaticMarkup(
       <BlockInspectorContent props={getDefaultBlockProps()} status="new" />,
@@ -58,6 +80,48 @@ describe('Block inspector content', () => {
     expect(html).toContain('Place a Block to edit these defaults.')
     expect(html).toContain('disabled=""')
     expect(html).not.toContain('New block')
+  })
+
+  it('names blank inspector fields by role instead of supplying legacy sample content', () => {
+    const block = renderToStaticMarkup(
+      <BlockInspectorContent
+        props={{
+          ...getDefaultBlockProps(),
+          inputs: [{ id: 'in_1', name: '', type: '', visible: true }],
+        }}
+        status="selected"
+        actions={noopActions}
+      />,
+    )
+    const pill = renderToStaticMarkup(
+      <BlockInspectorContent
+        props={createValueBlockProps(getDefaultBlockProps(), '')}
+        status="selected"
+        actions={noopActions}
+        pill={{ fedBy: null, fedType: null, feeds: [] }}
+      />,
+    )
+    const notes = renderToStaticMarkup(
+      <BlockInspectorContent
+        props={getDefaultBlockProps()}
+        status="selected"
+        actions={noopActions}
+        initialTab="notes"
+      />,
+    )
+
+    for (const role of ['Display description', 'Title', 'Type', 'Name', 'Default']) {
+      expect(block).toContain(`placeholder="${role}"`)
+    }
+    expect(notes).toContain('placeholder="Notes"')
+    for (const role of ['Name', 'Value', 'Type']) {
+      expect(pill).toContain(`placeholder="${role}"`)
+    }
+    for (const legacyExample of ['build_report', 'call', 'gain', '2.0', 'float']) {
+      expect(block).not.toContain(`placeholder="${legacyExample}"`)
+      expect(pill).not.toContain(`placeholder="${legacyExample}"`)
+      expect(notes).not.toContain(`placeholder="${legacyExample}"`)
+    }
   })
 
   it('renders the donor Notes editing surface from Block data', () => {
@@ -161,14 +225,14 @@ describe('the Pill section', () => {
     expect(html).toContain('aria-label="Variable name"')
     expect(html).toContain('aria-label="Literal value"')
     expect(html).toContain('aria-label="Variable type"')
-    expect(html).toContain('Fed by estimate() · pose')
+    expect(html).toContain('Connected from estimate() · pose')
     expect(html).toContain('Feeds encode() · pose')
     for (const section of ['Block', 'Tags', 'View', 'Inputs', 'Outputs', 'Ports']) {
       expect(html).not.toContain(`data-inspector-section="${section}"`)
     }
   })
 
-  it('reads the literal as the value and disables it only while a cable feeds the inlet', () => {
+  it('keeps the literal editable when a cable feeds the inlet and exposes explicit adoption', () => {
     const pill = createValueBlockProps(getDefaultBlockProps(), '2.0', 'gain')
     const unfed = renderToStaticMarkup(
       <BlockInspectorContent props={pill} status="selected" actions={noopActions} pill={{ fedBy: null, fedType: null, feeds: [] }} />,
@@ -179,7 +243,8 @@ describe('the Pill section', () => {
     const fed = renderToStaticMarkup(
       <BlockInspectorContent props={pill} status="selected" actions={noopActions} pill={{ fedBy: 'decode() · frame', fedType: 'Frame', feeds: [] }} />,
     )
-    expect(fed).toContain('disabled="" aria-label="Literal value"')
-    expect(fed).toContain('Fed by decode() · frame')
+    expect(fed).not.toContain('disabled="" aria-label="Literal value"')
+    expect(fed).toContain('Connected from decode() · frame')
+    expect(fed).toContain('Adopt cable type')
   })
 })

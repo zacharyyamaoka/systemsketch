@@ -164,13 +164,13 @@ async function main() {
     results.push(await scoreCase(page, {
       name: 'branch', id: 'shape:fidelity-branch', menuId: 'block-detach-to-primitives', label: 'Detach Branch',
       detached: `!window.__systemsketch.editor.getShape('shape:fidelity-branch')
-        && window.__systemsketch.editor.getCurrentPageShapes().some((shape) => shape.type === 'frame'
+        && window.__systemsketch.editor.getCurrentPageShapes().some((shape) => shape.type === 'group'
           && shape.meta?.systemSketch?.kind === 'branch')`,
     }))
     results.push(await scoreCase(page, {
       name: 'loop', id: 'shape:fidelity-loop', menuId: 'block-detach-to-primitives', label: 'Detach Loop',
       detached: `!window.__systemsketch.editor.getShape('shape:fidelity-loop')
-        && window.__systemsketch.editor.getCurrentPageShapes().some((shape) => shape.type === 'frame'
+        && window.__systemsketch.editor.getCurrentPageShapes().some((shape) => shape.type === 'group'
           && shape.meta?.systemSketch?.kind === 'loop')`,
     }))
     results.push(await scoreCase(page, {
@@ -186,14 +186,14 @@ async function main() {
       editor.getShape('shape:fidelity-edge')?.type ?? null,
     ])`))
     const replacements = JSON.parse(await editorEval(page, `return JSON.stringify([
-      editor.getCurrentPageShapes().find((shape) => shape.type === 'frame' && shape.meta?.systemSketch?.kind === 'branch')?.type ?? null,
-      editor.getCurrentPageShapes().find((shape) => shape.type === 'frame' && shape.meta?.systemSketch?.kind === 'loop')?.type ?? null,
+      editor.getCurrentPageShapes().find((shape) => shape.type === 'group' && shape.meta?.systemSketch?.kind === 'branch')?.type ?? null,
+      editor.getCurrentPageShapes().find((shape) => shape.type === 'group' && shape.meta?.systemSketch?.kind === 'loop')?.type ?? null,
     ])`))
     const shapes = JSON.parse(await editorEval(page, `return JSON.stringify(editor.getCurrentPageShapes().map((shape) => shape.type))`))
     const checks = {
       allFourContextMenuWorkflowsRan: results.length === 4,
       allSubjectsLowered: JSON.stringify(subjects) === JSON.stringify([null, null, null, null])
-        && JSON.stringify(replacements) === JSON.stringify(['frame', 'frame']),
+        && JSON.stringify(replacements) === JSON.stringify(['group', 'group']),
       everySameCameraScoreIsMeasured: results.every((result) => Number.isFinite(result.score.score)),
       noConsoleErrors: localConsoleErrors(page).length === 0,
     }

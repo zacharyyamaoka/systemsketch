@@ -266,6 +266,64 @@
   text-align: right;
 }
 
+/*
+ * V5's only new canvas language: a run of ordinary jacks receives one quiet
+ * DEF spelling. The bracket never owns a hit target and never changes row
+ * pitch, so the old port grammar, selection, and cable behavior stay stock.
+ */
+.systemsketch-block-canvas .BlockNode-variadicRun {
+  --variadic-ink: var(--ss-success);
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  width: calc(100% - 18px);
+  pointer-events: none;
+}
+
+.systemsketch-block-canvas .BlockNode-variadicRun--keyword {
+  --variadic-ink: var(--ss-warning);
+}
+
+.systemsketch-block-canvas .BlockNode-variadicBracket {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 13px;
+  width: 6px;
+  box-sizing: border-box;
+  border-top: 1px solid color-mix(in srgb, var(--variadic-ink) 66%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--variadic-ink) 66%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--variadic-ink) 66%, transparent);
+}
+
+.systemsketch-block-canvas .BlockNode-variadicLabel {
+  position: absolute;
+  top: 50%;
+  left: 27px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  max-width: calc(100% - 31px);
+  overflow: hidden;
+  color: var(--variadic-ink);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transform: translateY(-50%);
+}
+
+.systemsketch-block-canvas .BlockNode-variadicType {
+  overflow: hidden;
+  color: color-mix(in srgb, var(--variadic-ink) 62%, var(--ss-text-muted));
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+}
+
 .systemsketch-block-canvas .BlockNode-portName {
   overflow: hidden;
   color: var(--ss-text);
@@ -361,6 +419,27 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
 
 .systemsketch-block-canvas .Port.Port_connected {
   background: var(--port-color, var(--ss-text-muted));
+}
+
+/* A collar says the endpoint belongs to a run without turning it into a new
+ * primitive. Dotted is reserved for one unknown-cardinality spread source. */
+.systemsketch-block-canvas .Port_variadic:not(.Port_mutates)::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border: 1px solid var(--ss-success);
+  border-radius: 50%;
+  opacity: .5;
+  pointer-events: none;
+}
+
+.systemsketch-block-canvas .Port_variadic--keyword:not(.Port_mutates)::after {
+  border-color: var(--ss-warning);
+}
+
+.systemsketch-block-canvas .Port_variadic--bundled:not(.Port_mutates)::after {
+  border-style: dotted;
+  opacity: .78;
 }
 
 [data-state='select.idle'] .systemsketch-block-canvas .Port,
@@ -608,12 +687,40 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   white-space: nowrap;
 }
 
+/* WHY: Canvas entry is a one-line, code-like gesture. The live shape still
+ * normalizes and grows with every keystroke, but its painted declaration waits
+ * until commit so one edit is never shown twice—once in the input and once
+ * behind it. */
+.systemsketch-block-canvas .BlockNode-value[data-inline-editing='true'] > * {
+  visibility: hidden;
+}
+
 .systemsketch-block-canvas .BlockNode-valueName,
 .systemsketch-block-canvas .BlockNode-valueText {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: inherit;
+}
+
+/* A named pill reads like its Python declaration: `pose: Pose = 2`. The
+ * annotation is quieter than the variable but remains independently editable. */
+.systemsketch-block-canvas .BlockNode-valueDeclaration {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.systemsketch-block-canvas .BlockNode-valueColon {
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-block-canvas .BlockNode-valueType {
+  min-width: 0;
+  margin-left: 5px;
+  overflow: hidden;
+  color: var(--ss-text-muted);
+  text-overflow: ellipsis;
 }
 
 .systemsketch-block-canvas .BlockNode-valueEquals {
@@ -630,13 +737,6 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
 .systemsketch-block-canvas .BlockNode-inlineEditor--value {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-weight: 500;
-}
-
-/* A pill fed by a cable keeps its literal visible, but mutes it: the inlet
- * cable wins at runtime while the stored fallback remains truthful on canvas. */
-.systemsketch-block-canvas .BlockNode-valueText--fed {
-  color: var(--ss-text-faint);
-  opacity: 0.78;
 }
 
 /* Many-to-one: a port with two or more producers wears a count beside its dot. */

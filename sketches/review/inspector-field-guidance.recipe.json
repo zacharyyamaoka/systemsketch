@@ -1,0 +1,79 @@
+{
+  "feature": "Inspector empty-field guidance",
+  "viewport": { "width": 1600, "height": 900 },
+  "pages": [
+    { "id": "review", "name": "Inspector field guidance review" }
+  ],
+  "shapes": [
+    {
+      "id": "blank-block",
+      "type": "block",
+      "x": 560,
+      "y": 310,
+      "props": {
+        "title": "",
+        "description": "",
+        "blockType": "",
+        "view": "port",
+        "w": 340,
+        "h": 198,
+        "inputs": [
+          { "id": "in_1", "name": "", "type": "", "visible": true }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "blank-pill",
+      "type": "block",
+      "x": 950,
+      "y": 385,
+      "props": {
+        "title": "",
+        "view": "value"
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-block",
+      "kind": "step",
+      "text": "1 · Select this blank Block. Details names its empty Title, Type, and Display description fields.",
+      "x": 430,
+      "y": 80,
+      "w": 450,
+      "h": 130,
+      "target": { "shapeId": "blank-block", "anchor": "top", "dx": -70 }
+    },
+    {
+      "id": "step-port",
+      "kind": "step",
+      "text": "2 · Use + by Inputs. The new row says Name, Type, and Default — never an internal id.",
+      "x": 330,
+      "y": 650,
+      "w": 470,
+      "h": 130,
+      "target": { "shapeId": "blank-block", "anchor": "bottom", "dx": -60 }
+    },
+    {
+      "id": "step-pill",
+      "kind": "step",
+      "text": "3 · Select the blank Pill. Its empty fields say Name, Value, and Type, with no made-up literal.",
+      "x": 1210,
+      "y": 270,
+      "w": 380,
+      "h": 140,
+      "target": { "shapeId": "blank-pill", "anchor": "right" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Empty authored fields identify their role while remaining empty. No example data or generated ids appears as content.",
+      "x": 900,
+      "y": 650,
+      "w": 600,
+      "h": 130
+    }
+  ]
+}
