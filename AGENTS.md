@@ -13,6 +13,13 @@ read-only source of prior thinking; deliver code and artifacts here.
 - `tests/test_stock_boundary.py` asserts the seam list in `src/App.tsx`. If you are about to
   implement drag, resize, snapping, or z-order, stop and use the stock primitive.
 
+## Project preferences
+
+- Read [`docs/project-preferences.md`](docs/project-preferences.md) when making a product or
+  architecture choice. It records the preferred coding model: one canonical definition with
+  linked occurrences, dataflow-first representations, Python-shaped projections, and a clear
+  boundary between semantics and canvas presentation.
+
 ## Running the application
 
 ```bash
