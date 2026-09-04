@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-03",
+  "auditTarget": {
+    "branch": "track/chrome-input-visual-polish",
+    "commit": "31d60997600b03beff59b73ba52cb166a41944b1"
+  },
+  "narrowViewport": {
+    "width": 320,
+    "height": 720
+  },
+  "before": {
+    "pathbarClientWidth": 300,
+    "pathbarScrollWidth": 310,
+    "filterRight": 311,
+    "dialogRight": 312,
+    "inputBoxSizing": "content-box"
+  },
+  "after": {
+    "pathbarClientWidth": 300,
+    "pathbarScrollWidth": 300,
+    "filterRight": 303,
+    "pathbarRight": 311,
+    "rightInset": 8,
+    "inputBoxSizing": "border-box"
+  },
+  "journeys": {
+    "workspaceVisualPolish": "1/1 at 320\u00d7720",
+    "workspaceBrowser": "12/12",
+    "workspaceFollowup": "9/9",
+    "themeContrast": "light and dark chrome captures refreshed"
+  }
+}
