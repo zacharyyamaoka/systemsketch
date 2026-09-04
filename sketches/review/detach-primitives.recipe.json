@@ -6,14 +6,14 @@
     {
       "id": "feed",
       "type": "block",
-      "x": 170,
+      "x": 150,
       "y": 330,
       "props": {
         "title": "detections()",
         "description": "Real iterable source",
         "blockType": "Function",
         "view": "port",
-        "w": 300,
+        "w": 360,
         "h": 160,
         "inputs": [],
         "outputs": [{ "id": "out", "name": "detections", "type": "Detections", "visible": true }]
@@ -22,10 +22,10 @@
     {
       "id": "loop",
       "type": "loop",
-      "x": 600,
+      "x": 580,
       "y": 260,
       "props": {
-        "w": 440,
+        "w": 460,
         "h": 270,
         "title": "For every detection",
         "iterable": { "id": "iterable", "type": "Detections" },
@@ -37,14 +37,13 @@
       "id": "loop-body",
       "type": "block",
       "parentId": "loop",
-      "x": 110,
+        "x": 80,
       "y": 98,
       "props": {
-        "title": "classify()",
-        "description": "A real Loop child",
+        "title": "classify",
         "blockType": "Function",
         "view": "port",
-        "w": 220,
+        "w": 300,
         "h": 130,
         "inputs": [{ "id": "in", "name": "item", "type": "Detection", "visible": true }],
         "outputs": []
@@ -68,10 +67,10 @@
     {
       "id": "branch",
       "type": "branch",
-      "x": 600,
+      "x": 560,
       "y": 650,
       "props": {
-        "w": 400,
+        "w": 460,
         "h": 260,
         "title": "Choose route",
         "view": "expanded",
@@ -87,7 +86,7 @@
       "id": "branch-child",
       "type": "block",
       "parentId": "branch",
-      "x": 80,
+        "x": 80,
       "y": 92,
       "meta": { "branchArm": "yes" },
       "props": {
@@ -95,7 +94,7 @@
         "description": "A direct Branch child",
         "blockType": "Function",
         "view": "simple",
-        "w": 190,
+        "w": 300,
         "h": 120,
         "inputs": [],
         "outputs": []
@@ -104,14 +103,14 @@
     {
       "id": "block",
       "type": "block",
-      "x": 1120,
+      "x": 1100,
       "y": 650,
       "props": {
         "title": "normalize()",
         "description": "An ordinary authored Block",
         "blockType": "Function",
         "view": "port",
-        "w": 300,
+        "w": 360,
         "h": 180,
         "inputs": [{ "id": "in", "name": "image", "type": "Image", "visible": true }],
         "outputs": [{ "id": "out", "name": "result", "type": "Image", "visible": true }]
@@ -127,8 +126,8 @@
       "id": "step-loop",
       "kind": "step",
       "text": "1 · Select the For Loop, right-click its header, then choose Detach to primitives. Undo to repeat.",
-      "x": 600,
       "y": 20,
+      "x": 600,
       "w": 420,
       "h": 130,
       "target": { "shapeId": "loop", "anchor": "top" }

@@ -778,10 +778,17 @@ function detachPrimitives(editor: Editor, ids: readonly TLShapeId[]): DetachResu
 			}
 		}
 		const containerConnectionIds = new Set<TLShapeId>()
+		// Read the semantic wiring before its Connection records become arrows.
+		// The resulting stock Frame has no port identity, but a live wired port
+		// visibly has a filled 12px core and the chrome materialiser can retain
+		// that evidence while it still knows each port id.
+		const containerConnectedPortIds = new Map<TLShapeId, ReadonlySet<string>>()
 		for (const id of containerIds) {
 			const shape = editor.getShape(id)
 			if (!shape) continue
-			for (const entry of getBlockPortConnections(editor, shape.id)) {
+			const wiring = getBlockPortConnections(editor, shape.id)
+			containerConnectedPortIds.set(id, new Set(wiring.map((entry) => entry.ownPortId)))
+			for (const entry of wiring) {
 				containerConnectionIds.add(entry.connectionId)
 			}
 		}
@@ -795,9 +802,9 @@ function detachPrimitives(editor: Editor, ids: readonly TLShapeId[]): DetachResu
 		for (const id of containerIds) {
 			const shape = editor.getShape(id)
 			const frameId = isBranchShape(shape)
-				? detachBranchToPrimitives(editor, id)
+				? detachBranchToPrimitives(editor, id, containerConnectedPortIds.get(id))
 				: isLoopShape(shape)
-					? detachLoopToPrimitives(editor, id)
+					? detachLoopToPrimitives(editor, id, containerConnectedPortIds.get(id))
 					: null
 			if (frameId) {
 				loweredContainerIds.add(frameId)

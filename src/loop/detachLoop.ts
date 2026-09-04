@@ -18,6 +18,7 @@ import {
 } from 'tldraw'
 
 import { DETACH_FORMAT_VERSION } from '../blocks/detach/detachModel'
+import { portTldrawColor } from '../blocks/ui/portPalette'
 import { loopLayout, isLoopShape, type LoopShape } from './loopModel'
 
 function loopLine(parentId: LoopShape['id'], y: number, width: number): TLShapePartial {
@@ -41,10 +42,31 @@ function loopText(
 	parentId: LoopShape['id'],
 	text: string,
 	box: { x: number; y: number; w: number },
-	options: { align?: 'start' | 'middle'; color?: 'black' | 'grey'; font?: 'sans' | 'mono'; scale?: number } = {},
+	options: {
+		align?: 'start' | 'middle'
+		color?: 'black' | 'grey'
+		font?: 'sans' | 'mono'
+		scale?: number
+		bold?: boolean
+	} = {},
 ): TLShapePartial | null {
 	if (!text) return null
 	const scale = options.scale ?? 0.74
+	const richText = toRichText(text)
+	const weightedRichText = options.bold
+		? {
+			...richText,
+			content: richText.content.map((paragraph) => {
+				const node = paragraph as { content?: Array<{ type?: string; marks?: Array<{ type: string }>; [key: string]: unknown }>; [key: string]: unknown }
+				return {
+					...node,
+					content: node.content?.map((leaf) => leaf.type === 'text'
+						? { ...leaf, marks: [...(leaf.marks ?? []), { type: 'bold' }] }
+						: leaf),
+				}
+			}),
+		}
+		: richText
 	return {
 		id: createShapeId(),
 		type: 'text',
@@ -52,7 +74,7 @@ function loopText(
 		x: box.x,
 		y: box.y,
 		props: {
-			richText: toRichText(text),
+			richText: weightedRichText,
 			autoSize: false,
 			color: options.color ?? 'black',
 			font: options.font ?? 'sans',
@@ -78,7 +100,11 @@ function loopTitleForWidth(title: string, width: number): string {
  * two components have different hooks. Child records and stock arrow bindings
  * move to the replacement before the semantic record is deleted.
  */
-export function detachLoopToPrimitives(editor: Editor, loopId: LoopShape['id']): TLShapeId | null {
+export function detachLoopToPrimitives(
+	editor: Editor,
+	loopId: LoopShape['id'],
+	connectedPortIds: ReadonlySet<string> = new Set(),
+): TLShapeId | null {
 	const loop = editor.getShape(loopId)
 	if (!isLoopShape(loop)) return null
 	const layout = loopLayout(loop.props)
@@ -135,18 +161,27 @@ export function detachLoopToPrimitives(editor: Editor, loopId: LoopShape['id']):
 		layout.footer ? loopLine(frameId, layout.footer.y, layout.w) : null,
 		loopText(frameId, loopTitleForWidth(loop.props.title || 'For Loop', layout.title.w),
 			{ x: Math.max(1, layout.title.x - layout.title.w / 2), y: 14, w: Math.max(1, layout.title.w) },
-			{ align: 'middle', font: 'mono', scale: 0.86 }),
+			{ align: 'middle', font: 'mono', scale: 1 }),
 	]
+	const outerPortChrome: TLShapePartial[] = []
 
 	for (const placed of [layout.iterable, layout.item]) {
-		chrome.push({
+		const stockColor = portTldrawColor(placed.port.type)
+		outerPortChrome.push({
 			id: createShapeId(), type: 'geo', parentId: frameId,
-			x: placed.x - 5, y: placed.y - 5,
-			props: { geo: 'ellipse', w: 10, h: 10, color: 'blue', fill: 'semi', dash: 'solid', size: 's' },
+			x: placed.x - 9, y: placed.y - 9,
+			props: { geo: 'ellipse', w: 18, h: 18, color: stockColor, fill: 'none', dash: 'solid', size: 's' },
 		})
+		if (connectedPortIds.has(placed.port.id)) {
+			outerPortChrome.push({
+				id: createShapeId(), type: 'geo', parentId: frameId,
+				x: placed.x - 6, y: placed.y - 6,
+				props: { geo: 'ellipse', w: 12, h: 12, color: stockColor, fill: 'solid', dash: 'solid', size: 's' },
+			})
+		}
 		chrome.push(loopText(frameId, placed.port.type,
 			{ x: placed.label.x, y: placed.label.y - 7, w: Math.max(1, layout.labelMax) },
-			{ color: 'grey', scale: 0.66 }))
+			{ color: 'grey', scale: 12.5 / 18 }))
 	}
 
 	if (layout.turn) {
@@ -158,9 +193,20 @@ export function detachLoopToPrimitives(editor: Editor, loopId: LoopShape['id']):
 		})
 		chrome.push(loopText(frameId, loop.props.turn,
 			{ x: layout.turn.x + 6, y: layout.turn.y + 5, w: Math.max(1, layout.turn.w - 12) },
-			{ align: 'middle', font: 'mono', scale: 0.62 }))
+			{ align: 'middle', font: 'mono', scale: 11 / 18, bold: true }))
 	}
 
 	editor.createShapes(chrome.filter((shape): shape is TLShapePartial => shape !== null))
+	// A Frame clips its own children at the wall. Only the two header-edge port
+	// primitives need to escape that clip; leaving the rest as Frame children
+	// keeps ordinary tldraw text layout and the container's move semantics.
+	const exteriorPortShapes = outerPortChrome.map((shape) => ({
+		...shape,
+		parentId: loop.parentId,
+		x: loop.x + (shape.x ?? 0),
+		y: loop.y + (shape.y ?? 0),
+		rotation: loop.rotation,
+	}))
+	editor.createShapes(exteriorPortShapes)
 	return frameId
 }

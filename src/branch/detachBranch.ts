@@ -13,9 +13,11 @@ import {
 	type TLShape,
 	type TLShapeId,
 	type TLShapePartial,
+	type TLDefaultColorStyle,
 } from 'tldraw'
 
 import { DETACH_FORMAT_VERSION } from '../blocks/detach/detachModel'
+import { portTldrawColor } from '../blocks/ui/portPalette'
 import { branchLayout, isBranchShape, type BranchShape } from './branchModel'
 import { unwrapBranchArmFrames } from './branchArmFrames'
 
@@ -40,18 +42,41 @@ function branchText(
 	parentId: BranchShape['id'],
 	text: string,
 	box: { x: number; y: number; w: number },
-	options: { align?: 'start' | 'middle'; color?: 'black' | 'grey'; font?: 'sans' | 'mono'; scale?: number } = {},
+	options: {
+		align?: 'start' | 'middle'
+		color?: TLDefaultColorStyle
+		font?: 'sans' | 'mono'
+		scale?: number
+		bold?: boolean
+		opacity?: number
+	} = {},
 ): TLShapePartial | null {
 	if (!text) return null
 	const scale = options.scale ?? 0.78
+	const richText = toRichText(text)
+	const weightedRichText = options.bold
+		? {
+			...richText,
+			content: richText.content.map((paragraph) => {
+				const node = paragraph as { content?: Array<{ type?: string; marks?: Array<{ type: string }>; [key: string]: unknown }>; [key: string]: unknown }
+				return {
+					...node,
+					content: node.content?.map((leaf) => leaf.type === 'text'
+						? { ...leaf, marks: [...(leaf.marks ?? []), { type: 'bold' }] }
+						: leaf),
+				}
+			}),
+		}
+		: richText
 	return {
 		id: createShapeId(),
 		type: 'text',
 		parentId,
 		x: box.x,
 		y: box.y,
+		opacity: options.opacity,
 		props: {
-			richText: toRichText(text),
+			richText: weightedRichText,
 			autoSize: false,
 			color: options.color ?? 'black',
 			font: options.font ?? 'sans',
@@ -70,7 +95,11 @@ function branchText(
  * FrameShapeUtil and visibly paints the engine's Error fallback. Children and
  * arrow bindings move over before the old record is removed.
  */
-export function detachBranchToPrimitives(editor: Editor, branchId: BranchShape['id']): TLShapeId | null {
+export function detachBranchToPrimitives(
+	editor: Editor,
+	branchId: BranchShape['id'],
+	connectedPortIds: ReadonlySet<string> = new Set(),
+): TLShapeId | null {
 	const branch = editor.getShape(branchId)
 	if (!isBranchShape(branch)) return null
 	const layout = branchLayout(branch.props)
@@ -131,22 +160,65 @@ export function detachBranchToPrimitives(editor: Editor, branchId: BranchShape['
 	const chrome: Array<TLShapePartial | null> = [
 		branchLine(frameId, layout.band.h, layout.w),
 		branchText(frameId, branch.props.title || 'Branch',
-			{ x: 12, y: 7, w: Math.max(1, layout.w - 24) }, { align: 'middle', font: 'mono', scale: 0.86 }),
+			layout.title, { align: 'middle', font: 'mono', scale: 1 }),
 	]
+	const outerPortChrome: TLShapePartial[] = []
 	for (const control of layout.controls) {
-		chrome.push({
+		const stockColor = portTldrawColor(control.port.type)
+		outerPortChrome.push({
 			id: createShapeId(), type: 'geo', parentId: frameId,
-			x: Math.max(1, control.x + 1), y: control.y - 5,
-			props: { geo: 'ellipse', w: 10, h: 10, color: 'yellow', fill: 'semi', dash: 'solid', size: 's' },
+			x: control.x - 9, y: control.y - 9,
+			props: { geo: 'ellipse', w: 18, h: 18, color: stockColor, fill: 'none', dash: 'solid', size: 's' },
 		})
-		chrome.push(branchText(frameId, [control.port.name, control.port.type].filter(Boolean).join(': '),
-			{ x: 15, y: control.y - 9, w: Math.min(140, Math.max(1, layout.w * 0.3)) }, { color: 'grey', scale: 0.66 }))
+		if (connectedPortIds.has(control.port.id)) {
+			outerPortChrome.push({
+				id: createShapeId(), type: 'geo', parentId: frameId,
+				x: control.x - 6, y: control.y - 6,
+				props: { geo: 'ellipse', w: 12, h: 12, color: stockColor, fill: 'solid', dash: 'solid', size: 's' },
+			})
+		}
+		chrome.push(branchText(frameId, control.port.name,
+			control.label, { color: 'grey', scale: 13 / 18 }))
 	}
 	for (const row of layout.arms) {
 		if (row.dividerY !== null) chrome.push(branchLine(frameId, row.dividerY, layout.w, 'm'))
-		chrome.push(branchText(frameId, `${row.arm.open ? '⌄' : '›'} ${row.arm.title || 'case'}`,
-			{ x: 10, y: row.rowTop + 5, w: Math.max(1, layout.w - 20) }, { scale: 0.74 }))
+		const active = branch.props.activeArmId === row.arm.id
+		const opacity = branch.props.activeArmId !== null && !active ? 0.18 : undefined
+		chrome.push(branchText(frameId, row.arm.open ? '⌄' : '›', row.chevron,
+			{ align: 'middle', color: 'grey', scale: 15 / 18, opacity }))
+		chrome.push(branchText(frameId, row.arm.title || 'case', row.title,
+			{ color: active ? 'blue' : 'black', scale: 16 / 18, bold: true, opacity }))
+		if (active) {
+			const centreX = row.target.x + row.target.w / 2
+			const centreY = row.target.y + row.target.h / 2
+			// The live glyph is a blue 11px disk with a 3.6px raised-surface
+			// centre. Two stock filled ellipses preserve that active signal.
+			chrome.push({
+				id: createShapeId(), type: 'geo', parentId: frameId,
+				x: centreX - 5.5, y: centreY - 5.5,
+				props: { geo: 'ellipse', w: 11, h: 11, color: 'blue', fill: 'solid', dash: 'solid', size: 's' },
+			})
+			chrome.push({
+				id: createShapeId(), type: 'geo', parentId: frameId,
+				x: centreX - 1.8, y: centreY - 1.8,
+				props: { geo: 'ellipse', w: 3.6, h: 3.6, color: 'white', fill: 'solid', dash: 'solid', size: 's' },
+			})
+			chrome.push(branchText(frameId, 'active', {
+				x: Math.max(10, row.target.x - 40), y: row.rowTop + 9, w: 36,
+			}, { color: 'blue', scale: 11 / 18, bold: true }))
+		}
 	}
 	editor.createShapes(chrome.filter((shape): shape is TLShapePartial => shape !== null))
+	// A Frame clips its direct children at the wall. The control rim is the one
+	// visual that intentionally crosses it, so it is an ordinary sibling stock
+	// geo while the rest of the chrome remains a transform-owning Frame child.
+	const exteriorPortShapes = outerPortChrome.map((shape) => ({
+		...shape,
+		parentId: branch.parentId,
+		x: branch.x + (shape.x ?? 0),
+		y: branch.y + (shape.y ?? 0),
+		rotation: branch.rotation,
+	}))
+	editor.createShapes(exteriorPortShapes)
 	return frameId
 }

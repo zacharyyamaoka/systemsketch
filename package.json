@@ -98,6 +98,7 @@
     "test:expanded-layout-scope": "node tests/expanded_block_layout_scope_smoke.mjs",
     "test:effect-ports": "node tests/effect_ports_smoke.mjs",
     "report:detach-composite-fidelity": "python3 docs/build_detach_composite_fidelity.py",
+    "report:stock-tldr-capabilities": "python3 docs/build_stock_tldr_capabilities.py",
     "report:shot": "node tests/render_report.mjs",
     "test:loop": "node tests/loop_region_smoke.mjs",
     "test:loop-contents-layout": "node tests/loop_contents_layout_smoke.mjs",

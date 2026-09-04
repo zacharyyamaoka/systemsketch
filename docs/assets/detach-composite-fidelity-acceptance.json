@@ -12,11 +12,11 @@
       "after": "detach-composite-block-after.png",
       "diff": "detach-composite-block-diff.png",
       "score": {
-        "score": 0.909803,
-        "wholeSimilarity": 0.958865,
-        "foregroundSimilarity": 0.942122,
-        "edgeSimilarity": 0.799452,
-        "foregroundPixels": 77803,
+        "score": 0.904581,
+        "wholeSimilarity": 0.956525,
+        "foregroundSimilarity": 0.939266,
+        "edgeSimilarity": 0.786718,
+        "foregroundPixels": 78461,
         "totalPixels": 109848
       }
     },
@@ -32,10 +32,10 @@
       "after": "detach-composite-branch-after.png",
       "diff": "detach-composite-branch-diff.png",
       "score": {
-        "score": 0.929875,
-        "wholeSimilarity": 0.973613,
-        "foregroundSimilarity": 0.972777,
-        "edgeSimilarity": 0.8005,
+        "score": 0.935596,
+        "wholeSimilarity": 0.975177,
+        "foregroundSimilarity": 0.97439,
+        "edgeSimilarity": 0.818583,
         "foregroundPixels": 124966,
         "totalPixels": 128928
       }
@@ -52,10 +52,10 @@
       "after": "detach-composite-loop-after.png",
       "diff": "detach-composite-loop-diff.png",
       "score": {
-        "score": 0.931541,
-        "wholeSimilarity": 0.975387,
-        "foregroundSimilarity": 0.975384,
-        "edgeSimilarity": 0.800007,
+        "score": 0.932341,
+        "wholeSimilarity": 0.97494,
+        "foregroundSimilarity": 0.974937,
+        "edgeSimilarity": 0.80455,
         "foregroundPixels": 128911,
         "totalPixels": 128928
       }
@@ -121,21 +121,26 @@
     "frame",
     "line",
     "text",
-    "geo",
     "text",
+    "text",
+    "text",
+    "geo",
+    "geo",
     "text",
     "line",
     "text",
+    "text",
+    "geo",
     "frame",
     "line",
     "line",
     "text",
-    "geo",
+    "text",
     "text",
     "geo",
     "text",
     "geo",
-    "text",
+    "geo",
     "arrow"
   ]
 }
