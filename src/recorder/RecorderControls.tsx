@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTopNoticePlacement } from '../chrome/topNoticePlacement'
+import { useThemePortalContainer } from '../theme/ThemePortal'
 import {
   copyLastRecording,
   EXPLICIT_RECORDING_LIMIT_MS,
@@ -205,8 +206,8 @@ export function RecorderIndicator({ label }: { label?: string }) {
   const elapsed = useElapsed(state.takeStartedAt)
   const indicatorRef = useRef<HTMLDivElement>(null)
   const placement = useTopNoticePlacement(indicatorRef, state.installed && state.mode === 'take')
-  if (!state.installed || state.mode !== 'take' || typeof document === 'undefined') return null
-  const portalTarget = document.querySelector<HTMLElement>('.systemsketch-theme-root') ?? document.body
+  const portalContainer = useThemePortalContainer()
+  if (!state.installed || state.mode !== 'take' || !portalContainer) return null
   return createPortal(
     <div
       ref={indicatorRef}
@@ -223,6 +224,6 @@ export function RecorderIndicator({ label }: { label?: string }) {
         {state.saving ? 'Saving…' : 'Stop and save'}
       </button>
     </div>,
-    portalTarget,
+    portalContainer,
   )
 }

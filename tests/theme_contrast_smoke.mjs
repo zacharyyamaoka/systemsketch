@@ -243,6 +243,22 @@ async function rootState(page) {
   })()`).then((text) => JSON.parse(text))
 }
 
+/** Proves the DOM relationship that makes inherited appearance tokens survive. */
+async function workspacePortalState(page) {
+  return evaluate(page, `(() => {
+    const root = document.querySelector('[data-testid="systemsketch-theme-root"]')
+    const host = document.querySelector('[data-testid="systemsketch-theme-portal-root"]')
+    const dialog = document.querySelector('[data-testid="workspace-dialog"]')
+    return JSON.stringify({
+      root: Boolean(root),
+      host: Boolean(host),
+      dialog: Boolean(dialog),
+      hostInThemeRoot: Boolean(root && host && root.contains(host)),
+      dialogInThemeHost: Boolean(host && dialog && host.contains(dialog)),
+    })
+  })()`).then((text) => JSON.parse(text))
+}
+
 /** `#1f1f1f` → `rgb(31, 31, 31)`, the way Chrome serialises a computed colour. */
 function expectedCanvas(hex) {
   const digits = hex.replace('#', '')
@@ -435,6 +451,7 @@ async function main() {
 
       await openRenameDialog(page)
       const rename = await measure(page, WORKSPACE_RENAME_PROBES)
+      const renamePortal = await workspacePortalState(page)
       const renameInputStyle = JSON.parse(await evaluate(page, `(() => {
         const input = document.querySelector('.systemsketch-workspace-name-field input')
         if (!input) return 'null'
@@ -446,6 +463,7 @@ async function main() {
 
       await openWorkspaceBrowser(page)
       const workspaceBrowser = await measure(page, WORKSPACE_BROWSER_PROBES)
+      const browserPortal = await workspacePortalState(page)
       if (theme.id === 'systemsketch:light') {
         entry.screenshots.push(await shot(page, 'theme-systemsketch-light-workspace-filter.png'))
       }
@@ -466,6 +484,13 @@ async function main() {
         pass(`${theme.label}: workspace text and caret share theme ink in the app typeface`)
       } else {
         fail(`${theme.label}: workspace text and caret share theme ink in the app typeface`, JSON.stringify(renameInputStyle))
+      }
+      for (const [kind, state] of [['Rename', renamePortal], ['Open workspace', browserPortal]]) {
+        if (state.root && state.host && state.dialog && state.hostInThemeRoot && state.dialogInThemeHost) {
+          pass(`${theme.label}: ${kind} remains inside the active theme portal host`)
+        } else {
+          fail(`${theme.label}: ${kind} remains inside the active theme portal host`, JSON.stringify(state))
+        }
       }
 
       for (const probe of [...probes, ...menu, ...dialog, ...rename, ...workspaceBrowser, ...commandPalette]) {
