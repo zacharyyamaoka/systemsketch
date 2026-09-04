@@ -10,16 +10,17 @@ R1, R2, and R3 are frozen records of the research and feedback sequence Zach
 reviewed. This addendum records a later correction; it does not revise those
 pages in place.
 
-After the incorporated report, Zach superseded the report-era Split / Merge
-vocabulary with **Bundle** / **Unbundle**, and added shallow **Copy** with quick
-access at the existing loose-terminal drop picker. The completed independent
+After the incorporated report, Zach renamed the report-era **Set attributes**
+partial-update operation to **Bundle** and the shipped **Split** projection to
+**Unbundle**. He also added shallow **Copy** with quick access at the existing
+loose-terminal drop picker. The completed independent
 track is `track/bundle-unbundle-copy-quick-insert`, pinned locally to
 `7e8673b1265521b6922dd77406ff7e88565d3596`
 (base [`363792db43f0bf31c74ba7968759776aa3807401`](https://github.com/zacharyyamaoka/systemsketch/commit/363792db43f0bf31c74ba7968759776aa3807401)).
 The product branch is deliberately unmerged and has not been published to `origin`; the
 identifiers above are review coordinates in Zach's local repository, not public links.
 
-Bundle is a retained named record with stable `.field` member-update rows;
+Bundle is a retained record with stable named `.field` member-update rows;
 Unbundle is a projection with accessors; Copy is shallow, not deep or runtime
 evaluation. All three are ordinary Blocks and cables. The picker applies only
 to an existing loose-terminal drop, not the unsettled proposal for a midpoint
