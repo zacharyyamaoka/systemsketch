@@ -294,6 +294,25 @@ async function run() {
       [state.iterable?.type, state.item?.type, painted, state.cables, state.orphans],
       ['Poses', 'Pose', ['Poses', 'Pose'], 2, 0])
 
+    // 10b — once the Loop is broad enough for the full operator name, it
+    // belongs at the Loop's actual midpoint instead of the compact title lane.
+    await retype(page, 'Loop title', 'For each pose')
+    await delay(420)
+    const centredTitle = JSON.parse(await evaluate(page, `(() => {
+      const face = document.querySelector('[data-shape-id="' + ${JSON.stringify(loopId)} + '"] .systemsketch-loop-canvas')
+      const title = face?.querySelector('.Loop-title')
+      if (!face || !title) return JSON.stringify(null)
+      const loop = face.getBoundingClientRect()
+      const label = title.getBoundingClientRect()
+      return JSON.stringify({
+        title: title.textContent.trim(),
+        offset: (label.x + label.width / 2) - (loop.x + loop.width / 2),
+      })
+    })()`))
+    check('L10b', 'an expanded Loop centres the complete operator title',
+      [centredTitle?.title, Math.abs(centredTitle?.offset ?? Infinity) < 1],
+      ['For each pose', true])
+
     // 12 — every cable you can SEE inside the region is a cable you can click.
     // tldraw stops hit-testing at a frame-like shape's hollow face and answers
     // nothing, so a cable left in the page beneath the Loop was unselectable

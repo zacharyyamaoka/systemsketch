@@ -143,6 +143,15 @@ function labelWidth(text: string): number {
 	return Math.max(24, text.length * 7.1)
 }
 
+/**
+ * Roughly what the 18px monospace operator title renders at. This is a
+ * threshold, rather than a second rendering path: when its whole string fits
+ * in the protected central lane, the title belongs at the Loop's true centre.
+ */
+function titleWidth(text: string): number {
+	return text.length * 10.8
+}
+
 export function loopLayout(props: LoopShapeProps): LoopLayout {
 	const w = Math.max(1, props.w)
 	const h = Math.max(1, props.h)
@@ -196,7 +205,16 @@ export function loopLayout(props: LoopShapeProps): LoopLayout {
 		? { x: w - 14 - turnW, y: iterableY - 11, w: turnW, h: 22 }
 		: null
 	const bandW = Math.max(0, bandEnd - bandStart)
-	const title = { x: bandStart + bandW / 2, y: iterableY, w: bandW }
+	// At the floor width, a long operator name needs the lane to the right of
+	// the type labels. Once a resize gives its *complete* text a lane around
+	// the Loop midpoint, return it to that midpoint. Measuring the complete
+	// string avoids a title that is technically centred only because it has been
+	// ellipsized, and keeping the same protected band means labels and the turn
+	// chip never lose their reservation.
+	const centredW = Math.max(0, 2 * Math.min(w / 2 - bandStart, bandEnd - w / 2))
+	const title = centredW >= titleWidth(props.title)
+		? { x: w / 2, y: iterableY, w: centredW }
+		: { x: bandStart + bandW / 2, y: iterableY, w: bandW }
 
 	return {
 		w,

@@ -1,0 +1,70 @@
+{
+  "feature": "Loop header centering",
+  "viewport": { "width": 1600, "height": 900 },
+  "pages": [{ "id": "review", "name": "Review" }],
+  "shapes": [
+    {
+      "id": "for-each",
+      "type": "loop",
+      "x": 540,
+      "y": 260,
+      "props": {
+        "w": 340,
+        "h": 320,
+        "title": "For each pose",
+        "iterable": { "id": "iterable", "type": "Poses" },
+        "item": { "id": "item", "type": "Pose" },
+        "turn": ""
+      }
+    },
+    {
+      "id": "merge",
+      "type": "block",
+      "parentId": "for-each",
+      "x": 60,
+      "y": 132,
+      "props": {
+        "title": "merge()",
+        "description": "A child stays in the open Loop body.",
+        "blockType": "Function",
+        "view": "port",
+        "w": 220,
+        "h": 154,
+        "inputs": [{ "id": "in_1", "name": "pose", "type": "Pose", "visible": true }],
+        "outputs": []
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-select",
+      "kind": "step",
+      "text": "1 · Click the Loop header to select it.",
+      "x": 510,
+      "y": 45,
+      "w": 400,
+      "h": 110,
+      "target": { "shapeId": "for-each", "anchor": "top", "dx": 0 }
+    },
+    {
+      "id": "step-resize",
+      "kind": "step",
+      "text": "2 · Drag the right resize handle right until the Loop is roomy.",
+      "x": 1140,
+      "y": 330,
+      "w": 400,
+      "h": 120,
+      "target": { "shapeId": "for-each", "anchor": "right", "dy": 0 }
+    },
+    {
+      "id": "pass-centred",
+      "kind": "pass",
+      "text": "PASS WHEN · “For each pose” moves to the exact Loop midpoint once it has room, while the Poses and Pose labels stay clear.",
+      "x": 1100,
+      "y": 610,
+      "w": 440,
+      "h": 130
+    }
+  ]
+}
