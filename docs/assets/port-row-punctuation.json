@@ -1,0 +1,11 @@
+{
+  "ranAt": "2026-09-04T06:10:50.050Z",
+  "checks": [
+    "a real input port is authored with a name, type and default through the docked inspector",
+    "code-style punctuation is on by default: 'count : int = 0', Name and Type both monospace",
+    "the plain row (today's implementation) is one Appearance toggle away and keeps the port data untouched",
+    "the plain-row choice, and the board content, both survive a reload",
+    "switching back to the code-style row survives a reload the same way",
+    "zero local console errors across the whole journey"
+  ]
+}

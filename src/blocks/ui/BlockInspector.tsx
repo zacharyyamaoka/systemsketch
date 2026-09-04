@@ -28,6 +28,7 @@ import {
   setBlockViewProps,
 } from '../blockModel'
 import { commitBlockDefinitionName, definitionBadge } from '../definitions/definitionLinking'
+import { useAppearancePreferences } from '../../settings/appearancePreferences'
 import { getBlockPortConnections, type BlockPortConnection } from '../connections/blockPorts'
 import { valueBlockInlet, valueBlockName, valueBlockOutlet } from '../valueBlock'
 import {
@@ -586,6 +587,7 @@ function PortSection({
 }) {
   const [managing, setManaging] = useState(false)
   const [drag, setDrag] = useState<InspectorPortDrag | null>(null)
+  const { punctuatedPortRow } = useAppearancePreferences()
   const dragRef = useRef<InspectorPortDrag | null>(null)
   const listRef = useRef<HTMLUListElement | null>(null)
   const title = side === 'inputs' ? 'Inputs' : 'Outputs'
@@ -760,10 +762,38 @@ function PortSection({
         </li>
       )
     }
+    const typeField = (
+      <LiveTextInput
+        className="block-inspector__port-type"
+        value={port.type}
+        disabled={!actions}
+        placeholder="type"
+        ariaLabel={`${side} ${port.id} type`}
+        beginEdit={() => actions?.beginEdit?.('retype block port')}
+        onWrite={(type) => actions?.updatePort(side, port.id, { type }, { continuous: true })}
+      />
+    )
+    const defaultField = side === 'inputs' ? (
+      <LiveTextInput
+        className="block-inspector__port-default"
+        value={port.defaultValue ?? ''}
+        disabled={!actions}
+        placeholder={punctuatedPortRow ? '' : '='}
+        ariaLabel={`Default value for ${port.name || port.id}`}
+        beginEdit={() => actions?.beginEdit?.('edit port default')}
+        onWrite={(defaultValue) =>
+          actions?.updatePort(side, port.id, { defaultValue }, { continuous: true })}
+      />
+    ) : null
+    // Punctuation borrows room from Type/Default's own grid cell instead of
+    // claiming new columns — a wider row was tried first and it starved Name
+    // down to an unreadable ~18px, because Name already had almost no slack
+    // in the panel's real ~236px content width. Riding inside the existing
+    // cell keeps every other field exactly as wide as it is today.
     return (
       <li
         key={port.id}
-        className={`block-inspector__port-row${held ? ' is-dragging' : ''}`}
+        className={`block-inspector__port-row${held ? ' is-dragging' : ''}${punctuatedPortRow ? ' block-inspector__port-row--punctuated' : ''}`}
         style={style}
         {...shared}
       >
@@ -777,26 +807,19 @@ function PortSection({
           beginEdit={() => actions?.beginEdit?.('rename block port')}
           onWrite={(name) => actions?.updatePort(side, port.id, { name }, { continuous: true })}
         />
-        <LiveTextInput
-          className="block-inspector__port-type"
-          value={port.type}
-          disabled={!actions}
-          placeholder="type"
-          ariaLabel={`${side} ${port.id} type`}
-          beginEdit={() => actions?.beginEdit?.('retype block port')}
-          onWrite={(type) => actions?.updatePort(side, port.id, { type }, { continuous: true })}
-        />
-        {side === 'inputs' ? (
-          <LiveTextInput
-            className="block-inspector__port-default"
-            value={port.defaultValue ?? ''}
-            disabled={!actions}
-            placeholder="="
-            ariaLabel={`Default value for ${port.name || port.id}`}
-            beginEdit={() => actions?.beginEdit?.('edit port default')}
-            onWrite={(defaultValue) =>
-              actions?.updatePort(side, port.id, { defaultValue }, { continuous: true })}
-          />
+        {punctuatedPortRow ? (
+          <span className="block-inspector__port-field">
+            <span className="block-inspector__port-punct" aria-hidden="true">:</span>
+            {typeField}
+          </span>
+        ) : typeField}
+        {defaultField ? (
+          punctuatedPortRow ? (
+            <span className="block-inspector__port-field">
+              <span className="block-inspector__port-punct" aria-hidden="true">=</span>
+              {defaultField}
+            </span>
+          ) : defaultField
         ) : null}
         {side === 'inputs' ? (
           <button

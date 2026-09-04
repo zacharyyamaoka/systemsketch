@@ -14,6 +14,7 @@
     "test:batch": "node tests/block_batch_editing_smoke.mjs",
     "test:ports": "node tests/block_port_in_window_smoke.mjs",
     "test:rows": "node tests/block_port_rows_smoke.mjs",
+    "test:port-punctuation": "node tests/port_row_punctuation_smoke.mjs",
     "test:release-ui": "node tests/release_channel_controls_smoke.mjs",
     "test:promotion-handoff": "node tests/promoted_workspace_restore_smoke.mjs",
     "test:selection-menu": "node tests/selection_menu_smoke.mjs",
