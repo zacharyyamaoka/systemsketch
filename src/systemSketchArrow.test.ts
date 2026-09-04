@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import type { JsonObject } from 'tldraw'
+import type { Editor, JsonObject, TLArrowShape } from 'tldraw'
 import {
 	SYSTEMSKETCH_ARROW_ROUTE_META_KEY,
+	SYSTEMSKETCH_ARROW_SLANTED_META_KEY,
+	getArrowInspectorRouting,
+	getSlantedArrowPoints,
+	isSlantedArrow,
 	readSystemSketchArrowRoute,
+	setArrowInspectorRouting,
 } from './systemSketchArrow'
 
 const validRoute = {
@@ -30,5 +35,71 @@ describe('SystemSketch arrow route metadata', () => {
 	])('falls back to the stock elbow for malformed or future metadata: %j', (stored) => {
 		const meta = { [SYSTEMSKETCH_ARROW_ROUTE_META_KEY]: stored } as unknown as JsonObject
 		expect(readSystemSketchArrowRoute(meta)).toBeNull()
+	})
+})
+
+function arrow(meta: JsonObject = {}): TLArrowShape {
+	return {
+		id: 'shape:arrow',
+		typeName: 'shape',
+		type: 'arrow',
+		parentId: 'page:page',
+		index: 'a1',
+		x: 0,
+		y: 0,
+		rotation: 0,
+		isLocked: false,
+		opacity: 1,
+		meta,
+		props: {
+			kind: 'arc',
+			bend: 0,
+			arrowheadStart: 'none',
+			arrowheadEnd: 'arrow',
+		},
+	} as unknown as TLArrowShape
+}
+
+describe('SystemSketch slanted arrows', () => {
+	it('keeps the established output lead, then takes one diagonal to its destination', () => {
+		const route = getSlantedArrowPoints({ x: 0, y: 100 }, { x: 200, y: 0 })
+		expect(route).toHaveLength(3)
+		expect(route[0]).toMatchObject({ x: 0, y: 100 })
+		expect(route[1]).toMatchObject({ x: 200 / 3, y: 100 })
+		expect(route[2]).toMatchObject({ x: 200, y: 0 })
+	})
+
+	it('points its lead toward a leftward destination and stays direct for collinear endpoints', () => {
+		const leftward = getSlantedArrowPoints({ x: 200, y: 100 }, { x: 0, y: 0 })
+		expect(leftward[1]).toMatchObject({ x: 100, y: 100 })
+		expect(getSlantedArrowPoints({ x: 0, y: 20 }, { x: 200, y: 20 })).toHaveLength(2)
+	})
+
+	it('reports and switches the inspector-only routing without creating a tool preset', () => {
+		const selected = [arrow()]
+		const updates: unknown[] = []
+		const editor = {
+			getSelectedShapes: () => selected,
+			markHistoryStoppingPoint: () => undefined,
+			updateShapes: (patches: unknown[]) => updates.push(...patches),
+		} as unknown as Editor
+
+		expect(getArrowInspectorRouting(editor)).toBe('straight')
+		setArrowInspectorRouting(editor, 'slanted')
+		expect(updates).toEqual([expect.objectContaining({
+			id: 'shape:arrow',
+			props: expect.objectContaining({ kind: 'arc', bend: 0, arrowheadEnd: 'arrow' }),
+			meta: expect.objectContaining({
+				[SYSTEMSKETCH_ARROW_SLANTED_META_KEY]: { version: 1 },
+			}),
+		})])
+		expect(isSlantedArrow(arrow((updates[0] as { meta: JsonObject }).meta))).toBe(true)
+	})
+
+	it('does not present a route choice for a selection that includes another shape family', () => {
+		const editor = {
+			getSelectedShapes: () => [arrow(), { ...arrow(), id: 'shape:geo', type: 'geo' }],
+		} as unknown as Editor
+		expect(getArrowInspectorRouting(editor)).toBeNull()
 	})
 })

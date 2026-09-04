@@ -1,0 +1,99 @@
+{
+  "feature": "Inspector-only Slanted arrow",
+  "viewport": { "width": 1440, "height": 800 },
+  "pages": [{ "id": "review", "name": "Slanted arrow review" }],
+  "shapes": [
+    {
+      "id": "condition",
+      "type": "geo",
+      "x": 500,
+      "y": 470,
+      "props": { "geo": "rectangle", "w": 180, "h": 70 },
+      "text": "condition?"
+    },
+    {
+      "id": "action",
+      "type": "geo",
+      "x": 1040,
+      "y": 220,
+      "props": { "geo": "rectangle", "w": 200, "h": 70 },
+      "text": "run action"
+    },
+    {
+      "id": "branch",
+      "type": "arrow",
+      "x": 680,
+      "y": 505,
+      "meta": { "systemSketchSlantedArrow": { "version": 1 } },
+      "props": {
+        "kind": "arc",
+        "bend": 0,
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 360, "y": -250 },
+        "color": "violet",
+        "dash": "solid",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "branch-start",
+      "type": "arrow",
+      "fromId": "branch",
+      "toId": "condition",
+      "props": {
+        "terminal": "start",
+        "normalizedAnchor": { "x": 1, "y": 0.5 },
+        "isExact": false,
+        "isPrecise": true,
+        "snap": "edge-point"
+      }
+    },
+    {
+      "id": "branch-end",
+      "type": "arrow",
+      "fromId": "branch",
+      "toId": "action",
+      "props": {
+        "terminal": "end",
+        "normalizedAnchor": { "x": 0, "y": 0.5 },
+        "isExact": false,
+        "isPrecise": true,
+        "snap": "edge-point"
+      }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Select the violet behavior branch leaving this condition. Inspector is the only place to find Slanted.",
+      "x": 20,
+      "y": 390,
+      "w": 380,
+      "h": 140,
+      "target": { "shapeId": "condition", "anchor": "left" }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Choose Straight, then Slanted. The first lead stays horizontal and the head follows the diagonal.",
+      "x": 990,
+      "y": 620,
+      "w": 420,
+      "h": 120,
+      "target": { "x": 800, "y": 505 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The branch leaves condition? horizontally, reaches run action diagonally, and Inspector reports Slanted.",
+      "x": 20,
+      "y": 630,
+      "w": 420,
+      "h": 140
+    }
+  ]
+}
