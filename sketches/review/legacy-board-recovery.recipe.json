@@ -1,0 +1,105 @@
+{
+  "feature": "Legacy board recovery",
+  "viewport": { "width": 1600, "height": 900 },
+  "shapes": [
+    {
+      "id": "architecture",
+      "type": "frame",
+      "x": 540,
+      "y": 290,
+      "props": { "w": 430, "h": 310, "name": "Architecture (former page)" }
+    },
+    {
+      "id": "decode",
+      "type": "block",
+      "parentId": "architecture",
+      "x": 42,
+      "y": 78,
+      "props": {
+        "title": "decode()",
+        "description": "Legacy Block state upgrades to normal",
+        "blockType": "Function",
+        "view": "port",
+        "w": 340,
+        "h": 198,
+        "inputs": [{ "id": "in_1", "name": "image", "type": "Image", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "latent", "type": "Latent", "visible": true }]
+      }
+    },
+    {
+      "id": "runtime",
+      "type": "frame",
+      "x": 1050,
+      "y": 290,
+      "props": { "w": 430, "h": 390, "name": "Runtime (former page)" }
+    },
+    {
+      "id": "decision",
+      "type": "branch",
+      "parentId": "runtime",
+      "x": 32,
+      "y": 62,
+      "props": {
+        "w": 360,
+        "h": 460,
+        "title": "validate()",
+        "view": "expanded",
+        "activeArmId": null,
+        "controls": [],
+        "arms": [
+          { "id": "arm_1", "title": "if valid", "open": true, "h": 150 },
+          { "id": "arm_2", "title": "else", "open": true, "h": 150 }
+        ]
+      }
+    },
+    {
+      "id": "inside-decision",
+      "type": "block",
+      "parentId": "decision",
+      "x": 24,
+      "y": 94,
+      "meta": { "branchArm": "arm_1" },
+      "props": {
+        "title": "continue()",
+        "blockType": "Action",
+        "view": "simple",
+        "w": 280,
+        "h": 130,
+        "inputs": [],
+        "outputs": []
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "reload",
+      "kind": "step",
+      "text": "1 · Reload this board in Preview (Ctrl/Cmd+R)",
+      "x": 80,
+      "y": 320,
+      "w": 360,
+      "h": 108,
+      "target": { "shapeId": "architecture", "anchor": "left" }
+    },
+    {
+      "id": "inspect-branch",
+      "kind": "step",
+      "text": "2 · Click validate() and confirm both Branch arms remain usable",
+      "x": 1020,
+      "y": 60,
+      "w": 430,
+      "h": 112,
+      "target": { "shapeId": "decision", "anchor": "top" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Reload preserves both named Frames, Blocks, and Branch arms—never a blank board.",
+      "x": 80,
+      "y": 610,
+      "w": 430,
+      "h": 120
+    }
+  ]
+}

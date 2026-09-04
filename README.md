@@ -2,6 +2,8 @@
 
 SystemSketch starts from one deliberately boring datum: the stock tldraw whiteboard. Its engine, drawing tools, and shortcuts stay stock while narrow supported seams add local files, board overview, zoom, Help, and the Stable/Preview workflow.
 
+The [Preview board-recovery gallery](docs/preview-board-recovery-2026-09-03.html) records the safe reopen path for an old, multi-page SystemSketch board: a required Block style property is migrated before validation, Branch arm repair waits until the loading transaction finishes, and the recovered Series A board opens with all 598 shapes intact instead of being replaced by an empty canvas.
+
 ## Current improvement review
 
 The [Preview-to-Stable workspace handoff gallery](docs/promoted-workspace-handoff-2026-09-03.html) shows the new build-keyed transfer that lets Stable reopen Preview’s saved active board with its recent files and reviewed app preferences. It is intentionally not a copied browser profile: the handoff is capped, allowlisted, build-matched, applied once, and never overrides an explicit `?board=` link. The companion [`promoted-workspace-handoff.systemsketch`](sketches/review/promoted-workspace-handoff.systemsketch) board is ready to review at `http://127.0.0.1:4540/`.
