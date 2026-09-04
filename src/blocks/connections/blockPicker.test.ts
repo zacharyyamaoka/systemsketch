@@ -42,6 +42,23 @@ describe('block picker presets', () => {
 		expect(blockPickerPresetsFor(false).map((preset) => preset.id)).not.toContain('source')
 		expect(blockPickerPresetsFor(true).map((preset) => preset.id)).not.toContain('sink')
 	})
+
+	it('ships the three approved semantic stock Blocks through the same picker seam', () => {
+		const setAttributes = BLOCK_PICKER_PRESETS.find((preset) => preset.id === 'set-attributes')!
+		const select = BLOCK_PICKER_PRESETS.find((preset) => preset.id === 'select')!
+		const clock = BLOCK_PICKER_PRESETS.find((preset) => preset.id === 'clock-trigger')!
+
+		expect(blockPresetProps(setAttributes, getDefaultBlockProps())).toMatchObject({
+			blockType: 'set-attributes', inputs: expect.arrayContaining([expect.objectContaining({ id: 'record' })]),
+		})
+		expect(blockPresetProps(select, getDefaultBlockProps())).toMatchObject({
+			blockType: 'select', inputs: expect.arrayContaining([expect.objectContaining({ id: 'condition', type: 'bool' })]),
+		})
+		expect(blockPresetProps(clock, getDefaultBlockProps())).toMatchObject({
+			blockType: 'clock-trigger', stockConfig: { runtimeAdapter: 'unavailable' },
+		})
+		expect(blockPickerPresetsFor(true).map((preset) => preset.id)).toContain('clock-trigger')
+	})
 })
 
 describe('the Value preset', () => {

@@ -1,0 +1,109 @@
+{
+  "feature": "Semantic stock Blocks",
+  "viewport": { "width": 1600, "height": 1000 },
+  "pages": [{ "id": "review", "name": "Review" }],
+  "shapes": [
+    {
+      "id": "set-attributes",
+      "type": "block",
+      "x": 570,
+      "y": 280,
+      "props": {
+        "title": "Set attributes",
+        "description": "Update named members; preserve every member not listed.",
+        "blockType": "set-attributes",
+        "icon": "Settings",
+        "view": "port",
+        "w": 340,
+        "h": 250,
+        "inputs": [
+          { "id": "record", "name": "record", "type": "Record", "visible": true, "row": 0 },
+          { "id": "member_1", "name": ".quota", "type": "int", "visible": true, "row": 1 },
+          { "id": "member_2", "name": ".enabled", "type": "bool", "visible": true, "row": 2 }
+        ],
+        "outputs": [{ "id": "record_out", "name": "record", "type": "Record", "visible": true, "row": 0 }]
+      }
+    },
+    {
+      "id": "select",
+      "type": "block",
+      "x": 570,
+      "y": 650,
+      "props": {
+        "title": "Select",
+        "description": "Choose one value; this is not a Branch region.",
+        "blockType": "select",
+        "icon": "GitBranch",
+        "view": "port",
+        "w": 340,
+        "h": 240,
+        "inputs": [
+          { "id": "condition", "name": "condition", "type": "bool", "visible": true, "row": 0 },
+          { "id": "true_value", "name": "true", "type": "str", "visible": true, "row": 1 },
+          { "id": "false_value", "name": "false", "type": "str", "visible": true, "row": 2 }
+        ],
+        "outputs": [{ "id": "result", "name": "result", "type": "str", "visible": true, "row": 1 }]
+      }
+    },
+    {
+      "id": "clock",
+      "type": "block",
+      "x": 1110,
+      "y": 470,
+      "props": {
+        "title": "Clock",
+        "description": "10 Hz authoring source · runtime adapter unavailable.",
+        "blockType": "clock-trigger",
+        "icon": "Timer",
+        "view": "port",
+        "w": 340,
+        "h": 198,
+        "inputs": [],
+        "outputs": [{ "id": "trigger", "name": "trigger", "type": "Trigger", "visible": true, "row": 0 }],
+        "stockConfig": { "triggerSource": "clock", "rateHz": 10, "runtimeAdapter": "unavailable" }
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Select Set attributes. In its inspector, use Add member update; rename the new .field without changing its cable identity.",
+      "x": 70,
+      "y": 260,
+      "w": 420,
+      "h": 130,
+      "target": { "shapeId": "set-attributes", "anchor": "left", "dy": -35 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Select Select. Read its three input rows as values plus a bool control, not a Branch region.",
+      "x": 70,
+      "y": 670,
+      "w": 420,
+      "h": 120,
+      "target": { "shapeId": "select", "anchor": "left", "dy": 25 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Select Clock. In the inspector change source or rate; Runtime adapter unavailable must remain explicit.",
+      "x": 1080,
+      "y": 110,
+      "w": 440,
+      "h": 120,
+      "target": { "shapeId": "clock", "anchor": "top", "dx": 90 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · all three are ordinary Blocks: record data returns normally, Select has no execution pins, and Clock declares intent without claiming it runs.",
+      "x": 1020,
+      "y": 760,
+      "w": 470,
+      "h": 130
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import {
 	type BlockShapeProps,
 	type BlockView,
 } from '../blockModel'
+import { stockBlockPresetProps, type StockBlockPresetId } from '../stockBlocks'
 import type { ConnectionTerminal } from './connectionModel'
 
 /**
@@ -26,6 +27,8 @@ export interface BlockPickerPreset {
 	view: BlockView
 	inputs: number
 	outputs: number
+	/** A curated semantic Block whose full rows/config are authored by its factory. */
+	stockPreset?: StockBlockPresetId
 }
 
 export const BLOCK_PICKER_PRESETS: readonly BlockPickerPreset[] = [
@@ -42,6 +45,9 @@ export const BLOCK_PICKER_PRESETS: readonly BlockPickerPreset[] = [
 	// Block. Its rows are accessors on the type that arrives, which is why it is
 	// worth a preset: the cable already knows that type.
 	{ id: 'projection', label: 'Split', icon: 'Shuffle', blockType: PROJECTION_BLOCK_TYPE, view: 'port', inputs: 1, outputs: 1 },
+	{ id: 'set-attributes', label: 'Set attributes', icon: 'Settings', blockType: 'set-attributes', view: 'port', inputs: 2, outputs: 1, stockPreset: 'set-attributes' },
+	{ id: 'select', label: 'Select', icon: 'GitBranch', blockType: 'select', view: 'port', inputs: 3, outputs: 1, stockPreset: 'select' },
+	{ id: 'clock-trigger', label: 'Clock / Trigger', icon: 'Timer', blockType: 'clock-trigger', view: 'port', inputs: 0, outputs: 1, stockPreset: 'clock-trigger' },
 	{ id: 'group', label: 'Expanded group', icon: 'Boxes', blockType: 'group', view: 'expanded', inputs: 1, outputs: 1 },
 ]
 
@@ -106,6 +112,7 @@ export function blockPresetProps(
 	preset: BlockPickerPreset,
 	base: BlockShapeProps,
 ): BlockShapeProps {
+	if (preset.stockPreset) return stockBlockPresetProps(preset.stockPreset, base)
 	const projection = preset.blockType === PROJECTION_BLOCK_TYPE
 	const inputs = Array.from({ length: preset.inputs }, (_, index) => ({
 		id: `in_${index + 1}`,

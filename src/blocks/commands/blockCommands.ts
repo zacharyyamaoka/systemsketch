@@ -28,6 +28,7 @@ import {
   setBlockViewProps,
   withBlockPortSection,
 } from '../blockModel'
+import { appendSetAttributesMemberProps } from '../stockBlocks'
 import {
   growBlockPortViewToFit,
   type BlockPortSectionTarget,
@@ -86,7 +87,8 @@ export type BlockDetailsPatch = Partial<
     | 'showDescription'
     | 'icon'
     | 'notes'
-    | 'portLayout'
+		| 'portLayout'
+		| 'stockConfig'
   >
 >
 
@@ -444,6 +446,26 @@ export function appendBlockPort(
     (props) => growBlockPortViewToFit(appendBlockPortProps(props, side, initial)),
     { historyLabel: options.historyLabel ?? `add block ${side === 'inputs' ? 'input' : 'output'}` },
   )
+}
+
+/**
+ * Add one semantic member-update row to the stock Set attributes Block.
+ *
+ * The generic Add input control would give this row a generic `in_N` identity.
+ * The curated form instead persists `member_N` while its editable `.name`
+ * remains free to change, so existing cables survive a member rename.
+ */
+export function appendSetAttributesMember(
+	editor: Editor,
+	shapeId: TLShapeId,
+	options: BlockCommandOptions = {},
+): BlockCommandResult {
+	return updateBlockProps(
+		editor,
+		shapeId,
+		(props) => growBlockPortViewToFit(appendSetAttributesMemberProps(props)),
+		{ historyLabel: options.historyLabel ?? 'add attribute update' },
+	)
 }
 
 /**

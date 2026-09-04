@@ -229,6 +229,21 @@ export const BlockPort = T.object({
 })
 export type BlockPort = T.TypeOf<typeof BlockPort>
 
+/**
+ * Small, persisted authoring facts for the curated stock Blocks.
+ *
+ * This is deliberately optional. A Block remains an open canvas primitive and
+ * a newer curated preset must not make older hand-authored Blocks unreadable.
+ * `runtimeAdapter: unavailable` is an honest capability boundary, not a
+ * scheduler request hiding in a presentation prop.
+ */
+export const StockBlockConfig = T.object({
+	triggerSource: T.literalEnum('clock', 'external', 'manual').optional(),
+	rateHz: T.number.optional(),
+	runtimeAdapter: T.literalEnum('unavailable').optional(),
+})
+export type StockBlockConfig = T.TypeOf<typeof StockBlockConfig>
+
 /** An effect output's id is derived from the input it writes back to. */
 export const EFFECT_PORT_PREFIX = 'effect:'
 
@@ -319,6 +334,7 @@ export const BLOCK_SHAPE_PROPS = {
 	draftOrdinal: T.number.optional(),
 	inputs: T.arrayOf(BlockPort),
 	outputs: T.arrayOf(BlockPort),
+	stockConfig: StockBlockConfig.optional(),
 } as const
 
 declare module 'tldraw' {
@@ -349,6 +365,7 @@ declare module 'tldraw' {
 			draftOrdinal?: number
 			inputs: BlockPort[]
 			outputs: BlockPort[]
+			stockConfig?: StockBlockConfig
 		}
 	}
 }

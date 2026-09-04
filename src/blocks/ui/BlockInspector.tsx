@@ -36,8 +36,14 @@ import { commitBlockDefinitionName, definitionBadge } from '../definitions/defin
 import { getBlockPortConnections, type BlockPortConnection } from '../connections/blockPorts'
 import { valueBlockInlet, valueBlockName, valueBlockOutlet } from '../valueBlock'
 import {
+	appendSetAttributesMemberProps,
+	isClockTriggerBlock,
+	isSetAttributesBlock,
+} from '../stockBlocks'
+import {
   appendBlockPort,
   appendBlockPortProps,
+	appendSetAttributesMember,
   getBlockInspectorContext,
   getOnlySelectedBlock,
   sameBlockInspectorContext,
@@ -82,6 +88,8 @@ export interface BlockInspectorActions {
   updateDetails(patch: BlockDetailsPatch, options?: BlockEditOptions): void
   setView(view: BlockPresentationView): void
   addPort(side: BlockPortSide): void
+	/** Add a stable named member-update row to the curated Set attributes Block. */
+	addSetAttributesMember?(): void
   updatePort(
     side: BlockPortSide,
     portId: string,
@@ -440,6 +448,75 @@ function PillSection({
       </p>
     </section>
   )
+}
+
+/** Curated configuration lives beside the existing ordinary Block fields. */
+function StockBlockSection({
+	props,
+	actions,
+}: {
+	props: BlockShapeProps
+	actions?: BlockInspectorActions
+}) {
+	if (isSetAttributesBlock(props)) {
+		return (
+			<section className="block-inspector__section" data-inspector-section="Set attributes">
+				<div className="block-inspector__section-title">Set attributes</div>
+				<p className="block-inspector__hint">
+					The record inlet and outlet remain ordinary data. Add only members that this update writes; all unnamed members pass through unchanged.
+				</p>
+				<button
+					type="button"
+					className="block-inspector__tag-ghost"
+					disabled={!actions}
+					data-testid="set-attributes-add-member"
+					onClick={() => actions?.addSetAttributesMember?.()}
+				>
+					<PlusIcon />
+					Add member update
+				</button>
+			</section>
+		)
+	}
+	if (!isClockTriggerBlock(props)) return null
+	const config = props.stockConfig ?? { triggerSource: 'clock' as const, rateHz: 10, runtimeAdapter: 'unavailable' as const }
+	const setConfig = (patch: Partial<typeof config>) => actions?.updateDetails({ stockConfig: { ...config, ...patch } })
+	return (
+		<section className="block-inspector__section" data-inspector-section="Clock trigger">
+			<div className="block-inspector__section-title">Clock / Trigger</div>
+			<label className="block-inspector__field">
+				<span>Source</span>
+				<select
+					aria-label="Clock trigger source"
+					disabled={!actions}
+					value={config.triggerSource ?? 'clock'}
+					onChange={(event) => setConfig({ triggerSource: event.currentTarget.value as 'clock' | 'external' | 'manual' })}
+				>
+					<option value="clock">clock</option>
+					<option value="external">external trigger</option>
+					<option value="manual">manual trigger</option>
+				</select>
+			</label>
+			<label className="block-inspector__field">
+				<span>Rate (Hz)</span>
+				<input
+					type="number"
+					min="0"
+					step="any"
+					aria-label="Clock trigger rate in hertz"
+					disabled={!actions || config.triggerSource !== 'clock'}
+					value={config.rateHz ?? 10}
+					onChange={(event) => {
+						const rateHz = Number(event.currentTarget.value)
+						if (Number.isFinite(rateHz) && rateHz >= 0) setConfig({ rateHz })
+					}}
+				/>
+			</label>
+			<p className="block-inspector__hint" data-testid="clock-trigger-runtime-status">
+				Runtime adapter unavailable — this records authoring intent and does not start a scheduler.
+			</p>
+		</section>
+	)
 }
 
 const sectionKey = (row: number, branch: number) => `${row}:${branch}`
@@ -1061,6 +1138,19 @@ function PortSection({
 			>
 				Tags
 			</button>
+			{/** WHY: shape editing and semantic annotation are independent, so neither action hides the other. */}
+			{side === 'inputs' && isSetAttributesBlock(props) ? (
+				<button
+					type="button"
+					className="block-inspector__icon-button"
+					disabled={!actions}
+					aria-label="Add attribute member update"
+					data-testid="set-attributes-add-member-inline"
+					onClick={() => actions?.addSetAttributesMember?.()}
+				>
+					<PlusIcon />
+				</button>
+			) : null}
           <button
             type="button"
             className={`block-inspector__count-pill${managing ? ' is-active' : ''}`}
@@ -1250,6 +1340,7 @@ export function BlockInspectorContent({
             />
           </section>
 
+				<StockBlockSection props={props} actions={actions} />
             </>
           )}
 
@@ -1389,6 +1480,7 @@ export function EditorBlockInspector({
           void updateBlockDetails(editor, id, patch, history(options)),
         setView: (view) => void setBlockView(editor, id, view),
         addPort: (side) => void appendBlockPort(editor, id, side),
+		addSetAttributesMember: () => void appendSetAttributesMember(editor, id),
         updatePort: (side, portId, patch, options) =>
           void updateBlockPort(editor, id, side, portId, patch, history(options)),
         removePort: (side, portId) => void removeBlockPort(editor, id, side, portId),
@@ -1413,6 +1505,7 @@ export function EditorBlockInspector({
       updateDetails: (patch) => changeDraft((props) => patchBlockDetailsProps(props, patch)),
       setView: (view) => changeDraft((props) => setBlockViewProps(props, view)),
       addPort: (side) => changeDraft((props) => appendBlockPortProps(props, side)),
+		addSetAttributesMember: () => changeDraft((props) => appendSetAttributesMemberProps(props)),
       updatePort: (side, portId, patch) =>
         changeDraft((props) => patchBlockPortProps(props, side, portId, patch)),
       removePort: (side, portId) =>
