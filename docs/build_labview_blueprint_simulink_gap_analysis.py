@@ -13,7 +13,6 @@ import functools
 import html
 import io
 import json
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -25,12 +24,11 @@ DOCS = REPO / "docs"
 ASSETS = DOCS / "assets"
 OUTPUT = DOCS / "labview-blueprint-simulink-vocabulary-controls-gap-analysis-2026-09-03.html"
 SOURCE_NOTE = DOCS / "labview-blueprint-simulink-vocabulary-controls-gap-analysis-2026-09-03.md"
-
-
-def git(*args: str) -> str:
-    return subprocess.run(
-        ["git", *args], cwd=REPO, text=True, capture_output=True, check=False
-    ).stdout.strip()
+# WHY: this report is a historical research artifact whose source lineage must
+# remain stable after it is merged or rendered from a retained review worktree.
+# Reading the current checkout made a no-content rebuild rewrite the footer.
+REPORT_BRANCH = "main"
+REPORT_BASE = "d6d2c24"
 
 
 def esc(value: object) -> str:
@@ -560,9 +558,8 @@ def indexed_sources() -> tuple[tuple[str, str, str], ...]:
 
 
 def build() -> str:
-    branch = git("branch", "--show-current") or "detached"
-    head = git("rev-parse", "--short", "HEAD")
-    base = git("merge-base", "HEAD", "main")[:7] or head
+    branch = REPORT_BRANCH
+    base = REPORT_BASE
     counts = {kind: sum(e.status == kind for e in TRACK_A + TRACK_B) for kind in ("have", "useful", "skip")}
     capture_count = len({
         item.image
