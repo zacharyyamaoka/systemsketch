@@ -79,6 +79,7 @@ import { emitRecorderDiagnostic } from '../recorder/recorderEvents'
 import { useConfirm } from '../chrome/ConfirmDialog'
 import { consolidateDocumentToSinglePage } from '../singlePageDocument'
 import { settleConnectionParents } from '../blocks/connections/ConnectionBindingUtil'
+import { useThemePortalContainer } from '../theme/ThemePortal'
 
 const SAVE_DEBOUNCE_MS = 600
 const MAX_AUTOSAVE_DELAY_MS = 30_000
@@ -1429,11 +1430,7 @@ function relativeDay(mtime: number): string {
  */
 function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> }) {
   const workspace = useLocalWorkspace()
-  // Radix otherwise attaches to `body`, outside ThemeRoot's token inheritance.
-  // Keep the modal in the themed tree while retaining Radix's focus handling.
-  const portalContainer = typeof document === 'undefined'
-    ? undefined
-    : document.querySelector<HTMLElement>('.systemsketch-theme-root') ?? undefined
+  const portalContainer = useThemePortalContainer()
   const [listing, setListing] = useState<WorkspaceListing | null>(null)
   const [selectedPath, setSelectedPath] = useState<string | null>(null)
   const [query, setQuery] = useState('')
@@ -1646,6 +1643,10 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
         { label: 'Home', path: listing.root },
       ].filter((place, index, all) => all.findIndex((other) => other.path === place.path) === index)
     : []
+
+  // ThemeRoot's ref is set before a person can open a dialog. Skipping this
+  // pre-commit render is safer than letting Radix default to document.body.
+  if (!portalContainer) return null
 
   return (
     // WHY: Radix is already SystemSketch's dialog dependency and the primitive

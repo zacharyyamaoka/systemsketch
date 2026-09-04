@@ -20,8 +20,11 @@ button {
   font: inherit;
 }
 
-/* Carries the theme attributes for everything under it and draws nothing. */
-.systemsketch-theme-root {
+/* Carries the theme attributes and the one portal host for everything under
+ * it. Both draw nothing, but the host keeps escaped app UI inheriting the
+ * active appearance instead of falling back to document-body defaults. */
+.systemsketch-theme-root,
+.systemsketch-theme-portal-root {
   display: contents;
 }
 

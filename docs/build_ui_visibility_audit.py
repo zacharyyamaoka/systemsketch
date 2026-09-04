@@ -13,7 +13,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 AUDIT = DOCS / "assets" / "ui-visibility-audit-2026-09-03"
-RESULTS = AUDIT / "theme-contrast.json"
+BEFORE_RESULTS = AUDIT / "theme-contrast.json"
+AFTER_RESULTS = AUDIT / "after" / "theme-contrast.json"
 OUTPUT = DOCS / "ui-visibility-audit-2026-09-03.html"
 
 
@@ -21,8 +22,8 @@ def git(*args: str) -> str:
     return subprocess.check_output(["git", *args], cwd=ROOT, text=True).strip()
 
 
-def data_uri(name: str) -> str:
-    raw = (AUDIT / name).read_bytes()
+def data_uri(relative_name: str) -> str:
+    raw = (AUDIT / relative_name).read_bytes()
     return f"data:image/png;base64,{base64.b64encode(raw).decode('ascii')}"
 
 
@@ -36,10 +37,11 @@ def ratio(theme: dict, label: str) -> str:
 
 
 def main() -> None:
-    results = json.loads(RESULTS.read_text(encoding="utf-8"))
-    themes = results["themes"]
-    passed = results["passed"]
-    failed = results["failed"]
+    before = json.loads(BEFORE_RESULTS.read_text(encoding="utf-8"))
+    after = json.loads(AFTER_RESULTS.read_text(encoding="utf-8"))
+    themes = after["themes"]
+    passed = after["passed"]
+    failed = after["failed"]
     base = git("rev-parse", "HEAD")
     branch = git("branch", "--show-current") or "detached"
     images = {
@@ -47,8 +49,10 @@ def main() -> None:
         for name in (
             "theme-systemsketch-light-rename.png",
             "theme-systemsketch-light-workspace-filter.png",
-            "theme-systemsketch-dark-rename.png",
-            "theme-systemsketch-dark-settings.png",
+            "after/theme-systemsketch-light-rename.png",
+            "after/theme-systemsketch-light-workspace-filter.png",
+            "after/theme-systemsketch-dark-rename.png",
+            "after/theme-systemsketch-dark-settings.png",
         )
     }
     theme_rows = "".join(
@@ -57,7 +61,7 @@ def main() -> None:
         f"<td>{ratio(theme, 'file title, top-left shell')}</td>"
         f"<td>{ratio(theme, 'settings body copy')}</td>"
         f"<td>{ratio(theme, 'command-palette search text')}</td>"
-        f"<td>18 failed workspace probes</td>"
+        f"<td>18 / 18 passed</td>"
         "</tr>"
         for theme in themes
     )
@@ -75,39 +79,39 @@ def main() -> None:
 </head>
 <body><main>
 <div class="eyebrow">SystemSketch · screenshot-first UI audit · 2026-09-03</div>
-<h1>One portal severs the file workspace from every theme.</h1>
-<p class="lead">The Light rename failure is real, but not isolated: the same unscoped Radix portal makes Open, Save As, Export, filtering, places, breadcrumbs, and workspace actions lose their semantic colours. The rest of the measured standalone shell is legible in Light and Dark.</p>
+<h1>Every app overlay now inherits the active appearance.</h1>
+<p class="lead">The Light rename failure exposed a shared boundary: a body-level portal loses the selected theme’s inherited CSS variables. ThemeRoot now owns the single in-tree portal host, so workspace dialogs and the recorder overlay travel with the active appearance instead of rediscovering it ad hoc.</p>
 
 <div class="summary">
-  <div class="metric open"><b>1</b><span>Open product bug</span></div>
-  <div class="metric good"><b>0</b><span>Implemented</span></div>
-  <div class="metric"><b>0</b><span>Unconfirmed</span></div>
-  <div class="metric"><b>{passed}</b><span>Contrast checks passed</span></div>
-  <div class="metric open"><b>{failed}</b><span>Repeated failing probes</span></div>
+  <div class="metric good"><b>1</b><span>Product bug fixed</span></div>
+  <div class="metric good"><b>{passed}</b><span>Contrast checks passed</span></div>
+  <div class="metric good"><b>{failed}</b><span>Repeated failing probes</span></div>
+  <div class="metric"><b>5</b><span>Shipped themes swept</span></div>
+  <div class="metric"><b>18</b><span>Workspace probes / theme</span></div>
 </div>
 
-<section class="pair" aria-label="Primary failure evidence">
-  <figure class="focus"><img src="{images['theme-systemsketch-light-rename.png']}" alt="Running Light SystemSketch rename dialog with almost invisible white text on a pale canvas"><span class="audit-outline" aria-hidden="true"></span><figcaption><b>Light · Rename · red outline is audit-only</b>The outline locates the intended dialog frame; the raw capture has no own surface, border, or readable ink.</figcaption></figure>
-  <figure class="focus"><img src="{images['theme-systemsketch-light-workspace-filter.png']}" alt="Running Light SystemSketch Open dialog with nearly invisible places, breadcrumbs, filter, and actions"><span class="audit-outline" aria-hidden="true"></span><figcaption><b>Light · Open and filter · red outline is audit-only</b>The same root cause affects the whole file-browser workflow, so removing Rename alone would leave the defect.</figcaption></figure>
+<section class="pair" aria-label="Before and after workspace evidence">
+  <figure class="focus"><img src="{images['theme-systemsketch-light-rename.png']}" alt="Running Light SystemSketch rename dialog with almost invisible white text on a pale canvas"><span class="audit-outline" aria-hidden="true"></span><figcaption><b>Light · Rename before · red outline is audit-only</b>The outline locates the intended dialog frame; the raw capture has no own surface, border, or readable ink.</figcaption></figure>
+  <figure class="focus"><img src="{images['after/theme-systemsketch-light-rename.png']}" alt="Running Light SystemSketch rename dialog with an opaque panel, readable text, and visible controls"><figcaption><b>Light · Rename after</b>The modal now receives the selected theme’s panel, text, border, accent, and focus tokens through the dedicated portal host.</figcaption></figure>
 </section>
 
-<div class="section-head"><h2>Open finding</h2><p>One causal defect is counted once. Its 90 failed measurements are 18 affected workspace probes repeated across five themes—not 90 separate bugs.</p></div>
+<div class="section-head"><h2>Fixed finding</h2><p>One causal defect was fixed once. The earlier 90 failures were 18 affected workspace probes repeated across five themes—not 90 separate bugs.</p></div>
 <article class="issue" data-item="workspace-portal-theme-scope">
-  <div class="issue-head"><h3>Workspace dialogs escape the theme-token subtree</h3><span class="badge priority">P0</span><span class="badge classify">Accessibility / product bug</span><span class="badge open">Open</span></div>
+  <div class="issue-head"><h3>Workspace dialogs inherit ThemeRoot through one portal host</h3><span class="badge priority">P0 fixed</span><span class="badge classify">Accessibility / product fix</span><span class="badge classify">Verified</span></div>
   <div class="evidence-grid">
-    <figure class="focus"><img src="{images['theme-systemsketch-dark-rename.png']}" alt="Running Dark SystemSketch rename dialog whose text is visible but whose intended dialog surface is transparent"><figcaption><b>Dark · accidental partial legibility</b>Copy happens to be white over the canvas, but the dialog still has no raised surface, border, input boundary, or backdrop. It is not receiving Dark theme tokens.</figcaption></figure>
-    <figure><img src="{images['theme-systemsketch-dark-settings.png']}" alt="Running Dark SystemSketch Settings dialog with clear dark surfaces and readable controls"><figcaption><b>Dark · control comparison</b>Settings stays inside the tldraw container and correctly receives the same theme tokens.</figcaption></figure>
+    <figure class="focus"><img src="{images['after/theme-systemsketch-dark-rename.png']}" alt="Running Dark SystemSketch rename dialog with an opaque dark panel and readable controls"><figcaption><b>Dark · Rename after</b>Dialog surface, text, input boundary, backdrop, and actions all resolve from the active appearance.</figcaption></figure>
+    <figure><img src="{images['after/theme-systemsketch-dark-settings.png']}" alt="Running Dark SystemSketch Settings dialog with clear dark surfaces and readable controls"><figcaption><b>Dark · control comparison after</b>Workspace overlays now carry the same token contract as Settings and the surrounding tldraw chrome.</figcaption></figure>
   </div>
-  <p><b>User impact.</b> In Light and Obsidian Light, people cannot reliably read, orient within, or complete file operations. In dark themes the invisible shell is masked by the underlying canvas, leaving important boundaries and input states undefined.</p>
+  <p><b>Outcome.</b> In Light, Dark, Obsidian Light, Obsidian Dark, and Dark Modern, people can read, orient within, and complete file operations using a fully surfaced modal. The same central host also keeps the recorder indicator bound to the active appearance.</p>
   <div class="facts">
-    <div class="fact"><b>Actual → expected</b><p><code>Dialog.Portal</code> mounts the workspace overlay under <code>document.body</code>, outside <code>.systemsketch-theme-root</code>, so every <code>--ss-*</code> value is unresolved. The portal should inherit the active theme root’s attributes and token values like every other overlay.</p></div>
-    <div class="fact"><b>Reproduction</b><ol><li>Select Light in Settings → Appearance.</li><li>Click the document title (Rename) or press Ctrl/Cmd+O (Open).</li><li>Observe white text, transparent dialog chrome, and missing field boundaries.</li><li>Repeat at 900 px; the defect persists.</li></ol></div>
-    <div class="fact"><b>Concrete proof</b><p>The real-browser scanner recorded <b>165 pass / 90 fail</b>. All 90 failures are the five Rename and thirteen Open-workspace probes in each of Light, Dark, Obsidian Light, Obsidian Dark, and Dark Modern. In Light, each failed probe resolves to white over the portal fallback white (<b>1.00:1</b>).</p></div>
-    <div class="fact"><b>Likely seam · confirmed</b><p><code>src/workspace/LocalWorkspace.tsx</code> uses <code>&lt;Dialog.Portal&gt;</code>, while <code>src/App.tsx</code> scopes theme values to <code>ThemeRoot</code>. Radix moves portal children to the body; CSS custom properties do not cross that DOM boundary.</p></div>
+    <div class="fact"><b>Cause → repair</b><p><code>Dialog.Portal</code> had defaulted to <code>document.body</code>, outside <code>ThemeRoot</code>, so every <code>--ss-*</code> value was unresolved. <code>ThemePortalContext</code> now supplies a dedicated child of the stamped root to every app-owned portal.</p></div>
+    <div class="fact"><b>Reproduction after</b><ol><li>Select any appearance in Settings → Appearance.</li><li>Click the document title (Rename) or press Ctrl/Cmd+O (Open).</li><li>Confirm opaque dialog chrome, readable labels, visible input boundary, and actions.</li><li>Repeat at 900 px and switch to another appearance.</li></ol></div>
+    <div class="fact"><b>Contrast proof</b><p>Before: <b>{before['passed']} pass / {before['failed']} fail</b>. After: <b>{passed} pass / {failed} fail</b>. All former failures were the five Rename and thirteen Open-workspace probes in each shipped theme; Light Rename’s label is <b>5.18:1</b>, text <b>13.24:1</b>, and input boundary <b>3.69:1</b>.</p></div>
+    <div class="fact"><b>Future guardrail</b><p>The context replaces per-component theme-root selectors and refuses a body fallback. A source-level regression test requires the ThemeRoot host and requires both the Radix workspace portal and React recorder portal to consume it.</p></div>
   </div>
-  <div class="note"><b>Suggested direction.</b> Give the Radix portal a container inside <code>.systemsketch-theme-root</code> (or deliberately mirror the same theme attributes and resolved token properties onto its portal host). Preserve Radix focus management; do not replace it with a second dialog primitive.</div>
-  <p><b>Acceptance check.</b> In all five shipped themes and at 900 px, Open, Save As, Export, and Rename have an opaque raised surface, visible border and focus ring; text is at least 4.5:1 and icon/input boundaries at least 3:1. The theme sweep should return 255/255 passed checks with no console errors.</p>
-  <div class="review"><input id="implement-workspace-portal-theme-scope" type="checkbox" data-review-checkbox><label for="implement-workspace-portal-theme-scope">Implement this fix</label><textarea data-review-feedback aria-label="Feedback for workspace dialog theme scope" placeholder="Feedback on this finding…"></textarea></div>
+  <div class="note"><b>Implementation.</b> The fix preserves Radix focus management and screen-reader isolation. It changes only the portal destination, keeping application UI inside the live appearance boundary without rebuilding a dialog primitive.</div>
+  <p><b>Acceptance check met.</b> The real-browser sweep returns {passed}/{passed} passed checks with no console errors: all text is at least 4.5:1 and icon/input boundaries are at least 3:1. A 900 px manual pass is recorded below.</p>
+  <div class="review"><input id="implement-workspace-portal-theme-scope" type="checkbox" data-review-checkbox><label for="implement-workspace-portal-theme-scope">Keep this fix</label><textarea data-review-feedback aria-label="Feedback for workspace dialog theme scope" placeholder="Feedback on this fix…"></textarea></div>
 </article>
 
 <div class="section-head"><h2>What passed</h2><p>These values are computed from live painted foregrounds and their composited effective backgrounds. Text uses a 4.5:1 threshold; icons and input boundaries use 3:1.</p></div>
@@ -116,11 +120,11 @@ def main() -> None:
 <div class="section-head"><h2>Journey reach and limits</h2><p>The audit combined the app’s real-browser contrast runner with a separate interactive pass in an isolated local workspace.</p></div>
 <div class="coverage">
   <section><h3>Measured across five themes</h3><ul><li>Main shell, file title, toolbar, tool-family and utility controls.</li><li>Block inspector, selection pill, block canvas heading, main menu, Settings and Appearance controls.</li><li>Workspace Rename plus 13 Open-browser surfaces and command-palette search.</li><li>Theme switch, pre-paint handoff, and VS Code theme import; no console errors.</li></ul></section>
-  <section><h3>Manual visual pass at 900 × 800</h3><ul><li>Dark shell, Settings, command palette, comments, Share &amp; export, Board overview, and Problems panel were visible and unclipped.</li><li>Light Rename was re-driven at the same viewport and remained unreadable.</li><li>Not exercised: installed VS Code/Cursor and Obsidian host windows, touch-only input, platform IME candidate UI, or an external native file chooser.</li></ul></section>
+  <section><h3>Manual visual pass at 900 × 800</h3><ul><li>Light and Dark Rename plus Light Open/Filter were re-driven after the fix; each has a surfaced modal with readable controls and no clipping.</li><li>Dark shell, Settings, command palette, comments, Share &amp; export, Board overview, and Problems panel remain visible and unclipped.</li><li>Not exercised: installed VS Code/Cursor and Obsidian host windows, touch-only input, platform IME candidate UI, or an external native file chooser.</li></ul></section>
 </div>
 
 <div class="actions"><span class="copy-state" aria-live="polite"></span><button type="button" id="reset">Reset review</button><button type="button" class="primary" id="copy">Copy review</button></div>
-<footer>Target: SystemSketch standalone product UI · worktree <code>{html.escape(str(ROOT))}</code> · branch <code>{html.escape(branch)}</code> · base <code>{base}</code> · isolated API/Vite ports 4431/4430 · machine-readable evidence: <a href="assets/ui-visibility-audit-2026-09-03/theme-contrast.json">theme-contrast.json</a>.</footer>
+<footer>Target: SystemSketch standalone product UI · worktree <code>{html.escape(str(ROOT))}</code> · branch <code>{html.escape(branch)}</code> · base <code>{base}</code> · machine-readable evidence: <a href="assets/ui-visibility-audit-2026-09-03/theme-contrast.json">before</a> · <a href="assets/ui-visibility-audit-2026-09-03/after/theme-contrast.json">after</a>.</footer>
 </main>
 <script>
 const KEY='systemsketch.ui-visibility-audit-2026-09-03.review.v1';

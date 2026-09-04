@@ -251,6 +251,30 @@ class RootStampTests(unittest.TestCase):
         self.assertIn("updateUserPreferences({ colorScheme })", embedded)
         self.assertNotIn("updateUserPreferences({ colorScheme: 'light' })", embedded)
 
+    def test_app_owned_portals_use_the_single_themed_host(self) -> None:
+        """A portal that defaults to body loses the active appearance.
+
+        The host is deliberately a React context, rather than a selector
+        repeated in each overlay. This keeps every current portal tied to the
+        ThemeRoot and makes an unthemed fallback an explicit review failure.
+        """
+        app = (SRC / "App.tsx").read_text(encoding="utf-8")
+        workspace = (SRC / "workspace" / "LocalWorkspace.tsx").read_text(encoding="utf-8")
+        recorder = (SRC / "recorder" / "RecorderControls.tsx").read_text(encoding="utf-8")
+
+        self.assertIn("<ThemePortalContext.Provider value={portalContainer}>", app)
+        self.assertIn('data-testid="systemsketch-theme-portal-root"', app)
+        self.assertIn("ref={setPortalContainer}", app)
+
+        self.assertIn("const portalContainer = useThemePortalContainer()", workspace)
+        self.assertIn("<Dialog.Portal container={portalContainer}>", workspace)
+        self.assertNotIn("document.querySelector<HTMLElement>('.systemsketch-theme-root')", workspace)
+        self.assertNotIn("<Dialog.Portal>", workspace)
+
+        self.assertIn("const portalContainer = useThemePortalContainer()", recorder)
+        self.assertIn("portalContainer,", recorder)
+        self.assertNotIn("?? document.body", recorder)
+
 
 class NativeWorkspaceControlTests(unittest.TestCase):
     def test_workspace_text_inputs_own_their_theme_ink_and_typeface(self) -> None:
