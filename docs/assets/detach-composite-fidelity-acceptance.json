@@ -32,10 +32,10 @@
       "after": "detach-composite-branch-after.png",
       "diff": "detach-composite-branch-diff.png",
       "score": {
-        "score": 0.935596,
-        "wholeSimilarity": 0.975177,
-        "foregroundSimilarity": 0.97439,
-        "edgeSimilarity": 0.818583,
+        "score": 0.942499,
+        "wholeSimilarity": 0.98455,
+        "foregroundSimilarity": 0.98406,
+        "edgeSimilarity": 0.817423,
         "foregroundPixels": 124966,
         "totalPixels": 128928
       }
@@ -52,10 +52,10 @@
       "after": "detach-composite-loop-after.png",
       "diff": "detach-composite-loop-diff.png",
       "score": {
-        "score": 0.932341,
-        "wholeSimilarity": 0.97494,
-        "foregroundSimilarity": 0.974937,
-        "edgeSimilarity": 0.80455,
+        "score": 0.940345,
+        "wholeSimilarity": 0.98438,
+        "foregroundSimilarity": 0.984378,
+        "edgeSimilarity": 0.808245,
         "foregroundPixels": 128911,
         "totalPixels": 128928
       }
@@ -94,8 +94,8 @@
     null
   ],
   "replacements": [
-    "frame",
-    "frame"
+    "group",
+    "group"
   ],
   "shapes": [
     "block",
@@ -118,7 +118,7 @@
     "group",
     "group",
     "group",
-    "frame",
+    "geo",
     "line",
     "text",
     "text",
@@ -131,7 +131,8 @@
     "text",
     "text",
     "geo",
-    "frame",
+    "group",
+    "geo",
     "line",
     "line",
     "text",
@@ -141,6 +142,7 @@
     "text",
     "geo",
     "geo",
+    "group",
     "arrow"
   ]
 }

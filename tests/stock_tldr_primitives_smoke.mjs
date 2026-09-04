@@ -123,41 +123,48 @@ async function main() {
     await detachEverything(page, loopHeader)
     await waitFor(page, `(() => {
       const editor = window.__systemsketch.editor
-      return editor.getCurrentPageShapes().some((shape) => shape.type === 'frame'
-        && shape.meta?.systemSketch?.kind === 'loop')
+      return !editor.getShape('shape:loop')
         && !editor.getShape('shape:loop-item-edge')
         && !editor.getShape('shape:loop-in-edge')
     })()`, 'a Loop-only selection to lower through its own context menu')
     const loopDetach = JSON.parse(await evaluate(page, `(() => {
       const editor = window.__systemsketch.editor
-      const frame = editor.getCurrentPageShapes().find((shape) => shape.type === 'frame'
+      const group = editor.getCurrentPageShapes().find((shape) => shape.type === 'group'
         && shape.meta?.systemSketch?.kind === 'loop')
-      const children = frame ? editor.getSortedChildIdsForParent(frame.id).map((id) => editor.getShape(id)) : []
-		const exteriorPortDots = frame ? editor.getCurrentPageShapes().filter((shape) => shape.type === 'geo'
-			&& shape.parentId === frame.parentId && shape.props.geo === 'ellipse' && shape.props.w <= 18) : []
-      const arrowBindings = frame ? editor.getBindingsToShape(frame.id, 'arrow') : []
+      const children = group ? editor.getSortedChildIdsForParent(group.id).map((id) => editor.getShape(id)) : []
+		const portDots = children.filter((shape) => shape?.type === 'geo'
+			&& shape.props.geo === 'ellipse' && shape.props.w <= 18)
+      const card = children.find((shape) => shape?.type === 'geo' && shape.props.geo === 'rectangle'
+        && shape.props.w === 480 && shape.props.h === 220)
+      const arrowBindings = card ? editor.getBindingsToShape(card.id, 'arrow') : []
       return JSON.stringify({
-        frame: frame?.type,
-        remembered: frame?.meta?.systemSketch?.kind,
+        group: group?.type,
+        remembered: group?.meta?.systemSketch?.kind,
         loopShapes: editor.getCurrentPageShapes().filter((shape) => shape.type === 'loop').length,
         loopConnectionsRemain: ['shape:loop-item-edge', 'shape:loop-in-edge']
           .some((id) => editor.getShape(id) !== undefined),
         liveBlocksInside: children.filter((shape) => shape?.type === 'block').length,
-		// The port rims are Frame siblings so their full footprint is not clipped
-		// at the wall; the rules and text remain ordinary Frame children.
+		totalLiveBlocks: editor.getCurrentPageShapes().filter((shape) => shape.type === 'block').length,
+		// The port rims remain direct Group children: their full footprint is not
+		// clipped and they move with the materialised region.
         headerRules: children.filter((shape) => shape?.type === 'line').length,
-        portDots: exteriorPortDots.length,
-		wiredPortCores: exteriorPortDots.filter((shape) => shape?.type === 'geo'
+		portDots: portDots.length,
+		wiredPortCores: portDots.filter((shape) => shape?.type === 'geo'
 			&& shape.props.geo === 'ellipse' && shape.props.w === 12 && shape.props.fill === 'solid').length,
         arrowBindings: arrowBindings.length,
       })
     })()`))
     assert.deepEqual(loopDetach, {
-      frame: 'frame',
+      group: 'group',
       remembered: 'loop',
       loopShapes: 0,
       loopConnectionsRemain: false,
+      // A live Block is frame-like and stock groups refuse to contain it. A
+      // Loop-only detach therefore leaves that still-semantic child at page
+      // scope; a full descendant detach lowers it first and can group stock
+      // primitives with the region afterward.
       liveBlocksInside: 0,
+		totalLiveBlocks: 7,
       headerRules: 2,
 		// Two 18px rings and the wired iterable port's 12px core.
       portDots: 3,
@@ -228,6 +235,11 @@ async function main() {
 			&& shape.meta?.systemSketch?.routing === 'curved')
 		const elbowArrow = shapes.find((shape) => shape.type === 'arrow'
 			&& shape.meta?.systemSketch?.routing === 'elbow')
+		const normalElbows = shapes.filter((shape) => shape.type === 'arrow'
+			&& shape.meta?.systemSketch?.routing === 'elbow')
+		const frozenLineFor = (arrowId) => shapes.some((shape) => shape.type === 'line'
+			&& shape.meta?.systemSketch?.kind === 'connection-polyline'
+			&& shape.meta.systemSketch.ownerArrowId === arrowId)
       const nestedArrow = shapes.find((shape) => shape.type === 'arrow'
         && shape.meta?.systemSketch?.delayValue === 'nested')
       const nestedEdgeGroup = nestedArrow && editor.getShape(nestedArrow.parentId)
@@ -249,7 +261,22 @@ async function main() {
 			branchTitle: textWith('Loop / branch')?.props.size === 's' && textWith('Loop / branch')?.props.scale === 1,
 			activeLabel: textWith('active')?.props.size === 's' && Math.abs((textWith('active')?.props.scale ?? 0) - 11 / 18) < 0.0001,
 		},
-		arrowKinds: { curved: curvedArrow?.props.kind, curvedBend: curvedArrow?.props.bend, elbow: elbowArrow?.props.kind },
+		arrowKinds: {
+			curved: curvedArrow?.props.kind,
+			curvedBend: curvedArrow?.props.bend,
+			elbow: elbowArrow?.props.kind,
+			// WHY: an ordinary elbow keeps stock tldraw's live Arrow behaviour.
+			// Only a stored multi-corner route may freeze to a Line, because one
+			// Arrow elbow midpoint cannot encode those authored turns.
+			normalElbowsStayVisibleArrows: normalElbows.length >= 2
+				&& normalElbows.every((arrow) => arrow.props.kind === 'elbow'
+					&& arrow.opacity !== 0 && !frozenLineFor(arrow.id)),
+			normalElbowStates: normalElbows.map((arrow) => ({
+				kind: arrow.props.kind,
+				opacity: arrow.opacity,
+				hasFrozenLine: frozenLineFor(arrow.id),
+			})),
+		},
         delayPillGroups: shapes.filter((shape) => shape.type === 'group' && shape.meta?.systemSketch?.kind === 'connection-delay-pill').length,
         delayPillText: shapes.filter((shape) => shape.type === 'text').some((shape) => JSON.stringify(shape.props.richText).includes('z⁻¹ = 11')),
         directArrow: shapes.find((shape) => shape.type === 'arrow' && shape.meta?.systemSketch?.delayValue === 'direct')?.props.dash,
@@ -282,6 +309,7 @@ async function main() {
 		assert.equal(result.arrowKinds.curved, 'arc')
 		assert.notEqual(result.arrowKinds.curvedBend, 0)
 		assert.equal(result.arrowKinds.elbow, 'elbow')
+		assert.equal(result.arrowKinds.normalElbowsStayVisibleArrows, true, JSON.stringify(result.arrowKinds))
     assert.equal(result.delayPillGroups, 3)
     assert.equal(result.delayPillText, true)
     assert.equal(result.directArrow, 'dotted')

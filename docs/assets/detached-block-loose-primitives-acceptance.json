@@ -3,11 +3,11 @@
     "id": "AUTHORED-PARENTAGE",
     "label": "the target is a real child that extends beyond the Expanded Block",
     "observed": {
-      "childParent": "shape:npznWHUwGEb0wXZ1Hr4eu",
+      "childParent": "shape:rvvjKvHs6BYP9FtBT8NTG",
       "childEscapesBottom": true
     },
     "desired": {
-      "childParent": "shape:npznWHUwGEb0wXZ1Hr4eu",
+      "childParent": "shape:rvvjKvHs6BYP9FtBT8NTG",
       "childEscapesBottom": true
     },
     "ok": true
@@ -15,8 +15,8 @@
   {
     "id": "AUTHORED-CABLE-PARENT",
     "label": "the live data edge enters through the Expanded Block",
-    "observed": "shape:npznWHUwGEb0wXZ1Hr4eu",
-    "desired": "shape:npznWHUwGEb0wXZ1Hr4eu",
+    "observed": "shape:rvvjKvHs6BYP9FtBT8NTG",
+    "desired": "shape:rvvjKvHs6BYP9FtBT8NTG",
     "ok": true
   },
   {

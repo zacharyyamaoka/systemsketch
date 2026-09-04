@@ -3,8 +3,8 @@
     "formatVersion": 2,
     "application": "SystemSketch",
     "shapes": {
-      "branch-arm": 2,
       "geo": 4,
+      "branch-arm": 2,
       "block": 4,
       "arrow": 3,
       "connection": 1,
@@ -87,24 +87,12 @@
       "typeName": "pointer"
     },
     {
-      "x": 0,
-      "y": 218,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {
-        "branchArm": "no"
-      },
-      "id": "shape:Aek4BauA7Mt58VODvtObn",
-      "type": "branch-arm",
-      "parentId": "shape:branch",
-      "props": {
-        "w": 460,
-        "h": 32,
-        "armId": "no"
-      },
-      "index": "a30Cv",
-      "typeName": "shape"
+      "name": "",
+      "color": "#E34BA9",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:fkEXYVodSJWCpBU_ReMyy",
+      "typeName": "user"
     },
     {
       "x": 80,
@@ -117,10 +105,10 @@
       "type": "geo",
       "props": {
         "w": 390,
-        "h": 190,
+        "h": 230,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 0,
+        "growY": 12,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -140,7 +128,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · Loop, Branch, and Block lower cleanly. The Loop wire becomes a stock arrow; containers offer Delete container, leave children."
+                  "text": "PASS WHEN · Loop, Branch, and Block lower cleanly. A simple loop wire becomes a stock Arrow; an authored multi-elbow becomes a stock Line with every corner. Containers say Delete container, leave children."
                 }
               ]
             }
@@ -148,7 +136,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a9ZEb",
+      "index": "a9WJQ",
       "typeName": "shape"
     },
     {
@@ -188,9 +176,9 @@
       "typeName": "binding"
     },
     {
-      "x": -4.518348623853228,
-      "y": 45.321100917431195,
-      "z": 0.9797752808988764,
+      "x": 0,
+      "y": 0,
+      "z": 1,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -214,6 +202,26 @@
       "typeName": "binding"
     },
     {
+      "x": 0,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "branchArm": "yes"
+      },
+      "id": "shape:oqkKy5fYL2UdxRtGJ2uRy",
+      "type": "branch-arm",
+      "parentId": "shape:branch",
+      "props": {
+        "w": 460,
+        "h": 178,
+        "armId": "yes"
+      },
+      "index": "a2oAU",
+      "typeName": "shape"
+    },
+    {
       "x": 80,
       "y": 52,
       "rotation": 0,
@@ -224,7 +232,7 @@
       },
       "id": "shape:branch-child",
       "type": "block",
-      "parentId": "shape:NMGlnliPGGxV9fcVVrP3-",
+      "parentId": "shape:oqkKy5fYL2UdxRtGJ2uRy",
       "props": {
         "w": 300,
         "h": 120,
@@ -255,7 +263,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "c4uTB70hM_LmSn3ROYBt6",
+        "definitionId": "h22sGl116pMQqpg8o57Q6",
         "inputs": [],
         "outputs": [],
         "definitionKey": "accept"
@@ -277,8 +285,8 @@
       "typeName": "instance_page_state"
     },
     {
-      "x": 490,
-      "y": 715,
+      "x": 480,
+      "y": 710,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -299,8 +307,8 @@
           "y": 0
         },
         "end": {
-          "x": 70,
-          "y": 145
+          "x": 80,
+          "y": 150
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -317,7 +325,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a7uTm",
+      "index": "a7sLY",
       "typeName": "shape"
     },
     {
@@ -340,7 +348,7 @@
     },
     {
       "x": 810,
-      "y": 150,
+      "y": 180,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -362,7 +370,7 @@
         },
         "end": {
           "x": 0,
-          "y": 110
+          "y": 80
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -379,32 +387,12 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a6ptTV",
+      "index": "a6xs58",
       "typeName": "shape"
     },
     {
-      "x": 0,
-      "y": 40,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {
-        "branchArm": "yes"
-      },
-      "id": "shape:NMGlnliPGGxV9fcVVrP3-",
-      "type": "branch-arm",
-      "parentId": "shape:branch",
-      "props": {
-        "w": 460,
-        "h": 178,
-        "armId": "yes"
-      },
-      "index": "a2ACU",
-      "typeName": "shape"
-    },
-    {
-      "x": 70,
-      "y": 650,
+      "x": 60,
+      "y": 620,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -413,10 +401,10 @@
       "type": "geo",
       "props": {
         "w": 420,
-        "h": 130,
+        "h": 180,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 0,
+        "growY": 2,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -436,7 +424,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "2 · Right-click this Branch and choose Detach to primitives. Its child remains inside the stock container."
+                  "text": "2 · Right-click this Branch and choose Detach to primitives. Card and port chrome become one stock Group; the live child stays visually in place. Detach it too for an all-stock region."
                 }
               ]
             }
@@ -444,7 +432,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a7CLE",
+      "index": "a7NXj",
       "typeName": "shape"
     },
     {
@@ -458,10 +446,10 @@
       "type": "geo",
       "props": {
         "w": 420,
-        "h": 130,
+        "h": 160,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 0,
+        "growY": 22,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -481,7 +469,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "1 · Select the For Loop, right-click its header, then choose Detach to primitives. Undo to repeat."
+                  "text": "1 · Select the For Loop, right-click its header, then choose Detach to primitives. It becomes a stock Group with whole header-port rings, not a clipped Frame. Undo to repeat."
                 }
               ]
             }
@@ -489,7 +477,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6dfA",
+      "index": "a6rh6",
       "typeName": "shape"
     },
     {
@@ -532,7 +520,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "kpAbqVEm1uqwt_A6YGLZl",
+        "definitionId": "_wca1-g6quRHaa2l1cMV5",
         "inputs": [
           {
             "id": "in",
@@ -544,7 +532,7 @@
         "outputs": [],
         "definitionKey": "classify"
       },
-      "index": "a3bsn",
+      "index": "a3aef",
       "typeName": "shape"
     },
     {
@@ -586,7 +574,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "yuVfizWNTk_i36ivN-4Au",
+        "definitionId": "T1EbIqdwjTIj0nLGgp0Zw",
         "inputs": [
           {
             "id": "in",
@@ -606,7 +594,7 @@
         "definitionKey": "normalize"
       },
       "parentId": "page:page",
-      "index": "a5L6E",
+      "index": "a5Cza",
       "typeName": "shape"
     },
     {
@@ -640,15 +628,15 @@
         "state": "normal"
       },
       "parentId": "shape:loop",
-      "index": "a2KDE",
+      "index": "a2x5f",
       "typeName": "shape"
     },
     {
       "name": "",
-      "color": "#11B3A3",
+      "color": "#EC5E41",
       "imageUrl": "",
       "meta": {},
-      "id": "user:XiI2y9Fg2TEZvB8XiP3OF",
+      "id": "user:Sp788FKvW3-DNW-hVW0gk",
       "typeName": "user"
     },
     {
@@ -690,7 +678,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "a5Ja7nRQO8gUftEnRbOw8",
+        "definitionId": "3wxfIBJ0s9XpyIrsYvTI_",
         "inputs": [],
         "outputs": [
           {
@@ -703,7 +691,7 @@
         "definitionKey": "detections"
       },
       "parentId": "page:page",
-      "index": "a3hdL",
+      "index": "a3zohV",
       "typeName": "shape"
     },
     {
@@ -833,7 +821,7 @@
         ]
       },
       "parentId": "page:page",
-      "index": "a4iMv",
+      "index": "a47Xb",
       "typeName": "shape"
     },
     {
@@ -877,7 +865,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a8lBgV",
+      "index": "a8zeLt",
       "typeName": "shape"
     },
     {
@@ -904,8 +892,16 @@
         "turn": "turn 3 / 8"
       },
       "parentId": "page:page",
-      "index": "a4IFUV",
+      "index": "a40gft",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#EC5E41",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:5_ftnev4r7QvovAS_VS9Z",
+      "typeName": "user"
     },
     {
       "meta": {},
@@ -924,6 +920,26 @@
         "terminal": "end"
       },
       "typeName": "binding"
+    },
+    {
+      "x": 0,
+      "y": 218,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "branchArm": "no"
+      },
+      "id": "shape:CbzpaArf4gj0KHlz6DRab",
+      "type": "branch-arm",
+      "parentId": "shape:branch",
+      "props": {
+        "w": 460,
+        "h": 32,
+        "armId": "no"
+      },
+      "index": "a3MUJ",
+      "typeName": "shape"
     },
     {
       "x": 1080,
@@ -959,7 +975,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "3 · Right-click this Block and choose Detach to primitives. Its parts become ordinary editable shapes."
+                  "text": "3 · Right-click this Block and choose Detach to primitives. Its parts become ordinary editable stock shapes."
                 }
               ]
             }
@@ -967,7 +983,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a8Niz",
+      "index": "a8mIz",
       "typeName": "shape"
     }
   ]

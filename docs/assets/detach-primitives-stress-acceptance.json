@@ -1,0 +1,840 @@
+{
+  "cases": [
+    {
+      "category": "blocks",
+      "ordinal": 1,
+      "title": "simple · block 1",
+      "before": "detach-stress-blocks-1-before.png",
+      "after": "detach-stress-blocks-1-after.png",
+      "diff": "detach-stress-blocks-1-diff.png",
+      "score": {
+        "score": 0.834154,
+        "wholeSimilarity": 0.940877,
+        "foregroundSimilarity": 0.802147,
+        "edgeSimilarity": 0.819189,
+        "foregroundPixels": 442785,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "blocks",
+      "ordinal": 2,
+      "title": "port · block 2",
+      "before": "detach-stress-blocks-2-before.png",
+      "after": "detach-stress-blocks-2-after.png",
+      "diff": "detach-stress-blocks-2-diff.png",
+      "score": {
+        "score": 0.848763,
+        "wholeSimilarity": 0.951428,
+        "foregroundSimilarity": 0.833748,
+        "edgeSimilarity": 0.799663,
+        "foregroundPixels": 425529,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "blocks",
+      "ordinal": 3,
+      "title": "expanded · block 3",
+      "before": "detach-stress-blocks-3-before.png",
+      "after": "detach-stress-blocks-3-after.png",
+      "diff": "detach-stress-blocks-3-diff.png",
+      "score": {
+        "score": 0.857738,
+        "wholeSimilarity": 0.955151,
+        "foregroundSimilarity": 0.843514,
+        "edgeSimilarity": 0.8111,
+        "foregroundPixels": 413836,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "blocks",
+      "ordinal": 4,
+      "title": "port · block 4",
+      "before": "detach-stress-blocks-4-before.png",
+      "after": "detach-stress-blocks-4-after.png",
+      "diff": "detach-stress-blocks-4-diff.png",
+      "score": {
+        "score": 0.858392,
+        "wholeSimilarity": 0.954747,
+        "foregroundSimilarity": 0.843504,
+        "edgeSimilarity": 0.814063,
+        "foregroundPixels": 418092,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "blocks",
+      "ordinal": 5,
+      "title": "simple · block 5",
+      "before": "detach-stress-blocks-5-before.png",
+      "after": "detach-stress-blocks-5-after.png",
+      "diff": "detach-stress-blocks-5-diff.png",
+      "score": {
+        "score": 0.84627,
+        "wholeSimilarity": 0.95003,
+        "foregroundSimilarity": 0.813196,
+        "edgeSimilarity": 0.836024,
+        "foregroundPixels": 389322,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "blocks",
+      "ordinal": 6,
+      "title": "expanded · block 6",
+      "before": "detach-stress-blocks-6-before.png",
+      "after": "detach-stress-blocks-6-after.png",
+      "diff": "detach-stress-blocks-6-diff.png",
+      "score": {
+        "score": 0.858195,
+        "wholeSimilarity": 0.955454,
+        "foregroundSimilarity": 0.844123,
+        "edgeSimilarity": 0.811345,
+        "foregroundPixels": 412298,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "blocks",
+      "ordinal": 7,
+      "title": "port · block 7",
+      "before": "detach-stress-blocks-7-before.png",
+      "after": "detach-stress-blocks-7-after.png",
+      "diff": "detach-stress-blocks-7-diff.png",
+      "score": {
+        "score": 0.858271,
+        "wholeSimilarity": 0.954636,
+        "foregroundSimilarity": 0.843417,
+        "edgeSimilarity": 0.813855,
+        "foregroundPixels": 419017,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "blocks",
+      "ordinal": 8,
+      "title": "simple · block 8",
+      "before": "detach-stress-blocks-8-before.png",
+      "after": "detach-stress-blocks-8-after.png",
+      "diff": "detach-stress-blocks-8-diff.png",
+      "score": {
+        "score": 0.846662,
+        "wholeSimilarity": 0.950265,
+        "foregroundSimilarity": 0.813736,
+        "edgeSimilarity": 0.836217,
+        "foregroundPixels": 388413,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "blocks",
+      "ordinal": 9,
+      "title": "expanded · block 9",
+      "before": "detach-stress-blocks-9-before.png",
+      "after": "detach-stress-blocks-9-after.png",
+      "diff": "detach-stress-blocks-9-diff.png",
+      "score": {
+        "score": 0.85769,
+        "wholeSimilarity": 0.955166,
+        "foregroundSimilarity": 0.843536,
+        "edgeSimilarity": 0.81085,
+        "foregroundPixels": 413730,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "blocks",
+      "ordinal": 10,
+      "title": "port · block 10",
+      "before": "detach-stress-blocks-10-before.png",
+      "after": "detach-stress-blocks-10-after.png",
+      "diff": "detach-stress-blocks-10-diff.png",
+      "score": {
+        "score": 0.855493,
+        "wholeSimilarity": 0.953427,
+        "foregroundSimilarity": 0.839639,
+        "edgeSimilarity": 0.812026,
+        "foregroundPixels": 421207,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "branches",
+      "ordinal": 1,
+      "title": "2 arms · branche 1",
+      "before": "detach-stress-branches-1-before.png",
+      "after": "detach-stress-branches-1-after.png",
+      "diff": "detach-stress-branches-1-diff.png",
+      "score": {
+        "score": 0.950431,
+        "wholeSimilarity": 0.984847,
+        "foregroundSimilarity": 0.98283,
+        "edgeSimilarity": 0.851622,
+        "foregroundPixels": 1400814,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "branches",
+      "ordinal": 2,
+      "title": "3 arms · branche 2",
+      "before": "detach-stress-branches-2-before.png",
+      "after": "detach-stress-branches-2-after.png",
+      "diff": "detach-stress-branches-2-diff.png",
+      "score": {
+        "score": 0.941175,
+        "wholeSimilarity": 0.979739,
+        "foregroundSimilarity": 0.977017,
+        "edgeSimilarity": 0.831472,
+        "foregroundPixels": 1399325,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "branches",
+      "ordinal": 3,
+      "title": "4 arms · branche 3",
+      "before": "detach-stress-branches-3-before.png",
+      "after": "detach-stress-branches-3-after.png",
+      "diff": "detach-stress-branches-3-diff.png",
+      "score": {
+        "score": 0.932156,
+        "wholeSimilarity": 0.972804,
+        "foregroundSimilarity": 0.969202,
+        "edgeSimilarity": 0.818135,
+        "foregroundPixels": 1401702,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "branches",
+      "ordinal": 4,
+      "title": "2 arms · branche 4",
+      "before": "detach-stress-branches-4-before.png",
+      "after": "detach-stress-branches-4-after.png",
+      "diff": "detach-stress-branches-4-diff.png",
+      "score": {
+        "score": 0.947029,
+        "wholeSimilarity": 0.984035,
+        "foregroundSimilarity": 0.98191,
+        "edgeSimilarity": 0.840686,
+        "foregroundPixels": 1400932,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "branches",
+      "ordinal": 5,
+      "title": "3 arms · branche 5",
+      "before": "detach-stress-branches-5-before.png",
+      "after": "detach-stress-branches-5-after.png",
+      "diff": "detach-stress-branches-5-diff.png",
+      "score": {
+        "score": 0.941174,
+        "wholeSimilarity": 0.979739,
+        "foregroundSimilarity": 0.977017,
+        "edgeSimilarity": 0.831467,
+        "foregroundPixels": 1399325,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "branches",
+      "ordinal": 6,
+      "title": "4 arms · branche 6",
+      "before": "detach-stress-branches-6-before.png",
+      "after": "detach-stress-branches-6-after.png",
+      "diff": "detach-stress-branches-6-diff.png",
+      "score": {
+        "score": 0.93384,
+        "wholeSimilarity": 0.973366,
+        "foregroundSimilarity": 0.969838,
+        "edgeSimilarity": 0.823022,
+        "foregroundPixels": 1401702,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "branches",
+      "ordinal": 7,
+      "title": "2 arms · branche 7",
+      "before": "detach-stress-branches-7-before.png",
+      "after": "detach-stress-branches-7-after.png",
+      "diff": "detach-stress-branches-7-diff.png",
+      "score": {
+        "score": 0.950429,
+        "wholeSimilarity": 0.984847,
+        "foregroundSimilarity": 0.98283,
+        "edgeSimilarity": 0.851614,
+        "foregroundPixels": 1400814,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "branches",
+      "ordinal": 8,
+      "title": "3 arms · branche 8",
+      "before": "detach-stress-branches-8-before.png",
+      "after": "detach-stress-branches-8-after.png",
+      "diff": "detach-stress-branches-8-diff.png",
+      "score": {
+        "score": 0.931243,
+        "wholeSimilarity": 0.975852,
+        "foregroundSimilarity": 0.972609,
+        "edgeSimilarity": 0.804553,
+        "foregroundPixels": 1399444,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "branches",
+      "ordinal": 9,
+      "title": "4 arms · branche 9",
+      "before": "detach-stress-branches-9-before.png",
+      "after": "detach-stress-branches-9-after.png",
+      "diff": "detach-stress-branches-9-diff.png",
+      "score": {
+        "score": 0.932331,
+        "wholeSimilarity": 0.972344,
+        "foregroundSimilarity": 0.968682,
+        "edgeSimilarity": 0.820348,
+        "foregroundPixels": 1401712,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "branches",
+      "ordinal": 10,
+      "title": "2 arms · branche 10",
+      "before": "detach-stress-branches-10-before.png",
+      "after": "detach-stress-branches-10-after.png",
+      "diff": "detach-stress-branches-10-diff.png",
+      "score": {
+        "score": 0.95148,
+        "wholeSimilarity": 0.985705,
+        "foregroundSimilarity": 0.983802,
+        "edgeSimilarity": 0.852991,
+        "foregroundPixels": 1400813,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "loops",
+      "ordinal": 1,
+      "title": "for · loop 1",
+      "before": "detach-stress-loops-1-before.png",
+      "after": "detach-stress-loops-1-after.png",
+      "diff": "detach-stress-loops-1-diff.png",
+      "score": {
+        "score": 0.950716,
+        "wholeSimilarity": 0.983541,
+        "foregroundSimilarity": 0.98135,
+        "edgeSimilarity": 0.857059,
+        "foregroundPixels": 1400941,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "loops",
+      "ordinal": 2,
+      "title": "while · loop 2",
+      "before": "detach-stress-loops-2-before.png",
+      "after": "detach-stress-loops-2-after.png",
+      "diff": "detach-stress-loops-2-diff.png",
+      "score": {
+        "score": 0.9517,
+        "wholeSimilarity": 0.985137,
+        "foregroundSimilarity": 0.983159,
+        "edgeSimilarity": 0.85574,
+        "foregroundPixels": 1400936,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "loops",
+      "ordinal": 3,
+      "title": "for · loop 3",
+      "before": "detach-stress-loops-3-before.png",
+      "after": "detach-stress-loops-3-after.png",
+      "diff": "detach-stress-loops-3-diff.png",
+      "score": {
+        "score": 0.952228,
+        "wholeSimilarity": 0.985594,
+        "foregroundSimilarity": 0.983677,
+        "edgeSimilarity": 0.856348,
+        "foregroundPixels": 1400937,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "loops",
+      "ordinal": 4,
+      "title": "while · loop 4",
+      "before": "detach-stress-loops-4-before.png",
+      "after": "detach-stress-loops-4-after.png",
+      "diff": "detach-stress-loops-4-diff.png",
+      "score": {
+        "score": 0.95218,
+        "wholeSimilarity": 0.984337,
+        "foregroundSimilarity": 0.982252,
+        "edgeSimilarity": 0.860294,
+        "foregroundPixels": 1400941,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "loops",
+      "ordinal": 5,
+      "title": "for · loop 5",
+      "before": "detach-stress-loops-5-before.png",
+      "after": "detach-stress-loops-5-after.png",
+      "diff": "detach-stress-loops-5-diff.png",
+      "score": {
+        "score": 0.946826,
+        "wholeSimilarity": 0.982167,
+        "foregroundSimilarity": 0.979794,
+        "edgeSimilarity": 0.846022,
+        "foregroundPixels": 1400936,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "loops",
+      "ordinal": 6,
+      "title": "while · loop 6",
+      "before": "detach-stress-loops-6-before.png",
+      "after": "detach-stress-loops-6-after.png",
+      "diff": "detach-stress-loops-6-diff.png",
+      "score": {
+        "score": 0.951699,
+        "wholeSimilarity": 0.985137,
+        "foregroundSimilarity": 0.983159,
+        "edgeSimilarity": 0.855738,
+        "foregroundPixels": 1400936,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "loops",
+      "ordinal": 7,
+      "title": "for · loop 7",
+      "before": "detach-stress-loops-7-before.png",
+      "after": "detach-stress-loops-7-after.png",
+      "diff": "detach-stress-loops-7-diff.png",
+      "score": {
+        "score": 0.952325,
+        "wholeSimilarity": 0.984243,
+        "foregroundSimilarity": 0.982146,
+        "edgeSimilarity": 0.861182,
+        "foregroundPixels": 1400941,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "loops",
+      "ordinal": 8,
+      "title": "while · loop 8",
+      "before": "detach-stress-loops-8-before.png",
+      "after": "detach-stress-loops-8-after.png",
+      "diff": "detach-stress-loops-8-diff.png",
+      "score": {
+        "score": 0.95102,
+        "wholeSimilarity": 0.985096,
+        "foregroundSimilarity": 0.983112,
+        "edgeSimilarity": 0.853156,
+        "foregroundPixels": 1400936,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "loops",
+      "ordinal": 9,
+      "title": "for · loop 9",
+      "before": "detach-stress-loops-9-before.png",
+      "after": "detach-stress-loops-9-after.png",
+      "diff": "detach-stress-loops-9-diff.png",
+      "score": {
+        "score": 0.946826,
+        "wholeSimilarity": 0.982167,
+        "foregroundSimilarity": 0.979794,
+        "edgeSimilarity": 0.846022,
+        "foregroundPixels": 1400936,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "loops",
+      "ordinal": 10,
+      "title": "while · loop 10",
+      "before": "detach-stress-loops-10-before.png",
+      "after": "detach-stress-loops-10-after.png",
+      "diff": "detach-stress-loops-10-diff.png",
+      "score": {
+        "score": 0.952025,
+        "wholeSimilarity": 0.984092,
+        "foregroundSimilarity": 0.981975,
+        "edgeSimilarity": 0.86048,
+        "foregroundPixels": 1400941,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "multi-elbows",
+      "ordinal": 1,
+      "title": "3 rails · multi-elbow 1",
+      "before": "detach-stress-multi-elbows-1-before.png",
+      "after": "detach-stress-multi-elbows-1-after.png",
+      "diff": "detach-stress-multi-elbows-1-diff.png",
+      "score": {
+        "score": 0.99371,
+        "wholeSimilarity": 0.998411,
+        "foregroundSimilarity": 0.998184,
+        "edgeSimilarity": 0.980106,
+        "foregroundPixels": 1388539,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "multi-elbows",
+      "ordinal": 2,
+      "title": "4 rails · multi-elbow 2",
+      "before": "detach-stress-multi-elbows-2-before.png",
+      "after": "detach-stress-multi-elbows-2-after.png",
+      "diff": "detach-stress-multi-elbows-2-diff.png",
+      "score": {
+        "score": 0.988224,
+        "wholeSimilarity": 0.997479,
+        "foregroundSimilarity": 0.997118,
+        "edgeSimilarity": 0.961254,
+        "foregroundPixels": 1388539,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "multi-elbows",
+      "ordinal": 3,
+      "title": "5 rails · multi-elbow 3",
+      "before": "detach-stress-multi-elbows-3-before.png",
+      "after": "detach-stress-multi-elbows-3-after.png",
+      "diff": "detach-stress-multi-elbows-3-diff.png",
+      "score": {
+        "score": 0.975226,
+        "wholeSimilarity": 0.995394,
+        "foregroundSimilarity": 0.994734,
+        "edgeSimilarity": 0.916174,
+        "foregroundPixels": 1388539,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "multi-elbows",
+      "ordinal": 4,
+      "title": "6 rails · multi-elbow 4",
+      "before": "detach-stress-multi-elbows-4-before.png",
+      "after": "detach-stress-multi-elbows-4-after.png",
+      "diff": "detach-stress-multi-elbows-4-diff.png",
+      "score": {
+        "score": 0.992477,
+        "wholeSimilarity": 0.998133,
+        "foregroundSimilarity": 0.997865,
+        "edgeSimilarity": 0.9761,
+        "foregroundPixels": 1388539,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "multi-elbows",
+      "ordinal": 5,
+      "title": "7 rails · multi-elbow 5",
+      "before": "detach-stress-multi-elbows-5-before.png",
+      "after": "detach-stress-multi-elbows-5-after.png",
+      "diff": "detach-stress-multi-elbows-5-diff.png",
+      "score": {
+        "score": 0.987938,
+        "wholeSimilarity": 0.997357,
+        "foregroundSimilarity": 0.996978,
+        "edgeSimilarity": 0.960514,
+        "foregroundPixels": 1388539,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "multi-elbows",
+      "ordinal": 6,
+      "title": "3 rails · multi-elbow 6",
+      "before": "detach-stress-multi-elbows-6-before.png",
+      "after": "detach-stress-multi-elbows-6-after.png",
+      "diff": "detach-stress-multi-elbows-6-diff.png",
+      "score": {
+        "score": 0.975812,
+        "wholeSimilarity": 0.99554,
+        "foregroundSimilarity": 0.994901,
+        "edgeSimilarity": 0.918034,
+        "foregroundPixels": 1388539,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "multi-elbows",
+      "ordinal": 7,
+      "title": "4 rails · multi-elbow 7",
+      "before": "detach-stress-multi-elbows-7-before.png",
+      "after": "detach-stress-multi-elbows-7-after.png",
+      "diff": "detach-stress-multi-elbows-7-diff.png",
+      "score": {
+        "score": 0.992174,
+        "wholeSimilarity": 0.998046,
+        "foregroundSimilarity": 0.997766,
+        "edgeSimilarity": 0.975175,
+        "foregroundPixels": 1388539,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "multi-elbows",
+      "ordinal": 8,
+      "title": "5 rails · multi-elbow 8",
+      "before": "detach-stress-multi-elbows-8-before.png",
+      "after": "detach-stress-multi-elbows-8-after.png",
+      "diff": "detach-stress-multi-elbows-8-diff.png",
+      "score": {
+        "score": 0.987931,
+        "wholeSimilarity": 0.997363,
+        "foregroundSimilarity": 0.996986,
+        "edgeSimilarity": 0.960463,
+        "foregroundPixels": 1388539,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "multi-elbows",
+      "ordinal": 9,
+      "title": "6 rails · multi-elbow 9",
+      "before": "detach-stress-multi-elbows-9-before.png",
+      "after": "detach-stress-multi-elbows-9-after.png",
+      "diff": "detach-stress-multi-elbows-9-diff.png",
+      "score": {
+        "score": 0.976704,
+        "wholeSimilarity": 0.99579,
+        "foregroundSimilarity": 0.995188,
+        "edgeSimilarity": 0.92077,
+        "foregroundPixels": 1388856,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "multi-elbows",
+      "ordinal": 10,
+      "title": "7 rails · multi-elbow 10",
+      "before": "detach-stress-multi-elbows-10-before.png",
+      "after": "detach-stress-multi-elbows-10-after.png",
+      "diff": "detach-stress-multi-elbows-10-diff.png",
+      "score": {
+        "score": 0.992032,
+        "wholeSimilarity": 0.998067,
+        "foregroundSimilarity": 0.99779,
+        "edgeSimilarity": 0.974538,
+        "foregroundPixels": 1388539,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "nested",
+      "ordinal": 1,
+      "title": "Branch + expanded child · neste 1",
+      "before": "detach-stress-nested-1-before.png",
+      "after": "detach-stress-nested-1-after.png",
+      "diff": "detach-stress-nested-1-diff.png",
+      "score": {
+        "score": 0.909966,
+        "wholeSimilarity": 0.958511,
+        "foregroundSimilarity": 0.9444,
+        "edgeSimilarity": 0.795377,
+        "foregroundPixels": 1155677,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "nested",
+      "ordinal": 2,
+      "title": "Loop + expanded child · neste 2",
+      "before": "detach-stress-nested-2-before.png",
+      "after": "detach-stress-nested-2-after.png",
+      "diff": "detach-stress-nested-2-diff.png",
+      "score": {
+        "score": 0.916416,
+        "wholeSimilarity": 0.960657,
+        "foregroundSimilarity": 0.94706,
+        "edgeSimilarity": 0.813608,
+        "foregroundPixels": 1148539,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "nested",
+      "ordinal": 3,
+      "title": "Branch + expanded child · neste 3",
+      "before": "detach-stress-nested-3-before.png",
+      "after": "detach-stress-nested-3-after.png",
+      "diff": "detach-stress-nested-3-diff.png",
+      "score": {
+        "score": 0.911284,
+        "wholeSimilarity": 0.956802,
+        "foregroundSimilarity": 0.947805,
+        "edgeSimilarity": 0.794522,
+        "foregroundPixels": 1301300,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "nested",
+      "ordinal": 4,
+      "title": "Loop + expanded child · neste 4",
+      "before": "detach-stress-nested-4-before.png",
+      "after": "detach-stress-nested-4-after.png",
+      "diff": "detach-stress-nested-4-diff.png",
+      "score": {
+        "score": 0.916047,
+        "wholeSimilarity": 0.959628,
+        "foregroundSimilarity": 0.945648,
+        "edgeSimilarity": 0.816059,
+        "foregroundPixels": 1148800,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "nested",
+      "ordinal": 5,
+      "title": "Branch + expanded child · neste 5",
+      "before": "detach-stress-nested-5-before.png",
+      "after": "detach-stress-nested-5-after.png",
+      "diff": "detach-stress-nested-5-diff.png",
+      "score": {
+        "score": 0.911103,
+        "wholeSimilarity": 0.956588,
+        "foregroundSimilarity": 0.947561,
+        "edgeSimilarity": 0.79451,
+        "foregroundPixels": 1301757,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "nested",
+      "ordinal": 6,
+      "title": "Loop + expanded child · neste 6",
+      "before": "detach-stress-nested-6-before.png",
+      "after": "detach-stress-nested-6-after.png",
+      "diff": "detach-stress-nested-6-diff.png",
+      "score": {
+        "score": 0.916156,
+        "wholeSimilarity": 0.960472,
+        "foregroundSimilarity": 0.946829,
+        "edgeSimilarity": 0.813222,
+        "foregroundPixels": 1149166,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "nested",
+      "ordinal": 7,
+      "title": "Branch + expanded child · neste 7",
+      "before": "detach-stress-nested-7-before.png",
+      "after": "detach-stress-nested-7-after.png",
+      "diff": "detach-stress-nested-7-diff.png",
+      "score": {
+        "score": 0.909784,
+        "wholeSimilarity": 0.958275,
+        "foregroundSimilarity": 0.944096,
+        "edgeSimilarity": 0.795505,
+        "foregroundPixels": 1156173,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "nested",
+      "ordinal": 8,
+      "title": "Loop + expanded child · neste 8",
+      "before": "detach-stress-nested-8-before.png",
+      "after": "detach-stress-nested-8-after.png",
+      "diff": "detach-stress-nested-8-diff.png",
+      "score": {
+        "score": 0.915768,
+        "wholeSimilarity": 0.960195,
+        "foregroundSimilarity": 0.946475,
+        "edgeSimilarity": 0.812671,
+        "foregroundPixels": 1149863,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "nested",
+      "ordinal": 9,
+      "title": "Branch + expanded child · neste 9",
+      "before": "detach-stress-nested-9-before.png",
+      "after": "detach-stress-nested-9-after.png",
+      "diff": "detach-stress-nested-9-diff.png",
+      "score": {
+        "score": 0.910903,
+        "wholeSimilarity": 0.956373,
+        "foregroundSimilarity": 0.947316,
+        "edgeSimilarity": 0.794416,
+        "foregroundPixels": 1302265,
+        "totalPixels": 1587405
+      }
+    },
+    {
+      "category": "nested",
+      "ordinal": 10,
+      "title": "Loop + expanded child · neste 10",
+      "before": "detach-stress-nested-10-before.png",
+      "after": "detach-stress-nested-10-after.png",
+      "diff": "detach-stress-nested-10-diff.png",
+      "score": {
+        "score": 0.914172,
+        "wholeSimilarity": 0.958256,
+        "foregroundSimilarity": 0.943792,
+        "edgeSimilarity": 0.81374,
+        "foregroundPixels": 1149730,
+        "totalPixels": 1587405
+      }
+    }
+  ],
+  "checks": {
+    "fiftyCases": true,
+    "fiveTenCaseFamilies": true,
+    "noCustomSurvivors": true,
+    "authoredMultiElbowsUseStockLines": true,
+    "bareStockViewerMounted": true,
+    "bareStockViewerHasLines": true,
+    "bareStockViewerNoErrors": true,
+    "noConsoleErrors": true,
+    "everyVisualScoreMeasured": true
+  },
+  "authoredSummary": {
+    "customShapes": [],
+    "stockShapes": [
+      "arrow",
+      "geo",
+      "group",
+      "line",
+      "text"
+    ],
+    "frozenPolylines": 10
+  },
+  "stockSummary": {
+    "mounted": true,
+    "types": [
+      "arrow",
+      "geo",
+      "group",
+      "line",
+      "text"
+    ],
+    "lineCount": 113,
+    "errorBoundaries": 0
+  },
+  "stockFile": "detach-primitives-stress.tldr",
+  "stockViewer": "detach-primitives-stress-stock-viewer.png"
+}

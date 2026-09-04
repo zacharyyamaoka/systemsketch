@@ -5,13 +5,10 @@
       "rebuildWithBlocks": true,
       "temporal": "async",
       "delayValue": "",
-      "solidBeforePill": true,
-      "exact": true,
-      "presentationBody": true,
-      "dash": "56 4 10 4",
-      "cap": "butt",
-      "delaySegments": [],
-      "delayDashes": [],
+      "kind": "arc",
+      "dash": "dashed",
+      "exact": false,
+      "presentationBody": false,
       "pill": null,
       "bindings": 2
     },
@@ -20,13 +17,10 @@
       "rebuildWithBlocks": false,
       "temporal": "async",
       "delayValue": "",
-      "solidBeforePill": true,
-      "exact": true,
-      "presentationBody": true,
-      "dash": "56 4 10 4",
-      "cap": "butt",
-      "delaySegments": [],
-      "delayDashes": [],
+      "kind": "arc",
+      "dash": "dashed",
+      "exact": false,
+      "presentationBody": false,
       "pill": null,
       "bindings": 2
     },
@@ -35,20 +29,17 @@
       "rebuildWithBlocks": true,
       "temporal": "delayed",
       "delayValue": "11",
-      "solidBeforePill": true,
-      "exact": true,
-      "presentationBody": true,
-      "dash": "580 1000",
-      "cap": "round",
-      "delaySegments": [
-        "before",
-        "after"
-      ],
-      "delayDashes": [
-        "580 1000",
-        "0 580 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0 1000"
-      ],
-      "pill": "z⁻¹ = 11",
+      "kind": "elbow",
+      "dash": "dotted",
+      "exact": false,
+      "presentationBody": false,
+      "pill": {
+        "types": [
+          "geo",
+          "text"
+        ],
+        "text": "z⁻¹ = 11"
+      },
       "bindings": 2
     }
   ],
@@ -58,13 +49,10 @@
       "rebuildWithBlocks": true,
       "temporal": "async",
       "delayValue": "",
-      "solidBeforePill": true,
+      "kind": "arc",
+      "dash": "dashed",
       "exact": false,
-      "presentationBody": true,
-      "dash": "56 4 10 4",
-      "cap": "butt",
-      "delaySegments": [],
-      "delayDashes": [],
+      "presentationBody": false,
       "pill": null,
       "bindings": 2
     },
@@ -73,13 +61,10 @@
       "rebuildWithBlocks": false,
       "temporal": "async",
       "delayValue": "",
-      "solidBeforePill": true,
+      "kind": "arc",
+      "dash": "dashed",
       "exact": false,
-      "presentationBody": true,
-      "dash": "56 4 10 4",
-      "cap": "butt",
-      "delaySegments": [],
-      "delayDashes": [],
+      "presentationBody": false,
       "pill": null,
       "bindings": 2
     },
@@ -88,20 +73,17 @@
       "rebuildWithBlocks": true,
       "temporal": "delayed",
       "delayValue": "11",
-      "solidBeforePill": true,
+      "kind": "elbow",
+      "dash": "dotted",
       "exact": false,
-      "presentationBody": true,
-      "dash": "580 1000",
-      "cap": "round",
-      "delaySegments": [
-        "before",
-        "after"
-      ],
-      "delayDashes": [
-        "580 1000",
-        "0 580 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0 1000"
-      ],
-      "pill": "z⁻¹ = 11",
+      "presentationBody": false,
+      "pill": {
+        "types": [
+          "geo",
+          "text"
+        ],
+        "text": "z⁻¹ = 11"
+      },
       "bindings": 2
     }
   ],
@@ -111,13 +93,10 @@
       "rebuildWithBlocks": true,
       "temporal": "async",
       "delayValue": "",
-      "solidBeforePill": true,
+      "kind": "arc",
+      "dash": "dashed",
       "exact": false,
-      "presentationBody": true,
-      "dash": "56 4 10 4",
-      "cap": "butt",
-      "delaySegments": [],
-      "delayDashes": [],
+      "presentationBody": false,
       "pill": null,
       "bindings": 2
     },
@@ -126,13 +105,10 @@
       "rebuildWithBlocks": false,
       "temporal": "async",
       "delayValue": "",
-      "solidBeforePill": true,
+      "kind": "arc",
+      "dash": "dashed",
       "exact": false,
-      "presentationBody": true,
-      "dash": "56 4 10 4",
-      "cap": "butt",
-      "delaySegments": [],
-      "delayDashes": [],
+      "presentationBody": false,
       "pill": null,
       "bindings": 2
     },
@@ -141,75 +117,56 @@
       "rebuildWithBlocks": true,
       "temporal": "delayed",
       "delayValue": "11",
-      "solidBeforePill": true,
+      "kind": "elbow",
+      "dash": "dotted",
       "exact": false,
-      "presentationBody": true,
-      "dash": "580 1000",
-      "cap": "round",
-      "delaySegments": [
-        "before",
-        "after"
-      ],
-      "delayDashes": [
-        "580 1000",
-        "0 580 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0.261 15.646 0 1000"
-      ],
-      "pill": "z⁻¹ = 11",
+      "presentationBody": false,
+      "pill": {
+        "types": [
+          "geo",
+          "text"
+        ],
+        "text": "z⁻¹ = 11"
+      },
       "bindings": 2
     }
   ],
   "exported": {
-    "async": [
-      {
-        "dash": "56 4 10 4",
-        "cap": "butt"
-      },
-      {
-        "dash": "56 4 10 4",
-        "cap": "butt"
-      }
-    ],
-    "delayedSegments": [
-      "before",
-      "after"
-    ],
-    "delayedDashes": [
-      "580 1000",
-      "0 580 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0.357 21.429 0 1000"
-    ],
-    "pill": "z⁻¹ = 11"
+    "pathCount": 10,
+    "text": [],
+    "customPresentationNodes": 0
   },
   "crops": [
     {
       "key": "delayed",
       "score": {
-        "score": 1,
-        "wholeSimilarity": 1,
-        "foregroundSimilarity": 1,
-        "edgeSimilarity": 1,
-        "foregroundPixels": 1079,
+        "score": 0.821205,
+        "wholeSimilarity": 0.967405,
+        "foregroundSimilarity": 0.815009,
+        "edgeSimilarity": 0.717877,
+        "foregroundPixels": 2934,
         "totalPixels": 16660
       }
     },
     {
       "key": "async-block",
       "score": {
-        "score": 1,
-        "wholeSimilarity": 1,
-        "foregroundSimilarity": 1,
-        "edgeSimilarity": 1,
-        "foregroundPixels": 679,
+        "score": 0.76122,
+        "wholeSimilarity": 0.978812,
+        "foregroundSimilarity": 0.690979,
+        "edgeSimilarity": 0.741678,
+        "foregroundPixels": 974,
         "totalPixels": 14210
       }
     },
     {
       "key": "async-direct",
       "score": {
-        "score": 1,
-        "wholeSimilarity": 1,
-        "foregroundSimilarity": 1,
-        "edgeSimilarity": 1,
-        "foregroundPixels": 1568,
+        "score": 0.839579,
+        "wholeSimilarity": 0.991562,
+        "foregroundSimilarity": 0.783988,
+        "edgeSimilarity": 0.840295,
+        "foregroundPixels": 1712,
         "totalPixels": 43840
       }
     }
@@ -218,15 +175,15 @@
     "standaloneMenuActionExists": true,
     "standaloneAndBlockDetachBothConvert": true,
     "standaloneStaysIndependent": true,
-    "exactFrameUsesPresentationRenderer": true,
-    "asyncCadenceAndCapsMatch": true,
-    "delayedSplitAndTextMatch": true,
-    "svgExportKeepsPresentation": true,
-    "edgeCropsAtLeast99Percent": true,
-    "movementHandsGeometryToStock": true,
-    "movementKeepsPresentation": true,
+    "nativeStockGeometryFromFirstFrame": true,
+    "temporalStockStyles": true,
+    "delayedUsesStockPill": true,
+    "svgExportHasNoCustomPresentation": true,
+    "edgeCropsMeasured": true,
+    "movementKeepsStockGeometry": true,
+    "movementKeepsStockSemantics": true,
     "bindingsRemainLive": true,
-    "reloadKeepsPresentation": true,
+    "reloadKeepsStockSemantics": true,
     "noConsoleErrors": true
   }
 }
