@@ -13,9 +13,11 @@ pages in place.
 After the incorporated report, Zach superseded the report-era Split / Merge
 vocabulary with **Bundle** / **Unbundle**, and added shallow **Copy** with quick
 access at the existing loose-terminal drop picker. The completed independent
-track is [`track/bundle-unbundle-copy-quick-insert`](https://github.com/zacharyyamaoka/systemsketch/tree/track/bundle-unbundle-copy-quick-insert), pinned to
-[`7e8673b1265521b6922dd77406ff7e88565d3596`](https://github.com/zacharyyamaoka/systemsketch/commit/7e8673b1265521b6922dd77406ff7e88565d3596)
+track is `track/bundle-unbundle-copy-quick-insert`, pinned locally to
+`7e8673b1265521b6922dd77406ff7e88565d3596`
 (base [`363792db43f0bf31c74ba7968759776aa3807401`](https://github.com/zacharyyamaoka/systemsketch/commit/363792db43f0bf31c74ba7968759776aa3807401)).
+The product branch is deliberately unmerged and has not been published to `origin`; the
+identifiers above are review coordinates in Zach's local repository, not public links.
 
 Bundle is a retained named record with stable `.field` member-update rows;
 Unbundle is a projection with accessors; Copy is shallow, not deep or runtime
