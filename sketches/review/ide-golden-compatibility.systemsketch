@@ -151,9 +151,9 @@
       "typeName": "shape"
     },
     {
-      "x": 64.53367875647675,
-      "y": -72.6321243523316,
-      "z": 1.115606936416185,
+      "x": 0,
+      "y": 0,
+      "z": 1,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -265,6 +265,14 @@
       "parentId": "page:page",
       "index": "a1VFv",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#F2555A",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:pmiZADJbG448apdB4xJRM",
+      "typeName": "user"
     },
     {
       "x": 785,
@@ -389,7 +397,7 @@
         "x": 0,
         "y": 0,
         "w": 1360,
-        "h": 900
+        "h": 813
       },
       "insets": [
         false,

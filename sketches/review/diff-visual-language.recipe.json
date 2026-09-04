@@ -1,0 +1,325 @@
+{
+  "feature": "Conformance diff visual language \u00b7 state on Block, port and cable",
+  "viewport": {
+    "width": 2200,
+    "height": 1620
+  },
+  "shapes": [
+    {
+      "id": "producer",
+      "type": "block",
+      "x": 760,
+      "y": 300,
+      "props": {
+        "title": "estimate()",
+        "description": "Estimate a pose from a frame at an explicit gain.",
+        "blockType": "transform",
+        "view": "port",
+        "w": 460,
+        "h": 250,
+        "state": "changed",
+        "inputs": [
+          {
+            "id": "in_frame",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_pose",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          },
+          {
+            "id": "ghost_callee",
+            "name": "callee",
+            "type": "Estimator",
+            "visible": true,
+            "state": "removed"
+          }
+        ]
+      }
+    },
+    {
+      "id": "consumer",
+      "type": "block",
+      "x": 1420,
+      "y": 300,
+      "props": {
+        "title": "transform()",
+        "description": "The call the target asserts a callee dependency on.",
+        "blockType": "transform",
+        "view": "port",
+        "w": 640,
+        "h": 294,
+        "state": "changed",
+        "inputs": [
+          {
+            "id": "in_pose",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          },
+          {
+            "id": "in_callable",
+            "name": "callable",
+            "type": "Estimator",
+            "visible": true,
+            "state": "changed",
+            "stateBefore": "callee"
+          },
+          {
+            "id": "ghost_callee",
+            "name": "callee",
+            "type": "Estimator",
+            "visible": true,
+            "state": "removed"
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_result",
+            "name": "result",
+            "type": "Pose",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "live-cable",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow"
+      }
+    },
+    {
+      "id": "ghost-cable",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow",
+        "state": "removed"
+      }
+    },
+    {
+      "id": "calm-a",
+      "type": "block",
+      "x": 760,
+      "y": 760,
+      "props": {
+        "title": "decode()",
+        "description": "Unchanged: this is what a passing case looks like.",
+        "blockType": "transform",
+        "view": "port",
+        "w": 460,
+        "h": 210,
+        "inputs": [
+          {
+            "id": "in_raw",
+            "name": "raw",
+            "type": "bytes",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_frame",
+            "name": "frame",
+            "type": "Frame",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "calm-b",
+      "type": "block",
+      "x": 1420,
+      "y": 760,
+      "props": {
+        "title": "encode()",
+        "description": "Also unchanged. No tint, no badge, no ghost row.",
+        "blockType": "transform",
+        "view": "port",
+        "w": 460,
+        "h": 210,
+        "inputs": [
+          {
+            "id": "in_pose",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_payload",
+            "name": "payload",
+            "type": "bytes",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "calm-cable",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "routing": "elbow"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "live-start",
+      "type": "connection",
+      "fromId": "live-cable",
+      "toId": "producer",
+      "props": {
+        "portId": "out_pose",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "live-end",
+      "type": "connection",
+      "fromId": "live-cable",
+      "toId": "consumer",
+      "props": {
+        "portId": "in_pose",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "ghost-start",
+      "type": "connection",
+      "fromId": "ghost-cable",
+      "toId": "producer",
+      "props": {
+        "portId": "ghost_callee",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "ghost-end",
+      "type": "connection",
+      "fromId": "ghost-cable",
+      "toId": "consumer",
+      "props": {
+        "portId": "ghost_callee",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "calm-start",
+      "type": "connection",
+      "fromId": "calm-cable",
+      "toId": "calm-a",
+      "props": {
+        "portId": "out_frame",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "id": "calm-end",
+      "type": "connection",
+      "fromId": "calm-cable",
+      "toId": "calm-b",
+      "props": {
+        "portId": "in_pose",
+        "terminal": "end",
+        "face": "outer"
+      }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 \u00b7 Read the top pair first. This is a conformance diff drawn by SystemSketch itself, not a second picture of it. On estimate(), the struck row 'callee' is a port the target asserts and this board does not have; the red dashed cable is the connection that would have run through it.",
+      "x": 80,
+      "y": 250,
+      "w": 560,
+      "h": 200,
+      "target": {
+        "shapeId": "producer",
+        "anchor": "left",
+        "dy": 0
+      }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 \u00b7 On transform(), the row reading 'callee \u2192 callable' is one renamed port, not a removal beside an addition. Below it sits the second ghost row the missing cable lands on.",
+      "x": 1300,
+      "y": 60,
+      "w": 620,
+      "h": 140,
+      "target": {
+        "shapeId": "consumer",
+        "anchor": "top",
+        "dx": 0
+      }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 \u00b7 Now the bottom pair. It carries no marks at all, because nothing about it is wrong. A passing conformance case has to look exactly like this \u2014 an ordinary board.",
+      "x": 80,
+      "y": 700,
+      "w": 560,
+      "h": 150,
+      "target": {
+        "shapeId": "calm-a",
+        "anchor": "left",
+        "dy": 0
+      }
+    },
+    {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 \u00b7 Press Ctrl+P, type 'clear diff' and run Clear diff marks. Every tint, badge and strike goes; the two ghost rows and the ghost cable are deleted outright.",
+      "x": 760,
+      "y": 1080,
+      "w": 620,
+      "h": 160,
+      "target": {
+        "shapeId": "calm-a",
+        "anchor": "bottom",
+        "dx": 0
+      }
+    },
+    {
+      "id": "note-variants",
+      "kind": "note",
+      "text": "The paint is a variant. In the console: localStorage.setItem('systemsketch.diff-presentation.v1', JSON.stringify({variant:'diff-gutter'})) then reload. Try diff-gutter, ghost-weight, badge-only, status-fill.",
+      "x": 1440,
+      "y": 1080,
+      "w": 620,
+      "h": 180
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN \u00b7 The top pair reads as one graph whose two Blocks are visibly marked and whose missing port sits in its own struck row; the bottom pair looks completely untouched; and after Clear diff marks the whole board looks like the bottom pair, with the ghost rows and the red dashed cable gone.",
+      "x": 760,
+      "y": 1320,
+      "w": 1300,
+      "h": 150
+    }
+  ]
+}

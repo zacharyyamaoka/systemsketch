@@ -108,6 +108,14 @@
       "typeName": "pointer"
     },
     {
+      "name": "",
+      "color": "#BD54C6",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:oAwdl8L1mW2UYS9rTjLBL",
+      "typeName": "user"
+    },
+    {
       "x": 40,
       "y": 40,
       "rotation": 0,
@@ -243,9 +251,9 @@
       "typeName": "shape"
     },
     {
-      "x": 26.086956521739125,
-      "y": 34.673913043478265,
-      "z": 0.968421052631579,
+      "x": 54.48306271158088,
+      "y": 319.88139396895525,
+      "z": 0.6561000000000001,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -270,7 +278,14 @@
         },
         "routing": "elbow",
         "curve": null,
-        "pins": [],
+        "pins": [
+          {
+            "index": 1,
+            "axis": "y",
+            "t": 0.44814814814814813,
+            "offset": 0
+          }
+        ],
         "elbowRoute": null,
         "temporal": "data",
         "delayValue": "",
@@ -300,7 +315,14 @@
         },
         "routing": "elbow",
         "curve": null,
-        "pins": [],
+        "pins": [
+          {
+            "index": 1,
+            "axis": "y",
+            "t": 0.4740740740740741,
+            "offset": 0
+          }
+        ],
         "elbowRoute": null,
         "temporal": "data",
         "delayValue": "",
@@ -311,7 +333,7 @@
       "typeName": "shape"
     },
     {
-      "x": 1070,
+      "x": 650,
       "y": 260,
       "rotation": 0,
       "isLocked": false,
@@ -419,7 +441,9 @@
     {
       "editingShapeId": null,
       "croppingShapeId": null,
-      "selectedShapeIds": [],
+      "selectedShapeIds": [
+        "shape:target"
+      ],
       "hoveredShapeId": null,
       "erasingShapeIds": [],
       "hintingShapeIds": [],
@@ -449,7 +473,14 @@
         },
         "routing": "elbow",
         "curve": null,
-        "pins": [],
+        "pins": [
+          {
+            "index": 1,
+            "axis": "y",
+            "t": 0.5259259259259259,
+            "offset": 0
+          }
+        ],
         "elbowRoute": null,
         "temporal": "data",
         "delayValue": "",
@@ -479,7 +510,14 @@
         },
         "routing": "elbow",
         "curve": null,
-        "pins": [],
+        "pins": [
+          {
+            "index": 1,
+            "axis": "y",
+            "t": 0.5518518518518518,
+            "offset": 0
+          }
+        ],
         "elbowRoute": null,
         "temporal": "data",
         "delayValue": "",
@@ -566,7 +604,7 @@
     },
     {
       "x": 210,
-      "y": 330,
+      "y": 260,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -734,8 +772,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1600,
-        "h": 900
+        "w": 1250,
+        "h": 1086.4285888671875
       },
       "insets": [
         false,
@@ -750,9 +788,9 @@
       "isChatting": false,
       "highlightedUserIds": [],
       "isFocused": true,
-      "devicePixelRatio": 1,
+      "devicePixelRatio": 1.399999976158142,
       "isCoarsePointer": false,
-      "isHoveringCanvas": null,
+      "isHoveringCanvas": true,
       "openMenus": [],
       "isChangingStyle": false,
       "isReadonly": false,

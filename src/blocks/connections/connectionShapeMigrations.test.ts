@@ -54,6 +54,9 @@ describe('connection shape migrations', () => {
 				pillPosition: 0.5,
 				tunnel: false,
 				tunnelLayer: '',
+				// One state vocabulary across Block, port and cable; a StyleProp
+				// cannot be optional, so every stored cable gets `normal`.
+				state: 'normal',
 			},
 		})
 	})
@@ -90,4 +93,27 @@ describe('connection shape migrations', () => {
 			props: { pins: legacy.props.pins, routeMode: 'authored' },
 		})
 	})
+
+	it('takes the round-2 cable pairs off on the way down', () => {
+		const store = createTLStore({ shapeUtils: [ConnectionShapeUtil], bindingUtils: [] })
+		const sequence = store.schema.sortedMigrations
+			.filter((migration) => migration.id.startsWith(`${CONNECTION_MIGRATION_SEQUENCE}/`))
+		const step = sequence.find((migration) => migration.id.endsWith('/6'))
+		expect(step, 'the AddFieldDiffs migration').toBeDefined()
+		const props: Record<string, unknown> = {
+			...legacyConnection().props,
+			state: 'changed',
+			delayValue: '1.0',
+			fieldDiffs: [
+				{ path: 'delayValue', before: '0.0', after: '1.0' },
+				{ path: 'props.bindings.end.portId', before: 'in_a', after: 'in_b' },
+			],
+		}
+		;(step as { down: (record: unknown) => void }).down({ props })
+		// Without the vocabulary a rewired cable renders as an ordinary one
+		// landing on its new port, with no sign it used to land somewhere else.
+		expect(props).not.toHaveProperty('fieldDiffs')
+		expect(props.delayValue).toBe('1.0')
+	})
+
 })

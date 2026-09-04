@@ -1,205 +1,204 @@
 {"t":0.3,"lane":"mark","text":"take started"}
-{"t":7.6,"lane":"ui","name":"focusout","summary":"focusout button “Start recording · one minute maximum”","detail":"focus-000001"}
-{"t":50,"lane":"network","name":"fetch","summary":"POST /api/recordings/arm → 200 in 49.5 ms","method":"POST","url":"/api/recordings/arm","status":200,"ok":true,"durationMs":49.5,"level":"info","detail":"fetch-000002"}
-{"t":298.2,"lane":"workspace","name":"stat","summary":"board revision check started","level":"info","detail":"stat-000003"}
-{"t":301.2,"lane":"network","name":"fetch","summary":"GET /api/workspace/stat?path=<redacted> → 200 in 2.9 ms","method":"GET","url":"/api/workspace/stat?path=<redacted>","status":200,"ok":true,"durationMs":2.9,"level":"info","detail":"fetch-000004"}
-{"t":301.4,"lane":"workspace","name":"stat","summary":"board revision check completed","level":"info","detail":"stat-000005"}
-{"t":499.1,"lane":"ui","name":"resize","summary":"viewport 1440×960","viewport":{"w":1440,"h":960},"visualViewport":{"w":1440,"h":960,"scale":1,"x":0,"y":0}}
-{"t":500.3,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"isHoveringCanvas":true}}],"detail":"store-000006"}
-{"t":629.4,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"screenBounds":{"x":0,"y":0,"w":1440,"h":960}}}],"detail":"store-000007"}
-{"t":848.3,"lane":"input","name":"pointer_move","type":"pointer","screen":[200,880],"page":[200,880],"target":"canvas","button":-1}
-{"t":849.1,"lane":"dom","event":"pointerdown","button":0,"buttons":1,"pointerType":"mouse","screen":[200,880],"on":"div “canvas”","detail":"ui-hit-000008"}
-{"t":849.8,"lane":"input","name":"pointer_down","type":"pointer","screen":[200,880],"page":[200,880],"target":"canvas","button":0}
-{"t":849.8,"lane":"state","from":"select.idle","to":"select.pointing_canvas","trigger":"pointer_down"}
-{"t":854.4,"lane":"ui","name":"focusin","summary":"focusin div[application] “tldraw”","detail":"focus-000009"}
-{"t":855.1,"lane":"dom","event":"pointerup","button":0,"buttons":0,"pointerType":"mouse","screen":[200,880],"on":"div “canvas”"}
-{"t":855.5,"lane":"input","name":"pointer_up","type":"pointer","screen":[200,880],"page":[200,880],"target":"canvas","button":0}
-{"t":855.5,"lane":"state","from":"select.pointing_canvas","to":"select.idle","trigger":"pointer_up"}
-{"t":856.1,"lane":"dom","event":"click","button":0,"buttons":0,"pointerType":"mouse","screen":[200,880],"on":"div “canvas”","detail":"ui-hit-000010"}
-{"t":1017.2,"lane":"dom","event":"keydown","key":"b","code":"KeyB","on":"div[application] “tldraw”","mods":[]}
-{"t":1017.5,"lane":"input","name":"key_down","type":"keyboard","key":"b","code":"KeyB"}
-{"t":1029.8,"lane":"action","name":"chrome-right","summary":"opened inspector","level":"info","detail":"chrome-right-000011"}
-{"t":1046.1,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"cross","rotation":0}}}],"detail":"store-000012"}
-{"t":1046.1,"lane":"state","from":"select.idle","to":"block.idle","trigger":"store"}
-{"t":1047.8,"lane":"dom","event":"keyup","key":"b","code":"KeyB","on":"div[application] “tldraw”","mods":[]}
-{"t":1047.9,"lane":"input","name":"key_up","type":"keyboard","key":"b","code":"KeyB"}
-{"t":1131.5,"lane":"input","name":"pointer_move","type":"pointer","screen":[300,260],"page":[300,260],"target":"canvas","button":-1}
-{"t":1132.1,"lane":"dom","event":"pointerdown","button":0,"buttons":1,"pointerType":"mouse","screen":[300,260],"on":"div “canvas”","detail":"ui-hit-000013"}
-{"t":1132.4,"lane":"input","name":"pointer_down","type":"pointer","screen":[300,260],"page":[300,260],"target":"canvas","button":0}
-{"t":1132.4,"lane":"state","from":"block.idle","to":"block.pointing","trigger":"pointer_down"}
-{"t":1153.7,"lane":"input","name":"pointer_move","type":"pointer","screen":[357,293],"page":[357,293],"target":"canvas","button":-1}
-{"t":1153.8,"lane":"state","from":"block.pointing","to":"select.resizing","trigger":"pointer_move"}
-{"t":1155.4,"lane":"workspace","name":"autosave-scheduled","summary":"autosave scheduled","level":"info","detail":"autosave-scheduled-000014"}
-{"t":1155.4,"lane":"store","source":"user","ops":[{"op":"add","id":"shape:rGfQmbJ7k5U62mKqV2u-g","type":"block"},{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"selectedShapeIds":["shape:rGfQmbJ7k5U62mKqV2u-g"]}}],"detail":"store-000015"}
-{"t":1182.4,"lane":"action","name":"chrome-right","summary":"opened inspector","level":"info","detail":"chrome-right-000016"}
-{"t":1196.6,"lane":"input","name":"pointer_move","type":"pointer","screen":[413,327],"page":[413,327],"target":"canvas","button":-1}
-{"t":1214.4,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:rGfQmbJ7k5U62mKqV2u-g","type":"block","delta":{"props":"<339 chars>"}}],"detail":"store-000017"}
-{"t":1231.5,"lane":"input","name":"pointer_move","type":"pointer","screen":[470,360],"page":[470,360],"target":"canvas","button":-1}
-{"t":1247.6,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:rGfQmbJ7k5U62mKqV2u-g","type":"block","delta":{"props":"<341 chars>"}}],"detail":"store-000018"}
-{"t":1264.6,"lane":"input","name":"pointer_move","type":"pointer","screen":[527,393],"page":[527,393],"target":"canvas","button":-1}
-{"t":1281,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:rGfQmbJ7k5U62mKqV2u-g","type":"block","delta":{"props":"<341 chars>"}}],"detail":"store-000019"}
-{"t":1298.5,"lane":"input","name":"pointer_move","type":"pointer","screen":[583,427],"page":[583,427],"target":"canvas","button":-1}
-{"t":1314.3,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:rGfQmbJ7k5U62mKqV2u-g","type":"block","delta":{"props":"<341 chars>"}}],"detail":"store-000020"}
-{"t":1331.3,"lane":"input","name":"pointer_move","type":"pointer","screen":[640,460],"page":[640,460],"target":"canvas","button":-1}
-{"t":1347.6,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:rGfQmbJ7k5U62mKqV2u-g","type":"block","delta":{"props":"<341 chars>"}}],"detail":"store-000021"}
-{"t":1356.7,"lane":"dom","event":"pointerup","button":0,"buttons":0,"pointerType":"mouse","screen":[640,460],"on":"div “canvas”"}
-{"t":1358.2,"lane":"input","name":"pointer_up","type":"pointer","screen":[640,460],"page":[640,460],"target":"canvas","button":0}
-{"t":1358.2,"lane":"state","from":"select.resizing","to":"select.idle","trigger":"pointer_up"}
-{"t":1378.9,"lane":"ui","name":"focusout","summary":"focusout div[application] “tldraw”","detail":"focus-000022"}
-{"t":1379.1,"lane":"ui","name":"focusin","summary":"focusin input “Edit block title”","detail":"focus-000023"}
-{"t":1382.1,"lane":"dom","event":"click","button":0,"buttons":0,"pointerType":"mouse","screen":[640,460],"on":"div “canvas”","detail":"ui-hit-000024"}
-{"t":1383.3,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:rGfQmbJ7k5U62mKqV2u-g","type":"block","delta":{"props":"<339 chars>"}},{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"default","rotation":0}}},{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"editingShapeId":"shape:rGfQmbJ7k5U62mKqV2u-g","hoveredShapeId":"shape:rGfQmbJ7k5U62mKqV2u-g"}}],"detail":"store-000025"}
-{"t":1383.4,"lane":"state","from":"select.idle","to":"select.editing_shape","trigger":"store"}
-{"t":1386.7,"lane":"ui","name":"beforeinput","summary":"beforeinput on input “Edit block title”","inputType":"insertText","dataLength":6,"composing":false,"on":"input “Edit block title”"}
-{"t":1386.9,"lane":"ui","name":"input","summary":"input on input “Edit block title”","inputType":"insertText","dataLength":6,"composing":false,"on":"input “Edit block title”"}
-{"t":1399.4,"lane":"dom","event":"keydown","key":"Enter","code":"Enter","on":"input “Edit block title”","mods":[]}
-{"t":1399.8,"lane":"ui","name":"focusout","summary":"focusout input “Edit block title”","detail":"focus-000026"}
-{"t":1399.9,"lane":"ui","name":"focusin","summary":"focusin div[application] “tldraw”","detail":"focus-000027"}
-{"t":1401,"lane":"input","name":"complete","type":"misc"}
-{"t":1401,"lane":"state","from":"select.editing_shape","to":"select.idle","trigger":"complete"}
-{"t":1416.5,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:rGfQmbJ7k5U62mKqV2u-g","type":"block","delta":{"props":"<351 chars>"}},{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"editingShapeId":null,"hoveredShapeId":null}},{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"nwse-resize","rotation":0}}}],"detail":"store-000028"}
-{"t":1419.2,"lane":"dom","event":"keyup","key":"Enter","code":"Enter","on":"div[application] “tldraw”","mods":[]}
-{"t":1419.4,"lane":"input","name":"key_up","type":"keyboard","key":"Enter","code":"Enter"}
-{"t":1716.4,"lane":"input","name":"pointer_move","type":"pointer","screen":[1415,582],"page":[1415,582],"target":"canvas","button":-1}
-{"t":1718,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"default","rotation":0},"isHoveringCanvas":false}}],"detail":"store-000029"}
-{"t":1720,"lane":"dom","event":"pointerdown","button":0,"buttons":1,"pointerType":"mouse","screen":[1415,582],"on":"button “Add output port”","detail":"ui-hit-000030"}
-{"t":1720.6,"lane":"ui","name":"focusout","summary":"focusout div[application] “tldraw”","detail":"focus-000031"}
-{"t":1720.6,"lane":"ui","name":"focusin","summary":"focusin button “Add output port”","detail":"focus-000032"}
-{"t":1721.2,"lane":"dom","event":"pointerup","button":0,"buttons":0,"pointerType":"mouse","screen":[1415,582],"on":"button “Add output port”"}
-{"t":1721.4,"lane":"dom","event":"click","button":0,"buttons":0,"pointerType":"mouse","screen":[1415,582],"on":"button “Add output port”","detail":"ui-hit-000033"}
-{"t":1732.4,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:rGfQmbJ7k5U62mKqV2u-g","type":"block","delta":{"props":"<405 chars>"}}],"detail":"store-000034"}
-{"t":1798.2,"lane":"workspace","name":"stat","summary":"board revision check started","level":"info","detail":"stat-000035"}
-{"t":1800.1,"lane":"network","name":"fetch","summary":"GET /api/workspace/stat?path=<redacted> → 200 in 1.8 ms","method":"GET","url":"/api/workspace/stat?path=<redacted>","status":200,"ok":true,"durationMs":1.8,"level":"info","detail":"fetch-000036"}
-{"t":1800.2,"lane":"workspace","name":"stat","summary":"board revision check completed","level":"info","detail":"stat-000037"}
-{"t":2332.6,"lane":"workspace","name":"autosave-start","summary":"autosave started","level":"info","detail":"autosave-start-000038"}
-{"t":2333.1,"lane":"workspace","name":"write","summary":"board save started","level":"info","detail":"write-000039"}
-{"t":2353.8,"lane":"network","name":"fetch","summary":"POST /api/workspace/file → 200 in 20.7 ms","method":"POST","url":"/api/workspace/file","status":200,"ok":true,"durationMs":20.7,"level":"info","detail":"fetch-000040"}
-{"t":2354.1,"lane":"workspace","name":"write","summary":"board save completed","level":"info","detail":"write-000041"}
-{"t":2354.2,"lane":"workspace","name":"autosave-complete","summary":"autosave completed","level":"info","detail":"autosave-complete-000042"}
-{"t":2512.8,"lane":"dom","event":"keydown","key":"b","code":"KeyB","on":"button “Add output port”","mods":[]}
-{"t":2530.5,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"cross","rotation":0}}}],"detail":"store-000043"}
-{"t":2530.5,"lane":"state","from":"select.idle","to":"block.idle","trigger":"store"}
-{"t":2532.3,"lane":"dom","event":"keyup","key":"b","code":"KeyB","on":"button “Add output port”","mods":[]}
-{"t":2616.1,"lane":"input","name":"pointer_move","type":"pointer","screen":[820,260],"page":[820,260],"target":"canvas","button":-1}
-{"t":2616.2,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"isHoveringCanvas":true}}],"detail":"store-000044"}
-{"t":2617.9,"lane":"dom","event":"pointerdown","button":0,"buttons":1,"pointerType":"mouse","screen":[820,260],"on":"div “canvas”","detail":"ui-hit-000045"}
-{"t":2618.1,"lane":"input","name":"pointer_down","type":"pointer","screen":[820,260],"page":[820,260],"target":"canvas","button":0}
-{"t":2618.1,"lane":"state","from":"block.idle","to":"block.pointing","trigger":"pointer_down"}
-{"t":2618.7,"lane":"ui","name":"focusout","summary":"focusout button “Add output port”","detail":"focus-000046"}
-{"t":2618.8,"lane":"ui","name":"focusin","summary":"focusin div[application] “tldraw”","detail":"focus-000047"}
-{"t":2632.6,"lane":"input","name":"pointer_move","type":"pointer","screen":[877,293],"page":[877,293],"target":"canvas","button":-1}
-{"t":2632.7,"lane":"state","from":"block.pointing","to":"select.resizing","trigger":"pointer_move"}
-{"t":2633.2,"lane":"workspace","name":"autosave-scheduled","summary":"autosave scheduled","level":"info","detail":"autosave-scheduled-000048"}
-{"t":2633.2,"lane":"store","source":"user","ops":[{"op":"add","id":"shape:awptT39LCWry1Vj9XlEKZ","type":"block"},{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"selectedShapeIds":["shape:awptT39LCWry1Vj9XlEKZ"]}}],"detail":"store-000049"}
-{"t":2655.1,"lane":"action","name":"chrome-right","summary":"opened inspector","level":"info","detail":"chrome-right-000050"}
-{"t":2668.6,"lane":"input","name":"pointer_move","type":"pointer","screen":[933,327],"page":[933,327],"target":"canvas","button":-1}
-{"t":2680.9,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:awptT39LCWry1Vj9XlEKZ","type":"block","delta":{"props":"<339 chars>"}}],"detail":"store-000051"}
-{"t":2698.2,"lane":"input","name":"pointer_move","type":"pointer","screen":[990,360],"page":[990,360],"target":"canvas","button":-1}
-{"t":2714.2,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:awptT39LCWry1Vj9XlEKZ","type":"block","delta":{"props":"<341 chars>"}}],"detail":"store-000052"}
-{"t":2731.1,"lane":"input","name":"pointer_move","type":"pointer","screen":[1047,393],"page":[1047,393],"target":"canvas","button":-1}
-{"t":2747.5,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:awptT39LCWry1Vj9XlEKZ","type":"block","delta":{"props":"<341 chars>"}}],"detail":"store-000053"}
-{"t":2764.5,"lane":"input","name":"pointer_move","type":"pointer","screen":[1103,427],"page":[1103,427],"target":"canvas","button":-1}
-{"t":2781,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:awptT39LCWry1Vj9XlEKZ","type":"block","delta":{"props":"<341 chars>"}}],"detail":"store-000054"}
-{"t":2798.1,"lane":"input","name":"pointer_move","type":"pointer","screen":[1160,460],"page":[1160,460],"target":"canvas","button":-1}
-{"t":2814.6,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:awptT39LCWry1Vj9XlEKZ","type":"block","delta":{"props":"<341 chars>"}}],"detail":"store-000055"}
-{"t":2823.6,"lane":"dom","event":"pointerup","button":0,"buttons":0,"pointerType":"mouse","screen":[1160,460],"on":"div “canvas”"}
-{"t":2824.8,"lane":"input","name":"pointer_up","type":"pointer","screen":[1160,460],"page":[1160,460],"target":"canvas","button":0}
-{"t":2824.8,"lane":"state","from":"select.resizing","to":"select.idle","trigger":"pointer_up"}
-{"t":2839,"lane":"ui","name":"focusout","summary":"focusout div[application] “tldraw”","detail":"focus-000056"}
-{"t":2839.2,"lane":"ui","name":"focusin","summary":"focusin input “Edit block title”","detail":"focus-000057"}
-{"t":2842.5,"lane":"dom","event":"click","button":0,"buttons":0,"pointerType":"mouse","screen":[1160,460],"on":"div “canvas”","detail":"ui-hit-000058"}
-{"t":2844,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:awptT39LCWry1Vj9XlEKZ","type":"block","delta":{"props":"<339 chars>"}},{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"default","rotation":0},"isHoveringCanvas":false}},{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"editingShapeId":"shape:awptT39LCWry1Vj9XlEKZ","hoveredShapeId":"shape:awptT39LCWry1Vj9XlEKZ"}}],"detail":"store-000059"}
-{"t":2844,"lane":"state","from":"select.idle","to":"select.editing_shape","trigger":"store"}
-{"t":2847,"lane":"ui","name":"beforeinput","summary":"beforeinput on input “Edit block title”","inputType":"insertText","dataLength":8,"composing":false,"on":"input “Edit block title”"}
-{"t":2847.4,"lane":"ui","name":"input","summary":"input on input “Edit block title”","inputType":"insertText","dataLength":8,"composing":false,"on":"input “Edit block title”"}
-{"t":2856.9,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:awptT39LCWry1Vj9XlEKZ","type":"block","delta":{"props":"<347 chars>"}}],"detail":"store-000060"}
-{"t":2858.2,"lane":"dom","event":"keydown","key":"Enter","code":"Enter","on":"input “Edit block title”","mods":[]}
-{"t":2858.6,"lane":"ui","name":"focusout","summary":"focusout input “Edit block title”","detail":"focus-000061"}
-{"t":2858.7,"lane":"ui","name":"focusin","summary":"focusin div[application] “tldraw”","detail":"focus-000062"}
-{"t":2859.3,"lane":"input","name":"complete","type":"misc"}
-{"t":2859.3,"lane":"state","from":"select.editing_shape","to":"select.idle","trigger":"complete"}
-{"t":2868.6,"lane":"dom","event":"keyup","key":"Enter","code":"Enter","on":"div[application] “tldraw”","mods":[]}
-{"t":2868.7,"lane":"input","name":"key_up","type":"keyboard","key":"Enter","code":"Enter"}
-{"t":2869.2,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:awptT39LCWry1Vj9XlEKZ","type":"block","delta":{"props":"<355 chars>"}},{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"editingShapeId":null,"hoveredShapeId":null}},{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"nwse-resize","rotation":0}}}],"detail":"store-000063"}
-{"t":3165.1,"lane":"input","name":"pointer_move","type":"pointer","screen":[1415,499],"page":[1415,499],"target":"canvas","button":-1}
-{"t":3168.7,"lane":"dom","event":"pointerdown","button":0,"buttons":1,"pointerType":"mouse","screen":[1415,499],"on":"button “Add input port”","detail":"ui-hit-000064"}
-{"t":3169.1,"lane":"ui","name":"focusout","summary":"focusout div[application] “tldraw”","detail":"focus-000065"}
-{"t":3169.2,"lane":"ui","name":"focusin","summary":"focusin button “Add input port”","detail":"focus-000066"}
-{"t":3170,"lane":"dom","event":"pointerup","button":0,"buttons":0,"pointerType":"mouse","screen":[1415,499],"on":"button “Add input port”"}
-{"t":3170.5,"lane":"dom","event":"click","button":0,"buttons":0,"pointerType":"mouse","screen":[1415,499],"on":"button “Add input port”","detail":"ui-hit-000067"}
-{"t":3185.5,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"default","rotation":0}}},{"op":"update","id":"shape:awptT39LCWry1Vj9XlEKZ","type":"block","delta":{"props":"<407 chars>"}}],"detail":"store-000068"}
-{"t":3298.2,"lane":"workspace","name":"stat","summary":"board revision check started","level":"info","detail":"stat-000069"}
-{"t":3300.7,"lane":"network","name":"fetch","summary":"GET /api/workspace/stat?path=<redacted> → 200 in 2.4 ms","method":"GET","url":"/api/workspace/stat?path=<redacted>","status":200,"ok":true,"durationMs":2.4,"level":"info","detail":"fetch-000070"}
-{"t":3300.9,"lane":"workspace","name":"stat","summary":"board revision check completed","level":"info","detail":"stat-000071"}
-{"t":3785.5,"lane":"workspace","name":"autosave-start","summary":"autosave started","level":"info","detail":"autosave-start-000072"}
-{"t":3785.9,"lane":"workspace","name":"write","summary":"board save started","level":"info","detail":"write-000073"}
-{"t":3811.5,"lane":"network","name":"fetch","summary":"POST /api/workspace/file → 200 in 25.5 ms","method":"POST","url":"/api/workspace/file","status":200,"ok":true,"durationMs":25.5,"level":"info","detail":"fetch-000074"}
-{"t":3812,"lane":"workspace","name":"write","summary":"board save completed","level":"info","detail":"write-000075"}
-{"t":3812.1,"lane":"workspace","name":"autosave-complete","summary":"autosave completed","level":"info","detail":"autosave-complete-000076"}
-{"t":3982.9,"lane":"input","name":"pointer_move","type":"pointer","screen":[200,880],"page":[200,880],"target":"canvas","button":-1}
-{"t":3983,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"isHoveringCanvas":true}}],"detail":"store-000077"}
-{"t":3985.4,"lane":"dom","event":"pointerdown","button":0,"buttons":1,"pointerType":"mouse","screen":[200,880],"on":"div “canvas”","detail":"ui-hit-000078"}
-{"t":3986.1,"lane":"input","name":"pointer_down","type":"pointer","screen":[200,880],"page":[200,880],"target":"canvas","button":0}
-{"t":3986.1,"lane":"state","from":"select.idle","to":"select.pointing_canvas","trigger":"pointer_down"}
-{"t":3989.6,"lane":"ui","name":"focusout","summary":"focusout button “Add input port”","detail":"focus-000079"}
-{"t":3991.1,"lane":"ui","name":"focusin","summary":"focusin div[application] “tldraw”","detail":"focus-000080"}
-{"t":3992.1,"lane":"dom","event":"pointerup","button":0,"buttons":0,"pointerType":"mouse","screen":[200,880],"on":"div “canvas”"}
-{"t":3992.4,"lane":"input","name":"pointer_up","type":"pointer","screen":[200,880],"page":[200,880],"target":"canvas","button":0}
-{"t":3992.4,"lane":"state","from":"select.pointing_canvas","to":"select.idle","trigger":"pointer_up"}
-{"t":3993.3,"lane":"dom","event":"click","button":0,"buttons":0,"pointerType":"mouse","screen":[200,880],"on":"div “canvas”","detail":"ui-hit-000081"}
-{"t":3997.5,"lane":"store","source":"user","ops":[{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"selectedShapeIds":[]}}],"detail":"store-000082"}
-{"t":4415,"lane":"input","name":"pointer_move","type":"pointer","screen":[640,338],"page":[640,338],"target":"canvas","button":-1}
-{"t":4416.9,"lane":"dom","event":"pointerdown","button":0,"buttons":1,"pointerType":"mouse","screen":[640,338],"on":"div “canvas”","detail":"ui-hit-000083"}
-{"t":4417.5,"lane":"input","name":"pointer_down","type":"pointer","screen":[640,338],"page":[640,338],"target":"canvas","button":0}
-{"t":4417.5,"lane":"state","from":"select.idle","to":"select.pointing_block_port","trigger":"pointer_down"}
-{"t":4431.5,"lane":"store","source":"user","ops":[{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"hoveredShapeId":"shape:rGfQmbJ7k5U62mKqV2u-g"}}],"detail":"store-000084"}
-{"t":4434.5,"lane":"input","name":"pointer_move","type":"pointer","screen":[655,338],"page":[655,338],"target":"canvas","button":-1}
-{"t":4434.5,"lane":"state","from":"select.pointing_block_port","to":"select.dragging_handle","trigger":"pointer_move"}
-{"t":4439.2,"lane":"action","name":"chrome-right","summary":"opened inspector","level":"info","detail":"chrome-right-000085"}
-{"t":4451.1,"lane":"workspace","name":"autosave-scheduled","summary":"autosave scheduled","level":"info","detail":"autosave-scheduled-000086"}
-{"t":4451.3,"lane":"store","source":"user","ops":[{"op":"add","id":"shape:zcLlkgWwAp79SQL3ZsiHk","type":"connection"},{"op":"add","id":"binding:OcrbsWP74iXmsjgmL5IDf","type":"connection"},{"op":"update","id":"shape:rGfQmbJ7k5U62mKqV2u-g","type":"block","delta":{"index":"a4r2j"}},{"op":"update","id":"shape:awptT39LCWry1Vj9XlEKZ","type":"block","delta":{"index":"a5cTv"}},{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"cross","rotation":0}}},{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"selectedShapeIds":["shape:zcLlkgWwAp79SQL3ZsiHk"]}}],"detail":"store-000087"}
-{"t":4470.2,"lane":"input","name":"pointer_move","type":"pointer","screen":[670,338],"page":[670,338],"target":"canvas","button":-1}
-{"t":4481,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:zcLlkgWwAp79SQL3ZsiHk","type":"connection","delta":{"props":"<180 chars>"}}],"detail":"store-000088"}
-{"t":4498,"lane":"input","name":"pointer_move","type":"pointer","screen":[685,338],"page":[685,338],"target":"canvas","button":-1}
-{"t":4514.2,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:zcLlkgWwAp79SQL3ZsiHk","type":"connection","delta":{"props":"<180 chars>"}}],"detail":"store-000089"}
-{"t":4531.7,"lane":"input","name":"pointer_move","type":"pointer","screen":[700,338],"page":[700,338],"target":"canvas","button":-1}
-{"t":4547.5,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:zcLlkgWwAp79SQL3ZsiHk","type":"connection","delta":{"props":"<180 chars>"}}],"detail":"store-000090"}
-{"t":4564.7,"lane":"input","name":"pointer_move","type":"pointer","screen":[715,338],"page":[715,338],"target":"canvas","button":-1}
-{"t":4580.9,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:zcLlkgWwAp79SQL3ZsiHk","type":"connection","delta":{"props":"<180 chars>"}}],"detail":"store-000091"}
-{"t":4598.5,"lane":"input","name":"pointer_move","type":"pointer","screen":[730,338],"page":[730,338],"target":"canvas","button":-1}
-{"t":4614.6,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:zcLlkgWwAp79SQL3ZsiHk","type":"connection","delta":{"props":"<180 chars>"}}],"detail":"store-000092"}
-{"t":4631.2,"lane":"input","name":"pointer_move","type":"pointer","screen":[745,338],"page":[745,338],"target":"canvas","button":-1}
-{"t":4647.6,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:zcLlkgWwAp79SQL3ZsiHk","type":"connection","delta":{"props":"<181 chars>"}}],"detail":"store-000093"}
-{"t":4664.5,"lane":"input","name":"pointer_move","type":"pointer","screen":[760,338],"page":[760,338],"target":"canvas","button":-1}
-{"t":4680.8,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:zcLlkgWwAp79SQL3ZsiHk","type":"connection","delta":{"props":"<181 chars>"}}],"detail":"store-000094"}
-{"t":4697.9,"lane":"input","name":"pointer_move","type":"pointer","screen":[775,338],"page":[775,338],"target":"canvas","button":-1}
-{"t":4714.2,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:zcLlkgWwAp79SQL3ZsiHk","type":"connection","delta":{"props":"<181 chars>"}}],"detail":"store-000095"}
-{"t":4731.5,"lane":"input","name":"pointer_move","type":"pointer","screen":[790,338],"page":[790,338],"target":"canvas","button":-1}
-{"t":4747.7,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:zcLlkgWwAp79SQL3ZsiHk","type":"connection","delta":{"props":"<181 chars>"}}],"detail":"store-000096"}
-{"t":4764.9,"lane":"input","name":"pointer_move","type":"pointer","screen":[805,338],"page":[805,338],"target":"canvas","button":-1}
-{"t":4780.9,"lane":"store","source":"user","ops":[{"op":"add","id":"binding:AXsRnl_IRdmw0T6RtYAF9","type":"connection"}],"detail":"store-000097"}
-{"t":4798,"lane":"input","name":"pointer_move","type":"pointer","screen":[820,338],"page":[820,338],"target":"canvas","button":-1}
-{"t":4798.4,"lane":"workspace","name":"stat","summary":"board revision check started","level":"info","detail":"stat-000098"}
-{"t":4801.4,"lane":"network","name":"fetch","summary":"GET /api/workspace/stat?path=<redacted> → 200 in 3 ms","method":"GET","url":"/api/workspace/stat?path=<redacted>","status":200,"ok":true,"durationMs":3,"level":"info","detail":"fetch-000099"}
-{"t":4801.6,"lane":"workspace","name":"stat","summary":"board revision check completed","level":"info","detail":"stat-000100"}
-{"t":4824.9,"lane":"dom","event":"pointerup","button":0,"buttons":0,"pointerType":"mouse","screen":[820,338],"on":"div “canvas”"}
-{"t":4825.7,"lane":"input","name":"pointer_up","type":"pointer","screen":[820,338],"page":[820,338],"target":"canvas","button":0}
-{"t":4825.7,"lane":"state","from":"select.dragging_handle","to":"select.idle","trigger":"pointer_up"}
-{"t":4828.6,"lane":"dom","event":"click","button":0,"buttons":0,"pointerType":"mouse","screen":[820,338],"on":"div “canvas”","detail":"ui-hit-000101"}
-{"t":4830.9,"lane":"store","source":"user","ops":[{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"selectedShapeIds":[],"hoveredShapeId":"shape:awptT39LCWry1Vj9XlEKZ"}},{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"default","rotation":0}}}],"detail":"store-000102"}
-{"t":5381,"lane":"workspace","name":"autosave-start","summary":"autosave started","level":"info","detail":"autosave-start-000103"}
-{"t":5381.4,"lane":"workspace","name":"write","summary":"board save started","level":"info","detail":"write-000104"}
-{"t":5400.9,"lane":"network","name":"fetch","summary":"POST /api/workspace/file → 200 in 19.4 ms","method":"POST","url":"/api/workspace/file","status":200,"ok":true,"durationMs":19.4,"level":"info","detail":"fetch-000105"}
-{"t":5401.2,"lane":"workspace","name":"write","summary":"board save completed","level":"info","detail":"write-000106"}
-{"t":5401.2,"lane":"workspace","name":"autosave-complete","summary":"autosave completed","level":"info","detail":"autosave-complete-000107"}
-{"t":5471.3,"lane":"dom","event":"keydown","key":"Escape","code":"Escape","on":"div[application] “tldraw”","mods":[]}
-{"t":5471.3,"lane":"action","name":"chrome-close-latest","summary":"closed latest app surface","level":"info"}
-{"t":5479.7,"lane":"dom","event":"keyup","key":"Escape","code":"Escape","on":"div[application] “tldraw”","mods":[]}
-{"t":5479.8,"lane":"input","name":"key_up","type":"keyboard","key":"Escape","code":"Escape"}
-{"t":5965.4,"lane":"input","name":"pointer_move","type":"pointer","screen":[918,35],"page":[918,35],"target":"canvas","button":-1}
-{"t":5965.6,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"isHoveringCanvas":false}},{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"hoveredShapeId":null}}],"detail":"store-000108"}
-{"t":5967.2,"lane":"dom","event":"pointerdown","button":0,"buttons":1,"pointerType":"mouse","screen":[918,35],"on":"button “Stop and save”","detail":"ui-hit-000109"}
-{"t":5967.5,"lane":"ui","name":"focusout","summary":"focusout div[application] “tldraw”","detail":"focus-000110"}
-{"t":5967.6,"lane":"ui","name":"focusin","summary":"focusin button “Stop and save”","detail":"focus-000111"}
-{"t":5967.9,"lane":"dom","event":"pointerup","button":0,"buttons":0,"pointerType":"mouse","screen":[918,35],"on":"button “Stop and save”"}
-{"t":5968.1,"lane":"dom","event":"click","button":0,"buttons":0,"pointerType":"mouse","screen":[917,35],"on":"button “Stop and save”","detail":"ui-hit-000112"}
+{"t":10,"lane":"ui","name":"focusout","summary":"focusout button “Start recording · one minute maximum”","detail":"focus-000001"}
+{"t":50.7,"lane":"network","name":"fetch","summary":"POST /api/recordings/arm → 200 in 50.2 ms","method":"POST","url":"/api/recordings/arm","status":200,"ok":true,"durationMs":50.2,"level":"info","detail":"fetch-000002"}
+{"t":81.3,"lane":"workspace","name":"stat","summary":"board revision check started","level":"info","detail":"stat-000003"}
+{"t":84.9,"lane":"network","name":"fetch","summary":"GET /api/workspace/stat?path=<redacted> → 200 in 3.5 ms","method":"GET","url":"/api/workspace/stat?path=<redacted>","status":200,"ok":true,"durationMs":3.5,"level":"info","detail":"fetch-000004"}
+{"t":85.1,"lane":"workspace","name":"stat","summary":"board revision check completed","level":"info","detail":"stat-000005"}
+{"t":508.5,"lane":"ui","name":"resize","summary":"viewport 1440×960","viewport":{"w":1440,"h":960},"visualViewport":{"w":1440,"h":960,"scale":1,"x":0,"y":0}}
+{"t":509.9,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"isHoveringCanvas":true}}],"detail":"store-000006"}
+{"t":586.5,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"screenBounds":{"x":0,"y":0,"w":1440,"h":960}}}],"detail":"store-000007"}
+{"t":849.4,"lane":"input","name":"pointer_move","type":"pointer","screen":[200,880],"page":[200,880],"target":"canvas","button":-1}
+{"t":850.2,"lane":"dom","event":"pointerdown","button":0,"buttons":1,"pointerType":"mouse","screen":[200,880],"on":"div “canvas”","detail":"ui-hit-000008"}
+{"t":851,"lane":"input","name":"pointer_down","type":"pointer","screen":[200,880],"page":[200,880],"target":"canvas","button":0}
+{"t":851,"lane":"state","from":"select.idle","to":"select.pointing_canvas","trigger":"pointer_down"}
+{"t":855.9,"lane":"ui","name":"focusin","summary":"focusin div[application] “tldraw”","detail":"focus-000009"}
+{"t":857.1,"lane":"dom","event":"pointerup","button":0,"buttons":0,"pointerType":"mouse","screen":[200,880],"on":"div “canvas”"}
+{"t":857.8,"lane":"input","name":"pointer_up","type":"pointer","screen":[200,880],"page":[200,880],"target":"canvas","button":0}
+{"t":857.8,"lane":"state","from":"select.pointing_canvas","to":"select.idle","trigger":"pointer_up"}
+{"t":859,"lane":"dom","event":"click","button":0,"buttons":0,"pointerType":"mouse","screen":[200,880],"on":"div “canvas”","detail":"ui-hit-000010"}
+{"t":1020.7,"lane":"dom","event":"keydown","key":"b","code":"KeyB","on":"div[application] “tldraw”","mods":[]}
+{"t":1020.9,"lane":"input","name":"key_down","type":"keyboard","key":"b","code":"KeyB"}
+{"t":1036.6,"lane":"action","name":"chrome-right","summary":"opened inspector","level":"info","detail":"chrome-right-000011"}
+{"t":1057.2,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"cross","rotation":0}}}],"detail":"store-000012"}
+{"t":1057.2,"lane":"state","from":"select.idle","to":"block.idle","trigger":"store"}
+{"t":1058.8,"lane":"dom","event":"keyup","key":"b","code":"KeyB","on":"div[application] “tldraw”","mods":[]}
+{"t":1058.9,"lane":"input","name":"key_up","type":"keyboard","key":"b","code":"KeyB"}
+{"t":1147.3,"lane":"input","name":"pointer_move","type":"pointer","screen":[300,260],"page":[300,260],"target":"canvas","button":-1}
+{"t":1149.5,"lane":"dom","event":"pointerdown","button":0,"buttons":1,"pointerType":"mouse","screen":[300,260],"on":"div “canvas”","detail":"ui-hit-000013"}
+{"t":1150.2,"lane":"input","name":"pointer_down","type":"pointer","screen":[300,260],"page":[300,260],"target":"canvas","button":0}
+{"t":1150.2,"lane":"state","from":"block.idle","to":"block.pointing","trigger":"pointer_down"}
+{"t":1173,"lane":"input","name":"pointer_move","type":"pointer","screen":[357,293],"page":[357,293],"target":"canvas","button":-1}
+{"t":1173,"lane":"state","from":"block.pointing","to":"select.resizing","trigger":"pointer_move"}
+{"t":1174.6,"lane":"workspace","name":"autosave-scheduled","summary":"autosave scheduled","level":"info","detail":"autosave-scheduled-000014"}
+{"t":1175.5,"lane":"store","source":"user","ops":[{"op":"add","id":"shape:sWpb9c2uGpXdze1yrIbNZ","type":"block"},{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"selectedShapeIds":["shape:sWpb9c2uGpXdze1yrIbNZ"]}}],"detail":"store-000015"}
+{"t":1202.4,"lane":"action","name":"chrome-right","summary":"opened inspector","level":"info","detail":"chrome-right-000016"}
+{"t":1222,"lane":"input","name":"pointer_move","type":"pointer","screen":[413,327],"page":[413,327],"target":"canvas","button":-1}
+{"t":1233.2,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:sWpb9c2uGpXdze1yrIbNZ","type":"block","delta":{"props":"<356 chars>"}}],"detail":"store-000017"}
+{"t":1262.3,"lane":"input","name":"pointer_move","type":"pointer","screen":[470,360],"page":[470,360],"target":"canvas","button":-1}
+{"t":1278.4,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:sWpb9c2uGpXdze1yrIbNZ","type":"block","delta":{"props":"<358 chars>"}}],"detail":"store-000018"}
+{"t":1295.7,"lane":"input","name":"pointer_move","type":"pointer","screen":[527,393],"page":[527,393],"target":"canvas","button":-1}
+{"t":1312.1,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:sWpb9c2uGpXdze1yrIbNZ","type":"block","delta":{"props":"<358 chars>"}}],"detail":"store-000019"}
+{"t":1328.9,"lane":"input","name":"pointer_move","type":"pointer","screen":[583,427],"page":[583,427],"target":"canvas","button":-1}
+{"t":1345.9,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:sWpb9c2uGpXdze1yrIbNZ","type":"block","delta":{"props":"<358 chars>"}}],"detail":"store-000020"}
+{"t":1362.1,"lane":"input","name":"pointer_move","type":"pointer","screen":[640,460],"page":[640,460],"target":"canvas","button":-1}
+{"t":1381,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:sWpb9c2uGpXdze1yrIbNZ","type":"block","delta":{"props":"<358 chars>"}}],"detail":"store-000021"}
+{"t":1387.9,"lane":"dom","event":"pointerup","button":0,"buttons":0,"pointerType":"mouse","screen":[640,460],"on":"div “canvas”"}
+{"t":1389.6,"lane":"input","name":"pointer_up","type":"pointer","screen":[640,460],"page":[640,460],"target":"canvas","button":0}
+{"t":1389.6,"lane":"state","from":"select.resizing","to":"select.idle","trigger":"pointer_up"}
+{"t":1408.6,"lane":"ui","name":"focusout","summary":"focusout div[application] “tldraw”","detail":"focus-000022"}
+{"t":1408.9,"lane":"ui","name":"focusin","summary":"focusin input “Edit block title”","detail":"focus-000023"}
+{"t":1411.4,"lane":"dom","event":"click","button":0,"buttons":0,"pointerType":"mouse","screen":[640,460],"on":"div “canvas”","detail":"ui-hit-000024"}
+{"t":1413,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:sWpb9c2uGpXdze1yrIbNZ","type":"block","delta":{"props":"<356 chars>"}},{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"default","rotation":0}}},{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"editingShapeId":"shape:sWpb9c2uGpXdze1yrIbNZ","hoveredShapeId":"shape:sWpb9c2uGpXdze1yrIbNZ"}}],"detail":"store-000025"}
+{"t":1413,"lane":"state","from":"select.idle","to":"select.editing_shape","trigger":"store"}
+{"t":1417.3,"lane":"ui","name":"beforeinput","summary":"beforeinput on input “Edit block title”","inputType":"insertText","dataLength":6,"composing":false,"on":"input “Edit block title”"}
+{"t":1417.7,"lane":"ui","name":"input","summary":"input on input “Edit block title”","inputType":"insertText","dataLength":6,"composing":false,"on":"input “Edit block title”"}
+{"t":1434.2,"lane":"dom","event":"keydown","key":"Enter","code":"Enter","on":"input “Edit block title”","mods":[]}
+{"t":1434.8,"lane":"ui","name":"focusout","summary":"focusout input “Edit block title”","detail":"focus-000026"}
+{"t":1435.1,"lane":"ui","name":"focusin","summary":"focusin div[application] “tldraw”","detail":"focus-000027"}
+{"t":1436.7,"lane":"input","name":"complete","type":"misc"}
+{"t":1436.7,"lane":"state","from":"select.editing_shape","to":"select.idle","trigger":"complete"}
+{"t":1461.3,"lane":"dom","event":"keyup","key":"Enter","code":"Enter","on":"div[application] “tldraw”","mods":[]}
+{"t":1461.5,"lane":"input","name":"key_up","type":"keyboard","key":"Enter","code":"Enter"}
+{"t":1463,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:sWpb9c2uGpXdze1yrIbNZ","type":"block","delta":{"props":"<368 chars>"}},{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"editingShapeId":null,"hoveredShapeId":null}},{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"nwse-resize","rotation":0}}}],"detail":"store-000028"}
+{"t":1581.3,"lane":"workspace","name":"stat","summary":"board revision check started","level":"info","detail":"stat-000029"}
+{"t":1586,"lane":"network","name":"fetch","summary":"GET /api/workspace/stat?path=<redacted> → 200 in 4.4 ms","method":"GET","url":"/api/workspace/stat?path=<redacted>","status":200,"ok":true,"durationMs":4.4,"level":"info","detail":"fetch-000030"}
+{"t":1586.7,"lane":"workspace","name":"stat","summary":"board revision check completed","level":"info","detail":"stat-000031"}
+{"t":1747.8,"lane":"input","name":"pointer_move","type":"pointer","screen":[1415,582],"page":[1415,582],"target":"canvas","button":-1}
+{"t":1749.7,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"default","rotation":0},"isHoveringCanvas":false}}],"detail":"store-000032"}
+{"t":1752.4,"lane":"dom","event":"pointerdown","button":0,"buttons":1,"pointerType":"mouse","screen":[1415,582],"on":"button “Add output port”","detail":"ui-hit-000033"}
+{"t":1753,"lane":"ui","name":"focusout","summary":"focusout div[application] “tldraw”","detail":"focus-000034"}
+{"t":1753,"lane":"ui","name":"focusin","summary":"focusin button “Add output port”","detail":"focus-000035"}
+{"t":1754.1,"lane":"dom","event":"pointerup","button":0,"buttons":0,"pointerType":"mouse","screen":[1415,582],"on":"button “Add output port”"}
+{"t":1754.5,"lane":"dom","event":"click","button":0,"buttons":0,"pointerType":"mouse","screen":[1415,582],"on":"button “Add output port”","detail":"ui-hit-000036"}
+{"t":1770,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:sWpb9c2uGpXdze1yrIbNZ","type":"block","delta":{"props":"<422 chars>"}}],"detail":"store-000037"}
+{"t":2370.2,"lane":"workspace","name":"autosave-start","summary":"autosave started","level":"info","detail":"autosave-start-000038"}
+{"t":2371,"lane":"workspace","name":"write","summary":"board save started","level":"info","detail":"write-000039"}
+{"t":2395.9,"lane":"network","name":"fetch","summary":"POST /api/workspace/file → 200 in 24.7 ms","method":"POST","url":"/api/workspace/file","status":200,"ok":true,"durationMs":24.7,"level":"info","detail":"fetch-000040"}
+{"t":2396.2,"lane":"workspace","name":"write","summary":"board save completed","level":"info","detail":"write-000041"}
+{"t":2396.4,"lane":"workspace","name":"autosave-complete","summary":"autosave completed","level":"info","detail":"autosave-complete-000042"}
+{"t":2550.9,"lane":"dom","event":"keydown","key":"b","code":"KeyB","on":"button “Add output port”","mods":[]}
+{"t":2567,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"cross","rotation":0}}}],"detail":"store-000043"}
+{"t":2567,"lane":"state","from":"select.idle","to":"block.idle","trigger":"store"}
+{"t":2568.4,"lane":"dom","event":"keyup","key":"b","code":"KeyB","on":"button “Add output port”","mods":[]}
+{"t":2663.1,"lane":"input","name":"pointer_move","type":"pointer","screen":[820,260],"page":[820,260],"target":"canvas","button":-1}
+{"t":2663.1,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"isHoveringCanvas":true}}],"detail":"store-000044"}
+{"t":2664.6,"lane":"dom","event":"pointerdown","button":0,"buttons":1,"pointerType":"mouse","screen":[820,260],"on":"div “canvas”","detail":"ui-hit-000045"}
+{"t":2664.7,"lane":"input","name":"pointer_down","type":"pointer","screen":[820,260],"page":[820,260],"target":"canvas","button":0}
+{"t":2664.7,"lane":"state","from":"block.idle","to":"block.pointing","trigger":"pointer_down"}
+{"t":2665.6,"lane":"ui","name":"focusout","summary":"focusout button “Add output port”","detail":"focus-000046"}
+{"t":2665.7,"lane":"ui","name":"focusin","summary":"focusin div[application] “tldraw”","detail":"focus-000047"}
+{"t":2680.5,"lane":"input","name":"pointer_move","type":"pointer","screen":[877,293],"page":[877,293],"target":"canvas","button":-1}
+{"t":2680.5,"lane":"state","from":"block.pointing","to":"select.resizing","trigger":"pointer_move"}
+{"t":2681.1,"lane":"workspace","name":"autosave-scheduled","summary":"autosave scheduled","level":"info","detail":"autosave-scheduled-000048"}
+{"t":2681.7,"lane":"store","source":"user","ops":[{"op":"add","id":"shape:ivswBd_paFrdNLAEQBNfV","type":"block"},{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"selectedShapeIds":["shape:ivswBd_paFrdNLAEQBNfV"]}}],"detail":"store-000049"}
+{"t":2704.6,"lane":"action","name":"chrome-right","summary":"opened inspector","level":"info","detail":"chrome-right-000050"}
+{"t":2722.7,"lane":"input","name":"pointer_move","type":"pointer","screen":[933,327],"page":[933,327],"target":"canvas","button":-1}
+{"t":2735.2,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:ivswBd_paFrdNLAEQBNfV","type":"block","delta":{"props":"<356 chars>"}}],"detail":"store-000051"}
+{"t":2762.3,"lane":"input","name":"pointer_move","type":"pointer","screen":[990,360],"page":[990,360],"target":"canvas","button":-1}
+{"t":2778.2,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:ivswBd_paFrdNLAEQBNfV","type":"block","delta":{"props":"<358 chars>"}}],"detail":"store-000052"}
+{"t":2795.5,"lane":"input","name":"pointer_move","type":"pointer","screen":[1047,393],"page":[1047,393],"target":"canvas","button":-1}
+{"t":2812.7,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:ivswBd_paFrdNLAEQBNfV","type":"block","delta":{"props":"<358 chars>"}}],"detail":"store-000053"}
+{"t":2828.7,"lane":"input","name":"pointer_move","type":"pointer","screen":[1103,427],"page":[1103,427],"target":"canvas","button":-1}
+{"t":2844.8,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:ivswBd_paFrdNLAEQBNfV","type":"block","delta":{"props":"<358 chars>"}}],"detail":"store-000054"}
+{"t":2861.9,"lane":"input","name":"pointer_move","type":"pointer","screen":[1160,460],"page":[1160,460],"target":"canvas","button":-1}
+{"t":2878.5,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:ivswBd_paFrdNLAEQBNfV","type":"block","delta":{"props":"<358 chars>"}}],"detail":"store-000055"}
+{"t":2887.3,"lane":"dom","event":"pointerup","button":0,"buttons":0,"pointerType":"mouse","screen":[1160,460],"on":"div “canvas”"}
+{"t":2888.2,"lane":"input","name":"pointer_up","type":"pointer","screen":[1160,460],"page":[1160,460],"target":"canvas","button":0}
+{"t":2888.2,"lane":"state","from":"select.resizing","to":"select.idle","trigger":"pointer_up"}
+{"t":2903.1,"lane":"ui","name":"focusout","summary":"focusout div[application] “tldraw”","detail":"focus-000056"}
+{"t":2903.2,"lane":"ui","name":"focusin","summary":"focusin input “Edit block title”","detail":"focus-000057"}
+{"t":2905.7,"lane":"dom","event":"click","button":0,"buttons":0,"pointerType":"mouse","screen":[1160,460],"on":"div “canvas”","detail":"ui-hit-000058"}
+{"t":2906.9,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:ivswBd_paFrdNLAEQBNfV","type":"block","delta":{"props":"<356 chars>"}},{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"default","rotation":0},"isHoveringCanvas":false}},{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"editingShapeId":"shape:ivswBd_paFrdNLAEQBNfV","hoveredShapeId":"shape:ivswBd_paFrdNLAEQBNfV"}}],"detail":"store-000059"}
+{"t":2906.9,"lane":"state","from":"select.idle","to":"select.editing_shape","trigger":"store"}
+{"t":2909.3,"lane":"ui","name":"beforeinput","summary":"beforeinput on input “Edit block title”","inputType":"insertText","dataLength":8,"composing":false,"on":"input “Edit block title”"}
+{"t":2909.6,"lane":"ui","name":"input","summary":"input on input “Edit block title”","inputType":"insertText","dataLength":8,"composing":false,"on":"input “Edit block title”"}
+{"t":2919.8,"lane":"dom","event":"keydown","key":"Enter","code":"Enter","on":"input “Edit block title”","mods":[]}
+{"t":2920.1,"lane":"ui","name":"focusout","summary":"focusout input “Edit block title”","detail":"focus-000060"}
+{"t":2920.5,"lane":"ui","name":"focusin","summary":"focusin div[application] “tldraw”","detail":"focus-000061"}
+{"t":2921.3,"lane":"input","name":"complete","type":"misc"}
+{"t":2921.3,"lane":"state","from":"select.editing_shape","to":"select.idle","trigger":"complete"}
+{"t":2931.9,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:ivswBd_paFrdNLAEQBNfV","type":"block","delta":{"props":"<372 chars>"}},{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"editingShapeId":null,"hoveredShapeId":null}},{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"nwse-resize","rotation":0}}}],"detail":"store-000062"}
+{"t":2933.8,"lane":"dom","event":"keyup","key":"Enter","code":"Enter","on":"div[application] “tldraw”","mods":[]}
+{"t":2933.9,"lane":"input","name":"key_up","type":"keyboard","key":"Enter","code":"Enter"}
+{"t":3081.2,"lane":"workspace","name":"stat","summary":"board revision check started","level":"info","detail":"stat-000063"}
+{"t":3084.8,"lane":"network","name":"fetch","summary":"GET /api/workspace/stat?path=<redacted> → 200 in 3.5 ms","method":"GET","url":"/api/workspace/stat?path=<redacted>","status":200,"ok":true,"durationMs":3.5,"level":"info","detail":"fetch-000064"}
+{"t":3085.3,"lane":"workspace","name":"stat","summary":"board revision check completed","level":"info","detail":"stat-000065"}
+{"t":3229.5,"lane":"input","name":"pointer_move","type":"pointer","screen":[1415,499],"page":[1415,499],"target":"canvas","button":-1}
+{"t":3233.3,"lane":"dom","event":"pointerdown","button":0,"buttons":1,"pointerType":"mouse","screen":[1415,499],"on":"button “Add input port”","detail":"ui-hit-000066"}
+{"t":3233.8,"lane":"ui","name":"focusout","summary":"focusout div[application] “tldraw”","detail":"focus-000067"}
+{"t":3233.8,"lane":"ui","name":"focusin","summary":"focusin button “Add input port”","detail":"focus-000068"}
+{"t":3234.5,"lane":"dom","event":"pointerup","button":0,"buttons":0,"pointerType":"mouse","screen":[1415,499],"on":"button “Add input port”"}
+{"t":3234.9,"lane":"dom","event":"click","button":0,"buttons":0,"pointerType":"mouse","screen":[1415,499],"on":"button “Add input port”","detail":"ui-hit-000069"}
+{"t":3251.4,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"default","rotation":0}}},{"op":"update","id":"shape:ivswBd_paFrdNLAEQBNfV","type":"block","delta":{"props":"<424 chars>"}}],"detail":"store-000070"}
+{"t":3851.5,"lane":"workspace","name":"autosave-start","summary":"autosave started","level":"info","detail":"autosave-start-000071"}
+{"t":3852.1,"lane":"workspace","name":"write","summary":"board save started","level":"info","detail":"write-000072"}
+{"t":3880.3,"lane":"network","name":"fetch","summary":"POST /api/workspace/file → 200 in 28.2 ms","method":"POST","url":"/api/workspace/file","status":200,"ok":true,"durationMs":28.2,"level":"info","detail":"fetch-000073"}
+{"t":3880.6,"lane":"workspace","name":"write","summary":"board save completed","level":"info","detail":"write-000074"}
+{"t":3880.7,"lane":"workspace","name":"autosave-complete","summary":"autosave completed","level":"info","detail":"autosave-complete-000075"}
+{"t":4048,"lane":"input","name":"pointer_move","type":"pointer","screen":[200,880],"page":[200,880],"target":"canvas","button":-1}
+{"t":4048,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"isHoveringCanvas":true}}],"detail":"store-000076"}
+{"t":4050.2,"lane":"dom","event":"pointerdown","button":0,"buttons":1,"pointerType":"mouse","screen":[200,880],"on":"div “canvas”","detail":"ui-hit-000077"}
+{"t":4051,"lane":"input","name":"pointer_down","type":"pointer","screen":[200,880],"page":[200,880],"target":"canvas","button":0}
+{"t":4051,"lane":"state","from":"select.idle","to":"select.pointing_canvas","trigger":"pointer_down"}
+{"t":4056.2,"lane":"ui","name":"focusout","summary":"focusout button “Add input port”","detail":"focus-000078"}
+{"t":4058.6,"lane":"ui","name":"focusin","summary":"focusin div[application] “tldraw”","detail":"focus-000079"}
+{"t":4060.4,"lane":"dom","event":"pointerup","button":0,"buttons":0,"pointerType":"mouse","screen":[200,880],"on":"div “canvas”"}
+{"t":4060.9,"lane":"input","name":"pointer_up","type":"pointer","screen":[200,880],"page":[200,880],"target":"canvas","button":0}
+{"t":4060.9,"lane":"state","from":"select.pointing_canvas","to":"select.idle","trigger":"pointer_up"}
+{"t":4062.8,"lane":"dom","event":"click","button":0,"buttons":0,"pointerType":"mouse","screen":[200,880],"on":"div “canvas”","detail":"ui-hit-000080"}
+{"t":4067.4,"lane":"store","source":"user","ops":[{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"selectedShapeIds":[]}}],"detail":"store-000081"}
+{"t":4479.2,"lane":"input","name":"pointer_move","type":"pointer","screen":[640,338],"page":[640,338],"target":"canvas","button":-1}
+{"t":4481.4,"lane":"dom","event":"pointerdown","button":0,"buttons":1,"pointerType":"mouse","screen":[640,338],"on":"div “canvas”","detail":"ui-hit-000082"}
+{"t":4482.6,"lane":"input","name":"pointer_down","type":"pointer","screen":[640,338],"page":[640,338],"target":"canvas","button":0}
+{"t":4482.6,"lane":"state","from":"select.idle","to":"select.pointing_block_port","trigger":"pointer_down"}
+{"t":4497.1,"lane":"store","source":"user","ops":[{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"hoveredShapeId":"shape:sWpb9c2uGpXdze1yrIbNZ"}}],"detail":"store-000083"}
+{"t":4501.4,"lane":"input","name":"pointer_move","type":"pointer","screen":[655,338],"page":[655,338],"target":"canvas","button":-1}
+{"t":4501.4,"lane":"state","from":"select.pointing_block_port","to":"select.dragging_handle","trigger":"pointer_move"}
+{"t":4509.4,"lane":"action","name":"chrome-right","summary":"opened inspector","level":"info","detail":"chrome-right-000084"}
+{"t":4541.7,"lane":"workspace","name":"autosave-scheduled","summary":"autosave scheduled","level":"info","detail":"autosave-scheduled-000085"}
+{"t":4541.9,"lane":"store","source":"user","ops":[{"op":"add","id":"shape:doPWcEPxwLw2Uw-Ip2sZ4","type":"connection"},{"op":"add","id":"binding:XpJG01i79m_FT3cXYpQ_l","type":"connection"},{"op":"update","id":"shape:sWpb9c2uGpXdze1yrIbNZ","type":"block","delta":{"index":"a4zPW"}},{"op":"update","id":"shape:ivswBd_paFrdNLAEQBNfV","type":"block","delta":{"index":"a5FNb"}},{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"cross","rotation":0}}},{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"selectedShapeIds":["shape:doPWcEPxwLw2Uw-Ip2sZ4"]}}],"detail":"store-000086"}
+{"t":4542.4,"lane":"input","name":"pointer_move","type":"pointer","screen":[670,338],"page":[670,338],"target":"canvas","button":-1}
+{"t":4574.2,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:doPWcEPxwLw2Uw-Ip2sZ4","type":"connection","delta":{"props":"<229 chars>"}}],"detail":"store-000087"}
+{"t":4574.8,"lane":"input","name":"pointer_move","type":"pointer","screen":[685,338],"page":[685,338],"target":"canvas","button":-1}
+{"t":4581.2,"lane":"workspace","name":"stat","summary":"board revision check started","level":"info","detail":"stat-000088"}
+{"t":4584.5,"lane":"network","name":"fetch","summary":"GET /api/workspace/stat?path=<redacted> → 200 in 3.2 ms","method":"GET","url":"/api/workspace/stat?path=<redacted>","status":200,"ok":true,"durationMs":3.2,"level":"info","detail":"fetch-000089"}
+{"t":4584.8,"lane":"workspace","name":"stat","summary":"board revision check completed","level":"info","detail":"stat-000090"}
+{"t":4586.7,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:doPWcEPxwLw2Uw-Ip2sZ4","type":"connection","delta":{"props":"<229 chars>"}}],"detail":"store-000091"}
+{"t":4614.6,"lane":"input","name":"pointer_move","type":"pointer","screen":[700,338],"page":[700,338],"target":"canvas","button":-1}
+{"t":4630.8,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:doPWcEPxwLw2Uw-Ip2sZ4","type":"connection","delta":{"props":"<229 chars>"}}],"detail":"store-000092"}
+{"t":4647.1,"lane":"input","name":"pointer_move","type":"pointer","screen":[715,338],"page":[715,338],"target":"canvas","button":-1}
+{"t":4667.3,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:doPWcEPxwLw2Uw-Ip2sZ4","type":"connection","delta":{"props":"<229 chars>"}}],"detail":"store-000093"}
+{"t":4682.2,"lane":"input","name":"pointer_move","type":"pointer","screen":[730,338],"page":[730,338],"target":"canvas","button":-1}
+{"t":4699.7,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:doPWcEPxwLw2Uw-Ip2sZ4","type":"connection","delta":{"props":"<229 chars>"}}],"detail":"store-000094"}
+{"t":4713.7,"lane":"input","name":"pointer_move","type":"pointer","screen":[745,338],"page":[745,338],"target":"canvas","button":-1}
+{"t":4731.6,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:doPWcEPxwLw2Uw-Ip2sZ4","type":"connection","delta":{"props":"<230 chars>"}}],"detail":"store-000095"}
+{"t":4748.5,"lane":"input","name":"pointer_move","type":"pointer","screen":[760,338],"page":[760,338],"target":"canvas","button":-1}
+{"t":4765.2,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:doPWcEPxwLw2Uw-Ip2sZ4","type":"connection","delta":{"props":"<230 chars>"}}],"detail":"store-000096"}
+{"t":4780,"lane":"input","name":"pointer_move","type":"pointer","screen":[775,338],"page":[775,338],"target":"canvas","button":-1}
+{"t":4797.9,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:doPWcEPxwLw2Uw-Ip2sZ4","type":"connection","delta":{"props":"<230 chars>"}}],"detail":"store-000097"}
+{"t":4812.6,"lane":"input","name":"pointer_move","type":"pointer","screen":[790,338],"page":[790,338],"target":"canvas","button":-1}
+{"t":4830.6,"lane":"store","source":"user","ops":[{"op":"update","id":"shape:doPWcEPxwLw2Uw-Ip2sZ4","type":"connection","delta":{"props":"<230 chars>"}}],"detail":"store-000098"}
+{"t":4846,"lane":"input","name":"pointer_move","type":"pointer","screen":[805,338],"page":[805,338],"target":"canvas","button":-1}
+{"t":4869.7,"lane":"store","source":"user","ops":[{"op":"add","id":"binding:xWyYskc-s_hnsB_b-eAmz","type":"connection"}],"detail":"store-000099"}
+{"t":4883.7,"lane":"input","name":"pointer_move","type":"pointer","screen":[820,338],"page":[820,338],"target":"canvas","button":-1}
+{"t":4911.8,"lane":"dom","event":"pointerup","button":0,"buttons":0,"pointerType":"mouse","screen":[820,338],"on":"div “canvas”"}
+{"t":4913.4,"lane":"input","name":"pointer_up","type":"pointer","screen":[820,338],"page":[820,338],"target":"canvas","button":0}
+{"t":4913.4,"lane":"state","from":"select.dragging_handle","to":"select.idle","trigger":"pointer_up"}
+{"t":4917.1,"lane":"dom","event":"click","button":0,"buttons":0,"pointerType":"mouse","screen":[820,338],"on":"div “canvas”","detail":"ui-hit-000100"}
+{"t":4918,"lane":"store","source":"user","ops":[{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"selectedShapeIds":[],"hoveredShapeId":"shape:ivswBd_paFrdNLAEQBNfV"}},{"op":"update","id":"instance:instance","type":"instance","delta":{"cursor":{"type":"default","rotation":0}}}],"detail":"store-000101"}
+{"t":5469.9,"lane":"workspace","name":"autosave-start","summary":"autosave started","level":"info","detail":"autosave-start-000102"}
+{"t":5470.4,"lane":"workspace","name":"write","summary":"board save started","level":"info","detail":"write-000103"}
+{"t":5493.1,"lane":"network","name":"fetch","summary":"POST /api/workspace/file → 200 in 22.5 ms","method":"POST","url":"/api/workspace/file","status":200,"ok":true,"durationMs":22.5,"level":"info","detail":"fetch-000104"}
+{"t":5493.3,"lane":"workspace","name":"write","summary":"board save completed","level":"info","detail":"write-000105"}
+{"t":5493.4,"lane":"workspace","name":"autosave-complete","summary":"autosave completed","level":"info","detail":"autosave-complete-000106"}
+{"t":5561.2,"lane":"dom","event":"keydown","key":"Escape","code":"Escape","on":"div[application] “tldraw”","mods":[]}
+{"t":5561.3,"lane":"action","name":"chrome-close-latest","summary":"closed latest app surface","level":"info"}
+{"t":5572.3,"lane":"dom","event":"keyup","key":"Escape","code":"Escape","on":"div[application] “tldraw”","mods":[]}
+{"t":5572.4,"lane":"input","name":"key_up","type":"keyboard","key":"Escape","code":"Escape"}
+{"t":6063.4,"lane":"input","name":"pointer_move","type":"pointer","screen":[918,35],"page":[918,35],"target":"canvas","button":-1}
+{"t":6063.6,"lane":"store","source":"user","ops":[{"op":"update","id":"instance:instance","type":"instance","delta":{"isHoveringCanvas":false}},{"op":"update","id":"instance_page_state:page:page","type":"instance_page_state","delta":{"hoveredShapeId":null}}],"detail":"store-000107"}
+{"t":6066.4,"lane":"dom","event":"pointerdown","button":0,"buttons":1,"pointerType":"mouse","screen":[918,35],"on":"button “Stop and save”","detail":"ui-hit-000108"}
+{"t":6066.9,"lane":"ui","name":"focusout","summary":"focusout div[application] “tldraw”","detail":"focus-000109"}
+{"t":6066.9,"lane":"ui","name":"focusin","summary":"focusin button “Stop and save”","detail":"focus-000110"}
+{"t":6067.8,"lane":"dom","event":"pointerup","button":0,"buttons":0,"pointerType":"mouse","screen":[918,35],"on":"button “Stop and save”"}
+{"t":6068.3,"lane":"dom","event":"click","button":0,"buttons":0,"pointerType":"mouse","screen":[917,35],"on":"button “Stop and save”","detail":"ui-hit-000111"}

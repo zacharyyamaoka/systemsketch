@@ -1,0 +1,1620 @@
+{
+  "feature": "The mutating line - 20 examples",
+  "viewport": {
+    "width": 2000,
+    "height": 1600
+  },
+  "shapes": [
+    {
+      "id": "t-title",
+      "type": "text",
+      "x": 80,
+      "y": 40,
+      "text": "The mutating line - 20 examples, easy to hard",
+      "props": {
+        "size": "xl",
+        "color": "black",
+        "font": "sans"
+      }
+    },
+    {
+      "id": "t-row-0",
+      "type": "text",
+      "x": 80,
+      "y": 206,
+      "text": "EASY - single argument, no return  [1-4]",
+      "props": {
+        "size": "m",
+        "color": "black",
+        "font": "sans"
+      }
+    },
+    {
+      "id": "t-row-1",
+      "type": "text",
+      "x": 80,
+      "y": 686,
+      "text": "EASY - in-place reordering  [5-8]",
+      "props": {
+        "size": "m",
+        "color": "black",
+        "font": "sans"
+      }
+    },
+    {
+      "id": "t-row-2",
+      "type": "text",
+      "x": 80,
+      "y": 1166,
+      "text": "MEDIUM - returns a value AND mutates  [9-12]",
+      "props": {
+        "size": "m",
+        "color": "black",
+        "font": "sans"
+      }
+    },
+    {
+      "id": "t-row-3",
+      "type": "text",
+      "x": 80,
+      "y": 1646,
+      "text": "MEDIUM/HARD - multiple mutated arguments, and the receiver  [13-16]",
+      "props": {
+        "size": "m",
+        "color": "black",
+        "font": "sans"
+      }
+    },
+    {
+      "id": "r0c0",
+      "type": "block",
+      "x": 80,
+      "y": 240,
+      "props": {
+        "title": "poses.append",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 170,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "r0c1",
+      "type": "block",
+      "x": 520,
+      "y": 240,
+      "props": {
+        "title": "cache.update",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 170,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "cache",
+            "type": "dict",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "patch",
+            "type": "dict",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "cache",
+            "type": "dict",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "r0c2",
+      "type": "block",
+      "x": 960,
+      "y": 240,
+      "props": {
+        "title": "seen.add",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 170,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "seen",
+            "type": "set",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "item",
+            "type": "Any",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "seen",
+            "type": "set",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "r0c3",
+      "type": "block",
+      "x": 1400,
+      "y": 240,
+      "props": {
+        "title": "buffer.extend",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 170,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "buffer",
+            "type": "list[int]",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "chunk",
+            "type": "list[int]",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "buffer",
+            "type": "list[int]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "len_consumer",
+      "type": "block",
+      "x": 100,
+      "y": 500,
+      "props": {
+        "title": "len",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 190,
+        "h": 120,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "count",
+            "type": "int",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "wire-1",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "note-1",
+      "type": "text",
+      "x": 320,
+      "y": 510,
+      "text": "1 - the base case: a hook,\nan effect port, one tether.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      }
+    },
+    {
+      "id": "r1c0",
+      "type": "block",
+      "x": 80,
+      "y": 720,
+      "props": {
+        "title": "items.sort",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 150,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "items",
+            "type": "list[int]",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "items",
+            "type": "list[int]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "r1c1",
+      "type": "block",
+      "x": 520,
+      "y": 720,
+      "props": {
+        "title": "items.reverse",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 150,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "items",
+            "type": "list[int]",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "items",
+            "type": "list[int]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "r1c2",
+      "type": "block",
+      "x": 960,
+      "y": 720,
+      "props": {
+        "title": "stack.insert",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 190,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "stack",
+            "type": "list",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "index",
+            "type": "int",
+            "visible": true
+          },
+          {
+            "id": "in_3",
+            "name": "item",
+            "type": "Any",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "stack",
+            "type": "list",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "r1c3",
+      "type": "block",
+      "x": 1400,
+      "y": 720,
+      "props": {
+        "title": "queue.clear",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 150,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "queue",
+            "type": "list",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "queue",
+            "type": "list",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2c0",
+      "type": "block",
+      "x": 80,
+      "y": 1200,
+      "props": {
+        "title": "pending.pop",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 170,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pending",
+            "type": "list",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "item",
+            "type": "Any",
+            "visible": true
+          },
+          {
+            "id": "effect:in_1",
+            "name": "pending",
+            "type": "list",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2c1",
+      "type": "block",
+      "x": 520,
+      "y": 1200,
+      "props": {
+        "title": "table.pop",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 190,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "table",
+            "type": "dict",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "key",
+            "type": "str",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "value",
+            "type": "Any",
+            "visible": true
+          },
+          {
+            "id": "effect:in_1",
+            "name": "table",
+            "type": "dict",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2c2",
+      "type": "block",
+      "x": 960,
+      "y": 1200,
+      "props": {
+        "title": "table.setdefault",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 210,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "table",
+            "type": "dict",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "key",
+            "type": "str",
+            "visible": true
+          },
+          {
+            "id": "in_3",
+            "name": "default",
+            "type": "Any",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "value",
+            "type": "Any",
+            "visible": true
+          },
+          {
+            "id": "effect:in_1",
+            "name": "table",
+            "type": "dict",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "r2c3",
+      "type": "block",
+      "x": 1400,
+      "y": 1200,
+      "props": {
+        "title": "queue.popleft",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 170,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "queue",
+            "type": "deque",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "item",
+            "type": "Any",
+            "visible": true
+          },
+          {
+            "id": "effect:in_1",
+            "name": "queue",
+            "type": "deque",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "use_item",
+      "type": "block",
+      "x": 100,
+      "y": 1460,
+      "props": {
+        "title": "use",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 170,
+        "h": 110,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "item",
+            "type": "Any",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "len_after_pop",
+      "type": "block",
+      "x": 310,
+      "y": 1460,
+      "props": {
+        "title": "len",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 170,
+        "h": 110,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pending",
+            "type": "list",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "n",
+            "type": "int",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "wire-9a",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "wire-9b",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "note-9",
+      "type": "text",
+      "x": 520,
+      "y": 1470,
+      "text": "9 - a real output AND\nan effect port, wired\nto two different consumers.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      }
+    },
+    {
+      "id": "r3c0",
+      "type": "block",
+      "x": 80,
+      "y": 1680,
+      "props": {
+        "title": "swap",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 190,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "a",
+            "type": "list",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "b",
+            "type": "list",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "a",
+            "type": "list",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.82
+          },
+          {
+            "id": "effect:in_2",
+            "name": "b",
+            "type": "list",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.18
+          }
+        ]
+      }
+    },
+    {
+      "id": "r3c1",
+      "type": "block",
+      "x": 520,
+      "y": 1680,
+      "props": {
+        "title": "reconcile",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 340,
+        "h": 230,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "primary",
+            "type": "Cache",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "backup",
+            "type": "Cache",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_3",
+            "name": "preview",
+            "type": "Image",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "primary",
+            "type": "Cache",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.25
+          },
+          {
+            "id": "effect:in_2",
+            "name": "backup",
+            "type": "Cache",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          },
+          {
+            "id": "effect:in_3",
+            "name": "preview",
+            "type": "Image",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.75
+          }
+        ]
+      }
+    },
+    {
+      "id": "r3c2",
+      "type": "block",
+      "x": 960,
+      "y": 1680,
+      "props": {
+        "title": "counter.update",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 190,
+        "inputs": [
+          {
+            "id": "in_self",
+            "name": "self",
+            "type": "Counter",
+            "visible": true,
+            "mutates": true,
+            "row": 0
+          },
+          {
+            "id": "in_2",
+            "name": "other",
+            "type": "Counter",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_self",
+            "name": "self",
+            "type": "Counter",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "r3c3",
+      "type": "block",
+      "x": 1400,
+      "y": 1680,
+      "props": {
+        "title": "tracker.record",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 320,
+        "h": 170,
+        "inputs": [
+          {
+            "id": "in_self",
+            "name": "self",
+            "type": "Tracker",
+            "visible": true,
+            "mutates": true,
+            "row": 0
+          },
+          {
+            "id": "in_2",
+            "name": "event",
+            "type": "Event",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_self",
+            "name": "self",
+            "type": "Tracker",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "show_a",
+      "type": "block",
+      "x": 90,
+      "y": 1940,
+      "props": {
+        "title": "show",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 150,
+        "h": 110,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "a",
+            "type": "list",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "show_b",
+      "type": "block",
+      "x": 280,
+      "y": 1940,
+      "props": {
+        "title": "show",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 150,
+        "h": 110,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "b",
+            "type": "list",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "wire-13a",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "wire-13b",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "note-13",
+      "type": "text",
+      "x": 480,
+      "y": 1950,
+      "text": "13 - a's port sits right,\nb's sits left: reversed\nfrom argument order, so\nthe cables cross on purpose.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      }
+    },
+    {
+      "id": "t-hard",
+      "type": "text",
+      "x": 80,
+      "y": 2160,
+      "text": "HARD - nesting, the combined pill, and a Simple-view check  [17-20]",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      }
+    },
+    {
+      "id": "run_outer",
+      "type": "block",
+      "x": 80,
+      "y": 2200,
+      "props": {
+        "title": "run",
+        "description": "",
+        "blockType": "call",
+        "view": "expanded",
+        "w": 460,
+        "h": 360,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "append_inner",
+      "type": "block",
+      "x": 70,
+      "y": 140,
+      "props": {
+        "title": "poses.append",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 170,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      },
+      "parentId": "run_outer"
+    },
+    {
+      "id": "run_collapsed",
+      "type": "block",
+      "x": 380,
+      "y": 2200,
+      "props": {
+        "title": "run",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 220,
+        "h": 170,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "note-17b",
+      "type": "text",
+      "x": 380,
+      "y": 2390,
+      "text": "same run(), Port view:\nthe outside, collapsed.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      }
+    },
+    {
+      "id": "note-17",
+      "type": "text",
+      "x": 80,
+      "y": 2580,
+      "text": "17 - two levels, hand-marked at each:\ncheck the interior tether AND the\nouter's own collapsed Port view (right).",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      }
+    },
+    {
+      "id": "nest_outer",
+      "type": "block",
+      "x": 620,
+      "y": 2200,
+      "props": {
+        "title": "outer",
+        "description": "",
+        "blockType": "call",
+        "view": "expanded",
+        "w": 640,
+        "h": 520,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "nest_mid",
+      "type": "block",
+      "x": 60,
+      "y": 140,
+      "props": {
+        "title": "run",
+        "description": "",
+        "blockType": "call",
+        "view": "expanded",
+        "w": 520,
+        "h": 340,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      },
+      "parentId": "nest_outer"
+    },
+    {
+      "id": "nest_inner",
+      "type": "block",
+      "x": 60,
+      "y": 140,
+      "props": {
+        "title": "add_pose",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 170,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      },
+      "parentId": "nest_mid"
+    },
+    {
+      "id": "note-18",
+      "type": "text",
+      "x": 620,
+      "y": 2740,
+      "text": "18 - three levels. Each is independently\nmarked; auto-follow across a frame\nboundary is not wired yet.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      }
+    },
+    {
+      "id": "append_delayed",
+      "type": "block",
+      "x": 80,
+      "y": 2840,
+      "props": {
+        "title": "poses.append",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 300,
+        "h": 170,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "len_delayed",
+      "type": "block",
+      "x": 460,
+      "y": 2880,
+      "props": {
+        "title": "len",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 190,
+        "h": 120,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "count",
+            "type": "int",
+            "visible": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "wire-19",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "delayed",
+        "delayValue": "1.0",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "routeMode": "automatic",
+        "state": "normal"
+      }
+    },
+    {
+      "id": "note-19",
+      "type": "text",
+      "x": 80,
+      "y": 3040,
+      "text": "19 - one cable, both marks: mut z-1 = 1.0.\nDrag the pill - it should move like any pill.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      }
+    },
+    {
+      "id": "append_simple",
+      "type": "block",
+      "x": 780,
+      "y": 2840,
+      "props": {
+        "title": "poses.append",
+        "description": "",
+        "blockType": "call",
+        "view": "simple",
+        "w": 320,
+        "h": 206,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "mutates": true
+          },
+          {
+            "id": "in_2",
+            "name": "pose",
+            "type": "Pose",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "effect:in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true,
+            "effect": true,
+            "edgeT": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "note-20",
+      "type": "text",
+      "x": 780,
+      "y": 3070,
+      "text": "20 - Simple view: the hook and the\neffect port both hide until hover,\nlike every subtle port does.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans"
+      }
+    },
+    {
+      "id": "pass-card",
+      "type": "geo",
+      "x": 80,
+      "y": 3160,
+      "text": "PASS WHEN\nEvery mutated argument shows a hook.\nEvery effect port sits on the top edge.\nTethers are right-angled, and may cross when ports do.\nNesting shows independently at each level.\nThe combined pill reads mut z-1.\nSimple view reveals the hook and the port on hover.",
+      "props": {
+        "geo": "rectangle",
+        "w": 900,
+        "h": 260,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "dash": "draw",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "type": "connection",
+      "fromId": "wire-1",
+      "toId": "r0c0",
+      "props": {
+        "portId": "effect:in_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-1",
+      "toId": "len_consumer",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-9a",
+      "toId": "r2c0",
+      "props": {
+        "portId": "out_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-9a",
+      "toId": "use_item",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-9b",
+      "toId": "r2c0",
+      "props": {
+        "portId": "effect:in_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-9b",
+      "toId": "len_after_pop",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-13a",
+      "toId": "r3c0",
+      "props": {
+        "portId": "effect:in_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-13a",
+      "toId": "show_a",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-13b",
+      "toId": "r3c0",
+      "props": {
+        "portId": "effect:in_2",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-13b",
+      "toId": "show_b",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-19",
+      "toId": "append_delayed",
+      "props": {
+        "portId": "effect:in_1",
+        "terminal": "start",
+        "face": "outer"
+      }
+    },
+    {
+      "type": "connection",
+      "fromId": "wire-19",
+      "toId": "len_delayed",
+      "props": {
+        "portId": "in_1",
+        "terminal": "end",
+        "face": "outer"
+      }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "1",
+      "kind": "step",
+      "x": 80,
+      "y": 90,
+      "w": 380,
+      "h": 120,
+      "text": "Start here.\n20 real mutating calls, laid\nout easy to hard, top to bottom.",
+      "target": {
+        "shapeId": "r0c0",
+        "anchor": "top"
+      }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "x": 508,
+      "y": 90,
+      "w": 420,
+      "h": 150,
+      "text": "PASS WHEN - full list on the\ngreen card near the board's\nbottom. See it for the complete condition."
+    }
+  ]
+}

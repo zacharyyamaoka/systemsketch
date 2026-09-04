@@ -61,6 +61,8 @@ const blockVersions = createShapePropsMigrationIds(BLOCK_SHAPE_TYPE, {
 	PortLayoutStyle: 2,
 	PortRows: 3,
 	ValueView: 4,
+	DiffState: 5,
+	FieldDiffs: 6,
 })
 
 const LEGACY_VIEW_SIZES = {
@@ -304,6 +306,60 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 						props.w = box.w
 						props.h = box.h
 					}
+				}
+			},
+		}, {
+			id: blockVersions.DiffState,
+			up(props) {
+				// One migration for the whole state vocabulary. The Block's own
+				// state is a StyleProp, and a style prop cannot be optional — the
+				// editor must find a concrete value on every Block to decide
+				// whether a selection is shared or mixed — so every stored Block
+				// needs `normal` made explicit. The ports' states are ordinary
+				// optional fields and mean `normal` by their absence, so nothing
+				// has to be written into them; the connection carries the same
+				// migration on its own sequence.
+				if (props.state === undefined) props.state = 'normal'
+			},
+			down(props) {
+				// A reader without the vocabulary would show a ghost row as an
+				// ordinary port, which is the board telling a lie. Drop the lens
+				// entirely on the way down, ghost rows included.
+				delete props.state
+				for (const side of ['inputs', 'outputs'] as const) {
+					const ports = props[side]
+					if (!Array.isArray(ports)) continue
+					props[side] = ports
+						.filter((port: Record<string, unknown>) => port.state !== 'removed')
+						.map((port: Record<string, unknown>) => {
+							const { state: _state, stateBefore: _before, ...rest } = port
+							return rest
+						})
+				}
+			},
+		}, {
+			id: blockVersions.FieldDiffs,
+			up() {
+				// Nothing to write. `fieldDiffs` and `priorPose` are ordinary
+				// optional props, not StyleProps, so absence already means "this
+				// board has no lens on it" — which is what every stored board is.
+				// The migration exists for its `down`.
+			},
+			down(props) {
+				// A reader without round 2's vocabulary would render neither the
+				// before/after pairs nor the pose ghost, and would then show a
+				// renamed Block under its NEW name with no sign that it moved.
+				// Silently correct, and silently missing the finding — so the
+				// lens comes off on the way down, exactly as `DiffState` does.
+				delete props.fieldDiffs
+				delete props.priorPose
+				for (const side of ['inputs', 'outputs'] as const) {
+					const ports = props[side]
+					if (!Array.isArray(ports)) continue
+					props[side] = ports.map((port: Record<string, unknown>) => {
+						const { fieldDiffs: _fields, ...rest } = port
+						return rest
+					})
 				}
 			},
 		}],

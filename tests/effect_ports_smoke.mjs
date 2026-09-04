@@ -233,6 +233,29 @@ async function main() {
       && exitRun.dy < -8)
     await shot(page, '3-wired')
 
+    // ---------------------------------------- the pill behaves like z-1 ---
+    // One object, two contents: it spawns part-way along the cable and it can be
+    // dragged along it. The handle used to exist only for a delayed cable, so
+    // `mut` was visible and stuck.
+    const pillAt = () => evaluate(page, `(() => {
+      const t = [...document.querySelectorAll('[data-shape-type="connection"] text')]
+        .find((n) => n.textContent.trim() === 'mut')
+      if (!t) return 'null'
+      const r = t.getBoundingClientRect()
+      return JSON.stringify({ cx: r.x + r.width / 2, cy: r.y + r.height / 2 })
+    })()`)
+    const pillBefore = JSON.parse(await pillAt())
+    add('EP-9c the mut pill spawns part-way along the cable', pillBefore !== null)
+    await clickAt(page, pillBefore.cx, pillBefore.cy)
+    await delay(300)
+    await dragFrom(page, { cx: pillBefore.cx, cy: pillBefore.cy },
+      { cx: pillBefore.cx, cy: pillBefore.cy + 90 })
+    await delay(500)
+    const pillAfter = JSON.parse(await pillAt())
+    add('EP-9d it can be dragged along the cable, exactly as z\u207b\u00b9 can',
+      pillAfter !== null
+      && Math.hypot(pillAfter.cx - pillBefore.cx, pillAfter.cy - pillBefore.cy) > 20)
+
     // ------------------------------------------------------ round trip ---
     await page.send('Page.reload', { ignoreCache: false })
     await waitFor(page,

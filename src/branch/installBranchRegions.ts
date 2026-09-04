@@ -27,6 +27,8 @@ function branchIdForShape(editor: Editor, shape: TLShape): TLShapeId | null {
 export function installBranchRegions(editor: Editor): () => void {
 	let pending = new Map<TLShapeId, RepairSource>()
 	let normalizingSelection = false
+	let repairQueued = false
+	let disposed = false
 
 	const queue = (id: TLShapeId, source: RepairSource) => {
 		// A local edit wins over a remote/load repair so its structural changes
@@ -56,7 +58,9 @@ export function installBranchRegions(editor: Editor): () => void {
 			noteShape(after, repairSource)
 		}
 	})
-	const stopComplete = editor.sideEffects.registerOperationCompleteHandler(() => {
+	const repairPendingBranches = () => {
+		repairQueued = false
+		if (disposed) return
 		let pass = 0
 		while (pending.size > 0 && pass < 3) {
 			pass += 1
@@ -71,6 +75,16 @@ export function installBranchRegions(editor: Editor): () => void {
 				else repair()
 			}
 		}
+	}
+	const scheduleRepair = () => {
+		// Operation-complete is emitted before the store leaves its atomic
+		// transaction. A remote Branch repair must begin afterwards.
+		if (repairQueued || disposed) return
+		repairQueued = true
+		queueMicrotask(repairPendingBranches)
+	}
+	const stopComplete = editor.sideEffects.registerOperationCompleteHandler(() => {
+		scheduleRepair()
 	})
 
 	// An internal helper must never become a user-facing selection. Replacing it
@@ -103,6 +117,7 @@ export function installBranchRegions(editor: Editor): () => void {
 	})
 
 	return () => {
+		disposed = true
 		stopSelection()
 		stopCreate()
 		stopChange()

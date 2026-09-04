@@ -267,6 +267,14 @@ function contains(outer: ReturnType<typeof bounds>, inner: ReturnType<typeof bou
 		&& inner.right <= outer.right && inner.bottom <= outer.bottom
 }
 
+/** Which lane of a multi-view board one legacy node belongs to, if it says. */
+function legacyLaneId(node: LegacyNode): string | null {
+	const supplement = record(record(node.data)?.extension)?.pyblocksBlockView
+	const stamp = record(record(supplement)?.metadata)?.['pyblocks.view']
+	const id = record(stamp)?.id
+	return typeof id === 'string' && id !== '' ? id : null
+}
+
 function handlePortId(handle: unknown): string {
 	return text(handle).replace(/^(?:source|target):port:/, '')
 }
@@ -304,17 +312,39 @@ export function planLegacyPyblocksSystemSketch(
 	// The selected-function boundary owns the function's whole projected flow.
 	// Generated legacy boards laid that flow beyond the old boundary rectangle,
 	// so geometry alone is not enough to recover the semantic scope.
-	const boundaryLegacyIds = new Set(legacyNodes.flatMap((node, index) => {
-		const extension = blockExtension(node)
-		if (!extension || !isSelectedFunctionBoundary(node, extension)) return []
-		return [text(node.id, `node-${index + 1}`)]
+	//
+	// A document can carry SEVERAL selected functions: PyBlocks stores one
+	// board per *series* now, with one lane per selected view of a shared
+	// source file. Each lane names itself on every block, so parent a block to
+	// its own lane's boundary. Picking the first boundary for all of them
+	// nested every lane inside lane one, and each later lane's two boundary
+	// connections then failed to bind — measured as 37 of 75 on a 12-lane
+	// board. A one-lane document has one boundary and behaves exactly as
+	// before.
+	const laneByLegacyId = new Map(legacyNodes.flatMap((node, index) => {
+		const lane = legacyLaneId(node)
+		return lane === null ? [] : [[text(node.id, `node-${index + 1}`), lane] as const]
 	}))
-	const selectedBoundary = blocks.find((block) => boundaryLegacyIds.has(block.legacyId))
+	const boundaryByLane = new Map<string | null, LegacyBlockPlan>()
+	for (const [index, node] of legacyNodes.entries()) {
+		const extension = blockExtension(node)
+		if (!extension || !isSelectedFunctionBoundary(node, extension)) continue
+		const legacyId = text(node.id, `node-${index + 1}`)
+		const plan = blocks.find((block) => block.legacyId === legacyId)
+		if (!plan) continue
+		const lane = laneByLegacyId.get(legacyId) ?? null
+		if (!boundaryByLane.has(lane)) boundaryByLane.set(lane, plan)
+	}
+	const soleBoundary = boundaryByLane.size === 1
+		? [...boundaryByLane.values()][0]
+		: undefined
 
 	// Other old documents encoded containment only visually. Recover the
 	// smallest expanded Block that contains each child as the fallback.
 	const expanded = blocks.filter((block) => block.props.view === 'expanded')
 	for (const block of blocks) {
+		const lane = laneByLegacyId.get(block.legacyId) ?? null
+		const selectedBoundary = boundaryByLane.get(lane) ?? soleBoundary
 		if (block === selectedBoundary) continue
 		const parent = selectedBoundary ?? (
 			block.props.view === 'expanded' ? undefined : expanded

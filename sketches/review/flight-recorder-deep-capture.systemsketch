@@ -73,8 +73,8 @@
       "typeName": "pointer"
     },
     {
-      "x": 720,
-      "y": 650,
+      "x": 761.1403636903913,
+      "y": 673.3129040059691,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -265,9 +265,9 @@
       "typeName": "binding"
     },
     {
-      "x": -83.47150259067362,
-      "y": -71.80310880829015,
-      "z": 1.0997150997150997,
+      "x": 221.06618100031733,
+      "y": 382.8357297113894,
+      "z": 0.5208653241000001,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -318,6 +318,14 @@
       "typeName": "shape"
     },
     {
+      "name": "",
+      "color": "#F2555A",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:n6l1ilGyWR54dYEedKLSt",
+      "typeName": "user"
+    },
+    {
       "meta": {},
       "id": "binding:cue-step-1-arrow-end",
       "type": "arrow",
@@ -338,7 +346,9 @@
     {
       "editingShapeId": null,
       "croppingShapeId": null,
-      "selectedShapeIds": [],
+      "selectedShapeIds": [
+        "shape:cue-step-1"
+      ],
       "hoveredShapeId": null,
       "erasingShapeIds": [],
       "hintingShapeIds": [],
@@ -384,8 +394,8 @@
       "followingUserId": null,
       "opacityForNextShape": 1,
       "stylesForNextShape": {
-        "tldraw:arrowKind": "elbow",
-        "systemsketch:connectionRouting": "elbow"
+        "tldraw:arrowKind": "arc",
+        "systemsketch:connectionRouting": "curved"
       },
       "brush": null,
       "scribbles": [],
@@ -400,8 +410,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1400,
-        "h": 900
+        "w": 1527.857177734375,
+        "h": 1183.5714111328125
       },
       "insets": [
         false,
@@ -416,9 +426,9 @@
       "isChatting": false,
       "highlightedUserIds": [],
       "isFocused": true,
-      "devicePixelRatio": 1,
+      "devicePixelRatio": 1.399999976158142,
       "isCoarsePointer": false,
-      "isHoveringCanvas": null,
+      "isHoveringCanvas": false,
       "openMenus": [],
       "isChangingStyle": false,
       "isReadonly": false,
@@ -528,8 +538,8 @@
       "typeName": "shape"
     },
     {
-      "x": 720,
-      "y": 370,
+      "x": 724.3547900234339,
+      "y": 418.99078308672927,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,

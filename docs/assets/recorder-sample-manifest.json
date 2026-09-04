@@ -1,24 +1,24 @@
 {
   "format": "systemsketch-recording-v2",
   "clock": "milliseconds since header.startedAtWall",
-  "durationMs": 5968.4,
+  "durationMs": 6068.8,
   "moments": 5,
   "captureHealth": {
     "id": 3,
     "ok": true,
-    "captured": 177,
-    "droppedForDensity": 134,
+    "captured": 180,
+    "droppedForDensity": 137,
     "requestedKeyframes": 68,
     "keyframesMatched": 68,
-    "largestRawGapMs": 81,
-    "target": "http://127.0.0.1:35199/?board=%2Ftmp%2Frecorder-smoke-files-a35Nlx%2FSystemSketch%2Frecorder-proof.systemsketch",
-    "targetId": "8B7152BAD47265DF86BB1D78559A2CDE",
+    "largestRawGapMs": 82,
+    "target": "http://127.0.0.1:42655/?board=%2Ftmp%2Frecorder-smoke-files-nUUMmO%2FSystemSketch%2Frecorder-proof.systemsketch",
+    "targetId": "518A3EA0861FBB0EEC99DC9971EE6306",
     "targets": 1,
-    "cdpPort": 43157,
+    "cdpPort": 32865,
     "source": "screencast",
     "framesKept": 43,
     "largestKeptGapMs": 334,
-    "durationMs": 5968.4
+    "durationMs": 6068.8
   },
   "privacy": {
     "networkBodies": "not captured",
@@ -51,23 +51,23 @@
     },
     {
       "file": "end.snapshot.json",
-      "bytes": 5278,
+      "bytes": 5371,
       "description": "store snapshot at recording end"
     },
     {
       "file": "frames.jsonl",
-      "bytes": 4749,
+      "bytes": 4754,
       "description": "frame timestamps and capture reasons",
       "rows": 43
     },
     {
       "file": "header.json",
-      "bytes": 6315,
+      "bytes": 11967,
       "description": "recording and environment identity"
     },
     {
       "file": "host.jsonl",
-      "bytes": 1670,
+      "bytes": 1667,
       "description": "bounded local controller request log",
       "rows": 9
     },
@@ -79,7 +79,7 @@
     },
     {
       "file": "network.jsonl",
-      "bytes": 3550,
+      "bytes": 3553,
       "description": "request timing and failures without bodies",
       "rows": 8
     },
@@ -91,7 +91,7 @@
     },
     {
       "file": "playback.html",
-      "bytes": 119340,
+      "bytes": 119131,
       "description": "self-contained synchronized viewer"
     },
     {
@@ -106,25 +106,25 @@
     },
     {
       "file": "store.full.jsonl",
-      "bytes": 74620,
+      "bytes": 75032,
       "description": "lossless replay diffs with complete records",
-      "rows": 41
+      "rows": 40
     },
     {
       "file": "timeline.jsonl",
-      "bytes": 34247,
+      "bytes": 34046,
       "description": "compact causal index on the recording clock",
-      "rows": 205
+      "rows": 204
     },
     {
       "file": "ui-hits.jsonl",
-      "bytes": 56881,
+      "bytes": 56878,
       "description": "focus, target geometry, and hit-test stacks",
       "rows": 36
     },
     {
       "file": "workspace.jsonl",
-      "bytes": 6136,
+      "bytes": 6138,
       "description": "workspace and autosave lifecycle detail",
       "rows": 23
     }

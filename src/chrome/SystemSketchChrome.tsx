@@ -15,6 +15,7 @@ import { AppearanceControls } from '../appearance/AppearanceControls'
 import { WrapSelectionControl } from '../frames/WrapSelectionControl'
 import { BLOCK_TOOL_ID, PILL_TOOL_ID, getBlockInspectorContext, selectionHasBlockStyles } from '../blocks'
 import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
+import { clearDiffStates } from '../diff/clearDiffStates'
 import { describeOrganizeNodesOutcome, organizeNodes } from '../blocks/layout'
 import {
   EditorBlockInspector,
@@ -471,6 +472,19 @@ export function SystemSketchSurfaceHost() {
         keywords: ['value', 'literal', 'variable'],
         icon: '＝',
         run: () => editor.setCurrentTool(PILL_TOOL_ID),
+      },
+      {
+        // Taking the lens off is a safety property, not a convenience. A diff
+        // or lint `state` is something a projector said ABOUT a board, and a
+        // person can always open that board, like it, and start editing — at
+        // which moment the marks are lying to them. This is the one action
+        // that ends that, so it must be reachable rather than only tested.
+        id: 'clear-diff-marks',
+        label: 'Clear diff marks',
+        description: 'Remove every diff and lint mark, and the ghosts, from this board',
+        keywords: ['diff', 'lint', 'lens', 'ghost', 'state'],
+        icon: '⊘',
+        run: () => clearDiffStates(editor),
       },
       {
         id: 'shape-library',

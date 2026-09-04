@@ -309,9 +309,9 @@
       "typeName": "shape"
     },
     {
-      "x": 48.888888888888886,
-      "y": 1.5000000000000142,
-      "z": 0.9290322580645161,
+      "x": -22.634924994574703,
+      "y": 201.46475990998238,
+      "z": 0.81,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -383,10 +383,10 @@
         "curve": null,
         "pins": [],
         "elbowRoute": null,
-        "routeMode": "automatic",
         "temporal": "data",
         "delayValue": "",
-        "pillPosition": 0.5
+        "pillPosition": 0.5,
+        "routeMode": "automatic"
       },
       "parentId": "page:page",
       "index": "a342z",
@@ -413,7 +413,9 @@
     {
       "editingShapeId": null,
       "croppingShapeId": null,
-      "selectedShapeIds": [],
+      "selectedShapeIds": [
+        "shape:normal-arrow"
+      ],
       "hoveredShapeId": null,
       "erasingShapeIds": [],
       "hintingShapeIds": [],
@@ -616,8 +618,8 @@
       "followingUserId": null,
       "opacityForNextShape": 1,
       "stylesForNextShape": {
-        "tldraw:arrowKind": "elbow",
-        "systemsketch:connectionRouting": "elbow"
+        "tldraw:arrowKind": "arc",
+        "systemsketch:connectionRouting": "straight"
       },
       "brush": null,
       "scribbles": [],
@@ -632,8 +634,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1280,
-        "h": 720
+        "w": 977.1428833007812,
+        "h": 1183.5714111328125
       },
       "insets": [
         false,
@@ -648,9 +650,9 @@
       "isChatting": false,
       "highlightedUserIds": [],
       "isFocused": true,
-      "devicePixelRatio": 1,
+      "devicePixelRatio": 1.399999976158142,
       "isCoarsePointer": false,
-      "isHoveringCanvas": null,
+      "isHoveringCanvas": true,
       "openMenus": [],
       "isChangingStyle": false,
       "isReadonly": false,
@@ -662,6 +664,14 @@
       "typeName": "instance"
     },
     {
+      "name": "",
+      "color": "#9D5BD2",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:yneN5fabhwRzj2iEFWYDr",
+      "typeName": "user"
+    },
+    {
       "x": 550,
       "y": 370,
       "rotation": 0,
@@ -671,7 +681,7 @@
       "id": "shape:normal-arrow",
       "type": "arrow",
       "props": {
-        "kind": "elbow",
+        "kind": "arc",
         "elbowMidPoint": 0.52,
         "dash": "solid",
         "size": "m",

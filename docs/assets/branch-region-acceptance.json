@@ -1,9 +1,9 @@
 [
   {
     "id": "BR-1",
-    "label": "the Block slot is a family with a submenu, not a bare button",
-    "observed": true,
-    "desired": true,
+    "label": "the whole Block family slot is the submenu trigger, not a split target",
+    "observed": "menu",
+    "desired": "menu",
     "ok": true
   },
   {
@@ -15,15 +15,17 @@
   },
   {
     "id": "BR-3",
-    "label": "the submenu lists Block, Branch and Pill under one heading",
+    "label": "the submenu lists Block, Branch, Loop and Pill under one heading",
     "observed": [
       "Block",
       "Branch",
+      "Loop",
       "Pill"
     ],
     "desired": [
       "Block",
       "Branch",
+      "Loop",
       "Pill"
     ],
     "ok": true
@@ -104,28 +106,26 @@
   },
   {
     "id": "BR-7",
-    "label": "the selection pill reads Branch · + port · + arm · E · C · ◎ · Inspect",
+    "label": "the selection pill reads Branch · + port · + arm · E · C · ◎",
     "observed": [
-      "block-mini-menu__count",
+      "block-mini-menu__subject",
       "block-mini-menu__views",
       "branch-pill-add-control",
       "branch-pill-add-arm",
       "block-mini-menu__views",
       "branch-pill-view-expanded",
       "branch-pill-view-case",
-      "branch-pill-active",
-      "block-mini-menu__inspect"
+      "branch-pill-active"
     ],
     "desired": [
-      "block-mini-menu__count",
+      "block-mini-menu__subject",
       "block-mini-menu__views",
       "branch-pill-add-control",
       "branch-pill-add-arm",
       "block-mini-menu__views",
       "branch-pill-view-expanded",
       "branch-pill-view-case",
-      "branch-pill-active",
-      "block-mini-menu__inspect"
+      "branch-pill-active"
     ],
     "ok": true
   },
@@ -293,6 +293,13 @@
       "publish": "2",
       "estimate": null
     },
+    "ok": true
+  },
+  {
+    "id": "BR-18c",
+    "label": "an input count badge clears the input wire above its port",
+    "observed": true,
+    "desired": true,
     "ok": true
   },
   {

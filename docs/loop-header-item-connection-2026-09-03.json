@@ -1,0 +1,190 @@
+{
+  "settled": [
+    "header is an operator: the iterable feeds into it",
+    "a real item port, wirable, never purely derived",
+    "centred title",
+    "zero-iterations arm always drawn and transparent"
+  ],
+  "criteria": [
+    {
+      "key": "distinct",
+      "name": "Tells the item cable apart from every other cable",
+      "weight": 24
+    },
+    {
+      "key": "honest",
+      "name": "Says the true fact \u2014 one per turn, not one turn late",
+      "weight": 22
+    },
+    {
+      "key": "calm",
+      "name": "Adds nothing the board has to carry twice",
+      "weight": 16
+    },
+    {
+      "key": "scale",
+      "name": "Survives two consumers, zip, and nesting",
+      "weight": 16
+    },
+    {
+      "key": "wirable",
+      "name": "Stays a real port on a real cable you can drag",
+      "weight": 12
+    },
+    {
+      "key": "seams",
+      "name": "Fits what already ships",
+      "weight": 10
+    }
+  ],
+  "variants": {
+    "A": {
+      "name": "Dotted drop",
+      "one_line": "Your drawing: the item falls from the header on a dotted line carrying `i =`.",
+      "scores": {
+        "distinct": 4,
+        "honest": 6,
+        "calm": 8,
+        "scale": 7,
+        "wirable": 9,
+        "seams": 9
+      },
+      "weighted": 66.6
+    },
+    "B": {
+      "name": "Solid drop",
+      "one_line": "The same run, drawn solid. The item is this turn's value, so it is ordinary data.",
+      "scores": {
+        "distinct": 5,
+        "honest": 10,
+        "calm": 10,
+        "scale": 9,
+        "wirable": 10,
+        "seams": 10
+      },
+      "weighted": 86.4
+    },
+    "C": {
+      "name": "Source pill at the port",
+      "one_line": "A source pill `other \u00b7 Pose` right at the header, then an ordinary cable.",
+      "scores": {
+        "distinct": 8,
+        "honest": 9,
+        "calm": 7,
+        "scale": 8,
+        "wirable": 9,
+        "seams": 8
+      },
+      "weighted": 81.8
+    },
+    "D": {
+      "name": "Cadence ticks",
+      "one_line": "Solid, with a short cross-tick every few pixels: one tick, one turn.",
+      "scores": {
+        "distinct": 9,
+        "honest": 9,
+        "calm": 7,
+        "scale": 8,
+        "wirable": 10,
+        "seams": 6
+      },
+      "weighted": 83.4
+    },
+    "E": {
+      "name": "Half-weight line",
+      "one_line": "The item cable is drawn at half the weight of a data cable. Nothing else changes.",
+      "scores": {
+        "distinct": 7,
+        "honest": 8,
+        "calm": 10,
+        "scale": 8,
+        "wirable": 10,
+        "seams": 7
+      },
+      "weighted": 82.2
+    },
+    "F": {
+      "name": "Ghost fan",
+      "one_line": "The cable is solid, with two faded copies fanning behind it into the same port.",
+      "scores": {
+        "distinct": 9,
+        "honest": 7,
+        "calm": 3,
+        "scale": 4,
+        "wirable": 6,
+        "seams": 6
+      },
+      "weighted": 61.4
+    },
+    "G": {
+      "name": "Named cap stub",
+      "one_line": "A stub off the header ending in a labelled cap, and a matching cap at the consumer. No long cable.",
+      "scores": {
+        "distinct": 7,
+        "honest": 5,
+        "calm": 9,
+        "scale": 9,
+        "wirable": 2,
+        "seams": 5
+      },
+      "weighted": 64.0
+    },
+    "H": {
+      "name": "Port above the consumer",
+      "one_line": "The item port slides along the header to sit directly above the port it feeds.",
+      "scores": {
+        "distinct": 6,
+        "honest": 9,
+        "calm": 10,
+        "scale": 6,
+        "wirable": 10,
+        "seams": 8
+      },
+      "weighted": 79.8
+    },
+    "I": {
+      "name": "Type on the port, name on the cable",
+      "one_line": "The port says `Pose`; the cable says `other`. Your question, answered.",
+      "scores": {
+        "distinct": 7,
+        "honest": 10,
+        "calm": 7,
+        "scale": 7,
+        "wirable": 10,
+        "seams": 8
+      },
+      "weighted": 81.2
+    },
+    "J": {
+      "name": "Operator row",
+      "one_line": "`Iterable \u25b8 Iter` side by side on one header line: the header read as an operator with an in and an out.",
+      "scores": {
+        "distinct": 8,
+        "honest": 10,
+        "calm": 8,
+        "scale": 7,
+        "wirable": 10,
+        "seams": 9
+      },
+      "weighted": 86.2
+    }
+  },
+  "ranking": [
+    "B",
+    "J",
+    "D",
+    "E",
+    "C",
+    "I",
+    "H",
+    "A",
+    "G",
+    "F"
+  ],
+  "measured": {
+    "tldraw": "5.3.2",
+    "temporal": "'data', 'async', 'delayed'",
+    "scenes": 16,
+    "commit": "cf86800"
+  }
+}

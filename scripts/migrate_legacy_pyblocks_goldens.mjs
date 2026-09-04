@@ -127,6 +127,14 @@ async function migrateInProduct(app, sourcePath, index) {
     `window.__systemsketch.editor.getCurrentPageShapes().filter((shape) => shape.type === 'block').length === ${expectedBlocks}`,
     `${basename(dirname(sourcePath))}/${basename(sourcePath)} legacy Blocks`,
   )
+  // Connections land after the Blocks they bind, so the Block count alone is
+  // not "the import finished". On a one-lane board the gap is invisible; on a
+  // twelve-lane series board it read 37 of 75 and failed a correct migration.
+  await waitFor(
+    app.page,
+    `window.__systemsketch.editor.getCurrentPageShapes().filter((shape) => shape.type === 'connection').length === ${expectedConnections}`,
+    `${basename(dirname(sourcePath))}/${basename(sourcePath)} legacy connections`,
+  )
   const imported = await evaluate(app.page, `(() => {
     const editor = window.__systemsketch.editor
     const shapes = editor.getCurrentPageShapes()

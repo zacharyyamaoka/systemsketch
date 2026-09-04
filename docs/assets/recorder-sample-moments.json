@@ -1,47 +1,47 @@
 [
   {
-    "t": 1029.8,
+    "t": 1036.6,
     "severity": "info",
     "kind": "app-action",
     "lane": "action",
     "summary": "opened inspector",
     "detail": "chrome-right-000011",
-    "frame": "frames/f-001074.jpg"
+    "frame": "frames/f-001055.jpg"
   },
   {
-    "t": 1182.4,
+    "t": 1202.4,
     "severity": "info",
     "kind": "app-action",
     "lane": "action",
     "summary": "opened inspector",
     "detail": "chrome-right-000016",
-    "frame": "frames/f-001208.jpg"
+    "frame": "frames/f-001221.jpg"
   },
   {
-    "t": 2655.1,
+    "t": 2704.6,
     "severity": "info",
     "kind": "app-action",
     "lane": "action",
     "summary": "opened inspector",
     "detail": "chrome-right-000050",
-    "frame": "frames/f-002676.jpg"
+    "frame": "frames/f-002722.jpg"
   },
   {
-    "t": 4439.2,
+    "t": 4509.4,
     "severity": "info",
     "kind": "app-action",
     "lane": "action",
     "summary": "opened inspector",
-    "detail": "chrome-right-000085",
-    "frame": "frames/f-004441.jpg"
+    "detail": "chrome-right-000084",
+    "frame": "frames/f-004540.jpg"
   },
   {
-    "t": 5471.3,
+    "t": 5561.3,
     "severity": "info",
     "kind": "app-action",
     "lane": "action",
     "summary": "closed latest app surface",
     "detail": null,
-    "frame": "frames/f-005473.jpg"
+    "frame": "frames/f-005570.jpg"
   }
 ]

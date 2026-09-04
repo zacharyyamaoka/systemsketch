@@ -46,6 +46,14 @@ npm run dev
   builds with `--base ./`; the host bundles independently.
 - An extension may import from the app only through `src/embed/sharedWithHost.ts`. Keep that
   module free of React, tldraw, and the DOM.
+- For VS Code/Cursor work, acceptance launches the packaged VSIX in each real target editor
+  under Xvfb with disposable user-data, extensions, workspace, and ports, then drives it over
+  CDP like Playwright. Assert the exact document/custom editor, SystemSketch controls, no error
+  surface, expected interaction and close/save behavior, and byte stability for read-only
+  opens; capture and inspect screenshots. A parser pass or mounted canvas is not acceptance.
+- Run the full corpus in both hosts with
+  `CODE_PATH=/usr/bin/cursor npm --prefix vscode-systemsketch run test:corpus` and
+  `CODE_PATH=/usr/bin/code npm --prefix vscode-systemsketch run test:corpus`.
 
 ## Proof and reports
 

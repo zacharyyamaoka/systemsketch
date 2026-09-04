@@ -1,31 +1,31 @@
-SystemSketch interaction recording — 2026-09-03T03:26:38.813Z · 6.0 s · an explicit take
-channel preview · build recorder-smoke · http://127.0.0.1:35199/?board=%2Ftmp%2Frecorder-smoke-files-a35Nlx%2FSystemSketch%2Frecorder-proof.systemsketch
+SystemSketch interaction recording — 2026-09-03T15:04:03.113Z · 6.1 s · an explicit take
+channel preview · build recorder-smoke · http://127.0.0.1:42655/?board=%2Ftmp%2Frecorder-smoke-files-nUUMmO%2FSystemSketch%2Frecorder-proof.systemsketch
 viewport 1440×960 @1x · state path select.idle → select.idle · 3 shapes at the end
 
 Indexed moments (5; the first 5):
-  +   1.03s  INFO  opened inspector
-  +   1.18s  INFO  opened inspector
-  +   2.66s  INFO  opened inspector
-  +   4.44s  INFO  opened inspector
-  +   5.47s  INFO  closed latest app surface
+  +   1.04s  INFO  opened inspector
+  +   1.20s  INFO  opened inspector
+  +   2.70s  INFO  opened inspector
+  +   4.51s  INFO  opened inspector
+  +   5.56s  INFO  closed latest app surface
 
 State-chart transitions (19):
   +   0.85s  select.idle  →  select.pointing_canvas   (pointer_down)
   +   0.86s  select.pointing_canvas  →  select.idle   (pointer_up)
-  +   1.05s  select.idle  →  block.idle   (store)
-  +   1.13s  block.idle  →  block.pointing   (pointer_down)
-  +   1.15s  block.pointing  →  select.resizing   (pointer_move)
-  +   1.36s  select.resizing  →  select.idle   (pointer_up)
-  +   1.38s  select.idle  →  select.editing_shape   (store)
-  +   1.40s  select.editing_shape  →  select.idle   (complete)
-  +   2.53s  select.idle  →  block.idle   (store)
-  +   2.62s  block.idle  →  block.pointing   (pointer_down)
-  +   2.63s  block.pointing  →  select.resizing   (pointer_move)
-  +   2.82s  select.resizing  →  select.idle   (pointer_up)
+  +   1.06s  select.idle  →  block.idle   (store)
+  +   1.15s  block.idle  →  block.pointing   (pointer_down)
+  +   1.17s  block.pointing  →  select.resizing   (pointer_move)
+  +   1.39s  select.resizing  →  select.idle   (pointer_up)
+  +   1.41s  select.idle  →  select.editing_shape   (store)
+  +   1.44s  select.editing_shape  →  select.idle   (complete)
+  +   2.57s  select.idle  →  block.idle   (store)
+  +   2.66s  block.idle  →  block.pointing   (pointer_down)
+  +   2.68s  block.pointing  →  select.resizing   (pointer_move)
+  +   2.89s  select.resizing  →  select.idle   (pointer_up)
   … 7 more in timeline.jsonl
 
-Totals: 49 input events (32 moves, 5 presses, 1 key downs) · 34 DOM events · 41 store diffs · 0 menu changes · 0 console rows · 43 frames
-Deep lanes: 5 app actions · 23 workspace events · 8 network events · 0 performance events · 41 lossless store diffs
+Totals: 49 input events (32 moves, 5 presses, 1 key downs) · 34 DOM events · 40 store diffs · 0 menu changes · 0 console rows · 43 frames
+Deep lanes: 5 app actions · 23 workspace events · 8 network events · 0 performance events · 40 lossless store diffs
 
 States seen, and the file that defines each:
   select                       node_modules/tldraw/dist-esm/lib/tools/SelectTool/SelectTool.mjs
@@ -39,14 +39,14 @@ States seen, and the file that defines each:
   dragging_handle              node_modules/tldraw/dist-esm/lib/tools/SelectTool/childStates/DraggingHandle.mjs
 
 Read these files, in this order:
-1. /tmp/recorder-smoke-files-a35Nlx/SystemSketch/recordings/2026-09-02_20-26-38-take/README.md  — this summary
-2. /tmp/recorder-smoke-files-a35Nlx/SystemSketch/recordings/2026-09-02_20-26-38-take/manifest.json  — artifact index, counts, sizes, capture health, and privacy boundaries
-3. /tmp/recorder-smoke-files-a35Nlx/SystemSketch/recordings/2026-09-02_20-26-38-take/moments.json  — errors, stalls, app actions, and menu moments already paired with the nearest frame
-4. /tmp/recorder-smoke-files-a35Nlx/SystemSketch/recordings/2026-09-02_20-26-38-take/timeline.jsonl  — the compact causal index, one JSON object per line. `t` is ms since the start. Lanes: input (what tldraw's state chart received), dom (raw key, pointer, and click events on the window, with the UI element hit), state (state-chart path changes), menu (open menus), store (compact add/update/remove summaries), console, action, workspace, network, perf, ui, and mark.
-5. /tmp/recorder-smoke-files-a35Nlx/SystemSketch/recordings/2026-09-02_20-26-38-take/frames/  — 43 event-aware screenshots named by ms since the start (f-000327.jpg = +0.33 s). Use the frame named by moments.json, or open the first frame with a larger t. Chrome screencast frames: what the window actually showed, UI chrome included, no mouse pointer (the input lane has it).
-6. /tmp/recorder-smoke-files-a35Nlx/SystemSketch/recordings/2026-09-02_20-26-38-take/store.full.jsonl  — complete added, removed, and before/after updated records; timeline store rows point here by `detail` id
-7. /tmp/recorder-smoke-files-a35Nlx/SystemSketch/recordings/2026-09-02_20-26-38-take/start.snapshot.json  — the tldraw store (document + session records) at t=0; /tmp/recorder-smoke-files-a35Nlx/SystemSketch/recordings/2026-09-02_20-26-38-take/end.snapshot.json is the store at save time. `editor.store.loadStoreSnapshot(start)` then replaying `store.full.jsonl` reproduces every document instant.
-8. /tmp/recorder-smoke-files-a35Nlx/SystemSketch/recordings/2026-09-02_20-26-38-take/workspace.jsonl, network.jsonl, ui-hits.jsonl, performance.jsonl, browser-errors.jsonl, actions.jsonl, host.jsonl — detailed lanes; open only when the compact index points there
-9. /tmp/recorder-smoke-files-a35Nlx/SystemSketch/recordings/2026-09-02_20-26-38-take/playback.html  — open in a browser: slow frames, fast lanes, one scrubber; #t=<ms> deep-links a moment.
+1. /tmp/recorder-smoke-files-nUUMmO/SystemSketch/recordings/2026-09-03_08-04-03-take/README.md  — this summary
+2. /tmp/recorder-smoke-files-nUUMmO/SystemSketch/recordings/2026-09-03_08-04-03-take/manifest.json  — artifact index, counts, sizes, capture health, and privacy boundaries
+3. /tmp/recorder-smoke-files-nUUMmO/SystemSketch/recordings/2026-09-03_08-04-03-take/moments.json  — errors, stalls, app actions, and menu moments already paired with the nearest frame
+4. /tmp/recorder-smoke-files-nUUMmO/SystemSketch/recordings/2026-09-03_08-04-03-take/timeline.jsonl  — the compact causal index, one JSON object per line. `t` is ms since the start. Lanes: input (what tldraw's state chart received), dom (raw key, pointer, and click events on the window, with the UI element hit), state (state-chart path changes), menu (open menus), store (compact add/update/remove summaries), console, action, workspace, network, perf, ui, and mark.
+5. /tmp/recorder-smoke-files-nUUMmO/SystemSketch/recordings/2026-09-03_08-04-03-take/frames/  — 43 event-aware screenshots named by ms since the start (f-000427.jpg = +0.43 s). Use the frame named by moments.json, or open the first frame with a larger t. Chrome screencast frames: what the window actually showed, UI chrome included, no mouse pointer (the input lane has it).
+6. /tmp/recorder-smoke-files-nUUMmO/SystemSketch/recordings/2026-09-03_08-04-03-take/store.full.jsonl  — complete added, removed, and before/after updated records; timeline store rows point here by `detail` id
+7. /tmp/recorder-smoke-files-nUUMmO/SystemSketch/recordings/2026-09-03_08-04-03-take/start.snapshot.json  — the tldraw store (document + session records) at t=0; /tmp/recorder-smoke-files-nUUMmO/SystemSketch/recordings/2026-09-03_08-04-03-take/end.snapshot.json is the store at save time. `editor.store.loadStoreSnapshot(start)` then replaying `store.full.jsonl` reproduces every document instant.
+8. /tmp/recorder-smoke-files-nUUMmO/SystemSketch/recordings/2026-09-03_08-04-03-take/workspace.jsonl, network.jsonl, ui-hits.jsonl, performance.jsonl, browser-errors.jsonl, actions.jsonl, host.jsonl — detailed lanes; open only when the compact index points there
+9. /tmp/recorder-smoke-files-nUUMmO/SystemSketch/recordings/2026-09-03_08-04-03-take/playback.html  — open in a browser: slow frames, fast lanes, one scrubber; #t=<ms> deep-links a moment.
 
-Recorder cost inside the page: 11 ms over 5.97 s of uptime.
+Recorder cost inside the page: 14 ms over 6.07 s of uptime.

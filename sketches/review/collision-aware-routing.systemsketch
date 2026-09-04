@@ -1,6 +1,6 @@
 {
   "systemSketch": {
-    "formatVersion": 1,
+    "formatVersion": 2,
     "application": "SystemSketch",
     "shapes": {
       "arrow": 2,
@@ -46,6 +46,7 @@
       "com.tldraw.shape.line": 5,
       "com.tldraw.shape.block": 4,
       "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.branch-arm": 0,
       "com.tldraw.shape.connection": 3,
       "com.tldraw.binding.arrow": 1,
       "com.tldraw.binding.connection": 1,
@@ -121,8 +122,8 @@
       "typeName": "binding"
     },
     {
-      "x": 650,
-      "y": 230,
+      "x": 657.3311919280978,
+      "y": 250.77179746931847,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -317,9 +318,9 @@
       "typeName": "shape"
     },
     {
-      "x": 0,
-      "y": 0,
-      "z": 1,
+      "x": 47.99266926236851,
+      "y": 566.3546240439384,
+      "z": 0.5845851000000001,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -430,7 +431,9 @@
     {
       "editingShapeId": null,
       "croppingShapeId": null,
-      "selectedShapeIds": [],
+      "selectedShapeIds": [
+        "shape:source"
+      ],
       "hoveredShapeId": null,
       "erasingShapeIds": [],
       "hintingShapeIds": [],
@@ -487,7 +490,35 @@
         "routing": "elbow",
         "curve": null,
         "pins": [],
-        "elbowRoute": null,
+        "elbowRoute": {
+          "startAxis": "x",
+          "corners": [
+            {
+              "tx": 0.28444158923746377,
+              "ox": 0,
+              "ty": 0.5,
+              "oy": 0
+            },
+            {
+              "tx": 0.28444158923746377,
+              "ox": 0,
+              "ty": 0.5,
+              "oy": -171.22820253068153
+            },
+            {
+              "tx": 0.9946666666666667,
+              "ox": 0,
+              "ty": 0.5,
+              "oy": -171.22820253068153
+            },
+            {
+              "tx": 0.9946666666666667,
+              "ox": 0,
+              "ty": 0.5,
+              "oy": 0
+            }
+          ]
+        },
         "routeMode": "automatic",
         "temporal": "data",
         "delayValue": "",
@@ -570,6 +601,14 @@
       "typeName": "shape"
     },
     {
+      "name": "",
+      "color": "#55B467",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:pc-guWst8-1ycSjPdeIO-",
+      "typeName": "user"
+    },
+    {
       "meta": {},
       "id": "page:page",
       "name": "Page 1",
@@ -603,8 +642,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1600,
-        "h": 900
+        "w": 1046.4285888671875,
+        "h": 1183.5714111328125
       },
       "insets": [
         false,
@@ -619,9 +658,9 @@
       "isChatting": false,
       "highlightedUserIds": [],
       "isFocused": true,
-      "devicePixelRatio": 1,
+      "devicePixelRatio": 1.399999976158142,
       "isCoarsePointer": false,
-      "isHoveringCanvas": null,
+      "isHoveringCanvas": false,
       "openMenus": [],
       "isChangingStyle": false,
       "isReadonly": false,

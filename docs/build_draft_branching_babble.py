@@ -1,0 +1,421 @@
+#!/usr/bin/env python3
+"""
+    Build the five-way Draft Branching Babble & Prune gallery.
+
+    The builder keeps the auditable comparison spec free of embedded media,
+    then inlines the supplied prior-art screenshots into the generated,
+    self-contained HTML report.
+"""
+
+# BAM Imports
+
+# PYTHON Imports
+
+
+def main() -> None:
+    import json
+    import re
+    import subprocess
+    import sys
+    import tempfile
+    from pathlib import Path
+
+    repo = Path(__file__).resolve().parents[1]
+    docs = repo / "docs"
+    output = docs / "draft-branching-babble-2026-09-03.html"
+    spec_output = docs / "draft-branching-babble-2026-09-03.json"
+    gallery = Path("/home/bam/.claude/skills/babble/scripts/gallery.py")
+
+    app_text = (repo / "src" / "App.tsx").read_text(encoding="utf-8")
+    match = re.search(r"maxPages:\s*(\d+)", app_text)
+    if match is None:
+        raise SystemExit("Could not measure SystemSketch's maxPages constraint.")
+    max_pages = int(match.group(1))
+
+    mock_css = """
+<style>
+.ss-mock{--ink:#18212c;--muted:#75818e;--line:#dce2e8;--paper:#fff;--low:#f3f6f8;
+--accent:#4b8cff;--accent-soft:#eaf2ff;--warning:#bd7411;--warning-soft:#fff5e5;
+--success:#25815a;--danger:#b24d4a;position:relative;min-height:288px;overflow:hidden;
+background:radial-gradient(circle at 1px 1px,#d6dce3 1px,transparent 1.3px) 0 0/16px 16px,#f7f9fb;
+color:var(--ink);font:11px/1.3 Inter,ui-sans-serif,system-ui,sans-serif}
+.ss-mock *{box-sizing:border-box}.ss-mock button{font:inherit}.ss-top{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:10px;pointer-events:none}.ss-bar{display:flex;height:36px;align-items:center;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.95);box-shadow:0 2px 9px rgba(27,42,59,.10);pointer-events:auto}.ss-file{gap:7px;padding:0 11px;font-weight:800}.ss-file i{font-style:normal;color:var(--muted)}.ss-file em{display:grid;min-width:19px;height:19px;place-items:center;border-radius:6px;background:var(--accent-soft);color:var(--accent);font-size:13px;font-style:normal}.ss-right{gap:3px;padding:3px}.ss-icon,.ss-action{border:0;border-radius:8px;background:transparent;color:var(--ink);cursor:pointer}.ss-icon{height:28px;min-width:30px;padding:0 8px;font-weight:800}.ss-icon:hover,.ss-icon.active{background:var(--accent-soft);color:#236cb9}.ss-avatar{display:grid;width:26px;height:26px;place-items:center;border-radius:50%;background:#3277d4;color:#fff;font-size:9px;font-weight:850}.ss-share{height:27px;padding:0 10px;background:#3277d4!important;color:#fff!important;font-size:10px;font-weight:800}.ss-canvas{position:absolute;inset:62px 16px 14px}.ss-node{position:absolute;min-width:71px;padding:8px 9px;border:1.4px solid #94a4b5;border-radius:8px;background:#fff;box-shadow:0 1px 2px rgba(20,30,40,.08);font-weight:800;text-align:center}.ss-node small{display:block;margin-top:3px;color:var(--muted);font-size:8px;font-weight:600}.ss-node.source{left:7%;top:55%;border-color:#6b93c9}.ss-node.plan{left:38%;top:28%;border-color:#6b93c9}.ss-node.control{right:7%;top:55%;border-color:#6b93c9}.ss-node.gate{left:50%;top:60%;border-color:var(--warning);background:var(--warning-soft)}.ss-line{position:absolute;height:1.5px;background:#7890aa;transform-origin:left center}.ss-line.one{left:20%;top:64%;width:22%;transform:rotate(-30deg)}.ss-line.two{left:49%;top:39%;width:30%;transform:rotate(28deg)}.ss-line.three{left:47%;top:43%;width:18%;transform:rotate(52deg)}.ss-line.four{left:61%;top:67%;width:17%;transform:rotate(-16deg)}.ss-mode{position:absolute;z-index:2;top:55px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:7px;min-height:24px;padding:5px 9px;border:1px solid #e8c889;border-radius:7px;background:var(--warning-soft);color:#86500a;font-size:9px;font-weight:800}.ss-mode span{font-weight:600}.ss-pop{position:absolute;z-index:5;top:53px;right:13px;width:205px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.98);box-shadow:0 10px 25px rgba(23,37,52,.16)}.ss-pop-head{display:flex;align-items:center;justify-content:space-between;padding:10px 11px 7px;color:var(--muted);font-size:8px;font-weight:850;letter-spacing:.08em}.ss-pop-head button{border:0;background:transparent;color:#2974c8;cursor:pointer;font-size:14px}.ss-row{display:grid;width:100%;grid-template-columns:16px 1fr auto;align-items:center;gap:7px;padding:8px 10px;border:0;background:transparent;color:var(--ink);cursor:pointer;text-align:left}.ss-row:hover,.ss-row.current{background:var(--accent-soft)}.ss-row.draft{background:var(--warning-soft)}.ss-row i{display:grid;width:16px;height:16px;place-items:center;border-radius:5px;background:var(--low);color:var(--muted);font-size:9px;font-style:normal}.ss-row.draft i{background:#fde8bd;color:#98600d}.ss-row b,.ss-row small{display:block}.ss-row b{font-size:10px}.ss-row small{color:var(--muted);font-size:8px}.ss-row em{color:var(--muted);font-size:8px;font-style:normal}.ss-pop-foot{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--line)}.ss-button{min-height:25px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);cursor:pointer;font-size:9px;font-weight:800}.ss-button.primary{border-color:#337bc8;background:#337bc8;color:#fff}.ss-button.warn{border-color:#e1b56e;background:var(--warning-soft);color:#87500c}.ss-rail{position:absolute;z-index:4;top:53px;right:13px;width:224px;padding:10px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.98);box-shadow:0 10px 25px rgba(23,37,52,.16)}.ss-rail-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:10px;font-weight:850}.ss-timeline{position:relative;padding-left:20px}.ss-timeline:before{position:absolute;top:5px;bottom:6px;left:6px;width:1px;background:#cbd4de;content:""}.ss-event{position:relative;display:grid;grid-template-columns:1fr auto;gap:6px;padding:5px 0}.ss-event:before{position:absolute;top:9px;left:-18px;width:9px;height:9px;border:2px solid #7b91a8;border-radius:50%;background:#fff;content:""}.ss-event.branch:before{border-color:var(--warning);background:var(--warning-soft)}.ss-event.merge:before{border-color:var(--success);background:#eaf7f0}.ss-event b,.ss-event small{display:block}.ss-event b{font-size:9px}.ss-event small{color:var(--muted);font-size:8px}.ss-event em{color:var(--muted);font-size:8px;font-style:normal}.ss-deck{position:absolute;z-index:5;top:53px;right:13px;display:flex;gap:6px;width:284px;padding:8px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.98);box-shadow:0 10px 25px rgba(23,37,52,.16)}.ss-deck-card{width:83px;min-height:92px;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;text-align:left}.ss-deck-card:hover,.ss-deck-card.current{border-color:#6ea5e3;background:var(--accent-soft)}.ss-deck-card.draft{border-color:#e4be7c;background:var(--warning-soft)}.ss-deck-card b,.ss-deck-card small{display:block}.ss-deck-card b{margin-bottom:4px;font-size:9px}.ss-deck-card small{color:var(--muted);font-size:8px}.ss-thumb{height:35px;margin-top:7px;border:1px solid #d7dee6;border-radius:4px;background:linear-gradient(145deg,transparent 0 30%,#8fa2b5 31% 32%,transparent 33% 100%),#f6f8fa}.ss-changes{position:absolute;z-index:5;top:53px;right:13px;width:236px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.98);box-shadow:0 10px 25px rgba(23,37,52,.16)}.ss-change-head{padding:10px 11px 8px;border-bottom:1px solid var(--line)}.ss-change-head b{display:block;font-size:11px}.ss-change-head span{color:var(--muted);font-size:8px}.ss-change{display:flex;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid var(--line)}.ss-change:last-of-type{border-bottom:0}.ss-change i{display:grid;width:17px;height:17px;place-items:center;border-radius:5px;background:#eaf7f0;color:var(--success);font-size:10px;font-style:normal}.ss-change.conflict i{background:#fdeaea;color:var(--danger)}.ss-change b,.ss-change small{display:block}.ss-change b{font-size:9px}.ss-change small{color:var(--muted);font-size:8px}.ss-change .scope{margin-left:auto;color:var(--muted);font-size:8px}.ss-workbench{position:absolute;z-index:5;top:53px;right:13px;width:276px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.98);box-shadow:0 10px 25px rgba(23,37,52,.16)}.ss-work-head{display:flex;justify-content:space-between;padding:10px 11px 8px;border-bottom:1px solid var(--line)}.ss-work-head b{font-size:10px}.ss-work-head span{color:var(--muted);font-size:8px}.ss-conflict{margin:9px;padding:9px;border:1px solid #e3acaa;border-radius:8px;background:#fff7f6}.ss-conflict small,.ss-conflict b{display:block}.ss-conflict small{color:var(--danger);font-size:8px;font-weight:850}.ss-conflict b{margin:4px 0 7px;font-size:9px}.ss-choice{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}.ss-choice button{min-height:29px;padding:4px;border:1px solid var(--line);border-radius:5px;background:#fff;cursor:pointer;font-size:8px}.ss-choice button.selected{border-color:#4c91db;background:var(--accent-soft);color:#205f9a;font-weight:850}.ss-fast{margin:9px;padding:9px;border:1px solid #9acdb7;border-radius:8px;background:#effaf4;color:#246746;font-size:9px;font-weight:750}.ss-ref{height:142px;padding:8px;background:#eef2f6}.ss-ref img{display:block;width:100%;height:100%;object-fit:contain;object-position:center}.ss-mini-flow{display:flex;align-items:center;justify-content:center;gap:7px;height:142px;padding:15px;background:#f7f9fb}.ss-mini-flow div{width:72px;padding:9px 6px;border:1px solid var(--line);border-radius:7px;background:#fff;text-align:center;font-size:9px;font-weight:800}.ss-mini-flow i{color:var(--muted);font-size:15px;font-style:normal}
+</style>
+"""
+
+    def shell(body: str) -> str:
+        return f"""
+<div class="ss-mock">
+  <div class="ss-top">
+    <div class="ss-bar ss-file"><i>☰</i><em>◫</em><span>robot-arm.systemsketch</span></div>
+    <div class="ss-bar ss-right"><button class="ss-icon active" aria-label="Versions and drafts">⑂</button><button class="ss-icon" aria-label="Comments">▣</button><span class="ss-avatar">Z</span><button class="ss-action ss-share">Share</button></div>
+  </div>
+  {body}
+</div>"""
+
+    board_base = """
+<div class="ss-canvas">
+  <div class="ss-node source">Sensor input<small>source</small></div>
+  <div class="ss-node plan">Planner<small>expanded · depth 2</small></div>
+  <div class="ss-node control">Controller<small>command</small></div>
+  <span class="ss-line one"></span><span class="ss-line two"></span>
+</div>"""
+    board_draft = """
+<div class="ss-canvas">
+  <div class="ss-mode"><b>DRAFT · safer ingress</b><span>based on Current v0.7</span></div>
+  <div class="ss-node source">Sensor input<small>source</small></div>
+  <div class="ss-node plan">Planner<small>expanded · depth 2</small></div>
+  <div class="ss-node gate">Safety gate<small>new Block</small></div>
+  <div class="ss-node control">Controller<small>renamed command</small></div>
+  <span class="ss-line one"></span><span class="ss-line three"></span><span class="ss-line four"></span>
+</div>"""
+
+    variant_one = shell(f"""{mock_css}
+<div class="demo-base-only">
+  {board_base}
+  <aside class="ss-pop">
+    <div class="ss-pop-head"><span>VERSIONS &amp; DRAFTS</span><button aria-label="Create draft">＋</button></div>
+    <button class="ss-row current"><i>●</i><span><b>Current</b><small>Editable · v0.7</small></span><em>now</em></button>
+    <button class="ss-row draft" data-demo-toggle data-base-label="Open safer ingress" data-alt-label="Back to Current"><i>⑂</i><span><b>safer ingress</b><small>Draft · 4 changes</small></span><em>v0.7</em></button>
+    <button class="ss-row draft"><i>⑂</i><span><b>lean route</b><small>Draft · 2 changes</small></span><em>v0.7</em></button>
+    <div class="ss-pop-foot"><button class="ss-button">View timeline</button><button class="ss-button primary">New draft</button></div>
+  </aside>
+</div>
+<div class="demo-alt-only">
+  {board_draft}
+  <aside class="ss-pop">
+    <div class="ss-pop-head"><span>DRAFT · SAFER INGRESS</span><button data-demo-toggle aria-label="Back to Current">×</button></div>
+    <div class="ss-row draft"><i>⑂</i><span><b>4 changes</b><small>from Current v0.7</small></span><em>edit</em></div>
+    <div class="ss-pop-foot"><button class="ss-button warn">Discard</button><button class="ss-button primary">Review merge</button></div>
+  </aside>
+</div>""")
+
+    variant_two = shell(f"""
+<div class="demo-base-only">
+  {board_base}
+  <aside class="ss-rail">
+    <div class="ss-rail-head"><span>History · all drafts</span><button class="ss-button" data-demo-toggle data-base-label="View v0.6" data-alt-label="Back to Current">View v0.6</button></div>
+    <div class="ss-timeline">
+      <div class="ss-event"><span><b>Current · v0.7</b><small>Latency monitor</small></span><em>now</em></div>
+      <div class="ss-event merge"><span><b>Version v0.6</b><small>Pinned · safe to branch</small></span><em>10:24</em></div>
+      <div class="ss-event branch"><span><b>safer ingress</b><small>Draft · 4 changes</small></span><em>10:25</em></div>
+      <div class="ss-event branch"><span><b>lean route</b><small>Draft · 2 changes</small></span><em>10:29</em></div>
+      <div class="ss-event"><span><b>Version v0.5</b><small>“baseline wiring”</small></span><em>Mon</em></div>
+    </div>
+  </aside>
+</div>
+<div class="demo-alt-only">
+  <div class="ss-canvas"><div class="ss-mode"><b>VERSION v0.6</b><span>read-only · 10:24</span></div><div class="ss-node source">Sensor input<small>source</small></div><div class="ss-node plan">Planner<small>expanded · depth 2</small></div><div class="ss-node control">Controller<small>command</small></div><span class="ss-line one"></span><span class="ss-line two"></span></div>
+  <aside class="ss-rail"><div class="ss-rail-head"><span>Version v0.6</span><button class="ss-button primary">New Draft from Version</button></div><div class="ss-fast">Pinned state · read-only<br><small>Use it as a safe Draft root or return to Current.</small></div></aside>
+</div>""")
+
+    variant_three = shell(f"""
+<div class="demo-base-only">
+  {board_base}
+  <aside class="ss-deck">
+    <button class="ss-deck-card current"><b>Current</b><small>Editable · v0.7</small><span class="ss-thumb"></span></button>
+    <button class="ss-deck-card draft" data-demo-toggle data-base-label="Open safer ingress" data-alt-label="Back to Current"><b>safer ingress</b><small>Draft · 4 changes</small><span class="ss-thumb"></span></button>
+    <button class="ss-deck-card draft"><b>lean route</b><small>Draft · 2 changes</small><span class="ss-thumb"></span></button>
+  </aside>
+</div>
+<div class="demo-alt-only">
+  {board_draft}
+  <aside class="ss-deck">
+    <button class="ss-deck-card"><b>Current</b><small>v0.7</small><span class="ss-thumb"></span></button>
+    <button class="ss-deck-card draft current"><b>safer ingress</b><small>Editing now</small><span class="ss-thumb"></span></button>
+    <button class="ss-deck-card draft"><b>lean route</b><small>v0.7 base</small><span class="ss-thumb"></span></button>
+  </aside>
+</div>""")
+
+    variant_four = shell(f"""
+<div class="demo-base-only">
+  {board_draft}
+  <aside class="ss-changes">
+    <div class="ss-change-head"><b>Review 4 draft changes</b><span>safer ingress → Current · based on v0.7</span></div>
+    <div class="ss-change"><i>＋</i><span><b>Safety gate</b><small>New Block</small></span><em class="scope">root</em></div>
+    <div class="ss-change"><i>↝</i><span><b>Planner → gate</b><small>Rewired connection</small></span><em class="scope">root</em></div>
+    <div class="ss-change"><i>✎</i><span><b>Controller label</b><small>Renamed output</small></span><em class="scope">depth 2</em></div>
+    <div class="ss-change"><i>＋</i><span><b>Limit check</b><small>New condition</small></span><em class="scope">depth 2</em></div>
+    <div class="ss-pop-foot"><button class="ss-button" data-demo-toggle data-base-label="Jump to next change" data-alt-label="Back to change list">Jump to next</button><button class="ss-button primary">Merge all</button></div>
+  </aside>
+</div>
+<div class="demo-alt-only">
+  <div class="ss-canvas"><div class="ss-mode"><b>REVIEW · CHANGE 3 OF 4</b><span>Planner / Controller</span></div><div class="ss-node plan" style="left:23%;top:31%">Planner<small>expanded · depth 2</small></div><div class="ss-node control" style="right:23%;top:31%;border-color:#bd7411;background:#fff5e5">Controller<small>renamed output</small></div><span class="ss-line two" style="left:38%;top:45%;width:24%;transform:rotate(0deg)"></span></div>
+  <aside class="ss-changes"><div class="ss-change-head"><b>Change 3 · depth 2</b><span>Camera follows the change; Current stays untouched.</span></div><div class="ss-fast">Controller label: <b>command</b> → <b>safe command</b></div><div class="ss-pop-foot"><button class="ss-button" data-demo-toggle data-base-label="Back to list" data-alt-label="Back to list">Back to list</button><button class="ss-button primary">Keep draft change</button></div></aside>
+</div>""")
+
+    variant_five = shell(f"""
+<div class="demo-base-only">
+  {board_draft}
+  <aside class="ss-workbench">
+    <div class="ss-work-head"><b>Merge safer ingress into Current</b><span>4 changes · 1 conflict</span></div>
+    <div class="ss-conflict"><small>CONFLICT · DEPTH 2</small><b>Controller label changed in Current and Draft</b><div class="ss-choice"><button>Keep Current</button><button class="selected" data-demo-toggle data-base-label="Use draft" data-alt-label="Use draft">Use draft</button><button>Merge text</button></div></div>
+    <div class="ss-fast">3 changes can merge automatically.<br><small>New Safety gate · two rewired connections</small></div>
+    <div class="ss-pop-foot"><button class="ss-button">Cancel</button><button class="ss-button primary">Merge 4 changes</button></div>
+  </aside>
+</div>
+<div class="demo-alt-only">
+  {board_draft}
+  <aside class="ss-workbench">
+    <div class="ss-work-head"><b>Merge safer ingress into Current</b><span>4 changes · resolved</span></div>
+    <div class="ss-conflict" style="border-color:#9acdb7;background:#effaf4"><small style="color:#25815a">RESOLVED · DEPTH 2</small><b>Use draft: “safe command”</b><div class="ss-choice"><button>Keep Current</button><button class="selected">Use draft</button><button>Merge text</button></div></div>
+    <div class="ss-fast">Ready: preserve Current v0.7 as a named Version, then advance Current.</div>
+    <div class="ss-pop-foot"><button class="ss-button" data-demo-toggle data-base-label="Edit resolution" data-alt-label="Edit resolution">Edit resolution</button><button class="ss-button primary">Confirm merge</button></div>
+  </aside>
+</div>""")
+
+    def variant(
+        identifier: str,
+        name: str,
+        thesis: str,
+        best_when: str,
+        loses_when: str,
+        preview: str,
+        story_title: str,
+        first_step: tuple[str, str],
+        second_step: tuple[str, str],
+        decisions: list[tuple[str, str]],
+        keep_parts: list[str],
+        proof: list[str],
+        scores: dict[str, tuple[int, str, str]],
+        media: list[dict],
+    ) -> dict:
+        return {
+            "id": identifier,
+            "name": name,
+            "thesis": thesis,
+            "accent": {"v1": "#b97009", "v2": "#3978b8", "v3": "#6b61bb", "v4": "#28785a", "v5": "#a64745"}[identifier],
+            "bestWhen": best_when,
+            "losesWhen": loses_when,
+            "decisions": [{"label": label, "value": value} for label, value in decisions],
+            "keepParts": keep_parts,
+            "proof": proof,
+            "previewLabel": "interactive SystemSketch-style mock",
+            "story": {
+                "title": story_title,
+                "steps": [
+                    {"label": first_step[0], "caption": first_step[1], "state": "base", "target": "[data-demo-toggle]"},
+                    {"label": second_step[0], "caption": second_step[1], "state": "alt", "target": "[data-demo-toggle]"},
+                ],
+            },
+            "scores": {
+                requirement: {"score": score, "evidence": evidence, "confidence": confidence}
+                for requirement, (score, evidence, confidence) in scores.items()
+            },
+            "gateResults": {
+                "g1": {"pass": True, "evidence": f"The mock preserves SystemSketch's measured {max_pages}-canvas document rule; all state switches replace the document revision, never a page."},
+                "g2": {"pass": True, "evidence": "Each Draft shows a specific Current version or named Version as its base and edits only its own simulated head."},
+                "g3": {"pass": True, "evidence": "Merge UI names a base and offers a conflict stop; the mock never silently overwrites Current."},
+                "g4": {"pass": True, "evidence": "The interaction uses document terms—Current, Draft, Version, merge—not repository checkout or commit jargon."},
+            },
+            "preview": preview,
+            "media": media,
+        }
+
+    requirements = [
+        {
+            "id": "fr1",
+            "name": "Switch states as quickly as pages",
+            "weight": 28,
+            "why": "The everyday job is opening Current or a named experiment without turning document history into a separate workspace.",
+            "passCondition": "From the top-right control, a user can identify and switch to Current or a draft in one deliberate action.",
+            "anchors": {"1": "State switching requires a modal workflow or a separate browser surface.", "3": "States are reachable but require hierarchy or search to recover.", "5": "Current and drafts are immediately scannable and switch with the muscle memory of a page picker."},
+        },
+        {
+            "id": "fr2",
+            "name": "Keep continuous history useful",
+            "weight": 17,
+            "why": "Pinned versions and a continuous timeline make experimental work recoverable even when it is never merged.",
+            "passCondition": "A user can find a named version or earlier point, inspect it read-only, and branch safely from it.",
+            "anchors": {"1": "Only named drafts are visible; ordinary history is hidden.", "3": "Versions and recent activity exist but require a secondary route.", "5": "A chronological history clearly relates versions, draft roots, and merges."},
+        },
+        {
+            "id": "fr3",
+            "name": "Make Current versus Draft unmistakable",
+            "weight": 20,
+            "why": "A prototype must never feel like it is quietly editing the official board.",
+            "passCondition": "The selected state, editability, base, and safe return to Current are clear at a glance.",
+            "anchors": {"1": "Users infer state from filenames or memory.", "3": "State is labeled but disappears while editing.", "5": "The active state and Draft mode are continuously visible, and Current remains recoverable."},
+        },
+        {
+            "id": "fr4",
+            "name": "Review and merge across nested changes",
+            "weight": 25,
+            "why": "A branch can alter root wiring and a deeply stepped-in Block; a raw whole-board diff cannot make both reviewable.",
+            "passCondition": "Before Current changes, the user can navigate each change in context and resolve a real conflict deliberately.",
+            "anchors": {"1": "Promotion replaces Current wholesale or shows raw JSON.", "3": "A before/after view exists but deep changes must be found manually.", "5": "A change list drives focused navigation and conflicts offer explicit source/target choices."},
+        },
+        {
+            "id": "fr5",
+            "name": "Fit SystemSketch without Git ceremony",
+            "weight": 10,
+            "why": "Git ideas are useful implementation inspiration, but local sketching should not require a repository, commits, or checkout vocabulary.",
+            "passCondition": "The user can draft, pin, switch, and merge in an ordinary local document with no Git prerequisite.",
+            "anchors": {"1": "The workflow exposes branches, commits, and working trees as required concepts.", "3": "Git is optional but dominates navigation.", "5": "The UI is document-native; any Git-backed storage remains an invisible implementation choice."},
+        },
+    ]
+
+    score = lambda value, evidence, confidence: (value, evidence, confidence)
+    shared_proof = [
+        "The top-right Versions & drafts control and each primary action toggle real local gallery state.",
+        "All variants render the same Current v0.7 → safer-ingress Draft scenario with a root safety gate and one depth-2 label change.",
+        "This is a standalone interaction prototype: document serialization, version storage, and merge execution remain simulated.",
+    ]
+
+    spec = {
+        "schemaVersion": 3,
+        "title": "Draft branches without pages",
+        "kicker": "SystemSketch · Babble & Prune · 3 September 2026",
+        "brief": "Compare five document-native ways to switch between Current, named drafts, pinned versions, and a continuous timeline as quickly as changing pages—then review and merge a draft without making Git the user-facing dependency.",
+        "count": 5,
+        "defaultId": "v1",
+        "defaultWhy": "Branch Switcher is the AI recommendation at 91.6/100: it makes the daily Current ↔ Draft move as direct as the familiar page menu while retaining a quiet route to versions and a deliberate handoff to the stronger Changes Navigator review surface.",
+        "decisionHinge": "The recommendation assumes that rapid personal experimentation is more common than resolving conflicts. If merge review is the daily task, move 10 points from fast switching to cross-depth review; Changes Navigator rises from 83.4 to 87.4 but still needs the Switcher as its entry point.",
+        "invariants": [
+            f"One SystemSketch document exposes {max_pages} durable canvas; Frames and Depth Stack stay structural/navigation tools, never branch containers.",
+            "Every named Draft records its precise Current v0.7 or pinned-Version base and leaves Current unchanged while edited.",
+            "Pinned Versions are immutable/read-only; restoring or branching makes a new editable head rather than rewriting history.",
+            "A merge validates the base and pauses for an explicit resolution when Current and Draft touched the same item.",
+            "Git may be used underneath if it earns its keep, but the user never needs a repository, branch checkout, or commit to sketch.",
+        ],
+        "boundary": "The gallery uses realistic SystemSketch-style chrome and interactive local mock state. It does not change the application, tldraw records, local files, page model, or Git state; snapshot storage, record-aware diffing, and merge execution are deliberately simulated.",
+        "axes": [
+            {"name": "Daily state surface", "values": ["page-like list", "timeline graph", "visual state deck", "change list", "merge workbench"]},
+            {"name": "Primary object", "values": ["named branch", "chronological event", "visual board state", "reviewable change", "conflict decision"]},
+            {"name": "History emphasis", "values": ["secondary", "primary", "compact", "per-change", "merge-local"]},
+            {"name": "Merge posture", "values": ["hand off to review", "inspect then fork", "promote whole state", "accept/reject changes", "resolve conflicts directly"]},
+        ],
+        "requirements": requirements,
+        "hardGates": [
+            {"id": "g1", "name": "No pages as draft branches", "why": "SystemSketch has one durable canvas; drafts are document revisions, not tldraw pages."},
+            {"id": "g2", "name": "Every Draft has a recorded base", "why": "A Draft begins at a visible Current version or named Version, never at an ambiguous moving state."},
+            {"id": "g3", "name": "No blind promotion", "why": "A base check and explicit conflict stop are required before Current can change."},
+            {"id": "g4", "name": "No Git prerequisite", "why": "Version-control ideas may shape implementation, but standalone sketching must remain document-native."},
+        ],
+        "variants": [
+            variant(
+                "v1", "Branch Switcher",
+                "Turn the former page-picker location into one compact Current / Drafts / Versions list; switching is instant, while merging enters a focused review.",
+                "Most work is personal prototyping and the common action is flipping between Current and two or three named alternatives.",
+                "The user spends most of the session comparing long histories or resolving many individual conflicts.",
+                variant_one, "Switch between the official board and a draft",
+                ("Read the state list", "Current, two Drafts, their bases, and their change counts sit in the one top-right popover."),
+                ("Open the draft", "The amber Draft bar and the changed Safety gate make the state change impossible to miss."),
+                [("Primary object", "A named Draft rooted at Current."), ("Everyday interaction", "One page-picker-like popover and one click to switch."), ("Merge", "Draft mode hands off to a separate change-review surface.")],
+                ["Current / Drafts grouping", "small change counts", "amber active-Draft bar"],
+                shared_proof,
+                {
+                    "fr1": score(5, "The mock presents Current and both Drafts together in the top-right list; the live control switches the complete canvas state.", "high"),
+                    "fr2": score(4, "Versions are one click away from the same popover, but chronology is intentionally not the first thing shown.", "medium"),
+                    "fr3": score(5, "Current and Draft use separate row treatments and Draft mode persists above the board.", "high"),
+                    "fr4": score(4, "A draft has a clear Review merge handoff and change count, but detailed per-change review lives in another surface.", "medium"),
+                    "fr5": score(5, "It uses only Current, Draft, Version, and Review; there is no Git vocabulary or setup.", "high"),
+                },
+                [{"label": "Page-picker geometry to borrow", "caption": "The compact list and one-step switching follow the supplied familiar page-picker reference; it should list document states, not pages.", "html": '<div class="ss-mini-flow"><div>Current<br><small>editable</small></div><i>→</i><div>Drafts<br><small>named forks</small></div><i>→</i><div>Versions<br><small>pinned history</small></div></div>'}],
+            ),
+            variant(
+                "v2", "History Graph",
+                "Make the top-right control a compact chronological graph of saves, pinned versions, branches, and merges; switch by selecting a moment.",
+                "Recoverability, audit, and branching from a precise historical version are as important as rapid current-state switching.",
+                "The user usually knows the desired draft by name and wants a sparse menu rather than a growing graph.",
+                variant_two, "Inspect a pinned moment before branching",
+                ("Scan the graph", "The continuous timeline relates Current activity, pinned Versions, and two Draft roots."),
+                ("Open v0.6", "An earlier version becomes visibly read-only and offers Branch from version instead of destructive restore."),
+                [("Primary object", "A moment in the document's graph."), ("Navigation", "Chronological graph with branch and merge markers."), ("Branching", "Any pinned version can be a deliberate fork root.")],
+                ["read-only historical mode", "branch/merge markers", "branch from exact version"],
+                shared_proof,
+                {
+                    "fr1": score(3, "A known draft is present but competes with chronological scanning, so the common switch takes more interpretation.", "medium"),
+                    "fr2": score(5, "The timeline makes versions, ordinary activity, draft roots, and future merges one connected visible history.", "high"),
+                    "fr3": score(4, "Historical read-only state is explicit, though the active Draft distinction is one selection deeper.", "medium"),
+                    "fr4": score(3, "The graph provides ancestry and compare entry points but does not itself navigate the four deep changes.", "medium"),
+                    "fr5": score(4, "It remains document-native, but graph vocabulary adds conceptual weight for a quick sketching task.", "medium"),
+                },
+                [{"label": "Version versus activity", "caption": "Pinned versions must read differently from ordinary autosave activity; a branch should begin from the former, never from a vague point in the stream.", "html": '<div class="ss-mini-flow"><div>activity<br><small>continuous</small></div><i>→</i><div>version<br><small>pinned · read-only</small></div><i>→</i><div>draft<br><small>editable branch</small></div></div>'}],
+            ),
+            variant(
+                "v3", "State Deck",
+                "Make Drafts feel maximally like pages: the top-right control opens visual thumbnail cards for Current and each alternate board state.",
+                "The decision is primarily visual and rapid flipping between a few spatially distinct design options matters more than lineage.",
+                "Trustworthy continuous history, named versions, and record-level merging must be first-class rather than tucked behind the visual deck.",
+                variant_three, "Flip through board states at a glance",
+                ("Compare the deck", "Each card gives Current and both Drafts the same compact visual weight."),
+                ("Open safer ingress", "The selected Draft card and amber mode bar keep the page-like switch semantically honest."),
+                [("Primary object", "A visual board state."), ("Navigation", "Three equal thumbnail cards, optimized for fast visual recognition."), ("Promotion", "A whole-state action after a separate conflict check.")],
+                ["thumbnail recognition", "equal state cards", "visible active-state card"],
+                shared_proof,
+                {
+                    "fr1": score(5, "The visual cards are as direct as page tabs and the live draft card toggles the complete board state.", "high"),
+                    "fr2": score(2, "Only the currently useful three states fit; chronology and older versions fall behind a second interaction.", "high"),
+                    "fr3": score(4, "The selected card and amber bar identify the edit target, but thumbnails can overemphasize appearance over authority.", "medium"),
+                    "fr4": score(2, "Whole-board visual switching does not help locate or decide a nested conflicting change.", "high"),
+                    "fr5": score(5, "The metaphor is entirely board-native and familiar to Figma/FigJam users.", "high"),
+                },
+                [{"label": "Why the page-like metaphor is attractive", "caption": "The familiar page-picker pattern makes visual switching cheap, while the backing semantics remain document revisions rather than page records.", "html": '<div class="ss-mini-flow"><div>Current<br><small>v0.7</small></div><div>safer<br><small>Draft</small></div><div>lean<br><small>Draft</small></div></div>'}],
+            ),
+            variant(
+                "v4", "Changes Navigator",
+                "Keep rapid switching secondary and make a draft's ordered, scope-aware change list the primary object; every item focuses its real location before acceptance.",
+                "The hard part is reviewing a Draft that touches both the root board and deeply stepped-in Blocks before Current changes.",
+                "The user is merely bouncing among personal alternatives and does not need review or merge context yet.",
+                variant_four, "Navigate a merge across depth",
+                ("Scan all changes", "Root and depth-2 edits appear in one list with their actual scope; nothing asks the user to expand the whole system."),
+                ("Focus one change", "Jumping to a list item changes the board context and keeps the draft's intent readable before the user accepts it."),
+                [("Primary object", "A revision-aware change."), ("Navigation", "List items drive camera/depth focus into the affected scope."), ("Merge", "Keep or reject per change, then merge the compatible group.")],
+                ["scope badges", "next-change camera jump", "per-change review"],
+                shared_proof,
+                {
+                    "fr1": score(3, "Named state selection is available but the first surface is a review list, not a fast draft picker.", "high"),
+                    "fr2": score(4, "The draft's base and change sequence are explicit, although the continuous timeline is background context.", "medium"),
+                    "fr3": score(5, "Review mode and the active Draft base remain visible throughout focused navigation.", "high"),
+                    "fr4": score(5, "The direct toggle proves list-to-scope navigation; scope badges and per-change acceptance address the stated deep-diff problem.", "high"),
+                    "fr5": score(4, "It borrows review ideas without asking for a repository, but is too structured as the daily starting surface.", "medium"),
+                },
+                [{"label": "Change-list precedent", "caption": "The useful prior-art pattern is a count plus named affected objects; the SystemSketch translation must also drive depth/camera focus.", "html": '<div class="ss-mini-flow"><div>Safety gate<br><small>root</small></div><i>↓</i><div>Controller<br><small>depth 2</small></div><i>→</i><div>accept<br><small>merge</small></div></div>'}],
+            ),
+            variant(
+                "v5", "Merge Workbench",
+                "Reserve the top-right control for a concise merge workspace that exposes target-versus-draft choices wherever automatic merge cannot be trusted.",
+                "Drafts often overlap with Current and the user needs to make deliberate source/target decisions before advancing the official board.",
+                "Rapid state switching or ordinary continuous history should remain the main interaction; this is too heavy for every sketching session.",
+                variant_five, "Resolve the one conflict before merge",
+                ("Inspect the conflict", "The mock separates three automatic changes from the depth-2 Controller conflict and names its scope."),
+                ("Choose a resolution", "Use Draft is visibly selected; only then does the merge become confirmable and preserve Current as a Version."),
+                [("Primary object", "A merge decision between Current and Draft."), ("Conflict UI", "Keep Current, Use Draft, or merge text / properties when supported."), ("Safety", "Automatic changes stay summarized; conflicts receive intentional focus.")],
+                ["source/target choices", "automatic-versus-conflict split", "preserve-before-advance copy"],
+                shared_proof,
+                {
+                    "fr1": score(2, "It begins with a merge procedure rather than a quick state picker.", "high"),
+                    "fr2": score(4, "Base and pending change counts are clear, but the historical graph is not visible here.", "medium"),
+                    "fr3": score(5, "Source Draft, target Current, and the resolved choice are explicit before the confirm action.", "high"),
+                    "fr4": score(5, "This is the only variant that makes target/source alternatives tangible at the conflicting nested item.", "high"),
+                    "fr5": score(3, "The terminology is document-native, but merge strategy controls are necessarily more technical.", "medium"),
+                },
+                [{"label": "Calm normal merge, specific conflict choice", "caption": "Normal merge stays one quiet action; only the overlapping Controller change expands into source/target choices.", "html": '<div class="ss-mini-flow"><div>3 automatic<br><small>merge</small></div><i>+</i><div>1 conflict<br><small>choose</small></div><i>→</i><div>Current v0.8<br><small>new Current</small></div></div>'}],
+            ),
+        ],
+        "checks": [
+            "Exactly five structurally distinct top-right interaction models.",
+            "Every variant uses the same Current v0.7, two Current-rooted Drafts, four safer-ingress changes, and one depth-2 change.",
+            "Every hero has a live direct control and a synchronized two-step manual walkthrough.",
+            "Weighted requirements sum to 100%; score evidence and confidence are recorded after the prototypes.",
+            "No variant introduces a tldraw page, a second SystemSketch canvas, or a Git prerequisite.",
+            "The AI recommendation appears after—not inside—the visual variant atlas.",
+        ],
+    }
+
+    spec_output.write_text(json.dumps(spec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    with tempfile.TemporaryDirectory(prefix="systemsketch-draft-babble-") as directory:
+        staged_spec = Path(directory) / "gallery.json"
+        staged_spec.write_text(json.dumps(spec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        subprocess.run(
+            [sys.executable, str(gallery), "build", "--spec", str(staged_spec), "--output", str(output), "--strict"],
+            check=True,
+        )
+
+    print(f"Wrote {spec_output.relative_to(repo)}")
+    print(f"Wrote {output.relative_to(repo)}")
+
+
+if __name__ == "__main__":
+    main()

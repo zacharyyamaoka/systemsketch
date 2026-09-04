@@ -196,11 +196,48 @@ export function splitDashArrays(lengthPx: number, t: number): SplitDashArrays {
 
 /* --------------------------------- pill ---------------------------------- */
 
+/**
+ * A cable carries at most one pill, and it is always the same object: it spawns
+ * part-way along the cable, it can be dragged along it, and it can be put back
+ * to the middle. Only the text inside differs.
+ *
+ * `z⁻¹` says the value is read one iteration late. `mut` says it exists only
+ * because a call wrote its argument in place. A cable can be both — a mutation
+ * read next time round — and then the pill says both, in the order you would
+ * read them: what it is, then when.
+ */
 export const DELAY_PILL_GLYPH = 'z⁻¹'
+export const EFFECT_PILL_GLYPH = 'mut'
 export const DELAY_PILL_HEIGHT = 18
 /** Approximate advance of the pill's 12px monospace glyphs. */
 const PILL_GLYPH_ADVANCE = 7.4
 const PILL_PADDING = 16
+
+export interface CablePillFacts {
+	/** `data`, the intermittent `async` rail, or one-iteration-late `delayed`. */
+	temporal: string
+	/** The initial value a delayed cable names, `= value`; empty for none. */
+	delayValue?: string
+	/** Whether the cable leaves an effect port. */
+	effect?: boolean
+}
+
+/**
+ * What this cable's pill should say, or `null` when it carries none.
+ *
+ * One function so the renderer, the SVG export and the handle all agree on
+ * whether a pill exists — the handle used to be gated on `delayed` alone, which
+ * is how `mut` ended up visible but not draggable.
+ */
+export function cablePillLabel(facts: CablePillFacts): string | null {
+	const parts: string[] = []
+	if (facts.effect) parts.push(EFFECT_PILL_GLYPH)
+	if (facts.temporal === 'delayed') {
+		const value = (facts.delayValue ?? '').trim()
+		parts.push(value ? `${DELAY_PILL_GLYPH} = ${value}` : DELAY_PILL_GLYPH)
+	}
+	return parts.length ? parts.join(' ') : null
+}
 
 /** `z⁻¹`, or `z⁻¹ = 1.0` when the cable names its initial value. */
 export function delayPillLabel(delayValue: string): string {

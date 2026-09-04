@@ -52,8 +52,18 @@ Two rules hold the boundary, and `tests/test_stock_boundary.py` asserts both:
   A host bundles separately, so anything it reaches past that becomes a second, invisible
   build of that code. Keep every module behind it free of React, tldraw and the DOM.
 
-`npm run plugin:test` drives the packaged VSIX in real VS Code under Xvfb. Cursor's fresh
-profile shows a sign-in wall; the suite reports what it can reach there rather than failing.
+IDE plugin proof must launch the packaged VSIX in **each actual target editor** (VS Code and
+Cursor) under Xvfb, using disposable user-data, extension, workspace, and port directories.
+Drive the visible workflow over CDP like a Playwright test; Cursor sign-in is not required for
+extension/webview acceptance and is not a reason to stop early. Assert the exact case and
+custom editor opened, SystemSketch-specific controls, no host or webview error surface, the
+intended interaction and close/save behavior, and unchanged bytes for read-only opens. Capture
+and inspect screenshots. A parser pass, successful package, `.tl-container`, or mounted canvas
+alone does not count.
+
+`npm run plugin:test` exercises one packaged case. For the full golden corpus use
+`CODE_PATH=/usr/bin/cursor npm --prefix vscode-systemsketch run test:corpus` and repeat with
+`CODE_PATH=/usr/bin/code`; record the per-file result and fail on any skipped or unverified case.
 
 ## Proof is the running app, driven in a real browser
 

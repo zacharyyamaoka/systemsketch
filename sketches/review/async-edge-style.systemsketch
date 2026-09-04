@@ -1,6 +1,6 @@
 {
   "systemSketch": {
-    "formatVersion": 1,
+    "formatVersion": 2,
     "application": "SystemSketch",
     "shapes": {
       "arrow": 2,
@@ -46,7 +46,8 @@
       "com.tldraw.shape.line": 5,
       "com.tldraw.shape.block": 4,
       "com.tldraw.shape.branch": 0,
-      "com.tldraw.shape.connection": 2,
+      "com.tldraw.shape.branch-arm": 0,
+      "com.tldraw.shape.connection": 3,
       "com.tldraw.binding.arrow": 1,
       "com.tldraw.binding.connection": 1,
       "com.tldraw.comment-thread": 3,
@@ -55,6 +56,14 @@
     }
   },
   "records": [
+    {
+      "name": "",
+      "color": "#FF802B",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:pDgVoGhIMyTqePhVlyTlR",
+      "typeName": "user"
+    },
     {
       "x": 1585,
       "y": 210,
@@ -446,9 +455,9 @@
       "typeName": "shape"
     },
     {
-      "x": 38.675373134328325,
-      "y": 6.268656716417908,
-      "z": 0.9657657657657658,
+      "x": 47.16223883356342,
+      "y": 328.8348097900764,
+      "z": 0.534028571471949,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -535,7 +544,8 @@
         "elbowRoute": null,
         "temporal": "async",
         "delayValue": "",
-        "pillPosition": 0.5
+        "pillPosition": 0.5,
+        "routeMode": "automatic"
       },
       "parentId": "page:page",
       "index": "aCxjz",
@@ -594,9 +604,10 @@
         "curve": null,
         "pins": [],
         "elbowRoute": null,
-        "temporal": "data",
+        "temporal": "async",
         "delayValue": "",
-        "pillPosition": 0.5
+        "pillPosition": 0.5,
+        "routeMode": "automatic"
       },
       "parentId": "page:page",
       "index": "a9mUzV",
@@ -657,7 +668,8 @@
         "elbowRoute": null,
         "temporal": "async",
         "delayValue": "",
-        "pillPosition": 0.5
+        "pillPosition": 0.5,
+        "routeMode": "automatic"
       },
       "parentId": "page:page",
       "index": "aAC8j",
@@ -700,7 +712,8 @@
         "elbowRoute": null,
         "temporal": "data",
         "delayValue": "",
-        "pillPosition": 0.5
+        "pillPosition": 0.5,
+        "routeMode": "automatic"
       },
       "parentId": "page:page",
       "index": "aEiYb",
@@ -743,7 +756,8 @@
         "elbowRoute": null,
         "temporal": "async",
         "delayValue": "",
-        "pillPosition": 0.5
+        "pillPosition": 0.5,
+        "routeMode": "automatic"
       },
       "parentId": "page:page",
       "index": "aBYKv",
@@ -1013,7 +1027,8 @@
         "elbowRoute": null,
         "temporal": "data",
         "delayValue": "",
-        "pillPosition": 0.5
+        "pillPosition": 0.5,
+        "routeMode": "automatic"
       },
       "parentId": "page:page",
       "index": "aFcMb",
@@ -1083,7 +1098,8 @@
         "elbowRoute": null,
         "temporal": "async",
         "delayValue": "",
-        "pillPosition": 0.5
+        "pillPosition": 0.5,
+        "routeMode": "automatic"
       },
       "parentId": "page:page",
       "index": "aDzB9",
@@ -1109,8 +1125,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1900,
-        "h": 1200
+        "w": 1091.4285888671875,
+        "h": 1183.5714111328125
       },
       "insets": [
         false,
@@ -1125,9 +1141,9 @@
       "isChatting": false,
       "highlightedUserIds": [],
       "isFocused": true,
-      "devicePixelRatio": 1,
+      "devicePixelRatio": 1.399999976158142,
       "isCoarsePointer": false,
-      "isHoveringCanvas": null,
+      "isHoveringCanvas": true,
       "openMenus": [],
       "isChangingStyle": false,
       "isReadonly": false,
@@ -1165,8 +1181,8 @@
       "typeName": "binding"
     },
     {
-      "x": 800,
-      "y": 800,
+      "x": 900.3156272803026,
+      "y": 909.6784222075823,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1409,7 +1425,8 @@
         "elbowRoute": null,
         "temporal": "data",
         "delayValue": "",
-        "pillPosition": 0.5
+        "pillPosition": 0.5,
+        "routeMode": "automatic"
       },
       "parentId": "page:page",
       "index": "aGDWQ",

@@ -1,0 +1,272 @@
+{
+  "criteria": [
+    {
+      "key": "iterable",
+      "name": "Iterable vs element reads without a legend",
+      "weight": 22
+    },
+    {
+      "key": "timing",
+      "name": "This-turn vs next-turn reads without a legend",
+      "weight": 22
+    },
+    {
+      "key": "calm",
+      "name": "Nothing crosses, nothing competes",
+      "weight": 16
+    },
+    {
+      "key": "scale",
+      "name": "Survives more than one carried value",
+      "weight": 18
+    },
+    {
+      "key": "ink",
+      "name": "Marks added per loop",
+      "weight": 12
+    },
+    {
+      "key": "seams",
+      "name": "Fits what already ships",
+      "weight": 10
+    }
+  ],
+  "iterations": {
+    "A": {
+      "name": "As drawn",
+      "one_line": "Your drawing with the geometry tightened \u2014 the control everything else is measured against.",
+      "scores": {
+        "iterable": 6,
+        "timing": 8,
+        "calm": 8,
+        "scale": 7,
+        "ink": 9,
+        "seams": 10
+      },
+      "weighted": 77.0
+    },
+    "B": {
+      "name": "Split-face wall port",
+      "one_line": "One dot, painted as its two faces: filled outside, hollow inside, with the type change written across it.",
+      "scores": {
+        "iterable": 10,
+        "timing": 8,
+        "calm": 9,
+        "scale": 8,
+        "ink": 9,
+        "seams": 10
+      },
+      "weighted": 89.2
+    },
+    "C": {
+      "name": "Row-aligned item",
+      "one_line": "The boundary port sits at the row it feeds, so the item cable is one short horizontal run and nothing crosses.",
+      "scores": {
+        "iterable": 7,
+        "timing": 9,
+        "calm": 10,
+        "scale": 8,
+        "ink": 9,
+        "seams": 8
+      },
+      "weighted": 84.4
+    },
+    "D": {
+      "name": "Seed named on the back cable",
+      "one_line": "The z\u207b\u00b9 chip states both facts a delay has: one step late, and what arrives first.",
+      "scores": {
+        "iterable": 6,
+        "timing": 10,
+        "calm": 7,
+        "scale": 9,
+        "ink": 7,
+        "seams": 9
+      },
+      "weighted": 80.0
+    },
+    "E": {
+      "name": "The zero-iterations cable",
+      "one_line": "Draws what the analyzer already derives: if the loop never runs, estimate()'s pose is what leaves.",
+      "scores": {
+        "iterable": 6,
+        "timing": 8,
+        "calm": 5,
+        "scale": 10,
+        "ink": 5,
+        "seams": 9
+      },
+      "weighted": 71.8
+    },
+    "F": {
+      "name": "Back cable on the floor",
+      "one_line": "The return is not a free cable \u2014 it rides the region's own bottom border.",
+      "scores": {
+        "iterable": 6,
+        "timing": 7,
+        "calm": 10,
+        "scale": 6,
+        "ink": 10,
+        "seams": 5
+      },
+      "weighted": 72.4
+    },
+    "G": {
+      "name": "Tight stub",
+      "one_line": "The shortest possible return: out of the block, under it, and straight back in.",
+      "scores": {
+        "iterable": 6,
+        "timing": 8,
+        "calm": 9,
+        "scale": 4,
+        "ink": 10,
+        "seams": 7
+      },
+      "weighted": 71.4
+    },
+    "H": {
+      "name": "Weight change, no pill",
+      "one_line": "The cable outside is a doubled rail; it becomes a single rail at the wall. The pill is deleted.",
+      "scores": {
+        "iterable": 8,
+        "timing": 7,
+        "calm": 10,
+        "scale": 6,
+        "ink": 10,
+        "seams": 7
+      },
+      "weighted": 78.8
+    },
+    "I": {
+      "name": "Binding pill",
+      "one_line": "The pill stops being an index and becomes the Python binding itself.",
+      "scores": {
+        "iterable": 9,
+        "timing": 7,
+        "calm": 6,
+        "scale": 8,
+        "ink": 6,
+        "seams": 9
+      },
+      "weighted": 75.4
+    },
+    "J": {
+      "name": "Live values",
+      "one_line": "Every mark carries the value it actually has this turn.",
+      "scores": {
+        "iterable": 9,
+        "timing": 10,
+        "calm": 6,
+        "scale": 8,
+        "ink": 6,
+        "seams": 10
+      },
+      "weighted": 83.0
+    }
+  },
+  "ranking": [
+    "B",
+    "C",
+    "J",
+    "D",
+    "H",
+    "A",
+    "I",
+    "F",
+    "E",
+    "G"
+  ],
+  "stress": {
+    "S1": {
+      "title": "two carried values",
+      "verdicts": {
+        "B": [
+          "holds",
+          "The split dot is untouched by a second carry \u2014 it says one thing about one collection and stays out of the way."
+        ],
+        "C": [
+          "holds",
+          "Row alignment is what makes two lanes survive: with the item cable out of the vertical channel, both back cables get a clean floor lane."
+        ],
+        "J": [
+          "strained",
+          "Two live chips plus a live item pill is three moving strings on one board. It reads, but it is the first thing to switch off."
+        ]
+      }
+    },
+    "S2": {
+      "title": "the carry is written by a different block",
+      "verdicts": {
+        "B": [
+          "holds",
+          "Nothing about the boundary changes when the body grows; the split dot is a statement about the collection, not about the body."
+        ],
+        "C": [
+          "holds",
+          "The long back cable is now the ONLY right-to-left line on the board, which is exactly what makes it readable at a glance."
+        ],
+        "J": [
+          "holds",
+          "The best showing of the three: `z\u207b\u00b9 = pose\u2082` names the value at the far end of a long cable, where the reader has lost track of it."
+        ]
+      }
+    },
+    "S3": {
+      "title": "a carry and a collection leaving together",
+      "verdicts": {
+        "B": [
+          "strained",
+          "The wall now carries one marked port and two unmarked exits. The asymmetry invites the question the split dot cannot answer: is `trail` one float or many?"
+        ],
+        "C": [
+          "holds",
+          "Nothing changes for C \u2014 its whole claim is about the inbound side, and the two exits stay clear of it."
+        ],
+        "J": [
+          "holds",
+          "`z\u207b\u00b9 = pose\u2082` beside a live `score()` output is exactly the distinction the reader needs: one is last turn's, one is this turn's."
+        ]
+      }
+    },
+    "S4": {
+      "title": "a carry that is not written every turn",
+      "verdicts": {
+        "B": [
+          "fails",
+          "A port that says `Poses \u2192 Pose` says nothing about a turn that produces no write. The split dot is silent exactly where the reader needs a word."
+        ],
+        "C": [
+          "fails",
+          "Same silence. Routing cannot express a conditional write, and the guard band is drawn here rather than modelled."
+        ],
+        "J": [
+          "holds",
+          "The only one that can speak: the chip reads `z\u207b\u00b9 = pose\u2082 (unchanged)` on a skipped turn, which is the fact and nothing else. This is the case that earns live values their place."
+        ]
+      }
+    },
+    "S5": {
+      "title": "nested loops, one carry each",
+      "verdicts": {
+        "B": [
+          "strained",
+          "The inner region needs its own boundary port, and its collection is `track.dets` \u2014 an attribute of the outer element, not an outer input. The split dot has no way to say where its collection came from."
+        ],
+        "C": [
+          "holds",
+          "Two regions, two row-aligned entries, two floor lanes and not one crossing. Row alignment is what stops nesting turning into a knot."
+        ],
+        "J": [
+          "strained",
+          "Correct but crowded: five live strings on one board, and the inner chip's value changes several times per outer turn, which no static reading can follow."
+        ]
+      }
+    }
+  },
+  "measured": {
+    "tldraw": "5.3.2",
+    "temporal": "'data', 'async', 'delayed'",
+    "has_value_field": true,
+    "scenes": 25,
+    "commit": "cf86800"
+  }
+}

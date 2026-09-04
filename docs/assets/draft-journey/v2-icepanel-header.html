@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>V2 IcePanel header · Draft journey</title>
+  <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+  <div class="ss-page">
+    <div class="ss-stage">
+      <div class="ss-app" data-app data-variant="ice" data-beat-class='{"edit":"ss-app has-bar","resume":"ss-app has-bar","review":"ss-app has-bar","main":"ss-app","create":"ss-app","return":"ss-app","merged":"ss-app"}'>
+        <div class="ss-draft-bar" data-show="edit resume">
+          <div class="stripe"></div>
+          <button type="button" data-to="return">← Main</button>
+          <span class="mark">DRAFT</span>
+          <span class="name">try a second planner</span>
+          <span class="grow"></span>
+          <button type="button" data-to="review">2 changes</button>
+          <button class="merge" type="button" data-to="review">Merge</button>
+        </div>
+        <div class="ss-review" data-show="review">
+          <div class="stripe"></div>
+          <span class="pos">Change 1 of 2</span>
+          <button class="step" type="button" disabled>‹</button>
+          <button class="step" type="button">›</button>
+          <span class="kind">Updated · Planner</span>
+          <span class="grow"></span>
+          <button class="discard" type="button">Discard</button>
+          <button class="keep" type="button" data-to="merged">Keep</button>
+        </div>
+        <div class="ss-canvas">
+          <div class="ss-board" data-show="main create return">
+            <div class="ss-node" style="left:18%;top:38%"><span class="port out"></span><b>Planner</b><small>route · depth 1</small></div>
+            <div class="ss-node" style="left:58%;top:38%"><span class="port in"></span><b>Controller</b><small>command</small></div>
+            <span class="ss-wire" style="left:29%;top:48%;width:28%"></span>
+          </div>
+          <div class="ss-board" data-show="edit resume review merged">
+            <div class="ss-node is-changed" style="left:12%;top:30%"><span class="port out"></span><b>Planner v2</b><small>route · renamed</small></div>
+            <div class="ss-node is-added" style="left:40%;top:52%"><span class="port in"></span><span class="port out"></span><b>Safety check</b><small>new Block</small></div>
+            <div class="ss-node" style="left:68%;top:30%"><span class="port in"></span><b>Controller</b><small>command</small></div>
+            <span class="ss-wire is-new" style="left:24%;top:41%;width:18%;transform:rotate(28deg)"></span>
+            <span class="ss-wire is-new" style="left:52%;top:48%;width:18%;transform:rotate(-26deg)"></span>
+          </div>
+        </div>
+        <div class="ss-shell ss-shell-left">
+          <button class="ss-icon" type="button" aria-label="Menu"><svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h12"/></svg></button>
+          <div class="ss-file"><em>◫</em>robot-arm</div>
+          <button class="ss-chip" data-show="main create return merged" data-to="create" type="button">
+            <svg viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+            Drafts
+          </button>
+          <button class="ss-chip is-draft" data-show="edit resume review" type="button" data-to="create">
+            <svg viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+            Drafts
+          </button>
+        </div>
+        <div class="ss-shell ss-shell-right">
+          <button class="ss-icon" type="button" aria-label="Comments"><svg viewBox="0 0 20 20"><path d="M4 5h12v8H8l-4 3V5z"/></svg></button>
+          <span class="ss-avatar">Z</span>
+          <button class="ss-share" type="button">Share</button>
+        </div>
+        <aside class="ss-pop" data-show="create">
+          <div class="ss-pop-head">DRAFTS CONTAINING THIS BOARD</div>
+          <button class="ss-row is-on" type="button"><i>●</i><span><b>Main</b><small>v0.7 · 2 Blocks</small></span><em>now</em></button>
+          <div class="ss-pop-foot"><button class="ss-btn primary" type="button" data-to="edit">New draft</button></div>
+        </aside>
+        <aside class="ss-pop" data-show="return">
+          <div class="ss-pop-head">DRAFTS CONTAINING THIS BOARD</div>
+          <button class="ss-row is-on" type="button"><i>●</i><span><b>Main</b><small>v0.7 · unchanged</small></span><em>now</em></button>
+          <button class="ss-row is-draft" type="button" data-to="resume"><i>⑂</i><span><b>try a second planner</b><small>Draft · 2 changes · based on Main</small></span></button>
+        </aside>
+        <aside class="ss-changes" data-show="review">
+          <div class="hd"><span>Changes</span><span>2</span></div>
+          <div class="ss-change upd"><i>✎</i><span><b>Planner</b><small>Renamed to Planner v2</small></span><em>[Block]</em></div>
+          <div class="ss-change add"><i>＋</i><span><b>Safety check</b><small>New Block</small></span><em>[Block]</em></div>
+        </aside>
+        <aside class="ss-pop" data-show="merged">
+          <div class="ss-pop-head">DRAFTS CONTAINING THIS BOARD</div>
+          <button class="ss-row is-on" type="button"><i>●</i><span><b>Main</b><small>v0.8 · Planner v2</small></span><em>now</em></button>
+          <button class="ss-row" type="button"><i>◇</i><span><b>Version v0.8</b><small>before try a second planner</small></span><em>pinned</em></button>
+        </aside>
+        <div class="ss-tools">
+          <button class="is-on" type="button" aria-label="Select">➤</button>
+          <button type="button" aria-label="Hand">✋</button>
+          <button type="button" aria-label="Block">▢</button>
+          <button type="button" aria-label="Text">T</button>
+        </div>
+        <div class="ss-zoom">100%</div>
+      </div>
+      <div class="ss-walk" data-walk>
+        <button type="button" data-back>← Back</button>
+        <div class="chips" data-chips></div>
+        <button type="button" data-next>Next →</button>
+        <div class="cap" data-cap></div>
+      </div>
+    </div>
+  </div>
+  <script src="journey.js"></script>
+</body>
+</html>

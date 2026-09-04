@@ -1,0 +1,228 @@
+{
+  "feature": "Diff / lint lens · state vocabulary on Block, port and cable",
+  "viewport": { "width": 2700, "height": 2000 },
+  "shapes": [
+    {
+      "id": "calm-a",
+      "type": "block",
+      "x": 700,
+      "y": 200,
+      "props": {
+        "title": "decode()",
+        "description": "Unchanged: this is what an ordinary board looks like.",
+        "blockType": "transform",
+        "view": "port",
+        "w": 560,
+        "h": 300,
+        "inputs": [
+          { "id": "in_raw", "name": "raw", "type": "bytes", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_frame", "name": "frame", "type": "Frame", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "calm-b",
+      "type": "block",
+      "x": 1500,
+      "y": 200,
+      "props": {
+        "title": "encode()",
+        "description": "Also unchanged. No tint, no gutter, no ghost row.",
+        "blockType": "transform",
+        "view": "port",
+        "w": 560,
+        "h": 300,
+        "inputs": [
+          { "id": "in_frame", "name": "frame", "type": "Frame", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_payload", "name": "payload", "type": "bytes", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "calm-cable",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": { "routing": "elbow" }
+    },
+    {
+      "id": "changed-block",
+      "type": "block",
+      "x": 700,
+      "y": 700,
+      "props": {
+        "title": "resize()",
+        "description": "Signature drifted: mode dropped, callee renamed, scale now returned.",
+        "blockType": "transform",
+        "view": "port",
+        "w": 560,
+        "h": 300,
+        "portLayout": "offset",
+        "state": "changed",
+        "inputs": [
+          { "id": "in_image", "name": "image", "type": "Image", "visible": true },
+          {
+            "id": "in_mode",
+            "name": "mode",
+            "type": "str",
+            "visible": true,
+            "state": "removed"
+          },
+          {
+            "id": "in_callable",
+            "name": "callable",
+            "type": "Estimator",
+            "visible": true,
+            "state": "changed",
+            "stateBefore": "callee"
+          }
+        ],
+        "outputs": [
+          { "id": "out_result", "name": "result", "type": "Image", "visible": true },
+          {
+            "id": "out_scale",
+            "name": "scale",
+            "type": "float",
+            "visible": true,
+            "state": "added"
+          }
+        ]
+      }
+    },
+    {
+      "id": "error-block",
+      "type": "block",
+      "x": 700,
+      "y": 1300,
+      "props": {
+        "title": "authenticate()",
+        "description": "Lint: the session output has no declared exception path.",
+        "blockType": "transform",
+        "view": "port",
+        "w": 560,
+        "h": 300,
+        "state": "error",
+        "inputs": [
+          { "id": "in_token", "name": "token", "type": "str", "visible": true }
+        ],
+        "outputs": [
+          {
+            "id": "out_session",
+            "name": "session",
+            "type": "Session",
+            "visible": true,
+            "state": "error"
+          }
+        ]
+      }
+    },
+    {
+      "id": "warning-block",
+      "type": "block",
+      "x": 1500,
+      "y": 1300,
+      "props": {
+        "title": "retry()",
+        "description": "Lint: the backoff request has no upper bound.",
+        "blockType": "transform",
+        "view": "port",
+        "w": 560,
+        "h": 300,
+        "state": "warning",
+        "inputs": [
+          {
+            "id": "in_request",
+            "name": "request",
+            "type": "Request",
+            "visible": true,
+            "state": "warning"
+          }
+        ],
+        "outputs": [
+          { "id": "out_response", "name": "response", "type": "Response", "visible": true }
+        ]
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "calm-start",
+      "type": "connection",
+      "fromId": "calm-cable",
+      "toId": "calm-a",
+      "props": { "portId": "out_frame", "terminal": "start", "face": "outer" }
+    },
+    {
+      "id": "calm-end",
+      "type": "connection",
+      "fromId": "calm-cable",
+      "toId": "calm-b",
+      "props": { "portId": "in_frame", "terminal": "end", "face": "outer" }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Compare the top pair with the marked ones below — an unmarked board must look completely ordinary.",
+      "x": 200,
+      "y": 280,
+      "w": 380,
+      "h": 140,
+      "target": { "shapeId": "calm-a", "anchor": "left", "dy": 0 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Look at the struck-through row: a removed port is drawn IN the row it is missing from, not on a floating note.",
+      "x": 200,
+      "y": 660,
+      "w": 400,
+      "h": 160,
+      "target": { "shapeId": "changed-block", "anchor": "left", "dy": -70 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · The renamed row reads ‘callee → callable’ as ONE row, not a removal beside an addition.",
+      "x": 200,
+      "y": 900,
+      "w": 400,
+      "h": 160,
+      "target": { "shapeId": "changed-block", "anchor": "left", "dy": 70 }
+    },
+    {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 · The ‘+ − ~’ column on the left of each changed row is the default paint (diff-gutter).",
+      "x": 780,
+      "y": 1080,
+      "w": 400,
+      "h": 140,
+      "target": { "shapeId": "changed-block", "anchor": "bottom", "dx": 0 }
+    },
+    {
+      "id": "step-5",
+      "kind": "step",
+      "text": "5 · Error and warning use the SAME marks as the diff — one vocabulary, two producers (diff + linter).",
+      "x": 2140,
+      "y": 1380,
+      "w": 380,
+      "h": 140,
+      "target": { "shapeId": "warning-block", "anchor": "right", "dy": 0 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN the calm pair is indistinguishable from a normal board, every mark sits in its own port row, and no row clips its text.",
+      "x": 700,
+      "y": 1750,
+      "w": 1360,
+      "h": 120
+    }
+  ]
+}

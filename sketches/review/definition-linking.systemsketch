@@ -212,6 +212,14 @@
       "typeName": "shape"
     },
     {
+      "name": "",
+      "color": "#BD54C6",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:oAwdl8L1mW2UYS9rTjLBL",
+      "typeName": "user"
+    },
+    {
       "x": 1600,
       "y": 875,
       "rotation": 0,
@@ -391,9 +399,9 @@
       "typeName": "shape"
     },
     {
-      "x": 0,
-      "y": 0,
-      "z": 1,
+      "x": -101.7646222018891,
+      "y": 395.53326518983,
+      "z": 0.5663505114180035,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -498,8 +506,8 @@
       "id": "shape:linked-a",
       "type": "block",
       "props": {
-        "w": 560,
-        "h": 380,
+        "w": 1018,
+        "h": 614,
         "title": "run()",
         "description": "Linked occurrence A — edit me",
         "blockType": "Function",
@@ -515,8 +523,8 @@
             "h": 198
           },
           "expanded": {
-            "w": 560,
-            "h": 380
+            "w": 1018,
+            "h": 614
           },
           "value": {
             "w": 168,
@@ -532,6 +540,18 @@
             "id": "in_bytes",
             "name": "bytes",
             "type": "Bytes",
+            "visible": true
+          },
+          {
+            "id": "in_1",
+            "name": "in_1",
+            "type": "",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "in_2",
+            "type": "",
             "visible": true
           }
         ],
@@ -651,8 +671,8 @@
       "id": "shape:linked-b",
       "type": "block",
       "props": {
-        "w": 560,
-        "h": 380,
+        "w": 1018,
+        "h": 614,
         "title": "run()",
         "description": "Linked occurrence A — edit me",
         "blockType": "Function",
@@ -668,8 +688,8 @@
             "h": 198
           },
           "expanded": {
-            "w": 560,
-            "h": 380
+            "w": 1018,
+            "h": 614
           },
           "value": {
             "w": 168,
@@ -685,6 +705,18 @@
             "id": "in_bytes",
             "name": "bytes",
             "type": "Bytes",
+            "visible": true
+          },
+          {
+            "id": "in_1",
+            "name": "in_1",
+            "type": "",
+            "visible": true
+          },
+          {
+            "id": "in_2",
+            "name": "in_2",
+            "type": "",
             "visible": true
           }
         ],
@@ -759,7 +791,9 @@
     {
       "editingShapeId": null,
       "croppingShapeId": null,
-      "selectedShapeIds": [],
+      "selectedShapeIds": [
+        "shape:linked-a"
+      ],
       "hoveredShapeId": null,
       "erasingShapeIds": [],
       "hintingShapeIds": [],
@@ -860,8 +894,8 @@
       "typeName": "binding"
     },
     {
-      "x": 105,
-      "y": 105,
+      "x": 140.20234925976501,
+      "y": 107.34680991504746,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -878,7 +912,7 @@
       "props": {
         "w": 320,
         "h": 180,
-        "title": "decode()",
+        "title": "decodes",
         "description": "Shared expanded body",
         "blockType": "call",
         "icon": "",
@@ -907,7 +941,7 @@
         "definitionId": "review-definition-decode",
         "inputs": [],
         "outputs": [],
-        "definitionKey": "decode"
+        "definitionKey": "decodes"
       },
       "index": "a1Mfb",
       "typeName": "shape"
@@ -946,8 +980,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 2100,
-        "h": 1300
+        "w": 1409.2857666015625,
+        "h": 1183.5714111328125
       },
       "insets": [
         false,
@@ -962,9 +996,9 @@
       "isChatting": false,
       "highlightedUserIds": [],
       "isFocused": true,
-      "devicePixelRatio": 1,
+      "devicePixelRatio": 1.399999976158142,
       "isCoarsePointer": false,
-      "isHoveringCanvas": null,
+      "isHoveringCanvas": false,
       "openMenus": [],
       "isChangingStyle": false,
       "isReadonly": false,
@@ -976,8 +1010,8 @@
       "typeName": "instance"
     },
     {
-      "x": 105,
-      "y": 105,
+      "x": 140.20234925976501,
+      "y": 107.34680991504746,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -993,7 +1027,7 @@
       "props": {
         "w": 320,
         "h": 180,
-        "title": "decode()",
+        "title": "decodes",
         "description": "Shared expanded body",
         "blockType": "call",
         "icon": "",
@@ -1022,7 +1056,7 @@
         "definitionId": "review-definition-decode",
         "inputs": [],
         "outputs": [],
-        "definitionKey": "decode"
+        "definitionKey": "decodes"
       },
       "index": "a1Mfb",
       "parentId": "shape:linked-b",

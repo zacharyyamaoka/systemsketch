@@ -42,6 +42,8 @@ import {
 import { isBlockShape } from '../blockModel'
 import { sameSharedStyle } from '../commands/blockStyleCommands'
 import { CONNECTION_SHAPE_TYPE } from '../connections/connectionModel'
+import { cablePillLabel } from '../connections/connectionPresentation'
+import { isEffectCable } from '../connections/effectCable'
 import './block-inspector.css'
 
 export interface ConnectionInspectorContext {
@@ -54,7 +56,7 @@ export interface ConnectionInspectorContext {
 	/** Whether the single selection carries an authored bend or rails. */
 	authored: boolean
 	/** The single selected cable, for the per-cable delay controls. */
-	only: { id: TLShapeId; delayValue: string; pillCentred: boolean } | null
+	only: { id: TLShapeId; delayValue: string; pillCentred: boolean; hasPill: boolean } | null
 	/** Shared tunnel state; null means mixed across a multi-selection. */
 	tunnelEnabled: boolean | null
 	/** Shared layer name; null means mixed across a multi-selection. */
@@ -109,6 +111,13 @@ export function getConnectionInspectorContext(editor: Editor): ConnectionInspect
 				id: only.id,
 				delayValue: only.props.delayValue,
 				pillCentred: only.props.pillPosition === PILL_POSITION_DEFAULT,
+				// Whether there is a pill to centre at all — a `mut` pill is the
+				// same object as z⁻¹ and gets the same control.
+				hasPill: cablePillLabel({
+					temporal: only.props.temporal,
+					delayValue: only.props.delayValue,
+					effect: isEffectCable(editor, only),
+				}) !== null,
 			}
 			: null,
 		endpoints: bindings && direction
@@ -145,6 +154,7 @@ function sameConnectionInspectorContext(
 			&& before.only.id === next.only.id
 			&& before.only.delayValue === next.only.delayValue
 			&& before.only.pillCentred === next.only.pillCentred
+			&& before.only.hasPill === next.only.hasPill
 		))
 		&& (before.endpoints === next.endpoints || (
 			before.endpoints !== null && next.endpoints !== null
@@ -287,12 +297,13 @@ export function EditorConnectionInspector({ editor }: { editor: Editor }) {
 									? 'Async delivery: small packet marks ride a mostly continuous cable.'
 									: 'Read on this pass: the plain data cable.'}
 					</p>
-					{context.only && isSharedStyleValue(context.temporal, 'delayed') ? (
+					{context.only && context.only.hasPill ? (
 						<DelayValueField
 							key={context.only.id}
 							connectionId={context.only.id}
 							value={context.only.delayValue}
 							pillCentred={context.only.pillCentred}
+							showValue={isSharedStyleValue(context.temporal, 'delayed')}
 							editor={editor}
 						/>
 					) : null}
@@ -389,18 +400,21 @@ export function EditorConnectionInspector({ editor }: { editor: Editor }) {
 }
 
 /**
- * The initial value a delayed cable shows in its pill, and a way to put the
- * pill back in the middle after it has been slid along the cable.
+ * The pill's controls. Every cable that carries a pill gets the centre button,
+ * because every pill slides the same way; only a delayed cable also names an
+ * initial value, so that field is the one part that varies.
  */
 function DelayValueField({
 	connectionId,
 	value,
 	pillCentred,
+	showValue,
 	editor,
 }: {
 	connectionId: TLShapeId
 	value: string
 	pillCentred: boolean
+	showValue: boolean
 	editor: Editor
 }) {
 	const [draft, setDraft] = useState(value)
@@ -410,6 +424,7 @@ function DelayValueField({
 	}, [editor, connectionId, draft])
 	return (
 		<>
+			{showValue ? (
 			<label className="block-inspector__field">
 				<span>= value</span>
 				<input
@@ -429,6 +444,7 @@ function DelayValueField({
 					}}
 				/>
 			</label>
+			) : null}
 			<button
 				type="button"
 				className="block-inspector__count-pill"

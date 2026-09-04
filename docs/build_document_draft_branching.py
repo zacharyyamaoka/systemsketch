@@ -1,0 +1,327 @@
+#!/usr/bin/env python3
+"""
+    Build the dated research report for document draft branching.
+
+    The report reads the earlier PyBlocks version-control study and the current
+    SystemSketch source at build time, so its conclusions stay tied to the
+    live repositories rather than to a hand-maintained summary.
+"""
+
+# BAM Imports
+
+# PYTHON Imports
+
+
+def main() -> None:
+    import html
+    import json
+    import re
+    from pathlib import Path
+
+    repo = Path(__file__).resolve().parents[1]
+    docs = repo / "docs"
+    pyblocks = repo.parent / "pyblocks"
+    study_path = pyblocks / "docs" / "systemsketch-version-control-babble-2026-08-30.json"
+    app_path = repo / "src" / "App.tsx"
+    consolidation_path = repo / "src" / "singlePageDocument.ts"
+    workspace_path = repo / "src" / "workspace" / "workspaceClient.ts"
+    output = docs / "document-draft-branching-2026-09-03.html"
+
+    if not study_path.is_file():
+        raise SystemExit(f"Missing PyBlocks study: {study_path}")
+
+    study = json.loads(study_path.read_text(encoding="utf-8"))
+    requirements = {item["id"]: item for item in study["requirements"]}
+
+    def score(variant: dict) -> float:
+        return sum(
+            requirements[requirement_id]["weight"] * result["score"] / 5
+            for requirement_id, result in variant["scores"].items()
+        )
+
+    variants = sorted(
+        (
+            {
+                "id": item["id"],
+                "name": item["name"],
+                "score": score(item),
+                "thesis": item["thesis"],
+                "best_when": item["bestWhen"],
+                "loses_when": item["losesWhen"],
+            }
+            for item in study["variants"]
+        ),
+        key=lambda item: item["score"],
+        reverse=True,
+    )
+    draft_version = next(item for item in variants if item["id"] == "v1")
+    pages = next(item for item in variants if item["id"] == "v3")
+    app_text = app_path.read_text(encoding="utf-8")
+    consolidation_text = consolidation_path.read_text(encoding="utf-8")
+    workspace_text = workspace_path.read_text(encoding="utf-8")
+    max_pages = re.search(r"maxPages:\s*(\d+)", app_text)
+    if max_pages is None:
+        raise SystemExit("SystemSketch's maxPages setting was not found.")
+
+    measurements = {
+        "alternatives": len(variants),
+        "hard_gates": len(study["hardGates"]),
+        "max_pages": int(max_pages.group(1)),
+        "has_page_migration": "consolidateDocumentToSinglePage" in consolidation_text,
+        "has_digest_fence": "baseDigest" in workspace_text and "WorkspaceConflict" in workspace_text,
+    }
+
+    def esc(value: object) -> str:
+        return html.escape(str(value))
+
+    ranking_rows = "".join(
+        "<tr"
+        + (" class='selected'" if item["id"] == "v1" else "")
+        + ">"
+        + f"<td>{esc(item['name'])}</td>"
+        + f"<td class='score'>{item['score']:.1f}</td>"
+        + f"<td>{esc(item['best_when'])}</td>"
+        + f"<td>{esc(item['loses_when'])}</td>"
+        + "</tr>"
+        for item in variants
+    )
+    gate_rows = "".join(
+        f"<li><b>{esc(gate['name'])}.</b> {esc(gate['why'])}</li>"
+        for gate in study["hardGates"]
+    )
+    source_links = [
+        ("PyBlocks five-model study", study_path),
+        ("Current one-canvas constraint", app_path),
+        ("Legacy-page consolidation", consolidation_path),
+        ("Current digest-fenced workspace client", workspace_path),
+        ("PyBlocks project journal", Path.home() / "zach_brain/Projects/pyblocks/PROJECT - pyblocks.md"),
+        ("System Sketch project journal", Path.home() / "zach_brain/Sources/Notes/PROJECT - System Sketch.md"),
+    ]
+    source_items = "".join(
+        f"<li><a href='{esc(path.as_uri())}'>{esc(label)}</a></li>" for label, path in source_links
+    )
+    page_migration = "present" if measurements["has_page_migration"] else "not found"
+    digest_fence = "present" if measurements["has_digest_fence"] else "not found"
+
+    report = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Draft branches without pages · SystemSketch research</title>
+<style>
+:root {{
+  --ink:#18202b; --muted:#607080; --line:#d9e0e7; --paper:#ffffff; --ground:#f4f6f8;
+  --amber:#b97009; --amber-soft:#fff5df; --blue:#2269a6; --blue-soft:#e9f3fb;
+  --green:#237155; --green-soft:#eaf6f0; --red:#a5433c;
+}}
+* {{ box-sizing:border-box; }}
+body {{ margin:0; background:var(--ground); color:var(--ink);
+  font:15px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }}
+main {{ width:min(1160px,calc(100% - 36px)); margin:0 auto; padding:44px 0 76px; }}
+h1,h2,h3,p {{ margin-top:0; }}
+h1 {{ max-width:800px; margin-bottom:12px; font-size:36px; line-height:1.12; letter-spacing:-.04em; }}
+h2 {{ margin:42px 0 12px; padding-top:20px; border-top:1px solid var(--line); font-size:21px; }}
+h3 {{ margin:0 0 8px; font-size:14px; letter-spacing:.01em; }}
+p {{ margin-bottom:14px; }}
+a {{ color:#165f9a; text-decoration-thickness:1px; text-underline-offset:2px; }}
+.eyebrow {{ margin-bottom:10px; color:var(--amber); font-size:12px; font-weight:750; letter-spacing:.1em; text-transform:uppercase; }}
+.lede {{ max-width:850px; color:var(--muted); font-size:18px; }}
+.facts {{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:28px 0; }}
+.fact {{ min-height:112px; padding:16px; border:1px solid var(--line); border-radius:10px; background:var(--paper); }}
+.fact b {{ display:block; margin-bottom:3px; font-size:27px; line-height:1; letter-spacing:-.04em; }}
+.fact span {{ color:var(--muted); font-size:12.5px; line-height:1.4; }}
+.callout {{ margin:22px 0; padding:16px 18px; border:1px solid #e9ca8e; border-left:4px solid var(--amber); border-radius:8px; background:var(--amber-soft); }}
+.callout p:last-child {{ margin-bottom:0; }}
+.workflow {{ margin:22px 0 12px; padding:14px; border:1px solid var(--line); border-radius:10px; background:var(--paper); }}
+.workflow svg {{ display:block; width:100%; height:auto; }}
+.caption {{ margin-bottom:0; color:var(--muted); font-size:12.5px; }}
+.grid {{ display:grid; grid-template-columns:1.05fr .95fr; gap:16px; align-items:start; }}
+.panel {{ padding:18px; border:1px solid var(--line); border-radius:10px; background:var(--paper); }}
+.panel ul,.panel ol {{ margin:0; padding-left:20px; }}
+.panel li {{ margin-bottom:9px; }}
+table {{ width:100%; border-collapse:collapse; overflow:hidden; border:1px solid var(--line); border-radius:10px; background:var(--paper); font-size:13.5px; }}
+th,td {{ padding:10px 12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }}
+th {{ color:var(--muted); background:#f8fafb; font-size:11px; letter-spacing:.06em; text-transform:uppercase; }}
+tr:last-child td {{ border-bottom:0; }}
+tr.selected td {{ background:var(--amber-soft); }}
+.score {{ font-variant-numeric:tabular-nums; font-weight:750; white-space:nowrap; }}
+.rule {{ display:grid; grid-template-columns:26px 1fr; gap:10px; margin:11px 0; }}
+.rule b {{ color:var(--amber); font-variant-numeric:tabular-nums; }}
+.sources {{ columns:2; margin:0; padding-left:20px; }}
+.sources li {{ margin:8px 0; break-inside:avoid; }}
+footer {{ margin-top:42px; padding-top:16px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; }}
+@media (max-width:760px) {{
+  main {{ width:min(100% - 24px,1160px); padding-top:28px; }}
+  h1 {{ font-size:29px; }}
+  .facts,.grid {{ grid-template-columns:1fr; }}
+  .sources {{ columns:1; }}
+  table {{ display:block; overflow-x:auto; }}
+}}
+</style>
+</head>
+<body>
+<main>
+<div class="eyebrow">Research synthesis · 3 September 2026</div>
+<h1>Draft branches without pages</h1>
+<p class="lede">A named, editable alternative of one SystemSketch document is useful for
+prototyping. The earlier PyBlocks study already selected the relevant IcePanel model:
+an isolated Draft from a known Current state, plus immutable Versions. It also explains
+why a tldraw page is the wrong storage mechanism.</p>
+
+<section class="facts" aria-label="Measured report facts">
+  <div class="fact"><b>{measurements["alternatives"]}</b><span>version-control models
+  measured in the PyBlocks study</span></div>
+  <div class="fact"><b>{draft_version["score"]:.1f}</b><span>score of the selected
+  Draft + Version model</span></div>
+  <div class="fact"><b>{measurements["max_pages"]}</b><span>durable canvas allowed by
+  the current SystemSketch editor</span></div>
+  <div class="fact"><b>{measurements["hard_gates"]}</b><span>non-negotiable safety
+  gates recorded before the alternatives were judged</span></div>
+</section>
+
+<div class="callout">
+  <h3>Decision carried forward</h3>
+  <p><b>{esc(draft_version["name"])}</b> is the correct backbone for personal
+  “try several things without disturbing the real board” work. The report recommends
+  a conservative first promotion rule: a draft can replace Current only when Current
+  still equals the digest the draft started from. A changed Current is a visible stop,
+  not a hidden last-writer-wins merge.</p>
+</div>
+
+<h2>What a document draft means</h2>
+<div class="workflow">
+  <svg viewBox="0 0 1050 270" role="img" aria-label="Proposed document-local workflow:
+  Current forks to two isolated drafts. One draft can be discarded; a digest-gated promotion
+  first preserves an immutable version, then advances Current.">
+    <defs>
+      <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+        <path d="M0,0 L9,4.5 L0,9z" fill="#607080"/>
+      </marker>
+    </defs>
+    <rect x="24" y="88" width="155" height="98" rx="10" fill="#e9f3fb" stroke="#2269a6"/>
+    <text x="43" y="122" fill="#18202b" font-size="18" font-weight="700">Current v0</text>
+    <text x="43" y="148" fill="#607080" font-size="14">ordinary .systemsketch</text>
+    <text x="43" y="170" fill="#607080" font-size="14">editable source of truth</text>
+    <path d="M179,113 C216,70 232,68 270,68" fill="none" stroke="#607080" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M179,161 C216,204 232,206 270,206" fill="none" stroke="#607080" stroke-width="2" marker-end="url(#arrow)"/>
+    <rect x="280" y="25" width="220" height="88" rx="10" fill="#fff5df" stroke="#b97009"/>
+    <text x="301" y="58" fill="#18202b" font-size="17" font-weight="700">DRAFT · safer ingress</text>
+    <text x="301" y="83" fill="#607080" font-size="14">base = Current v0 digest</text>
+    <text x="301" y="102" fill="#607080" font-size="14">isolated autosave</text>
+    <rect x="280" y="157" width="220" height="88" rx="10" fill="#fff5df" stroke="#b97009"/>
+    <text x="301" y="190" fill="#18202b" font-size="17" font-weight="700">DRAFT · lean path</text>
+    <text x="301" y="215" fill="#607080" font-size="14">base = Current v0 digest</text>
+    <text x="301" y="234" fill="#607080" font-size="14">discard without changing Current</text>
+    <path d="M500,69 H550" fill="none" stroke="#607080" stroke-width="2" marker-end="url(#arrow)"/>
+    <rect x="560" y="39" width="140" height="62" rx="10" fill="#fff" stroke="#d9e0e7"/>
+    <text x="579" y="65" fill="#18202b" font-size="16" font-weight="700">digest gate</text>
+    <text x="579" y="87" fill="#607080" font-size="13">Current unchanged?</text>
+    <path d="M700,70 H730" fill="none" stroke="#237155" stroke-width="2" marker-end="url(#arrow)"/>
+    <rect x="740" y="39" width="130" height="62" rx="10" fill="#eaf6f0" stroke="#237155"/>
+    <text x="758" y="65" fill="#18202b" font-size="16" font-weight="700">Version v0</text>
+    <text x="758" y="87" fill="#607080" font-size="13">immutable snapshot</text>
+    <path d="M870,70 H892" fill="none" stroke="#237155" stroke-width="2" marker-end="url(#arrow)"/>
+    <rect x="902" y="39" width="125" height="62" rx="10" fill="#e9f3fb" stroke="#2269a6"/>
+    <text x="920" y="65" fill="#18202b" font-size="16" font-weight="700">Current v1</text>
+    <text x="920" y="87" fill="#607080" font-size="13">promoted draft</text>
+    <text x="730" y="131" fill="#237155" font-size="13" font-weight="700">preserve → promote → advance</text>
+    <text x="550" y="221" fill="#a5433c" font-size="13">changed Current: stop, compare, keep the draft; no silent overwrite</text>
+  </svg>
+</div>
+<p class="caption">Proposed first workflow, not present product UI. Each state is the same
+single canvas at a different document revision; no page records stand in for a branch.</p>
+
+<h2>Why not pages</h2>
+<div class="grid">
+  <div class="panel">
+    <h3>The prior study tested it</h3>
+    <p><b>{esc(pages["name"])}</b> scored <b>{pages["score"]:.1f}</b>, last of the
+    {measurements["alternatives"]} alternatives. It keeps the useful idea—fast visual
+    switching—but loses a real base/merge relationship because duplication creates
+    independent record identities.</p>
+    <p>It also overloads “page”: a spatial section, a navigation target, and a proposal
+    would become one ambiguous thing.</p>
+  </div>
+  <div class="panel">
+    <h3>The active product makes the boundary explicit</h3>
+    <p><code>maxPages: {measurements["max_pages"]}</code> is measured from
+    <code>src/App.tsx</code>. Legacy-page migration is <b>{page_migration}</b>;
+    imported pages become named stock Frames on one root canvas.</p>
+    <p>Drafts should therefore switch the document snapshot beneath the same canvas,
+    while Frames and Depth Stack continue to express structure and navigation.</p>
+  </div>
+</div>
+
+<h2>The five models, re-measured from the source study</h2>
+<table aria-label="Version-control model ranking">
+<thead><tr><th>Model</th><th>Score / 100</th><th>Best when</th><th>Not the center when</th></tr></thead>
+<tbody>{ranking_rows}</tbody>
+</table>
+<p>Review Patch remains the strongest later splice: it can provide per-change
+accept/reject inside a draft. It should not replace a whole-board draft for an
+hours-long exploratory redesign. Git Native remains valuable for code-derived PyBlocks
+projections, but asks a standalone whiteboard user to own repository state.</p>
+
+<h2>What is already real, and what is not</h2>
+<div class="grid">
+  <div class="panel">
+    <h3>Available building blocks</h3>
+    <ul>
+      <li>Complete board serialization and atomic local-file writes.</li>
+      <li>Content-digest fence: <b>{digest_fence}</b> in the current workspace client.</li>
+      <li>Clean external reload versus a visible Current-versus-disk conflict.</li>
+      <li>One-canvas migration, Frames, and ephemeral structural Depth navigation.</li>
+    </ul>
+  </div>
+  <div class="panel">
+    <h3>Not shipped</h3>
+    <ul>
+      <li>Draft metadata, heads, a draft picker, or an amber draft-mode bar.</li>
+      <li>Immutable document-version storage and non-destructive restore.</li>
+      <li>Record-aware comparison, three-way merge, or visual conflict resolution.</li>
+      <li>Review Patch ghosts, cross-document drafts, collaboration, or Git checkout.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Safety rules inherited from the selected model</h2>
+<div class="panel">
+  {gate_rows}
+</div>
+
+<h2>Recommended delivery order</h2>
+<div class="panel">
+  <div class="rule"><b>01</b><div><b>Immutable version foundation.</b> Store named,
+  read-only serialized snapshots without changing the ordinary Current-file format.</div></div>
+  <div class="rule"><b>02</b><div><b>Named local drafts.</b> Capture base digest plus
+  snapshot, autosave only the draft head, and make Current/Draft mode continuously visible.</div></div>
+  <div class="rule"><b>03</b><div><b>Conservative promotion.</b> Allow only unchanged-base
+  promotion; save an immutable version before advancing Current.</div></div>
+  <div class="rule"><b>04</b><div><b>Compare before merge.</b> Add record-aware revision
+  diff, then explicit conflict handling. Do not promise a three-way merge before it exists.</div></div>
+  <div class="rule"><b>05</b><div><b>Selective review later.</b> Add revision-linked
+  Review Patches only when per-change collaboration becomes the actual bottleneck.</div></div>
+</div>
+
+<h2>Evidence and lineage</h2>
+<ul class="sources">
+{source_items}
+<li><a href="https://docs.icepanel.io/future-state-design/drafts.md">IcePanel Drafts documentation</a></li>
+<li><a href="https://docs.icepanel.io/future-state-design/versioning.md">IcePanel Versioning documentation</a></li>
+<li><a href="https://docs.icepanel.io/integrations/linking-to-reality.md">IcePanel source-control links (separate concern)</a></li>
+</ul>
+
+<footer>Built from the live SystemSketch and PyBlocks trees on 2026-09-03. The historical
+PyBlocks study is a design prototype; this report does not claim that document draft
+branching is implemented in the application.</footer>
+</main>
+</body>
+</html>
+"""
+    output.write_text(report, encoding="utf-8")
+    print(f"Wrote {output.relative_to(repo)}")
+
+
+if __name__ == "__main__":
+    main()

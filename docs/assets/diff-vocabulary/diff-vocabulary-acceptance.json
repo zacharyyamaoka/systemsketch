@@ -1,0 +1,213 @@
+{
+  "checks": [
+    "a board with zero changes writes no diff markup at all, in any variant",
+    "every one of the 6 paints rendered at 3 changes and at 30",
+    "the variants differ only in paint: all six mark exactly the same rows",
+    "none of the six shipped variants tints the card face any more — the ink lives on the field",
+    "was-now ink at 30 changes: default 0.0326 of the board, delta-badge 0.0117",
+    "the blend scrubs before → after in place, on one document and one renderer",
+    "no port row clips a NAME at either density (0 type(s) ellipsised, which is by design)",
+    "the paint is a preference, not a fact: switching it writes nothing to the board",
+    "no browser console errors across the journey"
+  ],
+  "measured": {
+    "n3": {
+      "was-now": {
+        "cards": 6,
+        "markedRows": 3,
+        "clipped": 0,
+        "rails": 1,
+        "badges": 1,
+        "poseGhosts": 0,
+        "cableMarks": 0,
+        "clippedType": 0,
+        "clippedDetail": [],
+        "cardInk": 0,
+        "rowInk": 0.019,
+        "wasNowPairs": 1,
+        "wasNowInk": 0.0032
+      },
+      "stacked": {
+        "cards": 6,
+        "markedRows": 3,
+        "clipped": 0,
+        "rails": 1,
+        "badges": 1,
+        "poseGhosts": 0,
+        "cableMarks": 0,
+        "clippedType": 0,
+        "clippedDetail": [],
+        "cardInk": 0,
+        "rowInk": 0.019,
+        "wasNowPairs": 1,
+        "wasNowInk": 0.0017
+      },
+      "token-only": {
+        "cards": 6,
+        "markedRows": 3,
+        "clipped": 0,
+        "rails": 1,
+        "badges": 1,
+        "poseGhosts": 0,
+        "cableMarks": 0,
+        "clippedType": 0,
+        "clippedDetail": [],
+        "cardInk": 0,
+        "rowInk": 0.019,
+        "wasNowPairs": 1,
+        "wasNowInk": 0.0029
+      },
+      "delta-badge": {
+        "cards": 6,
+        "markedRows": 3,
+        "clipped": 0,
+        "rails": 1,
+        "badges": 1,
+        "poseGhosts": 0,
+        "cableMarks": 0,
+        "clippedType": 0,
+        "clippedDetail": [],
+        "cardInk": 0,
+        "rowInk": 0.019,
+        "wasNowPairs": 1,
+        "wasNowInk": 0.0011
+      },
+      "ghost-weight": {
+        "cards": 6,
+        "markedRows": 3,
+        "clipped": 0,
+        "rails": 1,
+        "badges": 1,
+        "poseGhosts": 0,
+        "cableMarks": 0,
+        "clippedType": 0,
+        "clippedDetail": [],
+        "cardInk": 0,
+        "rowInk": 0.019,
+        "wasNowPairs": 1,
+        "wasNowInk": 0.0029
+      },
+      "blend": {
+        "cards": 6,
+        "markedRows": 3,
+        "clipped": 0,
+        "rails": 1,
+        "badges": 1,
+        "poseGhosts": 0,
+        "cableMarks": 0,
+        "clippedType": 0,
+        "clippedDetail": [],
+        "cardInk": 0,
+        "rowInk": 0.019,
+        "wasNowPairs": 1,
+        "wasNowInk": 0.0032
+      }
+    },
+    "n30": {
+      "was-now": {
+        "cards": 6,
+        "markedRows": 30,
+        "clipped": 0,
+        "rails": 6,
+        "badges": 6,
+        "poseGhosts": 0,
+        "cableMarks": 0,
+        "clippedType": 0,
+        "clippedDetail": [],
+        "cardInk": 0,
+        "rowInk": 0.186,
+        "wasNowPairs": 10,
+        "wasNowInk": 0.0326
+      },
+      "stacked": {
+        "cards": 6,
+        "markedRows": 30,
+        "clipped": 0,
+        "rails": 6,
+        "badges": 6,
+        "poseGhosts": 0,
+        "cableMarks": 0,
+        "clippedType": 0,
+        "clippedDetail": [],
+        "cardInk": 0,
+        "rowInk": 0.186,
+        "wasNowPairs": 10,
+        "wasNowInk": 0.0185
+      },
+      "token-only": {
+        "cards": 6,
+        "markedRows": 30,
+        "clipped": 0,
+        "rails": 6,
+        "badges": 6,
+        "poseGhosts": 0,
+        "cableMarks": 0,
+        "clippedType": 0,
+        "clippedDetail": [],
+        "cardInk": 0,
+        "rowInk": 0.186,
+        "wasNowPairs": 10,
+        "wasNowInk": 0.0293
+      },
+      "delta-badge": {
+        "cards": 6,
+        "markedRows": 30,
+        "clipped": 0,
+        "rails": 6,
+        "badges": 6,
+        "poseGhosts": 0,
+        "cableMarks": 0,
+        "clippedType": 0,
+        "clippedDetail": [],
+        "cardInk": 0,
+        "rowInk": 0.186,
+        "wasNowPairs": 10,
+        "wasNowInk": 0.0117
+      },
+      "ghost-weight": {
+        "cards": 6,
+        "markedRows": 30,
+        "clipped": 0,
+        "rails": 6,
+        "badges": 6,
+        "poseGhosts": 0,
+        "cableMarks": 0,
+        "clippedType": 0,
+        "clippedDetail": [],
+        "cardInk": 0,
+        "rowInk": 0.186,
+        "wasNowPairs": 10,
+        "wasNowInk": 0.0297
+      },
+      "blend": {
+        "cards": 6,
+        "markedRows": 30,
+        "clipped": 0,
+        "rails": 6,
+        "badges": 6,
+        "poseGhosts": 0,
+        "cableMarks": 0,
+        "clippedType": 0,
+        "clippedDetail": [],
+        "cardInk": 0,
+        "rowInk": 0.186,
+        "wasNowPairs": 10,
+        "wasNowInk": 0.0326
+      }
+    }
+  },
+  "scrub": {
+    "0": {
+      "removed": 1,
+      "added": 0
+    },
+    "1": {
+      "removed": 0,
+      "added": 1
+    },
+    "0.5": {
+      "removed": 0.5,
+      "added": 0.5
+    }
+  }
+}

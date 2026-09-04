@@ -420,7 +420,7 @@ def feedback_html() -> str:
       <section class="feedback-lock" aria-labelledby="feedback-heading">
         <div class="feedback-lock__head">
           <div><div class="eyebrow">Feedback incorporated</div><h2 id="feedback-heading">Invert the mark: gaps are the packets.</h2></div>
-          <p>The first Burst Cadence made silence the dominant shape. That signalled intermittence, but the route fragmented. This pass holds a continuous carrier and cuts tiny, irregular Morse-like gaps into it. Every card now includes the requested long route, eight-cable bundle, two crossings, partial overlap, and 45% board view. <a href="async-edge-styles-2026-09-02.html">Return to the five-family study and tldraw implementation path.</a></p>
+          <p>The first Burst Cadence made silence the dominant shape. That signalled intermittence, but the route fragmented. This pass holds a continuous carrier and cuts tiny, irregular Morse-like gaps into it. Every card now includes the requested long route, eight-cable bundle, two crossings, partial overlap, and 45% board view. <a href="async-v5-packet-variants-2026-09-02.html">Open the reference-calibrated V5 packet-dash refinement.</a> <a href="async-edge-styles-2026-09-02.html">Return to the five-family study and tldraw implementation path.</a></p>
         </div>
         <div class="feedback-lock__compare">
           <figure><svg viewBox="0 0 420 44"><path class="before" d="M14 22 H406"/></svg><figcaption><b>Before.</b> Large 34px silence; strong intermittence, weak eye tracking.</figcaption></figure>

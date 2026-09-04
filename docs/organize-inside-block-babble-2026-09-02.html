@@ -989,7 +989,7 @@
 
     .story-driver {
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 10px 13px;
       align-items: center;
       margin: 0 18px 10px;
@@ -999,7 +999,6 @@
       background: color-mix(in srgb, #7667c6 5%, var(--panel));
     }
 
-    .story-play,
     .story-nav {
       min-height: 32px;
       border: 1px solid #a9a2ce;
@@ -1010,15 +1009,6 @@
       font: 750 10px/1 var(--mono);
     }
 
-    .story-play {
-      min-width: 92px;
-      padding: 7px 10px;
-      border-color: #7667c6;
-      background: #7667c6;
-      color: white;
-    }
-
-    .story-play:hover,
     .story-nav:hover:not(:disabled) {
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(82, 69, 146, 0.14);
@@ -2287,15 +2277,6 @@
         grid-template-columns: 1fr;
       }
 
-      .story-driver {
-        grid-template-columns: 1fr auto;
-      }
-
-      .story-play {
-        grid-column: 1 / -1;
-        width: 100%;
-      }
-
       .control-grid {
         grid-template-columns: 54px minmax(0, 1fr);
       }
@@ -3172,7 +3153,7 @@
     "Same run() frame, boundary ports, child Blocks, and messy starting geometry in every hero",
     "Five frozen weighted criteria sum to 100; every score includes evidence and confidence",
     "Five hard gates are evaluated separately; the literal compound direction visibly fails two",
-    "Every hero has a direct before/result toggle and a guided two-step story over those same states",
+    "Every hero has a direct before/result toggle and a manual two-step walkthrough over those same states",
     "Every direction includes an architecture trace, concrete commit boundary, and failure policy",
     "The recommended direction is supported by an isolated live elkjs 0.12.0 probe, not only a drawing",
     "Pick, shortlist, reject, note, splice, copy, and download remain available in the gallery",
@@ -3227,7 +3208,6 @@
       const byId = (id) => document.getElementById(id);
       const variantGrid = byId("variant-grid");
       const toast = byId("toast");
-      const storyTimers = new Map();
 
       document.title = `${project.title} · Babble & Prune`;
       byId("kicker").textContent = project.kicker || "Babble & Prune";
@@ -3250,7 +3230,7 @@
       renderAiPrune();
       variantGrid.innerHTML = variants.map((variant, index) => variantMarkup(variant, index)).join("");
       variantGrid.querySelectorAll(".variant-card").forEach((card) => {
-        setStoryStep(card, 0, { stopPlayback: false });
+        setStoryStep(card, 0);
       });
       byId("global-synthesis").value = state.synthesis;
       setLayout(state.layout || "grid");
@@ -3457,10 +3437,9 @@
             aria-label="Show story step ${stepIndex + 1}: ${escapeHtml(step.label)}">Step ${stepIndex + 1}</button>
         `).join("");
         const storyDriver = storySteps.length ? `
-          <div class="story-driver" data-story-driver aria-label="Guided click-through for ${escapeHtml(variant.name)}">
-            <button type="button" class="story-play" data-story-action="play">▶ Play story</button>
+          <div class="story-driver" data-story-driver aria-label="Manual walkthrough for ${escapeHtml(variant.name)}">
             <div class="story-copy" aria-live="polite">
-              <small><span data-story-position>Step 1 of ${storySteps.length}</span> · ${escapeHtml(variant.story.title || "Guided story")}</small>
+              <small><span data-story-position>Step 1 of ${storySteps.length}</span> · ${escapeHtml(variant.story.title || "Manual walkthrough")}</small>
               <b data-story-label>${escapeHtml(storySteps[0]?.label || "Start")}</b>
               <p data-story-caption>${escapeHtml(storySteps[0]?.caption || "")}</p>
             </div>
@@ -3526,33 +3505,14 @@
         return variants.find((variant) => variant.id === card?.dataset.variant);
       }
 
-      function stopStory(card) {
-        if (!card) return;
-        const timer = storyTimers.get(card.dataset.variant);
-        if (timer) clearTimeout(timer);
-        storyTimers.delete(card.dataset.variant);
-        card.classList.remove("is-story-playing");
-        const playButton = card.querySelector('[data-story-action="play"]');
-        const story = variantForCard(card)?.story;
-        if (!playButton || !story?.steps?.length) return;
-        const index = Number(card.dataset.storyIndex || 0);
-        playButton.textContent = index >= story.steps.length - 1 ? "↻ Replay story" : "▶ Play story";
-      }
-
-      function setStoryStep(card, requestedIndex, options = {}) {
-        const { stopPlayback = true } = options;
+      function setStoryStep(card, requestedIndex) {
         const story = variantForCard(card)?.story;
         if (!card || !story?.steps?.length) return;
-        if (stopPlayback) stopStory(card);
 
         const index = Math.max(0, Math.min(Number(requestedIndex) || 0, story.steps.length - 1));
         const step = story.steps[index];
         const prototype = card.querySelector(".prototype");
         card.dataset.storyIndex = String(index);
-        if (!storyTimers.has(card.dataset.variant)) {
-          card.querySelector('[data-story-action="play"]').textContent =
-            index >= story.steps.length - 1 ? "↻ Replay story" : "▶ Play story";
-        }
         prototype.dataset.storyState = step.state;
         prototype.classList.toggle("is-alt", step.state === "alt");
 
@@ -3577,34 +3537,6 @@
             target.classList.add("story-target");
           }
         }
-      }
-
-      function playStory(card) {
-        const story = variantForCard(card)?.story;
-        if (!card || !story?.steps?.length) return;
-        if (storyTimers.has(card.dataset.variant)) {
-          stopStory(card);
-          return;
-        }
-
-        let index = Number(card.dataset.storyIndex || 0);
-        if (index >= story.steps.length - 1) {
-          index = 0;
-          setStoryStep(card, index, { stopPlayback: false });
-        }
-        card.classList.add("is-story-playing");
-        card.querySelector('[data-story-action="play"]').textContent = "Ⅱ Pause";
-
-        const advance = () => {
-          const current = Number(card.dataset.storyIndex || 0);
-          if (current >= story.steps.length - 1) {
-            stopStory(card);
-            return;
-          }
-          setStoryStep(card, current + 1, { stopPlayback: false });
-          storyTimers.set(card.dataset.variant, setTimeout(advance, 1400));
-        };
-        storyTimers.set(card.dataset.variant, setTimeout(advance, 950));
       }
 
       function saveState() {
@@ -3874,7 +3806,6 @@
           const card = storyControl.closest(".variant-card");
           const action = storyControl.dataset.storyAction;
           const index = Number(card.dataset.storyIndex || 0);
-          if (action === "play") playStory(card);
           if (action === "back") setStoryStep(card, index - 1);
           if (action === "next") setStoryStep(card, index + 1);
           if (action === "jump") setStoryStep(card, Number(storyControl.dataset.storyIndex));
@@ -3906,7 +3837,6 @@
           if (matchingIndex >= 0) {
             setStoryStep(card, matchingIndex);
           } else {
-            stopStory(card);
             prototype.classList.toggle("is-alt", nextState === "alt");
             prototype.dataset.storyState = nextState;
             demoButton.textContent = nextState === "alt" ? demoButton.dataset.altLabel : demoButton.dataset.baseLabel;
@@ -3982,8 +3912,7 @@
       byId("download-prune").addEventListener("click", downloadMarkdown);
       byId("reset-prune").addEventListener("click", () => {
         variantGrid.querySelectorAll(".variant-card").forEach((card) => {
-          stopStory(card);
-          setStoryStep(card, 0, { stopPlayback: false });
+          setStoryStep(card, 0);
         });
         state = blankState();
         byId("global-synthesis").value = "";

@@ -93,6 +93,7 @@ import {
 	DELAY_DOT_GAP_PX,
 	DELAY_DOT_PX,
 	DELAY_PILL_HEIGHT,
+	cablePillLabel,
 	delayPillLabel,
 	delayPillWidth,
 	fractionNearest,
@@ -465,9 +466,14 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			{ id: 'end', type: 'vertex', index: 'a1' as IndexKey, x: end.x, y: end.y },
 		]
 
-		// The z⁻¹ pill is a thing you can see, so it is always a thing you can
-		// drag: it rides the cable at `pillPosition` and slides along it.
-		if (connection.props.temporal === 'delayed') {
+		// A pill you can see is a pill you can drag — whichever it is. This used
+		// to be gated on `delayed` alone, which is how `mut` came out visible but
+		// stuck: the two marks are one object that differs only in its text.
+		if (cablePillLabel({
+			temporal: connection.props.temporal,
+			delayValue: connection.props.delayValue,
+			effect: isEffectCable(this.editor, connection),
+		}) !== null) {
 			const pill = pointAtFraction(
 				getConnectionRenderPoints(this.editor, connection),
 				clampPillPosition(connection.props.pillPosition),
@@ -812,11 +818,16 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			const length = polylineLength(points)
 			return <DataCablePath path={path} length={length} temporal={connection.props.temporal} stroke="#475569" />
 		}
+		const exportPillLabel = cablePillLabel({
+			temporal: connection.props.temporal,
+			delayValue: connection.props.delayValue,
+			effect: isEffectCable(this.editor, connection),
+		})
 		const pill = delayPillGeometry(this.editor, connection)
 		return (
 			<g>
 				<DelayedCablePaths path={path} pill={pill} solidBeforePill={cablePresentation.get().solidBeforePill} stroke="#475569" />
-				<DelayPill pill={pill} label={delayPillLabel(connection.props.delayValue)} stroke="#475569" fill="#ffffff" ink="#1d2230" />
+				<DelayPill pill={pill} label={exportPillLabel ?? delayPillLabel(connection.props.delayValue)} stroke="#475569" fill="#ffffff" ink="#1d2230" />
 			</g>
 		)
 	}
@@ -886,6 +897,14 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		cableMark,
 	)
 	const diffDash = diffCableDashArray(diffState)
+	// One pill, wherever it comes from. `pill` above is the delayed case, which
+	// also owns the split path; this is the same object for a cable that is only
+	// an effect. Both ride `pillPosition` and both are draggable.
+	const pillLabel = cablePillLabel({
+		temporal: connection.props.temporal,
+		delayValue: connection.props.delayValue,
+		effect,
+	})
 	const effectPill = useValue(
 		'effect pill geometry',
 		() => (effect && !delayed ? delayPillGeometry(editor, connection) : null),
@@ -988,7 +1007,7 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 				{effectPill && !hiddenTunnel ? (
 					<DelayPill
 						pill={effectPill}
-						label={EFFECT_PILL_LABEL}
+						label={pillLabel ?? EFFECT_PILL_LABEL}
 						stroke={EFFECT_CABLE_INK}
 						fill="var(--ss-surface, #ffffff)"
 						ink={EFFECT_CABLE_INK}
@@ -1038,7 +1057,7 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 			{tunnelMouths ? <TunnelVias tunnel={tunnelMouths} stroke={stroke} fill="var(--ss-surface, #ffffff)" /> : null}
 			<DelayPill
 				pill={pill}
-				label={delayPillLabel(connection.props.delayValue)}
+				label={pillLabel ?? delayPillLabel(connection.props.delayValue)}
 				stroke={stroke}
 				fill="var(--ss-surface, #ffffff)"
 				ink="var(--ss-text, #1d2230)"

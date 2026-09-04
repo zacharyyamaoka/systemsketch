@@ -303,8 +303,24 @@
         "routing": "elbow",
         "curve": null,
         "pins": [],
-        "elbowRoute": null,
-        "routeMode": "automatic",
+        "elbowRoute": {
+          "startAxis": "y",
+          "corners": [
+            {
+              "tx": 0,
+              "ox": 0,
+              "ty": 0.5,
+              "oy": -5.891157627495147
+            },
+            {
+              "tx": 1,
+              "ox": 0,
+              "ty": 0.5,
+              "oy": -5.891157627495147
+            }
+          ]
+        },
+        "routeMode": "authored",
         "temporal": "data",
         "delayValue": "",
         "pillPosition": 0.5
@@ -358,9 +374,9 @@
       "typeName": "shape"
     },
     {
-      "x": 47.00854700854701,
-      "y": -78.9957264957265,
-      "z": 0.9551020408163267,
+      "x": -511.73296317425684,
+      "y": 216.84412736527463,
+      "z": 0.8301912159239959,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -387,8 +403,24 @@
         "routing": "elbow",
         "curve": null,
         "pins": [],
-        "elbowRoute": null,
-        "routeMode": "automatic",
+        "elbowRoute": {
+          "startAxis": "y",
+          "corners": [
+            {
+              "tx": 0,
+              "ox": 0,
+              "ty": 0.5,
+              "oy": 16.93716076757579
+            },
+            {
+              "tx": 1,
+              "ox": 0,
+              "ty": 0.5,
+              "oy": 16.93716076757579
+            }
+          ]
+        },
+        "routeMode": "authored",
         "temporal": "data",
         "delayValue": "",
         "pillPosition": 0.5
@@ -463,8 +495,24 @@
         "routing": "elbow",
         "curve": null,
         "pins": [],
-        "elbowRoute": null,
-        "routeMode": "automatic",
+        "elbowRoute": {
+          "startAxis": "y",
+          "corners": [
+            {
+              "tx": 0,
+              "ox": 0,
+              "ty": 0.5,
+              "oy": -24.301099936370633
+            },
+            {
+              "tx": 1,
+              "ox": 0,
+              "ty": 0.5,
+              "oy": -24.301099936370633
+            }
+          ]
+        },
+        "routeMode": "authored",
         "temporal": "data",
         "delayValue": "",
         "pillPosition": 0.5
@@ -494,8 +542,24 @@
         "routing": "elbow",
         "curve": null,
         "pins": [],
-        "elbowRoute": null,
-        "routeMode": "automatic",
+        "elbowRoute": {
+          "startAxis": "y",
+          "corners": [
+            {
+              "tx": 0,
+              "ox": 0,
+              "ty": 0.5,
+              "oy": 31.665070567461612
+            },
+            {
+              "tx": 1,
+              "ox": 0,
+              "ty": 0.5,
+              "oy": 31.665070567461612
+            }
+          ]
+        },
+        "routeMode": "authored",
         "temporal": "data",
         "delayValue": "",
         "pillPosition": 0.5
@@ -504,8 +568,8 @@
       "typeName": "shape"
     },
     {
-      "x": 250,
-      "y": 270,
+      "x": 122,
+      "y": 177,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -621,8 +685,10 @@
     {
       "editingShapeId": null,
       "croppingShapeId": null,
-      "selectedShapeIds": [],
-      "hoveredShapeId": null,
+      "selectedShapeIds": [
+        "shape:encode"
+      ],
+      "hoveredShapeId": "shape:encode",
       "erasingShapeIds": [],
       "hintingShapeIds": [],
       "focusedGroupId": null,
@@ -632,8 +698,8 @@
       "typeName": "instance_page_state"
     },
     {
-      "x": 650,
-      "y": 150,
+      "x": 487.69804933865066,
+      "y": 122.7956201693662,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -778,6 +844,14 @@
       "typeName": "binding"
     },
     {
+      "name": "",
+      "color": "#55B467",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:uaPvpuPq7oae6VUDA6z6u",
+      "typeName": "user"
+    },
+    {
       "meta": {},
       "id": "binding:connection-1",
       "type": "connection",
@@ -863,8 +937,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 2000,
-        "h": 1000
+        "w": 1046.4285888671875,
+        "h": 1183.5714111328125
       },
       "insets": [
         false,
@@ -879,9 +953,9 @@
       "isChatting": false,
       "highlightedUserIds": [],
       "isFocused": true,
-      "devicePixelRatio": 1,
+      "devicePixelRatio": 1.399999976158142,
       "isCoarsePointer": false,
-      "isHoveringCanvas": null,
+      "isHoveringCanvas": true,
       "openMenus": [],
       "isChangingStyle": false,
       "isReadonly": false,

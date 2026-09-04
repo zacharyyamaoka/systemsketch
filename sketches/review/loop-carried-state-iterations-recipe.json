@@ -1,0 +1,4397 @@
+{
+ "feature": "Loop carried state \u00b7 ten iterations",
+ "viewport": {
+  "width": 2600,
+  "height": 1900
+ },
+ "pages": [
+  {
+   "id": "review",
+   "name": "Review"
+  }
+ ],
+ "shapes": [
+  {
+   "id": "a-card",
+   "type": "geo",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 620,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "a-title",
+   "type": "text",
+   "x": 26,
+   "y": 18,
+   "text": "A \u00b7 As drawn",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "a-code",
+   "type": "text",
+   "x": 26,
+   "y": 58,
+   "text": "for other in others:\n    fused = merge(pose, other)\n    pose  = smooth(fused)",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "a-region",
+   "type": "geo",
+   "x": 360,
+   "y": 170,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 380,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "a-run",
+   "type": "block",
+   "x": 30,
+   "y": 210,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "others",
+      "type": "Poses",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "a-estimate",
+   "type": "block",
+   "x": 30,
+   "y": 400,
+   "props": {
+    "title": "estimate()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "a-merge",
+   "type": "block",
+   "x": 470,
+   "y": 250,
+   "props": {
+    "title": "merge()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 340,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "other",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "a-smooth",
+   "type": "block",
+   "x": 950,
+   "y": 290,
+   "props": {
+    "title": "smooth()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "a-out",
+   "type": "block",
+   "x": 1640,
+   "y": 300,
+   "props": {
+    "title": "encode()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "a-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "a-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "a-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "a-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "delayed",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "a-c5",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "a-one",
+   "type": "text",
+   "x": 26,
+   "y": 566,
+   "text": "Your drawing with the geometry tightened \u2014 the control everything else is measured against.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "a-cost",
+   "type": "text",
+   "x": 26,
+   "y": 592,
+   "text": "cost \u00b7 The item cable crosses the seed cable at merge.pose's row. It is small, it is in your own drawing, and it is the first thing a reader's eye trips on \u2014",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "b-card",
+   "type": "geo",
+   "x": 0,
+   "y": 700,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 620,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "b-title",
+   "type": "text",
+   "x": 26,
+   "y": 718,
+   "text": "B \u00b7 Split-face wall port",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "b-code",
+   "type": "text",
+   "x": 26,
+   "y": 758,
+   "text": "for other in others:\n    fused = merge(pose, other)\n    pose  = smooth(fused)",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "b-region",
+   "type": "geo",
+   "x": 360,
+   "y": 870,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 380,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "b-run",
+   "type": "block",
+   "x": 30,
+   "y": 910,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "others",
+      "type": "Poses",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "b-estimate",
+   "type": "block",
+   "x": 30,
+   "y": 1100,
+   "props": {
+    "title": "estimate()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "b-merge",
+   "type": "block",
+   "x": 470,
+   "y": 950,
+   "props": {
+    "title": "merge()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 340,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "other",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "b-smooth",
+   "type": "block",
+   "x": 950,
+   "y": 990,
+   "props": {
+    "title": "smooth()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "b-out",
+   "type": "block",
+   "x": 1640,
+   "y": 1000,
+   "props": {
+    "title": "encode()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "b-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "b-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "b-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "b-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "delayed",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "b-c5",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "b-one",
+   "type": "text",
+   "x": 26,
+   "y": 1266,
+   "text": "One dot, painted as its two faces: filled outside, hollow inside, with the type change written across it.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "b-cost",
+   "type": "text",
+   "x": 26,
+   "y": 1292,
+   "text": "cost \u00b7 A 14px dot is doing load-bearing work. At board zoom the half-fill is legible; on an exported PNG at 50% it is not, and the two type words are then ca",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "c-card",
+   "type": "geo",
+   "x": 0,
+   "y": 1400,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 620,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "c-title",
+   "type": "text",
+   "x": 26,
+   "y": 1418,
+   "text": "C \u00b7 Row-aligned item",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "c-code",
+   "type": "text",
+   "x": 26,
+   "y": 1458,
+   "text": "for other in others:\n    fused = merge(pose, other)\n    pose  = smooth(fused)",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "c-region",
+   "type": "geo",
+   "x": 360,
+   "y": 1570,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 380,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "c-run",
+   "type": "block",
+   "x": 30,
+   "y": 1610,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "others",
+      "type": "Poses",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "c-estimate",
+   "type": "block",
+   "x": 30,
+   "y": 1800,
+   "props": {
+    "title": "estimate()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "c-merge",
+   "type": "block",
+   "x": 470,
+   "y": 1650,
+   "props": {
+    "title": "merge()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 340,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "other",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "c-smooth",
+   "type": "block",
+   "x": 950,
+   "y": 1690,
+   "props": {
+    "title": "smooth()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "c-out",
+   "type": "block",
+   "x": 1640,
+   "y": 1700,
+   "props": {
+    "title": "encode()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "c-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "c-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "c-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "c-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "delayed",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "c-c5",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "c-one",
+   "type": "text",
+   "x": 26,
+   "y": 1966,
+   "text": "The boundary port sits at the row it feeds, so the item cable is one short horizontal run and nothing crosses.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "c-cost",
+   "type": "text",
+   "x": 26,
+   "y": 1992,
+   "text": "cost \u00b7 The port's position is now a consequence of the body's layout, so moving merge() moves the wall port \u2014 or breaks the alignment. It also gives up the h",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "d-card",
+   "type": "geo",
+   "x": 0,
+   "y": 2100,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 620,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "d-title",
+   "type": "text",
+   "x": 26,
+   "y": 2118,
+   "text": "D \u00b7 Seed named on the back cable",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "d-code",
+   "type": "text",
+   "x": 26,
+   "y": 2158,
+   "text": "for other in others:\n    fused = merge(pose, other)\n    pose  = smooth(fused)",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "d-region",
+   "type": "geo",
+   "x": 360,
+   "y": 2270,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 380,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "d-run",
+   "type": "block",
+   "x": 30,
+   "y": 2310,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "others",
+      "type": "Poses",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "d-estimate",
+   "type": "block",
+   "x": 30,
+   "y": 2500,
+   "props": {
+    "title": "estimate()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "d-merge",
+   "type": "block",
+   "x": 470,
+   "y": 2350,
+   "props": {
+    "title": "merge()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 340,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "other",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "d-smooth",
+   "type": "block",
+   "x": 950,
+   "y": 2390,
+   "props": {
+    "title": "smooth()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "d-out",
+   "type": "block",
+   "x": 1640,
+   "y": 2400,
+   "props": {
+    "title": "encode()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "d-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "d-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "d-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "d-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "delayed",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "d-c5",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "d-one",
+   "type": "text",
+   "x": 26,
+   "y": 2666,
+   "text": "The z\u207b\u00b9 chip states both facts a delay has: one step late, and what arrives first.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "d-cost",
+   "type": "text",
+   "x": 26,
+   "y": 2692,
+   "text": "cost \u00b7 Redundant on this board, because the seed cable is right there and comes from a block called estimate(). It earns its place only when the seed is far ",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "e-card",
+   "type": "geo",
+   "x": 0,
+   "y": 2800,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 620,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "e-title",
+   "type": "text",
+   "x": 26,
+   "y": 2818,
+   "text": "E \u00b7 The zero-iterations cable",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "e-code",
+   "type": "text",
+   "x": 26,
+   "y": 2858,
+   "text": "for other in others:\n    fused = merge(pose, other)\n    pose  = smooth(fused)",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "e-region",
+   "type": "geo",
+   "x": 360,
+   "y": 2970,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 380,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "e-run",
+   "type": "block",
+   "x": 30,
+   "y": 3010,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "others",
+      "type": "Poses",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "e-estimate",
+   "type": "block",
+   "x": 30,
+   "y": 3200,
+   "props": {
+    "title": "estimate()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "e-merge",
+   "type": "block",
+   "x": 470,
+   "y": 3050,
+   "props": {
+    "title": "merge()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 340,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "other",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "e-smooth",
+   "type": "block",
+   "x": 950,
+   "y": 3090,
+   "props": {
+    "title": "smooth()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "e-out",
+   "type": "block",
+   "x": 1640,
+   "y": 3100,
+   "props": {
+    "title": "encode()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "e-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "e-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "e-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "e-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "delayed",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "e-c5",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "e-one",
+   "type": "text",
+   "x": 26,
+   "y": 3366,
+   "text": "Draws what the analyzer already derives: if the loop never runs, estimate()'s pose is what leaves.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "e-cost",
+   "type": "text",
+   "x": 26,
+   "y": 3392,
+   "text": "cost \u00b7 It doubles the number of long cables on the board for a case that is often impossible. Your own default was <em>always drawn</em>; this is what always",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "f-card",
+   "type": "geo",
+   "x": 0,
+   "y": 3500,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 620,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "f-title",
+   "type": "text",
+   "x": 26,
+   "y": 3518,
+   "text": "F \u00b7 Back cable on the floor",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "f-code",
+   "type": "text",
+   "x": 26,
+   "y": 3558,
+   "text": "for other in others:\n    fused = merge(pose, other)\n    pose  = smooth(fused)",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "f-region",
+   "type": "geo",
+   "x": 360,
+   "y": 3670,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 380,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "f-run",
+   "type": "block",
+   "x": 30,
+   "y": 3710,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "others",
+      "type": "Poses",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "f-estimate",
+   "type": "block",
+   "x": 30,
+   "y": 3900,
+   "props": {
+    "title": "estimate()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "f-merge",
+   "type": "block",
+   "x": 470,
+   "y": 3750,
+   "props": {
+    "title": "merge()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 340,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "other",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "f-smooth",
+   "type": "block",
+   "x": 950,
+   "y": 3790,
+   "props": {
+    "title": "smooth()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "f-out",
+   "type": "block",
+   "x": 1640,
+   "y": 3800,
+   "props": {
+    "title": "encode()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "f-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "f-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "f-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "f-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "delayed",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "f-c5",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "f-one",
+   "type": "text",
+   "x": 26,
+   "y": 4066,
+   "text": "The return is not a free cable \u2014 it rides the region's own bottom border.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "f-cost",
+   "type": "text",
+   "x": 26,
+   "y": 4092,
+   "text": "cost \u00b7 A border that carries data is a new idea in this grammar, and it collides with the footer strip. It also stops being a cable you can select, drag or r",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "g-card",
+   "type": "geo",
+   "x": 0,
+   "y": 4200,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 620,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "g-title",
+   "type": "text",
+   "x": 26,
+   "y": 4218,
+   "text": "G \u00b7 Tight stub",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "g-code",
+   "type": "text",
+   "x": 26,
+   "y": 4258,
+   "text": "for other in others:\n    fused = merge(pose, other)\n    pose  = smooth(fused)",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "g-region",
+   "type": "geo",
+   "x": 360,
+   "y": 4370,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 380,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "g-run",
+   "type": "block",
+   "x": 30,
+   "y": 4410,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "others",
+      "type": "Poses",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "g-estimate",
+   "type": "block",
+   "x": 30,
+   "y": 4600,
+   "props": {
+    "title": "estimate()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "g-merge",
+   "type": "block",
+   "x": 470,
+   "y": 4450,
+   "props": {
+    "title": "merge()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 340,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "other",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "g-smooth",
+   "type": "block",
+   "x": 950,
+   "y": 4490,
+   "props": {
+    "title": "smooth()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "g-out",
+   "type": "block",
+   "x": 1640,
+   "y": 4500,
+   "props": {
+    "title": "encode()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "g-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "g-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "g-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "g-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "delayed",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "g-c5",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "g-one",
+   "type": "text",
+   "x": 26,
+   "y": 4766,
+   "text": "The shortest possible return: out of the block, under it, and straight back in.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "g-cost",
+   "type": "text",
+   "x": 26,
+   "y": 4792,
+   "text": "cost \u00b7 It contradicts the routing rule you already chose (&ldquo;go to the end first, then loop back&rdquo;), and with two body blocks the stub has to reach ",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "h-card",
+   "type": "geo",
+   "x": 0,
+   "y": 4900,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 620,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "h-title",
+   "type": "text",
+   "x": 26,
+   "y": 4918,
+   "text": "H \u00b7 Weight change, no pill",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "h-code",
+   "type": "text",
+   "x": 26,
+   "y": 4958,
+   "text": "for other in others:\n    fused = merge(pose, other)\n    pose  = smooth(fused)",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "h-region",
+   "type": "geo",
+   "x": 360,
+   "y": 5070,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 380,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "h-run",
+   "type": "block",
+   "x": 30,
+   "y": 5110,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "others",
+      "type": "Poses",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "h-estimate",
+   "type": "block",
+   "x": 30,
+   "y": 5300,
+   "props": {
+    "title": "estimate()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "h-merge",
+   "type": "block",
+   "x": 470,
+   "y": 5150,
+   "props": {
+    "title": "merge()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 340,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "other",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "h-smooth",
+   "type": "block",
+   "x": 950,
+   "y": 5190,
+   "props": {
+    "title": "smooth()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "h-out",
+   "type": "block",
+   "x": 1640,
+   "y": 5200,
+   "props": {
+    "title": "encode()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "h-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "h-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "h-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "h-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "delayed",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "h-c5",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "h-one",
+   "type": "text",
+   "x": 26,
+   "y": 5466,
+   "text": "The cable outside is a doubled rail; it becomes a single rail at the wall. The pill is deleted.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "h-cost",
+   "type": "text",
+   "x": 26,
+   "y": 5492,
+   "text": "cost \u00b7 It says <em>many became one</em> but never says <em>one per turn</em>, and it cannot say <em>which</em> one. It also spends the line-weight axis, whic",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "i-card",
+   "type": "geo",
+   "x": 0,
+   "y": 5600,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 620,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "i-title",
+   "type": "text",
+   "x": 26,
+   "y": 5618,
+   "text": "I \u00b7 Binding pill",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "i-code",
+   "type": "text",
+   "x": 26,
+   "y": 5658,
+   "text": "for other in others:\n    fused = merge(pose, other)\n    pose  = smooth(fused)",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "i-region",
+   "type": "geo",
+   "x": 360,
+   "y": 5770,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 380,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "i-run",
+   "type": "block",
+   "x": 30,
+   "y": 5810,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "others",
+      "type": "Poses",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "i-estimate",
+   "type": "block",
+   "x": 30,
+   "y": 6000,
+   "props": {
+    "title": "estimate()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "i-merge",
+   "type": "block",
+   "x": 470,
+   "y": 5850,
+   "props": {
+    "title": "merge()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 340,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "other",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "i-smooth",
+   "type": "block",
+   "x": 950,
+   "y": 5890,
+   "props": {
+    "title": "smooth()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "i-out",
+   "type": "block",
+   "x": 1640,
+   "y": 5900,
+   "props": {
+    "title": "encode()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "i-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "i-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "i-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "i-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "delayed",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "i-c5",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "i-one",
+   "type": "text",
+   "x": 26,
+   "y": 6166,
+   "text": "The pill stops being an index and becomes the Python binding itself.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "i-cost",
+   "type": "text",
+   "x": 26,
+   "y": 6192,
+   "text": "cost \u00b7 It is a wide pill on a short cable, and the whole point of a dataflow drawing is that the wire already says where the value came from. Two carried nam",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "j-card",
+   "type": "geo",
+   "x": 0,
+   "y": 6300,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 620,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "j-title",
+   "type": "text",
+   "x": 26,
+   "y": 6318,
+   "text": "J \u00b7 Live values",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "j-code",
+   "type": "text",
+   "x": 26,
+   "y": 6358,
+   "text": "for other in others:\n    fused = merge(pose, other)\n    pose  = smooth(fused)",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "j-region",
+   "type": "geo",
+   "x": 360,
+   "y": 6470,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 380,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "j-run",
+   "type": "block",
+   "x": 30,
+   "y": 6510,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "others",
+      "type": "Poses",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "j-estimate",
+   "type": "block",
+   "x": 30,
+   "y": 6700,
+   "props": {
+    "title": "estimate()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 300,
+    "h": 154,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "j-merge",
+   "type": "block",
+   "x": 470,
+   "y": 6550,
+   "props": {
+    "title": "merge()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 340,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "other",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "j-smooth",
+   "type": "block",
+   "x": 950,
+   "y": 6590,
+   "props": {
+    "title": "smooth()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "j-out",
+   "type": "block",
+   "x": 1640,
+   "y": 6600,
+   "props": {
+    "title": "encode()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "j-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "j-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "j-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "j-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "delayed",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "j-c5",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "j-one",
+   "type": "text",
+   "x": 26,
+   "y": 6866,
+   "text": "Every mark carries the value it actually has this turn.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "j-cost",
+   "type": "text",
+   "x": 26,
+   "y": 6892,
+   "text": "cost \u00b7 It only exists while something is running or recorded. On a static diagram the same marks have to fall back to i and z\u207b\u00b9, so this is a <em>state</em> ",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  }
+ ],
+ "bindings": [
+  {
+   "type": "connection",
+   "fromId": "a-c1",
+   "toId": "a-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "a-c1",
+   "toId": "a-merge",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "a-c2",
+   "toId": "a-estimate",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "a-c2",
+   "toId": "a-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "a-c3",
+   "toId": "a-merge",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "a-c3",
+   "toId": "a-smooth",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "a-c4",
+   "toId": "a-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "a-c4",
+   "toId": "a-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "a-c5",
+   "toId": "a-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "a-c5",
+   "toId": "a-out",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "b-c1",
+   "toId": "b-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "b-c1",
+   "toId": "b-merge",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "b-c2",
+   "toId": "b-estimate",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "b-c2",
+   "toId": "b-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "b-c3",
+   "toId": "b-merge",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "b-c3",
+   "toId": "b-smooth",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "b-c4",
+   "toId": "b-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "b-c4",
+   "toId": "b-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "b-c5",
+   "toId": "b-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "b-c5",
+   "toId": "b-out",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-c1",
+   "toId": "c-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-c1",
+   "toId": "c-merge",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-c2",
+   "toId": "c-estimate",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-c2",
+   "toId": "c-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-c3",
+   "toId": "c-merge",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-c3",
+   "toId": "c-smooth",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-c4",
+   "toId": "c-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-c4",
+   "toId": "c-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-c5",
+   "toId": "c-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "c-c5",
+   "toId": "c-out",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "d-c1",
+   "toId": "d-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "d-c1",
+   "toId": "d-merge",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "d-c2",
+   "toId": "d-estimate",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "d-c2",
+   "toId": "d-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "d-c3",
+   "toId": "d-merge",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "d-c3",
+   "toId": "d-smooth",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "d-c4",
+   "toId": "d-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "d-c4",
+   "toId": "d-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "d-c5",
+   "toId": "d-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "d-c5",
+   "toId": "d-out",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "e-c1",
+   "toId": "e-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "e-c1",
+   "toId": "e-merge",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "e-c2",
+   "toId": "e-estimate",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "e-c2",
+   "toId": "e-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "e-c3",
+   "toId": "e-merge",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "e-c3",
+   "toId": "e-smooth",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "e-c4",
+   "toId": "e-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "e-c4",
+   "toId": "e-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "e-c5",
+   "toId": "e-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "e-c5",
+   "toId": "e-out",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "f-c1",
+   "toId": "f-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "f-c1",
+   "toId": "f-merge",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "f-c2",
+   "toId": "f-estimate",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "f-c2",
+   "toId": "f-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "f-c3",
+   "toId": "f-merge",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "f-c3",
+   "toId": "f-smooth",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "f-c4",
+   "toId": "f-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "f-c4",
+   "toId": "f-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "f-c5",
+   "toId": "f-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "f-c5",
+   "toId": "f-out",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "g-c1",
+   "toId": "g-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "g-c1",
+   "toId": "g-merge",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "g-c2",
+   "toId": "g-estimate",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "g-c2",
+   "toId": "g-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "g-c3",
+   "toId": "g-merge",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "g-c3",
+   "toId": "g-smooth",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "g-c4",
+   "toId": "g-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "g-c4",
+   "toId": "g-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "g-c5",
+   "toId": "g-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "g-c5",
+   "toId": "g-out",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "h-c1",
+   "toId": "h-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "h-c1",
+   "toId": "h-merge",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "h-c2",
+   "toId": "h-estimate",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "h-c2",
+   "toId": "h-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "h-c3",
+   "toId": "h-merge",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "h-c3",
+   "toId": "h-smooth",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "h-c4",
+   "toId": "h-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "h-c4",
+   "toId": "h-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "h-c5",
+   "toId": "h-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "h-c5",
+   "toId": "h-out",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "i-c1",
+   "toId": "i-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "i-c1",
+   "toId": "i-merge",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "i-c2",
+   "toId": "i-estimate",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "i-c2",
+   "toId": "i-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "i-c3",
+   "toId": "i-merge",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "i-c3",
+   "toId": "i-smooth",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "i-c4",
+   "toId": "i-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "i-c4",
+   "toId": "i-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "i-c5",
+   "toId": "i-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "i-c5",
+   "toId": "i-out",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "j-c1",
+   "toId": "j-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "j-c1",
+   "toId": "j-merge",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "j-c2",
+   "toId": "j-estimate",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "j-c2",
+   "toId": "j-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "j-c3",
+   "toId": "j-merge",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "j-c3",
+   "toId": "j-smooth",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "j-c4",
+   "toId": "j-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "j-c4",
+   "toId": "j-merge",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "j-c5",
+   "toId": "j-smooth",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "j-c5",
+   "toId": "j-out",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  }
+ ],
+ "callouts": [
+  {
+   "id": "step-1",
+   "kind": "step",
+   "text": "1 \u00b7 Ten cards, top to bottom. Same Blocks and same cables every time \u2014 only the boundary port, the routing and the marks change.",
+   "x": -520,
+   "y": 160,
+   "w": 440,
+   "h": 180,
+   "target": {
+    "shapeId": "a-merge",
+    "anchor": "left"
+   }
+  },
+  {
+   "id": "step-2",
+   "kind": "step",
+   "text": "2 \u00b7 Drag any Block. Each card's dotted back cable is a real connection carrying temporal: delayed, so it reflows and keeps its z\u207b\u00b9 pill.",
+   "x": -520,
+   "y": 1560,
+   "w": 440,
+   "h": 180,
+   "target": {
+    "shapeId": "c-merge",
+    "anchor": "left"
+   }
+  },
+  {
+   "id": "step-3",
+   "kind": "step",
+   "text": "3 \u00b7 The body is merge() then smooth() because the editor refuses a cable from a Block to itself \u2014 a one-Block accumulator has no real back cable yet.",
+   "x": -520,
+   "y": 6460,
+   "w": 440,
+   "h": 200,
+   "target": {
+    "shapeId": "j-merge",
+    "anchor": "left"
+   }
+  },
+  {
+   "id": "pass",
+   "kind": "pass",
+   "text": "PASS WHEN one card reads correctly without the caption: which value is the collection, which is the element, and which arrives next turn.",
+   "x": 2140,
+   "y": 160,
+   "w": 440,
+   "h": 180
+  }
+ ]
+}

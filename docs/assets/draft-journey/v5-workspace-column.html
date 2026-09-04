@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>V5 Workspace column · Draft journey</title>
+  <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+  <div class="ss-page">
+    <div class="ss-stage">
+      <div class="ss-app has-rail" data-app data-variant="rail">
+        <aside class="ss-rail">
+          <h2>THIS BOARD</h2>
+          <button class="item is-on" data-show="main create return merged" type="button" data-to="return">
+            <span>●</span><span><b>Main</b><small data-show="main create return">v0.7 · 2 Blocks</small><small data-show="merged">v0.8 · Planner v2</small></span>
+          </button>
+          <button class="item" data-show="edit resume review" type="button" data-to="return">
+            <span>●</span><span><b>Main</b><small>v0.7 · unchanged</small></span>
+          </button>
+          <div class="sec">DRAFTS</div>
+          <button class="item" data-show="main" type="button" data-to="create">
+            <span>＋</span><span><b>New draft</b><small>from Main</small></span>
+          </button>
+          <button class="item is-draft" data-show="create" type="button">
+            <span>⑂</span><span><b>try a second planner</b><small>naming…</small></span>
+          </button>
+          <button class="item is-draft" data-show="return" type="button" data-to="resume">
+            <span>⑂</span><span><b>try a second planner</b><small>2 changes · based on Main</small></span>
+          </button>
+          <button class="item is-draft is-on" data-show="edit resume review" type="button">
+            <span>⑂</span><span><b>try a second planner</b><small>editing · 2 changes</small></span>
+          </button>
+          <div class="sec" data-show="edit resume review">CHANGES</div>
+          <div class="item" data-show="edit resume review" style="cursor:default">
+            <span>✎</span><span><b>Planner</b><small>→ Planner v2</small></span>
+          </div>
+          <div class="item" data-show="edit resume review" style="cursor:default">
+            <span>＋</span><span><b>Safety check</b><small>new Block</small></span>
+          </div>
+          <button class="ss-btn primary" data-show="edit resume" type="button" data-to="review" style="width:calc(100% - 8px);margin:10px 4px 0">Review & Merge</button>
+          <button class="ss-btn primary" data-show="review" type="button" data-to="merged" style="width:calc(100% - 8px);margin:10px 4px 0">Keep & Merge</button>
+          <div class="sec" data-show="merged">VERSIONS</div>
+          <button class="item" data-show="merged" type="button">
+            <span>◇</span><span><b>v0.8</b><small>before try a second planner</small></span>
+          </button>
+        </aside>
+        <div class="ss-review" data-show="review">
+          <div class="stripe"></div>
+          <span class="pos">Change 1 of 2</span>
+          <button class="step" type="button" disabled>‹</button>
+          <button class="step" type="button">›</button>
+          <span class="kind">Updated · Planner</span>
+          <span class="grow"></span>
+          <button class="discard" type="button">Discard</button>
+          <button class="keep" type="button" data-to="merged">Keep</button>
+        </div>
+        <div class="ss-canvas">
+          <div class="ss-board" data-show="main create return">
+            <div class="ss-node" style="left:14%;top:38%"><span class="port out"></span><b>Planner</b><small>route · depth 1</small></div>
+            <div class="ss-node" style="left:56%;top:38%"><span class="port in"></span><b>Controller</b><small>command</small></div>
+            <span class="ss-wire" style="left:26%;top:48%;width:28%"></span>
+          </div>
+          <div class="ss-board" data-show="edit resume review merged">
+            <div class="ss-node is-changed" style="left:8%;top:30%"><span class="port out"></span><b>Planner v2</b><small>route · renamed</small></div>
+            <div class="ss-node is-added" style="left:36%;top:52%"><span class="port in"></span><span class="port out"></span><b>Safety check</b><small>new Block</small></div>
+            <div class="ss-node" style="left:64%;top:30%"><span class="port in"></span><b>Controller</b><small>command</small></div>
+            <span class="ss-wire is-new" style="left:20%;top:41%;width:18%;transform:rotate(28deg)"></span>
+            <span class="ss-wire is-new" style="left:48%;top:48%;width:18%;transform:rotate(-26deg)"></span>
+          </div>
+        </div>
+        <div class="ss-shell ss-shell-left">
+          <button class="ss-icon" type="button" aria-label="Menu"><svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h12"/></svg></button>
+          <div class="ss-file"><em>◫</em>robot-arm</div>
+        </div>
+        <div class="ss-shell ss-shell-right">
+          <button class="ss-icon" type="button" aria-label="Comments"><svg viewBox="0 0 20 20"><path d="M4 5h12v8H8l-4 3V5z"/></svg></button>
+          <span class="ss-avatar">Z</span>
+          <button class="ss-share" type="button">Share</button>
+        </div>
+        <div class="ss-name" data-show="create">
+          <label>NEW DRAFT</label>
+          <input value="try a second planner" readonly>
+          <div class="row">
+            <button class="ss-btn" type="button" data-to="main">Cancel</button>
+            <button class="ss-btn primary" type="button" data-to="edit">Create</button>
+          </div>
+        </div>
+        <div class="ss-tools">
+          <button class="is-on" type="button" aria-label="Select">➤</button>
+          <button type="button" aria-label="Hand">✋</button>
+          <button type="button" aria-label="Block">▢</button>
+          <button type="button" aria-label="Text">T</button>
+        </div>
+        <div class="ss-zoom">100%</div>
+      </div>
+      <div class="ss-walk" data-walk>
+        <button type="button" data-back>← Back</button>
+        <div class="chips" data-chips></div>
+        <button type="button" data-next>Next →</button>
+        <div class="cap" data-cap></div>
+      </div>
+    </div>
+  </div>
+  <script src="journey.js"></script>
+</body>
+</html>

@@ -46,6 +46,7 @@
       "com.tldraw.shape.line": 5,
       "com.tldraw.shape.block": 6,
       "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.loop": 0,
       "com.tldraw.shape.branch-arm": 0,
       "com.tldraw.shape.connection": 6,
       "com.tldraw.binding.arrow": 1,
@@ -343,16 +344,16 @@
       "typeName": "shape"
     },
     {
-      "x": 162.79687211119193,
-      "y": 301.9665013551513,
+      "x": 147.66761325849083,
+      "y": 336.6262642220734,
       "z": 1,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
     },
     {
-      "x": 149.87220451356148,
-      "y": 313.8559386490722,
+      "x": 156.23584434510445,
+      "y": 311.1286437271972,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -374,15 +375,21 @@
           {
             "index": 1,
             "axis": "x",
-            "t": -1.1248403891509144,
-            "offset": 0
+            "t": -1.1088527676327529,
+            "offset": -1.4210854715202004e-14
+          },
+          {
+            "index": 2,
+            "axis": "y",
+            "t": 1.2805574764346646,
+            "offset": -2.842170943040401e-14
           }
         ],
         "elbowRoute": null,
         "routeMode": "authored",
         "temporal": "data",
         "delayValue": "",
-        "pillPosition": 0.5,
+        "pillPosition": 0.46858787228596804,
         "tunnel": false,
         "tunnelLayer": "",
         "state": "normal"
@@ -419,9 +426,9 @@
       "editingShapeId": null,
       "croppingShapeId": null,
       "selectedShapeIds": [
-        "shape:append"
+        "shape:UtSN9UC92zStUx7EzmfTF"
       ],
-      "hoveredShapeId": "shape:reconcile",
+      "hoveredShapeId": null,
       "erasingShapeIds": [],
       "hintingShapeIds": [],
       "focusedGroupId": null,
@@ -1012,7 +1019,7 @@
       "isFocused": true,
       "devicePixelRatio": 1.100000023841858,
       "isCoarsePointer": false,
-      "isHoveringCanvas": true,
+      "isHoveringCanvas": null,
       "openMenus": [],
       "isChangingStyle": false,
       "isReadonly": false,

@@ -1,0 +1,35 @@
+{
+  "checks": [
+    "a board with no lens on it paints exactly what it painted before",
+    "the Block carries the lens and a badge counted in ports",
+    "a missing port renders in the port row it is missing from",
+    "a renamed port reads as one row: callee → callable",
+    "a missing cable lands on the ghost dot, dashed, by the real router",
+    "the variant repaints the same document without changing it",
+    "Clear diff marks takes the lens off and leaves the board a person can edit",
+    "no browser console errors across the journey"
+  ],
+  "captures": [
+    "/home/bam/systemsketch/docs/assets/diff-states-calm.png",
+    "/home/bam/systemsketch/docs/assets/diff-states-marked.png",
+    "/home/bam/systemsketch/docs/assets/diff-states-delta-badge-variant.png",
+    "/home/bam/systemsketch/docs/assets/diff-states-cleared.png"
+  ],
+  "badge": "−1 ~1",
+  "ghostCable": {
+    "present": true,
+    "state": "removed",
+    "dash": "7 6",
+    "stroke": "rgb(208, 11, 11)",
+    "opacity": "0.55"
+  },
+  "renamed": {
+    "state": "changed",
+    "text": "~callee→callableEstimator",
+    "was": "callee",
+    "wasDisplay": "block",
+    "now": "callable",
+    "hasArrow": true,
+    "strike": false
+  }
+}

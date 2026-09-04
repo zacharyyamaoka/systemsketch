@@ -1873,9 +1873,9 @@
       "typeName": "shape"
     },
     {
-      "x": 12.22693531283123,
-      "y": -37.79851537645834,
-      "z": 1.0289143480632843,
+      "x": 0,
+      "y": 0,
+      "z": 1,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -2091,6 +2091,14 @@
       },
       "index": "a5PMv",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#F2555A",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:n6l1ilGyWR54dYEedKLSt",
+      "typeName": "user"
     },
     {
       "x": 752,
@@ -6027,8 +6035,8 @@
       "followingUserId": null,
       "opacityForNextShape": 1,
       "stylesForNextShape": {
-        "tldraw:arrowKind": "elbow",
-        "systemsketch:connectionRouting": "elbow"
+        "tldraw:arrowKind": "arc",
+        "systemsketch:connectionRouting": "curved"
       },
       "brush": null,
       "scribbles": [],
@@ -6043,8 +6051,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 3400,
-        "h": 3900
+        "w": 1060.71435546875,
+        "h": 1183.5714111328125
       },
       "insets": [
         false,
@@ -6059,7 +6067,7 @@
       "isChatting": false,
       "highlightedUserIds": [],
       "isFocused": true,
-      "devicePixelRatio": 1,
+      "devicePixelRatio": 1.399999976158142,
       "isCoarsePointer": false,
       "isHoveringCanvas": null,
       "openMenus": [],

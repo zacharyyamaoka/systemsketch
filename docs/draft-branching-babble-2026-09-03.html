@@ -1,0 +1,3898 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Babble &amp; Prune</title>
+  <style>
+    :root {
+      --paper: #f4f0e8;
+      --paper-deep: #ebe5da;
+      --panel: #fffdf9;
+      --ink: #20201f;
+      --muted: #6e6a63;
+      --line: #d8d0c4;
+      --line-strong: #bdb3a5;
+      --soft: #f8f5ef;
+      --green: #2f7f62;
+      --red: #b84939;
+      --blue: #3f6fa8;
+      --shadow: 0 18px 60px rgba(53, 46, 36, 0.10);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --serif: Iowan Old Style, Baskerville, Georgia, serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--paper);
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% -10%, rgba(224, 90, 63, 0.09), transparent 32rem),
+        radial-gradient(circle at 95% 5%, rgba(47, 127, 116, 0.08), transparent 30rem),
+        var(--paper);
+      font-family: var(--sans);
+      line-height: 1.5;
+    }
+
+    button,
+    textarea,
+    input {
+      font: inherit;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page {
+      width: min(1500px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .hero {
+      padding: 34px 0 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-grid {
+      display: block;
+    }
+
+    .kicker,
+    .eyebrow {
+      color: var(--muted);
+      font: 700 11px/1.2 var(--mono);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 1100px;
+      margin: 10px 0 12px;
+      font: 500 clamp(38px, 5vw, 68px)/0.98 var(--serif);
+      letter-spacing: -0.045em;
+    }
+
+    .brief {
+      max-width: 980px;
+      margin: 0;
+      color: #494641;
+      font-size: clamp(15px, 1.45vw, 19px);
+      line-height: 1.48;
+    }
+
+    .hero-aside {
+      border-left: 1px solid var(--line-strong);
+      padding-left: 24px;
+    }
+
+    .hero-aside strong {
+      display: block;
+      margin: 7px 0 9px;
+      font: 500 21px/1.25 var(--serif);
+    }
+
+    .hero-aside p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 29px;
+      padding: 5px 10px;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      background: rgba(255, 253, 249, 0.62);
+      color: #4d4943;
+      font: 650 11px/1 var(--mono);
+    }
+
+    .badge.primary {
+      border-color: #222;
+      background: #222;
+      color: white;
+    }
+
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      margin: 30px 0 0;
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 249, 0.52);
+    }
+
+    .workflow-step {
+      min-height: 92px;
+      padding: 15px 17px;
+      border-right: 1px solid var(--line);
+    }
+
+    .workflow-step:last-child {
+      border-right: 0;
+    }
+
+    .workflow-step span {
+      color: var(--muted);
+      font: 700 10px/1 var(--mono);
+      letter-spacing: 0.1em;
+    }
+
+    .workflow-step b {
+      display: block;
+      margin: 9px 0 3px;
+      font: 600 15px/1.2 var(--sans);
+    }
+
+    .workflow-step small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .context {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+      gap: 22px;
+      padding: 28px 0 32px;
+    }
+
+    .context-panel {
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 249, 0.72);
+      padding: 18px;
+    }
+
+    .context-panel h2 {
+      margin: 7px 0 13px;
+      font: 500 24px/1.2 var(--serif);
+    }
+
+    .axis-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .axis {
+      min-width: min(100%, 260px);
+      flex: 1 1 260px;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .axis b {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 12px;
+    }
+
+    .axis span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .invariant-list {
+      display: grid;
+      gap: 9px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .invariant-list li {
+      position: relative;
+      padding-left: 21px;
+      color: #4b4842;
+      font-size: 13px;
+    }
+
+    .invariant-list li::before {
+      position: absolute;
+      left: 0;
+      top: 0.2em;
+      color: var(--green);
+      content: "◆";
+      font-size: 9px;
+    }
+
+    .boundary {
+      margin-top: 15px;
+      padding-top: 13px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .boundary b {
+      color: var(--ink);
+    }
+
+    .objective-contract {
+      display: grid;
+      gap: 13px;
+      padding: 20px 0 24px;
+    }
+
+    .objective-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .objective-head h2 {
+      margin: 5px 0 0;
+      font: 500 clamp(24px, 2.7vw, 34px)/1.05 var(--serif);
+    }
+
+    .objective-head p {
+      max-width: 520px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .objective-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
+      gap: 12px;
+    }
+
+    .objective-panel {
+      padding: 13px;
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 249, 0.76);
+    }
+
+    .objective-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .objective-panel-head b {
+      font-size: 13px;
+    }
+
+    .objective-panel-head span {
+      color: var(--muted);
+      font: 700 9px/1 var(--mono);
+      text-transform: uppercase;
+    }
+
+    .criteria-strip,
+    .constraint-strip,
+    .ranking-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .criterion-chip,
+    .constraint-chip,
+    .ranking-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 34px;
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: white;
+      font-size: 11px;
+    }
+
+    .criterion-chip b,
+    .ranking-chip b {
+      color: #315f91;
+      font: 850 11px/1 var(--mono);
+    }
+
+    .constraint-chip::before {
+      color: var(--green);
+      content: "◆";
+      font-size: 8px;
+    }
+
+    .prototype-boundary {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .prototype-boundary b {
+      color: var(--ink);
+    }
+
+    .ai-prune {
+      margin: 10px 0 38px;
+      overflow: hidden;
+      border: 1px solid #a9a093;
+      border-radius: 8px;
+      background: rgba(255, 253, 249, 0.88);
+      box-shadow: 0 12px 38px rgba(53, 46, 36, 0.07);
+    }
+
+    .ai-prune-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 22px 24px 18px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(115deg, rgba(63, 111, 168, 0.08), transparent 45%),
+        var(--panel);
+    }
+
+    .ai-prune-head h2 {
+      margin: 7px 0 6px;
+      font: 500 clamp(28px, 3vw, 40px)/1.05 var(--serif);
+      letter-spacing: -0.025em;
+    }
+
+    .ai-prune-head p {
+      max-width: 790px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .formula {
+      flex: none;
+      padding: 10px 12px;
+      border: 1px solid #bdc9d7;
+      border-radius: 5px;
+      background: #f4f8fc;
+      color: #315b88;
+      font: 700 11px/1.35 var(--mono);
+      white-space: nowrap;
+    }
+
+    .judgment-chip,
+    .evidence-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 4px 7px;
+      border-radius: 99px;
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .judgment-chip {
+      border: 1px solid #b9c9db;
+      background: #eef4fa;
+      color: #315f91;
+    }
+
+    .evidence-chip {
+      border: 1px solid #bad1c5;
+      background: #eff8f3;
+      color: #28694f;
+    }
+
+    .ai-summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+      gap: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .ai-recommendation,
+    .hinge-card {
+      padding: 20px 24px;
+    }
+
+    .ai-recommendation {
+      border-right: 1px solid var(--line);
+    }
+
+    .recommendation-line {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 10px 0 8px;
+    }
+
+    .recommendation-line strong {
+      font: 500 clamp(25px, 3vw, 36px)/1 var(--serif);
+    }
+
+    .ai-total {
+      display: inline-grid;
+      min-width: 70px;
+      min-height: 48px;
+      place-items: center;
+      border: 1px solid #aebed0;
+      border-radius: 5px;
+      background: #eef4fa;
+      color: #315f91;
+      font: 800 14px/1 var(--mono);
+    }
+
+    .ai-recommendation p,
+    .hinge-card p {
+      margin: 0;
+      color: #55514b;
+      font-size: 13px;
+    }
+
+    .alternative-line {
+      margin-top: 11px !important;
+      padding-top: 10px;
+      border-top: 1px dashed var(--line);
+      color: var(--muted) !important;
+      font-size: 12px !important;
+    }
+
+    .hinge-card {
+      background: #faf7f1;
+    }
+
+    .hinge-card b {
+      display: block;
+      margin: 8px 0 7px;
+      font: 600 17px/1.2 var(--serif);
+    }
+
+    .criteria-section,
+    .matrix-section,
+    .gate-section {
+      padding: 21px 24px 24px;
+    }
+
+    .criteria-section,
+    .matrix-section {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .ranking-section {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .ranking-chip {
+      flex: 1 1 180px;
+      justify-content: space-between;
+    }
+
+    .ranking-chip.is-leader {
+      border-color: #aebed0;
+      background: #eef4fa;
+    }
+
+    .ranking-chip.is-ineligible {
+      border-color: #dfb7af;
+      background: #fbefed;
+      color: var(--red);
+    }
+
+    .calibration-details {
+      margin: 0;
+      padding: 0 24px 20px;
+      border: 0;
+    }
+
+    .calibration-details > summary {
+      padding: 14px 0;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .section-intro {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 13px;
+    }
+
+    .section-intro h3 {
+      margin: 5px 0 4px;
+      font: 500 22px/1.1 var(--serif);
+    }
+
+    .section-intro p {
+      max-width: 760px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      background: white;
+    }
+
+    .requirement-table,
+    .score-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .requirement-table {
+      min-width: 880px;
+    }
+
+    .score-table {
+      min-width: 980px;
+    }
+
+    .requirement-table th,
+    .score-table th {
+      padding: 9px 10px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line-strong);
+      background: #f4f1eb;
+      color: var(--muted);
+      font: 750 9px/1.2 var(--mono);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      vertical-align: bottom;
+    }
+
+    .score-table th small {
+      display: block;
+      margin-top: 4px;
+      color: #315f91;
+      font-size: 8px;
+    }
+
+    .requirement-table td,
+    .score-table td {
+      padding: 10px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      color: #4b4842;
+      font-size: 11px;
+      vertical-align: top;
+    }
+
+    .requirement-table tr:last-child td,
+    .score-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .requirement-table th:last-child,
+    .requirement-table td:last-child,
+    .score-table th:last-child,
+    .score-table td:last-child {
+      border-right: 0;
+    }
+
+    .requirement-name {
+      min-width: 150px;
+    }
+
+    .requirement-name b,
+    .score-variant b {
+      display: block;
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .requirement-name small,
+    .score-variant small {
+      color: var(--muted);
+      font: 700 9px/1 var(--mono);
+    }
+
+    .weight-number {
+      display: inline-grid;
+      min-width: 44px;
+      min-height: 29px;
+      place-items: center;
+      border-radius: 4px;
+      background: #eef4fa;
+      color: #315f91;
+      font: 800 11px/1 var(--mono);
+    }
+
+    .anchor-list {
+      display: grid;
+      min-width: 230px;
+      gap: 5px;
+    }
+
+    .anchor-list span {
+      display: grid;
+      grid-template-columns: 17px 1fr;
+      gap: 6px;
+    }
+
+    .anchor-list b {
+      color: #315f91;
+      font: 800 10px/1.4 var(--mono);
+    }
+
+    .score-table tbody tr.ai-leader {
+      background: #f5f9fd;
+    }
+
+    .score-table tbody tr.gate-fail {
+      background: #fbf1ef;
+    }
+
+    .score-variant {
+      min-width: 150px;
+    }
+
+    .score-detail {
+      min-width: 112px;
+      margin: 0;
+      border: 0;
+    }
+
+    .score-detail summary {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0;
+    }
+
+    .score-detail summary::after {
+      margin-left: auto;
+      font-size: 12px;
+    }
+
+    .score-value {
+      display: inline-grid;
+      width: 31px;
+      height: 31px;
+      place-items: center;
+      border: 1px solid #bcc7d3;
+      border-radius: 50%;
+      color: #315f91;
+      font: 850 12px/1 var(--mono);
+    }
+
+    .confidence {
+      padding: 4px 5px;
+      border-radius: 3px;
+      background: #f0eee9;
+      color: var(--muted);
+      font: 750 8px/1 var(--mono);
+      text-transform: uppercase;
+    }
+
+    .confidence.high { background: #edf7f1; color: #28694f; }
+    .confidence.low { background: #faf0e7; color: #97601d; }
+
+    .score-evidence {
+      width: 220px;
+      margin: 8px 0 0;
+      padding: 8px;
+      border-left: 2px solid #b9c9db;
+      background: #f7f9fb;
+      color: #56514b;
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
+    .total-cell {
+      min-width: 86px;
+      color: var(--ink) !important;
+      font: 850 15px/1.2 var(--mono) !important;
+    }
+
+    .rank-label {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font: 700 8px/1 var(--mono);
+      text-transform: uppercase;
+    }
+
+    .gate-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 10px;
+    }
+
+    .gate-card {
+      padding: 12px;
+      border: 1px solid var(--line);
+      background: white;
+    }
+
+    .gate-card > b {
+      display: block;
+      margin: 4px 0;
+      font-size: 13px;
+    }
+
+    .gate-card > p {
+      margin: 0 0 9px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .gate-results {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .gate-result {
+      padding: 4px 6px;
+      border: 1px solid #bad1c5;
+      border-radius: 3px;
+      background: #eff8f3;
+      color: #28694f;
+      font: 750 9px/1 var(--mono);
+      cursor: help;
+    }
+
+    .gate-result.fail {
+      border-color: #dfb7af;
+      background: #fbefed;
+      color: var(--red);
+    }
+
+    .gallery-head {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 13px 0;
+      border-top: 1px solid var(--line-strong);
+      border-bottom: 1px solid var(--line);
+      background: rgba(244, 240, 232, 0.94);
+      backdrop-filter: blur(16px);
+    }
+
+    .gallery-head h2 {
+      margin: 0;
+      font: 500 25px/1 var(--serif);
+    }
+
+    .gallery-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .tool-button,
+    .action-button,
+    .export-button,
+    .demo-button {
+      border: 1px solid var(--line-strong);
+      border-radius: 5px;
+      background: var(--panel);
+      cursor: pointer;
+      transition: 150ms ease;
+    }
+
+    .tool-button {
+      min-height: 34px;
+      padding: 7px 11px;
+      color: var(--muted);
+      font: 650 11px/1 var(--mono);
+    }
+
+    .tool-button:hover,
+    .tool-button.active,
+    .action-button:hover,
+    .export-button:hover {
+      border-color: var(--ink);
+      color: var(--ink);
+      transform: translateY(-1px);
+    }
+
+    .tool-button.active {
+      background: var(--ink);
+      color: white;
+    }
+
+    .variant-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+      padding: 24px 0 32px;
+    }
+
+    .variant-grid.focus-layout {
+      grid-template-columns: minmax(0, 1080px);
+      justify-content: center;
+    }
+
+    .variant-grid.focus-layout .variant-card:not(.is-focused) {
+      display: none;
+    }
+
+    .variant-card {
+      --accent: #222;
+      position: relative;
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+      border-top: 5px solid var(--accent);
+      border-radius: 7px;
+      background: var(--panel);
+      box-shadow: 0 3px 12px rgba(52, 45, 36, 0.04);
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .variant-card:hover,
+    .variant-card.is-focused {
+      border-color: color-mix(in srgb, var(--accent) 58%, var(--line-strong));
+      box-shadow: var(--shadow);
+    }
+
+    .variant-card.is-picked {
+      outline: 3px solid color-mix(in srgb, var(--accent) 55%, white);
+      outline-offset: 3px;
+    }
+
+    .variant-card.is-rejected {
+      opacity: 0.55;
+      filter: grayscale(0.45);
+    }
+
+    .variant-card.is-shortlisted::after {
+      position: absolute;
+      top: 11px;
+      right: 12px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--blue);
+      content: "";
+      box-shadow: 0 0 0 4px white;
+    }
+
+    .variant-header {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 13px;
+      align-items: start;
+      padding: 17px 18px 14px;
+    }
+
+    .variant-index {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--line));
+      border-radius: 50%;
+      color: var(--accent);
+      font: 800 12px/1 var(--mono);
+    }
+
+    .variant-title h3 {
+      margin: 0;
+      font: 500 27px/1.05 var(--serif);
+      letter-spacing: -0.02em;
+    }
+
+    .variant-title p {
+      margin: 7px 0 0;
+      color: #55514b;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .default-badge {
+      display: none;
+      padding: 5px 7px;
+      border-radius: 3px;
+      background: color-mix(in srgb, var(--accent) 12%, white);
+      color: var(--accent);
+      font: 800 9px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .variant-ai-meta {
+      display: grid;
+      justify-items: end;
+      gap: 6px;
+    }
+
+    .variant-score {
+      color: var(--muted);
+      font: 800 10px/1 var(--mono);
+      white-space: nowrap;
+    }
+
+    .variant-card.is-default .default-badge {
+      display: inline-flex;
+    }
+
+    .prototype-frame {
+      position: relative;
+      min-height: 288px;
+      margin: 0 18px;
+      overflow: hidden;
+      border: 1px solid #bbb3a7;
+      border-radius: 5px;
+      background: #e9e6df;
+    }
+
+    .prototype-label {
+      position: absolute;
+      z-index: 3;
+      top: 8px;
+      left: 8px;
+      padding: 4px 6px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.86);
+      color: #56514b;
+      font: 700 8px/1 var(--mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      backdrop-filter: blur(8px);
+    }
+
+    .prototype {
+      min-height: 288px;
+    }
+
+    .story-driver {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px 13px;
+      align-items: center;
+      margin: 0 18px 10px;
+      padding: 10px;
+      border: 1px solid color-mix(in srgb, #7667c6 34%, var(--line));
+      border-radius: 5px;
+      background: color-mix(in srgb, #7667c6 5%, var(--panel));
+    }
+
+    .story-nav {
+      min-height: 32px;
+      border: 1px solid #a9a2ce;
+      border-radius: 4px;
+      background: white;
+      color: #514592;
+      cursor: pointer;
+      font: 750 10px/1 var(--mono);
+    }
+
+    .story-nav:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(82, 69, 146, 0.14);
+    }
+
+    .story-copy {
+      min-width: 0;
+    }
+
+    .story-copy small {
+      display: block;
+      color: #6e639e;
+      font: 750 8px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .story-copy b {
+      display: block;
+      margin-top: 4px;
+      overflow: hidden;
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .story-copy p {
+      margin: 3px 0 0;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.35;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .story-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .story-nav {
+      min-width: 54px;
+      padding: 7px 8px;
+    }
+
+    .story-nav:disabled {
+      cursor: default;
+      opacity: 0.36;
+    }
+
+    .story-progress {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .story-progress button {
+      width: 100%;
+      height: 3px;
+      padding: 0;
+      overflow: hidden;
+      border: 0;
+      border-radius: 999px;
+      background: #d8d3ea;
+      cursor: pointer;
+      text-indent: -999px;
+    }
+
+    .story-progress button.active {
+      background: #7667c6;
+    }
+
+    .prototype button,
+    .prototype [role="button"] {
+      cursor: pointer;
+    }
+
+    .prototype .story-target {
+      position: relative;
+      z-index: 2;
+      outline: 2px solid #7667c6;
+      outline-offset: 3px;
+      box-shadow: 0 0 0 5px rgba(118, 103, 198, 0.13);
+      animation: story-target-pulse 780ms ease-out 2;
+    }
+
+    @keyframes story-target-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(118, 103, 198, 0.42); }
+      100% { box-shadow: 0 0 0 11px rgba(118, 103, 198, 0); }
+    }
+
+    .prototype img,
+    .prototype video,
+    .prototype canvas,
+    .prototype iframe,
+    .media-surface img,
+    .media-surface video,
+    .media-surface canvas,
+    .media-surface iframe {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .media-story {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 10px 18px 0;
+    }
+
+    .media-story:has(.media-exhibit:only-child) {
+      grid-template-columns: 1fr;
+    }
+
+    .media-exhibit {
+      min-width: 0;
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: var(--soft);
+    }
+
+    .media-surface {
+      min-height: 142px;
+      overflow: hidden;
+      background: #e9e6df;
+    }
+
+    .media-caption {
+      padding: 9px 10px 10px;
+    }
+
+    .media-caption b {
+      display: block;
+      margin-bottom: 4px;
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .media-caption span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .variant-body {
+      padding: 16px 18px 18px;
+    }
+
+    .fit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .fit {
+      min-height: 82px;
+      padding: 11px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+    }
+
+    .fit b {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .fit span {
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    details {
+      margin-top: 12px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    summary {
+      padding: 11px 0;
+      cursor: pointer;
+      color: #4d4943;
+      font: 700 11px/1 var(--mono);
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      float: right;
+      color: var(--muted);
+      content: "+";
+      font-size: 16px;
+    }
+
+    details[open] summary::after {
+      content: "−";
+    }
+
+    .decision-list {
+      display: grid;
+      gap: 8px;
+      padding: 0 0 13px;
+    }
+
+    .decision {
+      display: grid;
+      grid-template-columns: minmax(90px, 0.35fr) 1fr;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .decision b {
+      color: var(--muted);
+    }
+
+    .proof-list {
+      display: grid;
+      gap: 6px;
+      margin: 0 0 13px;
+      padding: 11px 0 0;
+      border-top: 1px dashed var(--line);
+      list-style: none;
+    }
+
+    .proof-list li {
+      position: relative;
+      padding-left: 17px;
+      color: #5a5650;
+      font-size: 11px;
+    }
+
+    .proof-list li::before {
+      position: absolute;
+      left: 0;
+      color: var(--green);
+      content: "✓";
+      font-weight: 800;
+    }
+
+    .keep-title {
+      margin: 14px 0 8px;
+      color: var(--muted);
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .keep-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .keep-chip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 29px;
+      padding: 5px 9px;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      background: white;
+      color: #55514b;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .keep-chip:has(input:checked) {
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 8%, white);
+      color: var(--accent);
+    }
+
+    .keep-chip input {
+      width: 13px;
+      height: 13px;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+
+    .variant-feedback {
+      width: 100%;
+      min-height: 60px;
+      margin: 0 0 12px;
+      padding: 9px 10px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .variant-feedback:focus,
+    .global-synthesis:focus {
+      border-color: var(--accent, var(--ink));
+      outline: 2px solid color-mix(in srgb, var(--accent, var(--ink)) 18%, white);
+    }
+
+    .variant-note {
+      margin-top: 12px;
+      border: 0;
+    }
+
+    .variant-note summary {
+      padding: 8px 0;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .variant-actions {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr 1fr;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .action-button {
+      min-height: 36px;
+      padding: 7px 9px;
+      font: 750 10px/1 var(--mono);
+    }
+
+    .action-button.pick {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+    }
+
+    .action-button.shortlist.active {
+      border-color: var(--blue);
+      background: #edf3fa;
+      color: var(--blue);
+    }
+
+    .action-button.reject.active {
+      border-color: var(--red);
+      background: #faefed;
+      color: var(--red);
+    }
+
+    .decision-dock {
+      position: sticky;
+      z-index: 30;
+      bottom: 12px;
+      display: grid;
+      grid-template-columns: minmax(210px, 0.62fr) minmax(260px, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      margin: 0 auto 28px;
+      padding: 14px;
+      border: 1px solid #aaa093;
+      border-radius: 8px;
+      background: rgba(255, 253, 249, 0.96);
+      box-shadow: 0 20px 65px rgba(46, 40, 32, 0.18);
+      backdrop-filter: blur(20px);
+    }
+
+    .decision-summary small {
+      display: block;
+      color: var(--muted);
+      font: 750 9px/1 var(--mono);
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .decision-summary b {
+      display: block;
+      margin-top: 5px;
+      font: 500 17px/1.2 var(--serif);
+    }
+
+    .decision-summary span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .global-synthesis {
+      width: 100%;
+      min-height: 72px;
+      padding: 10px 11px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: white;
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .dock-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 7px;
+    }
+
+    .export-button {
+      min-height: 36px;
+      padding: 7px 10px;
+      font: 750 10px/1 var(--mono);
+    }
+
+    .export-button.primary {
+      border-color: var(--ink);
+      background: var(--ink);
+      color: white;
+    }
+
+    .export-button.subtle {
+      border-color: transparent;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .checks {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.65fr);
+      gap: 24px;
+      padding: 26px 0 54px;
+      border-top: 1px solid var(--line-strong);
+    }
+
+    .checks h2 {
+      margin: 8px 0 9px;
+      font: 500 27px/1.15 var(--serif);
+    }
+
+    .checks p {
+      max-width: 720px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .check-list {
+      display: grid;
+      gap: 7px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .check-list li {
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 249, 0.7);
+      font-size: 12px;
+    }
+
+    .check-list li::before {
+      margin-right: 7px;
+      color: var(--green);
+      content: "✓";
+      font-weight: 800;
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 100;
+      right: 20px;
+      bottom: 20px;
+      padding: 10px 13px;
+      border-radius: 5px;
+      background: var(--ink);
+      color: white;
+      font: 650 11px/1 var(--mono);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: 180ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .empty-state {
+      display: none;
+      padding: 70px 20px;
+      border: 1px dashed var(--line-strong);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .placeholder-preview {
+      display: grid;
+      min-height: 288px;
+      place-content: center;
+      gap: 8px;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .placeholder-preview strong {
+      font: 500 23px/1.2 var(--serif);
+    }
+
+    .placeholder-preview span {
+      max-width: 360px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* Worked-example miniature prototypes */
+    .mini-shell {
+      min-height: 288px;
+      color: #29302f;
+      background: #f4f5f1;
+      font-family: var(--sans);
+    }
+
+    .mini-shell button {
+      font-family: var(--sans);
+    }
+
+    .demo-alt-only {
+      display: none;
+    }
+
+    .prototype.is-alt .demo-alt-only {
+      display: revert;
+    }
+
+    .prototype.is-alt .demo-base-only {
+      display: none !important;
+    }
+
+    .prototype.is-alt .queue-item.demo-alt-only {
+      display: grid;
+    }
+
+    .prototype.is-alt .annotation.demo-alt-only,
+    .prototype.is-alt .coach-card.demo-alt-only {
+      display: block;
+    }
+
+    .demo-button {
+      min-height: 28px;
+      padding: 5px 8px;
+      border-color: #a9aaa5;
+      background: rgba(255, 255, 255, 0.9);
+      color: #3f4644;
+      font-size: 9px;
+      font-weight: 750;
+    }
+
+    .demo-button:hover {
+      border-color: #343938;
+    }
+
+    .mini-top,
+    .notebook-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 36px;
+      padding: 0 12px;
+      border-bottom: 1px solid #cfd2cd;
+      background: #eceee9;
+      color: #5a615f;
+      font-size: 9px;
+    }
+
+    .mini-top b,
+    .notebook-head b {
+      color: #2a302e;
+      font-size: 10px;
+    }
+
+    .mini-top i,
+    .notebook-head i {
+      font-style: normal;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: 67px minmax(0, 1fr) 120px;
+      min-height: 252px;
+    }
+
+    .run-rail {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      padding: 13px 9px;
+      border-right: 1px solid #d2d5d0;
+      background: #e8eae5;
+      font-size: 9px;
+    }
+
+    .run-rail b {
+      margin-bottom: 3px;
+      color: #777d7b;
+      font-size: 8px;
+      letter-spacing: 0.08em;
+    }
+
+    .run-rail span {
+      padding: 5px;
+      border: 1px solid transparent;
+      border-radius: 3px;
+    }
+
+    .run-rail span.active {
+      border-color: #d96c56;
+      background: white;
+      color: #bd4d39;
+      font-weight: 800;
+    }
+
+    .run-rail small {
+      color: #777d7b;
+    }
+
+    .trace-pane {
+      min-width: 0;
+      padding: 13px 10px 9px;
+      background: #fbfcf9;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+
+    .metric-row span {
+      padding: 5px;
+      border: 1px solid #d9dbd6;
+      background: white;
+      color: #737876;
+      font-size: 7px;
+    }
+
+    .metric-row b {
+      display: block;
+      color: #303634;
+      font-size: 11px;
+    }
+
+    .trace-pane svg,
+    .evidence-card svg,
+    .note-main svg {
+      display: block;
+      width: 100%;
+      overflow: visible;
+    }
+
+    .gridline {
+      fill: none;
+      stroke: #dedfdc;
+      stroke-width: 1;
+    }
+
+    .command,
+    .measure,
+    .compare {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.2;
+    }
+
+    .command {
+      stroke: #2f3735;
+    }
+
+    .measure {
+      stroke: #e05a3f;
+    }
+
+    .compare {
+      stroke: #6d86b3;
+      stroke-dasharray: 4 3;
+    }
+
+    .event-line {
+      stroke: #ccaa75;
+      stroke-dasharray: 3 3;
+    }
+
+    .event-dot {
+      fill: #b7791f;
+    }
+
+    .legend {
+      display: flex;
+      gap: 12px;
+      color: #777d7b;
+      font-size: 7px;
+    }
+
+    .legend span::before {
+      display: inline-block;
+      width: 8px;
+      height: 2px;
+      margin-right: 4px;
+      vertical-align: middle;
+      background: #6d86b3;
+      content: "";
+    }
+
+    .legend .cmd::before { background: #2f3735; }
+    .legend .meas::before { background: #e05a3f; }
+
+    .event-pane {
+      padding: 15px 11px;
+      border-left: 1px solid #d2d5d0;
+      background: #f0f1ed;
+    }
+
+    .event-pane > b {
+      color: #7a7f7d;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .event-pane strong {
+      display: block;
+      margin-top: 8px;
+      color: #a65c2a;
+      font: 500 15px/1.1 var(--serif);
+    }
+
+    .event-pane p {
+      margin: 7px 0 12px;
+      color: #626866;
+      font-size: 8px;
+      line-height: 1.45;
+    }
+
+    .spatial-replay {
+      background: #e8eeeb;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 288px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 65% 42%, rgba(47, 127, 116, 0.12), transparent 42%),
+        linear-gradient(#f5f8f6, #dce5e1);
+    }
+
+    .stage > svg {
+      position: absolute;
+      inset: 22px 5px 0;
+      width: calc(100% - 10px);
+      height: 228px;
+    }
+
+    .floor {
+      fill: none;
+      stroke: #c7d1cd;
+      stroke-width: 1;
+    }
+
+    .motion-path {
+      fill: none;
+      stroke: url("#pathFade");
+      stroke-dasharray: 3 3;
+      stroke-width: 3;
+    }
+
+    .ghost-arm {
+      fill: none;
+      stroke: #78938d;
+      stroke-dasharray: 5 4;
+      stroke-width: 8;
+      opacity: 0.42;
+    }
+
+    .measure-arm {
+      fill: none;
+      stroke: #364c47;
+      stroke-linecap: round;
+      stroke-width: 7;
+    }
+
+    .joint {
+      fill: #eef3f1;
+      stroke: #56766e;
+      stroke-width: 3;
+    }
+
+    .playhead {
+      fill: rgba(255, 255, 255, 0.8);
+      stroke: #e05a3f;
+      stroke-width: 4;
+    }
+
+    .spatial-inspector {
+      position: absolute;
+      top: 34px;
+      right: 15px;
+      display: grid;
+      width: 132px;
+      gap: 5px;
+      padding: 10px;
+      border: 1px solid #a8bbb5;
+      border-radius: 4px;
+      background: rgba(250, 253, 251, 0.94);
+      box-shadow: 0 8px 25px rgba(51, 75, 69, 0.13);
+    }
+
+    .spatial-inspector small {
+      color: #72827e;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .spatial-inspector b {
+      font: 500 16px/1 var(--serif);
+    }
+
+    .spatial-inspector span {
+      color: #b7503b;
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    .spatial-inspector em {
+      color: #72827e;
+      font-size: 7px;
+      font-style: normal;
+    }
+
+    .spatial-button {
+      position: absolute;
+      right: 15px;
+      bottom: 15px;
+    }
+
+    .notebook {
+      background:
+        linear-gradient(90deg, transparent 45px, rgba(186, 90, 83, 0.18) 45px, rgba(186, 90, 83, 0.18) 46px, transparent 46px),
+        repeating-linear-gradient(#faf9f4, #faf9f4 23px, #dce0eb 24px);
+    }
+
+    .notebook-head {
+      background: rgba(245, 243, 236, 0.94);
+    }
+
+    .note-body {
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      min-height: 252px;
+    }
+
+    .note-margin {
+      display: flex;
+      flex-direction: column;
+      gap: 35px;
+      padding: 27px 8px;
+      color: #9a978f;
+      font: 7px/1 var(--mono);
+    }
+
+    .note-main {
+      padding: 17px 18px 12px 13px;
+    }
+
+    .hypothesis {
+      margin: 0 0 8px;
+      font: 500 13px/1.3 var(--serif);
+    }
+
+    .hypothesis small {
+      display: block;
+      margin-bottom: 3px;
+      color: #7667c6;
+      font: 750 7px/1 var(--mono);
+      letter-spacing: 0.08em;
+    }
+
+    .delta-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 3px;
+      color: #62635f;
+      font: 8px/1 var(--mono);
+    }
+
+    .delta-row ins {
+      color: #4d6f51;
+      text-decoration: none;
+    }
+
+    .result-line {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin: 2px 0 7px;
+      font-size: 8px;
+    }
+
+    .result-line b {
+      color: #7667c6;
+    }
+
+    .annotation {
+      margin: 5px 0 7px;
+      padding: 6px 7px;
+      border-left: 2px solid #7667c6;
+      background: rgba(118, 103, 198, 0.08);
+      color: #555463;
+      font-size: 8px;
+    }
+
+    .annotation u {
+      display: block;
+      margin-top: 2px;
+      color: #7667c6;
+      text-decoration: none;
+    }
+
+    .exception-queue {
+      background: #f3f1ec;
+    }
+
+    .queue-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 48px;
+      padding: 8px 12px;
+      border-bottom: 1px solid #d3cfc7;
+    }
+
+    .queue-head div {
+      display: grid;
+    }
+
+    .queue-head small {
+      color: #8b8275;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .queue-head b {
+      font: 500 15px/1.15 var(--serif);
+    }
+
+    .queue-head > span {
+      color: #858077;
+      font-size: 8px;
+    }
+
+    .queue-body {
+      display: grid;
+      grid-template-columns: minmax(150px, 0.8fr) 1fr;
+      min-height: 240px;
+    }
+
+    .queue-list {
+      border-right: 1px solid #d3cfc7;
+    }
+
+    .queue-item {
+      display: grid;
+      grid-template-columns: 9px 1fr auto;
+      gap: 7px;
+      align-items: center;
+      min-height: 50px;
+      padding: 7px 9px;
+      border-bottom: 1px solid #ddd9d1;
+      color: #55534f;
+    }
+
+    .queue-item.active {
+      background: white;
+      color: #282a28;
+    }
+
+    .queue-item span {
+      display: grid;
+    }
+
+    .queue-item b {
+      font-size: 9px;
+    }
+
+    .queue-item small,
+    .queue-item em {
+      color: #8a857d;
+      font-size: 7px;
+      font-style: normal;
+    }
+
+    .queue-item.resolved {
+      background: #e9f3ec;
+      color: #376848;
+    }
+
+    .sev {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #a9aaa5;
+    }
+
+    .sev.high { background: #c64b36; }
+    .sev.med { background: #cc8d33; }
+    .sev.low { background: #7c9a72; }
+
+    .evidence-card {
+      padding: 17px 15px;
+      background: #fbfaf7;
+    }
+
+    .evidence-card > small {
+      color: #a56e2a;
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+
+    .evidence-card > b {
+      display: block;
+      margin: 5px 0 4px;
+      font: 500 18px/1 var(--serif);
+    }
+
+    .evidence-card p {
+      margin: 3px 0 9px;
+      color: #6f6a63;
+      font-size: 8px;
+    }
+
+    .coach {
+      position: relative;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 100% 0, rgba(63, 111, 168, 0.12), transparent 46%),
+        #f4f6f8;
+    }
+
+    .coach-progress {
+      display: grid;
+      grid-template-columns: 23px 36px 23px 36px 23px 1fr;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .coach-progress span {
+      display: grid;
+      width: 22px;
+      height: 22px;
+      place-items: center;
+      border: 1px solid #aeb8c2;
+      border-radius: 50%;
+      background: white;
+      color: #6b7782;
+      font-size: 8px;
+    }
+
+    .coach-progress span.done {
+      border-color: #5b876c;
+      background: #5b876c;
+      color: white;
+    }
+
+    .coach-progress span.active {
+      border: 2px solid #3f6fa8;
+      color: #3f6fa8;
+      font-weight: 800;
+    }
+
+    .coach-progress i {
+      height: 1px;
+      background: #bbc3ca;
+    }
+
+    .coach-progress b {
+      margin-left: 10px;
+      font-size: 9px;
+    }
+
+    .coach-card {
+      min-height: 190px;
+      padding: 16px;
+      border: 1px solid #c6ced6;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 9px 28px rgba(60, 78, 96, 0.08);
+    }
+
+    .coach-card > small {
+      color: #3f6fa8;
+      font-size: 7px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .coach-card h4 {
+      max-width: 430px;
+      margin: 7px 0 12px;
+      font: 500 17px/1.22 var(--serif);
+    }
+
+    .evidence-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .evidence-options span,
+    .test-recipe span {
+      padding: 7px;
+      border: 1px solid #d4dae0;
+      border-radius: 3px;
+      color: #77818a;
+      font-size: 8px;
+    }
+
+    .evidence-options span.yes {
+      border-color: #5b876c;
+      background: #eef6f0;
+      color: #3b6b4a;
+    }
+
+    .coach-evidence {
+      margin-top: 11px;
+      padding-top: 9px;
+      border-top: 1px solid #e0e4e7;
+      font-size: 8px;
+    }
+
+    .coach-evidence p {
+      margin: 2px 0 0;
+      color: #6b747c;
+    }
+
+    .test-recipe {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .test-recipe span {
+      display: grid;
+    }
+
+    .test-recipe b {
+      margin-top: 2px;
+      color: #3f6fa8;
+      font-size: 10px;
+    }
+
+    .coach-button {
+      position: absolute;
+      right: 34px;
+      bottom: 29px;
+      border-color: #3f6fa8;
+      background: #3f6fa8;
+      color: white;
+    }
+
+    @media (max-width: 1050px) {
+      .hero-grid,
+      .context,
+      .checks,
+      .ai-summary,
+      .objective-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .ai-recommendation {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .hero-aside {
+        border-top: 1px solid var(--line);
+        border-left: 0;
+        padding-top: 17px;
+        padding-left: 0;
+      }
+
+      .variant-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .media-story {
+        grid-template-columns: 1fr;
+      }
+
+      .decision-dock {
+        grid-template-columns: 1fr;
+      }
+
+      .dock-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        width: min(100% - 20px, 1500px);
+      }
+
+      .hero {
+        padding-top: 34px;
+      }
+
+      .workflow {
+        grid-template-columns: 1fr;
+      }
+
+      .workflow-step {
+        min-height: 76px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .workflow-step:last-child {
+        border-bottom: 0;
+      }
+
+      .ai-prune-head,
+      .section-intro,
+      .recommendation-line,
+      .objective-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .objective-head p {
+        text-align: left;
+      }
+
+      .ai-prune-head,
+      .ai-recommendation,
+      .hinge-card,
+      .criteria-section,
+      .matrix-section,
+      .gate-section {
+        padding-right: 15px;
+        padding-left: 15px;
+      }
+
+      .gallery-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .fit-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .control-grid {
+        grid-template-columns: 54px minmax(0, 1fr);
+      }
+
+      .event-pane {
+        display: none;
+      }
+
+      .queue-body {
+        grid-template-columns: 1fr;
+      }
+
+      .queue-list {
+        display: none;
+      }
+
+      .evidence-options,
+      .test-recipe {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+
+      .prototype .story-target {
+        animation: none !important;
+      }
+    }
+
+    @media print {
+      .gallery-head,
+      .decision-dock,
+      .variant-actions,
+      .variant-feedback,
+      .variant-note,
+      .keep-list,
+      .demo-button,
+      .story-driver {
+        display: none !important;
+      }
+
+      .variant-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .variant-card {
+        break-inside: avoid;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="page">
+      <div class="hero-grid">
+        <div class="kicker" id="kicker">Babble &amp; Prune</div>
+        <h1 id="page-title">Prototype comparison</h1>
+        <p class="brief" id="page-brief"></p>
+        <div class="badge-row">
+          <span class="badge primary" id="count-badge">0 variants</span>
+          <span class="badge">prototype comparison</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="objective-contract" aria-labelledby="objective-heading">
+      <div class="objective-head">
+        <div>
+          <div class="eyebrow">Fixed before the variants</div>
+          <h2 id="objective-heading">Objective + constraints</h2>
+        </div>
+        <p>Maximize the weighted score. A winner must also pass every hard gate.</p>
+      </div>
+      <div class="objective-grid">
+        <div class="objective-panel">
+          <div class="objective-panel-head">
+            <b>Weighted objective</b>
+            <span>Σ(weight × score / 5) · 100 max</span>
+          </div>
+          <div class="criteria-strip" id="criteria-strip"></div>
+        </div>
+        <div class="objective-panel">
+          <div class="objective-panel-head">
+            <b>Hard gates</b>
+            <span>pass / fail</span>
+          </div>
+          <div class="constraint-strip" id="constraint-strip"></div>
+        </div>
+      </div>
+      <div class="prototype-boundary"><b>Prototype boundary:</b> <span id="boundary"></span></div>
+    </section>
+
+    <section aria-labelledby="variants-heading">
+      <div class="gallery-head">
+        <div>
+          <div class="eyebrow">Look first</div>
+          <h2 id="variants-heading">Compare the outcomes</h2>
+          <p>Interact with the variants. Scores and AI judgment come afterward.</p>
+        </div>
+        <div class="toolbar" aria-label="Gallery layout">
+          <button class="tool-button active" type="button" data-layout="grid">Grid</button>
+          <button class="tool-button" type="button" data-layout="focus">Focus</button>
+          <button class="tool-button" type="button" id="previous-variant" aria-label="Previous variant">←</button>
+          <button class="tool-button" type="button" id="next-variant" aria-label="Next variant">→</button>
+        </div>
+      </div>
+      <div class="variant-grid" id="variant-grid"></div>
+      <div class="empty-state" id="empty-state">No variants match this view.</div>
+    </section>
+
+    <section class="ai-prune" id="ai-prune" aria-labelledby="ai-prune-heading">
+      <div class="ai-prune-head">
+        <div>
+          <div class="eyebrow">Revealed after the variants</div>
+          <h2 id="ai-prune-heading">AI ranking + judgment</h2>
+        </div>
+      </div>
+
+      <div class="ai-summary">
+        <div class="ai-recommendation" id="ai-recommendation"></div>
+        <div class="hinge-card">
+          <span class="judgment-chip">sensitivity · ought</span>
+          <b>Decision hinge</b>
+          <p id="decision-hinge"></p>
+        </div>
+      </div>
+
+      <div class="ranking-section">
+        <div class="ranking-strip" id="ranking-strip"></div>
+      </div>
+
+      <div class="matrix-section">
+        <div class="section-intro">
+          <div>
+            <div class="eyebrow">Weighted objective</div>
+            <h3>Scores by criterion</h3>
+            <p>Open a score only when you want its evidence.</p>
+          </div>
+        </div>
+        <div class="table-scroll" id="score-matrix"></div>
+      </div>
+
+      <div class="gate-section" id="gate-panel">
+        <div class="section-intro">
+          <div>
+            <div class="eyebrow">Feasibility constraints</div>
+            <h3>Hard-gate results</h3>
+            <p>A failed gate cannot win, regardless of score.</p>
+          </div>
+        </div>
+        <div class="gate-grid" id="gate-grid"></div>
+      </div>
+
+      <details class="calibration-details">
+        <summary>Scoring calibration (optional)</summary>
+        <div class="table-scroll" id="requirement-table"></div>
+      </details>
+    </section>
+
+    <aside class="decision-dock" id="decision-dock" aria-label="Prune decision">
+      <div class="decision-summary">
+        <small>Your direction · controls optional</small>
+        <b id="decision-title">No pick yet</b>
+        <span id="decision-detail">Type the splice you want in ordinary language.</span>
+      </div>
+      <textarea class="global-synthesis" id="global-synthesis" placeholder="Type naturally: “Use V5’s structure, V2’s scrubber, and V1’s density. Avoid modals.”"></textarea>
+      <div class="dock-actions">
+        <button class="export-button primary" type="button" id="copy-prune">Copy direction</button>
+        <button class="export-button" type="button" id="download-prune">Download .md</button>
+        <button class="export-button subtle" type="button" id="reset-prune">Reset choices</button>
+      </div>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="application/json" id="babble-data">
+{
+  "schemaVersion": 3,
+  "title": "Draft branches without pages",
+  "kicker": "SystemSketch · Babble & Prune · 3 September 2026",
+  "brief": "Compare five document-native ways to switch between Current, named drafts, pinned versions, and a continuous timeline as quickly as changing pages—then review and merge a draft without making Git the user-facing dependency.",
+  "count": 5,
+  "defaultId": "v1",
+  "defaultWhy": "Branch Switcher is the AI recommendation at 91.6/100: it makes the daily Current ↔ Draft move as direct as the familiar page menu while retaining a quiet route to versions and a deliberate handoff to the stronger Changes Navigator review surface.",
+  "decisionHinge": "The recommendation assumes that rapid personal experimentation is more common than resolving conflicts. If merge review is the daily task, move 10 points from fast switching to cross-depth review; Changes Navigator rises from 83.4 to 87.4 but still needs the Switcher as its entry point.",
+  "invariants": [
+    "One SystemSketch document exposes 1 durable canvas; Frames and Depth Stack stay structural/navigation tools, never branch containers.",
+    "Every named Draft records its precise Current v0.7 or pinned-Version base and leaves Current unchanged while edited.",
+    "Pinned Versions are immutable/read-only; restoring or branching makes a new editable head rather than rewriting history.",
+    "A merge validates the base and pauses for an explicit resolution when Current and Draft touched the same item.",
+    "Git may be used underneath if it earns its keep, but the user never needs a repository, branch checkout, or commit to sketch."
+  ],
+  "boundary": "The gallery uses realistic SystemSketch-style chrome and interactive local mock state. It does not change the application, tldraw records, local files, page model, or Git state; snapshot storage, record-aware diffing, and merge execution are deliberately simulated.",
+  "axes": [
+    {
+      "name": "Daily state surface",
+      "values": [
+        "page-like list",
+        "timeline graph",
+        "visual state deck",
+        "change list",
+        "merge workbench"
+      ]
+    },
+    {
+      "name": "Primary object",
+      "values": [
+        "named branch",
+        "chronological event",
+        "visual board state",
+        "reviewable change",
+        "conflict decision"
+      ]
+    },
+    {
+      "name": "History emphasis",
+      "values": [
+        "secondary",
+        "primary",
+        "compact",
+        "per-change",
+        "merge-local"
+      ]
+    },
+    {
+      "name": "Merge posture",
+      "values": [
+        "hand off to review",
+        "inspect then fork",
+        "promote whole state",
+        "accept/reject changes",
+        "resolve conflicts directly"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "fr1",
+      "name": "Switch states as quickly as pages",
+      "weight": 28,
+      "why": "The everyday job is opening Current or a named experiment without turning document history into a separate workspace.",
+      "passCondition": "From the top-right control, a user can identify and switch to Current or a draft in one deliberate action.",
+      "anchors": {
+        "1": "State switching requires a modal workflow or a separate browser surface.",
+        "3": "States are reachable but require hierarchy or search to recover.",
+        "5": "Current and drafts are immediately scannable and switch with the muscle memory of a page picker."
+      }
+    },
+    {
+      "id": "fr2",
+      "name": "Keep continuous history useful",
+      "weight": 17,
+      "why": "Pinned versions and a continuous timeline make experimental work recoverable even when it is never merged.",
+      "passCondition": "A user can find a named version or earlier point, inspect it read-only, and branch safely from it.",
+      "anchors": {
+        "1": "Only named drafts are visible; ordinary history is hidden.",
+        "3": "Versions and recent activity exist but require a secondary route.",
+        "5": "A chronological history clearly relates versions, draft roots, and merges."
+      }
+    },
+    {
+      "id": "fr3",
+      "name": "Make Current versus Draft unmistakable",
+      "weight": 20,
+      "why": "A prototype must never feel like it is quietly editing the official board.",
+      "passCondition": "The selected state, editability, base, and safe return to Current are clear at a glance.",
+      "anchors": {
+        "1": "Users infer state from filenames or memory.",
+        "3": "State is labeled but disappears while editing.",
+        "5": "The active state and Draft mode are continuously visible, and Current remains recoverable."
+      }
+    },
+    {
+      "id": "fr4",
+      "name": "Review and merge across nested changes",
+      "weight": 25,
+      "why": "A branch can alter root wiring and a deeply stepped-in Block; a raw whole-board diff cannot make both reviewable.",
+      "passCondition": "Before Current changes, the user can navigate each change in context and resolve a real conflict deliberately.",
+      "anchors": {
+        "1": "Promotion replaces Current wholesale or shows raw JSON.",
+        "3": "A before/after view exists but deep changes must be found manually.",
+        "5": "A change list drives focused navigation and conflicts offer explicit source/target choices."
+      }
+    },
+    {
+      "id": "fr5",
+      "name": "Fit SystemSketch without Git ceremony",
+      "weight": 10,
+      "why": "Git ideas are useful implementation inspiration, but local sketching should not require a repository, commits, or checkout vocabulary.",
+      "passCondition": "The user can draft, pin, switch, and merge in an ordinary local document with no Git prerequisite.",
+      "anchors": {
+        "1": "The workflow exposes branches, commits, and working trees as required concepts.",
+        "3": "Git is optional but dominates navigation.",
+        "5": "The UI is document-native; any Git-backed storage remains an invisible implementation choice."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "g1",
+      "name": "No pages as draft branches",
+      "why": "SystemSketch has one durable canvas; drafts are document revisions, not tldraw pages."
+    },
+    {
+      "id": "g2",
+      "name": "Every Draft has a recorded base",
+      "why": "A Draft begins at a visible Current version or named Version, never at an ambiguous moving state."
+    },
+    {
+      "id": "g3",
+      "name": "No blind promotion",
+      "why": "A base check and explicit conflict stop are required before Current can change."
+    },
+    {
+      "id": "g4",
+      "name": "No Git prerequisite",
+      "why": "Version-control ideas may shape implementation, but standalone sketching must remain document-native."
+    }
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "Branch Switcher",
+      "thesis": "Turn the former page-picker location into one compact Current / Drafts / Versions list; switching is instant, while merging enters a focused review.",
+      "accent": "#b97009",
+      "bestWhen": "Most work is personal prototyping and the common action is flipping between Current and two or three named alternatives.",
+      "losesWhen": "The user spends most of the session comparing long histories or resolving many individual conflicts.",
+      "decisions": [
+        {
+          "label": "Primary object",
+          "value": "A named Draft rooted at Current."
+        },
+        {
+          "label": "Everyday interaction",
+          "value": "One page-picker-like popover and one click to switch."
+        },
+        {
+          "label": "Merge",
+          "value": "Draft mode hands off to a separate change-review surface."
+        }
+      ],
+      "keepParts": [
+        "Current / Drafts grouping",
+        "small change counts",
+        "amber active-Draft bar"
+      ],
+      "proof": [
+        "The top-right Versions & drafts control and each primary action toggle real local gallery state.",
+        "All variants render the same Current v0.7 → safer-ingress Draft scenario with a root safety gate and one depth-2 label change.",
+        "This is a standalone interaction prototype: document serialization, version storage, and merge execution remain simulated."
+      ],
+      "previewLabel": "interactive SystemSketch-style mock",
+      "story": {
+        "title": "Switch between the official board and a draft",
+        "steps": [
+          {
+            "label": "Read the state list",
+            "caption": "Current, two Drafts, their bases, and their change counts sit in the one top-right popover.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Open the draft",
+            "caption": "The amber Draft bar and the changed Safety gate make the state change impossible to miss.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "The mock presents Current and both Drafts together in the top-right list; the live control switches the complete canvas state.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 4,
+          "evidence": "Versions are one click away from the same popover, but chronology is intentionally not the first thing shown.",
+          "confidence": "medium"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "Current and Draft use separate row treatments and Draft mode persists above the board.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 4,
+          "evidence": "A draft has a clear Review merge handoff and change count, but detailed per-change review lives in another surface.",
+          "confidence": "medium"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "It uses only Current, Draft, Version, and Review; there is no Git vocabulary or setup.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The mock preserves SystemSketch's measured 1-canvas document rule; all state switches replace the document revision, never a page."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Each Draft shows a specific Current version or named Version as its base and edits only its own simulated head."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Merge UI names a base and offers a conflict stop; the mock never silently overwrites Current."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The interaction uses document terms—Current, Draft, Version, merge—not repository checkout or commit jargon."
+        }
+      },
+      "preview": "\n<div class=\"ss-mock\">\n  <div class=\"ss-top\">\n    <div class=\"ss-bar ss-file\"><i>☰<\/i><em>◫<\/em><span>robot-arm.systemsketch<\/span><\/div>\n    <div class=\"ss-bar ss-right\"><button class=\"ss-icon active\" aria-label=\"Versions and drafts\">⑂<\/button><button class=\"ss-icon\" aria-label=\"Comments\">▣<\/button><span class=\"ss-avatar\">Z<\/span><button class=\"ss-action ss-share\">Share<\/button><\/div>\n  <\/div>\n  \n<style>\n.ss-mock{--ink:#18212c;--muted:#75818e;--line:#dce2e8;--paper:#fff;--low:#f3f6f8;\n--accent:#4b8cff;--accent-soft:#eaf2ff;--warning:#bd7411;--warning-soft:#fff5e5;\n--success:#25815a;--danger:#b24d4a;position:relative;min-height:288px;overflow:hidden;\nbackground:radial-gradient(circle at 1px 1px,#d6dce3 1px,transparent 1.3px) 0 0/16px 16px,#f7f9fb;\ncolor:var(--ink);font:11px/1.3 Inter,ui-sans-serif,system-ui,sans-serif}\n.ss-mock *{box-sizing:border-box}.ss-mock button{font:inherit}.ss-top{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:10px;pointer-events:none}.ss-bar{display:flex;height:36px;align-items:center;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.95);box-shadow:0 2px 9px rgba(27,42,59,.10);pointer-events:auto}.ss-file{gap:7px;padding:0 11px;font-weight:800}.ss-file i{font-style:normal;color:var(--muted)}.ss-file em{display:grid;min-width:19px;height:19px;place-items:center;border-radius:6px;background:var(--accent-soft);color:var(--accent);font-size:13px;font-style:normal}.ss-right{gap:3px;padding:3px}.ss-icon,.ss-action{border:0;border-radius:8px;background:transparent;color:var(--ink);cursor:pointer}.ss-icon{height:28px;min-width:30px;padding:0 8px;font-weight:800}.ss-icon:hover,.ss-icon.active{background:var(--accent-soft);color:#236cb9}.ss-avatar{display:grid;width:26px;height:26px;place-items:center;border-radius:50%;background:#3277d4;color:#fff;font-size:9px;font-weight:850}.ss-share{height:27px;padding:0 10px;background:#3277d4!important;color:#fff!important;font-size:10px;font-weight:800}.ss-canvas{position:absolute;inset:62px 16px 14px}.ss-node{position:absolute;min-width:71px;padding:8px 9px;border:1.4px solid #94a4b5;border-radius:8px;background:#fff;box-shadow:0 1px 2px rgba(20,30,40,.08);font-weight:800;text-align:center}.ss-node small{display:block;margin-top:3px;color:var(--muted);font-size:8px;font-weight:600}.ss-node.source{left:7%;top:55%;border-color:#6b93c9}.ss-node.plan{left:38%;top:28%;border-color:#6b93c9}.ss-node.control{right:7%;top:55%;border-color:#6b93c9}.ss-node.gate{left:50%;top:60%;border-color:var(--warning);background:var(--warning-soft)}.ss-line{position:absolute;height:1.5px;background:#7890aa;transform-origin:left center}.ss-line.one{left:20%;top:64%;width:22%;transform:rotate(-30deg)}.ss-line.two{left:49%;top:39%;width:30%;transform:rotate(28deg)}.ss-line.three{left:47%;top:43%;width:18%;transform:rotate(52deg)}.ss-line.four{left:61%;top:67%;width:17%;transform:rotate(-16deg)}.ss-mode{position:absolute;z-index:2;top:55px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:7px;min-height:24px;padding:5px 9px;border:1px solid #e8c889;border-radius:7px;background:var(--warning-soft);color:#86500a;font-size:9px;font-weight:800}.ss-mode span{font-weight:600}.ss-pop{position:absolute;z-index:5;top:53px;right:13px;width:205px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.98);box-shadow:0 10px 25px rgba(23,37,52,.16)}.ss-pop-head{display:flex;align-items:center;justify-content:space-between;padding:10px 11px 7px;color:var(--muted);font-size:8px;font-weight:850;letter-spacing:.08em}.ss-pop-head button{border:0;background:transparent;color:#2974c8;cursor:pointer;font-size:14px}.ss-row{display:grid;width:100%;grid-template-columns:16px 1fr auto;align-items:center;gap:7px;padding:8px 10px;border:0;background:transparent;color:var(--ink);cursor:pointer;text-align:left}.ss-row:hover,.ss-row.current{background:var(--accent-soft)}.ss-row.draft{background:var(--warning-soft)}.ss-row i{display:grid;width:16px;height:16px;place-items:center;border-radius:5px;background:var(--low);color:var(--muted);font-size:9px;font-style:normal}.ss-row.draft i{background:#fde8bd;color:#98600d}.ss-row b,.ss-row small{display:block}.ss-row b{font-size:10px}.ss-row small{color:var(--muted);font-size:8px}.ss-row em{color:var(--muted);font-size:8px;font-style:normal}.ss-pop-foot{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--line)}.ss-button{min-height:25px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);cursor:pointer;font-size:9px;font-weight:800}.ss-button.primary{border-color:#337bc8;background:#337bc8;color:#fff}.ss-button.warn{border-color:#e1b56e;background:var(--warning-soft);color:#87500c}.ss-rail{position:absolute;z-index:4;top:53px;right:13px;width:224px;padding:10px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.98);box-shadow:0 10px 25px rgba(23,37,52,.16)}.ss-rail-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:10px;font-weight:850}.ss-timeline{position:relative;padding-left:20px}.ss-timeline:before{position:absolute;top:5px;bottom:6px;left:6px;width:1px;background:#cbd4de;content:\"\"}.ss-event{position:relative;display:grid;grid-template-columns:1fr auto;gap:6px;padding:5px 0}.ss-event:before{position:absolute;top:9px;left:-18px;width:9px;height:9px;border:2px solid #7b91a8;border-radius:50%;background:#fff;content:\"\"}.ss-event.branch:before{border-color:var(--warning);background:var(--warning-soft)}.ss-event.merge:before{border-color:var(--success);background:#eaf7f0}.ss-event b,.ss-event small{display:block}.ss-event b{font-size:9px}.ss-event small{color:var(--muted);font-size:8px}.ss-event em{color:var(--muted);font-size:8px;font-style:normal}.ss-deck{position:absolute;z-index:5;top:53px;right:13px;display:flex;gap:6px;width:284px;padding:8px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.98);box-shadow:0 10px 25px rgba(23,37,52,.16)}.ss-deck-card{width:83px;min-height:92px;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;text-align:left}.ss-deck-card:hover,.ss-deck-card.current{border-color:#6ea5e3;background:var(--accent-soft)}.ss-deck-card.draft{border-color:#e4be7c;background:var(--warning-soft)}.ss-deck-card b,.ss-deck-card small{display:block}.ss-deck-card b{margin-bottom:4px;font-size:9px}.ss-deck-card small{color:var(--muted);font-size:8px}.ss-thumb{height:35px;margin-top:7px;border:1px solid #d7dee6;border-radius:4px;background:linear-gradient(145deg,transparent 0 30%,#8fa2b5 31% 32%,transparent 33% 100%),#f6f8fa}.ss-changes{position:absolute;z-index:5;top:53px;right:13px;width:236px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.98);box-shadow:0 10px 25px rgba(23,37,52,.16)}.ss-change-head{padding:10px 11px 8px;border-bottom:1px solid var(--line)}.ss-change-head b{display:block;font-size:11px}.ss-change-head span{color:var(--muted);font-size:8px}.ss-change{display:flex;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid var(--line)}.ss-change:last-of-type{border-bottom:0}.ss-change i{display:grid;width:17px;height:17px;place-items:center;border-radius:5px;background:#eaf7f0;color:var(--success);font-size:10px;font-style:normal}.ss-change.conflict i{background:#fdeaea;color:var(--danger)}.ss-change b,.ss-change small{display:block}.ss-change b{font-size:9px}.ss-change small{color:var(--muted);font-size:8px}.ss-change .scope{margin-left:auto;color:var(--muted);font-size:8px}.ss-workbench{position:absolute;z-index:5;top:53px;right:13px;width:276px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.98);box-shadow:0 10px 25px rgba(23,37,52,.16)}.ss-work-head{display:flex;justify-content:space-between;padding:10px 11px 8px;border-bottom:1px solid var(--line)}.ss-work-head b{font-size:10px}.ss-work-head span{color:var(--muted);font-size:8px}.ss-conflict{margin:9px;padding:9px;border:1px solid #e3acaa;border-radius:8px;background:#fff7f6}.ss-conflict small,.ss-conflict b{display:block}.ss-conflict small{color:var(--danger);font-size:8px;font-weight:850}.ss-conflict b{margin:4px 0 7px;font-size:9px}.ss-choice{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}.ss-choice button{min-height:29px;padding:4px;border:1px solid var(--line);border-radius:5px;background:#fff;cursor:pointer;font-size:8px}.ss-choice button.selected{border-color:#4c91db;background:var(--accent-soft);color:#205f9a;font-weight:850}.ss-fast{margin:9px;padding:9px;border:1px solid #9acdb7;border-radius:8px;background:#effaf4;color:#246746;font-size:9px;font-weight:750}.ss-ref{height:142px;padding:8px;background:#eef2f6}.ss-ref img{display:block;width:100%;height:100%;object-fit:contain;object-position:center}.ss-mini-flow{display:flex;align-items:center;justify-content:center;gap:7px;height:142px;padding:15px;background:#f7f9fb}.ss-mini-flow div{width:72px;padding:9px 6px;border:1px solid var(--line);border-radius:7px;background:#fff;text-align:center;font-size:9px;font-weight:800}.ss-mini-flow i{color:var(--muted);font-size:15px;font-style:normal}\n<\/style>\n\n<div class=\"demo-base-only\">\n  \n<div class=\"ss-canvas\">\n  <div class=\"ss-node source\">Sensor input<small>source<\/small><\/div>\n  <div class=\"ss-node plan\">Planner<small>expanded · depth 2<\/small><\/div>\n  <div class=\"ss-node control\">Controller<small>command<\/small><\/div>\n  <span class=\"ss-line one\"><\/span><span class=\"ss-line two\"><\/span>\n<\/div>\n  <aside class=\"ss-pop\">\n    <div class=\"ss-pop-head\"><span>VERSIONS &amp; DRAFTS<\/span><button aria-label=\"Create draft\">＋<\/button><\/div>\n    <button class=\"ss-row current\"><i>●<\/i><span><b>Current<\/b><small>Editable · v0.7<\/small><\/span><em>now<\/em><\/button>\n    <button class=\"ss-row draft\" data-demo-toggle data-base-label=\"Open safer ingress\" data-alt-label=\"Back to Current\"><i>⑂<\/i><span><b>safer ingress<\/b><small>Draft · 4 changes<\/small><\/span><em>v0.7<\/em><\/button>\n    <button class=\"ss-row draft\"><i>⑂<\/i><span><b>lean route<\/b><small>Draft · 2 changes<\/small><\/span><em>v0.7<\/em><\/button>\n    <div class=\"ss-pop-foot\"><button class=\"ss-button\">View timeline<\/button><button class=\"ss-button primary\">New draft<\/button><\/div>\n  <\/aside>\n<\/div>\n<div class=\"demo-alt-only\">\n  \n<div class=\"ss-canvas\">\n  <div class=\"ss-mode\"><b>DRAFT · safer ingress<\/b><span>based on Current v0.7<\/span><\/div>\n  <div class=\"ss-node source\">Sensor input<small>source<\/small><\/div>\n  <div class=\"ss-node plan\">Planner<small>expanded · depth 2<\/small><\/div>\n  <div class=\"ss-node gate\">Safety gate<small>new Block<\/small><\/div>\n  <div class=\"ss-node control\">Controller<small>renamed command<\/small><\/div>\n  <span class=\"ss-line one\"><\/span><span class=\"ss-line three\"><\/span><span class=\"ss-line four\"><\/span>\n<\/div>\n  <aside class=\"ss-pop\">\n    <div class=\"ss-pop-head\"><span>DRAFT · SAFER INGRESS<\/span><button data-demo-toggle aria-label=\"Back to Current\">×<\/button><\/div>\n    <div class=\"ss-row draft\"><i>⑂<\/i><span><b>4 changes<\/b><small>from Current v0.7<\/small><\/span><em>edit<\/em><\/div>\n    <div class=\"ss-pop-foot\"><button class=\"ss-button warn\">Discard<\/button><button class=\"ss-button primary\">Review merge<\/button><\/div>\n  <\/aside>\n<\/div>\n<\/div>",
+      "media": [
+        {
+          "label": "Page-picker geometry to borrow",
+          "caption": "The compact list and one-step switching follow the supplied familiar page-picker reference; it should list document states, not pages.",
+          "html": "<div class=\"ss-mini-flow\"><div>Current<br><small>editable<\/small><\/div><i>→<\/i><div>Drafts<br><small>named forks<\/small><\/div><i>→<\/i><div>Versions<br><small>pinned history<\/small><\/div><\/div>"
+        }
+      ]
+    },
+    {
+      "id": "v2",
+      "name": "History Graph",
+      "thesis": "Make the top-right control a compact chronological graph of saves, pinned versions, branches, and merges; switch by selecting a moment.",
+      "accent": "#3978b8",
+      "bestWhen": "Recoverability, audit, and branching from a precise historical version are as important as rapid current-state switching.",
+      "losesWhen": "The user usually knows the desired draft by name and wants a sparse menu rather than a growing graph.",
+      "decisions": [
+        {
+          "label": "Primary object",
+          "value": "A moment in the document's graph."
+        },
+        {
+          "label": "Navigation",
+          "value": "Chronological graph with branch and merge markers."
+        },
+        {
+          "label": "Branching",
+          "value": "Any pinned version can be a deliberate fork root."
+        }
+      ],
+      "keepParts": [
+        "read-only historical mode",
+        "branch/merge markers",
+        "branch from exact version"
+      ],
+      "proof": [
+        "The top-right Versions & drafts control and each primary action toggle real local gallery state.",
+        "All variants render the same Current v0.7 → safer-ingress Draft scenario with a root safety gate and one depth-2 label change.",
+        "This is a standalone interaction prototype: document serialization, version storage, and merge execution remain simulated."
+      ],
+      "previewLabel": "interactive SystemSketch-style mock",
+      "story": {
+        "title": "Inspect a pinned moment before branching",
+        "steps": [
+          {
+            "label": "Scan the graph",
+            "caption": "The continuous timeline relates Current activity, pinned Versions, and two Draft roots.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Open v0.6",
+            "caption": "An earlier version becomes visibly read-only and offers Branch from version instead of destructive restore.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "scores": {
+        "fr1": {
+          "score": 3,
+          "evidence": "A known draft is present but competes with chronological scanning, so the common switch takes more interpretation.",
+          "confidence": "medium"
+        },
+        "fr2": {
+          "score": 5,
+          "evidence": "The timeline makes versions, ordinary activity, draft roots, and future merges one connected visible history.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "Historical read-only state is explicit, though the active Draft distinction is one selection deeper.",
+          "confidence": "medium"
+        },
+        "fr4": {
+          "score": 3,
+          "evidence": "The graph provides ancestry and compare entry points but does not itself navigate the four deep changes.",
+          "confidence": "medium"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "It remains document-native, but graph vocabulary adds conceptual weight for a quick sketching task.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The mock preserves SystemSketch's measured 1-canvas document rule; all state switches replace the document revision, never a page."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Each Draft shows a specific Current version or named Version as its base and edits only its own simulated head."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Merge UI names a base and offers a conflict stop; the mock never silently overwrites Current."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The interaction uses document terms—Current, Draft, Version, merge—not repository checkout or commit jargon."
+        }
+      },
+      "preview": "\n<div class=\"ss-mock\">\n  <div class=\"ss-top\">\n    <div class=\"ss-bar ss-file\"><i>☰<\/i><em>◫<\/em><span>robot-arm.systemsketch<\/span><\/div>\n    <div class=\"ss-bar ss-right\"><button class=\"ss-icon active\" aria-label=\"Versions and drafts\">⑂<\/button><button class=\"ss-icon\" aria-label=\"Comments\">▣<\/button><span class=\"ss-avatar\">Z<\/span><button class=\"ss-action ss-share\">Share<\/button><\/div>\n  <\/div>\n  \n<div class=\"demo-base-only\">\n  \n<div class=\"ss-canvas\">\n  <div class=\"ss-node source\">Sensor input<small>source<\/small><\/div>\n  <div class=\"ss-node plan\">Planner<small>expanded · depth 2<\/small><\/div>\n  <div class=\"ss-node control\">Controller<small>command<\/small><\/div>\n  <span class=\"ss-line one\"><\/span><span class=\"ss-line two\"><\/span>\n<\/div>\n  <aside class=\"ss-rail\">\n    <div class=\"ss-rail-head\"><span>History · all drafts<\/span><button class=\"ss-button\" data-demo-toggle data-base-label=\"View v0.6\" data-alt-label=\"Back to Current\">View v0.6<\/button><\/div>\n    <div class=\"ss-timeline\">\n      <div class=\"ss-event\"><span><b>Current · v0.7<\/b><small>Latency monitor<\/small><\/span><em>now<\/em><\/div>\n      <div class=\"ss-event merge\"><span><b>Version v0.6<\/b><small>Pinned · safe to branch<\/small><\/span><em>10:24<\/em><\/div>\n      <div class=\"ss-event branch\"><span><b>safer ingress<\/b><small>Draft · 4 changes<\/small><\/span><em>10:25<\/em><\/div>\n      <div class=\"ss-event branch\"><span><b>lean route<\/b><small>Draft · 2 changes<\/small><\/span><em>10:29<\/em><\/div>\n      <div class=\"ss-event\"><span><b>Version v0.5<\/b><small>“baseline wiring”<\/small><\/span><em>Mon<\/em><\/div>\n    <\/div>\n  <\/aside>\n<\/div>\n<div class=\"demo-alt-only\">\n  <div class=\"ss-canvas\"><div class=\"ss-mode\"><b>VERSION v0.6<\/b><span>read-only · 10:24<\/span><\/div><div class=\"ss-node source\">Sensor input<small>source<\/small><\/div><div class=\"ss-node plan\">Planner<small>expanded · depth 2<\/small><\/div><div class=\"ss-node control\">Controller<small>command<\/small><\/div><span class=\"ss-line one\"><\/span><span class=\"ss-line two\"><\/span><\/div>\n  <aside class=\"ss-rail\"><div class=\"ss-rail-head\"><span>Version v0.6<\/span><button class=\"ss-button primary\">New Draft from Version<\/button><\/div><div class=\"ss-fast\">Pinned state · read-only<br><small>Use it as a safe Draft root or return to Current.<\/small><\/div><\/aside>\n<\/div>\n<\/div>",
+      "media": [
+        {
+          "label": "Version versus activity",
+          "caption": "Pinned versions must read differently from ordinary autosave activity; a branch should begin from the former, never from a vague point in the stream.",
+          "html": "<div class=\"ss-mini-flow\"><div>activity<br><small>continuous<\/small><\/div><i>→<\/i><div>version<br><small>pinned · read-only<\/small><\/div><i>→<\/i><div>draft<br><small>editable branch<\/small><\/div><\/div>"
+        }
+      ]
+    },
+    {
+      "id": "v3",
+      "name": "State Deck",
+      "thesis": "Make Drafts feel maximally like pages: the top-right control opens visual thumbnail cards for Current and each alternate board state.",
+      "accent": "#6b61bb",
+      "bestWhen": "The decision is primarily visual and rapid flipping between a few spatially distinct design options matters more than lineage.",
+      "losesWhen": "Trustworthy continuous history, named versions, and record-level merging must be first-class rather than tucked behind the visual deck.",
+      "decisions": [
+        {
+          "label": "Primary object",
+          "value": "A visual board state."
+        },
+        {
+          "label": "Navigation",
+          "value": "Three equal thumbnail cards, optimized for fast visual recognition."
+        },
+        {
+          "label": "Promotion",
+          "value": "A whole-state action after a separate conflict check."
+        }
+      ],
+      "keepParts": [
+        "thumbnail recognition",
+        "equal state cards",
+        "visible active-state card"
+      ],
+      "proof": [
+        "The top-right Versions & drafts control and each primary action toggle real local gallery state.",
+        "All variants render the same Current v0.7 → safer-ingress Draft scenario with a root safety gate and one depth-2 label change.",
+        "This is a standalone interaction prototype: document serialization, version storage, and merge execution remain simulated."
+      ],
+      "previewLabel": "interactive SystemSketch-style mock",
+      "story": {
+        "title": "Flip through board states at a glance",
+        "steps": [
+          {
+            "label": "Compare the deck",
+            "caption": "Each card gives Current and both Drafts the same compact visual weight.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Open safer ingress",
+            "caption": "The selected Draft card and amber mode bar keep the page-like switch semantically honest.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "scores": {
+        "fr1": {
+          "score": 5,
+          "evidence": "The visual cards are as direct as page tabs and the live draft card toggles the complete board state.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 2,
+          "evidence": "Only the currently useful three states fit; chronology and older versions fall behind a second interaction.",
+          "confidence": "high"
+        },
+        "fr3": {
+          "score": 4,
+          "evidence": "The selected card and amber bar identify the edit target, but thumbnails can overemphasize appearance over authority.",
+          "confidence": "medium"
+        },
+        "fr4": {
+          "score": 2,
+          "evidence": "Whole-board visual switching does not help locate or decide a nested conflicting change.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 5,
+          "evidence": "The metaphor is entirely board-native and familiar to Figma/FigJam users.",
+          "confidence": "high"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The mock preserves SystemSketch's measured 1-canvas document rule; all state switches replace the document revision, never a page."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Each Draft shows a specific Current version or named Version as its base and edits only its own simulated head."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Merge UI names a base and offers a conflict stop; the mock never silently overwrites Current."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The interaction uses document terms—Current, Draft, Version, merge—not repository checkout or commit jargon."
+        }
+      },
+      "preview": "\n<div class=\"ss-mock\">\n  <div class=\"ss-top\">\n    <div class=\"ss-bar ss-file\"><i>☰<\/i><em>◫<\/em><span>robot-arm.systemsketch<\/span><\/div>\n    <div class=\"ss-bar ss-right\"><button class=\"ss-icon active\" aria-label=\"Versions and drafts\">⑂<\/button><button class=\"ss-icon\" aria-label=\"Comments\">▣<\/button><span class=\"ss-avatar\">Z<\/span><button class=\"ss-action ss-share\">Share<\/button><\/div>\n  <\/div>\n  \n<div class=\"demo-base-only\">\n  \n<div class=\"ss-canvas\">\n  <div class=\"ss-node source\">Sensor input<small>source<\/small><\/div>\n  <div class=\"ss-node plan\">Planner<small>expanded · depth 2<\/small><\/div>\n  <div class=\"ss-node control\">Controller<small>command<\/small><\/div>\n  <span class=\"ss-line one\"><\/span><span class=\"ss-line two\"><\/span>\n<\/div>\n  <aside class=\"ss-deck\">\n    <button class=\"ss-deck-card current\"><b>Current<\/b><small>Editable · v0.7<\/small><span class=\"ss-thumb\"><\/span><\/button>\n    <button class=\"ss-deck-card draft\" data-demo-toggle data-base-label=\"Open safer ingress\" data-alt-label=\"Back to Current\"><b>safer ingress<\/b><small>Draft · 4 changes<\/small><span class=\"ss-thumb\"><\/span><\/button>\n    <button class=\"ss-deck-card draft\"><b>lean route<\/b><small>Draft · 2 changes<\/small><span class=\"ss-thumb\"><\/span><\/button>\n  <\/aside>\n<\/div>\n<div class=\"demo-alt-only\">\n  \n<div class=\"ss-canvas\">\n  <div class=\"ss-mode\"><b>DRAFT · safer ingress<\/b><span>based on Current v0.7<\/span><\/div>\n  <div class=\"ss-node source\">Sensor input<small>source<\/small><\/div>\n  <div class=\"ss-node plan\">Planner<small>expanded · depth 2<\/small><\/div>\n  <div class=\"ss-node gate\">Safety gate<small>new Block<\/small><\/div>\n  <div class=\"ss-node control\">Controller<small>renamed command<\/small><\/div>\n  <span class=\"ss-line one\"><\/span><span class=\"ss-line three\"><\/span><span class=\"ss-line four\"><\/span>\n<\/div>\n  <aside class=\"ss-deck\">\n    <button class=\"ss-deck-card\"><b>Current<\/b><small>v0.7<\/small><span class=\"ss-thumb\"><\/span><\/button>\n    <button class=\"ss-deck-card draft current\"><b>safer ingress<\/b><small>Editing now<\/small><span class=\"ss-thumb\"><\/span><\/button>\n    <button class=\"ss-deck-card draft\"><b>lean route<\/b><small>v0.7 base<\/small><span class=\"ss-thumb\"><\/span><\/button>\n  <\/aside>\n<\/div>\n<\/div>",
+      "media": [
+        {
+          "label": "Why the page-like metaphor is attractive",
+          "caption": "The familiar page-picker pattern makes visual switching cheap, while the backing semantics remain document revisions rather than page records.",
+          "html": "<div class=\"ss-mini-flow\"><div>Current<br><small>v0.7<\/small><\/div><div>safer<br><small>Draft<\/small><\/div><div>lean<br><small>Draft<\/small><\/div><\/div>"
+        }
+      ]
+    },
+    {
+      "id": "v4",
+      "name": "Changes Navigator",
+      "thesis": "Keep rapid switching secondary and make a draft's ordered, scope-aware change list the primary object; every item focuses its real location before acceptance.",
+      "accent": "#28785a",
+      "bestWhen": "The hard part is reviewing a Draft that touches both the root board and deeply stepped-in Blocks before Current changes.",
+      "losesWhen": "The user is merely bouncing among personal alternatives and does not need review or merge context yet.",
+      "decisions": [
+        {
+          "label": "Primary object",
+          "value": "A revision-aware change."
+        },
+        {
+          "label": "Navigation",
+          "value": "List items drive camera/depth focus into the affected scope."
+        },
+        {
+          "label": "Merge",
+          "value": "Keep or reject per change, then merge the compatible group."
+        }
+      ],
+      "keepParts": [
+        "scope badges",
+        "next-change camera jump",
+        "per-change review"
+      ],
+      "proof": [
+        "The top-right Versions & drafts control and each primary action toggle real local gallery state.",
+        "All variants render the same Current v0.7 → safer-ingress Draft scenario with a root safety gate and one depth-2 label change.",
+        "This is a standalone interaction prototype: document serialization, version storage, and merge execution remain simulated."
+      ],
+      "previewLabel": "interactive SystemSketch-style mock",
+      "story": {
+        "title": "Navigate a merge across depth",
+        "steps": [
+          {
+            "label": "Scan all changes",
+            "caption": "Root and depth-2 edits appear in one list with their actual scope; nothing asks the user to expand the whole system.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Focus one change",
+            "caption": "Jumping to a list item changes the board context and keeps the draft's intent readable before the user accepts it.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "scores": {
+        "fr1": {
+          "score": 3,
+          "evidence": "Named state selection is available but the first surface is a review list, not a fast draft picker.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 4,
+          "evidence": "The draft's base and change sequence are explicit, although the continuous timeline is background context.",
+          "confidence": "medium"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "Review mode and the active Draft base remain visible throughout focused navigation.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "The direct toggle proves list-to-scope navigation; scope badges and per-change acceptance address the stated deep-diff problem.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 4,
+          "evidence": "It borrows review ideas without asking for a repository, but is too structured as the daily starting surface.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The mock preserves SystemSketch's measured 1-canvas document rule; all state switches replace the document revision, never a page."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Each Draft shows a specific Current version or named Version as its base and edits only its own simulated head."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Merge UI names a base and offers a conflict stop; the mock never silently overwrites Current."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The interaction uses document terms—Current, Draft, Version, merge—not repository checkout or commit jargon."
+        }
+      },
+      "preview": "\n<div class=\"ss-mock\">\n  <div class=\"ss-top\">\n    <div class=\"ss-bar ss-file\"><i>☰<\/i><em>◫<\/em><span>robot-arm.systemsketch<\/span><\/div>\n    <div class=\"ss-bar ss-right\"><button class=\"ss-icon active\" aria-label=\"Versions and drafts\">⑂<\/button><button class=\"ss-icon\" aria-label=\"Comments\">▣<\/button><span class=\"ss-avatar\">Z<\/span><button class=\"ss-action ss-share\">Share<\/button><\/div>\n  <\/div>\n  \n<div class=\"demo-base-only\">\n  \n<div class=\"ss-canvas\">\n  <div class=\"ss-mode\"><b>DRAFT · safer ingress<\/b><span>based on Current v0.7<\/span><\/div>\n  <div class=\"ss-node source\">Sensor input<small>source<\/small><\/div>\n  <div class=\"ss-node plan\">Planner<small>expanded · depth 2<\/small><\/div>\n  <div class=\"ss-node gate\">Safety gate<small>new Block<\/small><\/div>\n  <div class=\"ss-node control\">Controller<small>renamed command<\/small><\/div>\n  <span class=\"ss-line one\"><\/span><span class=\"ss-line three\"><\/span><span class=\"ss-line four\"><\/span>\n<\/div>\n  <aside class=\"ss-changes\">\n    <div class=\"ss-change-head\"><b>Review 4 draft changes<\/b><span>safer ingress → Current · based on v0.7<\/span><\/div>\n    <div class=\"ss-change\"><i>＋<\/i><span><b>Safety gate<\/b><small>New Block<\/small><\/span><em class=\"scope\">root<\/em><\/div>\n    <div class=\"ss-change\"><i>↝<\/i><span><b>Planner → gate<\/b><small>Rewired connection<\/small><\/span><em class=\"scope\">root<\/em><\/div>\n    <div class=\"ss-change\"><i>✎<\/i><span><b>Controller label<\/b><small>Renamed output<\/small><\/span><em class=\"scope\">depth 2<\/em><\/div>\n    <div class=\"ss-change\"><i>＋<\/i><span><b>Limit check<\/b><small>New condition<\/small><\/span><em class=\"scope\">depth 2<\/em><\/div>\n    <div class=\"ss-pop-foot\"><button class=\"ss-button\" data-demo-toggle data-base-label=\"Jump to next change\" data-alt-label=\"Back to change list\">Jump to next<\/button><button class=\"ss-button primary\">Merge all<\/button><\/div>\n  <\/aside>\n<\/div>\n<div class=\"demo-alt-only\">\n  <div class=\"ss-canvas\"><div class=\"ss-mode\"><b>REVIEW · CHANGE 3 OF 4<\/b><span>Planner / Controller<\/span><\/div><div class=\"ss-node plan\" style=\"left:23%;top:31%\">Planner<small>expanded · depth 2<\/small><\/div><div class=\"ss-node control\" style=\"right:23%;top:31%;border-color:#bd7411;background:#fff5e5\">Controller<small>renamed output<\/small><\/div><span class=\"ss-line two\" style=\"left:38%;top:45%;width:24%;transform:rotate(0deg)\"><\/span><\/div>\n  <aside class=\"ss-changes\"><div class=\"ss-change-head\"><b>Change 3 · depth 2<\/b><span>Camera follows the change; Current stays untouched.<\/span><\/div><div class=\"ss-fast\">Controller label: <b>command<\/b> → <b>safe command<\/b><\/div><div class=\"ss-pop-foot\"><button class=\"ss-button\" data-demo-toggle data-base-label=\"Back to list\" data-alt-label=\"Back to list\">Back to list<\/button><button class=\"ss-button primary\">Keep draft change<\/button><\/div><\/aside>\n<\/div>\n<\/div>",
+      "media": [
+        {
+          "label": "Change-list precedent",
+          "caption": "The useful prior-art pattern is a count plus named affected objects; the SystemSketch translation must also drive depth/camera focus.",
+          "html": "<div class=\"ss-mini-flow\"><div>Safety gate<br><small>root<\/small><\/div><i>↓<\/i><div>Controller<br><small>depth 2<\/small><\/div><i>→<\/i><div>accept<br><small>merge<\/small><\/div><\/div>"
+        }
+      ]
+    },
+    {
+      "id": "v5",
+      "name": "Merge Workbench",
+      "thesis": "Reserve the top-right control for a concise merge workspace that exposes target-versus-draft choices wherever automatic merge cannot be trusted.",
+      "accent": "#a64745",
+      "bestWhen": "Drafts often overlap with Current and the user needs to make deliberate source/target decisions before advancing the official board.",
+      "losesWhen": "Rapid state switching or ordinary continuous history should remain the main interaction; this is too heavy for every sketching session.",
+      "decisions": [
+        {
+          "label": "Primary object",
+          "value": "A merge decision between Current and Draft."
+        },
+        {
+          "label": "Conflict UI",
+          "value": "Keep Current, Use Draft, or merge text / properties when supported."
+        },
+        {
+          "label": "Safety",
+          "value": "Automatic changes stay summarized; conflicts receive intentional focus."
+        }
+      ],
+      "keepParts": [
+        "source/target choices",
+        "automatic-versus-conflict split",
+        "preserve-before-advance copy"
+      ],
+      "proof": [
+        "The top-right Versions & drafts control and each primary action toggle real local gallery state.",
+        "All variants render the same Current v0.7 → safer-ingress Draft scenario with a root safety gate and one depth-2 label change.",
+        "This is a standalone interaction prototype: document serialization, version storage, and merge execution remain simulated."
+      ],
+      "previewLabel": "interactive SystemSketch-style mock",
+      "story": {
+        "title": "Resolve the one conflict before merge",
+        "steps": [
+          {
+            "label": "Inspect the conflict",
+            "caption": "The mock separates three automatic changes from the depth-2 Controller conflict and names its scope.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Choose a resolution",
+            "caption": "Use Draft is visibly selected; only then does the merge become confirmable and preserve Current as a Version.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "scores": {
+        "fr1": {
+          "score": 2,
+          "evidence": "It begins with a merge procedure rather than a quick state picker.",
+          "confidence": "high"
+        },
+        "fr2": {
+          "score": 4,
+          "evidence": "Base and pending change counts are clear, but the historical graph is not visible here.",
+          "confidence": "medium"
+        },
+        "fr3": {
+          "score": 5,
+          "evidence": "Source Draft, target Current, and the resolved choice are explicit before the confirm action.",
+          "confidence": "high"
+        },
+        "fr4": {
+          "score": 5,
+          "evidence": "This is the only variant that makes target/source alternatives tangible at the conflicting nested item.",
+          "confidence": "high"
+        },
+        "fr5": {
+          "score": 3,
+          "evidence": "The terminology is document-native, but merge strategy controls are necessarily more technical.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g1": {
+          "pass": true,
+          "evidence": "The mock preserves SystemSketch's measured 1-canvas document rule; all state switches replace the document revision, never a page."
+        },
+        "g2": {
+          "pass": true,
+          "evidence": "Each Draft shows a specific Current version or named Version as its base and edits only its own simulated head."
+        },
+        "g3": {
+          "pass": true,
+          "evidence": "Merge UI names a base and offers a conflict stop; the mock never silently overwrites Current."
+        },
+        "g4": {
+          "pass": true,
+          "evidence": "The interaction uses document terms—Current, Draft, Version, merge—not repository checkout or commit jargon."
+        }
+      },
+      "preview": "\n<div class=\"ss-mock\">\n  <div class=\"ss-top\">\n    <div class=\"ss-bar ss-file\"><i>☰<\/i><em>◫<\/em><span>robot-arm.systemsketch<\/span><\/div>\n    <div class=\"ss-bar ss-right\"><button class=\"ss-icon active\" aria-label=\"Versions and drafts\">⑂<\/button><button class=\"ss-icon\" aria-label=\"Comments\">▣<\/button><span class=\"ss-avatar\">Z<\/span><button class=\"ss-action ss-share\">Share<\/button><\/div>\n  <\/div>\n  \n<div class=\"demo-base-only\">\n  \n<div class=\"ss-canvas\">\n  <div class=\"ss-mode\"><b>DRAFT · safer ingress<\/b><span>based on Current v0.7<\/span><\/div>\n  <div class=\"ss-node source\">Sensor input<small>source<\/small><\/div>\n  <div class=\"ss-node plan\">Planner<small>expanded · depth 2<\/small><\/div>\n  <div class=\"ss-node gate\">Safety gate<small>new Block<\/small><\/div>\n  <div class=\"ss-node control\">Controller<small>renamed command<\/small><\/div>\n  <span class=\"ss-line one\"><\/span><span class=\"ss-line three\"><\/span><span class=\"ss-line four\"><\/span>\n<\/div>\n  <aside class=\"ss-workbench\">\n    <div class=\"ss-work-head\"><b>Merge safer ingress into Current<\/b><span>4 changes · 1 conflict<\/span><\/div>\n    <div class=\"ss-conflict\"><small>CONFLICT · DEPTH 2<\/small><b>Controller label changed in Current and Draft<\/b><div class=\"ss-choice\"><button>Keep Current<\/button><button class=\"selected\" data-demo-toggle data-base-label=\"Use draft\" data-alt-label=\"Use draft\">Use draft<\/button><button>Merge text<\/button><\/div><\/div>\n    <div class=\"ss-fast\">3 changes can merge automatically.<br><small>New Safety gate · two rewired connections<\/small><\/div>\n    <div class=\"ss-pop-foot\"><button class=\"ss-button\">Cancel<\/button><button class=\"ss-button primary\">Merge 4 changes<\/button><\/div>\n  <\/aside>\n<\/div>\n<div class=\"demo-alt-only\">\n  \n<div class=\"ss-canvas\">\n  <div class=\"ss-mode\"><b>DRAFT · safer ingress<\/b><span>based on Current v0.7<\/span><\/div>\n  <div class=\"ss-node source\">Sensor input<small>source<\/small><\/div>\n  <div class=\"ss-node plan\">Planner<small>expanded · depth 2<\/small><\/div>\n  <div class=\"ss-node gate\">Safety gate<small>new Block<\/small><\/div>\n  <div class=\"ss-node control\">Controller<small>renamed command<\/small><\/div>\n  <span class=\"ss-line one\"><\/span><span class=\"ss-line three\"><\/span><span class=\"ss-line four\"><\/span>\n<\/div>\n  <aside class=\"ss-workbench\">\n    <div class=\"ss-work-head\"><b>Merge safer ingress into Current<\/b><span>4 changes · resolved<\/span><\/div>\n    <div class=\"ss-conflict\" style=\"border-color:#9acdb7;background:#effaf4\"><small style=\"color:#25815a\">RESOLVED · DEPTH 2<\/small><b>Use draft: “safe command”<\/b><div class=\"ss-choice\"><button>Keep Current<\/button><button class=\"selected\">Use draft<\/button><button>Merge text<\/button><\/div><\/div>\n    <div class=\"ss-fast\">Ready: preserve Current v0.7 as a named Version, then advance Current.<\/div>\n    <div class=\"ss-pop-foot\"><button class=\"ss-button\" data-demo-toggle data-base-label=\"Edit resolution\" data-alt-label=\"Edit resolution\">Edit resolution<\/button><button class=\"ss-button primary\">Confirm merge<\/button><\/div>\n  <\/aside>\n<\/div>\n<\/div>",
+      "media": [
+        {
+          "label": "Calm normal merge, specific conflict choice",
+          "caption": "Normal merge stays one quiet action; only the overlapping Controller change expands into source/target choices.",
+          "html": "<div class=\"ss-mini-flow\"><div>3 automatic<br><small>merge<\/small><\/div><i>+<\/i><div>1 conflict<br><small>choose<\/small><\/div><i>→<\/i><div>Current v0.8<br><small>new Current<\/small><\/div><\/div>"
+        }
+      ]
+    }
+  ],
+  "checks": [
+    "Exactly five structurally distinct top-right interaction models.",
+    "Every variant uses the same Current v0.7, two Current-rooted Drafts, four safer-ingress changes, and one depth-2 change.",
+    "Every hero has a live direct control and a synchronized two-step manual walkthrough.",
+    "Weighted requirements sum to 100%; score evidence and confidence are recorded after the prototypes.",
+    "No variant introduces a tldraw page, a second SystemSketch canvas, or a Git prerequisite.",
+    "The AI recommendation appears after—not inside—the visual variant atlas."
+  ]
+}
+  </script>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const project = JSON.parse(document.getElementById("babble-data").textContent);
+      const variants = project.variants;
+      const requirements = project.requirements || [];
+      const hardGates = project.hardGates || [];
+      const rankedResults = variants
+        .map((variant) => resultFor(variant))
+        .sort((left, right) => {
+          if (left.eligible !== right.eligible) return left.eligible ? -1 : 1;
+          if (right.total !== left.total) return right.total - left.total;
+          return variants.indexOf(left.variant) - variants.indexOf(right.variant);
+        });
+      const eligibleResults = rankedResults.filter((result) => result.eligible);
+      const topResult = eligibleResults[0] || rankedResults[0];
+      const coLeaders = topResult
+        ? eligibleResults.filter((result) => topResult.total - result.total <= 3)
+        : [];
+      const resultById = new Map(rankedResults.map((result) => [result.variant.id, result]));
+      const rankById = new Map(rankedResults.map((result, index) => [result.variant.id, index + 1]));
+      const defaultVariant = variants.find((variant) => variant.id === project.defaultId) || variants[0];
+      const storageKey = `babble-prune:${location.pathname}:${project.title}`;
+
+      const blankState = () => ({
+        pick: null,
+        statuses: {},
+        keeps: {},
+        notes: {},
+        synthesis: "",
+        focusIndex: 0,
+        layout: "grid"
+      });
+
+      let state = blankState();
+      try {
+        state = { ...state, ...JSON.parse(localStorage.getItem(storageKey) || "{}") };
+      } catch {
+        state = blankState();
+      }
+      state.synthesis = state.synthesis || state.why || "";
+
+      const byId = (id) => document.getElementById(id);
+      const variantGrid = byId("variant-grid");
+      const toast = byId("toast");
+
+      document.title = `${project.title} · Babble & Prune`;
+      byId("kicker").textContent = project.kicker || "Babble & Prune";
+      byId("page-title").textContent = project.title;
+      byId("page-brief").textContent = project.brief;
+      byId("count-badge").textContent = `${variants.length} orthogonal variant${variants.length === 1 ? "" : "s"}`;
+      byId("boundary").textContent = project.boundary;
+
+      byId("criteria-strip").innerHTML = requirements.map((requirement) => `
+        <span class="criterion-chip" title="${escapeHtml(requirement.passCondition)}">
+          <b>${escapeHtml(requirement.weight)}%</b>
+          <span>${escapeHtml(requirement.name)}</span>
+        </span>
+      `).join("");
+
+      byId("constraint-strip").innerHTML = hardGates.length
+        ? hardGates.map((gate) => `<span class="constraint-chip" title="${escapeHtml(gate.why)}">${escapeHtml(gate.name)}</span>`).join("")
+        : `<span class="constraint-chip">No separate hard gates</span>`;
+
+      renderAiPrune();
+      variantGrid.innerHTML = variants.map((variant, index) => variantMarkup(variant, index)).join("");
+      variantGrid.querySelectorAll(".variant-card").forEach((card) => {
+        setStoryStep(card, 0);
+      });
+      byId("global-synthesis").value = state.synthesis;
+      setLayout(state.layout || "grid");
+      updateUi();
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function labelFor(id) {
+        const index = variants.findIndex((variant) => variant.id === id);
+        return index >= 0 ? `V${index + 1}` : id;
+      }
+
+      function resultFor(variant) {
+        const total = requirements.reduce((sum, requirement) => {
+          const score = Number(variant.scores?.[requirement.id]?.score || 0);
+          return sum + Number(requirement.weight || 0) * score / 5;
+        }, 0);
+        const failedGates = hardGates.filter(
+          (gate) => variant.gateResults?.[gate.id]?.pass !== true
+        );
+        return {
+          variant,
+          total: Math.round((total + Number.EPSILON) * 100) / 100,
+          eligible: failedGates.length === 0,
+          failedGates
+        };
+      }
+
+      function formatTotal(value) {
+        return Number(value).toFixed(1);
+      }
+
+      function renderAiPrune() {
+        byId("decision-hinge").textContent = project.decisionHinge || "No decision hinge supplied.";
+
+        const requirementRows = requirements.map((requirement) => `
+          <tr>
+            <td class="requirement-name">
+              <small>${escapeHtml(requirement.id)}</small>
+              <b>${escapeHtml(requirement.name)}</b>
+            </td>
+            <td><span class="weight-number">${escapeHtml(requirement.weight)}%</span></td>
+            <td>${escapeHtml(requirement.why)}</td>
+            <td>${escapeHtml(requirement.passCondition)}</td>
+            <td>
+              <div class="anchor-list">
+                <span><b>1</b>${escapeHtml(requirement.anchors?.["1"] || "—")}</span>
+                <span><b>3</b>${escapeHtml(requirement.anchors?.["3"] || "—")}</span>
+                <span><b>5</b>${escapeHtml(requirement.anchors?.["5"] || "—")}</span>
+              </div>
+            </td>
+          </tr>
+        `).join("");
+
+        byId("requirement-table").innerHTML = `
+          <table class="requirement-table">
+            <thead><tr><th>Criterion</th><th>Weight</th><th>Why</th><th>Pass condition</th><th>1 / 3 / 5 anchors</th></tr></thead>
+            <tbody>${requirementRows}</tbody>
+          </table>
+        `;
+
+        const scoreHeaders = requirements.map((requirement) => `
+          <th title="${escapeHtml(requirement.passCondition)}">${escapeHtml(requirement.name)}<small>${escapeHtml(requirement.weight)}%</small></th>
+        `).join("");
+
+        const scoreRows = rankedResults.map((result) => {
+          const cells = requirements.map((requirement) => {
+            const entry = result.variant.scores?.[requirement.id] || {};
+            const confidence = entry.confidence || "low";
+            return `
+              <td>
+                <details class="score-detail">
+                  <summary aria-label="${escapeHtml(requirement.name)} score ${escapeHtml(entry.score ?? "—")} out of 5, ${escapeHtml(confidence)} confidence">
+                    <span class="score-value">${escapeHtml(entry.score ?? "—")}</span>
+                    <span class="confidence ${escapeHtml(confidence)}">${escapeHtml(confidence)}</span>
+                  </summary>
+                  <p class="score-evidence"><span class="evidence-chip">is</span><br>${escapeHtml(entry.evidence || "No evidence supplied.")}</p>
+                </details>
+              </td>
+            `;
+          }).join("");
+          const status = result.eligible ? `#${rankById.get(result.variant.id)} eligible` : "gate fail";
+          const rowClass = coLeaders.includes(result) ? "ai-leader" : (result.eligible ? "" : "gate-fail");
+          return `
+            <tr class="${rowClass}">
+              <td class="score-variant">
+                <small>${labelFor(result.variant.id)}</small>
+                <b>${escapeHtml(result.variant.name)}</b>
+              </td>
+              ${cells}
+              <td class="total-cell">${formatTotal(result.total)}<span class="rank-label">${escapeHtml(status)}</span></td>
+            </tr>
+          `;
+        }).join("");
+
+        byId("score-matrix").innerHTML = `
+          <table class="score-table">
+            <thead><tr><th>Ranked option</th>${scoreHeaders}<th>Weighted / 100</th></tr></thead>
+            <tbody>${scoreRows}</tbody>
+          </table>
+        `;
+
+        byId("ranking-strip").innerHTML = rankedResults.map((result) => {
+          const rank = rankById.get(result.variant.id);
+          const stateClass = !result.eligible ? "is-ineligible" : (coLeaders.includes(result) ? "is-leader" : "");
+          return `
+            <span class="ranking-chip ${stateClass}">
+              <b>#${rank}</b>
+              <span>${labelFor(result.variant.id)} · ${escapeHtml(result.variant.name)}</span>
+              <strong>${formatTotal(result.total)}${result.eligible ? "" : " · gate fail"}</strong>
+            </span>
+          `;
+        }).join("");
+
+        if (!topResult) {
+          byId("ai-recommendation").innerHTML = `
+            <span class="judgment-chip">AI judgment · ought</span>
+            <div class="recommendation-line"><strong>No eligible recommendation</strong></div>
+            <p>Complete the FR scores and hard-gate evidence before pruning.</p>
+          `;
+        } else {
+          const leaderNames = coLeaders.map(
+            (result) => `${labelFor(result.variant.id)} · ${result.variant.name}`
+          ).join(" + ");
+          const recommendationLabel = coLeaders.length > 1 ? "Co-leaders" : "Best overall";
+          const alternative = eligibleResults.find((result) => !coLeaders.includes(result));
+          const alternativeMarkup = alternative ? `
+            <p class="alternative-line"><b>Strong alternative:</b> ${labelFor(alternative.variant.id)} · ${escapeHtml(alternative.variant.name)} at ${formatTotal(alternative.total)} — ${escapeHtml(alternative.variant.bestWhen)}</p>
+          ` : "";
+          byId("ai-recommendation").innerHTML = `
+            <span class="judgment-chip">AI judgment · ought</span>
+            <div class="recommendation-line">
+              <strong>${recommendationLabel}: ${escapeHtml(leaderNames)}</strong>
+              <span class="ai-total">${formatTotal(topResult.total)} / 100</span>
+            </div>
+            <p>${escapeHtml(project.defaultWhy)}</p>
+            ${alternativeMarkup}
+          `;
+        }
+
+        if (!hardGates.length) {
+          byId("gate-grid").innerHTML = `<div class="gate-card"><b>No separate hard gates</b><p>All constraints are represented as weighted FRs for this round.</p></div>`;
+          return;
+        }
+
+        byId("gate-grid").innerHTML = hardGates.map((gate) => {
+          const results = variants.map((variant) => {
+            const entry = variant.gateResults?.[gate.id] || {};
+            const passed = entry.pass === true;
+            return `<span class="gate-result ${passed ? "" : "fail"}" title="${escapeHtml(entry.evidence || "No evidence supplied.")}">${labelFor(variant.id)} ${passed ? "✓ pass" : "✕ fail"}</span>`;
+          }).join("");
+          return `
+            <div class="gate-card">
+              <span class="evidence-chip">hard gate</span>
+              <b>${escapeHtml(gate.name)}</b>
+              <p>${escapeHtml(gate.why)}</p>
+              <div class="gate-results">${results}</div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function variantMarkup(variant, index) {
+        const decisions = variant.decisions.map((decision) => `
+          <div class="decision">
+            <b>${escapeHtml(decision.label)}</b>
+            <span>${escapeHtml(decision.value)}</span>
+          </div>
+        `).join("");
+
+        const proof = variant.proof.map((item) => `
+          <li>${escapeHtml(item)}</li>
+        `).join("");
+
+        const keepParts = variant.keepParts.map((part, partIndex) => `
+          <label class="keep-chip">
+            <input type="checkbox" data-keep="${escapeHtml(variant.id)}" data-part="${partIndex}">
+            <span>${escapeHtml(part)}</span>
+          </label>
+        `).join("");
+
+        const media = (variant.media || []).map((item) => `
+          <figure class="media-exhibit">
+            <div class="media-surface">${item.html}</div>
+            <figcaption class="media-caption">
+              <b>${escapeHtml(item.label)}</b>
+              <span>${escapeHtml(item.caption)}</span>
+            </figcaption>
+          </figure>
+        `).join("");
+
+        const mediaStory = media ? `<div class="media-story" aria-label="Supporting media for ${escapeHtml(variant.name)}">${media}</div>` : "";
+
+        const storySteps = variant.story?.steps || [];
+        const storyProgress = storySteps.map((step, stepIndex) => `
+          <button type="button" data-story-action="jump" data-story-index="${stepIndex}"
+            aria-label="Show story step ${stepIndex + 1}: ${escapeHtml(step.label)}">Step ${stepIndex + 1}</button>
+        `).join("");
+        const storyDriver = storySteps.length ? `
+          <div class="story-driver" data-story-driver aria-label="Manual walkthrough for ${escapeHtml(variant.name)}">
+            <div class="story-copy" aria-live="polite">
+              <small><span data-story-position>Step 1 of ${storySteps.length}</span> · ${escapeHtml(variant.story.title || "Manual walkthrough")}</small>
+              <b data-story-label>${escapeHtml(storySteps[0]?.label || "Start")}</b>
+              <p data-story-caption>${escapeHtml(storySteps[0]?.caption || "")}</p>
+            </div>
+            <div class="story-actions">
+              <button type="button" class="story-nav" data-story-action="back">← Back</button>
+              <button type="button" class="story-nav" data-story-action="next">Next →</button>
+            </div>
+            <div class="story-progress" aria-label="Story progress">${storyProgress}</div>
+          </div>
+        ` : "";
+
+        return `
+          <article class="variant-card" id="card-${escapeHtml(variant.id)}"
+            data-variant="${escapeHtml(variant.id)}"
+            style="--accent:${escapeHtml(variant.accent || "#222")}">
+            <div class="variant-header">
+              <div class="variant-index">V${index + 1}</div>
+              <div class="variant-title">
+                <h3>${escapeHtml(variant.name)}</h3>
+                <p>${escapeHtml(variant.thesis)}</p>
+              </div>
+            </div>
+            ${storyDriver}
+            <div class="prototype-frame">
+              <span class="prototype-label">${escapeHtml(variant.previewLabel || "hero specimen")}</span>
+              <div class="prototype">${variant.preview}</div>
+            </div>
+            ${mediaStory}
+            <div class="variant-body">
+              <details>
+                <summary>Fit, tradeoffs &amp; evidence</summary>
+                <div class="fit-grid">
+                  <div class="fit">
+                    <b>Best when</b>
+                    <span>${escapeHtml(variant.bestWhen)}</span>
+                  </div>
+                  <div class="fit">
+                    <b>Loses when</b>
+                    <span>${escapeHtml(variant.losesWhen)}</span>
+                  </div>
+                </div>
+                <div class="decision-list">${decisions}</div>
+                <ul class="proof-list">${proof}</ul>
+              </details>
+              <div class="keep-title">Parts worth splicing</div>
+              <div class="keep-list">${keepParts}</div>
+              <details class="variant-note">
+                <summary>Add a note on ${labelFor(variant.id)} (optional)</summary>
+                <textarea class="variant-feedback" data-note="${escapeHtml(variant.id)}"
+                  placeholder="A detail specific to ${escapeHtml(variant.name)}…">${escapeHtml(state.notes[variant.id] || "")}</textarea>
+              </details>
+              <div class="variant-actions">
+                <button type="button" class="action-button pick" data-action="pick" data-id="${escapeHtml(variant.id)}">Pick ${labelFor(variant.id)}</button>
+                <button type="button" class="action-button shortlist" data-action="shortlist" data-id="${escapeHtml(variant.id)}">Shortlist</button>
+                <button type="button" class="action-button reject" data-action="reject" data-id="${escapeHtml(variant.id)}">Reject</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      function variantForCard(card) {
+        return variants.find((variant) => variant.id === card?.dataset.variant);
+      }
+
+      function setStoryStep(card, requestedIndex) {
+        const story = variantForCard(card)?.story;
+        if (!card || !story?.steps?.length) return;
+
+        const index = Math.max(0, Math.min(Number(requestedIndex) || 0, story.steps.length - 1));
+        const step = story.steps[index];
+        const prototype = card.querySelector(".prototype");
+        card.dataset.storyIndex = String(index);
+        prototype.dataset.storyState = step.state;
+        prototype.classList.toggle("is-alt", step.state === "alt");
+
+        prototype.querySelectorAll("[data-demo-toggle]").forEach((button) => {
+          button.textContent = step.state === "alt" ? button.dataset.altLabel : button.dataset.baseLabel;
+        });
+        card.querySelector("[data-story-position]").textContent = `Step ${index + 1} of ${story.steps.length}`;
+        card.querySelector("[data-story-label]").textContent = step.label;
+        card.querySelector("[data-story-caption]").textContent = step.caption;
+        card.querySelector('[data-story-action="back"]').disabled = index === 0;
+        card.querySelector('[data-story-action="next"]').disabled = index === story.steps.length - 1;
+        card.querySelectorAll("[data-story-index]").forEach((button) => {
+          button.classList.toggle("active", Number(button.dataset.storyIndex) <= index);
+          button.setAttribute("aria-current", Number(button.dataset.storyIndex) === index ? "step" : "false");
+        });
+
+        prototype.querySelectorAll(".story-target").forEach((target) => target.classList.remove("story-target"));
+        if (step.target) {
+          const target = prototype.querySelector(step.target);
+          if (target) {
+            void target.offsetWidth;
+            target.classList.add("story-target");
+          }
+        }
+      }
+
+      function saveState() {
+        localStorage.setItem(storageKey, JSON.stringify(state));
+      }
+
+      function updateUi() {
+        variants.forEach((variant, index) => {
+          const card = byId(`card-${variant.id}`);
+          const status = state.statuses[variant.id];
+          card.classList.toggle("is-picked", state.pick === variant.id);
+          card.classList.toggle("is-shortlisted", status === "shortlist");
+          card.classList.toggle("is-rejected", status === "reject");
+          card.classList.toggle("is-focused", index === state.focusIndex);
+
+          const shortlistButton = card.querySelector('[data-action="shortlist"]');
+          const rejectButton = card.querySelector('[data-action="reject"]');
+          shortlistButton.classList.toggle("active", status === "shortlist");
+          rejectButton.classList.toggle("active", status === "reject");
+          shortlistButton.textContent = status === "shortlist" ? "Shortlisted" : "Shortlist";
+          rejectButton.textContent = status === "reject" ? "Rejected" : "Reject";
+
+          card.querySelectorAll("[data-keep]").forEach((input) => {
+            const selected = state.keeps[variant.id] || [];
+            input.checked = selected.includes(Number(input.dataset.part));
+          });
+        });
+
+        const picked = variants.find((variant) => variant.id === state.pick);
+        const shortlist = variants.filter((variant) => state.statuses[variant.id] === "shortlist");
+        const keptCount = Object.values(state.keeps).reduce((total, parts) => total + parts.length, 0);
+
+        if (picked) {
+          byId("decision-title").textContent = `Pick: ${labelFor(picked.id)} · ${picked.name}`;
+        } else if (shortlist.length) {
+          byId("decision-title").textContent = `Shortlist: ${shortlist.map((variant) => labelFor(variant.id)).join(", ")}`;
+        } else if (state.synthesis.trim()) {
+          byId("decision-title").textContent = "Free-form direction ready";
+        } else {
+          byId("decision-title").textContent = "No pick yet";
+        }
+
+        const details = [];
+        if (!picked && !state.synthesis.trim()) details.push("No direction captured yet");
+        if (state.synthesis.trim()) details.push("natural-language splice captured");
+        if (keptCount) details.push(`${keptCount} splice part${keptCount === 1 ? "" : "s"} selected`);
+        byId("decision-detail").textContent = details.join(" · ") || "Decision captured locally.";
+      }
+
+      function setStatus(id, status) {
+        if (state.statuses[id] === status) {
+          delete state.statuses[id];
+        } else {
+          state.statuses[id] = status;
+        }
+        if (status === "reject" && state.pick === id) state.pick = null;
+        saveState();
+        updateUi();
+      }
+
+      function setPick(id) {
+        state.pick = state.pick === id ? null : id;
+        if (state.pick) delete state.statuses[id];
+        saveState();
+        updateUi();
+        showToast(state.pick ? `${labelFor(id)} picked` : "Pick cleared");
+      }
+
+      function moveFocus(delta) {
+        state.focusIndex = (state.focusIndex + delta + variants.length) % variants.length;
+        saveState();
+        updateUi();
+        const card = byId(`card-${variants[state.focusIndex].id}`);
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      function focusVariant(index) {
+        if (index < 0 || index >= variants.length) return;
+        state.focusIndex = index;
+        saveState();
+        updateUi();
+        byId(`card-${variants[index].id}`).scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      function setLayout(layout) {
+        state.layout = layout;
+        variantGrid.classList.toggle("focus-layout", layout === "focus");
+        document.querySelectorAll("[data-layout]").forEach((button) => {
+          button.classList.toggle("active", button.dataset.layout === layout);
+        });
+        saveState();
+        updateUi();
+      }
+
+      function markdownBrief() {
+        const picked = variants.find((variant) => variant.id === state.pick);
+        const shortlisted = variants.filter((variant) => state.statuses[variant.id] === "shortlist");
+        const rejected = variants.filter((variant) => state.statuses[variant.id] === "reject");
+        const mdCell = (value) => String(value).replaceAll("|", "\\|").replaceAll("\n", " ");
+        const recommendationText = coLeaders.length > 1
+          ? `Co-leaders: ${coLeaders.map((result) => `${labelFor(result.variant.id)} · ${result.variant.name} (${formatTotal(result.total)})`).join(", ")}`
+          : topResult
+            ? `${labelFor(topResult.variant.id)} · ${topResult.variant.name} (${formatTotal(topResult.total)}/100)`
+            : "No eligible recommendation";
+        const lines = [
+          `# Babble prune — ${project.title}`,
+          "",
+          `**Shared brief:** ${project.brief}`,
+          "",
+          "## AI prune — judgment / ought",
+          "",
+          `**Recommendation:** ${recommendationText}`,
+          `**Why:** ${project.defaultWhy}`,
+          `**Decision hinge:** ${project.decisionHinge}`,
+          "",
+          "> FR weights, scores, and recommendation are AI judgments. Exercised prototype behavior is evidence; production integration remains outside the prototype boundary.",
+          "",
+          "### Weighted functional requirements",
+          ""
+        ];
+
+        requirements.forEach((requirement) => {
+          lines.push(
+            `- **${requirement.id} · ${requirement.name} — ${requirement.weight}%:** ${requirement.why}`,
+            `  - Pass: ${requirement.passCondition}`,
+            `  - Anchors: 1 = ${requirement.anchors?.["1"] || "—"}; 3 = ${requirement.anchors?.["3"] || "—"}; 5 = ${requirement.anchors?.["5"] || "—"}`
+          );
+        });
+
+        lines.push("", "### Ranked score matrix", "");
+        lines.push(
+          `| Rank | Option | ${requirements.map((requirement) => mdCell(requirement.id)).join(" | ")} | Weighted | Gates |`,
+          `| ---: | --- | ${requirements.map(() => "---:").join(" | ")} | ---: | --- |`
+        );
+        rankedResults.forEach((result, index) => {
+          const scores = requirements.map(
+            (requirement) => result.variant.scores?.[requirement.id]?.score ?? "—"
+          );
+          lines.push(
+            `| ${index + 1} | ${mdCell(`${labelFor(result.variant.id)} · ${result.variant.name}`)} | ${scores.join(" | ")} | ${formatTotal(result.total)} | ${result.eligible ? "pass" : `fail: ${result.failedGates.map((gate) => gate.name).join(", ")}`} |`
+          );
+        });
+
+        lines.push("", "### Score evidence — observed is, interpreted as ought", "");
+        rankedResults.forEach((result) => {
+          lines.push(`#### ${labelFor(result.variant.id)} · ${result.variant.name} — ${formatTotal(result.total)}/100`, "");
+          requirements.forEach((requirement) => {
+            const entry = result.variant.scores?.[requirement.id] || {};
+            lines.push(`- **${requirement.id}: ${entry.score ?? "—"}/5 · ${entry.confidence || "unknown"} confidence.** ${entry.evidence || "No evidence supplied."}`);
+          });
+          lines.push("");
+        });
+
+        lines.push("### Hard gates", "");
+        if (!hardGates.length) {
+          lines.push("- No separate hard gates in this round.", "");
+        } else {
+          hardGates.forEach((gate) => {
+            lines.push(`- **${gate.name}:** ${gate.why}`);
+            variants.forEach((variant) => {
+              const entry = variant.gateResults?.[gate.id] || {};
+              lines.push(`  - ${labelFor(variant.id)} ${entry.pass === true ? "PASS" : "FAIL"} — ${entry.evidence || "No evidence supplied."}`);
+            });
+          });
+          lines.push("");
+        }
+
+        lines.push(
+          "## Human prune — your decision",
+          "",
+          `**Decision:** ${picked ? `${labelFor(picked.id)} · ${picked.name}` : "No final pick"}`,
+          `**AI recommendation (advisory):** ${recommendationText}`,
+          `**Shortlist:** ${shortlisted.length ? shortlisted.map((variant) => `${labelFor(variant.id)} · ${variant.name}`).join(", ") : "none"}`,
+          `**Rejected:** ${rejected.length ? rejected.map((variant) => `${labelFor(variant.id)} · ${variant.name}`).join(", ") : "none"}`,
+          ""
+        );
+
+        const keepLines = variants.flatMap((variant) => {
+          const selected = state.keeps[variant.id] || [];
+          return selected.map((partIndex) => `- ${labelFor(variant.id)} · ${variant.keepParts[partIndex]}`);
+        });
+        lines.push("## Keep / splice", ...(keepLines.length ? keepLines : ["- none selected"]), "");
+
+        const feedbackLines = variants
+          .filter((variant) => (state.notes[variant.id] || "").trim())
+          .map((variant) => `- **${labelFor(variant.id)} · ${variant.name}:** ${state.notes[variant.id].trim()}`);
+        lines.push("## Variant feedback", ...(feedbackLines.length ? feedbackLines : ["- none"]), "");
+
+        lines.push("## Free-form direction", state.synthesis.trim() || "Not supplied.", "");
+        lines.push("## Prototype boundary", project.boundary, "");
+
+        if (picked || keepLines.length) {
+          lines.push("## Next", "Synthesize a new child prototype from this decision before production implementation.");
+        } else {
+          lines.push("## Next", `Review ${labelFor(defaultVariant.id)} as the AI recommendation, then pick, shortlist, reject, or splice before production implementation.`);
+        }
+        return lines.join("\n");
+      }
+
+      function compactDirection() {
+        const picked = variants.find((variant) => variant.id === state.pick);
+        const shortlisted = variants.filter((variant) => state.statuses[variant.id] === "shortlist");
+        const kept = variants.flatMap((variant) => {
+          const selected = state.keeps[variant.id] || [];
+          return selected.map((partIndex) => `${labelFor(variant.id)}: ${variant.keepParts[partIndex]}`);
+        });
+        const notes = variants
+          .filter((variant) => (state.notes[variant.id] || "").trim())
+          .map((variant) => `${labelFor(variant.id)}: ${state.notes[variant.id].trim()}`);
+        const fileName = decodeURIComponent(location.pathname.split("/").pop() || "babble-gallery.html");
+        return [
+          `# Babble direction — ${project.title}`,
+          `Gallery: ${fileName}`,
+          "",
+          `Pick: ${picked ? `${labelFor(picked.id)} · ${picked.name}` : "none"}`,
+          `Shortlist: ${shortlisted.length ? shortlisted.map((variant) => labelFor(variant.id)).join(", ") : "none"}`,
+          `Keep / borrow: ${kept.length ? kept.join("; ") : "none selected"}`,
+          ...(notes.length ? ["", "Variant notes:", ...notes.map((note) => `- ${note}`)] : []),
+          "",
+          "Direction:",
+          state.synthesis.trim() || "No free-form direction supplied."
+        ].join("\n");
+      }
+
+      async function copyMarkdown() {
+        const markdown = compactDirection();
+        try {
+          await navigator.clipboard.writeText(markdown);
+        } catch {
+          const fallback = document.createElement("textarea");
+          fallback.value = markdown;
+          fallback.style.position = "fixed";
+          fallback.style.opacity = "0";
+          document.body.appendChild(fallback);
+          fallback.select();
+          document.execCommand("copy");
+          fallback.remove();
+        }
+        showToast("Direction copied as Markdown");
+      }
+
+      function downloadMarkdown() {
+        const blob = new Blob([markdownBrief()], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        const slug = project.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        anchor.href = url;
+        anchor.download = `${slug || "babble"}-prune.md`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+        showToast("Markdown decision downloaded");
+      }
+
+      let toastTimer;
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+      }
+
+      document.addEventListener("click", (event) => {
+        const storyControl = event.target.closest("[data-story-action]");
+        if (storyControl) {
+          const card = storyControl.closest(".variant-card");
+          const action = storyControl.dataset.storyAction;
+          const index = Number(card.dataset.storyIndex || 0);
+          if (action === "back") setStoryStep(card, index - 1);
+          if (action === "next") setStoryStep(card, index + 1);
+          if (action === "jump") setStoryStep(card, Number(storyControl.dataset.storyIndex));
+          return;
+        }
+
+        const actionButton = event.target.closest("[data-action]");
+        if (actionButton) {
+          const { action, id } = actionButton.dataset;
+          if (action === "pick") setPick(id);
+          if (action === "shortlist") setStatus(id, "shortlist");
+          if (action === "reject") setStatus(id, "reject");
+          return;
+        }
+
+        const layoutButton = event.target.closest("[data-layout]");
+        if (layoutButton) {
+          setLayout(layoutButton.dataset.layout);
+          return;
+        }
+
+        const demoButton = event.target.closest("[data-demo-toggle]");
+        if (demoButton) {
+          const prototype = demoButton.closest(".prototype");
+          const card = demoButton.closest(".variant-card");
+          const nextState = prototype.classList.contains("is-alt") ? "base" : "alt";
+          const story = variantForCard(card)?.story;
+          const matchingIndex = story?.steps?.findIndex((step) => step.state === nextState) ?? -1;
+          if (matchingIndex >= 0) {
+            setStoryStep(card, matchingIndex);
+          } else {
+            prototype.classList.toggle("is-alt", nextState === "alt");
+            prototype.dataset.storyState = nextState;
+            demoButton.textContent = nextState === "alt" ? demoButton.dataset.altLabel : demoButton.dataset.baseLabel;
+          }
+          return;
+        }
+
+        const storyStateControl = event.target.closest("[data-story-to]");
+        if (storyStateControl) {
+          const card = storyStateControl.closest(".variant-card");
+          const story = variantForCard(card)?.story;
+          const matchingIndex = story?.steps?.findIndex((step) => step.state === storyStateControl.dataset.storyTo) ?? -1;
+          if (matchingIndex >= 0) setStoryStep(card, matchingIndex);
+        }
+      });
+
+      document.addEventListener("change", (event) => {
+        const keepInput = event.target.closest("[data-keep]");
+        if (!keepInput) return;
+        const id = keepInput.dataset.keep;
+        const partIndex = Number(keepInput.dataset.part);
+        const selected = new Set(state.keeps[id] || []);
+        if (keepInput.checked) selected.add(partIndex);
+        else selected.delete(partIndex);
+        state.keeps[id] = [...selected].sort((left, right) => left - right);
+        saveState();
+        updateUi();
+      });
+
+      document.addEventListener("input", (event) => {
+        const note = event.target.closest("[data-note]");
+        if (note) {
+          state.notes[note.dataset.note] = note.value;
+          saveState();
+        }
+        if (event.target.id === "global-synthesis") {
+          state.synthesis = event.target.value;
+          saveState();
+          updateUi();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        const typing = event.target.matches("input, textarea, [contenteditable='true']");
+        if (typing) return;
+
+        const numericIndex = event.key === "0" ? 9 : Number(event.key) - 1;
+        if (Number.isInteger(numericIndex) && numericIndex >= 0) {
+          focusVariant(numericIndex);
+          return;
+        }
+
+        if (event.key === "j" || event.key === "J" || event.key === "ArrowDown" || event.key === "ArrowRight") {
+          event.preventDefault();
+          moveFocus(1);
+        } else if (event.key === "k" || event.key === "K" || event.key === "ArrowUp" || event.key === "ArrowLeft") {
+          event.preventDefault();
+          moveFocus(-1);
+        } else if (event.key === "Enter") {
+          setPick(variants[state.focusIndex].id);
+        } else if (event.key === "s" || event.key === "S") {
+          setStatus(variants[state.focusIndex].id, "shortlist");
+        } else if (event.key === "r" || event.key === "R") {
+          setStatus(variants[state.focusIndex].id, "reject");
+        } else if (event.key === "c" || event.key === "C") {
+          copyMarkdown();
+        }
+      });
+
+      byId("previous-variant").addEventListener("click", () => moveFocus(-1));
+      byId("next-variant").addEventListener("click", () => moveFocus(1));
+      byId("copy-prune").addEventListener("click", copyMarkdown);
+      byId("download-prune").addEventListener("click", downloadMarkdown);
+      byId("reset-prune").addEventListener("click", () => {
+        variantGrid.querySelectorAll(".variant-card").forEach((card) => {
+          setStoryStep(card, 0);
+        });
+        state = blankState();
+        byId("global-synthesis").value = "";
+        document.querySelectorAll("[data-note]").forEach((note) => { note.value = ""; });
+        setLayout("grid");
+        saveState();
+        updateUi();
+        showToast("Local choices reset");
+      });
+    })();
+  </script>
+</body>
+</html>

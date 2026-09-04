@@ -1,0 +1,6174 @@
+{
+ "feature": "For-loop grammars \u00b7 stress suite",
+ "viewport": {
+  "width": 2600,
+  "height": 1900
+ },
+ "pages": [
+  {
+   "id": "review",
+   "name": "Review"
+  }
+ ],
+ "shapes": [
+  {
+   "id": "s0v4-card",
+   "type": "geo",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 748,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s0v4-title",
+   "type": "text",
+   "x": 26,
+   "y": 18,
+   "text": "V4 \u00b7 Header Contract \u2014 L1 \u00b7 map \u00b7 invariant \u00b7 packed result",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s0v4-code",
+   "type": "text",
+   "x": 26,
+   "y": 58,
+   "text": "thumbs = []\nfor f in frames:\n    thumbs.append(shrink(f, size))",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s0v4-region",
+   "type": "geo",
+   "x": 360,
+   "y": 228,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 420,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s0v4-run",
+   "type": "block",
+   "x": 20,
+   "y": 268,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 198,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "frames",
+      "type": "Frames",
+      "visible": true
+     },
+     {
+      "id": "out_2",
+      "name": "size",
+      "type": "int",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s0v4-res",
+   "type": "block",
+   "x": 1640,
+   "y": 348,
+   "props": {
+    "title": "result()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 330,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "thumbs",
+      "type": "Thumbs",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "s0v4-a",
+   "type": "block",
+   "x": 430,
+   "y": 278,
+   "props": {
+    "title": "shrink()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "f",
+      "type": "Frame",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "size",
+      "type": "int",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "thumb",
+      "type": "Thumb",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s0v4-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s0v4-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s0v4-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s0v4-note",
+   "type": "text",
+   "x": 26,
+   "y": 690,
+   "text": "V4 \u00b7 HEADER CONTRACT \u2014 each name the `for` binds is one header row that owns a wall port. The carry row IS the return path: solid, z\u207b\u00b9, solid.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s0v2-card",
+   "type": "geo",
+   "x": 2200,
+   "y": 0,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 748,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s0v2-title",
+   "type": "text",
+   "x": 2226,
+   "y": 18,
+   "text": "V2 \u00b7 Cardinality Cable \u2014 L1 \u00b7 map \u00b7 invariant \u00b7 packed result",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s0v2-code",
+   "type": "text",
+   "x": 2226,
+   "y": 58,
+   "text": "thumbs = []\nfor f in frames:\n    thumbs.append(shrink(f, size))",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s0v2-region",
+   "type": "geo",
+   "x": 2560,
+   "y": 228,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 420,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s0v2-run",
+   "type": "block",
+   "x": 2220,
+   "y": 268,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 198,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "frames",
+      "type": "Frames",
+      "visible": true
+     },
+     {
+      "id": "out_2",
+      "name": "size",
+      "type": "int",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s0v2-res",
+   "type": "block",
+   "x": 3840,
+   "y": 348,
+   "props": {
+    "title": "result()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 330,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "thumbs",
+      "type": "Thumbs",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "s0v2-a",
+   "type": "block",
+   "x": 2630,
+   "y": 278,
+   "props": {
+    "title": "shrink()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "f",
+      "type": "Frame",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "size",
+      "type": "int",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "thumb",
+      "type": "Thumb",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s0v2-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s0v2-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s0v2-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s0v2-note",
+   "type": "text",
+   "x": 2226,
+   "y": 690,
+   "text": "V2 \u00b7 CARDINALITY CABLE \u2014 nothing on the wall. A collection is a doubled rail that thins where it enters; the carry is the dotted z\u207b\u00b9 cable below the body.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s0v1-card",
+   "type": "geo",
+   "x": 4400,
+   "y": 0,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 748,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s0v1-title",
+   "type": "text",
+   "x": 4426,
+   "y": 18,
+   "text": "V1 \u00b7 Wall Tunnels \u2014 L1 \u00b7 map \u00b7 invariant \u00b7 packed result",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s0v1-code",
+   "type": "text",
+   "x": 4426,
+   "y": 58,
+   "text": "thumbs = []\nfor f in frames:\n    thumbs.append(shrink(f, size))",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s0v1-region",
+   "type": "geo",
+   "x": 4760,
+   "y": 228,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 420,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s0v1-run",
+   "type": "block",
+   "x": 4420,
+   "y": 268,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 198,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "frames",
+      "type": "Frames",
+      "visible": true
+     },
+     {
+      "id": "out_2",
+      "name": "size",
+      "type": "int",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s0v1-res",
+   "type": "block",
+   "x": 6040,
+   "y": 348,
+   "props": {
+    "title": "result()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 330,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "thumbs",
+      "type": "Thumbs",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "s0v1-a",
+   "type": "block",
+   "x": 4830,
+   "y": 278,
+   "props": {
+    "title": "shrink()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "f",
+      "type": "Frame",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "size",
+      "type": "int",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "thumb",
+      "type": "Thumb",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s0v1-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s0v1-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s0v1-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s0v1-note",
+   "type": "text",
+   "x": 4426,
+   "y": 690,
+   "text": "V1 \u00b7 WALL TUNNELS \u2014 the crossing marks are the grammar. [ ] unpacks the collection; the \u25bc/\u25b2 pair IS the delay and draws no cable at all.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s1v4-card",
+   "type": "geo",
+   "x": 0,
+   "y": 860,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 800,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s1v4-title",
+   "type": "text",
+   "x": 26,
+   "y": 878,
+   "text": "V4 \u00b7 Header Contract \u2014 L2 \u00b7 reduce + collect from one body",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s1v4-code",
+   "type": "text",
+   "x": 26,
+   "y": 918,
+   "text": "pose = estimate(frame, gain)\ntrail = []\nfor other in others:\n    pose = merge(pose, other)\n    trail.append(score(pose))",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s1v4-region",
+   "type": "geo",
+   "x": 360,
+   "y": 1140,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 420,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s1v4-run",
+   "type": "block",
+   "x": 20,
+   "y": 1180,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 198,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "others",
+      "type": "Poses",
+      "visible": true
+     },
+     {
+      "id": "out_2",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s1v4-res",
+   "type": "block",
+   "x": 1640,
+   "y": 1260,
+   "props": {
+    "title": "result()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 330,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "trail",
+      "type": "Floats",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "s1v4-a",
+   "type": "block",
+   "x": 430,
+   "y": 1190,
+   "props": {
+    "title": "merge()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "other",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s1v4-b",
+   "type": "block",
+   "x": 930,
+   "y": 1250,
+   "props": {
+    "title": "score()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "s",
+      "type": "float",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s1v4-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s1v4-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s1v4-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s1v4-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s1v4-carry",
+   "type": "arrow",
+   "x": 860,
+   "y": 1260,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": -460,
+     "y": 0
+    },
+    "bend": -90,
+    "color": "violet",
+    "dash": "dotted",
+    "size": "s",
+    "arrowheadStart": "none",
+    "arrowheadEnd": "arrow"
+   }
+  },
+  {
+   "id": "s1v4-carrylab",
+   "type": "text",
+   "x": 540.0,
+   "y": 1130,
+   "text": "z\u207b\u00b9  carry pose",
+   "props": {
+    "color": "violet",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s1v4-carrynote",
+   "type": "text",
+   "x": 380,
+   "y": 1526,
+   "text": "drawn, not wired \u2014 SystemSketch refuses a cable from a Block to itself, so a one-Block accumulator's recurrence has no real cable today",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s1v4-note",
+   "type": "text",
+   "x": 26,
+   "y": 1602,
+   "text": "V4 \u00b7 HEADER CONTRACT \u2014 each name the `for` binds is one header row that owns a wall port. The carry row IS the return path: solid, z\u207b\u00b9, solid.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s1v2-card",
+   "type": "geo",
+   "x": 2200,
+   "y": 860,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 800,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s1v2-title",
+   "type": "text",
+   "x": 2226,
+   "y": 878,
+   "text": "V2 \u00b7 Cardinality Cable \u2014 L2 \u00b7 reduce + collect from one body",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s1v2-code",
+   "type": "text",
+   "x": 2226,
+   "y": 918,
+   "text": "pose = estimate(frame, gain)\ntrail = []\nfor other in others:\n    pose = merge(pose, other)\n    trail.append(score(pose))",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s1v2-region",
+   "type": "geo",
+   "x": 2560,
+   "y": 1140,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 420,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s1v2-run",
+   "type": "block",
+   "x": 2220,
+   "y": 1180,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 198,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "others",
+      "type": "Poses",
+      "visible": true
+     },
+     {
+      "id": "out_2",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s1v2-res",
+   "type": "block",
+   "x": 3840,
+   "y": 1260,
+   "props": {
+    "title": "result()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 330,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "trail",
+      "type": "Floats",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "s1v2-a",
+   "type": "block",
+   "x": 2630,
+   "y": 1190,
+   "props": {
+    "title": "merge()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "other",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s1v2-b",
+   "type": "block",
+   "x": 3130,
+   "y": 1250,
+   "props": {
+    "title": "score()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "s",
+      "type": "float",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s1v2-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s1v2-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s1v2-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s1v2-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s1v2-carry",
+   "type": "arrow",
+   "x": 3060,
+   "y": 1260,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": -460,
+     "y": 0
+    },
+    "bend": -90,
+    "color": "violet",
+    "dash": "dotted",
+    "size": "s",
+    "arrowheadStart": "none",
+    "arrowheadEnd": "arrow"
+   }
+  },
+  {
+   "id": "s1v2-carrylab",
+   "type": "text",
+   "x": 2740.0,
+   "y": 1130,
+   "text": "z\u207b\u00b9  carry pose",
+   "props": {
+    "color": "violet",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s1v2-carrynote",
+   "type": "text",
+   "x": 2580,
+   "y": 1526,
+   "text": "drawn, not wired \u2014 SystemSketch refuses a cable from a Block to itself, so a one-Block accumulator's recurrence has no real cable today",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s1v2-note",
+   "type": "text",
+   "x": 2226,
+   "y": 1602,
+   "text": "V2 \u00b7 CARDINALITY CABLE \u2014 nothing on the wall. A collection is a doubled rail that thins where it enters; the carry is the dotted z\u207b\u00b9 cable below the body.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s1v1-card",
+   "type": "geo",
+   "x": 4400,
+   "y": 860,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 800,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s1v1-title",
+   "type": "text",
+   "x": 4426,
+   "y": 878,
+   "text": "V1 \u00b7 Wall Tunnels \u2014 L2 \u00b7 reduce + collect from one body",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s1v1-code",
+   "type": "text",
+   "x": 4426,
+   "y": 918,
+   "text": "pose = estimate(frame, gain)\ntrail = []\nfor other in others:\n    pose = merge(pose, other)\n    trail.append(score(pose))",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s1v1-region",
+   "type": "geo",
+   "x": 4760,
+   "y": 1140,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 420,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s1v1-run",
+   "type": "block",
+   "x": 4420,
+   "y": 1180,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 198,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "others",
+      "type": "Poses",
+      "visible": true
+     },
+     {
+      "id": "out_2",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s1v1-res",
+   "type": "block",
+   "x": 6040,
+   "y": 1260,
+   "props": {
+    "title": "result()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 330,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "trail",
+      "type": "Floats",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "s1v1-a",
+   "type": "block",
+   "x": 4830,
+   "y": 1190,
+   "props": {
+    "title": "merge()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "other",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "fused",
+      "type": "Pose",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s1v1-b",
+   "type": "block",
+   "x": 5330,
+   "y": 1250,
+   "props": {
+    "title": "score()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "pose",
+      "type": "Pose",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "s",
+      "type": "float",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s1v1-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s1v1-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s1v1-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s1v1-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s1v1-carry",
+   "type": "arrow",
+   "x": 5260,
+   "y": 1260,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": -460,
+     "y": 0
+    },
+    "bend": -90,
+    "color": "violet",
+    "dash": "dotted",
+    "size": "s",
+    "arrowheadStart": "none",
+    "arrowheadEnd": "arrow"
+   }
+  },
+  {
+   "id": "s1v1-carrylab",
+   "type": "text",
+   "x": 4940.0,
+   "y": 1130,
+   "text": "z\u207b\u00b9  carry pose",
+   "props": {
+    "color": "violet",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s1v1-carrynote",
+   "type": "text",
+   "x": 4780,
+   "y": 1526,
+   "text": "drawn, not wired \u2014 SystemSketch refuses a cable from a Block to itself, so a one-Block accumulator's recurrence has no real cable today",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s1v1-note",
+   "type": "text",
+   "x": 4426,
+   "y": 1602,
+   "text": "V1 \u00b7 WALL TUNNELS \u2014 the crossing marks are the grammar. [ ] unpacks the collection; the \u25bc/\u25b2 pair IS the delay and draws no cable at all.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s2v4-card",
+   "type": "geo",
+   "x": 0,
+   "y": 1720,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 774,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s2v4-title",
+   "type": "text",
+   "x": 26,
+   "y": 1738,
+   "text": "V4 \u00b7 Header Contract \u2014 L3 \u00b7 enumerate \u00b7 zip \u00b7 tuple unpack",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s2v4-code",
+   "type": "text",
+   "x": 26,
+   "y": 1778,
+   "text": "best = None\nfor i, (name, box) in enumerate(zip(names, boxes)):\n    score = rate(box, gain)\n    best = pick(best, score, name, i)",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s2v4-region",
+   "type": "geo",
+   "x": 360,
+   "y": 1974,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 420,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s2v4-run",
+   "type": "block",
+   "x": 20,
+   "y": 2014,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 286,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "boxes",
+      "type": "Boxes",
+      "visible": true
+     },
+     {
+      "id": "out_2",
+      "name": "names",
+      "type": "Names",
+      "visible": true
+     },
+     {
+      "id": "out_3",
+      "name": "gain",
+      "type": "float",
+      "visible": true
+     },
+     {
+      "id": "out_4",
+      "name": "best",
+      "type": "Best",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s2v4-res",
+   "type": "block",
+   "x": 1640,
+   "y": 2094,
+   "props": {
+    "title": "result()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 330,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "best",
+      "type": "Best",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "s2v4-a",
+   "type": "block",
+   "x": 430,
+   "y": 2024,
+   "props": {
+    "title": "rate()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "box",
+      "type": "Box",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "gain",
+      "type": "float",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "score",
+      "type": "float",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s2v4-b",
+   "type": "block",
+   "x": 930,
+   "y": 2084,
+   "props": {
+    "title": "pick()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 286,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "best",
+      "type": "Best",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "score",
+      "type": "float",
+      "visible": true
+     },
+     {
+      "id": "in_3",
+      "name": "name",
+      "type": "str",
+      "visible": true
+     },
+     {
+      "id": "in_4",
+      "name": "i",
+      "type": "int",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "best",
+      "type": "Best",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s2v4-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v4-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v4-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v4-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v4-c5",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v4-c6",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v4-carry",
+   "type": "arrow",
+   "x": 1360,
+   "y": 2154,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": -460,
+     "y": 0
+    },
+    "bend": -90,
+    "color": "violet",
+    "dash": "dotted",
+    "size": "s",
+    "arrowheadStart": "none",
+    "arrowheadEnd": "arrow"
+   }
+  },
+  {
+   "id": "s2v4-carrylab",
+   "type": "text",
+   "x": 1040.0,
+   "y": 2024,
+   "text": "z\u207b\u00b9  carry best",
+   "props": {
+    "color": "violet",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s2v4-carrynote",
+   "type": "text",
+   "x": 380,
+   "y": 2360,
+   "text": "drawn, not wired \u2014 SystemSketch refuses a cable from a Block to itself, so a one-Block accumulator's recurrence has no real cable today",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s2v4-note",
+   "type": "text",
+   "x": 26,
+   "y": 2436,
+   "text": "V4 \u00b7 HEADER CONTRACT \u2014 each name the `for` binds is one header row that owns a wall port. The carry row IS the return path: solid, z\u207b\u00b9, solid.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s2v2-card",
+   "type": "geo",
+   "x": 2200,
+   "y": 1720,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 774,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s2v2-title",
+   "type": "text",
+   "x": 2226,
+   "y": 1738,
+   "text": "V2 \u00b7 Cardinality Cable \u2014 L3 \u00b7 enumerate \u00b7 zip \u00b7 tuple unpack",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s2v2-code",
+   "type": "text",
+   "x": 2226,
+   "y": 1778,
+   "text": "best = None\nfor i, (name, box) in enumerate(zip(names, boxes)):\n    score = rate(box, gain)\n    best = pick(best, score, name, i)",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s2v2-region",
+   "type": "geo",
+   "x": 2560,
+   "y": 1974,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 420,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s2v2-run",
+   "type": "block",
+   "x": 2220,
+   "y": 2014,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 286,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "boxes",
+      "type": "Boxes",
+      "visible": true
+     },
+     {
+      "id": "out_2",
+      "name": "names",
+      "type": "Names",
+      "visible": true
+     },
+     {
+      "id": "out_3",
+      "name": "gain",
+      "type": "float",
+      "visible": true
+     },
+     {
+      "id": "out_4",
+      "name": "best",
+      "type": "Best",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s2v2-res",
+   "type": "block",
+   "x": 3840,
+   "y": 2094,
+   "props": {
+    "title": "result()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 330,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "best",
+      "type": "Best",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "s2v2-a",
+   "type": "block",
+   "x": 2630,
+   "y": 2024,
+   "props": {
+    "title": "rate()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "box",
+      "type": "Box",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "gain",
+      "type": "float",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "score",
+      "type": "float",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s2v2-b",
+   "type": "block",
+   "x": 3130,
+   "y": 2084,
+   "props": {
+    "title": "pick()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 286,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "best",
+      "type": "Best",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "score",
+      "type": "float",
+      "visible": true
+     },
+     {
+      "id": "in_3",
+      "name": "name",
+      "type": "str",
+      "visible": true
+     },
+     {
+      "id": "in_4",
+      "name": "i",
+      "type": "int",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "best",
+      "type": "Best",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s2v2-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v2-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v2-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v2-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v2-c5",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v2-c6",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v2-carry",
+   "type": "arrow",
+   "x": 3560,
+   "y": 2154,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": -460,
+     "y": 0
+    },
+    "bend": -90,
+    "color": "violet",
+    "dash": "dotted",
+    "size": "s",
+    "arrowheadStart": "none",
+    "arrowheadEnd": "arrow"
+   }
+  },
+  {
+   "id": "s2v2-carrylab",
+   "type": "text",
+   "x": 3240.0,
+   "y": 2024,
+   "text": "z\u207b\u00b9  carry best",
+   "props": {
+    "color": "violet",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s2v2-carrynote",
+   "type": "text",
+   "x": 2580,
+   "y": 2360,
+   "text": "drawn, not wired \u2014 SystemSketch refuses a cable from a Block to itself, so a one-Block accumulator's recurrence has no real cable today",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s2v2-note",
+   "type": "text",
+   "x": 2226,
+   "y": 2436,
+   "text": "V2 \u00b7 CARDINALITY CABLE \u2014 nothing on the wall. A collection is a doubled rail that thins where it enters; the carry is the dotted z\u207b\u00b9 cable below the body.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s2v1-card",
+   "type": "geo",
+   "x": 4400,
+   "y": 1720,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 774,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s2v1-title",
+   "type": "text",
+   "x": 4426,
+   "y": 1738,
+   "text": "V1 \u00b7 Wall Tunnels \u2014 L3 \u00b7 enumerate \u00b7 zip \u00b7 tuple unpack",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s2v1-code",
+   "type": "text",
+   "x": 4426,
+   "y": 1778,
+   "text": "best = None\nfor i, (name, box) in enumerate(zip(names, boxes)):\n    score = rate(box, gain)\n    best = pick(best, score, name, i)",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s2v1-region",
+   "type": "geo",
+   "x": 4760,
+   "y": 1974,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 420,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s2v1-run",
+   "type": "block",
+   "x": 4420,
+   "y": 2014,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 286,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "boxes",
+      "type": "Boxes",
+      "visible": true
+     },
+     {
+      "id": "out_2",
+      "name": "names",
+      "type": "Names",
+      "visible": true
+     },
+     {
+      "id": "out_3",
+      "name": "gain",
+      "type": "float",
+      "visible": true
+     },
+     {
+      "id": "out_4",
+      "name": "best",
+      "type": "Best",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s2v1-res",
+   "type": "block",
+   "x": 6040,
+   "y": 2094,
+   "props": {
+    "title": "result()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 330,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "best",
+      "type": "Best",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "s2v1-a",
+   "type": "block",
+   "x": 4830,
+   "y": 2024,
+   "props": {
+    "title": "rate()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "box",
+      "type": "Box",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "gain",
+      "type": "float",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "score",
+      "type": "float",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s2v1-b",
+   "type": "block",
+   "x": 5330,
+   "y": 2084,
+   "props": {
+    "title": "pick()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 286,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "best",
+      "type": "Best",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "score",
+      "type": "float",
+      "visible": true
+     },
+     {
+      "id": "in_3",
+      "name": "name",
+      "type": "str",
+      "visible": true
+     },
+     {
+      "id": "in_4",
+      "name": "i",
+      "type": "int",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "best",
+      "type": "Best",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s2v1-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v1-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v1-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v1-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v1-c5",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v1-c6",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s2v1-carry",
+   "type": "arrow",
+   "x": 5760,
+   "y": 2154,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": -460,
+     "y": 0
+    },
+    "bend": -90,
+    "color": "violet",
+    "dash": "dotted",
+    "size": "s",
+    "arrowheadStart": "none",
+    "arrowheadEnd": "arrow"
+   }
+  },
+  {
+   "id": "s2v1-carrylab",
+   "type": "text",
+   "x": 5440.0,
+   "y": 2024,
+   "text": "z\u207b\u00b9  carry best",
+   "props": {
+    "color": "violet",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s2v1-carrynote",
+   "type": "text",
+   "x": 4780,
+   "y": 2360,
+   "text": "drawn, not wired \u2014 SystemSketch refuses a cable from a Block to itself, so a one-Block accumulator's recurrence has no real cable today",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s2v1-note",
+   "type": "text",
+   "x": 4426,
+   "y": 2436,
+   "text": "V1 \u00b7 WALL TUNNELS \u2014 the crossing marks are the grammar. [ ] unpacks the collection; the \u25bc/\u25b2 pair IS the delay and draws no cable at all.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s3v4-card",
+   "type": "geo",
+   "x": 0,
+   "y": 2580,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 852,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s3v4-title",
+   "type": "text",
+   "x": 26,
+   "y": 2598,
+   "text": "V4 \u00b7 Header Contract \u2014 L4 \u00b7 continue \u00b7 conditional collect \u00b7 empty",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s3v4-code",
+   "type": "text",
+   "x": 26,
+   "y": 2638,
+   "text": "total = 0.0\nkept = []\nfor d in detections:\n    if d.score < thresh:\n        continue\n    total = total + weight(d)\n    kept.append(d)",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s3v4-region",
+   "type": "geo",
+   "x": 360,
+   "y": 2912,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 420,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s3v4-run",
+   "type": "block",
+   "x": 20,
+   "y": 2952,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 242,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "detections",
+      "type": "Dets",
+      "visible": true
+     },
+     {
+      "id": "out_2",
+      "name": "thresh",
+      "type": "float",
+      "visible": true
+     },
+     {
+      "id": "out_3",
+      "name": "total",
+      "type": "float",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s3v4-res",
+   "type": "block",
+   "x": 1640,
+   "y": 3032,
+   "props": {
+    "title": "result()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 330,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "total",
+      "type": "float",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "s3v4-a",
+   "type": "block",
+   "x": 430,
+   "y": 2962,
+   "props": {
+    "title": "weight()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "d",
+      "type": "Det",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "w",
+      "type": "float",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s3v4-b",
+   "type": "block",
+   "x": 930,
+   "y": 3022,
+   "props": {
+    "title": "add()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "total",
+      "type": "float",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "w",
+      "type": "float",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "total",
+      "type": "float",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s3v4-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s3v4-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s3v4-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s3v4-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s3v4-carry",
+   "type": "arrow",
+   "x": 1360,
+   "y": 3092,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": -460,
+     "y": 0
+    },
+    "bend": -90,
+    "color": "violet",
+    "dash": "dotted",
+    "size": "s",
+    "arrowheadStart": "none",
+    "arrowheadEnd": "arrow"
+   }
+  },
+  {
+   "id": "s3v4-carrylab",
+   "type": "text",
+   "x": 1040.0,
+   "y": 2962,
+   "text": "z\u207b\u00b9  carry total",
+   "props": {
+    "color": "violet",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s3v4-carrynote",
+   "type": "text",
+   "x": 380,
+   "y": 3298,
+   "text": "drawn, not wired \u2014 SystemSketch refuses a cable from a Block to itself, so a one-Block accumulator's recurrence has no real cable today",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s3v4-note",
+   "type": "text",
+   "x": 26,
+   "y": 3374,
+   "text": "V4 \u00b7 HEADER CONTRACT \u2014 each name the `for` binds is one header row that owns a wall port. The carry row IS the return path: solid, z\u207b\u00b9, solid.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s3v2-card",
+   "type": "geo",
+   "x": 2200,
+   "y": 2580,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 852,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s3v2-title",
+   "type": "text",
+   "x": 2226,
+   "y": 2598,
+   "text": "V2 \u00b7 Cardinality Cable \u2014 L4 \u00b7 continue \u00b7 conditional collect \u00b7 empty",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s3v2-code",
+   "type": "text",
+   "x": 2226,
+   "y": 2638,
+   "text": "total = 0.0\nkept = []\nfor d in detections:\n    if d.score < thresh:\n        continue\n    total = total + weight(d)\n    kept.append(d)",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s3v2-region",
+   "type": "geo",
+   "x": 2560,
+   "y": 2912,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 420,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s3v2-run",
+   "type": "block",
+   "x": 2220,
+   "y": 2952,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 242,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "detections",
+      "type": "Dets",
+      "visible": true
+     },
+     {
+      "id": "out_2",
+      "name": "thresh",
+      "type": "float",
+      "visible": true
+     },
+     {
+      "id": "out_3",
+      "name": "total",
+      "type": "float",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s3v2-res",
+   "type": "block",
+   "x": 3840,
+   "y": 3032,
+   "props": {
+    "title": "result()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 330,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "total",
+      "type": "float",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "s3v2-a",
+   "type": "block",
+   "x": 2630,
+   "y": 2962,
+   "props": {
+    "title": "weight()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "d",
+      "type": "Det",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "w",
+      "type": "float",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s3v2-b",
+   "type": "block",
+   "x": 3130,
+   "y": 3022,
+   "props": {
+    "title": "add()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "total",
+      "type": "float",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "w",
+      "type": "float",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "total",
+      "type": "float",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s3v2-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s3v2-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s3v2-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s3v2-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s3v2-carry",
+   "type": "arrow",
+   "x": 3560,
+   "y": 3092,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": -460,
+     "y": 0
+    },
+    "bend": -90,
+    "color": "violet",
+    "dash": "dotted",
+    "size": "s",
+    "arrowheadStart": "none",
+    "arrowheadEnd": "arrow"
+   }
+  },
+  {
+   "id": "s3v2-carrylab",
+   "type": "text",
+   "x": 3240.0,
+   "y": 2962,
+   "text": "z\u207b\u00b9  carry total",
+   "props": {
+    "color": "violet",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s3v2-carrynote",
+   "type": "text",
+   "x": 2580,
+   "y": 3298,
+   "text": "drawn, not wired \u2014 SystemSketch refuses a cable from a Block to itself, so a one-Block accumulator's recurrence has no real cable today",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s3v2-note",
+   "type": "text",
+   "x": 2226,
+   "y": 3374,
+   "text": "V2 \u00b7 CARDINALITY CABLE \u2014 nothing on the wall. A collection is a doubled rail that thins where it enters; the carry is the dotted z\u207b\u00b9 cable below the body.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s3v1-card",
+   "type": "geo",
+   "x": 4400,
+   "y": 2580,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 852,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s3v1-title",
+   "type": "text",
+   "x": 4426,
+   "y": 2598,
+   "text": "V1 \u00b7 Wall Tunnels \u2014 L4 \u00b7 continue \u00b7 conditional collect \u00b7 empty",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s3v1-code",
+   "type": "text",
+   "x": 4426,
+   "y": 2638,
+   "text": "total = 0.0\nkept = []\nfor d in detections:\n    if d.score < thresh:\n        continue\n    total = total + weight(d)\n    kept.append(d)",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s3v1-region",
+   "type": "geo",
+   "x": 4760,
+   "y": 2912,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 420,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s3v1-run",
+   "type": "block",
+   "x": 4420,
+   "y": 2952,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 242,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "detections",
+      "type": "Dets",
+      "visible": true
+     },
+     {
+      "id": "out_2",
+      "name": "thresh",
+      "type": "float",
+      "visible": true
+     },
+     {
+      "id": "out_3",
+      "name": "total",
+      "type": "float",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s3v1-res",
+   "type": "block",
+   "x": 6040,
+   "y": 3032,
+   "props": {
+    "title": "result()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 330,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "total",
+      "type": "float",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "s3v1-a",
+   "type": "block",
+   "x": 4830,
+   "y": 2962,
+   "props": {
+    "title": "weight()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "d",
+      "type": "Det",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "w",
+      "type": "float",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s3v1-b",
+   "type": "block",
+   "x": 5330,
+   "y": 3022,
+   "props": {
+    "title": "add()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "total",
+      "type": "float",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "w",
+      "type": "float",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "total",
+      "type": "float",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s3v1-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s3v1-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s3v1-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s3v1-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s3v1-carry",
+   "type": "arrow",
+   "x": 5760,
+   "y": 3092,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": -460,
+     "y": 0
+    },
+    "bend": -90,
+    "color": "violet",
+    "dash": "dotted",
+    "size": "s",
+    "arrowheadStart": "none",
+    "arrowheadEnd": "arrow"
+   }
+  },
+  {
+   "id": "s3v1-carrylab",
+   "type": "text",
+   "x": 5440.0,
+   "y": 2962,
+   "text": "z\u207b\u00b9  carry total",
+   "props": {
+    "color": "violet",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s3v1-carrynote",
+   "type": "text",
+   "x": 4780,
+   "y": 3298,
+   "text": "drawn, not wired \u2014 SystemSketch refuses a cable from a Block to itself, so a one-Block accumulator's recurrence has no real cable today",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s3v1-note",
+   "type": "text",
+   "x": 4426,
+   "y": 3374,
+   "text": "V1 \u00b7 WALL TUNNELS \u2014 the crossing marks are the grammar. [ ] unpacks the collection; the \u25bc/\u25b2 pair IS the delay and draws no cable at all.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s4v4-card",
+   "type": "geo",
+   "x": 0,
+   "y": 3440,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 878,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s4v4-title",
+   "type": "text",
+   "x": 26,
+   "y": 3458,
+   "text": "V4 \u00b7 Header Contract \u2014 L5 \u00b7 nested \u00b7 break \u00b7 for\u2026else",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s4v4-code",
+   "type": "text",
+   "x": 26,
+   "y": 3498,
+   "text": "misses = 0\nfor track in tracks:\n    for det in track.dets:\n        if match(det, query):\n            hit = det\n            break\n    else:\n        misses = misses + 1",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s4v4-region",
+   "type": "geo",
+   "x": 360,
+   "y": 3798,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 420,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s4v4-run",
+   "type": "block",
+   "x": 20,
+   "y": 3838,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 242,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "tracks",
+      "type": "Tracks",
+      "visible": true
+     },
+     {
+      "id": "out_2",
+      "name": "query",
+      "type": "Query",
+      "visible": true
+     },
+     {
+      "id": "out_3",
+      "name": "misses",
+      "type": "int",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s4v4-res",
+   "type": "block",
+   "x": 1640,
+   "y": 3918,
+   "props": {
+    "title": "result()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 330,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "hit",
+      "type": "bool",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "s4v4-a",
+   "type": "block",
+   "x": 430,
+   "y": 3848,
+   "props": {
+    "title": "match()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "det",
+      "type": "Det",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "query",
+      "type": "Query",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "hit",
+      "type": "bool",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s4v4-b",
+   "type": "block",
+   "x": 930,
+   "y": 3908,
+   "props": {
+    "title": "bump()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "misses",
+      "type": "int",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "misses",
+      "type": "int",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s4v4-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s4v4-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s4v4-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s4v4-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s4v4-carry",
+   "type": "arrow",
+   "x": 1360,
+   "y": 3978,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": -460,
+     "y": 0
+    },
+    "bend": -90,
+    "color": "violet",
+    "dash": "dotted",
+    "size": "s",
+    "arrowheadStart": "none",
+    "arrowheadEnd": "arrow"
+   }
+  },
+  {
+   "id": "s4v4-carrylab",
+   "type": "text",
+   "x": 1040.0,
+   "y": 3848,
+   "text": "z\u207b\u00b9  carry misses",
+   "props": {
+    "color": "violet",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s4v4-carrynote",
+   "type": "text",
+   "x": 380,
+   "y": 4184,
+   "text": "drawn, not wired \u2014 SystemSketch refuses a cable from a Block to itself, so a one-Block accumulator's recurrence has no real cable today",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s4v4-note",
+   "type": "text",
+   "x": 26,
+   "y": 4260,
+   "text": "V4 \u00b7 HEADER CONTRACT \u2014 each name the `for` binds is one header row that owns a wall port. The carry row IS the return path: solid, z\u207b\u00b9, solid.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s4v2-card",
+   "type": "geo",
+   "x": 2200,
+   "y": 3440,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 878,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s4v2-title",
+   "type": "text",
+   "x": 2226,
+   "y": 3458,
+   "text": "V2 \u00b7 Cardinality Cable \u2014 L5 \u00b7 nested \u00b7 break \u00b7 for\u2026else",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s4v2-code",
+   "type": "text",
+   "x": 2226,
+   "y": 3498,
+   "text": "misses = 0\nfor track in tracks:\n    for det in track.dets:\n        if match(det, query):\n            hit = det\n            break\n    else:\n        misses = misses + 1",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s4v2-region",
+   "type": "geo",
+   "x": 2560,
+   "y": 3798,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 420,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s4v2-run",
+   "type": "block",
+   "x": 2220,
+   "y": 3838,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 242,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "tracks",
+      "type": "Tracks",
+      "visible": true
+     },
+     {
+      "id": "out_2",
+      "name": "query",
+      "type": "Query",
+      "visible": true
+     },
+     {
+      "id": "out_3",
+      "name": "misses",
+      "type": "int",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s4v2-res",
+   "type": "block",
+   "x": 3840,
+   "y": 3918,
+   "props": {
+    "title": "result()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 330,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "hit",
+      "type": "bool",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "s4v2-a",
+   "type": "block",
+   "x": 2630,
+   "y": 3848,
+   "props": {
+    "title": "match()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "det",
+      "type": "Det",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "query",
+      "type": "Query",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "hit",
+      "type": "bool",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s4v2-b",
+   "type": "block",
+   "x": 3130,
+   "y": 3908,
+   "props": {
+    "title": "bump()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "misses",
+      "type": "int",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "misses",
+      "type": "int",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s4v2-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s4v2-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s4v2-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s4v2-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s4v2-carry",
+   "type": "arrow",
+   "x": 3560,
+   "y": 3978,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": -460,
+     "y": 0
+    },
+    "bend": -90,
+    "color": "violet",
+    "dash": "dotted",
+    "size": "s",
+    "arrowheadStart": "none",
+    "arrowheadEnd": "arrow"
+   }
+  },
+  {
+   "id": "s4v2-carrylab",
+   "type": "text",
+   "x": 3240.0,
+   "y": 3848,
+   "text": "z\u207b\u00b9  carry misses",
+   "props": {
+    "color": "violet",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s4v2-carrynote",
+   "type": "text",
+   "x": 2580,
+   "y": 4184,
+   "text": "drawn, not wired \u2014 SystemSketch refuses a cable from a Block to itself, so a one-Block accumulator's recurrence has no real cable today",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s4v2-note",
+   "type": "text",
+   "x": 2226,
+   "y": 4260,
+   "text": "V2 \u00b7 CARDINALITY CABLE \u2014 nothing on the wall. A collection is a doubled rail that thins where it enters; the carry is the dotted z\u207b\u00b9 cable below the body.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s4v1-card",
+   "type": "geo",
+   "x": 4400,
+   "y": 3440,
+   "props": {
+    "geo": "rectangle",
+    "w": 2000,
+    "h": 878,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s4v1-title",
+   "type": "text",
+   "x": 4426,
+   "y": 3458,
+   "text": "V1 \u00b7 Wall Tunnels \u2014 L5 \u00b7 nested \u00b7 break \u00b7 for\u2026else",
+   "props": {
+    "color": "black",
+    "size": "m",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s4v1-code",
+   "type": "text",
+   "x": 4426,
+   "y": 3498,
+   "text": "misses = 0\nfor track in tracks:\n    for det in track.dets:\n        if match(det, query):\n            hit = det\n            break\n    else:\n        misses = misses + 1",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s4v1-region",
+   "type": "geo",
+   "x": 4760,
+   "y": 3798,
+   "props": {
+    "geo": "rectangle",
+    "w": 1180,
+    "h": 420,
+    "fill": "none",
+    "color": "grey",
+    "dash": "solid",
+    "size": "s"
+   }
+  },
+  {
+   "id": "s4v1-run",
+   "type": "block",
+   "x": 4420,
+   "y": 3838,
+   "props": {
+    "title": "run()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 320,
+    "h": 242,
+    "inputs": [],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "tracks",
+      "type": "Tracks",
+      "visible": true
+     },
+     {
+      "id": "out_2",
+      "name": "query",
+      "type": "Query",
+      "visible": true
+     },
+     {
+      "id": "out_3",
+      "name": "misses",
+      "type": "int",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s4v1-res",
+   "type": "block",
+   "x": 6040,
+   "y": 3918,
+   "props": {
+    "title": "result()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 330,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "hit",
+      "type": "bool",
+      "visible": true
+     }
+    ],
+    "outputs": []
+   }
+  },
+  {
+   "id": "s4v1-a",
+   "type": "block",
+   "x": 4830,
+   "y": 3848,
+   "props": {
+    "title": "match()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 198,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "det",
+      "type": "Det",
+      "visible": true
+     },
+     {
+      "id": "in_2",
+      "name": "query",
+      "type": "Query",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "hit",
+      "type": "bool",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s4v1-b",
+   "type": "block",
+   "x": 5330,
+   "y": 3908,
+   "props": {
+    "title": "bump()",
+    "description": "",
+    "blockType": "Function",
+    "view": "port",
+    "w": 400,
+    "h": 154,
+    "inputs": [
+     {
+      "id": "in_1",
+      "name": "misses",
+      "type": "int",
+      "visible": true
+     }
+    ],
+    "outputs": [
+     {
+      "id": "out_1",
+      "name": "misses",
+      "type": "int",
+      "visible": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "s4v1-c1",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s4v1-c2",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s4v1-c3",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s4v1-c4",
+   "type": "connection",
+   "x": 0,
+   "y": 0,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": 0,
+     "y": 0
+    },
+    "routing": "elbow",
+    "curve": null,
+    "pins": [],
+    "elbowRoute": null,
+    "routeMode": "automatic",
+    "temporal": "data",
+    "delayValue": "",
+    "pillPosition": 0.5
+   }
+  },
+  {
+   "id": "s4v1-carry",
+   "type": "arrow",
+   "x": 5760,
+   "y": 3978,
+   "props": {
+    "start": {
+     "x": 0,
+     "y": 0
+    },
+    "end": {
+     "x": -460,
+     "y": 0
+    },
+    "bend": -90,
+    "color": "violet",
+    "dash": "dotted",
+    "size": "s",
+    "arrowheadStart": "none",
+    "arrowheadEnd": "arrow"
+   }
+  },
+  {
+   "id": "s4v1-carrylab",
+   "type": "text",
+   "x": 5440.0,
+   "y": 3848,
+   "text": "z\u207b\u00b9  carry misses",
+   "props": {
+    "color": "violet",
+    "size": "s",
+    "font": "mono"
+   }
+  },
+  {
+   "id": "s4v1-carrynote",
+   "type": "text",
+   "x": 4780,
+   "y": 4184,
+   "text": "drawn, not wired \u2014 SystemSketch refuses a cable from a Block to itself, so a one-Block accumulator's recurrence has no real cable today",
+   "props": {
+    "color": "grey",
+    "size": "s",
+    "font": "sans"
+   }
+  },
+  {
+   "id": "s4v1-note",
+   "type": "text",
+   "x": 4426,
+   "y": 4260,
+   "text": "V1 \u00b7 WALL TUNNELS \u2014 the crossing marks are the grammar. [ ] unpacks the collection; the \u25bc/\u25b2 pair IS the delay and draws no cable at all.",
+   "props": {
+    "color": "black",
+    "size": "s",
+    "font": "sans"
+   }
+  }
+ ],
+ "bindings": [
+  {
+   "type": "connection",
+   "fromId": "s0v4-c1",
+   "toId": "s0v4-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v4-c1",
+   "toId": "s0v4-a",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v4-c2",
+   "toId": "s0v4-run",
+   "props": {
+    "portId": "out_2",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v4-c2",
+   "toId": "s0v4-a",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v4-c3",
+   "toId": "s0v4-a",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v4-c3",
+   "toId": "s0v4-res",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v2-c1",
+   "toId": "s0v2-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v2-c1",
+   "toId": "s0v2-a",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v2-c2",
+   "toId": "s0v2-run",
+   "props": {
+    "portId": "out_2",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v2-c2",
+   "toId": "s0v2-a",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v2-c3",
+   "toId": "s0v2-a",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v2-c3",
+   "toId": "s0v2-res",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v1-c1",
+   "toId": "s0v1-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v1-c1",
+   "toId": "s0v1-a",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v1-c2",
+   "toId": "s0v1-run",
+   "props": {
+    "portId": "out_2",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v1-c2",
+   "toId": "s0v1-a",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v1-c3",
+   "toId": "s0v1-a",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s0v1-c3",
+   "toId": "s0v1-res",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v4-c1",
+   "toId": "s1v4-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v4-c1",
+   "toId": "s1v4-a",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v4-c2",
+   "toId": "s1v4-run",
+   "props": {
+    "portId": "out_2",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v4-c2",
+   "toId": "s1v4-a",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v4-c3",
+   "toId": "s1v4-a",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v4-c3",
+   "toId": "s1v4-b",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v4-c4",
+   "toId": "s1v4-b",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v4-c4",
+   "toId": "s1v4-res",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v2-c1",
+   "toId": "s1v2-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v2-c1",
+   "toId": "s1v2-a",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v2-c2",
+   "toId": "s1v2-run",
+   "props": {
+    "portId": "out_2",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v2-c2",
+   "toId": "s1v2-a",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v2-c3",
+   "toId": "s1v2-a",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v2-c3",
+   "toId": "s1v2-b",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v2-c4",
+   "toId": "s1v2-b",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v2-c4",
+   "toId": "s1v2-res",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v1-c1",
+   "toId": "s1v1-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v1-c1",
+   "toId": "s1v1-a",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v1-c2",
+   "toId": "s1v1-run",
+   "props": {
+    "portId": "out_2",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v1-c2",
+   "toId": "s1v1-a",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v1-c3",
+   "toId": "s1v1-a",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v1-c3",
+   "toId": "s1v1-b",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v1-c4",
+   "toId": "s1v1-b",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s1v1-c4",
+   "toId": "s1v1-res",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v4-c1",
+   "toId": "s2v4-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v4-c1",
+   "toId": "s2v4-a",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v4-c2",
+   "toId": "s2v4-run",
+   "props": {
+    "portId": "out_3",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v4-c2",
+   "toId": "s2v4-a",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v4-c3",
+   "toId": "s2v4-a",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v4-c3",
+   "toId": "s2v4-b",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v4-c4",
+   "toId": "s2v4-run",
+   "props": {
+    "portId": "out_2",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v4-c4",
+   "toId": "s2v4-b",
+   "props": {
+    "portId": "in_3",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v4-c5",
+   "toId": "s2v4-run",
+   "props": {
+    "portId": "out_4",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v4-c5",
+   "toId": "s2v4-b",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v4-c6",
+   "toId": "s2v4-b",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v4-c6",
+   "toId": "s2v4-res",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v2-c1",
+   "toId": "s2v2-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v2-c1",
+   "toId": "s2v2-a",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v2-c2",
+   "toId": "s2v2-run",
+   "props": {
+    "portId": "out_3",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v2-c2",
+   "toId": "s2v2-a",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v2-c3",
+   "toId": "s2v2-a",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v2-c3",
+   "toId": "s2v2-b",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v2-c4",
+   "toId": "s2v2-run",
+   "props": {
+    "portId": "out_2",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v2-c4",
+   "toId": "s2v2-b",
+   "props": {
+    "portId": "in_3",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v2-c5",
+   "toId": "s2v2-run",
+   "props": {
+    "portId": "out_4",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v2-c5",
+   "toId": "s2v2-b",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v2-c6",
+   "toId": "s2v2-b",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v2-c6",
+   "toId": "s2v2-res",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v1-c1",
+   "toId": "s2v1-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v1-c1",
+   "toId": "s2v1-a",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v1-c2",
+   "toId": "s2v1-run",
+   "props": {
+    "portId": "out_3",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v1-c2",
+   "toId": "s2v1-a",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v1-c3",
+   "toId": "s2v1-a",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v1-c3",
+   "toId": "s2v1-b",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v1-c4",
+   "toId": "s2v1-run",
+   "props": {
+    "portId": "out_2",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v1-c4",
+   "toId": "s2v1-b",
+   "props": {
+    "portId": "in_3",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v1-c5",
+   "toId": "s2v1-run",
+   "props": {
+    "portId": "out_4",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v1-c5",
+   "toId": "s2v1-b",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v1-c6",
+   "toId": "s2v1-b",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s2v1-c6",
+   "toId": "s2v1-res",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v4-c1",
+   "toId": "s3v4-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v4-c1",
+   "toId": "s3v4-a",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v4-c2",
+   "toId": "s3v4-a",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v4-c2",
+   "toId": "s3v4-b",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v4-c3",
+   "toId": "s3v4-run",
+   "props": {
+    "portId": "out_3",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v4-c3",
+   "toId": "s3v4-b",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v4-c4",
+   "toId": "s3v4-b",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v4-c4",
+   "toId": "s3v4-res",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v2-c1",
+   "toId": "s3v2-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v2-c1",
+   "toId": "s3v2-a",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v2-c2",
+   "toId": "s3v2-a",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v2-c2",
+   "toId": "s3v2-b",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v2-c3",
+   "toId": "s3v2-run",
+   "props": {
+    "portId": "out_3",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v2-c3",
+   "toId": "s3v2-b",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v2-c4",
+   "toId": "s3v2-b",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v2-c4",
+   "toId": "s3v2-res",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v1-c1",
+   "toId": "s3v1-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v1-c1",
+   "toId": "s3v1-a",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v1-c2",
+   "toId": "s3v1-a",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v1-c2",
+   "toId": "s3v1-b",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v1-c3",
+   "toId": "s3v1-run",
+   "props": {
+    "portId": "out_3",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v1-c3",
+   "toId": "s3v1-b",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v1-c4",
+   "toId": "s3v1-b",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s3v1-c4",
+   "toId": "s3v1-res",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v4-c1",
+   "toId": "s4v4-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v4-c1",
+   "toId": "s4v4-a",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v4-c2",
+   "toId": "s4v4-run",
+   "props": {
+    "portId": "out_2",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v4-c2",
+   "toId": "s4v4-a",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v4-c3",
+   "toId": "s4v4-run",
+   "props": {
+    "portId": "out_3",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v4-c3",
+   "toId": "s4v4-b",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v4-c4",
+   "toId": "s4v4-a",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v4-c4",
+   "toId": "s4v4-res",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v2-c1",
+   "toId": "s4v2-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v2-c1",
+   "toId": "s4v2-a",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v2-c2",
+   "toId": "s4v2-run",
+   "props": {
+    "portId": "out_2",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v2-c2",
+   "toId": "s4v2-a",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v2-c3",
+   "toId": "s4v2-run",
+   "props": {
+    "portId": "out_3",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v2-c3",
+   "toId": "s4v2-b",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v2-c4",
+   "toId": "s4v2-a",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v2-c4",
+   "toId": "s4v2-res",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v1-c1",
+   "toId": "s4v1-run",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v1-c1",
+   "toId": "s4v1-a",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v1-c2",
+   "toId": "s4v1-run",
+   "props": {
+    "portId": "out_2",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v1-c2",
+   "toId": "s4v1-a",
+   "props": {
+    "portId": "in_2",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v1-c3",
+   "toId": "s4v1-run",
+   "props": {
+    "portId": "out_3",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v1-c3",
+   "toId": "s4v1-b",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v1-c4",
+   "toId": "s4v1-a",
+   "props": {
+    "portId": "out_1",
+    "terminal": "start",
+    "face": "outer"
+   }
+  },
+  {
+   "type": "connection",
+   "fromId": "s4v1-c4",
+   "toId": "s4v1-res",
+   "props": {
+    "portId": "in_1",
+    "terminal": "end",
+    "face": "outer"
+   }
+  }
+ ],
+ "callouts": [
+  {
+   "id": "step-1",
+   "kind": "step",
+   "text": "1 \u00b7 Columns are the three finalists (V4, V2, V1); rows are the five stress loops. Every card carries real Blocks and real cables.",
+   "x": -520,
+   "y": 60,
+   "w": 460,
+   "h": 180,
+   "target": {
+    "shapeId": "s0v4-a",
+    "anchor": "left"
+   }
+  },
+  {
+   "id": "step-2",
+   "kind": "step",
+   "text": "2 \u00b7 Rewire anything. The fully drawn version of each of these fifteen lives in the HTML gallery; this board is for editing, not for reading.",
+   "x": -580,
+   "y": 3500,
+   "w": 460,
+   "h": 200,
+   "target": {
+    "shapeId": "s4v4-a",
+    "anchor": "left"
+   }
+  },
+  {
+   "id": "pass",
+   "kind": "pass",
+   "text": "PASS WHEN a card you edit still reads as the loop it names.",
+   "x": 6700,
+   "y": 60,
+   "w": 420,
+   "h": 130
+  }
+ ]
+}

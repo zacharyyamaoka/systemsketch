@@ -1,0 +1,139 @@
+{
+  "criteria": [
+    {
+      "key": "iterable",
+      "name": "Iterable vs element is unmistakable",
+      "weight": 18,
+      "asks": "Can a reader see that `others` is a collection and `other` is one element, without being told the convention first?"
+    },
+    {
+      "key": "timing",
+      "name": "Cross-iteration timing is unmistakable",
+      "weight": 18,
+      "asks": "Does the picture say \"available next turn, not this one\" \u2014 the single thing the source code says with a re-assignment and nothing else?"
+    },
+    {
+      "key": "scale",
+      "name": "Survives the hard semantics",
+      "weight": 15,
+      "asks": "Tuple unpacking, several loop variables, filter/continue, an empty iterable, nesting, break and for\u2026else."
+    },
+    {
+      "key": "calm",
+      "name": "Ink economy \u2014 a simple loop stays simple",
+      "weight": 15,
+      "asks": "Marks added per loop, and whether the return path becomes the bundle of parallel arrows Zach already rejected."
+    },
+    {
+      "key": "dataflow",
+      "name": "The dataflow reading survives",
+      "weight": 12,
+      "asks": "Every value still travels a visible path. Nothing teleports between two marks the reader has to pair up by name."
+    },
+    {
+      "key": "seams",
+      "name": "Fits SystemSketch's shipped seams",
+      "weight": 12,
+      "asks": "Block ports with inner/outer faces, the `temporal` StyleProp and its z\u207b\u00b9 pill, Branch's region-as-port-host, stock tldraw. Invention cost."
+    },
+    {
+      "key": "noblock",
+      "name": "Adds no node",
+      "weight": 10,
+      "asks": "Hard constraint. Anything that introduces a Block, gate, pill node or state node scores zero and is out."
+    }
+  ],
+  "variants": {
+    "v1": {
+      "name": "Wall Tunnels",
+      "scores": {
+        "iterable": 8,
+        "timing": 7,
+        "scale": 9,
+        "calm": 10,
+        "dataflow": 5,
+        "seams": 7,
+        "noblock": 10
+      },
+      "weighted": 79.9,
+      "owner_unpack": "the wall",
+      "owner_delay": "the wall"
+    },
+    "v2": {
+      "name": "Cardinality Cable",
+      "scores": {
+        "iterable": 7,
+        "timing": 9,
+        "scale": 6,
+        "calm": 7,
+        "dataflow": 10,
+        "seams": 10,
+        "noblock": 10
+      },
+      "weighted": 82.3,
+      "owner_unpack": "the cable",
+      "owner_delay": "the cable"
+    },
+    "v3": {
+      "name": "Binding Ports",
+      "scores": {
+        "iterable": 8,
+        "timing": 5,
+        "scale": 5,
+        "calm": 10,
+        "dataflow": 3,
+        "seams": 8,
+        "noblock": 10
+      },
+      "weighted": 69.1,
+      "owner_unpack": "the consuming port",
+      "owner_delay": "the port pair"
+    },
+    "v4": {
+      "name": "Header Contract",
+      "scores": {
+        "iterable": 10,
+        "timing": 8,
+        "scale": 8,
+        "calm": 8,
+        "dataflow": 9,
+        "seams": 9,
+        "noblock": 10
+      },
+      "weighted": 88.0,
+      "owner_unpack": "the wall, named on a header row",
+      "owner_delay": "the row itself \u2014 the return line runs along it"
+    },
+    "v5": {
+      "name": "Bare Cycle",
+      "scores": {
+        "iterable": 6,
+        "timing": 9,
+        "scale": 3,
+        "calm": 10,
+        "dataflow": 10,
+        "seams": 9,
+        "noblock": 10
+      },
+      "weighted": 79.3,
+      "owner_unpack": "the cable",
+      "owner_delay": "the cable"
+    }
+  },
+  "ranking": [
+    "v4",
+    "v2",
+    "v1",
+    "v5",
+    "v3"
+  ],
+  "measured": {
+    "tldraw": "5.3.2",
+    "temporal_kinds": "'data', 'async', 'delayed'",
+    "has_pill": true,
+    "has_inner_face": true,
+    "branch_modules": 19,
+    "scenes": 20,
+    "commit": "cf86800"
+  }
+}

@@ -152,8 +152,8 @@
       "typeName": "shape"
     },
     {
-      "x": 1510,
-      "y": 235,
+      "x": 548.7678443556285,
+      "y": 129.93875286479806,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -194,8 +194,8 @@
         "outputs": [],
         "definitionKey": "unrelated"
       },
-      "parentId": "page:page",
-      "index": "a2ukX",
+      "parentId": "shape:active-scope",
+      "index": "a2MBQ",
       "typeName": "shape"
     },
     {
@@ -334,16 +334,16 @@
       "typeName": "shape"
     },
     {
-      "x": 0,
-      "y": 0,
-      "z": 1,
+      "x": -147.49927540194017,
+      "y": 673.7536934435547,
+      "z": 0.42410187014594236,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
     },
     {
-      "x": 720,
-      "y": 40,
+      "x": 763.2605000489395,
+      "y": -59.49925484894288,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -387,8 +387,8 @@
       "typeName": "shape"
     },
     {
-      "x": 650,
-      "y": 240,
+      "x": 644.2420356437287,
+      "y": 165.14638136604754,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -396,8 +396,8 @@
       "id": "shape:active-scope",
       "type": "block",
       "props": {
-        "w": 700,
-        "h": 520,
+        "w": 949,
+        "h": 541,
         "title": "run()",
         "description": "The scope that should become its own board",
         "blockType": "Function",
@@ -413,8 +413,8 @@
             "h": 198
           },
           "expanded": {
-            "w": 560,
-            "h": 380
+            "w": 949,
+            "h": 541
           },
           "value": {
             "w": 168,
@@ -516,8 +516,10 @@
     {
       "editingShapeId": null,
       "croppingShapeId": null,
-      "selectedShapeIds": [],
-      "hoveredShapeId": null,
+      "selectedShapeIds": [
+        "shape:active-scope"
+      ],
+      "hoveredShapeId": "shape:outside-sibling",
       "erasingShapeIds": [],
       "hintingShapeIds": [],
       "focusedGroupId": null,
@@ -572,6 +574,14 @@
       },
       "index": "a1v32",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#EC5E41",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:G6sZbUB0AvfbxuHnSlig_",
+      "typeName": "user"
     },
     {
       "meta": {},
@@ -688,8 +698,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1920,
-        "h": 1080
+        "w": 1198.5714111328125,
+        "h": 1183.5714111328125
       },
       "insets": [
         false,
@@ -704,9 +714,9 @@
       "isChatting": false,
       "highlightedUserIds": [],
       "isFocused": true,
-      "devicePixelRatio": 1,
+      "devicePixelRatio": 1.399999976158142,
       "isCoarsePointer": false,
-      "isHoveringCanvas": null,
+      "isHoveringCanvas": true,
       "openMenus": [],
       "isChangingStyle": false,
       "isReadonly": false,
