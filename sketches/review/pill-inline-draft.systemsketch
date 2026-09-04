@@ -42,7 +42,7 @@
       "com.tldraw.shape.arrow": 8,
       "com.tldraw.shape.text": 4,
       "com.tldraw.shape.line": 5,
-      "com.tldraw.shape.block": 4,
+      "com.tldraw.shape.block": 6,
       "com.tldraw.shape.branch": 0,
       "com.tldraw.shape.loop": 0,
       "com.tldraw.shape.branch-arm": 0,
@@ -96,7 +96,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3q6q",
+      "index": "a3zyiG",
       "typeName": "shape"
     },
     {
@@ -106,14 +106,6 @@
       "meta": {},
       "id": "pointer:pointer",
       "typeName": "pointer"
-    },
-    {
-      "name": "",
-      "color": "#FF802B",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:W5E4f1LpsDwEdDKB4coS4",
-      "typeName": "user"
     },
     {
       "x": 360,
@@ -149,7 +141,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "1 · Click the blank pill’s =, then type pose: Pose = 2. Keep the editor open long enough to watch the typing state."
+                  "text": "1 · Click the blank pill’s = twice, then type pose: Pose = 2. Keep the editor open long enough to watch the typing state."
                 }
               ]
             }
@@ -157,7 +149,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a2V9z",
+      "index": "a2ZJX",
       "typeName": "shape"
     },
     {
@@ -202,7 +194,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4SKI",
+      "index": "a4yNz",
       "typeName": "shape"
     },
     {
@@ -247,16 +239,8 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3IqU",
+      "index": "a3YMv",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#02B1CC",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:j8ypQI_awyDpWxLMyZjRl",
-      "typeName": "user"
     },
     {
       "x": 0,
@@ -305,9 +289,7 @@
     {
       "editingShapeId": null,
       "croppingShapeId": null,
-      "selectedShapeIds": [
-        "shape:pill"
-      ],
+      "selectedShapeIds": [],
       "hoveredShapeId": null,
       "erasingShapeIds": [],
       "hintingShapeIds": [],
@@ -392,7 +374,6 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "8E5CsGYEespPyTOKuFgMA",
         "inputs": [
           {
             "id": "in_1",
@@ -408,12 +389,19 @@
             "type": "",
             "visible": true
           }
-        ],
-        "definitionKey": ""
+        ]
       },
       "parentId": "page:page",
-      "index": "a1bPb",
+      "index": "a1XJE",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#E34BA9",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:S37OB32ujm8anR3uROC2k",
+      "typeName": "user"
     },
     {
       "meta": {},
@@ -432,7 +420,10 @@
     {
       "followingUserId": null,
       "opacityForNextShape": 1,
-      "stylesForNextShape": {},
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
       "brush": null,
       "scribbles": [],
       "cursor": {
@@ -447,7 +438,7 @@
         "x": 0,
         "y": 0,
         "w": 1280,
-        "h": 720
+        "h": 760
       },
       "insets": [
         false,
@@ -516,7 +507,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a2z07G",
+      "index": "a2uAPV",
       "typeName": "shape"
     }
   ]
