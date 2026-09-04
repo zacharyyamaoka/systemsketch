@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 /**
- * A detached cable is briefly painted from its exact semantic snapshot, then
- * becomes a normal stock arrow as soon as either bound Block moves. Exercise
- * that hand-off with real pointer drags for both curved and elbow routes.
+ * A detached cable is a normal stock Arrow from the first frame and stays live
+ * when a bound Block moves. The earlier enhanced detach briefly painted a
+ * SystemSketch-only exact snapshot; that is deliberately disallowed now that
+ * stock renderability is the detach contract. Exercise both curved and elbow
+ * stock reflow with real pointer drags.
  */
 import assert from 'node:assert/strict'
 import { writeFile } from 'node:fs/promises'
@@ -136,8 +138,8 @@ async function main() {
     const curveGroup = await detach(page, 'shape:curve-target', 1)
     const elbowGroup = await detach(page, 'shape:elbow-target', 2)
     const detached = await arrowState(page)
-    assert.deepEqual(detached.map((arrow) => arrow.exactBody), [true, true],
-      'both arrows initially keep the exact before/after snapshot')
+    assert.deepEqual(detached.map((arrow) => arrow.exactBody), [false, false],
+      'both arrows begin as native stock geometry, without an exact custom body')
 
     await moveGroup(page, curveGroup, 190, 90)
     await moveGroup(page, elbowGroup, 190, 90)

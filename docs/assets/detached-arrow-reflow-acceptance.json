@@ -2,13 +2,13 @@
   "detached": [
     {
       "kind": "arc",
-      "exactBody": true,
+      "exactBody": false,
       "bindings": 2,
       "rememberedRouting": "curved"
     },
     {
       "kind": "elbow",
-      "exactBody": true,
+      "exactBody": false,
       "bindings": 2,
       "rememberedRouting": "elbow"
     }

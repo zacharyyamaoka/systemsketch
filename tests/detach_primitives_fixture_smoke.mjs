@@ -102,22 +102,24 @@ async function main() {
     const commandBox = await bounds(page, command)
     await clickAt(page, commandBox.x + commandBox.w / 2, commandBox.y + commandBox.h / 2)
     await waitFor(page, `!window.__systemsketch.editor.getShape(${JSON.stringify(LOOP)})
-      && window.__systemsketch.editor.getCurrentPageShapes().some((shape) => shape.type === 'frame'
+      && window.__systemsketch.editor.getCurrentPageShapes().some((shape) => shape.type === 'group'
         && shape.meta?.systemSketch?.kind === 'loop')`, 'Loop stock primitives')
     const lowered = JSON.parse(await evaluate(page, `(() => {
       const editor = window.__systemsketch.editor
-      const frame = editor.getCurrentPageShapes().find((shape) => shape.type === 'frame'
+      const group = editor.getCurrentPageShapes().find((shape) => shape.type === 'group'
         && shape.meta?.systemSketch?.kind === 'loop')
+      const children = group ? editor.getSortedChildIdsForParent(group.id).map((id) => editor.getShape(id)) : []
+      const card = children.find((shape) => shape?.type === 'geo' && shape.props.geo === 'rectangle')
       return JSON.stringify({
-        frame: frame?.id ?? null,
-        wireIsArrow: Boolean(frame && editor.getBindingsToShape(frame.id, 'arrow').some((binding) =>
+        group: group?.id ?? null,
+        wireIsArrow: Boolean(card && editor.getBindingsToShape(card.id, 'arrow').some((binding) =>
           editor.getShape(binding.fromId)?.type === 'arrow')),
-        childCount: frame ? editor.getSortedChildIdsForParent(frame.id).length : 0,
+        childCount: children.length,
       })
     })()`))
-    assert.ok(lowered.frame, 'the Loop becomes a fresh stock Frame')
+    assert.ok(lowered.group, 'the Loop becomes a fresh stock Group')
     assert.equal(lowered.wireIsArrow, true, 'the real Loop wire becomes a stock arrow')
-    assert.ok(lowered.childCount > 4, 'the stock Frame owns its visual structure and retained child content')
+    assert.ok(lowered.childCount > 4, 'the stock Group owns its materialised visual structure')
 
     await evaluate(page, '(() => { window.__systemsketch.editor.undo(); return true })()')
     await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(LOOP)})?.type === 'loop'`,
