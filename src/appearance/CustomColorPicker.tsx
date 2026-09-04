@@ -36,8 +36,26 @@ import { SLIDER_OVERHANG, SURFACE } from './figjamTokens'
  * which is the one place the two models differ: tldraw's is a shape property,
  * not part of the colour, so it applies to the label as well as the paint.
  */
-export function CustomColorPicker({ editor, control }: { editor: Editor; control: AppearanceControl }) {
-  const seed = seedHex(editor, control)
+export interface CustomColorPickerProps {
+  editor: Editor
+  /** Stock-shape colour control. Omit for another named-colour consumer. */
+  control?: AppearanceControl
+  /** The current named colour when the picker colours something other than a shape. */
+  colorName?: string
+  /** Receives a registered `custom-rrggbb` name instead of changing shape colour. */
+  onColorChange?: (name: string) => void
+  /** Title ink has no independent alpha channel; shapes retain FigJam's alpha slider. */
+  showOpacity?: boolean
+}
+
+export function CustomColorPicker({
+  editor,
+  control,
+  colorName,
+  onColorChange,
+  showOpacity = true,
+}: CustomColorPickerProps) {
+  const seed = seedHex(editor, control, colorName)
   const [hsv, setHsv] = useState(() => hexToHsv(seed))
   const [text, setText] = useState(() => seed.toUpperCase())
   const [focused, setFocused] = useState(false)
@@ -67,7 +85,14 @@ export function CustomColorPicker({ editor, control }: { editor: Editor; control
   const commit = (nextHex: string, next: Hsv) => {
     setHsv(next)
     setText(nextHex.toUpperCase())
-    applyCustomColor(editor, nextHex)
+    const name = customColorName(nextHex)
+    if (!name) return
+    if (onColorChange) {
+      registerCustomColors([name], editor)
+      onColorChange(name)
+    } else {
+      applyCustomColor(editor, nextHex)
+    }
   }
   const paint = (next: Hsv) => commit(hsvToHex(next), next)
 
@@ -151,20 +176,22 @@ export function CustomColorPicker({ editor, control }: { editor: Editor; control
           onStart={() => editor.markHistoryStoppingPoint('custom colour')}
           onChange={(t) => paint({ ...hsv, h: t * 360 })}
         />
-        <Slider
-          label="Opacity"
-          kind="alpha"
-          value={alpha}
-          thumb={hex}
-          track={hex}
-          onStart={() => editor.markHistoryStoppingPoint('opacity')}
-          onChange={(t) => {
-            editor.run(() => {
-              if (editor.isIn('select')) editor.setOpacityForSelectedShapes(t)
-              editor.setOpacityForNextShapes(t)
-            })
-          }}
-        />
+        {showOpacity ? (
+          <Slider
+            label="Opacity"
+            kind="alpha"
+            value={alpha}
+            thumb={hex}
+            track={hex}
+            onStart={() => editor.markHistoryStoppingPoint('opacity')}
+            onChange={(t) => {
+              editor.run(() => {
+                if (editor.isIn('select')) editor.setOpacityForSelectedShapes(t)
+                editor.setOpacityForNextShapes(t)
+              })
+            }}
+          />
+        ) : null}
       </div>
       <SaturationValue
         hsv={hsv}
@@ -190,7 +217,12 @@ export function applyCustomColor(editor: Editor, hex: string) {
 }
 
 /** What the picker opens on: the selection's colour, or the surface when it disagrees. */
-function seedHex(editor: Editor, control: AppearanceControl): string {
+function seedHex(editor: Editor, control: AppearanceControl | undefined, colorName: string | undefined): string {
+  if (colorName) {
+    if (isCustomColor(colorName)) return customColorHex(colorName) ?? SURFACE
+    return FIGJAM_COLOR_HEX[colorName] ?? registeredHex(editor, colorName) ?? SURFACE
+  }
+  if (!control) return SURFACE
   if (control.value.type !== 'shared') return SURFACE
   const name = control.value.value
   if (isCustomColor(name)) return customColorHex(name) ?? SURFACE

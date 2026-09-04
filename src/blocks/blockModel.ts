@@ -14,6 +14,18 @@ export const PILL_TOOL_ID = 'pill' as const
 export const BLOCK_VIEWS = ['simple', 'port', 'expanded', 'value'] as const
 export type BlockView = (typeof BLOCK_VIEWS)[number]
 
+/**
+ * A Block's title is one semantic string, but every canvas occurrence may give
+ * that string its own readable presentation. These names intentionally match
+ * tldraw's typography vocabulary so the FigJam-derived controls stay familiar.
+ */
+export const BLOCK_TITLE_SIZES = ['s', 'm', 'l', 'xl'] as const
+export type BlockTitleSize = (typeof BLOCK_TITLE_SIZES)[number]
+export const BLOCK_TITLE_FONTS = ['sans', 'serif', 'mono', 'draw'] as const
+export type BlockTitleFont = (typeof BLOCK_TITLE_FONTS)[number]
+export const BLOCK_TITLE_ALIGNS = ['start', 'middle', 'end'] as const
+export type BlockTitleAlign = (typeof BLOCK_TITLE_ALIGNS)[number]
+
 /** The source grammar of a call expression's variadic contribution. */
 export const BLOCK_VARIADIC_KINDS = ['positional', 'keyword'] as const
 export type BlockVariadicKind = (typeof BLOCK_VARIADIC_KINDS)[number]
@@ -251,6 +263,17 @@ export const BLOCK_SHAPE_PROPS = {
 	w: T.number,
 	h: T.number,
 	title: T.string,
+	/**
+	 * Occurrence-local title presentation. Optional fields preserve the exact
+	 * established face for every existing board; readers derive those defaults
+	 * from the current Block view until an author makes an explicit choice.
+	 */
+	titleSize: T.literalEnum(...BLOCK_TITLE_SIZES).optional(),
+	titleFont: T.literalEnum(...BLOCK_TITLE_FONTS).optional(),
+	titleAlign: T.literalEnum(...BLOCK_TITLE_ALIGNS).optional(),
+	titleBold: T.boolean.optional(),
+	/** Named FigJam/tldraw colour, including self-describing `custom-rrggbb`. */
+	titleColor: T.string.optional(),
 	description: T.string,
 	blockType: T.string,
 	/** Curated pyblocks glyph name. Optional so earlier profile records load. */
@@ -306,6 +329,11 @@ declare module 'tldraw' {
 			w: number
 			h: number
 			title: string
+			titleSize?: BlockTitleSize
+			titleFont?: BlockTitleFont
+			titleAlign?: BlockTitleAlign
+			titleBold?: boolean
+			titleColor?: string
 			description: string
 			blockType: string
 			icon?: string

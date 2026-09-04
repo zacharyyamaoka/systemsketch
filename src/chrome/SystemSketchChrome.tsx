@@ -31,12 +31,14 @@ import { describeOrganizeNodesOutcome, organizeNodes } from '../blocks/layout'
 import {
   EditorBlockInspector,
   EditorBlockSelectionMiniMenu,
+  BlockTitleFormattingControls,
   canShowBlockSelectionMiniMenu,
   EditorConnectionInspector,
   getConnectionInspectorContext,
   HitAreaOverlay,
   OnCanvasBlockPicker,
   TunnelLayerBar,
+  getEditingBlockTitle,
 } from '../blocks/ui'
 import {
   BRANCH_TOOL_ID,
@@ -393,6 +395,25 @@ function SelectionMiniMenu() {
   )
 }
 
+/** The title formatter occupies the selection pill while its text is live. */
+function EditingBlockTitleMenu() {
+  const editor = useEditor()
+  const isEditingTitle = useValue(
+    'systemsketch editing Block title menu',
+    () => getEditingBlockTitle(editor) !== null,
+    [editor],
+  )
+  if (!isEditingTitle) return null
+  return (
+    <SelectionContextualMenu
+      className="systemsketch-selection-menu systemsketch-title-formatting-menu"
+      label="Block title formatting"
+    >
+      <BlockTitleFormattingControls />
+    </SelectionContextualMenu>
+  )
+}
+
 export function SystemSketchSurfaceHost() {
   const editor = useEditor()
   const actions = useActions()
@@ -737,6 +758,7 @@ export function SystemSketchSurfaceHost() {
         />
       ) : null}
 
+      <EditingBlockTitleMenu />
       <SelectionMiniMenu />
     </div>
   )

@@ -1,0 +1,71 @@
+{
+  "feature": "Block title formatting",
+  "viewport": { "width": 1280, "height": 720 },
+  "shapes": [
+    {
+      "id": "fixture-label",
+      "type": "text",
+      "x": 20,
+      "y": 0,
+      "text": "Block title formatting · review board",
+      "props": { "color": "blue", "size": "s", "font": "sans" }
+    },
+    {
+      "id": "function-block",
+      "type": "block",
+      "x": 560,
+      "y": 420,
+      "props": {
+        "title": "parse_frame",
+        "description": "A function name stays semantic; its title presentation is local to this canvas occurrence.",
+        "blockType": "Function",
+        "view": "port",
+        "w": 360,
+        "h": 200,
+        "titleFont": "serif",
+        "titleSize": "m",
+        "titleBold": true,
+        "titleColor": "blue",
+        "titleAlign": "end",
+        "inputs": [
+          { "id": "in_packet", "name": "packet", "type": "Bytes", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_frame", "name": "frame", "type": "Frame", "visible": true }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-open",
+      "kind": "step",
+      "text": "1 · Double-click parse_frame. Its text input and floating bar open together.",
+      "x": 20,
+      "y": 180,
+      "w": 340,
+      "h": 130,
+      "target": { "shapeId": "function-block", "anchor": "left", "dy": -70 }
+    },
+    {
+      "id": "step-format",
+      "kind": "step",
+      "text": "2 · Try Typeface, Size, Bold, Color, and Alignment. Type again, then press Enter to commit the unchanged function name.",
+      "x": 40,
+      "y": 360,
+      "w": 420,
+      "h": 150,
+      "target": { "shapeId": "function-block", "anchor": "left", "dy": 70 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Formatting changes title paint, not parse_frame or its ports. Enter exits editing normally.",
+      "x": 40,
+      "y": 570,
+      "w": 420,
+      "h": 130
+    }
+  ]
+}
