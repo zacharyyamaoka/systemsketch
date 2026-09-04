@@ -2,6 +2,8 @@
 
 SystemSketch starts from one deliberately boring datum: the stock tldraw whiteboard. Its engine, drawing tools, and shortcuts stay stock while narrow supported seams add local files, board overview, zoom, Help, and the Stable/Preview workflow.
 
+The [V5 variadic-parameter-port implementation gallery](docs/variadic-port-v5-implementation-2026-09-03.html) shows the settled Python <code>*args</code>/<code>**kwargs</code> grammar in a live SystemSketch board: each real call expression keeps its own cableable port, while quiet brackets, labels, and collars explain the callee-owned groups. Its companion [`variadic-port-v5.systemsketch`](sketches/review/variadic-port-v5.systemsketch) is ready to open and inspect; the unusual manual escape hatch lives in the Block inspector rather than a canvas gesture.
+
 The [review-server lifecycle investigation](docs/server-lifecycle-investigation-2026-09-03.html) explains why a track URL disappears after its chat ends: `serve.sh` is deliberately task-owned. The [retained-review runtime gallery](docs/review-runtime-persistence-2026-09-03.html) records the shipped alternative: `npm run review -- up …` pins a committed board/report in its own worktree, waits for its public health check, supervises the pair, and stays live until `down NAME` or `down --all` is explicitly requested.
 
 The [Preview board-recovery gallery](docs/preview-board-recovery-2026-09-03.html) records the safe reopen path for an old, multi-page SystemSketch board: a required Block style property is migrated before validation, Branch arm repair waits until the loading transaction finishes, and the recovered Series A board opens with all 598 shapes intact instead of being replaced by an empty canvas.

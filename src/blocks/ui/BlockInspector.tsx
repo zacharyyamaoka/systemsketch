@@ -575,6 +575,92 @@ function EmptySection({
   )
 }
 
+/**
+ * Rare signature metadata belongs in the inspector, not in a new canvas
+ * gesture. Imported PyBlocks boards populate it automatically; this panel is
+ * the manual escape hatch when somebody authors a Block directly.
+ */
+function VariadicPortSettings({
+	side,
+	port,
+	actions,
+}: {
+	side: BlockPortSide
+	port: BlockPort
+	actions?: BlockInspectorActions
+}) {
+	if (side !== 'inputs') return null
+	const variadic = port.variadic
+	const setKind = (kind: 'ordinary' | 'positional' | 'keyword') => {
+		if (kind === 'ordinary') {
+			actions?.updatePort(side, port.id, { variadic: undefined })
+			return
+		}
+		const name = port.name.trim() || (kind === 'positional' ? 'args' : 'kwargs')
+		actions?.updatePort(side, port.id, {
+			variadic: {
+				groupId: `${kind}:${name}`,
+				label: `${kind === 'positional' ? '*' : '**'}${name}`,
+				kind,
+				bundled: variadic?.bundled ?? false,
+			},
+		})
+	}
+	const setLabel = (raw: string) => {
+		if (!variadic) return
+		const prefix = variadic.kind === 'positional' ? '*' : '**'
+		const tail = raw.trim().replace(/^\*+/, '') || (variadic.kind === 'positional' ? 'args' : 'kwargs')
+		actions?.updatePort(side, port.id, {
+			variadic: { ...variadic, groupId: `${variadic.kind}:${tail}`, label: `${prefix}${tail}` },
+		}, { continuous: true })
+	}
+	return (
+		<details className="block-inspector__variadic" data-testid={`inspector-variadic-${port.id}`}>
+			<summary>{variadic ? `Variadic · ${variadic.label}` : 'Variadic slot'}</summary>
+			<div className="block-inspector__variadic-fields">
+				<label>
+					<span>Slot</span>
+					<select
+						value={variadic?.kind ?? 'ordinary'}
+						disabled={!actions}
+						aria-label={`Variadic role for ${port.name || port.id}`}
+						onChange={(event) => setKind(event.currentTarget.value as 'ordinary' | 'positional' | 'keyword')}
+					>
+						<option value="ordinary">ordinary</option>
+						<option value="positional">*args</option>
+						<option value="keyword">**kwargs</option>
+					</select>
+				</label>
+				{variadic ? (
+					<>
+						<LiveTextInput
+							className="block-inspector__variadic-label"
+							value={variadic.label}
+							disabled={!actions}
+							placeholder={variadic.kind === 'positional' ? '*args' : '**kwargs'}
+							ariaLabel={`Variadic group label for ${port.name || port.id}`}
+							beginEdit={() => actions?.beginEdit?.('edit variadic group label')}
+							onWrite={setLabel}
+						/>
+						<button
+							type="button"
+							className="block-inspector__variadic-bundle"
+							disabled={!actions}
+							aria-pressed={variadic.bundled}
+							title="A bundled spread is one unknown-cardinality *iterable or **mapping expression"
+							onClick={() => actions?.updatePort(side, port.id, {
+								variadic: { ...variadic, bundled: !variadic.bundled },
+							})}
+						>
+							bundle
+						</button>
+					</>
+				) : null}
+			</div>
+		</details>
+	)
+}
+
 function PortSection({
   side,
   props,
@@ -817,6 +903,7 @@ function PortSection({
             mut
           </button>
         ) : null}
+			<VariadicPortSettings side={side} port={port} actions={actions} />
         <button
           type="button"
           className="block-inspector__icon-button block-inspector__delete"

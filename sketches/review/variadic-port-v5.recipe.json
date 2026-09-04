@@ -1,0 +1,88 @@
+{
+  "feature": "V5 variadic parameter ports",
+  "viewport": { "width": 1740, "height": 900 },
+  "pages": [{ "id": "review", "name": "Variadic port review" }],
+  "shapes": [
+    {
+      "id": "frame-source", "type": "block", "x": 330, "y": 220,
+      "props": { "title": "frame", "blockType": "Frame", "view": "port", "w": 220, "h": 120,
+        "inputs": [], "outputs": [{ "id": "out", "name": "frame", "type": "Frame", "visible": true }] }
+    },
+    {
+      "id": "boxes-source", "type": "block", "x": 330, "y": 350,
+      "props": { "title": "boxes", "blockType": "Layer", "view": "port", "w": 220, "h": 120,
+        "inputs": [], "outputs": [{ "id": "out", "name": "boxes", "type": "Layer", "visible": true }] }
+    },
+    {
+      "id": "labels-source", "type": "block", "x": 330, "y": 480,
+      "props": { "title": "labels", "blockType": "Layer", "view": "port", "w": 220, "h": 120,
+        "inputs": [], "outputs": [{ "id": "out", "name": "labels", "type": "Layer", "visible": true }] }
+    },
+    {
+      "id": "layers-source", "type": "block", "x": 330, "y": 610,
+      "props": { "title": "extra_layers", "blockType": "tuple[Layer, ...]", "view": "port", "w": 220, "h": 120,
+        "inputs": [], "outputs": [{ "id": "out", "name": "*extra_layers", "type": "Layer", "visible": true }] }
+    },
+    {
+      "id": "theme-source", "type": "block", "x": 330, "y": 740,
+      "props": { "title": "theme", "blockType": "dict[str, object]", "view": "port", "w": 220, "h": 120,
+        "inputs": [], "outputs": [{ "id": "out", "name": "**theme", "type": "object", "visible": true }] }
+    },
+    {
+      "id": "compose", "type": "block", "x": 690, "y": 180,
+      "props": {
+        "title": "compose()", "description": "Python call: compose(frame, boxes, labels, *extra_layers, opacity=0.7, mode='screen', **theme)",
+        "blockType": "Frame", "view": "port", "w": 470, "h": 620,
+        "inputs": [
+          { "id": "base", "name": "base", "type": "Frame", "visible": true },
+          { "id": "overlay-boxes", "name": "overlays", "type": "Layer", "visible": true,
+            "variadic": { "groupId": "positional:overlays", "label": "*overlays", "kind": "positional", "bundled": false } },
+          { "id": "overlay-labels", "name": "overlays", "type": "Layer", "visible": true,
+            "variadic": { "groupId": "positional:overlays", "label": "*overlays", "kind": "positional", "bundled": false } },
+          { "id": "overlay-spread", "name": "overlays", "type": "Layer", "visible": true,
+            "variadic": { "groupId": "positional:overlays", "label": "*overlays", "kind": "positional", "bundled": true } },
+          { "id": "option-opacity", "name": "opacity", "type": "object", "visible": true,
+            "variadic": { "groupId": "keyword:options", "label": "**options", "kind": "keyword", "bundled": false } },
+          { "id": "option-mode", "name": "mode", "type": "object", "visible": true,
+            "variadic": { "groupId": "keyword:options", "label": "**options", "kind": "keyword", "bundled": false } },
+          { "id": "option-spread", "name": "options", "type": "object", "visible": true,
+            "variadic": { "groupId": "keyword:options", "label": "**options", "kind": "keyword", "bundled": true } }
+        ],
+        "outputs": [{ "id": "result", "name": "result", "type": "Frame", "visible": true }]
+      }
+    },
+    { "id": "frame-cable", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 100, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null } },
+    { "id": "boxes-cable", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 100, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null } },
+    { "id": "labels-cable", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 100, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null } },
+    { "id": "layers-cable", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 100, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null } },
+    { "id": "theme-cable", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 100, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null } }
+  ],
+  "bindings": [
+    { "type": "connection", "fromId": "frame-cable", "toId": "frame-source", "props": { "portId": "out", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "frame-cable", "toId": "compose", "props": { "portId": "base", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "boxes-cable", "toId": "boxes-source", "props": { "portId": "out", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "boxes-cable", "toId": "compose", "props": { "portId": "overlay-boxes", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "labels-cable", "toId": "labels-source", "props": { "portId": "out", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "labels-cable", "toId": "compose", "props": { "portId": "overlay-labels", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "layers-cable", "toId": "layers-source", "props": { "portId": "out", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "layers-cable", "toId": "compose", "props": { "portId": "overlay-spread", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "theme-cable", "toId": "theme-source", "props": { "portId": "out", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "theme-cable", "toId": "compose", "props": { "portId": "option-spread", "terminal": "end", "face": "outer" } }
+  ],
+  "callouts": [
+    {
+      "id": "inspect", "kind": "step", "text": "1 · Select compose() and inspect the two quiet variadic runs. Each collar still surrounds one independently connectable call-expression port.",
+      "x": 1260, "y": 205, "w": 420, "h": 150,
+      "target": { "shapeId": "compose", "anchor": "right", "dy": -140 }
+    },
+    {
+      "id": "back-room", "kind": "step", "text": "2 · In the inspector, expand a Variadic slot. Change its group label or toggle bundle; only a spread source receives the dotted collar.",
+      "x": 1260, "y": 475, "w": 420, "h": 150,
+      "target": { "shapeId": "compose", "anchor": "right", "dy": 130 }
+    },
+    {
+      "id": "pass", "kind": "pass", "text": "PASS WHEN · *overlays and **options each have one bracket and label; all seven ports keep normal cadence; the two spread sources alone are dotted.",
+      "x": 32, "y": 70, "w": 500, "h": 140
+    }
+  ]
+}
