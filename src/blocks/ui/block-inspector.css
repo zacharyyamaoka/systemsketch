@@ -1054,6 +1054,47 @@
   align-self: flex-start;
 }
 
+/* One compact per-port choice is quieter than a Block-level tag cloud. */
+.block-inspector__semantic-role {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 3px;
+  color: var(--ss-text-muted);
+  font-size: 10px;
+  text-transform: lowercase;
+}
+
+.block-inspector__semantic-role > span.is-semantic {
+  color: var(--ss-accent);
+  font-weight: 650;
+}
+
+.block-inspector__semantic-role select {
+  width: 74px;
+  min-width: 0;
+  padding: 1px 2px;
+  border: 1px solid var(--ss-border);
+  border-radius: 4px;
+  color: inherit;
+  background: var(--ss-surface-raised);
+  font-size: 10px;
+}
+
+.connection-inspector__semantic-facts {
+  display: grid;
+  gap: 3px;
+  margin: 6px 0;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+}
+
+.connection-inspector__semantic-warning {
+  padding: 6px 7px;
+  border-left: 2px solid var(--ss-warning);
+  color: var(--ss-text);
+}
+
 /* A derived port: shown so the lane is honest, editable nowhere. */
 .block-inspector__port-row--derived {
   grid-template-columns: auto auto minmax(0, 1fr);

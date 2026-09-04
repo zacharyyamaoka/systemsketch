@@ -45,6 +45,7 @@ const blockVersions = createShapePropsMigrationIds(BLOCK_SHAPE_TYPE, {
 	ValueView: 4,
 	DiffState: 5,
 	FieldDiffs: 6,
+	SemanticPortRoles: 7,
 })
 
 function storedViews(props: BlockMigrationProps): StoredViews | undefined {
@@ -237,6 +238,26 @@ export function downgradeBlockPropsV6ToV5(props: BlockMigrationProps): BlockMigr
 	return next
 }
 
+/** v6 → v7: optional claims need no stored default; absent means implicit Data. */
+export function upgradeBlockPropsV6ToV7(props: BlockMigrationProps): BlockMigrationProps {
+	return props
+}
+
+function withoutSemanticRoleClaims(port: unknown): BlockMigrationProps {
+	const { semanticRoleDerived: _derived, semanticRoleAuthored: _authored, ...rest } = port as BlockMigrationProps
+	return rest
+}
+
+/** v7 → v6: a prior reader cannot retain claims it cannot validate. */
+export function downgradeBlockPropsV7ToV6(props: BlockMigrationProps): BlockMigrationProps {
+	let next = props
+	for (const side of ['inputs', 'outputs'] as const) {
+		const ports = props[side]
+		if (Array.isArray(ports)) next = { ...next, [side]: ports.map(withoutSemanticRoleClaims) }
+	}
+	return next
+}
+
 /**
  * tldraw's migration sequence invokes each step for its side effect; it does
  * not consume a replacement props object. Keep the exported steps pure for
@@ -283,5 +304,9 @@ export const blockShapeMigrations = createShapePropsMigrationSequence({
 		id: blockVersions.FieldDiffs,
 		up: (props) => applyPureMigration(props, upgradeBlockPropsV5ToV6),
 		down: (props) => applyPureMigration(props, downgradeBlockPropsV6ToV5),
+	}, {
+		id: blockVersions.SemanticPortRoles,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV6ToV7),
+		down: (props) => applyPureMigration(props, downgradeBlockPropsV7ToV6),
 	}],
 })

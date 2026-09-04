@@ -44,6 +44,7 @@ import { sameSharedStyle } from '../commands/blockStyleCommands'
 import { CONNECTION_SHAPE_TYPE } from '../connections/connectionModel'
 import { cablePillLabel } from '../connections/connectionPresentation'
 import { isEffectCable } from '../connections/effectCable'
+import { resolveConnectionSemanticRole, roleLabel, roleOriginLabel, type ConnectionSemanticRole } from '../connections/semanticRoles'
 import { EMPTY_FIELD_GUIDANCE } from '../../fields/emptyFieldGuidance'
 import './block-inspector.css'
 
@@ -64,6 +65,8 @@ export interface ConnectionInspectorContext {
 	tunnelLayer: string | null
 	/** Reusable tunnel layer names already present on this canvas. */
 	tunnelLayers: string[]
+	/** Read-only: wires inherit this live from their endpoint ports. */
+	semantic: ConnectionSemanticRole | null
 }
 
 const label = (value: string) => value[0].toUpperCase() + value.slice(1)
@@ -131,6 +134,7 @@ export function getConnectionInspectorContext(editor: Editor): ConnectionInspect
 		tunnelEnabled: sharedValue(selected.map((connection) => connection.props.tunnel)),
 		tunnelLayer: sharedValue(selected.map((connection) => connection.props.tunnelLayer)),
 		tunnelLayers: getTunnelLayers(editor),
+		semantic: only ? resolveConnectionSemanticRole(editor, only) : null,
 	}
 }
 
@@ -150,6 +154,15 @@ function sameConnectionInspectorContext(
 		&& before.tunnelLayer === next.tunnelLayer
 		&& before.tunnelLayers.length === next.tunnelLayers.length
 		&& before.tunnelLayers.every((layer, index) => layer === next.tunnelLayers[index])
+		&& (before.semantic === next.semantic || (
+			before.semantic !== null && next.semantic !== null
+			&& before.semantic.label === next.semantic.label
+			&& before.semantic.warning === next.semantic.warning
+			&& before.semantic.source?.origin === next.semantic.source?.origin
+			&& before.semantic.sink?.origin === next.semantic.sink?.origin
+			&& before.semantic.source?.role === next.semantic.source?.role
+			&& before.semantic.sink?.role === next.semantic.sink?.role
+		))
 		&& (before.only === next.only || (
 			before.only !== null && next.only !== null
 			&& before.only.id === next.only.id
@@ -250,6 +263,22 @@ export function EditorConnectionInspector({ editor }: { editor: Editor }) {
 					) : (
 						<p className="block-inspector__hint">Routing applies to all {context.count}.</p>
 					)}
+				</section>
+
+				<section className="block-inspector__section" data-inspector-section="Semantic role">
+					<div className="block-inspector__section-title">Semantic role</div>
+					{context.semantic ? (
+						<>
+							<p className="block-inspector__hint" data-testid="connection-semantic-role">
+								<strong>{context.semantic.label}</strong> — inherited live from endpoint ports.
+							</p>
+							<div className="connection-inspector__semantic-facts">
+								<span>Source: {context.semantic.source ? `${roleLabel(context.semantic.source.role)} · ${roleOriginLabel(context.semantic.source)}` : 'Unbound'}</span>
+								<span>Sink: {context.semantic.sink ? `${roleLabel(context.semantic.sink.role)} · ${roleOriginLabel(context.semantic.sink)}` : 'Unbound'}</span>
+							</div>
+							{context.semantic.warning ? <p className="block-inspector__hint connection-inspector__semantic-warning" role="status">{context.semantic.warning}</p> : null}
+						</>
+					) : <p className="block-inspector__hint">Select one cable to read its endpoint roles.</p>}
 				</section>
 
 				<section className="block-inspector__section" data-inspector-section="Routing">

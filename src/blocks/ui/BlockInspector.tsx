@@ -21,13 +21,16 @@ import {
   type BlockPortSide,
   type BlockShapeProps,
   type BlockPresentationView,
+  type SemanticPortRole,
   blockPortSections,
   isEffectPort,
   mutatedInputId,
   portInHeader,
   portMutates,
   setBlockViewProps,
+  SEMANTIC_PORT_ROLES,
 } from '../blockModel'
+import { resolveBlockPortSemanticRole, roleLabel } from '../connections/semanticRoles'
 import { commitBlockDefinitionName, definitionBadge } from '../definitions/definitionLinking'
 import { getBlockPortConnections, type BlockPortConnection } from '../connections/blockPorts'
 import { valueBlockInlet, valueBlockName, valueBlockOutlet } from '../valueBlock'
@@ -676,6 +679,46 @@ function VariadicPortSettings({
 	)
 }
 
+/** Per-row role authoring: Blocks do not have one blanket semantic tag. */
+function SemanticRoleSettings({
+	side,
+	port,
+	actions,
+}: {
+	side: BlockPortSide
+	port: BlockPort
+	actions?: BlockInspectorActions
+}) {
+	const resolved = resolveBlockPortSemanticRole(port)
+	const value = port.semanticRoleAuthored?.role ?? 'inherit'
+	const baseline = port.semanticRoleDerived?.role ?? 'data'
+	return (
+		<label className="block-inspector__semantic-role" data-testid={`inspector-semantic-role-${port.id}`}>
+			<span className={resolved.role === 'data' ? '' : 'is-semantic'}>
+				{resolved.role === 'data' ? 'role' : roleLabel(resolved.role)}
+			</span>
+			<select
+				value={value}
+				disabled={!actions}
+				aria-label={`Semantic role for ${side} ${port.name || port.id}`}
+				title={resolved.origin === 'derived'
+					? `Derived ${roleLabel(resolved.role)}${resolved.claim?.source ? ` — ${resolved.claim.source}` : ''}; choose a role to override`
+					: 'Semantic role; independent of type, delivery, mutation and routing'}
+				onChange={(event) => {
+					const next = event.currentTarget.value
+					actions?.beginEdit?.('set semantic port role')
+					actions?.updatePort(side, port.id, {
+						semanticRoleAuthored: next === 'inherit' ? undefined : { role: next as SemanticPortRole },
+					})
+				}}
+			>
+				<option value="inherit">inherit · {roleLabel(baseline)}</option>
+				{SEMANTIC_PORT_ROLES.map((role) => <option key={role} value={role}>{roleLabel(role)}</option>)}
+			</select>
+		</label>
+	)
+}
+
 function PortSection({
   side,
   props,
@@ -918,6 +961,7 @@ function PortSection({
             mut
           </button>
         ) : null}
+		<SemanticRoleSettings side={side} port={port} actions={actions} />
 			<VariadicPortSettings side={side} port={port} actions={actions} />
         <button
           type="button"
@@ -1046,7 +1090,6 @@ export function BlockInspectorContent({
 }: BlockInspectorContentProps) {
   const [tab, setTab] = useState<InspectorTab>(initialTab)
   const readOnly = !actions
-  const unsupportedControlTitle = 'Tags are intentionally future scope for this Block development profile'
 
   return (
     <section className="block-inspector" aria-label="Block inspector" data-status={status}>
@@ -1147,18 +1190,7 @@ export function BlockInspectorContent({
 
           <section className="block-inspector__section" data-inspector-section="Tags">
             <div className="block-inspector__section-title">Tags</div>
-            <button
-              type="button"
-              className="block-inspector__tag-ghost"
-              aria-disabled="true"
-              aria-label="Tag assignment is not available in this Block model"
-              title={unsupportedControlTitle}
-              tabIndex={-1}
-              onClick={() => {}}
-            >
-              <PlusIcon />
-              Add tags
-            </button>
+			<p className="block-inspector__hint">Semantic roles belong to individual port rows so each connected wire can inherit them honestly.</p>
           </section>
 
             </>

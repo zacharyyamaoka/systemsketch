@@ -32,6 +32,23 @@ export const BlockVariadicPort = T.object({
 export type BlockVariadicPort = T.TypeOf<typeof BlockVariadicPort>
 
 /**
+ * A semantic reading of a port. This is deliberately separate from Python
+ * type, routing and temporal delivery: a port can be an Event carrying a
+ * `Frame`, or ordinary Data carried on an async cable.
+ */
+export const SEMANTIC_PORT_ROLES = ['data', 'event', 'configuration', 'state', 'control', 'error'] as const
+export type SemanticPortRole = (typeof SEMANTIC_PORT_ROLES)[number]
+
+/** A claim made by a person or an offline analyser about one port. */
+export const SemanticPortRoleClaim = T.object({
+	role: T.literalEnum(...SEMANTIC_PORT_ROLES),
+	/** Human-readable analyser/source provenance; absent for a local authoring gesture. */
+	source: T.string.optional(),
+	analyzer: T.string.optional(),
+})
+export type SemanticPortRoleClaim = T.TypeOf<typeof SemanticPortRoleClaim>
+
+/**
  * The structural presentations an ordinary Block may switch between. `value`
  * is deliberately absent: it is the separate literal-pill representation,
  * created by the Pill tool or the connection-drop picker, never a conversion
@@ -205,6 +222,10 @@ export const BlockPort = T.object({
 	fieldDiffs: T.arrayOf(BlockFieldDiff).optional(),
 	/** Optional V5 membership; never changes the port's stable identity. */
 	variadic: BlockVariadicPort.optional(),
+	/** A reusable/source-analysis claim. It remains intact when a person overrides it. */
+	semanticRoleDerived: SemanticPortRoleClaim.optional(),
+	/** A local, explicit override. Absence deliberately reveals the derived claim. */
+	semanticRoleAuthored: SemanticPortRoleClaim.optional(),
 })
 export type BlockPort = T.TypeOf<typeof BlockPort>
 
@@ -908,6 +929,11 @@ export function reconcileEffectPorts(props: BlockShapeProps): BlockShapeProps {
 			// a reconcile never moves one that has already been put somewhere.
 			// One mutated argument still lands dead centre, as before.
 			edgeT: clampEdgeT((index + 1) / (wanted.length + 1)),
+			// WHY: an effect is the write-back of this input, not a new semantic
+			// channel. Keep its role claims with that fact so reconciliation cannot
+			// erase an analyser result or an explicit authoring override.
+			...(input.semanticRoleDerived ? { semanticRoleDerived: { ...input.semanticRoleDerived } } : {}),
+			...(input.semanticRoleAuthored ? { semanticRoleAuthored: { ...input.semanticRoleAuthored } } : {}),
 		})
 	})
 	// An effect port's name tracks the argument it writes back to: they are the
@@ -916,8 +942,17 @@ export function reconcileEffectPorts(props: BlockShapeProps): BlockShapeProps {
 		const source = mutatedInputId(port)
 		if (!isEffectPort(port) || source === null) return port
 		const input = wanted.find((candidate) => candidate.id === source)
-		if (!input || (port.name === input.name && port.type === input.type)) return port
-		return { ...port, name: input.name, type: input.type }
+		if (!input) return port
+		const sameRole = JSON.stringify(port.semanticRoleDerived) === JSON.stringify(input.semanticRoleDerived)
+			&& JSON.stringify(port.semanticRoleAuthored) === JSON.stringify(input.semanticRoleAuthored)
+		if (port.name === input.name && port.type === input.type && sameRole) return port
+		return {
+			...port,
+			name: input.name,
+			type: input.type,
+			semanticRoleDerived: input.semanticRoleDerived ? { ...input.semanticRoleDerived } : undefined,
+			semanticRoleAuthored: input.semanticRoleAuthored ? { ...input.semanticRoleAuthored } : undefined,
+		}
 	})
 	const outputs = [...renamed, ...added]
 	if (outputs.length === props.outputs.length
