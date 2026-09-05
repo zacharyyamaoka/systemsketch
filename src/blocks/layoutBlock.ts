@@ -1,5 +1,6 @@
 import {
 	blockIcon,
+	blockHeaderAlign,
 	blockPortLayout,
 	blockPortSections,
 	expandedSectionWeights,
@@ -1003,14 +1004,6 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 	}
 
 	const hasHeaderIcon = blockIcon(props) !== ''
-	const headerIcon: BlockRect | null = hasHeaderIcon
-		? {
-			x: HEADER_PAD_X,
-			y: (headerHeight - HEADER_ICON_PX) / 2,
-			w: HEADER_ICON_PX,
-			h: HEADER_ICON_PX,
-		}
-		: null
 	const headerTypeWidth = props.blockType !== ''
 		? Math.min(measureSimpleText(props.blockType, TLDRAW_TEXT_S_PX, 400), width * 0.35)
 		: 0
@@ -1022,8 +1015,38 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 			h: headerHeight,
 		}
 		: null
-	const titleLeft = HEADER_PAD_X + (hasHeaderIcon ? HEADER_ICON_PX + HEADER_GAP_PX : 0)
-	const titleRight = headerType ? headerType.x - HEADER_GAP_PX : width - HEADER_PAD_X
+	const centeredHeader = blockHeaderAlign(props) === 'center'
+	const iconReserve = hasHeaderIcon ? HEADER_ICON_PX + HEADER_GAP_PX : 0
+	const draftBadgeReserve = props.draftOrdinal === undefined
+		? 0
+		: measureSimpleText(`Draft ${props.draftOrdinal}`, 11, 650) + 18 + HEADER_GAP_PX
+	const centeredSideReserve = headerTypeWidth > 0
+		? headerTypeWidth + HEADER_GAP_PX
+		: 0
+	const centeredIdentityMax = Math.max(
+		0,
+		width - HEADER_PAD_X * 2 - centeredSideReserve * 2,
+	)
+	const centeredTitleWidth = Math.max(0, Math.min(
+		Math.max(0, centeredIdentityMax - iconReserve - draftBadgeReserve),
+		measureBlockText(props.title, PORT_TITLE_FONT_PX, 500, 'mono'),
+	))
+	const centeredIdentityWidth = iconReserve + centeredTitleWidth + draftBadgeReserve
+	const identityLeft = centeredHeader
+		? (width - centeredIdentityWidth) / 2
+		: HEADER_PAD_X
+	const headerIcon: BlockRect | null = hasHeaderIcon
+		? {
+			x: identityLeft,
+			y: (headerHeight - HEADER_ICON_PX) / 2,
+			w: HEADER_ICON_PX,
+			h: HEADER_ICON_PX,
+		}
+		: null
+	const titleLeft = identityLeft + iconReserve
+	const titleRight = centeredHeader
+		? titleLeft + centeredTitleWidth
+		: (headerType ? headerType.x - HEADER_GAP_PX : width - HEADER_PAD_X) - draftBadgeReserve
 	const headerTitle: BlockRect = {
 		x: titleLeft,
 		y: 0,

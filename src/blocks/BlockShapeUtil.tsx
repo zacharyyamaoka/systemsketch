@@ -49,6 +49,7 @@ import {
 	type BlockLayout,
 } from './layoutBlock'
 import { BlockCanvas } from './ui/BlockCanvas'
+import { blockTitleExportAppearance } from './titleAppearance'
 import { PORT_INDICATOR_RADIUS } from './detach/blockPrimitives'
 import { stepIntoDepthScope } from '../depth/depthNavigation'
 import { steppedInResizeRelocation } from './avoidSiblingOcclusion'
@@ -77,12 +78,22 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 	const muted = '#a1a1aa'
 	const divider = '#e4e4e7'
 	const description = layout.description
+	const titleAppearance = blockTitleExportAppearance(shape.props)
+	const titleBox = layout.title ?? layout.headerTitle ?? { x: 0, y: 0, w, h }
+	const titleAnchor = titleAppearance.textAlign === 'left'
+		? 'start'
+		: titleAppearance.textAlign === 'right' ? 'end' : 'middle'
+	const titleX = titleAnchor === 'start'
+		? titleBox.x
+		: titleAnchor === 'end' ? titleBox.x + titleBox.w : titleBox.x + titleBox.w / 2
+	const titleY = titleBox.y + titleBox.h / 2
+	const titleInk = titleAppearance.color ?? ink
 
 	if (layout.view === 'value') {
 		return (
 			<g pointerEvents="none">
 				<rect x={0.75} y={0.75} width={Math.max(0, w - 1.5)} height={Math.max(0, h - 1.5)} rx={h / 2} fill="#f4f4f5" stroke="#9ca3af" strokeWidth={1.5} />
-				<text x={w / 2} y={h / 2} textAnchor="middle" dominantBaseline="middle" fill={ink} fontFamily="ui-monospace, monospace" fontSize={VALUE_FONT_PX} fontWeight={500}>
+				<text x={titleX} y={titleY} textAnchor={titleAnchor} dominantBaseline="middle" fill={titleInk} fontFamily={titleAppearance.fontFamily} fontSize={titleAppearance.fontSize} fontWeight={titleAppearance.fontWeight}>
 					{valueBlockText(valueBlockLabel(shape.props))}
 				</text>
 				{layout.ports.filter((placed) => !placed.subtle).map((placed) => (
@@ -108,7 +119,7 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 			{layout.header ? (
 				<>
 					<line x1={1} y1={layout.header.h} x2={Math.max(1, w - 1)} y2={layout.header.h} stroke={divider} />
-					<text x={12} y={layout.header.h / 2} dominantBaseline="middle" fill={ink} fontFamily="ui-monospace, monospace" fontSize={36} fontWeight={500}>
+					<text x={titleX} y={titleY} textAnchor={titleAnchor} dominantBaseline="middle" fill={titleInk} fontFamily={titleAppearance.fontFamily} fontSize={titleAppearance.fontSize} fontWeight={titleAppearance.fontWeight}>
 						{shape.props.title}
 					</text>
 					<text x={Math.max(12, w - 12)} y={layout.header.h / 2} dominantBaseline="middle" textAnchor="end" fill={muted} fontFamily="ui-sans-serif, system-ui" fontSize={18}>
@@ -117,7 +128,7 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 				</>
 			) : (
 				<>
-					<text x={w / 2} y={layout.title ? layout.title.y + layout.title.h / 2 : h / 2} textAnchor="middle" dominantBaseline="middle" fill={ink} fontFamily="ui-monospace, monospace" fontSize={44} fontWeight={600}>
+					<text x={titleX} y={titleY} textAnchor={titleAnchor} dominantBaseline="middle" fill={titleInk} fontFamily={titleAppearance.fontFamily} fontSize={titleAppearance.fontSize} fontWeight={titleAppearance.fontWeight}>
 						{shape.props.title}
 					</text>
 					{layout.typeLabel ? (

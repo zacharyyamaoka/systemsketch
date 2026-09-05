@@ -24,6 +24,7 @@ import {
 
 import {
   HEADER_ROW,
+  blockHeaderAlign,
   blockIcon,
   blockDiffState,
   blockPortStateCounts,
@@ -46,6 +47,7 @@ import { getSemanticTagsVisible } from '../semanticTagVisibility'
 import { isBundleBlock } from '../stockBlocks'
 import { effectTethers } from '../effectTether'
 import { BlockInlineEditor } from '../BlockInlineEditor'
+import { blockTitleAppearance, type BlockTitleAppearance } from '../titleAppearance'
 import { valueBlockExactText, valueBlockInlet, valueBlockLabel, valueBlockOutlet } from '../valueBlock'
 import { getBlockPortConnections } from '../connections/blockPorts'
 import {
@@ -386,10 +388,12 @@ function ValueFace({
   shape,
   connectedIds,
   editing,
+  titleAppearance,
 }: {
   shape: BlockShape
   connectedIds: ReadonlySet<string>
   editing: boolean
+  titleAppearance: BlockTitleAppearance
 }) {
   const layout = layoutBlock(shape.props)
   const label = valueBlockLabel(shape.props)
@@ -447,6 +451,7 @@ function ValueFace({
         className="BlockNode-valueText"
         data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
         data-testid="block-value-text"
+        style={titleAppearance}
       >
         {label.display}
       </span>
@@ -673,7 +678,13 @@ function BlockPoseGhost({ shape }: { shape: BlockShape }) {
   )
 }
 
-function SimpleFace({ shape }: { shape: BlockShape }) {
+function SimpleFace({
+  shape,
+  titleAppearance,
+}: {
+  shape: BlockShape
+  titleAppearance: BlockTitleAppearance
+}) {
   const layout = layoutBlock(shape.props)
   const icon = blockIcon(shape.props)
   return (
@@ -681,7 +692,7 @@ function SimpleFace({ shape }: { shape: BlockShape }) {
       {layout.title ? (
         <div
           className="BlockNode-simpleTitle"
-          style={boxStyle(layout.title)}
+          style={{ ...boxStyle(layout.title), justifyContent: titleAppearance.justifyContent }}
           data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
         >
           {icon !== '' ? (
@@ -696,6 +707,7 @@ function SimpleFace({ shape }: { shape: BlockShape }) {
             className="BlockNode-simpleTitleText"
             data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
             title={shape.props.title}
+            style={titleAppearance}
           >
             <FieldValue diffs={shape.props.fieldDiffs} path="title" value={shape.props.title} />
           </span>
@@ -733,7 +745,7 @@ function SimpleFace({ shape }: { shape: BlockShape }) {
  * who never opens an inspector should still be able to tell a card with two
  * missing ports from a card that merely moved.
  */
-function BlockDiffBadge({ shape }: { shape: BlockShape }) {
+function BlockDiffBadge({ shape, layoutCopy = false }: { shape: BlockShape; layoutCopy?: boolean }) {
   const counts = blockPortStateCounts(shape.props)
   const state = blockDiffState(shape.props)
   const parts = [
@@ -748,8 +760,8 @@ function BlockDiffBadge({ shape }: { shape: BlockShape }) {
     <span
       className="BlockNode-diffBadge"
       data-diff-state={state === 'normal' ? 'changed' : state}
-      data-testid={`block-diff-badge-${shape.id.replace('shape:', '')}`}
-      title={describeDiffCounts(counts) || state}
+      data-testid={layoutCopy ? undefined : `block-diff-badge-${shape.id.replace('shape:', '')}`}
+      title={layoutCopy ? undefined : describeDiffCounts(counts) || state}
     >
       {label}
     </span>
@@ -919,46 +931,67 @@ function LinkedPortRuns({ ports }: { ports: readonly LaidOutBlockPort[] }) {
 	)
 }
 
-function DefinitionBadge({ shape }: { shape: BlockShape }) {
+function DefinitionBadge({ shape, layoutCopy = false }: { shape: BlockShape; layoutCopy?: boolean }) {
   const badge = definitionBadge(shape.props)
   return badge ? (
-    <span className="BlockNode-definitionBadge" data-testid="block-definition-badge">
+    <span
+      className="BlockNode-definitionBadge"
+      data-testid={layoutCopy ? undefined : 'block-definition-badge'}
+    >
       {badge}
     </span>
   ) : null
 }
 
-function BlockHeading({ shape, height }: { shape: BlockShape; height: number }) {
+function BlockHeading({
+  shape,
+  height,
+  titleAppearance,
+}: {
+  shape: BlockShape
+  height: number
+  titleAppearance: BlockTitleAppearance
+}) {
   const icon = blockIcon(shape.props)
+  const centered = blockHeaderAlign(shape.props) === 'center'
+  const metadata = (mirror: boolean) => (
+    <span className={mirror ? 'BlockNode-headingMirror' : 'BlockNode-headingMeta'} aria-hidden={mirror || undefined}>
+      <BlockDiffBadge shape={shape} layoutCopy={mirror} />
+      {shape.props.blockType !== '' ? (
+        <span
+          className="BlockNode-headingType"
+          data-pb-inline-field={mirror ? undefined : blockInlineFieldAttribute({ kind: 'blockType' })}
+          title={mirror ? undefined : shape.props.blockType}
+        >
+          <FieldValue diffs={shape.props.fieldDiffs} path="blockType" value={shape.props.blockType} />
+        </span>
+      ) : null}
+    </span>
+  )
   return (
     <div className="NodeShape-heading" style={{ height }}>
-      <div className="BlockNode-heading">
-        {icon !== '' ? (
+      <div className="BlockNode-heading" data-header-align={centered ? 'center' : 'left'}>
+        {centered ? metadata(true) : null}
+        <span className="BlockNode-headingIdentity" data-testid="block-heading-identity">
+          {icon !== '' ? (
+            <span
+              className="BlockNode-headingIcon"
+              data-pb-inline-field={blockInlineFieldAttribute({ kind: 'icon' })}
+            >
+              <BlockIconGlyph name={icon} size={HEADER_ICON_PX} />
+            </span>
+          ) : null}
           <span
-            className="BlockNode-headingIcon"
-            data-pb-inline-field={blockInlineFieldAttribute({ kind: 'icon' })}
+            className="BlockNode-headingTitle"
+            data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
+            title={shape.props.title}
+            style={titleAppearance}
           >
-            <BlockIconGlyph name={icon} size={HEADER_ICON_PX} />
+            <FieldValue diffs={shape.props.fieldDiffs} path="title" value={shape.props.title} />
           </span>
-        ) : null}
-        <span
-          className="BlockNode-headingTitle"
-          data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
-          title={shape.props.title}
-        >
-          <FieldValue diffs={shape.props.fieldDiffs} path="title" value={shape.props.title} />
+          <DefinitionBadge shape={shape} />
         </span>
-        <DefinitionBadge shape={shape} />
-        <BlockDiffBadge shape={shape} />
-        {shape.props.blockType !== '' ? (
-          <span
-            className="BlockNode-headingType"
-            data-pb-inline-field={blockInlineFieldAttribute({ kind: 'blockType' })}
-            title={shape.props.blockType}
-          >
-            <FieldValue diffs={shape.props.fieldDiffs} path="blockType" value={shape.props.blockType} />
-          </span>
-        ) : null}
+        {metadata(false)}
       </div>
     </div>
   )
@@ -1253,6 +1286,7 @@ export interface BlockCanvasProps {
 export function BlockCanvas({ shape }: BlockCanvasProps) {
   const editor = useEditor()
   const layout = layoutBlock(shape.props)
+  const titleAppearance = blockTitleAppearance(editor, shape.props)
   // A cable on either face of a port fills its dot: the dot is the port, and
   // the faces are the two sides of the boundary it sits on. The wiring table
   // keeps its identity while its entries do, so a Block that merely moved —
@@ -1347,10 +1381,19 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
     >
       <div className="BlockNode-layer">
         {simple
-          ? <SimpleFace shape={shape} />
+          ? <SimpleFace shape={shape} titleAppearance={titleAppearance} />
           : value
-            ? <ValueFace shape={shape} connectedIds={connectedIds} editing={isEditing} />
-            : <BlockHeading shape={shape} height={layout.headerHeight} />}
+            ? <ValueFace
+                shape={shape}
+                connectedIds={connectedIds}
+                editing={isEditing}
+                titleAppearance={titleAppearance}
+              />
+            : <BlockHeading
+                shape={shape}
+                height={layout.headerHeight}
+                titleAppearance={titleAppearance}
+              />}
         {simple ? <DefinitionBadge shape={shape} /> : null}
         {simple ? <BlockDiffBadge shape={shape} /> : null}
         {stated ? <BlockDiffRail ports={layout.ports} /> : null}

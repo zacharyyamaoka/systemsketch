@@ -32,12 +32,14 @@ import { describeOrganizeNodesOutcome, organizeNodes } from '../blocks/layout'
 import {
   EditorBlockInspector,
   EditorBlockSelectionMiniMenu,
+  BlockTitleFormattingControls,
   canShowBlockSelectionMiniMenu,
   EditorConnectionInspector,
   getConnectionInspectorContext,
   HitAreaOverlay,
   OnCanvasBlockPicker,
   TunnelLayerBar,
+  getEditingBlockTitle,
 } from '../blocks/ui'
 import {
   BRANCH_TOOL_ID,
@@ -83,8 +85,10 @@ import {
   getSelectionLayoutActionAvailability,
   SelectionLayoutActions,
 } from './SelectionLayoutActions'
+import { ContextualSurface } from '../contextualMenus/ContextualSurface'
 import type { RightSurface } from './chromeState'
 import './systemsketch-chrome.css'
+import './rich-text-toolbar.css'
 
 function PanelIcon() {
   return (
@@ -348,17 +352,6 @@ function SelectionMiniMenu() {
     )
   }
 
-  if (hasBranch) {
-    return (
-      <SelectionContextualMenu
-        className="systemsketch-selection-menu"
-        label="Selection actions"
-      >
-        <EditorBranchSelectionMiniMenu editor={editor} />
-      </SelectionContextualMenu>
-    )
-  }
-
   if (hasCode) {
     return (
       <SelectionContextualMenu
@@ -370,44 +363,52 @@ function SelectionMiniMenu() {
     )
   }
 
+  const surface = hasBranch
+    ? 'branch-selection'
+    : hasBlocks ? 'block-selection' : 'shape-selection'
+  const items = {
+    'branch-actions': <EditorBranchSelectionMiniMenu editor={editor} />,
+    'block-actions': <EditorBlockSelectionMiniMenu key={selectionKey} editor={editor} />,
+    appearance: <AppearanceControls />,
+    wrap: <WrapSelectionControl />,
+    layout: (
+      <SelectionLayoutActions
+        {...layoutActions}
+        onTidyEdges={runTidyEdges}
+        onOrganizeNodes={() => void runOrganizeNodes()}
+      />
+    ),
+    'propagation-focus': <PropagationFocusControls />,
+  }
+
   return (
     <SelectionContextualMenu
       className="systemsketch-selection-menu"
       label="Selection actions"
     >
-      {/* Appearance rides on both branches. A Block carries no tldraw styles of
-          its own, so it contributes nothing here — but a Block selected
-          *alongside* a rectangle must not put the rectangle's colour out of
-          reach. The control renders nothing when the selection has no styles,
-          so the Block-only pill is unchanged. */}
-      {hasBlocks ? (
-        <>
-          <EditorBlockSelectionMiniMenu key={selectionKey} editor={editor} />
-          <AppearanceControls />
-          <WrapSelectionControl />
-          <SelectionLayoutActions
-            {...layoutActions}
-            onTidyEdges={runTidyEdges}
-            onOrganizeNodes={() => void runOrganizeNodes()}
-          />
-          <PropagationFocusControls />
-        </>
-      ) : (
-        <>
-          {/* Appearance first, the way FigJam leads with what the thing looks
-              like. There is no Inspect button on either branch any more: the
-              dock follows the selection, so the pill only carries the things
-              that change the shape. */}
-          <AppearanceControls />
-          <WrapSelectionControl />
-          <SelectionLayoutActions
-            {...layoutActions}
-            onTidyEdges={runTidyEdges}
-            onOrganizeNodes={() => void runOrganizeNodes()}
-          />
-          <PropagationFocusControls />
-        </>
-      )}
+      <ContextualSurface surface={surface} items={items} />
+    </SelectionContextualMenu>
+  )
+}
+
+/** The title formatter occupies the selection pill while its text is live. */
+function EditingBlockTitleMenu() {
+  const editor = useEditor()
+  const isEditingTitle = useValue(
+    'systemsketch editing Block title menu',
+    () => getEditingBlockTitle(editor) !== null,
+    [editor],
+  )
+  if (!isEditingTitle) return null
+  return (
+    <SelectionContextualMenu
+      className="systemsketch-selection-menu systemsketch-title-formatting-menu"
+      label="Block title formatting"
+    >
+      <ContextualSurface
+        surface="block-title-editing"
+        items={{ 'title-formatting': <BlockTitleFormattingControls /> }}
+      />
     </SelectionContextualMenu>
   )
 }
@@ -757,6 +758,7 @@ export function SystemSketchSurfaceHost() {
         />
       ) : null}
 
+      <EditingBlockTitleMenu />
       <SelectionMiniMenu />
       <CodeResizeIndicator />
     </div>

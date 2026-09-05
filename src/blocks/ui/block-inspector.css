@@ -365,6 +365,14 @@
   line-height: 1.4;
 }
 
+.block-inspector__subfield-label {
+  margin: 12px 0 6px;
+  color: var(--ss-text-muted);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
 .block-inspector__choices {
   display: flex;
   gap: 4px;

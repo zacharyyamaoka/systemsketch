@@ -97,6 +97,29 @@ describe('Block inspector content', () => {
     }
   })
 
+  it('offers header composition alignment only on header-bearing views', () => {
+    const port = renderToStaticMarkup(
+      <BlockInspectorContent
+        props={{ ...getDefaultBlockProps(), view: 'port', headerAlign: 'center' }}
+        status="selected"
+        actions={noopActions}
+      />,
+    )
+    const simple = renderToStaticMarkup(
+      <BlockInspectorContent
+        props={getDefaultBlockProps()}
+        status="selected"
+        actions={noopActions}
+      />,
+    )
+
+    expect(port).toContain('aria-label="Header alignment"')
+    expect(port).toContain('data-testid="block-header-align-left"')
+    expect(port).toContain('data-testid="block-header-align-center"')
+    expect(port).toContain('data-testid="block-header-align-center" aria-pressed="true"')
+    expect(simple).not.toContain('aria-label="Header alignment"')
+  })
+
   it('keeps rare variadic-slot authoring behind the Inputs state toggle', () => {
     const html = renderToStaticMarkup(
       <BlockInspectorContent

@@ -1,0 +1,416 @@
+import * as Popover from '@radix-ui/react-popover'
+import {
+  forwardRef,
+  Fragment,
+  type ButtonHTMLAttributes,
+  type ReactNode,
+} from 'react'
+import {
+  TldrawUiPopover,
+  TldrawUiPopoverContent,
+  TldrawUiPopoverTrigger,
+  useContainer,
+  useEditor,
+  useValue,
+  type Editor,
+} from 'tldraw'
+
+import { AppearanceGlyph, FigjamGlyph, TriggerGlyph } from '../appearance/AppearanceGlyph'
+import { CustomColorPicker } from '../appearance/CustomColorPicker'
+import { isCustomColor, registeredHex } from '../appearance/customColors'
+import { FIGJAM_CHECK_ICON } from '../appearance/figjamIconMap'
+import {
+  CHEVRON_PATH,
+  CHEVRON_VIEWBOX,
+  FONT_SIZE_LADDER,
+  POPOVER_COLLISION_PADDING,
+  POPOVER_GAP,
+  SWATCH_SIZE,
+} from '../appearance/figjamTokens'
+import {
+  CUSTOM_LABEL,
+  MIXED_LABEL,
+  contextualTriggerLabel,
+  selectedContextualOption,
+  type ContextualControl,
+  type ContextualControlComposition,
+} from './contextualControlRegistry'
+import '../appearance/appearance.css'
+
+export type ContextualPopoverMode = 'selection' | 'editing'
+
+export interface ContextualControlsProps {
+  composition: ContextualControlComposition
+  popoverMode: ContextualPopoverMode
+  className?: string
+  testId?: string
+  label?: string
+}
+
+/** One renderer for every registered control, regardless of target surface. */
+export function ContextualControls({
+  composition,
+  popoverMode,
+  className,
+  testId,
+  label,
+}: ContextualControlsProps) {
+  const editor = useEditor()
+  return (
+    <div
+      className={['systemsketch-appearance', className].filter(Boolean).join(' ')}
+      data-testid={testId}
+      data-contextual-recipe={composition.id}
+      aria-label={label}
+    >
+      {composition.groups.map((group, groupIndex) => (
+        <Fragment key={group.id}>
+          {groupIndex > 0
+            ? <span className="systemsketch-appearance__separator" aria-hidden="true" />
+            : null}
+          <div className="systemsketch-contextual-controls__group" data-contextual-group={group.id}>
+            {group.controls.map((control) => (
+              <ContextualControlItem
+                key={control.id}
+                editor={editor}
+                control={control}
+                popoverMode={popoverMode}
+              />
+            ))}
+          </div>
+        </Fragment>
+      ))}
+    </div>
+  )
+}
+
+function ContextualControlItem({
+  editor,
+  control,
+  popoverMode,
+}: {
+  editor: Editor
+  control: ContextualControl
+  popoverMode: ContextualPopoverMode
+}) {
+  if (control.trigger === 'toggle') {
+    const pressed = control.value?.type === 'shared' && control.value.value === 'on'
+    return (
+      <button
+        type="button"
+        className="systemsketch-appearance__trigger systemsketch-appearance__toggle"
+        data-control={control.id}
+        data-kind={control.kind}
+        aria-label={control.label}
+        title={control.label}
+        aria-pressed={pressed}
+        onClick={() => control.onSelect(pressed ? 'off' : 'on')}
+      >
+        <strong aria-hidden="true">B</strong>
+      </button>
+    )
+  }
+
+  if (control.trigger === 'action') {
+    return (
+      <button
+        type="button"
+        className="systemsketch-appearance__trigger"
+        data-control={control.id}
+        data-kind={control.kind}
+        aria-label={control.label}
+        title={control.label}
+        onClick={() => control.onSelect()}
+      >
+        {control.kind === 'addText' ? <FigjamGlyph name="trigger/Add text" /> : null}
+      </button>
+    )
+  }
+
+  return (
+    <ContextualPopover
+      id={`systemsketch-contextual-${control.id}`}
+      mode={popoverMode}
+      trigger={<ControlTrigger control={control} editor={editor} />}
+      side="top"
+    >
+      <ControlPanel control={control} editor={editor} popoverMode={popoverMode} />
+    </ContextualPopover>
+  )
+}
+
+function Chevron() {
+  return (
+    <svg className="systemsketch-appearance__chevron" viewBox={CHEVRON_VIEWBOX} aria-hidden="true">
+      <path d={CHEVRON_PATH} />
+    </svg>
+  )
+}
+
+interface ControlTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  control: ContextualControl
+  editor: Editor
+}
+
+// WHY: Radix's `asChild` contract injects its event handlers and ref into this component.
+// Forwarding both is what lets one pointer-down open or drag from every composed menu surface.
+const ControlTrigger = forwardRef<HTMLButtonElement, ControlTriggerProps>(function ControlTrigger(
+  { control, editor, className, ...buttonProps },
+  ref,
+) {
+  const current = selectedContextualOption(control)
+  return (
+    <button
+      {...buttonProps}
+      ref={ref}
+      type="button"
+      className={['systemsketch-appearance__trigger', className].filter(Boolean).join(' ')}
+      data-control={control.id}
+      data-kind={control.kind}
+      data-trigger={control.trigger}
+      data-mixed={current ? undefined : true}
+      aria-label={contextualTriggerLabel(control)}
+      title={control.label}
+    >
+      {control.trigger === 'text' ? (
+        <span className="systemsketch-appearance__trigger-text">
+          {current ? current.label : MIXED_LABEL}
+        </span>
+      ) : control.automaticOption?.value === current?.value ? (
+        <span className="systemsketch-appearance__automatic" aria-hidden="true">A</span>
+      ) : (
+        <TriggerGlyph control={control} value={current?.value} editor={editor} />
+      )}
+      <Chevron />
+    </button>
+  )
+})
+
+function ControlPanel({
+  control,
+  editor,
+  popoverMode,
+}: {
+  control: ContextualControl
+  editor: Editor
+  popoverMode: ContextualPopoverMode
+}) {
+  const mode = control.modeControl
+  const beside = mode && control.modePlacement === 'beside'
+  const options = control.automaticOption
+    ? [control.automaticOption, ...control.options]
+    : control.options
+  return (
+    <div
+      className="systemsketch-appearance__panel"
+      role="menu"
+      aria-label={control.label}
+      data-layout={control.layout}
+      data-mode={mode ? control.modePlacement : undefined}
+      data-testid={`systemsketch-appearance-panel-${control.id}`}
+    >
+      {mode ? (
+        <div
+          className={beside ? 'systemsketch-appearance__group' : 'systemsketch-appearance__mode'}
+          role="group"
+          aria-label={mode.label}
+        >
+          {mode.options.map((option) => (
+            <OptionButton
+              key={option.value}
+              control={mode}
+              option={option}
+              editor={editor}
+              withLabel={!beside}
+            />
+          ))}
+        </div>
+      ) : null}
+      {beside ? <span className="systemsketch-appearance__divider" aria-hidden="true" /> : null}
+      <div
+        className="systemsketch-appearance__options"
+        role="group"
+        aria-label={control.label}
+        style={control.columns
+          ? { gridTemplateColumns: `repeat(${control.columns}, ${SWATCH_SIZE}px)` }
+          : undefined}
+      >
+        {options.map((option) => (
+          <OptionButton
+            key={option.value}
+            control={control}
+            option={option}
+            editor={editor}
+            withLabel={control.layout !== 'row' && control.layout !== 'swatches'}
+          />
+        ))}
+        {control.custom ? (
+          <CustomColorCell control={control} editor={editor} popoverMode={popoverMode} />
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+function OptionButton({
+  control,
+  option,
+  editor,
+  withLabel,
+}: {
+  control: ContextualControl
+  option: { value: string; label: string }
+  editor: Editor
+  withLabel?: boolean
+}) {
+  const isCurrent = control.value?.type === 'shared' && control.value.value === option.value
+  const list = control.layout === 'list'
+  const rowSize = list && control.kind === 'size' ? FONT_SIZE_LADDER[option.value] : undefined
+  const automatic = control.automaticOption?.value === option.value
+  return (
+    <button
+      type="button"
+      className="systemsketch-appearance__option"
+      data-control={control.id}
+      data-kind={control.kind}
+      data-value={option.value}
+      role="menuitemradio"
+      aria-checked={isCurrent}
+      aria-label={option.label}
+      title={option.label}
+      onClick={() => control.onSelect(option.value)}
+    >
+      {list ? <FigjamGlyph name={FIGJAM_CHECK_ICON} className="systemsketch-appearance__check" /> : null}
+      {automatic ? (
+        <span className="systemsketch-appearance__automatic" aria-hidden="true">A</span>
+      ) : (
+        <AppearanceGlyph control={control} value={option.value} editor={editor} />
+      )}
+      {withLabel ? (
+        <span
+          className="systemsketch-appearance__label"
+          style={rowSize
+            ? { fontSize: `${rowSize}px`, lineHeight: rowSize <= 12 ? '16px' : '24px' }
+            : undefined}
+        >
+          {option.label}
+        </span>
+      ) : null}
+    </button>
+  )
+}
+
+function CustomColorCell({
+  control,
+  editor,
+  popoverMode,
+}: {
+  control: ContextualControl
+  editor: Editor
+  popoverMode: ContextualPopoverMode
+}) {
+  const current = control.value?.type === 'shared' ? control.value.value : undefined
+  const active = isCustomColor(current) ? current : undefined
+  const hex = useValue(
+    `systemsketch contextual custom colour ${control.id}`,
+    () => active ? registeredHex(editor, active) : undefined,
+    [editor, active],
+  )
+  return (
+    <ContextualPopover
+      id={`systemsketch-contextual-${control.id}-custom`}
+      mode={popoverMode}
+      side="bottom"
+      trigger={(
+        <button
+          type="button"
+          className="systemsketch-appearance__custom"
+          data-control={control.id}
+          data-kind={control.kind}
+          data-active={active ? '' : undefined}
+          role="menuitemradio"
+          aria-checked={Boolean(active)}
+          aria-label={CUSTOM_LABEL}
+          title={CUSTOM_LABEL}
+        >
+          <span className="systemsketch-appearance__custom-ring">
+            <span
+              className="systemsketch-appearance__custom-disc"
+              style={hex ? { background: hex } : undefined}
+            />
+          </span>
+        </button>
+      )}
+    >
+      <CustomColorPicker
+        editor={editor}
+        colorName={current === control.automaticOption?.value ? undefined : current}
+        showOpacity={Boolean(control.customColorOpacity)}
+        onColorChange={(name) => control.onSelect(name, { continuous: true })}
+      />
+    </ContextualPopover>
+  )
+}
+
+function ContextualPopover({
+  id,
+  mode,
+  trigger,
+  children,
+  side,
+}: {
+  id: string
+  mode: ContextualPopoverMode
+  trigger: ReactNode
+  children: ReactNode
+  side: 'top' | 'bottom'
+}) {
+  return mode === 'editing' ? (
+    <EditingPopover trigger={trigger} side={side}>{children}</EditingPopover>
+  ) : (
+    <TldrawUiPopover id={id}>
+      <TldrawUiPopoverTrigger>{trigger}</TldrawUiPopoverTrigger>
+      <TldrawUiPopoverContent
+        side={side}
+        align="center"
+        sideOffset={POPOVER_GAP}
+        collisionPadding={POPOVER_COLLISION_PADDING}
+        autoFocusFirstButton={false}
+      >
+        {children}
+      </TldrawUiPopoverContent>
+    </TldrawUiPopover>
+  )
+}
+
+/** Radix mode keeps a live canvas text editor open while its menu is used. */
+function EditingPopover({
+  trigger,
+  children,
+  side,
+}: {
+  trigger: ReactNode
+  children: ReactNode
+  side: 'top' | 'bottom'
+}) {
+  const container = useContainer()
+  const editor = useEditor()
+  return (
+    <Popover.Root>
+      <Popover.Trigger asChild>{trigger}</Popover.Trigger>
+      <Popover.Portal container={container}>
+        <Popover.Content
+          className="tlui-popover__content"
+          side={side}
+          align="center"
+          sideOffset={POPOVER_GAP}
+          collisionPadding={POPOVER_COLLISION_PADDING}
+          onOpenAutoFocus={(event) => event.preventDefault()}
+          onPointerDown={editor.markEventAsHandled}
+        >
+          {children}
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  )
+}
