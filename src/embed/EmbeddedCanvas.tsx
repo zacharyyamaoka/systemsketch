@@ -84,7 +84,7 @@ import {
 } from '../import/legacyPyblocksSystemSketch'
 import { consolidateDocumentToSinglePage } from '../singlePageDocument'
 import {
-  enforceSystemSketchWheelZoom,
+  installSystemSketchWheelZoom,
   SYSTEMSKETCH_EDITOR_OPTIONS,
 } from '../canvasCamera'
 
@@ -190,7 +190,7 @@ function EmbeddedSurface({
 
   const onMount = useCallback((editor: Editor) => {
     editorRef.current = editor
-    enforceSystemSketchWheelZoom(editor)
+    const stopWheelZoom = installSystemSketchWheelZoom(editor)
     onCompatibilityCopyAvailable(false)
     if (openDocument.readOnly) editor.updateInstanceState({ isReadonly: true })
     const core = decodeDocumentText(openDocument.text)
@@ -346,6 +346,7 @@ function EmbeddedSurface({
       stopConnectorControlVisibility()
       stopBlockConnections()
       stopDefinitionLinking()
+      stopWheelZoom()
     }
   }, [openDocument, onCanvasCheckpoint, onCanvasText, onCompatibilityCopyAvailable, onLoadError])
 

@@ -38,7 +38,7 @@
     {
       "id": "step-2",
       "kind": "step",
-      "text": "2 · Scroll the wheel up and down — do not hold Ctrl",
+      "text": "2 · Scroll down to zoom in — do not hold Ctrl",
       "x": 940,
       "y": 310,
       "w": 340,
@@ -48,7 +48,7 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · The Block grows and shrinks around the pointer, and the zoom percentage changes",
+      "text": "PASS WHEN · Scroll down grows the Block around the pointer; Appearance can flip the direction",
       "x": 380,
       "y": 560,
       "w": 540,

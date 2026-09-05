@@ -75,7 +75,7 @@ import { SYSTEMSKETCH_ARROW_SHAPE_UTILS } from './systemSketchArrow'
 import { installConnectorControlVisibility } from './installConnectorControlVisibility'
 import { CompareProvider } from './compare'
 import {
-  enforceSystemSketchWheelZoom,
+  installSystemSketchWheelZoom,
   SYSTEMSKETCH_EDITOR_OPTIONS,
 } from './canvasCamera'
 
@@ -140,7 +140,7 @@ function SystemSketchCanvas() {
   useEffect(() => () => store.dispose(), [store])
   const onMount = useCallback((editor: Editor) => {
     setMountedEditor(editor)
-    enforceSystemSketchWheelZoom(editor)
+    const stopWheelZoom = installSystemSketchWheelZoom(editor)
     enablePasteAtCursor(editor)
     const stopDefinitionLinking = installDefinitionLinking(editor)
     const stopWorkspace = attach(editor)
@@ -173,6 +173,7 @@ function SystemSketchCanvas() {
       stopDefinitionLinking()
       stopBoardTheme()
       stopWorkspace()
+      stopWheelZoom()
       setMountedEditor(null)
     }
   }, [attach])
@@ -220,7 +221,7 @@ function SystemSketchCanvas() {
 function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId, 'product'> }) {
   const isBlockDevelopment = profile === 'block-dev'
   const onMount = useCallback((editor: Editor) => {
-    enforceSystemSketchWheelZoom(editor)
+    const stopWheelZoom = installSystemSketchWheelZoom(editor)
     enablePasteAtCursor(editor)
     // The development profiles keep tldraw's stock toolbar, so they cannot
     // cycle the preset — but they must still open on the same arrow and the
@@ -264,6 +265,7 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
       stopBlockConnections()
       stopDefinitionLinking()
       stopBoardTheme()
+      stopWheelZoom()
     }
   }, [isBlockDevelopment])
 

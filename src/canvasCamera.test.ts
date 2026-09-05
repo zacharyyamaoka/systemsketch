@@ -5,14 +5,17 @@ import {
   SYSTEMSKETCH_EDITOR_OPTIONS,
 } from './canvasCamera'
 
-function editorWithInputMode(inputMode: 'mouse' | 'trackpad' | null) {
+function editorWithPreferences(
+  inputMode: 'mouse' | 'trackpad' | null,
+  isZoomDirectionInverted: boolean,
+) {
   const setCameraOptions = vi.fn()
   const updateUserPreferences = vi.fn()
   return {
     editor: {
       setCameraOptions,
       user: {
-        getUserPreferences: () => ({ inputMode }),
+        getUserPreferences: () => ({ inputMode, isZoomDirectionInverted }),
         updateUserPreferences,
       },
     } as unknown as Editor,
@@ -29,19 +32,44 @@ describe('SystemSketch wheel zoom', () => {
   it.each(['trackpad', null] as const)(
     'replaces the %s device mode that would override wheel zoom',
     (inputMode) => {
-      const { editor, setCameraOptions, updateUserPreferences } = editorWithInputMode(inputMode)
+      const { editor, setCameraOptions, updateUserPreferences } = editorWithPreferences(inputMode, false)
 
-      enforceSystemSketchWheelZoom(editor)
+      enforceSystemSketchWheelZoom(editor, true)
 
       expect(setCameraOptions).toHaveBeenCalledWith({ wheelBehavior: 'zoom' })
-      expect(updateUserPreferences).toHaveBeenCalledWith({ inputMode: 'mouse' })
+      expect(updateUserPreferences).toHaveBeenCalledWith({
+        inputMode: 'mouse',
+        isZoomDirectionInverted: true,
+      })
     },
   )
 
-  it('does not rewrite an already-correct mouse preference', () => {
-    const { editor, updateUserPreferences } = editorWithInputMode('mouse')
+  it('uses scroll down to zoom in by default', () => {
+    const { editor, updateUserPreferences } = editorWithPreferences('mouse', false)
 
-    enforceSystemSketchWheelZoom(editor)
+    enforceSystemSketchWheelZoom(editor, true)
+
+    expect(updateUserPreferences).toHaveBeenCalledWith({
+      inputMode: 'mouse',
+      isZoomDirectionInverted: true,
+    })
+  })
+
+  it('can flip to scroll up to zoom in', () => {
+    const { editor, updateUserPreferences } = editorWithPreferences('mouse', true)
+
+    enforceSystemSketchWheelZoom(editor, false)
+
+    expect(updateUserPreferences).toHaveBeenCalledWith({
+      inputMode: 'mouse',
+      isZoomDirectionInverted: false,
+    })
+  })
+
+  it('does not rewrite already-correct wheel preferences', () => {
+    const { editor, updateUserPreferences } = editorWithPreferences('mouse', true)
+
+    enforceSystemSketchWheelZoom(editor, true)
 
     expect(updateUserPreferences).not.toHaveBeenCalled()
   })

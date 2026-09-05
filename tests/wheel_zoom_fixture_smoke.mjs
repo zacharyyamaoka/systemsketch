@@ -55,13 +55,13 @@ async function main() {
       x: target.x + target.w / 2,
       y: target.y + target.h / 2,
       deltaX: 0,
-      deltaY: -120,
+      deltaY: 120,
       modifiers: 0,
     })
     await delay(400)
     const zoomAfter = await evaluate(app.page, 'window.__systemsketch.editor.getZoomLevel()')
-    assert.notEqual(zoomAfter, zoomBefore)
-    pass(`the fixture's literal no-Ctrl wheel gesture changes scale (${zoomBefore.toFixed(2)} → ${zoomAfter.toFixed(2)})`)
+    assert.ok(zoomAfter > zoomBefore)
+    pass(`the fixture's literal no-Ctrl scroll-down gesture zooms in (${zoomBefore.toFixed(2)} → ${zoomAfter.toFixed(2)})`)
 
     const capture = await app.page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
     await writeFile(DRIVEN_SCREENSHOT, Buffer.from(capture.data, 'base64'))

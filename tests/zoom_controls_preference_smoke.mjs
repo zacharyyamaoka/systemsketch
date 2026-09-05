@@ -92,7 +92,7 @@ async function main() {
     await waitFor(page, `document.querySelector('[data-testid="systemsketch-zoom-out"]') && document.querySelector('[data-testid="systemsketch-zoom-in"]')`, 'both zoom step buttons')
     const enabled = await state(page)
     assert(
-      enabled.stored === '{"version":1,"showZoomButtons":true,"punctuatedPortRow":true}',
+      enabled.stored === '{"version":1,"showZoomButtons":true,"scrollDownZoomsIn":true,"punctuatedPortRow":true}',
       'enabling persists the versioned local preference',
     )
     await closeSettings(page)

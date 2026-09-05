@@ -4,6 +4,10 @@ export const APPEARANCE_PREFERENCES_STORAGE_KEY = 'systemsketch.appearance.v1'
 
 export interface AppearancePreferences {
   showZoomButtons: boolean
+  /** Plain wheel zoom follows Zach's spatial convention: moving the wheel
+   * down moves closer to the board. Keep the opposite convention reachable
+   * without changing the board or replacing tldraw's camera behavior. */
+  scrollDownZoomsIn: boolean
   /** The Inputs row reads as `name: type = default` — Name, Type and
    * Default all in monospace, the ':' / '=' muted rather than full-ink.
    * Chosen over a bolder full-ink treatment and over hiding '=' until a
@@ -13,6 +17,7 @@ export interface AppearancePreferences {
 
 export const DEFAULT_APPEARANCE_PREFERENCES: AppearancePreferences = Object.freeze({
   showZoomButtons: false,
+  scrollDownZoomsIn: true,
   punctuatedPortRow: true,
 })
 
@@ -28,13 +33,14 @@ export function parseStoredAppearancePreferences(value: unknown): AppearancePref
   if (!isRecord(value) || value.version !== 1) {
     return DEFAULT_APPEARANCE_PREFERENCES
   }
-  const { showZoomButtons, punctuatedPortRow } = value
+  const { showZoomButtons, scrollDownZoomsIn, punctuatedPortRow } = value
   // A field the stored record predates is `undefined`, not wrong — that
   // should fall back to its own default, not discard a real value the user
   // already set for every other field. A field that's present with the
   // wrong type means the record is corrupt, and the whole thing resets.
   if (
     (showZoomButtons !== undefined && typeof showZoomButtons !== 'boolean')
+    || (scrollDownZoomsIn !== undefined && typeof scrollDownZoomsIn !== 'boolean')
     || (punctuatedPortRow !== undefined && typeof punctuatedPortRow !== 'boolean')
   ) {
     return DEFAULT_APPEARANCE_PREFERENCES
@@ -43,6 +49,9 @@ export function parseStoredAppearancePreferences(value: unknown): AppearancePref
     showZoomButtons: typeof showZoomButtons === 'boolean'
       ? showZoomButtons
       : DEFAULT_APPEARANCE_PREFERENCES.showZoomButtons,
+    scrollDownZoomsIn: typeof scrollDownZoomsIn === 'boolean'
+      ? scrollDownZoomsIn
+      : DEFAULT_APPEARANCE_PREFERENCES.scrollDownZoomsIn,
     punctuatedPortRow: typeof punctuatedPortRow === 'boolean'
       ? punctuatedPortRow
       : DEFAULT_APPEARANCE_PREFERENCES.punctuatedPortRow,
@@ -97,6 +106,7 @@ export function updateAppearancePreferences(
   const next = { ...snapshot, ...patch }
   if (
     next.showZoomButtons === snapshot.showZoomButtons
+    && next.scrollDownZoomsIn === snapshot.scrollDownZoomsIn
     && next.punctuatedPortRow === snapshot.punctuatedPortRow
   ) {
     return snapshot
@@ -106,14 +116,14 @@ export function updateAppearancePreferences(
   return snapshot
 }
 
-function subscribe(listener: () => void): () => void {
+export function subscribeAppearancePreferences(listener: () => void): () => void {
   listeners.add(listener)
   return () => listeners.delete(listener)
 }
 
 export function useAppearancePreferences(): AppearancePreferences {
   return useSyncExternalStore(
-    subscribe,
+    subscribeAppearancePreferences,
     getAppearancePreferences,
     () => DEFAULT_APPEARANCE_PREFERENCES,
   )

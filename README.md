@@ -2,7 +2,7 @@
 
 SystemSketch starts from one deliberately boring datum: the stock tldraw whiteboard. Its engine, drawing tools, and shortcuts stay stock while narrow supported seams add local files, board overview, zoom, Help, and the Stable/Preview workflow.
 
-The [wheel-zoom restoration gallery](docs/wheel-zoom-restoration-2026-09-04.html) records the reverted board navigation: an ordinary vertical wheel gesture changes scale around the pointer instead of panning vertically, even after a stale Trackpad preference is restored. Its guided [`wheel-zoom.systemsketch`](sketches/review/wheel-zoom.systemsketch) board is ready for direct review.
+The [wheel-zoom restoration gallery](docs/wheel-zoom-restoration-2026-09-04.html) records the reverted board navigation: an ordinary vertical wheel gesture changes scale around the pointer instead of panning vertically, even after a stale Trackpad preference is restored. Scroll down zooms in by default, while Appearance can flip the direction. Its guided [`wheel-zoom.systemsketch`](sketches/review/wheel-zoom.systemsketch) board is ready for direct review.
 
 The [Figma-style history implementation gallery](docs/history-figma-implementation-2026-09-04.html) records the selected history direction now on `main`: one truthful shared revision language for Compare and the Block inspector, a top-right Compare entry, and a state-preserving right/bottom dock for Properties and Code. Its guided [`history-figma.systemsketch`](sketches/review/history-figma.systemsketch) fixture is ready to review.
 
