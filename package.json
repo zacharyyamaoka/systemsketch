@@ -18,6 +18,7 @@
     "test:hidden-port-counts": "node tests/hidden_port_counts_smoke.mjs",
     "test:port-alignment": "node tests/port_outline_alignment_smoke.mjs",
     "test:rows": "node tests/block_port_rows_smoke.mjs",
+    "test:port-punctuation": "node tests/port_row_punctuation_smoke.mjs",
     "test:release-ui": "node tests/release_channel_controls_smoke.mjs",
     "test:promotion-handoff": "node tests/promoted_workspace_restore_smoke.mjs",
     "test:selection-menu": "node tests/selection_menu_smoke.mjs",

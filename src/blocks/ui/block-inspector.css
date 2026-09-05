@@ -606,6 +606,40 @@
   grid-template-columns: 14px minmax(0, 1fr) 54px 54px 30px 22px;
 }
 
+/* Code-style Inputs row (Settings → Appearance → "Code-style Inputs row"):
+ * a muted ':' rides inside Type's own grid cell and a muted '=' inside
+ * Default's, so name: type = default reads as one line without adding new
+ * grid columns. A version with its own ':' / '=' columns was tried first —
+ * at the panel's real ~236px content width, Name already had almost no
+ * slack, and two more columns (plus their gaps) starved it down to an
+ * unreadable ~18px. Riding inside Type/Default's existing cell instead
+ * leaves Name exactly as wide as it is in the plain row. */
+.block-inspector__port-field {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 2px;
+}
+
+.block-inspector__port-field .block-inspector__port-type,
+.block-inspector__port-field .block-inspector__port-default {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.block-inspector__port-punct {
+  flex: none;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+  color: var(--ss-text-faint);
+  user-select: none;
+}
+
+.block-inspector__port-row--punctuated .block-inspector__port-name {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+}
+
 /*
  * `mut` — this argument is written in place, so the caller's own object changes.
  * A toggle rather than a field: it is read off the signature and it is what
