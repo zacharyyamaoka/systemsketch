@@ -46,6 +46,12 @@ import {
 } from '../branch'
 import { EditorLoopInspector, getOnlySelectedLoop } from '../loop'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
+import {
+  PropagationFocusControls,
+  PropagationFocusDomLens,
+  propagationSeedFromSelection,
+  usePropagationFocus,
+} from '../propagation'
 import { PortableShareButton } from '../export/PortableShareButton'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
 import { PrimitiveSearch } from '../library/PrimitiveSearch'
@@ -326,6 +332,12 @@ function SelectionMiniMenu() {
     () => canWrapSelection(editor),
     [editor],
   )
+  const propagationSeed = useValue(
+    'systemsketch propagation focus seed',
+    () => propagationSeedFromSelection(editor),
+    [editor],
+  )
+  const propagationFocus = usePropagationFocus(editor)
   const runTidyEdges = () => {
     const outcome = tidyEdges(editor)
     addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
@@ -338,9 +350,21 @@ function SelectionMiniMenu() {
     || hasBlockMiniMenu
     || hasAppearance
     || canWrap
+    || propagationSeed !== null
     || layoutActions.tidyEdges
     || layoutActions.organizeNodes
   if (!canShow || !hasVisibleActions) return null
+
+  if (propagationFocus.seedId !== null) {
+    return (
+      <SelectionContextualMenu
+        className="systemsketch-selection-menu systemsketch-selection-menu--focus"
+        label="Propagation focus controls"
+      >
+        <PropagationFocusControls />
+      </SelectionContextualMenu>
+    )
+  }
 
   if (hasBranch) {
     return (
@@ -373,6 +397,7 @@ function SelectionMiniMenu() {
             onTidyEdges={runTidyEdges}
             onOrganizeNodes={() => void runOrganizeNodes()}
           />
+          <PropagationFocusControls />
         </>
       ) : (
         <>
@@ -387,6 +412,7 @@ function SelectionMiniMenu() {
             onTidyEdges={runTidyEdges}
             onOrganizeNodes={() => void runOrganizeNodes()}
           />
+          <PropagationFocusControls />
         </>
       )}
     </SelectionContextualMenu>
@@ -669,6 +695,7 @@ export function SystemSketchSurfaceHost() {
 
   return (
     <div className="systemsketch-surface-host" data-testid="systemsketch-surface-host">
+      <PropagationFocusDomLens />
       <RecorderIndicator />
       <TunnelLayerBar />
       <OnCanvasBlockPicker />

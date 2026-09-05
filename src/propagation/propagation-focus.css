@@ -1,0 +1,71 @@
+/* A presentation-only lens: class/attribute changes leave document records alone. */
+.tl-container[data-propagation-focus-active] .tl-shape[data-shape-id]:not([data-propagation-focus='included']) {
+  /* Filter composes with each shape's saved opacity. Do not flatten authored
+     opacity, diff roles, or stock selection paint into a lens-specific value. */
+  filter: opacity(.17);
+  transition: filter 120ms ease-out;
+}
+
+.tl-container[data-propagation-focus-active] .tl-shape[data-shape-id][data-propagation-focus='included'] {
+  filter: none;
+  transition: filter 120ms ease-out;
+}
+
+.systemsketch-propagation-focus {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 5px;
+}
+
+.systemsketch-propagation-focus button,
+.systemsketch-propagation-focus input {
+  min-height: 24px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--ss-text-inverse);
+  background: transparent;
+}
+
+.systemsketch-propagation-focus button {
+  padding: 3px 6px;
+  cursor: pointer;
+}
+
+.systemsketch-propagation-focus button:hover {
+  background: color-mix(in srgb, var(--ss-text-inverse) 15%, transparent);
+}
+
+.systemsketch-propagation-focus label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.systemsketch-propagation-focus input {
+  /* WHY: range dragging needs enough physical travel to be a quick horizon
+     gesture. The flex basis keeps both directions legible on desktop, while
+     min-width: 0 lets the compact selection menu yield on narrow viewports. */
+  flex: 1 1 clamp(110px, 14vw, 180px);
+  width: clamp(110px, 14vw, 180px);
+  min-width: 0;
+  accent-color: var(--ss-accent);
+}
+
+.systemsketch-propagation-focus input:disabled {
+  cursor: not-allowed;
+  opacity: .35;
+}
+
+.systemsketch-propagation-focus__label,
+.systemsketch-propagation-focus output {
+  color: color-mix(in srgb, var(--ss-text-inverse) 75%, transparent);
+  font-size: 10px;
+}
+
+.systemsketch-propagation-focus output {
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
