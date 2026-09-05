@@ -16,6 +16,8 @@ The [wheel-zoom restoration gallery](docs/wheel-zoom-restoration-2026-09-04.html
 
 The [continuous Block auto-fit gallery](docs/block-autofit-continuous-2026-09-05.html) shows the supported-seam design: a paint-only Block preview follows children during every held pointer sample, then one public tldraw fit-to-content operation persists that exact box on release. It includes the reactive-cycle crash repair, immediate child-first dragging after selecting a parent, and the right-corner fold composition where type joins the title at left.
 
+The [generic Block work index](docs/generic-block-work-index-2026-09-05.html) gathers every completed candidate from the design thread—Ports, folding and fit, chrome switches, title/menu behavior, header alignment, and member presentation—into one filterable visual review surface while keeping their separate unmerged branch status explicit.
+
 The earlier [stock-settled Block auto-fit repair gallery](docs/block-autofit-stock-settle-2026-09-05.html) traces the original runaway drag feedback loop from the supplied recordings and the stable one-shot boundary this continuous presentation builds upon.
 
 The [Figma-style history implementation gallery](docs/history-figma-implementation-2026-09-04.html) records the selected history direction now on `main`: one truthful shared revision language for Compare and the Block inspector, a top-right Compare entry, and a state-preserving right/bottom dock for Properties and Code. Its guided [`history-figma.systemsketch`](sketches/review/history-figma.systemsketch) fixture is ready to review.
