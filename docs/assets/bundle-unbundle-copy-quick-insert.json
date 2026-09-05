@@ -62,7 +62,7 @@
       "count": 2,
       "source": "shape:quick-source",
       "sourcePort": "out",
-      "sink": "shape:3msFLRXj9MC1xBkTNJmD1",
+      "sink": "shape:cXmNjfT2-Ztt_ueGIFcHg",
       "sinkPort": "record",
       "normalized": true
     },
@@ -70,7 +70,7 @@
       "count": 2,
       "source": "shape:quick-source",
       "sourcePort": "out",
-      "sink": "shape:3msFLRXj9MC1xBkTNJmD1",
+      "sink": "shape:cXmNjfT2-Ztt_ueGIFcHg",
       "sinkPort": "record",
       "normalized": true
     },
@@ -229,7 +229,7 @@
       "count": 2,
       "source": "shape:quick-source",
       "sourcePort": "out",
-      "sink": "shape:AZGL9XOfoK1aJxGi1lI6R",
+      "sink": "shape:aCNO4y-iMfg0dyv2brxhQ",
       "sinkPort": "value",
       "normalized": true
     },
@@ -237,7 +237,7 @@
       "count": 2,
       "source": "shape:quick-source",
       "sourcePort": "out",
-      "sink": "shape:AZGL9XOfoK1aJxGi1lI6R",
+      "sink": "shape:aCNO4y-iMfg0dyv2brxhQ",
       "sinkPort": "value",
       "normalized": true
     },
@@ -386,7 +386,7 @@
     "label": "reverse insertion still normalizes two bindings to source→sink",
     "observed": {
       "count": 2,
-      "source": "shape:GbF5wmMO6ApxsSTGg8Lt8",
+      "source": "shape:ngEh6okktUuuglzuz5ZgR",
       "sourcePort": "out_1",
       "sink": "shape:quick-sink",
       "sinkPort": "in",
@@ -394,7 +394,7 @@
     },
     "desired": {
       "count": 2,
-      "source": "shape:GbF5wmMO6ApxsSTGg8Lt8",
+      "source": "shape:ngEh6okktUuuglzuz5ZgR",
       "sourcePort": "out_1",
       "sink": "shape:quick-sink",
       "sinkPort": "in",
@@ -415,28 +415,28 @@
     "observed": {
       "offered": false,
       "ids": [
-        "shape:9AYw0WS2HmOXT2KGnv8Sp",
-        "shape:GbF5wmMO6ApxsSTGg8Lt8",
+        "shape:ngEh6okktUuuglzuz5ZgR",
+        "shape:NVAJSLwSuhpz-KgWf9S_y",
         "shape:quick-sink",
         "shape:quick-source"
       ],
       "state": {
         "hasEditor": true,
-        "href": "http://127.0.0.1:34821/?preset=block-dev",
+        "href": "http://127.0.0.1:37109/?preset=block-dev",
         "readonly": true
       }
     },
     "desired": {
       "offered": false,
       "ids": [
-        "shape:9AYw0WS2HmOXT2KGnv8Sp",
-        "shape:GbF5wmMO6ApxsSTGg8Lt8",
+        "shape:ngEh6okktUuuglzuz5ZgR",
+        "shape:NVAJSLwSuhpz-KgWf9S_y",
         "shape:quick-sink",
         "shape:quick-source"
       ],
       "state": {
         "hasEditor": true,
-        "href": "http://127.0.0.1:34821/?preset=block-dev",
+        "href": "http://127.0.0.1:37109/?preset=block-dev",
         "readonly": true
       }
     },
