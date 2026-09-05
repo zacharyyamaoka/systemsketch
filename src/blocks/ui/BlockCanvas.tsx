@@ -1354,6 +1354,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
       className={`NodeShape systemsketch-block-canvas${simple ? ' NodeShape_plain' : ''}${value ? ' NodeShape_value' : ''}`}
       data-block-view={layout.view}
 		data-variadic-prototype={variadicPrototype ?? undefined}
+		data-header-divider={shape.props.showHeaderDivider === false ? 'hidden' : 'shown'}
       data-diff-state={diffState === 'normal' ? undefined : diffState}
       data-diff-variant={stated ? diffVariant : undefined}
 		data-definition-id={value ? undefined : shape.props.definitionId || undefined}

@@ -1,0 +1,97 @@
+{
+  "feature": "Block chrome toggles",
+  "viewport": { "width": 1650, "height": 1000 },
+  "pages": [{ "id": "review", "name": "Review" }],
+  "shapes": [
+    {
+      "id": "shown",
+      "type": "block",
+      "x": 560,
+      "y": 290,
+      "props": {
+        "title": "compose_scene()",
+        "blockType": "RenderPass",
+        "description": "The authored Port face begins with its familiar header rule and action footer.",
+        "showDescription": true,
+        "showFooter": true,
+        "showHeaderDivider": true,
+        "view": "port",
+        "w": 440,
+        "h": 260,
+        "views": {
+          "simple": { "w": 320, "h": 206 },
+          "port": { "w": 440, "h": 260 },
+          "expanded": { "w": 560, "h": 380 },
+          "value": { "w": 168, "h": 56 }
+        },
+        "portLayout": "inline",
+        "inputs": [
+          { "id": "in_1", "name": "camera", "type": "Camera", "visible": true },
+          { "id": "in_2", "name": "lights", "type": "LightSet", "visible": true }
+        ],
+        "outputs": [{ "id": "out_1", "name": "image", "type": "Image", "visible": true }]
+      }
+    },
+    {
+      "id": "stripped",
+      "type": "block",
+      "x": 560,
+      "y": 680,
+      "props": {
+        "title": "expected after",
+        "blockType": "RenderPass",
+        "description": "Reference: same Block face with both optional pieces of chrome hidden.",
+        "showDescription": true,
+        "showFooter": false,
+        "showHeaderDivider": false,
+        "view": "port",
+        "w": 440,
+        "h": 260,
+        "views": {
+          "simple": { "w": 320, "h": 206 },
+          "port": { "w": 440, "h": 260 },
+          "expanded": { "w": 560, "h": 380 },
+          "value": { "w": 168, "h": 56 }
+        },
+        "portLayout": "inline",
+        "inputs": [
+          { "id": "in_1", "name": "camera", "type": "Camera", "visible": true },
+          { "id": "in_2", "name": "lights", "type": "LightSet", "visible": true }
+        ],
+        "outputs": [{ "id": "out_1", "name": "image", "type": "Image", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-footer",
+      "kind": "step",
+      "text": "1 · Select this Block. In the Chrome inspector, choose Footer → Hide.",
+      "x": 80,
+      "y": 275,
+      "w": 360,
+      "h": 125,
+      "target": { "shapeId": "shown", "anchor": "left", "dy": -55 }
+    },
+    {
+      "id": "step-divider",
+      "kind": "step",
+      "text": "2 · In the same Chrome section, choose Header divider → Hide.",
+      "x": 1120,
+      "y": 275,
+      "w": 410,
+      "h": 125,
+      "target": { "shapeId": "shown", "anchor": "right", "dy": 55 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The upper Block matches the lower reference: no footer, no header/body rule, unchanged title and ports, with body space returned.",
+      "x": 80,
+      "y": 700,
+      "w": 360,
+      "h": 160
+    }
+  ]
+}

@@ -22,6 +22,8 @@ const STYLE_PROP_KEYS: Record<string, Record<string, string>> = {
     'systemsketch:blockView': 'view',
     'systemsketch:blockPortLayout': 'portLayout',
     'systemsketch:blockShowDescription': 'showDescription',
+		'systemsketch:blockShowFooter': 'showFooter',
+		'systemsketch:blockShowHeaderDivider': 'showHeaderDivider',
   },
   [CONNECTION_SHAPE_TYPE]: {
     'systemsketch:connectionRouting': 'routing',

@@ -79,6 +79,8 @@ import type { BlockPortSectionTarget } from '../ports/portAffordances'
 import {
   setBlockPortLayoutForSelection,
   setBlockShowDescriptionForSelection,
+	setBlockShowFooterForSelection,
+	setBlockShowHeaderDividerForSelection,
   setBlockViewForSelection,
 } from '../commands/blockStyleCommands'
 import { ElementHistoryPanel } from '../../history/ElementHistoryPanel'
@@ -1678,6 +1680,55 @@ export function BlockInspectorContent({
                 ) : null}
               </section>
 
+						<section className="block-inspector__section" data-inspector-section="Chrome">
+							<div className="block-inspector__section-title">Chrome</div>
+							<div className="block-inspector__chrome-control">
+								<span>Footer</span>
+								<div className="block-inspector__choices" role="group" aria-label="Block footer">
+									<button
+										type="button"
+										disabled={readOnly}
+										aria-pressed={props.showFooter !== false}
+										onClick={() => actions?.updateDetails({ showFooter: true })}
+									>
+										show
+									</button>
+									<button
+										type="button"
+										disabled={readOnly}
+										aria-pressed={props.showFooter === false}
+										onClick={() => actions?.updateDetails({ showFooter: false })}
+									>
+										hide
+									</button>
+								</div>
+							</div>
+							<div className="block-inspector__chrome-control">
+								<span>Header divider</span>
+								<div className="block-inspector__choices" role="group" aria-label="Header divider">
+									<button
+										type="button"
+										disabled={readOnly}
+										aria-pressed={props.showHeaderDivider !== false}
+										onClick={() => actions?.updateDetails({ showHeaderDivider: true })}
+									>
+										show
+									</button>
+									<button
+										type="button"
+										disabled={readOnly}
+										aria-pressed={props.showHeaderDivider === false}
+										onClick={() => actions?.updateDetails({ showHeaderDivider: false })}
+									>
+										hide
+									</button>
+								</div>
+							</div>
+							<p className="block-inspector__hint">
+								Applies in Port and Expanded views. Hiding the footer gives its room back to the Block body.
+							</p>
+						</section>
+
               <PortSection side="inputs" props={props} actions={actions} semanticTagsVisible={semanticTagsVisible} />
               <PortSection side="outputs" props={props} actions={actions} semanticTagsVisible={semanticTagsVisible} />
 
@@ -1851,12 +1902,18 @@ export function EditorBlockInspector({
         view={context.styles.view}
         portLayout={context.styles.portLayout}
         showDescription={context.styles.showDescription}
+				showFooter={context.styles.showFooter}
+				showHeaderDivider={context.styles.showHeaderDivider}
         actions={{
           setView: (view) => void setBlockViewForSelection(editor, view),
           setPortLayout: (portLayout) =>
             void setBlockPortLayoutForSelection(editor, portLayout),
           setShowDescription: (showDescription) =>
             void setBlockShowDescriptionForSelection(editor, showDescription),
+				setShowFooter: (showFooter) =>
+					void setBlockShowFooterForSelection(editor, showFooter),
+				setShowHeaderDivider: (showHeaderDivider) =>
+					void setBlockShowHeaderDividerForSelection(editor, showHeaderDivider),
         }}
         onRequestClose={onRequestClose}
       />

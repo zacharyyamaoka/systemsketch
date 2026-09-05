@@ -3,6 +3,7 @@ import {
 	blockHeaderAlign,
 	blockPortLayout,
 	blockPortSections,
+	blockShowsFooter,
 	expandedSectionWeights,
 	isEffectPort,
 	portDefaultValue,
@@ -307,7 +308,7 @@ export function blockPortViewHeightForSlots(
 		+ NODE_ROW_HEIGHT_PX * Math.max(1, slotCount)
 		+ NODE_ROW_BOTTOM_PADDING_PX
 		+ descriptionReserve
-		+ NODE_FOOTER_HEIGHT_PX,
+		+ (layout.footer?.h ?? 0),
 	)
 }
 
@@ -698,7 +699,16 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 			Math.max(BLOCK_HEADER_HEIGHT_PX, visibleHeaderInputs.length * HEADER_PORT_PITCH_PX + 8),
 		)
 	const bodyTop = headerHeight + NODE_ROW_HEADER_GAP_PX
-	const footerTop = Math.max(bodyTop, height - NODE_FOOTER_HEIGHT_PX)
+	// WHY: hiding a footer gives its room back to the authored face. Leaving a
+	// blank action-strip-sized dead zone would make the control cosmetic and
+	// would still compress Port rows or an Expanded child canvas for no reason.
+	// Simple reserves its pre-existing lower type strip; it has no footer chrome.
+	const reservesFooter = view === 'simple' || (
+		view !== 'value' && blockShowsFooter(props)
+	)
+	const footerTop = reservesFooter
+		? Math.max(bodyTop, height - NODE_FOOTER_HEIGHT_PX)
+		: height
 	const placed: LaidOutBlockPort[] = []
 
 	if (view === 'value') {
@@ -1113,7 +1123,9 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		body,
 		bodyTop,
 		footerTop,
-		footer: { x: 0, y: footerTop, w: width, h: Math.max(0, height - footerTop) },
+		footer: blockShowsFooter(props)
+			? { x: 0, y: footerTop, w: width, h: Math.max(0, height - footerTop) }
+			: null,
 		pitch,
 		description,
 		frameInterior: view === 'expanded'

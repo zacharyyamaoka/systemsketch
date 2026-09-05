@@ -17,6 +17,8 @@ import type { Editor, SharedStyle, StyleProp, TLShape } from 'tldraw'
 import {
   BlockPortLayoutStyle,
   BlockShowDescriptionStyle,
+	BlockShowFooterStyle,
+	BlockShowHeaderDividerStyle,
   BlockViewStyle,
   isBlockShape,
   type BlockShape,
@@ -144,6 +146,30 @@ export function setBlockShowDescriptionForSelection(
   )
 }
 
+export function setBlockShowFooterForSelection(
+	editor: Editor,
+	showFooter: boolean,
+): BlockStyleResult {
+	return setStyleForSelection(
+		editor,
+		BlockShowFooterStyle,
+		showFooter,
+		showFooter ? 'show block footers' : 'hide block footers',
+	)
+}
+
+export function setBlockShowHeaderDividerForSelection(
+	editor: Editor,
+	showHeaderDivider: boolean,
+): BlockStyleResult {
+	return setStyleForSelection(
+		editor,
+		BlockShowHeaderDividerStyle,
+		showHeaderDivider,
+		showHeaderDivider ? 'show block header dividers' : 'hide block header dividers',
+	)
+}
+
 export function setConnectionRoutingForSelection(
   editor: Editor,
   routing: ConnectionRoutingKind,
@@ -165,6 +191,8 @@ export interface BlockSelectionStyles {
   view: SharedStyle<BlockView> | undefined
   portLayout: SharedStyle<PortLayout> | undefined
   showDescription: SharedStyle<boolean> | undefined
+	showFooter: SharedStyle<boolean> | undefined
+	showHeaderDivider: SharedStyle<boolean> | undefined
 }
 
 /** Two shared-style readings are the same when a control would look the same. */
@@ -201,7 +229,9 @@ export function sameBlockSelectionStyles(
   return a.blockCount === b.blockCount
     && sameSharedStyle(a.view, b.view)
     && sameSharedStyle(a.portLayout, b.portLayout)
-    && sameSharedStyle(a.showDescription, b.showDescription)
+		&& sameSharedStyle(a.showDescription, b.showDescription)
+		&& sameSharedStyle(a.showFooter, b.showFooter)
+		&& sameSharedStyle(a.showHeaderDivider, b.showHeaderDivider)
 }
 
 export function getBlockSelectionStyles(editor: Editor): BlockSelectionStyles {
@@ -210,6 +240,8 @@ export function getBlockSelectionStyles(editor: Editor): BlockSelectionStyles {
     view: getSharedStyleForSelection(editor, BlockViewStyle),
     portLayout: getSharedStyleForSelection(editor, BlockPortLayoutStyle),
     showDescription: getSharedStyleForSelection(editor, BlockShowDescriptionStyle),
+		showFooter: getSharedStyleForSelection(editor, BlockShowFooterStyle),
+		showHeaderDivider: getSharedStyleForSelection(editor, BlockShowHeaderDividerStyle),
   }
 }
 

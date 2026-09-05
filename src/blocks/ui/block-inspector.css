@@ -207,6 +207,22 @@
   color: var(--ss-text-muted);
 }
 
+.block-inspector__chrome-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.block-inspector__chrome-control > span {
+  flex: 0 0 74px;
+  color: var(--ss-text-muted);
+}
+
+.block-inspector__chrome-control .block-inspector__choices {
+  flex: 1 1 auto;
+}
+
 .block-inspector input,
 .block-inspector select,
 .block-inspector textarea {

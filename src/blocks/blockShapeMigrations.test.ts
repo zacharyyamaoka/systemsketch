@@ -16,6 +16,7 @@ import {
 	downgradeBlockPropsV5ToV4,
 	downgradeBlockPropsV6ToV5,
 	downgradeBlockPropsV7ToV6,
+	downgradeBlockPropsV8ToV7,
 	upgradeBlockPropsV0ToV1,
 	upgradeBlockPropsV1ToV2,
 	upgradeBlockPropsV2ToV3,
@@ -23,6 +24,7 @@ import {
 	upgradeBlockPropsV4ToV5,
 	upgradeBlockPropsV5ToV6,
 	upgradeBlockPropsV6ToV7,
+	upgradeBlockPropsV7ToV8,
 	type BlockMigrationProps,
 } from './blockShapeMigrations'
 
@@ -168,6 +170,9 @@ describe('Block shape migrations', () => {
 		const v7 = throughPureStep(v6, upgradeBlockPropsV6ToV7)
 		expect(v7).toEqual(v6)
 
+		const v8 = throughPureStep(v7, upgradeBlockPropsV7ToV8)
+		expect(v8).toMatchObject({ showFooter: true, showHeaderDivider: true })
+
 		const restoredV0 = throughPureStep(v1, downgradeBlockPropsV1ToV0)
 		expect(restoredV0).toMatchObject({ w: 360, h: 230, views: v0.views })
 	})
@@ -211,7 +216,7 @@ describe('Block shape migrations', () => {
 		expect(() => store.loadStoreSnapshot(snapshot)).not.toThrow()
 		const migrated = store.get(legacy.id) as BlockShape
 		expect(migrated.props.stockConfig).toEqual({ triggerSource: 'clock', rateHz: 10 })
-		expect(store.schema.serialize().sequences[BLOCK_MIGRATION_SEQUENCE]).toBe(7)
+		expect(store.schema.serialize().sequences[BLOCK_MIGRATION_SEQUENCE]).toBe(8)
 
 		const sequence = store.schema.sortedMigrations
 			.filter((migration) => migration.id.startsWith(`${BLOCK_MIGRATION_SEQUENCE}/`))
@@ -220,6 +225,13 @@ describe('Block shape migrations', () => {
 		const record = { ...legacy, props: structuredClone(migrated.props) }
 		;(step as { down: (record: unknown) => void }).down(record)
 		expect((record.props as Record<string, unknown>)).not.toHaveProperty('stockConfig')
+	})
+
+	it('adds visible chrome to old records and removes it cleanly for a v7 reader', () => {
+		const v7: BlockMigrationProps = { title: 'draw', showFooter: undefined }
+		const v8 = throughPureStep(v7, upgradeBlockPropsV7ToV8)
+		expect(v8).toEqual({ title: 'draw', showFooter: true, showHeaderDivider: true })
+		expect(throughPureStep(v8, downgradeBlockPropsV8ToV7)).toEqual({ title: 'draw' })
 	})
 
 	it('downgrades disposable diff data without mutating the current record', () => {
@@ -282,6 +294,29 @@ describe('Block shape migrations', () => {
 
 		expect(() => store.loadStoreSnapshot(snapshot)).not.toThrow()
 		expect((store.get(legacy.id) as BlockShape).props.state).toBe('normal')
+	})
+
+	it('loads a v6 Block with the chrome it painted before these controls existed', () => {
+		const store = createTLStore({ shapeUtils: [BlockShapeUtil], bindingUtils: [] })
+		const currentSchema = store.schema.serialize()
+		const legacy = markerBlock()
+		legacy.props.inputs = [{ id: 'in_1', name: 'camera', type: 'Camera', visible: true }]
+		legacy.props.outputs = [{ id: 'out_1', name: 'image', type: 'Image', visible: true }]
+		delete (legacy.props as Record<string, unknown>).showFooter
+		delete (legacy.props as Record<string, unknown>).showHeaderDivider
+		const snapshot = {
+			schema: {
+				...currentSchema,
+				sequences: { ...currentSchema.sequences, [BLOCK_MIGRATION_SEQUENCE]: 6 },
+			},
+			store: { [legacy.id]: legacy },
+		} as unknown as TLStoreSnapshot
+
+		expect(() => store.loadStoreSnapshot(snapshot)).not.toThrow()
+		expect((store.get(legacy.id) as BlockShape).props).toMatchObject({
+			showFooter: true,
+			showHeaderDivider: true,
+		})
 	})
 
 	it('turns row and arm markers into the row and arm every port now names', () => {

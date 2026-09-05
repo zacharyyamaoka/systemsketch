@@ -90,6 +90,8 @@ export type BlockDetailsPatch = Partial<
     | 'blockType'
     | 'description'
     | 'showDescription'
+		| 'showFooter'
+		| 'showHeaderDivider'
     | 'icon'
     | 'notes'
     | 'portLayout'
