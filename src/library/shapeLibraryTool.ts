@@ -14,9 +14,10 @@ import {
   type ShapeLibraryStorage,
 } from './shapeLibraryModel'
 
-export type ShapeLibraryToolId = ShapeFamilyTool | TLGeoShape['props']['geo']
+export type ShapeLibraryToolId = ShapeFamilyTool | TLGeoShape['props']['geo'] | 'text'
 
 export function shapeLibraryToolId(item: ShapeLibraryItem): ShapeLibraryToolId {
+  if (item.kind === 'tool') return item.tool
   if (item.kind === 'geo') return item.geo
   if (item.arrowKind === 'elbow') return 'arrow-elbow'
   return Math.abs(item.bend) > 0.001 ? 'arrow-curve' : 'arrow-straight'

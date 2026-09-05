@@ -49,13 +49,16 @@ async function screenshot(page, path) {
   await writeFile(path, Buffer.from(capture.data, 'base64'))
 }
 
-async function openAppearanceSettings(page) {
+async function openCanvasSettings(page) {
   await waitFor(page, `document.querySelector('[data-testid="main-menu.button"]')`, 'the main menu button')
   await clickElement(page, '[data-testid="main-menu.button"]')
   await waitFor(page, `document.querySelector('[data-testid="main-menu.settings"]')`, 'the Settings menu item')
   await clickElement(page, '[data-testid="main-menu.settings"]')
   await waitFor(page, `document.querySelector('[data-testid="systemsketch-settings-dialog"]')`, 'the Settings dialog')
   await clickElement(page, '[data-testid="systemsketch-settings-category-appearance"]')
+  await waitFor(page, `document.querySelector('[data-testid="systemsketch-theme-list"]')`, 'the Appearance settings')
+  await waitFor(page, `!document.querySelector('[data-testid="systemsketch-wheel-zoom-sensitivity"]')`, 'Wheel zoom to stay out of Appearance')
+  await clickElement(page, '[data-testid="systemsketch-settings-category-canvas"]')
   await waitFor(page, `document.querySelector('[data-testid="systemsketch-wheel-zoom-sensitivity"]')`, 'the wheel sensitivity preference')
   await evaluate(page, `document.querySelector('[data-testid="systemsketch-wheel-zoom-sensitivity-control"]')?.scrollIntoView({ block: 'center' })`)
   await delay(180)
@@ -139,13 +142,13 @@ async function main() {
     pass(`the visible zoom readout follows the gesture (${before.zoomLabel} → ${after.zoomLabel})`)
     await screenshot(app.page, AFTER)
 
-    await openAppearanceSettings(app.page)
+    await openCanvasSettings(app.page)
     const checked = await evaluate(app.page, `document.querySelector('[data-testid="systemsketch-scroll-down-zooms-in"]')?.getAttribute('aria-checked')`)
     assert.equal(checked, 'true')
-    pass('Appearance exposes the enabled Scroll down to zoom in default')
+    pass('Canvas settings expose the enabled Scroll down to zoom in default')
     const standardSensitivity = await evaluate(app.page, `document.querySelector('[data-testid="systemsketch-wheel-zoom-sensitivity"]')?.value`)
     assert.equal(standardSensitivity, '100')
-    pass('Appearance exposes standard wheel sensitivity as 100%')
+    pass('Canvas settings expose standard wheel sensitivity as 100%')
     await screenshot(app.page, SETTING)
 
     await setSensitivity(app.page, 150)
@@ -176,7 +179,7 @@ async function main() {
     pass(`150% sensitivity makes one scroll step 15% (${tunedBefore.camera.z.toFixed(3)} → ${tunedAfter.camera.z.toFixed(3)})`)
     await screenshot(app.page, TUNED)
 
-    await openAppearanceSettings(app.page)
+    await openCanvasSettings(app.page)
     await setSensitivity(app.page, 75)
     await waitFor(
       app.page,
@@ -200,7 +203,7 @@ async function main() {
     assert.equal(reloadedSensitivity.appearance.wheelZoomSensitivityPercent, 75)
     pass('a tuned sensitivity survives a full reload')
 
-    await openAppearanceSettings(app.page)
+    await openCanvasSettings(app.page)
     await clickElement(app.page, '.systemsketch-settings__sensitivity-reset')
     await waitFor(
       app.page,

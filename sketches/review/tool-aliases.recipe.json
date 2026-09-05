@@ -1,0 +1,52 @@
+{
+  "feature": "Tool aliases",
+  "viewport": { "width": 1280, "height": 720 },
+  "shapes": [
+    {
+      "id": "text-tool",
+      "type": "block",
+      "x": 500,
+      "y": 285,
+      "props": {
+        "title": "Text tool",
+        "description": "The canonical tool remains Text. Personal aliases only change how it is found.",
+        "blockType": "Tool",
+        "view": "simple",
+        "w": 300,
+        "h": 142
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Open Settings → Tool aliases. Add @datatype to Text.",
+      "x": 35,
+      "y": 190,
+      "w": 370,
+      "h": 110,
+      "target": { "shapeId": "text-tool", "anchor": "left" }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Close Settings, press S, type @datatype, then press Enter.",
+      "x": 875,
+      "y": 190,
+      "w": 370,
+      "h": 110,
+      "target": { "shapeId": "text-tool", "anchor": "right" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Text is the only result, shows ↪ @datatype, and is armed without renaming the tool.",
+      "x": 300,
+      "y": 525,
+      "w": 650,
+      "h": 110
+    }
+  ]
+}

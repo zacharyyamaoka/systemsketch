@@ -8,7 +8,7 @@
       "x": 500,
       "y": 250,
       "props": {
-        "title": "wheel_target()",
+        "title": "wheel()",
         "description": "Keep the pointer here while testing board scale",
         "blockType": "Function",
         "view": "port",
@@ -57,7 +57,7 @@
     {
       "id": "sensitivity-note",
       "kind": "note",
-      "text": "OPTION · Settings → Appearance → Wheel zoom: tune 50–150% or Reset to standard",
+      "text": "OPTION · Settings → Canvas → Wheel zoom: tune 50–150% or Reset to standard",
       "x": 650,
       "y": 540,
       "w": 520,

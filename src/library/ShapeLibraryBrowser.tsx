@@ -12,6 +12,7 @@ import {
   type ShapeLibraryItem,
   type ShapeLibrarySection,
 } from './shapeLibraryModel'
+import { useToolAliases } from './toolAliases'
 import './shape-library.css'
 
 interface ShapeLibraryBrowserProps {
@@ -25,6 +26,7 @@ type BrowserSection = 'Recents' | ShapeLibrarySection
 
 const DEFAULT_OPEN_SECTIONS: Record<BrowserSection, boolean> = {
   Recents: true,
+  Tools: true,
   Connections: true,
   Basic: true,
   Flowchart: true,
@@ -68,8 +70,8 @@ function LibraryTile({
     <button
       type="button"
       className="systemsketch-library-tile"
-      title={`Insert ${item.label}`}
-      aria-label={`Insert ${item.label}`}
+      title={item.kind === 'tool' ? `Use ${item.label} tool` : `Insert ${item.label}`}
+      aria-label={item.kind === 'tool' ? `Use ${item.label} tool` : `Insert ${item.label}`}
       data-library-item={item.id}
       data-library-section={section}
       data-testid={`systemsketch-library-${item.id}`}
@@ -89,10 +91,11 @@ export function ShapeLibraryBrowser({
 }: ShapeLibraryBrowserProps) {
   const editor = useEditor()
   const recentIds = useShapeLibraryRecents()
+  const aliases = useToolAliases()
   const [query, setQuery] = useState('')
   const [openSections, setOpenSections] = useState(DEFAULT_OPEN_SECTIONS)
   const normalizedQuery = query.trim()
-  const matches = useMemo(() => filterShapeLibraryItems(query), [query])
+  const matches = useMemo(() => filterShapeLibraryItems(query, aliases), [aliases, query])
   const recents = useMemo(
     () => recentIds.map(shapeLibraryItemById).filter((item): item is ShapeLibraryItem => Boolean(item)),
     [recentIds],
@@ -102,6 +105,7 @@ export function ShapeLibraryBrowser({
     if (!normalizedQuery) return
     setOpenSections((current) => ({
       ...current,
+      Tools: true,
       Connections: true,
       Basic: true,
       Flowchart: true,
@@ -111,7 +115,7 @@ export function ShapeLibraryBrowser({
   const insert = (item: ShapeLibraryItem) => {
     const shapeId = insertShapeLibraryItem(editor, item)
     setQuery('')
-    onInserted?.(item, shapeId)
+    if (shapeId) onInserted?.(item, shapeId)
   }
 
   const toggleSection = (section: BrowserSection) => {

@@ -211,8 +211,8 @@ describe('in-app file browser', () => {
   const listing = {
     directories: [{ name: 'Robotics', path: '/home/z/SystemSketch/Robotics' }],
     documents: [
-      { name: 'Arm.tldr', title: 'Arm', path: '/home/z/SystemSketch/Arm.tldr', mtime: 10 },
-      { name: 'Gripper.tldr', title: 'Gripper', path: '/home/z/SystemSketch/Gripper.tldr', mtime: 20 },
+      { name: 'Arm.tldr', title: 'Arm', path: '/home/z/SystemSketch/Arm.tldr', mtime: 10, size: 240 },
+      { name: 'Gripper.tldr', title: 'Gripper', path: '/home/z/SystemSketch/Gripper.tldr', mtime: 20, size: 120 },
     ],
   }
 
@@ -221,13 +221,13 @@ describe('in-app file browser', () => {
       {
         directories: [{ name: 'Robotics', path: '/home/z/SystemSketch/Robotics' }],
         documents: [
-          { name: 'New.systemsketch', title: 'New', path: '/home/z/SystemSketch/New.systemsketch', mtime: 1, kind: 'systemsketch' as const },
-          { name: 'Legacy.tldr', title: 'Legacy', path: '/home/z/SystemSketch/Legacy.tldr', mtime: 2 },
+          { name: 'New.systemsketch', title: 'New', path: '/home/z/SystemSketch/New.systemsketch', mtime: 1, size: 42, kind: 'systemsketch' as const },
+          { name: 'Legacy.tldr', title: 'Legacy', path: '/home/z/SystemSketch/Legacy.tldr', mtime: 2, size: 64 },
         ],
       },
       '',
     )
-    expect(rows.map((row) => row.encoding)).toEqual([null, 'systemsketch', 'tldraw'])
+    expect(rows.map((row) => row.encoding)).toEqual([null, 'tldraw', 'systemsketch'])
   })
 
   it('lists folders before documents and filters both', () => {
@@ -236,6 +236,34 @@ describe('in-app file browser', () => {
     expect(browserRows(listing, 'grip').map((row) => row.title)).toEqual(['Gripper'])
     expect(browserRows(listing, 'zzz')).toEqual([])
     expect(browserRows(null, '')).toEqual([])
+  })
+
+  it('puts the most recently modified documents first without displacing folders', () => {
+    expect(browserRows(listing, '', 'modified').map((row) => row.title)).toEqual([
+      'Robotics', 'Gripper', 'Arm',
+    ])
+    expect(browserRows({
+      directories: [],
+      documents: [
+        { name: 'Zeta.tldr', title: 'Zeta', path: '/Zeta.tldr', mtime: 20, size: 1 },
+        { name: 'Alpha.tldr', title: 'Alpha', path: '/Alpha.tldr', mtime: 20, size: 1 },
+      ],
+    }, '', 'modified').map((row) => row.title)).toEqual(['Alpha', 'Zeta'])
+  })
+
+  it('uses familiar column-header directions for name, size, and modification time', () => {
+    expect(browserRows(listing, '', 'name', 'descending').map((row) => row.title)).toEqual([
+      'Robotics', 'Gripper', 'Arm',
+    ])
+    expect(browserRows(listing, '', 'size').map((row) => row.title)).toEqual([
+      'Robotics', 'Gripper', 'Arm',
+    ])
+    expect(browserRows(listing, '', 'size', 'descending').map((row) => row.title)).toEqual([
+      'Robotics', 'Arm', 'Gripper',
+    ])
+    expect(browserRows(listing, '', 'modified', 'ascending').map((row) => row.title)).toEqual([
+      'Robotics', 'Arm', 'Gripper',
+    ])
   })
 
   it('moves the arrow-key selection and clamps at both ends', () => {

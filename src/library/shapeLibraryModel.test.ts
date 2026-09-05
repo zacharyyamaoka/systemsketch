@@ -42,6 +42,8 @@ describe('shared shape library catalog', () => {
     expect(filterShapeLibraryItems('orthogonal connection').map((item) => item.id)).toEqual(['arrow-elbow'])
     expect(filterShapeLibraryItems('circle').map((item) => item.id)).toEqual(['ellipse'])
     expect(filterShapeLibraryItems('flow decision').map((item) => item.id)).toEqual(['decision'])
+    expect(filterShapeLibraryItems('type').map((item) => item.id)).toEqual(['text'])
+    expect(filterShapeLibraryItems('@datatype', { text: ['@datatype'] }).map((item) => item.id)).toEqual(['text'])
     expect(filterShapeLibraryItems('missing')).toEqual([])
   })
 

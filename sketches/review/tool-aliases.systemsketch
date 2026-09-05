@@ -4,7 +4,7 @@
     "application": "SystemSketch",
     "shapes": {
       "arrow": 2,
-      "geo": 4,
+      "geo": 3,
       "block": 1
     },
     "bindings": {
@@ -56,8 +56,8 @@
   },
   "records": [
     {
-      "x": 940,
-      "y": 370,
+      "x": 875,
+      "y": 245,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -78,8 +78,8 @@
           "y": 0
         },
         "end": {
-          "x": -100,
-          "y": 13
+          "x": -75,
+          "y": 111
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -96,7 +96,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3siiV",
+      "index": "a3xlVV",
       "typeName": "shape"
     },
     {
@@ -108,8 +108,16 @@
       "typeName": "pointer"
     },
     {
-      "x": 30,
-      "y": 140,
+      "name": "",
+      "color": "#02B1CC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:BuFxRNY8GgPrqD6i_iftr",
+      "typeName": "user"
+    },
+    {
+      "x": 35,
+      "y": 190,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -117,7 +125,7 @@
       "id": "shape:cue-step-1",
       "type": "geo",
       "props": {
-        "w": 360,
+        "w": 370,
         "h": 110,
         "geo": "rectangle",
         "dash": "draw",
@@ -141,7 +149,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "1 · Place the pointer over this Block"
+                  "text": "1 · Open Settings → Tool aliases. Add @datatype to Text."
                 }
               ]
             }
@@ -149,12 +157,12 @@
         }
       },
       "parentId": "page:page",
-      "index": "a2hin",
+      "index": "a228Q",
       "typeName": "shape"
     },
     {
-      "x": 80,
-      "y": 540,
+      "x": 300,
+      "y": 525,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -162,11 +170,11 @@
       "id": "shape:cue-pass",
       "type": "geo",
       "props": {
-        "w": 500,
-        "h": 120,
+        "w": 650,
+        "h": 110,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 2,
+        "growY": 0,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -186,7 +194,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · 100% feels unchanged; raising sensitivity makes each scroll step visibly larger"
+                  "text": "PASS WHEN · Text is the only result, shows ↪ @datatype, and is armed without renaming the tool."
                 }
               ]
             }
@@ -194,12 +202,12 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4WNU",
+      "index": "a4U4B",
       "typeName": "shape"
     },
     {
-      "x": 940,
-      "y": 310,
+      "x": 875,
+      "y": 190,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -207,8 +215,8 @@
       "id": "shape:cue-step-2",
       "type": "geo",
       "props": {
-        "w": 340,
-        "h": 120,
+        "w": 370,
+        "h": 110,
         "geo": "rectangle",
         "dash": "draw",
         "growY": 0,
@@ -231,7 +239,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "2 · Scroll down to zoom in — do not hold Ctrl"
+                  "text": "2 · Close Settings, press S, type @datatype, then press Enter."
                 }
               ]
             }
@@ -239,13 +247,13 @@
         }
       },
       "parentId": "page:page",
-      "index": "a35II",
+      "index": "a3ZXX",
       "typeName": "shape"
     },
     {
-      "x": 39.44444444444444,
-      "y": -10.375,
-      "z": 0.9216,
+      "x": 0,
+      "y": 0,
+      "z": 1,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -255,13 +263,13 @@
       "id": "binding:cue-step-1-arrow-end",
       "type": "arrow",
       "fromId": "shape:cue-step-1-arrow",
-      "toId": "shape:zoom-target",
+      "toId": "shape:text-tool",
       "props": {
         "isPrecise": true,
         "isExact": false,
         "normalizedAnchor": {
           "x": 0,
-          "y": 0.3282828282828283
+          "y": 0.5
         },
         "snap": "edge-point",
         "terminal": "end"
@@ -273,18 +281,26 @@
       "id": "binding:cue-step-2-arrow-end",
       "type": "arrow",
       "fromId": "shape:cue-step-2-arrow",
-      "toId": "shape:zoom-target",
+      "toId": "shape:text-tool",
       "props": {
         "isPrecise": true,
         "isExact": false,
         "normalizedAnchor": {
           "x": 1,
-          "y": 0.6717171717171717
+          "y": 0.5
         },
         "snap": "edge-point",
         "terminal": "end"
       },
       "typeName": "binding"
+    },
+    {
+      "name": "",
+      "color": "#55B467",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:J27Vf5JLd1UGPb-ww_mOW",
+      "typeName": "user"
     },
     {
       "editingShapeId": null,
@@ -318,6 +334,14 @@
       "typeName": "binding"
     },
     {
+      "name": "",
+      "color": "#02B1CC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:0s_x5_k5VBwkJ8h6o3IS9",
+      "typeName": "user"
+    },
+    {
       "meta": {},
       "id": "binding:cue-step-2-arrow-start",
       "type": "arrow",
@@ -337,118 +361,11 @@
     },
     {
       "name": "",
-      "color": "#F2555A",
+      "color": "#7B66DC",
       "imageUrl": "",
       "meta": {},
-      "id": "user:XRm28aKef2_fL2CNV1mau",
+      "id": "user:gVuu0kOe6QIiyvMoKsOre",
       "typeName": "user"
-    },
-    {
-      "x": 500,
-      "y": 250,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:zoom-target",
-      "type": "block",
-      "props": {
-        "w": 340,
-        "h": 198,
-        "title": "wheel()",
-        "description": "Keep the pointer here while testing board scale",
-        "blockType": "Function",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "bp73XH2nJnaTc6MREHNO2",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "scroll",
-            "type": "Wheel",
-            "visible": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "out_1",
-            "name": "scale",
-            "type": "Zoom",
-            "visible": true
-          }
-        ],
-        "definitionKey": "wheel"
-      },
-      "parentId": "page:page",
-      "index": "a12hM",
-      "typeName": "shape"
-    },
-    {
-      "x": 650,
-      "y": 540,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:cue-sensitivity-note",
-      "type": "geo",
-      "props": {
-        "w": 520,
-        "h": 120,
-        "geo": "rectangle",
-        "dash": "draw",
-        "growY": 0,
-        "url": "",
-        "scale": 1,
-        "flipX": false,
-        "flipY": false,
-        "color": "blue",
-        "labelColor": "black",
-        "fill": "semi",
-        "size": "m",
-        "font": "sans",
-        "align": "start",
-        "verticalAlign": "middle",
-        "richText": {
-          "type": "doc",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "OPTION · Settings → Canvas → Wheel zoom: tune 50–150% or Reset to standard"
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parentId": "page:page",
-      "index": "a5oUF",
-      "typeName": "shape"
     },
     {
       "meta": {},
@@ -484,8 +401,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1280,
-        "h": 720
+        "w": 1440,
+        "h": 900
       },
       "insets": [
         false,
@@ -514,8 +431,8 @@
       "typeName": "instance"
     },
     {
-      "x": 390,
-      "y": 195,
+      "x": 405,
+      "y": 245,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -536,8 +453,8 @@
           "y": 0
         },
         "end": {
-          "x": 110,
-          "y": 120
+          "x": 95,
+          "y": 111
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -554,7 +471,55 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a2xmuG",
+      "index": "a2pS9",
+      "typeName": "shape"
+    },
+    {
+      "x": 500,
+      "y": 285,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:text-tool",
+      "type": "block",
+      "props": {
+        "w": 300,
+        "h": 142,
+        "title": "Text tool",
+        "description": "The canonical tool remains Text. Personal aliases only change how it is found.",
+        "blockType": "Tool",
+        "icon": "",
+        "view": "simple",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "08qktvv8Tw6kRNB_N-5jb",
+        "inputs": [],
+        "outputs": [],
+        "definitionKey": "Text_tool"
+      },
+      "parentId": "page:page",
+      "index": "a1sIz",
       "typeName": "shape"
     }
   ]

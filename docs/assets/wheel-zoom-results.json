@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-09-05T07:32:00.113Z",
+  "ranAt": "2026-09-05T15:27:33.429Z",
   "before": {
     "camera": {
       "x": 0,
@@ -193,8 +193,8 @@
     "scroll down to zoom in is the first-run default",
     "a plain scroll-down gesture zooms in (1.00 → 1.10)",
     "the visible zoom readout follows the gesture (100% → 110%)",
-    "Appearance exposes the enabled Scroll down to zoom in default",
-    "Appearance exposes standard wheel sensitivity as 100%",
+    "Canvas settings expose the enabled Scroll down to zoom in default",
+    "Canvas settings expose standard wheel sensitivity as 100%",
     "changing sensitivity updates the live stock zoomSpeed and local storage",
     "150% sensitivity makes one scroll step 15% (1.100 → 1.265)",
     "a tuned sensitivity survives a full reload",
