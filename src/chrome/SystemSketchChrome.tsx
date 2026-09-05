@@ -96,6 +96,24 @@ function PanelIcon() {
   )
 }
 
+function ShapesIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true">
+      <rect x="3" y="3" width="6" height="6" rx="1" />
+      <circle cx="14" cy="6" r="3" />
+      <path d="m6 12 3.5 5H2.5L6 12Zm6 0h5v5h-5z" />
+    </svg>
+  )
+}
+
+function CommandIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true">
+      <path d="M7 5.5a2.5 2.5 0 1 0-2.5 2.5H15.5A2.5 2.5 0 1 0 13 5.5v9a2.5 2.5 0 1 0 2.5-2.5H4.5A2.5 2.5 0 1 0 7 14.5v-9Z" />
+    </svg>
+  )
+}
+
 export function SystemSketchMenuPanel() {
   const { MainMenu } = useTldrawUiComponents()
   const ref = useRef<HTMLElement>(null)
@@ -115,7 +133,7 @@ export function SystemSketchMenuPanel() {
 }
 
 export function SystemSketchSharePanel() {
-  const { rightSurface, toggleRight } = useChrome()
+  const { rightSurface, toggleRight, leftSurface, toggleLeft, toolbarSurface, setToolbar } = useChrome()
   const { addDialog } = useDialogs()
   const ref = useRef<HTMLElement>(null)
   usePassThroughWheelEvents(ref)
@@ -170,6 +188,41 @@ export function SystemSketchSharePanel() {
         onClick={() => toggleRight('comments')}
       >
         <PanelIcon />
+      </TldrawUiButton>
+      {/* WHY these two live here rather than beside the breadcrumb, where they
+          used to sit: "Refine structural breadcrumb controls" (66afad2e) gave
+          the top-left shell's whole width to the structural path — see the
+          `max-width` comment on `.systemsketch-top-left-shell` — and
+          `tests/depth_breadcrumb_navigation_smoke.mjs` now asserts zero
+          trailing controls in that shell at any width. The shared left
+          popout (Shapes/Behaviors) and the command palette still need a
+          discoverable opener beyond the palette-only path, so they ride the
+          other corner's icon-button row instead of reclaiming the space that
+          commit deliberately freed. They sit right before Share, the row's
+          rightmost anchor: the centred Preview/REC notice
+          (`topNoticePlacement.ts`) can only ever reach as far as this shell's
+          *left* edge, so the closer a button is to Share, the less a wide
+          notice can ever cover it. */}
+      <TldrawUiButton
+        type="icon"
+        className="systemsketch-shell-icon-button systemsketch-shapes-button"
+        title="Shapes library"
+        aria-expanded={leftSurface === 'shapes' || leftSurface === 'behaviors'}
+        aria-controls={leftSurface ? 'systemsketch-left-popout' : undefined}
+        onClick={() => toggleLeft('shapes')}
+      >
+        <ShapesIcon />
+      </TldrawUiButton>
+      <TldrawUiButton
+        type="icon"
+        className="systemsketch-shell-icon-button systemsketch-command-button"
+        title="Search and commands (Ctrl+P)"
+        aria-label="Search and commands"
+        aria-keyshortcuts="Control+P Meta+P"
+        aria-expanded={toolbarSurface !== null}
+        onClick={() => setToolbar(toolbarSurface ? null : 'commands')}
+      >
+        <CommandIcon />
       </TldrawUiButton>
       <PortableShareButton />
     </nav>

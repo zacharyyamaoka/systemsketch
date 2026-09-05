@@ -970,14 +970,6 @@
   }
 }
 
-/* At a narrow desktop width the bottom dock already carries Library. Reclaim
- * that duplicate chrome before truncating the current board/depth label. */
-@media (max-width: 920px) {
-  .systemsketch-top-left-shell .systemsketch-shapes-button {
-    display: none;
-  }
-}
-
 /* A notice uses the top row when it genuinely fits. Side popouts move only
  * when the measured fallback row is occupied. Active REC takes priority over
  * passive Preview status and is the only notice rendered while it runs. */
@@ -989,13 +981,6 @@ body:has(.systemsketch-recorder-indicator[data-placement='below']) .systemsketch
 @media (max-width: 560px) {
   .systemsketch-top-left-shell {
     max-width: calc(100vw - 176px);
-  }
-
-  /* The board name is the one piece of chrome needed to orient and rename a
-   * mobile board. Keep it, and let the bottom tool dock carry the duplicate
-   * shape/command launchers on this tightly constrained row. */
-  .systemsketch-top-left-shell .systemsketch-shell-icon-button {
-    display: none;
   }
 
   .systemsketch-share-button {
