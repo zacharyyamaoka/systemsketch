@@ -2,6 +2,8 @@
 
 SystemSketch starts from one deliberately boring datum: the stock tldraw whiteboard. Its engine, drawing tools, and shortcuts stay stock while narrow supported seams add local files, board overview, zoom, Help, and the Stable/Preview workflow.
 
+The [recursive Definition load-recovery gallery](docs/recursive-definition-load-2026-09-05.html) records a stack-overflow repair for valid self-recursive Definitions: overlapping occurrence bodies are now treated as a local recursive boundary, so the supplied Series A pipeline opens with all 574 shapes. Its guided [`recursive-definition-load.systemsketch`](sketches/review/recursive-definition-load.systemsketch) board cold-reopens and exercises a nested card move/undo; `npm run test:definitions` includes the real-browser regression.
+
 The [wheel-zoom restoration gallery](docs/wheel-zoom-restoration-2026-09-04.html) records the reverted board navigation: an ordinary vertical wheel gesture changes scale around the pointer instead of panning vertically, even after a stale Trackpad preference is restored. Scroll down zooms in by default; Appearance can flip the direction and tune tldraw’s standard 100% wheel sensitivity from 50–150% without changing the −/+ buttons. Its guided [`wheel-zoom.systemsketch`](sketches/review/wheel-zoom.systemsketch) board is ready for direct review.
 
 The [Figma-style history implementation gallery](docs/history-figma-implementation-2026-09-04.html) records the selected history direction now on `main`: one truthful shared revision language for Compare and the Block inspector, a top-right Compare entry, and a state-preserving right/bottom dock for Properties and Code. Its guided [`history-figma.systemsketch`](sketches/review/history-figma.systemsketch) fixture is ready to review.
