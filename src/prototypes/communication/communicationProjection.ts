@@ -490,9 +490,17 @@ export function applyCommunicationRouteStyle(editor: Editor, routeStyle: Communi
 export function applyCommunicationFocus(editor: Editor, groupKey: string | null): void {
 	communicationProjection.update(editor, (state) => ({
 		...state,
-		focusedGroupKey: state.focusedGroupKey === groupKey ? null : groupKey,
+		focusedGroupKey: groupKey,
 	}))
-	editor.selectNone()
+}
+
+export function selectedCommunicationGroupKey(
+	summary: CommunicationSummary,
+	selectedShapeIds: readonly TLShapeId[],
+): string | null {
+	if (selectedShapeIds.length !== 1) return null
+	const selectedId = selectedShapeIds[0]
+	return summary.relations.find((relation) => relation.memberIds.includes(selectedId))?.groupKey ?? null
 }
 
 export function phaseLabel(phase: CommunicationPhase): string {

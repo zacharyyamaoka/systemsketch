@@ -3,14 +3,14 @@
     "formatVersion": 2,
     "application": "SystemSketch",
     "shapes": {
-      "arrow": 4,
-      "geo": 5,
+      "arrow": 5,
+      "geo": 6,
       "connection": 17,
       "block": 2
     },
     "bindings": {
       "connection": 34,
-      "arrow": 8
+      "arrow": 9
     }
   },
   "tldrawFileFormatVersion": 1,
@@ -98,7 +98,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "aOoRcV",
+      "index": "aOyHYZ",
       "typeName": "shape"
     },
     {
@@ -143,7 +143,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aNPTQ",
+      "index": "aN78n",
       "typeName": "shape"
     },
     {
@@ -185,7 +185,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "a9tsr",
+      "index": "a9gJb",
       "typeName": "shape"
     },
     {
@@ -245,7 +245,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aGaz7",
+      "index": "aGVZv",
       "typeName": "shape"
     },
     {
@@ -318,7 +318,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aBSub",
+      "index": "aB4jz",
       "typeName": "shape"
     },
     {
@@ -352,16 +352,8 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "a6tLM",
+      "index": "a6OAU",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#EC5E41",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:1i3G4crEkgdke8AxshrrC",
-      "typeName": "user"
     },
     {
       "x": 180,
@@ -404,12 +396,12 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "aPrCPV",
+      "index": "aPnFUG",
       "typeName": "shape"
     },
     {
       "x": 1420,
-      "y": 900,
+      "y": -220,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -441,7 +433,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · Each click isolates exactly its named protocol, Action and Service status stay separate, and Clear focus restores all six relationships."
+                  "text": "PASS WHEN · Each ID isolates exactly its protocol; a canvas or component selection restores every relationship immediately."
                 }
               ]
             }
@@ -449,7 +441,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aQlTj",
+      "index": "aRxfv",
       "typeName": "shape"
     },
     {
@@ -494,13 +486,13 @@
         }
       },
       "parentId": "page:page",
-      "index": "aOV0b",
+      "index": "aOv8Q",
       "typeName": "shape"
     },
     {
-      "x": 187.3134328358209,
-      "y": 295.82089552238807,
-      "z": 0.8440944881889763,
+      "x": 0,
+      "y": 0,
+      "z": 1,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -536,7 +528,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aDnKI",
+      "index": "aDHmQ",
       "typeName": "shape"
     },
     {
@@ -570,7 +562,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "a8D0n",
+      "index": "a8fII",
       "typeName": "shape"
     },
     {
@@ -614,7 +606,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "aMybDd",
+      "index": "aMiE0V",
       "typeName": "shape"
     },
     {
@@ -659,8 +651,26 @@
         }
       },
       "parentId": "page:page",
-      "index": "aPZ7z",
+      "index": "aPKsM",
       "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-dismiss-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-dismiss-arrow",
+      "toId": "shape:cue-step-dismiss",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
     },
     {
       "x": 0,
@@ -693,7 +703,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aCHt2",
+      "index": "aCrZ2",
       "typeName": "shape"
     },
     {
@@ -727,7 +737,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "a5kMf",
+      "index": "a5Fr6",
       "typeName": "shape"
     },
     {
@@ -785,7 +795,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "aMrar",
+      "index": "aMM4b",
       "typeName": "shape"
     },
     {
@@ -837,7 +847,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aJ9qj",
+      "index": "aJPGU",
       "typeName": "shape"
     },
     {
@@ -871,8 +881,16 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aHFRX",
+      "index": "aHJCX",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#7B66DC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:ChK8dTN4uCsvkvLltZQrj",
+      "typeName": "user"
     },
     {
       "meta": {},
@@ -949,7 +967,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "svhI6s_M7cUHc1BCJj_VR",
+        "definitionId": "npwMAXCchd1DrcdPGV835",
         "inputs": [
           {
             "id": "move_feedback",
@@ -1059,7 +1077,7 @@
         "definitionKey": "Mission_Orchestrator"
       },
       "parentId": "page:page",
-      "index": "aK9zR",
+      "index": "aK6tf",
       "typeName": "shape"
     },
     {
@@ -1093,7 +1111,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aEsEr",
+      "index": "aEBkM",
       "typeName": "shape"
     },
     {
@@ -1163,7 +1181,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "a7i8I",
+      "index": "a7K66",
       "typeName": "shape"
     },
     {
@@ -1197,7 +1215,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aIHuA",
+      "index": "aIhLf",
       "typeName": "shape"
     },
     {
@@ -1283,7 +1301,51 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aAY6r",
+      "index": "aAIpQ",
+      "typeName": "shape"
+    },
+    {
+      "x": 1420,
+      "y": 970,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-dismiss-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -50,
+          "y": -140
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aQxAWV",
       "typeName": "shape"
     },
     {
@@ -1317,7 +1379,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "a3Fnn",
+      "index": "a3Va2",
       "typeName": "shape"
     },
     {
@@ -1567,7 +1629,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aF7BU",
+      "index": "aF1OX",
       "typeName": "shape"
     },
     {
@@ -1623,6 +1685,51 @@
       "typeName": "binding"
     },
     {
+      "x": 1420,
+      "y": 900,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-dismiss",
+      "type": "geo",
+      "props": {
+        "w": 560,
+        "h": 140,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "5 · With A2 focused, click this blank canvas or select either component. Focus clears; a selected component stays selected."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aQXgA",
+      "typeName": "shape"
+    },
+    {
       "x": 970,
       "y": -70,
       "rotation": 0,
@@ -1663,7 +1770,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "aNwXHV",
+      "index": "aNmXIV",
       "typeName": "shape"
     },
     {
@@ -1840,7 +1947,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "Wp78lYaXe-MRYrFGn1GUs",
+        "definitionId": "95F48TDiP1dCZIJ5QTGiQ",
         "inputs": [
           {
             "id": "move_goal",
@@ -1950,7 +2057,7 @@
         "definitionKey": "Robot_Runtime"
       },
       "parentId": "page:page",
-      "index": "aLkVn",
+      "index": "aLCB6",
       "typeName": "shape"
     },
     {
@@ -1984,7 +2091,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "a4Gnj",
+      "index": "a40U9",
       "typeName": "shape"
     },
     {

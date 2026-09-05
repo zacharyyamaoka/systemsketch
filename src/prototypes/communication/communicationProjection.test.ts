@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
+import { createShapeId } from 'tldraw'
 
-import { inspectCommunicationChannel, parseCommunicationChannel } from './communicationProjection'
+import {
+	inspectCommunicationChannel,
+	parseCommunicationChannel,
+	selectedCommunicationGroupKey,
+	type CommunicationSummary,
+} from './communicationProjection'
 
 const inferred = { provenance: 'strict-port-name' as const }
 
@@ -52,5 +58,26 @@ describe('communication channel parsing', () => {
 		expect(parseCommunicationChannel('status.request', 'status.request')).toMatchObject({
 			family: 'service', name: 'status', phase: 'request',
 		})
+	})
+})
+
+describe('communication focus selection', () => {
+	const goal = createShapeId('goal')
+	const result = createShapeId('result')
+	const request = createShapeId('request')
+	const response = createShapeId('response')
+	const summary = {
+		relations: [
+			{ groupKey: 'action:move', memberIds: [goal, result] },
+			{ groupKey: 'service:pose', memberIds: [request, response] },
+		],
+	} as unknown as CommunicationSummary
+
+	it('keeps focus only while exactly one member of that relationship is selected', () => {
+		expect(selectedCommunicationGroupKey(summary, [goal])).toBe('action:move')
+		expect(selectedCommunicationGroupKey(summary, [response])).toBe('service:pose')
+		expect(selectedCommunicationGroupKey(summary, [])).toBeNull()
+		expect(selectedCommunicationGroupKey(summary, [createShapeId('unrelated')])).toBeNull()
+		expect(selectedCommunicationGroupKey(summary, [goal, result])).toBeNull()
 	})
 })

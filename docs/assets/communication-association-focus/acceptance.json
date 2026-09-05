@@ -1,9 +1,12 @@
 {
-  "generatedAt": "2026-09-05T06:58:56.617Z",
+  "generatedAt": "2026-09-05T07:30:23.718Z",
   "checks": [
     "adversarial board opens with 21 canonical data edges and no projection metadata",
     "strict grouping assigns stable repeated IDs while two ambiguous legs remain neutral and diagnosed",
     "clicking one A2 leg focuses all four A2 legs and dims every unrelated edge, including unresolved wiring",
+    "selecting blank canvas clears the active communication focus",
+    "selecting another communication edge transfers focus to its relationship",
+    "selecting a component clears communication focus while preserving the new selection",
     "Components collapses the same graph into nine enumerated relationships without namespace collisions",
     "focused A2 aggregate reveals cancel, feedback, and result over the Simple cards while goal remains the aggregate track",
     "Straight keeps the centreline aggregate and reveals all four canonical A2 tracks underneath",

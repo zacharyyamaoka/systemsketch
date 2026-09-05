@@ -26,6 +26,8 @@ def main() -> None:
         ("dataflow", "Canonical dataflow", "01-adversarial-dataflow.png", "Twenty-one ordinary directed wires; no communication records were added."),
         ("ids", "Tagged IDs", "02-tagged-reference-ids.png", "Every constituent leg repeats its stable A#, S#, T#, or ST# association."),
         ("tag-focus", "A2 leg focus", "03-tagged-a2-focus.png", "Click any move leg: all four A2 legs remain vivid and the other fifteen parsed legs dim."),
+        ("canvas-dismiss", "Canvas dismisses", "03b-canvas-dismisses-focus.png", "A blank-canvas selection clears protocol focus and restores every parsed and unresolved edge."),
+        ("shape-dismiss", "Component dismisses", "03c-component-dismisses-focus.png", "Selecting Operations UI clears protocol focus while preserving the new component selection."),
         ("components", "Six-way collision", "04-components-enumerated.png", "Same-pair Actions and Services collapse independently; same-stem Action/Service status do not collide."),
         ("elbow-focus", "A2 track reveal", "05-components-a2-focus-elbow.png", "The aggregate stays on goal while cancel, feedback, and result reappear on their exact canonical tracks."),
         ("straight-focus", "S4 centreline focus", "07-components-s4-focus-straight.png", "Straight relationships share the honest centreline; staggered ID labels keep each one clickable."),
@@ -82,7 +84,7 @@ footer {{ padding:24px 60px; color:var(--muted); font-size:11px; }} code {{ font
 <body>
 <main>
 <header>
-  <div><p class="kicker">SystemSketch · implemented V1</p><h1>One protocol, one readable identity.</h1><p class="lede">Strict port-name inference now groups each Action and Service without conflating neighbors. The same stable reference ID appears on every leg and on the collapsed component relationship; click either representation to isolate the whole protocol.</p></div>
+	  <div><p class="kicker">SystemSketch · implemented V1</p><h1>One protocol, one readable identity.</h1><p class="lede">Strict port-name inference groups each Action and Service without conflating neighbors. The same stable reference ID appears on every leg and on the collapsed relationship; selecting it isolates the protocol, while the next canvas or shape selection dismisses that focus naturally.</p></div>
   <div class="score"><div><b>21</b><span>canonical data edges in the adversarial browser proof</span></div><div><b>9</b><span>independently addressable relationships</span></div><div><b>2</b><span>ambiguous edges left visibly unresolved</span></div><div><b>0</b><span>stored graph records changed by the projection</span></div></div>
 </header>
 

@@ -140,8 +140,13 @@
       "target": { "shapeId": "mission", "anchor": "bottom", "dx": -105 }
     },
     {
-      "id": "pass", "kind": "pass", "text": "PASS WHEN · Each click isolates exactly its named protocol, Action and Service status stay separate, and Clear focus restores all six relationships.",
-      "x": 1420, "y": 900, "w": 560, "h": 140
+      "id": "step-dismiss", "kind": "step", "text": "5 · With A2 focused, click this blank canvas or select either component. Focus clears; a selected component stays selected.",
+      "x": 1420, "y": 900, "w": 560, "h": 140,
+      "target": { "x": 1370, "y": 830 }
+    },
+    {
+      "id": "pass", "kind": "pass", "text": "PASS WHEN · Each ID isolates exactly its protocol; a canvas or component selection restores every relationship immediately.",
+      "x": 1420, "y": -220, "w": 560, "h": 140
     }
   ]
 }

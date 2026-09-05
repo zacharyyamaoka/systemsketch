@@ -183,6 +183,37 @@ async function clickRelationship(page, id, mode = 'components') {
   await clickAt(page, point.x, point.y)
 }
 
+async function clickShapeCenter(page, shapeId) {
+  const point = JSON.parse(await evaluate(page, `JSON.stringify((() => {
+    const editor = window.__systemsketch.editor
+    const bounds = editor.getShapePageBounds(${JSON.stringify(shapeId)})
+    return bounds ? editor.pageToViewport(bounds.center) : null
+  })())`))
+  if (!point) throw new Error(`Missing shape ${shapeId}`)
+  await clickAt(page, point.x, point.y)
+}
+
+async function clickBlankCanvas(page) {
+  const point = JSON.parse(await evaluate(page, `JSON.stringify((() => {
+    const editor = window.__systemsketch.editor
+    const canvas = document.querySelector('.tl-canvas')
+    const rect = canvas?.getBoundingClientRect()
+    if (!canvas || !rect) return null
+    for (let y = Math.min(rect.bottom - 120, 1040); y >= rect.top + 140; y -= 70) {
+      for (let x = rect.left + 120; x <= Math.min(rect.right - 120, 1680); x += 90) {
+        const target = document.elementFromPoint(x, y)
+        const pagePoint = editor.screenToPage({ x, y })
+        if (target?.closest('.tl-canvas') && !editor.getShapeAtPoint(pagePoint, { hitInside: true })) {
+          return { x, y }
+        }
+      }
+    }
+    return null
+  })())`))
+  if (!point) throw new Error('Missing blank canvas point')
+  await clickAt(page, point.x, point.y)
+}
+
 async function main() {
   await ensureDir(ASSETS)
   const app = await startApp({
@@ -224,10 +255,40 @@ async function main() {
     assert.equal(state.neutralDim, 2)
     assert.deepEqual(state.activeIds, ['A2'])
     assert.match(state.status, /A2 focused · 4 legs/)
+    assert.equal(JSON.parse(await evaluate(app.page,
+      `JSON.stringify(window.__systemsketch.editor.getSelectedShapeIds())`)).length, 1)
     pass('clicking one A2 leg focuses all four A2 legs and dims every unrelated edge, including unresolved wiring')
     await shot(app.page, '03-tagged-a2-focus.png')
 
-    await clickElement(app.page, '[data-testid="communication-focus-clear"]')
+    await clickBlankCanvas(app.page)
+    await delay(350)
+    state = await projectionState(app.page)
+    assert.equal(state.active, 0)
+    assert.equal(state.dim, 0)
+    assert.equal(state.neutralDim, 0)
+    assert.deepEqual(JSON.parse(await evaluate(app.page,
+      `JSON.stringify(window.__systemsketch.editor.getSelectedShapeIds())`)), [])
+    pass('selecting blank canvas clears the active communication focus')
+    await shot(app.page, '03b-canvas-dismisses-focus.png')
+
+    await clickRelationship(app.page, 'A2', 'tagged')
+    await clickRelationship(app.page, 'S1', 'tagged')
+    await delay(350)
+    state = await projectionState(app.page)
+    assert.deepEqual(state.activeIds, ['S1'])
+    assert.match(state.status, /S1 focused · 2 legs/)
+    pass('selecting another communication edge transfers focus to its relationship')
+
+    await clickShapeCenter(app.page, 'shape:dashboard')
+    await delay(350)
+    state = await projectionState(app.page)
+    assert.equal(state.active, 0)
+    assert.equal(state.dim, 0)
+    assert.deepEqual(JSON.parse(await evaluate(app.page,
+      `JSON.stringify(window.__systemsketch.editor.getSelectedShapeIds())`)), ['shape:dashboard'])
+    pass('selecting a component clears communication focus while preserving the new selection')
+    await shot(app.page, '03c-component-dismisses-focus.png')
+
     await clickElement(app.page, '[data-testid="communication-mode-components"]')
     await delay(550)
     state = await projectionState(app.page)

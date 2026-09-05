@@ -1003,9 +1003,10 @@ function TaggedCommunicationConnection({
 	const focusState = focusedGroupKey === null
 		? 'none'
 		: focusedGroupKey === descriptor.groupKey ? 'active' : 'dim'
-	const toggleFocus = (event: React.PointerEvent<SVGElement>) => {
+	const selectFocus = (event: React.PointerEvent<SVGElement>) => {
 		if (event.button !== 0) return
 		event.stopPropagation()
+		editor.select(connection.id)
 		applyCommunicationFocus(editor, descriptor.groupKey)
 	}
 	return (
@@ -1026,7 +1027,7 @@ function TaggedCommunicationConnection({
 				strokeWidth={18}
 				pointerEvents="stroke"
 				vectorEffect="non-scaling-stroke"
-				onPointerDown={toggleFocus}
+				onPointerDown={selectFocus}
 			/>
 			<path
 				d={path}
@@ -1045,7 +1046,7 @@ function TaggedCommunicationConnection({
 				ink={paint.ink}
 				soft={paint.soft}
 				communicationId={relation.displayId}
-				onPointerDown={toggleFocus}
+				onPointerDown={selectFocus}
 			/>
 		</SVGContainer>
 	)
@@ -1127,9 +1128,10 @@ function ComponentCommunicationConnection({
 	const focusState = focusedGroupKey === null
 		? 'none'
 		: focusedGroupKey === relation.groupKey ? 'active' : 'dim'
-	const toggleFocus = (event: React.PointerEvent<SVGElement>) => {
+	const selectFocus = (event: React.PointerEvent<SVGElement>) => {
 		if (event.button !== 0) return
 		event.stopPropagation()
+		editor.select(connection.id)
 		applyCommunicationFocus(editor, relation.groupKey)
 	}
 	return (
@@ -1157,7 +1159,7 @@ function ComponentCommunicationConnection({
 				strokeWidth={18}
 				pointerEvents="stroke"
 				vectorEffect="non-scaling-stroke"
-				onPointerDown={toggleFocus}
+				onPointerDown={selectFocus}
 			/>
 			<path
 				data-communication-track-path
@@ -1178,7 +1180,7 @@ function ComponentCommunicationConnection({
 				ink={paint.ink}
 				soft={paint.soft}
 				communicationId={relation.displayId}
-				onPointerDown={toggleFocus}
+				onPointerDown={selectFocus}
 			/>
 		</SVGContainer>
 	)

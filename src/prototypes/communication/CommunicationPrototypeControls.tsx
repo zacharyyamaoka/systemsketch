@@ -11,6 +11,7 @@ import {
 	communicationProjection,
 	isCommunicationPrototypeEnabled,
 	phaseLabel,
+	selectedCommunicationGroupKey,
 	type CommunicationComponentView,
 	type CommunicationProjectionMode,
 	type CommunicationRouteStyle,
@@ -53,6 +54,11 @@ export function CommunicationPrototypeControls() {
 		() => collectCommunicationRelations(editor),
 		[editor],
 	)
+	const selectionKey = useValue(
+		'communication focus selection',
+		() => [...editor.getSelectedShapeIds()].sort().join(','),
+		[editor],
+	)
 	const enabled = isCommunicationPrototypeEnabled()
 
 	useEffect(() => {
@@ -61,6 +67,16 @@ export function CommunicationPrototypeControls() {
 		// touching the document: every projection choice lives in an EditorAtom.
 		applyCommunicationProjectionMode(editor, 'wiring')
 	}, [editor, enabled])
+
+	useEffect(() => {
+		if (!enabled || state.focusedGroupKey === null) return
+		const selectedGroupKey = selectedCommunicationGroupKey(summary, editor.getSelectedShapeIds())
+		if (selectedGroupKey === state.focusedGroupKey) return
+		// WHY: communication focus is selection-scoped. Following tldraw's own
+		// selection means canvas clicks, other shapes, marquee, and Escape all
+		// dismiss the lens without a competing document-level click-away handler.
+		applyCommunicationFocus(editor, null)
+	}, [editor, enabled, selectionKey, state.focusedGroupKey, summary])
 
 	if (!enabled) return null
 
@@ -148,7 +164,10 @@ export function CommunicationPrototypeControls() {
 						<button
 							type="button"
 							data-testid="communication-focus-clear"
-							onClick={() => applyCommunicationFocus(editor, null)}
+							onClick={() => {
+								applyCommunicationFocus(editor, null)
+								editor.selectNone()
+							}}
 						>
 							Clear focus
 						</button>
