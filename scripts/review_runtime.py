@@ -359,6 +359,25 @@ def stop_child(process: subprocess.Popen[bytes] | subprocess.Popen[str]) -> None
         process.wait(timeout=STOP_TIMEOUT_SECONDS)
 
 
+def review_vite_config(root: Path, lease: Path) -> Path:
+    """Write the tiny per-review wrapper around the pinned Vite config."""
+    config = lease / "vite.config.mjs"
+    base_config = (root / "vite.config.ts").resolve()
+    cache_dir = (lease / "vite-cache").resolve()
+    # WHY: retained review worktrees share node_modules with the primary checkout.
+    # Vite otherwise stores one prebundle cache inside that shared dependency tree,
+    # so a second review can invalidate the first review's dynamic-import chunks.
+    # A wrapper preserves each pinned build's real config while giving its immutable
+    # lease a private cache; this also repairs reviews created before this change.
+    config.write_text(
+        "import { mergeConfig } from 'vite'\n"
+        f"import baseConfig from {json.dumps(str(base_config))}\n"
+        f"export default mergeConfig(baseConfig, {{ cacheDir: {json.dumps(str(cache_dir))} }})\n",
+        encoding="utf-8",
+    )
+    return config
+
+
 def launch_children(root: Path, port: int, api_port: int, name: str, commit: str) -> tuple[subprocess.Popen, subprocess.Popen]:
     lease = root / ".review-runtime"
     environment = {
@@ -374,9 +393,10 @@ def launch_children(root: Path, port: int, api_port: int, name: str, commit: str
         "--source-root", str(root),
     ], cwd=root, env=environment)
     try:
+        vite_config = review_vite_config(root, lease)
         vite = subprocess.Popen([
             str(root / "node_modules" / ".bin" / "vite"), "--host", "127.0.0.1",
-            "--port", str(port), "--strictPort",
+            "--port", str(port), "--strictPort", "--config", str(vite_config),
         ], cwd=root, env=environment)
     except OSError:
         stop_child(api)

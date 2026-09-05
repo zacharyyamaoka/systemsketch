@@ -87,6 +87,20 @@ class ReviewRuntimeTests(unittest.TestCase):
                 + quote(str(root.resolve() / "sketches/review/pill.systemsketch"), safe=""),
             )
 
+    def test_review_vite_config_keeps_pinned_config_and_cache_separate(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "review"
+            lease = root / ".review-runtime"
+            root.mkdir()
+            lease.mkdir()
+            (root / "vite.config.ts").write_text("export default {}\n", encoding="utf-8")
+            config = runtime.review_vite_config(root, lease)
+            contents = config.read_text(encoding="utf-8")
+            self.assertIn(str((root / "vite.config.ts").resolve()), contents)
+            self.assertIn(str((lease / "vite-cache").resolve()), contents)
+            self.assertIn("mergeConfig", contents)
+            self.assertNotIn("\\\\n", contents)
+
     def test_every_agent_publishes_beside_the_primary_checkout(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             primary = Path(directory) / "systemsketch"
