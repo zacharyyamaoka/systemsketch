@@ -76,6 +76,34 @@ class ReviewRuntimeTests(unittest.TestCase):
             with self.assertRaisesRegex(runtime.ReviewRuntimeError, "already occupied"):
                 runtime.allocate_port_pair(port)
 
+    def test_a_retired_review_keeps_its_port_pair_reserved(self) -> None:
+        # A retained review may be down while still owning a durable URL.
+        # Allocation must not make a later review silently replace that URL.
+        with patch.object(runtime, "port_is_free", return_value=True):
+            self.assertEqual(
+                runtime.allocate_port_pair(reserved_ports=frozenset({4600, 4601})),
+                (4602, 4603),
+            )
+
+    def test_new_publish_reserves_ports_listed_in_the_registry(self) -> None:
+        existing = self.review(Path("/tmp/existing-review"))
+        existing.name = "existing-review"
+        saved: dict[str, runtime.Review] = {}
+        with (
+            patch.object(runtime, "registry_lock", return_value=nullcontext()),
+            patch.object(runtime, "load_reviews", return_value={existing.name: existing}),
+            patch.object(runtime, "git", return_value="b" * 40),
+            patch.object(runtime, "review_worktree", return_value=Path("/tmp/new-review")),
+            patch.object(runtime, "port_is_free", return_value=True),
+            patch.object(runtime, "start", side_effect=lambda review: review),
+            patch.object(runtime, "write_reviews", side_effect=lambda reviews: saved.update(reviews)),
+            patch.object(sys, "argv", ["review_runtime.py", "up", "new-review", "--ref", "example"]),
+        ):
+            self.assertEqual(runtime.main(), 0)
+
+        self.assertEqual(saved["new-review"].port, 4602)
+        self.assertEqual(saved["new-review"].api_port, 4603)
+
     def test_review_urls_are_derived_from_the_pinned_worktree(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "review tree"
