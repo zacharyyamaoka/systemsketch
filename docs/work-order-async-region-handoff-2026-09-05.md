@@ -1,10 +1,10 @@
 # Work order: take over contextual Async regions
 
 **Status:** implemented, verified, committed, reconciled through `main` commit
-`1d0313b`, and intentionally not integrated. `main` advanced again while this
-handoff was being written, so the next agent must inspect and reconcile its new
-commits before further implementation or integration. Do not rebuild the
-feature from scratch.
+`da392448`, and intentionally not integrated. The focused review now has an
+adversarial companion with five components, 18 protocol legs, nine semantic
+relationships, and a live nineteenth-wire defaulting gesture. Do not rebuild
+the feature from scratch.
 
 ## Objective
 
@@ -31,11 +31,10 @@ components move, boards load, or users edit temporal behavior.
 | Repository | `/home/bam/systemsketch` |
 | Feature worktree | `/home/bam/.codex/worktrees/7110/systemsketch-track-communication-projection-prototype` |
 | Branch | `track/communication-projection-prototype` |
-| Implemented and browser-proven commit | `7a959d11d2ed7adce989a2a26e99944b9de6cc80` |
-| Reconciled `main` baseline | `1d0313b4cf77c8f06fc2c47585d08fdd550aa619` |
-| `main` observed when this handoff was committed | `da3924480479ed6cf9d053881175f4f3bcb2fe18` |
+| Original implementation and focused browser proof | `7a959d11d2ed7adce989a2a26e99944b9de6cc80` |
+| Latest reconciled `main` baseline | `da3924480479ed6cf9d053881175f4f3bcb2fe18` |
 | Integration state | Not merged into `main`; no integration was authorized |
-| Retained review | `async-region-contextual-20260905`, ports `4696/4697` |
+| Retained review | Run `python3 scripts/review_runtime.py list` for the current commit-pinned stress URL |
 
 Before writing, run `git status --short`, `git worktree list`, and
 `git rev-parse main`. The named worktree was clean when this handoff was
@@ -45,19 +44,21 @@ lane.
 
 ## Review surfaces
 
-- Interactive board:
-  `http://127.0.0.1:4696/?board=%2Fhome%2Fbam%2F.systemsketch-reviews%2Fasync-region-contextual-20260905-7a959d11d2ed%2Fsketches%2Freview%2Fasync-region.systemsketch`
-- Implementation gallery:
-  `http://127.0.0.1:4696/docs/async-region-2026-09-05.html`
+- The active retained review's exact board and report URLs are printed by
+  `python3 scripts/review_runtime.py list`; use the entry whose name starts
+  `async-region-stress`.
 - Committed board:
   `sketches/review/async-region.systemsketch`
+- Committed stress board:
+  `sketches/review/async-region-stress.systemsketch`
 - Report source and output:
   `docs/build_async_region.py` and `docs/async-region-2026-09-05.html`
 
-If the retained review is down, relaunch it from the feature worktree with:
+If the retained review is down, relaunch it from the feature worktree using
+the exact name reported by `list`, for example:
 
 ```bash
-python3 scripts/review_runtime.py up async-region-contextual-20260905
+python3 scripts/review_runtime.py up async-region-stress-20260905
 ```
 
 If the app reports unresolved CodeMirror imports, the review worktree's
@@ -138,14 +139,15 @@ npm install
 npm run check
 npm run test:async-region
 npm run test:async-region-fixture
+npm run test:async-region-stress
 npm run test:async-region-gallery
 git diff --check
 ```
 
-The last completed run passed 1,348 Vitest tests, 118 Python tests, the real
-depth-navigation browser journey, seven feature browser checks, three saved
-fixture checks, and the gallery browser check. Treat a browser journey as
-required evidence; a TypeScript build alone is insufficient.
+The stress journey additionally proves that 18 legs resolve to A1–A3, S1–S3,
+T1–T2, and ST1; A2 contains exactly the four move legs; and a real alerts port
+drag creates an Async nineteenth wire. Treat a browser journey as required
+evidence; a TypeScript build alone is insufficient.
 
 If UI behavior changes, refresh `sketches/review/async-region.systemsketch`
 through the repo's `systemsketch-review-fixture` skill, drive that exact saved
@@ -162,6 +164,13 @@ visually inspect the result. Never hand-edit tldraw schema JSON.
 - The region is not a runtime scheduler, deployment boundary, queue, or Dora
   topology object. Those could become projections or exports later, but they
   are not implied by this canvas tag.
+- The stress fixture exposed one adjacent integration gap: after the live
+  nineteenth wire triggers a board-wide diagnostic recompute, the generic
+  Problems analyzer reports `graph.cycle` across Mission orchestrator and Robot
+  runtime. Those reverse edges are valid Action/Service feedback, result, and
+  response legs, and the communication lens itself reports zero association
+  issues. Do not hide this finding; either teach generic cycle diagnostics
+  about communication phases or keep it as an explicit follow-up.
 - Do not add a background rule that rewrites every contained wire. That would
   make a spatial edit silently mutate runtime semantics.
 - Do not merge, promote, cherry-pick, or otherwise integrate the branch unless

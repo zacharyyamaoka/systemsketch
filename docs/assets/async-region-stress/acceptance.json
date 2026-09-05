@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-09-05T21:01:48.776Z",
+  "checks": [
+    "the saved stress board has five real component children and 18 real Async connection records",
+    "a real Frame move keeps the numbered cue attached and carries the entire stress topology",
+    "Tag edges separates three Actions, three Services, two Topics, and one Stream with no name bleed",
+    "Components collapses the graph to nine relationships and carries A2 on the move.goal track",
+    "clicking A2 isolates only the four-leg move Action from eight unrelated relationships",
+    "the A2 focus expands back to exactly goal, cancel, feedback, and result in Tagged view",
+    "a real alerts port drag adds a nineteenth wire with the region Async default and provenance",
+    "the stress test records the adjacent generic diagnostic raised after the valid live wire instead of hiding it",
+    "clicking outside dismisses the lens and the saved board returns to its seeded 18-wire state"
+  ],
+  "findings": [
+    "After the live nineteenth-wire mutation, the generic Problems analyzer reports graph.cycle: Error: Imported dataflow cycle across 2 Blocks. Mission orchestrator → Robot runtime forms a loop. SystemSketch prevents new loops, but imported records can still contain one.. The communication lens itself reports zero association issues."
+  ]
+}

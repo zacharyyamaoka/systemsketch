@@ -1,0 +1,2504 @@
+{
+  "systemSketch": {
+    "formatVersion": 2,
+    "application": "SystemSketch",
+    "shapes": {
+      "block": 5,
+      "connection": 18,
+      "geo": 6,
+      "frame": 1,
+      "arrow": 5
+    },
+    "bindings": {
+      "connection": 36,
+      "arrow": 10
+    }
+  },
+  "tldrawFileFormatVersion": 1,
+  "schema": {
+    "schemaVersion": 2,
+    "sequences": {
+      "com.tldraw.store": 5,
+      "com.tldraw.asset": 1,
+      "com.tldraw.camera": 1,
+      "com.tldraw.document": 2,
+      "com.tldraw.instance": 26,
+      "com.tldraw.instance_page_state": 5,
+      "com.tldraw.page": 1,
+      "com.tldraw.instance_presence": 6,
+      "com.tldraw.pointer": 1,
+      "com.tldraw.shape": 4,
+      "com.tldraw.user": 1,
+      "com.tldraw.asset.image": 6,
+      "com.tldraw.asset.video": 5,
+      "com.tldraw.asset.bookmark": 2,
+      "com.tldraw.shape.group": 0,
+      "com.tldraw.shape.bookmark": 2,
+      "com.tldraw.shape.draw": 5,
+      "com.tldraw.shape.note": 13,
+      "com.tldraw.shape.frame": 1,
+      "com.tldraw.shape.highlight": 4,
+      "com.tldraw.shape.embed": 4,
+      "com.tldraw.shape.image": 5,
+      "com.tldraw.shape.video": 4,
+      "com.tldraw.shape.geo": 12,
+      "com.tldraw.shape.arrow": 8,
+      "com.tldraw.shape.text": 4,
+      "com.tldraw.shape.line": 5,
+      "com.tldraw.shape.block": 7,
+      "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.loop": 0,
+      "com.tldraw.shape.behaviorTree": 0,
+      "com.tldraw.shape.behaviorTreeControl": 0,
+      "com.tldraw.shape.code": 0,
+      "com.tldraw.shape.branch-arm": 0,
+      "com.tldraw.shape.connection": 6,
+      "com.tldraw.binding.arrow": 1,
+      "com.tldraw.binding.connection": 1,
+      "com.tldraw.comment-thread": 3,
+      "com.tldraw.comment": 1,
+      "com.tldraw.comment-reaction": 1
+    }
+  },
+  "records": [
+    {
+      "x": 0,
+      "y": 0,
+      "lastActivityTimestamp": 0,
+      "meta": {},
+      "id": "pointer:pointer",
+      "typeName": "pointer"
+    },
+    {
+      "x": 1200,
+      "y": 100,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:telemetry",
+      "type": "block",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "w": 450,
+        "h": 220,
+        "title": "Telemetry UI",
+        "description": "Stream consumer; alerts is the live defaulting target",
+        "blockType": "component",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 190
+          },
+          "port": {
+            "w": 450,
+            "h": 220
+          },
+          "expanded": {
+            "w": 620,
+            "h": 440
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "qtgjmFTmGQ1XNBkocFJrT",
+        "inputs": [
+          {
+            "id": "preview",
+            "name": "preview",
+            "type": "Chunk[Image]",
+            "visible": true
+          },
+          {
+            "id": "alerts",
+            "name": "alerts",
+            "type": "Alert",
+            "visible": true
+          }
+        ],
+        "outputs": [],
+        "definitionKey": "Telemetry_UI"
+      },
+      "index": "aQP2A",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-17",
+      "type": "connection",
+      "fromId": "shape:edge-move-feedback",
+      "toId": "shape:runtime",
+      "props": {
+        "portId": "move_feedback",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-28",
+      "type": "connection",
+      "fromId": "shape:edge-health-response",
+      "toId": "shape:mission",
+      "props": {
+        "portId": "health_response",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-dock-result",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aBTV2",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-wire-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-wire-arrow",
+      "toId": "shape:async-region-stress",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.2549019607843137
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-18",
+      "type": "connection",
+      "fromId": "shape:edge-move-feedback",
+      "toId": "shape:mission",
+      "props": {
+        "portId": "move_feedback",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-29",
+      "type": "connection",
+      "fromId": "shape:edge-pose-request",
+      "toId": "shape:mission",
+      "props": {
+        "portId": "pose_request",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 1500,
+      "y": 30,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-count",
+      "type": "geo",
+      "props": {
+        "w": 620,
+        "h": 140,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "2 · Confirm A1 dock · A2 move · A3 status, S1 health · S2 pose · S3 status, T1 detections · T2 frame, and ST1 preview."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a3Vwz",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-move-result",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aFzBc",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-19",
+      "type": "connection",
+      "fromId": "shape:edge-move-result",
+      "toId": "shape:runtime",
+      "props": {
+        "portId": "move_result",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-dismiss-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-dismiss-arrow",
+      "toId": "shape:async-region-stress",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.23529411764705882,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 500,
+      "y": 260,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegion": {
+          "version": 1
+        }
+      },
+      "id": "shape:async-region-stress",
+      "type": "frame",
+      "props": {
+        "w": 1700,
+        "h": 1020,
+        "name": "Async region · Warehouse autonomy",
+        "color": "violet"
+      },
+      "parentId": "page:page",
+      "index": "a12mA",
+      "typeName": "shape"
+    },
+    {
+      "x": 1500,
+      "y": 1400,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-pass",
+      "type": "geo",
+      "props": {
+        "w": 650,
+        "h": 170,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "PASS WHEN · Nine relationships collapse from 18 correctly grouped protocol legs, A2 isolates four move legs, and the new alerts wire is Async by default."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a7HLE",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-detections",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "a8exz",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#7B66DC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:jcY_6k_-1CcrkCGwqLc6-",
+      "typeName": "user"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-status-action-goal",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aGmkn",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-open-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-open-arrow",
+      "toId": "shape:async-region-stress",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.20588235294117646,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-pose-response",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aLp86",
+      "typeName": "shape"
+    },
+    {
+      "x": 400,
+      "y": 595,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-focus-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": -75
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a4yRY",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-count-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-count-arrow",
+      "toId": "shape:async-region-stress",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.7941176470588235,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-wire-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-wire-arrow",
+      "toId": "shape:cue-step-wire",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-dock-feedback",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aARBQ",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-dismiss-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-dismiss-arrow",
+      "toId": "shape:cue-step-dismiss",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-move-feedback",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aEsiX",
+      "typeName": "shape"
+    },
+    {
+      "x": 20,
+      "y": 500,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-focus",
+      "type": "geo",
+      "props": {
+        "w": 380,
+        "h": 190,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "3 · Switch to Components and click A2. Exactly move.goal, cancel, feedback, and result belong to that focus."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a4DA2",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-pose-request",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aKDy6",
+      "typeName": "shape"
+    },
+    {
+      "editingShapeId": null,
+      "croppingShapeId": null,
+      "selectedShapeIds": [],
+      "hoveredShapeId": null,
+      "erasingShapeIds": [],
+      "hintingShapeIds": [],
+      "focusedGroupId": null,
+      "meta": {},
+      "id": "instance_page_state:page:page",
+      "pageId": "page:page",
+      "typeName": "instance_page_state"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-open-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-open-arrow",
+      "toId": "shape:cue-step-open",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-count-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-count-arrow",
+      "toId": "shape:cue-step-count",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 2300,
+      "y": 595,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-wire-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -100,
+          "y": -75
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a5yd44",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-focus-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-focus-arrow",
+      "toId": "shape:async-region-stress",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0,
+          "y": 0.2549019607843137
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-status-action-result",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aH9vf",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-preview",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "a71ff",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-status-service-request",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aMZbQ",
+      "typeName": "shape"
+    },
+    {
+      "x": 70,
+      "y": 390,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:mission",
+      "type": "block",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "w": 600,
+        "h": 540,
+        "title": "Mission orchestrator",
+        "description": "Three Actions + three Services share one component pair",
+        "blockType": "component",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 190
+          },
+          "port": {
+            "w": 600,
+            "h": 540
+          },
+          "expanded": {
+            "w": 620,
+            "h": 540
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "ZZyxmh6O561s6sJ1ifQsM",
+        "inputs": [
+          {
+            "id": "detections",
+            "name": "detections",
+            "type": "Detections",
+            "visible": true
+          },
+          {
+            "id": "dock_feedback",
+            "name": "dock.feedback",
+            "type": "Progress",
+            "visible": true
+          },
+          {
+            "id": "dock_result",
+            "name": "dock.result",
+            "type": "DockResult",
+            "visible": true
+          },
+          {
+            "id": "move_feedback",
+            "name": "move.feedback",
+            "type": "Progress",
+            "visible": true
+          },
+          {
+            "id": "move_result",
+            "name": "move.result",
+            "type": "MoveResult",
+            "visible": true
+          },
+          {
+            "id": "status_action_result",
+            "name": "status.result",
+            "type": "StatusResult",
+            "visible": true
+          },
+          {
+            "id": "health_response",
+            "name": "health.response",
+            "type": "Health",
+            "visible": true
+          },
+          {
+            "id": "pose_response",
+            "name": "pose.response",
+            "type": "Pose",
+            "visible": true
+          },
+          {
+            "id": "status_service_response",
+            "name": "status.response",
+            "type": "Status",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "dock_goal",
+            "name": "dock.goal",
+            "type": "DockGoal",
+            "visible": true
+          },
+          {
+            "id": "move_goal",
+            "name": "move.goal",
+            "type": "MoveGoal",
+            "visible": true
+          },
+          {
+            "id": "move_cancel",
+            "name": "move.cancel",
+            "type": "GoalId",
+            "visible": true
+          },
+          {
+            "id": "status_action_goal",
+            "name": "status.goal",
+            "type": "StatusGoal",
+            "visible": true
+          },
+          {
+            "id": "health_request",
+            "name": "health.request",
+            "type": "HealthQuery",
+            "visible": true
+          },
+          {
+            "id": "pose_request",
+            "name": "pose.request",
+            "type": "PoseQuery",
+            "visible": true
+          },
+          {
+            "id": "status_service_request",
+            "name": "status.request",
+            "type": "StatusQuery",
+            "visible": true
+          }
+        ],
+        "definitionKey": "Mission_orchestrator"
+      },
+      "index": "aROYj",
+      "typeName": "shape"
+    },
+    {
+      "x": 2300,
+      "y": 500,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-wire",
+      "type": "geo",
+      "props": {
+        "w": 440,
+        "h": 190,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "4 · Return to Dataflow. Drag Camera gateway.alerts onto Telemetry UI.alerts. The nineteenth wire should default to Async."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a5vzUV",
+      "typeName": "shape"
+    },
+    {
+      "x": 820,
+      "y": 170,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-open-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 30,
+          "y": 90
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a2zcyV",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-health-request",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aIaZr",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-frame",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "a6MSQ",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-dock-goal",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "a9oUm",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-focus-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-focus-arrow",
+      "toId": "shape:cue-step-focus",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 1,
+          "y": 0.5
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-30",
+      "type": "connection",
+      "fromId": "shape:edge-pose-request",
+      "toId": "shape:runtime",
+      "props": {
+        "portId": "pose_request",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-1",
+      "type": "connection",
+      "fromId": "shape:edge-frame",
+      "toId": "shape:camera",
+      "props": {
+        "portId": "frame",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-move-goal",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aCCQ2",
+      "typeName": "shape"
+    },
+    {
+      "x": 520,
+      "y": 30,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-open",
+      "type": "geo",
+      "props": {
+        "w": 600,
+        "h": 140,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 · Click this Async region, then Tag edges. All 18 seeded wires should receive a semantic label."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a22Hn",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-20",
+      "type": "connection",
+      "fromId": "shape:edge-move-result",
+      "toId": "shape:mission",
+      "props": {
+        "portId": "move_result",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-31",
+      "type": "connection",
+      "fromId": "shape:edge-pose-response",
+      "toId": "shape:runtime",
+      "props": {
+        "portId": "pose_response",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 845,
+      "y": 1400,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-dismiss-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 55,
+          "y": -120
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a6ug9",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-2",
+      "type": "connection",
+      "fromId": "shape:edge-frame",
+      "toId": "shape:perception",
+      "props": {
+        "portId": "frame",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-10",
+      "type": "connection",
+      "fromId": "shape:edge-dock-feedback",
+      "toId": "shape:mission",
+      "props": {
+        "portId": "dock_feedback",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-21",
+      "type": "connection",
+      "fromId": "shape:edge-status-action-goal",
+      "toId": "shape:mission",
+      "props": {
+        "portId": "status_action_goal",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-32",
+      "type": "connection",
+      "fromId": "shape:edge-pose-response",
+      "toId": "shape:mission",
+      "props": {
+        "portId": "pose_response",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-3",
+      "type": "connection",
+      "fromId": "shape:edge-preview",
+      "toId": "shape:camera",
+      "props": {
+        "portId": "preview",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "page:page",
+      "name": "Async region stress test",
+      "index": "a1",
+      "typeName": "page"
+    },
+    {
+      "gridSize": 10,
+      "name": "",
+      "meta": {},
+      "id": "document:document",
+      "typeName": "document"
+    },
+    {
+      "followingUserId": null,
+      "opacityForNextShape": 1,
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
+      "brush": null,
+      "scribbles": [],
+      "cursor": {
+        "type": "default",
+        "rotation": 0
+      },
+      "isFocusMode": false,
+      "exportBackground": true,
+      "isDebugMode": false,
+      "isToolLocked": false,
+      "screenBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 2800,
+        "h": 1650
+      },
+      "insets": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "zoomBrush": null,
+      "isGridMode": false,
+      "isPenMode": false,
+      "chatMessage": "",
+      "isChatting": false,
+      "highlightedUserIds": [],
+      "isFocused": true,
+      "devicePixelRatio": 1,
+      "isCoarsePointer": false,
+      "isHoveringCanvas": null,
+      "openMenus": [],
+      "isChangingStyle": false,
+      "isReadonly": false,
+      "meta": {},
+      "duplicateProps": null,
+      "cameraState": "idle",
+      "id": "instance:instance",
+      "currentPageId": "page:page",
+      "typeName": "instance"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-11",
+      "type": "connection",
+      "fromId": "shape:edge-dock-result",
+      "toId": "shape:runtime",
+      "props": {
+        "portId": "dock_result",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-22",
+      "type": "connection",
+      "fromId": "shape:edge-status-action-goal",
+      "toId": "shape:runtime",
+      "props": {
+        "portId": "status_action_goal",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-33",
+      "type": "connection",
+      "fromId": "shape:edge-status-service-request",
+      "toId": "shape:mission",
+      "props": {
+        "portId": "status_service_request",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-4",
+      "type": "connection",
+      "fromId": "shape:edge-preview",
+      "toId": "shape:telemetry",
+      "props": {
+        "portId": "preview",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-health-response",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aJStX",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-12",
+      "type": "connection",
+      "fromId": "shape:edge-dock-result",
+      "toId": "shape:mission",
+      "props": {
+        "portId": "dock_result",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-23",
+      "type": "connection",
+      "fromId": "shape:edge-status-action-result",
+      "toId": "shape:runtime",
+      "props": {
+        "portId": "status_action_result",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-34",
+      "type": "connection",
+      "fromId": "shape:edge-status-service-request",
+      "toId": "shape:runtime",
+      "props": {
+        "portId": "status_service_request",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-5",
+      "type": "connection",
+      "fromId": "shape:edge-detections",
+      "toId": "shape:perception",
+      "props": {
+        "portId": "detections",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 520,
+      "y": 1400,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-dismiss",
+      "type": "geo",
+      "props": {
+        "w": 650,
+        "h": 170,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "5 · Click outside the frame. The contextual controls should close while every wire and component remains."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a673j",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-13",
+      "type": "connection",
+      "fromId": "shape:edge-move-goal",
+      "toId": "shape:mission",
+      "props": {
+        "portId": "move_goal",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-24",
+      "type": "connection",
+      "fromId": "shape:edge-status-action-result",
+      "toId": "shape:mission",
+      "props": {
+        "portId": "status_action_result",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-35",
+      "type": "connection",
+      "fromId": "shape:edge-status-service-response",
+      "toId": "shape:runtime",
+      "props": {
+        "portId": "status_service_response",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-6",
+      "type": "connection",
+      "fromId": "shape:edge-detections",
+      "toId": "shape:mission",
+      "props": {
+        "portId": "detections",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-status-service-response",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aNFcQ",
+      "typeName": "shape"
+    },
+    {
+      "x": 1810,
+      "y": 170,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-count-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 40,
+          "y": 90
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a3xiUG",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-14",
+      "type": "connection",
+      "fromId": "shape:edge-move-goal",
+      "toId": "shape:runtime",
+      "props": {
+        "portId": "move_goal",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-25",
+      "type": "connection",
+      "fromId": "shape:edge-health-request",
+      "toId": "shape:mission",
+      "props": {
+        "portId": "health_request",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-36",
+      "type": "connection",
+      "fromId": "shape:edge-status-service-response",
+      "toId": "shape:mission",
+      "props": {
+        "portId": "status_service_response",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-7",
+      "type": "connection",
+      "fromId": "shape:edge-dock-goal",
+      "toId": "shape:mission",
+      "props": {
+        "portId": "dock_goal",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 50,
+      "y": 100,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:camera",
+      "type": "block",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "w": 500,
+        "h": 220,
+        "title": "Camera gateway",
+        "description": "Topic + Stream producer; alerts is intentionally unwired",
+        "blockType": "component",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 190
+          },
+          "port": {
+            "w": 500,
+            "h": 220
+          },
+          "expanded": {
+            "w": 620,
+            "h": 440
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "UgTVBgdOKzUvHoUdj0opu",
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "frame",
+            "name": "frame",
+            "type": "Image",
+            "visible": true
+          },
+          {
+            "id": "preview",
+            "name": "preview",
+            "type": "Chunk[Image]",
+            "visible": true
+          },
+          {
+            "id": "alerts",
+            "name": "alerts",
+            "type": "Alert",
+            "visible": true
+          }
+        ],
+        "definitionKey": "Camera_gateway"
+      },
+      "index": "aObnj",
+      "typeName": "shape"
+    },
+    {
+      "x": 670,
+      "y": 100,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:perception",
+      "type": "block",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "w": 360,
+        "h": 220,
+        "title": "Perception",
+        "description": "Consumes frames and publishes detections",
+        "blockType": "component",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 190
+          },
+          "port": {
+            "w": 360,
+            "h": 220
+          },
+          "expanded": {
+            "w": 620,
+            "h": 440
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "Ln3lGxXnKHceglI4f1eVp",
+        "inputs": [
+          {
+            "id": "frame",
+            "name": "frame",
+            "type": "Image",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "detections",
+            "name": "detections",
+            "type": "Detections",
+            "visible": true
+          }
+        ],
+        "definitionKey": "Perception"
+      },
+      "index": "aPTh6",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-15",
+      "type": "connection",
+      "fromId": "shape:edge-move-cancel",
+      "toId": "shape:mission",
+      "props": {
+        "portId": "move_cancel",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-26",
+      "type": "connection",
+      "fromId": "shape:edge-health-request",
+      "toId": "shape:runtime",
+      "props": {
+        "portId": "health_request",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-8",
+      "type": "connection",
+      "fromId": "shape:edge-dock-goal",
+      "toId": "shape:runtime",
+      "props": {
+        "portId": "dock_goal",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 1030,
+      "y": 390,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:runtime",
+      "type": "block",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "w": 600,
+        "h": 540,
+        "title": "Robot runtime",
+        "description": "Server for every Action and Service on the left",
+        "blockType": "component",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 190
+          },
+          "port": {
+            "w": 600,
+            "h": 540
+          },
+          "expanded": {
+            "w": 620,
+            "h": 540
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "BpGPWEPg6_7xC3MEupoCz",
+        "inputs": [
+          {
+            "id": "dock_goal",
+            "name": "dock.goal",
+            "type": "DockGoal",
+            "visible": true
+          },
+          {
+            "id": "move_goal",
+            "name": "move.goal",
+            "type": "MoveGoal",
+            "visible": true
+          },
+          {
+            "id": "move_cancel",
+            "name": "move.cancel",
+            "type": "GoalId",
+            "visible": true
+          },
+          {
+            "id": "status_action_goal",
+            "name": "status.goal",
+            "type": "StatusGoal",
+            "visible": true
+          },
+          {
+            "id": "health_request",
+            "name": "health.request",
+            "type": "HealthQuery",
+            "visible": true
+          },
+          {
+            "id": "pose_request",
+            "name": "pose.request",
+            "type": "PoseQuery",
+            "visible": true
+          },
+          {
+            "id": "status_service_request",
+            "name": "status.request",
+            "type": "StatusQuery",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "dock_feedback",
+            "name": "dock.feedback",
+            "type": "Progress",
+            "visible": true
+          },
+          {
+            "id": "dock_result",
+            "name": "dock.result",
+            "type": "DockResult",
+            "visible": true
+          },
+          {
+            "id": "move_feedback",
+            "name": "move.feedback",
+            "type": "Progress",
+            "visible": true
+          },
+          {
+            "id": "move_result",
+            "name": "move.result",
+            "type": "MoveResult",
+            "visible": true
+          },
+          {
+            "id": "status_action_result",
+            "name": "status.result",
+            "type": "StatusResult",
+            "visible": true
+          },
+          {
+            "id": "health_response",
+            "name": "health.response",
+            "type": "Health",
+            "visible": true
+          },
+          {
+            "id": "pose_response",
+            "name": "pose.response",
+            "type": "Pose",
+            "visible": true
+          },
+          {
+            "id": "status_service_response",
+            "name": "status.response",
+            "type": "Status",
+            "visible": true
+          }
+        ],
+        "definitionKey": "Robot_runtime"
+      },
+      "index": "aSoz9",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {
+        "systemSketchAsyncRegionDefault": {
+          "version": 1,
+          "regionId": "shape:async-region-stress"
+        }
+      },
+      "id": "shape:edge-move-cancel",
+      "type": "connection",
+      "parentId": "shape:async-region-stress",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "async",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aDGDb",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-16",
+      "type": "connection",
+      "fromId": "shape:edge-move-cancel",
+      "toId": "shape:runtime",
+      "props": {
+        "portId": "move_cancel",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-27",
+      "type": "connection",
+      "fromId": "shape:edge-health-response",
+      "toId": "shape:runtime",
+      "props": {
+        "portId": "health_response",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-9",
+      "type": "connection",
+      "fromId": "shape:edge-dock-feedback",
+      "toId": "shape:runtime",
+      "props": {
+        "portId": "dock_feedback",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    }
+  ]
+}
