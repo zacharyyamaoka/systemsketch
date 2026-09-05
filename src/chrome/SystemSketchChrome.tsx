@@ -646,7 +646,7 @@ export function SystemSketchSurfaceHost() {
   }, [blockInspectorContextKey, rightSurface, setRight])
 
   const rightTitle = rightSurface === 'board-overview'
-    ? 'Board overview'
+    ? 'Frames'
     : rightSurface === 'diagnostics'
       ? 'Problems'
     : rightSurface === 'inspector'

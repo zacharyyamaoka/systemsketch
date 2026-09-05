@@ -1,0 +1,18 @@
+{
+  "feature": "Unified Frames panel",
+  "viewport": { "width": 1440, "height": 840 },
+  "pages": [{ "id": "review", "name": "Review" }],
+  "shapes": [
+    { "id": "architecture", "type": "frame", "x": 500, "y": 125, "props": { "w": 460, "h": 300, "name": "Architecture", "color": "blue" } },
+    { "id": "ingest", "type": "block", "parentId": "architecture", "x": 64, "y": 105, "props": { "title": "ingest()", "description": "Local frame preview content.", "blockType": "Function", "view": "port", "w": 270, "h": 150, "inputs": [], "outputs": [] } },
+    { "id": "runtime", "type": "frame", "x": 1080, "y": 290, "props": { "w": 460, "h": 300, "name": "Runtime", "color": "green" } },
+    { "id": "worker", "type": "block", "parentId": "runtime", "x": 76, "y": 92, "props": { "title": "worker()", "description": "A second local preview.", "blockType": "Function", "view": "port", "w": 270, "h": 150, "inputs": [], "outputs": [] } }
+  ],
+  "bindings": [],
+  "callouts": [
+    { "id": "step-1", "kind": "step", "text": "1 · Open Frames from the bottom utility bar. Thumbnail cards show each Frame's own local contents.", "x": 35, "y": 72, "w": 400, "h": 112, "target": { "shapeId": "architecture", "anchor": "left", "dy": -64 } },
+    { "id": "step-2", "kind": "step", "text": "2 · Save this camera as a view, then use the panel menu to compare cards with Compact list.", "x": 35, "y": 276, "w": 400, "h": 112, "target": { "shapeId": "architecture", "anchor": "left", "dy": 66 } },
+    { "id": "step-3", "kind": "step", "text": "3 · Drag a row above or below another, then double-click its open card area to rename it in place.", "x": 1020, "y": 654, "w": 420, "h": 112, "target": { "shapeId": "runtime", "anchor": "bottom", "dx": 95 } },
+    { "id": "pass", "kind": "pass", "text": "PASS WHEN · Frames, regions, and saved camera views share one persisted order; each card represents its own target, and a saved view returns to its original camera.", "x": 500, "y": 650, "w": 455, "h": 170 }
+  ]
+}

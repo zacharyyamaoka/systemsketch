@@ -121,7 +121,9 @@
     "test:diff-vocabulary": "node tests/block_diff_vocabulary_smoke.mjs",
     "test:diff-round2": "node tests/block_diff_round2_smoke.mjs",
     "test:effect-follow": "node tests/effect_port_follow_smoke.mjs",
-    "test:semantic-roles": "node tests/semantic_role_inheritance_smoke.mjs"
+    "test:semantic-roles": "node tests/semantic_role_inheritance_smoke.mjs",
+    "test:named-landmarks": "node tests/named_landmarks_smoke.mjs",
+    "test:frames-panel": "node tests/frames_panel_smoke.mjs"
   },
   "dependencies": {
     "elkjs": "0.12.0",
