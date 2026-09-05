@@ -1,0 +1,62 @@
+{
+  "feature": "V8 centred variadic slot review",
+  "viewport": { "width": 1600, "height": 940 },
+  "shapes": [
+    {
+      "id": "compose",
+      "type": "block",
+      "x": 585,
+      "y": 195,
+      "props": {
+        "title": "compose()",
+        "description": "Python call: compose(frame, boxes, labels, *extra_layers, opacity=0.7, **theme)",
+        "blockType": "Frame",
+        "view": "port",
+        "w": 470,
+        "h": 540,
+        "inputs": [
+          { "id": "base", "name": "base", "type": "Frame", "visible": true },
+          { "id": "overlay-boxes", "name": "overlays", "type": "Layer", "visible": true, "variadic": { "groupId": "positional:overlays", "label": "*overlays", "kind": "positional", "bundled": false } },
+          { "id": "overlay-labels", "name": "overlays", "type": "Layer", "visible": true, "variadic": { "groupId": "positional:overlays", "label": "*overlays", "kind": "positional", "bundled": false } },
+          { "id": "overlay-spread", "name": "extra_layers", "type": "tuple[Layer, ...]", "visible": true, "variadic": { "groupId": "positional:overlays", "label": "*overlays", "kind": "positional", "bundled": true } },
+          { "id": "option-opacity", "name": "opacity", "type": "object", "visible": true, "variadic": { "groupId": "keyword:options", "label": "**options", "kind": "keyword", "bundled": false } },
+          { "id": "option-mode", "name": "mode", "type": "object", "visible": true, "variadic": { "groupId": "keyword:options", "label": "**options", "kind": "keyword", "bundled": false } },
+          { "id": "option-spread", "name": "theme", "type": "dict[str, object]", "visible": true, "variadic": { "groupId": "keyword:options", "label": "**options", "kind": "keyword", "bundled": true } }
+        ],
+        "outputs": [{ "id": "result", "name": "result", "type": "Frame", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "center-step",
+      "kind": "step",
+      "text": "1 · Compare the five centred-slot URLs. The gray slot’s centre line should pass directly through every ordinary port dot.",
+      "x": 95,
+      "y": 355,
+      "w": 410,
+      "h": 150,
+      "target": { "shapeId": "compose", "anchor": "left", "dy": 80 }
+    },
+    {
+      "id": "label-step",
+      "kind": "step",
+      "text": "2 · Read *overlays and **options as normal port labels. The gray slot groups; it does not draw a cable or a direction.",
+      "x": 1125,
+      "y": 245,
+      "w": 400,
+      "h": 135,
+      "target": { "shapeId": "compose", "anchor": "right", "dy": 80 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The slot is visually centred on the real endpoints, one normal label names each family, and no mark reads as data flow.",
+      "x": 95,
+      "y": 635,
+      "w": 420,
+      "h": 145
+    }
+  ]
+}

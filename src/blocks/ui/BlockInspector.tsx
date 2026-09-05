@@ -36,6 +36,8 @@ import {
   appendBlockPortProps,
   getBlockInspectorContext,
   getOnlySelectedBlock,
+  linkBlockPortRange,
+  linkBlockPortRangeProps,
   sameBlockInspectorContext,
   moveBlockPort,
   moveBlockPortProps,
@@ -47,6 +49,8 @@ import {
   removeBlockPort,
   removeBlockPortProps,
   setBlockView,
+  toggleBlockPortLinkSeam,
+  toggleBlockPortLinkSeamProps,
   updateBlockDetails,
   updateBlockPort,
   type BlockDetailsPatch,
@@ -62,8 +66,16 @@ import { BLOCK_ICONS, BlockIconGlyph } from './blockIcons'
 import './block-inspector.css'
 
 type InspectorTab = 'details' | 'notes'
+type PortLinkPrototype = '1' | '2' | '3'
 
 const DISPLAY_DESCRIPTION_LIMIT = 120
+
+/** Three review-only interaction treatments; the stored relationship is shared. */
+function portLinkPrototypeFromUrl(): PortLinkPrototype {
+  if (typeof window === 'undefined') return '2'
+  const candidate = new URLSearchParams(window.location.search).get('portLinkPrototype')
+  return candidate === '1' || candidate === '2' || candidate === '3' ? candidate : '2'
+}
 
 /**
  * Continuous edits (a text field writing on every keystroke) opt out of the
@@ -89,6 +101,10 @@ export interface BlockInspectorActions {
   movePort(side: BlockPortSide, portId: string, delta: -1 | 1): void
   /** Put the port in a row (and arm), before a neighbour or at the end. */
   movePortToSection(side: BlockPortSide, portId: string, target: BlockPortSectionTarget): void
+  /** Link a hand-authored, adjacent run without altering any port fields. */
+  linkPortRange(side: BlockPortSide, portIds: readonly string[]): void
+  /** Toggle one seam between two directly neighbouring ports. */
+  togglePortLinkSeam(side: BlockPortSide, leftPortId: string, rightPortId: string): void
   /** Explicitly copy a selected pill's inlet type; wiring never does this itself. */
   adoptConnectedType?(): void
   /** Open one undo step for a typing gesture. Absent for an unplaced draft. */
@@ -151,6 +167,14 @@ function PlusIcon() {
 
 function XIcon() {
   return <TinyIcon><path d="m4 4 8 8m0-8-8 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></TinyIcon>
+}
+
+function LinkIcon() {
+  return (
+    <TinyIcon>
+      <path d="M6.1 10.2 4.8 11.5a2.35 2.35 0 0 1-3.3-3.3l2.1-2.1a2.35 2.35 0 0 1 3.3 0M9.9 5.8l1.3-1.3a2.35 2.35 0 1 1 3.3 3.3l-2.1 2.1a2.35 2.35 0 0 1-3.3 0M5.6 8h4.8" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+    </TinyIcon>
+  )
 }
 
 function GripIcon() {
@@ -599,12 +623,15 @@ function VariadicPortSettings({
 	side,
 	port,
 	actions,
+	showPortState,
 }: {
 	side: BlockPortSide
 	port: BlockPort
 	actions?: BlockInspectorActions
+	/** Rare signature metadata stays out of the ordinary port table by default. */
+	showPortState: boolean
 }) {
-	if (side !== 'inputs') return null
+	if (side !== 'inputs' || !showPortState) return null
 	const variadic = port.variadic
 	const setKind = (kind: 'ordinary' | 'positional' | 'keyword') => {
 		if (kind === 'ordinary') {
@@ -629,11 +656,12 @@ function VariadicPortSettings({
 			variadic: { ...variadic, groupId: `${variadic.kind}:${tail}`, label: `${prefix}${tail}` },
 		}, { continuous: true })
 	}
+	const summary = variadic ? `Variadic · ${variadic.label}` : 'Variadic slot'
 	return (
 		<details className="block-inspector__variadic" data-testid={`inspector-variadic-${port.id}`}>
-			<summary>{variadic ? `Variadic · ${variadic.label}` : 'Variadic slot'}</summary>
+			<summary>{summary}</summary>
 			<div className="block-inspector__variadic-fields">
-				<label>
+				<label className="block-inspector__variadic-role">
 					<span>Slot</span>
 					<select
 						value={variadic?.kind ?? 'ordinary'}
@@ -686,12 +714,43 @@ function PortSection({
   actions?: BlockInspectorActions
 }) {
   const [managing, setManaging] = useState(false)
+	const [showPortState, setShowPortState] = useState(false)
+  const [linking, setLinking] = useState(false)
+  const [linkSelection, setLinkSelection] = useState<readonly string[]>([])
+  const [rangeStart, setRangeStart] = useState<string | null>(null)
+  const [rangeEnd, setRangeEnd] = useState<string | null>(null)
   const [drag, setDrag] = useState<InspectorPortDrag | null>(null)
   const dragRef = useRef<InspectorPortDrag | null>(null)
   const listRef = useRef<HTMLUListElement | null>(null)
   const title = side === 'inputs' ? 'Inputs' : 'Outputs'
   const ports = props[side]
   const visiblePorts = ports.filter((port) => port.visible)
+  const linkPrototype = portLinkPrototypeFromUrl()
+  // A heading input belongs to control flow, not the body lane. Linking is a
+  // local body-language affordance, so it only offers visually neighbouring
+  // ordinary rows and never smuggles a header port into the sleeve.
+  const linkablePorts = side === 'inputs'
+    ? visiblePorts.filter((port) => !portInHeader(port))
+    : []
+  const selectedRange = linkSelection
+    .map((id) => ports.findIndex((port) => port.id === id))
+    .filter((index) => index >= 0)
+  const linkSelectionIsContiguous = selectedRange.length >= 2
+    && new Set(selectedRange).size === selectedRange.length
+    && Math.max(...selectedRange) - Math.min(...selectedRange) + 1 === selectedRange.length
+  const selectedStart = rangeStart && linkablePorts.some((port) => port.id === rangeStart)
+    ? rangeStart : linkablePorts[0]?.id ?? null
+  const selectedEnd = rangeEnd && linkablePorts.some((port) => port.id === rangeEnd)
+    ? rangeEnd : linkablePorts.at(-1)?.id ?? null
+  const rangePortIds = (() => {
+    const start = ports.findIndex((port) => port.id === selectedStart)
+    const end = ports.findIndex((port) => port.id === selectedEnd)
+    if (start < 0 || end < start) return []
+    const range = ports.slice(start, end + 1)
+    return range.every((port) => port.visible && !portInHeader(port))
+      ? range.map((port) => port.id)
+      : []
+  })()
   const shown = (candidates: readonly BlockPort[]) => (
     managing ? candidates : candidates.filter((port) => port.visible)
   )
@@ -798,6 +857,19 @@ function PortSection({
       'data-port-id': port.id,
       'data-testid': `inspector-port-${side}-${port.id}`,
     }
+    const linkableIndex = linkablePorts.findIndex((candidate) => candidate.id === port.id)
+    const offeredNext = linkableIndex >= 0 ? linkablePorts[linkableIndex + 1] : undefined
+    const nextLinkable = offeredNext
+      && ports.findIndex((candidate) => candidate.id === offeredNext.id)
+        === ports.findIndex((candidate) => candidate.id === port.id) + 1
+      ? offeredNext
+      : undefined
+    const selectedForLink = linkSelection.includes(port.id)
+    const toggleLinkSelection = () => {
+      setLinkSelection((current) => (
+        current.includes(port.id) ? current.filter((id) => id !== port.id) : [...current, port.id]
+      ))
+    }
     if (managing) {
       return (
         <li
@@ -862,13 +934,24 @@ function PortSection({
       )
     }
     return (
-      <li
-        key={port.id}
-        className={`block-inspector__port-row${held ? ' is-dragging' : ''}`}
-        style={style}
-        {...shared}
-      >
-        {grip(port)}
+      <Fragment key={port.id}>
+        <li
+          className={`block-inspector__port-row${held ? ' is-dragging' : ''}`}
+          style={style}
+          {...shared}
+        >
+        {linking && linkPrototype === '1' && linkableIndex >= 0 ? (
+          <button
+            type="button"
+            className="block-inspector__link-select"
+            aria-pressed={selectedForLink}
+            aria-label={`${selectedForLink ? 'Unselect' : 'Select'} ${port.name || port.id} for adjacent link`}
+            data-testid={`inspector-link-select-${side}-${port.id}`}
+            onClick={toggleLinkSelection}
+          >
+            <LinkIcon />
+          </button>
+        ) : grip(port)}
         <LiveTextInput
           className="block-inspector__port-name"
           value={port.name}
@@ -918,7 +1001,7 @@ function PortSection({
             mut
           </button>
         ) : null}
-			<VariadicPortSettings side={side} port={port} actions={actions} />
+			<VariadicPortSettings side={side} port={port} actions={actions} showPortState={showPortState} />
         <button
           type="button"
           className="block-inspector__icon-button block-inspector__delete"
@@ -929,7 +1012,24 @@ function PortSection({
         >
           <XIcon />
         </button>
-      </li>
+        </li>
+        {linking && linkPrototype === '2' && nextLinkable ? (
+          <li className="block-inspector__link-seam-row" key={`link-seam-${port.id}-${nextLinkable.id}`}>
+            <button
+              type="button"
+              className="block-inspector__link-seam"
+              disabled={!actions}
+              aria-pressed={port.link?.groupId !== undefined && port.link.groupId === nextLinkable.link?.groupId}
+              aria-label={`Toggle link between ${port.name || port.id} and ${nextLinkable.name || nextLinkable.id}`}
+              data-testid={`inspector-link-seam-${side}-${port.id}-${nextLinkable.id}`}
+              onClick={() => actions?.togglePortLinkSeam(side, port.id, nextLinkable.id)}
+            >
+              <LinkIcon />
+              <span>Link next</span>
+            </button>
+          </li>
+        ) : null}
+      </Fragment>
     )
   }
 
@@ -980,10 +1080,48 @@ function PortSection({
             type="button"
             className={`block-inspector__count-pill${managing ? ' is-active' : ''}`}
             aria-expanded={managing}
-            onClick={() => setManaging((current) => !current)}
+            onClick={() => {
+              setManaging((current) => !current)
+              setShowPortState(false)
+              setLinking(false)
+            }}
           >
             {managing ? 'Done' : `${visiblePorts.length} visible`}
           </button>
+          {side === 'inputs' ? (
+            <button
+              type="button"
+              className={`block-inspector__count-pill${showPortState ? ' is-active' : ''}`}
+              aria-pressed={showPortState}
+              data-testid={`inspector-port-state-toggle-${side}`}
+              title="Show or hide rare per-port signature state"
+              onClick={() => {
+                setShowPortState((current) => !current)
+                setManaging(false)
+                setLinking(false)
+              }}
+            >
+              state
+            </button>
+          ) : null}
+          {side === 'inputs' ? (
+            <button
+              type="button"
+              className={`block-inspector__count-pill block-inspector__link-toggle${linking ? ' is-active' : ''}`}
+              aria-pressed={linking}
+              data-testid={`inspector-port-link-toggle-${side}`}
+              title="Link adjacent body ports without changing their names"
+              onClick={() => {
+                setLinking((current) => !current)
+                setManaging(false)
+                setShowPortState(false)
+                setLinkSelection([])
+              }}
+            >
+              <LinkIcon />
+              <span>Link</span>
+            </button>
+          ) : null}
           <button
             type="button"
             className="block-inspector__icon-button"
@@ -1001,6 +1139,49 @@ function PortSection({
       ) : !managing && ports.length > 0 && visiblePorts.length === 0 ? (
         <p className="block-inspector__hint">All {ports.length} hidden — manage to show.</p>
       ) : (
+        <>
+        {linking && linkPrototype === '1' ? (
+          <div className="block-inspector__link-toolbar" data-testid="inspector-link-variant-1">
+            <span>Select neighbouring rows, then join them.</span>
+            <button
+              type="button"
+              disabled={!actions || !linkSelectionIsContiguous}
+              data-testid="inspector-link-selection-apply"
+              onClick={() => {
+                if (!linkSelectionIsContiguous) return
+                const ordered = [...linkSelection].sort((a, b) => (
+                  linkablePorts.findIndex((port) => port.id === a) - linkablePorts.findIndex((port) => port.id === b)
+                ))
+                actions?.linkPortRange(side, ordered)
+                setLinkSelection([])
+              }}
+            >
+              Link {linkSelection.length || ''} selected
+            </button>
+          </div>
+        ) : null}
+        {linking && linkPrototype === '3' ? (
+          <div className="block-inspector__link-range" data-testid="inspector-link-variant-3">
+            <label>From
+              <select value={selectedStart ?? ''} onChange={(event) => setRangeStart(event.target.value)}>
+                {linkablePorts.map((port) => <option key={port.id} value={port.id}>{port.name || port.id}</option>)}
+              </select>
+            </label>
+            <label>To
+              <select value={selectedEnd ?? ''} onChange={(event) => setRangeEnd(event.target.value)}>
+                {linkablePorts.map((port) => <option key={port.id} value={port.id}>{port.name || port.id}</option>)}
+              </select>
+            </label>
+            <button
+              type="button"
+              disabled={!actions || rangePortIds.length < 2}
+              data-testid="inspector-link-range-apply"
+              onClick={() => actions?.linkPortRange(side, rangePortIds)}
+            >
+              Link range
+            </button>
+          </div>
+        ) : null}
         <ul
           ref={listRef}
           className={`block-inspector__ports${managing ? ' block-inspector__ports--managed' : ''}${dragging ? ' is-dragging' : ''}`}
@@ -1024,12 +1205,16 @@ function PortSection({
             />
           ) : null}
         </ul>
+        </>
       )}
 
       {managing && ports.length > 1 ? (
         <p className="block-inspector__port-help">
           Show or hide without changing port identity · drag the grip or use the arrows to reorder; cross a line to change row.
         </p>
+      ) : null}
+      {linking && linkPrototype === '2' ? (
+        <p className="block-inspector__port-help">Use the quiet seam between neighbouring body rows to join or split a run.</p>
       ) : null}
     </section>
   )
@@ -1049,7 +1234,11 @@ export function BlockInspectorContent({
   const unsupportedControlTitle = 'Tags are intentionally future scope for this Block development profile'
 
   return (
-    <section className="block-inspector" aria-label="Block inspector" data-status={status}>
+    <section
+      className="block-inspector"
+      aria-label="Block inspector"
+      data-status={status}
+    >
       <nav className="block-inspector__tabs" role="tablist" aria-label="Block inspector">
         <button
           type="button"
@@ -1301,6 +1490,9 @@ export function EditorBlockInspector({
         movePort: (side, portId, delta) => void moveBlockPort(editor, id, side, portId, delta),
         movePortToSection: (side, portId, target) =>
           void moveBlockPortToSection(editor, id, side, portId, target),
+        linkPortRange: (side, portIds) => void linkBlockPortRange(editor, id, side, portIds),
+        togglePortLinkSeam: (side, leftPortId, rightPortId) =>
+          void toggleBlockPortLinkSeam(editor, id, side, leftPortId, rightPortId),
         adoptConnectedType: () => void adoptConnectedPillType(editor, id),
         beginEdit: (label) => void editor.markHistoryStoppingPoint(label),
         commitTitle: () => commitBlockDefinitionName(editor, id),
@@ -1326,6 +1518,10 @@ export function EditorBlockInspector({
         changeDraft((props) => moveBlockPortProps(props, side, portId, delta)),
       movePortToSection: (side, portId, target) =>
         changeDraft((props) => moveBlockPortToSectionProps(props, side, portId, target)),
+      linkPortRange: (side, portIds) =>
+        changeDraft((props) => linkBlockPortRangeProps(props, side, portIds)),
+      togglePortLinkSeam: (side, leftPortId, rightPortId) =>
+        changeDraft((props) => toggleBlockPortLinkSeamProps(props, side, leftPortId, rightPortId)),
     }
   }, [context, editor, localDraft, onToolDraftChange, toolDraft])
 

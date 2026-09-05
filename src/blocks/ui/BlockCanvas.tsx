@@ -92,6 +92,27 @@ import './block-canvas.css'
 const SIMPLE_ICON_PX = 40
 const HEADER_ICON_PX = 22
 
+/**
+ * URL-only design-review state. It never reaches a Block record: exploring
+ * its visual language must not rewrite a board or become a file-format change.
+ */
+type VariadicPrototype = '1' | '2' | '3' | '4' | '5'
+  | 'slot-1' | 'slot-2' | 'slot-3' | 'slot-4' | 'slot-5'
+  | 'center-1' | 'center-2' | 'center-3' | 'center-4' | 'center-5'
+
+function variadicPrototypeFromUrl(): VariadicPrototype | null {
+  if (typeof window === 'undefined') return null
+  const candidate = new URLSearchParams(window.location.search).get('variadicPrototype')
+  return candidate === '1' || candidate === '2' || candidate === '3'
+    || candidate === '4' || candidate === '5'
+    || candidate === 'slot-1' || candidate === 'slot-2' || candidate === 'slot-3'
+    || candidate === 'slot-4' || candidate === 'slot-5'
+    || candidate === 'center-1' || candidate === 'center-2' || candidate === 'center-3'
+    || candidate === 'center-4' || candidate === 'center-5'
+    ? candidate
+    : null
+}
+
 const boxStyle = (box: BlockRect): CSSProperties => ({
   position: 'absolute',
   left: box.x,
@@ -737,7 +758,13 @@ function BlockDiffRail({ ports }: { ports: readonly LaidOutBlockPort[] }) {
  * lands on its own honest source expression, while this quiet rail says which
  * ports share the callee's `*args` or `**kwargs` formal.
  */
-function VariadicRuns({ ports }: { ports: readonly LaidOutBlockPort[] }) {
+function VariadicRuns({
+  ports,
+  prototype,
+}: {
+  ports: readonly LaidOutBlockPort[]
+  prototype: VariadicPrototype | null
+}) {
 	type Run = { groupId: string; members: LaidOutBlockPort[] }
 	const runs: Run[] = []
 	for (const placed of ports) {
@@ -754,6 +781,20 @@ function VariadicRuns({ ports }: { ports: readonly LaidOutBlockPort[] }) {
 				if (!first || !variadic) return null
 				const top = Math.min(...run.members.map((member) => member.y)) - 8
 				const bottom = Math.max(...run.members.map((member) => member.y)) + 8
+				const isContainmentPrototype = prototype?.startsWith('slot-')
+					|| prototype?.startsWith('center-')
+				// V6 borrows one actual port label box. The group label is a normal
+				// signature token, not a secondary caption beside an ornament.
+				const anchor = prototype === '4'
+					? first
+					: run.members[Math.floor((run.members.length - 1) / 2)] ?? first
+				const anchorLabel = anchor.label
+				const labelStyle = prototype && anchorLabel
+					? {
+						left: `${anchorLabel.x}px`,
+						top: `${anchorLabel.y + anchorLabel.h / 2 - top}px`,
+					}
+					: undefined
 				const type = run.members.every((member) => member.port.type === first.port.type)
 					? first.port.type : ''
 				return (
@@ -766,11 +807,73 @@ function VariadicRuns({ ports }: { ports: readonly LaidOutBlockPort[] }) {
 						style={{ top, height: bottom - top }}
 						aria-label={`${variadic.label}: ${run.members.length} call expression${run.members.length === 1 ? '' : 's'}`}
 					>
-						<span className="BlockNode-variadicBracket" aria-hidden="true" />
-						<span className="BlockNode-variadicLabel">
+						{!isContainmentPrototype ? <span className="BlockNode-variadicBracket" aria-hidden="true" /> : null}
+						{isContainmentPrototype ? <span className="BlockNode-variadicBackdrop" aria-hidden="true" /> : null}
+						{prototype === 'slot-5' || prototype === 'center-4' ? run.members.map((member) => (
+							<span
+								key={member.port.id}
+								className="BlockNode-variadicSlot"
+								aria-hidden="true"
+								style={{ top: `${member.y - top}px` }}
+							/>
+						)) : null}
+						{prototype && !isContainmentPrototype ? run.members.map((member) => (
+							<span
+								key={member.port.id}
+								className="BlockNode-variadicSocket"
+								aria-hidden="true"
+								style={{ top: `${member.y - top}px` }}
+							/>
+						)) : null}
+						<span className="BlockNode-variadicLabel" style={labelStyle}>
 							{variadic.label}
-							{type !== '' ? <span className="BlockNode-variadicType">{type}</span> : null}
+							{!prototype && type !== '' ? <span className="BlockNode-variadicType">{type}</span> : null}
 						</span>
+					</div>
+				)
+			})}
+		</>
+	)
+}
+
+/**
+ * Paint the generic relation independently of the old variadic import field.
+ * The tight slot has no caption and owns no hit target: normal port labels
+ * and ordinary cable endpoints remain the entire authored interface.
+ */
+function LinkedPortRuns({ ports }: { ports: readonly LaidOutBlockPort[] }) {
+	type Run = { groupId: string; members: LaidOutBlockPort[] }
+	const runs: Run[] = []
+	let previousWasLinked = false
+	for (const placed of ports) {
+		if (placed.side !== 'input' || !placed.port.link || placed.subtle || portInHeader(placed.port)) {
+			previousWasLinked = false
+			continue
+		}
+		const previous = runs.at(-1)
+		if (previousWasLinked && previous?.groupId === placed.port.link.groupId) previous.members.push(placed)
+		else {
+			runs.push({ groupId: placed.port.link.groupId, members: [placed] })
+		}
+		previousWasLinked = true
+	}
+	return (
+		<>
+			{runs.filter((run) => run.members.length >= 2).map((run) => {
+				const first = run.members[0]!
+				const top = Math.min(...run.members.map((member) => member.y)) - 8
+				const bottom = Math.max(...run.members.map((member) => member.y)) + 8
+				return (
+					<div
+						key={`${run.groupId}:${first.port.id}`}
+						className="BlockNode-portLinkRun"
+						data-testid={`port-link-run-${first.port.id}`}
+						data-port-link-group={run.groupId}
+						data-port-link-members={run.members.length}
+						style={{ top, height: bottom - top }}
+						aria-label={`Linked adjacent ports: ${run.members.length} members`}
+					>
+						<span className="BlockNode-portLinkSleeve" aria-hidden="true" />
 					</div>
 				)
 			})}
@@ -1112,6 +1215,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
     [editor, shape.id],
   )
   const drag = useValue('block port drag', () => getBlockPortDrag(editor), [editor])
+	const variadicPrototype = variadicPrototypeFromUrl()
   // A lens somebody put on this document, and how it is painted. Both are read
   // here so that a board with no lens on it renders exactly the markup it
   // rendered before the vocabulary existed: `normal` writes no attribute.
@@ -1144,6 +1248,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
     <HTMLContainer
       className={`NodeShape systemsketch-block-canvas${simple ? ' NodeShape_plain' : ''}${value ? ' NodeShape_value' : ''}`}
       data-block-view={layout.view}
+		data-variadic-prototype={variadicPrototype ?? undefined}
       data-diff-state={diffState === 'normal' ? undefined : diffState}
       data-diff-variant={stated ? diffVariant : undefined}
 		data-definition-id={value ? undefined : shape.props.definitionId || undefined}
@@ -1203,7 +1308,8 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
                 ) : null)
               : null}
 	            <PortLabels ports={layout.ports} drag={heldPort} connectedIds={connectedIds} />
-						<VariadicRuns ports={layout.ports} />
+						<LinkedPortRuns ports={layout.ports} />
+						<VariadicRuns ports={layout.ports} prototype={variadicPrototype} />
             {layout.description ? (
               <div
                 className="BlockNode-description"

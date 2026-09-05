@@ -470,7 +470,10 @@ export function insertBlockPortProps(
   const port = withBlockPortSection({ id, name: '', type: '', visible: true }, section)
   const ports = [...lane]
   ports.splice(at, 0, port)
-  const next = normalizeBlockPortRows({ ...props, [side]: ports })
+  const normalized = normalizeBlockPortRows({ ...props, [side]: ports })
+  const next = side === 'inputs'
+    ? { ...normalized, inputs: canonicalizeInputPortLinks(normalized.inputs) }
+    : normalized
   return { props: next, port: next[side].find((candidate) => candidate.id === id) ?? port }
 }
 
@@ -581,6 +584,170 @@ export function patchBlockPortProps(
   return reconcileEffectPorts({ ...props, [side]: ports })
 }
 
+function withLink(port: BlockPort, groupId: string | undefined): BlockPort {
+  if (groupId === undefined) {
+    const { link: _link, ...withoutLink } = port
+    return port.link === undefined ? port : withoutLink
+  }
+  return port.link?.groupId === groupId ? port : { ...port, link: { groupId } }
+}
+
+/**
+ * Re-spell each contiguous run with its first member's stable id. A group id
+ * is an implementation handle, not user-visible meaning, so splitting or
+ * reordering never leaves two disconnected islands pretending to be one run.
+ */
+function canonicalizePortLinks(ports: readonly BlockPort[]): BlockPort[] {
+  const next = [...ports]
+  let index = 0
+  while (index < ports.length) {
+    const groupId = ports[index]?.link?.groupId
+    if (!groupId) {
+      index += 1
+      continue
+    }
+    let end = index + 1
+    while (ports[end]?.link?.groupId === groupId) end += 1
+    const replacement = end - index >= 2 ? `link:${ports[index]!.id}` : undefined
+    for (let member = index; member < end; member += 1) {
+      const updated = withLink(ports[member]!, replacement)
+      if (updated !== ports[member]) {
+        next[member] = updated
+      }
+    }
+    index = end
+  }
+  return next
+}
+
+/** Header inputs are control-flow beads, outside the linkable body lane. */
+function canonicalizeInputPortLinks(ports: readonly BlockPort[]): BlockPort[] {
+  const bodyOnly = ports.map((port) => (portInHeader(port) ? withLink(port, undefined) : port))
+  return canonicalizePortLinks(bodyOnly)
+}
+
+function portRangeIndices(
+  ports: readonly BlockPort[],
+  portIds: readonly string[],
+): { start: number; end: number } | null {
+  if (portIds.length < 2 || new Set(portIds).size !== portIds.length) return null
+  const indices = portIds.map((id) => ports.findIndex((port) => port.id === id))
+  if (indices.some((index) => index < 0)) return null
+  const start = Math.min(...indices)
+  const end = Math.max(...indices)
+  return end - start + 1 === portIds.length ? { start, end } : null
+}
+
+/**
+ * Link one contiguous authored range. The names, types, visibility and cable
+ * endpoints are deliberately untouched; this is a relationship-only command.
+ */
+export function linkBlockPortRangeProps(
+  props: BlockShapeProps,
+  side: BlockPortSide,
+  portIds: readonly string[],
+): BlockShapeProps {
+  if (side !== 'inputs') return props
+  const ports = props[side]
+  const range = portRangeIndices(ports, portIds)
+  if (!range || ports.slice(range.start, range.end + 1).some(portInHeader)) return props
+  const groupId = `link:${ports[range.start]!.id}`
+  const linked = ports.map((port, index) => (
+    index >= range.start && index <= range.end ? withLink(port, groupId) : port
+  ))
+  const normalized = canonicalizeInputPortLinks(linked)
+  return normalized.every((port, index) => port === ports[index])
+    ? props
+    : { ...props, [side]: normalized }
+}
+
+/**
+ * Toggle the seam between exactly two neighbouring ports. Joining expands
+ * either linked run; toggling an existing seam splits it into two honest runs.
+ */
+export function toggleBlockPortLinkSeamProps(
+  props: BlockShapeProps,
+  side: BlockPortSide,
+  leftPortId: string,
+  rightPortId: string,
+): BlockShapeProps {
+  if (side !== 'inputs') return props
+  const ports = props[side]
+  const leftIndex = ports.findIndex((port) => port.id === leftPortId)
+  const rightIndex = ports.findIndex((port) => port.id === rightPortId)
+  if (
+    leftIndex < 0
+    || rightIndex !== leftIndex + 1
+    || portInHeader(ports[leftIndex]!)
+    || portInHeader(ports[rightIndex]!)
+  ) return props
+  const left = ports[leftIndex]!
+  const right = ports[rightIndex]!
+  const sameRun = left.link?.groupId !== undefined && left.link.groupId === right.link?.groupId
+    ? left.link.groupId
+    : undefined
+  let next = [...ports]
+
+  if (sameRun) {
+    let start = leftIndex
+    while (start > 0 && ports[start - 1]?.link?.groupId === sameRun) start -= 1
+    let end = rightIndex
+    while (end + 1 < ports.length && ports[end + 1]?.link?.groupId === sameRun) end += 1
+    for (let index = start; index <= end; index += 1) next[index] = withLink(ports[index]!, undefined)
+    if (leftIndex - start + 1 >= 2) {
+      const groupId = `link:${ports[start]!.id}`
+      for (let index = start; index <= leftIndex; index += 1) next[index] = withLink(ports[index]!, groupId)
+    }
+    if (end - rightIndex + 1 >= 2) {
+      const groupId = `link:${ports[rightIndex]!.id}`
+      for (let index = rightIndex; index <= end; index += 1) next[index] = withLink(ports[index]!, groupId)
+    }
+  } else {
+    let start = leftIndex
+    const leftGroup = left.link?.groupId
+    while (start > 0 && leftGroup && ports[start - 1]?.link?.groupId === leftGroup) start -= 1
+    let end = rightIndex
+    const rightGroup = right.link?.groupId
+    while (end + 1 < ports.length && rightGroup && ports[end + 1]?.link?.groupId === rightGroup) end += 1
+    const groupId = `link:${ports[start]!.id}`
+    for (let index = start; index <= end; index += 1) next[index] = withLink(ports[index]!, groupId)
+  }
+
+  next = [...canonicalizeInputPortLinks(next)]
+  return next.every((port, index) => port === ports[index]) ? props : { ...props, [side]: next }
+}
+
+export function linkBlockPortRange(
+  editor: Editor,
+  shapeId: TLShapeId,
+  side: BlockPortSide,
+  portIds: readonly string[],
+  options: BlockCommandOptions = {},
+): BlockCommandResult {
+  return updateBlockProps(
+    editor,
+    shapeId,
+    (props) => linkBlockPortRangeProps(props, side, portIds),
+    { historyLabel: options.historyLabel ?? 'link adjacent ports' },
+  )
+}
+
+export function toggleBlockPortLinkSeam(
+  editor: Editor,
+  shapeId: TLShapeId,
+  side: BlockPortSide,
+  leftPortId: string,
+  rightPortId: string,
+  options: BlockCommandOptions = {},
+): BlockCommandResult {
+  return updateBlockProps(
+    editor,
+    shapeId,
+    (props) => toggleBlockPortLinkSeamProps(props, side, leftPortId, rightPortId),
+    { historyLabel: options.historyLabel ?? 'toggle adjacent port link' },
+  )
+}
+
 /**
  * Explicitly destructive. Use `updateBlockPort(..., { visible: false })` for
  * the everyday hide operation so bindings keep their stable port id.
@@ -611,7 +778,8 @@ export function removeBlockPortProps(
   side: BlockPortSide,
   portId: string,
 ): BlockShapeProps {
-  const ports = props[side].filter((port) => port.id !== portId)
+  const filtered = props[side].filter((port) => port.id !== portId)
+  const ports = side === 'inputs' ? canonicalizeInputPortLinks(filtered) : filtered
   return ports.length === props[side].length ? props : { ...props, [side]: ports }
 }
 
@@ -665,7 +833,10 @@ export function moveBlockPortProps(
   if (sameBlockPortSection(portSection(port), portSection(neighbour))) {
     const ports = [...lane]
     ;[ports[index], ports[neighbourIndex]] = [ports[neighbourIndex], ports[index]]
-    return { ...props, [side]: ports }
+    return {
+      ...props,
+      [side]: side === 'inputs' ? canonicalizeInputPortLinks(ports) : ports,
+    }
   }
   return moveBlockPortToSectionProps(props, side, portId, {
     ...portSection(neighbour),
@@ -706,7 +877,10 @@ export function moveBlockPortToSectionProps(
     ? rest.findIndex((port) => port.id === target.before)
     : -1
   rest.splice(beforeIndex >= 0 ? beforeIndex : rest.length, 0, moved)
-  const next = normalizeBlockPortRows({ ...props, [side]: rest })
+  const normalized = normalizeBlockPortRows({ ...props, [side]: rest })
+  const next = side === 'inputs'
+    ? { ...normalized, inputs: canonicalizeInputPortLinks(normalized.inputs) }
+    : normalized
   return samePorts(next.inputs, props.inputs) && samePorts(next.outputs, props.outputs)
     ? props
     : next

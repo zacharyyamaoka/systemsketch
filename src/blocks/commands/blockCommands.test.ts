@@ -12,9 +12,14 @@ import {
   appendBlockPortForInlineEditing,
   getBlockInspectorContext,
   getOnlySelectedBlock,
+  linkBlockPortRangeProps,
   moveBlockPort,
+  moveBlockPortProps,
+  moveBlockPortToSectionProps,
   removeBlockPort,
+  removeBlockPortProps,
   setBlockView,
+  toggleBlockPortLinkSeamProps,
   updateBlockDetails,
   updateBlockPort,
 } from './blockCommands'
@@ -170,5 +175,86 @@ describe('block command integration surface', () => {
       ok: false,
       reason: 'missing-port',
     })
+  })
+
+  it('links only consecutive ports, without special-casing their written names', () => {
+    const props = getDefaultBlockProps()
+    const seeded = {
+      ...props,
+      inputs: [
+        { id: 'a', name: '*overlays', type: '', visible: true },
+        { id: 'b', name: 'layer', type: '', visible: true },
+        { id: 'c', name: '**options', type: '', visible: true },
+      ],
+    }
+    const linked = linkBlockPortRangeProps(seeded, 'inputs', ['a', 'b'])
+    expect(linked.inputs.map((port) => port.link?.groupId)).toEqual(['link:a', 'link:a', undefined])
+    expect(linked.inputs.map((port) => port.name)).toEqual(['*overlays', 'layer', '**options'])
+    expect(linkBlockPortRangeProps(seeded, 'inputs', ['a', 'c'])).toBe(seeded)
+  })
+
+  it('joins and splits links at an exact adjacent seam', () => {
+    const seeded = {
+      ...getDefaultBlockProps(),
+      inputs: ['a', 'b', 'c', 'd'].map((id) => ({ id, name: id, type: '', visible: true })),
+    }
+    const first = toggleBlockPortLinkSeamProps(seeded, 'inputs', 'a', 'b')
+    const joined = toggleBlockPortLinkSeamProps(first, 'inputs', 'b', 'c')
+    expect(joined.inputs.map((port) => port.link?.groupId)).toEqual(['link:a', 'link:a', 'link:a', undefined])
+    const split = toggleBlockPortLinkSeamProps(joined, 'inputs', 'b', 'c')
+    expect(split.inputs.map((port) => port.link?.groupId)).toEqual(['link:a', 'link:a', undefined, undefined])
+    expect(toggleBlockPortLinkSeamProps(split, 'inputs', 'a', 'c')).toBe(split)
+  })
+
+  it('keeps linked input runs canonical through deletion and reordering', () => {
+    const seeded = {
+      ...getDefaultBlockProps(),
+      inputs: ['a', 'b', 'c', 'd'].map((id) => ({
+        id,
+        name: id,
+        type: '',
+        visible: true,
+        ...(id === 'd' ? {} : { link: { groupId: 'old-run' } }),
+      })),
+    }
+
+    const withoutFirst = removeBlockPortProps(seeded, 'inputs', 'a')
+    expect(withoutFirst.inputs.map((port) => port.link?.groupId)).toEqual([
+      'link:b', 'link:b', undefined,
+    ])
+
+    const reordered = moveBlockPortProps(seeded, 'inputs', 'd', -1)
+    expect(reordered.inputs.map((port) => port.id)).toEqual(['a', 'b', 'd', 'c'])
+    expect(reordered.inputs.map((port) => port.link?.groupId)).toEqual([
+      'link:a', 'link:a', undefined, undefined,
+    ])
+  })
+
+  it('keeps header and output ports outside the linked body-input lane', () => {
+    const seeded = {
+      ...getDefaultBlockProps(),
+      inputs: ['a', 'b', 'c'].map((id) => ({
+        id,
+        name: id,
+        type: '',
+        visible: true,
+        link: { groupId: 'old-run' },
+      })),
+      outputs: ['x', 'y'].map((id) => ({ id, name: id, type: '', visible: true })),
+    }
+
+    const moved = moveBlockPortToSectionProps(
+      seeded,
+      'inputs',
+      'b',
+      { row: 0, branch: 0, before: null },
+    )
+    expect(moved.inputs.map((port) => [port.id, port.row, port.link?.groupId])).toEqual([
+      ['b', 0, undefined],
+      ['a', undefined, 'link:a'],
+      ['c', undefined, 'link:a'],
+    ])
+    expect(linkBlockPortRangeProps(seeded, 'outputs', ['x', 'y'])).toBe(seeded)
+    expect(toggleBlockPortLinkSeamProps(seeded, 'outputs', 'x', 'y')).toBe(seeded)
   })
 })
