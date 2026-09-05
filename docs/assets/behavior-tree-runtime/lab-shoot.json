@@ -1,0 +1,16 @@
+{
+  "seed": 34,
+  "chosen": {
+    "seed": 34,
+    "ticks": 9,
+    "outcome": "success",
+    "gripperFailures": 1,
+    "firstGripperFailTick": 7
+  },
+  "finished": {
+    "frames": 10,
+    "cursor": 9,
+    "cursorTick": 9,
+    "outcome": "success"
+  }
+}
