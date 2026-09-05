@@ -14,7 +14,9 @@ import { LiveTextArea, LiveTextInput, useLiveField } from '../../fields'
 import { EMPTY_FIELD_GUIDANCE } from '../../fields/emptyFieldGuidance'
 
 import {
+  BLOCK_HEADER_ALIGNS,
   BLOCK_PRESENTATION_VIEWS,
+  blockHeaderAlign,
   isBlockShape,
   HEADER_ROW,
   type BlockPort,
@@ -1184,6 +1186,32 @@ export function BlockInspectorContent({
                 <p className="block-inspector__hint">
                   Each view keeps its own size — {props.view} is {Math.round(props.w)}×{Math.round(props.h)}.
                 </p>
+                {props.view !== 'simple' ? (
+                  <>
+                    <div className="block-inspector__subfield-label">Header alignment</div>
+                    <div
+                      className="block-inspector__choices"
+                      role="group"
+                      aria-label="Header alignment"
+                    >
+                      {BLOCK_HEADER_ALIGNS.map((alignment) => (
+                        <button
+                          key={alignment}
+                          type="button"
+                          data-testid={`block-header-align-${alignment}`}
+                          disabled={readOnly}
+                          aria-pressed={blockHeaderAlign(props) === alignment}
+                          onClick={() => actions?.updateDetails({ headerAlign: alignment })}
+                        >
+                          {alignment}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="block-inspector__hint">
+                      Center keeps the icon and title together at the Block midpoint; type metadata stays at the edge.
+                    </p>
+                  </>
+                ) : null}
               </section>
 
               <PortSection side="inputs" props={props} actions={actions} />

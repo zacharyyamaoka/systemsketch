@@ -24,6 +24,7 @@ import {
 
 import {
   HEADER_ROW,
+  blockHeaderAlign,
   blockIcon,
   blockDiffState,
   blockPortStateCounts,
@@ -706,7 +707,7 @@ function SimpleFace({
  * who never opens an inspector should still be able to tell a card with two
  * missing ports from a card that merely moved.
  */
-function BlockDiffBadge({ shape }: { shape: BlockShape }) {
+function BlockDiffBadge({ shape, layoutCopy = false }: { shape: BlockShape; layoutCopy?: boolean }) {
   const counts = blockPortStateCounts(shape.props)
   const state = blockDiffState(shape.props)
   const parts = [
@@ -721,8 +722,8 @@ function BlockDiffBadge({ shape }: { shape: BlockShape }) {
     <span
       className="BlockNode-diffBadge"
       data-diff-state={state === 'normal' ? 'changed' : state}
-      data-testid={`block-diff-badge-${shape.id.replace('shape:', '')}`}
-      title={describeDiffCounts(counts) || state}
+      data-testid={layoutCopy ? undefined : `block-diff-badge-${shape.id.replace('shape:', '')}`}
+      title={layoutCopy ? undefined : describeDiffCounts(counts) || state}
     >
       {label}
     </span>
@@ -810,10 +811,13 @@ function VariadicRuns({ ports }: { ports: readonly LaidOutBlockPort[] }) {
 	)
 }
 
-function DefinitionBadge({ shape }: { shape: BlockShape }) {
+function DefinitionBadge({ shape, layoutCopy = false }: { shape: BlockShape; layoutCopy?: boolean }) {
   const badge = definitionBadge(shape.props)
   return badge ? (
-    <span className="BlockNode-definitionBadge" data-testid="block-definition-badge">
+    <span
+      className="BlockNode-definitionBadge"
+      data-testid={layoutCopy ? undefined : 'block-definition-badge'}
+    >
       {badge}
     </span>
   ) : null
@@ -829,36 +833,45 @@ function BlockHeading({
   titleAppearance: BlockTitleAppearance
 }) {
   const icon = blockIcon(shape.props)
+  const centered = blockHeaderAlign(shape.props) === 'center'
+  const metadata = (mirror: boolean) => (
+    <span className={mirror ? 'BlockNode-headingMirror' : 'BlockNode-headingMeta'} aria-hidden={mirror || undefined}>
+      <DefinitionBadge shape={shape} layoutCopy={mirror} />
+      <BlockDiffBadge shape={shape} layoutCopy={mirror} />
+      {shape.props.blockType !== '' ? (
+        <span
+          className="BlockNode-headingType"
+          data-pb-inline-field={mirror ? undefined : blockInlineFieldAttribute({ kind: 'blockType' })}
+          title={mirror ? undefined : shape.props.blockType}
+        >
+          <FieldValue diffs={shape.props.fieldDiffs} path="blockType" value={shape.props.blockType} />
+        </span>
+      ) : null}
+    </span>
+  )
   return (
     <div className="NodeShape-heading" style={{ height }}>
-      <div className="BlockNode-heading">
-        {icon !== '' ? (
+      <div className="BlockNode-heading" data-header-align={centered ? 'center' : 'left'}>
+        {centered ? metadata(true) : null}
+        <span className="BlockNode-headingIdentity" data-testid="block-heading-identity">
+          {icon !== '' ? (
+            <span
+              className="BlockNode-headingIcon"
+              data-pb-inline-field={blockInlineFieldAttribute({ kind: 'icon' })}
+            >
+              <BlockIconGlyph name={icon} size={HEADER_ICON_PX} />
+            </span>
+          ) : null}
           <span
-            className="BlockNode-headingIcon"
-            data-pb-inline-field={blockInlineFieldAttribute({ kind: 'icon' })}
+            className="BlockNode-headingTitle"
+            data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
+            title={shape.props.title}
+            style={titleAppearance}
           >
-            <BlockIconGlyph name={icon} size={HEADER_ICON_PX} />
+            <FieldValue diffs={shape.props.fieldDiffs} path="title" value={shape.props.title} />
           </span>
-        ) : null}
-        <span
-          className="BlockNode-headingTitle"
-          data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
-          title={shape.props.title}
-          style={titleAppearance}
-        >
-          <FieldValue diffs={shape.props.fieldDiffs} path="title" value={shape.props.title} />
         </span>
-        <DefinitionBadge shape={shape} />
-        <BlockDiffBadge shape={shape} />
-        {shape.props.blockType !== '' ? (
-          <span
-            className="BlockNode-headingType"
-            data-pb-inline-field={blockInlineFieldAttribute({ kind: 'blockType' })}
-            title={shape.props.blockType}
-          >
-            <FieldValue diffs={shape.props.fieldDiffs} path="blockType" value={shape.props.blockType} />
-          </span>
-        ) : null}
+        {metadata(false)}
       </div>
     </div>
   )

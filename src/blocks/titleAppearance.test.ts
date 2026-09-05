@@ -39,4 +39,10 @@ describe('Block title appearance', () => {
       color: '#a3f2c1',
     })
   })
+
+  it('centers an unformatted title with its centered header but preserves explicit text alignment', () => {
+    const port = setBlockViewProps(getDefaultBlockProps(), 'port')
+    expect(blockTitleAlign({ ...port, headerAlign: 'center' })).toBe('middle')
+    expect(blockTitleAlign({ ...port, headerAlign: 'center', titleAlign: 'end' })).toBe('end')
+  })
 })

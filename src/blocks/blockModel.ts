@@ -26,6 +26,10 @@ export type BlockTitleFont = (typeof BLOCK_TITLE_FONTS)[number]
 export const BLOCK_TITLE_ALIGNS = ['start', 'middle', 'end'] as const
 export type BlockTitleAlign = (typeof BLOCK_TITLE_ALIGNS)[number]
 
+/** Coarse placement of the identity inside Port and Expanded header bands. */
+export const BLOCK_HEADER_ALIGNS = ['left', 'center'] as const
+export type BlockHeaderAlign = (typeof BLOCK_HEADER_ALIGNS)[number]
+
 /** The source grammar of a call expression's variadic contribution. */
 export const BLOCK_VARIADIC_KINDS = ['positional', 'keyword'] as const
 export type BlockVariadicKind = (typeof BLOCK_VARIADIC_KINDS)[number]
@@ -274,6 +278,8 @@ export const BLOCK_SHAPE_PROPS = {
 	titleBold: T.boolean.optional(),
 	/** Named FigJam/tldraw colour, including self-describing `custom-rrggbb`. */
 	titleColor: T.string.optional(),
+	/** Header composition, separate from alignment inside the title text box. */
+	headerAlign: T.literalEnum(...BLOCK_HEADER_ALIGNS).optional(),
 	description: T.string,
 	blockType: T.string,
 	/** Curated pyblocks glyph name. Optional so earlier profile records load. */
@@ -334,6 +340,7 @@ declare module 'tldraw' {
 			titleAlign?: BlockTitleAlign
 			titleBold?: boolean
 			titleColor?: string
+			headerAlign?: BlockHeaderAlign
 			description: string
 			blockType: string
 			icon?: string
@@ -399,6 +406,11 @@ export function getDefaultBlockProps(): BlockShapeProps {
 /** The one reader for the optional donor icon field. */
 export function blockIcon(props: BlockShapeProps): string {
 	return props.icon ?? ''
+}
+
+/** Existing boards and newly placed Blocks retain the established left header. */
+export function blockHeaderAlign(props: BlockShapeProps): BlockHeaderAlign {
+	return props.headerAlign ?? 'left'
 }
 
 /** The one reader for the optional donor Notes field. */

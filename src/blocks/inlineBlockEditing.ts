@@ -7,7 +7,7 @@
  */
 import { atom, type Atom, type Editor, type TLShapeId } from 'tldraw'
 
-import type { BlockShape, BlockShapeProps } from './blockModel'
+import { blockHeaderAlign, type BlockShape, type BlockShapeProps } from './blockModel'
 import {
 	VALUE_FONT_PX,
 	VALUE_PAD_X,
@@ -127,7 +127,12 @@ export function blockInlineEditorPlacement(
 	switch (field.kind) {
 		case 'title': {
 			const box = layout.title ?? layout.headerTitle
-			return box ? { box, align: props.view === 'simple' ? 'center' : 'left' } : null
+			return box ? {
+				box,
+				align: props.view === 'simple' || blockHeaderAlign(props) === 'center'
+					? 'center'
+					: 'left',
+			} : null
 		}
 		case 'blockType': {
 			const box = layout.typeLabel ?? layout.headerType

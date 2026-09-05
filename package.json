@@ -14,6 +14,7 @@
     "test:title-formatting": "node tests/block_title_formatting_smoke.mjs",
     "test:contextual-composition": "node tests/contextual_menu_fixture_smoke.mjs",
     "test:rich-text-toolbar": "node tests/rich_text_toolbar_chrome_smoke.mjs",
+    "test:header-alignment": "node tests/block_header_alignment_smoke.mjs",
     "test:fields": "node tests/inspector_live_commit_smoke.mjs",
     "test:field-guidance": "node tests/inspector_field_guidance_smoke.mjs",
     "test:batch": "node tests/block_batch_editing_smoke.mjs",

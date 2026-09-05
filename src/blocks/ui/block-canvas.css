@@ -103,6 +103,59 @@
   gap: 8px;
 }
 
+.systemsketch-block-canvas .BlockNode-headingIdentity,
+.systemsketch-block-canvas .BlockNode-headingMeta,
+.systemsketch-block-canvas .BlockNode-headingMirror {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.systemsketch-block-canvas .BlockNode-headingIdentity {
+  flex: 1 1 auto;
+}
+
+.systemsketch-block-canvas .BlockNode-headingMeta,
+.systemsketch-block-canvas .BlockNode-headingMirror {
+  flex: 0 1 auto;
+  max-width: 35%;
+  justify-content: flex-end;
+}
+
+/* WHY: a centered title should describe the Block's midpoint, not the leftover
+ * space between an icon and a type badge. An invisible copy gives the left
+ * lane the visible metadata lane's exact width, so the identity stays truly
+ * centered and can still truncate safely on a narrow Block. */
+.systemsketch-block-canvas .BlockNode-heading[data-header-align='center'] {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0;
+}
+
+.systemsketch-block-canvas .BlockNode-heading[data-header-align='center'] .BlockNode-headingIdentity {
+  grid-column: 2;
+  max-width: 100%;
+  overflow: hidden;
+  justify-self: center;
+}
+
+.systemsketch-block-canvas .BlockNode-heading[data-header-align='center'] .BlockNode-headingMirror {
+  grid-column: 1;
+  grid-row: 1;
+  max-width: none;
+  visibility: hidden;
+  justify-self: start;
+}
+
+.systemsketch-block-canvas .BlockNode-heading[data-header-align='center'] .BlockNode-headingMeta {
+  grid-column: 3;
+  grid-row: 1;
+  max-width: none;
+  justify-self: end;
+  overflow: hidden;
+}
+
 .systemsketch-block-canvas .BlockNode-headingIcon {
   flex: 0 0 auto;
   display: flex;
@@ -124,9 +177,13 @@
   white-space: nowrap;
 }
 
+.systemsketch-block-canvas .BlockNode-heading[data-header-align='center'] .BlockNode-headingTitle {
+  flex: 0 1 auto;
+}
+
 .systemsketch-block-canvas .BlockNode-headingType {
   flex: 0 0 auto;
-  max-width: 35%;
+  max-width: 100%;
   overflow: hidden;
   color: var(--ss-text-muted);
   font-size: 18px;

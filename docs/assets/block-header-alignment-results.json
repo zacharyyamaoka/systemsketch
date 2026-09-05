@@ -1,0 +1,30 @@
+[
+  {
+    "label": "the cold-reopened review cue remains bound when its target Block moves",
+    "ok": true
+  },
+  {
+    "label": "existing and newly placed Blocks keep the established left-aligned header by default",
+    "ok": true
+  },
+  {
+    "label": "Center puts the icon/title identity group on the true Block midpoint without moving type metadata",
+    "ok": true
+  },
+  {
+    "label": "header composition and the retained per-title alignment remain independent controls",
+    "ok": true
+  },
+  {
+    "label": "Left restores the established header composition without erasing title-box formatting",
+    "ok": true
+  },
+  {
+    "label": "the same persisted option centers both Port and Expanded headers",
+    "ok": true
+  },
+  {
+    "label": "the real browser journey produced zero local console errors",
+    "ok": true
+  }
+]

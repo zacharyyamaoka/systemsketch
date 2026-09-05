@@ -12,6 +12,7 @@ import {
   type BlockTitleAlign,
   type BlockTitleFont,
   type BlockTitleSize,
+  blockHeaderAlign,
 } from './blockModel'
 import { customColorHex } from '../appearance/customColors'
 import { FIGJAM_COLOR_HEX } from '../appearance/figjamPalette'
@@ -42,7 +43,13 @@ export function blockTitleFont(props: BlockShapeProps): BlockTitleFont {
 
 /** The old face is the default until a person actually changes that control. */
 export function blockTitleAlign(props: BlockShapeProps): BlockTitleAlign {
-  return props.titleAlign ?? (props.view === 'simple' ? 'middle' : 'start')
+  return props.titleAlign ?? (
+    props.view === 'simple' || (
+      props.view !== 'value' && blockHeaderAlign(props) === 'center'
+    )
+      ? 'middle'
+      : 'start'
+  )
 }
 
 /** Simple cards already used a bold display title; the other views did not. */
