@@ -82,7 +82,7 @@
 	background: var(--ss-surface-hover);
 }
 
-.systemsketch-diagnostics__filters button[aria-pressed='true'] {
+.systemsketch-diagnostics__filters button[aria-checked='true'] {
 	color: var(--ss-text);
 	background: var(--ss-accent-soft);
 	box-shadow: inset 2px 0 0 var(--ss-accent);
