@@ -64,6 +64,8 @@ import { detachBranchToPrimitives } from '../../branch/detachBranch'
 import { isBranchShape } from '../../branch/branchModel'
 import { detachLoopToPrimitives } from '../../loop/detachLoop'
 import { isLoopShape } from '../../loop/loopModel'
+import { isBehaviorTreeShape, readBtChildMeta } from '../../behaviorTree/behaviorTreeModel'
+import { detachBehaviorTreeToPrimitives } from '../../behaviorTree/detachBehaviorTree'
 import { primitivesForBlock } from './blockPrimitives'
 import {
 	pointInPrimitiveParentSpace,
@@ -810,12 +812,34 @@ export function selectedDetachableIds(editor: Editor): TLShapeId[] {
 		for (const id of ids) {
 			const shape = editor.getShape(id)
 			if (!shape) continue
-			if (isBranchShape(shape) || isLoopShape(shape) || isBlockShape(shape) || shape.type === CONNECTION_SHAPE_TYPE) found.push(id)
+			if (isDetachableShape(shape)) found.push(id)
+			// A Behavior Tree region detaches whole; descending into it would
+			// list its projection as if a person had drawn each occurrence.
+			if (isBehaviorTreeShape(shape)) continue
 			visit(editor.getSortedChildIdsForParent(id))
 		}
 	}
 	visit(editor.getSelectedShapeIds())
 	return [...new Set(found)]
+}
+
+/**
+ * Whether Detach owns this record.
+ *
+ * WHY: a projected Behavior Tree child is refused. Its truth is the region's
+ * XML, so lowering the occurrence on its own would be a lie in two directions
+ * at once — the primitives would claim to be an authored Block, and deleting
+ * the Block record compiles an XML delete, so asking to *detach* a node would
+ * silently *remove* it from the tree. Refusal reuses the idiom the menu
+ * already has: nothing detachable in the selection, so no menu item appears.
+ */
+function isDetachableShape(shape: TLShape): boolean {
+	if (readBtChildMeta(shape) !== null) return false
+	return isBranchShape(shape)
+		|| isLoopShape(shape)
+		|| isBehaviorTreeShape(shape)
+		|| isBlockShape(shape)
+		|| shape.type === CONNECTION_SHAPE_TYPE
 }
 
 /**
@@ -844,7 +868,8 @@ export function allDetachableIds(editor: Editor): TLShapeId[] {
 		for (const id of ids) {
 			const shape = editor.getShape(id)
 			if (!shape) continue
-			if (isBranchShape(shape) || isLoopShape(shape) || isBlockShape(shape) || shape.type === CONNECTION_SHAPE_TYPE) found.push(id)
+			if (isDetachableShape(shape)) found.push(id)
+			if (isBehaviorTreeShape(shape)) continue
 			visit(editor.getSortedChildIdsForParent(id))
 		}
 	}
@@ -894,6 +919,14 @@ function detachPrimitives(editor: Editor, ids: readonly TLShapeId[]): DetachResu
 	const results: DetachResult[] = []
 	editor.run(() => {
 		const replacementSelection = new Set<TLShapeId>()
+		// A Behavior Tree region owns its whole projection, so it lowers first:
+		// its leaves go through the same Block detach below would have used,
+		// and nothing is left for the per-Block sweep to find twice.
+		for (const id of ids) {
+			if (!isBehaviorTreeShape(editor.getShape(id))) continue
+			const detached = detachBehaviorTreeToPrimitives(editor, id)
+			if (detached) replacementSelection.add(detached.frameId)
+		}
 		const containerIds = new Set(ids.filter((id) => {
 			const shape = editor.getShape(id)
 			return isBranchShape(shape) || isLoopShape(shape)

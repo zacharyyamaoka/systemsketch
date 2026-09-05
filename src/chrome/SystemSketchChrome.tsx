@@ -11,7 +11,7 @@ import {
   useValue,
   type Editor,
 } from 'tldraw'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AppearanceControls, hasAppearanceControls } from '../appearance/AppearanceControls'
 import { CompareTrigger } from '../compare'
 import { WrapSelectionControl } from '../frames/WrapSelectionControl'
@@ -26,9 +26,9 @@ import {
   selectionHasBlockStyles,
 } from '../blocks'
 import { addTextTarget, selectionHasVisibleText } from '../appearance/textPresence'
-import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
+import { describeTidyEdgesOutcome, tidyEdges, tidyEdgesOutcomeSeverity } from '../blocks/connections/tidyEdges'
 import { clearDiffStates } from '../diff/clearDiffStates'
-import { describeOrganizeNodesOutcome, organizeNodes } from '../blocks/layout'
+import { describeOrganizeNodesOutcome, organizeNodes, organizeNodesOutcomeSeverity } from '../blocks/layout'
 import {
   EditorBlockInspector,
   EditorBlockSelectionMiniMenu,
@@ -46,6 +46,7 @@ import {
   getOnlySelectedBranch,
 } from '../branch'
 import { EditorLoopInspector, getOnlySelectedLoop } from '../loop'
+import { EditorBehaviorTreeInspector, EditorBehaviorTreeSelectionMiniMenu, getSelectedBehaviorTree } from '../behaviorTree'
 import {
   CodeResizeIndicator,
   EditorCodeSelectionMiniMenu,
@@ -225,6 +226,7 @@ function InspectorDock({
 }) {
   if (subject === 'branch') return <EditorBranchInspector editor={editor} onRequestClose={onClose} />
   if (subject === 'loop') return <EditorLoopInspector editor={editor} onRequestClose={onClose} />
+  if (subject === 'behaviorTree') return <EditorBehaviorTreeInspector editor={editor} onRequestClose={onClose} />
   if (subject === 'connection') return <EditorConnectionInspector editor={editor} />
   if (subject === 'shape') return <ShapeFactsPanel editor={editor} />
   if (subject === 'empty') return <InspectorEmptyState />
@@ -290,6 +292,11 @@ function SelectionMiniMenu() {
     () => getOnlySelectedBranch(editor) !== null,
     [editor],
   )
+  const hasBehaviorTree = useValue(
+    'systemsketch selection is a Behavior Tree',
+    () => getSelectedBehaviorTree(editor) !== null,
+    [editor],
+  )
   const hasCode = useValue(
     'systemsketch selection is one Code block',
     () => getOnlySelectedCode(editor) !== null,
@@ -320,16 +327,26 @@ function SelectionMiniMenu() {
     [editor],
   )
   const propagationFocus = usePropagationFocus(editor)
+  const [organizingNodes, setOrganizingNodes] = useState(false)
   const runTidyEdges = () => {
     const outcome = tidyEdges(editor)
-    addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
+    addToast({ title: describeTidyEdgesOutcome(outcome), severity: tidyEdgesOutcomeSeverity(outcome) })
   }
   const runOrganizeNodes = async () => {
-    const outcome = await organizeNodes(editor)
-    addToast({ title: describeOrganizeNodesOutcome(outcome), severity: 'info' })
+    // The elk layout pass is async and can take a visible moment on a large
+    // graph; without this the trigger stayed clickable and unlabeled mid-run,
+    // inviting a second, redundant pass.
+    setOrganizingNodes(true)
+    try {
+      const outcome = await organizeNodes(editor)
+      addToast({ title: describeOrganizeNodesOutcome(outcome), severity: organizeNodesOutcomeSeverity(outcome) })
+    } finally {
+      setOrganizingNodes(false)
+    }
   }
   const hasVisibleActions = hasCode
     || hasBranch
+    || hasBehaviorTree
     || hasBlockMiniMenu
     || hasAppearance
     || canWrap
@@ -356,6 +373,17 @@ function SelectionMiniMenu() {
         label="Selection actions"
       >
         <EditorBranchSelectionMiniMenu editor={editor} />
+      </SelectionContextualMenu>
+    )
+  }
+
+  if (hasBehaviorTree) {
+    return (
+      <SelectionContextualMenu
+        className="systemsketch-selection-menu"
+        label="Behavior Tree actions"
+      >
+        <EditorBehaviorTreeSelectionMiniMenu editor={editor} />
       </SelectionContextualMenu>
     )
   }
@@ -388,6 +416,7 @@ function SelectionMiniMenu() {
           <WrapSelectionControl />
           <SelectionLayoutActions
             {...layoutActions}
+            organizeNodesBusy={organizingNodes}
             onTidyEdges={runTidyEdges}
             onOrganizeNodes={() => void runOrganizeNodes()}
           />
@@ -403,6 +432,7 @@ function SelectionMiniMenu() {
           <WrapSelectionControl />
           <SelectionLayoutActions
             {...layoutActions}
+            organizeNodesBusy={organizingNodes}
             onTidyEdges={runTidyEdges}
             onOrganizeNodes={() => void runOrganizeNodes()}
           />
@@ -445,6 +475,8 @@ export function SystemSketchSurfaceHost() {
       // never changed it.
       const loop = getOnlySelectedLoop(editor)
       if (loop) return `loop:${loop.id}`
+      const tree = getSelectedBehaviorTree(editor)
+      if (tree) return `behaviorTree:${tree.region.id}:${tree.path ?? ''}`
       const context = getBlockInspectorContext(editor)
       if (context.kind === 'selected') return context.shape.id
       if (context.kind === 'multi') return `multi:${context.styles.blockCount}`
@@ -477,6 +509,7 @@ export function SystemSketchSurfaceHost() {
     () => readInspectorSubject(editor, {
       getOnlySelectedBranch,
       getOnlySelectedLoop,
+      getSelectedBehaviorTree,
       getBlockInspectorContextKind: (target) => getBlockInspectorContext(target).kind,
       getConnectionInspectorContext,
     }),
@@ -654,6 +687,7 @@ export function SystemSketchSurfaceHost() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return
+      if (event.repeat) return
       const key = event.key.toLowerCase()
       if (key !== 'p' && key !== 'k' && key !== 'f') return
       event.preventDefault()

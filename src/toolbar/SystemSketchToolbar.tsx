@@ -24,6 +24,7 @@ import { PillIcon } from '../blocks/PillIcon'
 import { BlockIcon } from '../blocks/BlockIcon'
 import { BRANCH_TOOL_ID, BranchIcon } from '../branch'
 import { LOOP_TOOL_ID, LoopIcon } from '../loop'
+import { BEHAVIOR_TREE_TOOL_ID, BehaviorTreeIcon } from '../behaviorTree'
 import { CODE_TOOL_ID, CodeIcon } from '../code'
 import { CALLOUT_TOOL_ID, CalloutIcon, isCalloutCard, startAddingCalloutLeader } from '../callout'
 import { ASYNC_REGION_TOOL_ID, AsyncRegionIcon } from '../asyncRegion'
@@ -116,6 +117,9 @@ const SYSTEM_MENU_ITEMS: ReadonlyArray<{
   // right-click menu, is where the muscle memory forms.
   { id: LOOP_TOOL_ID, label: 'Loop', icon: <LoopIcon /> },
   { id: ASYNC_REGION_TOOL_ID, label: 'Async region', icon: <AsyncRegionIcon /> },
+  // A Behavior Tree is a region like Branch and Loop: its nodes are real
+  // Blocks, so it lives in the same family slot rather than on its own.
+  { id: BEHAVIOR_TREE_TOOL_ID, label: 'Behavior Tree', icon: <BehaviorTreeIcon /> },
   // Code is an authored literal on the board, so C inserts it directly while
   // its language and presentational width remain on the selected object.
   { id: CODE_TOOL_ID, label: 'Code', icon: <CodeIcon />, shortcut: 'C' },
@@ -309,6 +313,8 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
       ? LOOP_TOOL_ID
       : activeToolId === ASYNC_REGION_TOOL_ID
         ? ASYNC_REGION_TOOL_ID
+      : activeToolId === BEHAVIOR_TREE_TOOL_ID
+      ? BEHAVIOR_TREE_TOOL_ID
       : activeToolId === CODE_TOOL_ID
         ? CODE_TOOL_ID
       : activeToolId === BLOCK_TOOL_ID
@@ -323,6 +329,7 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
     || activeToolId === BRANCH_TOOL_ID
     || activeToolId === LOOP_TOOL_ID
     || activeToolId === ASYNC_REGION_TOOL_ID
+    || activeToolId === BEHAVIOR_TREE_TOOL_ID
     || activeToolId === CODE_TOOL_ID
     || activeToolId === PILL_TOOL_ID
     || activeToolId === CALLOUT_TOOL_ID
@@ -424,6 +431,10 @@ function LibrarySlot() {
         sideOffset={12}
         collisionPadding={12}
         autoFocusFirstButton={false}
+        // ShapeLibraryBrowser owns Escape itself — first clears its search,
+        // second closes via onCancel below — so Radix's own close-on-Escape
+        // must stand down rather than race it.
+        disableEscapeKeyDown
       >
         <aside
           className="systemsketch-library-panel"

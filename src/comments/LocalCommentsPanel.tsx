@@ -101,7 +101,7 @@ function CommentThreadCard({
         </button>
       ) : null}
 
-      <ol className="systemsketch-comments__messages" aria-label="Comment messages">
+      <ol className="systemsketch-comments__messages" aria-label="Comment messages" aria-live="polite">
         {thread.comments.map((comment) => (
           <li key={comment.record.id}>
             <span className="systemsketch-comments__avatar" aria-hidden="true">
@@ -279,7 +279,10 @@ export function LocalCommentsPanel({
         </form>
       )}
 
-      <div className="systemsketch-comments__list" aria-live="polite">
+      {/* Live-ness scoped to each thread's own message list, not the whole
+          panel — a reply landing in one thread used to re-announce every
+          thread's header, source chip and actions to a screen reader. */}
+      <div className="systemsketch-comments__list">
         {visibleThreads.map((thread) => (
           <CommentThreadCard
             key={thread.record.id}
@@ -291,8 +294,8 @@ export function LocalCommentsPanel({
           />
         ))}
         {visibleThreads.length === 0 ? (
-          <div className="systemsketch-comments__empty">
-            <span aria-hidden="true">◌</span>
+          <div className="systemsketch-panel-empty systemsketch-comments__empty">
+            <span aria-hidden="true">▣</span>
             <strong>{model.threads.length ? 'No open comments' : 'No comments yet'}</strong>
             <p>
               {model.threads.length

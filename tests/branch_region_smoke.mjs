@@ -231,7 +231,7 @@ async function main() {
     // same reason Branch is: it is used less often than a Block, and the
     // toolbar rather than the right-click menu is where the habit forms.
     check('BR-3', 'the submenu lists Blocks, regions, values, and Callouts under one heading',
-      items, ['Block', 'Branch', 'Loop', 'Async region', 'Code', 'Pill', 'Callout'])
+      items, ['Block', 'Branch', 'Loop', 'Async region', 'Behavior Tree', 'Code', 'Pill', 'Callout'])
     const branchItem = JSON.parse(await evaluate(page, `(() => {
       const item = Array.from(document.querySelectorAll('.systemsketch-tool-menu__item')).find((n) => n.textContent.includes('Branch'))
       const r = item.getBoundingClientRect(); return JSON.stringify({ cx: r.x + r.width / 2, cy: r.y + r.height / 2 })

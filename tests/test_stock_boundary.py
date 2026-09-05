@@ -40,7 +40,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("CalloutTool", source)
         self.assertIn("CalloutAddLeaderTool", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]", source
         )
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS", source)
         self.assertIn("...blockConnectionShapeUtils", source)
@@ -79,6 +79,8 @@ class StockBoundaryTests(unittest.TestCase):
         # The Loop region joins the same family slot as Block and Branch, one
         # click deeper. It must not become a top-level toolbar slot of its own.
         self.assertIn("label: 'Loop', icon: <LoopIcon />", toolbar_source)
+        self.assertIn("label: 'Behavior Tree', icon: <BehaviorTreeIcon />", toolbar_source)
+        self.assertNotIn('title="Behavior Tree"', toolbar_source)
         self.assertNotIn('title="Loop"', toolbar_source)
         # Async region is still a stock Frame gesture; its thin tool subclass
         # contributes only the semantic stamp and visible default name.
@@ -91,16 +93,22 @@ class StockBoundaryTests(unittest.TestCase):
         integration = (
             PROJECT_ROOT / "src" / "toolbar" / "toolbarIntegration.ts"
         ).read_text(encoding="utf-8")
-        for factory in ("withBlockTool", "withBranchTool", "withLoopTool", "withAsyncRegionTool", "withCodeTool", "withCalloutTool"):
+        for factory in ("withBlockTool", "withBranchTool", "withLoopTool", "withAsyncRegionTool", "withBehaviorTreeTool", "withCodeTool", "withCalloutTool"):
             self.assertIn(factory, integration)
         self.assertNotIn('title="Branch"', toolbar_source)
         self.assertNotIn('title="Comment"', toolbar_source)
         self.assertIn("BranchShapeUtil,", source)
         self.assertIn("BranchArmShapeUtil,", source)
         self.assertIn("LoopShapeUtil,", source)
+        # The Behavior Tree is a region whose nodes are real Blocks; its own
+        # shape paints only wires, rails and chips, and its control cards are a
+        # helper shape — never a second canvas beside the engine.
+        self.assertIn("BehaviorTreeShapeUtil,", source)
+        self.assertIn("BtControlShapeUtil,", source)
+        self.assertIn("const stopBehaviorTreeRegions = installBehaviorTreeRegions(editor)", product_source)
         self.assertIn("CodeShapeUtil,", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]", source
         )
         self.assertIn("const stopBranchRegions = installBranchRegions(editor)", product_source)
         self.assertIn("const stopBranchClickToEdit = installBranchClickToEdit(editor)", product_source)
@@ -141,12 +149,14 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("BlockShapeUtil,", embedded)
         self.assertIn("BranchShapeUtil,", embedded)
         self.assertIn("BranchArmShapeUtil,", embedded)
+        self.assertIn("BehaviorTreeShapeUtil,", embedded)
+        self.assertIn("BtControlShapeUtil,", embedded)
         self.assertIn("PillTool,", embedded)
         self.assertIn("CodeShapeUtil,", embedded)
         self.assertIn("CodeBlockTool,", embedded)
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS,", embedded)
         self.assertIn("...blockConnectionShapeUtils,", embedded)
-        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, AsyncRegionTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]", embedded)
+        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]", embedded)
         self.assertIn("Toolbar: SystemSketchFigmaToolbar", embedded)
         self.assertIn("ContextMenu: BlockContextMenu", embedded)
         self.assertIn("InFrontOfTheCanvas: EmbeddedSystemSketchSurfaceHost", embedded)
@@ -197,6 +207,13 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("LoopShapeUtil", portable_export)
         self.assertIn("detachLoopToPrimitives", portable_export)
         self.assertIn("isLoopShape", portable_export)
+        # A Behavior Tree region is a custom record too, and its projected
+        # children are custom records the export store must be able to load
+        # before it can lower them. Same shared-lowering rule as Branch/Loop.
+        self.assertIn("BehaviorTreeShapeUtil", portable_export)
+        self.assertIn("BtControlShapeUtil", portable_export)
+        self.assertIn("detachBehaviorTreeToPrimitives", portable_export)
+        self.assertIn("isBehaviorTreeShape", portable_export)
         self.assertIn("SYSTEMSKETCH_ROUNDED_RECT_GEO", portable_export)
         self.assertIn("portableValuePillText", portable_export)
         self.assertIn("freezeDetachedValuePill", portable_export)

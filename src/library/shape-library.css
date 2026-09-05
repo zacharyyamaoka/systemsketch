@@ -10,6 +10,10 @@
   margin: 0 14px 5px;
 }
 
+/* `ShapeLibraryBrowser` also carries `.ss-scroll`, which supplies exactly
+ * these three. They stay declared here so the stylesheet is self-sufficient:
+ * the class and the rule land in different commits, and a body that lost
+ * `min-height: 0` would simply stop scrolling. */
 .systemsketch-library-browser .systemsketch-library-panel__body {
   min-height: 0;
   flex: 1;

@@ -1,0 +1,55 @@
+digraph pastafarianism {
+ordering=out;
+graph [fontname="times-roman"];
+node [fontname="times-roman"];
+edge [fontname="times-roman"];
+"Pick and place#1" [label="Ⓜ Pick and place#1", shape=box, style=filled, fillcolor=orange, fontsize=9, fontcolor=black];
+"MoveToObj#2" [label="MoveToObj#2", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+"Pick and place#1" -> "MoveToObj#2";
+"Grasp or correct#3" [label="Ⓜ Grasp or correct#3", shape=octagon, style=filled, fillcolor=cyan, fontsize=9, fontcolor=black];
+"Pick and place#1" -> "Grasp or correct#3";
+"GraspValid#4" [label="GraspValid#4", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+"Grasp or correct#3" -> "GraspValid#4";
+"CorrectGrip#5" [label="CorrectGrip#5", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+"Grasp or correct#3" -> "CorrectGrip#5";
+"CloseGrip#6" [label="CloseGrip#6", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+"Pick and place#1" -> "CloseGrip#6";
+"MoveHome#7" [label="MoveHome#7", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+"Pick and place#1" -> "MoveHome#7";
+"Parallel#8" [label="⚡ Parallel#8\nSuccessOnAll", shape=parallelogram, style=filled, fillcolor=gold, fontsize=9, fontcolor=black];
+"Pick and place#1" -> "Parallel#8";
+"CloseGrip#9" [label="CloseGrip#9", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+"Parallel#8" -> "CloseGrip#9";
+"Sequence#10" [label="Ⓜ Sequence#10", shape=box, style=filled, fillcolor=orange, fontsize=9, fontcolor=black];
+"Parallel#8" -> "Sequence#10";
+"CloseGrip#11" [label="CloseGrip#11", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+"Sequence#10" -> "CloseGrip#11";
+"MoveHome#12" [label="MoveHome#12", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+"Sequence#10" -> "MoveHome#12";
+"MoveHome#13" [label="MoveHome#13", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+"Parallel#8" -> "MoveHome#13";
+"CloseGrip#9" -> "/grip_state" [color=blue, constraint=false, weight=0];
+"CloseGrip#6" -> "/grip_state" [color=blue, constraint=false, weight=0];
+"CloseGrip#11" -> "/grip_state" [color=blue, constraint=false, weight=0];
+"/object_pose" -> "CorrectGrip#5" [color=green, constraint=false, weight=0];
+"/object_pose" -> "GraspValid#4" [color=green, constraint=false, weight=0];
+"/object_pose" -> "MoveToObj#2" [color=green, constraint=false, weight=0];
+"CorrectGrip#5" -> "/object_pose" [color=blue, constraint=false, weight=0];
+"/grip_force" -> "CloseGrip#9" [color=green, constraint=false, weight=0];
+"/grip_force" -> "CloseGrip#6" [color=green, constraint=false, weight=0];
+"/grip_force" -> "CloseGrip#11" [color=green, constraint=false, weight=0];
+"/home_pose" -> "MoveHome#12" [color=green, constraint=false, weight=0];
+"/home_pose" -> "MoveHome#7" [color=green, constraint=false, weight=0];
+"/home_pose" -> "MoveHome#13" [color=green, constraint=false, weight=0];
+"GraspValid#4" -> "/quality" [color=blue, constraint=false, weight=0];
+subgraph Blackboard {
+id=Blackboard;
+label=Blackboard;
+rank=sink;
+"/grip_state" [label="/grip_state: -", shape=box, style=filled, color=blue, fillcolor=white, fontsize=8, fontcolor=blue, width=0, height=0, fixedsize=false];
+"/object_pose" [label="/object_pose: -", shape=box, style=filled, color=blue, fillcolor=white, fontsize=8, fontcolor=blue, width=0, height=0, fixedsize=false];
+"/grip_force" [label="/grip_force: -", shape=box, style=filled, color=blue, fillcolor=white, fontsize=8, fontcolor=blue, width=0, height=0, fixedsize=false];
+"/home_pose" [label="/home_pose: -", shape=box, style=filled, color=blue, fillcolor=white, fontsize=8, fontcolor=blue, width=0, height=0, fixedsize=false];
+"/quality" [label="/quality: -", shape=box, style=filled, color=blue, fillcolor=white, fontsize=8, fontcolor=blue, width=0, height=0, fixedsize=false];
+}
+}

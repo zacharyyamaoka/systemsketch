@@ -136,7 +136,24 @@ export function ShapeLibraryBrowser({
       ]
 
   return (
-    <div className={`systemsketch-library-browser ${className}`.trim()}>
+    <div
+      className={`systemsketch-library-browser ${className}`.trim()}
+      onKeyDownCapture={(event) => {
+        // Own Escape outright rather than letting it fall through: the
+        // toolbar's Library trigger hosts this browser inside a stock Radix
+        // popover, whose DismissableLayer closes on Escape via its own
+        // document-level listener — a separate mechanism from this React
+        // tree entirely, so `disableEscapeKeyDown` on that popover (see
+        // SystemSketchToolbar.tsx) hands the key fully to us. First Escape
+        // clears an active filter; only a second, on an already-empty
+        // search, closes the panel via the normal onCancel.
+        if (event.key !== 'Escape') return
+        event.preventDefault()
+        event.stopPropagation()
+        if (query) setQuery('')
+        else onCancel?.()
+      }}
+    >
       <TldrawUiInput
         autoFocus={autoFocus}
         autoSelect={autoFocus}

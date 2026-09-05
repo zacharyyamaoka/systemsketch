@@ -150,3 +150,25 @@ For a Branch, seed only the semantic `branch` and its ordinary direct children, 
 - Keep the full scene inside the declared viewport with margin. `zoomToFit` is not permission to place a card partly outside the screenshot.
 - Inspect the PNG for text clipping, edge cropping, crossings, and arrow approach angles. For changes to the generator itself, run `scripts/create_layout_sweep.mjs` on the same seed before/after and once more on a fresh seed.
 - Keep the saved board small enough that `zoomToFit` leaves labels legible.
+
+## Behavior Tree region
+
+A `behaviorTree` shape is authored by its XML alone. Give it `props.xml` (a
+BT.CPP v4 document), the presentation choices (`projection`, `orientation`,
+`nodeFace`, `controlFace`, `edgeStyle`, `dataLens`, `blackboardLayout`), and
+any `w`/`h`; the region resizes itself to its content. Do **not** author its
+child Blocks, control cards, pills or cables: the app projects them from the
+XML the moment the region exists and stamps each one with `meta.btRegion`,
+and the helper leaves those derived records out of the authored inventory.
+Target callouts at the region itself, never at a projected child, because a
+child's id is minted at load.
+
+```json
+{
+  "id": "subject",
+  "type": "behaviorTree",
+  "x": 520,
+  "y": 300,
+  "props": { "title": "PickAndPlace", "projection": "tree", "orientation": "down", "xml": "<root BTCPP_format=\"4\">…</root>" }
+}
+```

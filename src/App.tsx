@@ -22,6 +22,7 @@ import {
   installBranchRegions,
 } from './branch'
 import { LoopShapeUtil, LoopTool } from './loop'
+import { BehaviorTreeShapeUtil, BehaviorTreeTool, BtControlShapeUtil, installBehaviorTreeRegions } from './behaviorTree'
 import { CodeBlockTool, CodeShapeUtil, installCodeClickToEdit } from './code'
 import { CalloutAddLeaderTool, CalloutTool } from './callout'
 import {
@@ -101,11 +102,13 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   BranchShapeUtil,
   BranchArmShapeUtil,
   LoopShapeUtil,
+  BehaviorTreeShapeUtil,
+  BtControlShapeUtil,
   CodeShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
-const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
+const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: DevelopmentPreviewChrome,
 }
@@ -122,10 +125,12 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   BranchShapeUtil,
   BranchArmShapeUtil,
   LoopShapeUtil,
+  BehaviorTreeShapeUtil,
+  BtControlShapeUtil,
   CodeShapeUtil,
   ...blockConnectionShapeUtils,
 ]
-const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
+const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, BehaviorTreeTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
 const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
 
 /**
@@ -158,6 +163,7 @@ function SystemSketchCanvas() {
     const stopBranchClickToEdit = installBranchClickToEdit(editor)
     const stopCodeClickToEdit = installCodeClickToEdit(editor)
     const stopBranchRegions = installBranchRegions(editor)
+    const stopBehaviorTreeRegions = installBehaviorTreeRegions(editor)
     const stopBlockPortMenuTarget = installBlockPortMenuTarget(editor)
     const stopExcalidrawPaste = registerExcalidrawPasteHandler(editor)
     const stopToolbarSideEffects = registerToolbarSideEffects(editor)
@@ -167,6 +173,7 @@ function SystemSketchCanvas() {
       stopToolbarSideEffects()
       stopExcalidrawPaste()
       stopBlockPortMenuTarget()
+      stopBehaviorTreeRegions()
       stopBranchRegions()
       stopBranchClickToEdit()
       stopCodeClickToEdit()

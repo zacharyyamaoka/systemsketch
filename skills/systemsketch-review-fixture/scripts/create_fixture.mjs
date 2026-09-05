@@ -355,9 +355,14 @@ async function main() {
       // store transaction, so let its queued microtask settle before asserting
       // this editor-authored fixture's complete structural inventory.
       await Promise.resolve()
+      // A Behavior Tree region projects its XML onto child Blocks, control
+      // cards, pills and cables the moment it exists. Those records are derived
+      // from the region's XML, never authored by a recipe, so they are not part
+      // of the authored inventory this count checks.
+      const authored = editor.store.allRecords().filter((record) => record.typeName === 'shape' && !record.meta?.btRegion)
       return {
-        count: editor.store.allRecords().filter((record) => record.typeName === 'shape').length,
-        ids: editor.store.allRecords().filter((record) => record.typeName === 'shape').map((shape) => shape.id).sort(),
+        count: authored.length,
+        ids: authored.map((shape) => shape.id).sort(),
         pages: editor.getPages().map((page) => ({ id: page.id, name: page.name })),
       }
     })()`)
@@ -377,14 +382,14 @@ async function main() {
       `document.querySelector('.systemsketch-file-title i')?.dataset.state === 'clean'`,
       'fixture autosave')
     process.stdout.write('review fixture · autosave clean\n')
-    await waitFor(page, `window.__systemsketch.editor.store.allRecords().filter((record) => record.typeName === 'shape').length === ${expectedShapes}`,
+    await waitFor(page, `window.__systemsketch.editor.store.allRecords().filter((record) => record.typeName === 'shape' && !record.meta?.btRegion).length === ${expectedShapes}`,
       'the complete saved scene')
     await delay(250)
 
     await guardedReload(page)
     process.stdout.write('review fixture · reload accepted\n')
     await waitFor(page,
-      `window.__systemsketch?.editor?.store.allRecords().filter((record) => record.typeName === 'shape').length === ${expectedShapes}`,
+      `window.__systemsketch?.editor?.store.allRecords().filter((record) => record.typeName === 'shape' && !record.meta?.btRegion).length === ${expectedShapes}`,
       'the cold-reopened fixture')
     await delay(350)
     process.stdout.write('review fixture · cold reopen verified\n')
@@ -466,7 +471,9 @@ async function main() {
     if (document.systemSketch?.application !== 'SystemSketch' || document.systemSketch?.formatVersion !== 2) {
       throw new Error('saved fixture has an invalid SystemSketch manifest')
     }
-    const savedShapes = document.records.filter((record) => record.typeName === 'shape').length
+    // Projected Behavior Tree children are persisted with the board (they are
+    // real Blocks and pills) but derived from the region's XML, not authored.
+    const savedShapes = document.records.filter((record) => record.typeName === 'shape' && !record.meta?.btRegion).length
     if (savedShapes !== expectedShapes) throw new Error(`saved fixture contains ${savedShapes} shapes; expected ${expectedShapes}`)
     const expectedCueBindings = recipe.callouts.reduce((count, callout) => {
       if (!callout.target) return count

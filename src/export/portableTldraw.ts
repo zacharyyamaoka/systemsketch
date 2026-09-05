@@ -33,6 +33,12 @@ import {
 	isBranchShape,
 } from '../branch'
 import { LoopShapeUtil, detachLoopToPrimitives, isLoopShape } from '../loop'
+import {
+	BehaviorTreeShapeUtil,
+	BtControlShapeUtil,
+	detachBehaviorTreeToPrimitives,
+	isBehaviorTreeShape,
+} from '../behaviorTree'
 import { CodeShapeUtil, isCodeShape, type CodeShape } from '../code'
 import {
 	CONNECTION_SHAPE_TYPE,
@@ -70,6 +76,8 @@ const PORTABLE_SHAPE_UTILS = replaceConstructorsByType<TLAnyShapeUtilConstructor
 		BranchShapeUtil,
 		BranchArmShapeUtil,
 		LoopShapeUtil,
+		BehaviorTreeShapeUtil,
+		BtControlShapeUtil,
 		CodeShapeUtil,
 		...blockConnectionShapeUtils,
 	],
@@ -290,6 +298,12 @@ export async function exportPortableTldraw(editor: Editor): Promise<string> {
 
 		for (const page of exportEditor.getPages()) {
 			exportEditor.setCurrentPage(page.id)
+			// A Behavior Tree region lowers before the Block sweep: its leaves are
+			// projected occurrences, and lowering them as loose Blocks first would
+			// leave the region painting a second copy of the same tree.
+			for (const region of exportEditor.getCurrentPageShapes().filter(isBehaviorTreeShape)) {
+				detachBehaviorTreeToPrimitives(exportEditor, region.id)
+			}
 			const blocks = exportEditor.getCurrentPageShapes()
 				.filter(isBlockShape)
 				.sort((left, right) => blockDepth(exportEditor, left) - blockDepth(exportEditor, right))
