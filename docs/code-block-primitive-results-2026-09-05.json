@@ -1,0 +1,60 @@
+{
+  "checks": [
+    {
+      "id": "TOOL-1",
+      "ok": true,
+      "detail": "Code is available from the system family"
+    },
+    {
+      "id": "CREATE-1",
+      "ok": true,
+      "detail": "new Code block has a real CodeMirror-backed Python document with line numbers"
+    },
+    {
+      "id": "CREATE-2",
+      "ok": true,
+      "detail": "new Code block persists its readable character width"
+    },
+    {
+      "id": "RIBBON-1",
+      "ok": true,
+      "detail": "language control updates the live CodeMirror mode"
+    },
+    {
+      "id": "RIBBON-2",
+      "ok": true,
+      "detail": "line-number toggle keeps the authored character width while removing only the gutter"
+    },
+    {
+      "id": "WIDTH-1",
+      "ok": true,
+      "detail": "typed custom width is persisted as a 72-character measure"
+    },
+    {
+      "id": "RESIZE-1",
+      "ok": true,
+      "detail": "the Code block exposes tldraw’s stock bottom-right resize overlay"
+    },
+    {
+      "id": "RESIZE-2",
+      "ok": true,
+      "detail": "Code width uses tldraw’s active select.resizing state"
+    },
+    {
+      "id": "RESIZE-3",
+      "ok": true,
+      "detail": "a freely dragged wider shape recalculates its visible character width"
+    },
+    {
+      "id": "EDIT-1",
+      "ok": true,
+      "detail": "second click edits the existing Code block without creating a stock Text shape"
+    },
+    {
+      "id": "CONSOLE-1",
+      "ok": true,
+      "detail": "no browser console errors occurred"
+    }
+  ],
+  "screenshot": "/home/bam/.codex/worktrees/3233/systemsketch-track-code-block-primitive/docs/assets/code-block-primitive-live-2026-09-05.png"
+}

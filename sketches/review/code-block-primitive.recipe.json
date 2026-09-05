@@ -1,0 +1,64 @@
+{
+  "feature": "Code block primitive review",
+  "viewport": { "width": 1680, "height": 900 },
+  "pages": [{ "id": "review", "name": "Code block review" }],
+  "shapes": [
+    {
+      "id": "code-subject",
+      "type": "code",
+      "x": 540,
+      "y": 350,
+      "props": {
+        "w": 566,
+        "h": 240,
+        "code": "const normalize = (signal) => {\n  const baseline = signal.mean()\n  return signal - baseline\n}",
+        "language": "javascript",
+        "fontSize": 16,
+        "showLineNumbers": true,
+        "characterWidth": 48
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "select-ribbon",
+      "kind": "step",
+      "text": "1 · Select Code. Use its floating ribbon to change language, −/+ type size, or # Lines.",
+      "x": 60,
+      "y": 360,
+      "w": 380,
+      "h": 130,
+      "target": { "shapeId": "code-subject", "anchor": "left" }
+    },
+    {
+      "id": "width",
+      "kind": "step",
+      "text": "2 · Open ↔ 48ch. Choose Compact/Standard/Wide/Extra wide, or type 72 in Custom.",
+      "x": 520,
+      "y": 80,
+      "w": 600,
+      "h": 120,
+      "target": { "shapeId": "code-subject", "anchor": "top" }
+    },
+    {
+      "id": "edit-resize",
+      "kind": "step",
+      "text": "3 · Click the selected code body to enter CodeMirror. Type a line, then freely drag the lower-right handle and watch ch.",
+      "x": 500,
+      "y": 710,
+      "w": 640,
+      "h": 130,
+      "target": { "shapeId": "code-subject", "anchor": "bottom" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · One Code block changes language, font size, numbered lines, and preset/custom width; edits in CodeMirror; and reports ch during a native resize.",
+      "x": 1210,
+      "y": 370,
+      "w": 400,
+      "h": 180
+    }
+  ]
+}
