@@ -9,6 +9,7 @@ import {
 } from 'tldraw'
 import { storedTextOr } from './textFidelity'
 import { mergeImportedPageLandmarks } from './landmarks/boardLandmarks'
+import { FRAMES_PANEL_ORDER_META_KEY, mergeImportedFramesPanelOrder } from './chrome/framesPanelModel'
 
 const FRAME_PADDING = 64
 const FRAME_GAP = 160
@@ -210,7 +211,16 @@ export function consolidateDocumentToSinglePage(editor: Editor): SinglePageConso
             y: plan.destination.y - plan.initial.y,
           },
         })))
-        if (mergedLandmarkMeta) editor.updatePage({ id: rootPage.id, meta: mergedLandmarkMeta })
+        const mergedOrderMeta = mergeImportedFramesPanelOrder(rootPage, pages)
+        if (mergedLandmarkMeta || mergedOrderMeta) {
+          // Both migrations are projections of the former page metadata.
+          // Preserve opaque order records on their imported Frame rather than
+          // treating a one-page upgrade as permission to rewrite them.
+          editor.updatePage({ id: rootPage.id, meta: {
+            ...(mergedLandmarkMeta ?? rootPage.meta),
+            ...(mergedOrderMeta ? { [FRAMES_PANEL_ORDER_META_KEY]: mergedOrderMeta[FRAMES_PANEL_ORDER_META_KEY] } : {}),
+          } })
+        }
         for (const page of pages.slice(1)) editor.deletePage(page.id)
         editor.setCurrentPage(rootPage.id)
         editor.selectNone()
