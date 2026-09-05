@@ -186,13 +186,31 @@ def port_is_free(port: int) -> bool:
     return True
 
 
-def allocate_port_pair(requested: int | None = None) -> tuple[int, int]:
+def allocate_port_pair(
+    requested: int | None = None,
+    *,
+    reserved_ports: frozenset[int] = frozenset(),
+) -> tuple[int, int]:
+    """Pick a public/API pair that no published review can later reclaim.
+
+    A review can be temporarily down without being retired. Its URL still owns
+    its port pair, because restarting that review must never make a newer
+    review serve a different board at the old URL.
+    """
     candidates = [requested] if requested is not None else range(PORT_MIN, PORT_MAX + 1, 2)
     for port in candidates:
-        if port is not None and port_is_free(port) and port_is_free(port + 1):
+        if (
+            port is not None
+            and port not in reserved_ports
+            and port + 1 not in reserved_ports
+            and port_is_free(port)
+            and port_is_free(port + 1)
+        ):
             return port, port + 1
     if requested is not None:
-        raise ReviewRuntimeError(f"review port pair {requested}/{requested + 1} is already occupied")
+        raise ReviewRuntimeError(
+            f"review port pair {requested}/{requested + 1} is already occupied or reserved"
+        )
     raise ReviewRuntimeError(f"no free review port pair in {PORT_MIN}–{PORT_MAX + 1}")
 
 
@@ -509,7 +527,16 @@ def main() -> int:
                 if args.report:
                     review.report = relative_artifact(Path(review.worktree), args.report, "report")
             else:
-                port, api_port = allocate_port_pair(args.port)
+                # WHY: a retained review's address is part of its handoff.
+                # Reusing a stopped review's port makes its old board URL hit
+                # another review's server, which looks like a workspace-root
+                # rejection even though both boards are valid.
+                reserved_ports = frozenset(
+                    port
+                    for retained in reviews.values()
+                    for port in (retained.port, retained.api_port)
+                )
+                port, api_port = allocate_port_pair(args.port, reserved_ports=reserved_ports)
                 root = review_worktree(REPO, name, commit)
                 review = Review(
                     name, commit, args.ref, str(root), port, api_port,
