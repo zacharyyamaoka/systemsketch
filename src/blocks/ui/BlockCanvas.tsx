@@ -836,7 +836,6 @@ function BlockHeading({
   const centered = blockHeaderAlign(shape.props) === 'center'
   const metadata = (mirror: boolean) => (
     <span className={mirror ? 'BlockNode-headingMirror' : 'BlockNode-headingMeta'} aria-hidden={mirror || undefined}>
-      <DefinitionBadge shape={shape} layoutCopy={mirror} />
       <BlockDiffBadge shape={shape} layoutCopy={mirror} />
       {shape.props.blockType !== '' ? (
         <span
@@ -870,6 +869,7 @@ function BlockHeading({
           >
             <FieldValue diffs={shape.props.fieldDiffs} path="title" value={shape.props.title} />
           </span>
+          <DefinitionBadge shape={shape} />
         </span>
         {metadata(false)}
       </div>

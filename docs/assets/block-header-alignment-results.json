@@ -8,7 +8,7 @@
     "ok": true
   },
   {
-    "label": "Center puts the icon/title identity group on the true Block midpoint without moving type metadata",
+    "label": "Center puts icon, title, and optional Draft badge on the true midpoint without moving type metadata",
     "ok": true
   },
   {

@@ -33,6 +33,7 @@ async function headerFacts(page) {
     const identity = face?.querySelector('[data-testid="block-heading-identity"]')
     const title = face?.querySelector('.BlockNode-headingTitle')
     const meta = face?.querySelector('.BlockNode-headingMeta')
+    const draft = face?.querySelector('.BlockNode-definitionBadge')
     if (!shape || !face || !heading || !identity || !title || !meta) return 'null'
     const faceBox = face.getBoundingClientRect()
     const identityBox = identity.getBoundingClientRect()
@@ -49,6 +50,8 @@ async function headerFacts(page) {
       identityLeft: identityBox.left,
       identityCenter: identityBox.left + identityBox.width / 2,
       metaRight: metaBox.right,
+      draftText: draft?.textContent?.trim() ?? null,
+      draftInsideIdentity: draft ? identity.contains(draft) : null,
     })
   })()`))
 }
@@ -98,6 +101,13 @@ async function main() {
     assert.ok(initial.identityLeft - initial.faceLeft >= 10 && initial.identityLeft - initial.faceLeft <= 14)
     pass('existing and newly placed Blocks keep the established left-aligned header by default')
 
+    await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const shape = editor.getOnlySelectedShape()
+      editor.updateShape({ id: shape.id, type: shape.type, props: { ...shape.props, draftOrdinal: 2 } })
+    })()`)
+    await waitFor(page, `document.querySelector('.BlockNode-definitionBadge')?.textContent?.includes('Draft 2')`, 'Draft linking badge')
+
     await clickElement(page, '[data-testid="block-header-align-center"]')
     await waitFor(page, `window.__systemsketch.editor.getOnlySelectedShape()?.props.headerAlign === 'center'`, 'centered header to persist')
     const centered = await headerFacts(page)
@@ -105,7 +115,9 @@ async function main() {
     assert.equal(centered.paintAlign, 'center')
     assert.ok(Math.abs(centered.identityCenter - centered.faceCenter) <= 1)
     assert.ok(centered.metaRight <= centered.faceRight - 10)
-    pass('Center puts the icon/title identity group on the true Block midpoint without moving type metadata')
+    assert.equal(centered.draftText, 'Draft 2')
+    assert.equal(centered.draftInsideIdentity, true)
+    pass('Center puts icon, title, and optional Draft badge on the true midpoint without moving type metadata')
 
     await evaluate(page, `(() => {
       const editor = window.__systemsketch.editor

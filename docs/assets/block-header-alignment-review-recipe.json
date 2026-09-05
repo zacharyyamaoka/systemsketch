@@ -15,6 +15,7 @@
         "description": "Use the inspector to change this header composition.",
         "blockType": "Transform",
         "icon": "SquareFunction",
+        "draftOrdinal": 2,
         "view": "port",
         "w": 500,
         "h": 250,
@@ -33,7 +34,7 @@
       "y": 545,
       "props": {
         "title": "centered_reference",
-        "description": "The icon/title group is centered; the type stays at the edge.",
+        "description": "The icon/title/Draft group is centered; the type stays at the edge.",
         "blockType": "Transform",
         "icon": "SquareFunction",
         "headerAlign": "center",
@@ -84,7 +85,7 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · Center keeps icon + title on the Block midpoint, Type stays right, and Left restores the original header",
+      "text": "PASS WHEN · Center keeps icon + title + optional Draft badge on the Block midpoint; Type stays right and fold remains separate",
       "x": 70,
       "y": 700,
       "w": 590,

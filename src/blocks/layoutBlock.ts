@@ -981,6 +981,9 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		: null
 	const centeredHeader = blockHeaderAlign(props) === 'center'
 	const iconReserve = hasHeaderIcon ? HEADER_ICON_PX + HEADER_GAP_PX : 0
+	const draftBadgeReserve = props.draftOrdinal === undefined
+		? 0
+		: measureSimpleText(`Draft ${props.draftOrdinal}`, 11, 650) + 18 + HEADER_GAP_PX
 	const centeredSideReserve = headerTypeWidth > 0
 		? headerTypeWidth + HEADER_GAP_PX
 		: 0
@@ -989,10 +992,10 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		width - HEADER_PAD_X * 2 - centeredSideReserve * 2,
 	)
 	const centeredTitleWidth = Math.max(0, Math.min(
-		Math.max(0, centeredIdentityMax - iconReserve),
+		Math.max(0, centeredIdentityMax - iconReserve - draftBadgeReserve),
 		measureBlockText(props.title, PORT_TITLE_FONT_PX, 500, 'mono'),
 	))
-	const centeredIdentityWidth = iconReserve + centeredTitleWidth
+	const centeredIdentityWidth = iconReserve + centeredTitleWidth + draftBadgeReserve
 	const identityLeft = centeredHeader
 		? (width - centeredIdentityWidth) / 2
 		: HEADER_PAD_X
@@ -1007,7 +1010,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 	const titleLeft = identityLeft + iconReserve
 	const titleRight = centeredHeader
 		? titleLeft + centeredTitleWidth
-		: headerType ? headerType.x - HEADER_GAP_PX : width - HEADER_PAD_X
+		: (headerType ? headerType.x - HEADER_GAP_PX : width - HEADER_PAD_X) - draftBadgeReserve
 	const headerTitle: BlockRect = {
 		x: titleLeft,
 		y: 0,

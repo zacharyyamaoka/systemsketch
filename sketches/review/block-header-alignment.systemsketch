@@ -96,7 +96,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a4wULl",
+      "index": "a4kzOl",
       "typeName": "shape"
     },
     {
@@ -148,8 +148,16 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5zbgb",
+      "index": "a5iMN",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#BD54C6",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:SakgMxiH3eU_iBYx3KT84",
+      "typeName": "user"
     },
     {
       "x": 70,
@@ -193,7 +201,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3Iaf",
+      "index": "a3KxU",
       "typeName": "shape"
     },
     {
@@ -230,7 +238,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · Center keeps icon + title on the Block midpoint, Type stays right, and Left restores the original header"
+                  "text": "PASS WHEN · Center keeps icon + title + optional Draft badge on the Block midpoint; Type stays right and fold remains separate"
                 }
               ]
             }
@@ -238,7 +246,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6oX2",
+      "index": "a63U5",
       "typeName": "shape"
     },
     {
@@ -283,7 +291,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4BUo",
+      "index": "a4Pkf",
       "typeName": "shape"
     },
     {
@@ -333,7 +341,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "U5XGupupapgKeID3c501a",
+        "definitionId": "oMaVHvI6yeTk6naS92f6D",
         "inputs": [
           {
             "id": "in_1",
@@ -350,10 +358,11 @@
             "visible": true
           }
         ],
-        "definitionKey": "parse_frame"
+        "draftOrdinal": 2,
+        "definitionKey": "parse_frame_draft_2"
       },
       "parentId": "page:page",
-      "index": "a1C9j",
+      "index": "a1h9f",
       "typeName": "shape"
     },
     {
@@ -398,7 +407,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5xrn",
+      "index": "a58Wz",
       "typeName": "shape"
     },
     {
@@ -481,7 +490,7 @@
         "w": 500,
         "h": 220,
         "title": "centered_reference",
-        "description": "The icon/title group is centered; the type stays at the edge.",
+        "description": "The icon/title/Draft group is centered; the type stays at the edge.",
         "blockType": "Transform",
         "icon": "SquareFunction",
         "view": "port",
@@ -507,7 +516,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "DIlQ_630z8uK-lh4qJBry",
+        "definitionId": "FVHX5UWStDzxXWqSj6v71",
         "inputs": [
           {
             "id": "in_1",
@@ -528,7 +537,7 @@
         "definitionKey": "centered_reference"
       },
       "parentId": "page:page",
-      "index": "a2dRv",
+      "index": "a24kv",
       "typeName": "shape"
     },
     {
@@ -649,14 +658,6 @@
       "typeName": "instance"
     },
     {
-      "name": "",
-      "color": "#02B1CC",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:54pfidXw-5i0oJc9fzrxr",
-      "typeName": "user"
-    },
-    {
       "x": 500,
       "y": 205,
       "rotation": 0,
@@ -697,7 +698,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3nouV",
+      "index": "a3tHtV",
       "typeName": "shape"
     }
   ]

@@ -1208,7 +1208,7 @@ export function BlockInspectorContent({
                       ))}
                     </div>
                     <p className="block-inspector__hint">
-                      Center keeps the icon and title together at the Block midpoint; type metadata stays at the edge.
+                      Center keeps the icon, title, and optional Draft badge together at the Block midpoint; type metadata stays at the edge.
                     </p>
                   </>
                 ) : null}
