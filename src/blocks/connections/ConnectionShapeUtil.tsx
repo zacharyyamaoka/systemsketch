@@ -114,6 +114,7 @@ import { tunnelDisplayState, tunnelVisualForPoints, type TunnelVisual } from './
 import { getFocusedTunnelLayer } from './tunnelLayers'
 import { BRANCH_FADE_OPACITY } from '../../branch/branchModel'
 import { branchAncestry, branchFadeOpacity } from '../../branch/branchScope'
+import { applyAsyncRegionConnectionDefault } from '../../asyncRegion/asyncRegionModel'
 import {
 	getBentCurveCubicControlPoints,
 	getConnectionCenterPoint,
@@ -163,12 +164,25 @@ import {
 	applyCommunicationFocus,
 	communicationProjection,
 	describeCommunicationConnection,
+	isConnectionInCommunicationScope,
 	isCommunicationPrototypeEnabled,
 	phaseLabel,
 	type CommunicationDescriptor,
 	type CommunicationRelation,
 	type CommunicationRouteStyle,
 } from '../../prototypes/communication/communicationProjection'
+
+/** Complete one creation-time default after both semantic bindings exist. */
+function applyNewConnectionRegionDefault(editor: Editor, connectionId: TLShapeId): void {
+	const bindings = getConnectionBindings(editor, connectionId)
+	if (!bindings.start || !bindings.end) return
+	applyAsyncRegionConnectionDefault(
+		editor,
+		connectionId,
+		bindings.start.toId,
+		bindings.end.toId,
+	)
+}
 
 declare module 'tldraw' {
 	export interface TLGlobalShapePropsMap {
@@ -775,6 +789,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			// command makes a requested derivation visible and undoable.
 			normalizeConnectionDirection(this.editor, connection.id)
 			adoptCableTypeIntoProjection(this.editor, connection.id)
+			if (isCreatingShape) applyNewConnectionRegionDefault(this.editor, connection.id)
 			// A cable you just DREW is not left selected. Its terminal handles sit
 			// exactly on the dots it joins, and a selected cable's handle wins the
 			// next press on that dot — so leaving it selected would turn "wire this
@@ -1188,7 +1203,12 @@ function ComponentCommunicationConnection({
 
 function ConnectionShapeComponent({ connection }: { connection: ConnectionShape }) {
 	const editor = useEditor()
-	const prototypeEnabled = isCommunicationPrototypeEnabled()
+	const prototypeEnabled = isCommunicationPrototypeEnabled(editor)
+	const inCommunicationScope = useValue(
+		'connection in communication scope',
+		() => prototypeEnabled && isConnectionInCommunicationScope(editor, connection),
+		[editor, connection, prototypeEnabled],
+	)
 	const projection = useValue(
 		'communication connection projection',
 		() => communicationProjection.get(editor),
@@ -1196,19 +1216,19 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 	)
 	const descriptor = useValue(
 		'communication connection descriptor',
-		() => prototypeEnabled ? describeCommunicationConnection(editor, connection) : null,
-		[editor, connection, prototypeEnabled],
+		() => inCommunicationScope ? describeCommunicationConnection(editor, connection) : null,
+		[editor, connection, inCommunicationScope],
 	)
 	const relation = useValue(
 		'communication relationship',
 		() => {
-			if (!prototypeEnabled || projection.mode === 'wiring' || !descriptor) return null
+			if (!inCommunicationScope || projection.mode === 'wiring' || !descriptor) return null
 			return collectCommunicationRelations(editor).relations
 				.find((candidate) => candidate.groupKey === descriptor.groupKey) ?? null
 		},
-		[editor, descriptor, projection.mode, prototypeEnabled],
+		[editor, descriptor, projection.mode, inCommunicationScope],
 	)
-	if (prototypeEnabled && projection.mode === 'tagged' && descriptor && relation) {
+	if (inCommunicationScope && projection.mode === 'tagged' && descriptor && relation) {
 		return (
 			<TaggedCommunicationConnection
 				connection={connection}
@@ -1218,7 +1238,7 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 			/>
 		)
 	}
-	if (prototypeEnabled && projection.mode === 'components') {
+	if (inCommunicationScope && projection.mode === 'components') {
 		if (!relation) return null
 		const representative = relation.representativeId === connection.id
 		const focusedMember = projection.focusedGroupKey === relation.groupKey
@@ -1245,7 +1265,7 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 			</>
 		)
 	}
-	const dimUnrelatedCanonical = prototypeEnabled
+	const dimUnrelatedCanonical = inCommunicationScope
 		&& projection.mode === 'tagged'
 		&& projection.focusedGroupKey !== null
 	return (
@@ -2326,6 +2346,7 @@ export function offerBlockForLooseTerminal(
 				// explicit command is the only path that copies its type into a pill.
 				normalizeConnectionDirection(editor, connectionId)
 				adoptCableTypeIntoProjection(editor, connectionId)
+				if (creationMark) applyNewConnectionRegionDefault(editor, connectionId)
 			})
 			if (creationMark) {
 				editor.markHistoryStoppingPoint('finish_block_connection')

@@ -87,6 +87,7 @@ import {
   installSystemSketchWheelZoom,
   SYSTEMSKETCH_EDITOR_OPTIONS,
 } from '../canvasCamera'
+import { AsyncRegionTool } from '../asyncRegion'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
@@ -130,7 +131,7 @@ const EMBEDDED_SHAPE_UTILS = [
   ...blockConnectionShapeUtils,
 ]
 const EMBEDDED_BINDING_UTILS = [...blockConnectionBindingUtils]
-const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool, CalloutTool, CalloutAddLeaderTool]
+const EMBEDDED_TOOLS = [BlockTool, BranchTool, AsyncRegionTool, PillTool, CalloutTool, CalloutAddLeaderTool]
 
 /** Long enough that a drag is one write, short enough that a pause is saved. */
 const CHANGE_DEBOUNCE_MS = 250

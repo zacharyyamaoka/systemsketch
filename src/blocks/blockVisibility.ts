@@ -13,6 +13,7 @@ import { getActiveDepthScopeId } from '../depth/depthNavigation'
 import {
 	communicationProjection,
 	isCommunicationPrototypeEnabled,
+	isShapeInCommunicationScope,
 } from '../prototypes/communication/communicationProjection'
 
 /**
@@ -40,10 +41,11 @@ export function getBlockShapeVisibility(
 	// them here proves the simplified view did not create or delete a second
 	// graph merely to make component communication legible.
 	if (
-		isCommunicationPrototypeEnabled()
+		isCommunicationPrototypeEnabled(editor)
 		&& communicationProjection.get(editor).mode === 'components'
 		&& isBlockShape(shape)
 		&& shape.props.view === 'value'
+		&& isShapeInCommunicationScope(editor, shape.id)
 	) return 'hidden'
 	const depthScopeId = getActiveDepthScopeId(editor)
 	if (depthScopeId && editor.getShape(depthScopeId)) {

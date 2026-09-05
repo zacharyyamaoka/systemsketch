@@ -3,6 +3,8 @@ import { useEditor, useValue } from 'tldraw'
 
 import {
 	COMMUNICATION_FAMILY_PAINT,
+	activeCommunicationRegionId,
+	applyActiveCommunicationRegion,
 	applyCommunicationComponentView,
 	applyCommunicationFocus,
 	applyCommunicationProjectionMode,
@@ -10,12 +12,15 @@ import {
 	collectCommunicationRelations,
 	communicationProjection,
 	isCommunicationPrototypeEnabled,
+	isCommunicationPrototypeQueryEnabled,
+	isShapeInCommunicationScope,
 	phaseLabel,
 	selectedCommunicationGroupKey,
 	type CommunicationComponentView,
 	type CommunicationProjectionMode,
 	type CommunicationRouteStyle,
 } from './communicationProjection'
+import { isAsyncRegionShape } from '../../asyncRegion/asyncRegionModel'
 import './communication-prototype.css'
 
 const MODES: readonly {
@@ -59,14 +64,66 @@ export function CommunicationPrototypeControls() {
 		() => [...editor.getSelectedShapeIds()].sort().join(','),
 		[editor],
 	)
-	const enabled = isCommunicationPrototypeEnabled()
+	const selectedAsyncRegionId = useValue(
+		'selected Async region',
+		() => {
+			const selected = editor.getOnlySelectedShape()
+			return isAsyncRegionShape(selected) ? selected.id : null
+		},
+		[editor],
+	)
+	const legacyPrototype = isCommunicationPrototypeQueryEnabled()
+	const enabled = isCommunicationPrototypeEnabled(editor)
+	const activeRegionId = activeCommunicationRegionId(editor)
+	const activeRegion = activeRegionId ? editor.getShape(activeRegionId) : null
 
 	useEffect(() => {
-		if (!enabled) return
+		const selectedIds = [...editor.getSelectedShapeIds()]
+		if (selectedAsyncRegionId) {
+			if (state.activeRegionId !== selectedAsyncRegionId) {
+				applyActiveCommunicationRegion(editor, selectedAsyncRegionId)
+			}
+			return
+		}
+		if (state.activeRegionId && !activeRegionId) {
+			applyActiveCommunicationRegion(editor, null)
+			return
+		}
+		if (legacyPrototype || !activeRegionId) return
+		// Stay in the region while selecting its components or communication
+		// edges. Another region or any outside shape closes it. An empty
+		// selection alone is not enough: completing a new cable intentionally
+		// clears selection, but did not leave the region.
+		if (
+			selectedIds.some((id) => !isShapeInCommunicationScope(editor, id))
+		) {
+			applyActiveCommunicationRegion(editor, null)
+		}
+	}, [editor, selectionKey, selectedAsyncRegionId, state.activeRegionId, activeRegionId, legacyPrototype])
+
+	useEffect(() => {
+		if (legacyPrototype || !activeRegionId) return
+		const container = editor.getContainer()
+		const onPointerDown = (event: PointerEvent) => {
+			const target = event.target
+			if (target instanceof Element && target.closest('[data-systemsketch-chrome]')) return
+			const bounds = editor.getShapePageBounds(activeRegionId)
+			const point = editor.screenToPage({ x: event.clientX, y: event.clientY })
+			// WHY: selection can go empty after a successful wire, so dismissal is
+			// spatial: interacting inside the region keeps its lens; pressing the
+			// canvas beyond its frame leaves the region and closes the controls.
+			if (!bounds?.containsPoint(point)) applyActiveCommunicationRegion(editor, null)
+		}
+		container.addEventListener('pointerdown', onPointerDown, { capture: true })
+		return () => container.removeEventListener('pointerdown', onPointerDown, { capture: true })
+	}, [editor, activeRegionId, legacyPrototype])
+
+	useEffect(() => {
+		if (!legacyPrototype) return
 		// Re-entering a retained review starts at the canonical evidence without
 		// touching the document: every projection choice lives in an EditorAtom.
 		applyCommunicationProjectionMode(editor, 'wiring')
-	}, [editor, enabled])
+	}, [editor, legacyPrototype])
 
 	useEffect(() => {
 		if (!enabled || state.focusedGroupKey === null) return
@@ -91,16 +148,17 @@ export function CommunicationPrototypeControls() {
 		<>
 			<section
 				className="communication-prototype-bar"
-				aria-label="Communication projection prototype"
+				aria-label={activeRegionId ? 'Async region communication controls' : 'Communication projection prototype'}
 				data-testid="communication-prototype-controls"
 				data-projection-mode={state.mode}
+				data-active-region-id={activeRegionId ?? undefined}
 				data-systemsketch-chrome
 				onPointerDown={stopCanvasEvent}
 				onWheel={stopCanvasEvent}
 			>
 				<div className="communication-prototype-bar__context">
-					<span>Prototype</span>
-					<strong>Communication</strong>
+					<span>{activeRegionId ? 'Async region' : 'Prototype'}</span>
+					<strong>{activeRegion?.type === 'frame' ? activeRegion.props.name || 'Communication' : 'Communication'}</strong>
 				</div>
 				<div className="communication-prototype-tabs" role="tablist" aria-label="Board projection">
 					{MODES.map((mode) => (
@@ -174,12 +232,12 @@ export function CommunicationPrototypeControls() {
 					</>
 				) : state.mode === 'wiring' ? (
 					<>
-						<strong>{summary.edgeCount} canonical data edges</strong>
-						<span>Ports and value nodes are unchanged.</span>
+						<strong>{summary.edgeCount} canonical wire{summary.edgeCount === 1 ? '' : 's'}</strong>
+						<span>{activeRegionId ? 'New wires in this region default to Async.' : 'Ports and value nodes are unchanged.'}</span>
 					</>
 				) : state.mode === 'tagged' ? (
 					<>
-						<strong>{summary.taggedEdgeCount} protocol legs parsed</strong>
+						<strong>{summary.taggedEdgeCount} protocol leg{summary.taggedEdgeCount === 1 ? '' : 's'} parsed</strong>
 						<span>
 							{summary.localValueEdgeCount} local value · {unresolvedEdgeCount} unresolved · {summary.issues.length} issue{summary.issues.length === 1 ? '' : 's'}
 						</span>

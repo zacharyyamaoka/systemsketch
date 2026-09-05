@@ -62,17 +62,23 @@ import {
 import {
 	communicationProjection,
 	isCommunicationPrototypeEnabled,
+	isShapeInCommunicationScope,
 } from '../prototypes/communication/communicationProjection'
 
 function CommunicationProjectedBlockCanvas({ shape }: { shape: BlockShape }) {
 	const editor = useEditor()
-	const enabled = isCommunicationPrototypeEnabled()
+	const enabled = isCommunicationPrototypeEnabled(editor)
 	const projection = useValue(
 		'communication component presentation',
 		() => communicationProjection.get(editor),
 		[editor],
 	)
-	if (!enabled || projection.mode !== 'components' || shape.props.view === 'value') {
+	if (
+		!enabled
+		|| projection.mode !== 'components'
+		|| shape.props.view === 'value'
+		|| !isShapeInCommunicationScope(editor, shape.id)
+	) {
 		return <BlockCanvas shape={shape} />
 	}
 	// WHY: Components is a lens over the dataflow, not a view mutation. Swapping

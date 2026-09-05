@@ -25,6 +25,7 @@ import { BlockIcon } from '../blocks/BlockIcon'
 import { BRANCH_TOOL_ID, BranchIcon } from '../branch'
 import { LOOP_TOOL_ID, LoopIcon } from '../loop'
 import { CALLOUT_TOOL_ID, CalloutIcon, isCalloutCard, startAddingCalloutLeader } from '../callout'
+import { ASYNC_REGION_TOOL_ID, AsyncRegionIcon } from '../asyncRegion'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
 import {
   selectDrawFamilyTool,
@@ -113,6 +114,7 @@ const SYSTEM_MENU_ITEMS: ReadonlyArray<{
   // same reason: it is used less often than a Block and the toolbar, not the
   // right-click menu, is where the muscle memory forms.
   { id: LOOP_TOOL_ID, label: 'Loop', icon: <LoopIcon /> },
+  { id: ASYNC_REGION_TOOL_ID, label: 'Async region', icon: <AsyncRegionIcon /> },
   // A pill is a variable: a literal argument, a named result, or both. P.
   { id: PILL_TOOL_ID, label: 'Pill', icon: <PillIcon />, shortcut: 'P' },
   // Callout intentionally has no key: its two-click interaction is reached from
@@ -301,17 +303,20 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
     ? BRANCH_TOOL_ID
     : activeToolId === LOOP_TOOL_ID
       ? LOOP_TOOL_ID
-      : activeToolId === BLOCK_TOOL_ID
-        ? BLOCK_TOOL_ID
-      : activeToolId === PILL_TOOL_ID
-          ? PILL_TOOL_ID
-          : activeToolId === CALLOUT_TOOL_ID
-            ? CALLOUT_TOOL_ID
-          : preferences.lastSystemTool
+      : activeToolId === ASYNC_REGION_TOOL_ID
+        ? ASYNC_REGION_TOOL_ID
+        : activeToolId === BLOCK_TOOL_ID
+          ? BLOCK_TOOL_ID
+          : activeToolId === PILL_TOOL_ID
+            ? PILL_TOOL_ID
+            : activeToolId === CALLOUT_TOOL_ID
+              ? CALLOUT_TOOL_ID
+              : preferences.lastSystemTool
   const currentItem = SYSTEM_MENU_ITEMS.find((item) => item.id === current) ?? SYSTEM_MENU_ITEMS[0]
   const isActive = activeToolId === BLOCK_TOOL_ID
     || activeToolId === BRANCH_TOOL_ID
     || activeToolId === LOOP_TOOL_ID
+    || activeToolId === ASYNC_REGION_TOOL_ID
     || activeToolId === PILL_TOOL_ID
     || activeToolId === CALLOUT_TOOL_ID
 

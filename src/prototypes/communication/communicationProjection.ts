@@ -1,4 +1,4 @@
-import { WeakCache, computed, type Computed, type Editor, type TLShapeId } from 'tldraw'
+import { WeakCache, computed, isShapeId, type Computed, type Editor, type TLShapeId } from 'tldraw'
 
 import { isBlockShape } from '../../blocks/blockModel'
 import {
@@ -11,6 +11,7 @@ import {
 } from '../../blocks/connections/connectionModel'
 import type { ConnectionShape } from '../../blocks/connections/ConnectionShapeUtil'
 import { EditorAtom } from '../../blocks/ports/portState'
+import { isAsyncRegionShape } from '../../asyncRegion/asyncRegionModel'
 
 export const COMMUNICATION_PROTOTYPE_QUERY = 'communication'
 
@@ -33,11 +34,19 @@ export interface CommunicationProjectionState {
 	componentView: CommunicationComponentView
 	routeStyle: CommunicationRouteStyle
 	focusedGroupKey: string | null
+	/** Null is the legacy query-gated whole-board prototype. */
+	activeRegionId: TLShapeId | null
 }
 
 export const communicationProjection = new EditorAtom<CommunicationProjectionState>(
 	'communication projection prototype',
-	() => ({ mode: 'wiring', componentView: 'simple', routeStyle: 'elbow', focusedGroupKey: null }),
+	() => ({
+		mode: 'wiring',
+		componentView: 'simple',
+		routeStyle: 'elbow',
+		focusedGroupKey: null,
+		activeRegionId: null,
+	}),
 )
 
 export const COMMUNICATION_FAMILY_PAINT: Readonly<Record<CommunicationFamily, {
@@ -306,6 +315,7 @@ export function describeCommunicationConnection(
 function computeCommunicationRelations(editor: Editor): CommunicationSummary {
 	const connections = editor.getCurrentPageShapes()
 		.filter((shape): shape is ConnectionShape => shape.type === CONNECTION_SHAPE_TYPE)
+		.filter((connection) => isConnectionInCommunicationScope(editor, connection))
 	let localValueEdgeCount = 0
 	const issues: CommunicationAssociationIssue[] = []
 	const described = connections.flatMap((connection) => {
@@ -456,9 +466,65 @@ export function collectCommunicationRelations(editor: Editor): CommunicationSumm
 		.get()
 }
 
-export function isCommunicationPrototypeEnabled(): boolean {
+export function isCommunicationPrototypeQueryEnabled(): boolean {
 	if (typeof window === 'undefined') return false
 	return new URLSearchParams(window.location.search).get('prototype') === COMMUNICATION_PROTOTYPE_QUERY
+}
+
+export function activeCommunicationRegionId(editor: Editor): TLShapeId | null {
+	const id = communicationProjection.get(editor).activeRegionId
+	return id && isAsyncRegionShape(editor.getShape(id)) ? id : null
+}
+
+function shapeIsInRegion(editor: Editor, shapeId: TLShapeId, regionId: TLShapeId): boolean {
+	let shape = editor.getShape(shapeId)
+	const visited = new Set<TLShapeId>()
+	while (shape && !visited.has(shape.id)) {
+		visited.add(shape.id)
+		if (shape.id === regionId) return true
+		if (!isShapeId(shape.parentId)) return false
+		shape = editor.getShape(shape.parentId)
+	}
+	return false
+}
+
+/** True for the selected region's contents, or every shape in the legacy prototype URL. */
+export function isShapeInCommunicationScope(editor: Editor, shapeId: TLShapeId): boolean {
+	const regionId = activeCommunicationRegionId(editor)
+	return regionId
+		? shapeIsInRegion(editor, shapeId, regionId)
+		: isCommunicationPrototypeQueryEnabled()
+}
+
+/** A relationship belongs to a region only when both component endpoints do. */
+export function isConnectionInCommunicationScope(
+	editor: Editor,
+	connection: ConnectionShape,
+): boolean {
+	const regionId = activeCommunicationRegionId(editor)
+	if (!regionId) return isCommunicationPrototypeQueryEnabled()
+	const bindings = getConnectionBindings(editor, connection)
+	return Boolean(
+		bindings.start
+		&& bindings.end
+		&& shapeIsInRegion(editor, bindings.start.toId, regionId)
+		&& shapeIsInRegion(editor, bindings.end.toId, regionId),
+	)
+}
+
+export function isCommunicationPrototypeEnabled(editor?: Editor): boolean {
+	return isCommunicationPrototypeQueryEnabled()
+		|| Boolean(editor && activeCommunicationRegionId(editor))
+}
+
+/** Enter or leave the transient communication lens for one durable region. */
+export function applyActiveCommunicationRegion(editor: Editor, regionId: TLShapeId | null): void {
+	const valid = regionId && isAsyncRegionShape(editor.getShape(regionId)) ? regionId : null
+	communicationProjection.update(editor, (state) => ({
+		...state,
+		activeRegionId: valid,
+		focusedGroupKey: valid === state.activeRegionId ? state.focusedGroupKey : null,
+	}))
 }
 
 export function applyCommunicationProjectionMode(
@@ -473,7 +539,6 @@ export function applyCommunicationProjectionMode(
 		mode,
 		focusedGroupKey: mode === 'wiring' ? null : state.focusedGroupKey,
 	}))
-	editor.selectNone()
 }
 
 export function applyCommunicationComponentView(
