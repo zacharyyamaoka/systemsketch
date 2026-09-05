@@ -47,6 +47,7 @@ const blockVersions = createShapePropsMigrationIds(BLOCK_SHAPE_TYPE, {
 	FieldDiffs: 6,
 	SemanticRolesAndStockConfig: 7,
 	MemberLayout: 8,
+	InsetBackground: 9,
 })
 
 function storedViews(props: BlockMigrationProps): StoredViews | undefined {
@@ -295,6 +296,17 @@ export function downgradeBlockPropsV8ToV7(props: BlockMigrationProps): BlockMigr
 	return rest
 }
 
+/** v8 → v9: existing inset layouts keep the white production default. */
+export function upgradeBlockPropsV8ToV9(props: BlockMigrationProps): BlockMigrationProps {
+	return props.insetBackground === undefined ? { ...props, insetBackground: 'white' } : props
+}
+
+/** v9 → v8: older readers do not know the optional inset well treatment. */
+export function downgradeBlockPropsV9ToV8(props: BlockMigrationProps): BlockMigrationProps {
+	const { insetBackground: _insetBackground, ...rest } = props
+	return rest
+}
+
 /**
  * tldraw's migration sequence invokes each step for its side effect; it does
  * not consume a replacement props object. Keep the exported steps pure for
@@ -349,5 +361,9 @@ export const blockShapeMigrations = createShapePropsMigrationSequence({
 		id: blockVersions.MemberLayout,
 		up: (props) => applyPureMigration(props, upgradeBlockPropsV7ToV8),
 		down: (props) => applyPureMigration(props, downgradeBlockPropsV8ToV7),
+	}, {
+		id: blockVersions.InsetBackground,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV8ToV9),
+		down: (props) => applyPureMigration(props, downgradeBlockPropsV9ToV8),
 	}],
 })

@@ -17,6 +17,7 @@ import {
 	downgradeBlockPropsV6ToV5,
 	downgradeBlockPropsV7ToV6,
 	downgradeBlockPropsV8ToV7,
+	downgradeBlockPropsV9ToV8,
 	upgradeBlockPropsV0ToV1,
 	upgradeBlockPropsV1ToV2,
 	upgradeBlockPropsV2ToV3,
@@ -25,6 +26,7 @@ import {
 	upgradeBlockPropsV5ToV6,
 	upgradeBlockPropsV6ToV7,
 	upgradeBlockPropsV7ToV8,
+	upgradeBlockPropsV8ToV9,
 	type BlockMigrationProps,
 } from './blockShapeMigrations'
 
@@ -96,6 +98,15 @@ describe('Block shape migrations', () => {
 		expect(throughPureStep(v8, downgradeBlockPropsV8ToV7)).toEqual(v7)
 		expect(upgradeBlockPropsV7ToV8({ ...v7, memberLayout: 'edge-to-edge' }))
 			.toEqual({ ...v7, memberLayout: 'edge-to-edge' })
+	})
+
+	it('adds the white inset-background default and preserves an authored gray well', () => {
+		const v8 = { title: 'Class', memberLayout: 'inset', inputs: [], outputs: [] }
+		const v9 = throughPureStep(v8, upgradeBlockPropsV8ToV9)
+		expect(v9).toEqual({ ...v8, insetBackground: 'white' })
+		expect(throughPureStep(v9, downgradeBlockPropsV9ToV8)).toEqual(v8)
+		expect(upgradeBlockPropsV8ToV9({ ...v8, insetBackground: 'soft-gray' }))
+			.toEqual({ ...v8, insetBackground: 'soft-gray' })
 	})
 
 	it('loads a V6 Projection record as Unbundle without losing authored fields', () => {
@@ -203,7 +214,7 @@ describe('Block shape migrations', () => {
 		expect(throughPureStep(configV7, downgradeBlockPropsV7ToV6)).not.toHaveProperty('stockConfig')
 	})
 
-	it('round-trips a V6 saved Block through the registered schema and validates the V7 record', () => {
+	it('round-trips a V6 saved Block through the registered schema and validates the current record', () => {
 		const store = createTLStore({ shapeUtils: [BlockShapeUtil], bindingUtils: [] })
 		const currentSchema = store.schema.serialize()
 		const legacy = markerBlock()
@@ -222,7 +233,8 @@ describe('Block shape migrations', () => {
 		expect(() => store.loadStoreSnapshot(snapshot)).not.toThrow()
 		const migrated = store.get(legacy.id) as BlockShape
 		expect(migrated.props.stockConfig).toEqual({ triggerSource: 'clock', rateHz: 10 })
-		expect(store.schema.serialize().sequences[BLOCK_MIGRATION_SEQUENCE]).toBe(8)
+		expect(migrated.props.insetBackground).toBe('white')
+		expect(store.schema.serialize().sequences[BLOCK_MIGRATION_SEQUENCE]).toBe(9)
 
 		const sequence = store.schema.sortedMigrations
 			.filter((migration) => migration.id.startsWith(`${BLOCK_MIGRATION_SEQUENCE}/`))

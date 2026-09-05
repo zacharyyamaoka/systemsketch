@@ -26,6 +26,7 @@ import {
 import {
   HEADER_ROW,
   blockIcon,
+	blockInsetBackground,
   blockMemberLayout,
   blockDiffState,
   blockPortStateCounts,
@@ -1255,6 +1256,7 @@ export interface BlockCanvasProps {
 export function BlockCanvas({ shape }: BlockCanvasProps) {
   const editor = useEditor()
   const layout = layoutBlock(shape.props)
+	const insetBackground = blockInsetBackground(shape.props)
   const parentMemberLayout = useValue(
     'Block parent member layout',
     () => {
@@ -1333,6 +1335,9 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
       className={`NodeShape systemsketch-block-canvas${simple ? ' NodeShape_plain' : ''}${value ? ' NodeShape_value' : ''}`}
       data-block-view={layout.view}
 		data-member-layout={layout.view === 'expanded' ? blockMemberLayout(shape.props) : undefined}
+		data-inset-background={layout.view === 'expanded' && blockMemberLayout(shape.props) === 'inset'
+			? insetBackground
+			: undefined}
 		data-parent-member-layout={parentMemberLayout ?? undefined}
 		data-variadic-prototype={variadicPrototype ?? undefined}
       data-diff-state={diffState === 'normal' ? undefined : diffState}

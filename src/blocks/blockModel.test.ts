@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
 	appendBlockPortToProps,
 	blockMemberLayout,
+	blockInsetBackground,
 	blockIcon,
 	BLOCK_PRESENTATION_VIEWS,
 	blockNotes,
@@ -62,6 +63,7 @@ describe('Block model', () => {
 			notes: '',
 			portLayout: 'inline',
 			memberLayout: 'inset',
+			insetBackground: 'white',
 			inputs: [],
 			outputs: [],
 			views: {
@@ -79,6 +81,7 @@ describe('Block model', () => {
 		delete props.notes
 		delete props.expandedWeights
 		delete (props as { memberLayout?: BlockShape['props']['memberLayout'] }).memberLayout
+		delete (props as { insetBackground?: BlockShape['props']['insetBackground'] }).insetBackground
 		// portLayout is a required StyleProp since the PortLayoutStyle migration.
 		// The reader still guards an in-memory record assembled before the store
 		// migrates it, which is what this line reproduces.
@@ -89,6 +92,7 @@ describe('Block model', () => {
 		expect(blockNotes(props)).toBe('')
 		expect(blockPortLayout(props)).toBe('inline')
 		expect(blockMemberLayout(props)).toBe('inset')
+		expect(blockInsetBackground(props)).toBe('white')
 		expect(expandedSectionWeights(props)).toEqual({})
 		expect(portDefaultValue(port)).toBe('')
 		expect(portRow(port)).toBe(1)

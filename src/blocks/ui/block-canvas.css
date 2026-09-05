@@ -34,6 +34,13 @@
   box-shadow: inset 0 1px 0 var(--ss-border);
 }
 
+/* WHY: gray is a containment aid, not a semantic color. Limit it to the
+ * exposed well behind inset cards and derive it from the theme's ordinary
+ * sunken surface; child cards, header, and footer retain their raised surface. */
+.systemsketch-block-canvas[data-member-layout='inset'][data-inset-background='soft-gray'] {
+  background: var(--ss-surface-sunken);
+}
+
 .systemsketch-block-canvas[data-parent-member-layout='edge-to-edge'] .NodeShape-heading,
 .systemsketch-block-canvas[data-parent-member-layout='edge-to-edge'] .NodeShape-footer {
   border-radius: 0;

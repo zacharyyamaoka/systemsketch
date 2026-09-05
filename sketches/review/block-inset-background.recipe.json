@@ -1,0 +1,91 @@
+{
+  "feature": "Block inset background",
+  "viewport": { "width": 1680, "height": 980 },
+  "pages": [{ "id": "review", "name": "Review" }],
+  "shapes": [
+    {
+      "id": "class",
+      "type": "block",
+      "x": 530,
+      "y": 100,
+      "props": {
+        "title": "Class",
+        "description": "Two ordinary direct child Blocks",
+        "blockType": "Definition",
+        "view": "expanded",
+        "w": 600,
+        "h": 760,
+        "memberLayout": "inset",
+        "insetBackground": "white",
+        "inputs": [],
+        "outputs": []
+      }
+    },
+    {
+      "id": "init",
+      "type": "block",
+      "parentId": "class",
+      "x": 12,
+      "y": 60,
+      "props": {
+        "title": "__init__()",
+        "description": "Initialize the instance",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 576,
+        "h": 260,
+        "inputs": [{ "id": "self", "name": "self", "type": "Class", "visible": true }],
+        "outputs": []
+      }
+    },
+    {
+      "id": "call",
+      "type": "block",
+      "parentId": "class",
+      "x": 12,
+      "y": 332,
+      "props": {
+        "title": "__call__()",
+        "description": "Run the instance",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 576,
+        "h": 260,
+        "inputs": [{ "id": "self", "name": "self", "type": "Class", "visible": true }],
+        "outputs": [{ "id": "result", "name": "result", "type": "Any", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Select Class. Under Inset background, press Soft gray.",
+      "x": 20,
+      "y": 120,
+      "w": 390,
+      "h": 112,
+      "target": { "shapeId": "class", "anchor": "left", "dy": -200 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Press White, then Soft gray again. Only the member well should change.",
+      "x": 20,
+      "y": 390,
+      "w": 390,
+      "h": 112,
+      "target": { "shapeId": "class", "anchor": "left", "dy": 120 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Soft gray appears only in the exposed inset gutters and body well. The header and both member cards stay white; switching back to White restores the default.",
+      "x": 20,
+      "y": 660,
+      "w": 410,
+      "h": 170
+    }
+  ]
+}

@@ -15,6 +15,7 @@ import {
 	PILL_TOOL_ID,
 	canReparentDraggedShapesIntoBlock,
 	canBlockContainChildren,
+	blockInsetBackground,
 	blockMemberLayout,
 	getDefaultBlockProps,
 	isBlockShape,
@@ -83,6 +84,7 @@ function BlockExportSvg({
 	const layout = layoutBlock(shape.props)
 	const { w, h } = layout.bounds
 	const surface = '#ffffff'
+	const insetWell = '#f4f4f5'
 	const ink = '#27272a'
 	const muted = '#a1a1aa'
 	const divider = '#e4e4e7'
@@ -114,6 +116,17 @@ function BlockExportSvg({
 				stroke="#dedee3"
 				strokeWidth={1}
 			/>
+			{layout.view === 'expanded'
+			&& blockMemberLayout(shape.props) === 'inset'
+			&& blockInsetBackground(shape.props) === 'soft-gray' ? (
+				<rect
+					x={1}
+					y={layout.header?.h ?? 0}
+					width={Math.max(0, w - 2)}
+					height={Math.max(0, (layout.footer?.y ?? h) - (layout.header?.h ?? 0))}
+					fill={insetWell}
+				/>
+			) : null}
 
 			{layout.header ? (
 				<>

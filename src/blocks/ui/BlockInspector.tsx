@@ -15,7 +15,9 @@ import { EMPTY_FIELD_GUIDANCE } from '../../fields/emptyFieldGuidance'
 
 import {
   BLOCK_MEMBER_LAYOUTS,
+	BLOCK_INSET_BACKGROUNDS,
   BLOCK_PRESENTATION_VIEWS,
+	blockInsetBackground,
   blockMemberLayout,
   isBlockShape,
   HEADER_ROW,
@@ -1673,6 +1675,28 @@ export function BlockInspectorContent({
                     <p className="block-inspector__hint">
                       Inset separates member cards; edge-to-edge joins direct child Blocks into one stack.
                     </p>
+					{blockMemberLayout(props) === 'inset' ? (
+						<div className="block-inspector__subcontrol" data-testid="block-inset-background-control">
+							<span className="block-inspector__subheading">Inset background</span>
+							<div className="block-inspector__choices" role="group" aria-label="Inset background">
+								{BLOCK_INSET_BACKGROUNDS.map((background) => (
+									<button
+										key={background}
+										type="button"
+										disabled={readOnly}
+										aria-pressed={blockInsetBackground(props) === background}
+										data-testid={`block-inset-background-${background}`}
+										onClick={() => actions?.updateDetails({ insetBackground: background })}
+									>
+										{background === 'white' ? 'White' : 'Soft gray'}
+									</button>
+								))}
+							</div>
+							<p className="block-inspector__hint">
+								Soft gray differentiates the member well without assigning a semantic color.
+							</p>
+						</div>
+					) : null}
                   </div>
                 ) : null}
               </section>
