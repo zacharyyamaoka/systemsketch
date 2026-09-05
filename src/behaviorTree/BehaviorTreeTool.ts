@@ -1,7 +1,7 @@
 import { BaseBoxShapeTool, type TLShape } from 'tldraw'
 
 import { BEHAVIOR_TREE_SHAPE_TYPE, BEHAVIOR_TREE_TOOL_ID, isBehaviorTreeShape } from './behaviorTreeModel'
-import { SAMPLE_BEHAVIOR_TREE_XML } from './btcppXml'
+import { isEmptyBehaviorTreeXml, SAMPLE_BEHAVIOR_TREE_XML } from './btcppXml'
 import { reconcileBehaviorTree } from './installBehaviorTreeRegions'
 
 /**
@@ -17,7 +17,7 @@ export class BehaviorTreeTool extends BaseBoxShapeTool {
 
 	override onCreate(created: TLShape | null): void {
 		if (!isBehaviorTreeShape(created)) return
-		if (created.props.xml === '') {
+		if (isEmptyBehaviorTreeXml(created.props.xml)) {
 			this.editor.updateShape({ id: created.id, type: BEHAVIOR_TREE_SHAPE_TYPE, props: { ...created.props, xml: SAMPLE_BEHAVIOR_TREE_XML, title: 'PickAndPlace' } })
 		}
 		reconcileBehaviorTree(this.editor, created.id)
