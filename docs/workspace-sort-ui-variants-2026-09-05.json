@@ -1,0 +1,526 @@
+{
+  "schemaVersion": 3,
+  "title": "SystemSketch \u2014 Workspace sort UI directions",
+  "kicker": "Babble & Prune \u00b7 file organizer",
+  "brief": "Five compact ways to change the file organizer from name ordering to newest modified first. The shared fixture is Projects with two folders and three documents, so the placement and mental model\u2014not sample content\u2014drive the choice.",
+  "count": 5,
+  "defaultId": "v1",
+  "defaultWhy": "V1 puts the exact control Zach described directly above the file-name column, keeps the current order legible, and adds no extra browsing surface.",
+  "decisionHinge": "If visible timestamps matter more than the direct above-column target, V5's metadata column can overtake V1; if future sort modes are imminent, V3 earns its added indirection.",
+  "invariants": [
+    "The same folders and three documents appear in every direction.",
+    "Folders stay grouped before documents in both sort states.",
+    "A labelled, keyboard-reachable action makes the active sort observable."
+  ],
+  "boundary": "Prototype only \u2014 these are live HTML interaction slices inside a comparison gallery. They exercise state change and layout, not the production React dialog or persisted sort preference.",
+  "axes": [
+    {
+      "name": "Control ownership",
+      "values": [
+        "file column",
+        "utility toolbar",
+        "menu",
+        "mode switch",
+        "metadata column"
+      ]
+    },
+    {
+      "name": "Mental model",
+      "values": [
+        "column ordering",
+        "quick command",
+        "choice set",
+        "browser mode",
+        "data-table scan"
+      ]
+    },
+    {
+      "name": "Information density",
+      "values": [
+        "minimal",
+        "compact",
+        "expandable",
+        "explicit modes",
+        "timestamps first"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "fr-discovery",
+      "name": "Sort target is discoverable at the file list",
+      "weight": 40,
+      "why": "The user specifically wants a click target directly above the column, so the control should be found where the ordering is read.",
+      "passCondition": "A person opening the list can identify how to switch to recently modified files without scanning unrelated dialog chrome.",
+      "anchors": {
+        "1": "The control is hidden or requires a separate conceptual step.",
+        "3": "The control is visible but not closely tied to the rows it changes.",
+        "5": "The control is immediately visible at the affected column or list edge."
+      }
+    },
+    {
+      "id": "fr-scan",
+      "name": "Recent work is quick to scan",
+      "weight": 35,
+      "why": "The feature exists so a returning user can find what they touched most recently, not merely change a preference.",
+      "passCondition": "The prototype visibly puts Gripper, then Legacy, then Arm after recent order is selected.",
+      "anchors": {
+        "1": "Recency is absent or ambiguous.",
+        "3": "Newest-first order is present but the active meaning needs interpretation.",
+        "5": "Order, direction, and relative age are all legible in one glance."
+      }
+    },
+    {
+      "id": "fr-fit",
+      "name": "The organizer stays simple and compact",
+      "weight": 25,
+      "why": "This should be a small upgrade to an existing file dialog, not a new browser workflow.",
+      "passCondition": "The shared two-pane organizer remains recognizably compact and folders remain grouped first.",
+      "anchors": {
+        "1": "The solution consumes too much dialog space or changes the organizer's role.",
+        "3": "It works but adds an avoidable new surface or explanation burden.",
+        "5": "It feels like a natural part of the existing file list with almost no extra chrome."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "g-folders",
+      "name": "Folders stay grouped first",
+      "why": "Sorting recent documents must not bury navigation folders among files."
+    },
+    {
+      "id": "g-access",
+      "name": "The primary state change is a real labelled control",
+      "why": "A visual mock alone cannot establish that the compact interaction is judgeable."
+    }
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "Column header",
+      "thesis": "A clickable Name / Last modified header owns the action directly above the file names.",
+      "accent": "#277454",
+      "bestWhen": "You want the action anchored exactly where the ordering is read, especially in a dense list.",
+      "losesWhen": "You need timestamps to be the dominant information or expect many future sorting modes.",
+      "decisions": [
+        {
+          "label": "Control owner",
+          "value": "The primary Name header is the toggle."
+        },
+        {
+          "label": "Feedback",
+          "value": "The header label and downward arrow become Last modified \u2193."
+        },
+        {
+          "label": "Placement",
+          "value": "The action remains fixed above the rows."
+        }
+      ],
+      "keepParts": [
+        "above-column target",
+        "direction arrow",
+        "one-click toggle"
+      ],
+      "proof": [
+        "The direct control changes the same shared three-document ordering from name to newest first.",
+        "The miniature holds folders above documents before and after sorting."
+      ],
+      "previewLabel": "interactive column header",
+      "story": {
+        "title": "Try the sort state",
+        "steps": [
+          {
+            "label": "Read the default",
+            "caption": "Name is the default and the header itself advertises that relationship.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Switch to recent",
+            "caption": "Last modified \u2193 is now the header and the documents move newest first.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "scores": {
+        "fr-discovery": {
+          "score": 5,
+          "evidence": "The rendered control is visible in the organizer specimen and switches its shown state in the exercised prototype.",
+          "confidence": "high"
+        },
+        "fr-scan": {
+          "score": 5,
+          "evidence": "The live toggle reorders the shared Arm, Gripper, and Legacy fixture to the same newest-first sequence.",
+          "confidence": "high"
+        },
+        "fr-fit": {
+          "score": 4,
+          "evidence": "The specimen retains the existing compact two-pane dialog and its folders-first list contract.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g-folders": {
+          "pass": true,
+          "evidence": "Concepts and Robotics remain above documents in both interactive states."
+        },
+        "g-access": {
+          "pass": true,
+          "evidence": "Each alternate state is driven by a real labelled button in the gallery."
+        }
+      },
+      "preview": "\n<style>\n  .sort-lab { min-width: 690px; min-height: 470px; padding: 42px; box-sizing: border-box; background: #f2f3f0; color: #29312e; font: 12px/1.35 Inter, ui-sans-serif, system-ui, sans-serif; }\n  .sort-window { overflow: hidden; width: 610px; border: 1px solid #c9ccc7; border-radius: 10px; background: #fff; box-shadow: 0 18px 42px rgba(24, 36, 32, .14); }\n  .sort-titlebar { display: flex; align-items: center; justify-content: space-between; height: 48px; padding: 0 17px; border-bottom: 1px solid #e5e7e3; background: #fcfcfb; font-weight: 690; }\n  .sort-titlebar small { color: #74807a; font-size: 10px; font-weight: 650; }\n  .sort-body { display: grid; grid-template-columns: 132px 1fr; min-height: 330px; }\n  .sort-places { padding: 16px 10px; border-right: 1px solid #e7e9e5; background: #fafbfa; color: #65716b; }\n  .sort-places b { display: block; margin: 0 9px 10px; color: #89928d; font-size: 9px; letter-spacing: .09em; }\n  .sort-place { margin: 3px 0; padding: 7px 9px; border-radius: 5px; }\n  .sort-place.current { background: #e8f0ed; color: #22624e; font-weight: 720; }\n  .sort-main { min-width: 0; padding: 15px 17px; }\n  .sort-crumb { margin-bottom: 16px; color: #72807a; font-size: 10px; }\n  .sort-crumb strong { color: #3e4d46; }\n  .sort-toolbar { display: flex; align-items: center; justify-content: space-between; min-height: 32px; margin-bottom: 11px; }\n  .sort-toolbar label { color: #7a847e; font-size: 10px; font-weight: 720; letter-spacing: .055em; text-transform: uppercase; }\n  .sort-button, .sort-segment { min-height: 29px; border: 1px solid #bdc5bf; border-radius: 5px; background: #fff; color: #405048; font: 680 10px/1 Inter, ui-sans-serif, system-ui, sans-serif; }\n  .sort-button { padding: 0 9px; }\n  .sort-button.active, .sort-segment.active { border-color: #6da38d; background: #e6f3ed; color: #1e6a4b; }\n  .sort-list { overflow: hidden; border: 1px solid #dce1dc; border-radius: 6px; }\n  .sort-head, .sort-row { display: grid; grid-template-columns: minmax(0, 1fr) 112px; align-items: center; min-height: 36px; padding: 0 11px; border-bottom: 1px solid #ebeeeb; }\n  .sort-head { min-height: 31px; background: #f7f8f6; color: #77817b; font-size: 9px; font-weight: 770; letter-spacing: .065em; text-transform: uppercase; }\n  .sort-head button { justify-self: start; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; }\n  .sort-head button.is-current { color: #176646; }\n  .sort-row:last-child { border-bottom: 0; }\n  .sort-file { overflow: hidden; color: #34423c; font-weight: 630; text-overflow: ellipsis; white-space: nowrap; }\n  .sort-file .icon { display: inline-block; width: 18px; color: #8b9a93; }\n  .sort-row.folder .sort-file { color: #49645a; font-weight: 710; }\n  .sort-meta { color: #87918c; font-size: 10px; text-align: left; }\n  .sort-folder-rule { padding: 8px 11px; border-bottom: 1px solid #e7ece8; background: #fbfcfb; color: #759185; font-size: 9px; font-weight: 730; letter-spacing: .055em; text-transform: uppercase; }\n  .sort-menu-wrap { position: relative; }\n  .sort-popover { position: absolute; z-index: 2; top: 34px; right: 0; width: 155px; padding: 5px; border: 1px solid #b8c6be; border-radius: 6px; background: #fff; box-shadow: 0 9px 19px rgba(20, 50, 36, .16); color: #3e4c45; font-size: 10px; }\n  .sort-popover div { padding: 7px; border-radius: 4px; }\n  .sort-popover .chosen { background: #e6f3ed; color: #1d694a; font-weight: 720; }\n  .sort-segments { display: inline-flex; padding: 2px; border: 1px solid #c9d0cb; border-radius: 6px; background: #f6f8f6; }\n  .sort-segment { min-width: 61px; border-color: transparent; background: transparent; }\n  .sort-callout { margin-top: 14px; color: #63716a; font-size: 10px; }\n  .sort-callout b { color: #28694e; }\n  .sort-alt-only { display: none; }\n  .prototype.is-alt .sort-alt-only { display: revert; }\n  .prototype.is-alt .sort-base-only { display: none !important; }\n  .prototype.is-alt .sort-popover { display: block; }\n</style>\n\n<div class=\"sort-lab\"><div class=\"sort-window\"><div class=\"sort-titlebar\"><span>Open a board</span><small>workspace</small></div><div class=\"sort-body\"><aside class=\"sort-places\"><b>PLACES</b><div class=\"sort-place current\">SystemSketch</div><div class=\"sort-place\">Home</div></aside><section class=\"sort-main\"><div class=\"sort-crumb\">SystemSketch <strong>\u203a Projects</strong></div>\n<div class=\"sort-list\"><div class=\"sort-head\"><button type=\"button\" data-demo-toggle data-base-label=\"Name \u2195\" data-alt-label=\"Last modified \u2193\" class=\"sort-base-only\">Name \u2195</button><button type=\"button\" data-demo-toggle data-base-label=\"Name \u2195\" data-alt-label=\"Last modified \u2193\" class=\"sort-alt-only is-current\">Last modified \u2193</button><span>Modified</span></div><div class=\"sort-base-only\">\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Concepts</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Robotics</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-folder-rule\">Documents</div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Arm.systemsketch</div><div class=\"sort-meta\">1 hour ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Gripper.systemsketch</div><div class=\"sort-meta\">1 min ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Legacy.systemsketch</div><div class=\"sort-meta\">10 min ago</div></div>\n</div><div class=\"sort-alt-only\">\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Concepts</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Robotics</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-folder-rule\">Documents \u00b7 newest first</div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Gripper.systemsketch</div><div class=\"sort-meta\">1 min ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Legacy.systemsketch</div><div class=\"sort-meta\">10 min ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Arm.systemsketch</div><div class=\"sort-meta\">1 hour ago</div></div>\n</div></div><div class=\"sort-callout\"><b>Column-owned action.</b> The sort target stays fixed just above the file names while the list scrolls.</div>\n</section></div></div></div>",
+      "media": [
+        {
+          "label": "What stays invariant",
+          "caption": "This is the most literal version of the requested above-column control.",
+          "html": "<div class=\"mini-shell\" style=\"min-height:106px;padding:18px;color:#425049;background:#f7f8f6\"><b style=\"display:block;margin-bottom:8px;font-size:12px\">Folders remain a stable first group</b><span style=\"color:#728078;font-size:11px\">Only document order changes: Gripper \u2192 Legacy \u2192 Arm in the recent state.</span></div>"
+        }
+      ]
+    },
+    {
+      "id": "v2",
+      "name": "Utility toolbar",
+      "thesis": "A compact \u2018Sort: \u2026\u2019 button sits beside the Files label, matching the just-shipped direction.",
+      "accent": "#5966a8",
+      "bestWhen": "One compact named control is preferable to table-like headers and the dialog needs to stay very lightweight.",
+      "losesWhen": "The strongest preference is for the sort control to belong to a specific column.",
+      "decisions": [
+        {
+          "label": "Control owner",
+          "value": "A single button in the list toolbar."
+        },
+        {
+          "label": "Feedback",
+          "value": "The button carries the current state in its label."
+        },
+        {
+          "label": "Placement",
+          "value": "The control sits above the list but outside its columns."
+        }
+      ],
+      "keepParts": [
+        "compact wording",
+        "toggle state label",
+        "toolbar placement"
+      ],
+      "proof": [
+        "The direct control changes the same shared three-document ordering from name to newest first.",
+        "The miniature holds folders above documents before and after sorting."
+      ],
+      "previewLabel": "interactive toolbar control",
+      "story": {
+        "title": "Try the sort state",
+        "steps": [
+          {
+            "label": "Read the default",
+            "caption": "The toolbar reads as a small file-list utility with Name currently active.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Switch to recent",
+            "caption": "The same button confirms Last modified while the rows become newest first.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "scores": {
+        "fr-discovery": {
+          "score": 3,
+          "evidence": "The rendered control is visible in the organizer specimen and switches its shown state in the exercised prototype.",
+          "confidence": "high"
+        },
+        "fr-scan": {
+          "score": 4,
+          "evidence": "The live toggle reorders the shared Arm, Gripper, and Legacy fixture to the same newest-first sequence.",
+          "confidence": "high"
+        },
+        "fr-fit": {
+          "score": 5,
+          "evidence": "The specimen retains the existing compact two-pane dialog and its folders-first list contract.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g-folders": {
+          "pass": true,
+          "evidence": "Concepts and Robotics remain above documents in both interactive states."
+        },
+        "g-access": {
+          "pass": true,
+          "evidence": "Each alternate state is driven by a real labelled button in the gallery."
+        }
+      },
+      "preview": "\n<div class=\"sort-lab\"><div class=\"sort-window\"><div class=\"sort-titlebar\"><span>Open a board</span><small>workspace</small></div><div class=\"sort-body\"><aside class=\"sort-places\"><b>PLACES</b><div class=\"sort-place current\">SystemSketch</div><div class=\"sort-place\">Home</div></aside><section class=\"sort-main\"><div class=\"sort-crumb\">SystemSketch <strong>\u203a Projects</strong></div>\n<div class=\"sort-toolbar\"><label>Files</label><button type=\"button\" class=\"sort-button\" data-demo-toggle data-base-label=\"Sort: Name\" data-alt-label=\"Sort: Last modified\">Sort: Name</button></div><div class=\"sort-list\"><div class=\"sort-head\"><span>Name</span><span>Modified</span></div><div class=\"sort-base-only\">\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Concepts</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Robotics</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-folder-rule\">Documents</div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Arm.systemsketch</div><div class=\"sort-meta\">1 hour ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Gripper.systemsketch</div><div class=\"sort-meta\">1 min ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Legacy.systemsketch</div><div class=\"sort-meta\">10 min ago</div></div>\n</div><div class=\"sort-alt-only\">\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Concepts</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Robotics</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-folder-rule\">Documents \u00b7 newest first</div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Gripper.systemsketch</div><div class=\"sort-meta\">1 min ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Legacy.systemsketch</div><div class=\"sort-meta\">10 min ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Arm.systemsketch</div><div class=\"sort-meta\">1 hour ago</div></div>\n</div></div><div class=\"sort-callout\"><b>Single utility control.</b> A compact verb-and-state button shares a row with the list title.</div>\n</section></div></div></div>",
+      "media": [
+        {
+          "label": "What stays invariant",
+          "caption": "This is the current production pattern, retained as a baseline rather than assumed as the winner.",
+          "html": "<div class=\"mini-shell\" style=\"min-height:106px;padding:18px;color:#425049;background:#f7f8f6\"><b style=\"display:block;margin-bottom:8px;font-size:12px\">Folders remain a stable first group</b><span style=\"color:#728078;font-size:11px\">Only document order changes: Gripper \u2192 Legacy \u2192 Arm in the recent state.</span></div>"
+        }
+      ]
+    },
+    {
+      "id": "v3",
+      "name": "Sort menu",
+      "thesis": "A Sort button opens an explicit choice set that can eventually hold more than two ordering rules.",
+      "accent": "#a56a34",
+      "bestWhen": "The organizer is likely to gain Type, Created, or manual ordering, so a scalable choice set is worth one extra click.",
+      "losesWhen": "The immediate one-click recent-files task is more important than a future settings surface.",
+      "decisions": [
+        {
+          "label": "Control owner",
+          "value": "A menu trigger above the list."
+        },
+        {
+          "label": "Feedback",
+          "value": "A visible checkmark names the selected rule."
+        },
+        {
+          "label": "Growth path",
+          "value": "Additional sort rules can join the same compact popover."
+        }
+      ],
+      "keepParts": [
+        "checked selection",
+        "future sort menu",
+        "explicit rule names"
+      ],
+      "proof": [
+        "The direct control changes the same shared three-document ordering from name to newest first.",
+        "The miniature holds folders above documents before and after sorting."
+      ],
+      "previewLabel": "interactive sort menu",
+      "story": {
+        "title": "Try the sort state",
+        "steps": [
+          {
+            "label": "Read the default",
+            "caption": "The collapsed Sort trigger saves space until someone asks for an ordering rule.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Switch to recent",
+            "caption": "The open state shows Last modified chosen and the same recent ordering.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "scores": {
+        "fr-discovery": {
+          "score": 2,
+          "evidence": "The rendered control is visible in the organizer specimen and switches its shown state in the exercised prototype.",
+          "confidence": "high"
+        },
+        "fr-scan": {
+          "score": 4,
+          "evidence": "The live toggle reorders the shared Arm, Gripper, and Legacy fixture to the same newest-first sequence.",
+          "confidence": "high"
+        },
+        "fr-fit": {
+          "score": 4,
+          "evidence": "The specimen retains the existing compact two-pane dialog and its folders-first list contract.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g-folders": {
+          "pass": true,
+          "evidence": "Concepts and Robotics remain above documents in both interactive states."
+        },
+        "g-access": {
+          "pass": true,
+          "evidence": "Each alternate state is driven by a real labelled button in the gallery."
+        }
+      },
+      "preview": "\n<div class=\"sort-lab\"><div class=\"sort-window\"><div class=\"sort-titlebar\"><span>Open a board</span><small>workspace</small></div><div class=\"sort-body\"><aside class=\"sort-places\"><b>PLACES</b><div class=\"sort-place current\">SystemSketch</div><div class=\"sort-place\">Home</div></aside><section class=\"sort-main\"><div class=\"sort-crumb\">SystemSketch <strong>\u203a Projects</strong></div>\n<div class=\"sort-toolbar\"><label>Files</label><div class=\"sort-menu-wrap\"><button type=\"button\" class=\"sort-button\" data-demo-toggle data-base-label=\"Sort \u25be\" data-alt-label=\"Sort: Last modified \u25be\">Sort \u25be</button><div class=\"sort-popover sort-alt-only\"><div>Name</div><div class=\"chosen\">\u2713 Last modified</div></div></div></div><div class=\"sort-list\"><div class=\"sort-head\"><span>Name</span><span>Modified</span></div><div class=\"sort-base-only\">\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Concepts</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Robotics</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-folder-rule\">Documents</div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Arm.systemsketch</div><div class=\"sort-meta\">1 hour ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Gripper.systemsketch</div><div class=\"sort-meta\">1 min ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Legacy.systemsketch</div><div class=\"sort-meta\">10 min ago</div></div>\n</div><div class=\"sort-alt-only\">\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Concepts</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Robotics</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-folder-rule\">Documents \u00b7 newest first</div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Gripper.systemsketch</div><div class=\"sort-meta\">1 min ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Legacy.systemsketch</div><div class=\"sort-meta\">10 min ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Arm.systemsketch</div><div class=\"sort-meta\">1 hour ago</div></div>\n</div></div><div class=\"sort-callout\"><b>Expandable choice set.</b> It can grow to include file type or manual ordering later.</div>\n</section></div></div></div>",
+      "media": [
+        {
+          "label": "What stays invariant",
+          "caption": "This is deliberately the most extensible, but least direct, direction.",
+          "html": "<div class=\"mini-shell\" style=\"min-height:106px;padding:18px;color:#425049;background:#f7f8f6\"><b style=\"display:block;margin-bottom:8px;font-size:12px\">Folders remain a stable first group</b><span style=\"color:#728078;font-size:11px\">Only document order changes: Gripper \u2192 Legacy \u2192 Arm in the recent state.</span></div>"
+        }
+      ]
+    },
+    {
+      "id": "v4",
+      "name": "Name / Recent switch",
+      "thesis": "Two always-visible browser modes make the distinction between alphabetical and recency browsing explicit.",
+      "accent": "#7c5799",
+      "bestWhen": "The user may switch back and forth often and benefits from seeing both modes without opening a menu.",
+      "losesWhen": "The dialog should not dedicate permanent width to a two-mode chooser.",
+      "decisions": [
+        {
+          "label": "Control owner",
+          "value": "A segmented switch in the list toolbar."
+        },
+        {
+          "label": "Feedback",
+          "value": "The selected mode gets a filled, persistent state."
+        },
+        {
+          "label": "Language",
+          "value": "Recent describes the browsing intention rather than file-system mechanics."
+        }
+      ],
+      "keepParts": [
+        "plain-language Recent",
+        "always-visible modes",
+        "persistent selection state"
+      ],
+      "proof": [
+        "The direct control changes the same shared three-document ordering from name to newest first.",
+        "The miniature holds folders above documents before and after sorting."
+      ],
+      "previewLabel": "interactive mode switch",
+      "story": {
+        "title": "Try the sort state",
+        "steps": [
+          {
+            "label": "Read the default",
+            "caption": "Name reads as the calm default for browsing an organized workspace.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Switch to recent",
+            "caption": "Recent gains the active treatment and its list visibly becomes newest first.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "scores": {
+        "fr-discovery": {
+          "score": 4,
+          "evidence": "The rendered control is visible in the organizer specimen and switches its shown state in the exercised prototype.",
+          "confidence": "high"
+        },
+        "fr-scan": {
+          "score": 4,
+          "evidence": "The live toggle reorders the shared Arm, Gripper, and Legacy fixture to the same newest-first sequence.",
+          "confidence": "high"
+        },
+        "fr-fit": {
+          "score": 4,
+          "evidence": "The specimen retains the existing compact two-pane dialog and its folders-first list contract.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g-folders": {
+          "pass": true,
+          "evidence": "Concepts and Robotics remain above documents in both interactive states."
+        },
+        "g-access": {
+          "pass": true,
+          "evidence": "Each alternate state is driven by a real labelled button in the gallery."
+        }
+      },
+      "preview": "\n<div class=\"sort-lab\"><div class=\"sort-window\"><div class=\"sort-titlebar\"><span>Open a board</span><small>workspace</small></div><div class=\"sort-body\"><aside class=\"sort-places\"><b>PLACES</b><div class=\"sort-place current\">SystemSketch</div><div class=\"sort-place\">Home</div></aside><section class=\"sort-main\"><div class=\"sort-crumb\">SystemSketch <strong>\u203a Projects</strong></div>\n<div class=\"sort-toolbar\"><label>Files</label><div class=\"sort-segments\"><button type=\"button\" class=\"sort-segment sort-base-only active\" data-demo-toggle data-base-label=\"Name\" data-alt-label=\"Recent\">Name</button><button type=\"button\" class=\"sort-segment sort-base-only\" data-demo-toggle data-base-label=\"Recent\" data-alt-label=\"Name\">Recent</button><button type=\"button\" class=\"sort-segment sort-alt-only\" data-demo-toggle data-base-label=\"Name\" data-alt-label=\"Recent\">Name</button><button type=\"button\" class=\"sort-segment sort-alt-only active\" data-demo-toggle data-base-label=\"Recent\" data-alt-label=\"Name\">Recent</button></div></div><div class=\"sort-list\"><div class=\"sort-head\"><span>Name</span><span>Modified</span></div><div class=\"sort-base-only\">\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Concepts</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Robotics</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-folder-rule\">Documents</div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Arm.systemsketch</div><div class=\"sort-meta\">1 hour ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Gripper.systemsketch</div><div class=\"sort-meta\">1 min ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Legacy.systemsketch</div><div class=\"sort-meta\">10 min ago</div></div>\n</div><div class=\"sort-alt-only\">\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Concepts</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Robotics</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-folder-rule\">Documents \u00b7 newest first</div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Gripper.systemsketch</div><div class=\"sort-meta\">1 min ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Legacy.systemsketch</div><div class=\"sort-meta\">10 min ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Arm.systemsketch</div><div class=\"sort-meta\">1 hour ago</div></div>\n</div></div><div class=\"sort-callout\"><b>Two visible modes.</b> Name and Recent read as a durable browsing preference, not an action menu.</div>\n</section></div></div></div>",
+      "media": [
+        {
+          "label": "What stays invariant",
+          "caption": "This favors frequent switching over the most minimal chrome.",
+          "html": "<div class=\"mini-shell\" style=\"min-height:106px;padding:18px;color:#425049;background:#f7f8f6\"><b style=\"display:block;margin-bottom:8px;font-size:12px\">Folders remain a stable first group</b><span style=\"color:#728078;font-size:11px\">Only document order changes: Gripper \u2192 Legacy \u2192 Arm in the recent state.</span></div>"
+        }
+      ]
+    },
+    {
+      "id": "v5",
+      "name": "Modified column",
+      "thesis": "A full Modified column makes timestamp age and descending order legible as table data.",
+      "accent": "#237486",
+      "bestWhen": "People need to compare dates as well as identify the newest file, and the list can afford a second column.",
+      "losesWhen": "The file dialog must stay visually quiet, especially on narrow windows.",
+      "decisions": [
+        {
+          "label": "Control owner",
+          "value": "The Modified column header is the toggle."
+        },
+        {
+          "label": "Feedback",
+          "value": "A descending arrow appears beside the metadata heading."
+        },
+        {
+          "label": "Information",
+          "value": "Relative ages stay visible alongside every filename."
+        }
+      ],
+      "keepParts": [
+        "timestamp column",
+        "direct metadata header",
+        "relative-age scan"
+      ],
+      "proof": [
+        "The direct control changes the same shared three-document ordering from name to newest first.",
+        "The miniature holds folders above documents before and after sorting."
+      ],
+      "previewLabel": "interactive metadata column",
+      "story": {
+        "title": "Try the sort state",
+        "steps": [
+          {
+            "label": "Read the default",
+            "caption": "Alphabetical file names and their relative ages coexist in a compact table-like scan.",
+            "state": "base",
+            "target": "[data-demo-toggle]"
+          },
+          {
+            "label": "Switch to recent",
+            "caption": "Modified \u2193 shows that the metadata column is now deciding the newest-first order.",
+            "state": "alt",
+            "target": "[data-demo-toggle]"
+          }
+        ]
+      },
+      "scores": {
+        "fr-discovery": {
+          "score": 5,
+          "evidence": "The rendered control is visible in the organizer specimen and switches its shown state in the exercised prototype.",
+          "confidence": "high"
+        },
+        "fr-scan": {
+          "score": 5,
+          "evidence": "The live toggle reorders the shared Arm, Gripper, and Legacy fixture to the same newest-first sequence.",
+          "confidence": "high"
+        },
+        "fr-fit": {
+          "score": 3,
+          "evidence": "The specimen retains the existing compact two-pane dialog and its folders-first list contract.",
+          "confidence": "medium"
+        }
+      },
+      "gateResults": {
+        "g-folders": {
+          "pass": true,
+          "evidence": "Concepts and Robotics remain above documents in both interactive states."
+        },
+        "g-access": {
+          "pass": true,
+          "evidence": "Each alternate state is driven by a real labelled button in the gallery."
+        }
+      },
+      "preview": "\n<div class=\"sort-lab\"><div class=\"sort-window\"><div class=\"sort-titlebar\"><span>Open a board</span><small>workspace</small></div><div class=\"sort-body\"><aside class=\"sort-places\"><b>PLACES</b><div class=\"sort-place current\">SystemSketch</div><div class=\"sort-place\">Home</div></aside><section class=\"sort-main\"><div class=\"sort-crumb\">SystemSketch <strong>\u203a Projects</strong></div>\n<div class=\"sort-list\"><div class=\"sort-head\"><span>Name</span><button type=\"button\" data-demo-toggle data-base-label=\"Modified \u2195\" data-alt-label=\"Modified \u2193\" class=\"sort-base-only\">Modified \u2195</button><button type=\"button\" data-demo-toggle data-base-label=\"Modified \u2195\" data-alt-label=\"Modified \u2193\" class=\"sort-alt-only is-current\">Modified \u2193</button></div><div class=\"sort-base-only\">\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Concepts</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Robotics</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-folder-rule\">Documents</div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Arm.systemsketch</div><div class=\"sort-meta\">1 hour ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Gripper.systemsketch</div><div class=\"sort-meta\">1 min ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Legacy.systemsketch</div><div class=\"sort-meta\">10 min ago</div></div>\n</div><div class=\"sort-alt-only\">\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Concepts</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-row folder\"><div class=\"sort-file\"><span class=\"icon\">\u25b8</span>Robotics</div><div class=\"sort-meta\">folder</div></div>\n<div class=\"sort-folder-rule\">Documents \u00b7 newest first</div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Gripper.systemsketch</div><div class=\"sort-meta\">1 min ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Legacy.systemsketch</div><div class=\"sort-meta\">10 min ago</div></div>\n<div class=\"sort-row\"><div class=\"sort-file\"><span class=\"icon\">\u25a4</span>Arm.systemsketch</div><div class=\"sort-meta\">1 hour ago</div></div>\n</div></div><div class=\"sort-callout\"><b>Metadata-led scanning.</b> A dedicated Modified column makes both order and age readable at once.</div>\n</section></div></div></div>",
+      "media": [
+        {
+          "label": "What stays invariant",
+          "caption": "This is the strongest scanning aid, at the cost of more persistent visual structure.",
+          "html": "<div class=\"mini-shell\" style=\"min-height:106px;padding:18px;color:#425049;background:#f7f8f6\"><b style=\"display:block;margin-bottom:8px;font-size:12px\">Folders remain a stable first group</b><span style=\"color:#728078;font-size:11px\">Only document order changes: Gripper \u2192 Legacy \u2192 Arm in the recent state.</span></div>"
+        }
+      ]
+    }
+  ],
+  "checks": [
+    "Exactly five directions share the Arm / Gripper / Legacy fixture.",
+    "Every hero has a direct toggle and synchronized two-step walkthrough.",
+    "Every state keeps folders first and documents become Gripper, Legacy, Arm when recent is active.",
+    "The recommendation appears only after the unranked variant atlas."
+  ]
+}
