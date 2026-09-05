@@ -107,6 +107,9 @@ async function inspectorProof() {
     await key(app.page, 'Enter', 'Enter')
     await waitFor(app.page, `document.querySelector('${PANEL}')`, 'real inspector')
     await clickElement(app.page, ADD_INPUT)
+    // Signature metadata is deliberately tucked behind the inspector's rare
+    // per-port state control, so ordinary Blocks keep their authoring row lean.
+    await clickElement(app.page, `${PANEL} [data-testid="inspector-port-state-toggle-inputs"]`)
     await waitFor(app.page, `document.querySelector('${PANEL} [data-testid^="inspector-variadic-"]')`, 'ordinary port V5 disclosure')
     const disclosure = `${PANEL} [data-testid^="inspector-variadic-"]`
     await clickElement(app.page, `${disclosure} summary`)

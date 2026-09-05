@@ -8,18 +8,26 @@ import {
 } from './appearancePreferences'
 
 describe('appearance preferences', () => {
-  it('hides the zoom step buttons by default', () => {
+  it('hides the zoom step buttons by default, and punctuates the Inputs row by default', () => {
     expect(DEFAULT_APPEARANCE_PREFERENCES.showZoomButtons).toBe(false)
+    expect(DEFAULT_APPEARANCE_PREFERENCES.punctuatedPortRow).toBe(true)
     expect(parseStoredAppearancePreferences(null)).toBe(DEFAULT_APPEARANCE_PREFERENCES)
   })
 
   it('accepts only the current version with a boolean zoom preference', () => {
+    expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: true, punctuatedPortRow: false }))
+      .toEqual({ showZoomButtons: true, punctuatedPortRow: false })
+    expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: 'yes', punctuatedPortRow: true }))
+      .toBe(DEFAULT_APPEARANCE_PREFERENCES)
+    expect(parseStoredAppearancePreferences({ version: 2, showZoomButtons: true, punctuatedPortRow: true }))
+      .toBe(DEFAULT_APPEARANCE_PREFERENCES)
+  })
+
+  it('defaults a field a stored record predates, rather than discarding the whole record', () => {
+    // Simulates localStorage written before punctuatedPortRow existed: the
+    // zoom preference a user already set must survive, not silently reset.
     expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: true }))
-      .toEqual({ showZoomButtons: true })
-    expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: 'yes' }))
-      .toBe(DEFAULT_APPEARANCE_PREFERENCES)
-    expect(parseStoredAppearancePreferences({ version: 2, showZoomButtons: true }))
-      .toBe(DEFAULT_APPEARANCE_PREFERENCES)
+      .toEqual({ showZoomButtons: true, punctuatedPortRow: true })
   })
 
   it('persists under the app-level appearance key', () => {
@@ -29,10 +37,11 @@ describe('appearance preferences', () => {
       setItem: (key: string, value: string) => { values.set(key, value) },
     }
 
-    writeAppearancePreferences({ showZoomButtons: true }, storage)
+    writeAppearancePreferences({ showZoomButtons: true, punctuatedPortRow: false }, storage)
     expect(values.get(APPEARANCE_PREFERENCES_STORAGE_KEY))
-      .toBe('{"version":1,"showZoomButtons":true}')
-    expect(readAppearancePreferences(storage)).toEqual({ showZoomButtons: true })
+      .toBe('{"version":1,"showZoomButtons":true,"punctuatedPortRow":false}')
+    expect(readAppearancePreferences(storage))
+      .toEqual({ showZoomButtons: true, punctuatedPortRow: false })
   })
 
   it('falls back safely when storage is unavailable or malformed', () => {

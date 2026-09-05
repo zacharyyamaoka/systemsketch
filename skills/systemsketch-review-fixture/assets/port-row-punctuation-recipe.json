@@ -1,0 +1,66 @@
+{
+  "feature": "Inputs row code-style punctuation",
+  "viewport": { "width": 1280, "height": 1110 },
+  "shapes": [
+    {
+      "id": "subject",
+      "type": "block",
+      "x": 700,
+      "y": 580,
+      "props": {
+        "title": "transform",
+        "description": "Review target for the Inputs row punctuation toggle",
+        "blockType": "Function",
+        "view": "port",
+        "w": 340,
+        "h": 220,
+        "inputs": [
+          { "id": "in_1", "name": "count", "type": "int", "defaultValue": "0", "visible": true },
+          { "id": "in_2", "name": "image", "type": "Tensor", "visible": true },
+          { "id": "in_3", "name": "", "type": "", "visible": true }
+        ],
+        "outputs": []
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Select this Block. Its Inputs panel reads 'count : int = 0' — monospace, muted ':' and '='. The new default.",
+      "x": 220,
+      "y": 620,
+      "w": 380,
+      "h": 140,
+      "target": { "shapeId": "subject", "anchor": "left", "dy": 30 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · ≡ menu → Settings → Appearance → 'Inputs row style'. Toggle 'Code-style Inputs row' OFF — today's plain row: no punctuation, Name in the sans-serif font.",
+      "x": 220,
+      "y": 400,
+      "w": 400,
+      "h": 170
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Toggle it back ON. The row returns to name: type = default. Port values are untouched either way.",
+      "x": 680,
+      "y": 400,
+      "w": 400,
+      "h": 170
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · the row reads name: type = default by default, the toggle switches it to the plain row and back, and port values never change.",
+      "x": 400,
+      "y": 885,
+      "w": 480,
+      "h": 150
+    }
+  ]
+}
