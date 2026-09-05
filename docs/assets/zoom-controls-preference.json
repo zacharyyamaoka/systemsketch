@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-09-05T07:32:10.393Z",
+  "ranAt": "2026-09-05T15:27:39.860Z",
   "checks": [
     {
       "label": "−/+ zoom buttons are hidden by default",
@@ -14,7 +14,7 @@
       "ok": true
     },
     {
-      "label": "Appearance opens with Show zoom −/+ buttons unchecked",
+      "label": "Canvas opens with Show zoom −/+ buttons unchecked",
       "ok": true
     },
     {
@@ -34,7 +34,7 @@
       "ok": true
     },
     {
-      "label": "Appearance reflects the stored enabled state",
+      "label": "Canvas reflects the stored enabled state",
       "ok": true
     },
     {

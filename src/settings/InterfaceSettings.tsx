@@ -63,7 +63,7 @@ function CategoryIcon({ children }: { children: ReactNode }) {
   )
 }
 
-type SettingsCategoryId = 'general' | 'appearance' | 'interface' | 'shortcuts' | 'about'
+type SettingsCategoryId = 'general' | 'canvas' | 'appearance' | 'interface' | 'shortcuts' | 'about'
 
 const SETTINGS_CATEGORIES: readonly { id: SettingsCategoryId; label: string; icon: ReactNode }[] = [
   {
@@ -75,6 +75,11 @@ const SETTINGS_CATEGORIES: readonly { id: SettingsCategoryId; label: string; ico
     id: 'appearance',
     label: 'Appearance',
     icon: <CategoryIcon><circle cx="10" cy="10" r="6.5" /><path d="M10 3.5a6.5 6.5 0 0 0 0 13Z" /></CategoryIcon>,
+  },
+  {
+    id: 'canvas',
+    label: 'Canvas',
+    icon: <CategoryIcon><circle cx="10" cy="10" r="5.8" /><path d="M10 1.8v3M10 15.2v3M1.8 10h3M15.2 10h3" /></CategoryIcon>,
   },
   {
     id: 'interface',
@@ -93,7 +98,7 @@ const SETTINGS_CATEGORIES: readonly { id: SettingsCategoryId; label: string; ico
   },
 ]
 
-const OPEN_CATEGORIES: readonly SettingsCategoryId[] = ['appearance', 'interface']
+const OPEN_CATEGORIES: readonly SettingsCategoryId[] = ['appearance', 'canvas', 'interface']
 
 /** The category the dialog opens on; a caller may ask for another. */
 export interface SystemSketchSettingsDialogProps extends TLUiDialogProps {
@@ -140,7 +145,11 @@ export function SystemSketchSettingsDialog({ category: initial }: SystemSketchSe
             )
           })}
         </nav>
-        {category === 'appearance' ? <AppearancePanel /> : <InterfacePanel />}
+        {category === 'appearance'
+          ? <AppearancePanel />
+          : category === 'canvas'
+            ? <CanvasPanel />
+            : <InterfacePanel />}
       </TldrawUiDialogBody>
     </div>
   )
@@ -209,6 +218,104 @@ function InterfacePanel() {
   )
 }
 
+function CanvasPanel() {
+  const {
+    showZoomButtons,
+    scrollDownZoomsIn,
+    wheelZoomSensitivityPercent,
+  } = useAppearancePreferences()
+
+  return (
+    <section className="systemsketch-settings__panel" aria-labelledby="canvas-navigation-title">
+      <div className="systemsketch-settings__eyebrow">Canvas</div>
+      <div className="systemsketch-settings__intro">
+        <div>
+          <h2 id="canvas-navigation-title">Canvas navigation</h2>
+          <p>Choose how the canvas responds to a wheel and how its zoom controls appear.</p>
+        </div>
+      </div>
+
+      <section className="systemsketch-settings__appearance-section" aria-labelledby="wheel-zoom-title">
+        <div className="systemsketch-settings__appearance-heading">
+          <h3 id="wheel-zoom-title">Wheel zoom</h3>
+          <p>Choose which direction moves closer and how much each scroll step changes scale.</p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          className="systemsketch-settings__toggle-row"
+          aria-checked={scrollDownZoomsIn}
+          data-testid="systemsketch-scroll-down-zooms-in"
+          onClick={() => updateAppearancePreferences({ scrollDownZoomsIn: !scrollDownZoomsIn })}
+        >
+          <span>
+            <strong>Scroll down to zoom in</strong>
+            <small>Turn this off if you prefer scrolling up to zoom in.</small>
+          </span>
+          <i aria-hidden="true"><span /></i>
+        </button>
+        <div className="systemsketch-settings__sensitivity" data-testid="systemsketch-wheel-zoom-sensitivity-control">
+          <div className="systemsketch-settings__sensitivity-heading">
+            <label htmlFor="systemsketch-wheel-zoom-sensitivity">
+              <strong>Wheel zoom sensitivity</strong>
+              <small>100% matches the standard feel. The −/+ buttons keep their normal steps.</small>
+            </label>
+            <output htmlFor="systemsketch-wheel-zoom-sensitivity">{wheelZoomSensitivityPercent}%</output>
+          </div>
+          <div className="systemsketch-settings__sensitivity-slider">
+            <span>Slower</span>
+            <input
+              id="systemsketch-wheel-zoom-sensitivity"
+              data-testid="systemsketch-wheel-zoom-sensitivity"
+              type="range"
+              min={MIN_WHEEL_ZOOM_SENSITIVITY_PERCENT}
+              max={MAX_WHEEL_ZOOM_SENSITIVITY_PERCENT}
+              step={WHEEL_ZOOM_SENSITIVITY_STEP}
+              value={wheelZoomSensitivityPercent}
+              aria-valuetext={`${wheelZoomSensitivityPercent}% of standard wheel zoom`}
+              onChange={(event) => updateAppearancePreferences({
+                wheelZoomSensitivityPercent: Number(event.currentTarget.value),
+              })}
+            />
+            <span>Faster</span>
+          </div>
+          <button
+            type="button"
+            className="systemsketch-settings__sensitivity-reset"
+            disabled={wheelZoomSensitivityPercent === DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT}
+            onClick={() => updateAppearancePreferences({
+              wheelZoomSensitivityPercent: DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT,
+            })}
+          >
+            Reset to standard
+          </button>
+        </div>
+      </section>
+
+      <section className="systemsketch-settings__appearance-section" aria-labelledby="zoom-controls-title">
+        <div className="systemsketch-settings__appearance-heading">
+          <h3 id="zoom-controls-title">Zoom controls</h3>
+          <p>Choose how compact the bottom-right navigation strip should be.</p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          className="systemsketch-settings__toggle-row"
+          aria-checked={showZoomButtons}
+          data-testid="systemsketch-show-zoom-buttons"
+          onClick={() => updateAppearancePreferences({ showZoomButtons: !showZoomButtons })}
+        >
+          <span>
+            <strong>Show zoom −/+ buttons</strong>
+            <small>The zoom percentage remains available when these step buttons are hidden.</small>
+          </span>
+          <i aria-hidden="true"><span /></i>
+        </button>
+      </section>
+    </section>
+  )
+}
+
 /**
  * A miniature of the theme: its canvas, a panel on it, a line of text and the
  * accent. Painted from the palette's own values — those are data, not chrome,
@@ -251,9 +358,6 @@ function AppearancePanel() {
   const choice = useThemeChoice()
   const imported = useImportedPalettes()
   const {
-    showZoomButtons,
-    scrollDownZoomsIn,
-    wheelZoomSensitivityPercent,
     punctuatedPortRow,
   } = useAppearancePreferences()
   const options = themeOptions(BUILT_IN_PALETTES, imported)
@@ -406,84 +510,6 @@ function AppearancePanel() {
           {importMessage.text}
         </p>
       ) : null}
-
-      <section className="systemsketch-settings__appearance-section" aria-labelledby="wheel-zoom-title">
-        <div className="systemsketch-settings__appearance-heading">
-          <h3 id="wheel-zoom-title">Wheel zoom</h3>
-          <p>Choose which direction moves closer and how much each scroll step changes scale.</p>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          className="systemsketch-settings__toggle-row"
-          aria-checked={scrollDownZoomsIn}
-          data-testid="systemsketch-scroll-down-zooms-in"
-          onClick={() => updateAppearancePreferences({ scrollDownZoomsIn: !scrollDownZoomsIn })}
-        >
-          <span>
-            <strong>Scroll down to zoom in</strong>
-            <small>Turn this off if you prefer scrolling up to zoom in.</small>
-          </span>
-          <i aria-hidden="true"><span /></i>
-        </button>
-        <div className="systemsketch-settings__sensitivity" data-testid="systemsketch-wheel-zoom-sensitivity-control">
-          <div className="systemsketch-settings__sensitivity-heading">
-            <label htmlFor="systemsketch-wheel-zoom-sensitivity">
-              <strong>Wheel zoom sensitivity</strong>
-              <small>100% matches the standard feel. The −/+ buttons keep their normal steps.</small>
-            </label>
-            <output htmlFor="systemsketch-wheel-zoom-sensitivity">{wheelZoomSensitivityPercent}%</output>
-          </div>
-          <div className="systemsketch-settings__sensitivity-slider">
-            <span>Slower</span>
-            <input
-              id="systemsketch-wheel-zoom-sensitivity"
-              data-testid="systemsketch-wheel-zoom-sensitivity"
-              type="range"
-              min={MIN_WHEEL_ZOOM_SENSITIVITY_PERCENT}
-              max={MAX_WHEEL_ZOOM_SENSITIVITY_PERCENT}
-              step={WHEEL_ZOOM_SENSITIVITY_STEP}
-              value={wheelZoomSensitivityPercent}
-              aria-valuetext={`${wheelZoomSensitivityPercent}% of standard wheel zoom`}
-              onChange={(event) => updateAppearancePreferences({
-                wheelZoomSensitivityPercent: Number(event.currentTarget.value),
-              })}
-            />
-            <span>Faster</span>
-          </div>
-          <button
-            type="button"
-            className="systemsketch-settings__sensitivity-reset"
-            disabled={wheelZoomSensitivityPercent === DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT}
-            onClick={() => updateAppearancePreferences({
-              wheelZoomSensitivityPercent: DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT,
-            })}
-          >
-            Reset to standard
-          </button>
-        </div>
-      </section>
-
-      <section className="systemsketch-settings__appearance-section" aria-labelledby="zoom-controls-title">
-        <div className="systemsketch-settings__appearance-heading">
-          <h3 id="zoom-controls-title">Zoom controls</h3>
-          <p>Choose how compact the bottom-right navigation strip should be.</p>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          className="systemsketch-settings__toggle-row"
-          aria-checked={showZoomButtons}
-          data-testid="systemsketch-show-zoom-buttons"
-          onClick={() => updateAppearancePreferences({ showZoomButtons: !showZoomButtons })}
-        >
-          <span>
-            <strong>Show zoom −/+ buttons</strong>
-            <small>The zoom percentage remains available when these step buttons are hidden.</small>
-          </span>
-          <i aria-hidden="true"><span /></i>
-        </button>
-      </section>
 
       <section className="systemsketch-settings__appearance-section" aria-labelledby="port-row-punctuation-title">
         <div className="systemsketch-settings__appearance-heading">

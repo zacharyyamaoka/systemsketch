@@ -96,7 +96,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3aSP",
+      "index": "a3siiV",
       "typeName": "shape"
     },
     {
@@ -149,7 +149,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a2Zze",
+      "index": "a2hin",
       "typeName": "shape"
     },
     {
@@ -194,7 +194,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4QIv",
+      "index": "a4WNU",
       "typeName": "shape"
     },
     {
@@ -239,7 +239,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a314E",
+      "index": "a35II",
       "typeName": "shape"
     },
     {
@@ -300,14 +300,6 @@
       "typeName": "instance_page_state"
     },
     {
-      "name": "",
-      "color": "#7B66DC",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:vPpoGI-4PnoWUj53TMcFU",
-      "typeName": "user"
-    },
-    {
       "meta": {},
       "id": "binding:cue-step-1-arrow-start",
       "type": "arrow",
@@ -344,6 +336,14 @@
       "typeName": "binding"
     },
     {
+      "name": "",
+      "color": "#F2555A",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:XRm28aKef2_fL2CNV1mau",
+      "typeName": "user"
+    },
+    {
       "x": 500,
       "y": 250,
       "rotation": 0,
@@ -355,7 +355,7 @@
       "props": {
         "w": 340,
         "h": 198,
-        "title": "wheel_target()",
+        "title": "wheel()",
         "description": "Keep the pointer here while testing board scale",
         "blockType": "Function",
         "icon": "",
@@ -382,7 +382,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "X6HFOLlRNvTff05YQcC-b",
+        "definitionId": "bp73XH2nJnaTc6MREHNO2",
         "inputs": [
           {
             "id": "in_1",
@@ -399,10 +399,10 @@
             "visible": true
           }
         ],
-        "definitionKey": "wheel_target"
+        "definitionKey": "wheel"
       },
       "parentId": "page:page",
-      "index": "a1G5E",
+      "index": "a12hM",
       "typeName": "shape"
     },
     {
@@ -439,7 +439,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "OPTION · Settings → Appearance → Wheel zoom: tune 50–150% or Reset to standard"
+                  "text": "OPTION · Settings → Canvas → Wheel zoom: tune 50–150% or Reset to standard"
                 }
               ]
             }
@@ -447,7 +447,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5l4z",
+      "index": "a5oUF",
       "typeName": "shape"
     },
     {
@@ -554,7 +554,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a2yXMV",
+      "index": "a2xmuG",
       "typeName": "shape"
     }
   ]
