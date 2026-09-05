@@ -2,6 +2,20 @@
 
 ## 0.1.0
 
+- Picked up where the 2026-09-03 UI/UX hardening pass left off. The Comments panel's empty state
+  now shares the app's boxed-glyph pattern instead of a bespoke ◌ that read as a stuck spinner, and
+  its aria-live is scoped per thread instead of the whole list. Compare changes shows one calm
+  message instead of four contradictory ones when there's no history to compare against. The Help
+  panel's keyboard-shortcut hint was flatly wrong (Ctrl+Shift+? instead of Ctrl+Alt+/) and its intro
+  promised guidance it didn't hold. The Diagnostics severity filter is now a real radiogroup with
+  arrow-key navigation, matching the pattern already used elsewhere. Escape inside the shape
+  library's search now clears the filter before closing the panel — the fix needed a second pass
+  after the first one changed nothing on screen, because the toolbar's Library trigger hosts the
+  search inside a stock Radix popover whose own dismiss-on-Escape listener runs entirely outside the
+  app's event handling. Organize Nodes now shows a busy state while its async layout pass runs, and
+  Tidy Edges / Organize Nodes toasts report a real limitation at `warning` severity instead of the
+  same neutral tone as routine confirmation. The global Ctrl+P/K/F capture now ignores key-repeat,
+  the recorder's blink animation respects reduced motion, and a disabled Replace match explains why.
 - Made host plugins a best-effort follow-up to Preview → Stable. Promotion publishes the verified
   standalone app first, then builds one VSIX shared by VS Code/Cursor plus the guarded Obsidian
   bundle. A host failure cannot interrupt or roll back Stable; successful artifacts are checksummed

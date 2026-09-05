@@ -912,6 +912,11 @@
   outline-offset: -2px;
 }
 
+.systemsketch-selection-layout-action:disabled {
+  cursor: default;
+  opacity: .45;
+}
+
 .systemsketch-selection-layout-action svg {
   width: 18px;
   height: 18px;

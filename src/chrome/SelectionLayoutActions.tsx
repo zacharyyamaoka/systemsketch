@@ -44,6 +44,8 @@ function OrganizeNodesIcon() {
 }
 
 export interface SelectionLayoutActionsProps extends SelectionLayoutActionAvailability {
+  /** The elk layout pass is async; true while one is in flight. */
+  organizeNodesBusy?: boolean
   onTidyEdges(): void
   onOrganizeNodes(): void
 }
@@ -52,6 +54,7 @@ export interface SelectionLayoutActionsProps extends SelectionLayoutActionAvaila
 export function SelectionLayoutActions({
   tidyEdges,
   organizeNodes,
+  organizeNodesBusy = false,
   onTidyEdges,
   onOrganizeNodes,
 }: SelectionLayoutActionsProps) {
@@ -75,9 +78,12 @@ export function SelectionLayoutActions({
         <button
           type="button"
           className="systemsketch-selection-layout-action"
-          title="Organize nodes"
-          aria-label="Organize nodes"
+          title={organizeNodesBusy ? 'Organizing…' : 'Organize nodes'}
+          aria-label={organizeNodesBusy ? 'Organizing…' : 'Organize nodes'}
+          aria-busy={organizeNodesBusy}
+          disabled={organizeNodesBusy}
           data-testid="selection-action-organize-nodes"
+          data-busy={organizeNodesBusy || undefined}
           onClick={onOrganizeNodes}
         >
           <OrganizeNodesIcon />

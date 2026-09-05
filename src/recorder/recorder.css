@@ -261,6 +261,10 @@
   50% { opacity: .25; }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .systemsketch-recorder-indicator i { animation: none; }
+}
+
 .systemsketch-recorder-indicator button {
   min-height: 30px;
   padding: 3px 11px;
