@@ -18,7 +18,7 @@ import {
 } from 'tldraw'
 
 import { BLOCK_SHAPE_TYPE, isBlockShape, type BlockShape } from '../blocks'
-import { createOrUpdateConnectionBinding } from '../blocks/connections/ConnectionBindingUtil'
+import { createOrUpdateConnectionBinding, getConnectionBindings } from '../blocks/connections/ConnectionBindingUtil'
 import { CONNECTION_SHAPE_TYPE } from '../blocks/connections/connectionModel'
 import {
 	BEHAVIOR_TREE_SHAPE_TYPE,
@@ -39,6 +39,25 @@ const projecting = new WeakMap<Editor, number>()
 
 function isProjecting(editor: Editor): boolean {
 	return (projecting.get(editor) ?? 0) > 0
+}
+
+/**
+ * Run `body` with this installer deaf to the store.
+ *
+ * WHY: dismantling a region is not a gesture *on* a region. Detach deletes the
+ * projected children on purpose, and the after-delete handler below reads a
+ * deleted node as "the person removed this occurrence" — it would compile an
+ * XML delete per child and then repair the region back into existence around
+ * the primitives that just replaced it. The same counter the projection itself
+ * uses is the honest way to say "these writes are mine".
+ */
+export function withoutBehaviorTreeRepair<T>(editor: Editor, body: () => T): T {
+	projecting.set(editor, (projecting.get(editor) ?? 0) + 1)
+	try {
+		return body()
+	} finally {
+		projecting.set(editor, (projecting.get(editor) ?? 1) - 1)
+	}
 }
 
 export interface BtRepairReport {
@@ -101,6 +120,14 @@ export function reconcileBehaviorTree(editor: Editor, regionId: TLShapeId): BtRe
 					const wanted = desiredRecordProps(child, current)
 					if (Math.abs(current.x - child.x) > 0.01 || Math.abs(current.y - child.y) > 0.01 || !sameProps(current.props as Record<string, unknown>, wanted)) {
 						editor.updateShape({ id: current.id, type: current.type, x: child.x, y: child.y, props: wanted } as never)
+						report.updated += 1
+					}
+					// A copied child arrives naming the region it was copied from.
+					// Containment already decided it belongs here; make the stamp
+					// agree so nothing downstream — a later delete above all — reads
+					// the stale name and edits the wrong tree's XML.
+					if (current.meta[BT_META_REGION] !== region.id) {
+						editor.updateShape({ id: current.id, type: current.type, meta: btChildMeta(region.id, child.path, child.role) } as never)
 						report.updated += 1
 					}
 					continue
@@ -169,11 +196,69 @@ export function reconcileBehaviorTree(editor: Editor, regionId: TLShapeId): BtRe
 	return report
 }
 
+/** The Behavior Tree region a shape sits inside, if any. */
+export function behaviorTreeRegionAncestor(editor: Editor, shape: TLShape): BehaviorTreeShape | null {
+	let parent = editor.getShape(shape.parentId as TLShapeId)
+	while (parent) {
+		if (isBehaviorTreeShape(parent)) return parent
+		parent = editor.getShape(parent.parentId as TLShapeId)
+	}
+	return null
+}
+
+/**
+ * The region a projected child belongs to.
+ *
+ * WHY: containment decides, not the id stamped in `meta`. tldraw re-mints
+ * every shape id on duplicate and paste but copies `meta` verbatim, so a
+ * copied child still names the ORIGINAL region — and every rule that trusted
+ * that name then acted on the original: it reparented the copy into it,
+ * recorded the paste distance as one of the original's free offsets (which is
+ * why the original's layout scrambled and Tidy, which clears offsets, "fixed"
+ * it), and deleted the original's own children as duplicate strays. A child's
+ * parent is the one fact copy and paste get right. The stored id survives only
+ * as the fallback for the case containment cannot answer — a child dragged
+ * clean out of every region, which the drag rule below then pulls back.
+ *
+ * The stamp is kept and repaired rather than deleted, and that redundancy is
+ * deliberate — see docs/peps/0004-projected-child-ownership-by-containment.md
+ */
+export function behaviorTreeRegionFor(editor: Editor, shape: TLShape): BehaviorTreeShape | null {
+	const meta = readBtChildMeta(shape)
+	if (!meta) return null
+	if (meta.btRole === 'cable') return cableRegion(editor, shape)
+	const ancestor = behaviorTreeRegionAncestor(editor, shape)
+	if (ancestor) return ancestor
+	const stored = meta[BT_META_REGION]
+	const region = isShapeId(stored) ? editor.getShape(stored as TLShapeId) : undefined
+	return isBehaviorTreeShape(region) ? region : null
+}
+
+/**
+ * A cable is parented into the scope its two Blocks share — the page, not the
+ * region — so containment cannot answer for it. Its bound Blocks can: they are
+ * the occurrences it was projected between, and paste rebinds a copied cable
+ * to the copied Blocks.
+ */
+function cableRegion(editor: Editor, cable: TLShape): BehaviorTreeShape | null {
+	const bindings = getConnectionBindings(editor, cable.id)
+	for (const binding of [bindings.start, bindings.end]) {
+		const bound = binding ? editor.getShape(binding.toId) : undefined
+		if (!bound) continue
+		const region = behaviorTreeRegionAncestor(editor, bound)
+		if (region) return region
+	}
+	const stored = readBtChildMeta(cable)?.[BT_META_REGION]
+	const region = isShapeId(stored) ? editor.getShape(stored as TLShapeId) : undefined
+	return isBehaviorTreeShape(region) ? region : null
+}
+
 /** Every Dataflow cable this region projected, wherever the connection layer parented it. */
 export function regionCables(editor: Editor, regionId: TLShapeId): TLShape[] {
 	return editor.getCurrentPageShapes().filter((shape) => {
 		const meta = readBtChildMeta(shape)
-		return meta !== null && meta.btRole === 'cable' && meta[BT_META_REGION] === regionId
+		if (meta === null || meta.btRole !== 'cable') return false
+		return cableRegion(editor, shape)?.id === regionId
 	})
 }
 
@@ -208,13 +293,19 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 	}
 	const regionIdFor = (shape: TLShape): TLShapeId | null => {
 		if (isBehaviorTreeShape(shape)) return shape.id
-		const meta = readBtChildMeta(shape)
-		if (meta && isShapeId(meta[BT_META_REGION])) return meta[BT_META_REGION] as TLShapeId
-		return null
+		return behaviorTreeRegionFor(editor, shape)?.id ?? null
 	}
+
+	// WHY: a shape that has just been created is not a shape someone is
+	// dragging. Duplicate and paste land a whole projection at an offset, and
+	// the position handlers below would read each arrival as a free drag —
+	// writing the paste distance into a region's `offsets`. One operation's
+	// arrivals are remembered until the repair that follows it.
+	const arrived = new Set<TLShapeId>()
 
 	const stopCreate = editor.sideEffects.registerAfterCreateHandler('shape', (shape, source) => {
 		if (isProjecting(editor)) return
+		arrived.add(shape.id)
 		const id = regionIdFor(shape)
 		if (id) queue(id, source === 'remote' ? 'remote' : 'user')
 	})
@@ -230,20 +321,21 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 		}
 		const meta = readBtChildMeta(after)
 		if (!meta) return
-		const regionId = meta[BT_META_REGION] as TLShapeId
-		const region = editor.getShape(regionId)
+		const region = behaviorTreeRegionFor(editor, after)
 		if (!isBehaviorTreeShape(region)) return
+		const regionId = region.id
 		if (meta.btRole === 'cable') return
 		// A child dragged out of its region comes straight back: the region owns it.
-		if (after.parentId !== region.id) {
+		if (after.parentId !== regionId) {
 			queue(regionId, repairSource)
-			editor.reparentShapes([after.id], region.id)
+			editor.reparentShapes([after.id], regionId)
 			return
 		}
-		if (meta.btRole === 'node' && (before.x !== after.x || before.y !== after.y)) {
+		const dragged = !arrived.has(after.id)
+		if (dragged && meta.btRole === 'node' && (before.x !== after.x || before.y !== after.y)) {
 			recordOffset(editor, region, meta[BT_META_PATH], after)
 		}
-		if (meta.btRole === 'node' && isBlockShape(after) && isBlockShape(before) && source !== 'remote') {
+		if (dragged && meta.btRole === 'node' && isBlockShape(after) && isBlockShape(before) && source !== 'remote') {
 			compileBlockEdit(editor, region, meta[BT_META_PATH], before, after)
 		}
 		queue(regionId, repairSource)
@@ -259,9 +351,9 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 		}
 		const meta = readBtChildMeta(shape)
 		if (!meta || meta.btRole !== 'node') return
-		const regionId = meta[BT_META_REGION] as TLShapeId
-		const region = editor.getShape(regionId)
+		const region = behaviorTreeRegionFor(editor, shape)
 		if (!isBehaviorTreeShape(region)) return
+		const regionId = region.id
 		// Delete on a projected node is a semantic delete of that occurrence.
 		const result = deleteBehaviorTreeNode(region.props.xml, region.props.treeId, meta[BT_META_PATH])
 		if (result.ok) {
@@ -273,6 +365,7 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 
 	const repairPending = () => {
 		repairQueued = false
+		arrived.clear()
 		if (disposed) return
 		let pass = 0
 		while (pending.size > 0 && pass < 3) {
@@ -295,6 +388,7 @@ export function installBehaviorTreeRegions(editor: Editor): () => void {
 	}
 	const stopComplete = editor.sideEffects.registerOperationCompleteHandler(() => {
 		if (pending.size > 0) scheduleRepair()
+		else arrived.clear()
 	})
 
 	editor.store.mergeRemoteChanges(() => {

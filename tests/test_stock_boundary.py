@@ -203,6 +203,13 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("LoopShapeUtil", portable_export)
         self.assertIn("detachLoopToPrimitives", portable_export)
         self.assertIn("isLoopShape", portable_export)
+        # A Behavior Tree region is a custom record too, and its projected
+        # children are custom records the export store must be able to load
+        # before it can lower them. Same shared-lowering rule as Branch/Loop.
+        self.assertIn("BehaviorTreeShapeUtil", portable_export)
+        self.assertIn("BtControlShapeUtil", portable_export)
+        self.assertIn("detachBehaviorTreeToPrimitives", portable_export)
+        self.assertIn("isBehaviorTreeShape", portable_export)
         self.assertIn("SYSTEMSKETCH_ROUNDED_RECT_GEO", portable_export)
         self.assertIn("portableValuePillText", portable_export)
         self.assertIn("freezeDetachedValuePill", portable_export)

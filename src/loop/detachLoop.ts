@@ -16,7 +16,7 @@ import {
 	type TLShapePartial,
 } from 'tldraw'
 
-import { DETACH_FORMAT_VERSION } from '../blocks/detach/detachModel'
+import { DETACH_FORMAT_VERSION, toJsonSafe } from '../blocks/detach/detachModel'
 import { portTldrawColor } from '../blocks/ui/portPalette'
 import { loopLayout, isLoopShape, type LoopShape } from './loopModel'
 import {
@@ -213,7 +213,9 @@ export function detachLoopToPrimitives(
 			systemSketch: {
 				kind: 'loop',
 				version: DETACH_FORMAT_VERSION,
-				props: structuredClone(loop.props),
+				// WHY: `meta` is `T.jsonValue`; a present-but-undefined optional
+				// prop is legal in `props` and fatal here. See `toJsonSafe`.
+				props: toJsonSafe(structuredClone(loop.props)),
 			},
 		},
 	})
