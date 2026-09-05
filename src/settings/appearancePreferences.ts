@@ -1,9 +1,20 @@
 import { useSyncExternalStore } from 'react'
 
 export const APPEARANCE_PREFERENCES_STORAGE_KEY = 'systemsketch.appearance.v1'
+export const DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT = 100
+export const MIN_WHEEL_ZOOM_SENSITIVITY_PERCENT = 50
+export const MAX_WHEEL_ZOOM_SENSITIVITY_PERCENT = 150
+export const WHEEL_ZOOM_SENSITIVITY_STEP = 5
 
 export interface AppearancePreferences {
   showZoomButtons: boolean
+  /** Plain wheel zoom follows Zach's spatial convention: moving the wheel
+   * down moves closer to the board. Keep the opposite convention reachable
+   * without changing the board or replacing tldraw's camera behavior. */
+  scrollDownZoomsIn: boolean
+  /** A percentage of tldraw's stock `zoomSpeed: 1`. Keeping the persisted
+   * value in product language makes 100 the obvious, durable reset point. */
+  wheelZoomSensitivityPercent: number
   /** The Inputs row reads as `name: type = default` — Name, Type and
    * Default all in monospace, the ':' / '=' muted rather than full-ink.
    * Chosen over a bolder full-ink treatment and over hiding '=' until a
@@ -13,6 +24,8 @@ export interface AppearancePreferences {
 
 export const DEFAULT_APPEARANCE_PREFERENCES: AppearancePreferences = Object.freeze({
   showZoomButtons: false,
+  scrollDownZoomsIn: true,
+  wheelZoomSensitivityPercent: DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT,
   punctuatedPortRow: true,
 })
 
@@ -24,17 +37,32 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
+function isWheelZoomSensitivityPercent(value: unknown): value is number {
+  return typeof value === 'number'
+    && Number.isInteger(value)
+    && value >= MIN_WHEEL_ZOOM_SENSITIVITY_PERCENT
+    && value <= MAX_WHEEL_ZOOM_SENSITIVITY_PERCENT
+    && value % WHEEL_ZOOM_SENSITIVITY_STEP === 0
+}
+
 export function parseStoredAppearancePreferences(value: unknown): AppearancePreferences {
   if (!isRecord(value) || value.version !== 1) {
     return DEFAULT_APPEARANCE_PREFERENCES
   }
-  const { showZoomButtons, punctuatedPortRow } = value
+  const {
+    showZoomButtons,
+    scrollDownZoomsIn,
+    wheelZoomSensitivityPercent,
+    punctuatedPortRow,
+  } = value
   // A field the stored record predates is `undefined`, not wrong — that
   // should fall back to its own default, not discard a real value the user
   // already set for every other field. A field that's present with the
   // wrong type means the record is corrupt, and the whole thing resets.
   if (
     (showZoomButtons !== undefined && typeof showZoomButtons !== 'boolean')
+    || (scrollDownZoomsIn !== undefined && typeof scrollDownZoomsIn !== 'boolean')
+    || (wheelZoomSensitivityPercent !== undefined && !isWheelZoomSensitivityPercent(wheelZoomSensitivityPercent))
     || (punctuatedPortRow !== undefined && typeof punctuatedPortRow !== 'boolean')
   ) {
     return DEFAULT_APPEARANCE_PREFERENCES
@@ -43,6 +71,12 @@ export function parseStoredAppearancePreferences(value: unknown): AppearancePref
     showZoomButtons: typeof showZoomButtons === 'boolean'
       ? showZoomButtons
       : DEFAULT_APPEARANCE_PREFERENCES.showZoomButtons,
+    scrollDownZoomsIn: typeof scrollDownZoomsIn === 'boolean'
+      ? scrollDownZoomsIn
+      : DEFAULT_APPEARANCE_PREFERENCES.scrollDownZoomsIn,
+    wheelZoomSensitivityPercent: isWheelZoomSensitivityPercent(wheelZoomSensitivityPercent)
+      ? wheelZoomSensitivityPercent
+      : DEFAULT_APPEARANCE_PREFERENCES.wheelZoomSensitivityPercent,
     punctuatedPortRow: typeof punctuatedPortRow === 'boolean'
       ? punctuatedPortRow
       : DEFAULT_APPEARANCE_PREFERENCES.punctuatedPortRow,
@@ -97,6 +131,8 @@ export function updateAppearancePreferences(
   const next = { ...snapshot, ...patch }
   if (
     next.showZoomButtons === snapshot.showZoomButtons
+    && next.scrollDownZoomsIn === snapshot.scrollDownZoomsIn
+    && next.wheelZoomSensitivityPercent === snapshot.wheelZoomSensitivityPercent
     && next.punctuatedPortRow === snapshot.punctuatedPortRow
   ) {
     return snapshot
@@ -106,14 +142,14 @@ export function updateAppearancePreferences(
   return snapshot
 }
 
-function subscribe(listener: () => void): () => void {
+export function subscribeAppearancePreferences(listener: () => void): () => void {
   listeners.add(listener)
   return () => listeners.delete(listener)
 }
 
 export function useAppearancePreferences(): AppearancePreferences {
   return useSyncExternalStore(
-    subscribe,
+    subscribeAppearancePreferences,
     getAppearancePreferences,
     () => DEFAULT_APPEARANCE_PREFERENCES,
   )

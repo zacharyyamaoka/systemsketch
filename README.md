@@ -2,6 +2,8 @@
 
 SystemSketch starts from one deliberately boring datum: the stock tldraw whiteboard. Its engine, drawing tools, and shortcuts stay stock while narrow supported seams add local files, board overview, zoom, Help, and the Stable/Preview workflow.
 
+The [wheel-zoom restoration gallery](docs/wheel-zoom-restoration-2026-09-04.html) records the reverted board navigation: an ordinary vertical wheel gesture changes scale around the pointer instead of panning vertically, even after a stale Trackpad preference is restored. Scroll down zooms in by default; Appearance can flip the direction and tune tldraw’s standard 100% wheel sensitivity from 50–150% without changing the −/+ buttons. Its guided [`wheel-zoom.systemsketch`](sketches/review/wheel-zoom.systemsketch) board is ready for direct review.
+
 The [Figma-style history implementation gallery](docs/history-figma-implementation-2026-09-04.html) records the selected history direction now on `main`: one truthful shared revision language for Compare and the Block inspector, a top-right Compare entry, and a state-preserving right/bottom dock for Properties and Code. Its guided [`history-figma.systemsketch`](sketches/review/history-figma.systemsketch) fixture is ready to review.
 
 The [hidden port-count implementation gallery](docs/hidden-port-counts-2026-09-04.html) shows the new compact Block disclosure: a Port or Expanded face reports hidden inputs and outputs independently as `+N more`, preserving the size of a callable’s contract without repainting every port. It includes a real-browser capture, inspector Hide/Show journey, SVG parity, and the review fixture.
