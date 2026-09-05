@@ -2,6 +2,7 @@ import {
 	BaseFrameLikeShapeUtil,
 	Rectangle2d,
 	Stadium2d,
+	isShapeId,
 	type RecordProps,
 	type TLDragShapesInInfo,
 	type TLDragShapesOutInfo,
@@ -19,11 +20,15 @@ import {
 	canReparentDraggedShapesIntoBlock,
 	canBlockContainChildren,
 	blockShowsHeaderDivider,
+	blockInsetBackground,
+	blockMemberLayout,
 	getDefaultBlockProps,
+	isBlockShape,
 	isExpandedBlockShape,
 	mergeBlockResizeProps,
 	resizeBlockProps,
 	type BlockShape,
+	type BlockMemberLayout,
 } from './blockModel'
 import { blockShapeMigrations } from './blockShapeMigrations'
 import { normalizeStockBlockProps, stockBlockVisibleDescription } from './stockBlocks'
@@ -76,10 +81,17 @@ function exportPortColor(type: string): string {
 }
 
 /** SVG export mirrors the restored face without depending on browser HTML/CSS. */
-function BlockExportSvg({ shape }: { shape: BlockShape }) {
+function BlockExportSvg({
+	shape,
+	parentMemberLayout,
+}: {
+	shape: BlockShape
+	parentMemberLayout: BlockMemberLayout | null
+}) {
 	const layout = layoutBlock(shape.props)
 	const { w, h } = layout.bounds
 	const surface = '#ffffff'
+	const insetWell = '#f4f4f5'
 	const ink = '#27272a'
 	const muted = '#a1a1aa'
 	const divider = '#e4e4e7'
@@ -117,11 +129,22 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 				y={0.75}
 				width={Math.max(0, w - 1.5)}
 				height={Math.max(0, h - 1.5)}
-				rx={BLOCK_CORNER_RADIUS}
+				rx={parentMemberLayout === 'edge-to-edge' ? 0 : BLOCK_CORNER_RADIUS}
 				fill={surface}
 				stroke="#dedee3"
 				strokeWidth={1}
 			/>
+			{layout.view === 'expanded'
+			&& blockMemberLayout(shape.props) === 'inset'
+			&& blockInsetBackground(shape.props) === 'soft-gray' ? (
+				<rect
+					x={1}
+					y={layout.header?.h ?? 0}
+					width={Math.max(0, w - 2)}
+					height={Math.max(0, (layout.footer?.y ?? h) - (layout.header?.h ?? 0))}
+					fill={insetWell}
+				/>
+			) : null}
 
 			{layout.header ? (
 				<>
@@ -459,7 +482,11 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	}
 
 	override toSvg(shape: BlockShape) {
-		return <BlockExportSvg shape={shape} />
+		const parent = isShapeId(shape.parentId) ? this.editor.getShape(shape.parentId) : undefined
+		const parentMemberLayout = isBlockShape(parent) && parent.props.view === 'expanded'
+			? blockMemberLayout(parent.props)
+			: null
+		return <BlockExportSvg shape={shape} parentMemberLayout={parentMemberLayout} />
 	}
 
 	override getIndicatorPath(shape: BlockShape): Path2D {

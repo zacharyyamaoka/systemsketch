@@ -434,6 +434,24 @@
   color: var(--ss-text-faint);
 }
 
+.block-inspector__subcontrol {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ss-border);
+}
+
+.block-inspector__subheading {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--ss-text-muted);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.block-inspector__subcontrol .block-inspector__choices button {
+  text-transform: none;
+}
+
 .block-inspector__tag-ghost {
   display: inline-flex;
   align-items: center;

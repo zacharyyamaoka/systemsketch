@@ -2,6 +2,8 @@ import { createShapeId, type TLShape } from 'tldraw'
 import { describe, expect, it } from 'vitest'
 import {
 	appendBlockPortToProps,
+	blockMemberLayout,
+	blockInsetBackground,
 	blockIcon,
 	blockFoldControlSide,
 	BLOCK_PRESENTATION_VIEWS,
@@ -64,12 +66,14 @@ describe('Block model', () => {
 			showDescription: true,
 			notes: '',
 			portLayout: 'inline',
+			memberLayout: 'inset',
+			insetBackground: 'white',
 			inputs: [],
 			outputs: [],
 			views: {
 				simple: { w: 320, h: 206 },
 				port: { w: 340, h: 198 },
-			expanded: { w: 560, h: 380 },
+				expanded: { w: 560, h: 380 },
 			},
 			definitionId: expect.any(String),
 		})
@@ -81,6 +85,8 @@ describe('Block model', () => {
 		delete props.notes
 		delete props.foldControlSide
 		delete props.expandedWeights
+		delete (props as { memberLayout?: BlockShape['props']['memberLayout'] }).memberLayout
+		delete (props as { insetBackground?: BlockShape['props']['insetBackground'] }).insetBackground
 		// portLayout is a required StyleProp since the PortLayoutStyle migration.
 		// The reader still guards an in-memory record assembled before the store
 		// migrates it, which is what this line reproduces.
@@ -91,6 +97,8 @@ describe('Block model', () => {
 		expect(blockFoldControlSide(props)).toBe('left')
 		expect(blockNotes(props)).toBe('')
 		expect(blockPortLayout(props)).toBe('inline')
+		expect(blockMemberLayout(props)).toBe('inset')
+		expect(blockInsetBackground(props)).toBe('white')
 		expect(expandedSectionWeights(props)).toEqual({})
 		expect(portDefaultValue(port)).toBe('')
 		expect(portRow(port)).toBe(1)

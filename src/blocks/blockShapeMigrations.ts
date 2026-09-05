@@ -48,6 +48,8 @@ const blockVersions = createShapePropsMigrationIds(BLOCK_SHAPE_TYPE, {
 	SemanticRolesAndStockConfig: 7,
 	BlockChrome: 8,
 	FoldAndAutoResize: 9,
+	MemberLayout: 10,
+	InsetBackground: 11,
 })
 
 function storedViews(props: BlockMigrationProps): StoredViews | undefined {
@@ -301,6 +303,28 @@ export function downgradeBlockPropsV7ToV6(props: BlockMigrationProps): BlockMigr
 	return next.blockType === 'unbundle' ? { ...next, blockType: 'projection' } : next
 }
 
+/** v9 → v10: existing Expanded Blocks keep their separated-card presentation. */
+export function upgradeBlockPropsV9ToV10(props: BlockMigrationProps): BlockMigrationProps {
+	return props.memberLayout === undefined ? { ...props, memberLayout: 'inset' } : props
+}
+
+/** v10 → v9: older readers do not know the direct-child presentation policy. */
+export function downgradeBlockPropsV10ToV9(props: BlockMigrationProps): BlockMigrationProps {
+	const { memberLayout: _memberLayout, ...rest } = props
+	return rest
+}
+
+/** v10 → v11: existing inset layouts keep the white production default. */
+export function upgradeBlockPropsV10ToV11(props: BlockMigrationProps): BlockMigrationProps {
+	return props.insetBackground === undefined ? { ...props, insetBackground: 'white' } : props
+}
+
+/** v11 → v10: older readers do not know the optional inset well treatment. */
+export function downgradeBlockPropsV11ToV10(props: BlockMigrationProps): BlockMigrationProps {
+	const { insetBackground: _insetBackground, ...rest } = props
+	return rest
+}
+
 /**
  * v7 → v8: preserve the old painted face when chrome becomes configurable.
  *
@@ -380,5 +404,13 @@ export const blockShapeMigrations = createShapePropsMigrationSequence({
 		id: blockVersions.FoldAndAutoResize,
 		up: (props) => applyPureMigration(props, upgradeBlockPropsV8ToV9),
 		down: (props) => applyPureMigration(props, downgradeBlockPropsV9ToV8),
+	}, {
+		id: blockVersions.MemberLayout,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV9ToV10),
+		down: (props) => applyPureMigration(props, downgradeBlockPropsV10ToV9),
+	}, {
+		id: blockVersions.InsetBackground,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV10ToV11),
+		down: (props) => applyPureMigration(props, downgradeBlockPropsV11ToV10),
 	}],
 })

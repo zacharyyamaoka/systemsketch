@@ -98,6 +98,7 @@ export type BlockDetailsPatch = Partial<
     | 'icon'
     | 'notes'
 		| 'portLayout'
+		| 'insetBackground'
 		| 'stockConfig'
 		| 'headerAlign'
 		| 'foldControlSide'

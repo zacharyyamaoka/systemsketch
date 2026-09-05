@@ -18,6 +18,8 @@ import {
 	downgradeBlockPropsV7ToV6,
 	downgradeBlockPropsV8ToV7,
 	downgradeBlockPropsV9ToV8,
+	downgradeBlockPropsV10ToV9,
+	downgradeBlockPropsV11ToV10,
 	upgradeBlockPropsV0ToV1,
 	upgradeBlockPropsV1ToV2,
 	upgradeBlockPropsV2ToV3,
@@ -27,6 +29,8 @@ import {
 	upgradeBlockPropsV6ToV7,
 	upgradeBlockPropsV7ToV8,
 	upgradeBlockPropsV8ToV9,
+	upgradeBlockPropsV9ToV10,
+	upgradeBlockPropsV10ToV11,
 	type BlockMigrationProps,
 } from './blockShapeMigrations'
 
@@ -89,6 +93,24 @@ describe('Block shape migrations', () => {
 		}
 		expect(downgradeBlockPropsV7ToV6({ ...legacy, blockType: 'bundle' })).toEqual({ ...legacy, blockType: 'bundle' })
 		expect(downgradeBlockPropsV7ToV6({ ...legacy, blockType: 'copy' })).toEqual({ ...legacy, blockType: 'copy' })
+	})
+
+	it('adds the separated member-layout default and removes it for older readers', () => {
+		const v9 = { title: 'Class', inputs: [], outputs: [] }
+		const v10 = throughPureStep(v9, upgradeBlockPropsV9ToV10)
+		expect(v10).toEqual({ ...v9, memberLayout: 'inset' })
+		expect(throughPureStep(v10, downgradeBlockPropsV10ToV9)).toEqual(v9)
+		expect(upgradeBlockPropsV9ToV10({ ...v9, memberLayout: 'edge-to-edge' }))
+			.toEqual({ ...v9, memberLayout: 'edge-to-edge' })
+	})
+
+	it('adds the white inset-background default and preserves an authored gray well', () => {
+		const v10 = { title: 'Class', memberLayout: 'inset', inputs: [], outputs: [] }
+		const v11 = throughPureStep(v10, upgradeBlockPropsV10ToV11)
+		expect(v11).toEqual({ ...v10, insetBackground: 'white' })
+		expect(throughPureStep(v11, downgradeBlockPropsV11ToV10)).toEqual(v10)
+		expect(upgradeBlockPropsV10ToV11({ ...v10, insetBackground: 'soft-gray' }))
+			.toEqual({ ...v10, insetBackground: 'soft-gray' })
 	})
 
 	it('loads a V6 Projection record as Unbundle without losing authored fields', () => {
@@ -178,6 +200,12 @@ describe('Block shape migrations', () => {
 		const v9 = throughPureStep(v8, upgradeBlockPropsV8ToV9)
 		expect(v9).toMatchObject({ foldable: false, folded: false, autoResize: false })
 
+		const v10 = throughPureStep(v9, upgradeBlockPropsV9ToV10)
+		expect(v10.memberLayout).toBe('inset')
+
+		const v11 = throughPureStep(v10, upgradeBlockPropsV10ToV11)
+		expect(v11.insetBackground).toBe('white')
+
 		const restoredV0 = throughPureStep(v1, downgradeBlockPropsV1ToV0)
 		expect(restoredV0).toMatchObject({ w: 360, h: 230, views: v0.views })
 	})
@@ -221,7 +249,8 @@ describe('Block shape migrations', () => {
 		expect(() => store.loadStoreSnapshot(snapshot)).not.toThrow()
 		const migrated = store.get(legacy.id) as BlockShape
 		expect(migrated.props.stockConfig).toEqual({ triggerSource: 'clock', rateHz: 10 })
-		expect(store.schema.serialize().sequences[BLOCK_MIGRATION_SEQUENCE]).toBe(9)
+		expect(migrated.props.insetBackground).toBe('white')
+		expect(store.schema.serialize().sequences[BLOCK_MIGRATION_SEQUENCE]).toBe(11)
 
 		const sequence = store.schema.sortedMigrations
 			.filter((migration) => migration.id.startsWith(`${BLOCK_MIGRATION_SEQUENCE}/`))

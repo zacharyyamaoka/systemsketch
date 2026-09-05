@@ -101,6 +101,26 @@ export const PORT_LAYOUTS = ['offset', 'inline'] as const
 export type PortLayout = (typeof PORT_LAYOUTS)[number]
 
 /**
+ * How an Expanded Block presents its direct child Blocks.
+ *
+ * `inset` keeps class-like members as separate cards with breathing room.
+ * `edge-to-edge` turns branch-like members into one continuous stack. This is
+ * presentation only: membership stays in tldraw's ordinary parentId graph.
+ */
+export const BLOCK_MEMBER_LAYOUTS = ['inset', 'edge-to-edge'] as const
+export type BlockMemberLayout = (typeof BLOCK_MEMBER_LAYOUTS)[number]
+
+/**
+ * The non-semantic surface behind inset member cards.
+ *
+ * This is intentionally a tiny choice rather than the full colour palette:
+ * white is the quiet default, while soft gray adds containment contrast using
+ * the active theme's existing sunken-surface token.
+ */
+export const BLOCK_INSET_BACKGROUNDS = ['white', 'soft-gray'] as const
+export type BlockInsetBackground = (typeof BLOCK_INSET_BACKGROUNDS)[number]
+
+/**
  * tldraw's documented seam for a prop that batches across a multi-selection.
  *
  * Registering a prop as a `StyleProp` is not decoration. It is what makes
@@ -383,6 +403,10 @@ export const BLOCK_SHAPE_PROPS = {
 	 * to decide whether a selection is shared or mixed.
 	 */
 	portLayout: BlockPortLayoutStyle,
+	/** Direct-child presentation; old boards migrate to the separated-card default. */
+	memberLayout: T.literalEnum(...BLOCK_MEMBER_LAYOUTS),
+	/** Theme-aware well behind inset direct-child cards; ignored by edge-to-edge. */
+	insetBackground: T.literalEnum(...BLOCK_INSET_BACKGROUNDS),
 	/**
 	 * The lens's verdict on this Block. `normal` in every ordinary document;
 	 * a style prop cannot be optional, so the migration makes it explicit.
@@ -444,6 +468,8 @@ declare module 'tldraw' {
 			showHeaderDivider: boolean
 			notes?: string
 			portLayout: PortLayout
+			memberLayout: BlockMemberLayout
+			insetBackground: BlockInsetBackground
 			state: BlockState
 			fieldDiffs?: BlockFieldDiff[]
 			priorPose?: BlockPriorPose
@@ -492,6 +518,8 @@ export function getDefaultBlockProps(): BlockShapeProps {
 		showHeaderDivider: true,
 		notes: '',
 		portLayout: 'inline',
+		memberLayout: 'inset',
+		insetBackground: 'white',
 		state: 'normal',
 		definitionId: createShapeId().slice('shape:'.length),
 		inputs: [],
@@ -535,6 +563,20 @@ export function blockShowsHeaderDivider(
 	props: Pick<BlockShapeProps, 'showHeaderDivider'>,
 ): boolean {
 	return props.showHeaderDivider ?? true
+}
+
+/** One compatibility reader for pre-migration and hand-assembled records. */
+export function blockMemberLayout(
+	props: Partial<Pick<BlockShapeProps, 'memberLayout'>>,
+): BlockMemberLayout {
+	return props.memberLayout === 'edge-to-edge' ? 'edge-to-edge' : 'inset'
+}
+
+/** One compatibility reader for boards and draft records created before v9. */
+export function blockInsetBackground(
+	props: Partial<Pick<BlockShapeProps, 'insetBackground'>>,
+): BlockInsetBackground {
+	return props.insetBackground === 'soft-gray' ? 'soft-gray' : 'white'
 }
 
 /** The one reader for optional expanded divider weights. */
