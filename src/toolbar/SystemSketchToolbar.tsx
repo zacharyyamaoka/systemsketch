@@ -419,6 +419,10 @@ function LibrarySlot() {
         sideOffset={12}
         collisionPadding={12}
         autoFocusFirstButton={false}
+        // ShapeLibraryBrowser owns Escape itself — first clears its search,
+        // second closes via onCancel below — so Radix's own close-on-Escape
+        // must stand down rather than race it.
+        disableEscapeKeyDown
       >
         <aside
           className="systemsketch-library-panel"
