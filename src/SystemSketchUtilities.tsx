@@ -583,10 +583,10 @@ export function SystemSketchNavigationPanel() {
             <button type="button" aria-label="Close help" onClick={() => setHelpOpen(false)}>×</button>
           </header>
 
-          <p className="systemsketch-help-intro">Canvas guidance stays here. Preview, publishing, and isolated feature views now live under Dev.</p>
+          <p className="systemsketch-help-intro">Preview, publishing, and isolated feature views live under Dev.</p>
           <button type="button" className="systemsketch-help-row" onClick={openKeyboardShortcuts}>
             <span>Keyboard shortcuts</span>
-            <kbd>Ctrl Shift ?</kbd>
+            <kbd>Ctrl Alt /</kbd>
           </button>
         </section>
       ) : null}
