@@ -35,10 +35,11 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("BlockShapeUtil", source)
         self.assertIn("BlockTool", source)
         self.assertIn("PillTool", source)
+        self.assertIn("TypeTool", source)
         self.assertIn("CalloutTool", source)
         self.assertIn("CalloutAddLeaderTool", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool, CalloutTool, CalloutAddLeaderTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool, TypeTool, CalloutTool, CalloutAddLeaderTool]", source
         )
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS", source)
         self.assertIn("...blockConnectionShapeUtils", source)
@@ -93,7 +94,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("BranchArmShapeUtil,", source)
         self.assertIn("LoopShapeUtil,", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool, CalloutTool, CalloutAddLeaderTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool, TypeTool, CalloutTool, CalloutAddLeaderTool]", source
         )
         self.assertIn("const stopBranchRegions = installBranchRegions(editor)", product_source)
         self.assertIn("const stopBranchClickToEdit = installBranchClickToEdit(editor)", product_source)
@@ -135,9 +136,10 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("BranchShapeUtil,", embedded)
         self.assertIn("BranchArmShapeUtil,", embedded)
         self.assertIn("PillTool,", embedded)
+        self.assertIn("TypeTool,", embedded)
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS,", embedded)
         self.assertIn("...blockConnectionShapeUtils,", embedded)
-        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool, CalloutTool, CalloutAddLeaderTool]", embedded)
+        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool, TypeTool, CalloutTool, CalloutAddLeaderTool]", embedded)
         self.assertIn("Toolbar: SystemSketchFigmaToolbar", embedded)
         self.assertIn("ContextMenu: BlockContextMenu", embedded)
         self.assertIn("InFrontOfTheCanvas: EmbeddedSystemSketchSurfaceHost", embedded)

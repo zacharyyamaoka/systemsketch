@@ -4,6 +4,8 @@ export const BLOCK_SHAPE_TYPE = 'block' as const
 export const BLOCK_TOOL_ID = 'block' as const
 /** P creates the separate `value` literal-pill representation. */
 export const PILL_TOOL_ID = 'pill' as const
+/** Type uses the same Block geometry, with one compact annotation body. */
+export const TYPE_TOOL_ID = 'type' as const
 
 /**
  * `value` stores a literal argument drawn as a capsule. It shares the Block
@@ -317,6 +319,11 @@ export const BLOCK_SHAPE_PROPS = {
 	/** Detailed Markdown from the donor Notes tab. */
 	notes: T.string.optional(),
 	/**
+	 * The canonical body of a Type definition. Its compact outline in Port and
+	 * Expanded views is parsed presentation, never a second editable schema.
+	 */
+	attributeSource: T.string.optional(),
+	/**
 	 * Required since the `PortLayoutStyle` migration: a tldraw StyleProp cannot
 	 * be optional, because the editor must find a concrete value on every Block
 	 * to decide whether a selection is shared or mixed.
@@ -370,6 +377,7 @@ declare module 'tldraw' {
 			}
 			showDescription: boolean
 			notes?: string
+			attributeSource?: string
 			portLayout: PortLayout
 			state: BlockState
 			fieldDiffs?: BlockFieldDiff[]

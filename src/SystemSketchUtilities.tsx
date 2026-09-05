@@ -46,6 +46,7 @@ import { useTopNoticePlacement } from './chrome/topNoticePlacement'
 import { useLocalWorkspace } from './workspace/LocalWorkspace'
 import { startReleaseRefresh } from './releaseRefresh'
 import { cablePresentation, setSolidBeforePill } from './blocks/connections/connectionPresentation'
+import { setTypeChevronPlacement, typeAttributePresentation } from './blocks/typeAttributePresentation'
 import { useAppearancePreferences } from './settings/appearancePreferences'
 import './systemsketch-utilities.css'
 import { useBoardDiagnosticsModel } from './diagnostics'
@@ -183,6 +184,11 @@ export function SystemSketchNavigationPanel() {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [recentIds, setRecentIds] = useState<DevelopmentPresetId[]>(readRecentDevelopmentPresets)
   const solidBeforePill = useValue('solid before pill', () => cablePresentation.get().solidBeforePill, [])
+  const typeChevronPlacement = useValue(
+    'Type attribute chevron placement',
+    () => typeAttributePresentation.get().chevronPlacement,
+    [],
+  )
   const [busy, setBusy] = useState<BusyKey | null>(null)
   const [armed, setArmed] = useState(false)
   const [published, setPublished] = useState(false)
@@ -491,6 +497,23 @@ export function SystemSketchNavigationPanel() {
             <span>
               <b>Solid before the z⁻¹ pill</b>
               <small>Delayed cables: solid up to the pill, dotted after it</small>
+            </span>
+          </label>
+
+          <div className="systemsketch-dev-section-label">
+            <span>Type attributes</span>
+            <small>This browser, live</small>
+          </div>
+          <label className="systemsketch-dev-toggle">
+            <input
+              type="checkbox"
+              data-testid="systemsketch-dev-type-chevron-gutter"
+              checked={typeChevronPlacement === 'gutter'}
+              onChange={(event) => setTypeChevronPlacement(event.target.checked ? 'gutter' : 'inline')}
+            />
+            <span>
+              <b>Chevrons in code gutter</b>
+              <small>Type attributes: align fold controls left instead of placing them beside text</small>
             </span>
           </label>
 
