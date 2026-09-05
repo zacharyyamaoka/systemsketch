@@ -31,8 +31,17 @@ describe('Block inspector content', () => {
     expect(html).not.toContain('block-inspector__eyebrow')
     expect(html).not.toContain('>Selected<')
     expect(html).not.toContain('right-popout')
-    expect(html).toContain('Semantic roles belong to individual port rows')
-		expect(html).toContain('aria-label="Semantic role for inputs packet"')
+    expect(html).not.toContain('Semantic roles belong to individual port rows')
+		expect(html).not.toContain('aria-label="Semantic role for inputs packet"')
+		expect(html).not.toContain('aria-label="Semantic role for outputs message"')
+		expect((html.match(/>Tags<\/button>/g) ?? [])).toHaveLength(2)
+		expect(html.indexOf('>Tags</button>')).toBeLessThan(html.indexOf('>1 visible</button>'))
+		expect(html).toContain('aria-label="Show Inputs semantic tags"')
+		expect(html).toContain('aria-label="Show Outputs semantic tags"')
+		expect(html).toContain('aria-controls="inspector-semantic-tags-inputs"')
+		expect(html).toContain('aria-controls="inspector-semantic-tags-outputs"')
+		expect(html).toMatch(/aria-expanded="false" aria-controls="inspector-semantic-tags-inputs" aria-label="Show Inputs semantic tags"/)
+		expect(html).toMatch(/aria-expanded="false" aria-controls="inspector-semantic-tags-outputs" aria-label="Show Outputs semantic tags"/)
     expect(html).toContain('Icon: SquareFunction. Change icon')
     expect(html).toContain('value="raw"')
     expect(html).toContain('aria-label="Port layout"')
@@ -43,7 +52,7 @@ describe('Block inspector content', () => {
     expect(offset).toBeGreaterThan(-1)
     expect(aligned).toBeGreaterThan(offset)
 
-    const sections = ['Block', 'Tags', 'View', 'Inputs', 'Outputs', 'Ports']
+    const sections = ['Block', 'View', 'Inputs', 'Outputs', 'Ports']
     let previous = -1
     for (const section of sections) {
       const position = html.indexOf(`data-inspector-section="${section}"`)

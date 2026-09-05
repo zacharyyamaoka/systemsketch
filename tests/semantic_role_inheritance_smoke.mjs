@@ -7,7 +7,7 @@ import { join } from 'node:path'
 import { ROOT, clickAt, delay, evaluate, key, openApp, startApp, waitFor } from './browser_harness.mjs'
 
 const FIXTURE = join(ROOT, 'sketches/review/semantic-role-inheritance.systemsketch')
-const SHOT = join(ROOT, 'docs/assets/semantic-role-inheritance-smoke-2026-09-04.png')
+const SHOT = join(ROOT, 'docs/assets/semantic-role-tags-tab-smoke-2026-09-04.png')
 
 async function centre(page, selector) {
   return JSON.parse(await evaluate(page, `(() => {
@@ -54,7 +54,16 @@ async function main() {
 
 		const emitter = await centre(page, '[data-shape-id="shape:emitter"]')
 		await clickAt(page, emitter.x, emitter.y)
-    await waitFor(page, `document.querySelector('select[aria-label="Semantic role for outputs tick"]')`, 'per-port role selector')
+    await waitFor(page, `document.querySelector('[data-inspector-section="Outputs"] .block-inspector__tags-button')`, 'Outputs Tags button')
+    assert.equal(
+      await evaluate(page, `Boolean(document.querySelector('select[aria-label="Semantic role for outputs tick"]'))`),
+      false,
+      'normal port rows keep the Name/Type surface free of role selectors',
+    )
+    const tags = await centre(page, '[data-inspector-section="Outputs"] .block-inspector__tags-button')
+    await clickAt(page, tags.x, tags.y)
+    await waitFor(page, `document.querySelector('#inspector-semantic-tags-outputs select[aria-label="Semantic role for outputs tick"]')`, 'Tags role selector')
+    await waitFor(page, `document.querySelector('[data-testid="inspector-semantic-tag-outputs-out_1"]')`, 'all output tags')
     const select = await centre(page, 'select[aria-label="Semantic role for outputs tick"]')
     await clickAt(page, select.x, select.y)
 		await key(page, 'ArrowUp', 'ArrowUp')
@@ -97,6 +106,31 @@ async function main() {
 		await guardedReload(page)
 		await waitFor(page, `window.__systemsketch?.editor?.getShape('shape:emitter')?.props.outputs[0].semanticRoleAuthored?.role === 'event'`, 'autosaved semantic role after reload')
 		await waitFor(page, `document.querySelector('[data-shape-id="shape:consumer"] .Port[aria-label="Control port"]')?.textContent === 'Control'`, 'Control cue after reload')
+		const reselectedEmitter = await centre(page, '[data-shape-id="shape:emitter"]')
+		await clickAt(page, reselectedEmitter.x, reselectedEmitter.y)
+		await waitFor(page, `document.querySelector('[data-inspector-section="Outputs"] .block-inspector__tags-button')`, 'Outputs Tags button after reload')
+		const reopenedTags = await centre(page, '[data-inspector-section="Outputs"] .block-inspector__tags-button')
+		await clickAt(page, reopenedTags.x, reopenedTags.y)
+		await waitFor(page, `document.querySelector('#inspector-semantic-tags-outputs select[aria-label="Semantic role for outputs tick"]')?.value === 'event'`, 'event role in reopened Tags view')
+		await evaluate(page, `(() => {
+			const shape = window.__systemsketch.editor.getShape('shape:emitter')
+			const tick = shape.props.outputs[0]
+			window.__systemsketch.editor.updateShape({
+				id: shape.id,
+				type: shape.type,
+				props: {
+					...shape.props,
+					outputs: [
+						...shape.props.outputs,
+						{ ...tick, id: 'hidden-tag-proof', name: 'hidden tick', visible: false },
+						{ ...tick, id: 'effect-tag-proof', name: 'written tick', effect: true },
+					],
+				},
+			})
+			return true
+		})()`)
+		await waitFor(page, `document.querySelector('[data-testid="inspector-semantic-tag-outputs-hidden-tag-proof"]')?.textContent?.includes('hidden')`, 'hidden port included in Tags view')
+		await waitFor(page, `document.querySelector('[data-testid="inspector-semantic-tag-outputs-effect-tag-proof"] select')?.disabled === true`, 'derived effect role is read-only')
     const capture = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
     await writeFile(SHOT, Buffer.from(capture.data, 'base64'))
     process.stdout.write(`semantic roles real-app proof passed\n${SHOT}\n`)

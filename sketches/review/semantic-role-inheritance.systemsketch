@@ -189,7 +189,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "1 · Select emit_tick(), then set tick’s Semantic role to Event in its port row."
+                  "text": "1 · Select emit_tick(), then set tick’s Semantic role to Event in Outputs’ Tags view."
                 }
               ]
             }

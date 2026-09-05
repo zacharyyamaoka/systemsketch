@@ -679,15 +679,18 @@ function VariadicPortSettings({
 	)
 }
 
-/** Per-row role authoring: Blocks do not have one blanket semantic tag. */
+/** Per-port role authoring: Blocks do not have one blanket semantic tag. */
 function SemanticRoleSettings({
 	side,
 	port,
 	actions,
+	readOnly = false,
 }: {
 	side: BlockPortSide
 	port: BlockPort
 	actions?: BlockInspectorActions
+	/** Effect ports are reconciled from their mutated input and cannot be authored. */
+	readOnly?: boolean
 }) {
 	const resolved = resolveBlockPortSemanticRole(port)
 	const value = port.semanticRoleAuthored?.role ?? 'inherit'
@@ -695,13 +698,15 @@ function SemanticRoleSettings({
 	return (
 		<label className="block-inspector__semantic-role" data-testid={`inspector-semantic-role-${port.id}`}>
 			<span className={resolved.role === 'data' ? '' : 'is-semantic'}>
-				{resolved.role === 'data' ? 'role' : roleLabel(resolved.role)}
+				{readOnly ? 'inherited' : resolved.role === 'data' ? 'role' : roleLabel(resolved.role)}
 			</span>
 			<select
 				value={value}
-				disabled={!actions}
+				disabled={readOnly || !actions}
 				aria-label={`Semantic role for ${side} ${port.name || port.id}`}
-				title={resolved.origin === 'derived'
+				title={readOnly
+					? `Inherited ${roleLabel(resolved.role)}; effect ports follow their mutated input`
+					: resolved.origin === 'derived'
 					? `Derived ${roleLabel(resolved.role)}${resolved.claim?.source ? ` — ${resolved.claim.source}` : ''}; choose a role to override`
 					: 'Semantic role; independent of type, delivery, mutation and routing'}
 				onChange={(event) => {
@@ -729,6 +734,7 @@ function PortSection({
   actions?: BlockInspectorActions
 }) {
   const [managing, setManaging] = useState(false)
+	const [tagging, setTagging] = useState(false)
   const [drag, setDrag] = useState<InspectorPortDrag | null>(null)
   const dragRef = useRef<InspectorPortDrag | null>(null)
   const listRef = useRef<HTMLUListElement | null>(null)
@@ -961,7 +967,6 @@ function PortSection({
             mut
           </button>
         ) : null}
-		<SemanticRoleSettings side={side} port={port} actions={actions} />
 			<VariadicPortSettings side={side} port={port} actions={actions} />
         <button
           type="button"
@@ -1015,16 +1020,49 @@ function PortSection({
     })
   })
 
+	const tagItems = ports.map((port) => (
+		<li
+			key={port.id}
+			className={`block-inspector__semantic-tag${isEffectPort(port) ? ' block-inspector__semantic-tag--derived' : ''}`}
+			data-testid={`inspector-semantic-tag-${side}-${port.id}`}
+		>
+			<div className="block-inspector__semantic-tag-port">
+				<span className="block-inspector__semantic-tag-name">{port.name || port.id}</span>
+				<span className="block-inspector__semantic-tag-type">{port.type || 'type'}</span>
+				{!port.visible ? <span className="block-inspector__semantic-tag-hidden">hidden</span> : null}
+				{isEffectPort(port) ? <span className="block-inspector__semantic-tag-derived">derived effect</span> : null}
+			</div>
+			<SemanticRoleSettings side={side} port={port} actions={actions} readOnly={isEffectPort(port)} />
+		</li>
+	))
+
   return (
     <section className="block-inspector__section" aria-label={`${title} ports`} data-inspector-section={title}>
       <div className="block-inspector__section-title">
         <span>{title}</span>
         <span className="block-inspector__section-tools">
+			<button
+				type="button"
+				className={`block-inspector__tags-button${tagging ? ' is-active' : ''}`}
+				aria-pressed={tagging}
+				aria-expanded={tagging}
+				aria-controls={`inspector-semantic-tags-${side}`}
+				aria-label={`${tagging ? 'Hide' : 'Show'} ${title} semantic tags`}
+				onClick={() => {
+					setManaging(false)
+					setTagging((current) => !current)
+				}}
+			>
+				Tags
+			</button>
           <button
             type="button"
             className={`block-inspector__count-pill${managing ? ' is-active' : ''}`}
             aria-expanded={managing}
-            onClick={() => setManaging((current) => !current)}
+            onClick={() => {
+					setTagging(false)
+					setManaging((current) => !current)
+				}}
           >
             {managing ? 'Done' : `${visiblePorts.length} visible`}
           </button>
@@ -1040,7 +1078,12 @@ function PortSection({
         </span>
       </div>
 
-      {ports.length === 0 && side === 'outputs' ? (
+      {tagging ? (
+			<div id={`inspector-semantic-tags-${side}`} className="block-inspector__semantic-tags" role="region" aria-label={`${title} semantic tags`}>
+				<p className="block-inspector__hint">Choose a semantic role for each port. Hidden ports are included; derived effect ports inherit their role.</p>
+				{ports.length === 0 ? <p className="block-inspector__hint">No {side} to tag yet.</p> : <ul>{tagItems}</ul>}
+			</div>
+      ) : ports.length === 0 && side === 'outputs' ? (
         <p className="block-inspector__hint">No outputs yet.</p>
       ) : !managing && ports.length > 0 && visiblePorts.length === 0 ? (
         <p className="block-inspector__hint">All {ports.length} hidden — manage to show.</p>
@@ -1048,6 +1091,7 @@ function PortSection({
         <ul
           ref={listRef}
           className={`block-inspector__ports${managing ? ' block-inspector__ports--managed' : ''}${dragging ? ' is-dragging' : ''}`}
+			id={`inspector-ports-${side}`}
           data-testid={`inspector-ports-${side}`}
         >
           {items.map((item, index) => <Fragment key={index}>{item}</Fragment>)}
@@ -1186,11 +1230,6 @@ export function BlockInspectorContent({
               actions={actions}
               onToggle={() => actions?.updateDetails({ showDescription: !props.showDescription })}
             />
-          </section>
-
-          <section className="block-inspector__section" data-inspector-section="Tags">
-            <div className="block-inspector__section-title">Tags</div>
-			<p className="block-inspector__hint">Semantic roles belong to individual port rows so each connected wire can inherit them honestly.</p>
           </section>
 
             </>
