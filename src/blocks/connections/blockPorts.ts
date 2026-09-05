@@ -11,7 +11,7 @@ import { layoutBlock } from '../layoutBlock'
 import { BRANCH_SHAPE_TYPE, branchLayout, isBranchShape, type BranchShape } from '../../branch/branchModel'
 import { branchFoldAttachPoint } from '../../branch/branchScope'
 import { LOOP_SHAPE_TYPE, isLoopShape, loopLayout, type LoopShape } from '../../loop/loopModel'
-import type { ElbowSide } from '../elbow'
+import { ELBOW_SIDE_OPPOSITE, type ElbowSide } from '../elbow'
 import { portSnapPageUnits } from './connectionHit'
 import {
 	CONNECTION_BINDING_TYPE,
@@ -66,6 +66,24 @@ export interface BlockConnectionPort {
 	 * not: the cable starts inside the thing it would otherwise route around.
 	 */
 	facesInward?: boolean
+}
+
+/**
+ * The perpendicular direction a cable uses at one face of a port.
+ *
+ * A dot has one physical edge but two faces. Its outer face points away from
+ * the Block; its inner face points into an Expanded Block. Keeping the same
+ * direction for both faces makes a cable bound to a top-edge effect port leave
+ * above the enclosing Block and loop back in—the exact inside→outside failure
+ * that a nested call exposes. Flip the edge normal for the inner face while
+ * retaining one dot and one stable port identity.
+ */
+export function portElbowSideForFace(
+	port: BlockConnectionPort,
+	face: PortFace,
+): ElbowSide {
+	const outerSide = port.elbowSide ?? (port.side === 'input' ? 'left' : 'right')
+	return face === 'inner' ? ELBOW_SIDE_OPPOSITE[outerSide] : outerSide
 }
 
 /**
