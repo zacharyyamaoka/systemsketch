@@ -11,7 +11,7 @@ import { analyzeDataflow } from './dataflow'
 import { layoutBlackboard } from './blackboardLayout'
 import { layoutProcess } from './processLayout'
 import { sceneToSvg } from './sceneSvg'
-import { layoutTree } from './treeLayout'
+import { layoutTree, TREE_SIBLING_GAP } from './treeLayout'
 
 const FLOWSTATE_XML = `<root BTCPP_format="4" main_tree_to_execute="RigidBodyAssembly">
   <BehaviorTree ID="RigidBodyAssembly">
@@ -137,6 +137,37 @@ describe('Tree layout', () => {
 		const leaf = (scene: BtScene) => scene.nodes.find((entry) => entry.node.id === 'GraspValid')!.rect
 		expect(leaf(ports).h).toBeGreaterThan(leaf(simple).h)
 		preview('tree-down-ports', ports)
+	})
+
+	it('packs an unbalanced tree by contour', () => {
+		// A's own subtree is only wide four levels down (0.0.0.0…0.0.0.3); A's
+		// own card at depth 1 is as narrow as any control. A span-summing
+		// placer pushes B out by A's whole deep span; contour packing tucks B
+		// in right beside A's actual card instead.
+		const xml = `<root BTCPP_format="4"><BehaviorTree ID="T">
+			<Sequence name="Root">
+				<Sequence name="A">
+					<Sequence>
+						<LeafOne/><LeafTwo/><LeafThree/><LeafFour/>
+					</Sequence>
+				</Sequence>
+				<LeafB name="B"/>
+				<LeafC name="C"/>
+			</Sequence>
+		</BehaviorTree>
+		<TreeNodesModel>
+			<Action ID="LeafOne"/><Action ID="LeafTwo"/><Action ID="LeafThree"/><Action ID="LeafFour"/>
+			<Action ID="LeafB"/><Action ID="LeafC"/>
+		</TreeNodesModel></root>`
+		const unbalanced = selectTree(parseBehaviorTreeXml(xml), 'T')!
+		const scene = layoutTree(unbalanced, { orientation: 'down', nodeFace: 'simple', controlFace: 'expanded', edgeStyle: 'straight' })
+		expect(scene.nodes.map((entry) => entry.path)).toEqual(unbalanced.nodes.map((node) => node.path))
+		expectNoNodeOverlap(scene)
+		expectInsideBounds(scene)
+		const a = scene.nodes.find((entry) => entry.path === '0.0')!.rect
+		const b = scene.nodes.find((entry) => entry.path === '0.1')!.rect
+		expect(b.x - (a.x + a.w)).toBeLessThanOrEqual(TREE_SIBLING_GAP + 1)
+		preview('tree-down-unbalanced', scene)
 	})
 })
 

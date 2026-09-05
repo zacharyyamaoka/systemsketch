@@ -2,8 +2,8 @@
   "region": {
     "x": 200,
     "y": 160,
-    "w": 3525,
-    "h": 1018,
+    "w": 2097,
+    "h": 1114,
     "title": "PickAndPlace",
     "treeId": "",
     "projection": "tree",
@@ -20,7 +20,7 @@
   },
   "children": [
     {
-      "id": "shape:964QO92pkphqvUh1B_SdQ",
+      "id": "shape:-j4lLp9hm6UciH95-_Df5",
       "type": "block",
       "x": 60,
       "y": 344,
@@ -32,10 +32,10 @@
       "h": 112
     },
     {
-      "id": "shape:Wq4yFsgjaizLkRbO8_fcH",
+      "id": "shape:q8WC2TJXMoOWOIx31I-wi",
       "type": "block",
-      "x": 443,
-      "y": 492,
+      "x": 183.25,
+      "y": 540,
       "role": "node",
       "path": "0.1.0",
       "title": "GraspValid",
@@ -44,10 +44,10 @@
       "h": 112
     },
     {
-      "id": "shape:oPssn97VifMWgzeaYDbdX",
+      "id": "shape:jxnShucb2g_AfJOPV8t7h",
       "type": "block",
-      "x": 852,
-      "y": 492,
+      "x": 592.25,
+      "y": 540,
       "role": "node",
       "path": "0.1.1",
       "title": "CorrectGrip",
@@ -56,9 +56,9 @@
       "h": 112
     },
     {
-      "id": "shape:iEkRMeHyjNDL19E7lq5dE",
+      "id": "shape:6Q8VHZx5d4TWzIYhsHTgv",
       "type": "block",
-      "x": 1288,
+      "x": 755,
       "y": 344,
       "role": "node",
       "path": "0.2",
@@ -68,9 +68,9 @@
       "h": 112
     },
     {
-      "id": "shape:cI616FI2k67tI8ldk9qpN",
+      "id": "shape:0ZhoaI2HcUxkn7qCOjayI",
       "type": "block",
-      "x": 1671,
+      "x": 1138,
       "y": 344,
       "role": "node",
       "path": "0.3",
@@ -80,10 +80,10 @@
       "h": 112
     },
     {
-      "id": "shape:Wsvxc8W2cnCgUTpnsz0x5",
+      "id": "shape:hffvZ9WS13HyOxOEQR3Ii",
       "type": "block",
-      "x": 2027,
-      "y": 492,
+      "x": 1117.75,
+      "y": 540,
       "role": "node",
       "path": "0.4.0",
       "title": "CloseGrip",
@@ -92,10 +92,10 @@
       "h": 112
     },
     {
-      "id": "shape:HzajMHrn0VtghIIEhevyD",
+      "id": "shape:r7iDPllPQBlC588HNvbgf",
       "type": "block",
-      "x": 2410,
-      "y": 640,
+      "x": 1234.5,
+      "y": 736,
       "role": "node",
       "path": "0.4.1.0",
       "title": "CloseGrip",
@@ -104,10 +104,10 @@
       "h": 112
     },
     {
-      "id": "shape:LfewfBczoWVcrjN2CbNaK",
+      "id": "shape:lsR6hgQkCDwkEs0zFAJhn",
       "type": "block",
-      "x": 2793,
-      "y": 640,
+      "x": 1617.5,
+      "y": 736,
       "role": "node",
       "path": "0.4.1.1",
       "title": "MoveHome",
@@ -116,10 +116,10 @@
       "h": 112
     },
     {
-      "id": "shape:DQVBYeHjYigXf2VWK-yvF",
+      "id": "shape:2IEwNOMCkvHoQUpY8_vBU",
       "type": "block",
-      "x": 3149,
-      "y": 492,
+      "x": 1720.75,
+      "y": 540,
       "role": "node",
       "path": "0.4.2",
       "title": "MoveHome",
@@ -128,9 +128,9 @@
       "h": 112
     },
     {
-      "id": "shape:8d8vVdmHCSR0XjxThPpNL",
+      "id": "shape:BNd8SlWHtpha90-g3uGs7",
       "type": "behaviorTreeControl",
-      "x": 1639.5,
+      "x": 784.75,
       "y": 196,
       "role": "node",
       "path": "0",
@@ -140,9 +140,9 @@
       "h": 64
     },
     {
-      "id": "shape:mk-6DNDi-PnW8_2qhghoO",
+      "id": "shape:dIasyRWa2gU2Zbch6uRor",
       "type": "behaviorTreeControl",
-      "x": 709.5,
+      "x": 443,
       "y": 344,
       "role": "node",
       "path": "0.1",
@@ -152,9 +152,9 @@
       "h": 64
     },
     {
-      "id": "shape:uAHor9bbUeej9YxMuu4T5",
+      "id": "shape:ND_Lg4FwHB2AVTX4kX-cG",
       "type": "behaviorTreeControl",
-      "x": 2656,
+      "x": 1494,
       "y": 344,
       "role": "node",
       "path": "0.4",
@@ -164,10 +164,10 @@
       "h": 64
     },
     {
-      "id": "shape:pWsv0b79ngsij7oJ6ovH5",
+      "id": "shape:Gojw7LwLc1CbmCu0fnIP_",
       "type": "behaviorTreeControl",
-      "x": 2669.5,
-      "y": 492,
+      "x": 1500.75,
+      "y": 540,
       "role": "node",
       "path": "0.4.1",
       "title": "Sequence",
@@ -176,10 +176,10 @@
       "h": 64
     },
     {
-      "id": "shape:jvN04PQiM4-uhWyT5JntJ",
+      "id": "shape:CrRlVJnSVF5G5efPFcajR",
       "type": "block",
       "x": 60,
-      "y": 902,
+      "y": 998,
       "role": "key",
       "path": "key:object_pose",
       "title": "",
@@ -188,10 +188,10 @@
       "h": 56
     },
     {
-      "id": "shape:A-ea_OPDAWMZERftYgvTQ",
+      "id": "shape:NdWhIGFKRd9T4HIDccEBK",
       "type": "block",
-      "x": 825.5,
-      "y": 902,
+      "x": 468.4375,
+      "y": 998,
       "role": "key",
       "path": "key:quality",
       "title": "",
@@ -200,10 +200,10 @@
       "h": 56
     },
     {
-      "id": "shape:QcuLPNxXBuG9djRig05ja",
+      "id": "shape:_RJYucZQH-n2NptxtjXwK",
       "type": "block",
-      "x": 1562,
-      "y": 902,
+      "x": 847.875,
+      "y": 998,
       "role": "key",
       "path": "key:grip_force",
       "title": "",
@@ -212,10 +212,10 @@
       "h": 56
     },
     {
-      "id": "shape:4zDupacR7oCb92BVkXpc9",
+      "id": "shape:yOGhHe0-H82rNkKit38DV",
       "type": "block",
-      "x": 2341.5,
-      "y": 902,
+      "x": 1270.3125,
+      "y": 998,
       "role": "key",
       "path": "key:grip_state",
       "title": "",
@@ -224,10 +224,10 @@
       "h": 56
     },
     {
-      "id": "shape:Ny26uHTgQh1gFNugE68d7",
+      "id": "shape:7uPgUYzluZF4PQaKa06qx",
       "type": "block",
-      "x": 3165,
-      "y": 902,
+      "x": 1736.75,
+      "y": 998,
       "role": "key",
       "path": "key:home_pose",
       "title": "",

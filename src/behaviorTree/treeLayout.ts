@@ -6,6 +6,8 @@
  * polylines out. ELK is not used because a tidy tree has one right answer:
  * every subtree is centred over its children and siblings keep XML order.
  */
+import { hierarchy, tree as d3tree } from 'd3-hierarchy'
+
 import type { BtNode, BtTree } from './btcppXml'
 import {
 	BT_START_H,
@@ -41,14 +43,6 @@ export const TREE_LEVEL_GAP = 84
 export const TREE_SIBLING_GAP = 40
 export const TREE_START_GAP = 40
 
-interface Extent {
-	node: BtNode
-	size: { w: number; h: number }
-	/** Cross-axis extent of the whole subtree. */
-	span: number
-	children: Extent[]
-}
-
 export function layoutTree(tree: BtTree, options: TreeLayoutOptions): BtScene {
 	const scene = emptyScene()
 	const down = options.orientation === 'down'
@@ -56,38 +50,57 @@ export function layoutTree(tree: BtTree, options: TreeLayoutOptions): BtScene {
 	const crossOf = (size: { w: number; h: number }) => (down ? size.w : size.h)
 	const flowOf = (size: { w: number; h: number }) => (down ? size.h : size.w)
 
-	const measure = (node: BtNode): Extent => {
-		const size = btNodeSize(node, sizeOptions)
-		const children = node.children.map(measure)
-		const childrenSpan = children.reduce((sum, child) => sum + child.span, 0) + TREE_SIBLING_GAP * Math.max(0, children.length - 1)
-		return { node, size, span: Math.max(crossOf(size), childrenSpan), children }
-	}
-
-	const place = (extent: Extent, crossStart: number, flowStart: number) => {
-		const cross = crossStart + (extent.span - crossOf(extent.size)) / 2
-		const rect: BtRect = down
-			? { x: cross, y: flowStart, w: extent.size.w, h: extent.size.h }
-			: { x: flowStart, y: cross, w: extent.size.w, h: extent.size.h }
-		scene.nodes.push({
-			path: extent.node.path,
-			node: extent.node,
-			rect,
-			role: isBtControlNode(extent.node) ? 'control' : 'leaf',
-		})
-		if (extent.children.length === 0) return
-		const childFlow = flowStart + flowOf(extent.size) + TREE_LEVEL_GAP
-		const childrenSpan = extent.children.reduce((sum, child) => sum + child.span, 0) + TREE_SIBLING_GAP * (extent.children.length - 1)
-		let cursor = crossStart + (extent.span - childrenSpan) / 2
-		for (const child of extent.children) {
-			place(child, cursor, childFlow)
-			cursor += child.span + TREE_SIBLING_GAP
-		}
-	}
-
 	if (tree.root) {
-		const root = measure(tree.root)
-		const startFlow = flowOf({ w: BT_START_W, h: BT_START_H }) + TREE_START_GAP
-		place(root, 0, startFlow)
+		const sizeByPath = new Map(tree.nodes.map((node) => [node.path, btNodeSize(node, sizeOptions)]))
+		const crossOfNode = (node: BtNode) => crossOf(sizeByPath.get(node.path)!)
+
+		// WHY: d3-hierarchy's tree() runs synchronously (no worker, no async
+		// resolver), so the whole projection completes inside one store
+		// transaction and an edit stays one undo step. It walks the XML's own
+		// `children` array in order, so sibling order falls out of the
+		// hierarchy for free rather than needing a stable sort afterward. And
+		// it is the canonical implementation of Buchheim et al.'s contour-
+		// packing algorithm — the thing the hand-written span-summing placer
+		// above lacked, which is why a deep, narrow subtree used to push its
+		// siblings out by its whole span instead of tucking in beside it.
+		// ELK is not used here: it is async (a worker round trip inside a
+		// tldraw transaction is the wrong shape) and general-graph-shaped,
+		// where a rooted tree needs none of its layered/edge-routing power —
+		// ELK stays for the free-graph Block canvas (organizeGraph.ts).
+		const root = hierarchy(tree.root, (node) => node.children)
+		const layout = d3tree<BtNode>()
+			.nodeSize([1, 1])
+			.separation((a, b) => (crossOfNode(a.data) + crossOfNode(b.data)) / 2 + TREE_SIBLING_GAP)
+		const positioned = layout(root)
+		const nodeByPath = new Map(positioned.descendants().map((entry) => [entry.data.path, entry]))
+
+		// d3's y is depth * a fixed unit, which is useless once cards at the
+		// same depth have different heights (a compact control beside a tall
+		// port-face leaf). Flow is ours: each depth is a row, a row's extent
+		// is its tallest card, rows stack with TREE_LEVEL_GAP between them.
+		let maxDepth = 0
+		for (const node of tree.nodes) maxDepth = Math.max(maxDepth, node.depth)
+		const rowFlowExtent: number[] = new Array(maxDepth + 1).fill(0)
+		for (const node of tree.nodes) {
+			rowFlowExtent[node.depth] = Math.max(rowFlowExtent[node.depth], flowOf(sizeByPath.get(node.path)!))
+		}
+		const rowStart: number[] = new Array(maxDepth + 1)
+		rowStart[0] = flowOf({ w: BT_START_W, h: BT_START_H }) + TREE_START_GAP
+		for (let depth = 1; depth <= maxDepth; depth += 1) {
+			rowStart[depth] = rowStart[depth - 1] + rowFlowExtent[depth - 1] + TREE_LEVEL_GAP
+		}
+
+		for (const node of tree.nodes) {
+			const size = sizeByPath.get(node.path)!
+			const crossCenter = nodeByPath.get(node.path)!.x
+			const cross = crossCenter - crossOf(size) / 2
+			const flow = rowStart[node.depth]
+			const rect: BtRect = down
+				? { x: cross, y: flow, w: size.w, h: size.h }
+				: { x: flow, y: cross, w: size.w, h: size.h }
+			scene.nodes.push({ path: node.path, node, rect, role: isBtControlNode(node) ? 'control' : 'leaf' })
+		}
+
 		const rootRect = scene.nodes[0].rect
 		scene.start = down
 			? { x: rootRect.x + rootRect.w / 2 - BT_START_W / 2, y: 0, w: BT_START_W, h: BT_START_H }
