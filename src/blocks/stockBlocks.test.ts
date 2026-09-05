@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import type { Editor } from 'tldraw'
 
-import { BLOCK_SHAPE_TYPE, getDefaultBlockProps, type BlockShape } from './blockModel'
+import { BLOCK_SHAPE_TYPE, getDefaultBlockProps, portRow, type BlockShape } from './blockModel'
 import { BlockShapeUtil } from './BlockShapeUtil'
 import { layoutBlock } from './layoutBlock'
 import {
@@ -15,6 +15,12 @@ import {
 	setAttributesMemberPorts,
 	stockBlockSourceProjection,
 	stockBlockVisibleDescription,
+	appendBundleMemberProps,
+	createBundleProps,
+	createCopyProps,
+	createUnbundleProps,
+	isBundleBlock,
+	isUnbundleBlock,
 } from './stockBlocks'
 
 describe('stock semantic Blocks', () => {
@@ -101,5 +107,45 @@ describe('stock semantic Blocks', () => {
 		const svg = renderToStaticMarkup(new BlockShapeUtil(null as unknown as Editor).toSvg(shape))
 		expect(svg).toContain('Clock · 10 Hz · prototype declares intent; does not schedule.')
 		expect(svg).toContain('author note')
+	})
+})
+
+describe('Bundle, Unbundle and Copy', () => {
+	it('uses source-shaped ordinary Port Blocks', () => {
+		const bundle = createBundleProps()
+		expect(bundle.inputs.map((port) => port.id)).toEqual(['record', 'member_1'])
+		expect(bundle.inputs[1].name).toBe('.field')
+		expect(bundle.outputs.map((port) => port.id)).toEqual(['record_out'])
+		expect(portRow(bundle.outputs[0])).toBe(1)
+		expect(bundle.description).toMatch(/does not mutate/)
+		expect(createUnbundleProps().outputs[0].name).toBe('.')
+		const copy = createCopyProps()
+		expect(copy.description).toContain('copy.copy(value)')
+		expect(copy.description).toContain('nested mutable members may remain shared')
+		expect(copy.inputs[0].row).toBe(copy.outputs[0].row)
+	})
+
+	it('recognizes only the proven Projection alias and keeps member identity stable', () => {
+		expect(isUnbundleBlock({ blockType: 'projection' })).toBe(true)
+		expect(isUnbundleBlock({ blockType: 'split' })).toBe(false)
+		expect(isBundleBlock({ blockType: 'set-attributes' })).toBe(false)
+		expect(isBundleBlock({ blockType: 'merge' })).toBe(false)
+		const updated = appendBundleMemberProps({ ...createBundleProps(getDefaultBlockProps()), inputs: [...createBundleProps().inputs, { id: 'member_4', name: '.limit', type: '', visible: true }] })
+		expect(updated.inputs.map((port) => port.id)).toContain('member_5')
+	})
+
+	it('places a new member after the greatest existing member row', () => {
+		const base = createBundleProps()
+		const once = appendBundleMemberProps(base)
+		expect(once.inputs.filter((port) => port.id.startsWith('member_')).map(portRow)).toEqual([1, 2])
+		const updated = appendBundleMemberProps({
+			...base,
+			inputs: [
+				...base.inputs,
+				{ id: 'member_4', name: '.limit', type: '', visible: true, row: 7 },
+			],
+		})
+		expect(updated.inputs.find((port) => port.id === 'member_5')?.row).toBe(3)
+		expect(updated.inputs.find((port) => port.id === 'member_5')).toBeDefined()
 	})
 })

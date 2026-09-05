@@ -582,7 +582,7 @@ export function isUnresolvedBlock(props: BlockShapeProps): boolean {
 // Compatibility export: old documents named this primitive `projection`.
 // Fresh Blocks persist the clearer data-wire vocabulary, `unbundle`.
 export const PROJECTION_BLOCK_TYPE = 'unbundle'
-export const LEGACY_PROJECTION_BLOCK_TYPES = new Set(['projection', 'split', 'unbundle'])
+export const LEGACY_PROJECTION_BLOCK_TYPES = new Set(['projection', 'unbundle'])
 
 export function isProjectionBlock(props: BlockShapeProps): boolean {
 	return LEGACY_PROJECTION_BLOCK_TYPES.has(props.blockType.trim().toLowerCase())

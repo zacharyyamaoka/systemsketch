@@ -28,7 +28,12 @@ import {
   setBlockViewProps,
   withBlockPortSection,
 } from '../blockModel'
-import { appendSetAttributesMemberProps } from '../stockBlocks'
+import {
+  appendBundleMemberProps,
+  appendSetAttributesMemberProps,
+  bundleMemberPorts,
+  isBundleBlock,
+} from '../stockBlocks'
 import {
   growBlockPortViewToFit,
   type BlockPortSectionTarget,
@@ -466,6 +471,34 @@ export function appendSetAttributesMember(
 		(props) => growBlockPortViewToFit(appendSetAttributesMemberProps(props)),
 		{ historyLabel: options.historyLabel ?? 'add attribute update' },
 	)
+}
+
+/**
+ * Add one named retained-update row to a Bundle without making its editable
+ * field spelling the port identity. Renaming `.field` therefore keeps cables.
+ */
+export function appendBundleMember(
+  editor: Editor,
+  shapeId: TLShapeId,
+  options: BlockCommandOptions = {},
+): BlockPortCreationResult {
+  let created: BlockPort | null = null
+  const result = updateBlockProps(
+    editor,
+    shapeId,
+    (props) => {
+      if (!isBundleBlock(props)) return props
+      const revealed = props.view === 'simple' ? setBlockViewProps(props, 'port') : props
+      const before = new Set(bundleMemberPorts(revealed).map((port) => port.id))
+      const appended = appendBundleMemberProps(revealed)
+      created = bundleMemberPorts(appended).find((port) => !before.has(port.id)) ?? null
+      return growBlockPortViewToFit(appended)
+    },
+    { historyLabel: options.historyLabel ?? 'add Bundle member update' },
+  )
+  if (!result.ok) return result
+  if (!created) return { ok: false, reason: 'unchanged' }
+  return { ...result, port: created }
 }
 
 /**

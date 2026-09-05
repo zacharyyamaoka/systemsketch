@@ -36,6 +36,7 @@ import { commitBlockDefinitionName, definitionBadge } from '../definitions/defin
 import { getBlockPortConnections, type BlockPortConnection } from '../connections/blockPorts'
 import { valueBlockInlet, valueBlockName, valueBlockOutlet } from '../valueBlock'
 import {
+	appendBundleMemberProps,
 	appendSetAttributesMemberProps,
 	clockTriggerLabel,
 	isClockTriggerBlock,
@@ -43,8 +44,10 @@ import {
 	isSetAttributesBlock,
 	normalizeClockTriggerConfig,
 	stockBlockSourceProjection,
+	isBundleBlock,
 } from '../stockBlocks'
 import {
+  appendBundleMember,
   appendBlockPort,
   appendBlockPortProps,
 	appendSetAttributesMember,
@@ -94,6 +97,8 @@ export interface BlockInspectorActions {
   addPort(side: BlockPortSide): void
 	/** Add a stable named member-update row to the curated Set attributes Block. */
 	addSetAttributesMember?(): void
+	/** Add a stable `.field` update row to the curated Bundle Block. */
+	addBundleMember?(): void
   updatePort(
     side: BlockPortSide,
     portId: string,
@@ -848,6 +853,7 @@ function PortSection({
   const title = side === 'inputs' ? 'Inputs' : 'Outputs'
   const ports = props[side]
   const visiblePorts = ports.filter((port) => port.visible)
+  const addsBundleMember = side === 'inputs' && isBundleBlock(props)
   const shown = (candidates: readonly BlockPort[]) => (
     managing ? candidates : candidates.filter((port) => port.visible)
   )
@@ -1190,8 +1196,9 @@ function PortSection({
             type="button"
             className="block-inspector__icon-button"
             disabled={!actions}
-            aria-label={`Add ${side === 'inputs' ? 'input' : 'output'} port`}
-            onClick={() => actions?.addPort(side)}
+            aria-label={addsBundleMember ? 'Add Bundle member update' : `Add ${side === 'inputs' ? 'input' : 'output'} port`}
+            data-testid={addsBundleMember ? 'bundle-add-member' : undefined}
+				onClick={() => addsBundleMember ? actions?.addBundleMember?.() : actions?.addPort(side)}
           >
             <PlusIcon />
           </button>
@@ -1512,6 +1519,7 @@ export function EditorBlockInspector({
         setView: (view) => void setBlockView(editor, id, view),
         addPort: (side) => void appendBlockPort(editor, id, side),
 		addSetAttributesMember: () => void appendSetAttributesMember(editor, id),
+        addBundleMember: () => void appendBundleMember(editor, id),
         updatePort: (side, portId, patch, options) =>
           void updateBlockPort(editor, id, side, portId, patch, history(options)),
         removePort: (side, portId) => void removeBlockPort(editor, id, side, portId),
@@ -1537,6 +1545,7 @@ export function EditorBlockInspector({
       setView: (view) => changeDraft((props) => setBlockViewProps(props, view)),
       addPort: (side) => changeDraft((props) => appendBlockPortProps(props, side)),
 		addSetAttributesMember: () => changeDraft((props) => appendSetAttributesMemberProps(props)),
+      addBundleMember: () => changeDraft((props) => appendBundleMemberProps(props)),
       updatePort: (side, portId, patch) =>
         changeDraft((props) => patchBlockPortProps(props, side, portId, patch)),
       removePort: (side, portId) =>

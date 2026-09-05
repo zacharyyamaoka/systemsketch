@@ -198,6 +198,8 @@ describe('the projection Block', () => {
 		expect(derived.title).toBe('ObjectRecord')
 		expect(derived.inputs[0]).toMatchObject({ id: 'in_1', name: '', type: 'ObjectRecord' })
 		expect(isProjectionBlock(derived)).toBe(true)
+		expect(isProjectionBlock(block({ blockType: 'projection' }))).toBe(true)
+		expect(isProjectionBlock(block({ blockType: 'split' }))).toBe(false)
 	})
 
 	it('fills what is empty and never overwrites what someone authored', () => {

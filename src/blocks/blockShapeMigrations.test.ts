@@ -74,10 +74,45 @@ function markerBlock(): Omit<BlockShape, 'props'> & { props: Record<string, unkn
 }
 
 describe('Block shape migrations', () => {
-	it('canonicalizes legacy data-wire spellings without changing authored ports or prose', () => {
-		const legacy = { blockType: 'set-attributes', description: 'keep this', inputs: [{ id: 'member_4', name: '.limit' }], outputs: [{ id: 'record_out' }], w: 413 }
-		expect(upgradeBlockPropsV6ToV7(legacy)).toEqual({ ...legacy, blockType: 'bundle' })
-		expect(upgradeBlockPropsV6ToV7({ ...legacy, blockType: 'split' })).toEqual({ ...legacy, blockType: 'unbundle' })
+	it('renames only the shipped Projection primitive and preserves authored vocabulary', () => {
+		const legacy = { blockType: 'projection', description: 'keep this', inputs: [{ id: 'record' }], outputs: [{ id: 'out_1', name: '.limit' }], w: 413 }
+		const canonical = upgradeBlockPropsV6ToV7(legacy)
+		expect(canonical).toEqual({ ...legacy, blockType: 'unbundle' })
+		expect(downgradeBlockPropsV7ToV6(canonical)).toEqual(legacy)
+		for (const authored of ['split', 'merge', 'set-attributes', 'bundle', 'copy']) {
+			const props = { ...legacy, blockType: authored }
+			expect(upgradeBlockPropsV6ToV7(props)).toBe(props)
+		}
+		expect(downgradeBlockPropsV7ToV6({ ...legacy, blockType: 'bundle' })).toEqual({ ...legacy, blockType: 'bundle' })
+		expect(downgradeBlockPropsV7ToV6({ ...legacy, blockType: 'copy' })).toEqual({ ...legacy, blockType: 'copy' })
+	})
+
+	it('loads a V6 Projection record as Unbundle without losing authored fields', () => {
+		const store = createTLStore({ shapeUtils: [BlockShapeUtil], bindingUtils: [] })
+		const currentSchema = store.schema.serialize()
+		const legacy = markerBlock()
+		legacy.props.blockType = 'projection'
+		legacy.props.title = 'Choose members'
+		legacy.props.description = 'keep authored prose'
+		legacy.props.inputs = [{ id: 'record', name: 'packet', type: 'Packet', visible: true, row: 0 }]
+		legacy.props.outputs = [{ id: 'out_1', name: '.limit', type: 'float', visible: true, row: 1 }]
+		const snapshot = {
+			schema: {
+				...currentSchema,
+				sequences: { ...currentSchema.sequences, [BLOCK_MIGRATION_SEQUENCE]: 6 },
+			},
+			store: { [legacy.id]: legacy },
+		} as unknown as TLStoreSnapshot
+
+		expect(() => store.loadStoreSnapshot(snapshot)).not.toThrow()
+		const migrated = store.get(legacy.id) as BlockShape
+		expect(migrated.props).toMatchObject({
+			blockType: 'unbundle',
+			title: 'Choose members',
+			description: 'keep authored prose',
+			inputs: legacy.props.inputs,
+			outputs: legacy.props.outputs,
+		})
 	})
 	it('threads one immutable props record through the named version steps', () => {
 		const v0: BlockMigrationProps = {

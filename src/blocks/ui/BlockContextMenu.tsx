@@ -29,8 +29,10 @@ import {
   type BlockPortSide,
   type BlockShape,
 } from '../blockModel'
+import { isBundleBlock } from '../stockBlocks'
 import {
   appendAccessorPort,
+  appendBundleMember,
   appendBlockPortForInlineEditing,
   blockPortIndex,
   blockPortRowCount,
@@ -224,6 +226,7 @@ function BlockContextMenuItems() {
           row: portRow(port),
           inHeader: portInHeader(port),
           rowCount: blockPortRowCount(shape.props),
+          isBundleInput: target.side === 'inputs' && isBundleBlock(shape.props),
         }
         : null
     },
@@ -241,7 +244,9 @@ function BlockContextMenuItems() {
 
   const addPort = (side: BlockPortSide) => {
     if (!selectedBlock) return
-    const result = appendBlockPortForInlineEditing(editor, selectedBlock.id, side)
+    const result = side === 'inputs' && isBundleBlock(selectedBlock.props)
+      ? appendBundleMember(editor, selectedBlock.id)
+      : appendBlockPortForInlineEditing(editor, selectedBlock.id, side)
     if (!result.ok) return
     requestBlockInlineEdit(editor, selectedBlock.id, {
       kind: 'portName',
@@ -286,6 +291,17 @@ function BlockContextMenuItems() {
   }
 
   const addPortAt = (target: BlockPortRef, offset: 0 | 1) => {
+    const shape = editor.getShape(target.shapeId)
+    if (isBlockShape(shape) && target.side === 'inputs' && isBundleBlock(shape.props)) {
+      const result = appendBundleMember(editor, target.shapeId)
+      if (!result.ok) return
+      requestBlockInlineEdit(editor, target.shapeId, {
+        kind: 'portName',
+        side: 'inputs',
+        portId: result.port.id,
+      })
+      return
+    }
     const index = blockPortIndexOf(editor, target) + offset
     const result = insertBlockPortForInlineEditing(editor, target.shapeId, target.side, index, {
       like: target.portId,
@@ -317,16 +333,26 @@ function BlockContextMenuItems() {
     <>
       {portTarget ? (
         <TldrawUiMenuGroup id="systemsketch-block-port">
-          <TldrawUiMenuItem
-            id="block-port-add-above"
-            label="Add port above"
-            onSelect={() => addPortAt(portTarget.target, 0)}
-          />
-          <TldrawUiMenuItem
-            id="block-port-add-below"
-            label="Add port below"
-            onSelect={() => addPortAt(portTarget.target, 1)}
-          />
+          {portTarget.isBundleInput ? (
+            <TldrawUiMenuItem
+              id="block-port-add-bundle-member"
+              label="Add Bundle member update"
+              onSelect={() => addPortAt(portTarget.target, 1)}
+            />
+          ) : (
+            <>
+              <TldrawUiMenuItem
+                id="block-port-add-above"
+                label="Add port above"
+                onSelect={() => addPortAt(portTarget.target, 0)}
+              />
+              <TldrawUiMenuItem
+                id="block-port-add-below"
+                label="Add port below"
+                onSelect={() => addPortAt(portTarget.target, 1)}
+              />
+            </>
+          )}
           <TldrawUiMenuItem
             id="block-port-move-up"
             label="Move up"
@@ -442,8 +468,8 @@ function BlockContextMenuItems() {
                 />
               ) : null}
               <TldrawUiMenuItem
-                id="block-add-input-port"
-                label="Input port"
+                id={isBundleBlock(selectedBlock.props) ? 'block-add-bundle-member' : 'block-add-input-port'}
+                label={isBundleBlock(selectedBlock.props) ? 'Bundle member update' : 'Input port'}
                 onSelect={() => addPort('inputs')}
               />
               <TldrawUiMenuItem

@@ -8,6 +8,7 @@ import {
   getDefaultBlockProps,
 } from '../blockModel'
 import {
+  appendBundleMember,
   appendBlockPort,
   appendBlockPortForInlineEditing,
   getBlockInspectorContext,
@@ -19,6 +20,7 @@ import {
   updateBlockPort,
 } from './blockCommands'
 import { fakeBlock, styleTestEditor } from './styleTestEditor'
+import { createBundleProps } from '../stockBlocks'
 
 function blockShape(overrides: Partial<BlockShape['props']> = {}): BlockShape {
   return {
@@ -133,6 +135,19 @@ describe('block command integration surface', () => {
 
     moveBlockPort(fixture.editor, fixture.current().id, 'inputs', 'in_2', -1)
     expect(fixture.current().props.inputs.map((port) => port.id)).toEqual(['in_2', 'in_1'])
+  })
+
+  it('adds a semantic Bundle member with stable identity in one command', () => {
+    const fixture = mockEditor(blockShape(createBundleProps()))
+    const result = appendBundleMember(fixture.editor, fixture.current().id)
+    expect(result.ok).toBe(true)
+    expect(result.ok ? result.port.id : null).toBe('member_2')
+    expect(fixture.current().props.inputs.map((port) => [port.id, port.name])).toEqual([
+      ['record', 'record'],
+      ['member_1', '.field'],
+      ['member_2', '.field'],
+    ])
+    expect(fixture.history).toEqual(['add Bundle member update'])
   })
 
   it('adds a menu-authored port and reveals the remembered Port view in one undo step', () => {

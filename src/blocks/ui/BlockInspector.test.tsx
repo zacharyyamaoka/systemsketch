@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import { getDefaultBlockProps } from '../blockModel'
 import { createValueBlockProps } from '../valueBlock'
-import { createClockTriggerProps, createSelectProps, createSetAttributesProps } from '../stockBlocks'
+import { createBundleProps, createClockTriggerProps, createSelectProps, createSetAttributesProps } from '../stockBlocks'
 import { BlockInspectorContent, type BlockInspectorActions } from './BlockInspector'
 import { BlockSelectionMiniMenu } from './BlockSelectionMiniMenu'
 
@@ -32,6 +32,16 @@ describe('Block inspector content', () => {
 		expect(clock).toContain('derived Clock source/rate declaration stays visible')
 		expect(clock).not.toContain('Shown at a glance')
 	})
+
+  it('turns Bundle input addition into a named member update', () => {
+    const html = renderToStaticMarkup(
+      <BlockInspectorContent props={createBundleProps()} status="selected" actions={noopActions} />,
+    )
+    expect(html).toContain('data-testid="bundle-add-member"')
+    expect(html).toContain('aria-label="Add Bundle member update"')
+    expect(html).not.toContain('aria-label="Add input port"')
+    expect(html).toContain('aria-label="Add output port"')
+  })
 
   it('renders the donor information architecture without the old selected header or Connections tab', () => {
     const html = renderToStaticMarkup(
@@ -241,6 +251,7 @@ const noopActions: BlockInspectorActions = {
   updateDetails() {},
   setView() {},
   addPort() {},
+  addBundleMember() {},
   updatePort() {},
   removePort() {},
   movePort() {},

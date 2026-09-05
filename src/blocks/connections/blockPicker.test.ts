@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { getDefaultBlockProps } from '../blockModel'
 import { BLOCK_PICKER_PRESETS, blockPickerPresetsFor, blockPresetProps } from './blockPicker'
 import { firstOuterPortForPolarity } from './connectionRules'
+import { blockIconEntry } from '../ui/blockIcons'
 
 describe('block picker presets', () => {
 	it('offers at least one preset that can receive a cable and one that can send', () => {
@@ -31,6 +32,12 @@ describe('block picker presets', () => {
 			const props = blockPresetProps(preset, getDefaultBlockProps())
 			expect(firstOuterPortForPolarity(props, 'sink') !== null).toBe(preset.inputs > 0)
 			expect(firstOuterPortForPolarity(props, 'source') !== null).toBe(preset.outputs > 0)
+		}
+	})
+
+	it('uses an icon that the Block renderer can actually paint', () => {
+		for (const preset of BLOCK_PICKER_PRESETS) {
+			expect(blockIconEntry(preset.icon), preset.label).not.toBeNull()
 		}
 	})
 

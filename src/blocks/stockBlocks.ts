@@ -41,12 +41,12 @@ export function isClockTriggerBlock(props: Pick<BlockShapeProps, 'blockType'>): 
 
 /** Legacy `merge` records remain readable, but Set attributes stays its own partial-update concept. */
 export function isBundleBlock(props: Pick<BlockShapeProps, 'blockType'>): boolean {
-	return [BUNDLE_BLOCK_TYPE, 'merge'].includes(props.blockType.trim().toLowerCase())
+	return props.blockType.trim().toLowerCase() === BUNDLE_BLOCK_TYPE
 }
 
 /** Legacy projection/split records mean the same field-reading operation as Unbundle. */
 export function isUnbundleBlock(props: Pick<BlockShapeProps, 'blockType'>): boolean {
-	return [UNBUNDLE_BLOCK_TYPE, 'projection', 'split'].includes(props.blockType.trim().toLowerCase())
+	return ['unbundle', 'projection'].includes(props.blockType.trim().toLowerCase())
 }
 
 function withPortView(props: BlockShapeProps): BlockShapeProps {
@@ -133,7 +133,7 @@ export function createBundleProps(base = getDefaultBlockProps()): BlockShapeProp
 			{ id: 'record', name: 'record', type: 'Record', visible: true, row: HEADER_ROW },
 			{ id: 'member_1', name: '.field', type: '', visible: true, row: FIRST_BODY_ROW },
 		],
-		outputs: [{ id: 'record_out', name: 'record', type: 'Record', visible: true, row: HEADER_ROW }],
+		outputs: [{ id: 'record_out', name: 'record', type: 'Record', visible: true, row: FIRST_BODY_ROW }],
 	}))
 }
 
@@ -158,8 +158,8 @@ export function createCopyProps(base = getDefaultBlockProps()): BlockShapeProps 
 		description: 'Shallow copy — Python copy.copy(value); nested mutable members may remain shared.',
 		blockType: COPY_BLOCK_TYPE,
 		icon: 'Copy',
-		inputs: [{ id: 'value', name: 'value', type: '', visible: true, row: HEADER_ROW }],
-		outputs: [{ id: 'value_out', name: 'value', type: '', visible: true, row: HEADER_ROW }],
+		inputs: [{ id: 'value', name: 'value', type: '', visible: true, row: FIRST_BODY_ROW }],
+		outputs: [{ id: 'value_out', name: 'value', type: '', visible: true, row: FIRST_BODY_ROW }],
 	}))
 }
 
@@ -260,7 +260,7 @@ function nextMemberId(inputs: readonly BlockPort[]): string {
 export function appendSetAttributesMemberProps(props: BlockShapeProps): BlockShapeProps {
 	if (!isSetAttributesBlock(props)) return props
 	const members = setAttributesMemberPorts(props)
-	const row = members.reduce((last, port) => Math.max(last, port.row ?? FIRST_BODY_ROW - 1), FIRST_BODY_ROW - 1) + 1
+	const row = members.reduce((last, port) => Math.max(last, port.row ?? FIRST_BODY_ROW), FIRST_BODY_ROW - 1) + 1
 	return normalizeBlockPortRows({
 		...props,
 		inputs: [...props.inputs, {
@@ -273,11 +273,16 @@ export function appendSetAttributesMemberProps(props: BlockShapeProps): BlockSha
 	})
 }
 
+/** Bundle uses the same `member_N` identity scheme as Set attributes. */
+export function bundleMemberPorts(props: Pick<BlockShapeProps, 'inputs'>): readonly BlockPort[] {
+	return setAttributesMemberPorts(props)
+}
+
 /** Bundle rows share the stable `member_N` identity strategy, without making their editable spelling identity. */
 export function appendBundleMemberProps(props: BlockShapeProps): BlockShapeProps {
 	if (!isBundleBlock(props)) return props
-	const members = setAttributesMemberPorts(props)
-	const row = members.reduce((last, port) => Math.max(last, port.row ?? FIRST_BODY_ROW - 1), FIRST_BODY_ROW - 1) + 1
+	const members = bundleMemberPorts(props)
+	const row = members.reduce((last, port) => Math.max(last, port.row ?? FIRST_BODY_ROW), FIRST_BODY_ROW - 1) + 1
 	return normalizeBlockPortRows({
 		...props,
 		inputs: [...props.inputs, {

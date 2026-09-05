@@ -248,7 +248,9 @@ export function downgradeBlockPropsV6ToV5(props: BlockMigrationProps): BlockMigr
  */
 export function upgradeBlockPropsV6ToV7(props: BlockMigrationProps): BlockMigrationProps {
 	const raw = props.stockConfig
-	if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return props
+	if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+		return props.blockType === 'projection' ? { ...props, blockType: 'unbundle' } : props
+	}
 	const config = raw as BlockMigrationProps
 	const source = config.triggerSource === 'external' || config.triggerSource === 'manual'
 		? config.triggerSource
@@ -259,7 +261,10 @@ export function upgradeBlockPropsV6ToV7(props: BlockMigrationProps): BlockMigrat
 	const stockConfig = source === 'clock'
 		? { triggerSource: source, rateHz: rate }
 		: { triggerSource: source }
-	return JSON.stringify(stockConfig) === JSON.stringify(raw) ? props : { ...props, stockConfig }
+	const next = JSON.stringify(stockConfig) === JSON.stringify(raw) ? props : { ...props, stockConfig }
+	// WHY: only the shipped Projection preset has an unambiguous new name; other
+	// editable words (including Set attributes) are authored vocabulary, not aliases.
+	return next.blockType === 'projection' ? { ...next, blockType: 'unbundle' } : next
 }
 
 function withoutSemanticRoleClaims(port: unknown): BlockMigrationProps {
@@ -275,7 +280,7 @@ export function downgradeBlockPropsV7ToV6(props: BlockMigrationProps): BlockMigr
 		const ports = props[side]
 		if (Array.isArray(ports)) next = { ...next, [side]: ports.map(withoutSemanticRoleClaims) }
 	}
-	return next
+	return next.blockType === 'unbundle' ? { ...next, blockType: 'projection' } : next
 }
 
 /**

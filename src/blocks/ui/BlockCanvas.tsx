@@ -43,6 +43,7 @@ import {
 } from '../blockModel'
 import { resolveBlockPortSemanticRole, roleLabel } from '../connections/semanticRoles'
 import { getSemanticTagsVisible } from '../semanticTagVisibility'
+import { isBundleBlock } from '../stockBlocks'
 import { effectTethers } from '../effectTether'
 import { BlockInlineEditor } from '../BlockInlineEditor'
 import { valueBlockExactText, valueBlockInlet, valueBlockLabel, valueBlockOutlet } from '../valueBlock'
@@ -60,7 +61,7 @@ import {
 	type BlockRect,
   type LaidOutBlockPort,
 } from '../layoutBlock'
-import { insertBlockPortForInlineEditing } from '../commands/blockCommands'
+import { appendBundleMember, insertBlockPortForInlineEditing } from '../commands/blockCommands'
 import {
   blockHeaderPortAddAffordance,
   blockPortAddAffordance,
@@ -1035,18 +1036,21 @@ function PortAddAffordance({
   const editor = useEditor()
   const lane = side === 'inputs' ? 'input' : 'output'
   const where = header ? 'header' : side
+  const addsBundleMember = side === 'inputs' && !header && isBundleBlock(shape.props)
 
   const addPort = useCallback(() => {
-    const result = insertBlockPortForInlineEditing(
-      editor,
-      shape.id,
-      side,
-      Number.MAX_SAFE_INTEGER,
-      header ? { section: { row: HEADER_ROW, branch: 0 } } : {},
-    )
+    const result = addsBundleMember
+      ? appendBundleMember(editor, shape.id)
+      : insertBlockPortForInlineEditing(
+          editor,
+          shape.id,
+          side,
+          Number.MAX_SAFE_INTEGER,
+          header ? { section: { row: HEADER_ROW, branch: 0 } } : {},
+        )
     if (!result.ok) return
     requestBlockInlineEdit(editor, shape.id, { kind: 'portName', side, portId: result.port.id })
-  }, [editor, header, shape.id, side])
+  }, [addsBundleMember, editor, header, shape.id, side])
 
   return (
     <div className={`BlockNode-portAdd BlockNode-portAdd--${header ? 'header' : lane}`}>
@@ -1062,8 +1066,10 @@ function PortAddAffordance({
       */}
       <div
         role="button"
-		aria-label={`Add ${header ? 'header' : lane} port to ${shape.props.title === '' ? 'this Block' : shape.props.title} on canvas`}
-        title={header ? 'Add header port' : `Add ${lane} port`}
+        aria-label={addsBundleMember
+          ? `Add Bundle member update to ${shape.props.title === '' ? 'this Block' : shape.props.title} on canvas`
+          : `Add ${header ? 'header' : lane} port to ${shape.props.title === '' ? 'this Block' : shape.props.title} on canvas`}
+        title={addsBundleMember ? 'Add Bundle member update' : header ? 'Add header port' : `Add ${lane} port`}
         className="BlockNode-portAddBead"
         data-testid={`block-port-add-${where}`}
         style={{ left: affordance.x, top: affordance.y }}

@@ -1,0 +1,465 @@
+[
+  {
+    "id": "OFFER-0",
+    "label": "the loose terminal opens the on-canvas picker",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "QUICK-GROUP",
+    "label": "Quick insert visibly leads with Bundle, Unbundle, Copy",
+    "observed": [
+      "Bundle2 in · 1 out",
+      "Unbundle1 in · 1 out",
+      "Copy1 in · 1 out"
+    ],
+    "desired": [
+      "Bundle2 in · 1 out",
+      "Unbundle1 in · 1 out",
+      "Copy1 in · 1 out"
+    ],
+    "ok": true
+  },
+  {
+    "id": "PICKER-VIEWPORT",
+    "label": "the first offer is visible and focuses Bundle",
+    "observed": {
+      "within": true,
+      "focused": "block-picker-bundle"
+    },
+    "desired": {
+      "within": true,
+      "focused": "block-picker-bundle"
+    },
+    "ok": true
+  },
+  {
+    "id": "BUNDLE-PICK",
+    "label": "a real click creates the canonical retained-record Block",
+    "observed": {
+      "title": "Bundle",
+      "inputs": [
+        "record",
+        "member_1"
+      ],
+      "output": "record_out"
+    },
+    "desired": {
+      "title": "Bundle",
+      "inputs": [
+        "record",
+        "member_1"
+      ],
+      "output": "record_out"
+    },
+    "ok": true
+  },
+  {
+    "id": "BUNDLE-BINDINGS",
+    "label": "forward insertion has two bindings and normalized source→sink terminals",
+    "observed": {
+      "count": 2,
+      "source": "shape:quick-source",
+      "sourcePort": "out",
+      "sink": "shape:3msFLRXj9MC1xBkTNJmD1",
+      "sinkPort": "record",
+      "normalized": true
+    },
+    "desired": {
+      "count": 2,
+      "source": "shape:quick-source",
+      "sourcePort": "out",
+      "sink": "shape:3msFLRXj9MC1xBkTNJmD1",
+      "sinkPort": "record",
+      "normalized": true
+    },
+    "ok": true
+  },
+  {
+    "id": "BUNDLE-MEMBER",
+    "label": "the inspector adds a distinct next .field update row",
+    "observed": [
+      {
+        "id": "member_1",
+        "name": ".field",
+        "row": 1
+      },
+      {
+        "id": "member_2",
+        "name": ".field",
+        "row": 2
+      }
+    ],
+    "desired": [
+      {
+        "id": "member_1",
+        "name": ".field",
+        "row": 1
+      },
+      {
+        "id": "member_2",
+        "name": ".field",
+        "row": 2
+      }
+    ],
+    "ok": true
+  },
+  {
+    "id": "BUNDLE-MEMBER-UNDO",
+    "label": "one Ctrl+Z removes only the added member row",
+    "observed": [
+      "record",
+      "member_1"
+    ],
+    "desired": [
+      "record",
+      "member_1"
+    ],
+    "ok": true
+  },
+  {
+    "id": "BUNDLE-CANVAS-MEMBER",
+    "label": "the canvas add bead uses the same member_N/.field grammar",
+    "observed": {
+      "id": "member_2",
+      "name": ".field",
+      "type": "",
+      "visible": true,
+      "row": 2
+    },
+    "desired": {
+      "id": "member_2",
+      "name": ".field",
+      "type": "",
+      "visible": true,
+      "row": 2
+    },
+    "ok": true
+  },
+  {
+    "id": "BUNDLE-CANVAS-MEMBER-UNDO",
+    "label": "the canvas member action is one undo step",
+    "observed": [
+      "record",
+      "member_1"
+    ],
+    "desired": [
+      "record",
+      "member_1"
+    ],
+    "ok": true
+  },
+  {
+    "id": "BUNDLE-CONTEXT-LABEL",
+    "label": "the Add menu names a Bundle member instead of a generic input",
+    "observed": {
+      "member": "Bundle member update",
+      "genericInput": false
+    },
+    "desired": {
+      "member": "Bundle member update",
+      "genericInput": false
+    },
+    "ok": true
+  },
+  {
+    "id": "BUNDLE-CONTEXT-MEMBER",
+    "label": "the context action uses the same member_N/.field grammar",
+    "observed": {
+      "id": "member_2",
+      "name": ".field",
+      "type": "",
+      "visible": true,
+      "row": 2
+    },
+    "desired": {
+      "id": "member_2",
+      "name": ".field",
+      "type": "",
+      "visible": true,
+      "row": 2
+    },
+    "ok": true
+  },
+  {
+    "id": "BUNDLE-CONTEXT-MEMBER-UNDO",
+    "label": "the context member action is one undo step",
+    "observed": [
+      "record",
+      "member_1"
+    ],
+    "desired": [
+      "record",
+      "member_1"
+    ],
+    "ok": true
+  },
+  {
+    "id": "ONE-UNDO",
+    "label": "the insertion itself remains one Ctrl+Z after separate member edits",
+    "observed": [
+      "shape:quick-sink",
+      "shape:quick-source"
+    ],
+    "desired": [
+      "shape:quick-sink",
+      "shape:quick-source"
+    ],
+    "ok": true
+  },
+  {
+    "id": "OFFER-13",
+    "label": "the loose terminal opens the on-canvas picker",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "COPY-PICK",
+    "label": "a real click creates Copy with truthful shallow-copy wording",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "COPY-BINDINGS",
+    "label": "Copy receives the dragged value through its canonical input",
+    "observed": {
+      "count": 2,
+      "source": "shape:quick-source",
+      "sourcePort": "out",
+      "sink": "shape:AZGL9XOfoK1aJxGi1lI6R",
+      "sinkPort": "value",
+      "normalized": true
+    },
+    "desired": {
+      "count": 2,
+      "source": "shape:quick-source",
+      "sourcePort": "out",
+      "sink": "shape:AZGL9XOfoK1aJxGi1lI6R",
+      "sinkPort": "value",
+      "normalized": true
+    },
+    "ok": true
+  },
+  {
+    "id": "COPY-UNDO",
+    "label": "Copy also leaves no Block or loose cable after one undo",
+    "observed": [
+      "shape:quick-sink",
+      "shape:quick-source"
+    ],
+    "desired": [
+      "shape:quick-sink",
+      "shape:quick-source"
+    ],
+    "ok": true
+  },
+  {
+    "id": "OFFER-17",
+    "label": "the loose terminal opens the on-canvas picker",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "EDGE-PLACEMENT",
+    "label": "the full picker stays in the viewport at a lower-right cable drop",
+    "observed": {
+      "first": "block-picker-bundle",
+      "within": true
+    },
+    "desired": {
+      "first": "block-picker-bundle",
+      "within": true
+    },
+    "ok": true
+  },
+  {
+    "id": "KEYBOARD-NAV",
+    "label": "ArrowDown reaches the next quick action",
+    "observed": "block-picker-projection",
+    "desired": "block-picker-projection",
+    "ok": true
+  },
+  {
+    "id": "CANCEL",
+    "label": "Escape removes the offered cable and leaves no undo artifact",
+    "observed": {
+      "ids": [
+        "shape:quick-sink",
+        "shape:quick-source"
+      ],
+      "undos": 1
+    },
+    "desired": {
+      "ids": [
+        "shape:quick-sink",
+        "shape:quick-source"
+      ],
+      "undos": 1
+    },
+    "ok": true
+  },
+  {
+    "id": "OFFER-21",
+    "label": "the loose terminal opens the on-canvas picker",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "UNDO-CANCEL",
+    "label": "Ctrl+Z cancels an unfinished offer instead of undoing earlier board work",
+    "observed": [
+      "shape:quick-sink",
+      "shape:quick-source"
+    ],
+    "desired": [
+      "shape:quick-sink",
+      "shape:quick-source"
+    ],
+    "ok": true
+  },
+  {
+    "id": "UNDO-CANCEL-REDO",
+    "label": "Ctrl+Shift+Z cannot resurrect the transient half-cable",
+    "observed": [
+      "shape:quick-sink",
+      "shape:quick-source"
+    ],
+    "desired": [
+      "shape:quick-sink",
+      "shape:quick-source"
+    ],
+    "ok": true
+  },
+  {
+    "id": "OFFER-24",
+    "label": "the loose terminal opens the on-canvas picker",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "READONLY-WHILE-OPEN",
+    "label": "a host readonly transition rolls back the open offer and its history",
+    "observed": {
+      "ids": [
+        "shape:quick-sink",
+        "shape:quick-source"
+      ],
+      "undos": 1
+    },
+    "desired": {
+      "ids": [
+        "shape:quick-sink",
+        "shape:quick-source"
+      ],
+      "undos": 1
+    },
+    "ok": true
+  },
+  {
+    "id": "OFFER-26",
+    "label": "the loose terminal opens the on-canvas picker",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "UNBUNDLE-REVERSE",
+    "label": "a backward drag chooses Unbundle as the needed producer",
+    "observed": {
+      "blockType": "unbundle",
+      "output": "."
+    },
+    "desired": {
+      "blockType": "unbundle",
+      "output": "."
+    },
+    "ok": true
+  },
+  {
+    "id": "REVERSE-BINDINGS",
+    "label": "reverse insertion still normalizes two bindings to source→sink",
+    "observed": {
+      "count": 2,
+      "source": "shape:GbF5wmMO6ApxsSTGg8Lt8",
+      "sourcePort": "out_1",
+      "sink": "shape:quick-sink",
+      "sinkPort": "in",
+      "normalized": true
+    },
+    "desired": {
+      "count": 2,
+      "source": "shape:GbF5wmMO6ApxsSTGg8Lt8",
+      "sourcePort": "out_1",
+      "sink": "shape:quick-sink",
+      "sinkPort": "in",
+      "normalized": true
+    },
+    "ok": true
+  },
+  {
+    "id": "READONLY-STATE",
+    "label": "the real canvas entered readonly mode before the pointer gesture",
+    "observed": true,
+    "desired": true,
+    "ok": true
+  },
+  {
+    "id": "READONLY",
+    "label": "readonly canvas neither offers nor creates a quick-insert cable",
+    "observed": {
+      "offered": false,
+      "ids": [
+        "shape:9AYw0WS2HmOXT2KGnv8Sp",
+        "shape:GbF5wmMO6ApxsSTGg8Lt8",
+        "shape:quick-sink",
+        "shape:quick-source"
+      ],
+      "state": {
+        "hasEditor": true,
+        "href": "http://127.0.0.1:34821/?preset=block-dev",
+        "readonly": true
+      }
+    },
+    "desired": {
+      "offered": false,
+      "ids": [
+        "shape:9AYw0WS2HmOXT2KGnv8Sp",
+        "shape:GbF5wmMO6ApxsSTGg8Lt8",
+        "shape:quick-sink",
+        "shape:quick-source"
+      ],
+      "state": {
+        "hasEditor": true,
+        "href": "http://127.0.0.1:34821/?preset=block-dev",
+        "readonly": true
+      }
+    },
+    "ok": true
+  },
+  {
+    "id": "REOPEN",
+    "label": "the reverse Unbundle and its settled cable survive reload",
+    "observed": {
+      "unbundle": true,
+      "connections": 1
+    },
+    "desired": {
+      "unbundle": true,
+      "connections": 1
+    },
+    "ok": true
+  },
+  {
+    "id": "CLEAN",
+    "label": "the real browser journey raised no local console errors",
+    "observed": [],
+    "desired": [],
+    "ok": true
+  }
+]
