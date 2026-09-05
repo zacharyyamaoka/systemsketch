@@ -88,7 +88,7 @@ A partial Block lets the current `BlockShapeUtil` fill every omitted default:
 }
 ```
 
-For an Expanded Block, set `view`, `w`, and `h`, then make child shapes use the Block's shorthand id as `parentId`.
+For an Expanded Block, set `view`, `w`, and `h`, then make child shapes use the Block's shorthand id as `parentId`. Child `x` must clear the parent's left-edge port-label column (~160px), not just sit inside the frame: Expanded ports are vertically centred in the body, so extra top-inset alone leaves `poses` / `list[Pose]` buried under the child. Keep children below the 48px header as well.
 
 **`parentId` is the only thing that makes a child a child.** `Editor.createShapes` does not adopt by geometry, so a shape merely placed inside a Frame, an Expanded Block, a Branch or a Loop is a sibling that overlaps: drag the container and it is left behind, and only a manual nudge makes tldraw's frame drop claim it. Once a shape has a `parentId`, its `x`/`y` are **parent-local** — subtract the container's position when converting. The helper fails the build if a shape's bounds sit inside a container that is not one of its ancestors.
 

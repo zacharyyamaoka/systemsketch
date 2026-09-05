@@ -9,11 +9,11 @@
       "id": "tier-easy-single",
       "type": "frame",
       "x": 0,
-      "y": 550,
+      "y": 424,
       "props": {
         "name": "EASY \u2014 single argument, no return (1\u20134)",
-        "w": 1847,
-        "h": 596
+        "w": 2649,
+        "h": 402
       },
       "meta": {
         "systemSketch": {
@@ -25,10 +25,23 @@
       }
     },
     {
+      "id": "ord-r0c0",
+      "type": "text",
+      "x": 48,
+      "y": 48,
+      "text": "1",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
       "id": "r0c0",
       "type": "block",
-      "x": 40,
-      "y": 74,
+      "x": 136,
+      "y": 48,
       "props": {
         "title": "poses.append",
         "description": "",
@@ -65,10 +78,82 @@
       "parentId": "tier-easy-single"
     },
     {
+      "id": "sub-len_consumer",
+      "type": "text",
+      "x": 630,
+      "y": 48,
+      "text": "1b",
+      "props": {
+        "size": "s",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
+      "id": "len_consumer",
+      "type": "block",
+      "x": 630,
+      "y": 70,
+      "props": {
+        "title": "len(poses)",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 374,
+        "h": 158,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "poses",
+            "type": "list[Pose]",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "count",
+            "type": "int",
+            "visible": true
+          }
+        ]
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
+      "id": "note-r0c0",
+      "type": "text",
+      "x": 136,
+      "y": 278,
+      "text": "The base case: a hook, an effect port, one tether.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
+      "id": "ord-r0c1",
+      "type": "text",
+      "x": 1104,
+      "y": 48,
+      "text": "2",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
       "id": "r0c1",
       "type": "block",
-      "x": 534,
-      "y": 74,
+      "x": 1192,
+      "y": 48,
       "props": {
         "title": "cache.update",
         "description": "",
@@ -105,10 +190,38 @@
       "parentId": "tier-easy-single"
     },
     {
+      "id": "note-r0c1",
+      "type": "text",
+      "x": 1192,
+      "y": 278,
+      "text": "Same shape, a dict this time.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
+      "id": "ord-r0c2",
+      "type": "text",
+      "x": 1631,
+      "y": 48,
+      "text": "3",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
       "id": "r0c2",
       "type": "block",
-      "x": 993,
-      "y": 74,
+      "x": 1719,
+      "y": 48,
       "props": {
         "title": "seen.add",
         "description": "",
@@ -145,10 +258,38 @@
       "parentId": "tier-easy-single"
     },
     {
+      "id": "note-r0c2",
+      "type": "text",
+      "x": 1719,
+      "y": 278,
+      "text": "A set. Adding still mutates with no return.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
+      "id": "ord-r0c3",
+      "type": "text",
+      "x": 2139,
+      "y": 48,
+      "text": "4",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-single"
+    },
+    {
       "id": "r0c3",
       "type": "block",
-      "x": 1433,
-      "y": 74,
+      "x": 2227,
+      "y": 48,
       "props": {
         "title": "buffer.extend",
         "description": "",
@@ -185,145 +326,25 @@
       "parentId": "tier-easy-single"
     },
     {
-      "id": "ord-r0c0",
-      "type": "text",
-      "x": 40,
-      "y": 40,
-      "text": "01",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-easy-single"
-    },
-    {
-      "id": "ord-r0c1",
-      "type": "text",
-      "x": 534,
-      "y": 40,
-      "text": "02",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-easy-single"
-    },
-    {
-      "id": "ord-r0c2",
-      "type": "text",
-      "x": 993,
-      "y": 40,
-      "text": "03",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-easy-single"
-    },
-    {
-      "id": "ord-r0c3",
-      "type": "text",
-      "x": 1433,
-      "y": 40,
-      "text": "04",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-easy-single"
-    },
-    {
-      "id": "note-r0c0",
-      "type": "text",
-      "x": 40,
-      "y": 308,
-      "text": "1 - the base case: a hook, an\neffect port, one tether.",
-      "props": {
-        "size": "s",
-        "color": "black",
-        "font": "sans"
-      },
-      "parentId": "tier-easy-single"
-    },
-    {
-      "id": "len_consumer",
-      "type": "block",
-      "x": 40,
-      "y": 398,
-      "props": {
-        "title": "len(poses)",
-        "description": "",
-        "blockType": "call",
-        "view": "port",
-        "w": 374,
-        "h": 158,
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "poses",
-            "type": "list[Pose]",
-            "visible": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "out_1",
-            "name": "count",
-            "type": "int",
-            "visible": true
-          }
-        ]
-      },
-      "parentId": "tier-easy-single"
-    },
-    {
-      "id": "note-r0c1",
-      "type": "text",
-      "x": 534,
-      "y": 308,
-      "text": "2 - same shape, a dict this time.",
-      "props": {
-        "size": "s",
-        "color": "black",
-        "font": "sans"
-      },
-      "parentId": "tier-easy-single"
-    },
-    {
-      "id": "note-r0c2",
-      "type": "text",
-      "x": 993,
-      "y": 308,
-      "text": "3 - a set. adding still mutates\nwith no return.",
-      "props": {
-        "size": "s",
-        "color": "black",
-        "font": "sans"
-      },
-      "parentId": "tier-easy-single"
-    },
-    {
       "id": "note-r0c3",
       "type": "text",
-      "x": 1433,
-      "y": 308,
-      "text": "4 - extend copies elements in; the\nargument still just mutates.",
+      "x": 2227,
+      "y": 278,
+      "text": "extend copies elements in; the argument still just mutates.",
       "props": {
         "size": "s",
         "color": "black",
-        "font": "sans"
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
       },
       "parentId": "tier-easy-single"
     },
     {
       "id": "wire-1",
       "type": "connection",
-      "x": 40,
-      "y": 74,
+      "x": 48,
+      "y": 48,
       "props": {
         "start": {
           "x": 0,
@@ -339,7 +360,7 @@
         "elbowRoute": null,
         "temporal": "data",
         "delayValue": "",
-        "pillPosition": 0.5,
+        "pillPosition": 0.62,
         "tunnel": false,
         "tunnelLayer": "",
         "routeMode": "automatic",
@@ -351,11 +372,11 @@
       "id": "tier-easy-reorder",
       "type": "frame",
       "x": 0,
-      "y": 1286,
+      "y": 922,
       "props": {
         "name": "EASY \u2014 in-place reordering (5\u20138)",
-        "w": 1832,
-        "h": 450
+        "w": 2120,
+        "h": 424
       },
       "meta": {
         "systemSketch": {
@@ -367,10 +388,23 @@
       }
     },
     {
+      "id": "ord-r1c0",
+      "type": "text",
+      "x": 48,
+      "y": 48,
+      "text": "5",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-reorder"
+    },
+    {
       "id": "r1c0",
       "type": "block",
-      "x": 40,
-      "y": 162,
+      "x": 136,
+      "y": 48,
       "props": {
         "title": "items.sort",
         "description": "",
@@ -401,10 +435,38 @@
       "parentId": "tier-easy-reorder"
     },
     {
+      "id": "note-r1c0",
+      "type": "text",
+      "x": 136,
+      "y": 234,
+      "text": "In-place reordering: no new list, no return, just the hook.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
+      },
+      "parentId": "tier-easy-reorder"
+    },
+    {
+      "id": "ord-r1c1",
+      "type": "text",
+      "x": 589,
+      "y": 48,
+      "text": "6",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-reorder"
+    },
+    {
       "id": "r1c1",
       "type": "block",
-      "x": 513,
-      "y": 162,
+      "x": 677,
+      "y": 48,
       "props": {
         "title": "items.reverse",
         "description": "",
@@ -435,10 +497,38 @@
       "parentId": "tier-easy-reorder"
     },
     {
+      "id": "note-r1c1",
+      "type": "text",
+      "x": 677,
+      "y": 234,
+      "text": "Same idea, cheaper: reverses the list in place.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
+      },
+      "parentId": "tier-easy-reorder"
+    },
+    {
+      "id": "ord-r1c2",
+      "type": "text",
+      "x": 1137,
+      "y": 48,
+      "text": "7",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-reorder"
+    },
+    {
       "id": "r1c2",
       "type": "block",
-      "x": 993,
-      "y": 74,
+      "x": 1225,
+      "y": 48,
       "props": {
         "title": "stack.insert",
         "description": "",
@@ -481,10 +571,38 @@
       "parentId": "tier-easy-reorder"
     },
     {
+      "id": "note-r1c2",
+      "type": "text",
+      "x": 1225,
+      "y": 322,
+      "text": "Two ordinary args plus the one that mutates.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
+      },
+      "parentId": "tier-easy-reorder"
+    },
+    {
+      "id": "ord-r1c3",
+      "type": "text",
+      "x": 1664,
+      "y": 48,
+      "text": "8",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-easy-reorder"
+    },
+    {
       "id": "r1c3",
       "type": "block",
-      "x": 1452,
-      "y": 162,
+      "x": 1752,
+      "y": 48,
       "props": {
         "title": "queue.clear",
         "description": "",
@@ -515,106 +633,17 @@
       "parentId": "tier-easy-reorder"
     },
     {
-      "id": "ord-r1c0",
-      "type": "text",
-      "x": 40,
-      "y": 128,
-      "text": "05",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-easy-reorder"
-    },
-    {
-      "id": "ord-r1c1",
-      "type": "text",
-      "x": 513,
-      "y": 128,
-      "text": "06",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-easy-reorder"
-    },
-    {
-      "id": "ord-r1c2",
-      "type": "text",
-      "x": 993,
-      "y": 40,
-      "text": "07",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-easy-reorder"
-    },
-    {
-      "id": "ord-r1c3",
-      "type": "text",
-      "x": 1452,
-      "y": 128,
-      "text": "08",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-easy-reorder"
-    },
-    {
-      "id": "note-r1c0",
-      "type": "text",
-      "x": 40,
-      "y": 352,
-      "text": "5 - in-place reordering: no new\nlist, no return, just the hook.",
-      "props": {
-        "size": "s",
-        "color": "black",
-        "font": "sans"
-      },
-      "parentId": "tier-easy-reorder"
-    },
-    {
-      "id": "note-r1c1",
-      "type": "text",
-      "x": 513,
-      "y": 352,
-      "text": "6 - same idea, cheaper: reverses\nthe list in place.",
-      "props": {
-        "size": "s",
-        "color": "black",
-        "font": "sans"
-      },
-      "parentId": "tier-easy-reorder"
-    },
-    {
-      "id": "note-r1c2",
-      "type": "text",
-      "x": 993,
-      "y": 352,
-      "text": "7 - two ordinary args plus the one\nthat mutates.",
-      "props": {
-        "size": "s",
-        "color": "black",
-        "font": "sans"
-      },
-      "parentId": "tier-easy-reorder"
-    },
-    {
       "id": "note-r1c3",
       "type": "text",
-      "x": 1452,
-      "y": 352,
-      "text": "8 - the extreme case: every\nelement leaves, none return.",
+      "x": 1752,
+      "y": 234,
+      "text": "The extreme case: every element leaves, none return.",
       "props": {
         "size": "s",
         "color": "black",
-        "font": "sans"
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
       },
       "parentId": "tier-easy-reorder"
     },
@@ -622,11 +651,11 @@
       "id": "tier-medium-dual",
       "type": "frame",
       "x": 0,
-      "y": 1876,
+      "y": 1442,
       "props": {
         "name": "MEDIUM \u2014 returns a value AND mutates (9\u201312)",
-        "w": 1862,
-        "h": 854
+        "w": 2570,
+        "h": 566
       },
       "meta": {
         "systemSketch": {
@@ -638,10 +667,23 @@
       }
     },
     {
+      "id": "ord-r2c0",
+      "type": "text",
+      "x": 48,
+      "y": 48,
+      "text": "9",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
       "id": "r2c0",
       "type": "block",
-      "x": 40,
-      "y": 162,
+      "x": 136,
+      "y": 48,
       "props": {
         "title": "pending.pop",
         "description": "",
@@ -678,10 +720,119 @@
       "parentId": "tier-medium-dual"
     },
     {
+      "id": "sub-use_item",
+      "type": "text",
+      "x": 576,
+      "y": 48,
+      "text": "9b",
+      "props": {
+        "size": "s",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "use_item",
+      "type": "block",
+      "x": 576,
+      "y": 70,
+      "props": {
+        "title": "use",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 280,
+        "h": 158,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "item",
+            "type": "Any",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "sub-len_after_pop",
+      "type": "text",
+      "x": 136,
+      "y": 234,
+      "text": "9c",
+      "props": {
+        "size": "s",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "len_after_pop",
+      "type": "block",
+      "x": 136,
+      "y": 256,
+      "props": {
+        "title": "len(pending)",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 339,
+        "h": 158,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "pending",
+            "type": "list",
+            "visible": true
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": "n",
+            "type": "int",
+            "visible": true
+          }
+        ]
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "note-r2c0",
+      "type": "text",
+      "x": 136,
+      "y": 442,
+      "text": "A real output AND an effect port, wired to two different consumers.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "ord-r2c1",
+      "type": "text",
+      "x": 956,
+      "y": 48,
+      "text": "10",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
       "id": "r2c1",
       "type": "block",
-      "x": 480,
-      "y": 118,
+      "x": 1044,
+      "y": 48,
       "props": {
         "title": "table.pop",
         "description": "",
@@ -724,10 +875,38 @@
       "parentId": "tier-medium-dual"
     },
     {
+      "id": "note-r2c1",
+      "type": "text",
+      "x": 1044,
+      "y": 278,
+      "text": "Same split as pop() above, keyed by name instead of position.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "ord-r2c2",
+      "type": "text",
+      "x": 1464,
+      "y": 48,
+      "text": "11",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
       "id": "r2c2",
       "type": "block",
-      "x": 920,
-      "y": 74,
+      "x": 1552,
+      "y": 48,
       "props": {
         "title": "table.setdefault",
         "description": "",
@@ -776,10 +955,38 @@
       "parentId": "tier-medium-dual"
     },
     {
+      "id": "note-r2c2",
+      "type": "text",
+      "x": 1552,
+      "y": 322,
+      "text": "Three inputs, a real return, and an effect port: the busiest header here.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
+      "id": "ord-r2c3",
+      "type": "text",
+      "x": 2074,
+      "y": 48,
+      "text": "12",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-dual"
+    },
+    {
       "id": "r2c3",
       "type": "block",
-      "x": 1462,
-      "y": 162,
+      "x": 2162,
+      "y": 48,
       "props": {
         "title": "queue.popleft",
         "description": "",
@@ -816,169 +1023,25 @@
       "parentId": "tier-medium-dual"
     },
     {
-      "id": "ord-r2c0",
-      "type": "text",
-      "x": 40,
-      "y": 128,
-      "text": "09",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-medium-dual"
-    },
-    {
-      "id": "ord-r2c1",
-      "type": "text",
-      "x": 480,
-      "y": 84,
-      "text": "10",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-medium-dual"
-    },
-    {
-      "id": "ord-r2c2",
-      "type": "text",
-      "x": 920,
-      "y": 40,
-      "text": "11",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-medium-dual"
-    },
-    {
-      "id": "ord-r2c3",
-      "type": "text",
-      "x": 1462,
-      "y": 128,
-      "text": "12",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-medium-dual"
-    },
-    {
-      "id": "note-r2c0",
-      "type": "text",
-      "x": 40,
-      "y": 352,
-      "text": "9 - a real output AND an effect\nport, wired to two different\nconsumers.",
-      "props": {
-        "size": "s",
-        "color": "black",
-        "font": "sans"
-      },
-      "parentId": "tier-medium-dual"
-    },
-    {
-      "id": "use_item",
-      "type": "block",
-      "x": 40,
-      "y": 466,
-      "props": {
-        "title": "use",
-        "description": "",
-        "blockType": "call",
-        "view": "port",
-        "w": 280,
-        "h": 158,
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "item",
-            "type": "Any",
-            "visible": true
-          }
-        ],
-        "outputs": []
-      },
-      "parentId": "tier-medium-dual"
-    },
-    {
-      "id": "len_after_pop",
-      "type": "block",
-      "x": 40,
-      "y": 656,
-      "props": {
-        "title": "len(pending)",
-        "description": "",
-        "blockType": "call",
-        "view": "port",
-        "w": 339,
-        "h": 158,
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "pending",
-            "type": "list",
-            "visible": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "out_1",
-            "name": "n",
-            "type": "int",
-            "visible": true
-          }
-        ]
-      },
-      "parentId": "tier-medium-dual"
-    },
-    {
-      "id": "note-r2c1",
-      "type": "text",
-      "x": 480,
-      "y": 352,
-      "text": "10 - same split as pop() above,\nkeyed by name instead of position.",
-      "props": {
-        "size": "s",
-        "color": "black",
-        "font": "sans"
-      },
-      "parentId": "tier-medium-dual"
-    },
-    {
-      "id": "note-r2c2",
-      "type": "text",
-      "x": 920,
-      "y": 352,
-      "text": "11 - three inputs, a real return,\nand an effect port: the busiest\nheader here.",
-      "props": {
-        "size": "s",
-        "color": "black",
-        "font": "sans"
-      },
-      "parentId": "tier-medium-dual"
-    },
-    {
       "id": "note-r2c3",
       "type": "text",
-      "x": 1462,
-      "y": 352,
-      "text": "12 - a deque's own pop: value and\neffect, front instead of back.",
+      "x": 2162,
+      "y": 234,
+      "text": "A deque's own pop: value and effect, front instead of back.",
       "props": {
         "size": "s",
         "color": "black",
-        "font": "sans"
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
       },
       "parentId": "tier-medium-dual"
     },
     {
       "id": "wire-9a",
       "type": "connection",
-      "x": 40,
-      "y": 74,
+      "x": 48,
+      "y": 48,
       "props": {
         "start": {
           "x": 0,
@@ -1005,8 +1068,8 @@
     {
       "id": "wire-9b",
       "type": "connection",
-      "x": 40,
-      "y": 74,
+      "x": 48,
+      "y": 48,
       "props": {
         "start": {
           "x": 0,
@@ -1022,7 +1085,7 @@
         "elbowRoute": null,
         "temporal": "data",
         "delayValue": "",
-        "pillPosition": 0.5,
+        "pillPosition": 0.68,
         "tunnel": false,
         "tunnelLayer": "",
         "routeMode": "automatic",
@@ -1033,12 +1096,12 @@
     {
       "id": "tier-medium-hard-receiver",
       "type": "frame",
-      "x": 2022,
-      "y": 550,
+      "x": 2769,
+      "y": 424,
       "props": {
         "name": "MEDIUM/HARD \u2014 multiple mutated arguments, and the receiver (13\u201316)",
-        "w": 1842,
-        "h": 878
+        "w": 2550,
+        "h": 632
       },
       "meta": {
         "systemSketch": {
@@ -1050,10 +1113,23 @@
       }
     },
     {
+      "id": "ord-r3c0",
+      "type": "text",
+      "x": 48,
+      "y": 48,
+      "text": "13",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
       "id": "r3c0",
       "type": "block",
-      "x": 40,
-      "y": 118,
+      "x": 136,
+      "y": 48,
       "props": {
         "title": "swap",
         "description": "",
@@ -1099,10 +1175,112 @@
       "parentId": "tier-medium-hard-receiver"
     },
     {
+      "id": "sub-show_a",
+      "type": "text",
+      "x": 576,
+      "y": 48,
+      "text": "13b",
+      "props": {
+        "size": "s",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
+      "id": "show_a",
+      "type": "block",
+      "x": 576,
+      "y": 70,
+      "props": {
+        "title": "show(a)",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 280,
+        "h": 158,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "a",
+            "type": "list",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
+      "id": "sub-show_b",
+      "type": "text",
+      "x": 136,
+      "y": 278,
+      "text": "13c",
+      "props": {
+        "size": "s",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
+      "id": "show_b",
+      "type": "block",
+      "x": 136,
+      "y": 300,
+      "props": {
+        "title": "show(b)",
+        "description": "",
+        "blockType": "call",
+        "view": "port",
+        "w": 280,
+        "h": 158,
+        "inputs": [
+          {
+            "id": "in_1",
+            "name": "b",
+            "type": "list",
+            "visible": true
+          }
+        ],
+        "outputs": []
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
+      "id": "note-r3c0",
+      "type": "text",
+      "x": 136,
+      "y": 486,
+      "text": "a's port sits right, b's sits left, reversed from argument order, so the tethers cross on purpose.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
+      "id": "ord-r3c1",
+      "type": "text",
+      "x": 956,
+      "y": 48,
+      "text": "14",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
       "id": "r3c1",
       "type": "block",
-      "x": 480,
-      "y": 74,
+      "x": 1044,
+      "y": 48,
       "props": {
         "title": "reconcile",
         "description": "",
@@ -1163,10 +1341,38 @@
       "parentId": "tier-medium-hard-receiver"
     },
     {
+      "id": "note-r3c1",
+      "type": "text",
+      "x": 1044,
+      "y": 322,
+      "text": "Three mutated arguments, three effect ports on one top edge.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
+      "id": "ord-r3c2",
+      "type": "text",
+      "x": 1464,
+      "y": 48,
+      "text": "15",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
       "id": "r3c2",
       "type": "block",
-      "x": 920,
-      "y": 118,
+      "x": 1552,
+      "y": 48,
       "props": {
         "title": "counter.update",
         "description": "",
@@ -1204,10 +1410,38 @@
       "parentId": "tier-medium-hard-receiver"
     },
     {
+      "id": "note-r3c2",
+      "type": "text",
+      "x": 1552,
+      "y": 278,
+      "text": "self mutates like any other argument; the receiver isn't special.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
+      "id": "ord-r3c3",
+      "type": "text",
+      "x": 2033,
+      "y": 48,
+      "text": "16",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-medium-hard-receiver"
+    },
+    {
       "id": "r3c3",
       "type": "block",
-      "x": 1421,
-      "y": 118,
+      "x": 2121,
+      "y": 48,
       "props": {
         "title": "tracker.record",
         "description": "",
@@ -1245,162 +1479,25 @@
       "parentId": "tier-medium-hard-receiver"
     },
     {
-      "id": "ord-r3c0",
-      "type": "text",
-      "x": 40,
-      "y": 84,
-      "text": "13",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-medium-hard-receiver"
-    },
-    {
-      "id": "ord-r3c1",
-      "type": "text",
-      "x": 480,
-      "y": 40,
-      "text": "14",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-medium-hard-receiver"
-    },
-    {
-      "id": "ord-r3c2",
-      "type": "text",
-      "x": 920,
-      "y": 84,
-      "text": "15",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-medium-hard-receiver"
-    },
-    {
-      "id": "ord-r3c3",
-      "type": "text",
-      "x": 1421,
-      "y": 84,
-      "text": "16",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-medium-hard-receiver"
-    },
-    {
-      "id": "note-r3c0",
-      "type": "text",
-      "x": 40,
-      "y": 352,
-      "text": "13 - a's port sits right, b's sits\nleft, reversed from argument\norder, so the cables cross on\npurpose.",
-      "props": {
-        "size": "s",
-        "color": "black",
-        "font": "sans"
-      },
-      "parentId": "tier-medium-hard-receiver"
-    },
-    {
-      "id": "show_a",
-      "type": "block",
-      "x": 40,
-      "y": 490,
-      "props": {
-        "title": "show(a)",
-        "description": "",
-        "blockType": "call",
-        "view": "port",
-        "w": 280,
-        "h": 158,
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "a",
-            "type": "list",
-            "visible": true
-          }
-        ],
-        "outputs": []
-      },
-      "parentId": "tier-medium-hard-receiver"
-    },
-    {
-      "id": "show_b",
-      "type": "block",
-      "x": 40,
-      "y": 680,
-      "props": {
-        "title": "show(b)",
-        "description": "",
-        "blockType": "call",
-        "view": "port",
-        "w": 280,
-        "h": 158,
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "b",
-            "type": "list",
-            "visible": true
-          }
-        ],
-        "outputs": []
-      },
-      "parentId": "tier-medium-hard-receiver"
-    },
-    {
-      "id": "note-r3c1",
-      "type": "text",
-      "x": 480,
-      "y": 352,
-      "text": "14 - three mutated arguments,\nthree effect ports on one top\nedge.",
-      "props": {
-        "size": "s",
-        "color": "black",
-        "font": "sans"
-      },
-      "parentId": "tier-medium-hard-receiver"
-    },
-    {
-      "id": "note-r3c2",
-      "type": "text",
-      "x": 920,
-      "y": 352,
-      "text": "15 - self mutates like any other\nargument; the receiver isn't\nspecial.",
-      "props": {
-        "size": "s",
-        "color": "black",
-        "font": "sans"
-      },
-      "parentId": "tier-medium-hard-receiver"
-    },
-    {
       "id": "note-r3c3",
       "type": "text",
-      "x": 1421,
-      "y": 352,
-      "text": "16 - same receiver pattern, a\ndifferent shape of state.",
+      "x": 2121,
+      "y": 278,
+      "text": "Same receiver pattern, a different shape of state.",
       "props": {
         "size": "s",
         "color": "black",
-        "font": "sans"
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
       },
       "parentId": "tier-medium-hard-receiver"
     },
     {
       "id": "wire-13a",
       "type": "connection",
-      "x": 40,
-      "y": 74,
+      "x": 48,
+      "y": 48,
       "props": {
         "start": {
           "x": 0,
@@ -1416,7 +1513,7 @@
         "elbowRoute": null,
         "temporal": "data",
         "delayValue": "",
-        "pillPosition": 0.5,
+        "pillPosition": 0.72,
         "tunnel": false,
         "tunnelLayer": "",
         "routeMode": "automatic",
@@ -1427,8 +1524,8 @@
     {
       "id": "wire-13b",
       "type": "connection",
-      "x": 40,
-      "y": 74,
+      "x": 48,
+      "y": 48,
       "props": {
         "start": {
           "x": 0,
@@ -1444,7 +1541,7 @@
         "elbowRoute": null,
         "temporal": "data",
         "delayValue": "",
-        "pillPosition": 0.5,
+        "pillPosition": 0.38,
         "tunnel": false,
         "tunnelLayer": "",
         "routeMode": "automatic",
@@ -1455,12 +1552,12 @@
     {
       "id": "tier-hard-nesting",
       "type": "frame",
-      "x": 2022,
-      "y": 1568,
+      "x": 2769,
+      "y": 1152,
       "props": {
         "name": "HARD \u2014 nesting, the combined pill, and a Simple-view check (17\u201320)",
-        "w": 2157,
-        "h": 1180
+        "w": 2329,
+        "h": 1148
       },
       "meta": {
         "systemSketch": {
@@ -1474,15 +1571,15 @@
     {
       "id": "run_outer",
       "type": "block",
-      "x": 40,
-      "y": 40,
+      "x": 136,
+      "y": 48,
       "props": {
         "title": "run() \u2014 expanded",
         "description": "",
         "blockType": "call",
         "view": "expanded",
-        "w": 477,
-        "h": 362,
+        "w": 589,
+        "h": 324,
         "inputs": [
           {
             "id": "in_1",
@@ -1508,8 +1605,8 @@
     {
       "id": "append_inner",
       "type": "block",
-      "x": 48,
-      "y": 110,
+      "x": 168,
+      "y": 72,
       "props": {
         "title": "append (inner)",
         "description": "",
@@ -1546,10 +1643,23 @@
       "parentId": "run_outer"
     },
     {
+      "id": "sub-run_collapsed",
+      "type": "text",
+      "x": 845,
+      "y": 48,
+      "text": "17b",
+      "props": {
+        "size": "s",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-hard-nesting"
+    },
+    {
       "id": "run_collapsed",
       "type": "block",
-      "x": 637,
-      "y": 244,
+      "x": 845,
+      "y": 70,
       "props": {
         "title": "run() \u2014 collapsed",
         "description": "",
@@ -1580,27 +1690,44 @@
       "parentId": "tier-hard-nesting"
     },
     {
-      "id": "note-17b",
+      "id": "note-17",
       "type": "text",
-      "x": 637,
-      "y": 434,
-      "text": "same run(), Port view: the\noutside, collapsed.",
+      "x": 136,
+      "y": 400,
+      "text": "Two levels, hand-marked at each: check the interior tether AND the outer's own collapsed Port view (right).",
       "props": {
         "size": "s",
         "color": "black",
-        "font": "sans"
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
       },
       "parentId": "tier-hard-nesting"
     },
     {
-      "id": "note-17",
+      "id": "note-17b",
       "type": "text",
-      "x": 40,
-      "y": 434,
-      "text": "17 - two levels, hand-marked at\neach: check the interior tether\nAND\nthe outer's own collapsed Port\nview (right).",
+      "x": 845,
+      "y": 400,
+      "text": "Same run(), Port view: the outside, collapsed.",
       "props": {
         "size": "s",
         "color": "black",
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
+      },
+      "parentId": "tier-hard-nesting"
+    },
+    {
+      "id": "ord-run_outer",
+      "type": "text",
+      "x": 48,
+      "y": 48,
+      "text": "17",
+      "props": {
+        "size": "m",
+        "color": "orange",
         "font": "sans"
       },
       "parentId": "tier-hard-nesting"
@@ -1608,15 +1735,15 @@
     {
       "id": "nest_outer",
       "type": "block",
-      "x": 1200,
-      "y": 40,
+      "x": 1476,
+      "y": 48,
       "props": {
         "title": "outer",
         "description": "",
         "blockType": "call",
         "view": "expanded",
-        "w": 566,
-        "h": 522,
+        "w": 790,
+        "h": 446,
         "inputs": [
           {
             "id": "in_1",
@@ -1642,15 +1769,15 @@
     {
       "id": "nest_mid",
       "type": "block",
-      "x": 48,
-      "y": 110,
+      "x": 168,
+      "y": 72,
       "props": {
         "title": "run() \u2014 nested",
         "description": "",
         "blockType": "call",
         "view": "expanded",
-        "w": 470,
-        "h": 362,
+        "w": 582,
+        "h": 324,
         "inputs": [
           {
             "id": "in_1",
@@ -1676,8 +1803,8 @@
     {
       "id": "nest_inner",
       "type": "block",
-      "x": 48,
-      "y": 110,
+      "x": 168,
+      "y": 72,
       "props": {
         "title": "add_pose",
         "description": "",
@@ -1716,12 +1843,27 @@
     {
       "id": "note-18",
       "type": "text",
-      "x": 1200,
-      "y": 434,
-      "text": "18 - three levels. Each is\nindependently marked; auto-follow\nacross a frame boundary is not\nwired yet.",
+      "x": 1476,
+      "y": 522,
+      "text": "Three levels. Each is independently marked; auto-follow across a frame boundary is not wired yet.",
       "props": {
         "size": "s",
         "color": "black",
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
+      },
+      "parentId": "tier-hard-nesting"
+    },
+    {
+      "id": "ord-nest_outer",
+      "type": "text",
+      "x": 1388,
+      "y": 48,
+      "text": "18",
+      "props": {
+        "size": "m",
+        "color": "orange",
         "font": "sans"
       },
       "parentId": "tier-hard-nesting"
@@ -1729,8 +1871,8 @@
     {
       "id": "wire-19",
       "type": "connection",
-      "x": 40,
-      "y": 40,
+      "x": 48,
+      "y": 48,
       "props": {
         "start": {
           "x": 0,
@@ -1746,7 +1888,7 @@
         "elbowRoute": null,
         "temporal": "delayed",
         "delayValue": "1.0",
-        "pillPosition": 0.5,
+        "pillPosition": 0.55,
         "tunnel": false,
         "tunnelLayer": "",
         "routeMode": "automatic",
@@ -1757,8 +1899,8 @@
     {
       "id": "append_delayed",
       "type": "block",
-      "x": 40,
-      "y": 800,
+      "x": 136,
+      "y": 700,
       "props": {
         "title": "append (delayed)",
         "description": "",
@@ -1795,10 +1937,23 @@
       "parentId": "tier-hard-nesting"
     },
     {
+      "id": "sub-len_delayed",
+      "type": "text",
+      "x": 678,
+      "y": 700,
+      "text": "19b",
+      "props": {
+        "size": "s",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-hard-nesting"
+    },
+    {
       "id": "len_delayed",
       "type": "block",
-      "x": 582,
-      "y": 844,
+      "x": 678,
+      "y": 722,
       "props": {
         "title": "len (delayed)",
         "description": "",
@@ -1828,12 +1983,40 @@
     {
       "id": "note-19",
       "type": "text",
-      "x": 40,
-      "y": 1034,
-      "text": "19 - one cable, both marks: mut\nz\u207b\u00b9 = 1.0.\nDrag the pill - it should move\nlike any pill.",
+      "x": 136,
+      "y": 930,
+      "text": "One cable, both marks: mut\u00a0z\u207b\u00b9\u00a0=\u00a01.0. Drag the pill \u2014 it should move like any pill.",
       "props": {
         "size": "s",
         "color": "black",
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
+      },
+      "parentId": "tier-hard-nesting"
+    },
+    {
+      "id": "ord-append_delayed",
+      "type": "text",
+      "x": 48,
+      "y": 700,
+      "text": "19",
+      "props": {
+        "size": "m",
+        "color": "orange",
+        "font": "sans"
+      },
+      "parentId": "tier-hard-nesting"
+    },
+    {
+      "id": "ord-append_simple",
+      "type": "text",
+      "x": 1138,
+      "y": 700,
+      "text": "20",
+      "props": {
+        "size": "m",
+        "color": "orange",
         "font": "sans"
       },
       "parentId": "tier-hard-nesting"
@@ -1841,7 +2024,7 @@
     {
       "id": "label-simple",
       "type": "text",
-      "x": 1062,
+      "x": 1226,
       "y": 736,
       "text": "Simple view",
       "props": {
@@ -1854,9 +2037,9 @@
     {
       "id": "label-port",
       "type": "text",
-      "x": 1653,
+      "x": 1817,
       "y": 736,
-      "text": "Port view",
+      "text": "Port view \u00b7 20b",
       "props": {
         "size": "s",
         "color": "black",
@@ -1867,8 +2050,8 @@
     {
       "id": "append_simple",
       "type": "block",
-      "x": 1062,
-      "y": 800,
+      "x": 1226,
+      "y": 768,
       "props": {
         "title": "append (simple)",
         "description": "",
@@ -1907,8 +2090,8 @@
     {
       "id": "append_simple_portview",
       "type": "block",
-      "x": 1653,
-      "y": 804,
+      "x": 1817,
+      "y": 772,
       "props": {
         "title": "append (port view)",
         "description": "",
@@ -1947,77 +2130,27 @@
     {
       "id": "note-20",
       "type": "text",
-      "x": 1062,
-      "y": 1038,
-      "text": "20 - Simple view: the hook and the\neffect port both hide\nuntil hover, like every subtle\nport does.",
+      "x": 1226,
+      "y": 1002,
+      "text": "Simple view: the hook and the effect port both hide until hover, like every subtle port does.",
       "props": {
         "size": "s",
         "color": "black",
-        "font": "sans"
-      },
-      "parentId": "tier-hard-nesting"
-    },
-    {
-      "id": "ord-run_outer",
-      "type": "text",
-      "x": 40,
-      "y": 6,
-      "text": "17",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-hard-nesting"
-    },
-    {
-      "id": "ord-nest_outer",
-      "type": "text",
-      "x": 1200,
-      "y": 6,
-      "text": "18",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-hard-nesting"
-    },
-    {
-      "id": "ord-append_delayed",
-      "type": "text",
-      "x": 40,
-      "y": 766,
-      "text": "19",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
-      },
-      "parentId": "tier-hard-nesting"
-    },
-    {
-      "id": "ord-append_simple",
-      "type": "text",
-      "x": 1062,
-      "y": 766,
-      "text": "20",
-      "props": {
-        "size": "m",
-        "color": "orange",
-        "font": "sans"
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
       },
       "parentId": "tier-hard-nesting"
     },
     {
       "id": "tier-legend",
       "type": "frame",
-      "x": 4339,
-      "y": 550,
+      "x": 5439,
+      "y": 48,
       "props": {
         "name": "Legend \u2014 what each mark means",
-        "w": 1257,
-        "h": 784
+        "w": 835,
+        "h": 1090
       },
       "meta": {
         "systemSketch": {
@@ -2031,8 +2164,8 @@
     {
       "id": "legend_src",
       "type": "block",
-      "x": 40,
-      "y": 40,
+      "x": 48,
+      "y": 48,
       "props": {
         "title": "mutates(obj)",
         "description": "",
@@ -2065,8 +2198,8 @@
     {
       "id": "legend_now",
       "type": "block",
-      "x": 499,
-      "y": 40,
+      "x": 507,
+      "y": 48,
       "props": {
         "title": "reads now",
         "description": "",
@@ -2089,8 +2222,8 @@
     {
       "id": "legend_later",
       "type": "block",
-      "x": 899,
-      "y": 40,
+      "x": 48,
+      "y": 278,
       "props": {
         "title": "reads later",
         "description": "",
@@ -2113,8 +2246,8 @@
     {
       "id": "wire-legend-a",
       "type": "connection",
-      "x": 40,
-      "y": 40,
+      "x": 48,
+      "y": 48,
       "props": {
         "start": {
           "x": 0,
@@ -2130,7 +2263,7 @@
         "elbowRoute": null,
         "temporal": "data",
         "delayValue": "",
-        "pillPosition": 0.5,
+        "pillPosition": 0.58,
         "tunnel": false,
         "tunnelLayer": "",
         "routeMode": "automatic",
@@ -2141,8 +2274,8 @@
     {
       "id": "wire-legend-b",
       "type": "connection",
-      "x": 40,
-      "y": 40,
+      "x": 48,
+      "y": 48,
       "props": {
         "start": {
           "x": 0,
@@ -2158,7 +2291,7 @@
         "elbowRoute": null,
         "temporal": "delayed",
         "delayValue": "1.0",
-        "pillPosition": 0.5,
+        "pillPosition": 0.55,
         "tunnel": false,
         "tunnelLayer": "",
         "routeMode": "automatic",
@@ -2169,47 +2302,53 @@
     {
       "id": "legend-caption-1",
       "type": "text",
-      "x": 40,
-      "y": 230,
-      "text": "hook (orange, opens left) = this\ncall rewrites its\nargument in place. Port on the top\nedge = the only\nway the mutated value leaves (no\nreturn channel).",
+      "x": 507,
+      "y": 340,
+      "text": "Hook (orange, opens left) = this call rewrites its argument in place. Dashed elbow from hook to top-edge port = tether (which argument the port belongs to). Port on the top edge = the only way the mutated value leaves.",
       "props": {
         "size": "s",
         "color": "black",
-        "font": "sans"
+        "font": "sans",
+        "w": 280,
+        "autoSize": false
       },
       "parentId": "tier-legend"
     },
     {
       "id": "legend-caption-2",
       "type": "text",
-      "x": 499,
-      "y": 230,
-      "text": "solid orange cable, 'mut' pill:\nthis value exists only because of\nthe mutation.",
+      "x": 507,
+      "y": 234,
+      "text": "Solid orange cable, mut pill: this value exists only because of the mutation.",
       "props": {
         "size": "s",
         "color": "black",
-        "font": "sans"
+        "font": "sans",
+        "w": 280,
+        "autoSize": false
       },
       "parentId": "tier-legend"
     },
     {
       "id": "legend-caption-3",
       "type": "text",
-      "x": 899,
-      "y": 230,
-      "text": "dotted orange cable, 'mut z\u207b\u00b9 =\n1.0' pill:\nsame, but read one iteration late.",
+      "x": 48,
+      "y": 464,
+      "text": "Dotted orange cable, mut\u00a0z\u207b\u00b9\u00a0=\u00a01.0 pill: same value, read one iteration late.",
       "props": {
         "size": "s",
         "color": "black",
-        "font": "sans"
+        "font": "sans",
+        "w": 339,
+        "autoSize": false
       },
       "parentId": "tier-legend"
     },
     {
       "id": "legend_producer",
       "type": "block",
-      "x": 40,
-      "y": 448,
+      "x": 48,
+      "y": 648,
       "props": {
         "title": "producer",
         "description": "",
@@ -2232,8 +2371,8 @@
     {
       "id": "legend_consumer",
       "type": "block",
-      "x": 440,
-      "y": 448,
+      "x": 448,
+      "y": 648,
       "props": {
         "title": "consumer",
         "description": "",
@@ -2256,8 +2395,8 @@
     {
       "id": "wire-legend-c",
       "type": "connection",
-      "x": 40,
-      "y": 40,
+      "x": 48,
+      "y": 48,
       "props": {
         "start": {
           "x": 0,
@@ -2284,13 +2423,30 @@
     {
       "id": "legend-caption-4",
       "type": "text",
-      "x": 40,
-      "y": 638,
-      "text": "plain cable, no pill: an ordinary\nreturn value, for contrast\n(the board's other 'grey cable'\nlook).",
+      "x": 48,
+      "y": 834,
+      "text": "Plain cable, no pill: an ordinary return value, for contrast.",
       "props": {
         "size": "s",
         "color": "black",
-        "font": "sans"
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
+      },
+      "parentId": "tier-legend"
+    },
+    {
+      "id": "legend-caption-5",
+      "type": "text",
+      "x": 448,
+      "y": 834,
+      "text": "Simple view (see 20) hides the hook and the effect port until hover. A filled effect-port dot is wired; a hollow one is not. Type-coloured rings on ordinary ports are product chrome, not mutation grammar.",
+      "props": {
+        "size": "s",
+        "color": "black",
+        "font": "sans",
+        "w": 320,
+        "autoSize": false
       },
       "parentId": "tier-legend"
     },
@@ -2298,8 +2454,8 @@
       "id": "t-title",
       "type": "text",
       "x": 0,
-      "y": 90,
-      "text": "The mutating line - 20 examples, easy to hard",
+      "y": 48,
+      "text": "The mutating line \u2014 20 examples, easy to hard",
       "props": {
         "size": "xl",
         "color": "black",
@@ -2494,10 +2650,10 @@
       "id": "orientation",
       "kind": "step",
       "x": 0,
-      "y": 210,
-      "w": 480,
-      "h": 280,
-      "text": "Start here. 20 real mutating calls, laid out easy to hard.\nEach tier below is its own labeled frame; every example is\nnumbered 1-20 in orange. See the Legend frame (bottom) for\nwhat every hook, port, and cable style means.",
+      "y": 128,
+      "w": 500,
+      "h": 240,
+      "text": "Start here. 20 real mutating calls, laid out easy to hard. Each tier below is its own labeled frame; every example is numbered 1\u201320 in orange. The Legend frame on the right names every hook, tether, port, and cable style.",
       "target": {
         "shapeId": "r0c0",
         "anchor": "top"
@@ -2507,10 +2663,10 @@
       "id": "pass",
       "kind": "pass",
       "x": 560,
-      "y": 210,
-      "w": 640,
+      "y": 128,
+      "w": 520,
       "h": 240,
-      "text": "PASS WHEN\nEvery mutated argument shows a hook.\nEvery effect port sits on the top edge.\nTethers are right-angled, and may cross when ports do.\nNesting shows independently at each level.\nThe combined pill reads mut z\u207b\u00b9 = 1.0.\nSimple view reveals the hook and the port on hover."
+      "text": "PASS WHEN\nEvery mutated argument shows a hook.\nEvery effect port sits on the top edge.\nTethers are right-angled and may cross.\nNesting is independent at each level.\nCombined pill reads mut\u00a0z\u207b\u00b9\u00a0=\u00a01.0.\nSimple view: hook and port on hover."
     }
   ]
 }

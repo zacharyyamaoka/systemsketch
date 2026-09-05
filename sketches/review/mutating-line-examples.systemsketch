@@ -3,7 +3,7 @@
     "formatVersion": 2,
     "application": "SystemSketch",
     "shapes": {
-      "text": 48,
+      "text": 56,
       "frame": 6,
       "connection": 9,
       "block": 36,
@@ -68,8 +68,8 @@
       "typeName": "pointer"
     },
     {
-      "x": 1062,
-      "y": 1038,
+      "x": 1226,
+      "y": 1002,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -80,10 +80,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -93,41 +93,14 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "20 - Simple view: the hook and the"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "effect port both hide"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "until hover, like every subtle"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "port does."
+                  "text": "Simple view: the hook and the effect port both hide until hover, like every subtle port does."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aFOEA",
+      "index": "aLAaA",
       "typeName": "shape"
     },
     {
@@ -144,6 +117,14 @@
       "typeName": "binding"
     },
     {
+      "name": "",
+      "color": "#9D5BD2",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:EXcFMFGu_GH8wMhC7ZQ9A",
+      "typeName": "user"
+    },
+    {
       "meta": {},
       "id": "binding:connection-18",
       "type": "connection",
@@ -157,8 +138,16 @@
       "typeName": "binding"
     },
     {
+      "name": "",
+      "color": "#7B66DC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:stqZwAEb-PQJvqUvHr3Gw",
+      "typeName": "user"
+    },
+    {
       "x": 0,
-      "y": 550,
+      "y": 424,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -173,18 +162,18 @@
       "id": "shape:tier-easy-single",
       "type": "frame",
       "props": {
-        "w": 1847,
-        "h": 596,
+        "w": 2649,
+        "h": 402,
         "name": "EASY — single argument, no return (1–4)",
         "color": "black"
       },
       "parentId": "page:page",
-      "index": "a17of",
+      "index": "a14U3",
       "typeName": "shape"
     },
     {
       "x": 0,
-      "y": 1286,
+      "y": 922,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -199,18 +188,18 @@
       "id": "shape:tier-easy-reorder",
       "type": "frame",
       "props": {
-        "w": 1832,
-        "h": 450,
+        "w": 2120,
+        "h": 424,
         "name": "EASY — in-place reordering (5–8)",
         "color": "black"
       },
       "parentId": "page:page",
-      "index": "a20Eb",
+      "index": "a2dyM",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 6,
+      "x": 48,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -241,12 +230,12 @@
           ]
         }
       },
-      "index": "aGFdE",
+      "index": "aB2kG8",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 766,
+      "x": 48,
+      "y": 700,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -277,12 +266,12 @@
           ]
         }
       },
-      "index": "aIlPz",
+      "index": "aFglM",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 74,
+      "x": 48,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -306,17 +295,17 @@
         "routeMode": "automatic",
         "temporal": "data",
         "delayValue": "",
-        "pillPosition": 0.5,
+        "pillPosition": 0.62,
         "tunnel": false,
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aErkn",
+      "index": "aFEyz",
       "typeName": "shape"
     },
     {
       "x": 0,
-      "y": 1876,
+      "y": 1442,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -331,18 +320,18 @@
       "id": "shape:tier-medium-dual",
       "type": "frame",
       "props": {
-        "w": 1862,
-        "h": 854,
+        "w": 2570,
+        "h": 566,
         "name": "MEDIUM — returns a value AND mutates (9–12)",
         "color": "black"
       },
       "parentId": "page:page",
-      "index": "a3wiz",
+      "index": "a3GUi",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 230,
+      "x": 507,
+      "y": 340,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -353,10 +342,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 280,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -366,63 +355,26 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "hook (orange, opens left) = this"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "call rewrites its"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "argument in place. Port on the top"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "edge = the only"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "way the mutated value leaves (no"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "return channel)."
+                  "text": "Hook (orange, opens left) = this call rewrites its argument in place. Dashed elbow from hook to top-edge port = tether (which argument the port belongs to). Port on the top edge = the only way the mutated value leaves."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aByilC",
+      "index": "aBtE7G",
       "typeName": "shape"
     },
     {
-      "x": 1062,
+      "name": "",
+      "color": "#EC5E41",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:nZ4jxBbdfVZe0ctQ2h8lv",
+      "typeName": "user"
+    },
+    {
+      "x": 1226,
       "y": 736,
       "rotation": 0,
       "isLocked": false,
@@ -454,12 +406,12 @@
           ]
         }
       },
-      "index": "aBFtn",
+      "index": "aHOfE",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 466,
+      "x": 576,
+      "y": 70,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -497,7 +449,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "uACGrSLN-2OmZGbQaC9yV",
+        "definitionId": "_vabSDaUXWLBGZsuXe8s1",
         "inputs": [
           {
             "id": "in_1",
@@ -509,12 +461,12 @@
         "outputs": [],
         "definitionKey": "use"
       },
-      "index": "aQzE1",
+      "index": "aM12b",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 74,
+      "x": 136,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -552,7 +504,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "yo9-kzXNyNCO18p0hBsbb",
+        "definitionId": "WMgdG1fhgWLbjeU1eB1iY",
         "inputs": [
           {
             "id": "in_1",
@@ -580,12 +532,12 @@
         ],
         "definitionKey": "poses_append"
       },
-      "index": "aFU41",
+      "index": "aHzqs",
       "typeName": "shape"
     },
     {
-      "x": 499,
-      "y": 230,
+      "x": 507,
+      "y": 234,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -596,10 +548,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 280,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -609,37 +561,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "solid orange cable, 'mut' pill:"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "this value exists only because of"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "the mutation."
+                  "text": "Solid orange cable, mut pill: this value exists only because of the mutation."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aC2FUb",
+      "index": "aC1pz8",
       "typeName": "shape"
     },
     {
       "x": 560,
-      "y": 210,
+      "y": 128,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -647,7 +581,7 @@
       "id": "shape:cue-pass",
       "type": "geo",
       "props": {
-        "w": 640,
+        "w": 520,
         "h": 240,
         "geo": "rectangle",
         "dash": "draw",
@@ -698,7 +632,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Tethers are right-angled, and may cross when ports do."
+                  "text": "Tethers are right-angled and may cross."
                 }
               ]
             },
@@ -707,7 +641,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Nesting shows independently at each level."
+                  "text": "Nesting is independent at each level."
                 }
               ]
             },
@@ -716,7 +650,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "The combined pill reads mut z⁻¹ = 1.0."
+                  "text": "Combined pill reads mut z⁻¹ = 1.0."
                 }
               ]
             },
@@ -725,7 +659,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Simple view reveals the hook and the port on hover."
+                  "text": "Simple view: hook and port on hover."
                 }
               ]
             }
@@ -733,7 +667,51 @@
         }
       },
       "parentId": "page:page",
-      "index": "a9PS6",
+      "index": "a93Lz",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#55B467",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:jLijs4HY8vTKVY2PCkR6j",
+      "typeName": "user"
+    },
+    {
+      "x": 576,
+      "y": 48,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:sub-show_a",
+      "type": "text",
+      "parentId": "shape:tier-medium-hard-receiver",
+      "props": {
+        "color": "orange",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "13b"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aLN4A",
       "typeName": "shape"
     },
     {
@@ -745,8 +723,8 @@
       "typeName": "camera"
     },
     {
-      "x": 40,
-      "y": 162,
+      "x": 136,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -784,7 +762,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "LP8lDg4O1e_lMcktqQMMk",
+        "definitionId": "BHFgMvgQNdQE0UURtHkOG",
         "inputs": [
           {
             "id": "in_1",
@@ -806,12 +784,12 @@
         ],
         "definitionKey": "items_sort"
       },
-      "index": "a1STX",
+      "index": "a2xyr",
       "typeName": "shape"
     },
     {
-      "x": 534,
-      "y": 74,
+      "x": 1192,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -849,7 +827,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "hrAcDSBv4EIrDontnFLh-",
+        "definitionId": "8y1H4iZI8v-JPHoREGgac",
         "inputs": [
           {
             "id": "in_1",
@@ -877,12 +855,12 @@
         ],
         "definitionKey": "cache_update"
       },
-      "index": "aG9Rn",
+      "index": "aMO9b",
       "typeName": "shape"
     },
     {
-      "x": 899,
-      "y": 230,
+      "x": 48,
+      "y": 464,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -892,6 +870,42 @@
       "parentId": "shape:tier-legend",
       "props": {
         "color": "black",
+        "size": "s",
+        "w": 339,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": false,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Dotted orange cable, mut z⁻¹ = 1.0 pill: same value, read one iteration late."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aCAptG",
+      "typeName": "shape"
+    },
+    {
+      "x": 630,
+      "y": 48,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:sub-len_consumer",
+      "type": "text",
+      "parentId": "shape:tier-easy-single",
+      "props": {
+        "color": "orange",
         "size": "s",
         "w": 8,
         "font": "sans",
@@ -906,37 +920,27 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "dotted orange cable, 'mut z⁻¹ ="
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "1.0' pill:"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "same, but read one iteration late."
+                  "text": "1b"
                 }
               ]
             }
           ]
         }
       },
-      "index": "aC3pGx",
+      "index": "aIAyb",
       "typeName": "shape"
     },
     {
+      "name": "",
+      "color": "#F04F88",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:xA8Tk_Z_z8X0zrFbL3aGJ",
+      "typeName": "user"
+    },
+    {
       "x": 0,
-      "y": 90,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -959,7 +963,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "The mutating line - 20 examples, easy to hard"
+                  "text": "The mutating line — 20 examples, easy to hard"
                 }
               ]
             }
@@ -967,12 +971,48 @@
         }
       },
       "parentId": "page:page",
-      "index": "a7OL6",
+      "index": "a7ifn",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 162,
+      "x": 136,
+      "y": 278,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:sub-show_b",
+      "type": "text",
+      "parentId": "shape:tier-medium-hard-receiver",
+      "props": {
+        "color": "orange",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "13c"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aNzUDV",
+      "typeName": "shape"
+    },
+    {
+      "x": 136,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1010,7 +1050,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "gZBMqhKtUDRRd0H_JR3-U",
+        "definitionId": "IzhrLs81Drd4rprX4J3_B",
         "inputs": [
           {
             "id": "in_1",
@@ -1038,12 +1078,12 @@
         ],
         "definitionKey": "pending_pop"
       },
-      "index": "aHDOQ",
+      "index": "aKAZU",
       "typeName": "shape"
     },
     {
-      "x": 513,
-      "y": 162,
+      "x": 677,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1081,7 +1121,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "fDd1pAAzYC6fXC_I1I4uW",
+        "definitionId": "AssTHaPdtVrFP55w_DzdA",
         "inputs": [
           {
             "id": "in_1",
@@ -1103,12 +1143,20 @@
         ],
         "definitionKey": "items_reverse"
       },
-      "index": "a2wgU",
+      "index": "a5xcf",
       "typeName": "shape"
     },
     {
-      "x": 993,
-      "y": 74,
+      "name": "",
+      "color": "#F2555A",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:n6l1ilGyWR54dYEedKLSt",
+      "typeName": "user"
+    },
+    {
+      "x": 1719,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1146,7 +1194,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "ALpJuzIO4u0N5kKcg8Krp",
+        "definitionId": "1QpC9yGEArIDHBr-69-vG",
         "inputs": [
           {
             "id": "in_1",
@@ -1174,12 +1222,12 @@
         ],
         "definitionKey": "seen_add"
       },
-      "index": "aHuz5",
+      "index": "aP9Vb",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 638,
+      "x": 48,
+      "y": 834,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1190,10 +1238,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -1203,46 +1251,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "plain cable, no pill: an ordinary"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "return value, for contrast"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "(the board's other 'grey cable'"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "look)."
+                  "text": "Plain cable, no pill: an ordinary return value, for contrast."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aCJB2",
+      "index": "aCqsz",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 118,
+      "x": 136,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1280,7 +1301,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "W28gCXA_flMaX-a0k-mU-",
+        "definitionId": "ytZSzhX6JDP9VBI9h6AyN",
         "inputs": [
           {
             "id": "in_1",
@@ -1317,12 +1338,12 @@
         ],
         "definitionKey": "swap"
       },
-      "index": "aH0Jf",
+      "index": "aKuVv",
       "typeName": "shape"
     },
     {
-      "x": 480,
-      "y": 118,
+      "x": 1044,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1360,7 +1381,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "v0XHJADwz6YdLiX1IaKKv",
+        "definitionId": "upOiF29-P16pvgxovi5Yc",
         "inputs": [
           {
             "id": "in_1",
@@ -1394,12 +1415,12 @@
         ],
         "definitionKey": "table_pop"
       },
-      "index": "aI0Ev",
+      "index": "aRIgQ",
       "typeName": "shape"
     },
     {
-      "x": 993,
-      "y": 74,
+      "x": 1225,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1437,7 +1458,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "WAMj_Dpkng2yvZIEzRRHn",
+        "definitionId": "3Q0RNE8pxyI3MmWOfeNvs",
         "inputs": [
           {
             "id": "in_1",
@@ -1471,12 +1492,12 @@
         ],
         "definitionKey": "stack_insert"
       },
-      "index": "a3sKE",
+      "index": "a89eX",
       "typeName": "shape"
     },
     {
-      "x": 1433,
-      "y": 74,
+      "x": 2227,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1514,7 +1535,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "J3ELoYgaEyZs2nolXSuhG",
+        "definitionId": "4ChqPxYubd8_KR3J6ITP2",
         "inputs": [
           {
             "id": "in_1",
@@ -1542,12 +1563,48 @@
         ],
         "definitionKey": "buffer_extend"
       },
-      "index": "aItqE",
+      "index": "aSbUc",
       "typeName": "shape"
     },
     {
-      "x": 1653,
-      "y": 804,
+      "x": 448,
+      "y": 834,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:legend-caption-5",
+      "type": "text",
+      "parentId": "shape:tier-legend",
+      "props": {
+        "color": "black",
+        "size": "s",
+        "w": 320,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": false,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Simple view (see 20) hides the hook and the effect port until hover. A filled effect-port dot is wired; a hollow one is not. Type-coloured rings on ordinary ports are product chrome, not mutation grammar."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aDMMf",
+      "typeName": "shape"
+    },
+    {
+      "x": 1817,
+      "y": 772,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1585,7 +1642,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "hJyJafkRZL3xg5rlnQA1m",
+        "definitionId": "9xS8gTxFFG9b724suzWxm",
         "inputs": [
           {
             "id": "in_1",
@@ -1613,12 +1670,12 @@
         ],
         "definitionKey": "append_port_view"
       },
-      "index": "aER72",
+      "index": "aKyln",
       "typeName": "shape"
     },
     {
-      "x": 480,
-      "y": 74,
+      "x": 1044,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1656,7 +1713,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "9_V9PYOCd64oF7YbkPgZT",
+        "definitionId": "zRrPXVtBVNaqz7epOa8Si",
         "inputs": [
           {
             "id": "in_1",
@@ -1708,12 +1765,12 @@
         ],
         "definitionKey": "reconcile"
       },
-      "index": "aIP2j",
+      "index": "aRECI",
       "typeName": "shape"
     },
     {
-      "x": 920,
-      "y": 74,
+      "x": 1552,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1751,7 +1808,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "if0P-A43HESjyLv0tOr8B",
+        "definitionId": "3b7SQcwQ89oVQ5YWysCRf",
         "inputs": [
           {
             "id": "in_1",
@@ -1791,12 +1848,12 @@
         ],
         "definitionKey": "table_setdefault"
       },
-      "index": "aJD1r",
+      "index": "aUzfW",
       "typeName": "shape"
     },
     {
-      "x": 1452,
-      "y": 162,
+      "x": 1752,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1834,7 +1891,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "S4Br2HLEBJ9nDyEpXNKTa",
+        "definitionId": "7t73n0kusvayPj8N4nHlC",
         "inputs": [
           {
             "id": "in_1",
@@ -1856,12 +1913,12 @@
         ],
         "definitionKey": "queue_clear"
       },
-      "index": "a4jur",
+      "index": "aBfFr",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 434,
+      "x": 136,
+      "y": 400,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1872,10 +1929,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -1885,55 +1942,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "17 - two levels, hand-marked at"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "each: check the interior tether"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "AND"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "the outer's own collapsed Port"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "view (right)."
+                  "text": "Two levels, hand-marked at each: check the interior tether AND the outer's own collapsed Port view (right)."
                 }
               ]
             }
           ]
         }
       },
-      "index": "a820aG",
+      "index": "aAhpzt",
       "typeName": "shape"
     },
     {
-      "x": 48,
-      "y": 110,
+      "x": 168,
+      "y": 72,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -1971,7 +1992,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "eIx9iORAu_LUukqlOA3kN",
+        "definitionId": "LpdU6btE1goSWG3NdrN7f",
         "inputs": [
           {
             "id": "in_1",
@@ -1999,12 +2020,12 @@
         ],
         "definitionKey": "add_pose"
       },
-      "index": "a1pqr",
+      "index": "a1qNv",
       "typeName": "shape"
     },
     {
-      "x": 920,
-      "y": 118,
+      "x": 1552,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -2042,7 +2063,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "s0y10NmII06OJED-S21Lq",
+        "definitionId": "Jw1N6ug-LoBYFxA9VNciG",
         "inputs": [
           {
             "id": "in_self",
@@ -2071,12 +2092,12 @@
         ],
         "definitionKey": "counter_update"
       },
-      "index": "aJ85z",
+      "index": "aUl3U",
       "typeName": "shape"
     },
     {
-      "x": 1462,
-      "y": 162,
+      "x": 2162,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -2114,7 +2135,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "q1XtO8joQVl4sOcqX9ZHK",
+        "definitionId": "WkmC30czSsK7U5SFvpt4y",
         "inputs": [
           {
             "id": "in_1",
@@ -2142,12 +2163,12 @@
         ],
         "definitionKey": "queue_popleft"
       },
-      "index": "aKzyc",
+      "index": "aXUzfV",
       "typeName": "shape"
     },
     {
-      "x": 1200,
-      "y": 434,
+      "x": 1476,
+      "y": 522,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -2158,10 +2179,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -2171,46 +2192,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "18 - three levels. Each is"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "independently marked; auto-follow"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "across a frame boundary is not"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "wired yet."
+                  "text": "Three levels. Each is independently marked; auto-follow across a frame boundary is not wired yet."
                 }
               ]
             }
           ]
         }
       },
-      "index": "a8Qh5l",
+      "index": "aBG4tl",
       "typeName": "shape"
     },
     {
-      "x": 48,
-      "y": 110,
+      "x": 168,
+      "y": 72,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -2248,7 +2242,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "7h4RSTiDaWhkIu5uVQGH-",
+        "definitionId": "we05Igev3GEvBHuf8ZigX",
         "inputs": [
           {
             "id": "in_1",
@@ -2276,12 +2270,12 @@
         ],
         "definitionKey": "append_inner"
       },
-      "index": "a19iv",
+      "index": "a11FU",
       "typeName": "shape"
     },
     {
-      "x": 637,
-      "y": 244,
+      "x": 845,
+      "y": 70,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -2319,7 +2313,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "uwDnv80kGOQ2RZtiTVolp",
+        "definitionId": "U8K8N3U6WHyh18V4M67Vd",
         "inputs": [
           {
             "id": "in_1",
@@ -2341,12 +2335,12 @@
         ],
         "definitionKey": "run_collapsed"
       },
-      "index": "a7gdxG",
+      "index": "aAX8ul",
       "typeName": "shape"
     },
     {
-      "x": 1421,
-      "y": 118,
+      "x": 2121,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -2384,7 +2378,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "hbl_gBLRdwyUDMB08co2L",
+        "definitionId": "an-6S7gjqa9EcZpBMh6DC",
         "inputs": [
           {
             "id": "in_self",
@@ -2413,12 +2407,12 @@
         ],
         "definitionKey": "tracker_record"
       },
-      "index": "aKLib",
+      "index": "aXRaf",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 1034,
+      "x": 136,
+      "y": 930,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -2429,10 +2423,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -2442,46 +2436,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "19 - one cable, both marks: mut"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "z⁻¹ = 1.0."
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "Drag the pill - it should move"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "like any pill."
+                  "text": "One cable, both marks: mut z⁻¹ = 1.0. Drag the pill — it should move like any pill."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aAgJr",
+      "index": "aENzY",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 40,
+      "x": 48,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -2519,7 +2486,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "MXOO1lZToS_VZGqTCFo5W",
+        "definitionId": "D2xc6Hj6isg44-jlFfj2q",
         "inputs": [
           {
             "id": "in_1",
@@ -2541,7 +2508,7 @@
         ],
         "definitionKey": "mutates_obj"
       },
-      "index": "aBrYY2",
+      "index": "aBS30t",
       "typeName": "shape"
     },
     {
@@ -2576,8 +2543,8 @@
       "typeName": "instance_page_state"
     },
     {
-      "x": 2022,
-      "y": 550,
+      "x": 2769,
+      "y": 424,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -2592,18 +2559,18 @@
       "id": "shape:tier-medium-hard-receiver",
       "type": "frame",
       "props": {
-        "w": 1842,
-        "h": 878,
+        "w": 2550,
+        "h": 632,
         "name": "MEDIUM/HARD — multiple mutated arguments, and the receiver (13–16)",
         "color": "black"
       },
       "parentId": "page:page",
-      "index": "a43iE",
+      "index": "a4rQv",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 448,
+      "x": 48,
+      "y": 648,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -2641,7 +2608,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "2qiZR79gK77fzfSGqNUEf",
+        "definitionId": "_PU6qS0UCpirEME4lxsgY",
         "inputs": [],
         "outputs": [
           {
@@ -2653,12 +2620,12 @@
         ],
         "definitionKey": "producer"
       },
-      "index": "aC6z7O",
+      "index": "aCKCYV",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 656,
+      "x": 136,
+      "y": 256,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -2696,7 +2663,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "HmZwZljxqfdj00lx1Otmp",
+        "definitionId": "PZb3K9uBmhahGMOdpxBBS",
         "inputs": [
           {
             "id": "in_1",
@@ -2715,12 +2682,12 @@
         ],
         "definitionKey": "len_pending"
       },
-      "index": "aRbfM",
+      "index": "aO3Nn",
       "typeName": "shape"
     },
     {
-      "x": 1200,
-      "y": 40,
+      "x": 1476,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -2729,8 +2696,8 @@
       "type": "block",
       "parentId": "shape:tier-hard-nesting",
       "props": {
-        "w": 566,
-        "h": 522,
+        "w": 790,
+        "h": 446,
         "title": "outer",
         "description": "",
         "blockType": "call",
@@ -2758,7 +2725,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "ch7NiqOgh7S6QSaOedZmO",
+        "definitionId": "TPRsajJZtwR2TY_sEJhrq",
         "inputs": [
           {
             "id": "in_1",
@@ -2780,12 +2747,12 @@
         ],
         "definitionKey": "outer"
       },
-      "index": "a8EBAl",
+      "index": "aB517G",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 308,
+      "x": 136,
+      "y": 278,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -2796,10 +2763,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -2809,28 +2776,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "1 - the base case: a hook, an"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "effect port, one tether."
+                  "text": "The base case: a hook, an effect port, one tether."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aNqSv",
+      "index": "aKM36",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 40,
+      "x": 136,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -2839,8 +2797,8 @@
       "type": "block",
       "parentId": "shape:tier-hard-nesting",
       "props": {
-        "w": 477,
-        "h": 362,
+        "w": 589,
+        "h": 324,
         "title": "run() — expanded",
         "description": "",
         "blockType": "call",
@@ -2868,7 +2826,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "-lN1AkijQGgAarsAcACFs",
+        "definitionId": "SC5kGlAhNEJwuj1eTBfHo",
         "inputs": [
           {
             "id": "in_1",
@@ -2890,12 +2848,12 @@
         ],
         "definitionKey": "run_expanded"
       },
-      "index": "a7X4hV",
+      "index": "aAFmKl",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 352,
+      "x": 136,
+      "y": 234,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -2906,10 +2864,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -2919,28 +2877,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "5 - in-place reordering: no new"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "list, no return, just the hook."
+                  "text": "In-place reordering: no new list, no return, just the hook."
                 }
               ]
             }
           ]
         }
       },
-      "index": "a9rIM",
+      "index": "a3Diz",
       "typeName": "shape"
     },
     {
-      "x": 534,
-      "y": 308,
+      "x": 1192,
+      "y": 278,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -2951,10 +2900,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -2964,27 +2913,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "2 - same shape, a dict this time."
+                  "text": "Same shape, a dict this time."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aPKaI",
+      "index": "aN39Q",
       "typeName": "shape"
     },
     {
-      "name": "",
-      "color": "#E34BA9",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:D5Cj5FsZ7HUwizj9bJYb2",
-      "typeName": "user"
-    },
-    {
-      "x": 440,
-      "y": 448,
+      "x": 448,
+      "y": 648,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3022,7 +2963,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "veWv-n0LzxzOPjKG4PHDv",
+        "definitionId": "rMUqvuDVgvk1M5Ou5lx_l",
         "inputs": [
           {
             "id": "in_1",
@@ -3034,12 +2975,12 @@
         "outputs": [],
         "definitionKey": "consumer"
       },
-      "index": "aCDvl8",
+      "index": "aCYDSV",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 352,
+      "x": 136,
+      "y": 442,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3050,10 +2991,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -3063,37 +3004,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "9 - a real output AND an effect"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "port, wired to two different"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "consumers."
+                  "text": "A real output AND an effect port, wired to two different consumers."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aP6ff",
+      "index": "aPhPn",
       "typeName": "shape"
     },
     {
-      "x": 513,
-      "y": 352,
+      "x": 677,
+      "y": 234,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3104,10 +3027,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -3117,28 +3040,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "6 - same idea, cheaper: reverses"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "the list in place."
+                  "text": "Same idea, cheaper: reverses the list in place."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aAQmf",
+      "index": "a6QoX",
       "typeName": "shape"
     },
     {
-      "x": 993,
-      "y": 308,
+      "x": 1719,
+      "y": 278,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3149,10 +3063,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -3162,28 +3076,27 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "3 - a set. adding still mutates"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "with no return."
+                  "text": "A set. Adding still mutates with no return."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aQrY6",
+      "index": "aQOkM",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 74,
+      "name": "",
+      "color": "#F04F88",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:mNm0yZnlUnWjVq4-PUm0J",
+      "typeName": "user"
+    },
+    {
+      "x": 48,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3207,17 +3120,17 @@
         "routeMode": "automatic",
         "temporal": "data",
         "delayValue": "",
-        "pillPosition": 0.5,
+        "pillPosition": 0.72,
         "tunnel": false,
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aFN8r",
+      "index": "aH03n",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 40,
+      "x": 48,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3241,19 +3154,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "01"
+                  "text": "1"
                 }
               ]
             }
           ]
         }
       },
-      "index": "aJHPn",
+      "index": "aGCxv",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 352,
+      "x": 136,
+      "y": 486,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3264,10 +3177,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -3277,46 +3190,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "13 - a's port sits right, b's sits"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "left, reversed from argument"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "order, so the cables cross on"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "purpose."
+                  "text": "a's port sits right, b's sits left, reversed from argument order, so the tethers cross on purpose."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aPBVX",
+      "index": "aPTvb",
       "typeName": "shape"
     },
     {
-      "x": 480,
-      "y": 352,
+      "x": 1044,
+      "y": 278,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3327,10 +3213,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -3340,28 +3226,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "10 - same split as pop() above,"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "keyed by name instead of position."
+                  "text": "Same split as pop() above, keyed by name instead of position."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aSplv",
+      "index": "aScen",
       "typeName": "shape"
     },
     {
-      "x": 993,
-      "y": 352,
+      "x": 1225,
+      "y": 322,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3372,10 +3249,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -3385,28 +3262,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "7 - two ordinary args plus the one"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "that mutates."
+                  "text": "Two ordinary args plus the one that mutates."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aBZxA",
+      "index": "a9Elf",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 40,
+      "x": 48,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3430,17 +3298,17 @@
         "routeMode": "automatic",
         "temporal": "data",
         "delayValue": "",
-        "pillPosition": 0.5,
+        "pillPosition": 0.58,
         "tunnel": false,
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a4w2X",
+      "index": "a4Jhj",
       "typeName": "shape"
     },
     {
-      "x": 1433,
-      "y": 308,
+      "x": 2227,
+      "y": 278,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3451,10 +3319,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -3464,28 +3332,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "4 - extend copies elements in; the"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "argument still just mutates."
+                  "text": "extend copies elements in; the argument still just mutates."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aRPcX",
+      "index": "aTWRr",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 74,
+      "x": 48,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3509,17 +3368,17 @@
         "routeMode": "automatic",
         "temporal": "data",
         "delayValue": "",
-        "pillPosition": 0.5,
+        "pillPosition": 0.38,
         "tunnel": false,
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aGNQA",
+      "index": "aITJX",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 128,
+      "x": 48,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3543,19 +3402,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "05"
+                  "text": "5"
                 }
               ]
             }
           ]
         }
       },
-      "index": "a5oC6",
+      "index": "a1Oan",
       "typeName": "shape"
     },
     {
-      "x": 534,
-      "y": 40,
+      "x": 1104,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3579,19 +3438,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "02"
+                  "text": "2"
                 }
               ]
             }
           ]
         }
       },
-      "index": "aKJJX",
+      "index": "aLD92",
       "typeName": "shape"
     },
     {
-      "x": 480,
-      "y": 352,
+      "x": 1044,
+      "y": 322,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3602,10 +3461,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -3615,37 +3474,27 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "14 - three mutated arguments,"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "three effect ports on one top"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "edge."
+                  "text": "Three mutated arguments, three effect ports on one top edge."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aSnnr",
+      "index": "aSTsE",
       "typeName": "shape"
     },
     {
-      "x": 920,
-      "y": 352,
+      "name": "",
+      "color": "#E34BA9",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:DCrBxLuYoq_yZytl674q8",
+      "typeName": "user"
+    },
+    {
+      "x": 1552,
+      "y": 322,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3656,10 +3505,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -3669,37 +3518,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "11 - three inputs, a real return,"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "and an effect port: the busiest"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "header here."
+                  "text": "Three inputs, a real return, and an effect port: the busiest header here."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aTyK6",
+      "index": "aV2zP",
       "typeName": "shape"
     },
     {
-      "x": 1452,
-      "y": 352,
+      "x": 1752,
+      "y": 234,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3710,10 +3541,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -3723,28 +3554,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "8 - the extreme case: every"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "element leaves, none return."
+                  "text": "The extreme case: every element leaves, none return."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aCUsH",
+      "index": "aCg96",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 40,
+      "x": 48,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3768,21 +3590,57 @@
         "routeMode": "automatic",
         "temporal": "delayed",
         "delayValue": "1.0",
-        "pillPosition": 0.5,
+        "pillPosition": 0.55,
         "tunnel": false,
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a5DnQ",
+      "index": "a58VM",
       "typeName": "shape"
     },
     {
       "name": "",
-      "color": "#02B1CC",
+      "color": "#39B178",
       "imageUrl": "",
       "meta": {},
-      "id": "user:_sySAO3C_nAaYQnbFPhIr",
+      "id": "user:d5cCmG_SlHmZoNHfXuISl",
       "typeName": "user"
+    },
+    {
+      "x": 576,
+      "y": 48,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:sub-use_item",
+      "type": "text",
+      "parentId": "shape:tier-medium-dual",
+      "props": {
+        "color": "orange",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "9b"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aLUAUV",
+      "typeName": "shape"
     },
     {
       "meta": {},
@@ -3803,8 +3661,8 @@
       "typeName": "binding"
     },
     {
-      "x": 1062,
-      "y": 766,
+      "x": 1138,
+      "y": 700,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3835,12 +3693,12 @@
           ]
         }
       },
-      "index": "aJbHX",
+      "index": "aGkd2",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 128,
+      "x": 48,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3864,19 +3722,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "09"
+                  "text": "9"
                 }
               ]
             }
           ]
         }
       },
-      "index": "aL7Y2",
+      "index": "aJUeB",
       "typeName": "shape"
     },
     {
-      "x": 513,
-      "y": 128,
+      "x": 589,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3900,19 +3758,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "06"
+                  "text": "6"
                 }
               ]
             }
           ]
         }
       },
-      "index": "a6tJv",
+      "index": "a4psI",
       "typeName": "shape"
     },
     {
-      "x": 993,
-      "y": 40,
+      "x": 1631,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3936,19 +3794,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "03"
+                  "text": "3"
                 }
               ]
             }
           ]
         }
       },
-      "index": "aLEn6",
+      "index": "aONcr",
       "typeName": "shape"
     },
     {
-      "x": 920,
-      "y": 352,
+      "x": 1552,
+      "y": 278,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -3959,10 +3817,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -3972,37 +3830,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "15 - self mutates like any other"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "argument; the receiver isn't"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "special."
+                  "text": "self mutates like any other argument; the receiver isn't special."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aT7wn",
+      "index": "aVxxE",
       "typeName": "shape"
     },
     {
-      "x": 1462,
-      "y": 352,
+      "x": 2162,
+      "y": 234,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4013,10 +3853,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -4026,28 +3866,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "12 - a deque's own pop: value and"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "effect, front instead of back."
+                  "text": "A deque's own pop: value and effect, front instead of back."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aUX02",
+      "index": "aYNY6",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 40,
+      "x": 48,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4076,12 +3907,48 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aBpkQ",
+      "index": "aBJ5U",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 84,
+      "x": 678,
+      "y": 700,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:sub-len_delayed",
+      "type": "text",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "color": "orange",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "19b"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aCQcz",
+      "typeName": "shape"
+    },
+    {
+      "x": 48,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4112,11 +3979,11 @@
           ]
         }
       },
-      "index": "aLOQz",
+      "index": "aJQjI",
       "typeName": "shape"
     },
     {
-      "x": 1653,
+      "x": 1817,
       "y": 736,
       "rotation": 0,
       "isLocked": false,
@@ -4141,19 +4008,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Port view"
+                  "text": "Port view · 20b"
                 }
               ]
             }
           ]
         }
       },
-      "index": "aClDn",
+      "index": "aI0JE",
       "typeName": "shape"
     },
     {
-      "x": 480,
-      "y": 84,
+      "x": 956,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4184,12 +4051,12 @@
           ]
         }
       },
-      "index": "aMG0X",
+      "index": "aQ6ZM",
       "typeName": "shape"
     },
     {
-      "x": 993,
-      "y": 40,
+      "x": 1137,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4213,19 +4080,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "07"
+                  "text": "7"
                 }
               ]
             }
           ]
         }
       },
-      "index": "a72ub",
+      "index": "a77xU",
       "typeName": "shape"
     },
     {
-      "x": 1433,
-      "y": 40,
+      "x": 2139,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4249,19 +4116,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "04"
+                  "text": "4"
                 }
               ]
             }
           ]
         }
       },
-      "index": "aMCNn",
+      "index": "aRb4j",
       "typeName": "shape"
     },
     {
-      "x": 1421,
-      "y": 352,
+      "x": 2121,
+      "y": 278,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4272,10 +4139,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -4285,28 +4152,19 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "16 - same receiver pattern, a"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "different shape of state."
+                  "text": "Same receiver pattern, a different shape of state."
                 }
               ]
             }
           ]
         }
       },
-      "index": "aUjkM",
+      "index": "aYon2",
       "typeName": "shape"
     },
     {
-      "x": 899,
-      "y": 40,
+      "x": 48,
+      "y": 278,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4344,7 +4202,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "PQXzI-QTzKEXGTXnkZctN",
+        "definitionId": "kqJq6w7kdwRzn80rUdAVZ",
         "inputs": [
           {
             "id": "in_1",
@@ -4356,12 +4214,12 @@
         "outputs": [],
         "definitionKey": "reads_later"
       },
-      "index": "aBwSl8",
+      "index": "aBff9V",
       "typeName": "shape"
     },
     {
-      "x": 480,
-      "y": 40,
+      "x": 956,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4392,12 +4250,12 @@
           ]
         }
       },
-      "index": "aMNBA",
+      "index": "aQ32U",
       "typeName": "shape"
     },
     {
-      "x": 920,
-      "y": 40,
+      "x": 1464,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4428,12 +4286,12 @@
           ]
         }
       },
-      "index": "aNutM",
+      "index": "aTqrE",
       "typeName": "shape"
     },
     {
-      "x": 1452,
-      "y": 128,
+      "x": 1664,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4457,19 +4315,27 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "08"
+                  "text": "8"
                 }
               ]
             }
           ]
         }
       },
-      "index": "a8406",
+      "index": "aAbjj",
       "typeName": "shape"
     },
     {
-      "x": 920,
-      "y": 84,
+      "name": "",
+      "color": "#E34BA9",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:IbZ1zD4y3DuxO-UEhSw2k",
+      "typeName": "user"
+    },
+    {
+      "x": 1464,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4500,12 +4366,12 @@
           ]
         }
       },
-      "index": "aNUti",
+      "index": "aTanj",
       "typeName": "shape"
     },
     {
-      "x": 1462,
-      "y": 128,
+      "x": 2074,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4536,12 +4402,12 @@
           ]
         }
       },
-      "index": "aOlpf",
+      "index": "aWkIb",
       "typeName": "shape"
     },
     {
-      "x": 1421,
-      "y": 84,
+      "x": 2033,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4572,12 +4438,12 @@
           ]
         }
       },
-      "index": "aOoDE",
+      "index": "aWLMU",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 800,
+      "x": 136,
+      "y": 700,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4615,7 +4481,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "pVMRZoRV5FL9Kjnj0LyIK",
+        "definitionId": "DiK2cyqH2h1Xm7LrNb8Bq",
         "inputs": [
           {
             "id": "in_1",
@@ -4643,12 +4509,12 @@
         ],
         "definitionKey": "append_delayed"
       },
-      "index": "a8ZlA",
+      "index": "aBbiX",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 40,
+      "x": 48,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4672,17 +4538,25 @@
         "routeMode": "automatic",
         "temporal": "delayed",
         "delayValue": "1.0",
-        "pillPosition": 0.5,
+        "pillPosition": 0.55,
         "tunnel": false,
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a7HNv",
+      "index": "aA4Kn",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 74,
+      "name": "",
+      "color": "#F04F88",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:_coZaZDN7322FLSnOA3-a",
+      "typeName": "user"
+    },
+    {
+      "x": 48,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4711,7 +4585,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aFYGU",
+      "index": "aHXxU",
       "typeName": "shape"
     },
     {
@@ -4728,8 +4602,8 @@
       "typeName": "binding"
     },
     {
-      "x": 40,
-      "y": 490,
+      "x": 576,
+      "y": 70,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4767,7 +4641,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "ytZd-HWFd83qg5EpHFl5Z",
+        "definitionId": "JGUT1LlFQCLd4OAqa8PNw",
         "inputs": [
           {
             "id": "in_1",
@@ -4779,12 +4653,20 @@
         "outputs": [],
         "definitionKey": "show_a"
       },
-      "index": "aQQfn",
+      "index": "aMvUY",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 74,
+      "name": "",
+      "color": "#EC5E41",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:7JugDO1UXaHejecas_lhb",
+      "typeName": "user"
+    },
+    {
+      "x": 48,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4808,12 +4690,12 @@
         "routeMode": "automatic",
         "temporal": "data",
         "delayValue": "",
-        "pillPosition": 0.5,
+        "pillPosition": 0.68,
         "tunnel": false,
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aGu2n",
+      "index": "aIj36",
       "typeName": "shape"
     },
     {
@@ -4830,8 +4712,16 @@
       "typeName": "binding"
     },
     {
-      "x": 40,
-      "y": 680,
+      "name": "",
+      "color": "#11B3A3",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:S-e7ZBlcfp6yri3yacPHW",
+      "typeName": "user"
+    },
+    {
+      "x": 136,
+      "y": 300,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4869,7 +4759,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "lRX8C4br0KUn74NrMFLZN",
+        "definitionId": "B6XHuOfxaE9AYT1g-pCPu",
         "inputs": [
           {
             "id": "in_1",
@@ -4881,12 +4771,12 @@
         "outputs": [],
         "definitionKey": "show_b"
       },
-      "index": "aRdtf",
+      "index": "aOiFE",
       "typeName": "shape"
     },
     {
-      "x": 240,
-      "y": 490,
+      "x": 250,
+      "y": 368,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4907,8 +4797,8 @@
           "y": 0
         },
         "end": {
-          "x": -13,
-          "y": 134
+          "x": 73,
+          "y": 104
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -4925,12 +4815,12 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a8sa0G",
+      "index": "a8wnQV",
       "typeName": "shape"
     },
     {
-      "x": 40,
-      "y": 398,
+      "x": 630,
+      "y": 70,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -4968,7 +4858,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "XT8NwR5DxqiwZqRThEN14",
+        "definitionId": "l0oNT_SZuqypxyGdDcNT3",
         "inputs": [
           {
             "id": "in_1",
@@ -4987,12 +4877,12 @@
         ],
         "definitionKey": "len_poses"
       },
-      "index": "aOtgQ",
+      "index": "aJnIn",
       "typeName": "shape"
     },
     {
-      "x": 1200,
-      "y": 6,
+      "x": 1388,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -5023,7 +4913,7 @@
           ]
         }
       },
-      "index": "aHTSE",
+      "index": "aBMhIl",
       "typeName": "shape"
     },
     {
@@ -5070,8 +4960,8 @@
       "followingUserId": null,
       "opacityForNextShape": 1,
       "stylesForNextShape": {
-        "tldraw:arrowKind": "elbow",
-        "systemsketch:connectionRouting": "elbow"
+        "tldraw:arrowKind": "arc",
+        "systemsketch:connectionRouting": "curved"
       },
       "brush": null,
       "scribbles": [],
@@ -5086,8 +4976,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1,
-        "h": 1
+        "w": 1280,
+        "h": 720
       },
       "insets": [
         false,
@@ -5116,8 +5006,8 @@
       "typeName": "instance"
     },
     {
-      "x": 2022,
-      "y": 1568,
+      "x": 2769,
+      "y": 1152,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -5132,18 +5022,18 @@
       "id": "shape:tier-hard-nesting",
       "type": "frame",
       "props": {
-        "w": 2157,
-        "h": 1180,
+        "w": 2329,
+        "h": 1148,
         "name": "HARD — nesting, the combined pill, and a Simple-view check (17–20)",
         "color": "black"
       },
       "parentId": "page:page",
-      "index": "a5GIz",
+      "index": "a5h3I",
       "typeName": "shape"
     },
     {
-      "x": 637,
-      "y": 434,
+      "x": 845,
+      "y": 400,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -5154,10 +5044,10 @@
       "props": {
         "color": "black",
         "size": "s",
-        "w": 8,
+        "w": 320,
         "font": "sans",
         "textAlign": "start",
-        "autoSize": true,
+        "autoSize": false,
         "scale": 1,
         "richText": {
           "type": "doc",
@@ -5167,23 +5057,14 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "same run(), Port view: the"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "outside, collapsed."
+                  "text": "Same run(), Port view: the outside, collapsed."
                 }
               ]
             }
           ]
         }
       },
-      "index": "a7vBzl",
+      "index": "aAycUG",
       "typeName": "shape"
     },
     {
@@ -5200,8 +5081,16 @@
       "typeName": "binding"
     },
     {
-      "x": 48,
-      "y": 110,
+      "name": "",
+      "color": "#F2555A",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:oM3PzKQuYo2gYN18nKDpI",
+      "typeName": "user"
+    },
+    {
+      "x": 168,
+      "y": 72,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -5210,8 +5099,8 @@
       "type": "block",
       "parentId": "shape:nest_outer",
       "props": {
-        "w": 470,
-        "h": 362,
+        "w": 582,
+        "h": 324,
         "title": "run() — nested",
         "description": "",
         "blockType": "call",
@@ -5239,7 +5128,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "T2m2MPKEZFKxAQvrCC5EU",
+        "definitionId": "ZhshaPsTg3zkJl1BEfjt3",
         "inputs": [
           {
             "id": "in_1",
@@ -5261,7 +5150,7 @@
         ],
         "definitionKey": "run_nested"
       },
-      "index": "a1kEX",
+      "index": "a1udI",
       "typeName": "shape"
     },
     {
@@ -5304,6 +5193,14 @@
       "typeName": "binding"
     },
     {
+      "name": "",
+      "color": "#BD54C6",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:gsH8booxX7pgc2-MUsCJG",
+      "typeName": "user"
+    },
+    {
       "meta": {},
       "id": "binding:connection-13",
       "type": "connection",
@@ -5330,8 +5227,8 @@
       "typeName": "binding"
     },
     {
-      "x": 499,
-      "y": 40,
+      "x": 507,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -5369,7 +5266,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "9aCw-GqZU64Q5BlP7KKs5",
+        "definitionId": "Mm9DTVGynmHwBXQAHCIuW",
         "inputs": [
           {
             "id": "in_1",
@@ -5381,7 +5278,43 @@
         "outputs": [],
         "definitionKey": "reads_now"
       },
-      "index": "aBufM4",
+      "index": "aBbIhV",
+      "typeName": "shape"
+    },
+    {
+      "x": 845,
+      "y": 48,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:sub-run_collapsed",
+      "type": "text",
+      "parentId": "shape:tier-hard-nesting",
+      "props": {
+        "color": "orange",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "17b"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aAOrYV",
       "typeName": "shape"
     },
     {
@@ -5399,7 +5332,7 @@
     },
     {
       "x": 0,
-      "y": 210,
+      "y": 128,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -5407,8 +5340,8 @@
       "id": "shape:cue-orientation",
       "type": "geo",
       "props": {
-        "w": 480,
-        "h": 280,
+        "w": 500,
+        "h": 240,
         "geo": "rectangle",
         "dash": "draw",
         "growY": 0,
@@ -5431,34 +5364,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Start here. 20 real mutating calls, laid out easy to hard."
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "Each tier below is its own labeled frame; every example is"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "numbered 1-20 in orange. See the Legend frame (bottom) for"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "what every hook, port, and cable style means."
+                  "text": "Start here. 20 real mutating calls, laid out easy to hard. Each tier below is its own labeled frame; every example is numbered 1–20 in orange. The Legend frame on the right names every hook, tether, port, and cable style."
                 }
               ]
             }
@@ -5466,7 +5372,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a8fM6",
+      "index": "a8EEM",
       "typeName": "shape"
     },
     {
@@ -5483,8 +5389,8 @@
       "typeName": "binding"
     },
     {
-      "x": 1062,
-      "y": 800,
+      "x": 1226,
+      "y": 768,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -5522,7 +5428,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "OIlb07hJC1Ct54td_MQio",
+        "definitionId": "X8MYG4oMkJnw0EHBqzGnu",
         "inputs": [
           {
             "id": "in_1",
@@ -5550,7 +5456,7 @@
         ],
         "definitionKey": "append_simple"
       },
-      "index": "aDDyn",
+      "index": "aJC3f",
       "typeName": "shape"
     },
     {
@@ -5567,6 +5473,42 @@
       "typeName": "binding"
     },
     {
+      "x": 136,
+      "y": 234,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:sub-len_after_pop",
+      "type": "text",
+      "parentId": "shape:tier-medium-dual",
+      "props": {
+        "color": "orange",
+        "size": "s",
+        "w": 8,
+        "font": "sans",
+        "textAlign": "start",
+        "autoSize": true,
+        "scale": 1,
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "9c"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": "aNC6f",
+      "typeName": "shape"
+    },
+    {
       "meta": {},
       "id": "binding:connection-8",
       "type": "connection",
@@ -5580,8 +5522,8 @@
       "typeName": "binding"
     },
     {
-      "x": 582,
-      "y": 844,
+      "x": 678,
+      "y": 722,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -5619,7 +5561,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "d8zet_0zEobNLlwLSWow0",
+        "definitionId": "0YgeCn2SU9TS8P0lkk1bk",
         "inputs": [
           {
             "id": "in_1",
@@ -5638,7 +5580,7 @@
         ],
         "definitionKey": "len_delayed"
       },
-      "index": "a9yJX",
+      "index": "aDyzL",
       "typeName": "shape"
     },
     {
@@ -5668,8 +5610,8 @@
       "typeName": "binding"
     },
     {
-      "x": 4339,
-      "y": 550,
+      "x": 5439,
+      "y": 48,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -5684,13 +5626,13 @@
       "id": "shape:tier-legend",
       "type": "frame",
       "props": {
-        "w": 1257,
-        "h": 784,
+        "w": 835,
+        "h": 1090,
         "name": "Legend — what each mark means",
         "color": "black"
       },
       "parentId": "page:page",
-      "index": "a6jiQ",
+      "index": "a66KU",
       "typeName": "shape"
     }
   ]
