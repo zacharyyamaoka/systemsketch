@@ -1,0 +1,90 @@
+{
+  "feature": "Block member layout",
+  "viewport": { "width": 1680, "height": 980 },
+  "pages": [{ "id": "review", "name": "Review" }],
+  "shapes": [
+    {
+      "id": "class",
+      "type": "block",
+      "x": 530,
+      "y": 100,
+      "props": {
+        "title": "Class",
+        "description": "Two ordinary direct child Blocks",
+        "blockType": "Definition",
+        "view": "expanded",
+        "w": 600,
+        "h": 760,
+        "memberLayout": "inset",
+        "inputs": [],
+        "outputs": []
+      }
+    },
+    {
+      "id": "init",
+      "type": "block",
+      "parentId": "class",
+      "x": 12,
+      "y": 60,
+      "props": {
+        "title": "__init__()",
+        "description": "Initialize the instance",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 576,
+        "h": 260,
+        "inputs": [{ "id": "self", "name": "self", "type": "Class", "visible": true }],
+        "outputs": []
+      }
+    },
+    {
+      "id": "call",
+      "type": "block",
+      "parentId": "class",
+      "x": 12,
+      "y": 332,
+      "props": {
+        "title": "__call__()",
+        "description": "Run the instance",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 576,
+        "h": 260,
+        "inputs": [{ "id": "self", "name": "self", "type": "Class", "visible": true }],
+        "outputs": [{ "id": "result", "name": "result", "type": "Any", "visible": true }]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Select Class. In the inspector, set Member layout to Edge-to-edge.",
+      "x": 20,
+      "y": 180,
+      "w": 390,
+      "h": 112,
+      "target": { "shapeId": "class", "anchor": "left", "dy": -180 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Switch back to Inset. The same direct members become separated cards again.",
+      "x": 20,
+      "y": 440,
+      "w": 390,
+      "h": 112,
+      "target": { "shapeId": "class", "anchor": "left", "dy": 140 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN the two child Blocks join edge-to-edge, return to 12 px gutters, remain children of Class, and the inspector state follows each choice.",
+      "x": 1220,
+      "y": 340,
+      "w": 410,
+      "h": 180
+    }
+  ]
+}

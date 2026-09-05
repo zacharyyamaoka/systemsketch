@@ -43,6 +43,29 @@ describe('Block inspector content', () => {
     expect(html).toContain('aria-label="Add output port"')
   })
 
+	it('offers the structural member layout only for an Expanded Block', () => {
+		const expanded = renderToStaticMarkup(
+			<BlockInspectorContent
+				props={{ ...getDefaultBlockProps(), view: 'expanded' }}
+				status="selected"
+				actions={noopActions}
+			/>,
+		)
+		const port = renderToStaticMarkup(
+			<BlockInspectorContent
+				props={{ ...getDefaultBlockProps(), view: 'port' }}
+				status="selected"
+				actions={noopActions}
+			/>,
+		)
+
+		expect(expanded).toContain('aria-label="Member layout"')
+		expect(expanded).toContain('data-testid="block-member-layout-inset"')
+		expect(expanded).toContain('data-testid="block-member-layout-edge-to-edge"')
+		expect(expanded).toMatch(/aria-pressed="true"[^>]*data-testid="block-member-layout-inset"/)
+		expect(port).not.toContain('aria-label="Member layout"')
+	})
+
   it('renders the donor information architecture without the old selected header or Connections tab', () => {
     const html = renderToStaticMarkup(
       <BlockInspectorContent
@@ -249,6 +272,7 @@ describe('Block inspector content', () => {
 const noopActions: BlockInspectorActions = {
   updateDetails() {},
   setView() {},
+  setMemberLayout() {},
   addPort() {},
   addBundleMember() {},
   updatePort() {},

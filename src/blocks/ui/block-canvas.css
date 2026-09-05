@@ -23,6 +23,22 @@
   overflow: visible;
 }
 
+/*
+ * A direct child of an Edge-to-edge Block becomes one segment of its parent's
+ * continuous stack. The command has already aligned real shape geometry, so
+ * paint, ports, hit testing and wires remain on the same bounds. Inset keeps
+ * the ordinary raised-card chrome untouched.
+ */
+.systemsketch-block-canvas[data-parent-member-layout='edge-to-edge'] {
+  border-radius: 0;
+  box-shadow: inset 0 1px 0 var(--ss-border);
+}
+
+.systemsketch-block-canvas[data-parent-member-layout='edge-to-edge'] .NodeShape-heading,
+.systemsketch-block-canvas[data-parent-member-layout='edge-to-edge'] .NodeShape-footer {
+  border-radius: 0;
+}
+
 .systemsketch-block-canvas .BlockNode-layer {
   position: absolute;
   inset: 0;

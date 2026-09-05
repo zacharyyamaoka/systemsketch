@@ -14,11 +14,14 @@ import { LiveTextArea, LiveTextInput, useLiveField } from '../../fields'
 import { EMPTY_FIELD_GUIDANCE } from '../../fields/emptyFieldGuidance'
 
 import {
+  BLOCK_MEMBER_LAYOUTS,
   BLOCK_PRESENTATION_VIEWS,
+  blockMemberLayout,
   isBlockShape,
   HEADER_ROW,
   type BlockPort,
   type BlockPortSide,
+  type BlockMemberLayout,
   type BlockShapeProps,
   type BlockPresentationView,
   type SemanticPortRole,
@@ -73,6 +76,7 @@ import {
   updateBlockPort,
   type BlockDetailsPatch,
 } from '../commands/blockCommands'
+import { setBlockMemberLayout } from '../memberLayout'
 import type { BlockPortSectionTarget } from '../ports/portAffordances'
 import {
   setBlockPortLayoutForSelection,
@@ -108,6 +112,7 @@ export interface BlockEditOptions {
 export interface BlockInspectorActions {
   updateDetails(patch: BlockDetailsPatch, options?: BlockEditOptions): void
   setView(view: BlockPresentationView): void
+  setMemberLayout(memberLayout: BlockMemberLayout): void
   addPort(side: BlockPortSide): void
 	/** Add a stable named member-update row to the curated Set attributes Block. */
 	addSetAttributesMember?(): void
@@ -1648,6 +1653,28 @@ export function BlockInspectorContent({
                 <p className="block-inspector__hint">
                   Each view keeps its own size — {props.view} is {Math.round(props.w)}×{Math.round(props.h)}.
                 </p>
+                {props.view === 'expanded' ? (
+                  <div className="block-inspector__subcontrol" data-testid="block-member-layout-control">
+                    <span className="block-inspector__subheading">Member layout</span>
+                    <div className="block-inspector__choices" role="group" aria-label="Member layout">
+                      {BLOCK_MEMBER_LAYOUTS.map((memberLayout) => (
+                        <button
+                          key={memberLayout}
+                          type="button"
+                          disabled={readOnly}
+                          aria-pressed={blockMemberLayout(props) === memberLayout}
+                          data-testid={`block-member-layout-${memberLayout}`}
+                          onClick={() => actions?.setMemberLayout(memberLayout)}
+                        >
+                          {memberLayout === 'inset' ? 'Inset' : 'Edge-to-edge'}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="block-inspector__hint">
+                      Inset separates member cards; edge-to-edge joins direct child Blocks into one stack.
+                    </p>
+                  </div>
+                ) : null}
               </section>
 
               <PortSection side="inputs" props={props} actions={actions} semanticTagsVisible={semanticTagsVisible} />
@@ -1769,6 +1796,7 @@ export function EditorBlockInspector({
         updateDetails: (patch, options) =>
           void updateBlockDetails(editor, id, patch, history(options)),
         setView: (view) => void setBlockView(editor, id, view),
+        setMemberLayout: (memberLayout) => void setBlockMemberLayout(editor, id, memberLayout),
         addPort: (side) => void appendBlockPort(editor, id, side),
 		addSetAttributesMember: () => void appendSetAttributesMember(editor, id),
         addBundleMember: () => void appendBundleMember(editor, id),
@@ -1798,6 +1826,7 @@ export function EditorBlockInspector({
     return {
       updateDetails: (patch) => changeDraft((props) => patchBlockDetailsProps(props, patch)),
       setView: (view) => changeDraft((props) => setBlockViewProps(props, view)),
+      setMemberLayout: (memberLayout) => changeDraft((props) => ({ ...props, memberLayout })),
       addPort: (side) => changeDraft((props) => appendBlockPortProps(props, side)),
 		addSetAttributesMember: () => changeDraft((props) => appendSetAttributesMemberProps(props)),
       addBundleMember: () => changeDraft((props) => appendBundleMemberProps(props)),

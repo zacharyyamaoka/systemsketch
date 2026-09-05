@@ -18,6 +18,7 @@ import {
   TldrawUiDropdownMenuItem,
   TldrawUiDropdownMenuRoot,
   TldrawUiDropdownMenuTrigger,
+  isShapeId,
   useEditor,
   useValue,
 } from 'tldraw'
@@ -25,6 +26,7 @@ import {
 import {
   HEADER_ROW,
   blockIcon,
+  blockMemberLayout,
   blockDiffState,
   blockPortStateCounts,
   hasAnyBlockState,
@@ -1253,6 +1255,17 @@ export interface BlockCanvasProps {
 export function BlockCanvas({ shape }: BlockCanvasProps) {
   const editor = useEditor()
   const layout = layoutBlock(shape.props)
+  const parentMemberLayout = useValue(
+    'Block parent member layout',
+    () => {
+      if (!isShapeId(shape.parentId)) return null
+      const parent = editor.getShape(shape.parentId)
+      return isBlockShape(parent) && parent.props.view === 'expanded'
+        ? blockMemberLayout(parent.props)
+        : null
+    },
+    [editor, shape.parentId],
+  )
   // A cable on either face of a port fills its dot: the dot is the port, and
   // the faces are the two sides of the boundary it sits on. The wiring table
   // keeps its identity while its entries do, so a Block that merely moved —
@@ -1319,6 +1332,8 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
     <HTMLContainer
       className={`NodeShape systemsketch-block-canvas${simple ? ' NodeShape_plain' : ''}${value ? ' NodeShape_value' : ''}`}
       data-block-view={layout.view}
+		data-member-layout={layout.view === 'expanded' ? blockMemberLayout(shape.props) : undefined}
+		data-parent-member-layout={parentMemberLayout ?? undefined}
 		data-variadic-prototype={variadicPrototype ?? undefined}
       data-diff-state={diffState === 'normal' ? undefined : diffState}
       data-diff-variant={stated ? diffVariant : undefined}

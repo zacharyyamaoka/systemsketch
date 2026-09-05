@@ -2,6 +2,7 @@ import {
 	BaseFrameLikeShapeUtil,
 	Rectangle2d,
 	Stadium2d,
+	isShapeId,
 	type RecordProps,
 	type TLDragShapesInInfo,
 	type TLDragShapesOutInfo,
@@ -14,10 +15,13 @@ import {
 	PILL_TOOL_ID,
 	canReparentDraggedShapesIntoBlock,
 	canBlockContainChildren,
+	blockMemberLayout,
 	getDefaultBlockProps,
+	isBlockShape,
 	mergeBlockResizeProps,
 	resizeBlockProps,
 	type BlockShape,
+	type BlockMemberLayout,
 } from './blockModel'
 import { blockShapeMigrations } from './blockShapeMigrations'
 import { normalizeStockBlockProps, stockBlockVisibleDescription } from './stockBlocks'
@@ -69,7 +73,13 @@ function exportPortColor(type: string): string {
 }
 
 /** SVG export mirrors the restored face without depending on browser HTML/CSS. */
-function BlockExportSvg({ shape }: { shape: BlockShape }) {
+function BlockExportSvg({
+	shape,
+	parentMemberLayout,
+}: {
+	shape: BlockShape
+	parentMemberLayout: BlockMemberLayout | null
+}) {
 	const layout = layoutBlock(shape.props)
 	const { w, h } = layout.bounds
 	const surface = '#ffffff'
@@ -99,7 +109,7 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 				y={0.75}
 				width={Math.max(0, w - 1.5)}
 				height={Math.max(0, h - 1.5)}
-				rx={BLOCK_CORNER_RADIUS}
+				rx={parentMemberLayout === 'edge-to-edge' ? 0 : BLOCK_CORNER_RADIUS}
 				fill={surface}
 				stroke="#dedee3"
 				strokeWidth={1}
@@ -412,7 +422,11 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	}
 
 	override toSvg(shape: BlockShape) {
-		return <BlockExportSvg shape={shape} />
+		const parent = isShapeId(shape.parentId) ? this.editor.getShape(shape.parentId) : undefined
+		const parentMemberLayout = isBlockShape(parent) && parent.props.view === 'expanded'
+			? blockMemberLayout(parent.props)
+			: null
+		return <BlockExportSvg shape={shape} parentMemberLayout={parentMemberLayout} />
 	}
 
 	override getIndicatorPath(shape: BlockShape): Path2D {
