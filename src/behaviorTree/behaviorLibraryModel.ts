@@ -13,12 +13,15 @@
  * Pure: no React, no tldraw, no DOM, so the panel, a search modal and a test
  * can all ask the same question and get the same answer.
  */
+import { isBtControlNode } from './behaviorTreeModel'
 import type { BtIconSubject } from './btNodeIcons'
 import {
 	BT_BUILTIN_MODELS,
 	type BtDocument,
 	type BtInsertTemplate,
+	type BtNode,
 	type BtNodeModel,
+	type BtTree,
 } from './btcppXml'
 
 export const BEHAVIOR_LIBRARY_SECTIONS = [
@@ -283,4 +286,49 @@ export function rememberBehaviorLibraryItem(itemId: string, storage = browserSto
 		window.dispatchEvent(new CustomEvent<string[]>(BEHAVIOR_LIBRARY_RECENTS_EVENT, { detail: next }))
 	}
 	return next
+}
+
+/* ------------------------------ where it lands ----------------------------- */
+
+/**
+ * Where a click will put the new node, and the sentence that says so.
+ *
+ * WHY one function and not two: the panel used to compute the caption and the
+ * insertion separately, and they disagreed. With a region selected but no node,
+ * the caption said "Adds the root node." while the click passed
+ * `parentPath: null` to `insertBehaviorTreeChild` — which
+ * `insertBehaviorTreeNode` (`btcppXml.ts`) refuses outright on a tree that
+ * already has a root ("The tree already has a root; insert under it"). So every
+ * click in the panel's COMMONEST state was a silent no-op that still promised
+ * otherwise. Deriving both from one plan makes that class of lie impossible.
+ */
+export type BehaviorInsertPlan =
+	| { kind: 'root'; parentPath: null; index: 0; describe: string }
+	| { kind: 'child'; parentPath: string; index: number; describe: string }
+	| { kind: 'sibling'; path: string; after: boolean; describe: string }
+
+/** True when this node can still take another child. */
+function acceptsChild(node: BtNode): boolean {
+	if (!isBtControlNode(node)) return false
+	// A decorator holds exactly one child; a second has to go beside it.
+	return !(node.kind === 'decorator' && node.children.length >= 1)
+}
+
+export function planBehaviorInsert(
+	tree: Pick<BtTree, 'root'> | null,
+	selected: BtNode | null,
+): BehaviorInsertPlan {
+	const node = selected ?? tree?.root ?? null
+	// An empty tree is the only case that may create a root.
+	if (!node) return { kind: 'root', parentPath: null, index: 0, describe: 'Adds the root node.' }
+	if (acceptsChild(node)) {
+		return {
+			kind: 'child',
+			parentPath: node.path,
+			index: node.children.length,
+			describe: `Adds under ${node.label}.`,
+		}
+	}
+	// A leaf — including a tree whose whole root is one action — takes a sibling.
+	return { kind: 'sibling', path: node.path, after: true, describe: `Adds after ${node.label}.` }
 }

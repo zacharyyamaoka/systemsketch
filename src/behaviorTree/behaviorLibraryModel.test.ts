@@ -7,6 +7,7 @@ import {
 	behaviorLibrarySections,
 	filterBehaviorLibraryItems,
 	normalizeBehaviorLibraryRecentIds,
+	planBehaviorInsert,
 	readBehaviorLibraryRecentIds,
 	rememberBehaviorLibraryItem,
 	type BehaviorLibraryStorage,
@@ -171,5 +172,61 @@ describe('behavior library recents', () => {
 			setItem: () => { throw new Error('blocked') },
 		}
 		expect(() => rememberBehaviorLibraryItem('model:A', hostile)).not.toThrow()
+	})
+})
+
+describe('planBehaviorInsert', () => {
+	const tree = sample.trees.find((candidate) => candidate.id === sample.mainTreeId)!
+	const at = (path: string) => tree.nodes.find((node) => node.path === path)!
+
+	it('only creates a root when there is genuinely no tree', () => {
+		expect(planBehaviorInsert(null, null)).toMatchObject({ kind: 'root', parentPath: null, index: 0 })
+		expect(planBehaviorInsert({ root: null }, null).describe).toBe('Adds the root node.')
+	})
+
+	it('appends under the ROOT when a non-empty tree has no node selected', () => {
+		// The bug this replaces: the panel said "Adds the root node." and passed
+		// parentPath: null, which insertBehaviorTreeNode refuses outright on a
+		// tree that already has a root — so every click was a silent no-op.
+		const plan = planBehaviorInsert(tree, null)
+		expect(plan.kind).toBe('child')
+		if (plan.kind !== 'child') throw new Error('expected a child plan')
+		expect(plan.parentPath).toBe(tree.root!.path)
+		expect(plan.index).toBe(tree.root!.children.length)
+		expect(plan.describe).toBe(`Adds under ${tree.root!.label}.`)
+	})
+
+	it('adds under a selected control, at the end of its children', () => {
+		const control = tree.nodes.find((node) => node.kind === 'control')!
+		const plan = planBehaviorInsert(tree, control)
+		expect(plan).toMatchObject({ kind: 'child', parentPath: control.path, index: control.children.length })
+	})
+
+	it('adds beside a selected leaf', () => {
+		const leaf = tree.nodes.find((node) => node.kind === 'action' && node.children.length === 0)!
+		expect(planBehaviorInsert(tree, leaf)).toMatchObject({ kind: 'sibling', path: leaf.path, after: true })
+	})
+
+	it('adds beside a decorator that already holds its one child', () => {
+		const full = { ...at('0'), kind: 'decorator' as const, children: [at('0')], path: '0.9', label: 'Retry' }
+		expect(planBehaviorInsert(tree, full)).toMatchObject({ kind: 'sibling', path: '0.9' })
+		const empty = { ...full, children: [] }
+		expect(planBehaviorInsert(tree, empty)).toMatchObject({ kind: 'child', parentPath: '0.9', index: 0 })
+	})
+
+	it('never plans a root insert for a tree whose root is a lone leaf', () => {
+		const leafRoot = { root: { ...at('0'), kind: 'action' as const, children: [], path: '0', label: 'OnlyStep' } }
+		const plan = planBehaviorInsert(leafRoot, null)
+		expect(plan.kind).toBe('sibling')
+		expect(plan.describe).toBe('Adds after OnlyStep.')
+	})
+
+	it('says exactly what it will do, for every case', () => {
+		for (const selected of [null, ...tree.nodes]) {
+			const plan = planBehaviorInsert(tree, selected)
+			expect(plan.describe).toMatch(/^Adds (under|after) .+\.$|^Adds the root node\.$/)
+			// A non-empty tree must never be told to create a root.
+			expect(plan.kind).not.toBe('root')
+		}
 	})
 })

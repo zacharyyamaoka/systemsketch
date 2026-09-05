@@ -33,12 +33,13 @@ import {
 	behaviorLibraryCatalog,
 	behaviorLibrarySections,
 	filterBehaviorLibraryItems,
+	planBehaviorInsert,
 	readBehaviorLibraryRecentIds,
 	rememberBehaviorLibraryItem,
 	type BehaviorLibraryItem,
 	type BehaviorLibrarySection,
 } from '../behaviorLibraryModel'
-import { isBehaviorTreeShape, isBtControlNode, type BehaviorTreeShape } from '../behaviorTreeModel'
+import { isBehaviorTreeShape, type BehaviorTreeShape } from '../behaviorTreeModel'
 import { projectBehaviorTree } from '../behaviorTreeProjection'
 import { BEHAVIOR_DRAG_MIME, encodeBehaviorDrag } from '../behaviorTreeDrag'
 import { BtNodeIcon } from '../btNodeIcons'
@@ -148,6 +149,8 @@ export function BehaviorTreeLibraryPanel() {
 		[projection, region?.props.treeId],
 	)
 
+	const plan = useMemo(() => planBehaviorInsert(projection?.tree ?? null, node), [projection, node])
+
 	const searching = query.trim().length > 0
 	const matches = useMemo(() => filterBehaviorLibraryItems(catalog, query), [catalog, query])
 	const sections = useMemo(
@@ -166,12 +169,11 @@ export function BehaviorTreeLibraryPanel() {
 			setNotice('Select a Behavior Tree first.')
 			return
 		}
-		// The same three cases as the inspector's Library section and the "+".
-		let result: BtCommandResult
-		if (!node) result = insertBehaviorTreeChild(editor, region.id, null, 0, item.template)
-		else if (isBtControlNode(node) && !(node.kind === 'decorator' && node.children.length >= 1)) {
-			result = insertBehaviorTreeChild(editor, region.id, node.path, node.children.length, item.template)
-		} else result = insertBehaviorTreeSiblingOf(editor, region.id, node.path, true, item.template)
+		// One plan drives BOTH the click and the caption below, so the panel
+		// cannot promise a placement the command will refuse.
+		const result: BtCommandResult = plan.kind === 'sibling'
+			? insertBehaviorTreeSiblingOf(editor, region.id, plan.path, plan.after, item.template)
+			: insertBehaviorTreeChild(editor, region.id, plan.parentPath, plan.index, item.template)
 		if (result.ok) {
 			rememberBehaviorLibraryItem(item.id)
 			setNotice(null)
@@ -187,11 +189,7 @@ export function BehaviorTreeLibraryPanel() {
 		})
 	}
 
-	const where = !region
-		? 'Select a Behavior Tree to add to it.'
-		: node
-			? (isBtControlNode(node) ? `Adds under ${node.label}.` : `Adds after ${node.label}.`)
-			: 'Adds the root node.'
+	const where = region ? plan.describe : 'Select a Behavior Tree to add to it.'
 
 	return (
 		<div className="systemsketch-behavior-library" data-testid="systemsketch-behavior-library">
