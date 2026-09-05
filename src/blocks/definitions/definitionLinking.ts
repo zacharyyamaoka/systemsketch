@@ -162,6 +162,27 @@ function rootOccurrenceForShape(editor: Editor, shape: TLShape): BlockShape | nu
 	return parentBlock(editor, shape.parentId)
 }
 
+/**
+ * Linked Definition bodies may legitimately contain a recursive occurrence of
+ * the same Definition. Those two occurrence trees overlap, so copying either
+ * body onto the other would eventually map a descendant onto itself.
+ */
+function definitionBodiesOverlap(editor: Editor, source: BlockShape, target: BlockShape): boolean {
+	const hasAncestor = (ancestorId: TLShapeId, descendant: BlockShape): boolean => {
+		const visited = new Set<TLShapeId>()
+		let parentId = descendant.parentId
+		while (isShapeId(parentId)) {
+			if (parentId === ancestorId || visited.has(parentId)) return true
+			visited.add(parentId)
+			const parent = editor.getShape(parentId)
+			if (!parent) return false
+			parentId = parent.parentId
+		}
+		return false
+	}
+	return hasAncestor(source.id, target) || hasAncestor(target.id, source)
+}
+
 function memberRef(shape: TLShape): DefinitionMemberRef | null {
 	const value = shape.meta[DEFINITION_MEMBER_META_KEY]
 	if (!value || typeof value !== 'object' || Array.isArray(value)) return null
@@ -252,6 +273,11 @@ function internalBindings(editor: Editor, root: BlockShape, bodyIds: ReadonlySet
 function syncOccurrenceBody(editor: Editor, source: BlockShape, target: BlockShape): void {
 	const definitionId = blockDefinitionId(source.props)
 	if (!definitionId || source.id === target.id) return
+	// WHY: a recursive call can be a real member of its own Definition's body.
+	// Treat its body as an opaque recursive boundary: cloning into an ancestor
+	// would otherwise reparent the descendant occurrence under itself, which
+	// makes stock tldraw's ancestry walk recurse until it overflows.
+	if (definitionBodiesOverlap(editor, source, target)) return
 	const sourceBody = stampOccurrenceMembers(editor, source)
 	const targetBody = stampOccurrenceMembers(editor, target)
 	const targetByMember = new Map(targetBody.flatMap((shape) => {
