@@ -35,8 +35,10 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("BlockShapeUtil", source)
         self.assertIn("BlockTool", source)
         self.assertIn("PillTool", source)
+        self.assertIn("CalloutTool", source)
+        self.assertIn("CalloutAddLeaderTool", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool, CalloutTool, CalloutAddLeaderTool]", source
         )
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS", source)
         self.assertIn("...blockConnectionShapeUtils", source)
@@ -83,7 +85,7 @@ class StockBoundaryTests(unittest.TestCase):
         integration = (
             PROJECT_ROOT / "src" / "toolbar" / "toolbarIntegration.ts"
         ).read_text(encoding="utf-8")
-        for factory in ("withBlockTool", "withBranchTool", "withLoopTool"):
+        for factory in ("withBlockTool", "withBranchTool", "withLoopTool", "withCalloutTool"):
             self.assertIn(factory, integration)
         self.assertNotIn('title="Branch"', toolbar_source)
         self.assertNotIn('title="Comment"', toolbar_source)
@@ -91,7 +93,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("BranchArmShapeUtil,", source)
         self.assertIn("LoopShapeUtil,", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool, CalloutTool, CalloutAddLeaderTool]", source
         )
         self.assertIn("const stopBranchRegions = installBranchRegions(editor)", product_source)
         self.assertIn("const stopBranchClickToEdit = installBranchClickToEdit(editor)", product_source)
@@ -135,7 +137,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("PillTool,", embedded)
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS,", embedded)
         self.assertIn("...blockConnectionShapeUtils,", embedded)
-        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool]", embedded)
+        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool, CalloutTool, CalloutAddLeaderTool]", embedded)
         self.assertIn("Toolbar: SystemSketchFigmaToolbar", embedded)
         self.assertIn("ContextMenu: BlockContextMenu", embedded)
         self.assertIn("InFrontOfTheCanvas: EmbeddedSystemSketchSurfaceHost", embedded)

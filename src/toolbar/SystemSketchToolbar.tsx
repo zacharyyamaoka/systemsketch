@@ -24,6 +24,7 @@ import { PillIcon } from '../blocks/PillIcon'
 import { BlockIcon } from '../blocks/BlockIcon'
 import { BRANCH_TOOL_ID, BranchIcon } from '../branch'
 import { LOOP_TOOL_ID, LoopIcon } from '../loop'
+import { CALLOUT_TOOL_ID, CalloutIcon, isCalloutCard, startAddingCalloutLeader } from '../callout'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
 import {
   selectDrawFamilyTool,
@@ -114,6 +115,9 @@ const SYSTEM_MENU_ITEMS: ReadonlyArray<{
   { id: LOOP_TOOL_ID, label: 'Loop', icon: <LoopIcon /> },
   // A pill is a variable: a literal argument, a named result, or both. P.
   { id: PILL_TOOL_ID, label: 'Pill', icon: <PillIcon />, shortcut: 'P' },
+  // Callout intentionally has no key: its two-click interaction is reached from
+  // the shared system-design muscle-memory slot, not from a letter collision.
+  { id: CALLOUT_TOOL_ID, label: 'Callout', icon: <CalloutIcon /> },
 ]
 
 function isSupportedShapeTool(value: string | undefined): value is ShapeFamilyTool {
@@ -284,20 +288,32 @@ function ShapeFamilySlot({ activeToolId, geo }: { activeToolId: string; geo?: st
 function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
   const tools = useTools()
   const preferences = useToolbarPreferences()
+  const editor = useEditor()
+  const selectedCalloutId = useValue(
+    'SystemSketch selected Callout card',
+    () => {
+      const selected = editor.getOnlySelectedShape()
+      return isCalloutCard(selected) && !selected.isLocked ? selected.id : null
+    },
+    [editor],
+  )
   const current: SystemFamilyTool = activeToolId === BRANCH_TOOL_ID
     ? BRANCH_TOOL_ID
     : activeToolId === LOOP_TOOL_ID
       ? LOOP_TOOL_ID
       : activeToolId === BLOCK_TOOL_ID
         ? BLOCK_TOOL_ID
-        : activeToolId === PILL_TOOL_ID
+      : activeToolId === PILL_TOOL_ID
           ? PILL_TOOL_ID
+          : activeToolId === CALLOUT_TOOL_ID
+            ? CALLOUT_TOOL_ID
           : preferences.lastSystemTool
   const currentItem = SYSTEM_MENU_ITEMS.find((item) => item.id === current) ?? SYSTEM_MENU_ITEMS[0]
   const isActive = activeToolId === BLOCK_TOOL_ID
     || activeToolId === BRANCH_TOOL_ID
     || activeToolId === LOOP_TOOL_ID
     || activeToolId === PILL_TOOL_ID
+    || activeToolId === CALLOUT_TOOL_ID
 
   return (
     <FamilyToolSlot
@@ -318,6 +334,21 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
           onSelect={() => selectSystemFamilyTool(tools, item.id)}
         />
       ))}
+      {selectedCalloutId ? (
+        <>
+          <div className="systemsketch-tool-menu__separator" role="separator" />
+          <TldrawUiDropdownMenuItem>
+            <TldrawUiButton
+              type="menu"
+              className="systemsketch-tool-menu__item"
+              onClick={() => startAddingCalloutLeader(editor, selectedCalloutId)}
+            >
+              <TldrawUiButtonIcon icon={<CalloutIcon />} small />
+              <TldrawUiButtonLabel>Add leader to selected Callout</TldrawUiButtonLabel>
+            </TldrawUiButton>
+          </TldrawUiDropdownMenuItem>
+        </>
+      ) : null}
     </FamilyToolSlot>
   )
 }
