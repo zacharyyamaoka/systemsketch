@@ -1119,13 +1119,14 @@ function PortDragOverlay({
 
 export interface BlockCanvasProps {
   shape: BlockShape
+  communicationProjected?: boolean
 }
 
 /**
  * Canvas-only Block renderer. `BlockShapeUtil` remains the authority for frame
  * geometry, containment, clipping, resize, export and connection routing.
  */
-export function BlockCanvas({ shape }: BlockCanvasProps) {
+export function BlockCanvas({ shape, communicationProjected = false }: BlockCanvasProps) {
   const editor = useEditor()
   const layout = layoutBlock(shape.props)
   // A cable on either face of a port fills its dot: the dot is the port, and
@@ -1193,6 +1194,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
     <HTMLContainer
       className={`NodeShape systemsketch-block-canvas${simple ? ' NodeShape_plain' : ''}${value ? ' NodeShape_value' : ''}`}
       data-block-view={layout.view}
+      data-communication-projected={communicationProjected || undefined}
       data-diff-state={diffState === 'normal' ? undefined : diffState}
       data-diff-variant={stated ? diffVariant : undefined}
 		data-definition-id={value ? undefined : shape.props.definitionId || undefined}

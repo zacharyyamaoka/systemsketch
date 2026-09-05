@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-05T04:54:14.949Z",
+  "generatedAt": "2026-09-05T05:55:05.376Z",
   "checks": [
     "Dataflow opens as one real 8-node, 13-edge SystemSketch graph in Port view",
     "Tag edges recolors and labels all 11 component protocol legs without changing ports or local values",
-    "Components preserves occurrence centres, hides literal nodes, and collapses 11 legs into 7 relationships",
-    "Components switches every relationship to the straight treatment",
-    "Components switches every relationship to the laser treatment",
-    "returning to Dataflow restores ports and value nodes at the same centres",
+    "Simple overlays the Port-sized boxes without moving or mutating them; Elbow reuses goal/request/data tracks",
+    "Components toggles to Port without changing any box, centre, or stored Block view",
+    "Straight redraws all seven relationships on component centrelines over the same Simple boxes",
+    "returning to Dataflow restores values and canonical edges with a byte-identical stored graph",
     "the real browser journey emitted no local console errors"
   ]
 }

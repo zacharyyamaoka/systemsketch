@@ -4,11 +4,11 @@
  *
  * One actual SystemSketch board is driven through Dataflow → Tag edges →
  * Components. The journey asserts that the tagged state keeps all canonical
- * protocol legs and ports, while Components collapses those legs, switches the
- * same Block records to Simple, hides literal data nodes, and routes the
- * relationships independently of ports. It also exercises all three proposed
- * relationship route treatments; this is prototype evidence, not a claim that
- * the communication schema is ready for production persistence.
+ * protocol legs and ports, while Components collapses those legs without
+ * mutating any Block record. Simple and Port render in the exact same boxes.
+ * Elbow reuses the chosen canonical protocol track (goal for Action, request
+ * for Service); Straight follows the component centreline. This is prototype
+ * evidence, not a claim that the communication schema is ready for persistence.
  */
 import assert from 'node:assert/strict'
 import { writeFile } from 'node:fs/promises'
@@ -89,20 +89,20 @@ const SEED = `(() => {
     value('mission_value', 70, 455, 'mission_id', 'str'),
   ]
   const edges = [
-    ['frame', 'camera', 'frame', 'perception', 'image', -30],
-    ['preview', 'camera', 'preview', 'telemetry', 'preview', -150],
-    ['detections', 'perception', 'detections', 'planner', 'detections', -15],
-    ['plan', 'planner', 'plan', 'mission', 'plan', 90],
-    ['pose_request', 'mission', 'pose_query', 'motion', 'pose_query', -90],
-    ['pose_response', 'motion', 'pose_reply', 'mission', 'pose_reply', 90],
-    ['move_goal', 'mission', 'move_goal', 'motion', 'move_goal', -42],
-    ['move_cancel', 'mission', 'move_cancel', 'motion', 'move_cancel', -12],
-    ['move_feedback', 'motion', 'move_feedback', 'mission', 'move_feedback', 42],
-    ['move_result', 'motion', 'move_result', 'mission', 'move_result', 72],
-    ['status', 'motion', 'status', 'telemetry', 'status', 20],
-    ['threshold_value_edge', 'threshold_value', 'out_1', 'perception', 'threshold', 0],
-    ['mission_value_edge', 'mission_value', 'out_1', 'mission', 'mission_id', 0],
-  ].map(([id, source, sourcePort, target, targetPort, dy]) => ({
+    ['frame', 'camera', 'frame', 'perception', 'image'],
+    ['preview', 'camera', 'preview', 'telemetry', 'preview'],
+    ['detections', 'perception', 'detections', 'planner', 'detections'],
+    ['plan', 'planner', 'plan', 'mission', 'plan'],
+    ['pose_request', 'mission', 'pose_query', 'motion', 'pose_query'],
+    ['pose_response', 'motion', 'pose_reply', 'mission', 'pose_reply'],
+    ['move_goal', 'mission', 'move_goal', 'motion', 'move_goal'],
+    ['move_cancel', 'mission', 'move_cancel', 'motion', 'move_cancel'],
+    ['move_feedback', 'motion', 'move_feedback', 'mission', 'move_feedback'],
+    ['move_result', 'motion', 'move_result', 'mission', 'move_result'],
+    ['status', 'motion', 'status', 'telemetry', 'status'],
+    ['threshold_value_edge', 'threshold_value', 'out_1', 'perception', 'threshold'],
+    ['mission_value_edge', 'mission_value', 'out_1', 'mission', 'mission_id'],
+  ].map(([id, source, sourcePort, target, targetPort]) => ({
     id: 'shape:edge_' + id,
     source: 'shape:' + source,
     target: 'shape:' + target,
@@ -111,8 +111,8 @@ const SEED = `(() => {
     shape: {
       id: 'shape:edge_' + id, type: 'connection', x: 0, y: 0,
       props: {
-        start: { x: 0, y: 0 }, end: { x: 0, y: 0 }, routing: 'curved', curve: dy ? { dx: 0, dy } : null,
-        pins: [], elbowRoute: null, routeMode: 'authored', temporal: 'data', delayValue: '', pillPosition: .5,
+        start: { x: 0, y: 0 }, end: { x: 0, y: 0 }, routing: 'elbow', curve: null,
+        pins: [], elbowRoute: null, routeMode: 'automatic', temporal: 'data', delayValue: '', pillPosition: .5,
         tunnel: false, tunnelLayer: '', state: 'normal',
       },
     },
@@ -142,6 +142,26 @@ async function centers(page) {
   })())`))
 }
 
+async function componentBoxes(page) {
+  return JSON.parse(await evaluate(page, `JSON.stringify((() => {
+    return ['camera', 'perception', 'planner', 'mission', 'motion', 'telemetry'].map((name) => {
+      const box = document.querySelector('[data-shape-id="shape:' + name + '"]').getBoundingClientRect()
+      return { name, x: box.x, y: box.y, w: box.width, h: box.height }
+    })
+  })())`))
+}
+
+async function visiblePath(page, edge) {
+  return evaluate(page, `(() => {
+    const root = document.querySelector('[data-shape-id="shape:${edge}"]')
+    return (root?.querySelector('[data-communication-track-path]') ?? root?.querySelector('path'))?.getAttribute('d') ?? null
+  })()`)
+}
+
+async function storedGraph(page) {
+  return evaluate(page, `JSON.stringify(window.__systemsketch.editor.getCurrentPageShapes())`)
+}
+
 async function state(page) {
   return JSON.parse(await evaluate(page, `JSON.stringify((() => {
     const editor = window.__systemsketch.editor
@@ -150,13 +170,23 @@ async function state(page) {
       document.querySelector('[data-shape-id="shape:' + name + '"]'))
     return {
       mode: document.querySelector('[data-testid="communication-prototype-controls"]')?.dataset.projectionMode,
+	  componentView: [...document.querySelectorAll('[data-testid^="communication-components-view-"]')]
+	    .find((node) => node.getAttribute('aria-pressed') === 'true')?.textContent?.trim().toLowerCase() ?? null,
       tagged: document.querySelectorAll('[data-communication-mode="tagged"]').length,
       relationships: document.querySelectorAll('[data-communication-mode="components"]').length,
       relationshipFamilies: [...document.querySelectorAll('[data-communication-mode="components"]')]
         .map((node) => node.dataset.communicationFamily).sort(),
+	  representatives: [...document.querySelectorAll('[data-communication-mode="components"]')]
+	    .map((node) => ({
+	      family: node.dataset.communicationFamily,
+	      phase: node.dataset.communicationRepresentativePhase,
+	      edge: node.closest('[data-shape-id]')?.getAttribute('data-shape-id'),
+	    })),
       routes: [...document.querySelectorAll('[data-communication-mode="components"]')]
         .map((node) => node.dataset.communicationRoute),
-      componentViews: blocks.filter((shape) => shape.props.view !== 'value').map((shape) => shape.props.view),
+	  storedComponentViews: blocks.filter((shape) => shape.props.view !== 'value').map((shape) => shape.props.view),
+	  renderedComponentViews: ['camera', 'perception', 'planner', 'mission', 'motion', 'telemetry']
+	    .map((name) => document.querySelector('[data-shape-id="shape:' + name + '"] [data-block-view]')?.dataset.blockView),
       visibleValues,
       blockCount: blocks.length,
       edgeCount: editor.getCurrentPageShapes().filter((shape) => shape.type === 'connection').length,
@@ -184,11 +214,18 @@ async function main() {
     let observed = await state(app.page)
     assert.equal(observed.mode, 'wiring')
     assert.equal(observed.edgeCount, 13)
-    assert.deepEqual(new Set(observed.componentViews), new Set(['port']))
+    assert.deepEqual(new Set(observed.storedComponentViews), new Set(['port']))
+    assert.deepEqual(new Set(observed.renderedComponentViews), new Set(['port']))
     assert.deepEqual(observed.visibleValues, ['threshold_value', 'mission_value'])
     pass('Dataflow opens as one real 8-node, 13-edge SystemSketch graph in Port view')
     await shot(app.page, '01-dataflow.png')
     const beforeCenters = await centers(app.page)
+    const beforeBoxes = await componentBoxes(app.page)
+    const beforeGraph = await storedGraph(app.page)
+    const trackedPaths = Object.fromEntries(await Promise.all(
+      ['edge_frame', 'edge_preview', 'edge_pose_request', 'edge_move_goal']
+        .map(async (edge) => [edge, await visiblePath(app.page, edge)]),
+    ))
 
     await clickElement(app.page, '[data-testid="communication-mode-tagged"]')
     await delay(500)
@@ -196,7 +233,8 @@ async function main() {
     assert.equal(observed.mode, 'tagged')
     assert.equal(observed.tagged, 11)
     assert.equal(observed.relationships, 0)
-    assert.deepEqual(new Set(observed.componentViews), new Set(['port']))
+    assert.deepEqual(new Set(observed.storedComponentViews), new Set(['port']))
+    assert.deepEqual(new Set(observed.renderedComponentViews), new Set(['port']))
     assert.deepEqual(observed.visibleValues, ['threshold_value', 'mission_value'])
     pass('Tag edges recolors and labels all 11 component protocol legs without changing ports or local values')
     await shot(app.page, '02-tagged-edges.png')
@@ -208,22 +246,53 @@ async function main() {
     assert.equal(observed.tagged, 0)
     assert.equal(observed.relationships, 7)
     assert.deepEqual(observed.relationshipFamilies, ['action', 'service', 'stream', 'topic', 'topic', 'topic', 'topic'])
-    assert.deepEqual(new Set(observed.componentViews), new Set(['simple']))
+    assert.equal(observed.componentView, 'simple')
+    assert.deepEqual(new Set(observed.storedComponentViews), new Set(['port']))
+    assert.deepEqual(new Set(observed.renderedComponentViews), new Set(['simple']))
+    assert.deepEqual(new Set(observed.routes), new Set(['elbow']))
     assert.deepEqual(observed.visibleValues, [])
     const afterCenters = await centers(app.page)
     assert.deepEqual(afterCenters, beforeCenters)
-    pass('Components preserves occurrence centres, hides literal nodes, and collapses 11 legs into 7 relationships')
-    await shot(app.page, '03-components-curved.png')
-
-    for (const route of ['straight', 'laser']) {
-      await clickElement(app.page, `[data-testid="communication-route-${route}"]`)
-      await delay(400)
-      observed = await state(app.page)
-      assert.equal(observed.relationships, 7)
-      assert.deepEqual(new Set(observed.routes), new Set([route]))
-      pass(`Components switches every relationship to the ${route} treatment`)
-      await shot(app.page, `04-components-${route}.png`)
+    assert.deepEqual(await componentBoxes(app.page), beforeBoxes)
+    assert.equal(await storedGraph(app.page), beforeGraph)
+    const action = observed.representatives.find((entry) => entry.family === 'action')
+    const service = observed.representatives.find((entry) => entry.family === 'service')
+    assert.deepEqual(action, { family: 'action', phase: 'goal', edge: 'shape:edge_move_goal' })
+    assert.deepEqual(service, { family: 'service', phase: 'request', edge: 'shape:edge_pose_request' })
+    for (const [edge, path] of Object.entries(trackedPaths)) {
+      assert.equal(await visiblePath(app.page, edge), path)
     }
+    pass('Simple overlays the Port-sized boxes without moving or mutating them; Elbow reuses goal/request/data tracks')
+    await shot(app.page, '03-components-simple-elbow.png')
+
+    await clickElement(app.page, '[data-testid="communication-components-view-port"]')
+    await delay(350)
+    observed = await state(app.page)
+    assert.equal(observed.componentView, 'port')
+    assert.deepEqual(new Set(observed.renderedComponentViews), new Set(['port']))
+    assert.deepEqual(await componentBoxes(app.page), beforeBoxes)
+    assert.equal(await storedGraph(app.page), beforeGraph)
+    pass('Components toggles to Port without changing any box, centre, or stored Block view')
+    await shot(app.page, '04-components-port-elbow.png')
+
+    await clickElement(app.page, '[data-testid="communication-components-view-simple"]')
+    await clickElement(app.page, '[data-testid="communication-route-straight"]')
+    await delay(400)
+    observed = await state(app.page)
+    assert.equal(observed.componentView, 'simple')
+    assert.deepEqual(new Set(observed.routes), new Set(['straight']))
+    assert.deepEqual(new Set(observed.renderedComponentViews), new Set(['simple']))
+    assert.deepEqual(await componentBoxes(app.page), beforeBoxes)
+    assert.equal(await storedGraph(app.page), beforeGraph)
+    pass('Straight redraws all seven relationships on component centrelines over the same Simple boxes')
+    await shot(app.page, '05-components-simple-straight.png')
+
+    await clickElement(app.page, '[data-testid="communication-components-view-port"]')
+    await delay(350)
+    observed = await state(app.page)
+    assert.deepEqual(new Set(observed.renderedComponentViews), new Set(['port']))
+    assert.deepEqual(await componentBoxes(app.page), beforeBoxes)
+    await shot(app.page, '06-components-port-straight.png')
 
     await clickElement(app.page, '[data-testid="communication-mode-wiring"]')
     await delay(500)
@@ -231,10 +300,13 @@ async function main() {
     assert.equal(observed.mode, 'wiring')
     assert.equal(observed.tagged, 0)
     assert.equal(observed.relationships, 0)
-    assert.deepEqual(new Set(observed.componentViews), new Set(['port']))
+    assert.deepEqual(new Set(observed.storedComponentViews), new Set(['port']))
+    assert.deepEqual(new Set(observed.renderedComponentViews), new Set(['port']))
     assert.deepEqual(observed.visibleValues, ['threshold_value', 'mission_value'])
     assert.deepEqual(await centers(app.page), beforeCenters)
-    pass('returning to Dataflow restores ports and value nodes at the same centres')
+    assert.deepEqual(await componentBoxes(app.page), beforeBoxes)
+    assert.equal(await storedGraph(app.page), beforeGraph)
+    pass('returning to Dataflow restores values and canonical edges with a byte-identical stored graph')
 
     const errors = await localConsoleErrors(app.page)
     assert.deepEqual(errors, [])

@@ -1,10 +1,6 @@
 import { type Editor, type TLShapeId } from 'tldraw'
 
-import {
-	isBlockShape,
-	setBlockViewProps,
-	type BlockShape,
-} from '../../blocks/blockModel'
+import { isBlockShape } from '../../blocks/blockModel'
 import {
 	getConnectionBindings,
 	getConnectionDirection,
@@ -19,7 +15,8 @@ import { EditorAtom } from '../../blocks/ports/portState'
 export const COMMUNICATION_PROTOTYPE_QUERY = 'communication'
 
 export type CommunicationProjectionMode = 'wiring' | 'tagged' | 'components'
-export type CommunicationRouteStyle = 'curved' | 'straight' | 'laser'
+export type CommunicationComponentView = 'simple' | 'port'
+export type CommunicationRouteStyle = 'elbow' | 'straight'
 export type CommunicationFamily = 'topic' | 'stream' | 'service' | 'action'
 export type CommunicationPhase =
 	| 'publish'
@@ -33,12 +30,13 @@ export type CommunicationPhase =
 
 export interface CommunicationProjectionState {
 	mode: CommunicationProjectionMode
+	componentView: CommunicationComponentView
 	routeStyle: CommunicationRouteStyle
 }
 
 export const communicationProjection = new EditorAtom<CommunicationProjectionState>(
 	'communication projection prototype',
-	() => ({ mode: 'wiring', routeStyle: 'curved' }),
+	() => ({ mode: 'wiring', componentView: 'simple', routeStyle: 'elbow' }),
 )
 
 export const COMMUNICATION_FAMILY_PAINT: Readonly<Record<CommunicationFamily, {
@@ -92,6 +90,17 @@ const SERVICE_PHASES: Readonly<Record<string, CommunicationPhase>> = {
 	query: 'request',
 	reply: 'response',
 	response: 'response',
+}
+
+const REPRESENTATIVE_PHASE_PRIORITY: Readonly<Record<CommunicationPhase, number>> = {
+	goal: 0,
+	request: 0,
+	publish: 0,
+	stream: 0,
+	cancel: 1,
+	feedback: 2,
+	response: 3,
+	result: 4,
 }
 
 function finalToken(name: string): string {
@@ -213,7 +222,12 @@ export function collectCommunicationRelations(editor: Editor): CommunicationSumm
 		else groups.set(descriptor.groupKey, [descriptor])
 	}
 	const unslotted = [...groups.values()].map((members) => {
-		members.sort((a, b) => String(a.connectionId).localeCompare(String(b.connectionId)))
+		// WHY: an aggregate relationship still needs one honest route back to its
+		// source dataflow. Dora's initiating leg is the stable carrier: Action uses
+		// goal, Service uses request, and Topic/Stream already have one data track.
+		members.sort((a, b) =>
+			REPRESENTATIVE_PHASE_PRIORITY[a.phase] - REPRESENTATIVE_PHASE_PRIORITY[b.phase]
+			|| String(a.connectionId).localeCompare(String(b.connectionId)))
 		return {
 			...members[0],
 			representativeId: members[0].connectionId,
@@ -247,38 +261,22 @@ export function isCommunicationPrototypeEnabled(): boolean {
 	return new URLSearchParams(window.location.search).get('prototype') === COMMUNICATION_PROTOTYPE_QUERY
 }
 
-function presentationUpdate(shape: BlockShape, mode: CommunicationProjectionMode) {
-	if (shape.props.view === 'value') return null
-	const view = mode === 'components' ? 'simple' : 'port'
-	if (shape.props.view === view) return null
-	const props = setBlockViewProps(shape.props, view)
-	// Keep the card's centre stable while its presentation box changes. That is
-	// the visual proof that Components is a lens on the same occurrence, not a
-	// second layout that only happens to use the same title.
-	return {
-		id: shape.id,
-		type: shape.type,
-		x: shape.x + (shape.props.w - props.w) / 2,
-		y: shape.y + (shape.props.h - props.h) / 2,
-		props,
-	}
-}
-
 export function applyCommunicationProjectionMode(
 	editor: Editor,
 	mode: CommunicationProjectionMode,
 ): void {
-	const updates = editor.getCurrentPageShapes()
-		.filter(isBlockShape)
-		.flatMap((shape) => {
-			const update = presentationUpdate(shape, mode)
-			return update ? [update] : []
-		})
-	editor.run(() => {
-		if (updates.length > 0) editor.updateShapes(updates)
-		communicationProjection.update(editor, (state) => ({ ...state, mode }))
-		editor.selectNone()
-	})
+	// The projection changes paint only. In particular, Simple is rendered at
+	// the stored Port box rather than writing the Block's view or remembered
+	// dimensions, so switching lenses cannot dirty the document.
+	communicationProjection.update(editor, (state) => ({ ...state, mode }))
+	editor.selectNone()
+}
+
+export function applyCommunicationComponentView(
+	editor: Editor,
+	componentView: CommunicationComponentView,
+): void {
+	communicationProjection.update(editor, (state) => ({ ...state, componentView }))
 }
 
 export function applyCommunicationRouteStyle(editor: Editor, routeStyle: CommunicationRouteStyle): void {

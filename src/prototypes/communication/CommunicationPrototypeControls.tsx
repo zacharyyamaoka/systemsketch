@@ -3,12 +3,14 @@ import { useEditor, useValue } from 'tldraw'
 
 import {
 	COMMUNICATION_FAMILY_PAINT,
+	applyCommunicationComponentView,
 	applyCommunicationProjectionMode,
 	applyCommunicationRouteStyle,
 	collectCommunicationRelations,
 	communicationProjection,
 	isCommunicationPrototypeEnabled,
 	phaseLabel,
+	type CommunicationComponentView,
 	type CommunicationProjectionMode,
 	type CommunicationRouteStyle,
 } from './communicationProjection'
@@ -25,9 +27,13 @@ const MODES: readonly {
 ]
 
 const ROUTES: readonly { id: CommunicationRouteStyle; label: string }[] = [
-	{ id: 'curved', label: 'Curved' },
+	{ id: 'elbow', label: 'Elbow' },
 	{ id: 'straight', label: 'Straight' },
-	{ id: 'laser', label: 'Laser' },
+]
+
+const COMPONENT_VIEWS: readonly { id: CommunicationComponentView; label: string }[] = [
+	{ id: 'simple', label: 'Simple' },
+	{ id: 'port', label: 'Port' },
 ]
 
 function stopCanvasEvent(event: React.SyntheticEvent) {
@@ -50,8 +56,8 @@ export function CommunicationPrototypeControls() {
 
 	useEffect(() => {
 		if (!enabled) return
-		// A retained review may have autosaved while the Components lens was on.
-		// Re-entering the prototype always starts from its canonical evidence.
+		// Re-entering a retained review starts at the canonical evidence without
+		// touching the document: every projection choice lives in an EditorAtom.
 		applyCommunicationProjectionMode(editor, 'wiring')
 	}, [editor, enabled])
 
@@ -93,20 +99,36 @@ export function CommunicationPrototypeControls() {
 					))}
 				</div>
 				{state.mode === 'components' ? (
-					<div className="communication-prototype-routes" aria-label="Relationship routing">
-						<span>Arrow</span>
-						{ROUTES.map((route) => (
-							<button
-								key={route.id}
-								type="button"
-								aria-pressed={state.routeStyle === route.id}
-								data-testid={`communication-route-${route.id}`}
-								onClick={() => applyCommunicationRouteStyle(editor, route.id)}
-							>
-								{route.label}
-							</button>
-						))}
-					</div>
+					<>
+						<div className="communication-prototype-routes" aria-label="Component presentation">
+							<span>Card</span>
+							{COMPONENT_VIEWS.map((view) => (
+								<button
+									key={view.id}
+									type="button"
+									aria-pressed={state.componentView === view.id}
+									data-testid={`communication-components-view-${view.id}`}
+									onClick={() => applyCommunicationComponentView(editor, view.id)}
+								>
+									{view.label}
+								</button>
+							))}
+						</div>
+						<div className="communication-prototype-routes" aria-label="Relationship routing">
+							<span>Arrow</span>
+							{ROUTES.map((route) => (
+								<button
+									key={route.id}
+									type="button"
+									aria-pressed={state.routeStyle === route.id}
+									data-testid={`communication-route-${route.id}`}
+									onClick={() => applyCommunicationRouteStyle(editor, route.id)}
+								>
+									{route.label}
+								</button>
+							))}
+						</div>
+					</>
 				) : null}
 			</section>
 
@@ -129,7 +151,10 @@ export function CommunicationPrototypeControls() {
 				) : (
 					<>
 						<strong>{summary.relations.length} component relationships</strong>
-						<span>{summary.taggedEdgeCount} legs collapsed; value nodes hidden.</span>
+						<span>
+							{state.componentView === 'simple' ? 'Same Port-sized Simple cards' : 'Port cards'} ·{' '}
+							{state.routeStyle === 'elbow' ? 'canonical tracks' : 'centre lines'}
+						</span>
 					</>
 				)}
 			</aside>

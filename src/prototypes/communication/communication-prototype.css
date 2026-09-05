@@ -171,17 +171,11 @@
 	stroke-linejoin: round;
 }
 
-.CommunicationEdge-laserGlow {
-	filter: blur(4px);
-	opacity: .4;
-}
-
-.CommunicationEdge-laserPulse {
-	animation: communication-laser-pulse 1.7s linear infinite;
-}
-
-@keyframes communication-laser-pulse {
-	to { stroke-dashoffset: -36; }
+/* The same-size projection can be wider than Simple's remembered card. Keep a
+   near-threshold two-word title on one centred line instead of letting browser
+   font metrics disagree with the layout estimator and clip a surprise wrap. */
+.systemsketch-block-canvas[data-communication-projected="true"] .BlockNode-simpleTitle {
+	font-size: 40px;
 }
 
 @media (max-width: 900px) {

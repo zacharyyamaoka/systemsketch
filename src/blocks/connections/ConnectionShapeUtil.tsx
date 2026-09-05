@@ -1008,61 +1008,37 @@ function boundaryPoint(bounds: Box, toward: PagePoint): PagePoint {
 	return { x: center.x + dx * scale, y: center.y + dy * scale }
 }
 
-function quadraticPoint(start: PagePoint, control: PagePoint, end: PagePoint): PagePoint {
-	return {
-		x: start.x * 0.25 + control.x * 0.5 + end.x * 0.25,
-		y: start.y * 0.25 + control.y * 0.5 + end.y * 0.25,
-	}
-}
-
 function componentRelationshipGeometry(
 	editor: Editor,
 	connection: ConnectionShape,
 	relation: CommunicationRelation,
 	routeStyle: CommunicationRouteStyle,
 ) {
+	if (routeStyle === 'elbow') {
+		const points = getConnectionRenderPoints(editor, connection)
+		return {
+			// WHY: the aggregate Action rides its goal cable and Service rides its
+			// request cable. Topic and Stream each retain their existing data cable.
+			// This exact path is the visible proof of which leg was selected.
+			path: getConnectionShapePath(editor, connection),
+			label: pointAtFraction(points, 0.5),
+		}
+	}
 	const sourceBounds = editor.getShapePageBounds(relation.sourceShapeId)
 	const targetBounds = editor.getShapePageBounds(relation.targetShapeId)
 	if (!sourceBounds || !targetBounds) return null
 	const sourceCenter = sourceBounds.center
 	const targetCenter = targetBounds.center
-	const dx = targetCenter.x - sourceCenter.x
-	const dy = targetCenter.y - sourceCenter.y
-	const distance = Math.max(1, Math.hypot(dx, dy))
-	const perpendicular = { x: -dy / distance, y: dx / distance }
-	const laneOffset = relation.lane * 34
-	const shiftedSource = {
-		x: sourceCenter.x + perpendicular.x * laneOffset,
-		y: sourceCenter.y + perpendicular.y * laneOffset,
-	}
-	const shiftedTarget = {
-		x: targetCenter.x + perpendicular.x * laneOffset,
-		y: targetCenter.y + perpendicular.y * laneOffset,
-	}
-	const straight = routeStyle === 'straight'
-	const bend = straight
-		? 0
-		: relation.lane === 0
-			? Math.min(72, distance * 0.14)
-			: relation.lane * Math.min(180, distance * 0.32)
-	const control = {
-		x: (shiftedSource.x + shiftedTarget.x) / 2 + perpendicular.x * bend,
-		y: (shiftedSource.y + shiftedTarget.y) / 2 + perpendicular.y * bend,
-	}
-	const pageStart = boundaryPoint(sourceBounds, straight ? shiftedTarget : control)
-	const pageEnd = boundaryPoint(targetBounds, straight ? shiftedSource : control)
+	// The conceptual route is centre-to-centre. Clip its visible endpoints to the
+	// two card boundaries so arrowheads do not paint over component titles.
+	const pageStart = boundaryPoint(sourceBounds, targetCenter)
+	const pageEnd = boundaryPoint(targetBounds, sourceCenter)
 	const inverse = Mat.Inverse(editor.getShapePageTransform(connection))
 	const start = Mat.applyToPoint(inverse, pageStart)
 	const end = Mat.applyToPoint(inverse, pageEnd)
-	const localControl = Mat.applyToPoint(inverse, control)
-	const label = straight
-		? { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 }
-		: quadraticPoint(start, localControl, end)
 	return {
-		path: straight
-			? `M ${start.x} ${start.y} L ${end.x} ${end.y}`
-			: `M ${start.x} ${start.y} Q ${localControl.x} ${localControl.y} ${end.x} ${end.y}`,
-		label,
+		path: `M ${start.x} ${start.y} L ${end.x} ${end.y}`,
+		label: { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 },
 	}
 }
 
@@ -1084,12 +1060,12 @@ function ComponentCommunicationConnection({
 	if (!geometry) return null
 	const paint = COMMUNICATION_FAMILY_PAINT[relation.family]
 	const label = `${paint.monogram} · ${relation.family} · ${relation.name}`
-	const laser = routeStyle === 'laser'
 	return (
 		<SVGContainer
 			data-communication-mode="components"
 			data-communication-family={relation.family}
 			data-communication-edges={relation.edgeCount}
+			data-communication-representative-phase={relation.phase}
 			data-communication-route={routeStyle}
 		>
 			<CommunicationArrowDefs
@@ -1097,23 +1073,12 @@ function ComponentCommunicationConnection({
 				ink={paint.ink}
 				start={relation.bidirectional}
 			/>
-			{laser ? (
-				<path
-					className="CommunicationEdge-laserGlow"
-					d={geometry.path}
-					fill="none"
-					stroke={paint.ink}
-					strokeWidth={9}
-					vectorEffect="non-scaling-stroke"
-				/>
-			) : null}
 			<path
-				className={laser ? 'CommunicationEdge-laserPulse' : undefined}
+				data-communication-track-path
 				d={geometry.path}
 				fill="none"
 				stroke={paint.ink}
-				strokeWidth={laser ? 3 : 2.8}
-				strokeDasharray={laser ? '16 8 3 8' : undefined}
+				strokeWidth={2.8}
 				strokeLinecap="round"
 				strokeLinejoin="round"
 				markerStart={relation.bidirectional ? `url(#${markerId(connection.id, 'start')})` : undefined}
