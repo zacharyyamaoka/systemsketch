@@ -289,20 +289,40 @@ function groupItem(node: BtNode, emitter: Emitter): Item {
 }
 
 function emptyControlItem(node: BtNode, emitter: Emitter): Item {
-	const flow = 28
-	const cross = 28
+	const insertSize = 28
+	const cross = insertSize
+	const label = node.name || node.id
+	const chipW = chipTextWidth(label)
+	// The label chip is painted past the "+" along the flow, not inside the
+	// insert's own 28×28 box. Down orientation maps the flow axis to the
+	// chip's short, fixed side (PROCESS_CHIP_H); the other orientation maps it
+	// to the chip's long, label-dependent side (chipW). Either way, anchor the
+	// chip's NEAR edge a fixed gap past the box — not its center at a fixed
+	// offset, which is what the original code did — and let a longer label
+	// push only the FAR edge out. A center anchor would walk the chip's near
+	// edge backwards as chipW grows, creeping into the previous sibling's
+	// space for a long enough label.
+	const chipGap = emitter.down ? 27 : 34
+	const chipSpanF = emitter.down ? PROCESS_CHIP_H : chipW
+	const chipNearF = insertSize / 2 + chipGap
+	const chipCenterF = chipNearF + chipSpanF / 2
+	// `flow` is what stack()/sequenceItem reserve for this item downstream,
+	// and what a between-insert's midpoint is computed from — it has to reach
+	// the chip's own far edge, or a sibling placed PROCESS_NODE_GAP later
+	// lands its between-insert on top of this chip's own text.
+	const flow = chipNearF + chipSpanF
 	return {
 		flow,
 		cross,
 		rail: cross / 2,
 		place(origin) {
-			const at = emitter.toCanvas({ f: origin.f + flow / 2, c: origin.c + cross / 2 })
+			const at = emitter.toCanvas({ f: origin.f + insertSize / 2, c: origin.c + cross / 2 })
 			emitter.scene.inserts.push({ id: `empty:${node.path}`, at, parentPath: node.path, index: 0, kind: 'empty', persistent: true })
 			// The name sits just past the "+" along the flow, so the two never overprint.
 			emitter.scene.chips.push({
 				id: `label:${node.path}`,
-				rect: chipRect(emitter.toCanvas({ f: origin.f + flow / 2 + (emitter.down ? 44 : 96), c: origin.c + cross / 2 }), PROCESS_CHIP_W + 20, PROCESS_CHIP_H),
-				text: node.name || node.id,
+				rect: chipRect(emitter.toCanvas({ f: origin.f + chipCenterF, c: origin.c + cross / 2 }), chipW, PROCESS_CHIP_H),
+				text: label,
 				kind: 'label',
 				path: node.path,
 			})
@@ -512,7 +532,7 @@ function decoratorItem(node: BtNode, emitter: Emitter): Item {
 			const label = btDecoratorLabel(node)
 			emitter.scene.chips.push({
 				id: `decorator:${node.path}`,
-				rect: chipRect(emitter.toCanvas(chipCenter), Math.max(PROCESS_CHIP_W, 24 + label.length * 9), PROCESS_CHIP_H),
+				rect: chipRect(emitter.toCanvas(chipCenter), chipTextWidth(label), PROCESS_CHIP_H),
 				text: label,
 				kind: 'decorator',
 				path: node.path,
@@ -521,6 +541,11 @@ function decoratorItem(node: BtNode, emitter: Emitter): Item {
 			return { entry: { f: origin.f, c: origin.c + inner.rail }, exit: placed.exit }
 		},
 	}
+}
+
+/** A chip's width follows its label so the text never overflows the box — Inter 16px averages ~9px/char. */
+function chipTextWidth(label: string): number {
+	return Math.max(PROCESS_CHIP_W, 24 + label.length * 9)
 }
 
 function chipRect(center: BtPoint, w: number, h: number): BtRect {
