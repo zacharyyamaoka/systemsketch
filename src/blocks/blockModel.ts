@@ -292,7 +292,7 @@ export const BLOCK_SHAPE_PROPS = {
 	expandedWeights: T.dict(T.string, T.number).optional(),
 	/** Opaque identity shared by every occurrence of one callable definition. */
 	definitionId: T.string.optional(),
-	/** Collision-free export / namespace key. The canvas keeps showing `title`. */
+	/** Collision-free export / namespace key. A committed title rename may move one occurrence to a fresh Definition. */
 	definitionKey: T.string.optional(),
 	/** Present only while this definition is a same-name, different-body draft. */
 	draftOrdinal: T.number.optional(),

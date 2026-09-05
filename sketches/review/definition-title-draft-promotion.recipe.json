@@ -1,0 +1,122 @@
+{
+  "feature": "Occurrence-local titles and Draft promotion",
+  "viewport": { "width": 1700, "height": 1000 },
+  "pages": [
+    { "id": "review", "name": "Review" }
+  ],
+  "shapes": [
+    {
+      "id": "component-c",
+      "type": "block",
+      "x": 520,
+      "y": 150,
+      "props": {
+        "title": "ComponentC",
+        "description": "Same linked definition",
+        "definitionId": "review-component-definition",
+        "definitionKey": "ComponentC",
+        "view": "port",
+        "w": 320,
+        "h": 198,
+        "inputs": [{ "id": "in_1", "name": "data_in", "type": "", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "state", "type": "", "visible": true }]
+      }
+    },
+    {
+      "id": "component-e",
+      "type": "block",
+      "x": 900,
+      "y": 150,
+      "props": {
+        "title": "ComponentC",
+        "description": "Same linked definition",
+        "definitionId": "review-component-definition",
+        "definitionKey": "ComponentC",
+        "view": "port",
+        "w": 320,
+        "h": 198,
+        "inputs": [{ "id": "in_1", "name": "data_in", "type": "", "visible": true }],
+        "outputs": [{ "id": "out_1", "name": "state", "type": "", "visible": true }]
+      }
+    },
+    {
+      "id": "queue-main",
+      "type": "block",
+      "x": 500,
+      "y": 620,
+      "props": {
+        "title": "queue()",
+        "description": "Current canonical body",
+        "definitionId": "review-queue-main",
+        "definitionKey": "queue",
+        "view": "simple",
+        "w": 300,
+        "h": 150
+      }
+    },
+    {
+      "id": "queue-draft-1",
+      "type": "block",
+      "x": 860,
+      "y": 620,
+      "props": {
+        "title": "queue()",
+        "description": "Lowest queued draft",
+        "definitionId": "review-queue-draft-1",
+        "definitionKey": "queue_draft_1",
+        "draftOrdinal": 1,
+        "view": "simple",
+        "w": 300,
+        "h": 150
+      }
+    },
+    {
+      "id": "queue-draft-2",
+      "type": "block",
+      "x": 1220,
+      "y": 620,
+      "props": {
+        "title": "queue()",
+        "description": "Keeps Draft 2",
+        "definitionId": "review-queue-draft-2",
+        "definitionKey": "queue_draft_2",
+        "draftOrdinal": 2,
+        "view": "simple",
+        "w": 300,
+        "h": 150
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-title",
+      "kind": "step",
+      "text": "1 · Rename this right Block to ComponentE, then press Enter.",
+      "x": 1300,
+      "y": 150,
+      "w": 360,
+      "h": 120,
+      "target": { "shapeId": "component-e", "anchor": "right", "dy": -20 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN the left title stays ComponentC; then queue Draft 1 becomes canonical and Draft 2 keeps its number.",
+      "x": 40,
+      "y": 240,
+      "w": 370,
+      "h": 160
+    },
+    {
+      "id": "step-draft",
+      "kind": "step",
+      "text": "2 · Rename this canonical queue() to retired_queue(), then press Enter.",
+      "x": 40,
+      "y": 620,
+      "w": 360,
+      "h": 130,
+      "target": { "shapeId": "queue-main", "anchor": "left", "dy": 0 }
+    }
+  ]
+}

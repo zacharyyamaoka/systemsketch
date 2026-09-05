@@ -102,7 +102,7 @@
     "theme:import": "node --experimental-strip-types scripts/import_vscode_theme.mjs",
     "theme:obsidian": "python3 scripts/extract_obsidian_palette.py",
     "test:export": "node tests/tldraw_export_smoke.mjs",
-    "test:definitions": "node tests/definition_linking_smoke.mjs && node tests/port_drag_depth_repro.mjs",
+    "test:definitions": "node tests/definition_linking_smoke.mjs && node tests/definition_title_draft_promotion_smoke.mjs && node tests/definition_title_draft_promotion_fixture_smoke.mjs && node tests/port_drag_depth_repro.mjs",
     "test:expanded-layout-scope": "node tests/expanded_block_layout_scope_smoke.mjs",
     "test:effect-ports": "node tests/effect_ports_smoke.mjs",
     "report:detach-composite-fidelity": "python3 docs/build_detach_composite_fidelity.py",

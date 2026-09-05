@@ -19,8 +19,7 @@ interface DefinitionMemberRef {
 	occurrenceId: string
 }
 
-interface SemanticBlockProps {
-	title: string
+interface SharedDefinitionProps {
 	description: string
 	blockType: string
 	icon: string
@@ -80,9 +79,8 @@ export function definitionBadge(props: BlockShapeProps): string | null {
 	return props.view === 'value' || props.draftOrdinal === undefined ? null : `Draft ${props.draftOrdinal}`
 }
 
-function semanticProps(props: BlockShapeProps): SemanticBlockProps {
+function sharedDefinitionProps(props: BlockShapeProps): SharedDefinitionProps {
 	return {
-		title: props.title,
 		description: props.description,
 		blockType: props.blockType,
 		icon: props.icon ?? '',
@@ -98,11 +96,10 @@ function sameJson(a: unknown, b: unknown): boolean {
 	return JSON.stringify(a) === JSON.stringify(b)
 }
 
-function applySemanticProps(target: BlockShapeProps, source: BlockShapeProps): BlockShapeProps {
+function applySharedDefinitionProps(target: BlockShapeProps, source: BlockShapeProps): BlockShapeProps {
 	const expanded = { ...source.views.expanded }
 	return {
 		...target,
-		title: source.title,
 		description: source.description,
 		blockType: source.blockType,
 		icon: source.icon,
@@ -315,13 +312,13 @@ function syncOccurrenceBody(editor: Editor, source: BlockShape, target: BlockSha
 function syncLinkedProps(editor: Editor, source: BlockShape): void {
 	if (!source.props.definitionId) return
 	for (const target of linkedBlockOccurrences(editor, source)) {
-		if (target.id === source.id || sameJson(semanticProps(target.props), semanticProps(source.props))
+		if (target.id === source.id || sameJson(sharedDefinitionProps(target.props), sharedDefinitionProps(source.props))
 			&& target.props.definitionKey === source.props.definitionKey
 			&& target.props.draftOrdinal === source.props.draftOrdinal) continue
 		editor.updateShape<BlockShape>({
 			id: target.id,
 			type: target.type,
-			props: applySemanticProps(target.props, source.props),
+			props: applySharedDefinitionProps(target.props, source.props),
 		})
 	}
 }
@@ -337,7 +334,7 @@ function bodySignature(editor: Editor, root: BlockShape): unknown {
 		const shape = editor.getShape(id)
 		if (!shape) return []
 		const props = isBlockShape(shape)
-			? { ...semanticProps(shape.props), title: shape.props.title }
+			? { ...sharedDefinitionProps(shape.props), title: shape.props.title }
 			: shape.props
 		return [{
 			type: shape.type,
@@ -352,8 +349,7 @@ function bodySignature(editor: Editor, root: BlockShape): unknown {
 }
 
 function definitionContentSignature(editor: Editor, block: BlockShape): string {
-	const semantic = semanticProps(block.props)
-	return JSON.stringify({ ...semantic, title: undefined, body: bodySignature(editor, block) })
+	return JSON.stringify({ ...sharedDefinitionProps(block.props), body: bodySignature(editor, block) })
 }
 
 function updateDefinitionGroup(
@@ -370,19 +366,52 @@ function updateDefinitionGroup(
 	}
 }
 
+function moveOccurrenceToFreshDefinition(editor: Editor, source: BlockShape): BlockShape {
+	const definitionId = freshId()
+	editor.updateShape<BlockShape>({
+		id: source.id,
+		type: source.type,
+		props: {
+			...source.props,
+			definitionId,
+			definitionKey: '',
+			draftOrdinal: undefined,
+		},
+	})
+	for (const shape of descendants(editor, source.id)) {
+		const ref = memberRef(shape)
+		if (!ref) continue
+		editor.updateShape({
+			id: shape.id,
+			type: shape.type,
+			meta: withMemberRef(shape, { ...ref, definitionId, occurrenceId: source.id }),
+		} as never)
+	}
+	return editor.getShape(source.id) as BlockShape
+}
+
 /** Finalize a title gesture: join matching content, or quietly allocate Draft N. */
 export function commitBlockDefinitionName(editor: Editor, shapeId: TLShapeId): void {
 	const raw = editor.getShape(shapeId)
 	if (!isBlockShape(raw) || raw.props.view === 'value') return
-	const source = ensureBlockIdentity(editor, raw)
+	let source = ensureBlockIdentity(editor, raw)
 	const name = normalizedDefinitionName(source.props.title)
-	const group = linkedBlockOccurrences(editor, source)
+	let group = linkedBlockOccurrences(editor, source)
+	if (group.some((peer) => (
+		peer.id !== source.id && normalizedDefinitionName(peer.props.title) !== name
+	))) {
+		// WHY: the title is the escape seam between two occurrences. Broadcasting it
+		// first made a rename incapable of expressing "this one is different".
+		source = moveOccurrenceToFreshDefinition(editor, source)
+		group = [source]
+	}
 	if (!name) {
 		updateDefinitionGroup(editor, group, {
 			definitionId: source.props.definitionId,
 			definitionKey: '',
 			draftOrdinal: undefined,
 		})
+		reconcileExistingDefinitionNames(editor)
 		return
 	}
 	const candidates = allBlocks(editor).filter((block) => (
@@ -403,6 +432,7 @@ export function commitBlockDefinitionName(editor: Editor, shapeId: TLShapeId): v
 			syncLinkedProps(editor, rebound)
 			syncLinkedBody(editor, rebound.id)
 		}
+		reconcileExistingDefinitionNames(editor)
 		return
 	}
 	if (candidates.length) {
@@ -421,6 +451,7 @@ export function commitBlockDefinitionName(editor: Editor, shapeId: TLShapeId): v
 			),
 			draftOrdinal: ordinal,
 		})
+		reconcileExistingDefinitionNames(editor)
 		return
 	}
 	updateDefinitionGroup(editor, group, {
@@ -428,6 +459,7 @@ export function commitBlockDefinitionName(editor: Editor, shapeId: TLShapeId): v
 		definitionKey: availableDefinitionKey(editor, definitionKeyFor(name), source.props.definitionId),
 		draftOrdinal: undefined,
 	})
+	reconcileExistingDefinitionNames(editor)
 }
 
 /** Repair legacy/file-import collisions once, without turning title keystrokes into commands. */
@@ -443,11 +475,29 @@ function reconcileExistingDefinitionNames(editor: Editor): void {
 		}
 	}
 	for (const [name, definitions] of byName) {
+		let canonical = definitions.find((block) => block.props.draftOrdinal === undefined)
+		if (!canonical) {
+			canonical = [...definitions].sort((left, right) => (
+				(left.props.draftOrdinal ?? Number.MAX_SAFE_INTEGER)
+				- (right.props.draftOrdinal ?? Number.MAX_SAFE_INTEGER)
+			))[0]
+			updateDefinitionGroup(editor, linkedBlockOccurrences(editor, canonical), {
+				definitionId: canonical.props.definitionId,
+				definitionKey: availableDefinitionKey(
+					editor,
+					definitionKeyFor(name),
+					canonical.props.definitionId,
+				),
+				draftOrdinal: undefined,
+			})
+			canonical = editor.getShape(canonical.id) as BlockShape
+		}
 		if (definitions.length < 2) continue
-		const canonical = definitions.find((block) => block.props.draftOrdinal === undefined) ?? definitions[0]
 		const canonicalSignature = definitionContentSignature(editor, canonical)
 		const occupied = new Set(definitions.flatMap((block) => (
-			block.props.draftOrdinal === undefined ? [] : [block.props.draftOrdinal]
+			block.id === canonical.id
+				? []
+				: block.props.draftOrdinal === undefined ? [] : [block.props.draftOrdinal]
 		)))
 		let nextDraft = 1
 		for (const definition of definitions) {
@@ -621,14 +671,17 @@ export function installDefinitionLinking(editor: Editor): () => void {
 	const stopAfterChange = editor.sideEffects.registerAfterChangeHandler('shape', (before, after) => {
 		if (syncing) return
 		if (isBlockShape(after) && after.props.view !== 'value'
-			&& !sameJson(semanticProps(before.props as BlockShapeProps), semanticProps(after.props))) {
+			&& !sameJson(sharedDefinitionProps(before.props as BlockShapeProps), sharedDefinitionProps(after.props))) {
 			run(() => syncLinkedProps(editor, after))
 		}
 		markOwner(before)
 		markOwner(after)
 	})
 	const stopBeforeDelete = editor.sideEffects.registerBeforeDeleteHandler('shape', (shape) => {
-		if (!syncing) markOwner(shape)
+		if (!syncing) {
+			markOwner(shape)
+			if (isBlockShape(shape) && shape.props.view !== 'value') needsCollisionSweep = true
+		}
 	})
 	const markBinding = (binding: TLBinding) => {
 		const from = editor.getShape(binding.fromId)
