@@ -12,6 +12,7 @@ import {
 	type BlockView,
 	type PortLayout,
 } from './blockModel'
+import { stockBlockVisibleDescription } from './stockBlocks'
 
 /** Donor pyblocks geometry constants. Keep rendering and connection anchors on this grid. */
 export const BLOCK_CORNER_RADIUS = 9
@@ -154,6 +155,13 @@ export interface BlockLayoutSection {
 	branches: { branch: number; band: BlockLayoutBand }[]
 }
 
+/** A compact disclosure for ports deliberately omitted from this face. */
+export interface BlockHiddenPortSummary {
+	side: 'input' | 'output'
+	count: number
+	box: BlockRect
+}
+
 export interface BlockLayout {
 	view: BlockView
 	portLayout: PortLayout
@@ -180,6 +188,8 @@ export interface BlockLayout {
 	frameInterior: BlockRect | null
 	/** Visible drawable ports. Hidden ids are recovered by the connection fallback. */
 	ports: readonly LaidOutBlockPort[]
+	/** Per-side disclosure of stored ports omitted from this face. */
+	hiddenPortSummaries: readonly BlockHiddenPortSummary[]
 	/** Simple face boxes. */
 	title: BlockRect | null
 	typeLabel: BlockRect | null
@@ -289,7 +299,7 @@ export function blockPortViewHeightForSlots(
 	slotCount: number,
 ): number {
 	const layout = layoutBlock(props)
-	const descriptionReserve = showsDescription(props) ? DESCRIPTION_LINE_HEIGHT_PX + 4 : 0
+	const descriptionReserve = portDescriptionHeight(props, layout.width) + (showsDescription(props) ? 4 : 0)
 	return Math.ceil(
 		layout.headerHeight
 		+ NODE_ROW_HEADER_GAP_PX
@@ -422,8 +432,12 @@ function placeExpandedBody(
 	})
 }
 
+function visibleDescription(props: BlockShapeProps): string {
+	return stockBlockVisibleDescription(props).trim()
+}
+
 function showsDescription(props: BlockShapeProps): boolean {
-	return props.showDescription && props.description.trim() !== ''
+	return visibleDescription(props) !== ''
 }
 
 let simpleMeasureContext: CanvasRenderingContext2D | null | undefined
@@ -506,6 +520,58 @@ export function portLabelHitArea(placed: LaidOutBlockPort, width: number): Block
 	return { x: left, y: content.y, w: Math.max(0, right - left), h: content.h }
 }
 
+const HIDDEN_PORT_SUMMARY_HEIGHT_PX = 16
+
+/**
+ * Put `+N more` immediately after its lane when room remains, otherwise use
+ * the footer band. A short Block whose last visible row hits the body floor
+ * must never render its explanation over that row.
+ */
+function hiddenPortSummaries(
+	props: Pick<BlockShapeProps, 'inputs' | 'outputs'>,
+	placed: readonly LaidOutBlockPort[],
+	width: number,
+	bodyTop: number,
+	footerTop: number,
+	height: number,
+	description: BlockRect | null,
+): BlockHiddenPortSummary[] {
+	const summaries: BlockHiddenPortSummary[] = []
+	const bodyBottom = Math.max(bodyTop, (description?.y ?? footerTop) - 4)
+	const footerHeight = Math.max(0, height - footerTop)
+
+	for (const side of ['input', 'output'] as const) {
+		const source = side === 'input' ? props.inputs : props.outputs
+		const count = source.filter((port) => !port.visible).length
+		if (count === 0) continue
+
+		const lastLabelBottom = Math.max(
+			bodyTop - 4,
+			...placed
+				.filter((port) => port.side === side && port.label !== null)
+				.map((port) => port.label!.y + port.label!.h),
+		)
+		const preferredTop = lastLabelBottom + 4
+		const fitsInBody = preferredTop + HIDDEN_PORT_SUMMARY_HEIGHT_PX <= bodyBottom
+		const footerSummaryTop = footerTop + Math.max(
+			0,
+			(footerHeight - HIDDEN_PORT_SUMMARY_HEIGHT_PX) / 2,
+		)
+		const y = fitsInBody
+			? preferredTop
+			: Math.min(Math.max(0, height - HIDDEN_PORT_SUMMARY_HEIGHT_PX), footerSummaryTop)
+		const x = side === 'input' ? PORT_LABEL_INSET_PX : width / 2
+		const rightInset = side === 'output' ? 38 : PORT_LABEL_INSET_PX
+		summaries.push({
+			side,
+			count,
+			box: { x, y, w: Math.max(0, width - x - rightInset), h: HIDDEN_PORT_SUMMARY_HEIGHT_PX },
+		})
+	}
+
+	return summaries
+}
+
 function measureSimpleText(text: string, px: number, weight: number): number {
 	return measureBlockText(text, px, weight, 'sans')
 }
@@ -516,6 +582,16 @@ function estimateWrappedLines(
 	weight: number,
 	maxWidth: number,
 ): number {
+	if (text.trim() === '' || maxWidth <= 0) return 1
+	// Newlines separate the derived Clock declaration from its optional
+	// annotation. Preserve that authored boundary while still wrapping each row.
+	return text.split(/\n/).reduce(
+		(total, paragraph) => total + estimateParagraphLines(paragraph, px, weight, maxWidth),
+		0,
+	)
+}
+
+function estimateParagraphLines(text: string, px: number, weight: number, maxWidth: number): number {
 	const words = text.trim().split(/\s+/).filter(Boolean)
 	if (words.length === 0 || maxWidth <= 0) return 1
 	const spaceWidth = Math.max(1, measureSimpleText(' ', px, weight))
@@ -537,6 +613,14 @@ function estimateWrappedLines(
 		}
 	}
 	return lines
+}
+
+function portDescriptionHeight(props: BlockShapeProps, width: number): number {
+	if (!showsDescription(props)) return 0
+	const lines = Math.min(3, estimateWrappedLines(
+		visibleDescription(props), 11, 400, Math.max(0, width - PORT_LABEL_INSET_PX * 2),
+	))
+	return lines * DESCRIPTION_LINE_HEIGHT_PX
 }
 
 /**
@@ -638,6 +722,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 			description: null,
 			frameInterior: null,
 			ports: placed,
+			hiddenPortSummaries: [],
 			title: { x: VALUE_PAD_X, y: 0, w: Math.max(0, width - VALUE_PAD_X * 2), h: height },
 			typeLabel: null,
 			icon: null,
@@ -667,7 +752,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		let descriptionHeight = 0
 		if (showsDescription(props)) {
 			const wanted = estimateWrappedLines(
-				props.description,
+				visibleDescription(props),
 				SIMPLE_TEXT_FONT_PX,
 				400,
 				innerWidth,
@@ -785,6 +870,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 			description,
 			frameInterior: null,
 			ports: placed,
+			hiddenPortSummaries: [],
 			title,
 			typeLabel,
 			icon,
@@ -820,7 +906,8 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		})
 	})
 
-	const descriptionReserve = showsDescription(props) ? DESCRIPTION_LINE_HEIGHT_PX + 4 : 0
+	const descriptionHeight = portDescriptionHeight(props, width)
+	const descriptionReserve = descriptionHeight + (showsDescription(props) ? 4 : 0)
 	const dividers: BlockDivider[] = []
 	const sections: BlockLayoutSection[] = []
 	let pitch = NODE_ROW_HEIGHT_PX
@@ -934,7 +1021,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 
 	let description: BlockRect | null = null
 	if (showsDescription(props)) {
-		const lastTop = Math.max(bodyTop, footerTop - 4 - DESCRIPTION_LINE_HEIGHT_PX)
+		const lastTop = Math.max(bodyTop, footerTop - 4 - descriptionHeight)
 		const top = view === 'expanded'
 			? lastTop
 			: Math.min(bodyTop + pitch * blockPortSlotCount(props) + 2, lastTop)
@@ -942,7 +1029,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 			x: PORT_LABEL_INSET_PX,
 			y: top,
 			w: Math.max(0, width - PORT_LABEL_INSET_PX * 2),
-			h: Math.max(0, Math.min(DESCRIPTION_LINE_HEIGHT_PX, footerTop - 4 - top)),
+			h: Math.max(0, Math.min(descriptionHeight, footerTop - 4 - top)),
 		}
 	}
 
@@ -964,6 +1051,19 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 			lifted: false,
 		})
 	}
+
+	// WHY: `layout.ports` drops hidden records so they paint no dot and consume
+	// no row. Count the stored lanes instead, or the calm face makes a Block
+	// with no port indistinguishable from one with twenty hidden ports.
+	const hiddenSummaries = hiddenPortSummaries(
+		rawProps,
+		placed,
+		width,
+		bodyTop,
+		footerTop,
+		height,
+		description,
+	)
 
 	return {
 		view,
@@ -990,6 +1090,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 			}
 			: null,
 		ports: placed,
+		hiddenPortSummaries: hiddenSummaries,
 		title: null,
 		typeLabel: null,
 		icon: null,

@@ -38,7 +38,12 @@ import {
 	cableHitPadPageUnits,
 	withCableHitPad,
 } from './connectionHit'
-import { blockPresetProps, openBlockPicker } from './blockPicker'
+import {
+	blockPresetProps,
+	forgetPickerCreationMark,
+	openBlockPicker,
+	takePickerCreationMark,
+} from './blockPicker'
 import { requestBlockInlineEdit } from '../inlineBlockEditing'
 import { clearPortDragState, updatePortState } from '../ports/portState'
 import {
@@ -52,6 +57,7 @@ import {
 	type BlockShape,
 	type BlockState,
 } from '../blockModel'
+import { isBundleBlock } from '../stockBlocks'
 import {
 	adoptCableTypeIntoProjection,
 	connectionBindingPolarity,
@@ -78,6 +84,8 @@ import {
 	clampPillPosition,
 	PILL_POSITION_DEFAULT,
 } from './connectionModel'
+import { resolveConnectionSemanticRole } from './semanticRoles'
+import { getSemanticTagsVisible } from '../semanticTagVisibility'
 import {
 	blocksThatWouldCycle,
 	dropScopeAt,
@@ -748,6 +756,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		const terminal = handle.id as ConnectionTerminal
 
 		if (getConnectionBindings(this.editor, connection.id)[terminal]) {
+			forgetPickerCreationMark(this.editor, connection.id)
 			// WHY: a whiteboard wire is a relationship, not permission to overwrite
 			// an intentionally contradictory pill. The explicit “Adopt cable type”
 			// command makes a requested derivation visible and undoable.
@@ -782,13 +791,15 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		}
 
 		if (!connectionHasBothTerminals(this.editor, connection.id)) {
+			forgetPickerCreationMark(this.editor, connection.id)
 			this.editor.deleteShapes([connection.id])
 		}
 	}
 
-	override onHandleDragCancel(): void {
+	override onHandleDragCancel(connection: ConnectionShape): void {
 		this.activeRailDrag = null
 		clearPortDragState(this.editor)
+		forgetPickerCreationMark(this.editor, connection.id)
 	}
 
 	override component(connection: ConnectionShape) {
@@ -864,6 +875,16 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		[editor, connection.id],
 	)
 	const delayed = connection.props.temporal === 'delayed'
+	const semanticTagsVisible = useValue(
+		'connection semantic tag visibility',
+		() => getSemanticTagsVisible(editor),
+		[editor],
+	)
+	const semanticTag = useValue(
+		'connection semantic tag',
+		() => semanticTagsVisible ? resolveConnectionSemanticRole(editor, connection) : null,
+		[editor, connection, semanticTagsVisible],
+	)
 	const solidBeforePill = useValue('solid before pill', () => cablePresentation.get().solidBeforePill, [])
 	const pill = useValue(
 		'delay pill geometry',
@@ -936,6 +957,7 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 	)
 	const needsRenderPoints = connection.props.temporal === 'async'
 		|| tunnelState !== 'off'
+		|| semanticTag?.effective?.role !== 'data'
 		|| (cableMark === 'modified' && diffTraits.cable === 'endpoints')
 	const renderPoints = useValue(
 		'block connection render points',
@@ -949,6 +971,17 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 	const paintedTunnelState = tunnelMouths || tunnelState === 'off'
 		? tunnelState
 		: 'revealed'
+	// WHY: tags are authored in the spacious inspector, but canvas labels are a
+	// board-wide reading aid; hiding them removes presentation, never meaning.
+	const semanticTagLabel = semanticTag?.effective?.role !== 'data' ? semanticTag?.label : null
+	// The delay/effect pill is draggable, so put the tag on the opposite side;
+	// ordinary and modified cables reserve the middle for other existing chips.
+	const semanticTagFraction = delayed || effect
+		? connection.props.pillPosition < 0.5 ? 0.72 : 0.28
+		: 0.72
+	const semanticTagPoint = semanticTagLabel
+		? pointAtFraction(renderPoints, semanticTagFraction)
+		: null
 	// A MODIFIED cable's was→now chip. Only built when the variant actually
 	// draws a chip for it — `diffCableInk` above has already left the line's
 	// own ink untouched for exactly this mark, so recolouring it here as well
@@ -1020,6 +1053,7 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 						ink={EFFECT_CABLE_INK}
 					/>
 				) : null}
+				{semanticTagPoint && semanticTagLabel ? <SemanticTagPill point={semanticTagPoint} label={semanticTagLabel} /> : null}
 				{cableMarkChip ? (
 					<CableWasNowChip
 						pill={cableMarkChip.geometry}
@@ -1062,6 +1096,7 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 		>
 			<DelayedCablePaths path={path} pill={pill} solidBeforePill={solidBeforePill} stroke={stroke} />
 			{tunnelMouths ? <TunnelVias tunnel={tunnelMouths} stroke={stroke} fill="var(--ss-surface, #ffffff)" /> : null}
+			{semanticTagPoint && semanticTagLabel ? <SemanticTagPill point={semanticTagPoint} label={semanticTagLabel} /> : null}
 			<DelayPill
 				pill={pill}
 				label={pillLabel ?? delayPillLabel(connection.props.delayValue)}
@@ -1339,6 +1374,17 @@ export function DelayPill({
 			>
 				{label}
 			</text>
+		</g>
+	)
+}
+
+/** A read-only role cue; connection semantics remain resolved from its endpoints. */
+function SemanticTagPill({ point, label }: { point: { x: number; y: number }; label: string }) {
+	const width = delayPillWidth(label)
+	return (
+		<g transform={`translate(${point.x} ${point.y})`} data-testid="connection-semantic-tag" aria-label={`${label} semantic tag`} pointerEvents="none">
+			<rect x={-width / 2} y={-DELAY_PILL_HEIGHT / 2} width={width} height={DELAY_PILL_HEIGHT} rx={DELAY_PILL_HEIGHT / 2} fill="var(--ss-surface, #ffffff)" stroke="var(--ss-accent, #2563eb)" strokeWidth={1.3} />
+			<text x={0} y={4} textAnchor="middle" fontSize={12} fontWeight={700} fontFamily="'JetBrains Mono', ui-monospace, Menlo, monospace" fill="var(--ss-accent, #2563eb)" style={{ userSelect: 'none' }}>{label}</text>
 		</g>
 	)
 }
@@ -1797,20 +1843,25 @@ export function offerBlockForLooseTerminal(
 	scopeId: TLParentId,
 ): boolean {
 	const connection = editor.getShape<ConnectionShape>(connectionId)
-	if (!connection || connection.type !== CONNECTION_SHAPE_TYPE) return false
+	const creationMark = takePickerCreationMark(editor, connectionId)
+	const refuse = () => {
+		if (creationMark) editor.bailToMark(creationMark)
+		else forgetPickerCreationMark(editor, connectionId)
+		return false
+	}
+	if (editor.getIsReadonly() || !connection || connection.type !== CONNECTION_SHAPE_TYPE) return refuse()
 	const anchoredBinding = getConnectionBindings(editor, connection)[oppositeConnectionTerminal(terminal)]
-	if (!anchoredBinding) return false
+	if (!anchoredBinding) return refuse()
 	const anchor: PortDot = { shapeId: anchoredBinding.toId, portId: anchoredBinding.props.portId }
 	const face = anchorFaceForScope(editor, anchor, scopeId)
-	if (!face) return false
+	if (!face) return refuse()
 	setAnchoredFace(editor, anchoredBinding, face)
 	const anchoredPolarity = connectionBindingPolarity(editor, { ...anchoredBinding, props: { ...anchoredBinding.props, face } })
-	if (!anchoredPolarity) return false
+	if (!anchoredPolarity) return refuse()
 	const needed = oppositePolarity(anchoredPolarity)
 
 	const local = getConnectionTerminals(editor, connection)[terminal]
 	const anchorPoint = editor.getShapePageTransform(connection).applyToPoint(local)
-
 	openBlockPicker(editor, {
 		connectionId,
 		terminal,
@@ -1818,6 +1869,7 @@ export function offerBlockForLooseTerminal(
 		wantsProducer: needed === 'source',
 		scopeId,
 		onClose: () => {
+			if (creationMark) { editor.bailToMark(creationMark); return }
 			const cable = editor.getShape(connectionId)
 			if (!cable) return
 			if (!connectionHasBothTerminals(editor, connectionId)) {
@@ -1865,8 +1917,13 @@ export function offerBlockForLooseTerminal(
 				// explicit command is the only path that copies its type into a pill.
 				normalizeConnectionDirection(editor, connectionId)
 				adoptCableTypeIntoProjection(editor, connectionId)
-				editor.select(blockId)
 			})
+			if (creationMark) {
+				editor.markHistoryStoppingPoint('finish_block_connection')
+				editor.squashToMark(creationMark)
+			}
+			// Selection is chrome, not part of the created dataflow transaction.
+			editor.run(() => editor.select(blockId), { history: 'ignore' })
 			// The Block arrives unnamed, and naming it is the next thing anyone
 			// does — the same rule the Block tool already follows after a draw.
 			// A projection is the exception: it named itself from the type on the
@@ -1875,6 +1932,7 @@ export function offerBlockForLooseTerminal(
 			const placed = editor.getShape<BlockShape>(blockId)
 			if (!placed) return
 			const derived = isProjectionBlock(placed.props) && placed.props.title !== ''
+			const stockTitled = isBundleBlock(placed.props) || placed.props.blockType === 'copy'
 			const firstRow = placed.props.outputs[0]
 			if (derived && firstRow) {
 				requestBlockInlineEdit(editor, blockId, {
@@ -1882,7 +1940,7 @@ export function offerBlockForLooseTerminal(
 					side: 'outputs',
 					portId: firstRow.id,
 				})
-			} else {
+			} else if (!stockTitled) {
 				requestBlockInlineEdit(editor, blockId, { kind: 'title' })
 			}
 		},

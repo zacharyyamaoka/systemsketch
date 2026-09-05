@@ -1,0 +1,79 @@
+{
+  "feature": "Cursor primitive search",
+  "viewport": { "width": 1700, "height": 900 },
+  "pages": [{ "id": "review", "name": "Review" }],
+  "shapes": [
+    {
+      "id": "function",
+      "type": "block",
+      "x": 620,
+      "y": 250,
+      "props": {
+        "title": "normalize_reading()",
+        "description": "Search this function for a primitive",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 520,
+        "h": 360,
+        "inputs": [
+          { "id": "in_value", "name": "value", "type": "float", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_value", "name": "normalized", "type": "float", "visible": true }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Hover this blank point inside the function and press S",
+      "x": 40,
+      "y": 250,
+      "w": 410,
+      "h": 110,
+      "target": { "shapeId": "function", "anchor": "left", "dy": 85 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Type arrow — only library primitives should appear",
+      "x": 1230,
+      "y": 160,
+      "w": 420,
+      "h": 110,
+      "target": { "x": 1010, "y": 430 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Press ↓ once, then Enter — this only arms Curved arrow",
+      "x": 1230,
+      "y": 500,
+      "w": 420,
+      "h": 110,
+      "target": { "x": 1010, "y": 535 }
+    },
+    {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 · Now drag inside the function to draw the armed arrow",
+      "x": 40,
+      "y": 500,
+      "w": 410,
+      "h": 110,
+      "target": { "x": 790, "y": 585 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Enter closes search without adding a shape, the Curved arrow tool becomes active, and only the following canvas drag draws it",
+      "x": 530,
+      "y": 735,
+      "w": 780,
+      "h": 120
+    }
+  ]
+}

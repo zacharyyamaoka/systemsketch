@@ -15,6 +15,7 @@ import {
 	blockPortSlotCount,
 	layoutBlock,
 } from './layoutBlock'
+import { createClockTriggerProps } from './stockBlocks'
 
 function makeBlock(overrides: Partial<BlockShapeProps> = {}): BlockShapeProps {
 	const view = overrides.view ?? 'port'
@@ -114,6 +115,18 @@ describe('layoutBlock donor geometry', () => {
 		expect(layout.pitch).toBeLessThan(NODE_ROW_HEIGHT_PX)
 	})
 
+	it('sizes a Clock declaration even when its annotation is empty or hidden', () => {
+		const clock = {
+			...createClockTriggerProps(),
+			showDescription: false,
+			description: 'hidden annotation',
+		}
+		const layout = layoutBlock(clock)
+		expect(layout.description).not.toBeNull()
+		expect(layout.description!.h).toBeGreaterThan(16)
+		expect(layout.description!.y + layout.description!.h).toBeLessThanOrEqual(layout.footerTop - 4)
+	})
+
 	it('simple collapses all identities onto one subtle edge-midpoint affordance per side', () => {
 		const props = makeBlock({
 			view: 'simple',
@@ -136,6 +149,39 @@ describe('layoutBlock donor geometry', () => {
 			{ side: 'input', x: 0, y: 103, label: null, subtle: true },
 			{ side: 'output', x: 320, y: 103, label: null, subtle: true },
 		])
+	})
+
+	it('discloses hidden ports by side without giving them a painted port slot', () => {
+		const props = makeBlock({
+			inputs: [
+				{ id: 'in_1', name: 'shown', type: '', visible: true },
+				{ id: 'in_2', name: 'secret', type: '', visible: false },
+				{ id: 'in_3', name: 'also_secret', type: '', visible: false },
+			],
+			outputs: [
+				{ id: 'out_1', name: 'shown_result', type: '', visible: true },
+				{ id: 'out_2', name: 'secret_result', type: '', visible: false },
+			],
+		})
+		const layout = layoutBlock(props)
+
+		expect(layout.ports.map((entry) => entry.port.id)).toEqual(['in_1', 'out_1'])
+		expect(layout.hiddenPortSummaries.map(({ side, count }) => ({ side, count }))).toEqual([
+			{ side: 'input', count: 2 },
+			{ side: 'output', count: 1 },
+		])
+		for (const summary of layout.hiddenPortSummaries) {
+			expect(summary.box.y).toBeGreaterThanOrEqual(layout.bodyTop)
+			expect(summary.box.y + summary.box.h).toBeLessThanOrEqual(layout.height)
+		}
+	})
+
+	it('does not put a hidden-count disclosure on Simple, whose dots are intentionally anonymous', () => {
+		const layout = layoutBlock(makeBlock({
+			view: 'simple',
+			inputs: [{ id: 'in_1', name: 'hidden', type: '', visible: false }],
+		}))
+		expect(layout.hiddenPortSummaries).toEqual([])
 	})
 
 	it('simple text and icon reposition the face without moving midpoint anchors', () => {

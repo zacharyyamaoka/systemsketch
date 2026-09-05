@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+"""Build the compact, self-contained breadcrumb refinement evidence gallery."""
+
+import base64
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+SCREENSHOT = ROOT / 'assets' / 'breadcrumb-full-path-smoke-2026-09-04.png'
+OUT = ROOT / 'breadcrumb-full-path-2026-09-04.html'
+
+image = base64.b64encode(SCREENSHOT.read_bytes()).decode('ascii')
+OUT.write_text(f'''<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Full structural breadcrumb — SystemSketch</title>
+<style>
+:root{{color-scheme:dark;--bg:#0e1520;--card:#172333;--line:#2d4158;--ink:#eff6ff;--muted:#aebfd1;--blue:#76aefb;--green:#73d99a;--amber:#ffc266}}*{{box-sizing:border-box}}body{{margin:0;background:radial-gradient(circle at 12% 0,#1b3552,transparent 45%),var(--bg);color:var(--ink);font:16px/1.55 Inter,ui-sans-serif,system-ui,sans-serif}}main{{max-width:1120px;margin:auto;padding:48px 24px 76px}}h1{{max-width:850px;margin:0;font-size:clamp(2.1rem,5.7vw,4.5rem);line-height:1.03}}h2{{margin:0 0 12px;font-size:1.25rem}}p{{color:var(--muted)}}.lede{{max-width:760px;font-size:1.12rem}}.chips,.path{{display:flex;flex-wrap:wrap;gap:8px;align-items:center}}.chip,.node{{padding:5px 10px;border:1px solid var(--line);border-radius:999px;background:#111c2a;color:var(--muted);font-size:.84rem}}.card{{margin-top:18px;padding:22px;border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--card) 93%,transparent)}}.grid{{display:grid;grid-template-columns:1fr 1fr;gap:18px}}.node strong{{color:var(--ink)}}.arrow{{color:var(--blue);font-weight:800}}.hidden{{color:var(--amber);border-color:#695126}}.pass{{border-left:3px solid var(--green);padding-left:14px}}figure{{margin:18px 0 0}}img{{display:block;width:100%;border:1px solid var(--line);border-radius:13px;background:#fff}}figcaption{{margin-top:8px;color:var(--muted);font-size:.9rem}}a{{color:#9cc7ff}}code{{color:var(--ink)}}@media(max-width:720px){{main{{padding:30px 15px 48px}}.grid{{grid-template-columns:1fr}}}}
+</style></head><body><main>
+<p>SystemSketch implementation gallery · 2026-09-04</p>
+<h1>The structural path is the primary chrome.</h1>
+<p class="lede">The top bar now gives the full remaining viewport width to a clickable ancestry trail, while leaving clearance for Share and the avatar. Back and Forward remain the separate session-history controls; the redundant Up control and adjacent Shapes/command buttons are gone.</p>
+<div class="chips"><span class="chip">150-character path budget</span><span class="chip">root + parent + current retained</span><span class="chip">Back/Forward: buttons, Browser keys, mouse buttons 3/4</span><span class="chip">editable fields left native</span></div>
+<section class="grid"><article class="card"><h2>When the path fits</h2><div class="path"><span class="node"><strong>Board</strong></span><span class="arrow">›</span><span class="node">System</span><span class="arrow">›</span><span class="node">Scheduler</span><span class="arrow">›</span><span class="node"><strong>Dispatch</strong></span></div><p>Every ancestor is visible and selectable. The current scope is text; earlier scopes are jump buttons.</p></article><article class="card"><h2>When it does not</h2><div class="path"><span class="node"><strong>Board</strong></span><span class="arrow">›</span><span class="node">System</span><span class="arrow">›</span><span class="node hidden">…</span><span class="arrow">›</span><span class="node">Execution workspace</span><span class="arrow">›</span><span class="node"><strong>Dispatch</strong></span></div><p>Compaction removes level 2 onward first. The full ordinary disclosure list keeps all ancestor jump targets available to keyboard and pointer users.</p></article></section>
+<section class="card"><h2>Real-browser smoke evidence</h2><figure><img alt="SystemSketch live browser showing Board, System, an ellipsis, Execution workspace, and the current Dispatch path in the top breadcrumb" src="data:image/png;base64,{image}"><figcaption>Captured by <code>tests/depth_breadcrumb_navigation_smoke.mjs</code> in a real CDP browser at depth 4. The screenshot shows the compacted full structural trail extending past the former 620 px top-left shell cap, with clearance still held for the right-side chrome.</figcaption></figure><p class="pass"><strong>Verified:</strong> focused depth unit tests (17 assertions), production build, and the browser journey. The journey confirms compaction retains root/current/parent, a menu shell wider than 620 px, visible breadcrumb parent jump, no trailing controls, BrowserBack, mouse Forward (button 4), and native behavior inside an input.</p></section>
+<section class="card"><h2>Interaction contract</h2><p>BrowserBack / GoBack and BrowserForward / GoForward are captured only when depth history can move. Auxiliary mouse Back/Forward inputs (buttons 3/4) use the same rule. A target inside <code>input</code>, <code>textarea</code>, <code>select</code>, or <code>contenteditable</code> is never intercepted.</p><p><a href="../tests/depth_breadcrumb_navigation_smoke.mjs">Read the browser journey</a> · <a href="depth-breadcrumb-navigation-2026-09-04.html">Read the preceding depth-navigation gallery</a></p></section>
+</main></body></html>\n''', encoding='utf-8')
+print(OUT)

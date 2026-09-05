@@ -22,6 +22,7 @@ import {
   installBranchRegions,
 } from './branch'
 import { LoopShapeUtil, LoopTool } from './loop'
+import { CalloutAddLeaderTool, CalloutTool } from './callout'
 import {
   blockConnectionBindingUtils,
   blockConnectionShapeUtils,
@@ -72,6 +73,7 @@ import { createSystemSketchStore } from './store/createSystemSketchStore'
 import { SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS } from './stockPrimitiveVisuals'
 import { SYSTEMSKETCH_ARROW_SHAPE_UTILS } from './systemSketchArrow'
 import { installConnectorControlVisibility } from './installConnectorControlVisibility'
+import { CompareProvider } from './compare'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
@@ -98,7 +100,7 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
-const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool]
+const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool, CalloutTool, CalloutAddLeaderTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: DevelopmentPreviewChrome,
 }
@@ -117,7 +119,7 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   LoopShapeUtil,
   ...blockConnectionShapeUtils,
 ]
-const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool]
+const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool, CalloutTool, CalloutAddLeaderTool]
 const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
 
 /**
@@ -128,12 +130,14 @@ const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
  * through the SDK's public component, tool, shape, override, and mount APIs.
  */
 function SystemSketchCanvas() {
-  const { attach } = useLocalWorkspace()
+  const { attach, path } = useLocalWorkspace()
   const interfaceScale = useInterfaceScale()
   const scaleCss = interfaceScaleCssValues(interfaceScale)
   const [store] = useState(createSystemSketchStore)
+  const [mountedEditor, setMountedEditor] = useState<Editor | null>(null)
   useEffect(() => () => store.dispose(), [store])
   const onMount = useCallback((editor: Editor) => {
+    setMountedEditor(editor)
     enablePasteAtCursor(editor)
     const stopDefinitionLinking = installDefinitionLinking(editor)
     const stopWorkspace = attach(editor)
@@ -166,6 +170,7 @@ function SystemSketchCanvas() {
       stopDefinitionLinking()
       stopBoardTheme()
       stopWorkspace()
+      setMountedEditor(null)
     }
   }, [attach])
 
@@ -179,20 +184,32 @@ function SystemSketchCanvas() {
         '--systemsketch-interface-scale-inverse': scaleCss.inverse,
       } as CSSProperties}
     >
-      <Tldraw
-        assetUrls={ASSET_URLS}
-        bindingUtils={SYSTEMSKETCH_BINDING_UTILS}
-        components={SYSTEMSKETCH_COMPONENTS}
-        getShapeVisibility={getBlockShapeVisibility}
-        licenseKey={TLDRAW_LICENSE_KEY}
-        onMount={onMount}
-        options={SYSTEMSKETCH_EDITOR_OPTIONS}
-        overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
-        shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}
-        store={store}
-        themes={SYSTEMSKETCH_THEMES}
-        tools={SYSTEMSKETCH_TOOLS}
-      />
+      {/*
+        The provider is ABOVE <Tldraw>, and the trigger is inside it.
+
+        The dialog belongs to the app so its lifetime cannot be cut short by a
+        tldraw chrome component remounting underneath it; the button belongs to
+        the top-right shell so it is attached to real chrome instead of floating
+        over the canvas (see CompareLauncher.tsx). Context carries the open state
+        between them, which is what lets the two live at different depths without
+        either one owning the other.
+      */}
+      <CompareProvider editor={mountedEditor} currentPath={path}>
+        <Tldraw
+          assetUrls={ASSET_URLS}
+          bindingUtils={SYSTEMSKETCH_BINDING_UTILS}
+          components={SYSTEMSKETCH_COMPONENTS}
+          getShapeVisibility={getBlockShapeVisibility}
+          licenseKey={TLDRAW_LICENSE_KEY}
+          onMount={onMount}
+          options={SYSTEMSKETCH_EDITOR_OPTIONS}
+          overrides={SYSTEMSKETCH_TOOLBAR_OVERRIDES}
+          shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}
+          store={store}
+          themes={SYSTEMSKETCH_THEMES}
+          tools={SYSTEMSKETCH_TOOLS}
+        />
+      </CompareProvider>
     </main>
   )
 }

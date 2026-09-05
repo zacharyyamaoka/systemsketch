@@ -213,8 +213,7 @@
   color: var(--ss-text-muted);
   font-size: 11px;
   line-height: 1.45;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: pre-wrap;
 }
 
 /* The burger grammar is lines only. Full rules split async groups; right-half
@@ -263,6 +262,28 @@
 
 .systemsketch-block-canvas .BlockNode-portLabel--out {
   justify-content: flex-end;
+  text-align: right;
+}
+
+/* A disclosure, not another port row: hidden records retain stable IDs and
+ * bindings, while the layout intentionally gives them no painted dot or slot. */
+.systemsketch-block-canvas .BlockNode-hiddenPorts {
+  position: absolute;
+  z-index: 1;
+  box-sizing: border-box;
+  display: block;
+  overflow: hidden;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  font-style: italic;
+  font-weight: 650;
+  line-height: 16px;
+  pointer-events: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-block-canvas .BlockNode-hiddenPorts--output {
   text-align: right;
 }
 
@@ -1377,6 +1398,22 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
 .systemsketch-block-canvas[data-diff-variant='stacked'] .BlockNode-wasNowNow {
   display: block;
   width: 100%;
+}
+
+/* Data is intentionally the absence of decoration. A non-Data role earns a
+   tiny, accessible mark without borrowing colour from the Python type palette. */
+.systemsketch-block-canvas .Port-semanticCue {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 3px;
+  border-radius: 3px;
+  color: var(--ss-accent);
+  background: var(--ss-surface-raised);
+  font: 600 8px/11px Inter, ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: .01em;
+  pointer-events: none;
 }
 
 /* ---- R3 `token-only` · no furniture ------------------------------------

@@ -1,0 +1,955 @@
+{
+  "systemSketch": {
+    "formatVersion": 2,
+    "application": "SystemSketch",
+    "shapes": {
+      "arrow": 3,
+      "geo": 4,
+      "connection": 2,
+      "block": 4
+    },
+    "bindings": {
+      "arrow": 6,
+      "connection": 4
+    }
+  },
+  "tldrawFileFormatVersion": 1,
+  "schema": {
+    "schemaVersion": 2,
+    "sequences": {
+      "com.tldraw.store": 5,
+      "com.tldraw.asset": 1,
+      "com.tldraw.camera": 1,
+      "com.tldraw.document": 2,
+      "com.tldraw.instance": 26,
+      "com.tldraw.instance_page_state": 5,
+      "com.tldraw.page": 1,
+      "com.tldraw.instance_presence": 6,
+      "com.tldraw.pointer": 1,
+      "com.tldraw.shape": 4,
+      "com.tldraw.user": 1,
+      "com.tldraw.asset.image": 6,
+      "com.tldraw.asset.video": 5,
+      "com.tldraw.asset.bookmark": 2,
+      "com.tldraw.shape.group": 0,
+      "com.tldraw.shape.bookmark": 2,
+      "com.tldraw.shape.draw": 5,
+      "com.tldraw.shape.note": 13,
+      "com.tldraw.shape.frame": 1,
+      "com.tldraw.shape.highlight": 4,
+      "com.tldraw.shape.embed": 4,
+      "com.tldraw.shape.image": 5,
+      "com.tldraw.shape.video": 4,
+      "com.tldraw.shape.geo": 12,
+      "com.tldraw.shape.arrow": 8,
+      "com.tldraw.shape.text": 4,
+      "com.tldraw.shape.line": 5,
+      "com.tldraw.shape.block": 7,
+      "com.tldraw.shape.branch": 0,
+      "com.tldraw.shape.loop": 0,
+      "com.tldraw.shape.branch-arm": 0,
+      "com.tldraw.shape.connection": 6,
+      "com.tldraw.binding.arrow": 1,
+      "com.tldraw.binding.connection": 1,
+      "com.tldraw.comment-thread": 3,
+      "com.tldraw.comment": 1,
+      "com.tldraw.comment-reaction": 1
+    }
+  },
+  "records": [
+    {
+      "x": 665,
+      "y": 250,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -5,
+          "y": 80
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aCquZV",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "lastActivityTimestamp": 0,
+      "meta": {},
+      "id": "pointer:pointer",
+      "typeName": "pointer"
+    },
+    {
+      "x": 1130,
+      "y": 270,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-3-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": -50,
+          "y": 60
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aDzBSV",
+      "typeName": "shape"
+    },
+    {
+      "x": 60,
+      "y": 145,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1",
+      "type": "geo",
+      "props": {
+        "w": 360,
+        "h": 105,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 · Drag a data cable into empty canvas."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aBceQ",
+      "typeName": "shape"
+    },
+    {
+      "x": 940,
+      "y": 635,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-pass",
+      "type": "geo",
+      "props": {
+        "w": 420,
+        "h": 160,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "green",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "PASS WHEN · Bundle shows retained member updates, Copy names Python shallow-copy sharing, and Unbundle exposes .field accessors."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aERF6",
+      "typeName": "shape"
+    },
+    {
+      "x": 470,
+      "y": 145,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-2",
+      "type": "geo",
+      "props": {
+        "w": 390,
+        "h": 105,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "2 · Quick insert leads with Bundle, Unbundle, Copy."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aCewE",
+      "typeName": "shape"
+    },
+    {
+      "x": 3.41463414634147,
+      "y": -40.61585365853654,
+      "z": 1.0092307692307692,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    {
+      "x": 400,
+      "y": 420,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:wire-source-bundle",
+      "type": "connection",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 90,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "parentId": "page:page",
+      "index": "a5hxz",
+      "typeName": "shape"
+    },
+    {
+      "x": 920,
+      "y": 125,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-3",
+      "type": "geo",
+      "props": {
+        "w": 420,
+        "h": 145,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "3 · Pick a Block: both cable ends bind, then one Undo removes the whole gesture."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "aD0uE",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:record-source",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:bundle",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-3-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-step-3-arrow",
+      "toId": "shape:copy",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
+      },
+      "typeName": "binding"
+    },
+    {
+      "editingShapeId": null,
+      "croppingShapeId": null,
+      "selectedShapeIds": [],
+      "hoveredShapeId": null,
+      "erasingShapeIds": [],
+      "hintingShapeIds": [],
+      "focusedGroupId": null,
+      "meta": {},
+      "id": "instance_page_state:page:page",
+      "pageId": "page:page",
+      "typeName": "instance_page_state"
+    },
+    {
+      "x": 910,
+      "y": 330,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:copy",
+      "type": "block",
+      "props": {
+        "w": 340,
+        "h": 198,
+        "title": "Copy",
+        "description": "Shallow copy — Python copy.copy(value); nested mutable members may remain shared.",
+        "blockType": "copy",
+        "icon": "Copy",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "G-eEHqADsSK-8dCAfuPkZ",
+        "inputs": [
+          {
+            "id": "value",
+            "name": "value",
+            "type": "ObjectRecord",
+            "visible": true,
+            "row": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": "value_out",
+            "name": "value",
+            "type": "ObjectRecord",
+            "visible": true,
+            "row": 1
+          }
+        ],
+        "definitionKey": "Copy"
+      },
+      "parentId": "page:page",
+      "index": "a9lnr",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-1-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-1-arrow",
+      "toId": "shape:cue-step-1",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-2-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-2-arrow",
+      "toId": "shape:cue-step-2",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 830,
+      "y": 420,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:wire-bundle-copy",
+      "type": "connection",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 80,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "parentId": "page:page",
+      "index": "a6NUP",
+      "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-step-3-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-step-3-arrow",
+      "toId": "shape:cue-step-3",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 520,
+      "y": 650,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:unbundle",
+      "type": "block",
+      "props": {
+        "w": 340,
+        "h": 198,
+        "title": "ObjectRecord",
+        "description": "Project named members from one aggregate; this does not execute the value.",
+        "blockType": "unbundle",
+        "icon": "Shuffle",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "jRzhcjUmnFE1k39k61gJl",
+        "inputs": [
+          {
+            "id": "record",
+            "name": "",
+            "type": "ObjectRecord",
+            "visible": true,
+            "row": 0
+          }
+        ],
+        "outputs": [
+          {
+            "id": "out_1",
+            "name": ".field",
+            "type": "str",
+            "visible": true,
+            "row": 1
+          }
+        ],
+        "definitionKey": "ObjectRecord"
+      },
+      "parentId": "page:page",
+      "index": "aAt3E",
+      "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#7B66DC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:8Th52lOhhQXZSDP3jsohA",
+      "typeName": "user"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-1",
+      "type": "connection",
+      "fromId": "shape:wire-source-bundle",
+      "toId": "shape:record-source",
+      "props": {
+        "portId": "out",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-2",
+      "type": "connection",
+      "fromId": "shape:wire-source-bundle",
+      "toId": "shape:bundle",
+      "props": {
+        "portId": "record",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-3",
+      "type": "connection",
+      "fromId": "shape:wire-bundle-copy",
+      "toId": "shape:bundle",
+      "props": {
+        "portId": "record_out",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "page:page",
+      "name": "Bundle, Unbundle, Copy",
+      "index": "a1",
+      "typeName": "page"
+    },
+    {
+      "gridSize": 10,
+      "name": "",
+      "meta": {},
+      "id": "document:document",
+      "typeName": "document"
+    },
+    {
+      "followingUserId": null,
+      "opacityForNextShape": 1,
+      "stylesForNextShape": {
+        "tldraw:arrowKind": "elbow",
+        "systemsketch:connectionRouting": "elbow"
+      },
+      "brush": null,
+      "scribbles": [],
+      "cursor": {
+        "type": "default",
+        "rotation": 0
+      },
+      "isFocusMode": false,
+      "exportBackground": true,
+      "isDebugMode": false,
+      "isToolLocked": false,
+      "screenBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 1440,
+        "h": 900
+      },
+      "insets": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "zoomBrush": null,
+      "isGridMode": false,
+      "isPenMode": false,
+      "chatMessage": "",
+      "isChatting": false,
+      "highlightedUserIds": [],
+      "isFocused": true,
+      "devicePixelRatio": 1,
+      "isCoarsePointer": false,
+      "isHoveringCanvas": null,
+      "openMenus": [],
+      "isChangingStyle": false,
+      "isReadonly": false,
+      "meta": {},
+      "duplicateProps": null,
+      "cameraState": "idle",
+      "id": "instance:instance",
+      "currentPageId": "page:page",
+      "typeName": "instance"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-4",
+      "type": "connection",
+      "fromId": "shape:wire-bundle-copy",
+      "toId": "shape:copy",
+      "props": {
+        "portId": "value",
+        "terminal": "end",
+        "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "x": 490,
+      "y": 330,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:bundle",
+      "type": "block",
+      "props": {
+        "w": 340,
+        "h": 198,
+        "title": "Bundle",
+        "description": "Return a retained record with named member updates; does not mutate the input.",
+        "blockType": "bundle",
+        "icon": "PackagePlus",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "v3Tl5lnINGZZZ48m6A08q",
+        "inputs": [
+          {
+            "id": "record",
+            "name": "record",
+            "type": "ObjectRecord",
+            "visible": true,
+            "row": 0
+          },
+          {
+            "id": "member_1",
+            "name": ".field",
+            "type": "str",
+            "visible": true,
+            "row": 1
+          }
+        ],
+        "outputs": [
+          {
+            "id": "record_out",
+            "name": "record",
+            "type": "ObjectRecord",
+            "visible": true,
+            "row": 1
+          }
+        ],
+        "definitionKey": "Bundle"
+      },
+      "parentId": "page:page",
+      "index": "a8F0z",
+      "typeName": "shape"
+    },
+    {
+      "x": 100,
+      "y": 360,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:record-source",
+      "type": "block",
+      "props": {
+        "w": 300,
+        "h": 180,
+        "title": "make_record()",
+        "description": "A record producer for the drop gesture.",
+        "blockType": "call",
+        "icon": "",
+        "view": "port",
+        "views": {
+          "simple": {
+            "w": 320,
+            "h": 206
+          },
+          "port": {
+            "w": 340,
+            "h": 198
+          },
+          "expanded": {
+            "w": 560,
+            "h": 380
+          },
+          "value": {
+            "w": 168,
+            "h": 56
+          }
+        },
+        "showDescription": true,
+        "notes": "",
+        "portLayout": "inline",
+        "state": "normal",
+        "definitionId": "NQvu1wDwgxYsMvha22N4W",
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "out",
+            "name": "record",
+            "type": "ObjectRecord",
+            "visible": true
+          }
+        ],
+        "definitionKey": "make_record"
+      },
+      "parentId": "page:page",
+      "index": "a7UGF",
+      "typeName": "shape"
+    },
+    {
+      "x": 240,
+      "y": 250,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-step-1-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 10,
+          "y": 110
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "aBwEMG",
+      "typeName": "shape"
+    }
+  ]
+}

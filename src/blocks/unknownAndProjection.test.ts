@@ -198,6 +198,8 @@ describe('the projection Block', () => {
 		expect(derived.title).toBe('ObjectRecord')
 		expect(derived.inputs[0]).toMatchObject({ id: 'in_1', name: '', type: 'ObjectRecord' })
 		expect(isProjectionBlock(derived)).toBe(true)
+		expect(isProjectionBlock(block({ blockType: 'projection' }))).toBe(true)
+		expect(isProjectionBlock(block({ blockType: 'split' }))).toBe(false)
 	})
 
 	it('fills what is empty and never overwrites what someone authored', () => {
@@ -222,10 +224,10 @@ describe('the projection Block', () => {
 		expect(makeProjectionProps(settled, 'Response')).toBe(settled)
 	})
 
-	it('is offered by the connection-drop picker as Split', () => {
+	it('is offered by the connection-drop picker as Unbundle', () => {
 		const preset = BLOCK_PICKER_PRESETS.find((entry) => entry.id === 'projection')
 		expect(preset).toBeDefined()
-		expect(preset?.label).toBe('Split')
+		expect(preset?.label).toBe('Unbundle')
 		expect(preset?.blockType).toBe(PROJECTION_BLOCK_TYPE)
 		expect(preset?.view).toBe('port')
 	})

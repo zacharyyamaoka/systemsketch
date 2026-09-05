@@ -32,6 +32,23 @@ export const BlockVariadicPort = T.object({
 export type BlockVariadicPort = T.TypeOf<typeof BlockVariadicPort>
 
 /**
+ * A semantic reading of a port. This is deliberately separate from Python
+ * type, routing and temporal delivery: a port can be an Event carrying a
+ * `Frame`, or ordinary Data carried on an async cable.
+ */
+export const SEMANTIC_PORT_ROLES = ['data', 'event', 'configuration', 'state', 'control', 'error'] as const
+export type SemanticPortRole = (typeof SEMANTIC_PORT_ROLES)[number]
+
+/** A claim made by a person or an offline analyser about one port. */
+export const SemanticPortRoleClaim = T.object({
+	role: T.literalEnum(...SEMANTIC_PORT_ROLES),
+	/** Human-readable analyser/source provenance; absent for a local authoring gesture. */
+	source: T.string.optional(),
+	analyzer: T.string.optional(),
+})
+export type SemanticPortRoleClaim = T.TypeOf<typeof SemanticPortRoleClaim>
+
+/**
  * The structural presentations an ordinary Block may switch between. `value`
  * is deliberately absent: it is the separate literal-pill representation,
  * created by the Pill tool or the connection-drop picker, never a conversion
@@ -205,8 +222,26 @@ export const BlockPort = T.object({
 	fieldDiffs: T.arrayOf(BlockFieldDiff).optional(),
 	/** Optional V5 membership; never changes the port's stable identity. */
 	variadic: BlockVariadicPort.optional(),
+	/** A reusable/source-analysis claim. It remains intact when a person overrides it. */
+	semanticRoleDerived: SemanticPortRoleClaim.optional(),
+	/** A local, explicit override. Absence deliberately reveals the derived claim. */
+	semanticRoleAuthored: SemanticPortRoleClaim.optional(),
 })
 export type BlockPort = T.TypeOf<typeof BlockPort>
+
+/**
+ * Small, persisted authoring facts for the curated stock Blocks.
+ *
+ * This is deliberately optional. A Block remains an open canvas primitive and
+ * a newer curated preset must not make older hand-authored Blocks unreadable.
+ * Runtime availability is deliberately not document state: an adapter owns
+ * that live capability separately from a board's authoring declaration.
+ */
+export const StockBlockConfig = T.object({
+	triggerSource: T.literalEnum('clock', 'external', 'manual').optional(),
+	rateHz: T.number.optional(),
+})
+export type StockBlockConfig = T.TypeOf<typeof StockBlockConfig>
 
 /** An effect output's id is derived from the input it writes back to. */
 export const EFFECT_PORT_PREFIX = 'effect:'
@@ -292,12 +327,13 @@ export const BLOCK_SHAPE_PROPS = {
 	expandedWeights: T.dict(T.string, T.number).optional(),
 	/** Opaque identity shared by every occurrence of one callable definition. */
 	definitionId: T.string.optional(),
-	/** Collision-free export / namespace key. The canvas keeps showing `title`. */
+	/** Collision-free export / namespace key. A committed title rename may move one occurrence to a fresh Definition. */
 	definitionKey: T.string.optional(),
 	/** Present only while this definition is a same-name, different-body draft. */
 	draftOrdinal: T.number.optional(),
 	inputs: T.arrayOf(BlockPort),
 	outputs: T.arrayOf(BlockPort),
+	stockConfig: StockBlockConfig.optional(),
 } as const
 
 declare module 'tldraw' {
@@ -328,6 +364,7 @@ declare module 'tldraw' {
 			draftOrdinal?: number
 			inputs: BlockPort[]
 			outputs: BlockPort[]
+			stockConfig?: StockBlockConfig
 		}
 	}
 }
@@ -542,10 +579,13 @@ export function isUnresolvedBlock(props: BlockShapeProps): boolean {
  * about the incoming *type*, never about the variable that happened to arrive,
  * so one projection reads the same at every call site.
  */
-export const PROJECTION_BLOCK_TYPE = 'projection'
+// Compatibility export: old documents named this primitive `projection`.
+// Fresh Blocks persist the clearer data-wire vocabulary, `unbundle`.
+export const PROJECTION_BLOCK_TYPE = 'unbundle'
+export const LEGACY_PROJECTION_BLOCK_TYPES = new Set(['projection', 'unbundle'])
 
 export function isProjectionBlock(props: BlockShapeProps): boolean {
-	return props.blockType.trim().toLowerCase() === PROJECTION_BLOCK_TYPE
+	return LEGACY_PROJECTION_BLOCK_TYPES.has(props.blockType.trim().toLowerCase())
 }
 
 /**
@@ -570,7 +610,7 @@ export function makeProjectionProps(props: BlockShapeProps, incoming: string): B
 	return {
 		...props,
 		title: takesTitle ? type : props.title,
-		blockType: already ? props.blockType : PROJECTION_BLOCK_TYPE,
+		blockType: PROJECTION_BLOCK_TYPE,
 		inputs: takesType
 			? props.inputs.map((port, index) => (index === 0 ? { ...port, type } : port))
 			: props.inputs,
@@ -908,6 +948,11 @@ export function reconcileEffectPorts(props: BlockShapeProps): BlockShapeProps {
 			// a reconcile never moves one that has already been put somewhere.
 			// One mutated argument still lands dead centre, as before.
 			edgeT: clampEdgeT((index + 1) / (wanted.length + 1)),
+			// WHY: an effect is the write-back of this input, not a new semantic
+			// channel. Keep its role claims with that fact so reconciliation cannot
+			// erase an analyser result or an explicit authoring override.
+			...(input.semanticRoleDerived ? { semanticRoleDerived: { ...input.semanticRoleDerived } } : {}),
+			...(input.semanticRoleAuthored ? { semanticRoleAuthored: { ...input.semanticRoleAuthored } } : {}),
 		})
 	})
 	// An effect port's name tracks the argument it writes back to: they are the
@@ -916,8 +961,17 @@ export function reconcileEffectPorts(props: BlockShapeProps): BlockShapeProps {
 		const source = mutatedInputId(port)
 		if (!isEffectPort(port) || source === null) return port
 		const input = wanted.find((candidate) => candidate.id === source)
-		if (!input || (port.name === input.name && port.type === input.type)) return port
-		return { ...port, name: input.name, type: input.type }
+		if (!input) return port
+		const sameRole = JSON.stringify(port.semanticRoleDerived) === JSON.stringify(input.semanticRoleDerived)
+			&& JSON.stringify(port.semanticRoleAuthored) === JSON.stringify(input.semanticRoleAuthored)
+		if (port.name === input.name && port.type === input.type && sameRole) return port
+		return {
+			...port,
+			name: input.name,
+			type: input.type,
+			semanticRoleDerived: input.semanticRoleDerived ? { ...input.semanticRoleDerived } : undefined,
+			semanticRoleAuthored: input.semanticRoleAuthored ? { ...input.semanticRoleAuthored } : undefined,
+		}
 	})
 	const outputs = [...renamed, ...added]
 	if (outputs.length === props.outputs.length

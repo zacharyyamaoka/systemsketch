@@ -1,0 +1,347 @@
+{
+  "schemaVersion": 1,
+  "capturedFor": "docs/build_behavior_tree_moveit_groot_prior_art.py",
+  "generatedAt": "2026-09-04T20:29:12.289Z",
+  "captures": [
+    {
+      "file": "bt-atlas-moveit-editor-2026-09-04.png",
+      "bytes": 955589,
+      "label": "MoveIt Studio Pro Behavior Tree edit mode",
+      "sourceDocument": "https://docs.picknik.ai/tutorials/quick_start_intro/",
+      "sourceImage": "https://docs.picknik.ai/assets/images/edit_mode_bt-9441cfadcee0e05bdce63c97ca343499.png",
+      "capturedAt": "2026-09-04T20:29:13.300Z",
+      "startedAt": "2026-09-04T20:29:12.479Z",
+      "durationMs": 821,
+      "image": {
+        "naturalWidth": 1483,
+        "naturalHeight": 945,
+        "capturedWidth": 1180,
+        "capturedHeight": 945
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-moveit-node-taxonomy-2026-09-04.png",
+      "bytes": 251072,
+      "label": "MoveIt Studio Pro behavior-node categories",
+      "sourceDocument": "https://docs.picknik.ai/concepts/behavior_trees/",
+      "sourceImage": "https://docs.picknik.ai/assets/images/bt_node_types-2239365ddf130f7006482e751d49d978.png",
+      "capturedAt": "2026-09-04T20:29:13.541Z",
+      "startedAt": "2026-09-04T20:29:13.300Z",
+      "durationMs": 241,
+      "image": {
+        "naturalWidth": 876,
+        "naturalHeight": 167,
+        "capturedWidth": 876,
+        "capturedHeight": 167
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-moveit-control-2026-09-04.png",
+      "bytes": 898545,
+      "label": "MoveIt Studio Pro control-node examples",
+      "sourceDocument": "https://docs.picknik.ai/concepts/behavior_trees/",
+      "sourceImage": "https://docs.picknik.ai/assets/images/control_nodes-885dfb6974c8e09a9262549d3bf363c0.png",
+      "capturedAt": "2026-09-04T20:29:14.206Z",
+      "startedAt": "2026-09-04T20:29:13.541Z",
+      "durationMs": 665,
+      "image": {
+        "naturalWidth": 1334,
+        "naturalHeight": 475,
+        "capturedWidth": 1180,
+        "capturedHeight": 475
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-moveit-decorator-2026-09-04.png",
+      "bytes": 227554,
+      "label": "MoveIt Studio Pro decorator-node examples",
+      "sourceDocument": "https://docs.picknik.ai/concepts/behavior_trees/",
+      "sourceImage": "https://docs.picknik.ai/assets/images/decorator_nodes-93186bd15977ca59d03a1b934de8cda0.png",
+      "capturedAt": "2026-09-04T20:29:14.414Z",
+      "startedAt": "2026-09-04T20:29:14.206Z",
+      "durationMs": 208,
+      "image": {
+        "naturalWidth": 866,
+        "naturalHeight": 116,
+        "capturedWidth": 866,
+        "capturedHeight": 116
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-moveit-insert-2026-09-04.png",
+      "bytes": 129302,
+      "label": "MoveIt Studio Pro contextual plus insertion control",
+      "sourceDocument": "https://docs.picknik.ai/tutorials/quick_start_intro/",
+      "sourceImage": "https://docs.picknik.ai/assets/images/plus_button-39ff7e041e72d1e6861fd6421ba386dc.png",
+      "capturedAt": "2026-09-04T20:29:14.599Z",
+      "startedAt": "2026-09-04T20:29:14.414Z",
+      "durationMs": 185,
+      "image": {
+        "naturalWidth": 314,
+        "naturalHeight": 264,
+        "capturedWidth": 314,
+        "capturedHeight": 264
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-moveit-search-2026-09-04.png",
+      "bytes": 467500,
+      "label": "MoveIt Studio Pro searchable behavior picker",
+      "sourceDocument": "https://docs.picknik.ai/tutorials/quick_start_intro/",
+      "sourceImage": "https://docs.picknik.ai/assets/images/breakpoint_search-5056e9864427195d9b2baf8c0daaf4ec.png",
+      "capturedAt": "2026-09-04T20:29:15.026Z",
+      "startedAt": "2026-09-04T20:29:14.600Z",
+      "durationMs": 426,
+      "image": {
+        "naturalWidth": 613,
+        "naturalHeight": 418,
+        "capturedWidth": 613,
+        "capturedHeight": 418
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-moveit-inspector-2026-09-04.png",
+      "bytes": 906748,
+      "label": "MoveIt Studio Pro behavior library sidebar",
+      "sourceDocument": "https://docs.picknik.ai/tutorials/quick_start_intro/",
+      "sourceImage": "https://docs.picknik.ai/assets/images/image10-3e5ebfeea3d084fd83f3cbed7dede0ab.png",
+      "capturedAt": "2026-09-04T20:29:15.471Z",
+      "startedAt": "2026-09-04T20:29:15.026Z",
+      "durationMs": 445,
+      "image": {
+        "naturalWidth": 1770,
+        "naturalHeight": 710,
+        "capturedWidth": 1080,
+        "capturedHeight": 609.7109375
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-moveit-disabled-2026-09-04.png",
+      "bytes": 299350,
+      "label": "MoveIt Studio Pro disabled behavior node",
+      "sourceDocument": "https://docs.picknik.ai/tutorials/quick_start_intro/",
+      "sourceImage": "https://docs.picknik.ai/assets/images/comment_out_disabled-05c372869619000ec1520c7e793cf3c6.png",
+      "capturedAt": "2026-09-04T20:29:15.715Z",
+      "startedAt": "2026-09-04T20:29:15.471Z",
+      "durationMs": 244,
+      "image": {
+        "naturalWidth": 500,
+        "naturalHeight": 320,
+        "capturedWidth": 500,
+        "capturedHeight": 320
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-moveit-subtree-extract-2026-09-04.png",
+      "bytes": 614420,
+      "label": "MoveIt Studio Pro extract selection as a Subtree",
+      "sourceDocument": "https://docs.picknik.ai/tutorials/perception_%26_machine_learning/",
+      "sourceImage": "https://docs.picknik.ai/assets/images/convert_to_subtree_modal-b0f6d8360700616e8294087ebe6b68d2.png",
+      "capturedAt": "2026-09-04T20:29:16.172Z",
+      "startedAt": "2026-09-04T20:29:15.715Z",
+      "durationMs": 457,
+      "image": {
+        "naturalWidth": 880,
+        "naturalHeight": 968,
+        "capturedWidth": 880,
+        "capturedHeight": 968
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-moveit-subtree-port-2026-09-04.png",
+      "bytes": 477598,
+      "label": "MoveIt Studio Pro Subtree port inspector",
+      "sourceDocument": "https://docs.picknik.ai/tutorials/perception_%26_machine_learning/",
+      "sourceImage": "https://docs.picknik.ai/assets/images/apriltag_subtree_port-e6251563e9b9f7b936094c1e19296665.png",
+      "capturedAt": "2026-09-04T20:29:16.438Z",
+      "startedAt": "2026-09-04T20:29:16.172Z",
+      "durationMs": 266,
+      "image": {
+        "naturalWidth": 760,
+        "naturalHeight": 338,
+        "capturedWidth": 760,
+        "capturedHeight": 338
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-moveit-back-parent-2026-09-04.png",
+      "bytes": 289196,
+      "label": "MoveIt Studio Pro return-to-parent Subtree navigation",
+      "sourceDocument": "https://docs.picknik.ai/tutorials/perception_%26_machine_learning/",
+      "sourceImage": "https://docs.picknik.ai/assets/images/back_to_parent_objective-162d1b580414b4b7bbfa11f336d8eddf.png",
+      "capturedAt": "2026-09-04T20:29:16.686Z",
+      "startedAt": "2026-09-04T20:29:16.438Z",
+      "durationMs": 248,
+      "image": {
+        "naturalWidth": 786,
+        "naturalHeight": 262,
+        "capturedWidth": 786,
+        "capturedHeight": 262
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-moveit-breakpoint-2026-09-04.png",
+      "bytes": 683432,
+      "label": "MoveIt Studio Pro placed breakpoint in a behavior tree",
+      "sourceDocument": "https://docs.picknik.ai/tutorials/quick_start_intro/",
+      "sourceImage": "https://docs.picknik.ai/assets/images/breakpoint_placed-6197e2a0439a2837b8c8060a90c31bf3.png",
+      "capturedAt": "2026-09-04T20:29:17.044Z",
+      "startedAt": "2026-09-04T20:29:16.686Z",
+      "durationMs": 358,
+      "image": {
+        "naturalWidth": 923,
+        "naturalHeight": 540,
+        "capturedWidth": 923,
+        "capturedHeight": 540
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-moveit-blackboard-2026-09-04.png",
+      "bytes": 581091,
+      "label": "MoveIt Studio Pro Blackboard pane",
+      "sourceDocument": "https://docs.picknik.ai/tutorials/quick_start_intro/",
+      "sourceImage": "https://docs.picknik.ai/assets/images/blackboard-96b2bac3bbfb272d3bcdb430834cf469.png",
+      "capturedAt": "2026-09-04T20:29:17.526Z",
+      "startedAt": "2026-09-04T20:29:17.044Z",
+      "durationMs": 482,
+      "image": {
+        "naturalWidth": 891,
+        "naturalHeight": 519,
+        "capturedWidth": 891,
+        "capturedHeight": 519
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-moveit-panes-2026-09-04.png",
+      "bytes": 6677330,
+      "label": "MoveIt Studio Pro configurable pane layout",
+      "sourceDocument": "https://docs.picknik.ai/how_to/custom_view_panes/about_the_user_interface/",
+      "sourceImage": "https://docs.picknik.ai/assets/images/high_level_ui_panes-6042425fa93b9f4d6166d2809506e422.jpg",
+      "capturedAt": "2026-09-04T20:29:19.565Z",
+      "startedAt": "2026-09-04T20:29:17.526Z",
+      "durationMs": 2039,
+      "image": {
+        "naturalWidth": 1911,
+        "naturalHeight": 1048,
+        "capturedWidth": 1240,
+        "capturedHeight": 833.5703125
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-groot-model-2026-09-04.png",
+      "bytes": 979247,
+      "label": "Groot2 TreeNodesModel with typed ports",
+      "sourceDocument": "https://behaviortree.dev/docs/tutorial-basics/tutorial_11_groot2/",
+      "sourceImage": "https://www.behaviortree.dev/assets/images/t12_groot_models-5f1f63eeae69454a87cb5f609c0865b6.png",
+      "capturedAt": "2026-09-04T20:29:20.113Z",
+      "startedAt": "2026-09-04T20:29:19.565Z",
+      "durationMs": 548,
+      "image": {
+        "naturalWidth": 1523,
+        "naturalHeight": 794,
+        "capturedWidth": 1180,
+        "capturedHeight": 792.4296875
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-btcpp-explicit-ports-2026-09-04.png",
+      "bytes": 538163,
+      "label": "BehaviorTree.CPP explicit ports make dataflow visible",
+      "sourceDocument": "https://behaviortree.dev/docs/guides/ports_vs_blackboard/",
+      "sourceImage": "https://www.behaviortree.dev/assets/images/with_ports_sequence-610186a2466dfe975d67c2fd03f3a031.png",
+      "capturedAt": "2026-09-04T20:29:20.460Z",
+      "startedAt": "2026-09-04T20:29:20.113Z",
+      "durationMs": 347,
+      "image": {
+        "naturalWidth": 1440,
+        "naturalHeight": 507,
+        "capturedWidth": 1180,
+        "capturedHeight": 507
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-btcpp-subtree-2026-09-04.png",
+      "bytes": 202178,
+      "label": "BehaviorTree.CPP reusable SubTree call",
+      "sourceDocument": "https://behaviortree.dev/docs/tutorial-basics/tutorial_05_subtrees/",
+      "sourceImage": "https://www.behaviortree.dev/assets/images/crossdoor_subtree-4f2304772a896359d3fc67c9802e0bef.svg",
+      "capturedAt": "2026-09-04T20:29:20.734Z",
+      "startedAt": "2026-09-04T20:29:20.460Z",
+      "durationMs": 274,
+      "image": {
+        "naturalWidth": 951,
+        "naturalHeight": 423,
+        "capturedWidth": 951,
+        "capturedHeight": 423
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-btcpp-port-remapping-2026-09-04.png",
+      "bytes": 256012,
+      "label": "BehaviorTree.CPP explicit SubTree port remapping",
+      "sourceDocument": "https://behaviortree.dev/docs/tutorial-basics/tutorial_06_subtree_ports/",
+      "sourceImage": "https://www.behaviortree.dev/assets/images/port_remapping-e025094ce2207aef9dfda609fa10bae7.svg",
+      "capturedAt": "2026-09-04T20:29:21.029Z",
+      "startedAt": "2026-09-04T20:29:20.734Z",
+      "durationMs": 295,
+      "image": {
+        "naturalWidth": 1073,
+        "naturalHeight": 469,
+        "capturedWidth": 980,
+        "capturedHeight": 469
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-btcpp-running-2026-09-04.png",
+      "bytes": 92944,
+      "label": "BehaviorTree.CPP RUNNING state diagram",
+      "sourceDocument": "https://behaviortree.dev/docs/guides/asynchronous_nodes/",
+      "sourceImage": "https://www.behaviortree.dev/assets/images/RunningTree-6247b58f3119ffcc695094305dfd07c7.svg",
+      "capturedAt": "2026-09-04T20:29:21.239Z",
+      "startedAt": "2026-09-04T20:29:21.029Z",
+      "durationMs": 210,
+      "image": {
+        "naturalWidth": 662,
+        "naturalHeight": 305,
+        "capturedWidth": 662,
+        "capturedHeight": 305
+      },
+      "status": "captured"
+    },
+    {
+      "file": "bt-atlas-btcpp-prepost-2026-09-04.png",
+      "bytes": 132726,
+      "label": "BehaviorTree.CPP pre- and post-condition behavior",
+      "sourceDocument": "https://behaviortree.dev/docs/guides/pre_post_conditions/",
+      "sourceImage": "https://www.behaviortree.dev/assets/images/post_example-a0dd14431e604464b8bed24a2f411fc9.svg",
+      "capturedAt": "2026-09-04T20:29:21.471Z",
+      "startedAt": "2026-09-04T20:29:21.239Z",
+      "durationMs": 232,
+      "image": {
+        "naturalWidth": 918,
+        "naturalHeight": 288,
+        "capturedWidth": 918,
+        "capturedHeight": 288
+      },
+      "status": "captured"
+    }
+  ]
+}

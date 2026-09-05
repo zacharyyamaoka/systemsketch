@@ -41,6 +41,9 @@ import {
   type BlockShape,
   type BlockState,
 } from '../blockModel'
+import { resolveBlockPortSemanticRole, roleLabel } from '../connections/semanticRoles'
+import { getSemanticTagsVisible } from '../semanticTagVisibility'
+import { isBundleBlock } from '../stockBlocks'
 import { effectTethers } from '../effectTether'
 import { BlockInlineEditor } from '../BlockInlineEditor'
 import { valueBlockExactText, valueBlockInlet, valueBlockLabel, valueBlockOutlet } from '../valueBlock'
@@ -52,12 +55,13 @@ import {
   requestBlockInlineEdit,
 } from '../inlineBlockEditing'
 import {
-  layoutBlock,
-  type BlockDivider,
-  type BlockRect,
+	layoutBlock,
+	type BlockDivider,
+	type BlockHiddenPortSummary,
+	type BlockRect,
   type LaidOutBlockPort,
 } from '../layoutBlock'
-import { insertBlockPortForInlineEditing } from '../commands/blockCommands'
+import { appendBundleMember, insertBlockPortForInlineEditing } from '../commands/blockCommands'
 import {
   blockHeaderPortAddAffordance,
   blockPortAddAffordance,
@@ -70,6 +74,7 @@ import { getActiveDepthScopeId, toggleDepthScope } from '../../depth/depthNaviga
 import { branchFadeOpacity } from '../../branch/branchScope'
 import { countProducers, PortDot, usePortHintEligibility } from './PortDot'
 import { definitionBadge } from '../definitions/definitionLinking'
+import { isClockTriggerBlock, stockBlockVisibleDescription } from '../stockBlocks'
 import {
   describeDiffCounts,
   diffGutterGlyph,
@@ -141,8 +146,15 @@ function BlockPortDot({
   port: DrawnPort
   dragOffset: number | null
 }) {
-  const { placed, connected, hasDefault, producers } = port
-  const portId = placed.port.id
+	const { placed, connected, hasDefault, producers } = port
+	const portId = placed.port.id
+	const semanticRole = resolveBlockPortSemanticRole(placed.port)
+	const editor = useEditor()
+	const semanticTagsVisible = useValue(
+		'block semantic tag visibility',
+		() => getSemanticTagsVisible(editor),
+		[editor],
+	)
   const { hinting, eligible } = usePortHintEligibility(shape.id, portId)
 
   // No pointer handler here on purpose. The capture listener in
@@ -163,6 +175,7 @@ function BlockPortDot({
 		placed.port.variadic ? 'Port_variadic' : '',
 		placed.port.variadic ? `Port_variadic--${placed.port.variadic.kind}` : '',
 		placed.port.variadic?.bundled ? 'Port_variadic--bundled' : '',
+		semanticTagsVisible && semanticRole.role !== 'data' ? `Port_semantic--${semanticRole.role}` : '',
   ].filter(Boolean).join(' ')
   // A ghost row is a port the target asserts and this board does not have. It
   // keeps its dot so a missing cable has somewhere to land, in the row it is
@@ -182,12 +195,17 @@ function BlockPortDot({
       y={placed.y}
       hinting={hinting}
       eligible={eligible}
+		semanticLabel={semanticTagsVisible && semanticRole.role !== 'data' ? roleLabel(semanticRole.role) : undefined}
       className={extraClasses}
-      title={inHeader && !placed.subtle ? placed.port.name || undefined : undefined}
+		title={[
+			inHeader && !placed.subtle ? placed.port.name : '',
+			semanticTagsVisible && semanticRole.role !== 'data' ? `${semanticRole.role} port${semanticRole.origin === 'derived' ? ' (derived)' : ''}` : '',
+		].filter(Boolean).join(' · ') || undefined}
       attrs={{
         'data-block-port-edge': placed.edge,
         'data-block-port-row': String(portRow(placed.port)),
-        'data-block-port-mutates': portMutates(placed.port) ? 'true' : undefined,
+		'data-block-port-mutates': portMutates(placed.port) ? 'true' : undefined,
+		'data-semantic-role': semanticTagsVisible && semanticRole.role !== 'data' ? semanticRole.role : undefined,
 			'data-variadic-group': placed.port.variadic?.groupId,
 			'data-variadic-bundled': placed.port.variadic?.bundled ? 'true' : undefined,
         'data-diff-state': diffState === 'normal' ? undefined : diffState,
@@ -666,10 +684,10 @@ function SimpleFace({ shape }: { shape: BlockShape }) {
         <div
           className="BlockNode-simpleDescription"
           style={boxStyle(layout.description)}
-          data-pb-inline-field={blockInlineFieldAttribute({ kind: 'description' })}
-          title={shape.props.description}
+          data-pb-inline-field={isClockTriggerBlock(shape.props) ? undefined : blockInlineFieldAttribute({ kind: 'description' })}
+          title={stockBlockVisibleDescription(shape.props)}
         >
-          <FieldValue diffs={shape.props.fieldDiffs} path="description" value={shape.props.description} />
+          <FieldValue diffs={shape.props.fieldDiffs} path="description" value={stockBlockVisibleDescription(shape.props)} />
         </div>
       ) : null}
       {layout.typeLabel ? (
@@ -964,6 +982,34 @@ function PortLabels({
 }
 
 /**
+ * The face can omit individual ports without concealing the size of the
+ * callable contract. This reads layout's projection of the stored flags, so
+ * the count cannot drift into a second persisted display state.
+ */
+function HiddenPortSummaries({ summaries }: { summaries: readonly BlockHiddenPortSummary[] }) {
+	return (
+		<>
+			{summaries.map((summary) => {
+				const noun = `${summary.side} port${summary.count === 1 ? '' : 's'}`
+				return (
+					<span
+						key={summary.side}
+						className={`BlockNode-hiddenPorts BlockNode-hiddenPorts--${summary.side}`}
+						data-testid={`block-hidden-${summary.side}-ports`}
+						data-hidden-port-count={summary.count}
+						style={boxStyle(summary.box)}
+						aria-label={`${summary.count} hidden ${noun}`}
+						title={`${summary.count} hidden ${noun} — manage ports in the inspector to show them`}
+					>
+						+{summary.count} more
+					</span>
+				)
+			})}
+		</>
+	)
+}
+
+/**
  * The table-style "add one more" affordance, borrowed wholesale from a
  * spreadsheet's end-of-list gutter: hover the empty space under a lane and the
  * next row offers itself. Two of these exist per Block — inputs own the left
@@ -990,18 +1036,21 @@ function PortAddAffordance({
   const editor = useEditor()
   const lane = side === 'inputs' ? 'input' : 'output'
   const where = header ? 'header' : side
+  const addsBundleMember = side === 'inputs' && !header && isBundleBlock(shape.props)
 
   const addPort = useCallback(() => {
-    const result = insertBlockPortForInlineEditing(
-      editor,
-      shape.id,
-      side,
-      Number.MAX_SAFE_INTEGER,
-      header ? { section: { row: HEADER_ROW, branch: 0 } } : {},
-    )
+    const result = addsBundleMember
+      ? appendBundleMember(editor, shape.id)
+      : insertBlockPortForInlineEditing(
+          editor,
+          shape.id,
+          side,
+          Number.MAX_SAFE_INTEGER,
+          header ? { section: { row: HEADER_ROW, branch: 0 } } : {},
+        )
     if (!result.ok) return
     requestBlockInlineEdit(editor, shape.id, { kind: 'portName', side, portId: result.port.id })
-  }, [editor, header, shape.id, side])
+  }, [addsBundleMember, editor, header, shape.id, side])
 
   return (
     <div className={`BlockNode-portAdd BlockNode-portAdd--${header ? 'header' : lane}`}>
@@ -1017,8 +1066,10 @@ function PortAddAffordance({
       */}
       <div
         role="button"
-		aria-label={`Add ${header ? 'header' : lane} port to ${shape.props.title === '' ? 'this Block' : shape.props.title} on canvas`}
-        title={header ? 'Add header port' : `Add ${lane} port`}
+        aria-label={addsBundleMember
+          ? `Add Bundle member update to ${shape.props.title === '' ? 'this Block' : shape.props.title} on canvas`
+          : `Add ${header ? 'header' : lane} port to ${shape.props.title === '' ? 'this Block' : shape.props.title} on canvas`}
+        title={addsBundleMember ? 'Add Bundle member update' : header ? 'Add header port' : `Add ${lane} port`}
         className="BlockNode-portAddBead"
         data-testid={`block-port-add-${where}`}
         style={{ left: affordance.x, top: affordance.y }}
@@ -1223,18 +1274,19 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
                 ) : null)
               : null}
 	            <PortLabels ports={layout.ports} drag={heldPort} connectedIds={connectedIds} />
+						<HiddenPortSummaries summaries={layout.hiddenPortSummaries} />
 						<VariadicRuns ports={layout.ports} />
             {layout.description ? (
               <div
                 className="BlockNode-description"
                 style={boxStyle(layout.description)}
-                data-pb-inline-field={blockInlineFieldAttribute({ kind: 'description' })}
-                title={shape.props.description}
+                data-pb-inline-field={isClockTriggerBlock(shape.props) ? undefined : blockInlineFieldAttribute({ kind: 'description' })}
+                title={stockBlockVisibleDescription(shape.props)}
               >
                 <FieldValue
                   diffs={shape.props.fieldDiffs}
                   path="description"
-                  value={shape.props.description}
+                  value={stockBlockVisibleDescription(shape.props)}
                 />
               </div>
             ) : null}

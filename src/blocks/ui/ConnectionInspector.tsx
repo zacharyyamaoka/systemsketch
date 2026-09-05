@@ -40,10 +40,14 @@ import {
 	setConnectionTemporalForSelection,
 } from '../commands'
 import { isBlockShape } from '../blockModel'
+import { isBranchShape } from '../../branch/branchModel'
+import { isLoopShape } from '../../loop/loopModel'
+import { getPortHostPort, isPortHostShape } from '../connections/blockPorts'
 import { sameSharedStyle } from '../commands/blockStyleCommands'
 import { CONNECTION_SHAPE_TYPE } from '../connections/connectionModel'
 import { cablePillLabel } from '../connections/connectionPresentation'
 import { isEffectCable } from '../connections/effectCable'
+import { resolveConnectionSemanticRole, roleLabel, roleOriginLabel, type ConnectionSemanticRole } from '../connections/semanticRoles'
 import { EMPTY_FIELD_GUIDANCE } from '../../fields/emptyFieldGuidance'
 import './block-inspector.css'
 
@@ -64,6 +68,8 @@ export interface ConnectionInspectorContext {
 	tunnelLayer: string | null
 	/** Reusable tunnel layer names already present on this canvas. */
 	tunnelLayers: string[]
+	/** Read-only: wires inherit this live from their endpoint ports. */
+	semantic: ConnectionSemanticRole | null
 }
 
 const label = (value: string) => value[0].toUpperCase() + value.slice(1)
@@ -84,13 +90,14 @@ function sharedValue<T>(values: readonly T[]): T | null {
 function describeEndpoint(editor: Editor, binding: ConnectionBinding | undefined) {
 	if (!binding) return '—'
 	const shape = editor.getShape(binding.toId)
-	if (!isBlockShape(shape)) return '—'
-	const port = [...shape.props.inputs, ...shape.props.outputs]
-		.find((candidate) => candidate.id === binding.props.portId)
+	if (!isPortHostShape(shape)) return 'Missing host'
+	const port = getPortHostPort(editor, shape, binding.props.portId)
+	if (!port) return 'Missing port'
 	// An unnamed Block still has a type; "transform.in_1" reads far better than
 	// "Block.in_1" for one the picker just made. An inner face says so: a cable
 	// on the inside of a boundary port is a different wire from one outside it.
-	const name = shape.props.title || shape.props.blockType || 'Block'
+	const kind = isBranchShape(shape) ? 'Branch' : isLoopShape(shape) ? 'Loop' : 'Block'
+	const name = shape.props.title || (isBlockShape(shape) ? shape.props.blockType : '') || kind
 	const face = binding.props.face === 'inner' ? ' (inside)' : ''
 	return `${name}.${port?.name || port?.id || binding.props.portId}${face}`
 }
@@ -131,11 +138,23 @@ export function getConnectionInspectorContext(editor: Editor): ConnectionInspect
 		tunnelEnabled: sharedValue(selected.map((connection) => connection.props.tunnel)),
 		tunnelLayer: sharedValue(selected.map((connection) => connection.props.tunnelLayer)),
 		tunnelLayers: getTunnelLayers(editor),
+		semantic: only ? resolveConnectionSemanticRole(editor, only) : null,
 	}
 }
 
 /** Same panel, same words: the previous context is kept, so nothing re-renders. */
-function sameConnectionInspectorContext(
+function sameSemanticClaim(
+	previous: ConnectionSemanticRole['source'],
+	next: ConnectionSemanticRole['source'],
+): boolean {
+	return previous?.role === next?.role
+		&& previous?.origin === next?.origin
+		&& previous?.claim?.role === next?.claim?.role
+		&& previous?.claim?.source === next?.claim?.source
+		&& previous?.claim?.analyzer === next?.claim?.analyzer
+}
+
+export function sameConnectionInspectorContext(
 	previous: unknown,
 	next: ConnectionInspectorContext | null,
 ): previous is ConnectionInspectorContext | null {
@@ -150,6 +169,17 @@ function sameConnectionInspectorContext(
 		&& before.tunnelLayer === next.tunnelLayer
 		&& before.tunnelLayers.length === next.tunnelLayers.length
 		&& before.tunnelLayers.every((layer, index) => layer === next.tunnelLayers[index])
+		&& (before.semantic === next.semantic || (
+			before.semantic !== null && next.semantic !== null
+			&& before.semantic.label === next.semantic.label
+			&& before.semantic.warning === next.semantic.warning
+			&& before.semantic.halfBound === next.semantic.halfBound
+			&& before.semantic.malformed === next.semantic.malformed
+			&& before.semantic.conflict === next.semantic.conflict
+			&& sameSemanticClaim(before.semantic.effective, next.semantic.effective)
+			&& sameSemanticClaim(before.semantic.source, next.semantic.source)
+			&& sameSemanticClaim(before.semantic.sink, next.semantic.sink)
+		))
 		&& (before.only === next.only || (
 			before.only !== null && next.only !== null
 			&& before.only.id === next.only.id
@@ -250,6 +280,22 @@ export function EditorConnectionInspector({ editor }: { editor: Editor }) {
 					) : (
 						<p className="block-inspector__hint">Routing applies to all {context.count}.</p>
 					)}
+				</section>
+
+				<section className="block-inspector__section" data-inspector-section="Semantic role">
+					<div className="block-inspector__section-title">Semantic role</div>
+					{context.semantic ? (
+						<>
+							<p className="block-inspector__hint" data-testid="connection-semantic-role">
+								<strong>{context.semantic.label}</strong> — inherited live from endpoint ports.
+							</p>
+							<div className="connection-inspector__semantic-facts">
+								<span>Source: {context.semantic.source ? `${roleLabel(context.semantic.source.role)} · ${roleOriginLabel(context.semantic.source)}` : 'Unbound'}</span>
+								<span>Sink: {context.semantic.sink ? `${roleLabel(context.semantic.sink.role)} · ${roleOriginLabel(context.semantic.sink)}` : 'Unbound'}</span>
+							</div>
+							{context.semantic.warning ? <p className="block-inspector__hint connection-inspector__semantic-warning" role="status">{context.semantic.warning}</p> : null}
+						</>
+					) : <p className="block-inspector__hint">Select one cable to read its endpoint roles.</p>}
 				</section>
 
 				<section className="block-inspector__section" data-inspector-section="Routing">

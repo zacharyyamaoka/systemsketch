@@ -6,8 +6,9 @@ import {
 	type TLShapeId,
 	type VecLike,
 } from 'tldraw'
-import { BLOCK_SHAPE_TYPE, isBlockShape, type BlockShape, type BlockShapeProps } from '../blockModel'
+import { BLOCK_SHAPE_TYPE, isBlockShape, type BlockShape, type BlockShapeProps, type SemanticPortRole } from '../blockModel'
 import { layoutBlock } from '../layoutBlock'
+import { resolveBlockPortSemanticRole } from './semanticRoles'
 import { BRANCH_SHAPE_TYPE, branchLayout, isBranchShape, type BranchShape } from '../../branch/branchModel'
 import { branchFoldAttachPoint } from '../../branch/branchScope'
 import { LOOP_SHAPE_TYPE, isLoopShape, loopLayout, type LoopShape } from '../../loop/loopModel'
@@ -66,6 +67,8 @@ export interface BlockConnectionPort {
 	 * not: the cable starts inside the thing it would otherwise route around.
 	 */
 	facesInward?: boolean
+	/** Live role reading; source of truth remains the port's claims. */
+	semanticRole?: SemanticPortRole
 }
 
 /**
@@ -133,6 +136,7 @@ function projectBlockConnectionPorts(props: BlockShapeProps): BlockConnectionPor
 				elbowSide: placed && placed.edge !== (side === 'input' ? 'left' : 'right')
 					? placed.edge
 					: undefined,
+				semanticRole: resolveBlockPortSemanticRole(port).role,
 			}
 		})
 	})
@@ -191,6 +195,7 @@ export function getLoopConnectionPorts(loop: LoopShape): BlockConnectionPort[] {
 		subtle: false,
 		elbowSide: placed.elbowSide,
 		facesInward: placed.facesInward,
+		semanticRole: 'data',
 	}))
 }
 
@@ -207,6 +212,7 @@ export function getBranchConnectionPorts(branch: BranchShape): BlockConnectionPo
 		y: control.y,
 		anchor: { x: control.x / layout.w, y: control.y / layout.h },
 		subtle: false,
+		semanticRole: 'control',
 	}))
 }
 

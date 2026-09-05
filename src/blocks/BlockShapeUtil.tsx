@@ -20,6 +20,7 @@ import {
 	type BlockShape,
 } from './blockModel'
 import { blockShapeMigrations } from './blockShapeMigrations'
+import { normalizeStockBlockProps, stockBlockVisibleDescription } from './stockBlocks'
 import {
 	createValueBlockProps,
 	isBlankBlockProps,
@@ -75,6 +76,7 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 	const ink = '#27272a'
 	const muted = '#a1a1aa'
 	const divider = '#e4e4e7'
+	const description = layout.description
 
 	if (layout.view === 'value') {
 		return (
@@ -126,19 +128,37 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 				</>
 			)}
 
-			{layout.description ? (
+			{description ? (
 				<text
-					x={layout.view === 'simple' ? w / 2 : layout.description.x}
-					y={layout.description.y + layout.description.h / 2}
+					x={layout.view === 'simple' ? w / 2 : description.x}
+					y={description.y + (layout.view === 'simple' ? description.h / 2 : 11)}
 					textAnchor={layout.view === 'simple' ? 'middle' : 'start'}
-					dominantBaseline="middle"
+					dominantBaseline={layout.view === 'simple' ? 'middle' : undefined}
 					fill={muted}
 					fontFamily="ui-sans-serif, system-ui"
 					fontSize={layout.view === 'simple' ? 18 : 11}
 				>
-					{shape.props.description}
+					{stockBlockVisibleDescription(shape.props).split('\n').map((line, index) => (
+						<tspan key={`${index}:${line}`} x={layout.view === 'simple' ? w / 2 : description.x} dy={index === 0 ? 0 : (layout.view === 'simple' ? 24 : 16)}>{line}</tspan>
+					))}
 				</text>
 			) : null}
+
+			{layout.hiddenPortSummaries.map((summary) => (
+				<text
+					key={`hidden-${summary.side}`}
+					x={summary.side === 'input' ? summary.box.x : summary.box.x + summary.box.w}
+					y={summary.box.y + summary.box.h / 2}
+					textAnchor={summary.side === 'input' ? 'start' : 'end'}
+					dominantBaseline="middle"
+					fill={muted}
+					fontFamily="ui-sans-serif, system-ui"
+					fontSize={11}
+					fontStyle="italic"
+				>
+					+{summary.count} more
+				</text>
+			))}
 
 			{layout.dividers.map((rule, index) => (
 				<line key={index} x1={rule.x} y1={rule.y} x2={rule.x + rule.w} y2={rule.y} stroke={divider} />
@@ -197,9 +217,10 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 				kind: 'portName', side: 'outputs', portId: 'out_1',
 			})
 		}
-		const props = drawnAsPill
+		const valueProps = drawnAsPill
 			? createValueBlockProps(next.props)
 			: normalizeValueBlockProps(next.props)
+		const props = normalizeStockBlockProps(valueProps)
 		return props === next.props ? undefined : { ...next, props }
 	}
 
@@ -213,6 +234,8 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	}
 
 	override onBeforeUpdate(previous: BlockShape, next: BlockShape): BlockShape | void {
+		const normalizedStock = normalizeStockBlockProps(next.props)
+		if (normalizedStock !== next.props) return { ...next, props: normalizedStock }
 		if (next.props.view === 'value') {
 			const props = normalizeValueBlockProps(next.props, previous.props)
 			return props === next.props ? undefined : { ...next, props }

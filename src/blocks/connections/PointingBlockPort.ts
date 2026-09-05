@@ -21,6 +21,7 @@ import {
 } from '../ports/portInteraction'
 import { clearPortDragState } from '../ports/portState'
 import { createOrUpdateConnectionBinding } from './ConnectionBindingUtil'
+import { forgetPickerCreationMark, rememberPickerCreationMark } from './blockPicker'
 import {
 	offerBlockForLooseTerminal,
 	outerScopeOf,
@@ -96,6 +97,7 @@ function createConnectionFromPort(
 		editor.bailToMark(markId)
 		return null
 	}
+	rememberPickerCreationMark(editor, connectionId, markId)
 
 	return { connectionId, draggingTerminal: DRAGGED_TERMINAL, markId, shape, handle }
 }
@@ -258,6 +260,7 @@ export function offerBlockFromPort(editor: Editor, pressed: PointingBlockPortInf
 		created.draggingTerminal,
 		outerScopeOf(editor, pressed.shapeId),
 	)) {
+		forgetPickerCreationMark(editor, created.connectionId)
 		editor.bailToMark(created.markId)
 	}
 }

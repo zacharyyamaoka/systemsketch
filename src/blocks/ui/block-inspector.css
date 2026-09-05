@@ -81,12 +81,28 @@
   cursor: default;
 }
 
+/*
+ * The strip is a full-width BAR that contains a content-width PILL GROUP.
+ *
+ * Those are two different jobs and it matters which element does which. The bar
+ * has to stay full width: it carries the bottom border, the sticky background,
+ * and `.block-inspector__dock-close`, which is a child positioned against this
+ * element's right edge — shrink the bar and the close button walks inward with
+ * it. The TABS are what hug their content.
+ *
+ * It used to be `grid-template-columns: 1fr 1fr`, which stretched two tabs
+ * across the whole panel however short their labels were. A tab strip that
+ * grows with the panel instead of with its labels reads as a segmented control
+ * for the entire panel rather than a small switch between two views. Fixed here
+ * rather than in any one caller, so the Block, Branch, Loop and Compare strips
+ * all get it — one tab component was the point.
+ */
 .block-inspector__tabs {
   position: sticky;
   z-index: 8;
   top: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  align-items: center;
   flex: 0 0 auto;
   gap: 3px;
   padding: 8px 10px;
@@ -97,6 +113,7 @@
 .block-inspector__tabs > [role='tab'] {
   position: relative;
   display: inline-flex;
+  flex: 0 0 auto;
   min-height: 30px;
   align-items: center;
   justify-content: center;
@@ -835,6 +852,53 @@
   line-height: 1.5;
 }
 
+/*
+ * The element's History tab.
+ *
+ * Everything about the ROWS lives in `src/history/history.css` — this is only
+ * the frame the shared list sits in, matched to `.block-inspector__notes` so the
+ * three tabs feel like three views of one panel rather than three panels. If a
+ * row ever needs to look different in here, that is a change to the shared
+ * component; a private override at this seam is how the two history panels stop
+ * being the same component.
+ */
+.block-inspector__history {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 10px;
+  overflow-y: auto;
+}
+
+.block-inspector__history header {
+  padding: 0 4px;
+}
+
+.block-inspector__history header .block-inspector__section-title {
+  margin-bottom: 3px;
+}
+
+.block-inspector__history header p {
+  margin: 0;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+/* The provenance line. Muted and small, but never hidden: it is the sentence
+   that stops three rows from reading as three logged edits. */
+.block-inspector__history-note {
+  margin: 0;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-sunken);
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
 /* The notes editor is a code well: monospace, and painted from the code
    tokens so an imported VS Code theme gives it that editor's own surface. */
 .block-inspector .block-inspector__notes-editor {
@@ -1086,6 +1150,155 @@
 
 .connection-inspector__add-layer {
   align-self: flex-start;
+}
+
+/* Semantic role authoring is deliberately a separate, spacious port-mode: the
+ * name/type/default table is the high-frequency editing surface. */
+.block-inspector__semantic-role {
+	display: grid;
+	grid-template-columns: 72px minmax(0, 1fr);
+	min-width: 0;
+	align-items: center;
+	gap: 8px;
+	color: var(--ss-text-muted);
+	font-size: 11px;
+	text-transform: lowercase;
+}
+
+.block-inspector__semantic-role > span.is-semantic {
+  color: var(--ss-accent);
+  font-weight: 650;
+}
+
+.block-inspector__semantic-role select {
+	width: 100%;
+	min-width: 0;
+	padding: 5px 7px;
+	border: 1px solid var(--ss-border-strong);
+	border-radius: 6px;
+	color: inherit;
+	background: var(--ss-surface-sunken);
+	font-size: 11px;
+}
+
+.block-inspector__tags-button {
+	min-height: 22px;
+	padding: 2px 6px;
+	border: 1px solid var(--ss-border);
+	border-radius: 999px;
+	color: var(--ss-text-muted);
+	background: var(--ss-surface-raised);
+	cursor: pointer;
+	font-size: 10px;
+	font-weight: 600;
+}
+
+.block-inspector__tags-button:hover,
+.block-inspector__tags-button.is-active {
+	border-color: var(--ss-accent);
+	color: var(--ss-accent);
+	background: var(--ss-accent-soft);
+}
+
+.block-inspector__semantic-tags > .block-inspector__hint {
+	margin: 0 0 8px;
+}
+
+.block-inspector__semantic-visibility {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	margin: 0 0 9px;
+	color: var(--ss-text);
+	font-size: 11px;
+	font-weight: 650;
+	cursor: pointer;
+}
+
+.block-inspector__semantic-visibility input {
+	margin: 0;
+	accent-color: var(--ss-accent);
+}
+
+.block-inspector__semantic-visibility:has(input:disabled) {
+	cursor: default;
+	opacity: .58;
+}
+
+.block-inspector__semantic-visibility-state {
+	margin-left: auto;
+	padding: 2px 5px;
+	border-radius: 999px;
+	background: var(--ss-surface-sunken);
+	color: var(--ss-text-muted);
+	font: 10px/1 ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+.block-inspector__semantic-tags > ul {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.block-inspector__semantic-tag {
+	display: grid;
+	gap: 7px;
+	padding: 9px;
+	border: 1px solid var(--ss-border);
+	border-radius: 8px;
+	background: var(--ss-surface-hover);
+}
+
+.block-inspector__semantic-tag--derived {
+	border-style: dashed;
+	opacity: .72;
+}
+
+.block-inspector__semantic-tag-port {
+	display: flex;
+	min-width: 0;
+	align-items: baseline;
+	gap: 6px;
+}
+
+.block-inspector__semantic-tag-name {
+	min-width: 0;
+	overflow: hidden;
+	font-weight: 650;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.block-inspector__semantic-tag-type,
+.block-inspector__semantic-tag-hidden,
+.block-inspector__semantic-tag-derived {
+	flex: 0 0 auto;
+	color: var(--ss-text-muted);
+	font: 10px/1 ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+.block-inspector__semantic-tag-hidden,
+.block-inspector__semantic-tag-derived {
+	padding: 2px 4px;
+	border-radius: 3px;
+	background: var(--ss-surface-sunken);
+}
+
+.connection-inspector__semantic-facts {
+  display: grid;
+  gap: 3px;
+  margin: 6px 0;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+}
+
+.connection-inspector__semantic-warning {
+  padding: 6px 7px;
+  border-left: 2px solid var(--ss-warning);
+  color: var(--ss-text);
 }
 
 /* A derived port: shown so the lane is honest, editable nowhere. */

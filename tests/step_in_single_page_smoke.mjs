@@ -26,11 +26,21 @@ const ASSETS = join(ROOT, 'docs', 'assets')
 const MIGRATION_SHOT = join(ASSETS, 'step-in-single-page-migration-2026-09-02.png')
 const ISOLATION_SHOT = join(ASSETS, 'step-in-single-page-isolation-2026-09-02.png')
 const RESULTS = join(ASSETS, 'step-in-single-page-results.json')
+const REFRESH_SCREENSHOTS = process.env.SYSTEMSKETCH_REFRESH_STEP_IN_SCREENSHOTS === '1'
 
 const results = []
 
 function check(id, label, observed, desired = true) {
   const ok = JSON.stringify(observed) === JSON.stringify(desired)
+  results.push({ id, label, observed, desired, ok })
+  process.stdout.write(
+    `  ${ok ? 'PASS' : 'FAIL'}  ${id}  ${label}\n`
+      + (ok ? '' : `        observed=${JSON.stringify(observed)} desired=${JSON.stringify(desired)}\n`),
+  )
+}
+
+function checkNear(id, label, observed, desired, tolerance = 0.001) {
+  const ok = Object.keys(desired).every((key) => Math.abs(observed[key] - desired[key]) <= tolerance)
   results.push({ id, label, observed, desired, ok })
   process.stdout.write(
     `  ${ok ? 'PASS' : 'FAIL'}  ${id}  ${label}\n`
@@ -63,7 +73,6 @@ async function waitForDisk(path, accept, label, timeoutMs = 30_000) {
 }
 
 async function main() {
-  await ensureDir(ASSETS)
   const app = await startApp({
     label: 'systemsketch-step-in-single-page',
     build: 'step-in-single-page',
@@ -71,6 +80,8 @@ async function main() {
     height: 1000,
   })
   const { page, port, filesRoot } = app
+  const migrationShot = REFRESH_SCREENSHOTS ? MIGRATION_SHOT : join(filesRoot, 'step-in-single-page-migration.png')
+  const isolationShot = REFRESH_SCREENSHOTS ? ISOLATION_SHOT : join(filesRoot, 'step-in-single-page-isolation.png')
   const legacyPath = join(filesRoot, 'SystemSketch', 'legacy-two-page.tldr')
   const scopePath = join(filesRoot, 'SystemSketch', 'step-in-scope.systemsketch')
 
@@ -87,19 +98,47 @@ async function main() {
     await evaluate(page, `(() => {
       const editor = window.__systemsketch.editor
       const first = editor.getCurrentPageId()
-      editor.updatePage({ id: first, name: 'Architecture' })
+      editor.updatePage({ id: first, name: 'Architecture', meta: {
+        owner: { team: 'architecture' },
+        systemSketchLandmarks: { version: 1, landmarks: [{
+          id: 'overview', name: 'Overview', camera: { x: 40, y: 50, z: 1 },
+        }] },
+      } })
       editor.createShape({
         id: 'shape:architecture-service', type: 'geo', x: 120, y: 120,
         props: { geo: 'rectangle', w: 240, h: 140, color: 'blue' },
       })
       editor.createPage({ id: 'page:legacy-runtime', name: 'Runtime' })
       editor.setCurrentPage('page:legacy-runtime')
+      editor.updatePage({ id: 'page:legacy-runtime', name: 'Runtime', meta: {
+        owner: { team: 'runtime' },
+        systemSketchLandmarks: { version: 1, landmarks: [{
+          id: 'overview', name: 'Overview', camera: { x: 80, y: 90, z: 0.5 },
+        }, {
+          id: 'worker-detail', name: 'Worker detail', camera: { x: -140, y: 260, z: 2 },
+        }] },
+      } })
       editor.createShape({
         id: 'shape:runtime-worker', type: 'geo', x: 80, y: 100,
         props: { geo: 'ellipse', w: 210, h: 150, color: 'orange' },
       })
-      editor.setCurrentPage(first)
+      editor.setCurrentPage(editor.getPages().find((entry) => entry.name === 'Architecture').id)
       return true
+    })()`)
+    const sourceRuntimeViews = await json(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const sourcePage = 'page:legacy-runtime'
+      const views = [
+        { name: 'Runtime · Overview', camera: { x: 80, y: 90, z: 0.5 } },
+        { name: 'Worker detail', camera: { x: -140, y: 260, z: 2 } },
+      ].map((view) => {
+        editor.setCurrentPage(sourcePage)
+        editor.setCamera(view.camera, { animation: { duration: 0 } })
+        const viewport = editor.getViewportPageBounds()
+        return { ...view, viewport: { x: viewport.x, y: viewport.y, w: viewport.w, h: viewport.h } }
+      })
+      editor.setCurrentPage(editor.getPages().find((entry) => entry.name === 'Architecture').id)
+      return views
     })()`)
     const legacySource = await evaluate(page, `JSON.stringify({
       tldrawFileFormatVersion: 1,
@@ -138,6 +177,9 @@ async function main() {
         })),
         depthInMenu: Boolean(document.querySelector('.systemsketch-top-left-shell .systemsketch-depth-navigator--menu')),
         stockPageTrigger: Boolean(document.querySelector('.tlui-page-menu__trigger')),
+        landmarks: editor.getCurrentPage().meta?.systemSketchLandmarks?.landmarks ?? [],
+        runtimeWorkerBounds: editor.getShapePageBounds('shape:runtime-worker'),
+        sourceMetadata: frames.map((frame) => frame.meta?.systemSketch?.sourcePageMeta?.owner?.team),
       }
     })()`)
     check('M2', 'the product exposes exactly one durable canvas', migration.pageCount, 1)
@@ -164,9 +206,52 @@ async function main() {
         && record.type === 'frame'
         && record.meta?.systemSketch?.kind === 'imported-page').length,
     2)
+    check('M10', 'secondary page camera landmarks merge into the one board with stable collision names',
+      migration.landmarks.map((entry) => [entry.id, entry.name]),
+      [
+        ['overview', 'Overview'],
+        ['page-legacy-runtime:overview', 'Runtime · Overview'],
+        ['worker-detail', 'Worker detail'],
+      ])
+    check('M11', 'every removed page keeps unrelated metadata on its replacement Frame', migration.sourceMetadata,
+      ['architecture', 'runtime'])
+    const runtimeDisplacement = {
+      x: migration.runtimeWorkerBounds.x - 80,
+      y: migration.runtimeWorkerBounds.y - 100,
+    }
+    await clickElement(page, '[data-testid="systemsketch-board-overview-trigger"]')
+    await waitFor(page, `document.querySelector('[data-testid="systemsketch-named-landmarks-list"]')`, 'migrated saved-view list')
+    for (const [index, source] of sourceRuntimeViews.entries()) {
+      const id = migration.landmarks.find((landmark) => landmark.name === source.name)?.id
+      assert.ok(id, `migrated landmark id for ${source.name}`)
+      await clickElement(page, `[data-testid="systemsketch-landmark-jump-${id}"]`)
+      await delay(360)
+      const jumped = await json(page, `(() => {
+        const editor = window.__systemsketch.editor
+        const camera = editor.getCamera()
+        const viewport = editor.getViewportPageBounds()
+        return {
+          camera: { x: camera.x, y: camera.y, z: camera.z },
+          viewport: { x: viewport.x, y: viewport.y, w: viewport.w, h: viewport.h },
+        }
+      })()`)
+      const suffix = index === 0 ? 'zoomed out' : 'zoomed in'
+      checkNear(`M${12 + index * 2}`, `${suffix} migrated landmark jumps to its page-space translated camera`, jumped.camera, {
+        x: source.camera.x - runtimeDisplacement.x,
+        y: source.camera.y - runtimeDisplacement.y,
+        z: source.camera.z,
+      })
+      checkNear(`M${13 + index * 2}`, `${suffix} jump physically frames the former runtime content at its translated viewport`, jumped.viewport, {
+        x: source.viewport.x + runtimeDisplacement.x,
+        y: source.viewport.y + runtimeDisplacement.y,
+        w: source.viewport.w,
+        h: source.viewport.h,
+      })
+    }
     await evaluate(page, `window.__systemsketch.editor.zoomToFit({ animation: { duration: 0 } }); true`)
     await delay(300)
-    await screenshot(page, MIGRATION_SHOT)
+    if (REFRESH_SCREENSHOTS) await ensureDir(ASSETS)
+    await screenshot(page, migrationShot)
 
     // A fresh one-canvas board for the physical Step In proof.
     await openApp(page, port, `?board=${encodeURIComponent(scopePath)}`)
@@ -304,13 +389,13 @@ async function main() {
       return true
     })()`)
     await delay(250)
-    await clickElement(page, '.systemsketch-depth-pill__trigger')
+    await clickElement(page, '.systemsketch-depth-counter')
     await waitFor(page, `document.querySelector('#systemsketch-depth-stack')`, 'Depth Stack popover')
     const depthText = await evaluate(page,
       `document.querySelector('#systemsketch-depth-stack').textContent.replace(/\\s+/g, ' ').trim()`)
     check('D1', 'the in-slot Depth Stack exposes root and current scope',
       depthText.includes('root canvas') && depthText.includes('run()') && depthText.includes('current scope'), true)
-    await screenshot(page, ISOLATION_SHOT)
+    await screenshot(page, isolationShot)
 
     const consoleErrors = localConsoleErrors(page)
     check('Q1', 'the physical migration and resize journey emits no local console errors', consoleErrors, [])
@@ -318,7 +403,7 @@ async function main() {
     await writeFile(RESULTS, `${JSON.stringify({ checks: results }, null, 2)}\n`)
     assert.ok(results.every((entry) => entry.ok), 'one or more Step In / single-page checks failed')
     process.stdout.write(`\n  ${results.length}/${results.length} browser checks passed\n`)
-    process.stdout.write(`  ${MIGRATION_SHOT}\n  ${ISOLATION_SHOT}\n`)
+    process.stdout.write(`  ${migrationShot}\n  ${isolationShot}\n`)
   } finally {
     app.close()
   }

@@ -8,6 +8,7 @@
 import { atom, type Atom, type Editor, type TLShapeId } from 'tldraw'
 
 import type { BlockShape, BlockShapeProps } from './blockModel'
+import { isClockTriggerBlock } from './stockBlocks'
 import {
 	VALUE_FONT_PX,
 	VALUE_PAD_X,
@@ -264,7 +265,10 @@ export function blockInlineFieldAtPointOrNull(
 	}
 	if (contains(layout.icon ?? layout.headerIcon, point)) return { kind: 'icon' }
 	if (contains(layout.typeLabel ?? layout.headerType, point)) return { kind: 'blockType' }
-	if (contains(layout.description, point)) return { kind: 'description' }
+	// A Clock face includes an immutable derived declaration plus an optional
+	// annotation. Its combined paint is not one editable string; edit the
+	// annotation honestly in the inspector instead of overwriting the label.
+	if (contains(layout.description, point) && !isClockTriggerBlock(props)) return { kind: 'description' }
 
 	for (const placed of layout.ports) {
 		if (!contains(placed.label, point)) continue

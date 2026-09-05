@@ -21,20 +21,37 @@ import {
   type BlockPortSide,
   type BlockShapeProps,
   type BlockPresentationView,
+  type SemanticPortRole,
   blockPortSections,
   isEffectPort,
   mutatedInputId,
   portInHeader,
   portMutates,
   setBlockViewProps,
+  SEMANTIC_PORT_ROLES,
 } from '../blockModel'
+import { resolveBlockPortSemanticRole, roleLabel } from '../connections/semanticRoles'
+import { getSemanticTagsVisible, setSemanticTagsVisible } from '../semanticTagVisibility'
 import { commitBlockDefinitionName, definitionBadge } from '../definitions/definitionLinking'
 import { useAppearancePreferences } from '../../settings/appearancePreferences'
 import { getBlockPortConnections, type BlockPortConnection } from '../connections/blockPorts'
 import { valueBlockInlet, valueBlockName, valueBlockOutlet } from '../valueBlock'
 import {
+	appendBundleMemberProps,
+	appendSetAttributesMemberProps,
+	clockTriggerLabel,
+	isClockTriggerBlock,
+	isSelectBlock,
+	isSetAttributesBlock,
+	normalizeClockTriggerConfig,
+	stockBlockSourceProjection,
+	isBundleBlock,
+} from '../stockBlocks'
+import {
+  appendBundleMember,
   appendBlockPort,
   appendBlockPortProps,
+	appendSetAttributesMember,
   getBlockInspectorContext,
   getOnlySelectedBlock,
   sameBlockInspectorContext,
@@ -58,11 +75,12 @@ import {
   setBlockShowDescriptionForSelection,
   setBlockViewForSelection,
 } from '../commands/blockStyleCommands'
+import { ElementHistoryPanel } from '../../history/ElementHistoryPanel'
 import { BlockBatchInspectorContent } from './BlockBatchInspector'
 import { BLOCK_ICONS, BlockIconGlyph } from './blockIcons'
 import './block-inspector.css'
 
-type InspectorTab = 'details' | 'notes'
+type InspectorTab = 'details' | 'notes' | 'history'
 
 const DISPLAY_DESCRIPTION_LIMIT = 120
 
@@ -79,6 +97,10 @@ export interface BlockInspectorActions {
   updateDetails(patch: BlockDetailsPatch, options?: BlockEditOptions): void
   setView(view: BlockPresentationView): void
   addPort(side: BlockPortSide): void
+	/** Add a stable named member-update row to the curated Set attributes Block. */
+	addSetAttributesMember?(): void
+	/** Add a stable `.field` update row to the curated Bundle Block. */
+	addBundleMember?(): void
   updatePort(
     side: BlockPortSide,
     portId: string,
@@ -96,6 +118,8 @@ export interface BlockInspectorActions {
   beginEdit?(label: string): void
   /** Resolve a same-name collision only when the title gesture is complete. */
   commitTitle?(): void
+	/** One board-wide canvas lens, independent of per-port role authoring. */
+	setSemanticTagsVisible?(visible: boolean): void
 }
 
 /** What a pill is wired to, read from the cables; the content never reads the editor. */
@@ -115,6 +139,19 @@ export interface BlockInspectorContentProps {
   initialTab?: InspectorTab
   onRequestClose?: () => void
   pill?: PillInspectorFacts
+	semanticTagsVisible?: boolean
+  /**
+   * The element's own history panel, injected rather than built here.
+   *
+   * WHY: this component is presentational and is mounted in chromes that have no
+   * workspace provider at all (the development profiles) and in unit tests that
+   * have neither a provider nor a server. Resolving a file history inside it
+   * would make every one of those callers carry a fetch they never asked for. As
+   * a slot, the tab simply does not exist where nobody supplied one — and where
+   * one is supplied, the panel mounts only when the tab is opened, which is what
+   * keeps the read lazy without a second `enabled` flag to keep in sync.
+   */
+  historyPanel?: ReactNode
 }
 
 function TinyIcon({ children }: { children: ReactNode }) {
@@ -129,6 +166,16 @@ function FileTextIcon() {
   return (
     <TinyIcon>
       <path d="M4 2.25h5l3 3v8.5H4zM9 2.25v3h3M6 8h4M6 10.5h4" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+    </TinyIcon>
+  )
+}
+
+/* A clock with a hand, the same glyph Figma and Onshape both use for history. */
+function ClockIcon() {
+  return (
+    <TinyIcon>
+      <circle cx="8" cy="8" r="5.75" stroke="currentColor" strokeWidth="1.25" />
+      <path d="M8 4.75V8l2.25 1.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
     </TinyIcon>
   )
 }
@@ -283,12 +330,14 @@ function NotesEditor({
 function DescriptionEditor({
   value,
   visible,
+  clockAnnotation = false,
   disabled,
   actions,
   onToggle,
 }: {
   value: string
   visible: boolean
+  clockAnnotation?: boolean
   disabled: boolean
   actions?: BlockInspectorActions
   onToggle(): void
@@ -306,7 +355,7 @@ function DescriptionEditor({
   return (
     <div className="block-inspector__display-description">
       <div className="block-inspector__field-header">
-        <label htmlFor={descriptionId}>Display description</label>
+        <label htmlFor={descriptionId}>{clockAnnotation ? 'Clock annotation' : 'Display description'}</label>
         <span
           className="block-inspector__character-count"
           data-over-limit={draft.length > DISPLAY_DESCRIPTION_LIMIT || undefined}
@@ -318,7 +367,7 @@ function DescriptionEditor({
           className="block-inspector__visibility-button"
           disabled={disabled}
           aria-pressed={visible}
-          aria-label={`${visible ? 'Hide' : 'Show'} display description on block`}
+          aria-label={`${visible ? 'Hide' : 'Show'} ${clockAnnotation ? 'Clock annotation' : 'display description'} on block`}
           title={`${visible ? 'Hide' : 'Show'} on block`}
           onClick={onToggle}
         >
@@ -334,7 +383,9 @@ function DescriptionEditor({
         placeholder={EMPTY_FIELD_GUIDANCE.block.displayDescription}
       />
       <p className="block-inspector__field-help">
-        Shown at a glance · keep implementation detail in Notes.
+        {clockAnnotation
+          ? 'Optional canvas annotation. The derived Clock source/rate declaration stays visible.'
+          : 'Shown at a glance · keep implementation detail in Notes.'}
       </p>
     </div>
   )
@@ -434,6 +485,91 @@ function PillSection({
       </p>
     </section>
   )
+}
+
+/** Curated configuration lives beside the existing ordinary Block fields. */
+function StockBlockSection({
+	props,
+	actions,
+}: {
+	props: BlockShapeProps
+	actions?: BlockInspectorActions
+}) {
+	if (isSetAttributesBlock(props)) {
+		return (
+			<section className="block-inspector__section" data-inspector-section="Set attributes">
+				<div className="block-inspector__section-title">Set attributes</div>
+				<p className="block-inspector__hint">
+					The record inlet and outlet remain ordinary data. Add only members that this update writes; all unnamed members pass through unchanged.
+				</p>
+				<p className="block-inspector__hint" data-testid="set-attributes-source-status">
+					Source update semantics unresolved: direct mutation, immutable replacement, or an opaque helper.
+				</p>
+				<button
+					type="button"
+					className="block-inspector__tag-ghost"
+					disabled={!actions}
+					data-testid="set-attributes-add-member"
+					onClick={() => actions?.addSetAttributesMember?.()}
+				>
+					<PlusIcon />
+					Add member update
+				</button>
+			</section>
+		)
+	}
+	if (isSelectBlock(props)) {
+		const source = stockBlockSourceProjection(props)
+		return (
+			<section className="block-inspector__section" data-inspector-section="Select source">
+				<div className="block-inspector__section-title">Select source notation</div>
+				<p className="block-inspector__hint" data-testid="select-source-notation">
+					<code>{source}</code>
+				</p>
+			</section>
+		)
+	}
+	if (!isClockTriggerBlock(props)) return null
+	const config = normalizeClockTriggerConfig(props.stockConfig)
+	const setConfig = (patch: Partial<typeof config>) => actions?.updateDetails({
+		stockConfig: normalizeClockTriggerConfig({ ...config, ...patch }),
+	})
+	return (
+		<section className="block-inspector__section" data-inspector-section="Clock trigger">
+			<div className="block-inspector__section-title">Clock / Trigger</div>
+			<label className="block-inspector__field">
+				<span>Source</span>
+				<select
+					aria-label="Clock trigger source"
+					disabled={!actions}
+					value={config.triggerSource}
+					onChange={(event) => setConfig({ triggerSource: event.currentTarget.value as 'clock' | 'external' | 'manual' })}
+				>
+					<option value="clock">clock</option>
+					<option value="external">external trigger</option>
+					<option value="manual">manual trigger</option>
+				</select>
+			</label>
+			<label className="block-inspector__field">
+				<span>Rate (Hz)</span>
+				<input
+					type="number"
+					min="0.000001"
+					step="any"
+					aria-label="Clock trigger rate in hertz"
+					disabled={!actions || config.triggerSource !== 'clock'}
+					value={config.rateHz ?? ''}
+					onChange={(event) => {
+						const rateHz = Number(event.currentTarget.value)
+						if (Number.isFinite(rateHz) && rateHz > 0) setConfig({ rateHz })
+					}}
+				/>
+			</label>
+			<p className="block-inspector__hint" data-testid="clock-trigger-runtime-status">
+				{clockTriggerLabel(config)}. This prototype declares intent and does not schedule.
+			</p>
+		</section>
+	)
 }
 
 const sectionKey = (row: number, branch: number) => `${row}:${branch}`
@@ -677,16 +813,64 @@ function VariadicPortSettings({
 	)
 }
 
+/** Per-port role authoring: Blocks do not have one blanket semantic tag. */
+function SemanticRoleSettings({
+	side,
+	port,
+	actions,
+	readOnly = false,
+}: {
+	side: BlockPortSide
+	port: BlockPort
+	actions?: BlockInspectorActions
+	/** Effect ports are reconciled from their mutated input and cannot be authored. */
+	readOnly?: boolean
+}) {
+	const resolved = resolveBlockPortSemanticRole(port)
+	const value = port.semanticRoleAuthored?.role ?? 'inherit'
+	const baseline = port.semanticRoleDerived?.role ?? 'data'
+	return (
+		<label className="block-inspector__semantic-role" data-testid={`inspector-semantic-role-${port.id}`}>
+			<span className={resolved.role === 'data' ? '' : 'is-semantic'}>
+				{readOnly ? 'inherited' : resolved.role === 'data' ? 'role' : roleLabel(resolved.role)}
+			</span>
+			<select
+				value={value}
+				disabled={readOnly || !actions}
+				aria-label={`Semantic role for ${side} ${port.name || port.id}`}
+				title={readOnly
+					? `Inherited ${roleLabel(resolved.role)}; effect ports follow their mutated input`
+					: resolved.origin === 'derived'
+					? `Derived ${roleLabel(resolved.role)}${resolved.claim?.source ? ` — ${resolved.claim.source}` : ''}; choose a role to override`
+					: 'Semantic role; independent of type, delivery, mutation and routing'}
+				onChange={(event) => {
+					const next = event.currentTarget.value
+					actions?.beginEdit?.('set semantic port role')
+					actions?.updatePort(side, port.id, {
+						semanticRoleAuthored: next === 'inherit' ? undefined : { role: next as SemanticPortRole },
+					})
+				}}
+			>
+				<option value="inherit">inherit · {roleLabel(baseline)}</option>
+				{SEMANTIC_PORT_ROLES.map((role) => <option key={role} value={role}>{roleLabel(role)}</option>)}
+			</select>
+		</label>
+	)
+}
+
 function PortSection({
   side,
   props,
   actions,
+  semanticTagsVisible = true,
 }: {
   side: BlockPortSide
   props: BlockShapeProps
   actions?: BlockInspectorActions
+	semanticTagsVisible?: boolean
 }) {
   const [managing, setManaging] = useState(false)
+	const [tagging, setTagging] = useState(false)
   const [drag, setDrag] = useState<InspectorPortDrag | null>(null)
   const { punctuatedPortRow } = useAppearancePreferences()
   const dragRef = useRef<InspectorPortDrag | null>(null)
@@ -694,6 +878,7 @@ function PortSection({
   const title = side === 'inputs' ? 'Inputs' : 'Outputs'
   const ports = props[side]
   const visiblePorts = ports.filter((port) => port.visible)
+  const addsBundleMember = side === 'inputs' && isBundleBlock(props)
   const shown = (candidates: readonly BlockPort[]) => (
     managing ? candidates : candidates.filter((port) => port.visible)
   )
@@ -997,16 +1182,62 @@ function PortSection({
     })
   })
 
+	const tagItems = ports.map((port) => (
+		<li
+			key={port.id}
+			className={`block-inspector__semantic-tag${isEffectPort(port) ? ' block-inspector__semantic-tag--derived' : ''}`}
+			data-testid={`inspector-semantic-tag-${side}-${port.id}`}
+		>
+			<div className="block-inspector__semantic-tag-port">
+				<span className="block-inspector__semantic-tag-name">{port.name || port.id}</span>
+				<span className="block-inspector__semantic-tag-type">{port.type || 'type'}</span>
+				{!port.visible ? <span className="block-inspector__semantic-tag-hidden">hidden</span> : null}
+				{isEffectPort(port) ? <span className="block-inspector__semantic-tag-derived">derived effect</span> : null}
+			</div>
+			<SemanticRoleSettings side={side} port={port} actions={actions} readOnly={isEffectPort(port)} />
+		</li>
+	))
+
   return (
     <section className="block-inspector__section" aria-label={`${title} ports`} data-inspector-section={title}>
       <div className="block-inspector__section-title">
         <span>{title}</span>
         <span className="block-inspector__section-tools">
+			<button
+				type="button"
+				className={`block-inspector__tags-button${tagging ? ' is-active' : ''}`}
+				aria-pressed={tagging}
+				aria-expanded={tagging}
+				aria-controls={`inspector-semantic-tags-${side}`}
+				aria-label={`${tagging ? 'Hide' : 'Show'} ${title} semantic tags`}
+				onClick={() => {
+					setManaging(false)
+					setTagging((current) => !current)
+				}}
+			>
+				Tags
+			</button>
+			{/** WHY: shape editing and semantic annotation are independent, so neither action hides the other. */}
+			{side === 'inputs' && isSetAttributesBlock(props) ? (
+				<button
+					type="button"
+					className="block-inspector__icon-button"
+					disabled={!actions}
+					aria-label="Add attribute member update"
+					data-testid="set-attributes-add-member-inline"
+					onClick={() => actions?.addSetAttributesMember?.()}
+				>
+					<PlusIcon />
+				</button>
+			) : null}
           <button
             type="button"
             className={`block-inspector__count-pill${managing ? ' is-active' : ''}`}
             aria-expanded={managing}
-            onClick={() => setManaging((current) => !current)}
+            onClick={() => {
+					setTagging(false)
+					setManaging((current) => !current)
+				}}
           >
             {managing ? 'Done' : `${visiblePorts.length} visible`}
           </button>
@@ -1014,15 +1245,32 @@ function PortSection({
             type="button"
             className="block-inspector__icon-button"
             disabled={!actions}
-            aria-label={`Add ${side === 'inputs' ? 'input' : 'output'} port`}
-            onClick={() => actions?.addPort(side)}
+            aria-label={addsBundleMember ? 'Add Bundle member update' : `Add ${side === 'inputs' ? 'input' : 'output'} port`}
+            data-testid={addsBundleMember ? 'bundle-add-member' : undefined}
+				onClick={() => addsBundleMember ? actions?.addBundleMember?.() : actions?.addPort(side)}
           >
             <PlusIcon />
           </button>
         </span>
       </div>
 
-      {ports.length === 0 && side === 'outputs' ? (
+      {tagging ? (
+		<div id={`inspector-semantic-tags-${side}`} className="block-inspector__semantic-tags" role="region" aria-label={`${title} semantic tags`}>
+				<label className="block-inspector__semantic-visibility">
+					<input
+						type="checkbox"
+						checked={semanticTagsVisible}
+						disabled={!actions?.setSemanticTagsVisible}
+						aria-label="Show semantic tags on canvas ports and wires"
+						onChange={(event) => actions?.setSemanticTagsVisible?.(event.currentTarget.checked)}
+					/>
+					<span>Show tags on canvas</span>
+					<span className="block-inspector__semantic-visibility-state">{semanticTagsVisible ? 'Visible' : 'Hidden'}</span>
+				</label>
+				<p className="block-inspector__hint">Choose a semantic role for each port. Hidden ports are included; derived effect ports inherit their role.</p>
+				{ports.length === 0 ? <p className="block-inspector__hint">No {side} to tag yet.</p> : <ul>{tagItems}</ul>}
+			</div>
+      ) : ports.length === 0 && side === 'outputs' ? (
         <p className="block-inspector__hint">No outputs yet.</p>
       ) : !managing && ports.length > 0 && visiblePorts.length === 0 ? (
         <p className="block-inspector__hint">All {ports.length} hidden — manage to show.</p>
@@ -1030,6 +1278,7 @@ function PortSection({
         <ul
           ref={listRef}
           className={`block-inspector__ports${managing ? ' block-inspector__ports--managed' : ''}${dragging ? ' is-dragging' : ''}`}
+			id={`inspector-ports-${side}`}
           data-testid={`inspector-ports-${side}`}
         >
           {items.map((item, index) => <Fragment key={index}>{item}</Fragment>)}
@@ -1069,10 +1318,11 @@ export function BlockInspectorContent({
   initialTab = 'details',
   onRequestClose,
   pill,
+  semanticTagsVisible = true,
+  historyPanel,
 }: BlockInspectorContentProps) {
   const [tab, setTab] = useState<InspectorTab>(initialTab)
   const readOnly = !actions
-  const unsupportedControlTitle = 'Tags are intentionally future scope for this Block development profile'
 
   return (
     <section className="block-inspector" aria-label="Block inspector" data-status={status}>
@@ -1091,11 +1341,30 @@ export function BlockInspectorContent({
           role="tab"
           className={tab === 'notes' ? 'is-active' : ''}
           aria-selected={tab === 'notes'}
+          data-testid="block-inspector-tab-notes"
           onClick={() => setTab('notes')}
         >
           <FileTextIcon />
           Notes
         </button>
+        {/*
+          * History joins the strip only where a panel was supplied — see
+          * `historyPanel`. A tab that rendered an apology for having no data
+          * source would be a permanent piece of chrome advertising a gap.
+          */}
+        {historyPanel ? (
+          <button
+            type="button"
+            role="tab"
+            className={tab === 'history' ? 'is-active' : ''}
+            aria-selected={tab === 'history'}
+            data-testid="block-inspector-tab-history"
+            onClick={() => setTab('history')}
+          >
+            <ClockIcon />
+            History
+          </button>
+        ) : null}
         {onRequestClose ? (
           <button
             type="button"
@@ -1112,7 +1381,9 @@ export function BlockInspectorContent({
         <p className="block-inspector__notice">Place a Block to edit these defaults.</p>
       ) : null}
 
-      {tab === 'notes' ? (
+      {tab === 'history' && historyPanel ? (
+        historyPanel
+      ) : tab === 'notes' ? (
         <section className="block-inspector__notes" role="tabpanel" aria-label="Detailed notes">
           <header>
             <span className="block-inspector__section-title">Detailed notes</span>
@@ -1165,28 +1436,14 @@ export function BlockInspectorContent({
             <DescriptionEditor
               value={props.description}
               visible={props.showDescription}
+              clockAnnotation={isClockTriggerBlock(props)}
               disabled={readOnly}
               actions={actions}
               onToggle={() => actions?.updateDetails({ showDescription: !props.showDescription })}
             />
           </section>
 
-          <section className="block-inspector__section" data-inspector-section="Tags">
-            <div className="block-inspector__section-title">Tags</div>
-            <button
-              type="button"
-              className="block-inspector__tag-ghost"
-              aria-disabled="true"
-              aria-label="Tag assignment is not available in this Block model"
-              title={unsupportedControlTitle}
-              tabIndex={-1}
-              onClick={() => {}}
-            >
-              <PlusIcon />
-              Add tags
-            </button>
-          </section>
-
+				<StockBlockSection props={props} actions={actions} />
             </>
           )}
 
@@ -1212,8 +1469,8 @@ export function BlockInspectorContent({
                 </p>
               </section>
 
-              <PortSection side="inputs" props={props} actions={actions} />
-              <PortSection side="outputs" props={props} actions={actions} />
+              <PortSection side="inputs" props={props} actions={actions} semanticTagsVisible={semanticTagsVisible} />
+              <PortSection side="outputs" props={props} actions={actions} semanticTagsVisible={semanticTagsVisible} />
 
               <section className="block-inspector__section" data-inspector-section="Ports">
                 <div className="block-inspector__section-title">Ports</div>
@@ -1265,6 +1522,11 @@ export function EditorBlockInspector({
   onToolDraftChange,
   onRequestClose,
 }: EditorBlockInspectorProps) {
+	const semanticTagsVisible = useValue(
+		'SystemSketch semantic tag canvas visibility',
+		() => getSemanticTagsVisible(editor),
+		[editor],
+	)
   const context = useValue(
     'SystemSketch Block inspector context',
     (previous?: unknown) => {
@@ -1275,6 +1537,11 @@ export function EditorBlockInspector({
   )
   const [localDraft, setLocalDraft] = useState<BlockShapeProps | null>(null)
   const draft = toolDraft ?? localDraft ?? (context.kind === 'tool' ? context.props : null)
+	const isReadonly = useValue(
+		'SystemSketch Block inspector read-only state',
+		() => editor.getIsReadonly(),
+		[editor],
+	)
 
   // What the selected pill is wired to, in words: read from the same cable
   // table the dots read, so the panel and the canvas cannot disagree.
@@ -1311,6 +1578,7 @@ export function EditorBlockInspector({
 
   const actions = useMemo<BlockInspectorActions | undefined>(() => {
     if (context.kind === 'selected') {
+			if (isReadonly) return undefined
       const id = context.shape.id
       // A continuous field writes on every keystroke, so it must not also stamp
       // a history mark per keystroke; `beginEdit` marks once for the gesture.
@@ -1321,6 +1589,8 @@ export function EditorBlockInspector({
           void updateBlockDetails(editor, id, patch, history(options)),
         setView: (view) => void setBlockView(editor, id, view),
         addPort: (side) => void appendBlockPort(editor, id, side),
+		addSetAttributesMember: () => void appendSetAttributesMember(editor, id),
+        addBundleMember: () => void appendBundleMember(editor, id),
         updatePort: (side, portId, patch, options) =>
           void updateBlockPort(editor, id, side, portId, patch, history(options)),
         removePort: (side, portId) => void removeBlockPort(editor, id, side, portId),
@@ -1330,6 +1600,7 @@ export function EditorBlockInspector({
         adoptConnectedType: () => void adoptConnectedPillType(editor, id),
         beginEdit: (label) => void editor.markHistoryStoppingPoint(label),
         commitTitle: () => commitBlockDefinitionName(editor, id),
+			setSemanticTagsVisible: (visible) => setSemanticTagsVisible(editor, visible),
       }
     }
     if (context.kind !== 'tool' || !onToolDraftChange) return undefined
@@ -1344,6 +1615,8 @@ export function EditorBlockInspector({
       updateDetails: (patch) => changeDraft((props) => patchBlockDetailsProps(props, patch)),
       setView: (view) => changeDraft((props) => setBlockViewProps(props, view)),
       addPort: (side) => changeDraft((props) => appendBlockPortProps(props, side)),
+		addSetAttributesMember: () => changeDraft((props) => appendSetAttributesMemberProps(props)),
+      addBundleMember: () => changeDraft((props) => appendBundleMemberProps(props)),
       updatePort: (side, portId, patch) =>
         changeDraft((props) => patchBlockPortProps(props, side, portId, patch)),
       removePort: (side, portId) =>
@@ -1353,7 +1626,7 @@ export function EditorBlockInspector({
       movePortToSection: (side, portId, target) =>
         changeDraft((props) => moveBlockPortToSectionProps(props, side, portId, target)),
     }
-  }, [context, editor, localDraft, onToolDraftChange, toolDraft])
+  }, [context, editor, isReadonly, localDraft, onToolDraftChange, toolDraft])
 
   if (context.kind === 'multi') {
     return (
@@ -1382,13 +1655,35 @@ export function EditorBlockInspector({
     )
   }
 
+  const shown = context.kind === 'selected' ? context.props : (draft ?? context.props)
+
   return (
     <BlockInspectorContent
-      props={context.kind === 'selected' ? context.props : (draft ?? context.props)}
+      props={shown}
       status={context.kind === 'selected' ? 'selected' : 'new'}
       actions={actions}
       pill={pillFacts}
+		semanticTagsVisible={semanticTagsVisible}
       onRequestClose={onRequestClose}
+      /*
+       * History only for a Block that is actually ON the board.
+       *
+       * WHY: a tool draft has no shape id and therefore nothing a version file
+       * could ever be diffed against — offering the tab there would promise a
+       * history for something that has not happened yet. `block:` prefixes the
+       * shape id because that is `compareModel`'s element vocabulary, and both
+       * panels have to key on the same string or the shared chain cannot serve
+       * them both.
+       */
+      historyPanel={
+        context.kind === 'selected' ? (
+          <ElementHistoryPanel
+            editor={editor}
+            elementId={`block:${context.shape.id}`}
+            elementName={shown.title}
+          />
+        ) : undefined
+      }
     />
   )
 }

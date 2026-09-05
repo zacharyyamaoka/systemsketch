@@ -1,0 +1,385 @@
+/*
+ * The property table, ported from the omnibox variant's `src/review/review.css`.
+ *
+ * These rules and their `.systemsketch-review__*` class names are that file's,
+ * kept verbatim rather than restyled into this modal's own namespace, because
+ * this is the artifact Zach picked out of the five ("I like the property table
+ * in omnibox") and a rename is exactly the kind of drift that would quietly
+ * make it a lookalike instead of the thing he approved. The shell around it
+ * stays `.systemsketch-compare__*`; the table subtree is `__review__`, and the
+ * namespace split IS the provenance.
+ *
+ * Colour is copied, not invented. Added/Removed are GitHub's green/red. The
+ * third state is BLUE, and that is the one deliberate change from the file this
+ * came from being amber:
+ *
+ *   "Blue is much clearer than orange. […] for colors those are very orthogonal
+ *    in space RGB right, so blue is natural for a third color."
+ *
+ * Red, green and blue are the orthogonal axes, so blue is the one hue that
+ * cannot be misread as a shade of red-removed or green-added. Amber sat close
+ * enough to red to be read as a weak deletion.
+ */
+
+.systemsketch-compare {
+  --review-added: var(--ss-success);
+  --review-added-soft: var(--ss-success-soft);
+  --review-removed: var(--ss-danger);
+  --review-removed-soft: var(--ss-danger-soft);
+  --review-modified: var(--ss-accent);
+  --review-modified-soft: var(--ss-accent-soft);
+}
+
+/* ----------------------------------------------------------------- table -- */
+
+.systemsketch-review__table {
+  display: block;
+  min-height: 0;
+  flex: 1;
+  border-collapse: collapse;
+  overflow: auto;
+  font-size: 12px;
+}
+
+.systemsketch-review__table thead,
+.systemsketch-review__table tbody { display: table; width: 100%; table-layout: fixed; }
+
+.systemsketch-review__table thead {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  background: var(--ss-surface-raised);
+}
+
+.systemsketch-review__table th,
+.systemsketch-review__table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--ss-border);
+  text-align: left;
+  vertical-align: top;
+  word-break: break-word;
+}
+
+.systemsketch-review__table thead th {
+  color: var(--ss-text-faint);
+  font: 700 9px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.systemsketch-review__table tbody tr { cursor: pointer; }
+
+.systemsketch-review__table tbody tr:hover {
+  background: var(--ss-surface-hover);
+}
+
+/* The three states, each with its own left rail — so they are distinguishable
+ * without relying on hue alone. */
+.systemsketch-review__table tbody tr[data-state='added'] { box-shadow: inset 3px 0 var(--review-added); }
+.systemsketch-review__table tbody tr[data-state='removed'] { box-shadow: inset 3px 0 var(--review-removed); }
+.systemsketch-review__table tbody tr[data-state='modified'] { box-shadow: inset 3px 0 var(--review-modified); }
+
+/*
+ * Selection is a FORM difference, not a hue difference.
+ *
+ * `--review-modified` and the selection tint are both `--ss-accent` — the app's
+ * one accent — so a selected row and a modified row would read as the same
+ * signal if selection were only a blue wash. It is a full-row fill plus a hard
+ * outline; the state is a 3px rail on the left edge. Different shapes, so they
+ * stack legibly when a modified row is also the selected one.
+ */
+.systemsketch-review__table tbody tr[data-selected] {
+  background: var(--ss-accent-soft);
+  outline: 1px solid var(--ss-accent);
+  outline-offset: -1px;
+}
+
+.systemsketch-review__layer {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-weight: 600;
+}
+
+.systemsketch-review__layer-name {
+  color: var(--ss-text);
+  font-size: 11px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+/* The state badge. Ink on a tint plus its own bar — an accent on accent-soft
+ * fails contrast on its own, so the label is normal ink and the colour lives
+ * in the border. */
+.systemsketch-review__state {
+  align-self: flex-start;
+  padding: 2px 7px;
+  border: 1px solid var(--ss-border);
+  border-radius: 5px;
+  color: var(--ss-text);
+  font: 700 9px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.systemsketch-review__state[data-state='added'] {
+  border-color: var(--review-added);
+  background: var(--review-added-soft);
+}
+
+.systemsketch-review__state[data-state='removed'] {
+  border-color: var(--review-removed);
+  background: var(--review-removed-soft);
+}
+
+.systemsketch-review__state[data-state='modified'] {
+  border-color: var(--review-modified);
+  background: var(--review-modified-soft);
+}
+
+.systemsketch-review__value code {
+  color: var(--ss-code-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+/* Absence is asserted, never left blank: an empty cell reads as "unknown", and
+ * "this did not exist" is the whole claim an added/removed row makes. */
+.systemsketch-review__value[data-absent='true'] {
+  background: repeating-linear-gradient(
+    -45deg, transparent, transparent 5px, var(--ss-surface-sunken) 5px, var(--ss-surface-sunken) 10px
+  );
+}
+
+.systemsketch-review__absent {
+  color: var(--ss-text-faint);
+  font-weight: 700;
+}
+
+/*
+ * The git-style intra-value highlighting, and the toggle that removes it.
+ *
+ * Two layers, and the toggle governs BOTH:
+ *
+ *   1. a faint wash over the whole cell saying "this is the old / new side"
+ *   2. a stronger fill on only the substring that actually differs
+ *
+ * Zach's objection was that the two together read as one confused signal —
+ * "the kind of faint red green outline and then the stronger red green
+ * highlight on the actual thing that changed" — and that Figma's property panel
+ * shows neither and is usually clear enough. So the whole effect hangs off one
+ * `data-git-highlight` stamp on the table. Off, the cells are plain text.
+ *
+ * The row's Added/Removed/Modified BADGE is deliberately outside this: it says
+ * which of the three states the row is, which is the table's primary claim and
+ * not a highlighting flourish. It stays in both settings.
+ */
+.systemsketch-review__table[data-git-highlight='on'] .systemsketch-review__value[data-side='previous'] {
+  background: color-mix(in srgb, var(--review-removed) 10%, transparent);
+}
+
+.systemsketch-review__table[data-git-highlight='on'] .systemsketch-review__value[data-side='current'] {
+  background: color-mix(in srgb, var(--review-added) 10%, transparent);
+}
+
+/* Word-level highlight, GitHub's way: the cell is NOT recoloured, only the
+ * substring that actually differs takes a stronger fill. Highlight, never
+ * strikethrough. */
+.systemsketch-review__value mark {
+  padding: 1px 2px;
+  border-radius: 3px;
+  color: var(--ss-text);
+  background: transparent;
+  font-weight: 750;
+}
+
+.systemsketch-review__table[data-git-highlight='on'] .systemsketch-review__value mark[data-token='removed'] {
+  background: var(--review-removed-soft);
+  box-shadow: inset 0 -2px var(--review-removed);
+}
+
+.systemsketch-review__table[data-git-highlight='on'] .systemsketch-review__value mark[data-token='added'] {
+  background: var(--review-added-soft);
+  box-shadow: inset 0 -2px var(--review-added);
+}
+
+/* Highlighting off is Figma's baseline: the value is just the value. The
+ * `<mark>` elements stay in the DOM so a screen reader still reaches the same
+ * text and the toggle costs no re-render of the row model — they simply carry
+ * no ink and no weight. */
+.systemsketch-review__table[data-git-highlight='off'] .systemsketch-review__value mark {
+  font-weight: inherit;
+  padding: 0;
+}
+
+.systemsketch-review__empty {
+  padding: 28px 14px;
+  color: var(--ss-text-muted);
+  text-align: center;
+}
+
+/* ---------------------------------------------------------------- toggle -- */
+
+.systemsketch-review__highlight-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ss-border);
+  color: var(--ss-text-muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  user-select: none;
+}
+
+.systemsketch-review__highlight-toggle:hover { color: var(--ss-text); }
+
+.systemsketch-review__highlight-toggle input { accent-color: var(--ss-accent); cursor: pointer; }
+
+.systemsketch-review__highlight-toggle small {
+  margin-left: auto;
+  color: var(--ss-text-faint);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+/* ---- Element · Property columns ---------------------------------------- */
+
+/*
+ * The Property cell stays a REAL table cell — no `display: flex` on a `<td>`.
+ *
+ * Flex was the obvious way to stack the badge over the name, and it silently
+ * took the cell out of the table's column layout: the browser wraps a
+ * non-table-cell child in an anonymous cell, and the property text dropped onto
+ * its own line underneath the Element column instead of sitting under its own
+ * header. Every assertion still passed, because the text was present and
+ * correct — it was simply in the wrong column. Stacking is done with
+ * block-level children instead, which the table layout understands.
+ */
+.systemsketch-review__property-name {
+  display: block;
+  color: var(--ss-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.systemsketch-review__property .systemsketch-review__state {
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+/* ---- Figma's layout ----------------------------------------------------- */
+
+/*
+ * A list of elements, and the properties of exactly one of them. The split is
+ * fixed rather than proportional: the element list is an index and stops being
+ * readable when it is wider than its longest name, while the value columns are
+ * the thing a reviewer actually reads and should take every pixel that is left.
+ */
+.systemsketch-review__figma {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: minmax(112px, 148px) minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.systemsketch-review__elements {
+  margin: 0;
+  padding: 6px;
+  border-right: 1px solid var(--ss-border);
+  overflow-y: auto;
+  background: var(--ss-surface-sunken);
+  list-style: none;
+}
+
+.systemsketch-review__elements > li { margin-bottom: 3px; }
+
+.systemsketch-review__elements button {
+  display: grid;
+  width: 100%;
+  gap: 4px;
+  grid-template-areas: 'status count' 'name name';
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 6px 7px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--ss-text);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  text-align: left;
+}
+
+.systemsketch-review__elements button:hover { background: var(--ss-surface-hover); }
+
+.systemsketch-review__elements button[data-selected] {
+  border-color: var(--ss-accent);
+  background: var(--ss-accent-soft);
+}
+
+.systemsketch-review__element-name {
+  overflow: hidden;
+  grid-area: name;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-review__element-count {
+  grid-area: count;
+  color: var(--ss-text-faint);
+  font-variant-numeric: tabular-nums;
+  font-size: 10px;
+}
+
+/*
+ * Added · Edited · Removed — Figma's vocabulary, in the same chip the property
+ * rows use for their own three states, so one visual language covers both
+ * altitudes. Stacked above the name rather than inline: the column is an index
+ * about 180px wide, and a chip beside a name squeezes the name to nothing.
+ */
+.systemsketch-review__element-status {
+  grid-area: status;
+  justify-self: start;
+  padding: 2px 6px;
+  border: 1px solid var(--ss-border);
+  border-radius: 5px;
+  color: var(--ss-text);
+  font: 700 9px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.systemsketch-review__element-status[data-status='added'] {
+  border-color: var(--review-added);
+  background: var(--review-added-soft);
+}
+
+.systemsketch-review__element-status[data-status='removed'] {
+  border-color: var(--review-removed);
+  background: var(--review-removed-soft);
+}
+
+.systemsketch-review__element-status[data-status='edited'] {
+  border-color: var(--review-modified);
+  background: var(--review-modified-soft);
+}
+
+/* Figma's own sentence, not a paraphrase — this view exists to be judged
+ * against the tool it came from. */
+.systemsketch-review__figma-empty {
+  display: grid;
+  margin: 0;
+  padding: 24px;
+  align-content: center;
+  justify-items: center;
+  color: var(--ss-text-muted);
+  font-size: 12px;
+  text-align: center;
+}

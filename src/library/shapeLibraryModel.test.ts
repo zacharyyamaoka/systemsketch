@@ -95,4 +95,5 @@ describe('shared shape library catalog', () => {
       expect(partial.props.bend).toBe(itemId === 'arrow-curve' ? 42 : 0)
     }
   })
+
 })

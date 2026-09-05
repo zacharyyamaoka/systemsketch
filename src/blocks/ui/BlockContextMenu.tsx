@@ -29,8 +29,10 @@ import {
   type BlockPortSide,
   type BlockShape,
 } from '../blockModel'
+import { isBundleBlock } from '../stockBlocks'
 import {
   appendAccessorPort,
+  appendBundleMember,
   appendBlockPortForInlineEditing,
   blockPortIndex,
   blockPortRowCount,
@@ -63,6 +65,7 @@ import {
   setConnectionRoutingForSelection,
   setConnectionTemporalForSelection,
 } from '../commands/blockStyleCommands'
+import { isClockTriggerBlock } from '../stockBlocks'
 import {
   CONNECTION_ROUTING_KINDS,
   CONNECTION_TEMPORAL_KINDS,
@@ -89,10 +92,16 @@ import {
 } from '../definitions/definitionLinking'
 import { canWrapSelection, WRAP_TARGET_DESCRIPTORS } from '../../frames/wrapSelection'
 import { useRunWrap } from '../../frames/WrapSelectionControl'
+import { isCalloutCard, startAddingCalloutLeader } from '../../callout'
 
 function onlySelectedBlock(editor: ReturnType<typeof useEditor>): BlockShape | null {
   const selected = editor.getSelectedShapes()
   return selected.length === 1 && isBlockShape(selected[0]) ? selected[0] : null
+}
+
+function onlySelectedCallout(editor: ReturnType<typeof useEditor>) {
+  const selected = editor.getOnlySelectedShape()
+  return isCalloutCard(selected) && !selected.isLocked ? selected : null
 }
 
 /** The live index of a menu target, so Move up/down disable at the ends. */
@@ -145,6 +154,11 @@ function BlockContextMenuItems() {
   const selectedBlock = useValue(
     'context-menu selected Block',
     () => onlySelectedBlock(editor),
+    [editor],
+  )
+  const selectedCallout = useValue(
+    'context-menu selected Callout card',
+    () => onlySelectedCallout(editor),
     [editor],
   )
   const activeDepthScopeId = useValue(
@@ -212,6 +226,7 @@ function BlockContextMenuItems() {
           row: portRow(port),
           inHeader: portInHeader(port),
           rowCount: blockPortRowCount(shape.props),
+          isBundleInput: target.side === 'inputs' && isBundleBlock(shape.props),
         }
         : null
     },
@@ -229,7 +244,9 @@ function BlockContextMenuItems() {
 
   const addPort = (side: BlockPortSide) => {
     if (!selectedBlock) return
-    const result = appendBlockPortForInlineEditing(editor, selectedBlock.id, side)
+    const result = side === 'inputs' && isBundleBlock(selectedBlock.props)
+      ? appendBundleMember(editor, selectedBlock.id)
+      : appendBlockPortForInlineEditing(editor, selectedBlock.id, side)
     if (!result.ok) return
     requestBlockInlineEdit(editor, selectedBlock.id, {
       kind: 'portName',
@@ -274,6 +291,17 @@ function BlockContextMenuItems() {
   }
 
   const addPortAt = (target: BlockPortRef, offset: 0 | 1) => {
+    const shape = editor.getShape(target.shapeId)
+    if (isBlockShape(shape) && target.side === 'inputs' && isBundleBlock(shape.props)) {
+      const result = appendBundleMember(editor, target.shapeId)
+      if (!result.ok) return
+      requestBlockInlineEdit(editor, target.shapeId, {
+        kind: 'portName',
+        side: 'inputs',
+        portId: result.port.id,
+      })
+      return
+    }
     const index = blockPortIndexOf(editor, target) + offset
     const result = insertBlockPortForInlineEditing(editor, target.shapeId, target.side, index, {
       like: target.portId,
@@ -305,16 +333,26 @@ function BlockContextMenuItems() {
     <>
       {portTarget ? (
         <TldrawUiMenuGroup id="systemsketch-block-port">
-          <TldrawUiMenuItem
-            id="block-port-add-above"
-            label="Add port above"
-            onSelect={() => addPortAt(portTarget.target, 0)}
-          />
-          <TldrawUiMenuItem
-            id="block-port-add-below"
-            label="Add port below"
-            onSelect={() => addPortAt(portTarget.target, 1)}
-          />
+          {portTarget.isBundleInput ? (
+            <TldrawUiMenuItem
+              id="block-port-add-bundle-member"
+              label="Add Bundle member update"
+              onSelect={() => addPortAt(portTarget.target, 1)}
+            />
+          ) : (
+            <>
+              <TldrawUiMenuItem
+                id="block-port-add-above"
+                label="Add port above"
+                onSelect={() => addPortAt(portTarget.target, 0)}
+              />
+              <TldrawUiMenuItem
+                id="block-port-add-below"
+                label="Add port below"
+                onSelect={() => addPortAt(portTarget.target, 1)}
+              />
+            </>
+          )}
           <TldrawUiMenuItem
             id="block-port-move-up"
             label="Move up"
@@ -430,8 +468,8 @@ function BlockContextMenuItems() {
                 />
               ) : null}
               <TldrawUiMenuItem
-                id="block-add-input-port"
-                label="Input port"
+                id={isBundleBlock(selectedBlock.props) ? 'block-add-bundle-member' : 'block-add-input-port'}
+                label={isBundleBlock(selectedBlock.props) ? 'Bundle member update' : 'Input port'}
                 onSelect={() => addPort('inputs')}
               />
               <TldrawUiMenuItem
@@ -451,7 +489,7 @@ function BlockContextMenuItems() {
               {selectedBlock.props.description.trim() === '' ? (
                 <TldrawUiMenuItem
                   id="block-add-description"
-                  label="Description…"
+                  label={isClockTriggerBlock(selectedBlock.props) ? 'Clock annotation…' : 'Description…'}
                   onSelect={() => editField({ kind: 'description' }, { showDescription: true })}
                 />
               ) : null}
@@ -538,6 +576,16 @@ function BlockContextMenuItems() {
               onSelect={() => void rebuildSelectedBlocks(editor)}
             />
           ) : null}
+        </TldrawUiMenuGroup>
+      ) : null}
+
+      {selectedCallout ? (
+        <TldrawUiMenuGroup id="systemsketch-callout">
+          <TldrawUiMenuItem
+            id="callout-add-leader"
+            label="Add leader"
+            onSelect={() => startAddingCalloutLeader(editor, selectedCallout.id)}
+          />
         </TldrawUiMenuGroup>
       ) : null}
 
