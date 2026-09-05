@@ -1,9 +1,12 @@
 /**
  * The control-node glyphs, drawn as strokes so they scale with the card.
  *
- * Sequence and Parallel point the way the children read: across the page in
- * a top-to-bottom tree, down the page in a left-to-right one — Zach's rule
- * that the glyph shows the eye where to go next.
+ * Sequence points the way the children read: across the page in a
+ * top-to-bottom tree, down the page in a left-to-right one — Zach's rule
+ * that the glyph shows the eye where to go next. Parallel points across
+ * that reading direction instead, because its lanes fan out side by side
+ * rather than running one after another: down the page in a top-to-bottom
+ * tree, across the page in a left-to-right one.
  */
 import type { BtGlyph, BtOrientation } from './behaviorTreeModel'
 
@@ -19,9 +22,12 @@ export function BtGlyphSvg({ glyph, orientation, size = 24 }: { glyph: BtGlyph; 
 			body = childrenRun === 'right' ? arrow(1, 0) : arrow(0, 1)
 			break
 		case 'parallel':
+			// WHY: parallel lanes fan out side by side, so the glyph runs
+			// perpendicular to childrenRun rather than parallel to it — the
+			// opposite axis from sequence's reading-direction arrow.
 			body = childrenRun === 'right'
-				? [arrow(1, 0, -4.5), arrow(1, 0, 4.5)]
-				: [arrow(0, 1, -4.5), arrow(0, 1, 4.5)]
+				? [arrow(0, 1, -4.5), arrow(0, 1, 4.5)]
+				: [arrow(1, 0, -4.5), arrow(1, 0, 4.5)]
 			break
 		case 'fallback':
 			body = <path d="M8.5 9a3.5 3.5 0 1 1 5 3.2c-1.2.7-1.5 1.4-1.5 2.8M12 18.5v.1" {...stroke} />
