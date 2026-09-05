@@ -8,21 +8,24 @@ import {
 } from './appearancePreferences'
 
 describe('appearance preferences', () => {
-  it('uses compact controls, down-to-zoom-in, and punctuated Inputs by default', () => {
+  it('uses compact controls, standard down-to-zoom-in, and punctuated Inputs by default', () => {
     expect(DEFAULT_APPEARANCE_PREFERENCES.showZoomButtons).toBe(false)
     expect(DEFAULT_APPEARANCE_PREFERENCES.scrollDownZoomsIn).toBe(true)
+    expect(DEFAULT_APPEARANCE_PREFERENCES.wheelZoomSensitivityPercent).toBe(100)
     expect(DEFAULT_APPEARANCE_PREFERENCES.punctuatedPortRow).toBe(true)
     expect(parseStoredAppearancePreferences(null)).toBe(DEFAULT_APPEARANCE_PREFERENCES)
   })
 
   it('accepts only the current version with boolean appearance preferences', () => {
-    expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: true, scrollDownZoomsIn: false, punctuatedPortRow: false }))
-      .toEqual({ showZoomButtons: true, scrollDownZoomsIn: false, punctuatedPortRow: false })
-    expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: 'yes', scrollDownZoomsIn: true, punctuatedPortRow: true }))
+    expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: true, scrollDownZoomsIn: false, wheelZoomSensitivityPercent: 125, punctuatedPortRow: false }))
+      .toEqual({ showZoomButtons: true, scrollDownZoomsIn: false, wheelZoomSensitivityPercent: 125, punctuatedPortRow: false })
+    expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: 'yes', scrollDownZoomsIn: true, wheelZoomSensitivityPercent: 100, punctuatedPortRow: true }))
       .toBe(DEFAULT_APPEARANCE_PREFERENCES)
-    expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: true, scrollDownZoomsIn: 'yes', punctuatedPortRow: true }))
+    expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: true, scrollDownZoomsIn: 'yes', wheelZoomSensitivityPercent: 100, punctuatedPortRow: true }))
       .toBe(DEFAULT_APPEARANCE_PREFERENCES)
-    expect(parseStoredAppearancePreferences({ version: 2, showZoomButtons: true, scrollDownZoomsIn: true, punctuatedPortRow: true }))
+    expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: true, scrollDownZoomsIn: true, wheelZoomSensitivityPercent: 153, punctuatedPortRow: true }))
+      .toBe(DEFAULT_APPEARANCE_PREFERENCES)
+    expect(parseStoredAppearancePreferences({ version: 2, showZoomButtons: true, scrollDownZoomsIn: true, wheelZoomSensitivityPercent: 100, punctuatedPortRow: true }))
       .toBe(DEFAULT_APPEARANCE_PREFERENCES)
   })
 
@@ -30,7 +33,12 @@ describe('appearance preferences', () => {
     // Simulates an older localStorage record: its saved value must survive
     // while newly introduced fields receive their own defaults.
     expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: true }))
-      .toEqual({ showZoomButtons: true, scrollDownZoomsIn: true, punctuatedPortRow: true })
+      .toEqual({
+        showZoomButtons: true,
+        scrollDownZoomsIn: true,
+        wheelZoomSensitivityPercent: 100,
+        punctuatedPortRow: true,
+      })
   })
 
   it('persists under the app-level appearance key', () => {
@@ -40,11 +48,16 @@ describe('appearance preferences', () => {
       setItem: (key: string, value: string) => { values.set(key, value) },
     }
 
-    writeAppearancePreferences({ showZoomButtons: true, scrollDownZoomsIn: false, punctuatedPortRow: false }, storage)
+    writeAppearancePreferences({
+      showZoomButtons: true,
+      scrollDownZoomsIn: false,
+      wheelZoomSensitivityPercent: 75,
+      punctuatedPortRow: false,
+    }, storage)
     expect(values.get(APPEARANCE_PREFERENCES_STORAGE_KEY))
-      .toBe('{"version":1,"showZoomButtons":true,"scrollDownZoomsIn":false,"punctuatedPortRow":false}')
+      .toBe('{"version":1,"showZoomButtons":true,"scrollDownZoomsIn":false,"wheelZoomSensitivityPercent":75,"punctuatedPortRow":false}')
     expect(readAppearancePreferences(storage))
-      .toEqual({ showZoomButtons: true, scrollDownZoomsIn: false, punctuatedPortRow: false })
+      .toEqual({ showZoomButtons: true, scrollDownZoomsIn: false, wheelZoomSensitivityPercent: 75, punctuatedPortRow: false })
   })
 
   it('falls back safely when storage is unavailable or malformed', () => {

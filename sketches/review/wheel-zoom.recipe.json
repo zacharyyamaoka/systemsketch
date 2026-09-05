@@ -1,5 +1,5 @@
 {
-  "feature": "Wheel zoom restoration",
+  "feature": "Wheel zoom direction and sensitivity",
   "viewport": { "width": 1280, "height": 720 },
   "shapes": [
     {
@@ -48,10 +48,19 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · Scroll down grows the Block around the pointer; Appearance can flip the direction",
-      "x": 380,
-      "y": 560,
-      "w": 540,
+      "text": "PASS WHEN · 100% feels unchanged; raising sensitivity makes each scroll step visibly larger",
+      "x": 80,
+      "y": 540,
+      "w": 500,
+      "h": 120
+    },
+    {
+      "id": "sensitivity-note",
+      "kind": "note",
+      "text": "OPTION · Settings → Appearance → Wheel zoom: tune 50–150% or Reset to standard",
+      "x": 650,
+      "y": 540,
+      "w": 520,
       "h": 120
     }
   ]

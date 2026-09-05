@@ -4,7 +4,7 @@
     "application": "SystemSketch",
     "shapes": {
       "arrow": 2,
-      "geo": 3,
+      "geo": 4,
       "block": 1
     },
     "bindings": {
@@ -96,7 +96,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3qpo",
+      "index": "a3aSP",
       "typeName": "shape"
     },
     {
@@ -106,14 +106,6 @@
       "meta": {},
       "id": "pointer:pointer",
       "typeName": "pointer"
-    },
-    {
-      "name": "",
-      "color": "#F04F88",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:le7LnINrn5mLqgm3hbkuE",
-      "typeName": "user"
     },
     {
       "x": 30,
@@ -157,12 +149,12 @@
         }
       },
       "parentId": "page:page",
-      "index": "a22UB",
+      "index": "a2Zze",
       "typeName": "shape"
     },
     {
-      "x": 380,
-      "y": 560,
+      "x": 80,
+      "y": 540,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -170,11 +162,11 @@
       "id": "shape:cue-pass",
       "type": "geo",
       "props": {
-        "w": 540,
+        "w": 500,
         "h": 120,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 0,
+        "growY": 2,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -194,7 +186,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · Scroll down grows the Block around the pointer; Appearance can flip the direction"
+                  "text": "PASS WHEN · 100% feels unchanged; raising sensitivity makes each scroll step visibly larger"
                 }
               ]
             }
@@ -202,7 +194,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a44Hr",
+      "index": "a4QIv",
       "typeName": "shape"
     },
     {
@@ -247,12 +239,12 @@
         }
       },
       "parentId": "page:page",
-      "index": "a33gv",
+      "index": "a314E",
       "typeName": "shape"
     },
     {
       "x": 39.44444444444444,
-      "y": -19.374999999999986,
+      "y": -10.375,
       "z": 0.9216,
       "meta": {},
       "id": "camera:page:page",
@@ -306,6 +298,14 @@
       "id": "instance_page_state:page:page",
       "pageId": "page:page",
       "typeName": "instance_page_state"
+    },
+    {
+      "name": "",
+      "color": "#7B66DC",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:vPpoGI-4PnoWUj53TMcFU",
+      "typeName": "user"
     },
     {
       "meta": {},
@@ -382,7 +382,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "hxnKjpWDEkOPFTzOoG_we",
+        "definitionId": "X6HFOLlRNvTff05YQcC-b",
         "inputs": [
           {
             "id": "in_1",
@@ -402,7 +402,52 @@
         "definitionKey": "wheel_target"
       },
       "parentId": "page:page",
-      "index": "a1l3n",
+      "index": "a1G5E",
+      "typeName": "shape"
+    },
+    {
+      "x": 650,
+      "y": 540,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-sensitivity-note",
+      "type": "geo",
+      "props": {
+        "w": 520,
+        "h": 120,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "blue",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "OPTION · Settings → Appearance → Wheel zoom: tune 50–150% or Reset to standard"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a5l4z",
       "typeName": "shape"
     },
     {
@@ -509,7 +554,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a2rNc",
+      "index": "a2yXMV",
       "typeName": "shape"
     }
   ]

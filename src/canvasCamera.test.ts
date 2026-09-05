@@ -26,7 +26,7 @@ function editorWithPreferences(
 
 describe('SystemSketch wheel zoom', () => {
   it('declares zoom as the initial stock camera behavior', () => {
-    expect(SYSTEMSKETCH_EDITOR_OPTIONS.camera).toEqual({ wheelBehavior: 'zoom' })
+    expect(SYSTEMSKETCH_EDITOR_OPTIONS.camera).toEqual({ wheelBehavior: 'zoom', zoomSpeed: 1 })
   })
 
   it.each(['trackpad', null] as const)(
@@ -34,9 +34,9 @@ describe('SystemSketch wheel zoom', () => {
     (inputMode) => {
       const { editor, setCameraOptions, updateUserPreferences } = editorWithPreferences(inputMode, false)
 
-      enforceSystemSketchWheelZoom(editor, true)
+      enforceSystemSketchWheelZoom(editor, true, 100)
 
-      expect(setCameraOptions).toHaveBeenCalledWith({ wheelBehavior: 'zoom' })
+      expect(setCameraOptions).toHaveBeenCalledWith({ wheelBehavior: 'zoom', zoomSpeed: 1 })
       expect(updateUserPreferences).toHaveBeenCalledWith({
         inputMode: 'mouse',
         isZoomDirectionInverted: true,
@@ -47,7 +47,7 @@ describe('SystemSketch wheel zoom', () => {
   it('uses scroll down to zoom in by default', () => {
     const { editor, updateUserPreferences } = editorWithPreferences('mouse', false)
 
-    enforceSystemSketchWheelZoom(editor, true)
+    enforceSystemSketchWheelZoom(editor, true, 100)
 
     expect(updateUserPreferences).toHaveBeenCalledWith({
       inputMode: 'mouse',
@@ -58,7 +58,7 @@ describe('SystemSketch wheel zoom', () => {
   it('can flip to scroll up to zoom in', () => {
     const { editor, updateUserPreferences } = editorWithPreferences('mouse', true)
 
-    enforceSystemSketchWheelZoom(editor, false)
+    enforceSystemSketchWheelZoom(editor, false, 100)
 
     expect(updateUserPreferences).toHaveBeenCalledWith({
       inputMode: 'mouse',
@@ -69,8 +69,16 @@ describe('SystemSketch wheel zoom', () => {
   it('does not rewrite already-correct wheel preferences', () => {
     const { editor, updateUserPreferences } = editorWithPreferences('mouse', true)
 
-    enforceSystemSketchWheelZoom(editor, true)
+    enforceSystemSketchWheelZoom(editor, true, 100)
 
     expect(updateUserPreferences).not.toHaveBeenCalled()
+  })
+
+  it('projects the sensitivity percentage onto tldraw zoomSpeed', () => {
+    const { editor, setCameraOptions } = editorWithPreferences('mouse', true)
+
+    enforceSystemSketchWheelZoom(editor, true, 135)
+
+    expect(setCameraOptions).toHaveBeenCalledWith({ wheelBehavior: 'zoom', zoomSpeed: 1.35 })
   })
 })

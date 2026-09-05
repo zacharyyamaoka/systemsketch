@@ -27,6 +27,8 @@ def main() -> None:
     before_image = image_uri("docs/assets/wheel-zoom-before.png")
     after_image = image_uri("docs/assets/wheel-zoom-after.png")
     setting_image = image_uri("docs/assets/wheel-zoom-direction-setting.png")
+    sensitivity_setting_image = image_uri("docs/assets/wheel-zoom-sensitivity-setting.png")
+    tuned_image = image_uri("docs/assets/wheel-zoom-tuned.png")
     flipped_image = image_uri("docs/assets/wheel-zoom-flipped.png")
     fixture_image = image_uri("sketches/review/wheel-zoom.png")
 
@@ -73,13 +75,13 @@ code {{ color:#b9dcff; background:#111b29; padding:2px 6px; border-radius:6px; }
 <body>
 <main>
   <div class="eyebrow">SystemSketch · interaction restoration · 2026-09-04</div>
-  <h1>The wheel zooms in your direction.</h1>
-  <p class="lead">An ordinary vertical wheel gesture zooms around the pointer instead of moving the board. Scroll down zooms in by default; Appearance now exposes one clear switch for people who prefer scroll up.</p>
+  <h1>Your direction. Your pace.</h1>
+  <p class="lead">An ordinary vertical wheel gesture zooms around the pointer instead of moving the board. Scroll down zooms in by default, and tldraw’s standard sensitivity remains the 100% default; Appearance can gently tune the pace or flip the direction.</p>
 
   <section class="metrics" aria-label="Measured browser results">
     <div class="metric"><b>{html.escape(before['zoomLabel'])} → {html.escape(after['zoomLabel'])}</b><span>scroll down, default</span></div>
-    <div class="metric"><b>{html.escape(flipped_before['zoomLabel'])} → {html.escape(flipped_after['zoomLabel'])}</b><span>scroll up, flipped</span></div>
-    <div class="metric"><b>Appearance</b><span>saved on this computer</span></div>
+    <div class="metric"><b>100%</b><span>tldraw standard sensitivity</span></div>
+    <div class="metric"><b>50–150%</b><span>tunable in 5% steps</span></div>
     <div class="metric"><b>{len(results['checks'])} / {len(results['checks'])}</b><span>real-browser checks passed</span></div>
   </section>
 
@@ -96,16 +98,31 @@ code {{ color:#b9dcff; background:#111b29; padding:2px 6px; border-radius:6px; }
   </section>
 
   <section class="panel">
-    <h2>Default by taste, reversible by choice</h2>
-    <p>The first-run state is visibly on. Turning it off updates the live editor immediately, persists on this computer, and makes the opposite scroll direction zoom in after reload.</p>
+    <h2>Standard by default, tunable by choice</h2>
+    <p>The first-run state is visibly 100%. Moving the slider updates the live editor immediately, persists on this computer, and leaves the −/+ buttons on their normal discrete steps.</p>
     <div class="direction-grid">
       <div>
         <img class="screenshot" src="{setting_image}" alt="Appearance settings showing Scroll down to zoom in enabled by default">
-        <p class="caption">Appearance · <strong>Scroll down to zoom in</strong> is enabled by default.</p>
+        <p class="caption">Default · <strong>Scroll down to zoom in</strong> and standard 100% sensitivity.</p>
       </div>
       <div>
-        <img class="screenshot" src="{flipped_image}" alt="SystemSketch at 121 percent after the setting is flipped and a scroll-up gesture zooms in">
-        <p class="caption">Flipped · scroll up moves the stock camera from 110% to 121%.</p>
+        <img class="screenshot" src="{sensitivity_setting_image}" alt="Appearance settings showing wheel zoom sensitivity tuned to 150 percent">
+        <p class="caption">Tuned · 150% maps to stock <code>zoomSpeed: 1.5</code>; reset returns to standard.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Measured, not inferred</h2>
+    <p>The same real wheel event changes scale by 10% at the untouched default and 15% at 150%. Direction remains an independent choice.</p>
+    <div class="direction-grid">
+      <div>
+        <img class="screenshot" src="{tuned_image}" alt="SystemSketch at 126 percent after one wheel step at 150 percent sensitivity">
+        <p class="caption">150% sensitivity · one scroll-down step moves 1.100 → 1.265.</p>
+      </div>
+      <div>
+        <img class="screenshot" src="{flipped_image}" alt="SystemSketch at 110 percent after the setting is flipped and a scroll-up gesture zooms in">
+        <p class="caption">Flipped · after reset, scroll up moves the stock camera from {html.escape(flipped_before['zoomLabel'])} to {html.escape(flipped_after['zoomLabel'])}.</p>
       </div>
     </div>
   </section>
@@ -114,12 +131,12 @@ code {{ color:#b9dcff; background:#111b29; padding:2px 6px; border-radius:6px; }
     <article class="panel">
       <h2>Regression proof</h2>
       <ul>{checks}</ul>
-      <p class="stock">The repair stays on tldraw’s supported seams: <code>options.camera.wheelBehavior</code>, <code>Editor.setCameraOptions</code>, and the public <code>inputMode</code> / <code>isZoomDirectionInverted</code> preferences. No wheel listener, camera reimplementation, or tldraw fork was added.</p>
+      <p class="stock">The repair stays on tldraw’s supported seams: <code>options.camera.wheelBehavior</code>, <code>Editor.setCameraOptions</code> with <code>zoomSpeed</code>, and the public <code>inputMode</code> / <code>isZoomDirectionInverted</code> preferences. No wheel listener, camera reimplementation, or tldraw fork was added.</p>
     </article>
     <article class="panel">
       <h2>Human review board</h2>
       <img class="fixture" src="{fixture_image}" alt="Guided wheel zoom review board with two orange steps and a green pass condition">
-      <p>Place the pointer over <code>wheel_target()</code> and scroll down without Ctrl. Pass when the Block grows around that point and the visible percentage increases; Appearance can flip the direction.</p>
+      <p>Place the pointer over <code>wheel_target()</code> and scroll down without Ctrl. Pass when the Block grows around that point; Appearance can tune the pace from 50–150%, reset to 100%, or flip the direction.</p>
     </article>
   </section>
 

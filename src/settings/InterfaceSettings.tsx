@@ -42,8 +42,12 @@ import {
 } from '../theme/themeStore'
 import { paletteFromVsCodeTheme, parseVsCodeThemeText, slugify } from '../theme/vscodeTheme'
 import {
+  DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT,
+  MAX_WHEEL_ZOOM_SENSITIVITY_PERCENT,
+  MIN_WHEEL_ZOOM_SENSITIVITY_PERCENT,
   updateAppearancePreferences,
   useAppearancePreferences,
+  WHEEL_ZOOM_SENSITIVITY_STEP,
 } from './appearancePreferences'
 import './interface-settings.css'
 
@@ -246,7 +250,12 @@ function swatchOf(palettes: readonly ThemePalette[], id: string): SwatchTokens {
 function AppearancePanel() {
   const choice = useThemeChoice()
   const imported = useImportedPalettes()
-  const { showZoomButtons, scrollDownZoomsIn, punctuatedPortRow } = useAppearancePreferences()
+  const {
+    showZoomButtons,
+    scrollDownZoomsIn,
+    wheelZoomSensitivityPercent,
+    punctuatedPortRow,
+  } = useAppearancePreferences()
   const options = themeOptions(BUILT_IN_PALETTES, imported)
   const palettes = [...BUILT_IN_PALETTES, ...imported]
   const fileInput = useRef<HTMLInputElement | null>(null)
@@ -398,10 +407,10 @@ function AppearancePanel() {
         </p>
       ) : null}
 
-      <section className="systemsketch-settings__appearance-section" aria-labelledby="wheel-zoom-direction-title">
+      <section className="systemsketch-settings__appearance-section" aria-labelledby="wheel-zoom-title">
         <div className="systemsketch-settings__appearance-heading">
-          <h3 id="wheel-zoom-direction-title">Wheel zoom direction</h3>
-          <p>Choose which vertical scroll direction moves closer to the board.</p>
+          <h3 id="wheel-zoom-title">Wheel zoom</h3>
+          <p>Choose which direction moves closer and how much each scroll step changes scale.</p>
         </div>
         <button
           type="button"
@@ -417,6 +426,42 @@ function AppearancePanel() {
           </span>
           <i aria-hidden="true"><span /></i>
         </button>
+        <div className="systemsketch-settings__sensitivity" data-testid="systemsketch-wheel-zoom-sensitivity-control">
+          <div className="systemsketch-settings__sensitivity-heading">
+            <label htmlFor="systemsketch-wheel-zoom-sensitivity">
+              <strong>Wheel zoom sensitivity</strong>
+              <small>100% matches the standard feel. The −/+ buttons keep their normal steps.</small>
+            </label>
+            <output htmlFor="systemsketch-wheel-zoom-sensitivity">{wheelZoomSensitivityPercent}%</output>
+          </div>
+          <div className="systemsketch-settings__sensitivity-slider">
+            <span>Slower</span>
+            <input
+              id="systemsketch-wheel-zoom-sensitivity"
+              data-testid="systemsketch-wheel-zoom-sensitivity"
+              type="range"
+              min={MIN_WHEEL_ZOOM_SENSITIVITY_PERCENT}
+              max={MAX_WHEEL_ZOOM_SENSITIVITY_PERCENT}
+              step={WHEEL_ZOOM_SENSITIVITY_STEP}
+              value={wheelZoomSensitivityPercent}
+              aria-valuetext={`${wheelZoomSensitivityPercent}% of standard wheel zoom`}
+              onChange={(event) => updateAppearancePreferences({
+                wheelZoomSensitivityPercent: Number(event.currentTarget.value),
+              })}
+            />
+            <span>Faster</span>
+          </div>
+          <button
+            type="button"
+            className="systemsketch-settings__sensitivity-reset"
+            disabled={wheelZoomSensitivityPercent === DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT}
+            onClick={() => updateAppearancePreferences({
+              wheelZoomSensitivityPercent: DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT,
+            })}
+          >
+            Reset to standard
+          </button>
+        </div>
       </section>
 
       <section className="systemsketch-settings__appearance-section" aria-labelledby="zoom-controls-title">
