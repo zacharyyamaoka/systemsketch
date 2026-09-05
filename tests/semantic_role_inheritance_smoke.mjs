@@ -7,7 +7,7 @@ import { join } from 'node:path'
 import { ROOT, clickAt, delay, evaluate, key, openApp, startApp, waitFor } from './browser_harness.mjs'
 
 const FIXTURE = join(ROOT, 'sketches/review/semantic-role-inheritance.systemsketch')
-const SHOT = join(ROOT, 'docs/assets/semantic-role-tags-tab-smoke-2026-09-04.png')
+const SHOT = join(ROOT, 'docs/assets/semantic-tag-visibility-smoke-2026-09-04.png')
 
 async function centre(page, selector) {
   return JSON.parse(await evaluate(page, `(() => {
@@ -64,6 +64,7 @@ async function main() {
     await clickAt(page, tags.x, tags.y)
     await waitFor(page, `document.querySelector('#inspector-semantic-tags-outputs select[aria-label="Semantic role for outputs tick"]')`, 'Tags role selector')
     await waitFor(page, `document.querySelector('[data-testid="inspector-semantic-tag-outputs-out_1"]')`, 'all output tags')
+		await waitFor(page, `document.querySelector('input[aria-label="Show semantic tags on canvas ports and wires"]')?.checked === true`, 'default canvas tag visibility')
     const select = await centre(page, 'select[aria-label="Semantic role for outputs tick"]')
     await clickAt(page, select.x, select.y)
 		await key(page, 'ArrowUp', 'ArrowUp')
@@ -93,7 +94,8 @@ async function main() {
 		// directly so the assertion is not hostage to its hit padding at this
 		// headless zoom. The CUA review journey covers the literal canvas click.
 		await evaluate(page, `(() => { window.__systemsketch.editor.select('shape:event-to-control'); return null })()`)
-    await waitFor(page, `document.querySelector('[data-testid="connection-semantic-role"]')?.textContent?.includes('Event → Control')`, 'live conflict reading')
+		await waitFor(page, `document.querySelector('[data-testid="connection-semantic-role"]')?.textContent?.includes('Event → Control')`, 'live conflict reading')
+		await waitFor(page, `document.querySelector('[data-testid="connection-semantic-tag"]')?.textContent?.includes('Event → Control')`, 'visible canvas wire tag')
     const facts = JSON.parse(await evaluate(page, `JSON.stringify({
       role: document.querySelector('[data-testid="connection-semantic-role"]')?.textContent,
       warning: document.querySelector('.connection-inspector__semantic-warning')?.textContent,
@@ -103,15 +105,38 @@ async function main() {
     assert.match(facts.warning, /remains legal/)
 		assert.match(await evaluate(page, `document.querySelector('[data-testid="connection-endpoints"]')?.textContent ?? ''`), /choose_tick\(\)\.when tick/)
     assert.equal(facts.temporal, 'data', 'role authoring does not change delivery mode')
+		const emitterAgain = await centre(page, '[data-shape-id="shape:emitter"]')
+		await clickAt(page, emitterAgain.x, emitterAgain.y)
+		const tagsAgain = await centre(page, '[data-inspector-section="Outputs"] .block-inspector__tags-button')
+		await clickAt(page, tagsAgain.x, tagsAgain.y)
+		const visibilityToggle = await centre(page, 'input[aria-label="Show semantic tags on canvas ports and wires"]')
+		await clickAt(page, visibilityToggle.x, visibilityToggle.y)
+		await waitFor(page, `window.__systemsketch.editor.getDocumentSettings().meta['systemsketch:semanticTagsVisible'] === false`, 'saved hidden canvas tag visibility')
+		await waitFor(page, `!document.querySelector('[data-semantic-role], [data-testid="connection-semantic-tag"]')`, 'hidden canvas port and wire tags')
+		await evaluate(page, `(() => { window.__systemsketch.editor.select('shape:event-to-control'); return null })()`)
+		await waitFor(page, `document.querySelector('[data-testid="connection-semantic-role"]')?.textContent?.includes('Event → Control')`, 'hidden canvas keeps live connection semantics')
 		await guardedReload(page)
 		await waitFor(page, `window.__systemsketch?.editor?.getShape('shape:emitter')?.props.outputs[0].semanticRoleAuthored?.role === 'event'`, 'autosaved semantic role after reload')
-		await waitFor(page, `document.querySelector('[data-shape-id="shape:consumer"] .Port[aria-label="Control port"]')?.textContent === 'Control'`, 'Control cue after reload')
+		await waitFor(page, `window.__systemsketch.editor.getDocumentSettings().meta['systemsketch:semanticTagsVisible'] === false`, 'hidden canvas tag visibility after reload')
+		await waitFor(page, `!document.querySelector('[data-semantic-role], [data-testid="connection-semantic-tag"]')`, 'hidden canvas tags after reload')
 		const reselectedEmitter = await centre(page, '[data-shape-id="shape:emitter"]')
 		await clickAt(page, reselectedEmitter.x, reselectedEmitter.y)
 		await waitFor(page, `document.querySelector('[data-inspector-section="Outputs"] .block-inspector__tags-button')`, 'Outputs Tags button after reload')
 		const reopenedTags = await centre(page, '[data-inspector-section="Outputs"] .block-inspector__tags-button')
 		await clickAt(page, reopenedTags.x, reopenedTags.y)
 		await waitFor(page, `document.querySelector('#inspector-semantic-tags-outputs select[aria-label="Semantic role for outputs tick"]')?.value === 'event'`, 'event role in reopened Tags view')
+		const restoredVisibilityToggle = await centre(page, 'input[aria-label="Show semantic tags on canvas ports and wires"]')
+		await clickAt(page, restoredVisibilityToggle.x, restoredVisibilityToggle.y)
+		await waitFor(page, `document.querySelector('[data-shape-id="shape:emitter"] .Port[data-semantic-role="event"]')`, 'restored visible Event port cue')
+		await waitFor(page, `document.querySelector('[data-testid="connection-semantic-tag"]')?.textContent?.includes('Event → Control')`, 'restored visible wire tag')
+		assert.equal(await evaluate(page, `document.querySelector('[data-testid="connection-semantic-tag"]')?.getAttribute('pointer-events')`), 'none', 'wire tag does not become a cable hit target')
+		const wireTag = await centre(page, '[data-testid="connection-semantic-tag"]')
+		await clickAt(page, wireTag.x, wireTag.y)
+		await waitFor(page, `window.__systemsketch.editor.getSelectedShapeIds().includes('shape:event-to-control')`, 'click through wire tag selects its cable')
+		const emitterForCapture = await centre(page, '[data-shape-id="shape:emitter"]')
+		await clickAt(page, emitterForCapture.x, emitterForCapture.y)
+		const tagsForCapture = await centre(page, '[data-inspector-section="Outputs"] .block-inspector__tags-button')
+		await clickAt(page, tagsForCapture.x, tagsForCapture.y)
 		await evaluate(page, `(() => {
 			const shape = window.__systemsketch.editor.getShape('shape:emitter')
 			const tick = shape.props.outputs[0]

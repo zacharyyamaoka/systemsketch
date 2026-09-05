@@ -31,6 +31,7 @@ import {
   SEMANTIC_PORT_ROLES,
 } from '../blockModel'
 import { resolveBlockPortSemanticRole, roleLabel } from '../connections/semanticRoles'
+import { getSemanticTagsVisible, setSemanticTagsVisible } from '../semanticTagVisibility'
 import { commitBlockDefinitionName, definitionBadge } from '../definitions/definitionLinking'
 import { getBlockPortConnections, type BlockPortConnection } from '../connections/blockPorts'
 import { valueBlockInlet, valueBlockName, valueBlockOutlet } from '../valueBlock'
@@ -98,6 +99,8 @@ export interface BlockInspectorActions {
   beginEdit?(label: string): void
   /** Resolve a same-name collision only when the title gesture is complete. */
   commitTitle?(): void
+	/** One board-wide canvas lens, independent of per-port role authoring. */
+	setSemanticTagsVisible?(visible: boolean): void
 }
 
 /** What a pill is wired to, read from the cables; the content never reads the editor. */
@@ -117,6 +120,7 @@ export interface BlockInspectorContentProps {
   initialTab?: InspectorTab
   onRequestClose?: () => void
   pill?: PillInspectorFacts
+	semanticTagsVisible?: boolean
 }
 
 function TinyIcon({ children }: { children: ReactNode }) {
@@ -728,10 +732,12 @@ function PortSection({
   side,
   props,
   actions,
+  semanticTagsVisible = true,
 }: {
   side: BlockPortSide
   props: BlockShapeProps
   actions?: BlockInspectorActions
+	semanticTagsVisible?: boolean
 }) {
   const [managing, setManaging] = useState(false)
 	const [tagging, setTagging] = useState(false)
@@ -1079,7 +1085,18 @@ function PortSection({
       </div>
 
       {tagging ? (
-			<div id={`inspector-semantic-tags-${side}`} className="block-inspector__semantic-tags" role="region" aria-label={`${title} semantic tags`}>
+		<div id={`inspector-semantic-tags-${side}`} className="block-inspector__semantic-tags" role="region" aria-label={`${title} semantic tags`}>
+				<label className="block-inspector__semantic-visibility">
+					<input
+						type="checkbox"
+						checked={semanticTagsVisible}
+						disabled={!actions?.setSemanticTagsVisible}
+						aria-label="Show semantic tags on canvas ports and wires"
+						onChange={(event) => actions?.setSemanticTagsVisible?.(event.currentTarget.checked)}
+					/>
+					<span>Show tags on canvas</span>
+					<span className="block-inspector__semantic-visibility-state">{semanticTagsVisible ? 'Visible' : 'Hidden'}</span>
+				</label>
 				<p className="block-inspector__hint">Choose a semantic role for each port. Hidden ports are included; derived effect ports inherit their role.</p>
 				{ports.length === 0 ? <p className="block-inspector__hint">No {side} to tag yet.</p> : <ul>{tagItems}</ul>}
 			</div>
@@ -1131,6 +1148,7 @@ export function BlockInspectorContent({
   initialTab = 'details',
   onRequestClose,
   pill,
+  semanticTagsVisible = true,
 }: BlockInspectorContentProps) {
   const [tab, setTab] = useState<InspectorTab>(initialTab)
   const readOnly = !actions
@@ -1257,8 +1275,8 @@ export function BlockInspectorContent({
                 </p>
               </section>
 
-              <PortSection side="inputs" props={props} actions={actions} />
-              <PortSection side="outputs" props={props} actions={actions} />
+              <PortSection side="inputs" props={props} actions={actions} semanticTagsVisible={semanticTagsVisible} />
+              <PortSection side="outputs" props={props} actions={actions} semanticTagsVisible={semanticTagsVisible} />
 
               <section className="block-inspector__section" data-inspector-section="Ports">
                 <div className="block-inspector__section-title">Ports</div>
@@ -1310,6 +1328,11 @@ export function EditorBlockInspector({
   onToolDraftChange,
   onRequestClose,
 }: EditorBlockInspectorProps) {
+	const semanticTagsVisible = useValue(
+		'SystemSketch semantic tag canvas visibility',
+		() => getSemanticTagsVisible(editor),
+		[editor],
+	)
   const context = useValue(
     'SystemSketch Block inspector context',
     (previous?: unknown) => {
@@ -1375,6 +1398,7 @@ export function EditorBlockInspector({
         adoptConnectedType: () => void adoptConnectedPillType(editor, id),
         beginEdit: (label) => void editor.markHistoryStoppingPoint(label),
         commitTitle: () => commitBlockDefinitionName(editor, id),
+			setSemanticTagsVisible: (visible) => setSemanticTagsVisible(editor, visible),
       }
     }
     if (context.kind !== 'tool' || !onToolDraftChange) return undefined
@@ -1433,6 +1457,7 @@ export function EditorBlockInspector({
       status={context.kind === 'selected' ? 'selected' : 'new'}
       actions={actions}
       pill={pillFacts}
+		semanticTagsVisible={semanticTagsVisible}
       onRequestClose={onRequestClose}
     />
   )

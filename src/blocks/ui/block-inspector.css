@@ -1106,6 +1106,36 @@
 	margin: 0 0 8px;
 }
 
+.block-inspector__semantic-visibility {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	margin: 0 0 9px;
+	color: var(--ss-text);
+	font-size: 11px;
+	font-weight: 650;
+	cursor: pointer;
+}
+
+.block-inspector__semantic-visibility input {
+	margin: 0;
+	accent-color: var(--ss-accent);
+}
+
+.block-inspector__semantic-visibility:has(input:disabled) {
+	cursor: default;
+	opacity: .58;
+}
+
+.block-inspector__semantic-visibility-state {
+	margin-left: auto;
+	padding: 2px 5px;
+	border-radius: 999px;
+	background: var(--ss-surface-sunken);
+	color: var(--ss-text-muted);
+	font: 10px/1 ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
 .block-inspector__semantic-tags > ul {
 	display: flex;
 	flex-direction: column;

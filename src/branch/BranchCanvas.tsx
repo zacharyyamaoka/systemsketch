@@ -13,6 +13,7 @@ import { useCallback, useMemo, type CSSProperties } from 'react'
 import { HTMLContainer, useEditor, useValue } from 'tldraw'
 
 import { getBlockPortConnections } from '../blocks/connections/blockPorts'
+import { getSemanticTagsVisible } from '../blocks/semanticTagVisibility'
 import { countProducers, PortDot, usePortHintEligibility } from '../blocks/ui/PortDot'
 import { ControlIconBadges } from '../controlIcons'
 import { BranchInlineEditor } from './BranchInlineEditor'
@@ -47,11 +48,12 @@ const boxStyle = (box: BranchRect): CSSProperties => ({
 	height: box.h,
 })
 
-function ControlPortDot({ shape, control, connected, producers }: {
+function ControlPortDot({ shape, control, connected, producers, semanticTagsVisible }: {
 	shape: BranchShape
 	control: BranchControlLayout
 	connected: boolean
 	producers: number
+	semanticTagsVisible: boolean
 }) {
 	const portId = control.port.id
 	const { hinting, eligible } = usePortHintEligibility(shape.id, portId)
@@ -67,8 +69,8 @@ function ControlPortDot({ shape, control, connected, producers }: {
 			hinting={hinting}
 			eligible={eligible}
 			testId={`branch-control-dot-${portId}`}
-			semanticLabel="Control"
-			attrs={{ 'data-semantic-role': 'control' }}
+			semanticLabel={semanticTagsVisible ? 'Control' : undefined}
+			attrs={{ 'data-semantic-role': semanticTagsVisible ? 'control' : undefined }}
 		/>
 	)
 }
@@ -157,6 +159,11 @@ function ArmHeader({ shape, row, isActive, faded, selected, editing }: {
 
 export function BranchCanvas({ shape }: { shape: BranchShape }) {
 	const editor = useEditor()
+	const semanticTagsVisible = useValue(
+		'Branch semantic tag visibility',
+		() => getSemanticTagsVisible(editor),
+		[editor],
+	)
 	const layout = branchLayout(shape.props)
 	const connections = useValue('Branch port connections', () => getBlockPortConnections(editor, shape.id), [editor, shape.id])
 	const connectedIds = useMemo(() => new Set(connections.map((connection) => connection.ownPortId)), [connections])
@@ -242,6 +249,7 @@ export function BranchCanvas({ shape }: { shape: BranchShape }) {
 						control={control}
 						connected={connectedIds.has(control.port.id)}
 						producers={producerCounts.get(control.port.id) ?? 0}
+						semanticTagsVisible={semanticTagsVisible}
 					/>
 				))}
 
