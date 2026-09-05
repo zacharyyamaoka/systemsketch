@@ -44,7 +44,7 @@ function BranchExportSvg({ shape }: { shape: BranchShape }) {
 			{layout.controls.map((control) => (
 				<g key={control.port.id}>
 					<circle cx={control.x} cy={control.y} r={BRANCH_PORT_RADIUS} fill="#fff" stroke="#c08520" strokeWidth={2} />
-					<text x={control.label.x} y={control.y} dominantBaseline="middle" fill={muted} fontFamily="ui-sans-serif, system-ui" fontSize={13}>
+					<text x={control.label.x} y={control.y} dominantBaseline="middle" fill={muted} fontFamily="ui-monospace, monospace" fontSize={13}>
 						{control.port.name}
 					</text>
 				</g>

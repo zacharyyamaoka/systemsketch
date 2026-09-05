@@ -226,7 +226,9 @@ export function createCalloutCard(editor: Editor, center: VecLike): TLGeoShape |
       fill: 'none',
       dash: 'solid',
       size: 'm',
-      font: 'sans',
+		// A Callout begins as a whiteboard note, so retain the stock sketch face
+		// until someone deliberately changes its typeface.
+		font: 'draw',
       align: 'start',
       verticalAlign: 'middle',
       richText: toRichText('Callout — describe this detail'),

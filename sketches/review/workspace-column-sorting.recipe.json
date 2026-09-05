@@ -1,0 +1,64 @@
+{
+  "feature": "Workspace file-manager column sorting",
+  "viewport": { "width": 1280, "height": 720 },
+  "shapes": [
+    {
+      "id": "workspace-browser",
+      "type": "block",
+      "x": 480,
+      "y": 330,
+      "props": {
+        "title": "Workspace browser",
+        "description": "Open a board · Name | Size | Modified",
+        "blockType": "Function",
+        "view": "port",
+        "w": 340,
+        "h": 190,
+        "inputs": [],
+        "outputs": []
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-open",
+      "kind": "step",
+      "text": "1 · Press Ctrl/Cmd+O to open the file organizer.",
+      "x": 40,
+      "y": 250,
+      "w": 340,
+      "h": 110,
+      "target": { "shapeId": "workspace-browser", "anchor": "left", "dy": -48 }
+    },
+    {
+      "id": "step-recent",
+      "kind": "step",
+      "text": "2 · Click Modified once. Its arrow points down and newest files come first.",
+      "x": 900,
+      "y": 235,
+      "w": 340,
+      "h": 115,
+      "target": { "shapeId": "workspace-browser", "anchor": "right", "dy": -48 }
+    },
+    {
+      "id": "step-reverse",
+      "kind": "step",
+      "text": "3 · Click the same heading again to reverse it. Name and Size behave the same way.",
+      "x": 900,
+      "y": 455,
+      "w": 340,
+      "h": 115,
+      "target": { "shapeId": "workspace-browser", "anchor": "right", "dy": 48 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Name, Size, and Modified are column headers; the active header has an arrow, files reorder, and folders stay first.",
+      "x": 60,
+      "y": 600,
+      "w": 570,
+      "h": 110
+    }
+  ]
+}

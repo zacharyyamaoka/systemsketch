@@ -84,6 +84,7 @@
 }
 
 .systemsketch-block-canvas .BlockNode-inlineEditor--title,
+.systemsketch-block-canvas .BlockNode-inlineEditor--portName,
 .systemsketch-block-canvas .BlockNode-inlineEditor--portType {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
@@ -250,6 +251,8 @@
   gap: 12px;
   overflow: hidden;
   color: var(--ss-text);
+	/* WHY: a Block title is the source-shaped callable name even on the compact face. */
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 44px;
   font-weight: 600;
   line-height: 50px;
@@ -789,6 +792,8 @@
 .systemsketch-block-canvas .BlockNode-portName {
   overflow: hidden;
   color: var(--ss-text);
+	/* WHY: port names join types/defaults as one source-shaped signature row. */
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 18px;
   line-height: 24px;
   text-overflow: ellipsis;

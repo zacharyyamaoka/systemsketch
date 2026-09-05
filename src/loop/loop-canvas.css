@@ -72,6 +72,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+	/* Header port types are source-shaped annotations, not chrome captions. */
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 12.5px;
   color: var(--ss-text-muted);
 }
@@ -86,7 +88,8 @@
   border: 1px solid var(--ss-accent);
   background: var(--ss-accent-soft);
   color: var(--ss-text);
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+	/* `z⁻¹` and a turn status are SystemSketch's own notation, not source text. */
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;

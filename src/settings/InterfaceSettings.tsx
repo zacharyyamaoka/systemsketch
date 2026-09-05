@@ -49,6 +49,13 @@ import {
   useAppearancePreferences,
   WHEEL_ZOOM_SENSITIVITY_STEP,
 } from './appearancePreferences'
+import { SHAPE_LIBRARY_ITEMS, type ShapeLibraryItem } from '../library/shapeLibraryModel'
+import {
+  addToolAlias,
+  normalizeToolAlias,
+  removeToolAlias,
+  useToolAliases,
+} from '../library/toolAliases'
 import './interface-settings.css'
 
 export function SettingsGearIcon(props: ComponentProps<'svg'>) {
@@ -63,7 +70,7 @@ function CategoryIcon({ children }: { children: ReactNode }) {
   )
 }
 
-type SettingsCategoryId = 'general' | 'appearance' | 'interface' | 'shortcuts' | 'about'
+type SettingsCategoryId = 'general' | 'canvas' | 'appearance' | 'interface' | 'shortcuts' | 'about'
 
 const SETTINGS_CATEGORIES: readonly { id: SettingsCategoryId; label: string; icon: ReactNode }[] = [
   {
@@ -77,13 +84,18 @@ const SETTINGS_CATEGORIES: readonly { id: SettingsCategoryId; label: string; ico
     icon: <CategoryIcon><circle cx="10" cy="10" r="6.5" /><path d="M10 3.5a6.5 6.5 0 0 0 0 13Z" /></CategoryIcon>,
   },
   {
+    id: 'canvas',
+    label: 'Canvas',
+    icon: <CategoryIcon><circle cx="10" cy="10" r="5.8" /><path d="M10 1.8v3M10 15.2v3M1.8 10h3M15.2 10h3" /></CategoryIcon>,
+  },
+  {
     id: 'interface',
     label: 'Interface',
     icon: <CategoryIcon><rect x="3.5" y="4" width="13" height="12" rx="2" /><path d="M3.5 7.5h13M7.5 7.5V16" /></CategoryIcon>,
   },
   {
     id: 'shortcuts',
-    label: 'Shortcuts',
+    label: 'Tool aliases',
     icon: <CategoryIcon><rect x="3" y="5" width="14" height="10" rx="2" /><path d="M6 8h.01M9 8h.01M12 8h.01M15 8h.01M6 11h.01M9 11h.01M12 11h3M7 13h6" /></CategoryIcon>,
   },
   {
@@ -93,7 +105,7 @@ const SETTINGS_CATEGORIES: readonly { id: SettingsCategoryId; label: string; ico
   },
 ]
 
-const OPEN_CATEGORIES: readonly SettingsCategoryId[] = ['appearance', 'interface']
+const OPEN_CATEGORIES: readonly SettingsCategoryId[] = ['appearance', 'canvas', 'interface', 'shortcuts']
 
 /** The category the dialog opens on; a caller may ask for another. */
 export interface SystemSketchSettingsDialogProps extends TLUiDialogProps {
@@ -140,9 +152,108 @@ export function SystemSketchSettingsDialog({ category: initial }: SystemSketchSe
             )
           })}
         </nav>
-        {category === 'appearance' ? <AppearancePanel /> : <InterfacePanel />}
+        {category === 'appearance'
+          ? <AppearancePanel />
+          : category === 'canvas'
+            ? <CanvasPanel />
+          : category === 'shortcuts'
+            ? <ToolAliasesPanel />
+            : <InterfacePanel />}
       </TldrawUiDialogBody>
     </div>
+  )
+}
+
+function ToolAliasRow({ item }: { item: ShapeLibraryItem }) {
+  const aliases = useToolAliases()
+  const [draft, setDraft] = useState('')
+  const [message, setMessage] = useState<string | null>(null)
+  const itemAliases = aliases[item.id] ?? []
+
+  const add = () => {
+    const normalized = normalizeToolAlias(draft)
+    if (!normalized) {
+      setMessage('Enter a name up to 64 characters.')
+      return
+    }
+    if (!addToolAlias(item.id, normalized)) {
+      setMessage(`${normalized} is already an alias for ${item.label}.`)
+      return
+    }
+    setDraft('')
+    setMessage(null)
+  }
+
+  return (
+    <article className="systemsketch-tool-alias-row" data-testid={`systemsketch-tool-alias-row-${item.id}`}>
+      <header>
+        <div>
+          <h3>{item.label}</h3>
+          <p>{item.kind === 'tool' ? 'Canvas tool' : item.section}</p>
+        </div>
+      </header>
+      <div className="systemsketch-tool-alias-row__aliases" aria-label={`Aliases for ${item.label}`}>
+        {itemAliases.length > 0 ? itemAliases.map((alias) => (
+          <span key={alias} className="systemsketch-tool-alias-chip">
+            <span aria-hidden="true">↪</span>{alias}
+            <button
+              type="button"
+              aria-label={`Remove ${alias} from ${item.label}`}
+              data-testid={`systemsketch-tool-alias-remove-${item.id}-${alias}`}
+              onClick={() => removeToolAlias(item.id, alias)}
+            >×</button>
+          </span>
+        )) : <span className="systemsketch-tool-alias-row__empty">No custom aliases</span>}
+      </div>
+      <form
+        className="systemsketch-tool-alias-row__add"
+        onSubmit={(event) => {
+          event.preventDefault()
+          add()
+        }}
+      >
+        <label className="systemsketch-settings__visually-hidden" htmlFor={`systemsketch-tool-alias-${item.id}`}>
+          Add an alias for {item.label}
+        </label>
+        <input
+          id={`systemsketch-tool-alias-${item.id}`}
+          data-testid={`systemsketch-tool-alias-input-${item.id}`}
+          value={draft}
+          placeholder="Add an alias, e.g. @datatype"
+          maxLength={64}
+          onChange={(event) => {
+            setDraft(event.currentTarget.value)
+            setMessage(null)
+          }}
+        />
+        <button type="submit" data-testid={`systemsketch-tool-alias-add-${item.id}`} disabled={!draft.trim()}>Add</button>
+      </form>
+      {message ? <p className="systemsketch-tool-alias-row__message" role="status">{message}</p> : null}
+    </article>
+  )
+}
+
+function ToolAliasesPanel() {
+  return (
+    <section className="systemsketch-settings__panel" aria-labelledby="tool-aliases-title" data-testid="systemsketch-tool-aliases-panel">
+      <div className="systemsketch-settings__eyebrow">Tools</div>
+      <div className="systemsketch-settings__intro">
+        <div>
+          <h2 id="tool-aliases-title">Tool aliases</h2>
+          <p>Give any Asset-search tool the names you use. An alias like <code>@datatype</code> opens Text without changing the tool’s canonical name.</p>
+        </div>
+      </div>
+      <div className="systemsketch-tool-alias-list">
+        {SHAPE_LIBRARY_ITEMS.map((item) => <ToolAliasRow key={item.id} item={item} />)}
+      </div>
+      <div className="systemsketch-settings__note">
+        <span className="systemsketch-settings__saved-dot" aria-hidden="true" />
+        <div>
+          <strong>Saved on this computer</strong>
+          <p>Aliases enrich Asset search and the Shapes library. They are personal vocabulary, not board content.</p>
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -209,6 +320,104 @@ function InterfacePanel() {
   )
 }
 
+function CanvasPanel() {
+  const {
+    showZoomButtons,
+    scrollDownZoomsIn,
+    wheelZoomSensitivityPercent,
+  } = useAppearancePreferences()
+
+  return (
+    <section className="systemsketch-settings__panel" aria-labelledby="canvas-navigation-title">
+      <div className="systemsketch-settings__eyebrow">Canvas</div>
+      <div className="systemsketch-settings__intro">
+        <div>
+          <h2 id="canvas-navigation-title">Canvas navigation</h2>
+          <p>Choose how the canvas responds to a wheel and how its zoom controls appear.</p>
+        </div>
+      </div>
+
+      <section className="systemsketch-settings__appearance-section" aria-labelledby="wheel-zoom-title">
+        <div className="systemsketch-settings__appearance-heading">
+          <h3 id="wheel-zoom-title">Wheel zoom</h3>
+          <p>Choose which direction moves closer and how much each scroll step changes scale.</p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          className="systemsketch-settings__toggle-row"
+          aria-checked={scrollDownZoomsIn}
+          data-testid="systemsketch-scroll-down-zooms-in"
+          onClick={() => updateAppearancePreferences({ scrollDownZoomsIn: !scrollDownZoomsIn })}
+        >
+          <span>
+            <strong>Scroll down to zoom in</strong>
+            <small>Turn this off if you prefer scrolling up to zoom in.</small>
+          </span>
+          <i aria-hidden="true"><span /></i>
+        </button>
+        <div className="systemsketch-settings__sensitivity" data-testid="systemsketch-wheel-zoom-sensitivity-control">
+          <div className="systemsketch-settings__sensitivity-heading">
+            <label htmlFor="systemsketch-wheel-zoom-sensitivity">
+              <strong>Wheel zoom sensitivity</strong>
+              <small>100% matches the standard feel. The −/+ buttons keep their normal steps.</small>
+            </label>
+            <output htmlFor="systemsketch-wheel-zoom-sensitivity">{wheelZoomSensitivityPercent}%</output>
+          </div>
+          <div className="systemsketch-settings__sensitivity-slider">
+            <span>Slower</span>
+            <input
+              id="systemsketch-wheel-zoom-sensitivity"
+              data-testid="systemsketch-wheel-zoom-sensitivity"
+              type="range"
+              min={MIN_WHEEL_ZOOM_SENSITIVITY_PERCENT}
+              max={MAX_WHEEL_ZOOM_SENSITIVITY_PERCENT}
+              step={WHEEL_ZOOM_SENSITIVITY_STEP}
+              value={wheelZoomSensitivityPercent}
+              aria-valuetext={`${wheelZoomSensitivityPercent}% of standard wheel zoom`}
+              onChange={(event) => updateAppearancePreferences({
+                wheelZoomSensitivityPercent: Number(event.currentTarget.value),
+              })}
+            />
+            <span>Faster</span>
+          </div>
+          <button
+            type="button"
+            className="systemsketch-settings__sensitivity-reset"
+            disabled={wheelZoomSensitivityPercent === DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT}
+            onClick={() => updateAppearancePreferences({
+              wheelZoomSensitivityPercent: DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT,
+            })}
+          >
+            Reset to standard
+          </button>
+        </div>
+      </section>
+
+      <section className="systemsketch-settings__appearance-section" aria-labelledby="zoom-controls-title">
+        <div className="systemsketch-settings__appearance-heading">
+          <h3 id="zoom-controls-title">Zoom controls</h3>
+          <p>Choose how compact the bottom-right navigation strip should be.</p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          className="systemsketch-settings__toggle-row"
+          aria-checked={showZoomButtons}
+          data-testid="systemsketch-show-zoom-buttons"
+          onClick={() => updateAppearancePreferences({ showZoomButtons: !showZoomButtons })}
+        >
+          <span>
+            <strong>Show zoom −/+ buttons</strong>
+            <small>The zoom percentage remains available when these step buttons are hidden.</small>
+          </span>
+          <i aria-hidden="true"><span /></i>
+        </button>
+      </section>
+    </section>
+  )
+}
+
 /**
  * A miniature of the theme: its canvas, a panel on it, a line of text and the
  * accent. Painted from the palette's own values — those are data, not chrome,
@@ -251,9 +460,6 @@ function AppearancePanel() {
   const choice = useThemeChoice()
   const imported = useImportedPalettes()
   const {
-    showZoomButtons,
-    scrollDownZoomsIn,
-    wheelZoomSensitivityPercent,
     punctuatedPortRow,
   } = useAppearancePreferences()
   const options = themeOptions(BUILT_IN_PALETTES, imported)
@@ -406,84 +612,6 @@ function AppearancePanel() {
           {importMessage.text}
         </p>
       ) : null}
-
-      <section className="systemsketch-settings__appearance-section" aria-labelledby="wheel-zoom-title">
-        <div className="systemsketch-settings__appearance-heading">
-          <h3 id="wheel-zoom-title">Wheel zoom</h3>
-          <p>Choose which direction moves closer and how much each scroll step changes scale.</p>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          className="systemsketch-settings__toggle-row"
-          aria-checked={scrollDownZoomsIn}
-          data-testid="systemsketch-scroll-down-zooms-in"
-          onClick={() => updateAppearancePreferences({ scrollDownZoomsIn: !scrollDownZoomsIn })}
-        >
-          <span>
-            <strong>Scroll down to zoom in</strong>
-            <small>Turn this off if you prefer scrolling up to zoom in.</small>
-          </span>
-          <i aria-hidden="true"><span /></i>
-        </button>
-        <div className="systemsketch-settings__sensitivity" data-testid="systemsketch-wheel-zoom-sensitivity-control">
-          <div className="systemsketch-settings__sensitivity-heading">
-            <label htmlFor="systemsketch-wheel-zoom-sensitivity">
-              <strong>Wheel zoom sensitivity</strong>
-              <small>100% matches the standard feel. The −/+ buttons keep their normal steps.</small>
-            </label>
-            <output htmlFor="systemsketch-wheel-zoom-sensitivity">{wheelZoomSensitivityPercent}%</output>
-          </div>
-          <div className="systemsketch-settings__sensitivity-slider">
-            <span>Slower</span>
-            <input
-              id="systemsketch-wheel-zoom-sensitivity"
-              data-testid="systemsketch-wheel-zoom-sensitivity"
-              type="range"
-              min={MIN_WHEEL_ZOOM_SENSITIVITY_PERCENT}
-              max={MAX_WHEEL_ZOOM_SENSITIVITY_PERCENT}
-              step={WHEEL_ZOOM_SENSITIVITY_STEP}
-              value={wheelZoomSensitivityPercent}
-              aria-valuetext={`${wheelZoomSensitivityPercent}% of standard wheel zoom`}
-              onChange={(event) => updateAppearancePreferences({
-                wheelZoomSensitivityPercent: Number(event.currentTarget.value),
-              })}
-            />
-            <span>Faster</span>
-          </div>
-          <button
-            type="button"
-            className="systemsketch-settings__sensitivity-reset"
-            disabled={wheelZoomSensitivityPercent === DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT}
-            onClick={() => updateAppearancePreferences({
-              wheelZoomSensitivityPercent: DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT,
-            })}
-          >
-            Reset to standard
-          </button>
-        </div>
-      </section>
-
-      <section className="systemsketch-settings__appearance-section" aria-labelledby="zoom-controls-title">
-        <div className="systemsketch-settings__appearance-heading">
-          <h3 id="zoom-controls-title">Zoom controls</h3>
-          <p>Choose how compact the bottom-right navigation strip should be.</p>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          className="systemsketch-settings__toggle-row"
-          aria-checked={showZoomButtons}
-          data-testid="systemsketch-show-zoom-buttons"
-          onClick={() => updateAppearancePreferences({ showZoomButtons: !showZoomButtons })}
-        >
-          <span>
-            <strong>Show zoom −/+ buttons</strong>
-            <small>The zoom percentage remains available when these step buttons are hidden.</small>
-          </span>
-          <i aria-hidden="true"><span /></i>
-        </button>
-      </section>
 
       <section className="systemsketch-settings__appearance-section" aria-labelledby="port-row-punctuation-title">
         <div className="systemsketch-settings__appearance-heading">

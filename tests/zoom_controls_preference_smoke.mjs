@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Real-browser proof for the Appearance preference that keeps the compact
+ * Real-browser proof for the Canvas preference that keeps the compact
  * zoom strip as the default while allowing the explicit −/+ actions back.
  */
 import { writeFile } from 'node:fs/promises'
@@ -52,12 +52,12 @@ async function waitForApp(page) {
   await delay(300)
 }
 
-async function openAppearanceSettings(page) {
+async function openCanvasSettings(page) {
   await clickElement(page, '[data-testid="main-menu.button"]')
   await waitFor(page, `document.querySelector('[data-testid="main-menu.settings"]')`, 'the Settings menu item')
   await clickElement(page, '[data-testid="main-menu.settings"]')
   await waitFor(page, `document.querySelector('[data-testid="systemsketch-settings-dialog"]')`, 'the Settings dialog')
-  await clickElement(page, '[data-testid="systemsketch-settings-category-appearance"]')
+  await clickElement(page, '[data-testid="systemsketch-settings-category-canvas"]')
   await waitFor(page, `document.querySelector('[data-testid="systemsketch-show-zoom-buttons"]')`, 'the zoom-buttons preference')
   await evaluate(page, `document.querySelector('[data-testid="systemsketch-show-zoom-buttons"]')?.scrollIntoView({ block: 'center' })`)
   await delay(180)
@@ -83,10 +83,10 @@ async function main() {
     assert(initial.stored === null, 'the compact default needs no stored preference')
     await shot(page, 'zoom-controls-hidden.png')
 
-    await openAppearanceSettings(page)
+    await openCanvasSettings(page)
     const unchecked = await evaluate(page, `document.querySelector('[data-testid="systemsketch-show-zoom-buttons"]')?.getAttribute('aria-checked')`)
-    assert(unchecked === 'false', 'Appearance opens with Show zoom −/+ buttons unchecked')
-    await shot(page, 'zoom-controls-appearance-setting.png')
+    assert(unchecked === 'false', 'Canvas opens with Show zoom −/+ buttons unchecked')
+    await shot(page, 'zoom-controls-canvas-setting.png')
 
     await clickElement(page, '[data-testid="systemsketch-show-zoom-buttons"]')
     await waitFor(page, `document.querySelector('[data-testid="systemsketch-zoom-out"]') && document.querySelector('[data-testid="systemsketch-zoom-in"]')`, 'both zoom step buttons')
@@ -112,9 +112,9 @@ async function main() {
     const reloadedShown = await state(page)
     assert(reloadedShown.zoomOut && reloadedShown.zoomIn, 'shown buttons survive a full reload')
 
-    await openAppearanceSettings(page)
+    await openCanvasSettings(page)
     const checked = await evaluate(page, `document.querySelector('[data-testid="systemsketch-show-zoom-buttons"]')?.getAttribute('aria-checked')`)
-    assert(checked === 'true', 'Appearance reflects the stored enabled state')
+    assert(checked === 'true', 'Canvas reflects the stored enabled state')
     await clickElement(page, '[data-testid="systemsketch-show-zoom-buttons"]')
     await waitFor(page, `!document.querySelector('[data-testid="systemsketch-zoom-out"]') && !document.querySelector('[data-testid="systemsketch-zoom-in"]')`, 'both zoom step buttons to hide')
     await closeSettings(page)

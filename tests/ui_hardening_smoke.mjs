@@ -575,7 +575,7 @@ async function main() {
     assert.equal(themeAfter.focusMoved, true, 'focus did not follow the theme selection')
     pass('the theme radiogroup is one tab stop the arrow keys operate')
 
-    // A disabled Settings category stays reachable and says why.
+    // Tool aliases are now a real local preference, reachable from Settings.
     const category = JSON.parse(await evaluate(page, `(() => {
       const button = document.querySelector('[data-testid="systemsketch-settings-category-shortcuts"]')
       const before = document.querySelector('[data-testid="systemsketch-settings-dialog"]').dataset.category
@@ -592,12 +592,12 @@ async function main() {
       })
     })()`))
     measured.category = category
-    assert.equal(category.focusable, true, 'an unbuilt Settings category is still unfocusable')
-    assert.equal(category.nativelyDisabled, false, 'the category is still natively disabled')
-    assert.equal(category.ariaDisabled, 'true', 'the category is not announced as disabled')
-    assert.ok(category.badge, 'the category gives no visible reason for being inert')
-    assert.equal(category.after, category.before, 'an inert category still changed the panel')
-    pass('an unbuilt Settings category is reachable, announced, visibly explained, and inert')
+    assert.equal(category.focusable, true, 'the Tool aliases Settings category is unfocusable')
+    assert.equal(category.nativelyDisabled, false, 'the Tool aliases category is natively disabled')
+    assert.equal(category.ariaDisabled, null, 'the Tool aliases category is incorrectly announced as disabled')
+    assert.equal(category.badge, null, 'the Tool aliases category still presents itself as deferred')
+    assert.equal(category.after, 'shortcuts', 'Tool aliases did not open its Settings panel')
+    pass('Tool aliases is a live Settings panel, not an inert future category')
 
     await key(page, 'Escape')
     await delay(400)

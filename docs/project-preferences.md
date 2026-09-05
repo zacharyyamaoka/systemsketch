@@ -59,6 +59,28 @@ one to a semantic role.
 **Why:** people should be free to arrange a board for understanding without accidentally changing
 what the represented program means.
 
+## Typography communicates provenance
+
+Use typeface to say where a visible string comes from, rather than as incidental decoration:
+
+- **Scribbled** (`draw`) is for freeform, whiteboard-first material: a stock Text, Arrow or Geo
+  label, a Note, or a Callout whose words begin as a sketch. It says that the board is the first
+  home of the thought.
+- **Technical** (`mono`) is for source-shaped material that is expected to parse from, project to,
+  or otherwise stand in for code: Block and region titles, port names and types, literal values,
+  defaults, and code/diff evidence.
+- **Simple** (`sans`) is the default for SystemSketch chrome and derived presentation: menus,
+  buttons, inspector labels, status/count badges, navigation, generated captions, and SystemSketch
+  notation such as `z⁻¹` and `mut`. A technical-looking token is not automatically code; the
+  question is whether it is source text or a label the product places on top.
+
+An explicit user typeface choice remains meaningful. These are the defaults for each provenance,
+not a claim that every handwritten idea or generated caption has the same semantic weight.
+
+**Why:** SystemSketch deliberately spans a permissive whiteboard and a Python projection. A reader
+should be able to see whether words are an early sketch, source-shaped program material, or the
+product's own explanatory chrome before having to inspect a panel or infer it from location.
+
 ## Whiteboard hackability
 
 Prefer editable, literal board records over automatic derivation. Helpful calculations should be

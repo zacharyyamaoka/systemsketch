@@ -209,8 +209,8 @@ export function splitDashArrays(lengthPx: number, t: number): SplitDashArrays {
 export const DELAY_PILL_GLYPH = 'z⁻¹'
 export const EFFECT_PILL_GLYPH = 'mut'
 export const DELAY_PILL_HEIGHT = 18
-/** Approximate advance of the pill's 12px monospace glyphs. */
-const PILL_GLYPH_ADVANCE = 7.4
+/** Approximate advance of the pill's 12px SystemSketch-chrome sans glyphs. */
+const PILL_GLYPH_ADVANCE = 6.8
 const PILL_PADDING = 16
 
 export interface CablePillFacts {
