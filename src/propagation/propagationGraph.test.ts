@@ -5,12 +5,13 @@ import type { ConnectionBinding } from '../blocks/connections'
 import { CONNECTION_SHAPE_TYPE } from '../blocks/connections'
 import {
   getPropagationFocusSnapshot,
+  getPropagationFocusStepLimits,
   livePropagationEdges,
   normalizePropagationSteps,
   propagationSeedFromSelection,
   startPropagationFocus,
 } from './propagationFocus'
-import { walkPropagationGraph } from './propagationGraph'
+import { propagationReachableDepth, walkPropagationGraph } from './propagationGraph'
 
 const chain = [
   { edgeId: 'ab', sourceId: 'a', sinkId: 'b' },
@@ -83,6 +84,70 @@ describe('walkPropagationGraph', () => {
     expect(ids(result.nodes)).toEqual(['b'])
     expect(ids(result.edges)).toEqual([])
   })
+
+  it('measures each slider cap from the furthest useful graph layer, not a fixed ceiling', () => {
+    const longChain = Array.from({ length: 8 }, (_, index) => ({
+      edgeId: `e${index}`,
+      sourceId: `n${index}`,
+      sinkId: `n${index + 1}`,
+    }))
+    expect(propagationReachableDepth(longChain, ['n4'], 'upstream')).toBe(4)
+    expect(propagationReachableDepth(longChain, ['n4'], 'downstream')).toBe(4)
+    expect(propagationReachableDepth([
+      { edgeId: 'ab', sourceId: 'a', sinkId: 'b' },
+      { edgeId: 'bc', sourceId: 'b', sinkId: 'c' },
+      { edgeId: 'ca', sourceId: 'c', sinkId: 'a' },
+    ], ['a'], 'downstream')).toBe(3)
+  })
+
+  it('does not offer a selected cable an extra step just to revisit its initial endpoints', () => {
+    const edges = [
+      { edgeId: 'selected', sourceId: 'source', sinkId: 'join' },
+      { edgeId: 'closing', sourceId: 'join', sinkId: 'source' },
+    ]
+    expect(propagationReachableDepth(
+      edges,
+      ['source'],
+      'upstream',
+      ['source', 'join'],
+      ['selected'],
+    )).toBe(1)
+    const atCap = walkPropagationGraph({
+      edges,
+      upstreamStarts: ['source'],
+      downstreamStarts: ['join'],
+      upstreamSteps: 1,
+      downstreamSteps: 0,
+      initialNodes: ['source', 'join'],
+      initialEdges: ['selected'],
+    })
+    expect(ids(atCap.edges)).toEqual(['closing', 'selected'])
+  })
+
+  it('removes downstream feedback steps already lit by the chosen upstream range', () => {
+    const feedback = [
+      { edgeId: 'ab', sourceId: 'a', sinkId: 'b' },
+      { edgeId: 'bc', sourceId: 'b', sinkId: 'c' },
+      { edgeId: 'ca', sourceId: 'c', sinkId: 'a' },
+    ]
+    const afterUpstream = walkPropagationGraph({
+      edges: feedback,
+      upstreamStarts: ['a'],
+      downstreamStarts: ['a'],
+      upstreamSteps: 1,
+      downstreamSteps: 0,
+      initialNodes: ['a'],
+    })
+    // c and ca are already bright. Downstream a → b → c has two useful
+    // evidence additions, not a third inert click back through ca.
+    expect(propagationReachableDepth(
+      feedback,
+      ['a'],
+      'downstream',
+      [...afterUpstream.nodes],
+      [...afterUpstream.edges],
+    )).toBe(2)
+  })
 })
 
 function block(id: string, parentId = 'page:page', ports: { inputs?: string[]; outputs?: string[] } = {}): BlockShape {
@@ -105,13 +170,19 @@ function binding(edge: string, terminal: 'start' | 'end', host: string, portId: 
 }
 
 /** Minimal live-editor slice: enough to exercise the canonical connection validator. */
-function graphEditor(shapes: BlockShape[], bindings: ConnectionBinding[], edge = 'edge', temporal = 'data') {
-  const connection = {
-    id: createShapeId(edge), typeName: 'shape', type: CONNECTION_SHAPE_TYPE, x: 0, y: 0, rotation: 0,
-    index: 'a2', parentId: 'page:page', isLocked: false, opacity: 1, meta: {},
+function graphEditor(
+  shapes: BlockShape[],
+  bindings: ConnectionBinding[],
+  edge = 'edge',
+  temporal = 'data',
+  additionalEdges: string[] = [],
+) {
+  const connections = [edge, ...additionalEdges].map((id, index) => ({
+    id: createShapeId(id), typeName: 'shape' as const, type: CONNECTION_SHAPE_TYPE, x: 0, y: 0, rotation: 0,
+    index: `a${index + 2}`, parentId: 'page:page', isLocked: false, opacity: 1, meta: {},
     props: { temporal },
-  }
-  const all = new Map([...shapes, connection].map((shape) => [shape.id, shape]))
+  }))
+  const all = new Map([...shapes, ...connections].map((shape) => [shape.id, shape]))
   return {
     getCurrentPageShapes: () => [...all.values()],
     getCurrentPageShapeIds: () => new Set(all.keys()),
@@ -127,9 +198,9 @@ function graphEditor(shapes: BlockShape[], bindings: ConnectionBinding[], edge =
 }
 
 describe('propagation graph admission', () => {
-  it('normalizes every editable numeric state to a finite integer in [0, 5]', () => {
+  it('normalizes slider state to a finite non-negative integer; each graph supplies the maximum', () => {
     expect([normalizePropagationSteps(Number('')), normalizePropagationSteps(1.8), normalizePropagationSteps(Number.NaN), normalizePropagationSteps(-4), normalizePropagationSteps(99)])
-      .toEqual([0, 1, 0, 0, 5])
+      .toEqual([0, 1, 0, 0, 99])
   })
 
   it('admits canonical outer, effect, delayed, and async cables', () => {
@@ -141,6 +212,31 @@ describe('propagation graph admission', () => {
       const editor = graphEditor([source, sink], [binding(name, 'start', 'source', port), binding(name, 'end', 'sink', 'in')], name, temporal)
       expect(livePropagationEdges(editor)).toEqual([{ edgeId: createShapeId(name), sourceId: createShapeId('source'), sinkId: createShapeId('sink') }])
     }
+  })
+
+  it('keeps zero only for a direction with no reachable neighbour', () => {
+    const source = block('source', 'page:page', { outputs: ['out'] })
+    const sink = block('sink', 'page:page', { inputs: ['in'] })
+    const editor = graphEditor([source, sink], [binding('edge', 'start', 'source', 'out'), binding('edge', 'end', 'sink', 'in')])
+    expect(getPropagationFocusStepLimits(editor, source.id)).toEqual({ upstream: 0, downstream: 1 })
+    expect(startPropagationFocus(editor, source.id, 0, 0)).toBe(true)
+    expect(getPropagationFocusSnapshot(editor)).toMatchObject({ upstreamSteps: 0, downstreamSteps: 1 })
+  })
+
+  it('caps a selected reverse-cycle cable at useful evidence, including the shared upstream state', () => {
+    const source = block('source', 'page:page', { inputs: ['in'], outputs: ['out'] })
+    const join = block('join', 'page:page', { inputs: ['in'], outputs: ['out'] })
+    const editor = graphEditor(
+      [source, join],
+      [
+        binding('selected', 'start', 'source', 'out'), binding('selected', 'end', 'join', 'in'),
+        binding('closing', 'start', 'join', 'out'), binding('closing', 'end', 'source', 'in'),
+      ],
+      'selected',
+      'data',
+      ['closing'],
+    )
+    expect(getPropagationFocusStepLimits(editor, createShapeId('selected'))).toEqual({ upstream: 1, downstream: 0 })
   })
 
   it('admits a legal inner/outer tunnel but excludes scope and polarity violations', () => {

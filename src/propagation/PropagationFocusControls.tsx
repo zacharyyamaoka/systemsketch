@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react'
 import { useEditor, useValue } from 'tldraw'
 import {
-  MAX_PROPAGATION_STEPS,
   clearPropagationFocus,
+  getPropagationFocusStepLimits,
   getPropagationRelationEpoch,
   propagationSeedFromSelection,
   reconcilePropagationFocus,
@@ -28,50 +28,58 @@ export function PropagationFocusControls() {
     [editor],
   )
   const focus = usePropagationFocus(editor)
+  const relationEpoch = usePropagationRelationEpoch(editor)
   useEffect(() => {
     reconcilePropagationFocus(editor)
-  }, [editor, selectionSeed])
+  }, [editor, relationEpoch, selectionSeed])
   if (!selectionSeed && !focus.seedId) return null
   const active = focus.seedId !== null
+  const limits = focus.seedId !== null
+    ? getPropagationFocusStepLimits(editor, focus.seedId, focus.upstreamSteps)
+    : null
   return (
     <div className="systemsketch-propagation-focus" role="group" aria-label="Dataflow propagation focus">
       {!active ? (
         <button
           type="button"
           data-testid="propagation-focus-start"
-          title="Highlight one upstream and downstream graph step"
+          title="Highlight reachable upstream and downstream graph steps"
           onClick={() => startPropagationFocus(editor)}
         >
-          Focus flow
+          Focus
         </button>
       ) : (
         <>
-          <label title="How far to follow producers backward">
-            <span aria-hidden="true">←</span>
+          <label className="systemsketch-propagation-focus__range" title={limits!.upstream === 0 ? 'No upstream steps are reachable' : `Upstream: ${focus.upstreamSteps} of ${limits!.upstream} reachable steps`}>
+            <output data-testid="propagation-focus-upstream-count" aria-label={limits!.upstream === 0 ? 'No upstream steps reachable' : `${focus.upstreamSteps} upstream steps selected`}>{focus.upstreamSteps}</output>
             <input
               aria-label="Upstream propagation steps"
+              aria-valuetext={limits!.upstream === 0 ? 'No upstream steps reachable' : `${focus.upstreamSteps} of ${limits!.upstream} upstream steps`}
               data-testid="propagation-focus-upstream"
-              type="number"
-              min={0}
-              max={MAX_PROPAGATION_STEPS}
+              type="range"
+              min={limits!.upstream === 0 ? 0 : 1}
+              max={limits!.upstream}
               step={1}
               value={focus.upstreamSteps}
+              disabled={limits!.upstream === 0}
               onChange={(event) => setPropagationFocusSteps(editor, 'upstream', Number(event.currentTarget.value))}
             />
           </label>
           <span className="systemsketch-propagation-focus__label">steps</span>
-          <label title="How far to follow consumers forward">
+          <label className="systemsketch-propagation-focus__range" title={limits!.downstream === 0 ? 'No downstream steps are reachable' : `Downstream: ${focus.downstreamSteps} of ${limits!.downstream} reachable steps`}>
             <input
               aria-label="Downstream propagation steps"
+              aria-valuetext={limits!.downstream === 0 ? 'No downstream steps reachable' : `${focus.downstreamSteps} of ${limits!.downstream} downstream steps`}
               data-testid="propagation-focus-downstream"
-              type="number"
-              min={0}
-              max={MAX_PROPAGATION_STEPS}
+              type="range"
+              min={limits!.downstream === 0 ? 0 : 1}
+              max={limits!.downstream}
               step={1}
               value={focus.downstreamSteps}
+              disabled={limits!.downstream === 0}
               onChange={(event) => setPropagationFocusSteps(editor, 'downstream', Number(event.currentTarget.value))}
             />
-            <span aria-hidden="true">→</span>
+            <output data-testid="propagation-focus-downstream-count" aria-label={limits!.downstream === 0 ? 'No downstream steps reachable' : `${focus.downstreamSteps} downstream steps selected`}>{focus.downstreamSteps}</output>
           </label>
           <button
             type="button"

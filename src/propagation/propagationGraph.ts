@@ -17,6 +17,55 @@ export interface PropagationWalk {
   edges: ReadonlySet<string>
 }
 
+/**
+ * The furthest useful breadth-first expansion in one direction.
+ *
+ * It is deliberately not a longest-simple-path search through a cyclic graph.
+ * Instead it mirrors the lens's visited-node walk and stops at the last slider
+ * click that adds a node or cable not already present in the supplied evidence.
+ */
+export function propagationReachableDepth(
+  edges: readonly DirectedPropagationEdge[],
+  starts: readonly string[],
+  direction: 'upstream' | 'downstream',
+  initialNodes: readonly string[] = [],
+  initialEdges: readonly string[] = [],
+): number {
+  let frontier = new Set(starts)
+  const expanded = new Set<string>()
+  const nodes = new Set(initialNodes)
+  const includedEdges = new Set(initialEdges)
+  let depth = 0
+  let usefulDepth = 0
+  while (frontier.size > 0) {
+    const expandable = new Set([...frontier].filter((id) => !expanded.has(id)))
+    if (expandable.size === 0) break
+    for (const id of expandable) {
+      expanded.add(id)
+      nodes.add(id)
+    }
+    const next = new Set<string>()
+    const evidenceBefore = nodes.size + includedEdges.size
+    for (const edge of edges) {
+      const from = direction === 'upstream' ? edge.sinkId : edge.sourceId
+      const to = direction === 'upstream' ? edge.sourceId : edge.sinkId
+      if (!expandable.has(from)) continue
+      includedEdges.add(edge.edgeId)
+      const wasSeen = nodes.has(to)
+      nodes.add(from)
+      nodes.add(to)
+      if (!wasSeen && !frontier.has(to)) next.add(to)
+    }
+    depth += 1
+    // A selected cable's endpoints and cable are already evidence. Do not
+    // offer another range position merely to revisit one of those records.
+    if (nodes.size + includedEdges.size === evidenceBefore) break
+    usefulDepth = depth
+    frontier = new Set([...next].filter((id) => !expanded.has(id)))
+  }
+  return usefulDepth
+}
+
 function addAdjacent(
   edges: readonly DirectedPropagationEdge[],
   frontier: ReadonlySet<string>,

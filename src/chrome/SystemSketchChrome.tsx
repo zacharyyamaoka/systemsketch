@@ -46,7 +46,12 @@ import {
 } from '../branch'
 import { EditorLoopInspector, getOnlySelectedLoop } from '../loop'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
-import { PropagationFocusControls, PropagationFocusDomLens, propagationSeedFromSelection } from '../propagation'
+import {
+  PropagationFocusControls,
+  PropagationFocusDomLens,
+  propagationSeedFromSelection,
+  usePropagationFocus,
+} from '../propagation'
 import { PortableShareButton } from '../export/PortableShareButton'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
 import { BoardOverview } from './BoardOverview'
@@ -331,6 +336,7 @@ function SelectionMiniMenu() {
     () => propagationSeedFromSelection(editor),
     [editor],
   )
+  const propagationFocus = usePropagationFocus(editor)
   const runTidyEdges = () => {
     const outcome = tidyEdges(editor)
     addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
@@ -347,6 +353,17 @@ function SelectionMiniMenu() {
     || layoutActions.tidyEdges
     || layoutActions.organizeNodes
   if (!canShow || !hasVisibleActions) return null
+
+  if (propagationFocus.seedId !== null) {
+    return (
+      <SelectionContextualMenu
+        className="systemsketch-selection-menu systemsketch-selection-menu--focus"
+        label="Propagation focus controls"
+      >
+        <PropagationFocusControls />
+      </SelectionContextualMenu>
+    )
+  }
 
   if (hasBranch) {
     return (

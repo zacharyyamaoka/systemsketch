@@ -9,14 +9,27 @@ import {
   isPortHostShape,
   type ConnectionShape,
 } from '../blocks/connections'
-import { walkPropagationGraph, type DirectedPropagationEdge } from './propagationGraph'
-
-export const MAX_PROPAGATION_STEPS = 5
+import {
+  propagationReachableDepth,
+  walkPropagationGraph,
+  type DirectedPropagationEdge,
+} from './propagationGraph'
 
 /** Browser number inputs can yield blanks, decimals, and NaN while being edited. */
 export function normalizePropagationSteps(value: number): number {
   if (!Number.isFinite(value)) return 0
-  return Math.min(MAX_PROPAGATION_STEPS, Math.max(0, Math.trunc(value)))
+  return Math.max(0, Math.trunc(value))
+}
+
+/** A direction with a neighbour begins at one; a dead end is the only zero. */
+function clampPropagationSteps(value: number, maximum: number): number {
+  if (maximum === 0) return 0
+  return Math.min(Math.max(1, normalizePropagationSteps(value)), maximum)
+}
+
+export interface PropagationFocusStepLimits {
+  upstream: number
+  downstream: number
 }
 
 export interface PropagationFocusSnapshot {
@@ -251,24 +264,18 @@ export function livePropagationEdges(editor: Editor): DirectedPropagationEdge[] 
   return edges
 }
 
-function snapshotFor(
-  editor: Editor,
-  seedId: TLShapeId,
-  upstreamSteps: number,
-  downstreamSteps: number,
-): PropagationFocusSnapshot {
+function rootsFor(editor: Editor, seedId: TLShapeId, edges: readonly DirectedPropagationEdge[]) {
   const seed = editor.getShape(seedId)
-  if (!seed) return EMPTY_SNAPSHOT
-  const edges = livePropagationEdges(editor)
+  if (!seed) return null
   const selectedEdge = seed.type === CONNECTION_SHAPE_TYPE
     ? edges.find((edge) => edge.edgeId === seedId)
     : undefined
-  if (seed.type === CONNECTION_SHAPE_TYPE && !selectedEdge) return EMPTY_SNAPSHOT
-  if (seed.type !== CONNECTION_SHAPE_TYPE && !isPortHostShape(seed)) return EMPTY_SNAPSHOT
+  if (seed.type === CONNECTION_SHAPE_TYPE && !selectedEdge) return null
+  if (seed.type !== CONNECTION_SHAPE_TYPE && !isPortHostShape(seed)) return null
   // A selected cable begins with its two concrete endpoints lit. Its controls
   // then expand past either end; selecting it never fabricates a "node" for a
   // wire, and selecting a Block uses the Block itself as both directional root.
-  const roots = selectedEdge
+  return selectedEdge
     ? {
         upstreamStarts: [selectedEdge.sourceId],
         downstreamStarts: [selectedEdge.sinkId],
@@ -281,16 +288,87 @@ function snapshotFor(
         initialNodes: [seedId],
         initialEdges: [],
       }
-  const walk = walkPropagationGraph({
+}
+
+/**
+ * Return the actual useful range for each direction from this seed.
+ *
+ * WHY: a fixed ceiling makes a reading tool lie twice: shallow graphs invite
+ * pointless clicks, while deep graphs silently hide real dependencies. These
+ * caps are derived from the same breadth-first traversal used by the lens, so
+ * every non-zero slider position can reveal a reachable graph layer.
+ */
+export function getPropagationFocusStepLimits(
+  editor: Editor,
+  seedId: TLShapeId,
+  upstreamSteps = 1,
+): PropagationFocusStepLimits {
+  const edges = livePropagationEdges(editor)
+  const roots = rootsFor(editor, seedId, edges)
+  if (!roots) return { upstream: 0, downstream: 0 }
+  return stepLimitsFor(edges, roots, upstreamSteps)
+}
+
+/**
+ * Simulate the lens in its real upstream-then-downstream order.
+ *
+ * The second slider must start with evidence the first slider already lit.
+ * Otherwise a feedback cable can consume a displayed range position without
+ * changing the focus result at all.
+ */
+function stepLimitsFor(
+  edges: readonly DirectedPropagationEdge[],
+  roots: NonNullable<ReturnType<typeof rootsFor>>,
+  requestedUpstreamSteps: number,
+): PropagationFocusStepLimits {
+  const upstream = propagationReachableDepth(
+    edges,
+    roots.upstreamStarts,
+    'upstream',
+    roots.initialNodes,
+    roots.initialEdges,
+  )
+  const upstreamSteps = clampPropagationSteps(requestedUpstreamSteps, upstream)
+  const upstreamWalk = walkPropagationGraph({
     edges,
     ...roots,
     upstreamSteps,
-    downstreamSteps,
+    downstreamSteps: 0,
+  })
+  return {
+    upstream,
+    downstream: propagationReachableDepth(
+      edges,
+      roots.downstreamStarts,
+      'downstream',
+      [...upstreamWalk.nodes],
+      [...upstreamWalk.edges],
+    ),
+  }
+}
+
+function snapshotFor(
+  editor: Editor,
+  seedId: TLShapeId,
+  upstreamSteps: number,
+  downstreamSteps: number,
+): PropagationFocusSnapshot {
+  const edges = livePropagationEdges(editor)
+  const roots = rootsFor(editor, seedId, edges)
+  if (!roots) return EMPTY_SNAPSHOT
+  const limits = stepLimitsFor(edges, roots, upstreamSteps)
+  const upstream = clampPropagationSteps(upstreamSteps, limits.upstream)
+  const downstream = clampPropagationSteps(downstreamSteps, limits.downstream)
+  const walk = walkPropagationGraph({
+    edges,
+    ...roots,
+    upstreamSteps: upstream,
+    downstreamSteps: downstream,
   })
   return {
     seedId,
-    upstreamSteps,
-    downstreamSteps,
+    upstreamSteps: upstream,
+    downstreamSteps: downstream,
     includedShapeIds: new Set([...walk.nodes, ...walk.edges] as TLShapeId[]),
   }
 }
@@ -305,8 +383,8 @@ export function startPropagationFocus(
   const snapshot = snapshotFor(
     editor,
     seedId,
-    normalizePropagationSteps(upstreamSteps),
-    normalizePropagationSteps(downstreamSteps),
+    upstreamSteps,
+    downstreamSteps,
   )
   if (!snapshot.seedId) return false
   publish(editor, snapshot)

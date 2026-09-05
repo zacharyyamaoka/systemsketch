@@ -15,9 +15,8 @@
   display: inline-flex;
   min-height: 30px;
   align-items: center;
-  gap: 4px;
+  gap: 10px;
   padding: 3px 5px;
-  border-left: 1px solid color-mix(in srgb, var(--ss-text-inverse) 22%, transparent);
 }
 
 .systemsketch-propagation-focus button,
@@ -41,17 +40,26 @@
 .systemsketch-propagation-focus label {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
 }
 
 .systemsketch-propagation-focus input {
-  width: 28px;
-  padding: 0 2px;
-  text-align: center;
-  background: color-mix(in srgb, var(--ss-text-inverse) 14%, transparent);
+  width: 100%;
+  accent-color: var(--ss-accent);
 }
 
-.systemsketch-propagation-focus__label {
+.systemsketch-propagation-focus input:disabled {
+  cursor: not-allowed;
+  opacity: .35;
+}
+
+.systemsketch-propagation-focus__label,
+.systemsketch-propagation-focus output {
   color: color-mix(in srgb, var(--ss-text-inverse) 75%, transparent);
   font-size: 10px;
+}
+
+.systemsketch-propagation-focus output {
+  font-variant-numeric: tabular-nums;
+  text-align: center;
 }
