@@ -266,6 +266,28 @@
   text-align: right;
 }
 
+/* A disclosure, not another port row: hidden records retain stable IDs and
+ * bindings, while the layout intentionally gives them no painted dot or slot. */
+.systemsketch-block-canvas .BlockNode-hiddenPorts {
+  position: absolute;
+  z-index: 1;
+  box-sizing: border-box;
+  display: block;
+  overflow: hidden;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  font-style: italic;
+  font-weight: 650;
+  line-height: 16px;
+  pointer-events: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.systemsketch-block-canvas .BlockNode-hiddenPorts--output {
+  text-align: right;
+}
+
 /*
  * V5's only new canvas language: a run of ordinary jacks receives one quiet
  * DEF spelling. The bracket never owns a hit target and never changes row

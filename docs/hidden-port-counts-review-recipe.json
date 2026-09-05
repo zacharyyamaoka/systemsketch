@@ -1,0 +1,65 @@
+{
+  "feature": "Hidden Block port counts",
+  "viewport": { "width": 1280, "height": 720 },
+  "shapes": [
+    {
+      "id": "component",
+      "type": "block",
+      "x": 630,
+      "y": 395,
+      "props": {
+        "title": "Component",
+        "description": "Compact async boundary",
+        "blockType": "async component",
+        "view": "port",
+        "w": 420,
+        "h": 310,
+        "showDescription": false,
+        "inputs": [
+          { "id": "in_state", "name": "state", "type": "State", "visible": true },
+          { "id": "in_config", "name": "config", "type": "Config", "visible": true },
+          { "id": "in_data", "name": "data_in", "type": "Packet", "visible": false },
+          { "id": "in_tick", "name": "tick", "type": "Event", "visible": false },
+          { "id": "in_control", "name": "control", "type": "Control", "visible": false }
+        ],
+        "outputs": [
+          { "id": "out_state", "name": "state", "type": "State", "visible": true },
+          { "id": "out_logs", "name": "logs", "type": "Logs", "visible": false },
+          { "id": "out_dx", "name": "dx", "type": "Diagnostics", "visible": false }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Select Component. Its compact face says +3 more for inputs and +2 more for outputs.",
+      "x": 50,
+      "y": 415,
+      "w": 470,
+      "h": 118,
+      "target": { "shapeId": "component", "anchor": "left", "dy": 0 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · In Details → Inputs, press “2 visible”, then Hide / Show a port. Watch only the input count change.",
+      "x": 585,
+      "y": 215,
+      "w": 600,
+      "h": 100,
+      "target": { "shapeId": "component", "anchor": "top", "dx": 40 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Each side says +N more; showing every output removes only its label.",
+      "x": 50,
+      "y": 600,
+      "w": 500,
+      "h": 100
+    }
+  ]
+}

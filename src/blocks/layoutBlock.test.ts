@@ -138,6 +138,39 @@ describe('layoutBlock donor geometry', () => {
 		])
 	})
 
+	it('discloses hidden ports by side without giving them a painted port slot', () => {
+		const props = makeBlock({
+			inputs: [
+				{ id: 'in_1', name: 'shown', type: '', visible: true },
+				{ id: 'in_2', name: 'secret', type: '', visible: false },
+				{ id: 'in_3', name: 'also_secret', type: '', visible: false },
+			],
+			outputs: [
+				{ id: 'out_1', name: 'shown_result', type: '', visible: true },
+				{ id: 'out_2', name: 'secret_result', type: '', visible: false },
+			],
+		})
+		const layout = layoutBlock(props)
+
+		expect(layout.ports.map((entry) => entry.port.id)).toEqual(['in_1', 'out_1'])
+		expect(layout.hiddenPortSummaries.map(({ side, count }) => ({ side, count }))).toEqual([
+			{ side: 'input', count: 2 },
+			{ side: 'output', count: 1 },
+		])
+		for (const summary of layout.hiddenPortSummaries) {
+			expect(summary.box.y).toBeGreaterThanOrEqual(layout.bodyTop)
+			expect(summary.box.y + summary.box.h).toBeLessThanOrEqual(layout.height)
+		}
+	})
+
+	it('does not put a hidden-count disclosure on Simple, whose dots are intentionally anonymous', () => {
+		const layout = layoutBlock(makeBlock({
+			view: 'simple',
+			inputs: [{ id: 'in_1', name: 'hidden', type: '', visible: false }],
+		}))
+		expect(layout.hiddenPortSummaries).toEqual([])
+	})
+
 	it('simple text and icon reposition the face without moving midpoint anchors', () => {
 		const bare = layoutBlock(makeBlock({
 			view: 'simple',
