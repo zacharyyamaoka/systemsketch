@@ -11,7 +11,7 @@ import {
   useValue,
   type Editor,
 } from 'tldraw'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AppearanceControls, hasAppearanceControls } from '../appearance/AppearanceControls'
 import { CompareTrigger } from '../compare'
 import { WrapSelectionControl } from '../frames/WrapSelectionControl'
@@ -26,9 +26,9 @@ import {
   selectionHasBlockStyles,
 } from '../blocks'
 import { addTextTarget, selectionHasVisibleText } from '../appearance/textPresence'
-import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
+import { describeTidyEdgesOutcome, tidyEdges, tidyEdgesOutcomeSeverity } from '../blocks/connections/tidyEdges'
 import { clearDiffStates } from '../diff/clearDiffStates'
-import { describeOrganizeNodesOutcome, organizeNodes } from '../blocks/layout'
+import { describeOrganizeNodesOutcome, organizeNodes, organizeNodesOutcomeSeverity } from '../blocks/layout'
 import {
   EditorBlockInspector,
   EditorBlockSelectionMiniMenu,
@@ -319,13 +319,22 @@ function SelectionMiniMenu() {
     [editor],
   )
   const propagationFocus = usePropagationFocus(editor)
+  const [organizingNodes, setOrganizingNodes] = useState(false)
   const runTidyEdges = () => {
     const outcome = tidyEdges(editor)
-    addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
+    addToast({ title: describeTidyEdgesOutcome(outcome), severity: tidyEdgesOutcomeSeverity(outcome) })
   }
   const runOrganizeNodes = async () => {
-    const outcome = await organizeNodes(editor)
-    addToast({ title: describeOrganizeNodesOutcome(outcome), severity: 'info' })
+    // The elk layout pass is async and can take a visible moment on a large
+    // graph; without this the trigger stayed clickable and unlabeled mid-run,
+    // inviting a second, redundant pass.
+    setOrganizingNodes(true)
+    try {
+      const outcome = await organizeNodes(editor)
+      addToast({ title: describeOrganizeNodesOutcome(outcome), severity: organizeNodesOutcomeSeverity(outcome) })
+    } finally {
+      setOrganizingNodes(false)
+    }
   }
   const hasVisibleActions = hasCode
     || hasBranch
@@ -387,6 +396,7 @@ function SelectionMiniMenu() {
           <WrapSelectionControl />
           <SelectionLayoutActions
             {...layoutActions}
+            organizeNodesBusy={organizingNodes}
             onTidyEdges={runTidyEdges}
             onOrganizeNodes={() => void runOrganizeNodes()}
           />
@@ -402,6 +412,7 @@ function SelectionMiniMenu() {
           <WrapSelectionControl />
           <SelectionLayoutActions
             {...layoutActions}
+            organizeNodesBusy={organizingNodes}
             onTidyEdges={runTidyEdges}
             onOrganizeNodes={() => void runOrganizeNodes()}
           />
@@ -653,6 +664,7 @@ export function SystemSketchSurfaceHost() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return
+      if (event.repeat) return
       const key = event.key.toLowerCase()
       if (key !== 'p' && key !== 'k' && key !== 'f') return
       event.preventDefault()
