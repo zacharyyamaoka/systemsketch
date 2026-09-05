@@ -59,12 +59,31 @@ one to a semantic role.
 **Why:** people should be free to arrange a board for understanding without accidentally changing
 what the represented program means.
 
-## Whiteboard hackability
+## Freedom of control, freedom from control
 
-Prefer editable, literal board records over automatic derivation. Helpful calculations should be
-explicit commands, never a silent side effect of drawing a cable; a board may intentionally be
-incomplete, inconsistent, or ahead of the rules.
+Optimize for a fast, pleasant common path rather than maximum exposed control. Start with strong,
+opinionated defaults that make a useful Block or diagram immediately; add focused customization and
+escape hatches when they unlock a meaningfully different representation, composition, or repair.
+Do not make people configure primitives before those primitives become useful, and do not surface a
+setting merely because the implementation can support it.
 
-**Why:** a whiteboard is useful before it is a correct program. A cable can state a relationship
-without authorizing the editor to replace adjacent words; an explicit command makes any requested
-derivation visible, reversible, and safe to decline.
+**Freedom of control** means a person can override, rearrange, compose, or step outside a default
+when the work genuinely asks for it. **Freedom from control** means the normal case does not demand
+that attention in the first place. SystemSketch is not aiming for Figma's complete-control surface:
+the whiteboard should feel nice and fast before it feels infinitely configurable.
+
+**Why:** complete control transfers every small design decision to the user. Good defaults preserve
+creative freedom while removing setup and micromanagement, which is what makes the canvas fast.
+
+## Whiteboard hackability is an escape hatch
+
+Keep important board meaning editable and literal where a person may intentionally bend it, but do
+not confuse hackability with making every layer manual. Reliable derived presentation and presets
+are welcome when they make the common path faster and remain understandable. Semantic derivations
+that rewrite a person's work should be explicit commands, never a silent side effect of drawing a
+cable; a board may intentionally be incomplete, inconsistent, or ahead of the rules.
+
+**Why:** a whiteboard is useful before it is a correct program, and it is also useful because it
+lets someone move quickly. A cable can state a relationship without authorizing the editor to
+replace adjacent words; a strong visual default can still save work without taking ownership of
+the underlying idea.
