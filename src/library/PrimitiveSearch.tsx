@@ -32,6 +32,7 @@ import {
   primitiveSearchPanelHeight,
   type PrimitiveSearchPoint,
 } from './primitiveSearchModel'
+import { useToolAliases } from './toolAliases'
 import './primitive-search.css'
 
 interface PrimitiveSearchInvocation {
@@ -51,11 +52,13 @@ function toolbarObstacleTop(editorContainer: HTMLElement, viewportHeight: number
 function ResultRow({
   active,
   item,
+  aliases,
   onActivate,
   onChoose,
 }: {
   active: boolean
   item: ShapeLibraryItem
+  aliases: readonly string[]
   onActivate(): void
   onChoose(): void
 }) {
@@ -80,7 +83,10 @@ function ResultRow({
         </span>
         <span className="systemsketch-primitive-search__copy">
           <strong>{item.label}</strong>
-          <small>{item.section}</small>
+          <small>
+            {item.section}
+            {aliases.length > 0 ? <span className="systemsketch-primitive-search__aliases"><span aria-hidden="true">↪</span>{aliases.join(' · ')}</span> : null}
+          </small>
         </span>
         {active ? <kbd>Enter</kbd> : null}
       </button>
@@ -99,6 +105,7 @@ export function PrimitiveSearch() {
   const editor = useEditor()
   const tools = useTools()
   const { toolbarSurface } = useChrome()
+  const aliases = useToolAliases()
   const [invocation, setInvocation] = useState<PrimitiveSearchInvocation | null>(null)
   const [query, setQuery] = useState('')
   const [activeIndex, setActiveIndex] = useState(0)
@@ -108,8 +115,8 @@ export function PrimitiveSearch() {
   const listboxId = useId()
 
   const matches = useMemo(
-    () => query.trim() ? filterShapeLibraryItems(query) : [],
-    [query],
+    () => query.trim() ? filterShapeLibraryItems(query, aliases) : [],
+    [aliases, query],
   )
   const visibleMatches = matches.slice(0, PRIMITIVE_SEARCH_MAX_RESULTS)
   const activeItem = visibleMatches[activeIndex]
@@ -263,6 +270,7 @@ export function PrimitiveSearch() {
                 <ResultRow
                   key={item.id}
                   item={item}
+                  aliases={aliases[item.id] ?? []}
                   active={index === activeIndex}
                   onActivate={() => setActiveIndex(index)}
                   onChoose={() => choose(item)}
