@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { getDefaultBlockProps } from '../blockModel'
 import { BLOCK_PICKER_PRESETS, blockPickerPresetsFor, blockPresetProps } from './blockPicker'
 import { firstOuterPortForPolarity } from './connectionRules'
+import { blockIconEntry } from '../ui/blockIcons'
 
 describe('block picker presets', () => {
 	it('offers at least one preset that can receive a cable and one that can send', () => {
@@ -34,6 +35,12 @@ describe('block picker presets', () => {
 		}
 	})
 
+	it('uses an icon that the Block renderer can actually paint', () => {
+		for (const preset of BLOCK_PICKER_PRESETS) {
+			expect(blockIconEntry(preset.icon), preset.label).not.toBeNull()
+		}
+	})
+
 	it('offers only the presets that can answer the cable', () => {
 		// A cable looking for a consumer is not helped by a Source; one looking
 		// for a producer is not helped by a Sink.
@@ -41,6 +48,23 @@ describe('block picker presets', () => {
 		expect(blockPickerPresetsFor(true).every((preset) => preset.outputs > 0)).toBe(true)
 		expect(blockPickerPresetsFor(false).map((preset) => preset.id)).not.toContain('source')
 		expect(blockPickerPresetsFor(true).map((preset) => preset.id)).not.toContain('sink')
+	})
+
+	it('ships the three approved semantic stock Blocks through the same picker seam', () => {
+		const setAttributes = BLOCK_PICKER_PRESETS.find((preset) => preset.id === 'set-attributes')!
+		const select = BLOCK_PICKER_PRESETS.find((preset) => preset.id === 'select')!
+		const clock = BLOCK_PICKER_PRESETS.find((preset) => preset.id === 'clock-trigger')!
+
+		expect(blockPresetProps(setAttributes, getDefaultBlockProps())).toMatchObject({
+			blockType: 'set-attributes', inputs: expect.arrayContaining([expect.objectContaining({ id: 'record' })]),
+		})
+		expect(blockPresetProps(select, getDefaultBlockProps())).toMatchObject({
+			blockType: 'select', inputs: expect.arrayContaining([expect.objectContaining({ id: 'condition', type: 'bool' })]),
+		})
+		expect(blockPresetProps(clock, getDefaultBlockProps())).toMatchObject({
+			blockType: 'clock-trigger', stockConfig: { triggerSource: 'clock', rateHz: 10 },
+		})
+		expect(blockPickerPresetsFor(true).map((preset) => preset.id)).toContain('clock-trigger')
 	})
 })
 

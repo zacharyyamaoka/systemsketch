@@ -5,6 +5,7 @@ import {
 	type BlockShapeProps,
 	type BlockView,
 } from '../blockModel'
+import { stockBlockPresetProps, type StockBlockPresetId } from '../stockBlocks'
 import type { ConnectionTerminal } from './connectionModel'
 
 /**
@@ -26,6 +27,10 @@ export interface BlockPickerPreset {
 	view: BlockView
 	inputs: number
 	outputs: number
+	/** A curated semantic Block whose full rows/config are authored by its factory. */
+	stockPreset?: StockBlockPresetId
+	/** Edge-local data vocabulary comes first because it answers the cable immediately. */
+	group?: 'quick'
 }
 
 export const BLOCK_PICKER_PRESETS: readonly BlockPickerPreset[] = [
@@ -38,10 +43,14 @@ export const BLOCK_PICKER_PRESETS: readonly BlockPickerPreset[] = [
 	// A variable: the capsule, with an inlet and an outlet. A cable wanting a
 	// producer gets a literal to type; one wanting a consumer gets a named result.
 	{ id: 'value', label: 'Value', icon: 'Braces', blockType: 'literal', view: 'value', inputs: 1, outputs: 1 },
-	// Reading a member is function application, so a projection is an ordinary
-	// Block. Its rows are accessors on the type that arrives, which is why it is
-	// worth a preset: the cable already knows that type.
-	{ id: 'projection', label: 'Split', icon: 'Shuffle', blockType: PROJECTION_BLOCK_TYPE, view: 'port', inputs: 1, outputs: 1 },
+	{ id: 'bundle', label: 'Bundle', icon: 'PackagePlus', blockType: 'bundle', view: 'port', inputs: 2, outputs: 1, stockPreset: 'bundle', group: 'quick' },
+	// Reading a member is function application, so its established picker id is
+	// preserved for saved fixtures while fresh Blocks use the canonical Unbundle type.
+	{ id: 'projection', label: 'Unbundle', icon: 'Shuffle', blockType: PROJECTION_BLOCK_TYPE, view: 'port', inputs: 1, outputs: 1, stockPreset: 'unbundle', group: 'quick' },
+	{ id: 'copy', label: 'Copy', icon: 'Copy', blockType: 'copy', view: 'port', inputs: 1, outputs: 1, stockPreset: 'copy', group: 'quick' },
+	{ id: 'set-attributes', label: 'Set attributes', icon: 'Settings', blockType: 'set-attributes', view: 'port', inputs: 2, outputs: 1, stockPreset: 'set-attributes' },
+	{ id: 'select', label: 'Select', icon: 'GitBranch', blockType: 'select', view: 'port', inputs: 3, outputs: 1, stockPreset: 'select' },
+	{ id: 'clock-trigger', label: 'Clock / Trigger', icon: 'Timer', blockType: 'clock-trigger', view: 'port', inputs: 0, outputs: 1, stockPreset: 'clock-trigger' },
 	{ id: 'group', label: 'Expanded group', icon: 'Boxes', blockType: 'group', view: 'expanded', inputs: 1, outputs: 1 },
 ]
 
@@ -75,6 +84,28 @@ export const blockPickerState = new EditorAtom<BlockPickerState | null>(
 	() => null,
 )
 
+// History marks are UI-session state, never board data. The drag creates the
+// cable before the menu click, so this bridges that one interaction boundary.
+const pickerCreationMarks = new WeakMap<Editor, Map<TLShapeId, string>>()
+export function rememberPickerCreationMark(editor: Editor, connectionId: TLShapeId, mark: string): void {
+	const marks = pickerCreationMarks.get(editor) ?? new Map<TLShapeId, string>()
+	// WHY: stock cancellation can remove its cable after the shape util callback;
+	// pruning on the next creation keeps this UI-only bridge from retaining dead IDs.
+	for (const id of marks.keys()) if (!editor.getShape(id)) marks.delete(id)
+	marks.set(connectionId, mark)
+	pickerCreationMarks.set(editor, marks)
+}
+export function takePickerCreationMark(editor: Editor, connectionId: TLShapeId): string | undefined {
+	const marks = pickerCreationMarks.get(editor)
+	const mark = marks?.get(connectionId)
+	marks?.delete(connectionId)
+	return mark
+}
+
+/** Drop a transient history bridge when a loose cable resolves without a picker. */
+export function forgetPickerCreationMark(editor: Editor, connectionId: TLShapeId): void {
+	pickerCreationMarks.get(editor)?.delete(connectionId)
+}
 export function openBlockPicker(editor: Editor, state: BlockPickerState): void {
 	// An open offer is the thing to answer. Leaving the cable selected underneath
 	// it puts the selection menu on screen at the same time, competing with the
@@ -106,6 +137,7 @@ export function blockPresetProps(
 	preset: BlockPickerPreset,
 	base: BlockShapeProps,
 ): BlockShapeProps {
+	if (preset.stockPreset) return stockBlockPresetProps(preset.stockPreset, base)
 	const projection = preset.blockType === PROJECTION_BLOCK_TYPE
 	const inputs = Array.from({ length: preset.inputs }, (_, index) => ({
 		id: `in_${index + 1}`,

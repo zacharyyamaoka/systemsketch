@@ -38,7 +38,12 @@ import {
 	cableHitPadPageUnits,
 	withCableHitPad,
 } from './connectionHit'
-import { blockPresetProps, openBlockPicker } from './blockPicker'
+import {
+	blockPresetProps,
+	forgetPickerCreationMark,
+	openBlockPicker,
+	takePickerCreationMark,
+} from './blockPicker'
 import { requestBlockInlineEdit } from '../inlineBlockEditing'
 import { clearPortDragState, updatePortState } from '../ports/portState'
 import {
@@ -52,6 +57,7 @@ import {
 	type BlockShape,
 	type BlockState,
 } from '../blockModel'
+import { isBundleBlock } from '../stockBlocks'
 import {
 	adoptCableTypeIntoProjection,
 	connectionBindingPolarity,
@@ -761,6 +767,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		const terminal = handle.id as ConnectionTerminal
 
 		if (getConnectionBindings(this.editor, connection.id)[terminal]) {
+			forgetPickerCreationMark(this.editor, connection.id)
 			// WHY: a whiteboard wire is a relationship, not permission to overwrite
 			// an intentionally contradictory pill. The explicit “Adopt cable type”
 			// command makes a requested derivation visible and undoable.
@@ -795,13 +802,15 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		}
 
 		if (!connectionHasBothTerminals(this.editor, connection.id)) {
+			forgetPickerCreationMark(this.editor, connection.id)
 			this.editor.deleteShapes([connection.id])
 		}
 	}
 
-	override onHandleDragCancel(): void {
+	override onHandleDragCancel(connection: ConnectionShape): void {
 		this.activeRailDrag = null
 		clearPortDragState(this.editor)
+		forgetPickerCreationMark(this.editor, connection.id)
 	}
 
 	override component(connection: ConnectionShape) {
@@ -2117,20 +2126,25 @@ export function offerBlockForLooseTerminal(
 	scopeId: TLParentId,
 ): boolean {
 	const connection = editor.getShape<ConnectionShape>(connectionId)
-	if (!connection || connection.type !== CONNECTION_SHAPE_TYPE) return false
+	const creationMark = takePickerCreationMark(editor, connectionId)
+	const refuse = () => {
+		if (creationMark) editor.bailToMark(creationMark)
+		else forgetPickerCreationMark(editor, connectionId)
+		return false
+	}
+	if (editor.getIsReadonly() || !connection || connection.type !== CONNECTION_SHAPE_TYPE) return refuse()
 	const anchoredBinding = getConnectionBindings(editor, connection)[oppositeConnectionTerminal(terminal)]
-	if (!anchoredBinding) return false
+	if (!anchoredBinding) return refuse()
 	const anchor: PortDot = { shapeId: anchoredBinding.toId, portId: anchoredBinding.props.portId }
 	const face = anchorFaceForScope(editor, anchor, scopeId)
-	if (!face) return false
+	if (!face) return refuse()
 	setAnchoredFace(editor, anchoredBinding, face)
 	const anchoredPolarity = connectionBindingPolarity(editor, { ...anchoredBinding, props: { ...anchoredBinding.props, face } })
-	if (!anchoredPolarity) return false
+	if (!anchoredPolarity) return refuse()
 	const needed = oppositePolarity(anchoredPolarity)
 
 	const local = getConnectionTerminals(editor, connection)[terminal]
 	const anchorPoint = editor.getShapePageTransform(connection).applyToPoint(local)
-
 	openBlockPicker(editor, {
 		connectionId,
 		terminal,
@@ -2138,6 +2152,7 @@ export function offerBlockForLooseTerminal(
 		wantsProducer: needed === 'source',
 		scopeId,
 		onClose: () => {
+			if (creationMark) { editor.bailToMark(creationMark); return }
 			const cable = editor.getShape(connectionId)
 			if (!cable) return
 			if (!connectionHasBothTerminals(editor, connectionId)) {
@@ -2185,8 +2200,13 @@ export function offerBlockForLooseTerminal(
 				// explicit command is the only path that copies its type into a pill.
 				normalizeConnectionDirection(editor, connectionId)
 				adoptCableTypeIntoProjection(editor, connectionId)
-				editor.select(blockId)
 			})
+			if (creationMark) {
+				editor.markHistoryStoppingPoint('finish_block_connection')
+				editor.squashToMark(creationMark)
+			}
+			// Selection is chrome, not part of the created dataflow transaction.
+			editor.run(() => editor.select(blockId), { history: 'ignore' })
 			// The Block arrives unnamed, and naming it is the next thing anyone
 			// does — the same rule the Block tool already follows after a draw.
 			// A projection is the exception: it named itself from the type on the
@@ -2195,6 +2215,7 @@ export function offerBlockForLooseTerminal(
 			const placed = editor.getShape<BlockShape>(blockId)
 			if (!placed) return
 			const derived = isProjectionBlock(placed.props) && placed.props.title !== ''
+			const stockTitled = isBundleBlock(placed.props) || placed.props.blockType === 'copy'
 			const firstRow = placed.props.outputs[0]
 			if (derived && firstRow) {
 				requestBlockInlineEdit(editor, blockId, {
@@ -2202,7 +2223,7 @@ export function offerBlockForLooseTerminal(
 					side: 'outputs',
 					portId: firstRow.id,
 				})
-			} else {
+			} else if (!stockTitled) {
 				requestBlockInlineEdit(editor, blockId, { kind: 'title' })
 			}
 		},

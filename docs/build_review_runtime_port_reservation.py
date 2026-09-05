@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+"""Build evidence for the retained-review port-reservation repair."""
+
+from __future__ import annotations
+
+import html
+import subprocess
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+OUTPUT = ROOT / "docs" / "review-runtime-port-reservation-2026-09-04.html"
+
+
+def git(*args: str) -> str:
+    return subprocess.run(
+        ["git", *args], cwd=ROOT, check=True, capture_output=True, text=True
+    ).stdout.strip()
+
+
+def page() -> str:
+    commit = html.escape(git("rev-parse", "--short", "HEAD"))
+    return f'''<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Retained review port reservation</title>
+<style>
+:root{{--ink:#18212b;--muted:#5f6b78;--paper:#f6f8fb;--line:#d8e0e8;--bad:#bd4736;--good:#16704c;--blue:#2d61d2}}*{{box-sizing:border-box}}body{{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 Inter,ui-sans-serif,system-ui,sans-serif}}main{{max-width:1060px;margin:auto;padding:54px 28px 74px}}header{{max-width:780px;margin-bottom:30px}}.eyebrow{{color:var(--blue);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}}h1{{margin:9px 0 13px;font-size:clamp(31px,5vw,57px);line-height:1.03;letter-spacing:-.045em}}h2{{font-size:22px;margin:0 0 9px}}p{{margin:0}}.lede{{color:var(--muted);font-size:19px}}.grid{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:18px 0}}.card{{background:#fff;border:1px solid var(--line);border-radius:18px;padding:23px;box-shadow:0 10px 30px #12203a0a}}.bad{{border-color:#efc4bd}}.good{{border-color:#b7dec9}}.tag{{display:inline-block;border-radius:999px;padding:3px 9px;font-size:12px;font-weight:750;margin-bottom:12px}}.bad .tag{{background:#fff0ed;color:var(--bad)}}.good .tag{{background:#eaf8f0;color:var(--good)}}code,pre{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}code{{font-size:.9em;background:#edf1f5;padding:2px 5px;border-radius:5px}}pre{{margin:14px 0 0;overflow:auto;padding:16px;border-radius:12px;color:#e9f0f8;background:#172332;font-size:13px}}svg{{width:100%;height:auto;display:block;margin:18px 0 0}}hr{{border:0;border-top:1px solid var(--line);margin:30px 0}}.facts{{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--line)}}.facts div{{background:#fff;padding:16px}}.facts b{{display:block;font-size:19px}}.facts span{{color:var(--muted);font-size:13px}}@media(max-width:700px){{main{{padding:35px 16px}}.grid,.facts{{grid-template-columns:1fr}}}}
+</style></head><body><main>
+<header><span class="eyebrow">SystemSketch · review runtime repair</span><h1>A durable review URL stays bound to its own board.</h1><p class="lede">The screenshot was not a board-access policy problem. A later retained review reused an earlier review’s localhost port; its server correctly rejected the other review’s board as outside its own pinned checkout.</p></header>
+<section class="grid"><article class="card bad"><span class="tag">Before</span><h2>One port, two records</h2><p>A stopped review still owned a published URL, but allocation checked only currently bound sockets. A later review could reuse the pair.</p><pre>old board URL → :4606
+:4606 now serves another pinned worktree
+foreign board path → safe root rejection</pre></article><article class="card good"><span class="tag">After</span><h2>Registry reservation</h2><p>Every retained review reserves both its public and API ports until it is explicitly removed. Publishing skips those pairs even when their processes are down.</p><pre>old review → reserves :4606/:4607
+new review → chooses an unused pair
+old URL → its own board when restarted</pre></article></section>
+<section class="card"><h2>The safe boundary is unchanged</h2><p>Direct board URLs remain confined to the review’s immutable checkout. This fixes the routing error without granting one review server write access to every sibling review board.</p><svg viewBox="0 0 950 250" role="img" aria-label="Old URL routes to its reserved review server and board"><defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 8 4 0 8z" fill="#2d61d2"/></marker></defs><rect x="18" y="55" width="220" height="130" rx="16" fill="#fff" stroke="#d8e0e8"/><text x="40" y="97" font-family="ui-monospace,monospace" font-size="16">published URL</text><text x="40" y="129" font-family="ui-monospace,monospace" font-size="14" fill="#5f6b78">block-row…</text><path d="M242 120H380" stroke="#2d61d2" stroke-width="3" marker-end="url(#a)"/><rect x="390" y="55" width="200" height="130" rx="16" fill="#eaf8f0" stroke="#b7dec9"/><text x="414" y="98" font-size="17" font-weight="700" fill="#16704c">reserved :4606</text><text x="414" y="129" font-family="ui-monospace,monospace" font-size="14" fill="#16704c">pinned server</text><path d="M594 120H730" stroke="#2d61d2" stroke-width="3" marker-end="url(#a)"/><rect x="740" y="55" width="190" height="130" rx="16" fill="#fff" stroke="#d8e0e8"/><text x="765" y="98" font-size="17" font-weight="700">its board</text><text x="765" y="129" font-family="ui-monospace,monospace" font-size="14" fill="#5f6b78">inside checkout</text></svg></section>
+<hr><section class="facts"><div><b>2 ports</b><span>reserved per retained review</span></div><div><b>2 regression tests</b><span>down-review and registry allocation</span></div><div><b>{commit}</b><span>starting revision</span></div></section>
+<section class="card" style="margin-top:18px"><h2>Executable proof</h2><p><code>scripts/review_runtime.py</code> carries the reservation rule at the publication seam, with URL-ownership rationale beside it. <code>tests/test_review_runtime.py</code> proves a stopped review’s pair is skipped and the command supplies existing registry ports to allocation.</p><pre>python3 tests/test_review_runtime.py       # 12 tests passed
+python3 -m unittest tests.test_release_system  # 30 tests passed</pre></section>
+</main></body></html>'''
+
+
+if __name__ == "__main__":
+    OUTPUT.write_text(page(), encoding="utf-8")
+    print(OUTPUT)

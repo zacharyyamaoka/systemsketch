@@ -1,5 +1,7 @@
 import { createTLSchema } from 'tldraw'
 import { describe, expect, it } from 'vitest'
+import { getDefaultBlockProps } from '../blocks/blockModel'
+import { createSystemSketchStore } from '../store/createSystemSketchStore'
 import { inspectWorkspaceDocumentSource } from './workspaceDocument'
 
 const EMPTY_TLDRAW_FILE = JSON.stringify({
@@ -20,6 +22,50 @@ describe('standalone workspace document inspection', () => {
     const result = inspectWorkspaceDocumentSource(EMPTY_TLDRAW_FILE, schema)
     expect(result.kind).toBe('ready')
     expect(result.kind === 'ready' && result.snapshot.store).toBeDefined()
+  })
+
+  it('repairs malformed current-schema Clock facts before load, so re-export agrees with paint', () => {
+    const store = createSystemSketchStore()
+    store.put([
+      { typeName: 'document', id: 'document:document', gridSize: 10, name: '', meta: {} },
+      { typeName: 'page', id: 'page:page', name: 'Page 1', index: 'a1', meta: {} },
+      {
+      id: 'shape:malformed-clock',
+      typeName: 'shape',
+      type: 'block',
+      x: 0,
+      y: 0,
+      rotation: 0,
+      index: 'a1',
+      parentId: 'page:page',
+      isLocked: false,
+      opacity: 1,
+      meta: {},
+      props: {
+        ...getDefaultBlockProps(),
+        blockType: 'clock-trigger',
+        stockConfig: { triggerSource: 'clock', rateHz: 0 },
+      },
+      },
+    ] as never)
+    const snapshot = store.getStoreSnapshot()
+    const source = JSON.stringify({
+      tldrawFileFormatVersion: 1,
+      schema: snapshot.schema,
+      records: Object.values(snapshot.store),
+    })
+
+    const result = inspectWorkspaceDocumentSource(source, store.schema)
+    expect(result.kind).toBe('ready')
+    const repaired = result.kind === 'ready'
+      ? Object.values(result.snapshot.store).find((record) => (
+        (record as { type?: string }).type === 'block'
+      )) as { props: { stockConfig: unknown } } | undefined
+      : undefined
+    expect(repaired?.props.stockConfig).toEqual({ triggerSource: 'clock', rateHz: 10 })
+    // The returned snapshot is the persistence boundary: serializing it now
+    // cannot write the old zero while the canvas paints a fallback ten.
+    expect(JSON.stringify(result)).not.toContain('"rateHz":0')
   })
 
   it('recognizes the retired PyBlocks golden envelope before tldraw rejects it', () => {

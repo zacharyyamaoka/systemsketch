@@ -44,6 +44,27 @@ export type BoardDiagnosticCode =
 export type BoardDiagnosticSeverity = 'error' | 'warning' | 'info'
 
 /**
+ * The linter's severity, said in the primitives' own state vocabulary.
+ *
+ * The board diff contract's seventh rule is that a diff mark and a lint mark
+ * are the same visual object with different producers — "one state vocabulary
+ * on the primitives, two producers". This is the lint lane's half of that map,
+ * and it is the reason `BLOCK_STATES` carries `error` and `warning` at all.
+ *
+ * `info` deliberately flattens to `normal`: a note is not a mark, and painting
+ * every informational finding is how a board loses the ability to look calm.
+ *
+ * WHY here rather than in `src/diff/`: the diff lane must not depend on the
+ * lint lane's internals, so the mapping is owned by the producer that knows
+ * what a severity means. `src/diff/diffState.test.ts` pins every case.
+ */
+export function diagnosticSeverityState(severity: BoardDiagnosticSeverity): BlockState {
+	if (severity === 'error') return 'error'
+	if (severity === 'warning') return 'warning'
+	return 'normal'
+}
+
+/**
  * A future analyzer may point at a Python span as well as a canvas shape.
  * Diagnostics stay a read model: this reference never becomes source truth.
  */
@@ -533,24 +554,6 @@ export function getBoardDiagnosticsModel(editor: Editor): BoardDiagnosticsModel 
 	}
 
 	return { diagnostics, pages: groupedPages, counts }
-}
-
-/**
- * The second consumer of the diff lens's vocabulary.
- *
- * The linter and the conformance-diff projector both want to say "this thing
- * is wrong", and there is no reason for a reader to learn two spellings of it.
- * So a severity maps onto the same `state` enum a Block, a port and a cable
- * already carry, and the paint in `block-canvas.css` serves both.
- *
- * `info` deliberately gets `normal`: a note is not a mark. Painting every
- * informational finding onto the canvas is how a diff view stops being able to
- * show a calm board.
- */
-export function diagnosticSeverityState(severity: BoardDiagnosticSeverity): BlockState {
-	if (severity === 'error') return 'error'
-	if (severity === 'warning') return 'warning'
-	return 'normal'
 }
 
 /**

@@ -1,0 +1,40 @@
+{
+  "feature": "Named board landmarks",
+  "viewport": { "width": 1280, "height": 720 },
+  "pages": [{ "id": "review", "name": "Review" }],
+  "shapes": [
+    {
+      "id": "architecture", "type": "frame", "x": 500, "y": 95,
+      "props": { "w": 470, "h": 285, "name": "Architecture", "color": "blue" }
+    },
+    {
+      "id": "ingest", "type": "block", "parentId": "architecture", "x": 60, "y": 95,
+      "props": { "title": "ingest()", "description": "A first camera landmark.", "blockType": "Function", "view": "port", "w": 270, "h": 150, "inputs": [], "outputs": [] }
+    },
+    {
+      "id": "runtime", "type": "frame", "x": 1080, "y": 245,
+      "props": { "w": 470, "h": 285, "name": "Runtime", "color": "green" }
+    },
+    {
+      "id": "worker", "type": "block", "parentId": "runtime", "x": 80, "y": 94,
+      "props": { "title": "worker()", "description": "A second camera landmark.", "blockType": "Function", "view": "port", "w": 270, "h": 150, "inputs": [], "outputs": [] }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1", "kind": "step", "text": "1 · Pan or zoom to Architecture, then open Board overview from the bottom utility bar.",
+      "x": 35, "y": 70, "w": 390, "h": 110,
+      "target": { "shapeId": "architecture", "anchor": "left", "dy": -55 }
+    },
+    {
+      "id": "step-2", "kind": "step", "text": "2 · In Saved views, name and Save this camera. Pan to Runtime and click the saved view to return.",
+      "x": 35, "y": 260, "w": 390, "h": 120,
+      "target": { "shapeId": "architecture", "anchor": "left", "dy": 75 }
+    },
+    {
+      "id": "pass", "kind": "pass", "text": "PASS WHEN · The named view returns to the saved camera while your selection and the board structure stay unchanged.",
+      "x": 680, "y": 585, "w": 500, "h": 110
+    }
+  ]
+}

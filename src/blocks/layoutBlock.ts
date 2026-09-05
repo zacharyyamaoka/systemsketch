@@ -12,6 +12,7 @@ import {
 	type BlockView,
 	type PortLayout,
 } from './blockModel'
+import { stockBlockVisibleDescription } from './stockBlocks'
 
 /** Donor pyblocks geometry constants. Keep rendering and connection anchors on this grid. */
 export const BLOCK_CORNER_RADIUS = 9
@@ -298,7 +299,7 @@ export function blockPortViewHeightForSlots(
 	slotCount: number,
 ): number {
 	const layout = layoutBlock(props)
-	const descriptionReserve = showsDescription(props) ? DESCRIPTION_LINE_HEIGHT_PX + 4 : 0
+	const descriptionReserve = portDescriptionHeight(props, layout.width) + (showsDescription(props) ? 4 : 0)
 	return Math.ceil(
 		layout.headerHeight
 		+ NODE_ROW_HEADER_GAP_PX
@@ -431,8 +432,12 @@ function placeExpandedBody(
 	})
 }
 
+function visibleDescription(props: BlockShapeProps): string {
+	return stockBlockVisibleDescription(props).trim()
+}
+
 function showsDescription(props: BlockShapeProps): boolean {
-	return props.showDescription && props.description.trim() !== ''
+	return visibleDescription(props) !== ''
 }
 
 let simpleMeasureContext: CanvasRenderingContext2D | null | undefined
@@ -577,6 +582,16 @@ function estimateWrappedLines(
 	weight: number,
 	maxWidth: number,
 ): number {
+	if (text.trim() === '' || maxWidth <= 0) return 1
+	// Newlines separate the derived Clock declaration from its optional
+	// annotation. Preserve that authored boundary while still wrapping each row.
+	return text.split(/\n/).reduce(
+		(total, paragraph) => total + estimateParagraphLines(paragraph, px, weight, maxWidth),
+		0,
+	)
+}
+
+function estimateParagraphLines(text: string, px: number, weight: number, maxWidth: number): number {
 	const words = text.trim().split(/\s+/).filter(Boolean)
 	if (words.length === 0 || maxWidth <= 0) return 1
 	const spaceWidth = Math.max(1, measureSimpleText(' ', px, weight))
@@ -598,6 +613,14 @@ function estimateWrappedLines(
 		}
 	}
 	return lines
+}
+
+function portDescriptionHeight(props: BlockShapeProps, width: number): number {
+	if (!showsDescription(props)) return 0
+	const lines = Math.min(3, estimateWrappedLines(
+		visibleDescription(props), 11, 400, Math.max(0, width - PORT_LABEL_INSET_PX * 2),
+	))
+	return lines * DESCRIPTION_LINE_HEIGHT_PX
 }
 
 /**
@@ -729,7 +752,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		let descriptionHeight = 0
 		if (showsDescription(props)) {
 			const wanted = estimateWrappedLines(
-				props.description,
+				visibleDescription(props),
 				SIMPLE_TEXT_FONT_PX,
 				400,
 				innerWidth,
@@ -883,7 +906,8 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		})
 	})
 
-	const descriptionReserve = showsDescription(props) ? DESCRIPTION_LINE_HEIGHT_PX + 4 : 0
+	const descriptionHeight = portDescriptionHeight(props, width)
+	const descriptionReserve = descriptionHeight + (showsDescription(props) ? 4 : 0)
 	const dividers: BlockDivider[] = []
 	const sections: BlockLayoutSection[] = []
 	let pitch = NODE_ROW_HEIGHT_PX
@@ -997,7 +1021,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 
 	let description: BlockRect | null = null
 	if (showsDescription(props)) {
-		const lastTop = Math.max(bodyTop, footerTop - 4 - DESCRIPTION_LINE_HEIGHT_PX)
+		const lastTop = Math.max(bodyTop, footerTop - 4 - descriptionHeight)
 		const top = view === 'expanded'
 			? lastTop
 			: Math.min(bodyTop + pitch * blockPortSlotCount(props) + 2, lastTop)
@@ -1005,7 +1029,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 			x: PORT_LABEL_INSET_PX,
 			y: top,
 			w: Math.max(0, width - PORT_LABEL_INSET_PX * 2),
-			h: Math.max(0, Math.min(DESCRIPTION_LINE_HEIGHT_PX, footerTop - 4 - top)),
+			h: Math.max(0, Math.min(descriptionHeight, footerTop - 4 - top)),
 		}
 	}
 

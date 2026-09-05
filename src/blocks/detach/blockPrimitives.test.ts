@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { getDefaultBlockProps, type BlockPort, type BlockShapeProps } from '../blockModel'
 import { layoutBlock } from '../layoutBlock'
+import { createClockTriggerProps } from '../stockBlocks'
 import { PORT_CORE_RADIUS, PORT_INDICATOR_RADIUS, primitivesForBlock } from './blockPrimitives'
 
 const port = (id: string, name: string, type = ''): BlockPort =>
@@ -97,6 +98,12 @@ describe('a Block as stock primitives', () => {
 
 		const named = primitivesForBlock(blockProps({ view: 'port', title: 'decode' }), { x: 0, y: 0 })
 		expect(textOf(named.shapes).join()).toContain('decode')
+	})
+
+	it('keeps a Clock declaration visible after detach even with no annotation', () => {
+		const props = { ...createClockTriggerProps(), showDescription: false, description: '' }
+		const detached = textOf(primitivesForBlock(props, { x: 0, y: 0 }).shapes).join(' ')
+		expect(detached).toContain('Clock · 10 Hz · prototype declares intent; does not schedule.')
 	})
 
 	it('freezes what was on screen: every port has a ring and only wired ports add a core', () => {

@@ -1,0 +1,217 @@
+{
+  "feature": "Diff review modal",
+  "viewport": { "width": 1600, "height": 1050 },
+  "shapes": [
+    {
+      "id": "load",
+      "type": "block",
+      "x": 80,
+      "y": 300,
+      "props": {
+        "title": "load_frames",
+        "description": "Read a clip off disk",
+        "blockType": "Function",
+        "view": "port",
+        "w": 340,
+        "h": 170,
+        "inputs": [],
+        "outputs": [
+          { "id": "out_frames", "name": "frames", "type": "bytes", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "predict",
+      "type": "block",
+      "x": 620,
+      "y": 300,
+      "props": {
+        "title": "run_predict",
+        "description": "Detect objects per frame",
+        "blockType": "Function",
+        "view": "port",
+        "w": 340,
+        "h": 260,
+        "inputs": [
+          { "id": "in_frames", "name": "frames", "type": "bytes", "visible": true },
+          { "id": "in_threshold", "name": "threshold", "type": "float", "visible": true, "defaultValue": "0.5" }
+        ],
+        "outputs": [
+          { "id": "out_boxes", "name": "boxes", "type": "Detections", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "overlay",
+      "type": "block",
+      "x": 1160,
+      "y": 300,
+      "props": {
+        "title": "draw_overlay",
+        "description": "Paint boxes onto the frame",
+        "blockType": "Function",
+        "view": "port",
+        "w": 390,
+        "h": 198,
+        "inputs": [
+          { "id": "in_boxes", "name": "boxes", "type": "Detections", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_image", "name": "image", "type": "RGBA", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "metrics",
+      "type": "block",
+      "x": 620,
+      "y": 680,
+      "props": {
+        "title": "log_metrics",
+        "description": "Count detections per clip",
+        "blockType": "Function",
+        "view": "port",
+        "w": 340,
+        "h": 170,
+        "inputs": [
+          { "id": "in_data", "name": "data", "type": "Any", "visible": true }
+        ],
+        "outputs": []
+      }
+    },
+    {
+      "id": "cable_lp",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "cable_po",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    },
+    {
+      "id": "cable_xm",
+      "type": "connection",
+      "x": 0,
+      "y": 0,
+      "props": {
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 0, "y": 0 },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.5
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "cable_lp-start",
+      "type": "connection",
+      "fromId": "cable_lp",
+      "toId": "load",
+      "props": { "portId": "out_frames", "terminal": "start", "face": "outer" }
+    },
+    {
+      "id": "cable_lp-end",
+      "type": "connection",
+      "fromId": "cable_lp",
+      "toId": "predict",
+      "props": { "portId": "in_frames", "terminal": "end", "face": "outer" }
+    },
+    {
+      "id": "cable_po-start",
+      "type": "connection",
+      "fromId": "cable_po",
+      "toId": "predict",
+      "props": { "portId": "out_boxes", "terminal": "start", "face": "outer" }
+    },
+    {
+      "id": "cable_po-end",
+      "type": "connection",
+      "fromId": "cable_po",
+      "toId": "overlay",
+      "props": { "portId": "in_boxes", "terminal": "end", "face": "outer" }
+    },
+    {
+      "id": "cable_xm-start",
+      "type": "connection",
+      "fromId": "cable_xm",
+      "toId": "predict",
+      "props": { "portId": "out_boxes", "terminal": "start", "face": "outer" }
+    },
+    {
+      "id": "cable_xm-end",
+      "type": "connection",
+      "fromId": "cable_xm",
+      "toId": "metrics",
+      "props": { "portId": "in_data", "terminal": "end", "face": "outer" }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Press the Compare changes button in the top-right corner of the toolbar.",
+      "x": 80,
+      "y": 100,
+      "w": 400,
+      "h": 110,
+      "target": { "shapeId": "load", "anchor": "top", "dx": 0 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Pick an older entry in the History rail on the left of the modal.",
+      "x": 620,
+      "y": 100,
+      "w": 440,
+      "h": 110
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · Click a row in the property table, then toggle Side by side / Overlay.",
+      "x": 1160,
+      "y": 590,
+      "w": 400,
+      "h": 140
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN the table lists Added, Removed and Modified rows, and clicking one outlines that Block on both board renders.",
+      "x": 80,
+      "y": 950,
+      "w": 700,
+      "h": 130
+    }
+  ]
+}

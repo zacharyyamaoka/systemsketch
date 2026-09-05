@@ -61,6 +61,7 @@ button {
 .systemsketch-library-browser :focus-visible,
 .systemsketch-settings :focus-visible,
 .systemsketch-share-menu :focus-visible,
+.systemsketch-named-landmarks :focus-visible,
 .block-mini-menu :focus-visible,
 .tunnel-layer-bar :focus-visible {
   outline: 2px solid var(--ss-accent);

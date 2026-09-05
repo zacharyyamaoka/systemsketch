@@ -599,7 +599,9 @@ export function SystemSketchNavigationPanel() {
       >
         <TldrawUiToolbarButton
           type="icon"
-          title="Board overview"
+          title="Board overview and saved views"
+          className="systemsketch-board-overview-trigger"
+          data-testid="systemsketch-board-overview-trigger"
           aria-expanded={boardPanelOpen}
           aria-controls={boardPanelOpen ? 'systemsketch-right-popout' : undefined}
           onClick={toggleBoardPanel}

@@ -1,0 +1,757 @@
+/*
+ * Compare modal.
+ *
+ * Colour is the vocabulary `src/diff/diffPresentation.ts` ships — success for
+ * an insertion, danger for a deletion — with ONE deliberate departure: a
+ * modification is `--ss-accent` BLUE here, not the amber that module uses for
+ * a cable mark. Red, green and blue are the orthogonal axes, so blue is the
+ * only third hue that cannot be misread as a weak red; amber could, and was.
+ * Simulink's own legend is the same three-way split (Insertion · Deletion ·
+ * Modification), so the three-state model is not invented — only the third hue.
+ *
+ * The departure is scoped to what this review feature paints, on purpose.
+ * `diffPresentation.diffCableInk` still returns amber for a `rewired` cable on
+ * the live board, and `block-canvas.css` still shares one rule between the
+ * `changed` and `warning` diff states — recolouring those would repaint every
+ * other consumer of a shared module to settle a question asked about this
+ * table, and would turn genuine warnings blue along with it.
+ *
+ * The token file's standing rule is obeyed throughout: a `--ss-*-soft` value is
+ * a SURFACE, and copy sitting on it is `--ss-text`, never the accent itself. A
+ * mid-luminance colour on a tint of itself measures 2.6–4.3:1 in every palette
+ * here, so every state reads by an ink bar plus a tint, never by coloured text.
+ */
+
+.systemsketch-compare__scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--ss-overlay);
+  backdrop-filter: blur(2px);
+  z-index: 500;
+}
+
+.systemsketch-compare {
+  position: fixed;
+  inset: 3vh 3vw;
+  z-index: 501;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
+  border: 1px solid var(--ss-border);
+  border-radius: 12px;
+  box-shadow: var(--ss-shadow-2);
+  font-family: inherit;
+}
+
+/* ---- title bar --------------------------------------------------------- */
+
+.systemsketch-compare__titlebar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.systemsketch-compare__titlebar h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.systemsketch-compare__summary {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+}
+
+.systemsketch-compare__close {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--ss-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.systemsketch-compare__close:hover {
+  color: var(--ss-text);
+  background: var(--ss-surface-hover);
+}
+
+/* ---- three columns ----------------------------------------------------- */
+
+/*
+ * The detail column's floor went up when the by-element layout landed.
+ *
+ * That layout spends its first ~140px on the element list, and whatever is left
+ * is split three ways between Property, Previous and Current. At the old 392px
+ * floor the value columns fell under ~85px, which is narrower than
+ * `run_inference` at 11px monospace — so identifiers broke mid-word into
+ * `run_infere / nce`. Measured on the review fixture, not guessed.
+ */
+.systemsketch-compare__body {
+  display: grid;
+  /*
+   * The rail is 252px, not 228px.
+   *
+   * A Figma-language row spends its width on a 22px circle, a gap, an optional
+   * BEFORE/AFTER pin and a disclosure chevron before the title gets any — and at
+   * 228px "Earliest recorded version" truncated to "Earliest record…". The rail
+   * grew rather than the row shrinking, because every part it would have had to
+   * drop is load-bearing: the circle is the version, the pin is which endpoint
+   * this is, the chevron is the only way to the description.
+   */
+  grid-template-columns: 252px minmax(0, 1fr) minmax(470px, 34%);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.systemsketch-compare__history,
+.systemsketch-compare__detail {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.systemsketch-compare__history {
+  border-right: 1px solid var(--ss-border);
+}
+
+.systemsketch-compare__detail {
+  border-left: 1px solid var(--ss-border);
+}
+
+/* ---- the two dock placements -------------------------------------------
+ *
+ * Right is the default and is the three-column grid above. Bottom is Figma's:
+ * the panel becomes a full-width strip beneath the boards, and the boards take
+ * the width back.
+ *
+ * This is a GRID re-placement of the same DOM, never a second panel. The subtree
+ * does not unmount, so the selected row, the active tab, the ink toggle and the
+ * table layout survive the move without a single line of save/restore — the same
+ * discipline `fullscreen` uses, for the same reason.
+ *
+ * The History rail keeps its full height in both. It is navigation, not detail:
+ * folding it into the bottom strip would put "which version" and "what changed
+ * in it" in one box and cost the reader the thing the rail is for.
+ */
+.systemsketch-compare__body[data-dock='bottom'] {
+  grid-template-columns: 252px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(200px, 38%);
+}
+
+.systemsketch-compare__body[data-dock='bottom'] .systemsketch-compare__history {
+  grid-row: 1 / span 2;
+}
+
+.systemsketch-compare__body[data-dock='bottom'] .systemsketch-compare__detail {
+  grid-column: 2;
+  grid-row: 2;
+  border-top: 1px solid var(--ss-border);
+  border-left: 0;
+}
+
+/*
+ * Docked at the bottom, the table is wide and short — so it scrolls in its own
+ * box rather than pushing the tab strip off the top. `min-height: 0` on the
+ * body is what actually lets a grid child scroll instead of growing.
+ */
+.systemsketch-compare__body[data-dock='bottom'] .systemsketch-compare__detail-body {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.systemsketch-compare__dock-toggle {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  /* Pushed to the strip's far end, away from the tabs it is not one of. */
+  margin-left: auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ss-text-muted);
+  cursor: pointer;
+}
+
+.systemsketch-compare__dock-toggle:hover {
+  border-color: var(--ss-border);
+  color: var(--ss-text);
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-compare__dock-toggle:focus-visible {
+  outline: 2px solid var(--ss-focus-ring);
+  outline-offset: -2px;
+}
+
+.systemsketch-compare__dock-toggle svg {
+  width: 15px;
+  height: 15px;
+}
+
+.systemsketch-compare__history h3 {
+  margin: 0;
+  padding: 12px 14px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ss-text-muted);
+}
+
+/*
+ * The rail is now a CONTAINER, and the rows are not its business.
+ *
+ * What used to live here was a full row implementation — a two-column grid on
+ * `.systemsketch-compare__history button`, a label, a note, a pin. It is deleted
+ * rather than left in place, and the deletion is the load-bearing part: that
+ * `button` descendant selector matched EVERY button inside the rail, so once the
+ * shared `HistoryList` moved in, it silently re-gridded the row's pick button
+ * and its disclosure chevron and pulled the anatomy apart. Two implementations
+ * of one row cannot coexist even when only one of them is being rendered.
+ *
+ * The rows now come from `src/history/history.css`, which is the same file the
+ * Block inspector's History tab is styled by. This rule set owns the scroll box
+ * and nothing else.
+ */
+.systemsketch-compare__history .ss-history {
+  flex: 1 1 auto;
+  padding: 0 8px 8px;
+  overflow-y: auto;
+}
+
+.systemsketch-compare__history-foot {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--ss-text-muted);
+  border-top: 1px solid var(--ss-border);
+}
+
+/* ---- the two board renders --------------------------------------------- */
+
+.systemsketch-compare__stage {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--ss-surface);
+}
+
+.systemsketch-compare__panes {
+  position: relative;
+  display: grid;
+  flex: 1 1 auto;
+  gap: 1px;
+  min-height: 0;
+  background: var(--ss-border);
+}
+
+.systemsketch-compare__panes[data-mode='side-by-side'] {
+  grid-template-columns: 1fr 1fr;
+}
+
+/*
+ * Overlay stacks the two panes in one cell so the slider crossfades them.
+ * Figma's Overlay is opt-in and slider-controlled for a reason: the sweep found
+ * no mature tool that makes a full translucent composite its default view.
+ */
+.systemsketch-compare__panes[data-mode='overlay'] {
+  grid-template-columns: 1fr;
+}
+
+.systemsketch-compare__panes[data-mode='overlay'] .systemsketch-compare__pane {
+  grid-area: 1 / 1;
+}
+
+.systemsketch-compare__panes[data-mode='overlay'] .systemsketch-compare__pane[data-side='after'] {
+  /* The top layer is what the slider fades; the bottom one always paints. */
+  z-index: 2;
+}
+
+.systemsketch-compare__pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  background: var(--ss-surface);
+}
+
+.systemsketch-compare__pane figcaption {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-raised);
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.systemsketch-compare__panes[data-mode='overlay']
+  .systemsketch-compare__pane[data-side='before']
+  figcaption {
+  visibility: hidden;
+}
+
+.systemsketch-compare__canvas {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.systemsketch-compare__canvas .tl-container {
+  inset: 0;
+  position: absolute;
+}
+
+.systemsketch-compare__empty,
+.systemsketch-compare__none,
+.systemsketch-compare__problem {
+  margin: 0;
+  padding: 16px;
+  font-size: 12px;
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-compare__problem {
+  color: var(--ss-text);
+  background: var(--ss-warning-soft);
+  border-left: 3px solid var(--ss-warning);
+}
+
+/* The selection outline on a render — Simulink's plain box, nothing more. */
+/*
+ * The mark's default is the MODIFIED state, so it is blue like every other
+ * surface that paints one. Not amber: red, green and blue are the orthogonal
+ * axes, and amber sat close enough to red to read as a weak deletion at the
+ * distance a reviewer actually looks at a board.
+ *
+ * A cable does NOT use these rules. It routes as an elbow, so a box around
+ * its bounds is a big rectangle that says nothing about which line is meant,
+ * and several cables routed close together make that ambiguous. Cables get a
+ * `filter: drop-shadow(...)` under their own stroke instead, built inline in
+ * `BoardRender.tsx`'s `HighlightMark`, not a class here.
+ */
+.systemsketch-compare__mark {
+  border: 2px solid var(--ss-accent);
+  border-radius: 6px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ss-accent) 24%, transparent);
+}
+
+.systemsketch-compare__mark[data-kind='added'] {
+  border-color: var(--ss-success);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ss-success) 24%, transparent);
+}
+
+.systemsketch-compare__mark[data-kind='removed'] {
+  border-color: var(--ss-danger);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ss-danger) 24%, transparent);
+}
+
+/* ---- the bar under the renders ----------------------------------------- */
+
+/*
+ * The one bottom row, in both modes.
+ *
+ * A three-column grid rather than flex with `margin-left: auto`, because the
+ * centre slot has to be centred on the ROW and not on whatever space the outer
+ * two happen to leave. In fullscreen the centre slot holds the change stepper,
+ * which is the thing a reviewer's eye returns to between jumps; letting it
+ * drift as the version name gets longer would make it feel unanchored.
+ */
+.systemsketch-compare__stagebar {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  border-top: 1px solid var(--ss-border);
+  background: var(--ss-surface-raised);
+}
+
+.systemsketch-compare__bar-slot {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.systemsketch-compare__bar-slot[data-slot='center'] { justify-content: center; }
+.systemsketch-compare__bar-slot[data-slot='right'] { justify-content: flex-end; }
+
+.systemsketch-compare__segmented {
+  display: inline-flex;
+  padding: 2px;
+  background: var(--ss-surface-sunken);
+  border-radius: 8px;
+}
+
+.systemsketch-compare__segmented button {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ss-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.systemsketch-compare__segmented button[data-selected] {
+  color: var(--ss-text);
+  background: var(--ss-surface-raised);
+  box-shadow: var(--ss-shadow-1);
+}
+
+.systemsketch-compare__blend {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--ss-text-muted);
+}
+
+.systemsketch-compare__blend input {
+  width: 200px;
+  accent-color: var(--ss-accent);
+}
+
+.systemsketch-compare__blend output {
+  min-width: 38px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ss-text);
+}
+
+/* ---- Code / Properties -------------------------------------------------- */
+
+.systemsketch-compare__tabs {
+  display: flex;
+  gap: 4px;
+  flex: 0 0 auto;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.systemsketch-compare__tabs button {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ss-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.systemsketch-compare__tabs button[data-selected] {
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+}
+
+.systemsketch-compare__detail-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* ---- the header summary badge ------------------------------------------- */
+
+/*
+ * The property table itself now lives in `review-table.css`, ported from the
+ * omnibox variant under its own `.systemsketch-review__*` names. What survives
+ * here is the header's count badge and the two spans the Code tab head reuses;
+ * every rule that painted the old in-house table was deleted with it, so no
+ * stylesheet in this feature still claims that Modified is amber.
+ */
+
+.systemsketch-compare__name {
+  display: block;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.systemsketch-compare__path {
+  display: block;
+  font-size: 11px;
+  color: var(--ss-text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.systemsketch-compare__badge {
+  display: inline-block;
+  padding: 1px 7px;
+  margin-bottom: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+  border-radius: 999px;
+}
+
+.systemsketch-compare__badge[data-kind='added'] {
+  background: var(--ss-success-soft);
+  box-shadow: inset 0 0 0 1px var(--ss-success);
+}
+
+.systemsketch-compare__badge[data-kind='removed'] {
+  background: var(--ss-danger-soft);
+  box-shadow: inset 0 0 0 1px var(--ss-danger);
+}
+
+.systemsketch-compare__badge[data-kind='modified'] {
+  background: var(--ss-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--ss-accent);
+}
+
+/* ---- the Code tab ------------------------------------------------------- */
+
+.systemsketch-compare__code {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.systemsketch-compare__code-head {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.systemsketch-compare__code-head .systemsketch-compare__name,
+.systemsketch-compare__code-head .systemsketch-compare__path {
+  display: inline;
+}
+
+.systemsketch-compare__code-body {
+  margin: 0;
+  padding: 8px 0;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+
+.systemsketch-compare__code-line {
+  display: flex;
+  gap: 0;
+  white-space: pre;
+}
+
+.systemsketch-compare__code-line[data-kind='removed'] {
+  background: var(--ss-danger-soft);
+}
+
+.systemsketch-compare__code-line[data-kind='added'] {
+  background: var(--ss-success-soft);
+}
+
+.systemsketch-compare__gutter {
+  flex: 0 0 auto;
+  width: 34px;
+  padding-right: 6px;
+  text-align: right;
+  color: var(--ss-text-faint);
+  user-select: none;
+}
+
+.systemsketch-compare__sigil {
+  flex: 0 0 auto;
+  width: 16px;
+  text-align: center;
+  color: var(--ss-text-muted);
+  user-select: none;
+}
+
+.systemsketch-compare__code-text {
+  flex: 1 1 auto;
+  padding-right: 12px;
+  color: var(--ss-text);
+}
+
+/* ---- the toolbar entry point --------------------------------------------
+ *
+ * The button now lives IN the top-right shell, so it takes that shell's
+ * `.systemsketch-shell-icon-button` styling and this class adds almost nothing.
+ * What used to be here was a self-contained pill with its own height, padding,
+ * border and background — a complete second button style, which is precisely why
+ * it looked like it belonged to nothing. The absolutely-positioned
+ * `.systemsketch-compare-trigger-slot` that held it is deleted with it; leaving
+ * an unused `position: absolute` rule behind is how a floating element comes
+ * back.
+ */
+
+.systemsketch-compare-trigger svg {
+  display: block;
+}
+
+/*
+ * The rule that used to be here read: "Below the share zone, not beside it" —
+ * `top: 64px` chosen to clear tldraw's share panel, which the button at
+ * `top: 8px` had been covering. That comment was the diagnosis all along. A
+ * control that has to be nudged out of the way of the chrome is a control that
+ * should have been IN the chrome, and it is now: `CompareTrigger` renders inside
+ * `SystemSketchSharePanel`, so there is no zone left to dodge.
+ */
+
+/* ---- the bar's own controls -------------------------------------------- */
+
+.systemsketch-compare__bar-mode {
+  display: inline-flex;
+  min-height: 28px;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 0 11px;
+  border: 1px solid var(--ss-border-strong);
+  border-radius: 7px;
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.systemsketch-compare__bar-mode:hover {
+  border-color: var(--ss-accent);
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-compare__bar-vs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.systemsketch-compare__bar-vs select {
+  padding: 3px 6px;
+  border: 1px solid var(--ss-border);
+  border-radius: 6px;
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+  font: inherit;
+  font-size: 11px;
+}
+
+.systemsketch-compare__stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.systemsketch-compare__stepper button {
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--ss-border);
+  border-radius: 6px;
+  color: var(--ss-text);
+  background: var(--ss-surface-sunken);
+  cursor: pointer;
+  font-size: 13px;
+  place-items: center;
+}
+
+.systemsketch-compare__stepper button:hover:not(:disabled) {
+  border-color: var(--ss-accent);
+  background: var(--ss-surface-hover);
+}
+
+.systemsketch-compare__stepper button:disabled { cursor: default; opacity: .4; }
+
+.systemsketch-compare__stepper-count {
+  min-width: 104px;
+  color: var(--ss-text);
+  font-size: 11px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* ---- fullscreen --------------------------------------------------------- */
+
+/*
+ * Fullscreen subtracts; it never rebuilds. Every rule here either removes a
+ * piece of chrome or gives the stage the space that chrome was using — there is
+ * no second layout, which is what keeps the two modes from drifting apart.
+ *
+ * The bottom row is deliberately NOT among the things it removes. That row is
+ * the one place a reviewer's hand already goes, so it stays exactly where it
+ * was and changes what it carries.
+ */
+.systemsketch-compare[data-fullscreen] {
+  inset: 0;
+  border-radius: 0;
+}
+
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__titlebar,
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__history,
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__detail {
+  display: none;
+}
+
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__body {
+  grid-template-columns: 1fr;
+}
+
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__panes {
+  padding: 0;
+  gap: 0;
+}
+
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__pane {
+  border: 0;
+  border-radius: 0;
+}
+
+/* Both panes are stacked in one cell in overlay, so their captions would
+ * overprint into soup — and the crossfade is labelled with both endpoint
+ * names, which makes it the caption. */
+.systemsketch-compare[data-fullscreen] .systemsketch-compare__pane figcaption {
+  display: none;
+}
+
+/* ---- the Properties options row ---------------------------------------- */
+
+.systemsketch-review__options {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ss-border);
+}
+
+.systemsketch-review__options .systemsketch-review__highlight-toggle {
+  padding: 0;
+  border-bottom: 0;
+}
+
+.systemsketch-review__options .systemsketch-compare__segmented { margin-left: auto; }

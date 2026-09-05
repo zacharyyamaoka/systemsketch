@@ -15,6 +15,7 @@ import {
 	blockPortSlotCount,
 	layoutBlock,
 } from './layoutBlock'
+import { createClockTriggerProps } from './stockBlocks'
 
 function makeBlock(overrides: Partial<BlockShapeProps> = {}): BlockShapeProps {
 	const view = overrides.view ?? 'port'
@@ -112,6 +113,18 @@ describe('layoutBlock donor geometry', () => {
 		)
 		expect(layout.height).toBe(props.h)
 		expect(layout.pitch).toBeLessThan(NODE_ROW_HEIGHT_PX)
+	})
+
+	it('sizes a Clock declaration even when its annotation is empty or hidden', () => {
+		const clock = {
+			...createClockTriggerProps(),
+			showDescription: false,
+			description: 'hidden annotation',
+		}
+		const layout = layoutBlock(clock)
+		expect(layout.description).not.toBeNull()
+		expect(layout.description!.h).toBeGreaterThan(16)
+		expect(layout.description!.y + layout.description!.h).toBeLessThanOrEqual(layout.footerTop - 4)
 	})
 
 	it('simple collapses all identities onto one subtle edge-midpoint affordance per side', () => {
