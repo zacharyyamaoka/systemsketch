@@ -42,9 +42,11 @@
       "com.tldraw.shape.arrow": 8,
       "com.tldraw.shape.text": 4,
       "com.tldraw.shape.line": 5,
-      "com.tldraw.shape.block": 8,
+      "com.tldraw.shape.block": 11,
       "com.tldraw.shape.branch": 0,
       "com.tldraw.shape.loop": 0,
+      "com.tldraw.shape.code": 0,
+      "com.tldraw.shape.floating-port": 0,
       "com.tldraw.shape.branch-arm": 0,
       "com.tldraw.shape.connection": 6,
       "com.tldraw.binding.arrow": 1,
@@ -120,17 +122,21 @@
           }
         },
         "showDescription": true,
+        "showFooter": true,
+        "showHeaderDivider": true,
         "notes": "",
         "portLayout": "inline",
+        "memberLayout": "inset",
+        "insetBackground": "white",
         "state": "normal",
-        "definitionId": "8npLszNKmbBTp3Bg4ImCm",
+        "definitionId": "zSsO3aa53sQQfw35-2ez1",
         "inputs": [],
         "outputs": [],
         "foldControlSide": "right",
         "definitionKey": "right_corner_reference"
       },
       "parentId": "page:page",
-      "index": "a2rrE",
+      "index": "a2znm",
       "typeName": "shape"
     },
     {
@@ -174,7 +180,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a4Yho",
+      "index": "a4utHV",
       "typeName": "shape"
     },
     {
@@ -219,13 +225,13 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6ISA",
+      "index": "a6f4U",
       "typeName": "shape"
     },
     {
-      "x": 5.492518703241885,
-      "y": -117.14463840399009,
-      "z": 1.1062068965517242,
+      "x": 0,
+      "y": 0,
+      "z": 1,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -290,7 +296,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a43r2",
+      "index": "a4YG2",
       "typeName": "shape"
     },
     {
@@ -334,7 +340,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3zzzz",
+      "index": "a3jCH",
       "typeName": "shape"
     },
     {
@@ -409,7 +415,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5tGXV",
+      "index": "a5qHvV",
       "typeName": "shape"
     },
     {
@@ -454,7 +460,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3rlz",
+      "index": "a35EX",
       "typeName": "shape"
     },
     {
@@ -499,15 +505,15 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5BYE",
+      "index": "a5gJb",
       "typeName": "shape"
     },
     {
       "name": "",
-      "color": "#11B3A3",
+      "color": "#39B178",
       "imageUrl": "",
       "meta": {},
-      "id": "user:EkBSOmgUQQIOFS0jwjXJv",
+      "id": "user:sO-u53JiaE3DsYsjROUgE",
       "typeName": "user"
     },
     {
@@ -585,16 +591,20 @@
           }
         },
         "showDescription": true,
+        "showFooter": true,
+        "showHeaderDivider": true,
         "notes": "",
         "portLayout": "inline",
+        "memberLayout": "inset",
+        "insetBackground": "white",
         "state": "normal",
-        "definitionId": "vfz-d2yv1cYoSxEomMQIS",
+        "definitionId": "ONgLSvfbXYGTBVHC8xujv",
         "inputs": [],
         "outputs": [],
         "definitionKey": "initialize_workflow"
       },
       "parentId": "page:page",
-      "index": "a1xjE",
+      "index": "a1zzJV",
       "typeName": "shape"
     },
     {

@@ -18,6 +18,8 @@ The [continuous Block auto-fit gallery](docs/block-autofit-continuous-2026-09-05
 
 The [generic Block work index](docs/generic-block-work-index-2026-09-05.html) gathers every completed candidate from the design thread—Ports, folding and fit, chrome switches, title/menu behavior, header alignment, and member presentation—into one filterable visual review surface while keeping their separate unmerged branch status explicit.
 
+The [integrated generic Block candidate gallery](docs/generic-block-integrated-2026-09-05.html) is the single reconciled review surface: one ordinary Block record composes header alignment, left/right folding, continuous stock-settled auto-fit, footer/divider switches, inset/edge-to-edge members, the optional gray well, shared title menus, and a directly draggable Floating Port. Its guided [`generic-block-integrated.systemsketch`](sketches/review/generic-block-integrated.systemsketch) board exercises the features together before any merge to `main`.
+
 The earlier [stock-settled Block auto-fit repair gallery](docs/block-autofit-stock-settle-2026-09-05.html) traces the original runaway drag feedback loop from the supplied recordings and the stable one-shot boundary this continuous presentation builds upon.
 
 The [Block inset-background implementation gallery](docs/block-inset-background-2026-09-05.html) adds one restrained presentation choice to the Inset member layout: **White** remains the default, while **Soft gray** paints only the exposed parent well using the active theme’s sunken-surface token. Header, footer, child cards, geometry, and membership stay unchanged. Its guided [`block-inset-background.systemsketch`](sketches/review/block-inset-background.systemsketch) board exercises both choices.

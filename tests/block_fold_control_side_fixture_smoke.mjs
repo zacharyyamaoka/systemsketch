@@ -37,6 +37,16 @@ async function identityPosition(page, id) {
 	}
 }
 
+async function clickInspectorControl(page, selector) {
+	await evaluate(page, `(() => {
+		const element = document.querySelector(${JSON.stringify(selector)})
+		element?.scrollIntoView({ block: 'center' })
+		return Boolean(element)
+	})()`)
+	await delay(120)
+	await clickElement(page, selector)
+}
+
 async function main() {
 	const app = await startApp({ label: 'block-fold-control-side', build: 'block-fold-control-side-fixture-smoke', width: 1500, height: 930 })
 	const { page, port, filesRoot } = app
@@ -53,7 +63,7 @@ async function main() {
 		assert.ok(initial.fold.cx - initial.face.x < 28)
 		pass('an existing foldable Block defaults to the left corner')
 
-		await clickElement(page, '[data-testid="block-fold-control-right"]')
+		await clickInspectorControl(page, '[data-testid="block-fold-control-right"]')
 		await waitFor(page,
 			`window.__systemsketch.editor.getShape(${JSON.stringify(SUBJECT)})?.props.foldControlSide === 'right'`,
 			'right fold side persistence')
@@ -75,7 +85,7 @@ async function main() {
 		await waitFor(page, `window.__systemsketch.editor.getShape(${JSON.stringify(REFERENCE)})?.props.folded === false`, 'right-side unfold action')
 		pass('right-corner control folds and unfolds both Port and Expanded faces normally')
 
-		await clickElement(page, '[data-testid="block-fold-control-left"]')
+		await clickInspectorControl(page, '[data-testid="block-fold-control-left"]')
 		await waitFor(page,
 			`window.__systemsketch.editor.getShape(${JSON.stringify(SUBJECT)})?.props.foldControlSide === 'left'`,
 			'left fold side restore')

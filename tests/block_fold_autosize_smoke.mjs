@@ -28,6 +28,14 @@ const SHOTS = join(ROOT, 'docs', 'assets')
 const { checks, pass } = makeChecklist()
 
 async function clickInspectorChoice(page, label, value) {
+  await evaluate(page, `(() => {
+    const group = document.querySelector('[data-inspector-section="Behaviour"] [aria-label=${JSON.stringify(label)}]')
+    const button = Array.from(group?.querySelectorAll('button') ?? [])
+      .find((candidate) => candidate.textContent?.trim() === ${JSON.stringify(value)})
+    button?.scrollIntoView({ block: 'center' })
+    return Boolean(button)
+  })()`)
+  await delay(120)
   const target = await evaluate(page, `(() => {
     const group = document.querySelector('[data-inspector-section="Behaviour"] [aria-label=${JSON.stringify(label)}]')
     const button = Array.from(group?.querySelectorAll('button') ?? [])

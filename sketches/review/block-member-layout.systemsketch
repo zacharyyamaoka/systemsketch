@@ -42,9 +42,11 @@
       "com.tldraw.shape.arrow": 8,
       "com.tldraw.shape.text": 4,
       "com.tldraw.shape.line": 5,
-      "com.tldraw.shape.block": 8,
+      "com.tldraw.shape.block": 11,
       "com.tldraw.shape.branch": 0,
       "com.tldraw.shape.loop": 0,
+      "com.tldraw.shape.code": 0,
+      "com.tldraw.shape.floating-port": 0,
       "com.tldraw.shape.branch-arm": 0,
       "com.tldraw.shape.connection": 6,
       "com.tldraw.binding.arrow": 1,
@@ -96,7 +98,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3uYOV",
+      "index": "a3xUuC",
       "typeName": "shape"
     },
     {
@@ -106,6 +108,14 @@
       "meta": {},
       "id": "pointer:pointer",
       "typeName": "pointer"
+    },
+    {
+      "name": "",
+      "color": "#BD54C6",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:UJ1fNkBoIovJUToOV0ZRQ",
+      "typeName": "user"
     },
     {
       "x": 20,
@@ -149,7 +159,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a2Tn2",
+      "index": "a27Pv",
       "typeName": "shape"
     },
     {
@@ -194,7 +204,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a40Hv",
+      "index": "a4Y2j",
       "typeName": "shape"
     },
     {
@@ -239,13 +249,13 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3TlA",
+      "index": "a3rWE",
       "typeName": "shape"
     },
     {
-      "x": 0,
-      "y": 0,
-      "z": 1,
+      "x": 46.39175257731959,
+      "y": 28.311855670103114,
+      "z": 0.9639751552795031,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -266,6 +276,9 @@
         "title": "__init__()",
         "description": "Initialize the instance",
         "blockType": "Function",
+        "foldable": false,
+        "folded": false,
+        "autoResize": false,
         "icon": "",
         "view": "expanded",
         "views": {
@@ -287,11 +300,14 @@
           }
         },
         "showDescription": true,
+        "showFooter": true,
+        "showHeaderDivider": true,
         "notes": "",
         "portLayout": "inline",
         "memberLayout": "inset",
+        "insetBackground": "white",
         "state": "normal",
-        "definitionId": "ZZizf452IhLC9_mMYyJRL",
+        "definitionId": "A-4iDoOd8hQd-gjqJZxB4",
         "inputs": [
           {
             "id": "self",
@@ -303,7 +319,7 @@
         "outputs": [],
         "definitionKey": "init"
       },
-      "index": "a1zKc",
+      "index": "a1MUk",
       "typeName": "shape"
     },
     {
@@ -407,6 +423,9 @@
         "title": "__call__()",
         "description": "Run the instance",
         "blockType": "Function",
+        "foldable": false,
+        "folded": false,
+        "autoResize": false,
         "icon": "",
         "view": "expanded",
         "views": {
@@ -428,11 +447,14 @@
           }
         },
         "showDescription": true,
+        "showFooter": true,
+        "showHeaderDivider": true,
         "notes": "",
         "portLayout": "inline",
         "memberLayout": "inset",
+        "insetBackground": "white",
         "state": "normal",
-        "definitionId": "AlFW5yW21U-Mt_Erk8ksL",
+        "definitionId": "6h53lQZ62CLM-Y1v7lUJa",
         "inputs": [
           {
             "id": "self",
@@ -451,7 +473,7 @@
         ],
         "definitionKey": "call"
       },
-      "index": "a2eBE",
+      "index": "a2BJ2",
       "typeName": "shape"
     },
     {
@@ -518,14 +540,6 @@
       "typeName": "instance"
     },
     {
-      "name": "",
-      "color": "#39B178",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:7Ksz90HyijGIbkuHCNkI6",
-      "typeName": "user"
-    },
-    {
       "x": 530,
       "y": 100,
       "rotation": 0,
@@ -540,6 +554,9 @@
         "title": "Class",
         "description": "Two ordinary direct child Blocks",
         "blockType": "Definition",
+        "foldable": false,
+        "folded": false,
+        "autoResize": false,
         "icon": "",
         "view": "expanded",
         "views": {
@@ -561,17 +578,20 @@
           }
         },
         "showDescription": true,
+        "showFooter": true,
+        "showHeaderDivider": true,
         "notes": "",
         "portLayout": "inline",
         "memberLayout": "inset",
+        "insetBackground": "white",
         "state": "normal",
-        "definitionId": "N3odkwxBlkMGBRinylF4F",
+        "definitionId": "M5b2tTlJtlNQ2PQGpcjle",
         "inputs": [],
         "outputs": [],
         "definitionKey": "Class"
       },
       "parentId": "page:page",
-      "index": "a19Uw",
+      "index": "a1xmz",
       "typeName": "shape"
     },
     {
@@ -615,7 +635,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a2u0bV",
+      "index": "a2mSTV",
       "typeName": "shape"
     }
   ]
