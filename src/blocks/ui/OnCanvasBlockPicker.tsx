@@ -3,13 +3,15 @@
  *
  * Anchored to the loose terminal in viewport space and re-pinned on every
  * camera change, so it stays welded to the cable end while the board moves. It
- * is deliberately NOT a tldraw dialog: a dialog would take the canvas's focus
- * and swallow the Escape that should cancel the cable.
+ * It is deliberately NOT a tldraw dialog: this compact command surface moves
+ * focus to its first action, while its document-level guard keeps Escape and
+ * Undo bound to cancelling the unfinished cable rather than a modal lifecycle.
  */
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import {
 	Vec,
 	stopEventPropagation,
+	useAtom,
 	useEditor,
 	useQuickReactor,
 	useValue,
@@ -30,6 +32,7 @@ import {
 	CONNECTION_SHAPE_TYPE,
 	type ConnectionTerminal,
 } from '../connections/connectionModel'
+import { useInterfaceScale } from '../../settings/interfaceScale'
 
 /** The loose terminal the offer sits on, in page space. */
 function pickerAnchorPagePoint(
@@ -49,6 +52,8 @@ export function OnCanvasBlockPicker() {
 	// exists, and a ref assignment is invisible to it. Without this the offer
 	// paints at the viewport origin on the frame it opens.
 	const [container, setContainer] = useState<HTMLDivElement | null>(null)
+	const sizeEpoch = useAtom('on-canvas block picker size', 0)
+	const interfaceScale = useInterfaceScale()
 	const open = useValue('block picker open', () => blockPickerState.get(editor) !== null, [editor])
 	// Only the presets that can answer: a cable looking for a producer is not
 	// helped by a Sink, and one looking for a consumer not by a Source.
@@ -62,6 +67,19 @@ export function OnCanvasBlockPicker() {
 	)
 
 	const close = useCallback(() => closeBlockPicker(editor), [editor])
+	const quickPresets = presets.filter((preset) => preset.group === 'quick')
+	const ordinaryPresets = presets.filter((preset) => preset.group !== 'quick')
+
+	useEffect(() => {
+		if (!container) return
+		const observer = new ResizeObserver(() => sizeEpoch.update((epoch) => epoch + 1))
+		observer.observe(container)
+		return () => observer.disconnect()
+	}, [container, sizeEpoch])
+
+	useEffect(() => {
+		sizeEpoch.update((epoch) => epoch + 1)
+	}, [interfaceScale, sizeEpoch])
 
 	// Track the cable's live terminal rather than the point it was opened at:
 	// the board can be panned or zoomed while the picker is up.
@@ -69,6 +87,8 @@ export function OnCanvasBlockPicker() {
 		'on canvas block picker position',
 		() => {
 			const state = blockPickerState.get(editor)
+			const viewportBounds = editor.getViewportScreenBounds()
+			sizeEpoch.get()
 			if (!state || !container) return
 			const connection = editor.getShape<ConnectionShape>(state.connectionId)
 			if (!connection || connection.type !== CONNECTION_SHAPE_TYPE) {
@@ -77,24 +97,33 @@ export function OnCanvasBlockPicker() {
 			}
 			const page = pickerAnchorPagePoint(editor, connection, state.terminal)
 			const viewport = editor.pageToViewport(page)
-			// Custom properties rather than `transform`, so the stylesheet keeps
-			// ownership of how the interface scale is applied on top of the anchor.
-			container.style.setProperty('--systemsketch-block-picker-x', `${viewport.x}px`)
-			container.style.setProperty('--systemsketch-block-picker-y', `${viewport.y}px`)
+			const margin = 8
+			const scale = (interfaceScale || 100) / 100
+			const width = container.offsetWidth * scale
+			const maxHeight = Math.max(120, viewportBounds.h - margin * 2) / scale
+			container.style.maxHeight = `${maxHeight}px`
+			const height = Math.min(container.scrollHeight, maxHeight) * scale
+			const first = container.querySelector<HTMLElement>('.OnCanvasBlockPicker-item')
+			const anchor = ((first?.offsetTop ?? 0) + (first?.offsetHeight ?? 0) / 2) * scale
 
-			// A cable that reaches LEFT for a producer must not have the panel laid
-			// over it, so the panel goes on the far side of the terminal. The one
-			// exception is a terminal close enough to the viewport's left edge that
-			// the panel would land entirely off-screen: an invisible offer is worse
-			// than one on the "wrong" side, and the cable still points the way.
-			const wantsLeft = state.wantsProducer
-			const fitsLeft = viewport.x - container.offsetWidth >= 0
-			container.style.setProperty(
-				'--systemsketch-block-picker-side',
-				wantsLeft && fitsLeft ? '-100%' : '0px',
-			)
+			// Prefer the flow-facing side, then flip and finally clamp. Quick access
+			// has to remain quick at the bottom and right edges too; otherwise the
+			// newly promoted second and third choices can be outside the viewport.
+			const leftOfCable = viewport.x - width
+			const rightOfCable = viewport.x
+			const preferred = state.wantsProducer
+				? (leftOfCable >= margin ? leftOfCable : rightOfCable)
+				: (rightOfCable + width <= viewportBounds.w - margin ? rightOfCable : leftOfCable)
+			const x = Math.min(Math.max(preferred, margin), Math.max(margin, viewportBounds.w - width - margin))
+			const idealY = viewport.y - anchor
+			const y = Math.min(Math.max(idealY, margin), Math.max(margin, viewportBounds.h - height - margin))
+
+			// Custom properties rather than `transform`, so the stylesheet keeps
+			// ownership of the interface scale applied at this measured top-left.
+			container.style.setProperty('--systemsketch-block-picker-x', `${Math.round(x)}px`)
+			container.style.setProperty('--systemsketch-block-picker-y', `${Math.round(y)}px`)
 		},
-		[editor, container],
+		[editor, container, interfaceScale, sizeEpoch],
 	)
 
 	// The offer belongs to the select tool. Deriving that from the live tool id
@@ -106,19 +135,21 @@ export function OnCanvasBlockPicker() {
 		'on canvas block picker tool guard',
 		() => {
 			if (blockPickerState.get(editor) === null) return
-			if (editor.getCurrentToolId() === 'select') return
+			if (editor.getCurrentToolId() === 'select' && !editor.getIsReadonly()) return
 			closeBlockPicker(editor)
 		},
 		[editor],
 	)
 
-	// Escape closes the offer without also cancelling anything behind it. The
-	// listener is on the container's document so it fires before tldraw's own
-	// global cancel reaches the select tool.
+	// Escape or Undo closes the unfinished offer without also cancelling or
+	// undoing anything behind it. The listener is on the container's document so
+	// it fires before tldraw's own global shortcut reaches the select tool.
 	useEffect(() => {
 		if (!open) return
 		const onKeyDown = (event: KeyboardEvent) => {
-			if (event.key !== 'Escape') return
+			const cancelsOffer = event.key === 'Escape'
+				|| ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z')
+			if (!cancelsOffer) return
 			event.stopPropagation()
 			event.preventDefault()
 			close()
@@ -128,16 +159,15 @@ export function OnCanvasBlockPicker() {
 		return () => target.removeEventListener('keydown', onKeyDown, { capture: true })
 	}, [open, close, editor])
 
-	// Where the cable should meet the panel: the vertical centre of the first
-	// option, because that is the one the wire would flow into. Measured from
-	// the rendered panel so it survives the option list changing, and re-measured
-	// per open because the interface scale changes what "first row" measures.
+	// A loose cable is already a pointer gesture, but its resulting choice must
+	// not become a pointer trap. Focus the first quick action and provide the
+	// conventional menu-key path through all remaining choices.
 	useEffect(() => {
 		if (!open || !container) return
-		const first = container.querySelector<HTMLElement>('.OnCanvasBlockPicker-item')
-		if (!first) return
-		const anchor = first.offsetTop + first.offsetHeight / 2
-		container.style.setProperty('--systemsketch-block-picker-anchor', `${anchor}px`)
+		const frame = requestAnimationFrame(() => {
+			container.querySelector<HTMLButtonElement>('.OnCanvasBlockPicker-item')?.focus()
+		})
+		return () => cancelAnimationFrame(frame)
 	}, [open, container])
 
 	// A press anywhere else is a decline, not a pick.
@@ -157,6 +187,13 @@ export function OnCanvasBlockPicker() {
 	const pick = (preset: BlockPickerPreset) => {
 		const state = blockPickerState.get(editor)
 		if (!state) return
+		// The host can turn a board readonly while this transient offer is open.
+		// Decline through the same rollback path instead of asking tldraw to reject
+		// only the new Block and leaving the already-created loose cable behind.
+		if (editor.getIsReadonly()) {
+			close()
+			return
+		}
 		const connection = editor.getShape<ConnectionShape>(state.connectionId)
 		if (!connection || connection.type !== CONNECTION_SHAPE_TYPE) {
 			close()
@@ -169,6 +206,21 @@ export function OnCanvasBlockPicker() {
 		state.onPick(preset, Vec.From(page))
 	}
 
+	const onMenuKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+		if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return
+		const items = Array.from(container?.querySelectorAll<HTMLButtonElement>('.OnCanvasBlockPicker-item') ?? [])
+		if (items.length === 0) return
+		const current = items.indexOf(editor.getContainer().ownerDocument.activeElement as HTMLButtonElement)
+		let next = current
+		if (event.key === 'Home') next = 0
+		else if (event.key === 'End') next = items.length - 1
+		else if (event.key === 'ArrowDown') next = current < 0 ? 0 : (current + 1) % items.length
+		else next = current < 0 ? items.length - 1 : (current - 1 + items.length) % items.length
+		event.preventDefault()
+		event.stopPropagation()
+		items[next]?.focus()
+	}
+
 	return (
 		<div
 			ref={setContainer}
@@ -177,9 +229,11 @@ export function OnCanvasBlockPicker() {
 			role="menu"
 			aria-label="Insert a Block"
 			onPointerDown={stopEventPropagation}
+			onKeyDown={onMenuKeyDown}
 		>
-			<div className="OnCanvasBlockPicker-title">Insert a Block</div>
-			{presets.map((preset) => (
+			<div className="OnCanvasBlockPicker-title" role="heading" aria-level={1}>Insert a Block</div>
+			{quickPresets.length > 0 && <div className="OnCanvasBlockPicker-group" role="heading" aria-level={2} data-testid="block-picker-quick-insert">Quick insert</div>}
+			{quickPresets.map((preset) => (
 				<button
 					key={preset.id}
 					type="button"
@@ -197,6 +251,12 @@ export function OnCanvasBlockPicker() {
 						{preset.outputs}
 						{' out'}
 					</small>
+				</button>
+			))}
+			{quickPresets.length > 0 && ordinaryPresets.length > 0 && <div className="OnCanvasBlockPicker-group" role="heading" aria-level={2}>Other Blocks</div>}
+			{ordinaryPresets.map((preset) => (
+				<button key={preset.id} type="button" role="menuitem" className="OnCanvasBlockPicker-item" data-testid={`block-picker-${preset.id}`} onPointerDown={stopEventPropagation} onClick={() => pick(preset)}>
+					<BlockIconGlyph name={preset.icon} size={16} /><span>{preset.label}</span><small>{preset.inputs}{' in · '}{preset.outputs}{' out'}</small>
 				</button>
 			))}
 		</div>

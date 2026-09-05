@@ -6,7 +6,7 @@
  *   painted so they cannot be mistaken for a resolved name or type. Nothing is
  *   inferred from the cables that land on it.
  *
- *   A cable dropped on empty canvas offers Split; the projection that lands
+ *   A cable dropped on empty canvas offers Unbundle; the projection that lands
  *   takes the cable's type as its title and inlet, and its rows are accessors:
  *   typed without a dot they gain one, and a chain stays a single row.
  *
@@ -64,6 +64,9 @@ const blocks = (page) => evaluate(page, `JSON.stringify(
       blockType: shape.props.blockType,
       inputs: shape.props.inputs, outputs: shape.props.outputs,
     })))`).then(JSON.parse)
+
+const shapeIds = (page) => evaluate(page, `JSON.stringify(
+  window.__systemsketch.editor.getCurrentPageShapes().map((shape) => shape.id).sort())`).then(JSON.parse)
 
 const blockById = async (page, id) => (await blocks(page)).find((block) => block.id === id) ?? null
 
@@ -242,27 +245,60 @@ async function main() {
     await deselect(page, { x: 1100, y: 820 })
     await shot(page, 'unknown-projection-marked-port.png')
 
-    // ---- a cable dropped on nothing offers Split -----------------------------
+    // ---- a cable dropped on nothing offers Unbundle -------------------------
     const recordOut = await box(page, portDot(RECORD, 'output', 'out_1'))
+    const beforeQuickInsert = await shapeIds(page)
     const asked = await dragFrom(page, recordOut,
       { x: recordOut.cx + 420, y: recordOut.cy + 60 },
       { shotName: 'unknown-projection-picker-drag.png' })
     check('PICK-1', 'a cable dropped on nothing asks what should take it', asked.offered, true)
     await waitFor(page, `document.querySelector('[data-testid="block-picker-projection"]')`,
-      'Split in the offer')
+      'Unbundle in Quick insert')
+    const quickInsert = JSON.parse(await evaluate(page, `JSON.stringify({
+      heading: document.querySelector('[data-testid="block-picker-quick-insert"]')?.textContent?.trim(),
+      rows: Array.from(document.querySelectorAll('.OnCanvasBlockPicker-item')).map((row) => row.textContent?.trim())
+    })`))
+    check('PICK-QUICK', 'Quick insert visibly prioritizes Bundle, Unbundle, and Copy before ordinary presets',
+      { heading: quickInsert.heading, rows: quickInsert.rows.slice(0, 3).map((row) => row.replace(/\\s+/g, ' ')) },
+      { heading: 'Quick insert', rows: ['Bundle2 in · 1 out', 'Unbundle1 in · 1 out', 'Copy1 in · 1 out'] })
+    // Exercise the real pointer path for each quick choice. Undo must remove
+    // the new Block and its cable together: picker creation is one history run.
+    const bundleChoice = await box(page, '[data-testid="block-picker-bundle"]')
+    await clickAt(page, bundleChoice.cx, bundleChoice.cy)
+    await delay(350)
+    check('PICK-BUNDLE', 'Bundle is a real Port Block on the loose cable',
+      (await blocks(page)).some((block) => block.blockType === 'bundle'), true)
+    await shortcut(page, 'z', 'KeyZ', 2); await delay(300)
+    check('PICK-BUNDLE-UNDO', 'one canvas undo restores the exact pre-drag board — no loose cable remains',
+      await shapeIds(page), beforeQuickInsert)
+    const againOut = await box(page, portDot(RECORD, 'output', 'out_1'))
+    const beforeCopy = await shapeIds(page)
+    await dragFrom(page, againOut, { x: againOut.cx + 420, y: againOut.cy + 60 })
+    await waitFor(page, `document.querySelector('[data-testid="block-picker-copy"]')`, 'Copy in the offer')
+    const copyChoice = await box(page, '[data-testid="block-picker-copy"]')
+    await clickAt(page, copyChoice.cx, copyChoice.cy)
+    await delay(350)
+    check('PICK-COPY', 'Copy is a real shallow-copy Block on the loose cable',
+      (await blocks(page)).some((block) => block.blockType === 'copy'), true)
+    await shortcut(page, 'z', 'KeyZ', 2); await delay(300)
+    check('PICK-COPY-UNDO', 'Copy also completes as one gesture and one undo',
+      await shapeIds(page), beforeCopy)
+    const finalOut = await box(page, portDot(RECORD, 'output', 'out_1'))
+    await dragFrom(page, finalOut, { x: finalOut.cx + 420, y: finalOut.cy + 60 })
+    await waitFor(page, `document.querySelector('[data-testid="block-picker-projection"]')`, 'Unbundle re-opened')
     await shot(page, 'unknown-projection-picker-open.png')
-    const split = await box(page, '[data-testid="block-picker-projection"]')
-    await clickAt(page, split.cx, split.cy)
+    const unbundle = await box(page, '[data-testid="block-picker-projection"]')
+    await clickAt(page, unbundle.cx, unbundle.cy)
     await delay(700)
     check('PICK-1B', 'a self-titled projection asks for the MEMBER, not for a name',
       await evaluate(page, `Boolean(document.querySelector('[data-testid^="block-inline-port-name-outputs-"]'))`),
       true)
     await key(page, 'Escape', 'Escape')
     await delay(300)
-    const projection = (await blocks(page)).find((block) => block.blockType === 'projection') ?? null
-    check('PICK-2', 'Split makes a projection, titled by the type that arrived',
+    const projection = (await blocks(page)).find((block) => block.blockType === 'unbundle') ?? null
+    check('PICK-2', 'Unbundle makes a canonical projection, titled by the type that arrived',
       projection ? { blockType: projection.blockType, title: projection.title } : null,
-      { blockType: 'projection', title: 'ObjectRecord' })
+      { blockType: 'unbundle', title: 'ObjectRecord' })
     check('PICK-3', 'the inlet is the type itself and carries no variable name',
       projection ? { name: projection.inputs[0].name, type: projection.inputs[0].type } : null,
       { name: '', type: 'ObjectRecord' })

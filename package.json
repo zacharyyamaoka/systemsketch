@@ -39,6 +39,7 @@
     "test:arrow-sync": "node tests/edge_arrow_sync_smoke.mjs",
     "test:pill": "node tests/literal_pill_smoke.mjs",
     "test:unknown": "node tests/unknown_projection_smoke.mjs",
+    "test:bundle-quick-insert": "node tests/bundle_unbundle_copy_quick_insert_smoke.mjs",
     "test:ui-hardening": "node tests/ui_hardening_smoke.mjs",
     "test:recorder": "node tests/recorder_smoke.mjs",
     "plugin:build": "npm --prefix vscode-systemsketch run build",
@@ -123,7 +124,8 @@
     "test:effect-follow": "node tests/effect_port_follow_smoke.mjs",
     "test:semantic-roles": "node tests/semantic_role_inheritance_smoke.mjs",
     "test:named-landmarks": "node tests/named_landmarks_smoke.mjs",
-    "test:frames-panel": "node tests/frames_panel_smoke.mjs"
+    "test:frames-panel": "node tests/frames_panel_smoke.mjs",
+    "test:semantic-stock-blocks": "node tests/semantic_stock_blocks_smoke.mjs"
   },
   "dependencies": {
     "elkjs": "0.12.0",

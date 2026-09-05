@@ -213,8 +213,7 @@
   color: var(--ss-text-muted);
   font-size: 11px;
   line-height: 1.45;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: pre-wrap;
 }
 
 /* The burger grammar is lines only. Full rules split async groups; right-half

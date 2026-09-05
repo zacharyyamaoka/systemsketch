@@ -3,10 +3,46 @@ import { describe, expect, it } from 'vitest'
 
 import { getDefaultBlockProps } from '../blockModel'
 import { createValueBlockProps } from '../valueBlock'
+import { createBundleProps, createClockTriggerProps, createSelectProps, createSetAttributesProps } from '../stockBlocks'
 import { BlockInspectorContent, type BlockInspectorActions } from './BlockInspector'
 import { BlockSelectionMiniMenu } from './BlockSelectionMiniMenu'
 
 describe('Block inspector content', () => {
+	it('gives stock Blocks their honest configuration and batched member controls', () => {
+		const setAttributes = renderToStaticMarkup(
+			<BlockInspectorContent props={createSetAttributesProps()} status="selected" actions={noopActions} />,
+		)
+		expect(setAttributes).toContain('data-inspector-section="Set attributes"')
+		expect(setAttributes).toContain('data-testid="set-attributes-add-member"')
+		expect(setAttributes).toContain('preserve every member not listed')
+		expect(setAttributes).toContain('Source update semantics unresolved')
+
+		const select = renderToStaticMarkup(
+			<BlockInspectorContent props={createSelectProps()} status="selected" actions={noopActions} />,
+		)
+		expect(select).toContain('true_value if condition else false_value')
+
+		const clock = renderToStaticMarkup(
+			<BlockInspectorContent props={createClockTriggerProps()} status="selected" actions={noopActions} />,
+		)
+		expect(clock).toContain('data-inspector-section="Clock trigger"')
+		expect(clock).toContain('aria-label="Clock trigger rate in hertz"')
+		expect(clock).toContain('Clock · 10 Hz. This prototype declares intent and does not schedule.')
+		expect(clock).toContain('Clock annotation')
+		expect(clock).toContain('derived Clock source/rate declaration stays visible')
+		expect(clock).not.toContain('Shown at a glance')
+	})
+
+  it('turns Bundle input addition into a named member update', () => {
+    const html = renderToStaticMarkup(
+      <BlockInspectorContent props={createBundleProps()} status="selected" actions={noopActions} />,
+    )
+    expect(html).toContain('data-testid="bundle-add-member"')
+    expect(html).toContain('aria-label="Add Bundle member update"')
+    expect(html).not.toContain('aria-label="Add input port"')
+    expect(html).toContain('aria-label="Add output port"')
+  })
+
   it('renders the donor information architecture without the old selected header or Connections tab', () => {
     const html = renderToStaticMarkup(
       <BlockInspectorContent
@@ -215,6 +251,7 @@ const noopActions: BlockInspectorActions = {
   updateDetails() {},
   setView() {},
   addPort() {},
+  addBundleMember() {},
   updatePort() {},
   removePort() {},
   movePort() {},

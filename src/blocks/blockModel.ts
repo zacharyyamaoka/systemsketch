@@ -229,6 +229,20 @@ export const BlockPort = T.object({
 })
 export type BlockPort = T.TypeOf<typeof BlockPort>
 
+/**
+ * Small, persisted authoring facts for the curated stock Blocks.
+ *
+ * This is deliberately optional. A Block remains an open canvas primitive and
+ * a newer curated preset must not make older hand-authored Blocks unreadable.
+ * Runtime availability is deliberately not document state: an adapter owns
+ * that live capability separately from a board's authoring declaration.
+ */
+export const StockBlockConfig = T.object({
+	triggerSource: T.literalEnum('clock', 'external', 'manual').optional(),
+	rateHz: T.number.optional(),
+})
+export type StockBlockConfig = T.TypeOf<typeof StockBlockConfig>
+
 /** An effect output's id is derived from the input it writes back to. */
 export const EFFECT_PORT_PREFIX = 'effect:'
 
@@ -319,6 +333,7 @@ export const BLOCK_SHAPE_PROPS = {
 	draftOrdinal: T.number.optional(),
 	inputs: T.arrayOf(BlockPort),
 	outputs: T.arrayOf(BlockPort),
+	stockConfig: StockBlockConfig.optional(),
 } as const
 
 declare module 'tldraw' {
@@ -349,6 +364,7 @@ declare module 'tldraw' {
 			draftOrdinal?: number
 			inputs: BlockPort[]
 			outputs: BlockPort[]
+			stockConfig?: StockBlockConfig
 		}
 	}
 }
@@ -563,10 +579,13 @@ export function isUnresolvedBlock(props: BlockShapeProps): boolean {
  * about the incoming *type*, never about the variable that happened to arrive,
  * so one projection reads the same at every call site.
  */
-export const PROJECTION_BLOCK_TYPE = 'projection'
+// Compatibility export: old documents named this primitive `projection`.
+// Fresh Blocks persist the clearer data-wire vocabulary, `unbundle`.
+export const PROJECTION_BLOCK_TYPE = 'unbundle'
+export const LEGACY_PROJECTION_BLOCK_TYPES = new Set(['projection', 'unbundle'])
 
 export function isProjectionBlock(props: BlockShapeProps): boolean {
-	return props.blockType.trim().toLowerCase() === PROJECTION_BLOCK_TYPE
+	return LEGACY_PROJECTION_BLOCK_TYPES.has(props.blockType.trim().toLowerCase())
 }
 
 /**
@@ -591,7 +610,7 @@ export function makeProjectionProps(props: BlockShapeProps, incoming: string): B
 	return {
 		...props,
 		title: takesTitle ? type : props.title,
-		blockType: already ? props.blockType : PROJECTION_BLOCK_TYPE,
+		blockType: PROJECTION_BLOCK_TYPE,
 		inputs: takesType
 			? props.inputs.map((port, index) => (index === 0 ? { ...port, type } : port))
 			: props.inputs,

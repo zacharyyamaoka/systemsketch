@@ -36,8 +36,21 @@ import { commitBlockDefinitionName, definitionBadge } from '../definitions/defin
 import { getBlockPortConnections, type BlockPortConnection } from '../connections/blockPorts'
 import { valueBlockInlet, valueBlockName, valueBlockOutlet } from '../valueBlock'
 import {
+	appendBundleMemberProps,
+	appendSetAttributesMemberProps,
+	clockTriggerLabel,
+	isClockTriggerBlock,
+	isSelectBlock,
+	isSetAttributesBlock,
+	normalizeClockTriggerConfig,
+	stockBlockSourceProjection,
+	isBundleBlock,
+} from '../stockBlocks'
+import {
+  appendBundleMember,
   appendBlockPort,
   appendBlockPortProps,
+	appendSetAttributesMember,
   getBlockInspectorContext,
   getOnlySelectedBlock,
   sameBlockInspectorContext,
@@ -82,6 +95,10 @@ export interface BlockInspectorActions {
   updateDetails(patch: BlockDetailsPatch, options?: BlockEditOptions): void
   setView(view: BlockPresentationView): void
   addPort(side: BlockPortSide): void
+	/** Add a stable named member-update row to the curated Set attributes Block. */
+	addSetAttributesMember?(): void
+	/** Add a stable `.field` update row to the curated Bundle Block. */
+	addBundleMember?(): void
   updatePort(
     side: BlockPortSide,
     portId: string,
@@ -289,12 +306,14 @@ function NotesEditor({
 function DescriptionEditor({
   value,
   visible,
+  clockAnnotation = false,
   disabled,
   actions,
   onToggle,
 }: {
   value: string
   visible: boolean
+  clockAnnotation?: boolean
   disabled: boolean
   actions?: BlockInspectorActions
   onToggle(): void
@@ -312,7 +331,7 @@ function DescriptionEditor({
   return (
     <div className="block-inspector__display-description">
       <div className="block-inspector__field-header">
-        <label htmlFor={descriptionId}>Display description</label>
+        <label htmlFor={descriptionId}>{clockAnnotation ? 'Clock annotation' : 'Display description'}</label>
         <span
           className="block-inspector__character-count"
           data-over-limit={draft.length > DISPLAY_DESCRIPTION_LIMIT || undefined}
@@ -324,7 +343,7 @@ function DescriptionEditor({
           className="block-inspector__visibility-button"
           disabled={disabled}
           aria-pressed={visible}
-          aria-label={`${visible ? 'Hide' : 'Show'} display description on block`}
+          aria-label={`${visible ? 'Hide' : 'Show'} ${clockAnnotation ? 'Clock annotation' : 'display description'} on block`}
           title={`${visible ? 'Hide' : 'Show'} on block`}
           onClick={onToggle}
         >
@@ -340,7 +359,9 @@ function DescriptionEditor({
         placeholder={EMPTY_FIELD_GUIDANCE.block.displayDescription}
       />
       <p className="block-inspector__field-help">
-        Shown at a glance · keep implementation detail in Notes.
+        {clockAnnotation
+          ? 'Optional canvas annotation. The derived Clock source/rate declaration stays visible.'
+          : 'Shown at a glance · keep implementation detail in Notes.'}
       </p>
     </div>
   )
@@ -440,6 +461,91 @@ function PillSection({
       </p>
     </section>
   )
+}
+
+/** Curated configuration lives beside the existing ordinary Block fields. */
+function StockBlockSection({
+	props,
+	actions,
+}: {
+	props: BlockShapeProps
+	actions?: BlockInspectorActions
+}) {
+	if (isSetAttributesBlock(props)) {
+		return (
+			<section className="block-inspector__section" data-inspector-section="Set attributes">
+				<div className="block-inspector__section-title">Set attributes</div>
+				<p className="block-inspector__hint">
+					The record inlet and outlet remain ordinary data. Add only members that this update writes; all unnamed members pass through unchanged.
+				</p>
+				<p className="block-inspector__hint" data-testid="set-attributes-source-status">
+					Source update semantics unresolved: direct mutation, immutable replacement, or an opaque helper.
+				</p>
+				<button
+					type="button"
+					className="block-inspector__tag-ghost"
+					disabled={!actions}
+					data-testid="set-attributes-add-member"
+					onClick={() => actions?.addSetAttributesMember?.()}
+				>
+					<PlusIcon />
+					Add member update
+				</button>
+			</section>
+		)
+	}
+	if (isSelectBlock(props)) {
+		const source = stockBlockSourceProjection(props)
+		return (
+			<section className="block-inspector__section" data-inspector-section="Select source">
+				<div className="block-inspector__section-title">Select source notation</div>
+				<p className="block-inspector__hint" data-testid="select-source-notation">
+					<code>{source}</code>
+				</p>
+			</section>
+		)
+	}
+	if (!isClockTriggerBlock(props)) return null
+	const config = normalizeClockTriggerConfig(props.stockConfig)
+	const setConfig = (patch: Partial<typeof config>) => actions?.updateDetails({
+		stockConfig: normalizeClockTriggerConfig({ ...config, ...patch }),
+	})
+	return (
+		<section className="block-inspector__section" data-inspector-section="Clock trigger">
+			<div className="block-inspector__section-title">Clock / Trigger</div>
+			<label className="block-inspector__field">
+				<span>Source</span>
+				<select
+					aria-label="Clock trigger source"
+					disabled={!actions}
+					value={config.triggerSource}
+					onChange={(event) => setConfig({ triggerSource: event.currentTarget.value as 'clock' | 'external' | 'manual' })}
+				>
+					<option value="clock">clock</option>
+					<option value="external">external trigger</option>
+					<option value="manual">manual trigger</option>
+				</select>
+			</label>
+			<label className="block-inspector__field">
+				<span>Rate (Hz)</span>
+				<input
+					type="number"
+					min="0.000001"
+					step="any"
+					aria-label="Clock trigger rate in hertz"
+					disabled={!actions || config.triggerSource !== 'clock'}
+					value={config.rateHz ?? ''}
+					onChange={(event) => {
+						const rateHz = Number(event.currentTarget.value)
+						if (Number.isFinite(rateHz) && rateHz > 0) setConfig({ rateHz })
+					}}
+				/>
+			</label>
+			<p className="block-inspector__hint" data-testid="clock-trigger-runtime-status">
+				{clockTriggerLabel(config)}. This prototype declares intent and does not schedule.
+			</p>
+		</section>
+	)
 }
 
 const sectionKey = (row: number, branch: number) => `${row}:${branch}`
@@ -747,6 +853,7 @@ function PortSection({
   const title = side === 'inputs' ? 'Inputs' : 'Outputs'
   const ports = props[side]
   const visiblePorts = ports.filter((port) => port.visible)
+  const addsBundleMember = side === 'inputs' && isBundleBlock(props)
   const shown = (candidates: readonly BlockPort[]) => (
     managing ? candidates : candidates.filter((port) => port.visible)
   )
@@ -1061,6 +1168,19 @@ function PortSection({
 			>
 				Tags
 			</button>
+			{/** WHY: shape editing and semantic annotation are independent, so neither action hides the other. */}
+			{side === 'inputs' && isSetAttributesBlock(props) ? (
+				<button
+					type="button"
+					className="block-inspector__icon-button"
+					disabled={!actions}
+					aria-label="Add attribute member update"
+					data-testid="set-attributes-add-member-inline"
+					onClick={() => actions?.addSetAttributesMember?.()}
+				>
+					<PlusIcon />
+				</button>
+			) : null}
           <button
             type="button"
             className={`block-inspector__count-pill${managing ? ' is-active' : ''}`}
@@ -1076,8 +1196,9 @@ function PortSection({
             type="button"
             className="block-inspector__icon-button"
             disabled={!actions}
-            aria-label={`Add ${side === 'inputs' ? 'input' : 'output'} port`}
-            onClick={() => actions?.addPort(side)}
+            aria-label={addsBundleMember ? 'Add Bundle member update' : `Add ${side === 'inputs' ? 'input' : 'output'} port`}
+            data-testid={addsBundleMember ? 'bundle-add-member' : undefined}
+				onClick={() => addsBundleMember ? actions?.addBundleMember?.() : actions?.addPort(side)}
           >
             <PlusIcon />
           </button>
@@ -1244,12 +1365,14 @@ export function BlockInspectorContent({
             <DescriptionEditor
               value={props.description}
               visible={props.showDescription}
+              clockAnnotation={isClockTriggerBlock(props)}
               disabled={readOnly}
               actions={actions}
               onToggle={() => actions?.updateDetails({ showDescription: !props.showDescription })}
             />
           </section>
 
+				<StockBlockSection props={props} actions={actions} />
             </>
           )}
 
@@ -1343,6 +1466,11 @@ export function EditorBlockInspector({
   )
   const [localDraft, setLocalDraft] = useState<BlockShapeProps | null>(null)
   const draft = toolDraft ?? localDraft ?? (context.kind === 'tool' ? context.props : null)
+	const isReadonly = useValue(
+		'SystemSketch Block inspector read-only state',
+		() => editor.getIsReadonly(),
+		[editor],
+	)
 
   // What the selected pill is wired to, in words: read from the same cable
   // table the dots read, so the panel and the canvas cannot disagree.
@@ -1379,6 +1507,7 @@ export function EditorBlockInspector({
 
   const actions = useMemo<BlockInspectorActions | undefined>(() => {
     if (context.kind === 'selected') {
+			if (isReadonly) return undefined
       const id = context.shape.id
       // A continuous field writes on every keystroke, so it must not also stamp
       // a history mark per keystroke; `beginEdit` marks once for the gesture.
@@ -1389,6 +1518,8 @@ export function EditorBlockInspector({
           void updateBlockDetails(editor, id, patch, history(options)),
         setView: (view) => void setBlockView(editor, id, view),
         addPort: (side) => void appendBlockPort(editor, id, side),
+		addSetAttributesMember: () => void appendSetAttributesMember(editor, id),
+        addBundleMember: () => void appendBundleMember(editor, id),
         updatePort: (side, portId, patch, options) =>
           void updateBlockPort(editor, id, side, portId, patch, history(options)),
         removePort: (side, portId) => void removeBlockPort(editor, id, side, portId),
@@ -1413,6 +1544,8 @@ export function EditorBlockInspector({
       updateDetails: (patch) => changeDraft((props) => patchBlockDetailsProps(props, patch)),
       setView: (view) => changeDraft((props) => setBlockViewProps(props, view)),
       addPort: (side) => changeDraft((props) => appendBlockPortProps(props, side)),
+		addSetAttributesMember: () => changeDraft((props) => appendSetAttributesMemberProps(props)),
+      addBundleMember: () => changeDraft((props) => appendBundleMemberProps(props)),
       updatePort: (side, portId, patch) =>
         changeDraft((props) => patchBlockPortProps(props, side, portId, patch)),
       removePort: (side, portId) =>
@@ -1422,7 +1555,7 @@ export function EditorBlockInspector({
       movePortToSection: (side, portId, target) =>
         changeDraft((props) => moveBlockPortToSectionProps(props, side, portId, target)),
     }
-  }, [context, editor, localDraft, onToolDraftChange, toolDraft])
+  }, [context, editor, isReadonly, localDraft, onToolDraftChange, toolDraft])
 
   if (context.kind === 'multi') {
     return (
