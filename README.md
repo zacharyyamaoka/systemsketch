@@ -32,6 +32,8 @@ The concise [project preferences](docs/project-preferences.md) record the coding
 SystemSketch: one canonical definition with linked occurrences, a dataflow-first representation,
 Python-shaped projections, and a boundary between program meaning and canvas presentation.
 
+The [cursor primitive-search implementation gallery](docs/primitive-search-implementation-2026-09-04.html) shows the new Fusion-inspired path from **S** to a small, pointer-local search of the canonical Shapes library. Its [three interactive visual variants and prune audit](docs/primitive-search-variants-2026-09-04.html) preserve the two losing directions; Cursor Stack won at 96/100. ArrowUp/Down chooses, Enter inserts at the frozen pointer point, Escape cancels, and the existing Ctrl/Cmd+P, Ctrl/Cmd+K, and Ctrl/Cmd+F command/find modal stays separate. The guided [`primitive-search.systemsketch`](sketches/review/primitive-search.systemsketch) board exercises insertion inside a real expanded function.
+
 The [manual pill-derivation gallery](docs/pill-manual-derivation-2026-09-03.html) makes the whiteboard-hackability preference concrete: wiring leaves a pill’s literal and type alone, while **Adopt cable type** remains available from the selected pill and command palette when that calculation is wanted.
 
 The [linked Definition cable-drag repair gallery](docs/linked-definition-port-drag-2026-09-03.html) records the exact recovered-pipeline crash and its fix: a real port drag now exits tldraw’s atomic pointer update before Definition-body propagation mirrors the cable. The companion [`linked-definition-port-drag.systemsketch`](sketches/review/linked-definition-port-drag.systemsketch) is ready to review on this track.

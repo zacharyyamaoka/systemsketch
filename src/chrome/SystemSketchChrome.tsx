@@ -48,6 +48,7 @@ import { EditorLoopInspector, getOnlySelectedLoop } from '../loop'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
 import { PortableShareButton } from '../export/PortableShareButton'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
+import { PrimitiveSearch } from '../library/PrimitiveSearch'
 import { BoardOverview } from './BoardOverview'
 import { LocalCommentsPanel } from '../comments'
 import { BoardDiagnosticsPanel } from '../diagnostics'
@@ -672,6 +673,7 @@ export function SystemSketchSurfaceHost() {
       <TunnelLayerBar />
       <OnCanvasBlockPicker />
       <HitAreaOverlay />
+      <PrimitiveSearch />
       {leftSurface ? (
         <aside
           id="systemsketch-left-popout"

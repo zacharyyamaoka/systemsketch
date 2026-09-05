@@ -5,6 +5,7 @@ import {
   type TLGeoShape,
   type TLShapeId,
 } from 'tldraw'
+import { isExpandedBlockShape } from '../blocks/blockModel'
 
 export const SHAPE_LIBRARY_SECTIONS = ['Connections', 'Basic', 'Flowchart'] as const
 export type ShapeLibrarySection = (typeof SHAPE_LIBRARY_SECTIONS)[number]
@@ -110,6 +111,11 @@ export interface ShapeLibraryStorage {
   setItem(key: string, value: string): void
 }
 
+export interface ShapeLibraryPoint {
+  x: number
+  y: number
+}
+
 function browserStorage(): ShapeLibraryStorage | undefined {
   try {
     return typeof window === 'undefined' ? undefined : window.localStorage
@@ -166,8 +172,33 @@ export function insertShapeLibraryItem(
   item: ShapeLibraryItem,
   storage = browserStorage(),
 ): TLShapeId {
+  return insertShapeLibraryItemAtPointInternal(
+    editor,
+    item,
+    editor.getViewportPageBounds().center,
+    storage,
+    false,
+  )
+}
+
+/** Insert a catalog primitive with its visual centre at one explicit page point. */
+export function insertShapeLibraryItemAtPoint(
+  editor: Editor,
+  item: ShapeLibraryItem,
+  center: ShapeLibraryPoint,
+  storage = browserStorage(),
+): TLShapeId {
+  return insertShapeLibraryItemAtPointInternal(editor, item, center, storage, true)
+}
+
+function insertShapeLibraryItemAtPointInternal(
+  editor: Editor,
+  item: ShapeLibraryItem,
+  center: ShapeLibraryPoint,
+  storage: ShapeLibraryStorage | undefined,
+  adoptExpandedBlock: boolean,
+): TLShapeId {
   const id = createShapeId()
-  const center = editor.getViewportPageBounds().center
 
   editor.markHistoryStoppingPoint(`insert_library_shape:${item.id}`)
   editor.run(() => {
@@ -197,6 +228,29 @@ export function insertShapeLibraryItem(
           elbowMidPoint: 0.5,
         },
       })
+      const created = editor.getShape(id)
+      const bounds = editor.getShapePageBounds(id)
+      if (created && bounds) {
+        const dx = center.x - bounds.center.x
+        const dy = center.y - bounds.center.y
+        if (Math.abs(dx) > 0.01 || Math.abs(dy) > 0.01) {
+          editor.updateShape({
+            id: created.id,
+            type: created.type,
+            x: created.x + dx,
+            y: created.y + dy,
+          })
+        }
+      }
+    }
+    if (adoptExpandedBlock) {
+      const container = editor.getShapesAtPoint(center, { hitInside: true })
+        .find(isExpandedBlockShape)
+      // WHY: this path promises to place a primitive *where S was pressed*.
+      // Inside a function, visual overlap without parentage would look right
+      // until the function moved. Reparenting preserves the page pose while
+      // making the insertion an honest child of the Expanded Block.
+      if (container) editor.reparentShapes([id], container.id)
     }
     editor.setCurrentTool('select')
     editor.select(id)

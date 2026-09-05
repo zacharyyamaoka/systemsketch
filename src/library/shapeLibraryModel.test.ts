@@ -6,6 +6,7 @@ import {
   SHAPE_LIBRARY_RECENTS_KEY,
   filterShapeLibraryItems,
   insertShapeLibraryItem,
+  insertShapeLibraryItemAtPoint,
   normalizeShapeLibraryRecentIds,
   readShapeLibraryRecentIds,
   rememberShapeLibraryItem,
@@ -23,12 +24,18 @@ function memoryStorage(initial: Record<string, string> = {}): ShapeLibraryStorag
 
 function insertionEditor() {
   const events: string[] = []
-  const createShape = vi.fn((shape: unknown) => { events.push('create'); return shape })
+  let created: any = null
+  const createShape = vi.fn((shape: unknown) => { events.push('create'); created = shape; return shape })
   const editor = {
     getViewportPageBounds: () => ({ center: { x: 500, y: 360 } }),
     markHistoryStoppingPoint: vi.fn(() => { events.push('mark') }),
     run: vi.fn((callback: () => void) => { events.push('run:start'); callback(); events.push('run:end') }),
     createShape,
+    getShape: () => created,
+    getShapePageBounds: () => created ? ({ center: { x: created.x + 90, y: created.y + 36 } }) : null,
+    getShapesAtPoint: vi.fn(() => []),
+    reparentShapes: vi.fn(),
+    updateShape: vi.fn(),
     setCurrentTool: vi.fn(() => { events.push('tool') }),
     select: vi.fn(() => { events.push('select') }),
   } as unknown as Editor
@@ -94,5 +101,37 @@ describe('shared shape library catalog', () => {
       expect(partial.props.kind).toBe(itemId === 'arrow-elbow' ? 'elbow' : 'arc')
       expect(partial.props.bend).toBe(itemId === 'arrow-curve' ? 42 : 0)
     }
+  })
+
+  it('can centre a primitive on the pointer point without changing the shared transaction', () => {
+    const { editor, createShape } = insertionEditor()
+    const id = insertShapeLibraryItemAtPoint(
+      editor,
+      shapeLibraryItemById('rectangle')!,
+      { x: 210, y: 170 },
+      memoryStorage(),
+    )
+
+    expect(createShape).toHaveBeenCalledWith(expect.objectContaining({
+      id,
+      type: 'geo',
+      x: 135,
+      y: 120,
+    }))
+  })
+
+  it('adopts a pointer-inserted primitive into the expanded function under that point', () => {
+    const { editor } = insertionEditor()
+    const container = { id: 'shape:function', type: 'block', props: { view: 'expanded' } }
+    vi.mocked(editor.getShapesAtPoint).mockReturnValue([container] as any)
+
+    const id = insertShapeLibraryItemAtPoint(
+      editor,
+      shapeLibraryItemById('rectangle')!,
+      { x: 210, y: 170 },
+      memoryStorage(),
+    )
+
+    expect(editor.reparentShapes).toHaveBeenCalledWith([id], container.id)
   })
 })
