@@ -1,0 +1,121 @@
+{
+  "checks": [
+    {
+      "id": "FIXTURE-1",
+      "label": "the review board starts with four orientations and a two-leader card",
+      "observed": {
+        "cards": 5,
+        "leaders": 6,
+        "pending": 0
+      },
+      "desired": {
+        "cards": 5,
+        "leaders": 6,
+        "pending": 0
+      },
+      "ok": true
+    },
+    {
+      "id": "TOOL-1",
+      "label": "the System menu arms the two-click Callout tool",
+      "observed": "callout",
+      "desired": "callout",
+      "ok": true
+    },
+    {
+      "id": "CREATE-1",
+      "label": "the first click leaves one live, uncommitted pointed leader under the cursor",
+      "observed": [
+        "callout.placing_card",
+        {
+          "cards": 5,
+          "leaders": 7,
+          "pending": 1
+        }
+      ],
+      "desired": [
+        "callout.placing_card",
+        {
+          "cards": 5,
+          "leaders": 7,
+          "pending": 1
+        }
+      ],
+      "ok": true
+    },
+    {
+      "id": "CREATE-2",
+      "label": "the second click makes an editable stock card and welds both leader terminals",
+      "observed": {
+        "card": "geo",
+        "isEditing": true,
+        "leaderCount": 1,
+        "terminals": [
+          "end",
+          "start"
+        ]
+      },
+      "desired": {
+        "card": "geo",
+        "isEditing": true,
+        "leaderCount": 1,
+        "terminals": [
+          "end",
+          "start"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "id": "LEADER-1",
+      "label": "selected Callout menu enters the second-target picker",
+      "observed": "callout-add-leader",
+      "desired": "callout-add-leader",
+      "ok": true
+    },
+    {
+      "id": "LEADER-2",
+      "label": "a second independent stock arrow attaches to the same card and the clicked detail",
+      "observed": [
+        2,
+        "arrow",
+        true,
+        true
+      ],
+      "desired": [
+        2,
+        "arrow",
+        true,
+        true
+      ],
+      "ok": true
+    },
+    {
+      "id": "KNEE-1",
+      "label": "a selected Callout leader exposes a movable interior rail handle immediately",
+      "observed": true,
+      "desired": true,
+      "ok": true
+    },
+    {
+      "id": "KNEE-2",
+      "label": "dragging that rail authors an elbow route without breaking the card attachment",
+      "observed": {
+        "authored": true,
+        "terminals": 2
+      },
+      "desired": {
+        "authored": true,
+        "terminals": 2
+      },
+      "ok": true
+    },
+    {
+      "id": "CLEAN",
+      "label": "the completed interaction emitted no local browser console errors",
+      "observed": [],
+      "desired": [],
+      "ok": true
+    }
+  ]
+}

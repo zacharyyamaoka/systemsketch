@@ -89,10 +89,16 @@ import {
 } from '../definitions/definitionLinking'
 import { canWrapSelection, WRAP_TARGET_DESCRIPTORS } from '../../frames/wrapSelection'
 import { useRunWrap } from '../../frames/WrapSelectionControl'
+import { isCalloutCard, startAddingCalloutLeader } from '../../callout'
 
 function onlySelectedBlock(editor: ReturnType<typeof useEditor>): BlockShape | null {
   const selected = editor.getSelectedShapes()
   return selected.length === 1 && isBlockShape(selected[0]) ? selected[0] : null
+}
+
+function onlySelectedCallout(editor: ReturnType<typeof useEditor>) {
+  const selected = editor.getOnlySelectedShape()
+  return isCalloutCard(selected) && !selected.isLocked ? selected : null
 }
 
 /** The live index of a menu target, so Move up/down disable at the ends. */
@@ -145,6 +151,11 @@ function BlockContextMenuItems() {
   const selectedBlock = useValue(
     'context-menu selected Block',
     () => onlySelectedBlock(editor),
+    [editor],
+  )
+  const selectedCallout = useValue(
+    'context-menu selected Callout card',
+    () => onlySelectedCallout(editor),
     [editor],
   )
   const activeDepthScopeId = useValue(
@@ -538,6 +549,16 @@ function BlockContextMenuItems() {
               onSelect={() => void rebuildSelectedBlocks(editor)}
             />
           ) : null}
+        </TldrawUiMenuGroup>
+      ) : null}
+
+      {selectedCallout ? (
+        <TldrawUiMenuGroup id="systemsketch-callout">
+          <TldrawUiMenuItem
+            id="callout-add-leader"
+            label="Add leader"
+            onSelect={() => startAddingCalloutLeader(editor, selectedCallout.id)}
+          />
         </TldrawUiMenuGroup>
       ) : null}
 

@@ -30,6 +30,7 @@ import {
 	type ConnectionElbowRouteModel,
 } from './blocks/connections/elbowAuthoredRoute'
 import { showConnectorInteriorControls } from './connectorControlVisibility'
+import { calloutCardIdForLeader } from './callout'
 import {
 	readSystemSketchPrimitiveStyle,
 	systemSketchPrimitiveMeta,
@@ -683,7 +684,12 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 		const stockHandles = super.getHandles(shape)
 		const terminals = stockHandles
 			.filter((handle) => handle.id === 'start' || handle.id === 'end')
-		if (!showConnectorInteriorControls(this.editor, shape.id)) return terminals
+		// WHY: a Callout's leader knee is its primary formatting affordance—closer
+		// to a dimension-line grip than a rarely edited free arrow. Generic arrows
+		// still use the quiet FigJam-style hover gate, while an explicitly selected
+		// Callout leader exposes its rail immediately so the engineering gesture is
+		// discoverable without weakening the rest of the canvas.
+		if (!calloutCardIdForLeader(shape) && !showConnectorInteriorControls(this.editor, shape.id)) return terminals
 		if (shape.props.kind !== 'elbow') return stockHandles
 		const route = this.route(shape)
 		if (!route) return stockHandles
