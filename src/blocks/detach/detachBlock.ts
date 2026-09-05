@@ -556,7 +556,7 @@ function createDetachedDelayPill(
 			x: point.x - width / 2 + 8,
 			y: point.y - height - 4,
 			props: {
-				richText: toRichText(label), autoSize: false, color: 'black', font: 'mono',
+				richText: toRichText(label), autoSize: false, color: 'black', font: 'sans',
 				scale: 0.68, size: 's', textAlign: 'middle', w: Math.max(1, (width - 16) / 0.68),
 			},
 		},

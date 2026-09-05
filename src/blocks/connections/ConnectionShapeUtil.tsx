@@ -1792,7 +1792,7 @@ export function DelayPill({
 				textAnchor="middle"
 				fontSize={12}
 				fontWeight={700}
-				fontFamily="'JetBrains Mono', ui-monospace, Menlo, monospace"
+				fontFamily="Inter, ui-sans-serif, system-ui, sans-serif"
 				fill={ink}
 				style={{ userSelect: 'none' }}
 			>
@@ -1808,7 +1808,7 @@ function SemanticTagPill({ point, label }: { point: { x: number; y: number }; la
 	return (
 		<g transform={`translate(${point.x} ${point.y})`} data-testid="connection-semantic-tag" aria-label={`${label} semantic tag`} pointerEvents="none">
 			<rect x={-width / 2} y={-DELAY_PILL_HEIGHT / 2} width={width} height={DELAY_PILL_HEIGHT} rx={DELAY_PILL_HEIGHT / 2} fill="var(--ss-surface, #ffffff)" stroke="var(--ss-accent, #2563eb)" strokeWidth={1.3} />
-			<text x={0} y={4} textAnchor="middle" fontSize={12} fontWeight={700} fontFamily="'JetBrains Mono', ui-monospace, Menlo, monospace" fill="var(--ss-accent, #2563eb)" style={{ userSelect: 'none' }}>{label}</text>
+			<text x={0} y={4} textAnchor="middle" fontSize={12} fontWeight={700} fontFamily="Inter, ui-sans-serif, system-ui, sans-serif" fill="var(--ss-accent, #2563eb)" style={{ userSelect: 'none' }}>{label}</text>
 		</g>
 	)
 }

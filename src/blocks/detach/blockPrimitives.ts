@@ -302,7 +302,7 @@ function portLabelsAt(
 			outerWidth: contentWidth + (kind === 'default' ? PORT_DEFAULT_PAD_X_PX * 2 + 2 : 0),
 		}
 	}
-	const name = element('name', placed.port.name, 'sans', PORT_TEXT_FONT_PX, 24, 'var(--ss-text)', 'black')
+	const name = element('name', placed.port.name, 'mono', PORT_TEXT_FONT_PX, 24, 'var(--ss-text)', 'black')
 	const type = element('type', placed.port.type, 'mono', PORT_TEXT_FONT_PX, 24, 'var(--ss-text-muted)', 'grey')
 	const chip = element(
 		'default', defaultValue === '' ? '' : `= ${defaultValue}`,
@@ -499,7 +499,7 @@ export function primitivesForBlock(
 			: layout.title
 		parts.push(textAt({
 			text: props.title, px: SIMPLE_TITLE_FONT_PX, lineHeight: 50, weight: 600,
-			box: titleBox, origin, font: 'sans', color: 'var(--ss-text)',
+			box: titleBox, origin, font: 'mono', color: 'var(--ss-text)',
 			stockColor: 'black', align: layout.icon ? 'start' : 'middle',
 		}))
 	}

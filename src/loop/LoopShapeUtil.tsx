@@ -37,7 +37,7 @@ function LoopExportSvg({ shape }: { shape: LoopShape }) {
 			{layout.turn ? (
 				<>
 					<rect x={layout.turn.x} y={layout.turn.y} width={layout.turn.w} height={layout.turn.h} rx={11} fill="none" stroke="#6b4fbf" />
-					<text x={layout.turn.x + layout.turn.w / 2} y={layout.turn.y + layout.turn.h / 2} textAnchor="middle" dominantBaseline="middle" fill="#6b4fbf" fontFamily="ui-monospace, monospace" fontSize={11}>
+					<text x={layout.turn.x + layout.turn.w / 2} y={layout.turn.y + layout.turn.h / 2} textAnchor="middle" dominantBaseline="middle" fill="#6b4fbf" fontFamily="ui-sans-serif, system-ui" fontSize={11}>
 						{shape.props.turn}
 					</text>
 				</>
@@ -45,7 +45,7 @@ function LoopExportSvg({ shape }: { shape: LoopShape }) {
 			{[layout.iterable, layout.item].map((placed) => (
 				<g key={placed.port.id}>
 					<circle cx={placed.x} cy={placed.y} r={LOOP_PORT_RADIUS} fill="#fff" stroke="#c08520" strokeWidth={2} />
-					<text x={placed.label.x} y={placed.label.y} dominantBaseline="middle" fill={muted} fontFamily="ui-sans-serif, system-ui" fontSize={12.5}>
+					<text x={placed.label.x} y={placed.label.y} dominantBaseline="middle" fill={muted} fontFamily="ui-monospace, monospace" fontSize={12.5}>
 						{placed.port.type}
 					</text>
 				</g>

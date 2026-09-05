@@ -20,6 +20,7 @@ import {
   installDefinitionLinking,
 } from '../blocks'
 import { CalloutAddLeaderTool, CalloutTool } from '../callout'
+import { CodeBlockTool, CodeShapeUtil, installCodeClickToEdit } from '../code'
 import { BlockContextMenu } from '../blocks/ui'
 import {
   BranchArmShapeUtil,
@@ -128,10 +129,11 @@ const EMBEDDED_SHAPE_UTILS = [
   BlockShapeUtil,
   BranchShapeUtil,
   BranchArmShapeUtil,
+  CodeShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const EMBEDDED_BINDING_UTILS = [...blockConnectionBindingUtils]
-const EMBEDDED_TOOLS = [BlockTool, BranchTool, AsyncRegionTool, PillTool, CalloutTool, CalloutAddLeaderTool]
+const EMBEDDED_TOOLS = [BlockTool, BranchTool, AsyncRegionTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
 
 /** Long enough that a drag is one write, short enough that a pause is saved. */
 const CHANGE_DEBOUNCE_MS = 250
@@ -246,6 +248,7 @@ function EmbeddedSurface({
     const stopInstantTextEditing = installInstantTextEditing(editor)
     const stopBlockClickToEdit = installBlockClickToEdit(editor)
     const stopBranchClickToEdit = installBranchClickToEdit(editor)
+    const stopCodeClickToEdit = installCodeClickToEdit(editor)
     const stopBranchRegions = installBranchRegions(editor)
     const stopBlockPortMenuTarget = installBlockPortMenuTarget(editor)
     const stopExcalidrawPaste = registerExcalidrawPasteHandler(editor)
@@ -342,6 +345,7 @@ function EmbeddedSurface({
       stopBlockPortMenuTarget()
       stopBranchRegions()
       stopBranchClickToEdit()
+      stopCodeClickToEdit()
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopConnectorControlVisibility()

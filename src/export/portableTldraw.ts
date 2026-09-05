@@ -1,6 +1,7 @@
 import {
 	Editor,
 	createTLStore,
+	createShapeId,
 	defaultBindingUtils,
 	defaultAddFontsFromNode,
 	defaultShapeTools,
@@ -32,6 +33,7 @@ import {
 	isBranchShape,
 } from '../branch'
 import { LoopShapeUtil, detachLoopToPrimitives, isLoopShape } from '../loop'
+import { CodeShapeUtil, isCodeShape, type CodeShape } from '../code'
 import {
 	CONNECTION_SHAPE_TYPE,
 	blockConnectionBindingUtils,
@@ -68,6 +70,7 @@ const PORTABLE_SHAPE_UTILS = replaceConstructorsByType<TLAnyShapeUtilConstructor
 		BranchShapeUtil,
 		BranchArmShapeUtil,
 		LoopShapeUtil,
+		CodeShapeUtil,
 		...blockConnectionShapeUtils,
 	],
 )
@@ -154,6 +157,48 @@ function freezeDetachedValuePill(
 			w: Math.max(1, (frozenCard.props.w - 40) / scale),
 		},
 	})
+}
+
+/**
+ * Stock tldraw has no CodeMirror document shape. Freeze its authored text into
+ * two editable stock primitives in the isolated export instead of leaking a
+ * custom record into a `.tldr` another tldraw app cannot open.
+ */
+function detachCodeToPrimitives(editor: Editor, code: CodeShape): void {
+	const cardId = createShapeId()
+	const textId = createShapeId()
+	const inset = 14 + (code.props.showLineNumbers ? 42 : 0)
+	editor.createShapes([
+		{
+			id: cardId,
+			type: 'geo',
+			parentId: code.parentId,
+			x: code.x,
+			y: code.y,
+			props: {
+				geo: 'rectangle', w: code.props.w, h: code.props.h,
+				color: 'black', fill: 'solid', dash: 'solid', size: 's',
+			},
+		},
+		{
+			id: textId,
+			type: 'text',
+			parentId: code.parentId,
+			x: code.x + inset,
+			y: code.y + 34,
+			props: {
+				richText: toRichText(code.props.code),
+				autoSize: false,
+				color: 'white',
+				font: 'mono',
+				scale: code.props.fontSize / 18,
+				size: 's',
+				textAlign: 'start',
+				w: Math.max(1, code.props.w - inset - 14),
+			},
+		},
+	])
+	editor.deleteShape(code.id)
 }
 
 function normalizeCustomGeometries(editor: Editor): void {
@@ -273,6 +318,9 @@ export async function exportPortableTldraw(editor: Editor): Promise<string> {
 			}
 			for (const loop of exportEditor.getCurrentPageShapes().filter(isLoopShape)) {
 				detachLoopToPrimitives(exportEditor, loop.id)
+			}
+			for (const code of exportEditor.getCurrentPageShapes().filter(isCodeShape)) {
+				detachCodeToPrimitives(exportEditor, code)
 			}
 			normalizeCustomGeometries(exportEditor)
 		}

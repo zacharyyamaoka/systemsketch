@@ -46,6 +46,11 @@ import {
   getOnlySelectedBranch,
 } from '../branch'
 import { EditorLoopInspector, getOnlySelectedLoop } from '../loop'
+import {
+  CodeResizeIndicator,
+  EditorCodeSelectionMiniMenu,
+  getOnlySelectedCode,
+} from '../code'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
 import {
   PropagationFocusControls,
@@ -285,6 +290,11 @@ function SelectionMiniMenu() {
     () => getOnlySelectedBranch(editor) !== null,
     [editor],
   )
+  const hasCode = useValue(
+    'systemsketch selection is one Code block',
+    () => getOnlySelectedCode(editor) !== null,
+    [editor],
+  )
   const layoutActions = useValue(
     'systemsketch selection layout actions',
     () => getSelectionLayoutActionAvailability(editor),
@@ -318,7 +328,8 @@ function SelectionMiniMenu() {
     const outcome = await organizeNodes(editor)
     addToast({ title: describeOrganizeNodesOutcome(outcome), severity: 'info' })
   }
-  const hasVisibleActions = hasBranch
+  const hasVisibleActions = hasCode
+    || hasBranch
     || hasBlockMiniMenu
     || hasAppearance
     || canWrap
@@ -345,6 +356,17 @@ function SelectionMiniMenu() {
         label="Selection actions"
       >
         <EditorBranchSelectionMiniMenu editor={editor} />
+      </SelectionContextualMenu>
+    )
+  }
+
+  if (hasCode) {
+    return (
+      <SelectionContextualMenu
+        className="systemsketch-selection-menu"
+        label="Code block actions"
+      >
+        <EditorCodeSelectionMiniMenu editor={editor} />
       </SelectionContextualMenu>
     )
   }
@@ -738,6 +760,7 @@ export function SystemSketchSurfaceHost() {
       ) : null}
 
       <SelectionMiniMenu />
+      <CodeResizeIndicator />
     </div>
   )
 }

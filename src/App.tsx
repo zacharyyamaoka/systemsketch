@@ -22,6 +22,7 @@ import {
   installBranchRegions,
 } from './branch'
 import { LoopShapeUtil, LoopTool } from './loop'
+import { CodeBlockTool, CodeShapeUtil, installCodeClickToEdit } from './code'
 import { CalloutAddLeaderTool, CalloutTool } from './callout'
 import {
   blockConnectionBindingUtils,
@@ -100,10 +101,11 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   BranchShapeUtil,
   BranchArmShapeUtil,
   LoopShapeUtil,
+  CodeShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
-const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, PillTool, CalloutTool, CalloutAddLeaderTool]
+const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: DevelopmentPreviewChrome,
 }
@@ -120,9 +122,10 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   BranchShapeUtil,
   BranchArmShapeUtil,
   LoopShapeUtil,
+  CodeShapeUtil,
   ...blockConnectionShapeUtils,
 ]
-const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, PillTool, CalloutTool, CalloutAddLeaderTool]
+const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, AsyncRegionTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
 const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
 
 /**
@@ -153,6 +156,7 @@ function SystemSketchCanvas() {
     const stopArrowClickToPlace = installArrowClickToPlace(editor)
     const stopBlockClickToEdit = installBlockClickToEdit(editor)
     const stopBranchClickToEdit = installBranchClickToEdit(editor)
+    const stopCodeClickToEdit = installCodeClickToEdit(editor)
     const stopBranchRegions = installBranchRegions(editor)
     const stopBlockPortMenuTarget = installBlockPortMenuTarget(editor)
     const stopExcalidrawPaste = registerExcalidrawPasteHandler(editor)
@@ -165,6 +169,7 @@ function SystemSketchCanvas() {
       stopBlockPortMenuTarget()
       stopBranchRegions()
       stopBranchClickToEdit()
+      stopCodeClickToEdit()
       stopBlockClickToEdit()
       stopArrowClickToPlace()
       stopInstantTextEditing()
@@ -246,6 +251,9 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
     const stopBranchClickToEdit = isBlockDevelopment
       ? installBranchClickToEdit(editor)
       : () => undefined
+    const stopCodeClickToEdit = isBlockDevelopment
+      ? installCodeClickToEdit(editor)
+      : () => undefined
     const stopBranchRegions = isBlockDevelopment
       ? installBranchRegions(editor)
       : () => undefined
@@ -260,6 +268,7 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
       stopBlockPortMenuTarget()
       stopBranchRegions()
       stopBranchClickToEdit()
+      stopCodeClickToEdit()
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopConnectorControlVisibility()

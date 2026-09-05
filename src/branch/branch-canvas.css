@@ -60,8 +60,15 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+	/* A control name is a source-shaped binding, unlike the human arm caption below. */
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 13px;
   color: var(--ss-text-muted);
+}
+
+.systemsketch-branch-canvas .Branch-inlineEditor--title,
+.systemsketch-branch-canvas .Branch-inlineEditor--controlName {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
 [data-state='select.idle'] .systemsketch-branch-canvas [data-branch-field],

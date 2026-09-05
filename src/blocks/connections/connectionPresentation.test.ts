@@ -110,7 +110,7 @@ describe('the z⁻¹ pill', () => {
 
 	it('grows with the label, counting glyphs rather than UTF-16 units', () => {
 		expect(delayPillWidth('z⁻¹')).toBeLessThan(delayPillWidth('z⁻¹ = 1.0'))
-		expect(delayPillWidth('z⁻¹')).toBe(Math.round(16 + 3 * 7.4))
+		expect(delayPillWidth('z⁻¹')).toBe(Math.round(16 + 3 * 6.8))
 	})
 })
 
