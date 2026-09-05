@@ -2,6 +2,8 @@
 
 SystemSketch starts from one deliberately boring datum: the stock tldraw whiteboard. Its engine, drawing tools, and shortcuts stay stock while narrow supported seams add local files, board overview, zoom, Help, and the Stable/Preview workflow.
 
+The [generic Block merge-review index](docs/generic-block-merge-review-2026-09-04.html) gathers the nine commit-pinned Block/Port candidates from this design thread in one filterable, visual hub, with the correct live board and detailed gallery beside every feature. It keeps the integration boundary honest: the candidates remain unmerged until an explicit landing decision.
+
 The [Block header-alignment gallery](docs/block-header-alignment-2026-09-04.html) shows the inspector’s focused Left / Center choice for Port and Expanded headers: Center keeps the icon/title identity group on the true Block midpoint while type metadata remains at the right edge, and the existing occurrence-local title-formatting popup stays intact. Its [`block-header-alignment.systemsketch`](sketches/review/block-header-alignment.systemsketch) board is ready to drive.
 
 The [rich-text toolbar chrome gallery](docs/rich-text-toolbar-chrome-2026-09-04.html) shows the stock tldraw selected-range toolbar restyled as SystemSketch’s black contextual pill without replacing its Tiptap selection, link, list, formatting, focus, or keyboard behavior. Its [`rich-text-toolbar-chrome.systemsketch`](sketches/review/rich-text-toolbar-chrome.systemsketch) board contrasts whole-box formatting with selected-text formatting in one ready-to-drive review.
