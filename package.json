@@ -96,6 +96,8 @@
     "test:toolbar": "node tests/toolbar_family_menu_smoke.mjs",
     "test:primitive-search": "node tests/primitive_search_smoke.mjs",
     "test:zoom-controls": "node tests/zoom_controls_preference_smoke.mjs",
+    "test:wheel-zoom": "node tests/wheel_zoom_smoke.mjs",
+    "test:wheel-zoom-fixture": "node tests/wheel_zoom_fixture_smoke.mjs",
     "test:layout-commands": "node tests/layout_commands_smoke.mjs",
     "test:collision-routing": "node tests/collision_aware_routing_smoke.mjs",
     "test:collision-routing-stress": "node tests/collision_routing_stress_smoke.mjs",

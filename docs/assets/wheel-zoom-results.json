@@ -1,0 +1,36 @@
+{
+  "ranAt": "2026-09-05T06:26:55.500Z",
+  "before": {
+    "camera": {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "wheelBehavior": "zoom",
+    "zoomLabel": "100%"
+  },
+  "after": {
+    "camera": {
+      "x": -58.181818181818244,
+      "y": -40.00000000000006,
+      "z": 1.1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "wheelBehavior": "zoom",
+    "zoomLabel": "110%"
+  },
+  "checks": [
+    "the mounted stock camera declares plain-wheel zoom behavior",
+    "a stale Trackpad preference cannot override wheel zoom after reload",
+    "an unmodified vertical wheel gesture changes zoom (1.00 → 1.10)",
+    "the visible zoom readout follows the gesture (100% → 110%)",
+    "the wheel journey emits no local console errors"
+  ]
+}
