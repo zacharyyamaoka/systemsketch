@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useEditor, useValue } from 'tldraw'
 
 import {
@@ -33,26 +33,57 @@ function Crumb({
   children,
   current = false,
   onClick,
+  onCurrentMount,
   title,
 }: {
   children: string
   current?: boolean
   onClick?: () => void
+  onCurrentMount?: (element: HTMLElement | null) => void
   title?: string
 }) {
-  if (current) return <span className="systemsketch-depth-crumb is-current" title={title}>{children}</span>
+  if (current) return <span ref={onCurrentMount} className="systemsketch-depth-crumb is-current" title={title}>{children}</span>
   return <button type="button" className="systemsketch-depth-crumb" title={title} onClick={onClick}>{children}</button>
 }
 
 export function DepthStackNavigator({ placement = 'floating' }: { placement?: 'menu' | 'floating' }) {
   const editor = useEditor()
   const rootRef = useRef<HTMLDivElement>(null)
+  const currentCrumbRef = useRef<HTMLElement | null>(null)
+  const popoverRef = useRef<HTMLElement>(null)
   const [open, setOpen] = useState(false)
+  const [popoverLeft, setPopoverLeft] = useState<number>()
   const subscribe = useCallback((listener: () => void) => subscribeDepthNavigation(editor, listener), [editor])
   const getSnapshot = useCallback(() => getDepthNavigationSnapshot(editor), [editor])
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
   const model = useValue('SystemSketch depth navigation model', () => getDepthNavigationModel(editor, snapshot.scopeId), [editor, snapshot.scopeId])
   useEffect(() => setOpen(false), [snapshot.scopeId])
+  useLayoutEffect(() => {
+    if (!open) return
+    const position = () => {
+      const root = rootRef.current
+      const currentCrumb = currentCrumbRef.current
+      const popover = popoverRef.current
+      if (!root || !currentCrumb || !popover) return
+      const rootBounds = root.getBoundingClientRect()
+      const currentBounds = currentCrumb.getBoundingClientRect()
+      const width = popover.getBoundingClientRect().width
+      const gutter = 14
+      const desiredLeft = currentBounds.left
+      const safeLeft = Math.max(gutter, Math.min(desiredLeft, window.innerWidth - width - gutter))
+      setPopoverLeft(safeLeft - rootBounds.left)
+    }
+    position()
+    window.addEventListener('resize', position)
+    const observer = new ResizeObserver(position)
+    if (rootRef.current) observer.observe(rootRef.current)
+    if (currentCrumbRef.current) observer.observe(currentCrumbRef.current)
+    if (popoverRef.current) observer.observe(popoverRef.current)
+    return () => {
+      window.removeEventListener('resize', position)
+      observer.disconnect()
+    }
+  }, [open, snapshot.scopeId, snapshot.canGoBack, snapshot.canGoForward])
   useEffect(() => {
     if (!open) return
     const ownerDocument = rootRef.current?.ownerDocument ?? document
@@ -117,20 +148,20 @@ export function DepthStackNavigator({ placement = 'floating' }: { placement?: 'm
           </button>
         </span>
         <div className="systemsketch-depth-breadcrumbs" aria-label="Structural path">
-          <Crumb current={!model.current} title="Board root" onClick={() => void returnToDepthRoot(editor)}>{model.pageName}</Crumb>
+          <Crumb current={!model.current} onCurrentMount={(element) => { currentCrumbRef.current = element }} title="Board root" onClick={() => void returnToDepthRoot(editor)}>{model.pageName}</Crumb>
           {compactDepthBreadcrumbs(model.pageName, entries).map((entry) => isElision(entry) ? (
             <span key={`elision-${entry.hiddenCount}`} className="systemsketch-depth-crumb systemsketch-depth-crumb--elision" aria-label={`${entry.hiddenCount} intermediate ${entry.hiddenCount === 1 ? 'level' : 'levels'} hidden; open structural path for all levels`}>…</span>
           ) : (
             <span key={entry.id} className="systemsketch-depth-breadcrumb-pair">
               <span className="systemsketch-depth-separator" aria-hidden="true">›</span>
-              <Crumb current={entry.isCurrent} title={entry.name} onClick={() => void stepToDepthAncestor(editor, entry.id)}>{entry.name}</Crumb>
+              <Crumb current={entry.isCurrent} onCurrentMount={(element) => { currentCrumbRef.current = element }} title={entry.name} onClick={() => void stepToDepthAncestor(editor, entry.id)}>{entry.name}</Crumb>
             </span>
           ))}
         </div>
-        <button type="button" className="systemsketch-depth-pill__path-menu systemsketch-depth-pill__trigger" aria-label="Show structural path" aria-expanded={open} aria-controls="systemsketch-depth-stack" onClick={() => setOpen((value) => !value)}>⌄</button>
+        <button type="button" className="systemsketch-depth-counter systemsketch-depth-pill__trigger" aria-label={`Show structural path at depth ${model.depth}`} title="Show structural path" aria-expanded={open} aria-controls="systemsketch-depth-stack" onClick={() => setOpen((value) => !value)}>{model.depth}</button>
       </nav>
       {open ? (
-        <aside id="systemsketch-depth-stack" className="systemsketch-depth-popover" aria-label="Structural path">
+        <aside ref={popoverRef} id="systemsketch-depth-stack" className="systemsketch-depth-popover" style={popoverLeft === undefined ? undefined : { left: popoverLeft }} aria-label="Structural path">
           <header><span>Structural path</span><b>{model.depth} {model.depth === 1 ? 'level' : 'levels'}</b></header>
           <ol className="systemsketch-depth-popover__path" aria-label="Structural path levels">
             <li className="systemsketch-depth-path-item" aria-label="Board root">

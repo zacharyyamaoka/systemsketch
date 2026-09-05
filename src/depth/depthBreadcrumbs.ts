@@ -17,8 +17,9 @@ function pathLength(rootName: string, entries: readonly DepthBreadcrumbItem[]) {
 /**
  * Keeps the compact chrome useful as a location cue, rather than turning it
  * into a left- or right-truncated filename. The root, immediate parent, and
- * current scope orient a reader; levels two onward are the least useful first
- * removals, while the disclosure retains every ancestor as a jump target.
+ * current scope orient a reader; levels immediately after the root are the
+ * least useful first removals, while the disclosure retains every ancestor as
+ * a jump target.
  */
 export function compactDepthBreadcrumbs<Entry extends DepthBreadcrumbItem>(
   rootName: string,
@@ -28,9 +29,11 @@ export function compactDepthBreadcrumbs<Entry extends DepthBreadcrumbItem>(
   if (pathLength(rootName, entries) <= budget || entries.length < 3) return [...entries]
 
   const visible = new Set(entries.map((entry) => entry.id))
-  // Depth 1 gives the root a useful first landmark. Start at depth 2 and
-  // leave the immediate parent/current intact even for very deep paths.
-  for (const entry of entries.slice(1, -2)) {
+  // WHY: Keep the root plus immediate local context legible. When space runs
+  // out, the earliest descendant is the least actionable location cue, so
+  // delete from level 1 forward rather than surprising the reader by hiding a
+  // nearer parent.
+  for (const entry of entries.slice(0, -2)) {
     if (pathLength(rootName, entries.filter((candidate) => visible.has(candidate.id))) <= budget) break
     visible.delete(entry.id)
   }

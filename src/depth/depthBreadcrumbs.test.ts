@@ -13,7 +13,7 @@ describe('compactDepthBreadcrumbs', () => {
     expect(compactDepthBreadcrumbs('Board', entries)).toEqual(entries)
   })
 
-  it('keeps root context, immediate parent, and current scope while eliding level 2 onward first', () => {
+  it('keeps root context, immediate parent, and current scope while eliding level 1 onward first', () => {
     const entries = [
       entry(1, 'System'),
       entry(2, 'A'.repeat(75)),
@@ -23,10 +23,23 @@ describe('compactDepthBreadcrumbs', () => {
     ]
 
     expect(compactDepthBreadcrumbs('Board', entries)).toEqual([
-      entries[0],
-      { kind: 'elision', hiddenCount: 2 },
+      { kind: 'elision', hiddenCount: 3 },
       entries[3],
       entries[4],
+    ])
+  })
+
+  it('removes the earliest descendant before a nearer parent', () => {
+    const entries = [
+      entry(1, 'System'),
+      entry(2, 'Execution workspace'),
+      { ...entry(3, 'Dispatch'), isCurrent: true },
+    ]
+
+    expect(compactDepthBreadcrumbs('Board', entries, 35)).toEqual([
+      { kind: 'elision', hiddenCount: 1 },
+      entries[1],
+      entries[2],
     ])
   })
 

@@ -307,7 +307,7 @@ async function main() {
       return true
     })()`)
     await delay(250)
-    await clickElement(page, '.systemsketch-depth-pill__trigger')
+    await clickElement(page, '.systemsketch-depth-counter')
     await waitFor(page, `document.querySelector('#systemsketch-depth-stack')`, 'Depth Stack popover')
     const depthText = await evaluate(page,
       `document.querySelector('#systemsketch-depth-stack').textContent.replace(/\\s+/g, ' ').trim()`)

@@ -7,7 +7,7 @@ import { join } from 'node:path'
 import { ROOT, clickElement, delay, evaluate, localConsoleErrors, openApp, startApp, waitFor } from './browser_harness.mjs'
 
 const ASSETS = join(ROOT, 'docs', 'assets')
-const SHOT = join(ASSETS, 'breadcrumb-full-path-smoke-2026-09-04.png')
+const SHOT = join(ASSETS, 'breadcrumb-depth-counter-smoke-2026-09-04.png')
 const REFRESH_SCREENSHOT = process.env.SYSTEMSKETCH_REFRESH_DEPTH_SCREENSHOTS === '1'
 const MIDDLE_NAME = 'Scheduler for accessibility-sensitive jobs across all deployment partitions and rollback scenarios'
 const PARENT_NAME = 'Execution workspace'
@@ -77,17 +77,24 @@ async function main() {
         crumbs: Array.from(nav?.querySelectorAll('.systemsketch-depth-crumb') ?? []).map((crumb) => crumb.textContent?.trim()),
         shellWidth: Math.round(nav?.parentElement?.getBoundingClientRect().width ?? 0),
         breadcrumbWidth: Math.round(nav?.querySelector('.systemsketch-depth-breadcrumbs')?.getBoundingClientRect().width ?? 0),
-        pathMenu: Boolean(nav?.querySelector('.systemsketch-depth-pill__path-menu')),
+        counter: nav?.querySelector('.systemsketch-depth-counter')?.textContent?.trim(),
         backDisabled: nav?.querySelector('[aria-label="Back"]')?.disabled,
         up: Boolean(nav?.querySelector('.systemsketch-depth-pill__up')),
         trailingCommands: nav?.parentElement?.querySelectorAll('.systemsketch-shapes-button, .systemsketch-command-button').length,
       }
     })())`))
-    assert.deepEqual({ ...chrome, shellWidth: 0, breadcrumbWidth: 0 }, { depth: '4', crumbs: ['Board', 'System', '…', PARENT_NAME, CURRENT_NAME], shellWidth: 0, breadcrumbWidth: 0, pathMenu: true, backDisabled: false, up: false, trailingCommands: 0 })
+    assert.deepEqual({ ...chrome, shellWidth: 0, breadcrumbWidth: 0 }, { depth: '4', crumbs: ['Board', '…', PARENT_NAME, CURRENT_NAME], shellWidth: 0, breadcrumbWidth: 0, counter: '4', backDisabled: false, up: false, trailingCommands: 0 })
     assert.ok(chrome.shellWidth > 620, `breadcrumb shell reclaims the old 620px cap (${chrome.shellWidth}px)`)
     assert.ok(chrome.breadcrumbWidth > 500, `breadcrumb has room for the compact structural path (${chrome.breadcrumbWidth}px)`)
-    if (REFRESH_SCREENSHOT) await mkdir(ASSETS, { recursive: true })
-    await screenshot(app.page, screenshotPath)
+    if (REFRESH_SCREENSHOT) {
+      await mkdir(ASSETS, { recursive: true })
+      await clickElement(app.page, '.systemsketch-depth-counter')
+      await waitFor(app.page, `document.querySelector('#systemsketch-depth-stack')`, 'depth-four path popover for screenshot')
+      await evaluate(app.page, `window.__systemsketch.editor.setCamera({ x: 0, y: 0, z: 1 }, { animation: { duration: 0 } }); true`)
+      await screenshot(app.page, screenshotPath)
+      await evaluate(app.page, `document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); true`)
+      await waitFor(app.page, `!document.querySelector('#systemsketch-depth-stack')`, 'close screenshot popover')
+    }
     const unavailableForward = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
       const event = new KeyboardEvent('keydown', { key: 'GoForward', bubbles: true, cancelable: true })
       document.body.dispatchEvent(event)
@@ -144,17 +151,23 @@ async function main() {
     await waitFor(app.page, `document.querySelector('.systemsketch-depth-navigator--menu')?.dataset.depth === '4'`, 'Forward depth')
     await clickElement(app.page, '.systemsketch-depth-crumb[title="Execution workspace"]')
     await waitFor(app.page, `document.querySelector('.systemsketch-depth-navigator--menu')?.dataset.depth === '3'`, 'structural parent breadcrumb jump')
-    await clickElement(app.page, '.systemsketch-depth-pill__trigger')
+    await clickElement(app.page, '.systemsketch-depth-counter')
     await waitFor(app.page, `document.querySelector('#systemsketch-depth-stack')`, 'path popover')
     const popover = await evaluate(app.page, `document.querySelector('#systemsketch-depth-stack')?.textContent?.replace(/\\s+/g, ' ').trim()`)
     assert.ok(popover.includes('Board') && popover.includes('System') && popover.includes(MIDDLE_NAME) && popover.includes(PARENT_NAME))
     const ordinaryPathSemantics = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
-      const trigger = document.querySelector('.systemsketch-depth-pill__trigger')
+      const trigger = document.querySelector('.systemsketch-depth-counter')
       const popover = document.querySelector('#systemsketch-depth-stack')
+      const current = document.querySelector('.systemsketch-depth-crumb.is-current')
+      const popoverBounds = popover?.getBoundingClientRect()
+      const currentBounds = current?.getBoundingClientRect()
+      const currentNameLeft = (currentBounds?.left ?? 0) + Number.parseFloat(getComputedStyle(current).paddingLeft)
       return {
         hasMenuRole: popover?.getAttribute('role'),
         hasMenuItems: popover?.querySelectorAll('[role="menuitem"]').length,
         triggerHasPopup: trigger?.getAttribute('aria-haspopup'),
+        triggerLabel: trigger?.getAttribute('aria-label'),
+        popoverNameLeftDelta: Math.round((popoverBounds?.left ?? 0) - currentNameLeft),
         listTag: popover?.querySelector('.systemsketch-depth-popover__path')?.tagName,
         listName: popover?.querySelector('.systemsketch-depth-popover__path')?.getAttribute('aria-label'),
         rows: Array.from(popover?.querySelectorAll('.systemsketch-depth-popover__path > li') ?? []).map((row) => ({
@@ -169,6 +182,8 @@ async function main() {
       hasMenuRole: null,
       hasMenuItems: 0,
       triggerHasPopup: null,
+      triggerLabel: 'Show structural path at depth 3',
+      popoverNameLeftDelta: 0,
       listTag: 'OL',
       listName: 'Structural path levels',
       rows: [

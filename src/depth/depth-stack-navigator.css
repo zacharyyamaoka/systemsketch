@@ -71,7 +71,7 @@
 }
 
 .systemsketch-depth-history button,
-.systemsketch-depth-pill__path-menu {
+.systemsketch-depth-counter {
   display: grid;
   width: 32px;
   min-width: 32px;
@@ -118,7 +118,7 @@
 
 .systemsketch-depth-crumb.is-current {
   flex: 0 1 auto;
-  padding-inline: 2px;
+  padding-inline: 0;
   color: var(--ss-text);
   font-weight: 850;
 }
@@ -146,17 +146,20 @@
   line-height: 1;
 }
 
-.systemsketch-depth-pill__path-menu {
-  width: 28px;
-  min-width: 28px;
+.systemsketch-depth-counter {
+  width: 24px;
+  min-width: 24px;
+  margin-right: 5px;
+  border-radius: 7px !important;
   color: var(--ss-text-muted);
-  font-size: 13px;
+  font-size: 10px;
+  font-weight: 850;
 }
 
 .systemsketch-depth-popover {
   position: absolute;
   top: calc(var(--systemsketch-top-height) + 8px);
-  left: 50%;
+  left: 0;
   width: min(276px, calc(100vw - 28px));
   box-sizing: border-box;
   padding: 9px;
@@ -165,11 +168,6 @@
   background: color-mix(in srgb, var(--ss-surface-raised) 98%, transparent);
   box-shadow: var(--ss-shadow-2);
   backdrop-filter: blur(18px);
-  transform: translateX(-50%);
-}
-
-.systemsketch-depth-navigator--menu .systemsketch-depth-popover {
-  left: 0;
   transform: none;
 }
 
@@ -327,8 +325,7 @@
 }
 
 @media (max-width: 560px) {
-  .systemsketch-depth-history button[aria-label='Forward'],
-  .systemsketch-depth-pill__path-menu {
+  .systemsketch-depth-history button[aria-label='Forward'] {
     display: none;
   }
 
