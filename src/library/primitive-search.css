@@ -90,13 +90,12 @@
   font: 8.5px/1 var(--tl-font-mono, ui-monospace, monospace);
 }
 
+/* Scrolling and the thin themed bar come from `.ss-scroll`. */
 .systemsketch-primitive-search__results {
   max-height: 258px;
   margin: 0;
   padding: 4px;
-  overflow-y: auto;
   list-style: none;
-  overscroll-behavior: contain;
 }
 
 .systemsketch-primitive-search__result {

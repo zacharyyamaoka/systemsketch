@@ -1,4 +1,9 @@
-export type LeftSurface = 'shapes' | 'files'
+/**
+ * `behaviors` is the Behavior Tree library, a sibling of `shapes` rather than
+ * a second popout: both answer "what can I add?", and two panels racing for
+ * the same left edge is the thing the switcher exists to avoid.
+ */
+export type LeftSurface = 'shapes' | 'behaviors' | 'files'
 export type RightSurface = 'comments' | 'inspector' | 'board-overview' | 'diagnostics'
 export type ToolbarSurface = 'commands' | 'find-replace'
 
