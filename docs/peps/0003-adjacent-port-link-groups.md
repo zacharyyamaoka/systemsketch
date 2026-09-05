@@ -1,8 +1,8 @@
 # 0003: Adjacent input ports may share a presentation without becoming a new port kind
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-09-04
-- **Merge:** merge-ready candidate (pending integration)
+- **Merge:** 08aabe881b0315a454fe84f80f5430108169254a
 
 ## Context
 
