@@ -23,7 +23,6 @@ import {
 	type BlockShape,
 } from './blockModel'
 import { blockShapeMigrations } from './blockShapeMigrations'
-import { blockAutoResizePresentation } from './blockAutoResize'
 import { normalizeStockBlockProps, stockBlockVisibleDescription } from './stockBlocks'
 import {
 	createValueBlockProps,
@@ -400,16 +399,13 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	}
 
 	override getGeometry(shape: BlockShape) {
-		const presentation = blockAutoResizePresentation(this.editor, shape)
-		const offsetX = presentation?.x ?? 0
-		const offsetY = presentation?.y ?? 0
-		const layout = layoutBlock(presentation
-			? { ...shape.props, w: presentation.w, h: presentation.h }
-			: shape.props)
+		// WHY: shape geometry is one of tldraw's cached reactive roots. Reading
+		// live SelectTool state or descendant geometry from here makes the parent
+		// cache depend on the very interaction computations that ask for it and can
+		// recurse through `haveParentsChanged`. Continuous auto-fit is paint-only
+		// during a gesture; stock `fitFrameToContent` commits this box on settle.
+		const layout = layoutBlock(shape.props)
 		const isContainer = isExpandedBlockShape(shape)
-		const shiftRect = <T extends { x: number; y: number } | null>(rect: T): T => (
-			rect ? { ...rect, x: rect.x + offsetX, y: rect.y + offsetY } : rect
-		) as T
 		return containerHitGeometry({
 			body: shape.props.view === 'value'
 				? new Stadium2d({
@@ -418,24 +414,22 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 						isFilled: true,
 					})
 				: new Rectangle2d({
-						x: offsetX,
-						y: offsetY,
 						width: layout.bounds.w,
 						height: layout.bounds.h,
 						isFilled: !isContainer,
 					}),
 			chrome: isContainer
 				? [
-						shiftRect(layout.header),
-						...layout.ports.map((placed) => shiftRect(portLabelHitArea(placed, layout.width))),
-						shiftRect(layout.footer),
+						layout.header,
+						...layout.ports.map((placed) => portLabelHitArea(placed, layout.width)),
+						layout.footer,
 					]
 				: [],
 			dots: layout.ports
 				.filter((port) => !port.subtle)
 				.map((port) => ({
-					x: port.x + offsetX,
-					y: port.y + offsetY,
+					x: port.x,
+					y: port.y,
 					radius: BLOCK_PORT_RADIUS,
 				})),
 		})
@@ -450,15 +444,10 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	}
 
 	override getIndicatorPath(shape: BlockShape): Path2D {
-		const presentation = blockAutoResizePresentation(this.editor, shape)
-		const offsetX = presentation?.x ?? 0
-		const offsetY = presentation?.y ?? 0
-		const layout = layoutBlock(presentation
-			? { ...shape.props, w: presentation.w, h: presentation.h }
-			: shape.props)
+		const layout = layoutBlock(shape.props)
 		const { w, h } = layout.bounds
 		const path = new Path2D()
-		path.roundRect(offsetX, offsetY, w, h, shape.props.view === 'value' ? h / 2 : BLOCK_CORNER_RADIUS)
+		path.roundRect(0, 0, w, h, shape.props.view === 'value' ? h / 2 : BLOCK_CORNER_RADIUS)
 		const drawn = new Set<string>()
 		// `subtle` only fades the painted dot on canvas hover (Simple's ports are
 		// invisible until then) — the outline still owns the same socket the whole
@@ -468,8 +457,8 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 			const key = `${Math.round(port.x)}:${Math.round(port.y)}`
 			if (drawn.has(key)) continue
 			drawn.add(key)
-			path.moveTo(port.x + offsetX + PORT_INDICATOR_RADIUS, port.y + offsetY)
-			path.arc(port.x + offsetX, port.y + offsetY, PORT_INDICATOR_RADIUS, 0, Math.PI * 2)
+			path.moveTo(port.x + PORT_INDICATOR_RADIUS, port.y)
+			path.arc(port.x, port.y, PORT_INDICATOR_RADIUS, 0, Math.PI * 2)
 		}
 		return path
 	}

@@ -43,9 +43,19 @@
   "bindings": [],
   "callouts": [
     {
+      "id": "select-parent",
+      "kind": "step",
+      "text": "1 · Click the pipeline() header once so the outer Block is selected.",
+      "x": 555,
+      "y": 70,
+      "w": 520,
+      "h": 110,
+      "target": { "shapeId": "pipeline", "anchor": "top", "dx": 90 }
+    },
+    {
       "id": "drag",
       "kind": "step",
-      "text": "1 · Select parse(). Press again and drag it rapidly across every pipeline() edge without releasing.",
+      "text": "2 · Immediately press-drag parse() rapidly across every pipeline() edge without releasing.",
       "x": 30,
       "y": 300,
       "w": 470,
@@ -55,7 +65,7 @@
     {
       "id": "follow",
       "kind": "step",
-      "text": "2 · Keep holding: pipeline() follows continuously. Release: the same boundary becomes the saved frame.",
+      "text": "3 · Keep holding: pipeline() follows continuously. Release: the same boundary becomes the saved frame.",
       "x": 1110,
       "y": 300,
       "w": 450,
@@ -65,7 +75,7 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · The boundary follows on every held move, never runs away, and parse() keeps its release position and membership.",
+      "text": "PASS WHEN · Only parse() moves on the first drag, the boundary follows continuously, and membership survives release.",
       "x": 445,
       "y": 750,
       "w": 710,

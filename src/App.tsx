@@ -9,7 +9,8 @@ import {
   BlockTool,
   PillTool,
   getBlockShapeVisibility,
-	installBlockAutoResize,
+  installBlockAutoResize,
+  installBlockChildSelection,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
   installDefinitionLinking,
@@ -153,6 +154,7 @@ function SystemSketchCanvas() {
     const stopInstantTextEditing = installInstantTextEditing(editor)
     const stopArrowClickToPlace = installArrowClickToPlace(editor)
     const stopBlockClickToEdit = installBlockClickToEdit(editor)
+    const stopBlockChildSelection = installBlockChildSelection(editor)
     const stopBranchClickToEdit = installBranchClickToEdit(editor)
     const stopBranchRegions = installBranchRegions(editor)
     const stopBlockPortMenuTarget = installBlockPortMenuTarget(editor)
@@ -166,6 +168,7 @@ function SystemSketchCanvas() {
       stopBlockPortMenuTarget()
       stopBranchRegions()
       stopBranchClickToEdit()
+      stopBlockChildSelection()
       stopBlockClickToEdit()
       stopArrowClickToPlace()
       stopInstantTextEditing()
@@ -248,6 +251,9 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
     const stopBlockClickToEdit = isBlockDevelopment
       ? installBlockClickToEdit(editor)
       : () => undefined
+    const stopBlockChildSelection = isBlockDevelopment
+      ? installBlockChildSelection(editor)
+      : () => undefined
     const stopBranchClickToEdit = isBlockDevelopment
       ? installBranchClickToEdit(editor)
       : () => undefined
@@ -265,6 +271,7 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
       stopBlockPortMenuTarget()
       stopBranchRegions()
       stopBranchClickToEdit()
+      stopBlockChildSelection()
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopConnectorControlVisibility()

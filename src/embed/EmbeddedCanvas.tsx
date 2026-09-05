@@ -16,7 +16,8 @@ import {
   PillTool,
   getBlockShapeVisibility,
 	installBlockAutoResize,
-  installBlockClickToEdit,
+	installBlockChildSelection,
+	installBlockClickToEdit,
   installBlockPortMenuTarget,
   installDefinitionLinking,
 } from '../blocks'
@@ -246,6 +247,7 @@ function EmbeddedSurface({
     const stopConnectorControlVisibility = installConnectorControlVisibility(editor)
     const stopInstantTextEditing = installInstantTextEditing(editor)
     const stopBlockClickToEdit = installBlockClickToEdit(editor)
+    const stopBlockChildSelection = installBlockChildSelection(editor)
     const stopBranchClickToEdit = installBranchClickToEdit(editor)
     const stopBranchRegions = installBranchRegions(editor)
     const stopBlockPortMenuTarget = installBlockPortMenuTarget(editor)
@@ -343,6 +345,7 @@ function EmbeddedSurface({
       stopBlockPortMenuTarget()
       stopBranchRegions()
       stopBranchClickToEdit()
+      stopBlockChildSelection()
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopConnectorControlVisibility()

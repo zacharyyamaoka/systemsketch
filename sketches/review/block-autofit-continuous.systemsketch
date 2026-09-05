@@ -3,12 +3,12 @@
     "formatVersion": 2,
     "application": "SystemSketch",
     "shapes": {
-      "arrow": 2,
-      "geo": 3,
+      "arrow": 3,
+      "geo": 4,
       "block": 2
     },
     "bindings": {
-      "arrow": 4
+      "arrow": 6
     }
   },
   "tldrawFileFormatVersion": 1,
@@ -104,8 +104,16 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3YW3",
+      "index": "a4aUfV",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#FF802B",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:r_zedpPBonNhX4w0MkeZg",
+      "typeName": "user"
     },
     {
       "x": 500,
@@ -148,7 +156,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a2xMdt",
+      "index": "a3rHKV",
       "typeName": "shape"
     },
     {
@@ -185,7 +193,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "2 · Keep holding: pipeline() follows continuously. Release: the same boundary becomes the saved frame."
+                  "text": "3 · Keep holding: pipeline() follows continuously. Release: the same boundary becomes the saved frame."
                 }
               ]
             }
@@ -193,7 +201,51 @@
         }
       },
       "parentId": "page:page",
-      "index": "a36U5",
+      "index": "a40Zr",
+      "typeName": "shape"
+    },
+    {
+      "x": 815,
+      "y": 180,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-select-parent-arrow",
+      "type": "arrow",
+      "props": {
+        "kind": "elbow",
+        "elbowMidPoint": 0.5,
+        "dash": "draw",
+        "size": "m",
+        "fill": "none",
+        "color": "orange",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 90,
+          "y": 150
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph"
+            }
+          ]
+        },
+        "labelPosition": 0.5,
+        "font": "draw",
+        "scale": 1
+      },
+      "parentId": "page:page",
+      "index": "a2qQ9V",
       "typeName": "shape"
     },
     {
@@ -230,7 +282,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · The boundary follows on every held move, never runs away, and parse() keeps its release position and membership."
+                  "text": "PASS WHEN · Only parse() moves on the first drag, the boundary follows continuously, and membership survives release."
                 }
               ]
             }
@@ -238,12 +290,12 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4umI",
+      "index": "a57ZI",
       "typeName": "shape"
     },
     {
       "x": 36.52173913043478,
-      "y": -86.08695652173913,
+      "y": 28.913043478260875,
       "z": 0.9620915032679739,
       "meta": {},
       "id": "camera:page:page",
@@ -283,7 +335,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "1 · Select parse(). Press again and drag it rapidly across every pipeline() edge without releasing."
+                  "text": "2 · Immediately press-drag parse() rapidly across every pipeline() edge without releasing."
                 }
               ]
             }
@@ -291,7 +343,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a2sSz",
+      "index": "a3U2i",
       "typeName": "shape"
     },
     {
@@ -337,12 +389,57 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "VYtGJuhBv6LHdSOiCinlF",
+        "definitionId": "KhXsd3s-78cc4DltffSKd",
         "inputs": [],
         "outputs": [],
         "definitionKey": "parse"
       },
-      "index": "a1RUw",
+      "index": "a1A3E",
+      "typeName": "shape"
+    },
+    {
+      "x": 555,
+      "y": 70,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:cue-select-parent",
+      "type": "geo",
+      "props": {
+        "w": 520,
+        "h": 110,
+        "geo": "rectangle",
+        "dash": "draw",
+        "growY": 0,
+        "url": "",
+        "scale": 1,
+        "flipX": false,
+        "flipY": false,
+        "color": "orange",
+        "labelColor": "black",
+        "fill": "semi",
+        "size": "m",
+        "font": "sans",
+        "align": "start",
+        "verticalAlign": "middle",
+        "richText": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "1 · Click the pipeline() header once so the outer Block is selected."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "parentId": "page:page",
+      "index": "a2D2r",
       "typeName": "shape"
     },
     {
@@ -395,14 +492,6 @@
       "typeName": "binding"
     },
     {
-      "name": "",
-      "color": "#EC5E41",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:lAwfttlL6b7yBXuoWHXPI",
-      "typeName": "user"
-    },
-    {
       "meta": {},
       "id": "binding:cue-follow-arrow-start",
       "type": "arrow",
@@ -435,6 +524,24 @@
         },
         "snap": "edge-point",
         "terminal": "start"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-select-parent-arrow-end",
+      "type": "arrow",
+      "fromId": "shape:cue-select-parent-arrow",
+      "toId": "shape:pipeline",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.7195121951219512,
+          "y": 0
+        },
+        "snap": "edge-point",
+        "terminal": "end"
       },
       "typeName": "binding"
     },
@@ -543,14 +650,32 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "8tVD4fGaeoJwvQnMxMWgv",
+        "definitionId": "EUuSeq9HyReSWTOaXjq9a",
         "inputs": [],
         "outputs": [],
         "definitionKey": "pipeline"
       },
       "parentId": "page:page",
-      "index": "a1hNI",
+      "index": "a1mYQ",
       "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:cue-select-parent-arrow-start",
+      "type": "arrow",
+      "fromId": "shape:cue-select-parent-arrow",
+      "toId": "shape:cue-select-parent",
+      "props": {
+        "isPrecise": true,
+        "isExact": false,
+        "normalizedAnchor": {
+          "x": 0.5,
+          "y": 1
+        },
+        "snap": "edge-point",
+        "terminal": "start"
+      },
+      "typeName": "binding"
     }
   ]
 }
