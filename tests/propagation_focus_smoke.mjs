@@ -45,7 +45,7 @@ async function main() {
     allowSourceRoot: true,
   })
   const board = join(app.filesRoot, 'SystemSketch', 'propagation-focus-review.systemsketch')
-  const shot = join(ROOT, 'docs', 'assets', 'propagation-focus-outward-sliders-live-2026-09-04.png')
+  const shot = join(ROOT, 'docs', 'assets', 'propagation-focus-slider-legibility-live-2026-09-04.png')
   try {
     await ensureDir(join(app.filesRoot, 'SystemSketch'))
     await copyFile(FIXTURE, board)
@@ -97,6 +97,7 @@ async function main() {
         blockModes: menu.querySelectorAll('[data-testid^="block-pill-view-"]').length,
         ranges: [...menu.querySelectorAll('input[type="range"]')].map((input) => ({
           min: input.min, max: input.max, value: input.value, dir: input.dir, aria: input.getAttribute('aria-valuetext'),
+          width: Math.round(input.getBoundingClientRect().width),
         })),
         order: [...menu.querySelector('.systemsketch-propagation-focus').querySelectorAll('input, output, span, button')].map((element) => element.dataset.testid ?? element.textContent.trim()),
       }
@@ -105,8 +106,8 @@ async function main() {
       buttons: ['Clear'],
       blockModes: 0,
       ranges: [
-        { min: '1', max: '1', value: '1', dir: 'rtl', aria: '1 of 1 upstream steps' },
-        { min: '1', max: '1', value: '1', dir: '', aria: '1 of 1 downstream steps' },
+        { min: '1', max: '1', value: '1', dir: 'rtl', aria: '1 of 1 upstream steps', width: 180 },
+        { min: '1', max: '1', value: '1', dir: '', aria: '1 of 1 downstream steps', width: 180 },
       ],
       order: [
         'propagation-focus-upstream-maximum',

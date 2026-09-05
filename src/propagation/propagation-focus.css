@@ -41,11 +41,16 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
 }
 
 .systemsketch-propagation-focus input {
-  flex: 0 0 52px;
-  width: 52px;
+  /* WHY: range dragging needs enough physical travel to be a quick horizon
+     gesture. The flex basis keeps both directions legible on desktop, while
+     min-width: 0 lets the compact selection menu yield on narrow viewports. */
+  flex: 1 1 clamp(110px, 14vw, 180px);
+  width: clamp(110px, 14vw, 180px);
+  min-width: 0;
   accent-color: var(--ss-accent);
 }
 
