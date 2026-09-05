@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { getDefaultBlockProps, setBlockViewProps, type BlockShape } from './blockModel'
 import {
+	isBlockAutoResizeGestureActive,
 	removeSelectedFromAutoResizeContainer,
 	selectedAutoResizeMembership,
 } from './blockAutoResize'
@@ -36,6 +37,40 @@ function harness(selected: TLShape, shapes: TLShape[]) {
 }
 
 describe('auto-resize membership escape hatch', () => {
+	it.each([
+		'select.pointing_shape',
+		'select.pointing_selection',
+		'select.pointing_resize_handle',
+		'select.pointing_rotate_handle',
+		'select.pointing_handle',
+		'select.translating',
+		'select.resizing',
+		'select.rotating',
+		'select.dragging_handle',
+	])('defers stock fit-to-content while tldraw owns %s', (activePath) => {
+		const editor = {
+			inputs: { getIsPointing: () => false },
+			isIn: (path: string) => path === activePath,
+		} as unknown as Pick<Editor, 'inputs' | 'isIn'>
+		expect(isBlockAutoResizeGestureActive(editor)).toBe(true)
+	})
+
+	it('defers the first transform operation while the pointer is held before the path changes', () => {
+		const editor = {
+			inputs: { getIsPointing: () => true },
+			isIn: () => false,
+		} as unknown as Pick<Editor, 'inputs' | 'isIn'>
+		expect(isBlockAutoResizeGestureActive(editor)).toBe(true)
+	})
+
+	it('allows stock fit-to-content once tldraw returns to idle', () => {
+		const editor = {
+			inputs: { getIsPointing: () => false },
+			isIn: () => false,
+		} as unknown as Pick<Editor, 'inputs' | 'isIn'>
+		expect(isBlockAutoResizeGestureActive(editor)).toBe(false)
+	})
+
 	it('finds a direct selected child of an auto-sized Expanded Block', () => {
 		const container = autoBlock()
 		const member = child('member', container.id)

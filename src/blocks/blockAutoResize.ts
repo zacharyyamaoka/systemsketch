@@ -10,6 +10,7 @@ import {
 	fitFrameToContent,
 	isShapeId,
 	type Editor,
+	type TLEventInfo,
 	type TLShape,
 	type TLShapeId,
 } from 'tldraw'
@@ -25,6 +26,35 @@ import { isBlockShape, isExpandedBlockShape, type BlockShape } from './blockMode
 export const BLOCK_AUTO_RESIZE_PADDING_PX = 56
 
 type ResizeSource = 'user' | 'remote'
+
+/**
+ * tldraw's transform states calculate each pointer sample from the gesture's
+ * initial shape snapshot. `fitFrameToContent` is deliberately one-shot: it
+ * shifts the frame and every child-local coordinate together. Running that
+ * stock helper between pointer samples invalidates the transform snapshot and
+ * makes the two otherwise-correct operations amplify one another.
+ */
+const TRANSIENT_GEOMETRY_PATHS = [
+	// tldraw may write the first transformed sample before transitioning from a
+	// pointing state into its corresponding active transform state.
+	'select.pointing_shape',
+	'select.pointing_selection',
+	'select.pointing_resize_handle',
+	'select.pointing_rotate_handle',
+	'select.pointing_handle',
+	'select.translating',
+	'select.resizing',
+	'select.rotating',
+	'select.dragging_handle',
+] as const
+
+export function isBlockAutoResizeGestureActive(editor: Pick<Editor, 'inputs' | 'isIn'>): boolean {
+	// Cover both public views of the interaction lifecycle. The path list is the
+	// important guard; the input manager also covers custom transform tools that
+	// retain the stock pointer lifecycle without using a stock SelectTool path.
+	return editor.inputs.getIsPointing()
+		|| TRANSIENT_GEOMETRY_PATHS.some((path) => editor.isIn(path))
+}
 
 function isAutoResizeBlock(shape: TLShape | undefined): shape is BlockShape {
 	return isExpandedBlockShape(shape) && shape.props.autoResize
@@ -121,6 +151,10 @@ export function installBlockAutoResize(editor: Editor): () => void {
 	const settle = () => {
 		queued = false
 		if (disposed || pending.size === 0) return
+		// WHY: stock translation must be the sole geometry writer while a pointer
+		// gesture is active. Keep the dirty set and fit once after tldraw reaches
+		// its settled state; live fitting corrupts tldraw's initial drag snapshot.
+		if (isBlockAutoResizeGestureActive(editor)) return
 		const entries = pending
 		pending = new Map()
 		for (const [id, source] of entries) {
@@ -155,6 +189,15 @@ export function installBlockAutoResize(editor: Editor): () => void {
 		queueMicrotask(settle)
 	}
 	const stopComplete = editor.sideEffects.registerOperationCompleteHandler(schedule)
+	const onEvent = (info: TLEventInfo) => {
+		// `event` fires after tldraw has handled the transition, so a release from
+		// select.translating is already idle here. Cancel/interrupt cover Escape,
+		// tool switches, and other stock ways of ending a transform.
+		if (info.name === 'pointer_up' || info.name === 'cancel' || info.name === 'interrupt') {
+			schedule()
+		}
+	}
+	editor.on('event', onEvent)
 
 	// A document may have loaded before this mount seam. Reconcile opt-in
 	// records once, via remote semantics so opening a board does not create undo.
@@ -167,6 +210,7 @@ export function installBlockAutoResize(editor: Editor): () => void {
 
 	return () => {
 		disposed = true
+		editor.off('event', onEvent)
 		stopComplete()
 		stopDelete()
 		stopChange()

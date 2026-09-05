@@ -1,6 +1,8 @@
 import {
 	blockIcon,
 	blockIsFolded,
+	blockFoldControlSide,
+	canBlockFold,
 	blockPortLayout,
 	blockPortSections,
 	expandedSectionWeights,
@@ -45,6 +47,8 @@ export const PORT_TEXT_FONT_PX = TLDRAW_TEXT_S_PX
 export const HEADER_ICON_PX = 22
 const HEADER_PAD_X = 12
 const HEADER_GAP_PX = 8
+/** 20px chevron plus its 8px separation from the identity or metadata lane. */
+const FOLD_CONTROL_RESERVE_PX = 28
 
 /** Keep these in step with the painted flex row in `block-canvas.css`. */
 const PORT_LABEL_GAP_PX = 8
@@ -234,7 +238,8 @@ function foldedBlockLayout(props: BlockShapeProps): BlockLayout {
 			label: null, labelContent: null, subtle: true, lifted: false,
 		})
 	}
-	const foldInset = HEADER_PAD_X + 24
+	const foldSide = blockFoldControlSide(props)
+	const foldInset = HEADER_PAD_X + (foldSide === 'left' ? FOLD_CONTROL_RESERVE_PX : 0)
 	const hasIcon = blockIcon(props) !== ''
 	const headerIcon = hasIcon
 		? { x: foldInset, y: (height - HEADER_ICON_PX) / 2, w: HEADER_ICON_PX, h: HEADER_ICON_PX }
@@ -258,12 +263,18 @@ function foldedBlockLayout(props: BlockShapeProps): BlockLayout {
 		description: null,
 		frameInterior: null,
 		ports,
+		hiddenPortSummaries: [],
 		title: null,
 		typeLabel: null,
 		icon: null,
 		dividers: [],
 		headerIcon,
-		headerTitle: { x: titleLeft, y: 0, w: Math.max(0, width - titleLeft - HEADER_PAD_X), h: height },
+		headerTitle: {
+			x: titleLeft,
+			y: 0,
+			w: Math.max(0, width - titleLeft - HEADER_PAD_X - (foldSide === 'right' ? FOLD_CONTROL_RESERVE_PX : 0)),
+			h: height,
+		},
 		headerType: null,
 	}
 }
@@ -1054,9 +1065,12 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 	}
 
 	const hasHeaderIcon = blockIcon(props) !== ''
+	const foldSide = canBlockFold(props) ? blockFoldControlSide(props) : null
+	const headerLeftInset = HEADER_PAD_X + (foldSide === 'left' ? FOLD_CONTROL_RESERVE_PX : 0)
+	const headerRightInset = HEADER_PAD_X + (foldSide === 'right' ? FOLD_CONTROL_RESERVE_PX : 0)
 	const headerIcon: BlockRect | null = hasHeaderIcon
 		? {
-			x: HEADER_PAD_X,
+			x: headerLeftInset,
 			y: (headerHeight - HEADER_ICON_PX) / 2,
 			w: HEADER_ICON_PX,
 			h: HEADER_ICON_PX,
@@ -1067,14 +1081,14 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		: 0
 	const headerType: BlockRect | null = headerTypeWidth > 0
 		? {
-			x: width - HEADER_PAD_X - headerTypeWidth,
+			x: width - headerRightInset - headerTypeWidth,
 			y: 0,
 			w: headerTypeWidth,
 			h: headerHeight,
 		}
 		: null
-	const titleLeft = HEADER_PAD_X + (hasHeaderIcon ? HEADER_ICON_PX + HEADER_GAP_PX : 0)
-	const titleRight = headerType ? headerType.x - HEADER_GAP_PX : width - HEADER_PAD_X
+	const titleLeft = headerLeftInset + (hasHeaderIcon ? HEADER_ICON_PX + HEADER_GAP_PX : 0)
+	const titleRight = headerType ? headerType.x - HEADER_GAP_PX : width - headerRightInset
 	const headerTitle: BlockRect = {
 		x: titleLeft,
 		y: 0,

@@ -105,6 +105,18 @@ async function main() {
     await shot(page, 'block-fold-autosize-expanded-2026-09-04.png')
     pass('inspector enables occurrence-local folding and auto-fit, then derives a tighter Expanded box')
 
+	await clickInspectorChoice(page, 'Block fold control side', 'right')
+	const rightChevron = await box(page, `${scope(container)} [data-testid^="block-fold-"]`)
+	const rightFace = await box(page, `${scope(container)} .systemsketch-block-canvas`)
+	assert.ok(rightFace.x + rightFace.width - rightChevron.cx < 28,
+		'right fold control is pinned to the right header corner')
+	await clickInspectorChoice(page, 'Block fold control side', 'left')
+	const leftChevron = await box(page, `${scope(container)} [data-testid^="block-fold-"]`)
+	const leftFace = await box(page, `${scope(container)} .systemsketch-block-canvas`)
+	assert.ok(leftChevron.cx - leftFace.x < 28,
+		'left fold control is pinned to the left header corner')
+	pass('folding keeps its left default and offers an independent right-corner placement')
+
     const chevron = await box(page, `${scope(container)} [data-testid^="block-fold-"]`)
     await clickAt(page, chevron.cx, chevron.cy)
     await waitFor(page,
@@ -132,8 +144,10 @@ async function main() {
 	// Treat the whole child face as a fast, real-world grab target. The repeated
 	// reversals intentionally cross every current container edge; auto-fit must
 	// grow and follow, never hand the child to the page mid-gesture.
+	await selectBlock(page, child)
 	const stressStart = await box(page, `${scope(child)} .systemsketch-block-canvas`)
 	const stressOrigin = { x: stressStart.cx, y: stressStart.cy }
+	const containerBeforeStress = await shapeFacts(page, container)
 	const stressOffsets = [
 		{ x: 260, y: 0 }, { x: 260, y: 180 }, { x: -120, y: 180 },
 		{ x: -120, y: -90 }, { x: 330, y: -90 }, { x: 330, y: 210 },
@@ -148,17 +162,46 @@ async function main() {
 			await mouse(page, 'mouseMoved', x, y, { buttons: 1 })
 			assert.equal(await parentOf(page, child), container,
 				`auto-fit child stays a member during rapid drag sample ${cycle}:${offset.x},${offset.y}`)
+			const duringDrag = await shapeFacts(page, container)
+			assert.deepEqual(
+				{ x: duringDrag.x, y: duringDrag.y, w: duringDrag.w, h: duringDrag.h },
+				{
+					x: containerBeforeStress.x,
+					y: containerBeforeStress.y,
+					w: containerBeforeStress.w,
+					h: containerBeforeStress.h,
+				},
+				`stock translation is the only geometry writer during drag sample ${cycle}:${offset.x},${offset.y}`,
+			)
 		}
 	}
 	const stressEnd = stressOffsets.at(-1)
+	const childBeforeRelease = await shapeFacts(page, child)
+	const childPageBeforeRelease = {
+		x: containerBeforeStress.x + childBeforeRelease.x,
+		y: containerBeforeStress.y + childBeforeRelease.y,
+	}
 	await mouse(page, 'mouseReleased', stressOrigin.x + stressEnd.x, stressOrigin.y + stressEnd.y)
 	await waitFor(page,
-		`window.__systemsketch?.editor.getShape(${JSON.stringify(child)})?.parentId === ${JSON.stringify(container)}`,
-		'auto-fit child membership after rapid drag')
+		`(() => {
+			const editor = window.__systemsketch?.editor
+			const frame = editor?.getShape(${JSON.stringify(container)})
+			const member = editor?.getShape(${JSON.stringify(child)})
+			return frame && member
+				&& member.parentId === ${JSON.stringify(container)}
+				&& Math.abs(member.x - 56) < 0.01
+				&& Math.abs(member.y - 56) < 0.01
+		})()`,
+		'one settled stock fit after rapid drag')
 	const stressFitted = await shapeFacts(page, container)
+	const childAfterRelease = await shapeFacts(page, child)
 	assert.equal(stressFitted.autoResize, true)
+	assert.ok(Math.abs(stressFitted.x + childAfterRelease.x - childPageBeforeRelease.x) < 0.01,
+		'stock fit preserves the child page x')
+	assert.ok(Math.abs(stressFitted.y + childAfterRelease.y - childPageBeforeRelease.y) < 0.01,
+		'stock fit preserves the child page y')
 	await shot(page, 'block-fold-autosize-rapid-drag-2026-09-04.png')
-	pass('rapid edge-crossing child drags stay in the auto-fitting Block and leave it fitted')
+	pass('rapid edge-crossing uses stock translation, then one stock fit preserves membership and page pose')
 
     await selectBlock(page, child)
     const childFace = await box(page, `${scope(child)} .systemsketch-block-canvas`)

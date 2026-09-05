@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
 	appendBlockPortToProps,
 	blockIcon,
+	blockFoldControlSide,
 	BLOCK_PRESENTATION_VIEWS,
 	blockNotes,
 	blockPortLayout,
@@ -78,6 +79,7 @@ describe('Block model', () => {
 		const props = { ...getDefaultBlockProps() }
 		delete props.icon
 		delete props.notes
+		delete props.foldControlSide
 		delete props.expandedWeights
 		// portLayout is a required StyleProp since the PortLayoutStyle migration.
 		// The reader still guards an in-memory record assembled before the store
@@ -86,6 +88,7 @@ describe('Block model', () => {
 		const port = { id: 'in_1', name: 'value', type: '', visible: true }
 
 		expect(blockIcon(props)).toBe('')
+		expect(blockFoldControlSide(props)).toBe('left')
 		expect(blockNotes(props)).toBe('')
 		expect(blockPortLayout(props)).toBe('inline')
 		expect(expandedSectionWeights(props)).toEqual({})

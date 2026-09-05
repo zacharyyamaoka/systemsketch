@@ -14,6 +14,10 @@ export const PILL_TOOL_ID = 'pill' as const
 export const BLOCK_VIEWS = ['simple', 'port', 'expanded', 'value'] as const
 export type BlockView = (typeof BLOCK_VIEWS)[number]
 
+/** Disclosure chrome is independent of the Block's title/icon identity group. */
+export const BLOCK_FOLD_CONTROL_SIDES = ['left', 'right'] as const
+export type BlockFoldControlSide = (typeof BLOCK_FOLD_CONTROL_SIDES)[number]
+
 /** The source grammar of a call expression's variadic contribution. */
 export const BLOCK_VARIADIC_KINDS = ['positional', 'keyword'] as const
 export type BlockVariadicKind = (typeof BLOCK_VARIADIC_KINDS)[number]
@@ -308,6 +312,8 @@ export const BLOCK_SHAPE_PROPS = {
 	foldable: T.boolean,
 	/** The current compact-header state. Only meaningful while `foldable` is true. */
 	folded: T.boolean,
+	/** Optional so every existing Block keeps the established left-side control. */
+	foldControlSide: T.literalEnum(...BLOCK_FOLD_CONTROL_SIDES).optional(),
 	/** Expanded occurrences derive their box from their direct contents when true. */
 	autoResize: T.boolean,
 	/** Curated pyblocks glyph name. Optional so earlier profile records load. */
@@ -368,6 +374,7 @@ declare module 'tldraw' {
 			blockType: string
 			foldable: boolean
 			folded: boolean
+			foldControlSide?: BlockFoldControlSide
 			autoResize: boolean
 			icon?: string
 			view: BlockView
@@ -862,6 +869,13 @@ export function canBlockContainChildren(view: BlockView): boolean {
  */
 export function canBlockFold(props: Pick<BlockShapeProps, 'view' | 'foldable'>): boolean {
 	return props.foldable && (props.view === 'port' || props.view === 'expanded')
+}
+
+/** Existing boards and newly placed Blocks retain the established left control. */
+export function blockFoldControlSide(
+	props: Pick<BlockShapeProps, 'foldControlSide'>,
+): BlockFoldControlSide {
+	return props.foldControlSide ?? 'left'
 }
 
 /** A stale `folded` bit is harmless outside the headed foldable faces. */

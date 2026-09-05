@@ -103,10 +103,30 @@
   gap: 8px;
 }
 
-/* Furthest-left by design: the chevron describes the whole headed face, before
- * either its optional glyph or its editable name. */
+.systemsketch-block-canvas .BlockNode-heading[data-fold-control='true'][data-fold-placement='left'] {
+  padding-left: 28px;
+}
+
+.systemsketch-block-canvas .BlockNode-heading[data-fold-control='true'][data-fold-placement='right'] {
+  padding-right: 28px;
+}
+
+/* A centered identity still owns the literal Block midpoint. The fold control
+ * is independent corner chrome, never a member of the title/icon/Draft
+ * composition. */
+.systemsketch-block-canvas .BlockNode-heading[data-fold-control='true'][data-header-align='center'] {
+  padding-left: 0;
+	padding-right: 0;
+}
+
+/* Left is the compatibility default; the persisted placement may move this
+ * whole-face disclosure control to the opposite corner. */
 .systemsketch-block-canvas .BlockNode-foldButton {
-  flex: 0 0 auto;
+	position: absolute;
+	left: 12px;
+	top: 50%;
+	z-index: 2;
+	transform: translateY(-50%);
   display: grid;
   width: 20px;
   height: 20px;
@@ -118,6 +138,11 @@
   background: transparent;
   color: var(--ss-text-muted);
   cursor: pointer;
+}
+
+.systemsketch-block-canvas .BlockNode-foldButton[data-fold-placement='right'] {
+	left: auto;
+	right: 12px;
 }
 
 .systemsketch-block-canvas .BlockNode-foldButton:hover,

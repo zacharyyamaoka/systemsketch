@@ -24,6 +24,7 @@ import {
 
 import {
   HEADER_ROW,
+	blockFoldControlSide,
   blockIcon,
   blockIsFolded,
   blockDiffState,
@@ -934,11 +935,13 @@ function BlockFoldControl({ shape }: { shape: BlockShape }) {
   const editor = useEditor()
   if (!canBlockFold(shape.props)) return null
   const folded = blockIsFolded(shape.props)
+  const side = blockFoldControlSide(shape.props)
   const title = shape.props.title.trim() || 'Block'
   return (
     <button
       type="button"
       className="BlockNode-foldButton"
+		data-fold-placement={side}
       data-testid={`block-fold-${shape.id.replace('shape:', '')}`}
       aria-label={`${folded ? 'Expand' : 'Collapse'} ${title}`}
       title={`${folded ? 'Expand' : 'Collapse'} ${title}`}
@@ -960,10 +963,16 @@ function BlockFoldControl({ shape }: { shape: BlockShape }) {
 
 function BlockHeading({ shape, height }: { shape: BlockShape; height: number }) {
   const icon = blockIcon(shape.props)
+  const foldable = canBlockFold(shape.props)
+	const foldSide = blockFoldControlSide(shape.props)
   return (
     <div className="NodeShape-heading" style={{ height }}>
-      <div className="BlockNode-heading">
-        <BlockFoldControl shape={shape} />
+      <BlockFoldControl shape={shape} />
+      <div
+		className="BlockNode-heading"
+		data-fold-control={foldable || undefined}
+		data-fold-placement={foldable ? foldSide : undefined}
+	  >
         {icon !== '' ? (
           <span
             className="BlockNode-headingIcon"

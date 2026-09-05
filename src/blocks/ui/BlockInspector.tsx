@@ -14,6 +14,7 @@ import { LiveTextArea, LiveTextInput, useLiveField } from '../../fields'
 import { EMPTY_FIELD_GUIDANCE } from '../../fields/emptyFieldGuidance'
 
 import {
+	BLOCK_FOLD_CONTROL_SIDES,
   BLOCK_PRESENTATION_VIEWS,
   isBlockShape,
   HEADER_ROW,
@@ -33,6 +34,7 @@ import {
 	setBlockFoldableProps,
 	setBlockFoldedProps,
 	canBlockFold,
+	blockFoldControlSide,
 } from '../blockModel'
 import { resolveBlockPortSemanticRole, roleLabel } from '../connections/semanticRoles'
 import { getSemanticTagsVisible, setSemanticTagsVisible } from '../semanticTagVisibility'
@@ -1683,7 +1685,8 @@ export function BlockInspectorContent({
                     </button>
                   </div>
                   {canBlockFold(props) ? (
-                    <div className="block-inspector__choices" role="group" aria-label="Block fold state">
+					<>
+					<div className="block-inspector__choices" role="group" aria-label="Block fold state">
                       <button
                         type="button"
                         disabled={readOnly}
@@ -1701,6 +1704,22 @@ export function BlockInspectorContent({
                         folded
                       </button>
                     </div>
+					<span className="block-inspector__field-label">Fold control</span>
+					<div className="block-inspector__choices" role="group" aria-label="Block fold control side">
+						{BLOCK_FOLD_CONTROL_SIDES.map((side) => (
+							<button
+								key={side}
+								type="button"
+								data-testid={`block-fold-control-${side}`}
+								disabled={readOnly}
+								aria-pressed={blockFoldControlSide(props) === side}
+								onClick={() => actions?.updateDetails({ foldControlSide: side })}
+							>
+								{side}
+							</button>
+						))}
+					</div>
+					</>
                   ) : null}
                 </div>
                 <div className="block-inspector__subsection">

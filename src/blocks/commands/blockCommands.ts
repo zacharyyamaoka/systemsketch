@@ -97,6 +97,7 @@ export type BlockDetailsPatch = Partial<
     | 'notes'
 		| 'portLayout'
 		| 'stockConfig'
+		| 'foldControlSide'
   >
 >
 

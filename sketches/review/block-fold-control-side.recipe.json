@@ -1,0 +1,88 @@
+{
+  "feature": "Block fold control side",
+  "viewport": { "width": 1500, "height": 930 },
+  "pages": [{ "id": "review", "name": "Fold control side" }],
+  "shapes": [
+    {
+      "id": "fold-subject",
+      "type": "block",
+      "x": 680,
+      "y": 210,
+      "props": {
+        "title": "initialize_workflow",
+        "description": "Select this Block and choose where its disclosure control lives.",
+        "blockType": "Function",
+        "icon": "SquareFunction",
+        "view": "expanded",
+        "w": 520,
+        "h": 260,
+        "foldable": true,
+        "folded": false,
+        "inputs": [],
+        "outputs": []
+      }
+    },
+    {
+      "id": "right-reference",
+      "type": "block",
+      "x": 680,
+      "y": 555,
+      "props": {
+        "title": "right_corner_reference",
+        "description": "The chevron is independent of the icon and title.",
+        "blockType": "Function",
+        "icon": "SquareFunction",
+        "view": "port",
+        "w": 520,
+        "h": 210,
+        "foldable": true,
+        "folded": false,
+        "foldControlSide": "right",
+        "inputs": [],
+        "outputs": []
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "select",
+      "kind": "step",
+      "text": "1 · Select initialize_workflow and open Behaviour in its inspector.",
+      "x": 65,
+      "y": 175,
+      "w": 480,
+      "h": 110,
+      "target": { "shapeId": "fold-subject", "anchor": "left", "dy": -55 }
+    },
+    {
+      "id": "switch",
+      "kind": "step",
+      "text": "2 · Under Fold control, choose Right; then switch back to Left.",
+      "x": 65,
+      "y": 360,
+      "w": 480,
+      "h": 110,
+      "target": { "shapeId": "fold-subject", "anchor": "left", "dy": 55 }
+    },
+    {
+      "id": "compare",
+      "kind": "note",
+      "text": "3 · Compare the prepared right-corner Port face, then click its chevron to fold and unfold.",
+      "x": 65,
+      "y": 555,
+      "w": 500,
+      "h": 120,
+      "target": { "shapeId": "right-reference", "anchor": "left" }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Existing Blocks default Left; Right pins the fold control to the opposite corner without moving the title/icon identity.",
+      "x": 520,
+      "y": 790,
+      "w": 760,
+      "h": 110
+    }
+  ]
+}
