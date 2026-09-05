@@ -21,6 +21,7 @@ import {
   clickAt,
   clickElement,
   delay,
+  drag,
   evaluate,
   key,
   readConsoleErrors,
@@ -281,6 +282,51 @@ async function main() {
     await delay(400)
     await shot(page, 'stock-render.png')
     await evaluate(page, `(document.getElementById('bt-stock-render')?.remove(), null)`)
+
+    /* ---- a drawing made inside the region outlives the detach -------------- */
+    // A region refuses a shape DRAGGED in, but tldraw parents a newly drawn or
+    // pasted one to whatever it landed on — so a person can annotate a tree in
+    // place. Deleting the region deletes its whole subtree, and the painted
+    // layer only replaces chrome the projection drew, so the annotation has to
+    // be lifted out first or detach silently destroys a person's own work.
+    await seed(page, port)
+    const spot = await evaluate(page, `JSON.stringify((() => {
+      const editor = window.__systemsketch.editor
+      const b = editor.getShapePageBounds('${REGION}')
+      const a = editor.pageToScreen({ x: b.minX + 30, y: b.maxY - 95 })
+      const c = editor.pageToScreen({ x: b.minX + 170, y: b.maxY - 30 })
+      return { ax: a.x, ay: a.y, cx: c.x, cy: c.y }
+    })())`).then(JSON.parse)
+    await key(page, 'r')
+    await delay(200)
+    await drag(page, { x: spot.ax, y: spot.ay }, { x: spot.cx, y: spot.cy })
+    await delay(600)
+    await key(page, 'Escape')
+    await delay(200)
+    const annotation = await evaluate(page, `JSON.stringify((() => {
+      const editor = window.__systemsketch.editor
+      const drawn = editor.getCurrentPageShapes()
+        .filter((shape) => shape.type === 'geo' && shape.meta.btRole === undefined && shape.id !== '${WITNESS}')
+      return { ids: drawn.map((shape) => shape.id), parents: drawn.map((shape) => shape.parentId) }
+    })())`).then(JSON.parse)
+    check('annotate.parented', 'a rectangle drawn inside the region becomes its child',
+      annotation.parents, [REGION])
+
+    const bandFinal = await bandPoint(page)
+    await openContextMenuAt(page, bandFinal)
+    await clickElement(page, '[data-testid="context-menu.block-detach-to-primitives"]')
+    await delay(1300)
+    const kept = await evaluate(page, `JSON.stringify((() => {
+      const editor = window.__systemsketch.editor
+      const frame = editor.getCurrentPageShapes().find((shape) => shape.type === 'frame')
+      return ${JSON.stringify(annotation.ids)}.map((id) => {
+        const shape = editor.getShape(id)
+        return shape ? (shape.parentId === frame?.id ? 'in-frame' : 'loose') : 'DESTROYED'
+      })
+    })())`).then(JSON.parse)
+    check('annotate.survives', "the person's own drawing survives the detach, inside the frame",
+      kept, annotation.ids.map(() => 'in-frame'))
+    await shot(page, 'annotation-kept.png')
 
     check('console.end', 'no local console errors', readConsoleErrors(page), [])
   } catch (error) {

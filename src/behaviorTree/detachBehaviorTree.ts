@@ -35,6 +35,7 @@ import {
 	BT_META_REGION,
 	BT_META_ROLE,
 	isBehaviorTreeShape,
+	readBtChildMeta,
 } from './behaviorTreeModel'
 import { behaviorTreePrimitives } from './btPrimitives'
 import { regionCables, withoutBehaviorTreeRepair } from './installBehaviorTreeRegions'
@@ -115,6 +116,28 @@ export function detachBehaviorTreeToPrimitives(
 			pose,
 		)))
 
+		// A person can author straight into a region: tldraw parents a newly drawn
+		// or pasted shape to whatever it landed on, and only a *drag* in is
+		// refused (`BehaviorTreeShapeUtil.onDragShapesIn`). Everything the
+		// projection made carries a BT stamp, so an unstamped survivor is the
+		// person's own drawing and has to outlive the region.
+		//
+		// WHY: deleting the region deletes its whole subtree, and the painted
+		// layer above only replaces chrome the projection itself drew — so
+		// without this lift an annotation box drawn inside a tree vanishes at
+		// detach, the one thing detach must never do. Branch and Loop already
+		// lift their children out first (`detachBranch.ts:138`,
+		// `detachLoop.ts:139`); this is the region agreeing with them. The test
+		// is the absence of a stamp, not a list of kinds, so a shape type that
+		// does not exist yet is preserved too.
+		const authored: TLShapeId[] = []
+		for (const childId of editor.getSortedChildIdsForParent(region.id)) {
+			const child = editor.getShape(childId)
+			if (!child || readBtChildMeta(child) !== null) continue
+			authored.push(childId)
+		}
+		if (authored.length > 0) editor.reparentShapes(authored, primitiveParentId)
+
 		// Whatever is still parented by the region is chrome the projection owns
 		// — control cards above all — and the stock records just painted replace
 		// it. Deleting the region takes them with it.
@@ -147,7 +170,9 @@ export function detachBehaviorTreeToPrimitives(
 		})
 		// Frames adopt by containment, so the frame is created after its content
 		// and the content is handed to it explicitly: page positions are kept.
-		const produced: TLShapeId[] = []
+		// The lifted drawings were already on the board, so the "new since
+		// `before`" sweep below cannot see them; hand them to the frame by name.
+		const produced: TLShapeId[] = authored.filter((id) => editor.getShape(id) !== undefined)
 		for (const id of editor.getCurrentPageShapeIds()) {
 			if (id === frameId || before.has(id)) continue
 			const shape = editor.getShape(id)
