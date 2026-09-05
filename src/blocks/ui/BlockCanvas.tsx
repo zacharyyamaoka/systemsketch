@@ -41,6 +41,8 @@ import {
   type BlockShape,
   type BlockState,
 } from '../blockModel'
+import { resolveBlockPortSemanticRole, roleLabel } from '../connections/semanticRoles'
+import { getSemanticTagsVisible } from '../semanticTagVisibility'
 import { effectTethers } from '../effectTether'
 import { BlockInlineEditor } from '../BlockInlineEditor'
 import { valueBlockExactText, valueBlockInlet, valueBlockLabel, valueBlockOutlet } from '../valueBlock'
@@ -142,8 +144,15 @@ function BlockPortDot({
   port: DrawnPort
   dragOffset: number | null
 }) {
-  const { placed, connected, hasDefault, producers } = port
-  const portId = placed.port.id
+	const { placed, connected, hasDefault, producers } = port
+	const portId = placed.port.id
+	const semanticRole = resolveBlockPortSemanticRole(placed.port)
+	const editor = useEditor()
+	const semanticTagsVisible = useValue(
+		'block semantic tag visibility',
+		() => getSemanticTagsVisible(editor),
+		[editor],
+	)
   const { hinting, eligible } = usePortHintEligibility(shape.id, portId)
 
   // No pointer handler here on purpose. The capture listener in
@@ -164,6 +173,7 @@ function BlockPortDot({
 		placed.port.variadic ? 'Port_variadic' : '',
 		placed.port.variadic ? `Port_variadic--${placed.port.variadic.kind}` : '',
 		placed.port.variadic?.bundled ? 'Port_variadic--bundled' : '',
+		semanticTagsVisible && semanticRole.role !== 'data' ? `Port_semantic--${semanticRole.role}` : '',
   ].filter(Boolean).join(' ')
   // A ghost row is a port the target asserts and this board does not have. It
   // keeps its dot so a missing cable has somewhere to land, in the row it is
@@ -183,12 +193,17 @@ function BlockPortDot({
       y={placed.y}
       hinting={hinting}
       eligible={eligible}
+		semanticLabel={semanticTagsVisible && semanticRole.role !== 'data' ? roleLabel(semanticRole.role) : undefined}
       className={extraClasses}
-      title={inHeader && !placed.subtle ? placed.port.name || undefined : undefined}
+		title={[
+			inHeader && !placed.subtle ? placed.port.name : '',
+			semanticTagsVisible && semanticRole.role !== 'data' ? `${semanticRole.role} port${semanticRole.origin === 'derived' ? ' (derived)' : ''}` : '',
+		].filter(Boolean).join(' · ') || undefined}
       attrs={{
         'data-block-port-edge': placed.edge,
         'data-block-port-row': String(portRow(placed.port)),
-        'data-block-port-mutates': portMutates(placed.port) ? 'true' : undefined,
+		'data-block-port-mutates': portMutates(placed.port) ? 'true' : undefined,
+		'data-semantic-role': semanticTagsVisible && semanticRole.role !== 'data' ? semanticRole.role : undefined,
 			'data-variadic-group': placed.port.variadic?.groupId,
 			'data-variadic-bundled': placed.port.variadic?.bundled ? 'true' : undefined,
         'data-diff-state': diffState === 'normal' ? undefined : diffState,

@@ -125,6 +125,23 @@ describe('normalizeValueBlockProps', () => {
 		expect(next.outputs).toEqual([{ id: 'out_7', name: 'gain', type: 'float', visible: true }])
 	})
 
+	it('preserves each terminal claim through normalisation without copying a direction across the pill', () => {
+		const props = valueBlock({
+			inputs: [{ id: 'in_3', name: 'gain', type: 'float', visible: true, semanticRoleDerived: { role: 'configuration', source: 'signature', analyzer: 'parser' } }],
+			outputs: [{ id: 'out_7', name: 'gain', type: 'float', visible: true, semanticRoleAuthored: { role: 'event' } }],
+		})
+		const renamed = normalizeValueBlockProps({ ...props, title: '3' }, props)
+		expect(renamed.inputs[0]).toMatchObject({ semanticRoleDerived: { role: 'configuration', source: 'signature', analyzer: 'parser' } })
+		expect(renamed.outputs[0]).toMatchObject({ semanticRoleAuthored: { role: 'event' } })
+		expect(renamed.inputs[0].semanticRoleAuthored).toBeUndefined()
+		expect(renamed.outputs[0].semanticRoleDerived).toBeUndefined()
+
+		// A cloned/snapshotted record follows the same pure normaliser on reload.
+		const reloaded = normalizeValueBlockProps(structuredClone(renamed), structuredClone(renamed))
+		expect(reloaded.inputs[0].semanticRoleDerived).toEqual(renamed.inputs[0].semanticRoleDerived)
+		expect(reloaded.outputs[0].semanticRoleAuthored).toEqual(renamed.outputs[0].semanticRoleAuthored)
+	})
+
 	it('strips callable-Definition metadata so copied pills are always independent', () => {
 		const props = valueBlock({
 			definitionId: 'shared-callable-definition',
