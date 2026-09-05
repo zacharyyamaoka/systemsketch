@@ -46,6 +46,7 @@ import {
   getOnlySelectedBranch,
 } from '../branch'
 import { EditorLoopInspector, getOnlySelectedLoop } from '../loop'
+import { EditorBehaviorTreeInspector, EditorBehaviorTreeSelectionMiniMenu, getSelectedBehaviorTree } from '../behaviorTree'
 import {
   CodeResizeIndicator,
   EditorCodeSelectionMiniMenu,
@@ -224,6 +225,7 @@ function InspectorDock({
 }) {
   if (subject === 'branch') return <EditorBranchInspector editor={editor} onRequestClose={onClose} />
   if (subject === 'loop') return <EditorLoopInspector editor={editor} onRequestClose={onClose} />
+  if (subject === 'behaviorTree') return <EditorBehaviorTreeInspector editor={editor} onRequestClose={onClose} />
   if (subject === 'connection') return <EditorConnectionInspector editor={editor} />
   if (subject === 'shape') return <ShapeFactsPanel editor={editor} />
   if (subject === 'empty') return <InspectorEmptyState />
@@ -289,6 +291,11 @@ function SelectionMiniMenu() {
     () => getOnlySelectedBranch(editor) !== null,
     [editor],
   )
+  const hasBehaviorTree = useValue(
+    'systemsketch selection is a Behavior Tree',
+    () => getSelectedBehaviorTree(editor) !== null,
+    [editor],
+  )
   const hasCode = useValue(
     'systemsketch selection is one Code block',
     () => getOnlySelectedCode(editor) !== null,
@@ -329,6 +336,7 @@ function SelectionMiniMenu() {
   }
   const hasVisibleActions = hasCode
     || hasBranch
+    || hasBehaviorTree
     || hasBlockMiniMenu
     || hasAppearance
     || canWrap
@@ -355,6 +363,17 @@ function SelectionMiniMenu() {
         label="Selection actions"
       >
         <EditorBranchSelectionMiniMenu editor={editor} />
+      </SelectionContextualMenu>
+    )
+  }
+
+  if (hasBehaviorTree) {
+    return (
+      <SelectionContextualMenu
+        className="systemsketch-selection-menu"
+        label="Behavior Tree actions"
+      >
+        <EditorBehaviorTreeSelectionMiniMenu editor={editor} />
       </SelectionContextualMenu>
     )
   }
@@ -444,6 +463,8 @@ export function SystemSketchSurfaceHost() {
       // never changed it.
       const loop = getOnlySelectedLoop(editor)
       if (loop) return `loop:${loop.id}`
+      const tree = getSelectedBehaviorTree(editor)
+      if (tree) return `behaviorTree:${tree.region.id}:${tree.path ?? ''}`
       const context = getBlockInspectorContext(editor)
       if (context.kind === 'selected') return context.shape.id
       if (context.kind === 'multi') return `multi:${context.styles.blockCount}`
@@ -476,6 +497,7 @@ export function SystemSketchSurfaceHost() {
     () => readInspectorSubject(editor, {
       getOnlySelectedBranch,
       getOnlySelectedLoop,
+      getSelectedBehaviorTree,
       getBlockInspectorContextKind: (target) => getBlockInspectorContext(target).kind,
       getConnectionInspectorContext,
     }),

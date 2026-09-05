@@ -43,6 +43,7 @@
     "test:bundle-quick-insert": "node tests/bundle_unbundle_copy_quick_insert_smoke.mjs",
     "test:ui-hardening": "node tests/ui_hardening_smoke.mjs",
     "test:recorder": "node tests/recorder_smoke.mjs",
+    "test:bt": "node tests/behavior_tree_smoke.mjs",
     "plugin:build": "npm --prefix vscode-systemsketch run build",
     "plugin:package": "npm --prefix vscode-systemsketch run package",
     "plugin:test": "npm --prefix vscode-systemsketch test",

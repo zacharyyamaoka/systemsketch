@@ -50,6 +50,7 @@ describe('inspectorSubjectOwnsHeader', () => {
       block: true,
       branch: true,
       loop: true,
+      behaviorTree: true,
       connection: false,
       shape: false,
       empty: false,

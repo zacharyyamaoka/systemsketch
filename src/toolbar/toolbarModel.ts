@@ -17,7 +17,7 @@ export type ShapeFamilyTool =
 export type DrawFamilyTool = 'draw' | 'highlight'
 
 /** The system-design family under the Block slot: Blocks, regions, values, and Callouts. */
-export type SystemFamilyTool = 'block' | 'branch' | 'loop' | 'code' | 'pill' | 'callout'
+export type SystemFamilyTool = 'block' | 'branch' | 'loop' | 'behaviorTree' | 'code' | 'pill' | 'callout'
 
 export interface ToolbarPreferences {
   version: 1

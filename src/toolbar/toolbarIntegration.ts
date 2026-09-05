@@ -12,6 +12,7 @@ import { isDrawingArrowWithArrowTool } from '../arrowClickToPlace'
 import { withBlockTool } from '../blocks/blockToolUi'
 import { withBranchTool } from '../branch/branchToolUi'
 import { withLoopTool } from '../loop/loopToolUi'
+import { withBehaviorTreeTool } from '../behaviorTree/behaviorTreeToolUi'
 import { withCalloutTool } from '../callout'
 import { withCodeTool } from '../code'
 import { CONNECTION_SHAPE_TYPE, ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
@@ -257,7 +258,7 @@ function overrideTools(
  */
 function rememberSystemTools(tools: TLUiToolsContextType): TLUiToolsContextType {
   const next: TLUiToolsContextType = { ...tools }
-  for (const id of ['block', 'branch', 'loop', 'code', 'pill', 'callout'] as const satisfies readonly SystemFamilyTool[]) {
+  for (const id of ['block', 'branch', 'loop', 'behaviorTree', 'code', 'pill', 'callout'] as const satisfies readonly SystemFamilyTool[]) {
     const wrapped = wrapTool(tools[id], () => updateToolbarPreferences({ lastSystemTool: id }))
     if (wrapped) next[id] = wrapped
   }
@@ -266,8 +267,8 @@ function rememberSystemTools(tools: TLUiToolsContextType): TLUiToolsContextType 
 
 export const SYSTEMSKETCH_TOOLBAR_OVERRIDES: TLUiOverrides = {
   tools: (editor, tools) =>
-    rememberSystemTools(withCalloutTool(editor, withCodeTool(editor, withLoopTool(editor,
-      withBranchTool(editor, withBlockTool(editor, overrideTools(editor, tools))))))),
+    rememberSystemTools(withCalloutTool(editor, withCodeTool(editor, withBehaviorTreeTool(editor, withLoopTool(editor,
+      withBranchTool(editor, withBlockTool(editor, overrideTools(editor, tools)))))))),
   translations: {
     en: {
       // Stock frame removal reparents children out before deleting the

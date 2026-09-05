@@ -1,0 +1,31 @@
+{
+  "reference": {
+    "order": [
+      "object_pose",
+      "quality",
+      "grip_state",
+      "grip_force",
+      "home_pose"
+    ],
+    "sink_rank": true,
+    "behaviours": 13
+  },
+  "candidate": {
+    "order": [
+      "object_pose",
+      "quality",
+      "grip_force",
+      "grip_state",
+      "home_pose"
+    ],
+    "pills_below_tree": true
+  },
+  "pair_order_accuracy": 0.9,
+  "normalized_x_rmse": 0.22495062726047382,
+  "normalized_x_max": 0.4336642768828361,
+  "accessor_relative_rmse": 0.22401620841432432,
+  "gates": {
+    "order": true,
+    "sink": true
+  }
+}
