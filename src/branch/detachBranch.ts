@@ -171,7 +171,7 @@ export function detachBranchToPrimitives(
 			})
 		}
 		chrome.push(branchText(primitiveParentId, control.port.name,
-			control.label, { color: 'grey', scale: 13 / 18 }))
+			control.label, { color: 'grey', font: 'mono', scale: 13 / 18 }))
 	}
 	for (const row of layout.arms) {
 		if (row.dividerY !== null) chrome.push(branchLine(primitiveParentId, row.dividerY, layout.w, 'm'))
