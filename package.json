@@ -91,6 +91,7 @@
     "test:worktree-paths": "node tests/development_worktree_paths_smoke.mjs",
     "test:theme": "node --experimental-strip-types tests/theme_contrast_smoke.mjs",
     "test:toolbar": "node tests/toolbar_family_menu_smoke.mjs",
+    "test:primitive-search": "node tests/primitive_search_smoke.mjs",
     "test:zoom-controls": "node tests/zoom_controls_preference_smoke.mjs",
     "test:layout-commands": "node tests/layout_commands_smoke.mjs",
     "test:collision-routing": "node tests/collision_aware_routing_smoke.mjs",
