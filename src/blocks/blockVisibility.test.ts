@@ -1,7 +1,13 @@
 import { createShapeId, type Editor, type TLShape } from 'tldraw'
 import { describe, expect, it } from 'vitest'
 
-import { getDefaultBlockProps, setBlockViewProps, type BlockShape } from './blockModel'
+import {
+	getDefaultBlockProps,
+	setBlockFoldableProps,
+	setBlockFoldedProps,
+	setBlockViewProps,
+	type BlockShape,
+} from './blockModel'
 import { getBlockShapeVisibility } from './blockVisibility'
 import { stepIntoDepthScope } from '../depth/depthNavigation'
 
@@ -62,6 +68,17 @@ describe('Block child visibility', () => {
 	it('lets children inherit normal visibility while their Block is expanded', () => {
 		const parent = block('expanded')
 		expect(getBlockShapeVisibility(child(parent.id), editorWith(parent))).toBe('inherit')
+	})
+
+	it('hides expanded children while the optional header fold is closed', () => {
+		const parent = {
+			...block('expanded'),
+			props: setBlockFoldedProps(
+				setBlockFoldableProps(block('expanded').props, true),
+				true,
+			),
+		}
+		expect(getBlockShapeVisibility(child(parent.id), editorWith(parent))).toBe('hidden')
 	})
 
 	it('does not hide page-owned shapes or external cables', () => {

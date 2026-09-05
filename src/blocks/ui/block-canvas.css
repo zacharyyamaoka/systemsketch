@@ -30,6 +30,21 @@
   font-family: inherit;
 }
 
+/* During a child transform the document frame remains untouched so stock
+ * translation can keep using its initial snapshot. The derived layer is the
+ * group-like, continuous surface that follows the current child geometry; the
+ * release-time stock fit replaces it without a second visual state. */
+.systemsketch-block-canvas.NodeShape[data-auto-fit-live='true'] {
+  background: transparent;
+  box-shadow: none;
+}
+
+.systemsketch-block-canvas[data-auto-fit-live='true'] .BlockNode-layer {
+  border-radius: 9px;
+  background: var(--ss-surface-raised);
+  box-shadow: var(--node-shadow-border);
+}
+
 [data-state='select.idle'] .systemsketch-block-canvas [data-pb-inline-field],
 [data-state='select.editing_shape'] .systemsketch-block-canvas [data-pb-inline-field] {
   pointer-events: all;
@@ -163,6 +178,65 @@
   overflow: hidden;
 }
 
+.systemsketch-block-canvas .BlockNode-heading[data-fold-control='true'][data-fold-placement='left'] {
+  padding-left: 28px;
+}
+
+.systemsketch-block-canvas .BlockNode-heading[data-fold-control='true'][data-fold-placement='right'] {
+  padding-right: 28px;
+}
+
+/* A centered identity still owns the literal Block midpoint. The fold control
+ * is independent corner chrome, never a member of the title/icon/Draft
+ * composition. */
+.systemsketch-block-canvas .BlockNode-heading[data-fold-control='true'][data-header-align='center'] {
+  padding-left: 0;
+	padding-right: 0;
+}
+
+/* Left is the compatibility default; the persisted placement may move this
+ * whole-face disclosure control to the opposite corner. */
+.systemsketch-block-canvas .BlockNode-foldButton {
+	position: absolute;
+	left: 12px;
+	top: 50%;
+	z-index: 2;
+	transform: translateY(-50%);
+  display: grid;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  place-items: center;
+  pointer-events: all;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ss-text-muted);
+  cursor: pointer;
+}
+
+.systemsketch-block-canvas .BlockNode-foldButton[data-fold-placement='right'] {
+	left: auto;
+	right: 12px;
+}
+
+.systemsketch-block-canvas .BlockNode-foldButton:hover,
+.systemsketch-block-canvas .BlockNode-foldButton:focus-visible {
+  background: var(--ss-accent-soft);
+  color: var(--ss-accent);
+  outline: none;
+}
+
+.systemsketch-block-canvas .BlockNode-foldButton svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
 .systemsketch-block-canvas .BlockNode-headingIcon {
   flex: 0 0 auto;
   display: flex;
@@ -184,7 +258,11 @@
   white-space: nowrap;
 }
 
-.systemsketch-block-canvas .BlockNode-heading[data-header-align='center'] .BlockNode-headingTitle {
+/* With disclosure at the opposite corner, the title no longer consumes the
+ * whole header row: type is part of the left identity phrase, not a second
+ * right-side control competing with the chevron. */
+.systemsketch-block-canvas .BlockNode-heading[data-header-align='center'] .BlockNode-headingTitle,
+.systemsketch-block-canvas .BlockNode-heading[data-fold-control='true'][data-fold-placement='right'] .BlockNode-headingTitle {
   flex: 0 1 auto;
 }
 

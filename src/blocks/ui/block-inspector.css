@@ -193,6 +193,22 @@
   text-transform: uppercase;
 }
 
+.block-inspector__subsection + .block-inspector__subsection {
+  margin-top: 11px;
+}
+
+.block-inspector__field-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ss-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.block-inspector__subsection .block-inspector__choices + .block-inspector__choices {
+  margin-top: 5px;
+}
+
 .block-inspector__field {
   display: flex;
   align-items: center;

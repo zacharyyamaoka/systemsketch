@@ -129,6 +129,8 @@ the header-divider setting removes only the visual rule, not the heading or
 its edit target. Put the literal inspector clicks in external callouts—Chrome
 is product UI, not a fixture-only shape.
 
+For an auto-fitting Block drag-stability review, seed the child through that real `parentId` relationship and aim the one drag cue at the child's visible face. The observable expectation is that a rapid, edge-crossing drag keeps the child in the Block; tell reviewers to use **Remove from container** from its context menu for the deliberate exit. Do not imply that crossing the fitted boundary should remove the child—the moving boundary makes that gesture inherently ambiguous.
+
 **`parentId` is the only thing that makes a child a child.** `Editor.createShapes` does not adopt by geometry, so a shape merely placed inside a Frame, an Expanded Block, a Branch or a Loop is a sibling that overlaps: drag the container and it is left behind, and only a manual nudge makes tldraw's frame drop claim it. Once a shape has a `parentId`, its `x`/`y` are **parent-local** — subtract the container's position when converting. The helper fails the build if a shape's bounds sit inside a container that is not one of its ancestors.
 
 For a Loop region, the Blocks of the loop body take the Loop's shorthand id as `parentId`; the producers and consumers outside it stay on the page. For a semantic cable, create a `connection` shape plus its two `connection` bindings with the exact current props from the feature source or an existing acceptance test. Do not imitate a semantic cable with a stock arrow.

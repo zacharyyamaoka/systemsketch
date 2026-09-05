@@ -11,11 +11,16 @@ import {
 import {
 	BLOCK_SHAPE_PROPS,
 	BLOCK_SHAPE_TYPE,
+	BLOCK_FOLDED_HEIGHT_PX,
 	PILL_TOOL_ID,
+	blockFoldControlSide,
+	blockIsFolded,
+	canBlockFold,
 	canReparentDraggedShapesIntoBlock,
 	canBlockContainChildren,
 	blockShowsHeaderDivider,
 	getDefaultBlockProps,
+	isExpandedBlockShape,
 	mergeBlockResizeProps,
 	resizeBlockProps,
 	type BlockShape,
@@ -89,6 +94,7 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 		: titleAnchor === 'end' ? titleBox.x + titleBox.w : titleBox.x + titleBox.w / 2
 	const titleY = titleBox.y + titleBox.h / 2
 	const titleInk = titleAppearance.color ?? ink
+	const foldControlX = blockFoldControlSide(shape.props) === 'right' ? Math.max(12, w - 12) : 10
 
 	if (layout.view === 'value') {
 		return (
@@ -121,6 +127,18 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 				<>
 					{blockShowsHeaderDivider(shape.props) ? (
 						<line x1={1} y1={layout.header.h} x2={Math.max(1, w - 1)} y2={layout.header.h} stroke={divider} />
+					) : null}
+					{canBlockFold(shape.props) ? (
+						<polyline
+							points={blockIsFolded(shape.props)
+								? `${foldControlX - 4},20 ${foldControlX},24 ${foldControlX + 4},20`
+								: `${foldControlX - 2},18 ${foldControlX + 2},24 ${foldControlX - 2},30`}
+							fill="none"
+							stroke={muted}
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							strokeWidth={1.8}
+						/>
 					) : null}
 					<text x={titleX} y={titleY} textAnchor={titleAnchor} dominantBaseline="middle" fill={titleInk} fontFamily={titleAppearance.fontFamily} fontSize={titleAppearance.fontSize} fontWeight={titleAppearance.fontWeight}>
 						{shape.props.title}
@@ -240,7 +258,12 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 
 	/** A capsule sizes itself to its text; there is nothing to drag a handle for. */
 	override canResize(shape: BlockShape): boolean {
+		// Auto-fit owns an Expanded Block's bounds, and a folded Block is only a
+		// header. In both states offering stock resize handles would promise a
+		// manual size that the presentation immediately rejects.
 		return shape.props.view !== 'value'
+			&& !blockIsFolded(shape.props)
+			&& !(shape.props.view === 'expanded' && shape.props.autoResize)
 	}
 
 	override getDefaultProps(): BlockShape['props'] {
@@ -264,10 +287,11 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 
 		// Commands should normally use setBlockViewProps. This guard also makes a
 		// direct/imported view write safe by restoring that view's parked box.
-		if (viewChanged && (next.props.w !== remembered.w || next.props.h !== remembered.h)) {
+		const expectedHeight = blockIsFolded(next.props) ? BLOCK_FOLDED_HEIGHT_PX : remembered.h
+		if (viewChanged && (next.props.w !== remembered.w || next.props.h !== expectedHeight)) {
 			return {
 				...next,
-				props: { ...next.props, w: remembered.w, h: remembered.h },
+				props: { ...next.props, w: remembered.w, h: expectedHeight },
 			}
 		}
 
@@ -394,8 +418,13 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	}
 
 	override getGeometry(shape: BlockShape) {
+		// WHY: shape geometry is one of tldraw's cached reactive roots. Reading
+		// live SelectTool state or descendant geometry from here makes the parent
+		// cache depend on the very interaction computations that ask for it and can
+		// recurse through `haveParentsChanged`. Continuous auto-fit is paint-only
+		// during a gesture; stock `fitFrameToContent` commits this box on settle.
 		const layout = layoutBlock(shape.props)
-		const isContainer = canBlockContainChildren(shape.props.view)
+		const isContainer = isExpandedBlockShape(shape)
 		return containerHitGeometry({
 			body: shape.props.view === 'value'
 				? new Stadium2d({
@@ -417,7 +446,11 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 				: [],
 			dots: layout.ports
 				.filter((port) => !port.subtle)
-				.map((port) => ({ x: port.x, y: port.y, radius: BLOCK_PORT_RADIUS })),
+				.map((port) => ({
+					x: port.x,
+					y: port.y,
+					radius: BLOCK_PORT_RADIUS,
+				})),
 		})
 	}
 
@@ -430,7 +463,8 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	}
 
 	override getIndicatorPath(shape: BlockShape): Path2D {
-		const { w, h } = layoutBlock(shape.props).bounds
+		const layout = layoutBlock(shape.props)
+		const { w, h } = layout.bounds
 		const path = new Path2D()
 		path.roundRect(0, 0, w, h, shape.props.view === 'value' ? h / 2 : BLOCK_CORNER_RADIUS)
 		const drawn = new Set<string>()
@@ -438,7 +472,7 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 		// invisible until then) — the outline still owns the same socket the whole
 		// time, or a Simple Block's selection edge draws straight through the dot
 		// the moment hover reveals it.
-		for (const port of layoutBlock(shape.props).ports) {
+		for (const port of layout.ports) {
 			const key = `${Math.round(port.x)}:${Math.round(port.y)}`
 			if (drawn.has(key)) continue
 			drawn.add(key)
@@ -452,7 +486,7 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 		shape: BlockShape,
 		allowAncestorProxy: boolean,
 	): BlockShape | BranchArmShape | undefined {
-		if (canBlockContainChildren(shape.props.view)) return shape
+		if (isExpandedBlockShape(shape)) return shape
 		if (!allowAncestorProxy) return undefined
 		const ancestors = this.editor.getShapeAncestors(shape)
 		// The closest real container wins. Arm frames and Expanded Blocks share
@@ -461,7 +495,7 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 		for (let index = ancestors.length - 1; index >= 0; index -= 1) {
 			const ancestor = ancestors[index]
 			if (isBranchArmShape(ancestor)) return ancestor
-			if (ancestor.type === 'block' && canBlockContainChildren(ancestor.props.view)) {
+			if (isExpandedBlockShape(ancestor)) {
 				return ancestor
 			}
 		}
@@ -469,11 +503,11 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	}
 
 	override isFrameLike(shape: BlockShape): boolean {
-		return canBlockContainChildren(shape.props.view)
+		return isExpandedBlockShape(shape)
 	}
 
 	override canReceiveNewChildrenOfType(shape: BlockShape, type: TLShape['type']): boolean {
-		if (canBlockContainChildren(shape.props.view)) {
+		if (isExpandedBlockShape(shape)) {
 			return super.canReceiveNewChildrenOfType(shape, type)
 		}
 		// Do not proxy while createShape is finding a parent. A collapsed child
@@ -488,9 +522,14 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	}
 
 	override canRemoveChildrenOfType(shape: BlockShape, type: TLShape['type']): boolean {
-		return canBlockContainChildren(shape.props.view)
-			? super.canRemoveChildrenOfType(shape, type)
-			: true
+		if (!isExpandedBlockShape(shape)) return true
+		// WHY: An auto-fitting Block follows its children, so leaving its bounds is
+		// not a meaningful "remove" gesture—the moving boundary can cross the
+		// pointer mid-drag and make membership disappear accidentally. Keep its
+		// children sticky during a drag and make the already-visible context-menu
+		// command the intentional, position-preserving way out of the container.
+		if (shape.props.autoResize) return false
+		return super.canRemoveChildrenOfType(shape, type)
 	}
 
 	/** Semantic cables may cross an Expanded Block's frame boundary. */
@@ -499,11 +538,11 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	}
 
 	override getClipPath(shape: BlockShape) {
-		return canBlockContainChildren(shape.props.view) ? super.getClipPath(shape) : undefined
+		return isExpandedBlockShape(shape) ? super.getClipPath(shape) : undefined
 	}
 
 	override isExportBoundsContainer(shape: BlockShape): boolean {
-		return canBlockContainChildren(shape.props.view)
+		return isExpandedBlockShape(shape)
 	}
 
 	override onDragShapesIn(

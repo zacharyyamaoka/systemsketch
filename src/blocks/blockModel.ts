@@ -30,6 +30,10 @@ export type BlockTitleAlign = (typeof BLOCK_TITLE_ALIGNS)[number]
 export const BLOCK_HEADER_ALIGNS = ['left', 'center'] as const
 export type BlockHeaderAlign = (typeof BLOCK_HEADER_ALIGNS)[number]
 
+/** Disclosure chrome is independent of the Block's title/icon identity group. */
+export const BLOCK_FOLD_CONTROL_SIDES = ['left', 'right'] as const
+export type BlockFoldControlSide = (typeof BLOCK_FOLD_CONTROL_SIDES)[number]
+
 /** The source grammar of a call expression's variadic contribution. */
 export const BLOCK_VARIADIC_KINDS = ['positional', 'keyword'] as const
 export type BlockVariadicKind = (typeof BLOCK_VARIADIC_KINDS)[number]
@@ -349,6 +353,14 @@ export const BLOCK_SHAPE_PROPS = {
 	headerAlign: T.literalEnum(...BLOCK_HEADER_ALIGNS).optional(),
 	description: T.string,
 	blockType: T.string,
+	/** Whether this occurrence exposes the compact header fold affordance. */
+	foldable: T.boolean,
+	/** The current compact-header state. Only meaningful while `foldable` is true. */
+	folded: T.boolean,
+	/** Optional so every existing Block keeps the established left-side control. */
+	foldControlSide: T.literalEnum(...BLOCK_FOLD_CONTROL_SIDES).optional(),
+	/** Expanded occurrences derive their box from their direct contents when true. */
+	autoResize: T.boolean,
 	/** Curated pyblocks glyph name. Optional so earlier profile records load. */
 	icon: T.string.optional(),
 	view: BlockViewStyle,
@@ -415,6 +427,10 @@ declare module 'tldraw' {
 			headerAlign?: BlockHeaderAlign
 			description: string
 			blockType: string
+			foldable: boolean
+			folded: boolean
+			foldControlSide?: BlockFoldControlSide
+			autoResize: boolean
 			icon?: string
 			view: BlockView
 			views: {
@@ -465,6 +481,9 @@ export function getDefaultBlockProps(): BlockShapeProps {
 		title: '',
 		description: '',
 		blockType: '',
+		foldable: false,
+		folded: false,
+		autoResize: false,
 		icon: '',
 		view: 'simple',
 		views,
@@ -908,7 +927,7 @@ export function isBlockShape(shape: TLShape | null | undefined): shape is BlockS
 }
 
 export function isExpandedBlockShape(shape: TLShape | null | undefined): shape is BlockShape {
-	return isBlockShape(shape) && shape.props.view === 'expanded'
+	return isBlockShape(shape) && shape.props.view === 'expanded' && !blockIsFolded(shape.props)
 }
 
 /** A literal argument: a Block wearing the capsule. */
@@ -921,6 +940,76 @@ export function canBlockContainChildren(view: BlockView): boolean {
 }
 
 /**
+ * A fold is a presentation affordance for the two headed faces. Simple is
+ * already a compact card, while a Value pill has no interior to collapse.
+ */
+export function canBlockFold(props: Pick<BlockShapeProps, 'view' | 'foldable'>): boolean {
+	return props.foldable && (props.view === 'port' || props.view === 'expanded')
+}
+
+/** Existing boards and newly placed Blocks retain the established left control. */
+export function blockFoldControlSide(
+	props: Pick<BlockShapeProps, 'foldControlSide'>,
+): BlockFoldControlSide {
+	return props.foldControlSide ?? 'left'
+}
+
+/** A stale `folded` bit is harmless outside the headed foldable faces. */
+export function blockIsFolded(props: Pick<BlockShapeProps, 'view' | 'foldable' | 'folded'>): boolean {
+	return canBlockFold(props) && props.folded
+}
+
+/** The headed compact face is deliberately one stable row, not a squeezed body. */
+export const BLOCK_FOLDED_HEIGHT_PX = 48
+
+/**
+ * Opting out of folding always restores the parked view box. Otherwise a
+ * hidden interior would leave a Block permanently stranded at header height.
+ */
+export function setBlockFoldableProps(
+	props: BlockShapeProps,
+	foldable: boolean,
+): BlockShapeProps {
+	if (props.foldable === foldable) return props
+	if (!foldable && blockIsFolded(props)) {
+		const remembered = props.views[props.view]
+		return { ...props, foldable: false, folded: false, w: remembered.w, h: remembered.h }
+	}
+	return { ...props, foldable, ...(foldable ? {} : { folded: false }) }
+}
+
+/**
+ * Folding parks the live headed box in that view's memory, then shows only
+ * the header. Unfolding restores it exactly; this is not a lossy resize.
+ */
+export function setBlockFoldedProps(
+	props: BlockShapeProps,
+	folded: boolean,
+): BlockShapeProps {
+	if (!canBlockFold(props) || props.folded === folded) return props
+	if (!folded) {
+		const remembered = props.views[props.view]
+		return { ...props, folded: false, w: remembered.w, h: remembered.h }
+	}
+	return {
+		...props,
+		folded: true,
+		h: BLOCK_FOLDED_HEIGHT_PX,
+		views: {
+			...props.views,
+			[props.view]: { w: props.w, h: props.h },
+		},
+	}
+}
+
+export function setBlockAutoResizeProps(
+	props: BlockShapeProps,
+	autoResize: boolean,
+): BlockShapeProps {
+	return props.autoResize === autoResize ? props : { ...props, autoResize }
+}
+
+/**
  * Project a view switch through the remembered per-view boxes. The current
  * box is parked before the target box is restored, so resizing one view never
  * destroys the dimensions of another.
@@ -928,20 +1017,37 @@ export function canBlockContainChildren(view: BlockView): boolean {
 export function setBlockViewProps(props: BlockShapeProps, view: BlockView): BlockShapeProps {
 	const views = {
 		...props.views,
-		[props.view]: { w: props.w, h: props.h },
+		// While folded, the live height is just the header. Keep the parked body
+		// box rather than accidentally replacing it with that compact height.
+		[props.view]: blockIsFolded(props)
+			? props.views[props.view]
+			: { w: props.w, h: props.h },
 	}
 	const target = views[view]
+	const remainsFolded = props.foldable && (view === 'port' || view === 'expanded') && props.folded
 	return {
 		...props,
 		view,
 		views,
 		w: target.w,
-		h: target.h,
+		h: remainsFolded ? BLOCK_FOLDED_HEIGHT_PX : target.h,
+		folded: remainsFolded,
 	}
 }
 
 /** Keep tldraw's canonical box and the active remembered box in lockstep. */
 export function resizeBlockProps(props: BlockShapeProps, w: number, h: number): BlockShapeProps {
+	if (blockIsFolded(props)) {
+		return {
+			...props,
+			w,
+			h: BLOCK_FOLDED_HEIGHT_PX,
+			views: {
+				...props.views,
+				[props.view]: { w, h: props.views[props.view].h },
+			},
+		}
+	}
 	return {
 		...props,
 		w,

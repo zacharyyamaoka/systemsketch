@@ -15,7 +15,9 @@ import {
   BlockTool,
   PillTool,
   getBlockShapeVisibility,
-  installBlockClickToEdit,
+	installBlockAutoResize,
+	installBlockChildSelection,
+	installBlockClickToEdit,
   installBlockPortMenuTarget,
   installDefinitionLinking,
 } from '../blocks'
@@ -244,10 +246,12 @@ function EmbeddedSurface({
 
     enablePasteAtCursor(editor)
     const stopDefinitionLinking = installDefinitionLinking(editor)
+		const stopBlockAutoResize = installBlockAutoResize(editor)
     const stopBlockConnections = installBlockConnections(editor)
     const stopConnectorControlVisibility = installConnectorControlVisibility(editor)
     const stopInstantTextEditing = installInstantTextEditing(editor)
     const stopBlockClickToEdit = installBlockClickToEdit(editor)
+    const stopBlockChildSelection = installBlockChildSelection(editor)
     const stopBranchClickToEdit = installBranchClickToEdit(editor)
     const stopCodeClickToEdit = installCodeClickToEdit(editor)
     const stopBranchRegions = installBranchRegions(editor)
@@ -345,14 +349,16 @@ function EmbeddedSurface({
       stopExcalidrawPaste()
       stopBlockPortMenuTarget()
       stopBranchRegions()
-      stopBranchClickToEdit()
       stopCodeClickToEdit()
+      stopBranchClickToEdit()
+      stopBlockChildSelection()
       stopBlockClickToEdit()
       stopInstantTextEditing()
       stopConnectorControlVisibility()
       stopBlockConnections()
       stopDefinitionLinking()
       stopWheelZoom()
+		stopBlockAutoResize()
     }
   }, [openDocument, onCanvasCheckpoint, onCanvasText, onCompatibilityCopyAvailable, onLoadError])
 

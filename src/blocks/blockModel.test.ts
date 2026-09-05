@@ -3,11 +3,15 @@ import { describe, expect, it } from 'vitest'
 import {
 	appendBlockPortToProps,
 	blockIcon,
+	blockFoldControlSide,
 	BLOCK_PRESENTATION_VIEWS,
 	blockNotes,
 	blockPortLayout,
 	canReparentDraggedShapesIntoBlock,
 	canBlockContainChildren,
+	blockIsFolded,
+	setBlockFoldableProps,
+	setBlockFoldedProps,
 	expandedSectionWeights,
 	findBlockContainmentTarget,
 	getDefaultBlockProps,
@@ -75,6 +79,7 @@ describe('Block model', () => {
 		const props = { ...getDefaultBlockProps() }
 		delete props.icon
 		delete props.notes
+		delete props.foldControlSide
 		delete props.expandedWeights
 		// portLayout is a required StyleProp since the PortLayoutStyle migration.
 		// The reader still guards an in-memory record assembled before the store
@@ -83,6 +88,7 @@ describe('Block model', () => {
 		const port = { id: 'in_1', name: 'value', type: '', visible: true }
 
 		expect(blockIcon(props)).toBe('')
+		expect(blockFoldControlSide(props)).toBe('left')
 		expect(blockNotes(props)).toBe('')
 		expect(blockPortLayout(props)).toBe('inline')
 		expect(expandedSectionWeights(props)).toEqual({})
@@ -162,6 +168,31 @@ describe('Block model', () => {
 		const restoredSimple = setBlockViewProps(resizedExpanded, 'simple')
 		expect(restoredSimple).toMatchObject({ view: 'simple', w: 270, h: 160 })
 		expect(restoredSimple.views.expanded).toEqual({ w: 760, h: 520 })
+	})
+
+	it('folds a headed view to one row and restores its parked box exactly', () => {
+		const port = setBlockViewProps(getDefaultBlockProps(), 'port')
+		const roomy = resizeBlockProps(port, 480, 310)
+		const foldable = setBlockFoldableProps(roomy, true)
+		const folded = setBlockFoldedProps(foldable, true)
+
+		expect(blockIsFolded(folded)).toBe(true)
+		expect(folded.h).toBe(48)
+		expect(folded.views.port).toEqual({ w: 480, h: 310 })
+
+		const restored = setBlockFoldedProps(folded, false)
+		expect(blockIsFolded(restored)).toBe(false)
+		expect({ w: restored.w, h: restored.h }).toEqual({ w: 480, h: 310 })
+	})
+
+	it('leaves a folded body compact when moving between headed views', () => {
+		const foldedPort = setBlockFoldedProps(
+			setBlockFoldableProps(setBlockViewProps(getDefaultBlockProps(), 'port'), true),
+			true,
+		)
+		const expanded = setBlockViewProps(foldedPort, 'expanded')
+		expect(expanded).toMatchObject({ view: 'expanded', folded: true, h: 48 })
+		expect(expanded.views.port).toEqual(getDefaultBlockProps().views.port)
 	})
 
 	it('merges tldraw resize partials without dropping semantic Block props', () => {

@@ -82,6 +82,9 @@ describe('Block inspector content', () => {
     expect(html).toContain('value="raw"')
     expect(html).toContain('aria-label="Port layout"')
     expect(html).toContain('Aligned shares rows between inputs and outputs; offset stacks the outputs below the inputs.')
+		expect(html).toContain('data-inspector-section="Behaviour"')
+		expect(html).toContain('aria-label="Enable block folding"')
+		expect(html).toContain('aria-label="Auto fit Block children"')
 
     const offset = html.indexOf('>offset<')
     const aligned = html.indexOf('>aligned<')

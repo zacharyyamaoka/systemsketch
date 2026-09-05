@@ -1,0 +1,75 @@
+{
+  "feature": "Block folding, auto-fit, and membership exit",
+  "viewport": { "width": 1600, "height": 960 },
+  "pages": [{ "id": "review", "name": "Block folding & auto-fit" }],
+  "shapes": [
+    {
+      "id": "pipeline",
+      "type": "block",
+      "x": 570,
+      "y": 350,
+      "props": {
+        "title": "pipeline()",
+        "description": "",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 410,
+        "h": 280,
+        "foldable": true,
+        "folded": false,
+        "autoResize": true,
+        "inputs": [],
+        "outputs": []
+      }
+    },
+    {
+      "id": "decode",
+      "type": "block",
+      "parentId": "pipeline",
+      "x": 76,
+      "y": 76,
+      "props": {
+        "title": "parse()",
+        "description": "",
+        "blockType": "Function",
+        "view": "port",
+        "w": 250,
+        "h": 136,
+        "inputs": [],
+        "outputs": []
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "fold",
+      "kind": "step",
+      "text": "1 · Click the far-left chevron to fold pipeline(). Click it again to restore parse().",
+      "x": 40,
+      "y": 270,
+      "w": 420,
+      "h": 120,
+      "target": { "shapeId": "pipeline", "anchor": "left", "dy": -62 }
+    },
+    {
+      "id": "remove",
+      "kind": "step",
+      "text": "2 · Right-click parse(), then choose Remove from container. It should stay at the same canvas position.",
+      "x": 1120,
+      "y": 390,
+      "w": 430,
+      "h": 120,
+      "target": { "shapeId": "pipeline", "anchor": "right", "dy": 32 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Folding hides parse(); opening restores it. Removing parse keeps it in place and pipeline() refits around no child.",
+      "x": 420,
+      "y": 710,
+      "w": 620,
+      "h": 120
+    }
+  ]
+}
