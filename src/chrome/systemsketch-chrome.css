@@ -19,7 +19,9 @@
 }
 
 .systemsketch-top-left-shell {
-  max-width: min(620px, calc(100vw - 390px));
+  /* The breadcrumb is the structural location control now. Reserve the actual
+   * right-side chrome, rather than preserving width for controls we removed. */
+  max-width: calc(100vw - 230px);
   margin: var(--systemsketch-chrome-inset) 0 0 var(--systemsketch-chrome-inset);
 }
 

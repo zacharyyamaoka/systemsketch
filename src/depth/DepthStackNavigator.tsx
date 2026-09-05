@@ -7,17 +7,26 @@ import {
   goBackInDepthHistory,
   goForwardInDepthHistory,
   returnToDepthRoot,
-  stepOutOfDepthScope,
   stepToDepthAncestor,
   subscribeDepthNavigation,
 } from './depthNavigation'
 import { storedTextOr } from '../textFidelity'
+import { compactDepthBreadcrumbs, type CompactDepthBreadcrumbItem, type DepthBreadcrumbItem } from './depthBreadcrumbs'
 import './depth-stack-navigator.css'
 
-function ArrowGlyph({ direction }: { direction: 'back' | 'forward' | 'up' }) {
+function ArrowGlyph({ direction }: { direction: 'back' | 'forward' }) {
   const path = direction === 'back' ? 'm12.5 4-6 6 6 6M7 10h9' : direction === 'forward'
     ? 'm7.5 4 6 6-6 6M13 10H4' : 'm4 11 6-6 6 6M10 5v11'
   return <svg viewBox="0 0 20 20" aria-hidden="true"><path d={path} /></svg>
+}
+
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof Element)) return false
+  return Boolean(target.closest('input, textarea, select, [contenteditable="true"], [contenteditable=""]'))
+}
+
+function isElision(entry: CompactDepthBreadcrumbItem<DepthBreadcrumbItem>): entry is { kind: 'elision'; hiddenCount: number } {
+  return 'kind' in entry && entry.kind === 'elision'
 }
 
 function Crumb({
@@ -59,6 +68,31 @@ export function DepthStackNavigator({ placement = 'floating' }: { placement?: 'm
       ownerDocument.removeEventListener('keydown', escape)
     }
   }, [open])
+  useEffect(() => {
+    const ownerDocument = rootRef.current?.ownerDocument ?? document
+    const navigate = (direction: 'back' | 'forward', event: Event) => {
+      if (isEditableTarget(event.target)) return
+      const possible = direction === 'back' ? snapshot.canGoBack : snapshot.canGoForward
+      if (!possible) return
+      event.preventDefault()
+      if (direction === 'back') void goBackInDepthHistory(editor)
+      else void goForwardInDepthHistory(editor)
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'BrowserBack' || event.key === 'GoBack') navigate('back', event)
+      if (event.key === 'BrowserForward' || event.key === 'GoForward') navigate('forward', event)
+    }
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.button === 3) navigate('back', event)
+      if (event.button === 4) navigate('forward', event)
+    }
+    ownerDocument.addEventListener('keydown', onKeyDown, true)
+    ownerDocument.addEventListener('pointerdown', onPointerDown, true)
+    return () => {
+      ownerDocument.removeEventListener('keydown', onKeyDown, true)
+      ownerDocument.removeEventListener('pointerdown', onPointerDown, true)
+    }
+  }, [editor, snapshot.canGoBack, snapshot.canGoForward])
 
   if (!model || (placement === 'floating' && !model.current)) return null
   const entries = model.entries
@@ -82,15 +116,16 @@ export function DepthStackNavigator({ placement = 'floating' }: { placement?: 'm
             <ArrowGlyph direction="forward" />
           </button>
         </span>
-        {model.current ? (
-          <button type="button" className="systemsketch-depth-pill__up" aria-label={`Step out to ${model.parent?.name ?? model.pageName}`} title={`Step out to ${model.parent?.name ?? model.pageName}`} onClick={() => void stepOutOfDepthScope(editor)}>
-            <ArrowGlyph direction="up" />
-          </button>
-        ) : null}
         <div className="systemsketch-depth-breadcrumbs" aria-label="Structural path">
           <Crumb current={!model.current} title="Board root" onClick={() => void returnToDepthRoot(editor)}>{model.pageName}</Crumb>
-          {entries.length > 0 ? <span className="systemsketch-depth-separator" aria-hidden="true">›</span> : null}
-          {entries.length > 0 ? <Crumb current title={currentName}>{currentName}</Crumb> : null}
+          {compactDepthBreadcrumbs(model.pageName, entries).map((entry) => isElision(entry) ? (
+            <span key={`elision-${entry.hiddenCount}`} className="systemsketch-depth-crumb systemsketch-depth-crumb--elision" aria-label={`${entry.hiddenCount} intermediate ${entry.hiddenCount === 1 ? 'level' : 'levels'} hidden; open structural path for all levels`}>…</span>
+          ) : (
+            <span key={entry.id} className="systemsketch-depth-breadcrumb-pair">
+              <span className="systemsketch-depth-separator" aria-hidden="true">›</span>
+              <Crumb current={entry.isCurrent} title={entry.name} onClick={() => void stepToDepthAncestor(editor, entry.id)}>{entry.name}</Crumb>
+            </span>
+          ))}
         </div>
         <button type="button" className="systemsketch-depth-pill__path-menu systemsketch-depth-pill__trigger" aria-label="Show structural path" aria-expanded={open} aria-controls="systemsketch-depth-stack" onClick={() => setOpen((value) => !value)}>⌄</button>
       </nav>

@@ -71,7 +71,6 @@
 }
 
 .systemsketch-depth-history button,
-.systemsketch-depth-pill__up,
 .systemsketch-depth-pill__path-menu {
   display: grid;
   width: 32px;
@@ -83,8 +82,7 @@
   border-left: 1px solid color-mix(in srgb, var(--ss-border) 72%, transparent) !important;
 }
 
-.systemsketch-depth-history svg,
-.systemsketch-depth-pill__up svg {
+.systemsketch-depth-history svg {
   width: 16px;
   height: 16px;
   fill: none;
@@ -94,15 +92,11 @@
   stroke-linejoin: round;
 }
 
-.systemsketch-depth-pill__up {
-  border-right: 1px solid var(--ss-border) !important;
-}
-
 .systemsketch-depth-breadcrumbs {
   display: flex;
   align-items: center;
   min-width: 0;
-  max-width: min(430px, 47vw);
+  max-width: calc(100vw - 260px);
   overflow: hidden;
   padding: 0 6px;
 }
@@ -123,7 +117,7 @@
 }
 
 .systemsketch-depth-crumb.is-current {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   padding-inline: 2px;
   color: var(--ss-text);
   font-weight: 850;
@@ -131,6 +125,18 @@
 
 .systemsketch-depth-breadcrumbs > .systemsketch-depth-crumb:first-child {
   flex: 0 0 auto;
+}
+
+.systemsketch-depth-breadcrumb-pair {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.systemsketch-depth-crumb--elision {
+  flex: 0 0 auto;
+  padding-inline: 4px;
+  color: var(--ss-text-muted);
 }
 
 .systemsketch-depth-separator {
@@ -316,7 +322,7 @@
   }
 
   .systemsketch-depth-breadcrumbs {
-    max-width: min(310px, 48vw);
+    max-width: min(540px, 70vw);
   }
 }
 
@@ -327,6 +333,6 @@
   }
 
   .systemsketch-depth-breadcrumbs {
-    max-width: 54vw;
+    max-width: 62vw;
   }
 }
