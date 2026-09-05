@@ -23,6 +23,12 @@ import {
 	type PortPolarity,
 } from './connectionModel'
 import { getConnectionBindings, type ConnectionBinding } from './ConnectionBindingUtil'
+import {
+	FLOATING_PORT_ID,
+	FLOATING_PORT_SHAPE_TYPE,
+	isFloatingPortShape,
+	type FloatingPortShape,
+} from '../../floatingPort/floatingPortModel'
 
 /**
  * A screen-space magnet, kept as the floor under the hit profile's page-unit
@@ -163,12 +169,13 @@ function projectBlockConnectionPorts(props: BlockShapeProps): BlockConnectionPor
 }
 
 /**
- * A shape that carries ports: a Block, or a Branch with control ports on its
+ * A shape that carries ports: a Block, an unboxed Port, or a region with
+ * control ports on its
  * band. The connection layer reads both through this one table, so a cable
  * welds to a control port with the same binding, rules and paint as a Block's
  * input — the Branch is only a second kind of host, not a second edge model.
  */
-export type PortHostShape = BlockShape | BranchShape | LoopShape
+export type PortHostShape = BlockShape | BranchShape | LoopShape | FloatingPortShape
 
 /**
  * The one list of shape types a cable may weld to.
@@ -182,10 +189,19 @@ export const PORT_HOST_SHAPE_TYPES: readonly string[] = [
 	BLOCK_SHAPE_TYPE,
 	BRANCH_SHAPE_TYPE,
 	LOOP_SHAPE_TYPE,
+	FLOATING_PORT_SHAPE_TYPE,
 ]
 
 export function isPortHostShape(shape: TLShape | null | undefined): shape is PortHostShape {
-	return isBlockShape(shape) || isBranchShape(shape) || isLoopShape(shape)
+	return isBlockShape(shape) || isBranchShape(shape) || isLoopShape(shape) || isFloatingPortShape(shape)
+}
+
+/** One readable owner label for every shape that can host a semantic port. */
+export function portHostLabel(shape: PortHostShape): string {
+	if (isFloatingPortShape(shape)) return shape.props.name.trim() || 'Port'
+	if (isBranchShape(shape)) return shape.props.title.trim() || 'Branch'
+	if (isLoopShape(shape)) return shape.props.title.trim() || 'Loop'
+	return shape.props.title.trim() || shape.props.blockType.trim() || 'Block'
 }
 
 /**
@@ -234,9 +250,25 @@ export function getBranchConnectionPorts(branch: BranchShape): BlockConnectionPo
 	}))
 }
 
+/** A free Port is still one ordinary connection endpoint, merely without a card. */
+export function getFloatingPortConnectionPorts(port: FloatingPortShape): BlockConnectionPort[] {
+	return [{
+		id: FLOATING_PORT_ID,
+		name: port.props.name,
+		type: port.props.type,
+		side: port.props.direction,
+		hidden: false,
+		x: 0,
+		y: 0,
+		anchor: { x: 0, y: 0 },
+		subtle: false,
+	}]
+}
+
 function projectHostPorts(host: PortHostShape): BlockConnectionPort[] {
 	if (isBranchShape(host)) return getBranchConnectionPorts(host)
 	if (isLoopShape(host)) return getLoopConnectionPorts(host)
+	if (isFloatingPortShape(host)) return getFloatingPortConnectionPorts(host)
 	return getBlockConnectionPorts(host.props, { includeHidden: true })
 }
 

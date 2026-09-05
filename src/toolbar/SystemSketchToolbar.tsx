@@ -26,6 +26,7 @@ import { BRANCH_TOOL_ID, BranchIcon } from '../branch'
 import { LOOP_TOOL_ID, LoopIcon } from '../loop'
 import { CODE_TOOL_ID, CodeIcon } from '../code'
 import { CALLOUT_TOOL_ID, CalloutIcon, isCalloutCard, startAddingCalloutLeader } from '../callout'
+import { FLOATING_PORT_TOOL_ID, FloatingPortIcon } from '../floatingPort'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
 import {
   selectDrawFamilyTool,
@@ -119,6 +120,7 @@ const SYSTEM_MENU_ITEMS: ReadonlyArray<{
   { id: CODE_TOOL_ID, label: 'Code', icon: <CodeIcon />, shortcut: 'C' },
   // A pill is a variable: a literal argument, a named result, or both. P.
   { id: PILL_TOOL_ID, label: 'Pill', icon: <PillIcon />, shortcut: 'P' },
+  { id: FLOATING_PORT_TOOL_ID, label: 'Port', icon: <FloatingPortIcon /> },
   // Callout intentionally has no key: its two-click interaction is reached from
   // the shared system-design muscle-memory slot, not from a letter collision.
   { id: CALLOUT_TOOL_ID, label: 'Callout', icon: <CalloutIcon /> },
@@ -311,6 +313,8 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
         ? BLOCK_TOOL_ID
       : activeToolId === PILL_TOOL_ID
           ? PILL_TOOL_ID
+          : activeToolId === FLOATING_PORT_TOOL_ID
+            ? FLOATING_PORT_TOOL_ID
           : activeToolId === CALLOUT_TOOL_ID
             ? CALLOUT_TOOL_ID
           : preferences.lastSystemTool
@@ -320,6 +324,7 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
     || activeToolId === LOOP_TOOL_ID
     || activeToolId === CODE_TOOL_ID
     || activeToolId === PILL_TOOL_ID
+    || activeToolId === FLOATING_PORT_TOOL_ID
     || activeToolId === CALLOUT_TOOL_ID
 
   return (

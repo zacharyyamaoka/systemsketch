@@ -10,6 +10,7 @@ import { BlockShapeUtil } from '../blocks'
 import { BranchArmShapeUtil, BranchShapeUtil } from '../branch'
 import { LoopShapeUtil } from '../loop'
 import { CodeShapeUtil } from '../code'
+import { FloatingPortShapeUtil } from '../floatingPort'
 import {
   blockConnectionBindingUtils,
   blockConnectionShapeUtils,
@@ -37,6 +38,7 @@ const STORE_SHAPE_UTILS = replaceConstructorsByType<TLAnyShapeUtilConstructor>(
     BranchShapeUtil,
     LoopShapeUtil,
     CodeShapeUtil,
+    FloatingPortShapeUtil,
     BranchArmShapeUtil,
     ...blockConnectionShapeUtils,
   ],

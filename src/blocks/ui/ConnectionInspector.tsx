@@ -39,10 +39,7 @@ import {
 	setConnectionRoutingForSelection,
 	setConnectionTemporalForSelection,
 } from '../commands'
-import { isBlockShape } from '../blockModel'
-import { isBranchShape } from '../../branch/branchModel'
-import { isLoopShape } from '../../loop/loopModel'
-import { getPortHostPort, isPortHostShape } from '../connections/blockPorts'
+import { getPortHostPort, isPortHostShape, portHostLabel } from '../connections/blockPorts'
 import { sameSharedStyle } from '../commands/blockStyleCommands'
 import { CONNECTION_SHAPE_TYPE } from '../connections/connectionModel'
 import { cablePillLabel } from '../connections/connectionPresentation'
@@ -96,8 +93,7 @@ function describeEndpoint(editor: Editor, binding: ConnectionBinding | undefined
 	// An unnamed Block still has a type; "transform.in_1" reads far better than
 	// "Block.in_1" for one the picker just made. An inner face says so: a cable
 	// on the inside of a boundary port is a different wire from one outside it.
-	const kind = isBranchShape(shape) ? 'Branch' : isLoopShape(shape) ? 'Loop' : 'Block'
-	const name = shape.props.title || (isBlockShape(shape) ? shape.props.blockType : '') || kind
+	const name = portHostLabel(shape)
 	const face = binding.props.face === 'inner' ? ' (inside)' : ''
 	return `${name}.${port?.name || port?.id || binding.props.portId}${face}`
 }

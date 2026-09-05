@@ -34,6 +34,7 @@ import {
 } from '../branch'
 import { LoopShapeUtil, detachLoopToPrimitives, isLoopShape } from '../loop'
 import { CodeShapeUtil, isCodeShape, type CodeShape } from '../code'
+import { FloatingPortShapeUtil, detachFloatingPortToPrimitives, isFloatingPortShape } from '../floatingPort'
 import {
 	CONNECTION_SHAPE_TYPE,
 	blockConnectionBindingUtils,
@@ -71,6 +72,7 @@ const PORTABLE_SHAPE_UTILS = replaceConstructorsByType<TLAnyShapeUtilConstructor
 		BranchArmShapeUtil,
 		LoopShapeUtil,
 		CodeShapeUtil,
+		FloatingPortShapeUtil,
 		...blockConnectionShapeUtils,
 	],
 )
@@ -321,6 +323,9 @@ export async function exportPortableTldraw(editor: Editor): Promise<string> {
 			}
 			for (const code of exportEditor.getCurrentPageShapes().filter(isCodeShape)) {
 				detachCodeToPrimitives(exportEditor, code)
+			}
+			for (const port of exportEditor.getCurrentPageShapes().filter(isFloatingPortShape)) {
+				detachFloatingPortToPrimitives(exportEditor, port.id)
 			}
 			normalizeCustomGeometries(exportEditor)
 		}

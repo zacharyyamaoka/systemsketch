@@ -10,7 +10,7 @@ import {
 } from './inspectorSubject'
 
 const EMPTY = {
-  hasBranch: false, hasLoop: false, hasBlockContext: false, hasConnection: false, hasSelection: false,
+  hasBranch: false, hasLoop: false, hasPort: false, hasBlockContext: false, hasConnection: false, hasSelection: false,
 }
 
 describe('resolveInspectorSubject', () => {
@@ -22,6 +22,8 @@ describe('resolveInspectorSubject', () => {
     // over the Block lens below it.
     expect(resolveInspectorSubject({ ...EMPTY, hasLoop: true, hasBlockContext: true, hasSelection: true }))
       .toBe('loop')
+    expect(resolveInspectorSubject({ ...EMPTY, hasPort: true, hasBlockContext: true, hasSelection: true }))
+      .toBe('port')
     expect(resolveInspectorSubject({ ...EMPTY, hasConnection: true, hasSelection: true }))
       .toBe('connection')
     // A Block wins over a cable, because a Block carries far more to edit.
@@ -50,6 +52,7 @@ describe('inspectorSubjectOwnsHeader', () => {
       block: true,
       branch: true,
       loop: true,
+      port: false,
       connection: false,
       shape: false,
       empty: false,
@@ -60,7 +63,7 @@ describe('inspectorSubjectOwnsHeader', () => {
   })
 
   it('leaves the dock header — the only pointer way out — on every other subject', () => {
-    for (const subject of ['connection', 'shape', 'empty'] as const) {
+    for (const subject of ['port', 'connection', 'shape', 'empty'] as const) {
       expect(inspectorSubjectOwnsHeader(subject)).toBe(false)
       expect(inspectorSubjectTitle(subject)).not.toBe('')
     }
@@ -73,9 +76,11 @@ describe('readInspectorSubject', () => {
     kind: string,
     connection: unknown,
     loop: unknown = null,
+    port: unknown = null,
   ) => ({
     getOnlySelectedBranch: () => branch,
     getOnlySelectedLoop: () => loop,
+    getOnlySelectedFloatingPort: () => port,
     getBlockInspectorContextKind: () => kind,
     getConnectionInspectorContext: () => connection,
   })
@@ -99,5 +104,9 @@ describe('readInspectorSubject', () => {
 
   it('reads a selected Loop as the loop lens, ahead of the Block lens', () => {
     expect(readInspectorSubject(editor(['shape:loop']), reader(null, 'empty', null, {}))).toBe('loop')
+  })
+
+  it('reads a selected free Port ahead of the generic shape lens', () => {
+    expect(readInspectorSubject(editor(['shape:port']), reader(null, 'empty', null, null, {}))).toBe('port')
   })
 })

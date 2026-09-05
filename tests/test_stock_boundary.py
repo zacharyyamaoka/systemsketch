@@ -48,8 +48,10 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("CodeBlockTool", source)
         self.assertIn("CalloutTool", source)
         self.assertIn("CalloutAddLeaderTool", source)
+        self.assertIn("FloatingPortShapeUtil", source)
+        self.assertIn("FloatingPortTool", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
         )
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS", source)
         self.assertIn("...blockConnectionShapeUtils", source)
@@ -88,6 +90,7 @@ class StockBoundaryTests(unittest.TestCase):
         # The Loop region joins the same family slot as Block and Branch, one
         # click deeper. It must not become a top-level toolbar slot of its own.
         self.assertIn("label: 'Loop', icon: <LoopIcon />", toolbar_source)
+        self.assertIn("label: 'Port', icon: <FloatingPortIcon />", toolbar_source)
         self.assertNotIn('title="Loop"', toolbar_source)
         # Listing a tool in that submenu is not enough to make it selectable:
         # `selectSystemFamilyTool` calls `tools[id]?.onSelect(...)`, so an id
@@ -96,7 +99,7 @@ class StockBoundaryTests(unittest.TestCase):
         integration = (
             PROJECT_ROOT / "src" / "toolbar" / "toolbarIntegration.ts"
         ).read_text(encoding="utf-8")
-        for factory in ("withBlockTool", "withBranchTool", "withLoopTool", "withCodeTool", "withCalloutTool"):
+        for factory in ("withBlockTool", "withBranchTool", "withLoopTool", "withCodeTool", "withFloatingPortTool", "withCalloutTool"):
             self.assertIn(factory, integration)
         self.assertNotIn('title="Branch"', toolbar_source)
         self.assertNotIn('title="Comment"', toolbar_source)
@@ -105,7 +108,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("LoopShapeUtil,", source)
         self.assertIn("CodeShapeUtil,", source)
         self.assertIn(
-            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]", source
+            "const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", source
         )
         self.assertIn("const stopBranchRegions = installBranchRegions(editor)", product_source)
         self.assertIn("const stopBranchClickToEdit = installBranchClickToEdit(editor)", product_source)
@@ -149,9 +152,11 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("PillTool,", embedded)
         self.assertIn("CodeShapeUtil,", embedded)
         self.assertIn("CodeBlockTool,", embedded)
+        self.assertIn("FloatingPortShapeUtil,", embedded)
+        self.assertIn("FloatingPortTool", embedded)
         self.assertIn("...SYSTEMSKETCH_ARROW_SHAPE_UTILS,", embedded)
         self.assertIn("...blockConnectionShapeUtils,", embedded)
-        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]", embedded)
+        self.assertIn("const EMBEDDED_TOOLS = [BlockTool, BranchTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]", embedded)
         self.assertIn("Toolbar: SystemSketchFigmaToolbar", embedded)
         self.assertIn("ContextMenu: BlockContextMenu", embedded)
         self.assertIn("InFrontOfTheCanvas: EmbeddedSystemSketchSurfaceHost", embedded)
@@ -179,6 +184,7 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("BranchArmShapeUtil", store_factory)
         self.assertIn("SYSTEMSKETCH_ARROW_SHAPE_UTILS", store_factory)
         self.assertIn("SYSTEMSKETCH_STOCK_PRIMITIVE_SHAPE_UTILS", store_factory)
+        self.assertIn("FloatingPortShapeUtil", store_factory)
 
         arrow_util = (
             PROJECT_ROOT / "src" / "systemSketchArrow.tsx"
@@ -205,6 +211,11 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("SYSTEMSKETCH_ROUNDED_RECT_GEO", portable_export)
         self.assertIn("portableValuePillText", portable_export)
         self.assertIn("freezeDetachedValuePill", portable_export)
+        # The free semantic endpoint lowers alongside Blocks and regions; a
+        # portable .tldr must never depend on the custom Port shape type.
+        self.assertIn("FloatingPortShapeUtil", portable_export)
+        self.assertIn("detachFloatingPortToPrimitives", portable_export)
+        self.assertIn("isFloatingPortShape", portable_export)
 
     def test_the_host_bridge_stays_the_only_thing_an_extension_imports(self) -> None:
         """A host runs in Node and bundles separately, so anything it reaches

@@ -25,6 +25,11 @@ import {
   getOnlySelectedBlock,
   selectionHasBlockStyles,
 } from '../blocks'
+import {
+  FLOATING_PORT_TOOL_ID,
+  FloatingPortInspector,
+  getOnlySelectedFloatingPort,
+} from '../floatingPort'
 import { addTextTarget, selectionHasVisibleText } from '../appearance/textPresence'
 import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
 import { clearDiffStates } from '../diff/clearDiffStates'
@@ -228,6 +233,7 @@ function InspectorDock({
 }) {
   if (subject === 'branch') return <EditorBranchInspector editor={editor} onRequestClose={onClose} />
   if (subject === 'loop') return <EditorLoopInspector editor={editor} onRequestClose={onClose} />
+  if (subject === 'port') return <FloatingPortInspector editor={editor} />
   if (subject === 'connection') return <EditorConnectionInspector editor={editor} />
   if (subject === 'shape') return <ShapeFactsPanel editor={editor} />
   if (subject === 'empty') return <InspectorEmptyState />
@@ -248,7 +254,7 @@ function InspectorEmptyState() {
       <span aria-hidden="true">▣</span>
       <strong>Nothing selected</strong>
       <p>
-        Select a Block, a Branch or a cable to edit it here. Any other shape shows
+        Select a Block, Port, Branch or cable to edit it here. Any other shape shows
         what the board knows about it.
       </p>
     </div>
@@ -445,6 +451,8 @@ export function SystemSketchSurfaceHost() {
       // never changed it.
       const loop = getOnlySelectedLoop(editor)
       if (loop) return `loop:${loop.id}`
+      const port = getOnlySelectedFloatingPort(editor)
+      if (port) return `port:${port.id}`
       const context = getBlockInspectorContext(editor)
       if (context.kind === 'selected') return context.shape.id
       if (context.kind === 'multi') return `multi:${context.styles.blockCount}`
@@ -477,6 +485,7 @@ export function SystemSketchSurfaceHost() {
     () => readInspectorSubject(editor, {
       getOnlySelectedBranch,
       getOnlySelectedLoop,
+      getOnlySelectedFloatingPort,
       getBlockInspectorContextKind: (target) => getBlockInspectorContext(target).kind,
       getConnectionInspectorContext,
     }),
@@ -531,6 +540,14 @@ export function SystemSketchSurfaceHost() {
         keywords: ['value', 'literal', 'variable'],
         icon: '＝',
         run: () => editor.setCurrentTool(PILL_TOOL_ID),
+      },
+      {
+        id: 'insert-floating-port',
+        label: 'Insert Port',
+        description: 'Switch to the free, wireable Port primitive',
+        keywords: ['port', 'input', 'output', 'connector'],
+        icon: '◉',
+        run: () => editor.setCurrentTool(FLOATING_PORT_TOOL_ID),
       },
       {
         // Taking the lens off is a safety property, not a convenience. A diff

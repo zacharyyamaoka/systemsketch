@@ -24,6 +24,7 @@ import {
 import { LoopShapeUtil, LoopTool } from './loop'
 import { CodeBlockTool, CodeShapeUtil, installCodeClickToEdit } from './code'
 import { CalloutAddLeaderTool, CalloutTool } from './callout'
+import { FloatingPortShapeUtil, FloatingPortTool } from './floatingPort'
 import {
   blockConnectionBindingUtils,
   blockConnectionShapeUtils,
@@ -101,10 +102,11 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   BranchArmShapeUtil,
   LoopShapeUtil,
   CodeShapeUtil,
+  FloatingPortShapeUtil,
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
-const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
+const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: DevelopmentPreviewChrome,
 }
@@ -122,9 +124,10 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   BranchArmShapeUtil,
   LoopShapeUtil,
   CodeShapeUtil,
+  FloatingPortShapeUtil,
   ...blockConnectionShapeUtils,
 ]
-const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, CodeBlockTool, PillTool, CalloutTool, CalloutAddLeaderTool]
+const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, CodeBlockTool, PillTool, FloatingPortTool, CalloutTool, CalloutAddLeaderTool]
 const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
 
 /**
