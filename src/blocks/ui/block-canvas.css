@@ -305,6 +305,29 @@
   --variadic-ink: var(--ss-warning);
 }
 
+/* A link is structural, not a second kind of cable. This neutral socket slot
+ * hugs the unchanged anchors: its 22px outside diameter is only 2px beyond
+ * the port's 18px painted footprint on each side. */
+.systemsketch-block-canvas .BlockNode-portLinkRun {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  width: calc(100% - 18px);
+  pointer-events: none;
+}
+
+.systemsketch-block-canvas .BlockNode-portLinkSleeve {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: -11px;
+  width: 22px;
+  box-sizing: border-box;
+  border: 2px solid var(--ss-border-strong);
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--ss-text-muted) 5%, var(--ss-surface-raised));
+}
+
 .systemsketch-block-canvas .BlockNode-variadicBracket {
   position: absolute;
   top: 0;
@@ -343,6 +366,343 @@
   font-size: 10px;
   font-weight: 500;
   text-overflow: ellipsis;
+}
+
+/*
+ * V6 review only — five real paint states behind `?variadicPrototype=1…5`.
+ * They all preserve the V5 model: one DEF-owned name, ordinary cableable
+ * endpoints, and no added row. The socket teeth deliberately point right,
+ * into the Block, so a reader does not mistake the rail for outbound flow.
+ */
+.systemsketch-block-canvas[data-variadic-prototype] .BlockNode-variadicRun {
+  --variadic-line: color-mix(in srgb, var(--variadic-ink) 76%, var(--ss-border-strong));
+}
+
+.systemsketch-block-canvas[data-variadic-prototype] .BlockNode-variadicLabel {
+  max-width: calc(100% - 16px);
+  color: var(--ss-text);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 24px;
+}
+
+.systemsketch-block-canvas[data-variadic-prototype] .BlockNode-variadicSocket {
+  position: absolute;
+  left: -2px;
+  width: 11px;
+  height: 1px;
+  border-top: 1px solid var(--variadic-line);
+  transform: translateY(-50%);
+}
+
+.systemsketch-block-canvas[data-variadic-prototype] .BlockNode-variadicSocket::after {
+  position: absolute;
+  top: -4px;
+  right: -1px;
+  width: 0;
+  height: 0;
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+  border-left: 4px solid var(--variadic-line);
+  content: '';
+}
+
+/* V1 — one continuous inward-pointing rail. The label holds the middle row's
+ * exact normal-port box; the rail answers only the grouping question. */
+.systemsketch-block-canvas[data-variadic-prototype='1'] .BlockNode-variadicBracket {
+  top: 8px;
+  bottom: 8px;
+  left: 9px;
+  width: 1px;
+  border: 0;
+  background: var(--variadic-line);
+}
+
+/* V2 — the same connection grammar with terminal caps. It makes a short run
+ * read as a single socket family before the label is read. */
+.systemsketch-block-canvas[data-variadic-prototype='2'] .BlockNode-variadicBracket {
+  top: 8px;
+  bottom: 8px;
+  left: 9px;
+  width: 7px;
+  border: 0;
+  border-top: 1px solid var(--variadic-line);
+  border-bottom: 1px solid var(--variadic-line);
+  border-left: 1px solid var(--variadic-line);
+}
+
+.systemsketch-block-canvas[data-variadic-prototype='2'] .BlockNode-variadicSocket {
+  border-top-width: 2px;
+}
+
+/* V3 — dotted spine, solid inward arrows. The punctuation is quieter while
+ * preserving an unambiguous direction of travel at every actual endpoint. */
+.systemsketch-block-canvas[data-variadic-prototype='3'] .BlockNode-variadicBracket {
+  top: 9px;
+  bottom: 9px;
+  left: 9px;
+  width: 1px;
+  border: 0;
+  border-left: 1px dashed var(--variadic-line);
+}
+
+.systemsketch-block-canvas[data-variadic-prototype='3'] .BlockNode-variadicSocket {
+  opacity: .78;
+}
+
+/* V4 — DEF-rooted: the signature token occupies the first ordinary label box
+ * and the rail descends from it. This tests whether a reader prefers source
+ * order over a visually centred annotation. */
+.systemsketch-block-canvas[data-variadic-prototype='4'] .BlockNode-variadicBracket {
+  top: 12px;
+  bottom: 8px;
+  left: 9px;
+  width: 7px;
+  border: 0;
+  border-top: 1px solid var(--variadic-line);
+  border-left: 1px solid var(--variadic-line);
+}
+
+.systemsketch-block-canvas[data-variadic-prototype='4'] .BlockNode-variadicSocket:first-of-type {
+  border-top: 0;
+}
+
+.systemsketch-block-canvas[data-variadic-prototype='4'] .BlockNode-variadicSocket:first-of-type::after {
+  display: none;
+}
+
+/* V5 — yoke: a continuous rail becomes a light ladder, with the label still
+ * exactly on the middle ordinary row. It is the strongest visual grouping
+ * option without adding an icon or inventing a collector port. */
+.systemsketch-block-canvas[data-variadic-prototype='5'] .BlockNode-variadicBracket {
+  top: 8px;
+  bottom: 8px;
+  left: 9px;
+  width: 7px;
+  border: 0;
+  border-top: 1px solid var(--variadic-line);
+  border-bottom: 1px solid var(--variadic-line);
+  border-left: 2px solid var(--variadic-line);
+  box-shadow: 3px 0 0 -2px var(--ss-surface-raised);
+}
+
+.systemsketch-block-canvas[data-variadic-prototype='5'] .BlockNode-variadicSocket {
+  width: 12px;
+  border-top-width: 2px;
+}
+
+/* V7 review — containment, not connection. These states deliberately remove
+ * every rail and arrow. A neutral field behind ordinary ports says “one
+ * signature family” without borrowing the visual grammar of a data cable or
+ * asking readers to remember a second args-versus-keywords colour vocabulary. */
+.systemsketch-block-canvas[data-variadic-prototype^='slot-'] .BlockNode-variadicRun {
+  --slot-ink: color-mix(in srgb, var(--ss-text-muted) 22%, var(--ss-surface-raised));
+  --slot-wash: color-mix(in srgb, var(--ss-text-muted) 10%, var(--ss-surface-raised));
+}
+
+.systemsketch-block-canvas[data-variadic-prototype^='slot-'] .BlockNode-variadicLabel {
+  z-index: 2;
+  color: var(--ss-text);
+}
+
+.systemsketch-block-canvas[data-variadic-prototype^='slot-'] .BlockNode-variadicBackdrop {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Do not make `*` and `**` another colour legend. The existing dot still
+ * carries its normal type colour; only the grouping treatment becomes neutral. */
+.systemsketch-block-canvas[data-variadic-prototype^='slot-'] .Port_variadic:not(.Port_mutates)::after {
+  border-color: var(--ss-border-strong);
+  opacity: .44;
+}
+
+.systemsketch-block-canvas[data-variadic-prototype^='slot-'] .Port_variadic--bundled:not(.Port_mutates)::after {
+  border-color: var(--ss-border-strong);
+  opacity: .7;
+}
+
+/* S1 — a continuous soft gutter: closest to a recessed IDE slot, with no
+ * visible outline that could be followed as a cable. */
+.systemsketch-block-canvas[data-variadic-prototype='slot-1'] .BlockNode-variadicBackdrop {
+  top: 0;
+  bottom: 0;
+  left: -7px;
+  width: 27px;
+  border-radius: 9px;
+  background: var(--slot-wash);
+}
+
+/* S2 — a bordered tray. It uses a rounded area rather than a stroke between
+ * sockets, so it reads as shared containment at small sizes. */
+.systemsketch-block-canvas[data-variadic-prototype='slot-2'] .BlockNode-variadicBackdrop {
+  top: 1px;
+  bottom: 1px;
+  left: -8px;
+  width: 31px;
+  border: 1px solid var(--slot-ink);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--ss-text-muted) 6%, var(--ss-surface-raised));
+}
+
+/* S3 — a label-bearing capsule. It treats the group spelling as the title of
+ * a shared field, useful when the reader must spot the family before parsing
+ * each ordinary port. */
+.systemsketch-block-canvas[data-variadic-prototype='slot-3'] .BlockNode-variadicBackdrop {
+  top: 1px;
+  bottom: 1px;
+  left: -8px;
+  width: 152px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--ss-text-muted) 9%, var(--ss-surface-raised));
+}
+
+/* S4 — an inset well with a low-contrast inner shadow. The heavier bounded
+ * volume is intentionally a shape, not a line: it groups by background plane. */
+.systemsketch-block-canvas[data-variadic-prototype='slot-4'] .BlockNode-variadicBackdrop {
+  top: 0;
+  bottom: 0;
+  left: -8px;
+  width: 35px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ss-text-muted) 13%, var(--ss-surface-raised));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ss-text-muted) 16%, transparent), inset 3px 0 7px color-mix(in srgb, var(--ss-text-muted) 11%, transparent);
+}
+
+/* S5 — a stack of individual socket recesses on a shared quiet wash. It is
+ * the clearest “these are slots” reading while still refusing a connecting
+ * mark that could be mistaken for flow. */
+.systemsketch-block-canvas[data-variadic-prototype='slot-5'] .BlockNode-variadicBackdrop {
+  top: 0;
+  bottom: 0;
+  left: -7px;
+  width: 27px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--ss-text-muted) 5%, var(--ss-surface-raised));
+}
+
+.systemsketch-block-canvas[data-variadic-prototype='slot-5'] .BlockNode-variadicSlot {
+  position: absolute;
+  z-index: 1;
+  left: -6px;
+  width: 25px;
+  height: 22px;
+  border-radius: 7px;
+  background: var(--slot-wash);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ss-text-muted) 14%, transparent);
+  transform: translateY(-50%);
+}
+
+/* V8 review — every slot is centred on the actual port centres, matching the
+ * physical jack-bank reading in the reference. These are backgrounds, never
+ * rails: a run is a contained region and each dot remains its own endpoint. */
+.systemsketch-block-canvas[data-variadic-prototype^='center-'] .BlockNode-variadicRun {
+  --center-slot-ink: color-mix(in srgb, var(--ss-text-muted) 25%, var(--ss-surface-raised));
+  --center-slot-wash: color-mix(in srgb, var(--ss-text-muted) 13%, var(--ss-surface-raised));
+}
+
+.systemsketch-block-canvas[data-variadic-prototype^='center-'] .BlockNode-variadicLabel {
+  z-index: 2;
+  color: var(--ss-text);
+}
+
+.systemsketch-block-canvas[data-variadic-prototype^='center-'] .BlockNode-variadicBackdrop {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* The star spelling carries the grammar. A sleeve must not add a second colour
+ * code for positional versus keyword packing. */
+.systemsketch-block-canvas[data-variadic-prototype^='center-'] .Port_variadic:not(.Port_mutates)::after {
+  border-color: var(--ss-border-strong);
+  opacity: .44;
+}
+
+.systemsketch-block-canvas[data-variadic-prototype^='center-'] .Port_variadic--bundled:not(.Port_mutates)::after {
+  border-color: var(--ss-border-strong);
+  opacity: .7;
+}
+
+/* C1 — the direct translation of the reference: one filled, rounded neutral
+ * capsule whose centre line passes through every ordinary port centre. */
+.systemsketch-block-canvas[data-variadic-prototype='center-1'] .BlockNode-variadicBackdrop {
+  top: 0;
+  bottom: 0;
+  left: -18px;
+  width: 36px;
+  border-radius: 18px;
+  background: var(--center-slot-wash);
+}
+
+/* C2 — a centered sleeve: the same shared volume, but a recessed rim makes it
+ * read as a socket housing rather than an internal data connection. */
+.systemsketch-block-canvas[data-variadic-prototype='center-2'] .BlockNode-variadicBackdrop {
+  top: -1px;
+  bottom: -1px;
+  left: -19px;
+  width: 38px;
+  border: 2px solid var(--center-slot-ink);
+  border-radius: 19px;
+  background: color-mix(in srgb, var(--ss-text-muted) 5%, var(--ss-surface-raised));
+}
+
+/* C3 — a nested portal: the larger outer capsule establishes group membership;
+ * its lighter inner well says the real endpoints sit inside that material. */
+.systemsketch-block-canvas[data-variadic-prototype='center-3'] .BlockNode-variadicBackdrop {
+  top: 0;
+  bottom: 0;
+  left: -22px;
+  width: 44px;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--ss-text-muted) 16%, var(--ss-surface-raised));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ss-text-muted) 22%, transparent);
+}
+
+.systemsketch-block-canvas[data-variadic-prototype='center-3'] .BlockNode-variadicBackdrop::before {
+  position: absolute;
+  inset: 6px 8px;
+  border-radius: 12px;
+  background: var(--ss-surface-raised);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ss-text-muted) 12%, transparent);
+  content: '';
+}
+
+/* C4 — a socket bank: a quiet shared body states the family, while three
+ * centered recesses make each independently cableable member feel physical. */
+.systemsketch-block-canvas[data-variadic-prototype='center-4'] .BlockNode-variadicBackdrop {
+  top: 0;
+  bottom: 0;
+  left: -20px;
+  width: 40px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ss-text-muted) 8%, var(--ss-surface-raised));
+}
+
+.systemsketch-block-canvas[data-variadic-prototype='center-4'] .BlockNode-variadicSlot {
+  position: absolute;
+  z-index: 1;
+  left: -16px;
+  width: 32px;
+  height: 22px;
+  border-radius: 10px;
+  background: var(--center-slot-wash);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ss-text-muted) 15%, transparent);
+  transform: translateY(-50%);
+}
+
+/* C5 — a centered module: a square-shouldered shared backplate has a stronger
+ * product-module reading, useful if the rounded capsule feels too decorative. */
+.systemsketch-block-canvas[data-variadic-prototype='center-5'] .BlockNode-variadicBackdrop {
+  top: 2px;
+  bottom: 2px;
+  left: -24px;
+  width: 48px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--ss-text-muted) 11%, var(--ss-surface-raised));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ss-text-muted) 18%, transparent);
 }
 
 .systemsketch-block-canvas .BlockNode-portName {
