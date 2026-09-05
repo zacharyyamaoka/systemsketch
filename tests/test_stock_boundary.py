@@ -23,6 +23,15 @@ class StockBoundaryTests(unittest.TestCase):
         self.assertIn("SharePanel: SystemSketchSharePanel", source)
         self.assertIn("StylePanel: null", source)
         self.assertIn("Toolbar: SystemSketchFigmaToolbar", source)
+        # Selected-text formatting stays tldraw's native Tiptap toolbar; the
+        # product changes its chrome with a scoped stylesheet, never a second
+        # command implementation or selection transaction.
+        self.assertNotIn("RichTextToolbar:", source)
+        rich_text_skin = (
+            PROJECT_ROOT / "src" / "chrome" / "rich-text-toolbar.css"
+        ).read_text(encoding="utf-8")
+        self.assertIn(".tlui-rich-text__toolbar", rich_text_skin)
+        self.assertIn("--ss-surface-inverse", rich_text_skin)
         self.assertIn("InFrontOfTheCanvas: SystemSketchSurfaceHost", source)
         self.assertIn("components={SYSTEMSKETCH_COMPONENTS}", product_source)
         self.assertIn("shapeUtils={SYSTEMSKETCH_SHAPE_UTILS}", product_source)

@@ -2,6 +2,8 @@
 
 SystemSketch starts from one deliberately boring datum: the stock tldraw whiteboard. Its engine, drawing tools, and shortcuts stay stock while narrow supported seams add local files, board overview, zoom, Help, and the Stable/Preview workflow.
 
+The [rich-text toolbar chrome gallery](docs/rich-text-toolbar-chrome-2026-09-04.html) shows the stock tldraw selected-range toolbar restyled as SystemSketch’s black contextual pill without replacing its Tiptap selection, link, list, formatting, focus, or keyboard behavior. Its [`rich-text-toolbar-chrome.systemsketch`](sketches/review/rich-text-toolbar-chrome.systemsketch) board contrasts whole-box formatting with selected-text formatting in one ready-to-drive review.
+
 The [contextual-menu composition gallery](docs/contextual-menu-composition-2026-09-04.html) records the major menu refactor: one registered control vocabulary now supplies Text/Geo, connector, and live Block-title formatting; recipes alone choose grouping and order; and both photographed typeface menus use the same compact `Aa` + single-label rows. It includes matched real-browser captures and the exact extension seam for future generic-Block text fields.
 
 The [hidden port-count implementation gallery](docs/hidden-port-counts-2026-09-04.html) shows the new compact Block disclosure: a Port or Expanded face reports hidden inputs and outputs independently as `+N more`, preserving the size of a callable’s contract without repainting every port. It includes a real-browser capture, inspector Hide/Show journey, SVG parity, and the review fixture.

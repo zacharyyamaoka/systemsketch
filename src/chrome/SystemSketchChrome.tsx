@@ -76,6 +76,7 @@ import {
 import { ContextualSurface } from '../contextualMenus/ContextualSurface'
 import type { RightSurface } from './chromeState'
 import './systemsketch-chrome.css'
+import './rich-text-toolbar.css'
 
 function ShapesIcon() {
   return (
