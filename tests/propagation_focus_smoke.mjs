@@ -45,7 +45,7 @@ async function main() {
     allowSourceRoot: true,
   })
   const board = join(app.filesRoot, 'SystemSketch', 'propagation-focus-review.systemsketch')
-  const shot = join(ROOT, 'docs', 'assets', 'propagation-focus-sliders-live-2026-09-04.png')
+  const shot = join(ROOT, 'docs', 'assets', 'propagation-focus-outward-sliders-live-2026-09-04.png')
   try {
     await ensureDir(join(app.filesRoot, 'SystemSketch'))
     await copyFile(FIXTURE, board)
@@ -96,19 +96,28 @@ async function main() {
         buttons: [...menu.querySelectorAll('button')].map((button) => button.textContent.trim()),
         blockModes: menu.querySelectorAll('[data-testid^="block-pill-view-"]').length,
         ranges: [...menu.querySelectorAll('input[type="range"]')].map((input) => ({
-          min: input.min, max: input.max, value: input.value, aria: input.getAttribute('aria-valuetext'),
+          min: input.min, max: input.max, value: input.value, dir: input.dir, aria: input.getAttribute('aria-valuetext'),
         })),
-      counts: [...menu.querySelectorAll('output')].map((output) => output.textContent.trim()),
+        order: [...menu.querySelector('.systemsketch-propagation-focus').querySelectorAll('input, output, span, button')].map((element) => element.dataset.testid ?? element.textContent.trim()),
       }
     })())`))
     assert.deepEqual(focusSurface, {
       buttons: ['Clear'],
       blockModes: 0,
       ranges: [
-        { min: '1', max: '1', value: '1', aria: '1 of 1 upstream steps' },
-        { min: '1', max: '1', value: '1', aria: '1 of 1 downstream steps' },
+        { min: '1', max: '1', value: '1', dir: 'rtl', aria: '1 of 1 upstream steps' },
+        { min: '1', max: '1', value: '1', dir: '', aria: '1 of 1 downstream steps' },
       ],
-      counts: ['1', '1'],
+      order: [
+        'propagation-focus-upstream-maximum',
+        'propagation-focus-upstream',
+        'propagation-focus-upstream-count',
+        'steps',
+        'propagation-focus-downstream-count',
+        'propagation-focus-downstream',
+        'propagation-focus-downstream-maximum',
+        'propagation-focus-clear',
+      ],
     })
     // Simulate tldraw virtualizing a distant host then mounting a replacement:
     // the narrow child-list observer must mark the new included canvas host.
@@ -119,8 +128,7 @@ async function main() {
       oldHost.replaceWith(remounted)
     })()`)
     await waitFor(app.page, `document.querySelector('.tl-shape[data-shape-id="shape:source"]')?.dataset.propagationFocus === 'included'`, 'remounted included source marker')
-    await screenshot(app.page, shot)
-    pass('Focus opens a compact focus-only surface with real range caps and endpoint counts while unrelated shapes fade')
+    pass('Focus opens a compact focus-only surface with outer caps, inner selected values, and no selection-menu modes while unrelated shapes fade')
 
     await clickElement(app.page, '[data-testid="propagation-focus-clear"]')
     await evaluate(app.page, `(() => {
@@ -150,7 +158,7 @@ async function main() {
     await evaluate(app.page, `void window.__systemsketch.editor.setCurrentTool('select')`)
     await select(app.page, 'shape:join')
     await waitFor(app.page, `document.querySelector('[data-testid="propagation-focus-start"]')`, 'Focus selection action after stock key check')
-    // Add one disposable second downstream layer so the real range keyboard
+    // Add one disposable second downstream layer so normal keyboard range
     // interaction exercises a cap above its default of one.
     await evaluate(app.page, `(() => {
       const editor = window.__systemsketch.editor
@@ -181,8 +189,30 @@ async function main() {
     await clickElement(app.page, '[data-testid="propagation-focus-downstream"]')
     await key(app.page, 'ArrowRight', 'ArrowRight')
     await waitFor(app.page, `document.querySelector('[data-testid="propagation-focus-downstream"]')?.value === '2'`, 'downstream range update')
-    assert.equal(await evaluate(app.page, `document.querySelector('[data-testid="propagation-focus-upstream"]')?.value`), '1')
     await waitFor(app.page, `document.querySelector('[data-shape-id="shape:fan-c"]')?.dataset.propagationFocus === 'included'`, 'downstream immediately expands')
+    await clickElement(app.page, '[data-testid="propagation-focus-clear"]')
+    await select(app.page, 'shape:fan-c')
+    await focus(app.page)
+    await evaluate(app.page, `document.querySelector('[data-testid="propagation-focus-upstream"]')?.focus()`)
+    await key(app.page, 'ArrowLeft', 'ArrowLeft')
+    await waitFor(app.page, `document.querySelector('[data-testid="propagation-focus-upstream"]')?.value === '2'`, 'RTL upstream range update')
+    const outwardSurface = JSON.parse(await evaluate(app.page, `JSON.stringify((() => {
+      const focus = document.querySelector('.systemsketch-propagation-focus')
+      return {
+        order: [...focus.querySelectorAll('input, output, span, button')].map((element) => element.dataset.testid ?? element.textContent.trim()),
+        values: [...focus.querySelectorAll('output')].map((output) => output.textContent.trim()),
+        upstreamDirection: document.querySelector('[data-testid="propagation-focus-upstream"]')?.dir,
+        downstreamDirection: document.querySelector('[data-testid="propagation-focus-downstream"]')?.dir,
+      }
+    })())`))
+    assert.deepEqual(outwardSurface, {
+      order: [
+        'propagation-focus-upstream-maximum', 'propagation-focus-upstream', 'propagation-focus-upstream-count', 'steps',
+        'propagation-focus-downstream-count', 'propagation-focus-downstream', 'propagation-focus-downstream-maximum', 'propagation-focus-clear',
+      ],
+      values: ['3', '2', '0', '0'], upstreamDirection: 'rtl', downstreamDirection: '',
+    })
+    await screenshot(app.page, shot)
     const untouchedHost = JSON.parse(await evaluate(app.page, `JSON.stringify({
       mutationCount: window.__propagationMutations.length,
       opacity: document.querySelector('.tl-shape[data-shape-id="shape:unrelated"]')?.style.opacity ?? '',
@@ -191,7 +221,7 @@ async function main() {
     })`))
     await evaluate(app.page, `window.__propagationObserver.disconnect()`)
     assert.deepEqual(untouchedHost, { ...beforeHost, mutationCount: 0, marker: null })
-    pass('keyboard range adjustment instantly expands only the selected direction without touching unrelated canvas hosts')
+    pass('RTL ArrowLeft expands upstream outward while normal ArrowRight expands downstream, without touching unrelated canvas hosts')
 
     // 4. Clear must be a pure display reset; the saved fixture bytes remain exact.
     await delay(250)
@@ -200,6 +230,7 @@ async function main() {
     await waitFor(app.page, `!document.querySelector('.tl-container')?.hasAttribute('data-propagation-focus-active')`, 'cleared propagation lens')
     await delay(450)
     assert.deepEqual(await readFile(board), before, 'focus controls must not serialize board state')
+    await select(app.page, 'shape:join')
     await waitFor(app.page, `document.querySelector('[data-testid="block-pill-view-expanded"]')`, 'non-focus Block view controls restored')
     await clickElement(app.page, '[data-testid="block-pill-view-expanded"]')
     await waitFor(app.page, `window.__systemsketch.editor.getShape('shape:join')?.props.view === 'expanded'`, 'expanded view outside Focus')

@@ -51,11 +51,15 @@ export function PropagationFocusControls() {
       ) : (
         <>
           <label className="systemsketch-propagation-focus__range" title={limits!.upstream === 0 ? 'No upstream steps are reachable' : `Upstream: ${focus.upstreamSteps} of ${limits!.upstream} reachable steps`}>
-            <output data-testid="propagation-focus-upstream-count" aria-label={limits!.upstream === 0 ? 'No upstream steps reachable' : `${focus.upstreamSteps} upstream steps selected`}>{focus.upstreamSteps}</output>
+            {/* WHY: the two graph directions read away from the central seed.
+                RTL keeps upstream's visual and keyboard direction honest instead
+                of faking it with a paint-only flip. */}
+            <output data-testid="propagation-focus-upstream-maximum" aria-label={`${limits!.upstream} maximum upstream steps`}>{limits!.upstream}</output>
             <input
               aria-label="Upstream propagation steps"
               aria-valuetext={limits!.upstream === 0 ? 'No upstream steps reachable' : `${focus.upstreamSteps} of ${limits!.upstream} upstream steps`}
               data-testid="propagation-focus-upstream"
+              dir="rtl"
               type="range"
               min={limits!.upstream === 0 ? 0 : 1}
               max={limits!.upstream}
@@ -64,9 +68,11 @@ export function PropagationFocusControls() {
               disabled={limits!.upstream === 0}
               onChange={(event) => setPropagationFocusSteps(editor, 'upstream', Number(event.currentTarget.value))}
             />
+            <output data-testid="propagation-focus-upstream-count" aria-label={limits!.upstream === 0 ? 'No upstream steps reachable' : `${focus.upstreamSteps} upstream steps selected`}>{focus.upstreamSteps}</output>
           </label>
           <span className="systemsketch-propagation-focus__label">steps</span>
           <label className="systemsketch-propagation-focus__range" title={limits!.downstream === 0 ? 'No downstream steps are reachable' : `Downstream: ${focus.downstreamSteps} of ${limits!.downstream} reachable steps`}>
+            <output data-testid="propagation-focus-downstream-count" aria-label={limits!.downstream === 0 ? 'No downstream steps reachable' : `${focus.downstreamSteps} downstream steps selected`}>{focus.downstreamSteps}</output>
             <input
               aria-label="Downstream propagation steps"
               aria-valuetext={limits!.downstream === 0 ? 'No downstream steps reachable' : `${focus.downstreamSteps} of ${limits!.downstream} downstream steps`}
@@ -79,7 +85,7 @@ export function PropagationFocusControls() {
               disabled={limits!.downstream === 0}
               onChange={(event) => setPropagationFocusSteps(editor, 'downstream', Number(event.currentTarget.value))}
             />
-            <output data-testid="propagation-focus-downstream-count" aria-label={limits!.downstream === 0 ? 'No downstream steps reachable' : `${focus.downstreamSteps} downstream steps selected`}>{focus.downstreamSteps}</output>
+            <output data-testid="propagation-focus-downstream-maximum" aria-label={`${limits!.downstream} maximum downstream steps`}>{limits!.downstream}</output>
           </label>
           <button
             type="button"
