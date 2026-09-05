@@ -97,7 +97,7 @@ describe('Block inspector content', () => {
     }
   })
 
-  it('keeps rare variadic-slot authoring in an inspector disclosure', () => {
+  it('keeps rare variadic-slot authoring behind the Inputs state toggle', () => {
     const html = renderToStaticMarkup(
       <BlockInspectorContent
         props={{
@@ -111,12 +111,11 @@ describe('Block inspector content', () => {
         actions={noopActions}
       />,
     )
-    expect(html).toContain('data-testid="inspector-variadic-overlay-boxes"')
-    expect(html).toContain('Variadic · *overlays')
-    expect(html).toContain('aria-label="Variadic role for overlay_box"')
-    expect(html).toContain('<option value="positional" selected="">*args</option>')
-    expect(html).toContain('aria-label="Variadic group label for overlay_box"')
-    expect(html).toContain('title="A bundled spread is one unknown-cardinality *iterable or **mapping expression"')
+    expect(html).toContain('data-testid="inspector-port-state-toggle-inputs"')
+    expect(html).toContain('aria-pressed="false"')
+    expect(html).not.toContain('data-testid="inspector-variadic-overlay-boxes"')
+    expect(html).not.toContain('Variadic · *overlays')
+    expect(html).not.toContain('aria-label="Variadic role for overlay_box"')
   })
 
   it('keeps an unplaced tool state honest and read-only without adding a New block header', () => {
@@ -256,6 +255,8 @@ const noopActions: BlockInspectorActions = {
   removePort() {},
   movePort() {},
   movePortToSection() {},
+  linkPortRange() {},
+  togglePortLinkSeam() {},
 }
 
 describe('the Pill section', () => {
