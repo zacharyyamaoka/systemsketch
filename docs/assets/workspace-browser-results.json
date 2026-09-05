@@ -16,11 +16,11 @@
   "ok": true
  },
  {
-  "label": "Ctrl+O focuses Filter, traps Tab inside the modal, and names each document’s type",
+  "label": "Ctrl+O focuses Filter, traps Tab inside the modal, and gives the file list familiar Name, Size, and Modified headers",
   "ok": true
  },
  {
-  "label": "Sort by Last modified puts the newest document first while folders stay together",
+  "label": "Modified ↓ puts the newest document first while folders stay together",
   "ok": true
  },
  {

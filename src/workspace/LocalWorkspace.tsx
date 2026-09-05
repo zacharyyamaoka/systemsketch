@@ -67,6 +67,7 @@ import {
   type BrowserRow,
   type DocumentFingerprint,
   type WorkspaceBrowserSort,
+  type WorkspaceBrowserSortDirection,
 } from './workspaceModel'
 import { inspectWorkspaceDocumentSource } from './workspaceDocument'
 import { installWorkspaceLifecycleProtection } from './workspaceLifecycle'
@@ -1547,6 +1548,18 @@ function relativeDay(mtime: number): string {
   return when.toLocaleDateString([], { month: 'short', day: 'numeric' })
 }
 
+function fileSize(size: number | null): string {
+  if (size === null) return '—'
+  const units = ['B', 'KB', 'MB', 'GB']
+  let value = size
+  let unit = 0
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024
+    unit += 1
+  }
+  return `${value >= 10 || unit === 0 ? Math.round(value) : value.toFixed(1)} ${units[unit]}`
+}
+
 /**
  * The app's own file browser.
  *
@@ -1560,7 +1573,10 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
   const [listing, setListing] = useState<WorkspaceListing | null>(null)
   const [selectedPath, setSelectedPath] = useState<string | null>(null)
   const [query, setQuery] = useState('')
-  const [sort, setSort] = useState<WorkspaceBrowserSort>('name')
+  const [sort, setSort] = useState<{
+    column: WorkspaceBrowserSort
+    direction: WorkspaceBrowserSortDirection
+  }>({ column: 'name', direction: 'ascending' })
   const portableCopyMode = mode === 'portableCopy'
   const currentFormatCopyMode = mode === 'saveAs' && workspace.status.kind === 'future'
   const conflictCopyMode = useRef(mode === 'saveAs' && workspace.status.kind === 'conflict').current
@@ -1622,9 +1638,23 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
     void load(workspace.browserDirectory ?? undefined)
   }, [isRename, load, workspace.browserDirectory])
 
-  const rows = useMemo(() => browserRows(listing, query, sort), [listing, query, sort])
+  const rows = useMemo(
+    () => browserRows(listing, query, sort.column, sort.direction),
+    [listing, query, sort],
+  )
   const selectedRow = rows.find((row) => row.path === selectedPath) ?? null
   const trail = listing ? breadcrumbTrail(listing.dir, listing.root) : []
+  const toggleSort = useCallback((column: WorkspaceBrowserSort) => {
+    setSort((current) => ({
+      column,
+      // WHY: conventional file lists make a second header click reverse the
+      // same column. A first Modified click starts newest-first because that
+      // is the practical “what did I just edit?” question this browser serves.
+      direction: current.column === column
+        ? current.direction === 'ascending' ? 'descending' : 'ascending'
+        : column === 'modified' ? 'descending' : 'ascending',
+    }))
+  }, [])
 
   // Enter means something the moment the list appears, without a click first.
   useEffect(() => {
@@ -1909,15 +1939,6 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                     setError(null)
                   }}
                 >+ Folder</button>
-                <button
-                  type="button"
-                  className="systemsketch-workspace-sort"
-                  data-testid="workspace-sort"
-                  aria-pressed={sort === 'modified'}
-                  aria-label={`Sort files: ${sort === 'modified' ? 'Last modified' : 'Name'}. Click to switch.`}
-                  title="Switch between name and last modified"
-                  onClick={() => setSort((current) => current === 'name' ? 'modified' : 'name')}
-                >Sort: {sort === 'modified' ? 'Last modified' : 'Name'}</button>
                 <SystemSketchUiInput
                   ref={filterInputRef}
                   className="systemsketch-workspace-search"
@@ -1963,49 +1984,75 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                   }}>Cancel</button>
                 </form>
               ) : null}
-              <div
-                className="systemsketch-workspace-file-list"
-                ref={listRef}
-                role="listbox"
-                aria-label="Local files"
-              >
-                {rows.map((row) => (
-                  <button
-                    key={row.path}
-                    type="button"
-                    data-testid="workspace-row"
-                    data-kind={row.kind}
-                    data-path={row.path}
-                    className={`${row.kind === 'folder' ? 'folder' : ''}${selectedPath === row.path ? ' selected' : ''}`}
-                    role="option"
-                    aria-selected={selectedPath === row.path}
-                    onClick={() => {
-                      setSelectedPath(row.path)
-                      if (row.kind === 'folder') void load(row.path)
-                      else if (mode === 'saveAs' || writesTldraw) {
-                        setName(row.title)
-                        setReplacePath(null)
-                        setError(null)
-                      }
-                    }}
-                    onDoubleClick={() => workspace.runAction(() => activate(row))}
-                  >
-                    <span aria-hidden="true">{row.kind === 'folder' ? '▰' : '◇'}</span>
-                    <b>{row.title}</b>
-                    <small data-kind={row.encoding ?? 'folder'}>
-                      {row.kind === 'folder'
-                        ? 'Folder'
-                        : `${row.encoding === 'tldraw' ? 'tldraw' : 'sketch'} · ${relativeDay(row.mtime ?? 0)}`}
-                    </small>
-                  </button>
-                ))}
-                {!busy && listing && !rows.length ? (
-                  <p className="systemsketch-workspace-file-list__empty">
-                    {query
-                      ? `Nothing here matches “${query}”.`
-                      : 'This folder has no SystemSketch documents yet.'}
-                  </p>
-                ) : null}
+              <div className="systemsketch-workspace-file-list-shell">
+                <div className="systemsketch-workspace-file-list__columns" role="row">
+                  {([
+                    ['name', 'Name'],
+                    ['size', 'Size'],
+                    ['modified', 'Modified'],
+                  ] as const).map(([column, label]) => {
+                    const active = sort.column === column
+                    const direction = active ? sort.direction : 'none'
+                    const arrow = active ? sort.direction === 'ascending' ? '↑' : '↓' : ''
+                    return (
+                      <button
+                        key={column}
+                        type="button"
+                        data-testid={`workspace-sort-${column}`}
+                        data-active={active || undefined}
+                        aria-sort={direction}
+                        aria-label={`Sort by ${label}${active ? `, ${sort.direction}` : ''}`}
+                        title={`Sort by ${label}`}
+                        onClick={() => toggleSort(column)}
+                      >
+                        {label}<span aria-hidden="true">{arrow}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+                <div
+                  className="systemsketch-workspace-file-list"
+                  ref={listRef}
+                  role="listbox"
+                  aria-label="Local files"
+                >
+                  {rows.map((row) => (
+                    <button
+                      key={row.path}
+                      type="button"
+                      data-testid="workspace-row"
+                      data-kind={row.kind}
+                      data-path={row.path}
+                      className={`${row.kind === 'folder' ? 'folder' : ''}${selectedPath === row.path ? ' selected' : ''}`}
+                      role="option"
+                      aria-selected={selectedPath === row.path}
+                      onClick={() => {
+                        setSelectedPath(row.path)
+                        if (row.kind === 'folder') void load(row.path)
+                        else if (mode === 'saveAs' || writesTldraw) {
+                          setName(row.title)
+                          setReplacePath(null)
+                          setError(null)
+                        }
+                      }}
+                      onDoubleClick={() => workspace.runAction(() => activate(row))}
+                    >
+                      <span aria-hidden="true">{row.kind === 'folder' ? '▰' : '◇'}</span>
+                      <b data-kind={row.encoding ?? 'folder'}>{row.name}</b>
+                      <small className="systemsketch-workspace-file-list__size">{fileSize(row.size)}</small>
+                      <time className="systemsketch-workspace-file-list__modified">
+                        {row.mtime === null ? '—' : relativeDay(row.mtime)}
+                      </time>
+                    </button>
+                  ))}
+                  {!busy && listing && !rows.length ? (
+                    <p className="systemsketch-workspace-file-list__empty">
+                      {query
+                        ? `Nothing here matches “${query}”.`
+                        : 'This folder has no SystemSketch documents yet.'}
+                    </p>
+                  ) : null}
+                </div>
               </div>
               {mode === 'saveAs' || writesTldraw ? (
                 <div className="systemsketch-workspace-name-field is-save-as">

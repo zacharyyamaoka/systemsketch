@@ -94,7 +94,7 @@ const rowTitles = (page) => evaluate(page, `JSON.stringify(
 
 /** What each row says it is: `folder`, `systemsketch`, or `tldraw`. */
 const rowKinds = (page) => evaluate(page, `JSON.stringify(
-  Array.from(document.querySelectorAll('[data-testid="workspace-row"] small'))
+  Array.from(document.querySelectorAll('[data-testid="workspace-row"] b[data-kind]'))
     .map((cell) => cell.dataset.kind))`)
 
 const selectedRow = (page) => evaluate(page, `(() => {
@@ -191,7 +191,7 @@ async function main() {
     assert.equal(await evaluate(page, 'document.activeElement?.dataset.testid'), 'workspace-filter')
     assert.equal(await evaluate(page, 'document.activeElement?.classList.contains("tlui-input")'), true)
     assert.deepEqual(JSON.parse(await rowTitles(page)), [
-      'folder:Robotics', 'document:Arm', 'document:Gripper', 'document:Legacy',
+      'folder:Robotics', 'document:Arm.systemsketch', 'document:Gripper.systemsketch', 'document:Legacy.tldr',
     ])
     assert.deepEqual(JSON.parse(await rowKinds(page)), [
       'folder', 'systemsketch', 'systemsketch', 'tldraw',
@@ -209,28 +209,39 @@ async function main() {
     assert.equal(await evaluate(page, 'document.activeElement?.dataset.testid'), 'workspace-confirm')
     await clickElement(page, '[data-testid="workspace-filter"]')
     await shoot(page, SHOT_BROWSER)
-    pass('Ctrl+O focuses Filter, traps Tab inside the modal, and names each document\u2019s type')
+    assert.deepEqual(JSON.parse(await evaluate(page, `JSON.stringify(
+      Array.from(document.querySelectorAll('[data-testid^="workspace-sort-"]')).map((header) => header.textContent.trim()))`)),
+    ['Name↑', 'Size', 'Modified'])
+    pass('Ctrl+O focuses Filter, traps Tab inside the modal, and gives the file list familiar Name, Size, and Modified headers')
 
-    // 3a. The lightweight organizer keeps folders reachable while floating the
-    // newest board to the top of the document group.
-    await clickElement(page, '[data-testid="workspace-sort"]')
+    // 3a. Column headers use the file-manager contract: the first Modified
+    // click is newest-first, a second reverses it, and folders stay navigable.
+    await clickElement(page, '[data-testid="workspace-sort-modified"]')
     await waitFor(page, `Array.from(document.querySelectorAll('[data-testid="workspace-row"] b'))
-      .map((row) => row.textContent).join('|') === 'Robotics|Gripper|Legacy|Arm'`, 'last-modified ordering')
+      .map((row) => row.textContent).join('|') === 'Robotics|Gripper.systemsketch|Legacy.tldr|Arm.systemsketch'`, 'last-modified ordering')
     assert.deepEqual(JSON.parse(await rowTitles(page)), [
-      'folder:Robotics', 'document:Gripper', 'document:Legacy', 'document:Arm',
+      'folder:Robotics', 'document:Gripper.systemsketch', 'document:Legacy.tldr', 'document:Arm.systemsketch',
     ])
-    assert.equal(await evaluate(page, `document.querySelector('[data-testid="workspace-sort"]')?.getAttribute('aria-pressed')`), 'true')
+    assert.equal(await evaluate(page, `document.querySelector('[data-testid="workspace-sort-modified"]')?.getAttribute('aria-sort')`), 'descending')
     await shoot(page, SHOT_SORT)
-    pass('Sort by Last modified puts the newest document first while folders stay together')
+    pass('Modified ↓ puts the newest document first while folders stay together')
 
-    await clickElement(page, '[data-testid="workspace-sort"]')
+    await clickElement(page, '[data-testid="workspace-sort-modified"]')
+    await waitFor(page, `Array.from(document.querySelectorAll('[data-testid="workspace-row"] b'))
+      .map((row) => row.textContent).join('|') === 'Robotics|Arm.systemsketch|Legacy.tldr|Gripper.systemsketch'`, 'oldest-first ordering')
+    assert.equal(await evaluate(page, `document.querySelector('[data-testid="workspace-sort-modified"]')?.getAttribute('aria-sort')`), 'ascending')
+    await clickElement(page, '[data-testid="workspace-sort-size"]')
+    assert.equal(await evaluate(page, `document.querySelector('[data-testid="workspace-sort-size"]')?.getAttribute('aria-sort')`), 'ascending')
+    await clickElement(page, '[data-testid="workspace-sort-name"]')
+    await waitFor(page, `Array.from(document.querySelectorAll('[data-testid="workspace-row"] b'))
+      .map((row) => row.textContent).join('|') === 'Robotics|Arm.systemsketch|Gripper.systemsketch|Legacy.tldr'`, 'name ordering')
 
     // 4. Typing filters the folder; arrow keys and Enter never touch the mouse.
     await clickElement(page, '[data-testid="workspace-filter"]')
     await page.send('Input.insertText', { text: 'grip' })
     await delay(200)
-    assert.deepEqual(JSON.parse(await rowTitles(page)), ['document:Gripper'])
-    assert.equal(await selectedRow(page), 'Gripper')
+    assert.deepEqual(JSON.parse(await rowTitles(page)), ['document:Gripper.systemsketch'])
+    assert.equal(await selectedRow(page), 'Gripper.systemsketch')
     await shoot(page, SHOT_FILTER)
     pass('the filter narrows the folder and pre-selects the match')
 
@@ -252,7 +263,7 @@ async function main() {
     await waitFor(page, `document.querySelector('[data-testid="workspace-row"]')`, 'the file rows')
     await clickElement(page, '[data-testid="workspace-row"][data-kind="folder"]')
     await waitFor(page,
-      `Array.from(document.querySelectorAll('[data-testid="workspace-row"] b')).some((row) => row.textContent === 'Elbow')`,
+      `Array.from(document.querySelectorAll('[data-testid="workspace-row"] b')).some((row) => row.textContent === 'Elbow.systemsketch')`,
       'the nested folder listing')
     assert.deepEqual(JSON.parse(await crumbs(page)).slice(-2), ['SystemSketch', 'Robotics'])
     await shoot(page, SHOT_FOLDER)

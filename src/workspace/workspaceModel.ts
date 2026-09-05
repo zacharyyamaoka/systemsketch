@@ -365,6 +365,8 @@ export interface BrowserRow {
   title: string
   path: string
   mtime: number | null
+  /** Directories deliberately have no aggregate size in the browser. */
+  size: number | null
 }
 
 export interface BrowserListingShape {
@@ -374,21 +376,25 @@ export interface BrowserListingShape {
     title: string
     path: string
     mtime: number
+    size?: number
     kind?: 'systemsketch' | 'tldraw'
   }[]
 }
 
-export type WorkspaceBrowserSort = 'name' | 'modified'
+export type WorkspaceBrowserSort = 'name' | 'size' | 'modified'
+export type WorkspaceBrowserSortDirection = 'ascending' | 'descending'
 
 /**
- * Folders stay together at the top. The host's ordinary name order remains
- * intact; modification time is only meaningful for files, so interleaving
- * folders would make the “recent” view unpredictable.
+ * Folders stay together at the top, just as in an ordinary file manager.
+ * SystemSketch documents are the only entries with a meaningful byte size and
+ * modification time, so those columns reorder documents without burying the
+ * navigation folders in a mixed, unpredictable list.
  */
 export function browserRows(
   listing: BrowserListingShape | null,
   query: string,
   sort: WorkspaceBrowserSort = 'name',
+  direction: WorkspaceBrowserSortDirection = sort === 'modified' ? 'descending' : 'ascending',
 ): BrowserRow[] {
   if (!listing) return []
   const needle = query.trim().toLowerCase()
@@ -396,14 +402,24 @@ export function browserRows(
   const compareNames = (left: { name: string }, right: { name: string }) => (
     left.name.localeCompare(right.name, undefined, { sensitivity: 'base' })
   )
+  const directionMultiplier = direction === 'ascending' ? 1 : -1
+  const directoryDirection = sort === 'name' ? directionMultiplier : 1
+  const directories = listing.directories
+    .filter((directory) => matches(directory.name))
+    .sort((left, right) => compareNames(left, right) * directoryDirection)
   const documents = listing.documents
     .filter((document) => matches(document.title) || matches(document.name))
-  if (sort === 'modified') {
-    documents.sort((left, right) => right.mtime - left.mtime || compareNames(left, right))
-  }
+    .sort((left, right) => {
+      if (sort === 'modified') {
+        return (left.mtime - right.mtime) * directionMultiplier || compareNames(left, right)
+      }
+      if (sort === 'size') {
+        return ((left.size ?? 0) - (right.size ?? 0)) * directionMultiplier || compareNames(left, right)
+      }
+      return compareNames(left, right) * directionMultiplier
+    })
   return [
-    ...listing.directories
-      .filter((directory) => matches(directory.name))
+    ...directories
       .map((directory): BrowserRow => ({
         kind: 'folder',
         encoding: null,
@@ -411,6 +427,7 @@ export function browserRows(
         title: directory.name,
         path: directory.path,
         mtime: null,
+        size: null,
       })),
     ...documents
       .map((document): BrowserRow => ({
@@ -422,6 +439,7 @@ export function browserRows(
         title: document.title,
         path: document.path,
         mtime: document.mtime,
+        size: document.size ?? null,
       })),
   ]
 }
