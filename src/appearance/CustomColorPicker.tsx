@@ -5,9 +5,8 @@ import {
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import { DefaultColorStyle, useValue, type Editor, type StyleProp } from 'tldraw'
+import { useValue, type Editor } from 'tldraw'
 
-import type { AppearanceControl } from './appearanceModel'
 import { FigjamGlyph } from './AppearanceGlyph'
 import {
   customColorHex,
@@ -38,24 +37,21 @@ import { SLIDER_OVERHANG, SURFACE } from './figjamTokens'
  */
 export interface CustomColorPickerProps {
   editor: Editor
-  /** Stock-shape colour control. Omit for another named-colour consumer. */
-  control?: AppearanceControl
-  /** The current named colour when the picker colours something other than a shape. */
+  /** The current named colour for whichever contextual surface owns the picker. */
   colorName?: string
-  /** Receives a registered `custom-rrggbb` name instead of changing shape colour. */
-  onColorChange?: (name: string) => void
-  /** Title ink has no independent alpha channel; shapes retain FigJam's alpha slider. */
+  /** Receives a registered `custom-rrggbb` name; the surface owns its document transaction. */
+  onColorChange: (name: string) => void
+  /** Targets without an independent alpha channel omit FigJam's alpha slider. */
   showOpacity?: boolean
 }
 
 export function CustomColorPicker({
   editor,
-  control,
   colorName,
   onColorChange,
   showOpacity = true,
 }: CustomColorPickerProps) {
-  const seed = seedHex(editor, control, colorName)
+  const seed = seedHex(editor, colorName)
   const [hsv, setHsv] = useState(() => hexToHsv(seed))
   const [text, setText] = useState(() => seed.toUpperCase())
   const [focused, setFocused] = useState(false)
@@ -87,12 +83,8 @@ export function CustomColorPicker({
     setText(nextHex.toUpperCase())
     const name = customColorName(nextHex)
     if (!name) return
-    if (onColorChange) {
-      registerCustomColors([name], editor)
-      onColorChange(name)
-    } else {
-      applyCustomColor(editor, nextHex)
-    }
+    registerCustomColors([name], editor)
+    onColorChange(name)
   }
   const paint = (next: Hsv) => commit(hsvToHex(next), next)
 
@@ -203,30 +195,13 @@ export function CustomColorPicker({
   )
 }
 
-/** Register the colour and write it, the way the swatches write theirs. */
-export function applyCustomColor(editor: Editor, hex: string) {
-  const name = customColorName(hex)
-  if (!name) return
-  registerCustomColors([name], editor)
-  editor.run(() => {
-    if (editor.isIn('select')) {
-      editor.setStyleForSelectedShapes(DefaultColorStyle as StyleProp<string>, name)
-    }
-    editor.setStyleForNextShapes(DefaultColorStyle as StyleProp<string>, name)
-  })
-}
-
 /** What the picker opens on: the selection's colour, or the surface when it disagrees. */
-function seedHex(editor: Editor, control: AppearanceControl | undefined, colorName: string | undefined): string {
+function seedHex(editor: Editor, colorName: string | undefined): string {
   if (colorName) {
     if (isCustomColor(colorName)) return customColorHex(colorName) ?? SURFACE
     return FIGJAM_COLOR_HEX[colorName] ?? registeredHex(editor, colorName) ?? SURFACE
   }
-  if (!control) return SURFACE
-  if (control.value.type !== 'shared') return SURFACE
-  const name = control.value.value
-  if (isCustomColor(name)) return customColorHex(name) ?? SURFACE
-  return FIGJAM_COLOR_HEX[name] ?? registeredHex(editor, name) ?? SURFACE
+  return SURFACE
 }
 
 /**

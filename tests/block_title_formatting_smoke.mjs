@@ -20,6 +20,7 @@ import {
 } from './browser_harness.mjs'
 
 const SHOT = join(ROOT, 'docs', 'assets', 'block-title-formatting-live-2026-09-04.png')
+const FONT_SHOT = join(ROOT, 'docs', 'assets', 'contextual-menu-block-font-2026-09-04.png')
 
 async function clickSelector(page, selector) {
   const point = JSON.parse(await evaluate(page, `(() => {
@@ -84,17 +85,42 @@ async function main() {
       `document.querySelector('[data-testid="block-title-formatting-menu"]')?.closest('[data-visible="true"]')`,
       'title formatting menu',
     )
-    const controls = JSON.parse(await evaluate(page, `JSON.stringify(
-      Array.from(document.querySelectorAll('[data-testid="block-title-formatting-menu"] [data-control]'))
-        .map((element) => element.dataset.control))`))
-    assert.deepEqual(controls, ['titleFont', 'titleSize', 'titleBold', 'titleColor', 'titleAlign'])
+    const composition = JSON.parse(await evaluate(page, `(() => {
+      const menu = document.querySelector('[data-testid="block-title-formatting-menu"]')
+      return JSON.stringify({
+        recipe: menu?.dataset.contextualRecipe,
+        controls: Array.from(menu?.querySelectorAll('[data-control]') ?? [])
+          .map((element) => element.dataset.control),
+        kinds: Array.from(menu?.querySelectorAll('[data-kind]') ?? [])
+          .map((element) => element.dataset.kind),
+        groups: Array.from(menu?.querySelectorAll('[data-contextual-group]') ?? [])
+          .map((element) => element.dataset.contextualGroup),
+      })
+    })()`))
+    assert.equal(composition.recipe, 'block-title')
+    assert.deepEqual(composition.controls, ['titleFont', 'titleSize', 'titleBold', 'titleColor', 'titleAlign'])
+    assert.deepEqual(composition.kinds, ['font', 'size', 'bold', 'color', 'align'])
+    assert.deepEqual(composition.groups, ['type', 'emphasis', 'ink', 'alignment'])
     const initial = await shapeAndPaint(page)
     assert.equal(initial.editing, initial.id)
     assert.equal(initial.props.title, 'classify_frame')
-    pass('editing a Block title keeps a FigJam-style toolbar with typeface, size, bold, colour, and alignment')
+    pass('the Block title recipe composes registered typeface, size, bold, colour, and alignment controls')
 
     await clickSelector(page, '[data-control="titleFont"]')
     await waitFor(page, `document.querySelector('[data-control="titleFont"][data-value="serif"]')`, 'title typeface options')
+    const titleFontRows = JSON.parse(await evaluate(page, `JSON.stringify(
+      Array.from(document.querySelectorAll('[data-control="titleFont"][data-value]')).map((row) => ({
+        preview: row.querySelector('.systemsketch-appearance__font')?.textContent,
+        label: row.querySelector('.systemsketch-appearance__label')?.textContent,
+      })))`))
+    assert.deepEqual(titleFontRows, [
+      { preview: 'Aa', label: 'Simple' },
+      { preview: 'Aa', label: 'Bookish' },
+      { preview: 'Aa', label: 'Technical' },
+      { preview: 'Aa', label: 'Scribbled' },
+    ])
+    const fontCapture = await page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
+    await writeFile(FONT_SHOT, Buffer.from(fontCapture.data, 'base64'))
     await clickSelector(page, '[data-control="titleFont"][data-value="serif"]')
     await delay(160)
     let formatted = await shapeAndPaint(page)
@@ -158,7 +184,7 @@ async function main() {
     assert.deepEqual(page.events.filter((event) => event.method === 'Runtime.exceptionThrown'), [])
     pass('the journey produced no browser exceptions')
 
-    process.stdout.write(`\n  ${checks.length}/${checks.length} browser checks passed\n  ${SHOT}\n`)
+    process.stdout.write(`\n  ${checks.length}/${checks.length} browser checks passed\n  ${SHOT}\n  ${FONT_SHOT}\n`)
   } finally {
     app.close()
   }
