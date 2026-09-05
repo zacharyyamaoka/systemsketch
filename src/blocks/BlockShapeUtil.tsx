@@ -493,9 +493,14 @@ export class BlockShapeUtil extends BaseFrameLikeShapeUtil<BlockShape> {
 	}
 
 	override canRemoveChildrenOfType(shape: BlockShape, type: TLShape['type']): boolean {
-		return isExpandedBlockShape(shape)
-			? super.canRemoveChildrenOfType(shape, type)
-			: true
+		if (!isExpandedBlockShape(shape)) return true
+		// WHY: An auto-fitting Block follows its children, so leaving its bounds is
+		// not a meaningful "remove" gesture—the moving boundary can cross the
+		// pointer mid-drag and make membership disappear accidentally. Keep its
+		// children sticky during a drag and make the already-visible context-menu
+		// command the intentional, position-preserving way out of the container.
+		if (shape.props.autoResize) return false
+		return super.canRemoveChildrenOfType(shape, type)
 	}
 
 	/** Semantic cables may cross an Expanded Block's frame boundary. */

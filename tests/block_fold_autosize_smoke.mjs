@@ -17,6 +17,7 @@ import {
   evaluate,
   localConsoleErrors,
   makeChecklist,
+	mouse,
   openApp,
   startApp,
   waitFor,
@@ -127,6 +128,37 @@ async function main() {
       `document.querySelector(${JSON.stringify(`${scope(child)} .systemsketch-block-canvas`)})`,
       'restored child canvas')
     pass('same chevron restores the parked Expanded box and exact child record')
+
+	// Treat the whole child face as a fast, real-world grab target. The repeated
+	// reversals intentionally cross every current container edge; auto-fit must
+	// grow and follow, never hand the child to the page mid-gesture.
+	const stressStart = await box(page, `${scope(child)} .systemsketch-block-canvas`)
+	const stressOrigin = { x: stressStart.cx, y: stressStart.cy }
+	const stressOffsets = [
+		{ x: 260, y: 0 }, { x: 260, y: 180 }, { x: -120, y: 180 },
+		{ x: -120, y: -90 }, { x: 330, y: -90 }, { x: 330, y: 210 },
+		{ x: 40, y: 210 }, { x: 40, y: 30 },
+	]
+	await mouse(page, 'mouseMoved', stressOrigin.x, stressOrigin.y)
+	await mouse(page, 'mousePressed', stressOrigin.x, stressOrigin.y, { buttons: 1 })
+	for (let cycle = 0; cycle < 3; cycle += 1) {
+		for (const offset of stressOffsets) {
+			const x = stressOrigin.x + offset.x
+			const y = stressOrigin.y + offset.y
+			await mouse(page, 'mouseMoved', x, y, { buttons: 1 })
+			assert.equal(await parentOf(page, child), container,
+				`auto-fit child stays a member during rapid drag sample ${cycle}:${offset.x},${offset.y}`)
+		}
+	}
+	const stressEnd = stressOffsets.at(-1)
+	await mouse(page, 'mouseReleased', stressOrigin.x + stressEnd.x, stressOrigin.y + stressEnd.y)
+	await waitFor(page,
+		`window.__systemsketch?.editor.getShape(${JSON.stringify(child)})?.parentId === ${JSON.stringify(container)}`,
+		'auto-fit child membership after rapid drag')
+	const stressFitted = await shapeFacts(page, container)
+	assert.equal(stressFitted.autoResize, true)
+	await shot(page, 'block-fold-autosize-rapid-drag-2026-09-04.png')
+	pass('rapid edge-crossing child drags stay in the auto-fitting Block and leave it fitted')
 
     await selectBlock(page, child)
     const childFace = await box(page, `${scope(child)} .systemsketch-block-canvas`)
