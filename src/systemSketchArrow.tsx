@@ -20,6 +20,7 @@ import {
 	type TLHandle,
 	type TLHandleDragInfo,
 	type TLShapeId,
+	type VecLike,
 	type SvgExportContext,
 } from 'tldraw'
 import {
@@ -43,6 +44,7 @@ import {
 	splitDashArrays,
 } from './blocks/connections/connectionPresentation'
 import { clampPillPosition } from './blocks/connections/connectionModel'
+import { getConnectionControlPoints } from './blocks/connections/connectionRouting'
 import type { SystemSketchArrowPrimitiveStyle } from './stockPrimitiveVisuals'
 import {
 	DataCablePath as ConnectionDataCablePath,
@@ -62,11 +64,27 @@ import {
  */
 export const SYSTEMSKETCH_ARROW_ROUTE_META_KEY = 'systemSketchArrowRoute'
 const SYSTEMSKETCH_ARROW_ROUTE_VERSION = 1
+export const SYSTEMSKETCH_ARROW_SLANTED_META_KEY = 'systemSketchSlantedArrow'
+const SYSTEMSKETCH_ARROW_SLANTED_VERSION = 1
 const MIN_ARROW_SEGMENT_HANDLE_LENGTH = 20
+const SLANTED_ARROW_ELBOW_HANDLE_ID = 'systemsketch-slanted-elbow'
+
+/** The first short leg of a Slanted arrow leaves in this cardinal direction. */
+export type SlantedArrowDeparture = 'right' | 'bottom' | 'left' | 'top'
 
 interface StoredArrowRoute {
 	version: typeof SYSTEMSKETCH_ARROW_ROUTE_VERSION
 	route: ConnectionElbowRouteModel
+}
+
+interface StoredSlantedArrow {
+	version: typeof SYSTEMSKETCH_ARROW_SLANTED_VERSION
+	/**
+	 * Absent means use the established automatic lead. Once the virtual elbow is
+	 * dragged, keep its x position as a fraction of the endpoint span so it
+	 * keeps following terminal moves just like the other arrow controls.
+	 */
+	elbowT?: number
 }
 
 interface ResolvedArrowRoute {
@@ -349,8 +367,170 @@ function metaWithArrowRoute(
 
 function metaWithoutArrowRoute(meta: JsonObject): JsonObject {
 	const next = { ...meta }
-	delete next[SYSTEMSKETCH_ARROW_ROUTE_META_KEY]
+	// tldraw merges `meta` patches rather than treating this nested object as a
+	// replacement. A JSON null is therefore the supported tombstone for an
+	// enhancement that must really stop affecting the live arrow.
+	next[SYSTEMSKETCH_ARROW_ROUTE_META_KEY] = null
 	return next
+}
+
+/** A deliberately small record extension: plain tldraw still sees a valid straight arrow. */
+export function isSlantedArrow(shape: TLArrowShape): boolean {
+	const stored = shape.meta[SYSTEMSKETCH_ARROW_SLANTED_META_KEY]
+	return isObject(stored) && stored.version === SYSTEMSKETCH_ARROW_SLANTED_VERSION
+}
+
+function slantedArrowElbowT(meta: JsonObject): number | null {
+	const stored = meta[SYSTEMSKETCH_ARROW_SLANTED_META_KEY]
+	if (!isObject(stored) || stored.version !== SYSTEMSKETCH_ARROW_SLANTED_VERSION) return null
+	return isFiniteNumber(stored.elbowT) ? Math.max(0, Math.min(1, stored.elbowT)) : null
+}
+
+function metaWithSlantedArrow(meta: JsonObject, elbowT: number | null = slantedArrowElbowT(meta)): JsonObject {
+	const stored: StoredSlantedArrow = {
+		version: SYSTEMSKETCH_ARROW_SLANTED_VERSION,
+		...(elbowT === null ? {} : { elbowT: Math.max(0, Math.min(1, elbowT)) }),
+	}
+	return {
+		...metaWithoutArrowRoute(meta),
+		[SYSTEMSKETCH_ARROW_SLANTED_META_KEY]: stored as unknown as JsonObject,
+	}
+}
+
+function metaWithoutSlantedArrow(meta: JsonObject): JsonObject {
+	const next = { ...meta }
+	// See `metaWithoutArrowRoute`: omit would retain an old nested key after an
+	// `updateShapes` merge, leaving the rendered route unexpectedly Slanted.
+	next[SYSTEMSKETCH_ARROW_SLANTED_META_KEY] = null
+	return next
+}
+
+export type ArrowInspectorRouting = 'straight' | 'slanted' | 'mixed'
+
+/** The inspector is an arrow-only surface; mixed shape selections keep their ordinary facts panel. */
+export function getArrowInspectorRouting(editor: Editor): ArrowInspectorRouting | null {
+	const selected = editor.getSelectedShapes()
+	if (selected.length === 0 || selected.some((shape) => shape.type !== 'arrow')) return null
+	const arrows = selected as TLArrowShape[]
+	const first = isSlantedArrow(arrows[0])
+	return arrows.every((arrow) => isSlantedArrow(arrow) === first)
+		? first ? 'slanted' : 'straight'
+		: 'mixed'
+}
+
+/**
+ * The endpoint-gapped polyline used by established graph routers, not a new
+ * obstacle solver. `getConnectionControlPoints` is already our shared
+ * readable-output lead; rotating its scalar lead gives this arrow a short run
+ * along the source direction.
+ *
+ * WHY: ELK's POLYLINE option is the right prior art for the short-then-sloped
+ * reading, while React Flow makes that first direction explicit as
+ * `sourcePosition`. SystemSketch reads the bound source face when it has one;
+ * a loose tldraw arrow uses its dominant endpoint axis. Neither case asks a
+ * layout engine to move author-owned endpoints, and SVG orients the endpoint
+ * marker along the final segment.
+ */
+export function getSlantedArrowDeparture(start: VecLike, end: VecLike): SlantedArrowDeparture {
+	const dx = end.x - start.x
+	const dy = end.y - start.y
+	if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? 'right' : 'left'
+	return dy >= 0 ? 'bottom' : 'top'
+}
+
+function slantedDepartureFromStartBinding(editor: Editor, shape: TLArrowShape): SlantedArrowDeparture | null {
+	const anchor = getArrowBindings(editor, shape).start?.props.normalizedAnchor
+	if (!anchor) return null
+	const edges: Array<[SlantedArrowDeparture, number]> = [
+		['left', anchor.x],
+		['right', 1 - anchor.x],
+		['top', anchor.y],
+		['bottom', 1 - anchor.y],
+	]
+	edges.sort(([, distanceA], [, distanceB]) => distanceA - distanceB)
+	// A centered start binding has no meaningful face. The loose-arrow
+	// fallback then gives a stable direction from the endpoint relationship.
+	return edges[0][1] <= 0.1 ? edges[0][0] : null
+}
+
+function getSlantedArrowDepartureForShape(
+	editor: Editor,
+	shape: TLArrowShape,
+	start: VecLike,
+	end: VecLike,
+): SlantedArrowDeparture {
+	return slantedDepartureFromStartBinding(editor, shape) ?? getSlantedArrowDeparture(start, end)
+}
+
+function slantedDepartureAxis(departure: SlantedArrowDeparture): 'x' | 'y' {
+	return departure === 'left' || departure === 'right' ? 'x' : 'y'
+}
+
+function slantedDepartureSign(departure: SlantedArrowDeparture): number {
+	return departure === 'right' || departure === 'bottom' ? 1 : -1
+}
+
+export function getSlantedArrowPoints(
+	start: VecLike,
+	end: VecLike,
+	elbowT: number | null = null,
+	departure: SlantedArrowDeparture = getSlantedArrowDeparture(start, end),
+): Vec[] {
+	const dx = end.x - start.x
+	const dy = end.y - start.y
+	if (Math.abs(dx) < 0.001 || Math.abs(dy) < 0.001) {
+		return [Vec.From(start), Vec.From(end)]
+	}
+	const axis = slantedDepartureAxis(departure)
+	const span = axis === 'x' ? Math.abs(dx) : Math.abs(dy)
+	// Run the shared output-gap helper in a canonical positive axis. The helper
+	// is deliberately direction-agnostic here: departing left/up needs the same
+	// readable lead as departing right/down.
+	const [control] = getConnectionControlPoints({ x: 0, y: 0 }, { x: span, y: 0 })
+	const automaticLead = Math.min(Math.abs(control.x), span / 2)
+	const lead = elbowT === null
+		? automaticLead
+		: span * Math.max(0, Math.min(1, elbowT))
+	const signedLead = slantedDepartureSign(departure) * lead
+	const elbow = axis === 'x'
+		? new Vec(start.x + signedLead, start.y)
+		: new Vec(start.x, start.y + signedLead)
+	return [Vec.From(start), elbow, Vec.From(end)]
+}
+
+function slantedArrowPoints(editor: Editor, shape: TLArrowShape): Vec[] | null {
+	const info = getArrowInfo(editor, shape)
+	if (!info?.isValid) return null
+	return getSlantedArrowPoints(
+		info.start.point,
+		info.end.point,
+		slantedArrowElbowT(shape.meta),
+		getSlantedArrowDepartureForShape(editor, shape, info.start.point, info.end.point),
+	)
+}
+
+/** Apply the uncommon route from the dock without making it a tool or A-key preset. */
+export function setArrowInspectorRouting(editor: Editor, routing: Exclude<ArrowInspectorRouting, 'mixed'>): void {
+	const arrows = editor.getSelectedShapes()
+		.filter((shape): shape is TLArrowShape => shape.type === 'arrow')
+	if (arrows.length === 0) return
+	editor.markHistoryStoppingPoint(`use ${routing} arrow routing`)
+	editor.updateShapes(arrows.map((arrow) => ({
+		id: arrow.id,
+		type: 'arrow' as const,
+		props: routing === 'slanted'
+			? {
+				// A simple stock fallback preserves the record in a plain tldraw viewer.
+				kind: 'arc' as const,
+				bend: 0,
+				arrowheadStart: 'none' as const,
+				arrowheadEnd: 'arrow' as const,
+			}
+			: { kind: 'arc' as const, bend: 0 },
+		meta: routing === 'slanted'
+			? metaWithSlantedArrow(arrow.meta)
+			: metaWithoutSlantedArrow(arrow.meta),
+	})))
 }
 
 function visibleStockElbowPoints(
@@ -438,6 +618,83 @@ function AuthoredArrowBody({
 					forceSolid: false,
 					randomSeed: shape.id,
 				})}
+			</g>
+		</SVGContainer>
+	)
+}
+
+/**
+ * The marker is browser-owned geometry: `orient="auto"` follows the final
+ * sloped segment without duplicating tldraw's arrowhead-angle calculation.
+ * Slanted arrows standardise on the ordinary open head when selected in the
+ * inspector; choosing another endpoint style returns the arrow to stock routing.
+ */
+function SlantedArrowBody({
+	util,
+	shape,
+	points,
+}: {
+	util: SystemSketchArrowShapeUtil
+	shape: TLArrowShape
+	points: readonly Vec[]
+}) {
+	const colorMode = useColorMode()
+	const display = getDisplayValues(util, shape, colorMode)
+	const strokeWidth = display.strokeWidth * shape.props.scale
+	const markerId = `systemsketch-slanted-arrowhead-${shape.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`
+	const penultimate = points[points.length - 2]
+	const tip = points[points.length - 1]
+	return (
+		<SVGContainer
+			className="systemsketch-slanted-arrow__body"
+			style={{ minWidth: 50, minHeight: 50 }}
+		>
+			<defs>
+				<marker
+					id={markerId}
+					viewBox="0 0 10 10"
+					refX="9"
+					refY="5"
+					markerWidth="3.5"
+					markerHeight="3.5"
+					markerUnits="strokeWidth"
+					orient="auto"
+					overflow="visible"
+				>
+					<path
+						d="M 1 1 L 9 5 L 1 9"
+						fill="none"
+						stroke={display.strokeColor}
+						strokeWidth="2.5"
+						strokeLinejoin="round"
+						strokeLinecap="round"
+					/>
+				</marker>
+			</defs>
+			<g
+				fill="none"
+				stroke={display.strokeColor}
+				strokeWidth={strokeWidth}
+				strokeLinejoin="round"
+				strokeLinecap="round"
+				pointerEvents="none"
+			>
+				{authoredArrowPath(points).toSvg({
+					style: shape.props.dash,
+					strokeWidth,
+					forceSolid: false,
+					randomSeed: shape.id,
+				})}
+				{/* A transparent carrier retains the real stroke width for markerUnits.
+					`stroke="none"` makes browsers resolve the marker against a zero-width
+					line at large scales, which is how its open head could collapse into a
+					heavy blob. */}
+				<path
+					d={`M ${penultimate.x} ${penultimate.y} L ${tip.x} ${tip.y}`}
+					stroke={display.strokeColor}
+					strokeOpacity="0"
+					markerEnd={`url(#${markerId})`}
+				/>
 			</g>
 		</SVGContainer>
 	)
@@ -562,12 +819,19 @@ function SystemSketchArrow({
 	util,
 	shape,
 	points,
+	slanted,
 }: {
 	util: SystemSketchArrowShapeUtil
 	shape: TLArrowShape
 	points: readonly { x: number; y: number }[] | null
+	slanted: boolean
 }) {
 	const editor = useEditor()
+	const slantedPoints = useValue(
+		`slanted arrow route ${shape.id}`,
+		() => slanted ? slantedArrowPoints(editor, shape) : null,
+		[editor, shape, slanted],
+	)
 	const exact = useValue(
 		`exact detached arrow ${shape.id}`,
 		() => exactArrowPath(editor, shape),
@@ -591,6 +855,19 @@ function SystemSketchArrow({
 		)
 	}
 	if (exact) return <ExactArrowBody exact={exact} />
+	if (slanted && slantedPoints && slantedPoints.length >= 2) {
+		return (
+			<>
+				{/* The stock head follows its single straight fallback, not this
+					arrow's final diagonal. Slanted therefore replaces the complete
+					stock stroke and head with its own browser-oriented marker. */}
+				<div className="systemsketch-authored-arrow__stock systemsketch-authored-arrow__stock--replace-head">
+					<StockArrow util={util} shape={shape} />
+				</div>
+				<SlantedArrowBody util={util} shape={shape} points={slantedPoints} />
+			</>
+		)
+	}
 	if (!points) return <StockArrow util={util} shape={shape} />
 	return (
 		<>
@@ -607,9 +884,11 @@ function SystemSketchArrow({
  *
  * The stock tool, bindings, terminal drag, styles, labels, arrowheads and the
  * un-authored renderer remain `ArrowShapeUtil`. SystemSketch replaces an
- * authored elbow body and its segment handles, or the initial body of a cable
- * that was just detached. Both are namespaced metadata enhancements on a valid
- * stock arrow record.
+ * authored elbow body and its segment handles, the initial body of a cable
+ * that was just detached, or an Inspector-selected horizontal-then-diagonal
+ * body. These are namespaced metadata enhancements on a valid stock arrow
+ * record; Slanted deliberately uses SVG's public marker orientation and falls
+ * back to stock if someone chooses a different endpoint style.
  */
 export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 	private activeRouteDrag: {
@@ -623,14 +902,23 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 		return resolveArrowRoute(this.editor, shape)
 	}
 
+	private slantedRoute(shape: TLArrowShape): Vec[] | null {
+		return isSlantedArrow(shape) ? slantedArrowPoints(this.editor, shape) : null
+	}
+
 	override onBeforeUpdate(previous: TLArrowShape, next: TLArrowShape): TLArrowShape | void {
 		const routingContractChanged = previous.props.kind !== next.props.kind
+			|| previous.props.bend !== next.props.bend
 			|| previous.props.arrowheadStart !== next.props.arrowheadStart
 			|| previous.props.arrowheadEnd !== next.props.arrowheadEnd
 		let meta = next.meta
 		let changed = false
 		if (routingContractChanged && SYSTEMSKETCH_ARROW_ROUTE_META_KEY in meta) {
 			meta = metaWithoutArrowRoute(meta)
+			changed = true
+		}
+		if (isSlantedArrow(previous) && routingContractChanged) {
+			meta = metaWithoutSlantedArrow(meta)
 			changed = true
 		}
 
@@ -667,6 +955,16 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 				],
 			})
 		}
+		const slanted = this.slantedRoute(shape)
+		if (slanted && slanted.length >= 2) {
+			const stock = super.getGeometry(shape)
+			return new Group2d({
+				children: [
+					new Polyline2d({ points: slanted }),
+					...stock.children.slice(1),
+				],
+			})
+		}
 		const route = this.route(shape)
 		if (!route?.model) return super.getGeometry(shape)
 		const stock = super.getGeometry(shape)
@@ -684,6 +982,20 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 		const terminals = stockHandles
 			.filter((handle) => handle.id === 'start' || handle.id === 'end')
 		if (!showConnectorInteriorControls(this.editor, shape.id)) return terminals
+		if (isSlantedArrow(shape)) {
+			const route = this.slantedRoute(shape)
+			if (!route || route.length < 3) return terminals
+			return [...terminals, {
+				id: SLANTED_ARROW_ELBOW_HANDLE_ID,
+				// Match stock straight/curved arrows: a default virtual point does
+				// not alter the route until someone grabs it, then it becomes an
+				// authored vertex that survives terminal movement on the source axis.
+				type: slantedArrowElbowT(shape.meta) === null ? 'virtual' : 'vertex',
+				index: 'a2' as IndexKey,
+				x: route[1].x,
+				y: route[1].y,
+			}]
+		}
 		if (shape.props.kind !== 'elbow') return stockHandles
 		const route = this.route(shape)
 		if (!route) return stockHandles
@@ -691,6 +1003,31 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 	}
 
 	override onHandleDrag(shape: TLArrowShape, info: TLHandleDragInfo<TLArrowShape>) {
+		if (info.handle.id === SLANTED_ARROW_ELBOW_HANDLE_ID) {
+			const arrowInfo = getArrowInfo(this.editor, shape)
+			if (!arrowInfo?.isValid) return undefined
+			const start = arrowInfo.start.point
+			const end = arrowInfo.end.point
+			const departure = getSlantedArrowDepartureForShape(this.editor, shape, start, end)
+			const axis = slantedDepartureAxis(departure)
+			const startCoordinate = axis === 'x' ? start.x : start.y
+			const endCoordinate = axis === 'x' ? end.x : end.y
+			const handleCoordinate = axis === 'x' ? info.handle.x : info.handle.y
+			const span = Math.abs(endCoordinate - startCoordinate)
+			if (span < 0.001) return undefined
+			const elbowT = Math.max(0, Math.min(
+				1,
+				((handleCoordinate - startCoordinate) * slantedDepartureSign(departure)) / span,
+			))
+			return {
+				id: shape.id,
+				type: shape.type,
+				// See the matching authored-route update below: tldraw's geometry
+				// cache is prop-keyed, while this optional control lives in `meta`.
+				props: { richText: structuredClone(shape.props.richText) },
+				meta: metaWithSlantedArrow(shape.meta, elbowT),
+			}
+		}
 		if (!info.handle.id.startsWith('systemsketch-route:')) {
 			return super.onHandleDrag(shape, info)
 		}
@@ -749,6 +1086,7 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 				util={this}
 				shape={shape}
 				points={route?.model ? route.points : null}
+				slanted={isSlantedArrow(shape)}
 			/>
 		)
 	}
@@ -772,6 +1110,13 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 				exact.transform.f,
 			]))
 			return transformed
+		}
+		const slanted = this.slantedRoute(shape)
+		if (slanted && slanted.length >= 2) {
+			return authoredArrowPath(slanted).toPath2D({
+				style: 'solid',
+				strokeWidth: 1,
+			})
 		}
 		const route = this.route(shape)
 		if (!route?.model) return super.getIndicatorPath(shape)

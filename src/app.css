@@ -196,11 +196,19 @@ button {
 }
 
 /*
- * The stock arrow component still owns endpoint heads and editable text. Once
- * a route has authored rails, its original one-scalar body is the only piece
- * replaced; the authored body beside it uses tldraw's public PathBuilder and
- * the same stock display values.
+ * The stock arrow component still owns editable text. Once a route has
+ * authored rails, its original one-scalar body is the only piece replaced;
+ * the authored body beside it uses tldraw's public PathBuilder and the same
+ * stock display values.
  */
 .systemsketch-authored-arrow__stock > .tl-svg-container > g > g:first-of-type {
+	visibility: hidden;
+}
+
+/* A Slanted arrow's final tangent differs from the stock straight fallback.
+ * Hide that fallback's direct arrowhead too, or the two directions paint over
+ * each other as a malformed heavy-stroke head. Its replacement is the public
+ * SVG marker in SlantedArrowBody, which orients to the final diagonal. */
+.systemsketch-authored-arrow__stock--replace-head > .tl-svg-container > g > path {
 	visibility: hidden;
 }

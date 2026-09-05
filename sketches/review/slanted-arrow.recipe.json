@@ -1,0 +1,99 @@
+{
+  "feature": "Inspector-only Slanted arrow",
+  "viewport": { "width": 1440, "height": 800 },
+  "pages": [{ "id": "review", "name": "Slanted arrow review" }],
+  "shapes": [
+    {
+      "id": "condition",
+      "type": "geo",
+      "x": 520,
+      "y": 160,
+      "props": { "geo": "rectangle", "w": 240, "h": 80 },
+      "text": "condition?"
+    },
+    {
+      "id": "action",
+      "type": "geo",
+      "x": 1000,
+      "y": 510,
+      "props": { "geo": "rectangle", "w": 240, "h": 80 },
+      "text": "run action"
+    },
+    {
+      "id": "branch",
+      "type": "arrow",
+      "x": 640,
+      "y": 240,
+      "meta": { "systemSketchSlantedArrow": { "version": 1 } },
+      "props": {
+        "kind": "arc",
+        "bend": 0,
+        "start": { "x": 0, "y": 0 },
+        "end": { "x": 360, "y": 310 },
+        "color": "violet",
+        "dash": "solid",
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "id": "branch-start",
+      "type": "arrow",
+      "fromId": "branch",
+      "toId": "condition",
+      "props": {
+        "terminal": "start",
+        "normalizedAnchor": { "x": 0.5, "y": 1 },
+        "isExact": false,
+        "isPrecise": true,
+        "snap": "edge-point"
+      }
+    },
+    {
+      "id": "branch-end",
+      "type": "arrow",
+      "fromId": "branch",
+      "toId": "action",
+      "props": {
+        "terminal": "end",
+        "normalizedAnchor": { "x": 0, "y": 0.5 },
+        "isExact": false,
+        "isPrecise": true,
+        "snap": "edge-point"
+      }
+    }
+  ],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Select the violet branch leaving the bottom of condition?. Inspector is the only place to find Slanted.",
+      "x": 20,
+      "y": 130,
+      "w": 400,
+      "h": 160,
+      "target": { "shapeId": "condition", "anchor": "left" }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Drag the round elbow dot up or down. The branch continues to leave the bottom face vertically before its diagonal.",
+      "x": 970,
+      "y": 240,
+      "w": 420,
+      "h": 160,
+      "target": { "x": 735, "y": 395 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The branch leaves condition? vertically from its bottom, then reaches run action diagonally. Other source faces leave on their own axis.",
+      "x": 20,
+      "y": 520,
+      "w": 620,
+      "h": 140
+    }
+  ]
+}
