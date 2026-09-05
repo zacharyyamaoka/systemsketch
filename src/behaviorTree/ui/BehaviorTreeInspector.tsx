@@ -67,7 +67,7 @@ function Segmented<T extends string>({ label, value, options, onChange, testId }
 						type="button"
 						key={option.value}
 						aria-pressed={value === option.value}
-						title={option.title}
+						title={option.title ?? option.label}
 						disabled={option.disabled}
 						data-testid={`${testId}-${option.value}`}
 						onClick={() => onChange(option.value)}
