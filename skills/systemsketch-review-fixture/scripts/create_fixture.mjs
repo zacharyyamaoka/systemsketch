@@ -199,6 +199,11 @@ async function main() {
           props: normalizedProps,
         }
       }
+      // WHY: opening a fresh workspace may still materialize product starter
+      // shapes. A review fixture must be the recipe's exact evidence surface,
+      // not the recipe plus invisible/default canvas history.
+      const existingShapeIds = editor.getCurrentPageShapes().map((shape) => shape.id)
+      if (existingShapeIds.length) editor.deleteShapes(existingShapeIds)
       editor.createShapes(recipe.shapes.map(normalizeShape))
       if (recipe.bindings?.length) {
         editor.createBindings(recipe.bindings.map((binding, index) => ({

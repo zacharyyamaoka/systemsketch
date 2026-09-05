@@ -28,7 +28,7 @@ import {
 	getConnectionDirection,
 	type ConnectionBinding,
 } from './ConnectionBindingUtil'
-import { getPortHostPort } from './blockPorts'
+import { getPortHostPort, portElbowSideForFace } from './blockPorts'
 import { blockScopeId } from './connectionScope'
 import { getConnectionEndpoints, type ConnectionShape } from './ConnectionShapeUtil'
 
@@ -240,17 +240,22 @@ export function collectConnectionRoutingScene(
 	const direction = getConnectionDirection(editor, connection)
 	const sourceBinding = bindings[direction.sourceTerminal]
 	const sinkBinding = bindings[direction.sinkTerminal]
+	const sideFor = (binding: ConnectionBinding | undefined, fallback: 'left' | 'right') => {
+		if (!binding) return fallback
+		const port = portFor(editor, binding)
+		return port ? portElbowSideForFace(port, binding.props.face) : fallback
+	}
 	const structuralObstacles = collectConnectionRoutingObstacles(editor, connection)
 	const textObstacles = collectConnectionRoutingTextObstacles(editor, connection)
 	const obstacles = [...structuralObstacles, ...textObstacles]
 	const start: ElbowEndpoint = {
 		point: transform.applyToPoint(local.source),
-		side: portFor(editor, sourceBinding)?.elbowSide ?? 'right',
+		side: sideFor(sourceBinding, 'right'),
 		box: endpointBox(editor, sourceBinding),
 	}
 	const end: ElbowEndpoint = {
 		point: transform.applyToPoint(local.sink),
-		side: portFor(editor, sinkBinding)?.elbowSide ?? 'left',
+		side: sideFor(sinkBinding, 'left'),
 		box: endpointBox(editor, sinkBinding),
 	}
 	return {

@@ -30,6 +30,7 @@ import {
 	getBlockPortDotAtPoint,
 	getPortHostPort,
 	isPortHostShape,
+	portElbowSideForFace,
 } from './blockPorts'
 import {
 	HitPaddedCubicBezier2d,
@@ -1686,6 +1687,11 @@ function getConnectionElbowBoxes(
 	const portFor = (binding: ConnectionBinding | undefined) => (
 		binding ? getPortHostPort(editor, binding.toId, binding.props.portId) : null
 	)
+	const sideFor = (binding: ConnectionBinding | undefined) => {
+		if (!binding) return undefined
+		const port = portFor(binding)
+		return port ? portElbowSideForFace(port, binding.props.face) : undefined
+	}
 	const toLocalBox = (binding: ConnectionBinding | undefined) => {
 		if (!binding || binding.props.face === 'inner') return null
 		// A face that looks into its own host contributes no box, for exactly the
@@ -1706,8 +1712,8 @@ function getConnectionElbowBoxes(
 	return {
 		start: toLocalBox(source),
 		end: toLocalBox(sink),
-		startSide: portFor(source)?.elbowSide,
-		endSide: portFor(sink)?.elbowSide,
+		startSide: sideFor(source),
+		endSide: sideFor(sink),
 	}
 }
 
