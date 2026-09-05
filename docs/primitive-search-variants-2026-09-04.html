@@ -2473,7 +2473,7 @@
   "schemaVersion": 3,
   "title": "Three cursor-local primitive searches",
   "kicker": "Babble & Prune · SystemSketch",
-  "brief": "Press S on the canvas to search only the canonical primitive library in a compact surface beside the pointer, choose with the keyboard, and insert without opening the command palette.",
+  "brief": "Press S on the canvas to search only the canonical primitive library in a compact surface beside the pointer, choose with the keyboard, then draw with the matching stock tool without opening the command palette.",
   "count": 3,
   "defaultId": "v1",
   "defaultWhy": "Cursor Stack is the provisional implementation choice at 96/100. It is the only direction that keeps the Fusion-style pointer anchor, exposes enough labeled matches to disambiguate primitives, and makes ArrowDown + Enter obvious without growing into a command modal.",
@@ -2484,7 +2484,7 @@
     "The same pointer, query 'arrow', and three matching primitives are used in every direction.",
     "Ctrl/Cmd+P, Ctrl/Cmd+K, and Ctrl/Cmd+F retain the existing large command/find modal."
   ],
-  "boundary": "The gallery runs the open → filter → choose state machines with realistic SystemSketch content. Pointer capture, tldraw insertion, undo, focus restoration, viewport collision, and production hotkey guards remain simulated here and are verified only in the implemented app.",
+  "boundary": "The gallery runs the open → filter → arm state machines with realistic SystemSketch content. Pointer capture, the following tldraw drawing gesture, undo, focus restoration, viewport collision, and production hotkey guards remain simulated here and are verified only in the implemented app.",
   "axes": [
     {
       "name": "Result model",
@@ -2516,11 +2516,11 @@
       "id": "fr1",
       "name": "Pointer-local speed",
       "weight": 35,
-      "why": "The Fusion-inspired advantage is avoiding a trip to global chrome: the search should appear where attention and the intended insertion already are.",
+      "why": "The Fusion-inspired advantage is avoiding a trip to global chrome: the search should appear where attention and the intended drawing already are.",
       "passCondition": "From a canvas pointer position, the user can open search and reach a likely primitive without moving their gaze to a distant modal.",
       "anchors": {
         "1": "Search opens away from the working point or needs pointer travel before typing.",
-        "3": "Search is near the work but adds a detour or unstable placement.",
+        "3": "Search is near the work but adds a detour or unstable anchoring.",
         "5": "One unmodified key opens a stable, immediately focused search beside the pointer."
       }
     },
@@ -2531,7 +2531,7 @@
       "why": "A small surface still has to distinguish similar catalog entries such as straight, curved, and elbow arrows without leaking unrelated commands into the list.",
       "passCondition": "The filtered result set shows only canonical library primitives and provides enough name/category/icon context to choose the intended one.",
       "anchors": {
-        "1": "Results mix in commands or conceal which primitive will be inserted.",
+        "1": "Results mix in commands or conceal which primitive tool will be armed.",
         "3": "Results are scoped correctly but comparison or naming is weak.",
         "5": "Multiple similar primitive matches are compact, clearly labeled, and easy to compare."
       }
@@ -2545,19 +2545,19 @@
       "anchors": {
         "1": "The surface reads as another modal or obscures most of the working context.",
         "3": "The board remains recognizable, but the surface is larger than its task requires.",
-        "5": "Only a small cursor-adjacent region is covered and the intended insertion context stays legible."
+        "5": "Only a small cursor-adjacent region is covered and the intended drawing context stays legible."
       }
     },
     {
       "id": "fr4",
-      "name": "Confident keyboard placement",
+      "name": "Confident keyboard handoff",
       "weight": 20,
-      "why": "The interaction should stay in the keyboard flow that plain S starts while making the insertion target and selected result unambiguous.",
-      "passCondition": "Typing filters, keyboard navigation visibly moves one active result, Enter inserts it at the invocation point, and Escape cancels.",
+      "why": "The interaction should stay in the keyboard flow that plain S starts while making the selected result and handoff to the drawing tool unambiguous.",
+      "passCondition": "Typing filters, keyboard navigation visibly moves one active result, Enter arms its real drawing tool without creating a shape, and Escape cancels.",
       "anchors": {
-        "1": "Selection or insertion location is ambiguous and the keyboard path is incomplete.",
-        "3": "Keyboard insertion works but requires learning hidden focus or navigation behavior.",
-        "5": "Focus, active result, Enter, Escape, and the insertion point are all evident in the surface."
+        "1": "Selection or the armed tool is ambiguous and the keyboard path is incomplete.",
+        "3": "Keyboard handoff works but requires learning hidden focus or navigation behavior.",
+        "5": "Focus, active result, Enter, Escape, and the following canvas gesture are all evident in the surface."
       }
     }
   ],
@@ -2592,21 +2592,21 @@
         },
         {
           "label": "Selection",
-          "value": "ArrowUp/Down moves a strong active row; Enter inserts at the frozen invocation point."
+          "value": "ArrowUp/Down moves a strong active row; Enter arms that primitive's real drawing tool."
         }
       ],
       "keepParts": [
-        "frozen pointer target",
+        "pointer-local anchor",
         "ranked labeled rows",
         "ArrowDown + Enter footer hint"
       ],
       "proof": [
-        "The live hero moves through hidden, filtered-list, and inserted states from either the walkthrough or direct controls.",
+        "The live hero moves through hidden, filtered-list, and tool-armed states from either the walkthrough or direct controls.",
         "The three arrow matches remain simultaneously comparable while the board and function card stay visible."
       ],
       "previewLabel": "interactive cursor stack",
       "story": {
-        "title": "Search and insert without leaving the pointer",
+        "title": "Search and arm without leaving the pointer",
         "steps": [
           {
             "label": "Press S at the function",
@@ -2622,7 +2622,7 @@
           },
           {
             "label": "Press Enter",
-            "caption": "The active Straight arrow is inserted at the frozen invocation point and the compact surface disappears.",
+            "caption": "The compact surface disappears and the active Straight arrow tool is armed; no shape exists until the next canvas gesture.",
             "state": "inserted",
             "target": "[data-story-to='closed']"
           }
@@ -2646,7 +2646,7 @@
         },
         "fr4": {
           "score": 5,
-          "evidence": "Focus, active row, ArrowUp/Down, Enter, Escape, and the orange insertion target are all explicitly represented.",
+          "evidence": "Focus, active row, ArrowUp/Down, Enter, Escape, and the handoff to an armed drawing tool are all explicitly represented.",
           "confidence": "high"
         }
       },
@@ -2660,12 +2660,12 @@
           "evidence": "The concept labels plain S as canvas-only and leaves command/find shortcuts in their existing global modal."
         }
       },
-      "preview": "<style>.ps-stage{position:relative;min-height:340px;overflow:hidden;border-radius:18px;background-color:#f8fafc;background-image:radial-gradient(#cbd5e1 1px,transparent 1px);background-size:22px 22px;color:#172033;font:13px Inter,system-ui,sans-serif}.ps-function{position:absolute;left:72px;top:64px;width:310px;height:200px;border:2px solid #7b8da6;border-radius:14px;background:rgba(255,255,255,.82);box-shadow:0 9px 26px rgba(55,65,81,.08)}.ps-function header{padding:12px 15px;border-bottom:1px solid #d8e0e9;font-weight:750}.ps-function small{display:block;color:#738198;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.ps-port{position:absolute;left:-7px;top:86px;width:12px;height:12px;border:2px solid #fff;border-radius:50%;background:#7892b4}.ps-wire{position:absolute;left:0;top:156px;width:72px;border-top:3px solid #e36b3d}.ps-cursor{position:absolute;left:232px;top:134px;width:18px;height:24px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}.ps-popup{position:absolute;z-index:3;width:292px;border:1px solid #cad3df;border-radius:11px;background:#fff;box-shadow:0 18px 45px rgba(28,39,55,.2),0 2px 7px rgba(28,39,55,.12);overflow:hidden}.ps-search{height:42px;display:flex;align-items:center;gap:8px;padding:0 11px;border-bottom:1px solid #e4e9ef}.ps-search b{color:#e36b3d}.ps-search span{flex:1;font-weight:650}.ps-search kbd,.ps-hint kbd{padding:2px 5px;border:1px solid #d9e0e8;border-radius:5px;background:#f5f7f9;color:#66758a;font:10px ui-monospace,monospace}.ps-row{display:grid;grid-template-columns:30px 1fr auto;align-items:center;min-height:42px;padding:0 10px;border-left:3px solid transparent}.ps-row.active{border-left-color:#e36b3d;background:#fff1eb}.ps-icon{display:grid;width:25px;height:25px;place-items:center;border-radius:7px;background:#edf1f5;font-size:17px}.ps-row strong{display:block;font-size:12px}.ps-row small{color:#7c8797;font-size:10px}.ps-hint{display:flex;justify-content:space-between;padding:7px 10px;border-top:1px solid #eef1f4;color:#7c8797;font-size:10px}.ps-direct{position:absolute;left:16px;bottom:15px;z-index:5;display:flex;gap:7px}.ps-direct button{border:1px solid #ccd5df;border-radius:8px;background:#fff;padding:7px 10px;color:#26364a;font:700 11px inherit;box-shadow:0 2px 5px rgba(31,41,55,.08);cursor:pointer}.ps-direct button:hover{border-color:#e36b3d}.prototype[data-story-state='closed'] .ps-popup{display:none}.prototype[data-story-state='results'] .ps-inserted,.prototype[data-story-state='closed'] .ps-inserted{display:none}.prototype[data-story-state='inserted'] .ps-popup{display:none}.ps-inserted{position:absolute;left:223px;top:143px;color:#e36b3d;font-size:33px;font-weight:800;transform:rotate(-28deg)}.ps-stack .ps-popup{left:244px;top:146px}.ps-grid .ps-popup{left:146px;top:132px;width:346px}.ps-rail .ps-popup{left:170px;top:144px;width:380px}.ps-tiles{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:9px}.ps-tile{min-height:70px;border:1px solid #e1e7ee;border-radius:9px;padding:8px;background:#fafbfd;text-align:left}.ps-tile.active{border-color:#4e7aa8;box-shadow:0 0 0 2px #dbeafe}.ps-tile b{display:block;margin:4px 0 2px}.ps-rail-results{display:flex;align-items:center;gap:9px;padding:9px}.ps-rail-result{display:grid;grid-template-columns:28px 1fr auto;align-items:center;flex:1;min-width:0}.ps-rail-result strong{display:block}.ps-count{color:#7b8798;font-size:10px}.ps-stage .ps-pulse{position:absolute;left:220px;top:137px;width:32px;height:32px;border:2px solid rgba(227,107,61,.4);border-radius:50%}.prototype[data-story-state='closed'] .ps-pulse{display:none}<\/style><div class='ps-stage ps-stack'><div class='ps-function'><header><small>function<\/small>normalize_reading(value)<\/header><div class='ps-port'><\/div><\/div><div class='ps-wire'><\/div><div class='ps-pulse'><\/div><svg class='ps-cursor' viewBox='0 0 18 24' aria-hidden='true'><path d='M2 1 16 15l-7 1 4 6-3 1-4-7-4 5Z' fill='#182536' stroke='white' stroke-width='1.5'/><\/svg><div class='ps-popup'><div class='ps-search'><b>S<\/b><span>arrow<\/span><kbd>Esc<\/kbd><\/div><div class='ps-row active'><i class='ps-icon'>↗<\/i><span><strong>Straight arrow<\/strong><small>Connections<\/small><\/span><kbd>Enter<\/kbd><\/div><div class='ps-row'><i class='ps-icon'>⌁<\/i><span><strong>Curved arrow<\/strong><small>Connections<\/small><\/span><span><\/span><\/div><div class='ps-row'><i class='ps-icon'>↳<\/i><span><strong>Elbow arrow<\/strong><small>Connections<\/small><\/span><span><\/span><\/div><div class='ps-hint'><span>3 primitives<\/span><span><kbd>↑<\/kbd><kbd>↓<\/kbd> choose · <kbd>Enter<\/kbd> place<\/span><\/div><\/div><div class='ps-inserted'>→<\/div><div class='ps-direct'><button data-story-to='closed'>Reset<\/button><button data-story-to='results'>Press S + type arrow<\/button><button data-story-to='inserted'>Press Enter<\/button><\/div><\/div>",
+      "preview": "<style>.ps-stage{position:relative;min-height:340px;overflow:hidden;border-radius:18px;background-color:#f8fafc;background-image:radial-gradient(#cbd5e1 1px,transparent 1px);background-size:22px 22px;color:#172033;font:13px Inter,system-ui,sans-serif}.ps-function{position:absolute;left:72px;top:64px;width:310px;height:200px;border:2px solid #7b8da6;border-radius:14px;background:rgba(255,255,255,.82);box-shadow:0 9px 26px rgba(55,65,81,.08)}.ps-function header{padding:12px 15px;border-bottom:1px solid #d8e0e9;font-weight:750}.ps-function small{display:block;color:#738198;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.ps-port{position:absolute;left:-7px;top:86px;width:12px;height:12px;border:2px solid #fff;border-radius:50%;background:#7892b4}.ps-wire{position:absolute;left:0;top:156px;width:72px;border-top:3px solid #e36b3d}.ps-cursor{position:absolute;left:232px;top:134px;width:18px;height:24px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}.ps-popup{position:absolute;z-index:3;width:292px;border:1px solid #cad3df;border-radius:11px;background:#fff;box-shadow:0 18px 45px rgba(28,39,55,.2),0 2px 7px rgba(28,39,55,.12);overflow:hidden}.ps-search{height:42px;display:flex;align-items:center;gap:8px;padding:0 11px;border-bottom:1px solid #e4e9ef}.ps-search b{color:#e36b3d}.ps-search span{flex:1;font-weight:650}.ps-search kbd,.ps-hint kbd{padding:2px 5px;border:1px solid #d9e0e8;border-radius:5px;background:#f5f7f9;color:#66758a;font:10px ui-monospace,monospace}.ps-row{display:grid;grid-template-columns:30px 1fr auto;align-items:center;min-height:42px;padding:0 10px;border-left:3px solid transparent}.ps-row.active{border-left-color:#e36b3d;background:#fff1eb}.ps-icon{display:grid;width:25px;height:25px;place-items:center;border-radius:7px;background:#edf1f5;font-size:17px}.ps-row strong{display:block;font-size:12px}.ps-row small{color:#7c8797;font-size:10px}.ps-hint{display:flex;justify-content:space-between;padding:7px 10px;border-top:1px solid #eef1f4;color:#7c8797;font-size:10px}.ps-direct{position:absolute;left:16px;bottom:15px;z-index:5;display:flex;gap:7px}.ps-direct button{border:1px solid #ccd5df;border-radius:8px;background:#fff;padding:7px 10px;color:#26364a;font:700 11px inherit;box-shadow:0 2px 5px rgba(31,41,55,.08);cursor:pointer}.ps-direct button:hover{border-color:#e36b3d}.prototype[data-story-state='closed'] .ps-popup{display:none}.prototype[data-story-state='results'] .ps-inserted,.prototype[data-story-state='closed'] .ps-inserted{display:none}.prototype[data-story-state='inserted'] .ps-popup{display:none}.ps-inserted{position:absolute;left:184px;top:278px;padding:8px 12px;border:1px solid #e36b3d;border-radius:10px;background:#fff;color:#9a3f1d;font-size:11px;font-weight:800;box-shadow:0 5px 14px rgba(28,39,55,.12)}.ps-stack .ps-popup{left:244px;top:146px}.ps-grid .ps-popup{left:146px;top:132px;width:346px}.ps-rail .ps-popup{left:170px;top:144px;width:380px}.ps-tiles{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:9px}.ps-tile{min-height:70px;border:1px solid #e1e7ee;border-radius:9px;padding:8px;background:#fafbfd;text-align:left}.ps-tile.active{border-color:#4e7aa8;box-shadow:0 0 0 2px #dbeafe}.ps-tile b{display:block;margin:4px 0 2px}.ps-rail-results{display:flex;align-items:center;gap:9px;padding:9px}.ps-rail-result{display:grid;grid-template-columns:28px 1fr auto;align-items:center;flex:1;min-width:0}.ps-rail-result strong{display:block}.ps-count{color:#7b8798;font-size:10px}.ps-stage .ps-pulse{position:absolute;left:220px;top:137px;width:32px;height:32px;border:2px solid rgba(227,107,61,.4);border-radius:50%}.prototype[data-story-state='closed'] .ps-pulse{display:none}<\/style><div class='ps-stage ps-stack'><div class='ps-function'><header><small>function<\/small>normalize_reading(value)<\/header><div class='ps-port'><\/div><\/div><div class='ps-wire'><\/div><div class='ps-pulse'><\/div><svg class='ps-cursor' viewBox='0 0 18 24' aria-hidden='true'><path d='M2 1 16 15l-7 1 4 6-3 1-4-7-4 5Z' fill='#182536' stroke='white' stroke-width='1.5'/><\/svg><div class='ps-popup'><div class='ps-search'><b>S<\/b><span>arrow<\/span><kbd>Esc<\/kbd><\/div><div class='ps-row active'><i class='ps-icon'>↗<\/i><span><strong>Straight arrow<\/strong><small>Connections<\/small><\/span><kbd>Enter<\/kbd><\/div><div class='ps-row'><i class='ps-icon'>⌁<\/i><span><strong>Curved arrow<\/strong><small>Connections<\/small><\/span><span><\/span><\/div><div class='ps-row'><i class='ps-icon'>↳<\/i><span><strong>Elbow arrow<\/strong><small>Connections<\/small><\/span><span><\/span><\/div><div class='ps-hint'><span>3 primitives<\/span><span><kbd>↑<\/kbd><kbd>↓<\/kbd> choose · <kbd>Enter<\/kbd> arm<\/span><\/div><\/div><div class='ps-inserted'>Straight arrow armed · draw next<\/div><div class='ps-direct'><button data-story-to='closed'>Reset<\/button><button data-story-to='results'>Press S + type arrow<\/button><button data-story-to='inserted'>Press Enter · arm<\/button><\/div><\/div>",
       "media": [
         {
-          "label": "Why the anchor freezes",
-          "caption": "Search can grow or flip without changing where Enter will place the primitive; the orange ring records the invocation point until dismissal.",
-          "html": "<div style='min-height:132px;display:grid;place-items:center;border-radius:14px;background:#f7f9fb;color:#26364a'><div style='display:flex;align-items:center;gap:12px'><span style='width:44px;height:44px;border:2px solid #e36b3d;border-radius:50%;display:grid;place-items:center'>S<\/span><span>pointer point<\/span><b>→<\/b><span style='padding:12px 16px;border:1px solid #ccd5df;border-radius:10px;background:white'>frozen insertion target<\/span><\/div><\/div>"
+          "label": "Why the search stays anchored",
+          "caption": "Search can grow or flip beside the invocation point, then disappear while the armed tldraw tool gives final geometry back to the next canvas gesture.",
+          "html": "<div style='min-height:132px;display:grid;place-items:center;border-radius:14px;background:#f7f9fb;color:#26364a'><div style='display:flex;align-items:center;gap:12px'><span style='width:44px;height:44px;border:2px solid #e36b3d;border-radius:50%;display:grid;place-items:center'>S<\/span><span>local search<\/span><b>→<\/b><span style='padding:12px 16px;border:1px solid #ccd5df;border-radius:10px;background:white'>tool armed · draw next<\/span><\/div><\/div>"
         }
       ]
     },
@@ -2696,7 +2696,7 @@
         "pointer-origin pulse"
       ],
       "proof": [
-        "The live hero reveals the same three arrow results as visual tiles and completes the same insertion state.",
+        "The live hero reveals the same three arrow results as visual tiles and completes the same tool-armed state.",
         "The wider footprint and two-dimensional navigation are visible rather than hidden in prose."
       ],
       "previewLabel": "interactive icon constellation",
@@ -2717,7 +2717,7 @@
           },
           {
             "label": "Press Enter",
-            "caption": "The selected tile inserts at the same frozen point and the constellation collapses.",
+            "caption": "The selected tile arms its real drawing tool and the constellation collapses without creating a shape.",
             "state": "inserted",
             "target": "[data-story-to='closed']"
           }
@@ -2755,7 +2755,7 @@
           "evidence": "The design assumes the same canvas-only S guard and does not replace the global command/find modal."
         }
       },
-      "preview": "<div class='ps-stage ps-grid'><div class='ps-function'><header><small>function<\/small>normalize_reading(value)<\/header><div class='ps-port'><\/div><\/div><div class='ps-wire'><\/div><div class='ps-pulse'><\/div><svg class='ps-cursor' viewBox='0 0 18 24' aria-hidden='true'><path d='M2 1 16 15l-7 1 4 6-3 1-4-7-4 5Z' fill='#182536' stroke='white' stroke-width='1.5'/><\/svg><div class='ps-popup'><div class='ps-search'><b>S<\/b><span>arrow<\/span><kbd>Esc<\/kbd><\/div><div class='ps-tiles'><button class='ps-tile active'><span class='ps-icon'>↗<\/span><b>Straight arrow<\/b><small>Connections<\/small><\/button><button class='ps-tile'><span class='ps-icon'>⌁<\/span><b>Curved arrow<\/b><small>Connections<\/small><\/button><button class='ps-tile'><span class='ps-icon'>↳<\/span><b>Elbow arrow<\/b><small>Connections<\/small><\/button><\/div><div class='ps-hint'><span>3 primitives<\/span><span><kbd>←<\/kbd><kbd>→<\/kbd><kbd>↓<\/kbd> choose · <kbd>Enter<\/kbd><\/span><\/div><\/div><div class='ps-inserted'>→<\/div><div class='ps-direct'><button data-story-to='closed'>Reset<\/button><button data-story-to='results'>Press S + type arrow<\/button><button data-story-to='inserted'>Press Enter<\/button><\/div><\/div>",
+      "preview": "<div class='ps-stage ps-grid'><div class='ps-function'><header><small>function<\/small>normalize_reading(value)<\/header><div class='ps-port'><\/div><\/div><div class='ps-wire'><\/div><div class='ps-pulse'><\/div><svg class='ps-cursor' viewBox='0 0 18 24' aria-hidden='true'><path d='M2 1 16 15l-7 1 4 6-3 1-4-7-4 5Z' fill='#182536' stroke='white' stroke-width='1.5'/><\/svg><div class='ps-popup'><div class='ps-search'><b>S<\/b><span>arrow<\/span><kbd>Esc<\/kbd><\/div><div class='ps-tiles'><button class='ps-tile active'><span class='ps-icon'>↗<\/span><b>Straight arrow<\/b><small>Connections<\/small><\/button><button class='ps-tile'><span class='ps-icon'>⌁<\/span><b>Curved arrow<\/b><small>Connections<\/small><\/button><button class='ps-tile'><span class='ps-icon'>↳<\/span><b>Elbow arrow<\/b><small>Connections<\/small><\/button><\/div><div class='ps-hint'><span>3 primitives<\/span><span><kbd>←<\/kbd><kbd>→<\/kbd><kbd>↓<\/kbd> choose · <kbd>Enter<\/kbd><\/span><\/div><\/div><div class='ps-inserted'>Straight arrow armed · draw next<\/div><div class='ps-direct'><button data-story-to='closed'>Reset<\/button><button data-story-to='results'>Press S + type arrow<\/button><button data-story-to='inserted'>Press Enter · arm<\/button><\/div><\/div>",
       "media": [
         {
           "label": "Spatial selection order",
@@ -2782,7 +2782,7 @@
         },
         {
           "label": "Selection",
-          "value": "Left/Right cycles matches; Enter inserts the only visible candidate."
+          "value": "Left/Right cycles matches; Enter arms the only visible candidate's real drawing tool."
         }
       ],
       "keepParts": [
@@ -2791,12 +2791,12 @@
         "left/right cycling"
       ],
       "proof": [
-        "The live hero demonstrates the same open, query, and insertion states in the smallest rendered footprint.",
+        "The live hero demonstrates the same open, query, and tool-armed states in the smallest rendered footprint.",
         "The missing simultaneous comparison is honestly visible: only Straight arrow is rendered while the counter reports two hidden alternatives."
       ],
       "previewLabel": "interactive one-line rail",
       "story": {
-        "title": "Insert from the smallest possible search",
+        "title": "Arm from the smallest possible search",
         "steps": [
           {
             "label": "Press S at the function",
@@ -2812,7 +2812,7 @@
           },
           {
             "label": "Press Enter",
-            "caption": "Enter inserts the sole visible candidate at the pointer target and restores the full canvas.",
+            "caption": "Enter arms the sole visible candidate without creating it and restores the full canvas for the drawing gesture.",
             "state": "inserted",
             "target": "[data-story-to='closed']"
           }
@@ -2850,7 +2850,7 @@
           "evidence": "It uses the same canvas-only S contract and leaves command/find shortcuts untouched."
         }
       },
-      "preview": "<div class='ps-stage ps-rail'><div class='ps-function'><header><small>function<\/small>normalize_reading(value)<\/header><div class='ps-port'><\/div><\/div><div class='ps-wire'><\/div><div class='ps-pulse'><\/div><svg class='ps-cursor' viewBox='0 0 18 24' aria-hidden='true'><path d='M2 1 16 15l-7 1 4 6-3 1-4-7-4 5Z' fill='#182536' stroke='white' stroke-width='1.5'/><\/svg><div class='ps-popup'><div class='ps-search'><b>S<\/b><span>arrow<\/span><kbd>Esc<\/kbd><\/div><div class='ps-rail-results'><button aria-label='Previous primitive' style='border:0;background:transparent;color:#607086'>←<\/button><div class='ps-rail-result'><i class='ps-icon'>↗<\/i><span><strong>Straight arrow<\/strong><small>Connections<\/small><\/span><kbd>Enter<\/kbd><\/div><span class='ps-count'>1 / 3<\/span><button aria-label='Next primitive' style='border:0;background:transparent;color:#607086'>→<\/button><\/div><\/div><div class='ps-inserted'>→<\/div><div class='ps-direct'><button data-story-to='closed'>Reset<\/button><button data-story-to='results'>Press S + type arrow<\/button><button data-story-to='inserted'>Press Enter<\/button><\/div><\/div>",
+      "preview": "<div class='ps-stage ps-rail'><div class='ps-function'><header><small>function<\/small>normalize_reading(value)<\/header><div class='ps-port'><\/div><\/div><div class='ps-wire'><\/div><div class='ps-pulse'><\/div><svg class='ps-cursor' viewBox='0 0 18 24' aria-hidden='true'><path d='M2 1 16 15l-7 1 4 6-3 1-4-7-4 5Z' fill='#182536' stroke='white' stroke-width='1.5'/><\/svg><div class='ps-popup'><div class='ps-search'><b>S<\/b><span>arrow<\/span><kbd>Esc<\/kbd><\/div><div class='ps-rail-results'><button aria-label='Previous primitive' style='border:0;background:transparent;color:#607086'>←<\/button><div class='ps-rail-result'><i class='ps-icon'>↗<\/i><span><strong>Straight arrow<\/strong><small>Connections<\/small><\/span><kbd>Enter<\/kbd><\/div><span class='ps-count'>1 / 3<\/span><button aria-label='Next primitive' style='border:0;background:transparent;color:#607086'>→<\/button><\/div><\/div><div class='ps-inserted'>Straight arrow armed · draw next<\/div><div class='ps-direct'><button data-story-to='closed'>Reset<\/button><button data-story-to='results'>Press S + type arrow<\/button><button data-story-to='inserted'>Press Enter · arm<\/button><\/div><\/div>",
       "media": [
         {
           "label": "Occlusion profile",

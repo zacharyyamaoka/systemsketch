@@ -49,7 +49,7 @@
     {
       "id": "step-3",
       "kind": "step",
-      "text": "3 · Press ↓ once for Curved arrow, then press Enter",
+      "text": "3 · Press ↓ once, then Enter — this only arms Curved arrow",
       "x": 1230,
       "y": 500,
       "w": 420,
@@ -57,12 +57,22 @@
       "target": { "x": 1010, "y": 535 }
     },
     {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 · Now drag inside the function to draw the armed arrow",
+      "x": 40,
+      "y": 500,
+      "w": 410,
+      "h": 110,
+      "target": { "x": 790, "y": 585 }
+    },
+    {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · A small search opens beside the pointer, lists only Straight / Curved / Elbow arrow, and places Curved arrow at that point inside the function",
+      "text": "PASS WHEN · Enter closes search without adding a shape, the Curved arrow tool becomes active, and only the following canvas drag draws it",
       "x": 530,
       "y": 735,
-      "w": 680,
+      "w": 780,
       "h": 120
     }
   ]

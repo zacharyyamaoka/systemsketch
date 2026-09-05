@@ -18,6 +18,7 @@ VARIANTS = ROOT / "docs" / "primitive-search-variants-2026-09-04.json"
 SEARCH_SOURCE = ROOT / "src" / "library" / "PrimitiveSearch.tsx"
 MODEL_SOURCE = ROOT / "src" / "library" / "primitiveSearchModel.ts"
 CATALOG_SOURCE = ROOT / "src" / "library" / "shapeLibraryModel.ts"
+TOOL_SOURCE = ROOT / "src" / "library" / "shapeLibraryTool.ts"
 CHROME_SOURCE = ROOT / "src" / "chrome" / "SystemSketchChrome.tsx"
 
 
@@ -41,15 +42,18 @@ def main() -> None:
     search_source = SEARCH_SOURCE.read_text(encoding="utf-8")
     model_source = MODEL_SOURCE.read_text(encoding="utf-8")
     catalog_source = CATALOG_SOURCE.read_text(encoding="utf-8")
+    tool_source = TOOL_SOURCE.read_text(encoding="utf-8")
     chrome_source = CHROME_SOURCE.read_text(encoding="utf-8")
     gates = {
         "Plain S only": "isPrimitiveSearchKey(event)" in search_source,
         "Canonical catalog": "filterShapeLibraryItems(query)" in search_source,
-        "Pointer placement": "insertShapeLibraryItemAtPoint" in search_source,
+        "Real toolbar-tool handoff": "activateShapeLibraryTool(tools, item)" in search_source
+        and "onSelect(source)" in tool_source,
+        "No search-time insertion": "insertShapeLibraryItem" not in search_source,
         "Six-row ceiling": "PRIMITIVE_SEARCH_MAX_RESULTS = 6" in model_source,
         "Input/editing guards": "isEditableShortcutTarget" in search_source and "getEditingShapeId" in search_source,
         "Existing command modal retained": "<SystemSketchCommandPalette" in chrome_source,
-        "One shared insertion transaction": "editor.markHistoryStoppingPoint" in catalog_source and "editor.run" in catalog_source,
+        "Existing library insertion retained": "editor.markHistoryStoppingPoint" in catalog_source and "editor.run" in catalog_source,
     }
     if len(checks) != 8 or not all(gates.values()):
         raise SystemExit("refusing to build without all eight browser checks and source gates")
@@ -91,18 +95,18 @@ pre{{margin:0;overflow:auto;padding:19px;border-radius:14px;background:#202833;c
 </style></head><body><main>
 <div class="eyebrow">SystemSketch · implementation evidence · 2026-09-04</div>
 <h1>Primitive search now opens where the mouse is.</h1>
-<p class="lede">Plain <b>S</b> creates a small, primitive-only typeahead beside the latest canvas pointer. It searches the existing library—not commands or board text—and inserts the keyboard-selected result at the frozen pointer point.</p>
+<p class="lede">Plain <b>S</b> creates a small, primitive-only typeahead beside the latest canvas pointer. It searches the existing library—not commands or board text—and arms the keyboard-selected stock drawing tool. No shape exists until the next canvas gesture.</p>
 <div class="hero">
-  <article class="card"><div class="eyebrow">Complete keyboard path</div><div class="flow"><kbd>S</kbd><span class="arrow">→</span><b>type arrow</b><span class="arrow">→</span><kbd>↓</kbd><span class="arrow">→</span><kbd>Enter</kbd></div><p><b>Escape</b> cancels. Clicking a result inserts it. Successful insertion and selection remain one ordinary undo step.</p></article>
+  <article class="card"><div class="eyebrow">Search, arm, then draw</div><div class="flow"><kbd>S</kbd><span class="arrow">→</span><b>type arrow</b><span class="arrow">→</span><kbd>↓</kbd><span class="arrow">→</span><kbd>Enter</kbd><span class="arrow">→</span><b>canvas drag</b></div><p><b>Escape</b> cancels. Enter or clicking a result only arms its real toolbar tool; the following canvas click or drag owns placement and geometry.</p></article>
   <article class="card winner"><div class="eyebrow">AI prune · provisional default</div><strong class="big">Cursor Stack · 96/100</strong><p>It keeps the Fusion-style pointer anchor while exposing enough labeled matches to distinguish Straight, Curved, and Elbow arrows. <a href="primitive-search-variants-2026-09-04.html">Open all three interactive variants and the full scoring audit.</a></p></article>
 </div>
 <section><h2>The real product, driven twice</h2><div class="evidence">
-  <figure class="shot"><img src="{data_uri(FILTERED_SHOT)}" alt="Three primitive arrow results in a small search beside the canvas pointer"><figcaption>At a normal canvas point, ArrowDown visibly selects Curved arrow. The popup is 304 px wide and keeps the command modal out of the interaction.</figcaption></figure>
+  <figure class="shot"><img src="{data_uri(FILTERED_SHOT)}" alt="Three primitive arrow results in a small search beside the canvas pointer"><figcaption>At a normal canvas point, ArrowDown visibly selects Curved arrow and the footer says Enter will arm it. The popup is 304 px wide and keeps the command modal out of the interaction.</figcaption></figure>
   <figure class="shot"><img src="{data_uri(CORNER_SHOT)}" alt="Primitive search flipped above and left near the bottom-right canvas corner"><figcaption>At the bottom-right corner, the same result stack flips above-left, remains inside the viewport, and clears the bottom toolbar.</figcaption></figure>
 </div></section>
-<section><h2>Three visual directions, one frozen objective</h2><div class="card"><table><thead><tr><th>Direction</th><th>Score</th><th>Structural thesis</th></tr></thead><tbody>{score_table}</tbody></table><p class="note">Weights fixed before generation: pointer-local speed 35%, primitive discovery 25%, compact canvas continuity 20%, confident keyboard placement 20%. All three passed the canonical-catalog and canvas-safe-hotkey gates.</p></div></section>
+<section><h2>Three visual directions, one frozen objective</h2><div class="card"><table><thead><tr><th>Direction</th><th>Score</th><th>Structural thesis</th></tr></thead><tbody>{score_table}</tbody></table><p class="note">Weights fixed before generation: pointer-local speed 35%, primitive discovery 25%, compact canvas continuity 20%, confident keyboard handoff 20%. All three passed the canonical-catalog and canvas-safe-hotkey gates.</p></div></section>
 <section><h2>8/8 real-browser checks pass</h2><div class="hero"><article class="card"><ul>{browser_checks}</ul></article><article class="card"><div class="eyebrow">Current-tree gates</div>{source_gates}</article></div></section>
-<section><h2>The implementation owns two narrow seams</h2><div class="seams"><pre>{html.escape(excerpt(SEARCH_SOURCE, "export function PrimitiveSearch", "if (!invocation) return null"))}</pre><pre>{html.escape(excerpt(MODEL_SOURCE, "export function placePrimitiveSearch", "vertical,"))}</pre></div><p class="note">The component owns transient search state and keyboard focus. The pure model owns flip/clamp placement. Catalog content and shape creation remain canonical in <code>shapeLibraryModel.ts</code>; tldraw still owns records, selection, focus, and history.</p></section>
+<section><h2>The implementation owns two narrow seams</h2><div class="seams"><pre>{html.escape(excerpt(SEARCH_SOURCE, "export function PrimitiveSearch", "if (!invocation) return null"))}</pre><pre>{html.escape(excerpt(TOOL_SOURCE, "export function activateShapeLibraryTool", "return toolId"))}</pre></div><p class="note">The component owns transient search state and keyboard focus. The tool adapter maps the canonical catalog item to the same tldraw UI tool item used by the toolbar. Tldraw owns the subsequent pointer gesture, geometry, snapping, cancellation, selection, and history.</p></section>
 <p class="meta">Implementation track <code>track/primitive-search</code>, based on <code>main</code> at <code>e9b3345</code>. The existing Ctrl/Cmd+P, Ctrl/Cmd+K, and Ctrl/Cmd+F command/find modal remains unchanged.</p>
 </main></body></html>"""
     document = "\n".join(line.rstrip() for line in document.splitlines()) + "\n"

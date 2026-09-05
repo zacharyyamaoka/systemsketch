@@ -2,6 +2,7 @@ import {
   TldrawUiButtonIcon,
   TldrawUiInput,
   useEditor,
+  useTools,
 } from 'tldraw'
 import {
   useCallback,
@@ -17,10 +18,9 @@ import { useChrome } from '../chrome/ChromeProvider'
 import {
   SHAPE_LIBRARY_ITEMS,
   filterShapeLibraryItems,
-  insertShapeLibraryItemAtPoint,
   type ShapeLibraryItem,
-  type ShapeLibraryPoint,
 } from './shapeLibraryModel'
+import { activateShapeLibraryTool } from './shapeLibraryTool'
 import {
   PRIMITIVE_SEARCH_MAX_RESULTS,
   PRIMITIVE_SEARCH_WIDTH,
@@ -36,7 +36,6 @@ import './primitive-search.css'
 
 interface PrimitiveSearchInvocation {
   screenPoint: PrimitiveSearchPoint
-  pagePoint: ShapeLibraryPoint
 }
 
 function toolbarObstacleTop(editorContainer: HTMLElement, viewportHeight: number): number {
@@ -53,12 +52,12 @@ function ResultRow({
   active,
   item,
   onActivate,
-  onInsert,
+  onChoose,
 }: {
   active: boolean
   item: ShapeLibraryItem
   onActivate(): void
-  onInsert(): void
+  onChoose(): void
 }) {
   return (
     <li role="presentation">
@@ -67,13 +66,14 @@ function ResultRow({
         type="button"
         role="option"
         aria-selected={active}
+        aria-label={`Use ${item.label} tool`}
         className="systemsketch-primitive-search__result"
         data-active={active || undefined}
         data-library-item={item.id}
         data-testid={`systemsketch-primitive-search-${item.id}`}
         onPointerMove={onActivate}
         onFocus={onActivate}
-        onClick={onInsert}
+        onClick={onChoose}
       >
         <span className="systemsketch-primitive-search__icon" aria-hidden="true">
           <TldrawUiButtonIcon icon={item.icon} />
@@ -91,12 +91,13 @@ function ResultRow({
 /**
  * A primitive-only sibling to the command palette, anchored to the pointer.
  *
- * WHY: S is about putting one catalog object where the user is already
- * looking. Reusing the centred command modal would preserve code, but it would
- * destroy the Fusion-style spatial promise and reintroduce unrelated commands.
+ * WHY: S is about choosing what to draw where the user is already looking.
+ * Reusing the centred command modal would destroy that Fusion-style spatial
+ * promise; inserting immediately would steal the final placement gesture.
  */
 export function PrimitiveSearch() {
   const editor = useEditor()
+  const tools = useTools()
   const { toolbarSurface } = useChrome()
   const [invocation, setInvocation] = useState<PrimitiveSearchInvocation | null>(null)
   const [query, setQuery] = useState('')
@@ -120,11 +121,10 @@ export function PrimitiveSearch() {
     editor.focus()
   }, [editor])
 
-  const insert = useCallback((item: ShapeLibraryItem) => {
-    if (!invocation) return
-    insertShapeLibraryItemAtPoint(editor, item, invocation.pagePoint)
+  const choose = useCallback((item: ShapeLibraryItem) => {
+    activateShapeLibraryTool(tools, item)
     close()
-  }, [close, editor, invocation])
+  }, [close, tools])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -138,12 +138,10 @@ export function PrimitiveSearch() {
       event.preventDefault()
       event.stopImmediatePropagation()
       const screenPoint = editor.inputs.getCurrentScreenPoint()
-      const pagePoint = editor.inputs.getCurrentPagePoint()
       setQuery('')
       setActiveIndex(0)
       setInvocation({
         screenPoint: { x: screenPoint.x, y: screenPoint.y },
-        pagePoint: { x: pagePoint.x, y: pagePoint.y },
       })
     }
     window.addEventListener('keydown', onKeyDown, true)
@@ -201,7 +199,7 @@ export function PrimitiveSearch() {
     if (event.key === 'Enter') {
       event.preventDefault()
       event.stopPropagation()
-      if (activeItem) insert(activeItem)
+      if (activeItem) choose(activeItem)
     }
   }
 
@@ -267,13 +265,13 @@ export function PrimitiveSearch() {
                   item={item}
                   active={index === activeIndex}
                   onActivate={() => setActiveIndex(index)}
-                  onInsert={() => insert(item)}
+                  onChoose={() => choose(item)}
                 />
               ))}
             </ul>
             <footer className="systemsketch-primitive-search__footer">
               <span>{matches.length} {matches.length === 1 ? 'primitive' : 'primitives'}</span>
-              <span><kbd>↑</kbd><kbd>↓</kbd> choose <i>·</i> <kbd>Enter</kbd> place</span>
+              <span><kbd>↑</kbd><kbd>↓</kbd> choose <i>·</i> <kbd>Enter</kbd> arm</span>
             </footer>
           </>
         ) : (

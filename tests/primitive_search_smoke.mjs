@@ -9,6 +9,7 @@ import {
   clickAt,
   clickElement,
   delay,
+  drag,
   evaluate,
   key,
   localConsoleErrors,
@@ -81,8 +82,6 @@ async function main() {
     const point = JSON.parse(await evaluate(page,
       `JSON.stringify(window.__systemsketch.editor.pageToScreen({ x: 790, y: 390 }))`))
     await clickAt(page, point.x, point.y)
-    const insertionPoint = JSON.parse(await evaluate(page,
-      `JSON.stringify(window.__systemsketch.editor.inputs.getCurrentPagePoint())`))
     await shortcut(page, 's', 'KeyS')
     await waitFor(page, `document.querySelector('[data-testid="systemsketch-primitive-search"]')`, 'S primitive search')
     assert.equal(await evaluate(page,
@@ -110,30 +109,50 @@ async function main() {
     assert.equal(await evaluate(page,
       `document.querySelector('[data-testid="systemsketch-primitive-search-arrow-curve"]').getAttribute('aria-selected')`), 'true')
     await screenshot(page, 'primitive-search-filtered-2026-09-04.png')
+    const shapeCountBeforeChoice = await evaluate(page,
+      `window.__systemsketch.editor.getCurrentPageShapes().length`)
     await key(page, 'Enter', 'Enter')
     await waitFor(page, `!document.querySelector('[data-testid="systemsketch-primitive-search"]')`, 'search closing after Enter')
-    const inserted = JSON.parse(await evaluate(page, `(() => {
+    const armed = JSON.parse(await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      return JSON.stringify({
+        shapeCount: editor.getCurrentPageShapes().length,
+        tool: editor.getCurrentToolId(),
+        toolbarActive: document.querySelector('[data-testid="systemsketch-tool-shape"]')?.getAttribute('aria-pressed'),
+      })
+    })()`))
+    assert.deepEqual(armed, {
+      shapeCount: shapeCountBeforeChoice,
+      tool: 'arrow',
+      toolbarActive: 'true',
+    })
+
+    const arrowCountBeforeDrawing = await evaluate(page,
+      `window.__systemsketch.editor.getCurrentPageShapes().filter((shape) => shape.type === 'arrow').length`)
+    const arrowStart = JSON.parse(await evaluate(page,
+      `JSON.stringify(window.__systemsketch.editor.pageToScreen({ x: 780, y: 385 }))`))
+    const arrowEnd = JSON.parse(await evaluate(page,
+      `JSON.stringify(window.__systemsketch.editor.pageToScreen({ x: 940, y: 490 }))`))
+    await drag(page, arrowStart, arrowEnd)
+    await waitFor(page,
+      `window.__systemsketch.editor.getCurrentPageShapes().filter((shape) => shape.type === 'arrow').length === ${arrowCountBeforeDrawing + 1}`,
+      'canvas drag drawing the armed arrow')
+    const drawn = JSON.parse(await evaluate(page, `(() => {
       const editor = window.__systemsketch.editor
       const shape = editor.getOnlySelectedShape()
-      const bounds = shape && editor.getShapePageBounds(shape)
       return JSON.stringify({
         id: shape?.id,
         type: shape?.type,
         kind: shape?.props?.kind,
         bend: shape?.props?.bend,
-        parentId: shape?.parentId,
-        center: bounds?.center,
-        tool: editor.getCurrentToolId(),
       })
     })()`))
-    assert.deepEqual({ type: inserted.type, kind: inserted.kind, bend: inserted.bend, tool: inserted.tool },
-      { type: 'arrow', kind: 'arc', bend: 42, tool: 'select' })
-    assert.equal(inserted.parentId, 'shape:function')
-    assert.ok(Math.abs(inserted.center.x - insertionPoint.x) < 1)
-    assert.ok(Math.abs(inserted.center.y - insertionPoint.y) < 1)
+    assert.equal(drawn.type, 'arrow')
+    assert.equal(drawn.kind, 'arc')
+    assert.ok(Math.abs(drawn.bend) > 0)
     await shortcut(page, 'z', 'KeyZ', 2)
-    await waitFor(page, `!window.__systemsketch.editor.getShape(${JSON.stringify(inserted.id)})`, 'one-step insertion undo')
-    pass('ArrowDown + Enter inserts the chosen curved arrow at the frozen pointer point as a real function child, and one Undo removes it')
+    await waitFor(page, `!window.__systemsketch.editor.getShape(${JSON.stringify(drawn.id)})`, 'one-step drawing undo')
+    pass('ArrowDown + Enter arms the real Curved arrow tool without inserting; the following canvas drag draws it, and one Undo removes it')
 
     await clickElement(page, '[title="Shapes library"]')
     await waitFor(page, `document.querySelector('[data-testid="systemsketch-left-popout"] input[aria-label="Search shapes"]')`, 'library search input')

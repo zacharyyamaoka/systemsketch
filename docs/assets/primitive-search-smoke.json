@@ -2,7 +2,7 @@
   "the saved review fixture cold-opens and its bound step cue follows the function target",
   "plain S opens a focused, sub-100px primitive search beside the pointer without the command modal",
   "querying arrow returns only the three canonical library primitives and no commands",
-  "ArrowDown + Enter inserts the chosen curved arrow at the frozen pointer point as a real function child, and one Undo removes it",
+  "ArrowDown + Enter arms the real Curved arrow tool without inserting; the following canvas drag draws it, and one Undo removes it",
   "S remains ordinary typing while a library input owns focus",
   "Ctrl+P still opens the existing large Commands modal as a separate surface",
   "the result stack flips above-left at the corner and stays inside the canvas above the toolbar",
