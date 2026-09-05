@@ -49,6 +49,20 @@ export const SemanticPortRoleClaim = T.object({
 export type SemanticPortRoleClaim = T.TypeOf<typeof SemanticPortRoleClaim>
 
 /**
+ * A visual relationship between neighbouring, independently editable ports.
+ *
+ * WHY: the relationship intentionally carries neither a label nor a rendering
+ * choice. A Block author may type any ordinary port names (including `*args`)
+ * and later choose any presentation for this run without turning those ports
+ * into a second, special kind of endpoint; see
+ * docs/peps/0003-adjacent-port-link-groups.md.
+ */
+export const BlockPortLink = T.object({
+	groupId: T.string,
+})
+export type BlockPortLink = T.TypeOf<typeof BlockPortLink>
+
+/**
  * The structural presentations an ordinary Block may switch between. `value`
  * is deliberately absent: it is the separate literal-pill representation,
  * created by the Pill tool or the connection-drop picker, never a conversion
@@ -226,6 +240,8 @@ export const BlockPort = T.object({
 	semanticRoleDerived: SemanticPortRoleClaim.optional(),
 	/** A local, explicit override. Absence deliberately reveals the derived claim. */
 	semanticRoleAuthored: SemanticPortRoleClaim.optional(),
+	/** Optional generic membership in an adjacent-port visual run. */
+	link: BlockPortLink.optional(),
 })
 export type BlockPort = T.TypeOf<typeof BlockPort>
 

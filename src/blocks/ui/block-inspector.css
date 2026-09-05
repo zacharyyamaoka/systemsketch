@@ -431,6 +431,19 @@
   background: var(--ss-accent-soft);
 }
 
+/* This is a mode, so it shares the small pill language with visible/state;
+ * the linked-ring mark makes it recognizable without promoting a rare action. */
+.block-inspector__link-toggle {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.block-inspector__link-toggle svg {
+  width: 10px;
+  height: 10px;
+}
+
 .block-inspector__icon-button {
   display: inline-flex;
   width: 22px;
@@ -460,12 +473,133 @@
   list-style: none;
 }
 
+/* Link is deliberately a mode beside visibility, not a new special port
+ * editor. The normal name/type/default fields stay present while its small
+ * controls expose only the adjacent relationship. */
+.block-inspector__link-toolbar,
+.block-inspector__link-range {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  margin: 0 0 7px;
+  padding: 6px 7px;
+  border: 1px solid var(--ss-border);
+  border-radius: 7px;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-sunken);
+  font-size: 10.5px;
+}
+
+.block-inspector__link-toolbar > span {
+  flex: 1 1 100%;
+}
+
+.block-inspector__link-toolbar button,
+.block-inspector__link-range button,
+.block-inspector__link-range select {
+  height: 23px;
+  border: 1px solid var(--ss-border-strong);
+  border-radius: 5px;
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-raised);
+  font-size: 10px;
+}
+
+.block-inspector__link-toolbar button,
+.block-inspector__link-range button {
+  padding: 0 7px;
+  cursor: pointer;
+}
+
+.block-inspector__link-toolbar button:disabled,
+.block-inspector__link-range button:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+.block-inspector__link-range label {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+  color: var(--ss-text-faint);
+}
+
+.block-inspector__link-range select {
+  min-width: 58px;
+  max-width: 84px;
+}
+
 .block-inspector__port-row {
   position: relative;
   display: grid;
   grid-template-columns: 14px minmax(0, 1fr) 64px 22px;
   gap: 5px;
   align-items: center;
+}
+
+.block-inspector__link-select {
+  display: grid;
+  width: 14px;
+  height: 24px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 4px;
+  color: var(--ss-text-faint);
+  background: transparent;
+  cursor: pointer;
+}
+
+.block-inspector__link-select:hover,
+.block-inspector__link-select[aria-pressed='true'] {
+  color: var(--ss-accent);
+  background: var(--ss-accent-soft);
+}
+
+.block-inspector__link-seam-row {
+  display: flex;
+  height: 7px;
+  align-items: center;
+  padding-left: 15px;
+}
+
+.block-inspector__link-seam {
+  display: inline-flex;
+  min-width: 0;
+  height: 16px;
+  gap: 3px;
+  align-items: center;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--ss-text-faint);
+  background: var(--ss-surface-raised);
+  cursor: pointer;
+  font-size: 9px;
+  line-height: 1;
+  opacity: .42;
+}
+
+.block-inspector__link-seam svg {
+  width: 11px;
+  height: 11px;
+}
+
+.block-inspector__link-seam:hover:not(:disabled),
+.block-inspector__link-seam:focus-visible,
+.block-inspector__link-seam[aria-pressed='true'] {
+  color: var(--ss-text-muted);
+  background: var(--ss-surface-hover);
+  opacity: 1;
+}
+
+.block-inspector__link-seam[aria-pressed='true'] {
+  color: var(--ss-accent);
+}
+
+.block-inspector__link-seam:disabled {
+  cursor: default;
 }
 
 .block-inspector__port-row:has(.block-inspector__port-default) {

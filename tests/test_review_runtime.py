@@ -165,6 +165,17 @@ class ReviewRuntimeTests(unittest.TestCase):
             (lease / "lease.json").write_text('{"name":"pill-entry"}\n', encoding="utf-8")
             self.assertEqual(sweep.review_lease(root), "pill-entry")
 
+    def test_review_vite_config_keeps_optimizer_cache_inside_its_lease(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "review"
+            root.mkdir()
+            (root / ".review-runtime").mkdir()
+            wrapper = runtime.review_vite_config(root)
+            source = wrapper.read_text(encoding="utf-8")
+            self.assertEqual(wrapper, root / ".review-runtime" / "vite.review.config.mjs")
+            self.assertIn(json.dumps(str(root / "vite.config.ts")), source)
+            self.assertIn(json.dumps(str(root / ".review-runtime" / "vite-cache")), source)
+
 
 if __name__ == "__main__":
     unittest.main()
