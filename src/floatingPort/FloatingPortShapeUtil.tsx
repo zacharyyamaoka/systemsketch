@@ -50,7 +50,11 @@ export class FloatingPortShapeUtil extends ShapeUtil<FloatingPortShape> {
 					width: layout.label.w,
 					height: layout.label.h,
 					isFilled: true,
-					isLabel: true,
+					// WHY: A free Port's text is its movable face, not an editor label.
+					// Marking this child as a label makes tldraw leave it out of the
+					// ordinary shape hit target, which turns a press-and-drag into an
+					// initial canvas click. Keep the real label bounds hit-testable so
+					// one grab starts the stock translating interaction immediately.
 				}),
 			],
 		})

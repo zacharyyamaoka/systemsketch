@@ -10,6 +10,7 @@ import assert from 'node:assert/strict'
 import {
   clickAt,
   delay,
+  mouse,
   evaluate,
   localConsoleErrors,
   openApp,
@@ -20,6 +21,7 @@ import {
 import {
   box,
   cables,
+  deselect,
   dragFrom,
   portDot,
   shot,
@@ -152,6 +154,33 @@ async function main() {
       ],
     ])
     pass('a Block output also wires into a free input Port, so a Port is usable from either side')
+
+    // The dot remains the cable handle. The label is the Port's direct-manipulation
+    // face: an unselected Port must enter stock translating on the first press,
+    // rather than needing a selection click before a second drag can move it.
+    await deselect(page)
+    const sinkLabel = await box(page, `[data-testid="floating-port-${SINK.replace('shape:', '')}"] .FloatingPort-label`)
+    const sinkBefore = JSON.parse(await evaluate(page,
+      `JSON.stringify(window.__systemsketch.editor.getShape(${JSON.stringify(SINK)}))`))
+    const sinkTarget = { x: sinkLabel.cx - 120, y: sinkLabel.cy + 80 }
+    await mouse(page, 'mouseMoved', sinkLabel.cx, sinkLabel.cy)
+    await mouse(page, 'mousePressed', sinkLabel.cx, sinkLabel.cy, { buttons: 1 })
+    assert.equal(await evaluate(page, 'window.__systemsketch.editor.getPath()'), 'select.pointing_shape')
+    await mouse(page, 'mouseMoved', sinkTarget.x, sinkTarget.y, { buttons: 1 })
+    await waitFor(page,
+      `window.__systemsketch.editor.getPath() === 'select.translating'`,
+      'one-press floating Port label drag')
+    const sinkDuringDrag = JSON.parse(await evaluate(page,
+      `JSON.stringify(window.__systemsketch.editor.getShape(${JSON.stringify(SINK)}))`))
+    assert.notDeepEqual(
+      { x: sinkDuringDrag.x, y: sinkDuringDrag.y },
+      { x: sinkBefore.x, y: sinkBefore.y },
+      'first drag motion moves the Port',
+    )
+    await mouse(page, 'mouseReleased', sinkTarget.x, sinkTarget.y)
+    await delay(260)
+    assert.equal(await cables(page), 2, 'moving by the label does not create a cable')
+    pass('an unselected Port starts moving from its text on the first press-and-drag')
 
     await clickSelector(page, `[data-testid="floating-port-${SOURCE.replace('shape:', '')}"] .FloatingPort-label`)
     await waitFor(page, `document.querySelector('[data-testid="floating-port-inspector"]')`, 'reselected Port inspector')
