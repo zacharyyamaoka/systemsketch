@@ -246,7 +246,7 @@ function swatchOf(palettes: readonly ThemePalette[], id: string): SwatchTokens {
 function AppearancePanel() {
   const choice = useThemeChoice()
   const imported = useImportedPalettes()
-  const { showZoomButtons, punctuatedPortRow } = useAppearancePreferences()
+  const { showZoomButtons, scrollDownZoomsIn, punctuatedPortRow } = useAppearancePreferences()
   const options = themeOptions(BUILT_IN_PALETTES, imported)
   const palettes = [...BUILT_IN_PALETTES, ...imported]
   const fileInput = useRef<HTMLInputElement | null>(null)
@@ -397,6 +397,27 @@ function AppearancePanel() {
           {importMessage.text}
         </p>
       ) : null}
+
+      <section className="systemsketch-settings__appearance-section" aria-labelledby="wheel-zoom-direction-title">
+        <div className="systemsketch-settings__appearance-heading">
+          <h3 id="wheel-zoom-direction-title">Wheel zoom direction</h3>
+          <p>Choose which vertical scroll direction moves closer to the board.</p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          className="systemsketch-settings__toggle-row"
+          aria-checked={scrollDownZoomsIn}
+          data-testid="systemsketch-scroll-down-zooms-in"
+          onClick={() => updateAppearancePreferences({ scrollDownZoomsIn: !scrollDownZoomsIn })}
+        >
+          <span>
+            <strong>Scroll down to zoom in</strong>
+            <small>Turn this off if you prefer scrolling up to zoom in.</small>
+          </span>
+          <i aria-hidden="true"><span /></i>
+        </button>
+      </section>
 
       <section className="systemsketch-settings__appearance-section" aria-labelledby="zoom-controls-title">
         <div className="systemsketch-settings__appearance-heading">

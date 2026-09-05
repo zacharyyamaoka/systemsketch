@@ -1,0 +1,105 @@
+{
+  "ranAt": "2026-09-05T06:52:40.541Z",
+  "before": {
+    "camera": {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": true,
+    "wheelBehavior": "zoom",
+    "zoomLabel": "100%",
+    "appearance": null
+  },
+  "after": {
+    "camera": {
+      "x": -58.181818181818244,
+      "y": -40.00000000000006,
+      "z": 1.1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": true,
+    "wheelBehavior": "zoom",
+    "zoomLabel": "110%",
+    "appearance": null
+  },
+  "switched": {
+    "camera": {
+      "x": -58.181818181818244,
+      "y": -40.00000000000006,
+      "z": 1.1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": false,
+    "wheelBehavior": "zoom",
+    "zoomLabel": "110%",
+    "appearance": {
+      "version": 1,
+      "showZoomButtons": false,
+      "scrollDownZoomsIn": false,
+      "punctuatedPortRow": true
+    }
+  },
+  "flippedBefore": {
+    "camera": {
+      "x": -58.181818181818244,
+      "y": -40.00000000000006,
+      "z": 1.1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": false,
+    "wheelBehavior": "zoom",
+    "zoomLabel": "110%",
+    "appearance": {
+      "version": 1,
+      "showZoomButtons": false,
+      "scrollDownZoomsIn": false,
+      "punctuatedPortRow": true
+    }
+  },
+  "flippedAfter": {
+    "camera": {
+      "x": -111.07438016528931,
+      "y": -76.36363636363643,
+      "z": 1.2100000000000002,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": false,
+    "wheelBehavior": "zoom",
+    "zoomLabel": "121%",
+    "appearance": {
+      "version": 1,
+      "showZoomButtons": false,
+      "scrollDownZoomsIn": false,
+      "punctuatedPortRow": true
+    }
+  },
+  "checks": [
+    "the mounted stock camera declares plain-wheel zoom behavior",
+    "a stale Trackpad preference cannot override wheel zoom after remount",
+    "scroll down to zoom in is the first-run default",
+    "a plain scroll-down gesture zooms in (1.00 → 1.10)",
+    "the visible zoom readout follows the gesture (100% → 110%)",
+    "Appearance exposes the enabled Scroll down to zoom in default",
+    "flipping the setting updates the live stock camera preference and local storage",
+    "after the flip, a plain scroll-up gesture zooms in (1.10 → 1.21)",
+    "the flipped direction survives a full reload",
+    "the wheel journey emits no local console errors"
+  ]
+}
