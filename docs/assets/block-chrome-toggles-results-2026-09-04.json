@@ -1,0 +1,47 @@
+{
+  "before": {
+    "headerDivider": "shown",
+    "footer": true,
+    "footerTop": 334,
+    "heading": true,
+    "headingBorder": "rgb(232, 232, 232)",
+    "firstPortTop": 248,
+    "chromeControls": [
+      {
+        "label": "Block footer",
+        "pressed": [
+          "show"
+        ]
+      },
+      {
+        "label": "Header divider",
+        "pressed": [
+          "show"
+        ]
+      }
+    ]
+  },
+  "after": {
+    "headerDivider": "hidden",
+    "footer": false,
+    "footerTop": null,
+    "heading": true,
+    "headingBorder": "rgba(0, 0, 0, 0)",
+    "firstPortTop": 252,
+    "chromeControls": [
+      {
+        "label": "Block footer",
+        "pressed": [
+          "hide"
+        ]
+      },
+      {
+        "label": "Header divider",
+        "pressed": [
+          "hide"
+        ]
+      }
+    ]
+  },
+  "consoleErrors": []
+}

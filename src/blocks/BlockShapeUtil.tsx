@@ -14,6 +14,7 @@ import {
 	PILL_TOOL_ID,
 	canReparentDraggedShapesIntoBlock,
 	canBlockContainChildren,
+	blockShowsHeaderDivider,
 	getDefaultBlockProps,
 	mergeBlockResizeProps,
 	resizeBlockProps,
@@ -105,7 +106,9 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 
 			{layout.header ? (
 				<>
-					<line x1={1} y1={layout.header.h} x2={Math.max(1, w - 1)} y2={layout.header.h} stroke={divider} />
+					{blockShowsHeaderDivider(shape.props) ? (
+						<line x1={1} y1={layout.header.h} x2={Math.max(1, w - 1)} y2={layout.header.h} stroke={divider} />
+					) : null}
 					<text x={12} y={layout.header.h / 2} dominantBaseline="middle" fill={ink} fontFamily="ui-monospace, monospace" fontSize={36} fontWeight={500}>
 						{shape.props.title}
 					</text>
@@ -143,7 +146,7 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 			{layout.dividers.map((rule, index) => (
 				<line key={index} x1={rule.x} y1={rule.y} x2={rule.x + rule.w} y2={rule.y} stroke={divider} />
 			))}
-			{layout.header ? (
+			{layout.footer ? (
 				<line x1={1} y1={layout.footerTop} x2={Math.max(1, w - 1)} y2={layout.footerTop} stroke={divider} />
 			) : null}
 

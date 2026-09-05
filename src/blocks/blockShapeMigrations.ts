@@ -45,6 +45,7 @@ const blockVersions = createShapePropsMigrationIds(BLOCK_SHAPE_TYPE, {
 	ValueView: 4,
 	DiffState: 5,
 	FieldDiffs: 6,
+	BlockChrome: 7,
 })
 
 function storedViews(props: BlockMigrationProps): StoredViews | undefined {
@@ -238,6 +239,28 @@ export function downgradeBlockPropsV6ToV5(props: BlockMigrationProps): BlockMigr
 }
 
 /**
+ * v6 → v7: preserve the old painted face when chrome becomes configurable.
+ *
+ * Older boards always had both marks. Explicit `true` values make that visual
+ * contract survive loading, duplication, and later batch-style edits.
+ */
+export function upgradeBlockPropsV6ToV7(props: BlockMigrationProps): BlockMigrationProps {
+	return props.showFooter === undefined || props.showHeaderDivider === undefined
+		? {
+			...props,
+			showFooter: props.showFooter ?? true,
+			showHeaderDivider: props.showHeaderDivider ?? true,
+		}
+		: props
+}
+
+/** v7 → v6: remove the presentation fields the old validator does not know. */
+export function downgradeBlockPropsV7ToV6(props: BlockMigrationProps): BlockMigrationProps {
+	const { showFooter: _showFooter, showHeaderDivider: _showHeaderDivider, ...rest } = props
+	return rest
+}
+
+/**
  * tldraw's migration sequence invokes each step for its side effect; it does
  * not consume a replacement props object. Keep the exported steps pure for
  * direct testing, then apply their result to the loader-owned record here.
@@ -283,5 +306,9 @@ export const blockShapeMigrations = createShapePropsMigrationSequence({
 		id: blockVersions.FieldDiffs,
 		up: (props) => applyPureMigration(props, upgradeBlockPropsV5ToV6),
 		down: (props) => applyPureMigration(props, downgradeBlockPropsV6ToV5),
+	}, {
+		id: blockVersions.BlockChrome,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV6ToV7),
+		down: (props) => applyPureMigration(props, downgradeBlockPropsV7ToV6),
 	}],
 })

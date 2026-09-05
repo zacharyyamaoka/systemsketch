@@ -78,6 +78,22 @@ export const BlockShowDescriptionStyle = StyleProp.define('systemsketch:blockSho
 })
 
 /**
+ * Block chrome is presentation, like its view and description—not part of the
+ * callable's identity. Making it a StyleProp keeps a multi-selection honest:
+ * one deliberate gesture can clean up a row of Blocks without copying titles,
+ * ports, or source-facing meaning between them.
+ */
+export const BlockShowFooterStyle = StyleProp.define('systemsketch:blockShowFooter', {
+	defaultValue: true,
+	type: T.boolean,
+})
+
+export const BlockShowHeaderDividerStyle = StyleProp.define('systemsketch:blockShowHeaderDivider', {
+	defaultValue: true,
+	type: T.boolean,
+})
+
+/**
  * What a primitive is currently being *said about* — never what it is.
  *
  * `normal` is the whole document in ordinary use. The other five are a lens
@@ -263,6 +279,10 @@ export const BLOCK_SHAPE_PROPS = {
 		value: BlockViewSize,
 	}),
 	showDescription: BlockShowDescriptionStyle,
+	/** The Port / Expanded action strip; Simple and Value are intentionally chromeless. */
+	showFooter: BlockShowFooterStyle,
+	/** The rule between the Port / Expanded heading and its body. */
+	showHeaderDivider: BlockShowHeaderDividerStyle,
 	/** Detailed Markdown from the donor Notes tab. */
 	notes: T.string.optional(),
 	/**
@@ -317,6 +337,8 @@ declare module 'tldraw' {
 				value: BlockViewSize
 			}
 			showDescription: boolean
+			showFooter: boolean
+			showHeaderDivider: boolean
 			notes?: string
 			portLayout: PortLayout
 			state: BlockState
@@ -359,6 +381,8 @@ export function getDefaultBlockProps(): BlockShapeProps {
 		view: 'simple',
 		views,
 		showDescription: true,
+		showFooter: true,
+		showHeaderDivider: true,
 		notes: '',
 		portLayout: 'inline',
 		state: 'normal',
@@ -387,6 +411,18 @@ export function blockNotes(props: BlockShapeProps): string {
  */
 export function blockPortLayout(props: BlockShapeProps): PortLayout {
 	return props.portLayout ?? 'inline'
+}
+
+/** Legacy records read as the previously visible chrome until their migration runs. */
+export function blockShowsFooter(props: Pick<BlockShapeProps, 'showFooter'>): boolean {
+	return props.showFooter ?? true
+}
+
+/** Legacy records read as the previously visible header/body rule until migration. */
+export function blockShowsHeaderDivider(
+	props: Pick<BlockShapeProps, 'showHeaderDivider'>,
+): boolean {
+	return props.showHeaderDivider ?? true
 }
 
 /** The one reader for optional expanded divider weights. */

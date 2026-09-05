@@ -95,6 +95,12 @@
   background: var(--ss-surface-raised);
 }
 
+/* The heading band remains a real hit target when its rule is hidden; only the
+ * visual separator changes, so title editing and header-row ports stay put. */
+.systemsketch-block-canvas[data-header-divider='hidden'] .NodeShape-heading {
+  border-bottom-color: transparent;
+}
+
 .systemsketch-block-canvas .BlockNode-heading {
   flex: 1 1 auto;
   min-width: 0;
