@@ -1,0 +1,207 @@
+{
+  "ranAt": "2026-09-05T07:32:00.113Z",
+  "before": {
+    "camera": {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": true,
+    "wheelBehavior": "zoom",
+    "zoomSpeed": 1,
+    "zoomLabel": "100%",
+    "appearance": null
+  },
+  "after": {
+    "camera": {
+      "x": -58.181818181818244,
+      "y": -40.00000000000006,
+      "z": 1.1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": true,
+    "wheelBehavior": "zoom",
+    "zoomSpeed": 1,
+    "zoomLabel": "110%",
+    "appearance": null
+  },
+  "tunedSetting": {
+    "camera": {
+      "x": -58.181818181818244,
+      "y": -40.00000000000006,
+      "z": 1.1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": true,
+    "wheelBehavior": "zoom",
+    "zoomSpeed": 1.5,
+    "zoomLabel": "110%",
+    "appearance": {
+      "version": 1,
+      "showZoomButtons": false,
+      "scrollDownZoomsIn": true,
+      "wheelZoomSensitivityPercent": 150,
+      "punctuatedPortRow": true
+    }
+  },
+  "tunedBefore": {
+    "camera": {
+      "x": -58.181818181818244,
+      "y": -40.00000000000006,
+      "z": 1.1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": true,
+    "wheelBehavior": "zoom",
+    "zoomSpeed": 1.5,
+    "zoomLabel": "110%",
+    "appearance": {
+      "version": 1,
+      "showZoomButtons": false,
+      "scrollDownZoomsIn": true,
+      "wheelZoomSensitivityPercent": 150,
+      "punctuatedPortRow": true
+    }
+  },
+  "tunedAfter": {
+    "camera": {
+      "x": -134.0711462450593,
+      "y": -92.17391304347831,
+      "z": 1.2650000000000001,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": true,
+    "wheelBehavior": "zoom",
+    "zoomSpeed": 1.5,
+    "zoomLabel": "126%",
+    "appearance": {
+      "version": 1,
+      "showZoomButtons": false,
+      "scrollDownZoomsIn": true,
+      "wheelZoomSensitivityPercent": 150,
+      "punctuatedPortRow": true
+    }
+  },
+  "reloadedSensitivity": {
+    "camera": {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": true,
+    "wheelBehavior": "zoom",
+    "zoomSpeed": 0.75,
+    "zoomLabel": "100%",
+    "appearance": {
+      "version": 1,
+      "showZoomButtons": false,
+      "scrollDownZoomsIn": true,
+      "wheelZoomSensitivityPercent": 75,
+      "punctuatedPortRow": true
+    }
+  },
+  "switched": {
+    "camera": {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": false,
+    "wheelBehavior": "zoom",
+    "zoomSpeed": 1,
+    "zoomLabel": "100%",
+    "appearance": {
+      "version": 1,
+      "showZoomButtons": false,
+      "scrollDownZoomsIn": false,
+      "wheelZoomSensitivityPercent": 100,
+      "punctuatedPortRow": true
+    }
+  },
+  "flippedBefore": {
+    "camera": {
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": false,
+    "wheelBehavior": "zoom",
+    "zoomSpeed": 1,
+    "zoomLabel": "100%",
+    "appearance": {
+      "version": 1,
+      "showZoomButtons": false,
+      "scrollDownZoomsIn": false,
+      "wheelZoomSensitivityPercent": 100,
+      "punctuatedPortRow": true
+    }
+  },
+  "flippedAfter": {
+    "camera": {
+      "x": -58.181818181818244,
+      "y": -40.00000000000006,
+      "z": 1.1,
+      "meta": {},
+      "id": "camera:page:page",
+      "typeName": "camera"
+    },
+    "inputMode": "mouse",
+    "isZoomDirectionInverted": false,
+    "wheelBehavior": "zoom",
+    "zoomSpeed": 1,
+    "zoomLabel": "110%",
+    "appearance": {
+      "version": 1,
+      "showZoomButtons": false,
+      "scrollDownZoomsIn": false,
+      "wheelZoomSensitivityPercent": 100,
+      "punctuatedPortRow": true
+    }
+  },
+  "checks": [
+    "the mounted stock camera declares plain-wheel zoom behavior",
+    "first run keeps tldraw’s standard wheel zoom sensitivity",
+    "a stale Trackpad preference cannot override wheel zoom after remount",
+    "scroll down to zoom in is the first-run default",
+    "a plain scroll-down gesture zooms in (1.00 → 1.10)",
+    "the visible zoom readout follows the gesture (100% → 110%)",
+    "Appearance exposes the enabled Scroll down to zoom in default",
+    "Appearance exposes standard wheel sensitivity as 100%",
+    "changing sensitivity updates the live stock zoomSpeed and local storage",
+    "150% sensitivity makes one scroll step 15% (1.100 → 1.265)",
+    "a tuned sensitivity survives a full reload",
+    "Reset to standard restores tldraw’s 100% wheel sensitivity",
+    "flipping the setting updates the live stock camera preference and local storage",
+    "after the flip, a plain scroll-up gesture zooms in (1.00 → 1.10)",
+    "the flipped direction survives a full reload",
+    "the wheel journey emits no local console errors"
+  ]
+}

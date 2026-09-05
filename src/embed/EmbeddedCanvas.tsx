@@ -83,10 +83,13 @@ import {
   parseLegacyPyblocksSystemSketch,
 } from '../import/legacyPyblocksSystemSketch'
 import { consolidateDocumentToSinglePage } from '../singlePageDocument'
+import {
+  installSystemSketchWheelZoom,
+  SYSTEMSKETCH_EDITOR_OPTIONS,
+} from '../canvasCamera'
 
 const ASSET_URLS = getAssetUrlsByImport()
 const TLDRAW_LICENSE_KEY = __TLDRAW_LICENSE_KEY__ || undefined
-const SYSTEMSKETCH_EDITOR_OPTIONS = { maxPages: 1 }
 
 function EmbeddedSystemSketchSurfaceHost() {
   return (
@@ -187,6 +190,7 @@ function EmbeddedSurface({
 
   const onMount = useCallback((editor: Editor) => {
     editorRef.current = editor
+    const stopWheelZoom = installSystemSketchWheelZoom(editor)
     onCompatibilityCopyAvailable(false)
     if (openDocument.readOnly) editor.updateInstanceState({ isReadonly: true })
     const core = decodeDocumentText(openDocument.text)
@@ -342,6 +346,7 @@ function EmbeddedSurface({
       stopConnectorControlVisibility()
       stopBlockConnections()
       stopDefinitionLinking()
+      stopWheelZoom()
     }
   }, [openDocument, onCanvasCheckpoint, onCanvasText, onCompatibilityCopyAvailable, onLoadError])
 
