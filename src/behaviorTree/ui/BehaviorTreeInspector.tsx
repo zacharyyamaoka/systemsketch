@@ -95,7 +95,12 @@ function ViewSection({ props, set, onTidy }: {
 					<Segmented label="Controls" value={props.controlFace} testId="bt-view-controls" onChange={(controlFace) => set({ controlFace })}
 						options={[{ value: 'expanded', label: 'Icon + text' }, { value: 'compact', label: 'Icon only' }]} />
 					<Segmented label="Wires" value={props.edgeStyle} testId="bt-view-edges" onChange={(edgeStyle) => set({ edgeStyle })}
-						options={[{ value: 'straight', label: 'Straight' }, { value: 'elbow', label: 'Elbow' }]} />
+						options={[
+							{ value: 'straight', label: 'Straight' },
+							{ value: 'elbow', label: 'Elbow' },
+							{ value: 'curved', label: 'Curved' },
+							{ value: 'slanted', label: 'Slanted' },
+						]} />
 				</>
 			) : null}
 			<Segmented label="Data" value={props.dataLens} testId="bt-view-lens" onChange={(dataLens) => set({ dataLens })}
@@ -230,7 +235,10 @@ function LibrarySection({ editor, selection, node, document }: { editor: Editor;
 		}
 		for (const tree of document.trees) {
 			if (tree.id === (selection.region.props.treeId || document.mainTreeId)) continue
-			entries.push({ id: `tree:${tree.id}`, label: tree.id, detail: 'Sub Tree', template: { id: tree.id, kind: 'subtree' } })
+			// WHY not "Sub Tree": this row is another TREE of the file, and the
+			// SubTree node is merely how you tick it. The node's own kind badge
+			// (above) still says Sub Tree, because there it names the node type.
+			entries.push({ id: `tree:${tree.id}`, label: tree.id, detail: 'Behavior Tree', template: { id: tree.id, kind: 'subtree' } })
 		}
 		return entries.filter((entry) => needle === '' || entry.label.toLowerCase().includes(needle)).sort((a, b) => (a.detail === b.detail ? a.label.localeCompare(b.label) : a.detail.localeCompare(b.detail)))
 	}, [document, query, selection.region.props.treeId])

@@ -28,6 +28,12 @@ export const SCENE_COLORS = {
 export function edgePathData(edge: BtSceneEdge): string {
 	const points = edge.points
 	if (points.length === 0) return ''
+	if (edge.curve && points.length === 4) {
+		// The Tree view's `curved` style: p0, c1, c2, p3 are already the wire's
+		// own authored control points (`curvedTreePoints`), not inferred here.
+		const [p0, c1, c2, p3] = points
+		return `M ${p0.x} ${p0.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${p3.x} ${p3.y}`
+	}
 	if (edge.curve && points.length === 2) {
 		const [from, to] = points
 		const bend = Math.abs(to.y - from.y) >= Math.abs(to.x - from.x)
@@ -43,6 +49,9 @@ export function edgeEndAngle(edge: BtSceneEdge): number {
 	const points = edge.points
 	if (points.length < 2) return 0
 	const to = points[points.length - 1]
+	// For a 4-point `curved` edge this is already c2, so the fallback below
+	// (c2 → p3) is exactly the tangent at p3 with no extra branch needed; the
+	// 3-point `slanted` edge's last two points give the same tangent for free.
 	let from = points[points.length - 2]
 	if (edge.curve && points.length === 2) {
 		const bend = Math.abs(to.y - from.y) >= Math.abs(to.x - from.x)

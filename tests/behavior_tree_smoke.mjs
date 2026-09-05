@@ -156,6 +156,23 @@ async function selectRegion(page) {
   await delay(200)
 }
 
+/** Bring an on-canvas button to the middle of the viewport, the way a person
+ * would scroll before clicking it — needed before any insert-menu check,
+ * since a `fitRegion`-wide view can leave individual "+" targets (there is
+ * one per insertion point, scattered across the whole region) off-screen. */
+async function centerOnButton(page, selector) {
+  await evaluate(page, `(() => {
+    const editor = window.__systemsketch.editor
+    const button = document.querySelector(${JSON.stringify(selector)})
+    const rect = button.getBoundingClientRect()
+    const point = editor.screenToPage({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
+    editor.setCamera({ x: editor.getCamera().x, y: editor.getCamera().y, z: 0.8 })
+    editor.centerOnPoint(point, { animation: { duration: 0 } })
+    return null
+  })()`)
+  await delay(300)
+}
+
 async function selectPath(page, path) {
   return evaluate(page, `(() => {
     const editor = window.__systemsketch.editor
@@ -299,6 +316,18 @@ async function main() {
     await shot(page, 'process-dataflow.png')
     await setView(page, { projection: 'tree', dataLens: 'none', nodeFace: 'simple', orientation: 'down' })
 
+    // ---- Tree wire styles -----------------------------------------------------
+    for (const edgeStyle of ['straight', 'elbow', 'curved', 'slanted']) {
+      await setView(page, { edgeStyle })
+      await fitRegion(page)
+      const wires = await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('.BehaviorTree-wire')).map((path) => path.getAttribute('d')))`).then(JSON.parse)
+      check(`tree.wires.${edgeStyle}`, `Tree wires draw as ${edgeStyle}`,
+        { count: wires.length > 0, hasCurve: wires.some((d) => d.includes('C')) },
+        { count: true, hasCurve: edgeStyle === 'curved' })
+      await shot(page, `tree-wires-${edgeStyle}.png`)
+    }
+    await setView(page, { edgeStyle: 'straight' })
+
     // ---- insert through the on-canvas "+" -----------------------------------
     await setView(page, { projection: 'process' })
     await fitRegion(page)
@@ -306,27 +335,176 @@ async function main() {
     const xmlBefore = await regionXml(page)
     // Bring the end target to the middle of the viewport so its menu opens
     // clear of the bottom toolbar, the way a person would scroll before adding.
-    await evaluate(page, `(() => {
-      const editor = window.__systemsketch.editor
-      const button = document.querySelector('[data-testid="bt-insert-end"]')
-      const rect = button.getBoundingClientRect()
-      const point = editor.screenToPage({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
-      editor.setCamera({ x: editor.getCamera().x, y: editor.getCamera().y, z: 0.8 })
-      editor.centerOnPoint(point, { animation: { duration: 0 } })
-      return null
-    })()`)
-    await delay(300)
+    await centerOnButton(page, '[data-testid="bt-insert-end"]')
+
+    check('insert.closed-initially', 'no menu is open before any "+" is clicked',
+      await evaluate(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`), false)
+
+    // The menu is now a real `TldrawUiPopover`: registering with tldraw's own
+    // menu state buys outside-click dismissal, Escape, Tab trapping and focus
+    // return for free instead of hand-rolling each one.
     await clickElement(page, '[data-testid="bt-insert-end"]')
     await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`, 'the Add-process menu')
+    check('insert.pressed', 'the "+" that owns the open menu shows a pressed state',
+      await evaluate(page, `document.querySelector('[data-testid="bt-insert-end"]')?.getAttribute('aria-pressed')`), 'true')
     check('insert.menu-rows', 'the first page is Skills, Control flow, Fail',
       await evaluate(page, `JSON.stringify(Array.from(document.querySelectorAll('[data-testid="bt-insert-menu"] .BehaviorTree-menuRowLabel')).map((node) => node.textContent))`).then(JSON.parse),
       ['Skills', 'Control flow', 'Fail'])
+    check('insert.focus-on-open', 'opening the menu moves focus to its first row',
+      await evaluate(page, `document.activeElement?.getAttribute('data-testid') ?? null`), 'bt-insert-row-skills')
+
+    // ---- the menu never sits under a projected card, or under the toolbar --
+    const zOrder = await evaluate(page, `JSON.stringify((() => {
+      const menu = document.querySelector('[data-testid="bt-insert-menu"]')
+      const menuRect = menu.getBoundingClientRect()
+      const skillsRow = document.querySelector('[data-testid="bt-insert-row-skills"]')
+      const rowRect = skillsRow.getBoundingClientRect()
+      const rowHit = document.elementFromPoint(rowRect.x + rowRect.width / 2, rowRect.y + rowRect.height / 2)
+      const cards = Array.from(document.querySelectorAll('[data-shape-id]'))
+      const overlapping = cards.find((card) => {
+        const rect = card.getBoundingClientRect()
+        return rect.left < menuRect.right && menuRect.left < rect.right && rect.top < menuRect.bottom && menuRect.top < rect.bottom
+      })
+      const inViewport = menuRect.left >= 0 && menuRect.top >= 0 && menuRect.right <= window.innerWidth && menuRect.bottom <= window.innerHeight
+      let aboveCard = null
+      if (overlapping) {
+        const rect = overlapping.getBoundingClientRect()
+        const px = (Math.max(rect.left, menuRect.left) + Math.min(rect.right, menuRect.right)) / 2
+        const py = (Math.max(rect.top, menuRect.top) + Math.min(rect.bottom, menuRect.bottom)) / 2
+        const hit = document.elementFromPoint(px, py)
+        aboveCard = Boolean(hit && hit.closest('[data-testid="bt-insert-menu"]'))
+      }
+      return { rowUncovered: Boolean(rowHit && rowHit.closest('[data-testid="bt-insert-row-skills"]')), hasOverlappingCard: Boolean(overlapping), aboveCard, inViewport }
+    })())`).then(JSON.parse)
+    check('insert.z-order.row', 'nothing covers the Skills row', zOrder.rowUncovered, true)
+    check('insert.z-order.above-cards', 'where a card overlaps the menu, the menu paints above it in z-order',
+      zOrder.hasOverlappingCard ? zOrder.aboveCard : 'no overlapping card to check', zOrder.hasOverlappingCard ? true : 'no overlapping card to check')
+    check('insert.in-viewport', 'the menu stays inside the viewport rather than sitting under the toolbar or off-screen', zOrder.inViewport, true)
     await shot(page, 'insert-menu.png')
+
+    await key(page, 'Tab')
+    await delay(150)
+    check('insert.tab-trapped', 'Tab cycles inside the open menu rather than escaping to the canvas',
+      await evaluate(page, `Boolean(document.activeElement?.closest('[data-testid="bt-insert-menu"]'))`), true)
+
     await clickElement(page, '[data-testid="bt-insert-row-skills"]')
     await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-insert-search"]'))`, 'the Skills page')
+    check('insert.focus-skills', 'the Skills page moves focus to its search field',
+      await evaluate(page, `document.activeElement?.getAttribute('data-testid') ?? null`), 'bt-insert-search')
     await shot(page, 'insert-menu-skills.png')
+
+    // ---- Escape steps back before it closes ---------------------------------
+    await key(page, 'Escape')
+    await delay(150)
+    check('insert.escape-back', 'Escape on a sub-page returns to the root page instead of closing',
+      await evaluate(page, `JSON.stringify({ open: Boolean(document.querySelector('[data-testid="bt-insert-menu"]')), page: document.querySelector('[data-testid="bt-insert-menu"]')?.getAttribute('data-page') ?? null })`).then(JSON.parse),
+      { open: true, page: 'root' })
+    await key(page, 'Escape')
+    await delay(150)
+    check('insert.escape-close', 'Escape on the root page closes the menu',
+      await evaluate(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`), false)
+    check('insert.focus-return', 'focus returns to the "+" that opened the menu',
+      await evaluate(page, `document.activeElement?.getAttribute('data-testid') ?? null`), 'bt-insert-end')
+
+    // ---- outside pointer-down closes without inserting ----------------------
+    const xmlBeforeOutside = await regionXml(page)
+    await clickElement(page, '[data-testid="bt-insert-end"]')
+    await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`, 'the Add-process menu to reopen')
+    // A point well clear of the menu, chosen at runtime so it never lands on
+    // the toolbar or another chrome panel rather than guessing fixed pixels.
+    const outside = await evaluate(page, `JSON.stringify((() => {
+      const candidates = [
+        { x: 40, y: window.innerHeight / 2 },
+        { x: window.innerWidth / 2, y: 40 },
+        { x: window.innerWidth - 40, y: window.innerHeight / 2 },
+      ]
+      const isChrome = (element) => Boolean(element?.closest(
+        '.tlui-layout__top, .tlui-layout__bottom, .tlui-toolbar, .systemsketch-popout, .systemsketch-top-left-shell, .systemsketch-top-right-shell, [data-testid="bt-insert-menu"]',
+      ))
+      return candidates.find((point) => !isChrome(document.elementFromPoint(point.x, point.y))) ?? candidates[0]
+    })())`).then(JSON.parse)
+    await clickAt(page, outside.x, outside.y)
+    await delay(200)
+    check('insert.outside-closes', 'a pointer-down elsewhere closes the menu without inserting anything',
+      await evaluate(page, `JSON.stringify({ open: Boolean(document.querySelector('[data-testid="bt-insert-menu"]')) })`).then(JSON.parse),
+      { open: false })
+    check('insert.outside-no-insert', 'the XML is untouched by an outside dismissal', await regionXml(page), xmlBeforeOutside)
+
+    // ---- clicking the same "+" again closes it -------------------------------
+    await clickElement(page, '[data-testid="bt-insert-end"]')
+    await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`, 'the Add-process menu to reopen')
+    await clickElement(page, '[data-testid="bt-insert-end"]')
+    await delay(200)
+    check('insert.toggle-closes', 'clicking the same "+" again closes its own menu',
+      await evaluate(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`), false)
+
+    // ---- clicking a different "+" moves the menu; only one is ever open -----
+    await clickElement(page, '[data-testid="bt-insert-end"]')
+    await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`, 'the Add-process menu to reopen')
+    const otherInsertId = await evaluate(page, `JSON.stringify((() => {
+      const buttons = Array.from(document.querySelectorAll('.BehaviorTree-insert'))
+      const other = buttons.find((button) => button.dataset.testid !== 'bt-insert-end')
+      return other?.dataset.testid ?? null
+    })())`).then(JSON.parse)
+    check('insert.other-target-exists', 'the sample process view has more than one insertion target', typeof otherInsertId, 'string')
+    if (otherInsertId) {
+      // The camera is still centred tight on `bt-insert-end` (z 0.8, to clear
+      // the toolbar for the z-order checks above) — the sample's other
+      // insert points live elsewhere in the region, so bring this one into
+      // view too before clicking its real screen coordinates.
+      await centerOnButton(page, `[data-testid="${otherInsertId}"]`)
+      // Two clicks, not one: every "+" lives on the canvas itself (below
+      // tldraw's chrome layer), and while `bt-insert-end`'s menu is open,
+      // tldraw's own `MenuClickCapture` — an invisible, full-viewport
+      // overlay it mounts whenever any menu is open, specifically to swallow
+      // canvas interaction — sits above it in z-order and intercepts this
+      // click before it ever reaches the other button (confirmed live:
+      // `document.elementFromPoint` at the other button's own screen centre
+      // returned the `.tlui-menu-click-capture` div, not the button). That
+      // first click does what a bare canvas click always does — closes the
+      // open menu — exactly like `insert.outside-closes` above. Only the
+      // second click, now that nothing covers the canvas, lands on the real
+      // trigger and opens it. Every *stock* tldraw popover trigger lives in
+      // the chrome layer instead, so this two-click reality is specific to
+      // having a trigger on the canvas, not a bug in the exclusivity logic
+      // itself (`insert.closes-on-choose` below proves that logic correctly
+      // forces a stale popover closed once it's told to).
+      await clickElement(page, `[data-testid="${otherInsertId}"]`)
+      await delay(200)
+      await clickElement(page, `[data-testid="${otherInsertId}"]`)
+      await delay(200)
+      check('insert.one-open-at-a-time', 'opening a different "+" closes the first and shows exactly one menu, at the new target',
+        await evaluate(page, `JSON.stringify({
+          menus: document.querySelectorAll('[data-testid="bt-insert-menu"]').length,
+          endPressed: document.querySelector('[data-testid="bt-insert-end"]')?.getAttribute('aria-pressed'),
+          otherPressed: document.querySelector(${JSON.stringify(`[data-testid="${otherInsertId}"]`)})?.getAttribute('aria-pressed'),
+        })`).then(JSON.parse),
+        { menus: 1, endPressed: 'false', otherPressed: 'true' })
+      // A non-persistent "+" is normally hover-only; its own open menu keeps
+      // it (and only it) visible without the pointer resting on it.
+      check('insert.active-stays-visible', 'the "+" that owns the open menu stays visible even though it is not persistent',
+        await evaluate(page, `JSON.stringify((() => {
+          const button = document.querySelector(${JSON.stringify(`[data-testid="${otherInsertId}"]`)})
+          return { persistent: button.dataset.persistent, opacity: Number(getComputedStyle(button).opacity) }
+        })())`).then(JSON.parse),
+        { persistent: 'false', opacity: 1 })
+      await key(page, 'Escape')
+      await delay(150)
+    } else {
+      await key(page, 'Escape')
+      await delay(150)
+    }
+
+    // ---- choosing a row inserts exactly one node, closes, and selects it ----
+    await centerOnButton(page, '[data-testid="bt-insert-end"]')
+    await clickElement(page, '[data-testid="bt-insert-end"]')
+    await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`, 'the Add-process menu to reopen')
+    await clickElement(page, '[data-testid="bt-insert-row-skills"]')
+    await waitFor(page, `Boolean(document.querySelector('[data-testid="bt-insert-search"]'))`, 'the Skills page')
     await clickElement(page, '[data-testid="bt-insert-row-model:MoveHome"]')
     await waitFor(page, `window.__systemsketch.editor.getShape('${REGION}').props.xml !== ${JSON.stringify(xmlBefore)}`, 'the XML to change')
+    check('insert.closes-on-choose', 'choosing a row closes the menu',
+      await evaluate(page, `Boolean(document.querySelector('[data-testid="bt-insert-menu"]'))`), false)
     const xmlAfterInsert = await regionXml(page)
     check('insert.xml', 'MoveHome is appended to the root Sequence', (xmlAfterInsert.match(/<MoveHome/g) ?? []).length - (xmlBefore.match(/<MoveHome/g) ?? []).length, 1)
     check('insert.selected', 'the new occurrence is selected',

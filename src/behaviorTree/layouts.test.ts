@@ -6,12 +6,12 @@
 import { describe, expect, it } from 'vitest'
 
 import { SAMPLE_BEHAVIOR_TREE_XML, parseBehaviorTreeXml, selectTree } from './btcppXml'
-import { type BtRect, type BtScene } from './behaviorTreeModel'
+import { BT_EDGE_STYLES, type BtPoint, type BtRect, type BtScene } from './behaviorTreeModel'
 import { analyzeDataflow } from './dataflow'
 import { layoutBlackboard } from './blackboardLayout'
 import { layoutProcess } from './processLayout'
 import { sceneToSvg } from './sceneSvg'
-import { layoutTree, TREE_SIBLING_GAP } from './treeLayout'
+import { layoutTree, treeEdgeEndpoints, TREE_SIBLING_GAP } from './treeLayout'
 
 const FLOWSTATE_XML = `<root BTCPP_format="4" main_tree_to_execute="RigidBodyAssembly">
   <BehaviorTree ID="RigidBodyAssembly">
@@ -168,6 +168,68 @@ describe('Tree layout', () => {
 		const b = scene.nodes.find((entry) => entry.path === '0.1')!.rect
 		expect(b.x - (a.x + a.w)).toBeLessThanOrEqual(TREE_SIBLING_GAP + 1)
 		preview('tree-down-unbalanced', scene)
+	})
+})
+
+describe('Tree edge styles', () => {
+	// '0.1' (Fallback) has two children, so its wires to '0.1.0' and '0.1.1'
+	// are never cross-axis-aligned — the shape assertions below would be
+	// trivially satisfied (a straight line) by a centred, aligned pair.
+	for (const orientation of ['down', 'right'] as const) {
+		const down = orientation === 'down'
+		const cross = (point: BtPoint) => (down ? point.x : point.y)
+		const flow = (point: BtPoint) => (down ? point.y : point.x)
+
+		for (const edgeStyle of BT_EDGE_STYLES) {
+			it(`draws a ${edgeStyle} wire from the parent's exit to the child's entry (${orientation})`, () => {
+				const scene = layoutTree(sample, { orientation, nodeFace: 'simple', controlFace: 'expanded', edgeStyle })
+				const parent = scene.nodes.find((entry) => entry.path === '0.1')!.rect
+				const child = scene.nodes.find((entry) => entry.path === '0.1.0')!.rect
+				const { from, to } = treeEdgeEndpoints(parent, child, orientation)
+				const edge = scene.edges.find((candidate) => candidate.from === '0.1' && candidate.to === '0.1.0')!
+
+				expect(edge.points[0]).toEqual(from)
+				expect(edge.points[edge.points.length - 1]).toEqual(to)
+
+				if (edgeStyle === 'straight') {
+					expect(edge.points).toHaveLength(2)
+					expect(edge.curve).toBeFalsy()
+				} else if (edgeStyle === 'elbow') {
+					expect(edge.points).toHaveLength(4)
+					expect(edge.curve).toBeFalsy()
+				} else if (edgeStyle === 'curved') {
+					expect(edge.points).toHaveLength(4)
+					expect(edge.curve).toBe(true)
+					const [, c1, c2] = edge.points
+					// Control points sit on the reading axis: each keeps its
+					// nearest endpoint's cross-axis position and only moves
+					// halfway along the flow axis, so the axis is never guessed.
+					expect(cross(c1)).toBeCloseTo(cross(from))
+					expect(cross(c2)).toBeCloseTo(cross(to))
+					expect(flow(c1)).toBeCloseTo((flow(from) + flow(to)) / 2)
+					expect(flow(c2)).toBeCloseTo((flow(from) + flow(to)) / 2)
+				} else {
+					expect(edgeStyle).toBe('slanted')
+					expect(edge.points).toHaveLength(3)
+					expect(edge.curve).toBeFalsy()
+					const [, stubPoint] = edge.points
+					// The stub departs straight along the reading direction from
+					// the parent's exit face — same rule as the Slanted arrow.
+					expect(cross(stubPoint)).toBeCloseTo(cross(from))
+					expect(flow(stubPoint)).toBeGreaterThan(flow(from))
+					expect(flow(stubPoint)).toBeLessThan(flow(to))
+				}
+			})
+		}
+	}
+
+	it('clamps the slanted stub so a short span (the Start pill) never overshoots the child', () => {
+		const empty = selectTree(parseBehaviorTreeXml('<root BTCPP_format="4"><BehaviorTree ID="T"><LeafOnly/></BehaviorTree><TreeNodesModel><Action ID="LeafOnly"/></TreeNodesModel></root>'), 'T')!
+		const scene = layoutTree(empty, { orientation: 'down', nodeFace: 'simple', controlFace: 'expanded', edgeStyle: 'slanted' })
+		const startEdge = scene.edges.find((edge) => edge.to === '0')!
+		// The Start→root connector is always a plain straight stub, whatever
+		// the control-wire style — only parent→child wires take the style.
+		expect(startEdge.points).toHaveLength(2)
 	})
 })
 

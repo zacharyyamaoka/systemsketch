@@ -152,8 +152,8 @@ function addTreeEdges(scene: BtScene, options: TreeLayoutOptions) {
 		const parent = byPath.get(entry.node.parentPath)
 		if (!parent) continue
 		const { from, to } = treeEdgeEndpoints(parent.rect, entry.rect, options.orientation)
-		const points = options.edgeStyle === 'elbow' ? elbowPoints(from, to, options.orientation) : [from, to]
-		scene.edges.push({ id: `${parent.path}→${entry.path}`, kind: 'control', points, arrowEnd: true, from: parent.path, to: entry.path })
+		const { points, curve } = treeEdgePoints(from, to, options.edgeStyle, options.orientation)
+		scene.edges.push({ id: `${parent.path}→${entry.path}`, kind: 'control', points, curve, arrowEnd: true, from: parent.path, to: entry.path })
 	}
 }
 
@@ -167,6 +167,51 @@ export function elbowPoints(from: BtPoint, to: BtPoint, orientation: BtOrientati
 	const midX = (from.x + to.x) / 2
 	if (Math.abs(from.y - to.y) < 0.5) return [from, to]
 	return [from, { x: midX, y: from.y }, { x: midX, y: to.y }, to]
+}
+
+/**
+ * The `curved` style: a cubic whose control points sit on the reading axis,
+ * offset from each endpoint by half the span between them — a top-to-bottom
+ * tree bends vertically, a left-to-right one bends horizontally. Explicit
+ * points (not a heuristic bend inferred from two endpoints, the way the
+ * Blackboard lens's py_trees splines work) so the axis is never guessed.
+ */
+export function curvedTreePoints(from: BtPoint, to: BtPoint, orientation: BtOrientation): BtPoint[] {
+	if (orientation === 'down') {
+		const half = (to.y - from.y) / 2
+		return [from, { x: from.x, y: from.y + half }, { x: to.x, y: to.y - half }, to]
+	}
+	const half = (to.x - from.x) / 2
+	return [from, { x: from.x + half, y: from.y }, { x: to.x - half, y: to.y }, to]
+}
+
+/**
+ * The `slanted` style: the same departure rule as the Slanted arrow
+ * (`getSlantedArrowPoints` in `systemSketchArrow.tsx`) — leave the parent's
+ * exit face straight along the reading direction for a stub, then run
+ * diagonally to the child's entry point with the ordinary arrowhead. The
+ * arrow's own stub is a fraction of its span computed from
+ * `getConnectionControlPoints`; reusing that helper here would pull the
+ * Block-cable module into this otherwise dependency-free layout, so the
+ * fallback the spec allows — a fixed `TREE_LEVEL_GAP / 2` — stands in,
+ * clamped to half the span so a short gap (the Start pill's stub) never
+ * overshoots past the child.
+ */
+export function slantedTreePoints(from: BtPoint, to: BtPoint, orientation: BtOrientation): BtPoint[] {
+	const down = orientation === 'down'
+	const span = down ? to.y - from.y : to.x - from.x
+	const stub = Math.max(0, Math.min(TREE_LEVEL_GAP / 2, span / 2))
+	const elbow = down ? { x: from.x, y: from.y + stub } : { x: from.x + stub, y: from.y }
+	return [from, elbow, to]
+}
+
+function treeEdgePoints(from: BtPoint, to: BtPoint, edgeStyle: BtEdgeStyle, orientation: BtOrientation): { points: BtPoint[]; curve?: boolean } {
+	switch (edgeStyle) {
+		case 'elbow': return { points: elbowPoints(from, to, orientation) }
+		case 'curved': return { points: curvedTreePoints(from, to, orientation), curve: true }
+		case 'slanted': return { points: slantedTreePoints(from, to, orientation) }
+		default: return { points: [from, to] }
+	}
 }
 
 function addTreeInserts(scene: BtScene, tree: BtTree, options: TreeLayoutOptions) {

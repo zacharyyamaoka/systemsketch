@@ -29,7 +29,7 @@ export const BT_NODE_FACES = ['simple', 'port'] as const
 export type BtNodeFace = (typeof BT_NODE_FACES)[number]
 export const BT_CONTROL_FACES = ['expanded', 'compact'] as const
 export type BtControlFace = (typeof BT_CONTROL_FACES)[number]
-export const BT_EDGE_STYLES = ['straight', 'elbow'] as const
+export const BT_EDGE_STYLES = ['straight', 'elbow', 'curved', 'slanted'] as const
 export type BtEdgeStyle = (typeof BT_EDGE_STYLES)[number]
 export const BT_DATA_LENSES = ['none', 'blackboard', 'dataflow'] as const
 export type BtDataLens = (typeof BT_DATA_LENSES)[number]
@@ -320,7 +320,13 @@ export interface BtSceneEdge {
 	id: string
 	kind: BtEdgeKind
 	points: BtPoint[]
-	/** Cubic curve through the points (py_trees splines) rather than a polyline. */
+	/**
+	 * Cubic curve through the points rather than a polyline. Two shapes: the
+	 * Blackboard lens's py_trees splines give the two endpoints only and let
+	 * `sceneSvg` infer a bend from the reading direction; the Tree view's
+	 * `curved` wire style is explicit about its own control points, giving
+	 * all four — p0, c1, c2, p3 — so no heuristic has to guess the axis.
+	 */
 	curve?: boolean
 	arrowEnd: boolean
 	from?: string
