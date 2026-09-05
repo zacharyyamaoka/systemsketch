@@ -4,7 +4,7 @@
     "application": "SystemSketch",
     "shapes": {
       "connection": 86,
-      "block": 40,
+      "block": 37,
       "geo": 3,
       "text": 2,
       "arrow": 2
@@ -45,7 +45,7 @@
       "com.tldraw.shape.arrow": 8,
       "com.tldraw.shape.text": 4,
       "com.tldraw.shape.line": 5,
-      "com.tldraw.shape.block": 6,
+      "com.tldraw.shape.block": 7,
       "com.tldraw.shape.branch": 0,
       "com.tldraw.shape.loop": 0,
       "com.tldraw.shape.branch-arm": 0,
@@ -102,7 +102,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a8f4Q",
+      "index": "a8SEU",
       "typeName": "shape"
     },
     {
@@ -136,7 +136,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aCaOU",
+      "index": "aCUbT",
       "typeName": "shape"
     },
     {
@@ -187,7 +187,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "oJ28DJ5NQ63SMRf5CPJti",
+        "definitionId": "wBg6ahZtSuI3xpxj9hSR-",
         "inputs": [
           {
             "id": "in_plan",
@@ -212,7 +212,7 @@
         ],
         "definitionKey": "interpolate_plan"
       },
-      "index": "aH6nr",
+      "index": "aHlPE",
       "typeName": "shape"
     },
     {
@@ -246,7 +246,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aHzA9",
+      "index": "aHRzD",
       "typeName": "shape"
     },
     {
@@ -319,7 +319,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aAjAX",
+      "index": "aAiNz",
       "typeName": "shape"
     },
     {
@@ -361,7 +361,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "a-LK0vOATbJAydNfNIrHx",
+        "definitionId": "vPK05QHNZjJIWVotzFdlc",
         "inputs": [],
         "outputs": [
           {
@@ -374,7 +374,7 @@
         "definitionKey": "RealSense_frame_buffer"
       },
       "parentId": "page:page",
-      "index": "b07YLQ",
+      "index": "aLwFLA",
       "typeName": "shape"
     },
     {
@@ -443,7 +443,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "LaqTAy-83A9tbnVdhV87N",
+        "definitionId": "j1EWIcm1CEI575oBfpTWO",
         "inputs": [
           {
             "id": "in_torque",
@@ -468,7 +468,7 @@
         ],
         "definitionKey": "saturate_torque"
       },
-      "index": "aOmPr",
+      "index": "aODfU",
       "typeName": "shape"
     },
     {
@@ -502,7 +502,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aAzPs",
+      "index": "aAxyn",
       "typeName": "shape"
     },
     {
@@ -536,7 +536,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aHikA",
+      "index": "aHJrI",
       "typeName": "shape"
     },
     {
@@ -579,7 +579,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "iZ7R9w-5mo5r0Zsz1oW0p",
+        "definitionId": "eeZVzshamdx9hARDBbv9Y",
         "inputs": [
           {
             "id": "in_rgb",
@@ -604,7 +604,7 @@
         ],
         "definitionKey": "project_scene_cloud"
       },
-      "index": "aHAov",
+      "index": "aH2ZE",
       "typeName": "shape"
     },
     {
@@ -678,7 +678,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "g38lMhIsLa8i8t4AISgFL",
+        "definitionId": "_N7lv6SQnYl1v0OJtHzkt",
         "inputs": [
           {
             "id": "in_detections",
@@ -712,7 +712,7 @@
         ],
         "definitionKey": "associate_tracks"
       },
-      "index": "aFW2j",
+      "index": "aFTI6",
       "typeName": "shape"
     },
     {
@@ -755,7 +755,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "_dfTZfoAHAVWZDFu9Uh7U",
+        "definitionId": "F2DL3FTX0qQzEsoCaxpNt",
         "inputs": [
           {
             "id": "in_trajectory",
@@ -795,61 +795,7 @@
         ],
         "definitionKey": "servo_loop_1_kHz_force_control"
       },
-      "index": "aKXiX",
-      "typeName": "shape"
-    },
-    {
-      "x": 125.99136313892444,
-      "y": 124.2733663453281,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {
-        "systemSketchDefinitionMember": {
-          "definitionId": "7c-Beu4y3O2ugN15V5j-G",
-          "memberId": "u21tyQ9nWgumfWXa8UY3Y",
-          "occurrenceId": "shape:pop_frame"
-        }
-      },
-      "id": "shape:i4CqOwQrMtBuU2uv1XIVJ",
-      "type": "block",
-      "props": {
-        "w": 193,
-        "h": 126,
-        "title": "",
-        "description": "",
-        "blockType": "",
-        "icon": "",
-        "view": "simple",
-        "views": {
-          "simple": {
-            "w": 193,
-            "h": 126
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "rzuhEf_86d8lF6TDQkZMn",
-        "inputs": [],
-        "outputs": [],
-        "definitionKey": ""
-      },
-      "index": "a1IzF",
-      "parentId": "shape:pop_frame",
+      "index": "aKUfL",
       "typeName": "shape"
     },
     {
@@ -883,7 +829,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aCvHU",
+      "index": "aCXEn",
       "typeName": "shape"
     },
     {
@@ -917,7 +863,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aIEar",
+      "index": "aIOJ6",
       "typeName": "shape"
     },
     {
@@ -951,7 +897,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aAT0n",
+      "index": "aAr7z",
       "typeName": "shape"
     },
     {
@@ -994,7 +940,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "aEdh-rJNRnxA7bbMBljBc",
+        "definitionId": "JGZ-5aJt8Ymw6FlVaBnSV",
         "inputs": [
           {
             "id": "in_plan",
@@ -1034,7 +980,7 @@
         ],
         "definitionKey": "execute_pick"
       },
-      "index": "aPeGM",
+      "index": "aPNPX",
       "typeName": "shape"
     },
     {
@@ -1077,7 +1023,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "MQJibrZUuRJLbJwMqAc59",
+        "definitionId": "MFu3QznTzr9ah7JUzgt1l",
         "inputs": [
           {
             "id": "in_depth",
@@ -1102,7 +1048,7 @@
         ],
         "definitionKey": "denoise_depth"
       },
-      "index": "aGcRr",
+      "index": "aGLbE",
       "typeName": "shape"
     },
     {
@@ -1183,7 +1129,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "b0Ottj",
+      "index": "aQNlE",
       "typeName": "shape"
     },
     {
@@ -1217,7 +1163,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aIBzF",
+      "index": "aIsKU",
       "typeName": "shape"
     },
     {
@@ -1251,7 +1197,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a6VTj",
+      "index": "a6dU9",
       "typeName": "shape"
     },
     {
@@ -1285,102 +1231,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aKj0r",
-      "typeName": "shape"
-    },
-    {
-      "x": 2113.9294548161215,
-      "y": 203.12919875265175,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:c0caXB3FmFJaQMrrYUaiV",
-      "type": "block",
-      "props": {
-        "w": 628,
-        "h": 342,
-        "title": "Persist world snapshot",
-        "description": "",
-        "blockType": "call",
-        "icon": "",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 628,
-            "h": 342
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "_Qq8k92cLa9iz9Y3InrZa",
-        "inputs": [
-          {
-            "id": "in",
-            "name": "world",
-            "type": "WorldModel",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_1",
-            "name": "",
-            "type": "",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_2",
-            "name": "",
-            "type": "",
-            "visible": true,
-            "mutates": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "effect:in",
-            "name": "world",
-            "type": "WorldModel",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          },
-          {
-            "id": "effect:in_1",
-            "name": "",
-            "type": "",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.6666666666666666
-          },
-          {
-            "id": "effect:in_2",
-            "name": "",
-            "type": "",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.75
-          }
-        ],
-        "definitionKey": "Persist_world_snapshot"
-      },
-      "parentId": "page:page",
-      "index": "b0POPb",
+      "index": "aKsob",
       "typeName": "shape"
     },
     {
@@ -1402,71 +1253,9 @@
       "typeName": "binding"
     },
     {
-      "x": 2669.892424981556,
-      "y": -31.493844267935316,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:1s25hFT5uZdU5is0FS9dA",
-      "type": "block",
-      "parentId": "page:page",
-      "props": {
-        "w": 340,
-        "h": 198,
-        "title": "",
-        "description": "",
-        "blockType": "call",
-        "icon": "SquareFunction",
-        "view": "port",
-        "views": {
-          "simple": {
-            "w": 320,
-            "h": 206
-          },
-          "port": {
-            "w": 340,
-            "h": 198
-          },
-          "expanded": {
-            "w": 560,
-            "h": 380
-          },
-          "value": {
-            "w": 168,
-            "h": 56
-          }
-        },
-        "showDescription": true,
-        "notes": "",
-        "portLayout": "inline",
-        "state": "normal",
-        "definitionId": "I3dUii8To5iyST0HBQ4hg",
-        "inputs": [
-          {
-            "id": "in_1",
-            "name": "in_1",
-            "type": "",
-            "visible": true
-          }
-        ],
-        "outputs": [
-          {
-            "id": "out_1",
-            "name": "out_1",
-            "type": "",
-            "visible": true
-          }
-        ],
-        "definitionKey": ""
-      },
-      "index": "b0QN92",
-      "typeName": "shape"
-    },
-    {
-      "x": -1907.0628665186086,
-      "y": 167.02680182022067,
-      "z": 1.2653425025514344,
+      "x": 0,
+      "y": 0,
+      "z": 1,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -1502,7 +1291,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aDgor",
+      "index": "aDNh2",
       "typeName": "shape"
     },
     {
@@ -1536,7 +1325,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a8zfo",
+      "index": "a8Ntn",
       "typeName": "shape"
     },
     {
@@ -1572,7 +1361,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "b0Is8r",
+      "index": "aMGVM",
       "typeName": "shape"
     },
     {
@@ -1615,19 +1404,12 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "7c-Beu4y3O2ugN15V5j-G",
+        "definitionId": "HITQ-BVYiNQ9paedbAZBh",
         "inputs": [
           {
             "id": "in_frames",
             "name": "frames",
             "type": "deque[RGBDFrame]",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_1",
-            "name": "",
-            "type": "",
             "visible": true,
             "mutates": true
           }
@@ -1645,20 +1427,12 @@
             "type": "deque[RGBDFrame]",
             "visible": true,
             "effect": true,
-            "edgeT": 0.5
-          },
-          {
-            "id": "effect:in_1",
-            "name": "",
-            "type": "",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.6666666666666666
+            "edgeT": 0.52
           }
         ],
         "definitionKey": "frames_popleft"
       },
-      "index": "aEvIA",
+      "index": "aE9Db",
       "typeName": "shape"
     },
     {
@@ -1692,7 +1466,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aHFc6",
+      "index": "aHNZA",
       "typeName": "shape"
     },
     {
@@ -1726,21 +1500,8 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aESDU",
+      "index": "aEXMv",
       "typeName": "shape"
-    },
-    {
-      "meta": {},
-      "id": "binding:7LDlEHP4vvRzQTy9x8TWm",
-      "type": "connection",
-      "fromId": "shape:mA7MLm0-Jy2zfb0JuKz7w",
-      "toId": "shape:c0caXB3FmFJaQMrrYUaiV",
-      "props": {
-        "portId": "effect:in_2",
-        "terminal": "start",
-        "face": "outer"
-      },
-      "typeName": "binding"
     },
     {
       "x": 0,
@@ -1773,7 +1534,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aGy02",
+      "index": "aGZKr",
       "typeName": "shape"
     },
     {
@@ -1807,7 +1568,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a5GEX",
+      "index": "a5wTU",
       "typeName": "shape"
     },
     {
@@ -1841,7 +1602,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a6eEv",
+      "index": "a6grj",
       "typeName": "shape"
     },
     {
@@ -1875,7 +1636,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a8h22",
+      "index": "a8Bc6",
       "typeName": "shape"
     },
     {
@@ -1909,7 +1670,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a9ldM",
+      "index": "a9uzL",
       "typeName": "shape"
     },
     {
@@ -1943,7 +1704,41 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aB0sE",
+      "index": "aBtoM",
+      "typeName": "shape"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "opacity": 1,
+      "meta": {},
+      "id": "shape:acquire_frames_effect",
+      "type": "connection",
+      "parentId": "shape:acquire_scene",
+      "props": {
+        "start": {
+          "x": 0,
+          "y": 0
+        },
+        "end": {
+          "x": 100,
+          "y": 0
+        },
+        "routing": "elbow",
+        "curve": null,
+        "pins": [],
+        "elbowRoute": null,
+        "routeMode": "automatic",
+        "temporal": "data",
+        "delayValue": "",
+        "pillPosition": 0.4,
+        "tunnel": false,
+        "tunnelLayer": "",
+        "state": "normal"
+      },
+      "index": "aDRhQ",
       "typeName": "shape"
     },
     {
@@ -1977,7 +1772,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a586A",
+      "index": "a57tE",
       "typeName": "shape"
     },
     {
@@ -2011,7 +1806,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aLq22",
+      "index": "aLvKv",
       "typeName": "shape"
     },
     {
@@ -2055,7 +1850,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "b0NNmM",
+      "index": "aPtQbl",
       "typeName": "shape"
     },
     {
@@ -2089,7 +1884,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aKIDn",
+      "index": "aKMtU",
       "typeName": "shape"
     },
     {
@@ -2123,7 +1918,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aCH02",
+      "index": "aCDk2",
       "typeName": "shape"
     },
     {
@@ -2166,7 +1961,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "juvDdIfTOraD93lAYowI3",
+        "definitionId": "91FoEOY9WAHjrUNsCxx0I",
         "inputs": [
           {
             "id": "in_q",
@@ -2203,7 +1998,7 @@
         ],
         "definitionKey": "sample_servo_trace"
       },
-      "index": "aP5jf",
+      "index": "aP3Db",
       "typeName": "shape"
     },
     {
@@ -2237,7 +2032,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a6HS6",
+      "index": "a6XRz",
       "typeName": "shape"
     },
     {
@@ -2271,7 +2066,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aGVuv",
+      "index": "aGI3U",
       "typeName": "shape"
     },
     {
@@ -2305,7 +2100,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aCeab",
+      "index": "aC89f",
       "typeName": "shape"
     },
     {
@@ -2339,7 +2134,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aBnMU",
+      "index": "aBuWv",
       "typeName": "shape"
     },
     {
@@ -2373,7 +2168,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a7WQv",
+      "index": "a7Rv6",
       "typeName": "shape"
     },
     {
@@ -2407,7 +2202,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a6f2r",
+      "index": "a6ksz",
       "typeName": "shape"
     },
     {
@@ -2441,7 +2236,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aGK4Q",
+      "index": "aGrkz",
       "typeName": "shape"
     },
     {
@@ -2477,7 +2272,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "b0JZV2",
+      "index": "aNYwE",
       "typeName": "shape"
     },
     {
@@ -2519,7 +2314,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "eUCMInlH29xj54GyWAZcU",
+        "definitionId": "SenjFTWmTIZBwtbmUbQTo",
         "inputs": [],
         "outputs": [
           {
@@ -2532,7 +2327,7 @@
         "definitionKey": "Sorter_configuration"
       },
       "parentId": "page:page",
-      "index": "b0BOfv",
+      "index": "aLywL5",
       "typeName": "shape"
     },
     {
@@ -2566,7 +2361,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a8hGE",
+      "index": "a8HrM",
       "typeName": "shape"
     },
     {
@@ -2609,7 +2404,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "ByEyE5gmbDwLa1y5kIPHK",
+        "definitionId": "TtkdHF-8XhLw2jIVmK4l8",
         "inputs": [
           {
             "id": "in_frames",
@@ -2643,16 +2438,14 @@
         ],
         "definitionKey": "acquire_scene"
       },
-      "index": "aM9kn",
+      "index": "aMfX6",
       "typeName": "shape"
     },
     {
       "editingShapeId": null,
       "croppingShapeId": null,
-      "selectedShapeIds": [
-        "shape:c0caXB3FmFJaQMrrYUaiV"
-      ],
-      "hoveredShapeId": "shape:c0caXB3FmFJaQMrrYUaiV",
+      "selectedShapeIds": [],
+      "hoveredShapeId": null,
       "erasingShapeIds": [],
       "hintingShapeIds": [],
       "focusedGroupId": null,
@@ -2701,7 +2494,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "MXnzIAJDPrhxLByywGzih",
+        "definitionId": "DztaKjzjNPCaYCT2iALif",
         "inputs": [
           {
             "id": "in_plan",
@@ -2726,7 +2519,7 @@
         ],
         "definitionKey": "close_gripper"
       },
-      "index": "aIwWX",
+      "index": "aIf7I",
       "typeName": "shape"
     },
     {
@@ -2760,7 +2553,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aBdwv",
+      "index": "aBi8X",
       "typeName": "shape"
     },
     {
@@ -2803,7 +2596,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "cyQgVDq5L7c0hSguWID43",
+        "definitionId": "jKcTfczGW7FSlg5TiSR37",
         "inputs": [
           {
             "id": "in_tracks",
@@ -2828,7 +2621,7 @@
         ],
         "definitionKey": "label_material"
       },
-      "index": "aHUai",
+      "index": "aHzUKV",
       "typeName": "shape"
     },
     {
@@ -2862,7 +2655,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a8VkU",
+      "index": "a8QMX",
       "typeName": "shape"
     },
     {
@@ -2896,7 +2689,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a9moM",
+      "index": "a9tmI",
       "typeName": "shape"
     },
     {
@@ -2930,7 +2723,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a6WFE",
+      "index": "a6nUe",
       "typeName": "shape"
     },
     {
@@ -2972,7 +2765,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "b7YW2Hj6ML5R-sLPepim5",
+        "definitionId": "OTzvMHQQN_4NYB9wcbK0I",
         "inputs": [],
         "outputs": [
           {
@@ -2985,7 +2778,7 @@
         "definitionKey": "Pick_queue"
       },
       "parentId": "page:page",
-      "index": "b0AfmQ",
+      "index": "aLyDJY",
       "typeName": "shape"
     },
     {
@@ -3037,7 +2830,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aEiqX",
+      "index": "aEyXr",
       "typeName": "shape"
     },
     {
@@ -3071,7 +2864,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a9D9I",
+      "index": "a9J9Q",
       "typeName": "shape"
     },
     {
@@ -3105,7 +2898,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aFbUw",
+      "index": "aFSkb",
       "typeName": "shape"
     },
     {
@@ -3150,7 +2943,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "b0MNYv",
+      "index": "aPjtb",
       "typeName": "shape"
     },
     {
@@ -3184,7 +2977,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aDIYn",
+      "index": "aD2Rn",
       "typeName": "shape"
     },
     {
@@ -3227,7 +3020,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "QzWEUvJi02nN5U1jSri37",
+        "definitionId": "vVx_jodzZqCgGJ9jhEV-4",
         "inputs": [
           {
             "id": "in_queue",
@@ -3255,7 +3048,7 @@
         ],
         "definitionKey": "queue_append"
       },
-      "index": "aNtGX",
+      "index": "aN5Bb",
       "typeName": "shape"
     },
     {
@@ -3289,7 +3082,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a9ZOU",
+      "index": "a9QaI",
       "typeName": "shape"
     },
     {
@@ -3323,7 +3116,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aBraQ",
+      "index": "aBWpb",
       "typeName": "shape"
     },
     {
@@ -3365,7 +3158,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "cn9Z-4t6iE4rbTHnWs8az",
+        "definitionId": "ehaijvGlo1Xr3h1WCS563",
         "inputs": [
           {
             "id": "in_report",
@@ -3378,7 +3171,7 @@
         "definitionKey": "Operations_dashboard"
       },
       "parentId": "page:page",
-      "index": "b0H1jE",
+      "index": "aMAYkS",
       "typeName": "shape"
     },
     {
@@ -3412,7 +3205,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aF0pX",
+      "index": "aFUlB",
       "typeName": "shape"
     },
     {
@@ -3455,7 +3248,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "Zoq1k7NJcWP8PGhBC2pn4",
+        "definitionId": "ZogM5r0IjsvxucLAlgSww",
         "inputs": [
           {
             "id": "in_grip",
@@ -3486,7 +3279,7 @@
         ],
         "definitionKey": "verify_pick"
       },
-      "index": "aJaDf",
+      "index": "aJKDX",
       "typeName": "shape"
     },
     {
@@ -3520,7 +3313,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a5XmI",
+      "index": "a5i3X",
       "typeName": "shape"
     },
     {
@@ -3562,60 +3355,20 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "_Qq8k92cLa9iz9Y3InrZa",
+        "definitionId": "oht6wtmYJd6dWq1UzzXWw",
         "inputs": [
           {
             "id": "in",
             "name": "world",
             "type": "WorldModel",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_1",
-            "name": "",
-            "type": "",
-            "visible": true,
-            "mutates": true
-          },
-          {
-            "id": "in_2",
-            "name": "",
-            "type": "",
-            "visible": true,
-            "mutates": true
+            "visible": true
           }
         ],
-        "outputs": [
-          {
-            "id": "effect:in",
-            "name": "world",
-            "type": "WorldModel",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.5
-          },
-          {
-            "id": "effect:in_1",
-            "name": "",
-            "type": "",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.6666666666666666
-          },
-          {
-            "id": "effect:in_2",
-            "name": "",
-            "type": "",
-            "visible": true,
-            "effect": true,
-            "edgeT": 0.75
-          }
-        ],
+        "outputs": [],
         "definitionKey": "Persist_world_snapshot"
       },
       "parentId": "page:page",
-      "index": "b0ESoQ",
+      "index": "aM3zgf",
       "typeName": "shape"
     },
     {
@@ -3649,7 +3402,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aDzYq",
+      "index": "aDpMv",
       "typeName": "shape"
     },
     {
@@ -3692,7 +3445,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "-2k9f3uw8zWZqWGeOL7el",
+        "definitionId": "55UoCND-UNk0kFoJqqCC3",
         "inputs": [
           {
             "id": "in_pick",
@@ -3717,7 +3470,7 @@
         ],
         "definitionKey": "compose_pick_plan"
       },
-      "index": "aOtrr",
+      "index": "aONUo",
       "typeName": "shape"
     },
     {
@@ -3760,7 +3513,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "_Y5sEbl28LOwtvVAffOcB",
+        "definitionId": "TU3vod7Ay0MHMg2IoI66l",
         "inputs": [
           {
             "id": "in_scene",
@@ -3785,7 +3538,7 @@
         ],
         "definitionKey": "segment_waste"
       },
-      "index": "aEPDz",
+      "index": "aEuaU",
       "typeName": "shape"
     },
     {
@@ -3828,7 +3581,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "7k6FFKbGFnWmugFUKGypT",
+        "definitionId": "H3gdhvaP2nKjjgXiRDH2t",
         "inputs": [
           {
             "id": "in_rgbd",
@@ -3859,7 +3612,7 @@
         ],
         "definitionKey": "decode_rgbd"
       },
-      "index": "aFgw6",
+      "index": "aFzly",
       "typeName": "shape"
     },
     {
@@ -3893,7 +3646,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aH0KX",
+      "index": "aHEqU",
       "typeName": "shape"
     },
     {
@@ -3927,7 +3680,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aE40b",
+      "index": "aEUMH",
       "typeName": "shape"
     },
     {
@@ -3974,7 +3727,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aJYVz",
+      "index": "aJlJr",
       "typeName": "shape"
     },
     {
@@ -4008,7 +3761,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aBAVU",
+      "index": "aBFM6",
       "typeName": "shape"
     },
     {
@@ -4068,7 +3821,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aI4vM",
+      "index": "aIu42",
       "typeName": "shape"
     },
     {
@@ -4115,7 +3868,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aKZlU",
+      "index": "aK1Qr",
       "typeName": "shape"
     },
     {
@@ -4162,7 +3915,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a9oeI",
+      "index": "a9FFE",
       "typeName": "shape"
     },
     {
@@ -4235,7 +3988,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aAzf9",
+      "index": "aAk4A",
       "typeName": "shape"
     },
     {
@@ -4282,7 +4035,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aG86f",
+      "index": "aGycr",
       "typeName": "shape"
     },
     {
@@ -4381,7 +4134,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aEkLM",
+      "index": "aEM7M",
       "typeName": "shape"
     },
     {
@@ -4428,7 +4181,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a7zre",
+      "index": "a7lUq",
       "typeName": "shape"
     },
     {
@@ -4501,7 +4254,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aD08n",
+      "index": "aDhp6",
       "typeName": "shape"
     },
     {
@@ -4583,7 +4336,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "tStG6prEqaGLF0QIvWh4X",
+        "definitionId": "8h_Gic3XrHBEcpUWvD3Tc",
         "inputs": [
           {
             "id": "in_robot",
@@ -4617,7 +4370,7 @@
         ],
         "definitionKey": "apply_torque"
       },
-      "index": "aNdsU",
+      "index": "aNrev",
       "typeName": "shape"
     },
     {
@@ -4725,14 +4478,6 @@
       "typeName": "binding"
     },
     {
-      "name": "",
-      "color": "#9D5BD2",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:pWHkmGGQjxdeU1Km01d3o",
-      "typeName": "user"
-    },
-    {
       "meta": {},
       "id": "binding:connection-164",
       "type": "connection",
@@ -4776,16 +4521,8 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aJ47b",
+      "index": "aJXzN",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#11B3A3",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:DcsJP2_qWdz9cd7F1QyF7",
-      "typeName": "user"
     },
     {
       "meta": {},
@@ -4840,7 +4577,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "WdKUUizV8f8SRng-3Toic",
+        "definitionId": "qLFAkqyGk9xIgz9pO3WWy",
         "inputs": [
           {
             "id": "in_scene",
@@ -4880,8 +4617,21 @@
         ],
         "definitionKey": "update_world_model"
       },
-      "index": "aNXAA",
+      "index": "aNM0E",
       "typeName": "shape"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-61",
+      "type": "connection",
+      "fromId": "shape:acquire_frames_effect",
+      "toId": "shape:pop_frame",
+      "props": {
+        "portId": "effect:in_frames",
+        "terminal": "start",
+        "face": "outer"
+      },
+      "typeName": "binding"
     },
     {
       "meta": {},
@@ -5001,40 +4751,6 @@
       "typeName": "binding"
     },
     {
-      "x": 2503.9294548161215,
-      "y": 203.12919875265175,
-      "rotation": 0,
-      "isLocked": false,
-      "opacity": 1,
-      "meta": {},
-      "id": "shape:mA7MLm0-Jy2zfb0JuKz7w",
-      "type": "connection",
-      "props": {
-        "start": {
-          "x": 0,
-          "y": 0
-        },
-        "end": {
-          "x": 165.9629701654344,
-          "y": -156.62304302058706
-        },
-        "routing": "elbow",
-        "curve": null,
-        "pins": [],
-        "elbowRoute": null,
-        "routeMode": "automatic",
-        "temporal": "data",
-        "delayValue": "",
-        "pillPosition": 0.5,
-        "tunnel": false,
-        "tunnelLayer": "",
-        "state": "normal"
-      },
-      "parentId": "page:page",
-      "index": "b06pbr",
-      "typeName": "shape"
-    },
-    {
       "x": 100,
       "y": 2100,
       "rotation": 0,
@@ -5073,7 +4789,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "OJbktH754F0I4ndxfpouP",
+        "definitionId": "_zKNqSfPmFr5m2w4Y7tSf",
         "inputs": [],
         "outputs": [
           {
@@ -5086,7 +4802,7 @@
         "definitionKey": "UR5e_state_stream"
       },
       "parentId": "page:page",
-      "index": "b09RE2",
+      "index": "aLxy83",
       "typeName": "shape"
     },
     {
@@ -5120,7 +4836,7 @@
         "state": "normal"
       },
       "parentId": "page:page",
-      "index": "aJHXr",
+      "index": "aJ2DU",
       "typeName": "shape"
     },
     {
@@ -5154,7 +4870,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aDI1I",
+      "index": "aDr7f",
       "typeName": "shape"
     },
     {
@@ -5180,6 +4896,19 @@
         "portId": "out_rgbd",
         "terminal": "start",
         "face": "outer"
+      },
+      "typeName": "binding"
+    },
+    {
+      "meta": {},
+      "id": "binding:connection-62",
+      "type": "connection",
+      "fromId": "shape:acquire_frames_effect",
+      "toId": "shape:acquire_scene",
+      "props": {
+        "portId": "effect:in_frames",
+        "terminal": "end",
+        "face": "inner"
       },
       "typeName": "binding"
     },
@@ -5344,7 +5073,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aDNEz",
+      "index": "aDmu6",
       "typeName": "shape"
     },
     {
@@ -5378,7 +5107,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aFpX6",
+      "index": "aFn1n",
       "typeName": "shape"
     },
     {
@@ -5460,6 +5189,14 @@
       "typeName": "binding"
     },
     {
+      "name": "",
+      "color": "#FF802B",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:VCZ_wE1bB1UmPBr0Hc7zl",
+      "typeName": "user"
+    },
+    {
       "meta": {},
       "id": "binding:connection-86",
       "type": "connection",
@@ -5516,7 +5253,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aAzzaV",
+      "index": "aAPjb",
       "typeName": "shape"
     },
     {
@@ -5550,7 +5287,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aLwPr",
+      "index": "aLnjI",
       "typeName": "shape"
     },
     {
@@ -5649,7 +5386,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aFDk6",
+      "index": "aFLHz",
       "typeName": "shape"
     },
     {
@@ -5709,7 +5446,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a5MK2",
+      "index": "a5NrA",
       "typeName": "shape"
     },
     {
@@ -5743,7 +5480,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aIkt6",
+      "index": "aI1UL",
       "typeName": "shape"
     },
     {
@@ -5812,8 +5549,8 @@
       "typeName": "binding"
     },
     {
-      "x": 1179.981420554708,
-      "y": 628.7383721208296,
+      "x": 1150,
+      "y": 610,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -5850,7 +5587,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "J9fBuRobwBtzASgfyTy3F",
+        "definitionId": "i3Tu_VMurDRIS1Rd7kJfp",
         "inputs": [
           {
             "id": "in",
@@ -5863,7 +5600,7 @@
         "definitionKey": "Camera_backlog_metrics"
       },
       "parentId": "page:page",
-      "index": "b0DN1E",
+      "index": "aM1LvC",
       "typeName": "shape"
     },
     {
@@ -6040,7 +5777,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aCe4A",
+      "index": "aC9u6",
       "typeName": "shape"
     },
     {
@@ -6083,7 +5820,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "2VFit9EF2YF0wPCA_EYMA",
+        "definitionId": "E-wxP9X-VLI2lyapvCmhz",
         "inputs": [
           {
             "id": "in_robot",
@@ -6108,7 +5845,7 @@
         ],
         "definitionKey": "read_joint_state"
       },
-      "index": "aLoOU",
+      "index": "aLUOUV",
       "typeName": "shape"
     },
     {
@@ -6142,7 +5879,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a8JjX",
+      "index": "a8VDX",
       "typeName": "shape"
     },
     {
@@ -6411,7 +6148,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aAtrU",
+      "index": "aAjTQ",
       "typeName": "shape"
     },
     {
@@ -6445,7 +6182,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a7LyE",
+      "index": "a7cr6",
       "typeName": "shape"
     },
     {
@@ -6479,7 +6216,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a7o8Q",
+      "index": "a7ATb",
       "typeName": "shape"
     },
     {
@@ -6502,8 +6239,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 2135.45458984375,
-        "h": 1481.818115234375
+        "w": 2400,
+        "h": 1500
       },
       "insets": [
         false,
@@ -6518,9 +6255,9 @@
       "isChatting": false,
       "highlightedUserIds": [],
       "isFocused": true,
-      "devicePixelRatio": 1.100000023841858,
+      "devicePixelRatio": 1,
       "isCoarsePointer": false,
-      "isHoveringCanvas": true,
+      "isHoveringCanvas": null,
       "openMenus": [],
       "isChangingStyle": false,
       "isReadonly": false,
@@ -6692,7 +6429,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aFt96",
+      "index": "aF4cf",
       "typeName": "shape"
     },
     {
@@ -6739,7 +6476,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aELuz",
+      "index": "aEvEE",
       "typeName": "shape"
     },
     {
@@ -6833,7 +6570,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "waqorb6B-luT2W9ISwOrq",
+        "definitionId": "TdvaMLl8fL6hyLN0PbI3s",
         "inputs": [
           {
             "id": "in",
@@ -6846,7 +6583,7 @@
         "definitionKey": "Robot_state_watchdog"
       },
       "parentId": "page:page",
-      "index": "b0FRf6",
+      "index": "aM5Jj8",
       "typeName": "shape"
     },
     {
@@ -6890,7 +6627,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "b0LAJz",
+      "index": "aOsX2V",
       "typeName": "shape"
     },
     {
@@ -6951,7 +6688,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "EcwzNQFFiSNYMGEshBwDn",
+        "definitionId": "y5hL4ZyckdEgtTxpIVoo4",
         "inputs": [
           {
             "id": "in_tracks",
@@ -6970,16 +6707,8 @@
         ],
         "definitionKey": "estimate_velocity"
       },
-      "index": "aGhJU",
+      "index": "aGHyM",
       "typeName": "shape"
-    },
-    {
-      "name": "",
-      "color": "#F2555A",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:tbq663JBK--wm1hbpb_5d",
-      "typeName": "user"
     },
     {
       "meta": {},
@@ -7059,7 +6788,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "fRVRnL0nwSNoSk_9QkcCk",
+        "definitionId": "aMJOw4DSydRwPxCzzxcEt",
         "inputs": [],
         "outputs": [
           {
@@ -7072,7 +6801,7 @@
         "definitionKey": "World_model_store"
       },
       "parentId": "page:page",
-      "index": "b08JiM",
+      "index": "aLxKcw",
       "typeName": "shape"
     },
     {
@@ -7128,7 +6857,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "1qsrhQxTNT3IGBv1Vztjf",
+        "definitionId": "PzZMJCY0RlmnofbUI6Ld1",
         "inputs": [
           {
             "id": "in_feasible",
@@ -7153,7 +6882,7 @@
         ],
         "definitionKey": "rank_pick"
       },
-      "index": "aMswn",
+      "index": "aMCBE",
       "typeName": "shape"
     },
     {
@@ -7313,7 +7042,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "PLEJlxtWipqltkSA6hVu8",
+        "definitionId": "gR7VLchBapBpyV-D0vGez",
         "inputs": [
           {
             "id": "in_tracks",
@@ -7344,7 +7073,7 @@
         ],
         "definitionKey": "sample_grasps"
       },
-      "index": "aKFPv",
+      "index": "aKxsf",
       "typeName": "shape"
     },
     {
@@ -7378,21 +7107,8 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a6Egb",
+      "index": "a65sX",
       "typeName": "shape"
-    },
-    {
-      "meta": {},
-      "id": "binding:aJIiCwnwCamxfn2YNc_in",
-      "type": "connection",
-      "fromId": "shape:mA7MLm0-Jy2zfb0JuKz7w",
-      "toId": "shape:1s25hFT5uZdU5is0FS9dA",
-      "props": {
-        "portId": "in_1",
-        "terminal": "end",
-        "face": "outer"
-      },
-      "typeName": "binding"
     },
     {
       "x": 0,
@@ -7425,7 +7141,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aG34b",
+      "index": "aGZ3U",
       "typeName": "shape"
     },
     {
@@ -7459,7 +7175,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aJ6fn",
+      "index": "aJXP2",
       "typeName": "shape"
     },
     {
@@ -7493,7 +7209,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a7uV6",
+      "index": "a7qyA",
       "typeName": "shape"
     },
     {
@@ -7536,7 +7252,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "7SHrTd0m5xrwlI3m8C1Ew",
+        "definitionId": "e5vUywE4L_zLk_A1nx7b8",
         "inputs": [
           {
             "id": "in_trajectory",
@@ -7573,7 +7289,7 @@
         ],
         "definitionKey": "inverse_dynamics"
       },
-      "index": "aMVzB",
+      "index": "aMGub",
       "typeName": "shape"
     },
     {
@@ -7654,7 +7370,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "I0CHxnJ7k6kQfdeSCaJ8g",
+        "definitionId": "kwvFqabyXJYK4MG_gaf7E",
         "inputs": [
           {
             "id": "in",
@@ -7667,7 +7383,7 @@
         "definitionKey": "Queue_depth_metrics"
       },
       "parentId": "page:page",
-      "index": "b0Giwf",
+      "index": "aM8qnh",
       "typeName": "shape"
     },
     {
@@ -7818,7 +7534,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aCSSQ",
+      "index": "aCIeX",
       "typeName": "shape"
     },
     {
@@ -7904,7 +7620,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aB6eM",
+      "index": "aBnE6",
       "typeName": "shape"
     },
     {
@@ -8024,7 +7740,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "Rb0FHANlF3Z7Q-KZaItI8",
+        "definitionId": "RwHL9U0kniSWVaVuBAguI",
         "inputs": [
           {
             "id": "in_frames",
@@ -8104,7 +7820,7 @@
         "definitionKey": "sort_cycle_one_robotic_waste_sorting_cycle"
       },
       "parentId": "page:page",
-      "index": "b0CHFX",
+      "index": "aLzp9X",
       "typeName": "shape"
     },
     {
@@ -8138,7 +7854,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a730Q",
+      "index": "a7lSI",
       "typeName": "shape"
     },
     {
@@ -8181,7 +7897,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "vSES31bH9B_5ET4Wtixjv",
+        "definitionId": "D_ANmJAEKn7eVLI3OMKsk",
         "inputs": [
           {
             "id": "in_tracks",
@@ -8227,7 +7943,7 @@
         ],
         "definitionKey": "plan_pick"
       },
-      "index": "aOhq6",
+      "index": "aOcsn",
       "typeName": "shape"
     },
     {
@@ -8348,7 +8064,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "S9BdOuVheAAKpC8TymRfT",
+        "definitionId": "vaBBA_lTMp66DXMi0fcV7",
         "inputs": [
           {
             "id": "in_candidates",
@@ -8379,7 +8095,7 @@
         ],
         "definitionKey": "collision_filter"
       },
-      "index": "aL7u2",
+      "index": "aLdKn",
       "typeName": "shape"
     },
     {
@@ -8450,7 +8166,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "b0K452",
+      "index": "aOiHz",
       "typeName": "shape"
     },
     {
@@ -8484,7 +8200,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "aCeFr",
+      "index": "aCZHE",
       "typeName": "shape"
     },
     {
@@ -8518,7 +8234,7 @@
         "tunnelLayer": "",
         "state": "normal"
       },
-      "index": "a91vr",
+      "index": "a9RQI",
       "typeName": "shape"
     },
     {
