@@ -47,6 +47,7 @@
     "test:bt-detach": "node tests/behavior_tree_detach_smoke.mjs",
     "test:bt-identity": "node tests/behavior_tree_identity_smoke.mjs",
     "test:bt-library": "node tests/behavior_tree_library_smoke.mjs",
+    "test:bt-export": "node tests/behavior_tree_export_smoke.mjs",
     "plugin:build": "npm --prefix vscode-systemsketch run build",
     "plugin:package": "npm --prefix vscode-systemsketch run package",
     "plugin:test": "npm --prefix vscode-systemsketch test",
