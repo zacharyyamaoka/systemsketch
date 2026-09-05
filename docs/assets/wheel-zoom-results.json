@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-09-05T06:26:55.500Z",
+  "ranAt": "2026-09-05T06:36:41.844Z",
   "before": {
     "camera": {
       "x": 0,
@@ -28,7 +28,7 @@
   },
   "checks": [
     "the mounted stock camera declares plain-wheel zoom behavior",
-    "a stale Trackpad preference cannot override wheel zoom after reload",
+    "a stale Trackpad preference cannot override wheel zoom after remount",
     "an unmodified vertical wheel gesture changes zoom (1.00 → 1.10)",
     "the visible zoom readout follows the gesture (100% → 110%)",
     "the wheel journey emits no local console errors"

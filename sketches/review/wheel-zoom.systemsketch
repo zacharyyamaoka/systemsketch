@@ -96,7 +96,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3q81G",
+      "index": "a3yyLd",
       "typeName": "shape"
     },
     {
@@ -106,14 +106,6 @@
       "meta": {},
       "id": "pointer:pointer",
       "typeName": "pointer"
-    },
-    {
-      "name": "",
-      "color": "#FF802B",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:y8YqzYK6_7GzgUGcMSCfN",
-      "typeName": "user"
     },
     {
       "x": 30,
@@ -157,7 +149,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a2wfE",
+      "index": "a2HE6",
       "typeName": "shape"
     },
     {
@@ -202,7 +194,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4pUm",
+      "index": "a4frb",
       "typeName": "shape"
     },
     {
@@ -247,13 +239,13 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3bzzV",
+      "index": "a3r1I",
       "typeName": "shape"
     },
     {
-      "x": 39.44444444444444,
-      "y": -19.374999999999986,
-      "z": 0.9216,
+      "x": 0,
+      "y": 0,
+      "z": 1,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -293,6 +285,14 @@
         "terminal": "end"
       },
       "typeName": "binding"
+    },
+    {
+      "name": "",
+      "color": "#55B467",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:M_Ee5fLtlEgNGri-SmLoP",
+      "typeName": "user"
     },
     {
       "editingShapeId": null,
@@ -382,7 +382,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "oHMs6_2ochnuWyrA5bMkA",
+        "definitionId": "hLWSK8Uz09G9MRQpJT_6y",
         "inputs": [
           {
             "id": "in_1",
@@ -402,7 +402,7 @@
         "definitionKey": "wheel_target"
       },
       "parentId": "page:page",
-      "index": "a1Sz3",
+      "index": "a1RWE",
       "typeName": "shape"
     },
     {
@@ -509,7 +509,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a2zDX4",
+      "index": "a2sAk",
       "typeName": "shape"
     }
   ]

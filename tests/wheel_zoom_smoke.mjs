@@ -61,8 +61,12 @@ async function main() {
     // prove a fresh SystemSketch mount takes the wheel contract back.
     process.stdout.write('  SETUP reproducing stale Trackpad mode\n')
     await evaluate(app.page, `window.__systemsketch.editor.user.updateUserPreferences({ inputMode: 'trackpad' })`)
-    process.stdout.write('  SETUP reloading scratch board\n')
-    await app.page.send('Page.reload', { ignoreCache: true })
+    process.stdout.write('  SETUP remounting scratch board\n')
+    await openApp(
+      app.page,
+      app.port,
+      `?board=${encodeURIComponent(board)}&wheelProof=remount`,
+    )
     await waitFor(
       app.page,
       `window.__systemsketch?.editor?.user.getUserPreferences().inputMode === 'mouse'`,
@@ -74,7 +78,7 @@ async function main() {
     assert.equal(before.wheelBehavior, 'zoom')
     pass('the mounted stock camera declares plain-wheel zoom behavior')
     assert.equal(before.inputMode, 'mouse')
-    pass('a stale Trackpad preference cannot override wheel zoom after reload')
+    pass('a stale Trackpad preference cannot override wheel zoom after remount')
     await screenshot(app.page, BEFORE)
 
     await app.page.send('Input.dispatchMouseEvent', {
