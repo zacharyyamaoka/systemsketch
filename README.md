@@ -6,7 +6,9 @@ The [recursive Definition load-recovery gallery](docs/recursive-definition-load-
 
 The [wheel-zoom restoration gallery](docs/wheel-zoom-restoration-2026-09-04.html) records the reverted board navigation: an ordinary vertical wheel gesture changes scale around the pointer instead of panning vertically, even after a stale Trackpad preference is restored. Scroll down zooms in by default; Appearance can flip the direction and tune tldraw’s standard 100% wheel sensitivity from 50–150% without changing the −/+ buttons. Its guided [`wheel-zoom.systemsketch`](sketches/review/wheel-zoom.systemsketch) board is ready for direct review.
 
-The [stock-settled Block auto-fit repair gallery](docs/block-autofit-stock-settle-2026-09-05.html) traces the runaway drag feedback loop from the supplied recordings and demonstrates the repaired boundary: stock translation owns the held gesture, then one public tldraw fit-to-content operation runs on release.
+The [continuous Block auto-fit gallery](docs/block-autofit-continuous-2026-09-05.html) shows the supported-seam design: a derived, group-like Block surface follows children during every held pointer sample, then one public tldraw fit-to-content operation persists that exact box on release. It also demonstrates the right-corner fold composition, where type joins the title at left.
+
+The earlier [stock-settled Block auto-fit repair gallery](docs/block-autofit-stock-settle-2026-09-05.html) traces the original runaway drag feedback loop from the supplied recordings and the stable one-shot boundary this continuous presentation builds upon.
 
 The [Figma-style history implementation gallery](docs/history-figma-implementation-2026-09-04.html) records the selected history direction now on `main`: one truthful shared revision language for Compare and the Block inspector, a top-right Compare entry, and a state-preserving right/bottom dock for Properties and Code. Its guided [`history-figma.systemsketch`](sketches/review/history-figma.systemsketch) fixture is ready to review.
 

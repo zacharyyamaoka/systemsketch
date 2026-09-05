@@ -30,6 +30,13 @@ async function foldPosition(page, id) {
 	return { face, fold }
 }
 
+async function identityPosition(page, id) {
+	return {
+		title: await box(page, `${scope(id)} .BlockNode-headingTitle`),
+		type: await box(page, `${scope(id)} .BlockNode-headingType`),
+	}
+}
+
 async function main() {
 	const app = await startApp({ label: 'block-fold-control-side', build: 'block-fold-control-side-fixture-smoke', width: 1500, height: 930 })
 	const { page, port, filesRoot } = app
@@ -52,7 +59,11 @@ async function main() {
 			'right fold side persistence')
 		const right = await foldPosition(page, SUBJECT)
 		assert.ok(right.face.x + right.face.width - right.fold.cx < 28)
-		pass('the inspector moves the same fold control to the right corner')
+		const rightIdentity = await identityPosition(page, SUBJECT)
+		const titleToTypeGap = rightIdentity.type.x - (rightIdentity.title.x + rightIdentity.title.width)
+		assert.ok(titleToTypeGap >= 0 && titleToTypeGap <= 12,
+			`right-side type follows the title (gap ${titleToTypeGap})`)
+		pass('the inspector moves the fold control right and places type beside the left-side title')
 
 		const reference = await foldPosition(page, REFERENCE)
 		assert.ok(reference.face.x + reference.face.width - reference.fold.cx < 28)

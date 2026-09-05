@@ -29,7 +29,7 @@
       "y": 555,
       "props": {
         "title": "right_corner_reference",
-        "description": "The chevron is independent of the icon and title.",
+        "description": "Type joins the title when the chevron owns the right corner.",
         "blockType": "Function",
         "icon": "SquareFunction",
         "view": "port",
@@ -68,7 +68,7 @@
     {
       "id": "compare",
       "kind": "note",
-      "text": "3 · Compare the prepared right-corner Port face, then click its chevron to fold and unfold.",
+      "text": "3 · On the prepared Port face, confirm Function follows the title; then fold and unfold at right.",
       "x": 65,
       "y": 555,
       "w": 500,
@@ -78,7 +78,7 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · Existing Blocks default Left; Right pins the fold control to the opposite corner without moving the title/icon identity.",
+      "text": "PASS WHEN · Left remains the default. Right pins the chevron at the far corner and puts type directly after the left-side title.",
       "x": 520,
       "y": 790,
       "w": 760,

@@ -1,8 +1,9 @@
-import { createShapeId, type Editor, type TLShape } from 'tldraw'
+import { createShapeId, Mat, Rectangle2d, type Editor, type TLShape } from 'tldraw'
 import { describe, expect, it, vi } from 'vitest'
 
 import { getDefaultBlockProps, setBlockViewProps, type BlockShape } from './blockModel'
 import {
+	blockAutoResizePresentation,
 	isBlockAutoResizeGestureActive,
 	removeSelectedFromAutoResizeContainer,
 	selectedAutoResizeMembership,
@@ -37,6 +38,36 @@ function harness(selected: TLShape, shapes: TLShape[]) {
 }
 
 describe('auto-resize membership escape hatch', () => {
+	it('projects the same padded child box continuously without changing records', () => {
+		const container = autoBlock()
+		const member = child('member', container.id)
+		const editor = {
+			inputs: { getIsPointing: () => true },
+			isIn: () => true,
+			getSortedChildIdsForParent: () => [member.id],
+			getShape: (id: TLShape['id']) => id === member.id ? member : container,
+			getShapeLocalTransform: (shape: TLShape) => Mat.Translate(shape.x, shape.y),
+			getShapeGeometry: () => new Rectangle2d({ width: 100, height: 50, isFilled: true }),
+		} as unknown as Editor
+
+		expect(blockAutoResizePresentation(editor, container)).toEqual({
+			x: 34,
+			y: 64,
+			w: 212,
+			h: 162,
+		})
+		expect(member).toMatchObject({ x: 90, y: 120, parentId: container.id })
+	})
+
+	it('keeps the projection off outside an active stock geometry gesture', () => {
+		const container = autoBlock()
+		const editor = {
+			inputs: { getIsPointing: () => false },
+			isIn: () => false,
+		} as unknown as Editor
+		expect(blockAutoResizePresentation(editor, container)).toBeNull()
+	})
+
 	it.each([
 		'select.pointing_shape',
 		'select.pointing_selection',

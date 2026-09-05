@@ -1,0 +1,75 @@
+{
+  "feature": "Continuous Block auto-fit",
+  "viewport": { "width": 1600, "height": 960 },
+  "pages": [{ "id": "review", "name": "Continuous auto-fit" }],
+  "shapes": [
+    {
+      "id": "pipeline",
+      "type": "block",
+      "x": 610,
+      "y": 330,
+      "props": {
+        "title": "pipeline()",
+        "description": "",
+        "blockType": "Function",
+        "view": "expanded",
+        "w": 410,
+        "h": 280,
+        "foldable": true,
+        "folded": false,
+        "autoResize": true,
+        "inputs": [],
+        "outputs": []
+      }
+    },
+    {
+      "id": "decode",
+      "type": "block",
+      "parentId": "pipeline",
+      "x": 76,
+      "y": 76,
+      "props": {
+        "title": "parse()",
+        "description": "Rapid-drag target",
+        "blockType": "Function",
+        "view": "port",
+        "w": 250,
+        "h": 136,
+        "inputs": [],
+        "outputs": []
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "drag",
+      "kind": "step",
+      "text": "1 · Select parse(). Press again and drag it rapidly across every pipeline() edge without releasing.",
+      "x": 30,
+      "y": 300,
+      "w": 470,
+      "h": 130,
+      "target": { "shapeId": "decode", "anchor": "left" }
+    },
+    {
+      "id": "follow",
+      "kind": "step",
+      "text": "2 · Keep holding: pipeline() follows continuously. Release: the same boundary becomes the saved frame.",
+      "x": 1110,
+      "y": 300,
+      "w": 450,
+      "h": 130,
+      "target": { "shapeId": "pipeline", "anchor": "right", "dy": 48 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · The boundary follows on every held move, never runs away, and parse() keeps its release position and membership.",
+      "x": 445,
+      "y": 750,
+      "w": 710,
+      "h": 120
+    }
+  ]
+}

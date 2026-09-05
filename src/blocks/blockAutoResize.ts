@@ -7,6 +7,7 @@
  * auto-fit off an immediate return to ordinary stock resize handles.
  */
 import {
+	Box,
 	fitFrameToContent,
 	isShapeId,
 	type Editor,
@@ -24,6 +25,17 @@ import { isBlockShape, isExpandedBlockShape, type BlockShape } from './blockMode
  * 48px header rather than a hand-rolled asymmetric frame algorithm.
  */
 export const BLOCK_AUTO_RESIZE_PADDING_PX = 56
+
+/**
+ * Gesture-time projection of the box that stock `fitFrameToContent` will
+ * commit. Coordinates are relative to the Block's current local origin.
+ */
+export interface BlockAutoResizePresentation {
+	x: number
+	y: number
+	w: number
+	h: number
+}
 
 type ResizeSource = 'user' | 'remote'
 
@@ -58,6 +70,48 @@ export function isBlockAutoResizeGestureActive(editor: Pick<Editor, 'inputs' | '
 
 function isAutoResizeBlock(shape: TLShape | undefined): shape is BlockShape {
 	return isExpandedBlockShape(shape) && shape.props.autoResize
+}
+
+/**
+ * Derive a live frame surface from tldraw's current child geometry without
+ * writing any document geometry during the gesture.
+ *
+ * WHY: moving the persisted frame between pointer samples invalidates stock
+ * translation's initial snapshot and recreates the runaway feedback loop. A
+ * group-like derived geometry gives the continuous UX immediately; the same
+ * stock fit helper remains the sole commit path when the gesture settles.
+ */
+export function blockAutoResizePresentation(
+	editor: Editor,
+	shape: BlockShape,
+): BlockAutoResizePresentation | null {
+	if (!isAutoResizeBlock(shape) || !isBlockAutoResizeGestureActive(editor)) return null
+	const childIds = editor.getSortedChildIdsForParent(shape.id)
+	if (childIds.length === 0) return null
+
+	const points = childIds.flatMap((id) => {
+		const child = editor.getShape(id)
+		if (!child) return []
+		const transform = editor.getShapeLocalTransform(child)
+		return transform?.applyToPoints(editor.getShapeGeometry(child.id).vertices) ?? []
+	})
+	if (points.length === 0) return null
+
+	const bounds = Box.FromPoints(points)
+	const presentation = {
+		x: bounds.minX - BLOCK_AUTO_RESIZE_PADDING_PX,
+		y: bounds.minY - BLOCK_AUTO_RESIZE_PADDING_PX,
+		w: bounds.w + BLOCK_AUTO_RESIZE_PADDING_PX * 2,
+		h: bounds.h + BLOCK_AUTO_RESIZE_PADDING_PX * 2,
+	}
+	if (!Object.values(presentation).every(Number.isFinite)) return null
+	if (
+		Math.abs(presentation.x) < 0.001
+		&& Math.abs(presentation.y) < 0.001
+		&& Math.abs(presentation.w - shape.props.w) < 0.001
+		&& Math.abs(presentation.h - shape.props.h) < 0.001
+	) return null
+	return presentation
 }
 
 /**

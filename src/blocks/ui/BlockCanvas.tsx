@@ -77,6 +77,7 @@ import { getActiveDepthScopeId, toggleDepthScope } from '../../depth/depthNaviga
 import { branchFadeOpacity } from '../../branch/branchScope'
 import { countProducers, PortDot, usePortHintEligibility } from './PortDot'
 import { definitionBadge } from '../definitions/definitionLinking'
+import { blockAutoResizePresentation } from '../blockAutoResize'
 import { isClockTriggerBlock, stockBlockVisibleDescription } from '../stockBlocks'
 import {
   describeDiffCounts,
@@ -965,6 +966,15 @@ function BlockHeading({ shape, height }: { shape: BlockShape; height: number }) 
   const icon = blockIcon(shape.props)
   const foldable = canBlockFold(shape.props)
 	const foldSide = blockFoldControlSide(shape.props)
+  const typeLabel = shape.props.blockType !== '' ? (
+    <span
+      className="BlockNode-headingType"
+      data-pb-inline-field={blockInlineFieldAttribute({ kind: 'blockType' })}
+      title={shape.props.blockType}
+    >
+      <FieldValue diffs={shape.props.fieldDiffs} path="blockType" value={shape.props.blockType} />
+    </span>
+  ) : null
   return (
     <div className="NodeShape-heading" style={{ height }}>
       <BlockFoldControl shape={shape} />
@@ -988,17 +998,14 @@ function BlockHeading({ shape, height }: { shape: BlockShape; height: number }) 
         >
           <FieldValue diffs={shape.props.fieldDiffs} path="title" value={shape.props.title} />
         </span>
+        {/* WHY: the right-corner disclosure pattern reads as one left-side
+            identity phrase: icon, title, then type. Keep Draft / diff status
+            after that phrase; on the default left disclosure, retain the
+            established far-edge type placement. */}
+        {foldable && foldSide === 'right' ? typeLabel : null}
         <DefinitionBadge shape={shape} />
         <BlockDiffBadge shape={shape} />
-        {shape.props.blockType !== '' ? (
-          <span
-            className="BlockNode-headingType"
-            data-pb-inline-field={blockInlineFieldAttribute({ kind: 'blockType' })}
-            title={shape.props.blockType}
-          >
-            <FieldValue diffs={shape.props.fieldDiffs} path="blockType" value={shape.props.blockType} />
-          </span>
-        ) : null}
+        {!foldable || foldSide !== 'right' ? typeLabel : null}
       </div>
     </div>
   )
@@ -1292,7 +1299,17 @@ export interface BlockCanvasProps {
  */
 export function BlockCanvas({ shape }: BlockCanvasProps) {
   const editor = useEditor()
-  const layout = layoutBlock(shape.props)
+  const autoFitPresentation = useValue(
+    'Block continuous auto-fit presentation',
+    () => blockAutoResizePresentation(editor, shape),
+    [editor, shape],
+  )
+  const layoutOffset = autoFitPresentation
+    ? { x: autoFitPresentation.x, y: autoFitPresentation.y }
+    : { x: 0, y: 0 }
+  const layout = layoutBlock(autoFitPresentation
+    ? { ...shape.props, w: autoFitPresentation.w, h: autoFitPresentation.h }
+    : shape.props)
   // A cable on either face of a port fills its dot: the dot is the port, and
   // the faces are the two sides of the boundary it sits on. The wiring table
   // keeps its identity while its entries do, so a Block that merely moved —
@@ -1362,6 +1379,11 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
       data-block-view={layout.view}
 		data-variadic-prototype={variadicPrototype ?? undefined}
 		data-block-folded={folded || undefined}
+      data-auto-fit-live={autoFitPresentation ? 'true' : undefined}
+      data-auto-fit-x={autoFitPresentation?.x}
+      data-auto-fit-y={autoFitPresentation?.y}
+      data-auto-fit-w={autoFitPresentation?.w}
+      data-auto-fit-h={autoFitPresentation?.h}
       data-diff-state={diffState === 'normal' ? undefined : diffState}
       data-diff-variant={stated ? diffVariant : undefined}
 		data-definition-id={value ? undefined : shape.props.definitionId || undefined}
@@ -1387,7 +1409,17 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
         if (field) rememberBlockInlineField(editor, shape.id, field)
       }}
     >
-      <div className="BlockNode-layer">
+      <div
+        className="BlockNode-layer"
+        style={autoFitPresentation ? {
+          left: autoFitPresentation.x,
+          top: autoFitPresentation.y,
+          right: 'auto',
+          bottom: 'auto',
+          width: autoFitPresentation.w,
+          height: autoFitPresentation.h,
+        } : undefined}
+      >
         {simple
           ? <SimpleFace shape={shape} />
           : value
@@ -1493,7 +1525,11 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
       </div>
 
       {layout.footer ? (
-        <div className="NodeShape-footer" style={boxStyle(layout.footer)}>
+        <div className="NodeShape-footer" style={boxStyle({
+          ...layout.footer,
+          x: layout.footer.x + layoutOffset.x,
+          y: layout.footer.y + layoutOffset.y,
+        })}>
           <BlockFooterMenu shape={shape} />
         </div>
       ) : null}

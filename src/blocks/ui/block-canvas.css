@@ -30,6 +30,21 @@
   font-family: inherit;
 }
 
+/* During a child transform the document frame remains untouched so stock
+ * translation can keep using its initial snapshot. The derived layer is the
+ * group-like, continuous surface that follows the current child geometry; the
+ * release-time stock fit replaces it without a second visual state. */
+.systemsketch-block-canvas.NodeShape[data-auto-fit-live='true'] {
+  background: transparent;
+  box-shadow: none;
+}
+
+.systemsketch-block-canvas[data-auto-fit-live='true'] .BlockNode-layer {
+  border-radius: 9px;
+  background: var(--ss-surface-raised);
+  box-shadow: var(--node-shadow-border);
+}
+
 [data-state='select.idle'] .systemsketch-block-canvas [data-pb-inline-field],
 [data-state='select.editing_shape'] .systemsketch-block-canvas [data-pb-inline-field] {
   pointer-events: all;
@@ -181,6 +196,13 @@
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* With disclosure at the opposite corner, the title no longer consumes the
+ * whole header row: type is part of the left identity phrase, not a second
+ * right-side control competing with the chevron. */
+.systemsketch-block-canvas .BlockNode-heading[data-fold-control='true'][data-fold-placement='right'] .BlockNode-headingTitle {
+  flex: 0 1 auto;
 }
 
 .systemsketch-block-canvas .BlockNode-headingType {

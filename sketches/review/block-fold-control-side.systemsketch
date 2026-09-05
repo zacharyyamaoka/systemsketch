@@ -42,7 +42,7 @@
       "com.tldraw.shape.arrow": 8,
       "com.tldraw.shape.text": 4,
       "com.tldraw.shape.line": 5,
-      "com.tldraw.shape.block": 7,
+      "com.tldraw.shape.block": 8,
       "com.tldraw.shape.branch": 0,
       "com.tldraw.shape.loop": 0,
       "com.tldraw.shape.branch-arm": 0,
@@ -94,7 +94,7 @@
         "w": 520,
         "h": 210,
         "title": "right_corner_reference",
-        "description": "The chevron is independent of the icon and title.",
+        "description": "Type joins the title when the chevron owns the right corner.",
         "blockType": "Function",
         "foldable": true,
         "folded": false,
@@ -123,14 +123,14 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "F4nQR_PuqpZlQuE7_pU1n",
+        "definitionId": "8npLszNKmbBTp3Bg4ImCm",
         "inputs": [],
         "outputs": [],
         "foldControlSide": "right",
         "definitionKey": "right_corner_reference"
       },
       "parentId": "page:page",
-      "index": "a2eLX",
+      "index": "a2rrE",
       "typeName": "shape"
     },
     {
@@ -174,7 +174,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a4hFUl",
+      "index": "a4Yho",
       "typeName": "shape"
     },
     {
@@ -211,7 +211,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · Existing Blocks default Left; Right pins the fold control to the opposite corner without moving the title/icon identity."
+                  "text": "PASS WHEN · Left remains the default. Right pins the chevron at the far corner and puts type directly after the left-side title."
                 }
               ]
             }
@@ -219,24 +219,16 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6kkI",
+      "index": "a6ISA",
       "typeName": "shape"
     },
     {
-      "x": 0,
-      "y": 0,
-      "z": 1,
+      "x": 5.492518703241885,
+      "y": -117.14463840399009,
+      "z": 1.1062068965517242,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
-    },
-    {
-      "name": "",
-      "color": "#EC5E41",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:GTUrtVFDb_4sTpx0twuZ6",
-      "typeName": "user"
     },
     {
       "meta": {},
@@ -298,7 +290,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4C8j",
+      "index": "a43r2",
       "typeName": "shape"
     },
     {
@@ -342,7 +334,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3zzrSU",
+      "index": "a3zzzz",
       "typeName": "shape"
     },
     {
@@ -417,7 +409,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5rlgV",
+      "index": "a5tGXV",
       "typeName": "shape"
     },
     {
@@ -462,7 +454,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3zxF",
+      "index": "a3rlz",
       "typeName": "shape"
     },
     {
@@ -479,7 +471,7 @@
         "h": 120,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 0,
+        "growY": 2,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -499,7 +491,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "3 · Compare the prepared right-corner Port face, then click its chevron to fold and unfold."
+                  "text": "3 · On the prepared Port face, confirm Function follows the title; then fold and unfold at right."
                 }
               ]
             }
@@ -507,8 +499,16 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5hOz",
+      "index": "a5BYE",
       "typeName": "shape"
+    },
+    {
+      "name": "",
+      "color": "#11B3A3",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:EkBSOmgUQQIOFS0jwjXJv",
+      "typeName": "user"
     },
     {
       "meta": {},
@@ -588,13 +588,13 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "unzFNiKTAsy6ltnrD7hIV",
+        "definitionId": "vfz-d2yv1cYoSxEomMQIS",
         "inputs": [],
         "outputs": [],
         "definitionKey": "initialize_workflow"
       },
       "parentId": "page:page",
-      "index": "a1XSj",
+      "index": "a1xjE",
       "typeName": "shape"
     },
     {

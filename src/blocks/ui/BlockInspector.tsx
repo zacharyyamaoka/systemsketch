@@ -1744,8 +1744,8 @@ export function BlockInspectorContent({
                   </div>
                 </div>
                 <p className="block-inspector__hint">
-                  Folding adds a header chevron in Port and Expanded views. Auto fit takes over
-                  only in Expanded view, keeping a constant border around direct children.
+                  Folding adds a header chevron in Port and Expanded views. Auto fit follows
+                  direct children continuously in Expanded view and saves the fitted border on release.
                 </p>
               </section>
 

@@ -22,6 +22,9 @@ This standing request may not repeat the feature that was just added. Read the c
    its header chevron, keep every child under the real `parentId`, and exercise
    the post-fit membership exit through the live **Remove from container**
    context command rather than pre-authoring the post-removal state.
+   When the fixture reviews `foldControlSide: "right"`, point its fold cue at
+   the Block's right header edge and verify the type label sits immediately
+   after the left-side title; keep the default left-side cue for older Blocks.
 4. **A shape that sits inside a container must say so with `parentId`.** Placing it at coordinates inside a Frame, an Expanded Block, a Branch or a Loop is not membership: the helper authors through `Editor.createShapes`, which performs no frame adoption — that happens only on an interactive drop or in a region tool's enclosure sweep. A board without `parentId` looks correct and is not; drag the container and the children stay behind. A child's `x`/`y` are **parent-local** once it has a `parentId`, so subtract the container's position. The helper now fails the build when a shape's bounds sit inside a container it does not belong to, but write the `parentId` deliberately rather than waiting for the guard.
 4. Add numbered cue cards that state the literal gesture, such as “drag the output port onto…” or “collapse this Block.” Point each step at its target with an orange arrow. Add one separate green `PASS WHEN` card describing the visible result.
 5. Lay out the interaction first, then reserve a quiet perimeter for instructions. Keep at least 80 canvas units between cards and interaction bounds and at least 48 units between cards. Use cards at least 340×100; enlarge or shorten any card whose text would wrap beyond its height. Do not build a flush stack of cards along one object edge.
