@@ -117,7 +117,7 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 				</>
 			) : (
 				<>
-					<text x={w / 2} y={layout.title ? layout.title.y + layout.title.h / 2 : h / 2} textAnchor="middle" dominantBaseline="middle" fill={ink} fontFamily="ui-sans-serif, system-ui" fontSize={44} fontWeight={600}>
+					<text x={w / 2} y={layout.title ? layout.title.y + layout.title.h / 2 : h / 2} textAnchor="middle" dominantBaseline="middle" fill={ink} fontFamily="ui-monospace, monospace" fontSize={44} fontWeight={600}>
 						{shape.props.title}
 					</text>
 					{layout.typeLabel ? (
@@ -178,7 +178,7 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 								textAnchor={placed.side === 'input' ? 'start' : 'end'}
 								dominantBaseline="middle"
 								fill={ink}
-								fontFamily="ui-sans-serif, system-ui"
+								fontFamily="ui-monospace, monospace"
 								fontSize={18}
 							>
 								{placed.port.name}

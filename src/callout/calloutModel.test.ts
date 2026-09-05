@@ -4,6 +4,7 @@ import type { Editor, TLGeoShape, TLShape, TLShapeId } from 'tldraw'
 import {
   CALLOUT_META_KEY,
   calloutCardIdForLeader,
+  createCalloutCard,
   isCalloutCard,
   isCalloutLeader,
   nearestCardFaceAnchor,
@@ -54,5 +55,18 @@ describe('Callout stock-record contract', () => {
     expect(nearestCardFaceAnchor(faceEditor, subject, { x: 300, y: 40 })).toEqual({ x: 1, y: 0.5 })
     expect(nearestCardFaceAnchor(faceEditor, subject, { x: 120, y: -60 })).toEqual({ x: 0.5, y: 0 })
     expect(nearestCardFaceAnchor(faceEditor, subject, { x: 120, y: 140 })).toEqual({ x: 0.5, y: 1 })
+  })
+
+  it('begins a new Callout in the whiteboard sketch face', () => {
+    const created: Array<{ props: { font?: string } }> = []
+    const creationEditor = {
+      createShape: (shape: { props: { font?: string } }) => created.push(shape),
+      getShape: () => null,
+    } as unknown as Editor
+
+    createCalloutCard(creationEditor, { x: 120, y: 80 })
+
+    expect(created).toHaveLength(1)
+    expect(created[0].props.font).toBe('draw')
   })
 })

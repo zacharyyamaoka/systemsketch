@@ -176,7 +176,7 @@ export function detachLoopToPrimitives(
 		}
 		chrome.push(loopText(primitiveParentId, placed.port.type,
 			{ x: placed.label.x, y: placed.label.y - 7, w: Math.max(1, layout.labelMax) },
-			{ color: 'grey', scale: 12.5 / 18 }))
+			{ color: 'grey', font: 'mono', scale: 12.5 / 18 }))
 	}
 
 	if (layout.turn) {
@@ -188,7 +188,7 @@ export function detachLoopToPrimitives(
 		})
 		chrome.push(loopText(primitiveParentId, loop.props.turn,
 			{ x: layout.turn.x + 6, y: layout.turn.y + 5, w: Math.max(1, layout.turn.w - 12) },
-			{ align: 'middle', font: 'mono', scale: 11 / 18, bold: true }))
+			{ align: 'middle', font: 'sans', scale: 11 / 18, bold: true }))
 	}
 
 	const material = [

@@ -473,7 +473,7 @@ export function measureBlockText(
 /** Width of the name, type, default chip, and the gaps painted between them. */
 function portLabelContentWidth(port: BlockPort, side: 'input' | 'output'): number {
 	const parts: number[] = []
-	if (port.name !== '') parts.push(measureBlockText(port.name, PORT_TEXT_FONT_PX, 400))
+	if (port.name !== '') parts.push(measureBlockText(port.name, PORT_TEXT_FONT_PX, 400, 'mono'))
 	if (port.type !== '') parts.push(measureBlockText(port.type, PORT_TEXT_FONT_PX, 400, 'mono'))
 	const defaultValue = side === 'input' ? portDefaultValue(port) : ''
 	if (defaultValue !== '') {
@@ -572,8 +572,13 @@ function hiddenPortSummaries(
 	return summaries
 }
 
-function measureSimpleText(text: string, px: number, weight: number): number {
-	return measureBlockText(text, px, weight, 'sans')
+function measureSimpleText(
+	text: string,
+	px: number,
+	weight: number,
+	family: keyof typeof TEXT_FAMILIES = 'sans',
+): number {
+	return measureBlockText(text, px, weight, family)
 }
 
 function estimateWrappedLines(
@@ -581,24 +586,31 @@ function estimateWrappedLines(
 	px: number,
 	weight: number,
 	maxWidth: number,
+	family: keyof typeof TEXT_FAMILIES = 'sans',
 ): number {
 	if (text.trim() === '' || maxWidth <= 0) return 1
 	// Newlines separate the derived Clock declaration from its optional
 	// annotation. Preserve that authored boundary while still wrapping each row.
 	return text.split(/\n/).reduce(
-		(total, paragraph) => total + estimateParagraphLines(paragraph, px, weight, maxWidth),
+		(total, paragraph) => total + estimateParagraphLines(paragraph, px, weight, maxWidth, family),
 		0,
 	)
 }
 
-function estimateParagraphLines(text: string, px: number, weight: number, maxWidth: number): number {
+function estimateParagraphLines(
+	text: string,
+	px: number,
+	weight: number,
+	maxWidth: number,
+	family: keyof typeof TEXT_FAMILIES,
+): number {
 	const words = text.trim().split(/\s+/).filter(Boolean)
 	if (words.length === 0 || maxWidth <= 0) return 1
-	const spaceWidth = Math.max(1, measureSimpleText(' ', px, weight))
+	const spaceWidth = Math.max(1, measureSimpleText(' ', px, weight, family))
 	let lines = 1
 	let lineWidth = 0
 	for (const word of words) {
-		const wordWidth = measureSimpleText(word, px, weight)
+		const wordWidth = measureSimpleText(word, px, weight, family)
 		const lead = lineWidth === 0 ? 0 : lineWidth + spaceWidth
 		if (lead + wordWidth <= maxWidth) {
 			lineWidth = lead + wordWidth
@@ -742,7 +754,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		)
 		const titleLines = Math.min(
 			SIMPLE_TITLE_MAX_LINES,
-			estimateWrappedLines(props.title, SIMPLE_TITLE_FONT_PX, 600, titleTextWidth),
+			estimateWrappedLines(props.title, SIMPLE_TITLE_FONT_PX, 600, titleTextWidth, 'mono'),
 		)
 		const titleHeight = Math.max(
 			titleLines * SIMPLE_TITLE_LINE_PX,
@@ -795,7 +807,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 			const textWidth = titleLines > 1
 				? titleTextWidth
 				: Math.min(
-					measureSimpleText(props.title, SIMPLE_TITLE_FONT_PX, 600),
+					measureSimpleText(props.title, SIMPLE_TITLE_FONT_PX, 600, 'mono'),
 					titleTextWidth,
 				)
 			const groupWidth = SIMPLE_ICON_PX + SIMPLE_ICON_GAP_PX + textWidth
