@@ -1401,6 +1401,22 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   width: 100%;
 }
 
+/* Data is intentionally the absence of decoration. A non-Data role earns a
+   tiny, accessible mark without borrowing colour from the Python type palette. */
+.systemsketch-block-canvas .Port-semanticCue {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 3px;
+  border-radius: 3px;
+  color: var(--ss-accent);
+  background: var(--ss-surface-raised);
+  font: 600 8px/11px Inter, ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: .01em;
+  pointer-events: none;
+}
+
 /* ---- R3 `token-only` · no furniture ------------------------------------
  * Only the runs that differ carry ink. The least drawing that still shows
  * both values, and the least legible when a name is replaced outright rather

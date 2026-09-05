@@ -78,6 +78,8 @@ import {
 	clampPillPosition,
 	PILL_POSITION_DEFAULT,
 } from './connectionModel'
+import { resolveConnectionSemanticRole } from './semanticRoles'
+import { getSemanticTagsVisible } from '../semanticTagVisibility'
 import {
 	blocksThatWouldCycle,
 	dropScopeAt,
@@ -1147,6 +1149,16 @@ function CanonicalConnectionShapeComponent({ connection }: { connection: Connect
 		[editor, connection.id],
 	)
 	const delayed = connection.props.temporal === 'delayed'
+	const semanticTagsVisible = useValue(
+		'connection semantic tag visibility',
+		() => getSemanticTagsVisible(editor),
+		[editor],
+	)
+	const semanticTag = useValue(
+		'connection semantic tag',
+		() => semanticTagsVisible ? resolveConnectionSemanticRole(editor, connection) : null,
+		[editor, connection, semanticTagsVisible],
+	)
 	const solidBeforePill = useValue('solid before pill', () => cablePresentation.get().solidBeforePill, [])
 	const pill = useValue(
 		'delay pill geometry',
@@ -1219,6 +1231,7 @@ function CanonicalConnectionShapeComponent({ connection }: { connection: Connect
 	)
 	const needsRenderPoints = connection.props.temporal === 'async'
 		|| tunnelState !== 'off'
+		|| semanticTag?.effective?.role !== 'data'
 		|| (cableMark === 'modified' && diffTraits.cable === 'endpoints')
 	const renderPoints = useValue(
 		'block connection render points',
@@ -1232,6 +1245,17 @@ function CanonicalConnectionShapeComponent({ connection }: { connection: Connect
 	const paintedTunnelState = tunnelMouths || tunnelState === 'off'
 		? tunnelState
 		: 'revealed'
+	// WHY: tags are authored in the spacious inspector, but canvas labels are a
+	// board-wide reading aid; hiding them removes presentation, never meaning.
+	const semanticTagLabel = semanticTag?.effective?.role !== 'data' ? semanticTag?.label : null
+	// The delay/effect pill is draggable, so put the tag on the opposite side;
+	// ordinary and modified cables reserve the middle for other existing chips.
+	const semanticTagFraction = delayed || effect
+		? connection.props.pillPosition < 0.5 ? 0.72 : 0.28
+		: 0.72
+	const semanticTagPoint = semanticTagLabel
+		? pointAtFraction(renderPoints, semanticTagFraction)
+		: null
 	// A MODIFIED cable's was→now chip. Only built when the variant actually
 	// draws a chip for it — `diffCableInk` above has already left the line's
 	// own ink untouched for exactly this mark, so recolouring it here as well
@@ -1303,6 +1327,7 @@ function CanonicalConnectionShapeComponent({ connection }: { connection: Connect
 						ink={EFFECT_CABLE_INK}
 					/>
 				) : null}
+				{semanticTagPoint && semanticTagLabel ? <SemanticTagPill point={semanticTagPoint} label={semanticTagLabel} /> : null}
 				{cableMarkChip ? (
 					<CableWasNowChip
 						pill={cableMarkChip.geometry}
@@ -1345,6 +1370,7 @@ function CanonicalConnectionShapeComponent({ connection }: { connection: Connect
 		>
 			<DelayedCablePaths path={path} pill={pill} solidBeforePill={solidBeforePill} stroke={stroke} />
 			{tunnelMouths ? <TunnelVias tunnel={tunnelMouths} stroke={stroke} fill="var(--ss-surface, #ffffff)" /> : null}
+			{semanticTagPoint && semanticTagLabel ? <SemanticTagPill point={semanticTagPoint} label={semanticTagLabel} /> : null}
 			<DelayPill
 				pill={pill}
 				label={pillLabel ?? delayPillLabel(connection.props.delayValue)}
@@ -1622,6 +1648,17 @@ export function DelayPill({
 			>
 				{label}
 			</text>
+		</g>
+	)
+}
+
+/** A read-only role cue; connection semantics remain resolved from its endpoints. */
+function SemanticTagPill({ point, label }: { point: { x: number; y: number }; label: string }) {
+	const width = delayPillWidth(label)
+	return (
+		<g transform={`translate(${point.x} ${point.y})`} data-testid="connection-semantic-tag" aria-label={`${label} semantic tag`} pointerEvents="none">
+			<rect x={-width / 2} y={-DELAY_PILL_HEIGHT / 2} width={width} height={DELAY_PILL_HEIGHT} rx={DELAY_PILL_HEIGHT / 2} fill="var(--ss-surface, #ffffff)" stroke="var(--ss-accent, #2563eb)" strokeWidth={1.3} />
+			<text x={0} y={4} textAnchor="middle" fontSize={12} fontWeight={700} fontFamily="'JetBrains Mono', ui-monospace, Menlo, monospace" fill="var(--ss-accent, #2563eb)" style={{ userSelect: 'none' }}>{label}</text>
 		</g>
 	)
 }

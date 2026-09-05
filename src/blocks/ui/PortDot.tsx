@@ -78,6 +78,8 @@ export interface PortDotProps {
 	eligible: boolean
 	testId?: string
 	title?: string
+	/** A real DOM text cue for semantic dots; CSS pseudo-content is invisible to AT. */
+	semanticLabel?: string
 	/** Extra classes appended after the shared Port / side / connected / hint set. */
 	className?: string
 	/** Extra data-* (or other) attributes a caller's container needs on the dot. */
@@ -88,7 +90,7 @@ export interface PortDotProps {
 
 export function PortDot({
 	portId, side, connected, producers, portType, x, y, hinting, eligible,
-	testId, title, className, attrs, style,
+	testId, title, semanticLabel, className, attrs, style,
 }: PortDotProps) {
 	const classes = [
 		'Port',
@@ -105,9 +107,11 @@ export function PortDot({
 			data-block-port-side={side}
 			data-testid={testId}
 			title={title}
+			aria-label={semanticLabel ? `${semanticLabel} port` : undefined}
 			{...attrs}
 			style={{ '--port-color': portColor(portType), left: x, top: y, ...style } as CSSProperties}
 		>
+			{semanticLabel ? <span className="Port-semanticCue">{semanticLabel}</span> : null}
 			{producers >= 2 ? <PortCountBadge portId={portId} count={producers} /> : null}
 		</div>
 	)

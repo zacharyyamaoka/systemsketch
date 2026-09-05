@@ -1,0 +1,28 @@
+{
+  "feature": "Bounded propagation focus",
+  "viewport": { "width": 1800, "height": 980 },
+  "shapes": [
+    { "id": "source", "type": "block", "x": 420, "y": 420, "props": { "title": "source()", "description": "upstream", "blockType": "call", "view": "port", "w": 240, "h": 140, "inputs": [], "outputs": [{ "id": "out", "name": "packet", "type": "Packet", "visible": true }] } },
+    { "id": "join", "type": "block", "x": 790, "y": 420, "props": { "title": "join()", "description": "selected reading root", "blockType": "call", "view": "port", "w": 250, "h": 160, "inputs": [{ "id": "in", "name": "packet", "type": "Packet", "visible": true }], "outputs": [{ "id": "out", "name": "result", "type": "Result", "visible": true }] } },
+    { "id": "fan-a", "type": "block", "x": 1170, "y": 300, "props": { "title": "render()", "description": "fan-out route", "blockType": "call", "view": "port", "w": 250, "h": 150, "inputs": [{ "id": "in", "name": "result", "type": "Result", "visible": true }], "outputs": [{ "id": "out", "name": "image", "type": "Image", "visible": true }] } },
+    { "id": "fan-b", "type": "block", "x": 1170, "y": 580, "props": { "title": "archive()", "description": "fan-out route", "blockType": "call", "view": "port", "w": 250, "h": 150, "inputs": [{ "id": "in", "name": "result", "type": "Result", "visible": true }], "outputs": [] } },
+    { "id": "unrelated", "type": "block", "x": 780, "y": 760, "props": { "title": "unrelated()", "description": "must fade; never changes", "blockType": "call", "view": "port", "w": 260, "h": 140, "inputs": [], "outputs": [] } },
+    { "id": "source-join", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "temporal": "data", "delayValue": "", "pillPosition": 0.5 } },
+    { "id": "join-a", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "temporal": "data", "delayValue": "", "pillPosition": 0.5 } },
+    { "id": "join-b", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "elbow", "curve": null, "pins": [], "elbowRoute": null, "temporal": "async", "delayValue": "", "pillPosition": 0.5 } }
+  ],
+  "bindings": [
+    { "type": "connection", "fromId": "source-join", "toId": "source", "props": { "portId": "out", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "source-join", "toId": "join", "props": { "portId": "in", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "join-a", "toId": "join", "props": { "portId": "out", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "join-a", "toId": "fan-a", "props": { "portId": "in", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "join-b", "toId": "join", "props": { "portId": "out", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "join-b", "toId": "fan-b", "props": { "portId": "in", "terminal": "end", "face": "outer" } }
+  ],
+  "callouts": [
+    { "id": "select", "kind": "step", "text": "1 · Select join(). Focus flow appears only for a settled real cable or a Block.", "x": 670, "y": 70, "w": 440, "h": 124, "target": { "shapeId": "join", "anchor": "top" } },
+    { "id": "focus", "kind": "step", "text": "2 · Click Focus flow, then change the two bounded step counts. The two fan-out cables stay real and bright.", "x": 1220, "y": 70, "w": 480, "h": 125, "target": { "shapeId": "fan-a", "anchor": "top" } },
+    { "id": "clear", "kind": "step", "text": "3 · Click Clear. The unrelated card returns exactly as it was; no board object was edited.", "x": 80, "y": 740, "w": 480, "h": 120, "target": { "shapeId": "unrelated", "anchor": "left" } },
+    { "id": "pass", "kind": "pass", "text": "PASS WHEN · Only the traversed Blocks and their actual cables stay bright. The async cable participates normally, and Clear restores the untouched board.", "x": 1200, "y": 750, "w": 500, "h": 155 }
+  ]
+}

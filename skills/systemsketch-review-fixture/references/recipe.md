@@ -26,6 +26,20 @@ Use a recipe to describe intent while the helper lets the current SystemSketch e
 
 The helper accepts a `text` shorthand on any stock text-bearing shape and converts it to current tldraw rich text. Keep custom shape props native to that feature.
 
+### Product Callout primitive
+
+SystemSketch's engineering-style Callout is intentionally a composition of
+stock records, not a custom shape type: one `geo` rectangle tagged with
+`meta.systemSketchCallout: { version: 1, role: "card" }`, plus one or more
+stock elbow `arrow` shapes tagged with `role: "leader"` and their `cardId`.
+Use ordinary `arrow` bindings from each leader's `start` to its pointed target
+(when there is one) and `end` to the card. This keeps the fixture faithful to
+the product’s normal resize, arrowhead, and interior-rail editing surfaces.
+
+The recipe has no special Callout shorthand. Put the native `meta` object on
+the stock shapes and write the bindings explicitly, which makes the persisted
+relationship and the multiple-leader topology reviewable in the board file.
+
 ## Chrome and derived-panel features
 
 Comments, Problems, and Find & Replace are real chrome/read-model interactions, not fixture record types. Seed the smallest honest board state that makes the panel useful, put the literal keyboard or menu gesture in the callouts, and drive it after generation. Do not hand-author comment records, diagnostic rows, or search results in recipe JSON: comments must be created through the live Comments panel, while diagnostics and search results must be derived from the real board.

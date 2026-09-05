@@ -15,12 +15,14 @@ import {
 	downgradeBlockPropsV4ToV3,
 	downgradeBlockPropsV5ToV4,
 	downgradeBlockPropsV6ToV5,
+	downgradeBlockPropsV7ToV6,
 	upgradeBlockPropsV0ToV1,
 	upgradeBlockPropsV1ToV2,
 	upgradeBlockPropsV2ToV3,
 	upgradeBlockPropsV3ToV4,
 	upgradeBlockPropsV4ToV5,
 	upgradeBlockPropsV5ToV6,
+	upgradeBlockPropsV6ToV7,
 	type BlockMigrationProps,
 } from './blockShapeMigrations'
 
@@ -123,9 +125,20 @@ describe('Block shape migrations', () => {
 
 		const v6 = throughPureStep(v5, upgradeBlockPropsV5ToV6)
 		expect(v6).toEqual(v5)
+		expect(throughPureStep(v6, upgradeBlockPropsV6ToV7)).toEqual(v6)
 
 		const restoredV0 = throughPureStep(v1, downgradeBlockPropsV1ToV0)
 		expect(restoredV0).toMatchObject({ w: 360, h: 230, views: v0.views })
+	})
+
+	it('strips role claims only when intentionally loading into a prior schema', () => {
+		const v7: BlockMigrationProps = {
+			inputs: [{ id: 'in', semanticRoleDerived: { role: 'configuration', source: 'parser' }, semanticRoleAuthored: { role: 'data' } }],
+			outputs: [{ id: 'out', semanticRoleAuthored: { role: 'event' } }],
+		}
+		const v6 = throughPureStep(v7, downgradeBlockPropsV7ToV6)
+		expect(v6.inputs).toEqual([{ id: 'in' }])
+		expect(v6.outputs).toEqual([{ id: 'out' }])
 	})
 
 	it('downgrades disposable diff data without mutating the current record', () => {

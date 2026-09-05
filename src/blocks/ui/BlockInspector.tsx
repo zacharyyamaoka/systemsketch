@@ -21,13 +21,17 @@ import {
   type BlockPortSide,
   type BlockShapeProps,
   type BlockPresentationView,
+  type SemanticPortRole,
   blockPortSections,
   isEffectPort,
   mutatedInputId,
   portInHeader,
   portMutates,
   setBlockViewProps,
+  SEMANTIC_PORT_ROLES,
 } from '../blockModel'
+import { resolveBlockPortSemanticRole, roleLabel } from '../connections/semanticRoles'
+import { getSemanticTagsVisible, setSemanticTagsVisible } from '../semanticTagVisibility'
 import { commitBlockDefinitionName, definitionBadge } from '../definitions/definitionLinking'
 import { getBlockPortConnections, type BlockPortConnection } from '../connections/blockPorts'
 import { valueBlockInlet, valueBlockName, valueBlockOutlet } from '../valueBlock'
@@ -95,6 +99,8 @@ export interface BlockInspectorActions {
   beginEdit?(label: string): void
   /** Resolve a same-name collision only when the title gesture is complete. */
   commitTitle?(): void
+	/** One board-wide canvas lens, independent of per-port role authoring. */
+	setSemanticTagsVisible?(visible: boolean): void
 }
 
 /** What a pill is wired to, read from the cables; the content never reads the editor. */
@@ -114,6 +120,7 @@ export interface BlockInspectorContentProps {
   initialTab?: InspectorTab
   onRequestClose?: () => void
   pill?: PillInspectorFacts
+	semanticTagsVisible?: boolean
 }
 
 function TinyIcon({ children }: { children: ReactNode }) {
@@ -676,16 +683,64 @@ function VariadicPortSettings({
 	)
 }
 
+/** Per-port role authoring: Blocks do not have one blanket semantic tag. */
+function SemanticRoleSettings({
+	side,
+	port,
+	actions,
+	readOnly = false,
+}: {
+	side: BlockPortSide
+	port: BlockPort
+	actions?: BlockInspectorActions
+	/** Effect ports are reconciled from their mutated input and cannot be authored. */
+	readOnly?: boolean
+}) {
+	const resolved = resolveBlockPortSemanticRole(port)
+	const value = port.semanticRoleAuthored?.role ?? 'inherit'
+	const baseline = port.semanticRoleDerived?.role ?? 'data'
+	return (
+		<label className="block-inspector__semantic-role" data-testid={`inspector-semantic-role-${port.id}`}>
+			<span className={resolved.role === 'data' ? '' : 'is-semantic'}>
+				{readOnly ? 'inherited' : resolved.role === 'data' ? 'role' : roleLabel(resolved.role)}
+			</span>
+			<select
+				value={value}
+				disabled={readOnly || !actions}
+				aria-label={`Semantic role for ${side} ${port.name || port.id}`}
+				title={readOnly
+					? `Inherited ${roleLabel(resolved.role)}; effect ports follow their mutated input`
+					: resolved.origin === 'derived'
+					? `Derived ${roleLabel(resolved.role)}${resolved.claim?.source ? ` — ${resolved.claim.source}` : ''}; choose a role to override`
+					: 'Semantic role; independent of type, delivery, mutation and routing'}
+				onChange={(event) => {
+					const next = event.currentTarget.value
+					actions?.beginEdit?.('set semantic port role')
+					actions?.updatePort(side, port.id, {
+						semanticRoleAuthored: next === 'inherit' ? undefined : { role: next as SemanticPortRole },
+					})
+				}}
+			>
+				<option value="inherit">inherit · {roleLabel(baseline)}</option>
+				{SEMANTIC_PORT_ROLES.map((role) => <option key={role} value={role}>{roleLabel(role)}</option>)}
+			</select>
+		</label>
+	)
+}
+
 function PortSection({
   side,
   props,
   actions,
+  semanticTagsVisible = true,
 }: {
   side: BlockPortSide
   props: BlockShapeProps
   actions?: BlockInspectorActions
+	semanticTagsVisible?: boolean
 }) {
   const [managing, setManaging] = useState(false)
+	const [tagging, setTagging] = useState(false)
   const [drag, setDrag] = useState<InspectorPortDrag | null>(null)
   const dragRef = useRef<InspectorPortDrag | null>(null)
   const listRef = useRef<HTMLUListElement | null>(null)
@@ -971,16 +1026,49 @@ function PortSection({
     })
   })
 
+	const tagItems = ports.map((port) => (
+		<li
+			key={port.id}
+			className={`block-inspector__semantic-tag${isEffectPort(port) ? ' block-inspector__semantic-tag--derived' : ''}`}
+			data-testid={`inspector-semantic-tag-${side}-${port.id}`}
+		>
+			<div className="block-inspector__semantic-tag-port">
+				<span className="block-inspector__semantic-tag-name">{port.name || port.id}</span>
+				<span className="block-inspector__semantic-tag-type">{port.type || 'type'}</span>
+				{!port.visible ? <span className="block-inspector__semantic-tag-hidden">hidden</span> : null}
+				{isEffectPort(port) ? <span className="block-inspector__semantic-tag-derived">derived effect</span> : null}
+			</div>
+			<SemanticRoleSettings side={side} port={port} actions={actions} readOnly={isEffectPort(port)} />
+		</li>
+	))
+
   return (
     <section className="block-inspector__section" aria-label={`${title} ports`} data-inspector-section={title}>
       <div className="block-inspector__section-title">
         <span>{title}</span>
         <span className="block-inspector__section-tools">
+			<button
+				type="button"
+				className={`block-inspector__tags-button${tagging ? ' is-active' : ''}`}
+				aria-pressed={tagging}
+				aria-expanded={tagging}
+				aria-controls={`inspector-semantic-tags-${side}`}
+				aria-label={`${tagging ? 'Hide' : 'Show'} ${title} semantic tags`}
+				onClick={() => {
+					setManaging(false)
+					setTagging((current) => !current)
+				}}
+			>
+				Tags
+			</button>
           <button
             type="button"
             className={`block-inspector__count-pill${managing ? ' is-active' : ''}`}
             aria-expanded={managing}
-            onClick={() => setManaging((current) => !current)}
+            onClick={() => {
+					setTagging(false)
+					setManaging((current) => !current)
+				}}
           >
             {managing ? 'Done' : `${visiblePorts.length} visible`}
           </button>
@@ -996,7 +1084,23 @@ function PortSection({
         </span>
       </div>
 
-      {ports.length === 0 && side === 'outputs' ? (
+      {tagging ? (
+		<div id={`inspector-semantic-tags-${side}`} className="block-inspector__semantic-tags" role="region" aria-label={`${title} semantic tags`}>
+				<label className="block-inspector__semantic-visibility">
+					<input
+						type="checkbox"
+						checked={semanticTagsVisible}
+						disabled={!actions?.setSemanticTagsVisible}
+						aria-label="Show semantic tags on canvas ports and wires"
+						onChange={(event) => actions?.setSemanticTagsVisible?.(event.currentTarget.checked)}
+					/>
+					<span>Show tags on canvas</span>
+					<span className="block-inspector__semantic-visibility-state">{semanticTagsVisible ? 'Visible' : 'Hidden'}</span>
+				</label>
+				<p className="block-inspector__hint">Choose a semantic role for each port. Hidden ports are included; derived effect ports inherit their role.</p>
+				{ports.length === 0 ? <p className="block-inspector__hint">No {side} to tag yet.</p> : <ul>{tagItems}</ul>}
+			</div>
+      ) : ports.length === 0 && side === 'outputs' ? (
         <p className="block-inspector__hint">No outputs yet.</p>
       ) : !managing && ports.length > 0 && visiblePorts.length === 0 ? (
         <p className="block-inspector__hint">All {ports.length} hidden — manage to show.</p>
@@ -1004,6 +1108,7 @@ function PortSection({
         <ul
           ref={listRef}
           className={`block-inspector__ports${managing ? ' block-inspector__ports--managed' : ''}${dragging ? ' is-dragging' : ''}`}
+			id={`inspector-ports-${side}`}
           data-testid={`inspector-ports-${side}`}
         >
           {items.map((item, index) => <Fragment key={index}>{item}</Fragment>)}
@@ -1043,10 +1148,10 @@ export function BlockInspectorContent({
   initialTab = 'details',
   onRequestClose,
   pill,
+  semanticTagsVisible = true,
 }: BlockInspectorContentProps) {
   const [tab, setTab] = useState<InspectorTab>(initialTab)
   const readOnly = !actions
-  const unsupportedControlTitle = 'Tags are intentionally future scope for this Block development profile'
 
   return (
     <section className="block-inspector" aria-label="Block inspector" data-status={status}>
@@ -1145,22 +1250,6 @@ export function BlockInspectorContent({
             />
           </section>
 
-          <section className="block-inspector__section" data-inspector-section="Tags">
-            <div className="block-inspector__section-title">Tags</div>
-            <button
-              type="button"
-              className="block-inspector__tag-ghost"
-              aria-disabled="true"
-              aria-label="Tag assignment is not available in this Block model"
-              title={unsupportedControlTitle}
-              tabIndex={-1}
-              onClick={() => {}}
-            >
-              <PlusIcon />
-              Add tags
-            </button>
-          </section>
-
             </>
           )}
 
@@ -1186,8 +1275,8 @@ export function BlockInspectorContent({
                 </p>
               </section>
 
-              <PortSection side="inputs" props={props} actions={actions} />
-              <PortSection side="outputs" props={props} actions={actions} />
+              <PortSection side="inputs" props={props} actions={actions} semanticTagsVisible={semanticTagsVisible} />
+              <PortSection side="outputs" props={props} actions={actions} semanticTagsVisible={semanticTagsVisible} />
 
               <section className="block-inspector__section" data-inspector-section="Ports">
                 <div className="block-inspector__section-title">Ports</div>
@@ -1239,6 +1328,11 @@ export function EditorBlockInspector({
   onToolDraftChange,
   onRequestClose,
 }: EditorBlockInspectorProps) {
+	const semanticTagsVisible = useValue(
+		'SystemSketch semantic tag canvas visibility',
+		() => getSemanticTagsVisible(editor),
+		[editor],
+	)
   const context = useValue(
     'SystemSketch Block inspector context',
     (previous?: unknown) => {
@@ -1304,6 +1398,7 @@ export function EditorBlockInspector({
         adoptConnectedType: () => void adoptConnectedPillType(editor, id),
         beginEdit: (label) => void editor.markHistoryStoppingPoint(label),
         commitTitle: () => commitBlockDefinitionName(editor, id),
+			setSemanticTagsVisible: (visible) => setSemanticTagsVisible(editor, visible),
       }
     }
     if (context.kind !== 'tool' || !onToolDraftChange) return undefined
@@ -1362,6 +1457,7 @@ export function EditorBlockInspector({
       status={context.kind === 'selected' ? 'selected' : 'new'}
       actions={actions}
       pill={pillFacts}
+		semanticTagsVisible={semanticTagsVisible}
       onRequestClose={onRequestClose}
     />
   )

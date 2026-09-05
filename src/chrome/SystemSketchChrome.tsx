@@ -46,8 +46,15 @@ import {
 } from '../branch'
 import { EditorLoopInspector, getOnlySelectedLoop } from '../loop'
 import { DepthStackNavigator } from '../depth/DepthStackNavigator'
+import {
+  PropagationFocusControls,
+  PropagationFocusDomLens,
+  propagationSeedFromSelection,
+  usePropagationFocus,
+} from '../propagation'
 import { PortableShareButton } from '../export/PortableShareButton'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
+import { PrimitiveSearch } from '../library/PrimitiveSearch'
 import { BoardOverview } from './BoardOverview'
 import { LocalCommentsPanel } from '../comments'
 import { BoardDiagnosticsPanel } from '../diagnostics'
@@ -74,16 +81,6 @@ import type { RightSurface } from './chromeState'
 import { CommunicationPrototypeControls } from '../prototypes/communication/CommunicationPrototypeControls'
 import './systemsketch-chrome.css'
 
-function ShapesIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true">
-      <rect x="3" y="3" width="6" height="6" rx="1" />
-      <circle cx="14" cy="6" r="3" />
-      <path d="m6 12 3.5 5H2.5L6 12Zm6 0h5v5h-5z" />
-    </svg>
-  )
-}
-
 function PanelIcon() {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true">
@@ -93,50 +90,20 @@ function PanelIcon() {
   )
 }
 
-function CommandIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true">
-      <path d="M7 5.5a2.5 2.5 0 1 0-2.5 2.5H15.5A2.5 2.5 0 1 0 13 5.5v9a2.5 2.5 0 1 0 2.5-2.5H4.5A2.5 2.5 0 1 0 7 14.5v-9Z" />
-    </svg>
-  )
-}
-
 export function SystemSketchMenuPanel() {
   const { MainMenu } = useTldrawUiComponents()
-  const { leftSurface, toggleLeft, toolbarSurface, setToolbar } = useChrome()
   const ref = useRef<HTMLElement>(null)
   usePassThroughWheelEvents(ref)
   return (
     <nav
       ref={ref}
       className="systemsketch-top-left-shell"
-      aria-label="Board, depth, and library"
+      aria-label="Board and depth navigation"
       data-testid="systemsketch-top-left-shell"
       data-systemsketch-chrome
     >
       {MainMenu ? <MainMenu /> : null}
       <DepthStackNavigator placement="menu" />
-      <TldrawUiButton
-        type="icon"
-        className="systemsketch-shell-icon-button systemsketch-shapes-button"
-        title="Shapes library"
-        aria-expanded={leftSurface === 'shapes'}
-        aria-controls={leftSurface === 'shapes' ? 'systemsketch-left-popout' : undefined}
-        onClick={() => toggleLeft('shapes')}
-      >
-        <ShapesIcon />
-      </TldrawUiButton>
-      <TldrawUiButton
-        type="icon"
-        className="systemsketch-shell-icon-button systemsketch-command-button"
-        title="Search and commands (Ctrl+P)"
-        aria-label="Search and commands"
-        aria-keyshortcuts="Control+P Meta+P"
-        aria-expanded={toolbarSurface !== null}
-        onClick={() => setToolbar(toolbarSurface ? null : 'commands')}
-      >
-        <CommandIcon />
-      </TldrawUiButton>
     </nav>
   )
 }
@@ -326,6 +293,12 @@ function SelectionMiniMenu() {
     () => canWrapSelection(editor),
     [editor],
   )
+  const propagationSeed = useValue(
+    'systemsketch propagation focus seed',
+    () => propagationSeedFromSelection(editor),
+    [editor],
+  )
+  const propagationFocus = usePropagationFocus(editor)
   const runTidyEdges = () => {
     const outcome = tidyEdges(editor)
     addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
@@ -338,9 +311,21 @@ function SelectionMiniMenu() {
     || hasBlockMiniMenu
     || hasAppearance
     || canWrap
+    || propagationSeed !== null
     || layoutActions.tidyEdges
     || layoutActions.organizeNodes
   if (!canShow || !hasVisibleActions) return null
+
+  if (propagationFocus.seedId !== null) {
+    return (
+      <SelectionContextualMenu
+        className="systemsketch-selection-menu systemsketch-selection-menu--focus"
+        label="Propagation focus controls"
+      >
+        <PropagationFocusControls />
+      </SelectionContextualMenu>
+    )
+  }
 
   if (hasBranch) {
     return (
@@ -373,6 +358,7 @@ function SelectionMiniMenu() {
             onTidyEdges={runTidyEdges}
             onOrganizeNodes={() => void runOrganizeNodes()}
           />
+          <PropagationFocusControls />
         </>
       ) : (
         <>
@@ -387,6 +373,7 @@ function SelectionMiniMenu() {
             onTidyEdges={runTidyEdges}
             onOrganizeNodes={() => void runOrganizeNodes()}
           />
+          <PropagationFocusControls />
         </>
       )}
     </SelectionContextualMenu>
@@ -670,10 +657,12 @@ export function SystemSketchSurfaceHost() {
   return (
     <div className="systemsketch-surface-host" data-testid="systemsketch-surface-host">
       <CommunicationPrototypeControls />
+      <PropagationFocusDomLens />
       <RecorderIndicator />
       <TunnelLayerBar />
       <OnCanvasBlockPicker />
       <HitAreaOverlay />
+      <PrimitiveSearch />
       {leftSurface ? (
         <aside
           id="systemsketch-left-popout"

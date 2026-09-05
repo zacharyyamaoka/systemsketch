@@ -57,7 +57,7 @@
     }
 
     .page {
-      width: min(1500px, calc(100% - 32px));
+      width: min(1600px, calc(100% - 24px));
       margin: 0 auto;
     }
 
@@ -843,14 +843,14 @@
 
     .variant-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: minmax(0, 1fr);
       gap: 22px;
       padding: 24px 0 32px;
     }
 
     .variant-grid.focus-layout {
-      grid-template-columns: minmax(0, 1080px);
-      justify-content: center;
+      grid-template-columns: minmax(0, 1fr);
+      justify-content: stretch;
     }
 
     .variant-grid.focus-layout .variant-card:not(.is-focused) {
@@ -861,7 +861,7 @@
       --accent: #222;
       position: relative;
       min-width: 0;
-      overflow: hidden;
+      overflow: visible;
       border: 1px solid var(--line-strong);
       border-top: 5px solid var(--accent);
       border-radius: 7px;
@@ -959,9 +959,11 @@
 
     .prototype-frame {
       position: relative;
-      min-height: 288px;
+      min-height: 520px;
+      max-height: min(78vh, 920px);
       margin: 0 18px;
-      overflow: hidden;
+      padding-top: 36px;
+      overflow: auto;
       border: 1px solid #bbb3a7;
       border-radius: 5px;
       background: #e9e6df;
@@ -985,6 +987,8 @@
 
     .prototype {
       min-height: 288px;
+      width: max-content;
+      min-width: 100%;
     }
 
     .story-driver {
@@ -1117,13 +1121,16 @@
     .prototype video,
     .prototype canvas,
     .prototype iframe,
+    .prototype svg,
     .media-surface img,
     .media-surface video,
     .media-surface canvas,
-    .media-surface iframe {
+    .media-surface iframe,
+    .media-surface svg {
       display: block;
-      width: 100%;
-      max-width: 100%;
+      width: auto;
+      max-width: none;
+      height: auto;
     }
 
     .media-story {
@@ -1140,7 +1147,7 @@
     .media-exhibit {
       min-width: 0;
       margin: 0;
-      overflow: hidden;
+      overflow: auto;
       border: 1px solid var(--line);
       border-radius: 5px;
       background: var(--soft);
@@ -1148,7 +1155,8 @@
 
     .media-surface {
       min-height: 142px;
-      overflow: hidden;
+      max-height: min(70vh, 820px);
+      overflow: auto;
       background: #e9e6df;
     }
 
@@ -1782,7 +1790,7 @@
         linear-gradient(#f5f8f6, #dce5e1);
     }
 
-    .stage > svg {
+    .spatial-replay .stage > svg {
       position: absolute;
       inset: 22px 5px 0;
       width: calc(100% - 10px);
@@ -2494,8 +2502,8 @@
           <p>Interact with the variants. Scores and AI judgment come afterward.</p>
         </div>
         <div class="toolbar" aria-label="Gallery layout">
-          <button class="tool-button active" type="button" data-layout="grid">Grid</button>
-          <button class="tool-button" type="button" data-layout="focus">Focus</button>
+          <button class="tool-button" type="button" data-layout="grid">Grid</button>
+          <button class="tool-button active" type="button" data-layout="focus">Focus</button>
           <button class="tool-button" type="button" id="previous-variant" aria-label="Previous variant">←</button>
           <button class="tool-button" type="button" id="next-variant" aria-label="Next variant">→</button>
         </div>
@@ -3370,7 +3378,7 @@
         notes: {},
         synthesis: "",
         focusIndex: 0,
-        layout: "grid"
+        layout: "focus"
       });
 
       let state = blankState();
@@ -3410,7 +3418,7 @@
         setStoryStep(card, 0, { stopPlayback: false });
       });
       byId("global-synthesis").value = state.synthesis;
-      setLayout(state.layout || "grid");
+      setLayout(state.layout || "focus");
       updateUi();
 
       function escapeHtml(value) {

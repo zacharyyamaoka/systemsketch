@@ -57,17 +57,24 @@ function overviewEditor() {
     [PAGE_A, new Set(shapes.filter((item) => item.parentId === PAGE_A).map((item) => item.id))],
     [PAGE_B, new Set(shapes.filter((item) => item.parentId === PAGE_B).map((item) => item.id))],
   ])
+  let currentPageId = PAGE_A
+  let selection: TLShapeId[] = [shapes[2].id]
+  const camera = { id: 'camera:page:architecture' as const, typeName: 'camera' as const, x: 0, y: 0, z: 1, meta: {} }
   const editor = {
     getPages: () => pages,
     getPage: (id: TLPageId) => pages.find((page) => page.id === id),
-    getCurrentPageId: () => PAGE_A,
-    getSelectedShapeIds: () => [shapes[2].id],
+    getCurrentPageId: () => currentPageId,
+    getCurrentPage: () => pages.find((page) => page.id === currentPageId)!,
+    getSelectedShapeIds: () => selection,
     getPageShapeIds: (page: TLPageId | TLPage) => byPage.get(typeof page === 'string' ? page : page.id) ?? new Set(),
     getShape: (id: TLShapeId) => byId.get(id),
-    setCurrentPage: vi.fn(),
+    getAncestorPageId: (candidate: TLShape) => candidate.parentId as TLPageId,
+    setCurrentPage: vi.fn((next: TLPageId) => { currentPageId = next }),
     setCurrentTool: vi.fn(),
-    select: vi.fn(),
-    selectNone: vi.fn(),
+    select: vi.fn((...ids: TLShapeId[]) => { selection = ids }),
+    selectNone: vi.fn(() => { selection = [] }),
+    getCamera: () => camera,
+    setCamera: vi.fn(),
     getShapePageBounds: vi.fn(() => ({ x: 20, y: 30, w: 400, h: 260 })),
     zoomToBounds: vi.fn(),
     zoomToFit: vi.fn(),
@@ -103,7 +110,7 @@ describe('live board overview', () => {
     expect(editor.select).toHaveBeenCalledWith(target.id)
     expect(editor.zoomToBounds).toHaveBeenCalledWith(
       { x: 20, y: 30, w: 400, h: 260 },
-      { inset: 72, animation: { duration: 220 } },
+      { inset: 84, animation: { duration: 260 } },
     )
   })
 
@@ -112,6 +119,6 @@ describe('live board overview', () => {
     expect(focusBoardOverviewPage(editor, PAGE_B)).toBe(true)
     expect(editor.setCurrentPage).toHaveBeenCalledWith(PAGE_B)
     expect(editor.selectNone).toHaveBeenCalledOnce()
-    expect(editor.zoomToFit).toHaveBeenCalledWith({ animation: { duration: 220 } })
+    expect(editor.zoomToFit).toHaveBeenCalledWith({ animation: { duration: 260 } })
   })
 })

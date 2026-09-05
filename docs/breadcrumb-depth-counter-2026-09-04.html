@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>SystemSketch · Breadcrumb depth counter</title>
+<style>
+  :root { color-scheme: dark; font: 16px/1.5 Inter, system-ui, sans-serif; background:#12151a; color:#edf1f7; }
+  body { max-width:1100px; margin:0 auto; padding:42px 24px 70px; }
+  h1 { font-size:clamp(2rem,5vw,3.8rem); line-height:1; margin:0 0 14px; }
+  .lede { max-width:720px; color:#b9c2d0; font-size:1.15rem; }
+  figure { margin:32px 0; border:1px solid #3a4352; border-radius:16px; overflow:hidden; background:#202632; }
+  img { display:block; width:100%; height:auto; }
+  figcaption { padding:14px 18px; color:#c2cbd8; }
+  .proof { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-top:24px; }
+  .proof article { border:1px solid #3a4352; border-radius:12px; padding:16px; background:#1a1f28; }
+  .proof b { color:#9fd7ff; }
+  code { color:#a8e5b5; } a { color:#9fd7ff; }
+</style>
+<main>
+  <h1>Depth is the path control.</h1>
+  <p class="lede">A small number at the end of the structural breadcrumb now states the current zero-based depth and is the sole hit target for the complete ancestor path. The disclosure is deliberately anchored to the current crumb, not to the broad application bar.</p>
+  <figure>
+    <img src="assets/breadcrumb-depth-counter-smoke-2026-09-04.png" alt="Real SystemSketch browser screenshot: a compact Board breadcrumb ending in Dispatch, depth counter 4, and structural-path panel aligned to Dispatch's left edge.">
+    <figcaption>Real-browser capture from the depth-four fixture. The compact line retains Board, the immediate parent, and Dispatch; the one ellipsis represents the earliest hidden descendants. The open panel begins at Dispatch’s left edge and the counter is its only disclosure control.</figcaption>
+  </figure>
+  <section class="proof">
+    <article><b>Counter</b><br>The browser journey asserts the visible counter matches <code>data-depth</code>; at parent scope it reads <code>3</code>, with Board/root at 0.</article>
+    <article><b>Geometry</b><br>The same journey measures a <code>0 px</code> delta between the open panel’s left edge and the current crumb at a collision-safe desktop position.</article>
+    <article><b>Ordering</b><br>Unit and browser checks assert that compaction removes level 1 first, preserving root plus immediate parent/current and emitting one accessible ellipsis.</article>
+  </section>
+  <p><a href="../tests/depth_breadcrumb_navigation_smoke.mjs">Read the real-browser journey</a> · <a href="breadcrumb-full-path-2026-09-04.html">Previous full-path gallery</a></p>
+</main>

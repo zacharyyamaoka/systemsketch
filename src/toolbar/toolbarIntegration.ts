@@ -12,6 +12,7 @@ import { isDrawingArrowWithArrowTool } from '../arrowClickToPlace'
 import { withBlockTool } from '../blocks/blockToolUi'
 import { withBranchTool } from '../branch/branchToolUi'
 import { withLoopTool } from '../loop/loopToolUi'
+import { withCalloutTool } from '../callout'
 import { CONNECTION_SHAPE_TYPE, ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
 import {
   arrowPresetForActivation,
@@ -250,12 +251,12 @@ function overrideTools(
 }
 
 /**
- * Block, Branch and Pill share one toolbar slot, so the slot has to remember
+ * Block, Branch, Pill and Callout share one toolbar slot, so the slot has to remember
  * which of them was picked last — exactly as the shape slot remembers its geo.
  */
 function rememberSystemTools(tools: TLUiToolsContextType): TLUiToolsContextType {
   const next: TLUiToolsContextType = { ...tools }
-  for (const id of ['block', 'branch', 'loop', 'pill'] as const satisfies readonly SystemFamilyTool[]) {
+  for (const id of ['block', 'branch', 'loop', 'pill', 'callout'] as const satisfies readonly SystemFamilyTool[]) {
     const wrapped = wrapTool(tools[id], () => updateToolbarPreferences({ lastSystemTool: id }))
     if (wrapped) next[id] = wrapped
   }
@@ -264,8 +265,8 @@ function rememberSystemTools(tools: TLUiToolsContextType): TLUiToolsContextType 
 
 export const SYSTEMSKETCH_TOOLBAR_OVERRIDES: TLUiOverrides = {
   tools: (editor, tools) =>
-    rememberSystemTools(withLoopTool(editor,
-      withBranchTool(editor, withBlockTool(editor, overrideTools(editor, tools))))),
+    rememberSystemTools(withCalloutTool(editor, withLoopTool(editor,
+      withBranchTool(editor, withBlockTool(editor, overrideTools(editor, tools)))))),
   translations: {
     en: {
       // Stock frame removal reparents children out before deleting the

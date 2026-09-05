@@ -22,6 +22,7 @@ import {
   installBranchRegions,
 } from './branch'
 import { LoopShapeUtil, LoopTool } from './loop'
+import { CalloutAddLeaderTool, CalloutTool } from './callout'
 import {
   blockConnectionBindingUtils,
   blockConnectionShapeUtils,
@@ -98,7 +99,7 @@ const SYSTEMSKETCH_SHAPE_UTILS = [
   ...blockConnectionShapeUtils,
 ]
 const SYSTEMSKETCH_BINDING_UTILS = [...blockConnectionBindingUtils]
-const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool]
+const SYSTEMSKETCH_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool, CalloutTool, CalloutAddLeaderTool]
 const STOCK_DEVELOPMENT_COMPONENTS = {
   InFrontOfTheCanvas: DevelopmentPreviewChrome,
 }
@@ -117,7 +118,7 @@ const BLOCK_DEVELOPMENT_SHAPE_UTILS = [
   LoopShapeUtil,
   ...blockConnectionShapeUtils,
 ]
-const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool]
+const BLOCK_DEVELOPMENT_TOOLS = [BlockTool, BranchTool, LoopTool, PillTool, CalloutTool, CalloutAddLeaderTool]
 const BLOCK_DEVELOPMENT_BINDING_UTILS = [...blockConnectionBindingUtils]
 
 /**

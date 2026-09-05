@@ -19,6 +19,7 @@ import {
   installBlockPortMenuTarget,
   installDefinitionLinking,
 } from '../blocks'
+import { CalloutAddLeaderTool, CalloutTool } from '../callout'
 import { BlockContextMenu } from '../blocks/ui'
 import {
   BranchArmShapeUtil,
@@ -126,7 +127,7 @@ const EMBEDDED_SHAPE_UTILS = [
   ...blockConnectionShapeUtils,
 ]
 const EMBEDDED_BINDING_UTILS = [...blockConnectionBindingUtils]
-const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool]
+const EMBEDDED_TOOLS = [BlockTool, BranchTool, PillTool, CalloutTool, CalloutAddLeaderTool]
 
 /** Long enough that a drag is one write, short enough that a pause is saved. */
 const CHANGE_DEBOUNCE_MS = 250

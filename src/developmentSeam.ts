@@ -1,5 +1,6 @@
 import { serializeTldrawJson, type Editor } from 'tldraw'
 import { renderWithStockTldraw } from './export/stockTldrawPrimitives'
+import { getPropagationRelationMetrics } from './propagation'
 
 /**
  * A read-only development seam for the browser journeys.
@@ -28,6 +29,8 @@ export interface SystemSketchDevelopmentSeam {
 	renderStockTldraw(json: string): Promise<string>
 	/** Serialize the live board for a default-renderer proof. */
 	serializeTldraw(): Promise<string>
+	/** Connection-lens observer metrics for the no-page-scan browser regression. */
+	propagationRelationMetrics(): { connections: number; pageShapeReads: number; publishes: number }
 }
 
 declare global {
@@ -54,6 +57,7 @@ export function installDevelopmentSeam(editor: Editor): () => void {
 			}
 		},
 		serializeTldraw: () => serializeTldrawJson(editor),
+		propagationRelationMetrics: () => getPropagationRelationMetrics(editor),
 	}
 
 	return () => {

@@ -161,6 +161,32 @@ function samePort(port: BlockPort | undefined, wanted: BlockPort): boolean {
 		&& port.defaultValue === undefined
 		&& port.row === undefined
 		&& port.branch === undefined
+		&& sameSemanticClaims(port, wanted)
+}
+
+function sameSemanticClaims(a: BlockPort, b: BlockPort): boolean {
+	return a.semanticRoleDerived?.role === b.semanticRoleDerived?.role
+		&& a.semanticRoleDerived?.source === b.semanticRoleDerived?.source
+		&& a.semanticRoleDerived?.analyzer === b.semanticRoleDerived?.analyzer
+		&& a.semanticRoleAuthored?.role === b.semanticRoleAuthored?.role
+		&& a.semanticRoleAuthored?.source === b.semanticRoleAuthored?.source
+		&& a.semanticRoleAuthored?.analyzer === b.semanticRoleAuthored?.analyzer
+}
+
+/**
+ * A pill mirrors its name/type, but its inlet and outlet are different semantic
+ * directions. Keep each terminal's claims with that terminal; never copy an
+ * input claim onto an output merely because the capsule normalised its label.
+ */
+function preservedPillPort(existing: BlockPort | undefined, fallbackId: string, name: string, type: string): BlockPort {
+	return {
+		id: existing?.id ?? fallbackId,
+		name,
+		type,
+		visible: true,
+		...(existing?.semanticRoleDerived ? { semanticRoleDerived: existing.semanticRoleDerived } : {}),
+		...(existing?.semanticRoleAuthored ? { semanticRoleAuthored: existing.semanticRoleAuthored } : {}),
+	}
 }
 
 /**
@@ -216,8 +242,8 @@ export function normalizeValueBlockProps(
 		? (explicitTypeChanged && kept !== '' ? kept : (inferred !== '' ? inferred : kept))
 		: (kept !== '' ? kept : inferred)
 
-	const outlet: BlockPort = { id: outletExisting?.id ?? 'out_1', name, type, visible: true }
-	const inlet: BlockPort = { id: inletExisting?.id ?? 'in_1', name, type, visible: true }
+	const outlet = preservedPillPort(outletExisting, 'out_1', name, type)
+	const inlet = preservedPillPort(inletExisting, 'in_1', name, type)
 
 	const size = valueBlockSize(valueBlockLabel({ ...unlinkedProps, outputs: [outlet] }))
 	const unchanged = props.inputs.length === 1

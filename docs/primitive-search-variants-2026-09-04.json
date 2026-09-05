@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 3,
+  "title": "Three cursor-local primitive searches",
+  "kicker": "Babble & Prune · SystemSketch",
+  "brief": "Press S on the canvas to search only the canonical primitive library in a compact surface beside the pointer, choose with the keyboard, then draw with the matching stock tool without opening the command palette.",
+  "count": 3,
+  "defaultId": "v1",
+  "defaultWhy": "Cursor Stack is the provisional implementation choice at 96/100. It is the only direction that keeps the Fusion-style pointer anchor, exposes enough labeled matches to disambiguate primitives, and makes ArrowDown + Enter obvious without growing into a command modal.",
+  "decisionHinge": "The recommendation depends on labeled discovery mattering more than absolute minimum footprint. Moving about 17 weight points from Primitive discovery fidelity to Compact canvas continuity flips the recommendation to One-Line Rail; that would be appropriate if the catalog becomes familiar enough that users rarely need to compare matches.",
+  "invariants": [
+    "Plain S opens beside the latest canvas pointer only when normal canvas shortcuts are eligible.",
+    "Results come from the existing SHAPE_LIBRARY_ITEMS catalog; commands and board text never enter the result set.",
+    "The same pointer, query 'arrow', and three matching primitives are used in every direction.",
+    "Ctrl/Cmd+P, Ctrl/Cmd+K, and Ctrl/Cmd+F retain the existing large command/find modal."
+  ],
+  "boundary": "The gallery runs the open → filter → arm state machines with realistic SystemSketch content. Pointer capture, the following tldraw drawing gesture, undo, focus restoration, viewport collision, and production hotkey guards remain simulated here and are verified only in the implemented app.",
+  "axes": [
+    {
+      "name": "Result model",
+      "values": ["ranked vertical list", "visual tile constellation", "one-result horizontal rail"]
+    },
+    {
+      "name": "Canvas footprint",
+      "values": ["moderate and bounded", "wide around the pointer", "minimal single row"]
+    },
+    {
+      "name": "Selection grammar",
+      "values": ["ArrowUp/Down then Enter", "two-dimensional arrows or click", "Tab/ArrowLeft/Right then Enter"]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "fr1",
+      "name": "Pointer-local speed",
+      "weight": 35,
+      "why": "The Fusion-inspired advantage is avoiding a trip to global chrome: the search should appear where attention and the intended drawing already are.",
+      "passCondition": "From a canvas pointer position, the user can open search and reach a likely primitive without moving their gaze to a distant modal.",
+      "anchors": {
+        "1": "Search opens away from the working point or needs pointer travel before typing.",
+        "3": "Search is near the work but adds a detour or unstable anchoring.",
+        "5": "One unmodified key opens a stable, immediately focused search beside the pointer."
+      }
+    },
+    {
+      "id": "fr2",
+      "name": "Primitive discovery fidelity",
+      "weight": 25,
+      "why": "A small surface still has to distinguish similar catalog entries such as straight, curved, and elbow arrows without leaking unrelated commands into the list.",
+      "passCondition": "The filtered result set shows only canonical library primitives and provides enough name/category/icon context to choose the intended one.",
+      "anchors": {
+        "1": "Results mix in commands or conceal which primitive tool will be armed.",
+        "3": "Results are scoped correctly but comparison or naming is weak.",
+        "5": "Multiple similar primitive matches are compact, clearly labeled, and easy to compare."
+      }
+    },
+    {
+      "id": "fr3",
+      "name": "Compact canvas continuity",
+      "weight": 20,
+      "why": "The new surface exists specifically to avoid the current large modal and should preserve the spatial context of the function being edited.",
+      "passCondition": "The search remains visually subordinate to the board, occupies only the space its current results need, and stays inside the viewport.",
+      "anchors": {
+        "1": "The surface reads as another modal or obscures most of the working context.",
+        "3": "The board remains recognizable, but the surface is larger than its task requires.",
+        "5": "Only a small cursor-adjacent region is covered and the intended drawing context stays legible."
+      }
+    },
+    {
+      "id": "fr4",
+      "name": "Confident keyboard handoff",
+      "weight": 20,
+      "why": "The interaction should stay in the keyboard flow that plain S starts while making the selected result and handoff to the drawing tool unambiguous.",
+      "passCondition": "Typing filters, keyboard navigation visibly moves one active result, Enter arms its real drawing tool without creating a shape, and Escape cancels.",
+      "anchors": {
+        "1": "Selection or the armed tool is ambiguous and the keyboard path is incomplete.",
+        "3": "Keyboard handoff works but requires learning hidden focus or navigation behavior.",
+        "5": "Focus, active result, Enter, Escape, and the following canvas gesture are all evident in the surface."
+      }
+    }
+  ],
+  "hardGates": [
+    {
+      "id": "g1",
+      "name": "Canonical primitive-only catalog",
+      "why": "A second catalog would drift, while command results would violate the requested scope."
+    },
+    {
+      "id": "g2",
+      "name": "Canvas-safe S and separate command modal",
+      "why": "Typing in inputs or shape editors must remain typing, and existing Ctrl/Cmd command/find shortcuts must keep their established surface."
+    }
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "Cursor Stack",
+      "thesis": "A Fusion-like search field grows downward into a short ranked list, keeping labels and keyboard selection directly under the pointer.",
+      "accent": "#e36b3d",
+      "bestWhen": "People need to compare several similarly named primitives and want a familiar typeahead list with no pointer travel.",
+      "losesWhen": "The library becomes so familiar that showing more than one result at a time feels wasteful.",
+      "decisions": [
+        {"label": "Primary model", "value": "A six-row maximum ranked list attached to the search field."},
+        {"label": "Position", "value": "The invocation point is the upper-left anchor; the stack flips or clamps at viewport edges."},
+        {"label": "Selection", "value": "ArrowUp/Down moves a strong active row; Enter arms that primitive's real drawing tool."}
+      ],
+      "keepParts": ["pointer-local anchor", "ranked labeled rows", "ArrowDown + Enter footer hint"],
+      "proof": [
+        "The live hero moves through hidden, filtered-list, and tool-armed states from either the walkthrough or direct controls.",
+        "The three arrow matches remain simultaneously comparable while the board and function card stay visible."
+      ],
+      "previewLabel": "interactive cursor stack",
+      "story": {
+        "title": "Search and arm without leaving the pointer",
+        "steps": [
+          {"label": "Press S at the function", "caption": "The pointer is already inside normalize(); S opens a focused field at that exact screen point.", "state": "closed", "target": "[data-story-to='results']"},
+          {"label": "Type arrow", "caption": "Only three canonical library primitives appear, with the best match visibly active.", "state": "results", "target": "[data-story-to='inserted']"},
+          {"label": "Press Enter", "caption": "The compact surface disappears and the active Straight arrow tool is armed; no shape exists until the next canvas gesture.", "state": "inserted", "target": "[data-story-to='closed']"}
+        ]
+      },
+      "scores": {
+        "fr1": {"score": 5, "evidence": "The field and result stack share the pointer anchor inside the function card; no global chrome enters the path.", "confidence": "high"},
+        "fr2": {"score": 5, "evidence": "All three arrow types remain visible together with icons, names, categories, and a singular active row.", "confidence": "high"},
+        "fr3": {"score": 4, "evidence": "The 292×190 stack preserves most of the board, though it covers more canvas than the one-result rail.", "confidence": "high"},
+        "fr4": {"score": 5, "evidence": "Focus, active row, ArrowUp/Down, Enter, Escape, and the handoff to an armed drawing tool are all explicitly represented.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "Every shown result maps to an existing arrow item in SHAPE_LIBRARY_ITEMS; no command appears."},
+        "g2": {"pass": true, "evidence": "The concept labels plain S as canvas-only and leaves command/find shortcuts in their existing global modal."}
+      },
+      "preview": "<style>.ps-stage{position:relative;min-height:340px;overflow:hidden;border-radius:18px;background-color:#f8fafc;background-image:radial-gradient(#cbd5e1 1px,transparent 1px);background-size:22px 22px;color:#172033;font:13px Inter,system-ui,sans-serif}.ps-function{position:absolute;left:72px;top:64px;width:310px;height:200px;border:2px solid #7b8da6;border-radius:14px;background:rgba(255,255,255,.82);box-shadow:0 9px 26px rgba(55,65,81,.08)}.ps-function header{padding:12px 15px;border-bottom:1px solid #d8e0e9;font-weight:750}.ps-function small{display:block;color:#738198;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.ps-port{position:absolute;left:-7px;top:86px;width:12px;height:12px;border:2px solid #fff;border-radius:50%;background:#7892b4}.ps-wire{position:absolute;left:0;top:156px;width:72px;border-top:3px solid #e36b3d}.ps-cursor{position:absolute;left:232px;top:134px;width:18px;height:24px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}.ps-popup{position:absolute;z-index:3;width:292px;border:1px solid #cad3df;border-radius:11px;background:#fff;box-shadow:0 18px 45px rgba(28,39,55,.2),0 2px 7px rgba(28,39,55,.12);overflow:hidden}.ps-search{height:42px;display:flex;align-items:center;gap:8px;padding:0 11px;border-bottom:1px solid #e4e9ef}.ps-search b{color:#e36b3d}.ps-search span{flex:1;font-weight:650}.ps-search kbd,.ps-hint kbd{padding:2px 5px;border:1px solid #d9e0e8;border-radius:5px;background:#f5f7f9;color:#66758a;font:10px ui-monospace,monospace}.ps-row{display:grid;grid-template-columns:30px 1fr auto;align-items:center;min-height:42px;padding:0 10px;border-left:3px solid transparent}.ps-row.active{border-left-color:#e36b3d;background:#fff1eb}.ps-icon{display:grid;width:25px;height:25px;place-items:center;border-radius:7px;background:#edf1f5;font-size:17px}.ps-row strong{display:block;font-size:12px}.ps-row small{color:#7c8797;font-size:10px}.ps-hint{display:flex;justify-content:space-between;padding:7px 10px;border-top:1px solid #eef1f4;color:#7c8797;font-size:10px}.ps-direct{position:absolute;left:16px;bottom:15px;z-index:5;display:flex;gap:7px}.ps-direct button{border:1px solid #ccd5df;border-radius:8px;background:#fff;padding:7px 10px;color:#26364a;font:700 11px inherit;box-shadow:0 2px 5px rgba(31,41,55,.08);cursor:pointer}.ps-direct button:hover{border-color:#e36b3d}.prototype[data-story-state='closed'] .ps-popup{display:none}.prototype[data-story-state='results'] .ps-inserted,.prototype[data-story-state='closed'] .ps-inserted{display:none}.prototype[data-story-state='inserted'] .ps-popup{display:none}.ps-inserted{position:absolute;left:430px;top:246px;padding:8px 12px;border:1px solid #e36b3d;border-radius:10px;background:#fff;color:#9a3f1d;font-size:11px;font-weight:800;box-shadow:0 5px 14px rgba(28,39,55,.12)}.ps-stack .ps-popup{left:244px;top:146px}.ps-grid .ps-popup{left:146px;top:132px;width:346px}.ps-rail .ps-popup{left:170px;top:144px;width:380px}.ps-tiles{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:9px}.ps-tile{min-height:70px;border:1px solid #e1e7ee;border-radius:9px;padding:8px;background:#fafbfd;text-align:left}.ps-tile.active{border-color:#4e7aa8;box-shadow:0 0 0 2px #dbeafe}.ps-tile b{display:block;margin:4px 0 2px}.ps-rail-results{display:flex;align-items:center;gap:9px;padding:9px}.ps-rail-result{display:grid;grid-template-columns:28px 1fr auto;align-items:center;flex:1;min-width:0}.ps-rail-result strong{display:block}.ps-count{color:#7b8798;font-size:10px}.ps-stage .ps-pulse{position:absolute;left:220px;top:137px;width:32px;height:32px;border:2px solid rgba(227,107,61,.4);border-radius:50%}.prototype[data-story-state='closed'] .ps-pulse{display:none}</style><div class='ps-stage ps-stack'><div class='ps-function'><header><small>function</small>normalize_reading(value)</header><div class='ps-port'></div></div><div class='ps-wire'></div><div class='ps-pulse'></div><svg class='ps-cursor' viewBox='0 0 18 24' aria-hidden='true'><path d='M2 1 16 15l-7 1 4 6-3 1-4-7-4 5Z' fill='#182536' stroke='white' stroke-width='1.5'/></svg><div class='ps-popup'><div class='ps-search'><b>S</b><span>arrow</span><kbd>Esc</kbd></div><div class='ps-row active'><i class='ps-icon'>↗</i><span><strong>Straight arrow</strong><small>Connections</small></span><kbd>Enter</kbd></div><div class='ps-row'><i class='ps-icon'>⌁</i><span><strong>Curved arrow</strong><small>Connections</small></span><span></span></div><div class='ps-row'><i class='ps-icon'>↳</i><span><strong>Elbow arrow</strong><small>Connections</small></span><span></span></div><div class='ps-hint'><span>3 primitives</span><span><kbd>↑</kbd><kbd>↓</kbd> choose · <kbd>Enter</kbd> arm</span></div></div><div class='ps-inserted'>Straight arrow armed · draw next</div><div class='ps-direct'><button data-story-to='closed'>Reset</button><button data-story-to='results'>Press S + type arrow</button><button data-story-to='inserted'>Press Enter · arm</button></div></div>",
+      "media": [
+        {"label": "Why the search stays anchored", "caption": "Search can grow or flip beside the invocation point, then disappear while the armed tldraw tool gives final geometry back to the next canvas gesture.", "html": "<div style='min-height:132px;display:grid;place-items:center;border-radius:14px;background:#f7f9fb;color:#26364a'><div style='display:flex;align-items:center;gap:12px'><span style='width:44px;height:44px;border:2px solid #e36b3d;border-radius:50%;display:grid;place-items:center'>S</span><span>local search</span><b>→</b><span style='padding:12px 16px;border:1px solid #ccd5df;border-radius:10px;background:white'>tool armed · draw next</span></div></div>"}
+      ]
+    },
+    {
+      "id": "v2",
+      "name": "Icon Constellation",
+      "thesis": "A compact search field opens a two-dimensional icon grid around the pointer, favoring visual recognition over ranked reading.",
+      "accent": "#4e7aa8",
+      "bestWhen": "The catalog is visually distinctive and people remember the primitive's silhouette more readily than its exact name.",
+      "losesWhen": "Similar primitives need precise labels or the number of matches makes two-dimensional keyboard travel harder to predict.",
+      "decisions": [
+        {"label": "Primary model", "value": "A visual tile grid that uses the pointer as a local origin rather than a list edge."},
+        {"label": "Position", "value": "The tile field fans horizontally where there is room, then folds at a viewport edge."},
+        {"label": "Selection", "value": "Arrow keys move spatially between tiles; labels remain secondary to silhouettes."}
+      ],
+      "keepParts": ["large primitive glyphs", "category tint", "pointer-origin pulse"],
+      "proof": [
+        "The live hero reveals the same three arrow results as visual tiles and completes the same tool-armed state.",
+        "The wider footprint and two-dimensional navigation are visible rather than hidden in prose."
+      ],
+      "previewLabel": "interactive icon constellation",
+      "story": {
+        "title": "Recognize a primitive by silhouette",
+        "steps": [
+          {"label": "Press S at the function", "caption": "A local origin pulse marks where the visual picker will fan out.", "state": "closed", "target": "[data-story-to='results']"},
+          {"label": "Type arrow", "caption": "Three arrow silhouettes fill a two-column tile field; Straight arrow owns the blue focus ring.", "state": "results", "target": "[data-story-to='inserted']"},
+          {"label": "Press Enter", "caption": "The selected tile arms its real drawing tool and the constellation collapses without creating a shape.", "state": "inserted", "target": "[data-story-to='closed']"}
+        ]
+      },
+      "scores": {
+        "fr1": {"score": 4, "evidence": "The constellation opens around the pointer, but its width can place some results farther from the focal point.", "confidence": "high"},
+        "fr2": {"score": 4, "evidence": "Large silhouettes aid recognition, while a tile grid makes the three similar arrow labels less scannable than aligned rows.", "confidence": "high"},
+        "fr3": {"score": 4, "evidence": "The picker remains far smaller than the modal, though its 346px fan obscures more horizontal function context.", "confidence": "high"},
+        "fr4": {"score": 3, "evidence": "The active tile is clear, but two-dimensional arrow-key order and a partly empty final row add navigation ambiguity.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The same three canonical arrow items are represented; no command or board text is present."},
+        "g2": {"pass": true, "evidence": "The design assumes the same canvas-only S guard and does not replace the global command/find modal."}
+      },
+      "preview": "<div class='ps-stage ps-grid'><div class='ps-function'><header><small>function</small>normalize_reading(value)</header><div class='ps-port'></div></div><div class='ps-wire'></div><div class='ps-pulse'></div><svg class='ps-cursor' viewBox='0 0 18 24' aria-hidden='true'><path d='M2 1 16 15l-7 1 4 6-3 1-4-7-4 5Z' fill='#182536' stroke='white' stroke-width='1.5'/></svg><div class='ps-popup'><div class='ps-search'><b>S</b><span>arrow</span><kbd>Esc</kbd></div><div class='ps-tiles'><button class='ps-tile active'><span class='ps-icon'>↗</span><b>Straight arrow</b><small>Connections</small></button><button class='ps-tile'><span class='ps-icon'>⌁</span><b>Curved arrow</b><small>Connections</small></button><button class='ps-tile'><span class='ps-icon'>↳</span><b>Elbow arrow</b><small>Connections</small></button></div><div class='ps-hint'><span>3 primitives</span><span><kbd>←</kbd><kbd>→</kbd><kbd>↓</kbd> choose · <kbd>Enter</kbd></span></div></div><div class='ps-inserted'>Straight arrow armed · draw next</div><div class='ps-direct'><button data-story-to='closed'>Reset</button><button data-story-to='results'>Press S + type arrow</button><button data-story-to='inserted'>Press Enter · arm</button></div></div>",
+      "media": [
+        {"label": "Spatial selection order", "caption": "The diagram exposes the main risk: a visual grid is memorable by location, but keyboard order bends when the final row is incomplete.", "html": "<div style='min-height:132px;display:grid;place-items:center;border-radius:14px;background:#f7f9fb'><div style='display:grid;grid-template-columns:90px 90px;gap:8px;color:#26364a;text-align:center'><span style='padding:16px;border:2px solid #4e7aa8;border-radius:10px'>1 · ↗</span><span style='padding:16px;border:1px solid #ccd5df;border-radius:10px'>2 · ⌁</span><span style='padding:16px;border:1px solid #ccd5df;border-radius:10px'>3 · ↳</span><span style='padding:16px;border:1px dashed #ccd5df;border-radius:10px;color:#9aa7b6'>empty</span></div></div>"}
+      ]
+    },
+    {
+      "id": "v3",
+      "name": "One-Line Rail",
+      "thesis": "A single horizontal result rail shows only the current best match beside the field, minimizing occlusion and making cycling explicit.",
+      "accent": "#2e8a70",
+      "bestWhen": "People mostly know what they want, type distinctive queries, and care more about keeping the function visible than comparing several matches.",
+      "losesWhen": "A broad query returns similar primitives and the unseen alternatives matter to the choice.",
+      "decisions": [
+        {"label": "Primary model", "value": "One active result plus a 1-of-N counter rather than an exposed result set."},
+        {"label": "Position", "value": "A low, horizontal rail straddles the pointer and prefers the least occluding side."},
+        {"label": "Selection", "value": "Left/Right cycles matches; Enter arms the only visible candidate's real drawing tool."}
+      ],
+      "keepParts": ["1-of-N counter", "single-row footprint", "left/right cycling"],
+      "proof": [
+        "The live hero demonstrates the same open, query, and tool-armed states in the smallest rendered footprint.",
+        "The missing simultaneous comparison is honestly visible: only Straight arrow is rendered while the counter reports two hidden alternatives."
+      ],
+      "previewLabel": "interactive one-line rail",
+      "story": {
+        "title": "Arm from the smallest possible search",
+        "steps": [
+          {"label": "Press S at the function", "caption": "The function remains almost entirely visible because the search has no expanded result body.", "state": "closed", "target": "[data-story-to='results']"},
+          {"label": "Type arrow", "caption": "Only the best result appears; the 1 / 3 counter signals that Left/Right can cycle alternatives.", "state": "results", "target": "[data-story-to='inserted']"},
+          {"label": "Press Enter", "caption": "Enter arms the sole visible candidate without creating it and restores the full canvas for the drawing gesture.", "state": "inserted", "target": "[data-story-to='closed']"}
+        ]
+      },
+      "scores": {
+        "fr1": {"score": 5, "evidence": "The field and current result form one pointer-local row with no scanning or mouse travel.", "confidence": "high"},
+        "fr2": {"score": 3, "evidence": "The visible result is richly labeled, but two valid arrow alternatives are reduced to an abstract count and cannot be compared.", "confidence": "high"},
+        "fr3": {"score": 5, "evidence": "The 380×78 rail is the shallowest direction and preserves almost all vertical function context.", "confidence": "high"},
+        "fr4": {"score": 4, "evidence": "Enter is unambiguous and Left/Right cycling is named, though unseen candidates make navigation less confidently predictable.", "confidence": "high"}
+      },
+      "gateResults": {
+        "g1": {"pass": true, "evidence": "The rail indexes the same canonical three-item filtered set and never admits commands."},
+        "g2": {"pass": true, "evidence": "It uses the same canvas-only S contract and leaves command/find shortcuts untouched."}
+      },
+      "preview": "<div class='ps-stage ps-rail'><div class='ps-function'><header><small>function</small>normalize_reading(value)</header><div class='ps-port'></div></div><div class='ps-wire'></div><div class='ps-pulse'></div><svg class='ps-cursor' viewBox='0 0 18 24' aria-hidden='true'><path d='M2 1 16 15l-7 1 4 6-3 1-4-7-4 5Z' fill='#182536' stroke='white' stroke-width='1.5'/></svg><div class='ps-popup'><div class='ps-search'><b>S</b><span>arrow</span><kbd>Esc</kbd></div><div class='ps-rail-results'><button aria-label='Previous primitive' style='border:0;background:transparent;color:#607086'>←</button><div class='ps-rail-result'><i class='ps-icon'>↗</i><span><strong>Straight arrow</strong><small>Connections</small></span><kbd>Enter</kbd></div><span class='ps-count'>1 / 3</span><button aria-label='Next primitive' style='border:0;background:transparent;color:#607086'>→</button></div></div><div class='ps-inserted'>Straight arrow armed · draw next</div><div class='ps-direct'><button data-story-to='closed'>Reset</button><button data-story-to='results'>Press S + type arrow</button><button data-story-to='inserted'>Press Enter · arm</button></div></div>",
+      "media": [
+        {"label": "Occlusion profile", "caption": "At the same pointer point, the rail preserves the function's rows; its cost is that the other two results exist only behind cycling controls.", "html": "<div style='min-height:132px;display:grid;place-items:center;border-radius:14px;background:#f7f9fb;color:#26364a'><div style='width:82%;height:42px;display:flex;align-items:center;gap:12px;padding:0 14px;border:1px solid #ccd5df;border-radius:11px;background:white;box-shadow:0 8px 20px rgba(28,39,55,.12)'><b style='color:#2e8a70'>S</b><span style='flex:1'>arrow → Straight arrow</span><small>1 / 3</small></div></div>"}
+      ]
+    }
+  ]
+}
