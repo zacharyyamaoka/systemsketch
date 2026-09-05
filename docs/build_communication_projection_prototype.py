@@ -263,12 +263,13 @@ CUSTOM_JS = r"""
 def main() -> None:
     with tempfile.TemporaryDirectory(prefix="communication-projection-gallery-") as folder:
         spec_path = Path(folder) / "spec.json"
+        generated_path = Path(folder) / "gallery.html"
         spec_path.write_text(json.dumps(project, indent=2), encoding="utf-8")
         subprocess.run(
-            ["python3", str(GALLERY), "build", "--spec", str(spec_path), "--output", str(OUTPUT)],
+            ["python3", str(GALLERY), "build", "--spec", str(spec_path), "--output", str(generated_path)],
             check=True,
         )
-    html = OUTPUT.read_text(encoding="utf-8")
+        html = generated_path.read_text(encoding="utf-8")
     html = html.replace("</style>", f"{CUSTOM_CSS.strip()}\n  </style>", 1)
     # Let the first scan compare both outcomes before focus mode or the AI
     # ranking narrows attention to one. The gallery shell defaults to focus for

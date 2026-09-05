@@ -4,6 +4,7 @@ import { useEditor, useValue } from 'tldraw'
 import {
 	COMMUNICATION_FAMILY_PAINT,
 	applyCommunicationComponentView,
+	applyCommunicationFocus,
 	applyCommunicationProjectionMode,
 	applyCommunicationRouteStyle,
 	collectCommunicationRelations,
@@ -67,6 +68,8 @@ export function CommunicationPrototypeControls() {
 		counts[relation.family] = (counts[relation.family] ?? 0) + 1
 		return counts
 	}, {})
+	const focusedRelation = summary.relations.find((relation) => relation.groupKey === state.focusedGroupKey)
+	const unresolvedEdgeCount = summary.neutralEdgeCount - summary.localValueEdgeCount
 
 	return (
 		<>
@@ -138,7 +141,19 @@ export function CommunicationPrototypeControls() {
 				data-systemsketch-chrome
 				onPointerDown={stopCanvasEvent}
 			>
-				{state.mode === 'wiring' ? (
+				{focusedRelation && state.mode !== 'wiring' ? (
+					<>
+						<strong>{focusedRelation.displayId} focused · {focusedRelation.edgeCount} leg{focusedRelation.edgeCount === 1 ? '' : 's'}</strong>
+						<span>{focusedRelation.family} · {focusedRelation.name}; unrelated edges are dimmed.</span>
+						<button
+							type="button"
+							data-testid="communication-focus-clear"
+							onClick={() => applyCommunicationFocus(editor, null)}
+						>
+							Clear focus
+						</button>
+					</>
+				) : state.mode === 'wiring' ? (
 					<>
 						<strong>{summary.edgeCount} canonical data edges</strong>
 						<span>Ports and value nodes are unchanged.</span>
@@ -146,14 +161,16 @@ export function CommunicationPrototypeControls() {
 				) : state.mode === 'tagged' ? (
 					<>
 						<strong>{summary.taggedEdgeCount} protocol legs parsed</strong>
-						<span>{summary.localValueEdgeCount} local value edge{summary.localValueEdgeCount === 1 ? '' : 's'} left neutral.</span>
+						<span>
+							{summary.localValueEdgeCount} local value · {unresolvedEdgeCount} unresolved · {summary.issues.length} issue{summary.issues.length === 1 ? '' : 's'}
+						</span>
 					</>
 				) : (
 					<>
 						<strong>{summary.relations.length} component relationships</strong>
 						<span>
 							{state.componentView === 'simple' ? 'Same Port-sized Simple cards' : 'Port cards'} ·{' '}
-							{state.routeStyle === 'elbow' ? 'canonical tracks' : 'centre lines'}
+							{state.routeStyle === 'elbow' ? 'canonical tracks' : 'centre lines'} · {summary.issues.length} issue{summary.issues.length === 1 ? '' : 's'}
 						</span>
 					</>
 				)}

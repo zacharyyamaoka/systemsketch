@@ -159,6 +159,7 @@ import { wordDiff, type DiffToken } from '../../diff/wordDiff'
 import {
 	COMMUNICATION_FAMILY_PAINT,
 	collectCommunicationRelations,
+	applyCommunicationFocus,
 	communicationProjection,
 	describeCommunicationConnection,
 	isCommunicationPrototypeEnabled,
@@ -921,19 +922,26 @@ function CommunicationLabel({
 	text,
 	ink,
 	soft,
+	onPointerDown,
+	communicationId,
 }: {
 	x: number
 	y: number
 	text: string
 	ink: string
 	soft: string
+	onPointerDown?: (event: React.PointerEvent<SVGGElement>) => void
+	communicationId?: string
 }) {
 	const width = Math.max(74, text.length * 7.1 + 22)
 	return (
 		<g
 			className="CommunicationEdge-label"
 			transform={`translate(${x} ${y})`}
-			pointerEvents="none"
+			data-communication-label={communicationId}
+			pointerEvents={onPointerDown ? 'all' : 'none'}
+			onPointerDown={onPointerDown}
+			style={onPointerDown ? { cursor: 'pointer' } : undefined}
 		>
 			<rect
 				x={-width / 2}
@@ -964,9 +972,15 @@ function CommunicationLabel({
 function TaggedCommunicationConnection({
 	connection,
 	descriptor,
+	relation,
+	focusedGroupKey,
+	presentation = 'tagged',
 }: {
 	connection: ConnectionShape
 	descriptor: CommunicationDescriptor
+	relation: CommunicationRelation
+	focusedGroupKey: string | null
+	presentation?: 'tagged' | 'focus-member'
 }) {
 	const editor = useEditor()
 	const path = useValue(
@@ -984,14 +998,35 @@ function TaggedCommunicationConnection({
 	const detail = descriptor.family === 'topic' || descriptor.family === 'stream'
 		? descriptor.name
 		: phaseLabel(descriptor.phase)
-	const label = `${paint.monogram} · ${detail}`
+	const label = `${relation.displayId} · ${detail}`
+	const focusState = focusedGroupKey === null
+		? 'none'
+		: focusedGroupKey === descriptor.groupKey ? 'active' : 'dim'
+	const toggleFocus = (event: React.PointerEvent<SVGElement>) => {
+		if (event.button !== 0) return
+		event.stopPropagation()
+		applyCommunicationFocus(editor, descriptor.groupKey)
+	}
 	return (
 		<SVGContainer
-			data-communication-mode="tagged"
+			data-communication-mode={presentation}
 			data-communication-family={descriptor.family}
 			data-communication-phase={descriptor.phase}
+			data-communication-id={relation.displayId}
+			data-communication-focus={focusState}
+			style={{ opacity: focusState === 'dim' ? 0.12 : 1, transition: 'opacity 120ms ease' }}
 		>
 			<CommunicationArrowDefs connectionId={connection.id} ink={paint.ink} start={false} />
+			<path
+				data-communication-focus-hit
+				d={path}
+				fill="none"
+				stroke="transparent"
+				strokeWidth={18}
+				pointerEvents="stroke"
+				vectorEffect="non-scaling-stroke"
+				onPointerDown={toggleFocus}
+			/>
 			<path
 				d={path}
 				fill="none"
@@ -1002,7 +1037,15 @@ function TaggedCommunicationConnection({
 				markerEnd={`url(#${markerId(connection.id, 'end')})`}
 				vectorEffect="non-scaling-stroke"
 			/>
-			<CommunicationLabel x={at.x} y={at.y} text={label} ink={paint.ink} soft={paint.soft} />
+			<CommunicationLabel
+				x={at.x}
+				y={at.y}
+				text={label}
+				ink={paint.ink}
+				soft={paint.soft}
+				communicationId={relation.displayId}
+				onPointerDown={toggleFocus}
+			/>
 		</SVGContainer>
 	)
 }
@@ -1047,9 +1090,16 @@ function componentRelationshipGeometry(
 	const inverse = Mat.Inverse(editor.getShapePageTransform(connection))
 	const start = Mat.applyToPoint(inverse, pageStart)
 	const end = Mat.applyToPoint(inverse, pageEnd)
+	const labelFraction = Math.max(0.16, Math.min(0.84, 0.5 + relation.lane * 0.095))
 	return {
 		path: `M ${start.x} ${start.y} L ${end.x} ${end.y}`,
-		label: { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 },
+		// Multiple centre lines between one component pair are geometrically
+		// identical. Staggering their clickable labels keeps each exact straight
+		// relationship addressable without pretending the paths are different.
+		label: {
+			x: start.x + (end.x - start.x) * labelFraction,
+			y: start.y + (end.y - start.y) * labelFraction,
+		},
 	}
 }
 
@@ -1057,10 +1107,12 @@ function ComponentCommunicationConnection({
 	connection,
 	relation,
 	routeStyle,
+	focusedGroupKey,
 }: {
 	connection: ConnectionShape
 	relation: CommunicationRelation
 	routeStyle: CommunicationRouteStyle
+	focusedGroupKey: string | null
 }) {
 	const editor = useEditor()
 	const geometry = useValue(
@@ -1070,7 +1122,15 @@ function ComponentCommunicationConnection({
 	)
 	if (!geometry) return null
 	const paint = COMMUNICATION_FAMILY_PAINT[relation.family]
-	const label = `${paint.monogram} · ${relation.family} · ${relation.name}`
+	const label = `${relation.displayId} · ${relation.family} · ${relation.name}`
+	const focusState = focusedGroupKey === null
+		? 'none'
+		: focusedGroupKey === relation.groupKey ? 'active' : 'dim'
+	const toggleFocus = (event: React.PointerEvent<SVGElement>) => {
+		if (event.button !== 0) return
+		event.stopPropagation()
+		applyCommunicationFocus(editor, relation.groupKey)
+	}
 	return (
 		<SVGContainer
 			data-communication-mode="components"
@@ -1078,11 +1138,25 @@ function ComponentCommunicationConnection({
 			data-communication-edges={relation.edgeCount}
 			data-communication-representative-phase={relation.phase}
 			data-communication-route={routeStyle}
+			data-communication-id={relation.displayId}
+			data-communication-member-ids={relation.memberIds.join(',')}
+			data-communication-focus={focusState}
+			style={{ opacity: focusState === 'dim' ? 0.12 : 1, transition: 'opacity 120ms ease' }}
 		>
 			<CommunicationArrowDefs
 				connectionId={connection.id}
 				ink={paint.ink}
 				start={relation.bidirectional}
+			/>
+			<path
+				data-communication-focus-hit
+				d={geometry.path}
+				fill="none"
+				stroke="transparent"
+				strokeWidth={18}
+				pointerEvents="stroke"
+				vectorEffect="non-scaling-stroke"
+				onPointerDown={toggleFocus}
 			/>
 			<path
 				data-communication-track-path
@@ -1102,6 +1176,8 @@ function ComponentCommunicationConnection({
 				text={label}
 				ink={paint.ink}
 				soft={paint.soft}
+				communicationId={relation.displayId}
+				onPointerDown={toggleFocus}
 			/>
 		</SVGContainer>
 	)
@@ -1123,28 +1199,67 @@ function ConnectionShapeComponent({ connection }: { connection: ConnectionShape 
 	const relation = useValue(
 		'communication relationship',
 		() => {
-			if (!prototypeEnabled || projection.mode !== 'components') return null
+			if (!prototypeEnabled || projection.mode === 'wiring' || !descriptor) return null
 			return collectCommunicationRelations(editor).relations
-				.find((candidate) => candidate.representativeId === connection.id) ?? null
+				.find((candidate) => candidate.groupKey === descriptor.groupKey) ?? null
 		},
-		[editor, connection.id, projection.mode, prototypeEnabled],
+		[editor, descriptor, projection.mode, prototypeEnabled],
 	)
-	if (prototypeEnabled && projection.mode === 'tagged' && descriptor) {
-		return <TaggedCommunicationConnection connection={connection} descriptor={descriptor} />
+	if (prototypeEnabled && projection.mode === 'tagged' && descriptor && relation) {
+		return (
+			<TaggedCommunicationConnection
+				connection={connection}
+				descriptor={descriptor}
+				relation={relation}
+				focusedGroupKey={projection.focusedGroupKey}
+			/>
+		)
 	}
 	if (prototypeEnabled && projection.mode === 'components') {
-		return relation ? (
-			<ComponentCommunicationConnection
-				connection={connection}
-				relation={relation}
-				routeStyle={projection.routeStyle}
-			/>
-		) : null
+		if (!relation) return null
+		const representative = relation.representativeId === connection.id
+		const focusedMember = projection.focusedGroupKey === relation.groupKey
+		const showMember = focusedMember && (!representative || projection.routeStyle === 'straight')
+		return (
+			<>
+				{showMember && descriptor ? (
+					<TaggedCommunicationConnection
+						connection={connection}
+						descriptor={descriptor}
+						relation={relation}
+						focusedGroupKey={projection.focusedGroupKey}
+						presentation="focus-member"
+					/>
+				) : null}
+				{representative ? (
+					<ComponentCommunicationConnection
+						connection={connection}
+						relation={relation}
+						routeStyle={projection.routeStyle}
+						focusedGroupKey={projection.focusedGroupKey}
+					/>
+				) : null}
+			</>
+		)
 	}
-	return <CanonicalConnectionShapeComponent connection={connection} />
+	const dimUnrelatedCanonical = prototypeEnabled
+		&& projection.mode === 'tagged'
+		&& projection.focusedGroupKey !== null
+	return (
+		<CanonicalConnectionShapeComponent
+			connection={connection}
+			projectionOpacity={dimUnrelatedCanonical ? 0.12 : 1}
+		/>
+	)
 }
 
-function CanonicalConnectionShapeComponent({ connection }: { connection: ConnectionShape }) {
+function CanonicalConnectionShapeComponent({
+	connection,
+	projectionOpacity = 1,
+}: {
+	connection: ConnectionShape
+	projectionOpacity?: number
+}) {
 	const editor = useEditor()
 	const path = useValue(
 		'block connection path',
@@ -1310,7 +1425,8 @@ function CanonicalConnectionShapeComponent({ connection }: { connection: Connect
 		const length = polylineLength(renderPoints)
 		return (
 			<SVGContainer
-				style={{ opacity: opacity * diffCableOpacity(diffState) }}
+				style={{ opacity: opacity * diffCableOpacity(diffState) * projectionOpacity }}
+				data-communication-neutral-focus={projectionOpacity < 1 ? 'dim' : undefined}
 				data-temporal={connection.props.temporal}
 				data-channel={effect ? 'effect' : 'return'}
 				data-tunnel={paintedTunnelState}
@@ -1358,7 +1474,8 @@ function CanonicalConnectionShapeComponent({ connection }: { connection: Connect
 	if (hiddenTunnel) {
 		return (
 			<SVGContainer
-				style={{ opacity: opacity * diffCableOpacity(diffState) }}
+				style={{ opacity: opacity * diffCableOpacity(diffState) * projectionOpacity }}
+				data-communication-neutral-focus={projectionOpacity < 1 ? 'dim' : undefined}
 				data-temporal="delayed"
 				data-tunnel="hidden"
 				data-diff-state={diffState === 'normal' ? undefined : diffState}
@@ -1371,7 +1488,8 @@ function CanonicalConnectionShapeComponent({ connection }: { connection: Connect
 	}
 	return (
 		<SVGContainer
-			style={{ opacity: opacity * diffCableOpacity(diffState) }}
+			style={{ opacity: opacity * diffCableOpacity(diffState) * projectionOpacity }}
+			data-communication-neutral-focus={projectionOpacity < 1 ? 'dim' : undefined}
 			data-temporal="delayed"
 			data-tunnel={paintedTunnelState}
 			data-diff-state={diffState === 'normal' ? undefined : diffState}

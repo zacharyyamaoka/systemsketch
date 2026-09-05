@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-05T05:56:41.542Z",
+  "generatedAt": "2026-09-05T06:55:14.141Z",
   "checks": [
     "Dataflow opens as one real 8-node, 13-edge SystemSketch graph in Port view",
     "Tag edges recolors and labels all 11 component protocol legs without changing ports or local values",

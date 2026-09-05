@@ -123,6 +123,8 @@
     "test:diff-round2": "node tests/block_diff_round2_smoke.mjs",
     "test:effect-follow": "node tests/effect_port_follow_smoke.mjs",
     "test:communication-prototype": "node tests/communication_projection_prototype_smoke.mjs",
+    "test:communication-focus": "node tests/communication_association_focus_smoke.mjs",
+    "test:communication-focus-gallery": "node tests/communication_association_gallery_smoke.mjs",
     "test:communication-gallery": "node tests/communication_projection_gallery_smoke.mjs",
     "test:semantic-roles": "node tests/semantic_role_inheritance_smoke.mjs",
     "test:named-landmarks": "node tests/named_landmarks_smoke.mjs",
