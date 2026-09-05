@@ -16,11 +16,13 @@ import {
   ROOT,
   clickAt,
   delay,
+  drag,
   elementBox,
   ensureDir,
   evaluate,
   key,
   localConsoleErrors,
+  mouse,
   openApp,
   startApp,
   waitFor,
@@ -64,6 +66,7 @@ async function main() {
           end: { x: 540, y: -250 },
           kind: 'arc',
           bend: 0,
+    size: 'xl',
           arrowheadStart: 'none',
           arrowheadEnd: 'arrow',
         },
@@ -127,6 +130,7 @@ async function main() {
       }
       const markerId = markerCarrier.getAttribute('marker-end')?.match(/#([^)]*)/)?.[1]
       const marker = markerId ? document.getElementById(markerId) : null
+    const stockHead = shape?.querySelector('.systemsketch-authored-arrow__stock--replace-head > .tl-svg-container > g > path')
       return JSON.stringify({
         d: shaft.getAttribute('d'),
         length: Math.round(length),
@@ -135,19 +139,90 @@ async function main() {
         late: point(.86),
         end: point(1),
         markerOrient: marker?.getAttribute('orient'),
-        markerUnits: marker?.getAttribute('markerUnits'),
+    markerUnits: marker?.getAttribute('markerUnits'),
+    markerPath: marker?.querySelector('path')?.getAttribute('d'),
+    stockHeadVisibility: stockHead ? getComputedStyle(stockHead).visibility : null,
         meta: window.__systemsketch.editor.getShape('${arrowId}')?.meta?.systemSketchSlantedArrow?.version ?? null,
       })
     })()`))
     assert.ok(painted?.d, `the custom slanted shaft did not paint: ${JSON.stringify(painted)}`)
     assert.equal(painted.meta, 1, 'Slanted is not persisted as a versioned metadata extension')
-    assert.equal(painted.early.y, painted.start.y,
+  assert.ok(Math.abs(painted.early.y - painted.start.y) <= 2,
       `the first rendered leg is not horizontal: ${JSON.stringify(painted)}`)
     assert.notEqual(painted.late.y, painted.end.y,
       `the final rendered leg is not diagonal: ${JSON.stringify(painted)}`)
-    assert.deepEqual([painted.markerOrient, painted.markerUnits], ['auto', 'strokeWidth'],
+    assert.deepEqual([painted.markerOrient, painted.markerUnits, painted.markerPath, painted.stockHeadVisibility], ['auto', 'strokeWidth', 'M 0 0 L 6 3 L 0 6', 'hidden'],
       `the endpoint does not use browser-oriented arrowhead geometry: ${JSON.stringify(painted)}`)
-    pass('SLANTED-3', `the painted route has a horizontal lead and browser-oriented diagonal head (${painted.length}px)`)
+    pass('SLANTED-3', `the XL painted route has a horizontal lead and browser-oriented diagonal head (${painted.length}px)`)
+
+  // Its elbow follows stock control semantics: reveal the selected route,
+  // expose a virtual default point, then use a real pointer drag to author it.
+  await mouse(page, 'mouseMoved', painted.early.x, painted.early.y)
+  await waitFor(page, `(() => {
+    const editor = window.__systemsketch.editor
+    const shape = editor.getShape('${arrowId}')
+    return editor.getShapeHandles(shape)?.some((handle) => handle.id === 'systemsketch-slanted-elbow')
+  })()`, 'the Slanted elbow control')
+  const initialElbow = JSON.parse(await evaluate(page, `(() => {
+    const editor = window.__systemsketch.editor
+    const shape = editor.getShape('${arrowId}')
+    const handle = editor.getShapeHandles(shape)?.find((item) => item.id === 'systemsketch-slanted-elbow')
+    if (!handle) return JSON.stringify(null)
+    const pagePoint = editor.getShapePageTransform(shape.id).applyToPoint(handle)
+    return JSON.stringify({
+      type: handle.type,
+      x: handle.x,
+      y: handle.y,
+      screen: editor.pageToScreen(pagePoint),
+      hasStoredElbow: Object.hasOwn(shape.meta.systemSketchSlantedArrow ?? {}, 'elbowT'),
+    })
+  })()`))
+  assert.equal(initialElbow.type, 'virtual', `the untouched elbow should be virtual: ${JSON.stringify(initialElbow)}`)
+  assert.equal(initialElbow.hasStoredElbow, false,
+    `an untouched Slanted arrow should not persist a manual elbow: ${JSON.stringify(initialElbow)}`)
+  await drag(page, initialElbow.screen, {
+    x: initialElbow.screen.x + 120,
+    y: initialElbow.screen.y + 80,
+  })
+  await waitFor(page, `typeof window.__systemsketch.editor.getShape('${arrowId}')?.meta?.systemSketchSlantedArrow?.elbowT === 'number'`, 'the dragged Slanted elbow metadata')
+  // The shared reveal policy hides interior controls while the pointer is
+  // outside the route rectangle. Re-enter the shaft before reading the
+  // post-drag vertex, exactly as a person would after releasing it.
+  await mouse(page, 'mouseMoved', painted.early.x, painted.early.y)
+  await waitFor(page, `(() => {
+    const editor = window.__systemsketch.editor
+    const shape = editor.getShape('${arrowId}')
+    return editor.getShapeHandles(shape)?.some((handle) => handle.id === 'systemsketch-slanted-elbow')
+  })()`, 'the authored Slanted elbow control')
+  const draggedElbow = JSON.parse(await evaluate(page, `(() => {
+    const editor = window.__systemsketch.editor
+    const shape = editor.getShape('${arrowId}')
+    const handle = editor.getShapeHandles(shape)?.find((item) => item.id === 'systemsketch-slanted-elbow')
+    const body = document.querySelector('[data-shape-id="${arrowId}"] .systemsketch-slanted-arrow__body')
+    const shaft = body ? Array.from(body.querySelectorAll('g > path')).find((path) => !path.getAttribute('marker-end')) : null
+    if (!handle || !shaft) return JSON.stringify(null)
+    const length = shaft.getTotalLength()
+    const point = (fraction) => {
+      const raw = shaft.getPointAtLength(length * fraction)
+      return { x: Math.round(raw.x), y: Math.round(raw.y) }
+    }
+    return JSON.stringify({
+      type: handle.type,
+      handle: { x: Math.round(handle.x), y: Math.round(handle.y) },
+      storedT: shape.meta.systemSketchSlantedArrow?.elbowT,
+      start: shape.props.start,
+      early: point(.12),
+      end: point(1),
+    })
+  })()`))
+  assert.equal(draggedElbow.type, 'vertex', `the dragged elbow did not become persistent: ${JSON.stringify(draggedElbow)}`)
+  assert.equal(draggedElbow.handle.y, draggedElbow.start.y,
+    `the elbow drag must only move the horizontal lead: ${JSON.stringify(draggedElbow)}`)
+  assert.ok(draggedElbow.storedT > 0.4 && draggedElbow.storedT < 1,
+    `the dragged elbow was not saved as a relative endpoint-span position: ${JSON.stringify(draggedElbow)}`)
+  assert.ok(Math.abs(draggedElbow.early.y - draggedElbow.start.y) <= 2,
+      `the authored control broke the horizontal departure: ${JSON.stringify(draggedElbow)}`)
+  pass('SLANTED-4', 'a virtual default elbow becomes a persistent horizontal-only control after a real drag')
     await shot(page, 'slanted-arrow-canvas-live-2026-09-04.png')
 
     const straightButton = await elementBox(page, '[data-testid="shape-facts-arrow-routing-straight"]')
@@ -181,7 +256,7 @@ async function main() {
       })
     })()`))
     assert.deepEqual(reset, { slantedBody: false, metadata: null })
-    pass('SLANTED-4', 'Straight cleanly returns the selected arrow to stock rendering')
+    pass('SLANTED-5', 'Straight cleanly returns the selected arrow to stock rendering')
 
     assert.deepEqual(localConsoleErrors(page), [])
     pass('CLEAN', 'the real browser reported no console errors')

@@ -11,11 +11,16 @@
   },
   {
     "id": "SLANTED-3",
-    "detail": "the painted route has a horizontal lead and browser-oriented diagonal head (1235px)",
+    "detail": "the XL painted route has a horizontal lead and browser-oriented diagonal head (1233px)",
     "ok": true
   },
   {
     "id": "SLANTED-4",
+    "detail": "a virtual default elbow becomes a persistent horizontal-only control after a real drag",
+    "ok": true
+  },
+  {
+    "id": "SLANTED-5",
     "detail": "Straight cleanly returns the selected arrow to stock rendering",
     "ok": true
   },

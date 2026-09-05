@@ -75,6 +75,18 @@ describe('SystemSketch slanted arrows', () => {
 		expect(getSlantedArrowPoints({ x: 0, y: 20 }, { x: 200, y: 20 })).toHaveLength(2)
 	})
 
+	it('keeps the default lead absent until its virtual elbow is dragged', () => {
+		const untouched = getSlantedArrowPoints({ x: 0, y: 100 }, { x: 200, y: 0 })
+		const dragged = getSlantedArrowPoints({ x: 0, y: 100 }, { x: 200, y: 0 }, 0.25)
+
+		expect(untouched[1]).toMatchObject({ x: 200 / 3, y: 100 })
+		expect(dragged).toEqual([
+			expect.objectContaining({ x: 0, y: 100 }),
+			expect.objectContaining({ x: 50, y: 100 }),
+			expect.objectContaining({ x: 200, y: 0 }),
+		])
+	})
+
 	it('reports and switches the inspector-only routing without creating a tool preset', () => {
 		const selected = [arrow()]
 		const updates: unknown[] = []

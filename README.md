@@ -2,7 +2,7 @@
 
 SystemSketch starts from one deliberately boring datum: the stock tldraw whiteboard. Its engine, drawing tools, and shortcuts stay stock while narrow supported seams add local files, board overview, zoom, Help, and the Stable/Preview workflow.
 
-The [Slanted-arrow implementation gallery](docs/slanted-arrow-2026-09-04.html) records the new Inspector-only behavior-tree route: one established horizontal lead followed by a diagonal, with a browser-oriented head and a valid stock-arrow fallback. Its companion [`slanted-arrow.systemsketch`](sketches/review/slanted-arrow.systemsketch) board is ready to exercise.
+The [Slanted-arrow implementation gallery](docs/slanted-arrow-2026-09-04.html) records the Inspector-only behavior-tree route: one established horizontal lead followed by a diagonal, with one browser-oriented head and a valid stock-arrow fallback. Its elbow starts as the automatic lead and becomes a horizontal-only persistent control when dragged. Its companion [`slanted-arrow.systemsketch`](sketches/review/slanted-arrow.systemsketch) board is ready to exercise.
 
 The [Behavior Tree representation research gallery](docs/behavior-tree-representations-research-2026-09-04.html) separates AICA's reactive application graph, MoveIt Studio Pro's classic BehaviorTree.CPP canvas, and Intrinsic Flowstate's process projection into a proposed SystemSketch grammar: one canonical behavior tree, three focused views, top-to-bottom control, and left-to-right dataflow revealed only where it earns its complexity.
 

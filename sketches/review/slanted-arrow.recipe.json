@@ -79,17 +79,17 @@
     {
       "id": "step-2",
       "kind": "step",
-      "text": "2 · Choose Straight, then Slanted. The first lead stays horizontal and the head follows the diagonal.",
+      "text": "2 · Drag the round elbow dot left or right. Before a drag, the original automatic lead remains in place.",
       "x": 990,
       "y": 620,
       "w": 420,
       "h": 120,
-      "target": { "x": 800, "y": 505 }
+      "target": { "x": 840, "y": 550 }
     },
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · The branch leaves condition? horizontally, reaches run action diagonally, and Inspector reports Slanted.",
+      "text": "PASS WHEN · The branch keeps its untouched default lead, or a dragged elbow stays horizontal before the diagonal head.",
       "x": 20,
       "y": 630,
       "w": 420,
