@@ -49,6 +49,13 @@ import {
   useAppearancePreferences,
   WHEEL_ZOOM_SENSITIVITY_STEP,
 } from './appearancePreferences'
+import { SHAPE_LIBRARY_ITEMS, type ShapeLibraryItem } from '../library/shapeLibraryModel'
+import {
+  addToolAlias,
+  normalizeToolAlias,
+  removeToolAlias,
+  useToolAliases,
+} from '../library/toolAliases'
 import './interface-settings.css'
 
 export function SettingsGearIcon(props: ComponentProps<'svg'>) {
@@ -88,7 +95,7 @@ const SETTINGS_CATEGORIES: readonly { id: SettingsCategoryId; label: string; ico
   },
   {
     id: 'shortcuts',
-    label: 'Shortcuts',
+    label: 'Tool aliases',
     icon: <CategoryIcon><rect x="3" y="5" width="14" height="10" rx="2" /><path d="M6 8h.01M9 8h.01M12 8h.01M15 8h.01M6 11h.01M9 11h.01M12 11h3M7 13h6" /></CategoryIcon>,
   },
   {
@@ -98,7 +105,7 @@ const SETTINGS_CATEGORIES: readonly { id: SettingsCategoryId; label: string; ico
   },
 ]
 
-const OPEN_CATEGORIES: readonly SettingsCategoryId[] = ['appearance', 'canvas', 'interface']
+const OPEN_CATEGORIES: readonly SettingsCategoryId[] = ['appearance', 'canvas', 'interface', 'shortcuts']
 
 /** The category the dialog opens on; a caller may ask for another. */
 export interface SystemSketchSettingsDialogProps extends TLUiDialogProps {
@@ -149,9 +156,104 @@ export function SystemSketchSettingsDialog({ category: initial }: SystemSketchSe
           ? <AppearancePanel />
           : category === 'canvas'
             ? <CanvasPanel />
+          : category === 'shortcuts'
+            ? <ToolAliasesPanel />
             : <InterfacePanel />}
       </TldrawUiDialogBody>
     </div>
+  )
+}
+
+function ToolAliasRow({ item }: { item: ShapeLibraryItem }) {
+  const aliases = useToolAliases()
+  const [draft, setDraft] = useState('')
+  const [message, setMessage] = useState<string | null>(null)
+  const itemAliases = aliases[item.id] ?? []
+
+  const add = () => {
+    const normalized = normalizeToolAlias(draft)
+    if (!normalized) {
+      setMessage('Enter a name up to 64 characters.')
+      return
+    }
+    if (!addToolAlias(item.id, normalized)) {
+      setMessage(`${normalized} is already an alias for ${item.label}.`)
+      return
+    }
+    setDraft('')
+    setMessage(null)
+  }
+
+  return (
+    <article className="systemsketch-tool-alias-row" data-testid={`systemsketch-tool-alias-row-${item.id}`}>
+      <header>
+        <div>
+          <h3>{item.label}</h3>
+          <p>{item.kind === 'tool' ? 'Canvas tool' : item.section}</p>
+        </div>
+      </header>
+      <div className="systemsketch-tool-alias-row__aliases" aria-label={`Aliases for ${item.label}`}>
+        {itemAliases.length > 0 ? itemAliases.map((alias) => (
+          <span key={alias} className="systemsketch-tool-alias-chip">
+            <span aria-hidden="true">↪</span>{alias}
+            <button
+              type="button"
+              aria-label={`Remove ${alias} from ${item.label}`}
+              data-testid={`systemsketch-tool-alias-remove-${item.id}-${alias}`}
+              onClick={() => removeToolAlias(item.id, alias)}
+            >×</button>
+          </span>
+        )) : <span className="systemsketch-tool-alias-row__empty">No custom aliases</span>}
+      </div>
+      <form
+        className="systemsketch-tool-alias-row__add"
+        onSubmit={(event) => {
+          event.preventDefault()
+          add()
+        }}
+      >
+        <label className="systemsketch-settings__visually-hidden" htmlFor={`systemsketch-tool-alias-${item.id}`}>
+          Add an alias for {item.label}
+        </label>
+        <input
+          id={`systemsketch-tool-alias-${item.id}`}
+          data-testid={`systemsketch-tool-alias-input-${item.id}`}
+          value={draft}
+          placeholder="Add an alias, e.g. @datatype"
+          maxLength={64}
+          onChange={(event) => {
+            setDraft(event.currentTarget.value)
+            setMessage(null)
+          }}
+        />
+        <button type="submit" data-testid={`systemsketch-tool-alias-add-${item.id}`} disabled={!draft.trim()}>Add</button>
+      </form>
+      {message ? <p className="systemsketch-tool-alias-row__message" role="status">{message}</p> : null}
+    </article>
+  )
+}
+
+function ToolAliasesPanel() {
+  return (
+    <section className="systemsketch-settings__panel" aria-labelledby="tool-aliases-title" data-testid="systemsketch-tool-aliases-panel">
+      <div className="systemsketch-settings__eyebrow">Tools</div>
+      <div className="systemsketch-settings__intro">
+        <div>
+          <h2 id="tool-aliases-title">Tool aliases</h2>
+          <p>Give any Asset-search tool the names you use. An alias like <code>@datatype</code> opens Text without changing the tool’s canonical name.</p>
+        </div>
+      </div>
+      <div className="systemsketch-tool-alias-list">
+        {SHAPE_LIBRARY_ITEMS.map((item) => <ToolAliasRow key={item.id} item={item} />)}
+      </div>
+      <div className="systemsketch-settings__note">
+        <span className="systemsketch-settings__saved-dot" aria-hidden="true" />
+        <div>
+          <strong>Saved on this computer</strong>
+          <p>Aliases enrich Asset search and the Shapes library. They are personal vocabulary, not board content.</p>
+        </div>
+      </div>
+    </section>
   )
 }
 

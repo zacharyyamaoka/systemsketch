@@ -6,7 +6,7 @@ import {
   type TLShapeId,
 } from 'tldraw'
 
-export const SHAPE_LIBRARY_SECTIONS = ['Connections', 'Basic', 'Flowchart'] as const
+export const SHAPE_LIBRARY_SECTIONS = ['Tools', 'Connections', 'Basic', 'Flowchart'] as const
 export type ShapeLibrarySection = (typeof SHAPE_LIBRARY_SECTIONS)[number]
 
 interface ShapeLibraryItemBase {
@@ -30,7 +30,13 @@ export interface ShapeLibraryArrowItem extends ShapeLibraryItemBase {
   bend: number
 }
 
-export type ShapeLibraryItem = ShapeLibraryGeoItem | ShapeLibraryArrowItem
+/** A stock tool that arms a canvas gesture but does not itself create a shape. */
+export interface ShapeLibraryToolItem extends ShapeLibraryItemBase {
+  kind: 'tool'
+  tool: 'text'
+}
+
+export type ShapeLibraryItem = ShapeLibraryGeoItem | ShapeLibraryArrowItem | ShapeLibraryToolItem
 
 /**
  * One catalog for every SystemSketch library surface.
@@ -41,6 +47,15 @@ export type ShapeLibraryItem = ShapeLibraryGeoItem | ShapeLibraryArrowItem
  * where their required endpoint bindings can be created honestly.
  */
 export const SHAPE_LIBRARY_ITEMS: readonly ShapeLibraryItem[] = [
+  {
+    id: 'text',
+    label: 'Text',
+    section: 'Tools',
+    kind: 'tool',
+    tool: 'text',
+    icon: 'tool-text',
+    searchTerms: ['type', 'typing', 'label'],
+  },
   {
     id: 'arrow-straight',
     label: 'Straight arrow',
@@ -92,11 +107,16 @@ export function shapeLibraryItemById(id: string): ShapeLibraryItem | undefined {
   return ITEM_BY_ID.get(id)
 }
 
-export function filterShapeLibraryItems(query: string): ShapeLibraryItem[] {
+export function filterShapeLibraryItems(
+  query: string,
+  aliases: Readonly<Record<string, readonly string[]>> = {},
+): ShapeLibraryItem[] {
   const words = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean)
   if (words.length === 0) return [...SHAPE_LIBRARY_ITEMS]
   return SHAPE_LIBRARY_ITEMS.filter((item) => {
-    const haystack = [item.label, item.section, ...(item.searchTerms ?? [])].join(' ').toLocaleLowerCase()
+    const haystack = [item.label, item.section, ...(item.searchTerms ?? []), ...(aliases[item.id] ?? [])]
+      .join(' ')
+      .toLocaleLowerCase()
     return words.every((word) => haystack.includes(word))
   })
 }
@@ -165,7 +185,12 @@ export function insertShapeLibraryItem(
   editor: Editor,
   item: ShapeLibraryItem,
   storage = browserStorage(),
-): TLShapeId {
+): TLShapeId | null {
+  if (item.kind === 'tool') {
+    editor.setCurrentTool(item.tool)
+    rememberShapeLibraryItem(item.id, storage)
+    return null
+  }
   const id = createShapeId()
   const center = editor.getViewportPageBounds().center
 
@@ -181,7 +206,7 @@ export function insertShapeLibraryItem(
         y: center.y - height / 2,
         props: { geo: item.geo, w: width, h: height },
       })
-    } else {
+    } else if (item.kind === 'arrow') {
       const width = 180
       const height = 72
       editor.createShape<TLArrowShape>({

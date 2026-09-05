@@ -96,6 +96,7 @@
     "test:theme": "node --experimental-strip-types tests/theme_contrast_smoke.mjs",
     "test:toolbar": "node tests/toolbar_family_menu_smoke.mjs",
     "test:primitive-search": "node tests/primitive_search_smoke.mjs",
+    "test:tool-aliases": "node tests/tool_aliases_smoke.mjs",
     "test:zoom-controls": "node tests/zoom_controls_preference_smoke.mjs",
     "test:wheel-zoom": "node tests/wheel_zoom_smoke.mjs",
     "test:wheel-zoom-fixture": "node tests/wheel_zoom_fixture_smoke.mjs",
