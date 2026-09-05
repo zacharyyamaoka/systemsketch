@@ -154,6 +154,13 @@ export interface BlockLayoutSection {
 	branches: { branch: number; band: BlockLayoutBand }[]
 }
 
+/** A compact disclosure for ports deliberately omitted from this face. */
+export interface BlockHiddenPortSummary {
+	side: 'input' | 'output'
+	count: number
+	box: BlockRect
+}
+
 export interface BlockLayout {
 	view: BlockView
 	portLayout: PortLayout
@@ -180,6 +187,8 @@ export interface BlockLayout {
 	frameInterior: BlockRect | null
 	/** Visible drawable ports. Hidden ids are recovered by the connection fallback. */
 	ports: readonly LaidOutBlockPort[]
+	/** Per-side disclosure of stored ports omitted from this face. */
+	hiddenPortSummaries: readonly BlockHiddenPortSummary[]
 	/** Simple face boxes. */
 	title: BlockRect | null
 	typeLabel: BlockRect | null
@@ -506,6 +515,58 @@ export function portLabelHitArea(placed: LaidOutBlockPort, width: number): Block
 	return { x: left, y: content.y, w: Math.max(0, right - left), h: content.h }
 }
 
+const HIDDEN_PORT_SUMMARY_HEIGHT_PX = 16
+
+/**
+ * Put `+N more` immediately after its lane when room remains, otherwise use
+ * the footer band. A short Block whose last visible row hits the body floor
+ * must never render its explanation over that row.
+ */
+function hiddenPortSummaries(
+	props: Pick<BlockShapeProps, 'inputs' | 'outputs'>,
+	placed: readonly LaidOutBlockPort[],
+	width: number,
+	bodyTop: number,
+	footerTop: number,
+	height: number,
+	description: BlockRect | null,
+): BlockHiddenPortSummary[] {
+	const summaries: BlockHiddenPortSummary[] = []
+	const bodyBottom = Math.max(bodyTop, (description?.y ?? footerTop) - 4)
+	const footerHeight = Math.max(0, height - footerTop)
+
+	for (const side of ['input', 'output'] as const) {
+		const source = side === 'input' ? props.inputs : props.outputs
+		const count = source.filter((port) => !port.visible).length
+		if (count === 0) continue
+
+		const lastLabelBottom = Math.max(
+			bodyTop - 4,
+			...placed
+				.filter((port) => port.side === side && port.label !== null)
+				.map((port) => port.label!.y + port.label!.h),
+		)
+		const preferredTop = lastLabelBottom + 4
+		const fitsInBody = preferredTop + HIDDEN_PORT_SUMMARY_HEIGHT_PX <= bodyBottom
+		const footerSummaryTop = footerTop + Math.max(
+			0,
+			(footerHeight - HIDDEN_PORT_SUMMARY_HEIGHT_PX) / 2,
+		)
+		const y = fitsInBody
+			? preferredTop
+			: Math.min(Math.max(0, height - HIDDEN_PORT_SUMMARY_HEIGHT_PX), footerSummaryTop)
+		const x = side === 'input' ? PORT_LABEL_INSET_PX : width / 2
+		const rightInset = side === 'output' ? 38 : PORT_LABEL_INSET_PX
+		summaries.push({
+			side,
+			count,
+			box: { x, y, w: Math.max(0, width - x - rightInset), h: HIDDEN_PORT_SUMMARY_HEIGHT_PX },
+		})
+	}
+
+	return summaries
+}
+
 function measureSimpleText(text: string, px: number, weight: number): number {
 	return measureBlockText(text, px, weight, 'sans')
 }
@@ -638,6 +699,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 			description: null,
 			frameInterior: null,
 			ports: placed,
+			hiddenPortSummaries: [],
 			title: { x: VALUE_PAD_X, y: 0, w: Math.max(0, width - VALUE_PAD_X * 2), h: height },
 			typeLabel: null,
 			icon: null,
@@ -785,6 +847,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 			description,
 			frameInterior: null,
 			ports: placed,
+			hiddenPortSummaries: [],
 			title,
 			typeLabel,
 			icon,
@@ -965,6 +1028,19 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 		})
 	}
 
+	// WHY: `layout.ports` drops hidden records so they paint no dot and consume
+	// no row. Count the stored lanes instead, or the calm face makes a Block
+	// with no port indistinguishable from one with twenty hidden ports.
+	const hiddenSummaries = hiddenPortSummaries(
+		rawProps,
+		placed,
+		width,
+		bodyTop,
+		footerTop,
+		height,
+		description,
+	)
+
 	return {
 		view,
 		portLayout,
@@ -990,6 +1066,7 @@ function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
 			}
 			: null,
 		ports: placed,
+		hiddenPortSummaries: hiddenSummaries,
 		title: null,
 		typeLabel: null,
 		icon: null,

@@ -140,6 +140,22 @@ function BlockExportSvg({ shape }: { shape: BlockShape }) {
 				</text>
 			) : null}
 
+			{layout.hiddenPortSummaries.map((summary) => (
+				<text
+					key={`hidden-${summary.side}`}
+					x={summary.side === 'input' ? summary.box.x : summary.box.x + summary.box.w}
+					y={summary.box.y + summary.box.h / 2}
+					textAnchor={summary.side === 'input' ? 'start' : 'end'}
+					dominantBaseline="middle"
+					fill={muted}
+					fontFamily="ui-sans-serif, system-ui"
+					fontSize={11}
+					fontStyle="italic"
+				>
+					+{summary.count} more
+				</text>
+			))}
+
 			{layout.dividers.map((rule, index) => (
 				<line key={index} x1={rule.x} y1={rule.y} x2={rule.x + rule.w} y2={rule.y} stroke={divider} />
 			))}

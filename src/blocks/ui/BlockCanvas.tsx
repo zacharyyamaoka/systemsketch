@@ -52,9 +52,10 @@ import {
   requestBlockInlineEdit,
 } from '../inlineBlockEditing'
 import {
-  layoutBlock,
-  type BlockDivider,
-  type BlockRect,
+	layoutBlock,
+	type BlockDivider,
+	type BlockHiddenPortSummary,
+	type BlockRect,
   type LaidOutBlockPort,
 } from '../layoutBlock'
 import { insertBlockPortForInlineEditing } from '../commands/blockCommands'
@@ -964,6 +965,34 @@ function PortLabels({
 }
 
 /**
+ * The face can omit individual ports without concealing the size of the
+ * callable contract. This reads layout's projection of the stored flags, so
+ * the count cannot drift into a second persisted display state.
+ */
+function HiddenPortSummaries({ summaries }: { summaries: readonly BlockHiddenPortSummary[] }) {
+	return (
+		<>
+			{summaries.map((summary) => {
+				const noun = `${summary.side} port${summary.count === 1 ? '' : 's'}`
+				return (
+					<span
+						key={summary.side}
+						className={`BlockNode-hiddenPorts BlockNode-hiddenPorts--${summary.side}`}
+						data-testid={`block-hidden-${summary.side}-ports`}
+						data-hidden-port-count={summary.count}
+						style={boxStyle(summary.box)}
+						aria-label={`${summary.count} hidden ${noun}`}
+						title={`${summary.count} hidden ${noun} — manage ports in the inspector to show them`}
+					>
+						+{summary.count} more
+					</span>
+				)
+			})}
+		</>
+	)
+}
+
+/**
  * The table-style "add one more" affordance, borrowed wholesale from a
  * spreadsheet's end-of-list gutter: hover the empty space under a lane and the
  * next row offers itself. Two of these exist per Block — inputs own the left
@@ -1223,6 +1252,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
                 ) : null)
               : null}
 	            <PortLabels ports={layout.ports} drag={heldPort} connectedIds={connectedIds} />
+						<HiddenPortSummaries summaries={layout.hiddenPortSummaries} />
 						<VariadicRuns ports={layout.ports} />
             {layout.description ? (
               <div
