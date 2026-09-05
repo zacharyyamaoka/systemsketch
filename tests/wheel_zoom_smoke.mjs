@@ -185,12 +185,18 @@ async function main() {
     )
     await closeSettings(app.page)
     await app.page.send('Page.reload', { ignoreCache: true })
+    // Let the dev-only React remount settle before sampling evidence; the
+    // first editor instance can satisfy the predicate immediately before its
+    // StrictMode cleanup clears the debug handle.
+    await delay(300)
     await waitFor(
       app.page,
-      `window.__systemsketch?.editor?.getCameraOptions().zoomSpeed === 0.75`,
+      `window.__systemsketch?.editor?.getCameraOptions().zoomSpeed === 0.75
+        && document.querySelector('.systemsketch-utility-strip .tlui-zoom-menu__button')`,
       'the persisted 75% wheel sensitivity',
     )
     const reloadedSensitivity = await cameraState(app.page)
+    assert.equal(reloadedSensitivity.zoomSpeed, 0.75)
     assert.equal(reloadedSensitivity.appearance.wheelZoomSensitivityPercent, 75)
     pass('a tuned sensitivity survives a full reload')
 
