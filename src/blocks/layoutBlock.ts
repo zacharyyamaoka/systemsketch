@@ -1,5 +1,6 @@
 import {
 	blockIcon,
+	blockIsFolded,
 	blockPortLayout,
 	blockPortSections,
 	expandedSectionWeights,
@@ -204,6 +205,67 @@ export interface BlockLayout {
 
 function finiteDimension(value: number): number {
 	return Number.isFinite(value) ? Math.max(1, value) : 1
+}
+
+/**
+ * A folded headed Block is a genuine compact geometry, not a body painted
+ * transparent. Its persisted ports keep their identities and collapse onto
+ * the two header edges, exactly like Simple's coincident side anchors, so
+ * existing exterior cables remain attached and readable when the body closes.
+ */
+function foldedBlockLayout(props: BlockShapeProps): BlockLayout {
+	const width = finiteDimension(props.w)
+	const height = finiteDimension(props.h)
+	const bounds = { x: 0, y: 0, w: width, h: height }
+	const header: BlockRect = { ...bounds }
+	const midpoint = height / 2
+	const ports: LaidOutBlockPort[] = []
+	for (const port of props.inputs) {
+		if (!port.visible) continue
+		ports.push({
+			port, side: 'input', edge: 'left', x: 0, y: midpoint,
+			label: null, labelContent: null, subtle: true, lifted: false,
+		})
+	}
+	for (const port of props.outputs) {
+		if (!port.visible) continue
+		ports.push({
+			port, side: 'output', edge: 'right', x: width, y: midpoint,
+			label: null, labelContent: null, subtle: true, lifted: false,
+		})
+	}
+	const foldInset = HEADER_PAD_X + 24
+	const hasIcon = blockIcon(props) !== ''
+	const headerIcon = hasIcon
+		? { x: foldInset, y: (height - HEADER_ICON_PX) / 2, w: HEADER_ICON_PX, h: HEADER_ICON_PX }
+		: null
+	const titleLeft = foldInset + (hasIcon ? HEADER_ICON_PX + HEADER_GAP_PX : 0)
+	return {
+		view: props.view,
+		portLayout: blockPortLayout(props),
+		bounds,
+		width,
+		height,
+		header,
+		headerHeight: height,
+		headerBand: null,
+		sections: [],
+		body: { x: 0, y: height, w: width, h: 0 },
+		bodyTop: height,
+		footerTop: height,
+		footer: null,
+		pitch: NODE_ROW_HEIGHT_PX,
+		description: null,
+		frameInterior: null,
+		ports,
+		title: null,
+		typeLabel: null,
+		icon: null,
+		dividers: [],
+		headerIcon,
+		headerTitle: { x: titleLeft, y: 0, w: Math.max(0, width - titleLeft - HEADER_PAD_X), h: height },
+		headerType: null,
+	}
 }
 
 interface BodySlotPlan {
@@ -662,6 +724,7 @@ export function layoutBlock(props: BlockShapeProps): BlockLayout {
 }
 
 function computeBlockLayout(rawProps: BlockShapeProps): BlockLayout {
+	if (blockIsFolded(rawProps)) return foldedBlockLayout(rawProps)
 	// An effect port is an output that leaves by the *top* edge, because the call
 	// gave its value no name to leave by. Keep it out of the right-hand lane
 	// entirely — it must not take a body slot or the rows would space around a

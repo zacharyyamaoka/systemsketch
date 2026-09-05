@@ -93,6 +93,10 @@ import {
 import { canWrapSelection, WRAP_TARGET_DESCRIPTORS } from '../../frames/wrapSelection'
 import { useRunWrap } from '../../frames/WrapSelectionControl'
 import { isCalloutCard, startAddingCalloutLeader } from '../../callout'
+import {
+  removeSelectedFromAutoResizeContainer,
+  selectedAutoResizeMembership,
+} from '../blockAutoResize'
 
 function onlySelectedBlock(editor: ReturnType<typeof useEditor>): BlockShape | null {
   const selected = editor.getSelectedShapes()
@@ -149,6 +153,11 @@ function BlockContextMenuItems() {
     () => selectedDetachedGroupIds(editor).length,
     [editor],
   )
+	const removableMembership = useValue(
+		'context-menu auto resize membership',
+		() => selectedAutoResizeMembership(editor),
+		[editor],
+	)
   // Structural commands (Add, depth navigation) still need one unambiguous Block:
   // they create identity and open an inline editor on it.
   const selectedBlock = useValue(
@@ -588,6 +597,16 @@ function BlockContextMenuItems() {
           />
         </TldrawUiMenuGroup>
       ) : null}
+
+		{removableMembership ? (
+			<TldrawUiMenuGroup id="systemsketch-auto-resize-membership">
+				<TldrawUiMenuItem
+					id="remove-from-container"
+					label="Remove from container"
+					onSelect={() => void removeSelectedFromAutoResizeContainer(editor)}
+				/>
+			</TldrawUiMenuGroup>
+		) : null}
 
       {detachableConnectionCount > 0 ? (
         <TldrawUiMenuGroup id="systemsketch-connection-detach">

@@ -15,6 +15,7 @@ import {
   BlockTool,
   PillTool,
   getBlockShapeVisibility,
+	installBlockAutoResize,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
   installDefinitionLinking,
@@ -240,6 +241,7 @@ function EmbeddedSurface({
 
     enablePasteAtCursor(editor)
     const stopDefinitionLinking = installDefinitionLinking(editor)
+		const stopBlockAutoResize = installBlockAutoResize(editor)
     const stopBlockConnections = installBlockConnections(editor)
     const stopConnectorControlVisibility = installConnectorControlVisibility(editor)
     const stopInstantTextEditing = installInstantTextEditing(editor)
@@ -347,6 +349,7 @@ function EmbeddedSurface({
       stopBlockConnections()
       stopDefinitionLinking()
       stopWheelZoom()
+		stopBlockAutoResize()
     }
   }, [openDocument, onCanvasCheckpoint, onCanvasText, onCompatibilityCopyAvailable, onLoadError])
 

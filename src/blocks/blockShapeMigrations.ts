@@ -46,6 +46,7 @@ const blockVersions = createShapePropsMigrationIds(BLOCK_SHAPE_TYPE, {
 	DiffState: 5,
 	FieldDiffs: 6,
 	SemanticRolesAndStockConfig: 7,
+	FoldAndAutoResize: 8,
 })
 
 function storedViews(props: BlockMigrationProps): StoredViews | undefined {
@@ -238,6 +239,22 @@ export function downgradeBlockPropsV6ToV5(props: BlockMigrationProps): BlockMigr
 	return next
 }
 
+/** v7 → v8: compact folding and auto-fit are off until an author opts in. */
+export function upgradeBlockPropsV7ToV8(props: BlockMigrationProps): BlockMigrationProps {
+	return {
+		...props,
+		...(props.foldable === undefined ? { foldable: false } : {}),
+		...(props.folded === undefined ? { folded: false } : {}),
+		...(props.autoResize === undefined ? { autoResize: false } : {}),
+	}
+}
+
+/** v8 → v7: presentation-only controls did not exist in the older schema. */
+export function downgradeBlockPropsV8ToV7(props: BlockMigrationProps): BlockMigrationProps {
+	const { foldable: _foldable, folded: _folded, autoResize: _autoResize, ...rest } = props
+	return rest
+}
+
 /**
  * v6 → v7: reserve one persisted vocabulary seam. Role claims need no default;
  * curated stock config is normalized when legacy experiments supplied one.
@@ -333,5 +350,9 @@ export const blockShapeMigrations = createShapePropsMigrationSequence({
 		id: blockVersions.SemanticRolesAndStockConfig,
 		up: (props) => applyPureMigration(props, upgradeBlockPropsV6ToV7),
 		down: (props) => applyPureMigration(props, downgradeBlockPropsV7ToV6),
+	}, {
+		id: blockVersions.FoldAndAutoResize,
+		up: (props) => applyPureMigration(props, upgradeBlockPropsV7ToV8),
+		down: (props) => applyPureMigration(props, downgradeBlockPropsV8ToV7),
 	}],
 })

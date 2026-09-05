@@ -16,6 +16,7 @@ import {
 	downgradeBlockPropsV5ToV4,
 	downgradeBlockPropsV6ToV5,
 	downgradeBlockPropsV7ToV6,
+	downgradeBlockPropsV8ToV7,
 	upgradeBlockPropsV0ToV1,
 	upgradeBlockPropsV1ToV2,
 	upgradeBlockPropsV2ToV3,
@@ -23,6 +24,7 @@ import {
 	upgradeBlockPropsV4ToV5,
 	upgradeBlockPropsV5ToV6,
 	upgradeBlockPropsV6ToV7,
+	upgradeBlockPropsV7ToV8,
 	type BlockMigrationProps,
 } from './blockShapeMigrations'
 
@@ -168,6 +170,9 @@ describe('Block shape migrations', () => {
 		const v7 = throughPureStep(v6, upgradeBlockPropsV6ToV7)
 		expect(v7).toEqual(v6)
 
+		const v8 = throughPureStep(v7, upgradeBlockPropsV7ToV8)
+		expect(v8).toMatchObject({ foldable: false, folded: false, autoResize: false })
+
 		const restoredV0 = throughPureStep(v1, downgradeBlockPropsV1ToV0)
 		expect(restoredV0).toMatchObject({ w: 360, h: 230, views: v0.views })
 	})
@@ -192,7 +197,7 @@ describe('Block shape migrations', () => {
 		expect(throughPureStep(configV7, downgradeBlockPropsV7ToV6)).not.toHaveProperty('stockConfig')
 	})
 
-	it('round-trips a V6 saved Block through the registered schema and validates the V7 record', () => {
+	it('round-trips a V6 saved Block through the registered schema and validates the current record', () => {
 		const store = createTLStore({ shapeUtils: [BlockShapeUtil], bindingUtils: [] })
 		const currentSchema = store.schema.serialize()
 		const legacy = markerBlock()
@@ -211,7 +216,7 @@ describe('Block shape migrations', () => {
 		expect(() => store.loadStoreSnapshot(snapshot)).not.toThrow()
 		const migrated = store.get(legacy.id) as BlockShape
 		expect(migrated.props.stockConfig).toEqual({ triggerSource: 'clock', rateHz: 10 })
-		expect(store.schema.serialize().sequences[BLOCK_MIGRATION_SEQUENCE]).toBe(7)
+		expect(store.schema.serialize().sequences[BLOCK_MIGRATION_SEQUENCE]).toBe(8)
 
 		const sequence = store.schema.sortedMigrations
 			.filter((migration) => migration.id.startsWith(`${BLOCK_MIGRATION_SEQUENCE}/`))
@@ -395,5 +400,19 @@ describe('Block shape migrations', () => {
 		])
 		// The value itself is the current one and survives: only the lens comes off.
 		expect(downgraded.title).toBe('run_predict')
+	})
+
+	it('adds opt-in folding and auto-fit flags, and removes them for an older reader', () => {
+		const v6: BlockMigrationProps = { ...getDefaultBlockProps() }
+		delete v6.foldable
+		delete v6.folded
+		delete v6.autoResize
+		const v8 = throughPureStep(v6, upgradeBlockPropsV7ToV8)
+		expect(v8).toMatchObject({ foldable: false, folded: false, autoResize: false })
+
+		const older = throughPureStep({ ...v8, foldable: true, folded: true, autoResize: true }, downgradeBlockPropsV8ToV7)
+		expect(older).not.toHaveProperty('foldable')
+		expect(older).not.toHaveProperty('folded')
+		expect(older).not.toHaveProperty('autoResize')
 	})
 })

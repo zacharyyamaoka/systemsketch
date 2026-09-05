@@ -25,10 +25,12 @@ import {
 import {
   HEADER_ROW,
   blockIcon,
+  blockIsFolded,
   blockDiffState,
   blockPortStateCounts,
   hasAnyBlockState,
   expandedSectionWeights,
+  canBlockFold,
   isAccessorName,
   isBlockShape,
   isUnknownText,
@@ -61,7 +63,7 @@ import {
 	type BlockRect,
   type LaidOutBlockPort,
 } from '../layoutBlock'
-import { appendBundleMember, insertBlockPortForInlineEditing } from '../commands/blockCommands'
+import { appendBundleMember, insertBlockPortForInlineEditing, setBlockFolded } from '../commands/blockCommands'
 import {
   blockHeaderPortAddAffordance,
   blockPortAddAffordance,
@@ -928,11 +930,40 @@ function DefinitionBadge({ shape }: { shape: BlockShape }) {
   ) : null
 }
 
+function BlockFoldControl({ shape }: { shape: BlockShape }) {
+  const editor = useEditor()
+  if (!canBlockFold(shape.props)) return null
+  const folded = blockIsFolded(shape.props)
+  const title = shape.props.title.trim() || 'Block'
+  return (
+    <button
+      type="button"
+      className="BlockNode-foldButton"
+      data-testid={`block-fold-${shape.id.replace('shape:', '')}`}
+      aria-label={`${folded ? 'Expand' : 'Collapse'} ${title}`}
+      title={`${folded ? 'Expand' : 'Collapse'} ${title}`}
+      onPointerDownCapture={(event) => {
+        // This is chrome inside a tldraw shape. Keep its press out of stock
+        // selection / drag handling so a chevron click is one unsurprising
+        // fold operation rather than the start of a canvas gesture.
+        event.preventDefault()
+        event.stopPropagation()
+      }}
+      onClick={() => void setBlockFolded(editor, shape.id, !folded)}
+    >
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <path d={folded ? 'm4 6 4 4 4-4' : 'm6 4 4 4-4 4'} />
+      </svg>
+    </button>
+  )
+}
+
 function BlockHeading({ shape, height }: { shape: BlockShape; height: number }) {
   const icon = blockIcon(shape.props)
   return (
     <div className="NodeShape-heading" style={{ height }}>
       <div className="BlockNode-heading">
+        <BlockFoldControl shape={shape} />
         {icon !== '' ? (
           <span
             className="BlockNode-headingIcon"
@@ -1273,6 +1304,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
   const tethers = effectTethers(layout)
   const simple = layout.view === 'simple'
   const value = layout.view === 'value'
+  const folded = blockIsFolded(shape.props)
   // The two faces without a heading, rows, footer or add gutters.
   const plain = simple || value
   const isEditing = useValue(
@@ -1305,13 +1337,13 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
   // The add gutters are a selection affordance, exactly as the brief asks: they
   // exist for the Block you are working on and nowhere else, so a busy canvas
   // never sprouts a plus under every lane.
-  const addAffordances = !plain && isSelected && !isEditing && !heldPort
+  const addAffordances = !plain && !folded && isSelected && !isEditing && !heldPort
     ? (['inputs', 'outputs'] as const).flatMap((side) => {
         const affordance = blockPortAddAffordance(shape.props, side)
         return affordance ? [{ side, affordance }] : []
       })
     : []
-  const headerAffordance = !simple && isSelected && !isEditing && !heldPort
+  const headerAffordance = !simple && !folded && isSelected && !isEditing && !heldPort
     ? blockHeaderPortAddAffordance(shape.props)
     : null
 
@@ -1320,6 +1352,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
       className={`NodeShape systemsketch-block-canvas${simple ? ' NodeShape_plain' : ''}${value ? ' NodeShape_value' : ''}`}
       data-block-view={layout.view}
 		data-variadic-prototype={variadicPrototype ?? undefined}
+		data-block-folded={folded || undefined}
       data-diff-state={diffState === 'normal' ? undefined : diffState}
       data-diff-variant={stated ? diffVariant : undefined}
 		data-definition-id={value ? undefined : shape.props.definitionId || undefined}
@@ -1358,7 +1391,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
             without the two marks competing for the same pixels. */}
         <BlockPoseGhost shape={shape} />
 
-        {!plain ? (
+        {!plain && !folded ? (
           <>
             {layout.dividers.map((divider, index) => (
               <div
@@ -1402,7 +1435,7 @@ export function BlockCanvas({ shape }: BlockCanvasProps) {
         {/* Render only, Port view only — `effectTethers` returns nothing in any
             other view. It sits under the dots and takes no pointer events, so it
             can never swallow a click meant for a port, a label or the block. */}
-        {tethers.length > 0 ? (
+        {!folded && tethers.length > 0 ? (
           <svg
             className="BlockNode-tethers"
             width={layout.width}

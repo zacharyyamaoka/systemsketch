@@ -26,6 +26,9 @@ import {
   portSection,
   sameBlockPortSection,
   setBlockViewProps,
+	setBlockAutoResizeProps,
+	setBlockFoldableProps,
+	setBlockFoldedProps,
   withBlockPortSection,
 } from '../blockModel'
 import {
@@ -269,6 +272,51 @@ export function setBlockView(
     shapeId,
     (props) => (props.view === view ? props : setBlockViewProps(props, view)),
     { historyLabel: options.historyLabel ?? `show block as ${view}` },
+  )
+}
+
+/** Enable or disable the optional compact-header affordance for one occurrence. */
+export function setBlockFoldable(
+  editor: Editor,
+  shapeId: TLShapeId,
+  foldable: boolean,
+  options: BlockCommandOptions = {},
+): BlockCommandResult {
+  return updateBlockProps(
+    editor,
+    shapeId,
+    (props) => setBlockFoldableProps(props, foldable),
+    { historyLabel: options.historyLabel ?? `${foldable ? 'enable' : 'disable'} block folding` },
+  )
+}
+
+/** Toggle the compact headed face without losing that view's parked body box. */
+export function setBlockFolded(
+  editor: Editor,
+  shapeId: TLShapeId,
+  folded: boolean,
+  options: BlockCommandOptions = {},
+): BlockCommandResult {
+  return updateBlockProps(
+    editor,
+    shapeId,
+    (props) => setBlockFoldedProps(props, folded),
+    { historyLabel: options.historyLabel ?? `${folded ? 'fold' : 'unfold'} block` },
+  )
+}
+
+/** Turn the derived Expanded-frame fit policy on or off for one occurrence. */
+export function setBlockAutoResize(
+  editor: Editor,
+  shapeId: TLShapeId,
+  autoResize: boolean,
+  options: BlockCommandOptions = {},
+): BlockCommandResult {
+  return updateBlockProps(
+    editor,
+    shapeId,
+    (props) => setBlockAutoResizeProps(props, autoResize),
+    { historyLabel: options.historyLabel ?? `${autoResize ? 'enable' : 'disable'} block auto resize` },
   )
 }
 

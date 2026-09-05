@@ -9,6 +9,7 @@ import {
   BlockTool,
   PillTool,
   getBlockShapeVisibility,
+	installBlockAutoResize,
   installBlockClickToEdit,
   installBlockPortMenuTarget,
   installDefinitionLinking,
@@ -143,6 +144,7 @@ function SystemSketchCanvas() {
     const stopWheelZoom = installSystemSketchWheelZoom(editor)
     enablePasteAtCursor(editor)
     const stopDefinitionLinking = installDefinitionLinking(editor)
+		const stopBlockAutoResize = installBlockAutoResize(editor)
     const stopWorkspace = attach(editor)
     const stopBoardTheme = installBoardTheme(editor)
     const stopBlockConnections = installBlockConnections(editor)
@@ -171,6 +173,7 @@ function SystemSketchCanvas() {
       stopConnectorControlVisibility()
       stopBlockConnections()
       stopDefinitionLinking()
+		stopBlockAutoResize()
       stopBoardTheme()
       stopWorkspace()
       stopWheelZoom()
@@ -236,6 +239,9 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
     const stopDefinitionLinking = isBlockDevelopment
       ? installDefinitionLinking(editor)
       : () => undefined
+		const stopBlockAutoResize = isBlockDevelopment
+			? installBlockAutoResize(editor)
+			: () => undefined
     const stopInstantTextEditing = isBlockDevelopment
       ? installInstantTextEditing(editor)
       : () => undefined
@@ -264,6 +270,7 @@ function DevelopmentCanvas({ profile }: { profile: Exclude<DevelopmentProfileId,
       stopConnectorControlVisibility()
       stopBlockConnections()
       stopDefinitionLinking()
+		stopBlockAutoResize()
       stopBoardTheme()
       stopWheelZoom()
     }

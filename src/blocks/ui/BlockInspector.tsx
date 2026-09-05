@@ -29,6 +29,10 @@ import {
   portMutates,
   setBlockViewProps,
   SEMANTIC_PORT_ROLES,
+	setBlockAutoResizeProps,
+	setBlockFoldableProps,
+	setBlockFoldedProps,
+	canBlockFold,
 } from '../blockModel'
 import { resolveBlockPortSemanticRole, roleLabel } from '../connections/semanticRoles'
 import { getSemanticTagsVisible, setSemanticTagsVisible } from '../semanticTagVisibility'
@@ -69,6 +73,9 @@ import {
   setBlockView,
   toggleBlockPortLinkSeam,
   toggleBlockPortLinkSeamProps,
+	setBlockAutoResize,
+	setBlockFoldable,
+	setBlockFolded,
   updateBlockDetails,
   updateBlockPort,
   type BlockDetailsPatch,
@@ -108,6 +115,9 @@ export interface BlockEditOptions {
 export interface BlockInspectorActions {
   updateDetails(patch: BlockDetailsPatch, options?: BlockEditOptions): void
   setView(view: BlockPresentationView): void
+  setFoldable?(foldable: boolean): void
+  setFolded?(folded: boolean): void
+  setAutoResize?(autoResize: boolean): void
   addPort(side: BlockPortSide): void
 	/** Add a stable named member-update row to the curated Set attributes Block. */
 	addSetAttributesMember?(): void
@@ -1650,6 +1660,76 @@ export function BlockInspectorContent({
                 </p>
               </section>
 
+              <section className="block-inspector__section" data-inspector-section="Behaviour">
+                <div className="block-inspector__section-title">Behaviour</div>
+                <div className="block-inspector__subsection">
+                  <span className="block-inspector__field-label">Folding</span>
+                  <div className="block-inspector__choices" role="group" aria-label="Enable block folding">
+                    <button
+                      type="button"
+                      disabled={readOnly}
+                      aria-pressed={props.foldable}
+                      onClick={() => actions?.setFoldable?.(true)}
+                    >
+                      enabled
+                    </button>
+                    <button
+                      type="button"
+                      disabled={readOnly}
+                      aria-pressed={!props.foldable}
+                      onClick={() => actions?.setFoldable?.(false)}
+                    >
+                      disabled
+                    </button>
+                  </div>
+                  {canBlockFold(props) ? (
+                    <div className="block-inspector__choices" role="group" aria-label="Block fold state">
+                      <button
+                        type="button"
+                        disabled={readOnly}
+                        aria-pressed={!props.folded}
+                        onClick={() => actions?.setFolded?.(false)}
+                      >
+                        open
+                      </button>
+                      <button
+                        type="button"
+                        disabled={readOnly}
+                        aria-pressed={props.folded}
+                        onClick={() => actions?.setFolded?.(true)}
+                      >
+                        folded
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+                <div className="block-inspector__subsection">
+                  <span className="block-inspector__field-label">Auto fit children</span>
+                  <div className="block-inspector__choices" role="group" aria-label="Auto fit Block children">
+                    <button
+                      type="button"
+                      disabled={readOnly}
+                      aria-pressed={props.autoResize}
+                      onClick={() => actions?.setAutoResize?.(true)}
+                    >
+                      enabled
+                    </button>
+                    <button
+                      type="button"
+                      disabled={readOnly}
+                      aria-pressed={!props.autoResize}
+                      onClick={() => actions?.setAutoResize?.(false)}
+                    >
+                      disabled
+                    </button>
+                  </div>
+                </div>
+                <p className="block-inspector__hint">
+                  Folding adds a header chevron in Port and Expanded views. Auto fit takes over
+                  only in Expanded view, keeping a constant border around direct children.
+                </p>
+              </section>
+
               <PortSection side="inputs" props={props} actions={actions} semanticTagsVisible={semanticTagsVisible} />
               <PortSection side="outputs" props={props} actions={actions} semanticTagsVisible={semanticTagsVisible} />
 
@@ -1769,6 +1849,9 @@ export function EditorBlockInspector({
         updateDetails: (patch, options) =>
           void updateBlockDetails(editor, id, patch, history(options)),
         setView: (view) => void setBlockView(editor, id, view),
+		setFoldable: (foldable) => void setBlockFoldable(editor, id, foldable),
+		setFolded: (folded) => void setBlockFolded(editor, id, folded),
+		setAutoResize: (autoResize) => void setBlockAutoResize(editor, id, autoResize),
         addPort: (side) => void appendBlockPort(editor, id, side),
 		addSetAttributesMember: () => void appendSetAttributesMember(editor, id),
         addBundleMember: () => void appendBundleMember(editor, id),
@@ -1798,6 +1881,9 @@ export function EditorBlockInspector({
     return {
       updateDetails: (patch) => changeDraft((props) => patchBlockDetailsProps(props, patch)),
       setView: (view) => changeDraft((props) => setBlockViewProps(props, view)),
+		setFoldable: (foldable) => changeDraft((props) => setBlockFoldableProps(props, foldable)),
+		setFolded: (folded) => changeDraft((props) => setBlockFoldedProps(props, folded)),
+		setAutoResize: (autoResize) => changeDraft((props) => setBlockAutoResizeProps(props, autoResize)),
       addPort: (side) => changeDraft((props) => appendBlockPortProps(props, side)),
 		addSetAttributesMember: () => changeDraft((props) => appendSetAttributesMemberProps(props)),
       addBundleMember: () => changeDraft((props) => appendBundleMemberProps(props)),

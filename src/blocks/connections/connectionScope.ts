@@ -1,6 +1,6 @@
 import type { Editor, TLParentId, TLShape, TLShapeId } from 'tldraw'
 
-import { canBlockContainChildren, isBlockShape } from '../blockModel'
+import { isBlockShape, isExpandedBlockShape } from '../blockModel'
 import { isBranchShape } from '../../branch/branchModel'
 import { isLoopShape } from '../../loop/loopModel'
 import { isImportedPageFrame } from '../../singlePageDocument'
@@ -16,7 +16,7 @@ type ScopeHost = TLShape
  * straight from outside into an arm with no tunnel on the way.
  */
 function hostIsLiveScope(host: ScopeHost): boolean {
-	return isBlockShape(host) && canBlockContainChildren(host.props.view)
+	return isExpandedBlockShape(host)
 }
 
 /**

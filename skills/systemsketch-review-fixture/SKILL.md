@@ -16,6 +16,12 @@ This standing request may not repeat the feature that was just added. Read the c
 1. Choose a stable slug and create `sketches/review/<feature-slug>.systemsketch`. Never seed Zach's real `~/SystemSketch` workspace.
 2. Create a small recipe using [references/recipe.md](references/recipe.md). Start from [assets/example-review-recipe.json](assets/example-review-recipe.json) when useful.
 3. Seed the minimum real SystemSketch objects needed to reach the interaction. Prefer an already-interesting state over making Zach perform setup steps.
+   For a foldable Block review, seed the headed face open with native props
+   `foldable: true` and `folded: false`; add `autoResize: true` when the fixture
+   also reviews child fitting. Point the fold cue at the Block's left edge near
+   its header chevron, keep every child under the real `parentId`, and exercise
+   the post-fit membership exit through the live **Remove from container**
+   context command rather than pre-authoring the post-removal state.
 4. **A shape that sits inside a container must say so with `parentId`.** Placing it at coordinates inside a Frame, an Expanded Block, a Branch or a Loop is not membership: the helper authors through `Editor.createShapes`, which performs no frame adoption — that happens only on an interactive drop or in a region tool's enclosure sweep. A board without `parentId` looks correct and is not; drag the container and the children stay behind. A child's `x`/`y` are **parent-local** once it has a `parentId`, so subtract the container's position. The helper now fails the build when a shape's bounds sit inside a container it does not belong to, but write the `parentId` deliberately rather than waiting for the guard.
 4. Add numbered cue cards that state the literal gesture, such as “drag the output port onto…” or “collapse this Block.” Point each step at its target with an orange arrow. Add one separate green `PASS WHEN` card describing the visible result.
 5. Lay out the interaction first, then reserve a quiet perimeter for instructions. Keep at least 80 canvas units between cards and interaction bounds and at least 48 units between cards. Use cards at least 340×100; enlarge or shorten any card whose text would wrap beyond its height. Do not build a flush stack of cards along one object edge.
