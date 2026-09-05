@@ -80,14 +80,18 @@ describe('selection menu placement', () => {
     expect(x + MENU.w).toBe(VIEWPORT.w - SELECTION_MENU_MARGIN)
   })
 
-  it('treats the bottom toolbar as the floor, not the window edge', () => {
-    // Selection taller than the viewport: neither above nor below fits.
-    const { y } = place(
+  it('pins to the top margin when the selection is scrolled off above the viewport', () => {
+    // Selection's top edge is above the viewport (overlayTop < 0): there is no
+    // "above" to flip to, so this pins near the top instead of the old
+    // behaviour of clamping down against the bottom toolbar — the bug this
+    // rule fixes, not a regression in the toolbar-as-floor test it replaces.
+    const { y, side } = place(
       { x: 700, y: -400, w: 240, h: 1600 },
       { bottomObstacleTop: TOOL_BELT_TOP },
     )
 
-    expect(y + MENU.h).toBe(TOOL_BELT_TOP - SELECTION_MENU_MARGIN)
+    expect(side).toBe('pinned')
+    expect(y).toBe(SELECTION_MENU_MARGIN)
   })
 
   it('pins a menu wider than its safe area to the left margin', () => {
