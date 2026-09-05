@@ -125,7 +125,9 @@
     "test:semantic-roles": "node tests/semantic_role_inheritance_smoke.mjs",
     "test:named-landmarks": "node tests/named_landmarks_smoke.mjs",
     "test:frames-panel": "node tests/frames_panel_smoke.mjs",
-    "test:semantic-stock-blocks": "node tests/semantic_stock_blocks_smoke.mjs"
+    "test:semantic-stock-blocks": "node tests/semantic_stock_blocks_smoke.mjs",
+    "test:compare": "node tests/compare_modal_smoke.mjs",
+    "test:converged": "node tests/compare_converged_smoke.mjs"
   },
   "dependencies": {
     "elkjs": "0.12.0",

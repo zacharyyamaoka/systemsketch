@@ -13,6 +13,7 @@ import {
 } from 'tldraw'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { AppearanceControls, hasAppearanceControls } from '../appearance/AppearanceControls'
+import { CompareTrigger } from '../compare'
 import { WrapSelectionControl } from '../frames/WrapSelectionControl'
 import { canWrapSelection } from '../frames/wrapSelection'
 import {
@@ -144,6 +145,16 @@ export function SystemSketchSharePanel() {
       >
         Z
       </TldrawUiButton>
+      {/*
+        Compare sits beside the panel toggle, not over the canvas.
+
+        Both are "open a review surface", so they group; and this is the row a
+        hand already goes to for global actions. Its old home was an absolutely
+        positioned pill floating just below this shell, aligned to nothing —
+        which is exactly what Zach called out. It renders nothing outside the
+        product app, where no compare provider is mounted.
+      */}
+      <CompareTrigger />
       <TldrawUiButton
         type="icon"
         className="systemsketch-shell-icon-button"
