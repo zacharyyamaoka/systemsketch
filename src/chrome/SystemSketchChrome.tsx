@@ -71,6 +71,7 @@ import {
   SelectionLayoutActions,
 } from './SelectionLayoutActions'
 import type { RightSurface } from './chromeState'
+import { CommunicationPrototypeControls } from '../prototypes/communication/CommunicationPrototypeControls'
 import './systemsketch-chrome.css'
 
 function ShapesIcon() {
@@ -668,6 +669,7 @@ export function SystemSketchSurfaceHost() {
 
   return (
     <div className="systemsketch-surface-host" data-testid="systemsketch-surface-host">
+      <CommunicationPrototypeControls />
       <RecorderIndicator />
       <TunnelLayerBar />
       <OnCanvasBlockPicker />

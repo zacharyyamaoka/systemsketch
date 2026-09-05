@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-09-05T04:54:14.949Z",
+  "checks": [
+    "Dataflow opens as one real 8-node, 13-edge SystemSketch graph in Port view",
+    "Tag edges recolors and labels all 11 component protocol legs without changing ports or local values",
+    "Components preserves occurrence centres, hides literal nodes, and collapses 11 legs into 7 relationships",
+    "Components switches every relationship to the straight treatment",
+    "Components switches every relationship to the laser treatment",
+    "returning to Dataflow restores ports and value nodes at the same centres",
+    "the real browser journey emitted no local console errors"
+  ]
+}

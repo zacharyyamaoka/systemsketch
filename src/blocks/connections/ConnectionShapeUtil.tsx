@@ -148,6 +148,17 @@ import {
 } from '../../diff/diffPresentation'
 import { findFieldDiff } from '../../diff/fieldDiff'
 import { wordDiff, type DiffToken } from '../../diff/wordDiff'
+import {
+	COMMUNICATION_FAMILY_PAINT,
+	collectCommunicationRelations,
+	communicationProjection,
+	describeCommunicationConnection,
+	isCommunicationPrototypeEnabled,
+	phaseLabel,
+	type CommunicationDescriptor,
+	type CommunicationRelation,
+	type CommunicationRouteStyle,
+} from '../../prototypes/communication/communicationProjection'
 
 declare module 'tldraw' {
 	export interface TLGlobalShapePropsMap {
@@ -850,7 +861,314 @@ function setAnchoredFace(editor: Editor, binding: ConnectionBinding, face: PortF
 	})
 }
 
+function markerId(connectionId: TLShapeId, end: 'start' | 'end'): string {
+	return `communication-${String(connectionId).replace(/[^a-z0-9_-]/gi, '-')}-${end}`
+}
+
+function CommunicationArrowDefs({
+	connectionId,
+	ink,
+	start,
+}: {
+	connectionId: TLShapeId
+	ink: string
+	start: boolean
+}) {
+	return (
+		<defs>
+			{start ? (
+				<marker
+					id={markerId(connectionId, 'start')}
+					viewBox="0 0 10 10"
+					refX="8"
+					refY="5"
+					markerWidth="7"
+					markerHeight="7"
+					orient="auto-start-reverse"
+				>
+					<path d="M 0 0 L 10 5 L 0 10 z" fill={ink} />
+				</marker>
+			) : null}
+			<marker
+				id={markerId(connectionId, 'end')}
+				viewBox="0 0 10 10"
+				refX="8"
+				refY="5"
+				markerWidth="7"
+				markerHeight="7"
+				orient="auto-start-reverse"
+			>
+				<path d="M 0 0 L 10 5 L 0 10 z" fill={ink} />
+			</marker>
+		</defs>
+	)
+}
+
+function CommunicationLabel({
+	x,
+	y,
+	text,
+	ink,
+	soft,
+}: {
+	x: number
+	y: number
+	text: string
+	ink: string
+	soft: string
+}) {
+	const width = Math.max(74, text.length * 7.1 + 22)
+	return (
+		<g
+			className="CommunicationEdge-label"
+			transform={`translate(${x} ${y})`}
+			pointerEvents="none"
+		>
+			<rect
+				x={-width / 2}
+				y={-13}
+				width={width}
+				height={26}
+				rx={13}
+				fill="var(--ss-surface, #fff)"
+				stroke={ink}
+				strokeWidth={1.5}
+			/>
+			<rect x={-width / 2 + 4} y={-9} width={18} height={18} rx={9} fill={soft} />
+			<text
+				x={4}
+				y={4}
+				textAnchor="middle"
+				fill={ink}
+				fontFamily="'JetBrains Mono', ui-monospace, monospace"
+				fontSize={10.5}
+				fontWeight={750}
+			>
+				{text}
+			</text>
+		</g>
+	)
+}
+
+function TaggedCommunicationConnection({
+	connection,
+	descriptor,
+}: {
+	connection: ConnectionShape
+	descriptor: CommunicationDescriptor
+}) {
+	const editor = useEditor()
+	const path = useValue(
+		'communication tagged path',
+		() => getConnectionShapePath(editor, connection),
+		[editor, connection],
+	)
+	const points = useValue(
+		'communication tagged points',
+		() => getConnectionRenderPoints(editor, connection),
+		[editor, connection],
+	)
+	const at = pointAtFraction(points, 0.5)
+	const paint = COMMUNICATION_FAMILY_PAINT[descriptor.family]
+	const detail = descriptor.family === 'topic' || descriptor.family === 'stream'
+		? descriptor.name
+		: phaseLabel(descriptor.phase)
+	const label = `${paint.monogram} · ${detail}`
+	return (
+		<SVGContainer
+			data-communication-mode="tagged"
+			data-communication-family={descriptor.family}
+			data-communication-phase={descriptor.phase}
+		>
+			<CommunicationArrowDefs connectionId={connection.id} ink={paint.ink} start={false} />
+			<path
+				d={path}
+				fill="none"
+				stroke={paint.ink}
+				strokeWidth={2.6}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				markerEnd={`url(#${markerId(connection.id, 'end')})`}
+				vectorEffect="non-scaling-stroke"
+			/>
+			<CommunicationLabel x={at.x} y={at.y} text={label} ink={paint.ink} soft={paint.soft} />
+		</SVGContainer>
+	)
+}
+
+interface PagePoint { x: number; y: number }
+
+function boundaryPoint(bounds: Box, toward: PagePoint): PagePoint {
+	const center = bounds.center
+	const dx = toward.x - center.x
+	const dy = toward.y - center.y
+	const halfW = Math.max(bounds.w / 2, 1)
+	const halfH = Math.max(bounds.h / 2, 1)
+	const scale = 1 / Math.max(Math.abs(dx) / halfW, Math.abs(dy) / halfH, 0.0001)
+	return { x: center.x + dx * scale, y: center.y + dy * scale }
+}
+
+function quadraticPoint(start: PagePoint, control: PagePoint, end: PagePoint): PagePoint {
+	return {
+		x: start.x * 0.25 + control.x * 0.5 + end.x * 0.25,
+		y: start.y * 0.25 + control.y * 0.5 + end.y * 0.25,
+	}
+}
+
+function componentRelationshipGeometry(
+	editor: Editor,
+	connection: ConnectionShape,
+	relation: CommunicationRelation,
+	routeStyle: CommunicationRouteStyle,
+) {
+	const sourceBounds = editor.getShapePageBounds(relation.sourceShapeId)
+	const targetBounds = editor.getShapePageBounds(relation.targetShapeId)
+	if (!sourceBounds || !targetBounds) return null
+	const sourceCenter = sourceBounds.center
+	const targetCenter = targetBounds.center
+	const dx = targetCenter.x - sourceCenter.x
+	const dy = targetCenter.y - sourceCenter.y
+	const distance = Math.max(1, Math.hypot(dx, dy))
+	const perpendicular = { x: -dy / distance, y: dx / distance }
+	const laneOffset = relation.lane * 34
+	const shiftedSource = {
+		x: sourceCenter.x + perpendicular.x * laneOffset,
+		y: sourceCenter.y + perpendicular.y * laneOffset,
+	}
+	const shiftedTarget = {
+		x: targetCenter.x + perpendicular.x * laneOffset,
+		y: targetCenter.y + perpendicular.y * laneOffset,
+	}
+	const straight = routeStyle === 'straight'
+	const bend = straight
+		? 0
+		: relation.lane === 0
+			? Math.min(72, distance * 0.14)
+			: relation.lane * Math.min(180, distance * 0.32)
+	const control = {
+		x: (shiftedSource.x + shiftedTarget.x) / 2 + perpendicular.x * bend,
+		y: (shiftedSource.y + shiftedTarget.y) / 2 + perpendicular.y * bend,
+	}
+	const pageStart = boundaryPoint(sourceBounds, straight ? shiftedTarget : control)
+	const pageEnd = boundaryPoint(targetBounds, straight ? shiftedSource : control)
+	const inverse = Mat.Inverse(editor.getShapePageTransform(connection))
+	const start = Mat.applyToPoint(inverse, pageStart)
+	const end = Mat.applyToPoint(inverse, pageEnd)
+	const localControl = Mat.applyToPoint(inverse, control)
+	const label = straight
+		? { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 }
+		: quadraticPoint(start, localControl, end)
+	return {
+		path: straight
+			? `M ${start.x} ${start.y} L ${end.x} ${end.y}`
+			: `M ${start.x} ${start.y} Q ${localControl.x} ${localControl.y} ${end.x} ${end.y}`,
+		label,
+	}
+}
+
+function ComponentCommunicationConnection({
+	connection,
+	relation,
+	routeStyle,
+}: {
+	connection: ConnectionShape
+	relation: CommunicationRelation
+	routeStyle: CommunicationRouteStyle
+}) {
+	const editor = useEditor()
+	const geometry = useValue(
+		'component communication relationship geometry',
+		() => componentRelationshipGeometry(editor, connection, relation, routeStyle),
+		[editor, connection, relation, routeStyle],
+	)
+	if (!geometry) return null
+	const paint = COMMUNICATION_FAMILY_PAINT[relation.family]
+	const label = `${paint.monogram} · ${relation.family} · ${relation.name}`
+	const laser = routeStyle === 'laser'
+	return (
+		<SVGContainer
+			data-communication-mode="components"
+			data-communication-family={relation.family}
+			data-communication-edges={relation.edgeCount}
+			data-communication-route={routeStyle}
+		>
+			<CommunicationArrowDefs
+				connectionId={connection.id}
+				ink={paint.ink}
+				start={relation.bidirectional}
+			/>
+			{laser ? (
+				<path
+					className="CommunicationEdge-laserGlow"
+					d={geometry.path}
+					fill="none"
+					stroke={paint.ink}
+					strokeWidth={9}
+					vectorEffect="non-scaling-stroke"
+				/>
+			) : null}
+			<path
+				className={laser ? 'CommunicationEdge-laserPulse' : undefined}
+				d={geometry.path}
+				fill="none"
+				stroke={paint.ink}
+				strokeWidth={laser ? 3 : 2.8}
+				strokeDasharray={laser ? '16 8 3 8' : undefined}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				markerStart={relation.bidirectional ? `url(#${markerId(connection.id, 'start')})` : undefined}
+				markerEnd={`url(#${markerId(connection.id, 'end')})`}
+				vectorEffect="non-scaling-stroke"
+			/>
+			<CommunicationLabel
+				x={geometry.label.x}
+				y={geometry.label.y}
+				text={label}
+				ink={paint.ink}
+				soft={paint.soft}
+			/>
+		</SVGContainer>
+	)
+}
+
 function ConnectionShapeComponent({ connection }: { connection: ConnectionShape }) {
+	const editor = useEditor()
+	const prototypeEnabled = isCommunicationPrototypeEnabled()
+	const projection = useValue(
+		'communication connection projection',
+		() => communicationProjection.get(editor),
+		[editor],
+	)
+	const descriptor = useValue(
+		'communication connection descriptor',
+		() => prototypeEnabled ? describeCommunicationConnection(editor, connection) : null,
+		[editor, connection, prototypeEnabled],
+	)
+	const relation = useValue(
+		'communication relationship',
+		() => {
+			if (!prototypeEnabled || projection.mode !== 'components') return null
+			return collectCommunicationRelations(editor).relations
+				.find((candidate) => candidate.representativeId === connection.id) ?? null
+		},
+		[editor, connection.id, projection.mode, prototypeEnabled],
+	)
+	if (prototypeEnabled && projection.mode === 'tagged' && descriptor) {
+		return <TaggedCommunicationConnection connection={connection} descriptor={descriptor} />
+	}
+	if (prototypeEnabled && projection.mode === 'components') {
+		return relation ? (
+			<ComponentCommunicationConnection
+				connection={connection}
+				relation={relation}
+				routeStyle={projection.routeStyle}
+			/>
+		) : null
+	}
+	return <CanonicalConnectionShapeComponent connection={connection} />
+}
+
+function CanonicalConnectionShapeComponent({ connection }: { connection: ConnectionShape }) {
 	const editor = useEditor()
 	const path = useValue(
 		'block connection path',

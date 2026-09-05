@@ -1,0 +1,168 @@
+{
+  "feature": "Communication projection prototype",
+  "viewport": { "width": 1920, "height": 1200 },
+  "shapes": [
+    {
+      "id": "camera", "type": "block", "x": 0, "y": 300,
+      "props": {
+        "title": "Camera", "description": "", "blockType": "component", "view": "port", "w": 340, "h": 230,
+        "views": { "simple": { "w": 320, "h": 190 }, "port": { "w": 340, "h": 230 }, "expanded": { "w": 560, "h": 380 }, "value": { "w": 168, "h": 56 } },
+        "showDescription": false, "portLayout": "inline", "state": "normal", "inputs": [],
+        "outputs": [
+          { "id": "frame", "name": "frame", "type": "Image", "visible": true },
+          { "id": "preview", "name": "preview", "type": "Chunk[Image]", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "perception", "type": "block", "x": 500, "y": 250,
+      "props": {
+        "title": "Perception", "description": "", "blockType": "component", "view": "port", "w": 340, "h": 230,
+        "views": { "simple": { "w": 320, "h": 190 }, "port": { "w": 340, "h": 230 }, "expanded": { "w": 560, "h": 380 }, "value": { "w": 168, "h": 56 } },
+        "showDescription": false, "portLayout": "inline", "state": "normal",
+        "inputs": [
+          { "id": "image", "name": "image", "type": "Image", "visible": true },
+          { "id": "threshold", "name": "threshold", "type": "float", "visible": true }
+        ],
+        "outputs": [{ "id": "detections", "name": "detections", "type": "Detections", "visible": true }]
+      }
+    },
+    {
+      "id": "planner", "type": "block", "x": 1000, "y": 300,
+      "props": {
+        "title": "Planner", "description": "", "blockType": "component", "view": "port", "w": 340, "h": 230,
+        "views": { "simple": { "w": 320, "h": 190 }, "port": { "w": 340, "h": 230 }, "expanded": { "w": 560, "h": 380 }, "value": { "w": 168, "h": 56 } },
+        "showDescription": false, "portLayout": "inline", "state": "normal",
+        "inputs": [{ "id": "detections", "name": "detections", "type": "Detections", "visible": true }],
+        "outputs": [{ "id": "plan", "name": "plan", "type": "Plan", "visible": true }]
+      }
+    },
+    {
+      "id": "mission", "type": "block", "x": 40, "y": 750,
+      "props": {
+        "title": "Mission BT", "description": "", "blockType": "action client", "view": "port", "w": 390, "h": 320,
+        "views": { "simple": { "w": 320, "h": 190 }, "port": { "w": 390, "h": 320 }, "expanded": { "w": 560, "h": 380 }, "value": { "w": 168, "h": 56 } },
+        "showDescription": false, "portLayout": "inline", "state": "normal",
+        "inputs": [
+          { "id": "mission_id", "name": "mission_id", "type": "str", "visible": true },
+          { "id": "plan", "name": "plan", "type": "Plan", "visible": true },
+          { "id": "pose_reply", "name": "pose.reply", "type": "Pose", "visible": true },
+          { "id": "move_feedback", "name": "move.feedback", "type": "Progress", "visible": true },
+          { "id": "move_result", "name": "move.result", "type": "MoveResult", "visible": true }
+        ],
+        "outputs": [
+          { "id": "pose_query", "name": "pose.query", "type": "PoseQuery", "visible": true },
+          { "id": "move_goal", "name": "move.goal", "type": "MoveGoal", "visible": true },
+          { "id": "move_cancel", "name": "move.cancel", "type": "GoalId", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "motion", "type": "block", "x": 650, "y": 700,
+      "props": {
+        "title": "Motion Controller", "description": "", "blockType": "service + action server", "view": "port", "w": 420, "h": 320,
+        "views": { "simple": { "w": 320, "h": 190 }, "port": { "w": 420, "h": 320 }, "expanded": { "w": 560, "h": 380 }, "value": { "w": 168, "h": 56 } },
+        "showDescription": false, "portLayout": "inline", "state": "normal",
+        "inputs": [
+          { "id": "pose_query", "name": "pose.query", "type": "PoseQuery", "visible": true },
+          { "id": "move_goal", "name": "move.goal", "type": "MoveGoal", "visible": true },
+          { "id": "move_cancel", "name": "move.cancel", "type": "GoalId", "visible": true }
+        ],
+        "outputs": [
+          { "id": "pose_reply", "name": "pose.reply", "type": "Pose", "visible": true },
+          { "id": "move_feedback", "name": "move.feedback", "type": "Progress", "visible": true },
+          { "id": "move_result", "name": "move.result", "type": "MoveResult", "visible": true },
+          { "id": "status", "name": "status", "type": "Status", "visible": true }
+        ]
+      }
+    },
+    {
+      "id": "telemetry", "type": "block", "x": 1100, "y": 750,
+      "props": {
+        "title": "Telemetry UI", "description": "", "blockType": "component", "view": "port", "w": 340, "h": 230,
+        "views": { "simple": { "w": 320, "h": 190 }, "port": { "w": 340, "h": 230 }, "expanded": { "w": 560, "h": 380 }, "value": { "w": 168, "h": 56 } },
+        "showDescription": false, "portLayout": "inline", "state": "normal",
+        "inputs": [
+          { "id": "preview", "name": "preview", "type": "Chunk[Image]", "visible": true },
+          { "id": "status", "name": "status", "type": "Status", "visible": true }
+        ], "outputs": []
+      }
+    },
+    {
+      "id": "threshold_value", "type": "block", "x": 365, "y": 560,
+      "props": {
+        "title": "", "description": "", "blockType": "", "view": "value", "w": 168, "h": 56,
+        "views": { "simple": { "w": 320, "h": 190 }, "port": { "w": 340, "h": 230 }, "expanded": { "w": 560, "h": 380 }, "value": { "w": 168, "h": 56 } },
+        "showDescription": false, "portLayout": "inline", "state": "normal", "inputs": [],
+        "outputs": [{ "id": "out_1", "name": "threshold", "type": "float", "visible": true }]
+      }
+    },
+    {
+      "id": "mission_value", "type": "block", "x": -10, "y": 640,
+      "props": {
+        "title": "", "description": "", "blockType": "", "view": "value", "w": 168, "h": 56,
+        "views": { "simple": { "w": 320, "h": 190 }, "port": { "w": 340, "h": 230 }, "expanded": { "w": 560, "h": 380 }, "value": { "w": 168, "h": 56 } },
+        "showDescription": false, "portLayout": "inline", "state": "normal", "inputs": [],
+        "outputs": [{ "id": "out_1", "name": "mission_id", "type": "str", "visible": true }]
+      }
+    },
+    { "id": "edge_frame", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "curved", "curve": { "dx": 0, "dy": -30 }, "pins": [], "elbowRoute": null, "routeMode": "authored", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "", "state": "normal" } },
+    { "id": "edge_preview", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "curved", "curve": { "dx": 0, "dy": -150 }, "pins": [], "elbowRoute": null, "routeMode": "authored", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "", "state": "normal" } },
+    { "id": "edge_detections", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "curved", "curve": { "dx": 0, "dy": -15 }, "pins": [], "elbowRoute": null, "routeMode": "authored", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "", "state": "normal" } },
+    { "id": "edge_plan", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "curved", "curve": { "dx": 0, "dy": 90 }, "pins": [], "elbowRoute": null, "routeMode": "authored", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "", "state": "normal" } },
+    { "id": "edge_pose_request", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "curved", "curve": { "dx": 0, "dy": -90 }, "pins": [], "elbowRoute": null, "routeMode": "authored", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "", "state": "normal" } },
+    { "id": "edge_pose_response", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "curved", "curve": { "dx": 0, "dy": 90 }, "pins": [], "elbowRoute": null, "routeMode": "authored", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "", "state": "normal" } },
+    { "id": "edge_move_goal", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "curved", "curve": { "dx": 0, "dy": -42 }, "pins": [], "elbowRoute": null, "routeMode": "authored", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "", "state": "normal" } },
+    { "id": "edge_move_cancel", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "curved", "curve": { "dx": 0, "dy": -12 }, "pins": [], "elbowRoute": null, "routeMode": "authored", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "", "state": "normal" } },
+    { "id": "edge_move_feedback", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "curved", "curve": { "dx": 0, "dy": 42 }, "pins": [], "elbowRoute": null, "routeMode": "authored", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "", "state": "normal" } },
+    { "id": "edge_move_result", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "curved", "curve": { "dx": 0, "dy": 72 }, "pins": [], "elbowRoute": null, "routeMode": "authored", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "", "state": "normal" } },
+    { "id": "edge_status", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "curved", "curve": { "dx": 0, "dy": 20 }, "pins": [], "elbowRoute": null, "routeMode": "authored", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "", "state": "normal" } },
+    { "id": "edge_threshold_value", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "curved", "curve": null, "pins": [], "elbowRoute": null, "routeMode": "automatic", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "", "state": "normal" } },
+    { "id": "edge_mission_value", "type": "connection", "x": 0, "y": 0, "props": { "start": { "x": 0, "y": 0 }, "end": { "x": 0, "y": 0 }, "routing": "curved", "curve": null, "pins": [], "elbowRoute": null, "routeMode": "automatic", "temporal": "data", "delayValue": "", "pillPosition": 0.5, "tunnel": false, "tunnelLayer": "", "state": "normal" } }
+  ],
+  "bindings": [
+    { "type": "connection", "fromId": "edge_frame", "toId": "camera", "props": { "portId": "frame", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_frame", "toId": "perception", "props": { "portId": "image", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_preview", "toId": "camera", "props": { "portId": "preview", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_preview", "toId": "telemetry", "props": { "portId": "preview", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_detections", "toId": "perception", "props": { "portId": "detections", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_detections", "toId": "planner", "props": { "portId": "detections", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_plan", "toId": "planner", "props": { "portId": "plan", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_plan", "toId": "mission", "props": { "portId": "plan", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_pose_request", "toId": "mission", "props": { "portId": "pose_query", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_pose_request", "toId": "motion", "props": { "portId": "pose_query", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_pose_response", "toId": "motion", "props": { "portId": "pose_reply", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_pose_response", "toId": "mission", "props": { "portId": "pose_reply", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_move_goal", "toId": "mission", "props": { "portId": "move_goal", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_move_goal", "toId": "motion", "props": { "portId": "move_goal", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_move_cancel", "toId": "mission", "props": { "portId": "move_cancel", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_move_cancel", "toId": "motion", "props": { "portId": "move_cancel", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_move_feedback", "toId": "motion", "props": { "portId": "move_feedback", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_move_feedback", "toId": "mission", "props": { "portId": "move_feedback", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_move_result", "toId": "motion", "props": { "portId": "move_result", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_move_result", "toId": "mission", "props": { "portId": "move_result", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_status", "toId": "motion", "props": { "portId": "status", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_status", "toId": "telemetry", "props": { "portId": "status", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_threshold_value", "toId": "threshold_value", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_threshold_value", "toId": "perception", "props": { "portId": "threshold", "terminal": "end", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_mission_value", "toId": "mission_value", "props": { "portId": "out_1", "terminal": "start", "face": "outer" } },
+    { "type": "connection", "fromId": "edge_mission_value", "toId": "mission", "props": { "portId": "mission_id", "terminal": "end", "face": "outer" } }
+  ],
+  "callouts": [
+    {
+      "id": "step-tag", "kind": "step", "text": "1 · Click Tag edges — every protocol leg stays on its real port wire", "x": -500, "y": 300, "w": 380, "h": 110,
+      "target": { "shapeId": "camera", "anchor": "left", "dy": -32 }
+    },
+    {
+      "id": "step-components", "kind": "step", "text": "2 · Click Components — cards simplify, values vanish, and protocol legs collapse", "x": 600, "y": 1170, "w": 470, "h": 110,
+      "target": { "shapeId": "motion", "anchor": "bottom", "dx": 45 }
+    },
+    {
+      "id": "step-routes", "kind": "step", "text": "3 · Compare Curved, Straight, and Laser without changing the graph", "x": 1540, "y": 780, "w": 410, "h": 110,
+      "target": { "shapeId": "telemetry", "anchor": "right", "dy": 24 }
+    },
+    {
+      "id": "pass", "kind": "pass", "text": "PASS WHEN · Dataflow returns the same 13 edges, ports, values, and component centres", "x": -500, "y": 850, "w": 430, "h": 130
+    }
+  ]
+}
