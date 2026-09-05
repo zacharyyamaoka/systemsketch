@@ -96,7 +96,7 @@ function ArrowRoutingControls({
         {routing === 'mixed'
           ? 'Mixed — choose one route to settle the selection.'
           : routing === 'slanted'
-            ? 'Leaves horizontally, then climbs or descends diagonally. It keeps the ordinary arrowhead.'
+            ? 'Leaves from the source face, then reaches its destination diagonally. It keeps the ordinary arrowhead.'
             : 'Use Slanted for compact behavior-tree branches without adding a common toolbar tool.'}
       </p>
     </section>

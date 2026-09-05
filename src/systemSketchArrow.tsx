@@ -69,6 +69,9 @@ const SYSTEMSKETCH_ARROW_SLANTED_VERSION = 1
 const MIN_ARROW_SEGMENT_HANDLE_LENGTH = 20
 const SLANTED_ARROW_ELBOW_HANDLE_ID = 'systemsketch-slanted-elbow'
 
+/** The first short leg of a Slanted arrow leaves in this cardinal direction. */
+export type SlantedArrowDeparture = 'right' | 'bottom' | 'left' | 'top'
+
 interface StoredArrowRoute {
 	version: typeof SYSTEMSKETCH_ARROW_ROUTE_VERSION
 	route: ConnectionElbowRouteModel
@@ -418,40 +421,92 @@ export function getArrowInspectorRouting(editor: Editor): ArrowInspectorRouting 
 /**
  * The endpoint-gapped polyline used by established graph routers, not a new
  * obstacle solver. `getConnectionControlPoints` is already our shared
- * readable-output lead; its first point gives this arrow the horizontal run.
+ * readable-output lead; rotating its scalar lead gives this arrow a short run
+ * along the source direction.
  *
- * WHY: ELK's POLYLINE option is the right prior art for the horizontal-then-
- * sloped reading, but ELK's layout phase owns node positions. A loose tldraw
- * arrow must follow the endpoints its author placed, so it reuses the existing
- * lead distance and lets SVG orient the endpoint marker along the last segment.
+ * WHY: ELK's POLYLINE option is the right prior art for the short-then-sloped
+ * reading, while React Flow makes that first direction explicit as
+ * `sourcePosition`. SystemSketch reads the bound source face when it has one;
+ * a loose tldraw arrow uses its dominant endpoint axis. Neither case asks a
+ * layout engine to move author-owned endpoints, and SVG orients the endpoint
+ * marker along the final segment.
  */
+export function getSlantedArrowDeparture(start: VecLike, end: VecLike): SlantedArrowDeparture {
+	const dx = end.x - start.x
+	const dy = end.y - start.y
+	if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? 'right' : 'left'
+	return dy >= 0 ? 'bottom' : 'top'
+}
+
+function slantedDepartureFromStartBinding(editor: Editor, shape: TLArrowShape): SlantedArrowDeparture | null {
+	const anchor = getArrowBindings(editor, shape).start?.props.normalizedAnchor
+	if (!anchor) return null
+	const edges: Array<[SlantedArrowDeparture, number]> = [
+		['left', anchor.x],
+		['right', 1 - anchor.x],
+		['top', anchor.y],
+		['bottom', 1 - anchor.y],
+	]
+	edges.sort(([, distanceA], [, distanceB]) => distanceA - distanceB)
+	// A centered start binding has no meaningful face. The loose-arrow
+	// fallback then gives a stable direction from the endpoint relationship.
+	return edges[0][1] <= 0.1 ? edges[0][0] : null
+}
+
+function getSlantedArrowDepartureForShape(
+	editor: Editor,
+	shape: TLArrowShape,
+	start: VecLike,
+	end: VecLike,
+): SlantedArrowDeparture {
+	return slantedDepartureFromStartBinding(editor, shape) ?? getSlantedArrowDeparture(start, end)
+}
+
+function slantedDepartureAxis(departure: SlantedArrowDeparture): 'x' | 'y' {
+	return departure === 'left' || departure === 'right' ? 'x' : 'y'
+}
+
+function slantedDepartureSign(departure: SlantedArrowDeparture): number {
+	return departure === 'right' || departure === 'bottom' ? 1 : -1
+}
+
 export function getSlantedArrowPoints(
 	start: VecLike,
 	end: VecLike,
 	elbowT: number | null = null,
+	departure: SlantedArrowDeparture = getSlantedArrowDeparture(start, end),
 ): Vec[] {
 	const dx = end.x - start.x
 	const dy = end.y - start.y
 	if (Math.abs(dx) < 0.001 || Math.abs(dy) < 0.001) {
 		return [Vec.From(start), Vec.From(end)]
 	}
-	if (elbowT !== null) {
-		return [
-			Vec.From(start),
-			new Vec(start.x + dx * Math.max(0, Math.min(1, elbowT)), start.y),
-			Vec.From(end),
-		]
-	}
-	const [firstControl] = getConnectionControlPoints(start, end)
-	const lead = Math.min(Math.abs(firstControl.x - start.x), Math.abs(dx) / 2)
-	const x = start.x + Math.sign(dx) * lead
-	return [Vec.From(start), new Vec(x, start.y), Vec.From(end)]
+	const axis = slantedDepartureAxis(departure)
+	const span = axis === 'x' ? Math.abs(dx) : Math.abs(dy)
+	// Run the shared output-gap helper in a canonical positive axis. The helper
+	// is deliberately direction-agnostic here: departing left/up needs the same
+	// readable lead as departing right/down.
+	const [control] = getConnectionControlPoints({ x: 0, y: 0 }, { x: span, y: 0 })
+	const automaticLead = Math.min(Math.abs(control.x), span / 2)
+	const lead = elbowT === null
+		? automaticLead
+		: span * Math.max(0, Math.min(1, elbowT))
+	const signedLead = slantedDepartureSign(departure) * lead
+	const elbow = axis === 'x'
+		? new Vec(start.x + signedLead, start.y)
+		: new Vec(start.x, start.y + signedLead)
+	return [Vec.From(start), elbow, Vec.From(end)]
 }
 
 function slantedArrowPoints(editor: Editor, shape: TLArrowShape): Vec[] | null {
 	const info = getArrowInfo(editor, shape)
 	if (!info?.isValid) return null
-	return getSlantedArrowPoints(info.start.point, info.end.point, slantedArrowElbowT(shape.meta))
+	return getSlantedArrowPoints(
+		info.start.point,
+		info.end.point,
+		slantedArrowElbowT(shape.meta),
+		getSlantedArrowDepartureForShape(editor, shape, info.start.point, info.end.point),
+	)
 }
 
 /** Apply the uncommon route from the dock without making it a tool or A-key preset. */
@@ -597,19 +652,20 @@ function SlantedArrowBody({
 			<defs>
 				<marker
 					id={markerId}
-					viewBox="0 0 6 6"
-					refX="6"
-					refY="3"
-					markerWidth="3"
-					markerHeight="3"
+					viewBox="0 0 10 10"
+					refX="9"
+					refY="5"
+					markerWidth="3.5"
+					markerHeight="3.5"
 					markerUnits="strokeWidth"
 					orient="auto"
+					overflow="visible"
 				>
 					<path
-						d="M 0 0 L 6 3 L 0 6"
+						d="M 1 1 L 9 5 L 1 9"
 						fill="none"
 						stroke={display.strokeColor}
-						strokeWidth="1"
+						strokeWidth="2.5"
 						strokeLinejoin="round"
 						strokeLinecap="round"
 					/>
@@ -933,7 +989,7 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 				id: SLANTED_ARROW_ELBOW_HANDLE_ID,
 				// Match stock straight/curved arrows: a default virtual point does
 				// not alter the route until someone grabs it, then it becomes an
-				// authored vertex that survives terminal movement.
+				// authored vertex that survives terminal movement on the source axis.
 				type: slantedArrowElbowT(shape.meta) === null ? 'virtual' : 'vertex',
 				index: 'a2' as IndexKey,
 				x: route[1].x,
@@ -952,10 +1008,17 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 			if (!arrowInfo?.isValid) return undefined
 			const start = arrowInfo.start.point
 			const end = arrowInfo.end.point
-			const dx = end.x - start.x
-			const dy = end.y - start.y
-			if (Math.abs(dx) < 0.001 || Math.abs(dy) < 0.001) return undefined
-			const elbowT = Math.max(0, Math.min(1, (info.handle.x - start.x) / dx))
+			const departure = getSlantedArrowDepartureForShape(this.editor, shape, start, end)
+			const axis = slantedDepartureAxis(departure)
+			const startCoordinate = axis === 'x' ? start.x : start.y
+			const endCoordinate = axis === 'x' ? end.x : end.y
+			const handleCoordinate = axis === 'x' ? info.handle.x : info.handle.y
+			const span = Math.abs(endCoordinate - startCoordinate)
+			if (span < 0.001) return undefined
+			const elbowT = Math.max(0, Math.min(
+				1,
+				((handleCoordinate - startCoordinate) * slantedDepartureSign(departure)) / span,
+			))
 			return {
 				id: shape.id,
 				type: shape.type,

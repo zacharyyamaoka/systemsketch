@@ -30,6 +30,6 @@ describe('Shape facts arrow routing', () => {
     expect(html).toContain('data-testid="shape-facts-arrow-routing-slanted"')
     expect(html).toContain('aria-pressed="true"')
     expect(html).toContain('M 3 17 H 20 L 33 4')
-    expect(html).toContain('Leaves horizontally, then climbs or descends diagonally.')
+    expect(html).toContain('Leaves from the source face, then reaches its destination diagonally.')
   })
 })

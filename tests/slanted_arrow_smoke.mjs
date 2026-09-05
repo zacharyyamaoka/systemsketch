@@ -4,9 +4,9 @@
  *
  * This is not a menu-option assertion. The journey selects a real stock arrow,
  * turns on Slanted in the Inspector, and reads the painted SVG back from the
- * browser: the first leg must be horizontal and the end marker must follow the
- * final diagonal. It then returns to Straight and proves the namespaced route
- * metadata is gone again.
+ * browser: the first leg must leave on the source axis and the end marker must
+ * follow the final diagonal. It then returns to Straight and proves the
+ * namespaced route metadata is gone again.
  */
 import assert from 'node:assert/strict'
 import { writeFile } from 'node:fs/promises'
@@ -66,7 +66,7 @@ async function main() {
           end: { x: 540, y: -250 },
           kind: 'arc',
           bend: 0,
-    size: 'xl',
+          size: 'xl',
           arrowheadStart: 'none',
           arrowheadEnd: 'arrow',
         },
@@ -93,7 +93,7 @@ async function main() {
       slantedPressed: 'false',
       iconPath: 'M 3 17 H 20 L 33 4',
     })
-    pass('SLANTED-1', 'the Inspector alone exposes the requested horizontal-then-diagonal icon')
+    pass('SLANTED-1', 'the Inspector alone exposes the requested Slanted route icon')
     await shot(page, 'slanted-arrow-inspector-live-2026-09-04.png')
 
     // The compact tool menu is intentionally unchanged: Slanted is an unusual
@@ -130,7 +130,7 @@ async function main() {
       }
       const markerId = markerCarrier.getAttribute('marker-end')?.match(/#([^)]*)/)?.[1]
       const marker = markerId ? document.getElementById(markerId) : null
-    const stockHead = shape?.querySelector('.systemsketch-authored-arrow__stock--replace-head > .tl-svg-container > g > path')
+      const stockHead = shape?.querySelector('.systemsketch-authored-arrow__stock--replace-head > .tl-svg-container > g > path')
       return JSON.stringify({
         d: shaft.getAttribute('d'),
         length: Math.round(length),
@@ -139,90 +139,90 @@ async function main() {
         late: point(.86),
         end: point(1),
         markerOrient: marker?.getAttribute('orient'),
-    markerUnits: marker?.getAttribute('markerUnits'),
-    markerPath: marker?.querySelector('path')?.getAttribute('d'),
-    stockHeadVisibility: stockHead ? getComputedStyle(stockHead).visibility : null,
+        markerUnits: marker?.getAttribute('markerUnits'),
+        markerPath: marker?.querySelector('path')?.getAttribute('d'),
+        stockHeadVisibility: stockHead ? getComputedStyle(stockHead).visibility : null,
         meta: window.__systemsketch.editor.getShape('${arrowId}')?.meta?.systemSketchSlantedArrow?.version ?? null,
       })
     })()`))
     assert.ok(painted?.d, `the custom slanted shaft did not paint: ${JSON.stringify(painted)}`)
     assert.equal(painted.meta, 1, 'Slanted is not persisted as a versioned metadata extension')
-  assert.ok(Math.abs(painted.early.y - painted.start.y) <= 2,
+    assert.ok(Math.abs(painted.early.y - painted.start.y) <= 2,
       `the first rendered leg is not horizontal: ${JSON.stringify(painted)}`)
     assert.notEqual(painted.late.y, painted.end.y,
       `the final rendered leg is not diagonal: ${JSON.stringify(painted)}`)
-    assert.deepEqual([painted.markerOrient, painted.markerUnits, painted.markerPath, painted.stockHeadVisibility], ['auto', 'strokeWidth', 'M 0 0 L 6 3 L 0 6', 'hidden'],
+    assert.deepEqual([painted.markerOrient, painted.markerUnits, painted.markerPath, painted.stockHeadVisibility], ['auto', 'strokeWidth', 'M 1 1 L 9 5 L 1 9', 'hidden'],
       `the endpoint does not use browser-oriented arrowhead geometry: ${JSON.stringify(painted)}`)
-    pass('SLANTED-3', `the XL painted route has a horizontal lead and browser-oriented diagonal head (${painted.length}px)`)
+    pass('SLANTED-3', `the XL painted route has a rightward source lead and browser-oriented diagonal head (${painted.length}px)`)
 
-  // Its elbow follows stock control semantics: reveal the selected route,
-  // expose a virtual default point, then use a real pointer drag to author it.
-  await mouse(page, 'mouseMoved', painted.early.x, painted.early.y)
-  await waitFor(page, `(() => {
-    const editor = window.__systemsketch.editor
-    const shape = editor.getShape('${arrowId}')
-    return editor.getShapeHandles(shape)?.some((handle) => handle.id === 'systemsketch-slanted-elbow')
-  })()`, 'the Slanted elbow control')
-  const initialElbow = JSON.parse(await evaluate(page, `(() => {
-    const editor = window.__systemsketch.editor
-    const shape = editor.getShape('${arrowId}')
-    const handle = editor.getShapeHandles(shape)?.find((item) => item.id === 'systemsketch-slanted-elbow')
-    if (!handle) return JSON.stringify(null)
-    const pagePoint = editor.getShapePageTransform(shape.id).applyToPoint(handle)
-    return JSON.stringify({
-      type: handle.type,
-      x: handle.x,
-      y: handle.y,
-      screen: editor.pageToScreen(pagePoint),
-      hasStoredElbow: Object.hasOwn(shape.meta.systemSketchSlantedArrow ?? {}, 'elbowT'),
+    // Its elbow follows stock control semantics: reveal the selected route,
+    // expose a virtual default point, then use a real pointer drag to author it.
+    await mouse(page, 'mouseMoved', painted.early.x, painted.early.y)
+    await waitFor(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const shape = editor.getShape('${arrowId}')
+      return editor.getShapeHandles(shape)?.some((handle) => handle.id === 'systemsketch-slanted-elbow')
+    })()`, 'the Slanted elbow control')
+    const initialElbow = JSON.parse(await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const shape = editor.getShape('${arrowId}')
+      const handle = editor.getShapeHandles(shape)?.find((item) => item.id === 'systemsketch-slanted-elbow')
+      if (!handle) return JSON.stringify(null)
+      const pagePoint = editor.getShapePageTransform(shape.id).applyToPoint(handle)
+      return JSON.stringify({
+        type: handle.type,
+        x: handle.x,
+        y: handle.y,
+        screen: editor.pageToScreen(pagePoint),
+        hasStoredElbow: Object.hasOwn(shape.meta.systemSketchSlantedArrow ?? {}, 'elbowT'),
+      })
+    })()`))
+    assert.equal(initialElbow.type, 'virtual', `the untouched elbow should be virtual: ${JSON.stringify(initialElbow)}`)
+    assert.equal(initialElbow.hasStoredElbow, false,
+      `an untouched Slanted arrow should not persist a manual elbow: ${JSON.stringify(initialElbow)}`)
+    await drag(page, initialElbow.screen, {
+      x: initialElbow.screen.x + 120,
+      y: initialElbow.screen.y + 80,
     })
-  })()`))
-  assert.equal(initialElbow.type, 'virtual', `the untouched elbow should be virtual: ${JSON.stringify(initialElbow)}`)
-  assert.equal(initialElbow.hasStoredElbow, false,
-    `an untouched Slanted arrow should not persist a manual elbow: ${JSON.stringify(initialElbow)}`)
-  await drag(page, initialElbow.screen, {
-    x: initialElbow.screen.x + 120,
-    y: initialElbow.screen.y + 80,
-  })
-  await waitFor(page, `typeof window.__systemsketch.editor.getShape('${arrowId}')?.meta?.systemSketchSlantedArrow?.elbowT === 'number'`, 'the dragged Slanted elbow metadata')
-  // The shared reveal policy hides interior controls while the pointer is
-  // outside the route rectangle. Re-enter the shaft before reading the
-  // post-drag vertex, exactly as a person would after releasing it.
-  await mouse(page, 'mouseMoved', painted.early.x, painted.early.y)
-  await waitFor(page, `(() => {
-    const editor = window.__systemsketch.editor
-    const shape = editor.getShape('${arrowId}')
-    return editor.getShapeHandles(shape)?.some((handle) => handle.id === 'systemsketch-slanted-elbow')
-  })()`, 'the authored Slanted elbow control')
-  const draggedElbow = JSON.parse(await evaluate(page, `(() => {
-    const editor = window.__systemsketch.editor
-    const shape = editor.getShape('${arrowId}')
-    const handle = editor.getShapeHandles(shape)?.find((item) => item.id === 'systemsketch-slanted-elbow')
-    const body = document.querySelector('[data-shape-id="${arrowId}"] .systemsketch-slanted-arrow__body')
-    const shaft = body ? Array.from(body.querySelectorAll('g > path')).find((path) => !path.getAttribute('marker-end')) : null
-    if (!handle || !shaft) return JSON.stringify(null)
-    const length = shaft.getTotalLength()
-    const point = (fraction) => {
-      const raw = shaft.getPointAtLength(length * fraction)
-      return { x: Math.round(raw.x), y: Math.round(raw.y) }
-    }
-    return JSON.stringify({
-      type: handle.type,
-      handle: { x: Math.round(handle.x), y: Math.round(handle.y) },
-      storedT: shape.meta.systemSketchSlantedArrow?.elbowT,
-      start: shape.props.start,
-      early: point(.12),
-      end: point(1),
-    })
-  })()`))
-  assert.equal(draggedElbow.type, 'vertex', `the dragged elbow did not become persistent: ${JSON.stringify(draggedElbow)}`)
-  assert.equal(draggedElbow.handle.y, draggedElbow.start.y,
-    `the elbow drag must only move the horizontal lead: ${JSON.stringify(draggedElbow)}`)
-  assert.ok(draggedElbow.storedT > 0.4 && draggedElbow.storedT < 1,
-    `the dragged elbow was not saved as a relative endpoint-span position: ${JSON.stringify(draggedElbow)}`)
-  assert.ok(Math.abs(draggedElbow.early.y - draggedElbow.start.y) <= 2,
-      `the authored control broke the horizontal departure: ${JSON.stringify(draggedElbow)}`)
-  pass('SLANTED-4', 'a virtual default elbow becomes a persistent horizontal-only control after a real drag')
+    await waitFor(page, `typeof window.__systemsketch.editor.getShape('${arrowId}')?.meta?.systemSketchSlantedArrow?.elbowT === 'number'`, 'the dragged Slanted elbow metadata')
+    // The shared reveal policy hides interior controls while the pointer is
+    // outside the route rectangle. Re-enter the shaft before reading the
+    // post-drag vertex, exactly as a person would after releasing it.
+    await mouse(page, 'mouseMoved', painted.early.x, painted.early.y)
+    await waitFor(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const shape = editor.getShape('${arrowId}')
+      return editor.getShapeHandles(shape)?.some((handle) => handle.id === 'systemsketch-slanted-elbow')
+    })()`, 'the authored Slanted elbow control')
+    const draggedElbow = JSON.parse(await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const shape = editor.getShape('${arrowId}')
+      const handle = editor.getShapeHandles(shape)?.find((item) => item.id === 'systemsketch-slanted-elbow')
+      const body = document.querySelector('[data-shape-id="${arrowId}"] .systemsketch-slanted-arrow__body')
+      const shaft = body ? Array.from(body.querySelectorAll('g > path')).find((path) => !path.getAttribute('marker-end')) : null
+      if (!handle || !shaft) return JSON.stringify(null)
+      const length = shaft.getTotalLength()
+      const point = (fraction) => {
+        const raw = shaft.getPointAtLength(length * fraction)
+        return { x: Math.round(raw.x), y: Math.round(raw.y) }
+      }
+      return JSON.stringify({
+        type: handle.type,
+        handle: { x: Math.round(handle.x), y: Math.round(handle.y) },
+        storedT: shape.meta.systemSketchSlantedArrow?.elbowT,
+        start: shape.props.start,
+        early: point(.12),
+        end: point(1),
+      })
+    })()`))
+    assert.equal(draggedElbow.type, 'vertex', `the dragged elbow did not become persistent: ${JSON.stringify(draggedElbow)}`)
+    assert.equal(draggedElbow.handle.y, draggedElbow.start.y,
+      `the right-facing elbow drag must stay on its source axis: ${JSON.stringify(draggedElbow)}`)
+    assert.ok(draggedElbow.storedT > 0.4 && draggedElbow.storedT < 1,
+      `the dragged elbow was not saved as a relative endpoint-span position: ${JSON.stringify(draggedElbow)}`)
+    assert.ok(Math.abs(draggedElbow.early.y - draggedElbow.start.y) <= 2,
+        `the authored control broke the right-facing departure: ${JSON.stringify(draggedElbow)}`)
+    pass('SLANTED-4', 'a virtual default elbow becomes a persistent source-axis control after a real drag')
     await shot(page, 'slanted-arrow-canvas-live-2026-09-04.png')
 
     const straightButton = await elementBox(page, '[data-testid="shape-facts-arrow-routing-straight"]')
@@ -257,6 +257,192 @@ async function main() {
     })()`))
     assert.deepEqual(reset, { slantedBody: false, metadata: null })
     pass('SLANTED-5', 'Straight cleanly returns the selected arrow to stock rendering')
+
+    // React Flow delegates this choice to sourcePosition. A loose tldraw arrow
+    // has no port-side record, so verify its deterministic dominant-axis fallback
+    // in every diagonal direction with the actual SVG the canvas paints.
+    const directionCases = [
+      { id: 'right-up', x: 110, y: 170, end: { x: 210, y: -100 }, axis: 'x', sign: 1 },
+      { id: 'right-down', x: 110, y: 390, end: { x: 210, y: 100 }, axis: 'x', sign: 1 },
+      { id: 'down-right', x: 410, y: 150, end: { x: 90, y: 220 }, axis: 'y', sign: 1 },
+      { id: 'down-left', x: 660, y: 150, end: { x: -90, y: 220 }, axis: 'y', sign: 1 },
+      { id: 'left-up', x: 1060, y: 170, end: { x: -210, y: -100 }, axis: 'x', sign: -1 },
+      { id: 'left-down', x: 1060, y: 390, end: { x: -210, y: 100 }, axis: 'x', sign: -1 },
+      { id: 'up-right', x: 410, y: 760, end: { x: 90, y: -220 }, axis: 'y', sign: -1 },
+      { id: 'up-left', x: 660, y: 760, end: { x: -90, y: -220 }, axis: 'y', sign: -1 },
+    ]
+    const directional = JSON.parse(await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const cases = ${JSON.stringify(directionCases)}
+      editor.createShapes(cases.map((item) => ({
+        id: 'shape:slanted-' + item.id,
+        type: 'arrow',
+        x: item.x,
+        y: item.y,
+        meta: { systemSketchSlantedArrow: { version: 1 } },
+        props: {
+          start: { x: 0, y: 0 },
+          end: item.end,
+          kind: 'arc',
+          bend: 0,
+          color: 'violet',
+          dash: 'solid',
+          arrowheadStart: 'none',
+          arrowheadEnd: 'arrow',
+        },
+      })))
+      return JSON.stringify(cases)
+    })()`))
+    await waitFor(page,
+      `document.querySelectorAll('.systemsketch-slanted-arrow__body').length >= ${directionCases.length}`,
+      'all directional Slanted arrows')
+    const paintedDirections = JSON.parse(await evaluate(page, `(() => {
+      const cases = ${JSON.stringify(directional)}
+      return JSON.stringify(cases.map((item) => {
+        const body = document.querySelector('[data-shape-id="shape:slanted-' + item.id + '"] .systemsketch-slanted-arrow__body')
+        const shaft = body && Array.from(body.querySelectorAll('g > path')).find((path) => !path.getAttribute('marker-end'))
+        if (!shaft) return { id: item.id, missing: true }
+        const length = shaft.getTotalLength()
+        const start = shaft.getPointAtLength(0)
+        const first = shaft.getPointAtLength(Math.min(16, length / 4))
+        return {
+          id: item.id,
+          axis: item.axis,
+          sign: item.sign,
+          delta: { x: first.x - start.x, y: first.y - start.y },
+        }
+      }))
+    })()`))
+    for (const route of paintedDirections) {
+      assert.equal(route.missing, undefined, `missing ${route.id} Slanted body`)
+      const primary = route.axis === 'x' ? route.delta.x : route.delta.y
+      const cross = route.axis === 'x' ? route.delta.y : route.delta.x
+      assert.ok(Math.abs(cross) < 0.75 && primary * route.sign > 4,
+        `wrong first leg for ${route.id}: ${JSON.stringify(route)}`)
+    }
+    pass('SLANTED-6', 'right/up/down/left combinations all leave on the correct cardinal source axis')
+
+    const boundCases = [
+      { id: 'face-right', source: { x: 100, y: 620 }, anchor: { x: 1, y: .5 }, arrow: { x: 200, y: 650 }, end: { x: 140, y: 80 }, axis: 'x', sign: 1 },
+      { id: 'face-bottom', source: { x: 390, y: 620 }, anchor: { x: .5, y: 1 }, arrow: { x: 440, y: 680 }, end: { x: 70, y: 140 }, axis: 'y', sign: 1 },
+      { id: 'face-left', source: { x: 760, y: 620 }, anchor: { x: 0, y: .5 }, arrow: { x: 760, y: 650 }, end: { x: -140, y: 80 }, axis: 'x', sign: -1 },
+      { id: 'face-top', source: { x: 1000, y: 620 }, anchor: { x: .5, y: 0 }, arrow: { x: 1050, y: 620 }, end: { x: 70, y: -140 }, axis: 'y', sign: -1 },
+    ]
+    await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const cases = ${JSON.stringify(boundCases)}
+      editor.createShapes(cases.flatMap((item) => [
+        {
+          id: 'shape:source-' + item.id,
+          type: 'geo',
+          x: item.source.x,
+          y: item.source.y,
+          props: { geo: 'rectangle', w: 100, h: 60 },
+        },
+        {
+          id: 'shape:bound-' + item.id,
+          type: 'arrow',
+          x: item.arrow.x,
+          y: item.arrow.y,
+          meta: { systemSketchSlantedArrow: { version: 1 } },
+          props: {
+            start: { x: 0, y: 0 },
+            end: item.end,
+            kind: 'arc',
+            bend: 0,
+            color: 'green',
+            dash: 'solid',
+            arrowheadStart: 'none',
+            arrowheadEnd: 'arrow',
+          },
+        },
+      ]))
+      editor.createBindings(cases.map((item) => ({
+        type: 'arrow',
+        fromId: 'shape:bound-' + item.id,
+        toId: 'shape:source-' + item.id,
+        props: {
+          terminal: 'start',
+          normalizedAnchor: item.anchor,
+          isExact: false,
+          isPrecise: true,
+          snap: 'edge-point',
+        },
+      })))
+    })()`)
+    await waitFor(page,
+      `document.querySelectorAll('[data-shape-id^="shape:bound-face-"] .systemsketch-slanted-arrow__body').length === ${boundCases.length}`,
+      'all bound-face Slanted arrows')
+    const paintedBoundDirections = JSON.parse(await evaluate(page, `(() => {
+      const cases = ${JSON.stringify(boundCases)}
+      return JSON.stringify(cases.map((item) => {
+        const body = document.querySelector('[data-shape-id="shape:bound-' + item.id + '"] .systemsketch-slanted-arrow__body')
+        const shaft = body && Array.from(body.querySelectorAll('g > path')).find((path) => !path.getAttribute('marker-end'))
+        if (!shaft) return { id: item.id, missing: true }
+        const length = shaft.getTotalLength()
+        const start = shaft.getPointAtLength(0)
+        const first = shaft.getPointAtLength(Math.min(16, length / 4))
+        return {
+          id: item.id,
+          axis: item.axis,
+          sign: item.sign,
+          delta: { x: first.x - start.x, y: first.y - start.y },
+        }
+      }))
+    })()`))
+    for (const route of paintedBoundDirections) {
+      assert.equal(route.missing, undefined, `missing ${route.id} bound Slanted body`)
+      const primary = route.axis === 'x' ? route.delta.x : route.delta.y
+      const cross = route.axis === 'x' ? route.delta.y : route.delta.x
+      assert.ok(Math.abs(cross) < 0.75 && primary * route.sign > 4,
+        `wrong bound source face departure for ${route.id}: ${JSON.stringify(route)}`)
+    }
+    pass('SLANTED-7', 'bound right, bottom, left, and top faces override the loose-arrow fallback')
+    await shot(page, 'slanted-arrow-directions-live-2026-09-04.png')
+
+    const verticalControl = JSON.parse(await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const id = 'shape:bound-face-bottom'
+      editor.select(id)
+      const shaft = document.querySelector('[data-shape-id="' + id + '"] .systemsketch-slanted-arrow__body g > path:not([marker-end])')
+      if (!shaft) return JSON.stringify(null)
+      const point = shaft.getPointAtLength(12).matrixTransform(shaft.getScreenCTM())
+      return JSON.stringify({ x: point.x, y: point.y })
+    })()`))
+    assert.ok(verticalControl, 'could not find the vertical Slanted source leg')
+    await mouse(page, 'mouseMoved', verticalControl.x, verticalControl.y)
+    await waitFor(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const shape = editor.getShape('shape:bound-face-bottom')
+      return editor.getShapeHandles(shape)?.some((handle) => handle.id === 'systemsketch-slanted-elbow')
+    })()`, 'the vertical Slanted elbow control')
+    const verticalHandle = JSON.parse(await evaluate(page, `(() => {
+      const editor = window.__systemsketch.editor
+      const shape = editor.getShape('shape:bound-face-bottom')
+      const handle = editor.getShapeHandles(shape)?.find((item) => item.id === 'systemsketch-slanted-elbow')
+      if (!handle) return JSON.stringify(null)
+      const pagePoint = editor.getShapePageTransform(shape.id).applyToPoint(handle)
+      return JSON.stringify({ type: handle.type, screen: editor.pageToScreen(pagePoint) })
+    })()`))
+    assert.equal(verticalHandle.type, 'virtual')
+    await drag(page, verticalHandle.screen, {
+      x: verticalHandle.screen.x + 90,
+      y: verticalHandle.screen.y + 90,
+    })
+    await waitFor(page,
+      `typeof window.__systemsketch.editor.getShape('shape:bound-face-bottom')?.meta?.systemSketchSlantedArrow?.elbowT === 'number'`,
+      'the vertical Slanted elbow metadata')
+    const verticalAfterDrag = JSON.parse(await evaluate(page, `(() => {
+      const body = document.querySelector('[data-shape-id="shape:bound-face-bottom"] .systemsketch-slanted-arrow__body')
+      const shaft = body && Array.from(body.querySelectorAll('g > path')).find((path) => !path.getAttribute('marker-end'))
+      if (!shaft) return JSON.stringify(null)
+      const start = shaft.getPointAtLength(0)
+      const first = shaft.getPointAtLength(Math.min(16, shaft.getTotalLength() / 4))
+      return JSON.stringify({ delta: { x: first.x - start.x, y: first.y - start.y } })
+    })()`))
+    assert.ok(Math.abs(verticalAfterDrag.delta.x) < 0.75 && verticalAfterDrag.delta.y > 4,
+      `dragging a bottom-bound elbow should preserve its vertical departure: ${JSON.stringify(verticalAfterDrag)}`)
+    pass('SLANTED-8', 'the elbow control follows a bottom source face vertically after it is dragged')
 
     assert.deepEqual(localConsoleErrors(page), [])
     pass('CLEAN', 'the real browser reported no console errors')

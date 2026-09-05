@@ -1,7 +1,7 @@
 [
   {
     "id": "SLANTED-1",
-    "detail": "the Inspector alone exposes the requested horizontal-then-diagonal icon",
+    "detail": "the Inspector alone exposes the requested Slanted route icon",
     "ok": true
   },
   {
@@ -11,17 +11,32 @@
   },
   {
     "id": "SLANTED-3",
-    "detail": "the XL painted route has a horizontal lead and browser-oriented diagonal head (1233px)",
+    "detail": "the XL painted route has a rightward source lead and browser-oriented diagonal head (1233px)",
     "ok": true
   },
   {
     "id": "SLANTED-4",
-    "detail": "a virtual default elbow becomes a persistent horizontal-only control after a real drag",
+    "detail": "a virtual default elbow becomes a persistent source-axis control after a real drag",
     "ok": true
   },
   {
     "id": "SLANTED-5",
     "detail": "Straight cleanly returns the selected arrow to stock rendering",
+    "ok": true
+  },
+  {
+    "id": "SLANTED-6",
+    "detail": "right/up/down/left combinations all leave on the correct cardinal source axis",
+    "ok": true
+  },
+  {
+    "id": "SLANTED-7",
+    "detail": "bound right, bottom, left, and top faces override the loose-arrow fallback",
+    "ok": true
+  },
+  {
+    "id": "SLANTED-8",
+    "detail": "the elbow control follows a bottom source face vertically after it is dragged",
     "ok": true
   },
   {

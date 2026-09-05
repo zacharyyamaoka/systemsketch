@@ -55,8 +55,8 @@
   },
   "records": [
     {
-      "x": 990,
-      "y": 680,
+      "x": 970,
+      "y": 320,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -77,8 +77,8 @@
           "y": 0
         },
         "end": {
-          "x": -150,
-          "y": -130
+          "x": -235,
+          "y": 75
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -95,7 +95,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a5my3",
+      "index": "a5cgR",
       "typeName": "shape"
     },
     {
@@ -107,16 +107,8 @@
       "typeName": "pointer"
     },
     {
-      "name": "",
-      "color": "#F04F88",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:Dpsa94a1SNYZdLuDeF7WI",
-      "typeName": "user"
-    },
-    {
-      "x": 500,
-      "y": 470,
+      "x": 520,
+      "y": 160,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -124,8 +116,8 @@
       "id": "shape:condition",
       "type": "geo",
       "props": {
-        "w": 180,
-        "h": 70,
+        "w": 240,
+        "h": 80,
         "geo": "rectangle",
         "dash": "draw",
         "growY": 0,
@@ -156,12 +148,12 @@
         }
       },
       "parentId": "page:page",
-      "index": "a1NMX",
+      "index": "a1hTr",
       "typeName": "shape"
     },
     {
       "x": 20,
-      "y": 390,
+      "y": 130,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -169,11 +161,11 @@
       "id": "shape:cue-step-1",
       "type": "geo",
       "props": {
-        "w": 380,
-        "h": 140,
+        "w": 400,
+        "h": 160,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 12,
+        "growY": 0,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -193,7 +185,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "1 · Select the violet behavior branch leaving this condition. Inspector is the only place to find Slanted."
+                  "text": "1 · Select the violet branch leaving the bottom of condition?. Inspector is the only place to find Slanted."
                 }
               ]
             }
@@ -201,12 +193,12 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4XWf",
+      "index": "a41uI",
       "typeName": "shape"
     },
     {
       "x": 20,
-      "y": 630,
+      "y": 520,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -214,11 +206,11 @@
       "id": "shape:cue-pass",
       "type": "geo",
       "props": {
-        "w": 420,
+        "w": 620,
         "h": 140,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 12,
+        "growY": 0,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -238,7 +230,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · The branch keeps its untouched default lead, or a dragged elbow stays horizontal before the diagonal head."
+                  "text": "PASS WHEN · The branch leaves condition? vertically from its bottom, then reaches run action diagonally. Other source faces leave on their own axis."
                 }
               ]
             }
@@ -246,12 +238,12 @@
         }
       },
       "parentId": "page:page",
-      "index": "a6t2U",
+      "index": "a6GQE",
       "typeName": "shape"
     },
     {
-      "x": 990,
-      "y": 620,
+      "x": 970,
+      "y": 240,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -260,10 +252,10 @@
       "type": "geo",
       "props": {
         "w": 420,
-        "h": 120,
+        "h": 160,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 2,
+        "growY": 0,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -283,7 +275,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "2 · Drag the round elbow dot left or right. Before a drag, the original automatic lead remains in place."
+                  "text": "2 · Drag the round elbow dot up or down. The branch continues to leave the bottom face vertically before its diagonal."
                 }
               ]
             }
@@ -291,7 +283,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5OTf",
+      "index": "a59AQ",
       "typeName": "shape"
     },
     {
@@ -313,9 +305,9 @@
       "typeName": "binding"
     },
     {
-      "x": 0,
-      "y": 0,
-      "z": 1,
+      "x": 46.829268292682926,
+      "y": 22.682926829268297,
+      "z": 0.9576642335766423,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -341,9 +333,7 @@
     {
       "editingShapeId": null,
       "croppingShapeId": null,
-      "selectedShapeIds": [
-        "shape:branch"
-      ],
+      "selectedShapeIds": [],
       "hoveredShapeId": null,
       "erasingShapeIds": [],
       "hintingShapeIds": [],
@@ -363,8 +353,8 @@
         "isPrecise": true,
         "isExact": false,
         "normalizedAnchor": {
-          "x": 1,
-          "y": 0.5
+          "x": 0.5,
+          "y": 1
         },
         "snap": "edge-point",
         "terminal": "start"
@@ -372,8 +362,8 @@
       "typeName": "binding"
     },
     {
-      "x": 1040,
-      "y": 220,
+      "x": 1000,
+      "y": 510,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -381,8 +371,8 @@
       "id": "shape:action",
       "type": "geo",
       "props": {
-        "w": 200,
-        "h": 70,
+        "w": 240,
+        "h": 80,
         "geo": "rectangle",
         "dash": "draw",
         "growY": 0,
@@ -413,7 +403,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a2Bpb",
+      "index": "a2ngn",
       "typeName": "shape"
     },
     {
@@ -433,6 +423,14 @@
         "terminal": "start"
       },
       "typeName": "binding"
+    },
+    {
+      "name": "",
+      "color": "#11B3A3",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:vMD9I2eHfLxOknlIRAn1G",
+      "typeName": "user"
     },
     {
       "meta": {},
@@ -486,8 +484,8 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1280,
-        "h": 720
+        "w": 1440,
+        "h": 800
       },
       "insets": [
         false,
@@ -504,7 +502,7 @@
       "isFocused": true,
       "devicePixelRatio": 1,
       "isCoarsePointer": false,
-      "isHoveringCanvas": false,
+      "isHoveringCanvas": null,
       "openMenus": [],
       "isChangingStyle": false,
       "isReadonly": false,
@@ -516,16 +514,15 @@
       "typeName": "instance"
     },
     {
-      "x": 680,
-      "y": 505,
+      "x": 640,
+      "y": 240,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
       "meta": {
         "systemSketchSlantedArrow": {
           "version": 1
-        },
-        "systemSketchArrowRoute": null
+        }
       },
       "id": "shape:branch",
       "type": "arrow",
@@ -544,7 +541,7 @@
         },
         "end": {
           "x": 360,
-          "y": -250
+          "y": 310
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -561,20 +558,12 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3Sab",
+      "index": "a3f7v",
       "typeName": "shape"
     },
     {
-      "name": "",
-      "color": "#9D5BD2",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:1t88sSPVURkLsJGsp-t0N",
-      "typeName": "user"
-    },
-    {
-      "x": 400,
-      "y": 460,
+      "x": 420,
+      "y": 210,
       "rotation": 0,
       "isLocked": false,
       "opacity": 1,
@@ -596,7 +585,7 @@
         },
         "end": {
           "x": 100,
-          "y": 45
+          "y": -10
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
@@ -613,7 +602,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a4uNNV",
+      "index": "a4dKzV",
       "typeName": "shape"
     }
   ]

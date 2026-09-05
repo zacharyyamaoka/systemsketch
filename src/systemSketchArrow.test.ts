@@ -4,6 +4,7 @@ import {
 	SYSTEMSKETCH_ARROW_ROUTE_META_KEY,
 	SYSTEMSKETCH_ARROW_SLANTED_META_KEY,
 	getArrowInspectorRouting,
+	getSlantedArrowDeparture,
 	getSlantedArrowPoints,
 	isSlantedArrow,
 	readSystemSketchArrowRoute,
@@ -61,30 +62,53 @@ function arrow(meta: JsonObject = {}): TLArrowShape {
 }
 
 describe('SystemSketch slanted arrows', () => {
-	it('keeps the established output lead, then takes one diagonal to its destination', () => {
-		const route = getSlantedArrowPoints({ x: 0, y: 100 }, { x: 200, y: 0 })
-		expect(route).toHaveLength(3)
-		expect(route[0]).toMatchObject({ x: 0, y: 100 })
-		expect(route[1]).toMatchObject({ x: 200 / 3, y: 100 })
-		expect(route[2]).toMatchObject({ x: 200, y: 0 })
+	it.each([
+		['right-up', { x: 0, y: 0 }, { x: 300, y: -120 }, 'right', { x: 100, y: 0 }],
+		['right-down', { x: 0, y: 0 }, { x: 300, y: 120 }, 'right', { x: 100, y: 0 }],
+		['down-right', { x: 0, y: 0 }, { x: 120, y: 300 }, 'bottom', { x: 0, y: 100 }],
+		['down-left', { x: 0, y: 0 }, { x: -120, y: 300 }, 'bottom', { x: 0, y: 100 }],
+		['left-up', { x: 300, y: 0 }, { x: 0, y: -120 }, 'left', { x: 200, y: 0 }],
+		['left-down', { x: 300, y: 0 }, { x: 0, y: 120 }, 'left', { x: 200, y: 0 }],
+		['up-right', { x: 0, y: 300 }, { x: 120, y: 0 }, 'top', { x: 0, y: 200 }],
+		['up-left', { x: 0, y: 300 }, { x: -120, y: 0 }, 'top', { x: 0, y: 200 }],
+	] as const)('takes a short %s source lead before the diagonal', (
+		_name,
+		start,
+		end,
+		departure,
+		elbow,
+	) => {
+		expect(getSlantedArrowDeparture(start, end)).toBe(departure)
+		expect(getSlantedArrowPoints(start, end)).toEqual([
+			expect.objectContaining(start),
+			expect.objectContaining(elbow),
+			expect.objectContaining(end),
+		])
 	})
 
-	it('points its lead toward a leftward destination and stays direct for collinear endpoints', () => {
-		const leftward = getSlantedArrowPoints({ x: 200, y: 100 }, { x: 0, y: 0 })
-		expect(leftward[1]).toMatchObject({ x: 100, y: 100 })
+	it('uses a bound source face over the loose-arrow fallback and stays direct when collinear', () => {
+		const downward = getSlantedArrowPoints(
+			{ x: 0, y: 0 },
+			{ x: 300, y: 100 },
+			null,
+			'bottom',
+		)
+		expect(downward[1]).toMatchObject({ x: 0, y: 100 / 3 })
 		expect(getSlantedArrowPoints({ x: 0, y: 20 }, { x: 200, y: 20 })).toHaveLength(2)
 	})
 
 	it('keeps the default lead absent until its virtual elbow is dragged', () => {
-		const untouched = getSlantedArrowPoints({ x: 0, y: 100 }, { x: 200, y: 0 })
-		const dragged = getSlantedArrowPoints({ x: 0, y: 100 }, { x: 200, y: 0 }, 0.25)
+		const untouched = getSlantedArrowPoints({ x: 0, y: 100 }, { x: 300, y: 0 })
+		const dragged = getSlantedArrowPoints({ x: 0, y: 100 }, { x: 300, y: 0 }, 0.25)
+		const vertical = getSlantedArrowPoints({ x: 0, y: 0 }, { x: 120, y: 300 }, 0.25)
 
-		expect(untouched[1]).toMatchObject({ x: 200 / 3, y: 100 })
+		expect(untouched[1]).toMatchObject({ x: 100, y: 100 })
 		expect(dragged).toEqual([
 			expect.objectContaining({ x: 0, y: 100 }),
-			expect.objectContaining({ x: 50, y: 100 }),
-			expect.objectContaining({ x: 200, y: 0 }),
+			expect.objectContaining({ x: 75, y: 100 }),
+			expect.objectContaining({ x: 300, y: 0 }),
 		])
+		expect(vertical[1]).toMatchObject({ x: 0, y: 75 })
 	})
 
 	it('reports and switches the inspector-only routing without creating a tool preset', () => {
