@@ -66,6 +66,7 @@ import {
   workspaceBrowserDirectory,
   type BrowserRow,
   type DocumentFingerprint,
+  type WorkspaceBrowserSort,
 } from './workspaceModel'
 import { inspectWorkspaceDocumentSource } from './workspaceDocument'
 import { installWorkspaceLifecycleProtection } from './workspaceLifecycle'
@@ -1559,6 +1560,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
   const [listing, setListing] = useState<WorkspaceListing | null>(null)
   const [selectedPath, setSelectedPath] = useState<string | null>(null)
   const [query, setQuery] = useState('')
+  const [sort, setSort] = useState<WorkspaceBrowserSort>('name')
   const portableCopyMode = mode === 'portableCopy'
   const currentFormatCopyMode = mode === 'saveAs' && workspace.status.kind === 'future'
   const conflictCopyMode = useRef(mode === 'saveAs' && workspace.status.kind === 'conflict').current
@@ -1620,7 +1622,7 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
     void load(workspace.browserDirectory ?? undefined)
   }, [isRename, load, workspace.browserDirectory])
 
-  const rows = useMemo(() => browserRows(listing, query), [listing, query])
+  const rows = useMemo(() => browserRows(listing, query, sort), [listing, query, sort])
   const selectedRow = rows.find((row) => row.path === selectedPath) ?? null
   const trail = listing ? breadcrumbTrail(listing.dir, listing.root) : []
 
@@ -1907,6 +1909,15 @@ function WorkspaceDialog({ mode }: { mode: Exclude<WorkspaceDialogMode, null> })
                     setError(null)
                   }}
                 >+ Folder</button>
+                <button
+                  type="button"
+                  className="systemsketch-workspace-sort"
+                  data-testid="workspace-sort"
+                  aria-pressed={sort === 'modified'}
+                  aria-label={`Sort files: ${sort === 'modified' ? 'Last modified' : 'Name'}. Click to switch.`}
+                  title="Switch between name and last modified"
+                  onClick={() => setSort((current) => current === 'name' ? 'modified' : 'name')}
+                >Sort: {sort === 'modified' ? 'Last modified' : 'Name'}</button>
                 <SystemSketchUiInput
                   ref={filterInputRef}
                   className="systemsketch-workspace-search"

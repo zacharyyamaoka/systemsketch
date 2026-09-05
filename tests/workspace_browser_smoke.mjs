@@ -9,7 +9,7 @@
  * own browser instead, and asserts the subprocess endpoint is gone for good.
  */
 import assert from 'node:assert/strict'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, utimes, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import {
@@ -29,6 +29,7 @@ import {
 const ASSETS = join(ROOT, 'docs', 'assets')
 const SHOT_MENU = join(ASSETS, 'workspace-file-menu.png')
 const SHOT_BROWSER = join(ASSETS, 'workspace-browser-open.png')
+const SHOT_SORT = join(ASSETS, 'workspace-browser-last-modified.png')
 const SHOT_FILTER = join(ASSETS, 'workspace-browser-filter.png')
 const SHOT_FOLDER = join(ASSETS, 'workspace-browser-folder.png')
 const SHOT_SECOND_WINDOW = join(ASSETS, 'workspace-second-window.png')
@@ -66,15 +67,25 @@ async function seed(filesRoot) {
   const nested = join(workspace, 'Robotics')
   await mkdir(nested, { recursive: true })
   // Both document types, because the browser has to show both.
-  for (const path of [
+  const documents = [
     join(workspace, 'Arm.systemsketch'),
     join(workspace, 'Gripper.systemsketch'),
     join(workspace, 'Legacy.tldr'),
     join(nested, 'Elbow.systemsketch'),
-  ]) {
+  ]
+  for (const path of documents) {
     await writeFile(path, documentFor(path, path.split('/').pop().replace(/\.[^.]+$/, '')))
   }
-  return { workspace, nested }
+  return { workspace, nested, documents }
+}
+
+async function setDocumentModifiedTimes(documents) {
+  const now = Date.now() / 1000
+  await Promise.all([
+    utimes(documents[0], now - 3_600, now - 3_600),
+    utimes(documents[1], now - 60, now - 60),
+    utimes(documents[2], now - 600, now - 600),
+  ])
 }
 
 const rowTitles = (page) => evaluate(page, `JSON.stringify(
@@ -123,7 +134,7 @@ async function main() {
   const { checks, pass } = makeChecklist()
   const app = await startApp({ label: 'systemsketch-workspace-browser', width: 1400, height: 940 })
   const { page, port, apiPort, cdpPort, filesRoot } = app
-  const { workspace, nested } = await seed(filesRoot)
+  const { workspace, nested, documents } = await seed(filesRoot)
   await mkdir(ASSETS, { recursive: true })
 
   try {
@@ -139,6 +150,10 @@ async function main() {
 
     await openApp(page, port, `?board=${encodeURIComponent(join(workspace, 'Arm.systemsketch'))}`)
     await waitFor(page, `document.querySelector('[data-testid="systemsketch-app"]')`, 'the app')
+    // The app may persist its migration work after opening a board. Seed the
+    // list after that write so this test's ordering is deliberate.
+    await delay(800)
+    await setDocumentModifiedTimes(documents)
     assert.equal(await evaluate(page, 'document.title'), 'Arm — SystemSketch')
     pass('the window title names the open board, so many windows stay tellable apart')
 
@@ -195,6 +210,20 @@ async function main() {
     await clickElement(page, '[data-testid="workspace-filter"]')
     await shoot(page, SHOT_BROWSER)
     pass('Ctrl+O focuses Filter, traps Tab inside the modal, and names each document\u2019s type')
+
+    // 3a. The lightweight organizer keeps folders reachable while floating the
+    // newest board to the top of the document group.
+    await clickElement(page, '[data-testid="workspace-sort"]')
+    await waitFor(page, `Array.from(document.querySelectorAll('[data-testid="workspace-row"] b'))
+      .map((row) => row.textContent).join('|') === 'Robotics|Gripper|Legacy|Arm'`, 'last-modified ordering')
+    assert.deepEqual(JSON.parse(await rowTitles(page)), [
+      'folder:Robotics', 'document:Gripper', 'document:Legacy', 'document:Arm',
+    ])
+    assert.equal(await evaluate(page, `document.querySelector('[data-testid="workspace-sort"]')?.getAttribute('aria-pressed')`), 'true')
+    await shoot(page, SHOT_SORT)
+    pass('Sort by Last modified puts the newest document first while folders stay together')
+
+    await clickElement(page, '[data-testid="workspace-sort"]')
 
     // 4. Typing filters the folder; arrow keys and Enter never touch the mouse.
     await clickElement(page, '[data-testid="workspace-filter"]')

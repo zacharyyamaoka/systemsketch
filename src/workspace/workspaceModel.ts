@@ -378,14 +378,29 @@ export interface BrowserListingShape {
   }[]
 }
 
-/** Folders first, then documents, both already filtered by the search box. */
+export type WorkspaceBrowserSort = 'name' | 'modified'
+
+/**
+ * Folders stay together at the top. The host's ordinary name order remains
+ * intact; modification time is only meaningful for files, so interleaving
+ * folders would make the “recent” view unpredictable.
+ */
 export function browserRows(
   listing: BrowserListingShape | null,
   query: string,
+  sort: WorkspaceBrowserSort = 'name',
 ): BrowserRow[] {
   if (!listing) return []
   const needle = query.trim().toLowerCase()
   const matches = (value: string) => !needle || value.toLowerCase().includes(needle)
+  const compareNames = (left: { name: string }, right: { name: string }) => (
+    left.name.localeCompare(right.name, undefined, { sensitivity: 'base' })
+  )
+  const documents = listing.documents
+    .filter((document) => matches(document.title) || matches(document.name))
+  if (sort === 'modified') {
+    documents.sort((left, right) => right.mtime - left.mtime || compareNames(left, right))
+  }
   return [
     ...listing.directories
       .filter((directory) => matches(directory.name))
@@ -397,8 +412,7 @@ export function browserRows(
         path: directory.path,
         mtime: null,
       })),
-    ...listing.documents
-      .filter((document) => matches(document.title) || matches(document.name))
+    ...documents
       .map((document): BrowserRow => ({
         kind: 'document',
         // The host reports the encoding; the suffix is the fallback, and the

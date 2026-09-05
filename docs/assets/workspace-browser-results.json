@@ -20,6 +20,10 @@
   "ok": true
  },
  {
+  "label": "Sort by Last modified puts the newest document first while folders stay together",
+  "ok": true
+ },
+ {
   "label": "the filter narrows the folder and pre-selects the match",
   "ok": true
  },

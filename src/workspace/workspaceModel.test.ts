@@ -238,6 +238,19 @@ describe('in-app file browser', () => {
     expect(browserRows(null, '')).toEqual([])
   })
 
+  it('puts the most recently modified documents first without displacing folders', () => {
+    expect(browserRows(listing, '', 'modified').map((row) => row.title)).toEqual([
+      'Robotics', 'Gripper', 'Arm',
+    ])
+    expect(browserRows({
+      directories: [],
+      documents: [
+        { name: 'Zeta.tldr', title: 'Zeta', path: '/Zeta.tldr', mtime: 20 },
+        { name: 'Alpha.tldr', title: 'Alpha', path: '/Alpha.tldr', mtime: 20 },
+      ],
+    }, '', 'modified').map((row) => row.title)).toEqual(['Alpha', 'Zeta'])
+  })
+
   it('moves the arrow-key selection and clamps at both ends', () => {
     const rows = browserRows(listing, '')
     expect(moveBrowserSelection(rows, null, 1)).toBe(rows[0].path)
