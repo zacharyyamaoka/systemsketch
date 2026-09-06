@@ -2207,3 +2207,30 @@ html[data-pb-defaultmark='dotted'] .systemsketch-block-canvas .BlockNode-portNam
   justify-content: center;
   text-align: center;
 }
+
+/* The bare communication face: no header band, no footer, identity centred.
+   Communication lens + Port card only — see BareCommunicationFace. */
+.systemsketch-block-canvas .BlockNode-bareTitle {
+  /* Not the projected Simple face's 40px display size: this card's middle band
+     is only a third of its width and shares the card with four walls of port
+     labels, so the identity is a caption, not a headline. */
+  justify-content: center;
+  text-align: center;
+  font-size: 17px;
+  overflow: hidden;
+}
+
+.systemsketch-block-canvas .BlockNode-bareTitle .BlockNode-simpleTitleText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 17px;
+}
+
+.systemsketch-block-canvas .BlockNode-bareType {
+  text-align: center;
+  justify-content: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

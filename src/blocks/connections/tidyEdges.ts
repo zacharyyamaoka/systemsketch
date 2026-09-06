@@ -110,6 +110,18 @@ export interface TidyEdgesOptions {
 	 * restores the prior hard-obstacle-only Tidy planner exactly.
 	 */
 	softClearance?: Partial<ElbowSoftClearanceOptions>
+	/**
+	 * Tidy exactly these cables instead of the ones the selection implies.
+	 *
+	 * WHY an explicit input: the command is normally driven by what a person has
+	 * selected, but the automatic pass that runs when a new cable lands has no
+	 * selection to read — a freshly drawn cable is deliberately left deselected
+	 * so its handles do not steal the next press on the dot it joins. Naming the
+	 * set directly also keeps that pass LOCAL: the new cable and the ones
+	 * sharing a card with it, rather than a whole-board reshuffle every time
+	 * someone draws a wire.
+	 */
+	targets?: readonly TLShapeId[]
 }
 
 /** Default preference used only by Tidy edges; ordinary live routing is unchanged. */
@@ -122,7 +134,9 @@ export function tidyEdges(
 	const connections = editor.getCurrentPageShapes().filter(
 		(shape): shape is ConnectionShape => shape.type === CONNECTION_SHAPE_TYPE,
 	)
-	const selected = new Set(getTidyEdgesSelection(editor, connections).map((connection) => connection.id))
+	const selected = options.targets
+		? new Set(options.targets)
+		: new Set(getTidyEdgesSelection(editor, connections).map((connection) => connection.id))
 	if (selected.size === 0) return EMPTY_TIDY_EDGES_OUTCOME
 
 	const movable = new Set<TLShapeId>()

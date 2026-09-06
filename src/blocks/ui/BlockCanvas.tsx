@@ -68,6 +68,7 @@ import {
 	type BlockHiddenPortSummary,
 	type BlockRect,
   type LaidOutBlockPort,
+	BARE_TITLE_FONT_PX,
 } from '../layoutBlock'
 import { appendBundleMember, insertBlockPortForInlineEditing, setBlockFolded } from '../commands/blockCommands'
 import {
@@ -695,6 +696,58 @@ function BlockPoseGhost({ shape }: { shape: BlockShape }) {
         {describePoseChange(change)}
       </span>
     </div>
+  )
+}
+
+/**
+ * Name over type, centred, with no chrome around it.
+ *
+ * The Communication lens's Port card only: with sockets on all four walls the
+ * header and footer bands are two strips the ports cannot use, and the labels
+ * squeeze into what is left and overprint. This face gives both strips back.
+ */
+function BareCommunicationFace({
+  shape,
+  layout,
+  titleAppearance,
+}: {
+  shape: BlockShape
+  layout: ReturnType<typeof layoutBlock>
+  titleAppearance: BlockTitleAppearance
+}) {
+  return (
+    <>
+      {layout.title ? (
+        <div
+          className="BlockNode-simpleTitle BlockNode-bareTitle"
+          style={{ ...boxStyle(layout.title), justifyContent: 'center' }}
+          data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
+        >
+          <span
+            className="BlockNode-simpleTitleText"
+            data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
+            title={shape.props.title}
+            // The appearance's own size is a display size for a card whose
+            // whole face is the title. Here the identity is a caption sharing
+            // the card with four walls of port labels, and the inline size
+            // would beat any stylesheet, so it is replaced rather than themed.
+            style={{ ...titleAppearance, fontSize: BARE_TITLE_FONT_PX, lineHeight: 1.25 }}
+          >
+            <FieldValue diffs={shape.props.fieldDiffs} path="title" value={shape.props.title} />
+          </span>
+        </div>
+      ) : null}
+      {layout.typeLabel ? (
+        <div
+          className="BlockNode-simpleType BlockNode-bareType"
+          style={boxStyle(layout.typeLabel)}
+          data-pb-inline-field={blockInlineFieldAttribute({ kind: 'blockType' })}
+          title={shape.props.blockType}
+        >
+          <FieldValue diffs={shape.props.fieldDiffs} path="blockType" value={shape.props.blockType} />
+        </div>
+      ) : null}
+    </>
   )
 }
 
@@ -1400,6 +1453,9 @@ export function BlockCanvas({ shape, communicationProjected = false }: BlockCanv
   // and cheap, so it rides the layout rather than earning its own subscription.
   const tethers = effectTethers(layout)
   const simple = layout.view === 'simple'
+  // The bare communication face: no header band, no footer, identity centred.
+  // Recognised by the layout having produced a centred title on a Port card.
+  const bareFace = communicationProjected && layout.view === 'port' && layout.title !== null
   const value = layout.view === 'value'
   const folded = blockIsFolded(shape.props)
   // The two faces without a heading, rows, footer or add gutters.
@@ -1498,20 +1554,26 @@ export function BlockCanvas({ shape, communicationProjected = false }: BlockCanv
           height: autoFitPresentation.h,
         } : undefined}
       >
-        {simple
-          ? <SimpleFace shape={shape} titleAppearance={titleAppearance} />
-          : value
-            ? <ValueFace
-                shape={shape}
-                connectedIds={connectedIds}
-                editing={isEditing}
-                titleAppearance={titleAppearance}
-              />
-            : <BlockHeading
-                shape={shape}
-                height={layout.headerHeight}
-                titleAppearance={titleAppearance}
-              />}
+        {bareFace
+          ? <BareCommunicationFace
+              shape={shape}
+              layout={layout}
+              titleAppearance={titleAppearance}
+            />
+          : simple
+            ? <SimpleFace shape={shape} titleAppearance={titleAppearance} />
+            : value
+              ? <ValueFace
+                  shape={shape}
+                  connectedIds={connectedIds}
+                  editing={isEditing}
+                  titleAppearance={titleAppearance}
+                />
+              : <BlockHeading
+                  shape={shape}
+                  height={layout.headerHeight}
+                  titleAppearance={titleAppearance}
+                />}
         {simple ? <DefinitionBadge shape={shape} /> : null}
         {simple ? <BlockDiffBadge shape={shape} /> : null}
         {stated ? <BlockDiffRail ports={layout.ports} /> : null}

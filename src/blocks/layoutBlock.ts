@@ -101,6 +101,22 @@ export function edgePortPoint(
 
 /** Clearance between a horizontal rail's socket and its inward label. */
 export const RAIL_LABEL_GAP_PX = 12
+/** Clear space kept between two neighbouring labels on the same wall. */
+export const RAIL_LABEL_GUTTER_PX = 10
+/**
+ * How much of a bare face's width one side column may use.
+ *
+ * A third each for the two side columns leaves the middle third for the
+ * component's name and type, which is what keeps a long port name from running
+ * through the identity.
+ */
+export const SIDE_LABEL_SHARE = 0.33
+/** The bare face's identity type scale, matching `.BlockNode-bareTitle`. */
+export const BARE_TITLE_FONT_PX = 17
+/** Breathing room either side of the centred identity. */
+export const BARE_IDENTITY_PAD_PX = 16
+/** The identity never takes more than this much of the card's width. */
+export const BARE_IDENTITY_MAX_SHARE = 0.46
 
 /**
  * Which question the layout is answering.
@@ -739,6 +755,7 @@ function placeHorizontalRails(
 	width: number,
 	height: number,
 	band: { top: number; bottom: number },
+	bareSideLabelWidth: number | null,
 	placed: LaidOutBlockPort[],
 ): void {
 	// A top or bottom socket draws its label INWARD, into the same strip a side
@@ -791,11 +808,20 @@ function placeHorizontalRails(
 					y: usableSide.top + t * (usableSide.bottom - usableSide.top),
 				}
 				: edgePortPoint(edge, t, width, height)
+			// A horizontal label may be at most the gap between two adjacent
+			// sockets, or two names overprint — `mission.4.stmission.5.stre…`.
+			// Evenly spread sockets sit `width / (n + 1)` apart, so that, less a
+			// gutter, is the widest a label can honestly be.
+			// On the bare face the identity sits in the middle of the card, so a
+			// side label may only claim its own third — otherwise a long port
+			// name runs straight through the component's name.
 			const labelWidth = vertical
-				? Math.max(0, width / 2 - PORT_LABEL_INSET_PX - 8)
+				? bareSideLabelWidth !== null
+					? bareSideLabelWidth
+					: Math.max(0, width / 2 - PORT_LABEL_INSET_PX - 8)
 				: Math.max(0, Math.min(
 					width - PORT_LABEL_INSET_PX * 2,
-					width / Math.max(1, lane.length),
+					width / (lane.length + 1) - RAIL_LABEL_GUTTER_PX,
 				))
 			// Inward by the study's 12px gap, then clamped into the body band: the
 			// header and footer own the strips the raw offset would land in, and
@@ -1053,20 +1079,53 @@ function computeBlockLayout(
 	const visibleHeaderInputs = view === 'simple'
 		? []
 		: props.inputs.filter((port) => port.visible && portInHeader(port))
-	const headerHeight = view === 'simple'
-		? Math.min(NODE_HEADER_HEIGHT_PX, height)
-		: Math.min(
-			height,
-			Math.max(BLOCK_HEADER_HEIGHT_PX, visibleHeaderInputs.length * HEADER_PORT_PITCH_PX + 8),
+	/**
+	 * The bare communication face: Communication lens + Port card, and nowhere
+	 * else in the app.
+	 *
+	 * WHY it exists (Zach, 2026-09-06): "get rid of the footer and header of the
+	 * component, and instead just show its name and type… This is a special view
+	 * not used anywhere else in the app." With sockets on all four walls, the
+	 * header and footer bands are two horizontal strips the ports cannot use, so
+	 * the whole card squeezes its labels into what is left and they overprint.
+	 * Dropping the chrome hands both strips back to the ports and leaves the
+	 * identity where a diagram wants it — centred, in the middle of the card.
+	 */
+	const bareCommunicationFace = lens === 'communication' && view === 'port'
+	/**
+	 * How wide the centred identity actually needs to be, so the side columns
+	 * can have everything else. A fixed third each was tidy arithmetic and bad
+	 * design: it ellipsised a seven-letter component name AND the port names
+	 * beside it on an ordinary 340px card.
+	 */
+	const bareIdentityWidth = bareCommunicationFace
+		? Math.min(
+			width * BARE_IDENTITY_MAX_SHARE,
+			Math.max(
+				measureBlockText(props.title, BARE_TITLE_FONT_PX, 600, 'mono'),
+				measureBlockText(props.blockType, SIMPLE_TEXT_FONT_PX, 400),
+			) + BARE_IDENTITY_PAD_PX,
 		)
+		: 0
+	const bareSideLabelWidth = bareCommunicationFace
+		? Math.max(0, (width - bareIdentityWidth) / 2 - PORT_LABEL_INSET_PX)
+		: 0
+	const headerHeight = bareCommunicationFace
+		? 0
+		: view === 'simple'
+			? Math.min(NODE_HEADER_HEIGHT_PX, height)
+			: Math.min(
+				height,
+				Math.max(BLOCK_HEADER_HEIGHT_PX, visibleHeaderInputs.length * HEADER_PORT_PITCH_PX + 8),
+			)
 	const bodyTop = headerHeight + NODE_ROW_HEADER_GAP_PX
 	// WHY: hiding a footer gives its room back to the authored face. Leaving a
 	// blank action-strip-sized dead zone would make the control cosmetic and
 	// would still compress Port rows or an Expanded child canvas for no reason.
 	// Simple reserves its pre-existing lower type strip; it has no footer chrome.
-	const reservesFooter = view === 'simple' || (
+	const reservesFooter = !bareCommunicationFace && (view === 'simple' || (
 		view !== 'value' && blockShowsFooter(props)
-	)
+	))
 	const footerTop = reservesFooter
 		? Math.max(bodyTop, height - NODE_FOOTER_HEIGHT_PX)
 		: height
@@ -1372,7 +1431,14 @@ function computeBlockLayout(
 		// port" is enforced at the one place a rail can be created, so a stored
 		// `commEdge` cannot leak into the signature view.
 		if (lens === 'communication') {
-			placeHorizontalRails(props, width, height, { top: bodyTop, bottom: footerTop }, placed)
+			placeHorizontalRails(
+				props,
+				width,
+				height,
+				{ top: bodyTop, bottom: footerTop },
+				bareCommunicationFace ? bareSideLabelWidth : null,
+				placed,
+			)
 		}
 		dividers.push(...plan.dividers.map(({ kind, slot }) => ({
 			kind,
@@ -1443,6 +1509,30 @@ function computeBlockLayout(
 		h: headerHeight,
 	}
 
+	// The bare face's identity: name over type, centred, with no chrome band to
+	// belong to. Measured the same way the Simple face measures its own stack.
+	const bareIdentity = bareCommunicationFace
+		? (() => {
+			const innerWidth = Math.max(0, Math.min(width, bareIdentityWidth))
+			const titleHeight = SIMPLE_TEXT_LINE_PX
+			const typeHeight = props.blockType !== '' ? SIMPLE_TEXT_LINE_PX : 0
+			const stack = titleHeight + (typeHeight > 0 ? SIMPLE_STACK_GAP_PX + typeHeight : 0)
+			const top = Math.max(0, (height - stack) / 2)
+			const bandX = (width - innerWidth) / 2
+			return {
+				title: { x: bandX, y: top, w: innerWidth, h: titleHeight },
+				typeLabel: typeHeight > 0
+					? {
+						x: bandX,
+						y: top + titleHeight + SIMPLE_STACK_GAP_PX,
+						w: innerWidth,
+						h: typeHeight,
+					}
+					: null,
+			}
+		})()
+		: null
+
 	let description: BlockRect | null = null
 	if (showsDescription(props)) {
 		const lastTop = Math.max(bodyTop, footerTop - 4 - descriptionHeight)
@@ -1495,14 +1585,14 @@ function computeBlockLayout(
 		bounds,
 		width,
 		height,
-		header,
+		header: bareCommunicationFace ? null : header,
 		headerHeight,
-		headerBand: { top: 0, bottom: headerHeight },
+		headerBand: bareCommunicationFace ? null : { top: 0, bottom: headerHeight },
 		sections,
 		body,
 		bodyTop,
 		footerTop,
-		footer: blockShowsFooter(props)
+		footer: !bareCommunicationFace && blockShowsFooter(props)
 			? { x: 0, y: footerTop, w: width, h: Math.max(0, height - footerTop) }
 			: null,
 		pitch,
@@ -1517,12 +1607,12 @@ function computeBlockLayout(
 			: null,
 		ports: placed,
 		hiddenPortSummaries: hiddenSummaries,
-		title: null,
-		typeLabel: null,
+		title: bareIdentity?.title ?? null,
+		typeLabel: bareIdentity?.typeLabel ?? null,
 		icon: null,
 		dividers,
-		headerIcon,
-		headerTitle,
-		headerType,
+		headerIcon: bareCommunicationFace ? null : headerIcon,
+		headerTitle: bareCommunicationFace ? null : headerTitle,
+		headerType: bareCommunicationFace ? null : headerType,
 	}
 }

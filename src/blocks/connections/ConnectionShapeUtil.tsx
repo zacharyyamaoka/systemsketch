@@ -71,7 +71,9 @@ import {
 	removeConnectionBinding,
 	type ConnectionBinding,
 } from './ConnectionBindingUtil'
+import { tidyEdges } from './tidyEdges'
 import {
+	CONNECTION_BINDING_TYPE,
 	CONNECTION_SHAPE_TYPE,
 	ConnectionRoutingStyle,
 	oppositeConnectionTerminal,
@@ -120,6 +122,8 @@ import {
 	getBentCurveCubicControlPoints,
 	getConnectionCenterPoint,
 	getConnectionControlPoints,
+	type ConnectionExitSide,
+	type ConnectionExitSides,
 	getConnectionPath,
 	getElbowConnectionRoute,
 	getElbowRouteInput,
@@ -184,6 +188,39 @@ function applyNewConnectionRegionDefault(editor: Editor, connectionId: TLShapeId
 		bindings.start.toId,
 		bindings.end.toId,
 	)
+	tidyEdgesAfterNewCable(editor, connectionId)
+}
+
+/**
+ * Tidy the board the moment a new elbow cable lands.
+ *
+ * WHY only elbow, and only on creation: an elbow's shape is COMPUTED, so a new
+ * one routes straight through whatever is already there and the overlaps only
+ * become visible once it is drawn — which made Tidy edges a thing you had to
+ * know to run. Curved and straight cables have an authored shape that a tidy
+ * pass has no business rewriting, and re-tidying on every edit would fight the
+ * person moving a card.
+ *
+ * It runs inside the creation's own history entry, so undo removes the cable
+ * and its tidy together rather than leaving a re-routed board behind.
+ */
+function tidyEdgesAfterNewCable(editor: Editor, connectionId: TLShapeId): void {
+	const connection = editor.getShape<ConnectionShape>(connectionId)
+	if (connection?.type !== CONNECTION_SHAPE_TYPE || connection.props.routing !== 'elbow') return
+	const bindings = getConnectionBindings(editor, connectionId)
+	const cards = new Set([bindings.start?.toId, bindings.end?.toId].filter(Boolean) as TLShapeId[])
+	// The new cable plus every cable already touching either card it joins:
+	// those are the routes that can newly collide, and nothing further away has
+	// any reason to move.
+	const targets = editor.getCurrentPageShapes()
+		.filter((shape): shape is ConnectionShape => shape.type === CONNECTION_SHAPE_TYPE)
+		.filter((candidate) => candidate.props.routing === 'elbow')
+		.filter((candidate) => candidate.id === connectionId
+			|| editor.getBindingsFromShape(candidate, CONNECTION_BINDING_TYPE)
+				.some((binding) => cards.has(binding.toId)))
+		.map((candidate) => candidate.id)
+	if (targets.length < 2) return
+	tidyEdges(editor, { targets })
 }
 
 declare module 'tldraw' {
@@ -472,7 +509,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		// in the Excalidraw sense — so both bent cases share one geometry.
 		const [cp1, cp2] = curve
 			? getBentCurveCubicControlPoints(source, sink, curve)
-			: getConnectionControlPoints(source, sink)
+			: getConnectionControlPoints(source, sink, getConnectionExitSides(this.editor, connection))
 		return withCableHitPad(
 			new HitPaddedCubicBezier2d({
 				start: Vec.From(source),
@@ -2279,6 +2316,34 @@ export function getConnectionEndpoints(editor: Editor, connection: ConnectionSha
 	}
 }
 
+/**
+ * Which wall each end of a settled cable leaves by, in source→sink order.
+ *
+ * Read from the same `portElbowSideForFace` the elbow router uses, so a curved
+ * cable and an elbow cable agree about which way a socket faces. Absent for an
+ * unbound end, which keeps the historical horizontal exit for a cable still in
+ * the air.
+ */
+export function getConnectionExitSides(
+	editor: Editor,
+	connection: ConnectionShape,
+): ConnectionExitSides {
+	const bindings = getConnectionBindings(editor, connection)
+	const direction = getConnectionDirection(editor, connection)
+	const sideFor = (terminal: 'start' | 'end'): ConnectionExitSide | undefined => {
+		const binding = bindings[terminal]
+		if (!binding) return undefined
+		const host = editor.getShape(binding.toId)
+		if (!host) return undefined
+		const port = getPortHostPort(editor, host, binding.props.portId)
+		return port ? portElbowSideForFace(port, binding.props.face) : undefined
+	}
+	return {
+		start: sideFor(direction.sourceTerminal),
+		end: sideFor(direction.sinkTerminal),
+	}
+}
+
 export function getConnectionShapePath(
 	editor: Editor,
 	connection: ConnectionShape,
@@ -2286,6 +2351,7 @@ export function getConnectionShapePath(
 	const { source, sink } = getConnectionEndpoints(editor, connection)
 	return getConnectionPath(connection.props.routing, source, sink, {
 		curve: connection.props.curve,
+		sides: getConnectionExitSides(editor, connection),
 		route: connection.props.routing === 'elbow'
 			? getConnectionElbowRoute(editor, connection)
 			: undefined,
