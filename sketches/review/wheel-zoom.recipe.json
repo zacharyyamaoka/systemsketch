@@ -48,7 +48,7 @@
     {
       "id": "pass",
       "kind": "pass",
-      "text": "PASS WHEN · Normal scroll pans; Ctrl/Cmd + scroll zooms; the opt-in makes plain scroll zoom",
+      "text": "PASS WHEN · Normal scroll pans; Direct mode makes down scroll zoom in; Ctrl/Cmd + down scroll zooms out",
       "x": 30,
       "y": 540,
       "w": 500,
@@ -57,7 +57,7 @@
     {
       "id": "sensitivity-note",
       "kind": "note",
-      "text": "OPTION · Settings → Canvas → enable Direct wheel zoom, then plain scroll zooms here",
+      "text": "OPTION · Settings → Canvas → enable Direct wheel zoom and Ctrl/Cmd opposite zoom, then test both gestures here",
       "x": 650,
       "y": 540,
       "w": 520,

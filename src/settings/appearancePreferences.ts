@@ -16,6 +16,11 @@ export interface AppearancePreferences {
    * the board. Keep the opposite convention reachable without changing the
    * board or replacing tldraw's camera behavior. */
   scrollDownZoomsIn: boolean
+  /** In direct mode, keep Ctrl/Cmd + wheel available as an intentionally
+   * opposite zoom gesture instead of tldraw's usual temporary pan. This lets
+   * CAD and stock-whiteboard muscle memory coexist without changing the
+   * unmodified wheel's chosen direction. */
+  modifierWheelZoomsOppositely: boolean
   /** A percentage of tldraw's stock `zoomSpeed: 1`. Keeping the persisted
    * value in product language makes 100 the obvious, durable reset point. */
   wheelZoomSensitivityPercent: number
@@ -30,6 +35,7 @@ export const DEFAULT_APPEARANCE_PREFERENCES: AppearancePreferences = Object.free
   showZoomButtons: false,
   directWheelZoom: false,
   scrollDownZoomsIn: true,
+  modifierWheelZoomsOppositely: false,
   wheelZoomSensitivityPercent: DEFAULT_WHEEL_ZOOM_SENSITIVITY_PERCENT,
   punctuatedPortRow: true,
 })
@@ -58,6 +64,7 @@ export function parseStoredAppearancePreferences(value: unknown): AppearancePref
     showZoomButtons,
     directWheelZoom,
     scrollDownZoomsIn,
+    modifierWheelZoomsOppositely,
     wheelZoomSensitivityPercent,
     punctuatedPortRow,
   } = value
@@ -69,6 +76,7 @@ export function parseStoredAppearancePreferences(value: unknown): AppearancePref
     (showZoomButtons !== undefined && typeof showZoomButtons !== 'boolean')
     || (directWheelZoom !== undefined && typeof directWheelZoom !== 'boolean')
     || (scrollDownZoomsIn !== undefined && typeof scrollDownZoomsIn !== 'boolean')
+    || (modifierWheelZoomsOppositely !== undefined && typeof modifierWheelZoomsOppositely !== 'boolean')
     || (wheelZoomSensitivityPercent !== undefined && !isWheelZoomSensitivityPercent(wheelZoomSensitivityPercent))
     || (punctuatedPortRow !== undefined && typeof punctuatedPortRow !== 'boolean')
   ) {
@@ -84,6 +92,9 @@ export function parseStoredAppearancePreferences(value: unknown): AppearancePref
     scrollDownZoomsIn: typeof scrollDownZoomsIn === 'boolean'
       ? scrollDownZoomsIn
       : DEFAULT_APPEARANCE_PREFERENCES.scrollDownZoomsIn,
+    modifierWheelZoomsOppositely: typeof modifierWheelZoomsOppositely === 'boolean'
+      ? modifierWheelZoomsOppositely
+      : DEFAULT_APPEARANCE_PREFERENCES.modifierWheelZoomsOppositely,
     wheelZoomSensitivityPercent: isWheelZoomSensitivityPercent(wheelZoomSensitivityPercent)
       ? wheelZoomSensitivityPercent
       : DEFAULT_APPEARANCE_PREFERENCES.wheelZoomSensitivityPercent,
@@ -143,6 +154,7 @@ export function updateAppearancePreferences(
     next.showZoomButtons === snapshot.showZoomButtons
     && next.directWheelZoom === snapshot.directWheelZoom
     && next.scrollDownZoomsIn === snapshot.scrollDownZoomsIn
+    && next.modifierWheelZoomsOppositely === snapshot.modifierWheelZoomsOppositely
     && next.wheelZoomSensitivityPercent === snapshot.wheelZoomSensitivityPercent
     && next.punctuatedPortRow === snapshot.punctuatedPortRow
   ) {

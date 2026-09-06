@@ -26,6 +26,7 @@ const MODIFIER_ZOOM = join(ASSETS, 'canvas-navigation-modifier-zoom.png')
 const DEFAULT_SETTING = join(ASSETS, 'canvas-navigation-default-setting.png')
 const DIRECT_SETTING = join(ASSETS, 'canvas-navigation-direct-setting.png')
 const DIRECT = join(ASSETS, 'canvas-navigation-direct-zoom.png')
+const DIRECT_MODIFIER = join(ASSETS, 'canvas-navigation-direct-modifier-zoom.png')
 const RESTORED = join(ASSETS, 'canvas-navigation-restored.png')
 
 const { checks, pass } = makeChecklist()
@@ -50,13 +51,13 @@ async function screenshot(page, path) {
   await writeFile(path, Buffer.from(capture.data, 'base64'))
 }
 
-async function wheel(page, { ctrl = false } = {}) {
+async function wheel(page, { ctrl = false, deltaY = 120 } = {}) {
   await page.send('Input.dispatchMouseEvent', {
     type: 'mouseWheel',
     x: 640,
     y: 440,
     deltaX: 0,
-    deltaY: 120,
+    deltaY,
     modifiers: ctrl ? 2 : 0,
   })
   await delay(500)
@@ -146,6 +147,7 @@ async function main() {
     const initialToggle = await evaluate(app.page, `document.querySelector('[data-testid="systemsketch-direct-wheel-zoom"]')?.getAttribute('aria-checked')`)
     assert.equal(initialToggle, 'false')
     assert.equal(await evaluate(app.page, `Boolean(document.querySelector('[data-testid="systemsketch-wheel-zoom-sensitivity"]'))`), false)
+    assert.equal(await evaluate(app.page, `Boolean(document.querySelector('[data-testid="systemsketch-modifier-wheel-zooms-oppositely"]'))`), false)
     pass('Canvas says Direct wheel zoom is off and keeps direct-only controls out of the way')
     await screenshot(app.page, DEFAULT_SETTING)
 
@@ -160,7 +162,23 @@ async function main() {
     assert.equal(enabled.wheelBehavior, 'zoom')
     assert.equal(enabled.zoomSpeed, 1)
     assert.equal(enabled.appearance.directWheelZoom, true)
-    pass('enabling Direct wheel zoom switches the live stock camera and persists the opt-in')
+    assert.equal(await evaluate(app.page, `document.querySelector('[data-testid="systemsketch-modifier-wheel-zooms-oppositely"]')?.getAttribute('aria-checked')`), 'false')
+    pass('enabling Direct wheel zoom switches the live stock camera and reveals the optional modifier inversion')
+
+    await evaluate(app.page, `document.querySelector('[data-testid="systemsketch-modifier-wheel-zooms-oppositely"]')?.scrollIntoView({ block: 'center' })`)
+    await delay(180)
+    await clickElement(app.page, '[data-testid="systemsketch-modifier-wheel-zooms-oppositely"]')
+    await waitFor(
+      app.page,
+      `document.querySelector('[data-testid="systemsketch-modifier-wheel-zooms-oppositely"]')?.getAttribute('aria-checked') === 'true'`,
+      'the modifier inversion switch to turn on',
+    )
+    assert.equal(
+      await evaluate(app.page, `JSON.parse(localStorage.getItem('systemsketch.appearance.v1'))?.modifierWheelZoomsOppositely`),
+      true,
+      'the modifier inversion preference should persist',
+    )
+    pass('Canvas can opt Ctrl/Cmd + scroll into the opposite direct-zoom direction')
     await screenshot(app.page, DIRECT_SETTING)
     await closeSettings(app.page)
 
@@ -170,6 +188,20 @@ async function main() {
     assert.ok(directAfter.camera.z > directBefore.camera.z)
     pass('with direct mode enabled, a plain scroll-down zooms in')
     await screenshot(app.page, DIRECT)
+
+    await wheel(app.page, { ctrl: true })
+    const directModifierZoomed = await cameraState(app.page)
+    assert.ok(
+      directModifierZoomed.camera.z < directAfter.camera.z,
+      `expected Ctrl/Cmd down to zoom out: ${JSON.stringify({ directAfter, directModifierZoomed })}`,
+    )
+    pass('with the option enabled, Ctrl/Cmd + scroll-down zooms out instead of panning')
+    await screenshot(app.page, DIRECT_MODIFIER)
+
+    await wheel(app.page, { ctrl: true, deltaY: -120 })
+    const modifierReverse = await cameraState(app.page)
+    assert.ok(modifierReverse.camera.z > directModifierZoomed.camera.z)
+    pass('Ctrl/Cmd + scroll-up zooms in, opposite the direct wheel convention')
 
     await openCanvasSettings(app.page)
     await setSensitivity(app.page, 150)
@@ -205,10 +237,12 @@ async function main() {
       ranAt: new Date().toISOString(),
       stockBefore,
       panned,
-      modifierZoomed,
+      directModifierZoomed,
       enabled,
       directBefore,
       directAfter,
+      modifierZoomed,
+      modifierReverse,
       restored,
       checks,
     }, null, 2)}\n`)

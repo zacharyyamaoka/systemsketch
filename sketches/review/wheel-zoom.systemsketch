@@ -99,7 +99,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a3ncvV",
+      "index": "a3nO6V",
       "typeName": "shape"
     },
     {
@@ -152,7 +152,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a2N4j",
+      "index": "a2fDX",
       "typeName": "shape"
     },
     {
@@ -189,7 +189,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "PASS WHEN · Normal scroll pans; Ctrl/Cmd + scroll zooms; the opt-in makes plain scroll zoom"
+                  "text": "PASS WHEN · Normal scroll pans; Direct mode makes down scroll zoom in; Ctrl/Cmd + down scroll zooms out"
                 }
               ]
             }
@@ -197,7 +197,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a4B6E",
+      "index": "a4kSM",
       "typeName": "shape"
     },
     {
@@ -242,13 +242,13 @@
         }
       },
       "parentId": "page:page",
-      "index": "a3JX2",
+      "index": "a3Thv",
       "typeName": "shape"
     },
     {
-      "x": 0,
-      "y": 0,
-      "z": 1,
+      "x": 39.44444444444444,
+      "y": -10.375,
+      "z": 0.9216,
       "meta": {},
       "id": "camera:page:page",
       "typeName": "camera"
@@ -270,14 +270,6 @@
         "terminal": "end"
       },
       "typeName": "binding"
-    },
-    {
-      "name": "",
-      "color": "#7B66DC",
-      "imageUrl": "",
-      "meta": {},
-      "id": "user:lJJfryXmh9ewF4Ab_Mj5y",
-      "typeName": "user"
     },
     {
       "meta": {},
@@ -309,6 +301,14 @@
       "id": "instance_page_state:page:page",
       "pageId": "page:page",
       "typeName": "instance_page_state"
+    },
+    {
+      "name": "",
+      "color": "#FF802B",
+      "imageUrl": "",
+      "meta": {},
+      "id": "user:GQ0_760lAENuO5_pBCSEh",
+      "typeName": "user"
     },
     {
       "meta": {},
@@ -385,7 +385,7 @@
         "notes": "",
         "portLayout": "inline",
         "state": "normal",
-        "definitionId": "gaNXYDeP3jwPHVnDzK_D6",
+        "definitionId": "bmVqZM3NSB6Vs2A-O6wFD",
         "inputs": [
           {
             "id": "in_1",
@@ -405,7 +405,7 @@
         "definitionKey": "wheel"
       },
       "parentId": "page:page",
-      "index": "a1wEn",
+      "index": "a1D2U",
       "typeName": "shape"
     },
     {
@@ -422,7 +422,7 @@
         "h": 120,
         "geo": "rectangle",
         "dash": "draw",
-        "growY": 0,
+        "growY": 2,
         "url": "",
         "scale": 1,
         "flipX": false,
@@ -442,7 +442,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "OPTION · Settings → Canvas → enable Direct wheel zoom, then plain scroll zooms here"
+                  "text": "OPTION · Settings → Canvas → enable Direct wheel zoom and Ctrl/Cmd opposite zoom, then test both gestures here"
                 }
               ]
             }
@@ -450,7 +450,7 @@
         }
       },
       "parentId": "page:page",
-      "index": "a5L9I",
+      "index": "a5lej",
       "typeName": "shape"
     },
     {
@@ -471,6 +471,7 @@
       "followingUserId": null,
       "opacityForNextShape": 1,
       "stylesForNextShape": {
+        "tldraw:dash": "solid",
         "tldraw:arrowKind": "elbow",
         "systemsketch:connectionRouting": "elbow"
       },
@@ -557,7 +558,7 @@
         "scale": 1
       },
       "parentId": "page:page",
-      "index": "a2izEV",
+      "index": "a2sonG",
       "typeName": "shape"
     }
   ]

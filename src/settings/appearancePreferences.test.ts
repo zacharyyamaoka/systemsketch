@@ -12,17 +12,20 @@ describe('appearance preferences', () => {
     expect(DEFAULT_APPEARANCE_PREFERENCES.showZoomButtons).toBe(false)
     expect(DEFAULT_APPEARANCE_PREFERENCES.directWheelZoom).toBe(false)
     expect(DEFAULT_APPEARANCE_PREFERENCES.scrollDownZoomsIn).toBe(true)
+    expect(DEFAULT_APPEARANCE_PREFERENCES.modifierWheelZoomsOppositely).toBe(false)
     expect(DEFAULT_APPEARANCE_PREFERENCES.wheelZoomSensitivityPercent).toBe(100)
     expect(DEFAULT_APPEARANCE_PREFERENCES.punctuatedPortRow).toBe(true)
     expect(parseStoredAppearancePreferences(null)).toBe(DEFAULT_APPEARANCE_PREFERENCES)
   })
 
   it('accepts only the current version with boolean appearance preferences', () => {
-    expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: true, directWheelZoom: true, scrollDownZoomsIn: false, wheelZoomSensitivityPercent: 125, punctuatedPortRow: false }))
-      .toEqual({ showZoomButtons: true, directWheelZoom: true, scrollDownZoomsIn: false, wheelZoomSensitivityPercent: 125, punctuatedPortRow: false })
+    expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: true, directWheelZoom: true, scrollDownZoomsIn: false, modifierWheelZoomsOppositely: true, wheelZoomSensitivityPercent: 125, punctuatedPortRow: false }))
+      .toEqual({ showZoomButtons: true, directWheelZoom: true, scrollDownZoomsIn: false, modifierWheelZoomsOppositely: true, wheelZoomSensitivityPercent: 125, punctuatedPortRow: false })
     expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: 'yes', directWheelZoom: false, scrollDownZoomsIn: true, wheelZoomSensitivityPercent: 100, punctuatedPortRow: true }))
       .toBe(DEFAULT_APPEARANCE_PREFERENCES)
     expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: true, directWheelZoom: false, scrollDownZoomsIn: 'yes', wheelZoomSensitivityPercent: 100, punctuatedPortRow: true }))
+      .toBe(DEFAULT_APPEARANCE_PREFERENCES)
+    expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: true, directWheelZoom: false, scrollDownZoomsIn: true, modifierWheelZoomsOppositely: 'yes', wheelZoomSensitivityPercent: 100, punctuatedPortRow: true }))
       .toBe(DEFAULT_APPEARANCE_PREFERENCES)
     expect(parseStoredAppearancePreferences({ version: 1, showZoomButtons: true, directWheelZoom: 'yes', scrollDownZoomsIn: true, wheelZoomSensitivityPercent: 100, punctuatedPortRow: true }))
       .toBe(DEFAULT_APPEARANCE_PREFERENCES)
@@ -40,6 +43,7 @@ describe('appearance preferences', () => {
         showZoomButtons: true,
         directWheelZoom: false,
         scrollDownZoomsIn: true,
+        modifierWheelZoomsOppositely: false,
         wheelZoomSensitivityPercent: 100,
         punctuatedPortRow: true,
       })
@@ -56,13 +60,14 @@ describe('appearance preferences', () => {
       showZoomButtons: true,
       directWheelZoom: true,
       scrollDownZoomsIn: false,
+      modifierWheelZoomsOppositely: true,
       wheelZoomSensitivityPercent: 75,
       punctuatedPortRow: false,
     }, storage)
     expect(values.get(APPEARANCE_PREFERENCES_STORAGE_KEY))
-      .toBe('{"version":1,"showZoomButtons":true,"directWheelZoom":true,"scrollDownZoomsIn":false,"wheelZoomSensitivityPercent":75,"punctuatedPortRow":false}')
+      .toBe('{"version":1,"showZoomButtons":true,"directWheelZoom":true,"scrollDownZoomsIn":false,"modifierWheelZoomsOppositely":true,"wheelZoomSensitivityPercent":75,"punctuatedPortRow":false}')
     expect(readAppearancePreferences(storage))
-      .toEqual({ showZoomButtons: true, directWheelZoom: true, scrollDownZoomsIn: false, wheelZoomSensitivityPercent: 75, punctuatedPortRow: false })
+      .toEqual({ showZoomButtons: true, directWheelZoom: true, scrollDownZoomsIn: false, modifierWheelZoomsOppositely: true, wheelZoomSensitivityPercent: 75, punctuatedPortRow: false })
   })
 
   it('falls back safely when storage is unavailable or malformed', () => {

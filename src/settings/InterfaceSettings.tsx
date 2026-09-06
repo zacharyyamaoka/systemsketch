@@ -323,6 +323,7 @@ function InterfacePanel() {
 function CanvasPanel() {
   const {
     directWheelZoom,
+    modifierWheelZoomsOppositely,
     showZoomButtons,
     scrollDownZoomsIn,
     wheelZoomSensitivityPercent,
@@ -362,7 +363,7 @@ function CanvasPanel() {
       {directWheelZoom ? <section className="systemsketch-settings__appearance-section" aria-labelledby="wheel-zoom-title">
         <div className="systemsketch-settings__appearance-heading">
           <h3 id="wheel-zoom-title">Direct wheel zoom</h3>
-          <p>Choose which direction moves closer and how much each scroll step changes scale.</p>
+          <p>Choose which direction moves closer, whether Ctrl/Cmd reverses zoom, and how much each scroll step changes scale.</p>
         </div>
         <button
           type="button"
@@ -375,6 +376,22 @@ function CanvasPanel() {
           <span>
             <strong>Scroll down to zoom in</strong>
             <small>Turn this off if you prefer scrolling up to zoom in.</small>
+          </span>
+          <i aria-hidden="true"><span /></i>
+        </button>
+        <button
+          type="button"
+          role="switch"
+          className="systemsketch-settings__toggle-row"
+          aria-checked={modifierWheelZoomsOppositely}
+          data-testid="systemsketch-modifier-wheel-zooms-oppositely"
+          onClick={() => updateAppearancePreferences({
+            modifierWheelZoomsOppositely: !modifierWheelZoomsOppositely,
+          })}
+        >
+          <span>
+            <strong>Ctrl/Cmd + scroll zooms the opposite way</strong>
+            <small>When direct zoom is on, Ctrl/Cmd + scroll zooms instead of panning and reverses the plain wheel direction.</small>
           </span>
           <i aria-hidden="true"><span /></i>
         </button>

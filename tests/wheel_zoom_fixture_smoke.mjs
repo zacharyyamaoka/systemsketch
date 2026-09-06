@@ -50,6 +50,11 @@ async function enableDirectWheelZoom(page) {
   await waitFor(page, `document.querySelector('[data-testid="systemsketch-direct-wheel-zoom"]')`, 'the Canvas setting')
   await clickElement(page, '[data-testid="systemsketch-direct-wheel-zoom"]')
   await waitFor(page, `window.__systemsketch?.editor?.user.getUserPreferences().inputMode === 'mouse'`, 'direct zoom enabled')
+  await evaluate(page, `document.querySelector('[data-testid="systemsketch-modifier-wheel-zooms-oppositely"]')?.scrollIntoView({ block: 'center' })`)
+  await clickElement(page, '[data-testid="systemsketch-modifier-wheel-zooms-oppositely"]')
+  await waitFor(page,
+    `JSON.parse(localStorage.getItem('systemsketch.appearance.v1'))?.modifierWheelZoomsOppositely === true`,
+    'the modifier inversion setting')
   await clickElement(page, '.systemsketch-settings__header .tlui-button')
   await waitFor(page, `!document.querySelector('[data-testid="systemsketch-settings-dialog"]')`, 'the Settings dialog to close')
 }
@@ -94,6 +99,11 @@ async function main() {
     const directAfter = await evaluate(app.page, 'window.__systemsketch.editor.getZoomLevel()')
     assert.ok(directAfter > directBefore)
     pass('after the Canvas opt-in, the same plain scroll-down gesture zooms in')
+
+    await wheel(app.page, at.x, at.y, { ctrl: true })
+    const modifierAfter = await evaluate(app.page, 'window.__systemsketch.editor.getZoomLevel()')
+    assert.ok(modifierAfter < directAfter)
+    pass('the fixture’s Ctrl/Cmd + scroll-down gesture now zooms out instead of panning in direct mode')
 
     const capture = await app.page.send('Page.captureScreenshot', { format: 'png', fromSurface: true })
     await writeFile(DRIVEN_SCREENSHOT, Buffer.from(capture.data, 'base64'))
