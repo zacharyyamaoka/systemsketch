@@ -14,11 +14,19 @@ import { LiveTextArea, LiveTextInput, useLiveField } from '../../fields'
 import { EMPTY_FIELD_GUIDANCE } from '../../fields/emptyFieldGuidance'
 
 import {
+  BLOCK_HEADER_ALIGNS,
+	BLOCK_FOLD_CONTROL_SIDES,
+  BLOCK_MEMBER_LAYOUTS,
+	BLOCK_INSET_BACKGROUNDS,
   BLOCK_PRESENTATION_VIEWS,
+	blockHeaderAlign,
+	blockInsetBackground,
+  blockMemberLayout,
   isBlockShape,
   HEADER_ROW,
   type BlockPort,
   type BlockPortSide,
+  type BlockMemberLayout,
   type BlockShapeProps,
   type BlockPresentationView,
   type SemanticPortRole,
@@ -29,6 +37,11 @@ import {
   portMutates,
   setBlockViewProps,
   SEMANTIC_PORT_ROLES,
+	setBlockAutoResizeProps,
+	setBlockFoldableProps,
+	setBlockFoldedProps,
+	canBlockFold,
+	blockFoldControlSide,
 } from '../blockModel'
 import { resolveBlockPortSemanticRole, roleLabel } from '../connections/semanticRoles'
 import { getSemanticTagsVisible, setSemanticTagsVisible } from '../semanticTagVisibility'
@@ -69,14 +82,20 @@ import {
   setBlockView,
   toggleBlockPortLinkSeam,
   toggleBlockPortLinkSeamProps,
+	setBlockAutoResize,
+	setBlockFoldable,
+	setBlockFolded,
   updateBlockDetails,
   updateBlockPort,
   type BlockDetailsPatch,
 } from '../commands/blockCommands'
+import { setBlockMemberLayout } from '../memberLayout'
 import type { BlockPortSectionTarget } from '../ports/portAffordances'
 import {
   setBlockPortLayoutForSelection,
   setBlockShowDescriptionForSelection,
+	setBlockShowFooterForSelection,
+	setBlockShowHeaderDividerForSelection,
   setBlockViewForSelection,
 } from '../commands/blockStyleCommands'
 import { ElementHistoryPanel } from '../../history/ElementHistoryPanel'
@@ -108,6 +127,10 @@ export interface BlockEditOptions {
 export interface BlockInspectorActions {
   updateDetails(patch: BlockDetailsPatch, options?: BlockEditOptions): void
   setView(view: BlockPresentationView): void
+  setFoldable?(foldable: boolean): void
+  setFolded?(folded: boolean): void
+  setAutoResize?(autoResize: boolean): void
+  setMemberLayout(memberLayout: BlockMemberLayout): void
   addPort(side: BlockPortSide): void
 	/** Add a stable named member-update row to the curated Set attributes Block. */
 	addSetAttributesMember?(): void
@@ -1648,6 +1671,212 @@ export function BlockInspectorContent({
                 <p className="block-inspector__hint">
                   Each view keeps its own size — {props.view} is {Math.round(props.w)}×{Math.round(props.h)}.
                 </p>
+                {props.view !== 'simple' ? (
+                  <>
+                    <div className="block-inspector__subfield-label">Header alignment</div>
+                    <div
+                      className="block-inspector__choices"
+                      role="group"
+                      aria-label="Header alignment"
+                    >
+                      {BLOCK_HEADER_ALIGNS.map((alignment) => (
+                        <button
+                          key={alignment}
+                          type="button"
+                          data-testid={`block-header-align-${alignment}`}
+                          disabled={readOnly}
+                          aria-pressed={blockHeaderAlign(props) === alignment}
+                          onClick={() => actions?.updateDetails({ headerAlign: alignment })}
+                        >
+                          {alignment}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="block-inspector__hint">
+                      Center keeps the icon, title, and optional Draft badge together at the Block midpoint; type metadata stays at the edge.
+                    </p>
+                  </>
+                ) : null}
+                {props.view === 'expanded' ? (
+                  <div className="block-inspector__subcontrol" data-testid="block-member-layout-control">
+                    <span className="block-inspector__subheading">Member layout</span>
+                    <div className="block-inspector__choices" role="group" aria-label="Member layout">
+                      {BLOCK_MEMBER_LAYOUTS.map((memberLayout) => (
+                        <button
+                          key={memberLayout}
+                          type="button"
+                          disabled={readOnly}
+                          aria-pressed={blockMemberLayout(props) === memberLayout}
+                          data-testid={`block-member-layout-${memberLayout}`}
+                          onClick={() => actions?.setMemberLayout(memberLayout)}
+                        >
+                          {memberLayout === 'inset' ? 'Inset' : 'Edge-to-edge'}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="block-inspector__hint">
+                      Inset separates member cards; edge-to-edge joins direct child Blocks into one stack.
+                    </p>
+                    {blockMemberLayout(props) === 'inset' ? (
+                      <div className="block-inspector__subcontrol" data-testid="block-inset-background-control">
+                        <span className="block-inspector__subheading">Inset background</span>
+                        <div className="block-inspector__choices" role="group" aria-label="Inset background">
+                          {BLOCK_INSET_BACKGROUNDS.map((background) => (
+                            <button
+                              key={background}
+                              type="button"
+                              disabled={readOnly}
+                              aria-pressed={blockInsetBackground(props) === background}
+                              data-testid={`block-inset-background-${background}`}
+                              onClick={() => actions?.updateDetails({ insetBackground: background })}
+                            >
+                              {background === 'white' ? 'White' : 'Soft gray'}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="block-inspector__hint">
+                          Soft gray differentiates the member well without assigning a semantic color.
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+              </section>
+
+						<section className="block-inspector__section" data-inspector-section="Chrome">
+							<div className="block-inspector__section-title">Chrome</div>
+							<div className="block-inspector__chrome-control">
+								<span>Footer</span>
+								<div className="block-inspector__choices" role="group" aria-label="Block footer">
+									<button
+										type="button"
+										disabled={readOnly}
+										aria-pressed={props.showFooter !== false}
+										onClick={() => actions?.updateDetails({ showFooter: true })}
+									>
+										show
+									</button>
+									<button
+										type="button"
+										disabled={readOnly}
+										aria-pressed={props.showFooter === false}
+										onClick={() => actions?.updateDetails({ showFooter: false })}
+									>
+										hide
+									</button>
+								</div>
+							</div>
+							<div className="block-inspector__chrome-control">
+								<span>Header divider</span>
+								<div className="block-inspector__choices" role="group" aria-label="Header divider">
+									<button
+										type="button"
+										disabled={readOnly}
+										aria-pressed={props.showHeaderDivider !== false}
+										onClick={() => actions?.updateDetails({ showHeaderDivider: true })}
+									>
+										show
+									</button>
+									<button
+										type="button"
+										disabled={readOnly}
+										aria-pressed={props.showHeaderDivider === false}
+										onClick={() => actions?.updateDetails({ showHeaderDivider: false })}
+									>
+										hide
+									</button>
+								</div>
+							</div>
+							<p className="block-inspector__hint">
+								Applies in Port and Expanded views. Hiding the footer gives its room back to the Block body.
+							</p>
+						</section>
+
+              <section className="block-inspector__section" data-inspector-section="Behaviour">
+                <div className="block-inspector__section-title">Behaviour</div>
+                <div className="block-inspector__subsection">
+                  <span className="block-inspector__field-label">Folding</span>
+                  <div className="block-inspector__choices" role="group" aria-label="Enable block folding">
+                    <button
+                      type="button"
+                      disabled={readOnly}
+                      aria-pressed={props.foldable}
+                      onClick={() => actions?.setFoldable?.(true)}
+                    >
+                      enabled
+                    </button>
+                    <button
+                      type="button"
+                      disabled={readOnly}
+                      aria-pressed={!props.foldable}
+                      onClick={() => actions?.setFoldable?.(false)}
+                    >
+                      disabled
+                    </button>
+                  </div>
+                  {canBlockFold(props) ? (
+					<>
+					<div className="block-inspector__choices" role="group" aria-label="Block fold state">
+                      <button
+                        type="button"
+                        disabled={readOnly}
+                        aria-pressed={!props.folded}
+                        onClick={() => actions?.setFolded?.(false)}
+                      >
+                        open
+                      </button>
+                      <button
+                        type="button"
+                        disabled={readOnly}
+                        aria-pressed={props.folded}
+                        onClick={() => actions?.setFolded?.(true)}
+                      >
+                        folded
+                      </button>
+                    </div>
+					<span className="block-inspector__field-label">Fold control</span>
+					<div className="block-inspector__choices" role="group" aria-label="Block fold control side">
+						{BLOCK_FOLD_CONTROL_SIDES.map((side) => (
+							<button
+								key={side}
+								type="button"
+								data-testid={`block-fold-control-${side}`}
+								disabled={readOnly}
+								aria-pressed={blockFoldControlSide(props) === side}
+								onClick={() => actions?.updateDetails({ foldControlSide: side })}
+							>
+								{side}
+							</button>
+						))}
+					</div>
+					</>
+                  ) : null}
+                </div>
+                <div className="block-inspector__subsection">
+                  <span className="block-inspector__field-label">Auto fit children</span>
+                  <div className="block-inspector__choices" role="group" aria-label="Auto fit Block children">
+                    <button
+                      type="button"
+                      disabled={readOnly}
+                      aria-pressed={props.autoResize}
+                      onClick={() => actions?.setAutoResize?.(true)}
+                    >
+                      enabled
+                    </button>
+                    <button
+                      type="button"
+                      disabled={readOnly}
+                      aria-pressed={!props.autoResize}
+                      onClick={() => actions?.setAutoResize?.(false)}
+                    >
+                      disabled
+                    </button>
+                  </div>
+                </div>
+                <p className="block-inspector__hint">
+                  Folding adds a header chevron in Port and Expanded views. Auto fit follows
+                  direct children continuously in Expanded view and saves the fitted border on release.
+                </p>
               </section>
 
               <PortSection side="inputs" props={props} actions={actions} semanticTagsVisible={semanticTagsVisible} />
@@ -1769,6 +1998,10 @@ export function EditorBlockInspector({
         updateDetails: (patch, options) =>
           void updateBlockDetails(editor, id, patch, history(options)),
         setView: (view) => void setBlockView(editor, id, view),
+		setFoldable: (foldable) => void setBlockFoldable(editor, id, foldable),
+		setFolded: (folded) => void setBlockFolded(editor, id, folded),
+		setAutoResize: (autoResize) => void setBlockAutoResize(editor, id, autoResize),
+        setMemberLayout: (memberLayout) => void setBlockMemberLayout(editor, id, memberLayout),
         addPort: (side) => void appendBlockPort(editor, id, side),
 		addSetAttributesMember: () => void appendSetAttributesMember(editor, id),
         addBundleMember: () => void appendBundleMember(editor, id),
@@ -1798,6 +2031,10 @@ export function EditorBlockInspector({
     return {
       updateDetails: (patch) => changeDraft((props) => patchBlockDetailsProps(props, patch)),
       setView: (view) => changeDraft((props) => setBlockViewProps(props, view)),
+		setFoldable: (foldable) => changeDraft((props) => setBlockFoldableProps(props, foldable)),
+		setFolded: (folded) => changeDraft((props) => setBlockFoldedProps(props, folded)),
+		setAutoResize: (autoResize) => changeDraft((props) => setBlockAutoResizeProps(props, autoResize)),
+      setMemberLayout: (memberLayout) => changeDraft((props) => ({ ...props, memberLayout })),
       addPort: (side) => changeDraft((props) => appendBlockPortProps(props, side)),
 		addSetAttributesMember: () => changeDraft((props) => appendSetAttributesMemberProps(props)),
       addBundleMember: () => changeDraft((props) => appendBundleMemberProps(props)),
@@ -1823,12 +2060,18 @@ export function EditorBlockInspector({
         view={context.styles.view}
         portLayout={context.styles.portLayout}
         showDescription={context.styles.showDescription}
+				showFooter={context.styles.showFooter}
+				showHeaderDivider={context.styles.showHeaderDivider}
         actions={{
           setView: (view) => void setBlockViewForSelection(editor, view),
           setPortLayout: (portLayout) =>
             void setBlockPortLayoutForSelection(editor, portLayout),
           setShowDescription: (showDescription) =>
             void setBlockShowDescriptionForSelection(editor, showDescription),
+				setShowFooter: (showFooter) =>
+					void setBlockShowFooterForSelection(editor, showFooter),
+				setShowHeaderDivider: (showHeaderDivider) =>
+					void setBlockShowHeaderDividerForSelection(editor, showHeaderDivider),
         }}
         onRequestClose={onRequestClose}
       />

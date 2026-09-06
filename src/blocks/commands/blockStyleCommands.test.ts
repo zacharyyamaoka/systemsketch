@@ -13,6 +13,8 @@ import {
   selectionHasConnectionStyles,
   setBlockPortLayoutForSelection,
   setBlockShowDescriptionForSelection,
+	setBlockShowFooterForSelection,
+	setBlockShowHeaderDividerForSelection,
   setBlockViewForSelection,
   setConnectionRoutingForSelection,
   setConnectionTemporalForSelection,
@@ -123,6 +125,28 @@ describe('Block batch style commands', () => {
     expect(fixture.historyLabels)
       .toEqual(['use offset block ports', 'hide block descriptions'])
   })
+
+	it('batches footer and header-divider presentation without touching Block identity', () => {
+		const fixture = styleTestEditor([
+			fakeBlock('a', { showFooter: true, showHeaderDivider: false, title: 'one' }),
+			fakeBlock('b', { showFooter: false, showHeaderDivider: true, title: 'two' }),
+		])
+
+		expect(getBlockSelectionStyles(fixture.editor).showFooter).toEqual({ type: 'mixed' })
+		expect(getBlockSelectionStyles(fixture.editor).showHeaderDivider).toEqual({ type: 'mixed' })
+		expect(setBlockShowFooterForSelection(fixture.editor, false).ok).toBe(true)
+		expect(setBlockShowHeaderDividerForSelection(fixture.editor, false).ok).toBe(true)
+		expect(fixture.shape('a')?.props).toMatchObject({
+			title: 'one', showFooter: false, showHeaderDivider: false,
+		})
+		expect(fixture.shape('b')?.props).toMatchObject({
+			title: 'two', showFooter: false, showHeaderDivider: false,
+		})
+		expect(fixture.historyLabels).toEqual([
+			'hide block footers',
+			'hide block header dividers',
+		])
+	})
 
   it('batches connection routing through the same style path', () => {
     const fixture = styleTestEditor([

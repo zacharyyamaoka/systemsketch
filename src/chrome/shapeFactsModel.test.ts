@@ -192,3 +192,23 @@ describe('shapeFactsKey', () => {
     expect(before).not.toBe(after)
   })
 })
+
+describe('the edge facts', () => {
+  it('names the async line style the stored dash cannot show', () => {
+    // An async shape stores `dash: solid`, so a panel listing only stock props
+    // would name a solid outline the canvas is painting as packets.
+    const async = shape('a', 'geo', { dash: 'solid', color: 'blue' }, {
+      meta: { systemSketchStroke: { pattern: 'async', color: 'black' } },
+    } as never)
+    const model = getShapeFactsModel(editor({ shapes: [async] }))!
+    expect(model.styles).toContainEqual({ label: 'Line style', value: 'async' })
+    expect(model.styles).toContainEqual({ label: 'Edge colour', value: 'black' })
+  })
+
+  it('stays quiet about an edge that is only what the shape already says', () => {
+    const plain = shape('a', 'geo', { dash: 'dashed', color: 'blue' })
+    const model = getShapeFactsModel(editor({ shapes: [plain] }))!
+    expect(model.styles.map((fact) => fact.label)).not.toContain('Line style')
+    expect(model.styles.map((fact) => fact.label)).not.toContain('Edge colour')
+  })
+})

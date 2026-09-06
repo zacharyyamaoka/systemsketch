@@ -1,0 +1,77 @@
+{
+  "feature": "Contextual menu composition",
+  "viewport": { "width": 1280, "height": 840 },
+  "shapes": [
+    {
+      "id": "ordinary-text",
+      "type": "geo",
+      "x": 690,
+      "y": 150,
+      "text": "ordinary_text",
+      "props": {
+        "w": 380,
+        "h": 150,
+        "geo": "rectangle",
+        "color": "black",
+        "fill": "none",
+        "dash": "solid",
+        "font": "sans",
+        "size": "m",
+        "align": "middle",
+        "verticalAlign": "middle"
+      }
+    },
+    {
+      "id": "function-block",
+      "type": "block",
+      "x": 690,
+      "y": 490,
+      "props": {
+        "title": "parse_frame",
+        "description": "The same registered typography controls bind to Block title props.",
+        "blockType": "Function",
+        "view": "port",
+        "w": 380,
+        "h": 200,
+        "inputs": [
+          { "id": "in_packet", "name": "packet", "type": "Bytes", "visible": true }
+        ],
+        "outputs": [
+          { "id": "out_frame", "name": "frame", "type": "Frame", "visible": true }
+        ]
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-text",
+      "kind": "step",
+      "text": "1 · Click ordinary_text, then open Typeface (Aa). Confirm four compact Aa + single-label rows.",
+      "x": 30,
+      "y": 205,
+      "w": 430,
+      "h": 135,
+      "target": { "shapeId": "ordinary-text", "anchor": "left", "dy": -28 }
+    },
+    {
+      "id": "step-block",
+      "kind": "step",
+      "text": "2 · Double-click parse_frame, then open Typeface (Aa). The same four rows appear while the title stays editable.",
+      "x": 30,
+      "y": 430,
+      "w": 430,
+      "h": 145,
+      "target": { "shapeId": "function-block", "anchor": "left", "dy": -30 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Both Typeface menus match; no repeated Bookish / Technical words; Block typing still works after a choice.",
+      "x": 30,
+      "y": 650,
+      "w": 450,
+      "h": 140
+    }
+  ]
+}

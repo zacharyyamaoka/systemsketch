@@ -99,7 +99,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums} td.ok{color:#15803d;f
         <tr><td>SystemSketch order</td><td colspan="2"><code>object_pose → quality → grip_force → grip_state → home_pose</code></td></tr>
         </table>
         <p class="note">Graphviz's Blackboard edges carry <code>weight=0</code>: they order the sink rank by crossing minimisation but do not pull on positions, so the rank is spread evenly. SystemSketch does the same — an exact one-sided crossing minimum for up to eight keys, ties broken by document order — over a tree whose Blocks are far wider than dot's ellipses, which is what the cross-position error measures. The order agreement is the claim that matters; where it is below 1.0 the remaining pairs are ties in Graphviz's own output between runs.</p>
-        
+
 
 <h2>Real-browser acceptance · <code>npm run test:bt</code></h2>
 <p class="note">Generated 2026-09-05T19:22:20.346Z. Each check reads the editor or the painted DOM after a real pointer or keyboard gesture; screenshots are only written when every check passes.</p>

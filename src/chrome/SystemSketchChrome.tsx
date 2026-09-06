@@ -11,7 +11,7 @@ import {
   useValue,
   type Editor,
 } from 'tldraw'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { AppearanceControls, hasAppearanceControls } from '../appearance/AppearanceControls'
 import { CompareTrigger } from '../compare'
 import { WrapSelectionControl } from '../frames/WrapSelectionControl'
@@ -19,25 +19,33 @@ import { canWrapSelection } from '../frames/wrapSelection'
 import {
   BLOCK_TOOL_ID,
   PILL_TOOL_ID,
+  TYPE_TOOL_ID,
   adoptConnectedPillType,
   canAdoptConnectedPillType,
   getBlockInspectorContext,
   getOnlySelectedBlock,
   selectionHasBlockStyles,
 } from '../blocks'
+import {
+  FLOATING_PORT_TOOL_ID,
+  FloatingPortInspector,
+  getOnlySelectedFloatingPort,
+} from '../floatingPort'
 import { addTextTarget, selectionHasVisibleText } from '../appearance/textPresence'
-import { describeTidyEdgesOutcome, tidyEdges, tidyEdgesOutcomeSeverity } from '../blocks/connections/tidyEdges'
+import { describeTidyEdgesOutcome, tidyEdges } from '../blocks/connections/tidyEdges'
 import { clearDiffStates } from '../diff/clearDiffStates'
-import { describeOrganizeNodesOutcome, organizeNodes, organizeNodesOutcomeSeverity } from '../blocks/layout'
+import { describeOrganizeNodesOutcome, organizeNodes } from '../blocks/layout'
 import {
   EditorBlockInspector,
   EditorBlockSelectionMiniMenu,
+  BlockTitleFormattingControls,
   canShowBlockSelectionMiniMenu,
   EditorConnectionInspector,
   getConnectionInspectorContext,
   HitAreaOverlay,
   OnCanvasBlockPicker,
   TunnelLayerBar,
+  getEditingBlockTitle,
 } from '../blocks/ui'
 import {
   BRANCH_TOOL_ID,
@@ -61,6 +69,9 @@ import {
 } from '../propagation'
 import { PortableShareButton } from '../export/PortableShareButton'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
+// Imported by path rather than through `../behaviorTree`: the barrel is being
+// edited by a concurrent session, and the panel has no other consumer.
+import { BehaviorTreeLibraryPanel } from '../behaviorTree/ui/BehaviorTreeLibraryPanel'
 import { PrimitiveSearch } from '../library/PrimitiveSearch'
 import { BoardOverview } from './BoardOverview'
 import { LocalCommentsPanel } from '../comments'
@@ -84,15 +95,35 @@ import {
   getSelectionLayoutActionAvailability,
   SelectionLayoutActions,
 } from './SelectionLayoutActions'
+import { ContextualSurface } from '../contextualMenus/ContextualSurface'
 import type { RightSurface } from './chromeState'
 import { CommunicationPrototypeControls } from '../prototypes/communication/CommunicationPrototypeControls'
 import './systemsketch-chrome.css'
+import './rich-text-toolbar.css'
 
 function PanelIcon() {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true">
       <rect x="3" y="3.5" width="14" height="13" rx="2" />
       <path d="M12 3.5v13" />
+    </svg>
+  )
+}
+
+function ShapesIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true">
+      <rect x="3" y="3" width="6" height="6" rx="1" />
+      <circle cx="14" cy="6" r="3" />
+      <path d="m6 12 3.5 5H2.5L6 12Zm6 0h5v5h-5z" />
+    </svg>
+  )
+}
+
+function CommandIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true">
+      <path d="M7 5.5a2.5 2.5 0 1 0-2.5 2.5H15.5A2.5 2.5 0 1 0 13 5.5v9a2.5 2.5 0 1 0 2.5-2.5H4.5A2.5 2.5 0 1 0 7 14.5v-9Z" />
     </svg>
   )
 }
@@ -116,7 +147,7 @@ export function SystemSketchMenuPanel() {
 }
 
 export function SystemSketchSharePanel() {
-  const { rightSurface, toggleRight } = useChrome()
+  const { rightSurface, toggleRight, leftSurface, toggleLeft, toolbarSurface, setToolbar } = useChrome()
   const { addDialog } = useDialogs()
   const ref = useRef<HTMLElement>(null)
   usePassThroughWheelEvents(ref)
@@ -172,6 +203,41 @@ export function SystemSketchSharePanel() {
       >
         <PanelIcon />
       </TldrawUiButton>
+      {/* WHY these two live here rather than beside the breadcrumb, where they
+          used to sit: "Refine structural breadcrumb controls" (66afad2e) gave
+          the top-left shell's whole width to the structural path — see the
+          `max-width` comment on `.systemsketch-top-left-shell` — and
+          `tests/depth_breadcrumb_navigation_smoke.mjs` now asserts zero
+          trailing controls in that shell at any width. The shared left
+          popout (Shapes/Behaviors) and the command palette still need a
+          discoverable opener beyond the palette-only path, so they ride the
+          other corner's icon-button row instead of reclaiming the space that
+          commit deliberately freed. They sit right before Share, the row's
+          rightmost anchor: the centred Preview/REC notice
+          (`topNoticePlacement.ts`) can only ever reach as far as this shell's
+          *left* edge, so the closer a button is to Share, the less a wide
+          notice can ever cover it. */}
+      <TldrawUiButton
+        type="icon"
+        className="systemsketch-shell-icon-button systemsketch-shapes-button"
+        title="Shapes library"
+        aria-expanded={leftSurface === 'shapes' || leftSurface === 'behaviors'}
+        aria-controls={leftSurface ? 'systemsketch-left-popout' : undefined}
+        onClick={() => toggleLeft('shapes')}
+      >
+        <ShapesIcon />
+      </TldrawUiButton>
+      <TldrawUiButton
+        type="icon"
+        className="systemsketch-shell-icon-button systemsketch-command-button"
+        title="Search and commands (Ctrl+P)"
+        aria-label="Search and commands"
+        aria-keyshortcuts="Control+P Meta+P"
+        aria-expanded={toolbarSurface !== null}
+        onClick={() => setToolbar(toolbarSurface ? null : 'commands')}
+      >
+        <CommandIcon />
+      </TldrawUiButton>
       <PortableShareButton />
     </nav>
   )
@@ -226,6 +292,7 @@ function InspectorDock({
 }) {
   if (subject === 'branch') return <EditorBranchInspector editor={editor} onRequestClose={onClose} />
   if (subject === 'loop') return <EditorLoopInspector editor={editor} onRequestClose={onClose} />
+  if (subject === 'port') return <FloatingPortInspector editor={editor} />
   if (subject === 'behaviorTree') return <EditorBehaviorTreeInspector editor={editor} onRequestClose={onClose} />
   if (subject === 'connection') return <EditorConnectionInspector editor={editor} />
   if (subject === 'shape') return <ShapeFactsPanel editor={editor} />
@@ -247,7 +314,7 @@ function InspectorEmptyState() {
       <span aria-hidden="true">▣</span>
       <strong>Nothing selected</strong>
       <p>
-        Select a Block, a Branch or a cable to edit it here. Any other shape shows
+        Select a Block, Port, Branch, Behavior Tree or cable to edit it here. Any other shape shows
         what the board knows about it.
       </p>
     </div>
@@ -327,22 +394,13 @@ function SelectionMiniMenu() {
     [editor],
   )
   const propagationFocus = usePropagationFocus(editor)
-  const [organizingNodes, setOrganizingNodes] = useState(false)
   const runTidyEdges = () => {
     const outcome = tidyEdges(editor)
-    addToast({ title: describeTidyEdgesOutcome(outcome), severity: tidyEdgesOutcomeSeverity(outcome) })
+    addToast({ title: describeTidyEdgesOutcome(outcome), severity: 'info' })
   }
   const runOrganizeNodes = async () => {
-    // The elk layout pass is async and can take a visible moment on a large
-    // graph; without this the trigger stayed clickable and unlabeled mid-run,
-    // inviting a second, redundant pass.
-    setOrganizingNodes(true)
-    try {
-      const outcome = await organizeNodes(editor)
-      addToast({ title: describeOrganizeNodesOutcome(outcome), severity: organizeNodesOutcomeSeverity(outcome) })
-    } finally {
-      setOrganizingNodes(false)
-    }
+    const outcome = await organizeNodes(editor)
+    addToast({ title: describeOrganizeNodesOutcome(outcome), severity: 'info' })
   }
   const hasVisibleActions = hasCode
     || hasBranch
@@ -366,28 +424,6 @@ function SelectionMiniMenu() {
     )
   }
 
-  if (hasBranch) {
-    return (
-      <SelectionContextualMenu
-        className="systemsketch-selection-menu"
-        label="Selection actions"
-      >
-        <EditorBranchSelectionMiniMenu editor={editor} />
-      </SelectionContextualMenu>
-    )
-  }
-
-  if (hasBehaviorTree) {
-    return (
-      <SelectionContextualMenu
-        className="systemsketch-selection-menu"
-        label="Behavior Tree actions"
-      >
-        <EditorBehaviorTreeSelectionMiniMenu editor={editor} />
-      </SelectionContextualMenu>
-    )
-  }
-
   if (hasCode) {
     return (
       <SelectionContextualMenu
@@ -399,46 +435,54 @@ function SelectionMiniMenu() {
     )
   }
 
+  const surface = hasBehaviorTree
+    ? 'behavior-tree-selection'
+    : hasBranch ? 'branch-selection'
+      : hasBlocks ? 'block-selection' : 'shape-selection'
+  const items = {
+    'behavior-tree-actions': <EditorBehaviorTreeSelectionMiniMenu editor={editor} />,
+    'branch-actions': <EditorBranchSelectionMiniMenu editor={editor} />,
+    'block-actions': <EditorBlockSelectionMiniMenu key={selectionKey} editor={editor} />,
+    appearance: <AppearanceControls />,
+    wrap: <WrapSelectionControl />,
+    layout: (
+      <SelectionLayoutActions
+        {...layoutActions}
+        onTidyEdges={runTidyEdges}
+        onOrganizeNodes={() => void runOrganizeNodes()}
+      />
+    ),
+    'propagation-focus': <PropagationFocusControls />,
+  }
+
   return (
     <SelectionContextualMenu
       className="systemsketch-selection-menu"
       label="Selection actions"
     >
-      {/* Appearance rides on both branches. A Block carries no tldraw styles of
-          its own, so it contributes nothing here — but a Block selected
-          *alongside* a rectangle must not put the rectangle's colour out of
-          reach. The control renders nothing when the selection has no styles,
-          so the Block-only pill is unchanged. */}
-      {hasBlocks ? (
-        <>
-          <EditorBlockSelectionMiniMenu key={selectionKey} editor={editor} />
-          <AppearanceControls />
-          <WrapSelectionControl />
-          <SelectionLayoutActions
-            {...layoutActions}
-            organizeNodesBusy={organizingNodes}
-            onTidyEdges={runTidyEdges}
-            onOrganizeNodes={() => void runOrganizeNodes()}
-          />
-          <PropagationFocusControls />
-        </>
-      ) : (
-        <>
-          {/* Appearance first, the way FigJam leads with what the thing looks
-              like. There is no Inspect button on either branch any more: the
-              dock follows the selection, so the pill only carries the things
-              that change the shape. */}
-          <AppearanceControls />
-          <WrapSelectionControl />
-          <SelectionLayoutActions
-            {...layoutActions}
-            organizeNodesBusy={organizingNodes}
-            onTidyEdges={runTidyEdges}
-            onOrganizeNodes={() => void runOrganizeNodes()}
-          />
-          <PropagationFocusControls />
-        </>
-      )}
+      <ContextualSurface surface={surface} items={items} />
+    </SelectionContextualMenu>
+  )
+}
+
+/** The title formatter occupies the selection pill while its text is live. */
+function EditingBlockTitleMenu() {
+  const editor = useEditor()
+  const isEditingTitle = useValue(
+    'systemsketch editing Block title menu',
+    () => getEditingBlockTitle(editor) !== null,
+    [editor],
+  )
+  if (!isEditingTitle) return null
+  return (
+    <SelectionContextualMenu
+      className="systemsketch-selection-menu systemsketch-title-formatting-menu"
+      label="Block title formatting"
+    >
+      <ContextualSurface
+        surface="block-title-editing"
+        items={{ 'title-formatting': <BlockTitleFormattingControls /> }}
+      />
     </SelectionContextualMenu>
   )
 }
@@ -475,6 +519,8 @@ export function SystemSketchSurfaceHost() {
       // never changed it.
       const loop = getOnlySelectedLoop(editor)
       if (loop) return `loop:${loop.id}`
+      const port = getOnlySelectedFloatingPort(editor)
+      if (port) return `port:${port.id}`
       const tree = getSelectedBehaviorTree(editor)
       if (tree) return `behaviorTree:${tree.region.id}:${tree.path ?? ''}`
       const context = getBlockInspectorContext(editor)
@@ -509,6 +555,7 @@ export function SystemSketchSurfaceHost() {
     () => readInspectorSubject(editor, {
       getOnlySelectedBranch,
       getOnlySelectedLoop,
+      getOnlySelectedFloatingPort,
       getSelectedBehaviorTree,
       getBlockInspectorContextKind: (target) => getBlockInspectorContext(target).kind,
       getConnectionInspectorContext,
@@ -566,6 +613,22 @@ export function SystemSketchSurfaceHost() {
         run: () => editor.setCurrentTool(PILL_TOOL_ID),
       },
       {
+        id: 'insert-floating-port',
+        label: 'Insert Port',
+        description: 'Switch to the free, wireable Port primitive',
+        keywords: ['port', 'input', 'output', 'connector'],
+        icon: '◉',
+        run: () => editor.setCurrentTool(FLOATING_PORT_TOOL_ID),
+      },
+      {
+        id: 'insert-type',
+        label: 'Insert Type',
+        description: 'Switch to the compact Type definition tool',
+        keywords: ['class', 'record', 'namedtuple', 'attribute', 'domain model'],
+        icon: '⌘',
+        run: () => editor.setCurrentTool(TYPE_TOOL_ID),
+      },
+      {
         // Taking the lens off is a safety property, not a convenience. A diff
         // or lint `state` is something a projector said ABOUT a board, and a
         // person can always open that board, like it, and start editing — at
@@ -585,6 +648,14 @@ export function SystemSketchSurfaceHost() {
         keywords: ['insert'],
         icon: '◇',
         run: () => setLeft('shapes'),
+      },
+      {
+        id: 'behavior-library',
+        label: 'Open Behaviors library',
+        description: 'Browse skills, conditions, controls and decorators',
+        keywords: ['insert', 'behavior', 'behaviour', 'tree', 'skill'],
+        icon: '⌥',
+        run: () => setLeft('behaviors'),
       },
       {
         id: 'show-problems',
@@ -687,7 +758,6 @@ export function SystemSketchSurfaceHost() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return
-      if (event.repeat) return
       const key = event.key.toLowerCase()
       if (key !== 'p' && key !== 'k' && key !== 'f') return
       event.preventDefault()
@@ -730,22 +800,53 @@ export function SystemSketchSurfaceHost() {
       <OnCanvasBlockPicker />
       <HitAreaOverlay />
       <PrimitiveSearch />
-      {leftSurface ? (
-        <aside
-          id="systemsketch-left-popout"
-          className="systemsketch-popout systemsketch-popout--left"
-          aria-label="Shapes library"
-          data-testid="systemsketch-left-popout"
-          data-systemsketch-chrome
-          onWheel={(event) => event.stopPropagation()}
-        >
-          <header className="systemsketch-popout__header">
-            <div><span>Library</span><h2>Shapes</h2></div>
-            <button type="button" aria-label="Close shapes library" onClick={() => setLeft(null)}>×</button>
-          </header>
-          <ShapesLibrary />
-        </aside>
-      ) : null}
+      {leftSurface ? (() => {
+        // `files` is declared on LeftSurface but never set; treat anything that
+        // is not the Behaviors surface as Shapes rather than rendering nothing.
+        const surface = leftSurface === 'behaviors' ? 'behaviors' : 'shapes'
+        const title = surface === 'behaviors' ? 'Behaviors' : 'Shapes'
+        return (
+          <aside
+            id="systemsketch-left-popout"
+            className="systemsketch-popout systemsketch-popout--left"
+            aria-label={`${title} library`}
+            data-testid="systemsketch-left-popout"
+            data-left-surface={surface}
+            data-systemsketch-chrome
+            onWheel={(event) => event.stopPropagation()}
+          >
+            <header className="systemsketch-popout__header">
+              <div><span>Library</span><h2>{title}</h2></div>
+              <button type="button" aria-label={`Close ${title.toLowerCase()} library`} onClick={() => setLeft(null)}>×</button>
+            </header>
+            {/* WHY the switcher sits below the header rather than inside it:
+                `systemsketch-chrome.css` styles EVERY `button` in
+                `.systemsketch-popout__header` as a 30×30 icon square, which
+                would squash a labelled tab into an unreadable chip. */}
+            <div className="systemsketch-popout__surfaces" role="tablist" aria-label="Library surface">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={surface === 'shapes'}
+                data-testid="systemsketch-left-surface-shapes"
+                onClick={() => setLeft('shapes')}
+              >
+                Shapes
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={surface === 'behaviors'}
+                data-testid="systemsketch-left-surface-behaviors"
+                onClick={() => setLeft('behaviors')}
+              >
+                Behaviors
+              </button>
+            </div>
+            {surface === 'behaviors' ? <BehaviorTreeLibraryPanel /> : <ShapesLibrary />}
+          </aside>
+        )
+      })() : null}
 
       {rightSurface ? (
         <aside
@@ -793,6 +894,7 @@ export function SystemSketchSurfaceHost() {
         />
       ) : null}
 
+      <EditingBlockTitleMenu />
       <SelectionMiniMenu />
       <CodeResizeIndicator />
     </div>

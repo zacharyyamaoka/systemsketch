@@ -12,7 +12,9 @@ describe('Block batch inspector', () => {
         view={{ type: 'shared', value: 'port' }}
         portLayout={{ type: 'shared', value: 'inline' }}
         showDescription={{ type: 'shared', value: true }}
-        actions={{ setView: () => {}, setPortLayout: () => {}, setShowDescription: () => {} }}
+				showFooter={{ type: 'shared', value: true }}
+				showHeaderDivider={{ type: 'shared', value: true }}
+        actions={{ setView: () => {}, setPortLayout: () => {}, setShowDescription: () => {}, setShowFooter: () => {}, setShowHeaderDivider: () => {} }}
       />,
     )
 
@@ -22,7 +24,7 @@ describe('Block batch inspector', () => {
     expect(html).toContain('data-block-count="9"')
     expect(html).not.toContain('Select a Block to inspect it')
 
-    const sections = ['View', 'Ports', 'Display', 'Per-Block']
+    const sections = ['View', 'Ports', 'Display', 'Chrome', 'Per-Block']
     let previous = -1
     for (const section of sections) {
       const position = html.indexOf(`data-inspector-section="${section}"`)
@@ -39,13 +41,15 @@ describe('Block batch inspector', () => {
         view={{ type: 'mixed' }}
         portLayout={{ type: 'mixed' }}
         showDescription={{ type: 'mixed' }}
-        actions={{ setView: () => {}, setPortLayout: () => {}, setShowDescription: () => {} }}
+				showFooter={{ type: 'mixed' }}
+				showHeaderDivider={{ type: 'mixed' }}
+        actions={{ setView: () => {}, setPortLayout: () => {}, setShowDescription: () => {}, setShowFooter: () => {}, setShowHeaderDivider: () => {} }}
       />,
     )
 
     expect(html).toContain('Batch edit')
     expect(html).not.toContain('3 Blocks selected')
-    expect(html.match(/Mixed/g)).toHaveLength(3)
+    expect(html.match(/Mixed/g)).toHaveLength(5)
     expect(html).not.toContain('aria-pressed="true"')
   })
 
@@ -56,6 +60,8 @@ describe('Block batch inspector', () => {
         view={{ type: 'shared', value: 'expanded' }}
         portLayout={{ type: 'shared', value: 'offset' }}
         showDescription={{ type: 'shared', value: false }}
+				showFooter={{ type: 'shared', value: false }}
+				showHeaderDivider={{ type: 'shared', value: false }}
       />,
     )
 

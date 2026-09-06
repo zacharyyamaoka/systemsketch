@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-09-05T19:27:24.529Z",
+  "passed": 20,
+  "checks": [
+    "the sample PickAndPlace tree projects its 13 occurrences before the panel is ever opened",
+    "the command palette has no toolbar button for this panel, but \"Open Behaviors library\" reaches it and the switcher reflects the open surface",
+    "Controls and Decorators list with nothing selected on the canvas, ranked Sequence/Fallback/Parallel/IfThenElse first, and SubTree never appears as a pickable row",
+    "Decorators is collapsed by default and its rows (e.g. RetryUntilSuccessful) are absent from the DOM until it is opened",
+    "Skills lists the document's own action models with the region selected: [\"model:CloseGrip\",\"model:CorrectGrip\",\"model:FollowPath\",\"model:MoveHome\",\"model:PlanPath\",\"new:skill\"]",
+    "every projected leaf title is discoverable in the catalog (actual section per title, not forced to \"Skills\"): {\"MoveToObj\":\"Behavior Trees\",\"GraspValid\":\"Conditions\",\"CloseGrip\":\"Skills\",\"MoveHome\":\"Skills\",\"CorrectGrip\":\"Skills\"}",
+    "clicking a Controls row with the region selected but no node selected inserts under the tree's root (matching the \"Adds under Pick and place.\" caption from 3b), not a second root",
+    "Recents gains the just-inserted row, keyed by the same id the row was clicked with",
+    "one undo removes the complete root-level insertion in a single step",
+    "Recents is a localStorage history independent of document undo: it still lists the row after the XML change that produced it is undone",
+    "with a leaf occurrence selected instead of the root, the same Controls row inserts a Sequence as its sibling — the insert mechanism itself works",
+    "typing \"retry\" narrows the catalog to matches (force-opening the collapsed Decorators section so RetryUntilSuccessful is actually reachable) and excludes Sequence",
+    "clearing the search restores the full catalog",
+    "a gibberish query shows the empty state with its real copy",
+    "a library row carries draggable=\"true\"",
+    ".bt-library__body (bt-library__body + ss-scroll) computes scrollbar-width: thin",
+    "regression guard: .systemsketch-command-palette still computes scrollbar-width: thin after the scrollbar rules moved into src/scroll/scroll-area.css",
+    "clicking the Shapes tab brings back the Shapes browser with its own close button",
+    "switching back to Behaviors restores its own close button label",
+    "the complete journey emits no local browser console errors"
+  ],
+  "sourceDefects": [
+    {
+      "id": "undo.sibling-insert-drops-sibling",
+      "selector": "[data-testid=\"systemsketch-behavior-library\"] button[data-library-item=\"model:Sequence\"] (insert), then editor.undo()",
+      "observed": {
+        "countDelta": -1,
+        "xmlEqualsPreInsert": false,
+        "droppedTheNextMoveHome": true
+      },
+      "desired": {
+        "countDelta": 0,
+        "xmlEqualsPreInsert": true,
+        "droppedTheNextMoveHome": false
+      },
+      "explanation": "Reproduced through the panel's click plus a bare window.__systemsketch.editor.undo() call (ruling out any keyboard/shortcut double-fire): selecting the leaf at path 0.2 (CloseGrip) and inserting Sequence via insertBehaviorTreeSiblingOf (src/behaviorTree/behaviorTreeCommands.ts:180) requires shifting the following siblings (the standalone MoveHome at 0.3 -> 0.4, Parallel at 0.4 -> 0.5) via the `remap`/`restamps` path in applyEdit (src/behaviorTree/behaviorTreeCommands.ts:135-162). One `editor.undo()` afterward does not restore the pre-insert XML: child count lands one BELOW the original, and the standalone MoveHome that used to sit at path 0.3 is permanently gone from the XML, not merely un-shifted. Confirmed by the session owning behaviorTreeCommands.ts/installBehaviorTreeRegions.ts: `reconcileBehaviorTree` is re-run from the operation-complete handler via `editor.run(repair, { history: 'ignore' })` (installBehaviorTreeRegions.ts:380), so that repair runs OUTSIDE history and is never itself undone, and it deletes any shape whose role:path key collides with one already seen. Owned by another session this round; not fixed here."
+    }
+  ]
+}

@@ -19,15 +19,17 @@ import {
   type TLUiToolItem,
 } from 'tldraw'
 import { useId, useState, type ReactNode } from 'react'
-import { BLOCK_TOOL_ID, PILL_TOOL_ID } from '../blocks'
+import { BLOCK_TOOL_ID, PILL_TOOL_ID, TYPE_TOOL_ID } from '../blocks'
 import { PillIcon } from '../blocks/PillIcon'
 import { BlockIcon } from '../blocks/BlockIcon'
+import { TypeIcon } from '../blocks/TypeIcon'
 import { BRANCH_TOOL_ID, BranchIcon } from '../branch'
 import { LOOP_TOOL_ID, LoopIcon } from '../loop'
 import { BEHAVIOR_TREE_TOOL_ID, BehaviorTreeIcon } from '../behaviorTree'
 import { CODE_TOOL_ID, CodeIcon } from '../code'
 import { CALLOUT_TOOL_ID, CalloutIcon, isCalloutCard, startAddingCalloutLeader } from '../callout'
 import { ASYNC_REGION_TOOL_ID, AsyncRegionIcon } from '../asyncRegion'
+import { FLOATING_PORT_TOOL_ID, FloatingPortIcon } from '../floatingPort'
 import { ShapeLibraryBrowser } from '../library/ShapeLibraryBrowser'
 import {
   selectDrawFamilyTool,
@@ -125,6 +127,8 @@ const SYSTEM_MENU_ITEMS: ReadonlyArray<{
   { id: CODE_TOOL_ID, label: 'Code', icon: <CodeIcon />, shortcut: 'C' },
   // A pill is a variable: a literal argument, a named result, or both. P.
   { id: PILL_TOOL_ID, label: 'Pill', icon: <PillIcon />, shortcut: 'P' },
+  { id: FLOATING_PORT_TOOL_ID, label: 'Port', icon: <FloatingPortIcon /> },
+  { id: TYPE_TOOL_ID, label: 'Type', icon: <TypeIcon /> },
   // Callout intentionally has no key: its two-click interaction is reached from
   // the shared system-design muscle-memory slot, not from a letter collision.
   { id: CALLOUT_TOOL_ID, label: 'Callout', icon: <CalloutIcon /> },
@@ -321,6 +325,10 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
         ? BLOCK_TOOL_ID
       : activeToolId === PILL_TOOL_ID
           ? PILL_TOOL_ID
+          : activeToolId === FLOATING_PORT_TOOL_ID
+            ? FLOATING_PORT_TOOL_ID
+          : activeToolId === TYPE_TOOL_ID
+            ? TYPE_TOOL_ID
           : activeToolId === CALLOUT_TOOL_ID
             ? CALLOUT_TOOL_ID
           : preferences.lastSystemTool
@@ -332,6 +340,8 @@ function SystemFamilySlot({ activeToolId }: { activeToolId: string }) {
     || activeToolId === BEHAVIOR_TREE_TOOL_ID
     || activeToolId === CODE_TOOL_ID
     || activeToolId === PILL_TOOL_ID
+    || activeToolId === FLOATING_PORT_TOOL_ID
+    || activeToolId === TYPE_TOOL_ID
     || activeToolId === CALLOUT_TOOL_ID
 
   return (
@@ -431,10 +441,6 @@ function LibrarySlot() {
         sideOffset={12}
         collisionPadding={12}
         autoFocusFirstButton={false}
-        // ShapeLibraryBrowser owns Escape itself — first clears its search,
-        // second closes via onCancel below — so Radix's own close-on-Escape
-        // must stand down rather than race it.
-        disableEscapeKeyDown
       >
         <aside
           className="systemsketch-library-panel"

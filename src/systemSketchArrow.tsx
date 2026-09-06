@@ -30,6 +30,7 @@ import {
 	resolveAuthoredRoute,
 	type ConnectionElbowRouteModel,
 } from './blocks/connections/elbowAuthoredRoute'
+import { withAsyncEdge } from './appearance/asyncEdge'
 import { showConnectorInteriorControls } from './connectorControlVisibility'
 import { calloutCardIdForLeader } from './callout'
 import {
@@ -1174,5 +1175,10 @@ export class SystemSketchArrowShapeUtil extends ArrowShapeUtil {
 	}
 }
 
-/** Replace only the default `arrow` util through tldraw's public shape seam. */
-export const SYSTEMSKETCH_ARROW_SHAPE_UTILS = [SystemSketchArrowShapeUtil]
+/**
+ * Replace only the default `arrow` util through tldraw's public shape seam.
+ *
+ * The async wrapper is the same one a rectangle's edge wears: one line-style
+ * vocabulary in the menu means one paint behind it.
+ */
+export const SYSTEMSKETCH_ARROW_SHAPE_UTILS = [withAsyncEdge(SystemSketchArrowShapeUtil)]

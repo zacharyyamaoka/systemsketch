@@ -5,6 +5,10 @@ import {
   type StyleProp,
   type TLArrowShape,
   type TLGeoShape,
+  type TLShape,
+  type TLShapeId,
+  type TLUiActionsContextType,
+  type TLUiOverrideHelpers,
   type TLUiToolsContextType,
 } from 'tldraw'
 import {
@@ -16,6 +20,7 @@ import {
   prepareCreatedShapeForToolbarPreset,
   SYSTEMSKETCH_TOOLBAR_OVERRIDES,
 } from './toolbarIntegration'
+import { BEHAVIOR_TREE_SHAPE_TYPE } from '../behaviorTree/behaviorTreeModel'
 import { CONNECTION_SHAPE_TYPE, ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
 import { DEFAULT_TOOLBAR_PREFERENCES, updateToolbarPreferences } from './toolbarModel'
 
@@ -201,5 +206,115 @@ describe('one preset, two connectors', () => {
     expect(DEFAULT_TOOLBAR_PREFERENCES.lastArrowPreset).toBe('elbow')
     expect(written.get(ArrowShapeKindStyle.id)).toBe('elbow')
     expect(written.get(ConnectionRoutingStyle.id)).toBe('elbow')
+  })
+})
+
+/**
+ * Stock tldraw's export skips a lone selected frame-like shape's own `toSvg`
+ * (`getSvgJsx.tsx`'s `singleFrameShapeId`), which for a Behavior Tree region
+ * throws away the wires, Start marker and header title — the actual diagram,
+ * not decorative chrome. `SYSTEMSKETCH_TOOLBAR_OVERRIDES.actions` widens the
+ * exported ids before that skip can trigger; see the `WHY:` comment above
+ * `widenSingleRegionExportIds`. `tests/behavior_tree_export_smoke.mjs` proves
+ * this end to end through the real context menu; this is the fast unit-level
+ * guard on the id-widening logic itself.
+ */
+describe('Behavior Tree region export widening', () => {
+  function fakeEditor(opts: {
+    selectedIds: TLShapeId[]
+    pageIds?: TLShapeId[]
+    shapesById: Record<string, TLShape>
+    descendantsById?: Record<string, TLShapeId[]>
+  }) {
+    const pageIds = opts.pageIds ?? opts.selectedIds
+    return {
+      getSelectedShapeIds: () => opts.selectedIds,
+      getSelectedShapes: () => opts.selectedIds.map((id) => opts.shapesById[id]).filter(Boolean),
+      getCurrentPageShapeIds: () => new Set(pageIds),
+      getShape: (id: TLShapeId) => opts.shapesById[id],
+      getShapeAndDescendantIds: (ids: TLShapeId[]) =>
+        new Set(ids.flatMap((id) => [id, ...(opts.descendantsById?.[id] ?? [])])),
+      getDocumentSettings: () => ({ name: '' }),
+    } as unknown as Editor
+  }
+
+  function fakeActions(): TLUiActionsContextType {
+    return {
+      'export-as-svg': { id: 'export-as-svg', label: 'Export as SVG', onSelect: vi.fn() },
+      'export-as-png': { id: 'export-as-png', label: 'Export as PNG', onSelect: vi.fn() },
+    } as unknown as TLUiActionsContextType
+  }
+
+  it('widens a lone selected region to itself plus its descendants', () => {
+    const region = { id: 'shape:region', type: BEHAVIOR_TREE_SHAPE_TYPE } as unknown as TLShape
+    const exportAs = vi.fn()
+    const editor = fakeEditor({
+      selectedIds: ['shape:region' as TLShapeId],
+      shapesById: { 'shape:region': region },
+      descendantsById: { 'shape:region': ['shape:child-a' as TLShapeId, 'shape:child-b' as TLShapeId] },
+    })
+    const helpers = { exportAs, msg: () => 'Untitled' } as unknown as TLUiOverrideHelpers
+
+    const overridden = SYSTEMSKETCH_TOOLBAR_OVERRIDES.actions?.(editor, fakeActions(), helpers)
+    overridden?.['export-as-svg'].onSelect('context-menu')
+    expect(exportAs).toHaveBeenCalledWith(
+      ['shape:region', 'shape:child-a', 'shape:child-b'],
+      { format: 'svg', name: undefined },
+    )
+
+    overridden?.['export-as-png'].onSelect('context-menu')
+    expect(exportAs).toHaveBeenCalledWith(
+      ['shape:region', 'shape:child-a', 'shape:child-b'],
+      { format: 'png', name: undefined },
+    )
+  })
+
+  it('leaves ids alone when more than one shape is selected', () => {
+    const region = { id: 'shape:region', type: BEHAVIOR_TREE_SHAPE_TYPE } as unknown as TLShape
+    const other = { id: 'shape:other', type: 'geo' } as unknown as TLShape
+    const exportAs = vi.fn()
+    const editor = fakeEditor({
+      selectedIds: ['shape:region' as TLShapeId, 'shape:other' as TLShapeId],
+      shapesById: { 'shape:region': region, 'shape:other': other },
+      descendantsById: { 'shape:region': ['shape:child-a' as TLShapeId] },
+    })
+    const helpers = { exportAs, msg: () => 'Untitled' } as unknown as TLUiOverrideHelpers
+
+    const overridden = SYSTEMSKETCH_TOOLBAR_OVERRIDES.actions?.(editor, fakeActions(), helpers)
+    overridden?.['export-as-svg'].onSelect('context-menu')
+    expect(exportAs).toHaveBeenCalledWith(['shape:region', 'shape:other'], { format: 'svg', name: undefined })
+  })
+
+  it('leaves ids alone when the lone selected shape is not a Behavior Tree region', () => {
+    const geo = { id: 'shape:geo', type: 'geo' } as unknown as TLShape
+    const exportAs = vi.fn()
+    const editor = fakeEditor({
+      selectedIds: ['shape:geo' as TLShapeId],
+      shapesById: { 'shape:geo': geo },
+    })
+    const helpers = { exportAs, msg: () => 'Untitled' } as unknown as TLUiOverrideHelpers
+
+    const overridden = SYSTEMSKETCH_TOOLBAR_OVERRIDES.actions?.(editor, fakeActions(), helpers)
+    overridden?.['export-as-svg'].onSelect('context-menu')
+    expect(exportAs).toHaveBeenCalledWith(['shape:geo'], { format: 'svg', name: undefined })
+  })
+
+  it('falls back to every page shape when nothing is selected, same as stock', () => {
+    const region = { id: 'shape:region', type: BEHAVIOR_TREE_SHAPE_TYPE } as unknown as TLShape
+    const exportAs = vi.fn()
+    const editor = fakeEditor({
+      selectedIds: [],
+      pageIds: ['shape:region' as TLShapeId],
+      shapesById: { 'shape:region': region },
+    })
+    const helpers = { exportAs, msg: () => 'Untitled' } as unknown as TLUiOverrideHelpers
+
+    const overridden = SYSTEMSKETCH_TOOLBAR_OVERRIDES.actions?.(editor, fakeActions(), helpers)
+    overridden?.['export-as-svg'].onSelect('context-menu')
+    // Nothing selected + a single page shape is exactly the ids.length === 1
+    // case stock tldraw also hits; widening it too is the correct behavior,
+    // not just tolerated — an empty-selection export of a lone region should
+    // include its own paint as well.
+    expect(exportAs).toHaveBeenCalledWith(['shape:region'], { format: 'svg', name: 'Untitled' })
   })
 })

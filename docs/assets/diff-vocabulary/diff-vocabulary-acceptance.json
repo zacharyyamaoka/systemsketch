@@ -4,7 +4,7 @@
     "every one of the 6 paints rendered at 3 changes and at 30",
     "the variants differ only in paint: all six mark exactly the same rows",
     "none of the six shipped variants tints the card face any more — the ink lives on the field",
-    "was-now ink at 30 changes: default 0.0326 of the board, delta-badge 0.0117",
+    "was-now ink at 30 changes: default 0.0346 of the board, delta-badge 0.0133",
     "the blend scrubs before → after in place, on one document and one renderer",
     "no port row clips a NAME at either density (0 type(s) ellipsised, which is by design)",
     "the paint is a preference, not a fact: switching it writes nothing to the board",
@@ -25,7 +25,7 @@
         "cardInk": 0,
         "rowInk": 0.019,
         "wasNowPairs": 1,
-        "wasNowInk": 0.0032
+        "wasNowInk": 0.0036
       },
       "stacked": {
         "cards": 6,
@@ -40,7 +40,7 @@
         "cardInk": 0,
         "rowInk": 0.019,
         "wasNowPairs": 1,
-        "wasNowInk": 0.0017
+        "wasNowInk": 0.0021
       },
       "token-only": {
         "cards": 6,
@@ -55,7 +55,7 @@
         "cardInk": 0,
         "rowInk": 0.019,
         "wasNowPairs": 1,
-        "wasNowInk": 0.0029
+        "wasNowInk": 0.0032
       },
       "delta-badge": {
         "cards": 6,
@@ -70,7 +70,7 @@
         "cardInk": 0,
         "rowInk": 0.019,
         "wasNowPairs": 1,
-        "wasNowInk": 0.0011
+        "wasNowInk": 0.0015
       },
       "ghost-weight": {
         "cards": 6,
@@ -85,7 +85,7 @@
         "cardInk": 0,
         "rowInk": 0.019,
         "wasNowPairs": 1,
-        "wasNowInk": 0.0029
+        "wasNowInk": 0.0033
       },
       "blend": {
         "cards": 6,
@@ -100,7 +100,7 @@
         "cardInk": 0,
         "rowInk": 0.019,
         "wasNowPairs": 1,
-        "wasNowInk": 0.0032
+        "wasNowInk": 0.0036
       }
     },
     "n30": {
@@ -117,7 +117,7 @@
         "cardInk": 0,
         "rowInk": 0.186,
         "wasNowPairs": 10,
-        "wasNowInk": 0.0326
+        "wasNowInk": 0.0346
       },
       "stacked": {
         "cards": 6,
@@ -132,7 +132,7 @@
         "cardInk": 0,
         "rowInk": 0.186,
         "wasNowPairs": 10,
-        "wasNowInk": 0.0185
+        "wasNowInk": 0.0214
       },
       "token-only": {
         "cards": 6,
@@ -147,7 +147,7 @@
         "cardInk": 0,
         "rowInk": 0.186,
         "wasNowPairs": 10,
-        "wasNowInk": 0.0293
+        "wasNowInk": 0.0313
       },
       "delta-badge": {
         "cards": 6,
@@ -162,7 +162,7 @@
         "cardInk": 0,
         "rowInk": 0.186,
         "wasNowPairs": 10,
-        "wasNowInk": 0.0117
+        "wasNowInk": 0.0133
       },
       "ghost-weight": {
         "cards": 6,
@@ -177,7 +177,7 @@
         "cardInk": 0,
         "rowInk": 0.186,
         "wasNowPairs": 10,
-        "wasNowInk": 0.0297
+        "wasNowInk": 0.0317
       },
       "blend": {
         "cards": 6,
@@ -192,7 +192,7 @@
         "cardInk": 0,
         "rowInk": 0.186,
         "wasNowPairs": 10,
-        "wasNowInk": 0.0326
+        "wasNowInk": 0.0346
       }
     }
   },

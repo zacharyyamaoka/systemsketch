@@ -7,17 +7,38 @@
  * that reading direction instead, because its lanes fan out side by side
  * rather than running one after another: down the page in a top-to-bottom
  * tree, across the page in a left-to-right one.
+ *
+ * `sequence-reactive`/`fallback-reactive` draw the same base glyph as their
+ * latched sibling plus a small corner loop — BT.CPP's Reactive* controls
+ * re-check every child from the first on every tick instead of latching on
+ * the running child, and that runtime fork needs to read at a glance without
+ * opening the inspector (see `btGlyphFor` in `behaviorTreeModel.ts`).
  */
 import type { BtGlyph, BtOrientation } from './behaviorTreeModel'
 
+/** A small "re-checks every tick" loop, badged in the corner clear of every base glyph's strokes. */
+const REACTIVE_BADGE = (
+	<path
+		key="reactive-badge"
+		d="M22 5.5a3 3 0 1 1-1-2.3M22 2.7v2.8h-2.8"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth={1.5}
+		strokeLinecap="round"
+		strokeLinejoin="round"
+	/>
+)
+
 export function BtGlyphSvg({ glyph, orientation, size = 24 }: { glyph: BtGlyph; orientation: BtOrientation; size?: number }) {
+	const reactive = glyph === 'sequence-reactive' || glyph === 'fallback-reactive'
+	const baseGlyph = glyph === 'sequence-reactive' ? 'sequence' : glyph === 'fallback-reactive' ? 'fallback' : glyph
 	const childrenRun = orientation === 'down' ? 'right' : 'down'
 	const stroke = { fill: 'none', stroke: 'currentColor', strokeWidth: 2.2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
 	const arrow = (dx: number, dy: number, offset = 0) => (dx !== 0
 		? <path key={offset} d={`M4 ${12 + offset} H20 M15 ${7 + offset} L20 ${12 + offset} L15 ${17 + offset}`} {...stroke} />
 		: <path key={offset} d={`M${12 + offset} 4 V20 M${7 + offset} 15 L${12 + offset} 20 L${17 + offset} 15`} {...stroke} />)
 	let body: React.ReactNode
-	switch (glyph) {
+	switch (baseGlyph) {
 		case 'sequence':
 			body = childrenRun === 'right' ? arrow(1, 0) : arrow(0, 1)
 			break
@@ -69,12 +90,19 @@ export function BtGlyphSvg({ glyph, orientation, size = 24 }: { glyph: BtGlyph; 
 		case 'precondition':
 			body = <path d="M6 7h4M8 7v10M13 7h5M13 12h4M13 17h5" {...stroke} />
 			break
+		case 'breakpoint':
+			// The IDE breakpoint idiom: a filled dot inside a ring — the only
+			// filled glyph in the set, so a debugging marker cannot be misread
+			// as one of the stroked logic decorators.
+			body = <><circle cx="12" cy="12" r="8" {...stroke} /><circle cx="12" cy="12" r="3.6" fill="currentColor" stroke="none" /></>
+			break
 		default:
 			body = <rect x="5" y="5" width="14" height="14" rx="2.5" {...stroke} />
 	}
 	return (
 		<svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
 			{body}
+			{reactive ? REACTIVE_BADGE : null}
 		</svg>
 	)
 }

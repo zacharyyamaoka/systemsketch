@@ -52,7 +52,7 @@ import {
   selectedDetachableIds,
   selectedConnectionIds,
   selectedDetachedGroupIds,
-} from '../detach'
+} from '../../detach'
 import { getBlockPortMenuTarget, type BlockPortRef } from '../ports'
 import {
   getBlockSelectionStyles,
@@ -93,6 +93,18 @@ import {
 import { canWrapSelection, WRAP_TARGET_DESCRIPTORS } from '../../frames/wrapSelection'
 import { useRunWrap } from '../../frames/WrapSelectionControl'
 import { isCalloutCard, startAddingCalloutLeader } from '../../callout'
+import {
+  removeSelectedFromAutoResizeContainer,
+  selectedAutoResizeMembership,
+} from '../blockAutoResize'
+// Imported by module path, not the `../../behaviorTree` barrel: this file is
+// reachable from the blocks barrel that behaviorTree itself imports, and the
+// narrow paths keep that cycle out of module evaluation.
+import {
+  selectedTreeNode,
+  setBehaviorTreeNodeDisabled,
+} from '../../behaviorTree/behaviorTreeCommands'
+import { isBtNodeDisabled } from '../../behaviorTree/btcppXml'
 
 function onlySelectedBlock(editor: ReturnType<typeof useEditor>): BlockShape | null {
   const selected = editor.getSelectedShapes()
@@ -149,6 +161,11 @@ function BlockContextMenuItems() {
     () => selectedDetachedGroupIds(editor).length,
     [editor],
   )
+	const removableMembership = useValue(
+		'context-menu auto resize membership',
+		() => selectedAutoResizeMembership(editor),
+		[editor],
+	)
   // Structural commands (Add, depth navigation) still need one unambiguous Block:
   // they create identity and open an inline editor on it.
   const selectedBlock = useValue(
@@ -164,6 +181,18 @@ function BlockContextMenuItems() {
   const activeDepthScopeId = useValue(
     'context-menu active depth scope',
     () => getActiveDepthScopeId(editor),
+    [editor],
+  )
+  // A projected Behavior Tree occurrence: the comment-out toggle lives here
+  // beside the Block items, in MoveIt Pro's selection-toolbar idiom.
+  const behaviorTreeNode = useValue(
+    'context-menu selected Behavior Tree occurrence',
+    () => {
+      const selection = selectedTreeNode(editor)
+      return selection
+        ? { regionId: selection.region.id, path: selection.node.path, disabled: isBtNodeDisabled(selection.node) }
+        : null
+    },
     [editor],
   )
   const canWrap = useValue(
@@ -579,6 +608,21 @@ function BlockContextMenuItems() {
         </TldrawUiMenuGroup>
       ) : null}
 
+      {behaviorTreeNode ? (
+        <TldrawUiMenuGroup id="systemsketch-behavior-tree-node">
+          <TldrawUiMenuItem
+            id="bt-comment-out"
+            label={behaviorTreeNode.disabled ? 'Comment in' : 'Comment out'}
+            onSelect={() => void setBehaviorTreeNodeDisabled(
+              editor,
+              behaviorTreeNode.regionId,
+              behaviorTreeNode.path,
+              !behaviorTreeNode.disabled,
+            )}
+          />
+        </TldrawUiMenuGroup>
+      ) : null}
+
       {selectedCallout ? (
         <TldrawUiMenuGroup id="systemsketch-callout">
           <TldrawUiMenuItem
@@ -588,6 +632,16 @@ function BlockContextMenuItems() {
           />
         </TldrawUiMenuGroup>
       ) : null}
+
+		{removableMembership ? (
+			<TldrawUiMenuGroup id="systemsketch-auto-resize-membership">
+				<TldrawUiMenuItem
+					id="remove-from-container"
+					label="Remove from container"
+					onSelect={() => void removeSelectedFromAutoResizeContainer(editor)}
+				/>
+			</TldrawUiMenuGroup>
+		) : null}
 
       {detachableConnectionCount > 0 ? (
         <TldrawUiMenuGroup id="systemsketch-connection-detach">

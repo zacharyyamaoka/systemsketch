@@ -119,11 +119,25 @@ authored literal only; never seed execution, lint, or inferred-program records.
 
 For an Expanded Block, set `view`, `w`, and `h`, then make child shapes use the Block's shorthand id as `parentId`. Child `x` must clear the parent's left-edge port-label column (~160px), not just sit inside the frame: Expanded ports are vertically centred in the body, so extra top-inset alone leaves `poses` / `list[Pose]` buried under the child. Keep children below the 48px header as well.
 
+For a Floating Port direct-drag review, distinguish the two visible faces in the cue itself: drag the **label** to reposition the whole Port on its first press, and drag the **circular dot** to wire. Seed a real connection binding when the review should show that a moved Port takes its cable with it. Do not add a second selection click to the instruction—the label must be a normal shape hit target from rest.
+
+For a Block-chrome review, use the ordinary Block record with `showFooter` and
+`showHeaderDivider` booleans. Both default to `true`, so seed a visible and a
+stripped Port or Expanded face only when the review needs a comparison. The
+footer setting removes the action strip and returns that band to the body;
+the header-divider setting removes only the visual rule, not the heading or
+its edit target. Put the literal inspector clicks in external callouts—Chrome
+is product UI, not a fixture-only shape.
+
+For an auto-fitting Block drag-stability review, seed the child through that real `parentId` relationship and aim the one drag cue at the child's visible face. The observable expectation is that a rapid, edge-crossing drag keeps the child in the Block; tell reviewers to use **Remove from container** from its context menu for the deliberate exit. Do not imply that crossing the fitted boundary should remove the child—the moving boundary makes that gesture inherently ambiguous.
+
 **`parentId` is the only thing that makes a child a child.** `Editor.createShapes` does not adopt by geometry, so a shape merely placed inside a Frame, an Expanded Block, a Branch or a Loop is a sibling that overlaps: drag the container and it is left behind, and only a manual nudge makes tldraw's frame drop claim it. Once a shape has a `parentId`, its `x`/`y` are **parent-local** — subtract the container's position when converting. The helper fails the build if a shape's bounds sit inside a container that is not one of its ancestors.
 
 For a Loop region, the Blocks of the loop body take the Loop's shorthand id as `parentId`; the producers and consumers outside it stay on the page. For a semantic cable, create a `connection` shape plus its two `connection` bindings with the exact current props from the feature source or an existing acceptance test. Do not imitate a semantic cable with a stock arrow.
 
 A Block port has one physical edge and two binding faces. The `inner` face reverses the edge normal: for example, a top-edge effect port on an Expanded Block must be approached from below by a nested cable, while the same port's `outer` cable leaves upward. Preserve the real `face: "inner"` binding and let the app route it; never hand-route the nested cable above the parent header.
+
+For a free `floating-port`, keep `w: 1` and `h: 1`; its meaningful geometry is the circular endpoint at its `x`/`y`, with the label extending in the selected `direction`. Set `name`, `type`, `value`, `direction` (`input` or `output`), `textLayout` (`inline` or `offset`), and `fill` (`auto`, `filled`, or `empty`) explicitly when the review needs to demonstrate them. It has exactly one semantic endpoint, `port`: use it in ordinary `connection` bindings with `side` implied by the Port's `direction`. `fill: "auto"` is derived from those bindings; a review of the override should seed a real cable first, then ask the reviewer to toggle Empty and back to Auto. The Port is deliberately free-positioned — drag its label to prove it is not a child of the nearby Block.
 
 For an edge-tunnel review, set `tunnel: true` and give `tunnelLayer` a readable name such as `Diagnostics` on the real `connection` shape. The live app derives its reusable Layers chip from those persisted connection props; do not seed a fake layer card or a second metadata record. Also seed at least one other long semantic connection outside that layer. Leave the named cable idle so its endpoint stubs and outlined mouths are visible before the first gesture. Hover must restore its complete run while keeping both mouths visible; focusing the layer must remove the mouths from its member edge and tunnel every other long connection.
 
@@ -156,7 +170,11 @@ For a Branch, seed only the semantic `branch` and its ordinary direct children, 
 A `behaviorTree` shape is authored by its XML alone. Give it `props.xml` (a
 BT.CPP v4 document), the presentation choices (`projection`, `orientation`,
 `nodeFace`, `controlFace`, `edgeStyle`, `dataLens`, `blackboardLayout`), and
-any `w`/`h`; the region resizes itself to its content. Do **not** author its
+any `w`/`h`; the region resizes itself to its content. A commented-out node is
+also XML: stamp `_disabled="true"` on the occurrence and the projection opens
+with that whole subtree dimmed — do not try to author child opacity. The
+`Breakpoint` decorator and the `AsyncSequence`/`AsyncFallback` controls are
+ordinary built-ins in the XML vocabulary. Do **not** author its
 child Blocks, control cards, pills or cables: the app projects them from the
 XML the moment the region exists and stamps each one with `meta.btRegion`,
 and the helper leaves those derived records out of the authored inventory.

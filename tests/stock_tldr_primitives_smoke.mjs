@@ -166,9 +166,14 @@ async function main() {
       liveBlocksInside: 0,
 		totalLiveBlocks: 7,
       headerRules: 2,
-		// Two 18px rings and the wired iterable port's 12px core.
-      portDots: 3,
-		wiredPortCores: 1,
+		// Two 18px rings and a 12px core for each wired port. Both the outside
+		// iterable cable and the internal item cable are live when the sweep
+		// surveys wiring, so both ports keep the filled-core evidence the live
+		// Loop painted — the item core used to be lost because the old
+		// dispatcher read container wiring only after the child Block had
+		// already lowered that cable.
+      portDots: 4,
+		wiredPortCores: 2,
       arrowBindings: 2,
     })
     const nestedEdgeBefore = JSON.parse(await evaluate(page, `JSON.stringify(

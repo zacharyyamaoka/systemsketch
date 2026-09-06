@@ -266,6 +266,74 @@ describe('Process layout', () => {
 		preview('process-sample-right', scene)
 		preview('process-sample-down', layoutProcess(sample, { orientation: 'down', nodeFace: 'simple', controlFace: 'expanded' }))
 	})
+
+	/**
+	 * A childless control (or a childless decorator, which falls back to the
+	 * same code) paints its name as a chip past the "+" insert, not inside the
+	 * insert's own small box — `emptyControlItem`'s declared `flow` has to
+	 * reach the chip's real far edge, or a sibling's between-insert midpoint
+	 * lands on the chip's own text (the RetryUntilSuccessful/"blue icon cut
+	 * off" bug), and the chip's own box has to grow with the label, or a long
+	 * name like `RetryUntilSuccessful` overflows it.
+	 */
+	describe('empty-control label chip', () => {
+		// Deliberately spans short → long, and includes the exact name Zach
+		// reported (RetryUntilSuccessful, rendered when that decorator has no
+		// child yet).
+		const LABELS = ['Go', 'RetryUntilSuccessful', 'A Very Much Longer Synthetic Control Name For Testing Overflow']
+
+		function emptyControlTree(labels: string[]) {
+			const xml = `<root BTCPP_format="4" main_tree_to_execute="Repro">
+  <BehaviorTree ID="Repro">
+    <Sequence name="Repro">
+      <GraspValid pose="{object_pose}" quality="{quality}"/>
+      ${labels.map((label) => `<Sequence name="${label}"/>`).join('\n      ')}
+      <AlwaysFailure/>
+    </Sequence>
+  </BehaviorTree>
+  <TreeNodesModel>
+    <Condition ID="GraspValid">
+      <input_port name="pose" type="Pose"/>
+      <output_port name="quality" type="double"/>
+    </Condition>
+  </TreeNodesModel>
+</root>`
+			return selectTree(parseBehaviorTreeXml(xml), 'Repro')!
+		}
+
+		/** Matches `.BehaviorTree-insert`'s real 28×28 CSS box, centered on `at`. */
+		function insertRect(insert: { at: BtPoint }): BtRect {
+			return { x: insert.at.x - 14, y: insert.at.y - 14, w: 28, h: 28 }
+		}
+
+		for (const orientation of ['down', 'right'] as const) {
+			it(`sizes the chip to its label and keeps it clear of every insert (${orientation})`, () => {
+				const tree = emptyControlTree(LABELS)
+				const scene = layoutProcess(tree, { orientation, nodeFace: 'simple', controlFace: 'expanded' })
+				expectNoNodeOverlap(scene)
+
+				const labelChips = scene.chips.filter((chip) => chip.kind === 'label')
+				expect(labelChips).toHaveLength(LABELS.length)
+
+				// A longer label gets a wider chip — no longer a fixed constant
+				// that ignores the text and lets RetryUntilSuccessful overflow it.
+				const widths = LABELS.map((label) => labelChips.find((chip) => chip.text === label)!.rect.w)
+				for (let i = 1; i < widths.length; i += 1) {
+					expect(widths[i]).toBeGreaterThan(widths[i - 1])
+				}
+
+				// No label chip overlaps any insert point — this is the "+"
+				// icon vs. chip-text overlap: a between-insert's midpoint used
+				// to be computed from a declared extent that ignored the chip.
+				for (const chip of labelChips) {
+					for (const insert of scene.inserts) {
+						expect(overlaps(chip.rect, insertRect(insert)), `chip "${chip.text}" overlaps insert ${insert.id}`).toBe(false)
+					}
+				}
+				preview(`process-empty-control-${orientation}`, scene)
+			})
+		}
+	})
 })
 
 describe('Blackboard lens', () => {

@@ -16,13 +16,13 @@
   },
   {
     "id": "EV-2",
-    "label": "a data cable paints one solid path and no pill",
+    "label": "a data cable paints one path, now with the marching-ants dash, and no pill",
     "observed": {
       "segments": [
         null
       ],
       "dash": [
-        null
+        "5"
       ],
       "pill": null
     },
@@ -31,7 +31,7 @@
         null
       ],
       "dash": [
-        null
+        "5"
       ],
       "pill": null
     },

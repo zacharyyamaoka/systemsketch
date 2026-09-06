@@ -20,6 +20,7 @@ import {
 	insertBehaviorTreeChild,
 	insertBehaviorTreeSiblingOf,
 	nudgeBehaviorTreeOccurrence,
+	setBehaviorTreeNodeDisabled,
 	setBehaviorTreeNodeName,
 	setBehaviorTreePortValue,
 	setBehaviorTreeView,
@@ -35,8 +36,9 @@ import {
 	type BehaviorTreeShapeProps,
 	type BtBlackboardLayout,
 } from '../behaviorTreeModel'
+import { planBehaviorInsert } from '../behaviorLibraryModel'
 import { projectBehaviorTree } from '../behaviorTreeProjection'
-import { type BtDocument, type BtInsertTemplate, type BtNode } from '../btcppXml'
+import { isBtNodeDisabled, type BtDocument, type BtInsertTemplate, type BtNode, type BtTree } from '../btcppXml'
 import '../../blocks/ui/block-inspector.css'
 import './behavior-tree-inspector.css'
 
@@ -214,6 +216,11 @@ function NodeSection({ editor, selection, node }: { editor: Editor; selection: B
 				<button type="button" className="bt-inspector__action" data-testid="bt-action-later" disabled={isRoot} onClick={() => report(nudgeBehaviorTreeOccurrence(editor, regionId, node.path, 1))}>
 					Move later
 				</button>
+				{/* MoveIt Pro's "Comment out": disable in place, distinct from Delete.
+				    Authoring-time only — see setBehaviorTreeNodeDisabled. */}
+				<button type="button" className="bt-inspector__action" data-testid="bt-action-disable" aria-pressed={isBtNodeDisabled(node)} onClick={() => report(setBehaviorTreeNodeDisabled(editor, regionId, node.path, !isBtNodeDisabled(node)))}>
+					{isBtNodeDisabled(node) ? 'Comment in' : 'Comment out'}
+				</button>
 				<button type="button" className="bt-inspector__action bt-inspector__action--danger" data-testid="bt-action-delete" onClick={() => report(deleteBehaviorTreeOccurrence(editor, regionId, node.path))}>
 					Delete
 				</button>
@@ -223,8 +230,18 @@ function NodeSection({ editor, selection, node }: { editor: Editor; selection: B
 	)
 }
 
-function LibrarySection({ editor, selection, node, document }: { editor: Editor; selection: BtSelection; node: BtNode | null; document: BtDocument }) {
+function LibrarySection({ editor, selection, node, document, tree }: { editor: Editor; selection: BtSelection; node: BtNode | null; document: BtDocument; tree: BtTree | null }) {
 	const [query, setQuery] = useState('')
+	// WHY one plan drives both the caption and the click: this section used to
+	// compute them separately (caption said "Adds the root node." while the
+	// click always passed `parentPath: null`, which `insertBehaviorTreeNode`
+	// refuses outright once a root exists) — the exact drift
+	// `planBehaviorInsert` exists to make impossible. Ported from the
+	// Behaviors library panel (`BehaviorTreeLibraryPanel.tsx`), which found
+	// the bug first; both surfaces now share this one function so they cannot
+	// disagree again. See `planBehaviorInsert`'s own doc comment for the bug
+	// this replaced.
+	const plan = useMemo(() => planBehaviorInsert(tree, node), [tree, node])
 	const rows = useMemo(() => {
 		const needle = query.trim().toLowerCase()
 		const entries: Array<{ id: string; label: string; detail: string; template: BtInsertTemplate }> = []
@@ -245,10 +262,9 @@ function LibrarySection({ editor, selection, node, document }: { editor: Editor;
 	const [notice, setNotice] = useState<string | null>(null)
 	const add = (template: BtInsertTemplate) => {
 		const regionId = selection.region.id
-		let result: BtCommandResult
-		if (!node) result = insertBehaviorTreeChild(editor, regionId, null, 0, template)
-		else if (isBtControlNode(node) && !(node.kind === 'decorator' && node.children.length >= 1)) result = insertBehaviorTreeChild(editor, regionId, node.path, node.children.length, template)
-		else result = insertBehaviorTreeSiblingOf(editor, regionId, node.path, true, template)
+		const result: BtCommandResult = plan.kind === 'sibling'
+			? insertBehaviorTreeSiblingOf(editor, regionId, plan.path, plan.after, template)
+			: insertBehaviorTreeChild(editor, regionId, plan.parentPath, plan.index, template)
 		setNotice(result.ok ? null : result.reason)
 	}
 	return (
@@ -265,9 +281,7 @@ function LibrarySection({ editor, selection, node, document }: { editor: Editor;
 					</li>
 				))}
 			</ul>
-			<p className="block-inspector__hint">
-				{node ? (isBtControlNode(node) ? `Adds under ${node.label}.` : `Adds after ${node.label}.`) : 'Adds the root node.'}
-			</p>
+			<p className="block-inspector__hint">{plan.describe}</p>
 			{notice ? <p className="bt-inspector__notice" role="status">{notice}</p> : null}
 		</section>
 	)
@@ -324,7 +338,7 @@ export function BehaviorTreeInspectorContent({ editor, selection }: { editor: Ed
 		<div className="block-inspector__body" role="tabpanel" aria-label="Behavior Tree details">
 			{node ? <NodeSection editor={editor} selection={selection} node={node} /> : null}
 			<ViewSection props={selection.region.props} set={set} onTidy={() => void tidyBehaviorTree(editor, selection.region.id)} />
-			<LibrarySection editor={editor} selection={selection} node={node} document={projection.document} />
+			<LibrarySection editor={editor} selection={selection} node={node} document={projection.document} tree={projection.tree} />
 			<SourceSection editor={editor} selection={selection} document={projection.document} />
 		</div>
 	)

@@ -58,6 +58,13 @@ describe('behaviorLibraryCatalog', () => {
 		expect(behaviorLibraryCatalog(sample).some((item) => item.id === 'model:SubTree')).toBe(false)
 	})
 
+	it('offers the survey additions: Async controls and the Breakpoint decorator', () => {
+		const items = behaviorLibraryCatalog(null)
+		expect(items.find((item) => item.id === 'model:AsyncSequence')?.section).toBe('Controls')
+		expect(items.find((item) => item.id === 'model:AsyncFallback')?.section).toBe('Controls')
+		expect(items.find((item) => item.id === 'model:Breakpoint')?.section).toBe('Decorators')
+	})
+
 	it('derives Skills and Conditions from the document rather than a curated list', () => {
 		const skills = ids('Skills')
 		const conditions = ids('Conditions')

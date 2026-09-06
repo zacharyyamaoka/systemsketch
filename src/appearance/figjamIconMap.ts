@@ -7,7 +7,7 @@
  * to the drawn glyph, which is the honest outcome: inventing a FigJam-looking
  * icon for a state FigJam does not have would be worse than not matching.
  */
-import type { AppearanceControlId } from './appearanceModel'
+import type { AppearanceControlId } from '../contextualMenus/contextualControlRegistry'
 
 type ValueToIcon = Readonly<Record<string, string>>
 
@@ -21,10 +21,11 @@ const ARROWHEADS: ValueToIcon = {
   // tldraw's `square`, `pipe` and `bar` have no FigJam counterpart.
 }
 
-const DASH: ValueToIcon = {
+const LINE_STYLE: ValueToIcon = {
   solid: 'line-style/Solid',
   dashed: 'line-style/Dashed',
-  // tldraw's `draw` and `dotted` are its own; `none` is FigJam's No-line icon.
+  // tldraw's `dotted` and SystemSketch's `async` are ours to draw; `none` is
+  // FigJam's No-line icon.
   none: 'line-style/None',
 }
 
@@ -36,8 +37,10 @@ const DASH: ValueToIcon = {
  * three are read off the pill itself.
  */
 export const FIGJAM_TRIGGER_ICON: Partial<Record<AppearanceControlId, string>> = {
-  dash: 'trigger/Line style',
   lineStyle: 'trigger/Line style',
+  // A shape's Line style is the edge palette with those same chips above it,
+  // and it keeps FigJam's three-bar trigger: it is still the same control.
+  strokeColor: 'trigger/Line style',
   font: 'trigger/Typeface',
   geo: 'trigger/Shape',
 }
@@ -65,17 +68,19 @@ export const FIGJAM_ICON_FOR: Partial<Record<AppearanceControlId, ValueToIcon>> 
   connectionRouting: LINE_SHAPE,
   arrowKind: LINE_SHAPE,
   spline: LINE_SHAPE,
-  dash: DASH,
-  // A connector's Line style is the dash control with the weight beside it.
-  lineStyle: DASH,
+  // The one line-style control, whether it is drawn as chips on a shape or as
+  // a bare icon row beside a connector's weight.
+  lineStyle: LINE_STYLE,
   fill: {
     none: 'fill/No fill',
     semi: 'fill/Transparent',
     solid: 'fill/Fill',
   },
   size: {
-    // FigJam offers two weights; tldraw four. The ends match, the middle does not.
-    s: 'line-style/Thin',
+    // FigJam's two weights, on the two rungs SystemSketch offers: `m`, which
+    // every shape is created at, and `xl`. Only a connector's weight row ever
+    // reaches these — Font size is a list and draws no icon.
+    m: 'line-style/Thin',
     xl: 'line-style/Thick',
   },
   font: {

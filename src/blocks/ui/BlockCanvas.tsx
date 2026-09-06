@@ -18,17 +18,24 @@ import {
   TldrawUiDropdownMenuItem,
   TldrawUiDropdownMenuRoot,
   TldrawUiDropdownMenuTrigger,
+  isShapeId,
   useEditor,
   useValue,
 } from 'tldraw'
 
 import {
   HEADER_ROW,
+  blockHeaderAlign,
+	blockFoldControlSide,
   blockIcon,
+  blockIsFolded,
+	blockInsetBackground,
+  blockMemberLayout,
   blockDiffState,
   blockPortStateCounts,
   hasAnyBlockState,
   expandedSectionWeights,
+  canBlockFold,
   isAccessorName,
   isBlockShape,
   isUnknownText,
@@ -46,6 +53,7 @@ import { getSemanticTagsVisible } from '../semanticTagVisibility'
 import { isBundleBlock } from '../stockBlocks'
 import { effectTethers } from '../effectTether'
 import { BlockInlineEditor } from '../BlockInlineEditor'
+import { blockTitleAppearance, type BlockTitleAppearance } from '../titleAppearance'
 import { valueBlockExactText, valueBlockInlet, valueBlockLabel, valueBlockOutlet } from '../valueBlock'
 import { getBlockPortConnections } from '../connections/blockPorts'
 import {
@@ -61,7 +69,7 @@ import {
 	type BlockRect,
   type LaidOutBlockPort,
 } from '../layoutBlock'
-import { appendBundleMember, insertBlockPortForInlineEditing } from '../commands/blockCommands'
+import { appendBundleMember, insertBlockPortForInlineEditing, setBlockFolded } from '../commands/blockCommands'
 import {
   blockHeaderPortAddAffordance,
   blockPortAddAffordance,
@@ -74,7 +82,9 @@ import { getActiveDepthScopeId, toggleDepthScope } from '../../depth/depthNaviga
 import { branchFadeOpacity } from '../../branch/branchScope'
 import { countProducers, PortDot, usePortHintEligibility } from './PortDot'
 import { definitionBadge } from '../definitions/definitionLinking'
+import { blockAutoResizePresentation } from '../blockAutoResize'
 import { isClockTriggerBlock, stockBlockVisibleDescription } from '../stockBlocks'
+import { TypeAttributeRegion } from './TypeAttributeRegion'
 import {
   describeDiffCounts,
   diffGutterGlyph,
@@ -386,10 +396,12 @@ function ValueFace({
   shape,
   connectedIds,
   editing,
+  titleAppearance,
 }: {
   shape: BlockShape
   connectedIds: ReadonlySet<string>
   editing: boolean
+  titleAppearance: BlockTitleAppearance
 }) {
   const layout = layoutBlock(shape.props)
   const label = valueBlockLabel(shape.props)
@@ -447,6 +459,7 @@ function ValueFace({
         className="BlockNode-valueText"
         data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
         data-testid="block-value-text"
+        style={titleAppearance}
       >
         {label.display}
       </span>
@@ -673,7 +686,13 @@ function BlockPoseGhost({ shape }: { shape: BlockShape }) {
   )
 }
 
-function SimpleFace({ shape }: { shape: BlockShape }) {
+function SimpleFace({
+  shape,
+  titleAppearance,
+}: {
+  shape: BlockShape
+  titleAppearance: BlockTitleAppearance
+}) {
   const layout = layoutBlock(shape.props)
   const icon = blockIcon(shape.props)
   return (
@@ -681,7 +700,7 @@ function SimpleFace({ shape }: { shape: BlockShape }) {
       {layout.title ? (
         <div
           className="BlockNode-simpleTitle"
-          style={boxStyle(layout.title)}
+          style={{ ...boxStyle(layout.title), justifyContent: titleAppearance.justifyContent }}
           data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
         >
           {icon !== '' ? (
@@ -696,6 +715,7 @@ function SimpleFace({ shape }: { shape: BlockShape }) {
             className="BlockNode-simpleTitleText"
             data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
             title={shape.props.title}
+            style={titleAppearance}
           >
             <FieldValue diffs={shape.props.fieldDiffs} path="title" value={shape.props.title} />
           </span>
@@ -733,7 +753,7 @@ function SimpleFace({ shape }: { shape: BlockShape }) {
  * who never opens an inspector should still be able to tell a card with two
  * missing ports from a card that merely moved.
  */
-function BlockDiffBadge({ shape }: { shape: BlockShape }) {
+function BlockDiffBadge({ shape, layoutCopy = false }: { shape: BlockShape; layoutCopy?: boolean }) {
   const counts = blockPortStateCounts(shape.props)
   const state = blockDiffState(shape.props)
   const parts = [
@@ -748,8 +768,8 @@ function BlockDiffBadge({ shape }: { shape: BlockShape }) {
     <span
       className="BlockNode-diffBadge"
       data-diff-state={state === 'normal' ? 'changed' : state}
-      data-testid={`block-diff-badge-${shape.id.replace('shape:', '')}`}
-      title={describeDiffCounts(counts) || state}
+      data-testid={layoutCopy ? undefined : `block-diff-badge-${shape.id.replace('shape:', '')}`}
+      title={layoutCopy ? undefined : describeDiffCounts(counts) || state}
     >
       {label}
     </span>
@@ -919,46 +939,108 @@ function LinkedPortRuns({ ports }: { ports: readonly LaidOutBlockPort[] }) {
 	)
 }
 
-function DefinitionBadge({ shape }: { shape: BlockShape }) {
+function DefinitionBadge({ shape, layoutCopy = false }: { shape: BlockShape; layoutCopy?: boolean }) {
   const badge = definitionBadge(shape.props)
   return badge ? (
-    <span className="BlockNode-definitionBadge" data-testid="block-definition-badge">
+    <span
+      className="BlockNode-definitionBadge"
+      data-testid={layoutCopy ? undefined : 'block-definition-badge'}
+    >
       {badge}
     </span>
   ) : null
 }
 
-function BlockHeading({ shape, height }: { shape: BlockShape; height: number }) {
+function BlockFoldControl({ shape }: { shape: BlockShape }) {
+  const editor = useEditor()
+  if (!canBlockFold(shape.props)) return null
+  const folded = blockIsFolded(shape.props)
+  const side = blockFoldControlSide(shape.props)
+  const title = shape.props.title.trim() || 'Block'
+  return (
+    <button
+      type="button"
+      className="BlockNode-foldButton"
+		data-fold-placement={side}
+      data-testid={`block-fold-${shape.id.replace('shape:', '')}`}
+      aria-label={`${folded ? 'Expand' : 'Collapse'} ${title}`}
+      title={`${folded ? 'Expand' : 'Collapse'} ${title}`}
+      onPointerDownCapture={(event) => {
+        // This is chrome inside a tldraw shape. Keep its press out of stock
+        // selection / drag handling so a chevron click is one unsurprising
+        // fold operation rather than the start of a canvas gesture.
+        event.preventDefault()
+        event.stopPropagation()
+      }}
+      onClick={() => void setBlockFolded(editor, shape.id, !folded)}
+    >
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <path d={folded ? 'm4 6 4 4 4-4' : 'm6 4 4 4-4 4'} />
+      </svg>
+    </button>
+  )
+}
+
+function BlockHeading({
+  shape,
+  height,
+  titleAppearance,
+}: {
+  shape: BlockShape
+  height: number
+  titleAppearance: BlockTitleAppearance
+}) {
   const icon = blockIcon(shape.props)
+  const foldable = canBlockFold(shape.props)
+	const foldSide = blockFoldControlSide(shape.props)
+  const centered = blockHeaderAlign(shape.props) === 'center'
+  const inlineType = foldable && foldSide === 'right'
+  const typeLabel = (mirror: boolean) => shape.props.blockType !== '' ? (
+    <span
+      className="BlockNode-headingType"
+      data-pb-inline-field={mirror ? undefined : blockInlineFieldAttribute({ kind: 'blockType' })}
+      title={mirror ? undefined : shape.props.blockType}
+    >
+      <FieldValue diffs={shape.props.fieldDiffs} path="blockType" value={shape.props.blockType} />
+    </span>
+  ) : null
+  const metadata = (mirror: boolean) => (
+    <span className={mirror ? 'BlockNode-headingMirror' : 'BlockNode-headingMeta'} aria-hidden={mirror || undefined}>
+      <BlockDiffBadge shape={shape} layoutCopy={mirror} />
+      {!inlineType ? typeLabel(mirror) : null}
+    </span>
+  )
   return (
     <div className="NodeShape-heading" style={{ height }}>
-      <div className="BlockNode-heading">
-        {icon !== '' ? (
+      <BlockFoldControl shape={shape} />
+      <div
+		className="BlockNode-heading"
+		data-header-align={centered ? 'center' : 'left'}
+		data-fold-control={foldable || undefined}
+		data-fold-placement={foldable ? foldSide : undefined}
+	  >
+        {centered ? metadata(true) : null}
+        <span className="BlockNode-headingIdentity" data-testid="block-heading-identity">
+          {icon !== '' ? (
+            <span
+              className="BlockNode-headingIcon"
+              data-pb-inline-field={blockInlineFieldAttribute({ kind: 'icon' })}
+            >
+              <BlockIconGlyph name={icon} size={HEADER_ICON_PX} />
+            </span>
+          ) : null}
           <span
-            className="BlockNode-headingIcon"
-            data-pb-inline-field={blockInlineFieldAttribute({ kind: 'icon' })}
+            className="BlockNode-headingTitle"
+            data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
+            title={shape.props.title}
+            style={titleAppearance}
           >
-            <BlockIconGlyph name={icon} size={HEADER_ICON_PX} />
+            <FieldValue diffs={shape.props.fieldDiffs} path="title" value={shape.props.title} />
           </span>
-        ) : null}
-        <span
-          className="BlockNode-headingTitle"
-          data-pb-inline-field={blockInlineFieldAttribute({ kind: 'title' })}
-          title={shape.props.title}
-        >
-          <FieldValue diffs={shape.props.fieldDiffs} path="title" value={shape.props.title} />
+          {inlineType ? typeLabel(false) : null}
+          <DefinitionBadge shape={shape} />
         </span>
-        <DefinitionBadge shape={shape} />
-        <BlockDiffBadge shape={shape} />
-        {shape.props.blockType !== '' ? (
-          <span
-            className="BlockNode-headingType"
-            data-pb-inline-field={blockInlineFieldAttribute({ kind: 'blockType' })}
-            title={shape.props.blockType}
-          >
-            <FieldValue diffs={shape.props.fieldDiffs} path="blockType" value={shape.props.blockType} />
-          </span>
-        ) : null}
+        {metadata(false)}
       </div>
     </div>
   )
@@ -1253,7 +1335,30 @@ export interface BlockCanvasProps {
  */
 export function BlockCanvas({ shape, communicationProjected = false }: BlockCanvasProps) {
   const editor = useEditor()
-  const layout = layoutBlock(shape.props)
+  const autoFitPresentation = useValue(
+    'Block continuous auto-fit presentation',
+    () => blockAutoResizePresentation(editor, shape),
+    [editor, shape],
+  )
+  const layoutOffset = autoFitPresentation
+    ? { x: autoFitPresentation.x, y: autoFitPresentation.y }
+    : { x: 0, y: 0 }
+  const layout = layoutBlock(autoFitPresentation
+    ? { ...shape.props, w: autoFitPresentation.w, h: autoFitPresentation.h }
+    : shape.props)
+  const titleAppearance = blockTitleAppearance(editor, shape.props)
+	const insetBackground = blockInsetBackground(shape.props)
+  const parentMemberLayout = useValue(
+    'Block parent member layout',
+    () => {
+      if (!isShapeId(shape.parentId)) return null
+      const parent = editor.getShape(shape.parentId)
+      return isBlockShape(parent) && parent.props.view === 'expanded'
+        ? blockMemberLayout(parent.props)
+        : null
+    },
+    [editor, shape.parentId],
+  )
   // A cable on either face of a port fills its dot: the dot is the port, and
   // the faces are the two sides of the boundary it sits on. The wiring table
   // keeps its identity while its entries do, so a Block that merely moved —
@@ -1274,6 +1379,7 @@ export function BlockCanvas({ shape, communicationProjected = false }: BlockCanv
   const tethers = effectTethers(layout)
   const simple = layout.view === 'simple'
   const value = layout.view === 'value'
+  const folded = blockIsFolded(shape.props)
   // The two faces without a heading, rows, footer or add gutters.
   const plain = simple || value
   const isEditing = useValue(
@@ -1306,13 +1412,13 @@ export function BlockCanvas({ shape, communicationProjected = false }: BlockCanv
   // The add gutters are a selection affordance, exactly as the brief asks: they
   // exist for the Block you are working on and nowhere else, so a busy canvas
   // never sprouts a plus under every lane.
-  const addAffordances = !plain && isSelected && !isEditing && !heldPort
+  const addAffordances = !plain && !folded && isSelected && !isEditing && !heldPort
     ? (['inputs', 'outputs'] as const).flatMap((side) => {
         const affordance = blockPortAddAffordance(shape.props, side)
         return affordance ? [{ side, affordance }] : []
       })
     : []
-  const headerAffordance = !simple && isSelected && !isEditing && !heldPort
+  const headerAffordance = !simple && !folded && isSelected && !isEditing && !heldPort
     ? blockHeaderPortAddAffordance(shape.props)
     : null
 
@@ -1321,7 +1427,19 @@ export function BlockCanvas({ shape, communicationProjected = false }: BlockCanv
       className={`NodeShape systemsketch-block-canvas${simple ? ' NodeShape_plain' : ''}${value ? ' NodeShape_value' : ''}`}
       data-block-view={layout.view}
       data-communication-projected={communicationProjected || undefined}
+		data-member-layout={layout.view === 'expanded' ? blockMemberLayout(shape.props) : undefined}
+		data-inset-background={layout.view === 'expanded' && blockMemberLayout(shape.props) === 'inset'
+			? insetBackground
+			: undefined}
+		data-parent-member-layout={parentMemberLayout ?? undefined}
 		data-variadic-prototype={variadicPrototype ?? undefined}
+		data-header-divider={shape.props.showHeaderDivider === false ? 'hidden' : 'shown'}
+		data-block-folded={folded || undefined}
+      data-auto-fit-live={autoFitPresentation ? 'true' : undefined}
+      data-auto-fit-x={autoFitPresentation?.x}
+      data-auto-fit-y={autoFitPresentation?.y}
+      data-auto-fit-w={autoFitPresentation?.w}
+      data-auto-fit-h={autoFitPresentation?.h}
       data-diff-state={diffState === 'normal' ? undefined : diffState}
       data-diff-variant={stated ? diffVariant : undefined}
 		data-definition-id={value ? undefined : shape.props.definitionId || undefined}
@@ -1347,12 +1465,31 @@ export function BlockCanvas({ shape, communicationProjected = false }: BlockCanv
         if (field) rememberBlockInlineField(editor, shape.id, field)
       }}
     >
-      <div className="BlockNode-layer">
+      <div
+        className="BlockNode-layer"
+        style={autoFitPresentation ? {
+          left: autoFitPresentation.x,
+          top: autoFitPresentation.y,
+          right: 'auto',
+          bottom: 'auto',
+          width: autoFitPresentation.w,
+          height: autoFitPresentation.h,
+        } : undefined}
+      >
         {simple
-          ? <SimpleFace shape={shape} />
+          ? <SimpleFace shape={shape} titleAppearance={titleAppearance} />
           : value
-            ? <ValueFace shape={shape} connectedIds={connectedIds} editing={isEditing} />
-            : <BlockHeading shape={shape} height={layout.headerHeight} />}
+            ? <ValueFace
+                shape={shape}
+                connectedIds={connectedIds}
+                editing={isEditing}
+                titleAppearance={titleAppearance}
+              />
+            : <BlockHeading
+                shape={shape}
+                height={layout.headerHeight}
+                titleAppearance={titleAppearance}
+              />}
         {simple ? <DefinitionBadge shape={shape} /> : null}
         {simple ? <BlockDiffBadge shape={shape} /> : null}
         {stated ? <BlockDiffRail ports={layout.ports} /> : null}
@@ -1360,7 +1497,7 @@ export function BlockCanvas({ shape, communicationProjected = false }: BlockCanv
             without the two marks competing for the same pixels. */}
         <BlockPoseGhost shape={shape} />
 
-        {!plain ? (
+        {!plain && !folded ? (
           <>
             {layout.dividers.map((divider, index) => (
               <div
@@ -1398,13 +1535,19 @@ export function BlockCanvas({ shape, communicationProjected = false }: BlockCanv
                 />
               </div>
             ) : null}
+            <TypeAttributeRegion
+              shape={shape}
+              top={layout.headerHeight + 1}
+              bottom={layout.footerTop - 1}
+              selected={isSelected}
+            />
           </>
         ) : null}
 
         {/* Render only, Port view only — `effectTethers` returns nothing in any
             other view. It sits under the dots and takes no pointer events, so it
             can never swallow a click meant for a port, a label or the block. */}
-        {tethers.length > 0 ? (
+        {!folded && tethers.length > 0 ? (
           <svg
             className="BlockNode-tethers"
             width={layout.width}
@@ -1453,7 +1596,11 @@ export function BlockCanvas({ shape, communicationProjected = false }: BlockCanv
       </div>
 
       {layout.footer ? (
-        <div className="NodeShape-footer" style={boxStyle(layout.footer)}>
+        <div className="NodeShape-footer" style={boxStyle({
+          ...layout.footer,
+          x: layout.footer.x + layoutOffset.x,
+          y: layout.footer.y + layoutOffset.y,
+        })}>
           <BlockFooterMenu shape={shape} />
         </div>
       ) : null}

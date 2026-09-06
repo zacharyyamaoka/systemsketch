@@ -26,6 +26,8 @@ export interface BlockBatchInspectorActions {
   setView(view: BlockPresentationView): void
   setPortLayout(portLayout: PortLayout): void
   setShowDescription(showDescription: boolean): void
+	setShowFooter(showFooter: boolean): void
+	setShowHeaderDivider(showHeaderDivider: boolean): void
 }
 
 export interface BlockBatchInspectorContentProps {
@@ -33,6 +35,8 @@ export interface BlockBatchInspectorContentProps {
   view: SharedStyle<BlockView> | undefined
   portLayout: SharedStyle<PortLayout> | undefined
   showDescription: SharedStyle<boolean> | undefined
+	showFooter: SharedStyle<boolean> | undefined
+	showHeaderDivider: SharedStyle<boolean> | undefined
   actions?: BlockBatchInspectorActions
   onRequestClose?: () => void
 }
@@ -64,6 +68,8 @@ export function BlockBatchInspectorContent({
   view,
   portLayout,
   showDescription,
+	showFooter,
+	showHeaderDivider,
   actions,
   onRequestClose,
 }: BlockBatchInspectorContentProps) {
@@ -165,6 +171,59 @@ export function BlockBatchInspectorContent({
             </button>
           </div>
         </section>
+
+		<section className="block-inspector__section" data-inspector-section="Chrome">
+			<div className="block-inspector__section-title">
+				<span>Chrome</span>
+			</div>
+			<div className="block-inspector__chrome-control">
+				<span>Footer</span>
+				<MixedChip shared={showFooter} />
+				<div className="block-inspector__choices" role="group" aria-label="Block footer">
+					<button
+						type="button"
+						disabled={readOnly}
+						aria-pressed={isValue(showFooter, true)}
+						onClick={() => actions?.setShowFooter(true)}
+					>
+						show
+					</button>
+					<button
+						type="button"
+						disabled={readOnly}
+						aria-pressed={isValue(showFooter, false)}
+						onClick={() => actions?.setShowFooter(false)}
+					>
+						hide
+					</button>
+				</div>
+			</div>
+			<div className="block-inspector__chrome-control">
+				<span>Header divider</span>
+				<MixedChip shared={showHeaderDivider} />
+				<div className="block-inspector__choices" role="group" aria-label="Header divider">
+					<button
+						type="button"
+						disabled={readOnly}
+						aria-pressed={isValue(showHeaderDivider, true)}
+						onClick={() => actions?.setShowHeaderDivider(true)}
+					>
+						show
+					</button>
+					<button
+						type="button"
+						disabled={readOnly}
+						aria-pressed={isValue(showHeaderDivider, false)}
+						onClick={() => actions?.setShowHeaderDivider(false)}
+					>
+						hide
+					</button>
+				</div>
+			</div>
+			<p className="block-inspector__hint">
+				Applies to Port and Expanded faces; hiding footers frees their body space.
+			</p>
+		</section>
 
         <section className="block-inspector__section" data-inspector-section="Per-Block">
           <div className="block-inspector__section-title">Per-Block</div>
