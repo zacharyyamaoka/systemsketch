@@ -589,6 +589,62 @@ class WorkspaceStoreTests(unittest.TestCase):
                 lock_root=self.lock_root,
             )
 
+    def test_allow_any_path_bypasses_the_root_fence_for_every_operation(self) -> None:
+        with tempfile.TemporaryDirectory() as outside_directory:
+            outside = Path(outside_directory) / "Elsewhere.systemsketch"
+            renamed = Path(outside_directory) / "Renamed.systemsketch"
+
+            # Off by default: the fence still refuses a path outside the root.
+            with self.assertRaisesRegex(WorkspacePathError, "stay under an allowed root"):
+                save_document(str(outside), document_source(), self.root, lock_root=self.lock_root)
+            with self.assertRaisesRegex(WorkspacePathError, "stay under an allowed root"):
+                list_documents(outside_directory, self.root)
+            with self.assertRaisesRegex(WorkspacePathError, "stay under an allowed root"):
+                create_directory(outside_directory, "Nested", self.root)
+
+            saved = save_document(
+                str(outside),
+                document_source(),
+                self.root,
+                lock_root=self.lock_root,
+                allow_any_path=True,
+            )
+            loaded = load_document(str(outside), self.root, allow_any_path=True)
+            self.assertEqual(loaded["digest"], saved["digest"])
+            self.assertEqual(
+                stat_document(str(outside), self.root, allow_any_path=True)["size"],
+                saved["size"],
+            )
+            self.assertEqual(
+                [item["title"] for item in list_documents(outside_directory, self.root, allow_any_path=True)["documents"]],
+                ["Elsewhere"],
+            )
+            nested = create_directory(outside_directory, "Nested", self.root, allow_any_path=True)
+            self.assertTrue(Path(nested["path"]).is_dir())
+
+            renamed_result = rename_document(
+                str(outside),
+                str(renamed),
+                self.root,
+                base_digest=saved["digest"],
+                lock_root=self.lock_root,
+                allow_any_path=True,
+            )
+            self.assertEqual(renamed_result["path"], str(renamed))
+
+            trash_document(
+                str(renamed),
+                self.root,
+                base_digest=renamed_result["digest"],
+                lock_root=self.lock_root,
+                allow_any_path=True,
+            )
+            self.assertFalse(renamed.exists())
+
+            # A relative path is still refused even with the fence bypassed.
+            with self.assertRaisesRegex(WorkspacePathError, "path must be absolute"):
+                load_document("relative.systemsketch", self.root, allow_any_path=True)
+
     def test_an_explicit_additional_root_allows_a_worktree_board_only(self) -> None:
         with (
             tempfile.TemporaryDirectory() as development_directory,

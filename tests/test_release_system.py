@@ -19,17 +19,21 @@ sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
 from release_lib import (  # noqa: E402
     CONTROLLER_RUNTIME_FILES,
+    FileAccessSettings,
     ReleaseError,
     SOURCE_PATHS,
     controller_fingerprint,
+    file_access_path,
     promote_candidate,
     read_channels,
+    read_file_access_settings,
     read_manifest,
     release_build_id,
     rollback_stable,
     source_provenance,
     source_root_from_channels,
     stage_candidate,
+    write_file_access_settings,
 )
 import launch_systemsketch as launcher  # noqa: E402
 import release as release_cli  # noqa: E402
@@ -181,6 +185,46 @@ class ReleaseSystemTests(unittest.TestCase):
                 host_manifest.parent.mkdir(parents=True)
                 host_manifest.write_text("{}\n", encoding="utf-8")
                 self.assertTrue(server.release_payload()["hostArtifactsReady"])
+            finally:
+                server.server_close()
+
+    def test_file_access_settings_default_off_and_round_trip(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            release_home = Path(directory) / "runtime"
+            self.assertFalse(read_file_access_settings(release_home).allow_any_path)
+
+            write_file_access_settings(release_home, FileAccessSettings(allow_any_path=True))
+            self.assertTrue(read_file_access_settings(release_home).allow_any_path)
+
+            write_file_access_settings(release_home, FileAccessSettings(allow_any_path=False))
+            self.assertFalse(read_file_access_settings(release_home).allow_any_path)
+
+            file_access_path(release_home).write_text("not json", encoding="utf-8")
+            with self.assertRaises(ReleaseError):
+                read_file_access_settings(release_home)
+
+    def test_server_reads_file_access_settings_live_with_no_restart(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            release_home = root / "runtime"
+            build, _ = stage_candidate(PROJECT_ROOT, release_home, self.make_dist(root, "file-access"))
+            promote_candidate(release_home)
+            release = release_home / "releases" / build
+            server = SystemSketchServer(
+                ("127.0.0.1", 0),
+                dist=release / "dist",
+                channel="stable",
+                build=build,
+                release_home=release_home,
+                source_root=PROJECT_ROOT,
+            )
+            try:
+                self.assertFalse(server.file_access_settings().allow_any_path)
+                # A peer process (e.g. Preview, or the other channel's own
+                # server) writes the same shared file; this instance must see
+                # it on the very next call, with no restart or cache to bust.
+                write_file_access_settings(release_home, FileAccessSettings(allow_any_path=True))
+                self.assertTrue(server.file_access_settings().allow_any_path)
             finally:
                 server.server_close()
 
