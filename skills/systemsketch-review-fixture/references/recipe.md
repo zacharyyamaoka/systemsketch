@@ -148,7 +148,11 @@ For a Branch, seed only the semantic `branch` and its ordinary direct children, 
 A `behaviorTree` shape is authored by its XML alone. Give it `props.xml` (a
 BT.CPP v4 document), the presentation choices (`projection`, `orientation`,
 `nodeFace`, `controlFace`, `edgeStyle`, `dataLens`, `blackboardLayout`), and
-any `w`/`h`; the region resizes itself to its content. Do **not** author its
+any `w`/`h`; the region resizes itself to its content. A commented-out node is
+also XML: stamp `_disabled="true"` on the occurrence and the projection opens
+with that whole subtree dimmed — do not try to author child opacity. The
+`Breakpoint` decorator and the `AsyncSequence`/`AsyncFallback` controls are
+ordinary built-ins in the XML vocabulary. Do **not** author its
 child Blocks, control cards, pills or cables: the app projects them from the
 XML the moment the region exists and stamps each one with `meta.btRegion`,
 and the helper leaves those derived records out of the authored inventory.

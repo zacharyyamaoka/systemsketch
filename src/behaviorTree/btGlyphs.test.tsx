@@ -83,3 +83,22 @@ describe('latched vs. reactive control glyphs', () => {
 		expect(hash(a)).toBe(hash(b))
 	})
 })
+
+describe('the Breakpoint debugging glyph', () => {
+	it('maps Breakpoint to its own glyph, and the Async controls to their family glyph', () => {
+		expect(btGlyphFor({ id: 'Breakpoint', kind: 'decorator', controlKind: null })).toBe('breakpoint')
+		// Groot2 does not visually fork Async from the base kind either — the
+		// yield-between-children difference stays in the description.
+		expect(btGlyphFor({ id: 'AsyncSequence', kind: 'control', controlKind: 'sequence' })).toBe('sequence')
+		expect(btGlyphFor({ id: 'AsyncFallback', kind: 'control', controlKind: 'fallback' })).toBe('fallback')
+	})
+
+	it('renders breakpoint unlike every other decorator glyph', () => {
+		const breakpointHtml = renderToStaticMarkup(<BtGlyphSvg glyph="breakpoint" orientation="down" />)
+		for (const glyph of ['inverter', 'retry', 'repeat', 'timeout', 'delay', 'force-success', 'force-failure', 'run-once', 'keep-running', 'loop', 'precondition', 'generic'] as const) {
+			expect(hash(renderToStaticMarkup(<BtGlyphSvg glyph={glyph} orientation="down" />))).not.toBe(hash(breakpointHtml))
+		}
+		// The filled inner dot is the mark: the one solid fill in the whole set.
+		expect(breakpointHtml).toContain('fill="currentColor"')
+	})
+})

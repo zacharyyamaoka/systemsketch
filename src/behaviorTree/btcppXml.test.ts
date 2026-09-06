@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+	BT_BUILTIN_MODELS,
+	BT_DISABLED_ATTR,
 	SAMPLE_BEHAVIOR_TREE_XML,
 	deleteBehaviorTreeNode,
 	emptyBehaviorTreeXml,
+	groupBehaviorTreeSiblings,
 	insertBehaviorTreeNode,
 	insertBehaviorTreeSibling,
+	isBtNodeDisabled,
 	moveBehaviorTreeNode,
 	parseBehaviorTreeXml,
 	parseXml,
@@ -62,6 +66,27 @@ describe('BT.CPP XML parsing', () => {
 		const parsed = parseXml(SAMPLE_BEHAVIOR_TREE_XML)
 		const again = parseXml(serializeXml(parsed))
 		expect(again).toEqual(parsed)
+	})
+
+	it('carries the BT.CPP v4.8 Async controls with their family controlKind', () => {
+		const asyncSequence = BT_BUILTIN_MODELS.find((model) => model.id === 'AsyncSequence')
+		const asyncFallback = BT_BUILTIN_MODELS.find((model) => model.id === 'AsyncFallback')
+		expect(asyncSequence).toMatchObject({ kind: 'control', controlKind: 'sequence' })
+		expect(asyncFallback).toMatchObject({ kind: 'control', controlKind: 'fallback' })
+		expect(asyncSequence?.description).not.toBe('')
+		expect(asyncFallback?.description).not.toBe('')
+	})
+
+	it('carries Breakpoint as a decorator and round-trips it through the XML', () => {
+		expect(BT_BUILTIN_MODELS.find((model) => model.id === 'Breakpoint')).toMatchObject({ kind: 'decorator' })
+		const xml = '<root BTCPP_format="4"><BehaviorTree ID="T"><Breakpoint><AlwaysSuccess/></Breakpoint></BehaviorTree></root>'
+		const document = parseBehaviorTreeXml(xml)
+		const node = document.trees[0].nodes[0]
+		expect([node.id, node.kind]).toEqual(['Breakpoint', 'decorator'])
+		// A transparent passthrough: known, single child, no diagnostics at all.
+		expect(document.diagnostics).toEqual([])
+		const again = parseBehaviorTreeXml(serializeXml(parseXml(xml)))
+		expect(again.trees[0].nodes.map((entry) => entry.id)).toEqual(['Breakpoint', 'AlwaysSuccess'])
 	})
 
 	it('reads global keys and literals apart', () => {
@@ -152,6 +177,48 @@ describe('structural edits', () => {
 		if (!result.ok) return
 		expect(labels(result.xml, 'T')).toEqual(['0:Sequence', '0.0:Wave', '0.1:Bow'])
 		expect(result.remap['0']).toBe('0.0')
+	})
+
+	it('marks a node disabled through the reserved channel and round-trips it', () => {
+		const disabled = setBehaviorTreeNodeAttribute(SAMPLE_BEHAVIOR_TREE_XML, 'PickAndPlace', '0.2', BT_DISABLED_ATTR, 'true')
+		if (!disabled.ok) throw new Error(disabled.reason)
+		expect(disabled.xml).toContain('_disabled="true"')
+		const node = selectTree(parseBehaviorTreeXml(disabled.xml), 'PickAndPlace')!.nodes.find((entry) => entry.path === '0.2')!
+		expect(isBtNodeDisabled(node)).toBe(true)
+		// Not a port: the flag rides `reserved`, so the Blackboard lens ignores it.
+		expect(node.ports.some((binding) => binding.name === BT_DISABLED_ATTR)).toBe(false)
+		// Survives an unrelated re-serialize, and clears without a residue.
+		const reparsed = parseBehaviorTreeXml(serializeXml(parseXml(disabled.xml)))
+		expect(isBtNodeDisabled(selectTree(reparsed, 'PickAndPlace')!.nodes.find((entry) => entry.path === '0.2')!)).toBe(true)
+		const cleared = setBehaviorTreeNodeAttribute(disabled.xml, 'PickAndPlace', '0.2', BT_DISABLED_ATTR, null)
+		if (!cleared.ok) throw new Error(cleared.reason)
+		expect(cleared.xml).toBe(SAMPLE_BEHAVIOR_TREE_XML)
+	})
+
+	it('groups sibling nodes into a new Sequence at the first sibling\'s position', () => {
+		// 0.1 (Fallback) and 0.3 (MoveHome) selected out of order, 0.2 left alone.
+		const grouped = groupBehaviorTreeSiblings(SAMPLE_BEHAVIOR_TREE_XML, 'PickAndPlace', ['0.3', '0.1'], { id: 'Sequence', kind: 'control', name: 'Group' })
+		expect(grouped.ok).toBe(true)
+		if (!grouped.ok) return
+		expect(grouped.path).toBe('0.1')
+		expect(labels(grouped.xml).slice(0, 9)).toEqual([
+			'0:Sequence', '0.0:SubTree', '0.1:Sequence', '0.1.0:Fallback', '0.1.0.0:GraspValid',
+			'0.1.0.1:CorrectGrip', '0.1.1:MoveHome', '0.2:CloseGrip', '0.3:Parallel',
+		])
+		// XML sibling order wins over selection order, and members keep their subtrees.
+		expect(grouped.remap['0.1']).toBe('0.1.0')
+		expect(grouped.remap['0.1.0']).toBe('0.1.0.0')
+		expect(grouped.remap['0.3']).toBe('0.1.1')
+		expect(grouped.remap['0.2']).toBe('0.2')
+		expect(grouped.remap['0.4']).toBe('0.3')
+		expect(grouped.xml).toContain('<Sequence name="Group">')
+	})
+
+	it('refuses to group non-siblings, fewer than two nodes, or the root', () => {
+		expect(groupBehaviorTreeSiblings(SAMPLE_BEHAVIOR_TREE_XML, 'PickAndPlace', ['0.1', '0.1.0'], { id: 'Sequence', kind: 'control' }).ok).toBe(false)
+		expect(groupBehaviorTreeSiblings(SAMPLE_BEHAVIOR_TREE_XML, 'PickAndPlace', ['0.1'], { id: 'Sequence', kind: 'control' }).ok).toBe(false)
+		expect(groupBehaviorTreeSiblings(SAMPLE_BEHAVIOR_TREE_XML, 'PickAndPlace', ['0', '0.1'], { id: 'Sequence', kind: 'control' }).ok).toBe(false)
+		expect(groupBehaviorTreeSiblings(SAMPLE_BEHAVIOR_TREE_XML, 'PickAndPlace', ['0.1', '0.2'], { id: 'Inverter', kind: 'decorator' }).ok).toBe(false)
 	})
 
 	it('sets and clears attributes and renames a key everywhere', () => {

@@ -17,6 +17,10 @@ import { withBranchTool } from '../branch/branchToolUi'
 import { withLoopTool } from '../loop/loopToolUi'
 import { withBehaviorTreeTool } from '../behaviorTree/behaviorTreeToolUi'
 import { BEHAVIOR_TREE_SHAPE_TYPE } from '../behaviorTree/behaviorTreeModel'
+import {
+  getSelectedBehaviorTreeSiblings,
+  groupSelectedBehaviorTreeNodes,
+} from '../behaviorTree/behaviorTreeCommands'
 import { withCalloutTool } from '../callout'
 import { withCodeTool } from '../code'
 import { CONNECTION_SHAPE_TYPE, ConnectionRoutingStyle } from '../blocks/connections/connectionModel'
@@ -339,11 +343,44 @@ function overrideRegionExportActions(
   return next
 }
 
+/**
+ * Ctrl+G on sibling Behavior Tree occurrences groups them under one new
+ * Sequence — MoveIt Pro 10.0's "Group Under Sequence", on the very keystroke
+ * (and menu item) tldraw already spends on grouping.
+ *
+ * WHY shadow the stock action instead of adding a second shortcut: a tldraw
+ * group of projected children was never a real outcome anyway — the region's
+ * reconcile owns those shapes and would fight the group shape — so on this
+ * selection the stock behavior is a trap, and any selection the BT command
+ * refuses falls through to stock grouping unchanged.
+ */
+function overrideGroupActionForBehaviorTrees(
+  editor: Editor,
+  actions: TLUiActionsContextType,
+): TLUiActionsContextType {
+  const stockGroup = actions['group']
+  if (!stockGroup) return actions
+  return {
+    ...actions,
+    group: {
+      ...stockGroup,
+      onSelect(source) {
+        if (getSelectedBehaviorTreeSiblings(editor)) {
+          const result = groupSelectedBehaviorTreeNodes(editor)
+          if (result.ok) return
+        }
+        stockGroup.onSelect(source)
+      },
+    },
+  }
+}
+
 export const SYSTEMSKETCH_TOOLBAR_OVERRIDES: TLUiOverrides = {
   tools: (editor, tools) =>
     rememberSystemTools(withCalloutTool(editor, withCodeTool(editor, withBehaviorTreeTool(editor, withLoopTool(editor,
       withBranchTool(editor, withBlockTool(editor, overrideTools(editor, tools)))))))),
-  actions: (editor, actions, helpers) => overrideRegionExportActions(editor, actions, helpers),
+  actions: (editor, actions, helpers) =>
+    overrideGroupActionForBehaviorTrees(editor, overrideRegionExportActions(editor, actions, helpers)),
   translations: {
     en: {
       // Stock frame removal reparents children out before deleting the

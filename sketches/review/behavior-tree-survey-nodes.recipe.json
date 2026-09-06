@@ -1,0 +1,83 @@
+{
+  "feature": "Behavior Tree survey follow-ons: Async controls, Breakpoint, comment-out, Ctrl+G group",
+  "viewport": { "width": 2200, "height": 1300 },
+  "shapes": [
+    {
+      "id": "subject",
+      "type": "behaviorTree",
+      "x": 620,
+      "y": 240,
+      "props": {
+        "title": "Patrol",
+        "projection": "tree",
+        "orientation": "down",
+        "nodeFace": "simple",
+        "controlFace": "expanded",
+        "edgeStyle": "straight",
+        "xml": "<root BTCPP_format=\"4\" main_tree_to_execute=\"Patrol\">\n    <BehaviorTree ID=\"Patrol\">\n        <AsyncSequence name=\"Patrol\">\n            <Breakpoint>\n                <DetectTarget target=\"{target_pose}\"/>\n            </Breakpoint>\n            <AsyncFallback name=\"Approach or search\" _disabled=\"true\">\n                <ApproachTarget pose=\"{target_pose}\"/>\n                <SearchArea/>\n            </AsyncFallback>\n            <PickUp pose=\"{target_pose}\"/>\n            <Stow/>\n            <ReturnHome/>\n        </AsyncSequence>\n    </BehaviorTree>\n    <TreeNodesModel>\n        <Condition ID=\"DetectTarget\">\n            <output_port name=\"target\" type=\"Pose\"/>\n        </Condition>\n        <Action ID=\"ApproachTarget\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"SearchArea\"/>\n        <Action ID=\"PickUp\">\n            <input_port name=\"pose\" type=\"Pose\"/>\n        </Action>\n        <Action ID=\"Stow\"/>\n        <Action ID=\"ReturnHome\"/>\n    </TreeNodesModel>\n</root>\n"
+      }
+    }
+  ],
+  "bindings": [],
+  "callouts": [
+    {
+      "id": "step-1",
+      "kind": "step",
+      "text": "1 · Click the PickUp card, then shift-click Stow and ReturnHome, and press Ctrl+G — the three wrap into one new Sequence named \"Group\" (rename it in the dock)",
+      "x": 60,
+      "y": 300,
+      "w": 480,
+      "h": 130,
+      "target": { "shapeId": "subject", "anchor": "left", "dy": 90 }
+    },
+    {
+      "id": "step-2",
+      "kind": "step",
+      "text": "2 · Press Ctrl+Z once — the whole group (XML edit + layout) comes back as ONE undo step",
+      "x": 60,
+      "y": 490,
+      "w": 480,
+      "h": 110,
+      "target": { "shapeId": "subject", "anchor": "left", "dy": 240 }
+    },
+    {
+      "id": "step-3",
+      "kind": "step",
+      "text": "3 · The dimmed \"Approach or search\" branch is commented out. Right-click its card → Comment in to restore it; Comment out dims it again (also on the dock's Node section). Authoring-only: it is _disabled=\"true\" in Source, no executor semantics yet",
+      "x": 60,
+      "y": 660,
+      "w": 480,
+      "h": 190,
+      "target": { "shapeId": "subject", "anchor": "left", "dy": 390 }
+    },
+    {
+      "id": "step-4",
+      "kind": "step",
+      "text": "4 · The ◉ card over DetectTarget is the new Breakpoint decorator (a passthrough until a live executor exists) — insert more from the inspector Library or the Behaviors panel's Decorators",
+      "x": 700,
+      "y": 40,
+      "w": 560,
+      "h": 150,
+      "target": { "shapeId": "subject", "anchor": "top", "dx": -260 }
+    },
+    {
+      "id": "step-5",
+      "kind": "step",
+      "text": "5 · The root is AsyncSequence and the dimmed branch is AsyncFallback — BT.CPP v4.8's yield-between-children controls, both insertable from Library / Behaviors → Controls",
+      "x": 1400,
+      "y": 40,
+      "w": 560,
+      "h": 150,
+      "target": { "shapeId": "subject", "anchor": "top", "dx": 260 }
+    },
+    {
+      "id": "pass",
+      "kind": "pass",
+      "text": "PASS WHEN · Ctrl+G yields one \"Group\" Sequence and one Ctrl+Z removes it; Comment in/out toggles the dim and the _disabled attribute in Source; the Breakpoint card wears the filled-dot glyph",
+      "x": 60,
+      "y": 940,
+      "w": 520,
+      "h": 160
+    }
+  ]
+}

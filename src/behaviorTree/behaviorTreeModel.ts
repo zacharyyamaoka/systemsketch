@@ -147,7 +147,7 @@ export function keyPath(key: string, global: boolean): string {
 export const BT_GLYPHS = [
 	'sequence', 'sequence-reactive', 'fallback', 'fallback-reactive', 'parallel', 'branch', 'switch', 'generic',
 	'inverter', 'retry', 'repeat', 'timeout', 'delay', 'force-success', 'force-failure',
-	'run-once', 'keep-running', 'loop', 'precondition',
+	'run-once', 'keep-running', 'loop', 'precondition', 'breakpoint',
 ] as const
 export type BtGlyph = (typeof BT_GLYPHS)[number]
 export type BtControlTone = 'control' | 'decorator' | 'unknown'
@@ -190,6 +190,11 @@ export function btGlyphFor(node: Pick<BtNode, 'id' | 'kind' | 'controlKind'>): B
 		case 'RunOnce': return 'run-once'
 		case 'KeepRunningUntilFailure': return 'keep-running'
 		case 'Precondition': return 'precondition'
+		// WHY its own glyph and not the generic decorator box: Breakpoint is a
+		// debugging aid, not tree logic, and the IDE breakpoint dot is the one
+		// mark every editor already taught people to read that way — see
+		// docs/behavior-tree-node-survey-2026-09-05.html.
+		case 'Breakpoint': return 'breakpoint'
 		default: return node.id.startsWith('Loop') ? 'loop' : 'generic'
 	}
 }

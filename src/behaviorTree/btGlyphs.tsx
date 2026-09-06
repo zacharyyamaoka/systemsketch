@@ -90,6 +90,12 @@ export function BtGlyphSvg({ glyph, orientation, size = 24 }: { glyph: BtGlyph; 
 		case 'precondition':
 			body = <path d="M6 7h4M8 7v10M13 7h5M13 12h4M13 17h5" {...stroke} />
 			break
+		case 'breakpoint':
+			// The IDE breakpoint idiom: a filled dot inside a ring — the only
+			// filled glyph in the set, so a debugging marker cannot be misread
+			// as one of the stroked logic decorators.
+			body = <><circle cx="12" cy="12" r="8" {...stroke} /><circle cx="12" cy="12" r="3.6" fill="currentColor" stroke="none" /></>
+			break
 		default:
 			body = <rect x="5" y="5" width="14" height="14" rx="2.5" {...stroke} />
 	}

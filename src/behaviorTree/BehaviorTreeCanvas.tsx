@@ -64,6 +64,24 @@ function insertMenuId(insert: BtSceneInsert): string {
  * The sync effect below closes the first gap (mirrors `editor.menus` back
  * into `openInsert`); `closeInsert` and the `onOpenChange` below close the
  * second (mirror `openInsert` closes back into `editor.menus`).
+ *
+ * WHY switching to a *different* "+" while one is open takes two clicks
+ * (`insert.one-open-at-a-time` in tests/behavior_tree_smoke.mjs has the full
+ * mechanism): `MenuClickCapture` is a full-viewport overlay tldraw mounts
+ * whenever `editor.menus` is non-empty, specifically to swallow canvas
+ * clicks for outside-dismissal — and because every stock popover trigger
+ * lives in the chrome layer (z-index 300) while this "+" lives on the
+ * canvas itself, that overlay sits above it. The first click always lands on
+ * the overlay and just closes the open menu; only the second reaches the
+ * real button. Zach's call (2026-09-05): leave it — "it's kind of a rare
+ * gesture ... the first click, you see the menu disappear, so you get the
+ * visual feedback." A cheaper fix than portaling every "+" to the chrome
+ * layer would be to stop registering this popover with `editor.menus`
+ * entirely and hand-roll outside-click/Escape ourselves (a handful of plain
+ * listeners) — no `MenuClickCapture` mounts for a menu `editor.menus` never
+ * heard of, so canvas clicks reach other buttons directly. Not done: it
+ * trades away tldraw's free Tab-trapping and the recorder's menu-lane
+ * tracking for a one-click convenience on an already-rare path.
  */
 function InsertButton({ insert, active, document, onOpenChange, onChoose }: {
 	insert: BtSceneInsert
